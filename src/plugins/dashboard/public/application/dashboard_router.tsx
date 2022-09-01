@@ -61,13 +61,7 @@ export async function mountApp({
 }: DashboardMountProps) {
   const [coreStart, pluginsStart, dashboardStart] = await core.getStartServices();
 
-  const {
-    savedObjects,
-    data: dataStart,
-    spaces: spacesApi,
-    savedObjectsTaggingOss,
-    embeddable,
-  } = pluginsStart;
+  const { data: dataStart, spaces: spacesApi, savedObjectsTaggingOss, embeddable } = pluginsStart;
 
   const activeSpaceId =
     spacesApi && (await spacesApi.getActiveSpace$().pipe(first()).toPromise())?.id;
@@ -76,7 +70,6 @@ export async function mountApp({
 
   const dashboardServices: DashboardAppServices = {
     onAppLeave,
-    savedObjects,
     core: coreStart,
     restorePreviousUrl,
     setHeaderActionMenu,
@@ -151,7 +144,6 @@ export async function mountApp({
     if (!routerHistory) {
       routerHistory = routeProps.history;
     }
-
     return (
       <DashboardListing
         initialFilter={filter}

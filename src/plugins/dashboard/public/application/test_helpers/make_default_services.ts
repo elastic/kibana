@@ -7,7 +7,6 @@
  */
 
 import { ScopedHistory } from '@kbn/core/public';
-import { savedObjectsPluginMock } from '@kbn/saved-objects-plugin/public/mocks';
 import { coreMock } from '@kbn/core/public/mocks';
 
 import {
@@ -51,7 +50,6 @@ export function makeDefaultServices(): DashboardAppServices {
   dashboardSessionStorage.clearState = jest.fn();
 
   return {
-    savedObjects: savedObjectsPluginMock.createStartContract(),
     scopedHistory: () => ({} as ScopedHistory),
     setHeaderActionMenu: (mountPoint) => {},
     restorePreviousUrl: () => {},

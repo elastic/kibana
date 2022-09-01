@@ -25,7 +25,6 @@ import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { RefreshInterval } from '@kbn/data-plugin/public';
 import type { Query, TimeRange } from '@kbn/es-query';
-import type { SavedObjectsStart } from '@kbn/saved-objects-plugin/public';
 
 import type { DashboardContainer, DashboardSavedObject } from '.';
 import type { DashboardAppLocatorParams } from './locator';
@@ -164,7 +163,6 @@ export interface DashboardSaveOptions {
 export interface DashboardAppServices {
   core: CoreStart;
   restorePreviousUrl: () => void; // app mount context
-  savedObjects: SavedObjectsStart; // make a service
   savedDashboards: SavedObjectLoader; // TODO: Remove as part of https://github.com/elastic/kibana/pull/138774
   scopedHistory: () => ScopedHistory; // app mount context
   onAppLeave: AppMountParameters['onAppLeave']; // app mount  context

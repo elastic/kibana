@@ -21,6 +21,7 @@ import { DashboardInitializerContextServiceType } from './initializer_context/ty
 import { DashboardNavigationService } from './navigation/types';
 import { DashboardNotificationsService } from './notifications/types';
 import { DashboardOverlaysService } from './overlays/types';
+import { DashboardSavedObjectsService } from './saved_objects/types';
 import { DashboardScreenshotModeService } from './screenshot_mode/types';
 import { DashboardSettingsService } from './settings/types';
 import { DashboardShareService } from './share/types';
@@ -44,6 +45,7 @@ export interface DashboardServices {
   navigation: DashboardNavigationService;
   notifications: DashboardNotificationsService;
   overlays: DashboardOverlaysService;
+  savedObjects: DashboardSavedObjectsService;
   screenshotMode: DashboardScreenshotModeService;
   settings: DashboardSettingsService;
   share: DashboardShareService; // TODO: make this optional in follow up

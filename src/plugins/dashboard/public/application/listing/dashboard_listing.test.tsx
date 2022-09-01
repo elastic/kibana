@@ -40,7 +40,6 @@ function mountWith({
     children: React.ReactNode;
   }> = ({ children }) => {
     const DashboardServicesProvider = pluginServices.getContextProvider();
-
     return (
       <I18nProvider>
         <KibanaContextProvider services={services}>
@@ -114,7 +113,7 @@ describe('after fetch', () => {
     const props = makeDefaultProps();
     props.title = title;
     const services = makeDefaultServices();
-    services.core.savedObjects.client.find = <T extends unknown>() => {
+    pluginServices.getServices().savedObjects.client.find = <T extends unknown>() => {
       return Promise.resolve({
         perPage: 10,
         total: 2,
@@ -139,7 +138,7 @@ describe('after fetch', () => {
     const props = makeDefaultProps();
     props.title = title;
     const services = makeDefaultServices();
-    services.core.savedObjects.client.find = <T extends unknown>() => {
+    pluginServices.getServices().savedObjects.client.find = <T extends unknown>() => {
       return Promise.resolve({
         perPage: 10,
         total: 1,
@@ -174,8 +173,7 @@ describe('after fetch', () => {
   test('renders warning when listingLimit is exceeded', async () => {
     const services = makeDefaultServices();
     pluginServices.getServices().dashboardCapabilities.showWriteControls = true;
-
-    services.savedObjects.settings.getListingLimit = () => 1;
+    pluginServices.getServices().settings.uiSettings.get = jest.fn().mockReturnValueOnce(1);
     const { component } = mountWith({ services });
     // Ensure all promises resolve
     await new Promise((resolve) => process.nextTick(resolve));

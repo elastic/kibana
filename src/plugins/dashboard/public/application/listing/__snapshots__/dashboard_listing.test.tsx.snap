@@ -726,6 +726,7 @@ exports[`after fetch renders warning when listingLimit is exceeded 1`] = `
     findItems={[Function]}
     headingId="dashboardListingHeading"
     initialFilter=""
+    listingLimit={1}
     rowHeader="title"
     searchFilters={Array []}
     tableCaption="Dashboards"
