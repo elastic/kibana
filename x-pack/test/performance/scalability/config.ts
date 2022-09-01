@@ -43,7 +43,6 @@ interface ScalabilityJourney {
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const performanceConfig = await readConfigFile(require.resolve('../journeys/base.config.ts'));
-  const functionalConfig = await readConfigFile(require.resolve('../../functional/config.base.js'));
 
   if (!fs.existsSync(gatlingProjectRootPath)) {
     throw createFlagError(
@@ -86,8 +85,10 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         ...(!!AGGS_SHARD_DELAY ? ['--data.search.aggs.shardDelay.enabled=true'] : []),
         ...(!!DISABLE_PLUGINS ? ['--plugins.initialize=false'] : []),
       ],
-      // Telemetry is temporary off for scalability testing
-      serverArgs: [...functionalConfig.get('kbnTestServer.serverArgs')],
+      serverArgs: [
+        ...performanceConfig.get('kbnTestServer.serverArgs'),
+        `--telemetry.labels.journeyName=${scalabilityJourney.journeyName}`,
+      ],
       env: {
         ELASTIC_APM_ACTIVE: process.env.ELASTIC_APM_ACTIVE,
         ELASTIC_APM_CONTEXT_PROPAGATION_ONLY: 'false',
