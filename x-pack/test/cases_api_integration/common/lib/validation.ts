@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { CaseResponse, CasesByAlertId } from '@kbn/cases-plugin/common/api';
-import { xor } from 'lodash';
+import { xorWith, isEqual } from 'lodash';
 
 /**
  * Ensure that the result of the alerts API request matches with the cases created for the test.
@@ -35,7 +35,7 @@ export function arraysToEqual<T>(array1?: T[], array2?: T[]) {
     return false;
   }
 
-  return xor(array1, array2).length === 0;
+  return xorWith(array1, array2, isEqual).length === 0;
 }
 
 /**
