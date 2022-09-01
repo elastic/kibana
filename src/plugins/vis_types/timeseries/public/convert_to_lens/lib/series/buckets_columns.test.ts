@@ -226,7 +226,6 @@ describe('getBucketsColumns', () => {
         operationType: 'terms',
         params: expect.objectContaining({
           excludeIsRegex: false,
-          format: { id: 'bytes' },
           includeIsRegex: false,
           orderAgg: expect.objectContaining({
             dataType: 'number',
