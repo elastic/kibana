@@ -169,14 +169,22 @@ export class TaskScheduling {
       chunk(taskIds, BULK_ACTION_SIZE),
       async (taskIdsChunk) =>
         this.store.fetch({
-          query: mustBeAllOf({
-            terms: {
-              _id: taskIdsChunk.map((taskId) => `task:${taskId}`),
+          query: {
+            bool: {
+              must: [
+                {
+                  terms: {
+                    _id: taskIdsChunk.map((taskId) => `task:${taskId}`),
+                  },
+                },
+                {
+                  term: {
+                    'task.enabled': !enabled,
+                  },
+                },
+              ],
             },
-            term: {
-              'task.enabled': !enabled,
-            },
-          }),
+          },
           size: BULK_ACTION_SIZE,
         }),
       { concurrency: 10 }

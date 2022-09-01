@@ -60,7 +60,7 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
 beforeEach(() => {
   getBeforeSetup(rulesClientParams, taskManager, ruleTypeRegistry);
   taskManager.get.mockResolvedValue({
-    id: 'task-123',
+    id: '1',
     taskType: 'alerting:123',
     scheduledAt: new Date(),
     attempts: 1,
@@ -81,7 +81,7 @@ setGlobalDate();
 
 describe('disable()', () => {
   let rulesClient: RulesClient;
-  const existingAlert = {
+  const existingRule = {
     id: '1',
     type: 'alert',
     attributes: {
@@ -89,7 +89,7 @@ describe('disable()', () => {
       schedule: { interval: '10s' },
       alertTypeId: 'myType',
       enabled: true,
-      scheduledTaskId: 'task-123',
+      scheduledTaskId: '1',
       actions: [
         {
           group: 'default',
@@ -105,10 +105,10 @@ describe('disable()', () => {
     version: '123',
     references: [],
   };
-  const existingDecryptedAlert = {
-    ...existingAlert,
+  const existingDecryptedRule = {
+    ...existingRule,
     attributes: {
-      ...existingAlert.attributes,
+      ...existingRule.attributes,
       apiKey: Buffer.from('123:abc').toString('base64'),
       apiKeyOwner: 'elastic',
     },
@@ -118,12 +118,12 @@ describe('disable()', () => {
 
   beforeEach(() => {
     rulesClient = new RulesClient(rulesClientParams);
-    unsecuredSavedObjectsClient.get.mockResolvedValue(existingAlert);
-    encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue(existingDecryptedAlert);
+    unsecuredSavedObjectsClient.get.mockResolvedValue(existingRule);
+    encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue(existingDecryptedRule);
   });
 
   describe('authorization', () => {
-    test('ensures user is authorised to disable this type of alert under the consumer', async () => {
+    test('ensures user is authorised to disable this type of rule under the consumer', async () => {
       await rulesClient.disable({ id: '1' });
 
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
@@ -134,7 +134,7 @@ describe('disable()', () => {
       });
     });
 
-    test('throws when user is not authorised to disable this type of alert', async () => {
+    test('throws when user is not authorised to disable this type of rule', async () => {
       authorization.ensureAuthorized.mockRejectedValue(
         new Error(`Unauthorized to disable a "myType" alert for "myApp"`)
       );
@@ -191,7 +191,7 @@ describe('disable()', () => {
     });
   });
 
-  test('disables an alert', async () => {
+  test('disables an rule', async () => {
     await rulesClient.disable({ id: '1' });
     expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
     expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith('alert', '1', {
@@ -208,7 +208,7 @@ describe('disable()', () => {
         meta: {
           versionApiKeyLastmodified: 'v7.10.0',
         },
-        scheduledTaskId: 'task-123',
+        scheduledTaskId: '1',
         apiKey: 'MTIzOmFiYw==',
         apiKeyOwner: 'elastic',
         updatedAt: '2019-02-12T21:01:22.479Z',
@@ -229,11 +229,12 @@ describe('disable()', () => {
         version: '123',
       }
     );
-    expect(taskManager.bulkEnableDisable).toHaveBeenCalledWith(['task-123'], false);
+    expect(taskManager.bulkEnableDisable).toHaveBeenCalledWith(['1'], false);
+    expect(taskManager.removeIfExists).not.toHaveBeenCalledWith();
   });
 
   test('disables the rule with calling event log to "recover" the alert instances from the task state', async () => {
-    const scheduledTaskId = 'task-123';
+    const scheduledTaskId = '1';
     taskManager.get.mockResolvedValue({
       id: scheduledTaskId,
       taskType: 'alerting:123',
@@ -278,7 +279,7 @@ describe('disable()', () => {
         meta: {
           versionApiKeyLastmodified: 'v7.10.0',
         },
-        scheduledTaskId: 'task-123',
+        scheduledTaskId: '1',
         apiKey: 'MTIzOmFiYw==',
         apiKeyOwner: 'elastic',
         updatedAt: '2019-02-12T21:01:22.479Z',
@@ -299,7 +300,8 @@ describe('disable()', () => {
         version: '123',
       }
     );
-    expect(taskManager.bulkEnableDisable).toHaveBeenCalledWith(['task-123'], false);
+    expect(taskManager.bulkEnableDisable).toHaveBeenCalledWith(['1'], false);
+    expect(taskManager.removeIfExists).not.toHaveBeenCalledWith();
 
     expect(eventLogger.logEvent).toHaveBeenCalledTimes(1);
     expect(eventLogger.logEvent.mock.calls[0][0]).toStrictEqual({
@@ -359,7 +361,7 @@ describe('disable()', () => {
         meta: {
           versionApiKeyLastmodified: 'v7.10.0',
         },
-        scheduledTaskId: 'task-123',
+        scheduledTaskId: '1',
         apiKey: 'MTIzOmFiYw==',
         apiKeyOwner: 'elastic',
         updatedAt: '2019-02-12T21:01:22.479Z',
@@ -380,7 +382,8 @@ describe('disable()', () => {
         version: '123',
       }
     );
-    expect(taskManager.bulkEnableDisable).toHaveBeenCalledWith(['task-123'], false);
+    expect(taskManager.bulkEnableDisable).toHaveBeenCalledWith(['1'], false);
+    expect(taskManager.removeIfExists).not.toHaveBeenCalledWith();
 
     expect(eventLogger.logEvent).toHaveBeenCalledTimes(0);
     expect(rulesClientParams.logger.warn).toHaveBeenCalledWith(
@@ -403,7 +406,7 @@ describe('disable()', () => {
         schedule: { interval: '10s' },
         alertTypeId: 'myType',
         enabled: false,
-        scheduledTaskId: 'task-123',
+        scheduledTaskId: '1',
         updatedAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
         actions: [
@@ -422,14 +425,15 @@ describe('disable()', () => {
         version: '123',
       }
     );
-    expect(taskManager.bulkEnableDisable).toHaveBeenCalledWith(['task-123'], false);
+    expect(taskManager.bulkEnableDisable).toHaveBeenCalledWith(['1'], false);
+    expect(taskManager.removeIfExists).not.toHaveBeenCalledWith();
   });
 
-  test(`doesn't update already disabled alerts but ensures task is disabled`, async () => {
+  test(`doesn't disable already disabled rules`, async () => {
     encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValueOnce({
-      ...existingDecryptedAlert,
+      ...existingDecryptedRule,
       attributes: {
-        ...existingDecryptedAlert.attributes,
+        ...existingDecryptedRule.attributes,
         actions: [],
         enabled: false,
       },
@@ -437,7 +441,8 @@ describe('disable()', () => {
 
     await rulesClient.disable({ id: '1' });
     expect(unsecuredSavedObjectsClient.update).not.toHaveBeenCalled();
-    expect(taskManager.bulkEnableDisable).toHaveBeenCalledWith(['task-123'], false);
+    expect(taskManager.bulkEnableDisable).not.toHaveBeenCalled();
+    expect(taskManager.removeIfExists).not.toHaveBeenCalledWith();
   });
 
   test('swallows error when failing to load decrypted saved object', async () => {
@@ -446,6 +451,7 @@ describe('disable()', () => {
     await rulesClient.disable({ id: '1' });
     expect(unsecuredSavedObjectsClient.update).toHaveBeenCalled();
     expect(taskManager.bulkEnableDisable).toHaveBeenCalled();
+    expect(taskManager.removeIfExists).not.toHaveBeenCalledWith();
     expect(rulesClientParams.logger.error).toHaveBeenCalledWith(
       'disable(): Failed to load API key of alert 1: Fail'
     );
@@ -458,6 +464,7 @@ describe('disable()', () => {
       `"Failed to update"`
     );
     expect(taskManager.bulkEnableDisable).not.toHaveBeenCalled();
+    expect(taskManager.removeIfExists).not.toHaveBeenCalledWith();
   });
 
   test('throws when failing to disable task', async () => {
@@ -466,5 +473,44 @@ describe('disable()', () => {
     await expect(rulesClient.disable({ id: '1' })).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Failed to disable task"`
     );
+    expect(taskManager.removeIfExists).not.toHaveBeenCalledWith();
+  });
+
+  test('removes task document if scheduled task id does not match rule id', async () => {
+    encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue({
+      ...existingRule,
+      attributes: {
+        ...existingRule.attributes,
+        scheduledTaskId: 'task-123',
+      },
+    });
+    await rulesClient.disable({ id: '1' });
+    expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
+    expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith('alert', '1', {
+      namespace: 'default',
+    });
+    expect(unsecuredSavedObjectsClient.update).toHaveBeenCalled();
+    expect(taskManager.bulkEnableDisable).not.toHaveBeenCalled();
+    expect(taskManager.removeIfExists).toHaveBeenCalledWith('task-123');
+  });
+
+  test('throws when failing to remove existing task', async () => {
+    encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue({
+      ...existingRule,
+      attributes: {
+        ...existingRule.attributes,
+        scheduledTaskId: 'task-123',
+      },
+    });
+    taskManager.removeIfExists.mockRejectedValueOnce(new Error('Failed to remove task'));
+    await expect(rulesClient.disable({ id: '1' })).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Failed to remove task"`
+    );
+    expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
+    expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith('alert', '1', {
+      namespace: 'default',
+    });
+    expect(unsecuredSavedObjectsClient.update).toHaveBeenCalled();
+    expect(taskManager.bulkEnableDisable).not.toHaveBeenCalled();
   });
 });

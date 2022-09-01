@@ -2204,11 +2204,16 @@ export class RulesClient {
         }),
         { version }
       );
-    }
 
-    // Ensure the task is marked as disabled
-    if (attributes.scheduledTaskId) {
-      await this.taskManager.bulkEnableDisable([attributes.scheduledTaskId], false);
+      // If the scheduledTaskId does not match the rule id, we should
+      // remove the task, otherwise mark the task as disabled
+      if (attributes.scheduledTaskId) {
+        if (attributes.scheduledTaskId !== id) {
+          await this.taskManager.removeIfExists(attributes.scheduledTaskId);
+        } else {
+          await this.taskManager.bulkEnableDisable([attributes.scheduledTaskId], false);
+        }
+      }
     }
   }
 

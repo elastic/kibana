@@ -161,14 +161,22 @@ describe('TaskScheduling', () => {
 
       expect(mockTaskStore.fetch).toHaveBeenCalledTimes(1);
       expect(mockTaskStore.fetch).toHaveBeenCalledWith({
-        query: mustBeAllOf({
-          terms: {
-            _id: [`task:${id}`],
+        query: {
+          bool: {
+            must: [
+              {
+                terms: {
+                  _id: [`task:${id}`],
+                },
+              },
+              {
+                term: {
+                  'task.enabled': true,
+                },
+              },
+            ],
           },
-          term: {
-            'task.enabled': true,
-          },
-        }),
+        },
         size: 100,
       });
     });
@@ -181,14 +189,22 @@ describe('TaskScheduling', () => {
 
       expect(mockTaskStore.fetch).toHaveBeenCalledTimes(1);
       expect(mockTaskStore.fetch).toHaveBeenCalledWith({
-        query: mustBeAllOf({
-          terms: {
-            _id: [`task:${id}`],
+        query: {
+          bool: {
+            must: [
+              {
+                terms: {
+                  _id: [`task:${id}`],
+                },
+              },
+              {
+                term: {
+                  'task.enabled': false,
+                },
+              },
+            ],
           },
-          term: {
-            'task.enabled': false,
-          },
-        }),
+        },
         size: 100,
       });
     });
