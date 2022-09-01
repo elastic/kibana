@@ -11,8 +11,12 @@ import { APP_ID as SECURITY_SOLUTION_APP_ID } from '@kbn/security-solution-plugi
 import { observabilityFeatureId as OBSERVABILITY_APP_ID } from '@kbn/observability-plugin/common';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-import { deleteAllCaseItems } from '../../../cases_api_integration/common/lib/utils';
-import { findAssignees } from '../../../cases_api_integration/common/lib/user_profiles';
+import { createCase, deleteAllCaseItems } from '../../../cases_api_integration/common/lib/utils';
+import { getPostCaseRequest } from '../../../cases_api_integration/common/lib/mock';
+import {
+  findAssignees,
+  suggestUserProfiles,
+} from '../../../cases_api_integration/common/lib/user_profiles';
 import {
   casesAllUser,
   casesOnlyDeleteUser,
@@ -39,14 +43,30 @@ export default ({ getService }: FtrProviderContext): void => {
       it(`User ${
         user.username
       } with roles(s) ${user.roles.join()} can retrieve assignees`, async () => {
-        const profiles = await findAssignees({
+        const profiles = await suggestUserProfiles({
+          supertest: supertestWithoutAuth,
+          req: { name: user.username, owners: [owner], size: 1 },
+          auth: { user, space: null },
+        });
+
+        await createCase(
+          supertestWithoutAuth,
+          getPostCaseRequest({ owner, assignees: [{ uid: profiles[0].uid }] }),
+          200,
+          {
+            user,
+            space: null,
+          }
+        );
+
+        const assignees = await findAssignees({
           supertest: supertestWithoutAuth,
           req: { searchTerm: user.username, owners: [owner], size: 1 },
           auth: { user, space: null },
         });
 
-        expect(profiles.length).to.be(1);
-        expect(profiles[0].user.username).to.eql(user.username);
+        expect(assignees.length).to.be(1);
+        expect(assignees[0].user.username).to.eql(user.username);
       });
     }
 
