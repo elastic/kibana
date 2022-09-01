@@ -20,14 +20,13 @@ import {
   TABLE_TEST_ID,
 } from './indicators_flyout_table';
 import { unwrapValue } from '../../lib/unwrap_value';
-import { getDisplayName } from '../../lib/display_name';
 
 const mockIndicator: Indicator = generateMockIndicator();
 const mockFieldTypesMap = generateFieldTypeMap();
 
 describe('<IndicatorsFlyoutTable />', () => {
   it('should render fields and values in table', () => {
-    const { getByTestId, getByText } = render(
+    const { getByTestId, getByText, getAllByText } = render(
       <TestProvidersComponent>
         <IndicatorsFlyoutTable indicator={mockIndicator} fieldTypesMap={mockFieldTypesMap} />
       </TestProvidersComponent>
@@ -37,7 +36,10 @@ describe('<IndicatorsFlyoutTable />', () => {
 
     expect(getByText(RawIndicatorFieldId.Feed)).toBeInTheDocument();
 
-    expect(getByText(getDisplayName(mockIndicator).value as string)).toBeInTheDocument();
+    // There should be two occureces of 'threat.indicator.name' value on the page
+    expect(
+      getAllByText(unwrapValue(mockIndicator, RawIndicatorFieldId.Name) as string)
+    ).toHaveLength(2);
 
     expect(
       getByText(unwrapValue(mockIndicator, RawIndicatorFieldId.Feed) as string)

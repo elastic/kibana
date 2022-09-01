@@ -10,15 +10,13 @@ import { useContext, useEffect } from 'react';
 import { euiLightVars as themeLight, euiDarkVars as themeDark } from '@kbn/ui-theme';
 import React from 'react';
 import { useKibana } from '../../../../hooks/use_kibana';
-import { EMPTY_VALUE } from '../../../../../common/constants';
 import { Indicator } from '../../../../../common/types/indicator';
-import { getDisplayName } from '../../lib/display_name';
 import { IndicatorField } from '../indicator_field/indicator_field';
 import { IndicatorsTableContext } from './context';
 import { ActionsRowCell } from './actions_row_cell';
 
 export enum ComputedIndicatorFieldId {
-  DisplayName = 'display_name',
+  DisplayName = 'threat.indicator.name',
 }
 
 export const cellRendererFactory = (from: number) => {
@@ -57,12 +55,6 @@ export const cellRendererFactory = (from: number) => {
 
     if (columnId === 'Actions') {
       return <ActionsRowCell indicator={indicator} />;
-    }
-
-    if (columnId === ComputedIndicatorFieldId.DisplayName) {
-      const displayName = getDisplayName(indicator);
-      const displayNameValue = displayName.value;
-      return displayNameValue || EMPTY_VALUE;
     }
 
     return <IndicatorField indicator={indicator} field={columnId} fieldTypesMap={fieldTypesMap} />;
