@@ -41,6 +41,7 @@ export const ConfigPanelQueryAnnotation = ({
 }) => {
   const inputQuery = annotation?.filter ?? defaultQuery;
   const currentIndexPattern = frame.dataViews.indexPatterns[layer.indexPatternId];
+  const currentExistingFields = frame.dataViews.existingFields[currentIndexPattern.title];
   // list only supported field by operation, remove the rest
   const options = currentIndexPattern.fields
     .filter((field) => field.type === 'date' && field.displayName)
@@ -52,7 +53,7 @@ export const ConfigPanelQueryAnnotation = ({
           field: field.name,
           dataType: field.type,
         },
-        exists: fieldExists(frame.dataViews.existingFields[currentIndexPattern.title], field.name),
+        exists: fieldExists(currentExistingFields, field.name),
         compatible: true,
         'data-test-subj': `lns-fieldOption-${field.name}`,
       } as FieldOption<FieldOptionValue>;
@@ -63,6 +64,9 @@ export const ConfigPanelQueryAnnotation = ({
   );
 
   const selectedField = annotation?.timeField;
+  const fieldIsValid = selectedField
+    ? Boolean(currentIndexPattern.getFieldByName(selectedField))
+    : true;
   return (
     <>
       <EuiFormRow
@@ -90,7 +94,7 @@ export const ConfigPanelQueryAnnotation = ({
               onChange({ timeField: choice.field });
             }
           }}
-          fieldIsInvalid={false}
+          fieldIsInvalid={!fieldIsValid}
           data-test-subj="annotation-query-based-field-picker"
         />
       </EuiFormRow>
@@ -111,7 +115,7 @@ export const ConfigPanelQueryAnnotation = ({
           }}
           disableAutoFocus
           indexPatternTitle={frame.dataViews.indexPatterns[layer.indexPatternId].title}
-          isInvalid={isQueryInputValid}
+          isInvalid={!isQueryInputValid}
           onSubmit={() => {}}
           data-test-subj="annotation-query-based-query-input"
           placeholder={

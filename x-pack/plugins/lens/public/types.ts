@@ -444,6 +444,10 @@ export interface Datasource<T = unknown, P = unknown> {
    * Get the used DataView value from state
    */
   getUsedDataView: (state: T, layerId: string) => string;
+  /**
+   * Get all the used DataViews from state
+   */
+  getUsedDataViews: (state: T) => string[];
 }
 
 export interface DatasourceFixAction<T> {
@@ -505,6 +509,7 @@ export interface DatasourceDataPanelProps<T = unknown> {
   uiActions: UiActionsStart;
   indexPatternService: IndexPatternServiceAPI;
   frame: FramePublicAPI;
+  usedIndexPatterns?: string[];
 }
 
 interface SharedDimensionProps {
@@ -891,13 +896,9 @@ export interface Visualization<T = unknown, P = unknown> {
   initialize: (addNewLayer: () => string, state?: T, mainPalette?: PaletteOutput) => T;
 
   /**
-   * Retrieve the used indexpatterns in the visualization
+   * Retrieve the used DataViews in the visualization
    */
-  getUsedIndexPatterns?: (
-    state?: T,
-    indexPatternRefs?: IndexPatternRef[],
-    savedObjectReferences?: SavedObjectReference[]
-  ) => { usedPatterns: string[] };
+  getUsedDataViews?: (state?: T) => string[];
 
   getMainPalette?: (state: T) => undefined | PaletteOutput;
 

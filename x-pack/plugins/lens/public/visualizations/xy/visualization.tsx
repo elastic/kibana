@@ -741,6 +741,11 @@ export const getXyVisualization = ({
   getUniqueLabels(state) {
     return getUniqueLabels(state.layers);
   },
+  getUsedDataViews(state) {
+    return (
+      state?.layers.filter(isAnnotationsLayer).map(({ indexPatternId }) => indexPatternId) ?? []
+    );
+  },
   renderDimensionTrigger({
     columnId,
     label,

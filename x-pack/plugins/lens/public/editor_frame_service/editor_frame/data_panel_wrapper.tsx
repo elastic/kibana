@@ -165,6 +165,19 @@ export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
     onChangeIndexPattern,
     indexPatternService: props.indexPatternService,
     frame: props.frame,
+    // Visualization can handle dataViews, so need to pass to the data panel the full list of used dataViews
+    usedIndexPatterns: [
+      ...((activeDatasourceId &&
+        props.datasourceMap[activeDatasourceId]?.getUsedDataViews(
+          datasourceStates[activeDatasourceId].state
+        )) ||
+        []),
+      ...((visualizationState.activeId &&
+        props.visualizationMap[visualizationState.activeId]?.getUsedDataViews?.(
+          visualizationState.state
+        )) ||
+        []),
+    ],
   };
 
   const [showDatasourceSwitcher, setDatasourceSwitcher] = useState(false);

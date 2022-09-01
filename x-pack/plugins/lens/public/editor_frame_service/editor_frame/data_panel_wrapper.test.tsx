@@ -26,6 +26,7 @@ describe('Data Panel Wrapper', () => {
       const datasourceMap = {
         activeDatasource: {
           renderDataPanel,
+          getUsedDataViews: jest.fn(),
         } as unknown as Datasource,
       };
 

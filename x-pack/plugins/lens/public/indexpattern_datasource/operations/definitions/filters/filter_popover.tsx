@@ -10,7 +10,9 @@ import './filter_popover.scss';
 import React from 'react';
 import { EuiPopover, EuiSpacer } from '@elastic/eui';
 import type { Query } from '@kbn/es-query';
-import { QueryInput, isQueryValid } from '../../../../shared_components';
+// Need to keep it separate to make it work Jest mocks in dimension_panel tests
+// import { QueryInput } from '../../../../shared_components/query_input';
+import { isQueryValid, QueryInput } from '../../../../shared_components';
 import { IndexPattern } from '../../../../types';
 import { FilterValue, defaultLabel } from '.';
 import { LabelInput } from '../shared_components';

@@ -76,20 +76,21 @@ function AnnotationLayerHeaderContent({
   });
   const layerIndex = state.layers.findIndex((l) => l.layerId === layerId);
   const layer = state.layers[layerIndex] as XYAnnotationLayerConfig;
+  const currentIndexPattern = frame.dataViews.indexPatterns[layer.indexPatternId];
 
   return (
     <ChangeIndexPattern
       data-test-subj="indexPattern-switcher"
       trigger={{
-        label: frame.dataViews.indexPatterns[layer.indexPatternId]?.name || notFoundTitleLabel,
-        title: frame.dataViews.indexPatterns[layer.indexPatternId]?.title || notFoundTitleLabel,
+        label: currentIndexPattern?.name || notFoundTitleLabel,
+        title: currentIndexPattern?.title || notFoundTitleLabel,
         'data-test-subj': 'lns_layerIndexPatternLabel',
         size: 's',
         fontWeight: 'normal',
       }}
       indexPatternId={layer.indexPatternId}
       indexPatternRefs={frame.dataViews.indexPatternRefs}
-      isMissingCurrent={false}
+      isMissingCurrent={!currentIndexPattern}
       onChangeIndexPattern={onChangeIndexPattern}
     />
   );

@@ -220,6 +220,10 @@ export const AnnotationsPanel = (
                   );
                 const selectedField = (currentAnnotation as QueryPointEventAnnotationConfig)
                   .textField;
+
+                const fieldIsValid = selectedField
+                  ? Boolean(currentIndexPattern.getFieldByName(selectedField))
+                  : true;
                 return (
                   <>
                     <EuiSpacer size="xs" />
@@ -240,7 +244,7 @@ export const AnnotationsPanel = (
                           setAnnotations({ textField: choice.field });
                         }
                       }}
-                      fieldIsInvalid={false}
+                      fieldIsInvalid={!fieldIsValid}
                     />
                   </>
                 );

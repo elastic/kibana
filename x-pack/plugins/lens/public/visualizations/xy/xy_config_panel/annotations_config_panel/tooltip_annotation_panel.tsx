@@ -119,6 +119,7 @@ export function TooltipSection({
       </>
     );
   }
+  const currentExistingField = existingFields[indexPattern.title];
   const disableActions = localValues.length === 2 && localValues.some(({ isNew }) => isNew);
   const options = indexPattern.fields
     .filter(
@@ -134,7 +135,7 @@ export function TooltipSection({
             field: field.name,
             dataType: field.type,
           },
-          exists: fieldExists(existingFields[indexPattern.title], field.name),
+          exists: fieldExists(currentExistingField, field.name),
           compatible: true,
           'data-test-subj': `lnsXY-annotation-tooltip-fieldOption-${field.name}`,
         } as FieldOption<FieldOptionValue>)
@@ -152,6 +153,7 @@ export function TooltipSection({
         items={localValues}
       >
         {localValues.map(({ id, value, isNew }, index) => {
+          const fieldIsValid = value ? Boolean(indexPattern.getFieldByName(value)) : true;
           return (
             <EuiDraggable
               style={{ marginBottom: 4 }}
@@ -194,7 +196,7 @@ export function TooltipSection({
                       onChoose={function (choice: FieldOptionValue | undefined): void {
                         onFieldSelectChange(choice, index);
                       }}
-                      fieldIsInvalid={false}
+                      fieldIsInvalid={!fieldIsValid}
                     />
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>

@@ -701,6 +701,9 @@ export function getIndexPatternDatasource({
     getUsedDataView: (state: IndexPatternPrivateState, layerId: string) => {
       return state.layers[layerId].indexPatternId;
     },
+    getUsedDataViews: (state) => {
+      return Object.values(state.layers).map(({ indexPatternId }) => indexPatternId);
+    },
   };
 
   return indexPatternDatasource;

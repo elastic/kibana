@@ -143,15 +143,16 @@ export function IndexPatternDataPanel({
   indexPatternService,
   frame,
   onIndexPatternRefresh,
+  usedIndexPatterns,
 }: Props) {
   const { indexPatterns, indexPatternRefs, existingFields, isFirstExistenceFetch } =
     frame.dataViews;
   const { currentIndexPatternId } = state;
 
   const indexPatternList = uniq(
-    Object.values(state.layers)
-      .map((l) => l.indexPatternId)
-      .concat(currentIndexPatternId)
+    (
+      usedIndexPatterns ?? Object.values(state.layers).map(({ indexPatternId }) => indexPatternId)
+    ).concat(currentIndexPatternId)
   )
     .filter((id) => !!indexPatterns[id])
     .sort()
@@ -283,7 +284,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   onIndexPatternRefresh,
 }: Omit<
   DatasourceDataPanelProps,
-  'state' | 'setState' | 'showNoDataPopover' | 'core' | 'onChangeIndexPattern'
+  'state' | 'setState' | 'showNoDataPopover' | 'core' | 'onChangeIndexPattern' | 'usedIndexPatterns'
 > & {
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
