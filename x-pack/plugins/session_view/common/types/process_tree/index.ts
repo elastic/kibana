@@ -126,6 +126,9 @@ export interface ProcessEventHost {
     platform?: string;
     version?: string;
   };
+  boot?: {
+    id?: string;
+  };
 }
 
 export interface ProcessEventAlertRule {

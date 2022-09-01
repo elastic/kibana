@@ -7,7 +7,7 @@
 
 import { LogicMounter, mockFlashMessageHelpers } from '../../../../__mocks__/kea_logic';
 
-import { UpdateConnectorSchedulingApiLogic } from '../../../api/connector_package/update_connector_scheduling_api_logic';
+import { UpdateConnectorSchedulingApiLogic } from '../../../api/connector/update_connector_scheduling_api_logic';
 
 import { ConnectorSchedulingLogic } from './connector_scheduling_logic';
 

@@ -17,7 +17,7 @@ export interface AlertStatusFilterProps {
   onChange: (id: string, value: string) => void;
 }
 
-export const allAlerts: AlertStatusFilter = {
+export const ALL_ALERTS: AlertStatusFilter = {
   status: '',
   query: '',
   label: i18n.translate('xpack.observability.alerts.alertStatusFilter.showAll', {
@@ -25,7 +25,7 @@ export const allAlerts: AlertStatusFilter = {
   }),
 };
 
-export const activeAlerts: AlertStatusFilter = {
+export const ACTIVE_ALERTS: AlertStatusFilter = {
   status: ALERT_STATUS_ACTIVE,
   query: `${ALERT_STATUS}: "${ALERT_STATUS_ACTIVE}"`,
   label: i18n.translate('xpack.observability.alerts.alertStatusFilter.active', {
@@ -33,7 +33,7 @@ export const activeAlerts: AlertStatusFilter = {
   }),
 };
 
-export const recoveredAlerts: AlertStatusFilter = {
+export const RECOVERED_ALERTS: AlertStatusFilter = {
   status: ALERT_STATUS_RECOVERED,
   query: `${ALERT_STATUS}: "${ALERT_STATUS_RECOVERED}"`,
   label: i18n.translate('xpack.observability.alerts.alertStatusFilter.recovered', {
@@ -43,21 +43,21 @@ export const recoveredAlerts: AlertStatusFilter = {
 
 const options: EuiButtonGroupOptionProps[] = [
   {
-    id: allAlerts.status,
-    label: allAlerts.label,
-    value: allAlerts.query,
+    id: ALL_ALERTS.status,
+    label: ALL_ALERTS.label,
+    value: ALL_ALERTS.query,
     'data-test-subj': 'alert-status-filter-show-all-button',
   },
   {
-    id: activeAlerts.status,
-    label: activeAlerts.label,
-    value: activeAlerts.query,
+    id: ACTIVE_ALERTS.status,
+    label: ACTIVE_ALERTS.label,
+    value: ACTIVE_ALERTS.query,
     'data-test-subj': 'alert-status-filter-active-button',
   },
   {
-    id: recoveredAlerts.status,
-    label: recoveredAlerts.label,
-    value: recoveredAlerts.query,
+    id: RECOVERED_ALERTS.status,
+    label: RECOVERED_ALERTS.label,
+    value: RECOVERED_ALERTS.query,
     'data-test-subj': 'alert-status-filter-recovered-button',
   },
 ];

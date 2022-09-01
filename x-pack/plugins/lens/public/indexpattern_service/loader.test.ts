@@ -212,7 +212,7 @@ describe('loader', () => {
       const cache = await loadIndexPatterns({
         cache: {},
         patterns: ['1', '2'],
-        notUsedPatterns: ['3'],
+        notUsedPatterns: ['11', '3', '4', '5', '6', '7', '8', '9', '10'],
         dataViews: dataViewsService,
       });
 
@@ -225,6 +225,8 @@ describe('loader', () => {
           fields: [documentField],
         }),
       });
+      // trying to load the used patterns 1 and 2, then trying the not used pattern 11 and succeeding with the pattern 3 - 4 loads
+      expect(dataViewsService.get).toHaveBeenCalledTimes(4);
     });
   });
 
