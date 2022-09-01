@@ -89,6 +89,7 @@ export async function _installPackage({
   try {
     // if some installation already exists
     if (installedPkg) {
+      console.log('installedPkg', installedPkg);
       // if the installation is currently running, don't try to install
       // instead, only return already installed assets
       if (
@@ -113,6 +114,8 @@ export async function _installPackage({
         });
       }
     } else {
+      console.log('no previously installed package calling createInstallation');
+
       await createInstallation({
         savedObjectsClient,
         packageInfo,
@@ -177,10 +180,8 @@ export async function _installPackage({
      * more easily write unit tests against the asset generation code without needing to mock ES responses.
      */
 
-    console.log('paths', paths);
     const preparedIngestPipelines = prepareToInstallPipelines(packageInfo, paths);
     const preparedIndexTemplates = prepareToInstallTemplates(packageInfo, paths, esReferences);
-    console.log('preparedIndexTemplates', preparedIndexTemplates);
 
     // Update the references for the templates and ingest pipelines together. Need to be done togther to avoid race
     // conditions on updating the installed_es field at the same time
