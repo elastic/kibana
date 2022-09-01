@@ -196,15 +196,15 @@ export function getTSDBRollupWarningMessages(
             ].includes(col.operationType)
           )
           .map((col) => col.label)
-      ).map((label) => (
-        <FormattedMessage
-          id="xpack.lens.indexPattern.tsdbRollupWarning"
-          defaultMessage="{name} does not work for all indices in the selected data view because it's using a function which is not supported on rolled up data. Please edit the visualization to use another function or change the time range."
-          values={{
-            name: <EuiTextColor color="accent">{label}</EuiTextColor>,
-          }}
-        />
-      ))
+      ).map((label) =>
+        i18n.translate('xpack.lens.indexPattern.tsdbRollupWarning', {
+          defaultMessage:
+            '"{label}" does not work for all indices in the selected data view because it\'s using a function which is not supported on rolled up data. Please edit the visualization to use another function or change the time range.',
+          values: {
+            label,
+          },
+        })
+      )
     );
   }
 

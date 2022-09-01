@@ -9,7 +9,6 @@ import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { EmbeddableEditorState } from '@kbn/embeddable-plugin/public';
 import { Filter, Query } from '@kbn/es-query';
 import { SavedQuery } from '@kbn/data-plugin/public';
-import { ReactNode } from 'react';
 import { Document } from '../persistence';
 
 import type { TableInspectorAdapter } from '../editor_frame_service/types';
@@ -42,7 +41,7 @@ export interface PreviewState {
   visualization: VisualizationState;
   datasourceStates: DatasourceStates;
   activeData?: TableInspectorAdapter;
-  requestWarnings?: ReactNode[];
+  requestWarnings?: string[];
 }
 export interface EditorFrameState extends PreviewState {
   activeDatasourceId: string | null;

@@ -45,6 +45,7 @@ import {
   SelfStyledEmbeddable,
   FilterableEmbeddable,
 } from '@kbn/embeddable-plugin/public';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { DataViewsContract, DataView } from '@kbn/data-views-plugin/public';
 import type {
@@ -490,6 +491,26 @@ export class Embeddable
     return isDirty;
   }
 
+  private handleWarnings(adapters?: Partial<DefaultInspectorAdapters>) {
+    const activeDatasourceId = getActiveDatasourceIdFromDoc(this.savedVis);
+    if (!activeDatasourceId || !adapters?.requests) return;
+    const activeDatasource = this.deps.datasourceMap[activeDatasourceId];
+    const docDatasourceState = this.savedVis?.state.datasourceStates[activeDatasourceId];
+    const warnings: React.ReactNode[] = [];
+    this.deps.data.search.showWarnings(adapters.requests, (warning) => {
+      const warningMessage = activeDatasource.getSearchWarningMessages?.(
+        docDatasourceState,
+        warning
+      );
+
+      warnings.push(...(warningMessage || []));
+      if (warningMessage && warningMessage.length) return true;
+    });
+    if (warnings && this.warningDomNode) {
+      render(<Warnings warnings={warnings} />, this.warningDomNode);
+    }
+  }
+
   private updateActiveData: ExpressionWrapperProps['onData$'] = (data, adapters) => {
     this.activeDataInfo.activeData = adapters?.tables?.tables;
     if (this.input.onLoad) {
@@ -504,23 +525,7 @@ export class Embeddable
       error: type === 'error' ? error : undefined,
     });
 
-    const activeDatasourceId = getActiveDatasourceIdFromDoc(this.savedVis);
-    if (!activeDatasourceId) return;
-    const activeDatasource = this.deps.datasourceMap[activeDatasourceId];
-    const docDatasourceState = this.savedVis?.state.datasourceStates[activeDatasourceId];
-    const warnings: React.ReactNode[] = [];
-    this.deps.data.search.showWarnings(this.getInspectorAdapters().requests!, (warning) => {
-      const warningMessage = activeDatasource.getSearchWarningMessages?.(
-        docDatasourceState,
-        warning
-      );
-
-      warnings.push(...(warningMessage || []));
-      if (warningMessage && warningMessage.length) return true;
-    });
-    if (warnings && this.warningDomNode) {
-      render(<Warnings warnings={warnings} />, this.warningDomNode);
-    }
+    this.handleWarnings(adapters);
   };
 
   private onRender: ExpressionWrapperProps['onRender$'] = () => {
@@ -640,8 +645,8 @@ export class Embeddable
           css={css({
             position: 'absolute',
             zIndex: 2,
-            right: 12,
-            bottom: 12,
+            right: euiThemeVars.euiSizeM,
+            bottom: euiThemeVars.euiSizeM,
           })}
           ref={(el) => {
             if (el) {

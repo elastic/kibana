@@ -325,6 +325,31 @@ export class VisualizeEmbeddable
     return dirty;
   }
 
+  private handleWarnings() {
+    const warnings: React.ReactNode[] = [];
+    if (this.getInspectorAdapters()?.requests) {
+      this.deps
+        .start()
+        .plugins.data.search.showWarnings(this.getInspectorAdapters()!.requests!, (warning) => {
+          if (
+            warning.type === 'shard_failure' &&
+            warning.reason.type === 'unsupported_aggregation_on_rollup_index'
+          ) {
+            warnings.push(warning.reason.reason || warning.message);
+            return true;
+          }
+          if (this.vis.type.suppressWarnings?.()) {
+            // if the vis type wishes to supress all warnings, return true so the default logic won't pick it up
+            return true;
+          }
+        });
+    }
+
+    if (this.warningDomNode) {
+      render(<Warnings warnings={warnings || []} />, this.warningDomNode);
+    }
+  }
+
   // this is a hack to make editor still work, will be removed once we clean up editor
   // @ts-ignore
   hasInspector = () => Boolean(this.getInspectorAdapters());
@@ -340,30 +365,11 @@ export class VisualizeEmbeddable
   };
 
   onContainerData = () => {
-    const warnings: React.ReactNode[] = [];
-    this.deps
-      .start()
-      .plugins.data.search.showWarnings(this.getInspectorAdapters()!.requests!, (warning) => {
-        if (
-          warning.type === 'shard_failure' &&
-          warning.reason.type === 'unsupported_aggregation_on_rollup_index'
-        ) {
-          warnings.push(warning.reason.reason || warning.message);
-          return true;
-        }
-        if (this.vis.type.suppressWarnings?.()) {
-          // if the vis type wishes to supress all warnings, return true so the default logic won't pick it up
-          return true;
-        }
-      });
+    this.handleWarnings();
     this.updateOutput({
       ...this.getOutput(),
       loading: false,
     });
-
-    if (this.warningDomNode) {
-      render(<Warnings warnings={warnings || []} />, this.warningDomNode);
-    }
   };
 
   onContainerRender = () => {

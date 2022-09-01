@@ -420,10 +420,7 @@ export interface Datasource<T = unknown, P = unknown> {
   /**
    * The embeddable calls this function to display warnings about visualization on the dashboard
    */
-  getSearchWarningMessages?: (
-    state: P,
-    warning: SearchResponseWarning
-  ) => React.ReactNode[] | undefined;
+  getSearchWarningMessages?: (state: P, warning: SearchResponseWarning) => string[] | undefined;
   /**
    * Checks if the visualization created is time based, for example date histogram
    */
