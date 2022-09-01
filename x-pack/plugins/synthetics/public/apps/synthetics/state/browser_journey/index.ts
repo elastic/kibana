@@ -9,7 +9,7 @@ import { createReducer } from '@reduxjs/toolkit';
 
 import { isScreenshotBlockDoc } from '../../../../../common/runtime_types';
 
-import type { SyntheticsReducerState } from './models';
+import type { BrowserJourneyState } from './models';
 import {
   pruneCacheAction,
   putBlocksAction,
@@ -19,7 +19,7 @@ import {
   setBlockLoadingAction,
 } from './actions';
 
-const initialState: SyntheticsReducerState = {
+const initialState: BrowserJourneyState = {
   blocks: {},
   cacheSize: 0,
   hitCount: [],
@@ -89,7 +89,7 @@ export const browserJourneyReducer = createReducer(initialState, (builder) => {
     });
 });
 
-function handlePruneAction(state: SyntheticsReducerState, pruneSize: number) {
+function handlePruneAction(state: BrowserJourneyState, pruneSize: number) {
   const { blocks, hitCount } = state;
   const hashesToPrune: string[] = [];
   let sizeToRemove = 0;
@@ -112,7 +112,7 @@ function handlePruneAction(state: SyntheticsReducerState, pruneSize: number) {
   state.hitCount = hitCount.slice(0, removeIndex + 1);
 }
 
-function handleUpdateHitCountsAction(state: SyntheticsReducerState, hashes: string[]) {
+function handleUpdateHitCountsAction(state: BrowserJourneyState, hashes: string[]) {
   const newHitCount = [...state.hitCount];
   const hitTime = Date.now();
   hashes.forEach((hash) => {

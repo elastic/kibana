@@ -14,7 +14,7 @@ import { syntheticsEnablementReducer, SyntheticsEnablementState } from './synthe
 import { monitorListReducer, MonitorListState } from './monitor_list';
 import { serviceLocationsReducer, ServiceLocationsState } from './service_locations';
 import { monitorOverviewReducer, MonitorOverviewState } from './overview';
-import { SyntheticsReducerState } from './browser_journey/models';
+import { BrowserJourneyState } from './browser_journey/models';
 import { browserJourneyReducer } from './browser_journey';
 
 export interface SyntheticsAppState {
@@ -25,7 +25,7 @@ export interface SyntheticsAppState {
   serviceLocations: ServiceLocationsState;
   monitorDetails: MonitorDetailsState;
   overview: MonitorOverviewState;
-  browserJourney: SyntheticsReducerState;
+  browserJourney: BrowserJourneyState;
 }
 
 export const rootReducer = combineReducers<SyntheticsAppState>({

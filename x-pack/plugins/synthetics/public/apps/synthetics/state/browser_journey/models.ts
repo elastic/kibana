@@ -20,7 +20,7 @@ export interface CacheHitCount {
   hitTime: number;
 }
 
-export interface SyntheticsReducerState {
+export interface BrowserJourneyState {
   blocks: ScreenshotBlockCache;
   cacheSize: number;
   hitCount: CacheHitCount[];
