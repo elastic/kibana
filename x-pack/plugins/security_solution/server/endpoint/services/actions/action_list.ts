@@ -18,7 +18,9 @@ import {
   categorizeResponseResults,
   getActionCompletionInfo,
   mapToNormalizedActionRequest,
+  getAgentHostNamesWithIds,
 } from './utils';
+import type { EndpointMetadataService } from '../metadata';
 
 interface OptionalFilterParams {
   commands?: string[];
@@ -28,21 +30,29 @@ interface OptionalFilterParams {
   pageSize?: number;
   startDate?: string;
   userIds?: string[];
+  /** Will filter out the action requests so that only those show `expiration` date is greater than now */
+  unExpiredOnly?: boolean;
 }
 
+/**
+ * Retrieve a list of Actions (`ActionDetails`)
+ */
 export const getActionList = async ({
   commands,
   elasticAgentIds,
   esClient,
   endDate,
   logger,
+  metadataService,
   page: _page,
   pageSize,
   startDate,
   userIds,
+  unExpiredOnly = false,
 }: OptionalFilterParams & {
   esClient: ElasticsearchClient;
   logger: Logger;
+  metadataService: EndpointMetadataService;
 }): Promise<ActionListApiResponse> => {
   const size = pageSize ?? ENDPOINT_DEFAULT_PAGE_SIZE;
   const page = _page ?? 1;
@@ -56,9 +66,11 @@ export const getActionList = async ({
     endDate,
     from,
     logger,
+    metadataService,
     size,
     startDate,
     userIds,
+    unExpiredOnly,
   });
 
   return {
@@ -87,16 +99,19 @@ const getActionDetailsList = async ({
   endDate,
   from,
   logger,
+  metadataService,
   size,
   startDate,
   userIds,
-}: GetActionDetailsListParam): Promise<{
-  actionDetails: ActionDetails[];
+  unExpiredOnly,
+}: GetActionDetailsListParam & { metadataService: EndpointMetadataService }): Promise<{
+  actionDetails: ActionListApiResponse['data'];
   totalRecords: number;
 }> => {
   let actionRequests;
   let actionReqIds;
   let actionResponses;
+  let agentsHostInfo: { [id: string]: string };
 
   try {
     // fetch actions with matching agent_ids if any
@@ -109,13 +124,15 @@ const getActionDetailsList = async ({
       from,
       size,
       userIds,
+      unExpiredOnly,
     });
     actionRequests = _actionRequests;
     actionReqIds = actionIds;
   } catch (error) {
     // all other errors
     const err = new CustomHttpRequestError(
-      error.meta?.meta?.body?.error?.reason ?? 'Unknown error while fetching action requests',
+      error.meta?.meta?.body?.error?.reason ??
+        `Unknown error while fetching action requests (${error.message})`,
       error.meta?.meta?.statusCode ?? 500,
       error
     );
@@ -136,15 +153,24 @@ const getActionDetailsList = async ({
 
   try {
     // get all responses for given action Ids and agent Ids
-    actionResponses = await getActionResponses({
-      actionIds: actionReqIds,
-      elasticAgentIds,
-      esClient,
-    });
+    // and get host metadata info with queried agents
+    [actionResponses, agentsHostInfo] = await Promise.all([
+      getActionResponses({
+        actionIds: actionReqIds,
+        elasticAgentIds,
+        esClient,
+      }),
+      await getAgentHostNamesWithIds({
+        esClient,
+        metadataService,
+        agentIds: normalizedActionRequests.map((action) => action.agents).flat(),
+      }),
+    ]);
   } catch (error) {
     // all other errors
     const err = new CustomHttpRequestError(
-      error.meta?.meta?.body?.error?.reason ?? 'Unknown error while fetching action responses',
+      error.meta?.meta?.body?.error?.reason ??
+        `Unknown error while fetching action responses (${error.message})`,
       error.meta?.meta?.statusCode ?? 500,
       error
     );
@@ -167,20 +193,28 @@ const getActionDetailsList = async ({
     );
 
     // find the specific response's details using that set of matching responses
-    const { isCompleted, completedAt, wasSuccessful, errors } = getActionCompletionInfo(
+    const { isCompleted, completedAt, wasSuccessful, errors, agentState } = getActionCompletionInfo(
       action.agents,
       matchedResponses
     );
 
+    // NOTE: `outputs` is not returned in this service because including it on a list of data
+    // could result in a very large response unnecessarily. In the future, we might include
+    // an option to optionally include it.
     return {
       id: action.id,
       agents: action.agents,
+      hosts: action.agents.reduce<ActionDetails['hosts']>((acc, id) => {
+        acc[id] = { name: agentsHostInfo[id] };
+        return acc;
+      }, {}),
       command: action.command,
       startedAt: action.createdAt,
       isCompleted,
       completedAt,
       wasSuccessful,
       errors,
+      agentState,
       isExpired: !isCompleted && action.expiration < new Date().toISOString(),
       createdBy: action.createdBy,
       comment: action.comment,
