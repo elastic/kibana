@@ -262,7 +262,7 @@ export const RulesList = ({
     setCurrentRuleToEdit(ruleItem);
   };
 
-  const onRuleRun = async (rule: RuleTableItem) => {
+  const onRunRule = async (rule: RuleTableItem) => {
     try {
       await runSoon({ http, id: rule.id });
       toasts.addSuccess({
@@ -806,7 +806,7 @@ export const RulesList = ({
             setRulesToDelete={setRulesToDelete}
             onEditRule={() => onRuleEdit(rule)}
             onUpdateAPIKey={setRulesToUpdateAPIKey}
-            onRunRule={() => onRuleRun(rule)}
+            onRunRule={() => onRunRule(rule)}
           />
         )}
         renderRuleError={(rule) => {
