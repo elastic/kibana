@@ -16,6 +16,7 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiTablePagination,
+  EuiToolTip,
 } from '@elastic/eui';
 
 import { FormattedCount } from '../../../../common/components/formatted_number';
@@ -100,10 +101,16 @@ const getTableColumns: GetTableColumns = (handleClick) => [
   {
     field: 'userName',
     name: i18n.USER_ALERTS_USERNAME_COLUMN,
-    truncateText: true,
-    textOnly: true,
     'data-test-subj': 'userSeverityAlertsTable-userName',
-    render: (userName: string) => <UserDetailsLink userName={userName} />,
+    render: (userName: string) => (
+      <EuiToolTip
+        title={i18n.OPEN_USER_DETAIL_TOOLTIP}
+        content={userName}
+        anchorClassName="eui-textTruncate"
+      >
+        <UserDetailsLink userName={userName} />
+      </EuiToolTip>
+    ),
   },
   {
     field: 'totalAlerts',

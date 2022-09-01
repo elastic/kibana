@@ -123,7 +123,7 @@ export const PercentWidget = ({
         />
       )}
       <div css={styles.title}>{title}</div>
-      <EuiFlexGroup direction="column" gutterSize="m">
+      <EuiFlexGroup direction="column" gutterSize="s">
         {Object.keys(dataValueMap).map((groupedByValue, idx) => {
           const value = data?.[groupedByValue] || 0;
           return (

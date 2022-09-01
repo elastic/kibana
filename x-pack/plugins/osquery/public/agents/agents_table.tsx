@@ -35,12 +35,13 @@ import { AGENT_GROUP_KEY } from './types';
 interface AgentsTableProps {
   agentSelection: AgentSelection;
   onChange: (payload: AgentSelection) => void;
+  error?: string;
 }
 
 const perPage = 10;
 const DEBOUNCE_DELAY = 300; // ms
 
-const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onChange }) => {
+const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onChange, error }) => {
   // search related
   const [searchValue, setSearchValue] = useState<string>('');
   const [modifyingSearch, setModifyingSearch] = useState<boolean>(false);
@@ -185,7 +186,7 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onCh
 
   return (
     <div>
-      <EuiFormRow label={AGENT_SELECTION_LABEL} fullWidth>
+      <EuiFormRow label={AGENT_SELECTION_LABEL} fullWidth isInvalid={!!error} error={error}>
         <EuiComboBox
           data-test-subj="agentSelection"
           placeholder={SELECT_AGENT_LABEL}

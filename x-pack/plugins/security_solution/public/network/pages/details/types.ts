@@ -5,9 +5,12 @@
  * 2.0.
  */
 
+import type { Optional } from '@kbn/utility-types';
+
 import type { ESTermQuery } from '../../../../common/typed_json';
-import { NetworkType } from '../../store/model';
+import type { NavTab } from '../../../common/components/navigation/types';
 import type { GlobalTimeArgs } from '../../../common/containers/use_global_time';
+import { NetworkType } from '../../store/model';
 
 export const type = NetworkType.details;
 
@@ -21,3 +24,17 @@ export interface OwnProps {
   skip: boolean;
   setQuery: GlobalTimeArgs['setQuery'];
 }
+
+export enum NetworkDetailsRouteType {
+  anomalies = 'anomalies',
+  flows = 'flows',
+  tls = 'tls',
+  http = 'http',
+  events = 'events',
+  users = 'users',
+}
+
+export type NetworkDetailsNavTabs = Optional<
+  Record<`${NetworkDetailsRouteType}`, NavTab>,
+  'anomalies'
+>;

@@ -496,6 +496,47 @@ describe('TaskScheduling', () => {
       );
     });
   });
+
+  describe('bulkSchedule', () => {
+    test('allows scheduling tasks', async () => {
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+      const task = {
+        taskType: 'foo',
+        params: {},
+        state: {},
+      };
+      await taskScheduling.bulkSchedule([task]);
+      expect(mockTaskStore.bulkSchedule).toHaveBeenCalled();
+      expect(mockTaskStore.bulkSchedule).toHaveBeenCalledWith([
+        {
+          ...task,
+          id: undefined,
+          schedule: undefined,
+          traceparent: 'parent',
+        },
+      ]);
+    });
+
+    test('doesnt allow naively rescheduling existing tasks that have already been scheduled', async () => {
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+      mockTaskStore.bulkSchedule.mockRejectedValueOnce({
+        statusCode: 409,
+      });
+
+      return expect(
+        taskScheduling.bulkSchedule([
+          {
+            id: 'my-foo-id',
+            taskType: 'foo',
+            params: {},
+            state: {},
+          },
+        ])
+      ).rejects.toMatchObject({
+        statusCode: 409,
+      });
+    });
+  });
 });
 
 function mockTask(overrides: Partial<ConcreteTaskInstance> = {}): ConcreteTaskInstance {

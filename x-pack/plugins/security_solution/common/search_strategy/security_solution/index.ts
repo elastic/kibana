@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { IEsSearchRequest } from '@kbn/data-plugin/common';
 import type { ESQuery } from '../../typed_json';
 import type {
@@ -120,7 +119,6 @@ export interface RequestBasicOptions extends IEsSearchRequest {
   timerange: TimerangeInput;
   filterQuery: ESQuery | string | undefined;
   defaultIndex: string[];
-  docValueFields?: estypes.QueryDslFieldAndFormat[];
   factoryQueryType?: FactoryQueryTypes;
 }
 

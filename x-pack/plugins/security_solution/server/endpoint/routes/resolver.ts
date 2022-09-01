@@ -7,6 +7,7 @@
 import type { StartServicesAccessor } from '@kbn/core/server';
 import type { SecuritySolutionPluginRouter } from '../../types';
 import type { StartPlugins } from '../../plugin';
+import type { ConfigType } from '../../config';
 import {
   validateEvents,
   validateEntities,
@@ -19,16 +20,17 @@ import { handleEvents } from './resolver/events';
 
 export const registerResolverRoutes = async (
   router: SecuritySolutionPluginRouter,
-  startServices: StartServicesAccessor<StartPlugins>
+  startServices: StartServicesAccessor<StartPlugins>,
+  config: ConfigType
 ) => {
-  const [, { ruleRegistry }] = await startServices();
+  const [, { ruleRegistry, licensing }] = await startServices();
   router.post(
     {
       path: '/api/endpoint/resolver/tree',
       validate: validateTree,
       options: { authRequired: true },
     },
-    handleTree(ruleRegistry)
+    handleTree(ruleRegistry, config, licensing)
   );
 
   router.post(

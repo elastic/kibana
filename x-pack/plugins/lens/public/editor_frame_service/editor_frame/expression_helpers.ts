@@ -7,11 +7,12 @@
 
 import { Ast, fromExpression } from '@kbn/interpreter';
 import { DatasourceStates } from '../../state_management';
-import { Visualization, DatasourceMap, DatasourceLayers } from '../../types';
+import { Visualization, DatasourceMap, DatasourceLayers, IndexPatternMap } from '../../types';
 
 export function getDatasourceExpressionsByLayers(
   datasourceMap: DatasourceMap,
-  datasourceStates: DatasourceStates
+  datasourceStates: DatasourceStates,
+  indexPatterns: IndexPatternMap
 ): null | Record<string, Ast> {
   const datasourceExpressions: Array<[string, Ast | string]> = [];
 
@@ -24,7 +25,7 @@ export function getDatasourceExpressionsByLayers(
     const layers = datasource.getLayers(state);
 
     layers.forEach((layerId) => {
-      const result = datasource.toExpression(state, layerId);
+      const result = datasource.toExpression(state, layerId, indexPatterns);
       if (result) {
         datasourceExpressions.push([layerId, result]);
       }
@@ -52,6 +53,7 @@ export function buildExpression({
   datasourceLayers,
   title,
   description,
+  indexPatterns,
 }: {
   title?: string;
   description?: string;
@@ -60,6 +62,7 @@ export function buildExpression({
   datasourceMap: DatasourceMap;
   datasourceStates: DatasourceStates;
   datasourceLayers: DatasourceLayers;
+  indexPatterns: IndexPatternMap;
 }): Ast | null {
   if (visualization === null) {
     return null;
@@ -67,7 +70,8 @@ export function buildExpression({
 
   const datasourceExpressionsByLayers = getDatasourceExpressionsByLayers(
     datasourceMap,
-    datasourceStates
+    datasourceStates,
+    indexPatterns
   );
 
   const visualizationExpression = visualization.toExpression(

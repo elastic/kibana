@@ -34,3 +34,18 @@ export interface PackSavedObjectAttributes {
 }
 
 export type PackSavedObject = SavedObject<PackSavedObjectAttributes>;
+
+export interface SavedQuerySavedObjectAttributes {
+  id: string;
+  description: string | undefined;
+  query: string;
+  interval: number | string;
+  platform: string;
+  ecs_mapping?: Array<Record<string, unknown>>;
+  created_at: string;
+  created_by: string | undefined;
+  updated_at: string;
+  updated_by: string | undefined;
+}
+
+export type SavedQuerySavedObject = SavedObject<PackSavedObjectAttributes>;

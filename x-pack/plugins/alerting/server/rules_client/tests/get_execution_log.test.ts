@@ -273,7 +273,9 @@ const aggregateResults = {
         ],
       },
       executionUuidCardinality: {
-        value: 374,
+        executionUuidCardinality: {
+          value: 374,
+        },
       },
     },
   },
@@ -453,9 +455,9 @@ describe('getExecutionLogForRule()', () => {
         aggs: getExecutionLogAggregation({
           page: 1,
           perPage: 10,
+          filter: 'event.outcome: success',
           sort: [{ timestamp: { order: 'desc' } }],
         }),
-        filter: 'event.outcome: success',
         end: mockedDateString,
         start: '2019-02-12T20:01:22.479Z',
       },

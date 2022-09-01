@@ -22,6 +22,9 @@ export const CASES_PAGE = '[data-test-subj="collapsibleNavGroup-securitySolution
 export const EXPLORE_PAGE =
   '[data-test-subj="collapsibleNavGroup-securitySolution"] [title="Explore"]';
 
+export const THREAT_INTELLIGENCE_PAGE =
+  '[data-test-subj="collapsibleNavGroup-securitySolution"] [title="Intelligence"]';
+
 export const MANAGE_PAGE =
   '[data-test-subj="collapsibleNavGroup-securitySolution"] [title="Manage"]';
 
@@ -29,4 +32,4 @@ export const KIBANA_NAVIGATION_TOGGLE = '[data-test-subj="toggleNavButton"]';
 
 export const SPACES_BUTTON = '[data-test-subj="spacesNavSelector"]';
 
-export const getGoToSpaceMenuItem = (space: string) => `[data-test-subj="${space}-gotoSpace"]`;
+export const getGoToSpaceMenuItem = (space: string) => `[data-test-subj="space-avatar-${space}"]`;

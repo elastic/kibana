@@ -16,7 +16,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const { common } = getPageObjects(['common']);
 
   describe('Core Context Providers', () => {
-    let event: Event;
+    let event: Event<Record<string, unknown>>;
     before(async () => {
       await common.navigateToApp('home');
       [event] = await ebtUIHelper.getEvents(1, { eventTypes: ['Loaded Kibana'] }); // Get the loaded Kibana event

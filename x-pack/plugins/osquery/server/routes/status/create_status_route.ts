@@ -18,7 +18,7 @@ import { packSavedObjectType } from '../../../common/types';
 import { PLUGIN_ID, OSQUERY_INTEGRATION_NAME } from '../../../common';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { convertPackQueriesToSO } from '../pack/utils';
-import { getInternalSavedObjectsClient } from '../../usage/collector';
+import { getInternalSavedObjectsClient } from '../utils';
 
 export const createStatusRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.get(

@@ -94,12 +94,18 @@
         },
         {
           "id": "kibDevKeyConceptsNavigation"
+        },
+        {
+          "id": "kibDevDocsEmbeddables"
         }
       ]
     },
     {
       "label": "Tutorials",
       "items": [
+        {
+          "id": "kibDevTutorialAddingPerformanceMetrics"
+        },
         {
           "id": "kibDevTutorialSetupWindowsDevWSL"
         },
@@ -121,6 +127,10 @@
         {
           "id": "kibDevTutorialDataSearchAndSessions",
           "label": "data.search"
+        },
+        {
+          "id": "kibDevTutorialFilesService",
+          "label": "File service"
         },
         {
           "id": "kibDevTutorialDataViews"
@@ -227,13 +237,7 @@
           "id": "kibCorePluginApi"
         },
         {
-          "id": "kibCoreApplicationPluginApi"
-        },
-        {
           "id": "kibCoreChromePluginApi"
-        },
-        {
-          "id": "kibCoreSavedObjectsPluginApi"
         },
         {
           "id": "kibFieldFormatsPluginApi"
@@ -429,6 +433,9 @@
         },
         {
           "id": "kibVisualizationsPluginApi"
+        },
+        {
+          "id": "kibDevDocsOpsTest"
         }
       ]
     },
@@ -438,6 +445,14 @@
         {
           "id": "kibDevDocsOpsOverview",
           "label": "Overview"
+        },
+        {
+          "label": "Initiatives",
+          "items": [
+            {
+              "id": "kibDevDocsOpsPackages"
+            }
+          ]
         },
         {
           "label": "CI",
@@ -540,6 +555,24 @@
             },
             {
               "id": "kibDevDocsOpsRepoSourceClassifier"
+            },
+            {
+              "id": "kibDevDocsOpsJsonc"
+            },
+            {
+              "id": "kibDevDocsOpsKibanaManifestParser"
+            },
+            {
+              "id": "kibDevDocsOpsKibanaManifestSchema"
+            },
+            {
+              "id": "kibDevDocsOpsManagedVscodeConfig"
+            },
+            {
+              "id": "kibDevDocsOpsManagedVscodeConfigCli"
+            },
+            {
+              "id": "kibDevDocsOpsTest"
             }
           ]
         }

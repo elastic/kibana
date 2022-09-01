@@ -7,38 +7,24 @@
 
 import type { ReactNode } from 'react';
 import React, { memo } from 'react';
-import { EuiText, EuiTextColor } from '@elastic/eui';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import type { EuiTextProps } from '@elastic/eui';
+import { EuiText } from '@elastic/eui';
+import styled from 'styled-components';
+
+const CodeBlock = styled(EuiText)`
+  font-family: ${(props) => props.theme.eui.euiCodeFontFamily};
+`;
 
 export const ConsoleCodeBlock = memo<{
   children: ReactNode;
   inline?: boolean;
-  textColor?: 'default' | 'error' | 'success';
+  textColor?: EuiTextProps['color'];
   bold?: boolean;
 }>(({ children, inline = false, textColor = 'default', bold = false }) => {
-  const baseStyledComponent = inline ? EuiTextColor : EuiText;
-
-  const CodeBlock = euiStyled(baseStyledComponent).attrs({
-    transparentBackground: true,
-    size: 's',
-  })`{
-          color: ${(props) => {
-            if (textColor === 'error') {
-              return props.theme.eui.euiColorDanger;
-            } else if (textColor === 'success') {
-              return props.theme.eui.euiColorSuccessText;
-            } else {
-              return props.theme.eui.euiColorDarkestShade;
-            }
-          }};
-          font-weight: ${(props) => {
-            return bold ? props.theme.eui.euiFontWeightBold : props.theme.eui.euiFontWeightRegular;
-          }};
-          font-family: ${(props) => props.theme.eui.euiCodeFontFamily};
-          padding: 0;
-         }
-      `;
-
-  return <CodeBlock>{children}</CodeBlock>;
+  return (
+    <CodeBlock size="relative" color={textColor} className={inline ? 'eui-displayInline' : ''}>
+      {bold ? <strong>{children}</strong> : children}
+    </CodeBlock>
+  );
 });
 ConsoleCodeBlock.displayName = 'ConsoleCodeBlock';

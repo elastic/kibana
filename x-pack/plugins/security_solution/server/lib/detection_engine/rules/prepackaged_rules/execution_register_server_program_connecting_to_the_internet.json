@@ -19,6 +19,53 @@
   "references": [
     "https://www.iana.org/assignments/iana-ipv4-special-registry/iana-ipv4-special-registry.xhtml"
   ],
+  "required_fields": [
+    {
+      "ecs": true,
+      "name": "destination.ip",
+      "type": "ip"
+    },
+    {
+      "ecs": true,
+      "name": "event.type",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "network.protocol",
+      "type": "keyword"
+    },
+    {
+      "ecs": false,
+      "name": "process.Ext.token.integrity_level_name",
+      "type": "unknown"
+    },
+    {
+      "ecs": true,
+      "name": "process.entity_id",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.name",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.parent.executable",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.parent.name",
+      "type": "keyword"
+    },
+    {
+      "ecs": false,
+      "name": "winlog.event_data.IntegrityLevel",
+      "type": "keyword"
+    }
+  ],
   "risk_score": 21,
   "rule_id": "fb02b8d3-71ee-4af1-bacd-215d23f17efa",
   "severity": "low",
@@ -49,7 +96,7 @@
       "technique": [
         {
           "id": "T1218",
-          "name": "Signed Binary Proxy Execution",
+          "name": "System Binary Proxy Execution",
           "reference": "https://attack.mitre.org/techniques/T1218/",
           "subtechnique": [
             {
@@ -63,5 +110,5 @@
     }
   ],
   "type": "eql",
-  "version": 11
+  "version": 13
 }

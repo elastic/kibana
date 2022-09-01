@@ -9,11 +9,15 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
+import type { DataViewBase } from '@kbn/es-query';
+import { fields } from '@kbn/data-plugin/common/mocks';
+
 import { TestProviders } from '../../../../common/mock';
 import type { RulePreviewProps } from '.';
 import { RulePreview } from '.';
 import { usePreviewRoute } from './use_preview_route';
 import { usePreviewHistogram } from './use_preview_histogram';
+import { DataSourceType } from '../../../pages/detection_engine/rules/types';
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('./use_preview_route');
@@ -27,9 +31,17 @@ jest.mock('../../../../common/containers/use_global_time', () => ({
   }),
 }));
 
+const getMockIndexPattern = (): DataViewBase => ({
+  fields,
+  id: '1234',
+  title: 'logstash-*',
+});
+
 const defaultProps: RulePreviewProps = {
   ruleType: 'threat_match',
   index: ['test-*'],
+  indexPattern: getMockIndexPattern(),
+  dataSourceType: DataSourceType.IndexPatterns,
   threatIndex: ['threat-*'],
   threatMapping: [
     {

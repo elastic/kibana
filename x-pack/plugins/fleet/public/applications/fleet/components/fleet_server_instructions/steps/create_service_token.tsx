@@ -116,7 +116,7 @@ const ServiceTokenStepContent: React.FunctionComponent<{
           <EuiSpacer size="m" />
           <EuiFlexGroup direction="column" gutterSize="s">
             <EuiFlexItem grow={false}>
-              <strong>
+              <strong data-test-subject="serviceTokenSaveReminderHeader">
                 <FormattedMessage
                   id="xpack.fleet.fleetServerSetup.serviceTokenLabel"
                   defaultMessage="Service token"

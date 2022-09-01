@@ -7,8 +7,8 @@
 
 import { uniq, defaultsDeep, cloneDeep } from 'lodash';
 import { ESSearchRequest, ESFilter } from '@kbn/core/types/elasticsearch';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { PROCESSOR_EVENT } from '../../../../../common/elasticsearch_fieldnames';
-import { ProcessorEvent } from '../../../../../common/processor_event';
 import { ApmIndicesConfig } from '../../../../routes/settings/apm_indices/get_apm_indices';
 
 const processorEventIndexMap = {

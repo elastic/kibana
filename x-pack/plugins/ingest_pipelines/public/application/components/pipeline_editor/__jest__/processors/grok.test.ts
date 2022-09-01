@@ -104,4 +104,26 @@ describe('Processor: Grok', () => {
       patterns: ['pattern1', 'pattern2', 'pattern3'],
     });
   });
+
+  test('accepts grok pattern that contains escaped characters', async () => {
+    const {
+      actions: { saveNewProcessor },
+      form,
+    } = testBed;
+
+    // Add "field" value
+    form.setInputValue('fieldNameField.input', 'test_grok_processor');
+
+    // Add the escaped value of \[%{HTTPDATE:timestamp}\]%{SPACE}\"%{WORD:http_method}%{SPACE}HTTP/%{NUMBER:http_version}\"
+    const escapedValue =
+      '\\[%{HTTPDATE:timestamp}\\]%{SPACE}\\"%{WORD:http_method}%{SPACE}HTTP/%{NUMBER:http_version}\\"';
+    form.setInputValue('droppableList.input-0', escapedValue);
+
+    // Save the field
+    await saveNewProcessor();
+
+    const processors = getProcessorValue(onUpdate, GROK_TYPE);
+
+    expect(processors[0][GROK_TYPE].patterns).toEqual([escapedValue]);
+  });
 });

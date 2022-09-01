@@ -109,6 +109,7 @@ export function DependenciesInventoryTable() {
       )}
       status={status}
       compact={false}
+      initialPageSize={25}
     />
   );
 }

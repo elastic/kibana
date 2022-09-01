@@ -49,6 +49,7 @@ export const DATA_STREAM_API_ROUTES = {
 // Package policy API routes
 export const PACKAGE_POLICY_API_ROUTES = {
   LIST_PATTERN: `${PACKAGE_POLICY_API_ROOT}`,
+  BULK_GET_PATTERN: `${PACKAGE_POLICY_API_ROOT}/_bulk_get`,
   INFO_PATTERN: `${PACKAGE_POLICY_API_ROOT}/{packagePolicyId}`,
   CREATE_PATTERN: `${PACKAGE_POLICY_API_ROOT}`,
   UPDATE_PATTERN: `${PACKAGE_POLICY_API_ROOT}/{packagePolicyId}`,
@@ -61,6 +62,7 @@ export const PACKAGE_POLICY_API_ROUTES = {
 // Agent policy API routes
 export const AGENT_POLICY_API_ROUTES = {
   LIST_PATTERN: `${AGENT_POLICY_API_ROOT}`,
+  BULK_GET_PATTERN: `${AGENT_POLICY_API_ROOT}/_bulk_get`,
   INFO_PATTERN: `${AGENT_POLICY_API_ROOT}/{agentPolicyId}`,
   CREATE_PATTERN: `${AGENT_POLICY_API_ROOT}`,
   UPDATE_PATTERN: `${AGENT_POLICY_API_ROOT}/{agentPolicyId}`,
@@ -116,6 +118,7 @@ export const AGENT_API_ROUTES = {
   BULK_UNENROLL_PATTERN: `${API_ROOT}/agents/bulk_unenroll`,
   REASSIGN_PATTERN: `${API_ROOT}/agents/{agentId}/reassign`,
   BULK_REASSIGN_PATTERN: `${API_ROOT}/agents/bulk_reassign`,
+  AVAILABLE_VERSIONS_PATTERN: `${API_ROOT}/agents/available_versions`,
   STATUS_PATTERN: `${API_ROOT}/agent_status`,
   DATA_PATTERN: `${API_ROOT}/agent_status/data`,
   // deprecated since 8.0

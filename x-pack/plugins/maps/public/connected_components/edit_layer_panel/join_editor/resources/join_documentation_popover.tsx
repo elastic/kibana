@@ -34,7 +34,7 @@ export class JoinDocumentationPopover extends Component<{}, State> {
   _renderContent() {
     return (
       <div>
-        <EuiText grow={false}>
+        <EuiText style={{ maxWidth: '36em' }}>
           <p>
             <FormattedMessage
               id="xpack.maps.joinDocs.intro"

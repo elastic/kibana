@@ -310,6 +310,30 @@ export const casesAll: Role = {
   },
 };
 
+export const casesRead: Role = {
+  name: 'cases_read_role',
+  privileges: {
+    elasticsearch: {
+      indices: [
+        {
+          names: ['*'],
+          privileges: ['all'],
+        },
+      ],
+    },
+    kibana: [
+      {
+        feature: {
+          generalCases: ['read'],
+          actions: ['all'],
+          actionsSimulators: ['all'],
+        },
+        spaces: ['*'],
+      },
+    ],
+  },
+};
+
 /**
  * Roles for Cases in Observability
  */
@@ -386,6 +410,30 @@ export const obsCasesAll: Role = {
   },
 };
 
+export const obsCasesRead: Role = {
+  name: 'obs_cases_read_role',
+  privileges: {
+    elasticsearch: {
+      indices: [
+        {
+          names: ['*'],
+          privileges: ['all'],
+        },
+      ],
+    },
+    kibana: [
+      {
+        feature: {
+          observabilityCases: ['read'],
+          actions: ['all'],
+          actionsSimulators: ['all'],
+        },
+        spaces: ['*'],
+      },
+    ],
+  },
+};
+
 export const roles = [
   secAllCasesOnlyDelete,
   secAllCasesNoDelete,
@@ -399,7 +447,9 @@ export const roles = [
   casesOnlyDelete,
   casesNoDelete,
   casesAll,
+  casesRead,
   obsCasesOnlyDelete,
   obsCasesNoDelete,
   obsCasesAll,
+  obsCasesRead,
 ];

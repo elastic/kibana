@@ -227,13 +227,7 @@
                 "label": "notifications",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.NotificationsStart",
-                    "text": "NotificationsStart"
-                  }
+                  "NotificationsStart"
                 ],
                 "path": "src/plugins/embeddable/public/lib/panel/panel_header/panel_actions/add_panel/add_panel_action.ts",
                 "deprecated": false,
@@ -490,13 +484,7 @@
                 "label": "toasts",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.IToasts",
-                    "text": "IToasts"
-                  }
+                  "IToasts"
                 ],
                 "path": "src/plugins/embeddable/public/lib/attribute_service/attribute_service.tsx",
                 "deprecated": false,
@@ -2016,13 +2004,7 @@
                 "label": "application",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCoreApplicationPluginApi",
-                    "section": "def-public.ApplicationStart",
-                    "text": "ApplicationStart"
-                  }
+                  "ApplicationStart"
                 ],
                 "path": "src/plugins/embeddable/public/lib/actions/edit_panel_action.ts",
                 "deprecated": false,
@@ -3666,13 +3648,7 @@
                 "description": [],
                 "signature": [
                   "(appId: string, options?: ",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCoreApplicationPluginApi",
-                    "section": "def-public.NavigateToAppOptions",
-                    "text": "NavigateToAppOptions"
-                  },
+                  "NavigateToAppOptions",
                   " | undefined) => Promise<void>"
                 ],
                 "path": "src/plugins/embeddable/public/lib/state_transfer/embeddable_state_transfer.ts",
@@ -3703,13 +3679,7 @@
                 "description": [],
                 "signature": [
                   "ReadonlyMap<string, ",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCoreApplicationPluginApi",
-                    "section": "def-public.PublicAppInfo",
-                    "text": "PublicAppInfo"
-                  },
+                  "PublicAppInfo",
                   "> | undefined"
                 ],
                 "path": "src/plugins/embeddable/public/lib/state_transfer/embeddable_state_transfer.ts",
@@ -4812,6 +4782,43 @@
       },
       {
         "parentPluginId": "embeddable",
+        "id": "def-public.isFilterableEmbeddable",
+        "type": "Function",
+        "tags": [],
+        "label": "isFilterableEmbeddable",
+        "description": [
+          "\nEnsure that embeddable supports filtering/querying"
+        ],
+        "signature": [
+          "(incoming: unknown) => boolean"
+        ],
+        "path": "src/plugins/embeddable/public/lib/filterable_embeddable/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.isFilterableEmbeddable.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "incoming",
+            "description": [
+              "Embeddable that is being tested to check if it is a FilterableEmbeddable"
+            ],
+            "signature": [
+              "unknown"
+            ],
+            "path": "src/plugins/embeddable/public/lib/filterable_embeddable/types.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "true if the incoming embeddable is a FilterableEmbeddable, false if it is not"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "embeddable",
         "id": "def-public.isRangeSelectTriggerContext",
         "type": "Function",
         "tags": [],
@@ -5453,13 +5460,7 @@
           ">>; overlays: ",
           "OverlayStart",
           "; notifications: ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.NotificationsStart",
-            "text": "NotificationsStart"
-          },
+          "NotificationsStart",
           "; SavedObjectFinder: React.ComponentType<any>; showCreateNewMenu?: boolean | undefined; reportUiCounter?: ((appName: string, type: string, eventNames: string | string[], count?: number | undefined) => void) | undefined; theme: ",
           "ThemeServiceStart",
           "; }) => ",
@@ -5684,13 +5685,7 @@
                 "label": "notifications",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.NotificationsStart",
-                    "text": "NotificationsStart"
-                  }
+                  "NotificationsStart"
                 ],
                 "path": "src/plugins/embeddable/public/lib/panel/panel_header/panel_actions/add_panel/open_add_panel_flyout.tsx",
                 "deprecated": false
@@ -7456,6 +7451,61 @@
       },
       {
         "parentPluginId": "embeddable",
+        "id": "def-public.FilterableEmbeddable",
+        "type": "Interface",
+        "tags": [],
+        "label": "FilterableEmbeddable",
+        "description": [
+          "\nAll embeddables that implement this interface should support being filtered\nand/or queried via the top navigation bar"
+        ],
+        "path": "src/plugins/embeddable/public/lib/filterable_embeddable/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.FilterableEmbeddable.getFilters",
+            "type": "Function",
+            "tags": [],
+            "label": "getFilters",
+            "description": [
+              "\nGets the embeddable's local filters"
+            ],
+            "signature": [
+              "() => Promise<",
+              "Filter",
+              "[]>"
+            ],
+            "path": "src/plugins/embeddable/public/lib/filterable_embeddable/types.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.FilterableEmbeddable.getQuery",
+            "type": "Function",
+            "tags": [],
+            "label": "getQuery",
+            "description": [
+              "\nGets the embeddable's local query"
+            ],
+            "signature": [
+              "() => Promise<",
+              "Query",
+              " | ",
+              "AggregateQuery",
+              " | undefined>"
+            ],
+            "path": "src/plugins/embeddable/public/lib/filterable_embeddable/types.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "embeddable",
         "id": "def-public.IContainer",
         "type": "Interface",
         "tags": [],
@@ -8346,6 +8396,38 @@
                 "description": [],
                 "signature": [
                   "Partial<I>"
+                ],
+                "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.IEmbeddable.updateOutput",
+            "type": "Function",
+            "tags": [],
+            "label": "updateOutput",
+            "description": [
+              "\nUpdates output state with the given changes."
+            ],
+            "signature": [
+              "(changes: Partial<O>) => void"
+            ],
+            "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "embeddable",
+                "id": "def-public.IEmbeddable.updateOutput.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "changes",
+                "description": [],
+                "signature": [
+                  "Partial<O>"
                 ],
                 "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
                 "deprecated": false,

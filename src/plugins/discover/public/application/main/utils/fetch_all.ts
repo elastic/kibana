@@ -9,6 +9,7 @@ import { DataPublicPluginStart, ISearchSource } from '@kbn/data-plugin/public';
 import { Adapters } from '@kbn/inspector-plugin/common';
 import { ReduxLikeStateContainer } from '@kbn/kibana-utils-plugin/common';
 import { DataViewType } from '@kbn/data-views-plugin/public';
+import type { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
 import { getRawRecordType } from './get_raw_record_type';
 import {
   sendCompleteMsg,
@@ -19,7 +20,6 @@ import {
   sendResetMsg,
 } from '../hooks/use_saved_search_messages';
 import { updateSearchSource } from './update_search_source';
-import type { SavedSearch, SortOrder } from '../../../services/saved_searches';
 import { fetchDocuments } from './fetch_documents';
 import { fetchTotalHits } from './fetch_total_hits';
 import { fetchChart } from './fetch_chart';

@@ -18,6 +18,10 @@ type ExtraEuiVars = {
 type EuiVars = typeof euiLightVars & ExtraEuiVars;
 type EuiThemeReturn = ReturnType<typeof useEuiThemeHook> & { euiVars: EuiVars };
 
+export type EuiVarsColors = Pick<
+  ReturnType<typeof useEuiTheme>['euiVars'],
+  'euiColorVis0' | 'euiColorVis1' | 'euiColorVis3' | 'euiColorVis8' | 'euiColorVis9'
+>;
 // Not all Eui Tokens were fully migrated to @elastic/eui/useEuiTheme yet, so
 // this hook overrides the default useEuiTheme hook to provide a custom hook that
 // allows the use the euiVars tokens from the euiLightVars and euiDarkVars

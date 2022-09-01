@@ -8,10 +8,21 @@ PKG_REQUIRE_NAME = "@kbn/ui-shared-deps-npm"
 
 SOURCE_FILES = glob(
   [
-    "src/**/*",
+    "**/*.ts",
+    "**/*.js",
   ],
   exclude = [
-    "**/*.md",
+    "**/*.config.js",
+    "**/*.mock.*",
+    "**/*.test.*",
+    "**/*.stories.*",
+    "**/__snapshots__/**",
+    "**/integration_tests/**",
+    "**/mocks/**",
+    "**/scripts/**",
+    "**/storybook/**",
+    "**/test_fixtures/**",
+    "**/test_helpers/**",
   ],
 )
 
@@ -50,7 +61,6 @@ RUNTIME_DEPS = [
   "@npm//react-router-dom",
   "@npm//react-router",
   "@npm//react",
-  "@npm//regenerator-runtime",
   "@npm//rison-node",
   "@npm//rxjs",
   "@npm//styled-components",
@@ -87,7 +97,6 @@ TYPES_DEPS = [
   "@npm//react-is",
   "@npm//react-router",
   "@npm//react-router-dom",
-  "@npm//regenerator-runtime",
   "@npm//rison-node",
   "@npm//rxjs",
   "@npm//styled-components",
@@ -123,7 +132,6 @@ ts_project(
   declaration_map = True,
   emit_declaration_only = True,
   out_dir = "target_types",
-  root_dir = "src",
   tsconfig = ":tsconfig",
 )
 

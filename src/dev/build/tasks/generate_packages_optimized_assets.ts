@@ -14,8 +14,6 @@ import fs from 'fs';
 
 import gulpBrotli from 'gulp-brotli';
 // @ts-expect-error
-import gulpGzip from 'gulp-gzip';
-// @ts-expect-error
 import gulpPostCSS from 'gulp-postcss';
 // @ts-expect-error
 import gulpTerser from 'gulp-terser';
@@ -62,17 +60,6 @@ async function optimizeAssets(log: ToolingLog, assetDir: string) {
       gulpBrotli({
         params: {
           [zlib.constants.BROTLI_PARAM_QUALITY]: zlib.constants.BROTLI_MAX_QUALITY,
-        },
-      }),
-      vfs.dest(assetDir)
-    );
-
-    log.debug('GZip compress');
-    await asyncPipeline(
-      vfs.src(['**/*.{js,css}'], { cwd: assetDir }),
-      gulpGzip({
-        gzipOptions: {
-          level: 9,
         },
       }),
       vfs.dest(assetDir)

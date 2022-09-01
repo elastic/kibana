@@ -10,9 +10,9 @@ import { FtrConfigProviderContext } from '@kbn/test';
 import { ThreatIntelligenceCypressVisualTestRunner } from './runner';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-  const securitySolutionCypressConfig = await readConfigFile(require.resolve('./config.ts'));
+  const tiCypressConfig = await readConfigFile(require.resolve('./config.ts'));
   return {
-    ...securitySolutionCypressConfig.getAll(),
+    ...tiCypressConfig.getAll(),
 
     testRunner: ThreatIntelligenceCypressVisualTestRunner,
   };

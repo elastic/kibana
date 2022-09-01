@@ -36,6 +36,7 @@ import type {
   PostNewAgentActionRequest,
   PostNewAgentActionResponse,
   GetCurrentUpgradesResponse,
+  GetAvailableVersionsResponse,
 } from '../../types';
 
 import { useRequest, sendRequest } from './use_request';
@@ -230,5 +231,12 @@ export function sendPostBulkAgentTagsUpdate(
     path: agentRouteService.getBulkUpdateTagsPath(),
     body,
     ...options,
+  });
+}
+
+export function sendGetAgentsAvailableVersions() {
+  return sendRequest<GetAvailableVersionsResponse>({
+    method: 'get',
+    path: agentRouteService.getAvailableVersionsPath(),
   });
 }

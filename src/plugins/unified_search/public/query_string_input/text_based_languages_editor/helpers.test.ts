@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { parseErrors } from './helpers';
+import { parseErrors, getInlineEditorText } from './helpers';
 
 describe('helpers', function () {
   describe('parseErrors', function () {
@@ -100,6 +100,32 @@ describe('helpers', function () {
           startLineNumber: 1,
         },
       ]);
+    });
+  });
+
+  describe('getInlineEditorText', function () {
+    it('should return the entire query if it is one liner', function () {
+      const text = getInlineEditorText(
+        'SELECT field1, count(*) FROM index1 ORDER BY field1',
+        false
+      );
+      expect(text).toEqual(text);
+    });
+
+    it('should return the query on one line with extra space if is multiliner', function () {
+      const text = getInlineEditorText(
+        'SELECT field1, count(*)\nFROM index1 ORDER BY field1',
+        true
+      );
+      expect(text).toEqual('SELECT field1, count(*) FROM index1 ORDER BY field1');
+    });
+
+    it('should return the query on one line with extra spaces removed if is multiliner', function () {
+      const text = getInlineEditorText(
+        'SELECT field1, count(*)\nFROM index1 \n   ORDER BY field1',
+        true
+      );
+      expect(text).toEqual('SELECT field1, count(*) FROM index1 ORDER BY field1');
     });
   });
 });

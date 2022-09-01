@@ -22,9 +22,11 @@ export const allowedExperimentalValues = Object.freeze({
   pendingActionResponsesWithAck: true,
   policyListEnabled: true,
   policyResponseInFleetEnabled: true,
+  threatIntelligenceEnabled: false,
+  entityAnalyticsDashboardEnabled: false,
 
   /**
-   * This is used for enabling the end to end tests for the security_solution telemetry.
+   * This is used for enabling the end-to-end tests for the security_solution telemetry.
    * We disable the telemetry since we don't have specific roles or permissions around it and
    * we don't want people to be able to violate security by getting access to whole documents
    * around telemetry they should not.
@@ -51,6 +53,11 @@ export const allowedExperimentalValues = Object.freeze({
    * - We show a table with plain execution logs on the Rule Details page.
    */
   extendedRuleExecutionLoggingEnabled: false,
+
+  /**
+   * Enables the SOC trends timerange and stats on D&R page
+   */
+  socTrendsEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

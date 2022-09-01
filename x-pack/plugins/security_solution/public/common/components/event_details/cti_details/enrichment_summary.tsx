@@ -33,6 +33,7 @@ export interface ThreatSummaryDescription {
   timelineId: string;
   value: string | undefined;
   isDraggable?: boolean;
+  isReadOnly?: boolean;
 }
 
 const EnrichmentFieldFeedName = styled.span`
@@ -65,6 +66,7 @@ const EnrichmentDescription: React.FC<ThreatSummaryDescription> = ({
   timelineId,
   value,
   isDraggable,
+  isReadOnly,
 }) => {
   if (!data || !value) return null;
   const key = `alert-details-value-formatted-field-value-${timelineId}-${eventId}-${data.field}-${value}-${index}-${feedName}`;
@@ -92,7 +94,7 @@ const EnrichmentDescription: React.FC<ThreatSummaryDescription> = ({
         </div>
       </EuiFlexItem>
       <EuiFlexItem>
-        {value && (
+        {value && !isReadOnly && (
           <ActionCell
             data={data}
             contextId={timelineId}
@@ -115,7 +117,8 @@ const EnrichmentSummaryComponent: React.FC<{
   timelineId: string;
   eventId: string;
   isDraggable?: boolean;
-}> = ({ browserFields, data, enrichments, timelineId, eventId, isDraggable }) => {
+  isReadOnly?: boolean;
+}> = ({ browserFields, data, enrichments, timelineId, eventId, isDraggable, isReadOnly }) => {
   const parsedEnrichments = enrichments.map((enrichment, index) => {
     const { field, type, feedName, value } = getEnrichmentIdentifiers(enrichment);
     const eventData = data.find((item) => item.field === field);
@@ -168,6 +171,7 @@ const EnrichmentSummaryComponent: React.FC<{
                     data={fieldsData}
                     browserField={browserField}
                     isDraggable={isDraggable}
+                    isReadOnly={isReadOnly}
                   />
                 }
               />
@@ -198,6 +202,7 @@ const EnrichmentSummaryComponent: React.FC<{
                     data={fieldsData}
                     browserField={browserField}
                     isDraggable={isDraggable}
+                    isReadOnly={isReadOnly}
                   />
                 }
               />

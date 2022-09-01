@@ -821,13 +821,7 @@
         "description": [],
         "signature": [
           "(savedObject: ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCoreSavedObjectsPluginApi",
-            "section": "def-public.SavedObjectsStart",
-            "text": "SavedObjectsStart"
-          },
+          "SavedObjectsStart",
           ", uiSettings: ",
           "IUiSettingsClient",
           ") => (props: ",
@@ -845,13 +839,7 @@
             "label": "savedObject",
             "description": [],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-public.SavedObjectsStart",
-                "text": "SavedObjectsStart"
-              }
+              "SavedObjectsStart"
             ],
             "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
             "deprecated": false,
@@ -1462,22 +1450,6 @@
             "path": "src/plugins/saved_objects_tagging_oss/public/api.ts"
           },
           {
-            "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/utils/saved_objects_utils/display_duplicate_title_confirm_modal.ts"
-          },
-          {
-            "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/utils/saved_objects_utils/display_duplicate_title_confirm_modal.ts"
-          },
-          {
-            "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/utils/saved_objects_utils/check_for_duplicate_title.ts"
-          },
-          {
-            "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/utils/saved_objects_utils/check_for_duplicate_title.ts"
-          },
-          {
             "plugin": "dashboard",
             "path": "src/plugins/dashboard/public/services/saved_object_loader.ts"
           },
@@ -1520,22 +1492,6 @@
           {
             "plugin": "dashboard",
             "path": "src/plugins/dashboard/public/application/actions/clone_panel_action.tsx"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/persistence/saved_objects_utils/display_duplicate_title_confirm_modal.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/persistence/saved_objects_utils/display_duplicate_title_confirm_modal.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/persistence/saved_objects_utils/check_for_duplicate_title.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/persistence/saved_objects_utils/check_for_duplicate_title.ts"
           }
         ],
         "children": [
@@ -2663,6 +2619,19 @@
             ],
             "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "savedObjects",
+            "id": "def-public.SavedObjectMetaData.defaultSearchField",
+            "type": "string",
+            "tags": [],
+            "label": "defaultSearchField",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -2887,13 +2856,7 @@
         "description": [],
         "signature": [
           "{ savedObjects: ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCoreSavedObjectsPluginApi",
-            "section": "def-public.SavedObjectsStart",
-            "text": "SavedObjectsStart"
-          },
+          "SavedObjectsStart",
           "; uiSettings: ",
           "IUiSettingsClient",
           "; } & ",

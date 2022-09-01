@@ -15,6 +15,7 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import type { CaseStatuses } from '@kbn/cases-plugin/common';
 
@@ -100,11 +101,16 @@ const getTableColumns: GetTableColumns = () => [
   {
     field: 'id',
     name: i18n.CASES_TABLE_COLUMN_NAME,
-    truncateText: true,
-    textOnly: true,
     'data-test-subj': 'recentlyCreatedCaseName',
-
-    render: (id: string, { name }) => <CaseDetailsLink detailName={id}>{name}</CaseDetailsLink>,
+    render: (id: string, { name }) => (
+      <EuiToolTip
+        title={i18n.OPEN_CASE_DETAIL_TOOLTIP}
+        content={name}
+        anchorClassName="eui-textTruncate"
+      >
+        <CaseDetailsLink detailName={id}>{name}</CaseDetailsLink>
+      </EuiToolTip>
+    ),
   },
   {
     field: 'totalAlerts',

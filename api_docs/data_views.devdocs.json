@@ -306,6 +306,19 @@
           },
           {
             "parentPluginId": "dataViews",
+            "id": "def-public.DataView.matchedIndices",
+            "type": "Array",
+            "tags": [],
+            "label": "matchedIndices",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_view.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dataViews",
             "id": "def-public.DataView.Unnamed",
             "type": "Function",
             "tags": [],
@@ -653,6 +666,23 @@
                 "path": "src/plugins/data_view_management/public/components/edit_index_pattern/scripted_fields_table/scripted_fields_table.tsx"
               }
             ],
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-public.DataView.isTSDBMode",
+            "type": "Function",
+            "tags": [],
+            "label": "isTSDBMode",
+            "description": [
+              "\nreturns true if dataview contains TSDB fields"
+            ],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_view.ts",
+            "deprecated": false,
             "children": [],
             "returnComment": []
           },
@@ -1046,7 +1076,7 @@
             "tags": [],
             "label": "getAllRuntimeFields",
             "description": [
-              "\nGet all runtime field definitions."
+              "\nGet all runtime field definitions.\nNOTE: this does not strip out runtime fields that match mapped field names"
             ],
             "signature": [
               "() => Record<string, ",
@@ -1599,7 +1629,7 @@
                 "section": "def-common.RuntimeFieldSpec",
                 "text": "RuntimeFieldSpec"
               },
-              " | undefined; shortDotsEnable?: boolean | undefined; isMapped?: boolean | undefined; }"
+              " | undefined; fixedInterval?: string[] | undefined; timeZone?: string[] | undefined; timeSeriesDimension?: boolean | undefined; timeSeriesMetric?: \"gauge\" | \"histogram\" | \"summary\" | \"counter\" | undefined; shortDotsEnable?: boolean | undefined; isMapped?: boolean | undefined; }"
             ],
             "path": "src/plugins/data_views/common/fields/data_view_field.ts",
             "deprecated": false
@@ -1917,6 +1947,78 @@
             "label": "aggregatable",
             "description": [
               "\nReturns true if field is aggregatable"
+            ],
+            "path": "src/plugins/data_views/common/fields/data_view_field.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-public.DataViewField.timeSeriesDimension",
+            "type": "boolean",
+            "tags": [],
+            "label": "timeSeriesDimension",
+            "description": [
+              "\nreturns true if field is a TSDB dimension field"
+            ],
+            "path": "src/plugins/data_views/common/fields/data_view_field.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-public.DataViewField.timeSeriesMetric",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "timeSeriesMetric",
+            "description": [
+              "\nreturns type of TSDB metric or undefined"
+            ],
+            "signature": [
+              "\"gauge\" | \"histogram\" | \"summary\" | \"counter\" | undefined"
+            ],
+            "path": "src/plugins/data_views/common/fields/data_view_field.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-public.DataViewField.fixedInterval",
+            "type": "Array",
+            "tags": [],
+            "label": "fixedInterval",
+            "description": [
+              "\nreturns list of alloeed fixed intervals"
+            ],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "src/plugins/data_views/common/fields/data_view_field.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-public.DataViewField.isRolledUpField",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isRolledUpField",
+            "description": [
+              "\nreturns true if the field is of rolled up type"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/data_views/common/fields/data_view_field.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-public.DataViewField.timeZone",
+            "type": "Array",
+            "tags": [],
+            "label": "timeZone",
+            "description": [
+              "\nreturn list of allowed time zones"
+            ],
+            "signature": [
+              "string[] | undefined"
             ],
             "path": "src/plugins/data_views/common/fields/data_view_field.ts",
             "deprecated": false
@@ -2279,14 +2381,8 @@
                 "text": "GetFieldsOptions"
               },
               ") => Promise<",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.FieldSpec",
-                "text": "FieldSpec"
-              },
-              "[]>"
+              "FieldsForWildcardResponse",
+              ">"
             ],
             "path": "src/plugins/data_views/public/data_views/data_views_api_client.ts",
             "deprecated": false,
@@ -2318,10 +2414,10 @@
           },
           {
             "parentPluginId": "dataViews",
-            "id": "def-public.DataViewsApiClient.hasUserIndexPattern",
+            "id": "def-public.DataViewsApiClient.hasUserDataView",
             "type": "Function",
             "tags": [],
-            "label": "hasUserIndexPattern",
+            "label": "hasUserDataView",
             "description": [
               "\nDoes a user created data view exist?"
             ],
@@ -6055,7 +6151,7 @@
             "section": "def-common.RuntimeFieldSpec",
             "text": "RuntimeFieldSpec"
           },
-          " | undefined; shortDotsEnable?: boolean | undefined; isMapped?: boolean | undefined; }"
+          " | undefined; fixedInterval?: string[] | undefined; timeZone?: string[] | undefined; timeSeriesDimension?: boolean | undefined; timeSeriesMetric?: \"gauge\" | \"histogram\" | \"summary\" | \"counter\" | undefined; shortDotsEnable?: boolean | undefined; isMapped?: boolean | undefined; }"
         ],
         "path": "src/plugins/data_views/common/types.ts",
         "deprecated": false,
@@ -6510,6 +6606,19 @@
           },
           {
             "parentPluginId": "dataViews",
+            "id": "def-server.DataView.matchedIndices",
+            "type": "Array",
+            "tags": [],
+            "label": "matchedIndices",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_view.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dataViews",
             "id": "def-server.DataView.Unnamed",
             "type": "Function",
             "tags": [],
@@ -6857,6 +6966,23 @@
                 "path": "src/plugins/data_view_management/public/components/edit_index_pattern/scripted_fields_table/scripted_fields_table.tsx"
               }
             ],
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-server.DataView.isTSDBMode",
+            "type": "Function",
+            "tags": [],
+            "label": "isTSDBMode",
+            "description": [
+              "\nreturns true if dataview contains TSDB fields"
+            ],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_view.ts",
+            "deprecated": false,
             "children": [],
             "returnComment": []
           },
@@ -7250,7 +7376,7 @@
             "tags": [],
             "label": "getAllRuntimeFields",
             "description": [
-              "\nGet all runtime field definitions."
+              "\nGet all runtime field definitions.\nNOTE: this does not strip out runtime fields that match mapped field names"
             ],
             "signature": [
               "() => Record<string, ",
@@ -9327,7 +9453,7 @@
             "signature": [
               "(options: { pattern: string | string[]; metaFields?: string[] | undefined; fieldCapsOptions?: { allow_no_indices: boolean; } | undefined; type?: string | undefined; rollupIndex?: string | undefined; filter?: ",
               "QueryDslQueryContainer",
-              " | undefined; }) => Promise<",
+              " | undefined; }) => Promise<{ fields: ",
               {
                 "pluginId": "dataViews",
                 "scope": "server",
@@ -9335,7 +9461,7 @@
                 "section": "def-server.FieldDescriptor",
                 "text": "FieldDescriptor"
               },
-              "[]>"
+              "[]; indices: string[]; }>"
             ],
             "path": "src/plugins/data_views/server/fetcher/index_patterns_fetcher.ts",
             "deprecated": false,
@@ -9967,6 +10093,58 @@
             ],
             "path": "src/plugins/data_views/server/fetcher/index_patterns_fetcher.ts",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-server.FieldDescriptor.fixedInterval",
+            "type": "Array",
+            "tags": [],
+            "label": "fixedInterval",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "src/plugins/data_views/server/fetcher/index_patterns_fetcher.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-server.FieldDescriptor.timeZone",
+            "type": "Array",
+            "tags": [],
+            "label": "timeZone",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "src/plugins/data_views/server/fetcher/index_patterns_fetcher.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-server.FieldDescriptor.timeSeriesMetric",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "timeSeriesMetric",
+            "description": [],
+            "signature": [
+              "\"gauge\" | \"histogram\" | \"summary\" | \"counter\" | undefined"
+            ],
+            "path": "src/plugins/data_views/server/fetcher/index_patterns_fetcher.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-server.FieldDescriptor.timeSeriesDimension",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "timeSeriesDimension",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/data_views/server/fetcher/index_patterns_fetcher.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -10419,7 +10597,7 @@
             "section": "def-common.RuntimeFieldSpec",
             "text": "RuntimeFieldSpec"
           },
-          " | undefined; shortDotsEnable?: boolean | undefined; isMapped?: boolean | undefined; }"
+          " | undefined; fixedInterval?: string[] | undefined; timeZone?: string[] | undefined; timeSeriesDimension?: boolean | undefined; timeSeriesMetric?: \"gauge\" | \"histogram\" | \"summary\" | \"counter\" | undefined; shortDotsEnable?: boolean | undefined; isMapped?: boolean | undefined; }"
         ],
         "path": "src/plugins/data_views/common/types.ts",
         "deprecated": false,
@@ -10700,7 +10878,61 @@
               "label": "elasticsearchClient",
               "description": [],
               "signature": [
-                "{ name: string | symbol; transform: ",
+                "{ get: { <TDocument = unknown>(this: That, params: ",
+                "GetRequest",
+                " | ",
+                "GetRequest",
+                ", options?: ",
+                "TransportRequestOptionsWithOutMeta",
+                " | undefined): Promise<",
+                "GetResponse",
+                "<TDocument>>; <TDocument = unknown>(this: That, params: ",
+                "GetRequest",
+                " | ",
+                "GetRequest",
+                ", options?: ",
+                "TransportRequestOptionsWithMeta",
+                " | undefined): Promise<",
+                "TransportResult",
+                "<",
+                "GetResponse",
+                "<TDocument>, unknown>>; <TDocument = unknown>(this: That, params: ",
+                "GetRequest",
+                " | ",
+                "GetRequest",
+                ", options?: ",
+                "TransportRequestOptions",
+                " | undefined): Promise<",
+                "GetResponse",
+                "<TDocument>>; }; delete: { (this: That, params: ",
+                "DeleteRequest",
+                " | ",
+                "DeleteRequest",
+                ", options?: ",
+                "TransportRequestOptionsWithOutMeta",
+                " | undefined): Promise<",
+                "WriteResponseBase",
+                ">; (this: That, params: ",
+                "DeleteRequest",
+                " | ",
+                "DeleteRequest",
+                ", options?: ",
+                "TransportRequestOptionsWithMeta",
+                " | undefined): Promise<",
+                "TransportResult",
+                "<",
+                "WriteResponseBase",
+                ", unknown>>; (this: That, params: ",
+                "DeleteRequest",
+                " | ",
+                "DeleteRequest",
+                ", options?: ",
+                "TransportRequestOptions",
+                " | undefined): Promise<",
+                "WriteResponseBase",
+                ">; }; cluster: ",
+                "default",
+                "; eql: ",
                 "default",
                 "; search: { <TDocument = unknown, TAggregations = Record<string, ",
                 "AggregationsAggregate",
@@ -10734,11 +10966,7 @@
                 "TransportRequestOptions",
                 " | undefined): Promise<",
                 "SearchResponse",
-                "<TDocument, TAggregations>>; }; cluster: ",
-                "default",
-                "; eql: ",
-                "default",
-                "; create: { <TDocument = unknown>(this: That, params: ",
+                "<TDocument, TAggregations>>; }; create: { <TDocument = unknown>(this: That, params: ",
                 "CreateRequest",
                 "<TDocument> | ",
                 "CreateRequest",
@@ -10768,7 +10996,7 @@
                 "default",
                 "; security: ",
                 "default",
-                "; index: { <TDocument = unknown>(this: That, params: ",
+                "; name: string | symbol; index: { <TDocument = unknown>(this: That, params: ",
                 "IndexRequest",
                 "<TDocument> | ",
                 "IndexRequest",
@@ -10794,33 +11022,7 @@
                 "TransportRequestOptions",
                 " | undefined): Promise<",
                 "WriteResponseBase",
-                ">; }; get: { <TDocument = unknown>(this: That, params: ",
-                "GetRequest",
-                " | ",
-                "GetRequest",
-                ", options?: ",
-                "TransportRequestOptionsWithOutMeta",
-                " | undefined): Promise<",
-                "GetResponse",
-                "<TDocument>>; <TDocument = unknown>(this: That, params: ",
-                "GetRequest",
-                " | ",
-                "GetRequest",
-                ", options?: ",
-                "TransportRequestOptionsWithMeta",
-                " | undefined): Promise<",
-                "TransportResult",
-                "<",
-                "GetResponse",
-                "<TDocument>, unknown>>; <TDocument = unknown>(this: That, params: ",
-                "GetRequest",
-                " | ",
-                "GetRequest",
-                ", options?: ",
-                "TransportRequestOptions",
-                " | undefined): Promise<",
-                "GetResponse",
-                "<TDocument>>; }; update: { <TDocument = unknown, TPartialDocument = unknown, TDocumentR = unknown>(this: That, params: ",
+                ">; }; update: { <TDocument = unknown, TPartialDocument = unknown, TDocumentR = unknown>(this: That, params: ",
                 "UpdateRequest",
                 "<TDocument, TPartialDocument> | ",
                 "UpdateRequest",
@@ -10846,33 +11048,7 @@
                 "TransportRequestOptions",
                 " | undefined): Promise<",
                 "UpdateResponse",
-                "<TDocumentR>>; }; delete: { (this: That, params: ",
-                "DeleteRequest",
-                " | ",
-                "DeleteRequest",
-                ", options?: ",
-                "TransportRequestOptionsWithOutMeta",
-                " | undefined): Promise<",
-                "WriteResponseBase",
-                ">; (this: That, params: ",
-                "DeleteRequest",
-                " | ",
-                "DeleteRequest",
-                ", options?: ",
-                "TransportRequestOptionsWithMeta",
-                " | undefined): Promise<",
-                "TransportResult",
-                "<",
-                "WriteResponseBase",
-                ", unknown>>; (this: That, params: ",
-                "DeleteRequest",
-                " | ",
-                "DeleteRequest",
-                ", options?: ",
-                "TransportRequestOptions",
-                " | undefined): Promise<",
-                "WriteResponseBase",
-                ">; }; [kInternal]: symbol | null; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
+                "<TDocumentR>>; }; [kInternal]: symbol | null; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
                 "default",
                 "; helpers: ",
                 "default",
@@ -11832,6 +12008,8 @@
                 "TermvectorsResponse",
                 ">; }; textStructure: ",
                 "default",
+                "; transform: ",
+                "default",
                 "; updateByQuery: { (this: That, params: ",
                 "UpdateByQueryRequest",
                 " | ",
@@ -12248,6 +12426,19 @@
           },
           {
             "parentPluginId": "dataViews",
+            "id": "def-common.DataView.matchedIndices",
+            "type": "Array",
+            "tags": [],
+            "label": "matchedIndices",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_view.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dataViews",
             "id": "def-common.DataView.Unnamed",
             "type": "Function",
             "tags": [],
@@ -12595,6 +12786,23 @@
                 "path": "src/plugins/data_view_management/public/components/edit_index_pattern/scripted_fields_table/scripted_fields_table.tsx"
               }
             ],
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-common.DataView.isTSDBMode",
+            "type": "Function",
+            "tags": [],
+            "label": "isTSDBMode",
+            "description": [
+              "\nreturns true if dataview contains TSDB fields"
+            ],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_view.ts",
+            "deprecated": false,
             "children": [],
             "returnComment": []
           },
@@ -12988,7 +13196,7 @@
             "tags": [],
             "label": "getAllRuntimeFields",
             "description": [
-              "\nGet all runtime field definitions."
+              "\nGet all runtime field definitions.\nNOTE: this does not strip out runtime fields that match mapped field names"
             ],
             "signature": [
               "() => Record<string, ",
@@ -13541,7 +13749,7 @@
                 "section": "def-common.RuntimeFieldSpec",
                 "text": "RuntimeFieldSpec"
               },
-              " | undefined; shortDotsEnable?: boolean | undefined; isMapped?: boolean | undefined; }"
+              " | undefined; fixedInterval?: string[] | undefined; timeZone?: string[] | undefined; timeSeriesDimension?: boolean | undefined; timeSeriesMetric?: \"gauge\" | \"histogram\" | \"summary\" | \"counter\" | undefined; shortDotsEnable?: boolean | undefined; isMapped?: boolean | undefined; }"
             ],
             "path": "src/plugins/data_views/common/fields/data_view_field.ts",
             "deprecated": false
@@ -13859,6 +14067,78 @@
             "label": "aggregatable",
             "description": [
               "\nReturns true if field is aggregatable"
+            ],
+            "path": "src/plugins/data_views/common/fields/data_view_field.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-common.DataViewField.timeSeriesDimension",
+            "type": "boolean",
+            "tags": [],
+            "label": "timeSeriesDimension",
+            "description": [
+              "\nreturns true if field is a TSDB dimension field"
+            ],
+            "path": "src/plugins/data_views/common/fields/data_view_field.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-common.DataViewField.timeSeriesMetric",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "timeSeriesMetric",
+            "description": [
+              "\nreturns type of TSDB metric or undefined"
+            ],
+            "signature": [
+              "\"gauge\" | \"histogram\" | \"summary\" | \"counter\" | undefined"
+            ],
+            "path": "src/plugins/data_views/common/fields/data_view_field.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-common.DataViewField.fixedInterval",
+            "type": "Array",
+            "tags": [],
+            "label": "fixedInterval",
+            "description": [
+              "\nreturns list of alloeed fixed intervals"
+            ],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "src/plugins/data_views/common/fields/data_view_field.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-common.DataViewField.isRolledUpField",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isRolledUpField",
+            "description": [
+              "\nreturns true if the field is of rolled up type"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/data_views/common/fields/data_view_field.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-common.DataViewField.timeZone",
+            "type": "Array",
+            "tags": [],
+            "label": "timeZone",
+            "description": [
+              "\nreturn list of allowed time zones"
+            ],
+            "signature": [
+              "string[] | undefined"
             ],
             "path": "src/plugins/data_views/common/fields/data_view_field.ts",
             "deprecated": false
@@ -16285,13 +16565,7 @@
             ],
             "signature": [
               "(toastInputFields: ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.ToastInputFields",
-                "text": "ToastInputFields"
-              },
+              "ToastInputFields",
               ", key: string) => void"
             ],
             "path": "src/plugins/data_views/common/data_views/data_views.ts",
@@ -16308,7 +16582,7 @@
                 "signature": [
                   "Pick<",
                   "Toast",
-                  ", \"children\" | \"color\" | \"className\" | \"lang\" | \"style\" | \"role\" | \"tabIndex\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChange\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onError\" | \"onErrorCapture\" | \"onKeyDown\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClick\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"data-test-subj\" | \"hidden\" | \"security\" | \"defaultValue\" | \"defaultChecked\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"placeholder\" | \"slot\" | \"spellCheck\" | \"translate\" | \"radioGroup\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"unselectable\" | \"inputMode\" | \"is\" | \"toastLifeTimeMs\" | \"iconType\" | \"onClose\"> & { title?: string | ",
+                  ", \"children\" | \"onError\" | \"hidden\" | \"color\" | \"className\" | \"onChange\" | \"onKeyDown\" | \"onClick\" | \"security\" | \"defaultValue\" | \"lang\" | \"defaultChecked\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"placeholder\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onErrorCapture\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"toastLifeTimeMs\" | \"iconType\" | \"onClose\" | \"data-test-subj\"> & { title?: string | ",
                   "MountPoint",
                   "<HTMLElement> | undefined; text?: string | ",
                   "MountPoint",
@@ -16340,13 +16614,7 @@
             ],
             "signature": [
               "(error: Error, toastInputFields: ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.ErrorToastOptions",
-                "text": "ErrorToastOptions"
-              },
+              "ErrorToastOptions",
               ", key: string) => void"
             ],
             "path": "src/plugins/data_views/common/data_views/data_views.ts",
@@ -16374,13 +16642,7 @@
                 "label": "toastInputFields",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.ErrorToastOptions",
-                    "text": "ErrorToastOptions"
-                  }
+                  "ErrorToastOptions"
                 ],
                 "path": "src/plugins/data_views/common/types.ts",
                 "deprecated": false
@@ -17867,14 +18129,8 @@
                 "text": "GetFieldsOptions"
               },
               ") => Promise<",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.FieldSpec",
-                "text": "FieldSpec"
-              },
-              "[]>"
+              "FieldsForWildcardResponse",
+              ">"
             ],
             "path": "src/plugins/data_views/common/types.ts",
             "deprecated": false,
@@ -17904,10 +18160,10 @@
           },
           {
             "parentPluginId": "dataViews",
-            "id": "def-common.IDataViewsApiClient.hasUserIndexPattern",
+            "id": "def-common.IDataViewsApiClient.hasUserDataView",
             "type": "Function",
             "tags": [],
-            "label": "hasUserIndexPattern",
+            "label": "hasUserDataView",
             "description": [],
             "signature": [
               "() => Promise<boolean>"
@@ -19519,7 +19775,7 @@
         "label": "DataViewSavedObjectAttrs",
         "description": [],
         "signature": [
-          "{ type?: string | undefined; name?: string | undefined; title: string; typeMeta?: string | undefined; }"
+          "{ type?: string | undefined; title: string; name?: string | undefined; typeMeta?: string | undefined; }"
         ],
         "path": "src/plugins/data_views/common/data_views/data_views.ts",
         "deprecated": false,
@@ -19535,7 +19791,15 @@
           "\nData views service interface"
         ],
         "signature": [
-          "{ create: ({ id, name, title, ...restOfSpec }: ",
+          "{ get: (id: string) => Promise<",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataView",
+            "text": "DataView"
+          },
+          ">; delete: (indexPatternId: string) => Promise<{}>; create: ({ id, name, title, ...restOfSpec }: ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -19559,15 +19823,7 @@
             "section": "def-common.DataView",
             "text": "DataView"
           },
-          "[]>; get: (id: string) => Promise<",
-          {
-            "pluginId": "dataViews",
-            "scope": "common",
-            "docId": "kibDataViewsPluginApi",
-            "section": "def-common.DataView",
-            "text": "DataView"
-          },
-          ">; delete: (indexPatternId: string) => Promise<{}>; getCanSave: () => Promise<boolean>; getIds: (refresh?: boolean) => Promise<string[]>; getTitles: (refresh?: boolean) => Promise<string[]>; getIdsWithTitle: (refresh?: boolean) => Promise<",
+          "[]>; getCanSave: () => Promise<boolean>; getIds: (refresh?: boolean) => Promise<string[]>; getTitles: (refresh?: boolean) => Promise<string[]>; getIdsWithTitle: (refresh?: boolean) => Promise<",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -19912,7 +20168,7 @@
             "section": "def-common.RuntimeFieldSpec",
             "text": "RuntimeFieldSpec"
           },
-          " | undefined; shortDotsEnable?: boolean | undefined; isMapped?: boolean | undefined; }"
+          " | undefined; fixedInterval?: string[] | undefined; timeZone?: string[] | undefined; timeSeriesDimension?: boolean | undefined; timeSeriesMetric?: \"gauge\" | \"histogram\" | \"summary\" | \"counter\" | undefined; shortDotsEnable?: boolean | undefined; isMapped?: boolean | undefined; }"
         ],
         "path": "src/plugins/data_views/common/types.ts",
         "deprecated": false,
@@ -19998,13 +20254,7 @@
         ],
         "signature": [
           "(error: Error, toastInputFields: ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.ErrorToastOptions",
-            "text": "ErrorToastOptions"
-          },
+          "ErrorToastOptions",
           ", key: string) => void"
         ],
         "path": "src/plugins/data_views/common/types.ts",
@@ -20036,13 +20286,7 @@
               "Toast notif config"
             ],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.ErrorToastOptions",
-                "text": "ErrorToastOptions"
-              }
+              "ErrorToastOptions"
             ],
             "path": "src/plugins/data_views/common/types.ts",
             "deprecated": false
@@ -20073,13 +20317,7 @@
         ],
         "signature": [
           "(toastInputFields: ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.ToastInputFields",
-            "text": "ToastInputFields"
-          },
+          "ToastInputFields",
           ", key: string) => void"
         ],
         "path": "src/plugins/data_views/common/types.ts",
@@ -20098,7 +20336,7 @@
             "signature": [
               "Pick<",
               "Toast",
-              ", \"children\" | \"color\" | \"className\" | \"lang\" | \"style\" | \"role\" | \"tabIndex\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChange\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onError\" | \"onErrorCapture\" | \"onKeyDown\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClick\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"data-test-subj\" | \"hidden\" | \"security\" | \"defaultValue\" | \"defaultChecked\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"placeholder\" | \"slot\" | \"spellCheck\" | \"translate\" | \"radioGroup\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"unselectable\" | \"inputMode\" | \"is\" | \"toastLifeTimeMs\" | \"iconType\" | \"onClose\"> & { title?: string | ",
+              ", \"children\" | \"onError\" | \"hidden\" | \"color\" | \"className\" | \"onChange\" | \"onKeyDown\" | \"onClick\" | \"security\" | \"defaultValue\" | \"lang\" | \"defaultChecked\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"placeholder\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onErrorCapture\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"toastLifeTimeMs\" | \"iconType\" | \"onClose\" | \"data-test-subj\"> & { title?: string | ",
               "MountPoint",
               "<HTMLElement> | undefined; text?: string | ",
               "MountPoint",
@@ -20479,38 +20717,21 @@
         "tags": [],
         "label": "DEFAULT_ASSETS_TO_IGNORE",
         "description": [
-          "\nUsed to determine if the instance has some user created index patterns by filtering index patterns\nthat are created and backed only by Fleet server data\nShould be revised after https://github.com/elastic/kibana/issues/82851 is fixed\nFor more background see: https://github.com/elastic/kibana/issues/107020"
+          "\nUsed to optimize on-boarding experience to determine if the instance has some user created data views or data indices/streams by filtering data sources\nthat are created by default by elastic in ese.\nWe should somehow prevent creating initial data for the users without their explicit action\ninstead of relying on these hardcoded assets"
         ],
         "path": "src/plugins/data_views/common/constants.ts",
         "deprecated": false,
         "children": [
           {
             "parentPluginId": "dataViews",
-            "id": "def-common.DEFAULT_ASSETS_TO_IGNORE.LOGS_INDEX_PATTERN",
-            "type": "string",
+            "id": "def-common.DEFAULT_ASSETS_TO_IGNORE.DATA_STREAMS_TO_IGNORE",
+            "type": "Array",
             "tags": [],
-            "label": "LOGS_INDEX_PATTERN",
+            "label": "DATA_STREAMS_TO_IGNORE",
             "description": [],
-            "path": "src/plugins/data_views/common/constants.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "dataViews",
-            "id": "def-common.DEFAULT_ASSETS_TO_IGNORE.LOGS_DATA_STREAM_TO_IGNORE",
-            "type": "string",
-            "tags": [],
-            "label": "LOGS_DATA_STREAM_TO_IGNORE",
-            "description": [],
-            "path": "src/plugins/data_views/common/constants.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "dataViews",
-            "id": "def-common.DEFAULT_ASSETS_TO_IGNORE.ENT_SEARCH_LOGS_DATA_STREAM_TO_IGNORE",
-            "type": "string",
-            "tags": [],
-            "label": "ENT_SEARCH_LOGS_DATA_STREAM_TO_IGNORE",
-            "description": [],
+            "signature": [
+              "string[]"
+            ],
             "path": "src/plugins/data_views/common/constants.ts",
             "deprecated": false
           }

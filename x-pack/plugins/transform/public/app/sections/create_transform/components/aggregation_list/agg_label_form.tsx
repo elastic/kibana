@@ -14,7 +14,7 @@ import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiPopover, EuiTextColor } fr
 import { AggName } from '../../../../../../common/types/aggregations';
 
 import {
-  isPivotAggsConfigWithUiSupport,
+  isPivotAggsConfigWithUiBase,
   PivotAggsConfig,
   PivotAggsConfigWithUiSupportDict,
 } from '../../../../common';
@@ -50,7 +50,7 @@ export const AggLabelForm: React.FC<Props> = ({
   const helperText = isPivotAggsWithExtendedForm(item) && item.helperText && item.helperText();
 
   const isSubAggSupported =
-    isPivotAggsConfigWithUiSupport(item) &&
+    isPivotAggsConfigWithUiBase(item) &&
     item.isSubAggsSupported &&
     (isPivotAggsWithExtendedForm(item) ? item.isValid() : true);
 
@@ -86,7 +86,7 @@ export const AggLabelForm: React.FC<Props> = ({
                 size="s"
                 iconType="pencil"
                 onClick={() => setPopoverVisibility(!isPopoverVisible)}
-                data-test-subj="transformAggregationEntryEditButton"
+                data-test-subj={`transformAggregationEntryEditButton_${item.aggName}`}
               />
             }
             isOpen={isPopoverVisible}

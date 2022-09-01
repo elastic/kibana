@@ -1,16 +1,12 @@
 title: Upgrade agent
-oneOf:
-  - type: object
-    properties:
-      version:
-        type: string
-    required:
-      - version
-  - type: object
-    properties:
-      version:
-        type: string
-      source_uri:
-        type: string
-    required:
-      - version
+type: object
+properties:
+  version:
+    type: string
+  source_uri:
+    type: string
+  force:
+    type: boolean
+    description: Force upgrade, skipping validation (should be used with caution)
+required:
+  - version

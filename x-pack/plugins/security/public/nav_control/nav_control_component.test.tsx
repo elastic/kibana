@@ -85,26 +85,11 @@ describe('SecurityNavControl', () => {
                 "name": "basic1",
                 "type": "basic",
               },
-              "authentication_realm": Object {
-                "name": "native1",
-                "type": "native",
-              },
-              "authentication_type": "realm",
-              "elastic_cloud_user": false,
-              "email": "email",
-              "enabled": true,
-              "full_name": "full name",
-              "lookup_realm": Object {
-                "name": "native1",
-                "type": "native",
-              },
-              "metadata": Object {
-                "_reserved": false,
-              },
-              "roles": Array [
-                "user-role",
-              ],
-              "username": "user",
+              "email": "some@email",
+              "realm_domain": "some-realm-domain",
+              "realm_name": "some-realm",
+              "roles": Array [],
+              "username": "some-username",
             }
           }
         />

@@ -58,7 +58,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('inspector table', function indexPatternCreation() {
       it('should update table header when columns change', async function () {
         await inspector.open();
-        await inspector.expectTableHeaders(['Count']);
+        await inspector.expectTableHeaders(['Count', 'All docs']);
         await inspector.close();
 
         log.debug('Add Average Metric on machine.ram field');
@@ -67,7 +67,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visEditor.selectField('machine.ram', 'metrics');
         await PageObjects.visEditor.clickGo();
         await inspector.open();
-        await inspector.expectTableHeaders(['Count', 'Average machine.ram']);
+        await inspector.expectTableHeaders(['Count', 'Average machine.ram', 'All docs']);
         await inspector.close();
       });
 

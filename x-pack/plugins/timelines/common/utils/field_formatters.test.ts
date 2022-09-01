@@ -581,6 +581,17 @@ describe('Events Details Helpers', () => {
           originalValue: ['a04ac6d98ad989312783d4fe3456c53730b212c79a426fb215708b6c6daa3de3'],
           values: ['a04ac6d98ad989312783d4fe3456c53730b212c79a426fb215708b6c6daa3de3'],
         },
+        {
+          category: 'threat',
+          field: 'threat.enrichments',
+          isObjectArray: true,
+          originalValue: [
+            '{"matched.field":["myhash.mysha256"],"matched.index":["logs-ti_abusech.malware"],"matched.type":["indicator_match_rule"],"feed.name":["AbuseCH malware"],"matched.atomic":["a04ac6d98ad989312783d4fe3456c53730b212c79a426fb215708b6c6daa3de3"]}',
+          ],
+          values: [
+            '{"matched.field":["myhash.mysha256"],"matched.index":["logs-ti_abusech.malware"],"matched.type":["indicator_match_rule"],"feed.name":["AbuseCH malware"],"matched.atomic":["a04ac6d98ad989312783d4fe3456c53730b212c79a426fb215708b6c6daa3de3"]}',
+          ],
+        },
       ];
       const result = getDataFromFieldsHits(data);
       expect(result).toEqual(ruleParametersResultFields);

@@ -38,6 +38,8 @@ const latencyOverallTransactionDistributionRoute = createApmServerRoute({
             fieldValue: t.union([t.string, toNumberRt]),
           })
         ),
+        durationMin: toNumberRt,
+        durationMax: toNumberRt,
       }),
       environmentRt,
       kueryRt,
@@ -63,6 +65,8 @@ const latencyOverallTransactionDistributionRoute = createApmServerRoute({
       start,
       end,
       percentileThreshold,
+      durationMin,
+      durationMax,
       termFilters,
       chartType,
     } = resources.params.body;
@@ -99,6 +103,8 @@ const latencyOverallTransactionDistributionRoute = createApmServerRoute({
         },
       },
       percentileThreshold,
+      durationMinOverride: durationMin,
+      durationMaxOverride: durationMax,
       searchMetrics: searchAggregatedTransactions,
     });
   },

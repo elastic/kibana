@@ -390,8 +390,13 @@ export const descriptions = Object.freeze(
     ],
     [
       'linux_deadlock',
-      // intentionally blank for now: https://github.com/elastic/security-team/issues/4264#issuecomment-1194136633
-      '',
+      i18n.translate(
+        'xpack.securitySolution.endpoint.details.policyResponse.description.linux_deadlock',
+        {
+          defaultMessage:
+            'Malware protection was disabled to avoid a potential system deadlock. To resolve this issue, the file systems causing this need to be identified in integration policy advanced settings (linux.advanced.fanotify.ignored_filesystems). Learn more in our',
+        }
+      ),
     ],
   ])
 );
@@ -421,7 +426,7 @@ const linkTexts = Object.freeze(
       i18n.translate(
         'xpack.securitySolution.endpoint.details.policyResponse.link.text.linux_deadlock',
         {
-          defaultMessage: ' Learn more.',
+          defaultMessage: ' troubleshooting docs.',
         }
       ),
     ],

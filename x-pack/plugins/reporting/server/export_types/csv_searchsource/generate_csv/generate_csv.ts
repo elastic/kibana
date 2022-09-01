@@ -8,17 +8,22 @@
 import { errors as esErrors } from '@elastic/elasticsearch';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { IScopedClusterClient, IUiSettingsClient, Logger } from '@kbn/core/server';
+import type {
+  DataView,
+  ISearchSource,
+  ISearchStartSearchSource,
+  SearchRequest,
+} from '@kbn/data-plugin/common';
+import { cellHasFormulas, ES_SEARCH_STRATEGY, tabifyDocs } from '@kbn/data-plugin/common';
 import type { IScopedSearchClient } from '@kbn/data-plugin/server';
 import type { Datatable } from '@kbn/expressions-plugin/server';
-import type { Writable } from 'stream';
-import { lastValueFrom } from 'rxjs';
-import type { DataView, ISearchSource, ISearchStartSearchSource } from '@kbn/data-plugin/common';
-import { cellHasFormulas, ES_SEARCH_STRATEGY, tabifyDocs } from '@kbn/data-plugin/common';
 import type {
   FieldFormat,
   FieldFormatConfig,
   IFieldFormatsRegistry,
 } from '@kbn/field-formats-plugin/common';
+import { lastValueFrom } from 'rxjs';
+import type { Writable } from 'stream';
 import type { ReportingConfig } from '../../..';
 import type { CancellationToken } from '../../../../common/cancellation_token';
 import { CONTENT_TYPE_CSV } from '../../../../common/constants';
@@ -58,8 +63,13 @@ export class CsvGenerator {
 
   private async scan(index: DataView, searchSource: ISearchSource, settings: CsvExportSettings) {
     const { scroll: scrollSettings, includeFrozen } = settings;
-    const searchBody = searchSource.getSearchRequestBody();
-    this.logger.debug(`executing search request`);
+    const searchBody: SearchRequest | undefined = searchSource.getSearchRequestBody();
+    if (searchBody == null) {
+      throw new Error('Could not retrieve the search body!');
+    }
+
+    this.logger.debug(`Tracking total hits with: track_total_hits=${searchBody.track_total_hits}`);
+    this.logger.info(`Executing search request...`);
     const searchParams = {
       params: {
         body: searchBody,
@@ -70,20 +80,35 @@ export class CsvGenerator {
       },
     };
 
-    const results = (
-      await lastValueFrom(this.clients.data.search(searchParams, { strategy: ES_SEARCH_STRATEGY }))
-    ).rawResponse as estypes.SearchResponse<unknown>;
+    let results: estypes.SearchResponse<unknown> | undefined;
+    try {
+      results = (
+        await lastValueFrom(
+          this.clients.data.search(searchParams, { strategy: ES_SEARCH_STRATEGY })
+        )
+      ).rawResponse as estypes.SearchResponse<unknown>;
+    } catch (err) {
+      this.logger.error(`CSV export scan error: ${err}`);
+      throw err;
+    }
 
     return results;
   }
 
   private async scroll(scrollId: string, scrollSettings: CsvExportSettings['scroll']) {
-    this.logger.debug(`executing scroll request`);
+    this.logger.info(`Executing scroll request...`);
 
-    return await this.clients.es.asCurrentUser.scroll({
-      scroll: scrollSettings.duration,
-      scroll_id: scrollId,
-    });
+    let results: estypes.SearchResponse<unknown> | undefined;
+    try {
+      results = await this.clients.es.asCurrentUser.scroll({
+        scroll: scrollSettings.duration,
+        scroll_id: scrollId,
+      });
+    } catch (err) {
+      this.logger.error(`CSV export scroll error: ${err}`);
+      throw err;
+    }
+    return results;
   }
 
   /*
@@ -262,7 +287,8 @@ export class CsvGenerator {
     const warnings: string[] = [];
     let first = true;
     let currentRecord = -1;
-    let totalRecords = 0;
+    let totalRecords: number | undefined;
+    let totalRelation = 'eq';
     let scrollId: string | undefined;
 
     // apply timezone from the job to all date field formatters
@@ -293,9 +319,15 @@ export class CsvGenerator {
           // open a scroll cursor in Elasticsearch
           results = await this.scan(index, searchSource, settings);
           scrollId = results?._scroll_id;
-          if (results.hits?.total != null) {
-            totalRecords = results.hits.total as number;
-            this.logger.debug(`Total search results: ${totalRecords}`);
+          if (results?.hits?.total != null) {
+            const { hits } = results;
+            if (typeof hits.total === 'number') {
+              totalRecords = hits.total;
+            } else {
+              totalRecords = hits.total?.value;
+              totalRelation = hits.total?.relation ?? 'unknown';
+            }
+            this.logger.info(`Total hits: [${totalRecords}].` + `Accuracy: ${totalRelation}`);
           }
         } else {
           // use the scroll cursor in Elasticsearch
@@ -321,6 +353,7 @@ export class CsvGenerator {
           table = tabifyDocs(results, index, { shallow: true, includeIgnoredValues: true });
         } catch (err) {
           this.logger.error(err);
+          warnings.push(i18nTexts.unknownError(err?.message ?? err));
         }
 
         if (!table) {
@@ -348,7 +381,7 @@ export class CsvGenerator {
 
         // update iterator
         currentRecord += table.rows.length;
-      } while (currentRecord < totalRecords - 1);
+      } while (totalRecords != null && currentRecord < totalRecords - 1);
 
       // Add warnings to be logged
       if (this.csvContainsFormulas && escapeFormulaValues) {
@@ -364,12 +397,12 @@ export class CsvGenerator {
           warnings.push(i18nTexts.esErrorMessage(err.statusCode ?? 0, String(err.body)));
         }
       } else {
-        warnings.push(i18nTexts.unknownError(err?.message));
+        warnings.push(i18nTexts.unknownError(err?.message ?? err));
       }
     } finally {
       // clear scrollID
       if (scrollId) {
-        this.logger.debug(`executing clearScroll request`);
+        this.logger.debug(`Executing clearScroll request`);
         try {
           await this.clients.es.asCurrentUser.clearScroll({ scroll_id: [scrollId] });
         } catch (err) {
@@ -380,12 +413,15 @@ export class CsvGenerator {
       }
     }
 
-    this.logger.debug(`Finished generating. Row count: ${this.csvRowCount}.`);
+    this.logger.info(`Finished generating. Row count: ${this.csvRowCount}.`);
 
     if (!this.maxSizeReached && this.csvRowCount !== totalRecords) {
       this.logger.warn(
         `ES scroll returned fewer total hits than expected! ` +
           `Search result total hits: ${totalRecords}. Row count: ${this.csvRowCount}.`
+      );
+      warnings.push(
+        i18nTexts.csvRowCountError({ expected: totalRecords ?? NaN, received: this.csvRowCount })
       );
     }
 

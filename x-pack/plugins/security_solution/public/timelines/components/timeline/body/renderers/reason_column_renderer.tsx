@@ -10,6 +10,7 @@ import { isEqual } from 'lodash/fp';
 import React, { useMemo } from 'react';
 
 import type { ColumnHeaderOptions, RowRenderer } from '../../../../../../common/types';
+import { TimelineId } from '../../../../../../common/types';
 import type { Ecs } from '../../../../../../common/ecs';
 import { eventRendererNames } from '../../../row_renderers_browser/catalog/constants';
 import type { ColumnRenderer } from './column_renderer';
@@ -91,9 +92,12 @@ const ReasonCell: React.FC<{
     );
   }, [rowRenderer, ecsData, timelineId]);
 
+  // We don't currently show enriched renders for rule preview table
+  const isPlainText = useMemo(() => timelineId === TimelineId.rulePreview, [timelineId]);
+
   return (
     <>
-      {rowRenderer && rowRender ? (
+      {rowRenderer && rowRender && !isPlainText ? (
         <>
           {value}
           <h4>{i18n.REASON_RENDERER_TITLE(eventRendererNames[rowRenderer.id] ?? '')}</h4>

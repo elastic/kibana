@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { QueryObserverResult, UseQueryOptions } from 'react-query';
-import { useQuery } from 'react-query';
+import type { QueryObserverResult, UseQueryOptions } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { PendingActionsResponse } from '../../../../common/endpoint/types';
 import { fetchPendingActionsByAgentId } from '../../../common/lib/endpoint_pending_actions';

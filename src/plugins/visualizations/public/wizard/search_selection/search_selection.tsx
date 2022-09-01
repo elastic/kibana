@@ -86,6 +86,7 @@ export class SearchSelection extends React.Component<SearchSelectionProps> {
                     defaultMessage: 'Data view',
                   }
                 ),
+                defaultSearchField: 'name',
               },
             ]}
             fixedPageSize={this.fixedPageSize}

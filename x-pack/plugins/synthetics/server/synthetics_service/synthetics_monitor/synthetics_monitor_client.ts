@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { KibanaRequest } from '@kbn/core/server';
+import { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
 import { UptimeServerSetup } from '../../legacy_uptime/lib/adapters';
 import { SyntheticsPrivateLocation } from '../private_location/synthetics_private_location';
 import { SyntheticsService } from '../synthetics_service';
@@ -26,7 +26,12 @@ export class SyntheticsMonitorClient {
     this.privateLocationAPI = new SyntheticsPrivateLocation(server);
   }
 
-  async addMonitor(monitor: MonitorFields, id: string, request: KibanaRequest) {
+  async addMonitor(
+    monitor: MonitorFields,
+    id: string,
+    request: KibanaRequest,
+    savedObjectsClient: SavedObjectsClientContract
+  ) {
     await this.syntheticsService.setupIndexTemplates();
 
     const config = formatHeartbeatRequest({
@@ -38,7 +43,7 @@ export class SyntheticsMonitorClient {
     const { privateLocations, publicLocations } = this.parseLocations(config);
 
     if (privateLocations.length > 0) {
-      await this.privateLocationAPI.createMonitor(config, request);
+      await this.privateLocationAPI.createMonitor(config, request, savedObjectsClient);
     }
 
     if (publicLocations.length > 0) {
@@ -46,7 +51,12 @@ export class SyntheticsMonitorClient {
     }
   }
 
-  async editMonitor(editedMonitor: MonitorFields, id: string, request: KibanaRequest) {
+  async editMonitor(
+    editedMonitor: MonitorFields,
+    id: string,
+    request: KibanaRequest,
+    savedObjectsClient: SavedObjectsClientContract
+  ) {
     const editedConfig = formatHeartbeatRequest({
       monitor: editedMonitor,
       monitorId: id,
@@ -55,7 +65,7 @@ export class SyntheticsMonitorClient {
 
     const { publicLocations } = this.parseLocations(editedConfig);
 
-    await this.privateLocationAPI.editMonitor(editedConfig, request);
+    await this.privateLocationAPI.editMonitor(editedConfig, request, savedObjectsClient);
 
     if (publicLocations.length > 0) {
       return await this.syntheticsService.editConfig(editedConfig);
@@ -64,8 +74,12 @@ export class SyntheticsMonitorClient {
     await this.syntheticsService.editConfig(editedConfig);
   }
 
-  async deleteMonitor(monitor: SyntheticsMonitorWithId, request: KibanaRequest) {
-    await this.privateLocationAPI.deleteMonitor(monitor, request);
+  async deleteMonitor(
+    monitor: SyntheticsMonitorWithId,
+    request: KibanaRequest,
+    savedObjectsClient: SavedObjectsClientContract
+  ) {
+    await this.privateLocationAPI.deleteMonitor(monitor, request, savedObjectsClient);
     return await this.syntheticsService.deleteConfigs([monitor]);
   }
 

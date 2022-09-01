@@ -19,6 +19,7 @@ import {
   EuiToolTip,
   EuiSwitch,
   EuiSpacer,
+  EuiText,
 } from '@elastic/eui';
 import type { IFieldFormat } from '@kbn/field-formats-plugin/common';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
@@ -179,9 +180,13 @@ const BaseRangeEditor = ({
       <EuiSpacer size="s" />
       <EuiFormRow display="rowCompressed" hasChildLabel={false}>
         <EuiSwitch
-          label={i18n.translate('xpack.lens.indexPattern.ranges.includeEmptyRows', {
-            defaultMessage: 'Include empty rows',
-          })}
+          label={
+            <EuiText size="xs">
+              {i18n.translate('xpack.lens.indexPattern.ranges.includeEmptyRows', {
+                defaultMessage: 'Include empty rows',
+              })}
+            </EuiText>
+          }
           checked={Boolean(includeEmptyRows)}
           onChange={() => {
             onChangeIncludeEmptyRows(!includeEmptyRows);

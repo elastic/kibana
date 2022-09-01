@@ -27,7 +27,8 @@ import type {
   GenericIndexPatternColumn,
   GenericOperationDefinition,
 } from '..';
-import type { IndexPattern, IndexPatternLayer } from '../../../types';
+import type { IndexPatternLayer } from '../../../types';
+import type { IndexPattern } from '../../../../types';
 import type { TinymathNodeTypes } from './types';
 
 interface ValidationErrors {
@@ -495,6 +496,19 @@ function getQueryValidationErrors(
           message: i18n.translate('xpack.lens.indexPattern.invalidTimeShift', {
             defaultMessage:
               'Invalid time shift. Enter positive integer amount followed by one of the units s, m, h, d, w, M, y. For example 3h for 3 hours',
+          }),
+          locations: [arg.location],
+        });
+      }
+    }
+
+    if (arg.name === 'reducedTimeRange') {
+      const parsedReducedTimeRange = parseTimeShift(arg.value || '');
+      if (parsedReducedTimeRange === 'invalid' || parsedReducedTimeRange === 'previous') {
+        errors.push({
+          message: i18n.translate('xpack.lens.indexPattern.invalidReducedTimeRange', {
+            defaultMessage:
+              'Invalid reduced time range. Enter positive integer amount followed by one of the units s, m, h, d, w, M, y. For example 3h for 3 hours',
           }),
           locations: [arg.location],
         });

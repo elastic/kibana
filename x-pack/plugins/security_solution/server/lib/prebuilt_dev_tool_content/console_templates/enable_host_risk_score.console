@@ -83,7 +83,12 @@ PUT ml_host_risk_score_{{space_name}}
         "type": "date"
       },
       "risk": {
-        "type": "keyword"
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type":  "keyword"
+          }
+        }
       },
       "risk_stats": {
         "properties": {
@@ -205,7 +210,12 @@ PUT ml_host_risk_score_latest_{{space_name}}
         "type": "date"
       },
       "risk": {
-        "type": "keyword"
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type":  "keyword"
+          }
+        }
       },
       "risk_stats": {
         "properties": {

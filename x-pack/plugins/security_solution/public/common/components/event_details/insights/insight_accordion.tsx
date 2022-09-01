@@ -18,18 +18,14 @@ const StyledAccordion = euiStyled(EuiAccordion)`
   border-radius: 6px;
 `;
 
-const EmptyAccordion = euiStyled(StyledAccordion)`
-  color: ${({ theme }) => theme.eui.euiColorDisabledText};
-  pointer-events: none;
-`;
-
-export type InsightAccordionState = 'loading' | 'error' | 'success' | 'empty';
+export type InsightAccordionState = 'loading' | 'error' | 'success';
 
 interface Props {
   prefix: string;
   state: InsightAccordionState;
   text: string;
   renderContent: () => ReactNode;
+  extraAction?: EuiAccordionProps['extraAction'];
   onToggle?: EuiAccordionProps['onToggle'];
 }
 
@@ -38,7 +34,7 @@ interface Props {
  * It wraps logic and custom styling around the loading, error and success states of an insight section.
  */
 export const InsightAccordion = React.memo<Props>(
-  ({ prefix, state, text, renderContent, onToggle = noop }) => {
+  ({ prefix, state, text, renderContent, onToggle = noop, extraAction }) => {
     const accordionId = useGeneratedHtmlId({ prefix });
 
     switch (state) {
@@ -59,24 +55,7 @@ export const InsightAccordion = React.memo<Props>(
               </span>
             }
             onToggle={onToggle}
-          />
-        );
-      case 'empty':
-        // Since EuiAccordions don't have an empty state and they don't allow to style the arrow
-        // we're using a custom styled Accordion here and we're adding the faded-out button manually.
-        return (
-          <EmptyAccordion
-            id={accordionId}
-            buttonContent={
-              <span>
-                <EuiIcon type="arrowRight" style={{ margin: '0px 8px 0 4px' }} />
-                {text}
-              </span>
-            }
-            buttonProps={{
-              'aria-disabled': true,
-            }}
-            arrowDisplay="none"
+            extraAction={extraAction}
           />
         );
       case 'success':
@@ -87,6 +66,7 @@ export const InsightAccordion = React.memo<Props>(
             buttonContent={text}
             onToggle={onToggle}
             paddingSize="l"
+            extraAction={extraAction}
           >
             {renderContent()}
           </StyledAccordion>

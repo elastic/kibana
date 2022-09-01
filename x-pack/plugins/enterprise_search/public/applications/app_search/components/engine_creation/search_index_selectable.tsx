@@ -45,6 +45,7 @@ export interface SearchIndexSelectableOption {
     };
   };
   checked?: 'on';
+  count: number;
 }
 
 const healthColorsMap = {
@@ -89,7 +90,7 @@ export const IndexStatusDetails: React.FC<IndexStatusDetailsProps> = ({ option }
               { defaultMessage: 'Docs count' }
             )}
           </b>
-          :<EuiTextColor color="subdued">&nbsp;{option.total?.docs?.count ?? '-'}</EuiTextColor>
+          :<EuiTextColor color="subdued">&nbsp;{option.count ?? '-'}</EuiTextColor>
         </span>
       </EuiFlexItem>
       <EuiFlexItem data-test-subj="optionStorage">

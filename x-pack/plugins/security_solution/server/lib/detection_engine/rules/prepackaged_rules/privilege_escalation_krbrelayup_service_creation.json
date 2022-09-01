@@ -18,6 +18,53 @@
     "https://github.com/cube0x0/KrbRelay",
     "https://gist.github.com/tyranid/c24cfd1bd141d14d4925043ee7e03c82"
   ],
+  "required_fields": [
+    {
+      "ecs": true,
+      "name": "event.action",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "event.outcome",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "host.id",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "source.ip",
+      "type": "ip"
+    },
+    {
+      "ecs": true,
+      "name": "source.port",
+      "type": "long"
+    },
+    {
+      "ecs": false,
+      "name": "winlog.event_data.AuthenticationPackageName",
+      "type": "keyword"
+    },
+    {
+      "ecs": false,
+      "name": "winlog.event_data.SubjectLogonId",
+      "type": "keyword"
+    },
+    {
+      "ecs": false,
+      "name": "winlog.event_data.TargetLogonId",
+      "type": "keyword"
+    },
+    {
+      "ecs": false,
+      "name": "winlog.logon.type",
+      "type": "unknown"
+    }
+  ],
   "risk_score": 73,
   "rule_id": "e4e31051-ee01-4307-a6ee-b21b186958f4",
   "severity": "high",
@@ -69,5 +116,5 @@
     }
   ],
   "type": "eql",
-  "version": 1
+  "version": 2
 }

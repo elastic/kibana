@@ -13,10 +13,10 @@ import { setupFleetAndAgents } from '../agents/services';
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
-  const esArchiver = getService('esArchiver');
   const pkgName = 'error_handling';
   const goodPackageVersion = '0.1.0';
   const badPackageVersion = '0.2.0';
+  const kibanaServer = getService('kibanaServer');
 
   const installPackage = async (pkg: string, version: string) => {
     await supertest
@@ -33,10 +33,10 @@ export default function (providerContext: FtrProviderContext) {
     skipIfNoDockerRegistry(providerContext);
     setupFleetAndAgents(providerContext);
     beforeEach(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
+      await kibanaServer.savedObjects.cleanStandardList();
     });
     afterEach(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/empty_kibana');
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     it('on a fresh install, it should uninstall a broken package during rollback', async function () {

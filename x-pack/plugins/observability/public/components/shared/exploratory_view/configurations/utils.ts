@@ -17,7 +17,7 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import { PersistableFilter } from '@kbn/lens-plugin/common';
 import type { ReportViewType, UrlFilter } from '../types';
 import type { AllSeries, AllShortSeries } from '../hooks/use_series_storage';
-import { convertToShortUrl } from './exploratory_view_url';
+import { convertToShortUrl, encodeUriIfNeeded } from './exploratory_view_url';
 
 export function createExploratoryViewRoutePath({
   reportType,
@@ -28,8 +28,8 @@ export function createExploratoryViewRoutePath({
 }) {
   const allShortSeries: AllShortSeries = allSeries.map((series) => convertToShortUrl(series));
 
-  return `/exploratory-view/#?reportType=${reportType}&sr=${rison.encode(
-    allShortSeries as unknown as RisonValue
+  return `/exploratory-view/#?reportType=${reportType}&sr=${encodeUriIfNeeded(
+    rison.encode(allShortSeries as unknown as RisonValue)
   )}`;
 }
 

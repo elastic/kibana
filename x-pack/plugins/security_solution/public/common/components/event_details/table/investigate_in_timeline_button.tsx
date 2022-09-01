@@ -9,6 +9,7 @@ import React from 'react';
 import { EuiButton, EuiButtonEmpty } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
 
+import { InputsModelId } from '../../../store/inputs/constants';
 import { inputsActions } from '../../../store/inputs';
 import { updateProviders } from '../../../../timelines/store/timeline/actions';
 import { sourcererActions } from '../../../store/actions';
@@ -21,7 +22,7 @@ import { ACTION_INVESTIGATE_IN_TIMELINE } from '../../../../detections/component
 export const InvestigateInTimelineButton: React.FunctionComponent<{
   asEmptyButton: boolean;
   dataProviders: DataProvider[];
-}> = ({ asEmptyButton, children, dataProviders }) => {
+}> = ({ asEmptyButton, children, dataProviders, ...rest }) => {
   const dispatch = useDispatch();
 
   const clearTimeline = useCreateTimeline({
@@ -50,7 +51,7 @@ export const InvestigateInTimelineButton: React.FunctionComponent<{
         })
       );
       // Unlock the time range from the global time range
-      dispatch(inputsActions.removeGlobalLinkTo());
+      dispatch(inputsActions.removeLinkTo([InputsModelId.timeline, InputsModelId.global]));
     }
   }, [dispatch, clearTimeline, dataProviders]);
 
@@ -64,7 +65,11 @@ export const InvestigateInTimelineButton: React.FunctionComponent<{
       {children}
     </EuiButtonEmpty>
   ) : (
-    <EuiButton aria-label={ACTION_INVESTIGATE_IN_TIMELINE} onClick={configureAndOpenTimeline}>
+    <EuiButton
+      aria-label={ACTION_INVESTIGATE_IN_TIMELINE}
+      onClick={configureAndOpenTimeline}
+      {...rest}
+    >
       {children}
     </EuiButton>
   );

@@ -16,7 +16,13 @@ import {
 import { CASE_SAVED_OBJECT } from '../../../common/constants';
 import { getNoneCaseConnector } from '../../common/utils';
 import { createExternalService, ESCaseConnectorWithId } from '../../services/test_utils';
-import { addDuration, addSeverity, caseConnectorIdMigration, removeCaseType } from './cases';
+import {
+  addAssignees,
+  addDuration,
+  addSeverity,
+  caseConnectorIdMigration,
+  removeCaseType,
+} from './cases';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 const create_7_14_0_case = ({
@@ -534,6 +540,43 @@ describe('case migrations', () => {
         attributes: {
           ...doc.attributes,
           severity: CaseSeverity.CRITICAL,
+        },
+      });
+    });
+  });
+
+  describe('addAssignees', () => {
+    it('adds the assignees field correctly when none is present', () => {
+      const doc = {
+        id: '123',
+        attributes: {},
+        type: 'abc',
+        references: [],
+      } as unknown as SavedObjectSanitizedDoc<CaseAttributes>;
+      expect(addAssignees(doc)).toEqual({
+        ...doc,
+        attributes: {
+          ...doc.attributes,
+          assignees: [],
+        },
+      });
+    });
+
+    it('keeps the existing assignees value if the field already exists', () => {
+      const assignees = [{ uid: '1' }];
+      const doc = {
+        id: '123',
+        attributes: {
+          assignees,
+        },
+        type: 'abc',
+        references: [],
+      } as unknown as SavedObjectSanitizedDoc<CaseAttributes>;
+      expect(addAssignees(doc)).toEqual({
+        ...doc,
+        attributes: {
+          ...doc.attributes,
+          assignees,
         },
       });
     });
