@@ -27,7 +27,13 @@ export const CreateTimeSliderControlButton = ({
     <EuiContextMenuItem
       icon="plusInCircle"
       onClick={() => {
-        addNewEmbeddable(TIME_SLIDER_CONTROL, {});
+        addNewEmbeddable(
+          TIME_SLIDER_CONTROL,
+          { 
+            title: i18n.translate('controls.controlGroup.timeSlider.title', {
+              defaultMessage: 'Time slider',
+            })
+          });
         if (closePopover) {
           closePopover();
         }
