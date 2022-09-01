@@ -53,7 +53,7 @@ export class ElasticsearchBlobStorageClient implements BlobStorageClient {
       this.index.startsWith('.kibana'),
       `Elasticsearch blob store index name must start with ".kibana", got ${this.index}.`
     );
-    assert(this.uploadSemaphore, `No default semaphore provided and no sempahore was passed in.`);
+    assert(this.uploadSemaphore, `No default semaphore provided and no semaphore was passed in.`);
   }
 
   /**
