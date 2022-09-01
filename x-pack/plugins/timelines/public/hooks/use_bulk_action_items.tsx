@@ -89,19 +89,15 @@ export const useBulkActionItems = ({
     [addError, onUpdateFailure]
   );
 
-  const startUpdateStatusTransaction = useCallback(() => {
-    if (query) {
-      startTransaction({ name: APM_USER_INTERACTIONS.BULK_QUERY_STATUS_UPDATE });
-    } else if (eventIds.length > 1) {
-      startTransaction({ name: APM_USER_INTERACTIONS.BULK_STATUS_UPDATE });
-    } else {
-      startTransaction({ name: APM_USER_INTERACTIONS.STATUS_UPDATE });
-    }
-  }, [startTransaction, query, eventIds]);
-
   const onClickUpdate = useCallback(
     async (status: AlertStatus) => {
-      startUpdateStatusTransaction();
+      if (query) {
+        startTransaction({ name: APM_USER_INTERACTIONS.BULK_QUERY_STATUS_UPDATE });
+      } else if (eventIds.length > 1) {
+        startTransaction({ name: APM_USER_INTERACTIONS.BULK_STATUS_UPDATE });
+      } else {
+        startTransaction({ name: APM_USER_INTERACTIONS.STATUS_UPDATE });
+      }
 
       try {
         setEventsLoading({ eventIds, isLoading: true });
@@ -135,7 +131,7 @@ export const useBulkActionItems = ({
       setEventsDeleted,
       onAlertStatusUpdateSuccess,
       onAlertStatusUpdateFailure,
-      startUpdateStatusTransaction,
+      startTransaction,
     ]
   );
 

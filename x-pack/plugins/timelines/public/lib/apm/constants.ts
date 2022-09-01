@@ -9,4 +9,5 @@ export const APM_USER_INTERACTIONS = {
   BULK_QUERY_STATUS_UPDATE: 'Timeline bulkQueryStatusUpdate',
   BULK_STATUS_UPDATE: 'Timeline bulkStatusUpdate',
   STATUS_UPDATE: 'Timeline statusUpdate',
+  ADD_TO_TIMELINE: 'Timeline addToTimeline',
 } as const;

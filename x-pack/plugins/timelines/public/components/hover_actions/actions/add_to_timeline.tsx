@@ -22,6 +22,8 @@ import { HoverActionComponentProps } from './types';
 import { addProviderToTimeline } from '../../../store/t_grid/actions';
 import { useAppToasts } from '../../../hooks/use_app_toasts';
 import * as i18n from './translations';
+import { useStartTransaction } from '../../../lib/apm/use_start_transaction';
+import { APM_USER_INTERACTIONS } from '../../../lib/apm/constants';
 
 export const ADD_TO_TIMELINE_KEYBOARD_SHORTCUT = 'a';
 
@@ -70,12 +72,15 @@ const AddToTimelineButton: React.FC<AddToTimelineButtonProps> = React.memo(
     const { addSuccess } = useAppToasts();
     const startDragToTimeline = useGetHandleStartDragToTimeline({ draggableId, field });
     const getTGrid = tGridSelectors.getTGridByIdSelector();
+    const { startTransaction } = useStartTransaction();
 
     const { timelineType } = useDeepEqualSelector((state) => {
       return getTGrid(state, TimelineId.active);
     });
 
     const handleStartDragToTimeline = useCallback(() => {
+      startTransaction({ name: APM_USER_INTERACTIONS.ADD_TO_TIMELINE });
+
       if (draggableId != null) {
         startDragToTimeline();
       } else if (!isEmpty(dataProvider)) {
@@ -105,6 +110,7 @@ const AddToTimelineButton: React.FC<AddToTimelineButtonProps> = React.memo(
       draggableId,
       onClick,
       startDragToTimeline,
+      startTransaction,
       timelineType,
     ]);
 

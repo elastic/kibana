@@ -40,3 +40,8 @@ export const TIMELINE_ACTIONS = {
   DELETE: `${APP_UI_ID} timeline delete`,
   BULK_DELETE: `${APP_UI_ID} timeline bulkDelete`,
 };
+
+export const FIELD_BROWSER_ACTIONS = {
+  FIELD_SAVED: `${APP_UI_ID} fieldBrowser fieldSaved`,
+  FIELD_DELETED: `${APP_UI_ID} fieldBrowser fieldDeleted`,
+};
