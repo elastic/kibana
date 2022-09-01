@@ -40,7 +40,7 @@ export const convertToLastValueColumn = (
     ...createColumn(series, currentMetric, undefined, { reducedTimeRange }),
     params: {
       ...convertToLastValueParams(currentMetric),
-      ...getFormat(series, currentMetric.field, dataView),
+      ...getFormat(series),
     },
   };
 };

@@ -109,6 +109,6 @@ export const converToTermsColumn = (
     sourceField: field.name,
     isBucketed: true,
     isSplit,
-    params: { ...params, ...getFormat(series, field.name, dataView) },
+    params: { ...params, ...getFormat(series) },
   };
 };

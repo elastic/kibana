@@ -132,7 +132,7 @@ export const convertMetricAggregationColumnWithoutSpecialParams = (
     operationType: aggregation.name,
     sourceField,
     ...createColumn(series, metric, field, { reducedTimeRange }),
-    params: { ...getFormat(series, field?.name, dataView) },
+    params: { ...getFormat(series) },
   } as MetricAggregationColumnWithoutSpecialParams;
 };
 
@@ -289,9 +289,7 @@ export const createParentPipelineAggregationColumn = (
   references: string[] = []
 ) => {
   const params =
-    aggregation === 'moving_average'
-      ? convertToMovingAverageParams(metric)
-      : getFormat(series, metric.field, dataView);
+    aggregation === 'moving_average' ? convertToMovingAverageParams(metric) : getFormat(series);
 
   return {
     operationType: aggregation,

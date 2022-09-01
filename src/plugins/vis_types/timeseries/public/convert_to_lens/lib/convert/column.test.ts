@@ -44,48 +44,40 @@ describe('getFormat', () => {
     jest.resetAllMocks();
   });
 
-  test('should return formatter of the field, if formatter is set to default', () => {
-    expect(getFormat(series, stubLogstashDataView.fields[0].name, stubLogstashDataView)).toEqual({
-      format: { id: 'bytes' },
-    });
-  });
-
-  test("should return no formatter, if a field with a specified name doesn't exist", () => {
-    expect(getFormat(series, 'some-other-name', stubLogstashDataView)).toEqual({});
-  });
-
-  test('should return no formatter, if the type of the field is not supported', () => {
-    expect(
-      getFormat(
-        series,
-        dataViewWithoutSupportedFormatsFields.fields[2].name,
-        dataViewWithoutSupportedFormatsFields
-      )
-    ).toEqual({});
-  });
-
   test('should return formatter value, if formatter is not set to default', () => {
     const formatter = 'percent';
-    expect(
-      getFormat(
-        createSeries({ formatter }),
-        stubLogstashDataView.fields[0].name,
-        stubLogstashDataView
-      )
-    ).toEqual({
-      format: { id: formatter },
+    expect(getFormat(createSeries({ formatter }))).toEqual({
+      format: {
+        id: formatter,
+        params: {
+          suffix: '',
+        },
+      },
     });
   });
 
-  test('should not return formatter value, if formatter is set to not suppported format', () => {
-    const formatter = 'date';
-    expect(
-      getFormat(
-        createSeries({ formatter }),
-        stubLogstashDataView.fields[0].name,
-        stubLogstashDataView
-      )
-    ).toEqual({});
+  test('should return number formatter, if formatter is set to not supported format', () => {
+    const formatter = 'custom';
+    expect(getFormat(createSeries({ formatter }))).toEqual({
+      format: {
+        id: 'number',
+        params: {
+          suffix: '',
+        },
+      },
+    });
+  });
+
+  test('should return formatter with suffix, if formatter template includes suffix', () => {
+    const formatter = 'number';
+    expect(getFormat(createSeries({ formatter, value_template: '{{value}}d' }))).toEqual({
+      format: {
+        id: 'number',
+        params: {
+          suffix: 'd',
+        },
+      },
+    });
   });
 });
 

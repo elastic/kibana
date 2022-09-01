@@ -27,14 +27,14 @@ const convertToFormulaParams = (formula: string): FormulaParams => ({
 
 export const createFormulaColumn = (
   formula: string,
-  { series, metric, dataView }: CommonColumnConverterArgs
+  { series, metric }: CommonColumnConverterArgs
 ): FormulaColumn | null => {
   const params = convertToFormulaParams(formula);
   return {
     operationType: 'formula',
     references: [],
     ...createColumn(series, metric),
-    params: { ...params, ...getFormat(series, metric.field, dataView) },
+    params: { ...params, ...getFormat(series) },
   };
 };
 

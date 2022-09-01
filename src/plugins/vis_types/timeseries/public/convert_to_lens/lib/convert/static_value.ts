@@ -33,7 +33,7 @@ export const convertToStaticValueColumn = (
     ...createColumn(series, currentMetric, undefined, { reducedTimeRange }),
     params: {
       ...convertToStaticValueParams(currentMetric),
-      ...getFormat(series, currentMetric.field, dataView),
+      ...getFormat(series),
     },
   };
 };

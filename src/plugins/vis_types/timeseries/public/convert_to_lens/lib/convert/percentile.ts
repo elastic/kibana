@@ -48,7 +48,7 @@ export const convertToPercentileColumn = (
     operationType: 'percentile',
     sourceField: field.name,
     ...commonColumnParams,
-    params: { ...params, ...getFormat(series, metric.field, dataView) },
+    params: { ...params, ...getFormat(series) },
     meta:
       index !== undefined
         ? {

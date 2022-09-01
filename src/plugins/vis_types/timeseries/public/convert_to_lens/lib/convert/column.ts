@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
+import type { DataViewField } from '@kbn/data-views-plugin/common';
 import {
   BaseColumn,
   Operation,
@@ -16,6 +16,7 @@ import {
 } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import uuid from 'uuid';
 import type { Metric, Series } from '../../../../common/types';
+import { DATA_FORMATTERS } from '../../../../common/enums';
 import { ConvertToColumnsFn } from '../../types';
 import { getTimeScale } from '../metrics';
 import { ColumnWithMeta, Meta, Column, CommonColumnsConverterArgs } from './types';
@@ -30,45 +31,22 @@ interface ExtraColumnFields {
 
 const isSupportedFormat = (format: string) => ['bytes', 'number', 'percent'].includes(format);
 
-const findField = (series: Series, field?: string): string | undefined => {
-  const subMetric = series.metrics.find((m) => m.id === field);
-  if (subMetric) {
-    return findField(series, subMetric.field);
-  }
-  return field;
-};
+export const getFormat = (series: Series): FormatParams => {
+  let params;
 
-export const getFormat = (
-  series: Series,
-  fieldName: string | undefined,
-  dataView: DataView
-): FormatParams => {
-  if (series.formatter === 'default') {
-    const correctFieldName = findField(series, fieldName);
-
-    if (!correctFieldName) {
-      return {};
-    }
-
-    const field = dataView.getFieldByName(correctFieldName);
-    if (!field) {
-      return {};
-    }
-
-    const formatter = dataView.getFormatterForField(field);
-    const id = formatter.type.id;
-
-    if (!isSupportedFormat(id)) {
-      return {};
-    }
-    return { format: { id } };
+  if (series.value_template) {
+    const suffix = series.value_template.split('}}')[1];
+    params = {
+      suffix,
+    };
   }
 
+  // not supported formatters should be converted to number
   if (!isSupportedFormat(series.formatter)) {
-    return {};
+    return { format: { id: DATA_FORMATTERS.NUMBER, params } };
   }
 
-  return { format: { id: series.formatter } };
+  return { format: { id: series.formatter, params } };
 };
 
 export const createColumn = (

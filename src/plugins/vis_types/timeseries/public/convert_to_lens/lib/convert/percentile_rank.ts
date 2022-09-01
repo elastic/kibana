@@ -55,7 +55,7 @@ export const convertToPercentileRankColumn = (
     operationType: 'percentile_rank',
     sourceField: field.name,
     ...commonColumnParams,
-    params: { ...params, ...getFormat(series, metric.field, dataView) },
+    params: { ...params, ...getFormat(series) },
     meta:
       index !== undefined
         ? {
