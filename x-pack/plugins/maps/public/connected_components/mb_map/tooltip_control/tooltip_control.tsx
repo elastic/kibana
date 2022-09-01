@@ -178,13 +178,13 @@ export class TooltipControl extends Component<Props, {}> {
     for (let i = 0; i < mbFeatures.length; i++) {
       const mbFeature = mbFeatures[i];
       const layer = this._getLayerByMbLayerId(mbFeature.layer.id);
-      if (!layer) {
-        break;
+      if (!layer || !layer.canShowTooltip() || layer.areTooltipsDisabled()) {
+        continue;
       }
 
       const featureId = layer.getFeatureId(mbFeature);
       if (featureId === undefined) {
-        break;
+        continue;
       }
       const layerId = layer.getId();
       let match = false;
@@ -192,7 +192,7 @@ export class TooltipControl extends Component<Props, {}> {
         const uniqueFeature = uniqueFeatures[j];
         if (featureId === uniqueFeature.id && layerId === uniqueFeature.layerId) {
           match = true;
-          break;
+          continue;
         }
       }
       if (!match) {

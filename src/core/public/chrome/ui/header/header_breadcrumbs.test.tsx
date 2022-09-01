@@ -16,14 +16,14 @@ describe('HeaderBreadcrumbs', () => {
   it('renders updates to the breadcrumbs$ observable', () => {
     const breadcrumbs$ = new BehaviorSubject([{ text: 'First' }]);
     const wrapper = mount(<HeaderBreadcrumbs breadcrumbs$={breadcrumbs$} />);
-    expect(wrapper.find('.euiBreadcrumb')).toMatchSnapshot();
+    wrapper.find('.euiBreadcrumb').forEach((el) => expect(el.render()).toMatchSnapshot());
 
     act(() => breadcrumbs$.next([{ text: 'First' }, { text: 'Second' }]));
     wrapper.update();
-    expect(wrapper.find('.euiBreadcrumb')).toMatchSnapshot();
+    wrapper.find('.euiBreadcrumb').forEach((el) => expect(el.render()).toMatchSnapshot());
 
     act(() => breadcrumbs$.next([]));
     wrapper.update();
-    expect(wrapper.find('.euiBreadcrumb')).toMatchSnapshot();
+    wrapper.find('.euiBreadcrumb').forEach((el) => expect(el.render()).toMatchSnapshot());
   });
 });

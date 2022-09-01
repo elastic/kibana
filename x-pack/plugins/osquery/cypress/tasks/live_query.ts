@@ -25,7 +25,10 @@ export const clearInputQuery = () =>
 
 export const inputQuery = (query: string) => cy.get(LIVE_QUERY_EDITOR).type(query);
 
-export const submitQuery = () => cy.contains('Submit').click();
+export const submitQuery = () => {
+  cy.wait(1000); // wait for the validation to trigger - cypress is way faster than users ;)
+  cy.contains('Submit').click();
+};
 
 export const checkResults = () =>
   cy.getBySel('dataGridRowCell', { timeout: 120000 }).should('have.lengthOf.above', 0);

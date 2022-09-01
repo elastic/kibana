@@ -11,17 +11,18 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const telemetryTestResources = getService('telemetryTestResources');
+  const kibanaServer = getService('kibanaServer');
 
   // The source of the data for these tests have changed and need to be updated
   // There are currently tests in the security_solution application being maintained
   describe.skip('security solution endpoint telemetry', () => {
     after(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     describe('when no agents are connected', () => {
       before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
+        await kibanaServer.savedObjects.cleanStandardList();
       });
 
       it('reports no endpoints or policies', async () => {

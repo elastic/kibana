@@ -11,6 +11,7 @@ import { IUiSettingsClient } from '@kbn/core/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { getDefaultSort, getSortArray } from '../../../utils/sorting';
 import {
   DEFAULT_COLUMNS_SETTING,
   DOC_HIDE_TIME_COLUMN_SETTING,
@@ -19,7 +20,6 @@ import {
 } from '../../../../common';
 
 import { AppState } from '../services/discover_state';
-import { getDefaultSort, getSortArray } from '../../../components/doc_table';
 import { CHART_HIDDEN_KEY } from '../components/chart/discover_chart';
 
 function getDefaultColumns(savedSearch: SavedSearch, config: IUiSettingsClient) {
