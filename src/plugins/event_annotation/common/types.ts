@@ -70,7 +70,7 @@ export type QueryPointEventAnnotationConfig = {
   type: QueryAnnotationType;
   filter: KibanaQueryOutput;
   timeField: string;
-  textField: string;
+  textField?: string;
   extraFields?: string[];
   key: {
     type: 'point_in_time';

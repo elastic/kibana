@@ -14,9 +14,9 @@ import {
   EuiFlexItem,
   EuiIcon,
 } from '@elastic/eui';
-import type { PointInTimeQueryEventAnnotationConfig } from '@kbn/event-annotation-plugin/common';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo } from 'react';
+import { QueryPointEventAnnotationConfig } from '@kbn/event-annotation-plugin/common';
 import type { ExistingFieldsMap, IndexPattern } from '../../../../types';
 import {
   fieldExists,
@@ -32,8 +32,8 @@ const generateId = htmlIdGenerator();
 const supportedTypes = new Set(['string', 'boolean', 'number', 'ip', 'date']);
 
 export interface FieldInputsProps {
-  currentConfig: PointInTimeQueryEventAnnotationConfig;
-  setConfig: (config: PointInTimeQueryEventAnnotationConfig) => void;
+  currentConfig: QueryPointEventAnnotationConfig;
+  setConfig: (config: QueryPointEventAnnotationConfig) => void;
   indexPattern: IndexPattern;
   existingFields: ExistingFieldsMap;
   invalidFields?: string[];

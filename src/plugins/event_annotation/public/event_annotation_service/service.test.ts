@@ -53,7 +53,6 @@ describe('Event Annotation Service', () => {
             label: 'Hello Range',
             isHidden: true,
             filter: { type: 'kibana_query', query: '', language: 'kuery' },
-            textField: '',
           },
         ])
       ).toEqual([]);
@@ -141,7 +140,6 @@ describe('Event Annotation Service', () => {
             },
             label: 'Hello',
             filter: { type: 'kibana_query', query: '', language: 'kuery' },
-            textField: '',
           },
         ])
       ).toEqual([
@@ -214,7 +212,6 @@ describe('Event Annotation Service', () => {
             },
             label: 'Hello',
             filter: { type: 'kibana_query', query: '', language: 'kuery' },
-            textField: '',
           },
         ])
       ).toEqual([
