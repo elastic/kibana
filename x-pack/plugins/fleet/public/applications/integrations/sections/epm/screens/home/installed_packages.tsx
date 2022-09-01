@@ -42,7 +42,7 @@ const AnnouncementLink = () => {
   );
 };
 
-const InstalledIntegrationsInfoCallout = () => (
+const InstalledIntegrationsInfoCallout: React.FC = () => (
   <EuiCallOut
     title={i18n.translate('xpack.fleet.epmList.availableCalloutTitle', {
       defaultMessage: 'Only installed Elastic Agent Integrations are displayed.',
@@ -56,6 +56,23 @@ const InstalledIntegrationsInfoCallout = () => (
         values={{
           link: <AnnouncementLink />,
         }}
+      />
+    </p>
+  </EuiCallOut>
+);
+const UpdatesAvailableCallout: React.FC = () => (
+  <EuiCallOut
+    title={i18n.translate('xpack.fleet.epmList.updatesAvailableCalloutTitle', {
+      defaultMessage: 'Some of your installed integrations have updates available.',
+    })}
+    iconType="alert"
+    color="warning"
+  >
+    <p>
+      <FormattedMessage
+        id="xpack.fleet.epmList.updatesAvailableCalloutText"
+        defaultMessage="Install the latest version of integrations to get the latest integration features."
+       
       />
     </p>
   </EuiCallOut>
@@ -185,9 +202,13 @@ export const InstalledPackages: React.FC<{
     })
   );
 
-  const CalloutComponent = cards.some((c) => c.isUnverified)
-    ? VerificationWarningCallout
-    : InstalledIntegrationsInfoCallout;
+  let CalloutComponent = InstalledIntegrationsInfoCallout
+  
+  if(cards.some((c) => c.isUnverified)){
+    CalloutComponent = VerificationWarningCallout;
+  } else if (cards.some((c) => c.isUpdateAvailable)){
+    CalloutComponent = UpdatesAvailableCallout;
+  }
   const callout = selectedCategory === UPDATES_AVAILABLE || isLoading ? null : <CalloutComponent />;
 
   return (
