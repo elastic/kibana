@@ -7,7 +7,7 @@
  */
 
 import { compact, shuffle } from 'lodash';
-import { apm, ApmFields, EntityArrayIterable, timerange } from '..';
+import { apm, ApmFields, EntityArrayIterable, timerange } from '../..';
 import { generateLongId, generateShortId } from '../lib/utils/generate_id';
 import { Scenario } from '../cli/scenario';
 import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';

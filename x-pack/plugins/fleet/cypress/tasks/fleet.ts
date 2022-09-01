@@ -15,9 +15,15 @@ import {
 } from '../screens/fleet';
 
 export function createAgentPolicy() {
+  cy.intercept({
+    url: '/api/fleet/agent_policies?sys_monitoring=true',
+    method: 'POST',
+  }).as('postAgentPolicy');
   cy.getBySel(ADD_AGENT_BUTTON_TOP).click();
   cy.getBySel(STANDALONE_TAB).click();
   cy.getBySel(CREATE_POLICY_BUTTON).click();
+
+  cy.wait('@postAgentPolicy');
   cy.getBySel(AGENT_FLYOUT_CLOSE_BUTTON).click();
 }
 

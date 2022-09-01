@@ -6,7 +6,7 @@
  */
 
 import { useCallback } from 'react';
-import { useQueryClient } from 'react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import { CASE_TAGS_CACHE_KEY, CASE_VIEW_CACHE_KEY } from '../../containers/constants';
 
 /**
@@ -20,7 +20,7 @@ import { CASE_TAGS_CACHE_KEY, CASE_VIEW_CACHE_KEY } from '../../containers/const
 export const useRefreshCaseViewPage = () => {
   const queryClient = useQueryClient();
   return useCallback(() => {
-    queryClient.invalidateQueries(CASE_VIEW_CACHE_KEY);
-    queryClient.invalidateQueries(CASE_TAGS_CACHE_KEY);
+    queryClient.invalidateQueries([CASE_VIEW_CACHE_KEY]);
+    queryClient.invalidateQueries([CASE_TAGS_CACHE_KEY]);
   }, [queryClient]);
 };

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ALERTS_QUERY_NAMES } from '../../../../detections/containers/detection_engine/alerts/constants';
 import { buildVulnerableHostAggregationQuery } from './use_host_alerts_items';
 
 export const mockVulnerableHostsBySeverityResult = {
@@ -126,4 +127,5 @@ export const mockQuery = () => ({
   }),
   indexName: 'signal-alerts',
   skip: false,
+  queryName: ALERTS_QUERY_NAMES.VULNERABLE_HOSTS,
 });

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { FileJSON } from '../common';
 import type {
   FindFilesHttpEndpoint,
   FileShareHttpEndpoint,
@@ -28,6 +29,10 @@ import type {
  */
 type ClientMethodFrom<E extends HttpApiInterfaceEntryDefinition> = (
   args: E['inputs']['body'] & E['inputs']['params'] & E['inputs']['query']
+) => Promise<E['output']>;
+
+type ClientMethodOptionalArgsFrom<E extends HttpApiInterfaceEntryDefinition> = (
+  args?: E['inputs']['body'] & E['inputs']['params'] & E['inputs']['query']
 ) => Promise<E['output']>;
 
 /**
@@ -57,7 +62,7 @@ export interface FilesClient {
    *
    * @param args - list files args
    */
-  list: ClientMethodFrom<ListFileKindHttpEndpoint>;
+  list: ClientMethodOptionalArgsFrom<ListFileKindHttpEndpoint>;
   /**
    * Find a set of files given some filters.
    *
@@ -123,7 +128,17 @@ export interface FilesClient {
    * @param args - Get public download arguments.
    */
   publicDownload: ClientMethodFrom<FilePublicDownloadHttpEndpoint>;
+
+  /**
+   * Get a string for downloading a file that can be passed to a button element's
+   * href for download.
+   */
+  getDownloadHref: (file: FileJSON) => string;
 }
+
+export type FilesClientResponses = {
+  [K in keyof FilesClient]: Awaited<ReturnType<FilesClient[K]>>;
+};
 
 /**
  * A factory for creating a {@link FilesClient}

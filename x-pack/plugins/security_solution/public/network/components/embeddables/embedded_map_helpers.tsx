@@ -7,7 +7,7 @@
 
 import uuid from 'uuid';
 import React from 'react';
-import type { PortalNode } from 'react-reverse-portal';
+import type { HtmlPortalNode } from 'react-reverse-portal';
 import { OutPortal } from 'react-reverse-portal';
 import minimatch from 'minimatch';
 import type { Filter, Query } from '@kbn/es-query';
@@ -51,7 +51,7 @@ export const createEmbeddable = async (
   startDate: GlobalTimeArgs['from'],
   endDate: GlobalTimeArgs['to'],
   setQuery: GlobalTimeArgs['setQuery'],
-  portalNode: PortalNode,
+  portalNode: HtmlPortalNode,
   embeddableApi: EmbeddableStart
 ): Promise<MapEmbeddable | ErrorEmbeddable> => {
   const factory = embeddableApi.getEmbeddableFactory<

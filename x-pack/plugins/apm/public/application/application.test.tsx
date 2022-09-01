@@ -122,13 +122,19 @@ describe('renderApp (APM)', () => {
     };
   };
 
-  it('renders the app', () => {
+  it('renders the app', async () => {
+    const promise = Promise.resolve();
     const mountProps = getApmMountProps();
 
     let unmount: () => void;
 
     act(() => {
       unmount = renderApmApp(mountProps);
+    });
+
+    // fake promise to wait for to ensure the app is mounted
+    await act(async () => {
+      await promise;
     });
 
     expect(() => {

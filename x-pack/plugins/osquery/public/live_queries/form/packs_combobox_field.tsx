@@ -12,8 +12,7 @@ import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiFormRow, EuiComboBox, EuiTextColor, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 
-import type { FieldHook } from '../../shared_imports';
-import { VALIDATION_TYPES } from '../../shared_imports';
+import { useController } from 'react-hook-form';
 import type { PackSavedObject } from '../../packs/types';
 
 const TextTruncate = styled.div`
@@ -21,13 +20,12 @@ const TextTruncate = styled.div`
   text-overflow: ellipsis;
 `;
 
-interface Props {
-  field: FieldHook<string[]>;
-  euiFieldProps?: {
+interface PackComboBoxFieldProps {
+  fieldProps?: {
     packsData?: PackSavedObject[];
   };
   idAria?: string;
-  [key: string]: unknown;
+  queryType: string;
 }
 
 interface PackOption {
@@ -36,48 +34,53 @@ interface PackOption {
   description?: string;
 }
 
-export const PacksComboBoxField = ({ field, euiFieldProps = {}, idAria, ...rest }: Props) => {
+export const PacksComboBoxField = ({
+  queryType,
+  fieldProps = {},
+  idAria,
+  ...rest
+}: PackComboBoxFieldProps) => {
+  const {
+    field: { value, onChange },
+    fieldState,
+  } = useController({
+    name: 'packId',
+    rules: {
+      required: {
+        message: i18n.translate(
+          'xpack.osquery.pack.queryFlyoutForm.osqueryPackMissingErrorMessage',
+          {
+            defaultMessage: 'Pack is a required field',
+          }
+        ),
+        value: queryType === 'pack',
+      },
+    },
+    defaultValue: [],
+  });
+  const error = fieldState.error?.message;
   const [selectedOptions, setSelectedOptions] = useState<
     Array<EuiComboBoxOptionOption<PackOption>>
   >([]);
-  // Errors for the comboBox value (the "array")
-  const errorMessageField = field.getErrorsMessages();
-
-  // Errors for comboBox option added (the array "item")
-  const errorMessageArrayItem = field.getErrorsMessages({
-    validationType: VALIDATION_TYPES.ARRAY_ITEM,
-  });
-
-  const isInvalid = field.errors.length
-    ? errorMessageField !== null || errorMessageArrayItem !== null
-    : false;
-
-  // Concatenate error messages.
-  const errorMessage =
-    errorMessageField && errorMessageArrayItem
-      ? `${errorMessageField}, ${errorMessageArrayItem}`
-      : errorMessageField
-      ? errorMessageField
-      : errorMessageArrayItem;
 
   const handlePackChange = useCallback(
     (newSelectedOptions) => {
       if (!newSelectedOptions.length) {
         setSelectedOptions(newSelectedOptions);
-        field.setValue([]);
+        onChange([]);
 
         return;
       }
 
       setSelectedOptions(newSelectedOptions);
-      field.setValue([newSelectedOptions[0].value?.id]);
+      onChange([newSelectedOptions[0].value?.id]);
     },
-    [field]
+    [onChange]
   );
 
   const packOptions = useMemo<Array<EuiComboBoxOptionOption<PackOption>>>(
     () =>
-      euiFieldProps?.packsData?.map((packSO) => ({
+      fieldProps?.packsData?.map((packSO) => ({
         label: packSO.attributes.name ?? '',
         value: {
           id: packSO.id,
@@ -85,20 +88,11 @@ export const PacksComboBoxField = ({ field, euiFieldProps = {}, idAria, ...rest 
           description: packSO.attributes.description,
         },
       })) ?? [],
-    [euiFieldProps?.packsData]
-  );
-
-  const onSearchComboChange = useCallback(
-    (value: string) => {
-      if (value !== undefined) {
-        field.clearErrors(VALIDATION_TYPES.ARRAY_ITEM);
-      }
-    },
-    [field]
+    [fieldProps?.packsData]
   );
 
   const renderOption = useCallback(
-    ({ value }) => (
+    ({ value: option }) => (
       <EuiFlexGroup
         gutterSize="none"
         direction="column"
@@ -106,11 +100,11 @@ export const PacksComboBoxField = ({ field, euiFieldProps = {}, idAria, ...rest 
         justifyContent="flexStart"
       >
         <EuiFlexItem>
-          <strong>{value.name}</strong>
+          <strong>{option?.name}</strong>
         </EuiFlexItem>
         <EuiFlexItem>
           <TextTruncate>
-            <EuiTextColor color="subdued">{value.description}</EuiTextColor>
+            <EuiTextColor color="subdued">{option?.description}</EuiTextColor>
           </TextTruncate>
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -119,22 +113,22 @@ export const PacksComboBoxField = ({ field, euiFieldProps = {}, idAria, ...rest 
   );
 
   useEffect(() => {
-    if (field.value.length) {
-      const packOption = find(packOptions, ['value.id', field.value[0]]);
+    if (value?.length) {
+      const packOption = find(packOptions, ['value.id', value[0]]);
 
       if (packOption) {
         setSelectedOptions([packOption]);
       }
     }
-  }, [field.value, packOptions]);
+  }, [value, packOptions]);
 
   return (
     <EuiFormRow
-      label={field.label}
-      labelAppend={field.labelAppend}
-      helpText={typeof field.helpText === 'function' ? field.helpText() : field.helpText}
-      error={errorMessage}
-      isInvalid={isInvalid}
+      label={i18n.translate('xpack.osquery.liveQuery.queryForm.packQueryTypeLabel', {
+        defaultMessage: `Pack`,
+      })}
+      error={error}
+      isInvalid={!!error}
       fullWidth
       // eslint-disable-next-line react-perf/jsx-no-new-array-as-prop
       describedByIds={idAria ? [idAria] : undefined}
@@ -146,7 +140,6 @@ export const PacksComboBoxField = ({ field, euiFieldProps = {}, idAria, ...rest 
         })}
         selectedOptions={selectedOptions}
         onChange={handlePackChange}
-        onSearchChange={onSearchComboChange}
         data-test-subj="select-live-pack"
         fullWidth
         // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
@@ -154,7 +147,7 @@ export const PacksComboBoxField = ({ field, euiFieldProps = {}, idAria, ...rest 
         renderOption={renderOption}
         options={packOptions}
         rowHeight={60}
-        {...euiFieldProps}
+        {...fieldProps}
       />
     </EuiFormRow>
   );

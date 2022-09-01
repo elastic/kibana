@@ -28,7 +28,7 @@ describe('ui settings service', () => {
       });
 
       await root.start();
-    }, 30000);
+    });
     afterAll(async () => await root.shutdown());
 
     describe('set', () => {

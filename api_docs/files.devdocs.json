@@ -141,7 +141,7 @@
               "\nList all file objects, of a given {@link FileKind}.\n"
             ],
             "signature": [
-              "(args: ",
+              "(args?: ",
               {
                 "pluginId": "files",
                 "scope": "common",
@@ -149,7 +149,7 @@
                 "section": "def-common.Pagination",
                 "text": "Pagination"
               },
-              ") => Promise<{ files: ",
+              " | undefined) => Promise<{ files: ",
               {
                 "pluginId": "files",
                 "scope": "common",
@@ -173,7 +173,7 @@
                   "- list files args"
                 ],
                 "signature": [
-                  "E[\"inputs\"][\"body\"] & E[\"inputs\"][\"params\"] & E[\"inputs\"][\"query\"]"
+                  "(E[\"inputs\"][\"body\"] & E[\"inputs\"][\"params\"] & E[\"inputs\"][\"query\"]) | undefined"
                 ],
                 "path": "x-pack/plugins/files/public/types.ts",
                 "deprecated": false
@@ -280,7 +280,7 @@
               "\nStream the contents of the file to Kibana server for storage.\n"
             ],
             "signature": [
-              "(args: any) => Promise<{ ok: true; size: number; }>"
+              "(args: { body: unknown; } & { id: string; }) => Promise<{ ok: true; size: number; }>"
             ],
             "path": "x-pack/plugins/files/public/types.ts",
             "deprecated": false,
@@ -575,6 +575,53 @@
                 "deprecated": false
               }
             ]
+          },
+          {
+            "parentPluginId": "files",
+            "id": "def-public.FilesClient.getDownloadHref",
+            "type": "Function",
+            "tags": [],
+            "label": "getDownloadHref",
+            "description": [
+              "\nGet a string for downloading a file that can be passed to a button element's\nhref for download."
+            ],
+            "signature": [
+              "(file: ",
+              {
+                "pluginId": "files",
+                "scope": "common",
+                "docId": "kibFilesPluginApi",
+                "section": "def-common.FileJSON",
+                "text": "FileJSON"
+              },
+              "<unknown>) => string"
+            ],
+            "path": "x-pack/plugins/files/public/types.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "files",
+                "id": "def-public.FilesClient.getDownloadHref.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "file",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "files",
+                    "scope": "common",
+                    "docId": "kibFilesPluginApi",
+                    "section": "def-common.FileJSON",
+                    "text": "FileJSON"
+                  },
+                  "<unknown>"
+                ],
+                "path": "x-pack/plugins/files/public/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -637,8 +684,116 @@
       }
     ],
     "enums": [],
-    "misc": [],
-    "objects": []
+    "misc": [
+      {
+        "parentPluginId": "files",
+        "id": "def-public.FilesClientResponses",
+        "type": "Type",
+        "tags": [],
+        "label": "FilesClientResponses",
+        "description": [],
+        "signature": [
+          "{ create: { file: ",
+          {
+            "pluginId": "files",
+            "scope": "common",
+            "docId": "kibFilesPluginApi",
+            "section": "def-common.FileJSON",
+            "text": "FileJSON"
+          },
+          "<unknown>; }; delete: { ok: true; }; getById: { file: ",
+          {
+            "pluginId": "files",
+            "scope": "common",
+            "docId": "kibFilesPluginApi",
+            "section": "def-common.FileJSON",
+            "text": "FileJSON"
+          },
+          "<unknown>; }; list: { files: ",
+          {
+            "pluginId": "files",
+            "scope": "common",
+            "docId": "kibFilesPluginApi",
+            "section": "def-common.FileJSON",
+            "text": "FileJSON"
+          },
+          "<unknown>[]; }; find: { files: ",
+          {
+            "pluginId": "files",
+            "scope": "common",
+            "docId": "kibFilesPluginApi",
+            "section": "def-common.FileJSON",
+            "text": "FileJSON"
+          },
+          "<unknown>[]; }; update: { file: ",
+          {
+            "pluginId": "files",
+            "scope": "common",
+            "docId": "kibFilesPluginApi",
+            "section": "def-common.FileJSON",
+            "text": "FileJSON"
+          },
+          "<unknown>; }; upload: { ok: true; size: number; }; download: any; share: ",
+          {
+            "pluginId": "files",
+            "scope": "common",
+            "docId": "kibFilesPluginApi",
+            "section": "def-common.FileShareJSON",
+            "text": "FileShareJSON"
+          },
+          " & { token: string; }; unshare: { ok: true; }; getShare: { share: ",
+          {
+            "pluginId": "files",
+            "scope": "common",
+            "docId": "kibFilesPluginApi",
+            "section": "def-common.FileShareJSON",
+            "text": "FileShareJSON"
+          },
+          "; }; listShares: { shares: ",
+          {
+            "pluginId": "files",
+            "scope": "common",
+            "docId": "kibFilesPluginApi",
+            "section": "def-common.FileShareJSON",
+            "text": "FileShareJSON"
+          },
+          "[]; }; getMetrics: ",
+          {
+            "pluginId": "files",
+            "scope": "common",
+            "docId": "kibFilesPluginApi",
+            "section": "def-common.FilesMetrics",
+            "text": "FilesMetrics"
+          },
+          "; publicDownload: any; getDownloadHref: string; }"
+        ],
+        "path": "x-pack/plugins/files/public/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [],
+    "start": {
+      "parentPluginId": "files",
+      "id": "def-public.FilesStart",
+      "type": "Type",
+      "tags": [],
+      "label": "FilesStart",
+      "description": [],
+      "signature": [
+        {
+          "pluginId": "files",
+          "scope": "public",
+          "docId": "kibFilesPluginApi",
+          "section": "def-public.FilesSetup",
+          "text": "FilesSetup"
+        }
+      ],
+      "path": "x-pack/plugins/files/public/plugin.ts",
+      "deprecated": false,
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
   },
   "server": {
     "classes": [],
@@ -2218,22 +2373,12 @@
         "children": [
           {
             "parentPluginId": "files",
-            "id": "def-server.DeleteForFileArgs.file",
-            "type": "Object",
+            "id": "def-server.DeleteForFileArgs.id",
+            "type": "string",
             "tags": [],
-            "label": "file",
+            "label": "id",
             "description": [
-              "\nThe file object to delete the shares for."
-            ],
-            "signature": [
-              {
-                "pluginId": "files",
-                "scope": "common",
-                "docId": "kibFilesPluginApi",
-                "section": "def-common.File",
-                "text": "File"
-              },
-              "<unknown>"
+              "\nThe file id to delete the shares for."
             ],
             "path": "x-pack/plugins/files/server/file_share_service/internal_file_share_service.ts",
             "deprecated": false
@@ -2250,7 +2395,7 @@
         "description": [
           "\nWraps the {@link FileMetadataClient} and {@link BlobStorageClient} client\nto provide basic file CRUD functionality.\n\nFor now this is just a shallow type of the implementation for export purposes."
         ],
-        "path": "x-pack/plugins/files/server/file_client/file_client.ts",
+        "path": "x-pack/plugins/files/server/file_client/types.ts",
         "deprecated": false,
         "children": [
           {
@@ -2262,7 +2407,7 @@
             "description": [
               "See {@link FileMetadata.FileKind}."
             ],
-            "path": "x-pack/plugins/files/server/file_client/file_client.ts",
+            "path": "x-pack/plugins/files/server/file_client/types.ts",
             "deprecated": false
           },
           {
@@ -2275,19 +2420,19 @@
               "\nSee {@link FileMetadataClient.create}.\n"
             ],
             "signature": [
-              "(arg: ",
+              "<M = unknown>(arg: ",
               "CreateArgs",
               ") => Promise<",
               {
                 "pluginId": "files",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibFilesPluginApi",
-                "section": "def-server.FileDescriptor",
-                "text": "FileDescriptor"
+                "section": "def-common.File",
+                "text": "File"
               },
-              "<unknown>>"
+              "<M>>"
             ],
-            "path": "x-pack/plugins/files/server/file_client/file_client.ts",
+            "path": "x-pack/plugins/files/server/file_client/types.ts",
             "deprecated": false,
             "children": [
               {
@@ -2302,7 +2447,7 @@
                 "signature": [
                   "CreateArgs"
                 ],
-                "path": "x-pack/plugins/files/server/file_client/file_client.ts",
+                "path": "x-pack/plugins/files/server/file_client/types.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -2319,7 +2464,7 @@
               "\nSee {@link FileMetadataClient.get}\n"
             ],
             "signature": [
-              "(arg: ",
+              "<M = unknown>(arg: ",
               {
                 "pluginId": "files",
                 "scope": "server",
@@ -2330,16 +2475,15 @@
               ") => Promise<",
               {
                 "pluginId": "files",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibFilesPluginApi",
-                "section": "def-server.FileDescriptor",
-                "text": "FileDescriptor"
+                "section": "def-common.File",
+                "text": "File"
               },
-              "<unknown>>"
+              "<M>>"
             ],
-            "path": "x-pack/plugins/files/server/file_client/file_client.ts",
+            "path": "x-pack/plugins/files/server/file_client/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "files",
@@ -2359,10 +2503,12 @@
                     "text": "GetArg"
                   }
                 ],
-                "path": "x-pack/plugins/files/server/file_client/file_metadata_client/file_metadata_client.ts",
-                "deprecated": false
+                "path": "x-pack/plugins/files/server/file_client/types.ts",
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "files",
@@ -2374,51 +2520,60 @@
               "\n{@link FileMetadataClient.update}\n"
             ],
             "signature": [
-              "(arg: ",
+              "<M = unknown>(id: string, metadata: ",
               {
                 "pluginId": "files",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibFilesPluginApi",
-                "section": "def-server.UpdateArgs",
-                "text": "UpdateArgs"
+                "section": "def-common.UpdatableFileMetadata",
+                "text": "UpdatableFileMetadata"
               },
-              "<unknown>) => Promise<",
-              {
-                "pluginId": "files",
-                "scope": "server",
-                "docId": "kibFilesPluginApi",
-                "section": "def-server.FileDescriptor",
-                "text": "FileDescriptor"
-              },
-              "<unknown>>"
+              "<M>) => Promise<void>"
             ],
-            "path": "x-pack/plugins/files/server/file_client/file_client.ts",
+            "path": "x-pack/plugins/files/server/file_client/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "files",
                 "id": "def-server.FileClient.update.$1",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [
+                  "- File id"
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/plugins/files/server/file_client/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "files",
+                "id": "def-server.FileClient.update.$2",
                 "type": "Object",
                 "tags": [],
-                "label": "arg",
+                "label": "metadata",
                 "description": [
-                  "- Argument to get a file"
+                  "- new file metadata"
                 ],
                 "signature": [
                   {
                     "pluginId": "files",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibFilesPluginApi",
-                    "section": "def-server.UpdateArgs",
-                    "text": "UpdateArgs"
+                    "section": "def-common.UpdatableFileMetadata",
+                    "text": "UpdatableFileMetadata"
                   },
-                  "<unknown>"
+                  "<M>"
                 ],
-                "path": "x-pack/plugins/files/server/file_client/file_metadata_client/file_metadata_client.ts",
-                "deprecated": false
+                "path": "x-pack/plugins/files/server/file_client/types.ts",
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "files",
@@ -2440,7 +2595,7 @@
               },
               ") => Promise<void>"
             ],
-            "path": "x-pack/plugins/files/server/file_client/file_client.ts",
+            "path": "x-pack/plugins/files/server/file_client/types.ts",
             "deprecated": false,
             "children": [
               {
@@ -2461,42 +2616,12 @@
                     "text": "DeleteArgs"
                   }
                 ],
-                "path": "x-pack/plugins/files/server/file_client/file_client.ts",
+                "path": "x-pack/plugins/files/server/file_client/types.ts",
                 "deprecated": false,
                 "isRequired": true
               }
             ],
             "returnComment": []
-          },
-          {
-            "parentPluginId": "files",
-            "id": "def-server.FileClient.deleteContent",
-            "type": "Function",
-            "tags": [],
-            "label": "deleteContent",
-            "description": [
-              "\nSee {@link BlobStorageClient.delete}\n"
-            ],
-            "signature": [
-              "(id: string) => Promise<void>"
-            ],
-            "path": "x-pack/plugins/files/server/file_client/file_client.ts",
-            "deprecated": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "files",
-                "id": "def-server.FileClient.deleteContent.$1",
-                "type": "string",
-                "tags": [],
-                "label": "id",
-                "description": [
-                  "- Argument to delete a file"
-                ],
-                "path": "x-pack/plugins/files/server/blob_storage_service/types.ts",
-                "deprecated": false
-              }
-            ]
           },
           {
             "parentPluginId": "files",
@@ -2519,16 +2644,15 @@
               " | undefined) => Promise<",
               {
                 "pluginId": "files",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibFilesPluginApi",
-                "section": "def-server.FileDescriptor",
-                "text": "FileDescriptor"
+                "section": "def-common.File",
+                "text": "File"
               },
               "<unknown>[]>"
             ],
-            "path": "x-pack/plugins/files/server/file_client/file_client.ts",
+            "path": "x-pack/plugins/files/server/file_client/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "files",
@@ -2549,10 +2673,12 @@
                   },
                   " | undefined"
                 ],
-                "path": "x-pack/plugins/files/server/file_client/file_metadata_client/file_metadata_client.ts",
-                "deprecated": false
+                "path": "x-pack/plugins/files/server/file_client/types.ts",
+                "deprecated": false,
+                "isRequired": false
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "files",
@@ -2575,16 +2701,15 @@
               ") => Promise<",
               {
                 "pluginId": "files",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibFilesPluginApi",
-                "section": "def-server.FileDescriptor",
-                "text": "FileDescriptor"
+                "section": "def-common.File",
+                "text": "File"
               },
               "<unknown>[]>"
             ],
-            "path": "x-pack/plugins/files/server/file_client/file_client.ts",
+            "path": "x-pack/plugins/files/server/file_client/types.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "files",
@@ -2604,113 +2729,147 @@
                     "text": "FindFileArgs"
                   }
                 ],
-                "path": "x-pack/plugins/files/server/file_client/file_metadata_client/file_metadata_client.ts",
-                "deprecated": false
-              }
-            ]
-          },
-          {
-            "parentPluginId": "files",
-            "id": "def-server.FileClient.upload",
-            "type": "Function",
-            "tags": [],
-            "label": "upload",
-            "description": [
-              "\nSee {@link BlobStorageClient.upload}\n"
-            ],
-            "signature": [
-              "(id: string, rs: ",
-              "Readable",
-              ", opts?: ",
-              "UploadOptions",
-              " | undefined) => Promise<{ id: string; size: number; }>"
-            ],
-            "path": "x-pack/plugins/files/server/file_client/file_client.ts",
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "files",
-                "id": "def-server.FileClient.upload.$1",
-                "type": "string",
-                "tags": [],
-                "label": "id",
-                "description": [
-                  "- Readable stream to upload"
-                ],
-                "signature": [
-                  "string"
-                ],
-                "path": "x-pack/plugins/files/server/file_client/file_client.ts",
+                "path": "x-pack/plugins/files/server/file_client/types.ts",
                 "deprecated": false,
                 "isRequired": true
-              },
-              {
-                "parentPluginId": "files",
-                "id": "def-server.FileClient.upload.$2",
-                "type": "Object",
-                "tags": [],
-                "label": "rs",
-                "description": [
-                  "- Readable stream to upload"
-                ],
-                "signature": [
-                  "Readable"
-                ],
-                "path": "x-pack/plugins/files/server/file_client/file_client.ts",
-                "deprecated": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "files",
-                "id": "def-server.FileClient.upload.$3",
-                "type": "Object",
-                "tags": [],
-                "label": "opts",
-                "description": [
-                  "- Argument for uploads"
-                ],
-                "signature": [
-                  "UploadOptions",
-                  " | undefined"
-                ],
-                "path": "x-pack/plugins/files/server/file_client/file_client.ts",
-                "deprecated": false,
-                "isRequired": false
               }
             ],
             "returnComment": []
           },
           {
             "parentPluginId": "files",
-            "id": "def-server.FileClient.download",
+            "id": "def-server.FileClient.share",
             "type": "Function",
-            "tags": [],
-            "label": "download",
+            "tags": [
+              "note"
+            ],
+            "label": "share",
             "description": [
-              "\nSee {@link BlobStorageClient.download}\n"
+              "\nCreate a file share instance for this file.\n"
             ],
             "signature": [
-              "(args: { id: string; size?: number | undefined; }) => Promise<",
-              "Readable",
+              "(args: ",
+              "ShareArgs",
+              ") => Promise<",
+              {
+                "pluginId": "files",
+                "scope": "common",
+                "docId": "kibFilesPluginApi",
+                "section": "def-common.FileShareJSONWithToken",
+                "text": "FileShareJSONWithToken"
+              },
               ">"
             ],
-            "path": "x-pack/plugins/files/server/file_client/file_client.ts",
+            "path": "x-pack/plugins/files/server/file_client/types.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "files",
+                "id": "def-server.FileClient.share.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "args",
+                "description": [
+                  "- Arguments to create a file share"
+                ],
+                "signature": [
+                  "ShareArgs"
+                ],
+                "path": "x-pack/plugins/files/server/file_client/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "files",
+            "id": "def-server.FileClient.unshare",
+            "type": "Function",
+            "tags": [
+              "note"
+            ],
+            "label": "unshare",
+            "description": [
+              "\nCreate a file share instance for this file.\n"
+            ],
+            "signature": [
+              "(args: IdArg) => Promise<void>"
+            ],
+            "path": "x-pack/plugins/files/server/file_client/types.ts",
             "deprecated": false,
             "returnComment": [],
             "children": [
               {
                 "parentPluginId": "files",
-                "id": "def-server.FileClient.download.$1",
+                "id": "def-server.FileClient.unshare.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "args",
                 "description": [
-                  "- to download a file"
+                  "- Arguments to remove a file share"
                 ],
                 "signature": [
-                  "{ id: string; size?: number | undefined; }"
+                  "IdArg"
                 ],
-                "path": "x-pack/plugins/files/server/blob_storage_service/types.ts",
+                "path": "x-pack/plugins/files/server/file_share_service/types.ts",
+                "deprecated": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "files",
+            "id": "def-server.FileClient.listShares",
+            "type": "Function",
+            "tags": [
+              "note"
+            ],
+            "label": "listShares",
+            "description": [
+              "\nCreate a file share instance for this file.\n"
+            ],
+            "signature": [
+              "(arg: ",
+              {
+                "pluginId": "files",
+                "scope": "server",
+                "docId": "kibFilesPluginApi",
+                "section": "def-server.ListArgs",
+                "text": "ListArgs"
+              },
+              ") => Promise<{ shares: ",
+              {
+                "pluginId": "files",
+                "scope": "common",
+                "docId": "kibFilesPluginApi",
+                "section": "def-common.FileShareJSON",
+                "text": "FileShareJSON"
+              },
+              "[]; }>"
+            ],
+            "path": "x-pack/plugins/files/server/file_client/types.ts",
+            "deprecated": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "files",
+                "id": "def-server.FileClient.listShares.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "arg",
+                "description": [
+                  "- Arguments to remove a file share"
+                ],
+                "signature": [
+                  {
+                    "pluginId": "files",
+                    "scope": "server",
+                    "docId": "kibFilesPluginApi",
+                    "section": "def-server.ListArgs",
+                    "text": "ListArgs"
+                  }
+                ],
+                "path": "x-pack/plugins/files/server/file_share_service/types.ts",
                 "deprecated": false
               }
             ]
@@ -3352,7 +3511,7 @@
               "\nUpdate updatable file attributes like name and meta.\n"
             ],
             "signature": [
-              "<M>(args: ",
+              "(args: ",
               {
                 "pluginId": "files",
                 "scope": "server",
@@ -3360,15 +3519,7 @@
                 "section": "def-server.UpdateFileArgs",
                 "text": "UpdateFileArgs"
               },
-              ") => Promise<",
-              {
-                "pluginId": "files",
-                "scope": "common",
-                "docId": "kibFilesPluginApi",
-                "section": "def-common.File",
-                "text": "File"
-              },
-              "<M>>"
+              ") => Promise<void>"
             ],
             "path": "x-pack/plugins/files/server/file_service/file_service.ts",
             "deprecated": false,
@@ -4803,19 +4954,45 @@
             "section": "def-common.File",
             "text": "File"
           },
-          "<Meta> extends ",
-          {
-            "pluginId": "files",
-            "scope": "common",
-            "docId": "kibFilesPluginApi",
-            "section": "def-common.FileJSON",
-            "text": "FileJSON"
-          },
           "<Meta>"
         ],
         "path": "x-pack/plugins/files/common/types.ts",
         "deprecated": false,
         "children": [
+          {
+            "parentPluginId": "files",
+            "id": "def-common.File.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [
+              "\nThe file ID"
+            ],
+            "path": "x-pack/plugins/files/common/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "files",
+            "id": "def-common.File.data",
+            "type": "Object",
+            "tags": [],
+            "label": "data",
+            "description": [
+              "\nFile metadata in camelCase form."
+            ],
+            "signature": [
+              {
+                "pluginId": "files",
+                "scope": "common",
+                "docId": "kibFilesPluginApi",
+                "section": "def-common.FileJSON",
+                "text": "FileJSON"
+              },
+              "<Meta>"
+            ],
+            "path": "x-pack/plugins/files/common/types.ts",
+            "deprecated": false
+          },
           {
             "parentPluginId": "files",
             "id": "def-common.File.update",
@@ -4886,7 +5063,15 @@
             "signature": [
               "(content: ",
               "Readable",
-              ") => Promise<void>"
+              ") => Promise<",
+              {
+                "pluginId": "files",
+                "scope": "common",
+                "docId": "kibFilesPluginApi",
+                "section": "def-common.File",
+                "text": "File"
+              },
+              "<Meta>>"
             ],
             "path": "x-pack/plugins/files/common/types.ts",
             "deprecated": false,
@@ -5319,10 +5504,12 @@
             "parentPluginId": "files",
             "id": "def-common.FileKind.maxSizeBytes",
             "type": "number",
-            "tags": [],
+            "tags": [
+              "default"
+            ],
             "label": "maxSizeBytes",
             "description": [
-              "\nMaximum size, in bytes, a file of this kind can be."
+              "\nMaximum size, in bytes, a file of this kind can be.\n"
             ],
             "signature": [
               "number | undefined"
@@ -5373,10 +5560,12 @@
             "parentPluginId": "files",
             "id": "def-common.FileKind.http",
             "type": "Object",
-            "tags": [],
+            "tags": [
+              "note"
+            ],
             "label": "http",
             "description": [
-              "\nOptionally specify which HTTP routes to create for the file kind"
+              "\nSpecify which HTTP routes to create for the file kind.\n\nYou can always create your own HTTP routes for working with files but\nthis interface allows you to expose basic CRUD operations, upload, download\nand sharing of files over a RESTful-like interface.\n"
             ],
             "signature": [
               "{ create?: HttpEndpointDefinition | undefined; update?: HttpEndpointDefinition | undefined; delete?: HttpEndpointDefinition | undefined; getById?: HttpEndpointDefinition | undefined; list?: HttpEndpointDefinition | undefined; download?: HttpEndpointDefinition | undefined; share?: HttpEndpointDefinition | undefined; }"
