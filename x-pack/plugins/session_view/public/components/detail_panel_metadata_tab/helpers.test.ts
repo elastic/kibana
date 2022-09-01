@@ -8,9 +8,10 @@ import {
   ProcessEventHost,
   ProcessEventContainer,
   ProcessEventOrchestrator,
+  ProcessEventCloud,
 } from '../../../common/types/process_tree';
 import { DASH } from '../../constants';
-import { getHostData, getContainerData, getOrchestratorData } from './helpers';
+import { getHostData, getContainerData, getOrchestratorData, getCloudData } from './helpers';
 
 const MOCK_HOST_DATA: ProcessEventHost = {
   architecture: 'x86_64',
@@ -46,15 +47,29 @@ const MOCK_ORCHESTRATOR_DATA: ProcessEventOrchestrator = {
     name: 'pdcsi-node-6hvsp',
     type: 'pod',
     ip: 'PLACEHOLDER_FOR_RESOURCE.IP',
+    parent: {
+      type: 'PLACEHOLDER_FOR_RESOURCE.PARENT.TYPE',
+    },
   },
   namespace: 'kube-system',
   cluster: {
     name: 'elastic-k8s-cluster',
     id: 'PLACEHOLDER_FOR_CLUSTER.ID',
   },
-  parent: {
-    type: 'PLACEHOLDER_FOR_PARENT.TYPE',
+};
+
+const MOCK_CLOUD_DATA: ProcessEventCloud = {
+  instance: {
+    name: 'gke-cluster-1-paulo-default-pool-f0fea4ab-lhx2',
   },
+  account: {
+    id: 'PLACEHOLDER_FOR_CLOUD_ACCOUNT_ID',
+  },
+  project: {
+    id: 'elastic-security-dev',
+  },
+  provider: 'gcp',
+  region: 'us-central1-c',
 };
 
 describe('detail panel host tab helpers tests', () => {
@@ -149,14 +164,14 @@ describe('detail panel host tab helpers tests', () => {
         name: undefined,
         type: 'pod',
         ip: undefined,
+        parent: {
+          type: 'PLACEHOLDER_FOR_RESOURCE.PARENT.TYPE',
+        },
       },
       namespace: 'kube-system',
       cluster: {
         name: 'elastic-k8s-cluster',
         id: undefined,
-      },
-      parent: {
-        type: 'PLACEHOLDER_FOR_PARENT.TYPE',
       },
     });
     expect(result.resource.name).toEqual(DASH);
@@ -165,7 +180,7 @@ describe('detail panel host tab helpers tests', () => {
     expect(result.namespace).toEqual(MOCK_ORCHESTRATOR_DATA?.namespace);
     expect(result.cluster.name).toEqual(MOCK_ORCHESTRATOR_DATA?.cluster?.name);
     expect(result.cluster.id).toEqual(DASH);
-    expect(result.parent.type).toEqual(MOCK_ORCHESTRATOR_DATA?.parent?.type);
+    expect(result.resource.parent.type).toEqual(MOCK_ORCHESTRATOR_DATA?.resource?.parent?.type);
   });
 
   it('getOchestratorData returns all data provided', () => {
@@ -176,6 +191,36 @@ describe('detail panel host tab helpers tests', () => {
     expect(result.namespace).toEqual(MOCK_ORCHESTRATOR_DATA?.namespace);
     expect(result.cluster.name).toEqual(MOCK_ORCHESTRATOR_DATA?.cluster?.name);
     expect(result.cluster.id).toEqual(MOCK_ORCHESTRATOR_DATA?.cluster?.id);
-    expect(result.parent.type).toEqual(MOCK_ORCHESTRATOR_DATA?.parent?.type);
+    expect(result.resource.parent.type).toEqual(MOCK_ORCHESTRATOR_DATA?.resource?.parent?.type);
+  });
+
+  it('getCloudData returns dashes for missing fields', () => {
+    const result = getCloudData({
+      instance: {
+        name: 'gke-cluster-1-paulo-default-pool-f0fea4ab-lhx2',
+      },
+      account: {
+        id: undefined,
+      },
+      project: {
+        id: 'elastic-security-dev',
+      },
+      provider: undefined,
+      region: 'us-central1-c',
+    });
+    expect(result.instance.name).toEqual(MOCK_CLOUD_DATA?.instance?.name);
+    expect(result.account.id).toEqual(DASH);
+    expect(result.project.id).toEqual(MOCK_CLOUD_DATA?.project?.id);
+    expect(result.provider).toEqual(DASH);
+    expect(result.region).toEqual(MOCK_CLOUD_DATA?.region);
+  });
+
+  it('getCloudData returns all data provided', () => {
+    const result = getCloudData(MOCK_CLOUD_DATA);
+    expect(result.instance.name).toEqual(MOCK_CLOUD_DATA?.instance?.name);
+    expect(result.account.id).toEqual(MOCK_CLOUD_DATA?.account?.id);
+    expect(result.project.id).toEqual(MOCK_CLOUD_DATA?.project?.id);
+    expect(result.provider).toEqual(MOCK_CLOUD_DATA?.provider);
+    expect(result.region).toEqual(MOCK_CLOUD_DATA?.region);
   });
 });

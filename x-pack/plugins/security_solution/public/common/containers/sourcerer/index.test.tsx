@@ -12,7 +12,7 @@ import { Provider } from 'react-redux';
 
 import { getScopeFromPath, useInitSourcerer, useSourcererDataView } from '.';
 import { mockPatterns } from './mocks';
-import { RouteSpyState } from '../../utils/route/types';
+import type { RouteSpyState } from '../../utils/route/types';
 import {
   DEFAULT_DATA_VIEW_ID,
   DEFAULT_INDEX_PATTERN,
@@ -31,7 +31,8 @@ import {
   mockSourcererState,
   TestProviders,
 } from '../../mock';
-import { SelectedDataView, SourcererScopeName } from '../../store/sourcerer/model';
+import type { SelectedDataView } from '../../store/sourcerer/model';
+import { SourcererScopeName } from '../../store/sourcerer/model';
 import { postSourcererDataView } from './api';
 import { sourcererActions } from '../../store/sourcerer';
 import { useInitializeUrlParam, useUpdateUrlParam } from '../../utils/global_query_string';

@@ -24,6 +24,7 @@ import {
   Embeddable,
   EmbeddableInput,
   EmbeddableOutput,
+  FilterableEmbeddable,
   IContainer,
   ReferenceOrValueEmbeddable,
   SavedObjectEmbeddableInput,
@@ -35,8 +36,9 @@ import {
   ExpressionRenderError,
   IExpressionLoaderParams,
 } from '@kbn/expressions-plugin/public';
-import type { RenderMode } from '@kbn/expressions-plugin';
+import type { RenderMode } from '@kbn/expressions-plugin/common';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/public';
+import { mapAndFlattenFilters } from '@kbn/data-plugin/public';
 import { isFallbackDataView } from '../visualize_app/utils';
 import { VisualizationMissedSavedObjectError } from '../components/visualization_missed_saved_object_error';
 import VisualizationError from '../components/visualization_error';
@@ -94,7 +96,9 @@ export type VisualizeByReferenceInput = SavedObjectEmbeddableInput & VisualizeIn
 
 export class VisualizeEmbeddable
   extends Embeddable<VisualizeInput, VisualizeOutput>
-  implements ReferenceOrValueEmbeddable<VisualizeByValueInput, VisualizeByReferenceInput>
+  implements
+    ReferenceOrValueEmbeddable<VisualizeByValueInput, VisualizeByReferenceInput>,
+    FilterableEmbeddable
 {
   private handler?: ExpressionLoader;
   private timefilter: TimefilterContract;
@@ -179,8 +183,43 @@ export class VisualizeEmbeddable
         typeof inspectorAdapters === 'function' ? inspectorAdapters() : inspectorAdapters;
     }
   }
+
+  public reportsEmbeddableLoad() {
+    return true;
+  }
+
   public getDescription() {
     return this.vis.description;
+  }
+
+  public getVis() {
+    return this.vis;
+  }
+
+  /**
+   * Gets the Visualize embeddable's local filters
+   * @returns Local/panel-level array of filters for Visualize embeddable
+   */
+  public async getFilters() {
+    let input = this.getInput();
+    if (this.inputIsRefType(input)) {
+      input = await this.getInputAsValueType();
+    }
+    const filters = input.savedVis?.data.searchSource?.filter ?? [];
+    // must clone the filters so that it's not read only, because mapAndFlattenFilters modifies the array
+    return mapAndFlattenFilters(_.cloneDeep(filters));
+  }
+
+  /**
+   * Gets the Visualize embeddable's local query
+   * @returns Local/panel-level query for Visualize embeddable
+   */
+  public async getQuery() {
+    let input = this.getInput();
+    if (this.inputIsRefType(input)) {
+      input = await this.getInputAsValueType();
+    }
+    return input.savedVis?.data.searchSource?.query;
   }
 
   public getInspectorAdapters = () => {
@@ -290,12 +329,27 @@ export class VisualizeEmbeddable
 
   onContainerLoading = () => {
     this.renderComplete.dispatchInProgress();
-    this.updateOutput({ loading: true, error: undefined });
+    this.updateOutput({
+      ...this.getOutput(),
+      loading: true,
+      rendered: false,
+      error: undefined,
+    });
+  };
+
+  onContainerData = () => {
+    this.updateOutput({
+      ...this.getOutput(),
+      loading: false,
+    });
   };
 
   onContainerRender = () => {
     this.renderComplete.dispatchComplete();
-    this.updateOutput({ loading: false, error: undefined });
+    this.updateOutput({
+      ...this.getOutput(),
+      rendered: true,
+    });
   };
 
   onContainerError = (error: ExpressionRenderError) => {
@@ -303,7 +357,11 @@ export class VisualizeEmbeddable
       this.abortController.abort();
     }
     this.renderComplete.dispatchError();
-    this.updateOutput({ loading: false, error });
+    this.updateOutput({
+      ...this.getOutput(),
+      rendered: true,
+      error,
+    });
   };
 
   /**
@@ -337,6 +395,7 @@ export class VisualizeEmbeddable
       onRenderError: (element: HTMLElement, error: ExpressionRenderError) => {
         this.onContainerError(error);
       },
+      executionContext: this.getExecutionContext(),
     });
 
     this.subscriptions.push(
@@ -387,6 +446,7 @@ export class VisualizeEmbeddable
     div.setAttribute('data-shared-item', '');
 
     this.subscriptions.push(this.handler.loading$.subscribe(this.onContainerLoading));
+    this.subscriptions.push(this.handler.data$.subscribe(this.onContainerData));
     this.subscriptions.push(this.handler.render$.subscribe(this.onContainerRender));
 
     this.subscriptions.push(
@@ -439,19 +499,24 @@ export class VisualizeEmbeddable
     await this.handleVisUpdate();
   };
 
-  private async updateHandler() {
+  private getExecutionContext() {
     const parentContext = this.parent?.getInput().executionContext || getExecutionContext().get();
     const child: KibanaExecutionContext = {
-      type: 'visualization',
+      type: 'agg_based',
       name: this.vis.type.name,
       id: this.vis.id ?? 'new',
       description: this.vis.title || this.input.title || this.vis.type.name,
       url: this.output.editUrl,
     };
-    const context = {
+
+    return {
       ...parentContext,
       child,
     };
+  }
+
+  private async updateHandler() {
+    const context = this.getExecutionContext();
 
     const expressionParams: IExpressionLoaderParams = {
       searchContext: {

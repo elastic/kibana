@@ -6,7 +6,7 @@
  */
 
 import { FlowTarget, FlowTargetSourceDest } from '../../../../../common/search_strategy';
-import { CriteriaFields } from '../types';
+import type { CriteriaFields } from '../types';
 import { networkToCriteria } from './network_to_criteria';
 
 describe('network_to_criteria', () => {

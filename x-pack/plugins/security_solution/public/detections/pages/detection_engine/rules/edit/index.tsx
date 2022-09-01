@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { EuiTabbedContentTab } from '@elastic/eui';
 import {
   EuiButton,
   EuiCallOut,
@@ -12,14 +13,14 @@ import {
   EuiFlexItem,
   EuiSpacer,
   EuiTabbedContent,
-  EuiTabbedContentTab,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { FC, memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type { FC } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 
-import { DataViewListItem } from '@kbn/data-views-plugin/common';
-import { UpdateRulesSchema } from '../../../../../../common/detection_engine/schemas/request';
+import type { DataViewListItem } from '@kbn/data-views-plugin/common';
+import type { UpdateRulesSchema } from '../../../../../../common/detection_engine/schemas/request';
 import { useRule, useUpdateRule } from '../../../../containers/detection_engine/rules';
 import { useListsConfig } from '../../../../containers/detection_engine/lists/use_lists_config';
 import { SecuritySolutionPageWrapper } from '../../../../../common/components/page_wrapper';
@@ -51,7 +52,8 @@ import {
   MaxWidthEuiFlexItem,
 } from '../helpers';
 import * as ruleI18n from '../translations';
-import { RuleStep, RuleStepsFormHooks, RuleStepsFormData, RuleStepsData } from '../types';
+import type { RuleStepsFormHooks, RuleStepsFormData, RuleStepsData } from '../types';
+import { RuleStep } from '../types';
 import * as i18n from './translations';
 import { SecurityPageName } from '../../../../../app/types';
 import { ruleStepsOrder } from '../utils';

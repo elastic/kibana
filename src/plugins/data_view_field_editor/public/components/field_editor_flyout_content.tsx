@@ -6,25 +6,24 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, useCallback, useEffect, useRef } from 'react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import {
-  EuiTitle,
+  EuiButton,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButtonEmpty,
-  EuiButton,
   EuiText,
+  EuiTitle,
 } from '@elastic/eui';
-
-import type { Field } from '../types';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { euiFlyoutClassname } from '../constants';
-import { FlyoutPanels } from './flyout_panels';
-import { useFieldEditorContext } from './field_editor_context';
-import { FieldEditor, FieldEditorFormState } from './field_editor/field_editor';
-import { FieldPreview, useFieldPreviewContext } from './preview';
+import type { Field } from '../types';
 import { ModifiedFieldModal, SaveFieldTypeOrNameChangedModal } from './confirm_modals';
+import { FieldEditor, FieldEditorFormState } from './field_editor/field_editor';
+import { useFieldEditorContext } from './field_editor_context';
+import { FlyoutPanels } from './flyout_panels';
+import { FieldPreview, useFieldPreviewContext } from './preview';
 
 const i18nTexts = {
   cancelButtonLabel: i18n.translate('indexPatternFieldEditor.editor.flyoutCancelButtonLabel', {
@@ -50,7 +49,9 @@ export interface Props {
    */
   onCancel: () => void;
   /** Optional field to process */
-  field?: Field;
+  fieldToEdit?: Field;
+  /** Optional preselected configuration for new field */
+  fieldToCreate?: Field;
   isSavingField: boolean;
   /** Handler to call when the component mounts.
    *  We will pass "up" data that the parent component might need
@@ -59,14 +60,15 @@ export interface Props {
 }
 
 const FieldEditorFlyoutContentComponent = ({
-  field,
+  fieldToEdit,
+  fieldToCreate,
   onSave,
   onCancel,
   isSavingField,
   onMounted,
 }: Props) => {
   const isMounted = useRef(false);
-  const isEditingExistingField = !!field;
+  const isEditingExistingField = !!fieldToEdit;
   const { dataView } = useFieldEditorContext();
   const {
     panel: { isVisible: isPanelVisible },
@@ -75,9 +77,9 @@ const FieldEditorFlyoutContentComponent = ({
   const [formState, setFormState] = useState<FieldEditorFormState>({
     isSubmitted: false,
     isSubmitting: false,
-    isValid: field ? true : undefined,
-    submit: field
-      ? async () => ({ isValid: true, data: field })
+    isValid: fieldToEdit ? true : undefined,
+    submit: fieldToEdit
+      ? async () => ({ isValid: true, data: fieldToEdit })
       : async () => ({ isValid: false, data: {} as Field }),
   });
 
@@ -106,8 +108,8 @@ const FieldEditorFlyoutContentComponent = ({
     }
 
     if (isValid) {
-      const nameChange = field?.name !== data.name;
-      const typeChange = field?.type !== data.type;
+      const nameChange = fieldToEdit?.name !== data.name;
+      const typeChange = fieldToEdit?.type !== data.type;
 
       if (isEditingExistingField && (nameChange || typeChange)) {
         setModalVisibility({
@@ -118,7 +120,7 @@ const FieldEditorFlyoutContentComponent = ({
         onSave(data);
       }
     }
-  }, [onSave, submit, field, isEditingExistingField]);
+  }, [onSave, submit, fieldToEdit, isEditingExistingField]);
 
   const onClickCancel = useCallback(() => {
     const canClose = canCloseValidator();
@@ -132,7 +134,7 @@ const FieldEditorFlyoutContentComponent = ({
     if (modalVisibility.confirmChangeNameOrType) {
       return (
         <SaveFieldTypeOrNameChangedModal
-          fieldName={field?.name!}
+          fieldName={fieldToEdit?.name!}
           onConfirm={async () => {
             const { data } = await submit();
             onSave(data);
@@ -196,12 +198,12 @@ const FieldEditorFlyoutContentComponent = ({
             <FlyoutPanels.Header>
               <EuiTitle data-test-subj="flyoutTitle">
                 <h2>
-                  {field ? (
+                  {fieldToEdit ? (
                     <FormattedMessage
                       id="indexPatternFieldEditor.editor.flyoutEditFieldTitle"
                       defaultMessage="Edit field '{fieldName}'"
                       values={{
-                        fieldName: field.name,
+                        fieldName: fieldToEdit.name,
                       }}
                     />
                   ) : (
@@ -226,7 +228,7 @@ const FieldEditorFlyoutContentComponent = ({
             </FlyoutPanels.Header>
 
             <FieldEditor
-              field={field}
+              field={fieldToEdit ?? fieldToCreate}
               onChange={setFormState}
               onFormModifiedChange={setIsFormModified}
             />

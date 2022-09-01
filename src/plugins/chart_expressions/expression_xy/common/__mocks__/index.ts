@@ -8,7 +8,7 @@
 
 import { Position } from '@elastic/charts';
 import type { PaletteOutput } from '@kbn/coloring';
-import { Datatable, DatatableRow } from '@kbn/expressions-plugin';
+import { Datatable, DatatableRow } from '@kbn/expressions-plugin/common';
 import { LayerTypes } from '../constants';
 import { DataLayerConfig, ExtendedDataLayerConfig, XYProps } from '../types';
 
@@ -54,7 +54,7 @@ export const sampleLayer: DataLayerConfig = {
   seriesType: 'line',
   xAccessor: 'c',
   accessors: ['a', 'b'],
-  splitAccessor: 'd',
+  splitAccessors: ['d'],
   columnToLabel: '{"a": "Label A", "b": "Label B", "d": "Label D"}',
   xScaleType: 'ordinal',
   isHistogram: false,
@@ -72,7 +72,7 @@ export const sampleExtendedLayer: ExtendedDataLayerConfig = {
   seriesType: 'line',
   xAccessor: 'c',
   accessors: ['a', 'b'],
-  splitAccessor: 'd',
+  splitAccessors: ['d'],
   columnToLabel: '{"a": "Label A", "b": "Label B", "d": "Label D"}',
   xScaleType: 'ordinal',
   isHistogram: false,

@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import {
+import type {
   UninitialisedResourceState,
   LoadingResourceState,
   LoadedResourceState,
   FailedResourceState,
+} from './async_resource_state';
+import {
   isUninitialisedResourceState,
   isLoadingResourceState,
   isLoadedResourceState,

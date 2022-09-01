@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ExperimentalFeatures } from '../../common/experimental_features';
+import type { ExperimentalFeatures } from '../../common/experimental_features';
 
 export class ExperimentalFeaturesService {
   private static experimentalFeatures?: ExperimentalFeatures;

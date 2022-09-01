@@ -91,8 +91,8 @@ export default ({ config: storybookConfig }: { config: Configuration }) => {
             {
               loader: 'postcss-loader',
               options: {
-                config: {
-                  path: require.resolve('@kbn/optimizer/postcss.config.js'),
+                postcssOptions: {
+                  config: require.resolve('@kbn/optimizer/postcss.config.js'),
                 },
               },
             },

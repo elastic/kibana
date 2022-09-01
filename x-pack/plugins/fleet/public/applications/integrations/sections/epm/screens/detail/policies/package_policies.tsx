@@ -15,6 +15,7 @@ import {
   EuiFlexItem,
   EuiText,
   EuiButton,
+  EuiIcon,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedRelative, FormattedMessage } from '@kbn/i18n-react';
@@ -47,7 +48,7 @@ interface PackagePoliciesPanelProps {
 
 interface InMemoryPackagePolicyAndAgentPolicy {
   packagePolicy: InMemoryPackagePolicy;
-  agentPolicy: GetAgentPoliciesResponseItem;
+  agentPolicy?: GetAgentPoliciesResponseItem;
 }
 
 const IntegrationDetailsLink = memo<{
@@ -67,6 +68,17 @@ const IntegrationDetailsLink = memo<{
     </EuiLink>
   );
 });
+
+const AgentPolicyNotFound = () => (
+  <EuiText color="subdued" size="xs" className="eui-textNoWrap">
+    <EuiIcon size="m" type="alert" color="warning" />
+    &nbsp;
+    <FormattedMessage
+      id="xpack.fleet.epm.packageDetails.integrationList.agentPolicyDeletedWarning"
+      defaultMessage="Policy not found"
+    />
+  </EuiText>
+);
 
 export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps) => {
   const { search } = useLocation();
@@ -101,7 +113,7 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
   const canWriteIntegrationPolicies = useAuthz().integrations.writeIntegrationPolicies;
 
   const packageAndAgentPolicies = useMemo((): Array<{
-    agentPolicy: GetAgentPoliciesResponseItem;
+    agentPolicy?: GetAgentPoliciesResponseItem;
     packagePolicy: InMemoryPackagePolicy;
   }> => {
     if (!data?.items) {
@@ -131,7 +143,7 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
   }, [data?.items, updatableIntegrations]);
 
   const showAddAgentHelpForPackagePolicyId = packageAndAgentPolicies.find(
-    ({ agentPolicy }) => agentPolicy.id === showAddAgentHelpForPolicyId
+    ({ agentPolicy }) => agentPolicy?.id === showAddAgentHelpForPolicyId
   )?.packagePolicy?.id;
   // Handle the "add agent" link displayed in post-installation toast notifications in the case
   // where a user is clicking the link while on the package policies listing page
@@ -187,7 +199,7 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
                 </EuiText>
               </EuiFlexItem>
 
-              {packagePolicy.hasUpgrade && (
+              {agentPolicy && packagePolicy.hasUpgrade && (
                 <EuiFlexItem grow={false}>
                   <EuiButton
                     size="s"
@@ -217,7 +229,11 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
         }),
         truncateText: true,
         render(id, { agentPolicy }) {
-          return <AgentPolicySummaryLine policy={agentPolicy} />;
+          return agentPolicy ? (
+            <AgentPolicySummaryLine policy={agentPolicy} />
+          ) : (
+            <AgentPolicyNotFound />
+          );
         },
       },
       {
@@ -250,6 +266,9 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
           defaultMessage: 'Agents',
         }),
         render({ agentPolicy, packagePolicy }: InMemoryPackagePolicyAndAgentPolicy) {
+          if (!agentPolicy) {
+            return null;
+          }
           return (
             <PackagePolicyAgentsCell
               agentPolicy={agentPolicy}
@@ -273,10 +292,14 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
               agentPolicy={agentPolicy}
               packagePolicy={packagePolicy}
               showAddAgent={true}
-              upgradePackagePolicyHref={`${getHref('upgrade_package_policy', {
-                policyId: agentPolicy.id,
-                packagePolicyId: packagePolicy.id,
-              })}?from=integrations-policy-list`}
+              upgradePackagePolicyHref={
+                agentPolicy
+                  ? `${getHref('upgrade_package_policy', {
+                      policyId: agentPolicy.id,
+                      packagePolicyId: packagePolicy.id,
+                    })}?from=integrations-policy-list`
+                  : undefined
+              }
             />
           );
         },
@@ -311,7 +334,7 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
     );
   }
   const selectedPolicies = packageAndAgentPolicies.find(
-    ({ agentPolicy: policy }) => policy.id === flyoutOpenForPolicyId
+    ({ agentPolicy: policy }) => policy?.id === flyoutOpenForPolicyId
   );
   const agentPolicy = selectedPolicies?.agentPolicy;
   const packagePolicy = selectedPolicies?.packagePolicy;

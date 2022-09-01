@@ -103,11 +103,10 @@ export const getEuiContextMapping = (): EuiTokensObject => {
       defaultMessage: 'Page level controls',
       description: 'Screen reader announcement about heading controls',
     }),
-    'euiBreadcrumbs.collapsedBadge.ariaLabel': i18n.translate(
-      'core.euiBreadcrumbs.collapsedBadge.ariaLabel',
+    'euiBreadcrumb.collapsedBadge.ariaLabel': i18n.translate(
+      'core.euiBreadcrumb.collapsedBadge.ariaLabel',
       {
         defaultMessage: 'See collapsed breadcrumbs',
-        description: 'Displayed when one or more breadcrumbs are hidden.',
       }
     ),
     'euiBreadcrumbs.nav.ariaLabel': i18n.translate('core.euiBreadcrumbs.nav.ariaLabel', {
@@ -401,10 +400,10 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         values: { page, pageCount },
         description: 'Screen reader text to describe the size of the data grid',
       }),
-    'euiDataGridCell.position': ({ row, col }: EuiValues) =>
+    'euiDataGridCell.position': ({ columnId, row, col }: EuiValues) =>
       i18n.translate('core.euiDataGridCell.position', {
-        defaultMessage: 'Row: {row}; Column: {col}',
-        values: { row, col },
+        defaultMessage: '{columnId}, column {col}, row {row}',
+        values: { columnId, row, col },
       }),
     'euiDataGridCellActions.expandButtonTitle': i18n.translate(
       'core.euiDataGridCellActions.expandButtonTitle',
@@ -415,7 +414,46 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiDataGridHeaderCell.headerActions': i18n.translate(
       'core.euiDataGridHeaderCell.headerActions',
       {
-        defaultMessage: 'Header actions',
+        defaultMessage: 'Click to view column header actions',
+      }
+    ),
+    'euiDataGridHeaderCell.sortedByAscendingSingle': i18n.translate(
+      'core.euiDataGridHeaderCell.sortedByAscendingSingle',
+      {
+        defaultMessage: 'Sorted ascending',
+      }
+    ),
+    'euiDataGridHeaderCell.sortedByDescendingSingle': i18n.translate(
+      'core.euiDataGridHeaderCell.sortedByDescendingSingle',
+      {
+        defaultMessage: 'Sorted descending',
+      }
+    ),
+    'euiDataGridHeaderCell.sortedByAscendingFirst': ({ columnId }: EuiValues) =>
+      i18n.translate('core.euiDataGridHeaderCell.sortedByAscendingFirst', {
+        defaultMessage: 'Sorted by {columnId}, ascending',
+        values: { columnId },
+      }),
+    'euiDataGridHeaderCell.sortedByDescendingFirst': ({ columnId }: EuiValues) =>
+      i18n.translate('core.euiDataGridHeaderCell.sortedByDescendingFirst', {
+        defaultMessage: 'Sorted by {columnId}, descending',
+        values: { columnId },
+      }),
+    'euiDataGridHeaderCell.sortedByAscendingMultiple': ({ columnId }: EuiValues) =>
+      i18n.translate('core.euiDataGridHeaderCell.sortedByAscendingMultiple', {
+        defaultMessage: ', then sorted by {columnId}, ascending',
+        values: { columnId },
+      }),
+    'euiDataGridHeaderCell.sortedByDescendingMultiple': ({ columnId }: EuiValues) =>
+      i18n.translate('core.euiDataGridHeaderCell.sortedByDescendingMultiple', {
+        defaultMessage: ', then sorted by {columnId}, descending',
+        values: { columnId },
+      }),
+    'euiDataGridHeaderCell.actionsPopoverScreenReaderText': i18n.translate(
+      'core.euiDataGridHeaderCell.actionsPopoverScreenReaderText',
+      {
+        defaultMessage:
+          'To navigate through the list of column actions, press the Tab or Up and Down arrow keys.',
       }
     ),
     'euiDataGridPagination.detailedPaginationLabel': ({ label }: EuiValues) =>
@@ -605,16 +643,12 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiHue.label': i18n.translate('core.euiHue.label', {
       defaultMessage: 'Select the HSV color mode "hue" value',
     }),
-    'euiImage.closeImage': ({ alt }: EuiValues) =>
-      i18n.translate('core.euiImage.closeImage', {
-        defaultMessage: 'Close fullscreen {alt} image',
-        values: { alt },
-      }),
-    'euiImage.openImage': ({ alt }: EuiValues) =>
-      i18n.translate('core.euiImage.openImage', {
-        defaultMessage: 'Open fullscreen {alt} image',
-        values: { alt },
-      }),
+    'euiImageButton.openFullScreen': i18n.translate('core.euiImageButton.openFullScreen', {
+      defaultMessage: 'Click to open this image in fullscreen mode',
+    }),
+    'euiImageButton.closeFullScreen': i18n.translate('core.euiImageButton.closeFullScreen', {
+      defaultMessage: 'Press Escape or click to close image fullscreen mode',
+    }),
     'euiLink.external.ariaLabel': i18n.translate('core.euiLink.external.ariaLabel', {
       defaultMessage: 'External link',
     }),

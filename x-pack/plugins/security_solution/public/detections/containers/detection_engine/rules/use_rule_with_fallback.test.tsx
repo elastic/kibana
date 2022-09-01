@@ -6,9 +6,9 @@
  */
 
 import { renderHook, act } from '@testing-library/react-hooks';
-import { SecurityAppError } from '@kbn/securitysolution-t-grid';
+import type { SecurityAppError } from '@kbn/securitysolution-t-grid';
 import { alertsMock8x, alertMockEmptyResults } from '../alerts/mock';
-import { AlertSearchResponse } from '../alerts/types';
+import type { AlertSearchResponse } from '../alerts/types';
 import { useRuleWithFallback } from './use_rule_with_fallback';
 import * as api from './api';
 import * as alertsAPI from '../alerts/api';
@@ -18,6 +18,7 @@ import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 jest.mock('./api');
 jest.mock('../alerts/api');
 jest.mock('../../../../common/hooks/use_app_toasts');
+jest.mock('../../../../common/lib/kibana');
 
 const mockNotFoundErrorForRule = () => {
   (api.fetchRuleById as jest.Mock).mockImplementation(async () => {

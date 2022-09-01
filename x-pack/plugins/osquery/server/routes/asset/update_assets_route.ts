@@ -6,19 +6,19 @@
  */
 
 import moment from 'moment-timezone';
-import { filter, omit } from 'lodash';
+import { filter, omit, some } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import { asyncForEach } from '@kbn/std';
 import deepmerge from 'deepmerge';
 
-import { IRouter } from '@kbn/core/server';
-import { KibanaAssetReference } from '@kbn/fleet-plugin/common';
+import type { IRouter } from '@kbn/core/server';
+import type { KibanaAssetReference } from '@kbn/fleet-plugin/common';
 import { packAssetSavedObjectType, packSavedObjectType } from '../../../common/types';
 import { combineMerge } from './utils';
 import { PLUGIN_ID, OSQUERY_INTEGRATION_NAME } from '../../../common';
-import { OsqueryAppContext } from '../../lib/osquery_app_context_services';
+import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { convertSOQueriesToPack, convertPackQueriesToSO } from '../pack/utils';
-import { PackSavedObjectAttributes } from '../../common/types';
+import type { PackSavedObjectAttributes } from '../../common/types';
 
 export const updateAssetsRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.post(
@@ -102,9 +102,14 @@ export const updateAssetsRoute = (router: IRouter, osqueryContext: OsqueryAppCon
               filter: `${packSavedObjectType}.attributes.name: "${packAssetSavedObject.attributes.name}"`,
             });
 
-            const name = conflictingEntries.saved_objects.length
-              ? `${packAssetSavedObject.attributes.name}-elastic`
-              : packAssetSavedObject.attributes.name;
+            const name =
+              conflictingEntries.saved_objects.length &&
+              some(conflictingEntries.saved_objects, [
+                'attributes.name',
+                packAssetSavedObject.attributes.name,
+              ])
+                ? `${packAssetSavedObject.attributes.name}-elastic`
+                : packAssetSavedObject.attributes.name;
 
             await savedObjectsClient.create(
               packSavedObjectType,

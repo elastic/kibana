@@ -8,22 +8,22 @@
 import deepEqual from 'fast-deep-equal';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { inputsModel, State } from '../../../common/store';
+import type { inputsModel, State } from '../../../common/store';
 import { createFilter } from '../../../common/containers/helpers';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
-import { hostsModel, hostsSelectors } from '../../store';
+import type { hostsModel } from '../../store';
+import { hostsSelectors } from '../../store';
 import { generateTablePaginationOptions } from '../../../common/components/paginated_table/helpers';
-import {
+import type {
   HostsEdges,
   PageInfoPaginated,
-  DocValueFields,
-  HostsQueries,
   HostsRequestOptions,
 } from '../../../../common/search_strategy';
-import { ESTermQuery } from '../../../../common/typed_json';
+import { HostsQueries } from '../../../../common/search_strategy';
+import type { ESTermQuery } from '../../../../common/typed_json';
 
 import * as i18n from './translations';
-import { InspectResponse } from '../../../types';
+import type { InspectResponse } from '../../../types';
 import { useSearchStrategy } from '../../../common/containers/use_search_strategy';
 
 export const ID = 'hostsAllQuery';
@@ -43,7 +43,6 @@ export interface HostsArgs {
 }
 
 interface UseAllHost {
-  docValueFields?: DocValueFields[];
   endDate: string;
   filterQuery?: ESTermQuery | string;
   indexNames: string[];
@@ -53,7 +52,6 @@ interface UseAllHost {
 }
 
 export const useAllHost = ({
-  docValueFields,
   endDate,
   filterQuery,
   indexNames,
@@ -135,7 +133,6 @@ export const useAllHost = ({
       const myRequest = {
         ...(prevRequest ?? {}),
         defaultIndex: indexNames,
-        docValueFields: docValueFields ?? [],
         factoryQueryType: HostsQueries.hosts,
         filterQuery: createFilter(filterQuery),
         pagination: generateTablePaginationOptions(activePage, limit),
@@ -154,17 +151,7 @@ export const useAllHost = ({
       }
       return prevRequest;
     });
-  }, [
-    activePage,
-    direction,
-    docValueFields,
-    endDate,
-    filterQuery,
-    indexNames,
-    limit,
-    startDate,
-    sortField,
-  ]);
+  }, [activePage, direction, endDate, filterQuery, indexNames, limit, startDate, sortField]);
 
   useEffect(() => {
     if (!skip && hostsRequest) {

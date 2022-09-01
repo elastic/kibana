@@ -5,31 +5,31 @@
  * 2.0.
  */
 
-export const SECURITY_ACTIONS_PREFIX = 'securitySolution';
+import { APP_UI_ID } from '../../../../common/constants';
 
 export const SINGLE_RULE_ACTIONS = {
-  ENABLE: `${SECURITY_ACTIONS_PREFIX} singleRuleActions enable`,
-  DISABLE: `${SECURITY_ACTIONS_PREFIX} singleRuleActions disable`,
-  DUPLICATE: `${SECURITY_ACTIONS_PREFIX} singleRuleActions duplicate`,
-  EXPORT: `${SECURITY_ACTIONS_PREFIX} singleRuleActions export`,
-  DELETE: `${SECURITY_ACTIONS_PREFIX} singleRuleActions delete`,
-  PREVIEW: `${SECURITY_ACTIONS_PREFIX} singleRuleActions preview`,
-  SAVE: `${SECURITY_ACTIONS_PREFIX} singleRuleActions save`,
+  ENABLE: `${APP_UI_ID} singleRuleActions enable`,
+  DISABLE: `${APP_UI_ID} singleRuleActions disable`,
+  DUPLICATE: `${APP_UI_ID} singleRuleActions duplicate`,
+  EXPORT: `${APP_UI_ID} singleRuleActions export`,
+  DELETE: `${APP_UI_ID} singleRuleActions delete`,
+  PREVIEW: `${APP_UI_ID} singleRuleActions preview`,
+  SAVE: `${APP_UI_ID} singleRuleActions save`,
 };
 
 export const BULK_RULE_ACTIONS = {
-  ENABLE: `${SECURITY_ACTIONS_PREFIX} bulkRuleActions enable`,
-  DISABLE: `${SECURITY_ACTIONS_PREFIX} bulkRuleActions disable`,
-  DUPLICATE: `${SECURITY_ACTIONS_PREFIX} bulkRuleActions duplicate`,
-  EXPORT: `${SECURITY_ACTIONS_PREFIX} bulkRuleActions export`,
-  DELETE: `${SECURITY_ACTIONS_PREFIX} bulkRuleActions delete`,
-  EDIT: `${SECURITY_ACTIONS_PREFIX} bulkRuleActions edit`,
+  ENABLE: `${APP_UI_ID} bulkRuleActions enable`,
+  DISABLE: `${APP_UI_ID} bulkRuleActions disable`,
+  DUPLICATE: `${APP_UI_ID} bulkRuleActions duplicate`,
+  EXPORT: `${APP_UI_ID} bulkRuleActions export`,
+  DELETE: `${APP_UI_ID} bulkRuleActions delete`,
+  EDIT: `${APP_UI_ID} bulkRuleActions edit`,
 };
 
 export const RULES_TABLE_ACTIONS = {
-  REFRESH: `${SECURITY_ACTIONS_PREFIX} rulesTable refresh`,
-  FILTER: `${SECURITY_ACTIONS_PREFIX} rulesTable filter`,
-  LOAD_PREBUILT: `${SECURITY_ACTIONS_PREFIX} rulesTable loadPrebuilt`,
-  PREVIEW_ON: `${SECURITY_ACTIONS_PREFIX} rulesTable technicalPreview on`,
-  PREVIEW_OFF: `${SECURITY_ACTIONS_PREFIX} rulesTable technicalPreview off`,
+  REFRESH: `${APP_UI_ID} rulesTable refresh`,
+  FILTER: `${APP_UI_ID} rulesTable filter`,
+  LOAD_PREBUILT: `${APP_UI_ID} rulesTable loadPrebuilt`,
+  PREVIEW_ON: `${APP_UI_ID} rulesTable technicalPreview on`,
+  PREVIEW_OFF: `${APP_UI_ID} rulesTable technicalPreview off`,
 };

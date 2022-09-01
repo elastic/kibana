@@ -4,18 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import { EuiSearchBar, EuiPagination } from '@elastic/eui';
 import { EuiSearchBarOnChangeArgs } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Process } from '../../../common/types/process_tree';
 import { useStyles } from './styles';
 
 interface SessionViewSearchBarDeps {
   searchQuery: string;
   setSearchQuery(val: string): void;
-  searchResults: Process[] | null;
-  onProcessSelected(process: Process): void;
+  totalMatches: number;
+  onPrevious: (index: number) => void;
+  onNext: (index: number) => void;
 }
 
 const translatePlaceholder = {
@@ -34,11 +34,12 @@ const NO_RESULTS = i18n.translate('xpack.sessionView.searchBar.searchBarNoResult
 export const SessionViewSearchBar = ({
   searchQuery,
   setSearchQuery,
-  onProcessSelected,
-  searchResults,
+  totalMatches,
+  onPrevious,
+  onNext,
 }: SessionViewSearchBarDeps) => {
-  const showPagination = !!searchQuery && searchResults?.length !== 0;
-  const noResults = !!searchQuery && searchResults?.length === 0;
+  const showPagination = !!searchQuery && totalMatches !== 0;
+  const noResults = !!searchQuery && totalMatches === 0;
 
   const styles = useStyles({ hasSearchResults: showPagination });
 
@@ -54,15 +55,18 @@ export const SessionViewSearchBar = ({
     }
   };
 
-  useEffect(() => {
-    if (searchResults) {
-      const process = searchResults[selectedResult];
+  const onPageClick = useCallback(
+    (page: number) => {
+      setSelectedResult(page);
 
-      if (process) {
-        onProcessSelected(process);
+      if (page > selectedResult) {
+        onNext(page);
+      } else {
+        onPrevious(page);
       }
-    }
-  }, [searchResults, onProcessSelected, selectedResult]);
+    },
+    [onNext, onPrevious, selectedResult]
+  );
 
   return (
     <div data-test-subj="sessionView:searchBar" css={styles.searchBar}>
@@ -72,9 +76,9 @@ export const SessionViewSearchBar = ({
         <EuiPagination
           data-test-subj="sessionView:searchPagination"
           css={styles.pagination}
-          pageCount={searchResults?.length}
+          pageCount={totalMatches}
           activePage={selectedResult}
-          onPageClick={setSelectedResult}
+          onPageClick={onPageClick}
           compressed
         />
       )}

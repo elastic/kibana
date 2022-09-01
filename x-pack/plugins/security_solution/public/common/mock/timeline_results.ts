@@ -7,18 +7,19 @@
 
 import { FilterStateStore } from '@kbn/es-query';
 
+import type { TimelineResult } from '../../../common/types/timeline';
 import {
   TimelineId,
   TimelineType,
   TimelineStatus,
   TimelineTabs,
-  TimelineResult,
 } from '../../../common/types/timeline';
 
-import { OpenTimelineResult } from '../../timelines/components/open_timeline/types';
-import { Direction, TimelineEventsDetailsItem } from '../../../common/search_strategy';
-import { CreateTimelineProps } from '../../detections/components/alerts_table/types';
-import { TimelineModel } from '../../timelines/store/timeline/model';
+import type { OpenTimelineResult } from '../../timelines/components/open_timeline/types';
+import type { TimelineEventsDetailsItem } from '../../../common/search_strategy';
+import { Direction } from '../../../common/search_strategy';
+import type { CreateTimelineProps } from '../../detections/components/alerts_table/types';
+import type { TimelineModel } from '../../timelines/store/timeline/model';
 import { timelineDefaults } from '../../timelines/store/timeline/defaults';
 
 export const mockOpenTimelineQueryResults = {
@@ -2177,16 +2178,3 @@ export const mockTimelineDetails: TimelineEventsDetailsItem[] = [
     isObjectArray: false,
   },
 ];
-
-export const mockTimelineDetailsApollo = {
-  data: {
-    source: {
-      TimelineDetails: {
-        data: mockTimelineDetails,
-      },
-    },
-  },
-  loading: false,
-  networkStatus: 7,
-  stale: false,
-};

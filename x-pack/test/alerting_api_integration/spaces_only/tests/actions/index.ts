@@ -20,6 +20,7 @@ export default function actionsTests({ loadTestFile, getService }: FtrProviderCo
     loadTestFile(require.resolve('./get'));
     loadTestFile(require.resolve('./connector_types'));
     loadTestFile(require.resolve('./update'));
+    loadTestFile(require.resolve('./monitoring_collection'));
     loadTestFile(require.resolve('./execute'));
     loadTestFile(require.resolve('./enqueue'));
     loadTestFile(require.resolve('./builtin_action_types/email'));

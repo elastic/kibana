@@ -30,7 +30,6 @@ import {
   TotalHits,
 } from '../../../../common/elasticsearch_util';
 import { encodeMvtResponseBody } from '../../../../common/mvt_request_body';
-// @ts-expect-error
 import { UpdateSourceEditor } from './update_source_editor';
 import {
   DEFAULT_MAX_BUCKETS_LIMIT,
@@ -221,15 +220,12 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
   }
 
   async getImmutableProperties(): Promise<ImmutableSourceProperty[]> {
-    let indexPatternName = this.getIndexPatternId();
     let geoFieldType = '';
     try {
-      const indexPattern = await this.getIndexPattern();
-      indexPatternName = indexPattern.title;
       const geoField = await this._getGeoField();
       geoFieldType = geoField.type;
     } catch (error) {
-      // ignore error, title will just default to id
+      // ignore error, geoFieldType will just be blank
     }
 
     return [
@@ -239,7 +235,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
       },
       {
         label: getDataViewLabel(),
-        value: indexPatternName,
+        value: await this.getDisplayName(),
       },
       {
         label: i18n.translate('xpack.maps.source.esSearch.geoFieldLabel', {
@@ -640,7 +636,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
       );
     }
 
-    const properties = indexPattern.flattenHit(hit);
+    const properties = indexPattern.flattenHit(hit) as Record<string, string>;
     indexPattern.metaFields.forEach((metaField: string) => {
       if (!this._getTooltipPropertyNames().includes(metaField)) {
         delete properties[metaField];

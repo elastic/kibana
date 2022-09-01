@@ -10,7 +10,7 @@ import { EuiCallOut, EuiLoadingSpinner, EuiSpacer, EuiText } from '@elastic/eui'
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useDispatch } from 'react-redux';
-import {
+import type {
   PackagePolicyEditExtensionComponentProps,
   NewPackagePolicy,
 } from '@kbn/fleet-plugin/public';
@@ -23,7 +23,7 @@ import {
   getPolicyEventFiltersPath,
 } from '../../../../common/routing';
 import { PolicyDetailsForm } from '../policy_details_form';
-import { AppAction } from '../../../../../common/store/actions';
+import type { AppAction } from '../../../../../common/store/actions';
 import { usePolicyDetailsSelector } from '../policy_hooks';
 import {
   apiError,

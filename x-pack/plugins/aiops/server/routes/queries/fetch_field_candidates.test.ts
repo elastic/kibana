@@ -9,9 +9,11 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 
+import type { AiopsExplainLogRateSpikesSchema } from '../../../common/api/explain_log_rate_spikes';
+
 import { fetchFieldCandidates, getRandomDocsRequest } from './fetch_field_candidates';
 
-const params = {
+const params: AiopsExplainLogRateSpikesSchema = {
   index: 'the-index',
   timeFieldName: 'the-time-field-name',
   start: 1577836800000,
@@ -21,7 +23,7 @@ const params = {
   deviationMin: 30,
   deviationMax: 40,
   includeFrozen: false,
-  kuery: '',
+  searchQuery: '{"bool":{"filter":[],"must":[{"match_all":{}}],"must_not":[]}}',
 };
 
 describe('query_field_candidates', () => {
@@ -38,6 +40,7 @@ describe('query_field_candidates', () => {
               query: {
                 bool: {
                   filter: [
+                    { bool: { filter: [], must: [{ match_all: {} }], must_not: [] } },
                     {
                       range: {
                         'the-time-field-name': {

@@ -12,6 +12,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiPageContent } from '@elastic/eu
 import { ConsoleHistory } from '../console_history';
 import { Editor } from '../editor';
 import { Settings } from '../settings';
+import { Variables } from '../variables';
 
 import {
   TopNavMenu,
@@ -47,6 +48,7 @@ export function Main() {
   const [showingHistory, setShowHistory] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
+  const [showVariables, setShowVariables] = useState(false);
 
   const [editorInstance, setEditorInstance] = useState<SenseEditor | null>(null);
 
@@ -89,6 +91,7 @@ export function Main() {
                   onClickHistory: () => setShowHistory(!showingHistory),
                   onClickSettings: () => setShowSettings(true),
                   onClickHelp: () => setShowHelp(!showHelp),
+                  onClickVariables: () => setShowVariables(!showVariables),
                 })}
               />
             </EuiFlexItem>
@@ -128,6 +131,8 @@ export function Main() {
       {showSettings ? (
         <Settings onClose={() => setShowSettings(false)} editorInstance={editorInstance} />
       ) : null}
+
+      {showVariables ? <Variables onClose={() => setShowVariables(false)} /> : null}
 
       {showHelp ? <HelpPanel onClose={() => setShowHelp(false)} /> : null}
     </div>

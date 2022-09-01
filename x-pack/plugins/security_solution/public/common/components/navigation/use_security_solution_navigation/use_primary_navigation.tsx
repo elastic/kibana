@@ -8,33 +8,30 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { KibanaPageTemplateProps } from '@kbn/shared-ux-components';
-import { PrimaryNavigationProps } from './types';
+import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
+import type { PrimaryNavigationProps } from './types';
 import { usePrimaryNavigationItems } from './use_navigation_items';
 import { useIsGroupedNavigationEnabled } from '../helpers';
 import { SecuritySideNav } from '../security_side_nav';
+import { useTourContext } from '../../guided_onboarding';
 
 const translatedNavTitle = i18n.translate('xpack.securitySolution.navigation.mainLabel', {
   defaultMessage: 'Security',
 });
 
 export const usePrimaryNavigation = ({
-  filters,
-  query,
   navTabs,
   pageName,
-  savedQuery,
-  tabName,
-  timeline,
-  timerange,
 }: PrimaryNavigationProps): KibanaPageTemplateProps['solutionNav'] => {
   const isGroupedNavigationEnabled = useIsGroupedNavigationEnabled();
   const mapLocationToTab = useCallback(
-    (): string => ((tabName && navTabs[tabName]) || navTabs[pageName])?.id ?? '',
-    [pageName, tabName, navTabs]
+    (): string => navTabs[pageName]?.id ?? '',
+    [pageName, navTabs]
   );
 
   const [selectedTabId, setSelectedTabId] = useState(mapLocationToTab());
+
+  const { isTourShown } = useTourContext();
 
   useEffect(() => {
     const currentTabSelected = mapLocationToTab();
@@ -49,14 +46,10 @@ export const usePrimaryNavigation = ({
   const navItems = usePrimaryNavigationItems({
     navTabs,
     selectedTabId,
-    filters,
-    query,
-    savedQuery,
-    timeline,
-    timerange,
   });
 
   return {
+    canBeCollapsed: !isTourShown,
     name: translatedNavTitle,
     icon: 'logoSecurity',
     ...(isGroupedNavigationEnabled

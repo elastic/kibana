@@ -29,7 +29,8 @@ import type {
   LogsEndpointActionResponse,
 } from '../../../../common/endpoint/types';
 import uuid from 'uuid';
-import { mockAuditLogSearchResult, Results } from '../../routes/actions/mocks';
+import type { Results } from '../../routes/actions/mocks';
+import { mockAuditLogSearchResult } from '../../routes/actions/mocks';
 
 describe('When using Actions service utilities', () => {
   let fleetActionGenerator: FleetActionGenerator;
@@ -110,10 +111,18 @@ describe('When using Actions service utilities', () => {
       wasSuccessful: false,
       errors: undefined,
       outputs: {},
+      agentState: {
+        123: {
+          completedAt: undefined,
+          errors: undefined,
+          isCompleted: false,
+          wasSuccessful: false,
+        },
+      },
     });
 
     it('should show complete `false` if no action ids', () => {
-      expect(getActionCompletionInfo([], [])).toEqual(NOT_COMPLETED_OUTPUT);
+      expect(getActionCompletionInfo([], [])).toEqual({ ...NOT_COMPLETED_OUTPUT, agentState: {} });
     });
 
     it('should show complete as `false` if no responses', () => {
@@ -139,7 +148,10 @@ describe('When using Actions service utilities', () => {
           data: {
             '@timestamp': COMPLETED_AT,
             agent: { id: '123' },
-            EndpointActions: { completed_at: COMPLETED_AT },
+            EndpointActions: {
+              completed_at: COMPLETED_AT,
+              data: { output: { type: 'json', content: { foo: 'bar' } } },
+            },
           },
         },
       });
@@ -148,12 +160,27 @@ describe('When using Actions service utilities', () => {
         completedAt: COMPLETED_AT,
         errors: undefined,
         wasSuccessful: true,
-        outputs: {},
+        outputs: {
+          '123': {
+            content: {
+              foo: 'bar',
+            },
+            type: 'json',
+          },
+        },
+        agentState: {
+          '123': {
+            completedAt: COMPLETED_AT,
+            errors: undefined,
+            isCompleted: true,
+            wasSuccessful: true,
+          },
+        },
       });
     });
 
     it('should return action outputs (if any) per agent id', () => {
-      const runningProcesses = endpointActionGenerator.randomResponseActionProcesses(3);
+      const processes = endpointActionGenerator.randomResponseActionProcesses(3);
       const endpointResponse = endpointActionGenerator.generateActivityLogActionResponse({
         item: {
           data: {
@@ -161,10 +188,12 @@ describe('When using Actions service utilities', () => {
             agent: { id: '123' },
             EndpointActions: {
               completed_at: COMPLETED_AT,
-              output: {
-                type: 'json',
-                content: {
-                  entries: runningProcesses,
+              data: {
+                output: {
+                  type: 'json',
+                  content: {
+                    entries: processes,
+                  },
                 },
               },
             },
@@ -180,8 +209,16 @@ describe('When using Actions service utilities', () => {
           '123': {
             type: 'json',
             content: {
-              entries: runningProcesses,
+              entries: processes,
             },
+          },
+        },
+        agentState: {
+          '123': {
+            completedAt: COMPLETED_AT,
+            errors: undefined,
+            isCompleted: true,
+            wasSuccessful: true,
           },
         },
       });
@@ -223,6 +260,14 @@ describe('When using Actions service utilities', () => {
           isCompleted: true,
           wasSuccessful: false,
           outputs: {},
+          agentState: {
+            '123': {
+              completedAt: endpointResponseAtError.item.data['@timestamp'],
+              errors: ['Endpoint action response error: endpoint failed to apply'],
+              isCompleted: true,
+              wasSuccessful: false,
+            },
+          },
         });
       });
 
@@ -233,6 +278,14 @@ describe('When using Actions service utilities', () => {
           isCompleted: true,
           wasSuccessful: false,
           outputs: {},
+          agentState: {
+            '123': {
+              completedAt: fleetResponseAtError.item.data.completed_at,
+              errors: ['Fleet action response error: agent failed to deliver'],
+              isCompleted: true,
+              wasSuccessful: false,
+            },
+          },
         });
       });
 
@@ -248,6 +301,17 @@ describe('When using Actions service utilities', () => {
           isCompleted: true,
           wasSuccessful: false,
           outputs: {},
+          agentState: {
+            '123': {
+              completedAt: endpointResponseAtError.item.data['@timestamp'],
+              errors: [
+                'Endpoint action response error: endpoint failed to apply',
+                'Fleet action response error: agent failed to deliver',
+              ],
+              isCompleted: true,
+              wasSuccessful: false,
+            },
+          },
         });
       });
     });
@@ -309,7 +373,24 @@ describe('When using Actions service utilities', () => {
       });
 
       it('should show complete as `false` if no responses', () => {
-        expect(getActionCompletionInfo(agentIds, [])).toEqual(NOT_COMPLETED_OUTPUT);
+        expect(getActionCompletionInfo(agentIds, [])).toEqual({
+          ...NOT_COMPLETED_OUTPUT,
+          agentState: {
+            ...NOT_COMPLETED_OUTPUT.agentState,
+            '456': {
+              completedAt: undefined,
+              errors: undefined,
+              isCompleted: false,
+              wasSuccessful: false,
+            },
+            '789': {
+              completedAt: undefined,
+              errors: undefined,
+              isCompleted: false,
+              wasSuccessful: false,
+            },
+          },
+        });
       });
 
       it('should complete as `false` if at least one agent id has not received a response', () => {
@@ -322,7 +403,29 @@ describe('When using Actions service utilities', () => {
 
             ...action789Responses,
           ])
-        ).toEqual(NOT_COMPLETED_OUTPUT);
+        ).toEqual({
+          ...NOT_COMPLETED_OUTPUT,
+          agentState: {
+            '123': {
+              completedAt: '2022-01-05T19:27:23.816Z',
+              errors: undefined,
+              isCompleted: true,
+              wasSuccessful: true,
+            },
+            '456': {
+              completedAt: undefined,
+              errors: undefined,
+              isCompleted: false,
+              wasSuccessful: false,
+            },
+            '789': {
+              completedAt: '2022-03-05T19:27:23.816Z',
+              errors: undefined,
+              isCompleted: true,
+              wasSuccessful: true,
+            },
+          },
+        });
       });
 
       it('should show complete as `true` if all agent response were received', () => {
@@ -338,6 +441,26 @@ describe('When using Actions service utilities', () => {
           wasSuccessful: true,
           errors: undefined,
           outputs: {},
+          agentState: {
+            '123': {
+              completedAt: '2022-01-05T19:27:23.816Z',
+              errors: undefined,
+              isCompleted: true,
+              wasSuccessful: true,
+            },
+            '456': {
+              completedAt: '2022-05-05T18:53:18.836Z',
+              errors: undefined,
+              isCompleted: true,
+              wasSuccessful: true,
+            },
+            '789': {
+              completedAt: '2022-03-05T19:27:23.816Z',
+              errors: undefined,
+              isCompleted: true,
+              wasSuccessful: true,
+            },
+          },
         });
       });
 
@@ -360,6 +483,91 @@ describe('When using Actions service utilities', () => {
           isCompleted: true,
           wasSuccessful: false,
           outputs: {},
+          agentState: {
+            '123': {
+              completedAt: '2022-01-05T19:27:23.816Z',
+              errors: undefined,
+              isCompleted: true,
+              wasSuccessful: true,
+            },
+            '456': {
+              completedAt: action456Responses[0].item.data['@timestamp'],
+              errors: ['Fleet action response error: something is no good'],
+              isCompleted: true,
+              wasSuccessful: false,
+            },
+            '789': {
+              completedAt: '2022-03-05T19:27:23.816Z',
+              errors: undefined,
+              isCompleted: true,
+              wasSuccessful: true,
+            },
+          },
+        });
+      });
+
+      it('should include output for agents for which the action was complete', () => {
+        // Add output to the completed actions
+        (
+          action123Responses[1] as EndpointActivityLogActionResponse
+        ).item.data.EndpointActions.data.output = {
+          type: 'json',
+          content: {
+            foo: 'bar',
+          },
+        };
+
+        (
+          action789Responses[1] as EndpointActivityLogActionResponse
+        ).item.data.EndpointActions.data.output = {
+          type: 'text',
+          // @ts-expect-error need to fix ActionResponseOutput type
+          content: 'some endpoint output data',
+        };
+
+        expect(
+          getActionCompletionInfo(agentIds, [
+            ...action123Responses,
+
+            // Action id: 456 === Not complete (only fleet response)
+            action456Responses[0],
+
+            ...action789Responses,
+          ])
+        ).toEqual({
+          ...NOT_COMPLETED_OUTPUT,
+          agentState: {
+            '123': {
+              completedAt: '2022-01-05T19:27:23.816Z',
+              errors: undefined,
+              isCompleted: true,
+              wasSuccessful: true,
+            },
+            '456': {
+              completedAt: undefined,
+              errors: undefined,
+              isCompleted: false,
+              wasSuccessful: false,
+            },
+            '789': {
+              completedAt: '2022-03-05T19:27:23.816Z',
+              errors: undefined,
+              isCompleted: true,
+              wasSuccessful: true,
+            },
+          },
+          outputs: {
+            '123': {
+              content: {
+                foo: 'bar',
+              },
+              type: 'json',
+            },
+            '789': {
+              content: 'some endpoint output data',
+              type: 'text',
+            },
+          },
         });
       });
     });

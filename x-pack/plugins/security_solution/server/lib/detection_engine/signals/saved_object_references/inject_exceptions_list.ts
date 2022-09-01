@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Logger, SavedObjectReference } from '@kbn/core/server';
-import { RuleParams } from '../../schemas/rule_schemas';
+import type { Logger, SavedObjectReference } from '@kbn/core/server';
+import type { RuleParams } from '../../schemas/rule_schemas';
 import { getSavedObjectReferenceForExceptionsList, logMissingSavedObjectError } from './utils';
 
 /**

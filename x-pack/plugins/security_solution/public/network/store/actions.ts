@@ -6,7 +6,7 @@
  */
 
 import actionCreatorFactory from 'typescript-fsa';
-import { networkModel } from '.';
+import type { networkModel } from '.';
 
 const actionCreator = actionCreatorFactory('x-pack/security_solution/local/network');
 

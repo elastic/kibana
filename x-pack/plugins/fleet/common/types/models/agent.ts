@@ -29,13 +29,7 @@ export type AgentStatus =
 
 export type SimplifiedAgentStatus = 'healthy' | 'unhealthy' | 'updating' | 'offline' | 'inactive';
 
-export type AgentActionType =
-  | 'POLICY_CHANGE'
-  | 'UNENROLL'
-  | 'UPGRADE'
-  | 'SETTINGS'
-  | 'POLICY_REASSIGN'
-  | 'CANCEL';
+export type AgentActionType = 'UNENROLL' | 'UPGRADE' | 'SETTINGS' | 'POLICY_REASSIGN' | 'CANCEL';
 
 export interface NewAgentAction {
   type: AgentActionType;
@@ -48,6 +42,7 @@ export interface NewAgentAction {
   expiration?: string;
   start_time?: string;
   minimum_execution_duration?: number;
+  source_uri?: string;
 }
 
 export interface AgentAction extends NewAgentAction {
@@ -85,6 +80,7 @@ interface AgentBase {
 export interface Agent extends AgentBase {
   id: string;
   access_api_key?: string;
+  default_api_key_history?: FleetServerAgent['default_api_key_history'];
   status?: AgentStatus;
   packages: string[];
   sort?: Array<number | string | null>;
@@ -206,6 +202,13 @@ export interface FleetServerAgent {
    * A list of tags used for organizing/filtering agents
    */
   tags?: string[];
+  /**
+   * Default API Key History
+   */
+  default_api_key_history?: Array<{
+    id: string;
+    retired_at: string;
+  }>;
 }
 /**
  * An Elastic Agent metadata

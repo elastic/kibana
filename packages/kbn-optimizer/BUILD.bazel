@@ -7,12 +7,21 @@ PKG_REQUIRE_NAME = "@kbn/optimizer"
 
 SOURCE_FILES = glob(
   [
-    "src/**/*.ts",
+    "**/*.ts",
   ],
   exclude = [
+    "**/*.config.js",
+    "**/*.mock.*",
     "**/*.test.*",
+    "**/*.stories.*",
     "**/__fixtures__/**",
     "**/__snapshots__/**",
+    "**/integration_tests/**",
+    "**/mocks/**",
+    "**/scripts/**",
+    "**/storybook/**",
+    "**/test_fixtures/**",
+    "**/test_helpers/**",
   ],
 )
 
@@ -59,7 +68,6 @@ RUNTIME_DEPS = [
   "@npm//webpack",
   "@npm//webpack-merge",
   "@npm//webpack-sources",
-  "@npm//zlib"
 ]
 
 TYPES_DEPS = [
@@ -81,7 +89,6 @@ TYPES_DEPS = [
   "@npm//lmdb-store",
   "@npm//pirates",
   "@npm//rxjs",
-  "@npm//zlib",
   "@npm//@types/babel__core",
   "@npm//@types/compression-webpack-plugin",
   "@npm//@types/dedent",
@@ -122,7 +129,6 @@ ts_project(
   declaration_map = True,
   emit_declaration_only = True,
   out_dir = "target_types",
-  root_dir = "src",
   tsconfig = ":tsconfig",
 )
 

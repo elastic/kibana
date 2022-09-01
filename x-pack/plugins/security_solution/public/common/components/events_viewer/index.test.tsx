@@ -23,7 +23,7 @@ import { useTimelineEvents } from '../../../timelines/containers';
 import { getDefaultControlColumn } from '../../../timelines/components/timeline/body/control_columns';
 import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
 import { defaultCellActions } from '../../lib/cell_actions/default_cell_actions';
-import { UseFieldBrowserOptionsProps } from '../../../timelines/components/fields_browser';
+import type { UseFieldBrowserOptionsProps } from '../../../timelines/components/fields_browser';
 import { useGetUserCasesPermissions } from '../../lib/kibana';
 
 jest.mock('../../lib/kibana');
@@ -39,7 +39,7 @@ jest.mock('../../../timelines/containers', () => ({
   useTimelineEvents: jest.fn(),
 }));
 
-jest.mock('../url_state/normalize_time_range');
+jest.mock('../../utils/normalize_time_range');
 
 const mockUseFieldBrowserOptions = jest.fn();
 jest.mock('../../../timelines/components/fields_browser', () => ({

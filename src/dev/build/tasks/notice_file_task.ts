@@ -52,3 +52,23 @@ export const CreateNoticeFile: Task = {
     await write(build.resolvePath('NOTICE.txt'), notice);
   },
 };
+
+export const CreateXPackNoticeFile: Task = {
+  description: 'Generating x-pack NOTICE.txt file',
+
+  async run(config, log, build) {
+    log.info('Generating x-pack notice from source');
+    const noticeFromSource = await log.indent(
+      4,
+      async () =>
+        await generateNoticeFromSource({
+          productName: 'Kibana X-Pack',
+          directory: build.resolvePath('x-pack'),
+          log,
+        })
+    );
+
+    log.info('Writing notice to x-pack/NOTICE.txt');
+    await write(build.resolvePath('x-pack/NOTICE.txt'), noticeFromSource);
+  },
+};

@@ -13,11 +13,31 @@ interface AddConnectorValue {
   index_name: string;
 }
 
-export const addConnectorPackage = async ({ indexName }: { indexName: string }) => {
+export interface AddConnectorPackageApiLogicArgs {
+  deleteExistingConnector?: boolean;
+  indexName: string;
+  language: string | null;
+}
+
+export interface AddConnectorPackageApiLogicResponse {
+  id: string;
+  indexName: string;
+}
+
+export const addConnectorPackage = async ({
+  deleteExistingConnector,
+  indexName,
+  language,
+}: AddConnectorPackageApiLogicArgs): Promise<AddConnectorPackageApiLogicResponse> => {
   const route = '/internal/enterprise_search/connectors';
 
+  const deleteParam = deleteExistingConnector
+    ? { delete_existing_connector: deleteExistingConnector }
+    : {};
   const params = {
+    ...deleteParam,
     index_name: indexName,
+    language,
   };
   const result = await HttpLogic.values.http.post<AddConnectorValue>(route, {
     body: JSON.stringify(params),

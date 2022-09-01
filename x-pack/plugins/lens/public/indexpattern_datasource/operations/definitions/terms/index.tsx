@@ -17,6 +17,10 @@ import {
   EuiIconTip,
   htmlIdGenerator,
   EuiButtonGroup,
+  EuiText,
+  useEuiTheme,
+  EuiTitle,
+  EuiTextColor,
 } from '@elastic/eui';
 import { uniq } from 'lodash';
 import { AggFunctionsMapping } from '@kbn/data-plugin/public';
@@ -38,13 +42,14 @@ import {
   getErrorMessage,
 } from '../../../dimension_panel/field_input';
 import type { TermsIndexPatternColumn } from './types';
-import type { IndexPatternField } from '../../../types';
+import type { IndexPatternField } from '../../../../types';
 import {
   getDisallowedTermsMessage,
   getMultiTermsScriptedFieldErrorMessage,
   getFieldsByValidationState,
   isSortableByColumn,
   isPercentileRankSortable,
+  computeOrderForMultiplePercentiles,
 } from './helpers';
 import {
   DEFAULT_MAX_DOC_COUNT,
@@ -52,6 +57,7 @@ import {
   MAXIMUM_MAX_DOC_COUNT,
   supportedTypes,
 } from './constants';
+import { IncludeExcludeRow } from './include_exclude_options';
 
 export function supportsRarityRanking(field?: IndexPatternField) {
   // these es field types can't be sorted by rarity
@@ -59,7 +65,6 @@ export function supportsRarityRanking(field?: IndexPatternField) {
     ['double', 'float', 'half_float', 'scaled_float'].includes(esType)
   );
 }
-
 export type { TermsIndexPatternColumn } from './types';
 
 const missingFieldLabel = i18n.translate('xpack.lens.indexPattern.missingFieldLabel', {
@@ -258,6 +263,14 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
       if (!isPercentileRankSortable(orderColumn)) {
         orderBy = '_key';
       }
+
+      const orderByMultiplePercentiles = computeOrderForMultiplePercentiles(
+        orderColumn,
+        layer,
+        orderedColumnIds
+      );
+
+      orderBy = orderByMultiplePercentiles ?? orderBy;
     }
 
     // To get more accurate results, we set shard_size to a minimum of 1000
@@ -318,6 +331,10 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
       orderAgg,
       size: column.params.size,
       shardSize,
+      ...(column.params.include?.length && { include: column.params.include }),
+      ...(column.params.exclude?.length && { exclude: column.params.exclude }),
+      includeIsRegex: Boolean(column.params.includeIsRegex),
+      excludeIsRegex: Boolean(column.params.excludeIsRegex),
       otherBucket: Boolean(column.params.otherBucket),
       otherBucketLabel: i18n.translate('xpack.lens.indexPattern.terms.otherLabel', {
         defaultMessage: 'Other',
@@ -547,6 +564,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
     operationDefinitionMap,
     ReferenceEditor,
     paramEditorCustomProps,
+    activeData,
     ...rest
   }) {
     const [incompleteColumn, setIncompleteColumn] = useState<IncompleteColumn | undefined>(
@@ -615,6 +633,8 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
     const secondaryFieldsCount = currentColumn.params.secondaryFields
       ? currentColumn.params.secondaryFields.length
       : 0;
+
+    const { euiTheme } = useEuiTheme();
 
     return (
       <>
@@ -907,39 +927,33 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
         </EuiFormRow>
         {!hasRestrictions && (
           <>
-            <EuiSpacer size="s" />
+            <EuiSpacer size="m" />
             <EuiAccordion
               id="lnsTermsAdvanced"
-              buttonContent={i18n.translate('xpack.lens.indexPattern.terms.advancedSettings', {
-                defaultMessage: 'Advanced',
-              })}
+              arrowProps={{ color: 'primary' }}
+              buttonContent={
+                <EuiTitle size="xxs">
+                  <h5>
+                    <EuiTextColor color={euiTheme.colors.primary}>
+                      {i18n.translate('xpack.lens.indexPattern.terms.advancedSettings', {
+                        defaultMessage: 'Advanced',
+                      })}
+                    </EuiTextColor>
+                  </h5>
+                </EuiTitle>
+              }
               data-test-subj="indexPattern-terms-advanced"
+              className="lnsIndexPatternDimensionEditor-advancedOptions"
             >
-              <EuiSpacer size="m" />
+              <EuiSpacer size="s" />
               <EuiSwitch
-                label={i18n.translate('xpack.lens.indexPattern.terms.otherBucketDescription', {
-                  defaultMessage: 'Group other values as "Other"',
-                })}
-                compressed
-                data-test-subj="indexPattern-terms-other-bucket"
-                checked={Boolean(currentColumn.params.otherBucket)}
-                disabled={currentColumn.params.orderBy.type === 'rare'}
-                onChange={(e: EuiSwitchEvent) =>
-                  paramEditorUpdater(
-                    updateColumnParam({
-                      layer,
-                      columnId,
-                      paramName: 'otherBucket',
-                      value: e.target.checked,
-                    })
-                  )
+                label={
+                  <EuiText size="xs">
+                    {i18n.translate('xpack.lens.indexPattern.terms.missingBucketDescription', {
+                      defaultMessage: 'Include documents without the selected field',
+                    })}
+                  </EuiText>
                 }
-              />
-              <EuiSpacer size="m" />
-              <EuiSwitch
-                label={i18n.translate('xpack.lens.indexPattern.terms.missingBucketDescription', {
-                  defaultMessage: 'Include documents without this field',
-                })}
                 compressed
                 disabled={
                   !currentColumn.params.otherBucket ||
@@ -959,10 +973,34 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
                   )
                 }
               />
-              <EuiSpacer size="m" />
+              <EuiSpacer size="s" />
               <EuiSwitch
                 label={
-                  <>
+                  <EuiText size="xs">
+                    {i18n.translate('xpack.lens.indexPattern.terms.otherBucketDescription', {
+                      defaultMessage: 'Group remaining values as "Other"',
+                    })}
+                  </EuiText>
+                }
+                compressed
+                data-test-subj="indexPattern-terms-other-bucket"
+                checked={Boolean(currentColumn.params.otherBucket)}
+                disabled={currentColumn.params.orderBy.type === 'rare'}
+                onChange={(e: EuiSwitchEvent) =>
+                  paramEditorUpdater(
+                    updateColumnParam({
+                      layer,
+                      columnId,
+                      paramName: 'otherBucket',
+                      value: e.target.checked,
+                    })
+                  )
+                }
+              />
+              <EuiSpacer size="s" />
+              <EuiSwitch
+                label={
+                  <EuiText size="xs">
                     {i18n.translate('xpack.lens.indexPattern.terms.accuracyModeDescription', {
                       defaultMessage: 'Enable accuracy mode',
                     })}{' '}
@@ -978,7 +1016,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
                       size="s"
                       type="questionInCircle"
                     />
-                  </>
+                  </EuiText>
                 }
                 compressed
                 disabled={currentColumn.params.orderBy.type === 'rare'}
@@ -997,12 +1035,43 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
                   )
                 }
               />
+              {(currentColumn.dataType === 'number' || currentColumn.dataType === 'string') &&
+                !currentColumn.params.secondaryFields?.length && (
+                  <>
+                    <IncludeExcludeRow
+                      include={currentColumn.params.include}
+                      exclude={currentColumn.params.exclude}
+                      includeIsRegex={Boolean(currentColumn.params.includeIsRegex)}
+                      excludeIsRegex={Boolean(currentColumn.params.excludeIsRegex)}
+                      tableRows={activeData?.[rest.layerId]?.rows}
+                      columnId={columnId}
+                      isNumberField={Boolean(currentColumn.dataType === 'number')}
+                      updateParams={(operation, operationValue, regex, regexValue) =>
+                        paramEditorUpdater({
+                          ...layer,
+                          columns: {
+                            ...layer.columns,
+                            [columnId]: {
+                              ...currentColumn,
+                              params: {
+                                ...currentColumn.params,
+                                [operation]: operationValue,
+                                [regex]: regexValue,
+                              },
+                            },
+                          } as Record<string, TermsIndexPatternColumn>,
+                        })
+                      }
+                    />
+                  </>
+                )}
             </EuiAccordion>
           </>
         )}
       </>
     );
   },
+  getMaxPossibleNumValues: (column) => column.params.size + (column.params.otherBucket ? 1 : 0),
 };
 function getLabelForRankFunctions(operationType: string) {
   switch (operationType) {

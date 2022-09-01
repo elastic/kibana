@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { createStore, Store, Reducer } from 'redux';
+import type { Store, Reducer } from 'redux';
+import { createStore } from 'redux';
 import { cameraReducer, cameraInitialState } from './reducer';
-import { CameraState, Vector2 } from '../../types';
+import type { CameraState, Vector2 } from '../../types';
 import * as selectors from './selectors';
 import { animatePanning } from './methods';
 import { lerp } from '../../lib/math';
-import { ResolverAction } from '../actions';
+import type { ResolverAction } from '../actions';
 import { panAnimationDuration } from './scaling_constants';
 
 type TestAction =

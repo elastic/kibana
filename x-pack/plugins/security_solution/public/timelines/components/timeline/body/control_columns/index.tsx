@@ -8,7 +8,7 @@
 import React from 'react';
 
 import { getActionsColumnWidth } from '@kbn/timelines-plugin/public';
-import { ControlColumnProps } from '../../../../../../common/types/timeline';
+import type { ControlColumnProps } from '../../../../../../common/types/timeline';
 import { Actions } from '../actions';
 import * as i18n from '../../../../../common/components/events_viewer/translations';
 

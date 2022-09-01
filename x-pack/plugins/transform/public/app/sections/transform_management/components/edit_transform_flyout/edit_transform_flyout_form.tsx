@@ -323,7 +323,7 @@ export const EditTransformFlyoutForm: FC<EditTransformFlyoutFormProps> = ({
             dataTestSubj="transformEditFlyoutDocsPerSecondInput"
             errorMessages={formFields.docsPerSecond.errorMessages}
             helpText={i18n.translate(
-              'xpack.transform.transformList.editFlyoutFormDocsPerSecondHelptext',
+              'xpack.transform.transformList.editFlyoutFormDocsPerSecondHelpText',
               {
                 defaultMessage:
                   'To enable throttling, set a limit of documents to input per second.',
@@ -343,7 +343,7 @@ export const EditTransformFlyoutForm: FC<EditTransformFlyoutFormProps> = ({
             dataTestSubj="transformEditFlyoutMaxPageSearchSizeInput"
             errorMessages={formFields.maxPageSearchSize.errorMessages}
             helpText={i18n.translate(
-              'xpack.transform.transformList.editFlyoutFormMaxPageSearchSizeHelptext',
+              'xpack.transform.transformList.editFlyoutFormMaxPageSearchSizeHelpText',
               {
                 defaultMessage:
                   'The initial page size to use for the composite aggregation for each checkpoint.',
@@ -364,6 +364,22 @@ export const EditTransformFlyoutForm: FC<EditTransformFlyoutFormProps> = ({
                 values: { defaultValue: formFields.maxPageSearchSize.defaultValue },
               }
             )}
+          />
+          <EditTransformFlyoutFormTextInput
+            dataTestSubj="transformEditFlyoutNumFailureRetriesInput"
+            errorMessages={formFields.numFailureRetries.errorMessages}
+            helpText={i18n.translate(
+              'xpack.transform.transformList.editFlyoutFormNumFailureRetriesHelpText',
+              {
+                defaultMessage:
+                  'The number of retries on a recoverable failure before the transform task is marked as failed. Set it to -1 for infinite retries.',
+              }
+            )}
+            label={i18n.translate('xpack.transform.transformList.numFailureRetriesLabel', {
+              defaultMessage: 'Number of failure retries',
+            })}
+            onChange={(value) => dispatch({ field: 'numFailureRetries', value })}
+            value={formFields.numFailureRetries.value}
           />
         </div>
       </EuiAccordion>

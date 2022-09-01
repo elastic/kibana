@@ -196,29 +196,11 @@
             "description": [],
             "signature": [
               "(encryptedDoc: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectUnsanitizedDoc",
-                "text": "SavedObjectUnsanitizedDoc"
-              },
+              "SavedObjectUnsanitizedDoc",
               "<InputAttributes> | ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectUnsanitizedDoc",
-                "text": "SavedObjectUnsanitizedDoc"
-              },
+              "SavedObjectUnsanitizedDoc",
               "<MigratedAttributes>) => encryptedDoc is ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectUnsanitizedDoc",
-                "text": "SavedObjectUnsanitizedDoc"
-              },
+              "SavedObjectUnsanitizedDoc",
               "<InputAttributes>"
             ],
             "path": "x-pack/plugins/encrypted_saved_objects/server/create_migration.ts",
@@ -233,21 +215,9 @@
                 "label": "encryptedDoc",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectUnsanitizedDoc",
-                    "text": "SavedObjectUnsanitizedDoc"
-                  },
+                  "SavedObjectUnsanitizedDoc",
                   "<InputAttributes> | ",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectUnsanitizedDoc",
-                    "text": "SavedObjectUnsanitizedDoc"
-                  },
+                  "SavedObjectUnsanitizedDoc",
                   "<MigratedAttributes>"
                 ],
                 "path": "x-pack/plugins/encrypted_saved_objects/server/create_migration.ts",
@@ -264,29 +234,11 @@
             "description": [],
             "signature": [
               "(doc: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectUnsanitizedDoc",
-                "text": "SavedObjectUnsanitizedDoc"
-              },
+              "SavedObjectUnsanitizedDoc",
               "<InputAttributes>, context: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectMigrationContext",
-                "text": "SavedObjectMigrationContext"
-              },
+              "SavedObjectMigrationContext",
               ") => ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectUnsanitizedDoc",
-                "text": "SavedObjectUnsanitizedDoc"
-              },
+              "SavedObjectUnsanitizedDoc",
               "<MigratedAttributes>"
             ],
             "path": "x-pack/plugins/encrypted_saved_objects/server/create_migration.ts",
@@ -301,9 +253,12 @@
                 "label": "doc",
                 "description": [],
                 "signature": [
-                  "SavedObjectDoc<InputAttributes> & Partial<Referencable>"
+                  "SavedObjectDoc",
+                  "<InputAttributes> & { references?: ",
+                  "SavedObjectReference",
+                  "[] | undefined; }"
                 ],
-                "path": "src/core/server/saved_objects/migrations/types.ts",
+                "path": "node_modules/@types/kbn__core-saved-objects-server/index.d.ts",
                 "deprecated": false
               },
               {
@@ -314,15 +269,9 @@
                 "label": "context",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectMigrationContext",
-                    "text": "SavedObjectMigrationContext"
-                  }
+                  "SavedObjectMigrationContext"
                 ],
-                "path": "src/core/server/saved_objects/migrations/types.ts",
+                "path": "node_modules/@types/kbn__core-saved-objects-server/index.d.ts",
                 "deprecated": false
               }
             ]
@@ -402,13 +351,7 @@
             "description": [],
             "signature": [
               "<T = unknown>(type: string, id: string, options?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsBaseOptions",
-                "text": "SavedObjectsBaseOptions"
-              },
+              "SavedObjectsBaseOptions",
               " | undefined) => Promise<",
               "SavedObject",
               "<T>>"
@@ -452,13 +395,7 @@
                 "label": "options",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsBaseOptions",
-                    "text": "SavedObjectsBaseOptions"
-                  },
+                  "SavedObjectsBaseOptions",
                   " | undefined"
                 ],
                 "path": "x-pack/plugins/encrypted_saved_objects/server/saved_objects/index.ts",
@@ -479,29 +416,11 @@
             ],
             "signature": [
               "<T = unknown, A = unknown>(findOptions: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsCreatePointInTimeFinderOptions",
-                "text": "SavedObjectsCreatePointInTimeFinderOptions"
-              },
+              "SavedObjectsCreatePointInTimeFinderOptions",
               ", dependencies?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsCreatePointInTimeFinderDependencies",
-                "text": "SavedObjectsCreatePointInTimeFinderDependencies"
-              },
+              "SavedObjectsCreatePointInTimeFinderDependencies",
               " | undefined) => Promise<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.ISavedObjectsPointInTimeFinder",
-                "text": "ISavedObjectsPointInTimeFinder"
-              },
+              "ISavedObjectsPointInTimeFinder",
               "<T, A>>"
             ],
             "path": "x-pack/plugins/encrypted_saved_objects/server/saved_objects/index.ts",
@@ -517,13 +436,7 @@
                   "matches interface of corresponding argument of Saved Objects API `createPointInTimeFinder` {@link SavedObjectsCreatePointInTimeFinderOptions }"
                 ],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsCreatePointInTimeFinderOptions",
-                    "text": "SavedObjectsCreatePointInTimeFinderOptions"
-                  }
+                  "SavedObjectsCreatePointInTimeFinderOptions"
                 ],
                 "path": "x-pack/plugins/encrypted_saved_objects/server/saved_objects/index.ts",
                 "deprecated": false,
@@ -539,13 +452,7 @@
                   "matches interface of corresponding argument of Saved Objects API `createPointInTimeFinder` {@link SavedObjectsCreatePointInTimeFinderDependencies }"
                 ],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsCreatePointInTimeFinderDependencies",
-                    "text": "SavedObjectsCreatePointInTimeFinderDependencies"
-                  },
+                  "SavedObjectsCreatePointInTimeFinderDependencies",
                   " | undefined"
                 ],
                 "path": "x-pack/plugins/encrypted_saved_objects/server/saved_objects/index.ts",
@@ -766,29 +673,11 @@
         "description": [],
         "signature": [
           "(encryptedDoc: ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCoreSavedObjectsPluginApi",
-            "section": "def-server.SavedObjectUnsanitizedDoc",
-            "text": "SavedObjectUnsanitizedDoc"
-          },
+          "SavedObjectUnsanitizedDoc",
           "<InputAttributes> | ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCoreSavedObjectsPluginApi",
-            "section": "def-server.SavedObjectUnsanitizedDoc",
-            "text": "SavedObjectUnsanitizedDoc"
-          },
+          "SavedObjectUnsanitizedDoc",
           "<MigratedAttributes>) => encryptedDoc is ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCoreSavedObjectsPluginApi",
-            "section": "def-server.SavedObjectUnsanitizedDoc",
-            "text": "SavedObjectUnsanitizedDoc"
-          },
+          "SavedObjectUnsanitizedDoc",
           "<InputAttributes>"
         ],
         "path": "x-pack/plugins/encrypted_saved_objects/server/create_migration.ts",
@@ -803,21 +692,9 @@
             "label": "encryptedDoc",
             "description": [],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectUnsanitizedDoc",
-                "text": "SavedObjectUnsanitizedDoc"
-              },
+              "SavedObjectUnsanitizedDoc",
               "<InputAttributes> | ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectUnsanitizedDoc",
-                "text": "SavedObjectUnsanitizedDoc"
-              },
+              "SavedObjectUnsanitizedDoc",
               "<MigratedAttributes>"
             ],
             "path": "x-pack/plugins/encrypted_saved_objects/server/create_migration.ts",

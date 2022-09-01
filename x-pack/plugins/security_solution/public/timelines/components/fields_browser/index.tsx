@@ -5,19 +5,20 @@
  * 2.0.
  */
 
-import { MutableRefObject, useCallback, useEffect, useMemo, useState } from 'react';
+import type { MutableRefObject } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { DataViewField, DataView } from '@kbn/data-views-plugin/common';
+import type { DataViewField, DataView } from '@kbn/data-views-plugin/common';
 import type {
   CreateFieldComponent,
   GetFieldTableColumns,
 } from '@kbn/timelines-plugin/common/types';
-import { TimelineId } from '../../../../common/types';
+import type { TimelineId } from '../../../../common/types';
 import { useDataView } from '../../../common/containers/source/use_data_view';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { useKibana } from '../../../common/lib/kibana';
 import { sourcererSelectors } from '../../../common/store';
-import { SourcererScopeName } from '../../../common/store/sourcerer/model';
+import type { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { upsertColumn, removeColumn } from '../../store/timeline/actions';
 import { defaultColumnHeaderType } from '../timeline/body/column_headers/default_headers';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../timeline/body/constants';

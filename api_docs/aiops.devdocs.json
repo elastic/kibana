@@ -10,17 +10,11 @@
         "tags": [],
         "label": "ExplainLogRateSpikes",
         "description": [
-          "\nLazy-wrapped ExplainLogRateSpikes React component"
+          "\nLazy-wrapped ExplainLogRateSpikesAppState React component"
         ],
         "signature": [
           "(props: React.PropsWithChildren<",
-          {
-            "pluginId": "aiops",
-            "scope": "public",
-            "docId": "kibAiopsPluginApi",
-            "section": "def-public.ExplainLogRateSpikesProps",
-            "text": "ExplainLogRateSpikesProps"
-          },
+          "ExplainLogRateSpikesAppStateProps",
           ">) => JSX.Element"
         ],
         "path": "x-pack/plugins/aiops/public/shared_lazy_components.tsx",
@@ -37,13 +31,7 @@
             ],
             "signature": [
               "React.PropsWithChildren<",
-              {
-                "pluginId": "aiops",
-                "scope": "public",
-                "docId": "kibAiopsPluginApi",
-                "section": "def-public.ExplainLogRateSpikesProps",
-                "text": "ExplainLogRateSpikesProps"
-              },
+              "ExplainLogRateSpikesAppStateProps",
               ">"
             ],
             "path": "x-pack/plugins/aiops/public/shared_lazy_components.tsx",
@@ -55,59 +43,7 @@
         "initialIsOpen": false
       }
     ],
-    "interfaces": [
-      {
-        "parentPluginId": "aiops",
-        "id": "def-public.ExplainLogRateSpikesProps",
-        "type": "Interface",
-        "tags": [],
-        "label": "ExplainLogRateSpikesProps",
-        "description": [
-          "\nExplainLogRateSpikes props require a data view."
-        ],
-        "path": "x-pack/plugins/aiops/public/components/explain_log_rate_spikes/explain_log_rate_spikes.tsx",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "aiops",
-            "id": "def-public.ExplainLogRateSpikesProps.dataView",
-            "type": "Object",
-            "tags": [],
-            "label": "dataView",
-            "description": [
-              "The data view to analyze."
-            ],
-            "signature": [
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataView",
-                "text": "DataView"
-              }
-            ],
-            "path": "x-pack/plugins/aiops/public/components/explain_log_rate_spikes/explain_log_rate_spikes.tsx",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "aiops",
-            "id": "def-public.ExplainLogRateSpikesProps.windowParameters",
-            "type": "Object",
-            "tags": [],
-            "label": "windowParameters",
-            "description": [
-              "Window parameters for the analysis"
-            ],
-            "signature": [
-              "WindowParameters"
-            ],
-            "path": "x-pack/plugins/aiops/public/components/explain_log_rate_spikes/explain_log_rate_spikes.tsx",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      }
-    ],
+    "interfaces": [],
     "enums": [],
     "misc": [],
     "objects": [],

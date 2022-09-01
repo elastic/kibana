@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { useMutation, UseMutationOptions, UseMutationResult } from 'react-query';
-import { HttpFetchError } from '@kbn/core/public';
-import {
+import type { UseMutationOptions, UseMutationResult } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
+import type {
   ProcessesRequestBody,
   ResponseActionApiResponse,
-  ProcessesEntry,
+  GetProcessesActionOutputContent,
 } from '../../../../common/endpoint/types/actions';
 import { GET_PROCESSES_ROUTE } from '../../../../common/endpoint/constants';
 import { KibanaServices } from '../../../common/lib/kibana';
@@ -21,25 +22,24 @@ import { KibanaServices } from '../../../common/lib/kibana';
  */
 export const useSendGetEndpointProcessesRequest = (
   customOptions?: UseMutationOptions<
-    ResponseActionApiResponse<ProcessesEntry>,
-    HttpFetchError,
+    ResponseActionApiResponse<GetProcessesActionOutputContent>,
+    IHttpFetchError,
     ProcessesRequestBody
   >
 ): UseMutationResult<
-  ResponseActionApiResponse<ProcessesEntry>,
-  HttpFetchError,
+  ResponseActionApiResponse<GetProcessesActionOutputContent>,
+  IHttpFetchError,
   ProcessesRequestBody
 > => {
   return useMutation<
-    ResponseActionApiResponse<ProcessesEntry>,
-    HttpFetchError,
+    ResponseActionApiResponse<GetProcessesActionOutputContent>,
+    IHttpFetchError,
     ProcessesRequestBody
   >((getRunningProcessesData: ProcessesRequestBody) => {
-    return KibanaServices.get().http.post<ResponseActionApiResponse<ProcessesEntry>>(
-      GET_PROCESSES_ROUTE,
-      {
-        body: JSON.stringify(getRunningProcessesData),
-      }
-    );
+    return KibanaServices.get().http.post<
+      ResponseActionApiResponse<GetProcessesActionOutputContent>
+    >(GET_PROCESSES_ROUTE, {
+      body: JSON.stringify(getRunningProcessesData),
+    });
   }, customOptions);
 };

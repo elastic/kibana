@@ -98,7 +98,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.goToTimeRange();
       await PageObjects.lens.switchToVisualization('lnsDatatable');
       await PageObjects.lens.clickAddField();
-      await fieldEditor.setName(`ab' "'`);
+      await fieldEditor.setName(`ab' "'`, true, true);
       await fieldEditor.enableValue();
       await fieldEditor.typeScript("emit('abc')");
       await fieldEditor.save();
@@ -174,7 +174,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         operation: 'formula',
       });
 
-      await PageObjects.lens.waitForVisualization('mtrVis');
+      await PageObjects.lens.waitForVisualization('legacyMtrVis');
       expect(await PageObjects.lens.getErrorCount()).to.eql(0);
     });
 

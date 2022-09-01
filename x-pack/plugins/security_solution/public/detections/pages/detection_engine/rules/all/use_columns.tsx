@@ -5,19 +5,12 @@
  * 2.0.
  */
 
-import {
-  EuiBadge,
-  EuiBasicTableColumn,
-  EuiLink,
-  EuiTableActionsColumnType,
-  EuiText,
-  EuiToolTip,
-} from '@elastic/eui';
+import type { EuiBasicTableColumn, EuiTableActionsColumnType } from '@elastic/eui';
+import { EuiBadge, EuiLink, EuiText, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
 import { IntegrationsPopover } from '../../../../components/rules/related_integrations/integrations_popover';
 import {
-  APP_UI_ID,
   DEFAULT_RELATIVE_DATE_THRESHOLD,
   SecurityPageName,
   SHOW_RELATED_INTEGRATIONS_SETTING,
@@ -25,15 +18,13 @@ import {
 import { isMlRule } from '../../../../../../common/machine_learning/helpers';
 import { getEmptyTagValue } from '../../../../../common/components/empty_value';
 import { FormattedRelativePreferenceDate } from '../../../../../common/components/formatted_date';
-import { LinkAnchor } from '../../../../../common/components/links';
-import { useFormatUrl } from '../../../../../common/components/link_to';
-import { getRuleDetailsUrl } from '../../../../../common/components/link_to/redirect_to_detection_engine';
+import { getRuleDetailsTabUrl } from '../../../../../common/components/link_to/redirect_to_detection_engine';
 import { PopoverItems } from '../../../../../common/components/popover_items';
 import { useKibana, useUiSetting$ } from '../../../../../common/lib/kibana';
 import { canEditRuleWithActions, getToolTipContent } from '../../../../../common/utils/privileges';
 import { RuleSwitch } from '../../../../components/rules/rule_switch';
 import { SeverityBadge } from '../../../../components/rules/severity_badge';
-import { Rule } from '../../../../containers/detection_engine/rules';
+import type { Rule } from '../../../../containers/detection_engine/rules';
 import { useRulesTableContext } from './rules_table/rules_table_context';
 import * as i18n from '../translations';
 import { PopoverTooltip } from './popover_tooltip';
@@ -42,12 +33,16 @@ import { useHasActionsPrivileges } from './use_has_actions_privileges';
 import { useHasMlPermissions } from './use_has_ml_permissions';
 import { getRulesTableActions } from './rules_table_actions';
 import { RuleStatusBadge } from '../../../../components/rules/rule_execution_status';
-import {
+import type {
   DurationMetric,
   RuleExecutionSummary,
-} from '../../../../../../common/detection_engine/schemas/common';
+} from '../../../../../../common/detection_engine/rule_monitoring';
 import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
 import { useStartTransaction } from '../../../../../common/lib/apm/use_start_transaction';
+import { useInvalidateRules } from '../../../../containers/detection_engine/rules/use_find_rules_query';
+import { useInvalidatePrePackagedRulesStatus } from '../../../../containers/detection_engine/rules/use_pre_packaged_rules_status';
+import { SecuritySolutionLinkAnchor } from '../../../../../common/components/links';
+import { RuleDetailTabs } from '../details';
 
 export type TableColumn = EuiBasicTableColumn<Rule> | EuiTableActionsColumnType<Rule>;
 
@@ -94,24 +89,15 @@ const useEnabledColumn = ({ hasPermissions }: ColumnsProps): TableColumn => {
 };
 
 export const RuleLink = ({ name, id }: Pick<Rule, 'id' | 'name'>) => {
-  const { formatUrl } = useFormatUrl(SecurityPageName.rules);
-  const { navigateToApp } = useKibana().services.application;
-
   return (
     <EuiToolTip content={name} anchorClassName="eui-textTruncate">
-      <LinkAnchor
+      <SecuritySolutionLinkAnchor
         data-test-subj="ruleName"
-        onClick={(ev: { preventDefault: () => void }) => {
-          ev.preventDefault();
-          navigateToApp(APP_UI_ID, {
-            deepLinkId: SecurityPageName.rules,
-            path: getRuleDetailsUrl(id),
-          });
-        }}
-        href={formatUrl(getRuleDetailsUrl(id))}
+        deepLinkId={SecurityPageName.rules}
+        path={getRuleDetailsTabUrl(id, RuleDetailTabs.alerts)}
       >
         {name}
-      </LinkAnchor>
+      </SecuritySolutionLinkAnchor>
     </EuiToolTip>
   );
 };
@@ -178,22 +164,33 @@ const useActionsColumn = (): EuiTableActionsColumnType<Rule> => {
   const { navigateToApp } = useKibana().services.application;
   const hasActionsPrivileges = useHasActionsPrivileges();
   const toasts = useAppToasts();
-  const { reFetchRules, setLoadingRules } = useRulesTableContext().actions;
+  const { setLoadingRules } = useRulesTableContext().actions;
   const { startTransaction } = useStartTransaction();
+  const invalidateRules = useInvalidateRules();
+  const invalidatePrePackagedRulesStatus = useInvalidatePrePackagedRulesStatus();
 
   return useMemo(
     () => ({
-      actions: getRulesTableActions(
+      actions: getRulesTableActions({
         toasts,
         navigateToApp,
-        reFetchRules,
-        hasActionsPrivileges,
+        invalidateRules,
+        invalidatePrePackagedRulesStatus,
+        actionsPrivileges: hasActionsPrivileges,
         setLoadingRules,
-        startTransaction
-      ),
+        startTransaction,
+      }),
       width: '40px',
     }),
-    [hasActionsPrivileges, navigateToApp, reFetchRules, setLoadingRules, startTransaction, toasts]
+    [
+      hasActionsPrivileges,
+      invalidatePrePackagedRulesStatus,
+      invalidateRules,
+      navigateToApp,
+      setLoadingRules,
+      startTransaction,
+      toasts,
+    ]
   );
 };
 

@@ -9,10 +9,10 @@ import { shallow, mount } from 'enzyme';
 import React from 'react';
 import { keys } from 'lodash';
 import { ConditionEntryField, OperatingSystem } from '@kbn/securitysolution-utils';
-import { TrustedAppConditionEntry } from '../../../../../../../common/endpoint/types';
+import type { TrustedAppConditionEntry } from '../../../../../../../common/endpoint/types';
 
 import { ConditionEntryInput } from '.';
-import { EuiSuperSelectProps } from '@elastic/eui';
+import type { EuiSuperSelectProps } from '@elastic/eui';
 
 let onRemoveMock: jest.Mock;
 let onChangeMock: jest.Mock;

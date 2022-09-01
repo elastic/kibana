@@ -19,7 +19,7 @@ import {
 } from './helpers';
 import { useAuthentications } from '../../containers/authentications';
 import { useQueryInspector } from '../page/manage_query';
-import { HostsComponentsQueryProps } from '../../../hosts/pages/navigation/types';
+import type { HostsComponentsQueryProps } from '../../../hosts/pages/navigation/types';
 import { hostsActions, hostsModel, hostsSelectors } from '../../../hosts/store';
 import { useQueryToggle } from '../../containers/query_toggle';
 import { useDeepEqualSelector } from '../../hooks/use_selector';

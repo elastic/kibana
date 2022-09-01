@@ -28,7 +28,7 @@ export const COLUMN_NODE = i18n.translate('xpack.securitySolution.kubernetes.col
 export const COLUMN_ENTRY_USER = i18n.translate(
   'xpack.securitySolution.kubernetes.columnEntryUser',
   {
-    defaultMessage: 'Session entry users',
+    defaultMessage: 'Session entry user',
   }
 );
 
@@ -42,7 +42,7 @@ export const COLUMN_INTERACTIVE = i18n.translate(
 export const COLUMN_ENTRY_TYPE = i18n.translate(
   'xpack.securitySolution.kubernetes.columnEntryType',
   {
-    defaultMessage: 'Entry mechanism',
+    defaultMessage: 'Entry type',
   }
 );
 

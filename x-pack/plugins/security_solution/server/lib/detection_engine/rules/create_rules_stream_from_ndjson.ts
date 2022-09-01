@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Transform } from 'stream';
-import * as t from 'io-ts';
+import type { Transform } from 'stream';
+import type * as t from 'io-ts';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import {
@@ -18,16 +18,14 @@ import {
 
 import { exactCheck, formatErrors } from '@kbn/securitysolution-io-ts-utils';
 import { BadRequestError } from '@kbn/securitysolution-es-utils';
-import {
+import type {
   ImportExceptionListItemSchema,
   ImportExceptionsListSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { has } from 'lodash/fp';
 import { importRuleValidateTypeDependents } from '../../../../common/detection_engine/schemas/request/import_rules_type_dependents';
-import {
-  importRulesSchema,
-  ImportRulesSchema,
-} from '../../../../common/detection_engine/schemas/request/import_rules_schema';
+import type { ImportRulesSchema } from '../../../../common/detection_engine/schemas/request/import_rules_schema';
+import { importRulesSchema } from '../../../../common/detection_engine/schemas/request/import_rules_schema';
 import {
   parseNdjsonStrings,
   createRulesLimitStream,

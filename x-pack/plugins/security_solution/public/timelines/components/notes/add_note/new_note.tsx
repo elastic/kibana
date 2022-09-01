@@ -10,7 +10,7 @@ import React from 'react';
 import styled from 'styled-components';
 
 import { MarkdownEditor } from '../../../../common/components/markdown_editor';
-import { UpdateInternalNewNote } from '../helpers';
+import type { UpdateInternalNewNote } from '../helpers';
 import * as i18n from '../translations';
 
 const NewNoteTabs = styled(EuiFlexItem)`

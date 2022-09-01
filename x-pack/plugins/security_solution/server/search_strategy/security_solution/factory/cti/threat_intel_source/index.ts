@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { IEsSearchResponse } from '@kbn/data-plugin/common';
-import { SecuritySolutionFactory } from '../../types';
-import {
+import type { IEsSearchResponse } from '@kbn/data-plugin/common';
+import type { SecuritySolutionFactory } from '../../types';
+import type {
   CtiDataSourceStrategyResponse,
   CtiQueries,
   CtiDataSourceRequestOptions,

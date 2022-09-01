@@ -9,7 +9,7 @@
 
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
-import { capitalize, sortBy } from 'lodash';
+import { capitalize, isEmpty, sortBy } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useEffect, useState, ReactNode, useCallback, useMemo } from 'react';
 import {
@@ -38,6 +38,7 @@ import {
   ALERTS_FEATURE_ID,
   RuleExecutionStatusErrorReasons,
 } from '@kbn/alerting-plugin/common';
+import { AlertingConnectorFeatureId } from '@kbn/actions-plugin/common';
 import {
   ActionType,
   Rule,
@@ -73,7 +74,6 @@ import { DeleteModalConfirmation } from '../../../components/delete_modal_confir
 import { EmptyPrompt } from '../../../components/prompts/empty_prompt';
 import { ALERT_STATUS_LICENSE_ERROR } from '../translations';
 import { useKibana } from '../../../../common/lib/kibana';
-import { DEFAULT_HIDDEN_ACTION_TYPES } from '../../../../common/constants';
 import './rules_list.scss';
 import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
 import { ManageLicenseModal } from './manage_license_modal';
@@ -87,8 +87,28 @@ import { useLoadRuleAggregations } from '../../../hooks/use_load_rule_aggregatio
 import { RulesListTable, convertRulesToTableItems } from './rules_list_table';
 import { RulesListAutoRefresh } from './rules_list_auto_refresh';
 import { UpdateApiKeyModalConfirmation } from '../../../components/update_api_key_modal_confirmation';
+import { RulesListVisibleColumns } from './rules_list_column_selector';
 
 const ENTER_KEY = 13;
+
+interface RulesPageContainerState {
+  lastResponse: string[];
+  status: RuleStatus[];
+}
+
+export interface RulesListProps {
+  filteredRuleTypes?: string[];
+  showActionFilter?: boolean;
+  ruleDetailsRoute?: string;
+  showCreateRuleButton?: boolean;
+  statusFilter?: RuleStatus[];
+  onStatusFilterChange?: (status: RuleStatus[]) => RulesPageContainerState;
+  lastResponseFilter?: string[];
+  onLastResponseFilterChange?: (lastResponse: string[]) => RulesPageContainerState;
+  refresh?: Date;
+  rulesListKey?: string;
+  visibleColumns?: RulesListVisibleColumns[];
+}
 
 interface RuleTypeState {
   isLoading: boolean;
@@ -108,7 +128,19 @@ const initialPercentileOptions = Object.values(Percentiles).map((percentile) => 
   key: percentile,
 }));
 
-export const RulesList: React.FunctionComponent = () => {
+export const RulesList = ({
+  filteredRuleTypes = [],
+  showActionFilter = true,
+  ruleDetailsRoute,
+  showCreateRuleButton = true,
+  statusFilter,
+  onStatusFilterChange,
+  lastResponseFilter,
+  onLastResponseFilterChange,
+  refresh,
+  rulesListKey,
+  visibleColumns,
+}: RulesListProps) => {
   const history = useHistory();
   const {
     http,
@@ -127,10 +159,13 @@ export const RulesList: React.FunctionComponent = () => {
   const [page, setPage] = useState<Pagination>({ index: 0, size: DEFAULT_SEARCH_PAGE_SIZE });
   const [searchText, setSearchText] = useState<string | undefined>();
   const [inputText, setInputText] = useState<string | undefined>();
-  const [typesFilter, setTypesFilter] = useState<string[]>([]);
+  const [typesFilter, setTypesFilter] = useState<string[]>();
   const [actionTypesFilter, setActionTypesFilter] = useState<string[]>([]);
-  const [ruleExecutionStatusesFilter, setRuleExecutionStatusesFilter] = useState<string[]>([]);
-  const [ruleStatusesFilter, setRuleStatusesFilter] = useState<RuleStatus[]>([]);
+  const [ruleExecutionStatusesFilter, setRuleExecutionStatusesFilter] = useState<string[]>(
+    lastResponseFilter || []
+  );
+  const [ruleStatusesFilter, setRuleStatusesFilter] = useState<RuleStatus[]>(statusFilter || []);
+
   const [tagsFilter, setTagsFilter] = useState<string[]>([]);
   const [ruleFlyoutVisible, setRuleFlyoutVisibility] = useState<boolean>(false);
   const [editFlyoutVisible, setEditFlyoutVisibility] = useState<boolean>(false);
@@ -180,10 +215,22 @@ export const RulesList: React.FunctionComponent = () => {
     [toasts]
   );
 
+  const authorizedRuleTypes = useMemo(() => [...ruleTypesState.data.values()], [ruleTypesState]);
+  const authorizedToCreateAnyRules = authorizedRuleTypes.some(
+    (ruleType) => ruleType.authorizedConsumers[ALERTS_FEATURE_ID]?.all
+  );
+
+  const [rulesTypesFilter, hasDefaultRuleTypesFiltersOn] = useMemo(() => {
+    if (isEmpty(typesFilter) && !isEmpty(filteredRuleTypes)) {
+      return [authorizedRuleTypes.map((art) => art.id), true];
+    }
+    return [typesFilter, false];
+  }, [typesFilter, filteredRuleTypes, authorizedRuleTypes]);
+
   const { rulesState, setRulesState, loadRules, noData, initialLoad } = useLoadRules({
     page,
     searchText,
-    typesFilter,
+    typesFilter: rulesTypesFilter,
     actionTypesFilter,
     ruleExecutionStatusesFilter,
     ruleStatusesFilter,
@@ -191,6 +238,7 @@ export const RulesList: React.FunctionComponent = () => {
     sort,
     onPage: setPage,
     onError,
+    hasDefaultRuleTypesFiltersOn,
   });
 
   const { tags, loadTags } = useLoadTags({
@@ -238,6 +286,10 @@ export const RulesList: React.FunctionComponent = () => {
 
   useEffect(() => {
     loadData();
+  }, [loadData, refresh]);
+
+  useEffect(() => {
+    loadData();
   }, [loadData, percentileOptions]);
 
   useEffect(() => {
@@ -249,7 +301,15 @@ export const RulesList: React.FunctionComponent = () => {
         for (const ruleType of ruleTypes) {
           index.set(ruleType.id, ruleType);
         }
-        setRuleTypesState({ isLoading: false, data: index, isInitialized: true });
+        let filteredIndex = index;
+        if (filteredRuleTypes && filteredRuleTypes.length > 0) {
+          filteredIndex = new Map(
+            [...index].filter(([k, v]) => {
+              return filteredRuleTypes.includes(v.id);
+            })
+          );
+        }
+        setRuleTypesState({ isLoading: false, data: filteredIndex, isInitialized: true });
       } catch (e) {
         toasts.addDanger({
           title: i18n.translate(
@@ -265,13 +325,9 @@ export const RulesList: React.FunctionComponent = () => {
   useEffect(() => {
     (async () => {
       try {
-        const result = await loadActionTypes({ http });
+        const result = await loadActionTypes({ http, featureId: AlertingConnectorFeatureId });
         const sortedResult = result
-          .filter(
-            // TODO: Remove "DEFAULT_HIDDEN_ACTION_TYPES" when cases connector is available across Kibana.
-            // Issue: https://github.com/elastic/kibana/issues/82502.
-            ({ id }) => actionTypeRegistry.has(id) && !DEFAULT_HIDDEN_ACTION_TYPES.includes(id)
-          )
+          .filter(({ id }) => actionTypeRegistry.has(id))
           .sort((a, b) => a.name.localeCompare(b.name));
         setActionTypes(sortedResult);
       } catch (e) {
@@ -284,6 +340,30 @@ export const RulesList: React.FunctionComponent = () => {
       }
     })();
   }, []);
+
+  useEffect(() => {
+    if (onStatusFilterChange) {
+      onStatusFilterChange(ruleStatusesFilter);
+    }
+  }, [ruleStatusesFilter]);
+
+  useEffect(() => {
+    if (statusFilter) {
+      setRuleStatusesFilter(statusFilter);
+    }
+  }, [statusFilter]);
+
+  useEffect(() => {
+    if (lastResponseFilter) {
+      setRuleExecutionStatusesFilter(lastResponseFilter);
+    }
+  }, [lastResponseFilter]);
+
+  useEffect(() => {
+    if (onLastResponseFilterChange) {
+      onLastResponseFilterChange(ruleExecutionStatusesFilter);
+    }
+  }, [ruleExecutionStatusesFilter]);
 
   const buildErrorListItems = (_executionStatus: RuleExecutionStatus) => {
     const hasErrorMessage = _executionStatus.status === 'error';
@@ -347,11 +427,6 @@ export const RulesList: React.FunctionComponent = () => {
     });
   }, [showErrors, rulesState]);
 
-  const authorizedRuleTypes = [...ruleTypesState.data.values()];
-  const authorizedToCreateAnyRules = authorizedRuleTypes.some(
-    (ruleType) => ruleType.authorizedConsumers[ALERTS_FEATURE_ID]?.all
-  );
-
   const getProducerFeatureName = (producer: string) => {
     return kibanaFeatures?.find((featureItem) => featureItem.id === producer)?.name;
   };
@@ -413,26 +488,30 @@ export const RulesList: React.FunctionComponent = () => {
     return unsnoozeRule({ http, id: rule.id, scheduleIds });
   };
 
+  const filterOptions = sortBy(Object.entries(groupRuleTypesByProducer())).map(
+    ([groupName, ruleTypesOptions]) => ({
+      groupName: getProducerFeatureName(groupName) ?? capitalize(groupName),
+      subOptions: ruleTypesOptions.sort((a, b) => a.name.localeCompare(b.name)),
+    })
+  );
+
   const toolsRight = [
     <TypeFilter
       key="type-filter"
       onChange={(types: string[]) => setTypesFilter(types)}
-      options={sortBy(Object.entries(groupRuleTypesByProducer())).map(
-        ([groupName, ruleTypesOptions]) => ({
-          groupName: getProducerFeatureName(groupName) ?? capitalize(groupName),
-          subOptions: ruleTypesOptions.sort((a, b) => a.name.localeCompare(b.name)),
-        })
-      )}
+      options={filterOptions}
     />,
-    <ActionTypeFilter
-      key="action-type-filter"
-      actionTypes={actionTypes}
-      onChange={(ids: string[]) => setActionTypesFilter(ids)}
-    />,
+    showActionFilter && (
+      <ActionTypeFilter
+        key="action-type-filter"
+        actionTypes={actionTypes}
+        onChange={(ids: string[]) => setActionTypesFilter(ids)}
+      />
+    ),
     <RuleExecutionStatusFilter
       key="rule-status-filter"
       selectedStatuses={ruleExecutionStatusesFilter}
-      onChange={(ids: string[]) => setRuleExecutionStatusesFilter(ids)}
+      onChange={setRuleExecutionStatusesFilter}
     />,
     ...getRuleTagFilter(),
   ];
@@ -490,11 +569,12 @@ export const RulesList: React.FunctionComponent = () => {
                   setIsPerformingAction(false);
                 }}
                 setRulesToDelete={setRulesToDelete}
+                setRulesToUpdateAPIKey={setRulesToUpdateAPIKey}
               />
             </BulkOperationPopover>
           </EuiFlexItem>
         )}
-        {authorizedToCreateAnyRules ? (
+        {authorizedToCreateAnyRules && showCreateRuleButton ? (
           <EuiFlexItem grow={false}>
             <EuiButton
               key="create-rule"
@@ -538,6 +618,20 @@ export const RulesList: React.FunctionComponent = () => {
               <React.Fragment key={index}>{tool}</React.Fragment>
             ))}
           </EuiFilterGroup>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            data-test-subj="refreshRulesButton"
+            iconType="refresh"
+            onClick={loadData}
+            name="refresh"
+            color="primary"
+          >
+            <FormattedMessage
+              id="xpack.triggersActionsUI.sections.rulesList.refreshRulesButtonLabel"
+              defaultMessage="Refresh"
+            />
+          </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
@@ -661,7 +755,8 @@ export const RulesList: React.FunctionComponent = () => {
         onPage={setPage}
         onRuleChanged={() => loadData()}
         onRuleClick={(rule) => {
-          history.push(routeToRuleDetails.replace(`:ruleId`, rule.id));
+          const detailsRoute = ruleDetailsRoute ? ruleDetailsRoute : routeToRuleDetails;
+          history.push(detailsRoute.replace(`:ruleId`, rule.id));
         }}
         onRuleEditClick={(rule) => {
           if (rule.isEditable && isRuleTypeEditableInContext(rule.ruleTypeId)) {
@@ -708,7 +803,9 @@ export const RulesList: React.FunctionComponent = () => {
             />
           ) : null;
         }}
+        rulesListKey={rulesListKey}
         config={config}
+        visibleColumns={visibleColumns}
       />
       {manageLicenseModalOpts && (
         <ManageLicenseModal
@@ -723,12 +820,14 @@ export const RulesList: React.FunctionComponent = () => {
       )}
     </>
   );
-
   // if initial load, show spinner
   const getRulesList = () => {
     if (noData && !rulesState.isLoading && !ruleTypesState.isLoading) {
       return authorizedToCreateAnyRules ? (
-        <EmptyPrompt onCTAClicked={() => setRuleFlyoutVisibility(true)} />
+        <EmptyPrompt
+          showCreateRuleButton={showCreateRuleButton}
+          onCTAClicked={() => setRuleFlyoutVisibility(true)}
+        />
       ) : (
         noPermissionPrompt
       );
@@ -820,6 +919,7 @@ export { RulesList as default };
 
 const noPermissionPrompt = (
   <EuiEmptyPrompt
+    data-test-subj="noPermissionPrompt"
     iconType="securityApp"
     title={
       <h1>

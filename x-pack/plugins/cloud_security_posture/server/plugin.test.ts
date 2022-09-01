@@ -82,9 +82,20 @@ describe('Cloud Security Posture Plugin', () => {
     const findMock = mockRouteContext.core.savedObjects.client.find as jest.Mock;
     findMock.mockReturnValue(
       Promise.resolve({
-        saved_objects: [],
-        total: 0,
-        per_page: 0,
+        saved_objects: [
+          {
+            type: 'csp_rule',
+            attributes: {
+              enabled: false,
+              metadata: {
+                rego_rule_id: 'cis_1_1_1',
+                benchmark: { id: 'cis_k8s' },
+              },
+            },
+          },
+        ],
+        total: 1,
+        per_page: 10,
         page: 1,
       })
     );
@@ -230,7 +241,7 @@ describe('Cloud Security Posture Plugin', () => {
 
       const packageMock = createPackagePolicyMock();
       packageMock.package!.name = CLOUD_SECURITY_POSTURE_PACKAGE_NAME;
-      packageMock.vars = { dataYaml: { type: 'foo' } };
+      packageMock.vars = { runtimeCfg: { type: 'foo' } };
 
       const packagePolicyPostCreateCallbacks: PostPackagePolicyPostCreateCallback[] = [];
       fleetMock.registerExternalCallback.mockImplementation((...args) => {
@@ -261,8 +272,8 @@ describe('Cloud Security Posture Plugin', () => {
         );
         if (fleetMock.packagePolicyService.update.mock.calls.length) {
           expect(updatedPackagePolicy).toHaveProperty('vars');
-          expect(updatedPackagePolicy.vars).toHaveProperty('dataYaml');
-          expect(updatedPackagePolicy.vars!.dataYaml).toHaveProperty('value');
+          expect(updatedPackagePolicy.vars).toHaveProperty('runtimeCfg');
+          expect(updatedPackagePolicy.vars!.runtimeCfg).toHaveProperty('value');
         }
       }
       expect(fleetMock.packagePolicyService.update).toHaveBeenCalledTimes(1);
@@ -295,6 +306,9 @@ describe('Cloud Security Posture Plugin', () => {
             {
               type: 'csp-rule-template',
               id: 'csp_rule_template-41308bcdaaf665761478bb6f0d745a5c',
+              benchmark: {
+                id: 'cis_k8s',
+              },
             },
           ],
         })

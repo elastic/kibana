@@ -11,7 +11,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
 import { DescriptiveName } from './descriptive_name';
-import { SafeResolverEvent } from '../../../../common/endpoint/types';
+import type { SafeResolverEvent } from '../../../../common/endpoint/types';
 
 describe('DescriptiveName', () => {
   const generator = new EndpointDocGenerator('seed');

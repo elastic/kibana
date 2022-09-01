@@ -39,7 +39,7 @@ import { apmRouter } from './apm_route_config';
 import { TrackPageview } from './track_pageview';
 import { RedirectWithDefaultEnvironment } from '../shared/redirect_with_default_environment';
 import { RedirectWithOffset } from '../shared/redirect_with_offset';
-import { RedirectBackendsToBackendInventory } from './home/redirect_backends_to_backend_inventory';
+import { RedirectDependenciesToDependenciesInventory } from './home/redirect_dependencies_to_dependencies_inventory';
 
 const storage = new Storage(localStorage);
 
@@ -66,7 +66,7 @@ export function ApmAppRoot({
           <i18nCore.Context>
             <TimeRangeIdContextProvider>
               <RouterProvider history={history} router={apmRouter as any}>
-                <RedirectBackendsToBackendInventory>
+                <RedirectDependenciesToDependenciesInventory>
                   <RedirectWithDefaultEnvironment>
                     <RedirectWithDefaultDateRange>
                       <RedirectWithOffset>
@@ -93,7 +93,7 @@ export function ApmAppRoot({
                       </RedirectWithOffset>
                     </RedirectWithDefaultDateRange>
                   </RedirectWithDefaultEnvironment>
-                </RedirectBackendsToBackendInventory>
+                </RedirectDependenciesToDependenciesInventory>
               </RouterProvider>
             </TimeRangeIdContextProvider>
           </i18nCore.Context>

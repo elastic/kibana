@@ -61,6 +61,7 @@ export enum FIELD_FORMAT_IDS {
   BOOLEAN = 'boolean',
   BYTES = 'bytes',
   COLOR = 'color',
+  CURRENCY = 'currency',
   CUSTOM = 'custom',
   DATE = 'date',
   DATE_NANOS = 'date_nanos',
@@ -131,7 +132,7 @@ export type FieldFormatInstanceType = (new (
  * TODO: support strict typing for params depending on format type
  * https://github.com/elastic/kibana/issues/108158
  */
-export type FieldFormatParams = SerializableRecord;
+export type FieldFormatParams<P = {}> = SerializableRecord & P;
 
 /**
  * Params provided by the registry to every field formatter
@@ -156,9 +157,12 @@ export type FieldFormatsStartCommon = Omit<FieldFormatsRegistry, 'init' | 'regis
  * @public
  */
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-export type SerializedFieldFormat<TParams extends FieldFormatParams = FieldFormatParams> = {
+export type SerializedFieldFormat<
+  P = {},
+  TParams extends FieldFormatParams<P> = FieldFormatParams<P>
+> = {
   id?: string;
   params?: TParams;
 };
 
-export type FormatFactory = (mapping?: SerializedFieldFormat) => IFieldFormat;
+export type FormatFactory = <P = {}>(mapping?: SerializedFieldFormat<P>) => IFieldFormat;

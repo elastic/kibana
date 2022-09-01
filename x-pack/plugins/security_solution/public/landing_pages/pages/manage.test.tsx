@@ -10,7 +10,7 @@ import React from 'react';
 import { SecurityPageName } from '../../app/types';
 import { TestProviders } from '../../common/mock';
 import { ManagementCategories } from './manage';
-import { NavLinkItem } from '../../common/components/navigation/types';
+import type { NavLinkItem } from '../../common/components/navigation/types';
 
 const RULES_ITEM_LABEL = 'elastic rules!';
 const EXCEPTIONS_ITEM_LABEL = 'exceptional!';

@@ -70,6 +70,10 @@ export type RuleDetailsProps = {
   refreshToken?: number;
 } & Pick<BulkOperationsComponentOpts, 'disableRule' | 'enableRule' | 'snoozeRule' | 'unsnoozeRule'>;
 
+const ruleDetailStyle = {
+  minWidth: 0,
+};
+
 export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
   rule,
   ruleType,
@@ -507,7 +511,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
           </EuiFlexGroup>
         )}
         <EuiFlexGroup>
-          <EuiFlexItem>
+          <EuiFlexItem style={ruleDetailStyle}>
             <RuleRouteWithApi
               requestRefresh={requestRefresh}
               refreshToken={refreshToken}

@@ -115,6 +115,7 @@ export class ExpressionLoader {
       syncColors: params?.syncColors,
       syncTooltips: params?.syncTooltips,
       hasCompatibleActions: params?.hasCompatibleActions,
+      executionContext: params?.executionContext,
     });
     this.render$ = this.renderHandler.render$;
     this.update$ = this.renderHandler.update$;

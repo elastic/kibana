@@ -33,7 +33,10 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
     kbnTestServer: {
       ...kibanaFunctionalConfig.get('kbnTestServer'),
-      serverArgs: [...kibanaFunctionalConfig.get('kbnTestServer.serverArgs')],
+      serverArgs: [
+        ...kibanaFunctionalConfig.get('kbnTestServer.serverArgs'),
+        `--xpack.fleet.registryUrl=http://localhost:12345`, // setting to invalid registry url to prevent installing preconfigured packages
+      ],
     },
   };
 }

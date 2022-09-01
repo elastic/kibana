@@ -7,56 +7,81 @@
 
 import React from 'react';
 import userEvent from '@testing-library/user-event';
-import { AppContextTestRender, createAppRootMockRenderer } from '../../../common/mock/endpoint';
-import { PolicyResponseWrapper, PolicyResponseWrapperProps } from './policy_response_wrapper';
+import type { AppContextTestRender } from '../../../common/mock/endpoint';
+import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
+import type { PolicyResponseWrapperProps } from './policy_response_wrapper';
+import { PolicyResponseWrapper } from './policy_response_wrapper';
 import { HostPolicyResponseActionStatus } from '../../../../common/search_strategy';
 import { useGetEndpointPolicyResponse } from '../../hooks/endpoint/use_get_endpoint_policy_response';
-import {
+import type {
   HostPolicyResponse,
   HostPolicyResponseAppliedAction,
 } from '../../../../common/endpoint/types';
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
+import { useGetEndpointDetails } from '../../hooks';
+import {
+  descriptions,
+  LINUX_DEADLOCK_MESSAGE,
+  policyResponseTitles,
+} from './policy_response_friendly_names';
+
+jest.setTimeout(10000);
 
 jest.mock('../../hooks/endpoint/use_get_endpoint_policy_response');
+jest.mock('../../hooks/endpoint/use_get_endpoint_details');
 
 describe('when on the policy response', () => {
   const docGenerator = new EndpointDocGenerator();
   const createPolicyResponse = (
-    overallStatus: HostPolicyResponseActionStatus = HostPolicyResponseActionStatus.success
+    overallStatus: HostPolicyResponseActionStatus = HostPolicyResponseActionStatus.success,
+    extraActions: HostPolicyResponseAppliedAction[] = [
+      {
+        name: 'download_model',
+        message: 'Failed to apply a portion of the configuration (kernel)',
+        status: overallStatus,
+      },
+    ]
   ): HostPolicyResponse => {
     const policyResponse = docGenerator.generatePolicyResponse();
     const malwareResponseConfigurations =
       policyResponse.Endpoint.policy.applied.response.configurations.malware;
     policyResponse.Endpoint.policy.applied.status = overallStatus;
     malwareResponseConfigurations.status = overallStatus;
-    let downloadModelAction = policyResponse.Endpoint.policy.applied.actions.find(
-      (action) => action.name === 'download_model'
+
+    // remove existing extra actions so no dupes when we add them in later
+    Object.values(policyResponse.Endpoint.policy.applied.response.configurations).forEach(
+      (responseConfiguration) => {
+        extraActions.forEach((extraAction) => {
+          let extraActionIndex = responseConfiguration.concerned_actions.indexOf(extraAction.name);
+          // generator can pick same action multiple times
+          while (extraActionIndex !== -1) {
+            responseConfiguration.concerned_actions.splice(extraActionIndex, 1);
+            extraActionIndex = responseConfiguration.concerned_actions.indexOf(extraAction.name);
+          }
+        });
+      }
     );
 
-    if (!downloadModelAction) {
-      downloadModelAction = {
-        name: 'download_model',
-        message: 'Failed to apply a portion of the configuration (kernel)',
-        status: overallStatus,
-      };
-      policyResponse.Endpoint.policy.applied.actions.push(downloadModelAction);
-    } else {
-      // Else, make sure the status of the generated action matches what was passed in
-      downloadModelAction.status = overallStatus;
-    }
+    extraActions.forEach((extraAction) => {
+      let foundExtraAction = policyResponse.Endpoint.policy.applied.actions.find(
+        (action) => action.name === extraAction.name
+      );
 
-    if (
-      overallStatus === HostPolicyResponseActionStatus.failure ||
-      overallStatus === HostPolicyResponseActionStatus.warning
-    ) {
-      downloadModelAction.message = 'no action taken';
-    }
+      if (!foundExtraAction) {
+        foundExtraAction = extraAction;
+        policyResponse.Endpoint.policy.applied.actions.push(foundExtraAction);
+      } else {
+        // Else, make sure the status of the generated action matches what was passed in
+        foundExtraAction.status = overallStatus;
+        foundExtraAction.message = extraAction.message;
+      }
 
-    // Make sure that at least one configuration has the above action, else
-    // we get into an out-of-sync condition
-    if (malwareResponseConfigurations.concerned_actions.indexOf(downloadModelAction.name) === -1) {
-      malwareResponseConfigurations.concerned_actions.push(downloadModelAction.name);
-    }
+      // Make sure that at least one configuration has the above action, else
+      // we get into an out-of-sync condition
+      if (malwareResponseConfigurations.concerned_actions.indexOf(foundExtraAction.name) === -1) {
+        malwareResponseConfigurations.concerned_actions.push(foundExtraAction.name);
+      }
+    });
 
     // Add an unknown Action Name - to ensure we handle the format of it on the UI
     const unknownAction: HostPolicyResponseAppliedAction = {
@@ -73,14 +98,23 @@ describe('when on the policy response', () => {
   let commonPolicyResponse: HostPolicyResponse;
 
   const useGetEndpointPolicyResponseMock = useGetEndpointPolicyResponse as jest.Mock;
+  const useGetEndpointDetailsMock = useGetEndpointDetails as jest.Mock;
   let render: (
     props?: Partial<PolicyResponseWrapperProps>
   ) => ReturnType<AppContextTestRender['render']>;
   let renderOpenedTree: () => Promise<ReturnType<AppContextTestRender['render']>>;
-  const runMock = (customPolicyResponse?: HostPolicyResponse): void => {
+  const runMock = (customPolicyResponse?: HostPolicyResponse, os = 'macOS'): void => {
     commonPolicyResponse = customPolicyResponse ?? createPolicyResponse();
     useGetEndpointPolicyResponseMock.mockReturnValue({
       data: { policy_response: commonPolicyResponse },
+      isLoading: false,
+      isFetching: false,
+      isError: false,
+    });
+    useGetEndpointDetailsMock.mockReturnValue({
+      data: {
+        metadata: { host: { os: { name: os } } },
+      },
       isLoading: false,
       isFetching: false,
       isError: false,
@@ -261,5 +295,69 @@ describe('when on the policy response', () => {
       const calloutLinks = component.queryAllByTestId('endpointPolicyResponseErrorCallOutLink');
       expect(calloutLinks.length).toEqual(2);
     });
+
+    it('should display correct description and link for macos_system_ext failure', async () => {
+      policyResponse = createPolicyResponse(HostPolicyResponseActionStatus.failure, [
+        {
+          name: 'connect_kernel',
+          message: '',
+          status: HostPolicyResponseActionStatus.failure,
+        },
+      ]);
+      runMock(policyResponse);
+
+      const component = await renderOpenedTree();
+
+      const calloutTitles = component
+        .queryAllByTestId('endpointPolicyResponseErrorCallOut')
+        .filter((calloutTitle) =>
+          calloutTitle.innerHTML.includes(policyResponseTitles.get('macos_system_ext')!)
+        );
+      expect(calloutTitles.length).toEqual(2);
+
+      const calloutMessages = component
+        .queryAllByTestId('endpointPolicyResponseErrorCallOut')
+        .filter((calloutMessage) =>
+          calloutMessage.innerHTML.includes(descriptions.get('macos_system_ext')!)
+        );
+      expect(calloutMessages.length).toEqual(2);
+
+      const calloutLinks = component.queryAllByTestId('endpointPolicyResponseErrorCallOutLink');
+      expect(calloutLinks.length).toEqual(2);
+    });
+
+    it.each(['load_malware_model', 'configure_malware'])(
+      'should display correct description and link for linux_deadlock with %s failure',
+      async (actionName: string) => {
+        policyResponse = createPolicyResponse(HostPolicyResponseActionStatus.failure, [
+          {
+            name: actionName,
+            message: LINUX_DEADLOCK_MESSAGE,
+            status: HostPolicyResponseActionStatus.failure,
+          },
+        ]);
+        runMock(policyResponse, 'Linux');
+
+        const component = await renderOpenedTree();
+
+        const calloutTitles = component
+          .queryAllByTestId('endpointPolicyResponseErrorCallOut')
+          .filter((calloutTitle) =>
+            calloutTitle.innerHTML.includes(policyResponseTitles.get('linux_deadlock')!)
+          );
+        expect(calloutTitles.length).toEqual(2);
+
+        // uncomment once we have an actual description
+        // const calloutMessages = component
+        //   .queryAllByTestId('endpointPolicyResponseErrorCallOut')
+        //   .filter((calloutMessage) =>
+        //     calloutMessage.innerHTML.includes(descriptions.get('linux_deadlock')!)
+        //   );
+        // expect(calloutMessages.length).toEqual(2);
+
+        const calloutLinks = component.queryAllByTestId('endpointPolicyResponseErrorCallOutLink');
+        expect(calloutLinks.length).toEqual(2);
+      }
+    );
   });
 });

@@ -11,21 +11,21 @@ import { EuiContextMenuItem } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { ALERT_RULE_EXCEPTIONS_LIST } from '@kbn/rule-data-utils';
-import {
+import type {
   ExceptionListIdentifiers,
   ExceptionListItemSchema,
-  ExceptionListTypeEnum,
 } from '@kbn/securitysolution-io-ts-list-types';
+import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { useApi } from '@kbn/securitysolution-list-hooks';
 
 import { useKibana } from '../../../../common/lib/kibana';
 import { TimelineId, TimelineType } from '../../../../../common/types/timeline';
-import { Ecs } from '../../../../../common/ecs';
+import type { Ecs } from '../../../../../common/ecs';
 import { timelineActions, timelineSelectors } from '../../../../timelines/store/timeline';
 import { sendAlertToTimelineAction } from '../actions';
 import { dispatchUpdateTimeline } from '../../../../timelines/components/open_timeline/helpers';
 import { useCreateTimeline } from '../../../../timelines/components/timeline/properties/use_create_timeline';
-import { CreateTimelineProps } from '../types';
+import type { CreateTimelineProps } from '../types';
 import { ACTION_INVESTIGATE_IN_TIMELINE } from '../translations';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { getField } from '../../../../helpers';

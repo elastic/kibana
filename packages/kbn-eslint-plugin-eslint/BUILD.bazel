@@ -12,8 +12,17 @@ SOURCE_FILES = glob(
     "lib.js",
   ],
   exclude = [
+    "**/*.config.js",
+    "**/*.mock.*",
     "**/*.test.*",
-    "**/__fixtures__"
+    "**/*.stories.*",
+    "**/__snapshots__/**",
+    "**/integration_tests/**",
+    "**/mocks/**",
+    "**/scripts/**",
+    "**/storybook/**",
+    "**/test_fixtures/**",
+    "**/test_helpers/**",
   ],
 )
 
@@ -34,7 +43,6 @@ RUNTIME_DEPS = [
   "@npm//dedent",
   "@npm//eslint",
   "@npm//eslint-module-utils",
-  "@npm//micromatch",
 ]
 
 js_library(

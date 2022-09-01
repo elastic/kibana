@@ -17,14 +17,22 @@ describe('parseEventEnrichmentResponse', () => {
     const response = buildEventEnrichmentRawResponseMock();
     const parsedResponse = await parseEventEnrichmentResponse(options, response);
 
-    const expectedInspect = expect.objectContaining({
+    const expectedInspect = {
       allow_no_indices: true,
       body: {
         _source: false,
         fields: [
-          '*',
+          { field: '*', include_unmapped: true },
           {
             field: '@timestamp',
+            format: 'strict_date_optional_time',
+          },
+          {
+            field: 'code_signature.timestamp',
+            format: 'strict_date_optional_time',
+          },
+          {
+            field: 'dll.code_signature.timestamp',
             format: 'strict_date_optional_time',
           },
         ],
@@ -62,10 +70,11 @@ describe('parseEventEnrichmentResponse', () => {
             ],
           },
         },
+        stored_fields: ['*'],
       },
       ignore_unavailable: true,
       index: ['filebeat-*'],
-    });
+    };
     const parsedInspect = JSON.parse(parsedResponse.inspect.dsl[0]);
     expect(parsedInspect).toEqual(expectedInspect);
   });

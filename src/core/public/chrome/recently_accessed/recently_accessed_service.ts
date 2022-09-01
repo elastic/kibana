@@ -7,10 +7,10 @@
  */
 
 import { Observable } from 'rxjs';
+import type { HttpSetup } from '@kbn/core-http-browser';
 
 import { PersistedLog } from './persisted_log';
 import { createLogKey } from './create_log_key';
-import { HttpSetup } from '../../http';
 
 /** @public */
 export interface ChromeRecentlyAccessedHistoryItem {

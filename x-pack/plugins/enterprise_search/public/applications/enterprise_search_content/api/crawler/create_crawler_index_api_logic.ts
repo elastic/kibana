@@ -7,22 +7,23 @@
 
 import { createApiLogic } from '../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../shared/http';
+import { LanguageForOptimization } from '../../components/new_index/types';
 
 export interface CreateCrawlerIndexArgs {
   indexName: string;
-  language: string;
+  language: LanguageForOptimization;
 }
 
 interface CreateCrawlerIndexRequest {
   index_name: string;
-  language: string;
+  language: LanguageForOptimization;
 }
 
 export interface CreateCrawlerIndexResponse {
   created: string; // the name of the newly created index
 }
 
-const createCrawlerIndex = async ({ indexName, language }: CreateCrawlerIndexArgs) => {
+export const createCrawlerIndex = async ({ indexName, language }: CreateCrawlerIndexArgs) => {
   const route = '/internal/enterprise_search/crawler';
 
   const params: CreateCrawlerIndexRequest = {

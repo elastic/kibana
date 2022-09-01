@@ -11,6 +11,7 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 export default ({ loadTestFile }: FtrProviderContext): void => {
   describe('lists api security and spaces enabled', function () {
     loadTestFile(require.resolve('./create_lists'));
+    loadTestFile(require.resolve('./create_lists_index'));
     loadTestFile(require.resolve('./create_list_items'));
     loadTestFile(require.resolve('./read_lists'));
     loadTestFile(require.resolve('./read_list_items'));

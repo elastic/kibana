@@ -11,12 +11,12 @@ import { BadRequestError } from '@kbn/securitysolution-es-utils';
 import { ruleTypeMappings } from '@kbn/securitysolution-rules';
 import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
 
-import { ResolvedSanitizedRule, SanitizedRule } from '@kbn/alerting-plugin/common';
+import type { ResolvedSanitizedRule, SanitizedRule } from '@kbn/alerting-plugin/common';
 import {
   normalizeMachineLearningJobIds,
   normalizeThresholdObject,
 } from '../../../../common/detection_engine/utils';
-import {
+import type {
   InternalRuleCreate,
   RuleParams,
   TypeSpecificRuleParams,
@@ -34,28 +34,39 @@ import {
   MachineLearningRuleParams,
   MachineLearningSpecificRuleParams,
   InternalRuleUpdate,
+  NewTermsRuleParams,
+  NewTermsSpecificRuleParams,
 } from './rule_schemas';
 import { assertUnreachable } from '../../../../common/utility_types';
-import { RuleExecutionSummary } from '../../../../common/detection_engine/schemas/common';
+import type {
+  RelatedIntegrationArray,
+  RequiredFieldArray,
+  SetupGuide,
+} from '../../../../common/detection_engine/schemas/common';
+import type { RuleExecutionSummary } from '../../../../common/detection_engine/rule_monitoring';
 import {
+  eqlPatchParams,
+  machineLearningPatchParams,
+  newTermsPatchParams,
+  queryPatchParams,
+  savedQueryPatchParams,
+  threatMatchPatchParams,
+  thresholdPatchParams,
+} from '../../../../common/detection_engine/schemas/request';
+import type {
   CreateRulesSchema,
   CreateTypeSpecific,
-  eqlPatchParams,
   EqlPatchParams,
   FullResponseSchema,
-  machineLearningPatchParams,
   MachineLearningPatchParams,
-  queryPatchParams,
+  NewTermsPatchParams,
   QueryPatchParams,
   ResponseTypeSpecific,
-  savedQueryPatchParams,
   SavedQueryPatchParams,
-  threatMatchPatchParams,
   ThreatMatchPatchParams,
-  thresholdPatchParams,
   ThresholdPatchParams,
 } from '../../../../common/detection_engine/schemas/request';
-import { PatchRulesSchema } from '../../../../common/detection_engine/schemas/request/patch_rules_schema';
+import type { PatchRulesSchema } from '../../../../common/detection_engine/schemas/request/patch_rules_schema';
 import {
   DEFAULT_INDICATOR_SOURCE_PATH,
   DEFAULT_MAX_SIGNALS,
@@ -69,12 +80,12 @@ import {
   transformActions,
 } from '../rules/utils';
 // eslint-disable-next-line no-restricted-imports
-import { LegacyRuleActions } from '../rule_actions/legacy_types';
-import { mergeRuleExecutionSummary } from '../rule_execution_log';
+import type { LegacyRuleActions } from '../rule_actions/legacy_types';
+import { mergeRuleExecutionSummary } from '../rule_monitoring';
 
 // These functions provide conversions from the request API schema to the internal rule schema and from the internal rule schema
 // to the response API schema. This provides static type-check assurances that the internal schema is in sync with the API schema for
-// required and defaultable fields. However, it is still possible to add an optional field to the API schema
+// required and default-able fields. However, it is still possible to add an optional field to the API schema
 // without causing a type-check error here.
 
 // Converts params from the snake case API format to the internal camel case format AND applies default values where needed.
@@ -153,6 +164,18 @@ export const typeSpecificSnakeToCamel = (params: CreateTypeSpecific): TypeSpecif
         type: params.type,
         anomalyThreshold: params.anomaly_threshold,
         machineLearningJobId: normalizeMachineLearningJobIds(params.machine_learning_job_id),
+      };
+    }
+    case 'new_terms': {
+      return {
+        type: params.type,
+        query: params.query,
+        newTermsFields: params.new_terms_fields,
+        historyWindowStart: params.history_window_start,
+        index: params.index,
+        filters: params.filters,
+        language: params.language ?? 'kuery',
+        dataViewId: params.data_view_id,
       };
     }
     default: {
@@ -262,6 +285,22 @@ const patchMachineLearningParams = (
   };
 };
 
+const patchNewTermsParams = (
+  params: NewTermsPatchParams,
+  existingRule: NewTermsRuleParams
+): NewTermsSpecificRuleParams => {
+  return {
+    type: existingRule.type,
+    language: params.language ?? existingRule.language,
+    index: params.index ?? existingRule.index,
+    dataViewId: params.data_view_id ?? existingRule.dataViewId,
+    query: params.query ?? existingRule.query,
+    filters: params.filters ?? existingRule.filters,
+    newTermsFields: params.new_terms_fields ?? existingRule.newTermsFields,
+    historyWindowStart: params.history_window_start ?? existingRule.historyWindowStart,
+  };
+};
+
 const parseValidationError = (error: string | null): BadRequestError => {
   if (error != null) {
     return new BadRequestError(error);
@@ -322,6 +361,13 @@ export const patchTypeSpecificSnakeToCamel = (
       }
       return patchMachineLearningParams(validated, existingRule);
     }
+    case 'new_terms': {
+      const [validated, error] = validateNonExact(params, newTermsPatchParams);
+      if (validated == null) {
+        throw parseValidationError(error);
+      }
+      return patchNewTermsParams(validated, existingRule);
+    }
     default: {
       return assertUnreachable(existingRule);
     }
@@ -329,73 +375,97 @@ export const patchTypeSpecificSnakeToCamel = (
 };
 
 const versionExcludedKeys = ['enabled', 'id', 'rule_id'];
-const shouldUpdateVersion = (params: PatchRulesSchema): boolean => {
-  for (const key in params) {
+const incrementVersion = (nextParams: PatchRulesSchema, existingRule: RuleParams) => {
+  // The the version from nextParams if it's provided
+  if (nextParams.version) {
+    return nextParams.version;
+  }
+
+  // If the rule is immutable, keep the current version
+  if (existingRule.immutable) {
+    return existingRule.version;
+  }
+
+  // For custom rules, check modified params to deicide whether version increment is needed
+  for (const key in nextParams) {
     if (!versionExcludedKeys.includes(key)) {
-      return true;
+      return existingRule.version + 1;
     }
   }
-  return false;
+  return existingRule.version;
 };
 
 // eslint-disable-next-line complexity
 export const convertPatchAPIToInternalSchema = (
-  params: PatchRulesSchema,
+  nextParams: PatchRulesSchema & {
+    related_integrations?: RelatedIntegrationArray;
+    required_fields?: RequiredFieldArray;
+    setup?: SetupGuide;
+  },
   existingRule: SanitizedRule<RuleParams>
 ): InternalRuleUpdate => {
-  const typeSpecificParams = patchTypeSpecificSnakeToCamel(params, existingRule.params);
+  const typeSpecificParams = patchTypeSpecificSnakeToCamel(nextParams, existingRule.params);
   const existingParams = existingRule.params;
   return {
-    name: params.name ?? existingRule.name,
-    tags: params.tags ?? existingRule.tags,
+    name: nextParams.name ?? existingRule.name,
+    tags: nextParams.tags ?? existingRule.tags,
     params: {
-      author: params.author ?? existingParams.author,
-      buildingBlockType: params.building_block_type ?? existingParams.buildingBlockType,
-      description: params.description ?? existingParams.description,
+      author: nextParams.author ?? existingParams.author,
+      buildingBlockType: nextParams.building_block_type ?? existingParams.buildingBlockType,
+      description: nextParams.description ?? existingParams.description,
       ruleId: existingParams.ruleId,
-      falsePositives: params.false_positives ?? existingParams.falsePositives,
-      from: params.from ?? existingParams.from,
+      falsePositives: nextParams.false_positives ?? existingParams.falsePositives,
+      from: nextParams.from ?? existingParams.from,
       immutable: existingParams.immutable,
-      license: params.license ?? existingParams.license,
-      outputIndex: params.output_index ?? existingParams.outputIndex,
-      timelineId: params.timeline_id ?? existingParams.timelineId,
-      timelineTitle: params.timeline_title ?? existingParams.timelineTitle,
-      meta: params.meta ?? existingParams.meta,
-      maxSignals: params.max_signals ?? existingParams.maxSignals,
-      relatedIntegrations: existingParams.relatedIntegrations,
-      requiredFields: existingParams.requiredFields,
-      riskScore: params.risk_score ?? existingParams.riskScore,
-      riskScoreMapping: params.risk_score_mapping ?? existingParams.riskScoreMapping,
-      ruleNameOverride: params.rule_name_override ?? existingParams.ruleNameOverride,
-      setup: existingParams.setup,
-      severity: params.severity ?? existingParams.severity,
-      severityMapping: params.severity_mapping ?? existingParams.severityMapping,
-      threat: params.threat ?? existingParams.threat,
-      timestampOverride: params.timestamp_override ?? existingParams.timestampOverride,
-      to: params.to ?? existingParams.to,
-      references: params.references ?? existingParams.references,
-      namespace: params.namespace ?? existingParams.namespace,
-      note: params.note ?? existingParams.note,
+      license: nextParams.license ?? existingParams.license,
+      outputIndex: nextParams.output_index ?? existingParams.outputIndex,
+      timelineId: nextParams.timeline_id ?? existingParams.timelineId,
+      timelineTitle: nextParams.timeline_title ?? existingParams.timelineTitle,
+      meta: nextParams.meta ?? existingParams.meta,
+      maxSignals: nextParams.max_signals ?? existingParams.maxSignals,
+      relatedIntegrations: nextParams.related_integrations ?? existingParams.relatedIntegrations,
+      requiredFields: nextParams.required_fields ?? existingParams.requiredFields,
+      riskScore: nextParams.risk_score ?? existingParams.riskScore,
+      riskScoreMapping: nextParams.risk_score_mapping ?? existingParams.riskScoreMapping,
+      ruleNameOverride: nextParams.rule_name_override ?? existingParams.ruleNameOverride,
+      setup: nextParams.setup ?? existingParams.setup,
+      severity: nextParams.severity ?? existingParams.severity,
+      severityMapping: nextParams.severity_mapping ?? existingParams.severityMapping,
+      threat: nextParams.threat ?? existingParams.threat,
+      timestampOverride: nextParams.timestamp_override ?? existingParams.timestampOverride,
+      timestampOverrideFallbackDisabled:
+        nextParams.timestamp_override_fallback_disabled ??
+        existingParams.timestampOverrideFallbackDisabled,
+      to: nextParams.to ?? existingParams.to,
+      references: nextParams.references ?? existingParams.references,
+      namespace: nextParams.namespace ?? existingParams.namespace,
+      note: nextParams.note ?? existingParams.note,
       // Always use the version from the request if specified. If it isn't specified, leave immutable rules alone and
       // increment the version of mutable rules by 1.
-      version:
-        params.version ?? existingParams.immutable
-          ? existingParams.version
-          : shouldUpdateVersion(params)
-          ? existingParams.version + 1
-          : existingParams.version,
-      exceptionsList: params.exceptions_list ?? existingParams.exceptionsList,
+      version: incrementVersion(nextParams, existingParams),
+      exceptionsList: nextParams.exceptions_list ?? existingParams.exceptionsList,
       ...typeSpecificParams,
     },
-    schedule: { interval: params.interval ?? existingRule.schedule.interval },
-    actions: params.actions ? params.actions.map(transformRuleToAlertAction) : existingRule.actions,
-    throttle: params.throttle ? transformToAlertThrottle(params.throttle) : existingRule.throttle,
-    notifyWhen: params.throttle ? transformToNotifyWhen(params.throttle) : existingRule.notifyWhen,
+    schedule: { interval: nextParams.interval ?? existingRule.schedule.interval },
+    actions: nextParams.actions
+      ? nextParams.actions.map(transformRuleToAlertAction)
+      : existingRule.actions,
+    throttle: nextParams.throttle
+      ? transformToAlertThrottle(nextParams.throttle)
+      : existingRule.throttle,
+    notifyWhen: nextParams.throttle
+      ? transformToNotifyWhen(nextParams.throttle)
+      : existingRule.notifyWhen,
   };
 };
 
+// eslint-disable-next-line complexity
 export const convertCreateAPIToInternalSchema = (
-  input: CreateRulesSchema,
+  input: CreateRulesSchema & {
+    related_integrations?: RelatedIntegrationArray;
+    required_fields?: RequiredFieldArray;
+    setup?: SetupGuide;
+  },
   immutable = false,
   defaultEnabled = true
 ): InternalRuleCreate => {
@@ -427,15 +497,16 @@ export const convertCreateAPIToInternalSchema = (
       severityMapping: input.severity_mapping ?? [],
       threat: input.threat ?? [],
       timestampOverride: input.timestamp_override,
+      timestampOverrideFallbackDisabled: input.timestamp_override_fallback_disabled,
       to: input.to ?? 'now',
       references: input.references ?? [],
       namespace: input.namespace,
       note: input.note,
       version: input.version ?? 1,
       exceptionsList: input.exceptions_list ?? [],
-      relatedIntegrations: [],
-      requiredFields: [],
-      setup: '',
+      relatedIntegrations: input.related_integrations ?? [],
+      requiredFields: input.required_fields ?? [],
+      setup: input.setup ?? '',
       ...typeSpecificParams,
     },
     schedule: { interval: input.interval ?? '5m' },
@@ -500,6 +571,7 @@ export const typeSpecificCamelToSnake = (params: TypeSpecificRuleParams): Respon
         query: params.query,
         filters: params.filters,
         saved_id: params.savedId,
+        data_view_id: params.dataViewId,
       };
     }
     case 'threshold': {
@@ -519,6 +591,18 @@ export const typeSpecificCamelToSnake = (params: TypeSpecificRuleParams): Respon
         type: params.type,
         anomaly_threshold: params.anomalyThreshold,
         machine_learning_job_id: params.machineLearningJobId,
+      };
+    }
+    case 'new_terms': {
+      return {
+        type: params.type,
+        query: params.query,
+        new_terms_fields: params.newTermsFields,
+        history_window_start: params.historyWindowStart,
+        index: params.index,
+        filters: params.filters,
+        language: params.language,
+        data_view_id: params.dataViewId,
       };
     }
     default: {
@@ -544,6 +628,7 @@ export const commonParamsCamelToSnake = (params: BaseRuleParams) => {
     meta: params.meta,
     rule_name_override: params.ruleNameOverride,
     timestamp_override: params.timestampOverride,
+    timestamp_override_fallback_disabled: params.timestampOverrideFallbackDisabled,
     author: params.author,
     false_positives: params.falsePositives,
     from: params.from,

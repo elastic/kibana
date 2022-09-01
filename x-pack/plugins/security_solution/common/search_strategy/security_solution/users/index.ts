@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TotalUsersKpiStrategyResponse } from './kpi/total_users';
+import type { TotalUsersKpiStrategyResponse } from './kpi/total_users';
 
 export * from './all';
 export * from './common';

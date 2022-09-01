@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { HttpFetchOptionsWithPath } from '@kbn/core/public';
+import type { HttpFetchOptionsWithPath } from '@kbn/core/public';
 import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
-import {
+import type {
   ExceptionListItemSchema,
   FoundExceptionListItemSchema,
   FindExceptionListItemSchema,
@@ -19,10 +19,10 @@ import {
   ExceptionListSummarySchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { getExceptionListSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_schema.mock';
+import type { ResponseProvidersInterface } from '../../common/mock/endpoint/http_handler_mock_factory';
 import {
   composeHttpHandlerMocks,
   httpHandlerMockFactory,
-  ResponseProvidersInterface,
 } from '../../common/mock/endpoint/http_handler_mock_factory';
 import { ExceptionsListItemGenerator } from '../../../common/endpoint/data_generators/exceptions_list_item_generator';
 import {

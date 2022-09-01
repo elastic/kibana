@@ -142,13 +142,7 @@
             "label": "tagReferences",
             "description": [],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsFindOptionsReference",
-                "text": "SavedObjectsFindOptionsReference"
-              },
+              "SavedObjectsFindOptionsReference",
               "[]"
             ],
             "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
@@ -535,13 +529,7 @@
             ],
             "signature": [
               "(tagName: string) => ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsFindOptionsReference",
-                "text": "SavedObjectsFindOptionsReference"
-              },
+              "SavedObjectsFindOptionsReference",
               " | undefined"
             ],
             "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
@@ -649,13 +637,7 @@
               "(references: (",
               "SavedObjectReference",
               " | ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsFindOptionsReference",
-                "text": "SavedObjectsFindOptionsReference"
-              },
+              "SavedObjectsFindOptionsReference",
               ")[]) => string[]"
             ],
             "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
@@ -672,13 +654,7 @@
                   "(",
                   "SavedObjectReference",
                   " | ",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsFindOptionsReference",
-                    "text": "SavedObjectsFindOptionsReference"
-                  },
+                  "SavedObjectsFindOptionsReference",
                   ")[]"
                 ],
                 "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
@@ -1319,7 +1295,9 @@
                 "section": "def-common.TagAttributes",
                 "text": "TagAttributes"
               },
-              ") => Promise<",
+              ", options?: ",
+              "CreateTagOptions",
+              " | undefined) => Promise<",
               {
                 "pluginId": "savedObjectsTaggingOss",
                 "scope": "common",
@@ -1351,6 +1329,21 @@
                 "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
                 "deprecated": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "savedObjectsTaggingOss",
+                "id": "def-common.ITagsClient.create.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "CreateTagOptions",
+                  " | undefined"
+                ],
+                "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+                "deprecated": false,
+                "isRequired": false
               }
             ],
             "returnComment": []

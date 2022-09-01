@@ -16,17 +16,19 @@ import {
 import { isEmpty } from 'lodash/fp';
 import React, { useMemo, useEffect, useCallback } from 'react';
 import styled from 'styled-components';
-import { Dispatch } from 'redux';
-import { connect, ConnectedProps, useDispatch } from 'react-redux';
+import type { Dispatch } from 'redux';
+import type { ConnectedProps } from 'react-redux';
+import { connect, useDispatch } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 import { InPortal } from 'react-reverse-portal';
 
 import { FilterManager } from '@kbn/data-plugin/public';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
+import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { useInvalidFilterQuery } from '../../../../common/hooks/use_invalid_filter_query';
 import { timelineActions, timelineSelectors } from '../../../store/timeline';
-import { CellValueElementProps } from '../cell_rendering';
-import { Direction, TimelineItem } from '../../../../../common/search_strategy';
+import type { CellValueElementProps } from '../cell_rendering';
+import type { Direction, TimelineItem } from '../../../../../common/search_strategy';
 import { useTimelineEvents } from '../../../containers';
 import { useKibana } from '../../../../common/lib/kibana';
 import { defaultHeaders } from '../body/column_headers/default_headers';
@@ -35,23 +37,23 @@ import { Footer, footerHeight } from '../footer';
 import { TimelineHeader } from '../header';
 import { calculateTotalPages, combineQueries } from '../helpers';
 import { TimelineRefetch } from '../refetch_timeline';
-import {
+import type {
   ControlColumnProps,
   KueryFilterQueryKind,
   RowRenderer,
-  TimelineId,
-  TimelineTabs,
   ToggleDetailPanel,
 } from '../../../../../common/types/timeline';
+import { TimelineId, TimelineTabs } from '../../../../../common/types/timeline';
 import { requiredFieldsForActions } from '../../../../detections/components/alerts_table/default_config';
 import { SuperDatePicker } from '../../../../common/components/super_date_picker';
 import { EventDetailsWidthProvider } from '../../../../common/components/events_viewer/event_details_width_context';
-import { inputsModel, inputsSelectors, State } from '../../../../common/store';
+import type { inputsModel, State } from '../../../../common/store';
+import { inputsSelectors } from '../../../../common/store';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { timelineDefaults } from '../../../store/timeline/defaults';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { useTimelineEventsCountPortal } from '../../../../common/hooks/use_timeline_events_count';
-import { TimelineModel } from '../../../store/timeline/model';
+import type { TimelineModel } from '../../../store/timeline/model';
 import { TimelineDatePickerLock } from '../date_picker_lock';
 import { useTimelineFullScreen } from '../../../../common/containers/use_full_screen';
 import { activeTimeline } from '../../../containers/active_timeline_context';
@@ -192,7 +194,6 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   const {
     browserFields,
     dataViewId,
-    docValueFields,
     loading: loadingSourcerer,
     indexPattern,
     runtimeMappings,
@@ -285,7 +286,6 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   const [isQueryLoading, { events, inspect, totalCount, pageInfo, loadPage, updatedAt, refetch }] =
     useTimelineEvents({
       dataViewId,
-      docValueFields,
       endDate: end,
       fields: getTimelineQueryFields(),
       filterQuery: combinedQueries?.filterQuery,
@@ -341,7 +341,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
       </InPortal>
       <TimelineRefetch
         id={`${timelineId}-${TimelineTabs.query}`}
-        inputId="timeline"
+        inputId={InputsModelId.timeline}
         inspect={inspect}
         loading={isQueryLoading}
         refetch={refetch}
@@ -366,7 +366,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
               )}
               <DatePicker grow={10}>
                 <SuperDatePicker
-                  id="timeline"
+                  id={InputsModelId.timeline}
                   timelineId={timelineId}
                   disabled={isDatePickerDisabled}
                 />
@@ -444,7 +444,6 @@ export const QueryTabContentComponent: React.FC<Props> = ({
             <ScrollableFlexItem grow={1}>
               <DetailsPanel
                 browserFields={browserFields}
-                docValueFields={docValueFields}
                 handleOnPanelClosed={handleOnPanelClosed}
                 runtimeMappings={runtimeMappings}
                 tabType={TimelineTabs.query}

@@ -1273,6 +1273,16 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/bulk_upgrade_agents"
+              },
+              "example": {
+                "version": "8.4.0",
+                "source_uri": "https://artifacts.elastic.co/downloads/beats/elastic-agent",
+                "rollout_duration_seconds": 3600,
+                "agents": [
+                  "agent1",
+                  "agent2"
+                ],
+                "start_time": "2022-08-03T14:00:00.000Z"
               }
             }
           }
@@ -1745,18 +1755,21 @@
                 "type": "object",
                 "properties": {
                   "policy_id": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "new agent policy id"
                   },
                   "agents": {
                     "oneOf": [
                       {
-                        "type": "string"
+                        "type": "string",
+                        "description": "KQL query string, leave empty to action all agents"
                       },
                       {
                         "type": "array",
                         "items": {
                           "type": "string"
-                        }
+                        },
+                        "description": "list of agent IDs"
                       }
                     ]
                   }
@@ -1765,6 +1778,10 @@
                   "policy_id",
                   "agents"
                 ]
+              },
+              "example": {
+                "policy_id": "policy_id",
+                "agents": "fleet-agents.policy_id : (\"policy1\" or \"policy2\")"
               }
             }
           }
@@ -1814,27 +1831,39 @@
                 "type": "object",
                 "properties": {
                   "revoke": {
-                    "type": "boolean"
+                    "type": "boolean",
+                    "description": "Revokes API keys of agents"
                   },
                   "force": {
-                    "type": "boolean"
+                    "type": "boolean",
+                    "description": "Unenroll hosted agents too"
                   },
                   "agents": {
                     "oneOf": [
                       {
-                        "type": "string"
+                        "type": "string",
+                        "description": "KQL query string, leave empty to action all agents"
                       },
                       {
                         "type": "array",
                         "items": {
                           "type": "string"
-                        }
+                        },
+                        "description": "list of agent IDs"
                       }
                     ]
                   }
                 },
                 "required": [
                   "agents"
+                ]
+              },
+              "example": {
+                "revoke": true,
+                "force": false,
+                "agents": [
+                  "agent1",
+                  "agent2"
                 ]
               }
             }
@@ -1888,7 +1917,7 @@
                     "oneOf": [
                       {
                         "type": "string",
-                        "description": "KQL query string, can be empty"
+                        "description": "KQL query string, leave empty to action all agents"
                       },
                       {
                         "type": "array",
@@ -1918,10 +1947,41 @@
                 "required": [
                   "agents"
                 ]
+              },
+              "example": {
+                "agents": [
+                  "agent1",
+                  "agent2"
+                ],
+                "tagsToAdd": [
+                  "newTag"
+                ],
+                "tagsToRemove": [
+                  "existingTag"
+                ]
               }
             }
           }
         }
+      }
+    },
+    "/agents/tags": {
+      "get": {
+        "summary": "Agent Tags - List",
+        "description": "List all agent tags",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/get_agent_tags_response"
+                }
+              }
+            }
+          }
+        },
+        "operationId": "get-agent-tags"
       }
     },
     "/agent_policies": {
@@ -2153,6 +2213,66 @@
           },
           "description": ""
         }
+      }
+    },
+    "/agent_policies/_bulk_get": {
+      "post": {
+        "summary": "Agent policies - Bulk Get",
+        "tags": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "ids": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "list of agent policy ids"
+                  },
+                  "full": {
+                    "type": "boolean",
+                    "description": "get full policies with package policies populated"
+                  },
+                  "ignoreMissing": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "ids"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/agent_policy"
+                      }
+                    }
+                  },
+                  "required": [
+                    "items"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "operationId": "bulk-get-agent-policies",
+        "security": [],
+        "parameters": []
       }
     },
     "/agent_policies/delete": {
@@ -2646,6 +2766,62 @@
         ]
       }
     },
+    "/package_policies/_bulk_get": {
+      "post": {
+        "summary": "Package policies - Bulk Get",
+        "tags": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "ids": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "list of package policy ids"
+                  },
+                  "ignoreMissing": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "ids"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/package_policy"
+                      }
+                    }
+                  },
+                  "required": [
+                    "items"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "operationId": "bulk-get-package-policies",
+        "security": [],
+        "parameters": []
+      }
+    },
     "/package_policies/delete": {
       "post": {
         "summary": "Package policy - Delete",
@@ -2899,6 +3075,48 @@
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
+          }
+        ]
+      },
+      "delete": {
+        "summary": "Package policy - Delete",
+        "tags": [],
+        "operationId": "delete-package-policy",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "name": "packagePolicyId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "schema": {
+              "type": "boolean"
+            },
+            "name": "force",
+            "in": "query"
           }
         ]
       }
@@ -4082,6 +4300,9 @@
                 "encrypted_saved_object_encryption_key_required"
               ]
             }
+          },
+          "package_verification_key_id": {
+            "type": "string"
           }
         },
         "required": [
@@ -4214,29 +4435,39 @@
         "type": "object",
         "properties": {
           "version": {
-            "type": "string"
+            "type": "string",
+            "description": "version to upgrade to"
           },
           "source_uri": {
-            "type": "string"
+            "type": "string",
+            "description": "alternative upgrade binary download url"
           },
           "rollout_duration_seconds": {
-            "type": "number"
+            "type": "number",
+            "description": "rolling upgrade window duration in seconds"
           },
           "start_time": {
-            "type": "string"
+            "type": "string",
+            "description": "start time of upgrade in ISO 8601 format"
           },
           "agents": {
             "oneOf": [
               {
+                "type": "string",
+                "description": "KQL query string, leave empty to action all agents"
+              },
+              {
                 "type": "array",
                 "items": {
                   "type": "string"
-                }
-              },
-              {
-                "type": "string"
+                },
+                "description": "list of agent IDs"
               }
             ]
+          },
+          "force": {
+            "type": "boolean",
+            "description": "Force upgrade, skipping validation (should be used with caution)"
           }
         },
         "required": [
@@ -4246,32 +4477,21 @@
       },
       "upgrade_agent": {
         "title": "Upgrade agent",
-        "oneOf": [
-          {
-            "type": "object",
-            "properties": {
-              "version": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "version"
-            ]
+        "type": "object",
+        "properties": {
+          "version": {
+            "type": "string"
           },
-          {
-            "type": "object",
-            "properties": {
-              "version": {
-                "type": "string"
-              },
-              "source_uri": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "version"
-            ]
+          "source_uri": {
+            "type": "string"
+          },
+          "force": {
+            "type": "boolean",
+            "description": "Force upgrade, skipping validation (should be used with caution)"
           }
+        },
+        "required": [
+          "version"
         ]
       },
       "agent_action": {
@@ -4288,7 +4508,6 @@
               "type": {
                 "type": "string",
                 "enum": [
-                  "POLICY_CHANGE",
                   "UNENROLL",
                   "UPGRADE",
                   "POLICY_REASSIGN"
@@ -4318,6 +4537,18 @@
             }
           }
         ]
+      },
+      "get_agent_tags_response": {
+        "title": "Get Agent Tags response",
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
       },
       "new_agent_policy": {
         "title": "New agent policy",
@@ -4389,7 +4620,8 @@
             "type": "string"
           },
           "output_id": {
-            "type": "string"
+            "type": "string",
+            "deprecated": true
           },
           "inputs": {
             "type": "array",
@@ -4799,7 +5031,9 @@
             "type": "string"
           },
           "output_id": {
-            "type": "string"
+            "type": "string",
+            "description": "Not supported output can be set at the agent policy level only",
+            "deprecated": true
           },
           "inputs": {
             "type": "array",
@@ -4939,7 +5173,6 @@
           }
         },
         "required": [
-          "id",
           "is_default",
           "name",
           "host"

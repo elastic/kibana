@@ -6,9 +6,8 @@
  * Side Public License, v 1.
  */
 import type { KibanaExecutionContext } from '@kbn/core/public';
-import { Observable } from 'rxjs';
-import type { RequestAdapter } from '@kbn/inspector-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import { Observable } from 'rxjs';
 import { IEsSearchRequest, IEsSearchResponse } from '..';
 
 export type ISearchGeneric = <
@@ -91,13 +90,6 @@ export interface IKibanaSearchRequest<Params = any> {
   params?: Params;
 }
 
-export interface IInspectorInfo {
-  adapter?: RequestAdapter;
-  title: string;
-  id?: string;
-  description?: string;
-}
-
 export interface ISearchOptions {
   /**
    * An `AbortSignal` that allows the caller of `search` to abort a search request.
@@ -132,16 +124,14 @@ export interface ISearchOptions {
   isRestore?: boolean;
 
   /**
+   * Represents a meta-information about a Kibana entity intitating a saerch request.
+   */
+  executionContext?: KibanaExecutionContext;
+
+  /**
    * Index pattern reference is used for better error messages
    */
   indexPattern?: DataView;
-
-  /**
-   * Inspector integration options
-   */
-  inspector?: IInspectorInfo;
-
-  executionContext?: KibanaExecutionContext;
 }
 
 /**

@@ -20,7 +20,7 @@ export const initApi = (httpClient: HttpSetup) => {
     index: string;
     context: PainlessExecuteContext;
     script: { source: string } | null;
-    document: Record<string, any>;
+    document: Record<string, unknown>;
   }) => {
     return sendRequest<FieldPreviewResponse>(httpClient, {
       path: `${API_BASE_PATH}/field_preview`,

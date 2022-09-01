@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { PolicyConfig, ProtectionModes } from '../types';
+import type { PolicyConfig } from '../types';
+import { ProtectionModes } from '../types';
 
 /**
  * Return a new default `PolicyConfig` for platinum and above licenses
@@ -62,6 +63,11 @@ export const policyFactory = (): PolicyConfig => {
       antivirus_registration: {
         enabled: false,
       },
+      attack_surface_reduction: {
+        credential_hardening: {
+          enabled: true,
+        },
+      },
     },
     mac: {
       events: {
@@ -105,6 +111,7 @@ export const policyFactory = (): PolicyConfig => {
         file: true,
         network: true,
         session_data: false,
+        tty_io: false,
       },
       malware: {
         mode: ProtectionModes.prevent,
@@ -145,6 +152,14 @@ export const policyFactory = (): PolicyConfig => {
 export const policyFactoryWithoutPaidFeatures = (
   policy: PolicyConfig = policyFactory()
 ): PolicyConfig => {
+  const rollbackConfig = {
+    rollback: {
+      self_healing: {
+        enabled: false,
+      },
+    },
+  };
+
   return {
     ...policy,
     windows: {
@@ -154,7 +169,15 @@ export const policyFactoryWithoutPaidFeatures = (
           ? undefined
           : {
               ...policy.windows.advanced,
-              rollback: undefined,
+              alerts:
+                policy.windows.advanced.alerts === undefined
+                  ? {
+                      ...rollbackConfig,
+                    }
+                  : {
+                      ...policy.windows.advanced.alerts,
+                      ...rollbackConfig,
+                    },
             },
       ransomware: {
         mode: ProtectionModes.off,
@@ -167,6 +190,11 @@ export const policyFactoryWithoutPaidFeatures = (
       behavior_protection: {
         mode: ProtectionModes.off,
         supported: false,
+      },
+      attack_surface_reduction: {
+        credential_hardening: {
+          enabled: false,
+        },
       },
       popup: {
         ...policy.windows.popup,

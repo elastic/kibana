@@ -9,6 +9,7 @@ import { convertPatchAPIToInternalSchema, patchTypeSpecificSnakeToCamel } from '
 import {
   getEqlRuleParams,
   getMlRuleParams,
+  getNewTermsRuleParams,
   getQueryRuleParams,
   getSavedQueryRuleParams,
   getThreatRuleParams,
@@ -179,16 +180,69 @@ describe('rule_converters', () => {
         'Invalid value "invalid" supplied to "anomaly_threshold"'
       );
     });
+
+    test('should accept new terms params when existing rule type is new terms', () => {
+      const patchParams = {
+        new_terms_fields: ['event.new_field'],
+      };
+      const rule = getNewTermsRuleParams();
+      const patchedParams = patchTypeSpecificSnakeToCamel(patchParams, rule);
+      expect(patchedParams).toEqual(
+        expect.objectContaining({
+          newTermsFields: ['event.new_field'],
+        })
+      );
+    });
+
+    test('should reject invalid new terms params when existing rule type is new terms', () => {
+      const patchParams = {
+        new_terms_fields: 'invalid',
+      };
+      const rule = getNewTermsRuleParams();
+      expect(() => patchTypeSpecificSnakeToCamel(patchParams, rule)).toThrowError(
+        'Invalid value "invalid" supplied to "new_terms_fields"'
+      );
+    });
   });
 
   describe('convertPatchAPIToInternalSchema', () => {
-    test('should not update version for immutable rules', () => {
-      const patchParams = {
+    test('should set version to one specified in next params for custom rules', () => {
+      const nextParams = {
+        index: ['new-test-index'],
+        language: 'lucene',
+        version: 3,
+      };
+      const existingRule = getRuleMock({ ...getQueryRuleParams(), version: 1 });
+      const patchedParams = convertPatchAPIToInternalSchema(nextParams, existingRule);
+      expect(patchedParams).toEqual(
+        expect.objectContaining({
+          params: expect.objectContaining({ version: 3 }),
+        })
+      );
+    });
+
+    test('should set version to one specified in next params for immutable rules', () => {
+      const nextParams = {
+        index: ['new-test-index'],
+        language: 'lucene',
+        version: 3,
+      };
+      const existingRule = getRuleMock({ ...getQueryRuleParams(), version: 1, immutable: true });
+      const patchedParams = convertPatchAPIToInternalSchema(nextParams, existingRule);
+      expect(patchedParams).toEqual(
+        expect.objectContaining({
+          params: expect.objectContaining({ version: 3 }),
+        })
+      );
+    });
+
+    test('should not increment version for immutable rules if it is not specified in next params', () => {
+      const nextParams = {
         index: ['new-test-index'],
         language: 'lucene',
       };
-      const rule = getRuleMock({ ...getQueryRuleParams(), immutable: true });
-      const patchedParams = convertPatchAPIToInternalSchema(patchParams, rule);
+      const existingRule = getRuleMock({ ...getQueryRuleParams(), version: 1, immutable: true });
+      const patchedParams = convertPatchAPIToInternalSchema(nextParams, existingRule);
       expect(patchedParams).toEqual(
         expect.objectContaining({
           params: expect.objectContaining({ version: 1 }),
@@ -196,13 +250,13 @@ describe('rule_converters', () => {
       );
     });
 
-    test('should update version for mutable rules', () => {
-      const patchParams = {
+    test('should increment version for custom rules if it is not specified in next params', () => {
+      const nextParams = {
         index: ['new-test-index'],
         language: 'lucene',
       };
-      const rule = getRuleMock({ ...getQueryRuleParams() });
-      const patchedParams = convertPatchAPIToInternalSchema(patchParams, rule);
+      const existingRule = getRuleMock({ ...getQueryRuleParams(), version: 1 });
+      const patchedParams = convertPatchAPIToInternalSchema(nextParams, existingRule);
       expect(patchedParams).toEqual(
         expect.objectContaining({
           params: expect.objectContaining({ version: 2 }),
@@ -210,14 +264,14 @@ describe('rule_converters', () => {
       );
     });
 
-    test('should not update version due to enabled, id, or rule_id, ', () => {
-      const patchParams = {
+    test('should not increment version due to enabled, id, or rule_id, ', () => {
+      const nextParams = {
         enabled: false,
         id: 'some-id',
         rule_id: 'some-rule-id',
       };
-      const rule = getRuleMock(getQueryRuleParams());
-      const patchedParams = convertPatchAPIToInternalSchema(patchParams, rule);
+      const existingRule = getRuleMock({ ...getQueryRuleParams(), version: 1 });
+      const patchedParams = convertPatchAPIToInternalSchema(nextParams, existingRule);
       expect(patchedParams).toEqual(
         expect.objectContaining({
           params: expect.objectContaining({ version: 1 }),

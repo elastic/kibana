@@ -10,19 +10,15 @@ import { useDispatch } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 
 import { networkActions, networkModel, networkSelectors } from '../../store';
-import {
-  Direction,
-  NetworkTlsEdges,
-  NetworkTlsFields,
-  SortField,
-} from '../../../../common/search_strategy';
+import type { Direction, NetworkTlsEdges, SortField } from '../../../../common/search_strategy';
+import { NetworkTlsFields } from '../../../../common/search_strategy';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
-import {
+import type {
   Criteria,
   ItemsPerRow,
-  PaginatedTable,
   SortingBasicTable,
 } from '../../../common/components/paginated_table';
+import { PaginatedTable } from '../../../common/components/paginated_table';
 import { getTlsColumns } from './columns';
 import * as i18n from './translations';
 

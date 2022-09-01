@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { DisposableAppender, LogLevel, Logger, LoggerFactory } from '@kbn/logging';
+import { getFlattenedObject, merge } from '@kbn/std';
+import { DisposableAppender, LogLevel, Logger, LoggerFactory, LogMeta } from '@kbn/logging';
 import type { LoggerConfigType, LoggerContextConfigInput } from '@kbn/core-logging-server';
 import { Appenders } from './appenders/appenders';
 import { BufferAppender } from './appenders/buffer/buffer_appender';
@@ -25,6 +26,7 @@ export interface ILoggingSystem extends LoggerFactory {
   asLoggerFactory(): LoggerFactory;
   upgrade(rawConfig?: LoggingConfigType): Promise<void>;
   setContextConfig(baseContextParts: string[], rawConfig: LoggerContextConfigInput): Promise<void>;
+  setGlobalContext(meta: Partial<LogMeta>): void;
   stop(): Promise<void>;
 }
 
@@ -41,13 +43,20 @@ export class LoggingSystem implements ILoggingSystem {
   private readonly bufferAppender = new BufferAppender();
   private readonly loggers: Map<string, LoggerAdapter> = new Map();
   private readonly contextConfigs = new Map<string, LoggerContextConfigType>();
+  private globalContext: Partial<LogMeta> = {};
 
   constructor() {}
 
   public get(...contextParts: string[]): Logger {
     const context = LoggingConfig.getLoggerContext(contextParts);
     if (!this.loggers.has(context)) {
-      this.loggers.set(context, new LoggerAdapter(this.createLogger(context, this.computedConfig)));
+      this.loggers.set(
+        context,
+        new LoggerAdapter(
+          this.createLogger(context, this.computedConfig),
+          getFlattenedObject(this.globalContext)
+        )
+      );
     }
     return this.loggers.get(context)!;
   }
@@ -107,6 +116,23 @@ export class LoggingSystem implements ILoggingSystem {
     // will be picked up on next call to `upgrade`.
     if (this.baseConfig) {
       await this.applyBaseConfig(this.baseConfig);
+    }
+  }
+
+  /**
+   * A mechanism for specifying some "global" {@link LogMeta} that we want
+   * to inject into all log entries.
+   *
+   * @remarks
+   * The provided context will be merged with the meta of each individual log
+   * entry. In the case of conflicting keys, the global context will always be
+   * overridden by the log entry.
+   */
+  public setGlobalContext(meta: Partial<LogMeta>) {
+    this.globalContext = merge(this.globalContext, meta);
+    const flattenedContext = getFlattenedObject(this.globalContext);
+    for (const loggerAdapter of this.loggers.values()) {
+      loggerAdapter.updateGlobalContext(flattenedContext);
     }
   }
 

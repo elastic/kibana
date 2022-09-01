@@ -6,12 +6,15 @@
  */
 
 import moment from 'moment';
-import { ConcreteTaskInstance, TaskStatus } from '@kbn/task-manager-plugin/server';
-import { TelemetryEventsSender } from '../sender';
-import { TelemetryReceiver } from '../receiver';
-import { SecurityTelemetryTaskConfig } from '../task';
-import { PackagePolicy } from '@kbn/fleet-plugin/common/types/models/package_policy';
+import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
+import { TaskStatus } from '@kbn/task-manager-plugin/server';
+import type { TelemetryEventsSender } from '../sender';
+import type { TelemetryReceiver } from '../receiver';
+import type { SecurityTelemetryTaskConfig } from '../task';
+import type { PackagePolicy } from '@kbn/fleet-plugin/common/types/models/package_policy';
 import { stubEndpointAlertResponse, stubProcessTree, stubFetchTimelineEvents } from './timeline';
+import { stubEndpointMetricsResponse } from './metrics';
+import { prebuiltRuleAlertsResponse } from './prebuilt_rule_alerts';
 
 export const createMockTelemetryEventsSender = (
   enableTelemetry?: boolean,
@@ -81,8 +84,9 @@ export const createMockTelemetryReceiver = (
     copyLicenseFields: jest.fn(),
     fetchFleetAgents: jest.fn(),
     fetchDiagnosticAlerts: jest.fn().mockReturnValue(diagnosticsAlert ?? jest.fn()),
-    fetchEndpointMetrics: jest.fn(),
+    fetchEndpointMetrics: jest.fn().mockReturnValue(stubEndpointMetricsResponse),
     fetchEndpointPolicyResponses: jest.fn(),
+    fetchPrebuiltRuleAlerts: jest.fn().mockReturnValue(prebuiltRuleAlertsResponse),
     fetchTrustedApplications: jest.fn(),
     fetchEndpointList: jest.fn(),
     fetchDetectionRules: jest.fn().mockReturnValue({ body: null }),
@@ -92,6 +96,7 @@ export const createMockTelemetryReceiver = (
       .mockReturnValue(Promise.resolve(stubEndpointAlertResponse())),
     buildProcessTree: jest.fn().mockReturnValue(processTreeResponse),
     fetchTimelineEvents: jest.fn().mockReturnValue(Promise.resolve(stubFetchTimelineEvents())),
+    fetchValueListMetaData: jest.fn(),
   } as unknown as jest.Mocked<TelemetryReceiver>;
 };
 

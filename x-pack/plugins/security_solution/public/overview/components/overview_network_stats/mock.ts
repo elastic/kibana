@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { NetworkOverviewStrategyResponse } from '../../../../common/search_strategy';
+import type { NetworkOverviewStrategyResponse } from '../../../../common/search_strategy';
 
 export const mockData: NetworkOverviewStrategyResponse['overviewNetwork'] = {
   auditbeatSocket: 12,

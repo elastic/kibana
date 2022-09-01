@@ -23,7 +23,8 @@ import {
   setHostPageQueriesActivePageToZero,
   setHostDetailsQueriesActivePageToZero,
 } from './helpers';
-import { HostsModel, HostsTableType } from './model';
+import type { HostsModel } from './model';
+import { HostsTableType } from './model';
 
 export type HostsState = HostsModel;
 
@@ -49,10 +50,6 @@ export const initialHostsState: HostsState = {
         limit: DEFAULT_TABLE_LIMIT,
       },
       [HostsTableType.anomalies]: null,
-      [HostsTableType.alerts]: {
-        activePage: DEFAULT_TABLE_ACTIVE_PAGE,
-        limit: DEFAULT_TABLE_LIMIT,
-      },
       [HostsTableType.risk]: {
         activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         limit: DEFAULT_TABLE_LIMIT,
@@ -89,10 +86,6 @@ export const initialHostsState: HostsState = {
         limit: DEFAULT_TABLE_LIMIT,
       },
       [HostsTableType.anomalies]: null,
-      [HostsTableType.alerts]: {
-        activePage: DEFAULT_TABLE_ACTIVE_PAGE,
-        limit: DEFAULT_TABLE_LIMIT,
-      },
       [HostsTableType.risk]: {
         activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         limit: DEFAULT_TABLE_LIMIT,

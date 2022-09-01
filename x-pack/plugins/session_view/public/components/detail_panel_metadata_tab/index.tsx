@@ -11,18 +11,20 @@ import {
   ProcessEventHost,
   ProcessEventContainer,
   ProcessEventOrchestrator,
+  ProcessEventCloud,
 } from '../../../common/types/process_tree';
 import { DetailPanelAccordion } from '../detail_panel_accordion';
 import { DetailPanelCopy } from '../detail_panel_copy';
 import { DetailPanelListItem } from '../detail_panel_list_item';
 import { useStyles } from '../detail_panel_process_tab/styles';
 import { useStyles as useStylesChild } from './styles';
-import { getHostData, getContainerData, getOrchestratorData } from './helpers';
+import { getHostData, getContainerData, getOrchestratorData, getCloudData } from './helpers';
 
 interface DetailPanelMetadataTabDeps {
   processHost?: ProcessEventHost;
   processContainer?: ProcessEventContainer;
   processOrchestrator?: ProcessEventOrchestrator;
+  processCloud?: ProcessEventCloud;
 }
 
 /**
@@ -32,6 +34,7 @@ export const DetailPanelMetadataTab = ({
   processHost,
   processContainer,
   processOrchestrator,
+  processCloud,
 }: DetailPanelMetadataTabDeps) => {
   const styles = useStyles();
   const stylesChild = useStylesChild();
@@ -41,6 +44,7 @@ export const DetailPanelMetadataTab = ({
     () => getOrchestratorData(processOrchestrator),
     [processOrchestrator]
   );
+  const cloudData = useMemo(() => getCloudData(processCloud), [processCloud]);
 
   return (
     <>
@@ -120,8 +124,8 @@ export const DetailPanelMetadataTab = ({
       >
         <EuiPanel
           hasShadow={false}
-          color="subdued"
-          hasBorder={true}
+          color="plain"
+          hasBorder={false}
           borderRadius="m"
           paddingSize="none"
           css={stylesChild.metadataHostOS}
@@ -228,6 +232,83 @@ export const DetailPanelMetadataTab = ({
         </EuiPanel>
       </DetailPanelAccordion>
 
+      {processCloud && (
+        <>
+          <DetailPanelAccordion
+            id="metadataCloud"
+            title={i18n.translate('xpack.sessionView.metadataDetailsTab.cloud', {
+              defaultMessage: 'Cloud',
+            })}
+            listItems={[
+              {
+                title: <DetailPanelListItem>instance.name</DetailPanelListItem>,
+                description: (
+                  <DetailPanelCopy
+                    textToCopy={`cloud.provider: "${cloudData.instance.name}"`}
+                    tooltipContent={cloudData.instance.name}
+                  >
+                    <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
+                      {cloudData.instance.name}
+                    </EuiTextColor>
+                  </DetailPanelCopy>
+                ),
+              },
+              {
+                title: <DetailPanelListItem>provider</DetailPanelListItem>,
+                description: (
+                  <DetailPanelCopy
+                    textToCopy={`cloud.provider: "${cloudData.provider}"`}
+                    tooltipContent={cloudData.provider}
+                  >
+                    <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
+                      {cloudData.provider}
+                    </EuiTextColor>
+                  </DetailPanelCopy>
+                ),
+              },
+              {
+                title: <DetailPanelListItem>region</DetailPanelListItem>,
+                description: (
+                  <DetailPanelCopy
+                    textToCopy={`cloud.region: "${cloudData.region}"`}
+                    tooltipContent={cloudData.region}
+                  >
+                    <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
+                      {cloudData.region}
+                    </EuiTextColor>
+                  </DetailPanelCopy>
+                ),
+              },
+              {
+                title: <DetailPanelListItem>account.id</DetailPanelListItem>,
+                description: (
+                  <DetailPanelCopy
+                    textToCopy={`cloud.account.id: "${cloudData.account.id}"`}
+                    tooltipContent={cloudData.account.id}
+                  >
+                    <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
+                      {cloudData.account.id}
+                    </EuiTextColor>
+                  </DetailPanelCopy>
+                ),
+              },
+              {
+                title: <DetailPanelListItem>project.id</DetailPanelListItem>,
+                description: (
+                  <DetailPanelCopy
+                    textToCopy={`cloud.project.id: "${cloudData.project.id}"`}
+                    tooltipContent={cloudData.project.id}
+                  >
+                    <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
+                      {cloudData.project.id}
+                    </EuiTextColor>
+                  </DetailPanelCopy>
+                ),
+              },
+            ]}
+          />
+        </>
+      )}
       {processContainer && (
         <>
           <DetailPanelAccordion
@@ -353,6 +434,19 @@ export const DetailPanelMetadataTab = ({
                 ),
               },
               {
+                title: <DetailPanelListItem>resource.parent.type</DetailPanelListItem>,
+                description: (
+                  <DetailPanelCopy
+                    textToCopy={`orchestrator.resource.parent.type: "${orchestratorData.resource.parent.type}"`}
+                    tooltipContent={orchestratorData.resource.parent.type}
+                  >
+                    <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
+                      {orchestratorData.resource.parent.type}
+                    </EuiTextColor>
+                  </DetailPanelCopy>
+                ),
+              },
+              {
                 title: <DetailPanelListItem>namespace</DetailPanelListItem>,
                 description: (
                   <DetailPanelCopy
@@ -387,19 +481,6 @@ export const DetailPanelMetadataTab = ({
                   >
                     <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
                       {orchestratorData.cluster.name}
-                    </EuiTextColor>
-                  </DetailPanelCopy>
-                ),
-              },
-              {
-                title: <DetailPanelListItem>parent.type</DetailPanelListItem>,
-                description: (
-                  <DetailPanelCopy
-                    textToCopy={`orchestrator.parent.type: "${orchestratorData.parent.type}"`}
-                    tooltipContent={orchestratorData.parent.type}
-                  >
-                    <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
-                      {orchestratorData.parent.type}
                     </EuiTextColor>
                   </DetailPanelCopy>
                 ),

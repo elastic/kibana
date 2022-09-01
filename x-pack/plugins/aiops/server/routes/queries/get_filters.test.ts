@@ -8,11 +8,11 @@
 import { getFilters } from './get_filters';
 
 describe('getFilters', () => {
-  it('returns an empty array with no timeFieldName and kuery supplied', () => {
+  it('returns an empty array with no timeFieldName and searchQuery supplied', () => {
     const filters = getFilters({
       index: 'the-index',
       timeFieldName: '',
-      kuery: '',
+      searchQuery: '{"bool":{"filter":[],"must":[{"match_all":{}}],"must_not":[]}}',
       start: 1577836800000,
       end: 1609459200000,
       baselineMin: 10,
@@ -27,7 +27,7 @@ describe('getFilters', () => {
     const filters = getFilters({
       index: 'the-index',
       timeFieldName: 'the-time-field-name',
-      kuery: '',
+      searchQuery: '{"bool":{"filter":[],"must":[{"match_all":{}}],"must_not":[]}}',
       start: 1577836800000,
       end: 1609459200000,
       baselineMin: 10,

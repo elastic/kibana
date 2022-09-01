@@ -16,30 +16,26 @@ export const ABOUT_DETAILS =
 
 export const ADDITIONAL_LOOK_BACK_DETAILS = 'Additional look-back time';
 
-export const ALERTS_TAB = '[data-test-subj="alertsTab"]';
+export const ALERTS_TAB = '[data-test-subj="navigation-alerts"]';
 
 export const ANOMALY_SCORE_DETAILS = 'Anomaly score';
 
 export const CUSTOM_QUERY_DETAILS = 'Custom query';
 
+export const DATA_VIEW_DETAILS = 'Data View';
+
 export const DEFINITION_DETAILS =
   '[data-test-subj=definitionRule] [data-test-subj="listItemColumnStepRuleDescription"]';
-
-export const DELETE_RULE = '[data-test-subj=rules-details-delete-rule]';
 
 export const DETAILS_DESCRIPTION = '.euiDescriptionList__description';
 
 export const DETAILS_TITLE = '.euiDescriptionList__title';
 
-export const EXCEPTIONS_TAB = '[data-test-subj="exceptionsTab"]';
-
-export const EXCEPTIONS_TAB_SEARCH = '[data-test-subj="exceptionsHeaderSearch"]';
+export const EXCEPTIONS_TAB = '[data-test-subj="navigation-rule_exceptions"]';
 
 export const FALSE_POSITIVES_DETAILS = 'False positive examples';
 
 export const INDEX_PATTERNS_DETAILS = 'Index patterns';
-
-export const DATA_VIEW_DETAILS = 'Data View';
 
 export const INDICATOR_INDEX_PATTERNS = 'Indicator index patterns';
 
@@ -61,6 +57,10 @@ export const MACHINE_LEARNING_JOB_STATUS = '[data-test-subj="machineLearningJobS
 
 export const MITRE_ATTACK_DETAILS = 'MITRE ATT&CK';
 
+export const NEW_TERMS_FIELDS_DETAILS = 'Fields';
+
+export const NEW_TERMS_HISTORY_WINDOW_DETAILS = 'History Window Size';
+
 export const FIELDS_BROWSER_BTN =
   '[data-test-subj="events-viewer-panel"] [data-test-subj="show-field-browser"]';
 
@@ -78,11 +78,14 @@ export const RISK_SCORE_OVERRIDE_DETAILS = 'Risk score override';
 
 export const REFERENCE_URLS_DETAILS = 'Reference URLs';
 
-export const REMOVE_EXCEPTION_BTN = '[data-test-subj="exceptionsViewerDeleteBtn"]';
+export const EXCEPTION_ITEM_ACTIONS_BUTTON =
+  'button[data-test-subj="exceptionItemCardHeader-actionButton"]';
+
+export const REMOVE_EXCEPTION_BTN = '[data-test-subj="exceptionItemCardHeader-actionItem-delete"]';
+
+export const EDIT_EXCEPTION_BTN = '[data-test-subj="exceptionItemCardHeader-actionItem-edit"]';
 
 export const RULE_SWITCH = '[data-test-subj="ruleSwitch"]';
-
-export const RULE_SWITCH_LOADER = '[data-test-subj="rule-switch-loader"]';
 
 export const RULE_TYPE_DETAILS = 'Rule type';
 

@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { PostBulkUpdateAgentTagsRequest, UpdateAgentRequest } from '../../../common';
+import type {
+  GetAgentTagsResponse,
+  PostBulkUpdateAgentTagsRequest,
+  UpdateAgentRequest,
+} from '../../../common/types';
 
 import { agentRouteService } from '../../services';
 
@@ -32,6 +36,7 @@ import type {
   PostNewAgentActionRequest,
   PostNewAgentActionResponse,
   GetCurrentUpgradesResponse,
+  GetAvailableVersionsResponse,
 } from '../../types';
 
 import { useRequest, sendRequest } from './use_request';
@@ -88,6 +93,15 @@ export function sendGetAgentStatus(
   return sendRequest<GetAgentStatusResponse>({
     method: 'get',
     path: agentRouteService.getStatusPath(),
+    query,
+    ...options,
+  });
+}
+
+export function sendGetAgentTags(query: GetAgentsRequest['query'], options?: RequestOptions) {
+  return sendRequest<GetAgentTagsResponse>({
+    method: 'get',
+    path: agentRouteService.getListTagsPath(),
     query,
     ...options,
   });
@@ -217,5 +231,12 @@ export function sendPostBulkAgentTagsUpdate(
     path: agentRouteService.getBulkUpdateTagsPath(),
     body,
     ...options,
+  });
+}
+
+export function sendGetAgentsAvailableVersions() {
+  return sendRequest<GetAvailableVersionsResponse>({
+    method: 'get',
+    path: agentRouteService.getAvailableVersionsPath(),
   });
 }

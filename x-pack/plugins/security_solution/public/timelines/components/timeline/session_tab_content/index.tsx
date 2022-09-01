@@ -8,7 +8,7 @@
 import React, { useState, useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 import styled from 'styled-components';
-import { TimelineId } from '../../../../../common/types/timeline';
+import type { TimelineId } from '../../../../../common/types/timeline';
 import { useSessionViewNavigation, useSessionView } from './use_session_view';
 
 const MaxWidthFlexItem = styled(EuiFlexItem)`

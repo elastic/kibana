@@ -9,10 +9,10 @@ import sinon from 'sinon';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { Alert } from './alert';
 import { createAlertFactory } from './create_alert_factory';
-import { getRecoveredAlerts } from '../lib';
+import { processAlerts } from '../lib';
 
 jest.mock('../lib', () => ({
-  getRecoveredAlerts: jest.fn(),
+  processAlerts: jest.fn(),
 }));
 
 let clock: sinon.SinonFakeTimers;
@@ -29,6 +29,7 @@ describe('createAlertFactory()', () => {
     const alertFactory = createAlertFactory({
       alerts: {},
       logger,
+      maxAlerts: 1000,
     });
     const result = alertFactory.create('1');
     expect(result).toMatchInlineSnapshot(`
@@ -37,6 +38,7 @@ describe('createAlertFactory()', () => {
                 "state": Object {},
               }
         `);
+    // @ts-expect-error
     expect(result.getId()).toEqual('1');
   });
 
@@ -50,6 +52,7 @@ describe('createAlertFactory()', () => {
         '1': alert,
       },
       logger,
+      maxAlerts: 1000,
     });
     const result = alertFactory.create('1');
     expect(result).toMatchInlineSnapshot(`
@@ -72,6 +75,7 @@ describe('createAlertFactory()', () => {
     const alertFactory = createAlertFactory({
       alerts,
       logger,
+      maxAlerts: 1000,
     });
     alertFactory.create('1');
     expect(alerts).toMatchInlineSnapshot(`
@@ -84,10 +88,30 @@ describe('createAlertFactory()', () => {
         `);
   });
 
+  test('throws error and sets flag when more alerts are created than allowed', () => {
+    const alertFactory = createAlertFactory({
+      alerts: {},
+      logger,
+      maxAlerts: 3,
+    });
+
+    expect(alertFactory.hasReachedAlertLimit()).toBe(false);
+    alertFactory.create('1');
+    alertFactory.create('2');
+    alertFactory.create('3');
+
+    expect(() => {
+      alertFactory.create('4');
+    }).toThrowErrorMatchingInlineSnapshot(`"Rule reported more than 3 alerts."`);
+
+    expect(alertFactory.hasReachedAlertLimit()).toBe(true);
+  });
+
   test('throws error when creating alerts after done() is called', () => {
     const alertFactory = createAlertFactory({
       alerts: {},
       logger,
+      maxAlerts: 1000,
     });
     const result = alertFactory.create('1');
     expect(result).toEqual({
@@ -108,22 +132,25 @@ describe('createAlertFactory()', () => {
   });
 
   test('returns recovered alerts when setsRecoveryContext is true', () => {
-    (getRecoveredAlerts as jest.Mock).mockReturnValueOnce({
-      z: {
-        id: 'z',
-        state: { foo: true },
-        meta: { lastScheduledActions: { group: 'default', date: new Date() } },
-      },
-      y: {
-        id: 'y',
-        state: { foo: true },
-        meta: { lastScheduledActions: { group: 'default', date: new Date() } },
+    (processAlerts as jest.Mock).mockReturnValueOnce({
+      recoveredAlerts: {
+        z: {
+          id: 'z',
+          state: { foo: true },
+          meta: { lastScheduledActions: { group: 'default', date: new Date() } },
+        },
+        y: {
+          id: 'y',
+          state: { foo: true },
+          meta: { lastScheduledActions: { group: 'default', date: new Date() } },
+        },
       },
     });
     const alertFactory = createAlertFactory({
       alerts: {},
       logger,
       canSetRecoveryContext: true,
+      maxAlerts: 1000,
     });
     const result = alertFactory.create('1');
     expect(result).toEqual({
@@ -142,10 +169,11 @@ describe('createAlertFactory()', () => {
   });
 
   test('returns empty array if no recovered alerts', () => {
-    (getRecoveredAlerts as jest.Mock).mockReturnValueOnce({});
+    (processAlerts as jest.Mock).mockReturnValueOnce({ recoveredAlerts: {} });
     const alertFactory = createAlertFactory({
       alerts: {},
       logger,
+      maxAlerts: 1000,
       canSetRecoveryContext: true,
     });
     const result = alertFactory.create('1');
@@ -163,11 +191,12 @@ describe('createAlertFactory()', () => {
     expect(recoveredAlerts.length).toEqual(0);
   });
 
-  test('returns empty array if getRecoveredAlerts returns null', () => {
-    (getRecoveredAlerts as jest.Mock).mockReturnValueOnce(null);
+  test('returns empty array if recovered alerts are null', () => {
+    (processAlerts as jest.Mock).mockReturnValueOnce({ recoveredAlerts: null });
     const alertFactory = createAlertFactory({
       alerts: {},
       logger,
+      maxAlerts: 1000,
       canSetRecoveryContext: true,
     });
     const result = alertFactory.create('1');
@@ -189,6 +218,7 @@ describe('createAlertFactory()', () => {
     const alertFactory = createAlertFactory({
       alerts: {},
       logger,
+      maxAlerts: 1000,
       canSetRecoveryContext: false,
     });
     const result = alertFactory.create('1');

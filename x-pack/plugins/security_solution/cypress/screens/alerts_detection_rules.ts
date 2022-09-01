@@ -35,6 +35,8 @@ export const ELASTIC_RULES_BTN = '[data-test-subj="showElasticRulesFilterButton"
 
 export const EXPORT_ACTION_BTN = '[data-test-subj="exportRuleAction"]';
 
+export const BULK_EXPORT_ACTION_BTN = '[data-test-subj="exportRuleBulk"]';
+
 export const FIRST_RULE = 0;
 
 export const FOURTH_RULE = 3;
@@ -88,6 +90,9 @@ export const rowsPerPageSelector = (count: number) =>
 export const pageSelector = (pageNumber: number) =>
   `[data-test-subj="pagination-button-${pageNumber - 1}"]`;
 
+export const ruleCheckboxByIdSelector = (id: string) =>
+  `[data-test-subj="checkboxSelectRow-${id}"]`;
+
 export const SELECT_ALL_RULES_BTN = '[data-test-subj="selectAllRules"]';
 
 export const RULES_EMPTY_PROMPT = '[data-test-subj="rulesEmptyPrompt"]';
@@ -100,9 +105,11 @@ export const MODAL_CONFIRMATION_TITLE = '[data-test-subj="confirmModalTitleText"
 
 export const MODAL_CONFIRMATION_BODY = '[data-test-subj="confirmModalBodyText"]';
 
-export const RULE_DETAILS_DELETE_BTN = '[data-test-subj="rules-details-delete-rule"]';
+export const MODAL_ERROR_BODY = '[data-test-subj="errorModalBody"]';
 
-export const ALERT_DETAILS_CELLS = '[data-test-subj="dataGridRowCell"]';
+export const MODAL_CONFIRMATION_CANCEL_BTN = '[data-test-subj="confirmModalCancelButton"]';
+
+export const RULE_DETAILS_DELETE_BTN = '[data-test-subj="rules-details-delete-rule"]';
 
 export const SERVER_SIDE_EVENT_COUNT = '[data-test-subj="server-side-event-count"]';
 
@@ -116,7 +123,9 @@ export const INPUT_FILE = 'input[type=file]';
 
 export const TOASTER = '[data-test-subj="euiToastHeader"]';
 
-export const TOASTER_BODY = '[data-test-subj="globalToastList"] .euiToastBody';
+export const TOASTER_BODY = '[data-test-subj="globalToastList"] [data-test-subj="euiToastBody"]';
+
+export const TOASTER_ERROR_BTN = '[data-test-subj="errorToastBtn"]';
 
 export const RULE_IMPORT_OVERWRITE_CHECKBOX = '[id="import-data-modal-checkbox-label"]';
 
@@ -130,3 +139,11 @@ export const RULES_TAGS_POPOVER_WRAPPER = '[data-test-subj="tagsDisplayPopoverWr
 export const RULES_TAGS_FILTER_BTN = '[data-test-subj="tags-filter-popover-button"]';
 
 export const SELECTED_RULES_NUMBER_LABEL = '[data-test-subj="selectedRules"]';
+
+export const REFRESH_SETTINGS_POPOVER = '[data-test-subj="refreshSettings-popover"]';
+
+export const REFRESH_SETTINGS_SWITCH = '[data-test-subj="refreshSettingsSwitch"]';
+
+export const REFRESH_SETTINGS_SELECTION_NOTE = '[data-test-subj="refreshSettingsSelectionNote"]';
+
+export const REFRESH_RULES_STATUS = '[data-test-subj="refreshRulesStatus"]';

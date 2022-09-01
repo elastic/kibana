@@ -89,6 +89,7 @@ export function createExtentFilter(mapExtent: MapExtent, geoFieldNames: string[]
   }
 
   const meta: FilterMeta = {
+    type: SPATIAL_FILTER_TYPE,
     alias: null,
     disabled: false,
     negate: false,

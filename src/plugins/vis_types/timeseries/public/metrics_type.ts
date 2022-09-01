@@ -9,6 +9,7 @@
 import { i18n } from '@kbn/i18n';
 import uuid from 'uuid/v4';
 import type { DataViewsContract, DataView } from '@kbn/data-views-plugin/public';
+import { TimeRange } from '@kbn/data-plugin/common';
 import {
   Vis,
   VIS_EVENT_TO_TRIGGER,
@@ -28,6 +29,7 @@ import { toExpressionAst } from './to_ast';
 import { getDataViewsStart } from './services';
 import type { TimeseriesVisDefaultParams, TimeseriesVisParams } from './types';
 import type { IndexPatternValue, Panel } from '../common/types';
+import { convertTSVBtoLensConfiguration } from './convert_to_lens';
 
 export const withReplacedIds = (
   vis: Vis<TimeseriesVisParams | TimeseriesVisDefaultParams>
@@ -167,14 +169,9 @@ export const metricsVisDefinition: VisTypeDefinition<
     }
     return [];
   },
-  navigateToLens: async (params?: VisParams) => {
-    const { triggerTSVBtoLensConfiguration } = await import('./trigger_action');
+  navigateToLens: async (params?: VisParams, timeRange?: TimeRange) =>
+    params ? await convertTSVBtoLensConfiguration(params as Panel, timeRange) : null,
 
-    const triggerConfiguration = params
-      ? await triggerTSVBtoLensConfiguration(params as Panel)
-      : null;
-    return triggerConfiguration;
-  },
   inspectorAdapters: () => ({
     requests: new RequestAdapter(),
   }),

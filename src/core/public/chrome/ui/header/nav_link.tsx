@@ -9,9 +9,11 @@
 import { EuiIcon, EuiListGroupItemProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { ChromeNavLink, ChromeRecentlyAccessedHistoryItem, CoreStart } from '../../..';
-import { HttpStart } from '../../../http';
-import { InternalApplicationStart } from '../../../application/types';
+import type { HttpStart } from '@kbn/core-http-browser';
+import type { ApplicationStart } from '@kbn/core-application-browser';
+import type { InternalApplicationStart } from '@kbn/core-application-browser-internal';
+
+import type { ChromeNavLink, ChromeRecentlyAccessedHistoryItem } from '../..';
 import { relativeToAbsolute } from '../../nav_links/to_nav_link';
 
 export const isModifiedOrPrevented = (event: React.MouseEvent<HTMLElement, MouseEvent>) =>
@@ -23,7 +25,7 @@ interface Props {
   basePath?: HttpStart['basePath'];
   dataTestSubj?: string;
   onClick?: Function;
-  navigateToUrl: CoreStart['application']['navigateToUrl'];
+  navigateToUrl: ApplicationStart['navigateToUrl'];
   externalLink?: boolean;
   iconProps?: EuiListGroupItemProps['iconProps'];
 }

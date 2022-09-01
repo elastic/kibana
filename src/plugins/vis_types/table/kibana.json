@@ -6,15 +6,15 @@
   "requiredPlugins": [
     "expressions",
     "visualizations",
-    "data"
+    "fieldFormats"
   ],
   "requiredBundles": [
+    "data",
     "kibanaUtils",
     "kibanaReact",
     "share",
     "visDefaultEditor"
   ],
-  "optionalPlugins": ["usageCollection"],
   "owner": {
     "name": "Vis Editors",
     "githubTeam": "kibana-vis-editors"

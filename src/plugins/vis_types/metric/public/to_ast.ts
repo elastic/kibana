@@ -52,7 +52,7 @@ export const toExpressionAst: VisToExpressionAst<VisParams> = (vis, params) => {
 
   const hasColorRanges = colorsRange && colorsRange.length > 1;
 
-  const metricVis = buildExpressionFunction('metricVis', {
+  const metricVis = buildExpressionFunction('legacyMetricVis', {
     percentageMode,
     colorMode: hasColorRanges ? metricColorMode : ColorMode.None,
     showLabels: labels?.show ?? false,

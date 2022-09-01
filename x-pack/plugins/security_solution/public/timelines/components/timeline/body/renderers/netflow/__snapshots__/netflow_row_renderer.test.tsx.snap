@@ -2,12 +2,7 @@
 
 exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
 <DocumentFragment>
-  .c15 svg {
-  position: relative;
-  top: -1px;
-}
-
-.c0 {
+  .c0 {
   font-size: 12px;
   line-height: 1.5;
   padding-left: 12px;
@@ -18,6 +13,11 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
   padding: 0 8px;
   border: 1px solid #343741;
   border-radius: 4px;
+}
+
+.c15 svg {
+  position: relative;
+  top: -1px;
 }
 
 .c13,
@@ -107,6 +107,31 @@ tr:hover .c5:focus::before {
   background-image: linear-gradient( 135deg, #1d1e24 25%, transparent 25% ), linear-gradient( -135deg, #1d1e24 25%, transparent 25% ), linear-gradient( 135deg, transparent 75%, #1d1e24 75% ), linear-gradient( -135deg, transparent 75%, #1d1e24 75% );
 }
 
+.c4 {
+  display: inline-block;
+  max-width: 100%;
+}
+
+.c4 [data-rbd-placeholder-context-id] {
+  display: none !important;
+}
+
+.c6 > span.euiToolTipAnchor {
+  display: block;
+}
+
+.c6 > span.euiToolTipAnchor.eui-textTruncate {
+  display: inline-block;
+}
+
+.c7 {
+  vertical-align: top;
+}
+
+.c24 {
+  margin-right: 5px;
+}
+
 .c23 {
   margin-right: 5px;
 }
@@ -179,31 +204,6 @@ tr:hover .c5:focus::before {
   margin-right: 10px;
 }
 
-.c4 {
-  display: inline-block;
-  max-width: 100%;
-}
-
-.c4 [data-rbd-placeholder-context-id] {
-  display: none !important;
-}
-
-.c6 > span.euiToolTipAnchor {
-  display: block;
-}
-
-.c6 > span.euiToolTipAnchor.eui-textTruncate {
-  display: inline-block;
-}
-
-.c7 {
-  vertical-align: top;
-}
-
-.c24 {
-  margin-right: 5px;
-}
-
 .c1 {
   margin: 5px 0;
 }
@@ -239,10 +239,10 @@ tr:hover .c5:focus::before {
                     class=""
                   >
                     <div
-                      class="euiPopover euiPopover--anchorDownCenter c3"
+                      class="euiPopover c3 emotion-euiPopover"
                     >
                       <div
-                        class="euiPopover__anchor"
+                        class="euiPopover__anchor css-16vtueo-render"
                       >
                         <div
                           data-test-subj="withHoverActionsButton"
@@ -274,7 +274,7 @@ tr:hover .c5:focus::before {
                                   tabindex="-1"
                                 >
                                   <p
-                                    class="euiScreenReaderOnly"
+                                    class="emotion-euiScreenReaderOnly"
                                   >
                                     user.name
                                   </p>
@@ -307,7 +307,7 @@ tr:hover .c5:focus::before {
                                     </span>
                                   </span>
                                   <p
-                                    class="euiScreenReaderOnly"
+                                    class="emotion-euiScreenReaderOnly"
                                   >
                                     Press enter for options, or press space to begin dragging.
                                   </p>
@@ -327,10 +327,10 @@ tr:hover .c5:focus::before {
                     class=""
                   >
                     <div
-                      class="euiPopover euiPopover--anchorDownCenter c3"
+                      class="euiPopover c3 emotion-euiPopover"
                     >
                       <div
-                        class="euiPopover__anchor"
+                        class="euiPopover__anchor css-16vtueo-render"
                       >
                         <div
                           data-test-subj="withHoverActionsButton"
@@ -362,7 +362,7 @@ tr:hover .c5:focus::before {
                                   tabindex="-1"
                                 >
                                   <p
-                                    class="euiScreenReaderOnly"
+                                    class="emotion-euiScreenReaderOnly"
                                   >
                                     process.name
                                   </p>
@@ -395,7 +395,7 @@ tr:hover .c5:focus::before {
                                     </span>
                                   </span>
                                   <p
-                                    class="euiScreenReaderOnly"
+                                    class="emotion-euiScreenReaderOnly"
                                   >
                                     Press enter for options, or press space to begin dragging.
                                   </p>
@@ -424,10 +424,10 @@ tr:hover .c5:focus::before {
                     class=""
                   >
                     <div
-                      class="euiPopover euiPopover--anchorDownCenter c3"
+                      class="euiPopover c3 emotion-euiPopover"
                     >
                       <div
-                        class="euiPopover__anchor"
+                        class="euiPopover__anchor css-16vtueo-render"
                       >
                         <div
                           data-test-subj="withHoverActionsButton"
@@ -459,7 +459,7 @@ tr:hover .c5:focus::before {
                                   tabindex="-1"
                                 >
                                   <p
-                                    class="euiScreenReaderOnly"
+                                    class="emotion-euiScreenReaderOnly"
                                   >
                                     event.duration
                                   </p>
@@ -486,7 +486,7 @@ tr:hover .c5:focus::before {
                                     </div>
                                   </span>
                                   <p
-                                    class="euiScreenReaderOnly"
+                                    class="emotion-euiScreenReaderOnly"
                                   >
                                     Press enter for options, or press space to begin dragging.
                                   </p>
@@ -506,10 +506,10 @@ tr:hover .c5:focus::before {
                     class=""
                   >
                     <div
-                      class="euiPopover euiPopover--anchorDownCenter c3"
+                      class="euiPopover c3 emotion-euiPopover"
                     >
                       <div
-                        class="euiPopover__anchor"
+                        class="euiPopover__anchor css-16vtueo-render"
                       >
                         <div
                           data-test-subj="withHoverActionsButton"
@@ -541,7 +541,7 @@ tr:hover .c5:focus::before {
                                   tabindex="-1"
                                 >
                                   <p
-                                    class="euiScreenReaderOnly"
+                                    class="emotion-euiScreenReaderOnly"
                                   >
                                     event.start
                                   </p>
@@ -564,7 +564,7 @@ tr:hover .c5:focus::before {
                                     </div>
                                   </span>
                                   <p
-                                    class="euiScreenReaderOnly"
+                                    class="emotion-euiScreenReaderOnly"
                                   >
                                     Press enter for options, or press space to begin dragging.
                                   </p>
@@ -584,10 +584,10 @@ tr:hover .c5:focus::before {
                     class=""
                   >
                     <div
-                      class="euiPopover euiPopover--anchorDownCenter c3"
+                      class="euiPopover c3 emotion-euiPopover"
                     >
                       <div
-                        class="euiPopover__anchor"
+                        class="euiPopover__anchor css-16vtueo-render"
                       >
                         <div
                           data-test-subj="withHoverActionsButton"
@@ -619,7 +619,7 @@ tr:hover .c5:focus::before {
                                   tabindex="-1"
                                 >
                                   <p
-                                    class="euiScreenReaderOnly"
+                                    class="emotion-euiScreenReaderOnly"
                                   >
                                     event.end
                                   </p>
@@ -642,7 +642,7 @@ tr:hover .c5:focus::before {
                                     </div>
                                   </span>
                                   <p
-                                    class="euiScreenReaderOnly"
+                                    class="emotion-euiScreenReaderOnly"
                                   >
                                     Press enter for options, or press space to begin dragging.
                                   </p>
@@ -676,10 +676,10 @@ tr:hover .c5:focus::before {
                         class=""
                       >
                         <div
-                          class="euiPopover euiPopover--anchorDownCenter c3"
+                          class="euiPopover c3 emotion-euiPopover"
                         >
                           <div
-                            class="euiPopover__anchor"
+                            class="euiPopover__anchor css-16vtueo-render"
                           >
                             <div
                               data-test-subj="withHoverActionsButton"
@@ -711,7 +711,7 @@ tr:hover .c5:focus::before {
                                       tabindex="-1"
                                     >
                                       <p
-                                        class="euiScreenReaderOnly"
+                                        class="emotion-euiScreenReaderOnly"
                                       >
                                         network.direction
                                       </p>
@@ -744,7 +744,7 @@ tr:hover .c5:focus::before {
                                         </span>
                                       </span>
                                       <p
-                                        class="euiScreenReaderOnly"
+                                        class="emotion-euiScreenReaderOnly"
                                       >
                                         Press enter for options, or press space to begin dragging.
                                       </p>
@@ -764,10 +764,10 @@ tr:hover .c5:focus::before {
                         class=""
                       >
                         <div
-                          class="euiPopover euiPopover--anchorDownCenter c3"
+                          class="euiPopover c3 emotion-euiPopover"
                         >
                           <div
-                            class="euiPopover__anchor"
+                            class="euiPopover__anchor css-16vtueo-render"
                           >
                             <div
                               data-test-subj="withHoverActionsButton"
@@ -799,7 +799,7 @@ tr:hover .c5:focus::before {
                                       tabindex="-1"
                                     >
                                       <p
-                                        class="euiScreenReaderOnly"
+                                        class="emotion-euiScreenReaderOnly"
                                       >
                                         network.protocol
                                       </p>
@@ -827,7 +827,7 @@ tr:hover .c5:focus::before {
                                         </span>
                                       </span>
                                       <p
-                                        class="euiScreenReaderOnly"
+                                        class="emotion-euiScreenReaderOnly"
                                       >
                                         Press enter for options, or press space to begin dragging.
                                       </p>
@@ -847,10 +847,10 @@ tr:hover .c5:focus::before {
                         class=""
                       >
                         <div
-                          class="euiPopover euiPopover--anchorDownCenter c3"
+                          class="euiPopover c3 emotion-euiPopover"
                         >
                           <div
-                            class="euiPopover__anchor"
+                            class="euiPopover__anchor css-16vtueo-render"
                           >
                             <div
                               data-test-subj="withHoverActionsButton"
@@ -882,7 +882,7 @@ tr:hover .c5:focus::before {
                                       tabindex="-1"
                                     >
                                       <p
-                                        class="euiScreenReaderOnly"
+                                        class="emotion-euiScreenReaderOnly"
                                       >
                                         network.bytes
                                       </p>
@@ -903,7 +903,7 @@ tr:hover .c5:focus::before {
                                         </span>
                                       </span>
                                       <p
-                                        class="euiScreenReaderOnly"
+                                        class="emotion-euiScreenReaderOnly"
                                       >
                                         Press enter for options, or press space to begin dragging.
                                       </p>
@@ -923,10 +923,10 @@ tr:hover .c5:focus::before {
                         class=""
                       >
                         <div
-                          class="euiPopover euiPopover--anchorDownCenter c3"
+                          class="euiPopover c3 emotion-euiPopover"
                         >
                           <div
-                            class="euiPopover__anchor"
+                            class="euiPopover__anchor css-16vtueo-render"
                           >
                             <div
                               data-test-subj="withHoverActionsButton"
@@ -958,7 +958,7 @@ tr:hover .c5:focus::before {
                                       tabindex="-1"
                                     >
                                       <p
-                                        class="euiScreenReaderOnly"
+                                        class="emotion-euiScreenReaderOnly"
                                       >
                                         network.packets
                                       </p>
@@ -979,7 +979,7 @@ tr:hover .c5:focus::before {
                                         </span>
                                       </span>
                                       <p
-                                        class="euiScreenReaderOnly"
+                                        class="emotion-euiScreenReaderOnly"
                                       >
                                         Press enter for options, or press space to begin dragging.
                                       </p>
@@ -999,10 +999,10 @@ tr:hover .c5:focus::before {
                         class=""
                       >
                         <div
-                          class="euiPopover euiPopover--anchorDownCenter c3"
+                          class="euiPopover c3 emotion-euiPopover"
                         >
                           <div
-                            class="euiPopover__anchor"
+                            class="euiPopover__anchor css-16vtueo-render"
                           >
                             <div
                               data-test-subj="withHoverActionsButton"
@@ -1034,7 +1034,7 @@ tr:hover .c5:focus::before {
                                       tabindex="-1"
                                     >
                                       <p
-                                        class="euiScreenReaderOnly"
+                                        class="emotion-euiScreenReaderOnly"
                                       >
                                         network.transport
                                       </p>
@@ -1062,7 +1062,7 @@ tr:hover .c5:focus::before {
                                         </span>
                                       </span>
                                       <p
-                                        class="euiScreenReaderOnly"
+                                        class="emotion-euiScreenReaderOnly"
                                       >
                                         Press enter for options, or press space to begin dragging.
                                       </p>
@@ -1082,10 +1082,10 @@ tr:hover .c5:focus::before {
                         class=""
                       >
                         <div
-                          class="euiPopover euiPopover--anchorDownCenter c3"
+                          class="euiPopover c3 emotion-euiPopover"
                         >
                           <div
-                            class="euiPopover__anchor"
+                            class="euiPopover__anchor css-16vtueo-render"
                           >
                             <div
                               data-test-subj="withHoverActionsButton"
@@ -1117,7 +1117,7 @@ tr:hover .c5:focus::before {
                                       tabindex="-1"
                                     >
                                       <p
-                                        class="euiScreenReaderOnly"
+                                        class="emotion-euiScreenReaderOnly"
                                       >
                                         network.community_id
                                       </p>
@@ -1145,7 +1145,7 @@ tr:hover .c5:focus::before {
                                         </span>
                                       </span>
                                       <p
-                                        class="euiScreenReaderOnly"
+                                        class="emotion-euiScreenReaderOnly"
                                       >
                                         Press enter for options, or press space to begin dragging.
                                       </p>
@@ -1212,10 +1212,10 @@ tr:hover .c5:focus::before {
                                           class=""
                                         >
                                           <div
-                                            class="euiPopover euiPopover--anchorDownCenter c3"
+                                            class="euiPopover c3 emotion-euiPopover"
                                           >
                                             <div
-                                              class="euiPopover__anchor"
+                                              class="euiPopover__anchor css-16vtueo-render"
                                             >
                                               <div
                                                 data-test-subj="withHoverActionsButton"
@@ -1247,7 +1247,7 @@ tr:hover .c5:focus::before {
                                                         tabindex="-1"
                                                       >
                                                         <p
-                                                          class="euiScreenReaderOnly"
+                                                          class="emotion-euiScreenReaderOnly"
                                                         >
                                                           source.ip
                                                         </p>
@@ -1261,7 +1261,7 @@ tr:hover .c5:focus::before {
                                                             <a
                                                               class="euiLink emotion-euiLink-primary"
                                                               data-test-subj="network-details"
-                                                              href="/ip/192.168.1.2/source"
+                                                              href="/ip/192.168.1.2/source/flows"
                                                               rel="noreferrer"
                                                             >
                                                               192.168.1.2
@@ -1269,7 +1269,7 @@ tr:hover .c5:focus::before {
                                                           </span>
                                                         </span>
                                                         <p
-                                                          class="euiScreenReaderOnly"
+                                                          class="emotion-euiScreenReaderOnly"
                                                         >
                                                           Press enter for options, or press space to begin dragging.
                                                         </p>
@@ -1305,10 +1305,10 @@ tr:hover .c5:focus::before {
                                               class=""
                                             >
                                               <div
-                                                class="euiPopover euiPopover--anchorDownCenter c3"
+                                                class="euiPopover c3 emotion-euiPopover"
                                               >
                                                 <div
-                                                  class="euiPopover__anchor"
+                                                  class="euiPopover__anchor css-16vtueo-render"
                                                 >
                                                   <div
                                                     data-test-subj="withHoverActionsButton"
@@ -1340,7 +1340,7 @@ tr:hover .c5:focus::before {
                                                             tabindex="-1"
                                                           >
                                                             <p
-                                                              class="euiScreenReaderOnly"
+                                                              class="emotion-euiScreenReaderOnly"
                                                             >
                                                               source.port
                                                             </p>
@@ -1369,7 +1369,7 @@ tr:hover .c5:focus::before {
                                                                       External link
                                                                     </span>
                                                                     <span
-                                                                      class="euiScreenReaderOnly"
+                                                                      class="emotion-euiScreenReaderOnly-euiLink__screenReaderText"
                                                                     >
                                                                       (opens in a new tab or window)
                                                                     </span>
@@ -1378,7 +1378,7 @@ tr:hover .c5:focus::before {
                                                               </span>
                                                             </span>
                                                             <p
-                                                              class="euiScreenReaderOnly"
+                                                              class="emotion-euiScreenReaderOnly"
                                                             >
                                                               Press enter for options, or press space to begin dragging.
                                                             </p>
@@ -1416,10 +1416,10 @@ tr:hover .c5:focus::before {
                                           class=""
                                         >
                                           <div
-                                            class="euiPopover euiPopover--anchorDownCenter c3"
+                                            class="euiPopover c3 emotion-euiPopover"
                                           >
                                             <div
-                                              class="euiPopover__anchor"
+                                              class="euiPopover__anchor css-16vtueo-render"
                                             >
                                               <div
                                                 data-test-subj="withHoverActionsButton"
@@ -1451,7 +1451,7 @@ tr:hover .c5:focus::before {
                                                         tabindex="-1"
                                                       >
                                                         <p
-                                                          class="euiScreenReaderOnly"
+                                                          class="emotion-euiScreenReaderOnly"
                                                         >
                                                           source.geo.continent_name
                                                         </p>
@@ -1466,7 +1466,7 @@ tr:hover .c5:focus::before {
                                                           </span>
                                                         </span>
                                                         <p
-                                                          class="euiScreenReaderOnly"
+                                                          class="emotion-euiScreenReaderOnly"
                                                         >
                                                           Press enter for options, or press space to begin dragging.
                                                         </p>
@@ -1494,10 +1494,10 @@ tr:hover .c5:focus::before {
                                           class=""
                                         >
                                           <div
-                                            class="euiPopover euiPopover--anchorDownCenter c3"
+                                            class="euiPopover c3 emotion-euiPopover"
                                           >
                                             <div
-                                              class="euiPopover__anchor"
+                                              class="euiPopover__anchor css-16vtueo-render"
                                             >
                                               <div
                                                 data-test-subj="withHoverActionsButton"
@@ -1529,7 +1529,7 @@ tr:hover .c5:focus::before {
                                                         tabindex="-1"
                                                       >
                                                         <p
-                                                          class="euiScreenReaderOnly"
+                                                          class="emotion-euiScreenReaderOnly"
                                                         >
                                                           source.geo.country_name
                                                         </p>
@@ -1544,7 +1544,7 @@ tr:hover .c5:focus::before {
                                                           </span>
                                                         </span>
                                                         <p
-                                                          class="euiScreenReaderOnly"
+                                                          class="emotion-euiScreenReaderOnly"
                                                         >
                                                           Press enter for options, or press space to begin dragging.
                                                         </p>
@@ -1582,10 +1582,10 @@ tr:hover .c5:focus::before {
                                           class=""
                                         >
                                           <div
-                                            class="euiPopover euiPopover--anchorDownCenter c3"
+                                            class="euiPopover c3 emotion-euiPopover"
                                           >
                                             <div
-                                              class="euiPopover__anchor"
+                                              class="euiPopover__anchor css-16vtueo-render"
                                             >
                                               <div
                                                 data-test-subj="withHoverActionsButton"
@@ -1617,7 +1617,7 @@ tr:hover .c5:focus::before {
                                                         tabindex="-1"
                                                       >
                                                         <p
-                                                          class="euiScreenReaderOnly"
+                                                          class="emotion-euiScreenReaderOnly"
                                                         >
                                                           source.geo.country_iso_code
                                                         </p>
@@ -1632,7 +1632,7 @@ tr:hover .c5:focus::before {
                                                           </span>
                                                         </span>
                                                         <p
-                                                          class="euiScreenReaderOnly"
+                                                          class="emotion-euiScreenReaderOnly"
                                                         >
                                                           Press enter for options, or press space to begin dragging.
                                                         </p>
@@ -1660,10 +1660,10 @@ tr:hover .c5:focus::before {
                                           class=""
                                         >
                                           <div
-                                            class="euiPopover euiPopover--anchorDownCenter c3"
+                                            class="euiPopover c3 emotion-euiPopover"
                                           >
                                             <div
-                                              class="euiPopover__anchor"
+                                              class="euiPopover__anchor css-16vtueo-render"
                                             >
                                               <div
                                                 data-test-subj="withHoverActionsButton"
@@ -1695,7 +1695,7 @@ tr:hover .c5:focus::before {
                                                         tabindex="-1"
                                                       >
                                                         <p
-                                                          class="euiScreenReaderOnly"
+                                                          class="emotion-euiScreenReaderOnly"
                                                         >
                                                           source.geo.region_name
                                                         </p>
@@ -1710,7 +1710,7 @@ tr:hover .c5:focus::before {
                                                           </span>
                                                         </span>
                                                         <p
-                                                          class="euiScreenReaderOnly"
+                                                          class="emotion-euiScreenReaderOnly"
                                                         >
                                                           Press enter for options, or press space to begin dragging.
                                                         </p>
@@ -1738,10 +1738,10 @@ tr:hover .c5:focus::before {
                                           class=""
                                         >
                                           <div
-                                            class="euiPopover euiPopover--anchorDownCenter c3"
+                                            class="euiPopover c3 emotion-euiPopover"
                                           >
                                             <div
-                                              class="euiPopover__anchor"
+                                              class="euiPopover__anchor css-16vtueo-render"
                                             >
                                               <div
                                                 data-test-subj="withHoverActionsButton"
@@ -1773,7 +1773,7 @@ tr:hover .c5:focus::before {
                                                         tabindex="-1"
                                                       >
                                                         <p
-                                                          class="euiScreenReaderOnly"
+                                                          class="emotion-euiScreenReaderOnly"
                                                         >
                                                           source.geo.city_name
                                                         </p>
@@ -1788,7 +1788,7 @@ tr:hover .c5:focus::before {
                                                           </span>
                                                         </span>
                                                         <p
-                                                          class="euiScreenReaderOnly"
+                                                          class="emotion-euiScreenReaderOnly"
                                                         >
                                                           Press enter for options, or press space to begin dragging.
                                                         </p>
@@ -1834,10 +1834,10 @@ tr:hover .c5:focus::before {
                               class=""
                             >
                               <div
-                                class="euiPopover euiPopover--anchorDownCenter c3"
+                                class="euiPopover c3 emotion-euiPopover"
                               >
                                 <div
-                                  class="euiPopover__anchor"
+                                  class="euiPopover__anchor css-16vtueo-render"
                                 >
                                   <div
                                     data-test-subj="withHoverActionsButton"
@@ -1869,7 +1869,7 @@ tr:hover .c5:focus::before {
                                             tabindex="-1"
                                           >
                                             <p
-                                              class="euiScreenReaderOnly"
+                                              class="emotion-euiScreenReaderOnly"
                                             >
                                               source.bytes
                                             </p>
@@ -1895,7 +1895,7 @@ tr:hover .c5:focus::before {
                                               </span>
                                             </span>
                                             <p
-                                              class="euiScreenReaderOnly"
+                                              class="emotion-euiScreenReaderOnly"
                                             >
                                               Press enter for options, or press space to begin dragging.
                                             </p>
@@ -1923,10 +1923,10 @@ tr:hover .c5:focus::before {
                               class=""
                             >
                               <div
-                                class="euiPopover euiPopover--anchorDownCenter c3"
+                                class="euiPopover c3 emotion-euiPopover"
                               >
                                 <div
-                                  class="euiPopover__anchor"
+                                  class="euiPopover__anchor css-16vtueo-render"
                                 >
                                   <div
                                     data-test-subj="withHoverActionsButton"
@@ -1958,7 +1958,7 @@ tr:hover .c5:focus::before {
                                             tabindex="-1"
                                           >
                                             <p
-                                              class="euiScreenReaderOnly"
+                                              class="emotion-euiScreenReaderOnly"
                                             >
                                               source.packets
                                             </p>
@@ -1979,7 +1979,7 @@ tr:hover .c5:focus::before {
                                               </span>
                                             </span>
                                             <p
-                                              class="euiScreenReaderOnly"
+                                              class="emotion-euiScreenReaderOnly"
                                             >
                                               Press enter for options, or press space to begin dragging.
                                             </p>
@@ -2041,10 +2041,10 @@ tr:hover .c5:focus::before {
                               class=""
                             >
                               <div
-                                class="euiPopover euiPopover--anchorDownCenter c3"
+                                class="euiPopover c3 emotion-euiPopover"
                               >
                                 <div
-                                  class="euiPopover__anchor"
+                                  class="euiPopover__anchor css-16vtueo-render"
                                 >
                                   <div
                                     data-test-subj="withHoverActionsButton"
@@ -2076,7 +2076,7 @@ tr:hover .c5:focus::before {
                                             tabindex="-1"
                                           >
                                             <p
-                                              class="euiScreenReaderOnly"
+                                              class="emotion-euiScreenReaderOnly"
                                             >
                                               destination.bytes
                                             </p>
@@ -2102,7 +2102,7 @@ tr:hover .c5:focus::before {
                                               </span>
                                             </span>
                                             <p
-                                              class="euiScreenReaderOnly"
+                                              class="emotion-euiScreenReaderOnly"
                                             >
                                               Press enter for options, or press space to begin dragging.
                                             </p>
@@ -2130,10 +2130,10 @@ tr:hover .c5:focus::before {
                               class=""
                             >
                               <div
-                                class="euiPopover euiPopover--anchorDownCenter c3"
+                                class="euiPopover c3 emotion-euiPopover"
                               >
                                 <div
-                                  class="euiPopover__anchor"
+                                  class="euiPopover__anchor css-16vtueo-render"
                                 >
                                   <div
                                     data-test-subj="withHoverActionsButton"
@@ -2165,7 +2165,7 @@ tr:hover .c5:focus::before {
                                             tabindex="-1"
                                           >
                                             <p
-                                              class="euiScreenReaderOnly"
+                                              class="emotion-euiScreenReaderOnly"
                                             >
                                               destination.packets
                                             </p>
@@ -2186,7 +2186,7 @@ tr:hover .c5:focus::before {
                                               </span>
                                             </span>
                                             <p
-                                              class="euiScreenReaderOnly"
+                                              class="emotion-euiScreenReaderOnly"
                                             >
                                               Press enter for options, or press space to begin dragging.
                                             </p>
@@ -2256,10 +2256,10 @@ tr:hover .c5:focus::before {
                                           class=""
                                         >
                                           <div
-                                            class="euiPopover euiPopover--anchorDownCenter c3"
+                                            class="euiPopover c3 emotion-euiPopover"
                                           >
                                             <div
-                                              class="euiPopover__anchor"
+                                              class="euiPopover__anchor css-16vtueo-render"
                                             >
                                               <div
                                                 data-test-subj="withHoverActionsButton"
@@ -2291,7 +2291,7 @@ tr:hover .c5:focus::before {
                                                         tabindex="-1"
                                                       >
                                                         <p
-                                                          class="euiScreenReaderOnly"
+                                                          class="emotion-euiScreenReaderOnly"
                                                         >
                                                           destination.ip
                                                         </p>
@@ -2305,7 +2305,7 @@ tr:hover .c5:focus::before {
                                                             <a
                                                               class="euiLink emotion-euiLink-primary"
                                                               data-test-subj="network-details"
-                                                              href="/ip/10.1.2.3/source"
+                                                              href="/ip/10.1.2.3/source/flows"
                                                               rel="noreferrer"
                                                             >
                                                               10.1.2.3
@@ -2313,7 +2313,7 @@ tr:hover .c5:focus::before {
                                                           </span>
                                                         </span>
                                                         <p
-                                                          class="euiScreenReaderOnly"
+                                                          class="emotion-euiScreenReaderOnly"
                                                         >
                                                           Press enter for options, or press space to begin dragging.
                                                         </p>
@@ -2349,10 +2349,10 @@ tr:hover .c5:focus::before {
                                               class=""
                                             >
                                               <div
-                                                class="euiPopover euiPopover--anchorDownCenter c3"
+                                                class="euiPopover c3 emotion-euiPopover"
                                               >
                                                 <div
-                                                  class="euiPopover__anchor"
+                                                  class="euiPopover__anchor css-16vtueo-render"
                                                 >
                                                   <div
                                                     data-test-subj="withHoverActionsButton"
@@ -2384,7 +2384,7 @@ tr:hover .c5:focus::before {
                                                             tabindex="-1"
                                                           >
                                                             <p
-                                                              class="euiScreenReaderOnly"
+                                                              class="emotion-euiScreenReaderOnly"
                                                             >
                                                               destination.port
                                                             </p>
@@ -2413,7 +2413,7 @@ tr:hover .c5:focus::before {
                                                                       External link
                                                                     </span>
                                                                     <span
-                                                                      class="euiScreenReaderOnly"
+                                                                      class="emotion-euiScreenReaderOnly-euiLink__screenReaderText"
                                                                     >
                                                                       (opens in a new tab or window)
                                                                     </span>
@@ -2422,7 +2422,7 @@ tr:hover .c5:focus::before {
                                                               </span>
                                                             </span>
                                                             <p
-                                                              class="euiScreenReaderOnly"
+                                                              class="emotion-euiScreenReaderOnly"
                                                             >
                                                               Press enter for options, or press space to begin dragging.
                                                             </p>
@@ -2460,10 +2460,10 @@ tr:hover .c5:focus::before {
                                           class=""
                                         >
                                           <div
-                                            class="euiPopover euiPopover--anchorDownCenter c3"
+                                            class="euiPopover c3 emotion-euiPopover"
                                           >
                                             <div
-                                              class="euiPopover__anchor"
+                                              class="euiPopover__anchor css-16vtueo-render"
                                             >
                                               <div
                                                 data-test-subj="withHoverActionsButton"
@@ -2495,7 +2495,7 @@ tr:hover .c5:focus::before {
                                                         tabindex="-1"
                                                       >
                                                         <p
-                                                          class="euiScreenReaderOnly"
+                                                          class="emotion-euiScreenReaderOnly"
                                                         >
                                                           destination.geo.continent_name
                                                         </p>
@@ -2510,7 +2510,7 @@ tr:hover .c5:focus::before {
                                                           </span>
                                                         </span>
                                                         <p
-                                                          class="euiScreenReaderOnly"
+                                                          class="emotion-euiScreenReaderOnly"
                                                         >
                                                           Press enter for options, or press space to begin dragging.
                                                         </p>
@@ -2538,10 +2538,10 @@ tr:hover .c5:focus::before {
                                           class=""
                                         >
                                           <div
-                                            class="euiPopover euiPopover--anchorDownCenter c3"
+                                            class="euiPopover c3 emotion-euiPopover"
                                           >
                                             <div
-                                              class="euiPopover__anchor"
+                                              class="euiPopover__anchor css-16vtueo-render"
                                             >
                                               <div
                                                 data-test-subj="withHoverActionsButton"
@@ -2573,7 +2573,7 @@ tr:hover .c5:focus::before {
                                                         tabindex="-1"
                                                       >
                                                         <p
-                                                          class="euiScreenReaderOnly"
+                                                          class="emotion-euiScreenReaderOnly"
                                                         >
                                                           destination.geo.country_name
                                                         </p>
@@ -2588,7 +2588,7 @@ tr:hover .c5:focus::before {
                                                           </span>
                                                         </span>
                                                         <p
-                                                          class="euiScreenReaderOnly"
+                                                          class="emotion-euiScreenReaderOnly"
                                                         >
                                                           Press enter for options, or press space to begin dragging.
                                                         </p>
@@ -2626,10 +2626,10 @@ tr:hover .c5:focus::before {
                                           class=""
                                         >
                                           <div
-                                            class="euiPopover euiPopover--anchorDownCenter c3"
+                                            class="euiPopover c3 emotion-euiPopover"
                                           >
                                             <div
-                                              class="euiPopover__anchor"
+                                              class="euiPopover__anchor css-16vtueo-render"
                                             >
                                               <div
                                                 data-test-subj="withHoverActionsButton"
@@ -2661,7 +2661,7 @@ tr:hover .c5:focus::before {
                                                         tabindex="-1"
                                                       >
                                                         <p
-                                                          class="euiScreenReaderOnly"
+                                                          class="emotion-euiScreenReaderOnly"
                                                         >
                                                           destination.geo.country_iso_code
                                                         </p>
@@ -2676,7 +2676,7 @@ tr:hover .c5:focus::before {
                                                           </span>
                                                         </span>
                                                         <p
-                                                          class="euiScreenReaderOnly"
+                                                          class="emotion-euiScreenReaderOnly"
                                                         >
                                                           Press enter for options, or press space to begin dragging.
                                                         </p>
@@ -2704,10 +2704,10 @@ tr:hover .c5:focus::before {
                                           class=""
                                         >
                                           <div
-                                            class="euiPopover euiPopover--anchorDownCenter c3"
+                                            class="euiPopover c3 emotion-euiPopover"
                                           >
                                             <div
-                                              class="euiPopover__anchor"
+                                              class="euiPopover__anchor css-16vtueo-render"
                                             >
                                               <div
                                                 data-test-subj="withHoverActionsButton"
@@ -2739,7 +2739,7 @@ tr:hover .c5:focus::before {
                                                         tabindex="-1"
                                                       >
                                                         <p
-                                                          class="euiScreenReaderOnly"
+                                                          class="emotion-euiScreenReaderOnly"
                                                         >
                                                           destination.geo.region_name
                                                         </p>
@@ -2754,7 +2754,7 @@ tr:hover .c5:focus::before {
                                                           </span>
                                                         </span>
                                                         <p
-                                                          class="euiScreenReaderOnly"
+                                                          class="emotion-euiScreenReaderOnly"
                                                         >
                                                           Press enter for options, or press space to begin dragging.
                                                         </p>
@@ -2782,10 +2782,10 @@ tr:hover .c5:focus::before {
                                           class=""
                                         >
                                           <div
-                                            class="euiPopover euiPopover--anchorDownCenter c3"
+                                            class="euiPopover c3 emotion-euiPopover"
                                           >
                                             <div
-                                              class="euiPopover__anchor"
+                                              class="euiPopover__anchor css-16vtueo-render"
                                             >
                                               <div
                                                 data-test-subj="withHoverActionsButton"
@@ -2817,7 +2817,7 @@ tr:hover .c5:focus::before {
                                                         tabindex="-1"
                                                       >
                                                         <p
-                                                          class="euiScreenReaderOnly"
+                                                          class="emotion-euiScreenReaderOnly"
                                                         >
                                                           destination.geo.city_name
                                                         </p>
@@ -2832,7 +2832,7 @@ tr:hover .c5:focus::before {
                                                           </span>
                                                         </span>
                                                         <p
-                                                          class="euiScreenReaderOnly"
+                                                          class="emotion-euiScreenReaderOnly"
                                                         >
                                                           Press enter for options, or press space to begin dragging.
                                                         </p>
@@ -2874,10 +2874,10 @@ tr:hover .c5:focus::before {
                 class=""
               >
                 <div
-                  class="euiPopover euiPopover--anchorDownCenter c3"
+                  class="euiPopover c3 emotion-euiPopover"
                 >
                   <div
-                    class="euiPopover__anchor"
+                    class="euiPopover__anchor css-16vtueo-render"
                   >
                     <div
                       data-test-subj="withHoverActionsButton"
@@ -2909,7 +2909,7 @@ tr:hover .c5:focus::before {
                               tabindex="-1"
                             >
                               <p
-                                class="euiScreenReaderOnly"
+                                class="emotion-euiScreenReaderOnly"
                               >
                                 tls.fingerprints.ja3.hash
                               </p>
@@ -2950,7 +2950,7 @@ tr:hover .c5:focus::before {
                                             External link
                                           </span>
                                           <span
-                                            class="euiScreenReaderOnly"
+                                            class="emotion-euiScreenReaderOnly-euiLink__screenReaderText"
                                           >
                                             (opens in a new tab or window)
                                           </span>
@@ -2966,7 +2966,7 @@ tr:hover .c5:focus::before {
                                 </span>
                               </span>
                               <p
-                                class="euiScreenReaderOnly"
+                                class="emotion-euiScreenReaderOnly"
                               >
                                 Press enter for options, or press space to begin dragging.
                               </p>
@@ -2986,10 +2986,10 @@ tr:hover .c5:focus::before {
                 class=""
               >
                 <div
-                  class="euiPopover euiPopover--anchorDownCenter c3"
+                  class="euiPopover c3 emotion-euiPopover"
                 >
                   <div
-                    class="euiPopover__anchor"
+                    class="euiPopover__anchor css-16vtueo-render"
                   >
                     <div
                       data-test-subj="withHoverActionsButton"
@@ -3021,7 +3021,7 @@ tr:hover .c5:focus::before {
                               tabindex="-1"
                             >
                               <p
-                                class="euiScreenReaderOnly"
+                                class="emotion-euiScreenReaderOnly"
                               >
                                 tls.client_certificate.fingerprint.sha1
                               </p>
@@ -3062,7 +3062,7 @@ tr:hover .c5:focus::before {
                                             External link
                                           </span>
                                           <span
-                                            class="euiScreenReaderOnly"
+                                            class="emotion-euiScreenReaderOnly-euiLink__screenReaderText"
                                           >
                                             (opens in a new tab or window)
                                           </span>
@@ -3078,7 +3078,7 @@ tr:hover .c5:focus::before {
                                 </span>
                               </span>
                               <p
-                                class="euiScreenReaderOnly"
+                                class="emotion-euiScreenReaderOnly"
                               >
                                 Press enter for options, or press space to begin dragging.
                               </p>
@@ -3098,10 +3098,10 @@ tr:hover .c5:focus::before {
                 class=""
               >
                 <div
-                  class="euiPopover euiPopover--anchorDownCenter c3"
+                  class="euiPopover c3 emotion-euiPopover"
                 >
                   <div
-                    class="euiPopover__anchor"
+                    class="euiPopover__anchor css-16vtueo-render"
                   >
                     <div
                       data-test-subj="withHoverActionsButton"
@@ -3133,7 +3133,7 @@ tr:hover .c5:focus::before {
                               tabindex="-1"
                             >
                               <p
-                                class="euiScreenReaderOnly"
+                                class="emotion-euiScreenReaderOnly"
                               >
                                 tls.server_certificate.fingerprint.sha1
                               </p>
@@ -3174,7 +3174,7 @@ tr:hover .c5:focus::before {
                                             External link
                                           </span>
                                           <span
-                                            class="euiScreenReaderOnly"
+                                            class="emotion-euiScreenReaderOnly-euiLink__screenReaderText"
                                           >
                                             (opens in a new tab or window)
                                           </span>
@@ -3190,7 +3190,7 @@ tr:hover .c5:focus::before {
                                 </span>
                               </span>
                               <p
-                                class="euiScreenReaderOnly"
+                                class="emotion-euiScreenReaderOnly"
                               >
                                 Press enter for options, or press space to begin dragging.
                               </p>

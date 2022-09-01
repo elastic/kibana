@@ -6,6 +6,7 @@
  */
 import React from 'react';
 import {
+  EuiBadge,
   EuiButtonIcon,
   EuiSpacer,
   EuiTableActionsColumnType,
@@ -13,13 +14,13 @@ import {
   EuiTitle,
   EuiToolTip,
   PropsOf,
-  useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import { euiThemeVars } from '@kbn/ui-theme';
 import type { Serializable } from '@kbn/utility-types';
+import { getPrimaryRuleTags } from '../../../common/utils/get_primary_rule_tags';
+import { TimestampTableCell } from '../../../components/timestamp_table_cell';
 import { ColumnNameWithTooltip } from '../../../components/column_name_with_tooltip';
 import { CspEvaluationBadge } from '../../../components/csp_evaluation_badge';
 import {
@@ -27,18 +28,7 @@ import {
   FINDINGS_TABLE_CELL_ADD_NEGATED_FILTER,
 } from '../test_subjects';
 
-export const PageWrapper: React.FC = ({ children }) => {
-  const { euiTheme } = useEuiTheme();
-  return (
-    <div
-      css={css`
-        padding: ${euiTheme.size.l};
-      `}
-    >
-      {children}
-    </div>
-  );
-};
+export type OnAddFilter = <T extends string>(key: T, value: Serializable, negate: boolean) => void;
 
 export const PageTitle: React.FC = ({ children }) => (
   <EuiTitle size="l">
@@ -70,8 +60,6 @@ export const getExpandColumn = <T extends unknown>({
   ],
 });
 
-export type OnAddFilter = <T extends string>(key: T, value: Serializable, negate: boolean) => void;
-
 const baseColumns = [
   {
     field: 'resource.id',
@@ -88,7 +76,7 @@ const baseColumns = [
       />
     ),
     truncateText: true,
-    width: '15%',
+    width: '10%',
     sortable: true,
     render: (filename: string) => (
       <EuiToolTip position="top" content={filename} anchorClassName="eui-textTruncate">
@@ -101,7 +89,7 @@ const baseColumns = [
     name: i18n.translate('xpack.csp.findings.findingsTable.findingsTableColumn.resultColumnLabel', {
       defaultMessage: 'Result',
     }),
-    width: '120px',
+    width: '110px',
     sortable: true,
     render: (type: PropsOf<typeof CspEvaluationBadge>['type']) => (
       <CspEvaluationBadge type={type} />
@@ -114,7 +102,7 @@ const baseColumns = [
       { defaultMessage: 'Resource Type' }
     ),
     sortable: true,
-    width: '150px',
+    truncateText: true,
   },
   {
     field: 'resource.name',
@@ -123,6 +111,7 @@ const baseColumns = [
       { defaultMessage: 'Resource Name' }
     ),
     sortable: true,
+    truncateText: true,
   },
   {
     field: 'rule.name',
@@ -141,6 +130,20 @@ const baseColumns = [
     truncateText: true,
   },
   {
+    field: 'rule.tags',
+    name: i18n.translate(
+      'xpack.csp.findings.findingsTable.findingsTableColumn.ruleTagsColumnLabel',
+      { defaultMessage: 'Rule Tags' }
+    ),
+    width: '200px',
+    sortable: false,
+    truncateText: true,
+    render: (tags: string[]) => {
+      const { benchmark, version } = getPrimaryRuleTags(tags);
+      return [benchmark, version].map((tag) => <EuiBadge>{tag}</EuiBadge>);
+    },
+  },
+  {
     field: 'cluster_id',
     name: (
       <ColumnNameWithTooltip
@@ -154,6 +157,7 @@ const baseColumns = [
         )}
       />
     ),
+    width: '10%',
     truncateText: true,
     sortable: true,
   },
@@ -166,11 +170,7 @@ const baseColumns = [
     ),
     truncateText: true,
     sortable: true,
-    render: (timestamp: number) => (
-      <EuiToolTip position="top" content={timestamp}>
-        <span>{moment(timestamp).fromNow()}</span>
-      </EuiToolTip>
-    ),
+    render: (timestamp: number) => <TimestampTableCell timestamp={timestamp} />,
   },
 ] as const;
 

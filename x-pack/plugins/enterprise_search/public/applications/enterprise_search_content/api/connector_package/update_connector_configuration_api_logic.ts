@@ -5,14 +5,13 @@
  * 2.0.
  */
 
+import { ConnectorConfiguration } from '../../../../../common/types/connectors';
 import { createApiLogic } from '../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../shared/http';
 
-import { ConnectorConfiguration } from '../index/fetch_index_api_logic';
-
 export interface PostConnectorConfigurationArgs {
   configuration: ConnectorConfiguration;
-  indexId: string;
+  connectorId: string;
   indexName: string;
 }
 
@@ -23,10 +22,10 @@ export interface PostConnectorConfigurationResponse {
 
 export const postConnectorConfiguration = async ({
   configuration,
-  indexId,
+  connectorId,
   indexName,
 }: PostConnectorConfigurationArgs) => {
-  const route = `/internal/enterprise_search/connectors/${indexId}/configuration`;
+  const route = `/internal/enterprise_search/connectors/${connectorId}/configuration`;
 
   await HttpLogic.values.http.post<ConnectorConfiguration>(route, {
     body: JSON.stringify(configuration),

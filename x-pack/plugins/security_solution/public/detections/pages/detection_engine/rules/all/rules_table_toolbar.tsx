@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { EuiSwitch, EuiSwitchEvent, EuiTab, EuiTabs, EuiToolTip } from '@elastic/eui';
+import type { EuiSwitchEvent } from '@elastic/eui';
+import { EuiSwitch, EuiTab, EuiTabs, EuiToolTip } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import styled from 'styled-components';
 import { useRulesTableContext } from './rules_table/rules_table_context';

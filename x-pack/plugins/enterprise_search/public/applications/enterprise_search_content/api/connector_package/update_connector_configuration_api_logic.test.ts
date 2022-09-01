@@ -23,7 +23,7 @@ describe('updateConnectorConfigurationLogic', () => {
       const configuration = { configurationKey: { label: 'hello', value: 'yeahhhh' } };
       const result = postConnectorConfiguration({
         configuration,
-        indexId: 'anIndexId',
+        connectorId: 'anIndexId',
         indexName: 'anIndexName',
       });
       await nextTick();

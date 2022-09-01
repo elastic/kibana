@@ -17,7 +17,3 @@
     - "x-pack/plugins/synthetics/**/*.*"
     - "x-pack/plugins/ux/**/*.*"
     - "x-pack/plugins/observability/public/components/shared/exploratory_view/**/*.*"
-    - "x-pack/plugins/apm/server/lib/rum_client/**/*.*"
-    - "x-pack/plugins/apm/server/lib/rum_client/*.*"
-    - "x-pack/plugins/apm/server/routes/rum_client.ts"
-    - "x-pack/plugins/apm/server/projections/rum_overview.ts"

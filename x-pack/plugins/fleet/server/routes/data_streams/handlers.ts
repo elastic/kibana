@@ -8,8 +8,8 @@ import { keyBy, keys, merge } from 'lodash';
 import type { RequestHandler } from '@kbn/core/server';
 
 import type { DataStream } from '../../types';
-import { KibanaSavedObjectType } from '../../../common';
-import type { GetDataStreamsResponse } from '../../../common';
+import { KibanaSavedObjectType } from '../../../common/types';
+import type { GetDataStreamsResponse } from '../../../common/types';
 import { getPackageSavedObjects } from '../../services/epm/packages/get';
 import { defaultIngestErrorHandler } from '../../errors';
 
@@ -190,7 +190,7 @@ export const getListHandler: RequestHandler = async (context, request, response)
     });
 
     // Return final data streams objects sorted by last activity, descending
-    // After filtering out data streams that are missing dataset/namespace/type fields
+    // After filtering out data streams that are missing dataset/namespace/type/package fields
     body.data_streams = (await Promise.all(dataStreamPromises))
       .filter(({ dataset, namespace, type }) => dataset && namespace && type)
       .sort((a, b) => b.last_activity_ms - a.last_activity_ms);

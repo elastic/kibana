@@ -12,18 +12,41 @@ import {
   Uuid,
 } from '@elastic/elasticsearch/lib/api/types';
 
+import { Connector } from './connectors';
+import { Crawler } from './crawler';
+
 export interface ElasticsearchIndex {
+  count: number; // Elasticsearch _count
   health?: HealthStatus;
-  status?: IndicesStatsIndexMetadataState;
+  hidden: boolean;
   name: IndexName;
-  uuid?: Uuid;
+  status?: IndicesStatsIndexMetadataState;
   total: {
     docs: {
-      count: number;
+      count: number; // Lucene count (includes nested documents)
       deleted: number;
     };
     store: {
       size_in_bytes: string;
     };
   };
+  uuid?: Uuid;
 }
+
+export interface ConnectorIndex extends ElasticsearchIndex {
+  connector: Connector;
+}
+export interface CrawlerIndex extends ElasticsearchIndex {
+  crawler: Crawler;
+  connector?: Connector;
+}
+
+export interface ElasticsearchIndexWithPrivileges extends ElasticsearchIndex {
+  alias: boolean;
+  privileges: {
+    manage: boolean;
+    read: boolean;
+  };
+}
+
+export type ElasticsearchIndexWithIngestion = ElasticsearchIndex | ConnectorIndex | CrawlerIndex;

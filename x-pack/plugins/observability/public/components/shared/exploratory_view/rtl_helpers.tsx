@@ -22,7 +22,6 @@ import { coreMock, themeServiceMock } from '@kbn/core/public/mocks';
 import { KibanaContextProvider, KibanaServices } from '@kbn/kibana-react-plugin/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { lensPluginMock } from '@kbn/lens-plugin/public/mocks';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { setIndexPatterns } from '@kbn/unified-search-plugin/public/services';
 import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
 import { createStubDataView } from '@kbn/data-views-plugin/common/stubs';

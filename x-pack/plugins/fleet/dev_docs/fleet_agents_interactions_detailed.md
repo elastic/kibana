@@ -1,3 +1,5 @@
+TODO: combine with fleet_agent_communication.md
+
 # Fleet <-> Agent Interactions
 
 ## Agent enrollment and checkin

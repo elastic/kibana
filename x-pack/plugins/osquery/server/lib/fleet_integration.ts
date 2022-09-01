@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { SavedObjectReference, SavedObjectsClient } from '@kbn/core/server';
+import type { SavedObjectReference, SavedObjectsClient } from '@kbn/core/server';
 import { filter, map } from 'lodash';
-import { PostPackagePolicyDeleteCallback } from '@kbn/fleet-plugin/server';
+import type { PostPackagePolicyDeleteCallback } from '@kbn/fleet-plugin/server';
 import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import { packSavedObjectType } from '../../common/types';
 import { OSQUERY_INTEGRATION_NAME } from '../../common';

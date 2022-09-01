@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import { createReducer } from '@reduxjs/toolkit';
-import { SyntheticsMonitor } from '../../../../../common/runtime_types';
+import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
+
+import type { SyntheticsMonitor } from '../../../../../common/runtime_types';
 import { getSyntheticsMonitorAction } from './actions';
 
 export interface SyntheticsMonitorState {

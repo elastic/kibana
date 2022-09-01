@@ -768,7 +768,7 @@
         "label": "getManageTimelineById",
         "description": [],
         "signature": [
-          "() => Reselect.OutputParametricSelector<unknown, string, { dataViewId: string | null; documentType: string; defaultColumns: (Pick<",
+          "() => ((state: {}, params_0: string) => { dataViewId: string | null; documentType: string; defaultColumns: (Pick<",
           "EuiDataGridColumn",
           ", \"id\" | \"display\" | \"displayAsText\" | \"initialWidth\"> & Pick<",
           "EuiDataGridColumn",
@@ -792,7 +792,9 @@
             "section": "def-public.FilterManager",
             "text": "FilterManager"
           },
-          " | undefined; footerText: React.ReactNode; loadingText: React.ReactNode; queryFields: string[]; selectAll: boolean; title: string; }, (res: ",
+          " | undefined; footerText: React.ReactNode; loadingText: React.ReactNode; queryFields: string[]; selectAll: boolean; title: string; }) & ",
+          "OutputSelectorFields",
+          "<(args_0: ",
           {
             "pluginId": "timelines",
             "scope": "public",
@@ -824,7 +826,7 @@
             "section": "def-public.FilterManager",
             "text": "FilterManager"
           },
-          " | undefined; footerText: React.ReactNode; loadingText: React.ReactNode; queryFields: string[]; selectAll: boolean; title: string; }>"
+          " | undefined; footerText: React.ReactNode; loadingText: React.ReactNode; queryFields: string[]; selectAll: boolean; title: string; } & { clearCache: () => void; }> & { clearCache: () => void; }"
         ],
         "path": "x-pack/plugins/timelines/public/store/t_grid/selectors.ts",
         "deprecated": false,
@@ -2269,6 +2271,112 @@
     "interfaces": [
       {
         "parentPluginId": "timelines",
+        "id": "def-public.AddToTimelineButtonProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "AddToTimelineButtonProps",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "timelines",
+            "scope": "public",
+            "docId": "kibTimelinesPluginApi",
+            "section": "def-public.AddToTimelineButtonProps",
+            "text": "AddToTimelineButtonProps"
+          },
+          " extends ",
+          "HoverActionComponentProps"
+        ],
+        "path": "x-pack/plugins/timelines/public/components/hover_actions/actions/add_to_timeline.tsx",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "timelines",
+            "id": "def-public.AddToTimelineButtonProps.Component",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "Component",
+            "description": [
+              "`Component` is only used with `EuiDataGrid`; the grid keeps a reference to `Component` for show / hide functionality"
+            ],
+            "signature": [
+              "React.FunctionComponent<(",
+              "DisambiguateSet",
+              "<EuiButtonEmptyPropsForAnchor, EuiButtonEmptyPropsForButton> & ",
+              "CommonEuiButtonEmptyProps",
+              " & { onClick?: React.MouseEventHandler<HTMLButtonElement> | undefined; } & React.ButtonHTMLAttributes<HTMLButtonElement>) | (",
+              "DisambiguateSet",
+              "<EuiButtonEmptyPropsForButton, EuiButtonEmptyPropsForAnchor> & ",
+              "CommonEuiButtonEmptyProps",
+              " & { href?: string | undefined; onClick?: React.MouseEventHandler<HTMLAnchorElement> | undefined; } & React.AnchorHTMLAttributes<HTMLAnchorElement>)> | React.FunctionComponent<(",
+              "DisambiguateSet",
+              "<",
+              "EuiButtonIconPropsForAnchor",
+              ", ",
+              "EuiButtonIconPropsForButton",
+              "> & { type?: \"reset\" | \"button\" | \"submit\" | undefined; } & ",
+              "EuiButtonIconProps",
+              " & { onClick?: React.MouseEventHandler<HTMLButtonElement> | undefined; } & React.ButtonHTMLAttributes<HTMLButtonElement> & { buttonRef?: React.Ref<HTMLButtonElement> | undefined; }) | (",
+              "DisambiguateSet",
+              "<",
+              "EuiButtonIconPropsForButton",
+              ", ",
+              "EuiButtonIconPropsForAnchor",
+              "> & { type?: string | undefined; } & ",
+              "EuiButtonIconProps",
+              " & { href?: string | undefined; onClick?: React.MouseEventHandler<HTMLAnchorElement> | undefined; } & React.AnchorHTMLAttributes<HTMLAnchorElement> & { buttonRef?: React.Ref<HTMLAnchorElement> | undefined; })> | typeof ",
+              "EuiContextMenuItem",
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/timelines/public/components/hover_actions/actions/add_to_timeline.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "timelines",
+            "id": "def-public.AddToTimelineButtonProps.draggableId",
+            "type": "string",
+            "tags": [],
+            "label": "draggableId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/timelines/public/components/hover_actions/actions/add_to_timeline.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "timelines",
+            "id": "def-public.AddToTimelineButtonProps.dataProvider",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "dataProvider",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "timelines",
+                "scope": "common",
+                "docId": "kibTimelinesPluginApi",
+                "section": "def-common.DataProvider",
+                "text": "DataProvider"
+              },
+              " | ",
+              {
+                "pluginId": "timelines",
+                "scope": "common",
+                "docId": "kibTimelinesPluginApi",
+                "section": "def-common.DataProvider",
+                "text": "DataProvider"
+              },
+              "[] | undefined"
+            ],
+            "path": "x-pack/plugins/timelines/public/components/hover_actions/actions/add_to_timeline.tsx",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "timelines",
         "id": "def-public.TGridModel",
         "type": "Interface",
         "tags": [],
@@ -2849,7 +2957,7 @@
         "label": "TGridModelForTimeline",
         "description": [],
         "signature": [
-          "{ title: string; columns: (Pick<",
+          "{ columns: (Pick<",
           "EuiDataGridColumn",
           ", \"id\" | \"display\" | \"displayAsText\" | \"initialWidth\"> & Pick<",
           "EuiDataGridColumn",
@@ -2865,7 +2973,7 @@
           },
           "; description?: string | null | undefined; esTypes?: string[] | undefined; example?: string | number | null | undefined; format?: string | undefined; linkField?: string | undefined; placeholder?: string | undefined; subType?: ",
           "IFieldSubType",
-          " | undefined; type?: string | undefined; })[]; id: string; filters?: ",
+          " | undefined; type?: string | undefined; })[]; id: string; title: string; filters?: ",
           "Filter",
           "[] | undefined; dataViewId: string | null; sort: ",
           "SortColumnTimeline",
@@ -6614,7 +6722,7 @@
         "label": "DataProvidersAnd",
         "description": [],
         "signature": [
-          "{ id: string; type?: ",
+          "{ type?: ",
           {
             "pluginId": "timelines",
             "scope": "common",
@@ -6622,7 +6730,7 @@
             "section": "def-common.DataProviderType",
             "text": "DataProviderType"
           },
-          " | undefined; name: string; enabled: boolean; excluded: boolean; kqlQuery: string; queryMatch: ",
+          " | undefined; id: string; name: string; enabled: boolean; excluded: boolean; kqlQuery: string; queryMatch: ",
           {
             "pluginId": "timelines",
             "scope": "common",
@@ -6647,35 +6755,6 @@
           "\"DELETED_SECURITY_SOLUTION_DATA_VIEW\""
         ],
         "path": "x-pack/plugins/timelines/common/constants.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "timelines",
-        "id": "def-common.DocValueFields",
-        "type": "Type",
-        "tags": [],
-        "label": "DocValueFields",
-        "description": [],
-        "signature": [
-          "QueryDslFieldAndFormat"
-        ],
-        "path": "x-pack/plugins/timelines/common/search_strategy/common/index.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "timelines",
-        "id": "def-common.EMPTY_DOCVALUE_FIELD",
-        "type": "Array",
-        "tags": [],
-        "label": "EMPTY_DOCVALUE_FIELD",
-        "description": [],
-        "signature": [
-          "QueryDslFieldAndFormat",
-          "[]"
-        ],
-        "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -6950,7 +7029,7 @@
         "label": "TimelineKpiStrategyRequest",
         "description": [],
         "signature": [
-          "{ id?: string | undefined; params?: ",
+          "{ params?: ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -6958,7 +7037,7 @@
             "section": "def-common.ISearchRequestParams",
             "text": "ISearchRequestParams"
           },
-          " | undefined; defaultIndex: string[]; timerange: ",
+          " | undefined; id?: string | undefined; timerange: ",
           {
             "pluginId": "timelines",
             "scope": "common",
@@ -6966,11 +7045,9 @@
             "section": "def-common.TimerangeInput",
             "text": "TimerangeInput"
           },
-          "; filterQuery: string | ",
+          "; defaultIndex: string[]; filterQuery: string | ",
           "ESQuery",
-          " | undefined; docValueFields?: ",
-          "QueryDslFieldAndFormat",
-          "[] | undefined; factoryQueryType?: ",
+          " | undefined; factoryQueryType?: ",
           "TimelineEventsQueries",
           " | undefined; entityType?: ",
           {

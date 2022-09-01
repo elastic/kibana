@@ -7,11 +7,11 @@
 
 import { left } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 
+import type { RulesSchema } from './rules_schema';
 import {
   rulesSchema,
-  RulesSchema,
   checkTypeDependents,
   getDependents,
   addSavedId,
@@ -22,7 +22,7 @@ import {
   addEqlFields,
 } from './rules_schema';
 import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
-import { TypeAndTimelineOnly } from './type_timeline_only_schema';
+import type { TypeAndTimelineOnly } from './type_timeline_only_schema';
 import {
   getRulesSchemaMock,
   getRulesMlSchemaMock,
@@ -30,8 +30,6 @@ import {
   getRulesEqlSchemaMock,
 } from './rules_schema.mocks';
 import type { ListArray } from '@kbn/securitysolution-io-ts-list-types';
-
-export const ANCHOR_DATE = '2020-02-20T03:57:54.037Z';
 
 describe('rules_schema', () => {
   test('it should validate a type of "query" without anything extra', () => {
@@ -665,9 +663,9 @@ describe('rules_schema', () => {
       expect(emptyArray).toEqual(expected);
     });
 
-    test('should array of size 1 given a "saved_query"', () => {
+    test('should array of size 2 given a "saved_query"', () => {
       const array = addSavedId({ type: 'saved_query' });
-      expect(array.length).toEqual(1);
+      expect(array.length).toEqual(2);
     });
   });
 

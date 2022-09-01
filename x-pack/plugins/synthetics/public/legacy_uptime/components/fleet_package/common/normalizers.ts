@@ -84,10 +84,12 @@ export const commonNormalizers: CommonNormalizerMap = {
     }
   },
   [ConfigKey.APM_SERVICE_NAME]: getCommonNormalizer(ConfigKey.APM_SERVICE_NAME),
+  [ConfigKey.CONFIG_ID]: getCommonNormalizer(ConfigKey.CONFIG_ID),
   [ConfigKey.TAGS]: getCommonjsonToJavascriptNormalizer(ConfigKey.TAGS),
   [ConfigKey.TIMEOUT]: getCommonCronToSecondsNormalizer(ConfigKey.TIMEOUT),
   [ConfigKey.NAMESPACE]: (fields) =>
     fields?.[ConfigKey.NAMESPACE]?.value ?? DEFAULT_NAMESPACE_STRING,
   [ConfigKey.REVISION]: getCommonNormalizer(ConfigKey.REVISION),
   [ConfigKey.MONITOR_SOURCE_TYPE]: getCommonNormalizer(ConfigKey.MONITOR_SOURCE_TYPE),
+  [ConfigKey.FORM_MONITOR_TYPE]: getCommonNormalizer(ConfigKey.FORM_MONITOR_TYPE),
 };

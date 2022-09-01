@@ -9,13 +9,9 @@ import Boom from '@hapi/boom';
 import { isEqual } from 'lodash';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 
-import {
-  decodeCloudId,
-  GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
-  GLOBAL_SETTINGS_ID,
-  normalizeHostsForAgents,
-} from '../../common';
-import type { SettingsSOAttributes, Settings, BaseSettings } from '../../common';
+import { decodeCloudId, normalizeHostsForAgents } from '../../common/services';
+import { GLOBAL_SETTINGS_SAVED_OBJECT_TYPE, GLOBAL_SETTINGS_ID } from '../../common/constants';
+import type { SettingsSOAttributes, Settings, BaseSettings } from '../../common/types';
 
 import { appContextService } from './app_context';
 

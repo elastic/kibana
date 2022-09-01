@@ -12,10 +12,33 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Clearing Windows Event Logs",
-  "note": "## Triage and analysis\n\n### Investigating Clearing Windows Event Logs\n\nWindows event logs are a fundamental data source for security monitoring, forensics, and incident response. Adversaries\ncan tamper, clear, and delete this data to break SIEM detections, cover their tracks, and slow down incident response.\n\nThis rule looks for the execution of the `wevtutil.exe` utility or the `Clear-EventLog` cmdlet to clear event logs.\n\n#### Possible investigation steps\n\n- Investigate the process execution chain (parent process tree) for unknown processes. Examine their executable files\nfor prevalence, whether they are located in expected locations, and if they are signed with valid digital signatures.\n- Identify the user account that performed the action and whether it should perform this kind of action.\n- Contact the account owner and confirm whether they are aware of this activity.\n- Investigate other alerts associated with the user/host during the past 48 hours.\n  - Verify if any other anti-forensics behaviors were observed.\n- Investigate the event logs prior to the action for suspicious behaviors that an attacker may be trying to cover up.\n\n### False positive analysis\n\n- This mechanism can be used legitimately. Analysts can dismiss the alert if the administrator is aware of the activity\nand there are justifications for this action.\n- Analyze whether the cleared event log is pertinent to security and general monitoring. Administrators can clear\nnon-relevant event logs using this mechanism. If this activity is expected and noisy in your environment, consider\nadding exceptions \u2014 preferably with a combination of user and command line conditions.\n\n### Response and remediation\n\n- Initiate the incident response process based on the outcome of the triage.\n  - This activity is potentially done after the adversary achieves its objectives on the host. Ensure that previous\n  actions, if any, are investigated accordingly with their response playbooks.\n- Isolate the involved host to prevent further post-compromise behavior.\n- Investigate credential exposure on systems compromised or used by the attacker to ensure all compromised accounts are\nidentified. Reset passwords for these accounts and other potentially compromised credentials, such as email, business\nsystems, and web services.\n- Run a full antimalware scan. This may reveal additional artifacts left in the system, persistence mechanisms, and\nmalware components.\n- Determine the initial vector abused by the attacker and take action to prevent reinfection through the same vector.\n- Using the incident response data, update logging and audit policies to improve the mean time to detect (MTTD) and the\nmean time to respond (MTTR).\n\n## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
+  "note": "## Triage and analysis\n\n### Investigating Clearing Windows Event Logs\n\nWindows event logs are a fundamental data source for security monitoring, forensics, and incident response. Adversaries\ncan tamper, clear, and delete this data to break SIEM detections, cover their tracks, and slow down incident response.\n\nThis rule looks for the execution of the `wevtutil.exe` utility or the `Clear-EventLog` cmdlet to clear event logs.\n\n#### Possible investigation steps\n\n- Investigate the process execution chain (parent process tree) for unknown processes. Examine their executable files\nfor prevalence, whether they are located in expected locations, and if they are signed with valid digital signatures.\n- Identify the user account that performed the action and whether it should perform this kind of action.\n- Contact the account owner and confirm whether they are aware of this activity.\n- Investigate other alerts associated with the user/host during the past 48 hours.\n  - Verify if any other anti-forensics behaviors were observed.\n- Investigate the event logs prior to the action for suspicious behaviors that an attacker may be trying to cover up.\n\n### False positive analysis\n\n- This mechanism can be used legitimately. Analysts can dismiss the alert if the administrator is aware of the activity\nand there are justifications for this action.\n- Analyze whether the cleared event log is pertinent to security and general monitoring. Administrators can clear\nnon-relevant event logs using this mechanism. If this activity is expected and noisy in your environment, consider\nadding exceptions \u2014 preferably with a combination of user and command line conditions.\n\n### Response and remediation\n\n- Initiate the incident response process based on the outcome of the triage.\n  - This activity is potentially done after the adversary achieves its objectives on the host. Ensure that previous\n  actions, if any, are investigated accordingly with their response playbooks.\n- Isolate the involved host to prevent further post-compromise behavior.\n- Investigate credential exposure on systems compromised or used by the attacker to ensure all compromised accounts are\nidentified. Reset passwords for these accounts and other potentially compromised credentials, such as email, business\nsystems, and web services.\n- Run a full antimalware scan. This may reveal additional artifacts left in the system, persistence mechanisms, and\nmalware components.\n- Determine the initial vector abused by the attacker and take action to prevent reinfection through the same vector.\n- Using the incident response data, update logging and audit policies to improve the mean time to detect (MTTD) and the\nmean time to respond (MTTR).",
   "query": "process where event.type in (\"process_started\", \"start\") and\n  (process.name : \"wevtutil.exe\" or process.pe.original_file_name == \"wevtutil.exe\") and\n    process.args : (\"/e:false\", \"cl\", \"clear-log\") or\n  process.name : (\"powershell.exe\", \"pwsh.exe\", \"powershell_ise.exe\") and process.args : \"Clear-EventLog\"\n",
+  "required_fields": [
+    {
+      "ecs": true,
+      "name": "event.type",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.args",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.name",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.pe.original_file_name",
+      "type": "keyword"
+    }
+  ],
   "risk_score": 21,
   "rule_id": "d331bbe2-6db4-4941-80a5-8270db72eb61",
+  "setup": "If enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.",
   "severity": "low",
   "tags": [
     "Elastic",
@@ -50,5 +73,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 13
+  "version": 15
 }

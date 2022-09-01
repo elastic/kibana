@@ -226,7 +226,9 @@ export default function ({ getService }: FtrProviderContext) {
             await ml.testExecution.logTestStep('should display enabled AD job row action buttons');
             await ml.jobTable.assertJobActionsMenuButtonEnabled(adJobId, true);
             await ml.jobTable.assertJobActionStartDatafeedButtonEnabled(adJobId, true);
+            await ml.jobTable.assertJobActionResetJobButtonEnabled(adJobId, true);
             await ml.jobTable.assertJobActionCloneJobButtonEnabled(adJobId, true);
+            await ml.jobTable.assertJobActionViewDatafeedCountsButtonEnabled(adJobId, true);
             await ml.jobTable.assertJobActionEditJobButtonEnabled(adJobId, true);
             await ml.jobTable.assertJobActionDeleteJobButtonEnabled(adJobId, true);
 

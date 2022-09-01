@@ -15,9 +15,19 @@ import { map, getOrElse } from 'fp-ts/lib/Option';
 import { Logger } from '@kbn/core/server';
 import { getRetryAfterIntervalFromHeaders } from './lib/http_rersponse_retry_header';
 import { isOk, promiseResult, Result } from './lib/result_type';
-import { request } from './lib/axios_utils';
-import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../types';
+import { request } from '../lib/axios_utils';
+import {
+  ActionType,
+  ActionTypeExecutorOptions,
+  ActionTypeExecutorResult,
+  ValidatorServices,
+} from '../types';
 import { ActionsConfigurationUtilities } from '../actions_config';
+import {
+  AlertingConnectorFeatureId,
+  UptimeConnectorFeatureId,
+  SecurityConnectorFeatureId,
+} from '../../common';
 
 export type TeamsActionType = ActionType<{}, ActionTypeSecretsType, ActionParamsType, unknown>;
 export type TeamsActionTypeExecutorOptions = ActionTypeExecutorOptions<
@@ -58,38 +68,51 @@ export function getActionType({
     name: i18n.translate('xpack.actions.builtin.teamsTitle', {
       defaultMessage: 'Microsoft Teams',
     }),
+    supportedFeatureIds: [
+      AlertingConnectorFeatureId,
+      UptimeConnectorFeatureId,
+      SecurityConnectorFeatureId,
+    ],
     validate: {
-      secrets: schema.object(secretsSchemaProps, {
-        validate: curry(validateActionTypeConfig)(configurationUtilities),
-      }),
-      params: ParamsSchema,
+      secrets: {
+        schema: SecretsSchema,
+        customValidator: validateActionTypeConfig,
+      },
+      params: {
+        schema: ParamsSchema,
+      },
     },
     executor: curry(teamsExecutor)({ logger, configurationUtilities }),
   };
 }
 
 function validateActionTypeConfig(
-  configurationUtilities: ActionsConfigurationUtilities,
-  secretsObject: ActionTypeSecretsType
+  secretsObject: ActionTypeSecretsType,
+  validatorServices: ValidatorServices
 ) {
+  const { configurationUtilities } = validatorServices;
   const configuredUrl = secretsObject.webhookUrl;
   try {
     new URL(configuredUrl);
   } catch (err) {
-    return i18n.translate('xpack.actions.builtin.teams.teamsConfigurationErrorNoHostname', {
-      defaultMessage: 'error configuring teams action: unable to parse host name from webhookUrl',
-    });
+    throw new Error(
+      i18n.translate('xpack.actions.builtin.teams.teamsConfigurationErrorNoHostname', {
+        defaultMessage: 'error configuring teams action: unable to parse host name from webhookUrl',
+      })
+    );
   }
 
   try {
     configurationUtilities.ensureUriAllowed(configuredUrl);
   } catch (allowListError) {
-    return i18n.translate('xpack.actions.builtin.teams.teamsConfigurationError', {
-      defaultMessage: 'error configuring teams action: {message}',
-      values: {
-        message: allowListError.message,
-      },
-    });
+    throw new Error(
+      i18n.translate('xpack.actions.builtin.teams.teamsConfigurationError', {
+        defaultMessage: 'error configuring teams action: {message}',
+        values: {
+          message: allowListError.message,
+        },
+      })
+    );
   }
 }
 

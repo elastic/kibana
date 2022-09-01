@@ -16,7 +16,15 @@ import type { AgentStatus } from '../../types';
 import { AgentStatusKueryHelper } from '../../../common/services';
 import { FleetUnauthorizedError } from '../../errors';
 
-import { getAgentById, getAgentsByKuery, removeSOAttributes } from './crud';
+import { appContextService } from '../app_context';
+
+import {
+  closePointInTime,
+  getAgentById,
+  getAgentsByKuery,
+  openPointInTime,
+  removeSOAttributes,
+} from './crud';
 
 const DATA_STREAM_INDEX_PATTERN = 'logs-*-*,metrics-*-*,traces-*-*,synthetics-*-*';
 const MAX_AGENT_DATA_PREVIEW_SIZE = 20;
@@ -55,6 +63,18 @@ export async function getAgentStatusForAgentPolicy(
   agentPolicyId?: string,
   filterKuery?: string
 ) {
+  let pitId: string | undefined;
+  try {
+    pitId = await openPointInTime(esClient);
+  } catch (error) {
+    if (error.statusCode === 404) {
+      appContextService
+        .getLogger()
+        .debug('Index .fleet-agents does not exist yet, skipping point in time.');
+    } else {
+      throw error;
+    }
+  }
   const [all, allActive, online, error, offline, updating] = await pMap(
     [
       undefined, // All agents, including inactive
@@ -69,11 +89,11 @@ export async function getAgentStatusForAgentPolicy(
         showInactive: index === 0,
         perPage: 0,
         page: 1,
+        pitId,
         kuery: joinKuerys(
           ...[
             kuery,
             filterKuery,
-            `${AGENTS_PREFIX}.attributes.active:true`,
             agentPolicyId ? `${AGENTS_PREFIX}.policy_id:"${agentPolicyId}"` : undefined,
           ]
         ),
@@ -83,7 +103,11 @@ export async function getAgentStatusForAgentPolicy(
     }
   );
 
-  return {
+  if (pitId) {
+    await closePointInTime(esClient, pitId);
+  }
+
+  const result = {
     total: allActive.total,
     inactive: all.total - allActive.total,
     online: online.total,
@@ -94,6 +118,7 @@ export async function getAgentStatusForAgentPolicy(
     /* @deprecated Agent events do not exists anymore */
     events: 0,
   };
+  return result;
 }
 export async function getIncomingDataByAgentsId(
   esClient: ElasticsearchClient,

@@ -8,11 +8,12 @@
 import React, { memo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { DocLinks } from '@kbn/doc-links';
+import type { DocLinks } from '@kbn/doc-links';
 import { EuiLink } from '@elastic/eui';
 
 import { useHttp } from '../../../../common/lib/kibana';
-import { ArtifactListPage, ArtifactListPageProps } from '../../../components/artifact_list_page';
+import type { ArtifactListPageProps } from '../../../components/artifact_list_page';
+import { ArtifactListPage } from '../../../components/artifact_list_page';
 import { EventFiltersApiClient } from '../service/api_client';
 import { EventFiltersForm } from './components/form';
 import { SEARCHABLE_FIELDS } from '../constants';

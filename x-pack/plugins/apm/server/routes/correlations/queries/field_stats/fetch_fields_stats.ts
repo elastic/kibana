@@ -7,6 +7,7 @@
 import { chunk } from 'lodash';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { rangeQuery } from '@kbn/observability-plugin/server';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import {
   CommonCorrelationsQueryParams,
   FieldValuePair,
@@ -16,7 +17,6 @@ import { fetchKeywordFieldStats } from './fetch_keyword_field_stats';
 import { fetchNumericFieldStats } from './fetch_numeric_field_stats';
 import { fetchBooleanFieldStats } from './fetch_boolean_field_stats';
 import { Setup } from '../../../../lib/helpers/setup_request';
-import { ProcessorEvent } from '../../../../../common/processor_event';
 
 export const fetchFieldsStats = async ({
   setup,

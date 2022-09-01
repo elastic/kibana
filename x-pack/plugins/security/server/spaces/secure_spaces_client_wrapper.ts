@@ -7,7 +7,7 @@
 
 import Boom from '@hapi/boom';
 
-import type { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
+import type { KibanaRequest, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type {
   GetAllSpacesOptions,
   GetAllSpacesPurpose,
@@ -52,7 +52,7 @@ export class SecureSpacesClientWrapper implements ISpacesClient {
     private readonly request: KibanaRequest,
     private readonly authorization: AuthorizationServiceSetup,
     private readonly auditLogger: AuditLogger,
-    private readonly errors: SavedObjectsClientContract['errors']
+    private readonly errors: typeof SavedObjectsErrorHelpers
   ) {
     this.useRbac = this.authorization.mode.useRbacForRequest(this.request);
   }

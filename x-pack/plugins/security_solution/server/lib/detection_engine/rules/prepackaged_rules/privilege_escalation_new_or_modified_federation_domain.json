@@ -10,8 +10,8 @@
   "language": "kuery",
   "license": "Elastic License v2",
   "name": "New or Modified Federation Domain",
-  "note": "## Config\n\nThe Office 365 Logs Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
-  "query": "event.dataset:o365.audit and event.provider:Exchange and event.category:web and event.action:(\"Set-AcceptedDomain\" or \n\"Set-MsolDomainFederationSettings\" or \"Add-FederatedDomain\" or \"New-AcceptedDomain\" or \"Remove-AcceptedDomain\" or \"Remove-FederatedDomain\") and \nevent.outcome:success\n",
+  "note": "",
+  "query": "event.dataset:o365.audit and event.provider:Exchange and event.category:web and event.action:(\"Set-AcceptedDomain\" or\n\"Set-MsolDomainFederationSettings\" or \"Add-FederatedDomain\" or \"New-AcceptedDomain\" or \"Remove-AcceptedDomain\" or \"Remove-FederatedDomain\") and\nevent.outcome:success\n",
   "references": [
     "https://docs.microsoft.com/en-us/powershell/module/exchange/remove-accepteddomain?view=exchange-ps",
     "https://docs.microsoft.com/en-us/powershell/module/exchange/remove-federateddomain?view=exchange-ps",
@@ -20,8 +20,42 @@
     "https://docs.microsoft.com/en-us/powershell/module/exchange/set-accepteddomain?view=exchange-ps",
     "https://docs.microsoft.com/en-us/powershell/module/msonline/set-msoldomainfederationsettings?view=azureadps-1.0"
   ],
+  "related_integrations": [
+    {
+      "package": "o365",
+      "version": "1.3.0"
+    }
+  ],
+  "required_fields": [
+    {
+      "ecs": true,
+      "name": "event.action",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "event.category",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "event.dataset",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "event.outcome",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "event.provider",
+      "type": "keyword"
+    }
+  ],
   "risk_score": 21,
   "rule_id": "684554fc-0777-47ce-8c9b-3d01f198d7f8",
+  "setup": "The Office 365 Logs Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
   "severity": "low",
   "tags": [
     "Elastic",
@@ -57,5 +91,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 2
+  "version": 4
 }

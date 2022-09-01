@@ -30,6 +30,7 @@ describe('createExtentFilter', () => {
         disabled: false,
         key: 'location',
         negate: false,
+        type: 'spatial_filter',
       },
       query: {
         bool: {
@@ -66,6 +67,7 @@ describe('createExtentFilter', () => {
         disabled: false,
         key: 'location',
         negate: false,
+        type: 'spatial_filter',
       },
       query: {
         bool: {
@@ -102,6 +104,7 @@ describe('createExtentFilter', () => {
         disabled: false,
         key: 'location',
         negate: false,
+        type: 'spatial_filter',
       },
       query: {
         bool: {
@@ -138,6 +141,7 @@ describe('createExtentFilter', () => {
         disabled: false,
         key: 'location',
         negate: false,
+        type: 'spatial_filter',
       },
       query: {
         bool: {
@@ -174,6 +178,7 @@ describe('createExtentFilter', () => {
         disabled: false,
         key: 'location',
         negate: false,
+        type: 'spatial_filter',
       },
       query: {
         bool: {
@@ -210,6 +215,7 @@ describe('createExtentFilter', () => {
         disabled: false,
         isMultiIndex: true,
         negate: false,
+        type: 'spatial_filter',
       },
       query: {
         bool: {

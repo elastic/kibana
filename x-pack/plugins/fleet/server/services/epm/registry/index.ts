@@ -13,7 +13,7 @@ import semverGte from 'semver/functions/gte';
 import type { Response } from 'node-fetch';
 import type { Logger } from '@kbn/logging';
 
-import { splitPkgKey as split } from '../../../../common';
+import { splitPkgKey as split } from '../../../../common/services';
 
 import { KibanaAssetType } from '../../../types';
 import type {
@@ -310,7 +310,7 @@ export async function fetchArchiveBuffer({
     });
 
     if (verificationResult.verificationStatus === 'unverified' && !ignoreUnverified) {
-      throw new PackageFailedVerificationError(`${pkgName}-${pkgVersion}`);
+      throw new PackageFailedVerificationError(pkgName, pkgVersion);
     }
     return { archiveBuffer, archivePath, verificationResult };
   }

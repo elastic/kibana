@@ -6,15 +6,16 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { EventCountOptions, EventsOptions, EventDoc } from './types';
+import type { EventCountOptions, EventsOptions, EventDoc } from './types';
 import { getQueryFilter } from '../../../../../common/detection_engine/get_query_filter';
 import { singleSearchAfter } from '../single_search_after';
 import { buildEventsSearchQuery } from '../build_events_query';
 
-export const MAX_PER_PAGE = 9000;
+export const MAX_PER_PAGE = 3000;
 
 export const getEventList = async ({
   services,
+  ruleExecutionLogger,
   query,
   language,
   index,
@@ -22,10 +23,9 @@ export const getEventList = async ({
   searchAfter,
   exceptionItems,
   filters,
-  buildRuleMessage,
-  logger,
   tuple,
-  timestampOverride,
+  primaryTimestamp,
+  secondaryTimestamp,
   runtimeMappings,
 }: EventsOptions): Promise<estypes.SearchResponse<EventDoc>> => {
   const calculatedPerPage = perPage ?? MAX_PER_PAGE;
@@ -33,33 +33,29 @@ export const getEventList = async ({
     throw new TypeError('perPage cannot exceed the size of 10000');
   }
 
-  logger.debug(
-    buildRuleMessage(
-      `Querying the events items from the index: "${index}" with searchAfter: "${searchAfter}" for up to ${calculatedPerPage} indicator items`
-    )
+  ruleExecutionLogger.debug(
+    `Querying the events items from the index: "${index}" with searchAfter: "${searchAfter}" for up to ${calculatedPerPage} indicator items`
   );
 
   const filter = getQueryFilter(query, language ?? 'kuery', filters, index, exceptionItems);
 
   const { searchResult } = await singleSearchAfter({
-    buildRuleMessage,
     searchAfterSortIds: searchAfter,
     index,
     from: tuple.from.toISOString(),
     to: tuple.to.toISOString(),
     services,
-    logger,
+    ruleExecutionLogger,
     filter,
-    pageSize: Math.ceil(Math.min(tuple.maxSignals, calculatedPerPage)),
-    timestampOverride,
+    pageSize: calculatedPerPage,
+    primaryTimestamp,
+    secondaryTimestamp,
     sortOrder: 'desc',
     trackTotalHits: false,
     runtimeMappings,
   });
 
-  logger.debug(
-    buildRuleMessage(`Retrieved events items of size: ${searchResult.hits.hits.length}`)
-  );
+  ruleExecutionLogger.debug(`Retrieved events items of size: ${searchResult.hits.hits.length}`);
   return searchResult;
 };
 
@@ -71,7 +67,8 @@ export const getEventCount = async ({
   index,
   exceptionItems,
   tuple,
-  timestampOverride,
+  primaryTimestamp,
+  secondaryTimestamp,
 }: EventCountOptions): Promise<number> => {
   const filter = getQueryFilter(query, language ?? 'kuery', filters, index, exceptionItems);
   const eventSearchQueryBodyQuery = buildEventsSearchQuery({
@@ -80,7 +77,8 @@ export const getEventCount = async ({
     to: tuple.to.toISOString(),
     filter,
     size: 0,
-    timestampOverride,
+    primaryTimestamp,
+    secondaryTimestamp,
     searchAfterSortIds: undefined,
     runtimeMappings: undefined,
   }).body.query;

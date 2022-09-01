@@ -9,7 +9,7 @@ import React from 'react';
 import styled from 'styled-components';
 import { EuiBadge, EuiToolTip } from '@elastic/eui';
 
-import { IntegrationDetails } from '../integration_details';
+import type { IntegrationDetails } from '../integration_details';
 import * as i18n from '../translations';
 
 const PaddedBadge = styled(EuiBadge)`

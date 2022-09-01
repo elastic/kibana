@@ -9,7 +9,7 @@ import { EuiBadge, EuiText } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
 
-import { BrowserFields } from '../../../../common/containers/source';
+import type { BrowserFields } from '../../../../common/containers/source';
 import { AndOrBadge } from '../../../../common/components/and_or_badge';
 import { AddDataProviderPopover } from './add_data_provider_popover';
 

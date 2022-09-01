@@ -47,6 +47,7 @@ export type PackageSpecCategory =
   | 'productivity'
   | 'security'
   | 'support'
+  | 'threat_intel'
   | 'ticketing'
   | 'version_control'
   | 'web';

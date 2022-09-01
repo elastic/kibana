@@ -16,7 +16,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardPanelActions = getService('dashboardPanelActions');
   const queryBar = getService('queryBar');
   const elasticChart = getService('elasticChart');
-  const xyChartSelector = 'visTypeXyChart';
+  const xyChartSelector = 'xyVisChart';
 
   const enableNewChartLibraryDebug = async () => {
     await elasticChart.setNewChartUiDebugFlag();

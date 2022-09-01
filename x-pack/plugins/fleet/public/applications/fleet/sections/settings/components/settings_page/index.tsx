@@ -8,21 +8,26 @@
 import React from 'react';
 import { EuiSpacer } from '@elastic/eui';
 
-import type { Output, Settings } from '../../../../types';
+import type { Output, Settings, DownloadSource } from '../../../../types';
 
 import { SettingsSection } from './settings_section';
 import { OutputSection } from './output_section';
+import { AgentBinarySection } from './agent_binary_section';
 
 export interface SettingsPageProps {
   settings: Settings;
   outputs: Output[];
   deleteOutput: (output: Output) => void;
+  downloadSources: DownloadSource[];
+  deleteDownloadSource: (ds: DownloadSource) => void;
 }
 
 export const SettingsPage: React.FunctionComponent<SettingsPageProps> = ({
   settings,
   outputs,
   deleteOutput,
+  downloadSources,
+  deleteDownloadSource,
 }) => {
   return (
     <>
@@ -30,6 +35,11 @@ export const SettingsPage: React.FunctionComponent<SettingsPageProps> = ({
       <SettingsSection settings={settings} />
       <EuiSpacer size="m" />
       <OutputSection outputs={outputs} deleteOutput={deleteOutput} />
+      <EuiSpacer size="m" />
+      <AgentBinarySection
+        downloadSources={downloadSources}
+        deleteDownloadSource={deleteDownloadSource}
+      />
     </>
   );
 };

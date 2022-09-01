@@ -6,7 +6,7 @@ exports[`NoData should show a default message if reason is unknown 1`] = `
   data-test-subj="noDataContainer"
 >
   <h1
-    class="euiScreenReaderOnly"
+    class="emotion-euiScreenReaderOnly"
   >
     No monitoring data found.
   </h1>
@@ -101,7 +101,7 @@ exports[`NoData should show text next to the spinner while checking a setting 1`
   data-test-subj="noDataContainer"
 >
   <h1
-    class="euiScreenReaderOnly"
+    class="emotion-euiScreenReaderOnly"
   >
     No monitoring data found.
   </h1>

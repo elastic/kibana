@@ -126,4 +126,22 @@ describe('AddMessageVariables', () => {
 
     expect(wrapper.find('[data-test-subj="fooAddVariableButton"]')).toHaveLength(0);
   });
+
+  test('it renders button title when passed', () => {
+    const wrapper = mountWithIntl(
+      <AddMessageVariables
+        messageVariables={[
+          {
+            name: 'myVar',
+            description: 'My variable description',
+          },
+        ]}
+        paramsProperty="foo"
+        onSelectEventHandler={jest.fn()}
+        showButtonTitle
+      />
+    );
+
+    expect(wrapper.find('[data-test-subj="fooAddVariableButton-Title"]').exists()).toEqual(true);
+  });
 });

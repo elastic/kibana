@@ -19,27 +19,32 @@ import type {
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
 import type { LoggingConfigType } from '@kbn/core-logging-server-internal';
 import type { Logger } from '@kbn/logging';
-import { SavedObjectsServiceStart, SavedObjectTypeRegistry } from '..';
-import { ElasticsearchConfigType } from '../elasticsearch/elasticsearch_config';
-import { HttpConfigType, InternalHttpServiceSetup } from '../http';
-
-import { SavedObjectsConfigType } from '../saved_objects/saved_objects_config';
+import type { HttpConfigType, InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
+import type { ElasticsearchServiceStart } from '@kbn/core-elasticsearch-server';
+import type { ElasticsearchConfigType } from '@kbn/core-elasticsearch-server-internal';
+import type { MetricsServiceSetup, OpsMetrics } from '@kbn/core-metrics-server';
+import {
+  LEGACY_URL_ALIAS_TYPE,
+  type SavedObjectsConfigType,
+} from '@kbn/core-saved-objects-base-server-internal';
 import type {
   CoreServicesUsageData,
   CoreUsageData,
   CoreUsageDataStart,
-  InternalCoreUsageDataSetup,
+  CoreIncrementUsageCounter,
   ConfigUsageData,
   CoreConfigUsageData,
-} from './types';
+} from '@kbn/core-usage-data-server';
+import {
+  CORE_USAGE_STATS_TYPE,
+  type InternalCoreUsageDataSetup,
+} from '@kbn/core-usage-data-base-server-internal';
+import type { SavedObjectTypeRegistry } from '@kbn/core-saved-objects-base-server-internal';
+import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
+
 import { isConfigured } from './is_configured';
-import { ElasticsearchServiceStart } from '../elasticsearch';
 import { coreUsageStatsType } from './core_usage_stats';
-import { LEGACY_URL_ALIAS_TYPE } from '../saved_objects/object_types';
-import { CORE_USAGE_STATS_TYPE } from './constants';
 import { CoreUsageStatsClient } from './core_usage_stats_client';
-import { MetricsServiceSetup, OpsMetrics } from '..';
-import { CoreIncrementUsageCounter } from './types';
 
 export type ExposedConfigsToUsage = Map<string, Record<string, boolean>>;
 

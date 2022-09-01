@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { Unit } from '@kbn/datemath';
+import type { Unit } from '@kbn/datemath';
 import { renderHook, act } from '@testing-library/react-hooks';
 import { of, throwError } from 'rxjs';
 import { delay } from 'rxjs/operators';
 
 import * as i18n from '../translations';
 import type { EqlSearchStrategyResponse } from '@kbn/data-plugin/common';
-import { Source } from './types';
-import { EqlSearchResponse } from '../../../../common/detection_engine/types';
+import type { Source } from './types';
+import type { EqlSearchResponse } from '../../../../common/detection_engine/types';
 import { useKibana } from '../../lib/kibana';
 import { useEqlPreview } from '.';
 import { getMockEqlResponse } from './eql_search_response.mock';

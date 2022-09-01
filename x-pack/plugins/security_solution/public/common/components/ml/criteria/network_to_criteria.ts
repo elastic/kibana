@@ -6,7 +6,7 @@
  */
 
 import { FlowTargetSourceDest } from '../../../../../common/search_strategy';
-import { CriteriaFields } from '../types';
+import type { CriteriaFields } from '../types';
 
 export const networkToCriteria = (
   ip: string,

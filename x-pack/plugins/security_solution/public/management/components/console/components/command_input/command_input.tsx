@@ -5,24 +5,20 @@
  * 2.0.
  */
 
-import React, {
-  memo,
-  MouseEventHandler,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
-import { CommonProps, EuiFlexGroup, EuiFlexItem, useResizeObserver } from '@elastic/eui';
+import type { MouseEventHandler } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type { CommonProps } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, useResizeObserver, EuiButtonIcon } from '@elastic/eui';
 import styled from 'styled-components';
 import classNames from 'classnames';
-import { ConsoleDataState } from '../console_state/types';
+import { useWithInputVisibleState } from '../../hooks/state_selectors/use_with_input_visible_state';
+import type { ConsoleDataState } from '../console_state/types';
 import { useInputHints } from './hooks/use_input_hints';
 import { InputPlaceholder } from './components/input_placeholder';
 import { useWithInputTextEntered } from '../../hooks/state_selectors/use_with_input_text_entered';
 import { InputAreaPopover } from './components/input_area_popover';
-import { KeyCapture, KeyCaptureProps } from './key_capture';
+import type { KeyCaptureProps } from './key_capture';
+import { KeyCapture } from './key_capture';
 import { useConsoleStateDispatch } from '../../hooks/state_selectors/use_console_state_dispatch';
 import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
 import { useDataTestSubj } from '../../hooks/state_selectors/use_data_test_subj';
@@ -38,8 +34,12 @@ const CommandInputContainer = styled.div`
   }
 
   &.active {
-    border-bottom: solid ${({ theme: { eui } }) => eui.euiBorderWidthThin}
-      ${({ theme: { eui } }) => eui.euiColorPrimary};
+    border-bottom: ${({ theme: { eui } }) => eui.euiBorderThick};
+    border-bottom-color: ${({ theme: { eui } }) => eui.euiColorPrimary};
+  }
+
+  &.error {
+    border-bottom-color: ${({ theme: { eui } }) => eui.euiColorDanger};
   }
 
   .textEntered {
@@ -83,6 +83,7 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
   useInputHints();
   const dispatch = useConsoleStateDispatch();
   const { rightOfCursor, textEntered } = useWithInputTextEntered();
+  const visibleState = useWithInputVisibleState();
   const [isKeyInputBeingCaptured, setIsKeyInputBeingCaptured] = useState(false);
   const getTestId = useTestIdGenerator(useDataTestSubj());
   const [commandToExecute, setCommandToExecute] = useState('');
@@ -108,12 +109,32 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
     });
   }, [isKeyInputBeingCaptured]);
 
-  const focusClassName = useMemo(() => {
+  const inputContainerClassname = useMemo(() => {
     return classNames({
       cmdInput: true,
       active: isKeyInputBeingCaptured,
+      error: visibleState === 'error',
     });
-  }, [isKeyInputBeingCaptured]);
+  }, [isKeyInputBeingCaptured, visibleState]);
+
+  const disableArrowButton = useMemo(
+    () => textEntered.length === 0 && rightOfCursor.text.length === 0,
+    [rightOfCursor.text.length, textEntered.length]
+  );
+
+  const handleSubmitButton = useCallback<MouseEventHandler>(
+    (ev) => {
+      setCommandToExecute(textEntered + rightOfCursor.text);
+      dispatch({
+        type: 'updateInputTextEnteredState',
+        payload: {
+          textEntered: '',
+          rightOfCursor: undefined,
+        },
+      });
+    },
+    [dispatch, textEntered, rightOfCursor.text]
+  );
 
   const handleKeyCaptureOnStateChange = useCallback<NonNullable<KeyCaptureProps['onStateChange']>>(
     (isCapturing) => {
@@ -136,12 +157,13 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
       const keyCode = eventDetails.keyCode;
 
       // UP arrow key
-      if (keyCode === 38) {
-        dispatch({ type: 'removeFocusFromKeyCapture' });
-        dispatch({ type: 'updateInputPopoverState', payload: { show: 'input-history' } });
-
-        return;
-      }
+      // FIXME:PT to be addressed via OLM task #4384
+      // if (keyCode === 38) {
+      //   dispatch({ type: 'removeFocusFromKeyCapture' });
+      //   dispatch({ type: 'updateInputPopoverState', payload: { show: 'input-history' } });
+      //
+      //   return;
+      // }
 
       // Update the store with the updated text that was entered
       dispatch({
@@ -241,6 +263,12 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
     [dispatch, rightOfCursor.text]
   );
 
+  const handleOnFocus = useCallback(() => {
+    if (!isKeyInputBeingCaptured) {
+      dispatch({ type: 'addFocusToKeyCapture' });
+    }
+  }, [dispatch, isKeyInputBeingCaptured]);
+
   // Execute the command if one was ENTER'd.
   useEffect(() => {
     if (commandToExecute) {
@@ -253,9 +281,12 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
     <InputAreaPopover width={popoverWidth}>
       <CommandInputContainer
         {...commonProps}
-        className={focusClassName}
+        className={inputContainerClassname}
         onClick={handleTypingAreaClick}
         ref={containerRef}
+        tabIndex={0}
+        onFocus={handleOnFocus}
+        data-test-subj={getTestId('cmdInput-container')}
       >
         <EuiFlexGroup
           wrap={true}
@@ -288,6 +319,17 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
               </EuiFlexItem>
             </EuiFlexGroup>
             <InputPlaceholder />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonIcon
+              data-test-subj={getTestId('inputTextSubmitButton')}
+              aria-label="submit-command"
+              iconType="playFilled"
+              display="empty"
+              color="primary"
+              isDisabled={disableArrowButton}
+              onClick={handleSubmitButton}
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
 

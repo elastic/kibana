@@ -7,7 +7,8 @@
 
 import * as t from 'io-ts';
 import { isObject } from 'lodash/fp';
-import { Either, left, fold } from 'fp-ts/lib/Either';
+import type { Either } from 'fp-ts/lib/Either';
+import { left, fold } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 
 import {
@@ -33,10 +34,11 @@ import {
   max_signals,
 } from '@kbn/securitysolution-io-ts-alerting-types';
 import { DefaultStringArray, version } from '@kbn/securitysolution-io-ts-types';
-
 import { DefaultListArray } from '@kbn/securitysolution-io-ts-list-types';
+
 import { isMlRule } from '../../../machine_learning/helpers';
 import { isThresholdRule } from '../../utils';
+import { RuleExecutionSummary } from '../../rule_monitoring';
 import {
   anomaly_threshold,
   data_view_id,
@@ -76,13 +78,13 @@ import {
   rule_name_override,
   timestamp_override,
   namespace,
-  ruleExecutionSummary,
   RelatedIntegrationArray,
   RequiredFieldArray,
   SetupGuide,
 } from '../common';
 
-import { typeAndTimelineOnlySchema, TypeAndTimelineOnly } from './type_timeline_only_schema';
+import type { TypeAndTimelineOnly } from './type_timeline_only_schema';
+import { typeAndTimelineOnlySchema } from './type_timeline_only_schema';
 
 /**
  * This is the required fields for the rules schema response. Put all required properties on
@@ -187,7 +189,7 @@ export const partialRulesSchema = t.partial({
   namespace,
   note,
   uuid: id, // Move to 'required' post-migration
-  execution_summary: ruleExecutionSummary,
+  execution_summary: RuleExecutionSummary,
 });
 
 /**
@@ -225,7 +227,10 @@ export type RulesSchema = t.TypeOf<typeof rulesSchema>;
 
 export const addSavedId = (typeAndTimelineOnly: TypeAndTimelineOnly): t.Mixed[] => {
   if (typeAndTimelineOnly.type === 'saved_query') {
-    return [t.exact(t.type({ saved_id: dependentRulesSchema.props.saved_id }))];
+    return [
+      t.exact(t.type({ saved_id: dependentRulesSchema.props.saved_id })),
+      t.exact(t.partial({ data_view_id: dependentRulesSchema.props.data_view_id })),
+    ];
   } else {
     return [];
   }

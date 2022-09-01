@@ -11,7 +11,7 @@ import styled from 'styled-components';
 import { SecurityPageName } from '../../app/types';
 import { HeaderPage } from '../../common/components/header_page';
 import { useAppRootNavLink } from '../../common/components/navigation/nav_links';
-import { NavLinkItem } from '../../common/components/navigation/types';
+import type { NavLinkItem } from '../../common/components/navigation/types';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { LandingLinksIcons } from '../components/landing_links_icons';

@@ -7,4 +7,5 @@
 
 export enum SYNTHETICS_API_URLS {
   MONITOR_STATUS = `/internal/synthetics/monitor/status`,
+  SYNTHETICS_OVERVIEW = '/internal/synthetics/overview',
 }

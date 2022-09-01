@@ -72,6 +72,13 @@ export const getSharedStyle = (config: ReferenceLineAnnotationConfig) => ({
       ? [(config.lineWidth || 1) * 3, config.lineWidth || 1]
       : config.lineStyle === 'dotted'
       ? [config.lineWidth || 1, config.lineWidth || 1]
+      : config.lineStyle === 'dot-dashed'
+      ? [
+          (config.lineWidth || 1) * 5,
+          config.lineWidth || 1,
+          config.lineWidth || 1,
+          config.lineWidth || 1,
+        ]
       : undefined,
 });
 
@@ -121,7 +128,7 @@ export const getBottomRect = (
   headerLabel: string | undefined,
   isFillAbove: boolean,
   formatter: FieldFormat | undefined,
-  currentValue: number,
+  currentValue?: number,
   nextValue?: number
 ) => ({
   coordinates: {
@@ -131,14 +138,14 @@ export const getBottomRect = (
     y1: undefined,
   },
   header: headerLabel,
-  details: formatter?.convert(currentValue) || currentValue.toString(),
+  details: formatter?.convert(currentValue) || currentValue?.toString(),
 });
 
 export const getHorizontalRect = (
   headerLabel: string | undefined,
   isFillAbove: boolean,
   formatter: FieldFormat | undefined,
-  currentValue: number,
+  currentValue?: number,
   nextValue?: number
 ) => ({
   coordinates: {
@@ -148,7 +155,7 @@ export const getHorizontalRect = (
     y1: isFillAbove ? nextValue : currentValue,
   },
   header: headerLabel,
-  details: formatter?.convert(currentValue) || currentValue.toString(),
+  details: formatter?.convert(currentValue) || currentValue?.toString(),
 });
 
 const sortReferenceLinesByGroup = (referenceLines: ReferenceLineConfig[], group: FillStyle) => {

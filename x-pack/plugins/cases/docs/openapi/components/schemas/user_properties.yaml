@@ -1,0 +1,9 @@
+email:
+  type: string
+  example: null
+full_name:
+  type: string
+  example: null
+username:
+  type: string
+  example: elastic

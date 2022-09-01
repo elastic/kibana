@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { KUBERNETES_PATH, SecurityPageName } from '../../common/constants';
 import { KUBERNETES } from '../app/translations';
-import { LinkItem } from '../common/links/types';
+import type { LinkItem } from '../common/links/types';
 import kubernetesPageImg from '../common/images/kubernetes_page.png';
 
 export const links: LinkItem = {
@@ -20,8 +20,7 @@ export const links: LinkItem = {
       'Provides interactive visualizations of your Kubernetes workload and session data.',
   }),
   path: KUBERNETES_PATH,
-  globalNavEnabled: false,
+  isBeta: true,
   experimentalKey: 'kubernetesEnabled',
   globalSearchKeywords: ['Kubernetes'],
-  globalNavOrder: 9005,
 };

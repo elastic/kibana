@@ -12,8 +12,8 @@
 import React, { memo, useMemo, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { EuiBreadcrumb } from '@elastic/eui';
 import {
-  EuiBreadcrumb,
   EuiSpacer,
   EuiText,
   EuiDescriptionList,
@@ -32,13 +32,14 @@ import * as eventModel from '../../../../common/endpoint/models/event';
 import * as selectors from '../../store/selectors';
 import { PanelLoading } from './panel_loading';
 import { PanelContentError } from './panel_content_error';
-import { ResolverState } from '../../types';
+import type { ResolverState } from '../../types';
 import { DescriptiveName } from './descriptive_name';
 import { useLinkProps } from '../use_link_props';
-import { SafeResolverEvent } from '../../../../common/endpoint/types';
+import type { SafeResolverEvent } from '../../../../common/endpoint/types';
 import { deepObjectEntries } from './deep_object_entries';
 import { useFormattedDate } from './use_formatted_date';
 import * as nodeDataModel from '../../models/node_data';
+import { expandDottedObject } from '../../../../common/utils/expand_dotted';
 
 const eventDetailRequestError = i18n.translate(
   'xpack.securitySolution.resolver.panel.eventDetail.requestError',
@@ -158,9 +159,10 @@ function EventDetailFields({ event }: { event: SafeResolverEvent }) {
       namespace: React.ReactNode;
       descriptions: Array<{ title: React.ReactNode; description: React.ReactNode }>;
     }> = [];
-    for (const [key, value] of Object.entries(event)) {
+    const expandedEventObject: object = expandDottedObject(event);
+    for (const [key, value] of Object.entries(expandedEventObject)) {
       // ignore these keys
-      if (key === 'agent' || key === 'ecs' || key === 'process' || key === '@timestamp') {
+      if (key === 'agent' || key === 'ecs' || key === '@timestamp' || !value) {
         continue;
       }
 

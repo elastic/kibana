@@ -7,7 +7,7 @@
 import { useState, useCallback, useRef } from 'react';
 import { useAsyncConfirmation } from '../rules_table/use_async_confirmation';
 
-import {
+import type {
   BulkActionEditType,
   BulkActionEditPayload,
 } from '../../../../../../../common/detection_engine/schemas/common/schemas';

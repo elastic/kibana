@@ -10,16 +10,16 @@ import { getOr } from 'lodash/fp';
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../common/constants';
-import { HostsQueries } from '../../../../../../common/search_strategy/security_solution';
+import type { HostsQueries } from '../../../../../../common/search_strategy/security_solution';
 import { processFieldsMap, userFieldsMap } from '../../../../../../common/ecs/ecs_fields';
-import {
+import type {
   HostsUncommonProcessesRequestOptions,
   HostsUncommonProcessesStrategyResponse,
 } from '../../../../../../common/search_strategy/security_solution/hosts/uncommon_processes';
 
 import { inspectStringifyObject } from '../../../../../utils/build_query';
 
-import { SecuritySolutionFactory } from '../../types';
+import type { SecuritySolutionFactory } from '../../types';
 import { buildQuery } from './dsl/query.dsl';
 import { formatUncommonProcessesData, getHits } from './helpers';
 

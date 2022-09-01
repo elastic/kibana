@@ -10,24 +10,26 @@ import { i18n } from '@kbn/i18n';
 
 import { CONNECTORS_INDEX } from '../..';
 
-import { Connector, ConnectorScheduling } from '../../types/connector';
+import { ConnectorDocument, ConnectorScheduling } from '../../../common/types/connectors';
 
 export const updateConnectorScheduling = async (
   client: IScopedClusterClient,
   connectorId: string,
   scheduling: ConnectorScheduling
 ) => {
-  const connectorResult = await client.asCurrentUser.get<Connector>({
+  const connectorResult = await client.asCurrentUser.get<ConnectorDocument>({
     id: connectorId,
     index: CONNECTORS_INDEX,
   });
   const connector = connectorResult._source;
   if (connector) {
-    return await client.asCurrentUser.index<Connector>({
+    const result = await client.asCurrentUser.index<ConnectorDocument>({
       document: { ...connector, scheduling },
       id: connectorId,
       index: CONNECTORS_INDEX,
     });
+    await client.asCurrentUser.indices.refresh({ index: CONNECTORS_INDEX });
+    return result;
   } else {
     throw new Error(
       i18n.translate('xpack.enterpriseSearch.server.connectors.scheduling.error', {

@@ -16,7 +16,8 @@ import { run } from '@kbn/dev-cli-runner';
 import { createFlagError } from '@kbn/dev-cli-errors';
 import { EsVersion, readConfigFile } from '@kbn/test';
 import path from 'path';
-import { extractor, ScalabilitySetup } from './extractor';
+import { extractor } from './extractor';
+import { ScalabilitySetup } from './types';
 
 interface Vars {
   [key: string]: string;
@@ -58,8 +59,9 @@ export async function runExtractor() {
       const scalabilitySetup: ScalabilitySetup = config.get('scalabilitySetup');
 
       if (!scalabilitySetup) {
-        log.error(`'scalabilitySetup' must be defined in config file!`);
-        return;
+        log.warning(
+          `'scalabilitySetup' is not defined in config file, output file for Kibana scalability run won't be generated`
+        );
       }
 
       const env = config.get(`kbnTestServer.env`);
@@ -98,8 +100,10 @@ export async function runExtractor() {
         throw createFlagError('--buildId must be defined');
       }
 
+      const withoutStaticResources = !!flags['without-static-resources'] || false;
+
       return extractor({
-        param: { journeyName, scalabilitySetup, buildId },
+        param: { journeyName, scalabilitySetup, buildId, withoutStaticResources },
         client: { baseURL, username, password },
         log,
       });
@@ -108,12 +112,14 @@ export async function runExtractor() {
       description: `CLI to fetch and normalize APM traces for journey scalability testing`,
       flags: {
         string: ['config', 'buildId', 'es-url', 'es-username', 'es-password'],
+        boolean: ['without-static-resources'],
         help: `
-          --config           path to an FTR config file that sets scalabilitySetup and journeyName (stored as 'labels.journeyName' in APM-based document)
-          --buildId          BUILDKITE_JOB_ID or uuid generated locally, stored in APM-based document as label: 'labels.testBuildId'
-          --es-url           url for Elasticsearch (APM cluster)
-          --es-username      username for Elasticsearch (APM cluster)
-          --es-password      password for Elasticsearch (APM cluster)
+          --config <config_path>     path to an FTR config file that sets scalabilitySetup and journeyName (stored as 'labels.journeyName' in APM-based document)
+          --buildId <buildId>        BUILDKITE_JOB_ID or uuid generated locally, stored in APM-based document as label: 'labels.testBuildId'
+          --es-url <url>             url for Elasticsearch (APM cluster)
+          --es-username <username>   username for Elasticsearch (APM cluster)
+          --es-password <password>   password for Elasticsearch (APM cluster)
+          --without-static-resources filters out traces with url path matching static resources pattern
         `,
       },
     }

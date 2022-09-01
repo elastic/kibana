@@ -10,14 +10,15 @@ import { mount } from 'enzyme';
 import { waitFor, act } from '@testing-library/react';
 import { noop } from 'lodash/fp';
 
-import { TestProviders } from '../../common/mock';
+import { noCreateCasesPermissions, TestProviders } from '../../common/mock';
 
-import { CommentRequest, CommentType } from '../../../common/api';
+import { CommentType } from '../../../common/api';
 import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { useCreateAttachments } from '../../containers/use_create_attachments';
 import { AddComment, AddCommentProps, AddCommentRefObject } from '.';
 import { CasesTimelineIntegrationProvider } from '../timeline_context';
 import { timelineIntegrationMock } from '../__mock__/timeline';
+import { CaseAttachmentWithoutOwner } from '../../types';
 
 jest.mock('../../containers/use_create_attachments');
 
@@ -41,10 +42,9 @@ const defaultResponse = {
   createAttachments,
 };
 
-const sampleData: CommentRequest = {
+const sampleData: CaseAttachmentWithoutOwner = {
   comment: 'what a cool comment',
-  type: CommentType.user,
-  owner: SECURITY_SOLUTION_OWNER,
+  type: CommentType.user as const,
 };
 
 describe('AddComment ', () => {
@@ -73,6 +73,7 @@ describe('AddComment ', () => {
       expect(onCommentSaving).toBeCalled();
       expect(createAttachments).toBeCalledWith({
         caseId: addCommentProps.caseId,
+        caseOwner: SECURITY_SOLUTION_OWNER,
         data: [sampleData],
         updateCase: onCommentPosted,
       });
@@ -113,13 +114,13 @@ describe('AddComment ', () => {
     ).toBeTruthy();
   });
 
-  it('should hide the component when the user does not have crud permissions', () => {
+  it('should hide the component when the user does not have create permissions', () => {
     useCreateAttachmentsMock.mockImplementation(() => ({
       ...defaultResponse,
       isLoading: true,
     }));
     const wrapper = mount(
-      <TestProviders permissions={{ all: false, read: false }}>
+      <TestProviders permissions={noCreateCasesPermissions()}>
         <AddComment {...{ ...addCommentProps }} />
       </TestProviders>
     );

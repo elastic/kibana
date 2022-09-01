@@ -41,7 +41,6 @@ export default function createMuteTests({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'foo')
         .expect(200);
       expect(updatedAlert.mute_all).to.eql(true);
-      expect(updatedAlert.snooze_schedule.length).to.eql(0);
       // Ensure AAD isn't broken
       await checkAAD({
         supertest: supertestWithoutAuth,
@@ -70,7 +69,6 @@ export default function createMuteTests({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'foo')
           .expect(200);
         expect(updatedAlert.mute_all).to.eql(true);
-        expect(updatedAlert.snooze_schedule.length).to.eql(0);
 
         // Ensure AAD isn't broken
         await checkAAD({

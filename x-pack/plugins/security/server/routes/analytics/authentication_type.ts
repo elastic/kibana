@@ -8,6 +8,7 @@
 import { createHash } from 'crypto';
 
 import { schema } from '@kbn/config-schema';
+import type { Logger } from '@kbn/logging';
 
 import type { RouteDefinitionParams } from '..';
 import type { AuthenticationTypeAnalyticsEvent } from '../../analytics';
@@ -74,6 +75,11 @@ export function defineRecordAnalyticsOnAuthTypeRoutes({
           previouslyRegisteredSignature !== signature
         ) {
           analyticsService.reportAuthenticationTypeEvent(authTypeEventToReport);
+
+          logApiKeyWithInteractiveUserDeprecated(
+            authTypeEventToReport.httpAuthenticationScheme,
+            logger
+          );
         } else {
           timestamp = previousRegistrationTimestamp;
         }
@@ -87,4 +93,24 @@ export function defineRecordAnalyticsOnAuthTypeRoutes({
       }
     })
   );
+}
+
+/**
+ * API Key authentication by interactive users is deprecated, this method logs a deprecation warning.
+ *
+ * @param httpAuthenticationScheme A string representing the authentication type event's scheme (ApiKey, etc.) by an interactive user.
+ * @param logger A reference to the Logger to log the deprecation message.
+ */
+function logApiKeyWithInteractiveUserDeprecated(
+  httpAuthenticationScheme: string = '',
+  logger: Logger
+): void {
+  const isUsingApiKey = httpAuthenticationScheme?.toLowerCase() === 'apikey';
+
+  if (isUsingApiKey) {
+    logger.warn(
+      `API keys are intended for programmatic access. Do not use API keys to authenticate access via a web browser.`,
+      { tags: ['deprecation'] }
+    );
+  }
 }

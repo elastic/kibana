@@ -28,15 +28,14 @@ export const timelineEventsLastEventTime: TimelineFactory<TimelineEventsQueries.
       dsl: [inspectStringifyObject(buildLastEventTimeQuery(options))],
     };
 
-    // First try to get the formatted field if it exists or not.
+    // Try to get the formatted field if it exists or not.
     const formattedField: string | null = getOr(
       null,
       'hits.hits[0].fields.@timestamp[0]',
       response.rawResponse
     );
-    // If it doesn't exist, fall back on _source as a last try.
-    const lastSeen: string | null =
-      formattedField || getOr(null, 'hits.hits[0]._source.@timestamp', response.rawResponse);
+
+    const lastSeen: string | null = formattedField || null;
 
     return {
       ...response,

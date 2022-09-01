@@ -9,14 +9,15 @@ import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
 import { QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 import { SERVER_APP_ID } from '../../../../../common/constants';
 
-import { queryRuleParams, QueryRuleParams } from '../../schemas/rule_schemas';
+import type { QueryRuleParams } from '../../schemas/rule_schemas';
+import { queryRuleParams } from '../../schemas/rule_schemas';
 import { queryExecutor } from '../../signals/executors/query';
-import { CreateRuleOptions, SecurityAlertType } from '../types';
+import type { CreateRuleOptions, SecurityAlertType } from '../types';
 import { validateImmutable, validateIndexPatterns } from '../utils';
 export const createQueryAlertType = (
   createOptions: CreateRuleOptions
 ): SecurityAlertType<QueryRuleParams, {}, {}, 'default'> => {
-  const { eventsTelemetry, experimentalFeatures, logger, version } = createOptions;
+  const { eventsTelemetry, experimentalFeatures, version } = createOptions;
   return {
     id: QUERY_RULE_TYPE_ID,
     name: 'Custom Query Rule',
@@ -64,35 +65,38 @@ export const createQueryAlertType = (
         runOpts: {
           inputIndex,
           runtimeMappings,
-          buildRuleMessage,
-          bulkCreate,
+          completeRule,
+          tuple,
           exceptionItems,
           listClient,
-          completeRule,
+          ruleExecutionLogger,
           searchAfterSize,
-          tuple,
+          bulkCreate,
           wrapHits,
+          primaryTimestamp,
+          secondaryTimestamp,
         },
         services,
         state,
       } = execOptions;
 
       const result = await queryExecutor({
-        buildRuleMessage,
-        bulkCreate,
-        exceptionItems,
-        experimentalFeatures,
-        eventsTelemetry,
-        listClient,
-        logger,
         completeRule,
-        searchAfterSize,
-        services,
         tuple,
+        exceptionItems,
+        listClient,
+        experimentalFeatures,
+        ruleExecutionLogger,
+        eventsTelemetry,
+        services,
         version,
+        searchAfterSize,
+        bulkCreate,
         wrapHits,
         inputIndex,
         runtimeMappings,
+        primaryTimestamp,
+        secondaryTimestamp,
       });
       return { ...result, state };
     },

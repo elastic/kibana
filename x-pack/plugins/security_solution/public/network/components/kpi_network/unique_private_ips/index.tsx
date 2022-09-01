@@ -8,12 +8,12 @@
 import React, { useEffect, useState } from 'react';
 import { euiPaletteColorBlind } from '@elastic/eui';
 
-import { StatItems } from '../../../../common/components/stat_items';
+import type { StatItems } from '../../../../common/components/stat_items';
 import {
   useNetworkKpiUniquePrivateIps,
   ID,
 } from '../../../containers/kpi_network/unique_private_ips';
-import { NetworkKpiProps } from '../types';
+import type { NetworkKpiProps } from '../types';
 import * as i18n from './translations';
 import { kpiUniquePrivateIpsSourceMetricLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/network/kpi_unique_private_ips_source_metric';
 import { kpiUniquePrivateIpsDestinationMetricLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/network/kpi_unique_private_ips_destination_metric';
@@ -62,7 +62,7 @@ const NetworkKpiUniquePrivateIpsComponent: React.FC<NetworkKpiProps> = ({
   from,
   indexNames,
   to,
-  narrowDateRange,
+  updateDateRange,
   setQuery,
   skip,
 }) => {
@@ -88,7 +88,7 @@ const NetworkKpiUniquePrivateIpsComponent: React.FC<NetworkKpiProps> = ({
       fieldsMapping={fieldsMapping}
       from={from}
       to={to}
-      narrowDateRange={narrowDateRange}
+      updateDateRange={updateDateRange}
       refetch={refetch}
       setQuery={setQuery}
       setQuerySkip={setQuerySkip}

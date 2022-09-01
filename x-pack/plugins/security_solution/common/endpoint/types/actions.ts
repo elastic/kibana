@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { TypeOf } from '@kbn/config-schema';
-import {
+import type { TypeOf } from '@kbn/config-schema';
+import type {
   ActionStatusRequestSchema,
   NoParametersRequestSchema,
   ResponseActionBodySchema,
@@ -18,9 +18,7 @@ export type ISOLATION_ACTIONS = 'isolate' | 'unisolate';
 /** The output provided by some of the Endpoint responses */
 export interface ActionResponseOutput<TOutputContent extends object = object> {
   type: 'json' | 'text';
-  content: {
-    entries: TOutputContent[];
-  };
+  content: TOutputContent;
 }
 
 export interface ProcessesEntry {
@@ -28,6 +26,24 @@ export interface ProcessesEntry {
   pid: string;
   entity_id: string;
   user: string;
+}
+
+export interface GetProcessesActionOutputContent {
+  entries: ProcessesEntry[];
+}
+
+export interface SuspendProcessActionOutputContent {
+  code: string;
+  command?: string;
+  pid?: number;
+  entity_id?: string;
+}
+
+export interface KillProcessActionOutputContent {
+  code: string;
+  command?: string;
+  pid?: number;
+  entity_id?: string;
 }
 
 export const RESPONSE_ACTION_COMMANDS = [
@@ -55,9 +71,9 @@ interface EcsError {
   type?: string;
 }
 
-interface EndpointActionFields {
+interface EndpointActionFields<TOutputContent extends object = object> {
   action_id: string;
-  data: EndpointActionData;
+  data: EndpointActionData<undefined, TOutputContent>;
 }
 
 interface ActionRequestFields {
@@ -96,8 +112,7 @@ export interface LogsEndpointActionResponse<TOutputContent extends object = obje
   agent: {
     id: string | string[];
   };
-  EndpointActions: EndpointActionFields &
-    ActionResponseFields & { output?: ActionResponseOutput<TOutputContent> };
+  EndpointActions: EndpointActionFields<TOutputContent> & ActionResponseFields;
   error?: EcsError;
 }
 
@@ -119,10 +134,14 @@ export type EndpointActionDataParameterTypes =
   | undefined
   | ResponseActionParametersWithPidOrEntityId;
 
-export interface EndpointActionData<T extends EndpointActionDataParameterTypes = never> {
+export interface EndpointActionData<
+  T extends EndpointActionDataParameterTypes = never,
+  TOutputContent extends object = object
+> {
   command: ResponseActions;
   comment?: string;
   parameters?: T;
+  output?: ActionResponseOutput<TOutputContent>;
 }
 
 export interface FleetActionResponseData {
@@ -233,7 +252,7 @@ export interface ResponseActionApiResponse<TOutput extends object = object> {
 export interface EndpointPendingActions {
   agent_id: string;
   pending_actions: {
-    /** Number of actions pending for each type. The `key` could be one of the `ISOLATION_ACTIONS` values. */
+    /** Number of actions pending for each type. The `key` could be one of the `RESPONSE_ACTION_COMMANDS` values. */
     [key: string]: number;
   };
 }
@@ -252,6 +271,11 @@ export interface ActionDetails<TOutputContent extends object = object> {
    * This is an Array because the action could have been sent to multiple endpoints.
    */
   agents: string[];
+  /**
+   * A map of `Agent ID`'s to which the action was sent whose value contains more
+   * information about the host (currently the host name only).
+   */
+  hosts: Record<string, { name: string }>;
   /**
    * The Endpoint type of action (ex. `isolate`, `release`) that is being requested to be
    * performed on the endpoint
@@ -272,10 +296,21 @@ export interface ActionDetails<TOutputContent extends object = object> {
   startedAt: string;
   /** The date when the action was completed (a response by the endpoint (not fleet) was received) */
   completedAt: string | undefined;
-  /**
-   * The output data from an action
-   */
+  /** The output data from an action stored in an object where the key is the agent id */
   outputs?: Record<string, ActionResponseOutput<TOutputContent>>;
+  /**
+   * A map by Agent ID holding information about the action for the specific agent.
+   * Helpful when action is sent to multiple agents
+   */
+  agentState: Record<
+    string,
+    {
+      isCompleted: boolean;
+      wasSuccessful: boolean;
+      errors: undefined | string[];
+      completedAt: string | undefined;
+    }
+  >;
   /** user that created the action */
   createdBy: string;
   /** comment submitted with action */
@@ -295,6 +330,11 @@ export interface ActionListApiResponse {
   endDate: string | undefined;
   userIds: string[] | undefined; // users that requested the actions
   commands: string[] | undefined; // type of actions
-  data: ActionDetails[];
+  /**
+   * The `outputs` is not currently part of the list response due to possibly large amounts of
+   * data, especially for cases (in the future) where we might support actions being sent to
+   * multiple agents
+   */
+  data: Array<Omit<ActionDetails, 'outputs'>>;
   total: number;
 }

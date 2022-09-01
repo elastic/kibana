@@ -21,7 +21,6 @@ const ZOOM: number = 2;
  */
 export class CanvasLayout extends BaseLayout implements Layout {
   public readonly selectors: LayoutSelectorDictionary = { ...DEFAULT_SELECTORS };
-  public readonly groupCount = 1;
   public readonly height: number;
   public readonly width: number;
   private readonly scaledHeight: number;

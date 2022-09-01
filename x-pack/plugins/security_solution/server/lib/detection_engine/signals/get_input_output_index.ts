@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import {
+import type {
   AlertInstanceContext,
   AlertInstanceState,
   RuleExecutorServices,
 } from '@kbn/alerting-plugin/server';
-import { DataViewAttributes } from '@kbn/data-views-plugin/common';
+import type { DataViewAttributes } from '@kbn/data-views-plugin/common';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 
 import { DEFAULT_INDEX_KEY, DEFAULT_INDEX_PATTERN } from '../../../../common/constants';
 import { withSecuritySpan } from '../../../utils/with_security_span';
@@ -34,6 +34,8 @@ export interface GetInputIndexReturn {
   warningToWrite?: string;
 }
 
+export class DataViewError extends Error {}
+
 export const getInputIndex = async ({
   index,
   services,
@@ -45,10 +47,15 @@ export const getInputIndex = async ({
   // If data views defined, use it
   if (dataViewId != null && dataViewId !== '') {
     // Check to see that the selected dataView exists
-    const dataView = await services.savedObjectsClient.get<DataViewAttributes>(
-      'index-pattern',
-      dataViewId
-    );
+    let dataView;
+    try {
+      dataView = await services.savedObjectsClient.get<DataViewAttributes>(
+        'index-pattern',
+        dataViewId
+      );
+    } catch (exc) {
+      throw new DataViewError(exc.message);
+    }
     const indices = dataView.attributes.title.split(',');
     const runtimeMappings =
       dataView.attributes.runtimeFieldMap != null

@@ -11,19 +11,21 @@ import { Subscription } from 'rxjs';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
 import type { DataViewBase, Filter, Query } from '@kbn/es-query';
-import { FilterManager, SavedQuery } from '@kbn/data-plugin/public';
+import type { SavedQuery } from '@kbn/data-plugin/public';
+import { FilterManager } from '@kbn/data-plugin/public';
 
-import { BrowserFields } from '../../../../common/containers/source';
+import type { BrowserFields } from '../../../../common/containers/source';
 import { OpenTimelineModal } from '../../../../timelines/components/open_timeline/open_timeline_modal';
-import { ActionTimelineToShow } from '../../../../timelines/components/open_timeline/types';
+import type { ActionTimelineToShow } from '../../../../timelines/components/open_timeline/types';
 import { QueryBar } from '../../../../common/components/query_bar';
 import { buildGlobalQuery } from '../../../../timelines/components/timeline/helpers';
 import { getDataProviderFilter } from '../../../../timelines/components/timeline/query_bar';
 import { convertKueryToElasticSearchQuery } from '../../../../common/lib/keury';
 import { useKibana } from '../../../../common/lib/kibana';
-import { TimelineModel } from '../../../../timelines/store/timeline/model';
+import type { TimelineModel } from '../../../../timelines/store/timeline/model';
 import { useSavedQueryServices } from '../../../../common/utils/saved_query_services';
-import { FieldHook, getFieldValidityAndErrorMessage } from '../../../../shared_imports';
+import type { FieldHook } from '../../../../shared_imports';
+import { getFieldValidityAndErrorMessage } from '../../../../shared_imports';
 import * as i18n from './translations';
 
 export interface FieldValueQueryBar {

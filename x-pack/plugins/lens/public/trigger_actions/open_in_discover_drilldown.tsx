@@ -9,6 +9,7 @@ import React from 'react';
 import { IEmbeddable, EmbeddableInput } from '@kbn/embeddable-plugin/public';
 import type { Query, Filter, TimeRange } from '@kbn/es-query';
 import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
+import type { ApplicationStart } from '@kbn/core/public';
 import { CollectConfigProps as CollectConfigPropsBase } from '@kbn/kibana-utils-plugin/public';
 import { reactToUiComponent } from '@kbn/kibana-react-plugin/public';
 import {
@@ -20,7 +21,7 @@ import { DiscoverSetup } from '@kbn/discover-plugin/public';
 import { ApplyGlobalFilterActionContext } from '@kbn/unified-search-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { DataViewsService } from '@kbn/data-views-plugin/public';
-import { execute, isCompatible, isLensEmbeddable } from './open_in_discover_helpers';
+import { isCompatible, isLensEmbeddable, getHref, getLocation } from './open_in_discover_helpers';
 
 interface EmbeddableQueryInput extends EmbeddableInput {
   query?: Query;
@@ -35,6 +36,7 @@ interface UrlDrilldownDeps {
   discover: Pick<DiscoverSetup, 'locator'>;
   dataViews: () => Pick<DataViewsService, 'get'>;
   hasDiscoverAccess: () => boolean;
+  application: () => ApplicationStart;
 }
 
 export type ActionContext = ApplyGlobalFilterActionContext;
@@ -119,14 +121,28 @@ export class OpenInDiscoverDrilldown
     return this.deps.hasDiscoverAccess() && isLensEmbeddable(context.embeddable as IEmbeddable);
   };
 
-  public readonly execute = async (config: Config, context: ActionContext) => {
-    execute({
+  public readonly getHref = async (config: Config, context: ActionContext) => {
+    return getHref({
       discover: this.deps.discover,
       dataViews: this.deps.dataViews(),
       hasDiscoverAccess: this.deps.hasDiscoverAccess(),
       ...context,
       embeddable: context.embeddable as IEmbeddable,
-      openInSameTab: !config.openInNewTab,
     });
+  };
+
+  public readonly execute = async (config: Config, context: ActionContext) => {
+    if (config.openInNewTab) {
+      window.open(await this.getHref(config, context), '_blank');
+    } else {
+      const { app, path, state } = await getLocation({
+        discover: this.deps.discover,
+        dataViews: this.deps.dataViews(),
+        hasDiscoverAccess: this.deps.hasDiscoverAccess(),
+        ...context,
+        embeddable: context.embeddable as IEmbeddable,
+      });
+      await this.deps.application().navigateToApp(app, { path, state });
+    }
   };
 }

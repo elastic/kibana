@@ -53,13 +53,7 @@
                 "label": "uiSettings",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.IUiSettingsClient",
-                    "text": "IUiSettingsClient"
-                  }
+                  "IUiSettingsClient"
                 ],
                 "path": "src/plugins/data/public/query/filter_manager/filter_manager.ts",
                 "deprecated": false,
@@ -1164,13 +1158,7 @@
         "description": [],
         "signature": [
           "(http: ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCoreHttpPluginApi",
-            "section": "def-public.HttpSetup",
-            "text": "HttpSetup"
-          },
+          "HttpSetup",
           ") => { createQuery: (attributes: ",
           {
             "pluginId": "data",
@@ -1240,13 +1228,7 @@
             "label": "http",
             "description": [],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-public.HttpSetup",
-                "text": "HttpSetup"
-              }
+              "HttpSetup"
             ],
             "path": "src/plugins/data/public/query/saved_query/saved_query_service.ts",
             "deprecated": false,
@@ -1782,14 +1764,6 @@
             "path": "src/plugins/discover/public/application/main/services/discover_state.ts"
           },
           {
-            "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/visualize_app/app.tsx"
-          },
-          {
-            "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/visualize_app/app.tsx"
-          },
-          {
             "plugin": "dashboard",
             "path": "src/plugins/dashboard/public/application/lib/sync_dashboard_filter_state.ts"
           },
@@ -1804,14 +1778,6 @@
           {
             "plugin": "dashboard",
             "path": "src/plugins/dashboard/public/application/listing/dashboard_listing.tsx"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/app_plugin/mounter.tsx"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/app_plugin/mounter.tsx"
           },
           {
             "plugin": "maps",
@@ -1921,7 +1887,13 @@
             "label": "time",
             "description": [],
             "signature": [
-              "TimeRange",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataQueryPluginApi",
+                "section": "def-common.TimeRange",
+                "text": "TimeRange"
+              },
               " | undefined"
             ],
             "path": "src/plugins/data/public/query/state_sync/types.ts",
@@ -2048,16 +2020,26 @@
             "signature": [
               "{ getDefaultQuery: () => { query: string; language: any; }; formatQuery: (query: string | ",
               "Query",
+              " | ",
+              "AggregateQuery",
               " | undefined) => ",
               "Query",
+              " | ",
+              "AggregateQuery",
               "; getUpdates$: () => ",
               "Observable",
               "<",
               "Query",
+              " | ",
+              "AggregateQuery",
               ">; getQuery: () => ",
               "Query",
+              " | ",
+              "AggregateQuery",
               "; setQuery: (query: ",
               "Query",
+              " | ",
+              "AggregateQuery",
               ") => void; clearQuery: () => void; }"
             ],
             "path": "src/plugins/data/public/query/query_service.ts",
@@ -2202,16 +2184,26 @@
             "signature": [
               "{ getDefaultQuery: () => { query: string; language: any; }; formatQuery: (query: string | ",
               "Query",
+              " | ",
+              "AggregateQuery",
               " | undefined) => ",
               "Query",
+              " | ",
+              "AggregateQuery",
               "; getUpdates$: () => ",
               "Observable",
               "<",
               "Query",
+              " | ",
+              "AggregateQuery",
               ">; getQuery: () => ",
               "Query",
+              " | ",
+              "AggregateQuery",
               "; setQuery: (query: ",
               "Query",
+              " | ",
+              "AggregateQuery",
               ") => void; clearQuery: () => void; }"
             ],
             "path": "src/plugins/data/public/query/query_service.ts",
@@ -3024,16 +3016,26 @@
         "signature": [
           "{ getDefaultQuery: () => { query: string; language: any; }; formatQuery: (query: string | ",
           "Query",
+          " | ",
+          "AggregateQuery",
           " | undefined) => ",
           "Query",
+          " | ",
+          "AggregateQuery",
           "; getUpdates$: () => ",
           "Observable",
           "<",
           "Query",
+          " | ",
+          "AggregateQuery",
           ">; getQuery: () => ",
           "Query",
+          " | ",
+          "AggregateQuery",
           "; setQuery: (query: ",
           "Query",
+          " | ",
+          "AggregateQuery",
           ") => void; clearQuery: () => void; }"
         ],
         "path": "src/plugins/data/public/query/query_string/query_string_manager.ts",
@@ -3589,7 +3591,13 @@
         "description": [],
         "signature": [
           "(x: unknown) => x is ",
-          "TimeRange"
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataQueryPluginApi",
+            "section": "def-common.TimeRange",
+            "text": "TimeRange"
+          }
         ],
         "path": "src/plugins/data/common/query/timefilter/is_time_range.ts",
         "deprecated": false,
@@ -3622,22 +3630,15 @@
           "\nConverts QueryState to expression AST"
         ],
         "signature": [
-          "({ filters, query, time }: ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataQueryPluginApi",
-            "section": "def-common.QueryState",
-            "text": "QueryState"
-          },
-          ") => ",
+          "({\n  filters,\n  query,\n  inputQuery,\n  time,\n  dataViewsService,\n}: Args) => Promise<",
           {
             "pluginId": "expressions",
             "scope": "common",
             "docId": "kibExpressionsPluginApi",
-            "section": "def-common.ExpressionAstExpressionBuilder",
-            "text": "ExpressionAstExpressionBuilder"
-          }
+            "section": "def-common.ExpressionAstExpression",
+            "text": "ExpressionAstExpression"
+          },
+          ">"
         ],
         "path": "src/plugins/data/common/query/to_expression_ast.ts",
         "deprecated": false,
@@ -3647,16 +3648,10 @@
             "id": "def-common.queryStateToExpressionAst.$1",
             "type": "Object",
             "tags": [],
-            "label": "{ filters, query, time }",
+            "label": "{\n  filters,\n  query,\n  inputQuery,\n  time,\n  dataViewsService,\n}",
             "description": [],
             "signature": [
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataQueryPluginApi",
-                "section": "def-common.QueryState",
-                "text": "QueryState"
-              }
+              "Args"
             ],
             "path": "src/plugins/data/common/query/to_expression_ast.ts",
             "deprecated": false,
@@ -3843,7 +3838,13 @@
         ],
         "signature": [
           "{ time?: ",
-          "TimeRange",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataQueryPluginApi",
+            "section": "def-common.TimeRange",
+            "text": "TimeRange"
+          },
           " | undefined; refreshInterval?: ",
           {
             "pluginId": "data",
@@ -3856,6 +3857,8 @@
           "Filter",
           "[] | undefined; query?: ",
           "Query",
+          " | ",
+          "AggregateQuery",
           " | undefined; }"
         ],
         "path": "src/plugins/data/common/query/query_state.ts",
@@ -3884,7 +3887,13 @@
         "label": "SavedQueryTimeFilter",
         "description": [],
         "signature": [
-          "TimeRange",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataQueryPluginApi",
+            "section": "def-common.TimeRange",
+            "text": "TimeRange"
+          },
           " & { refreshInterval: ",
           {
             "pluginId": "data",
@@ -3896,6 +3905,20 @@
           "; }"
         ],
         "path": "src/plugins/data/common/query/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.TimeRange",
+        "type": "Type",
+        "tags": [],
+        "label": "TimeRange",
+        "description": [],
+        "signature": [
+          "{ from: string; to: string; mode?: \"absolute\" | \"relative\" | undefined; }"
+        ],
+        "path": "src/plugins/data/common/query/timefilter/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       }

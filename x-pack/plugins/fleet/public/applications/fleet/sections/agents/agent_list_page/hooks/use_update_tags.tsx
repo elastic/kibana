@@ -18,37 +18,51 @@ export const useUpdateTags = () => {
   const { notifications } = useStartServices();
 
   const wrapRequest = useCallback(
-    async (requestFn: () => Promise<any>, onSuccess: () => void) => {
+    async (
+      requestFn: () => Promise<any>,
+      onSuccess: () => void,
+      successMessage?: string,
+      errorMessage?: string
+    ) => {
       try {
         const res = await requestFn();
 
         if (res.error) {
           throw res.error;
         }
-        const successMessage = i18n.translate(
-          'xpack.fleet.updateAgentTags.successNotificationTitle',
-          {
+        const message =
+          successMessage ??
+          i18n.translate('xpack.fleet.updateAgentTags.successNotificationTitle', {
             defaultMessage: 'Tags updated',
-          }
-        );
-        notifications.toasts.addSuccess(successMessage);
+          });
+        notifications.toasts.addSuccess(message);
 
         onSuccess();
       } catch (error) {
-        const errorMessage = i18n.translate('xpack.fleet.updateAgentTags.errorNotificationTitle', {
-          defaultMessage: 'Tags update failed',
-        });
-        notifications.toasts.addError(error, { title: errorMessage });
+        const errorTitle =
+          errorMessage ??
+          i18n.translate('xpack.fleet.updateAgentTags.errorNotificationTitle', {
+            defaultMessage: 'Tags update failed',
+          });
+        notifications.toasts.addError(error, { title: errorTitle });
       }
     },
     [notifications.toasts]
   );
 
   const updateTags = useCallback(
-    async (agentId: string, newTags: string[], onSuccess: () => void) => {
+    async (
+      agentId: string,
+      newTags: string[],
+      onSuccess: () => void,
+      successMessage?: string,
+      errorMessage?: string
+    ) => {
       await wrapRequest(
         async () => await sendPutAgentTagsUpdate(agentId, { tags: newTags }),
-        onSuccess
+        onSuccess,
+        successMessage,
+        errorMessage
       );
     },
     [wrapRequest]
@@ -59,11 +73,15 @@ export const useUpdateTags = () => {
       agents: string[] | string,
       tagsToAdd: string[],
       tagsToRemove: string[],
-      onSuccess: () => void
+      onSuccess: () => void,
+      successMessage?: string,
+      errorMessage?: string
     ) => {
       await wrapRequest(
         async () => await sendPostBulkAgentTagsUpdate({ agents, tagsToAdd, tagsToRemove }),
-        onSuccess
+        onSuccess,
+        successMessage,
+        errorMessage
       );
     },
     [wrapRequest]

@@ -10,7 +10,7 @@ import { EuiButton, EuiContextMenuPanel, EuiContextMenuItem, EuiPopover } from '
 import React, { useCallback, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
-import { Case } from '@kbn/cases-plugin/common';
+import type { Case } from '@kbn/cases-plugin/common';
 import { APP_ID, APP_UI_ID } from '../../../../../common/constants';
 import { timelineSelectors } from '../../../store/timeline';
 import { setInsertTimeline, showTimeline } from '../../../store/timeline/actions';
@@ -67,8 +67,7 @@ const AddToCaseButtonComponent: React.FC<Props> = ({ timelineId }) => {
     [dispatch, graphEventId, navigateToApp, savedObjectId, timelineId, timelineTitle]
   );
 
-  const userPermissions = useGetUserCasesPermissions();
-  const casesPermissions = { all: userPermissions.crud, read: userPermissions.read };
+  const userCasesPermissions = useGetUserCasesPermissions();
 
   const handleButtonClick = useCallback(() => {
     setPopover((currentIsOpen) => !currentIsOpen);
@@ -165,7 +164,7 @@ const AddToCaseButtonComponent: React.FC<Props> = ({ timelineId }) => {
         cases.ui.getAllCasesSelectorModal({
           onRowClick,
           owner: [APP_ID],
-          permissions: casesPermissions,
+          permissions: userCasesPermissions,
         })}
     </>
   );

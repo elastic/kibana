@@ -268,6 +268,7 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
             interval={futureTimeToInterval(item.isSnoozedUntil)}
             hasTitle={false}
             scheduledSnoozes={item.snoozeSchedule ?? []}
+            activeSnoozes={item.activeSnoozes ?? []}
             showCancel={isRuleSnoozed(item)}
             snoozeRule={snoozeRuleInternal}
             unsnoozeRule={unsnoozeRuleInternal}

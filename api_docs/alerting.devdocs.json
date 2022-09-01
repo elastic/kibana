@@ -43,7 +43,7 @@
               "The rule to view"
             ],
             "signature": [
-              "{ id: string; monitoring?: ",
+              "{ params: never; tags: string[]; id: string; monitoring?: ",
               {
                 "pluginId": "alerting",
                 "scope": "common",
@@ -51,7 +51,7 @@
                 "section": "def-common.RuleMonitoring",
                 "text": "RuleMonitoring"
               },
-              " | undefined; name: string; tags: string[]; enabled: boolean; params: never; actions: ",
+              " | undefined; name: string; enabled: boolean; actions: ",
               {
                 "pluginId": "alerting",
                 "scope": "common",
@@ -91,7 +91,7 @@
                 "section": "def-common.RuleSnooze",
                 "text": "RuleSnooze"
               },
-              " | undefined; isSnoozedUntil?: Date | null | undefined; }"
+              " | undefined; activeSnoozes?: string[] | undefined; isSnoozedUntil?: Date | null | undefined; }"
             ],
             "path": "x-pack/plugins/alerting/public/alert_navigation_registry/types.ts",
             "deprecated": false
@@ -831,6 +831,37 @@
       },
       {
         "parentPluginId": "alerting",
+        "id": "def-server.isRuleSnoozed",
+        "type": "Function",
+        "tags": [],
+        "label": "isRuleSnoozed",
+        "description": [],
+        "signature": [
+          "(rule: RuleSnoozeProps) => boolean"
+        ],
+        "path": "x-pack/plugins/alerting/server/lib/is_rule_snoozed.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "alerting",
+            "id": "def-server.isRuleSnoozed.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "rule",
+            "description": [],
+            "signature": [
+              "RuleSnoozeProps"
+            ],
+            "path": "x-pack/plugins/alerting/server/lib/is_rule_snoozed.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
         "id": "def-server.parseDuration",
         "type": "Function",
         "tags": [],
@@ -1479,13 +1510,7 @@
             "description": [],
             "signature": [
               "(request: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.KibanaRequest",
-                "text": "KibanaRequest"
-              },
+              "KibanaRequest",
               "<unknown, unknown, unknown, any>) => ",
               "RulesClientApi"
             ],
@@ -1500,13 +1525,7 @@
                 "label": "request",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreHttpPluginApi",
-                    "section": "def-server.KibanaRequest",
-                    "text": "KibanaRequest"
-                  },
+                  "KibanaRequest",
                   "<unknown, unknown, unknown, any>"
                 ],
                 "path": "x-pack/plugins/alerting/server/plugin.ts",
@@ -1525,13 +1544,7 @@
             "description": [],
             "signature": [
               "(request: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.KibanaRequest",
-                "text": "KibanaRequest"
-              },
+              "KibanaRequest",
               "<unknown, unknown, unknown, any>) => ",
               "PublicMethodsOf",
               "<",
@@ -1555,13 +1568,7 @@
                 "label": "request",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreHttpPluginApi",
-                    "section": "def-server.KibanaRequest",
-                    "text": "KibanaRequest"
-                  },
+                  "KibanaRequest",
                   "<unknown, unknown, unknown, any>"
                 ],
                 "path": "x-pack/plugins/alerting/server/plugin.ts",
@@ -1725,7 +1732,7 @@
                 "section": "def-common.SanitizedRule",
                 "text": "SanitizedRule"
               },
-              "<never>, \"name\" | \"tags\" | \"enabled\" | \"actions\" | \"throttle\" | \"consumer\" | \"schedule\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"notifyWhen\"> & { producer: string; ruleTypeId: string; ruleTypeName: string; }"
+              "<never>, \"tags\" | \"name\" | \"enabled\" | \"actions\" | \"throttle\" | \"consumer\" | \"schedule\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"notifyWhen\"> & { producer: string; ruleTypeId: string; ruleTypeName: string; }"
             ],
             "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false
@@ -1852,331 +1859,7 @@
             "label": "savedObjectsClient",
             "description": [],
             "signature": [
-              "{ create: <T = unknown>(type: string, attributes: T, options?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsCreateOptions",
-                "text": "SavedObjectsCreateOptions"
-              },
-              " | undefined) => Promise<",
-              "SavedObject",
-              "<T>>; bulkCreate: <T = unknown>(objects: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsBulkCreateObject",
-                "text": "SavedObjectsBulkCreateObject"
-              },
-              "<T>[], options?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsCreateOptions",
-                "text": "SavedObjectsCreateOptions"
-              },
-              " | undefined) => Promise<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsBulkResponse",
-                "text": "SavedObjectsBulkResponse"
-              },
-              "<T>>; checkConflicts: (objects?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsCheckConflictsObject",
-                "text": "SavedObjectsCheckConflictsObject"
-              },
-              "[], options?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsBaseOptions",
-                "text": "SavedObjectsBaseOptions"
-              },
-              ") => Promise<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsCheckConflictsResponse",
-                "text": "SavedObjectsCheckConflictsResponse"
-              },
-              ">; delete: (type: string, id: string, options?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsDeleteOptions",
-                "text": "SavedObjectsDeleteOptions"
-              },
-              ") => Promise<{}>; find: <T = unknown, A = unknown>(options: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsFindOptions",
-                "text": "SavedObjectsFindOptions"
-              },
-              ") => Promise<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsFindResponse",
-                "text": "SavedObjectsFindResponse"
-              },
-              "<T, A>>; bulkGet: <T = unknown>(objects?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsBulkGetObject",
-                "text": "SavedObjectsBulkGetObject"
-              },
-              "[], options?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsBaseOptions",
-                "text": "SavedObjectsBaseOptions"
-              },
-              ") => Promise<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsBulkResponse",
-                "text": "SavedObjectsBulkResponse"
-              },
-              "<T>>; bulkResolve: <T = unknown>(objects: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsBulkResolveObject",
-                "text": "SavedObjectsBulkResolveObject"
-              },
-              "[], options?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsBaseOptions",
-                "text": "SavedObjectsBaseOptions"
-              },
-              " | undefined) => Promise<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsBulkResolveResponse",
-                "text": "SavedObjectsBulkResolveResponse"
-              },
-              "<T>>; get: <T = unknown>(type: string, id: string, options?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsBaseOptions",
-                "text": "SavedObjectsBaseOptions"
-              },
-              ") => Promise<",
-              "SavedObject",
-              "<T>>; resolve: <T = unknown>(type: string, id: string, options?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsBaseOptions",
-                "text": "SavedObjectsBaseOptions"
-              },
-              ") => Promise<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsResolveResponse",
-                "text": "SavedObjectsResolveResponse"
-              },
-              "<T>>; update: <T = unknown>(type: string, id: string, attributes: Partial<T>, options?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsUpdateOptions",
-                "text": "SavedObjectsUpdateOptions"
-              },
-              "<T>) => Promise<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsUpdateResponse",
-                "text": "SavedObjectsUpdateResponse"
-              },
-              "<T>>; collectMultiNamespaceReferences: (objects: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsCollectMultiNamespaceReferencesObject",
-                "text": "SavedObjectsCollectMultiNamespaceReferencesObject"
-              },
-              "[], options?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsCollectMultiNamespaceReferencesOptions",
-                "text": "SavedObjectsCollectMultiNamespaceReferencesOptions"
-              },
-              " | undefined) => Promise<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsCollectMultiNamespaceReferencesResponse",
-                "text": "SavedObjectsCollectMultiNamespaceReferencesResponse"
-              },
-              ">; updateObjectsSpaces: (objects: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsUpdateObjectsSpacesObject",
-                "text": "SavedObjectsUpdateObjectsSpacesObject"
-              },
-              "[], spacesToAdd: string[], spacesToRemove: string[], options?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsUpdateObjectsSpacesOptions",
-                "text": "SavedObjectsUpdateObjectsSpacesOptions"
-              },
-              " | undefined) => Promise<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsUpdateObjectsSpacesResponse",
-                "text": "SavedObjectsUpdateObjectsSpacesResponse"
-              },
-              ">; bulkUpdate: <T = unknown>(objects: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsBulkUpdateObject",
-                "text": "SavedObjectsBulkUpdateObject"
-              },
-              "<T>[], options?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsBulkUpdateOptions",
-                "text": "SavedObjectsBulkUpdateOptions"
-              },
-              " | undefined) => Promise<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsBulkUpdateResponse",
-                "text": "SavedObjectsBulkUpdateResponse"
-              },
-              "<T>>; removeReferencesTo: (type: string, id: string, options?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsRemoveReferencesToOptions",
-                "text": "SavedObjectsRemoveReferencesToOptions"
-              },
-              " | undefined) => Promise<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsRemoveReferencesToResponse",
-                "text": "SavedObjectsRemoveReferencesToResponse"
-              },
-              ">; openPointInTimeForType: (type: string | string[], options?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsOpenPointInTimeOptions",
-                "text": "SavedObjectsOpenPointInTimeOptions"
-              },
-              ") => Promise<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsOpenPointInTimeResponse",
-                "text": "SavedObjectsOpenPointInTimeResponse"
-              },
-              ">; closePointInTime: (id: string, options?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsBaseOptions",
-                "text": "SavedObjectsBaseOptions"
-              },
-              " | undefined) => Promise<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsClosePointInTimeResponse",
-                "text": "SavedObjectsClosePointInTimeResponse"
-              },
-              ">; createPointInTimeFinder: <T = unknown, A = unknown>(findOptions: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsCreatePointInTimeFinderOptions",
-                "text": "SavedObjectsCreatePointInTimeFinderOptions"
-              },
-              ", dependencies?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsCreatePointInTimeFinderDependencies",
-                "text": "SavedObjectsCreatePointInTimeFinderDependencies"
-              },
-              " | undefined) => ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.ISavedObjectsPointInTimeFinder",
-                "text": "ISavedObjectsPointInTimeFinder"
-              },
-              "<T, A>; errors: typeof ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsErrorHelpers",
-                "text": "SavedObjectsErrorHelpers"
-              },
-              "; }"
+              "SavedObjectsClientContract"
             ],
             "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false
@@ -2208,13 +1891,7 @@
             "label": "scopedClusterClient",
             "description": [],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.IScopedClusterClient",
-                "text": "IScopedClusterClient"
-              }
+              "IScopedClusterClient"
             ],
             "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false
@@ -2235,7 +1912,7 @@
                 "section": "def-server.PublicAlert",
                 "text": "PublicAlert"
               },
-              "<InstanceState, InstanceContext, ActionGroupIds>; done: () => ",
+              "<InstanceState, InstanceContext, ActionGroupIds>; hasReachedAlertLimit: () => boolean; done: () => ",
               "AlertFactoryDoneUtils",
               "<InstanceState, InstanceContext, ActionGroupIds>; }"
             ],
@@ -2719,7 +2396,7 @@
         "label": "AlertingRulesConfig",
         "description": [],
         "signature": [
-          "Pick<Readonly<{} & { run: Readonly<{ timeout?: string | undefined; ruleTypeOverrides?: Readonly<{ timeout?: string | undefined; } & { id: string; }>[] | undefined; } & { actions: Readonly<{ connectorTypeOverrides?: Readonly<{ max?: number | undefined; } & { id: string; }>[] | undefined; } & { max: number; }>; }>; minimumScheduleInterval: Readonly<{} & { value: string; enforce: boolean; }>; }>, \"minimumScheduleInterval\"> & { isUsingSecurity: boolean; }"
+          "Pick<Readonly<{} & { run: Readonly<{ timeout?: string | undefined; ruleTypeOverrides?: Readonly<{ timeout?: string | undefined; } & { id: string; }>[] | undefined; } & { actions: Readonly<{ connectorTypeOverrides?: Readonly<{ max?: number | undefined; } & { id: string; }>[] | undefined; } & { max: number; }>; alerts: Readonly<{} & { max: number; }>; }>; minimumScheduleInterval: Readonly<{} & { value: string; enforce: boolean; }>; }>, \"minimumScheduleInterval\"> & { isUsingSecurity: boolean; }"
         ],
         "path": "x-pack/plugins/alerting/server/config.ts",
         "deprecated": false,
@@ -2892,7 +2569,25 @@
         "label": "RulesClient",
         "description": [],
         "signature": [
-          "{ aggregate: ({ options: { fields, filter, ...options }, }?: { options?: ",
+          "{ get: <Params extends ",
+          {
+            "pluginId": "alerting",
+            "scope": "common",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-common.RuleTypeParams",
+            "text": "RuleTypeParams"
+          },
+          " = never>({ id, includeLegacyId, includeSnoozeData, excludeFromPublicApi, }: { id: string; includeLegacyId?: boolean | undefined; includeSnoozeData?: boolean | undefined; excludeFromPublicApi?: boolean | undefined; }) => Promise<",
+          {
+            "pluginId": "alerting",
+            "scope": "common",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-common.SanitizedRule",
+            "text": "SanitizedRule"
+          },
+          "<Params> | ",
+          "SanitizedRuleWithLegacyId",
+          "<Params>>; delete: ({ id }: { id: string; }) => Promise<{}>; aggregate: ({ options: { fields, filter, ...options }, }?: { options?: ",
           "AggregateOptions",
           " | undefined; }) => Promise<",
           "AggregateResult",
@@ -2914,7 +2609,7 @@
             "section": "def-common.SanitizedRule",
             "text": "SanitizedRule"
           },
-          "<Params>>; delete: ({ id }: { id: string; }) => Promise<{}>; find: <Params extends ",
+          "<Params>>; find: <Params extends ",
           {
             "pluginId": "alerting",
             "scope": "common",
@@ -2922,49 +2617,15 @@
             "section": "def-common.RuleTypeParams",
             "text": "RuleTypeParams"
           },
-          " = never>({ options: { fields, ...options }, excludeFromPublicApi, }?: { options?: ",
+          " = never>({ options: { fields, ...options }, excludeFromPublicApi, includeSnoozeData, }?: { options?: ",
           "FindOptions",
-          " | undefined; excludeFromPublicApi?: boolean | undefined; }) => Promise<",
+          " | undefined; excludeFromPublicApi?: boolean | undefined; includeSnoozeData?: boolean | undefined; }) => Promise<",
           {
             "pluginId": "alerting",
             "scope": "server",
             "docId": "kibAlertingPluginApi",
             "section": "def-server.FindResult",
             "text": "FindResult"
-          },
-          "<Params>>; get: <Params extends ",
-          {
-            "pluginId": "alerting",
-            "scope": "common",
-            "docId": "kibAlertingPluginApi",
-            "section": "def-common.RuleTypeParams",
-            "text": "RuleTypeParams"
-          },
-          " = never>({ id, includeLegacyId, excludeFromPublicApi, }: { id: string; includeLegacyId?: boolean | undefined; excludeFromPublicApi?: boolean | undefined; }) => Promise<",
-          {
-            "pluginId": "alerting",
-            "scope": "common",
-            "docId": "kibAlertingPluginApi",
-            "section": "def-common.SanitizedRule",
-            "text": "SanitizedRule"
-          },
-          "<Params> | ",
-          "SanitizedRuleWithLegacyId",
-          "<Params>>; resolve: <Params extends ",
-          {
-            "pluginId": "alerting",
-            "scope": "common",
-            "docId": "kibAlertingPluginApi",
-            "section": "def-common.RuleTypeParams",
-            "text": "RuleTypeParams"
-          },
-          " = never>({ id, includeLegacyId, }: { id: string; includeLegacyId?: boolean | undefined; }) => Promise<",
-          {
-            "pluginId": "alerting",
-            "scope": "common",
-            "docId": "kibAlertingPluginApi",
-            "section": "def-common.ResolvedSanitizedRule",
-            "text": "ResolvedSanitizedRule"
           },
           "<Params>>; update: <Params extends ",
           {
@@ -2984,6 +2645,22 @@
             "section": "def-server.PartialRule",
             "text": "PartialRule"
           },
+          "<Params>>; resolve: <Params extends ",
+          {
+            "pluginId": "alerting",
+            "scope": "common",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-common.RuleTypeParams",
+            "text": "RuleTypeParams"
+          },
+          " = never>({ id, includeLegacyId, }: { id: string; includeLegacyId?: boolean | undefined; }) => Promise<",
+          {
+            "pluginId": "alerting",
+            "scope": "common",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-common.ResolvedSanitizedRule",
+            "text": "ResolvedSanitizedRule"
+          },
           "<Params>>; enable: ({ id }: { id: string; }) => Promise<void>; disable: ({ id }: { id: string; }) => Promise<void>; muteAll: ({ id }: { id: string; }) => Promise<void>; getAlertState: ({ id }: { id: string; }) => Promise<void | { alertTypeState?: { [x: string]: unknown; } | undefined; alertInstances?: { [x: string]: { state?: { [x: string]: unknown; } | undefined; meta?: { lastScheduledActions?: ({ subgroup?: string | undefined; } & { group: string; date: Date; }) | undefined; } | undefined; }; } | undefined; previousStartedAt?: Date | null | undefined; }>; getAlertSummary: ({ id, dateStart, numberOfExecutions, }: ",
           "GetAlertSummaryParams",
           ") => Promise<",
@@ -3001,8 +2678,18 @@
             "pluginId": "alerting",
             "scope": "common",
             "docId": "kibAlertingPluginApi",
-            "section": "def-common.IExecutionLogWithErrorsResult",
-            "text": "IExecutionLogWithErrorsResult"
+            "section": "def-common.IExecutionLogResult",
+            "text": "IExecutionLogResult"
+          },
+          ">; getActionErrorLog: ({ id, dateStart, dateEnd, filter, page, perPage, sort, }: ",
+          "GetActionErrorLogByIdParams",
+          ") => Promise<",
+          {
+            "pluginId": "alerting",
+            "scope": "common",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-common.IExecutionErrorsResult",
+            "text": "IExecutionErrorsResult"
           },
           ">; bulkEdit: <Params extends ",
           {
@@ -3044,7 +2731,15 @@
             "section": "def-common.RuleSnoozeSchedule",
             "text": "RuleSnoozeSchedule"
           },
-          "; }) => Promise<void>; unsnooze: ({ id, scheduleIds, }: { id: string; scheduleIds?: string[] | undefined; }) => Promise<void>; updateSnoozedUntilTime: ({ id }: { id: string; }) => Promise<void>; unmuteAll: ({ id }: { id: string; }) => Promise<void>; muteInstance: ({ alertId, alertInstanceId }: ",
+          "; }) => Promise<void>; unsnooze: ({ id, scheduleIds, }: { id: string; scheduleIds?: string[] | undefined; }) => Promise<void>; calculateIsSnoozedUntil: (rule: { muteAll: boolean; snoozeSchedule?: ",
+          {
+            "pluginId": "alerting",
+            "scope": "common",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-common.RuleSnooze",
+            "text": "RuleSnooze"
+          },
+          " | undefined; }) => string | null; clearExpiredSnoozes: ({ id }: { id: string; }) => Promise<void>; unmuteAll: ({ id }: { id: string; }) => Promise<void>; muteInstance: ({ alertId, alertInstanceId }: ",
           "MuteOptions",
           ") => Promise<void>; unmuteInstance: ({ alertId, alertInstanceId }: ",
           "MuteOptions",
@@ -4374,7 +4069,7 @@
             "label": "freq",
             "description": [],
             "signature": [
-              "0 | 2 | 1 | 4 | 3 | 5 | 6 | undefined"
+              "0 | 2 | 1 | 3 | 4 | 5 | 6 | undefined"
             ],
             "path": "x-pack/plugins/alerting/common/rule_snooze_type.ts",
             "deprecated": false
@@ -4908,6 +4603,19 @@
           },
           {
             "parentPluginId": "alerting",
+            "id": "def-common.Rule.activeSnoozes",
+            "type": "Array",
+            "tags": [],
+            "label": "activeSnoozes",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/plugins/alerting/common/rule.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "alerting",
             "id": "def-common.Rule.isSnoozedUntil",
             "type": "CompoundType",
             "tags": [],
@@ -5313,6 +5021,19 @@
             ],
             "path": "x-pack/plugins/alerting/common/rule_snooze_type.ts",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.RuleSnoozeSchedule.skipRecurrences",
+            "type": "Array",
+            "tags": [],
+            "label": "skipRecurrences",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/plugins/alerting/common/rule_snooze_type.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -5604,9 +5325,48 @@
         "path": "x-pack/plugins/alerting/common/rule.ts",
         "deprecated": false,
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-common.RuleExecutionStatusWarningReasons",
+        "type": "Enum",
+        "tags": [],
+        "label": "RuleExecutionStatusWarningReasons",
+        "description": [],
+        "path": "x-pack/plugins/alerting/common/rule.ts",
+        "deprecated": false,
+        "initialIsOpen": false
       }
     ],
     "misc": [
+      {
+        "parentPluginId": "alerting",
+        "id": "def-common.actionErrorLogSortableColumns",
+        "type": "Array",
+        "tags": [],
+        "label": "actionErrorLogSortableColumns",
+        "description": [],
+        "signature": [
+          "string[]"
+        ],
+        "path": "x-pack/plugins/alerting/common/execution_log_types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-common.ActionErrorLogSortFields",
+        "type": "Type",
+        "tags": [],
+        "label": "ActionErrorLogSortFields",
+        "description": [],
+        "signature": [
+          "string"
+        ],
+        "path": "x-pack/plugins/alerting/common/execution_log_types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "alerting",
         "id": "def-common.ActionGroupIdsOf",
@@ -5751,34 +5511,6 @@
       },
       {
         "parentPluginId": "alerting",
-        "id": "def-common.IExecutionLogWithErrorsResult",
-        "type": "Type",
-        "tags": [],
-        "label": "IExecutionLogWithErrorsResult",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "alerting",
-            "scope": "common",
-            "docId": "kibAlertingPluginApi",
-            "section": "def-common.IExecutionLogResult",
-            "text": "IExecutionLogResult"
-          },
-          " & ",
-          {
-            "pluginId": "alerting",
-            "scope": "common",
-            "docId": "kibAlertingPluginApi",
-            "section": "def-common.IExecutionErrorsResult",
-            "text": "IExecutionErrorsResult"
-          }
-        ],
-        "path": "x-pack/plugins/alerting/common/execution_log_types.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "alerting",
         "id": "def-common.INTERNAL_BASE_ALERTING_API_PATH",
         "type": "string",
         "tags": [],
@@ -5899,13 +5631,7 @@
             "text": "SanitizedRule"
           },
           "<Params> & Omit<",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCoreSavedObjectsPluginApi",
-            "section": "def-server.SavedObjectsResolveResponse",
-            "text": "SavedObjectsResolveResponse"
-          },
+          "SavedObjectsResolveResponse",
           "<unknown>, \"saved_object\">"
         ],
         "path": "x-pack/plugins/alerting/common/rule.ts",
@@ -5953,17 +5679,6 @@
         "signature": [
           "\"error\" | \"warning\" | \"unknown\" | \"pending\" | \"ok\" | \"active\""
         ],
-        "path": "x-pack/plugins/alerting/common/rule.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "alerting",
-        "id": "def-common.RuleExecutionStatusWarningReasons",
-        "type": "string",
-        "tags": [],
-        "label": "RuleExecutionStatusWarningReasons",
-        "description": [],
         "path": "x-pack/plugins/alerting/common/rule.ts",
         "deprecated": false,
         "initialIsOpen": false
@@ -6018,7 +5733,7 @@
         "label": "RuleSnooze",
         "description": [],
         "signature": [
-          "{ duration: number; rRule: SnoozeRRule; id?: string | undefined; }[]"
+          "{ duration: number; rRule: SnoozeRRule; id?: string | undefined; skipRecurrences?: string[] | undefined; }[]"
         ],
         "path": "x-pack/plugins/alerting/common/rule_snooze_type.ts",
         "deprecated": false,
@@ -6102,7 +5817,7 @@
         "label": "SanitizedRule",
         "description": [],
         "signature": [
-          "{ id: string; monitoring?: ",
+          "{ params: Params; tags: string[]; id: string; monitoring?: ",
           {
             "pluginId": "alerting",
             "scope": "common",
@@ -6110,7 +5825,7 @@
             "section": "def-common.RuleMonitoring",
             "text": "RuleMonitoring"
           },
-          " | undefined; name: string; tags: string[]; enabled: boolean; params: Params; actions: ",
+          " | undefined; name: string; enabled: boolean; actions: ",
           {
             "pluginId": "alerting",
             "scope": "common",
@@ -6150,7 +5865,7 @@
             "section": "def-common.RuleSnooze",
             "text": "RuleSnooze"
           },
-          " | undefined; isSnoozedUntil?: Date | null | undefined; }"
+          " | undefined; activeSnoozes?: string[] | undefined; isSnoozedUntil?: Date | null | undefined; }"
         ],
         "path": "x-pack/plugins/alerting/common/rule.ts",
         "deprecated": false,
@@ -6172,7 +5887,7 @@
             "section": "def-common.SanitizedRule",
             "text": "SanitizedRule"
           },
-          "<never>, \"name\" | \"tags\" | \"enabled\" | \"actions\" | \"throttle\" | \"consumer\" | \"schedule\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"notifyWhen\"> & { producer: string; ruleTypeId: string; ruleTypeName: string; }"
+          "<never>, \"tags\" | \"name\" | \"enabled\" | \"actions\" | \"throttle\" | \"consumer\" | \"schedule\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"notifyWhen\"> & { producer: string; ruleTypeId: string; ruleTypeName: string; }"
         ],
         "path": "x-pack/plugins/alerting/common/rule.ts",
         "deprecated": false,

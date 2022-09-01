@@ -7,7 +7,8 @@
 
 /* eslint-disable complexity */
 
-import { EuiButtonEmpty, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import type { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { isNumber, isEmpty } from 'lodash/fp';
 import React from 'react';
 

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import { monaco } from '@kbn/monaco';
-import { DataViewField, DataView } from '../shared_imports';
+import { DataViewField, DataView, RuntimeType } from '../shared_imports';
 import type { Field, RuntimeFieldPainlessError } from '../types';
 
 export const deserializeField = (dataView: DataView, field?: DataViewField): Field | undefined => {
@@ -16,7 +16,7 @@ export const deserializeField = (dataView: DataView, field?: DataViewField): Fie
 
   return {
     name: field.name,
-    type: field?.esTypes ? field.esTypes[0] : 'keyword',
+    type: field?.esTypes ? (field.esTypes[0] as RuntimeType) : ('keyword' as const),
     script: field.runtimeField ? field.runtimeField.script : undefined,
     customLabel: field.customLabel,
     popularity: field.count,

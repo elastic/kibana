@@ -39,7 +39,9 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/* eslint-disable */
+/* eslint-disable prettier/prettier,no-var,eqeqeq,no-use-before-define,block-scoped-var,no-undef,
+    guard-for-in,one-var,strict,no-redeclare,no-sequences,no-proto,new-cap,no-nested-ternary,no-unused-vars,
+    prefer-const,no-empty,no-extend-native,camelcase */
 /*
   This file is loaded up as a blob by Brace to hand to Ace to load as Jsonp
   (hence the redefining of everything).  It is based on the json

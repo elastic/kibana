@@ -213,13 +213,7 @@
                 "label": "overlays",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.OverlayStart",
-                    "text": "OverlayStart"
-                  }
+                  "OverlayStart"
                 ],
                 "path": "src/plugins/embeddable/public/lib/panel/panel_header/panel_actions/add_panel/add_panel_action.ts",
                 "deprecated": false,
@@ -233,13 +227,7 @@
                 "label": "notifications",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.NotificationsStart",
-                    "text": "NotificationsStart"
-                  }
+                  "NotificationsStart"
                 ],
                 "path": "src/plugins/embeddable/public/lib/panel/panel_header/panel_actions/add_panel/add_panel_action.ts",
                 "deprecated": false,
@@ -496,13 +484,7 @@
                 "label": "toasts",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.IToasts",
-                    "text": "IToasts"
-                  }
+                  "IToasts"
                 ],
                 "path": "src/plugins/embeddable/public/lib/attribute_service/attribute_service.tsx",
                 "deprecated": false,
@@ -2022,13 +2004,7 @@
                 "label": "application",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCoreApplicationPluginApi",
-                    "section": "def-public.ApplicationStart",
-                    "text": "ApplicationStart"
-                  }
+                  "ApplicationStart"
                 ],
                 "path": "src/plugins/embeddable/public/lib/actions/edit_panel_action.ts",
                 "deprecated": false,
@@ -2511,6 +2487,21 @@
                 "isRequired": false
               }
             ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.Embeddable.reportsEmbeddableLoad",
+            "type": "Function",
+            "tags": [],
+            "label": "reportsEmbeddableLoad",
+            "description": [],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
+            "deprecated": false,
+            "children": [],
             "returnComment": []
           },
           {
@@ -3657,13 +3648,7 @@
                 "description": [],
                 "signature": [
                   "(appId: string, options?: ",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCoreApplicationPluginApi",
-                    "section": "def-public.NavigateToAppOptions",
-                    "text": "NavigateToAppOptions"
-                  },
+                  "NavigateToAppOptions",
                   " | undefined) => Promise<void>"
                 ],
                 "path": "src/plugins/embeddable/public/lib/state_transfer/embeddable_state_transfer.ts",
@@ -3694,13 +3679,7 @@
                 "description": [],
                 "signature": [
                   "ReadonlyMap<string, ",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCoreApplicationPluginApi",
-                    "section": "def-public.PublicAppInfo",
-                    "text": "PublicAppInfo"
-                  },
+                  "PublicAppInfo",
                   "> | undefined"
                 ],
                 "path": "src/plugins/embeddable/public/lib/state_transfer/embeddable_state_transfer.ts",
@@ -4803,6 +4782,43 @@
       },
       {
         "parentPluginId": "embeddable",
+        "id": "def-public.isFilterableEmbeddable",
+        "type": "Function",
+        "tags": [],
+        "label": "isFilterableEmbeddable",
+        "description": [
+          "\nEnsure that embeddable supports filtering/querying"
+        ],
+        "signature": [
+          "(incoming: unknown) => boolean"
+        ],
+        "path": "src/plugins/embeddable/public/lib/filterable_embeddable/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.isFilterableEmbeddable.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "incoming",
+            "description": [
+              "Embeddable that is being tested to check if it is a FilterableEmbeddable"
+            ],
+            "signature": [
+              "unknown"
+            ],
+            "path": "src/plugins/embeddable/public/lib/filterable_embeddable/types.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "true if the incoming embeddable is a FilterableEmbeddable, false if it is not"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "embeddable",
         "id": "def-public.isRangeSelectTriggerContext",
         "type": "Function",
         "tags": [],
@@ -5442,31 +5458,13 @@
           ">, ",
           "SavedObjectAttributes",
           ">>; overlays: ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.OverlayStart",
-            "text": "OverlayStart"
-          },
+          "OverlayStart",
           "; notifications: ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.NotificationsStart",
-            "text": "NotificationsStart"
-          },
+          "NotificationsStart",
           "; SavedObjectFinder: React.ComponentType<any>; showCreateNewMenu?: boolean | undefined; reportUiCounter?: ((appName: string, type: string, eventNames: string | string[], count?: number | undefined) => void) | undefined; theme: ",
           "ThemeServiceStart",
           "; }) => ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.OverlayRef",
-            "text": "OverlayRef"
-          }
+          "OverlayRef"
         ],
         "path": "src/plugins/embeddable/public/lib/panel/panel_header/panel_actions/add_panel/open_add_panel_flyout.tsx",
         "deprecated": false,
@@ -5674,13 +5672,7 @@
                 "label": "overlays",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.OverlayStart",
-                    "text": "OverlayStart"
-                  }
+                  "OverlayStart"
                 ],
                 "path": "src/plugins/embeddable/public/lib/panel/panel_header/panel_actions/add_panel/open_add_panel_flyout.tsx",
                 "deprecated": false
@@ -5693,13 +5685,7 @@
                 "label": "notifications",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.NotificationsStart",
-                    "text": "NotificationsStart"
-                  }
+                  "NotificationsStart"
                 ],
                 "path": "src/plugins/embeddable/public/lib/panel/panel_header/panel_actions/add_panel/open_add_panel_flyout.tsx",
                 "deprecated": false
@@ -6200,6 +6186,50 @@
                 "deprecated": false
               }
             ]
+          },
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.EmbeddableChildPanelProps.onPanelStatusChange",
+            "type": "Function",
+            "tags": [],
+            "label": "onPanelStatusChange",
+            "description": [],
+            "signature": [
+              "((info: ",
+              {
+                "pluginId": "embeddable",
+                "scope": "public",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-public.EmbeddablePhaseEvent",
+                "text": "EmbeddablePhaseEvent"
+              },
+              ") => void) | undefined"
+            ],
+            "path": "src/plugins/embeddable/public/lib/containers/embeddable_child_panel.tsx",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "embeddable",
+                "id": "def-public.EmbeddableChildPanelProps.onPanelStatusChange.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "info",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "embeddable",
+                    "scope": "public",
+                    "docId": "kibEmbeddablePluginApi",
+                    "section": "def-public.EmbeddablePhaseEvent",
+                    "text": "EmbeddablePhaseEvent"
+                  }
+                ],
+                "path": "src/plugins/embeddable/public/lib/containers/embeddable_child_panel.tsx",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -6919,6 +6949,19 @@
           },
           {
             "parentPluginId": "embeddable",
+            "id": "def-public.EmbeddableOutput.rendered",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "rendered",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "embeddable",
             "id": "def-public.EmbeddableOutput.error",
             "type": "CompoundType",
             "tags": [],
@@ -7111,6 +7154,72 @@
               "string | undefined"
             ],
             "path": "src/plugins/embeddable/public/lib/state_transfer/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "embeddable",
+        "id": "def-public.EmbeddablePhaseEvent",
+        "type": "Interface",
+        "tags": [],
+        "label": "EmbeddablePhaseEvent",
+        "description": [],
+        "path": "src/plugins/embeddable/public/lib/containers/embeddable_child_panel.tsx",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.EmbeddablePhaseEvent.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "src/plugins/embeddable/public/lib/containers/embeddable_child_panel.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.EmbeddablePhaseEvent.status",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "status",
+            "description": [],
+            "signature": [
+              "\"loading\" | \"error\" | \"loaded\" | \"rendered\""
+            ],
+            "path": "src/plugins/embeddable/public/lib/containers/embeddable_child_panel.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.EmbeddablePhaseEvent.error",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "error",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ErrorLike",
+                "text": "ErrorLike"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/embeddable/public/lib/containers/embeddable_child_panel.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.EmbeddablePhaseEvent.timeToEvent",
+            "type": "number",
+            "tags": [],
+            "label": "timeToEvent",
+            "description": [],
+            "path": "src/plugins/embeddable/public/lib/containers/embeddable_child_panel.tsx",
             "deprecated": false
           }
         ],
@@ -7336,6 +7445,61 @@
             "description": [],
             "path": "src/plugins/embeddable/public/types.ts",
             "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "embeddable",
+        "id": "def-public.FilterableEmbeddable",
+        "type": "Interface",
+        "tags": [],
+        "label": "FilterableEmbeddable",
+        "description": [
+          "\nAll embeddables that implement this interface should support being filtered\nand/or queried via the top navigation bar"
+        ],
+        "path": "src/plugins/embeddable/public/lib/filterable_embeddable/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.FilterableEmbeddable.getFilters",
+            "type": "Function",
+            "tags": [],
+            "label": "getFilters",
+            "description": [
+              "\nGets the embeddable's local filters"
+            ],
+            "signature": [
+              "() => Promise<",
+              "Filter",
+              "[]>"
+            ],
+            "path": "src/plugins/embeddable/public/lib/filterable_embeddable/types.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.FilterableEmbeddable.getQuery",
+            "type": "Function",
+            "tags": [],
+            "label": "getQuery",
+            "description": [
+              "\nGets the embeddable's local query"
+            ],
+            "signature": [
+              "() => Promise<",
+              "Query",
+              " | ",
+              "AggregateQuery",
+              " | undefined>"
+            ],
+            "path": "src/plugins/embeddable/public/lib/filterable_embeddable/types.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -8084,6 +8248,23 @@
           },
           {
             "parentPluginId": "embeddable",
+            "id": "def-public.IEmbeddable.reportsEmbeddableLoad",
+            "type": "Function",
+            "tags": [],
+            "label": "reportsEmbeddableLoad",
+            "description": [
+              "\nThis method returns false by default.\nIt should be set to true for any embeddable type that utilizes the `loading` and `rendered`\noutput variables to notify a container of their loading progress. If set to false, a container should assume\nthe embeddable is loaded immediately."
+            ],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "embeddable",
             "id": "def-public.IEmbeddable.getIsContainer",
             "type": "Function",
             "tags": [],
@@ -8215,6 +8396,38 @@
                 "description": [],
                 "signature": [
                   "Partial<I>"
+                ],
+                "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.IEmbeddable.updateOutput",
+            "type": "Function",
+            "tags": [],
+            "label": "updateOutput",
+            "description": [
+              "\nUpdates output state with the given changes."
+            ],
+            "signature": [
+              "(changes: Partial<O>) => void"
+            ],
+            "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "embeddable",
+                "id": "def-public.IEmbeddable.updateOutput.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "changes",
+                "description": [],
+                "signature": [
+                  "Partial<O>"
                 ],
                 "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
                 "deprecated": false,
@@ -8902,6 +9115,39 @@
       },
       {
         "parentPluginId": "embeddable",
+        "id": "def-public.SelfStyledEmbeddable",
+        "type": "Interface",
+        "tags": [],
+        "label": "SelfStyledEmbeddable",
+        "description": [
+          "\nAll embeddables that implement this interface will be able to configure\nthe style of their containing panels"
+        ],
+        "path": "src/plugins/embeddable/public/lib/self_styled_embeddable/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.SelfStyledEmbeddable.getSelfStyledOptions",
+            "type": "Function",
+            "tags": [],
+            "label": "getSelfStyledOptions",
+            "description": [
+              "\nGets the embeddable's style configuration"
+            ],
+            "signature": [
+              "() => ",
+              "SelfStyledOptions"
+            ],
+            "path": "src/plugins/embeddable/public/lib/self_styled_embeddable/types.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "embeddable",
         "id": "def-public.ValueClickContext",
         "type": "Interface",
         "tags": [],
@@ -9082,7 +9328,7 @@
             "section": "def-public.EmbeddableFactory",
             "text": "EmbeddableFactory"
           },
-          "<I, O, E, T>, \"create\" | \"type\" | \"isEditable\" | \"getDisplayName\"> & Partial<Pick<",
+          "<I, O, E, T>, \"type\" | \"create\" | \"isEditable\" | \"getDisplayName\"> & Partial<Pick<",
           {
             "pluginId": "embeddable",
             "scope": "public",
@@ -9090,7 +9336,7 @@
             "section": "def-public.EmbeddableFactory",
             "text": "EmbeddableFactory"
           },
-          "<I, O, E, T>, \"createFromSavedObject\" | \"isContainerType\" | \"getExplicitInput\" | \"savedObjectMetaData\" | \"canCreateNew\" | \"getDefaultInput\" | \"telemetry\" | \"extract\" | \"inject\" | \"migrations\" | \"grouping\" | \"getIconType\" | \"getDescription\">>"
+          "<I, O, E, T>, \"telemetry\" | \"inject\" | \"extract\" | \"migrations\" | \"createFromSavedObject\" | \"isContainerType\" | \"getExplicitInput\" | \"savedObjectMetaData\" | \"canCreateNew\" | \"getDefaultInput\" | \"grouping\" | \"getIconType\" | \"getDescription\">>"
         ],
         "path": "src/plugins/embeddable/public/lib/embeddables/embeddable_factory_definition.ts",
         "deprecated": false,
@@ -9195,6 +9441,20 @@
             "deprecated": false
           }
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "embeddable",
+        "id": "def-public.EmbeddablePhase",
+        "type": "Type",
+        "tags": [],
+        "label": "EmbeddablePhase",
+        "description": [],
+        "signature": [
+          "\"loading\" | \"error\" | \"loaded\" | \"rendered\""
+        ],
+        "path": "src/plugins/embeddable/public/lib/containers/embeddable_child_panel.tsx",
+        "deprecated": false,
         "initialIsOpen": false
       },
       {

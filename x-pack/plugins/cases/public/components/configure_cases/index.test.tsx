@@ -10,7 +10,7 @@ import { ReactWrapper, mount } from 'enzyme';
 import { waitFor } from '@testing-library/react';
 
 import { ConfigureCases } from '.';
-import { noCasesPermissions, TestProviders } from '../../common/mock';
+import { noUpdateCasesPermissions, TestProviders } from '../../common/mock';
 import { Connectors } from './connectors';
 import { ClosureOptions } from './closure_options';
 
@@ -188,10 +188,10 @@ describe('ConfigureCases', () => {
       expect(wrapper.find('[data-test-subj="edit-connector-flyout"]').exists()).toBe(false);
     });
 
-    test('it disables correctly when the user cannot crud', () => {
+    test('it disables correctly when the user cannot update', () => {
       const newWrapper = mount(<ConfigureCases />, {
         wrappingComponent: TestProviders,
-        wrappingComponentProps: { permissions: noCasesPermissions() },
+        wrappingComponentProps: { permissions: noUpdateCasesPermissions() },
       });
 
       expect(newWrapper.find('button[data-test-subj="dropdown-connectors"]').prop('disabled')).toBe(
@@ -553,20 +553,7 @@ describe('ConfigureCases', () => {
         expect(wrapper.find('[data-test-subj="add-connector-flyout"]').exists()).toBe(true);
         expect(getAddConnectorFlyoutMock).toHaveBeenCalledWith(
           expect.objectContaining({
-            supportedActionTypes: [
-              expect.objectContaining({
-                id: '.servicenow',
-              }),
-              expect.objectContaining({
-                id: '.jira',
-              }),
-              expect.objectContaining({
-                id: '.resilient',
-              }),
-              expect.objectContaining({
-                id: '.servicenow-sir',
-              }),
-            ],
+            featureId: 'cases',
           })
         );
       });

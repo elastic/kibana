@@ -10,7 +10,8 @@ import { noop } from 'lodash/fp';
 import React, { useCallback, useMemo, useState } from 'react';
 
 import { buildHostNamesFilter } from '../../../../../../common/search_strategy';
-import { HostRisk, useHostRiskScore } from '../../../../../risk_score/containers';
+import type { HostRisk } from '../../../../../risk_score/containers';
+import { useHostRiskScore } from '../../../../../risk_score/containers';
 import { useHostIsolationTools } from '../use_host_isolation_tools';
 import { FlyoutHeaderContent } from './header';
 import { FlyoutBody } from './body';
@@ -25,9 +26,7 @@ export { FlyoutHeader } from './header';
 export { FlyoutFooter } from './footer';
 
 export const useToGetInternalFlyout = () => {
-  const { browserFields, docValueFields, runtimeMappings } = useSourcererDataView(
-    SourcererScopeName.detections
-  );
+  const { browserFields, runtimeMappings } = useSourcererDataView(SourcererScopeName.detections);
   const [alert, setAlert] = useState<{ id?: string; indexName?: string }>({
     id: undefined,
     indexName: undefined,
@@ -35,7 +34,6 @@ export const useToGetInternalFlyout = () => {
 
   const [loading, detailsData, rawEventData, ecsData, refetchFlyoutData] = useTimelineEventsDetails(
     {
-      docValueFields,
       entityType: EntityType.EVENTS,
       indexName: alert.indexName ?? '',
       eventId: alert.id ?? '',

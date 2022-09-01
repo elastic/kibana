@@ -5,17 +5,17 @@
  * 2.0.
  */
 
+import type { ResponseProvidersInterface } from '../../../common/mock/endpoint/http_handler_mock_factory';
 import {
   composeHttpHandlerMocks,
   httpHandlerMockFactory,
-  ResponseProvidersInterface,
 } from '../../../common/mock/endpoint/http_handler_mock_factory';
-import {
+import type {
   HostInfo,
   HostPolicyResponse,
-  HostStatus,
   MetadataListResponse,
 } from '../../../../common/endpoint/types';
+import { HostStatus } from '../../../../common/endpoint/types';
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
 import {
   BASE_POLICY_RESPONSE_ROUTE,
@@ -23,21 +23,24 @@ import {
   HOST_METADATA_LIST_ROUTE,
   METADATA_TRANSFORMS_STATUS_ROUTE,
 } from '../../../../common/endpoint/constants';
-import {
-  pendingActionsHttpMock,
-  PendingActionsHttpMockInterface,
-} from '../../../common/lib/endpoint_pending_actions/mocks';
+import type { PendingActionsHttpMockInterface } from '../../../common/lib/endpoint_pending_actions/mocks';
+import { pendingActionsHttpMock } from '../../../common/lib/endpoint_pending_actions/mocks';
 import { TRANSFORM_STATES } from '../../../../common/constants';
-import { TransformStatsResponse } from './types';
-import {
-  fleetGetAgentPolicyListHttpMock,
+import type { TransformStatsResponse } from './types';
+import type {
   FleetGetAgentPolicyListHttpMockInterface,
   FleetGetAgentStatusHttpMockInterface,
-  fleetGetCheckPermissionsHttpMock,
   FleetGetCheckPermissionsInterface,
   FleetGetEndpointPackagePolicyHttpMockInterface,
-  fleetGetPackageListHttpMock,
   FleetGetPackageListHttpMockInterface,
+} from '../../mocks';
+import {
+  fleetGetAgentPolicyListHttpMock,
+  fleetGetCheckPermissionsHttpMock,
+  fleetGetPackageListHttpMock,
+  fleetBulkGetPackagePoliciesListHttpMock,
+  fleetBulkGetAgentPolicyListHttpMock,
+  fleetGetPackagePoliciesListHttpMock,
 } from '../../mocks';
 
 type EndpointMetadataHttpMocksInterface = ResponseProvidersInterface<{
@@ -133,6 +136,9 @@ export const endpointListFleetApisHttpMock =
   composeHttpHandlerMocks<EndpointListFleetApisHttpMockInterface>([
     fleetGetPackageListHttpMock,
     fleetGetAgentPolicyListHttpMock,
+    fleetBulkGetPackagePoliciesListHttpMock,
+    fleetBulkGetAgentPolicyListHttpMock,
+    fleetGetPackagePoliciesListHttpMock,
     fleetGetCheckPermissionsHttpMock,
   ]);
 type EndpointPageHttpMockInterface = EndpointMetadataHttpMocksInterface &

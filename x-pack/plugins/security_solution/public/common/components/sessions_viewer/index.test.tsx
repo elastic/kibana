@@ -9,9 +9,10 @@ import React, { useEffect } from 'react';
 import { waitFor, render } from '@testing-library/react';
 import { TestProviders } from '../../mock';
 import { TEST_ID, SessionsView, defaultSessionsFilter } from '.';
-import { EntityType, TimelineId } from '@kbn/timelines-plugin/common';
-import { SessionsComponentsProps } from './types';
-import { TimelineModel } from '../../../timelines/store/timeline/model';
+import type { EntityType } from '@kbn/timelines-plugin/common';
+import { TimelineId } from '@kbn/timelines-plugin/common';
+import type { SessionsComponentsProps } from './types';
+import type { TimelineModel } from '../../../timelines/store/timeline/model';
 import { useGetUserCasesPermissions } from '../../lib/kibana';
 
 jest.mock('../../lib/kibana');
@@ -23,7 +24,7 @@ const originalKibanaLib = jest.requireActual('../../lib/kibana');
 const mockUseGetUserCasesPermissions = useGetUserCasesPermissions as jest.Mock;
 mockUseGetUserCasesPermissions.mockImplementation(originalKibanaLib.useGetUserCasesPermissions);
 
-jest.mock('../url_state/normalize_time_range');
+jest.mock('../../utils/normalize_time_range');
 
 const startDate = '2022-03-22T22:10:56.794Z';
 const endDate = '2022-03-21T22:10:56.791Z';

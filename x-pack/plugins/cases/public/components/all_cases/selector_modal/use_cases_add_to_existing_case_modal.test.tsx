@@ -11,7 +11,7 @@ import userEvent from '@testing-library/user-event';
 import React from 'react';
 import AllCasesSelectorModal from '.';
 import { Case, CaseStatuses, StatusAll } from '../../../../common';
-import { AppMockRenderer, createAppMockRenderer } from '../../../common/mock';
+import { allCasesPermissions, AppMockRenderer, createAppMockRenderer } from '../../../common/mock';
 import { useCasesToast } from '../../../common/use_cases_toast';
 import { alertComment } from '../../../containers/mock';
 import { useCreateAttachments } from '../../../containers/use_create_attachments';
@@ -19,6 +19,7 @@ import { CasesContext } from '../../cases_context';
 import { CasesContextStoreActionsList } from '../../cases_context/cases_context_reducer';
 import { ExternalReferenceAttachmentTypeRegistry } from '../../../client/attachment_framework/external_reference_registry';
 import { useCasesAddToExistingCaseModal } from './use_cases_add_to_existing_case_modal';
+import { PersistableStateAttachmentTypeRegistry } from '../../../client/attachment_framework/persistable_state_registry';
 
 jest.mock('../../../common/use_cases_toast');
 jest.mock('../../../containers/use_create_attachments');
@@ -47,6 +48,7 @@ const TestComponent: React.FC = () => {
 const useCreateAttachmentsMock = useCreateAttachments as jest.Mock;
 
 const externalReferenceAttachmentTypeRegistry = new ExternalReferenceAttachmentTypeRegistry();
+const persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTypeRegistry();
 
 describe('use cases add to existing case modal hook', () => {
   useCreateAttachmentsMock.mockReturnValue({
@@ -60,16 +62,14 @@ describe('use cases add to existing case modal hook', () => {
       <CasesContext.Provider
         value={{
           externalReferenceAttachmentTypeRegistry,
+          persistableStateAttachmentTypeRegistry,
           owner: ['test'],
-          permissions: {
-            all: true,
-            read: true,
-          },
+          permissions: allCasesPermissions(),
           appId: 'test',
           appTitle: 'jest',
           basePath: '/jest',
           dispatch,
-          features: { alerts: { sync: true, enabled: true }, metrics: [] },
+          features: { alerts: { sync: true, enabled: true, isExperimental: false }, metrics: [] },
           releasePhase: 'ga',
         }}
       >

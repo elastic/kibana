@@ -8,15 +8,15 @@
 import actionCreatorFactory from 'typescript-fsa';
 import type { Filter } from '@kbn/es-query';
 
-import {
+import type {
   DataProvider,
   DataProviderType,
   QueryOperator,
 } from '../../components/timeline/data_providers/data_provider';
 
-import { KqlMode, TimelineModel } from './model';
-import { InsertTimeline } from './types';
-import { FieldsEqlOptions } from '../../../../common/search_strategy/timeline';
+import type { KqlMode, TimelineModel } from './model';
+import type { InsertTimeline } from './types';
+import type { FieldsEqlOptions } from '../../../../common/search_strategy/timeline';
 import type {
   TimelineEventsType,
   RowRendererId,
@@ -45,8 +45,8 @@ export {
   updateSort,
   upsertColumn,
 } from '@kbn/timelines-plugin/public';
-import { ResolveTimelineConfig } from '../../components/open_timeline/types';
-import { SessionViewConfig } from '../../components/timeline/session_tab_content/use_session_view';
+import type { ResolveTimelineConfig } from '../../components/open_timeline/types';
+import type { SessionViewConfig } from '../../components/timeline/session_tab_content/use_session_view';
 
 const actionCreator = actionCreatorFactory('x-pack/security_solution/local/timeline');
 

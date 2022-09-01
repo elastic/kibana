@@ -11,7 +11,7 @@
  * 2.0.
  */
 
-import { RequestHandler } from '@kbn/core/server';
+import type { RequestHandler } from '@kbn/core/server';
 import type { EndpointActionListRequestQuery } from '../../../../common/endpoint/schema/actions';
 import { getActionList } from '../../services';
 import type { SecuritySolutionRequestHandlerContext } from '../../../types';
@@ -42,6 +42,7 @@ export const actionListHandler = (
         commands: formatStringIds(commands),
         esClient,
         elasticAgentIds: formatStringIds(elasticAgentIds),
+        metadataService: endpointContext.service.getEndpointMetadataService(),
         page,
         pageSize,
         startDate,

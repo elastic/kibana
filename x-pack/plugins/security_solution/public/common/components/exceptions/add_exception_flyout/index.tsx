@@ -5,10 +5,13 @@
  * 2.0.
  */
 
-/* eslint complexity: ["error", 30]*/
+// Component being re-implemented in 8.5
+
+/* eslint complexity: ["error", 35]*/
 
 import React, { memo, useEffect, useState, useCallback, useMemo } from 'react';
 import styled, { css } from 'styled-components';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiFlyout,
   EuiFlyoutHeader,
@@ -24,7 +27,6 @@ import {
   EuiText,
   EuiCallOut,
   EuiComboBox,
-  EuiComboBoxOptionOption,
   EuiFlexGroup,
 } from '@elastic/eui';
 import type {
@@ -33,15 +35,17 @@ import type {
   ExceptionListItemSchema,
   CreateExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
-import { ExceptionsBuilderExceptionItem } from '@kbn/securitysolution-list-utils';
+import type { ExceptionsBuilderExceptionItem } from '@kbn/securitysolution-list-utils';
 import { getExceptionBuilderComponentLazy } from '@kbn/lists-plugin/public';
-import { DataViewBase } from '@kbn/es-query';
+import type { DataViewBase } from '@kbn/es-query';
+import { useRuleIndices } from '../../../../detections/containers/detection_engine/rules/use_rule_indices';
 import {
   hasEqlSequenceQuery,
   isEqlRule,
+  isNewTermsRule,
   isThresholdRule,
 } from '../../../../../common/detection_engine/utils';
-import { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
+import type { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
 import * as i18nCommon from '../../../translations';
 import * as i18n from './translations';
 import * as sharedI18n from '../translations';
@@ -63,10 +67,10 @@ import {
   retrieveAlertOsTypes,
   filterIndexPatterns,
 } from '../helpers';
-import { ErrorInfo, ErrorCallout } from '../error_callout';
-import { AlertData } from '../types';
+import type { ErrorInfo } from '../error_callout';
+import { ErrorCallout } from '../error_callout';
+import type { AlertData } from '../types';
 import { useFetchIndex } from '../../../containers/source';
-import { useGetInstalledJob } from '../../ml/hooks/use_get_jobs';
 
 export interface AddExceptionFlyoutProps {
   ruleName: string;
@@ -158,32 +162,32 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
   const [isSignalIndexPatternLoading, { indexPatterns: signalIndexPatterns }] =
     useFetchIndex(memoSignalIndexName);
 
-  const memoMlJobIds = useMemo(() => maybeRule?.machine_learning_job_id ?? [], [maybeRule]);
-  const { loading: mlJobLoading, jobs } = useGetInstalledJob(memoMlJobIds);
-
-  const memoRuleIndices = useMemo(() => {
-    if (jobs.length > 0) {
-      return jobs[0].results_index_name ? [`.ml-anomalies-${jobs[0].results_index_name}`] : [];
-    } else {
-      return ruleIndices;
-    }
-  }, [jobs, ruleIndices]);
-
-  const [isIndexPatternLoading, { indexPatterns: indexIndexPatterns }] =
-    useFetchIndex(memoRuleIndices);
-
-  const [indexPattern, setIndexPattern] = useState<DataViewBase>(indexIndexPatterns);
+  const { mlJobLoading, ruleIndices: memoRuleIndices } = useRuleIndices(
+    maybeRule?.machine_learning_job_id,
+    ruleIndices
+  );
+  const hasDataViewId = dataViewId || maybeRule?.data_view_id || null;
+  const [dataViewIndexPatterns, setDataViewIndexPatterns] = useState<DataViewBase | null>(null);
 
   useEffect(() => {
     const fetchSingleDataView = async () => {
-      if (dataViewId != null && dataViewId !== '') {
-        const dv = await data.dataViews.get(dataViewId);
-        setIndexPattern(dv);
+      if (hasDataViewId) {
+        const dv = await data.dataViews.get(hasDataViewId);
+        setDataViewIndexPatterns(dv);
       }
     };
 
     fetchSingleDataView();
-  }, [data.dataViews, dataViewId, setIndexPattern]);
+  }, [hasDataViewId, data.dataViews, setDataViewIndexPatterns]);
+
+  const [isIndexPatternLoading, { indexPatterns: indexIndexPatterns }] = useFetchIndex(
+    hasDataViewId ? [] : memoRuleIndices
+  );
+
+  const indexPattern = useMemo(
+    (): DataViewBase | null => (hasDataViewId ? dataViewIndexPatterns : indexIndexPatterns),
+    [hasDataViewId, dataViewIndexPatterns, indexIndexPatterns]
+  );
 
   const handleBuilderOnChange = useCallback(
     ({
@@ -481,6 +485,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
           <Loader data-test-subj="loadingAddExceptionFlyout" size="xl" />
         )}
       {fetchOrCreateListError == null &&
+        indexPattern != null &&
         !isSignalIndexLoading &&
         !isSignalIndexPatternLoading &&
         !isLoadingExceptionList &&
@@ -520,7 +525,9 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
               )}
               {getExceptionBuilderComponentLazy({
                 allowLargeValueLists:
-                  !isEqlRule(maybeRule?.type) && !isThresholdRule(maybeRule?.type),
+                  !isEqlRule(maybeRule?.type) &&
+                  !isThresholdRule(maybeRule?.type) &&
+                  !isNewTermsRule(maybeRule?.type),
                 httpService: http,
                 autocompleteService: unifiedSearch.autocomplete,
                 exceptionListItems: initialExceptionItems,
@@ -530,8 +537,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
                 listNamespaceType: ruleExceptionList.namespace_type,
                 listTypeSpecificIndexPatternFilter: filterIndexPatterns,
                 ruleName,
-                indexPatterns:
-                  dataViewId != null && dataViewId !== '' ? indexPattern : indexIndexPatterns,
+                indexPatterns: indexPattern,
                 isOrDisabled: isExceptionBuilderFormDisabled,
                 isAndDisabled: isExceptionBuilderFormDisabled,
                 isNestedDisabled: isExceptionBuilderFormDisabled,

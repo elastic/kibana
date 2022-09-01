@@ -32,7 +32,7 @@ const tableTitle = i18n.translate('indexPatternManagement.dataViewTable.tableTit
 });
 
 export const deleteModalMsg = (views: RemoveDataViewProps[], hasSpaces: boolean) => {
-  const columns: Array<EuiTableFieldDataColumnType<any>> = [
+  const columns: Array<EuiTableFieldDataColumnType<RemoveDataViewProps>> = [
     {
       field: 'name',
       name: dataViewColumnName,

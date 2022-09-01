@@ -11,33 +11,33 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { Subscription } from 'rxjs';
 
-import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { DataView, isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
-import { ESQuery } from '../../../common/typed_json';
+import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { DataView } from '@kbn/data-plugin/common';
+import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
+import type { ESQuery } from '../../../common/typed_json';
 
-import { inputsModel } from '../../common/store';
+import type { inputsModel } from '../../common/store';
 import { useKibana } from '../../common/lib/kibana';
 import { createFilter } from '../../common/containers/helpers';
 import { timelineActions } from '../store/timeline';
 import { detectionsTimelineIds, skipQueryForDetectionsPage } from './helpers';
 import { getInspectResponse } from '../../helpers';
-import {
-  Direction,
+import type {
   PaginationInputPaginated,
-  TimelineEventsQueries,
   TimelineEventsAllStrategyResponse,
   TimelineEventsAllRequestOptions,
   TimelineEdges,
   TimelineItem,
   TimelineRequestSortField,
-  DocValueFields,
 } from '../../../common/search_strategy';
-import { InspectResponse } from '../../types';
+import { Direction, TimelineEventsQueries } from '../../../common/search_strategy';
+import type { InspectResponse } from '../../types';
 import * as i18n from './translations';
-import { KueryFilterQueryKind, TimelineId } from '../../../common/types/timeline';
+import type { KueryFilterQueryKind } from '../../../common/types/timeline';
+import { TimelineId } from '../../../common/types/timeline';
 import { useRouteSpy } from '../../common/utils/route/use_route_spy';
 import { activeTimeline } from './active_timeline_context';
-import {
+import type {
   EqlOptionsSelected,
   TimelineEqlRequestOptions,
   TimelineEqlResponse,
@@ -75,7 +75,6 @@ type TimelineResponse<T extends KueryFilterQueryKind> = T extends 'kuery'
 
 export interface UseTimelineEventsProps {
   dataViewId: string | null;
-  docValueFields?: DocValueFields[];
   endDate: string;
   eqlOptions?: EqlOptionsSelected;
   fields: string[];
@@ -129,7 +128,6 @@ const deStructureEqlOptions = (eqlOptions?: EqlOptionsSelected) => ({
 
 export const useTimelineEvents = ({
   dataViewId,
-  docValueFields,
   endDate,
   eqlOptions = undefined,
   id = ID,
@@ -365,10 +363,9 @@ export const useTimelineEvents = ({
 
       const currentRequest = {
         defaultIndex: indexNames,
-        docValueFields: docValueFields ?? [],
         factoryQueryType: TimelineEventsQueries.all,
         fieldRequested: fields,
-        fields: [],
+        fields,
         filterQuery: createFilter(filterQuery),
         pagination: {
           activePage: newActivePage,
@@ -400,7 +397,6 @@ export const useTimelineEvents = ({
     dispatch,
     indexNames,
     activePage,
-    docValueFields,
     endDate,
     eqlOptions,
     filterQuery,

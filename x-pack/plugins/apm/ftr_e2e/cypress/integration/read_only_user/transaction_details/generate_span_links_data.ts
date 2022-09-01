@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { apm, EntityArrayIterable, timerange } from '@elastic/apm-synthtrace';
+import { apm, EntityArrayIterable, timerange } from '@kbn/apm-synthtrace';
 import { synthtrace } from '../../../../synthtrace';
 import { SpanLink } from '../../../../../typings/es_schemas/raw/fields/span_links';
 
@@ -296,7 +296,7 @@ function getConsumerMultiple({
  * ----Span E
  * ------span.links= producer-external-only / Span B | producer-consumer / Transaction C
  */
-export async function generateSpanLinksData() {
+export function generateSpanLinksData() {
   const producerInternalOnly = getProducerInternalOnly();
   const producerExternalOnly = getProducerExternalOnly();
   const producerConsumer = getProducerConsumer({
@@ -309,7 +309,7 @@ export async function generateSpanLinksData() {
     producerExternalOnlySpanBSpanLink: producerExternalOnly.spanBSpanLink,
   });
 
-  await synthtrace.index(
+  synthtrace.index(
     new EntityArrayIterable(producerInternalOnly.apmFields).merge(
       new EntityArrayIterable(producerExternalOnly.apmFields),
       new EntityArrayIterable(producerConsumer.apmFields),

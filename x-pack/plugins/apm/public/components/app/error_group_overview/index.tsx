@@ -27,7 +27,6 @@ import { APIReturnType } from '../../../services/rest/create_call_apm_api';
 import { FailedTransactionRateChart } from '../../shared/charts/failed_transaction_rate_chart';
 import { ErrorDistribution } from '../error_group_details/distribution';
 import { ErrorGroupList } from './error_group_list';
-import { INITIAL_PAGE_SIZE } from '../../shared/managed_table';
 
 type ErrorGroupMainStatistics =
   APIReturnType<'GET /internal/apm/services/{serviceName}/errors/groups/main_statistics'>;
@@ -63,7 +62,7 @@ export function ErrorGroupOverview() {
       offset,
       comparisonEnabled,
       page = 0,
-      pageSize = INITIAL_PAGE_SIZE,
+      pageSize = 25,
     },
   } = useApmParams('/services/{serviceName}/errors');
 

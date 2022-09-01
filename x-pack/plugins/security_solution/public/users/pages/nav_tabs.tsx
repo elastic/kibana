@@ -8,7 +8,7 @@
 import { omit } from 'lodash/fp';
 import * as i18n from './translations';
 import { UsersTableType } from '../store/model';
-import { UsersNavTab } from './navigation/types';
+import type { UsersNavTab } from './navigation/types';
 import { USERS_PATH } from '../../../common/constants';
 
 const getTabsOnUsersUrl = (tabName: UsersTableType) => `${USERS_PATH}/${tabName}`;
@@ -42,12 +42,6 @@ export const navTabsUsers = (
       id: UsersTableType.events,
       name: i18n.NAVIGATION_EVENTS_TITLE,
       href: getTabsOnUsersUrl(UsersTableType.events),
-      disabled: false,
-    },
-    [UsersTableType.alerts]: {
-      id: UsersTableType.alerts,
-      name: i18n.NAVIGATION_ALERTS_TITLE,
-      href: getTabsOnUsersUrl(UsersTableType.alerts),
       disabled: false,
     },
     [UsersTableType.risk]: {

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { AppContextTestRender, createAppRootMockRenderer } from '../../../common/mock/endpoint';
+import type { AppContextTestRender } from '../../../common/mock/endpoint';
+import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
 import {
   ConsoleManagerTestComponent,
   getConsoleManagerMockRenderResultQueriesAndActions,
@@ -15,9 +16,14 @@ import { getEndpointResponseActionsConsoleCommands } from './endpoint_response_a
 import { responseActionsHttpMocks } from '../../mocks/response_actions_http_mocks';
 import { enterConsoleCommand } from '../console/mocks';
 import { waitFor } from '@testing-library/react';
+import { getDeferred } from '../mocks';
+import type { ResponderCapabilities } from '../../../../common/endpoint/constants';
+import { RESPONDER_CAPABILITIES } from '../../../../common/endpoint/constants';
 
 describe('When using isolate action from response actions console', () => {
-  let render: () => Promise<ReturnType<AppContextTestRender['render']>>;
+  let render: (
+    capabilities?: ResponderCapabilities[]
+  ) => Promise<ReturnType<AppContextTestRender['render']>>;
   let renderResult: ReturnType<AppContextTestRender['render']>;
   let apiMocks: ReturnType<typeof responseActionsHttpMocks>;
   let consoleManagerMockAccess: ReturnType<
@@ -29,14 +35,17 @@ describe('When using isolate action from response actions console', () => {
 
     apiMocks = responseActionsHttpMocks(mockedContext.coreStart.http);
 
-    render = async () => {
+    render = async (capabilities: ResponderCapabilities[] = [...RESPONDER_CAPABILITIES]) => {
       renderResult = mockedContext.render(
         <ConsoleManagerTestComponent
           registerConsoleProps={() => {
             return {
               consoleProps: {
                 'data-test-subj': 'test',
-                commands: getEndpointResponseActionsConsoleCommands('a.b.c'),
+                commands: getEndpointResponseActionsConsoleCommands({
+                  endpointAgentId: 'a.b.c',
+                  endpointCapabilities: [...capabilities],
+                }),
               },
             };
           }}
@@ -50,6 +59,15 @@ describe('When using isolate action from response actions console', () => {
 
       return renderResult;
     };
+  });
+
+  it('should show an error if the `isolation` capability is not present in the endpoint', async () => {
+    await render([]);
+    enterConsoleCommand(renderResult, 'isolate');
+
+    expect(renderResult.getByTestId('test-validationError-message').textContent).toEqual(
+      'The current version of the Agent does not support this feature. Upgrade your Agent through Fleet to use this feature and new response actions such as killing and suspending processes.'
+    );
   });
 
   it('should call `isolate` api when command is entered', async () => {
@@ -115,6 +133,30 @@ describe('When using isolate action from response actions console', () => {
       expect(renderResult.getByTestId('isolateErrorCallout').textContent).toMatch(
         /error one \| error two/
       );
+    });
+  });
+
+  it('should create action request and store id even if console is closed prior to request api response', async () => {
+    const deferrable = getDeferred();
+    apiMocks.responseProvider.isolateHost.mockDelay.mockReturnValue(deferrable.promise);
+    await render();
+
+    // enter command
+    enterConsoleCommand(renderResult, 'isolate');
+    // hide console
+    await consoleManagerMockAccess.hideOpenedConsole();
+
+    // Release API response
+    deferrable.resolve();
+    await waitFor(() => {
+      expect(apiMocks.responseProvider.isolateHost).toHaveBeenCalledTimes(1);
+    });
+
+    // open console
+    await consoleManagerMockAccess.openRunningConsole();
+    // status should be updating
+    await waitFor(() => {
+      expect(apiMocks.responseProvider.actionDetails.mock.calls.length).toBeGreaterThan(0);
     });
   });
 

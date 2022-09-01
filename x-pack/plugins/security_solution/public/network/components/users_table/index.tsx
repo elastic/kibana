@@ -12,19 +12,19 @@ import deepEqual from 'fast-deep-equal';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { assertUnreachable } from '../../../../common/utility_types';
 import { networkActions, networkModel, networkSelectors } from '../../store';
-import {
+import type {
   Direction,
   FlowTargetSourceDest,
   NetworkUsersEdges,
-  NetworkUsersFields,
   SortField,
 } from '../../../../common/search_strategy';
-import {
+import { NetworkUsersFields } from '../../../../common/search_strategy';
+import type {
   Criteria,
   ItemsPerRow,
-  PaginatedTable,
   SortingBasicTable,
 } from '../../../common/components/paginated_table';
+import { PaginatedTable } from '../../../common/components/paginated_table';
 
 import { getUsersColumns } from './columns';
 import * as i18n from './translations';

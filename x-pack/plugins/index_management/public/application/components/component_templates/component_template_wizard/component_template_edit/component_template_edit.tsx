@@ -8,6 +8,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { EuiPageContentBody, EuiPageHeader, EuiSpacer } from '@elastic/eui';
 import { History } from 'history';
 
@@ -22,6 +23,9 @@ import {
 import { ComponentTemplateForm } from '../component_template_form';
 import type { WizardSection } from '../component_template_form';
 import { useRedirectPath } from '../../../../hooks/redirect_path';
+import { MANAGED_BY_FLEET } from '../../constants';
+
+import { MappingsDatastreamRolloverModal } from './mappings_datastreams_rollover_modal';
 
 interface MatchParams {
   name: string;
@@ -57,7 +61,7 @@ export const ComponentTemplateEdit: React.FunctionComponent<RouteComponentProps<
   },
   history,
 }) => {
-  const { api, breadcrumbs } = useComponentTemplatesContext();
+  const { api, breadcrumbs, overlays } = useComponentTemplatesContext();
   const { activeStep: defaultActiveStep, updateStep } = useStepFromQueryString(history);
   const redirectTo = useRedirectPath(history);
 
@@ -67,6 +71,8 @@ export const ComponentTemplateEdit: React.FunctionComponent<RouteComponentProps<
   const decodedName = attemptToURIDecode(name)!;
 
   const { error, data: componentTemplate, isLoading } = api.useLoadComponentTemplate(decodedName);
+  const { data: dataStreamResponse } = api.useLoadComponentTemplatesDatastream(decodedName);
+  const dataStreams = useMemo(() => dataStreamResponse?.data_streams ?? [], [dataStreamResponse]);
 
   useEffect(() => {
     breadcrumbs.setEditBreadcrumbs();
@@ -85,6 +91,38 @@ export const ComponentTemplateEdit: React.FunctionComponent<RouteComponentProps<
       return;
     }
 
+    if (updatedComponentTemplate._meta?.managed_by === MANAGED_BY_FLEET && dataStreams.length) {
+      const dataStreamsToRollover: string[] = [];
+      for (const dataStream of dataStreams) {
+        try {
+          const { error: applyMappingError } = await api.postDataStreamMappingsFromTemplate(
+            dataStream
+          );
+          if (applyMappingError) {
+            throw applyMappingError;
+          }
+        } catch (err) {
+          dataStreamsToRollover.push(dataStream);
+        }
+      }
+
+      if (dataStreamsToRollover.length) {
+        const ref = overlays.openModal(
+          toMountPoint(
+            <MappingsDatastreamRolloverModal
+              componentTemplatename={updatedComponentTemplate.name}
+              dataStreams={dataStreamsToRollover}
+              api={api}
+              onClose={() => {
+                ref.close();
+              }}
+            />
+          )
+        );
+
+        await ref.onClose;
+      }
+    }
     redirectTo({
       pathname: encodeURI(
         `/component_templates/${encodeURIComponent(updatedComponentTemplate.name)}`
@@ -141,6 +179,7 @@ export const ComponentTemplateEdit: React.FunctionComponent<RouteComponentProps<
 
       <ComponentTemplateForm
         defaultValue={componentTemplate!}
+        dataStreams={dataStreams}
         defaultActiveWizardSection={defaultActiveStep}
         onStepChange={updateStep}
         onSave={onSave}

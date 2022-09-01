@@ -7,6 +7,7 @@
 
 import { isEqual } from 'lodash';
 import { merge } from 'lodash';
+import { numberValidator } from '@kbn/ml-agg-utils';
 
 import { useReducer } from 'react';
 
@@ -44,7 +45,8 @@ type EditTransformFormFields =
   | 'docsPerSecond'
   | 'maxPageSearchSize'
   | 'retentionPolicyField'
-  | 'retentionPolicyMaxAge';
+  | 'retentionPolicyMaxAge'
+  | 'numFailureRetries';
 
 type EditTransformFlyoutFieldsState = Record<EditTransformFormFields, FormField>;
 
@@ -107,15 +109,29 @@ type Validator = (value: any, isOptional?: boolean) => string[];
 // We do this so we have fine grained control over field validation and the option to
 // cast to special values like `null` for disabling `docs_per_second`.
 const numberAboveZeroNotValidErrorMessage = i18n.translate(
-  'xpack.transform.transformList.editFlyoutFormNumberNotValidErrorMessage',
+  'xpack.transform.transformList.editFlyoutFormNumberAboveZeroNotValidErrorMessage',
   {
     defaultMessage: 'Value needs to be an integer above zero.',
   }
 );
+
+const numberRangeMinus1To100NotValidErrorMessage = i18n.translate(
+  'xpack.transform.transformList.editFlyoutFormNumberGreaterThanOrEqualToNegativeOneNotValidErrorMessage',
+  {
+    defaultMessage: 'Number of retries needs to be between 0 and 100, or -1 for infinite retries.',
+  }
+);
+
 export const integerAboveZeroValidator: Validator = (value) =>
-  !isNaN(value) && Number.isInteger(+value) && +value > 0 && !(value + '').includes('.')
+  !(value + '').includes('.') && numberValidator({ min: 1, integerOnly: true })(+value) === null
     ? []
     : [numberAboveZeroNotValidErrorMessage];
+
+export const integerRangeMinus1To100Validator: Validator = (value) =>
+  !(value + '').includes('.') &&
+  numberValidator({ min: -1, max: 100, integerOnly: true })(+value) === null
+    ? []
+    : [numberRangeMinus1To100NotValidErrorMessage];
 
 const numberRange10To10000NotValidErrorMessage = i18n.translate(
   'xpack.transform.transformList.editFlyoutFormNumberRange10To10000NotValidErrorMessage',
@@ -124,7 +140,8 @@ const numberRange10To10000NotValidErrorMessage = i18n.translate(
   }
 );
 export const integerRange10To10000Validator: Validator = (value) =>
-  integerAboveZeroValidator(value).length === 0 && +value >= 10 && +value <= 10000
+  !(value + '').includes('.') &&
+  numberValidator({ min: 10, max: 100001, integerOnly: true })(+value) === null
     ? []
     : [numberRange10To10000NotValidErrorMessage];
 
@@ -214,6 +231,7 @@ const validate = {
   string: stringValidator,
   frequency: frequencyValidator,
   integerAboveZero: integerAboveZeroValidator,
+  integerRangeMinus1To100: integerRangeMinus1To100Validator,
   integerRange10To10000: integerRange10To10000Validator,
   retentionPolicyMaxAge: retentionPolicyMaxAgeValidator,
 } as const;
@@ -404,6 +422,18 @@ export const getDefaultState = (config: TransformConfigUnion): EditTransformFlyo
         isNullable: true,
         isOptional: true,
         validator: 'integerRange10To10000',
+        valueParser: (v) => +v,
+      }
+    ),
+    numFailureRetries: initializeField(
+      'numFailureRetries',
+      'settings.num_failure_retries',
+      config,
+      {
+        defaultValue: undefined,
+        isNullable: true,
+        isOptional: true,
+        validator: 'integerRangeMinus1To100',
         valueParser: (v) => +v,
       }
     ),

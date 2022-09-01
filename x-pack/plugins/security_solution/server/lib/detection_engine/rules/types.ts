@@ -5,30 +5,31 @@
  * 2.0.
  */
 
-import { Readable } from 'stream';
+import type { Readable } from 'stream';
 
-import { SavedObjectAttributes, SavedObjectsClientContract } from '@kbn/core/server';
+import type { SavedObjectAttributes, SavedObjectsClientContract } from '@kbn/core/server';
+import type { SanitizedRule } from '@kbn/alerting-plugin/common';
+import type { RulesClient, PartialRule } from '@kbn/alerting-plugin/server';
 import { ruleTypeMappings } from '@kbn/securitysolution-rules';
 
-import { RulesClient, PartialRule, BulkEditOperation } from '@kbn/alerting-plugin/server';
-import { SanitizedRule } from '@kbn/alerting-plugin/common';
-import { UpdateRulesSchema } from '../../../../common/detection_engine/schemas/request';
-import {
+import type {
+  FieldsOrUndefined,
   Id,
   IdOrUndefined,
-  RuleIdOrUndefined,
-  PerPageOrUndefined,
   PageOrUndefined,
-  SortFieldOrUndefined,
+  PerPageOrUndefined,
   QueryFilterOrUndefined,
-  FieldsOrUndefined,
+  RuleIdOrUndefined,
+  SortFieldOrUndefined,
   SortOrderOrUndefined,
 } from '../../../../common/detection_engine/schemas/common';
 
-import { RuleParams } from '../schemas/rule_schemas';
-import { IRuleExecutionLogForRoutes } from '../rule_execution_log';
-import { CreateRulesSchema } from '../../../../common/detection_engine/schemas/request/rule_schemas';
-import { PatchRulesSchema } from '../../../../common/detection_engine/schemas/request/patch_rules_schema';
+import type { CreateRulesSchema } from '../../../../common/detection_engine/schemas/request/rule_schemas';
+import type { PatchRulesSchema } from '../../../../common/detection_engine/schemas/request/patch_rules_schema';
+import type { UpdateRulesSchema } from '../../../../common/detection_engine/schemas/request';
+
+import type { RuleParams } from '../schemas/rule_schemas';
+import type { IRuleExecutionLogForRoutes } from '../rule_monitoring';
 
 export type RuleAlertType = SanitizedRule<RuleParams>;
 
@@ -55,12 +56,6 @@ export interface Clients {
   rulesClient: RulesClient;
 }
 
-export const isAlertTypes = (
-  partialAlert: Array<PartialRule<RuleParams>>
-): partialAlert is RuleAlertType[] => {
-  return partialAlert.every((rule) => isAlertType(rule));
-};
-
 export const isAlertType = (
   partialAlert: PartialRule<RuleParams>
 ): partialAlert is RuleAlertType => {
@@ -84,8 +79,8 @@ export interface UpdateRulesOptions {
 
 export interface PatchRulesOptions {
   rulesClient: RulesClient;
-  params: PatchRulesSchema;
-  rule: RuleAlertType | null | undefined;
+  nextParams: PatchRulesSchema;
+  existingRule: RuleAlertType | null | undefined;
 }
 
 export interface ReadRuleOptions {
@@ -102,21 +97,12 @@ export interface DeleteRuleOptions {
 
 export interface FindRuleOptions {
   rulesClient: RulesClient;
-  perPage: PerPageOrUndefined;
-  page: PageOrUndefined;
-  sortField: SortFieldOrUndefined;
   filter: QueryFilterOrUndefined;
   fields: FieldsOrUndefined;
+  sortField: SortFieldOrUndefined;
   sortOrder: SortOrderOrUndefined;
-}
-
-export interface BulkEditRulesOptions {
-  isRuleRegistryEnabled: boolean;
-  rulesClient: RulesClient;
-  operations: BulkEditOperation[];
-  filter?: QueryFilterOrUndefined;
-  ids?: string[];
-  paramsModifier?: (params: RuleParams) => Promise<RuleParams>;
+  page: PageOrUndefined;
+  perPage: PerPageOrUndefined;
 }
 
 export interface LegacyMigrateParams {

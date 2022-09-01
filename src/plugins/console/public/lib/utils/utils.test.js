@@ -193,4 +193,67 @@ describe('Utils class', () => {
 
     expect(utils.getResponseWithMostSevereStatusCode(undefined)).toBe(undefined);
   });
+
+  describe('replaceVariables', () => {
+    function testVariables(data, variables, expected) {
+      const result = utils.replaceVariables([data], [variables]);
+      expect(result).toEqual([expected]);
+    }
+
+    it('should replace variables in url and body', () => {
+      testVariables(
+        { url: '${v1}/search', data: ['{\n  "f": "${v1}"\n}'] },
+        { name: 'v1', value: 'test' },
+        {
+          url: 'test/search',
+          data: ['{\n  "f": "test"\n}'],
+        }
+      );
+    });
+
+    describe('with booleans as field value', () => {
+      testVariables(
+        { url: 'test', data: ['{\n  "f": "${v2}"\n}'] },
+        { name: 'v2', value: 'true' },
+        {
+          url: 'test',
+          data: ['{\n  "f": true\n}'],
+        }
+      );
+    });
+
+    describe('with objects as field values', () => {
+      testVariables(
+        { url: 'test', data: ['{\n  "f": "${v3}"\n}'] },
+        { name: 'v3', value: '{"f": "test"}' },
+        { url: 'test', data: ['{\n  "f": {"f": "test"}\n}'] }
+      );
+    });
+
+    describe('with arrays as field values', () => {
+      testVariables(
+        { url: 'test', data: ['{\n  "f": "${v5}"\n}'] },
+        { name: 'v5', value: '[{"t": "test"}]' },
+        { url: 'test', data: ['{\n  "f": [{"t": "test"}]\n}'] }
+      );
+    });
+
+    describe('with numbers as field values', () => {
+      testVariables(
+        { url: 'test', data: ['{\n  "f": "${v6}"\n}'] },
+        { name: 'v6', value: '1' },
+        { url: 'test', data: ['{\n  "f": 1\n}'] }
+      );
+    });
+
+    describe('with other variables as field values', () => {
+      // Currently, variables embedded in other variables' values aren't replaced.
+      // Once we build this feature, this test will fail and need to be updated.
+      testVariables(
+        { url: 'test', data: ['{\n  "f": "${v4}"\n}'] },
+        { name: 'v4', value: '{"v1": "${v1}", "v6": "${v6}"}' },
+        { url: 'test', data: ['{\n  "f": {"v1": "${v1}", "v6": "${v6}"}\n}'] }
+      );
+    });
+  });
 });

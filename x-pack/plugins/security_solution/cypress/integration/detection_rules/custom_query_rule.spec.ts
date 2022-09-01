@@ -23,7 +23,6 @@ import {
   RULES_TABLE,
   RULE_SWITCH,
   SEVERITY,
-  SHOWING_RULES_TEXT,
 } from '../../screens/alerts_detection_rules';
 import {
   ABOUT_CONTINUE_BTN,
@@ -218,7 +217,10 @@ describe('Custom query rules', () => {
             const initialNumberOfRules = rules.length;
             const expectedNumberOfRulesAfterDeletion = initialNumberOfRules - 1;
 
-            cy.get(SHOWING_RULES_TEXT).should('have.text', `Showing ${initialNumberOfRules} rules`);
+            cy.request({ url: '/api/detection_engine/rules/_find' }).then(({ body }) => {
+              const numberOfRules = body.data.length;
+              expect(numberOfRules).to.eql(initialNumberOfRules);
+            });
 
             deleteFirstRule();
             waitForRulesTableToBeRefreshed();
@@ -226,10 +228,10 @@ describe('Custom query rules', () => {
             cy.get(RULES_TABLE)
               .find(RULES_ROW)
               .should('have.length', expectedNumberOfRulesAfterDeletion);
-            cy.get(SHOWING_RULES_TEXT).should(
-              'have.text',
-              `Showing ${expectedNumberOfRulesAfterDeletion} rules`
-            );
+            cy.request({ url: '/api/detection_engine/rules/_find' }).then(({ body }) => {
+              const numberOfRules = body.data.length;
+              expect(numberOfRules).to.eql(expectedNumberOfRulesAfterDeletion);
+            });
             cy.get(CUSTOM_RULES_BTN).should(
               'have.text',
               `Custom rules (${expectedNumberOfRulesAfterDeletion})`
@@ -253,10 +255,10 @@ describe('Custom query rules', () => {
             cy.get(RULES_TABLE)
               .find(RULES_ROW)
               .should('have.length', expectedNumberOfRulesAfterDeletion);
-            cy.get(SHOWING_RULES_TEXT).should(
-              'have.text',
-              `Showing ${expectedNumberOfRulesAfterDeletion} rule`
-            );
+            cy.request({ url: '/api/detection_engine/rules/_find' }).then(({ body }) => {
+              const numberOfRules = body.data.length;
+              expect(numberOfRules).to.eql(expectedNumberOfRulesAfterDeletion);
+            });
             cy.get(CUSTOM_RULES_BTN).should(
               'have.text',
               `Custom rules (${expectedNumberOfRulesAfterDeletion})`
@@ -281,10 +283,10 @@ describe('Custom query rules', () => {
               cy.get(RULES_TABLE)
                 .find(RULES_ROW)
                 .should('have.length', expectedNumberOfRulesAfterDeletion);
-              cy.get(SHOWING_RULES_TEXT).should(
-                'have.text',
-                `Showing ${expectedNumberOfRulesAfterDeletion} rules`
-              );
+              cy.request({ url: '/api/detection_engine/rules/_find' }).then(({ body }) => {
+                const numberOfRules = body.data.length;
+                expect(numberOfRules).to.eql(expectedNumberOfRulesAfterDeletion);
+              });
               cy.get(CUSTOM_RULES_BTN).should(
                 'have.text',
                 `Custom rules (${expectedNumberOfRulesAfterDeletion})`
@@ -295,10 +297,13 @@ describe('Custom query rules', () => {
     });
 
     context('Edition', () => {
-      const expectedEditedtags = getEditedRule().tags.join('');
+      const rule = getEditedRule();
+      const expectedEditedtags = rule.tags.join('');
       const expectedEditedIndexPatterns =
-        getEditedRule().index && getEditedRule().index.length
-          ? getEditedRule().index
+        rule.dataSource.type === 'indexPatterns' &&
+        rule.dataSource.index &&
+        rule.dataSource.index.length
+          ? rule.dataSource.index
           : getIndexPatterns();
 
       before(() => {
@@ -325,27 +330,32 @@ describe('Custom query rules', () => {
       });
 
       it('Allows a rule to be edited', () => {
+        const existingRule = getExistingRule();
+
         editFirstRule();
 
         // expect define step to populate
-        cy.get(CUSTOM_QUERY_INPUT).should('have.value', getExistingRule().customQuery);
-        if (getExistingRule().index && getExistingRule().index.length > 0) {
-          cy.get(DEFINE_INDEX_INPUT).should('have.text', getExistingRule().index.join(''));
+        cy.get(CUSTOM_QUERY_INPUT).should('have.value', existingRule.customQuery);
+        if (
+          existingRule.dataSource.type === 'indexPatterns' &&
+          existingRule.dataSource.index.length > 0
+        ) {
+          cy.get(DEFINE_INDEX_INPUT).should('have.text', existingRule.dataSource.index.join(''));
         }
 
         goToAboutStepTab();
 
         // expect about step to populate
-        cy.get(RULE_NAME_INPUT).invoke('val').should('eql', getExistingRule().name);
-        cy.get(RULE_DESCRIPTION_INPUT).should('have.text', getExistingRule().description);
-        cy.get(TAGS_FIELD).should('have.text', getExistingRule().tags.join(''));
-        cy.get(SEVERITY_DROPDOWN).should('have.text', getExistingRule().severity);
-        cy.get(DEFAULT_RISK_SCORE_INPUT).invoke('val').should('eql', getExistingRule().riskScore);
+        cy.get(RULE_NAME_INPUT).invoke('val').should('eql', existingRule.name);
+        cy.get(RULE_DESCRIPTION_INPUT).should('have.text', existingRule.description);
+        cy.get(TAGS_FIELD).should('have.text', existingRule.tags.join(''));
+        cy.get(SEVERITY_DROPDOWN).should('have.text', existingRule.severity);
+        cy.get(DEFAULT_RISK_SCORE_INPUT).invoke('val').should('eql', existingRule.riskScore);
 
         goToScheduleStepTab();
 
         // expect schedule step to populate
-        const interval = getExistingRule().interval;
+        const interval = existingRule.interval;
         const intervalParts = interval != null && interval.match(/[0-9]+|[a-zA-Z]+/g);
         if (intervalParts) {
           const [amount, unit] = intervalParts;
@@ -381,7 +391,7 @@ describe('Custom query rules', () => {
         cy.wait('@getRule').then(({ response }) => {
           cy.wrap(response?.statusCode).should('eql', 200);
           // ensure that editing rule does not modify max_signals
-          cy.wrap(response?.body.max_signals).should('eql', getExistingRule().maxSignals);
+          cy.wrap(response?.body.max_signals).should('eql', existingRule.maxSignals);
         });
 
         cy.get(RULE_NAME_HEADER).should('contain', `${getEditedRule().name}`);
@@ -396,7 +406,7 @@ describe('Custom query rules', () => {
         cy.get(DEFINITION_DETAILS).within(() => {
           getDetails(INDEX_PATTERNS_DETAILS).should(
             'have.text',
-            expectedEditedIndexPatterns.join('')
+            expectedEditedIndexPatterns?.join('')
           );
           getDetails(CUSTOM_QUERY_DETAILS).should('have.text', getEditedRule().customQuery);
           getDetails(RULE_TYPE_DETAILS).should('have.text', 'Query');

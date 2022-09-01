@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React, { memo, PropsWithChildren, useMemo } from 'react';
-import { QueryClient, QueryClientProvider } from 'react-query';
+import type { PropsWithChildren } from 'react';
+import React, { memo, useMemo } from 'react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 type QueryClientOptionsProp = ConstructorParameters<typeof QueryClient>[0];
 

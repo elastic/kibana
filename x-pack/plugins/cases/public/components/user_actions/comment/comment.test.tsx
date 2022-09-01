@@ -18,14 +18,18 @@ import {
   getExternalReferenceAttachment,
   getExternalReferenceUserAction,
   getHostIsolationUserAction,
+  getPersistableStateAttachment,
+  getPersistableStateUserAction,
   getUserAction,
   hostIsolationComment,
+  persistableStateAttachment,
 } from '../../../containers/mock';
 import { AppMockRenderer, createAppMockRenderer, TestProviders } from '../../../common/mock';
 import { createCommentUserActionBuilder } from './comment';
 import { getMockBuilderArgs } from '../mock';
 import { useCaseViewParams } from '../../../common/navigation';
 import { ExternalReferenceAttachmentTypeRegistry } from '../../../client/attachment_framework/external_reference_registry';
+import { PersistableStateAttachmentTypeRegistry } from '../../../client/attachment_framework/persistable_state_registry';
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../../common/navigation/hooks');
@@ -186,9 +190,7 @@ describe('createCommentUserActionBuilder', () => {
 
     it('renders correctly an external reference', async () => {
       const externalReferenceAttachmentTypeRegistry = new ExternalReferenceAttachmentTypeRegistry();
-      externalReferenceAttachmentTypeRegistry.register(
-        getExternalReferenceAttachment({ type: 'regular' })
-      );
+      externalReferenceAttachmentTypeRegistry.register(getExternalReferenceAttachment());
 
       const userAction = getExternalReferenceUserAction();
       const builder = createCommentUserActionBuilder({
@@ -204,7 +206,7 @@ describe('createCommentUserActionBuilder', () => {
       const createdUserAction = builder.build();
       const result = appMockRender.render(<EuiCommentList comments={createdUserAction} />);
 
-      expect(result.getByTestId('comment-external-reference-.test')).toBeInTheDocument();
+      expect(result.getByTestId('comment-externalReference-.test')).toBeInTheDocument();
       expect(result.getByTestId('copy-link-external-reference-comment-id')).toBeInTheDocument();
       expect(result.getByTestId('user-action-username-with-avatar')).toBeInTheDocument();
       expect(screen.getByText('added a chart')).toBeInTheDocument();
@@ -227,7 +229,7 @@ describe('createCommentUserActionBuilder', () => {
       const createdUserAction = builder.build();
       const result = appMockRender.render(<EuiCommentList comments={createdUserAction} />);
 
-      expect(result.getByTestId('comment-external-reference-not-found')).toBeInTheDocument();
+      expect(result.getByTestId('comment-externalReference-not-found')).toBeInTheDocument();
       expect(screen.getByText('added an attachment of type')).toBeInTheDocument();
       expect(screen.getByText('Attachment type is not registered')).toBeInTheDocument();
     });
@@ -238,7 +240,6 @@ describe('createCommentUserActionBuilder', () => {
       };
 
       const attachment = getExternalReferenceAttachment({
-        type: 'regular',
         actions: <ActionsView />,
       });
 
@@ -259,7 +260,91 @@ describe('createCommentUserActionBuilder', () => {
       const createdUserAction = builder.build();
       const result = appMockRender.render(<EuiCommentList comments={createdUserAction} />);
 
-      expect(result.getByTestId('comment-external-reference-.test')).toBeInTheDocument();
+      expect(result.getByTestId('comment-externalReference-.test')).toBeInTheDocument();
+      expect(screen.getByText('Attachment actions')).toBeInTheDocument();
+    });
+  });
+
+  describe('Persistable state', () => {
+    let appMockRender: AppMockRenderer;
+
+    beforeEach(() => {
+      appMockRender = createAppMockRenderer();
+    });
+
+    it('renders correctly a persistable state attachment', async () => {
+      const persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTypeRegistry();
+      persistableStateAttachmentTypeRegistry.register(getPersistableStateAttachment());
+
+      const userAction = getPersistableStateUserAction();
+      const builder = createCommentUserActionBuilder({
+        ...builderArgs,
+        persistableStateAttachmentTypeRegistry,
+        caseData: {
+          ...builderArgs.caseData,
+          comments: [persistableStateAttachment],
+        },
+        userAction,
+      });
+
+      const createdUserAction = builder.build();
+      const result = appMockRender.render(<EuiCommentList comments={createdUserAction} />);
+
+      expect(result.getByTestId('comment-persistableState-.test')).toBeInTheDocument();
+      expect(result.getByTestId('copy-link-persistable-state-comment-id')).toBeInTheDocument();
+      expect(result.getByTestId('user-action-username-with-avatar')).toBeInTheDocument();
+      expect(screen.getByText('added an embeddable')).toBeInTheDocument();
+    });
+
+    it('renders correctly if the reference is not registered', async () => {
+      const persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTypeRegistry();
+
+      const userAction = getPersistableStateUserAction();
+      const builder = createCommentUserActionBuilder({
+        ...builderArgs,
+        persistableStateAttachmentTypeRegistry,
+        caseData: {
+          ...builderArgs.caseData,
+          comments: [persistableStateAttachment],
+        },
+        userAction,
+      });
+
+      const createdUserAction = builder.build();
+      const result = appMockRender.render(<EuiCommentList comments={createdUserAction} />);
+
+      expect(result.getByTestId('comment-persistableState-not-found')).toBeInTheDocument();
+      expect(screen.getByText('added an attachment of type')).toBeInTheDocument();
+      expect(screen.getByText('Attachment type is not registered')).toBeInTheDocument();
+    });
+
+    it('renders correctly a persistable state with actions', async () => {
+      const ActionsView = () => {
+        return <>{'Attachment actions'}</>;
+      };
+
+      const attachment = getPersistableStateAttachment({
+        actions: <ActionsView />,
+      });
+
+      const persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTypeRegistry();
+      persistableStateAttachmentTypeRegistry.register(attachment);
+
+      const userAction = getPersistableStateUserAction();
+      const builder = createCommentUserActionBuilder({
+        ...builderArgs,
+        persistableStateAttachmentTypeRegistry,
+        caseData: {
+          ...builderArgs.caseData,
+          comments: [persistableStateAttachment],
+        },
+        userAction,
+      });
+
+      const createdUserAction = builder.build();
+      const result = appMockRender.render(<EuiCommentList comments={createdUserAction} />);
+
+      expect(result.getByTestId('comment-persistableState-.test')).toBeInTheDocument();
       expect(screen.getByText('Attachment actions')).toBeInTheDocument();
     });
   });

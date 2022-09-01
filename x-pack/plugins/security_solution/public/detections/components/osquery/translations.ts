@@ -7,13 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const BACK_TO_ALERT_DETAILS = i18n.translate(
-  'xpack.securitySolution.alertsView.osqueryBackToAlertDetails',
-  {
-    defaultMessage: 'Alert Details',
-  }
-);
-
 export const ACTION_OSQUERY = i18n.translate(
   'xpack.securitySolution.alertsView.osqueryAlertTitle',
   {

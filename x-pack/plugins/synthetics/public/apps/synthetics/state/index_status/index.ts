@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
+import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import { createReducer } from '@reduxjs/toolkit';
 import { StatesIndexStatus } from '../../../../../common/runtime_types';
 

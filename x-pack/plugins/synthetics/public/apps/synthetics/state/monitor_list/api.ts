@@ -11,6 +11,7 @@ import {
   FetchMonitorManagementListQueryArgs,
   MonitorManagementListResult,
   MonitorManagementListResultCodec,
+  MonitorOverviewItem,
   ServiceLocationErrors,
   SyntheticsMonitor,
 } from '../../../../../common/runtime_types';
@@ -54,7 +55,7 @@ export const fetchUpsertMonitor = async ({
   monitor,
   id,
 }: {
-  monitor: SyntheticsMonitor | EncryptedSyntheticsMonitor;
+  monitor: SyntheticsMonitor | EncryptedSyntheticsMonitor | MonitorOverviewItem;
   id?: string;
 }): Promise<{ attributes: { errors: ServiceLocationErrors } } | SyntheticsMonitor> => {
   if (id) {

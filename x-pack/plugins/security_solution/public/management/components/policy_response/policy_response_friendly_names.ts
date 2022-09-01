@@ -6,8 +6,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
-  HostPolicyResponseActionStatus,
+import type { DocLinks } from '@kbn/doc-links';
+import { HostPolicyResponseActionStatus } from '../../../../common/endpoint/types';
+import type {
   HostPolicyResponseAppliedAction,
   ImmutableObject,
 } from '../../../../common/endpoint/types';
@@ -112,7 +113,7 @@ type PolicyResponseAction =
   | 'workflow'
   | 'full_disk_access';
 
-const policyResponseTitles = Object.freeze(
+export const policyResponseTitles = Object.freeze(
   new Map<PolicyResponseAction | string, string>([
     [
       'configure_dns_events',
@@ -320,6 +321,18 @@ const policyResponseTitles = Object.freeze(
         defaultMessage: 'Full Disk Access',
       }),
     ],
+    [
+      'macos_system_ext',
+      i18n.translate('xpack.securitySolution.endpoint.details.policyResponse.macos_system_ext', {
+        defaultMessage: 'Permissions required',
+      }),
+    ],
+    [
+      'linux_deadlock',
+      i18n.translate('xpack.securitySolution.endpoint.details.policyResponse.linux_deadlock', {
+        defaultMessage: 'Disabled to avoid potential system deadlock',
+      }),
+    ],
   ])
 );
 
@@ -328,25 +341,25 @@ type PolicyResponseStatus = `${HostPolicyResponseActionStatus}`;
 const policyResponseStatuses = Object.freeze(
   new Map<PolicyResponseStatus, string>([
     [
-      'success',
+      HostPolicyResponseActionStatus.success,
       i18n.translate('xpack.securitySolution.endpoint.details.policyResponse.success', {
         defaultMessage: 'Success',
       }),
     ],
     [
-      'warning',
+      HostPolicyResponseActionStatus.warning,
       i18n.translate('xpack.securitySolution.endpoint.details.policyResponse.warning', {
         defaultMessage: 'Warning',
       }),
     ],
     [
-      'failure',
+      HostPolicyResponseActionStatus.failure,
       i18n.translate('xpack.securitySolution.endpoint.details.policyResponse.failed', {
         defaultMessage: 'Failed',
       }),
     ],
     [
-      'unsupported',
+      HostPolicyResponseActionStatus.unsupported,
       i18n.translate('xpack.securitySolution.endpoint.details.policyResponse.unsupported', {
         defaultMessage: 'Unsupported',
       }),
@@ -354,14 +367,34 @@ const policyResponseStatuses = Object.freeze(
   ])
 );
 
-const descriptions = Object.freeze(
+export const descriptions = Object.freeze(
   new Map<Partial<PolicyResponseAction> | string, string>([
     [
       'full_disk_access',
       i18n.translate(
         'xpack.securitySolution.endpoint.details.policyResponse.description.full_disk_access',
         {
-          defaultMessage: 'You must enable full disk access for Elastic Endpoint on your machine. ',
+          defaultMessage: 'You must enable full disk access for Elastic Endpoint on your machine.',
+        }
+      ),
+    ],
+    [
+      'macos_system_ext',
+      i18n.translate(
+        'xpack.securitySolution.endpoint.details.policyResponse.description.macos_system_ext',
+        {
+          defaultMessage:
+            'You must enable the Mac system extension for Elastic Endpoint on your machine.',
+        }
+      ),
+    ],
+    [
+      'linux_deadlock',
+      i18n.translate(
+        'xpack.securitySolution.endpoint.details.policyResponse.description.linux_deadlock',
+        {
+          defaultMessage:
+            'Malware protection was disabled to avoid a potential system deadlock. To resolve this issue, the file systems causing this need to be identified in integration policy advanced settings (linux.advanced.fanotify.ignored_filesystems). Learn more in our',
         }
       ),
     ],
@@ -375,17 +408,56 @@ const linkTexts = Object.freeze(
       i18n.translate(
         'xpack.securitySolution.endpoint.details.policyResponse.link.text.full_disk_access',
         {
-          defaultMessage: 'Learn more.',
+          defaultMessage: ' Learn more.',
+        }
+      ),
+    ],
+    [
+      'macos_system_ext',
+      i18n.translate(
+        'xpack.securitySolution.endpoint.details.policyResponse.link.text.macos_system_ext',
+        {
+          defaultMessage: ' Learn more.',
+        }
+      ),
+    ],
+    [
+      'linux_deadlock',
+      i18n.translate(
+        'xpack.securitySolution.endpoint.details.policyResponse.link.text.linux_deadlock',
+        {
+          defaultMessage: ' troubleshooting docs.',
         }
       ),
     ],
   ])
 );
 
-/**
- * An array with errors we want to bubble up in policy response
- */
-const GENERIC_ACTION_ERRORS: readonly string[] = Object.freeze(['full_disk_access']);
+export const LINUX_DEADLOCK_MESSAGE = 'Disabled due to potential system deadlock';
+const LINUX_DEADLOCK_ACTION_ERRORS: Set<string> = new Set([
+  'load_malware_model',
+  'configure_malware',
+]);
+
+function isMacosFullDiskAccessError(os: string, policyAction: HostPolicyResponseAppliedAction) {
+  return os === 'macos' && policyAction.name === 'full_disk_access';
+}
+
+function isMacosSystemExtensionError(os: string, policyAction: HostPolicyResponseAppliedAction) {
+  return (
+    os === 'macos' &&
+    policyAction.name === 'connect_kernel' &&
+    policyAction.status === HostPolicyResponseActionStatus.failure
+  );
+}
+
+function isLinuxDeadlockError(os: string, policyAction: HostPolicyResponseAppliedAction) {
+  return (
+    os === 'linux' &&
+    LINUX_DEADLOCK_ACTION_ERRORS.has(policyAction.name) &&
+    policyAction.message === LINUX_DEADLOCK_MESSAGE
+  );
+}
 
 export class PolicyResponseActionFormatter {
   public key: string;
@@ -396,28 +468,53 @@ export class PolicyResponseActionFormatter {
   public errorDescription?: string;
   public status?: string;
   public linkText?: string;
-  public linkUrl?: string;
 
   constructor(
-    policyResponseAppliedAction: ImmutableObject<HostPolicyResponseAppliedAction>,
-    link?: string
+    private policyResponseAppliedAction: ImmutableObject<HostPolicyResponseAppliedAction>,
+    private docLinks: DocLinks['securitySolution']['policyResponseTroubleshooting'],
+    private os: string = ''
   ) {
     this.key = policyResponseAppliedAction.name;
     this.title =
-      policyResponseTitles.get(this.key) ??
+      policyResponseTitles.get(this.errorKey || this.key) ??
       this.key.replace(/_/g, ' ').replace(/\b(\w)/g, (m) => m.toUpperCase());
     this.hasError =
-      policyResponseAppliedAction.status === 'failure' ||
-      policyResponseAppliedAction.status === 'warning';
+      policyResponseAppliedAction.status === HostPolicyResponseActionStatus.failure ||
+      policyResponseAppliedAction.status === HostPolicyResponseActionStatus.warning;
     this.description = descriptions.get(this.key) || policyResponseAppliedAction.message;
-    this.errorDescription = descriptions.get(this.key) || policyResponseAppliedAction.message;
+    this.errorDescription =
+      descriptions.get(this.errorKey || this.key) || this.policyResponseAppliedAction.message;
     this.errorTitle = this.errorDescription ? this.title : policyResponseAppliedAction.name;
     this.status = policyResponseStatuses.get(policyResponseAppliedAction.status);
-    this.linkText = linkTexts.get(this.key);
-    this.linkUrl = link;
+    this.linkText = linkTexts.get(this.errorKey || this.key);
   }
 
-  public isGeneric(): boolean {
-    return GENERIC_ACTION_ERRORS.includes(this.key);
+  public get linkUrl(): string {
+    return this.docLinks[this.errorKey];
+  }
+
+  public get isGeneric(): boolean {
+    if (
+      isMacosFullDiskAccessError(this.os, this.policyResponseAppliedAction) ||
+      isMacosSystemExtensionError(this.os, this.policyResponseAppliedAction) ||
+      isLinuxDeadlockError(this.os, this.policyResponseAppliedAction)
+    ) {
+      return true;
+    }
+
+    return false;
+  }
+
+  private get errorKey(): keyof DocLinks['securitySolution']['policyResponseTroubleshooting'] {
+    if (isMacosSystemExtensionError(this.os, this.policyResponseAppliedAction)) {
+      return 'macos_system_ext';
+    }
+
+    if (isLinuxDeadlockError(this.os, this.policyResponseAppliedAction)) {
+      return 'linux_deadlock';
+    }
+
+    return this.policyResponseAppliedAction
+      .name as keyof DocLinks['securitySolution']['policyResponseTroubleshooting'];
   }
 }

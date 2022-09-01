@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import {
-  HostPolicyResponse,
-  HostPolicyResponseActionStatus,
-  ImmutableObject,
-} from '../../../../../common/endpoint/types';
+import type { HostPolicyResponse, ImmutableObject } from '../../../../../common/endpoint/types';
+import { HostPolicyResponseActionStatus } from '../../../../../common/endpoint/types';
 
 export const getFailedOrWarningActionCountFromPolicyResponse = (
   applied: ImmutableObject<HostPolicyResponse['Endpoint']['policy']['applied']> | undefined

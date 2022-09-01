@@ -11,8 +11,8 @@ import React from 'react';
 import { AGENT_API_ROUTES, PACKAGE_POLICY_API_ROOT } from '@kbn/fleet-plugin/common';
 import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_data';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
+import type { AppContextTestRender } from '../../../../common/mock/endpoint';
 import {
-  AppContextTestRender,
   createAppRootMockRenderer,
   resetReactDomCreatePortalMock,
 } from '../../../../common/mock/endpoint';
@@ -23,7 +23,9 @@ import { APP_UI_ID } from '../../../../../common/constants';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { exceptionsFindHttpMocks } from '../../../mocks/exceptions_list_http_mocks';
 
-jest.mock('./policy_forms/components/policy_form_layout');
+jest.mock('./policy_forms/components/policy_form_layout', () => ({
+  PolicyFormLayout: () => <></>,
+}));
 jest.mock('../../../../common/components/user_privileges');
 jest.mock('../../../../common/hooks/use_experimental_features');
 

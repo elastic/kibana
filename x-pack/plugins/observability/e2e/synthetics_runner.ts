@@ -53,16 +53,20 @@ export class SyntheticsRunner {
   }
 
   async loadTestData(e2eDir: string, dataArchives: string[]) {
-    console.log('Loading esArchiver...');
+    try {
+      console.log('Loading esArchiver...');
 
-    const esArchiver = this.getService('esArchiver');
+      const esArchiver = this.getService('esArchiver');
 
-    const promises = dataArchives.map((archive) => esArchiver.loadIfNeeded(e2eDir + archive));
+      const promises = dataArchives.map((archive) => esArchiver.loadIfNeeded(e2eDir + archive));
 
-    await Promise.all([
-      ...promises,
-      esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote'),
-    ]);
+      await Promise.all([
+        ...promises,
+        esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote'),
+      ]);
+    } catch (e) {
+      console.log(e);
+    }
   }
 
   getKibanaUrl() {

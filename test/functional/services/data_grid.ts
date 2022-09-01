@@ -325,4 +325,23 @@ export class DataGridService extends FtrService {
   public async hasNoResults() {
     return await this.find.existsByCssSelector('.euiDataGrid__noResults');
   }
+
+  public async checkCurrentRowsPerPageToBe(value: number) {
+    await this.retry.try(async () => {
+      return (
+        (await this.testSubjects.getVisibleText('tablePaginationPopoverButton')) ===
+        `Rows per page: ${value}`
+      );
+    });
+  }
+
+  public async changeRowsPerPageTo(newValue: number) {
+    await this.testSubjects.click('tablePaginationPopoverButton');
+    const option = `tablePagination-${newValue}-rows`;
+    await this.retry.try(async () => {
+      return this.testSubjects.exists(option);
+    });
+    await this.testSubjects.click(option);
+    await this.checkCurrentRowsPerPageToBe(newValue);
+  }
 }

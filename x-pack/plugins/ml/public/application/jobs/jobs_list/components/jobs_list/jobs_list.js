@@ -137,6 +137,7 @@ export class JobsList extends Component {
             </p>
           </EuiScreenReaderOnly>
         ),
+        'data-test-subj': 'mlJobListColumnExpand',
         render: (item) => (
           <EuiButtonIcon
             onClick={() => this.toggleRow(item)}
@@ -195,6 +196,7 @@ export class JobsList extends Component {
       },
       {
         field: 'auditMessage',
+        'data-test-subj': 'mlJobListColumnIcons',
         name: (
           <EuiScreenReaderOnly>
             <p>
@@ -209,6 +211,7 @@ export class JobsList extends Component {
       },
       {
         field: 'alertingRules',
+        'data-test-subj': 'mlJobListColumnAlertingRuleIndicator',
         name: (
           <EuiScreenReaderOnly>
             <p>
@@ -293,13 +296,6 @@ export class JobsList extends Component {
         width: '8%',
       },
       {
-        name: i18n.translate('xpack.ml.jobsList.actionsLabel', {
-          defaultMessage: 'Actions',
-        }),
-        render: (item) => <ResultLinks jobs={[item]} />,
-        width: '8%',
-      },
-      {
         name: i18n.translate('xpack.ml.jobsList.latestTimestampLabel', {
           defaultMessage: 'Latest timestamp',
         }),
@@ -328,8 +324,16 @@ export class JobsList extends Component {
             </p>
           </EuiScreenReaderOnly>
         ),
+        render: (item) => <ResultLinks jobs={[item]} />,
+        width: '64px',
+      },
+      {
+        name: i18n.translate('xpack.ml.jobsList.actionsLabel', {
+          defaultMessage: 'Actions',
+        }),
         actions: actionsMenuContent(
           this.props.showEditJobFlyout,
+          this.props.showDatafeedChartFlyout,
           this.props.showDeleteJobModal,
           this.props.showResetJobModal,
           this.props.showStartDatafeedModal,
@@ -338,7 +342,7 @@ export class JobsList extends Component {
           this.props.refreshJobs,
           this.props.showCreateAlertFlyout
         ),
-        width: '40px',
+        width: '5%',
       },
     ];
 
@@ -406,6 +410,7 @@ JobsList.propTypes = {
   toggleRow: PropTypes.func.isRequired,
   selectJobChange: PropTypes.func.isRequired,
   showEditJobFlyout: PropTypes.func,
+  showDatafeedChartFlyout: PropTypes.func,
   showDeleteJobModal: PropTypes.func,
   showStartDatafeedModal: PropTypes.func,
   showCloseJobsConfirmModal: PropTypes.func,

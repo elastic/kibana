@@ -42,6 +42,7 @@ export class DashboardPageObject extends FtrService {
   private readonly header = this.ctx.getPageObject('header');
   private readonly visualize = this.ctx.getPageObject('visualize');
   private readonly discover = this.ctx.getPageObject('discover');
+
   private readonly logstashIndex = this.config.get('esTestCluster.ccs')
     ? 'ftr-remote:logstash-*'
     : 'logstash-*';
@@ -332,7 +333,7 @@ export class DashboardPageObject extends FtrService {
         await this.common.clickConfirmOnModal();
       }
     }
-    await this.listingTable.clickNewButton('createDashboardPromptButton');
+    await this.listingTable.clickNewButton();
     if (await this.testSubjects.exists('dashboardCreateConfirm')) {
       if (continueEditing) {
         await this.testSubjects.click('dashboardCreateConfirmContinue');
@@ -354,7 +355,7 @@ export class DashboardPageObject extends FtrService {
         await this.common.clickConfirmOnModal();
       }
     }
-    await this.listingTable.clickNewButton('createDashboardPromptButton');
+    await this.listingTable.clickNewButton();
     await this.testSubjects.existOrFail('dashboardCreateConfirm');
     if (continueEditing) {
       await this.testSubjects.click('dashboardCreateConfirmContinue');
@@ -366,11 +367,11 @@ export class DashboardPageObject extends FtrService {
   }
 
   public async clickCreateDashboardPrompt() {
-    await this.testSubjects.click('createDashboardPromptButton');
+    await this.testSubjects.click('newItemButton');
   }
 
   public async getCreateDashboardPromptExists() {
-    return await this.testSubjects.exists('createDashboardPromptButton');
+    return this.testSubjects.exists('emptyListPrompt');
   }
 
   public async isOptionsOpen() {
@@ -561,11 +562,13 @@ export class DashboardPageObject extends FtrService {
 
   public async getPanelTitles() {
     this.log.debug('in getPanelTitles');
-    const titleObjects = await this.testSubjects.findAll('dashboardPanelTitle');
+    const titleObjects = await this.find.allByCssSelector('span.embPanel__titleInner');
     return await Promise.all(titleObjects.map(async (title) => await title.getVisibleText()));
   }
 
-  // returns an array of Boolean values - true if the panel title is visible in view mode, false if it is not
+  /**
+   * @return An array of boolean values - true if the panel title is visible in view mode, false if it is not
+   */
   public async getVisibilityOfPanelTitles() {
     this.log.debug('in getVisibilityOfPanels');
     // only works if the dashboard is in view mode
@@ -574,9 +577,12 @@ export class DashboardPageObject extends FtrService {
       await this.clickCancelOutOfEditMode();
     }
     const visibilities: boolean[] = [];
-    const titleObjects = await this.testSubjects.findAll('dashboardPanelTitle__wrapper');
-    for (const titleObject of titleObjects) {
-      const exists = !(await titleObject.elementHasClass('embPanel__header--floater'));
+    const panels = await this.getDashboardPanels();
+    for (const panel of panels) {
+      const exists = await this.find.descendantExistsByCssSelector(
+        'figcaption.embPanel__header',
+        panel
+      );
       visibilities.push(exists);
     }
     // return to edit mode if a switch to view mode above was necessary

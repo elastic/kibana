@@ -21,7 +21,7 @@ export const getAlerts = async (
   alertsInfo: AlertInfo[],
   clientArgs: CasesClientArgs
 ): Promise<CasesClientGetAlertsResponse> => {
-  const { alertsService } = clientArgs;
+  const { alertsService } = clientArgs.services;
   if (alertsInfo.length === 0) {
     return [];
   }

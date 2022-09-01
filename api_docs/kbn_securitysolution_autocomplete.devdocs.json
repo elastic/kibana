@@ -120,7 +120,7 @@
         "label": "AutocompleteFieldMatchComponent",
         "description": [],
         "signature": [
-          "{ ({ placeholder, rowLabel, selectedField, selectedValue, indexPattern, isLoading, isDisabled, isClearable, isRequired, fieldInputWidth, onChange, onError, autocompleteService, }: React.PropsWithChildren<AutocompleteFieldMatchProps>): JSX.Element; displayName: string | undefined; }"
+          "{ ({ placeholder, rowLabel, selectedField, selectedValue, indexPattern, isLoading, isDisabled, isClearable, isRequired, fieldInputWidth, autocompleteService, onChange, onError, }: React.PropsWithChildren<AutocompleteFieldMatchProps>): JSX.Element; displayName: string | undefined; }"
         ],
         "path": "packages/kbn-securitysolution-autocomplete/src/field_value_match/index.tsx",
         "deprecated": false,
@@ -130,7 +130,7 @@
             "id": "def-common.AutocompleteFieldMatchComponent.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  placeholder,\n  rowLabel,\n  selectedField,\n  selectedValue,\n  indexPattern,\n  isLoading,\n  isDisabled = false,\n  isClearable = false,\n  isRequired = false,\n  fieldInputWidth,\n  onChange,\n  onError,\n  autocompleteService,\n}",
+            "label": "{\n  placeholder,\n  rowLabel,\n  selectedField,\n  selectedValue,\n  indexPattern,\n  isLoading,\n  isDisabled = false,\n  isClearable = false,\n  isRequired = false,\n  fieldInputWidth,\n  autocompleteService,\n  onChange,\n  onError,\n}",
             "description": [],
             "signature": [
               "React.PropsWithChildren<AutocompleteFieldMatchProps>"
@@ -305,9 +305,9 @@
           "\nGiven an array of lists and optionally a field this will return all\nthe lists that match against the field based on the types from the field\n\nNOTE: That we support one additional property from \"FieldSpec\" located here:\nsrc/plugins/data/common/index_patterns/fields/types.ts\nThis type property is esTypes. If it exists and is on there we will read off the esTypes."
         ],
         "signature": [
-          "(lists: { _version: string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: object | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"keyword\" | \"ip\" | \"text\" | \"date\" | \"geo_point\" | \"geo_shape\" | \"date_nanos\" | \"long\" | \"double\" | \"date_range\" | \"ip_range\" | \"shape\" | \"short\" | \"binary\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; updated_at: string; updated_by: string; version: number; }[], field?: (",
+          "(lists: { _version: string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: object | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"ip\" | \"text\" | \"geo_point\" | \"geo_shape\" | \"date_nanos\" | \"long\" | \"double\" | \"date_range\" | \"ip_range\" | \"shape\" | \"short\" | \"binary\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; updated_at: string; updated_by: string; version: number; }[], field?: (",
           "DataViewFieldBase",
-          " & { esTypes?: string[] | undefined; }) | undefined) => { _version: string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: object | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"keyword\" | \"ip\" | \"text\" | \"date\" | \"geo_point\" | \"geo_shape\" | \"date_nanos\" | \"long\" | \"double\" | \"date_range\" | \"ip_range\" | \"shape\" | \"short\" | \"binary\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; updated_at: string; updated_by: string; version: number; }[]"
+          " & { esTypes?: string[] | undefined; }) | undefined) => { _version: string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: object | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"ip\" | \"text\" | \"geo_point\" | \"geo_shape\" | \"date_nanos\" | \"long\" | \"double\" | \"date_range\" | \"ip_range\" | \"shape\" | \"short\" | \"binary\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; updated_at: string; updated_by: string; version: number; }[]"
         ],
         "path": "packages/kbn-securitysolution-autocomplete/src/filter_field_to_list/index.ts",
         "deprecated": false,
@@ -322,7 +322,7 @@
               "The lists to match against the field"
             ],
             "signature": [
-              "{ _version: string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: object | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"keyword\" | \"ip\" | \"text\" | \"date\" | \"geo_point\" | \"geo_shape\" | \"date_nanos\" | \"long\" | \"double\" | \"date_range\" | \"ip_range\" | \"shape\" | \"short\" | \"binary\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; updated_at: string; updated_by: string; version: number; }[]"
+              "{ _version: string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: object | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"ip\" | \"text\" | \"geo_point\" | \"geo_shape\" | \"date_nanos\" | \"long\" | \"double\" | \"date_range\" | \"ip_range\" | \"shape\" | \"short\" | \"binary\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; updated_at: string; updated_by: string; version: number; }[]"
             ],
             "path": "packages/kbn-securitysolution-autocomplete/src/filter_field_to_list/index.ts",
             "deprecated": false,
@@ -508,6 +508,37 @@
               "React.PropsWithChildren<OperatorState>"
             ],
             "path": "packages/kbn-securitysolution-autocomplete/src/operator/index.tsx",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-autocomplete",
+        "id": "def-common.paramContainsSpace",
+        "type": "Function",
+        "tags": [],
+        "label": "paramContainsSpace",
+        "description": [],
+        "signature": [
+          "(param: string) => boolean | \"\""
+        ],
+        "path": "packages/kbn-securitysolution-autocomplete/src/param_contains_space/index.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-autocomplete",
+            "id": "def-common.paramContainsSpace.$1",
+            "type": "string",
+            "tags": [],
+            "label": "param",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-securitysolution-autocomplete/src/param_contains_space/index.ts",
             "deprecated": false,
             "isRequired": true
           }

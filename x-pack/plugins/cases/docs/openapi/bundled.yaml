@@ -19,7 +19,8 @@ servers:
 paths:
   /api/cases:
     post:
-      summary: Creates a case.
+      summary: Creates a case in the default space.
+      operationId: createCaseDefaultSpace
       description: >
         You must have `all` privileges for the **Cases** feature in the
         **Management**, **Observability**, or **Security** section of the Kibana
@@ -144,12 +145,7 @@ paths:
                 owner:
                   $ref: '#/components/schemas/owners'
                 settings:
-                  description: An object that contains the case settings.
-                  type: object
-                  properties:
-                    syncAlerts:
-                      description: Turns alert syncing on or off.
-                      type: boolean
+                  $ref: '#/components/schemas/settings'
                 severity:
                   $ref: '#/components/schemas/severity_property'
                 tags:
@@ -190,10 +186,13 @@ paths:
                     properties:
                       email:
                         type: string
+                        example: null
                       full_name:
                         type: string
+                        example: null
                       username:
                         type: string
+                        example: elastic
                     nullable: true
                     example: null
                   comments:
@@ -330,43 +329,14 @@ paths:
                       than half a second, the duration is rounded down to zero.
                     example: 120
                   external_service:
-                    type: object
-                    properties:
-                      connector_id:
-                        type: string
-                      connector_name:
-                        type: string
-                      external_id:
-                        type: string
-                      external_title:
-                        type: string
-                      external_url:
-                        type: string
-                      pushed_at:
-                        type: string
-                        format: date-time
-                      pushed_by:
-                        type: object
-                        properties:
-                          email:
-                            type: string
-                          full_name:
-                            type: string
-                          username:
-                            type: string
-                        nullable: true
-                        example: null
+                    $ref: '#/components/schemas/external_service'
                   id:
                     type: string
                     example: 66b9aa00-94fa-11ea-9f74-e7e108796192
                   owner:
                     $ref: '#/components/schemas/owners'
                   settings:
-                    type: object
-                    properties:
-                      syncAlerts:
-                        type: boolean
-                        example: true
+                    $ref: '#/components/schemas/settings'
                   severity:
                     $ref: '#/components/schemas/severity_property'
                   status:
@@ -396,10 +366,13 @@ paths:
                     properties:
                       email:
                         type: string
+                        example: null
                       full_name:
                         type: string
+                        example: null
                       username:
                         type: string
+                        example: elastic
                     nullable: true
                     example: null
                   version:
@@ -411,11 +384,13 @@ paths:
       servers:
         - url: https://localhost:5601
     delete:
-      summary: Deletes one or more cases.
+      summary: Deletes one or more cases from the default space.
+      operationId: deleteCaseDefaultSpace
       description: >
-        You must have `all` privileges for the **Cases** feature in the
-        **Management**, **Observability**, or **Security** section of the Kibana
-        feature privileges, depending on the owner of the cases you're deleting.
+        You must have `read` or `all` privileges and the `delete` sub-feature
+        privilege for the **Cases** feature in the **Management**,
+        **Observability**, or **Security** section of the Kibana feature
+        privileges, depending on the owner of the cases you're deleting.
       tags:
         - cases
         - kibana
@@ -436,7 +411,8 @@ paths:
       servers:
         - url: https://localhost:5601
     patch:
-      summary: Updates one or more cases.
+      summary: Updates one or more cases in the default space.
+      operationId: updateCaseDefaultSpace
       description: >
         You must have `all` privileges for the **Cases** feature in the
         **Management**, **Observability**, or **Security** section of the Kibana
@@ -570,12 +546,7 @@ paths:
                         description: The identifier for the case.
                         type: string
                       settings:
-                        description: An object that contains the case settings.
-                        type: object
-                        properties:
-                          syncAlerts:
-                            description: Turns alert syncing on or off.
-                            type: boolean
+                        $ref: '#/components/schemas/settings'
                       severity:
                         $ref: '#/components/schemas/severity_property'
                       status:
@@ -615,10 +586,13 @@ paths:
                     properties:
                       email:
                         type: string
+                        example: null
                       full_name:
                         type: string
+                        example: null
                       username:
                         type: string
+                        example: elastic
                     nullable: true
                     example: null
                   comments:
@@ -755,43 +729,14 @@ paths:
                       than half a second, the duration is rounded down to zero.
                     example: 120
                   external_service:
-                    type: object
-                    properties:
-                      connector_id:
-                        type: string
-                      connector_name:
-                        type: string
-                      external_id:
-                        type: string
-                      external_title:
-                        type: string
-                      external_url:
-                        type: string
-                      pushed_at:
-                        type: string
-                        format: date-time
-                      pushed_by:
-                        type: object
-                        properties:
-                          email:
-                            type: string
-                          full_name:
-                            type: string
-                          username:
-                            type: string
-                        nullable: true
-                        example: null
+                    $ref: '#/components/schemas/external_service'
                   id:
                     type: string
                     example: 66b9aa00-94fa-11ea-9f74-e7e108796192
                   owner:
                     $ref: '#/components/schemas/owners'
                   settings:
-                    type: object
-                    properties:
-                      syncAlerts:
-                        type: boolean
-                        example: true
+                    $ref: '#/components/schemas/settings'
                   severity:
                     $ref: '#/components/schemas/severity_property'
                   status:
@@ -821,10 +766,13 @@ paths:
                     properties:
                       email:
                         type: string
+                        example: null
                       full_name:
                         type: string
+                        example: null
                       username:
                         type: string
+                        example: elastic
                     nullable: true
                     example: null
                   version:
@@ -839,7 +787,8 @@ paths:
       - url: https://localhost:5601
   /api/cases/_find:
     get:
-      summary: Retrieves a paginated subset of cases.
+      summary: Retrieves a paginated subset of cases from the default space.
+      operationId: getCasesDefaultSpace
       description: >
         You must have `read` privileges for the **Cases** feature in the
         **Management**, **Observability**, or **Security** section of the Kibana
@@ -989,10 +938,13 @@ paths:
                           properties:
                             email:
                               type: string
+                              example: null
                             full_name:
                               type: string
+                              example: null
                             username:
                               type: string
+                              example: elastic
                           nullable: true
                           example: null
                         comments:
@@ -1134,43 +1086,14 @@ paths:
                             is rounded down to zero.
                           example: 120
                         external_service:
-                          type: object
-                          properties:
-                            connector_id:
-                              type: string
-                            connector_name:
-                              type: string
-                            external_id:
-                              type: string
-                            external_title:
-                              type: string
-                            external_url:
-                              type: string
-                            pushed_at:
-                              type: string
-                              format: date-time
-                            pushed_by:
-                              type: object
-                              properties:
-                                email:
-                                  type: string
-                                full_name:
-                                  type: string
-                                username:
-                                  type: string
-                              nullable: true
-                              example: null
+                          $ref: '#/components/schemas/external_service'
                         id:
                           type: string
                           example: 66b9aa00-94fa-11ea-9f74-e7e108796192
                         owner:
                           $ref: '#/components/schemas/owners'
                         settings:
-                          type: object
-                          properties:
-                            syncAlerts:
-                              type: boolean
-                              example: true
+                          $ref: '#/components/schemas/settings'
                         severity:
                           $ref: '#/components/schemas/severity_property'
                         status:
@@ -1200,10 +1123,13 @@ paths:
                           properties:
                             email:
                               type: string
+                              example: null
                             full_name:
                               type: string
+                              example: null
                             username:
                               type: string
+                              example: elastic
                           nullable: true
                           example: null
                         version:
@@ -1230,7 +1156,8 @@ paths:
       - url: https://localhost:5601
   /api/cases/alerts/{alertId}:
     get:
-      summary: Returns the cases associated with a specific alert.
+      summary: Returns the cases associated with a specific alert in the default space.
+      operationId: getCasesByAlertDefaultSpace
       description: >
         You must have `read` privileges for the **Cases** feature in the
         **Management**, **Observability**, or **Security** section of the Kibana
@@ -1269,7 +1196,8 @@ paths:
     get:
       summary: >-
         Retrieves external connection details, such as the closure type and
-        default connector for cases.
+        default connector for cases in the default space.
+      operationId: getCaseConfigurationDefaultSpace
       description: >
         You must have `read` privileges for the **Cases** feature in the
         **Management**, **Observability**, or **Security** section of the Kibana
@@ -1455,7 +1383,8 @@ paths:
     post:
       summary: >-
         Sets external connection details, such as the closure type and default
-        connector for cases.
+        connector for cases in the default space.
+      operationId: setCaseConfigurationDefaultSpace
       description: >
         You must have `all` privileges for the **Cases** feature in the
         **Management**, **Observability**, or **Security** section of the Kibana
@@ -1776,7 +1705,8 @@ paths:
     patch:
       summary: >-
         Updates external connection details, such as the closure type and
-        default connector for cases.
+        default connector for cases in the default space.
+      operationId: updateCaseConfigurationDefaultSpace
       description: >
         You must have `all` privileges for the **Cases** feature in the
         **Management**, **Observability**, or **Security** section of the Kibana
@@ -2086,7 +2016,8 @@ paths:
       - url: https://localhost:5601
   /api/cases/configure/connectors/_find:
     get:
-      summary: Retrieves information about connectors.
+      summary: Retrieves information about connectors for cases in the default space.
+      operationId: getCaseConnectorsDefaultSpace
       description: >
         In particular, only the connectors that are supported for use in cases
         are  returned. You must have `read` privileges for the **Actions and
@@ -2136,7 +2067,10 @@ paths:
       - url: https://localhost:5601
   /api/cases/reporters:
     get:
-      summary: Returns information about the users who opened cases.
+      summary: >-
+        Returns information about the users who opened cases in the default
+        space.
+      operationId: getCaseReportersDefaultSpace
       description: >
         You must have read privileges for the **Cases** feature in the
         **Management**, **Observability**, or **Security** section of the Kibana
@@ -2173,9 +2107,45 @@ paths:
         - url: https://localhost:5601
     servers:
       - url: https://localhost:5601
+  /api/cases/status:
+    get:
+      summary: Returns the number of cases that are open, closed, and in progress.
+      operationId: getCaseStatusDefaultSpace
+      description: >
+        You must have `read` privileges for the **Cases** feature in the
+        **Management**, **Observability**, or **Security** section of the Kibana
+        feature privileges, depending on the owner of the cases you're seeking.
+      tags:
+        - cases
+        - kibana
+      deprecated: true
+      parameters:
+        - $ref: '#/components/parameters/owner'
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json; charset=utf-8:
+              schema:
+                type: object
+                properties:
+                  count_closed_cases:
+                    type: integer
+                  count_in_progress_cases:
+                    type: integer
+                  count_open_cases:
+                    type: integer
+              examples:
+                getStatusResponse:
+                  $ref: '#/components/examples/get_status_response'
+      servers:
+        - url: https://localhost:5601
+    servers:
+      - url: https://localhost:5601
   /api/cases/tags:
     get:
-      summary: Aggregates and returns a list of case tags.
+      summary: Aggregates and returns a list of case tags in the default space.
+      operationId: getCaseTagsDefaultSpace
       description: >
         You must have read privileges for the **Cases** feature in the
         **Management**, **Observability**, or **Security** section of the Kibana
@@ -2212,29 +2182,26 @@ paths:
         - url: https://localhost:5601
     servers:
       - url: https://localhost:5601
-  /api/cases/{caseId}/comments:
-    post:
-      summary: Adds a comment or alert to a case.
+  /api/cases/{caseId}:
+    get:
+      summary: Retrieves information about a case in the default space.
+      operationId: getCaseDefaultSpace
       description: >
-        You must have `all` privileges for the **Cases** feature in the
+        You must have `read` privileges for the **Cases** feature in the
         **Management**, **Observability**, or **Security** section of the Kibana
-        feature privileges, depending on the owner of the case you're creating.
+        feature privileges, depending on the owner of the case you're seeking.
       tags:
         - cases
         - kibana
       parameters:
-        - $ref: '#/components/parameters/kbn_xsrf'
         - $ref: '#/components/parameters/case_id'
-      requestBody:
-        content:
-          application/json:
-            schema:
-              oneOf:
-                - $ref: '#/components/schemas/add_alert_comment_request_properties'
-                - $ref: '#/components/schemas/add_user_comment_request_properties'
-            examples:
-              createCaseCommentRequest:
-                $ref: '#/components/examples/add_comment_request'
+        - in: query
+          name: includeComments
+          description: Determines whether case comments are returned.
+          deprecated: true
+          schema:
+            type: boolean
+            default: true
       responses:
         '200':
           description: Indicates a successful call.
@@ -2253,10 +2220,13 @@ paths:
                     properties:
                       email:
                         type: string
+                        example: null
                       full_name:
                         type: string
+                        example: null
                       username:
                         type: string
+                        example: elastic
                     nullable: true
                     example: null
                   comments:
@@ -2393,43 +2363,14 @@ paths:
                       than half a second, the duration is rounded down to zero.
                     example: 120
                   external_service:
-                    type: object
-                    properties:
-                      connector_id:
-                        type: string
-                      connector_name:
-                        type: string
-                      external_id:
-                        type: string
-                      external_title:
-                        type: string
-                      external_url:
-                        type: string
-                      pushed_at:
-                        type: string
-                        format: date-time
-                      pushed_by:
-                        type: object
-                        properties:
-                          email:
-                            type: string
-                          full_name:
-                            type: string
-                          username:
-                            type: string
-                        nullable: true
-                        example: null
+                    $ref: '#/components/schemas/external_service'
                   id:
                     type: string
                     example: 66b9aa00-94fa-11ea-9f74-e7e108796192
                   owner:
                     $ref: '#/components/schemas/owners'
                   settings:
-                    type: object
-                    properties:
-                      syncAlerts:
-                        type: boolean
-                        example: true
+                    $ref: '#/components/schemas/settings'
                   severity:
                     $ref: '#/components/schemas/severity_property'
                   status:
@@ -2459,10 +2400,284 @@ paths:
                     properties:
                       email:
                         type: string
+                        example: null
                       full_name:
                         type: string
+                        example: null
                       username:
                         type: string
+                        example: elastic
+                    nullable: true
+                    example: null
+                  version:
+                    type: string
+                    example: WzUzMiwxXQ==
+              examples:
+                getCaseResponse:
+                  $ref: '#/components/examples/get_case_response'
+      servers:
+        - url: https://localhost:5601
+    servers:
+      - url: https://localhost:5601
+  /api/cases/{caseId}/alerts:
+    get:
+      summary: Gets all alerts attached to a case in the default space.
+      description: >
+        You must have `read` privileges for the **Cases** feature in the
+        **Management**, **Observability**, or **Security** section of the Kibana
+        feature privileges, depending on the owner of the cases you're seeking.
+      operationId: getCaseAlertsDefaultSpace
+      tags:
+        - cases
+        - kibana
+      x-technical-preview: true
+      parameters:
+        - $ref: '#/components/parameters/case_id'
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json; charset=utf-8:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/alert_response_properties'
+              examples:
+                createCaseCommentResponse:
+                  $ref: '#/components/examples/get_case_alerts_response'
+      servers:
+        - url: https://localhost:5601
+    servers:
+      - url: https://localhost:5601
+  /api/cases/{caseId}/comments:
+    post:
+      summary: Adds a comment or alert to a case in the default space.
+      operationId: addCaseCommentDefaultSpace
+      description: >
+        You must have `all` privileges for the **Cases** feature in the
+        **Management**, **Observability**, or **Security** section of the Kibana
+        feature privileges, depending on the owner of the case you're creating.
+      tags:
+        - cases
+        - kibana
+      parameters:
+        - $ref: '#/components/parameters/kbn_xsrf'
+        - $ref: '#/components/parameters/case_id'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: '#/components/schemas/add_alert_comment_request_properties'
+                - $ref: '#/components/schemas/add_user_comment_request_properties'
+            examples:
+              createCaseCommentRequest:
+                $ref: '#/components/examples/add_comment_request'
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json; charset=utf-8:
+              schema:
+                type: object
+                properties:
+                  closed_at:
+                    type: string
+                    format: date-time
+                    nullable: true
+                    example: null
+                  closed_by:
+                    type: object
+                    properties:
+                      email:
+                        type: string
+                        example: null
+                      full_name:
+                        type: string
+                        example: null
+                      username:
+                        type: string
+                        example: elastic
+                    nullable: true
+                    example: null
+                  comments:
+                    type: array
+                    items:
+                      oneOf:
+                        - $ref: >-
+                            #/components/schemas/alert_comment_response_properties
+                        - $ref: >-
+                            #/components/schemas/user_comment_response_properties
+                    example: []
+                  connector:
+                    type: object
+                    properties:
+                      fields:
+                        description: >-
+                          An object containing the connector fields. To create a
+                          case without a connector, specify null. If you want to
+                          omit any individual field, specify null as its value.
+                        nullable: true
+                        type: object
+                        properties:
+                          caseId:
+                            description: The case identifier for Swimlane connectors.
+                            type: string
+                          category:
+                            description: >-
+                              The category of the incident for ServiceNow ITSM
+                              and ServiceNow SecOps connectors.
+                            type: string
+                          destIp:
+                            description: >-
+                              A comma-separated list of destination IPs for
+                              ServiceNow SecOps connectors.
+                            type: string
+                          impact:
+                            description: >-
+                              The effect an incident had on business for
+                              ServiceNow ITSM connectors.
+                            type: string
+                          issueType:
+                            description: The type of issue for Jira connectors.
+                            type: string
+                          issueTypes:
+                            description: The type of incident for IBM Resilient connectors.
+                            type: array
+                            items:
+                              type: number
+                          malwareHash:
+                            description: >-
+                              A comma-separated list of malware hashes for
+                              ServiceNow SecOps connectors.
+                            type: string
+                          malwareUrl:
+                            description: >-
+                              A comma-separated list of malware URLs for
+                              ServiceNow SecOps connectors.
+                            type: string
+                          parent:
+                            description: >-
+                              The key of the parent issue, when the issue type
+                              is sub-task for Jira connectors.
+                            type: string
+                          priority:
+                            description: >-
+                              The priority of the issue for Jira and ServiceNow
+                              SecOps connectors.
+                            type: string
+                          severity:
+                            description: >-
+                              The severity of the incident for ServiceNow ITSM
+                              connectors.
+                            type: string
+                          severityCode:
+                            description: >-
+                              The severity code of the incident for IBM
+                              Resilient connectors.
+                            type: number
+                          sourceIp:
+                            description: >-
+                              A comma-separated list of source IPs for
+                              ServiceNow SecOps connectors.
+                            type: string
+                          subcategory:
+                            description: >-
+                              The subcategory of the incident for ServiceNow
+                              ITSM connectors.
+                            type: string
+                          urgency:
+                            description: >-
+                              The extent to which the incident resolution can be
+                              delayed for ServiceNow ITSM connectors.
+                            type: string
+                        example: null
+                      id:
+                        description: >-
+                          The identifier for the connector. To create a case
+                          without a connector, use `none`.
+                        type: string
+                        example: none
+                      name:
+                        description: >-
+                          The name of the connector. To create a case without a
+                          connector, use `none`.
+                        type: string
+                        example: none
+                      type:
+                        $ref: '#/components/schemas/connector_types'
+                  created_at:
+                    type: string
+                    format: date-time
+                    example: '2022-05-13T09:16:17.416Z'
+                  created_by:
+                    type: object
+                    properties:
+                      email:
+                        type: string
+                        example: null
+                      full_name:
+                        type: string
+                        example: null
+                      username:
+                        type: string
+                        example: elastic
+                  description:
+                    type: string
+                    example: A case description.
+                  duration:
+                    type: integer
+                    description: >
+                      The elapsed time from the creation of the case to its
+                      closure (in seconds). If the case has not been closed, the
+                      duration is set to null. If the case was closed after less
+                      than half a second, the duration is rounded down to zero.
+                    example: 120
+                  external_service:
+                    $ref: '#/components/schemas/external_service'
+                  id:
+                    type: string
+                    example: 66b9aa00-94fa-11ea-9f74-e7e108796192
+                  owner:
+                    $ref: '#/components/schemas/owners'
+                  settings:
+                    $ref: '#/components/schemas/settings'
+                  severity:
+                    $ref: '#/components/schemas/severity_property'
+                  status:
+                    $ref: '#/components/schemas/status'
+                  tags:
+                    type: array
+                    items:
+                      type: string
+                    example:
+                      - tag-1
+                  title:
+                    type: string
+                    example: Case title 1
+                  totalAlerts:
+                    type: integer
+                    example: 0
+                  totalComment:
+                    type: integer
+                    example: 0
+                  updated_at:
+                    type: string
+                    format: date-time
+                    nullable: true
+                    example: null
+                  updated_by:
+                    type: object
+                    properties:
+                      email:
+                        type: string
+                        example: null
+                      full_name:
+                        type: string
+                        example: null
+                      username:
+                        type: string
+                        example: elastic
                     nullable: true
                     example: null
                   version:
@@ -2474,7 +2689,8 @@ paths:
       servers:
         - url: https://localhost:5601
     delete:
-      summary: Deletes all comments and alerts from a case.
+      summary: Deletes all comments and alerts from a case in the default space.
+      operationId: deleteCaseCommentsDefaultSpace
       description: >
         You must have `all` privileges for the **Cases** feature in the
         **Management**, **Observability**, or **Security** section of the Kibana
@@ -2491,7 +2707,8 @@ paths:
       servers:
         - url: https://localhost:5601
     patch:
-      summary: Updates a comment or alert in a case.
+      summary: Updates a comment or alert in a case in the default space.
+      operationId: updateCaseCommentDefaultSpace
       description: >
         You must have `all` privileges for the **Cases** feature in the
         **Management**, **Observability**, or **Security** section of the Kibana
@@ -2531,10 +2748,13 @@ paths:
                     properties:
                       email:
                         type: string
+                        example: null
                       full_name:
                         type: string
+                        example: null
                       username:
                         type: string
+                        example: elastic
                     nullable: true
                     example: null
                   comments:
@@ -2671,43 +2891,14 @@ paths:
                       than half a second, the duration is rounded down to zero.
                     example: 120
                   external_service:
-                    type: object
-                    properties:
-                      connector_id:
-                        type: string
-                      connector_name:
-                        type: string
-                      external_id:
-                        type: string
-                      external_title:
-                        type: string
-                      external_url:
-                        type: string
-                      pushed_at:
-                        type: string
-                        format: date-time
-                      pushed_by:
-                        type: object
-                        properties:
-                          email:
-                            type: string
-                          full_name:
-                            type: string
-                          username:
-                            type: string
-                        nullable: true
-                        example: null
+                    $ref: '#/components/schemas/external_service'
                   id:
                     type: string
                     example: 66b9aa00-94fa-11ea-9f74-e7e108796192
                   owner:
                     $ref: '#/components/schemas/owners'
                   settings:
-                    type: object
-                    properties:
-                      syncAlerts:
-                        type: boolean
-                        example: true
+                    $ref: '#/components/schemas/settings'
                   severity:
                     $ref: '#/components/schemas/severity_property'
                   status:
@@ -2737,10 +2928,13 @@ paths:
                     properties:
                       email:
                         type: string
+                        example: null
                       full_name:
                         type: string
+                        example: null
                       username:
                         type: string
+                        example: elastic
                     nullable: true
                     example: null
                   version:
@@ -2751,11 +2945,357 @@ paths:
                   $ref: '#/components/examples/update_comment_response'
       servers:
         - url: https://localhost:5601
+    get:
+      summary: Retrieves all the comments from a case in the default space.
+      operationId: getAllCaseCommentsDefaultSpace
+      description: >
+        You must have `read` privileges for the **Cases** feature in the
+        **Management**, **Observability**, or **Security** section of the Kibana
+        feature privileges, depending on the owner of the cases with the
+        comments you're seeking.
+      tags:
+        - cases
+        - kibana
+      deprecated: true
+      parameters:
+        - $ref: '#/components/parameters/case_id'
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json; charset=utf-8:
+              schema:
+                type: array
+                items:
+                  anyOf:
+                    - $ref: '#/components/schemas/alert_comment_response_properties'
+                    - $ref: '#/components/schemas/user_comment_response_properties'
+            examples: {}
+      servers:
+        - url: https://localhost:5601
+    servers:
+      - url: https://localhost:5601
+  /api/cases/{caseId}/comments/{commentId}:
+    delete:
+      summary: Deletes a comment or alert from a case in the default space.
+      operationId: deleteCaseCommentDefaultSpace
+      description: >
+        You must have `all` privileges for the **Cases** feature in the
+        **Management**, **Observability**, or **Security** section of the Kibana
+        feature privileges, depending on the owner of the cases you're deleting.
+      tags:
+        - cases
+        - kibana
+      parameters:
+        - $ref: '#/components/parameters/kbn_xsrf'
+        - $ref: '#/components/parameters/case_id'
+        - $ref: '#/components/parameters/comment_id'
+      responses:
+        '204':
+          description: Indicates a successful call.
+      servers:
+        - url: https://localhost:5601
+    get:
+      summary: Retrieves a comment from a case in the default space.
+      operationId: getCaseCommentDefaultSpace
+      description: >
+        You must have `read` privileges for the **Cases** feature in the
+        **Management**, **Observability**, or **Security** section of the Kibana
+        feature privileges, depending on the owner of the cases with the
+        comments you're seeking.
+      tags:
+        - cases
+        - kibana
+      parameters:
+        - $ref: '#/components/parameters/case_id'
+        - $ref: '#/components/parameters/comment_id'
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json; charset=utf-8:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/alert_comment_response_properties'
+                  - $ref: '#/components/schemas/user_comment_response_properties'
+              examples:
+                getCaseCommentResponse:
+                  $ref: '#/components/examples/get_comment_response'
+      servers:
+        - url: https://localhost:5601
+    servers:
+      - url: https://localhost:5601
+  /api/cases/{caseId}/connector/{connectorId}/_push:
+    post:
+      summary: Pushes a case to an external service.
+      description: >
+        You must have `all` privileges for the **Actions and Connectors**
+        feature in the **Management** section of the Kibana feature privileges.
+        You must also have `all` privileges for the **Cases** feature in the
+        **Management**, **Observability**, or **Security** section of the Kibana
+        feature privileges, depending on the owner of the case you're pushing.
+      operationId: pushCaseDefaultSpace
+      tags:
+        - cases
+        - kibana
+      parameters:
+        - $ref: '#/components/parameters/case_id'
+        - $ref: '#/components/parameters/connector_id'
+        - $ref: '#/components/parameters/kbn_xsrf'
+      requestBody:
+        content:
+          application/json: {}
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json; charset=utf-8:
+              schema:
+                type: object
+                properties:
+                  closed_at:
+                    type: string
+                    format: date-time
+                    nullable: true
+                    example: null
+                  closed_by:
+                    type: object
+                    properties:
+                      email:
+                        type: string
+                        example: null
+                      full_name:
+                        type: string
+                        example: null
+                      username:
+                        type: string
+                        example: elastic
+                    nullable: true
+                    example: null
+                  comments:
+                    type: array
+                    items:
+                      oneOf:
+                        - $ref: >-
+                            #/components/schemas/alert_comment_response_properties
+                        - $ref: >-
+                            #/components/schemas/user_comment_response_properties
+                    example: []
+                  connector:
+                    type: object
+                    properties:
+                      fields:
+                        description: >-
+                          An object containing the connector fields. To create a
+                          case without a connector, specify null. If you want to
+                          omit any individual field, specify null as its value.
+                        nullable: true
+                        type: object
+                        properties:
+                          caseId:
+                            description: The case identifier for Swimlane connectors.
+                            type: string
+                          category:
+                            description: >-
+                              The category of the incident for ServiceNow ITSM
+                              and ServiceNow SecOps connectors.
+                            type: string
+                          destIp:
+                            description: >-
+                              A comma-separated list of destination IPs for
+                              ServiceNow SecOps connectors.
+                            type: string
+                          impact:
+                            description: >-
+                              The effect an incident had on business for
+                              ServiceNow ITSM connectors.
+                            type: string
+                          issueType:
+                            description: The type of issue for Jira connectors.
+                            type: string
+                          issueTypes:
+                            description: The type of incident for IBM Resilient connectors.
+                            type: array
+                            items:
+                              type: number
+                          malwareHash:
+                            description: >-
+                              A comma-separated list of malware hashes for
+                              ServiceNow SecOps connectors.
+                            type: string
+                          malwareUrl:
+                            description: >-
+                              A comma-separated list of malware URLs for
+                              ServiceNow SecOps connectors.
+                            type: string
+                          parent:
+                            description: >-
+                              The key of the parent issue, when the issue type
+                              is sub-task for Jira connectors.
+                            type: string
+                          priority:
+                            description: >-
+                              The priority of the issue for Jira and ServiceNow
+                              SecOps connectors.
+                            type: string
+                          severity:
+                            description: >-
+                              The severity of the incident for ServiceNow ITSM
+                              connectors.
+                            type: string
+                          severityCode:
+                            description: >-
+                              The severity code of the incident for IBM
+                              Resilient connectors.
+                            type: number
+                          sourceIp:
+                            description: >-
+                              A comma-separated list of source IPs for
+                              ServiceNow SecOps connectors.
+                            type: string
+                          subcategory:
+                            description: >-
+                              The subcategory of the incident for ServiceNow
+                              ITSM connectors.
+                            type: string
+                          urgency:
+                            description: >-
+                              The extent to which the incident resolution can be
+                              delayed for ServiceNow ITSM connectors.
+                            type: string
+                        example: null
+                      id:
+                        description: >-
+                          The identifier for the connector. To create a case
+                          without a connector, use `none`.
+                        type: string
+                        example: none
+                      name:
+                        description: >-
+                          The name of the connector. To create a case without a
+                          connector, use `none`.
+                        type: string
+                        example: none
+                      type:
+                        $ref: '#/components/schemas/connector_types'
+                  created_at:
+                    type: string
+                    format: date-time
+                    example: '2022-05-13T09:16:17.416Z'
+                  created_by:
+                    type: object
+                    properties:
+                      email:
+                        type: string
+                        example: null
+                      full_name:
+                        type: string
+                        example: null
+                      username:
+                        type: string
+                        example: elastic
+                  description:
+                    type: string
+                    example: A case description.
+                  duration:
+                    type: integer
+                    description: >
+                      The elapsed time from the creation of the case to its
+                      closure (in seconds). If the case has not been closed, the
+                      duration is set to null. If the case was closed after less
+                      than half a second, the duration is rounded down to zero.
+                    example: 120
+                  external_service:
+                    $ref: '#/components/schemas/external_service'
+                  id:
+                    type: string
+                    example: 66b9aa00-94fa-11ea-9f74-e7e108796192
+                  owner:
+                    $ref: '#/components/schemas/owners'
+                  settings:
+                    $ref: '#/components/schemas/settings'
+                  severity:
+                    $ref: '#/components/schemas/severity_property'
+                  status:
+                    $ref: '#/components/schemas/status'
+                  tags:
+                    type: array
+                    items:
+                      type: string
+                    example:
+                      - tag-1
+                  title:
+                    type: string
+                    example: Case title 1
+                  totalAlerts:
+                    type: integer
+                    example: 0
+                  totalComment:
+                    type: integer
+                    example: 0
+                  updated_at:
+                    type: string
+                    format: date-time
+                    nullable: true
+                    example: null
+                  updated_by:
+                    type: object
+                    properties:
+                      email:
+                        type: string
+                        example: null
+                      full_name:
+                        type: string
+                        example: null
+                      username:
+                        type: string
+                        example: elastic
+                    nullable: true
+                    example: null
+                  version:
+                    type: string
+                    example: WzUzMiwxXQ==
+              examples:
+                pushCaseResponse:
+                  $ref: '#/components/examples/push_case_response'
+      servers:
+        - url: https://localhost:5601
+    servers:
+      - url: https://localhost:5601
+  /api/cases/{caseId}/user_actions:
+    get:
+      summary: Returns all user activity for a case in the default space.
+      description: >
+        You must have `read` privileges for the **Cases** feature in the
+        **Management**, **Observability**, or **Security** section of the Kibana
+        feature privileges, depending on the owner of the case you're seeking.
+      deprecated: true
+      operationId: getCaseActivityDefaultSpace
+      tags:
+        - cases
+        - kibana
+      parameters:
+        - $ref: '#/components/parameters/case_id'
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json; charset=utf-8:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/user_actions_response_properties'
+              examples:
+                getCaseActivityResponse:
+                  $ref: '#/components/examples/get_case_activity_response'
+      servers:
+        - url: https://localhost:5601
     servers:
       - url: https://localhost:5601
   /s/{spaceId}/api/cases:
     post:
       summary: Creates a case.
+      operationId: createCase
       description: >
         You must have `all` privileges for the **Cases** feature in the
         **Management**, **Observability**, or **Security** section of the
@@ -2882,12 +3422,7 @@ paths:
                 owner:
                   $ref: '#/components/schemas/owners'
                 settings:
-                  description: An object that contains the case settings.
-                  type: object
-                  properties:
-                    syncAlerts:
-                      description: Turns alert syncing on or off.
-                      type: boolean
+                  $ref: '#/components/schemas/settings'
                 severity:
                   $ref: '#/components/schemas/severity_property'
                 tags:
@@ -2928,10 +3463,13 @@ paths:
                     properties:
                       email:
                         type: string
+                        example: null
                       full_name:
                         type: string
+                        example: null
                       username:
                         type: string
+                        example: elastic
                     nullable: true
                     example: null
                   comments:
@@ -3068,43 +3606,14 @@ paths:
                       than half a second, the duration is rounded down to zero.
                     example: 120
                   external_service:
-                    type: object
-                    properties:
-                      connector_id:
-                        type: string
-                      connector_name:
-                        type: string
-                      external_id:
-                        type: string
-                      external_title:
-                        type: string
-                      external_url:
-                        type: string
-                      pushed_at:
-                        type: string
-                        format: date-time
-                      pushed_by:
-                        type: object
-                        properties:
-                          email:
-                            type: string
-                          full_name:
-                            type: string
-                          username:
-                            type: string
-                        nullable: true
-                        example: null
+                    $ref: '#/components/schemas/external_service'
                   id:
                     type: string
                     example: 66b9aa00-94fa-11ea-9f74-e7e108796192
                   owner:
                     $ref: '#/components/schemas/owners'
                   settings:
-                    type: object
-                    properties:
-                      syncAlerts:
-                        type: boolean
-                        example: true
+                    $ref: '#/components/schemas/settings'
                   severity:
                     $ref: '#/components/schemas/severity_property'
                   status:
@@ -3134,10 +3643,13 @@ paths:
                     properties:
                       email:
                         type: string
+                        example: null
                       full_name:
                         type: string
+                        example: null
                       username:
                         type: string
+                        example: elastic
                     nullable: true
                     example: null
                   version:
@@ -3150,11 +3662,12 @@ paths:
         - url: https://localhost:5601
     delete:
       summary: Deletes one or more cases.
+      operationId: deleteCase
       description: >
-        You must have `all` privileges for the **Cases** feature in the 
-        **Management**, **Observability**, or **Security** section of the
-        Kibana  feature privileges, depending on the owner of the cases you're
-        deleting.
+        You must have `read` or `all` privileges and the `delete` sub-feature
+        privilege for the **Cases** feature in the **Management**,
+        **Observability**, or **Security** section of the Kibana feature
+        privileges, depending on the owner of the cases you're deleting.
       tags:
         - cases
         - kibana
@@ -3177,6 +3690,7 @@ paths:
         - url: https://localhost:5601
     patch:
       summary: Updates one or more cases.
+      operationId: updateCase
       description: >
         You must have `all` privileges for the **Cases** feature in the 
         **Management**, **Observability**, or **Security** section of the
@@ -3312,12 +3826,7 @@ paths:
                         description: The identifier for the case.
                         type: string
                       settings:
-                        description: An object that contains the case settings.
-                        type: object
-                        properties:
-                          syncAlerts:
-                            description: Turns alert syncing on or off.
-                            type: boolean
+                        $ref: '#/components/schemas/settings'
                       severity:
                         $ref: '#/components/schemas/severity_property'
                       status:
@@ -3357,10 +3866,13 @@ paths:
                     properties:
                       email:
                         type: string
+                        example: null
                       full_name:
                         type: string
+                        example: null
                       username:
                         type: string
+                        example: elastic
                     nullable: true
                     example: null
                   comments:
@@ -3497,43 +4009,14 @@ paths:
                       than half a second, the duration is rounded down to zero.
                     example: 120
                   external_service:
-                    type: object
-                    properties:
-                      connector_id:
-                        type: string
-                      connector_name:
-                        type: string
-                      external_id:
-                        type: string
-                      external_title:
-                        type: string
-                      external_url:
-                        type: string
-                      pushed_at:
-                        type: string
-                        format: date-time
-                      pushed_by:
-                        type: object
-                        properties:
-                          email:
-                            type: string
-                          full_name:
-                            type: string
-                          username:
-                            type: string
-                        nullable: true
-                        example: null
+                    $ref: '#/components/schemas/external_service'
                   id:
                     type: string
                     example: 66b9aa00-94fa-11ea-9f74-e7e108796192
                   owner:
                     $ref: '#/components/schemas/owners'
                   settings:
-                    type: object
-                    properties:
-                      syncAlerts:
-                        type: boolean
-                        example: true
+                    $ref: '#/components/schemas/settings'
                   severity:
                     $ref: '#/components/schemas/severity_property'
                   status:
@@ -3563,10 +4046,13 @@ paths:
                     properties:
                       email:
                         type: string
+                        example: null
                       full_name:
                         type: string
+                        example: null
                       username:
                         type: string
+                        example: elastic
                     nullable: true
                     example: null
                   version:
@@ -3582,6 +4068,7 @@ paths:
   /s/{spaceId}/api/cases/_find:
     get:
       summary: Retrieves a paginated subset of cases.
+      operationId: getCases
       description: >
         You must have `read` privileges for the **Cases** feature in the
         **Management**, **Observability**, or **Security** section of the Kibana
@@ -3734,10 +4221,13 @@ paths:
                           properties:
                             email:
                               type: string
+                              example: null
                             full_name:
                               type: string
+                              example: null
                             username:
                               type: string
+                              example: elastic
                           nullable: true
                           example: null
                         comments:
@@ -3879,43 +4369,14 @@ paths:
                             is rounded down to zero.
                           example: 120
                         external_service:
-                          type: object
-                          properties:
-                            connector_id:
-                              type: string
-                            connector_name:
-                              type: string
-                            external_id:
-                              type: string
-                            external_title:
-                              type: string
-                            external_url:
-                              type: string
-                            pushed_at:
-                              type: string
-                              format: date-time
-                            pushed_by:
-                              type: object
-                              properties:
-                                email:
-                                  type: string
-                                full_name:
-                                  type: string
-                                username:
-                                  type: string
-                              nullable: true
-                              example: null
+                          $ref: '#/components/schemas/external_service'
                         id:
                           type: string
                           example: 66b9aa00-94fa-11ea-9f74-e7e108796192
                         owner:
                           $ref: '#/components/schemas/owners'
                         settings:
-                          type: object
-                          properties:
-                            syncAlerts:
-                              type: boolean
-                              example: true
+                          $ref: '#/components/schemas/settings'
                         severity:
                           $ref: '#/components/schemas/severity_property'
                         status:
@@ -3945,10 +4406,13 @@ paths:
                           properties:
                             email:
                               type: string
+                              example: null
                             full_name:
                               type: string
+                              example: null
                             username:
                               type: string
+                              example: elastic
                           nullable: true
                           example: null
                         version:
@@ -3976,6 +4440,7 @@ paths:
   /s/{spaceId}/api/cases/alerts/{alertId}:
     get:
       summary: Returns the cases associated with a specific alert.
+      operationId: getCasesByAlert
       description: >
         You must have `read` privileges for the **Cases** feature in the
         **Management**, **Observability**, or **Security** section of the Kibana
@@ -4016,6 +4481,7 @@ paths:
       summary: >-
         Retrieves external connection details, such as the closure type and
         default connector for cases.
+      operationId: getCaseConfiguration
       description: >
         You must have `read` privileges for the **Cases** feature in the
         **Management**, **Observability**, or **Security** section of the Kibana
@@ -4203,6 +4669,7 @@ paths:
       summary: >-
         Sets external connection details, such as the closure type and default
         connector for cases.
+      operationId: setCaseConfiguration
       description: >
         You must have `all` privileges for the **Cases** feature in the
         **Management**, **Observability**, or **Security** section of the Kibana
@@ -4525,6 +4992,7 @@ paths:
       summary: >-
         Updates external connection details, such as the closure type and
         default connector for cases.
+      operationId: updateCaseConfiguration
       description: >
         You must have `all` privileges for the **Cases** feature in the
         **Management**, **Observability**, or **Security** section of the Kibana
@@ -4836,6 +5304,7 @@ paths:
   /s/{spaceId}/api/cases/configure/connectors/_find:
     get:
       summary: Retrieves information about connectors.
+      operationId: getCaseConnectors
       description: >
         In particular, only the connectors that are supported for use in cases
         are returned. You must have `read` privileges for the **Actions and
@@ -4888,6 +5357,7 @@ paths:
   /s/{spaceId}/api/cases/reporters:
     get:
       summary: Returns information about the users who opened cases.
+      operationId: getCaseReporters
       description: >
         You must have read privileges for the **Cases** feature in the
         **Management**, **Observability**, or **Security** section of the Kibana
@@ -4925,9 +5395,46 @@ paths:
         - url: https://localhost:5601
     servers:
       - url: https://localhost:5601
+  /s/{spaceId}/api/cases/status:
+    get:
+      summary: Returns the number of cases that are open, closed, and in progress.
+      operationId: getCaseStatus
+      description: >
+        You must have `read` privileges for the **Cases** feature in the
+        **Management**, **Observability**, or **Security** section of the Kibana
+        feature privileges, depending on the owner of the cases you're seeking.
+      deprecated: true
+      tags:
+        - cases
+        - kibana
+      parameters:
+        - $ref: '#/components/parameters/space_id'
+        - $ref: '#/components/parameters/owner'
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json; charset=utf-8:
+              schema:
+                type: object
+                properties:
+                  count_closed_cases:
+                    type: integer
+                  count_in_progress_cases:
+                    type: integer
+                  count_open_cases:
+                    type: integer
+              examples:
+                getStatusResponse:
+                  $ref: '#/components/examples/get_status_response'
+      servers:
+        - url: https://localhost:5601
+    servers:
+      - url: https://localhost:5601
   /s/{spaceId}/api/cases/tags:
     get:
       summary: Aggregates and returns a list of case tags.
+      operationId: getCaseTags
       description: >
         You must have read privileges for the **Cases*** feature in the
         **Management**, **Observability**, or **Security** section of the Kibana
@@ -4965,30 +5472,27 @@ paths:
         - url: https://localhost:5601
     servers:
       - url: https://localhost:5601
-  /s/{spaceId}/api/cases/{caseId}/comments:
-    post:
-      summary: Adds a comment or alert to a case.
+  /s/{spaceId}/api/cases/{caseId}:
+    get:
+      summary: Retrieves information about a case.
+      operationId: getCase
       description: >
-        You must have `all` privileges for the **Cases** feature in the
+        You must have `read` privileges for the **Cases** feature in the
         **Management**, **Observability**, or **Security** section of the Kibana
-        feature privileges, depending on the owner of the case you're creating.
+        feature privileges, depending on the owner of the case you're seeking.
       tags:
         - cases
         - kibana
       parameters:
-        - $ref: '#/components/parameters/kbn_xsrf'
         - $ref: '#/components/parameters/case_id'
         - $ref: '#/components/parameters/space_id'
-      requestBody:
-        content:
-          application/json:
-            schema:
-              oneOf:
-                - $ref: '#/components/schemas/add_alert_comment_request_properties'
-                - $ref: '#/components/schemas/add_user_comment_request_properties'
-            examples:
-              createCaseCommentRequest:
-                $ref: '#/components/examples/add_comment_request'
+        - in: query
+          name: includeComments
+          description: Determines whether case comments are returned.
+          deprecated: true
+          schema:
+            type: boolean
+            default: true
       responses:
         '200':
           description: Indicates a successful call.
@@ -5007,10 +5511,13 @@ paths:
                     properties:
                       email:
                         type: string
+                        example: null
                       full_name:
                         type: string
+                        example: null
                       username:
                         type: string
+                        example: elastic
                     nullable: true
                     example: null
                   comments:
@@ -5147,43 +5654,14 @@ paths:
                       than half a second, the duration is rounded down to zero.
                     example: 120
                   external_service:
-                    type: object
-                    properties:
-                      connector_id:
-                        type: string
-                      connector_name:
-                        type: string
-                      external_id:
-                        type: string
-                      external_title:
-                        type: string
-                      external_url:
-                        type: string
-                      pushed_at:
-                        type: string
-                        format: date-time
-                      pushed_by:
-                        type: object
-                        properties:
-                          email:
-                            type: string
-                          full_name:
-                            type: string
-                          username:
-                            type: string
-                        nullable: true
-                        example: null
+                    $ref: '#/components/schemas/external_service'
                   id:
                     type: string
                     example: 66b9aa00-94fa-11ea-9f74-e7e108796192
                   owner:
                     $ref: '#/components/schemas/owners'
                   settings:
-                    type: object
-                    properties:
-                      syncAlerts:
-                        type: boolean
-                        example: true
+                    $ref: '#/components/schemas/settings'
                   severity:
                     $ref: '#/components/schemas/severity_property'
                   status:
@@ -5213,10 +5691,286 @@ paths:
                     properties:
                       email:
                         type: string
+                        example: null
                       full_name:
                         type: string
+                        example: null
                       username:
                         type: string
+                        example: elastic
+                    nullable: true
+                    example: null
+                  version:
+                    type: string
+                    example: WzUzMiwxXQ==
+              examples:
+                getCaseResponse:
+                  $ref: '#/components/examples/get_case_response'
+      servers:
+        - url: https://localhost:5601
+    servers:
+      - url: https://localhost:5601
+  /s/{spaceId}/api/cases/{caseId}/alerts:
+    get:
+      summary: Gets all alerts attached to a case.
+      description: >
+        You must have `read` privileges for the **Cases** feature in the
+        **Management**, **Observability**, or **Security** section of the Kibana
+        feature privileges, depending on the owner of the cases you're seeking.
+      x-technical-preview: true
+      operationId: getCaseAlerts
+      tags:
+        - cases
+        - kibana
+      parameters:
+        - $ref: '#/components/parameters/case_id'
+        - $ref: '#/components/parameters/space_id'
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json; charset=utf-8:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/alert_response_properties'
+              examples:
+                createCaseCommentResponse:
+                  $ref: '#/components/examples/get_case_alerts_response'
+      servers:
+        - url: https://localhost:5601
+    servers:
+      - url: https://localhost:5601
+  /s/{spaceId}/api/cases/{caseId}/comments:
+    post:
+      summary: Adds a comment or alert to a case.
+      operationId: addCaseComment
+      description: >
+        You must have `all` privileges for the **Cases** feature in the
+        **Management**, **Observability**, or **Security** section of the Kibana
+        feature privileges, depending on the owner of the case you're creating.
+      tags:
+        - cases
+        - kibana
+      parameters:
+        - $ref: '#/components/parameters/kbn_xsrf'
+        - $ref: '#/components/parameters/case_id'
+        - $ref: '#/components/parameters/space_id'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: '#/components/schemas/add_alert_comment_request_properties'
+                - $ref: '#/components/schemas/add_user_comment_request_properties'
+            examples:
+              createCaseCommentRequest:
+                $ref: '#/components/examples/add_comment_request'
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json; charset=utf-8:
+              schema:
+                type: object
+                properties:
+                  closed_at:
+                    type: string
+                    format: date-time
+                    nullable: true
+                    example: null
+                  closed_by:
+                    type: object
+                    properties:
+                      email:
+                        type: string
+                        example: null
+                      full_name:
+                        type: string
+                        example: null
+                      username:
+                        type: string
+                        example: elastic
+                    nullable: true
+                    example: null
+                  comments:
+                    type: array
+                    items:
+                      oneOf:
+                        - $ref: >-
+                            #/components/schemas/alert_comment_response_properties
+                        - $ref: >-
+                            #/components/schemas/user_comment_response_properties
+                    example: []
+                  connector:
+                    type: object
+                    properties:
+                      fields:
+                        description: >-
+                          An object containing the connector fields. To create a
+                          case without a connector, specify null. If you want to
+                          omit any individual field, specify null as its value.
+                        nullable: true
+                        type: object
+                        properties:
+                          caseId:
+                            description: The case identifier for Swimlane connectors.
+                            type: string
+                          category:
+                            description: >-
+                              The category of the incident for ServiceNow ITSM
+                              and ServiceNow SecOps connectors.
+                            type: string
+                          destIp:
+                            description: >-
+                              A comma-separated list of destination IPs for
+                              ServiceNow SecOps connectors.
+                            type: string
+                          impact:
+                            description: >-
+                              The effect an incident had on business for
+                              ServiceNow ITSM connectors.
+                            type: string
+                          issueType:
+                            description: The type of issue for Jira connectors.
+                            type: string
+                          issueTypes:
+                            description: The type of incident for IBM Resilient connectors.
+                            type: array
+                            items:
+                              type: number
+                          malwareHash:
+                            description: >-
+                              A comma-separated list of malware hashes for
+                              ServiceNow SecOps connectors.
+                            type: string
+                          malwareUrl:
+                            description: >-
+                              A comma-separated list of malware URLs for
+                              ServiceNow SecOps connectors.
+                            type: string
+                          parent:
+                            description: >-
+                              The key of the parent issue, when the issue type
+                              is sub-task for Jira connectors.
+                            type: string
+                          priority:
+                            description: >-
+                              The priority of the issue for Jira and ServiceNow
+                              SecOps connectors.
+                            type: string
+                          severity:
+                            description: >-
+                              The severity of the incident for ServiceNow ITSM
+                              connectors.
+                            type: string
+                          severityCode:
+                            description: >-
+                              The severity code of the incident for IBM
+                              Resilient connectors.
+                            type: number
+                          sourceIp:
+                            description: >-
+                              A comma-separated list of source IPs for
+                              ServiceNow SecOps connectors.
+                            type: string
+                          subcategory:
+                            description: >-
+                              The subcategory of the incident for ServiceNow
+                              ITSM connectors.
+                            type: string
+                          urgency:
+                            description: >-
+                              The extent to which the incident resolution can be
+                              delayed for ServiceNow ITSM connectors.
+                            type: string
+                        example: null
+                      id:
+                        description: >-
+                          The identifier for the connector. To create a case
+                          without a connector, use `none`.
+                        type: string
+                        example: none
+                      name:
+                        description: >-
+                          The name of the connector. To create a case without a
+                          connector, use `none`.
+                        type: string
+                        example: none
+                      type:
+                        $ref: '#/components/schemas/connector_types'
+                  created_at:
+                    type: string
+                    format: date-time
+                    example: '2022-05-13T09:16:17.416Z'
+                  created_by:
+                    type: object
+                    properties:
+                      email:
+                        type: string
+                        example: null
+                      full_name:
+                        type: string
+                        example: null
+                      username:
+                        type: string
+                        example: elastic
+                  description:
+                    type: string
+                    example: A case description.
+                  duration:
+                    type: integer
+                    description: >
+                      The elapsed time from the creation of the case to its
+                      closure (in seconds). If the case has not been closed, the
+                      duration is set to null. If the case was closed after less
+                      than half a second, the duration is rounded down to zero.
+                    example: 120
+                  external_service:
+                    $ref: '#/components/schemas/external_service'
+                  id:
+                    type: string
+                    example: 66b9aa00-94fa-11ea-9f74-e7e108796192
+                  owner:
+                    $ref: '#/components/schemas/owners'
+                  settings:
+                    $ref: '#/components/schemas/settings'
+                  severity:
+                    $ref: '#/components/schemas/severity_property'
+                  status:
+                    $ref: '#/components/schemas/status'
+                  tags:
+                    type: array
+                    items:
+                      type: string
+                    example:
+                      - tag-1
+                  title:
+                    type: string
+                    example: Case title 1
+                  totalAlerts:
+                    type: integer
+                    example: 0
+                  totalComment:
+                    type: integer
+                    example: 0
+                  updated_at:
+                    type: string
+                    format: date-time
+                    nullable: true
+                    example: null
+                  updated_by:
+                    type: object
+                    properties:
+                      email:
+                        type: string
+                        example: null
+                      full_name:
+                        type: string
+                        example: null
+                      username:
+                        type: string
+                        example: elastic
                     nullable: true
                     example: null
                   version:
@@ -5229,6 +5983,7 @@ paths:
         - url: https://localhost:5601
     delete:
       summary: Deletes all comments and alerts from a case.
+      operationId: deleteCaseComments
       description: >
         You must have `all` privileges for the **Cases** feature in the
         **Management**, **Observability**, or **Security** section of the Kibana
@@ -5247,6 +6002,7 @@ paths:
         - url: https://localhost:5601
     patch:
       summary: Updates a comment or alert in a case.
+      operationId: updateCaseComment
       description: >
         You must have `all` privileges for the **Cases** feature in the
         **Management**, **Observability**, or **Security** section of the Kibana
@@ -5287,10 +6043,13 @@ paths:
                     properties:
                       email:
                         type: string
+                        example: null
                       full_name:
                         type: string
+                        example: null
                       username:
                         type: string
+                        example: elastic
                     nullable: true
                     example: null
                   comments:
@@ -5427,43 +6186,14 @@ paths:
                       than half a second, the duration is rounded down to zero.
                     example: 120
                   external_service:
-                    type: object
-                    properties:
-                      connector_id:
-                        type: string
-                      connector_name:
-                        type: string
-                      external_id:
-                        type: string
-                      external_title:
-                        type: string
-                      external_url:
-                        type: string
-                      pushed_at:
-                        type: string
-                        format: date-time
-                      pushed_by:
-                        type: object
-                        properties:
-                          email:
-                            type: string
-                          full_name:
-                            type: string
-                          username:
-                            type: string
-                        nullable: true
-                        example: null
+                    $ref: '#/components/schemas/external_service'
                   id:
                     type: string
                     example: 66b9aa00-94fa-11ea-9f74-e7e108796192
                   owner:
                     $ref: '#/components/schemas/owners'
                   settings:
-                    type: object
-                    properties:
-                      syncAlerts:
-                        type: boolean
-                        example: true
+                    $ref: '#/components/schemas/settings'
                   severity:
                     $ref: '#/components/schemas/severity_property'
                   status:
@@ -5493,10 +6223,13 @@ paths:
                     properties:
                       email:
                         type: string
+                        example: null
                       full_name:
                         type: string
+                        example: null
                       username:
                         type: string
+                        example: elastic
                     nullable: true
                     example: null
                   version:
@@ -5505,6 +6238,356 @@ paths:
               examples:
                 updateCaseCommentResponse:
                   $ref: '#/components/examples/update_comment_response'
+      servers:
+        - url: https://localhost:5601
+    get:
+      summary: Retrieves all the comments from a case.
+      operationId: getAllCaseComments
+      description: >
+        You must have `read` privileges for the **Cases** feature in the
+        **Management**, **Observability**, or **Security** section of the Kibana
+        feature privileges, depending on the owner of the cases with the
+        comments you're seeking.
+      deprecated: true
+      tags:
+        - cases
+        - kibana
+      parameters:
+        - $ref: '#/components/parameters/case_id'
+        - $ref: '#/components/parameters/space_id'
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json; charset=utf-8:
+              schema:
+                type: array
+                items:
+                  anyOf:
+                    - $ref: '#/components/schemas/alert_comment_response_properties'
+                    - $ref: '#/components/schemas/user_comment_response_properties'
+            examples: {}
+      servers:
+        - url: https://localhost:5601
+    servers:
+      - url: https://localhost:5601
+  /s/{spaceId}/api/cases/{caseId}/comments/{commentId}:
+    delete:
+      summary: Deletes a comment or alert from a case.
+      operationId: deleteCaseComment
+      description: >
+        You must have `all` privileges for the **Cases** feature in the
+        **Management**, **Observability**, or **Security** section of the Kibana
+        feature privileges, depending on the owner of the cases you're deleting.
+      tags:
+        - cases
+        - kibana
+      parameters:
+        - $ref: '#/components/parameters/kbn_xsrf'
+        - $ref: '#/components/parameters/case_id'
+        - $ref: '#/components/parameters/comment_id'
+        - $ref: '#/components/parameters/space_id'
+      responses:
+        '204':
+          description: Indicates a successful call.
+      servers:
+        - url: https://localhost:5601
+    get:
+      summary: Retrieves a comment from a case.
+      operationId: getCaseComment
+      description: >
+        You must have `read` privileges for the **Cases** feature in the
+        **Management**, **Observability**, or **Security*** section of the
+        Kibana feature privileges, depending on the owner of the cases with the
+        comments you're seeking.
+      tags:
+        - cases
+        - kibana
+      parameters:
+        - $ref: '#/components/parameters/case_id'
+        - $ref: '#/components/parameters/comment_id'
+        - $ref: '#/components/parameters/space_id'
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json; charset=utf-8:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/alert_comment_response_properties'
+                  - $ref: '#/components/schemas/user_comment_response_properties'
+              examples:
+                getCaseCommentResponse:
+                  $ref: '#/components/examples/get_comment_response'
+      servers:
+        - url: https://localhost:5601
+    servers:
+      - url: https://localhost:5601
+  /s/{spaceId}/api/cases/{caseId}/connector/{connectorId}/_push:
+    post:
+      summary: Pushes a case to an external service.
+      description: >
+        You must have `all` privileges for the **Actions and Connectors**
+        feature in the **Management** section of the Kibana feature privileges.
+        You must also have `all` privileges for the **Cases** feature in the
+        **Management**, **Observability**, or **Security** section of the Kibana
+        feature privileges, depending on the owner of the case you're pushing.
+      operationId: pushCase
+      tags:
+        - cases
+        - kibana
+      parameters:
+        - $ref: '#/components/parameters/case_id'
+        - $ref: '#/components/parameters/connector_id'
+        - $ref: '#/components/parameters/kbn_xsrf'
+        - $ref: '#/components/parameters/space_id'
+      requestBody:
+        content:
+          application/json: {}
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json; charset=utf-8:
+              schema:
+                type: object
+                properties:
+                  closed_at:
+                    type: string
+                    format: date-time
+                    nullable: true
+                    example: null
+                  closed_by:
+                    type: object
+                    properties:
+                      email:
+                        type: string
+                        example: null
+                      full_name:
+                        type: string
+                        example: null
+                      username:
+                        type: string
+                        example: elastic
+                    nullable: true
+                    example: null
+                  comments:
+                    type: array
+                    items:
+                      oneOf:
+                        - $ref: >-
+                            #/components/schemas/alert_comment_response_properties
+                        - $ref: >-
+                            #/components/schemas/user_comment_response_properties
+                    example: []
+                  connector:
+                    type: object
+                    properties:
+                      fields:
+                        description: >-
+                          An object containing the connector fields. To create a
+                          case without a connector, specify null. If you want to
+                          omit any individual field, specify null as its value.
+                        nullable: true
+                        type: object
+                        properties:
+                          caseId:
+                            description: The case identifier for Swimlane connectors.
+                            type: string
+                          category:
+                            description: >-
+                              The category of the incident for ServiceNow ITSM
+                              and ServiceNow SecOps connectors.
+                            type: string
+                          destIp:
+                            description: >-
+                              A comma-separated list of destination IPs for
+                              ServiceNow SecOps connectors.
+                            type: string
+                          impact:
+                            description: >-
+                              The effect an incident had on business for
+                              ServiceNow ITSM connectors.
+                            type: string
+                          issueType:
+                            description: The type of issue for Jira connectors.
+                            type: string
+                          issueTypes:
+                            description: The type of incident for IBM Resilient connectors.
+                            type: array
+                            items:
+                              type: number
+                          malwareHash:
+                            description: >-
+                              A comma-separated list of malware hashes for
+                              ServiceNow SecOps connectors.
+                            type: string
+                          malwareUrl:
+                            description: >-
+                              A comma-separated list of malware URLs for
+                              ServiceNow SecOps connectors.
+                            type: string
+                          parent:
+                            description: >-
+                              The key of the parent issue, when the issue type
+                              is sub-task for Jira connectors.
+                            type: string
+                          priority:
+                            description: >-
+                              The priority of the issue for Jira and ServiceNow
+                              SecOps connectors.
+                            type: string
+                          severity:
+                            description: >-
+                              The severity of the incident for ServiceNow ITSM
+                              connectors.
+                            type: string
+                          severityCode:
+                            description: >-
+                              The severity code of the incident for IBM
+                              Resilient connectors.
+                            type: number
+                          sourceIp:
+                            description: >-
+                              A comma-separated list of source IPs for
+                              ServiceNow SecOps connectors.
+                            type: string
+                          subcategory:
+                            description: >-
+                              The subcategory of the incident for ServiceNow
+                              ITSM connectors.
+                            type: string
+                          urgency:
+                            description: >-
+                              The extent to which the incident resolution can be
+                              delayed for ServiceNow ITSM connectors.
+                            type: string
+                        example: null
+                      id:
+                        description: >-
+                          The identifier for the connector. To create a case
+                          without a connector, use `none`.
+                        type: string
+                        example: none
+                      name:
+                        description: >-
+                          The name of the connector. To create a case without a
+                          connector, use `none`.
+                        type: string
+                        example: none
+                      type:
+                        $ref: '#/components/schemas/connector_types'
+                  created_at:
+                    type: string
+                    format: date-time
+                    example: '2022-05-13T09:16:17.416Z'
+                  created_by:
+                    type: object
+                    properties:
+                      email:
+                        type: string
+                        example: null
+                      full_name:
+                        type: string
+                        example: null
+                      username:
+                        type: string
+                        example: elastic
+                  description:
+                    type: string
+                    example: A case description.
+                  duration:
+                    type: integer
+                    description: >
+                      The elapsed time from the creation of the case to its
+                      closure (in seconds). If the case has not been closed, the
+                      duration is set to null. If the case was closed after less
+                      than half a second, the duration is rounded down to zero.
+                    example: 120
+                  external_service:
+                    $ref: '#/components/schemas/external_service'
+                  id:
+                    type: string
+                    example: 66b9aa00-94fa-11ea-9f74-e7e108796192
+                  owner:
+                    $ref: '#/components/schemas/owners'
+                  settings:
+                    $ref: '#/components/schemas/settings'
+                  severity:
+                    $ref: '#/components/schemas/severity_property'
+                  status:
+                    $ref: '#/components/schemas/status'
+                  tags:
+                    type: array
+                    items:
+                      type: string
+                    example:
+                      - tag-1
+                  title:
+                    type: string
+                    example: Case title 1
+                  totalAlerts:
+                    type: integer
+                    example: 0
+                  totalComment:
+                    type: integer
+                    example: 0
+                  updated_at:
+                    type: string
+                    format: date-time
+                    nullable: true
+                    example: null
+                  updated_by:
+                    type: object
+                    properties:
+                      email:
+                        type: string
+                        example: null
+                      full_name:
+                        type: string
+                        example: null
+                      username:
+                        type: string
+                        example: elastic
+                    nullable: true
+                    example: null
+                  version:
+                    type: string
+                    example: WzUzMiwxXQ==
+              examples:
+                pushCaseResponse:
+                  $ref: '#/components/examples/push_case_response'
+      servers:
+        - url: https://localhost:5601
+    servers:
+      - url: https://localhost:5601
+  /s/{spaceId}/api/cases/{caseId}/user_actions:
+    get:
+      summary: Returns all user activity for a case.
+      description: >
+        You must have `read` privileges for the **Cases** feature in the
+        **Management**, **Observability**, or **Security** section of the Kibana
+        feature privileges, depending on the owner of the case you're seeking.
+      deprecated: true
+      operationId: getCaseActivity
+      tags:
+        - cases
+        - kibana
+      parameters:
+        - $ref: '#/components/parameters/case_id'
+        - $ref: '#/components/parameters/space_id'
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json; charset=utf-8:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/user_actions_response_properties'
+              examples:
+                getCaseActivityResponse:
+                  $ref: '#/components/examples/get_case_activity_response'
       servers:
         - url: https://localhost:5601
     servers:
@@ -5576,6 +6659,26 @@ components:
       schema:
         type: string
         example: 9c235210-6834-11ea-a78c-6ffb38a34414
+    comment_id:
+      in: path
+      name: commentId
+      description: >
+        The identifier for the comment. To retrieve comment IDs, use the get
+        case or find cases APIs.
+      required: true
+      schema:
+        type: string
+        example: 71ec1870-725b-11ea-a0b2-c51ea50a58e2
+    connector_id:
+      in: path
+      name: connectorId
+      description: >-
+        An identifier for the connector. To retrieve connector IDs, use the find
+        connectors API.
+      required: true
+      schema:
+        type: string
+        example: abed3a70-71bd-11ea-a0b2-c51ea50a58e2
     space_id:
       in: path
       name: spaceId
@@ -5589,6 +6692,7 @@ components:
       type: string
       description: The type of connector.
       enum:
+        - .cases-webhook
         - .jira
         - .none
         - .resilient
@@ -5606,6 +6710,14 @@ components:
         - observability
         - securitySolution
       example: cases
+    settings:
+      type: object
+      description: An object that contains the case settings.
+      properties:
+        syncAlerts:
+          description: Turns alert syncing on or off.
+          type: boolean
+          example: true
     severity_property:
       type: string
       description: The severity of the case.
@@ -5667,9 +6779,11 @@ components:
           type: object
           properties:
             id:
+              description: The rule identifier.
               type: string
               example: 94d80550-aaf4-11ec-985f-97e55adae8b9
             name:
+              description: The rule name.
               type: string
               example: security_rule
         type:
@@ -5731,10 +6845,13 @@ components:
           properties:
             email:
               type: string
+              example: null
             full_name:
               type: string
+              example: null
             username:
               type: string
+              example: elastic
           nullable: true
           example: null
         type:
@@ -5750,15 +6867,47 @@ components:
           properties:
             email:
               type: string
+              example: null
             full_name:
               type: string
+              example: null
             username:
               type: string
+              example: elastic
           nullable: true
           example: null
         version:
           type: string
           example: WzIwNDMxLDFd
+    external_service:
+      type: object
+      properties:
+        connector_id:
+          type: string
+        connector_name:
+          type: string
+        external_id:
+          type: string
+        external_title:
+          type: string
+        external_url:
+          type: string
+        pushed_at:
+          type: string
+          format: date-time
+        pushed_by:
+          type: object
+          properties:
+            email:
+              type: string
+              example: null
+            full_name:
+              type: string
+              example: null
+            username:
+              type: string
+              example: elastic
+          nullable: true
     status:
       type: string
       description: The status of the case.
@@ -5776,27 +6925,49 @@ components:
         - close-by-pushing
         - close-by-user
       example: close-by-user
+    alert_response_properties:
+      type: object
+      properties:
+        attached_at:
+          type: string
+          format: date-time
+        id:
+          description: The alert identifier.
+          type: string
+        index:
+          description: The alert index.
+          type: string
     add_alert_comment_request_properties:
       type: object
       properties:
         alertId:
           description: >
-            The alert identifier. It is required only when `type` is `alert`.
-            This functionality is in technical preview and may be changed or
-            removed in a future release. Elastic will apply best effort to fix
-            any issues, but features in technical preview are not subject to the
-            support SLA of official GA features.
-          type: string
+            The alert identifier. It is required only when `type` is `alert`. If
+            it is an array, `index` must also be an array. This functionality is
+            in technical preview and may be changed or removed in a future
+            release. Elastic will apply best effort to fix any issues, but
+            features in technical preview are not subject to the support SLA of
+            official GA features.
+          oneOf:
+            - type: string
+            - type: array
+              items:
+                type: string
           x-technical-preview: true
           example: 6b24c4dc44bc720cfc92797f3d61fff952f2b2627db1fb4f8cc49f4530c4ff42
         index:
           description: >
-            The alert index. It is required only when `type` is `alert`. This
-            functionality is in technical preview and may be changed or removed
-            in a future release. Elastic will apply best effort to fix any
-            issues, but features in technical preview are not subject to the
-            support SLA of official GA features.
-          type: string
+            The alert index. It is required only when `type` is `alert`. If it
+            is an array, `alertId` must also be an array. This functionality is
+            in technical preview and may be changed or removed in a future
+            release. Elastic will apply best effort to fix any issues, but
+            features in technical preview are not subject to the support SLA of
+            official GA features.
+          oneOf:
+            - type: string
+            - type: array
+              items:
+                type: string
           x-technical-preview: true
         owner:
           $ref: '#/components/schemas/owners'
@@ -5813,12 +6984,10 @@ components:
             id:
               description: The rule identifier.
               type: string
-              x-technical-preview: true
               example: 94d80550-aaf4-11ec-985f-97e55adae8b9
             name:
               description: The rule name.
               type: string
-              x-technical-preview: true
               example: security_rule
         type:
           description: The type of comment.
@@ -5856,12 +7025,17 @@ components:
       properties:
         alertId:
           description: >
-            The alert identifier. It is required only when `type` is `alert`.
-            This functionality is in technical preview and may be changed or
-            removed in a future release. Elastic will apply best effort to fix
-            any issues, but features in technical preview are not subject to the
-            support SLA of official GA features.
-          type: string
+            The alert identifier. It is required only when `type` is `alert`. If
+            it is an array, `index` must also be an array. This functionality is
+            in technical preview and may be changed or removed in a future
+            release. Elastic will apply best effort to fix any issues, but
+            features in technical preview are not subject to the support SLA of
+            official GA features.
+          oneOf:
+            - type: string
+            - type: array
+              items:
+                type: string
           x-technical-preview: true
           example: 6b24c4dc44bc720cfc92797f3d61fff952f2b2627db1fb4f8cc49f4530c4ff42
         id:
@@ -5872,12 +7046,17 @@ components:
           example: 8af6ac20-74f6-11ea-b83a-553aecdb28b6
         index:
           description: >
-            The alert index. It is required only when `type` is `alert`. This
-            functionality is in technical preview and may be changed or removed
-            in a future release. Elastic will apply best effort to fix any
-            issues, but features in technical preview are not subject to the
-            support SLA of official GA features.
-          type: string
+            The alert index. It is required only when `type` is `alert`. If it
+            is an array, `alertId` must also be an array. This functionality is
+            in technical preview and may be changed or removed in a future
+            release. Elastic will apply best effort to fix any issues, but
+            features in technical preview are not subject to the support SLA of
+            official GA features.
+          oneOf:
+            - type: string
+            - type: array
+              items:
+                type: string
           x-technical-preview: true
         owner:
           $ref: '#/components/schemas/owners'
@@ -5894,12 +7073,10 @@ components:
             id:
               description: The rule identifier.
               type: string
-              x-technical-preview: true
               example: 94d80550-aaf4-11ec-985f-97e55adae8b9
             name:
               description: The rule name.
               type: string
-              x-technical-preview: true
               example: security_rule
         type:
           description: The type of comment.
@@ -5954,6 +7131,383 @@ components:
         - owner
         - type
         - version
+    actions:
+      type: string
+      enum:
+        - add
+        - create
+        - delete
+        - push_to_service
+        - update
+      example: create
+    payload_alert_comment:
+      type: object
+      properties:
+        comment:
+          type: object
+          properties:
+            alertId:
+              oneOf:
+                - type: string
+                  example: 1c0b056b-cc9f-4b61-b5c9-cb801abd5e1d
+                - type: array
+                  items:
+                    type: string
+            index:
+              oneOf:
+                - type: string
+                  example: .alerts-observability.logs.alerts-default
+                - type: array
+                  items:
+                    type: string
+            owner:
+              $ref: '#/components/schemas/owners'
+            rule:
+              type: object
+              properties:
+                id:
+                  description: The rule identifier.
+                  type: string
+                  example: 94d80550-aaf4-11ec-985f-97e55adae8b9
+                name:
+                  description: The rule name.
+                  type: string
+                  example: security_rule
+            type:
+              type: string
+              enum:
+                - alert
+    payload_connector:
+      type: object
+      properties:
+        connector:
+          type: object
+          properties:
+            fields:
+              description: >-
+                An object containing the connector fields. To create a case
+                without a connector, specify null. If you want to omit any
+                individual field, specify null as its value.
+              nullable: true
+              type: object
+              properties:
+                caseId:
+                  description: The case identifier for Swimlane connectors.
+                  type: string
+                category:
+                  description: >-
+                    The category of the incident for ServiceNow ITSM and
+                    ServiceNow SecOps connectors.
+                  type: string
+                destIp:
+                  description: >-
+                    A comma-separated list of destination IPs for ServiceNow
+                    SecOps connectors.
+                  type: string
+                impact:
+                  description: >-
+                    The effect an incident had on business for ServiceNow ITSM
+                    connectors.
+                  type: string
+                issueType:
+                  description: The type of issue for Jira connectors.
+                  type: string
+                issueTypes:
+                  description: The type of incident for IBM Resilient connectors.
+                  type: array
+                  items:
+                    type: number
+                malwareHash:
+                  description: >-
+                    A comma-separated list of malware hashes for ServiceNow
+                    SecOps connectors.
+                  type: string
+                malwareUrl:
+                  description: >-
+                    A comma-separated list of malware URLs for ServiceNow SecOps
+                    connectors.
+                  type: string
+                parent:
+                  description: >-
+                    The key of the parent issue, when the issue type is sub-task
+                    for Jira connectors.
+                  type: string
+                priority:
+                  description: >-
+                    The priority of the issue for Jira and ServiceNow SecOps
+                    connectors.
+                  type: string
+                severity:
+                  description: The severity of the incident for ServiceNow ITSM connectors.
+                  type: string
+                severityCode:
+                  description: >-
+                    The severity code of the incident for IBM Resilient
+                    connectors.
+                  type: number
+                sourceIp:
+                  description: >-
+                    A comma-separated list of source IPs for ServiceNow SecOps
+                    connectors.
+                  type: string
+                subcategory:
+                  description: >-
+                    The subcategory of the incident for ServiceNow ITSM
+                    connectors.
+                  type: string
+                urgency:
+                  description: >-
+                    The extent to which the incident resolution can be delayed
+                    for ServiceNow ITSM connectors.
+                  type: string
+              example: null
+            id:
+              description: >-
+                The identifier for the connector. To create a case without a
+                connector, use `none`.
+              type: string
+              example: none
+            name:
+              description: >-
+                The name of the connector. To create a case without a connector,
+                use `none`.
+              type: string
+              example: none
+            type:
+              $ref: '#/components/schemas/connector_types'
+    payload_create_case:
+      type: object
+      properties:
+        connector:
+          type: object
+          properties:
+            fields:
+              description: >-
+                An object containing the connector fields. To create a case
+                without a connector, specify null. If you want to omit any
+                individual field, specify null as its value.
+              nullable: true
+              type: object
+              properties:
+                caseId:
+                  description: The case identifier for Swimlane connectors.
+                  type: string
+                category:
+                  description: >-
+                    The category of the incident for ServiceNow ITSM and
+                    ServiceNow SecOps connectors.
+                  type: string
+                destIp:
+                  description: >-
+                    A comma-separated list of destination IPs for ServiceNow
+                    SecOps connectors.
+                  type: string
+                impact:
+                  description: >-
+                    The effect an incident had on business for ServiceNow ITSM
+                    connectors.
+                  type: string
+                issueType:
+                  description: The type of issue for Jira connectors.
+                  type: string
+                issueTypes:
+                  description: The type of incident for IBM Resilient connectors.
+                  type: array
+                  items:
+                    type: number
+                malwareHash:
+                  description: >-
+                    A comma-separated list of malware hashes for ServiceNow
+                    SecOps connectors.
+                  type: string
+                malwareUrl:
+                  description: >-
+                    A comma-separated list of malware URLs for ServiceNow SecOps
+                    connectors.
+                  type: string
+                parent:
+                  description: >-
+                    The key of the parent issue, when the issue type is sub-task
+                    for Jira connectors.
+                  type: string
+                priority:
+                  description: >-
+                    The priority of the issue for Jira and ServiceNow SecOps
+                    connectors.
+                  type: string
+                severity:
+                  description: The severity of the incident for ServiceNow ITSM connectors.
+                  type: string
+                severityCode:
+                  description: >-
+                    The severity code of the incident for IBM Resilient
+                    connectors.
+                  type: number
+                sourceIp:
+                  description: >-
+                    A comma-separated list of source IPs for ServiceNow SecOps
+                    connectors.
+                  type: string
+                subcategory:
+                  description: >-
+                    The subcategory of the incident for ServiceNow ITSM
+                    connectors.
+                  type: string
+                urgency:
+                  description: >-
+                    The extent to which the incident resolution can be delayed
+                    for ServiceNow ITSM connectors.
+                  type: string
+              example: null
+            id:
+              description: >-
+                The identifier for the connector. To create a case without a
+                connector, use `none`.
+              type: string
+              example: none
+            name:
+              description: >-
+                The name of the connector. To create a case without a connector,
+                use `none`.
+              type: string
+              example: none
+            type:
+              $ref: '#/components/schemas/connector_types'
+        description:
+          type: string
+        owner:
+          $ref: '#/components/schemas/owners'
+        settings:
+          $ref: '#/components/schemas/settings'
+        severity:
+          $ref: '#/components/schemas/severity_property'
+        status:
+          $ref: '#/components/schemas/status'
+        tags:
+          type: array
+          items:
+            type: string
+            example:
+              - tag-1
+        title:
+          type: string
+    payload_description:
+      type: object
+      properties:
+        description:
+          type: string
+    payload_pushed:
+      type: object
+      properties:
+        externalService:
+          $ref: '#/components/schemas/external_service'
+    payload_settings:
+      type: object
+      properties:
+        settings:
+          $ref: '#/components/schemas/settings'
+    payload_severity:
+      type: object
+      properties:
+        severity:
+          $ref: '#/components/schemas/severity_property'
+    payload_status:
+      type: object
+      properties:
+        status:
+          $ref: '#/components/schemas/status'
+    payload_tags:
+      type: object
+      properties:
+        tags:
+          type: array
+          items:
+            type: string
+          example:
+            - tag-1
+    payload_title:
+      type: object
+      properties:
+        title:
+          type: string
+    payload_user_comment:
+      type: object
+      properties:
+        comment:
+          type: object
+          properties:
+            comment:
+              type: string
+            owner:
+              $ref: '#/components/schemas/owners'
+            type:
+              type: string
+              enum:
+                - user
+    action_types:
+      type: string
+      description: The type of action.
+      enum:
+        - create_case
+        - comment
+        - connector
+        - delete_case
+        - description
+        - pushed
+        - tags
+        - title
+        - status
+        - settings
+        - severity
+      example: create_case
+    user_actions_response_properties:
+      type: object
+      properties:
+        action:
+          $ref: '#/components/schemas/actions'
+        action_id:
+          type: string
+          example: 22fd3e30-03b1-11ed-920c-974bfa104448
+        case_id:
+          type: string
+          example: 22df07d0-03b1-11ed-920c-974bfa104448
+        comment_id:
+          type: string
+          example: 578608d0-03b1-11ed-920c-974bfa104448
+        created_at:
+          type: string
+          format: date-time
+          example: '2022-05-13T09:16:17.416Z'
+        created_by:
+          type: object
+          properties:
+            email:
+              type: string
+              example: null
+            full_name:
+              type: string
+              example: null
+            username:
+              type: string
+              example: elastic
+        owner:
+          $ref: '#/components/schemas/owners'
+        payload:
+          oneOf:
+            - $ref: '#/components/schemas/payload_alert_comment'
+            - $ref: '#/components/schemas/payload_connector'
+            - $ref: '#/components/schemas/payload_create_case'
+            - $ref: '#/components/schemas/payload_description'
+            - $ref: '#/components/schemas/payload_pushed'
+            - $ref: '#/components/schemas/payload_settings'
+            - $ref: '#/components/schemas/payload_severity'
+            - $ref: '#/components/schemas/payload_status'
+            - $ref: '#/components/schemas/payload_tags'
+            - $ref: '#/components/schemas/payload_title'
+            - $ref: '#/components/schemas/payload_user_comment'
+          nullable: true
+        type:
+          $ref: '#/components/schemas/action_types'
   examples:
     create_case_request:
       summary: Create a security case that uses a Jira connector.
@@ -6151,6 +7705,12 @@ components:
         - username: user2
           full_name: User 2
           email: user2@elastic.co
+    get_status_response:
+      summary: Get the number of cases in each state.
+      value:
+        count_open_cases: 27
+        count_in_progress_cases: 50
+        count_closed_cases: 198
     get_tags_response:
       summary: A list of tags that are used in cases
       value:
@@ -6158,6 +7718,62 @@ components:
         - security
         - tag 1
         - tag 2
+    get_case_response:
+      summary: Retrieves information about a case including its comments.
+      value:
+        id: 31cdada0-02c1-11ed-85f2-4f7c222ca2fa
+        version: WzM2LDFd
+        comments:
+          - id: 2134c1d0-02c2-11ed-85f2-4f7c222ca2fa
+            version: WzM3LDFd
+            type: user
+            owner: cases
+            comment: A new comment
+            created_at: '2022-07-13T15:40:32.335Z'
+            created_by:
+              email: null
+              full_name: null
+              username: elastic
+            pushed_at: null
+            pushed_by: null
+            updated_at: null
+            updated_by: null
+        totalComment: 1
+        totalAlerts: 0
+        title: Case title 1
+        tags:
+          - tag 1
+        settings:
+          syncAlerts: true
+        owner: cases
+        description: A case description
+        duration: null
+        severity: low
+        closed_at: null
+        closed_by: null
+        created_at: '2022-07-13T15:33:50.604Z'
+        created_by:
+          username: elastic
+          email: null
+          full_name: null
+        status: open
+        updated_at: '2022-07-13T15:40:32.335Z'
+        updated_by:
+          full_name: null
+          email: null
+          username: elastic
+        connector:
+          id: none
+          name: none
+          type: .none
+          fields: null
+        external_service: null
+    get_case_alerts_response:
+      summary: Retrieves all alerts attached to a case
+      value:
+        - id: f6a7d0c3-d52d-432c-b2e6-447cd7fce04d
+          index: .alerts-observability.logs.alerts-default
+          attached_at: '2022-07-25T20:09:40.963Z'
     add_comment_request:
       summary: Adds a comment to a case.
       value:
@@ -6278,6 +7894,119 @@ components:
           type: .none
           fields: null
         external_service: null
+    get_comment_response:
+      summary: A single user comment retrieved from a case
+      value:
+        id: 8048b460-fe2b-11ec-b15d-779a7c8bbcc3
+        version: WzIzLDFd
+        type: user
+        owner: cases
+        comment: A new comment
+        created_at: '2022-07-07T19:32:13.104Z'
+        created_by:
+          email: null
+          full_name: null
+          username: elastic
+        pushed_at: null
+        pushed_by: null
+        updated_at: null
+        updated_by: null
+    push_case_response:
+      summary: >-
+        The push case API returns a JSON object with details about the case and
+        the external service.
+      value:
+        id: b917f300-0ed9-11ed-bd18-65557fe66949
+        version: WzE3NjgsM10=
+        comments: []
+        totalComment: 0
+        totalAlerts: 0
+        description: A case description.
+        title: Case title 1
+        tags:
+          - tag 1
+        settings:
+          syncAlerts: true
+        owner: cases
+        duration: null
+        severity: low
+        closed_at: null
+        closed_by: null
+        created_at: '2022-07-29T00:59:39.444Z'
+        created_by:
+          username: elastic
+          email: null
+          full_name: null
+        status: open
+        updated_at: '2022-07-29T01:20:58.436Z'
+        updated_by:
+          username: elastic
+          full_name: null
+          email: null
+        connector:
+          id: 09f8c0b0-0eda-11ed-bd18-65557fe66949
+          name: My connector
+          type: .jira
+          fields:
+            issueType: '10006'
+            parent: null
+            priority: Low
+        external_service:
+          pushed_at: '2022-07-29T01:20:58.436Z'
+          pushed_by:
+            username: elastic
+            full_name: null
+            email: null
+          connector_name: My connector
+          external_id: '71926'
+          external_title: ES-554
+          external_url: https://cases.jira.com
+          connector_id: 09f8c0b0-0eda-11ed-bd18-65557fe66949
+    get_case_activity_response:
+      summary: Retrieves all activity for a case
+      value:
+        - created_at: '2022-07-14T20:11:24.947Z'
+          created_by:
+            username: elastic
+            email: null
+            full_name: null
+          owner: cases
+          action: create
+          payload:
+            description: A case description
+            title: Case title 1
+            tags:
+              - tag 1
+            connector:
+              name: none
+              type: .none
+              fields: null
+              id: none
+            settings:
+              syncAlerts: true
+            owner: cases
+            severity: low
+            status: open
+          type: create_case
+          action_id: 22fd3e30-03b1-11ed-920c-974bfa104448
+          case_id: 22df07d0-03b1-11ed-920c-974bfa104448
+          comment_id: null
+        - created_at: '2022-07-14T20:12:53.354Z'
+          created_by:
+            username: elastic
+            email: null
+            full_name: null
+          owner: cases
+          action: create
+          payload:
+            comment:
+              type: user
+              owner: cases
+              comment: A new comment
+          type: comment
+          action_id: 57af14a0-03b1-11ed-920c-974bfa104448
+          case_id: 22df07d0-03b1-11ed-920c-974bfa104448
+          comment_id: 578608d0-03b1-11ed-920c-974bfa104448
 security:
   - basicAuth: []
   - apiKeyAuth: []

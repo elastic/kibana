@@ -1848,21 +1848,9 @@
           "<unknown>; }[]; storageKey: string; navLinkUpdater$: ",
           "BehaviorSubject",
           "<",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCoreApplicationPluginApi",
-            "section": "def-public.AppUpdater",
-            "text": "AppUpdater"
-          },
+          "AppUpdater",
           ">; toastNotifications: ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.IToasts",
-            "text": "IToasts"
-          },
+          "IToasts",
           "; history?: ",
           "History",
           "<unknown> | undefined; getHistory?: (() => ",
@@ -1948,13 +1936,7 @@
                 "signature": [
                   "BehaviorSubject",
                   "<",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCoreApplicationPluginApi",
-                    "section": "def-public.AppUpdater",
-                    "text": "AppUpdater"
-                  },
+                  "AppUpdater",
                   ">"
                 ],
                 "path": "src/plugins/kibana_utils/public/state_management/url/kbn_url_tracker.ts",
@@ -1970,153 +1952,7 @@
                   "\nToast notifications service to show toasts in error cases."
                 ],
                 "signature": [
-                  "{ add: (toastOrTitle: ",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.ToastInput",
-                    "text": "ToastInput"
-                  },
-                  ") => ",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.Toast",
-                    "text": "Toast"
-                  },
-                  "; get$: () => ",
-                  "Observable",
-                  "<",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.Toast",
-                    "text": "Toast"
-                  },
-                  "[]>; remove: (toastOrId: string | ",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.Toast",
-                    "text": "Toast"
-                  },
-                  ") => void; addSuccess: (toastOrTitle: ",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.ToastInput",
-                    "text": "ToastInput"
-                  },
-                  ", options?: ",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.ToastOptions",
-                    "text": "ToastOptions"
-                  },
-                  " | undefined) => ",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.Toast",
-                    "text": "Toast"
-                  },
-                  "; addWarning: (toastOrTitle: ",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.ToastInput",
-                    "text": "ToastInput"
-                  },
-                  ", options?: ",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.ToastOptions",
-                    "text": "ToastOptions"
-                  },
-                  " | undefined) => ",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.Toast",
-                    "text": "Toast"
-                  },
-                  "; addDanger: (toastOrTitle: ",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.ToastInput",
-                    "text": "ToastInput"
-                  },
-                  ", options?: ",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.ToastOptions",
-                    "text": "ToastOptions"
-                  },
-                  " | undefined) => ",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.Toast",
-                    "text": "Toast"
-                  },
-                  "; addError: (error: Error, options: ",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.ErrorToastOptions",
-                    "text": "ErrorToastOptions"
-                  },
-                  ") => ",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.Toast",
-                    "text": "Toast"
-                  },
-                  "; addInfo: (toastOrTitle: ",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.ToastInput",
-                    "text": "ToastInput"
-                  },
-                  ", options?: ",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.ToastOptions",
-                    "text": "ToastOptions"
-                  },
-                  " | undefined) => ",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.Toast",
-                    "text": "Toast"
-                  },
-                  "; }"
+                  "IToasts"
                 ],
                 "path": "src/plugins/kibana_utils/public/state_management/url/kbn_url_tracker.ts",
                 "deprecated": false
@@ -3352,29 +3188,11 @@
           "({\n  history,\n  navigateToApp,\n  basePath,\n  mapping,\n  toastNotifications,\n  onBeforeRedirect,\n  theme,\n}: { history: ",
           "History",
           "<unknown>; navigateToApp: (appId: string, options?: ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCoreApplicationPluginApi",
-            "section": "def-public.NavigateToAppOptions",
-            "text": "NavigateToAppOptions"
-          },
+          "NavigateToAppOptions",
           " | undefined) => Promise<void>; basePath: ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCoreHttpPluginApi",
-            "section": "def-public.IBasePath",
-            "text": "IBasePath"
-          },
+          "IBasePath",
           "; mapping: string | Mapping; toastNotifications: ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.IToasts",
-            "text": "IToasts"
-          },
+          "IToasts",
           "; onBeforeRedirect?: ((error: ",
           {
             "pluginId": "kibanaUtils",
@@ -3431,13 +3249,7 @@
                 "description": [],
                 "signature": [
                   "(appId: string, options?: ",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCoreApplicationPluginApi",
-                    "section": "def-public.NavigateToAppOptions",
-                    "text": "NavigateToAppOptions"
-                  },
+                  "NavigateToAppOptions",
                   " | undefined) => Promise<void>"
                 ],
                 "path": "src/plugins/kibana_utils/public/history/redirect_when_missing.tsx",
@@ -3451,7 +3263,7 @@
                     "tags": [],
                     "label": "appId",
                     "description": [],
-                    "path": "src/core/public/application/types.ts",
+                    "path": "node_modules/@types/kbn__core-application-browser/index.d.ts",
                     "deprecated": false
                   },
                   {
@@ -3462,16 +3274,10 @@
                     "label": "options",
                     "description": [],
                     "signature": [
-                      {
-                        "pluginId": "core",
-                        "scope": "public",
-                        "docId": "kibCoreApplicationPluginApi",
-                        "section": "def-public.NavigateToAppOptions",
-                        "text": "NavigateToAppOptions"
-                      },
+                      "NavigateToAppOptions",
                       " | undefined"
                     ],
-                    "path": "src/core/public/application/types.ts",
+                    "path": "node_modules/@types/kbn__core-application-browser/index.d.ts",
                     "deprecated": false
                   }
                 ]
@@ -3484,13 +3290,7 @@
                 "label": "basePath",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCoreHttpPluginApi",
-                    "section": "def-public.IBasePath",
-                    "text": "IBasePath"
-                  }
+                  "IBasePath"
                 ],
                 "path": "src/plugins/kibana_utils/public/history/redirect_when_missing.tsx",
                 "deprecated": false
@@ -3520,153 +3320,7 @@
                   "\nToast notifications service to show toasts in error cases."
                 ],
                 "signature": [
-                  "{ add: (toastOrTitle: ",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.ToastInput",
-                    "text": "ToastInput"
-                  },
-                  ") => ",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.Toast",
-                    "text": "Toast"
-                  },
-                  "; get$: () => ",
-                  "Observable",
-                  "<",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.Toast",
-                    "text": "Toast"
-                  },
-                  "[]>; remove: (toastOrId: string | ",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.Toast",
-                    "text": "Toast"
-                  },
-                  ") => void; addSuccess: (toastOrTitle: ",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.ToastInput",
-                    "text": "ToastInput"
-                  },
-                  ", options?: ",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.ToastOptions",
-                    "text": "ToastOptions"
-                  },
-                  " | undefined) => ",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.Toast",
-                    "text": "Toast"
-                  },
-                  "; addWarning: (toastOrTitle: ",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.ToastInput",
-                    "text": "ToastInput"
-                  },
-                  ", options?: ",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.ToastOptions",
-                    "text": "ToastOptions"
-                  },
-                  " | undefined) => ",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.Toast",
-                    "text": "Toast"
-                  },
-                  "; addDanger: (toastOrTitle: ",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.ToastInput",
-                    "text": "ToastInput"
-                  },
-                  ", options?: ",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.ToastOptions",
-                    "text": "ToastOptions"
-                  },
-                  " | undefined) => ",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.Toast",
-                    "text": "Toast"
-                  },
-                  "; addError: (error: Error, options: ",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.ErrorToastOptions",
-                    "text": "ErrorToastOptions"
-                  },
-                  ") => ",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.Toast",
-                    "text": "Toast"
-                  },
-                  "; addInfo: (toastOrTitle: ",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.ToastInput",
-                    "text": "ToastInput"
-                  },
-                  ", options?: ",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.ToastOptions",
-                    "text": "ToastOptions"
-                  },
-                  " | undefined) => ",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.Toast",
-                    "text": "Toast"
-                  },
-                  "; }"
+                  "IToasts"
                 ],
                 "path": "src/plugins/kibana_utils/public/history/redirect_when_missing.tsx",
                 "deprecated": false
@@ -4401,13 +4055,7 @@
         ],
         "signature": [
           "(toasts: ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.IToasts",
-            "text": "IToasts"
-          },
+          "IToasts",
           ") => { onGetError: (error: Error) => void; onSetError: (error: Error) => void; }"
         ],
         "path": "src/plugins/kibana_utils/public/state_management/url/errors.ts",
@@ -4421,13 +4069,7 @@
             "label": "toasts",
             "description": [],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.IToasts",
-                "text": "IToasts"
-              }
+              "IToasts"
             ],
             "path": "src/plugins/kibana_utils/public/state_management/url/errors.ts",
             "deprecated": false,
@@ -6951,7 +6593,7 @@
           "signature": [
             "(history: Pick<",
             "History",
-            "<unknown>, \"replace\" | \"location\">) => void"
+            "<unknown>, \"location\" | \"replace\">) => void"
           ],
           "path": "src/plugins/kibana_utils/public/plugin.ts",
           "deprecated": false,
@@ -6966,7 +6608,7 @@
               "signature": [
                 "Pick<",
                 "History",
-                "<unknown>, \"replace\" | \"location\">"
+                "<unknown>, \"location\" | \"replace\">"
               ],
               "path": "src/plugins/kibana_utils/public/plugin.ts",
               "deprecated": false,
@@ -7468,193 +7110,9 @@
           "\n"
         ],
         "signature": [
-          "(res: { custom: <T extends string | Record<string, any> | Error | ",
-          "Stream",
-          " | { message: string | Error; attributes?: ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCoreHttpPluginApi",
-            "section": "def-server.ResponseErrorAttributes",
-            "text": "ResponseErrorAttributes"
-          },
-          " | undefined; } | Buffer | undefined>(options: ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCoreHttpPluginApi",
-            "section": "def-server.CustomHttpResponseOptions",
-            "text": "CustomHttpResponseOptions"
-          },
-          "<T>) => ",
-          "KibanaResponse",
-          "<T>; badRequest: (options?: ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCoreHttpPluginApi",
-            "section": "def-server.ErrorHttpResponseOptions",
-            "text": "ErrorHttpResponseOptions"
-          },
-          ") => ",
-          "KibanaResponse",
-          "<string | Error | { message: string | Error; attributes?: ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCoreHttpPluginApi",
-            "section": "def-server.ResponseErrorAttributes",
-            "text": "ResponseErrorAttributes"
-          },
-          " | undefined; }>; unauthorized: (options?: ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCoreHttpPluginApi",
-            "section": "def-server.ErrorHttpResponseOptions",
-            "text": "ErrorHttpResponseOptions"
-          },
-          ") => ",
-          "KibanaResponse",
-          "<string | Error | { message: string | Error; attributes?: ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCoreHttpPluginApi",
-            "section": "def-server.ResponseErrorAttributes",
-            "text": "ResponseErrorAttributes"
-          },
-          " | undefined; }>; forbidden: (options?: ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCoreHttpPluginApi",
-            "section": "def-server.ErrorHttpResponseOptions",
-            "text": "ErrorHttpResponseOptions"
-          },
-          ") => ",
-          "KibanaResponse",
-          "<string | Error | { message: string | Error; attributes?: ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCoreHttpPluginApi",
-            "section": "def-server.ResponseErrorAttributes",
-            "text": "ResponseErrorAttributes"
-          },
-          " | undefined; }>; notFound: (options?: ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCoreHttpPluginApi",
-            "section": "def-server.ErrorHttpResponseOptions",
-            "text": "ErrorHttpResponseOptions"
-          },
-          ") => ",
-          "KibanaResponse",
-          "<string | Error | { message: string | Error; attributes?: ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCoreHttpPluginApi",
-            "section": "def-server.ResponseErrorAttributes",
-            "text": "ResponseErrorAttributes"
-          },
-          " | undefined; }>; conflict: (options?: ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCoreHttpPluginApi",
-            "section": "def-server.ErrorHttpResponseOptions",
-            "text": "ErrorHttpResponseOptions"
-          },
-          ") => ",
-          "KibanaResponse",
-          "<string | Error | { message: string | Error; attributes?: ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCoreHttpPluginApi",
-            "section": "def-server.ResponseErrorAttributes",
-            "text": "ResponseErrorAttributes"
-          },
-          " | undefined; }>; customError: (options: ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCoreHttpPluginApi",
-            "section": "def-server.CustomHttpResponseOptions",
-            "text": "CustomHttpResponseOptions"
-          },
-          "<",
-          "Stream",
-          " | ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCoreHttpPluginApi",
-            "section": "def-server.ResponseError",
-            "text": "ResponseError"
-          },
-          " | Buffer>) => ",
-          "KibanaResponse",
-          "<string | Error | ",
-          "Stream",
-          " | { message: string | Error; attributes?: ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCoreHttpPluginApi",
-            "section": "def-server.ResponseErrorAttributes",
-            "text": "ResponseErrorAttributes"
-          },
-          " | undefined; } | Buffer>; redirected: (options: ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCoreHttpPluginApi",
-            "section": "def-server.RedirectResponseOptions",
-            "text": "RedirectResponseOptions"
-          },
-          ") => ",
-          "KibanaResponse",
-          "<string | Record<string, any> | ",
-          "Stream",
-          " | Buffer>; ok: (options?: ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCoreHttpPluginApi",
-            "section": "def-server.HttpResponseOptions",
-            "text": "HttpResponseOptions"
-          },
-          ") => ",
-          "KibanaResponse",
-          "<string | Record<string, any> | ",
-          "Stream",
-          " | Buffer>; accepted: (options?: ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCoreHttpPluginApi",
-            "section": "def-server.HttpResponseOptions",
-            "text": "HttpResponseOptions"
-          },
-          ") => ",
-          "KibanaResponse",
-          "<string | Record<string, any> | ",
-          "Stream",
-          " | Buffer>; noContent: (options?: ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCoreHttpPluginApi",
-            "section": "def-server.HttpResponseOptions",
-            "text": "HttpResponseOptions"
-          },
-          ") => ",
-          "KibanaResponse",
-          "<undefined>; }, err: ",
+          "(res: ",
+          "KibanaResponseFactory",
+          ", err: ",
           {
             "pluginId": "kibanaUtils",
             "scope": "server",
@@ -7663,18 +7121,8 @@
             "text": "KbnServerError"
           },
           ") => ",
-          "KibanaResponse",
-          "<string | Error | ",
-          "Stream",
-          " | { message: string | Error; attributes?: ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCoreHttpPluginApi",
-            "section": "def-server.ResponseErrorAttributes",
-            "text": "ResponseErrorAttributes"
-          },
-          " | undefined; } | Buffer>"
+          "IKibanaResponse",
+          "<any>"
         ],
         "path": "src/plugins/kibana_utils/server/report_server_error.ts",
         "deprecated": false,
@@ -7682,200 +7130,14 @@
           {
             "parentPluginId": "kibanaUtils",
             "id": "def-server.reportServerError.$1",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "res",
             "description": [
               "Formats a `KbnServerError` into a server error response"
             ],
             "signature": [
-              "{ custom: <T extends string | Record<string, any> | Error | ",
-              "Stream",
-              " | { message: string | Error; attributes?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.ResponseErrorAttributes",
-                "text": "ResponseErrorAttributes"
-              },
-              " | undefined; } | Buffer | undefined>(options: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.CustomHttpResponseOptions",
-                "text": "CustomHttpResponseOptions"
-              },
-              "<T>) => ",
-              "KibanaResponse",
-              "<T>; badRequest: (options?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.ErrorHttpResponseOptions",
-                "text": "ErrorHttpResponseOptions"
-              },
-              ") => ",
-              "KibanaResponse",
-              "<string | Error | { message: string | Error; attributes?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.ResponseErrorAttributes",
-                "text": "ResponseErrorAttributes"
-              },
-              " | undefined; }>; unauthorized: (options?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.ErrorHttpResponseOptions",
-                "text": "ErrorHttpResponseOptions"
-              },
-              ") => ",
-              "KibanaResponse",
-              "<string | Error | { message: string | Error; attributes?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.ResponseErrorAttributes",
-                "text": "ResponseErrorAttributes"
-              },
-              " | undefined; }>; forbidden: (options?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.ErrorHttpResponseOptions",
-                "text": "ErrorHttpResponseOptions"
-              },
-              ") => ",
-              "KibanaResponse",
-              "<string | Error | { message: string | Error; attributes?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.ResponseErrorAttributes",
-                "text": "ResponseErrorAttributes"
-              },
-              " | undefined; }>; notFound: (options?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.ErrorHttpResponseOptions",
-                "text": "ErrorHttpResponseOptions"
-              },
-              ") => ",
-              "KibanaResponse",
-              "<string | Error | { message: string | Error; attributes?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.ResponseErrorAttributes",
-                "text": "ResponseErrorAttributes"
-              },
-              " | undefined; }>; conflict: (options?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.ErrorHttpResponseOptions",
-                "text": "ErrorHttpResponseOptions"
-              },
-              ") => ",
-              "KibanaResponse",
-              "<string | Error | { message: string | Error; attributes?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.ResponseErrorAttributes",
-                "text": "ResponseErrorAttributes"
-              },
-              " | undefined; }>; customError: (options: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.CustomHttpResponseOptions",
-                "text": "CustomHttpResponseOptions"
-              },
-              "<",
-              "Stream",
-              " | ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.ResponseError",
-                "text": "ResponseError"
-              },
-              " | Buffer>) => ",
-              "KibanaResponse",
-              "<string | Error | ",
-              "Stream",
-              " | { message: string | Error; attributes?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.ResponseErrorAttributes",
-                "text": "ResponseErrorAttributes"
-              },
-              " | undefined; } | Buffer>; redirected: (options: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.RedirectResponseOptions",
-                "text": "RedirectResponseOptions"
-              },
-              ") => ",
-              "KibanaResponse",
-              "<string | Record<string, any> | ",
-              "Stream",
-              " | Buffer>; ok: (options?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.HttpResponseOptions",
-                "text": "HttpResponseOptions"
-              },
-              ") => ",
-              "KibanaResponse",
-              "<string | Record<string, any> | ",
-              "Stream",
-              " | Buffer>; accepted: (options?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.HttpResponseOptions",
-                "text": "HttpResponseOptions"
-              },
-              ") => ",
-              "KibanaResponse",
-              "<string | Record<string, any> | ",
-              "Stream",
-              " | Buffer>; noContent: (options?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.HttpResponseOptions",
-                "text": "HttpResponseOptions"
-              },
-              ") => ",
-              "KibanaResponse",
-              "<undefined>; }"
+              "KibanaResponseFactory"
             ],
             "path": "src/plugins/kibana_utils/server/report_server_error.ts",
             "deprecated": false,

@@ -6,10 +6,8 @@
  */
 import React from 'react';
 import { act, waitFor } from '@testing-library/react';
-import {
-  AppContextTestRender,
-  createAppRootMockRenderer,
-} from '../../../../../../common/mock/endpoint';
+import type { AppContextTestRender } from '../../../../../../common/mock/endpoint';
+import { createAppRootMockRenderer } from '../../../../../../common/mock/endpoint';
 import {
   getEventFiltersListPath,
   getPolicyDetailsArtifactsListPath,
@@ -18,7 +16,7 @@ import {
 import { EndpointDocGenerator } from '../../../../../../../common/endpoint/generate_data';
 
 import { PolicyArtifactsLayout } from './policy_artifacts_layout';
-import { ImmutableObject, PolicyData } from '../../../../../../../common/endpoint/types';
+import type { ImmutableObject, PolicyData } from '../../../../../../../common/endpoint/types';
 import { parsePoliciesAndFilterToKql } from '../../../../../common/utils';
 import { eventFiltersListQueryHttpMock } from '../../../../event_filters/test_utils';
 import { getFoundExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/found_exception_list_item_schema.mock';

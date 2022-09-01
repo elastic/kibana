@@ -11,6 +11,7 @@ import { createReactOverlays } from '@kbn/kibana-react-plugin/public';
 import { Embeddable, EmbeddableInput } from '@kbn/embeddable-plugin/public';
 import { createAction } from '@kbn/ui-actions-plugin/public';
 import type { Embeddable as LensEmbeddable } from '@kbn/lens-plugin/public';
+import { isLegacyMap } from '../legacy_visualizations';
 import { MAP_SAVED_OBJECT_TYPE } from '../../common/constants';
 import { getCore } from '../kibana_services';
 
@@ -39,8 +40,8 @@ export const synchronizeMovementAction = createAction<SynchronizeMovementActionC
     return 'crosshairs';
   },
   isCompatible: async ({ embeddable }: SynchronizeMovementActionContext) => {
-    const { synchronizeMovement } = await import('../embeddable/synchronize_movement');
-    if (!synchronizeMovement.hasMultipleMaps()) {
+    const { mapEmbeddablesSingleton } = await import('../embeddable/map_embeddables_singleton');
+    if (!mapEmbeddablesSingleton.hasMultipleMaps()) {
       return false;
     }
 
@@ -49,6 +50,10 @@ export const synchronizeMovementAction = createAction<SynchronizeMovementActionC
       typeof (embeddable as LensEmbeddable).getSavedVis === 'function' &&
       (embeddable as LensEmbeddable).getSavedVis()?.visualizationType === 'lnsChoropleth'
     ) {
+      return true;
+    }
+
+    if (isLegacyMap(embeddable)) {
       return true;
     }
 

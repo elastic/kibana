@@ -10,14 +10,14 @@ import { EuiFlexItem, EuiFlexGroup, EuiSpacer, EuiLink } from '@elastic/eui';
 
 import { HostsKpiHosts } from './hosts';
 import { HostsKpiUniqueIps } from './unique_ips';
-import { HostsKpiProps } from './types';
+import type { HostsKpiProps } from './types';
 import { CallOutSwitcher } from '../../../common/components/callouts';
 import { RISKY_HOSTS_DOC_LINK } from '../../../overview/components/overview_risky_host_links/risky_hosts_disabled_module';
 import * as i18n from './translations';
 import { useHostRiskScore } from '../../../risk_score/containers';
 
 export const HostsKpiComponent = React.memo<HostsKpiProps>(
-  ({ filterQuery, from, indexNames, to, setQuery, skip, narrowDateRange }) => {
+  ({ filterQuery, from, indexNames, to, setQuery, skip, updateDateRange }) => {
     const [_, { isModuleEnabled }] = useHostRiskScore({});
 
     return (
@@ -53,7 +53,7 @@ export const HostsKpiComponent = React.memo<HostsKpiProps>(
               from={from}
               indexNames={indexNames}
               to={to}
-              narrowDateRange={narrowDateRange}
+              updateDateRange={updateDateRange}
               setQuery={setQuery}
               skip={skip}
             />
@@ -64,7 +64,7 @@ export const HostsKpiComponent = React.memo<HostsKpiProps>(
               from={from}
               indexNames={indexNames}
               to={to}
-              narrowDateRange={narrowDateRange}
+              updateDateRange={updateDateRange}
               setQuery={setQuery}
               skip={skip}
             />
@@ -78,7 +78,7 @@ export const HostsKpiComponent = React.memo<HostsKpiProps>(
 HostsKpiComponent.displayName = 'HostsKpiComponent';
 
 export const HostsDetailsKpiComponent = React.memo<HostsKpiProps>(
-  ({ filterQuery, from, indexNames, to, setQuery, skip, narrowDateRange }) => {
+  ({ filterQuery, from, indexNames, to, setQuery, skip, updateDateRange }) => {
     return (
       <EuiFlexGroup wrap>
         <EuiFlexItem grow={1}>
@@ -87,7 +87,7 @@ export const HostsDetailsKpiComponent = React.memo<HostsKpiProps>(
             from={from}
             indexNames={indexNames}
             to={to}
-            narrowDateRange={narrowDateRange}
+            updateDateRange={updateDateRange}
             setQuery={setQuery}
             skip={skip}
           />

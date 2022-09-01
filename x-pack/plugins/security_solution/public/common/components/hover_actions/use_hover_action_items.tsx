@@ -7,7 +7,7 @@
 
 import { EuiContextMenuItem } from '@elastic/eui';
 import React, { useMemo } from 'react';
-import { DraggableId } from 'react-beautiful-dnd';
+import type { DraggableId } from 'react-beautiful-dnd';
 
 import { isEmpty } from 'lodash';
 
@@ -15,7 +15,8 @@ import { FilterManager } from '@kbn/data-plugin/public';
 import { useKibana } from '../../lib/kibana';
 import { allowTopN } from '../drag_and_drop/helpers';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
-import { ColumnHeaderOptions, DataProvider, TimelineId } from '../../../../common/types/timeline';
+import type { ColumnHeaderOptions, DataProvider } from '../../../../common/types/timeline';
+import { TimelineId } from '../../../../common/types/timeline';
 import { timelineSelectors } from '../../../timelines/store/timeline';
 import { ShowTopNButton } from './actions/show_top_n';
 

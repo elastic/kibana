@@ -7,12 +7,12 @@
  */
 
 import { PublicContract } from '@kbn/utility-types';
-import { HttpSetup, SavedObjectsFindOptions } from '@kbn/core/public';
+import { HttpSetup } from '@kbn/core/public';
 import type {
   SavedObject,
   SavedObjectsFindResponse,
   SavedObjectsUpdateResponse,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+  SavedObjectsFindOptions,
 } from '@kbn/core/server';
 import type { SearchSessionSavedObjectAttributes } from '../../../common';
 export type SearchSessionSavedObject = SavedObject<SearchSessionSavedObjectAttributes>;

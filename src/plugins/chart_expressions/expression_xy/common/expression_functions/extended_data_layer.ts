@@ -20,25 +20,22 @@ export const extendedDataLayerFunction: ExtendedDataLayerFn = {
   args: {
     ...commonDataLayerArgs,
     xAccessor: {
-      types: ['string'],
+      types: ['vis_dimension', 'string'],
       help: strings.getXAccessorHelp(),
     },
-    splitAccessor: {
-      types: ['string'],
+    splitAccessors: {
+      types: ['vis_dimension', 'string'],
       help: strings.getSplitAccessorHelp(),
+      multi: true,
     },
     accessors: {
-      types: ['string'],
+      types: ['vis_dimension', 'string'],
       help: strings.getAccessorsHelp(),
       multi: true,
     },
     markSizeAccessor: {
-      types: ['string'],
+      types: ['vis_dimension', 'string'],
       help: strings.getMarkSizeAccessorHelp(),
-    },
-    table: {
-      types: ['datatable'],
-      help: strings.getTableHelp(),
     },
     layerId: {
       types: ['string'],

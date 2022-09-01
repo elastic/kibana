@@ -31,6 +31,7 @@ import {
   InspectorContextProvider,
   useBreadcrumbs,
 } from '@kbn/observability-plugin/public';
+import { CsmSharedContextProvider } from '../components/app/rum_dashboard/csm_shared_context';
 import {
   DASHBOARD_LABEL,
   RumHome,
@@ -125,6 +126,8 @@ export function UXAppRoot({
   const i18nCore = core.i18n;
   const plugins = { ...deps, maps };
 
+  createCallApmApi(core);
+
   return (
     <RedirectAppLinks
       className={APP_WRAPPER_CLASS}
@@ -148,7 +151,9 @@ export function UXAppRoot({
               <InspectorContextProvider>
                 <UrlParamsProvider>
                   <EuiErrorBoundary>
-                    <UxApp />
+                    <CsmSharedContextProvider>
+                      <UxApp />
+                    </CsmSharedContextProvider>
                   </EuiErrorBoundary>
                   <UXActionMenu appMountParameters={appMountParameters} />
                 </UrlParamsProvider>

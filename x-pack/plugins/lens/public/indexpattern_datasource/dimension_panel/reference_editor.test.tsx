@@ -12,6 +12,7 @@ import { EuiComboBox } from '@elastic/eui';
 import { mountWithIntl as mount } from '@kbn/test-jest-helpers';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import type { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from '@kbn/core/public';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -72,6 +73,7 @@ describe('reference editor', () => {
       savedObjectsClient: {} as SavedObjectsClientContract,
       http: {} as HttpSetup,
       data: {} as DataPublicPluginStart,
+      fieldFormats: fieldFormatsServiceMock.createStartContract(),
       unifiedSearch: {} as UnifiedSearchPublicPluginStart,
       dataViews: dataViewPluginMocks.createStartContract(),
       dimensionGroups: [],

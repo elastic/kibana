@@ -40,7 +40,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await kibanaServer.savedObjects.cleanStandardList();
       });
 
-      it('can search for index patterns', async () => {
+      it('can search for data views', async () => {
         const results = await findResultsWithApi('type:index-pattern logstash');
         expect(results.length).to.be(1);
         expect(results[0].type).to.be('index-pattern');

@@ -61,13 +61,7 @@
             "description": [],
             "signature": [
               "(esClient: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.ElasticsearchClient",
-                "text": "ElasticsearchClient"
-              },
+              "ElasticsearchClient",
               ") => void"
             ],
             "path": "x-pack/plugins/monitoring/server/types.ts",
@@ -81,13 +75,7 @@
                 "label": "esClient",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-server.ElasticsearchClient",
-                    "text": "ElasticsearchClient"
-                  }
+                  "ElasticsearchClient"
                 ],
                 "path": "x-pack/plugins/monitoring/server/types.ts",
                 "deprecated": false,

@@ -7,7 +7,7 @@
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { extractReferences } from './extract_references';
-import { RuleParams } from '../../schemas/rule_schemas';
+import type { RuleParams } from '../../schemas/rule_schemas';
 import {
   EXCEPTION_LIST_NAMESPACE,
   EXCEPTION_LIST_NAMESPACE_AGNOSTIC,

@@ -137,7 +137,6 @@ export class DataPublicPlugin
       fieldFormats,
       indexPatterns: dataViews,
       screenshotMode,
-      nowProvider: this.nowProvider,
     });
     setSearchService(search);
 

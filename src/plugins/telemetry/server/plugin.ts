@@ -19,6 +19,7 @@ import {
   takeUntil,
   tap,
   shareReplay,
+  map,
 } from 'rxjs';
 
 import { ElasticV3ServerShipper } from '@kbn/analytics-shippers-elastic-v3-server';
@@ -45,7 +46,7 @@ import {
   registerTelemetryUsageCollector,
   registerTelemetryPluginUsageCollector,
 } from './collectors';
-import type { TelemetryConfigType } from './config';
+import type { TelemetryConfigLabels, TelemetryConfigType } from './config';
 import { FetcherTask } from './fetcher';
 import { getTelemetrySavedObject, TelemetrySavedObject } from './telemetry_repository';
 import { OPT_IN_POLL_INTERVAL_MS } from '../common/constants';
@@ -155,6 +156,19 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
       channelName: 'kibana-server',
       version: currentKibanaVersion,
       sendTo: this.initialConfig.sendUsageTo === 'prod' ? 'production' : 'staging',
+    });
+
+    analytics.registerContextProvider<{ labels: TelemetryConfigLabels }>({
+      name: 'telemetry labels',
+      context$: this.config$.pipe(map(({ labels }) => ({ labels }))),
+      schema: {
+        labels: {
+          type: 'pass_through',
+          _meta: {
+            description: 'Custom labels added to the telemetry.labels config in the kibana.yml',
+          },
+        },
+      },
     });
 
     const config$ = this.config$;

@@ -12,7 +12,7 @@ import type {
   GetInfoResponse,
   InstallPackageResponse,
   UpdatePackageResponse,
-} from '../../../common';
+} from '../../../common/types';
 
 import { EPM_API_ROUTES } from '../../constants';
 import { splitPkgKey } from '../../services/epm/registry';

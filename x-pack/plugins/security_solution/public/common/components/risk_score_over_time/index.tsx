@@ -6,6 +6,7 @@
  */
 
 import React, { useMemo, useCallback } from 'react';
+import type { TooltipValue } from '@elastic/charts';
 import {
   Chart,
   LineSeries,
@@ -15,7 +16,6 @@ import {
   Position,
   AnnotationDomainType,
   LineAnnotation,
-  TooltipValue,
 } from '@elastic/charts';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingChart, EuiText, EuiPanel } from '@elastic/eui';
@@ -27,7 +27,7 @@ import { HeaderSection } from '../header_section';
 import { InspectButton, InspectButtonContainer } from '../inspect';
 import * as i18n from './translations';
 import { PreferenceFormattedDate } from '../formatted_date';
-import { RiskScore } from '../../../../common/search_strategy';
+import type { RiskScore } from '../../../../common/search_strategy';
 
 export interface RiskScoreOverTimeProps {
   from: string;

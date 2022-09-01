@@ -25,6 +25,18 @@ export const strings = {
     i18n.translate('expressionXY.xyVis.logDatatable.breakDown', {
       defaultMessage: 'Break down by',
     }),
+  getSplitRowHelp: () =>
+    i18n.translate('expressionXY.xyVis.logDatatable.splitRow', {
+      defaultMessage: 'Split rows by',
+    }),
+  getSplitColumnHelp: () =>
+    i18n.translate('expressionXY.xyVis.logDatatable.splitColumn', {
+      defaultMessage: 'Split columns by',
+    }),
+  getMarkSizeHelp: () =>
+    i18n.translate('expressionXY.xyVis.logDatatable.markSize', {
+      defaultMessage: 'Mark size',
+    }),
   getReferenceLineHelp: () =>
     i18n.translate('expressionXY.xyVis.logDatatable.breakDown', {
       defaultMessage: 'Break down by',
@@ -125,9 +137,9 @@ export const strings = {
     i18n.translate('expressionXY.dataLayer.help', {
       defaultMessage: `Configure a layer in the xy chart`,
     }),
-  getHideHelp: () =>
-    i18n.translate('expressionXY.dataLayer.hide.help', {
-      defaultMessage: 'Show / hide axis',
+  getSimpleView: () =>
+    i18n.translate('expressionXY.dataLayer.simpleView.help', {
+      defaultMessage: 'Show / hide details',
     }),
   getXAccessorHelp: () =>
     i18n.translate('expressionXY.dataLayer.xAccessor.help', {
@@ -233,8 +245,8 @@ export const strings = {
     i18n.translate('expressionXY.annotationLayer.help', {
       defaultMessage: `Configure an annotation layer in the xy chart`,
     }),
-  getAnnotationLayerHideHelp: () =>
-    i18n.translate('expressionXY.annotationLayer.hide.help', {
+  getAnnotationLayerSimpleViewHelp: () =>
+    i18n.translate('expressionXY.annotationLayer.simpleView.help', {
       defaultMessage: 'Show / hide details',
     }),
   getAnnotationLayerAnnotationsHelp: () =>

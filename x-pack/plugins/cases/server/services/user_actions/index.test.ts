@@ -13,11 +13,13 @@ import {
   SavedObjectReference,
   SavedObjectsFindResponse,
   SavedObjectsFindResult,
+  SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
 import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
 import {
   Actions,
   ActionTypes,
+  CaseAttributes,
   CaseSeverity,
   CaseStatuses,
   CaseUserActionAttributes,
@@ -39,6 +41,7 @@ import {
 } from '../../common/constants';
 
 import {
+  createCaseSavedObjectResponse,
   createConnectorObject,
   createExternalService,
   createJiraConnector,
@@ -51,6 +54,9 @@ import {
   updatedCases,
   comment,
   attachments,
+  updatedAssigneesCases,
+  originalCasesWithAssignee,
+  updatedTagsCases,
 } from './mocks';
 import { CaseUserActionService, transformFindResponseToExternalModel } from '.';
 import { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
@@ -667,6 +673,7 @@ describe('CaseUserActionService', () => {
               type: 'create_case',
               owner: 'securitySolution',
               payload: {
+                assignees: [{ uid: '1' }],
                 connector: {
                   fields: {
                     category: 'Denial of Service',
@@ -854,46 +861,49 @@ describe('CaseUserActionService', () => {
           user: commonArgs.user,
         });
 
-        expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledWith([
-          {
-            attributes: {
-              action: 'delete',
-              created_at: '2022-01-09T22:00:00.000Z',
-              created_by: {
-                email: 'elastic@elastic.co',
-                full_name: 'Elastic User',
-                username: 'elastic',
+        expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledWith(
+          [
+            {
+              attributes: {
+                action: 'delete',
+                created_at: '2022-01-09T22:00:00.000Z',
+                created_by: {
+                  email: 'elastic@elastic.co',
+                  full_name: 'Elastic User',
+                  username: 'elastic',
+                },
+                type: 'delete_case',
+                owner: 'securitySolution',
+                payload: {},
               },
-              type: 'delete_case',
-              owner: 'securitySolution',
-              payload: {},
+              references: [
+                { id: '1', name: 'associated-cases', type: 'cases' },
+                { id: '3', name: 'connectorId', type: 'action' },
+              ],
+              type: 'cases-user-actions',
             },
-            references: [
-              { id: '1', name: 'associated-cases', type: 'cases' },
-              { id: '3', name: 'connectorId', type: 'action' },
-            ],
-            type: 'cases-user-actions',
-          },
-          {
-            attributes: {
-              action: 'delete',
-              created_at: '2022-01-09T22:00:00.000Z',
-              created_by: {
-                email: 'elastic@elastic.co',
-                full_name: 'Elastic User',
-                username: 'elastic',
+            {
+              attributes: {
+                action: 'delete',
+                created_at: '2022-01-09T22:00:00.000Z',
+                created_by: {
+                  email: 'elastic@elastic.co',
+                  full_name: 'Elastic User',
+                  username: 'elastic',
+                },
+                type: 'delete_case',
+                owner: 'securitySolution',
+                payload: {},
               },
-              type: 'delete_case',
-              owner: 'securitySolution',
-              payload: {},
+              references: [
+                { id: '2', name: 'associated-cases', type: 'cases' },
+                { id: '4', name: 'connectorId', type: 'action' },
+              ],
+              type: 'cases-user-actions',
             },
-            references: [
-              { id: '2', name: 'associated-cases', type: 'cases' },
-              { id: '4', name: 'connectorId', type: 'action' },
-            ],
-            type: 'cases-user-actions',
-          },
-        ]);
+          ],
+          { refresh: undefined }
+        );
       });
     });
 
@@ -906,161 +916,425 @@ describe('CaseUserActionService', () => {
           user: commonArgs.user,
         });
 
-        expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledWith([
-          {
-            attributes: {
-              action: Actions.update,
-              created_at: '2022-01-09T22:00:00.000Z',
-              created_by: {
-                email: 'elastic@elastic.co',
-                full_name: 'Elastic User',
-                username: 'elastic',
+        expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledWith(
+          [
+            {
+              attributes: {
+                action: Actions.update,
+                created_at: '2022-01-09T22:00:00.000Z',
+                created_by: {
+                  email: 'elastic@elastic.co',
+                  full_name: 'Elastic User',
+                  username: 'elastic',
+                },
+                type: 'title',
+                owner: 'securitySolution',
+                payload: { title: 'updated title' },
               },
-              type: 'title',
-              owner: 'securitySolution',
-              payload: { title: 'updated title' },
+              references: [{ id: '1', name: 'associated-cases', type: 'cases' }],
+              type: 'cases-user-actions',
             },
-            references: [{ id: '1', name: 'associated-cases', type: 'cases' }],
-            type: 'cases-user-actions',
-          },
-          {
-            attributes: {
-              action: Actions.update,
-              created_at: '2022-01-09T22:00:00.000Z',
-              created_by: {
-                email: 'elastic@elastic.co',
-                full_name: 'Elastic User',
-                username: 'elastic',
+            {
+              attributes: {
+                action: Actions.update,
+                created_at: '2022-01-09T22:00:00.000Z',
+                created_by: {
+                  email: 'elastic@elastic.co',
+                  full_name: 'Elastic User',
+                  username: 'elastic',
+                },
+                type: 'status',
+                owner: 'securitySolution',
+                payload: { status: 'closed' },
               },
-              type: 'status',
-              owner: 'securitySolution',
-              payload: { status: 'closed' },
+              references: [{ id: '1', name: 'associated-cases', type: 'cases' }],
+              type: 'cases-user-actions',
             },
-            references: [{ id: '1', name: 'associated-cases', type: 'cases' }],
-            type: 'cases-user-actions',
-          },
-          {
-            attributes: {
-              action: Actions.update,
-              created_at: '2022-01-09T22:00:00.000Z',
-              created_by: {
-                email: 'elastic@elastic.co',
-                full_name: 'Elastic User',
-                username: 'elastic',
-              },
-              type: 'connector',
-              owner: 'securitySolution',
-              payload: {
-                connector: {
-                  fields: {
-                    category: 'Denial of Service',
-                    destIp: true,
-                    malwareHash: true,
-                    malwareUrl: true,
-                    priority: '2',
-                    sourceIp: true,
-                    subcategory: '45',
+            {
+              attributes: {
+                action: Actions.update,
+                created_at: '2022-01-09T22:00:00.000Z',
+                created_by: {
+                  email: 'elastic@elastic.co',
+                  full_name: 'Elastic User',
+                  username: 'elastic',
+                },
+                type: 'connector',
+                owner: 'securitySolution',
+                payload: {
+                  connector: {
+                    fields: {
+                      category: 'Denial of Service',
+                      destIp: true,
+                      malwareHash: true,
+                      malwareUrl: true,
+                      priority: '2',
+                      sourceIp: true,
+                      subcategory: '45',
+                    },
+                    name: 'ServiceNow SN',
+                    type: '.servicenow-sir',
                   },
-                  name: 'ServiceNow SN',
-                  type: '.servicenow-sir',
                 },
               },
+              references: [
+                { id: '1', name: 'associated-cases', type: 'cases' },
+                { id: '456', name: 'connectorId', type: 'action' },
+              ],
+              type: 'cases-user-actions',
             },
-            references: [
-              { id: '1', name: 'associated-cases', type: 'cases' },
-              { id: '456', name: 'connectorId', type: 'action' },
+            {
+              attributes: {
+                action: Actions.update,
+                created_at: '2022-01-09T22:00:00.000Z',
+                created_by: {
+                  email: 'elastic@elastic.co',
+                  full_name: 'Elastic User',
+                  username: 'elastic',
+                },
+                type: 'description',
+                owner: 'securitySolution',
+                payload: { description: 'updated desc' },
+              },
+              references: [{ id: '2', name: 'associated-cases', type: 'cases' }],
+              type: 'cases-user-actions',
+            },
+            {
+              attributes: {
+                action: 'add',
+                created_at: '2022-01-09T22:00:00.000Z',
+                created_by: {
+                  email: 'elastic@elastic.co',
+                  full_name: 'Elastic User',
+                  username: 'elastic',
+                },
+                type: 'tags',
+                owner: 'securitySolution',
+                payload: { tags: ['one', 'two'] },
+              },
+              references: [{ id: '2', name: 'associated-cases', type: 'cases' }],
+              type: 'cases-user-actions',
+            },
+            {
+              attributes: {
+                action: 'delete',
+                created_at: '2022-01-09T22:00:00.000Z',
+                created_by: {
+                  email: 'elastic@elastic.co',
+                  full_name: 'Elastic User',
+                  username: 'elastic',
+                },
+                type: 'tags',
+                owner: 'securitySolution',
+                payload: { tags: ['defacement'] },
+              },
+              references: [{ id: '2', name: 'associated-cases', type: 'cases' }],
+              type: 'cases-user-actions',
+            },
+            {
+              attributes: {
+                action: Actions.update,
+                created_at: '2022-01-09T22:00:00.000Z',
+                created_by: {
+                  email: 'elastic@elastic.co',
+                  full_name: 'Elastic User',
+                  username: 'elastic',
+                },
+                type: 'settings',
+                owner: 'securitySolution',
+                payload: { settings: { syncAlerts: false } },
+              },
+              references: [{ id: '2', name: 'associated-cases', type: 'cases' }],
+              type: 'cases-user-actions',
+            },
+            {
+              attributes: {
+                action: 'update',
+                created_at: '2022-01-09T22:00:00.000Z',
+                created_by: {
+                  email: 'elastic@elastic.co',
+                  full_name: 'Elastic User',
+                  username: 'elastic',
+                },
+                owner: 'securitySolution',
+                payload: {
+                  severity: 'critical',
+                },
+                type: 'severity',
+              },
+              references: [
+                {
+                  id: '2',
+                  name: 'associated-cases',
+                  type: 'cases',
+                },
+              ],
+              type: 'cases-user-actions',
+            },
+          ],
+          { refresh: undefined }
+        );
+      });
+
+      it('creates the correct user actions when an assignee is added', async () => {
+        await service.bulkCreateUpdateCase({
+          ...commonArgs,
+          originalCases,
+          updatedCases: updatedAssigneesCases,
+          user: commonArgs.user,
+        });
+
+        expect(unsecuredSavedObjectsClient.bulkCreate.mock.calls[0]).toMatchInlineSnapshot(`
+          Array [
+            Array [
+              Object {
+                "attributes": Object {
+                  "action": "add",
+                  "created_at": "2022-01-09T22:00:00.000Z",
+                  "created_by": Object {
+                    "email": "elastic@elastic.co",
+                    "full_name": "Elastic User",
+                    "username": "elastic",
+                  },
+                  "owner": "securitySolution",
+                  "payload": Object {
+                    "assignees": Array [
+                      Object {
+                        "uid": "1",
+                      },
+                    ],
+                  },
+                  "type": "assignees",
+                },
+                "references": Array [
+                  Object {
+                    "id": "1",
+                    "name": "associated-cases",
+                    "type": "cases",
+                  },
+                ],
+                "type": "cases-user-actions",
+              },
             ],
-            type: 'cases-user-actions',
-          },
-          {
-            attributes: {
-              action: Actions.update,
-              created_at: '2022-01-09T22:00:00.000Z',
-              created_by: {
-                email: 'elastic@elastic.co',
-                full_name: 'Elastic User',
-                username: 'elastic',
-              },
-              type: 'description',
-              owner: 'securitySolution',
-              payload: { description: 'updated desc' },
+            Object {
+              "refresh": undefined,
             },
-            references: [{ id: '2', name: 'associated-cases', type: 'cases' }],
-            type: 'cases-user-actions',
-          },
+          ]
+        `);
+      });
+
+      it('creates the correct user actions when an assignee is removed', async () => {
+        const casesWithAssigneeRemoved: Array<SavedObjectsUpdateResponse<CaseAttributes>> = [
           {
+            ...createCaseSavedObjectResponse(),
+            id: '1',
             attributes: {
-              action: 'add',
-              created_at: '2022-01-09T22:00:00.000Z',
-              created_by: {
-                email: 'elastic@elastic.co',
-                full_name: 'Elastic User',
-                username: 'elastic',
-              },
-              type: 'tags',
-              owner: 'securitySolution',
-              payload: { tags: ['one', 'two'] },
+              assignees: [],
             },
-            references: [{ id: '2', name: 'associated-cases', type: 'cases' }],
-            type: 'cases-user-actions',
           },
-          {
-            attributes: {
-              action: 'delete',
-              created_at: '2022-01-09T22:00:00.000Z',
-              created_by: {
-                email: 'elastic@elastic.co',
-                full_name: 'Elastic User',
-                username: 'elastic',
-              },
-              type: 'tags',
-              owner: 'securitySolution',
-              payload: { tags: ['defacement'] },
-            },
-            references: [{ id: '2', name: 'associated-cases', type: 'cases' }],
-            type: 'cases-user-actions',
-          },
-          {
-            attributes: {
-              action: Actions.update,
-              created_at: '2022-01-09T22:00:00.000Z',
-              created_by: {
-                email: 'elastic@elastic.co',
-                full_name: 'Elastic User',
-                username: 'elastic',
-              },
-              type: 'settings',
-              owner: 'securitySolution',
-              payload: { settings: { syncAlerts: false } },
-            },
-            references: [{ id: '2', name: 'associated-cases', type: 'cases' }],
-            type: 'cases-user-actions',
-          },
-          {
-            attributes: {
-              action: 'update',
-              created_at: '2022-01-09T22:00:00.000Z',
-              created_by: {
-                email: 'elastic@elastic.co',
-                full_name: 'Elastic User',
-                username: 'elastic',
-              },
-              owner: 'securitySolution',
-              payload: {
-                severity: 'critical',
-              },
-              type: 'severity',
-            },
-            references: [
-              {
-                id: '2',
-                name: 'associated-cases',
-                type: 'cases',
+        ];
+
+        await service.bulkCreateUpdateCase({
+          ...commonArgs,
+          originalCases: originalCasesWithAssignee,
+          updatedCases: casesWithAssigneeRemoved,
+          user: commonArgs.user,
+        });
+
+        expect(unsecuredSavedObjectsClient.bulkCreate.mock.calls[0]).toMatchInlineSnapshot(`
+          Array [
+            Array [
+              Object {
+                "attributes": Object {
+                  "action": "delete",
+                  "created_at": "2022-01-09T22:00:00.000Z",
+                  "created_by": Object {
+                    "email": "elastic@elastic.co",
+                    "full_name": "Elastic User",
+                    "username": "elastic",
+                  },
+                  "owner": "securitySolution",
+                  "payload": Object {
+                    "assignees": Array [
+                      Object {
+                        "uid": "1",
+                      },
+                    ],
+                  },
+                  "type": "assignees",
+                },
+                "references": Array [
+                  Object {
+                    "id": "1",
+                    "name": "associated-cases",
+                    "type": "cases",
+                  },
+                ],
+                "type": "cases-user-actions",
               },
             ],
-            type: 'cases-user-actions',
+            Object {
+              "refresh": undefined,
+            },
+          ]
+        `);
+      });
+
+      it('creates the correct user actions when assignees are added and removed', async () => {
+        const caseAssignees: Array<SavedObjectsUpdateResponse<CaseAttributes>> = [
+          {
+            ...createCaseSavedObjectResponse(),
+            id: '1',
+            attributes: {
+              assignees: [{ uid: '2' }],
+            },
           },
-        ]);
+        ];
+
+        await service.bulkCreateUpdateCase({
+          ...commonArgs,
+          originalCases: originalCasesWithAssignee,
+          updatedCases: caseAssignees,
+          user: commonArgs.user,
+        });
+
+        expect(unsecuredSavedObjectsClient.bulkCreate.mock.calls[0]).toMatchInlineSnapshot(`
+          Array [
+            Array [
+              Object {
+                "attributes": Object {
+                  "action": "add",
+                  "created_at": "2022-01-09T22:00:00.000Z",
+                  "created_by": Object {
+                    "email": "elastic@elastic.co",
+                    "full_name": "Elastic User",
+                    "username": "elastic",
+                  },
+                  "owner": "securitySolution",
+                  "payload": Object {
+                    "assignees": Array [
+                      Object {
+                        "uid": "2",
+                      },
+                    ],
+                  },
+                  "type": "assignees",
+                },
+                "references": Array [
+                  Object {
+                    "id": "1",
+                    "name": "associated-cases",
+                    "type": "cases",
+                  },
+                ],
+                "type": "cases-user-actions",
+              },
+              Object {
+                "attributes": Object {
+                  "action": "delete",
+                  "created_at": "2022-01-09T22:00:00.000Z",
+                  "created_by": Object {
+                    "email": "elastic@elastic.co",
+                    "full_name": "Elastic User",
+                    "username": "elastic",
+                  },
+                  "owner": "securitySolution",
+                  "payload": Object {
+                    "assignees": Array [
+                      Object {
+                        "uid": "1",
+                      },
+                    ],
+                  },
+                  "type": "assignees",
+                },
+                "references": Array [
+                  Object {
+                    "id": "1",
+                    "name": "associated-cases",
+                    "type": "cases",
+                  },
+                ],
+                "type": "cases-user-actions",
+              },
+            ],
+            Object {
+              "refresh": undefined,
+            },
+          ]
+        `);
+      });
+
+      it('creates the correct user actions when tags are added and removed', async () => {
+        await service.bulkCreateUpdateCase({
+          ...commonArgs,
+          originalCases,
+          updatedCases: updatedTagsCases,
+          user: commonArgs.user,
+        });
+
+        expect(unsecuredSavedObjectsClient.bulkCreate.mock.calls[0]).toMatchInlineSnapshot(`
+          Array [
+            Array [
+              Object {
+                "attributes": Object {
+                  "action": "add",
+                  "created_at": "2022-01-09T22:00:00.000Z",
+                  "created_by": Object {
+                    "email": "elastic@elastic.co",
+                    "full_name": "Elastic User",
+                    "username": "elastic",
+                  },
+                  "owner": "securitySolution",
+                  "payload": Object {
+                    "tags": Array [
+                      "a",
+                      "b",
+                    ],
+                  },
+                  "type": "tags",
+                },
+                "references": Array [
+                  Object {
+                    "id": "1",
+                    "name": "associated-cases",
+                    "type": "cases",
+                  },
+                ],
+                "type": "cases-user-actions",
+              },
+              Object {
+                "attributes": Object {
+                  "action": "delete",
+                  "created_at": "2022-01-09T22:00:00.000Z",
+                  "created_by": Object {
+                    "email": "elastic@elastic.co",
+                    "full_name": "Elastic User",
+                    "username": "elastic",
+                  },
+                  "owner": "securitySolution",
+                  "payload": Object {
+                    "tags": Array [
+                      "defacement",
+                    ],
+                  },
+                  "type": "tags",
+                },
+                "references": Array [
+                  Object {
+                    "id": "1",
+                    "name": "associated-cases",
+                    "type": "cases",
+                  },
+                ],
+                "type": "cases-user-actions",
+              },
+            ],
+            Object {
+              "refresh": undefined,
+            },
+          ]
+        `);
       });
     });
 
@@ -1070,56 +1344,59 @@ describe('CaseUserActionService', () => {
           ...commonArgs,
           attachments,
         });
-        expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledWith([
-          {
-            attributes: {
-              action: 'delete',
-              created_at: '2022-01-09T22:00:00.000Z',
-              created_by: {
-                email: 'elastic@elastic.co',
-                full_name: 'Elastic User',
-                username: 'elastic',
-              },
-              type: 'comment',
-              owner: 'securitySolution',
-              payload: {
-                comment: { comment: 'a comment', owner: 'securitySolution', type: 'user' },
-              },
-            },
-            references: [
-              { id: '123', name: 'associated-cases', type: 'cases' },
-              { id: '1', name: 'associated-cases-comments', type: 'cases-comments' },
-            ],
-            type: 'cases-user-actions',
-          },
-          {
-            attributes: {
-              action: 'delete',
-              created_at: '2022-01-09T22:00:00.000Z',
-              created_by: {
-                email: 'elastic@elastic.co',
-                full_name: 'Elastic User',
-                username: 'elastic',
-              },
-              type: 'comment',
-              owner: 'securitySolution',
-              payload: {
-                comment: {
-                  alertId: 'alert-id-1',
-                  index: 'alert-index-1',
-                  owner: 'securitySolution',
-                  rule: { id: 'rule-id-1', name: 'rule-name-1' },
-                  type: 'alert',
+        expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledWith(
+          [
+            {
+              attributes: {
+                action: 'delete',
+                created_at: '2022-01-09T22:00:00.000Z',
+                created_by: {
+                  email: 'elastic@elastic.co',
+                  full_name: 'Elastic User',
+                  username: 'elastic',
+                },
+                type: 'comment',
+                owner: 'securitySolution',
+                payload: {
+                  comment: { comment: 'a comment', owner: 'securitySolution', type: 'user' },
                 },
               },
+              references: [
+                { id: '123', name: 'associated-cases', type: 'cases' },
+                { id: '1', name: 'associated-cases-comments', type: 'cases-comments' },
+              ],
+              type: 'cases-user-actions',
             },
-            references: [
-              { id: '123', name: 'associated-cases', type: 'cases' },
-              { id: '2', name: 'associated-cases-comments', type: 'cases-comments' },
-            ],
-            type: 'cases-user-actions',
-          },
-        ]);
+            {
+              attributes: {
+                action: 'delete',
+                created_at: '2022-01-09T22:00:00.000Z',
+                created_by: {
+                  email: 'elastic@elastic.co',
+                  full_name: 'Elastic User',
+                  username: 'elastic',
+                },
+                type: 'comment',
+                owner: 'securitySolution',
+                payload: {
+                  comment: {
+                    alertId: 'alert-id-1',
+                    index: 'alert-index-1',
+                    owner: 'securitySolution',
+                    rule: { id: 'rule-id-1', name: 'rule-name-1' },
+                    type: 'alert',
+                  },
+                },
+              },
+              references: [
+                { id: '123', name: 'associated-cases', type: 'cases' },
+                { id: '2', name: 'associated-cases-comments', type: 'cases-comments' },
+              ],
+              type: 'cases-user-actions',
+            },
+          ],
+          { refresh: undefined }
+        );
       });
     });
 
@@ -1247,16 +1524,14 @@ describe('CaseUserActionService', () => {
                   Object {
                     "arguments": Array [
                       Object {
+                        "isQuoted": false,
                         "type": "literal",
                         "value": "cases-user-actions.attributes.type",
                       },
                       Object {
+                        "isQuoted": false,
                         "type": "literal",
                         "value": "connector",
-                      },
-                      Object {
-                        "type": "literal",
-                        "value": false,
                       },
                     ],
                     "function": "is",
@@ -1265,16 +1540,14 @@ describe('CaseUserActionService', () => {
                   Object {
                     "arguments": Array [
                       Object {
+                        "isQuoted": false,
                         "type": "literal",
                         "value": "cases-user-actions.attributes.type",
                       },
                       Object {
+                        "isQuoted": false,
                         "type": "literal",
                         "value": "create_case",
-                      },
-                      Object {
-                        "type": "literal",
-                        "value": false,
                       },
                     ],
                     "function": "is",

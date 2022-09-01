@@ -46,22 +46,30 @@ export function getDataLayers(layers: XYExtendedLayerConfigResult[]) {
 
 export function getAccessors<
   T,
-  U extends { splitAccessor?: T; xAccessor?: T; accessors: T[]; markSizeAccessor?: T }
+  U extends { splitAccessors?: T[]; xAccessor?: T; accessors: T[]; markSizeAccessor?: T }
 >(args: U, table: Datatable) {
-  let splitAccessor: T | string | undefined = args.splitAccessor;
+  let splitAccessors: Array<T | string> | undefined = args.splitAccessors;
   let xAccessor: T | string | undefined = args.xAccessor;
   let accessors: Array<T | string> = args.accessors ?? [];
   let markSizeAccessor: T | string | undefined = args.markSizeAccessor;
 
-  if (!splitAccessor && !xAccessor && !(accessors && accessors.length) && !markSizeAccessor) {
+  if (
+    !(splitAccessors && splitAccessors.length) &&
+    !xAccessor &&
+    !(accessors && accessors.length) &&
+    !markSizeAccessor
+  ) {
     const y = table.columns.find((column) => column.id === PointSeriesColumnNames.Y)?.id;
+    const splitColumnId = table.columns.find(
+      (column) => column.id === PointSeriesColumnNames.COLOR
+    )?.id;
     xAccessor = table.columns.find((column) => column.id === PointSeriesColumnNames.X)?.id;
-    splitAccessor = table.columns.find((column) => column.id === PointSeriesColumnNames.COLOR)?.id;
+    splitAccessors = splitColumnId ? [splitColumnId] : [];
     accessors = y ? [y] : [];
     markSizeAccessor = table.columns.find(
       (column) => column.id === PointSeriesColumnNames.SIZE
     )?.id;
   }
 
-  return { splitAccessor, xAccessor, accessors, markSizeAccessor };
+  return { splitAccessors, xAccessor, accessors, markSizeAccessor };
 }

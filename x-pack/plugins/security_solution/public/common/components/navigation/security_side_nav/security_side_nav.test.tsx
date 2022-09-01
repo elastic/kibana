@@ -10,8 +10,8 @@ import { render } from '@testing-library/react';
 import { SecurityPageName } from '../../../../app/types';
 import { TestProviders } from '../../../mock';
 import { SecuritySideNav } from './security_side_nav';
-import { SolutionGroupedNavProps } from '../solution_grouped_nav/solution_grouped_nav';
-import { NavLinkItem } from '../types';
+import type { SolutionGroupedNavProps } from '../solution_grouped_nav/solution_grouped_nav';
+import type { NavLinkItem } from '../types';
 import { bottomNavOffset } from '../../../lib/helpers';
 
 const manageNavLink: NavLinkItem = {
@@ -24,6 +24,7 @@ const manageNavLink: NavLinkItem = {
       id: SecurityPageName.endpoints,
       title: 'title 2',
       description: 'description 2',
+      isBeta: true,
     },
   ],
 };
@@ -129,6 +130,7 @@ describe('SecuritySideNav', () => {
                 label: 'title 2',
                 description: 'description 2',
                 href: '/endpoints',
+                isBeta: true,
               },
             ],
           },
@@ -148,6 +150,7 @@ describe('SecuritySideNav', () => {
             title: 'title 2',
             description: 'description 2',
             disabled: true,
+            isBeta: true,
           },
         ],
       },

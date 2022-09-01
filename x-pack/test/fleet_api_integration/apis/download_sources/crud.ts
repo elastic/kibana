@@ -14,11 +14,12 @@ export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
 
   describe('fleet_download_sources_crud', async function () {
     skipIfNoDockerRegistry(providerContext);
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
+      await kibanaServer.savedObjects.cleanStandardList();
       await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
     });
     setupFleetAndAgents(providerContext);
@@ -38,7 +39,7 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/empty_kibana');
+      await kibanaServer.savedObjects.cleanStandardList();
       await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
     });
 
@@ -50,9 +51,9 @@ export default function (providerContext: FtrProviderContext) {
 
         expect(downloadSource.items[0]).to.eql({
           id: 'fleet-default-download-source',
-          name: 'default',
+          name: 'Elastic Artifacts',
           is_default: true,
-          host: 'artifactory.elastic.co',
+          host: 'https://artifacts.elastic.co/downloads/',
         });
       });
     });
@@ -66,9 +67,9 @@ export default function (providerContext: FtrProviderContext) {
         expect(downloadSource).to.eql({
           item: {
             id: 'fleet-default-download-source',
-            name: 'default',
+            name: 'Elastic Artifacts',
             is_default: true,
-            host: 'artifactory.elastic.co',
+            host: 'https://artifacts.elastic.co/downloads/',
           },
         });
       });

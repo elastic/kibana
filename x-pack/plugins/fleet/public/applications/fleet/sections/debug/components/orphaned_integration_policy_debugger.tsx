@@ -15,7 +15,7 @@ import {
   EuiButton,
   EuiConfirmModal,
 } from '@elastic/eui';
-import { useMutation, useQuery } from 'react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -46,7 +46,7 @@ export const OrphanedIntegrationPolicyDebugger: React.FunctionComponent = () => 
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
   const [isDeleteAllModalVisible, setIsDeleteAllModalVisible] = useState(false);
 
-  const { data: orphanedPolicies } = useQuery('debug-orphaned-policies', fetchOrphanedPolicies);
+  const { data: orphanedPolicies } = useQuery(['debug-orphaned-policies'], fetchOrphanedPolicies);
 
   const comboBoxOptions =
     orphanedPolicies?.map((policy: { id: string; name: string }) => ({
@@ -83,7 +83,7 @@ export const OrphanedIntegrationPolicyDebugger: React.FunctionComponent = () => 
         defaultMessage: 'Successfully deleted orphaned policy',
       })
     );
-    queryClient.invalidateQueries('debug-orphaned-policies');
+    queryClient.invalidateQueries(['debug-orphaned-policies']);
     setSelectedPolicyId(undefined);
     setIsDeleteModalVisible(false);
 
@@ -112,7 +112,7 @@ export const OrphanedIntegrationPolicyDebugger: React.FunctionComponent = () => 
         defaultMessage: 'Successfully deleted all orphaned policies',
       })
     );
-    queryClient.invalidateQueries('debug-orphaned-policies');
+    queryClient.invalidateQueries(['debug-orphaned-policies']);
     setSelectedPolicyId(undefined);
     setIsDeleteAllModalVisible(false);
 

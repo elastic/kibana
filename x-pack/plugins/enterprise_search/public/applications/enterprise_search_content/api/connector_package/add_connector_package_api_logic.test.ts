@@ -20,10 +20,28 @@ describe('addConnectorPackageApiLogic', () => {
     it('calls correct api', async () => {
       const promise = Promise.resolve({ id: 'unique id', index_name: 'indexName' });
       http.post.mockReturnValue(promise);
-      const result = addConnectorPackage({ indexName: 'indexName' });
+      const result = addConnectorPackage({ indexName: 'indexName', language: 'en' });
       await nextTick();
       expect(http.post).toHaveBeenCalledWith('/internal/enterprise_search/connectors', {
-        body: JSON.stringify({ index_name: 'indexName' }),
+        body: JSON.stringify({ index_name: 'indexName', language: 'en' }),
+      });
+      await expect(result).resolves.toEqual({ id: 'unique id', indexName: 'indexName' });
+    });
+    it('adds delete param if specific', async () => {
+      const promise = Promise.resolve({ id: 'unique id', index_name: 'indexName' });
+      http.post.mockReturnValue(promise);
+      const result = addConnectorPackage({
+        deleteExistingConnector: true,
+        indexName: 'indexName',
+        language: null,
+      });
+      await nextTick();
+      expect(http.post).toHaveBeenCalledWith('/internal/enterprise_search/connectors', {
+        body: JSON.stringify({
+          delete_existing_connector: true,
+          index_name: 'indexName',
+          language: null,
+        }),
       });
       await expect(result).resolves.toEqual({ id: 'unique id', indexName: 'indexName' });
     });

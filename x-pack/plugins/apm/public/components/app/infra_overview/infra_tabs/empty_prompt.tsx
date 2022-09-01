@@ -5,38 +5,75 @@
  * 2.0.
  */
 
-import { EuiEmptyPrompt, EuiPageTemplate } from '@elastic/eui';
+import {
+  EuiDescriptionList,
+  EuiDescriptionListDescription,
+  EuiDescriptionListTitle,
+  EuiEmptyPrompt,
+  EuiImage,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import noResultsIllustrationDark from '../../../../assets/no_results_dark.svg';
+import noResultsIllustrationLight from '../../../../assets/no_results_light.svg';
+import { useTheme } from '../../../../hooks/use_theme';
 
 export function EmptyPrompt() {
   return (
-    <EuiPageTemplate
-      pageContentProps={{
-        color: 'transparent',
-      }}
-      template="centeredBody"
-    >
-      <EuiEmptyPrompt
-        iconType="metricsApp"
-        color="subdued"
-        title={
-          <h2>
-            {i18n.translate('xpack.apm.infraTabs.noMetricsPromptTitle', {
-              defaultMessage: 'No infrastructure data found',
-            })}
-          </h2>
-        }
-        titleSize="m"
-        body={
-          <p>
-            {i18n.translate('xpack.apm.infraTabs.noMetricsPromptDescription', {
-              defaultMessage:
-                'Try adjusting your time range or check if you have any metrics data set up.',
-            })}
-          </p>
-        }
-      />
-    </EuiPageTemplate>
+    <EuiEmptyPrompt
+      body={
+        <EuiDescriptionList compressed>
+          <EuiDescriptionListTitle>
+            {i18n.translate(
+              'xpack.apm.infraTabs.emptyMessagePromptTimeRangeTitle',
+              {
+                defaultMessage: 'Expand your time range',
+              }
+            )}
+          </EuiDescriptionListTitle>
+          <EuiDescriptionListDescription>
+            {i18n.translate(
+              'xpack.apm.infraTabs.emptyMessagePromptDescription',
+              {
+                defaultMessage: 'Try searching over a longer period of time.',
+              }
+            )}
+          </EuiDescriptionListDescription>
+        </EuiDescriptionList>
+      }
+      color="subdued"
+      data-test-subj="metricsTableEmptyIndicesContent"
+      icon={<NoResultsIllustration />}
+      layout="horizontal"
+      title={
+        <h2>
+          {i18n.translate('xpack.apm.infraTabs.emptyMessagePromptTitle', {
+            defaultMessage: 'No results match your search criteria.',
+          })}
+        </h2>
+      }
+      titleSize="m"
+    />
   );
 }
+
+function NoResultsIllustration() {
+  const theme = useTheme();
+
+  const illustration = theme.darkMode
+    ? noResultsIllustrationDark
+    : noResultsIllustrationLight;
+
+  return (
+    <EuiImage
+      alt={noResultsIllustrationAlternativeText}
+      size="fullWidth"
+      src={illustration}
+    />
+  );
+}
+
+const noResultsIllustrationAlternativeText = i18n.translate(
+  'xpack.apm.infraTabs.emptyMessageIllustrationAlternativeText',
+  { defaultMessage: 'A magnifying glass with an exclamation mark' }
+);

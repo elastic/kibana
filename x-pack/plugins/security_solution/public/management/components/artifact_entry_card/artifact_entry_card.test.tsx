@@ -6,14 +6,16 @@
  */
 
 import React from 'react';
-import { AppContextTestRender, createAppRootMockRenderer } from '../../../common/mock/endpoint';
-import { ArtifactEntryCard, ArtifactEntryCardProps } from './artifact_entry_card';
+import type { AppContextTestRender } from '../../../common/mock/endpoint';
+import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
+import type { ArtifactEntryCardProps } from './artifact_entry_card';
+import { ArtifactEntryCard } from './artifact_entry_card';
 import { act, fireEvent, getByTestId } from '@testing-library/react';
-import { AnyArtifact } from './types';
+import type { AnyArtifact } from './types';
 import { isTrustedApp } from './utils';
 import { getTrustedAppProviderMock, getExceptionProviderMock } from './test_utils';
 import { OS_LINUX, OS_MAC, OS_WINDOWS } from './components/translations';
-import { TrustedApp } from '../../../../common/endpoint/types';
+import type { TrustedApp } from '../../../../common/endpoint/types';
 
 describe.each([
   ['trusted apps', getTrustedAppProviderMock],

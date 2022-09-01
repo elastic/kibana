@@ -20,8 +20,8 @@ export function isRouteWithTimeRange({
       route.path === '/services' ||
       route.path === '/traces' ||
       route.path === '/service-map' ||
-      route.path === '/backends' ||
-      route.path === '/backends/inventory' ||
+      route.path === '/dependencies' ||
+      route.path === '/dependencies/inventory' ||
       route.path === '/services/{serviceName}' ||
       route.path === '/service-groups' ||
       location.pathname === '/' ||
@@ -44,8 +44,8 @@ export function isRouteWithComparison({
     return (
       route.path === '/services' ||
       route.path === '/service-map' ||
-      route.path === '/backends' ||
-      route.path === '/backends/inventory' ||
+      route.path === '/dependencies' ||
+      route.path === '/dependencies/inventory' ||
       route.path === '/services/{serviceName}' ||
       route.path === '/service-groups' ||
       location.pathname === '/' ||

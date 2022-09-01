@@ -7,14 +7,15 @@
 
 import { fold } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
-import * as rt from 'io-ts';
+import type * as rt from 'io-ts';
 import { formatErrors, exactCheck } from '@kbn/securitysolution-io-ts-utils';
-import {
+import type {
   RouteValidationFunction,
   RouteValidationResultFactory,
   RouteValidationError,
 } from '@kbn/core/server';
-import { excess, GenericIntersectionC } from '../runtime_types';
+import type { GenericIntersectionC } from '../runtime_types';
+import { excess } from '../runtime_types';
 
 type RequestValidationResult<T> =
   | {

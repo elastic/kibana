@@ -9,7 +9,7 @@ import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type {
   FullAgentPolicyOutputPermissions,
   RegistryDataStreamPrivileges,
-} from '../../../common';
+} from '../../../common/types';
 import { PACKAGE_POLICY_DEFAULT_INDEX_PRIVILEGES } from '../../constants';
 
 import type { PackagePolicy } from '../../types';
@@ -20,17 +20,17 @@ export const DEFAULT_CLUSTER_PERMISSIONS = ['monitor'];
 
 export async function storedPackagePoliciesToAgentPermissions(
   soClient: SavedObjectsClientContract,
-  packagePolicies: string[] | PackagePolicy[]
+  packagePolicies?: PackagePolicy[]
 ): Promise<FullAgentPolicyOutputPermissions | undefined> {
-  if (packagePolicies.length === 0) {
-    return;
-  }
-
   // I'm not sure what permissions to return for this case, so let's return the defaults
-  if (typeof packagePolicies[0] === 'string') {
+  if (!packagePolicies) {
     throw new Error(
       'storedPackagePoliciesToAgentPermissions should be called with a PackagePolicy'
     );
+  }
+
+  if (packagePolicies.length === 0) {
+    return;
   }
 
   const permissionEntries = (packagePolicies as PackagePolicy[]).map<Promise<[string, any]>>(

@@ -14,7 +14,6 @@ import type {
   GetFieldTableColumns,
   FieldBrowserProps,
   BrowserFieldItem,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '@kbn/triggers-actions-ui-plugin/public/types';
 
 import { OnRowSelected, SortColumnTimeline, TimelineTabs } from '..';

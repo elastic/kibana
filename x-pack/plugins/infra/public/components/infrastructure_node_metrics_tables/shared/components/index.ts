@@ -14,4 +14,3 @@ export {
 } from './no_data_content';
 export { NumberCell } from './number_cell';
 export { StepwisePagination } from './stepwise_pagination';
-export { UptimeCell } from './uptime_cell';

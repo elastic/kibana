@@ -25,7 +25,7 @@ import type { ConfigType } from '../config';
 import { getErrorStatusCode } from '../errors';
 import type { SecurityFeatureUsageServiceStart } from '../feature_usage';
 import type { Session, SessionValue } from '../session_management';
-import type { UserProfileServiceStart } from '../user_profile';
+import type { UserProfileServiceStartInternal } from '../user_profile';
 import { AuthenticationResult } from './authentication_result';
 import { canRedirectRequest } from './can_redirect_request';
 import { DeauthenticationResult } from './deauthentication_result';
@@ -80,7 +80,7 @@ export interface ProviderLoginAttempt {
 export interface AuthenticatorOptions {
   audit: AuditServiceSetup;
   featureUsageService: SecurityFeatureUsageServiceStart;
-  userProfileService: UserProfileServiceStart;
+  userProfileService: UserProfileServiceStartInternal;
   getCurrentUser: (request: KibanaRequest) => AuthenticatedUser | null;
   config: Pick<ConfigType, 'authc'>;
   basePath: IBasePath;
@@ -715,10 +715,15 @@ export class Authenticator {
       existingSessionValue = null;
     }
 
+    let userProfileId = existingSessionValue?.userProfileId;
+
     // If authentication result includes user profile grant, we should try to activate user profile for this user and
     // store user profile identifier in the session value.
-    let userProfileId = existingSessionValue?.userProfileId;
-    if (authenticationResult.userProfileGrant) {
+    // IMPORTANT: We don't activate profiles for the Elastic Cloud managed users until Cloud supports stable user
+    // profile identifiers.
+    const shouldActivateProfile =
+      authenticationResult.userProfileGrant && !authenticationResult.user?.elastic_cloud_user;
+    if (shouldActivateProfile) {
       this.logger.debug(`Activating profile for "${authenticationResult.user?.username}".`);
       userProfileId = (
         await this.options.userProfileService.activate(authenticationResult.userProfileGrant)

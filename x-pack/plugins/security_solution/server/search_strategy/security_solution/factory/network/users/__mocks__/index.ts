@@ -7,12 +7,12 @@
 
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 
+import type { NetworkUsersRequestOptions } from '../../../../../../../common/search_strategy';
 import {
   Direction,
   FlowTargetSourceDest,
   NetworkQueries,
   NetworkUsersFields,
-  NetworkUsersRequestOptions,
 } from '../../../../../../../common/search_strategy';
 
 export const mockOptions: NetworkUsersRequestOptions = {

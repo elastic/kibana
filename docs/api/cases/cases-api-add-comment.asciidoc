@@ -29,18 +29,19 @@ You must have `all` privileges for the *Cases* feature in the *Management*,
 (Optional, string) An identifier for the space. If it is not specified, the
 default space is used.
 
+[role="child_attributes"]
 === {api-request-body-title}
 
 `alertId`::
-(Required*, string) The alert identifier. It is required only when `type` is
-`alert`. preview:[]
+(Required*, string or array of strings) The alert identifier. It is required
+only when `type` is `alert`. If it is an array, `index` must also be an array. preview:[]
 
 `comment`::
 (Required*, string) The new comment. It is required only when `type` is `user`.
 
 `index`::
-(Required*, string) The alert index. It is required only when `type` is `alert`.
-preview:[]
+(Required*, string or array of strings) The alert index. It is required only
+when `type` is `alert`. If it is an array, `alertId` must also be an array. preview:[]
 
 `owner`::
 (Required, string) The application that owns the case. Valid values are:

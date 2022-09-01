@@ -38,6 +38,9 @@ const mockLayer = {
   canShowTooltip: () => {
     return true;
   },
+  areTooltipsDisabled: () => {
+    return false;
+  },
   getMbTooltipLayerIds: () => {
     return ['foo', 'bar'];
   },
@@ -89,6 +92,7 @@ const defaultProps = {
   openOnClickTooltip: () => {},
   closeOnHoverTooltip: () => {},
   openOnHoverTooltip: () => {},
+  updateOpenTooltips: () => {},
   layerList: [mockLayer],
   isDrawingFilter: false,
   addFilters: async () => {},
@@ -162,7 +166,7 @@ describe('TooltipControl', () => {
     test('should un-register all map callbacks on unmount', () => {
       const component = mount(<TooltipControl {...defaultProps} />);
 
-      expect(Object.keys(mockMbMapHandlers).length).toBe(4);
+      expect(Object.keys(mockMbMapHandlers).length).toBe(5);
 
       component.unmount();
       expect(Object.keys(mockMbMapHandlers).length).toBe(0);

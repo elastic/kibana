@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { RulesTableContextType } from '../rules_table_context';
+import type { RulesTableContextType } from '../rules_table_context';
 
 export const useRulesTableContextMock = {
   create: (): jest.Mocked<RulesTableContextType> => ({
@@ -51,18 +51,20 @@ export const useRulesTableContextMock = {
       setPerPage: jest.fn(),
       setSelectedRuleIds: jest.fn(),
       setSortingOptions: jest.fn(),
+      clearRulesSelection: jest.fn(),
     },
   }),
 };
 
+// do not delete
 export const useRulesTableContext = jest
   .fn<jest.Mocked<RulesTableContextType>, []>()
   .mockImplementation(useRulesTableContextMock.create);
-
+// do not delete
 export const useRulesTableContextOptional = jest
   .fn<jest.Mocked<RulesTableContextType>, []>()
   .mockImplementation(useRulesTableContextMock.create);
-
+// do not delete
 export const RulesTableContextProvider = jest
   .fn()
   .mockImplementation(({ children }: { children: React.ReactNode }) => <>{children}</>);

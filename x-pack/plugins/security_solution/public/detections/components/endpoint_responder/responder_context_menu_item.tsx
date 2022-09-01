@@ -6,7 +6,8 @@
  */
 
 import { EuiContextMenuItem } from '@elastic/eui';
-import React, { memo, ReactNode, useCallback, useMemo } from 'react';
+import type { ReactNode } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { useGetEndpointDetails, useWithShowEndpointResponder } from '../../../management/hooks';
@@ -26,6 +27,10 @@ export const HOST_ENDPOINT_UNENROLLED_TOOLTIP = i18n.translate(
 export const LOADING_ENDPOINT_DATA_TOOLTIP = i18n.translate(
   'xpack.securitySolution.endpoint.detections.takeAction.responseActionConsole.loadingTooltip',
   { defaultMessage: 'Loading' }
+);
+export const METADATA_API_ERROR_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.endpoint.detections.takeAction.responseActionConsole.generalMetadataErrorTooltip',
+  { defaultMessage: 'Failed to retrieve Endpoint metadata' }
 );
 
 export interface ResponderContextMenuItemProps {
@@ -52,18 +57,23 @@ export const ResponderContextMenuItem = memo<ResponderContextMenuItemProps>(
         return [true, LOADING_ENDPOINT_DATA_TOOLTIP];
       }
 
-      // if we got an error and it's a 404 (alerts can exist for endpoint that are no longer around)
+      // if we got an error and it's a 400 with unenrolled in the error message (alerts can exist for endpoint that are no longer around)
       // or,
       // the Host status is `unenrolled`
       if (
-        (error && error.body.statusCode === 404) ||
+        (error && error.body?.statusCode === 400 && error.body?.message.includes('unenrolled')) ||
         endpointHostInfo?.host_status === HostStatus.UNENROLLED
       ) {
         return [true, HOST_ENDPOINT_UNENROLLED_TOOLTIP];
       }
 
+      // return general error tooltip
+      if (error) {
+        return [true, METADATA_API_ERROR_TOOLTIP];
+      }
+
       return [false, undefined];
-    }, [endpointHostInfo?.host_status, endpointId, error, isFetching]);
+    }, [endpointHostInfo, endpointId, error, isFetching]);
 
     const handleResponseActionsClick = useCallback(() => {
       if (endpointHostInfo) showEndpointResponseActionsConsole(endpointHostInfo.metadata);
@@ -81,7 +91,7 @@ export const ResponderContextMenuItem = memo<ResponderContextMenuItemProps>(
       >
         <FormattedMessage
           id="xpack.securitySolution.endpoint.detections.takeAction.responseActionConsole.buttonLabel"
-          defaultMessage="Launch responder"
+          defaultMessage="Respond"
         />
       </EuiContextMenuItem>
     );

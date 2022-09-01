@@ -37,7 +37,7 @@ exports[`StartTrial component when trial is allowed display for basic license 1`
                 External link
               </span>
               <span
-                class="euiScreenReaderOnly"
+                class="emotion-euiScreenReaderOnly-euiLink__screenReaderText"
               >
                 (opens in a new tab or window)
               </span>
@@ -107,7 +107,7 @@ exports[`StartTrial component when trial is allowed should display for expired e
                 External link
               </span>
               <span
-                class="euiScreenReaderOnly"
+                class="emotion-euiScreenReaderOnly-euiLink__screenReaderText"
               >
                 (opens in a new tab or window)
               </span>
@@ -177,7 +177,7 @@ exports[`StartTrial component when trial is allowed should display for expired p
                 External link
               </span>
               <span
-                class="euiScreenReaderOnly"
+                class="emotion-euiScreenReaderOnly-euiLink__screenReaderText"
               >
                 (opens in a new tab or window)
               </span>
@@ -247,7 +247,7 @@ exports[`StartTrial component when trial is allowed should display for gold lice
                 External link
               </span>
               <span
-                class="euiScreenReaderOnly"
+                class="emotion-euiScreenReaderOnly-euiLink__screenReaderText"
               >
                 (opens in a new tab or window)
               </span>

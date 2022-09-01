@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { calculateEndpointAuthz } from '../../common/endpoint/service/authz';
 import {
@@ -35,8 +35,8 @@ import {
   TRUSTED_APPLICATIONS,
 } from '../app/translations';
 import { licenseService } from '../common/hooks/use_license';
-import { LinkItem } from '../common/links/types';
-import { StartPlugins } from '../types';
+import type { LinkItem } from '../common/links/types';
+import type { StartPlugins } from '../types';
 import {
   manageCategories as cloudSecurityPostureCategories,
   manageLinks as cloudSecurityPostureLinks,
@@ -80,8 +80,7 @@ export const links: LinkItem = {
   path: MANAGE_PATH,
   skipUrlState: true,
   hideTimeline: true,
-  globalNavEnabled: true,
-  globalNavOrder: 7,
+  globalNavPosition: 8,
   capabilities: [`${SERVER_APP_ID}.show`],
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.appLinks.manage', {
@@ -123,6 +122,8 @@ export const links: LinkItem = {
       }),
       landingIcon: IconExceptionLists,
       path: EXCEPTIONS_PATH,
+      skipUrlState: true,
+      hideTimeline: true,
       globalSearchKeywords: [
         i18n.translate('xpack.securitySolution.appLinks.exceptions', {
           defaultMessage: 'Exception lists',

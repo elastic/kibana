@@ -248,6 +248,12 @@ exports[`PartitionVisComponent should render correct structure for donut 1`] = `
           legendMaxDepth={1}
           legendPosition="right"
           legendSize={130}
+          noResults={
+            <VisualizationNoResults
+              chartType="donut"
+              renderComplete={[Function]}
+            />
+          }
           onElementClick={[Function]}
           onRenderChange={[Function]}
           showLegend={true}
@@ -676,6 +682,12 @@ exports[`PartitionVisComponent should render correct structure for mosaic 1`] = 
           legendColorPicker={[Function]}
           legendPosition="right"
           legendSize={130}
+          noResults={
+            <VisualizationNoResults
+              chartType="mosaic"
+              renderComplete={[Function]}
+            />
+          }
           onElementClick={[Function]}
           onRenderChange={[Function]}
           showLegend={true}
@@ -1060,6 +1072,12 @@ exports[`PartitionVisComponent should render correct structure for pie 1`] = `
           legendMaxDepth={1}
           legendPosition="right"
           legendSize={130}
+          noResults={
+            <VisualizationNoResults
+              chartType="pie"
+              renderComplete={[Function]}
+            />
+          }
           onElementClick={[Function]}
           onRenderChange={[Function]}
           showLegend={true}
@@ -1472,6 +1490,12 @@ exports[`PartitionVisComponent should render correct structure for treemap 1`] =
           legendColorPicker={[Function]}
           legendPosition="right"
           legendSize={130}
+          noResults={
+            <VisualizationNoResults
+              chartType="treemap"
+              renderComplete={[Function]}
+            />
+          }
           onElementClick={[Function]}
           onRenderChange={[Function]}
           showLegend={true}
@@ -1874,6 +1898,12 @@ exports[`PartitionVisComponent should render correct structure for waffle 1`] = 
           legendMaxDepth={1}
           legendPosition="right"
           legendSize={130}
+          noResults={
+            <VisualizationNoResults
+              chartType="waffle"
+              renderComplete={[Function]}
+            />
+          }
           onElementClick={[Function]}
           onRenderChange={[Function]}
           showLegend={true}

@@ -12,7 +12,7 @@ import { NetworkHttpTable } from '../../components/network_http_table';
 import { ID, useNetworkHttp } from '../../containers/network_http';
 import { manageQuery } from '../../../common/components/page/manage_query';
 
-import { HttpQueryTabBodyProps } from './types';
+import type { HttpQueryTabBodyProps } from './types';
 import { useQueryToggle } from '../../../common/containers/query_toggle';
 
 const NetworkHttpTableManage = manageQuery(NetworkHttpTable);

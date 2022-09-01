@@ -8,13 +8,13 @@
 import { find } from 'lodash/fp';
 import { EuiCodeBlock, EuiFormRow, EuiComboBox, EuiTextColor } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { SimpleSavedObject } from '@kbn/core/public';
 import styled from 'styled-components';
+import { useWatch } from 'react-hook-form';
 import { QUERIES_DROPDOWN_LABEL, QUERIES_DROPDOWN_SEARCH_FIELD_LABEL } from './constants';
 import { OsquerySchemaLink } from '../components/osquery_schema_link';
 
 import { useSavedQueries } from './use_saved_queries';
-import { useFormData } from '../shared_imports';
+import type { SavedQuerySO } from '../routes/saved_queries/list';
 
 const TextTruncate = styled.div`
   overflow: hidden;
@@ -31,23 +31,17 @@ interface SavedQueriesDropdownProps {
   disabled?: boolean;
   onChange: (
     value:
-      | SimpleSavedObject<{
-          id: string;
-          description?: string | undefined;
-          query: string;
-        }>['attributes']
+      | (Pick<SavedQuerySO['attributes'], 'id' | 'description' | 'query' | 'ecs_mapping'> & {
+          savedQueryId: string;
+        })
       | null
   ) => void;
 }
 
 interface SelectedOption {
   label: string;
-  value: {
+  value: Pick<SavedQuerySO['attributes'], 'id' | 'description' | 'query' | 'ecs_mapping'> & {
     savedQueryId: string;
-    id: string;
-    description: string;
-    query: string;
-    ecs_mapping: Record<string, unknown>;
   };
 }
 
@@ -55,16 +49,14 @@ const SavedQueriesDropdownComponent: React.FC<SavedQueriesDropdownProps> = ({
   disabled,
   onChange,
 }) => {
+  const savedQueryId = useWatch({ name: 'savedQueryId' });
   const [selectedOptions, setSelectedOptions] = useState<SelectedOption[]>([]);
-
-  const [{ savedQueryId }] = useFormData();
 
   const { data } = useSavedQueries({});
 
   const queryOptions = useMemo(
     () =>
-      // @ts-expect-error update types
-      data?.saved_objects?.map((savedQuery) => ({
+      data?.data?.map((savedQuery) => ({
         label: savedQuery.attributes.id ?? '',
         value: {
           savedQueryId: savedQuery.id,
@@ -74,7 +66,7 @@ const SavedQueriesDropdownComponent: React.FC<SavedQueriesDropdownProps> = ({
           ecs_mapping: savedQuery.attributes.ecs_mapping,
         },
       })) ?? [],
-    [data?.saved_objects]
+    [data]
   );
 
   const handleSavedQueryChange = useCallback(
@@ -88,7 +80,7 @@ const SavedQueriesDropdownComponent: React.FC<SavedQueriesDropdownProps> = ({
 
       const selectedSavedQuery = find(
         ['attributes.id', newSelectedOptions[0].value.id],
-        data?.saved_objects
+        data?.data
       );
 
       if (selectedSavedQuery) {
@@ -97,7 +89,7 @@ const SavedQueriesDropdownComponent: React.FC<SavedQueriesDropdownProps> = ({
 
       setSelectedOptions(newSelectedOptions);
     },
-    [data?.saved_objects, onChange]
+    [data, onChange]
   );
 
   const renderOption = useCallback(

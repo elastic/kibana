@@ -9,77 +9,66 @@ import React from 'react';
 
 import { useValues } from 'kea';
 
-import {
-  EuiCodeBlock,
-  EuiText,
-  EuiFlexGroup,
-  EuiButton,
-  EuiButtonIcon,
-  EuiFlexItem,
-  EuiPanel,
-} from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 
-import { Status } from '../../../../../common/types/api';
-import { getEnterpriseSearchUrl } from '../../../shared/enterprise_search_url/external_url';
+import { i18n } from '@kbn/i18n';
 
-import { FetchIndexApiLogic } from '../../api/index/fetch_index_api_logic';
-import { DOCUMENTS_API_JSON_EXAMPLE } from '../new_index/constants';
+import { isApiIndex, isConnectorIndex, isCrawlerIndex } from '../../utils/indices';
 
+import { ConnectorOverviewPanels } from './connector/connector_overview_panels';
+import { CrawlDetailsFlyout } from './crawler/crawl_details_flyout/crawl_details_flyout';
+import { CrawlRequestsPanel } from './crawler/crawl_requests_panel/crawl_requests_panel';
+import { CrawlerTotalStats } from './crawler_total_stats';
+import { GenerateApiKeyPanel } from './generate_api_key_panel';
+import { OverviewLogic } from './overview.logic';
 import { TotalStats } from './total_stats';
 
 export const SearchIndexOverview: React.FC = () => {
-  const { data, status } = useValues(FetchIndexApiLogic);
-
-  const searchIndexApiUrl = getEnterpriseSearchUrl('/api/ent/v1/search_indices/');
-  const apiKey = 'Create an API Key';
+  const { indexData } = useValues(OverviewLogic);
 
   return (
     <>
-      {status === Status.SUCCESS && data && (
+      <EuiSpacer />
+      {isCrawlerIndex(indexData) ? (
+        <CrawlerTotalStats />
+      ) : (
         <TotalStats
-          lastUpdated={'TODO'}
-          documentCount={data.index.total.docs.count ?? 0}
-          indexHealth={data.index.health ?? ''}
-          ingestionType={data.connector ? 'Connector' : data.crawler ? 'Crawler' : 'API'}
+          ingestionType={
+            isConnectorIndex(indexData)
+              ? i18n.translate(
+                  'xpack.enterpriseSearch.content.searchIndex.totalStats.connectorIngestionMethodLabel',
+                  {
+                    defaultMessage: 'Connector',
+                  }
+                )
+              : i18n.translate(
+                  'xpack.enterpriseSearch.content.searchIndex.totalStats.apiIngestionMethodLabel',
+                  {
+                    defaultMessage: 'API',
+                  }
+                )
+          }
         />
       )}
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiPanel>
-            <EuiFlexGroup direction="column">
-              <EuiFlexItem>
-                <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-                  <EuiFlexItem>
-                    <EuiText>
-                      <h2>Indexing by API</h2>
-                    </EuiText>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
-                      <EuiFlexItem>
-                        <EuiButtonIcon iconType="iInCircle" />
-                      </EuiFlexItem>
-                      <EuiFlexItem>
-                        <EuiButton>Generate an API key</EuiButton>
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiCodeBlock language="bash" fontSize="m" isCopyable>
-                  {`\
-curl -X POST '${searchIndexApiUrl}${name}/document' \\
-  -H 'Content-Type: application/json' \\
-  -H 'Authorization: Bearer ${apiKey}' \\
-  -d '${JSON.stringify(DOCUMENTS_API_JSON_EXAMPLE, null, 2)}'
-`}
-                </EuiCodeBlock>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiPanel>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      {isApiIndex(indexData) && (
+        <>
+          <EuiSpacer />
+          <GenerateApiKeyPanel />
+        </>
+      )}
+      {isCrawlerIndex(indexData) && (
+        <>
+          <EuiSpacer />
+          <CrawlRequestsPanel />
+          <CrawlDetailsFlyout />
+        </>
+      )}
+      {isConnectorIndex(indexData) && (
+        <>
+          <EuiSpacer />
+          <ConnectorOverviewPanels />
+        </>
+      )}
     </>
   );
 };

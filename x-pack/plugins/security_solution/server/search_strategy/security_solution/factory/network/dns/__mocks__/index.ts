@@ -7,10 +7,10 @@
 
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 
+import type { NetworkDnsRequestOptions } from '../../../../../../../common/search_strategy';
 import {
   Direction,
   NetworkDnsFields,
-  NetworkDnsRequestOptions,
   NetworkQueries,
 } from '../../../../../../../common/search_strategy';
 

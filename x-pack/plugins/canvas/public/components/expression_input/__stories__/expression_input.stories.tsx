@@ -8,7 +8,11 @@
 import { action } from '@storybook/addon-actions';
 import { storiesOf } from '@storybook/react';
 import React from 'react';
-import { ExpressionFunction, ExpressionFunctionParameter, Style } from '@kbn/expressions-plugin';
+import {
+  ExpressionFunction,
+  ExpressionFunctionParameter,
+  Style,
+} from '@kbn/expressions-plugin/common';
 
 import { registerExpressionsLanguage } from '@kbn/presentation-util-plugin/public';
 import { ExpressionInput } from '../expression_input';

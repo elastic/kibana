@@ -12,7 +12,8 @@ import { OperatingSystem } from '@kbn/securitysolution-utils';
 import { policyConfig } from '../../../store/policy_details/selectors';
 import { setIn } from '../../../models/policy_details_config';
 import { usePolicyDetailsSelector } from '../../policy_hooks';
-import { EventFormOption, EventsForm } from '../../components/events_form';
+import type { EventFormOption } from '../../components/events_form';
+import { EventsForm } from '../../components/events_form';
 
 const OPTIONS: ReadonlyArray<EventFormOption<OperatingSystem.MAC>> = [
   {

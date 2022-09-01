@@ -4,6 +4,8 @@ set -euo pipefail
 
 .buildkite/scripts/bootstrap.sh
 
+export NODE_OPTIONS="--max-old-space-size=8192"
+
 node scripts/build_kibana_platform_plugins.js --dist --profile
 
 mkdir -p built_assets/webpack_bundle_analyzer

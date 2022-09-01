@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { Action } from 'redux';
+import type { Action } from 'redux';
 import type { DataViewBase } from '@kbn/es-query';
-import {
+import type {
   HostInfo,
   GetHostPolicyResponse,
   HostIsolationRequestBody,
   ISOLATION_ACTIONS,
   MetadataListResponse,
 } from '../../../../../common/endpoint/types';
-import { ServerApiError } from '../../../../common/types';
-import { GetPolicyListResponse } from '../../policy/types';
-import { EndpointState } from '../types';
+import type { ServerApiError } from '../../../../common/types';
+import type { GetPolicyListResponse } from '../../policy/types';
+import type { EndpointState } from '../types';
 
 export interface ServerReturnedEndpointList {
   type: 'serverReturnedEndpointList';

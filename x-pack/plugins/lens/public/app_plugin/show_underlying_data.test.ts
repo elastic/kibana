@@ -21,6 +21,7 @@ describe('getLayerMetaInfo', () => {
         createMockDatasource('testDatasource'),
         {},
         undefined,
+        {},
         undefined,
         capabilities
       ).error
@@ -36,6 +37,7 @@ describe('getLayerMetaInfo', () => {
           datatable1: { type: 'datatable', columns: [], rows: [] },
           datatable2: { type: 'datatable', columns: [], rows: [] },
         },
+        {},
         undefined,
         capabilities
       ).error
@@ -43,7 +45,7 @@ describe('getLayerMetaInfo', () => {
   });
 
   it('should return error in case of missing activeDatasource', () => {
-    expect(getLayerMetaInfo(undefined, {}, undefined, undefined, capabilities).error).toBe(
+    expect(getLayerMetaInfo(undefined, {}, undefined, {}, undefined, capabilities).error).toBe(
       'Visualization has no data available to show'
     );
   });
@@ -53,6 +55,7 @@ describe('getLayerMetaInfo', () => {
       getLayerMetaInfo(
         createMockDatasource('testDatasource'),
         undefined,
+        {},
         {},
         undefined,
         capabilities
@@ -76,11 +79,12 @@ describe('getLayerMetaInfo', () => {
       getTableSpec: jest.fn(),
       getVisualDefaults: jest.fn(),
       getSourceId: jest.fn(),
+      getMaxPossibleNumValues: jest.fn(),
       getFilters: jest.fn(),
     };
     mockDatasource.getPublicAPI.mockReturnValue(updatedPublicAPI);
     expect(
-      getLayerMetaInfo(createMockDatasource('testDatasource'), {}, {}, undefined, capabilities)
+      getLayerMetaInfo(createMockDatasource('testDatasource'), {}, {}, {}, undefined, capabilities)
         .error
     ).toBe('Visualization has no data available to show');
   });
@@ -93,6 +97,7 @@ describe('getLayerMetaInfo', () => {
       getTableSpec: jest.fn(() => [{ columnId: 'col1', fields: ['bytes'] }]),
       getVisualDefaults: jest.fn(),
       getSourceId: jest.fn(),
+      getMaxPossibleNumValues: jest.fn(),
       getFilters: jest.fn(() => ({ error: 'filters error' })),
     };
     mockDatasource.getPublicAPI.mockReturnValue(updatedPublicAPI);
@@ -103,6 +108,7 @@ describe('getLayerMetaInfo', () => {
         {
           datatable1: { type: 'datatable', columns: [], rows: [] },
         },
+        {},
         undefined,
         capabilities
       ).error
@@ -118,6 +124,7 @@ describe('getLayerMetaInfo', () => {
         {
           datatable1: { type: 'datatable', columns: [], rows: [] },
         },
+        {},
         undefined,
         {
           navLinks: { discover: false },
@@ -132,6 +139,7 @@ describe('getLayerMetaInfo', () => {
         {
           datatable1: { type: 'datatable', columns: [], rows: [] },
         },
+        {},
         undefined,
         {
           navLinks: { discover: true },
@@ -149,6 +157,7 @@ describe('getLayerMetaInfo', () => {
       getTableSpec: jest.fn(() => [{ columnId: 'col1', fields: ['bytes'] }]),
       getVisualDefaults: jest.fn(),
       getSourceId: jest.fn(),
+      getMaxPossibleNumValues: jest.fn(),
       getFilters: jest.fn(() => ({
         enabled: {
           kuery: [[{ language: 'kuery', query: 'memory > 40000' }]],
@@ -164,6 +173,7 @@ describe('getLayerMetaInfo', () => {
       {
         datatable1: { type: 'datatable', columns: [], rows: [] },
       },
+      {},
       undefined,
       capabilities
     );

@@ -7,7 +7,8 @@
 
 import Hapi from '@hapi/hapi';
 import type {
-  BasePath,
+  DocLinksServiceSetup,
+  IBasePath,
   IClusterClient,
   Logger,
   PackageInfo,
@@ -48,7 +49,7 @@ import { ExecuteReportTask, MonitorReportsTask, ReportTaskParams } from './lib/t
 import type { PdfScreenshotOptions, PngScreenshotOptions, ReportingPluginRouter } from './types';
 
 export interface ReportingInternalSetup {
-  basePath: Pick<BasePath, 'set'>;
+  basePath: Pick<IBasePath, 'set'>;
   router: ReportingPluginRouter;
   features: FeaturesPluginSetup;
   security?: SecurityPluginSetup;
@@ -57,6 +58,7 @@ export interface ReportingInternalSetup {
   taskManager: TaskManagerSetupContract;
   logger: Logger;
   status: StatusServiceSetup;
+  docLinks: DocLinksServiceSetup;
 }
 
 export interface ReportingInternalStart {

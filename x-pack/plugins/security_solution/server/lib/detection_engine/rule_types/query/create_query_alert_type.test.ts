@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { elasticsearchClientMock } from '@kbn/core/server/elasticsearch/client/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
 import { allowedExperimentalValues } from '../../../../../common/experimental_features';
 import { createQueryAlertType } from './create_query_alert_type';
@@ -14,7 +13,7 @@ import { createRuleTypeMocks } from '../__mocks__/rule_type';
 import { createSecurityRuleTypeWrapper } from '../create_security_rule_type_wrapper';
 import { createMockConfig } from '../../routes/__mocks__';
 import { createMockTelemetryEventsSender } from '../../../telemetry/__mocks__';
-import { ruleExecutionLogMock } from '../../rule_execution_log/__mocks__';
+import { ruleExecutionLogMock } from '../../rule_monitoring/mocks';
 import { sampleDocNoSortId } from '../../signals/__mocks__/es_results';
 import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
 
@@ -33,14 +32,13 @@ jest.mock('../utils/get_list_client', () => ({
 describe('Custom Query Alerts', () => {
   const mocks = createRuleTypeMocks();
   const { dependencies, executor, services } = mocks;
-  const { alerting, eventLogService, lists, logger, ruleDataClient } = dependencies;
+  const { alerting, lists, logger, ruleDataClient } = dependencies;
   const securityRuleTypeWrapper = createSecurityRuleTypeWrapper({
     lists,
     logger,
     config: createMockConfig(),
     ruleDataClient,
-    eventLogService,
-    ruleExecutionLoggerFactory: () => ruleExecutionLogMock.forExecutors.create(),
+    ruleExecutionLoggerFactory: () => Promise.resolve(ruleExecutionLogMock.forExecutors.create()),
     version: '8.3',
   });
   const eventsTelemetry = createMockTelemetryEventsSender(true);

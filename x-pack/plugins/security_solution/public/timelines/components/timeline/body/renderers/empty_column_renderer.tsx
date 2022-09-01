@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { ColumnHeaderOptions } from '../../../../../../common/types';
-import { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
+import type { ColumnHeaderOptions } from '../../../../../../common/types';
+import type { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
 import {
   DraggableWrapper,
   DragEffects,
@@ -16,7 +16,7 @@ import { escapeDataProviderId } from '../../../../../common/components/drag_and_
 import { getEmptyValue } from '../../../../../common/components/empty_value';
 import { EXISTS_OPERATOR } from '../../data_providers/data_provider';
 import { Provider } from '../../data_providers/provider';
-import { ColumnRenderer } from './column_renderer';
+import type { ColumnRenderer } from './column_renderer';
 import { parseQueryValue } from './parse_query_value';
 
 export const dataNotExistsAtColumn = (columnName: string, data: TimelineNonEcsData[]): boolean =>

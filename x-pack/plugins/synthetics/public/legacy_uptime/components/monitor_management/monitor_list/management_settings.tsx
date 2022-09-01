@@ -5,12 +5,13 @@
  * 2.0.
  */
 import React, { useEffect, useState } from 'react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { EuiPopover, EuiPopoverTitle, EuiText, EuiButtonEmpty, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useFetcher } from '@kbn/observability-plugin/public';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ApiKeyBtn } from './api_key_btn';
 import { fetchServiceAPIKey } from '../../../state/api';
+import { ClientPluginsStart } from '../../../../plugin';
 import { useEnablement } from '../hooks/use_enablement';
 
 const syntheticsTestRunDocsLink =
@@ -23,6 +24,10 @@ export const ManagementSettings = () => {
   const [apiKey, setApiKey] = useState<string | undefined>(undefined);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [loadAPIKey, setLoadAPIKey] = useState(false);
+
+  const kServices = useKibana<ClientPluginsStart>().services;
+  const canSaveIntegrations: boolean =
+    !!kServices?.fleet?.authz.integrations.writeIntegrationPolicies;
 
   const { data, loading } = useFetcher(async () => {
     if (loadAPIKey) {
@@ -65,7 +70,7 @@ export const ManagementSettings = () => {
           <>
             <EuiPopoverTitle>{GET_API_KEY_GENERATE}</EuiPopoverTitle>
             <EuiText size="s">
-              {GET_API_KEY_LABEL_DESCRIPTION}{' '}
+              {GET_API_KEY_LABEL_DESCRIPTION} {!canSaveIntegrations ? `${API_KEY_DISCLAIMER} ` : ''}
               <EuiLink href={syntheticsTestRunDocsLink} external target="_blank">
                 {LEARN_MORE_LABEL}
               </EuiLink>
@@ -107,6 +112,14 @@ const GET_API_KEY_LABEL_DESCRIPTION = i18n.translate(
   'xpack.synthetics.monitorManagement.getAPIKeyLabel.description',
   {
     defaultMessage: 'Use an API key to push monitors remotely from a CLI or CD pipeline.',
+  }
+);
+
+const API_KEY_DISCLAIMER = i18n.translate(
+  'xpack.synthetics.monitorManagement.getAPIKeyLabel.disclaimer',
+  {
+    defaultMessage:
+      'Please note: In order to use push monitors using private testing locations, you must generate this API key with a user who has Fleet and Integrations write permissions.',
   }
 );
 

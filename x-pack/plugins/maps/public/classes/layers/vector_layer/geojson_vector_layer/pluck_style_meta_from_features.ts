@@ -17,7 +17,10 @@ import {
   RangeFieldMeta,
   StyleMetaDescriptor,
 } from '../../../../../common/descriptor_types';
-import { IDynamicStyleProperty } from '../../../styles/vector/properties/dynamic_style_property';
+import {
+  IDynamicStyleProperty,
+  OTHER_CATEGORY_KEY,
+} from '../../../styles/vector/properties/dynamic_style_property';
 
 const POINTS = [GEO_JSON_TYPE.POINT, GEO_JSON_TYPE.MULTI_POINT];
 const LINES = [GEO_JSON_TYPE.LINE_STRING, GEO_JSON_TYPE.MULTI_LINE_STRING];
@@ -173,7 +176,23 @@ export function pluckCategoricalStyleMetaFromFeatures(
   ordered.sort((a, b) => {
     return b.count - a.count;
   });
-  return ordered.slice(0, size);
+
+  if (ordered.length <= size) {
+    return ordered;
+  }
+
+  const topCategories = ordered.slice(0, size);
+  let otherCategoryCount = 0;
+  for (let i = size; i < ordered.length; i++) {
+    otherCategoryCount += ordered[i].count;
+  }
+  return [
+    ...topCategories,
+    {
+      key: OTHER_CATEGORY_KEY,
+      count: otherCategoryCount,
+    },
+  ];
 }
 
 export function isOnlySingleFeatureType(

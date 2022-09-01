@@ -9,18 +9,22 @@ import React from 'react';
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import { UsersContainer } from './pages';
 
-import { SecurityPageName, SecuritySubPluginRoutes } from '../app/types';
+import type { SecuritySubPluginRoutes } from '../app/types';
+import { SecurityPageName } from '../app/types';
 import { USERS_PATH } from '../../common/constants';
+import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
 
 export const UsersRoutes = () => (
-  <TrackApplicationView viewId={SecurityPageName.users}>
-    <UsersContainer />
-  </TrackApplicationView>
+  <PluginTemplateWrapper>
+    <TrackApplicationView viewId={SecurityPageName.users}>
+      <UsersContainer />
+    </TrackApplicationView>
+  </PluginTemplateWrapper>
 );
 
 export const routes: SecuritySubPluginRoutes = [
   {
     path: USERS_PATH,
-    render: UsersRoutes,
+    component: UsersRoutes,
   },
 ];

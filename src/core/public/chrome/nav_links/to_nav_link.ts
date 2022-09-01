@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
+import type { IBasePath } from '@kbn/core-http-browser';
 import {
-  PublicAppInfo,
   AppNavLinkStatus,
   AppStatus,
-  PublicAppDeepLinkInfo,
-} from '../../application';
-import { IBasePath } from '../../http';
+  type PublicAppInfo,
+  type PublicAppDeepLinkInfo,
+} from '@kbn/core-application-browser';
+import { appendAppPath } from '@kbn/core-application-browser-internal';
 import { NavLinkWrapper } from './nav_link';
-import { appendAppPath } from '../../application/utils';
 
 export function toNavLink(
   app: PublicAppInfo,

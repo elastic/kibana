@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import {
-  Direction,
-  FirstLastSeenRequestOptions,
-  FirstLastSeenQuery,
-} from '../../../../../../common/search_strategy';
+import type { FirstLastSeenRequestOptions } from '../../../../../../common/search_strategy';
+import { Direction, FirstLastSeenQuery } from '../../../../../../common/search_strategy';
 
 export const mockOptions: FirstLastSeenRequestOptions = {
   defaultIndex: [

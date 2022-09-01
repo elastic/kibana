@@ -12,10 +12,13 @@ import { act, fireEvent, waitFor } from '@testing-library/react';
 
 import { createFleetTestRendererMock } from '../../../../../mock';
 
-import { sendGetAgents } from '../../../hooks';
+import { sendGetAgents, sendGetAgentStatus } from '../../../hooks';
 
 import { AgentListPage } from '.';
 
+jest.mock('../../../../integrations/hooks/use_confirm_force_install', () => ({
+  useConfirmForceInstall: () => <>confirmForceInstall</>,
+}));
 jest.mock('../../../hooks', () => ({
   ...jest.requireActual('../../../hooks'),
   sendGetAgents: jest.fn(),
@@ -28,17 +31,8 @@ jest.mock('../../../hooks', () => ({
     return props.children;
   },
   useFleetStatus: jest.fn().mockReturnValue({}),
-  sendGetAgentStatus: jest.fn().mockResolvedValue({
-    data: {
-      results: {
-        online: 6,
-        error: 0,
-        offline: 0,
-        updating: 0,
-      },
-      totalInactive: 0,
-    },
-  }),
+  sendGetAgentStatus: jest.fn(),
+  sendGetAgentTags: jest.fn().mockReturnValue({ data: { items: ['tag1', 'tag2'] } }),
   useAuthz: jest.fn().mockReturnValue({ fleet: { all: true } }),
   useStartServices: jest.fn().mockReturnValue({
     notifications: {
@@ -74,6 +68,7 @@ jest.mock('./components/search_and_filter_bar', () => {
 });
 
 const mockedSendGetAgents = sendGetAgents as jest.Mock;
+const mockedSendGetAgentStatus = sendGetAgentStatus as jest.Mock;
 
 function renderAgentList() {
   const renderer = createFleetTestRendererMock();
@@ -111,96 +106,140 @@ describe('agent_list_page', () => {
         },
       });
     jest.useFakeTimers();
-
-    ({ utils } = renderAgentList());
-
-    await waitFor(() => {
-      expect(utils.getByText('Showing 6 agents')).toBeInTheDocument();
-    });
-
-    act(() => {
-      const selectAll = utils.container.querySelector('[data-test-subj="checkboxSelectAll"]');
-      fireEvent.click(selectAll!);
-    });
-
-    await waitFor(() => {
-      utils.getByText('5 agents selected');
-    });
-
-    act(() => {
-      fireEvent.click(utils.getByText('Select everything on all pages'));
-    });
-    utils.getByText('All agents selected');
   });
 
   afterEach(() => {
     jest.useRealTimers();
   });
 
-  it('should not set selection mode when agent selection changed automatically', async () => {
+  it('should not send another agents status request if first one takes longer', () => {
+    mockedSendGetAgentStatus.mockImplementation(async () => {
+      const sleep = () => {
+        return new Promise((res) => {
+          setTimeout(() => res({}), 35000);
+        });
+      };
+      await sleep();
+      return {
+        data: {
+          results: {
+            online: 6,
+            error: 0,
+            offline: 0,
+            updating: 0,
+          },
+          totalInactive: 0,
+        },
+      };
+    });
+    ({ utils } = renderAgentList());
+
     act(() => {
-      jest.runOnlyPendingTimers();
+      jest.advanceTimersByTime(65000);
     });
 
-    await waitFor(() => {
-      expect(utils.getByText('agent6')).toBeInTheDocument();
-    });
-
-    utils.getByText('All agents selected');
-
-    expect(
-      utils
-        .getByText('agent6')
-        .closest('tr')!
-        .getAttribute('class')!
-        .includes('euiTableRow-isSelected')
-    ).toBeTruthy();
+    expect(mockedSendGetAgentStatus).toHaveBeenCalledTimes(1);
   });
 
-  it('should set selection mode when agent selection changed manually', async () => {
-    act(() => {
-      fireEvent.click(utils.getAllByRole('checkbox')[3]);
+  describe('selection change', () => {
+    beforeEach(async () => {
+      mockedSendGetAgentStatus.mockResolvedValue({
+        data: {
+          results: {
+            online: 6,
+            error: 0,
+            offline: 0,
+            updating: 0,
+          },
+          totalInactive: 0,
+        },
+      });
+      ({ utils } = renderAgentList());
+
+      await waitFor(() => {
+        expect(utils.getByText('Showing 6 agents')).toBeInTheDocument();
+      });
+
+      act(() => {
+        const selectAll = utils.container.querySelector('[data-test-subj="checkboxSelectAll"]');
+        fireEvent.click(selectAll!);
+      });
+
+      await waitFor(() => {
+        utils.getByText('5 agents selected');
+      });
+
+      act(() => {
+        fireEvent.click(utils.getByText('Select everything on all pages'));
+      });
+      utils.getByText('All agents selected');
     });
 
-    utils.getByText('4 agents selected');
-  });
+    it('should not set selection mode when agent selection changed automatically', async () => {
+      act(() => {
+        jest.runOnlyPendingTimers();
+      });
 
-  it('should pass sort parameters on table sort', () => {
-    act(() => {
-      fireEvent.click(utils.getByTitle('Last activity'));
+      await waitFor(() => {
+        expect(utils.getByText('agent6')).toBeInTheDocument();
+      });
+
+      utils.getByText('All agents selected');
+
+      expect(
+        utils
+          .getByText('agent6')
+          .closest('tr')!
+          .getAttribute('class')!
+          .includes('euiTableRow-isSelected')
+      ).toBeTruthy();
     });
 
-    expect(mockedSendGetAgents).toHaveBeenCalledWith(
-      expect.objectContaining({
-        sortField: 'last_checkin',
-        sortOrder: 'asc',
-      })
-    );
-  });
+    it('should set selection mode when agent selection changed manually', async () => {
+      act(() => {
+        fireEvent.click(utils.getAllByRole('checkbox')[3]);
+      });
 
-  it('should pass keyword field on table sort on version', () => {
-    act(() => {
-      fireEvent.click(utils.getByTitle('Version'));
+      utils.getByText('4 agents selected');
     });
 
-    expect(mockedSendGetAgents).toHaveBeenCalledWith(
-      expect.objectContaining({
-        sortField: 'local_metadata.elastic.agent.version.keyword',
-        sortOrder: 'asc',
-      })
-    );
-  });
+    it('should pass sort parameters on table sort', () => {
+      act(() => {
+        fireEvent.click(utils.getByTitle('Last activity'));
+      });
 
-  it('should pass keyword field on table sort on hostname', () => {
-    act(() => {
-      fireEvent.click(utils.getByTitle('Host'));
+      expect(mockedSendGetAgents).toHaveBeenCalledWith(
+        expect.objectContaining({
+          sortField: 'last_checkin',
+          sortOrder: 'asc',
+        })
+      );
     });
 
-    expect(mockedSendGetAgents).toHaveBeenCalledWith(
-      expect.objectContaining({
-        sortField: 'local_metadata.host.hostname.keyword',
-        sortOrder: 'asc',
-      })
-    );
+    it('should pass keyword field on table sort on version', () => {
+      act(() => {
+        fireEvent.click(utils.getByTitle('Version'));
+      });
+
+      expect(mockedSendGetAgents).toHaveBeenCalledWith(
+        expect.objectContaining({
+          sortField: 'local_metadata.elastic.agent.version.keyword',
+          sortOrder: 'asc',
+        })
+      );
+    });
+
+    it('should pass keyword field on table sort on hostname', () => {
+      act(() => {
+        fireEvent.click(utils.getByTitle('Host'));
+      });
+
+      expect(mockedSendGetAgents).toHaveBeenCalledWith(
+        expect.objectContaining({
+          sortField: 'local_metadata.host.hostname.keyword',
+          sortOrder: 'asc',
+        })
+      );
+    });
   });
 });

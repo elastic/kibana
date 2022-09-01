@@ -8,7 +8,7 @@
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
-import { SetupPlugins } from '../../../../plugin';
+import type { SetupPlugins } from '../../../../plugin';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { buildMlAuthz } from '../../../machine_learning/authz';
 import { throwAuthzError } from '../../../machine_learning/validation';

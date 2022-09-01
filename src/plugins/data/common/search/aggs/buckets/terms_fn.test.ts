@@ -27,8 +27,10 @@ describe('agg_expression_functions', () => {
             "params": Object {
               "customLabel": undefined,
               "exclude": undefined,
+              "excludeIsRegex": undefined,
               "field": "machine.os.keyword",
               "include": undefined,
+              "includeIsRegex": undefined,
               "json": undefined,
               "missingBucket": undefined,
               "missingBucketLabel": undefined,
@@ -61,8 +63,8 @@ describe('agg_expression_functions', () => {
         missingBucketLabel: 'missing',
         otherBucket: true,
         otherBucketLabel: 'other',
-        include: 'win',
-        exclude: 'ios',
+        include: ['win'],
+        exclude: ['ios'],
       });
 
       expect(actual.value).toMatchInlineSnapshot(`
@@ -71,9 +73,15 @@ describe('agg_expression_functions', () => {
           "id": "1",
           "params": Object {
             "customLabel": undefined,
-            "exclude": "ios",
+            "exclude": Array [
+              "ios",
+            ],
+            "excludeIsRegex": undefined,
             "field": "machine.os.keyword",
-            "include": "win",
+            "include": Array [
+              "win",
+            ],
+            "includeIsRegex": undefined,
             "json": undefined,
             "missingBucket": true,
             "missingBucketLabel": "missing",
@@ -103,8 +111,10 @@ describe('agg_expression_functions', () => {
         Object {
           "customLabel": undefined,
           "exclude": undefined,
+          "excludeIsRegex": undefined,
           "field": "machine.os.keyword",
           "include": undefined,
+          "includeIsRegex": undefined,
           "json": undefined,
           "missingBucket": undefined,
           "missingBucketLabel": undefined,
@@ -115,8 +125,10 @@ describe('agg_expression_functions', () => {
             "params": Object {
               "customLabel": undefined,
               "exclude": undefined,
+              "excludeIsRegex": undefined,
               "field": "name",
               "include": undefined,
+              "includeIsRegex": undefined,
               "json": undefined,
               "missingBucket": undefined,
               "missingBucketLabel": undefined,

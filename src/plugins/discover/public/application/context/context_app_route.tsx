@@ -13,12 +13,12 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { ContextApp } from './context_app';
 import { getRootBreadcrumbs } from '../../utils/breadcrumbs';
 import { LoadingIndicator } from '../../components/common/loading_indicator';
-import { useIndexPattern } from '../../hooks/use_index_pattern';
+import { useDataView } from '../../hooks/use_data_view';
 import { useMainRouteBreadcrumb } from '../../hooks/use_navigation_props';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 
 export interface ContextUrlParams {
-  indexPatternId: string;
+  dataViewId: string;
   id: string;
 }
 
@@ -26,9 +26,9 @@ export function ContextAppRoute() {
   const services = useDiscoverServices();
   const { chrome } = services;
 
-  const { indexPatternId, id } = useParams<ContextUrlParams>();
+  const { dataViewId, id } = useParams<ContextUrlParams>();
   const anchorId = decodeURIComponent(id);
-  const dataViewId = decodeURIComponent(indexPatternId);
+  const usedDataViewId = decodeURIComponent(dataViewId);
   const breadcrumb = useMainRouteBreadcrumb();
 
   useEffect(() => {
@@ -42,7 +42,7 @@ export function ContextAppRoute() {
     ]);
   }, [chrome, breadcrumb]);
 
-  const { indexPattern, error } = useIndexPattern(services.indexPatterns, dataViewId);
+  const { dataView, error } = useDataView(services.dataViews, usedDataViewId);
 
   if (error) {
     return (
@@ -66,9 +66,9 @@ export function ContextAppRoute() {
     );
   }
 
-  if (!indexPattern) {
+  if (!dataView) {
     return <LoadingIndicator />;
   }
 
-  return <ContextApp anchorId={anchorId} indexPattern={indexPattern} />;
+  return <ContextApp anchorId={anchorId} dataView={dataView} />;
 }

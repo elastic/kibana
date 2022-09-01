@@ -9,7 +9,8 @@ import { EuiFormRow } from '@elastic/eui';
 import React, { useCallback, useEffect, useState } from 'react';
 
 import { SearchTimelineSuperSelect } from '../../../../timelines/components/timeline/search_super_select';
-import { FieldHook, getFieldValidityAndErrorMessage } from '../../../../shared_imports';
+import type { FieldHook } from '../../../../shared_imports';
+import { getFieldValidityAndErrorMessage } from '../../../../shared_imports';
 
 export interface FieldValueTimeline {
   id: string | null;
@@ -21,6 +22,7 @@ interface QueryBarDefineRuleProps {
   field: FieldHook;
   idAria: string;
   isDisabled: boolean;
+  placeholder?: string;
 }
 
 export const PickTimeline = ({
@@ -28,6 +30,7 @@ export const PickTimeline = ({
   field,
   idAria,
   isDisabled = false,
+  placeholder,
 }: QueryBarDefineRuleProps) => {
   const [timelineId, setTimelineId] = useState<string | null>(null);
   const [timelineTitle, setTimelineTitle] = useState<string | null>(null);
@@ -69,6 +72,7 @@ export const PickTimeline = ({
         timelineId={timelineId}
         timelineTitle={timelineTitle}
         onTimelineChange={handleOnTimelineChange}
+        placeholder={placeholder}
       />
     </EuiFormRow>
   );

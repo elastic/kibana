@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { SecurityPageName, USERS_PATH } from '../../common/constants';
 import { USERS } from '../app/translations';
-import { LinkItem } from '../common/links/types';
+import type { LinkItem } from '../common/links/types';
 import userPageImg from '../common/images/users_page.png';
 
 export const links: LinkItem = {
@@ -55,13 +55,6 @@ export const links: LinkItem = {
         defaultMessage: 'Events',
       }),
       path: `${USERS_PATH}/events`,
-    },
-    {
-      id: SecurityPageName.usersExternalAlerts,
-      title: i18n.translate('xpack.securitySolution.appLinks.users.externalAlerts', {
-        defaultMessage: 'External Alerts',
-      }),
-      path: `${USERS_PATH}/externalAlerts`,
     },
   ],
 };

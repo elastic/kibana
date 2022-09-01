@@ -10,6 +10,7 @@ import {
   EQL_RULE_TYPE_ID,
   INDICATOR_RULE_TYPE_ID,
   ML_RULE_TYPE_ID,
+  NEW_TERMS_RULE_TYPE_ID,
   QUERY_RULE_TYPE_ID,
   SAVED_QUERY_RULE_TYPE_ID,
   THRESHOLD_RULE_TYPE_ID,
@@ -25,6 +26,7 @@ export const ruleTypeMappings = {
   saved_query: SAVED_QUERY_RULE_TYPE_ID,
   threat_match: INDICATOR_RULE_TYPE_ID,
   threshold: THRESHOLD_RULE_TYPE_ID,
+  new_terms: NEW_TERMS_RULE_TYPE_ID,
 };
 type RuleTypeMappings = typeof ruleTypeMappings;
 

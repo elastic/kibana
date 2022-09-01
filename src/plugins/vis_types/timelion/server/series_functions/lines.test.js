@@ -8,8 +8,8 @@
 
 import fn from './lines';
 
-const expect = require('chai').expect;
-import invoke from './helpers/invoke_series_fn';
+import expect from '@kbn/expect';
+import invoke from './test_helpers/invoke_series_fn';
 
 describe('lines.js', () => {
   let seriesList;

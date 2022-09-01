@@ -6,10 +6,9 @@
  */
 
 import type { DataViewBase, Query } from '@kbn/es-query';
-import { CoreStart, HttpStart } from '@kbn/core/public';
-import { Dispatch } from 'redux';
+import type { CoreStart, HttpStart } from '@kbn/core/public';
+import type { Dispatch } from 'redux';
 import semverGte from 'semver/functions/gte';
-import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import {
   BASE_POLICY_RESPONSE_ROUTE,
   HOST_METADATA_GET_ROUTE,
@@ -18,11 +17,11 @@ import {
   METADATA_UNITED_INDEX,
   METADATA_TRANSFORMS_STATUS_ROUTE,
 } from '../../../../../common/endpoint/constants';
-import {
+import type {
   GetHostPolicyResponse,
   HostInfo,
   HostIsolationRequestBody,
-  HostIsolationResponse,
+  ResponseActionApiResponse,
   HostResultList,
   Immutable,
   ImmutableObject,
@@ -30,8 +29,8 @@ import {
 } from '../../../../../common/endpoint/types';
 import { isolateHost, unIsolateHost } from '../../../../common/lib/endpoint_isolation';
 import { fetchPendingActionsByAgentId } from '../../../../common/lib/endpoint_pending_actions';
-import { ImmutableMiddlewareAPI, ImmutableMiddlewareFactory } from '../../../../common/store';
-import { AppAction } from '../../../../common/store/actions';
+import type { ImmutableMiddlewareAPI, ImmutableMiddlewareFactory } from '../../../../common/store';
+import type { AppAction } from '../../../../common/store/actions';
 import { resolvePathVariables } from '../../../../common/utils/resolve_path_variables';
 import { sendGetEndpointSpecificPackagePolicies } from '../../../services/policies/policies';
 import {
@@ -41,19 +40,19 @@ import {
   createLoadingResourceState,
 } from '../../../state';
 import {
-  sendGetAgentPolicyList,
+  sendBulkGetPackagePolicies,
   sendGetEndpointSecurityPackage,
   sendGetFleetAgentsWithEndpoint,
 } from '../../../services/policies/ingest';
-import { GetPolicyListResponse } from '../../policy/types';
-import {
+import type { GetPolicyListResponse } from '../../policy/types';
+import type {
   AgentIdsPendingActions,
   EndpointState,
   PolicyIds,
   TransformStats,
   TransformStatsResponse,
 } from '../types';
-import { EndpointPackageInfoStateChanged } from './action';
+import type { EndpointPackageInfoStateChanged } from './action';
 import {
   detailsData,
   endpointPackageInfo,
@@ -173,19 +172,12 @@ const getAgentAndPoliciesForEndpointsList = async (
   // Package Ids that it uses, thus if a reference exists there, then the package policy (policy)
   // exists.
   const policiesFound = (
-    await sendGetAgentPolicyList(http, {
-      query: {
-        kuery: `${AGENT_POLICY_SAVED_OBJECT_TYPE}.package_policies: (${policyIdsToCheck.join(
-          ' or '
-        )})`,
-      },
-    })
+    await sendBulkGetPackagePolicies(http, policyIdsToCheck)
   ).items.reduce<PolicyIds>(
-    (list, agentPolicy) => {
-      (agentPolicy.package_policies as string[]).forEach((packagePolicy) => {
-        list.packagePolicy[packagePolicy as string] = true;
-        list.agentPolicy[packagePolicy as string] = agentPolicy.id;
-      });
+    (list, packagePolicy) => {
+      list.packagePolicy[packagePolicy.id as string] = true;
+      list.agentPolicy[packagePolicy.id as string] = packagePolicy.policy_id;
+
       return list;
     },
     { packagePolicy: {}, agentPolicy: {} }
@@ -264,7 +256,7 @@ const handleIsolateEndpointHost = async (
 
   try {
     // Cast needed below due to the value of payload being `Immutable<>`
-    let response: HostIsolationResponse;
+    let response: ResponseActionApiResponse;
 
     if (action.payload.type === 'unisolate') {
       response = await unIsolateHost(action.payload.data as HostIsolationRequestBody);
@@ -274,12 +266,12 @@ const handleIsolateEndpointHost = async (
 
     dispatch({
       type: 'endpointIsolationRequestStateChange',
-      payload: createLoadedResourceState<HostIsolationResponse>(response),
+      payload: createLoadedResourceState<ResponseActionApiResponse>(response),
     });
   } catch (error) {
     dispatch({
       type: 'endpointIsolationRequestStateChange',
-      payload: createFailedResourceState<HostIsolationResponse>(error.body ?? error),
+      payload: createFailedResourceState<ResponseActionApiResponse>(error.body ?? error),
     });
   }
 };

@@ -70,6 +70,10 @@ const kqlQuery = {
   language: 'kuery',
 };
 
+const sqlQuery = {
+  sql: 'SELECT * from test',
+};
+
 function wrapSearchBarInContext(testProps: any) {
   const defaultOptions = {
     appName: 'test',
@@ -124,6 +128,7 @@ describe('SearchBar', () => {
   const FILTER_BAR = '[data-test-subj="unifiedFilterBar"]';
   const QUERY_BAR = '.kbnQueryBar';
   const QUERY_INPUT = '[data-test-subj="unifiedQueryInput"]';
+  const EDITOR = '[data-test-subj="unifiedTextLangEditor"]';
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -223,5 +228,18 @@ describe('SearchBar', () => {
     expect(component.find(FILTER_BAR).length).toBeTruthy();
     expect(component.find(QUERY_BAR).length).toBeTruthy();
     expect(component.find(QUERY_INPUT).length).toBeTruthy();
+  });
+
+  it('Should NOT render the input query input, for sql query', () => {
+    const component = mount(
+      wrapSearchBarInContext({
+        indexPatterns: [mockIndexPattern],
+        screenTitle: 'test screen',
+        onQuerySubmit: noop,
+        query: sqlQuery,
+      })
+    );
+    expect(component.find(QUERY_INPUT).length).toBeFalsy();
+    expect(component.find(EDITOR).length).toBeTruthy();
   });
 });

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { AddPrepackagedRulesSchema } from '../../../../common/detection_engine/schemas/request/add_prepackaged_rules_schema';
-import { RuleAlertType } from './types';
+import type { AddPrepackagedRulesSchema } from '../../../../common/detection_engine/schemas/request/add_prepackaged_rules_schema';
+import type { RuleAlertType } from './types';
 
 export const getRulesToInstall = (
-  rulesFromFileSystem: AddPrepackagedRulesSchema[],
-  installedRules: RuleAlertType[]
+  latestPrePackagedRules: Map<string, AddPrepackagedRulesSchema>,
+  installedRules: Map<string, RuleAlertType>
 ) => {
-  return rulesFromFileSystem.filter(
-    (rule) => !installedRules.some((installedRule) => installedRule.params.ruleId === rule.rule_id)
+  return Array.from(latestPrePackagedRules.values()).filter(
+    (rule) => !installedRules.has(rule.rule_id)
   );
 };

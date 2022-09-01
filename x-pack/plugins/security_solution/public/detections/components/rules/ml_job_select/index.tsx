@@ -6,9 +6,9 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiComboBox,
-  EuiComboBoxOptionOption,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
@@ -18,7 +18,8 @@ import {
 
 import styled from 'styled-components';
 import { isJobStarted } from '../../../../../common/machine_learning/helpers';
-import { FieldHook, getFieldValidityAndErrorMessage } from '../../../../shared_imports';
+import type { FieldHook } from '../../../../shared_imports';
+import { getFieldValidityAndErrorMessage } from '../../../../shared_imports';
 import { useSecurityJobs } from '../../../../common/components/ml_popover/hooks/use_security_jobs';
 import { useKibana } from '../../../../common/lib/kibana';
 import { ML_JOB_SELECT_PLACEHOLDER_TEXT } from '../step_define_rule/translations';

@@ -222,7 +222,7 @@ export const serviceDetail = {
         ...page({
           tab: 'nodes',
           title: i18n.translate('xpack.apm.views.nodes.title', {
-            defaultMessage: 'JVMs',
+            defaultMessage: 'Metrics',
           }),
           element: <Outlet />,
         }),

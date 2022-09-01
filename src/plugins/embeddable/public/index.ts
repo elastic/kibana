@@ -14,11 +14,15 @@ import { EmbeddablePublicPlugin } from './plugin';
 export type {
   Adapters,
   ReferenceOrValueEmbeddable,
+  SelfStyledEmbeddable,
+  FilterableEmbeddable,
   ChartActionContext,
   ContainerInput,
   ContainerOutput,
   EmbeddableChildPanelProps,
   EmbeddableContext,
+  EmbeddablePhaseEvent,
+  EmbeddablePhase,
   EmbeddableFactory,
   EmbeddableFactoryDefinition,
   EmbeddableInput,
@@ -76,6 +80,7 @@ export {
   EmbeddableStateTransfer,
   EmbeddableRenderer,
   useEmbeddableFactory,
+  isFilterableEmbeddable,
 } from './lib';
 
 export { AttributeService, ATTRIBUTE_SERVICE_KEY } from './lib/attribute_service';

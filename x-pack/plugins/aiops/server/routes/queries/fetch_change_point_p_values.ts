@@ -8,12 +8,15 @@ import { uniqBy } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ElasticsearchClient } from '@kbn/core/server';
 
+import { ChangePoint } from '@kbn/ml-agg-utils';
 import { SPIKE_ANALYSIS_THRESHOLD } from '../../../common/constants';
 import type { AiopsExplainLogRateSpikesSchema } from '../../../common/api/explain_log_rate_spikes';
-import { ChangePoint } from '../../../common/types';
 
 import { getQueryWithParams } from './get_query_with_params';
 import { getRequestBase } from './get_request_base';
+
+// TODO Consolidate with duplicate `fetchDurationFieldCandidates` in
+// `x-pack/plugins/apm/server/routes/correlations/queries/fetch_failed_events_correlation_p_values.ts`
 
 export const getChangePointRequest = (
   params: AiopsExplainLogRateSpikesSchema,
@@ -106,6 +109,13 @@ export const fetchChangePointPValues = async (
     for (const bucket of overallResult.buckets) {
       const pValue = Math.exp(-bucket.score);
 
+      // Scale the score into a value from 0 - 1
+      // using a concave piecewise linear function in -log(p-value)
+      const normalizedScore =
+        0.5 * Math.min(Math.max((bucket.score - 3.912) / 2.995, 0), 1) +
+        0.25 * Math.min(Math.max((bucket.score - 6.908) / 6.908, 0), 1) +
+        0.25 * Math.min(Math.max((bucket.score - 13.816) / 101.314, 0), 1);
+
       if (typeof pValue === 'number' && pValue < SPIKE_ANALYSIS_THRESHOLD) {
         result.push({
           fieldName,
@@ -114,6 +124,7 @@ export const fetchChangePointPValues = async (
           bg_count: bucket.doc_count,
           score: bucket.score,
           pValue,
+          normalizedScore,
         });
       }
     }

@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { Criteria } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { BoolQuery, Filter, Query } from '@kbn/es-query';
 import type { CspRuleMetadata } from '../../../common/schemas';
@@ -86,3 +87,5 @@ export interface CspFindingsQueryData {
   page: CspFinding[];
   total: number;
 }
+
+export type Sort<T> = NonNullable<Criteria<T>['sort']>;

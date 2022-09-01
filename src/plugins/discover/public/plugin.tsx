@@ -18,6 +18,7 @@ import {
   PluginInitializerContext,
 } from '@kbn/core/public';
 import { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { ExpressionsSetup, ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { NavigationPublicPluginStart as NavigationStart } from '@kbn/navigation-plugin/public';
@@ -152,6 +153,7 @@ export interface DiscoverSetupPlugins {
   urlForwarding: UrlForwardingSetup;
   home?: HomePublicPluginSetup;
   data: DataPublicPluginSetup;
+  expressions: ExpressionsSetup;
 }
 
 /**
@@ -173,6 +175,7 @@ export interface DiscoverStartPlugins {
   dataViewFieldEditor: IndexPatternFieldEditorStart;
   spaces?: SpacesPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
+  expressions: ExpressionsStart;
 }
 
 /**
@@ -232,7 +235,7 @@ export class DiscoverPlugin
         defaultMessage: 'JSON',
       }),
       order: 20,
-      component: ({ hit, indexPattern }) => (
+      component: ({ hit, dataView }) => (
         <React.Suspense
           fallback={
             <DeferredSpinner>
@@ -243,7 +246,7 @@ export class DiscoverPlugin
           <SourceViewer
             index={hit.raw._index}
             id={hit.raw._id}
-            indexPattern={indexPattern}
+            dataView={dataView}
             hasLineNumbers
           />
         </React.Suspense>
@@ -284,7 +287,7 @@ export class DiscoverPlugin
           this.locator!
         );
 
-        // make sure the index pattern list is up to date
+        // make sure the data view list is up to date
         await discoverStartPlugins.data.indexPatterns.clearCache();
 
         const { renderApp } = await import('./application');

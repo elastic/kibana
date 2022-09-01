@@ -143,6 +143,22 @@ Specifies preconfigured connector IDs and configs. Default: {}.
 
 `xpack.actions.proxyUrl` {ess-icon}::
 Specifies the proxy URL to use, if using a proxy for actions. By default, no proxy is used.
++
+Proxies may be used to proxy http or https requests through a proxy using the http or https protocol.  Kibana only uses proxies in "CONNECT" mode (sometimes referred to as "tunneling" TCP mode, compared to HTTP mode).  That is, Kibana will always make requests through a proxy using the HTTP `CONNECT` method.
++
+If your proxy is using the https protocol (vs the http protocol), the setting `xpack.actions.ssl.proxyVerificationMode: none` will likely be needed, unless your proxy's certificates are signed using a publicly available certificate authority.
++
+There is currently no support for using basic authentication with a proxy (authentication for the proxy itself, not the URL being requested through the proxy).
++
+To help diagnose problems using a proxy, you can use the `curl` command with options to use your proxy, and log debug information, with the following command, replacing the proxy and target URLs as appropriate.  This will force the request to be made to the
+proxy in tunneling mode, and display some of the interaction between the client and the proxy.
++
+[source,sh]
+--
+curl --verbose --proxytunnel --proxy http://localhost:8080 http://example.com
+--
++
+
 
 `xpack.actions.proxyBypassHosts` {ess-icon}::
 Specifies hostnames which should not use the proxy, if using a proxy for actions. The value is an array of hostnames as strings.  By default, all hosts will use the proxy, but if an action's hostname is in this list, the proxy will not be used.  The settings `xpack.actions.proxyBypassHosts` and `xpack.actions.proxyOnlyHosts` cannot be used at the same time.
@@ -209,6 +225,9 @@ Specifies the behavior when a new or changed rule has a schedule interval less t
 
 `xpack.alerting.rules.run.actions.max` {ess-icon}::
 Specifies the maximum number of actions that a rule can generate each time detection checks run.
+
+`xpack.alerting.rules.run.alerts.max` {ess-icon}::
+Specifies the maximum number of alerts that a rule can generate each time detection checks run. Default: 1000.
 
 `xpack.alerting.rules.run.timeout` {ess-icon}::
 Specifies the default timeout for tasks associated with all types of rules. The time is formatted as:

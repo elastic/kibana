@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { ISearchRequestParams } from '@kbn/data-plugin/common';
+import type { ISearchRequestParams } from '@kbn/data-plugin/common';
 import { OSQUERY_INTEGRATION_NAME } from '../../../../../common';
-import { ResultsRequestOptions } from '../../../../../common/search_strategy';
+import type { ResultsRequestOptions } from '../../../../../common/search_strategy';
 import { createQueryFilterClauses } from '../../../../../common/utils/build_query';
 
 export const buildResultsQuery = ({

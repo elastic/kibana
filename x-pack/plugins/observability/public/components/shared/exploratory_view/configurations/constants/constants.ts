@@ -166,6 +166,7 @@ export const PERCENTILE_RANKS = [
   '90th' as OperationType,
   '75th' as OperationType,
   '50th' as OperationType,
+  '25th' as OperationType,
 ];
 export const LABEL_FIELDS_FILTER = 'LABEL_FIELDS_FILTER';
 export const LABEL_FIELDS_BREAKDOWN = 'LABEL_FIELDS_BREAKDOWN';

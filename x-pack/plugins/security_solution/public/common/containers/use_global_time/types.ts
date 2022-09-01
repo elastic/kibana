@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { inputsActions } from '../../store/actions';
+import type { inputsActions } from '../../store/actions';
 
 export type SetQuery = Pick<
   Parameters<typeof inputsActions.setQuery>[0],

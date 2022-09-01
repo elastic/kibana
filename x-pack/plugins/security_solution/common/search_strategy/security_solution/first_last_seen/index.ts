@@ -7,8 +7,8 @@
 
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 
-import { Inspect, Maybe, Direction } from '../../common';
-import { RequestBasicOptions } from '../..';
+import type { Inspect, Maybe, Direction } from '../../common';
+import type { RequestBasicOptions } from '../..';
 
 export const FirstLastSeenQuery = 'firstlastseen';
 export interface FirstLastSeenRequestOptions extends Partial<RequestBasicOptions> {

@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import { alertsMock, RuleExecutorServicesMock } from '@kbn/alerting-plugin/server/mocks';
+import type { RuleExecutorServicesMock } from '@kbn/alerting-plugin/server/mocks';
+import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import type { MockedLogger } from '@kbn/logging-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 
 import { DEFAULT_INDEX_KEY, DEFAULT_INDEX_PATTERN } from '../../../../common/constants';
-import { getInputIndex, GetInputIndex } from './get_input_output_index';
+import type { GetInputIndex } from './get_input_output_index';
+import { getInputIndex, DataViewError } from './get_input_output_index';
 
 describe('get_input_output_index', () => {
   let servicesMock: RuleExecutorServicesMock;
@@ -193,6 +195,22 @@ describe('get_input_output_index', () => {
       ).rejects.toThrowErrorMatchingInlineSnapshot(
         `"Saved object [index-pattern/12345] not found"`
       );
+    });
+
+    test('Returns error of DataViewErrorType', async () => {
+      servicesMock.savedObjectsClient.get.mockRejectedValue(
+        new Error('Saved object [index-pattern/12345] not found')
+      );
+      await expect(
+        getInputIndex({
+          services: servicesMock,
+          version: '8.0.0',
+          index: [],
+          dataViewId: '12345',
+          ruleId: 'rule_1',
+          logger,
+        })
+      ).rejects.toBeInstanceOf(DataViewError);
     });
   });
 });

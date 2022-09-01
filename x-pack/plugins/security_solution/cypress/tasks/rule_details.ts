@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Exception } from '../objects/exception';
+import type { Exception } from '../objects/exception';
 import { RULE_STATUS } from '../screens/create_new_rule';
 import {
   ADD_EXCEPTIONS_BTN,
@@ -19,7 +19,6 @@ import {
 import {
   ALERTS_TAB,
   BACK_TO_RULES,
-  DATA_VIEW_DETAILS,
   EXCEPTIONS_TAB,
   FIELDS_BROWSER_BTN,
   REFRESH_BUTTON,
@@ -29,6 +28,8 @@ import {
   INDEX_PATTERNS_DETAILS,
   DETAILS_TITLE,
   DETAILS_DESCRIPTION,
+  EXCEPTION_ITEM_ACTIONS_BUTTON,
+  EDIT_EXCEPTION_BTN,
 } from '../screens/rule_details';
 import { addsFields, closeFieldsBrowser, filterFieldsBrowser } from './fields_browser';
 
@@ -88,15 +89,18 @@ export const goToAlertsTab = () => {
 };
 
 export const goToExceptionsTab = () => {
-  cy.root()
-    .pipe(($el) => {
-      $el.find(EXCEPTIONS_TAB).trigger('click');
-      return $el.find(ADD_EXCEPTIONS_BTN);
-    })
-    .should('be.visible');
+  cy.get(EXCEPTIONS_TAB).click();
+};
+
+export const editException = () => {
+  cy.get(EXCEPTION_ITEM_ACTIONS_BUTTON).click({ force: true });
+
+  cy.get(EDIT_EXCEPTION_BTN).click({ force: true });
 };
 
 export const removeException = () => {
+  cy.get(EXCEPTION_ITEM_ACTIONS_BUTTON).click();
+
   cy.get(REMOVE_EXCEPTION_BTN).click();
 };
 
@@ -120,11 +124,5 @@ export const getDetails = (title: string) =>
 export const hasIndexPatterns = (indexPatterns: string) => {
   cy.get(DEFINITION_DETAILS).within(() => {
     getDetails(INDEX_PATTERNS_DETAILS).should('have.text', indexPatterns);
-  });
-};
-
-export const doesNotHaveDataView = () => {
-  cy.get(DEFINITION_DETAILS).within(() => {
-    cy.get(DETAILS_TITLE).within(() => cy.get(DATA_VIEW_DETAILS).should('not.exist'));
   });
 };

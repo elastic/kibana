@@ -6,7 +6,7 @@
  */
 import { mapKeys, mapValues } from 'lodash';
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
-import { ProcessorEvent } from '../../../../common/processor_event';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import {
   PROFILE_ID,
   SERVICE_NAME,

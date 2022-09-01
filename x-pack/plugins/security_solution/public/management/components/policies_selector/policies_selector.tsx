@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useMemo, useState, useEffect, ChangeEvent } from 'react';
+import type { ChangeEvent } from 'react';
+import React, { memo, useCallback, useMemo, useState, useEffect } from 'react';
 
 import { i18n } from '@kbn/i18n';
+import type { FilterChecked } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -17,11 +19,10 @@ import {
   EuiFieldSearch,
   EuiFilterButton,
   EuiFilterSelectItem,
-  FilterChecked,
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ImmutableArray, PolicyData } from '../../../../common/endpoint/types';
+import type { ImmutableArray, PolicyData } from '../../../../common/endpoint/types';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 
 export interface PoliciesSelectorProps {

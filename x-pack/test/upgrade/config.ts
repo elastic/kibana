@@ -11,6 +11,7 @@ import { FtrConfigProviderContext } from '@kbn/test';
 import { pageObjects } from '../functional/page_objects';
 import { ReportingAPIProvider } from './services/reporting_upgrade_services';
 import { MapsHelper } from './services/maps_upgrade_services';
+import { RulesHelper } from './services/rules_upgrade_services';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const apiConfig = await readConfigFile(require.resolve('../api_integration/config'));
@@ -27,6 +28,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       require.resolve('./apps/logs'),
       require.resolve('./apps/maps'),
       require.resolve('./apps/reporting'),
+      require.resolve('./apps/rules'),
     ],
 
     pageObjects,
@@ -36,6 +38,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ...functionalConfig.get('services'),
       reportingAPI: ReportingAPIProvider,
       mapsHelper: MapsHelper,
+      rulesHelper: RulesHelper,
     },
 
     screenshots: {

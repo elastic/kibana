@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { filterrows } from '../../../canvas_plugin_src/functions/common/filterrows';
+import type { filterrows } from '../../../canvas_plugin_src/functions/common/filterrows';
 import { FunctionHelp } from '../function_help';
 import { FunctionFactory } from '../../../types';
 import { DATATABLE, TYPE_BOOLEAN, BOOLEAN_TRUE, BOOLEAN_FALSE } from '../../constants';

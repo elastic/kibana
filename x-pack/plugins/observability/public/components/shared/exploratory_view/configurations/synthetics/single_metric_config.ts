@@ -33,7 +33,7 @@ export function getSyntheticsSingleMetricConfig({ dataView }: ConfigProps): Seri
       {
         id: 'monitor_availability',
         columnType: FORMULA_COLUMN,
-        label: 'Monitor availability',
+        label: 'Availability',
         formula: "1- (count(kql='summary.down > 0') / count())",
         metricStateOptions: {
           colorMode: 'Labels',
@@ -45,7 +45,7 @@ export function getSyntheticsSingleMetricConfig({ dataView }: ConfigProps): Seri
               name: 'custom',
               reverse: false,
               rangeType: 'number',
-              rangeMin: 0.8,
+              rangeMin: 0,
               rangeMax: 1,
               progression: 'fixed',
               stops: [
@@ -62,6 +62,7 @@ export function getSyntheticsSingleMetricConfig({ dataView }: ConfigProps): Seri
               maxSteps: 5,
             },
           },
+          titlePosition: 'bottom',
         },
       },
     ],

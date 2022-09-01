@@ -42,6 +42,7 @@ const baseAllowlistFields: AllowlistFields = {
 
 // Allow list for event-related fields, which can also be nested under events[]
 const allowlistBaseEventFields: AllowlistFields = {
+  credential_access: true,
   dll: {
     name: true,
     path: true,
@@ -101,6 +102,7 @@ const allowlistBaseEventFields: AllowlistFields = {
   user: {
     id: true,
   },
+  Persistence: true,
 };
 
 // Allow list for the data we include in the events. True means that it is deep-cloned

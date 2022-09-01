@@ -20,7 +20,7 @@ import { SetupModeContext } from '../../../components/setup_mode/setup_mode_cont
 import { AlertsByName } from '../../../alerts/types';
 import { fetchAlerts } from '../../../lib/fetch_alerts';
 import { ELASTICSEARCH_SYSTEM_ID, RULE_CCR_READ_EXCEPTIONS } from '../../../../common/constants';
-import { BreadcrumbContainer } from '../../hooks/use_breadcrumbs';
+import { useBreadcrumbContainerContext } from '../../hooks/use_breadcrumbs';
 
 interface SetupModeProps {
   setupMode: any;
@@ -33,7 +33,7 @@ export const ElasticsearchCcrShardPage: React.FC<ComponentProps> = ({ clusters }
   const { services } = useKibana<{ data: any }>();
   const [data, setData] = useState({} as any);
   const { index, shardId }: { index: string; shardId: string } = useParams();
-  const { generate: generateBreadcrumbs } = useContext(BreadcrumbContainer.Context);
+  const { generate: generateBreadcrumbs } = useBreadcrumbContainerContext();
 
   const clusterUuid = globalState.cluster_uuid;
   const cluster = find(clusters, {

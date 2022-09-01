@@ -20,7 +20,7 @@ import type { ConfigType } from '../config';
 import type { SecurityFeatureUsageServiceStart } from '../feature_usage';
 import type { Session } from '../session_management';
 import type { SecurityRouter } from '../types';
-import type { UserProfileServiceStart } from '../user_profile';
+import type { UserProfileServiceStartInternal } from '../user_profile';
 import { defineAnalyticsRoutes } from './analytics';
 import { defineAnonymousAccessRoutes } from './anonymous_access';
 import { defineApiKeysRoutes } from './api_keys';
@@ -51,7 +51,7 @@ export interface RouteDefinitionParams {
   getFeatures: () => Promise<KibanaFeature[]>;
   getFeatureUsageService: () => SecurityFeatureUsageServiceStart;
   getAuthenticationService: () => InternalAuthenticationServiceStart;
-  getUserProfileService: () => UserProfileServiceStart;
+  getUserProfileService: () => UserProfileServiceStartInternal;
   getAnonymousAccessService: () => AnonymousAccessServiceStart;
   analyticsService: AnalyticsServiceSetup;
 }

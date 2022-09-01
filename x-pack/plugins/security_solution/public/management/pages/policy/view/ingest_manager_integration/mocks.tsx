@@ -6,31 +6,27 @@
  */
 
 import React, { useEffect, useMemo } from 'react';
-import { Action, Reducer } from 'redux';
+import type { Action, Reducer } from 'redux';
+import type { RenderOptions } from '@testing-library/react';
 // eslint-disable-next-line import/no-extraneous-dependencies
-import { render as reactRender, RenderOptions } from '@testing-library/react';
+import { render as reactRender } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { PackageInfo } from '@kbn/fleet-plugin/common/types';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { SecuritySolutionQueryClient } from '../../../../../common/containers/query_client/query_client_provider';
-import {
-  AppContextTestRender,
-  createAppRootMockRenderer,
-  UiRender,
-} from '../../../../../common/mock/endpoint';
+import type { AppContextTestRender, UiRender } from '../../../../../common/mock/endpoint';
+import { createAppRootMockRenderer } from '../../../../../common/mock/endpoint';
 import { createFleetContextReduxStore } from './with_security_context/store';
-import {
-  allowedExperimentalValues,
-  ExperimentalFeatures,
-} from '../../../../../../common/experimental_features';
-import { State } from '../../../../../common/store';
+import type { ExperimentalFeatures } from '../../../../../../common/experimental_features';
+import { allowedExperimentalValues } from '../../../../../../common/experimental_features';
+import type { State } from '../../../../../common/store';
 import { mockGlobalState } from '../../../../../common/mock';
 import { managementReducer } from '../../../../store/reducer';
 import { appReducer } from '../../../../../common/store/app';
 import { ExperimentalFeaturesService } from '../../../../../common/experimental_features_service';
 import { RenderContextProviders } from './with_security_context/render_context_providers';
-import { AppAction } from '../../../../../common/store/actions';
+import type { AppAction } from '../../../../../common/store/actions';
 
 // Defined a private custom reducer that reacts to an action that enables us to update the
 // store with new values for technical preview features/flags. Because the `action.type` is a `Symbol`,

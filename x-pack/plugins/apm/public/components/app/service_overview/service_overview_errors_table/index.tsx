@@ -20,7 +20,7 @@ import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { ErrorOverviewLink } from '../../../shared/links/apm/error_overview_link';
 import { OverviewTableContainer } from '../../../shared/overview_table_container';
-import { getColumns } from './get_columns';
+import { getColumns } from '../../../shared/errors_table/get_columns';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 

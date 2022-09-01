@@ -10,14 +10,14 @@ import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { isDataViewFieldSubtypeNested } from '@kbn/es-query';
 
-import { ColumnHeaderOptions } from '../../../../../../../common/types';
+import type { ColumnHeaderOptions } from '../../../../../../../common/types';
 import {
   useDeepEqualSelector,
   useShallowEqualSelector,
 } from '../../../../../../common/hooks/use_selector';
 import { timelineActions, timelineSelectors } from '../../../../../store/timeline';
-import { OnFilterChange } from '../../../events';
-import { Sort } from '../../sort';
+import type { OnFilterChange } from '../../../events';
+import type { Sort } from '../../sort';
 import { Actions } from '../actions';
 import { Filter } from '../filter';
 import { getNewSortDirectionOnClick } from './helpers';

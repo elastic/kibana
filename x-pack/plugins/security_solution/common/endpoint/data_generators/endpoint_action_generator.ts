@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { DeepPartial } from 'utility-types';
+import type { DeepPartial } from 'utility-types';
 import { merge } from 'lodash';
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ENDPOINT_ACTION_RESPONSES_DS, ENDPOINT_ACTIONS_DS } from '../constants';
 import { BaseDataGenerator } from './base_data_generator';
 import type {
@@ -58,14 +58,6 @@ export class EndpointActionGenerator extends BaseDataGenerator {
     return Object.assign(this.toEsSearchHit(this.generate(overrides)), {
       _index: `.ds-${ENDPOINT_ACTIONS_DS}-some_namespace`,
     });
-  }
-
-  generateIsolateAction(overrides: DeepPartial<LogsEndpointAction> = {}): LogsEndpointAction {
-    return merge(this.generate({ EndpointActions: { data: { command: 'isolate' } } }), overrides);
-  }
-
-  generateUnIsolateAction(overrides: DeepPartial<LogsEndpointAction> = {}): LogsEndpointAction {
-    return merge(this.generate({ EndpointActions: { data: { command: 'unisolate' } } }), overrides);
   }
 
   /** Generates an endpoint action response */
@@ -119,6 +111,7 @@ export class EndpointActionGenerator extends BaseDataGenerator {
       agents: ['agent-a'],
       command: 'isolate',
       completedAt: '2022-04-30T16:08:47.449Z',
+      hosts: { 'agent-a': { name: 'Host-agent-a' } },
       id: '123',
       isCompleted: true,
       isExpired: false,
@@ -129,6 +122,14 @@ export class EndpointActionGenerator extends BaseDataGenerator {
       createdBy: 'auserid',
       parameters: undefined,
       outputs: {},
+      agentState: {
+        'agent-a': {
+          errors: undefined,
+          isCompleted: true,
+          completedAt: '2022-04-30T16:08:47.449Z',
+          wasSuccessful: true,
+        },
+      },
     };
 
     return merge(details, overrides);

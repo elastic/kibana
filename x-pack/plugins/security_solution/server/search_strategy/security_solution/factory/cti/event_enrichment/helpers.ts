@@ -12,9 +12,11 @@ import {
   ENRICHMENT_TYPES,
   EVENT_ENRICHMENT_INDICATOR_FIELD_MAP,
 } from '../../../../../../common/cti/constants';
-import {
+import type {
   CtiEnrichment,
   EventField,
+} from '../../../../../../common/search_strategy/security_solution/cti';
+import {
   isValidEventField,
   validEventFields,
 } from '../../../../../../common/search_strategy/security_solution/cti';

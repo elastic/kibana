@@ -34,6 +34,7 @@ export enum InstallStatus {
   installed = 'installed',
   notInstalled = 'not_installed',
   installing = 'installing',
+  reinstalling = 'reinstalling',
   uninstalling = 'uninstalling',
 }
 
@@ -335,7 +336,14 @@ export interface RegistryDataStreamPrivileges {
   indices?: string[];
 }
 
-export type RegistryVarType = 'integer' | 'bool' | 'password' | 'text' | 'yaml' | 'string';
+export type RegistryVarType =
+  | 'integer'
+  | 'bool'
+  | 'password'
+  | 'text'
+  | 'yaml'
+  | 'string'
+  | 'textarea';
 export enum RegistryVarsEntryKeys {
   name = 'name',
   title = 'title',
@@ -399,6 +407,8 @@ export interface IntegrationCardItem {
   id: string;
   categories: string[];
   fromIntegrations?: string;
+  isUnverified?: boolean;
+  showLabels?: boolean;
 }
 
 export type PackageVerificationStatus = 'verified' | 'unverified' | 'unknown';
@@ -473,6 +483,7 @@ export type PackageAssetReference = Pick<SavedObjectReference, 'id'> & {
 
 export interface IndexTemplateMappings {
   properties: any;
+  dynamic_templates?: any;
 }
 
 // This is an index template v2, see https://github.com/elastic/elasticsearch/issues/53101

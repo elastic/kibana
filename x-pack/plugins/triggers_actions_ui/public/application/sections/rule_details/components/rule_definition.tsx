@@ -13,7 +13,9 @@ import {
   EuiFlexItem,
   EuiPanel,
   EuiTitle,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
+import { AlertConsumers } from '@kbn/rule-data-utils';
 import { i18n } from '@kbn/i18n';
 import { formatDuration } from '@kbn/alerting-plugin/common';
 import { RuleDefinitionProps } from '../../../../types';
@@ -24,13 +26,13 @@ import { NOTIFY_WHEN_OPTIONS } from '../../rule_form/rule_notify_when';
 import { RuleActions } from './rule_actions';
 import { RuleEdit } from '../../rule_form';
 
-const OBSERVABILITY_SOLUTIONS = ['logs', 'uptime', 'infrastructure', 'apm'];
-
 export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = ({
   rule,
   actionTypeRegistry,
   ruleTypeRegistry,
   onEditRule,
+  hideEditButton = false,
+  filteredRuleTypes,
 }) => {
   const {
     application: { capabilities },
@@ -38,8 +40,8 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = ({
 
   const [editFlyoutVisible, setEditFlyoutVisible] = useState<boolean>(false);
   const [ruleType, setRuleType] = useState<RuleType>();
-  const { ruleTypes, ruleTypeIndex } = useLoadRuleTypes({
-    filteredSolutions: OBSERVABILITY_SOLUTIONS,
+  const { ruleTypes, ruleTypeIndex, ruleTypesIsLoading } = useLoadRuleTypes({
+    filteredRuleTypes,
   });
 
   const getRuleType = useMemo(() => {
@@ -69,13 +71,33 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = ({
     hasAllPrivilege(rule, ruleType) &&
     // if the rule has actions, can the user save the rule's action params
     (canExecuteActions || (!canExecuteActions && rule.actions.length === 0));
-  const hasEditButton =
+  const hasEditButton = useMemo(() => {
+    if (hideEditButton) {
+      return false;
+    }
     // can the user save the rule
-    canSaveRule &&
-    // is this rule type editable from within Rules Management
-    (ruleTypeRegistry.has(rule.ruleTypeId)
-      ? !ruleTypeRegistry.get(rule.ruleTypeId).requiresAppContext
-      : false);
+    return (
+      canSaveRule &&
+      // is this rule type editable from within Rules Management
+      (ruleTypeRegistry.has(rule.ruleTypeId)
+        ? !ruleTypeRegistry.get(rule.ruleTypeId).requiresAppContext
+        : false)
+    );
+  }, [hideEditButton, canSaveRule, ruleTypeRegistry, rule]);
+
+  const ruleDescription = useMemo(() => {
+    if (ruleTypeRegistry.has(rule.ruleTypeId)) {
+      return ruleTypeRegistry.get(rule.ruleTypeId).description;
+    }
+    // TODO: Replace this generic description with proper SIEM rule descriptions
+    if (rule.consumer === AlertConsumers.SIEM) {
+      return i18n.translate('xpack.triggersActionsUI.ruleDetails.securityDetectionRule', {
+        defaultMessage: 'Security detection rule',
+      });
+    }
+    return '';
+  }, [rule, ruleTypeRegistry]);
+
   return (
     <EuiFlexItem data-test-subj="ruleSummaryRuleDefinition" grow={3}>
       <EuiPanel color="subdued" hasBorder={false} paddingSize={'m'}>
@@ -87,14 +109,20 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = ({
               })}
             </EuiFlexItem>
           </EuiTitle>
-          {hasEditButton && (
+          {ruleTypesIsLoading ? (
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                data-test-subj="ruleDetailsEditButton"
-                iconType={'pencil'}
-                onClick={() => setEditFlyoutVisible(true)}
-              />
+              <EuiLoadingSpinner data-test-subj="ruleDetailsEditButtonLoadingSpinner" />
             </EuiFlexItem>
+          ) : (
+            hasEditButton && (
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  data-test-subj="ruleDetailsEditButton"
+                  iconType={'pencil'}
+                  onClick={() => setEditFlyoutVisible(true)}
+                />
+              </EuiFlexItem>
+            )
           )}
         </EuiFlexGroup>
 
@@ -108,10 +136,16 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = ({
                   defaultMessage: 'Rule type',
                 })}
               </ItemTitleRuleSummary>
-              <ItemValueRuleSummary
-                data-test-subj="ruleSummaryRuleType"
-                itemValue={ruleTypeIndex.get(rule.ruleTypeId)?.name || rule.ruleTypeId}
-              />
+              {ruleTypesIsLoading ? (
+                <EuiFlexItem>
+                  <EuiLoadingSpinner data-test-subj="ruleSummaryRuleTypeLoadingSpinner" />
+                </EuiFlexItem>
+              ) : (
+                <ItemValueRuleSummary
+                  data-test-subj="ruleSummaryRuleType"
+                  itemValue={ruleTypeIndex.get(rule.ruleTypeId)?.name || rule.ruleTypeId}
+                />
+              )}
             </EuiFlexGroup>
 
             <EuiSpacer size="m" />
@@ -124,27 +158,33 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = ({
               </ItemTitleRuleSummary>
               <ItemValueRuleSummary
                 data-test-subj="ruleSummaryRuleDescription"
-                itemValue={ruleTypeRegistry.get(rule.ruleTypeId).description}
+                itemValue={ruleDescription}
               />
             </EuiFlexGroup>
 
             <EuiSpacer size="m" />
 
-            <EuiFlexGroup>
+            <EuiFlexGroup alignItems="center">
               <ItemTitleRuleSummary>
                 {i18n.translate('xpack.triggersActionsUI.ruleDetails.conditionsTitle', {
                   defaultMessage: 'Conditions',
                 })}
               </ItemTitleRuleSummary>
               <EuiFlexItem grow={3}>
-                <EuiFlexGroup data-test-subj="ruleSummaryRuleConditions" alignItems="center">
-                  {hasEditButton ? (
-                    <EuiButtonEmpty onClick={() => setEditFlyoutVisible(true)}>
+                <EuiFlexGroup
+                  data-test-subj="ruleSummaryRuleConditions"
+                  alignItems="center"
+                  gutterSize="none"
+                >
+                  <EuiFlexItem grow={false}>
+                    {hasEditButton ? (
+                      <EuiButtonEmpty onClick={() => setEditFlyoutVisible(true)} flush="left">
+                        <EuiText size="s">{getRuleConditionsWording()}</EuiText>
+                      </EuiButtonEmpty>
+                    ) : (
                       <EuiText size="s">{getRuleConditionsWording()}</EuiText>
-                    </EuiButtonEmpty>
-                  ) : (
-                    <EuiText size="s">{getRuleConditionsWording()}</EuiText>
-                  )}
+                    )}
+                  </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiFlexItem>
             </EuiFlexGroup>

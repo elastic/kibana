@@ -14,10 +14,11 @@
     "uiActions",
     "savedObjects",
     "dataViewFieldEditor",
-    "dataViewEditor"
+    "dataViewEditor",
+    "expressions"
   ],
   "optionalPlugins": ["home", "share", "usageCollection", "spaces", "triggersActionsUi"],
-  "requiredBundles": ["kibanaUtils", "kibanaReact", "dataViews", "unifiedSearch"],
+  "requiredBundles": ["kibanaUtils", "kibanaReact", "dataViews", "unifiedSearch", "savedSearch"],
   "extraPublicDirs": ["common"],
   "owner": {
     "name": "Data Discovery",

@@ -15,8 +15,7 @@ import { Assign, Ensure } from '@kbn/utility-types';
 import { ExpressionAstExpression, ExpressionAstArgument } from '@kbn/expressions-plugin/common';
 import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import { FieldFormatParams } from '@kbn/field-formats-plugin/common';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ISearchOptions, ISearchSource } from '../../../public';
+import type { ISearchOptions, ISearchSource } from '../../../public';
 
 import { IAggType } from './agg_type';
 import { writeParams } from './agg_params';

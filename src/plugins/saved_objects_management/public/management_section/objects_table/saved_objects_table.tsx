@@ -14,12 +14,12 @@ import { EuiSpacer, Query, CriteriaWithPagination } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
   SavedObjectsClientContract,
-  SavedObjectsFindOptions,
   HttpStart,
   OverlayStart,
   NotificationsStart,
   ApplicationStart,
 } from '@kbn/core/public';
+import type { SavedObjectsFindOptions } from '@kbn/core-saved-objects-api-server';
 import { RedirectAppLinks } from '@kbn/kibana-react-plugin/public';
 import { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import { DataViewsContract } from '@kbn/data-views-plugin/public';

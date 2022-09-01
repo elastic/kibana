@@ -10,7 +10,7 @@
 import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 
 import type { AgentStatus, ListWithKuery } from '../../types';
-import type { Agent, GetAgentStatusResponse } from '../../../common';
+import type { Agent, GetAgentStatusResponse } from '../../../common/types';
 
 import { getAuthzFromRequest } from '../../routes/security';
 

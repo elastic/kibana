@@ -43,12 +43,10 @@ export class VisTypePiePlugin {
     { visualizations, charts, usageCollection }: VisTypePieSetupDependencies
   ) {
     if (!core.uiSettings.get(LEGACY_PIE_CHARTS_LIBRARY, false)) {
-      const trackUiMetric = usageCollection?.reportUiCounter.bind(usageCollection, 'vis_type_pie');
       visualizations.createBaseVisualization(
         pieVisType({
           showElasticChartsOptions: true,
           palettes: charts.palettes,
-          trackUiMetric,
         })
       );
     }

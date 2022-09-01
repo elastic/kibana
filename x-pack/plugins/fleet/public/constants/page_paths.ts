@@ -18,6 +18,7 @@ export type StaticPage =
   | 'settings'
   | 'settings_edit_fleet_server_hosts'
   | 'settings_create_outputs'
+  | 'settings_create_download_sources'
   | 'debug';
 
 export type DynamicPage =
@@ -38,7 +39,8 @@ export type DynamicPage =
   | 'agent_list'
   | 'agent_details'
   | 'agent_details_logs'
-  | 'settings_edit_outputs';
+  | 'settings_edit_outputs'
+  | 'settings_edit_download_sources';
 
 export type Page = StaticPage | DynamicPage;
 
@@ -68,6 +70,8 @@ export const FLEET_ROUTING_PATHS = {
   settings_edit_fleet_server_hosts: '/settings/edit-fleet-server-hosts',
   settings_create_outputs: '/settings/create-outputs',
   settings_edit_outputs: '/settings/outputs/:outputId',
+  settings_create_download_sources: '/settings/create-download-sources',
+  settings_edit_download_sources: '/settings/downloadSources/:downloadSourceId',
   debug: '/_debug',
 
   // TODO: Move this to the integrations app
@@ -191,6 +195,17 @@ export const pagePathGetters: {
     FLEET_BASE_PATH,
     FLEET_ROUTING_PATHS.settings_edit_outputs.replace(':outputId', outputId as string),
   ],
+  settings_edit_download_sources: ({ downloadSourceId }) => [
+    FLEET_BASE_PATH,
+    FLEET_ROUTING_PATHS.settings_edit_download_sources.replace(
+      ':downloadSourceId',
+      downloadSourceId as string
+    ),
+  ],
   settings_create_outputs: () => [FLEET_BASE_PATH, FLEET_ROUTING_PATHS.settings_create_outputs],
+  settings_create_download_sources: () => [
+    FLEET_BASE_PATH,
+    FLEET_ROUTING_PATHS.settings_create_download_sources,
+  ],
   debug: () => [FLEET_BASE_PATH, FLEET_ROUTING_PATHS.debug],
 };

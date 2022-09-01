@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { MouseEventHandler, useMemo, useRef } from 'react';
+import { MouseEventHandler, useMemo } from 'react';
 import { useHistory, matchPath } from 'react-router-dom';
 import type { Location } from 'history';
 import { stringify } from 'query-string';
@@ -19,15 +19,13 @@ import { useDiscoverServices } from './use_discover_services';
 export type DiscoverNavigationProps = { onClick: () => void } | { href: string };
 
 export interface UseNavigationProps {
-  indexPatternId: string;
+  dataViewId: string;
   rowIndex: string;
   rowId: string;
   columns: string[];
   filterManager: FilterManager;
   addBasePath: (url: string) => string;
 }
-
-export type HistoryState = { breadcrumb?: string } | undefined;
 
 export const getContextHash = (columns: string[], filterManager: FilterManager) => {
   const globalFilters = filterManager.getGlobalFilters();
@@ -64,33 +62,39 @@ const getCurrentBreadcrumbs = (
   return isContextRoute ? prevBreadcrumb : '#' + currentLocation.pathname + currentLocation.search;
 };
 
+const getCurrentBreadcrumb = (search: string | undefined) =>
+  new URLSearchParams(search).get('breadcrumb') || undefined;
+
 export const useMainRouteBreadcrumb = () => {
-  // useRef needed to retrieve initial breadcrumb link from the push state without updates
-  return useRef(useHistory<HistoryState>().location.state?.breadcrumb).current;
+  const history = useHistory();
+  return useMemo(() => getCurrentBreadcrumb(history.location.search), [history.location.search]);
 };
 
 export const useNavigationProps = ({
-  indexPatternId,
+  dataViewId,
   rowIndex,
   rowId,
   columns,
   filterManager,
   addBasePath,
 }: UseNavigationProps) => {
-  const history = useHistory<HistoryState>();
+  const history = useHistory();
   const currentLocation = useDiscoverServices().history().location;
 
-  const prevBreadcrumb = useRef(history?.location.state?.breadcrumb).current;
+  const prevBreadcrumb = useMemo(
+    () => getCurrentBreadcrumb(history?.location?.search),
+    [history?.location?.search]
+  );
   const contextSearchHash = useMemo(
     () => getContextHash(columns, filterManager),
     [columns, filterManager]
   );
 
   const singleDocHref = addBasePath(
-    `/app/discover#/doc/${indexPatternId}/${rowIndex}?id=${encodeURIComponent(rowId)}`
+    `/app/discover#/doc/${dataViewId}/${rowIndex}?id=${encodeURIComponent(rowId)}`
   );
   const surDocsHref = addBasePath(
-    `/app/discover#/context/${encodeURIComponent(indexPatternId)}/${encodeURIComponent(
+    `/app/discover#/context/${encodeURIComponent(dataViewId)}/${encodeURIComponent(
       rowId
     )}?${contextSearchHash}`
   );
@@ -101,19 +105,19 @@ export const useNavigationProps = ({
    */
   if (!!history) {
     const isContextRoute = matchPath(history.location.pathname, {
-      path: '/context/:indexPatternId/:id',
+      path: '/context/:dataViewId/:id',
       exact: true,
     });
+    const currentBreadcrumb = encodeURIComponent(
+      getCurrentBreadcrumbs(!!isContextRoute, currentLocation, prevBreadcrumb) ?? ''
+    );
 
     const onOpenSingleDoc: MouseEventHandler<HTMLAnchorElement> = (event) => {
       event?.preventDefault?.();
 
       history.push({
-        pathname: `/doc/${indexPatternId}/${rowIndex}`,
-        search: `?id=${encodeURIComponent(rowId)}`,
-        state: {
-          breadcrumb: getCurrentBreadcrumbs(!!isContextRoute, currentLocation, prevBreadcrumb),
-        },
+        pathname: `/doc/${dataViewId}/${rowIndex}`,
+        search: `?id=${encodeURIComponent(rowId)}&breadcrumb=${currentBreadcrumb}`,
       });
     };
 
@@ -121,19 +125,20 @@ export const useNavigationProps = ({
       event?.preventDefault?.();
 
       history.push({
-        pathname: `/context/${encodeURIComponent(indexPatternId)}/${encodeURIComponent(
-          String(rowId)
-        )}`,
-        search: `?${contextSearchHash}`,
-        state: {
-          breadcrumb: getCurrentBreadcrumbs(!!isContextRoute, currentLocation, prevBreadcrumb),
-        },
+        pathname: `/context/${encodeURIComponent(dataViewId)}/${encodeURIComponent(String(rowId))}`,
+        search: `?${contextSearchHash}&breadcrumb=${currentBreadcrumb}`,
       });
     };
 
     return {
-      singleDocProps: { onClick: onOpenSingleDoc, href: singleDocHref },
-      surrDocsProps: { onClick: onOpenSurrDocs, href: surDocsHref },
+      singleDocProps: {
+        onClick: onOpenSingleDoc,
+        href: `${singleDocHref}&breadcrumb=${currentBreadcrumb}`,
+      },
+      surrDocsProps: {
+        onClick: onOpenSurrDocs,
+        href: `${surDocsHref}&breadcrumb=${currentBreadcrumb}`,
+      },
     };
   }
 

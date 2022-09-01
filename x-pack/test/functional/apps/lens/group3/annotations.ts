@@ -13,8 +13,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const find = getService('find');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
+  const from = 'Sep 19, 2015 @ 06:31:44.000';
+  const to = 'Sep 23, 2015 @ 18:31:44.000';
 
   describe('lens annotations tests', () => {
+    before(async () => {
+      await PageObjects.common.setTime({ from, to });
+    });
+    after(async () => {
+      await PageObjects.common.unsetTime();
+    });
+
     it('should show a disabled annotation layer button if there is no date histogram in data layer', async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');

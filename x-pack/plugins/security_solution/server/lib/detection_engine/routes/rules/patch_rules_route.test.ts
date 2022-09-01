@@ -10,7 +10,6 @@ import { mlServicesMock, mlAuthzMock as mockMlAuthzFactory } from '../../../mach
 import { buildMlAuthz } from '../../../machine_learning/authz';
 import {
   getEmptyFindResult,
-  getRuleExecutionSummarySucceeded,
   getRuleMock,
   getPatchRequest,
   getFindResultWithSingleHit,
@@ -46,9 +45,6 @@ describe('patch_rules', () => {
     clients.rulesClient.get.mockResolvedValue(getRuleMock(getQueryRuleParams())); // existing rule
     clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit()); // existing rule
     clients.rulesClient.update.mockResolvedValue(getRuleMock(getQueryRuleParams())); // successful update
-    clients.ruleExecutionLog.getExecutionSummary.mockResolvedValue(
-      getRuleExecutionSummarySucceeded()
-    );
 
     (legacyMigrate as jest.Mock).mockResolvedValue(getRuleMock(getQueryRuleParams()));
 

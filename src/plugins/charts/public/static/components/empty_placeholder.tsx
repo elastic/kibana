@@ -14,7 +14,7 @@ import { css } from '@emotion/react';
 export interface EmptyPlaceholderProps {
   icon: IconType;
   iconColor?: string;
-  message?: JSX.Element;
+  message?: JSX.Element | string;
   dataTestSubj?: string;
   className?: string;
   renderComplete?: () => void;

@@ -12,10 +12,11 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 const DEFAULT_REQUEST = `
 
-GET _search
+# Click the Variables button, above, to create your own variables.
+GET \${exampleVariable1} // _search
 {
   "query": {
-    "match_all": {}
+    "\${exampleVariable2}": {} // match_all
   }
 }
 
@@ -27,6 +28,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const PageObjects = getPageObjects(['common', 'console', 'header']);
   const toasts = getService('toasts');
+  const security = getService('security');
+  const testSubjects = getService('testSubjects');
 
   describe('console app', function describeIndexTests() {
     this.tags('includeFirefox');
@@ -51,6 +54,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('default request response should include `"timed_out" : false`', async () => {
       const expectedResponseContains = `"timed_out": false`;
+      await PageObjects.console.selectAllRequests();
       await PageObjects.console.clickPlay();
       await retry.try(async () => {
         const actualResponse = await PageObjects.console.getResponse();
@@ -124,6 +128,22 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
+    describe('with query params', () => {
+      it('should issue a successful request', async () => {
+        await PageObjects.console.clearTextArea();
+        await PageObjects.console.enterRequest(
+          '\n GET _cat/aliases?format=json&v=true&pretty=true'
+        );
+        await PageObjects.console.clickPlay();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+
+        await retry.try(async () => {
+          const status = await PageObjects.console.getResponseStatus();
+          expect(status).to.eql(200);
+        });
+      });
+    });
+
     describe('multiple requests output', () => {
       const sendMultipleRequests = async (requests: string[]) => {
         await asyncForEach(requests, async (request) => {
@@ -133,7 +153,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.console.clickPlay();
       };
 
+      before(async () => {
+        await security.testUser.setRoles(['kibana_admin', 'test_index']);
+      });
+
+      after(async () => {
+        await security.testUser.restoreDefaults();
+      });
+
       beforeEach(async () => {
+        // Welcome fly out exists sometimes
+        const flyOutExists = await testSubjects.exists('euiFlyoutCloseButton');
+        if (flyOutExists) {
+          await testSubjects.click('euiFlyoutCloseButton');
+        }
         await PageObjects.console.clearTextArea();
       });
 
@@ -142,8 +175,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.try(async () => {
           const response = await PageObjects.console.getResponse();
           log.debug(response);
-          expect(response).to.contain('# PUT test-index 200 OK');
-          expect(response).to.contain('# DELETE test-index 200 OK');
+          expect(response).to.contain('# PUT test-index 200');
+          expect(response).to.contain('# DELETE test-index 200');
         });
       });
 
@@ -156,33 +189,39 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('with folded/unfolded lines in request body', () => {
-      const enterRequestWithBody = async () => {
-        await PageObjects.console.enterRequest();
-        await PageObjects.console.pressEnter();
-        await PageObjects.console.enterText('{\n\t\t"_source": []');
+      const enterRequest = async () => {
+        await PageObjects.console.enterRequest('\nGET test/doc/1 \n{\n\t\t"_source": []');
+        await PageObjects.console.clickPlay();
       };
 
-      it('should save the state of folding/unfolding when navigating back to Console', async () => {
+      beforeEach(async () => {
         await PageObjects.console.clearTextArea();
-        await enterRequestWithBody();
+      });
+
+      it('should restore the state of folding/unfolding when navigating back to Console', async () => {
+        await enterRequest();
         await PageObjects.console.clickFoldWidget();
         await PageObjects.common.navigateToApp('home');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.common.navigateToApp('console');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.console.closeHelpIfExists();
         expect(await PageObjects.console.hasFolds()).to.be(true);
       });
 
-      it('should save the state of folding/unfolding when the page reloads', async () => {
-        // blocks the close help button for several seconds so just retry until we can click it.
-        await retry.try(async () => {
-          await PageObjects.console.collapseHelp();
-        });
-        await PageObjects.console.clearTextArea();
-        await enterRequestWithBody();
+      it('should restore the state of folding/unfolding when the page reloads', async () => {
+        await enterRequest();
         await PageObjects.console.clickFoldWidget();
         await browser.refresh();
         await PageObjects.header.waitUntilLoadingHasFinished();
         expect(await PageObjects.console.hasFolds()).to.be(true);
+      });
+
+      it('should not have folds by default', async () => {
+        await enterRequest();
+        await browser.refresh();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        expect(await PageObjects.console.hasFolds()).to.be(false);
       });
     });
   });

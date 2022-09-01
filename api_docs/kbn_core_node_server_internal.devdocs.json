@@ -49,7 +49,7 @@
               "ObjectType",
               "<{ roles: ",
               "Type",
-              "<(\"ui\" | \"background_tasks\")[] | \"*\"[]>; }>"
+              "<\"*\"[] | (\"ui\" | \"background_tasks\")[]>; }>"
             ],
             "path": "packages/core/node/core-node-server-internal/src/node_config.ts",
             "deprecated": false

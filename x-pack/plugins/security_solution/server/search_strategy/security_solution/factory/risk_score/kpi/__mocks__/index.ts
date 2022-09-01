@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import {
-  KpiRiskScoreRequestOptions,
-  RiskQueries,
-} from '../../../../../../../common/search_strategy';
+import type { KpiRiskScoreRequestOptions } from '../../../../../../../common/search_strategy';
+import { RiskQueries } from '../../../../../../../common/search_strategy';
 
 export const mockOptions: KpiRiskScoreRequestOptions = {
   defaultIndex: [

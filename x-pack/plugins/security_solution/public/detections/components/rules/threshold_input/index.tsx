@@ -9,8 +9,9 @@ import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 
-import { DataViewFieldBase } from '@kbn/es-query';
-import { FieldHook, Field } from '../../../../shared_imports';
+import type { DataViewFieldBase } from '@kbn/es-query';
+import type { FieldHook } from '../../../../shared_imports';
+import { Field } from '../../../../shared_imports';
 import { THRESHOLD_FIELD_PLACEHOLDER } from './translations';
 
 const FIELD_COMBO_BOX_WIDTH = 410;

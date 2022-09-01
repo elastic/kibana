@@ -12,6 +12,7 @@ import { UserRT } from '../user';
 import { CommentResponseRt } from './comment';
 import { CasesStatusResponseRt, CaseStatusRt } from './status';
 import { CaseConnectorRt } from '../connectors';
+import { CaseAssigneesRt } from './assignee';
 
 const BucketsAggs = rt.array(
   rt.type({
@@ -86,6 +87,10 @@ const CaseBasicRt = rt.type({
    * The severity of the case
    */
   severity: CaseSeverityRt,
+  /**
+   * The users assigned to this case
+   */
+  assignees: CaseAssigneesRt,
 });
 
 /**
@@ -154,6 +159,10 @@ export const CasePostRequestRt = rt.intersection([
   }),
   rt.partial({
     /**
+     * The users assigned to the case
+     */
+    assignees: CaseAssigneesRt,
+    /**
      * The severity of the case. The severity is
      * default it to "low" if not provided.
      */
@@ -174,6 +183,10 @@ export const CasesFindRequestRt = rt.partial({
    * The severity of the case
    */
   severity: CaseSeverityRt,
+  /**
+   * The uids of the user profiles to filter by
+   */
+  assignees: rt.union([rt.array(rt.string), rt.string]),
   /**
    * The reporters to filter by
    */

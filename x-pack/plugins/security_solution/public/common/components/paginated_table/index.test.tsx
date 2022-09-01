@@ -10,7 +10,8 @@ import React from 'react';
 
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../common/constants';
 
-import { BasicTableProps, PaginatedTable } from '.';
+import type { BasicTableProps } from '.';
+import { PaginatedTable } from '.';
 import { getHostsColumns, mockData, rowItems, sortedHosts } from './index.mock';
 import { ThemeProvider } from 'styled-components';
 import { getMockTheme } from '../../lib/kibana/kibana_react.mock';

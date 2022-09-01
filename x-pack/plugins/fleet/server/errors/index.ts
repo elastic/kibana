@@ -8,13 +8,15 @@
 /* eslint-disable max-classes-per-file */
 import type { ElasticsearchErrorDetails } from '@kbn/es-errors';
 
+import type { FleetErrorType } from '../../common/types';
+
 import { isESClientError } from './utils';
 
 export { defaultIngestErrorHandler, ingestErrorToResponseOptions } from './handlers';
 
 export { isESClientError } from './utils';
-
 export class IngestManagerError extends Error {
+  attributes?: { type: FleetErrorType };
   constructor(message?: string, public readonly meta?: unknown) {
     super(message);
     this.name = this.constructor.name; // for stack traces
@@ -32,8 +34,11 @@ export class PackageNotFoundError extends IngestManagerError {}
 export class PackageKeyInvalidError extends IngestManagerError {}
 export class PackageOutdatedError extends IngestManagerError {}
 export class PackageFailedVerificationError extends IngestManagerError {
-  constructor(pkgKey: string) {
-    super(`${pkgKey} failed signature verification.`);
+  constructor(pkgName: string, pkgVersion: string) {
+    super(`${pkgName}-${pkgVersion} failed signature verification.`);
+    this.attributes = {
+      type: 'verification_failed',
+    };
   }
 }
 export class AgentPolicyError extends IngestManagerError {}
@@ -49,11 +54,19 @@ export class ConcurrentInstallOperationError extends IngestManagerError {}
 export class AgentReassignmentError extends IngestManagerError {}
 export class PackagePolicyIneligibleForUpgradeError extends IngestManagerError {}
 export class PackagePolicyValidationError extends IngestManagerError {}
+export class PackagePolicyNotFoundError extends IngestManagerError {}
 export class BundledPackageNotFoundError extends IngestManagerError {}
 export class HostedAgentPolicyRestrictionRelatedError extends IngestManagerError {
   constructor(message = 'Cannot perform that action') {
     super(
       `${message} in Fleet because the agent policy is managed by an external orchestration solution, such as Elastic Cloud, Kubernetes, etc. Please make changes using your orchestration solution.`
+    );
+  }
+}
+export class PackagePolicyRestrictionRelatedError extends IngestManagerError {
+  constructor(message = 'Cannot perform that action') {
+    super(
+      `${message} in Fleet because the package policy is managed by an external orchestration solution, such as Elastic Cloud, Kubernetes, etc. Please make changes using your orchestration solution.`
     );
   }
 }

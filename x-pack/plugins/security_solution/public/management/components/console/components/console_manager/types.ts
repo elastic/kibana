@@ -8,7 +8,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { ComponentType } from 'react';
-import { ConsoleProps } from '../../types';
+import type { ConsoleProps } from '../../types';
 
 export interface ConsoleRegistrationInterface<TMeta extends object = any> {
   id: string;
@@ -35,6 +35,9 @@ export interface ConsoleRegistrationInterface<TMeta extends object = any> {
    * the Responder page overlay is shown.
    */
   ActionComponents?: Array<ComponentType<ManagedConsoleExtensionComponentProps<TMeta>>>;
+
+  /** controls the visibility of the console close button */
+  showCloseButton?: boolean;
 }
 
 /**

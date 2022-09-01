@@ -18,11 +18,14 @@ import {
   EuiIcon,
   EuiLink,
   EuiPopoverTitle,
+  EuiPopoverFooter,
   EuiSelect,
   EuiSpacer,
   EuiText,
   EuiTitle,
+  EuiCallOut,
   useGeneratedHtmlId,
+  useEuiTheme,
 } from '@elastic/eui';
 import { RuleSnooze } from '@kbn/alerting-plugin/common';
 import moment from 'moment';
@@ -40,10 +43,12 @@ export interface BaseSnoozePanelProps {
   unsnoozeRule: (scheduleIds?: string[]) => Promise<void>;
   showCancel: boolean;
   scheduledSnoozes: RuleSnooze;
+  activeSnoozes: string[];
   hasTitle?: boolean;
   navigateToScheduler: (sched?: SnoozeSchedule) => void;
   isLoading: boolean;
   onRemoveAllSchedules: (ids: string[]) => void;
+  inPopover?: boolean;
 }
 
 export const BaseSnoozePanel: React.FunctionComponent<BaseSnoozePanelProps> = ({
@@ -53,16 +58,21 @@ export const BaseSnoozePanel: React.FunctionComponent<BaseSnoozePanelProps> = ({
   unsnoozeRule,
   showCancel,
   scheduledSnoozes,
+  activeSnoozes,
   navigateToScheduler,
   onRemoveAllSchedules,
   hasTitle,
+  inPopover = false,
 }) => {
   const [intervalValue, setIntervalValue] = useState(parseInterval(interval).value);
   const [intervalUnit, setIntervalUnit] = useState(parseInterval(interval).unit);
 
   const [isRemoveAllModalVisible, setIsRemoveAllModalVisible] = useState(false);
+  const [isCancelModalVisible, setIsCancelModalVisible] = useState(false);
 
   const [previousSnoozeInterval, setPreviousSnoozeInterval] = usePreviousSnoozeInterval();
+
+  const { euiTheme } = useEuiTheme();
 
   const onChangeValue = useCallback(
     ({ target }) => setIntervalValue(target.value),
@@ -106,7 +116,14 @@ export const BaseSnoozePanel: React.FunctionComponent<BaseSnoozePanelProps> = ({
     () => applySnooze(intervalValue, intervalUnit as SnoozeUnit),
     [applySnooze, intervalValue, intervalUnit]
   );
-  const onCancelSnooze = useCallback(() => applySnooze(0, 'm'), [applySnooze]);
+  const onCancelSnooze = useCallback(() => {
+    applySnooze(0, 'm');
+    setIsCancelModalVisible(false);
+  }, [applySnooze, setIsCancelModalVisible]);
+  const onClickCancelSnooze = useCallback(() => {
+    if (activeSnoozes.length === 0) onCancelSnooze();
+    else setIsCancelModalVisible(true);
+  }, [activeSnoozes, setIsCancelModalVisible, onCancelSnooze]);
 
   const onClickAddSchedule = useCallback(() => navigateToScheduler(), [navigateToScheduler]);
   const onClickEditScheduleFactory = useCallback(
@@ -132,6 +149,7 @@ export const BaseSnoozePanel: React.FunctionComponent<BaseSnoozePanelProps> = ({
       <EuiFlexGroup alignItems="center" justifyContent="flexStart" gutterSize="s">
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
+            flush="left"
             size="s"
             iconType="refresh"
             data-test-subj="ruleSnoozePreviousButton"
@@ -165,9 +183,20 @@ export const BaseSnoozePanel: React.FunctionComponent<BaseSnoozePanelProps> = ({
               })}
             </EuiFlexItem>
           </EuiFlexGroup>
+          <EuiFlexGroup alignItems="center" justifyContent="flexStart" gutterSize="s">
+            <EuiFlexItem>
+              <EuiText textAlign="left" size="xs" color="subdued">
+                {i18n.translate(
+                  'xpack.triggersActionsUI.sections.rulesList.addScheduleDescription',
+                  {
+                    defaultMessage: 'Silence actions immediately or schedule downtimes.',
+                  }
+                )}
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiPopoverTitle>
       )}
-      <EuiSpacer size="s" />
       <EuiFlexGroup data-test-subj="snoozePanel" gutterSize="xs">
         <EuiFlexItem>
           <EuiFieldNumber
@@ -206,6 +235,7 @@ export const BaseSnoozePanel: React.FunctionComponent<BaseSnoozePanelProps> = ({
             isLoading={isLoading}
             onClick={onClickApplyButton}
             data-test-subj="ruleSnoozeApply"
+            minWidth={0}
           >
             {i18n.translate('xpack.triggersActionsUI.sections.rulesList.applySnooze', {
               defaultMessage: 'Apply',
@@ -239,12 +269,17 @@ export const BaseSnoozePanel: React.FunctionComponent<BaseSnoozePanelProps> = ({
       </EuiFlexGrid>
       <EuiHorizontalRule margin="s" />
       <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiLink onClick={onApplyIndefinite} data-test-subj="ruleSnoozeIndefiniteApply">
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            flush="left"
+            size="s"
+            onClick={onApplyIndefinite}
+            data-test-subj="ruleSnoozeIndefiniteApply"
+          >
             {i18n.translate('xpack.triggersActionsUI.sections.rulesList.snoozeIndefinitely', {
               defaultMessage: 'Snooze indefinitely',
             })}
-          </EuiLink>
+          </EuiButtonEmpty>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiHorizontalRule margin="s" />
@@ -253,6 +288,7 @@ export const BaseSnoozePanel: React.FunctionComponent<BaseSnoozePanelProps> = ({
           <EuiFlexGroup>
             <EuiFlexItem grow>
               <EuiButton
+                fill
                 color="primary"
                 onClick={onClickAddSchedule}
                 data-test-subj="ruleAddSchedule"
@@ -262,19 +298,6 @@ export const BaseSnoozePanel: React.FunctionComponent<BaseSnoozePanelProps> = ({
                   defaultMessage: 'Add schedule',
                 })}
               </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiFlexGroup gutterSize="m">
-            <EuiFlexItem>
-              <EuiText textAlign="center" size="xs" color="subdued">
-                {i18n.translate(
-                  'xpack.triggersActionsUI.sections.rulesList.addScheduleDescription',
-                  {
-                    defaultMessage:
-                      'Create recurring schedules to silence actions during expected downtimes',
-                  }
-                )}
-              </EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>
         </>
@@ -308,27 +331,39 @@ export const BaseSnoozePanel: React.FunctionComponent<BaseSnoozePanelProps> = ({
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiFlexGroup direction="column" gutterSize="xs" data-test-subj="ruleSchedulesList">
-            {scheduledSnoozes!.map((schedule) => (
-              <EuiFlexItem key={`snooze-${schedule.id}`}>
-                <button
-                  style={{ paddingLeft: '9px', paddingRight: '9px' }}
-                  className="euiButton euiPanel euiPanel--borderRadiusMedium euiPanel--subdued euiPanel--noShadow euiPanel--noBorder"
-                  onClick={onClickEditScheduleFactory(schedule as SnoozeSchedule)}
-                >
-                  <EuiFlexGroup alignItems="center">
-                    <EuiFlexItem grow={false}>
-                      <EuiIcon type="calendar" />
-                    </EuiFlexItem>
-                    <EuiFlexItem style={{ textAlign: 'left' }}>
-                      {scheduleSummary(schedule as SnoozeSchedule)}
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiIcon type="arrowRight" />
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </button>
-              </EuiFlexItem>
-            ))}
+            {scheduledSnoozes!
+              .filter((s) => s.id)
+              .map((schedule) => {
+                const isActive = schedule.id && activeSnoozes.includes(schedule.id);
+                return (
+                  <EuiFlexItem key={`snooze-${schedule.id}`}>
+                    <button
+                      style={{
+                        paddingLeft: '9px',
+                        paddingRight: '9px',
+                        // Replicate euiPanel--accent vs euiPanel--subdued
+                        // Applying these classNames by themselves doesn't work due to a CSS-in-JS issue with EuiPanel
+                        color: isActive ? '#a8376a' : euiTheme.colors.subduedText,
+                        backgroundColor: isActive ? 'rgba(240,78,152,0.2)' : euiTheme.colors.body,
+                      }}
+                      className="euiButton euiPanel euiPanel--borderRadiusMedium euiPanel--noShadow euiPanel--noBorder"
+                      onClick={onClickEditScheduleFactory(schedule as SnoozeSchedule)}
+                    >
+                      <EuiFlexGroup alignItems="center">
+                        <EuiFlexItem grow={false}>
+                          <EuiIcon type={isActive ? 'bellSlash' : 'calendar'} />
+                        </EuiFlexItem>
+                        <EuiFlexItem style={{ textAlign: 'left' }}>
+                          {scheduleSummary(schedule as SnoozeSchedule)}
+                        </EuiFlexItem>
+                        <EuiFlexItem grow={false}>
+                          <EuiIcon type="arrowRight" />
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                    </button>
+                  </EuiFlexItem>
+                );
+              })}
           </EuiFlexGroup>
           <EuiFlexGroup>
             <EuiFlexItem>
@@ -347,21 +382,24 @@ export const BaseSnoozePanel: React.FunctionComponent<BaseSnoozePanelProps> = ({
       )}
       {showCancel && (
         <>
-          <EuiHorizontalRule margin="s" />
-          <EuiFlexGroup>
-            <EuiFlexItem grow>
-              <EuiButton
-                isLoading={isLoading}
-                color="danger"
-                onClick={onCancelSnooze}
-                data-test-subj="ruleSnoozeCancel"
-              >
-                {i18n.translate('xpack.triggersActionsUI.sections.rulesList.cancelSnooze', {
-                  defaultMessage: 'Cancel snooze',
-                })}
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          {!inPopover && <EuiSpacer size="s" />}
+          <EuiPopoverFooter>
+            {!inPopover && <EuiSpacer size="s" />}
+            <EuiFlexGroup>
+              <EuiFlexItem grow>
+                <EuiButton
+                  isLoading={isLoading}
+                  color="danger"
+                  onClick={onClickCancelSnooze}
+                  data-test-subj="ruleSnoozeCancel"
+                >
+                  {i18n.translate('xpack.triggersActionsUI.sections.rulesList.cancelSnooze', {
+                    defaultMessage: 'Cancel snooze',
+                  })}
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiPopoverFooter>
         </>
       )}
       <EuiSpacer size="s" />
@@ -399,6 +437,46 @@ export const BaseSnoozePanel: React.FunctionComponent<BaseSnoozePanelProps> = ({
               }
             )}
           </EuiText>
+        </EuiConfirmModal>
+      )}
+      {isCancelModalVisible && (
+        <EuiConfirmModal
+          title={i18n.translate('xpack.triggersActionsUI.sections.rulesList.cancelSnooze', {
+            defaultMessage: 'Cancel snooze',
+          })}
+          style={{ maxWidth: '420px' }}
+          onCancel={() => setIsCancelModalVisible(false)}
+          onConfirm={onCancelSnooze}
+          cancelButtonText={i18n.translate(
+            'xpack.triggersActionsUI.sections.rulesList.dontApplyCancelSnoozeButton',
+            {
+              defaultMessage: "Don't apply",
+            }
+          )}
+          confirmButtonText={i18n.translate(
+            'xpack.triggersActionsUI.sections.rulesList.applyCancelSnoozeButton',
+            {
+              defaultMessage: 'Apply',
+            }
+          )}
+        >
+          <EuiText>
+            {i18n.translate('xpack.triggersActionsUI.sections.rulesList.cancelSnoozeConfirmText', {
+              defaultMessage:
+                'Resume notifying when alerts are generated as defined in the rule actions.',
+            })}
+          </EuiText>
+          <EuiSpacer size="s" />
+          <EuiCallOut
+            iconType="iInCircle"
+            size="s"
+            title={i18n.translate(
+              'xpack.triggersActionsUI.sections.rulesList.cancelSnoozeConfirmCallout',
+              {
+                defaultMessage: 'Only the current occurrence of a schedule will be cancelled.',
+              }
+            )}
+          />
         </EuiConfirmModal>
       )}
     </>
