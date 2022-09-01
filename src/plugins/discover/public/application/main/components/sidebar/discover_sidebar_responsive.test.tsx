@@ -222,6 +222,17 @@ describe('discover responsive sidebar', function () {
     findTestSubject(comp, 'plus-extension-gif').simulate('click');
     expect(props.onAddFilter).toHaveBeenCalled();
   });
+  it('should allow adding "exist" filter', async function () {
+    await act(async () => {
+      const button = findTestSubject(comp, 'field-extension-showDetails');
+      await button.simulate('click');
+      await comp.update();
+    });
+
+    await comp.update();
+    findTestSubject(comp, 'discoverFieldListPanelAddExistFilter-extension').simulate('click');
+    expect(props.onAddFilter).toHaveBeenCalledWith('_exists_', 'extension', '+');
+  });
   it('should allow filtering by string, and calcFieldCount should just be executed once', function () {
     expect(findTestSubject(comp, 'fieldList-unpopular').children().length).toBe(6);
     act(() => {

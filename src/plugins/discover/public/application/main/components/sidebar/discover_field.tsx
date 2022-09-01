@@ -351,36 +351,66 @@ function DiscoverFieldComponent({
   const { canEdit, canDelete } = getFieldCapabilities(dataView, field);
   const canEditField = onEditField && canEdit;
   const canDeleteField = onDeleteField && canDelete;
+
+  const addExistFilterTooltip = i18n.translate(
+    'discover.fieldChooser.discoverField.addExistFieldLabel',
+    {
+      defaultMessage: 'Filter for field present',
+    }
+  );
+
+  const editFieldTooltip = i18n.translate('discover.fieldChooser.discoverField.editFieldLabel', {
+    defaultMessage: 'Edit data view field',
+  });
+
+  const deleteFieldTooltip = i18n.translate(
+    'discover.fieldChooser.discoverField.deleteFieldLabel',
+    {
+      defaultMessage: 'Delete data view field',
+    }
+  );
+
   const popoverTitle = (
     <EuiPopoverTitle style={{ textTransform: 'none' }} className="eui-textBreakWord">
       <EuiFlexGroup responsive={false} gutterSize="s">
         <EuiFlexItem grow={true}>
           <h5>{field.displayName}</h5>
         </EuiFlexItem>
+        {onAddFilter && !dataView.metaFields.includes(field.name) && !field.scripted && (
+          <EuiFlexItem grow={false} data-test-subj="discoverFieldListPanelAddExistFilterItem">
+            <EuiToolTip content={addExistFilterTooltip}>
+              <EuiButtonIcon
+                onClick={() => {
+                  setOpen(false);
+                  onAddFilter('_exists_', field.name, '+');
+                }}
+                iconType="filter"
+                data-test-subj={`discoverFieldListPanelAddExistFilter-${field.name}`}
+                aria-label={addExistFilterTooltip}
+              />
+            </EuiToolTip>
+          </EuiFlexItem>
+        )}
         {canEditField && (
           <EuiFlexItem grow={false} data-test-subj="discoverFieldListPanelEditItem">
-            <EuiButtonIcon
-              onClick={() => {
-                if (onEditField) {
-                  togglePopover();
-                  onEditField(field.name);
-                }
-              }}
-              iconType="pencil"
-              data-test-subj={`discoverFieldListPanelEdit-${field.name}`}
-              aria-label={i18n.translate('discover.fieldChooser.discoverField.editFieldLabel', {
-                defaultMessage: 'Edit data view field',
-              })}
-            />
+            <EuiToolTip content={editFieldTooltip}>
+              <EuiButtonIcon
+                onClick={() => {
+                  if (onEditField) {
+                    togglePopover();
+                    onEditField(field.name);
+                  }
+                }}
+                iconType="pencil"
+                data-test-subj={`discoverFieldListPanelEdit-${field.name}`}
+                aria-label={editFieldTooltip}
+              />
+            </EuiToolTip>
           </EuiFlexItem>
         )}
         {canDeleteField && (
           <EuiFlexItem grow={false} data-test-subj="discoverFieldListPanelDeleteItem">
-            <EuiToolTip
-              content={i18n.translate('discover.fieldChooser.discoverField.deleteFieldLabel', {
-                defaultMessage: 'Delete data view field',
-              })}
-            >
+            <EuiToolTip content={deleteFieldTooltip}>
               <EuiButtonIcon
                 onClick={() => {
                   onDeleteField?.(field.name);
@@ -388,9 +418,7 @@ function DiscoverFieldComponent({
                 iconType="trash"
                 data-test-subj={`discoverFieldListPanelDelete-${field.name}`}
                 color="danger"
-                aria-label={i18n.translate('discover.fieldChooser.discoverField.deleteFieldLabel', {
-                  defaultMessage: 'Delete data view field',
-                })}
+                aria-label={deleteFieldTooltip}
               />
             </EuiToolTip>
           </EuiFlexItem>
