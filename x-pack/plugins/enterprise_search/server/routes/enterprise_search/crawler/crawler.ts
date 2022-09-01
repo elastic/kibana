@@ -14,6 +14,8 @@ import { ErrorCode } from '../../../../common/types/error_codes';
 import { addConnector } from '../../../lib/connectors/add_connector';
 import { deleteConnectorById } from '../../../lib/connectors/delete_connector';
 import { fetchConnectorByIndexName } from '../../../lib/connectors/fetch_connectors';
+import { fetchCrawlerByIndexName } from '../../../lib/crawler/fetch_crawlers';
+import { deleteIndex } from '../../../lib/indices/delete_index';
 import { RouteDependencies } from '../../../plugin';
 import { createError } from '../../../utils/create_error';
 import { elasticsearchErrorHandler } from '../../../utils/elasticsearch_error_handler';
@@ -45,33 +47,71 @@ export function registerCrawlerRoutes(routeDependencies: RouteDependencies) {
       };
       const { client } = (await context.core).elasticsearch;
 
+      const indexExists = await client.asCurrentUser.indices.exists({
+        index: request.body.index_name,
+      });
+      if (indexExists) {
+        return createError({
+          errorCode: ErrorCode.INDEX_ALREADY_EXISTS,
+          message: i18n.translate(
+            'xpack.enterpriseSearch.server.routes.addCrawler.indexExistsError',
+            {
+              defaultMessage: 'This index already exists',
+            }
+          ),
+          response,
+          statusCode: 409,
+        });
+      }
+
+      const crawler = await fetchCrawlerByIndexName(client, request.body.index_name);
+      if (crawler) {
+        return createError({
+          errorCode: ErrorCode.CRAWLER_ALREADY_EXISTS,
+          message: i18n.translate(
+            'xpack.enterpriseSearch.server.routes.addCrawler.crawlerExistsError',
+            {
+              defaultMessage: 'A crawler for this index already exists',
+            }
+          ),
+          response,
+          statusCode: 409,
+        });
+      }
+
+      const connector = await fetchConnectorByIndexName(client, request.body.index_name);
+      if (connector) {
+        return createError({
+          errorCode: ErrorCode.CONNECTOR_DOCUMENT_ALREADY_EXISTS,
+          message: i18n.translate(
+            'xpack.enterpriseSearch.server.routes.addCrawler.connectorExistsError',
+            {
+              defaultMessage: 'A connector for this index already exists',
+            }
+          ),
+          response,
+          statusCode: 409,
+        });
+      }
+
       try {
         await addConnector(client, connParams);
-        return enterpriseSearchRequestHandler.createRequest({
+        const res = await enterpriseSearchRequestHandler.createRequest({
           path: '/api/ent/v1/internal/indices',
         })(context, request, response);
+
+        if (res.status !== 200) {
+          throw new Error(res.payload.message);
+        }
+        return res;
       } catch (error) {
-        if (
-          (error as Error).message === ErrorCode.CONNECTOR_DOCUMENT_ALREADY_EXISTS ||
-          (error as Error).message === ErrorCode.INDEX_ALREADY_EXISTS
-        ) {
-          return createError({
-            errorCode: (error as Error).message as ErrorCode,
-            message: i18n.translate(
-              'xpack.enterpriseSearch.server.routes.addConnector.connectorExistsError',
-              {
-                defaultMessage: 'Connector or index already exists',
-              }
-            ),
-            response,
-            statusCode: 409,
-          });
-        }
         // clean up connector index if it was created
-        const connector = await fetchConnectorByIndexName(client, request.body.index_name);
-        if (connector) {
-          await deleteConnectorById(client, connector.id);
+        const createdConnector = await fetchConnectorByIndexName(client, request.body.index_name);
+        if (createdConnector) {
+          await deleteConnectorById(client, createdConnector.id);
+          await deleteIndex(client, createdConnector.index_name);
         }
+
         throw error;
       }
     })
