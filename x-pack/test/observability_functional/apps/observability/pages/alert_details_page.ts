@@ -35,6 +35,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('Alert Detail / Alert Flyout', () => {
       before(async () => {
+        await observability.alerts.common.setKibanaTimeZoneToUTC();
         await observability.alerts.common.navigateToTimeWithData();
       });
 
