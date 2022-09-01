@@ -5,120 +5,6 @@
     "functions": [
       {
         "parentPluginId": "data",
-        "id": "def-public.handleResponse",
-        "type": "Function",
-        "tags": [],
-        "label": "handleResponse",
-        "description": [],
-        "signature": [
-          "(request: ",
-          "SearchRequest",
-          ", response: ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-common.IKibanaSearchResponse",
-            "text": "IKibanaSearchResponse"
-          },
-          "<any>, { disableShardFailureWarning }: ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-common.SearchSourceSearchOptions",
-            "text": "SearchSourceSearchOptions"
-          },
-          ", theme: ",
-          "ThemeServiceStart",
-          ") => ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-common.IKibanaSearchResponse",
-            "text": "IKibanaSearchResponse"
-          },
-          "<any>"
-        ],
-        "path": "src/plugins/data/public/search/fetch/handle_response.tsx",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "data",
-            "id": "def-public.handleResponse.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "request",
-            "description": [],
-            "signature": [
-              "SearchRequest"
-            ],
-            "path": "src/plugins/data/public/search/fetch/handle_response.tsx",
-            "deprecated": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.handleResponse.$2",
-            "type": "Object",
-            "tags": [],
-            "label": "response",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.IKibanaSearchResponse",
-                "text": "IKibanaSearchResponse"
-              },
-              "<any>"
-            ],
-            "path": "src/plugins/data/public/search/fetch/handle_response.tsx",
-            "deprecated": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.handleResponse.$3",
-            "type": "Object",
-            "tags": [],
-            "label": "{ disableShardFailureWarning }",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.SearchSourceSearchOptions",
-                "text": "SearchSourceSearchOptions"
-              }
-            ],
-            "path": "src/plugins/data/public/search/fetch/handle_response.tsx",
-            "deprecated": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.handleResponse.$4",
-            "type": "Object",
-            "tags": [],
-            "label": "theme",
-            "description": [],
-            "signature": [
-              "ThemeServiceStart"
-            ],
-            "path": "src/plugins/data/public/search/fetch/handle_response.tsx",
-            "deprecated": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
         "id": "def-public.isEsError",
         "type": "Function",
         "tags": [],
@@ -593,7 +479,9 @@
             "type": "Function",
             "tags": [],
             "label": "showError",
-            "description": [],
+            "description": [
+              "\nShow toast for caught error"
+            ],
             "signature": [
               "(e: Error) => void"
             ],
@@ -606,13 +494,80 @@
                 "type": "Object",
                 "tags": [],
                 "label": "e",
-                "description": [],
+                "description": [
+                  "Error"
+                ],
                 "signature": [
                   "Error"
                 ],
                 "path": "src/plugins/data/public/search/types.ts",
                 "deprecated": false,
                 "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.ISearchStart.showWarnings",
+            "type": "Function",
+            "tags": [],
+            "label": "showWarnings",
+            "description": [
+              "\nShow warnings, or customize how they're shown"
+            ],
+            "signature": [
+              "(adapter: ",
+              {
+                "pluginId": "inspector",
+                "scope": "common",
+                "docId": "kibInspectorPluginApi",
+                "section": "def-common.RequestAdapter",
+                "text": "RequestAdapter"
+              },
+              ", cb?: ",
+              "WarningHandlerCallback",
+              " | undefined) => void"
+            ],
+            "path": "src/plugins/data/public/search/types.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-public.ISearchStart.showWarnings.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "adapter",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "inspector",
+                    "scope": "common",
+                    "docId": "kibInspectorPluginApi",
+                    "section": "def-common.RequestAdapter",
+                    "text": "RequestAdapter"
+                  }
+                ],
+                "path": "src/plugins/data/public/search/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-public.ISearchStart.showWarnings.$2",
+                "type": "Function",
+                "tags": [],
+                "label": "cb",
+                "description": [
+                  "WarningHandlerCallback - optional callback to intercept warnings"
+                ],
+                "signature": [
+                  "WarningHandlerCallback",
+                  " | undefined"
+                ],
+                "path": "src/plugins/data/public/search/types.ts",
+                "deprecated": false,
+                "isRequired": false
               }
             ],
             "returnComment": []
