@@ -8,6 +8,7 @@
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { I18nService } from '@kbn/core-i18n-server-internal';
+import type { I18nService } from '@kbn/core-i18n-server-internal';
 import type { I18nServiceSetup } from '@kbn/core-i18n-server';
 
 const createSetupContractMock = () => {
