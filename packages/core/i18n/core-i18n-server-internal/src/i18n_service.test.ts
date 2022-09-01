@@ -17,7 +17,7 @@ import { I18nService } from './i18n_service';
 
 import { configServiceMock } from '@kbn/config-mocks';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
-import { httpServiceMock } from '../mocks';
+import { httpServiceMock } from '@kbn/core-http-server-mocks';
 
 const getConfigService = (locale = 'en') => {
   const configService = configServiceMock.create();
