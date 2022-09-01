@@ -12,6 +12,7 @@ import {
   EuiContextMenuPanel,
   EuiFlexItem,
   EuiPopover,
+  EuiPopoverTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -72,7 +73,7 @@ export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
         >
           <FormattedMessage
             id="xpack.ml.explorer.anomalies.addToDashboardLabel"
-            defaultMessage="Add anomaly charts to dashboard"
+            defaultMessage="Add to dashboard"
           />
         </EuiContextMenuItem>
       );
@@ -94,7 +95,7 @@ export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
         >
           <FormattedMessage
             id="xpack.ml.explorer.attachToCaseLabel"
-            defaultMessage="Attach to case"
+            defaultMessage="Add to case"
           />
         </EuiContextMenuItem>
       );
@@ -127,6 +128,11 @@ export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
             panelPaddingSize="none"
             anchorPosition="downLeft"
           >
+             <EuiPopoverTitle paddingSize="s">
+                {i18n.translate('xpack.ml.explorer.anomalies.actionsPopoverLabel', {
+                  defaultMessage: 'Anomaly charts',
+                })}
+              </EuiPopoverTitle>
             <EuiContextMenuPanel items={menuItems} />
           </EuiPopover>
         </EuiFlexItem>
