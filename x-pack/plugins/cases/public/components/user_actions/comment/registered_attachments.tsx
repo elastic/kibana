@@ -12,6 +12,7 @@
  */
 
 import React, { Suspense } from 'react';
+import { memoize } from 'lodash';
 
 import { EuiCallOut, EuiCode, EuiLoadingSpinner } from '@elastic/eui';
 import { AttachmentType } from '../../../client/attachment_framework/types';
@@ -30,6 +31,29 @@ type BuilderArgs<C, R> = Pick<UserActionBuilderArgs, 'userAction' | 'caseData'> 
   getId: () => string;
   getAttachmentViewProps: () => object;
 };
+
+/**
+ * Provides a render function for attachment type
+ */
+const getAttachmentRenderer = memoize((attachmentType: AttachmentType<unknown>) => {
+  const attachmentViewObject = attachmentType.getAttachmentViewObject();
+
+  let AttachmentElement: React.ReactElement;
+
+  const renderCallback = (props: object) => {
+    if (!attachmentViewObject.children) return;
+
+    if (!AttachmentElement) {
+      AttachmentElement = React.createElement(attachmentViewObject.children, props);
+    } else {
+      AttachmentElement = React.cloneElement(AttachmentElement, props);
+    }
+
+    return <Suspense fallback={<EuiLoadingSpinner />}>{AttachmentElement}</Suspense>;
+  };
+
+  return renderCallback;
+});
 
 export const createRegisteredAttachmentUserActionBuilder = <
   C extends CommentResponse,
@@ -75,6 +99,7 @@ export const createRegisteredAttachmentUserActionBuilder = <
     }
 
     const attachmentType = registry.get(attachmentTypeId);
+    const renderer = getAttachmentRenderer(attachmentType);
 
     const attachmentViewObject = attachmentType.getAttachmentViewObject();
     const props = {
@@ -101,11 +126,7 @@ export const createRegisteredAttachmentUserActionBuilder = <
             {attachmentViewObject.actions}
           </>
         ),
-        children: attachmentViewObject.children ? (
-          <Suspense fallback={<EuiLoadingSpinner />}>
-            {React.createElement(attachmentViewObject.children, props)}
-          </Suspense>
-        ) : undefined,
+        children: renderer(props),
       },
     ];
   },
