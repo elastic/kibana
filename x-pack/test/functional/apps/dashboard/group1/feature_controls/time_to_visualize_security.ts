@@ -30,11 +30,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const find = getService('find');
   const kbnServer = getService('kibanaServer');
 
-  describe.only('dashboard time to visualize security', () => {
+  describe('dashboard time to visualize security', () => {
     before(async () => {
-      // await esArchiver.load(
-      // //   'x-pack/test/functional/es_archives/dashboard/feature_controls/security'
-      // );
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
       await kbnServer.importExport.load(
         'x-pack/test/functional/fixtures/kbn_archiver/dashboard/feature_controls/security/security.json'
