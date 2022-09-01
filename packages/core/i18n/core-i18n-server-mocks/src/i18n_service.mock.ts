@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { PublicMethodsOf } from '@kbn/utility-types';
-import type { I18nServiceSetup, I18nService } from './i18n_service';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { I18nService } from '@kbn/core-i18n-server-internal';
+import type { I18nServiceSetup } from '@kbn/core-i18n-server';
 
 const createSetupContractMock = () => {
   const mock: jest.Mocked<I18nServiceSetup> = {

@@ -6,10 +6,8 @@
  * Side Public License, v 1.
  */
 
-export const globbyMock = jest.fn();
-jest.doMock('globby', () => globbyMock);
-
-export const readFileMock = jest.fn();
-jest.doMock('./fs', () => ({
-  readFile: readFileMock,
-}));
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../..',
+  roots: ['<rootDir>/packages/core/i18n/core-i18n-server'],
+};
