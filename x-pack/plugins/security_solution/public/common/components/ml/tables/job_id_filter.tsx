@@ -38,18 +38,19 @@ export const JobIdFilter: React.FC<{
   const button = useMemo(
     () => (
       <EuiFilterButton
+        disabled={jobIds.length === 0}
         data-test-subj="risk-filter-button"
         hasActiveFilters={selectedJobIds.length > 0}
         iconType="arrowDown"
         isSelected={isPopoverOpen}
         numActiveFilters={selectedJobIds.length}
         onClick={onButtonClick}
-        contentProps={{ style: { minWidth: 120 } }} // avoid resizing when selecting job id
+        contentProps={{ style: { minWidth: 112 } }} // avoid resizing when selecting job id
       >
         {title}
       </EuiFilterButton>
     ),
-    [isPopoverOpen, onButtonClick, title, selectedJobIds.length]
+    [isPopoverOpen, onButtonClick, title, selectedJobIds.length, jobIds]
   );
 
   return (
