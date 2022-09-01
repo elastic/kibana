@@ -16,7 +16,7 @@ export const ABOUT_DETAILS =
 
 export const ADDITIONAL_LOOK_BACK_DETAILS = 'Additional look-back time';
 
-export const ALERTS_TAB = '[data-test-subj="alertsTab"]';
+export const ALERTS_TAB = '[data-test-subj="navigation-alerts"]';
 
 export const ANOMALY_SCORE_DETAILS = 'Anomaly score';
 
@@ -31,7 +31,7 @@ export const DETAILS_DESCRIPTION = '.euiDescriptionList__description';
 
 export const DETAILS_TITLE = '.euiDescriptionList__title';
 
-export const EXCEPTIONS_TAB = '[data-test-subj="exceptionsTab"]';
+export const EXCEPTIONS_TAB = '[data-test-subj="navigation-rule_exceptions"]';
 
 export const FALSE_POSITIVES_DETAILS = 'False positive examples';
 
