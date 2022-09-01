@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { UserAvatar, UserAvatarProps } from './user_avatar';
-// import mdx from './README.mdx';
+import mdx from './README.mdx';
 import { UserProfileUserInfo } from './user_profile';
 
 export default {
@@ -16,7 +16,7 @@ export default {
   description: '',
   parameters: {
     docs: {
-      // page: mdx,
+      page: mdx,
     },
   },
 };
