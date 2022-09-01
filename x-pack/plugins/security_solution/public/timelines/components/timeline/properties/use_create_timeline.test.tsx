@@ -14,6 +14,7 @@ import { mount, shallow } from 'enzyme';
 import { TimelineType } from '../../../../../common/types/timeline';
 import { TestProviders } from '../../../../common/mock';
 import { useCreateTimelineButton } from './use_create_timeline';
+import { InputsModelId } from '../../../../common/store/inputs/constants';
 
 const mockDispatch = jest.fn();
 
@@ -136,7 +137,10 @@ describe('useCreateTimelineButton', () => {
         expect(mockDispatch.mock.calls[2][0].type).toEqual(
           'x-pack/security_solution/local/inputs/ADD_LINK_TO'
         );
-        expect(mockDispatch.mock.calls[2][0].payload).toEqual(['global', 'timeline']);
+        expect(mockDispatch.mock.calls[2][0].payload).toEqual([
+          InputsModelId.global,
+          InputsModelId.timeline,
+        ]);
         expect(mockDispatch.mock.calls[3][0].type).toEqual(
           'x-pack/security_solution/local/app/ADD_NOTE'
         );
