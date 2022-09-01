@@ -7,7 +7,6 @@
 
 import './filters.scss';
 import React, { useState } from 'react';
-import { fromKueryExpression, luceneStringToDsl, toElasticsearchQuery } from '@kbn/es-query';
 import { omit } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiLink, htmlIdGenerator } from '@elastic/eui';
@@ -57,29 +56,6 @@ const defaultFilter: Filter = {
   },
   label: '',
 };
-
-export const validateQuery = (input: Query | undefined, indexPattern: IndexPattern) => {
-  let isValid = true;
-  let error: string | undefined;
-
-  try {
-    if (input) {
-      if (input.language === 'kuery') {
-        toElasticsearchQuery(fromKueryExpression(input.query), indexPattern);
-      } else {
-        luceneStringToDsl(input.query);
-      }
-    }
-  } catch (e) {
-    isValid = false;
-    error = e.message;
-  }
-
-  return { isValid, error };
-};
-
-export const isQueryValid = (input: Query, indexPattern: IndexPattern) =>
-  validateQuery(input, indexPattern).isValid;
 
 export interface FiltersIndexPatternColumn extends BaseIndexPatternColumn {
   operationType: typeof OPERATION_NAME;

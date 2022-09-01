@@ -10,12 +10,13 @@ import type { Query } from '@kbn/data-plugin/common';
 import type { QueryPointEventAnnotationConfig } from '@kbn/event-annotation-plugin/common';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { QueryInput } from '../../../../indexpattern_datasource/query_input';
 import {
   fieldExists,
   FieldOption,
   FieldOptionValue,
   FieldPicker,
+  QueryInput,
+  validateQuery,
 } from '../../../../shared_components';
 import type { FramePublicAPI } from '../../../../types';
 import type { XYState, XYAnnotationLayerConfig } from '../../types';
@@ -56,6 +57,10 @@ export const ConfigPanelQueryAnnotation = ({
         'data-test-subj': `lns-fieldOption-${field.name}`,
       } as FieldOption<FieldOptionValue>;
     });
+  const { isValid: isQueryInputValid, error: queryInputError } = validateQuery(
+    annotation?.filter,
+    currentIndexPattern
+  );
 
   const selectedField = annotation?.timeField;
   return (
@@ -96,6 +101,8 @@ export const ConfigPanelQueryAnnotation = ({
         label={i18n.translate('xpack.lens.xyChart.annotation.queryInput', {
           defaultMessage: 'Annotation query',
         })}
+        isInvalid={!isQueryInputValid}
+        error={queryInputError}
       >
         <QueryInput
           value={inputQuery}
@@ -104,7 +111,7 @@ export const ConfigPanelQueryAnnotation = ({
           }}
           disableAutoFocus
           indexPatternTitle={frame.dataViews.indexPatterns[layer.indexPatternId].title}
-          isInvalid={false}
+          isInvalid={isQueryInputValid}
           onSubmit={() => {}}
           data-test-subj="annotation-query-based-query-input"
           placeholder={

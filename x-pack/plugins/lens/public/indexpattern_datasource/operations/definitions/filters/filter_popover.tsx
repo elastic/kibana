@@ -10,10 +10,10 @@ import './filter_popover.scss';
 import React from 'react';
 import { EuiPopover, EuiSpacer } from '@elastic/eui';
 import type { Query } from '@kbn/es-query';
+import { QueryInput, isQueryValid } from '../../../../shared_components';
 import { IndexPattern } from '../../../../types';
-import { FilterValue, defaultLabel, isQueryValid } from '.';
+import { FilterValue, defaultLabel } from '.';
 import { LabelInput } from '../shared_components';
-import { QueryInput } from '../../../query_input';
 
 export const FilterPopover = ({
   filter,
