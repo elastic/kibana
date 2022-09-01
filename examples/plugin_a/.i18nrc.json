@@ -1,0 +1,7 @@
+{
+  "prefix": "pluginA",
+  "paths": {
+    "pluginA": "."
+  },
+  "translations": ["translations/ja-JP.json"]
+}

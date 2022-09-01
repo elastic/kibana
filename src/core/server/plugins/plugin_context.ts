@@ -223,6 +223,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
       basePath: deps.http.basePath,
       csp: deps.http.csp,
       getServerInfo: deps.http.getServerInfo,
+      registerRPCDefinition: deps.registerRPCDefinition,
     },
     i18n: deps.i18n,
     logging: {

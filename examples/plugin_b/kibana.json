@@ -1,0 +1,14 @@
+{
+  "id": "pluginB",
+  "version": "1.0.0",
+  "kibanaVersion": "kibana",
+  "owner": {
+    "name": "App Services",
+    "githubTeam": "kibana-app-services"
+  },
+  "description": "",
+  "server": true,
+  "ui": true,
+  "requiredPlugins": ["navigation"],
+  "optionalPlugins": []
+}
