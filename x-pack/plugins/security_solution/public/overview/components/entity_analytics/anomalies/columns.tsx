@@ -11,12 +11,14 @@ import { ML_PAGES, useMlHref } from '@kbn/ml-plugin/public';
 import { useDispatch } from 'react-redux';
 import * as i18n from './translations';
 import type { AnomaliesCount } from '../../../../common/components/ml/anomaly/use_anomalies_search';
-import { AnomalyJobStatus } from '../../../../common/components/ml/anomaly/use_anomalies_search';
+import {
+  AnomalyJobStatus,
+  AnomalyEntity,
+} from '../../../../common/components/ml/anomaly/use_anomalies_search';
 import { useKibana } from '../../../../common/lib/kibana';
 import { LinkAnchor, SecuritySolutionLinkAnchor } from '../../../../common/components/links';
 import { SecurityPageName } from '../../../../app/types';
-import type { NotableAnomaliesJobId, NotableAnomaliesJobId } from './config';
-import { AnomalyConfigEntity, NOTABLE_ANOMALIES_CONFIG } from './config';
+import type { NotableAnomaliesJobId } from './config';
 import { usersActions } from '../../../../users/store';
 import { hostsActions } from '../../../../hosts/store';
 import { HostsType } from '../../../../hosts/store/model';
@@ -62,11 +64,11 @@ export const useAnomaliesColumns = (loading: boolean): AnomaliesColumns => {
         mobileOptions: { show: true },
         width: '15%',
         'data-test-subj': 'anomalies-table-column-count',
-        render: (count, { status, jobId, name }) => {
+        render: (count, { status, jobId, name, entity }) => {
           if (loading) return '';
 
           if (count > 0 || status === AnomalyJobStatus.enabled) {
-            return <AnomaliesTabLink count={count} jobId={jobId} jobName={name} />;
+            return <AnomaliesTabLink count={count} jobId={jobId} jobName={name} entity={entity} />;
           } else {
             if (status === AnomalyJobStatus.disabled && jobId) {
               return <EnableJobLink jobId={jobId} />;
@@ -123,22 +125,24 @@ const AnomaliesTabLink = ({
   count,
   jobId,
   jobName,
+  entity,
 }: {
   count: number;
   jobId?: string;
   jobName: NotableAnomaliesJobId;
+  entity: AnomalyEntity;
 }) => {
   const dispatch = useDispatch();
-  const entity = NOTABLE_ANOMALIES_CONFIG[jobName].entity;
+
   const deepLinkId =
-    entity === AnomalyConfigEntity.User
+    entity === AnomalyEntity.User
       ? SecurityPageName.usersAnomalies
       : SecurityPageName.hostsAnomalies;
 
   const onClick = useCallback(() => {
     if (!jobId) return;
 
-    if (entity === AnomalyConfigEntity.User) {
+    if (entity === AnomalyEntity.User) {
       dispatch(
         usersActions.updateUsersAnomaliesJobIdFilter({
           jobIds: [jobId],
