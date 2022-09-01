@@ -28995,7 +28995,6 @@
     "xpack.securitySolution.timeline.properties.addTimelineButtonLabel": "添加新时间线或模板",
     "xpack.securitySolution.timeline.properties.addToFavoriteButtonLabel": "添加到收藏夹",
     "xpack.securitySolution.timeline.properties.attachToCaseButtonLabel": "附加到案例",
-    "xpack.securitySolution.timeline.properties.attachToExistingCaseButtonLabel": "附加到现有案例......",
     "xpack.securitySolution.timeline.properties.attachToNewCaseButtonLabel": "附加到新案例",
     "xpack.securitySolution.timeline.properties.autosavedLabel": "已自动保存",
     "xpack.securitySolution.timeline.properties.descriptionPlaceholder": "添加描述",
