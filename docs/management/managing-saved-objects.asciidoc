@@ -1,5 +1,5 @@
 [[managing-saved-objects]]
-== Saved Objects
+== Manage saved objects
 
 Copy, edit, delete, import, and export the objects you have saved.
 These objects include dashboards, visualizations,
