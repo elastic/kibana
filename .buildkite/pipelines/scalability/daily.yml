@@ -1,4 +1,12 @@
 steps:
+  - label: ':male-mechanic::skin-tone-2: Pre-Build'
+    command: .buildkite/scripts/steps/scalability/pre_build.sh
+    agents:
+      queue: kibana-default
+    timeout_in_minutes: 10
+
+  - wait
+
   - label: ':kibana: Scalability Tests'
     command: .buildkite/scripts/steps/scalability/benchmarking.sh
     agents:
@@ -12,3 +20,4 @@ steps:
     command: .buildkite/scripts/lifecycle/post_build.sh
     agents:
       queue: kibana-default
+    timeout_in_minutes: 10
