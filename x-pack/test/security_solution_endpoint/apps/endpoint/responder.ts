@@ -136,6 +136,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           timeline.data.persistTimeline.timeline.version
         );
 
+        // start/stop the endpoint rule. This should cause the rule to run immediately
+        // and avoid us having to wait for the interval (of 5 minutes)
+        await detectionsTestService.stopStartEndpointRule();
+
         await detectionsTestService.waitForAlerts(
           getEndpointAlertsQueryForAgentId(endpointAgentId),
           // The Alerts rules seems to run every 5 minutes, so we wait here a max
