@@ -11,7 +11,7 @@ image::images/management-saved-objects.png[Saved Objects]
 [float]
 === Required permissions
 
-The `Saved Objects Management` {kib} privilege is required to access *Saved Objects*.
+To access *Saved Objects*, you must have the required `Saved Objects Management` {kib} privilege.
 
 To add the privilege, open the menu, then click *Stack Management > Roles*.
 
