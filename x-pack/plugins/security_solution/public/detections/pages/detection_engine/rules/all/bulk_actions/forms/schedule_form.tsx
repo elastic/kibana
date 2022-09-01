@@ -17,24 +17,18 @@ import { ScheduleItem } from '../../../../../../components/rules/schedule_item_f
 import { bulkSetSchedule as i18n } from '../translations';
 
 export interface ScheduleFormData {
-  schedule: {
-    interval: string;
-    from: string;
-  };
+  interval: string;
+  lookback: string;
 }
 
 const formSchema: FormSchema<ScheduleFormData> = {
-  schedule: {
-    interval: 'Interval',
-    from: 'from',
-  },
+  interval: 'INTERVAL',
+  lookback: 'LOOKBACK',
 };
 
 const defaultFormData: ScheduleFormData = {
-  schedule: {
-    interval: 'test',
-    from: 'from',
-  },
+  interval: '5s',
+  lookback: '5m',
 };
 
 interface ScheduleFormComponentProps {
@@ -58,9 +52,9 @@ export const ScheduleForm = ({ rulesCount, onClose, onConfirm }: ScheduleFormCom
     onConfirm({
       type: BulkActionEditType.set_schedule,
       value: {
-        interval: 'timelineId',
+        interval: data.interval,
         meta: {
-          from: 'string',
+          from: data.lookback,
         },
       },
     });
