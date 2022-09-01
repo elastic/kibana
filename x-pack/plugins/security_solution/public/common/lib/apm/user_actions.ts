@@ -41,6 +41,12 @@ export const TIMELINE_ACTIONS = {
   BULK_DELETE: `${APP_UI_ID} timeline bulkDelete`,
 };
 
+export const ALERTS_ACTIONS = {
+  OPEN_ANALYZER: `${APP_UI_ID} alerts openAnalyzer`,
+  OPEN_SESSION_VIEW: `${APP_UI_ID} alerts openSessionView`,
+  INVESTIGATE_IN_TIMELINE: `${APP_UI_ID} alerts investigateInTimeline`,
+};
+
 export const FIELD_BROWSER_ACTIONS = {
   FIELD_SAVED: `${APP_UI_ID} fieldBrowser fieldSaved`,
   FIELD_DELETED: `${APP_UI_ID} fieldBrowser fieldDeleted`,
