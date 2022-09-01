@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { UserProfileUserInfo } from '@kbn/user-profile-components/target_types/user_profile';
+import { getUserDisplayName, UserProfileUserInfo } from '@kbn/user-profile-components';
+import { isEmpty } from 'lodash';
 import * as i18n from './translations';
 
 export const getName = (user?: UserProfileUserInfo): string => {
@@ -13,5 +14,6 @@ export const getName = (user?: UserProfileUserInfo): string => {
     return i18n.UNKNOWN;
   }
 
-  return user.full_name ?? user.email ?? user.username;
+  const displayName = getUserDisplayName(user);
+  return !isEmpty(displayName) ? displayName : i18n.UNKNOWN;
 };
