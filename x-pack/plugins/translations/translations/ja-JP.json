@@ -27125,7 +27125,6 @@
     "xpack.securitySolution.detectionEngine.ruleDetails.backToRulesButton": "ルール",
     "xpack.securitySolution.detectionEngine.ruleDetails.deletedRule": "削除されたルール",
     "xpack.securitySolution.detectionEngine.ruleDetails.enableRuleLabel": "有効にする",
-    "xpack.securitySolution.detectionEngine.ruleDetails.exceptionsTab": "例外",
     "xpack.securitySolution.detectionEngine.ruleDetails.pageTitle": "ルール詳細",
     "xpack.securitySolution.detectionEngine.ruleDetails.ruleExecutionEventsTab": "実行イベント",
     "xpack.securitySolution.detectionEngine.ruleDetails.ruleExecutionLog.actionFieldNotFoundErrorDescription": "アラートインデックスにフィールド'kibana.alert.rule.execution.uuid'が見つかりません。",
