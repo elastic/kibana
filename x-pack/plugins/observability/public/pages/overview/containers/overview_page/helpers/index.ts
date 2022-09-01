@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { calculateBucketSize } from './calculateBucketSize';
+export { calculateBucketSize } from './calculate_bucket_size';

@@ -6,4 +6,4 @@
  */
 
 export { OverviewPage } from './overview_page';
-export { BucketSize } from './types';
+export type { BucketSize } from './types';
