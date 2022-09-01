@@ -17,6 +17,7 @@ import type {
   TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import type { CasesUiStart, CasesUiSetup } from '@kbn/cases-plugin/public';
+import type { TimelinesUIStart } from '@kbn/timelines-plugin/public';
 import type { getLazyOsqueryAction } from './shared_components';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -39,6 +40,7 @@ export interface StartPlugins {
   security: SecurityPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   cases: CasesUiStart;
+  timelines: TimelinesUIStart;
 }
 
 export interface SetupPlugins {
