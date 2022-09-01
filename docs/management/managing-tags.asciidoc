@@ -2,7 +2,7 @@
 [[managing-tags]]
 == Tags
 
-Use tags to categorize your saved objects.
+Use tags to categorize your saved objects,
 You can then filter for related objects based on shared tags.
 
 To get started, open the main menu, and then click *Stack Management > Tags*.
