@@ -269,9 +269,13 @@ export function MonitorDetailFlyout(props: Props) {
             <BodyInfo
               header={URL_HEADER_TEXT}
               content={
-                <EuiLink href={monitorDetail.data?.url?.full ?? ''}>
-                  {monitorDetail.data?.url?.full ?? ''}
-                </EuiLink>
+                monitorDetail.data?.url?.full ? (
+                  <EuiLink href={monitorDetail.data.url.full}>
+                    {monitorDetail.data.url.full}
+                  </EuiLink>
+                ) : (
+                  ''
+                )
               }
             />
           </EuiFlyoutBody>
