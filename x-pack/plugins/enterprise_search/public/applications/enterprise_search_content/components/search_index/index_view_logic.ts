@@ -16,7 +16,7 @@ import {
   clearFlashMessages,
   flashSuccessToast,
 } from '../../../shared/flash_messages';
-import { StartSyncApiLogic, StartSyncArgs } from '../../api/connector_package/start_sync_api_logic';
+import { StartSyncApiLogic, StartSyncArgs } from '../../api/connector/start_sync_api_logic';
 import {
   FetchIndexApiLogic,
   FetchIndexApiParams,

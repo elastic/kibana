@@ -5,7 +5,6 @@
     "declarationMap": true,
     "emitDeclarationOnly": true,
     "outDir": "target_types",
-    "rootDir": ".",
     "stripInternal": false,
     "types": [
       "jest",
@@ -14,6 +13,6 @@
     ]
   },
   "include": [
-    "*.ts"
+    "**/*.ts"
   ]
 }
