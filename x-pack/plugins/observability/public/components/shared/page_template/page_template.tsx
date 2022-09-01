@@ -162,7 +162,11 @@ export function ObservabilityPageTemplate({
                   : undefined
               }
             >
-              <KibanaPageTemplate.Section component="div" {...pageSectionProps}>
+              <KibanaPageTemplate.Section
+                component="div"
+                alignment={pageTemplateProps.isEmptyState ? 'center' : 'top'}
+                {...pageSectionProps}
+              >
                 {children}
               </KibanaPageTemplate.Section>
               {bottomBar && (
