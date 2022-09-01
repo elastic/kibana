@@ -69,7 +69,7 @@ export class SyntheticsPrivateLocation {
         newPolicy.name = `${config[ConfigKey.NAME]}-${locName}-${spaceId}`;
       }
 
-      newPolicy.namespace = 'default';
+      newPolicy.namespace = spaceId;
 
       const { formattedPolicy } = formatSyntheticsPolicy(newPolicy, config.type, {
         ...(config as Partial<MonitorFields>),
