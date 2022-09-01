@@ -8,7 +8,7 @@
 
 import { resolve, dirname } from 'path';
 import globby from 'globby';
-import { readFile } from './fs';
+import { readFile } from 'fs/promises';
 
 interface I18NRCFileStructure {
   translations?: string[];

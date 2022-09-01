@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import Fs from 'fs';
-import { promisify } from 'util';
-
-export const readFile = promisify(Fs.readFile);
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../../../..',
+  roots: ['<rootDir>/packages/core/i18n/core-i18n-server-internal'],
+};

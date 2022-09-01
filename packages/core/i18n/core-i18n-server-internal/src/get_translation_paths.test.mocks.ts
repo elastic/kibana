@@ -6,7 +6,10 @@
  * Side Public License, v 1.
  */
 
-export { config } from './i18n_config';
-export type { I18nConfigType } from './i18n_config';
-export { I18nService } from './i18n_service';
-export type { I18nServiceSetup } from './i18n_service';
+export const globbyMock = jest.fn();
+jest.doMock('globby', () => globbyMock);
+
+export const readFileMock = jest.fn();
+jest.doMock('fs/promises', () => ({
+  readFile: readFileMock,
+}));
