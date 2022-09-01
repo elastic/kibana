@@ -211,6 +211,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
     describe('severity filtering', () => {
       before(async () => {
+        await cases.navigation.navigateToApp();
         await cases.api.createCase({ severity: CaseSeverity.LOW });
         await cases.api.createCase({ severity: CaseSeverity.LOW });
         await cases.api.createCase({ severity: CaseSeverity.HIGH });
@@ -219,6 +220,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await header.waitUntilLoadingHasFinished();
         await cases.casesTable.waitForCasesToBeListed();
       });
+
       beforeEach(async () => {
         /**
          * There is no easy way to clear the filtering.
