@@ -233,13 +233,7 @@
           "id": "kibCorePluginApi"
         },
         {
-          "id": "kibCoreApplicationPluginApi"
-        },
-        {
           "id": "kibCoreChromePluginApi"
-        },
-        {
-          "id": "kibCoreSavedObjectsPluginApi"
         },
         {
           "id": "kibFieldFormatsPluginApi"

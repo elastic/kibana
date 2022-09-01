@@ -218,6 +218,7 @@ export const LensTopNavMenu = ({
   initialContext,
   theme$,
   indexPatternService,
+  currentDoc,
 }: LensTopNavMenuProps) => {
   const {
     data,
@@ -377,6 +378,7 @@ export const LensTopNavMenu = ({
         query,
         filters,
         initialContext,
+        currentDoc,
       });
       return menuEntry ? [menuEntry] : [];
     });
@@ -391,6 +393,7 @@ export const LensTopNavMenu = ({
     query,
     filters,
     initialContext,
+    currentDoc,
   ]);
 
   const layerMetaInfo = useMemo(() => {
