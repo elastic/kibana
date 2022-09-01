@@ -274,13 +274,15 @@ describe('createCommentUserActionBuilder', () => {
 
     it('renders correctly a persistable state attachment', async () => {
       const MockComponent = jest.fn((props) => {
-        return <div data-test-subj="my-custom-attachment" />;
+        return (
+          <div data-test-subj={`attachment_${props.persistableStateAttachmentState.test_foo}`} />
+        );
       });
 
       const SpyLazyFactory = jest.fn(() => {
         return Promise.resolve().then(() => {
           return {
-            default: MockComponent,
+            default: React.memo(MockComponent),
           };
         });
       });
@@ -293,21 +295,24 @@ describe('createCommentUserActionBuilder', () => {
       );
 
       const userAction = getPersistableStateUserAction();
+      const attachment01 = {
+        ...persistableStateAttachment,
+        persistableStateAttachmentState: { test_foo: '01' },
+      };
       const builder = createCommentUserActionBuilder({
         ...builderArgs,
         persistableStateAttachmentTypeRegistry,
         caseData: {
           ...builderArgs.caseData,
-          comments: [persistableStateAttachment],
+          comments: [attachment01],
         },
         userAction,
       });
 
-      const createdUserAction = builder.build();
-      const result = appMockRender.render(<EuiCommentList comments={createdUserAction} />);
+      const result = appMockRender.render(<EuiCommentList comments={builder.build()} />);
 
       await waitFor(() => {
-        expect(result.getByTestId('my-custom-attachment')).toBeInTheDocument();
+        expect(result.getByTestId('attachment_01')).toBeInTheDocument();
         expect(MockComponent).toHaveBeenCalledTimes(1);
         expect(SpyLazyFactory).toHaveBeenCalledTimes(1);
       });
@@ -317,10 +322,26 @@ describe('createCommentUserActionBuilder', () => {
       expect(result.getByTestId('user-action-username-with-avatar')).toBeInTheDocument();
       expect(screen.getByText('added an embeddable')).toBeInTheDocument();
 
-      result.rerender(<EuiCommentList comments={builder.build()} />);
+      result.unmount();
+
+      const attachment02 = {
+        ...persistableStateAttachment,
+        persistableStateAttachmentState: { test_foo: '02' },
+      };
+      const updateBuilder = createCommentUserActionBuilder({
+        ...builderArgs,
+        persistableStateAttachmentTypeRegistry,
+        caseData: {
+          ...builderArgs.caseData,
+          comments: [attachment02],
+        },
+        userAction,
+      });
+
+      const result2 = appMockRender.render(<EuiCommentList comments={updateBuilder.build()} />);
 
       await waitFor(() => {
-        expect(result.getByTestId('my-custom-attachment')).toBeInTheDocument();
+        expect(result2.getByTestId('attachment_02')).toBeInTheDocument();
         expect(MockComponent).toHaveBeenCalledTimes(2);
         expect(SpyLazyFactory).toHaveBeenCalledTimes(1);
       });
