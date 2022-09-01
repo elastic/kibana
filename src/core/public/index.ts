@@ -361,7 +361,6 @@ export type {
   PluginOpaqueId,
   IUiSettingsClient,
   UiSettingsState,
-  NavType,
 };
 
 export { __kbnBootstrap__ } from './kbn_bootstrap';
