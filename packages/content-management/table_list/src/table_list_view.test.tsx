@@ -12,7 +12,7 @@ import React, { useEffect } from 'react';
 import moment, { Moment } from 'moment';
 import { act } from 'react-dom/test-utils';
 
-import { WithServices } from '../__jest__';
+import { WithServices } from './__jest__';
 import { TableListView, Props as TableListViewProps } from './table_list_view';
 
 const mockUseEffect = useEffect;

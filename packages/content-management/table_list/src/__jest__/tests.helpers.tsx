@@ -7,7 +7,7 @@
  */
 import React from 'react';
 import type { ComponentType } from 'react';
-import { TableListViewProvider, Services } from '../table_list_view/services';
+import { TableListViewProvider, Services } from '../services';
 
 export const getMockServices = (overrides?: Partial<Services>) => {
   const services: Services = {

@@ -16,7 +16,7 @@ import { Params, getStoryArgTypes, getStoryServices } from './mocks';
 import { TableListView as Component, UserContentCommonSchema } from './table_list_view';
 import { TableListViewProvider } from './services';
 
-import mdx from '../../README.mdx';
+import mdx from '../README.mdx';
 
 const chance = new Chance();
 

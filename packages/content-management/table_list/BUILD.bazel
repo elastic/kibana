@@ -7,8 +7,8 @@ PKG_REQUIRE_NAME = "@kbn/content-management-table-list"
 
 SOURCE_FILES = glob(
   [
-    "src/**/*.ts",
-    "src/**/*.tsx",
+    "**/*.ts",
+    "**/*.tsx",
   ],
   exclude = [
     "**/*.config.js",
@@ -95,7 +95,6 @@ jsts_transpiler(
   name = "target_node",
   srcs = SRCS,
   build_pkg_name = package_name(),
-  root_input_dir = "src",
 )
 
 jsts_transpiler(
@@ -103,7 +102,6 @@ jsts_transpiler(
   srcs = SRCS,
   build_pkg_name = package_name(),
   web = True,
-  root_input_dir = "src",
 )
 
 ts_config(
@@ -124,7 +122,6 @@ ts_project(
   declaration_map = True,
   emit_declaration_only = True,
   out_dir = "target_types",
-  root_dir = "src",
   tsconfig = ":tsconfig",
 )
 
