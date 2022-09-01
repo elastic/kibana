@@ -346,7 +346,7 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
             showOverlappingTicks={true}
             tickFormat={(value) => xAxisFormatter.convert(value)}
             // temporary fix to reduce horizontal chart margin until fixed in Elastic Charts itself
-            labelFormat={() => ''}
+            labelFormat={useLegacyTimeAxis ? undefined : () => ''}
             timeAxisLayerCount={useLegacyTimeAxis ? 0 : 2}
             style={useLegacyTimeAxis ? {} : MULTILAYER_TIME_AXIS_STYLE}
           />
