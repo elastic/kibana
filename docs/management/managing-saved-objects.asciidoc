@@ -131,7 +131,7 @@ image:images/actions_icon.png[Actions icon].
 Or, indicate that you want the object to be shared to _all spaces_,
 which includes those that exist now and any created in the future.
 +
-Not all saved object types are shareable. If an object is shareable, the Spaces column shows which spaces it exists in. You can click
+Not all saved object types are shareable. If an object is shareable, the *Spaces* column shows where the object exists. You can click
 those space icons to open the Share UI.
 +
 The share operation automatically includes child objects that are related to the saved objects.
