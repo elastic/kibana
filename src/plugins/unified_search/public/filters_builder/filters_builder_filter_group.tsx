@@ -8,7 +8,7 @@
 
 import React, { useContext } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiPanel, EuiText } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
 import type { Path } from './filters_builder_types';
 import { ConditionTypes } from '../utils';
@@ -24,10 +24,19 @@ export interface FilterGroupProps {
   reverseBackground?: boolean;
 }
 
-const Delimiter = ({ conditionType }: { conditionType: ConditionTypes }) => {
+const Delimiter = ({
+  conditionType,
+  isRootLevelFilterGroup,
+}: {
+  conditionType: ConditionTypes;
+  isRootLevelFilterGroup: boolean;
+}) => {
   return conditionType === ConditionTypes.OR ? (
     <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
-      <EuiFlexItem grow={1} style={{ marginLeft: '-12px', flexGrow: 0.12 }}>
+      <EuiFlexItem
+        grow={1}
+        style={{ marginLeft: isRootLevelFilterGroup ? '4px' : '-12px', flexGrow: 0.12 }}
+      >
         <EuiHorizontalRule margin="m" />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
@@ -37,13 +46,13 @@ const Delimiter = ({ conditionType }: { conditionType: ConditionTypes }) => {
           })}
         </EuiText>
       </EuiFlexItem>
-      <EuiFlexItem grow={10} style={{ marginRight: '-12px' }}>
+      <EuiFlexItem grow={10} style={{ marginRight: isRootLevelFilterGroup ? '4px' : '-12px' }}>
         <EuiHorizontalRule margin="m" />
       </EuiFlexItem>
     </EuiFlexGroup>
   ) : (
     <EuiFlexGroup>
-      <EuiFlexItem grow={false} style={{ maxHeight: '8px' }}>
+      <EuiFlexItem grow={false} style={{ maxHeight: isRootLevelFilterGroup ? '0px' : '8px' }}>
         <EuiHorizontalRule margin="xs" />
       </EuiFlexItem>
     </EuiFlexGroup>
@@ -55,7 +64,7 @@ export const FilterGroup = ({
   conditionType,
   path,
   timeRangeForSuggestionsOverride,
-  reverseBackground = false,
+  reverseBackground = true,
 }: FilterGroupProps) => {
   const {
     globalParams: { maxDepth, hideOr },
@@ -67,9 +76,15 @@ export const FilterGroup = ({
   const andDisabled = isDepthReached && conditionType === ConditionTypes.OR;
   const removeDisabled = pathInArray.length <= 1 && filters.length === 1;
   const color = !reverseBackground ? 'subdued' : 'plain';
+  const isRootLevelFilterGroup = pathInArray.length <= 1;
 
   return (
-    <>
+    <EuiPanel
+      color={color}
+      paddingSize={`${isRootLevelFilterGroup ? 'none' : 'm'}`}
+      hasShadow={false}
+      hasBorder={!isRootLevelFilterGroup}
+    >
       {filters.map((filter, index, acc) => (
         <EuiFlexGroup direction="column" gutterSize="none">
           <EuiFlexItem>
@@ -88,11 +103,14 @@ export const FilterGroup = ({
 
           {conditionType && index + 1 < acc.length ? (
             <EuiFlexItem>
-              <Delimiter conditionType={conditionType} />
+              <Delimiter
+                conditionType={conditionType}
+                isRootLevelFilterGroup={isRootLevelFilterGroup}
+              />
             </EuiFlexItem>
           ) : null}
         </EuiFlexGroup>
       ))}
-    </>
+    </EuiPanel>
   );
 };

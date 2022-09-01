@@ -157,15 +157,13 @@ export function FilterItem({
   return (
     <>
       {conditionalOperationType ? (
-        <EuiPanel color={color} hasShadow={false} hasBorder>
-          <FilterGroup
-            path={path}
-            conditionType={conditionalOperationType}
-            filters={Array.isArray(filter) ? filter : filter.meta?.params}
-            timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
-            reverseBackground={!reverseBackground}
-          />
-        </EuiPanel>
+        <FilterGroup
+          path={path}
+          conditionType={conditionalOperationType}
+          filters={Array.isArray(filter) ? filter : filter.meta?.params}
+          timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
+          reverseBackground={!reverseBackground}
+        />
       ) : (
         <EuiDroppable
           droppableId={path}
@@ -191,7 +189,7 @@ export function FilterItem({
                 className={cx({ [cursorOr]: dropTarget === path && !hideOr })}
               >
                 <EuiFlexItem>
-                  <EuiPanel color="transparent" paddingSize={'none'} hasShadow={false}>
+                  <EuiPanel color={color} paddingSize={'none'} hasShadow={false}>
                     <EuiFlexGroup
                       gutterSize="m"
                       responsive={false}
