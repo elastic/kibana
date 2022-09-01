@@ -792,7 +792,7 @@ export class Authenticator {
     sessionValue,
     skipAuditEvent,
   }: InvalidateSessionValueParams) {
-    if (sessionValue && isSessionAuthenticated(sessionValue) && !skipAuditEvent) {
+    if (isSessionAuthenticated(sessionValue) && !skipAuditEvent) {
       const auditLogger = this.options.audit.asScoped(request);
       auditLogger.log(
         userLogoutEvent({
