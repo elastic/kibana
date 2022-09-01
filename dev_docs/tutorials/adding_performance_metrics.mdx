@@ -145,7 +145,7 @@ to follow if it's important for you to look inside of specific event e.g. `page-
   If a function that loads data is called when an app loads, when the user changes filters and when the refresh button is clicked, you should distinguish between
   these flows by specifying a `meta` field.
 - Avoid duplicate events 
-  Make sure that measurment and reporting happens in a point of the code that is executed only once. 
+  Make sure that measurement and reporting happens in a point of the code that is executed only once. 
   For example, make sure that refresh events are reported only once per button click.
 - Measure as close to the event as possible
   For example, if you're measuring the execution of a specific React Effect execution, place the measurment code inside the effect.
