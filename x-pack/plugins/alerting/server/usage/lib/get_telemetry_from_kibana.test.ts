@@ -103,6 +103,42 @@ describe('kibana index telemetry', () => {
               },
             ],
           },
+          connector_types_by_consumers: {
+            doc_count_error_upper_bound: 0,
+            sum_other_doc_count: 0,
+            buckets: [
+              {
+                key: 'alerts',
+                actions: {
+                  connector_types: {
+                    buckets: [
+                      {
+                        key: '.server-log',
+                        doc_count: 2,
+                      },
+                      {
+                        key: '.email',
+                        doc_count: 3,
+                      },
+                    ],
+                  },
+                },
+              },
+              {
+                key: 'siem',
+                actions: {
+                  connector_types: {
+                    buckets: [
+                      {
+                        key: '.index',
+                        doc_count: 4,
+                      },
+                    ],
+                  },
+                },
+              },
+            ],
+          },
           max_throttle_time: { value: 60 },
           min_throttle_time: { value: 0 },
           avg_throttle_time: { value: 30 },
@@ -175,6 +211,15 @@ describe('kibana index telemetry', () => {
         count_rules_snoozed: 11,
         count_rules_muted: 12,
         count_rules_with_muted_alerts: 13,
+        count_connector_types_by_consumers: {
+          alerts: {
+            __email: 3,
+            '__server-log': 2,
+          },
+          siem: {
+            __index: 4,
+          },
+        },
       });
     });
 
@@ -239,6 +284,7 @@ describe('kibana index telemetry', () => {
           max: 0,
           min: 0,
         },
+        count_connector_types_by_consumers: {},
       });
     });
   });

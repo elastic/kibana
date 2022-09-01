@@ -48,9 +48,7 @@ export interface AlertingUsage {
   //   warning: number;
   // };
   // // 5
-  // count_connector_types_by_rule_type_owner: {
-  //   [key: string]: string[];
-  // };
+  count_connector_types_by_consumers: Record<string, Record<string, number>>;
   // // 6
   // avg_connector_types_run_duration_per_day: Record<string, number>;
   // // 7

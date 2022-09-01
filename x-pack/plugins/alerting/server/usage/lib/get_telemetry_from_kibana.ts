@@ -12,6 +12,11 @@ import type {
   AggregationsStringTermsBucketKeys,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
+
+import {
+  ConnectorsByConsumersBucket,
+  groupConnectorsByConsumers,
+} from './group_connectors_by_consumers';
 import { groupRulesByNotifyWhen } from './group_rules_by_notify_when';
 import { groupRulesByStatus } from './group_rules_by_status';
 import { AlertingUsage } from '../types';
@@ -34,6 +39,7 @@ type GetTotalCountsResults = Pick<
   | 'count_rules_snoozed'
   | 'count_rules_muted'
   | 'count_rules_with_muted_alerts'
+  | 'count_connector_types_by_consumers'
   | 'throttle_time'
   | 'schedule_time'
   | 'throttle_time_number_s'
@@ -233,6 +239,25 @@ export async function getTotalCountAggregations({
               field: 'alert.notifyWhen',
             },
           },
+          connector_types_by_consumers: {
+            terms: {
+              field: 'alert.consumer',
+            },
+            aggs: {
+              actions: {
+                nested: {
+                  path: 'alert.actions',
+                },
+                aggs: {
+                  connector_types: {
+                    terms: {
+                      field: 'alert.actions.actionTypeId',
+                    },
+                  },
+                },
+              },
+            },
+          },
           sum_rules_with_tags: { sum: { field: 'rule_with_tags' } },
           sum_rules_snoozed: { sum: { field: 'rule_snoozed' } },
           sum_rules_muted: { sum: { field: 'rule_muted' } },
@@ -259,6 +284,7 @@ export async function getTotalCountAggregations({
       avg_actions_count: AggregationsSingleMetricAggregateBase;
       by_execution_status: AggregationsTermsAggregateBase<AggregationsStringTermsBucketKeys>;
       by_notify_when: AggregationsTermsAggregateBase<AggregationsStringTermsBucketKeys>;
+      connector_types_by_consumers: AggregationsTermsAggregateBase<ConnectorsByConsumersBucket>;
       sum_rules_with_tags: AggregationsSingleMetricAggregateBase;
       sum_rules_snoozed: AggregationsSingleMetricAggregateBase;
       sum_rules_muted: AggregationsSingleMetricAggregateBase;
@@ -276,6 +302,10 @@ export async function getTotalCountAggregations({
       parseSimpleRuleTypeBucket(aggregations.by_notify_when.buckets)
     );
 
+    const countConnectorTypesByConsumers = groupConnectorsByConsumers(
+      aggregations.connector_types_by_consumers.buckets
+    );
+
     return {
       hasErrors: false,
       count_total: totalRulesCount ?? 0,
@@ -286,6 +316,7 @@ export async function getTotalCountAggregations({
       count_rules_snoozed: aggregations.sum_rules_snoozed.value ?? 0,
       count_rules_muted: aggregations.sum_rules_muted.value ?? 0,
       count_rules_with_muted_alerts: aggregations.sum_rules_with_muted_alerts.value ?? 0,
+      count_connector_types_by_consumers: countConnectorTypesByConsumers,
       throttle_time: {
         min: `${aggregations.min_throttle_time.value ?? 0}s`,
         avg: `${aggregations.avg_throttle_time.value ?? 0}s`,
@@ -337,6 +368,7 @@ export async function getTotalCountAggregations({
       count_rules_snoozed: 0,
       count_rules_muted: 0,
       count_rules_with_muted_alerts: 0,
+      count_connector_types_by_consumers: {},
       throttle_time: {
         min: '0s',
         avg: '0s',
