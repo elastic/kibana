@@ -77,6 +77,8 @@ export const SnapshotPage = () => {
                 }}
                 pageSectionProps={{
                   contentProps: {
+                    // This is added to facilitate a full height layout whereby the
+                    // inner container will set its own height and be scrollable.
                     css: css`
                       display: flex;
                       flex-direction: column;
