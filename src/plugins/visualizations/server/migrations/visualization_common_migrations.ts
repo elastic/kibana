@@ -246,3 +246,24 @@ export const commonPreserveOldLegendSizeDefault = (visState: any) => {
 
   return visState;
 };
+
+export const commonRemoveExclamationCircleIcon = (visState: any) => {
+  if (visState && visState.type === 'metrics') {
+    const { params } = visState;
+
+    if (params.annotations && Array.isArray(params.annotations)) {
+      params.annotations.forEach((annotation: any) => {
+        if (annotation.icon === 'fa-exclamation-circle') {
+          annotation.icon = 'fa-exclamation-triangle';
+        }
+      });
+    }
+
+    delete params.default_index_pattern;
+    delete params.default_timefield;
+
+    return visState;
+  }
+
+  return visState;
+};
