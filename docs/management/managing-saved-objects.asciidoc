@@ -87,7 +87,7 @@ that the imported saved objects are compatible with the current version.
 However, saved objects can only be imported into the same version,
 a newer minor on the same major, or the next major.
 Exported saved objects are not backward compatible and cannot be imported
-into an older version of {kib}. The following table shows some examples:
+into an older version of {kib}. For example:
 
 |=======
 | Exporting version | Importing version | Compatible?
