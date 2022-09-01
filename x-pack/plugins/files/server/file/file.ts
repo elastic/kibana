@@ -101,11 +101,13 @@ export class File<M = unknown> implements IFile {
           return this.updateFileState({ action: 'uploaded', payload: { size } });
         }),
         catchError(async (e) => {
-          await this.updateFileState({ action: 'uploadError' }).catch(() => {
+          try {
+            await this.updateFileState({ action: 'uploadError' });
+          } catch (updateError) {
             this.logger.error(
-              `Could not update file ${this.id} after upload error ${e.message}. This file may be in an inconsistent state.`
+              `Could not update file ${this.id} after upload error (${e.message}). Update failed with: ${updateError.message}. This file may be in an inconsistent state.`
             );
-          });
+          }
           this.fileClient.deleteContent(this.id).catch(() => {});
           throw e;
         })
