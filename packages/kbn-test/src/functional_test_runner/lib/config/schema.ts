@@ -275,7 +275,7 @@ export const schema = Joi.object()
         kbnArchives: Joi.array().items(Joi.string()).default([]),
         esArchives: Joi.array().items(Joi.string()).default([]),
       })
-      .optional(),
+      .default(),
 
     /**
      * Optional settings to enable scalability testing for single user performance journey.

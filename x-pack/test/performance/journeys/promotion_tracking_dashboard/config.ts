@@ -15,6 +15,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const testFiles = [require.resolve(`./${JOURNEY_PROMOTION_TRACKING_DASHBOARD}`)];
 
   const config = {
+    ...performanceConfig.getAll(),
     testFiles,
     testData: {
       kbnArchives: ['x-pack/test/performance/kbn_archives/promotion_tracking_dashboard'],
@@ -43,7 +44,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ],
       maxDuration: '10m',
     },
-    ...performanceConfig.getAll(),
   };
 
   const apmGlobalLabels = {
