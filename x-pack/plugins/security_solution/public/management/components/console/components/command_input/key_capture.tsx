@@ -70,7 +70,6 @@ export const KeyCapture = memo<KeyCaptureProps>(({ onCapture, focusRef, onStateC
   //    3. When the 'keyup' event is triggered, we call `onCapture()`
   //        with all of the character that were entered
   //    4. We set the last input back to an empty string
-  const [, setLastInput] = useState('');
   const getTestId = useTestIdGenerator(useDataTestSubj());
   const inputRef = useRef<HTMLInputElement | null>(null);
   const blurInputRef = useRef<HTMLInputElement | null>(null);
@@ -96,11 +95,35 @@ export const KeyCapture = memo<KeyCaptureProps>(({ onCapture, focusRef, onStateC
     [onStateChange]
   );
 
+  const handleInputOnPaste = useCallback<FormEventHandler>(
+    (ev) => {
+      const value = ev.clipboardData.getData('text');
+      ev.stopPropagation();
+
+      const eventDetails = pick(ev, [
+        'key',
+        'altKey',
+        'ctrlKey',
+        'keyCode',
+        'metaKey',
+        'repeat',
+        'shiftKey',
+      ]);
+
+      onCapture({
+        value,
+        eventDetails,
+      });
+    },
+    [onCapture]
+  );
+
   // 1. Determine if the key press is one that we need to store ex) letters, digits, values that we see
   // 2. If the user clicks a key we don't need to store as text, but we need to do logic with ex) backspace, delete, l/r arrows, we must call onCapture
   const handleOnKeyDown = useCallback<KeyboardEventHandler>(
     (ev) => {
-      const newValue = ev.key;
+      // checking to ensure that the key is not a control character
+      const newValue = /^[\w\d]{2}/.test(ev.key) ? '' : ev.key;
 
       // @ts-expect-error
       if (!isCapturing || ev._CONSOLE_IGNORE_KEY) {
@@ -115,6 +138,11 @@ export const KeyCapture = memo<KeyCaptureProps>(({ onCapture, focusRef, onStateC
 
       ev.stopPropagation();
 
+      // allows for clipboard events to be captured via onPaste event handler
+      if (ev.metaKey || ev.ctrlKey) {
+        return;
+      }
+
       const eventDetails = pick(ev, [
         'key',
         'altKey',
@@ -126,7 +154,7 @@ export const KeyCapture = memo<KeyCaptureProps>(({ onCapture, focusRef, onStateC
       ]);
 
       onCapture({
-        value: newValue.length === 1 ? newValue : '',
+        value: newValue,
         eventDetails,
       });
     },
@@ -170,6 +198,7 @@ export const KeyCapture = memo<KeyCaptureProps>(({ onCapture, focusRef, onStateC
         onKeyDown={handleOnKeyDown}
         onBlur={handleInputOnBlur}
         onFocus={handleInputOnFocus}
+        onPaste={handleInputOnPaste}
         onChange={NOOP} // this just silences Jest output warnings
         ref={inputRef}
       />
