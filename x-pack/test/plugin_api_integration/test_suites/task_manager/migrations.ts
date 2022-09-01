@@ -137,7 +137,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
       expect(response.body._source?.task.status).to.eql(`unrecognized`);
     });
 
-    it('8.5.0 migrates all tasks to set enabled = true', async () => {
+    it('8.5.0 migrates all tasks to set enabled field', async () => {
       const response = await es.search<{ task: ConcreteTaskInstance }>(
         {
           index: '.kibana_task_manager',
@@ -155,7 +155,14 @@ export default function createGetTests({ getService }: FtrProviderContext) {
       expect(response.statusCode).to.eql(200);
       const tasks = response.body.hits.hits;
       tasks.forEach((task) => {
-        expect(task._source?.task?.enabled).to.eql(true);
+        if (
+          task._source?.task.status === 'failed' ||
+          task._source?.task.status === 'unrecognized'
+        ) {
+          expect(task._source?.task.enabled).to.eql(false);
+        } else {
+          expect(task._source?.task.enabled).to.eql(true);
+        }
       });
     });
   });

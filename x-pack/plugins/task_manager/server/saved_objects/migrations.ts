@@ -196,11 +196,15 @@ function resetAttemptsAndStatusForTheTasksWithoutSchedule(
 }
 
 function addEnabledField(doc: SavedObjectUnsanitizedDoc<ConcreteTaskInstance>) {
+  const enabled = !(
+    doc.attributes.status === TaskStatus.Failed || doc.attributes.status === TaskStatus.Unrecognized
+  );
+
   return {
     ...doc,
     attributes: {
       ...doc.attributes,
-      enabled: true,
+      enabled,
     },
   };
 }
