@@ -57,7 +57,7 @@ export class Semaphore {
 
   private schedule(task: Task) {
     this.queue.push(task);
-    setImmediate(() => this.next());
+    this.next();
   }
 
   private cancel(task: Task) {
