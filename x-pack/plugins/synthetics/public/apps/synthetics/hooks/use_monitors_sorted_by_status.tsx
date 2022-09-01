@@ -113,7 +113,6 @@ export function useMonitorsSortedByStatus(shouldUpdate: boolean) {
       !isEqual(downMonitorMap, downMonitors.current) ||
       !isEqual(monitors, currentMonitors.current)
     ) {
-      console.warn('reordering');
       const orderedDownMonitors: MonitorOverviewItem[] = [];
       const orderedUpMonitors: MonitorOverviewItem[] = [];
       const orderedDisabledMonitors: MonitorOverviewItem[] = [];
