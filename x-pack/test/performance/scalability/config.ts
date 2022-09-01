@@ -85,6 +85,10 @@ export default async function ({ readConfigFile, log }: FtrConfigProviderContext
         ...(!!AGGS_SHARD_DELAY ? ['--data.search.aggs.shardDelay.enabled=true'] : []),
         ...(!!DISABLE_PLUGINS ? ['--plugins.initialize=false'] : []),
       ],
+      serverArgs: [
+        ...performanceConfig.get('kbnTestServer.serverArgs'),
+        `--telemetry.labels.journeyName=${scalabilityJourney.journeyName}`,
+      ],
       env: {
         ELASTIC_APM_ACTIVE: process.env.ELASTIC_APM_ACTIVE,
         ELASTIC_APM_CONTEXT_PROPAGATION_ONLY: 'false',
