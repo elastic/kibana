@@ -15,7 +15,6 @@ import {
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { toNavLink } from './to_nav_link';
 
-
 const app = (props: Partial<PublicAppInfo> = {}): PublicAppInfo => ({
   id: 'some-id',
   title: 'some-title',
