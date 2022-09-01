@@ -16,8 +16,6 @@ import {
 
 import { ElasticsearchBlobStorageClient, BLOB_STORAGE_SYSTEM_INDEX_NAME } from '../es';
 
-import { configureSemaphore } from '../upload_semaphore';
-
 describe('Elasticsearch blob storage', () => {
   let manageES: TestElasticsearchUtils;
   let manageKbn: TestKibanaUtils;
@@ -26,7 +24,7 @@ describe('Elasticsearch blob storage', () => {
   const sandbox = sinon.createSandbox();
 
   beforeAll(async () => {
-    configureSemaphore(Infinity);
+    ElasticsearchBlobStorageClient.configureConcurrentUpload(Infinity);
     const { startES, startKibana } = createTestServers({ adjustTimeout: jest.setTimeout });
     manageES = await startES();
     manageKbn = await startKibana();

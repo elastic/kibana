@@ -6,4 +6,3 @@
  */
 
 export { ElasticsearchBlobStorageClient, MAX_BLOB_STORE_SIZE_BYTES } from './es';
-export { configureSemaphore } from './upload_semaphore';

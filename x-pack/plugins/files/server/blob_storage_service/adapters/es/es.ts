@@ -9,6 +9,7 @@ import assert from 'assert';
 import { once } from 'lodash';
 import { errors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { Semaphore } from '@kbn/std';
 import { Readable, Transform } from 'stream';
 import { pipeline } from 'stream/promises';
 import { promisify } from 'util';
@@ -17,7 +18,6 @@ import type { BlobStorageClient } from '../../types';
 import type { ReadableContentStream } from './content_stream';
 import { getReadableContentStream, getWritableContentStream } from './content_stream';
 import { mappings } from './mappings';
-import { getSemaphore, configureSemaphore } from './upload_semaphore';
 
 /**
  * Export this value for convenience to be used in tests. Do not use outside of
@@ -29,11 +29,14 @@ export const BLOB_STORAGE_SYSTEM_INDEX_NAME = '.kibana_blob_storage';
 export const MAX_BLOB_STORE_SIZE_BYTES = 50 * 1024 * 1024 * 1024; // 50 GiB
 
 export class ElasticsearchBlobStorageClient implements BlobStorageClient {
+  private static defaultSemaphore: Semaphore;
   /**
    * Call this function once to globally set a concurrent upload limit for
    * all {@link ElasticsearchBlobStorageClient} instances.
    */
-  public static configureConcurrentUpload = configureSemaphore;
+  public static configureConcurrentUpload(capacity: number) {
+    this.defaultSemaphore = new Semaphore(capacity);
+  }
 
   constructor(
     private readonly esClient: ElasticsearchClient,
@@ -44,12 +47,13 @@ export class ElasticsearchBlobStorageClient implements BlobStorageClient {
      * Override the default concurrent upload limit by passing in a different
      * semaphore
      */
-    private readonly uploadSemaphore = getSemaphore()
+    private readonly uploadSemaphore = ElasticsearchBlobStorageClient.defaultSemaphore
   ) {
     assert(
       this.index.startsWith('.kibana'),
       `Elasticsearch blob store index name must start with ".kibana", got ${this.index}.`
     );
+    assert(this.uploadSemaphore, `No default semaphore provided and no sempahore was passed in.`);
   }
 
   /**
