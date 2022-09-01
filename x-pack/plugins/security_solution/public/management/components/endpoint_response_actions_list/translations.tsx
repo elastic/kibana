@@ -78,8 +78,8 @@ export const TABLE_COLUMN_NAMES = Object.freeze({
   user: i18n.translate('xpack.securitySolution.responseActionsList.list.user', {
     defaultMessage: 'User',
   }),
-  host: i18n.translate('xpack.securitySolution.responseActionsList.list.host', {
-    defaultMessage: 'Host',
+  hosts: i18n.translate('xpack.securitySolution.responseActionsList.list.hosts', {
+    defaultMessage: 'Hosts',
   }),
   comments: i18n.translate('xpack.securitySolution.responseActionsList.list.comments', {
     defaultMessage: 'Comments',
