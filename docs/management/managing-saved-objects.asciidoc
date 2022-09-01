@@ -72,7 +72,7 @@ Export objects by selection or type.
 * To export objects by type, click *Export x objects* in the toolbar.
 
 {kib} creates an NDJSON with all your saved objects. By default, the NDJSON includes child objects related to the saved
-objects. Exported dashboards include their associated data views.
+objects. Exported dashboards include their associated {data-sources}.
 
 NOTE: The <<savedObjects-maxImportExportSize, `savedObjects.maxImportExportSize`>> configuration setting
 limits the number of saved objects that you can export.
