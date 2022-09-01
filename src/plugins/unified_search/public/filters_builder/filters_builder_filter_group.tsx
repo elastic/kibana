@@ -52,7 +52,7 @@ const Delimiter = ({
     </EuiFlexGroup>
   ) : (
     <EuiFlexGroup>
-      <EuiFlexItem grow={false} style={{ maxHeight: isRootLevelFilterGroup ? '0px' : '8px' }}>
+      <EuiFlexItem grow={false} style={{ maxHeight: '8px' }}>
         <EuiHorizontalRule margin="xs" />
       </EuiFlexItem>
     </EuiFlexGroup>
