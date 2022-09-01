@@ -103,9 +103,9 @@ const mockServices = {
         ...dataServiceMock.query.timefilter,
         timefilter: {
           ...dataServiceMock.query.timefilter.timefilter,
-          getTime: () => ({
-            from: 'now-7d',
-            to: 'now',
+          getAbsoluteTime: () => ({
+            from: '2021-08-31T22:00:00.000Z',
+            to: '2022-09-01T09:16:29.553Z',
           }),
         },
       },

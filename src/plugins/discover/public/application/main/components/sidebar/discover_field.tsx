@@ -424,7 +424,7 @@ function DiscoverFieldComponent({
   }
 
   const renderPopover = () => {
-    const dateRange = data?.query?.timefilter.timefilter.getTime();
+    const dateRange = data?.query?.timefilter.timefilter.getAbsoluteTime();
     const fieldForStats = multiFields ? multiFields[0].field : field; // TODO: how to handle multifields?
     const showLegacyFieldStats = services.uiSettings.get(SHOW_LEGACY_FIELD_TOP_VALUES);
 
