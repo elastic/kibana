@@ -11,6 +11,7 @@ import styled from 'styled-components';
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
+import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { useInvalidFilterQuery } from '../../../../common/hooks/use_invalid_filter_query';
 import type { FlowTargetSourceDest } from '../../../../../common/search_strategy';
 import { NetworkDetailsLink } from '../../../../common/components/links';
@@ -86,7 +87,7 @@ export const ExpandableNetworkDetails = ({
       const fromTo = scoreIntervalToDateTime(score, interval);
       dispatch(
         setAbsoluteRangeDatePicker({
-          id: 'global',
+          id: InputsModelId.global,
           from: fromTo.from,
           to: fromTo.to,
         })

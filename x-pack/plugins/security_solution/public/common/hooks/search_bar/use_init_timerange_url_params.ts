@@ -22,7 +22,7 @@ import { inputsActions } from '../../store/inputs';
 import { formatDate } from '../../components/super_date_picker';
 import { useInitializeUrlParam } from '../../utils/global_query_string';
 import { URL_PARAM_KEY } from '../use_url_state';
-import { socTrendsId } from '../../store/inputs/constants';
+import { InputsModelId } from '../../store/inputs/constants';
 
 export const useInitTimerangeFromUrlParam = () => {
   const dispatch = useDispatch();
@@ -52,26 +52,34 @@ const initializeTimerangeFromUrlParam = (
     const socTrendsType: TimeRangeKinds = get('socTrends.timerange.kind', initialState);
     if (isSocTrendsEnabled) {
       if (isEmpty(socTrendsLinkTo.linkTo)) {
-        dispatch(inputsActions.removeLinkTo(['global', 'socTrends']));
+        dispatch(inputsActions.removeLinkTo([InputsModelId.global, InputsModelId.socTrends]));
       } else {
-        dispatch(inputsActions.addLinkTo(['global', 'socTrends']));
+        dispatch(inputsActions.addLinkTo([InputsModelId.global, InputsModelId.socTrends]));
       }
     }
 
     if (isEmpty(globalLinkTo.linkTo)) {
-      dispatch(inputsActions.removeLinkTo(['global', 'timeline']));
+      dispatch(inputsActions.removeLinkTo([InputsModelId.global, InputsModelId.timeline]));
       dispatch(
-        inputsActions.removeLinkTo(['global', ...(isSocTrendsEnabled ? [socTrendsId] : [])])
+        inputsActions.removeLinkTo([
+          InputsModelId.global,
+          ...(isSocTrendsEnabled ? [InputsModelId.socTrends] : []),
+        ])
       );
     } else {
-      dispatch(inputsActions.addLinkTo(['global', 'timeline']));
-      dispatch(inputsActions.addLinkTo(['global', ...(isSocTrendsEnabled ? [socTrendsId] : [])]));
+      dispatch(inputsActions.addLinkTo([InputsModelId.global, InputsModelId.timeline]));
+      dispatch(
+        inputsActions.addLinkTo([
+          InputsModelId.global,
+          ...(isSocTrendsEnabled ? [InputsModelId.socTrends] : []),
+        ])
+      );
     }
 
     if (isEmpty(timelineLinkTo.linkTo)) {
-      dispatch(inputsActions.removeLinkTo(['global', 'timeline']));
+      dispatch(inputsActions.removeLinkTo([InputsModelId.global, InputsModelId.timeline]));
     } else {
-      dispatch(inputsActions.addLinkTo(['global', 'timeline']));
+      dispatch(inputsActions.addLinkTo([InputsModelId.global, InputsModelId.timeline]));
     }
 
     if (timelineType) {
@@ -83,7 +91,7 @@ const initializeTimerangeFromUrlParam = (
         dispatch(
           inputsActions.setAbsoluteRangeDatePicker({
             ...absoluteRange,
-            id: 'timeline',
+            id: InputsModelId.timeline,
           })
         );
       }
@@ -102,7 +110,7 @@ const initializeTimerangeFromUrlParam = (
         dispatch(
           inputsActions.setRelativeRangeDatePicker({
             ...relativeRange,
-            id: 'timeline',
+            id: InputsModelId.timeline,
           })
         );
       }
@@ -117,7 +125,7 @@ const initializeTimerangeFromUrlParam = (
         dispatch(
           inputsActions.setAbsoluteRangeDatePicker({
             ...absoluteRange,
-            id: 'global',
+            id: InputsModelId.global,
           })
         );
       }
@@ -135,7 +143,7 @@ const initializeTimerangeFromUrlParam = (
         dispatch(
           inputsActions.setRelativeRangeDatePicker({
             ...relativeRange,
-            id: 'global',
+            id: InputsModelId.global,
           })
         );
       }
@@ -150,7 +158,7 @@ const initializeTimerangeFromUrlParam = (
         dispatch(
           inputsActions.setAbsoluteRangeDatePicker({
             ...absoluteRange,
-            id: socTrendsId,
+            id: InputsModelId.socTrends,
           })
         );
       }
@@ -169,7 +177,7 @@ const initializeTimerangeFromUrlParam = (
         dispatch(
           inputsActions.setRelativeRangeDatePicker({
             ...relativeRange,
-            id: socTrendsId,
+            id: InputsModelId.socTrends,
           })
         );
       }
