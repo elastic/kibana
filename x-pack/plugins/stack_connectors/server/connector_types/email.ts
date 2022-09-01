@@ -28,7 +28,12 @@ import {
   renderMustacheObject,
   renderMustacheString,
 } from '@kbn/actions-plugin/server/lib/mustache_renderer';
-import { sendEmail, JSON_TRANSPORT_SERVICE, SendEmailOptions, Transport } from './lib/send_email';
+import {
+  sendEmail,
+  JSON_TRANSPORT_SERVICE,
+  SendEmailOptions,
+  Transport,
+} from '@kbn/actions-plugin/server/lib/send_email';
 import { portSchema } from './lib/schemas';
 
 export type EmailConnectorType = ConnectorType<
@@ -160,7 +165,7 @@ const ParamsSchemaProps = {
   kibanaFooterLink: schema.object({
     path: schema.string({ defaultValue: '/' }),
     text: schema.string({
-      defaultValue: i18n.translate('xpack.actions.builtin.email.kibanaFooterLinkText', {
+      defaultValue: i18n.translate('xpack.stack_connectors.email.kibanaFooterLinkText', {
         defaultMessage: 'Go to Kibana',
       }),
     }),
@@ -222,7 +227,7 @@ export function getConnectorType(params: GetConnectorTypeParams): EmailConnector
   return {
     id: ConnectorTypeId,
     minimumLicenseRequired: 'gold',
-    name: i18n.translate('xpack.actions.builtin.emailTitle', {
+    name: i18n.translate('xpack.stack_connectors.email.title', {
       defaultMessage: 'Email',
     }),
     supportedFeatureIds: [
@@ -353,7 +358,7 @@ async function executor(
   try {
     result = await sendEmail(logger, sendEmailOptions, connectorTokenClient);
   } catch (err) {
-    const message = i18n.translate('xpack.actions.builtin.email.errorSendingErrorMessage', {
+    const message = i18n.translate('xpack.stack_connectors.email.errorSendingErrorMessage', {
       defaultMessage: 'error sending email',
     });
     return {
@@ -402,12 +407,12 @@ function getFooterMessage({
   kibanaFooterLink: ActionParamsType['kibanaFooterLink'];
 }) {
   if (!publicBaseUrl) {
-    return i18n.translate('xpack.actions.builtin.email.sentByKibanaMessage', {
+    return i18n.translate('xpack.stack_connectors.email.sentByKibanaMessage', {
       defaultMessage: 'This message was sent by Kibana.',
     });
   }
 
-  return i18n.translate('xpack.actions.builtin.email.customViewInKibanaMessage', {
+  return i18n.translate('xpack.stack_connectors.email.customViewInKibanaMessage', {
     defaultMessage: 'This message was sent by Kibana. [{kibanaFooterLinkText}]({link}).',
     values: {
       kibanaFooterLinkText: kibanaFooterLink.text,

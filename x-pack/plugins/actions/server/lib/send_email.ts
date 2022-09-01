@@ -11,12 +11,12 @@ import nodemailer from 'nodemailer';
 import { default as MarkdownIt } from 'markdown-it';
 
 import { Logger } from '@kbn/core/server';
-import { ActionsConfigurationUtilities } from '../../actions_config';
-import { CustomHostSettings } from '../../config';
+import { ActionsConfigurationUtilities } from '../actions_config';
+import { CustomHostSettings } from '../config';
 import { getNodeSSLOptions, getSSLSettingsFromConfig } from './get_node_ssl_options';
 import { sendEmailGraphApi } from './send_email_graph_api';
-import { ConnectorTokenClientContract, ProxySettings } from '../../types';
-import { AdditionalEmailServices } from '../../../common';
+import { ConnectorTokenClientContract, ProxySettings } from '../types';
+import { AdditionalEmailServices } from '../../common';
 import { getOAuthClientCredentialsAccessToken } from './get_oauth_client_credentials_access_token';
 
 // an email "service" which doesn't actually send, just returns what it would send

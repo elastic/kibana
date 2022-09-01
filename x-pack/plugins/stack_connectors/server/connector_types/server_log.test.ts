@@ -7,32 +7,31 @@
 
 import { validateParams } from '@kbn/actions-plugin/server/lib';
 import { Logger } from '@kbn/core/server';
-import { createActionTypeRegistry } from './index.test';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import {
-  ActionParamsType,
+  getConnectorType,
   ServerLogConnectorType,
   ServerLogConnectorTypeExecutorOptions,
-  ConnectorTypeId,
 } from './server_log';
 import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
+import { loggerMock } from '@kbn/logging-mocks';
+
+const mockedLogger: jest.Mocked<Logger> = loggerMock.create();
 
 let connectorType: ServerLogConnectorType;
-let mockedLogger: jest.Mocked<Logger>;
 let configurationUtilities: jest.Mocked<ActionsConfigurationUtilities>;
 
-beforeAll(() => {
-  const { logger, actionTypeRegistry } = createActionTypeRegistry();
-  connectorType = actionTypeRegistry.get<{}, {}, ActionParamsType>(ConnectorTypeId);
-  mockedLogger = logger;
+beforeEach(() => {
   configurationUtilities = actionsConfigMock.create();
-  expect(connectorType).toBeTruthy();
+  connectorType = getConnectorType({
+    logger: mockedLogger,
+  });
 });
 
-describe('get()', () => {
+describe('connectorType', () => {
   test('returns connector type', () => {
-    expect(connectorType.id).toEqual(ConnectorTypeId);
+    expect(connectorType.id).toEqual('.server-log');
     expect(connectorType.name).toEqual('Server log');
   });
 });
@@ -90,7 +89,7 @@ describe('validateParams()', () => {
 `);
 
     expect(() => {
-      validateParams(actionType, { message: 'x', level: 'foo' }, { configurationUtilities });
+      validateParams(connectorType, { message: 'x', level: 'foo' }, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(`
 "error validating action params: [level]: types that failed validation:
 - [level.0]: expected value to equal [trace]

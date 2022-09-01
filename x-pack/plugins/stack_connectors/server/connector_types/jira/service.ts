@@ -10,6 +10,12 @@ import { isEmpty } from 'lodash';
 
 import { Logger } from '@kbn/core/server';
 import {
+  request,
+  getErrorMessage,
+  throwIfResponseIsNotValid,
+} from '@kbn/actions-plugin/server/lib/axios_utils';
+import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
+import {
   CreateCommentParams,
   CreateIncidentParams,
   ExternalService,
@@ -27,8 +33,6 @@ import {
 } from './types';
 
 import * as i18n from './translations';
-import { request, getErrorMessage, throwIfResponseIsNotValid } from '../../lib/axios_utils';
-import { ActionsConfigurationUtilities } from '../../actions_config';
 
 const VERSION = '2';
 const BASE_URL = `rest/api/${VERSION}`;

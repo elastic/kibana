@@ -5,53 +5,52 @@
  * 2.0.
  */
 
-jest.mock('./lib/send_email', () => ({
+jest.mock('@kbn/actions-plugin/server/lib/send_email', () => ({
   sendEmail: jest.fn(),
 }));
 
 import { Logger } from '@kbn/core/server';
-
-import { actionsConfigMock } from '../actions_config.mock';
-import { validateConfig, validateConnector, validateParams, validateSecrets } from '../lib';
-import { createActionTypeRegistry } from './index.test';
-import { sendEmail } from './lib/send_email';
-import { actionsMock } from '../mocks';
+import { loggerMock } from '@kbn/logging-mocks';
+import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
+import { actionsMock } from '@kbn/actions-plugin/server/mocks';
+import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
+import {
+  validateConfig,
+  validateConnector,
+  validateParams,
+  validateSecrets,
+} from '@kbn/actions-plugin/server/lib';
+import { sendEmail } from '@kbn/actions-plugin/server/lib/send_email';
 import {
   ActionParamsType,
-  ActionTypeConfigType,
-  ActionTypeSecretsType,
-  getActionType,
+  getConnectorType,
   EmailConnectorType,
   EmailConnectorTypeExecutorOptions,
+  ConnectorTypeConfigType,
+  ConnectorTypeSecretsType,
 } from './email';
-import { ValidateEmailAddressesOptions } from '../../common';
-import { ActionsConfigurationUtilities } from '../actions_config';
+import { ValidateEmailAddressesOptions } from '@kbn/actions-plugin/common';
 
 const sendEmailMock = sendEmail as jest.Mock;
 
-const ACTION_TYPE_ID = '.email';
-
 const services = actionsMock.createServices();
+const mockedLogger: jest.Mocked<Logger> = loggerMock.create();
 
-let actionType: EmailConnectorType;
-let mockedLogger: jest.Mocked<Logger>;
-let configurationUtilities: ActionsConfigurationUtilities;
+let connectorType: EmailConnectorType;
+let configurationUtilities: jest.Mocked<ActionsConfigurationUtilities>;
 
 beforeEach(() => {
   jest.resetAllMocks();
-  const { actionTypeRegistry } = createActionTypeRegistry();
-  configurationUtilities = actionTypeRegistry.getUtils();
-  actionType = actionTypeRegistry.get<
-    ActionTypeConfigType,
-    ActionTypeSecretsType,
-    ActionParamsType
-  >(ACTION_TYPE_ID);
+  configurationUtilities = actionsConfigMock.create();
+  connectorType = getConnectorType({
+    logger: mockedLogger,
+  });
 });
 
-describe('actionTypeRegistry.get() works', () => {
-  test('action type static data is as expected', () => {
-    expect(actionType.id).toEqual(ACTION_TYPE_ID);
-    expect(actionType.name).toEqual('Email');
+describe('connector registration', () => {
+  test('returns connector type', () => {
+    expect(connectorType.id).toEqual('.email');
+    expect(connectorType.name).toEqual('Email');
   });
 });
 
@@ -62,7 +61,7 @@ describe('config validation', () => {
       from: 'bob@example.com',
       hasAuth: true,
     };
-    expect(validateConfig(actionType, config, { configurationUtilities })).toEqual({
+    expect(validateConfig(connectorType, config, { configurationUtilities })).toEqual({
       ...config,
       host: null,
       port: null,
@@ -80,7 +79,7 @@ describe('config validation', () => {
       port: 8080,
       hasAuth: true,
     };
-    expect(validateConfig(actionType, config, { configurationUtilities })).toEqual({
+    expect(validateConfig(connectorType, config, { configurationUtilities })).toEqual({
       ...config,
       service: 'other',
       secure: null,
@@ -98,7 +97,7 @@ describe('config validation', () => {
       port: 8080,
       hasAuth: true,
     };
-    expect(validateConfig(actionType, config, { configurationUtilities })).toEqual({
+    expect(validateConfig(connectorType, config, { configurationUtilities })).toEqual({
       ...config,
       secure: null,
       clientId: null,
@@ -115,7 +114,7 @@ describe('config validation', () => {
       tenantId: '12345778',
       hasAuth: true,
     };
-    expect(validateConfig(actionType, config, { configurationUtilities })).toEqual({
+    expect(validateConfig(connectorType, config, { configurationUtilities })).toEqual({
       ...config,
       secure: null,
       host: null,
@@ -130,7 +129,7 @@ describe('config validation', () => {
       from: 'bob@example.com',
       hasAuth: true,
     };
-    expect(validateConfig(actionType, config, { configurationUtilities })).toEqual({
+    expect(validateConfig(connectorType, config, { configurationUtilities })).toEqual({
       ...config,
       host: null,
       port: null,
@@ -148,28 +147,32 @@ describe('config validation', () => {
 
     // empty object
     expect(() => {
-      validateConfig(actionType, {}, { configurationUtilities });
+      validateConfig(connectorType, {}, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
       `"error validating action type config: [from]: expected value of type [string] but got [undefined]"`
     );
 
     // no service or host/port
     expect(() => {
-      validateConfig(actionType, baseConfig, { configurationUtilities });
+      validateConfig(connectorType, baseConfig, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
       `"error validating action type config: [host]/[port] is required"`
     );
 
     // host but no port
     expect(() => {
-      validateConfig(actionType, { ...baseConfig, host: 'elastic.co' }, { configurationUtilities });
+      validateConfig(
+        connectorType,
+        { ...baseConfig, host: 'elastic.co' },
+        { configurationUtilities }
+      );
     }).toThrowErrorMatchingInlineSnapshot(
       `"error validating action type config: [port] is required"`
     );
 
     // port but no host
     expect(() => {
-      validateConfig(actionType, { ...baseConfig, port: 8080 }, { configurationUtilities });
+      validateConfig(connectorType, { ...baseConfig, port: 8080 }, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
       `"error validating action type config: [host] is required"`
     );
@@ -177,7 +180,7 @@ describe('config validation', () => {
     // invalid service
     expect(() => {
       validateConfig(
-        actionType,
+        connectorType,
         {
           ...baseConfig,
           service: 'bad-nodemailer-service',
@@ -191,7 +194,7 @@ describe('config validation', () => {
     // invalid exchange_server no clientId and no tenantId
     expect(() => {
       validateConfig(
-        actionType,
+        connectorType,
         {
           ...baseConfig,
           service: 'exchange_server',
@@ -205,7 +208,7 @@ describe('config validation', () => {
     // invalid exchange_server no clientId
     expect(() => {
       validateConfig(
-        actionType,
+        connectorType,
         {
           ...baseConfig,
           service: 'exchange_server',
@@ -220,7 +223,7 @@ describe('config validation', () => {
     // invalid exchange_server no tenantId
     expect(() => {
       validateConfig(
-        actionType,
+        connectorType,
         {
           ...baseConfig,
           service: 'exchange_server',
@@ -242,10 +245,6 @@ describe('config validation', () => {
       ...actionsConfigMock.create(),
       isHostnameAllowed: (hostname: string) => hostname === NODEMAILER_AOL_SERVICE_HOST,
     };
-    actionType = getActionType({
-      logger: mockedLogger,
-      configurationUtilities: configUtils,
-    });
     const baseConfig = {
       from: 'bob@example.com',
     };
@@ -269,13 +268,13 @@ describe('config validation', () => {
       port: 42,
     };
 
-    const validatedConfig1 = validateConfig(actionType, allowedHosts1, {
+    const validatedConfig1 = validateConfig(connectorType, allowedHosts1, {
       configurationUtilities: configUtils,
     });
     expect(validatedConfig1.service).toEqual(allowedHosts1.service);
     expect(validatedConfig1.from).toEqual(allowedHosts1.from);
 
-    const validatedConfig2 = validateConfig(actionType, allowedHosts2, {
+    const validatedConfig2 = validateConfig(connectorType, allowedHosts2, {
       configurationUtilities: configUtils,
     });
     expect(validatedConfig2.host).toEqual(allowedHosts2.host);
@@ -283,7 +282,7 @@ describe('config validation', () => {
     expect(validatedConfig2.from).toEqual(allowedHosts2.from);
 
     expect(() => {
-      validateConfig(actionType, notAllowedHosts1, {
+      validateConfig(connectorType, notAllowedHosts1, {
         configurationUtilities: configUtils,
       });
     }).toThrowErrorMatchingInlineSnapshot(
@@ -291,7 +290,7 @@ describe('config validation', () => {
     );
 
     expect(() => {
-      validateConfig(actionType, notAllowedHosts2, { configurationUtilities: configUtils });
+      validateConfig(connectorType, notAllowedHosts2, { configurationUtilities: configUtils });
     }).toThrowErrorMatchingInlineSnapshot(
       `"error validating action type config: [host] value 'smtp.gmail.com' is not in the allowedHosts configuration"`
     );
@@ -301,14 +300,9 @@ describe('config validation', () => {
     const configUtils = actionsConfigMock.create();
     configUtils.validateEmailAddresses.mockImplementation(validateEmailAddressesImpl);
 
-    const basicActionType = getActionType({
-      logger: mockedLogger,
-      configurationUtilities: configUtils,
-    });
-
     expect(() => {
       validateConfig(
-        basicActionType,
+        connectorType,
         {
           from: 'badmail',
           service: 'gmail',
@@ -328,7 +322,7 @@ describe('secrets validation', () => {
       user: 'bob',
       password: 'supersecret',
     };
-    expect(validateSecrets(actionType, secrets, { configurationUtilities })).toEqual({
+    expect(validateSecrets(connectorType, secrets, { configurationUtilities })).toEqual({
       ...secrets,
       clientSecret: null,
     });
@@ -340,11 +334,11 @@ describe('secrets validation', () => {
       password: null,
       clientSecret: null,
     };
-    expect(validateSecrets(actionType, {}, { configurationUtilities })).toEqual(secrets);
-    expect(validateSecrets(actionType, { user: null }, { configurationUtilities })).toEqual(
+    expect(validateSecrets(connectorType, {}, { configurationUtilities })).toEqual(secrets);
+    expect(validateSecrets(connectorType, { user: null }, { configurationUtilities })).toEqual(
       secrets
     );
-    expect(validateSecrets(actionType, { password: null }, { configurationUtilities })).toEqual(
+    expect(validateSecrets(connectorType, { password: null }, { configurationUtilities })).toEqual(
       secrets
     );
   });
@@ -353,7 +347,7 @@ describe('secrets validation', () => {
     const secrets: Record<string, unknown> = {
       clientSecret: '12345678',
     };
-    expect(validateSecrets(actionType, secrets, { configurationUtilities })).toEqual({
+    expect(validateSecrets(connectorType, secrets, { configurationUtilities })).toEqual({
       ...secrets,
       user: null,
       password: null,
@@ -370,7 +364,7 @@ describe('connector validation: secrets with config', () => {
     const config: Record<string, unknown> = {
       hasAuth: true,
     };
-    expect(validateConnector(actionType, { config, secrets })).toBeNull();
+    expect(validateConnector(connectorType, { config, secrets })).toBeNull();
   });
 
   test('connector validation succeeds when username/password not filled for hasAuth false', () => {
@@ -382,10 +376,10 @@ describe('connector validation: secrets with config', () => {
     const config: Record<string, unknown> = {
       hasAuth: false,
     };
-    expect(validateConnector(actionType, { config, secrets })).toBeNull();
-    expect(validateConnector(actionType, { config, secrets: {} })).toBeNull();
-    expect(validateConnector(actionType, { config, secrets: { user: null } })).toBeNull();
-    expect(validateConnector(actionType, { config, secrets: { password: null } })).toBeNull();
+    expect(validateConnector(connectorType, { config, secrets })).toBeNull();
+    expect(validateConnector(connectorType, { config, secrets: {} })).toBeNull();
+    expect(validateConnector(connectorType, { config, secrets: { user: null } })).toBeNull();
+    expect(validateConnector(connectorType, { config, secrets: { password: null } })).toBeNull();
   });
 
   test('connector validation fails when username/password was populated for hasAuth true', () => {
@@ -398,7 +392,7 @@ describe('connector validation: secrets with config', () => {
     };
     // invalid user
     expect(() => {
-      validateConnector(actionType, { config, secrets });
+      validateConnector(connectorType, { config, secrets });
     }).toThrowErrorMatchingInlineSnapshot(
       `"error validating action type connector: [user] is required"`
     );
@@ -411,7 +405,7 @@ describe('connector validation: secrets with config', () => {
     const config: Record<string, unknown> = {
       service: 'exchange_server',
     };
-    expect(validateConnector(actionType, { config, secrets })).toBeNull();
+    expect(validateConnector(connectorType, { config, secrets })).toBeNull();
   });
 
   test('connector validation fails when service is exchange_server and clientSecret is not populated', () => {
@@ -423,7 +417,7 @@ describe('connector validation: secrets with config', () => {
     };
     // invalid user
     expect(() => {
-      validateConnector(actionType, { config, secrets });
+      validateConnector(connectorType, { config, secrets });
     }).toThrowErrorMatchingInlineSnapshot(
       `"error validating action type connector: [clientSecret] is required"`
     );
@@ -437,7 +431,8 @@ describe('params validation', () => {
       subject: 'this is a test',
       message: 'this is the message',
     };
-    expect(validateParams(actionType, params, { configurationUtilities })).toMatchInlineSnapshot(`
+    expect(validateParams(connectorType, params, { configurationUtilities }))
+      .toMatchInlineSnapshot(`
       Object {
         "bcc": Array [],
         "cc": Array [],
@@ -457,7 +452,7 @@ describe('params validation', () => {
   test('params validation fails when params is not valid', () => {
     // empty object
     expect(() => {
-      validateParams(actionType, {}, { configurationUtilities });
+      validateParams(connectorType, {}, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
       `"error validating action params: [subject]: expected value of type [string] but got [undefined]"`
     );
@@ -467,14 +462,9 @@ describe('params validation', () => {
     const configUtils = actionsConfigMock.create();
     configUtils.validateEmailAddresses.mockImplementation(validateEmailAddressesImpl);
 
-    const basicActionType = getActionType({
-      logger: mockedLogger,
-      configurationUtilities: configUtils,
-    });
-
     expect(() => {
       validateParams(
-        basicActionType,
+        connectorType,
         {
           to: ['to@example.com'],
           cc: ['cc@example.com'],
@@ -496,7 +486,7 @@ describe('params validation', () => {
 });
 
 describe('execute()', () => {
-  const config: ActionTypeConfigType = {
+  const config: ConnectorTypeConfigType = {
     service: '__json',
     host: 'a host',
     port: 42,
@@ -507,7 +497,7 @@ describe('execute()', () => {
     tenantId: null,
     oauthTokenUrl: null,
   };
-  const secrets: ActionTypeSecretsType = {
+  const secrets: ConnectorTypeSecretsType = {
     user: 'bob',
     password: 'supersecret',
     clientSecret: null,
@@ -531,11 +521,12 @@ describe('execute()', () => {
     params,
     secrets,
     services,
+    configurationUtilities: actionsConfigMock.create(),
   };
 
   test('ensure parameters are as expected', async () => {
     sendEmailMock.mockReset();
-    const result = await actionType.executor(executorOptions);
+    const result = await connectorType.executor(executorOptions);
     expect(result).toMatchInlineSnapshot(`
       Object {
         "actionId": "some-id",
@@ -593,7 +584,7 @@ describe('execute()', () => {
     };
 
     sendEmailMock.mockReset();
-    await actionType.executor(customExecutorOptions);
+    await connectorType.executor(customExecutorOptions);
     delete sendEmailMock.mock.calls[0][1].configurationUtilities;
     expect(sendEmailMock.mock.calls[0][1]).toMatchInlineSnapshot(`
       Object {
@@ -644,7 +635,7 @@ describe('execute()', () => {
     };
 
     sendEmailMock.mockReset();
-    await actionType.executor(customExecutorOptions);
+    await connectorType.executor(customExecutorOptions);
     delete sendEmailMock.mock.calls[0][1].configurationUtilities;
     expect(sendEmailMock.mock.calls[0][1]).toMatchInlineSnapshot(`
       Object {
@@ -696,7 +687,7 @@ describe('execute()', () => {
 
     sendEmailMock.mockReset();
     sendEmailMock.mockRejectedValue(new Error('wops'));
-    const result = await actionType.executor(customExecutorOptions);
+    const result = await connectorType.executor(customExecutorOptions);
     expect(result).toMatchInlineSnapshot(`
       Object {
         "actionId": "some-id",
@@ -708,7 +699,7 @@ describe('execute()', () => {
   });
 
   test('renders parameter templates as expected', async () => {
-    expect(actionType.renderParameterTemplates).toBeTruthy();
+    expect(connectorType.renderParameterTemplates).toBeTruthy();
     const paramsWithTemplates = {
       to: [],
       cc: ['{{rogue}}'],
@@ -723,7 +714,7 @@ describe('execute()', () => {
     const variables = {
       rogue: '*bold*',
     };
-    const renderedParams = actionType.renderParameterTemplates!(paramsWithTemplates, variables);
+    const renderedParams = connectorType.renderParameterTemplates!(paramsWithTemplates, variables);
     // Yes, this is tested in the snapshot below, but it's double-escaped there,
     // so easier to see here that the escaping is correct.
     expect(renderedParams.message).toBe('\\*bold\\*');
@@ -749,13 +740,12 @@ describe('execute()', () => {
   });
 
   test('provides a footer link to Kibana when publicBaseUrl is defined', async () => {
-    const actionTypeWithPublicUrl = getActionType({
+    const connectorTypeWithPublicUrl = getConnectorType({
       logger: mockedLogger,
-      configurationUtilities: actionsConfigMock.create(),
       publicBaseUrl: 'https://localhost:1234/foo/bar',
     });
 
-    await actionTypeWithPublicUrl.executor(executorOptions);
+    await connectorTypeWithPublicUrl.executor(executorOptions);
 
     expect(sendEmailMock).toHaveBeenCalledTimes(1);
     const sendMailCall = sendEmailMock.mock.calls[0][1];
@@ -769,9 +759,8 @@ describe('execute()', () => {
   });
 
   test('allows to generate a deep link into Kibana when publicBaseUrl is defined', async () => {
-    const actionTypeWithPublicUrl = getActionType({
+    const connectorTypeWithPublicUrl = getConnectorType({
       logger: mockedLogger,
-      configurationUtilities: actionsConfigMock.create(),
       publicBaseUrl: 'https://localhost:1234/foo/bar',
     });
 
@@ -786,7 +775,7 @@ describe('execute()', () => {
       },
     };
 
-    await actionTypeWithPublicUrl.executor(customExecutorOptions);
+    await connectorTypeWithPublicUrl.executor(customExecutorOptions);
 
     expect(sendEmailMock).toHaveBeenCalledTimes(1);
     const sendMailCall = sendEmailMock.mock.calls[0][1];
@@ -803,19 +792,15 @@ describe('execute()', () => {
     const configUtils = actionsConfigMock.create();
     configUtils.validateEmailAddresses.mockImplementation(validateEmailAddressesImpl);
 
-    const testActionType = getActionType({
-      logger: mockedLogger,
-      configurationUtilities: configUtils,
-    });
-
     const customExecutorOptions: EmailConnectorTypeExecutorOptions = {
       ...executorOptions,
       params: {
         ...params,
       },
+      configurationUtilities: configUtils,
     };
 
-    const result = await testActionType.executor(customExecutorOptions);
+    const result = await connectorType.executor(customExecutorOptions);
     expect(result).toMatchInlineSnapshot(`
       Object {
         "actionId": "some-id",

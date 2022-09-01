@@ -8,7 +8,6 @@
 import { registerBuiltInConnectorTypes } from '.';
 import { Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { ActionTypeRegistry } from '@kbn/actions-plugin/server/action_type_registry';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 
 const ACTION_TYPE_IDS = [
@@ -23,25 +22,25 @@ const ACTION_TYPE_IDS = [
   '.xmatters',
 ];
 
-export function createConnectorTypeRegistry(): {
-  logger: jest.Mocked<Logger>;
-  actionTypeRegistry: ActionTypeRegistry;
-} {
-  const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
-  registerBuiltInConnectorTypes({
-    logger,
-    actions: actionsMock.createSetup(),
-  });
-  return { logger, actionTypeRegistry };
-}
+const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
+const mockedActions = actionsMock.createSetup();
 
 beforeEach(() => {
   jest.resetAllMocks();
 });
 
-describe('connector is registered', () => {
-  test('gets registered with builtin connectors', () => {
-    const { actionTypeRegistry } = createConnectorTypeRegistry();
-    ACTION_TYPE_IDS.forEach((id) => expect(actionTypeRegistry.has(id)).toEqual(true));
+describe('registers connectors', () => {
+  test('calls registerType with expected connector types', () => {
+    registerBuiltInConnectorTypes({
+      logger,
+      actions: mockedActions,
+    });
+    ACTION_TYPE_IDS.forEach((id) =>
+      expect(mockedActions.registerType).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id,
+        })
+      )
+    );
   });
 });

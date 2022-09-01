@@ -109,7 +109,7 @@ function validateParams(paramsObject: unknown): string | void {
     try {
       const date = moment(validatedTimestamp);
       if (!date.isValid()) {
-        return i18n.translate('xpack.actions.builtin.pagerduty.invalidTimestampErrorMessage', {
+        return i18n.translate('xpack.stack_connectors.pagerduty.invalidTimestampErrorMessage', {
           defaultMessage: `error parsing timestamp "{timestamp}"`,
           values: {
             timestamp,
@@ -117,7 +117,7 @@ function validateParams(paramsObject: unknown): string | void {
         });
       }
     } catch (err) {
-      return i18n.translate('xpack.actions.builtin.pagerduty.timestampParsingFailedErrorMessage', {
+      return i18n.translate('xpack.stack_connectors.pagerduty.timestampParsingFailedErrorMessage', {
         defaultMessage: `error parsing timestamp "{timestamp}": {message}`,
         values: {
           timestamp,
@@ -127,7 +127,7 @@ function validateParams(paramsObject: unknown): string | void {
     }
   }
   if (eventAction && EVENT_ACTIONS_WITH_REQUIRED_DEDUPKEY.has(eventAction) && !dedupKey) {
-    return i18n.translate('xpack.actions.builtin.pagerduty.missingDedupkeyErrorMessage', {
+    return i18n.translate('xpack.stack_connectors.pagerduty.missingDedupkeyErrorMessage', {
       defaultMessage: `DedupKey is required when eventAction is "{eventAction}"`,
       values: {
         eventAction,
@@ -142,7 +142,7 @@ export function getConnectorType({ logger }: { logger: Logger }): PagerDutyConne
   return {
     id: ConnectorTypeId,
     minimumLicenseRequired: 'gold',
-    name: i18n.translate('xpack.actions.builtin.pagerdutyTitle', {
+    name: i18n.translate('xpack.stack_connectors.pagerduty.title', {
       defaultMessage: 'PagerDuty',
     }),
     supportedFeatureIds: [
@@ -175,7 +175,7 @@ function validateConnectorTypeConfig(
     configurationUtilities.ensureUriAllowed(getPagerDutyApiUrl(configObject));
   } catch (allowListError) {
     throw new Error(
-      i18n.translate('xpack.actions.builtin.pagerduty.pagerdutyConfigurationError', {
+      i18n.translate('xpack.stack_connectors.pagerduty.configurationError', {
         defaultMessage: 'error configuring pagerduty action: {message}',
         values: {
           message: allowListError.message,
@@ -217,7 +217,7 @@ async function executor(
       configurationUtilities
     );
   } catch (err) {
-    const message = i18n.translate('xpack.actions.builtin.pagerduty.postingErrorMessage', {
+    const message = i18n.translate('xpack.stack_connectors.pagerduty.postingErrorMessage', {
       defaultMessage: 'error posting pagerduty event',
     });
     logger.warn(`error thrown posting pagerduty event: ${err.message}`);
@@ -240,7 +240,7 @@ async function executor(
   }
 
   if (response.status === 429 || response.status >= 500) {
-    const message = i18n.translate('xpack.actions.builtin.pagerduty.postingRetryErrorMessage', {
+    const message = i18n.translate('xpack.stack_connectors.pagerduty.postingRetryErrorMessage', {
       defaultMessage: 'error posting pagerduty event: http status {status}, retry later',
       values: {
         status: response.status,
@@ -255,7 +255,7 @@ async function executor(
     };
   }
 
-  const message = i18n.translate('xpack.actions.builtin.pagerduty.postingUnexpectedErrorMessage', {
+  const message = i18n.translate('xpack.stack_connectors.pagerduty.postingUnexpectedErrorMessage', {
     defaultMessage: 'error posting pagerduty event: unexpected status {status}',
     values: {
       status: response.status,

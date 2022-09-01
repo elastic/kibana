@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { request } from '@kbn/actions-plugin/server/lib/axios_utils';
 import { ServiceFactory, ExternalServiceITOM, ExecutorSubActionAddEventParams } from './types';
 
-import { request } from '../../lib/axios_utils';
 import { createExternalService } from './service';
 import { createServiceError } from './utils';
 

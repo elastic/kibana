@@ -7,6 +7,7 @@
 
 import { AxiosResponse } from 'axios';
 
+import { request } from '@kbn/actions-plugin/server/lib/axios_utils';
 import {
   ExternalService,
   ExternalServiceParamsCreate,
@@ -20,7 +21,6 @@ import {
 
 import * as i18n from './translations';
 import { ServiceNowPublicConfigurationType, ServiceNowSecretConfigurationType } from './types';
-import { request } from '../../lib/axios_utils';
 import { createServiceError, getPushedDate, prepareIncident } from './utils';
 
 export const SYS_DICTIONARY_ENDPOINT = `api/now/table/sys_dictionary`;

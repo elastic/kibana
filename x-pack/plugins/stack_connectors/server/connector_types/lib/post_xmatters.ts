@@ -7,8 +7,8 @@
 
 import axios, { AxiosResponse } from 'axios';
 import { Logger } from '@kbn/core/server';
-import { request } from '../../lib/axios_utils';
-import { ActionsConfigurationUtilities } from '../../actions_config';
+import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
+import { request } from '@kbn/actions-plugin/server/lib/axios_utils';
 
 interface PostXmattersOptions {
   url: string;

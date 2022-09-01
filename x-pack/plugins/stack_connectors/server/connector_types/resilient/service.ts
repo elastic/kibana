@@ -10,6 +10,12 @@ import { omitBy, isNil } from 'lodash/fp';
 
 import { Logger } from '@kbn/core/server';
 import {
+  getErrorMessage,
+  request,
+  throwIfResponseIsNotValid,
+} from '@kbn/actions-plugin/server/lib/axios_utils';
+import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
+import {
   ExternalServiceCredentials,
   ExternalService,
   ExternalServiceParams,
@@ -24,8 +30,6 @@ import {
 } from './types';
 
 import * as i18n from './translations';
-import { getErrorMessage, request, throwIfResponseIsNotValid } from '../../lib/axios_utils';
-import { ActionsConfigurationUtilities } from '../../actions_config';
 
 const VIEW_INCIDENT_URL = `#incidents`;
 

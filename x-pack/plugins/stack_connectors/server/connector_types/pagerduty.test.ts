@@ -14,44 +14,35 @@ jest.mock('./lib/post_pagerduty', () => ({
 import { Services } from '@kbn/actions-plugin/server/types';
 import { validateConfig, validateSecrets, validateParams } from '@kbn/actions-plugin/server/lib';
 import { postPagerduty } from './lib/post_pagerduty';
-import { createActionTypeRegistry } from './index.test';
 import { Logger } from '@kbn/core/server';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import {
   ActionParamsType,
-  ConnectorTypeConfigType,
-  ConnectorTypeSecretsType,
   getConnectorType,
   PagerDutyConnectorType,
   PagerDutyConnectorTypeExecutorOptions,
 } from './pagerduty';
 import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
+import { loggerMock } from '@kbn/logging-mocks';
 
 const postPagerdutyMock = postPagerduty as jest.Mock;
-
-const ACTION_TYPE_ID = '.pagerduty';
-
 const services: Services = actionsMock.createServices();
+const mockedLogger: jest.Mocked<Logger> = loggerMock.create();
 
 let connectorType: PagerDutyConnectorType;
-let mockedLogger: jest.Mocked<Logger>;
 let configurationUtilities: jest.Mocked<ActionsConfigurationUtilities>;
 
-beforeAll(() => {
-  const { logger, actionTypeRegistry } = createActionTypeRegistry();
-  connectorType = actionTypeRegistry.get<
-    ConnectorTypeConfigType,
-    ConnectorTypeSecretsType,
-    ActionParamsType
-  >(ACTION_TYPE_ID);
-  mockedLogger = logger;
+beforeEach(() => {
   configurationUtilities = actionsConfigMock.create();
+  connectorType = getConnectorType({
+    logger: mockedLogger,
+  });
 });
 
 describe('get()', () => {
   test('should return correct connector type', () => {
-    expect(connectorType.id).toEqual(ACTION_TYPE_ID);
+    expect(connectorType.id).toEqual('.pagerduty');
     expect(connectorType.name).toEqual('PagerDuty');
   });
 });

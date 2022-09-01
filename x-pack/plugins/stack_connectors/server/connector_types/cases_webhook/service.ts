@@ -9,8 +9,10 @@ import axios, { AxiosResponse } from 'axios';
 
 import { Logger } from '@kbn/core/server';
 import { isString } from 'lodash';
+import { renderMustacheStringNoEscape } from '@kbn/actions-plugin/server/lib/mustache_renderer';
+import { request } from '@kbn/actions-plugin/server/lib/axios_utils';
+import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import { validateAndNormalizeUrl, validateJson } from './validators';
-import { renderMustacheStringNoEscape } from '../../lib/mustache_renderer';
 import {
   createServiceError,
   getObjectValueByKeyAsString,
@@ -31,8 +33,6 @@ import {
 } from './types';
 
 import * as i18n from './translations';
-import { request } from '../../lib/axios_utils';
-import { ActionsConfigurationUtilities } from '../../actions_config';
 
 export const createExternalService = (
   actionId: string,

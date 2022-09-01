@@ -5,44 +5,41 @@
  * 2.0.
  */
 
-jest.mock('./lib/send_email', () => ({
-  sendEmail: jest.fn(),
-}));
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { validateConfig, validateParams } from '../lib';
-import { createActionTypeRegistry } from './index.test';
-import { actionsMock } from '../mocks';
+import { validateConfig, validateParams } from '@kbn/actions-plugin/server/lib';
+import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import {
   ActionParamsType,
-  ActionTypeConfigType,
-  ESIndexActionType,
-  ESIndexActionTypeExecutorOptions,
+  ConnectorTypeConfigType,
+  ESIndexConnectorType,
+  ESIndexConnectorTypeExecutorOptions,
+  getConnectorType,
 } from './es_index';
-import { AlertHistoryEsIndexConnectorId } from '../../common';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import { ActionsConfigurationUtilities } from '../actions_config';
-
-const ACTION_TYPE_ID = '.index';
+import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
+import { loggerMock } from '@kbn/logging-mocks';
+import { Logger } from '@kbn/logging';
+import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
+import { AlertHistoryEsIndexConnectorId } from '@kbn/actions-plugin/common';
 
 const services = actionsMock.createServices();
+const mockedLogger: jest.Mocked<Logger> = loggerMock.create();
 
-let actionType: ESIndexActionType;
+let connectorType: ESIndexConnectorType;
 let configurationUtilities: ActionsConfigurationUtilities;
-
-beforeAll(() => {
-  const { actionTypeRegistry } = createActionTypeRegistry();
-  actionType = actionTypeRegistry.get<ActionTypeConfigType, {}, ActionParamsType>(ACTION_TYPE_ID);
-  configurationUtilities = actionTypeRegistry.getUtils();
-});
 
 beforeEach(() => {
   jest.resetAllMocks();
+  configurationUtilities = actionsConfigMock.create();
+  connectorType = getConnectorType({
+    logger: mockedLogger,
+  });
 });
 
-describe('actionTypeRegistry.get() works', () => {
-  test('action type static data is as expected', () => {
-    expect(actionType.id).toEqual(ACTION_TYPE_ID);
-    expect(actionType.name).toEqual('Index');
+describe('connector registration', () => {
+  test('returns connector type', () => {
+    expect(connectorType.id).toEqual('.index');
+    expect(connectorType.name).toEqual('Index');
   });
 });
 
@@ -53,7 +50,7 @@ describe('config validation', () => {
       refresh: false,
     };
 
-    expect(validateConfig(actionType, config, { configurationUtilities })).toEqual({
+    expect(validateConfig(connectorType, config, { configurationUtilities })).toEqual({
       ...config,
       index: 'testing-123',
       refresh: false,
@@ -61,7 +58,7 @@ describe('config validation', () => {
     });
 
     config.executionTimeField = 'field-123';
-    expect(validateConfig(actionType, config, { configurationUtilities })).toEqual({
+    expect(validateConfig(connectorType, config, { configurationUtilities })).toEqual({
       ...config,
       index: 'testing-123',
       refresh: false,
@@ -69,7 +66,7 @@ describe('config validation', () => {
     });
 
     config.executionTimeField = null;
-    expect(validateConfig(actionType, config, { configurationUtilities })).toEqual({
+    expect(validateConfig(connectorType, config, { configurationUtilities })).toEqual({
       ...config,
       index: 'testing-123',
       refresh: false,
@@ -79,7 +76,7 @@ describe('config validation', () => {
     delete config.index;
 
     expect(() => {
-      validateConfig(actionType, { index: 666 }, { configurationUtilities });
+      validateConfig(connectorType, { index: 666 }, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
       `"error validating action type config: [index]: expected value of type [string] but got [number]"`
     );
@@ -87,7 +84,7 @@ describe('config validation', () => {
 
     expect(() => {
       validateConfig(
-        actionType,
+        connectorType,
         { index: 'testing-123', executionTimeField: true },
         { configurationUtilities }
       );
@@ -100,7 +97,7 @@ describe('config validation', () => {
     delete config.refresh;
     expect(() => {
       validateConfig(
-        actionType,
+        connectorType,
         { index: 'testing-123', refresh: 'foo' },
         { configurationUtilities }
       );
@@ -115,7 +112,7 @@ describe('config validation', () => {
     };
 
     expect(() => {
-      validateConfig(actionType, baseConfig, { configurationUtilities });
+      validateConfig(connectorType, baseConfig, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
       `"error validating action type config: [index]: expected value of type [string] but got [undefined]"`
     );
@@ -128,7 +125,8 @@ describe('params validation', () => {
       documents: [{ rando: 'thing' }],
       indexOverride: null,
     };
-    expect(validateParams(actionType, params, { configurationUtilities })).toMatchInlineSnapshot(`
+    expect(validateParams(connectorType, params, { configurationUtilities }))
+      .toMatchInlineSnapshot(`
         Object {
           "documents": Array [
             Object {
@@ -142,20 +140,20 @@ describe('params validation', () => {
 
   test('params validation fails when params is not valid', () => {
     expect(() => {
-      validateParams(actionType, { documents: [{}], jim: 'bob' }, { configurationUtilities });
+      validateParams(connectorType, { documents: [{}], jim: 'bob' }, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
       `"error validating action params: [jim]: definition for this key is missing"`
     );
 
     expect(() => {
-      validateParams(actionType, {}, { configurationUtilities });
+      validateParams(connectorType, {}, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
       `"error validating action params: [documents]: expected value of type [array] but got [undefined]"`
     );
 
     expect(() => {
       validateParams(
-        actionType,
+        connectorType,
         { documents: ['should be an object'] },
         { configurationUtilities }
       );
@@ -168,9 +166,9 @@ describe('params validation', () => {
 describe('execute()', () => {
   test('ensure parameters are as expected', async () => {
     const secrets = {};
-    let config: ActionTypeConfigType;
+    let config: ConnectorTypeConfigType;
     let params: ActionParamsType;
-    let executorOptions: ESIndexActionTypeExecutorOptions;
+    let executorOptions: ESIndexConnectorTypeExecutorOptions;
 
     // minimal params
     config = { index: 'index-value', refresh: false, executionTimeField: null };
@@ -187,11 +185,12 @@ describe('execute()', () => {
       secrets,
       params,
       services,
+      configurationUtilities,
     };
     const scopedClusterClient = elasticsearchClientMock
       .createClusterClient()
       .asScoped().asCurrentUser;
-    await actionType.executor({
+    await connectorType.executor({
       ...executorOptions,
       services: { ...services, scopedClusterClient },
     });
@@ -224,9 +223,9 @@ describe('execute()', () => {
       indexOverride: null,
     };
 
-    executorOptions = { actionId, config, secrets, params, services };
+    executorOptions = { actionId, config, secrets, params, services, configurationUtilities };
     scopedClusterClient.bulk.mockClear();
-    await actionType.executor({
+    await connectorType.executor({
       ...executorOptions,
       services: { ...services, scopedClusterClient },
     });
@@ -266,10 +265,10 @@ describe('execute()', () => {
       indexOverride: null,
     };
 
-    executorOptions = { actionId, config, secrets, params, services };
+    executorOptions = { actionId, config, secrets, params, services, configurationUtilities };
 
     scopedClusterClient.bulk.mockClear();
-    await actionType.executor({
+    await connectorType.executor({
       ...executorOptions,
       services: { ...services, scopedClusterClient },
     });
@@ -302,9 +301,9 @@ describe('execute()', () => {
       indexOverride: null,
     };
 
-    executorOptions = { actionId, config, secrets, params, services };
+    executorOptions = { actionId, config, secrets, params, services, configurationUtilities };
     scopedClusterClient.bulk.mockClear();
-    await actionType.executor({
+    await connectorType.executor({
       ...executorOptions,
       services: { ...services, scopedClusterClient },
     });
@@ -340,7 +339,7 @@ describe('execute()', () => {
   });
 
   test('renders parameter templates as expected', async () => {
-    expect(actionType.renderParameterTemplates).toBeTruthy();
+    expect(connectorType.renderParameterTemplates).toBeTruthy();
     const paramsWithTemplates = {
       documents: [{ hello: '{{who}}' }],
       indexOverride: null,
@@ -348,7 +347,7 @@ describe('execute()', () => {
     const variables = {
       who: 'world',
     };
-    const renderedParams = actionType.renderParameterTemplates!(
+    const renderedParams = connectorType.renderParameterTemplates!(
       paramsWithTemplates,
       variables,
       'action-type-id'
@@ -366,7 +365,7 @@ describe('execute()', () => {
   });
 
   test('ignores indexOverride for generic es index connector', async () => {
-    expect(actionType.renderParameterTemplates).toBeTruthy();
+    expect(connectorType.renderParameterTemplates).toBeTruthy();
     const paramsWithTemplates = {
       documents: [{ hello: '{{who}}' }],
       indexOverride: 'hello-world',
@@ -374,7 +373,7 @@ describe('execute()', () => {
     const variables = {
       who: 'world',
     };
-    const renderedParams = actionType.renderParameterTemplates!(
+    const renderedParams = connectorType.renderParameterTemplates!(
       paramsWithTemplates,
       variables,
       'action-type-id'
@@ -392,7 +391,7 @@ describe('execute()', () => {
   });
 
   test('renders parameter templates as expected for preconfigured alert history connector', async () => {
-    expect(actionType.renderParameterTemplates).toBeTruthy();
+    expect(connectorType.renderParameterTemplates).toBeTruthy();
     const paramsWithTemplates = {
       documents: [{ hello: '{{who}}' }],
       indexOverride: null,
@@ -423,7 +422,7 @@ describe('execute()', () => {
         alertStateAnotherValue: 'yes',
       },
     };
-    const renderedParams = actionType.renderParameterTemplates!(
+    const renderedParams = connectorType.renderParameterTemplates!(
       paramsWithTemplates,
       variables,
       AlertHistoryEsIndexConnectorId
@@ -472,7 +471,7 @@ describe('execute()', () => {
   });
 
   test('passes through indexOverride for preconfigured alert history connector', async () => {
-    expect(actionType.renderParameterTemplates).toBeTruthy();
+    expect(connectorType.renderParameterTemplates).toBeTruthy();
     const paramsWithTemplates = {
       documents: [{ hello: '{{who}}' }],
       indexOverride: 'hello-world',
@@ -503,7 +502,7 @@ describe('execute()', () => {
         alertStateAnotherValue: 'yes',
       },
     };
-    const renderedParams = actionType.renderParameterTemplates!(
+    const renderedParams = connectorType.renderParameterTemplates!(
       paramsWithTemplates,
       variables,
       AlertHistoryEsIndexConnectorId
@@ -552,7 +551,7 @@ describe('execute()', () => {
   });
 
   test('throws error for preconfigured alert history index when no variables are available', async () => {
-    expect(actionType.renderParameterTemplates).toBeTruthy();
+    expect(connectorType.renderParameterTemplates).toBeTruthy();
     const paramsWithTemplates = {
       documents: [{ hello: '{{who}}' }],
       indexOverride: null,
@@ -560,7 +559,7 @@ describe('execute()', () => {
     const variables = {};
 
     expect(() =>
-      actionType.renderParameterTemplates!(
+      connectorType.renderParameterTemplates!(
         paramsWithTemplates,
         variables,
         AlertHistoryEsIndexConnectorId
@@ -605,8 +604,16 @@ describe('execute()', () => {
       ],
     });
 
-    expect(await actionType.executor({ actionId, config, secrets, params, services }))
-      .toMatchInlineSnapshot(`
+    expect(
+      await connectorType.executor({
+        actionId,
+        config,
+        secrets,
+        params,
+        services,
+        configurationUtilities,
+      })
+    ).toMatchInlineSnapshot(`
       Object {
         "actionId": "some-id",
         "message": "error indexing documents",
