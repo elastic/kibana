@@ -15,9 +15,10 @@ import {
   useIsWithinBreakpoints,
 } from '@elastic/eui';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
-import React, { RefObject, useCallback } from 'react';
+import React, { RefObject, useCallback, useMemo } from 'react';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { METRIC_TYPE } from '@kbn/analytics';
+import { createHtmlPortalNode, InPortal } from 'react-reverse-portal';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DataTableRecord } from '../../../../types';
 import { DocumentViewModeToggle, VIEW_MODE } from '../../../../components/view_mode_toggle';
@@ -88,67 +89,17 @@ export const DiscoverMainContent = ({
     [trackUiMetric, stateContainer]
   );
 
+  const histogramPanel = useMemo(
+    () => createHtmlPortalNode({ attributes: { class: 'eui-fullHeight' } }),
+    []
+  );
+
+  const mainPanel = useMemo(
+    () => createHtmlPortalNode({ attributes: { class: 'eui-fullHeight' } }),
+    []
+  );
+
   const showFixedPanels = useIsWithinBreakpoints(['xs', 's']) || isPlainRecord || state.hideChart;
-
-  const histogramPanel = (
-    <DiscoverChartMemoized
-      resetSavedSearch={resetSavedSearch}
-      savedSearch={savedSearch}
-      savedSearchDataChart$={savedSearchData$.charts$}
-      savedSearchDataTotalHits$={savedSearchData$.totalHits$}
-      stateContainer={stateContainer}
-      dataView={dataView}
-      hideChart={state.hideChart}
-      interval={state.interval}
-      isTimeBased={isTimeBased}
-      appendHistogram={showFixedPanels ? <EuiSpacer size="s" /> : <EuiSpacer size="m" />}
-    />
-  );
-
-  const mainPanel = (
-    <EuiFlexGroup
-      className="eui-fullHeight"
-      direction="column"
-      gutterSize="none"
-      responsive={false}
-    >
-      {!isPlainRecord && (
-        <EuiFlexItem grow={false}>
-          {!showFixedPanels && <EuiSpacer size="s" />}
-          <EuiHorizontalRule margin="none" />
-          <DocumentViewModeToggle viewMode={viewMode} setDiscoverViewMode={setDiscoverViewMode} />
-        </EuiFlexItem>
-      )}
-      {viewMode === VIEW_MODE.DOCUMENT_LEVEL ? (
-        <DiscoverDocuments
-          documents$={savedSearchData$.documents$}
-          expandedDoc={expandedDoc}
-          dataView={dataView}
-          navigateTo={navigateTo}
-          onAddFilter={!isPlainRecord ? onAddFilter : undefined}
-          savedSearch={savedSearch}
-          setExpandedDoc={setExpandedDoc}
-          state={state}
-          stateContainer={stateContainer}
-          onFieldEdited={!isPlainRecord ? onFieldEdited : undefined}
-        />
-      ) : (
-        <FieldStatisticsTableMemoized
-          availableFields$={savedSearchData$.availableFields$}
-          savedSearch={savedSearch}
-          dataView={dataView}
-          query={state.query}
-          filters={state.filters}
-          columns={columns}
-          stateContainer={stateContainer}
-          onAddFilter={!isPlainRecord ? onAddFilter : undefined}
-          trackUiMetric={trackUiMetric}
-          savedSearchRefetch$={savedSearchRefetch$}
-        />
-      )}
-    </EuiFlexGroup>
-  );
-
   const { euiTheme } = useEuiTheme();
   const panelsProps = {
     className: 'dscPageContent__inner',
@@ -157,13 +108,77 @@ export const DiscoverMainContent = ({
     mainPanel,
   };
 
-  return showFixedPanels ? (
-    <DiscoverFixedPanels
-      isPlainRecord={isPlainRecord}
-      hideChart={state.hideChart}
-      {...panelsProps}
-    />
-  ) : (
-    <DiscoverResizablePanels resizeRef={resizeRef} {...panelsProps} />
+  return (
+    <>
+      <InPortal node={histogramPanel}>
+        <DiscoverChartMemoized
+          resetSavedSearch={resetSavedSearch}
+          savedSearch={savedSearch}
+          savedSearchDataChart$={savedSearchData$.charts$}
+          savedSearchDataTotalHits$={savedSearchData$.totalHits$}
+          stateContainer={stateContainer}
+          dataView={dataView}
+          hideChart={state.hideChart}
+          interval={state.interval}
+          isTimeBased={isTimeBased}
+          appendHistogram={showFixedPanels ? <EuiSpacer size="s" /> : <EuiSpacer size="m" />}
+        />
+      </InPortal>
+      <InPortal node={mainPanel}>
+        <EuiFlexGroup
+          className="eui-fullHeight"
+          direction="column"
+          gutterSize="none"
+          responsive={false}
+        >
+          {!isPlainRecord && (
+            <EuiFlexItem grow={false}>
+              {!showFixedPanels && <EuiSpacer size="s" />}
+              <EuiHorizontalRule margin="none" />
+              <DocumentViewModeToggle
+                viewMode={viewMode}
+                setDiscoverViewMode={setDiscoverViewMode}
+              />
+            </EuiFlexItem>
+          )}
+          {viewMode === VIEW_MODE.DOCUMENT_LEVEL ? (
+            <DiscoverDocuments
+              documents$={savedSearchData$.documents$}
+              expandedDoc={expandedDoc}
+              dataView={dataView}
+              navigateTo={navigateTo}
+              onAddFilter={!isPlainRecord ? onAddFilter : undefined}
+              savedSearch={savedSearch}
+              setExpandedDoc={setExpandedDoc}
+              state={state}
+              stateContainer={stateContainer}
+              onFieldEdited={!isPlainRecord ? onFieldEdited : undefined}
+            />
+          ) : (
+            <FieldStatisticsTableMemoized
+              availableFields$={savedSearchData$.availableFields$}
+              savedSearch={savedSearch}
+              dataView={dataView}
+              query={state.query}
+              filters={state.filters}
+              columns={columns}
+              stateContainer={stateContainer}
+              onAddFilter={!isPlainRecord ? onAddFilter : undefined}
+              trackUiMetric={trackUiMetric}
+              savedSearchRefetch$={savedSearchRefetch$}
+            />
+          )}
+        </EuiFlexGroup>
+      </InPortal>
+      {showFixedPanels ? (
+        <DiscoverFixedPanels
+          isPlainRecord={isPlainRecord}
+          hideChart={state.hideChart}
+          {...panelsProps}
+        />
+      ) : (
+        <DiscoverResizablePanels resizeRef={resizeRef} {...panelsProps} />
+      )}
+    </>
   );
 };

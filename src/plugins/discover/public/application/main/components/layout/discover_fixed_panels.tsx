@@ -9,6 +9,7 @@
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React from 'react';
+import { HtmlPortalNode, OutPortal } from 'react-reverse-portal';
 
 export const DiscoverFixedPanels = ({
   className,
@@ -22,8 +23,8 @@ export const DiscoverFixedPanels = ({
   histogramHeight: number;
   isPlainRecord: boolean;
   hideChart: boolean | undefined;
-  histogramPanel: React.ReactElement;
-  mainPanel: React.ReactElement;
+  histogramPanel: HtmlPortalNode;
+  mainPanel: HtmlPortalNode;
 }) => {
   const histogramPanelCss = hideChart
     ? undefined
@@ -45,10 +46,12 @@ export const DiscoverFixedPanels = ({
     >
       {!isPlainRecord && (
         <EuiFlexItem grow={false} css={histogramPanelCss}>
-          {histogramPanel}
+          <OutPortal node={histogramPanel} />
         </EuiFlexItem>
       )}
-      <EuiFlexItem css={mainPanelCss}>{mainPanel}</EuiFlexItem>
+      <EuiFlexItem css={mainPanelCss}>
+        <OutPortal node={mainPanel} />
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };
