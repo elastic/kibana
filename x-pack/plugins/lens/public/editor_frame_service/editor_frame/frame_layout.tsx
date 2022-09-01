@@ -25,7 +25,7 @@ export function FrameLayout(props: FrameLayoutProps) {
   const isFullscreen = useLensSelector(selectIsFullscreenDatasource);
 
   return (
-    <EuiFlexGroup direction="column" responsive={false} gutterSize="none" alignItems={'stretch'}>
+    <EuiFlexGroup direction="column" responsive={false} gutterSize="none" alignItems="stretch">
       {props.bannerMessages ? (
         <EuiFlexItem grow={false}>
           <section aria-labelledby="bannerMessagesId">
@@ -40,7 +40,7 @@ export function FrameLayout(props: FrameLayoutProps) {
           </section>
         </EuiFlexItem>
       ) : null}
-      <EuiFlexItem grow={true}>
+      <EuiFlexItem grow={true} className="lnsFrameLayout__wrapper">
         <EuiPage
           paddingSize="none"
           className={classNames('lnsFrameLayout', {
