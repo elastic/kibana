@@ -17,7 +17,7 @@ export class IndexPatternsService extends FtrService {
    */
   async create(
     indexPattern: { title: string; timeFieldName?: string },
-    { override = false }: { override: boolean },
+    { override } = { override: false },
     spaceId = ''
   ): Promise<DataViewSpec> {
     const response = await this.kibanaServer.request<{

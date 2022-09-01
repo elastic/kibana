@@ -27156,7 +27156,6 @@
     "xpack.securitySolution.detectionEngine.ruleDetails.backToRulesButton": "规则",
     "xpack.securitySolution.detectionEngine.ruleDetails.deletedRule": "已删除规则",
     "xpack.securitySolution.detectionEngine.ruleDetails.enableRuleLabel": "启用",
-    "xpack.securitySolution.detectionEngine.ruleDetails.exceptionsTab": "例外",
     "xpack.securitySolution.detectionEngine.ruleDetails.pageTitle": "规则详情",
     "xpack.securitySolution.detectionEngine.ruleDetails.ruleExecutionEventsTab": "执行事件",
     "xpack.securitySolution.detectionEngine.ruleDetails.ruleExecutionLog.actionFieldNotFoundErrorDescription": "在告警索引中找不到字段“kibana.alert.rule.execution.uuid”。",
