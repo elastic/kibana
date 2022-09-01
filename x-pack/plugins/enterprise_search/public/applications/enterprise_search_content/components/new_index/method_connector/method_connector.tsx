@@ -45,7 +45,7 @@ export const MethodConnector: React.FC<{ isNative: boolean }> = ({ isNative }) =
       onNameChange={() => {
         apiReset();
       }}
-      onSubmit={(name, lang) => makeRequest({ indexName: name, isNative, language: lang, serviceType: null })}
+      onSubmit={(name, lang) => makeRequest({ indexName: name, isNative, language: lang })}
       buttonLoading={status === Status.LOADING}
     >
       <EuiSteps
@@ -133,7 +133,6 @@ export const MethodConnector: React.FC<{ isNative: boolean }> = ({ isNative }) =
               indexName: fullIndexName,
               isNative,
               language,
-              serviceType: null
             });
           }}
           cancelButtonText={i18n.translate(

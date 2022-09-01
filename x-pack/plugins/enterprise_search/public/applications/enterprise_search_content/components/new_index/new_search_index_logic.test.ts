@@ -128,7 +128,7 @@ describe('NewSearchIndexLogic', () => {
     });
     describe('crawlerIndexCreated', () => {
       it('calls flash index created toast', () => {
-        NewSearchIndexLogic.actions.crawlerIndexCreated({ updated: 'indexName' });
+        NewSearchIndexLogic.actions.crawlerIndexCreated({ created: 'indexName' });
         expect(flashIndexCreatedToast).toHaveBeenCalled();
       });
     });

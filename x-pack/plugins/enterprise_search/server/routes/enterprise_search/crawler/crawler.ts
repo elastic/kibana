@@ -6,8 +6,16 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { i18n } from '@kbn/i18n';
 
+import { ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE } from '../../../../common/constants';
+
+import { ErrorCode } from '../../../../common/types/error_codes';
+import { addConnector } from '../../../lib/connectors/add_connector';
+import { deleteConnectorById } from '../../../lib/connectors/delete_connector';
+import { fetchConnectorByIndexName } from '../../../lib/connectors/fetch_connectors';
 import { RouteDependencies } from '../../../plugin';
+import { createError } from '../../../utils/create_error';
 import { elasticsearchErrorHandler } from '../../../utils/elasticsearch_error_handler';
 
 import { registerCrawlerCrawlRulesRoutes } from './crawler_crawl_rules';
@@ -17,22 +25,55 @@ import { registerCrawlerSitemapRoutes } from './crawler_sitemaps';
 export function registerCrawlerRoutes(routeDependencies: RouteDependencies) {
   const { router, enterpriseSearchRequestHandler, log } = routeDependencies;
 
-  router.put(
+  router.post(
     {
-      path: '/internal/enterprise_search/crawler/{indexName}',
+      path: '/internal/enterprise_search/crawler',
       validate: {
-        params: schema.object({
-          indexName: schema.string(),
-        }),
         body: schema.object({
+          index_name: schema.string(),
           language: schema.oneOf([schema.string(), schema.literal(null)]),
         }),
       },
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
-      return enterpriseSearchRequestHandler.createRequest({
-        path: '/api/ent/v1/internal/indices/:indexName',
-      })(context, request, response);
+      const connParams = {
+        delete_existing_connector: true,
+        index_name: request.body.index_name,
+        is_native: true,
+        language: request.body.language,
+        service_type: ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE,
+      };
+      const { client } = (await context.core).elasticsearch;
+
+      try {
+        await addConnector(client, connParams);
+        return enterpriseSearchRequestHandler.createRequest({
+          path: '/api/ent/v1/internal/indices',
+        })(context, request, response);
+      } catch (error) {
+        if (
+          (error as Error).message === ErrorCode.CONNECTOR_DOCUMENT_ALREADY_EXISTS ||
+          (error as Error).message === ErrorCode.INDEX_ALREADY_EXISTS
+        ) {
+          return createError({
+            errorCode: (error as Error).message as ErrorCode,
+            message: i18n.translate(
+              'xpack.enterpriseSearch.server.routes.addConnector.connectorExistsError',
+              {
+                defaultMessage: 'Connector or index already exists',
+              }
+            ),
+            response,
+            statusCode: 409,
+          });
+        }
+        // clean up connector index if it was created
+        const connector = await fetchConnectorByIndexName(client, request.body.index_name);
+        if (connector) {
+          await deleteConnectorById(client, connector.id);
+        }
+        throw error;
+      }
     })
   );
 

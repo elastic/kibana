@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE } from '@kbn/enterprise-search-plugin/common/constants';
 import { createApiLogic } from '../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../shared/http';
 import { LanguageForOptimization } from '../../components/new_index/types';
@@ -16,31 +15,23 @@ export interface CreateCrawlerIndexArgs {
 }
 
 interface CreateCrawlerIndexRequest {
+  index_name: string;
   language: LanguageForOptimization;
 }
 
 export interface CreateCrawlerIndexResponse {
-  updated: string; // the name of the updated index
+  created: string; // the name of the newly created index
 }
 
 export const createCrawlerIndex = async ({ indexName, language }: CreateCrawlerIndexArgs) => {
-  const connRoute = '/internal/enterprise_search/connectors';
-  const connParams = {
-    delete_existing_connector: true,
+  const route = '/internal/enterprise_search/crawler';
+
+  const params: CreateCrawlerIndexRequest = {
     index_name: indexName,
-    is_native: true,
     language,
-    service_type: ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE,
   };
 
-  await HttpLogic.values.http.post(connRoute, {
-    body: JSON.stringify(connParams),
-  });
-
-  const route = `/internal/enterprise_search/crawler/${indexName}`;
-  const params: CreateCrawlerIndexRequest = { language };
-
-  return await HttpLogic.values.http.put<CreateCrawlerIndexResponse>(route, {
+  return await HttpLogic.values.http.post<CreateCrawlerIndexResponse>(route, {
     body: JSON.stringify(params),
   });
 };

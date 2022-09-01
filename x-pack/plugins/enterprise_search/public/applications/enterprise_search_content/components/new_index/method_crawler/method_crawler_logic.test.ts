@@ -28,7 +28,7 @@ describe('MethodCrawlerLogic', () => {
   describe('listeners', () => {
     describe('apiSuccess', () => {
       it('navigates user to index detail view', () => {
-        MethodCrawlerLogic.actions.apiSuccess({ updated: 'my-index' });
+        MethodCrawlerLogic.actions.apiSuccess({ created: 'my-index' });
 
         expect(navigateToUrl).toHaveBeenCalledWith('/search_indices/my-index/domain_management');
       });
