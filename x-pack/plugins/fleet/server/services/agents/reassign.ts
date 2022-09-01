@@ -7,6 +7,7 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/server';
 import Boom from '@hapi/boom';
+import uuid from 'uuid';
 
 import type { Agent, BulkActionResult } from '../../types';
 import { agentPolicyService } from '../agent_policy';
@@ -14,18 +15,12 @@ import { AgentReassignmentError, HostedAgentPolicyRestrictionRelatedError } from
 
 import { SO_SEARCH_LIMIT } from '../../constants';
 
-import {
-  getAgentDocuments,
-  getAgentPolicyForAgent,
-  updateAgent,
-  getAgentsByKuery,
-  openPointInTime,
-} from './crud';
+import { getAgentDocuments, getAgentPolicyForAgent, updateAgent, getAgentsByKuery } from './crud';
 import type { GetAgentsOptions } from '.';
 import { createAgentAction } from './actions';
 import { searchHitToAgent } from './helpers';
 
-import { ReassignActionRunner, reassignBatch } from './reassign_action_runner';
+import { reassignBatch } from './reassign_action_runner';
 
 export async function reassignAgent(
   soClient: SavedObjectsClientContract,
@@ -99,6 +94,7 @@ export async function reassignAgents(
 
   const outgoingErrors: Record<Agent['id'], Error> = {};
   let givenAgents: Agent[] = [];
+  let total;
   if ('agents' in options) {
     givenAgents = options.agents;
   } else if ('agentIds' in options) {
@@ -120,27 +116,19 @@ export async function reassignAgents(
       page: 1,
       perPage: batchSize,
     });
-    if (res.total <= batchSize) {
-      givenAgents = res.agents;
-    } else {
-      return await new ReassignActionRunner(
-        esClient,
-        soClient,
-        {
-          ...options,
-          batchSize,
-          total: res.total,
-          newAgentPolicyId,
-        },
-        { pitId: await openPointInTime(esClient) }
-      ).runActionAsyncWithRetry();
-    }
+    givenAgents = res.agents;
+    total = res.total;
   }
 
   return await reassignBatch(
     soClient,
     esClient,
-    { newAgentPolicyId },
+    {
+      newAgentPolicyId,
+      total,
+      actionId: uuid(),
+      kuery: 'kuery' in options ? options.kuery : undefined,
+    },
     givenAgents,
     outgoingErrors,
     'agentIds' in options ? options.agentIds : undefined

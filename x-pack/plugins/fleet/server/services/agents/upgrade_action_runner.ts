@@ -24,6 +24,7 @@ import { errorsToResults, bulkUpdateAgents } from './crud';
 import { createAgentAction } from './actions';
 import { getHostedPolicies, isHostedAgent } from './hosted_agent';
 import { BulkActionTaskType } from './bulk_actions_resolver';
+import { createPercolateQuery } from './reassign_action_runner';
 
 export class UpgradeActionRunner extends ActionRunner {
   protected async processAgents(agents: Agent[]): Promise<{ items: BulkActionResult[] }> {
@@ -122,7 +123,7 @@ export async function upgradeBatch(
     ack_data: data,
     type: 'UPGRADE',
     total: options.total,
-    agents: agentsToUpdate.map((agent) => agent.id),
+    agents: options.kuery !== undefined ? [] : agentsToUpdate.map((agent) => agent.id),
     ...rollingUpgradeOptions,
   });
 
@@ -137,7 +138,7 @@ export async function upgradeBatch(
     }))
   );
 
-  return {
+  const result = {
     items: errorsToResults(
       givenAgents,
       errors,
@@ -145,6 +146,14 @@ export async function upgradeBatch(
       skipSuccess
     ),
   };
+
+  if (options.kuery === undefined) {
+    return result;
+  }
+
+  await createPercolateQuery(esClient, options);
+
+  return result;
 }
 
 const MINIMUM_EXECUTION_DURATION_SECONDS = 60 * 60 * 2; // 2h

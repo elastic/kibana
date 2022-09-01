@@ -49,6 +49,7 @@ export async function reassignBatch(
     newAgentPolicyId: string;
     actionId?: string;
     total?: number;
+    kuery?: string;
   },
   givenAgents: Agent[],
   outgoingErrors: Record<Agent['id'], Error>,
@@ -113,11 +114,67 @@ export async function reassignBatch(
   const now = new Date().toISOString();
   await createAgentAction(esClient, {
     id: options.actionId,
-    agents: agentsToUpdate.map((agent) => agent.id),
+    agents: options.kuery !== undefined ? [] : agentsToUpdate.map((agent) => agent.id),
     created_at: now,
     type: 'POLICY_REASSIGN',
     total: options.total,
   });
 
+  if (options.kuery === undefined) {
+    return result;
+  }
+
+  await createPercolateQuery(esClient, options);
+
   return result;
+}
+
+export async function createPercolateQuery(esClient: ElasticsearchClient, options: any) {
+  const exists = await esClient.indices.exists({ index: '.fleet-percolator-queries' });
+  if (!exists) {
+    await esClient.indices.create({
+      index: '.fleet-percolator-queries',
+      mappings: {
+        properties: {
+          query: {
+            type: 'percolator',
+          },
+          policy_id: { type: 'keyword' },
+          // TODO all mappings from .fleet-agents
+        },
+      },
+    });
+  }
+
+  if (options.kuery === '') {
+    await esClient.create({
+      index: '.fleet-percolator-queries',
+      id: options.actionId!,
+      body: {
+        query: {
+          bool: {
+            must: [
+              {
+                match_all: {},
+              },
+            ],
+          },
+        },
+      },
+      refresh: 'wait_for',
+    });
+  } else {
+    await esClient.create({
+      index: '.fleet-percolator-queries',
+      id: options.actionId!,
+      body: {
+        query: {
+          query_string: {
+            query: (options.kuery ?? '').replaceAll('fleet-agents.', '').trim(), // "policy_id: 73611b20-2789-11ed-8503-c3d22eca5e83"
+          },
+        },
+      },
+      refresh: 'wait_for',
+    });
+  }
 }

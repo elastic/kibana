@@ -8,6 +8,8 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import pMap from 'p-map';
 
+import { appContextService } from '..';
+
 import { SO_SEARCH_LIMIT } from '../../constants';
 
 import { AGENT_ACTIONS_STATUS_INDEX } from '../../../common/constants';
@@ -44,10 +46,32 @@ export async function getActionStatuses(esClient: ElasticsearchClient): Promise<
       });
 
       const nbAgentsActioned = action.nbAgentsActioned || action.nbAgentsActionCreated;
-      const complete = count === nbAgentsActioned;
+      const complete = count >= nbAgentsActioned;
       const isCancelled = cancelledActionIds.indexOf(action.actionId) > -1;
 
       const actionStatus = actionStatuses.find((as) => as.actionId === action.actionId);
+
+      if (complete) {
+        // clean up percolator queries for this action
+        // this logic should live in FS to make sure it checks regularly (not only when the UI is running)
+        const hasPercolatorQuery = await esClient.exists({
+          id: action.actionId,
+          index: '.fleet-percolator-queries',
+        });
+        if (hasPercolatorQuery) {
+          await esClient.delete({
+            id: action.actionId,
+            index: '.fleet-percolator-queries',
+          });
+          appContextService
+            .getLogger()
+            .info(
+              new Date().toISOString() +
+                ' Cleanup percolator query for actionId: ' +
+                action.actionId
+            );
+        }
+      }
 
       return {
         ...action,
@@ -119,13 +143,6 @@ async function _getActions(esClient: ElasticsearchClient) {
           {
             term: {
               type: 'CANCEL',
-            },
-          },
-        ],
-        must: [
-          {
-            exists: {
-              field: 'agents',
             },
           },
         ],

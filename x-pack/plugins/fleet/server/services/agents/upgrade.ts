@@ -7,6 +7,7 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import pMap from 'p-map';
+import uuid from 'uuid';
 
 import type { Agent, FleetServerAgentAction, CurrentUpgrade } from '../../types';
 import { AgentReassignmentError, HostedAgentPolicyRestrictionRelatedError } from '../../errors';
@@ -15,11 +16,10 @@ import { SO_SEARCH_LIMIT } from '../../constants';
 
 import { createAgentAction } from './actions';
 import type { GetAgentsOptions } from './crud';
-import { openPointInTime } from './crud';
 import { getAgentsByKuery } from './crud';
 import { getAgentDocuments, updateAgent, getAgentPolicyForAgent } from './crud';
 import { searchHitToAgent } from './helpers';
-import { UpgradeActionRunner, upgradeBatch } from './upgrade_action_runner';
+import { upgradeBatch } from './upgrade_action_runner';
 
 function isMgetDoc(doc?: estypes.MgetResponseItem<unknown>): doc is estypes.GetGetResult {
   return Boolean(doc && 'found' in doc);
@@ -79,6 +79,7 @@ export async function sendUpgradeAgentsActions(
   // Full set of agents
   const outgoingErrors: Record<Agent['id'], Error> = {};
   let givenAgents: Agent[] = [];
+  let total;
   if ('agents' in options) {
     givenAgents = options.agents;
   } else if ('agentIds' in options) {
@@ -100,23 +101,15 @@ export async function sendUpgradeAgentsActions(
       page: 1,
       perPage: batchSize,
     });
-    if (res.total <= batchSize) {
-      givenAgents = res.agents;
-    } else {
-      return await new UpgradeActionRunner(
-        esClient,
-        soClient,
-        {
-          ...options,
-          batchSize,
-          total: res.total,
-        },
-        { pitId: await openPointInTime(esClient) }
-      ).runActionAsyncWithRetry();
-    }
+    givenAgents = res.agents;
+    total = res.total;
   }
 
-  return await upgradeBatch(soClient, esClient, givenAgents, outgoingErrors, options);
+  return await upgradeBatch(soClient, esClient, givenAgents, outgoingErrors, {
+    ...options,
+    total,
+    actionId: uuid(),
+  });
 }
 
 /**
