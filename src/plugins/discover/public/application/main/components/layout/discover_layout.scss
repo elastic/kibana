@@ -29,10 +29,6 @@ discover-app {
 
 .dscPageBody__contents {
   overflow: hidden;
-
-  @include euiBreakpoint('xs', 's') {
-    flex-direction: column;
-  }
 }
 
 .dscPageContent__wrapper {
