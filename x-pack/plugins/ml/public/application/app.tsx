@@ -146,7 +146,7 @@ export const renderApp = (
 
   appMountParams.onAppLeave((actions) => actions.default());
 
-  const mlLicense = setLicenseCache(deps.licensing, [
+  const mlLicense = setLicenseCache(deps.licensing, coreStart.application, [
     () =>
       ReactDOM.render(
         <App coreStart={coreStart} deps={deps} appMountParams={appMountParams} />,

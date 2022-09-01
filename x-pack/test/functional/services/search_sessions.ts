@@ -30,7 +30,7 @@ export class SearchSessionsService extends FtrService {
   private readonly log = this.ctx.getService('log');
   private readonly retry = this.ctx.getService('retry');
   private readonly browser = this.ctx.getService('browser');
-  private readonly supertest = this.ctx.getService('supertest');
+  private readonly security = this.ctx.getService('security');
 
   public async find(): Promise<WebElementWrapper> {
     return this.testSubjects.find(SEARCH_SESSION_INDICATOR_TEST_SUBJ);
@@ -138,21 +138,31 @@ export class SearchSessionsService extends FtrService {
     this.log.debug('Deleting created search sessions');
     // ignores 409 errs and keeps retrying
     await this.retry.tryForTime(10000, async () => {
-      const { body } = await this.supertest
+      const { body } = await this.security.testUserSupertest
         .post('/internal/session/_find')
         .set('kbn-xsrf', 'anything')
         .set('kbn-system-request', 'true')
-        .send({ page: 1, perPage: 10000, sortField: 'created', sortOrder: 'asc' })
+        .send({
+          page: 1,
+          perPage: 10000,
+          sortField: 'created',
+          sortOrder: 'asc',
+        })
         .expect(200);
 
       const { saved_objects: savedObjects } = body as SavedObjectsFindResponse;
-      if (savedObjects.length) {
+
+      if (savedObjects.length > 0) {
         this.log.debug(`Found created search sessions: ${savedObjects.map(({ id }) => id)}`);
+      } else {
+        this.log.debug(`Found no search sessions to delete`);
+        return;
       }
+
       await Promise.all(
         savedObjects.map(async (so) => {
           this.log.debug(`Deleting search session: ${so.id}`);
-          await this.supertest
+          await this.security.testUserSupertest
             .delete(`/internal/session/${so.id}`)
             .set(`kbn-xsrf`, `anything`)
             .expect(200);
