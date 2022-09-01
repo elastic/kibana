@@ -42,7 +42,7 @@ RUNTIME_DEPS = [
   "//packages/kbn-eslint-plugin-imports",
   "//packages/kbn-utility-types",
   "//packages/kbn-utils",
-  "@npm//glob",
+  "@npm//globby",
   "@npm//listr",
   "@npm//normalize-path",
 ]
@@ -52,8 +52,8 @@ TYPES_DEPS = [
   "//packages/kbn-eslint-plugin-imports:npm_module_types",
   "//packages/kbn-utility-types:npm_module_types",
   "//packages/kbn-utils:npm_module_types",
+  "@npm//globby",
   "@npm//tslib",
-  "@npm//@types/glob",
   "@npm//@types/jest",
   "@npm//@types/listr",
   "@npm//@types/lodash",
