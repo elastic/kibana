@@ -35,6 +35,7 @@ import {
 } from '../hooks/use_saved_search';
 import { DiscoverServices } from '../../../build_services';
 import { fetchSql } from './fetch_sql';
+import { getAdHocDataView } from './adhoc_data_view';
 
 export interface FetchDeps {
   abortController: AbortController;
@@ -110,10 +111,11 @@ export function fetchAll(
     const isChartVisible =
       !hideChart && dataView.isTimeBased() && dataView.type !== DataViewType.ROLLUP;
 
+    const adHocDataView = getAdHocDataView();
     // Start fetching all required requests
     const documents =
       useSql && query
-        ? fetchSql(query, services.dataViews, data, services.expressions, dataView.timeFieldName)
+        ? fetchSql(query, services.dataViews, data, services.expressions, adHocDataView)
         : fetchDocuments(searchSource.createCopy(), fetchDeps);
     const charts =
       isChartVisible && !useSql ? fetchChart(searchSource.createCopy(), fetchDeps) : undefined;

@@ -36,7 +36,7 @@ test('onSaveSearch', async () => {
     savedSearch: savedSearchMock,
     services: serviceMock,
     state: stateMock,
-    updateHocDataViewId: jest.fn(),
+    updateAdHocDataViewId: jest.fn(),
   });
 
   expect(showSaveModal).toHaveBeenCalled();

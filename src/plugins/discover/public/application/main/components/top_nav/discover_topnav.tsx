@@ -17,6 +17,7 @@ import { getTopNavLinks } from './get_top_nav_links';
 import { getHeaderActionMenuMounter } from '../../../../kibana_services';
 import { GetStateReturn } from '../../services/discover_state';
 import { onSaveSearch } from './on_save_search';
+import { setAdHocDataView } from '../../utils/adhoc_data_view';
 
 export type DiscoverTopNavProps = Pick<
   DiscoverLayoutProps,
@@ -36,7 +37,7 @@ export type DiscoverTopNavProps = Pick<
   textBasedLanguageModeErrors?: Error;
   onFieldEdited: () => void;
   persistDataView: (dataView: DataView) => Promise<DataView | undefined>;
-  updateHocDataViewId: (dataView: DataView) => Promise<DataView>;
+  updateAdHocDataViewId: (dataView: DataView) => Promise<DataView>;
 };
 
 export const DiscoverTopNav = ({
@@ -55,7 +56,7 @@ export const DiscoverTopNav = ({
   textBasedLanguageModeErrors,
   onFieldEdited,
   persistDataView,
-  updateHocDataViewId,
+  updateAdHocDataViewId,
 }: DiscoverTopNavProps) => {
   const history = useHistory();
 
@@ -71,11 +72,17 @@ export const DiscoverTopNav = ({
   const closeFieldEditor = useRef<() => void | undefined>();
   const closeDataViewEditor = useRef<() => void | undefined>();
 
-  const [adHocDataViews, setAdHocDataViews] = useState<DataView[]>(
-    !dataView.isPersisted() ? [dataView] : []
-  );
+  const updateAdHocDataView = useCallback((newDataView: DataView) => {
+    const newAdHocDataView = !newDataView.isPersisted() ? newDataView : undefined;
+    setAdHocDataView(newAdHocDataView);
+    return newAdHocDataView;
+  }, []);
 
-  useEffect(() => setAdHocDataViews(!dataView.isPersisted() ? [dataView] : []), [dataView]);
+  const [adHocDataView, _setAdHocDataView] = useState(updateAdHocDataView(dataView));
+  useEffect(
+    () => _setAdHocDataView(updateAdHocDataView(dataView)),
+    [dataView, updateAdHocDataView]
+  );
 
   const { AggregateQueryTopNavMenu } = navigation.ui;
 
@@ -158,7 +165,7 @@ export const DiscoverTopNav = ({
         onOpenSavedSearch,
         isPlainRecord,
         persistDataView,
-        updateHocDataViewId,
+        updateAdHocDataViewId,
       }),
     [
       dataView,
@@ -171,7 +178,7 @@ export const DiscoverTopNav = ({
       onOpenSavedSearch,
       isPlainRecord,
       persistDataView,
-      updateHocDataViewId,
+      updateAdHocDataViewId,
     ]
   );
 
@@ -207,7 +214,7 @@ export const DiscoverTopNav = ({
     onDataViewCreated: createNewDataView,
     onChangeDataView,
     textBasedLanguages: supportedTextBasedLanguages as DataViewPickerProps['textBasedLanguages'],
-    adHocDataViews,
+    adHocDataViews: adHocDataView ? [adHocDataView] : [],
   };
 
   const onTextBasedSavedAndExit = useCallback(
@@ -220,10 +227,10 @@ export const DiscoverTopNav = ({
         state: stateContainer,
         onClose: onCancel,
         onSaveCb: onSave,
-        updateHocDataViewId,
+        updateAdHocDataViewId,
       });
     },
-    [dataView, navigateTo, savedSearch, services, stateContainer, updateHocDataViewId]
+    [dataView, navigateTo, savedSearch, services, stateContainer, updateAdHocDataViewId]
   );
 
   return (

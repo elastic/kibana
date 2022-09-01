@@ -16,7 +16,7 @@ import type { DataViewField } from '@kbn/data-views-plugin/public';
 import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
 import { getUiActions } from '../../../../../kibana_services';
 
-function getTriggerConstant(type: string) {
+export function getTriggerConstant(type: string) {
   return type === KBN_FIELD_TYPES.GEO_POINT || type === KBN_FIELD_TYPES.GEO_SHAPE
     ? VISUALIZE_GEO_FIELD_TRIGGER
     : VISUALIZE_FIELD_TRIGGER;

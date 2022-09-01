@@ -34,7 +34,7 @@ export const getTopNavLinks = ({
   onOpenSavedSearch,
   isPlainRecord,
   persistDataView,
-  updateHocDataViewId,
+  updateAdHocDataViewId,
 }: {
   dataView: DataView;
   navigateTo: (url: string) => void;
@@ -46,7 +46,7 @@ export const getTopNavLinks = ({
   onOpenSavedSearch: (id: string) => void;
   isPlainRecord: boolean;
   persistDataView: (dataView: DataView) => Promise<DataView | undefined>;
-  updateHocDataViewId: (dataView: DataView) => Promise<DataView>;
+  updateAdHocDataViewId: (dataView: DataView) => Promise<DataView>;
 }): TopNavMenuData[] => {
   const options = {
     id: 'options',
@@ -119,7 +119,7 @@ export const getTopNavLinks = ({
         dataView,
         navigateTo,
         state,
-        updateHocDataViewId,
+        updateAdHocDataViewId,
         onClose: () => {
           anchorElement?.focus();
         },

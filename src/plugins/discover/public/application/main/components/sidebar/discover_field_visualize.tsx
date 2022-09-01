@@ -10,7 +10,12 @@ import React, { useEffect, useState } from 'react';
 import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 
-import { triggerVisualizeActions, VisualizeInformation } from './lib/visualize_trigger_utils';
+import { VISUALIZE_GEO_FIELD_TRIGGER } from '@kbn/ui-actions-plugin/public';
+import {
+  getTriggerConstant,
+  triggerVisualizeActions,
+  VisualizeInformation,
+} from './lib/visualize_trigger_utils';
 import type { FieldDetails } from './types';
 import { getVisualizeInformation } from './lib/visualize_trigger_utils';
 import { DiscoverFieldVisualizeInner } from './discover_field_visualize_inner';
@@ -21,10 +26,11 @@ interface Props {
   details: FieldDetails;
   multiFields?: DataViewField[];
   trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
+  persistDataView: (dataView: DataView) => Promise<DataView | undefined>;
 }
 
 export const DiscoverFieldVisualize: React.FC<Props> = React.memo(
-  ({ field, dataView, details, trackUiMetric, multiFields }) => {
+  ({ field, dataView, details, trackUiMetric, multiFields, persistDataView }) => {
     const [visualizeInfo, setVisualizeInfo] = useState<VisualizeInformation>();
 
     useEffect(() => {
@@ -43,8 +49,20 @@ export const DiscoverFieldVisualize: React.FC<Props> = React.memo(
       // regular link click. let the uiActions code handle the navigation and show popup if needed
       event.preventDefault();
 
-      trackUiMetric?.(METRIC_TYPE.CLICK, 'visualize_link_click');
-      triggerVisualizeActions(visualizeInfo.field, dataView.id, details.columns);
+      const trigger = getTriggerConstant(field.type);
+      const triggerVisualization = (updatedDataView: DataView) => {
+        trackUiMetric?.(METRIC_TYPE.CLICK, 'visualize_link_click');
+        triggerVisualizeActions(visualizeInfo.field, updatedDataView.id, details.columns);
+      };
+
+      if (trigger === VISUALIZE_GEO_FIELD_TRIGGER) {
+        const updatedDataView = await persistDataView(dataView);
+        if (updatedDataView) {
+          triggerVisualization(updatedDataView);
+        }
+      } else {
+        triggerVisualization(dataView);
+      }
     };
 
     return (

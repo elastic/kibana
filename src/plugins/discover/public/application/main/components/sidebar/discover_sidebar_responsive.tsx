@@ -107,6 +107,7 @@ export interface DiscoverSidebarResponsiveProps {
    * list of available fields fetched from ES
    */
   availableFields$: AvailableFields$;
+  persistDataView: (dataView: DataView) => Promise<DataView | undefined>;
 }
 
 /**

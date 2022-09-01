@@ -5,9 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { isOfAggregateQueryType, getAggregateQueryMode, Query } from '@kbn/es-query';
+import {
+  isOfAggregateQueryType,
+  getAggregateQueryMode,
+  Query,
+  getIndexPatternFromSQLQuery,
+} from '@kbn/es-query';
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/common';
-import type { DataViewsContract } from '@kbn/data-views-plugin/common';
+import type { DataViewsContract, DataView } from '@kbn/data-views-plugin/common';
 import {
   ExpressionFunctionKibana,
   ExpressionFunctionKibanaContext,
@@ -21,7 +26,7 @@ import {
 interface Args extends QueryState {
   dataViewsService: DataViewsContract;
   inputQuery?: Query;
-  timeFieldName?: string;
+  adHocDataView?: DataView;
 }
 
 /**
@@ -35,7 +40,8 @@ export async function queryStateToExpressionAst({
   query,
   inputQuery,
   time,
-  timeFieldName,
+  dataViewsService,
+  adHocDataView,
 }: Args) {
   const kibana = buildExpressionFunction<ExpressionFunctionKibana>('kibana', {});
   let q;
@@ -48,15 +54,27 @@ export async function queryStateToExpressionAst({
     filters: filters && filtersToAst(filters),
   });
   const ast = buildExpression([kibana, kibanaContext]).toAst();
-
   if (query && isOfAggregateQueryType(query)) {
     const mode = getAggregateQueryMode(query);
     // sql query
     if (mode === 'sql' && 'sql' in query) {
-      const essql = aggregateQueryToAst(query, timeFieldName);
+      const idxPattern = getIndexPatternFromSQLQuery(query.sql);
+      const idsTitles = await dataViewsService.getIdsWithTitle();
 
-      if (essql) {
-        ast.chain.push(essql);
+      let dataViewId = idsTitles.find(({ title }) => title === idxPattern)?.id;
+      if (!dataViewId && adHocDataView?.title === idxPattern) {
+        dataViewId = adHocDataView.id;
+      }
+      if (dataViewId) {
+        const dataView = await dataViewsService.get(dataViewId);
+        const timeFieldName = dataView.timeFieldName;
+        const essql = aggregateQueryToAst(query, timeFieldName);
+
+        if (essql) {
+          ast.chain.push(essql);
+        }
+      } else {
+        throw new Error(`No data view found for index pattern ${idxPattern}`);
       }
     }
   }

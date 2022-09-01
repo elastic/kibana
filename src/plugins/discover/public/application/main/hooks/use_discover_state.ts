@@ -317,10 +317,10 @@ export function useDiscoverState({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [config, documentState, dataViews]);
 
-  const updateHocDataViewId = useCallback(
-    async (hocDataView: DataView) => {
-      const newDataView = await dataViews.create({ ...hocDataView.toSpec(), id: undefined });
-      dataViews.clearInstanceCache(hocDataView.id);
+  const updateAdHocDataViewId = useCallback(
+    async (dataViewToUpdate: DataView) => {
+      const newDataView = await dataViews.create({ ...dataViewToUpdate.toSpec(), id: undefined });
+      dataViews.clearInstanceCache(dataViewToUpdate.id);
       savedSearch.searchSource.setField('index', newDataView);
 
       // update filters references
@@ -329,7 +329,7 @@ export function useDiscoverState({
       const action = uiActions.getAction(UPDATE_FILTER_REFERENCES_ACTION);
       action?.execute({
         trigger,
-        fromDataView: hocDataView.id,
+        fromDataView: dataViewToUpdate.id,
         toDataView: newDataView.id,
         usedDataViews: [],
       } as ActionExecutionContext);
@@ -339,7 +339,7 @@ export function useDiscoverState({
     [dataViews, savedSearch.searchSource]
   );
 
-  const openConfirmSavePrompt = usePersistedDataView(updateHocDataViewId);
+  const { openConfirmSavePrompt, updateSavedSearch } = usePersistedDataView(updateAdHocDataViewId);
   const persistDataView = useCallback(async () => {
     const currentDataView = savedSearch.searchSource.getField('index')!;
     if (currentDataView && !currentDataView.isPersisted()) {
@@ -347,12 +347,18 @@ export function useDiscoverState({
       if (createdDataView) {
         savedSearch.searchSource.setField('index', createdDataView);
         await onChangeDataView(createdDataView.id!);
+
+        // update saved search with saved data view
+        if (savedSearch.id) {
+          const currentState = stateContainer.appStateContainer.getState();
+          await updateSavedSearch({ savedSearch, dataView: createdDataView, state: currentState });
+        }
         return createdDataView;
       }
       return undefined;
     }
     return currentDataView;
-  }, [onChangeDataView, openConfirmSavePrompt, savedSearch.searchSource]);
+  }, [stateContainer, onChangeDataView, openConfirmSavePrompt, savedSearch, updateSavedSearch]);
 
   return {
     data$,
@@ -362,7 +368,7 @@ export function useDiscoverState({
     resetSavedSearch,
     onChangeDataView,
     persistDataView,
-    updateHocDataViewId,
+    updateAdHocDataViewId,
     onUpdateQuery,
     searchSource,
     setState,

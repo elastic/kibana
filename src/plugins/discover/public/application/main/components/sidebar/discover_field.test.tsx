@@ -56,6 +56,7 @@ function getComponent({
     onRemoveField: jest.fn(),
     showDetails,
     selected,
+    persistDataView: jest.fn(),
   };
   const services = {
     history: () => ({
