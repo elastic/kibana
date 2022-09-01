@@ -17280,13 +17280,7 @@
             "label": "deprecations",
             "description": [],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.DeprecationsRequestHandlerContext",
-                "text": "DeprecationsRequestHandlerContext"
-              }
+              "DeprecationsRequestHandlerContext"
             ],
             "path": "src/core/server/core_route_handler_context.ts",
             "deprecated": false
@@ -19625,7 +19619,10 @@
         "description": [
           "\nServer-side client that provides access to fetch all Kibana deprecations\n"
         ],
-        "path": "src/core/server/deprecations/deprecations_service.ts",
+        "signature": [
+          "DeprecationsClient"
+        ],
+        "path": "node_modules/@types/kbn__core-deprecations-server/index.d.ts",
         "deprecated": false,
         "children": [
           {
@@ -19640,7 +19637,7 @@
               "DomainDeprecationDetails",
               "[]>"
             ],
-            "path": "src/core/server/deprecations/deprecations_service.ts",
+            "path": "node_modules/@types/kbn__core-deprecations-server/index.d.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -19699,7 +19696,10 @@
         "description": [
           "\nCore's `deprecations` request handler context."
         ],
-        "path": "src/core/server/deprecations/deprecations_route_handler_context.ts",
+        "signature": [
+          "DeprecationsRequestHandlerContext"
+        ],
+        "path": "node_modules/@types/kbn__core-deprecations-server/index.d.ts",
         "deprecated": false,
         "children": [
           {
@@ -19710,15 +19710,9 @@
             "label": "client",
             "description": [],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.DeprecationsClient",
-                "text": "DeprecationsClient"
-              }
+              "DeprecationsClient"
             ],
-            "path": "src/core/server/deprecations/deprecations_route_handler_context.ts",
+            "path": "node_modules/@types/kbn__core-deprecations-server/index.d.ts",
             "deprecated": false
           }
         ],

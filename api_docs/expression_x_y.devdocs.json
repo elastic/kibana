@@ -428,10 +428,10 @@
         "children": [
           {
             "parentPluginId": "expressionXY",
-            "id": "def-common.CollectiveConfig.roundedTimestamp",
+            "id": "def-common.CollectiveConfig.timebucket",
             "type": "number",
             "tags": [],
-            "label": "roundedTimestamp",
+            "label": "timebucket",
             "description": [],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_renderers.ts",
             "deprecated": false

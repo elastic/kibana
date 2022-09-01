@@ -316,6 +316,28 @@
       },
       {
         "parentPluginId": "@kbn/utility-types",
+        "id": "def-server.DedotObject",
+        "type": "Type",
+        "tags": [],
+        "label": "DedotObject",
+        "description": [],
+        "signature": [
+          "(Exclude<",
+          "ValuesType",
+          "<{ [TKey in keyof TObject]: {} extends Pick<TObject, TKey> ? ",
+          "DeepPartial",
+          "<DedotKey<TObject, TKey, Exclude<TObject[TKey], undefined>>> : DedotKey<TObject, TKey, TObject[TKey]>; }>, undefined> extends any ? (k: Exclude<",
+          "ValuesType",
+          "<{ [TKey in keyof TObject]: {} extends Pick<TObject, TKey> ? ",
+          "DeepPartial",
+          "<DedotKey<TObject, TKey, Exclude<TObject[TKey], undefined>>> : DedotKey<TObject, TKey, TObject[TKey]>; }>, undefined>) => void : never) extends (k: infer I) => void ? I : never"
+        ],
+        "path": "packages/kbn-utility-types/src/dot.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/utility-types",
         "id": "def-server.DeepPartial",
         "type": "Type",
         "tags": [],
@@ -365,6 +387,24 @@
           "<T[P]> | undefined; }"
         ],
         "path": "packages/kbn-utility-types/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/utility-types",
+        "id": "def-server.DotObject",
+        "type": "Type",
+        "tags": [],
+        "label": "DotObject",
+        "description": [],
+        "signature": [
+          "(",
+          "ValuesType",
+          "<{ [TKey in keyof TObject & string]: {} extends Pick<TObject, TKey> ? Partial<DotKey<Required<TObject>, TKey, TPrefix>> : DotKey<TObject, TKey, TPrefix>; }> extends any ? (k: ",
+          "ValuesType",
+          "<{ [TKey in keyof TObject & string]: {} extends Pick<TObject, TKey> ? Partial<DotKey<Required<TObject>, TKey, TPrefix>> : DotKey<TObject, TKey, TPrefix>; }>) => void : never) extends (k: infer I) => void ? I : never"
+        ],
+        "path": "packages/kbn-utility-types/src/dot.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
