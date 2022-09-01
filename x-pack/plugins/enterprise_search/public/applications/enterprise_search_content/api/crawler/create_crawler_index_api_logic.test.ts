@@ -32,9 +32,9 @@ describe('CreateCrawlerIndexApiLogic', () => {
         body: JSON.stringify({
           delete_existing_connector: true,
           index_name: indexName,
-          service_type: ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE,
           is_native: true,
           language,
+          service_type: ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE,
         }),
       });
       expect(http.put).toHaveBeenCalledWith(`/internal/enterprise_search/crawler/${indexName}`, {

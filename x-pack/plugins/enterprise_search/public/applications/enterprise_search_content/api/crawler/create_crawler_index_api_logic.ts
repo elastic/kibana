@@ -24,17 +24,17 @@ export interface CreateCrawlerIndexResponse {
 }
 
 export const createCrawlerIndex = async ({ indexName, language }: CreateCrawlerIndexArgs) => {
-  const conn_route = '/internal/enterprise_search/connectors';
-  const conn_params = {
+  const connRoute = '/internal/enterprise_search/connectors';
+  const connParams = {
     delete_existing_connector: true,
     index_name: indexName,
-    service_type: ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE,
     is_native: true,
     language,
+    service_type: ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE,
   };
 
-  await HttpLogic.values.http.post(conn_route, {
-    body: JSON.stringify(conn_params),
+  await HttpLogic.values.http.post(connRoute, {
+    body: JSON.stringify(connParams),
   });
 
   const route = `/internal/enterprise_search/crawler/${indexName}`;
