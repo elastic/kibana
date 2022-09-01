@@ -155,11 +155,11 @@ export function StorageDetailsPerService({
 
   return (
     <>
-      <EuiFlexGroup direction="column" responsive={false} gutterSize="xl">
+      <EuiFlexGroup direction="column" responsive={false} gutterSize="m">
         <EuiFlexItem>
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem>
-              <EuiTitle size="xxs">
+              <EuiTitle size="xs">
                 <h4>
                   {i18n.translate(
                     'xpack.apm.settings.storageExplorer.serviceDetails.title',
@@ -224,14 +224,14 @@ export function StorageDetailsPerService({
               </EuiPanel>
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiPanel hasShadow={false} paddingSize="xl">
+              <EuiPanel hasShadow={false} paddingSize="l">
                 {processorEventStats.map(
                   ({ processorEventLabel, docs, size }) => (
                     <>
                       <EuiFlexGrid
                         columns={2}
                         css={css`
-                          font-weight: bold;
+                          font-weight: ${euiTheme.font.weight.semiBold};
                         `}
                       >
                         <EuiFlexItem>{processorEventLabel}</EuiFlexItem>

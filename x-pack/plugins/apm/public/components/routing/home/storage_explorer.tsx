@@ -30,7 +30,7 @@ export const storageExplorer = {
               alignItems="baseline"
             >
               <EuiFlexItem grow={false}>
-                <EuiTitle size="s">
+                <EuiTitle size="l">
                   <h2>
                     {i18n.translate('xpack.apm.views.storageExplorer.title', {
                       defaultMessage: 'Storage explorer',
