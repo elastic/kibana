@@ -48,6 +48,7 @@ export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
   const externalContext = useLensSelector(selectExecutionContext);
   const activeDatasourceId = useLensSelector(selectActiveDatasourceId);
   const datasourceStates = useLensSelector(selectDatasourceStates);
+  const { query } = useLensSelector((state) => state.lens);
 
   const datasourceIsLoading = activeDatasourceId
     ? datasourceStates[activeDatasourceId].isLoading
@@ -80,6 +81,7 @@ export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
           initialContext: undefined,
           storage: new Storage(localStorage),
           defaultIndexPatternId: props.core.uiSettings.get('defaultIndex'),
+          query,
         },
         {
           isFullEditor: true,
@@ -110,6 +112,7 @@ export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
     dispatchLens,
     props.plugins.dataViews,
     props.core.uiSettings,
+    query,
   ]);
 
   const onChangeIndexPattern = useCallback(
@@ -152,7 +155,7 @@ export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
   return (
     <>
       <Easteregg query={externalContext?.query} />
-      {Object.keys(props.datasourceMap).length > 1 && (
+      {/* {Object.keys(props.datasourceMap).length > 1 && (
         <EuiPopover
           id="datasource-switch"
           className="lnsDataPanelWrapper__switchSource"
@@ -193,7 +196,7 @@ export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
             ))}
           />
         </EuiPopover>
-      )}
+      )} */}
       {activeDatasourceId && !datasourceIsLoading && (
         <NativeRenderer
           className="lnsDataPanelWrapper"

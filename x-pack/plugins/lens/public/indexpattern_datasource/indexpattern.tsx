@@ -8,6 +8,7 @@
 import React from 'react';
 import { render } from 'react-dom';
 import { I18nProvider } from '@kbn/i18n-react';
+import type { Query, AggregateQuery } from '@kbn/es-query';
 import type { CoreStart, SavedObjectReference } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { TimeRange } from '@kbn/es-query';
@@ -147,6 +148,7 @@ export function getIndexPatternDatasource({
       persistedState?: IndexPatternPersistedState,
       references?: SavedObjectReference[],
       initialContext?: VisualizeFieldContext | VisualizeEditorContext,
+      query?: Query | AggregateQuery,
       indexPatternRefs?: IndexPatternRef[],
       indexPatterns?: Record<string, IndexPattern>
     ) {
@@ -176,6 +178,33 @@ export function getIndexPatternDatasource({
           ...state.layers,
           [newLayerId]: blankLayer(state.currentIndexPatternId),
         },
+      };
+    },
+    // updateLayerId(state: IndexPatternPrivateState, oldLayerId: string, newLayerId: string) {
+    //   let layers = {};
+    //   Object.entries(state.layers).map(([key, value]) => {
+    //     if (key === oldLayerId) {
+    //       layers = {
+    //         ...layers,
+    //         [newLayerId]: value,
+    //       };
+    //     } else {
+    //       layers = {
+    //         ...layers,
+    //         [key]: value,
+    //       };
+    //     }
+    //   });
+    //   return {
+    //     ...state,
+    //     layers,
+    //   };
+    // },
+
+    createEmptyLayer(indexPatternId: string) {
+      return {
+        currentIndexPatternId: indexPatternId,
+        layers: {},
       };
     },
 

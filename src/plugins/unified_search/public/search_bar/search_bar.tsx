@@ -347,7 +347,7 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
       () => {
         if (this.props.onQuerySubmit) {
           this.props.onQuerySubmit({
-            query: this.state.query,
+            query: query as QT,
             dateRange: {
               from: this.state.dateRangeFrom,
               to: this.state.dateRangeTo,

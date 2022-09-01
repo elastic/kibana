@@ -7,6 +7,7 @@
 
 import { IUiSettingsClient, SavedObjectReference } from '@kbn/core/public';
 import { Ast } from '@kbn/interpreter';
+import type { Query } from '@kbn/es-query';
 import memoizeOne from 'memoize-one';
 import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { difference } from 'lodash';
@@ -164,6 +165,7 @@ export async function initializeSources(
     references,
     initialContext,
     adHocDataViews,
+    query,
   }: {
     dataViews: DataViewsContract;
     datasourceMap: DatasourceMap;
@@ -173,6 +175,7 @@ export async function initializeSources(
     references?: SavedObjectReference[];
     initialContext?: VisualizeFieldContext | VisualizeEditorContext;
     adHocDataViews?: Record<string, DataViewSpec>;
+    query?: Query;
   },
   options?: InitializationOptions
 ) {
@@ -199,6 +202,7 @@ export async function initializeSources(
       indexPatternRefs,
       indexPatterns,
       references,
+      query,
     }),
   };
 }
@@ -210,6 +214,7 @@ export function initializeDatasources({
   indexPatterns,
   references,
   initialContext,
+  query,
 }: {
   datasourceMap: DatasourceMap;
   datasourceStates: DatasourceStates;
@@ -217,6 +222,7 @@ export function initializeDatasources({
   indexPatternRefs: IndexPatternRef[];
   references?: SavedObjectReference[];
   initialContext?: VisualizeFieldContext | VisualizeEditorContext;
+  query?: Query;
 }) {
   // init datasources
   const states: DatasourceStates = {};
@@ -226,6 +232,7 @@ export function initializeDatasources({
         datasourceStates[datasourceId].state || undefined,
         references,
         initialContext,
+        query,
         indexPatternRefs,
         indexPatterns
       );

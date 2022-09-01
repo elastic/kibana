@@ -18,7 +18,7 @@ import type {
   Datatable,
 } from '@kbn/expressions-plugin/public';
 import type { VisualizeEditorLayersContext } from '@kbn/visualizations-plugin/public';
-import type { Query } from '@kbn/es-query';
+import type { Query, AggregateQuery } from '@kbn/es-query';
 import type {
   UiActionsStart,
   RowClickContext,
@@ -266,6 +266,7 @@ export interface Datasource<T = unknown, P = unknown> {
     state?: P,
     savedObjectReferences?: SavedObjectReference[],
     initialContext?: VisualizeFieldContext | VisualizeEditorContext,
+    query?: Query | AggregateQuery,
     indexPatternRefs?: IndexPatternRef[],
     indexPatterns?: IndexPatternMap
   ) => T;
@@ -275,6 +276,7 @@ export interface Datasource<T = unknown, P = unknown> {
   getCurrentIndexPatternId: (state: T) => string;
 
   insertLayer: (state: T, newLayerId: string) => T;
+  createEmptyLayer: (indexPatternId: string) => T;
   removeLayer: (state: T, layerId: string) => T;
   clearLayer: (state: T, layerId: string) => T;
   getLayers: (state: T) => string[];
