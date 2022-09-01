@@ -1205,7 +1205,6 @@ describe('SearchSource', () => {
         expect(fetchSub.error).toHaveBeenCalledTimes(0);
         expect(searchSourceDependencies.onResponse).toBeCalledTimes(1);
 
-
         expect(typesRegistry.get('avg').postFlightRequest).toHaveBeenCalledTimes(0);
       });
 
