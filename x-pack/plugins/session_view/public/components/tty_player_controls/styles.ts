@@ -14,11 +14,17 @@ export const useStyles = () => {
   const cached = useMemo(() => {
     const { size } = euiTheme;
 
+    const controlsPanel: CSSObject = {
+      paddingTop: size.s,
+      paddingBottom: size.s,
+    };
+
     const controlButton: CSSObject = {
       width: size.l,
     };
 
     return {
+      controlsPanel,
       controlButton,
     };
   }, [euiTheme]);
