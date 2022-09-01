@@ -129,6 +129,10 @@
           "label": "data.search"
         },
         {
+          "id": "kibDevTutorialFilesService",
+          "label": "File service"
+        },
+        {
           "id": "kibDevTutorialDataViews"
         },
         {
