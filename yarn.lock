@@ -2751,6 +2751,22 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-application-browser-internal@link:bazel-bin/packages/core/application/core-application-browser-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-application-browser-mocks@link:bazel-bin/packages/core/application/core-application-browser-mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-application-browser@link:bazel-bin/packages/core/application/core-application-browser":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-application-common@link:bazel-bin/packages/core/application/core-application-common":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-base-browser-internal@link:bazel-bin/packages/core/base/core-base-browser-internal":
   version "0.0.0"
   uid ""
@@ -2772,6 +2788,14 @@
   uid ""
 
 "@kbn/core-base-server-mocks@link:bazel-bin/packages/core/base/core-base-server-mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-capabilities-browser-internal@link:bazel-bin/packages/core/capabilities/core-capabilities-browser-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-capabilities-browser-mocks@link:bazel-bin/packages/core/capabilities/core-capabilities-browser-mocks":
   version "0.0.0"
   uid ""
 
@@ -2812,6 +2836,14 @@
   uid ""
 
 "@kbn/core-deprecations-common@link:bazel-bin/packages/core/deprecations/core-deprecations-common":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-deprecations-server-internal@link:bazel-bin/packages/core/deprecations/core-deprecations-server-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-deprecations-server-mocks@link:bazel-bin/packages/core/deprecations/core-deprecations-server-mocks":
   version "0.0.0"
   uid ""
 
@@ -6765,6 +6797,22 @@
   version "0.0.0"
   uid ""
 
+"@types/kbn__core-application-browser-internal@link:bazel-bin/packages/core/application/core-application-browser-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-application-browser-mocks@link:bazel-bin/packages/core/application/core-application-browser-mocks/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-application-browser@link:bazel-bin/packages/core/application/core-application-browser/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-application-common@link:bazel-bin/packages/core/application/core-application-common/npm_module_types":
+  version "0.0.0"
+  uid ""
+
 "@types/kbn__core-base-browser-internal@link:bazel-bin/packages/core/base/core-base-browser-internal/npm_module_types":
   version "0.0.0"
   uid ""
@@ -6794,6 +6842,14 @@
   uid ""
 
 "@types/kbn__core-base-server@link:bazel-bin/packages/core/base/core-base-server/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-capabilities-browser-internal@link:bazel-bin/packages/core/capabilities/core-capabilities-browser-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-capabilities-browser-mocks@link:bazel-bin/packages/core/capabilities/core-capabilities-browser-mocks/npm_module_types":
   version "0.0.0"
   uid ""
 
@@ -6838,6 +6894,14 @@
   uid ""
 
 "@types/kbn__core-deprecations-common@link:bazel-bin/packages/core/deprecations/core-deprecations-common/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-deprecations-server-internal@link:bazel-bin/packages/core/deprecations/core-deprecations-server-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-deprecations-server-mocks@link:bazel-bin/packages/core/deprecations/core-deprecations-server-mocks/npm_module_types":
   version "0.0.0"
   uid ""
 
