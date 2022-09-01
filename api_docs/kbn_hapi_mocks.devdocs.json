@@ -22,7 +22,7 @@
         "tags": [],
         "label": "hapiMocks",
         "description": [],
-        "path": "packages/kbn-hapi-mocks/src/index.ts",
+        "path": "packages/kbn-hapi-mocks/index.ts",
         "deprecated": false,
         "children": [
           {
@@ -40,7 +40,7 @@
               ">) => ",
               "Request"
             ],
-            "path": "packages/kbn-hapi-mocks/src/index.ts",
+            "path": "packages/kbn-hapi-mocks/index.ts",
             "deprecated": false,
             "returnComment": [],
             "children": [

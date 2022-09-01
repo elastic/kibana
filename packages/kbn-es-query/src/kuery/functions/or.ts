@@ -8,7 +8,7 @@
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import * as ast from '../ast';
-import type { DataViewBase, KueryNode, KueryQueryOptions } from '../..';
+import type { DataViewBase, KueryNode, KueryQueryOptions } from '../../..';
 import type { KqlContext } from '../types';
 
 export function buildNodeParams(children: KueryNode[]) {
