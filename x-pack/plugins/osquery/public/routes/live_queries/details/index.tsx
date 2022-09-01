@@ -57,17 +57,16 @@ const LiveQueryDetailsPageComponent = () => {
 
   return (
     <CasesContext owner={['securitySolution']} permissions={{ all: true, read: true }}>
-    <WithHeaderLayout leftColumn={LeftColumn} rightColumnGrow={false}>
-      <PackQueriesStatusTable
-        actionId={actionId}
-        data={data?.queries}
-        startDate={data?.['@timestamp']}
-        expirationDate={data?.expiration}
-        agentIds={data?.agents}
-      />
-    </WithHeaderLayout>
+      <WithHeaderLayout leftColumn={LeftColumn} rightColumnGrow={false}>
+        <PackQueriesStatusTable
+          actionId={actionId}
+          data={data?.queries}
+          startDate={data?.['@timestamp']}
+          expirationDate={data?.expiration}
+          agentIds={data?.agents}
+        />
+      </WithHeaderLayout>
     </CasesContext>
-
   );
 };
 
