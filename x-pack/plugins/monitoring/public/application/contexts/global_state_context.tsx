@@ -7,6 +7,7 @@
 import React, { createContext } from 'react';
 import type { TimeRange } from '@kbn/es-query';
 import { RefreshInterval } from '@kbn/data-plugin/public';
+import useUnmount from 'react-use/lib/useUnmount';
 import { GlobalState } from '../../url_state';
 import { MonitoringStartPluginDependencies, MonitoringStartServices } from '../../types';
 import { Legacy } from '../../legacy_shims';
@@ -64,6 +65,10 @@ export const GlobalStateProvider: React.FC<GlobalStateProviderProps> = ({
     Legacy.shims.timefilter.setRefreshInterval(localState.refreshInterval);
     localState.save();
   }
+
+  useUnmount(() => {
+    state.destroy();
+  });
 
   return <GlobalStateContext.Provider value={localState}>{children}</GlobalStateContext.Provider>;
 };
