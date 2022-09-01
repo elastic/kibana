@@ -29,8 +29,8 @@ import { DiscoverChart } from '../chart';
 import { FieldStatisticsTable } from '../field_stats_table';
 import { DiscoverDocuments } from './discover_documents';
 import { DOCUMENTS_VIEW_CLICK, FIELD_STATISTICS_VIEW_CLICK } from '../field_stats_table/constants';
-import { DiscoverResizablePanels } from './discover_resizable_panels';
-import { DiscoverFixedPanels } from './discover_fixed_panels';
+import { DiscoverResizablePanels } from './discover_panels_resizable';
+import { DiscoverFixedPanels } from './discover_panels_fixed';
 
 const DiscoverChartMemoized = React.memo(DiscoverChart);
 const FieldStatisticsTableMemoized = React.memo(FieldStatisticsTable);
