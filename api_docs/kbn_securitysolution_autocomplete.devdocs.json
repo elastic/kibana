@@ -120,7 +120,7 @@
         "label": "AutocompleteFieldMatchComponent",
         "description": [],
         "signature": [
-          "{ ({ placeholder, rowLabel, selectedField, selectedValue, indexPattern, isLoading, isDisabled, isClearable, isRequired, fieldInputWidth, onChange, onError, autocompleteService, }: React.PropsWithChildren<AutocompleteFieldMatchProps>): JSX.Element; displayName: string | undefined; }"
+          "{ ({ placeholder, rowLabel, selectedField, selectedValue, indexPattern, isLoading, isDisabled, isClearable, isRequired, fieldInputWidth, autocompleteService, onChange, onError, }: React.PropsWithChildren<AutocompleteFieldMatchProps>): JSX.Element; displayName: string | undefined; }"
         ],
         "path": "packages/kbn-securitysolution-autocomplete/src/field_value_match/index.tsx",
         "deprecated": false,
@@ -130,7 +130,7 @@
             "id": "def-common.AutocompleteFieldMatchComponent.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  placeholder,\n  rowLabel,\n  selectedField,\n  selectedValue,\n  indexPattern,\n  isLoading,\n  isDisabled = false,\n  isClearable = false,\n  isRequired = false,\n  fieldInputWidth,\n  onChange,\n  onError,\n  autocompleteService,\n}",
+            "label": "{\n  placeholder,\n  rowLabel,\n  selectedField,\n  selectedValue,\n  indexPattern,\n  isLoading,\n  isDisabled = false,\n  isClearable = false,\n  isRequired = false,\n  fieldInputWidth,\n  autocompleteService,\n  onChange,\n  onError,\n}",
             "description": [],
             "signature": [
               "React.PropsWithChildren<AutocompleteFieldMatchProps>"
@@ -508,6 +508,37 @@
               "React.PropsWithChildren<OperatorState>"
             ],
             "path": "packages/kbn-securitysolution-autocomplete/src/operator/index.tsx",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-autocomplete",
+        "id": "def-common.paramContainsSpace",
+        "type": "Function",
+        "tags": [],
+        "label": "paramContainsSpace",
+        "description": [],
+        "signature": [
+          "(param: string) => boolean | \"\""
+        ],
+        "path": "packages/kbn-securitysolution-autocomplete/src/param_contains_space/index.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-autocomplete",
+            "id": "def-common.paramContainsSpace.$1",
+            "type": "string",
+            "tags": [],
+            "label": "param",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-securitysolution-autocomplete/src/param_contains_space/index.ts",
             "deprecated": false,
             "isRequired": true
           }
