@@ -29,6 +29,7 @@ export const createCrawlerIndex = async ({ indexName, language }: CreateCrawlerI
     delete_existing_connector: true,
     index_name: indexName,
     service_type: ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE,
+    is_native: true,
     language,
   };
 
