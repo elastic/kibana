@@ -6,12 +6,20 @@
  * Side Public License, v 1.
  */
 
-import React, { useContext } from 'react';
+import React, { useContext, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiPanel, EuiText } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
+  EuiPanel,
+  EuiText,
+  useEuiTheme,
+} from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
+import { cx, css } from '@emotion/css';
 import type { Path } from './filters_builder_types';
-import { ConditionTypes } from '../utils';
+import { ConditionTypes, isOrFilter } from '../utils';
 import { FilterItem } from './filters_builder_filter_item';
 import { FiltersBuilderContextType } from './filters_builder_context';
 import { getPathInArray } from './filters_builder_utils';
@@ -66,6 +74,17 @@ export const FilterGroup = ({
   timeRangeForSuggestionsOverride,
   reverseBackground = true,
 }: FilterGroupProps) => {
+  const { euiTheme } = useEuiTheme();
+
+  const border = useMemo(
+    () =>
+      css`
+        border: ${euiTheme.border.thin};
+        border-radius: ${euiTheme.border.radius.medium};
+      `,
+    [euiTheme.border.thin, euiTheme.border.radius.medium]
+  );
+
   const {
     globalParams: { maxDepth, hideOr },
   } = useContext(FiltersBuilderContextType);
@@ -78,6 +97,8 @@ export const FilterGroup = ({
   const color = !reverseBackground ? 'subdued' : 'plain';
   const isRootLevelFilterGroup = pathInArray.length <= 1;
 
+  const shouldDrawBorder = (filter: Filter) => !isRootLevelFilterGroup && isOrFilter(filter);
+
   return (
     <EuiPanel
       color={color}
@@ -87,7 +108,11 @@ export const FilterGroup = ({
     >
       {filters.map((filter, index, acc) => (
         <EuiFlexGroup direction="column" gutterSize="none">
-          <EuiFlexItem>
+          <EuiFlexItem
+            className={cx({
+              [border]: shouldDrawBorder(filter),
+            })}
+          >
             <FilterItem
               filter={filter}
               path={`${path}${path ? '.' : ''}${index}`}
