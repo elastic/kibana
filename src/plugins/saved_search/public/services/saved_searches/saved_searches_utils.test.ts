@@ -30,8 +30,15 @@ describe('saved_searches_utils', () => {
         isTextBasedQuery: false,
       };
 
-      expect(fromSavedSearchAttributes('id', attributes, createSearchSourceMock(), {}))
-        .toMatchInlineSnapshot(`
+      expect(
+        fromSavedSearchAttributes(
+          'id',
+          attributes,
+          ['tags-1', 'tags-2'],
+          createSearchSourceMock(),
+          {}
+        )
+      ).toMatchInlineSnapshot(`
         Object {
           "columns": Array [
             "a",
@@ -67,6 +74,10 @@ describe('saved_searches_utils', () => {
           },
           "sharingSavedObjectProps": Object {},
           "sort": Array [],
+          "tags": Array [
+            "tags-1",
+            "tags-2",
+          ],
           "timeRange": undefined,
           "timeRestore": undefined,
           "title": "saved search",

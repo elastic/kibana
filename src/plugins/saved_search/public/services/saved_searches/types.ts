@@ -58,6 +58,7 @@ export interface SavedSearch {
   sort?: SortOrder[];
   columns?: string[];
   description?: string;
+  tags?: string[] | undefined;
   grid?: {
     columns?: Record<string, DiscoverGridSettingsColumn>;
   };

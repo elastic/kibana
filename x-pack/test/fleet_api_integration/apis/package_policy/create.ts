@@ -145,8 +145,8 @@ export default function (providerContext: FtrProviderContext) {
       const { body } = await supertest
         .get(`/internal/saved_objects_tagging/tags/_find?page=1&perPage=10000`)
         .expect(200);
-      expect(body.tags.find((tag: any) => tag.name === 'Managed').relationCount).to.be(6);
-      expect(body.tags.find((tag: any) => tag.name === 'For File Tests').relationCount).to.be(6);
+      expect(body.tags.find((tag: any) => tag.name === 'Managed').relationCount).to.be(9);
+      expect(body.tags.find((tag: any) => tag.name === 'For File Tests').relationCount).to.be(9);
     });
 
     it('should return a 400 with an empty namespace', async function () {

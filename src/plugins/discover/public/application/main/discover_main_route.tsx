@@ -118,6 +118,7 @@ export function DiscoverMainRoute(props: Props) {
         search: services.data.search,
         savedObjectsClient: core.savedObjects.client,
         spaces: services.spaces,
+        savedObjectsTagging: services.savedObjectsTagging,
       });
 
       const currentDataView = await loadDefaultOrCurrentDataView(currentSavedSearch.searchSource);
@@ -172,6 +173,7 @@ export function DiscoverMainRoute(props: Props) {
     services.data,
     services.spaces,
     services.timefilter,
+    services.savedObjectsTagging,
     core.savedObjects.client,
     core.application.navigateToApp,
     core.theme,

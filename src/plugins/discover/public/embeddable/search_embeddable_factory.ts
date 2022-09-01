@@ -76,6 +76,7 @@ export class SearchEmbeddableFactory
         search: services.data.search,
         savedObjectsClient: services.core.savedObjects.client,
         spaces: services.spaces,
+        savedObjectsTagging: services.savedObjectsTagging,
       });
 
       await throwErrorOnSavedSearchUrlConflict(savedSearch);

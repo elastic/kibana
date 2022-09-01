@@ -92,6 +92,7 @@ describe('tagKibanaAssets', () => {
     const kibanaAssets = {
       dashboard: [{ id: 'dashboard1', type: 'dashboard' }],
       search: [{ id: 's1', type: 'search' }],
+      config: [{ id: 'c1', type: 'config' }],
       visualization: [{ id: 'v1', type: 'visualization' }],
     } as any;
 
@@ -105,14 +106,14 @@ describe('tagKibanaAssets', () => {
 
     expect(savedObjectTagAssignmentService.updateTagAssignments).toHaveBeenCalledWith({
       tags: ['managed', 'system'],
-      assign: [...kibanaAssets.dashboard, ...kibanaAssets.visualization],
+      assign: [...kibanaAssets.dashboard, ...kibanaAssets.search, ...kibanaAssets.visualization],
       unassign: [],
       refresh: false,
     });
   });
 
   it('should do nothing if no taggable assets', async () => {
-    const kibanaAssets = { search: [{ id: 's1', type: 'search' }] } as any;
+    const kibanaAssets = { config: [{ id: 'c1', type: 'config' }] } as any;
 
     await tagKibanaAssets({
       savedObjectTagAssignmentService,
