@@ -31,3 +31,6 @@ export const authenticationsSelector = () =>
 
 export const usersAnomaliesJobIdFilterSelector = () =>
   createSelector(selectUsers, (users) => users.queries[UsersTableType.anomalies].jobIdSelection);
+
+export const usersAnomaliesIntervalSelector = () =>
+  createSelector(selectUsers, (users) => users.queries[UsersTableType.anomalies].intervalSelection);

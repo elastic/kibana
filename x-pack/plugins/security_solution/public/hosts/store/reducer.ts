@@ -19,6 +19,7 @@ import {
   updateTableActivePage,
   updateTableLimit,
   updateHostsAnomaliesJobIdFilter,
+  updateHostsAnomaliesInterval,
 } from './actions';
 import {
   setHostPageQueriesActivePageToZero,
@@ -52,6 +53,7 @@ export const initialHostsState: HostsState = {
       },
       [HostsTableType.anomalies]: {
         jobIdSelection: [],
+        intervalSelection: 'auto',
       },
       [HostsTableType.risk]: {
         activePage: DEFAULT_TABLE_ACTIVE_PAGE,
@@ -90,6 +92,7 @@ export const initialHostsState: HostsState = {
       },
       [HostsTableType.anomalies]: {
         jobIdSelection: [],
+        intervalSelection: 'auto',
       },
       [HostsTableType.risk]: {
         activePage: DEFAULT_TABLE_ACTIVE_PAGE,
@@ -204,6 +207,19 @@ export const hostsReducer = reducerWithInitialState(initialHostsState)
         [HostsTableType.anomalies]: {
           ...state[hostsType].queries[HostsTableType.anomalies],
           jobIdSelection: jobIds,
+        },
+      },
+    },
+  }))
+  .case(updateHostsAnomaliesInterval, (state, { interval, hostsType }) => ({
+    ...state,
+    [hostsType]: {
+      ...state[hostsType],
+      queries: {
+        ...state[hostsType].queries,
+        [HostsTableType.anomalies]: {
+          ...state[hostsType].queries[HostsTableType.anomalies],
+          intervalSelection: interval,
         },
       },
     },

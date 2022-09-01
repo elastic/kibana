@@ -8,9 +8,9 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { useDispatch } from 'react-redux';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useAnomaliesTableData } from '../anomaly/use_anomalies_table_data';
 import { HeaderSection } from '../../header_section';
-
 import { hasMlUserPermissions } from '../../../../../common/machine_learning/has_ml_user_permissions';
 import * as i18n from './translations';
 import { getAnomaliesHostTableColumnsCurated } from './get_anomalies_host_table_columns';
@@ -21,12 +21,12 @@ import { useMlCapabilities } from '../hooks/use_ml_capabilities';
 import { BasicTable } from './basic_table';
 import { getCriteriaFromHostType } from '../criteria/get_criteria_from_host_type';
 import { Panel } from '../../panel';
-import { anomaliesTableDefaultEquality } from './default_equality';
 import { useQueryToggle } from '../../../containers/query_toggle';
 import { useInstalledSecurityJobsIds } from '../hooks/use_installed_security_jobs';
 import { useDeepEqualSelector } from '../../../hooks/use_selector';
 import type { State } from '../../../store';
 import { JobIdFilter } from './job_id_filter';
+import { SelectInterval } from './select_interval';
 import { hostsActions, hostsSelectors } from '../../../../hosts/store';
 
 const sorting = {
@@ -59,7 +59,7 @@ const AnomaliesHostTableComponent: React.FC<AnomaliesHostTableProps> = ({
     [setQuerySkip, setToggleStatus]
   );
 
-  const jobIds = useInstalledSecurityJobsIds();
+  const { jobIds, loading: loadingJobs } = useInstalledSecurityJobsIds();
 
   const getAnomaliesHostsTableFilterQuerySelector = useMemo(
     () => hostsSelectors.hostsAnomaliesJobIdFilterSelector(),
@@ -82,7 +82,28 @@ const AnomaliesHostTableComponent: React.FC<AnomaliesHostTableProps> = ({
     [dispatch, type]
   );
 
-  const [loading, tableData] = useAnomaliesTableData({
+  const getAnomaliesHostTableIntervalQuerySelector = useMemo(
+    () => hostsSelectors.hostsAnomaliesIntervalSelector(),
+    []
+  );
+
+  const selectedInterval = useDeepEqualSelector((state: State) =>
+    getAnomaliesHostTableIntervalQuerySelector(state, type)
+  );
+
+  const onSelectInterval = useCallback(
+    (newInterval: string) => {
+      dispatch(
+        hostsActions.updateHostsAnomaliesInterval({
+          interval: newInterval,
+          hostsType: type,
+        })
+      );
+    },
+    [dispatch, type]
+  );
+
+  const [loadingTable, tableData] = useAnomaliesTableData({
     startDate,
     endDate,
     skip: querySkip,
@@ -91,6 +112,7 @@ const AnomaliesHostTableComponent: React.FC<AnomaliesHostTableProps> = ({
       exists: { field: 'host.name' },
     },
     jobIds: selectedJobIds.length > 0 ? selectedJobIds : jobIds,
+    aggregationInterval: selectedInterval,
   });
 
   const hosts = convertAnomaliesToHosts(tableData, hostName);
@@ -108,7 +130,7 @@ const AnomaliesHostTableComponent: React.FC<AnomaliesHostTableProps> = ({
     return null;
   } else {
     return (
-      <Panel loading={loading}>
+      <Panel loading={loadingTable || loadingJobs}>
         <HeaderSection
           subtitle={`${i18n.SHOWING}: ${pagination.totalItemCount.toLocaleString()} ${i18n.UNIT(
             pagination.totalItemCount
@@ -119,14 +141,19 @@ const AnomaliesHostTableComponent: React.FC<AnomaliesHostTableProps> = ({
           tooltip={i18n.TOOLTIP}
           isInspectDisabled={skip}
           headerFilters={
-            jobIds.length > 0 && (
-              <JobIdFilter
-                title={i18n.JOB_ID}
-                onSelect={onSelectJobId}
-                selectedJobIds={selectedJobIds}
-                jobIds={jobIds}
-              />
-            )
+            <EuiFlexGroup>
+              <EuiFlexItem>
+                <SelectInterval interval={selectedInterval} onChange={onSelectInterval} />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <JobIdFilter
+                  title={i18n.JOB_ID}
+                  onSelect={onSelectJobId}
+                  selectedJobIds={selectedJobIds}
+                  jobIds={jobIds}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
           }
         />
         {toggleStatus && (
@@ -140,7 +167,7 @@ const AnomaliesHostTableComponent: React.FC<AnomaliesHostTableProps> = ({
           />
         )}
 
-        {loading && (
+        {(loadingTable || loadingJobs) && (
           <Loader data-test-subj="anomalies-host-table-loading-panel" overlay size="xl" />
         )}
       </Panel>
@@ -148,7 +175,4 @@ const AnomaliesHostTableComponent: React.FC<AnomaliesHostTableProps> = ({
   }
 };
 
-export const AnomaliesHostTable = React.memo(
-  AnomaliesHostTableComponent,
-  anomaliesTableDefaultEquality
-);
+export const AnomaliesHostTable = React.memo(AnomaliesHostTableComponent);

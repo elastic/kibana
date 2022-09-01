@@ -26,7 +26,7 @@ interface Props {
 
 export const AnomalyTableProvider = React.memo<Props>(
   ({ influencers, startDate, endDate, children, criteriaFields, skip }) => {
-    const jobIds = useInstalledSecurityJobsIds();
+    const { jobIds } = useInstalledSecurityJobsIds();
     const [isLoadingAnomaliesData, anomaliesData] = useAnomaliesTableData({
       criteriaFields,
       influencers,
@@ -34,6 +34,7 @@ export const AnomalyTableProvider = React.memo<Props>(
       endDate,
       skip,
       jobIds,
+      aggregationInterval: 'auto',
     });
     return <>{children({ isLoadingAnomaliesData, anomaliesData })}</>;
   }

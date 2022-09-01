@@ -44,6 +44,7 @@ export interface UsersRiskScoreQuery extends BasicQueryPaginated {
 
 export interface UsersAnomaliesQuery {
   jobIdSelection: string[];
+  intervalSelection: string;
 }
 
 export interface UsersQueries {

@@ -49,3 +49,8 @@ export const updateHostsAnomaliesJobIdFilter = actionCreator<{
   jobIds: string[];
   hostsType: HostsType;
 }>('UPDATE_HOSTS_ANOMALIES_JOB_ID_FILTER');
+
+export const updateHostsAnomaliesInterval = actionCreator<{
+  interval: string;
+  hostsType: HostsType;
+}>('UPDATE_HOSTS_ANOMALIES_INTERVAL');

@@ -26,6 +26,7 @@ interface Args {
   criteriaFields?: CriteriaFields[];
   filterQuery?: estypes.QueryDslQueryContainer;
   jobIds: string[];
+  aggregationInterval: string;
 }
 
 type Return = [boolean, Anomalies | null];
@@ -60,6 +61,7 @@ export const useAnomaliesTableData = ({
   skip = false,
   filterQuery,
   jobIds,
+  aggregationInterval,
 }: Args): Return => {
   const [tableData, setTableData] = useState<Anomalies | null>(null);
   const mlCapabilities = useMlCapabilities();
@@ -93,7 +95,7 @@ export const useAnomaliesTableData = ({
               jobIds,
               criteriaFields: criteriaFieldsInput,
               influencersFilterQuery: filterQuery,
-              aggregationInterval: 'auto',
+              aggregationInterval,
               threshold: getThreshold(anomalyScore, threshold),
               earliestMs,
               latestMs,
@@ -139,6 +141,7 @@ export const useAnomaliesTableData = ({
     endDateMs,
     skip,
     isMlUser,
+    aggregationInterval,
     // eslint-disable-next-line react-hooks/exhaustive-deps
     jobIds.sort().join(),
   ]);

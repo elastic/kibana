@@ -8,11 +8,19 @@ import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { ML_PAGES, useMlHref } from '@kbn/ml-plugin/public';
+import { useDispatch } from 'react-redux';
 import * as i18n from './translations';
 import type { AnomaliesCount } from '../../../../common/components/ml/anomaly/use_anomalies_search';
 import { AnomalyJobStatus } from '../../../../common/components/ml/anomaly/use_anomalies_search';
 import { useKibana } from '../../../../common/lib/kibana';
-import { LinkAnchor } from '../../../../common/components/links';
+import { LinkAnchor, SecuritySolutionLinkAnchor } from '../../../../common/components/links';
+import { SecurityPageName } from '../../../../app/types';
+import type { NotableAnomaliesJobId, NotableAnomaliesJobId } from './config';
+import { AnomalyConfigEntity, NOTABLE_ANOMALIES_CONFIG } from './config';
+import { usersActions } from '../../../../users/store';
+import { hostsActions } from '../../../../hosts/store';
+import { HostsType } from '../../../../hosts/store/model';
+import { UsersType } from '../../../../users/store/model';
 
 type AnomaliesColumns = Array<EuiBasicTableColumn<AnomaliesCount>>;
 
@@ -54,11 +62,11 @@ export const useAnomaliesColumns = (loading: boolean): AnomaliesColumns => {
         mobileOptions: { show: true },
         width: '15%',
         'data-test-subj': 'anomalies-table-column-count',
-        render: (count, { status, jobId }) => {
+        render: (count, { status, jobId, name }) => {
           if (loading) return '';
 
           if (count > 0 || status === AnomalyJobStatus.enabled) {
-            return count;
+            return <AnomaliesTabLink count={count} jobId={jobId} jobName={name} />;
           } else {
             if (status === AnomalyJobStatus.disabled && jobId) {
               return <EnableJobLink jobId={jobId} />;
@@ -108,5 +116,48 @@ const EnableJobLink = ({ jobId }: { jobId: string }) => {
     <LinkAnchor data-test-subj="jobs-table-link" href={jobUrl} onClick={onClick}>
       {i18n.RUN_JOB}
     </LinkAnchor>
+  );
+};
+
+const AnomaliesTabLink = ({
+  count,
+  jobId,
+  jobName,
+}: {
+  count: number;
+  jobId?: string;
+  jobName: NotableAnomaliesJobId;
+}) => {
+  const dispatch = useDispatch();
+  const entity = NOTABLE_ANOMALIES_CONFIG[jobName].entity;
+  const deepLinkId =
+    entity === AnomalyConfigEntity.User
+      ? SecurityPageName.usersAnomalies
+      : SecurityPageName.hostsAnomalies;
+
+  const onClick = useCallback(() => {
+    if (!jobId) return;
+
+    if (entity === AnomalyConfigEntity.User) {
+      dispatch(
+        usersActions.updateUsersAnomaliesJobIdFilter({
+          jobIds: [jobId],
+          usersType: UsersType.page,
+        })
+      );
+    } else {
+      dispatch(
+        hostsActions.updateHostsAnomaliesJobIdFilter({
+          jobIds: [jobId],
+          hostsType: HostsType.page,
+        })
+      );
+    }
+  }, [jobId, dispatch, entity]);
+
+  return (
+    <SecuritySolutionLinkAnchor onClick={onClick} deepLinkId={deepLinkId}>
+      {count}
+    </SecuritySolutionLinkAnchor>
   );
 };

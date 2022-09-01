@@ -44,6 +44,7 @@ export interface HostRiskScoreQuery extends BasicQueryPaginated {
 
 export interface HostsAnomaliesQuery {
   jobIdSelection: string[];
+  intervalSelection: string;
 }
 
 export interface Queries {

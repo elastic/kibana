@@ -14,6 +14,7 @@ import {
   updateTableLimit,
   updateTableSorting,
   updateUserRiskScoreSeverityFilter,
+  updateUsersAnomaliesInterval,
   updateUsersAnomaliesJobIdFilter,
 } from './actions';
 import { setUsersPageQueriesActivePageToZero } from './helpers';
@@ -49,6 +50,7 @@ export const initialUsersState: UsersModel = {
       },
       [UsersTableType.anomalies]: {
         jobIdSelection: [],
+        intervalSelection: 'auto',
       },
       [UsersTableType.events]: {
         activePage: DEFAULT_TABLE_ACTIVE_PAGE,
@@ -60,6 +62,7 @@ export const initialUsersState: UsersModel = {
     queries: {
       [UsersTableType.anomalies]: {
         jobIdSelection: [],
+        intervalSelection: 'auto',
       },
       [UsersTableType.events]: {
         activePage: DEFAULT_TABLE_ACTIVE_PAGE,
@@ -156,6 +159,37 @@ export const usersReducer = reducerWithInitialState(initialUsersState)
             [UsersTableType.anomalies]: {
               ...state[usersType].queries[UsersTableType.anomalies],
               jobIdSelection: jobIds,
+            },
+          },
+        },
+      };
+    }
+  })
+  .case(updateUsersAnomaliesInterval, (state, { interval, usersType }) => {
+    if (usersType === 'page') {
+      return {
+        ...state,
+        page: {
+          ...state.page,
+          queries: {
+            ...state.page.queries,
+            [UsersTableType.anomalies]: {
+              ...state[usersType].queries[UsersTableType.anomalies],
+              intervalSelection: interval,
+            },
+          },
+        },
+      };
+    } else {
+      return {
+        ...state,
+        details: {
+          ...state.details,
+          queries: {
+            ...state.details.queries,
+            [UsersTableType.anomalies]: {
+              ...state[usersType].queries[UsersTableType.anomalies],
+              intervalSelection: interval,
             },
           },
         },

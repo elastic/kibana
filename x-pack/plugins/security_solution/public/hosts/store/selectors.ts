@@ -33,3 +33,6 @@ export const uncommonProcessesSelector = () =>
 
 export const hostsAnomaliesJobIdFilterSelector = () =>
   createSelector(selectHosts, (hosts) => hosts.queries[HostsTableType.anomalies].jobIdSelection);
+
+export const hostsAnomaliesIntervalSelector = () =>
+  createSelector(selectHosts, (hosts) => hosts.queries[HostsTableType.anomalies].intervalSelection);

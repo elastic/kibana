@@ -69,3 +69,31 @@ export const TIME_STAMP = i18n.translate('xpack.securitySolution.ml.table.timest
 export const JOB_ID = i18n.translate('xpack.securitySolution.ml.table.jobIdFilter', {
   defaultMessage: 'Job',
 });
+
+export const INTERVAL_TOOLTIP = i18n.translate('xpack.securitySolution.ml.table.intervalTooltip', {
+  defaultMessage:
+    'Show only the highest severity anomaly for each interval (such as hour or day) or show all anomalies in the selected time period.',
+});
+
+export const INTERVAL = i18n.translate('xpack.securitySolution.ml.table.intervalLabel', {
+  defaultMessage: 'Interval',
+});
+
+export const INTERVAL_AUTO = i18n.translate('xpack.securitySolution.ml.table.intervalAutoOption', {
+  defaultMessage: 'Auto',
+});
+
+export const INTERVAL_HOUR = i18n.translate('xpack.securitySolution.ml.table.intervalHourOption', {
+  defaultMessage: '1 hour',
+});
+
+export const INTERVAL_DAY = i18n.translate('xpack.securitySolution.ml.table.intervalDayOption', {
+  defaultMessage: '1 day',
+});
+
+export const INTERVAL_SHOW_ALL = i18n.translate(
+  'xpack.securitySolution.ml.table.intervalshowAllOption',
+  {
+    defaultMessage: 'Show all',
+  }
+);

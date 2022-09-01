@@ -18,7 +18,6 @@ import type { AnomaliesNetworkTableProps } from '../types';
 import { getAnomaliesNetworkTableColumnsCurated } from './get_anomalies_network_table_columns';
 import { useMlCapabilities } from '../hooks/use_ml_capabilities';
 import { BasicTable } from './basic_table';
-import { networkEquality } from './network_equality';
 import { getCriteriaFromNetworkType } from '../criteria/get_criteria_from_network_type';
 import { Panel } from '../../panel';
 import { useQueryToggle } from '../../../containers/query_toggle';
@@ -59,7 +58,7 @@ const AnomaliesNetworkTableComponent: React.FC<AnomaliesNetworkTableProps> = ({
     [setQuerySkip, setToggleStatus]
   );
 
-  const jobIds = useInstalledSecurityJobsIds();
+  const { jobIds, loading: loadingJobs } = useInstalledSecurityJobsIds();
 
   const getAnomaliesUserTableFilterQuerySelector = useMemo(
     () => networkSelectors.networkAnomaliesJobIdFilterSelector(),
@@ -81,12 +80,13 @@ const AnomaliesNetworkTableComponent: React.FC<AnomaliesNetworkTableProps> = ({
     },
     [dispatch, type]
   );
-  const [loading, tableData] = useAnomaliesTableData({
+  const [loadingTable, tableData] = useAnomaliesTableData({
     startDate,
     endDate,
     skip: querySkip,
     criteriaFields: getCriteriaFromNetworkType(type, ip, flowTarget),
     jobIds: selectedJobIds.length > 0 ? selectedJobIds : jobIds,
+    aggregationInterval: 'second',
   });
 
   const networks = convertAnomaliesToNetwork(tableData, ip);
@@ -103,7 +103,7 @@ const AnomaliesNetworkTableComponent: React.FC<AnomaliesNetworkTableProps> = ({
     return null;
   } else {
     return (
-      <Panel loading={loading}>
+      <Panel loading={loadingTable || loadingJobs}>
         <HeaderSection
           subtitle={`${i18n.SHOWING}: ${pagination.totalItemCount.toLocaleString()} ${i18n.UNIT(
             pagination.totalItemCount
@@ -114,14 +114,12 @@ const AnomaliesNetworkTableComponent: React.FC<AnomaliesNetworkTableProps> = ({
           toggleStatus={toggleStatus}
           isInspectDisabled={skip}
           headerFilters={
-            jobIds.length > 0 && (
-              <JobIdFilter
-                title={i18n.JOB_ID}
-                onSelect={onSelectJobId}
-                selectedJobIds={selectedJobIds}
-                jobIds={jobIds}
-              />
-            )
+            <JobIdFilter
+              title={i18n.JOB_ID}
+              onSelect={onSelectJobId}
+              selectedJobIds={selectedJobIds}
+              jobIds={jobIds}
+            />
           }
         />
         {toggleStatus && (
@@ -135,7 +133,7 @@ const AnomaliesNetworkTableComponent: React.FC<AnomaliesNetworkTableProps> = ({
           />
         )}
 
-        {loading && (
+        {(loadingTable || loadingJobs) && (
           <Loader data-test-subj="anomalies-network-table-loading-panel" overlay size="xl" />
         )}
       </Panel>
@@ -143,4 +141,4 @@ const AnomaliesNetworkTableComponent: React.FC<AnomaliesNetworkTableProps> = ({
   }
 };
 
-export const AnomaliesNetworkTable = React.memo(AnomaliesNetworkTableComponent, networkEquality);
+export const AnomaliesNetworkTable = React.memo(AnomaliesNetworkTableComponent);

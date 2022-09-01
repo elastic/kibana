@@ -5,29 +5,33 @@
  * 2.0.
  */
 
+export const enum AnomalyConfigEntity {
+  User,
+  Host,
+}
 interface AnomalyConfig {
   name: string;
-  entity: 'User' | 'Host';
+  entity: AnomalyConfigEntity;
 }
 
 export const NOTABLE_ANOMALIES_CONFIG = {
   auth_rare_source_ip_for_a_user: {
-    entity: 'User',
+    entity: AnomalyConfigEntity.User,
   },
   packetbeat_dns_tunneling: {
-    entity: 'Host',
+    entity: AnomalyConfigEntity.Host,
   },
   packetbeat_rare_server_domain: {
-    entity: 'Host',
+    entity: AnomalyConfigEntity.Host,
   },
   packetbeat_rare_dns_question: {
-    entity: 'Host',
+    entity: AnomalyConfigEntity.Host,
   },
   suspicious_login_activity: {
-    entity: 'User',
+    entity: AnomalyConfigEntity.User,
   },
   v3_windows_anomalous_script: {
-    entity: 'User',
+    entity: AnomalyConfigEntity.User,
   },
 };
 
