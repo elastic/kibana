@@ -237,6 +237,24 @@ export const XyToolbar = memo(function XyToolbar(
       }
     : undefined;
 
+  // only allow changing showCurrentTimeMarker visibility if it could show up theoretically (if it's a time viz)
+  const onChangeCurrentTimeMarkerVisibility = dataLayers.every(
+    (layer) =>
+      layer.xAccessor &&
+      getScaleType(
+        props.frame.datasourceLayers[layer.layerId]?.getOperationForColumnId(layer.xAccessor) ??
+          null,
+        ScaleType.Linear
+      ) === 'time'
+  )
+    ? (checked: boolean): void => {
+        setState({
+          ...state,
+          showCurrentTimeMarker: checked,
+        });
+      }
+    : undefined;
+
   const legendMode =
     state?.legend.isVisible && !state?.legend.showSingleSeries
       ? 'auto'
@@ -503,6 +521,8 @@ export const XyToolbar = memo(function XyToolbar(
             isAxisTitleVisible={axisTitlesVisibilitySettings.x}
             endzonesVisible={!state?.hideEndzones}
             setEndzoneVisibility={onChangeEndzoneVisiblity}
+            currentTimeMarkerVisible={state?.showCurrentTimeMarker}
+            setCurrentTimeMarkerVisibility={onChangeCurrentTimeMarkerVisibility}
             hasBarOrAreaOnAxis={false}
             hasPercentageAxis={false}
             useMultilayerTimeAxis={
