@@ -2839,6 +2839,14 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-deprecations-server-internal@link:bazel-bin/packages/core/deprecations/core-deprecations-server-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-deprecations-server-mocks@link:bazel-bin/packages/core/deprecations/core-deprecations-server-mocks":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-deprecations-server@link:bazel-bin/packages/core/deprecations/core-deprecations-server":
   version "0.0.0"
   uid ""
@@ -6885,6 +6893,14 @@
   version "0.0.0"
   uid ""
 
+"@types/kbn__core-deprecations-server-internal@link:bazel-bin/packages/core/deprecations/core-deprecations-server-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-deprecations-server-mocks@link:bazel-bin/packages/core/deprecations/core-deprecations-server-mocks/npm_module_types":
+  version "0.0.0"
+  uid ""
+
 "@types/kbn__core-deprecations-server@link:bazel-bin/packages/core/deprecations/core-deprecations-server/npm_module_types":
   version "0.0.0"
   uid ""
@@ -8719,6 +8735,13 @@
   version "2.9.1"
   resolved "https://registry.yarnpkg.com/@types/yauzl/-/yauzl-2.9.1.tgz#d10f69f9f522eef3cf98e30afb684a1e1ec923af"
   integrity sha512-A1b8SU4D10uoPjwb0lnHmmu8wZhR9d+9o2PKBQT2jU5YPTKsxac6M2qGAdY7VcL+dHHhARVUDmeg0rOrcd9EjA==
+  dependencies:
+    "@types/node" "*"
+
+"@types/yazl@^2.4.2":
+  version "2.4.2"
+  resolved "https://registry.yarnpkg.com/@types/yazl/-/yazl-2.4.2.tgz#d5f8a4752261badbf1a36e8b49e042dc18ec84bc"
+  integrity sha512-T+9JH8O2guEjXNxqmybzQ92mJUh2oCwDDMSSimZSe1P+pceZiFROZLYmcbqkzV5EUwz6VwcKXCO2S2yUpra6XQ==
   dependencies:
     "@types/node" "*"
 

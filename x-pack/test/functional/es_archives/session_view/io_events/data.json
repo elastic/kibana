@@ -4,17 +4,30 @@
     "index": "logs-endpoint.events.process",
     "id": "1",
     "source": {
-      "@timestamp": "2022-07-14T11:16:29.570Z",
+      "@timestamp": "2022-05-08T13:44:29.570Z",
       "message": "only event.action: 'io' events should be returned in an io_events request",
       "event": {
-        "action": "exec"
+        "action": "session_id_changed"
+      },
+      "host": {
+        "boot": {
+          "id": "1234"
+        }
       },
       "process": {
         "entity_id": "1",
         "name": "bash",
         "executable": "/bin/bash",
         "entry_leader": {
-          "entity_id": "1"
+          "entity_id": "MDEwMTAxMDEtMDEwMS0wMTAxLTAxMDEtMDEwMTAxMDEwMTAxLTUyMDU3LTEzMjk2NDkxMDQwLjEzMDAwMDAwMA==",
+          "tty": {
+            "char_device": {
+              "major": 4,
+              "minor": 1
+            },
+            "rows": 66,
+            "columns": 280
+          }
         }
       }
     }
@@ -27,17 +40,30 @@
     "index": "logs-endpoint.events.process",
     "id": "1",
     "source": {
-      "@timestamp": "2022-07-14T11:16:29.570Z",
+      "@timestamp": "2022-05-08T13:44:29.570Z",
       "message": "hello world security",
       "event": {
         "action": "text_output"
+      },
+      "host": {
+        "boot": {
+          "id": "1234"
+        }
       },
       "process": {
         "entity_id": "1",
         "name": "bash",
         "executable": "/bin/bash",
         "entry_leader": {
-          "entity_id": "1"
+          "entity_id": "MDEwMTAxMDEtMDEwMS0wMTAxLTAxMDEtMDEwMTAxMDEwMTAxLTUyMDU3LTEzMjk2NDkxMDQwLjEzMDAwMDAwMA==",
+          "tty": {
+            "char_device": {
+              "major": 4,
+              "minor": 1
+            },
+            "rows": 66,
+            "columns": 280
+          }
         },
         "io": {
           "type": "tty",
@@ -65,17 +91,30 @@
     "index": "logs-endpoint.events.process",
     "id": "2",
     "source": {
-      "@timestamp": "2022-07-14T11:16:30.570Z",
+      "@timestamp": "2022-05-08T13:44:30.570Z",
       "message": "hello world security",
       "event": {
         "action": "text_output"
+      },
+      "host": {
+        "boot": {
+          "id": "1234"
+        }
       },
       "process": {
         "entity_id": "2",
         "name": "vim",
         "executable": "/bin/vi",
         "entry_leader": {
-          "entity_id": "1"
+          "entity_id": "MDEwMTAxMDEtMDEwMS0wMTAxLTAxMDEtMDEwMTAxMDEwMTAxLTUyMDU3LTEzMjk2NDkxMDQwLjEzMDAwMDAwMA==",
+          "tty": {
+            "char_device": {
+              "major": 4,
+              "minor": 1
+            },
+            "rows": 66,
+            "columns": 280
+          }
         },
         "io": {
           "type": "tty",
@@ -103,17 +142,30 @@
     "index": "logs-endpoint.events.process",
     "id": "3",
     "source": {
-      "@timestamp": "2022-07-14T11:16:31.570Z",
+      "@timestamp": "2022-05-08T13:44:31.570Z",
       "message": "hello world security",
       "event": {
         "action": "text_output"
+      },
+      "host": {
+        "boot": {
+          "id": "1234"
+        }
       },
       "process": {
         "entity_id": "2",
         "name": "vim",
         "executable": "/bin/vi",
         "entry_leader": {
-          "entity_id": "1"
+          "entity_id": "MDEwMTAxMDEtMDEwMS0wMTAxLTAxMDEtMDEwMTAxMDEwMTAxLTUyMDU3LTEzMjk2NDkxMDQwLjEzMDAwMDAwMA==",
+          "tty": {
+            "char_device": {
+              "major": 4,
+              "minor": 1
+            },
+            "rows": 66,
+            "columns": 280
+          }
         },
         "io": {
           "type": "tty",
@@ -141,17 +193,30 @@
     "index": "logs-endpoint.events.process",
     "id": "4",
     "source": {
-      "@timestamp": "2022-07-14T11:16:32.570Z",
+      "@timestamp": "2022-05-08T13:44:32.570Z",
       "message": "hello world security",
       "event": {
         "action": "text_output"
+      },
+      "host": {
+        "boot": {
+          "id": "1234"
+        }
       },
       "process": {
         "entity_id": "2",
         "name": "vim",
         "executable": "/bin/vi",
         "entry_leader": {
-          "entity_id": "1"
+          "entity_id": "MDEwMTAxMDEtMDEwMS0wMTAxLTAxMDEtMDEwMTAxMDEwMTAxLTUyMDU3LTEzMjk2NDkxMDQwLjEzMDAwMDAwMA==",
+          "tty": {
+            "char_device": {
+              "major": 4,
+              "minor": 1
+            },
+            "rows": 66,
+            "columns": 280
+          }
         },
         "io": {
           "type": "tty",
@@ -179,17 +244,30 @@
     "index": "logs-endpoint.events.process",
     "id": "5",
     "source": {
-      "@timestamp": "2022-07-14T11:16:33.570Z",
+      "@timestamp": "2022-05-08T13:44:33.570Z",
       "message": "hello world security",
       "event": {
         "action": "text_output"
+      },
+      "host": {
+        "boot": {
+          "id": "1234"
+        }
       },
       "process": {
         "entity_id": "2",
         "name": "vim",
         "executable": "/bin/vi",
         "entry_leader": {
-          "entity_id": "1"
+          "entity_id": "MDEwMTAxMDEtMDEwMS0wMTAxLTAxMDEtMDEwMTAxMDEwMTAxLTUyMDU3LTEzMjk2NDkxMDQwLjEzMDAwMDAwMA==",
+          "tty": {
+            "char_device": {
+              "major": 4,
+              "minor": 1
+            },
+            "rows": 66,
+            "columns": 280
+          }
         },
         "io": {
           "type": "tty",
@@ -217,17 +295,30 @@
     "index": "logs-endpoint.events.process",
     "id": "6",
     "source": {
-      "@timestamp": "2022-07-14T11:16:34.570Z",
+      "@timestamp": "2022-05-08T13:44:34.570Z",
       "message": "hello world security",
       "event": {
         "action": "text_output"
+      },
+      "host": {
+        "boot": {
+          "id": "1234"
+        }
       },
       "process": {
         "entity_id": "2",
         "name": "vim",
         "executable": "/bin/vi",
         "entry_leader": {
-          "entity_id": "1"
+          "entity_id": "MDEwMTAxMDEtMDEwMS0wMTAxLTAxMDEtMDEwMTAxMDEwMTAxLTUyMDU3LTEzMjk2NDkxMDQwLjEzMDAwMDAwMA==",
+          "tty": {
+            "char_device": {
+              "major": 4,
+              "minor": 1
+            },
+            "rows": 66,
+            "columns": 280
+          }
         },
         "io": {
           "type": "tty",
@@ -255,17 +346,30 @@
     "index": "logs-endpoint.events.process",
     "id": "7",
     "source": {
-      "@timestamp": "2022-07-14T11:16:35.570Z",
+      "@timestamp": "2022-05-08T13:44:35.570Z",
       "message": "hello world security",
       "event": {
         "action": "text_output"
+      },
+      "host": {
+        "boot": {
+          "id": "1234"
+        }
       },
       "process": {
         "entity_id": "2",
         "name": "vim",
         "executable": "/bin/vi",
         "entry_leader": {
-          "entity_id": "1"
+          "entity_id": "MDEwMTAxMDEtMDEwMS0wMTAxLTAxMDEtMDEwMTAxMDEwMTAxLTUyMDU3LTEzMjk2NDkxMDQwLjEzMDAwMDAwMA==",
+          "tty": {
+            "char_device": {
+              "major": 4,
+              "minor": 1
+            },
+            "rows": 66,
+            "columns": 280
+          }
         },
         "io": {
           "type": "tty",
@@ -293,17 +397,30 @@
     "index": "logs-endpoint.events.process",
     "id": "8",
     "source": {
-      "@timestamp": "2022-07-14T11:16:36.570Z",
+      "@timestamp": "2022-05-08T13:44:36.570Z",
       "message": "hello world security",
       "event": {
         "action": "text_output"
+      },
+      "host": {
+        "boot": {
+          "id": "1234"
+        }
       },
       "process": {
         "entity_id": "1",
         "name": "bash",
         "executable": "/bin/bash",
         "entry_leader": {
-          "entity_id": "1"
+          "entity_id": "MDEwMTAxMDEtMDEwMS0wMTAxLTAxMDEtMDEwMTAxMDEwMTAxLTUyMDU3LTEzMjk2NDkxMDQwLjEzMDAwMDAwMA==",
+          "tty": {
+            "char_device": {
+              "major": 4,
+              "minor": 1
+            },
+            "rows": 66,
+            "columns": 280
+          }
         },
         "io": {
           "type": "tty",
