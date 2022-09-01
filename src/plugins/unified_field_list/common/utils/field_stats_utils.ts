@@ -11,7 +11,7 @@ import DateMath from '@kbn/datemath';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import type { ESSearchResponse } from '@kbn/core/types/elasticsearch';
 import type { FieldStatsResponse } from '../types';
-import { getFieldExampleBuckets } from './field_examples_calculator';
+import { getFieldExampleBuckets, canFetchFieldExamples } from './field_examples_calculator';
 
 export type SearchHandler = ({
   aggs,
@@ -336,6 +336,10 @@ export async function getSimpleExamples(
   dataView: DataView
 ): Promise<FieldStatsResponse<string | number>> {
   try {
+    if (!canFetchFieldExamples(field)) {
+      return {};
+    }
+
     const fieldRef = getFieldRef(field);
 
     const simpleExamplesBody = {

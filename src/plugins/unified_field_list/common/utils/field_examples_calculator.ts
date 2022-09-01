@@ -23,18 +23,22 @@ interface FieldValueCountsParams {
   count?: number;
 }
 
+export const canFetchFieldExamples = (field: DataViewField): boolean => {
+  return !(
+    field.type === 'geo_point' ||
+    field.type === 'geo_shape' ||
+    field.type === 'attachment' ||
+    field.type === 'unknown'
+  );
+};
+
 export function getFieldExampleBuckets(params: FieldValueCountsParams) {
   params = defaults(params, {
     count: 5,
     grouped: false,
   });
 
-  if (
-    params.field.type === 'geo_point' ||
-    params.field.type === 'geo_shape' ||
-    params.field.type === 'attachment' ||
-    params.field.type === 'unknown'
-  ) {
+  if (!canFetchFieldExamples(params.field)) {
     throw new Error('Analysis is not available this field type');
   }
 
