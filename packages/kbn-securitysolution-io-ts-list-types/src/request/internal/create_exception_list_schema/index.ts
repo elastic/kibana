@@ -6,6 +6,12 @@
  * Side Public License, v 1.
  */
 
+import {
+  ENDPOINT_BLOCKLISTS_LIST_ID,
+  ENDPOINT_EVENT_FILTERS_LIST_ID,
+  ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID,
+  ENDPOINT_TRUSTED_APPS_LIST_ID,
+} from '@kbn/securitysolution-list-constants';
 import * as t from 'io-ts';
 
 import {
@@ -28,10 +34,10 @@ export const internalCreateExceptionListSchema = t.intersection([
     t.partial({
       // TODO: Move the ALL_ENDPOINT_ARTIFACT_LIST_IDS inside the package and use it here instead
       list_id: t.keyof({
-        endpoint_trusted_apps: null,
-        endpoint_event_filters: null,
-        endpoint_host_isolation_exceptions: null,
-        endpoint_blocklists: null,
+        [ENDPOINT_TRUSTED_APPS_LIST_ID]: null,
+        [ENDPOINT_EVENT_FILTERS_LIST_ID]: null,
+        [ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID]: null,
+        [ENDPOINT_BLOCKLISTS_LIST_ID]: null,
       }),
     })
   ),
