@@ -37,7 +37,7 @@ export_events() {
 
   docker run --rm -ti --net=host -v "$PWD:/data" -w /data -e "NODE_OPTIONS=--max_old_space_size=8192" \
     elasticdump/elasticsearch-dump:latest \
-    --input="https://""${ELASTIC_TESTING_CREDENTIALS}""@profiling-es.35.240.6.93.ip.es.io/${index}" \
+    --input="https://""${ELASTIC_TESTING_CREDENTIALS}""@profiling-8-5-rc.es.us-west2.gcp.elastic-cloud.com/${index}" \
     --output="${index}-data_${from}_${to}.json.gz" \
     --type=data  --fsCompress --noRefresh --limit=100000 --support-big-int \
     --searchBody='
@@ -47,7 +47,7 @@ export_events() {
       "filter": [
         {
           "term": {
-            "ProjectID": 5
+            "service.name": "922"
           }
         },
         {
@@ -70,7 +70,7 @@ export_index() {
 
   docker run --rm -ti --net=host -v "$PWD:/data" -w /data -e "NODE_OPTIONS=--max_old_space_size=8192" \
     elasticdump/elasticsearch-dump:latest \
-    --input="https://""${ELASTIC_TESTING_CREDENTIALS}""@profiling-es.35.240.6.93.ip.es.io/${index}" \
+    --input="https://""${ELASTIC_TESTING_CREDENTIALS}""@profiling-8-5-rc.es.us-west2.gcp.elastic-cloud.com/${index}" \
     --output="${index}-data.json.gz" \
     --type=data  --fsCompress --noRefresh --limit=100000 --support-big-int
 }
@@ -108,7 +108,7 @@ export_events "profiling-events-all" "$date_from" "$date_to"
 
 # Export down-sampled tables
 for ((i = 1; i <= 11; i++)); do
-  export_events "profiling-events-5pow$(printf '%02d' i)" "$date_from" "$date_to"
+  export_events "profiling-events-5pow$(printf '%02d' $i)" "$date_from" "$date_to"
 done
 
 # We need all stacktraces, stackframes and executables as 'LastSeen' may be outside [date_from, date_to].
