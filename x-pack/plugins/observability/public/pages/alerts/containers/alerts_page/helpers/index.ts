@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export { WrappedAlertsPage as AlertsPage } from './alerts_page';
-export type { TopAlert } from './types';
+export { buildEsQuery } from './build_es_query';
