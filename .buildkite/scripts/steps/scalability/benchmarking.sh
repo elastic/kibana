@@ -116,4 +116,4 @@ for journey in scalability_traces/server/*; do
       --debug
 done
 
-kill "$esPid"
+trap "kill -9 $esPid" EXIT
