@@ -489,7 +489,33 @@ describe('disable()', () => {
     expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith('alert', '1', {
       namespace: 'default',
     });
-    expect(unsecuredSavedObjectsClient.update).toHaveBeenCalled();
+    expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith(
+      'alert',
+      '1',
+      {
+        consumer: 'myApp',
+        schedule: { interval: '10s' },
+        alertTypeId: 'myType',
+        enabled: false,
+        scheduledTaskId: null,
+        updatedAt: '2019-02-12T21:01:22.479Z',
+        updatedBy: 'elastic',
+        actions: [
+          {
+            group: 'default',
+            id: '1',
+            actionTypeId: '1',
+            actionRef: '1',
+            params: {
+              foo: true,
+            },
+          },
+        ],
+      },
+      {
+        version: '123',
+      }
+    );
     expect(taskManager.bulkEnableDisable).not.toHaveBeenCalled();
     expect(taskManager.removeIfExists).toHaveBeenCalledWith('task-123');
   });
@@ -510,7 +536,33 @@ describe('disable()', () => {
     expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith('alert', '1', {
       namespace: 'default',
     });
-    expect(unsecuredSavedObjectsClient.update).toHaveBeenCalled();
+    expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith(
+      'alert',
+      '1',
+      {
+        consumer: 'myApp',
+        schedule: { interval: '10s' },
+        alertTypeId: 'myType',
+        enabled: false,
+        scheduledTaskId: null,
+        updatedAt: '2019-02-12T21:01:22.479Z',
+        updatedBy: 'elastic',
+        actions: [
+          {
+            group: 'default',
+            id: '1',
+            actionTypeId: '1',
+            actionRef: '1',
+            params: {
+              foo: true,
+            },
+          },
+        ],
+      },
+      {
+        version: '123',
+      }
+    );
     expect(taskManager.bulkEnableDisable).not.toHaveBeenCalled();
   });
 });

@@ -2199,6 +2199,7 @@ export class RulesClient {
         this.updateMeta({
           ...attributes,
           enabled: false,
+          scheduledTaskId: attributes.scheduledTaskId === id ? attributes.scheduledTaskId : null,
           updatedBy: await this.getUserName(),
           updatedAt: new Date().toISOString(),
         }),
