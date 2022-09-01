@@ -19,7 +19,6 @@ import { createColumn, excludeMetaFromColumn, getFormat, isColumnWithMeta } from
 import { MaxColumn } from './types';
 
 describe('getFormat', () => {
-  const series = createSeries();
   const dataViewWithoutSupportedFormatsFields = createStubDataView({
     spec: {
       id: 'logstash-*',
