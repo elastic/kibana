@@ -27,6 +27,11 @@ import {
 import type { SavedQuery } from '@kbn/data-plugin/common';
 import { isErrorEmbeddable, openAddPanelFlyout, ViewMode } from '@kbn/embeddable-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import {
+  getSavedObjectFinder,
+  type SaveResult,
+  showSaveModal,
+} from '@kbn/saved-objects-plugin/public';
 
 import { saveDashboard } from '../lib';
 import { TopNavIds } from './top_nav_ids';
@@ -41,7 +46,6 @@ import { DashboardConstants } from '../../dashboard_constants';
 import { confirmDiscardUnsavedChanges } from '../listing/confirm_overlays';
 import type { DashboardAppState, DashboardSaveOptions, NavAction } from '../../types';
 import type { DashboardAppServices, DashboardEmbedSettings, DashboardRedirect } from '../../types';
-import { getSavedObjectFinder, SaveResult, showSaveModal } from '../../services/saved_objects';
 import { getCreateVisualizationButtonTitle, unsavedChangesBadge } from '../../dashboard_strings';
 import {
   setFullScreenMode,

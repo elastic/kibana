@@ -29,7 +29,7 @@ import { DashboardUsageCollectionService } from './usage_collection/types';
 import { DashboardVisualizationsService } from './visualizations/types';
 
 export type DashboardPluginServiceParams = KibanaPluginServiceParams<DashboardStartDependencies> & {
-  initContext: PluginInitializerContext;
+  initContext: PluginInitializerContext; // need a custom type so that initContext is a required parameter for initializerContext
 };
 export interface DashboardServices {
   chrome: DashboardChromeService;

@@ -15,7 +15,8 @@ import { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { ISearchSource } from '@kbn/data-plugin/common';
 import { RefreshInterval } from '@kbn/data-plugin/public';
 import { Query, Filter } from '@kbn/es-query';
-import { SavedObject, SavedObjectsStart } from '../services/saved_objects';
+import type { SavedObject, SavedObjectsStart } from '@kbn/saved-objects-plugin/public';
+
 import { createDashboardEditUrl } from '../dashboard_constants';
 import { extractReferences, injectReferences } from '../../common/saved_dashboard_references';
 

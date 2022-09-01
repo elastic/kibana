@@ -15,7 +15,7 @@ import { DataView } from '@kbn/data-views-plugin/public';
 
 import { DashboardSessionStorage } from '../lib';
 import { DashboardConstants } from '../../dashboard_constants';
-import { SavedObjectLoader } from '../../services/saved_objects';
+import { SavedObjectLoader } from '../../services/saved_object_loader';
 import { DashboardAppServices, DashboardAppState } from '../../types';
 import { DashboardContainer } from '../embeddable/dashboard_container';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';

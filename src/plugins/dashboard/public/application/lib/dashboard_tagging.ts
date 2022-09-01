@@ -10,9 +10,9 @@ import {
   SavedObjectsTaggingApi,
   type TagDecoratedSavedObject,
 } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import type { SavedObject } from '@kbn/saved-objects-plugin/public';
 
 import { DashboardSavedObject } from '../..';
-import { SavedObject } from '../../services/saved_objects';
 
 // TS is picky with type guards, we can't just inline `() => false`
 function defaultTaggingGuard(_obj: SavedObject): _obj is TagDecoratedSavedObject {

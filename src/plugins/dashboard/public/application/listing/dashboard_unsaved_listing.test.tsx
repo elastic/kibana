@@ -16,7 +16,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { DashboardSavedObject } from '../..';
 import { DashboardAppServices } from '../../types';
 import { makeDefaultServices } from '../test_helpers';
-import { SavedObjectLoader } from '../../services/saved_objects';
+import { SavedObjectLoader } from '../../services/saved_object_loader';
 import { DASHBOARD_PANELS_UNSAVED_ID } from '../lib/dashboard_session_storage';
 import { DashboardUnsavedListing, DashboardUnsavedListingProps } from './dashboard_unsaved_listing';
 

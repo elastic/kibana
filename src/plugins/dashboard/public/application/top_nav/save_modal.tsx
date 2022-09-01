@@ -11,8 +11,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiTextArea, EuiSwitch } from '@elastic/eui';
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import { SavedObjectSaveModal } from '@kbn/saved-objects-plugin/public';
 
-import { SavedObjectSaveModal } from '../../services/saved_objects';
 import type { DashboardSaveOptions } from '../../types';
 
 interface Props {

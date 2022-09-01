@@ -11,13 +11,13 @@ import _ from 'lodash';
 import { isFilterPinned } from '@kbn/es-query';
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { RefreshInterval } from '@kbn/data-plugin/public';
+import type { SavedObjectSaveOpts } from '@kbn/saved-objects-plugin/public';
 
 import { convertTimeToUTCString } from '.';
 import type { DashboardSavedObject } from '../../saved_dashboards';
 import { dashboardSaveToastStrings } from '../../dashboard_strings';
 import { getHasTaggingCapabilitiesGuard } from './dashboard_tagging';
 import type { DashboardRedirect, DashboardState } from '../../types';
-import type { SavedObjectSaveOpts } from '../../services/saved_objects';
 import type { DashboardSessionStorage } from './dashboard_session_storage';
 import { serializeControlGroupToDashboardSavedObject } from './dashboard_control_group';
 import { convertPanelStateToSavedDashboardPanel } from '../../../common/embeddable/embeddable_saved_object_converters';

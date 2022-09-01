@@ -10,7 +10,10 @@ import { ScopedHistory } from '@kbn/core/public';
 import { savedObjectsPluginMock } from '@kbn/saved-objects-plugin/public/mocks';
 import { coreMock } from '@kbn/core/public/mocks';
 
-import { SavedObjectLoader, SavedObjectLoaderFindOptions } from '../../services/saved_objects';
+import {
+  SavedObjectLoader,
+  type SavedObjectLoaderFindOptions,
+} from '../../services/saved_object_loader';
 import { DashboardAppServices } from '../../types';
 import { getSavedDashboardMock } from './get_saved_dashboard_mock';
 import { DashboardSessionStorage } from '../lib';

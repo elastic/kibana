@@ -26,12 +26,13 @@ import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { RefreshInterval } from '@kbn/data-plugin/public';
 import type { Query, TimeRange } from '@kbn/es-query';
+import type { SavedObjectsStart } from '@kbn/saved-objects-plugin/public';
+
 import type { DashboardContainer, DashboardSavedObject } from '.';
 import type { DashboardAppLocatorParams } from './locator';
-
 import { DashboardSessionStorage } from './application/lib';
 import { DashboardPanelState, SavedDashboardPanel } from '../common/types';
-import { SavedObjectLoader, SavedObjectsStart } from './services/saved_objects';
+import { SavedObjectLoader } from './services/saved_object_loader';
 
 export type { SavedDashboardPanel };
 

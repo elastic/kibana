@@ -54,15 +54,10 @@ import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public'
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
-// import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
-
-import {
-  getSavedObjectFinder,
-  SavedObjectLoader,
-  SavedObjectsStart,
-} from './services/saved_objects';
+import { getSavedObjectFinder, type SavedObjectsStart } from '@kbn/saved-objects-plugin/public';
+// import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 
 import {
   ClonePanelAction,
@@ -78,6 +73,7 @@ import {
   CopyToDashboardAction,
   DashboardCapabilities,
 } from './application';
+import { SavedObjectLoader } from './services/saved_object_loader';
 import { DashboardAppLocatorDefinition, DashboardAppLocator } from './locator';
 import { createSavedDashboardLoader } from './saved_dashboards';
 import { DashboardConstants } from './dashboard_constants';

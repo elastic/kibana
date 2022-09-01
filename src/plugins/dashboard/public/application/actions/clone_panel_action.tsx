@@ -21,8 +21,8 @@ import {
   isReferenceOrValueEmbeddable,
 } from '@kbn/embeddable-plugin/public';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import type { SavedObject } from '@kbn/saved-objects-plugin/public';
 
-import { SavedObject } from '../../services/saved_objects';
 import {
   placePanelBeside,
   IPanelPlacementBesideArgs,
