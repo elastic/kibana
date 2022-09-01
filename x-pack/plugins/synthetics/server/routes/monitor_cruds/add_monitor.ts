@@ -20,7 +20,10 @@ import {
 } from '../../../common/runtime_types';
 import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes/types';
 import { API_URLS } from '../../../common/constants';
-import { DEFAULT_FIELDS } from '../../../common/constants/monitor_defaults';
+import {
+  DEFAULT_FIELDS,
+  DEFAULT_NAMESPACE_STRING,
+} from '../../../common/constants/monitor_defaults';
 import { syntheticsMonitorType } from '../../legacy_uptime/lib/saved_objects/synthetics_monitor';
 import { validateMonitor } from './monitor_validation';
 import { sendTelemetryEvents, formatTelemetryEvent } from '../telemetry/monitor_upgrade_sender';
@@ -53,7 +56,10 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
     const monitorWithDefaults = {
       ...DEFAULT_FIELDS[monitorType],
       ...monitor,
-      [ConfigKey.NAMESPACE]: spaceId,
+      [ConfigKey.NAMESPACE]:
+        monitor[ConfigKey.NAMESPACE] !== DEFAULT_NAMESPACE_STRING
+          ? monitor[ConfigKey.NAMESPACE]
+          : spaceId,
     };
 
     const validationResult = validateMonitor(monitorWithDefaults as MonitorFields);
