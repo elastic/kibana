@@ -2,7 +2,6 @@
 == Manage saved objects
 
 Copy, edit, delete, import, and export your saved dashboards, visualizations, maps, {data-sources}, *Canvas* workpads, and other saved objects.
-maps, data views, Canvas workpads, and much more.
 
 To get started, open the main menu, and then click *Stack Management > Saved Objects*.
 
