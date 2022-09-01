@@ -226,9 +226,9 @@ describe('View agents list', () => {
       cy.getBySel(FLEET_AGENT_LIST_PAGE.BULK_ACTIONS_BUTTON).click();
       cy.get('button').contains('Upgrade 15 agents').click();
       cy.get('.euiModalFooter button').contains('Upgrade 15 agents').click();
-      // Cancel upgrade
-      cy.getBySel(CURRENT_BULK_UPGRADES_CALLOUT.ABORT_BTN).click();
-      cy.get('button').contains('Confirm').click();
+      // Cancel upgrade - this assertion is currently flaky
+      // cy.getBySel(CURRENT_BULK_UPGRADES_CALLOUT.ABORT_BTN).click();
+      // cy.get('button').contains('Confirm').click();
     });
   });
 });

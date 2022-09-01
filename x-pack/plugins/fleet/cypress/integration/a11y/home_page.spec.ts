@@ -20,8 +20,7 @@ import {
   AGENT_POLICIES_FLYOUT_ADVANCED_DEFAULT_NAMESPACE_HEADER,
   AGENT_POLICY_FLYOUT_CREATE_BUTTON,
   ENROLLMENT_TOKENS_TAB,
-  ENROLLMENT_TOKENS_CREATE_TOKEN_BUTTON,
-  ENROLLMENT_TOKENS_CREATE_TOKEN_NAME_FIELD,
+  ENROLLMENT_TOKENS,
   DATA_STREAMS_TAB,
   SETTINGS_TAB,
   SETTINGS_FLEET_SERVER_HOST_HEADING,
@@ -109,8 +108,8 @@ describe('Home page', () => {
       checkA11y({ skipFailures: false });
     });
     it('Create Enrollment Token Modal', () => {
-      cy.getBySel(ENROLLMENT_TOKENS_CREATE_TOKEN_BUTTON).click();
-      cy.getBySel(ENROLLMENT_TOKENS_CREATE_TOKEN_NAME_FIELD, { timeout: 15000 }).should(
+      cy.getBySel(ENROLLMENT_TOKENS.CREATE_TOKEN_BUTTON).click();
+      cy.getBySel(ENROLLMENT_TOKENS.CREATE_TOKEN_MODAL_NAME_FIELD, { timeout: 15000 }).should(
         'be.visible'
       );
       checkA11y({ skipFailures: false });

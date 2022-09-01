@@ -34,8 +34,14 @@ export const CREATE_FLEET_SERVER_POLICY_BTN = 'createFleetServerPolicyBtn';
 export const AGENT_POLICY_CREATE_AGENT_POLICY_NAME_FIELD = 'createAgentPolicyNameField';
 export const AGENT_POLICIES_FLYOUT_ADVANCED_DEFAULT_NAMESPACE_HEADER = 'defaultNamespaceHeader';
 export const AGENT_POLICY_FLYOUT_CREATE_BUTTON = 'createAgentPolicyFlyoutBtn';
-export const ENROLLMENT_TOKENS_CREATE_TOKEN_BUTTON = 'createEnrollmentTokenButton';
-export const ENROLLMENT_TOKENS_CREATE_TOKEN_NAME_FIELD = 'createEnrollmentTokenNameField';
+
+export const ENROLLMENT_TOKENS = {
+  CREATE_TOKEN_BUTTON: 'createEnrollmentTokenButton',
+  CREATE_TOKEN_MODAL_NAME_FIELD: 'createEnrollmentTokenNameField',
+  CREATE_TOKEN_MODAL_SELECT_FIELD: 'createEnrollmentTokenSelectField',
+  LIST_TABLE: 'enrollmentTokenListTable',
+  TABLE_REVOKE_BTN: 'enrollmentTokenTable.revokeBtn',
+};
 export const SETTINGS_FLEET_SERVER_HOST_HEADING = 'fleetServerHostHeader';
 export const SETTINGS_SAVE_BTN = 'saveApplySettingsBtn';
 
