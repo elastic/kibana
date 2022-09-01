@@ -16,6 +16,10 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
   const config = {
     testFiles,
+    testData: {
+      kbnArchives: ['test/functional/fixtures/kbn_archiver/many_fields_data_view'],
+      esArchives: ['test/functional/fixtures/es_archiver/many_fields'],
+    },
     ...performanceConfig.getAll(),
   };
 

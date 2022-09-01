@@ -16,7 +16,10 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
   const config = {
     testFiles,
-    ...performanceConfig.getAll(),
+    testData: {
+      kbnArchives: ['x-pack/test/performance/kbn_archives/promotion_tracking_dashboard'],
+      esArchives: ['x-pack/test/performance/es_archives/ecommerce_sample_data'],
+    },
     scalabilitySetup: {
       warmup: [
         {
@@ -40,6 +43,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ],
       maxDuration: '10m',
     },
+    ...performanceConfig.getAll(),
   };
 
   const apmGlobalLabels = {
