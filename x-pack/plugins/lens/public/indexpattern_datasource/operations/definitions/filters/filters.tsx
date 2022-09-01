@@ -17,6 +17,7 @@ import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import {
   DragDropBuckets,
   DraggableBucketContainer,
+  isQueryValid,
   NewBucketButton,
 } from '../../../../shared_components';
 import { IndexPattern } from '../../../../types';
