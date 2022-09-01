@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FLEET_AGENT_LIST_PAGE } from '../screens/fleet';
+import { FLEET_AGENT_LIST_PAGE, CURRENT_BULK_UPGRADES_CALLOUT } from '../screens/fleet';
 
 import { createAgentDoc } from '../tasks/agents';
 import { setupFleetServer } from '../tasks/fleet_server';
@@ -227,7 +227,7 @@ describe('View agents list', () => {
       cy.get('button').contains('Upgrade 15 agents').click();
       cy.get('.euiModalFooter button').contains('Upgrade 15 agents').click();
       // Cancel upgrade
-      cy.getBySel('abortUpgradeBtn').click();
+      cy.getBySel(CURRENT_BULK_UPGRADES_CALLOUT.ABORT_BTN).click();
       cy.get('button').contains('Confirm').click();
     });
   });

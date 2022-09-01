@@ -14,18 +14,6 @@ export const ENROLLMENT_TOKENS_TAB = 'fleet-enrollment-tokens-tab';
 export const DATA_STREAMS_TAB = 'fleet-datastreams-tab';
 export const SETTINGS_TAB = 'fleet-settings-tab';
 
-export const AGENT_FLYOUT = {
-  CREATE_POLICY_BUTTON: 'createPolicyBtn',
-  CLOSE_BUTTON: 'euiFlyoutCloseButton',
-  POLICY_DROPDOWN: 'agentPolicyDropdown',
-  QUICK_START_TAB_BUTTON: 'fleetServerFlyoutTab-quickStart',
-  ADVANCED_TAB_BUTTON: 'fleetServerFlyoutTab-advanced',
-  AGENT_POLICY_CODE_BLOCK: 'agentPolicyCodeBlock',
-  STANDALONE_TAB: 'standaloneTab',
-  CONFIRM_AGENT_ENROLLMENT_BUTTON: 'ConfirmAgentEnrollmentButton',
-  INCOMING_DATA_CONFIRMED_CALL_OUT: 'IncomingDataConfirmedCallOut',
-};
-
 export const MISSING_PRIVILEGES_TITLE = 'missingPrivilegesPromptTitle';
 export const MISSING_PRIVILEGES_MESSAGE = 'missingPrivilegesPromptMessage';
 export const FLEET_SERVER_MISSING_PRIVILEGES_MESSAGE = 'fleetServerMissingPrivilegesMessage';
@@ -41,13 +29,6 @@ export const ADVANCED_FLEET_SERVER_ADD_HOST_BUTTON = 'fleetServerAddHostBtn';
 export const ADVANCED_FLEET_SERVER_GENERATE_SERVICE_TOKEN_BUTTON =
   'fleetServerGenerateServiceTokenBtn';
 
-export const AGENT_POLICIES_CREATE_AGENT_POLICY_FLYOUT = {
-  TITLE: 'createAgentPolicyFlyoutTitle',
-  CREATE_BUTTON: 'createAgentPolicyButton',
-  COLLECT_LOGS_CHECKBOX: 'collectLogsCheckbox',
-  COLLECT_METRICS_CHECKBOX: 'collectMetricsCheckbox',
-};
-
 export const CREATE_FLEET_SERVER_POLICY_BTN = 'createFleetServerPolicyBtn';
 
 export const AGENT_POLICY_CREATE_AGENT_POLICY_NAME_FIELD = 'createAgentPolicyNameField';
@@ -62,6 +43,31 @@ export const AGENT_POLICY_SYSTEM_MONITORING_CHECKBOX = 'agentPolicyFormSystemMon
 export const INSTALL_INTEGRATIONS_ADVANCE_OPTIONS_BTN = 'AgentPolicyAdvancedOptions.AccordionBtn';
 export const AGENT_POLICY_CREATE_STATUS_CALLOUT = 'agentPolicyCreateStatusCallOut';
 export const FLEET_SERVER_HOST_INPUT = 'fleetServerHostInput';
+export const EXISTING_HOSTS_TAB = 'existingHostsTab';
+export const NEW_HOSTS_TAB = 'newHostsTab';
+
+export const CURRENT_BULK_UPGRADES_CALLOUT = {
+  ABORT_BTN: 'currentBulkUpgrade.abortBtn',
+};
+
+export const AGENT_FLYOUT = {
+  CREATE_POLICY_BUTTON: 'createPolicyBtn',
+  CLOSE_BUTTON: 'euiFlyoutCloseButton',
+  POLICY_DROPDOWN: 'agentPolicyDropdown',
+  QUICK_START_TAB_BUTTON: 'fleetServerFlyoutTab-quickStart',
+  ADVANCED_TAB_BUTTON: 'fleetServerFlyoutTab-advanced',
+  AGENT_POLICY_CODE_BLOCK: 'agentPolicyCodeBlock',
+  STANDALONE_TAB: 'standaloneTab',
+  CONFIRM_AGENT_ENROLLMENT_BUTTON: 'ConfirmAgentEnrollmentButton',
+  INCOMING_DATA_CONFIRMED_CALL_OUT: 'IncomingDataConfirmedCallOut',
+};
+
+export const AGENT_POLICIES_CREATE_AGENT_POLICY_FLYOUT = {
+  TITLE: 'createAgentPolicyFlyoutTitle',
+  CREATE_BUTTON: 'createAgentPolicyButton',
+  COLLECT_LOGS_CHECKBOX: 'collectLogsCheckbox',
+  COLLECT_METRICS_CHECKBOX: 'collectMetricsCheckbox',
+};
 
 export const AGENT_BINARY_SOURCES_TABLE = 'AgentDownloadSourcesTable';
 export const AGENT_BINARY_SOURCES_TABLE_ACTIONS = {

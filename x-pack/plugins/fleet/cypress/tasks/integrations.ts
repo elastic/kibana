@@ -11,13 +11,13 @@ import {
   FLYOUT_CLOSE_BTN_SEL,
 } from '../screens/integrations';
 
-import { AGENT_POLICY_SYSTEM_MONITORING_CHECKBOX } from '../screens/fleet';
+import { AGENT_POLICY_SYSTEM_MONITORING_CHECKBOX, EXISTING_HOSTS_TAB } from '../screens/fleet';
 import { TOAST_CLOSE_BTN, CONFIRM_MODAL } from '../screens/navigation';
 
 export const addIntegration = ({ useExistingPolicy } = { useExistingPolicy: false }) => {
   cy.getBySel(ADD_INTEGRATION_POLICY_BTN).click();
   if (useExistingPolicy) {
-    cy.get('#existing').click();
+    cy.getBySel(EXISTING_HOSTS_TAB).click();
   } else {
     // speeding up creating with unchecking system and agent integration
     cy.getBySel(AGENT_POLICY_SYSTEM_MONITORING_CHECKBOX).uncheck({ force: true });
