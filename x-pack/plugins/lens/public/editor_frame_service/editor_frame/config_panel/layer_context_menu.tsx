@@ -13,6 +13,7 @@ import {
   EuiCheckbox,
   EuiContextMenu,
   EuiContextMenuPanelDescriptor,
+  EuiContextMenuPanelItemDescriptor,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -26,7 +27,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-import { Visualization } from '../../../types';
+import { StateSetter, Visualization } from '../../../types';
 import { LocalStorageLens, LOCAL_STORAGE_LENS_KEY } from '../../../settings_storage';
 import { LayerType, layerTypes } from '../../..';
 
@@ -126,16 +127,22 @@ const getButtonCopy = (
 // TODO - clean up remove option generation logic
 export function LayerContextMenu({
   onRemoveLayer,
+  layerId,
   layerIndex,
   isOnlyLayer,
   activeVisualization,
   layerType,
+  visualizationState,
+  updateVisualization,
 }: {
   onRemoveLayer: () => void;
+  layerId: string;
   layerIndex: number;
   isOnlyLayer: boolean;
   activeVisualization: Visualization;
   layerType?: LayerType;
+  visualizationState: unknown;
+  updateVisualization: StateSetter<unknown, unknown>;
 }) {
   const contextMenuPopoverId = useGeneratedHtmlId({
     prefix: 'lnsLayerContextMenuPopover',
@@ -171,6 +178,21 @@ export function LayerContextMenu({
           'data-test-subj': 'lnsLayerRemove',
           'aria-label': ariaLabel,
         },
+        ...(activeVisualization.getLayerActions
+          ? activeVisualization.getLayerActions(layerId, visualizationState)
+          : []
+        ).map(
+          (item) =>
+            ({
+              ...item,
+              onClick: () => {
+                updateVisualization(
+                  activeVisualization.onLayerAction!(layerId, item.actionId, visualizationState)
+                );
+                closeContextMenu();
+              },
+            } as EuiContextMenuPanelItemDescriptor)
+        ),
       ],
     },
   ];

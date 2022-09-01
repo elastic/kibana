@@ -58,6 +58,9 @@ const applyPaletteToColumnConfig = (
   };
 };
 
+const PARTITION_BY_DIMENSION_ACTION_ID = 'partitionByDimensionAction';
+const PARTITION_BY_SLICE_ACTION_ID = 'partitionBySliceAction';
+
 export const getPieVisualization = ({
   paletteService,
   kibanaTheme,
@@ -322,5 +325,40 @@ export const getPieVisualization = ({
   getErrorMessages(state) {
     // not possible to break it?
     return undefined;
+  },
+
+  getLayerActions(layerId, state) {
+    const layerInQuestion = state.layers.find((layer) => layer.layerId === layerId);
+
+    if (!layerInQuestion) {
+      return [];
+    }
+
+    return layerInQuestion.partitionByDimension
+      ? [
+          {
+            actionId: PARTITION_BY_SLICE_ACTION_ID,
+            name: 'Partition by slice',
+            icon: 'visPie',
+          },
+        ]
+      : [
+          {
+            actionId: PARTITION_BY_DIMENSION_ACTION_ID,
+            name: 'Partition by dimension',
+            icon: 'visPie',
+          },
+        ];
+  },
+
+  onLayerAction(layerId, actionId, state) {
+    return {
+      ...state,
+      layers: state.layers.map((layer) =>
+        layer.layerId !== layerId
+          ? layer
+          : { ...layer, partitionByDimension: actionId === PARTITION_BY_DIMENSION_ACTION_ID }
+      ),
+    };
   },
 });

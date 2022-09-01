@@ -28,6 +28,7 @@ import type { ClickTriggerEvent, BrushTriggerEvent } from '@kbn/charts-plugin/pu
 import type { IndexPatternAggRestrictions } from '@kbn/data-plugin/public';
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import type { FieldFormatParams } from '@kbn/field-formats-plugin/common';
+import { EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
 import type { DraggingIdentifier, DragDropIdentifier, DragContextState } from './drag_drop';
 import type { DateRange, LayerType, SortingHint } from '../common';
 import type {
@@ -1092,6 +1093,13 @@ export interface Visualization<T = unknown> {
    * Get RenderEventCounters events for telemetry
    */
   getRenderEventCounters?: (state: T) => string[];
+
+  getLayerActions?: (
+    layerId: string,
+    state: T
+  ) => Array<Omit<EuiContextMenuPanelItemDescriptor, 'onClick'> & { actionId: string }>;
+
+  onLayerAction?: (layerId: string, actionId: string, state: T) => T;
 }
 
 // Use same technique as TriggerContext

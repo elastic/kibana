@@ -329,10 +329,13 @@ export function LayerPanel(
               <EuiFlexItem grow={false}>
                 <LayerContextMenu
                   onRemoveLayer={onRemoveLayer}
+                  layerId={layerId}
                   layerIndex={layerIndex}
                   isOnlyLayer={isOnlyLayer}
                   activeVisualization={activeVisualization}
                   layerType={activeVisualization.getLayerType(layerId, visualizationState)}
+                  visualizationState={visualizationState}
+                  updateVisualization={props.updateVisualization}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
