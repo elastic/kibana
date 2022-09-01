@@ -22,5 +22,6 @@ export const tagUsageCollectorSchema: MakeSchemaFrom<TaggingUsageData> = {
     lens: perTypeSchema,
     visualization: perTypeSchema,
     map: perTypeSchema,
+    search: perTypeSchema,
   },
 };
