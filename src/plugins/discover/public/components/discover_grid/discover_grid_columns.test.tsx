@@ -73,7 +73,7 @@ describe('Discover grid columns', function () {
           ],
           "displayAsText": "extension",
           "id": "extension",
-          "isSortable": false,
+          "isSortable": true,
           "schema": "string",
         },
         Object {

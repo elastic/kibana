@@ -38,6 +38,7 @@ const fields = [
     scripted: false,
     filterable: true,
     aggregatable: true,
+    sortable: true,
   },
   {
     name: 'bytes',
@@ -46,6 +47,7 @@ const fields = [
     scripted: false,
     filterable: true,
     aggregatable: true,
+    sortable: true,
   },
   {
     name: 'scripted',

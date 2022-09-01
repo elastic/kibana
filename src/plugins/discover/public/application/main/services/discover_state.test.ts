@@ -113,7 +113,7 @@ describe('Test discover initial state sort handling', () => {
   test('Empty sort in URL should allow fallback state defaults', async () => {
     history = createBrowserHistory();
     history.push('/#?_a=(sort:!())');
-    const savedSearch = { ...savedSearchMock, sort: [['fallback', 'desc']] as SortOrder[] };
+    const savedSearch = { ...savedSearchMock, sort: [['extension', 'desc']] as SortOrder[] };
 
     state = getState({
       savedSearch,
@@ -125,7 +125,7 @@ describe('Test discover initial state sort handling', () => {
     expect(state.appStateContainer.getState().sort).toMatchInlineSnapshot(`
       Array [
         Array [
-          "fallback",
+          "extension",
           "desc",
         ],
       ]
