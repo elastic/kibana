@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
 
@@ -40,12 +39,7 @@ import type {
 
 import { useDeepEqualSelector } from '../../../hooks/use_selector';
 import { defaultHeaders } from '../body/column_headers/default_headers';
-import {
-  ALERTS_TABLE_VIEW_SELECTION_KEY,
-  getCombinedFilterQuery,
-  getDefaultViewSelection,
-  resolverIsShowing,
-} from '../helpers';
+import { getCombinedFilterQuery, resolverIsShowing } from '../helpers';
 import { tGridActions, tGridSelectors } from '../../../store/t_grid';
 import { Ecs } from '../../../../common/ecs';
 import { useTimelineEvents, InspectResponse, Refetch } from '../../../container';
@@ -53,10 +47,9 @@ import { StatefulBody } from '../body';
 import { SELECTOR_TIMELINE_GLOBAL_CONTAINER, UpdatedFlexGroup, UpdatedFlexItem } from '../styles';
 import { Sort } from '../body/sort';
 import { InspectButton, InspectButtonContainer } from '../../inspect';
-import { SummaryViewSelector, ViewSelection } from '../event_rendered_view/selector';
+import { SummaryViewSelector } from '../event_rendered_view/selector';
 import { TGridLoading, TGridEmpty, TimelineContext } from '../shared';
-
-const storage = new Storage(localStorage);
+import { useTGridComponentState } from '../../../methods/context';
 
 const TitleText = styled.span`
   margin-right: 12px;
@@ -198,11 +191,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
   const dispatch = useDispatch();
   const columnsHeader = isEmpty(columns) ? defaultHeaders : columns;
   const { uiSettings } = useKibana<CoreStart>().services;
-
-  const [tableView, setTableView] = useState<ViewSelection>(
-    getDefaultViewSelection({ timelineId: id, value: storage.get(ALERTS_TABLE_VIEW_SELECTION_KEY) })
-  );
-
+  const { viewSelection, setViewSelection } = useTGridComponentState();
   const getManageTimeline = useMemo(() => tGridSelectors.getManageTimelineById(), []);
   const { queryFields, title } = useDeepEqualSelector((state) =>
     getManageTimeline(state, id ?? '')
@@ -295,7 +284,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
     [deletedEventIds, events]
   );
 
-  const alignItems = tableView === 'gridView' ? 'baseline' : 'center';
+  const alignItems = viewSelection === 'gridView' ? 'baseline' : 'center';
 
   useEffect(() => {
     setQuery(inspect, loading, refetch);
@@ -337,7 +326,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
                 data-test-subj="updated-flex-group"
                 gutterSize="m"
                 justifyContent="flexEnd"
-                $view={tableView}
+                $view={viewSelection}
               >
                 <UpdatedFlexItem grow={false} $show={!loading}>
                   <InspectButton title={justTitle} inspect={inspect} loading={loading} />
@@ -348,7 +337,10 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
                 {tGridEventRenderedViewEnabled &&
                   ['detections-page', 'detections-rules-details-page'].includes(id) && (
                     <UpdatedFlexItem grow={false} $show={!loading}>
-                      <SummaryViewSelector viewSelected={tableView} onViewChange={setTableView} />
+                      <SummaryViewSelector
+                        viewSelected={viewSelection}
+                        onViewChange={setViewSelection}
+                      />
                     </UpdatedFlexItem>
                   )}
               </UpdatedFlexGroup>
@@ -385,7 +377,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
                         refetch={refetch}
                         renderCellValue={renderCellValue}
                         rowRenderers={rowRenderers}
-                        tableView={tableView}
+                        tableView={viewSelection}
                         tabType={TimelineTabs.query}
                         totalItems={totalCountMinusDeleted}
                         trailingControlColumns={trailingControlColumns}

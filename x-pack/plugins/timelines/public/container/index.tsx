@@ -142,6 +142,7 @@ const useApmTracking = (timelineId: string) => {
   return { startTracking };
 };
 
+export type UseTimelineResult = [boolean, TimelineArgs];
 const NO_CONSUMERS: AlertConsumers[] = [];
 export const useTimelineEvents = ({
   alertConsumers = NO_CONSUMERS,
@@ -161,7 +162,7 @@ export const useTimelineEvents = ({
   skip = false,
   timerangeKind,
   data,
-}: UseTimelineEventsProps): [boolean, TimelineArgs] => {
+}: UseTimelineEventsProps): UseTimelineResult => {
   const dispatch = useDispatch();
   const { startTracking } = useApmTracking(id);
   const refetch = useRef<Refetch>(noop);

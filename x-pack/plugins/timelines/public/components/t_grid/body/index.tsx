@@ -81,6 +81,7 @@ import { ViewSelection } from '../event_rendered_view/selector';
 import { EventRenderedView } from '../event_rendered_view';
 import { REMOVE_COLUMN } from './column_headers/translations';
 import { TimelinesStartPlugins } from '../../../types';
+import { TGridComponentStateProvider } from '../../../methods/context';
 
 const StatefulAlertBulkActions = lazy(() => import('../toolbar/bulk_actions/alert_bulk_actions'));
 
@@ -878,52 +879,60 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     });
     return (
       <>
-        <StatefulEventContext.Provider value={activeStatefulEventContext}>
-          {tableView === 'gridView' && (
-            <EuiDataGridContainer hideLastPage={totalItems > ES_LIMIT_COUNT}>
-              <EuiDataGrid
-                id={'body-data-grid'}
-                data-test-subj="body-data-grid"
-                aria-label={i18n.TGRID_BODY_ARIA_LABEL}
-                columns={columnsWithCellActions}
-                columnVisibility={{ visibleColumns, setVisibleColumns: onSetVisibleColumns }}
-                gridStyle={gridStyle}
-                leadingControlColumns={leadingTGridControlColumns}
-                trailingControlColumns={trailingTGridControlColumns}
-                toolbarVisibility={toolbarVisibility}
-                rowCount={totalItems}
-                renderCellValue={renderTGridCellValue}
-                sorting={{ columns: sortingColumns, onSort }}
-                onColumnResize={onColumnResize}
-                pagination={{
-                  pageIndex: activePage,
-                  pageSize,
-                  pageSizeOptions: itemsPerPageOptions,
-                  onChangeItemsPerPage,
-                  onChangePage,
-                }}
-                ref={dataGridRef}
+        <TGridComponentStateProvider
+          customBulkActions={additionalBulkActions}
+          filterStatus={filterStatus}
+          filterQuery={filterQuery}
+          indexName={indexNames.join()}
+          timelineId={id}
+          showAlertStatusActions={showAlertStatusActions}
+        >
+          <StatefulEventContext.Provider value={activeStatefulEventContext}>
+            {tableView === 'gridView' && (
+              <EuiDataGridContainer hideLastPage={totalItems > ES_LIMIT_COUNT}>
+                <EuiDataGrid
+                  id={'body-data-grid'}
+                  data-test-subj="body-data-grid"
+                  aria-label={i18n.TGRID_BODY_ARIA_LABEL}
+                  columns={columnsWithCellActions}
+                  columnVisibility={{ visibleColumns, setVisibleColumns: onSetVisibleColumns }}
+                  gridStyle={gridStyle}
+                  leadingControlColumns={leadingTGridControlColumns}
+                  trailingControlColumns={trailingTGridControlColumns}
+                  toolbarVisibility={toolbarVisibility}
+                  rowCount={totalItems}
+                  renderCellValue={renderTGridCellValue}
+                  sorting={{ columns: sortingColumns, onSort }}
+                  onColumnResize={onColumnResize}
+                  pagination={{
+                    pageIndex: activePage,
+                    pageSize,
+                    pageSizeOptions: itemsPerPageOptions,
+                    onChangeItemsPerPage,
+                    onChangePage,
+                  }}
+                  ref={dataGridRef}
+                />
+              </EuiDataGridContainer>
+            )}
+            {tableView === 'eventRenderedView' && (
+              <EventRenderedView
+                appId={appId}
+                alertToolbar={alertToolbar}
+                events={data}
+                leadingControlColumns={leadingTGridControlColumns ?? []}
+                onChangePage={onChangePage}
+                onChangeItemsPerPage={onChangeItemsPerPage}
+                pageIndex={activePage}
+                pageSize={pageSize}
+                pageSizeOptions={itemsPerPageOptions}
+                rowRenderers={rowRenderers}
+                timelineId={id}
+                totalItemCount={totalItems}
               />
-            </EuiDataGridContainer>
-          )}
-          {tableView === 'eventRenderedView' && (
-            <EventRenderedView
-              appId={appId}
-              alertToolbar={alertToolbar}
-              events={data}
-              getRowRenderer={getRowRenderer}
-              leadingControlColumns={leadingTGridControlColumns ?? []}
-              onChangePage={onChangePage}
-              onChangeItemsPerPage={onChangeItemsPerPage}
-              pageIndex={activePage}
-              pageSize={pageSize}
-              pageSizeOptions={itemsPerPageOptions}
-              rowRenderers={rowRenderers}
-              timelineId={id}
-              totalItemCount={totalItems}
-            />
-          )}
-        </StatefulEventContext.Provider>
+            )}
+          </StatefulEventContext.Provider>
+        </TGridComponentStateProvider>
       </>
     );
   }
