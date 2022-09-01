@@ -28964,7 +28964,6 @@
     "xpack.securitySolution.timeline.properties.addTimelineButtonLabel": "新しいタイムラインまたはテンプレートの追加",
     "xpack.securitySolution.timeline.properties.addToFavoriteButtonLabel": "お気に入りに追加",
     "xpack.securitySolution.timeline.properties.attachToCaseButtonLabel": "ケースに関連付ける",
-    "xpack.securitySolution.timeline.properties.attachToExistingCaseButtonLabel": "既存のケースに添付...",
     "xpack.securitySolution.timeline.properties.attachToNewCaseButtonLabel": "新しいケースに添付",
     "xpack.securitySolution.timeline.properties.autosavedLabel": "自動保存済み",
     "xpack.securitySolution.timeline.properties.descriptionPlaceholder": "説明を追加",
