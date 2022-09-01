@@ -327,7 +327,9 @@ describe('IndexPattern Data Panel', () => {
   });
 
   describe('loading existence data', () => {
-    function testProps(updateIndexPatterns: IndexPatternServiceProps['updateIndexPatterns']) {
+    function testProps(
+      updateIndexPatterns: IndexPatternServiceProps['updateIndexPatterns']
+    ): Props {
       core.http.post.mockImplementation(async (path) => {
         const parts = (path as unknown as string).split('/');
         const indexPatternTitle = parts[parts.length - 1];
@@ -390,7 +392,7 @@ describe('IndexPattern Data Panel', () => {
       stateChanges?: Partial<IndexPatternPrivateState>,
       propChanges?: Partial<Props>
     ) {
-      const inst = mountWithIntl(<IndexPatternDataPanel {...props} />);
+      const inst = mountWithIntl<Props>(<IndexPatternDataPanel {...props} />);
 
       await act(async () => {
         inst.update();
@@ -400,10 +402,10 @@ describe('IndexPattern Data Panel', () => {
         await act(async () => {
           inst.setProps({
             ...props,
-            ...((propChanges as object) || {}),
+            ...(propChanges || {}),
             state: {
               ...props.state,
-              ...((stateChanges as object) || {}),
+              ...(stateChanges || {}),
             },
           });
           inst.update();
