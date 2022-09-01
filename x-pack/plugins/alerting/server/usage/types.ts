@@ -27,6 +27,40 @@ export interface AlertingUsage {
     string,
     Record<string, number>
   >;
+  // 1
+  count_rules_by_execution_status: {
+    success: number;
+    error: number;
+    warning: number;
+  };
+  // 2
+  count_rules_with_tags: number;
+  // 3
+  count_rules_by_notify_when: {
+    on_action_group_change: number;
+    on_active_alert: number;
+    on_throttle_interval: number;
+  };
+  // 4
+  // count_rules_by_execution_status_per_day: {
+  //   success: number;
+  //   error: number;
+  //   warning: number;
+  // };
+  // // 5
+  // count_connector_types_by_rule_type_owner: {
+  //   [key: string]: string[];
+  // };
+  // // 6
+  // avg_connector_types_run_duration_per_day: Record<string, number>;
+  // // 7
+  // count_connector_types_success_per_day: number;
+  // count_connector_types_failure_per_day: number;
+  // 8
+  count_rules_snoozed: number;
+  count_rules_muted: number;
+  // // 9
+  count_rules_with_muted_alerts: number;
   percentile_num_generated_actions_per_day: {
     p50: number;
     p90: number;
