@@ -80,6 +80,7 @@ export interface PartitionVisParams extends VisCommonParams {
 
 export interface PieVisConfig extends VisCommonConfig {
   buckets?: Array<ExpressionValueVisDimension | string>;
+  partitionByColumn?: boolean;
   isDonut: boolean;
   emptySizeRatio?: EmptySizeRatios;
   respectSourceOrder?: boolean;

@@ -9,6 +9,7 @@
 import { Position } from '@elastic/charts';
 import { prepareLogTable, validateAccessor } from '@kbn/visualizations-plugin/common/utils';
 import { DEFAULT_LEGEND_SIZE, LegendSize } from '@kbn/visualizations-plugin/common/constants';
+import { Datatable, DatatableColumn, DatatableRow } from '@kbn/expressions-plugin/common';
 import { EmptySizeRatios, LegendDisplay, PartitionVisParams } from '../types/expression_renderers';
 import { ChartTypes, PieVisExpressionFunctionDefinition } from '../types';
 import {
@@ -19,6 +20,51 @@ import {
 } from '../constants';
 import { errors, strings } from './i18n';
 
+const transposeTable = (
+  table: Datatable
+): {
+  table: Datatable;
+  metricAccessor: string;
+  bucketAccessor: string;
+} => {
+  const oldRow = table.rows[0]; // only supports single row tables for now
+
+  const nameColumnId = 'name';
+  const valueColumnId = 'value';
+
+  const transposedRows: DatatableRow[] = table.columns.map((column) => ({
+    [nameColumnId]: column.name,
+    [valueColumnId]: oldRow[column.id],
+  }));
+
+  const transposedColumns: DatatableColumn[] = [
+    {
+      id: nameColumnId,
+      name: nameColumnId,
+      meta: {
+        type: 'string',
+      },
+    },
+    {
+      id: valueColumnId,
+      name: valueColumnId,
+      meta: {
+        type: 'number',
+      },
+    },
+  ];
+
+  return {
+    metricAccessor: valueColumnId,
+    bucketAccessor: nameColumnId,
+    table: {
+      type: 'datatable',
+      columns: transposedColumns,
+      rows: transposedRows,
+    },
+  };
+};
+
 export const pieVisFunction = (): PieVisExpressionFunctionDefinition => ({
   name: PIE_VIS_EXPRESSION_NAME,
   type: 'render',
@@ -28,12 +74,16 @@ export const pieVisFunction = (): PieVisExpressionFunctionDefinition => ({
     metric: {
       types: ['vis_dimension', 'string'],
       help: strings.getMetricArgHelp(),
-      required: true,
     },
     buckets: {
       types: ['vis_dimension', 'string'],
       help: strings.getBucketsArgHelp(),
       multi: true,
+    },
+    // TODO - revisit arg name (columnsAsSlices?)
+    partitionByColumn: {
+      types: ['boolean'],
+      help: 'whether or not to transpose the datatable before rendering the slices',
     },
     splitColumn: {
       types: ['vis_dimension', 'string'],
@@ -137,7 +187,9 @@ export const pieVisFunction = (): PieVisExpressionFunctionDefinition => ({
       throw new Error(errors.splitRowAndSplitColumnAreSpecifiedError());
     }
 
-    validateAccessor(args.metric, context.columns);
+    if (args.metric) {
+      validateAccessor(args.metric, context.columns);
+    }
     if (args.buckets) {
       args.buckets.forEach((bucket) => validateAccessor(bucket, context.columns));
     }
@@ -148,6 +200,16 @@ export const pieVisFunction = (): PieVisExpressionFunctionDefinition => ({
       args.splitRow.forEach((splitRow) => validateAccessor(splitRow, context.columns));
     }
 
+    let transposedTable;
+    let transposedMetricAccessor;
+    let transposedBucketAccessor;
+    if (args.partitionByColumn) {
+      const result = transposeTable(context);
+      transposedTable = result.table;
+      transposedMetricAccessor = result.metricAccessor;
+      transposedBucketAccessor = result.bucketAccessor;
+    }
+
     const visConfig: PartitionVisParams = {
       ...args,
       ariaLabel:
@@ -156,13 +218,14 @@ export const pieVisFunction = (): PieVisExpressionFunctionDefinition => ({
         handlers.getExecutionContext?.()?.description,
       palette: args.palette,
       dimensions: {
-        metric: args.metric,
-        buckets: args.buckets,
+        metric: transposedMetricAccessor ?? args.metric,
+        buckets: transposedBucketAccessor ? [transposedBucketAccessor] : args.buckets,
         splitColumn: args.splitColumn,
         splitRow: args.splitRow,
       },
     };
 
+    // TODO fix inspector
     if (handlers?.inspectorAdapters?.tables) {
       handlers.inspectorAdapters.tables.reset();
       handlers.inspectorAdapters.tables.allowCsvExport = true;
@@ -170,8 +233,11 @@ export const pieVisFunction = (): PieVisExpressionFunctionDefinition => ({
       const logTable = prepareLogTable(
         context,
         [
-          [[args.metric], strings.getSliceSizeHelp()],
-          [args.buckets, strings.getSliceHelp()],
+          [[transposedMetricAccessor ?? args.metric], strings.getSliceSizeHelp()],
+          [
+            transposedBucketAccessor ? [transposedBucketAccessor] : args.buckets,
+            strings.getSliceHelp(),
+          ],
           [args.splitColumn, strings.getColumnSplitHelp()],
           [args.splitRow, strings.getRowSplitHelp()],
         ],
@@ -184,7 +250,7 @@ export const pieVisFunction = (): PieVisExpressionFunctionDefinition => ({
       type: 'render',
       as: PARTITION_VIS_RENDERER_NAME,
       value: {
-        visData: context,
+        visData: transposedTable ?? context,
         visConfig,
         syncColors: handlers?.isSyncColorsEnabled?.() ?? false,
         visType: args.isDonut ? ChartTypes.DONUT : ChartTypes.PIE,
