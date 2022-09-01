@@ -116,13 +116,14 @@ const NetworkDetailsComponent: React.FC = () => {
     ip,
   });
 
-  const jobIds = useInstalledSecurityJobsIds();
+  const { jobIds } = useInstalledSecurityJobsIds();
   const [isLoadingAnomaliesData, anomaliesData] = useAnomaliesTableData({
     criteriaFields: networkToCriteria(detailName, flowTarget),
     startDate: from,
     endDate: to,
     skip: isInitializing,
     jobIds,
+    aggregationInterval: 'auto',
   });
 
   const headerDraggableArguments = useMemo(

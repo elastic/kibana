@@ -116,13 +116,14 @@ export const ExpandableNetworkDetails = ({
   });
 
   useInvalidFilterQuery({ id, filterQuery, kqlError, query, startDate: from, endDate: to });
-  const jobIds = useInstalledSecurityJobsIds();
+  const { jobIds } = useInstalledSecurityJobsIds();
   const [isLoadingAnomaliesData, anomaliesData] = useAnomaliesTableData({
     criteriaFields: networkToCriteria(ip, flowTarget),
     startDate: from,
     endDate: to,
     skip: isInitializing,
     jobIds,
+    aggregationInterval: 'auto',
   });
 
   return indicesExist ? (

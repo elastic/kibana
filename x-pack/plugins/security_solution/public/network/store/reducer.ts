@@ -22,6 +22,7 @@ import {
   setNetworkTablesActivePageToZero,
   updateNetworkTable,
   updateNetworkAnomaliesJobIdFilter,
+  updateNetworkAnomaliesInterval,
 } from './actions';
 import {
   setNetworkDetailsQueriesActivePageToZero,
@@ -97,6 +98,7 @@ export const initialNetworkState: NetworkState = {
       },
       [NetworkTableType.anomalies]: {
         jobIdSelection: [],
+        intervalSelection: 'auto',
       },
     },
   },
@@ -159,6 +161,7 @@ export const initialNetworkState: NetworkState = {
       },
       [NetworkDetailsTableType.anomalies]: {
         jobIdSelection: [],
+        intervalSelection: 'auto',
       },
     },
     flowTarget: FlowTarget.source,
@@ -206,6 +209,7 @@ export const networkReducer = reducerWithInitialState(initialNetworkState)
           queries: {
             ...state.page.queries,
             anomalies: {
+              ...state.page.queries.anomalies,
               jobIdSelection: jobIds,
             },
           },
@@ -219,7 +223,39 @@ export const networkReducer = reducerWithInitialState(initialNetworkState)
           queries: {
             ...state.details.queries,
             anomalies: {
+              ...state.details.queries.anomalies,
               jobIdSelection: jobIds,
+            },
+          },
+        },
+      };
+    }
+  })
+  .case(updateNetworkAnomaliesInterval, (state, { interval, networkType }) => {
+    if (networkType === NetworkType.page) {
+      return {
+        ...state,
+        page: {
+          ...state.page,
+          queries: {
+            ...state.page.queries,
+            anomalies: {
+              ...state.page.queries.anomalies,
+              intervalSelection: interval,
+            },
+          },
+        },
+      };
+    } else {
+      return {
+        ...state,
+        details: {
+          ...state.details,
+          queries: {
+            ...state.details.queries,
+            anomalies: {
+              ...state.details.queries.anomalies,
+              intervalSelection: interval,
             },
           },
         },

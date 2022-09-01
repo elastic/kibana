@@ -142,8 +142,8 @@ export const usersReducer = reducerWithInitialState(initialUsersState)
           ...state.page,
           queries: {
             ...state.page.queries,
-            [UsersTableType.anomalies]: {
-              ...state[usersType].queries[UsersTableType.anomalies],
+            anomalies: {
+              ...state.page.queries.anomalies,
               jobIdSelection: jobIds,
             },
           },
@@ -156,8 +156,8 @@ export const usersReducer = reducerWithInitialState(initialUsersState)
           ...state.details,
           queries: {
             ...state.details.queries,
-            [UsersTableType.anomalies]: {
-              ...state[usersType].queries[UsersTableType.anomalies],
+            anomalies: {
+              ...state.details.queries.anomalies,
               jobIdSelection: jobIds,
             },
           },
@@ -173,8 +173,8 @@ export const usersReducer = reducerWithInitialState(initialUsersState)
           ...state.page,
           queries: {
             ...state.page.queries,
-            [UsersTableType.anomalies]: {
-              ...state[usersType].queries[UsersTableType.anomalies],
+            anomalies: {
+              ...state.page.queries.anomalies,
               intervalSelection: interval,
             },
           },
@@ -187,8 +187,8 @@ export const usersReducer = reducerWithInitialState(initialUsersState)
           ...state.details,
           queries: {
             ...state.details.queries,
-            [UsersTableType.anomalies]: {
-              ...state[usersType].queries[UsersTableType.anomalies],
+            anomalies: {
+              ...state.details.queries.anomalies,
               intervalSelection: interval,
             },
           },

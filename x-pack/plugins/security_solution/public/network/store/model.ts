@@ -120,6 +120,7 @@ export interface NetworkUsersQuery extends BasicQueryPaginated {
 
 export interface NetworkAnomaliesQuery {
   jobIdSelection: string[];
+  intervalSelection: string;
 }
 
 export interface NetworkDetailsQueries {

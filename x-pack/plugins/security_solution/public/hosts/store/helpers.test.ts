@@ -32,7 +32,11 @@ export const mockHostsState: HostsModel = {
         activePage: 8,
         limit: DEFAULT_TABLE_LIMIT,
       },
-      [HostsTableType.anomalies]: null,
+      [HostsTableType.anomalies]: {
+        jobIdSelection: [],
+        intervalSelection: 'auto',
+      },
+
       [HostsTableType.risk]: {
         activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         limit: DEFAULT_TABLE_LIMIT,
@@ -68,7 +72,10 @@ export const mockHostsState: HostsModel = {
         activePage: 8,
         limit: DEFAULT_TABLE_LIMIT,
       },
-      [HostsTableType.anomalies]: null,
+      [HostsTableType.anomalies]: {
+        jobIdSelection: [],
+        intervalSelection: 'auto',
+      },
       [HostsTableType.risk]: {
         activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         limit: DEFAULT_TABLE_LIMIT,

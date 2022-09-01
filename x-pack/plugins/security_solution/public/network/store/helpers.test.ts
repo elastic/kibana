@@ -79,6 +79,10 @@ export const mockNetworkState: NetworkModel = {
         activePage: 0,
         limit: DEFAULT_TABLE_LIMIT,
       },
+      [NetworkDetailsTableType.anomalies]: {
+        jobIdSelection: [],
+        intervalSelection: 'auto',
+      },
     },
   },
   details: {
@@ -135,6 +139,10 @@ export const mockNetworkState: NetworkModel = {
         activePage: 0,
         limit: DEFAULT_TABLE_LIMIT,
         sort: { direction: Direction.desc },
+      },
+      [NetworkDetailsTableType.anomalies]: {
+        jobIdSelection: [],
+        intervalSelection: 'auto',
       },
     },
     flowTarget: FlowTarget.source,

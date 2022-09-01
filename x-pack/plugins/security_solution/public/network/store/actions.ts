@@ -29,3 +29,8 @@ export const updateNetworkAnomaliesJobIdFilter = actionCreator<{
   jobIds: string[];
   networkType: NetworkType;
 }>('UPDATE_NETWORK_ANOMALIES_JOB_ID_FILTER');
+
+export const updateNetworkAnomaliesInterval = actionCreator<{
+  interval: string;
+  networkType: NetworkType;
+}>('UPDATE_NETWORK_ANOMALIES_INTERVAL');

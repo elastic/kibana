@@ -98,3 +98,9 @@ export const networkAnomaliesJobIdFilterSelector = () =>
     selectNetwork,
     (network) => network.queries[NetworkTableType.anomalies].jobIdSelection
   );
+
+export const networkAnomaliesIntervalSelector = () =>
+  createSelector(
+    selectNetwork,
+    (network) => network.queries[NetworkTableType.anomalies].intervalSelection
+  );

@@ -7,6 +7,7 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useAnomaliesTableData } from '../anomaly/use_anomalies_table_data';
 import { HeaderSection } from '../../header_section';
 
@@ -26,6 +27,7 @@ import { useDeepEqualSelector } from '../../../hooks/use_selector';
 import type { State } from '../../../store';
 import { JobIdFilter } from './job_id_filter';
 import { networkActions, networkSelectors } from '../../../../network/store';
+import { SelectInterval } from './select_interval';
 
 const sorting = {
   sort: {
@@ -80,13 +82,35 @@ const AnomaliesNetworkTableComponent: React.FC<AnomaliesNetworkTableProps> = ({
     },
     [dispatch, type]
   );
+
+  const getAnomaliesNetworkTableIntervalQuerySelector = useMemo(
+    () => networkSelectors.networkAnomaliesIntervalSelector(),
+    []
+  );
+
+  const selectedInterval = useDeepEqualSelector((state: State) =>
+    getAnomaliesNetworkTableIntervalQuerySelector(state, type)
+  );
+
+  const onSelectInterval = useCallback(
+    (newInterval: string) => {
+      dispatch(
+        networkActions.updateNetworkAnomaliesInterval({
+          interval: newInterval,
+          networkType: type,
+        })
+      );
+    },
+    [dispatch, type]
+  );
+
   const [loadingTable, tableData] = useAnomaliesTableData({
     startDate,
     endDate,
     skip: querySkip,
     criteriaFields: getCriteriaFromNetworkType(type, ip, flowTarget),
     jobIds: selectedJobIds.length > 0 ? selectedJobIds : jobIds,
-    aggregationInterval: 'second',
+    aggregationInterval: selectedInterval,
   });
 
   const networks = convertAnomaliesToNetwork(tableData, ip);
@@ -114,12 +138,19 @@ const AnomaliesNetworkTableComponent: React.FC<AnomaliesNetworkTableProps> = ({
           toggleStatus={toggleStatus}
           isInspectDisabled={skip}
           headerFilters={
-            <JobIdFilter
-              title={i18n.JOB_ID}
-              onSelect={onSelectJobId}
-              selectedJobIds={selectedJobIds}
-              jobIds={jobIds}
-            />
+            <EuiFlexGroup>
+              <EuiFlexItem>
+                <SelectInterval interval={selectedInterval} onChange={onSelectInterval} />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <JobIdFilter
+                  title={i18n.JOB_ID}
+                  onSelect={onSelectJobId}
+                  selectedJobIds={selectedJobIds}
+                  jobIds={jobIds}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
           }
         />
         {toggleStatus && (
