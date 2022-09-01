@@ -8,28 +8,32 @@
 
 import React from 'react';
 import { UserAvatar, UserAvatarProps } from './user_avatar';
-import mdx from './README.mdx';
+// import mdx from './README.mdx';
+import { UserProfileUserInfo } from './user_profile';
 
 export default {
   title: 'Avatar/User Profile',
   description: '',
   parameters: {
     docs: {
-      page: mdx,
+      // page: mdx,
     },
   },
 };
 
-type UserAvatarParams = Pick<UserAvatarProps, 'user'>
+type UserAvatarParams = Pick<UserAvatarProps, 'user'>;
 
-
-export const userAvatar = (params: UserAvatarParams) => {
-  return <UserAvatar {...params.user?.username !== undefined ? userAvatar.argTypes.user : userAvatar.argTypes.user.defaultValue} {...params} />;
+export const userAvatar = (
+  params: Pick<UserProfileUserInfo, 'username'>,
+  rest: UserAvatarParams
+) => {
+  return <UserAvatar {...params} {...rest} />;
 };
 
 userAvatar.argTypes = {
-  user: {
-    control: 'text',
+  username: {
+    control: { type: 'radio' },
+    options: ['Peggy', 'Burt', 'Leonardo DiCaprio'],
     defaultValue: 'Peggy',
   },
 };
