@@ -18,6 +18,53 @@ rm -rf "${KIBANA_BUILD_LOCATION}"
 rm -rf "${KIBANA_LOAD_TESTING_DIR}"
 rm -rf "${GCS_ARTIFACTS_DIR}"
 
+download_artifacts() {
+  mkdir -p "${GCS_ARTIFACTS_DIR}"
+
+  gsutil cp "$GCS_BUCKET/latest" "${GCS_ARTIFACTS_DIR}/"
+  HASH=`cat ${GCS_ARTIFACTS_DIR}/latest`
+  gsutil cp -r "$GCS_BUCKET/$HASH" "${GCS_ARTIFACTS_DIR}/"
+
+  export LATEST_RUN_ARTIFACTS_DIR="${GCS_ARTIFACTS_DIR}/${HASH}"
+
+  echo "Unzip kibana build, plugins and scalability traces"
+  cd "$WORKSPACE"
+  mkdir -p "$KIBANA_BUILD_LOCATION"
+  tar -xzf "${LATEST_RUN_ARTIFACTS_DIR}/kibana-default.tar.gz" -C "$KIBANA_BUILD_LOCATION" --strip=1
+
+  cd "$KIBANA_DIR"
+  tar -xzf "../${LATEST_RUN_ARTIFACTS_DIR}/kibana-default-plugins.tar.gz"
+  tar -xzf "../${LATEST_RUN_ARTIFACTS_DIR}/scalability_traces.tar.gz"
+}
+
+checkout_and_compile_load_runner() {
+  mkdir -p "${KIBANA_LOAD_TESTING_DIR}" && cd "${KIBANA_LOAD_TESTING_DIR}"
+
+  if [[ ! -d .git ]]; then
+    git init
+    git remote add origin https://github.com/elastic/kibana-load-testing.git
+  fi
+  git fetch origin --depth 1 "main"
+  git reset --hard FETCH_HEAD
+
+  KIBANA_LOAD_TESTING_GIT_COMMIT="$(git rev-parse HEAD)"
+  export KIBANA_LOAD_TESTING_GIT_COMMIT
+
+  mvn -q test-compile
+  echo "Set 'GATLING_PROJECT_PATH' env var for ScalabilityTestRunner"
+  export GATLING_PROJECT_PATH="$(pwd)"
+}
+
+upload_test_results() {
+  cd "${KIBANA_DIR}"
+  echo "--- Archive Gatling reports and upload as build artifacts"
+  tar -czf "scalability_test_report.tar.gz" --exclude=simulation.log -C kibana-load-testing/target gatling
+  buildkite-agent artifact upload "scalability_test_report.tar.gz"
+  cd "${LATEST_RUN_ARTIFACTS_DIR}"
+  echo "Upload scalability traces as build artifacts"
+  buildkite-agent artifact upload "scalability_traces.tar.gz"
+}
+
 echo "--- Download the latest artifacts from single user performance pipeline"
 download_artifacts
 
@@ -70,51 +117,3 @@ for journey in scalability_traces/server/*; do
 done
 
 kill "$esPid"
-
-
-download_artifacts() {
-  mkdir -p "${GCS_ARTIFACTS_DIR}"
-
-  gsutil cp "$GCS_BUCKET/latest" "${GCS_ARTIFACTS_DIR}/"
-  HASH=`cat ${GCS_ARTIFACTS_DIR}/latest`
-  gsutil cp -r "$GCS_BUCKET/$HASH" "${GCS_ARTIFACTS_DIR}/"
-
-  export LATEST_RUN_ARTIFACTS_DIR="${GCS_ARTIFACTS_DIR}/${HASH}"
-
-  echo "Unzip kibana build, plugins and scalability traces"
-  cd "$WORKSPACE"
-  mkdir -p "$KIBANA_BUILD_LOCATION"
-  tar -xzf "${LATEST_RUN_ARTIFACTS_DIR}/kibana-default.tar.gz" -C "$KIBANA_BUILD_LOCATION" --strip=1
-
-  cd "$KIBANA_DIR"
-  tar -xzf "../${LATEST_RUN_ARTIFACTS_DIR}/kibana-default-plugins.tar.gz"
-  tar -xzf "../${LATEST_RUN_ARTIFACTS_DIR}/scalability_traces.tar.gz"
-}
-
-checkout_and_compile_load_runner() {
-  mkdir -p "${KIBANA_LOAD_TESTING_DIR}" && cd "${KIBANA_LOAD_TESTING_DIR}"
-
-  if [[ ! -d .git ]]; then
-    git init
-    git remote add origin https://github.com/elastic/kibana-load-testing.git
-  fi
-  git fetch origin --depth 1 "main"
-  git reset --hard FETCH_HEAD
-
-  KIBANA_LOAD_TESTING_GIT_COMMIT="$(git rev-parse HEAD)"
-  export KIBANA_LOAD_TESTING_GIT_COMMIT
-
-  mvn -q test-compile
-  echo "Set 'GATLING_PROJECT_PATH' env var for ScalabilityTestRunner"
-  export GATLING_PROJECT_PATH="$(pwd)"
-}
-
-upload_test_results() {
-  cd "${KIBANA_DIR}"
-  echo "--- Archive Gatling reports and upload as build artifacts"
-  tar -czf "scalability_test_report.tar.gz" --exclude=simulation.log -C kibana-load-testing/target gatling
-  buildkite-agent artifact upload "scalability_test_report.tar.gz"
-  cd "${LATEST_RUN_ARTIFACTS_DIR}"
-  echo "Upload scalability traces as build artifacts"
-  buildkite-agent artifact upload "scalability_traces.tar.gz"
-}
