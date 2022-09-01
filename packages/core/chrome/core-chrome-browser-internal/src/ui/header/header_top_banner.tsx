@@ -9,7 +9,7 @@
 import React, { FC } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { Observable } from 'rxjs';
-import { ChromeUserBanner } from '../../types';
+import type { ChromeUserBanner } from '@kbn/core-chrome-browser';
 import { HeaderExtension } from './header_extension';
 
 export interface HeaderTopBannerProps {

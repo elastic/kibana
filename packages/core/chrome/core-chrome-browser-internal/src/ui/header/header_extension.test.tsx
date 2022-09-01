@@ -8,6 +8,7 @@
 
 import { mount } from 'enzyme';
 import React from 'react';
+import '@testing-library/jest-dom';
 import { HeaderExtension } from './header_extension';
 
 describe('HeaderExtension', () => {

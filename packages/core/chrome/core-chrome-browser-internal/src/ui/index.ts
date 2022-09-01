@@ -7,13 +7,5 @@
  */
 
 export { Header } from './header';
-export type { HeaderProps } from './header';
-export type { OnIsLockedUpdate, NavType } from './types';
-export type {
-  ChromeHelpExtensionLinkBase,
-  ChromeHelpExtensionMenuLink,
-  ChromeHelpExtensionMenuCustomLink,
-  ChromeHelpExtensionMenuDiscussLink,
-  ChromeHelpExtensionMenuDocumentationLink,
-  ChromeHelpExtensionMenuGitHubLink,
-} from './header_help_menu';
+export { LoadingIndicator } from './loading_indicator';
+export type { NavType } from './header';

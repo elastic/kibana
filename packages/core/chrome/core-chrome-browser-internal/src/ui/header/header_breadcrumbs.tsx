@@ -11,7 +11,7 @@ import classNames from 'classnames';
 import React from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { Observable } from 'rxjs';
-import { ChromeBreadcrumb } from '../../types';
+import type { ChromeBreadcrumb } from '@kbn/core-chrome-browser';
 
 interface Props {
   breadcrumbs$: Observable<ChromeBreadcrumb[]>;

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { NavControlsService } from './nav_controls_service';
 import { take } from 'rxjs/operators';
+import { NavControlsService } from './nav_controls_service';
 
 describe('RecentlyAccessed#start()', () => {
   const getStart = () => {

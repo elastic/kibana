@@ -13,7 +13,7 @@ import useObservable from 'react-use/lib/useObservable';
 import { Observable } from 'rxjs';
 import Url from 'url';
 import type { HttpStart } from '@kbn/core-http-browser';
-import type { ChromeNavLink } from '../..';
+import type { ChromeNavLink } from '@kbn/core-chrome-browser';
 import { ElasticMark } from './elastic_mark';
 import { LoadingIndicator } from '../loading_indicator';
 

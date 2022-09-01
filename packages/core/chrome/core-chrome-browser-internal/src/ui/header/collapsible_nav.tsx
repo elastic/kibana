@@ -25,9 +25,8 @@ import * as Rx from 'rxjs';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { InternalApplicationStart } from '@kbn/core-application-browser-internal';
 import type { AppCategory } from '@kbn/core-application-common';
-
-import type { ChromeNavLink, ChromeRecentlyAccessedHistoryItem } from '../..';
-import type { OnIsLockedUpdate } from '.';
+import type { ChromeNavLink, ChromeRecentlyAccessedHistoryItem } from '@kbn/core-chrome-browser';
+import type { OnIsLockedUpdate } from './types';
 import {
   createEuiListItem,
   createRecentNavLink,

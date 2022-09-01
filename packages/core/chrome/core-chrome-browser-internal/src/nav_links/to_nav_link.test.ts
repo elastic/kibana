@@ -12,9 +12,9 @@ import {
   type PublicAppInfo,
   type PublicAppDeepLinkInfo,
 } from '@kbn/core-application-browser';
+import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { toNavLink } from './to_nav_link';
 
-import { httpServiceMock } from '../../mocks';
 
 const app = (props: Partial<PublicAppInfo> = {}): PublicAppInfo => ({
   id: 'some-id',

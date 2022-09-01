@@ -8,10 +8,10 @@
 
 import React from 'react';
 import { mount, ReactWrapper } from 'enzyme';
-import { act } from 'react-dom/test-utils';
 import { BehaviorSubject } from 'rxjs';
-import { HeaderActionMenu } from './header_action_menu';
+import { act } from 'react-dom/test-utils';
 import type { MountPoint, UnmountCallback } from '@kbn/core-mount-utils-browser';
+import { HeaderActionMenu } from './header_action_menu';
 
 type MockedUnmount = jest.MockedFunction<UnmountCallback>;
 

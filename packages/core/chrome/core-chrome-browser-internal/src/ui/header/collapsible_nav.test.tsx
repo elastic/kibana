@@ -12,8 +12,8 @@ import { BehaviorSubject } from 'rxjs';
 import sinon from 'sinon';
 import { StubBrowserStorage } from '@kbn/test-jest-helpers';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
-import { ChromeNavLink, DEFAULT_APP_CATEGORIES } from '../../..';
-import { ChromeRecentlyAccessedHistoryItem } from '../../recently_accessed';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
+import type { ChromeNavLink, ChromeRecentlyAccessedHistoryItem } from '@kbn/core-chrome-browser';
 import { CollapsibleNav } from './collapsible_nav';
 
 const { kibana, observability, security, management } = DEFAULT_APP_CATEGORIES;

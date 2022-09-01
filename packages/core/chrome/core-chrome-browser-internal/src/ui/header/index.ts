@@ -6,4 +6,6 @@
  * Side Public License, v 1.
  */
 
-export * from './nav_controls_service';
+export { Header } from './header';
+export type { HeaderProps } from './header';
+export type { OnIsLockedUpdate, NavType } from './types';

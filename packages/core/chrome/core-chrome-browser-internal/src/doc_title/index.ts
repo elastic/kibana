@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export * from './doc_title_service';
+export { DocTitleService } from './doc_title_service';

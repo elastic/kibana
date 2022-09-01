@@ -24,21 +24,18 @@ import useObservable from 'react-use/lib/useObservable';
 import type { Observable } from 'rxjs';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { InternalApplicationStart } from '@kbn/core-application-browser-internal';
-
-import { LoadingIndicator } from '..';
 import type {
   ChromeBadge,
   ChromeBreadcrumb,
   ChromeNavControl,
   ChromeNavLink,
   ChromeRecentlyAccessedHistoryItem,
-} from '../..';
-import type {
   ChromeBreadcrumbsAppendExtension,
   ChromeHelpExtension,
   ChromeUserBanner,
-} from '../../types';
-import type { OnIsLockedUpdate } from '.';
+} from '@kbn/core-chrome-browser';
+import { LoadingIndicator } from '../loading_indicator';
+import type { OnIsLockedUpdate } from './types';
 import { CollapsibleNav } from './collapsible_nav';
 import { HeaderBadge } from './header_badge';
 import { HeaderBreadcrumbs } from './header_breadcrumbs';

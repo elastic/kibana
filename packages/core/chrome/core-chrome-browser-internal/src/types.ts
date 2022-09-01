@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import type { ChromeStart } from '@kbn/core-chrome-browser';
 
 /** @internal */

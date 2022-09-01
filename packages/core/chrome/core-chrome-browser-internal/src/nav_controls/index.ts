@@ -6,14 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { Header } from './header';
-export { LoadingIndicator } from './loading_indicator';
-export type {
-  ChromeHelpExtensionLinkBase,
-  ChromeHelpExtensionMenuLink,
-  ChromeHelpExtensionMenuCustomLink,
-  ChromeHelpExtensionMenuDiscussLink,
-  ChromeHelpExtensionMenuDocumentationLink,
-  ChromeHelpExtensionMenuGitHubLink,
-  NavType,
-} from './header';
+export { NavControlsService } from './nav_controls_service';
