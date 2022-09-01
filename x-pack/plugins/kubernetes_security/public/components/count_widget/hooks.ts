@@ -14,10 +14,11 @@ export const useFetchCountWidgetData = (
   widgetKey: string,
   filterQuery: string,
   groupedBy: string,
+  updatedAt: number | undefined,
   index?: string
 ) => {
   const { http } = useKibana<CoreStart>().services;
-  const cachingKeys = [QUERY_KEY_COUNT_WIDGET, widgetKey, filterQuery, groupedBy, index];
+  const cachingKeys = [QUERY_KEY_COUNT_WIDGET, widgetKey, filterQuery, groupedBy, updatedAt, index];
 
   const query = useInfiniteQuery(
     cachingKeys,

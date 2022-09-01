@@ -59,13 +59,14 @@ const KubernetesSecurityRoutesComponent = ({
   indexPattern,
   globalFilter,
   renderSessionsView,
+  updatedAt,
 }: KubernetesSecurityDeps) => {
   const [shouldHideCharts, setShouldHideCharts] = useLocalStorage(
     LOCAL_STORAGE_HIDE_WIDGETS_KEY,
     false
   );
   const styles = useStyles();
-  const lastUpdated = useLastUpdated(globalFilter);
+  const lastUpdated = useLastUpdated(updatedAt);
 
   const onReduceInteractiveAggs = useCallback(
     (result: AggregateResult): Record<string, number> =>
@@ -128,6 +129,7 @@ const KubernetesSecurityRoutesComponent = ({
                       globalFilter={globalFilter}
                       widgetKey={COUNT_WIDGET_KEY_CLUSTERS}
                       groupedBy={ORCHESTRATOR_CLUSTER_ID}
+                      updatedAt={updatedAt}
                     />
                   </EuiFlexItem>
                   <EuiFlexItem>
@@ -137,6 +139,7 @@ const KubernetesSecurityRoutesComponent = ({
                       globalFilter={globalFilter}
                       widgetKey={COUNT_WIDGET_KEY_NAMESPACE}
                       groupedBy={ORCHESTRATOR_NAMESPACE}
+                      updatedAt={updatedAt}
                     />
                   </EuiFlexItem>
                   <EuiFlexItem>
@@ -146,6 +149,7 @@ const KubernetesSecurityRoutesComponent = ({
                       globalFilter={globalFilter}
                       widgetKey={COUNT_WIDGET_KEY_NODES}
                       groupedBy={CLOUD_INSTANCE_NAME}
+                      updatedAt={updatedAt}
                     />
                   </EuiFlexItem>
                   <EuiFlexItem>
@@ -155,6 +159,7 @@ const KubernetesSecurityRoutesComponent = ({
                       globalFilter={globalFilter}
                       widgetKey={COUNT_WIDGET_KEY_NODES}
                       groupedBy={ORCHESTRATOR_RESOURCE_ID}
+                      updatedAt={updatedAt}
                     />
                   </EuiFlexItem>
                   <EuiFlexItem>
@@ -164,6 +169,7 @@ const KubernetesSecurityRoutesComponent = ({
                       globalFilter={globalFilter}
                       widgetKey={COUNT_WIDGET_KEY_CONTAINER_IMAGES}
                       groupedBy={CONTAINER_IMAGE_NAME}
+                      updatedAt={updatedAt}
                     />
                   </EuiFlexItem>
                 </EuiFlexGroup>
@@ -218,6 +224,7 @@ const KubernetesSecurityRoutesComponent = ({
                       groupedBy={ENTRY_LEADER_INTERACTIVE}
                       countBy={ENTRY_LEADER_ENTITY_ID}
                       onReduce={onReduceInteractiveAggs}
+                      updatedAt={updatedAt}
                     />
                   </EuiFlexItem>
                   <EuiFlexItem>
@@ -265,6 +272,7 @@ const KubernetesSecurityRoutesComponent = ({
                       groupedBy={ENTRY_LEADER_USER_ID}
                       countBy={ENTRY_LEADER_ENTITY_ID}
                       onReduce={onReduceRootAggs}
+                      updatedAt={updatedAt}
                     />
                   </EuiFlexItem>
                 </EuiFlexGroup>
@@ -276,6 +284,7 @@ const KubernetesSecurityRoutesComponent = ({
                   globalFilter={globalFilter}
                   groupedBy={CONTAINER_IMAGE_NAME}
                   countBy={ENTRY_LEADER_ENTITY_ID}
+                  updatedAt={updatedAt}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>

@@ -58,6 +58,7 @@ describe('PercentWidget component', () => {
         globalFilter={GLOBAL_FILTER}
         groupedBy={ENTRY_LEADER_INTERACTIVE}
         onReduce={jest.fn()}
+        updatedAt={1662045071281}
       />
     ));
 

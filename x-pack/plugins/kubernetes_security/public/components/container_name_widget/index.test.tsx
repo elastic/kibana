@@ -82,6 +82,7 @@ describe('ContainerNameWidget component', () => {
         globalFilter={GLOBAL_FILTER}
         groupedBy={CONTAINER_IMAGE_NAME}
         countBy={ENTRY_LEADER_ENTITY_ID}
+        updatedAt={1662045071281}
       />
     ));
 

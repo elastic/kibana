@@ -19,14 +19,21 @@ import { inputsSelectors } from '../../common/store';
 import { useGlobalFullScreen } from '../../common/containers/use_full_screen';
 import { useSourcererDataView } from '../../common/containers/sourcerer';
 import { useGlobalTime } from '../../common/containers/use_global_time';
-import { useDeepEqualSelector } from '../../common/hooks/use_selector';
+import { useDeepEqualSelector, useShallowEqualSelector } from '../../common/hooks/use_selector';
 import { convertToBuildEsQuery } from '../../common/lib/keury';
 import { useInvalidFilterQuery } from '../../common/hooks/use_invalid_filter_query';
 import { SessionsView } from '../../common/components/sessions_viewer';
 import { TimelineId } from '../../../common/types/timeline';
 import { kubernetesSessionsHeaders } from './constants';
+import { timelineSelectors } from '../../timelines/store/timeline';
+import { timelineDefaults } from '../../timelines/store/timeline/defaults';
 
 export const KubernetesContainer = React.memo(() => {
+  const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
+  const updatedAt = useShallowEqualSelector(
+    (state) => (getTimeline(state, TimelineId.kubernetesPageSessions) ?? timelineDefaults).updated
+  );
+
   const { kubernetesSecurity, uiSettings } = useKibana().services;
   const { globalFullScreen } = useGlobalFullScreen();
   const {
@@ -94,6 +101,7 @@ export const KubernetesContainer = React.memo(() => {
           endDate: to,
         },
         renderSessionsView,
+        updatedAt,
       })}
       <SpyRoute pageName={SecurityPageName.kubernetes} />
     </SecuritySolutionPageWrapper>

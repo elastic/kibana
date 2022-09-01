@@ -45,6 +45,7 @@ export interface ContainerNameWidgetDeps {
   globalFilter: GlobalFilter;
   groupedBy: string;
   countBy?: string;
+  updatedAt: number | undefined;
 }
 
 interface FilterButtons {
@@ -62,6 +63,7 @@ export const ContainerNameWidget = ({
   globalFilter,
   groupedBy,
   countBy,
+  updatedAt,
 }: ContainerNameWidgetDeps) => {
   const [sortField, setSortField] = useState('count');
   const [sortDirection, setSortDirection] = useState('desc');
@@ -79,6 +81,7 @@ export const ContainerNameWidget = ({
     filterQueryWithTimeRange,
     widgetKey,
     groupedBy,
+    updatedAt,
     countBy,
     indexPattern?.title,
     sortDirection

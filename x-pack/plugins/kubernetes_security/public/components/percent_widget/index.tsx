@@ -33,6 +33,7 @@ export interface PercentWidgetDeps {
   groupedBy: string;
   countBy?: string;
   onReduce: (result: AggregateResult) => Record<string, number>;
+  updatedAt: number | undefined;
 }
 
 interface FilterButtons {
@@ -49,6 +50,7 @@ export const PercentWidget = ({
   groupedBy,
   countBy,
   onReduce,
+  updatedAt,
 }: PercentWidgetDeps) => {
   const [hoveredFilter, setHoveredFilter] = useState<number | null>(null);
   const styles = useStyles();
@@ -66,6 +68,7 @@ export const PercentWidget = ({
     filterQueryWithTimeRange,
     widgetKey,
     groupedBy,
+    updatedAt,
     countBy,
     indexPattern?.title
   );

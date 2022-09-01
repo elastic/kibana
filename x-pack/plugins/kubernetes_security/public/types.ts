@@ -38,6 +38,7 @@ export interface KubernetesSecurityDeps {
   renderSessionsView: (sessionsFilterQuery: string | undefined) => JSX.Element;
   indexPattern?: IndexPattern;
   globalFilter: GlobalFilter;
+  updatedAt: number | undefined;
 }
 
 export interface KubernetesSecurityStart {

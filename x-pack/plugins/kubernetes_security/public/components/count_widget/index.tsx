@@ -25,6 +25,7 @@ export interface CountWidgetDeps {
   indexPattern?: IndexPattern;
   globalFilter: GlobalFilter;
   groupedBy: string;
+  updatedAt: number | undefined;
 }
 
 export const CountWidget = ({
@@ -33,6 +34,7 @@ export const CountWidget = ({
   indexPattern,
   globalFilter,
   groupedBy,
+  updatedAt,
 }: CountWidgetDeps) => {
   const styles = useStyles();
 
@@ -53,6 +55,7 @@ export const CountWidget = ({
     widgetKey,
     filterQueryWithTimeRange,
     groupedBy,
+    updatedAt,
     indexPattern?.title
   );
 

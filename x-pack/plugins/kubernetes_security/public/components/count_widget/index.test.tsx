@@ -56,6 +56,7 @@ describe('CountWidget component', () => {
         globalFilter={GLOBAL_FILTER}
         widgetKey="CountContainerImagesWidgets"
         groupedBy={'container.image.name'}
+        updatedAt={1662045071281}
       />
     ));
 
