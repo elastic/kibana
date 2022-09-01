@@ -23,12 +23,12 @@ const AttachmentContentLazy = lazy(() => import('./external_references_content')
 
 export const getExternalReferenceAttachmentRegular: () => ExternalReferenceAttachmentType = () => ({
   id: 'osquery',
-  icon: 'osqueryApp',
-  displayName: 'Test',
+  icon: 'logoOsquery',
+  displayName: 'Osquery',
   getAttachmentViewObject: () => ({
     type: 'regular',
-    event: 'added a chart',
-    timelineIcon: 'casesApp',
+    event: 'attached Osquery results',
+    timelineIcon: 'logoOsquery',
     // actions: <AttachmentActions />,
     // @ts-expect-error update types
     children: AttachmentContentLazy,
