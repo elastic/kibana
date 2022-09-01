@@ -41,7 +41,7 @@ interface ScalabilityJourney {
   journeyName: string;
 }
 
-export default async function ({ readConfigFile, log }: FtrConfigProviderContext) {
+export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const performanceConfig = await readConfigFile(require.resolve('../journeys/base.config.ts'));
 
   if (!fs.existsSync(gatlingProjectRootPath)) {
