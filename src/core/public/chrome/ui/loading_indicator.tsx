@@ -13,6 +13,8 @@ import classNames from 'classnames';
 import type { Subscription } from 'rxjs';
 import type { HttpStart } from '@kbn/core-http-browser';
 
+import './loading_indicator.scss';
+
 export interface LoadingIndicatorProps {
   loadingCount$: ReturnType<HttpStart['getLoadingCount$']>;
   showAsBar?: boolean;
