@@ -9,7 +9,6 @@
 /**
  * @public
  */
-
 export interface I18nServiceSetup {
   /**
    * Return the locale currently in use.
