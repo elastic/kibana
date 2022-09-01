@@ -174,7 +174,7 @@ export function ActionsPopover({
   );
 }
 
-const quickInspectName = i18n.translate('xpack.synthetics.overview.actions.openPopover.ariaLabel', {
+const quickInspectName = i18n.translate('xpack.synthetics.overview.actions.quickInspect.title', {
   defaultMessage: 'Quick inspect',
 });
 
