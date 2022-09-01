@@ -88,7 +88,7 @@ describe('convertMetricAggregationColumnWithoutSpecialParams', () => {
       {
         meta: { metricId: 'some-id' },
         operationType: 'average',
-        params: { format: { id: 'bytes' } },
+        params: {},
       },
     ],
     [
@@ -97,7 +97,7 @@ describe('convertMetricAggregationColumnWithoutSpecialParams', () => {
       {
         meta: { metricId: 'some-id' },
         operationType: 'unique_count',
-        params: { format: { id: 'bytes' } },
+        params: {},
       },
     ],
     [
@@ -106,7 +106,7 @@ describe('convertMetricAggregationColumnWithoutSpecialParams', () => {
       {
         meta: { metricId: 'some-id' },
         operationType: 'max',
-        params: { format: { id: 'bytes' } },
+        params: {},
       },
     ],
     [
@@ -115,7 +115,7 @@ describe('convertMetricAggregationColumnWithoutSpecialParams', () => {
       {
         meta: { metricId: 'some-id' },
         operationType: 'min',
-        params: { format: { id: 'bytes' } },
+        params: {},
       },
     ],
     [
@@ -124,7 +124,7 @@ describe('convertMetricAggregationColumnWithoutSpecialParams', () => {
       {
         meta: { metricId: 'some-id' },
         operationType: 'sum',
-        params: { format: { id: 'bytes' } },
+        params: {},
       },
     ],
     [
@@ -133,7 +133,7 @@ describe('convertMetricAggregationColumnWithoutSpecialParams', () => {
       {
         meta: { metricId: 'some-id' },
         operationType: 'standard_deviation',
-        params: { format: { id: 'bytes' } },
+        params: {},
       },
     ],
   ])('should return column for metric %s with valid field', (_, operation, expected) => {
@@ -216,11 +216,11 @@ describe('convertMetricAggregationToColumn', () => {
       {
         meta: { metricId: 'some-id' },
         operationType: 'percentile',
-        params: { format: { id: 'bytes' }, percentile: 50 },
+        params: { percentile: 50 },
       },
     ],
     [
-      'percentile column for percentile if metaValue is set and window is passed',
+      'percentile column for percentile if metaValue is set and reducedTimeRange is passed',
       [
         SUPPORTED_METRICS.percentile,
         { series, metric: { id, field, type: TSVB_METRIC_TYPES.PERCENTILE }, dataView },
@@ -229,7 +229,7 @@ describe('convertMetricAggregationToColumn', () => {
       {
         meta: { metricId: 'some-id' },
         operationType: 'percentile',
-        params: { format: { id: 'bytes' }, percentile: 50 },
+        params: { percentile: 50 },
         reducedTimeRange: '10m',
       },
     ],
@@ -251,11 +251,11 @@ describe('convertMetricAggregationToColumn', () => {
       {
         meta: { metricId: 'some-id' },
         operationType: 'percentile_rank',
-        params: { format: { id: 'bytes' }, value: 50 },
+        params: { value: 50 },
       },
     ],
     [
-      'percentile rank column for percentile rank if metaValue is set and window is passed',
+      'percentile rank column for percentile rank if metaValue is set and reducedTimeRange is passed',
       [
         SUPPORTED_METRICS.percentile_rank,
         { series, metric: { id, field, type: TSVB_METRIC_TYPES.PERCENTILE_RANK }, dataView },
@@ -264,7 +264,7 @@ describe('convertMetricAggregationToColumn', () => {
       {
         meta: { metricId: 'some-id' },
         operationType: 'percentile_rank',
-        params: { format: { id: 'bytes' }, value: 50 },
+        params: { value: 50 },
         reducedTimeRange: '10m',
       },
     ],
@@ -285,7 +285,7 @@ describe('convertMetricAggregationToColumn', () => {
       {
         meta: { metricId: 'some-id' },
         operationType: 'formula',
-        params: { format: { id: 'bytes' }, formula: 'pick_max(differences(max(bytes)), 0)' },
+        params: { formula: 'pick_max(differences(max(bytes)), 0)' },
       },
     ],
     [
@@ -361,7 +361,7 @@ describe('computeParentPipelineColumns', () => {
       {
         meta: { metricId: 'some-id' },
         operationType: 'formula',
-        params: { format: { id: 'bytes' }, formula: "percentile(count(kql='*') / count(kql='*'))" },
+        params: { formula: "percentile(count(kql='*') / count(kql='*'))" },
       },
     ],
     [
@@ -391,7 +391,6 @@ describe('computeParentPipelineColumns', () => {
         meta: { metricId: 'some-id' },
         operationType: 'formula',
         params: {
-          format: { id: 'bytes' },
           formula: "percentile(average('bytes',kql='*') / average('bytes',kql='*'))",
         },
       },
@@ -418,7 +417,7 @@ describe('computeParentPipelineColumns', () => {
         {
           meta: { metricId: 'some-id' },
           operationType: 'average',
-          params: { format: { id: 'bytes' } },
+          params: {},
           sourceField: 'bytes',
         },
         {
@@ -625,7 +624,7 @@ describe('createParentPipelineAggregationColumn', () => {
       {
         meta: { metricId: 'some-id-0' },
         operationType: 'cumulative_sum',
-        params: { format: { id: 'bytes' } },
+        params: {},
       },
     ],
     [
@@ -641,7 +640,7 @@ describe('createParentPipelineAggregationColumn', () => {
       {
         meta: { metricId: 'some-id-0' },
         operationType: 'differences',
-        params: { format: { id: 'bytes' } },
+        params: {},
       },
     ],
   ])('should return %s', (_, input, expected) => {

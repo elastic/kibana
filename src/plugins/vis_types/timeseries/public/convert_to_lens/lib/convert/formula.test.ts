@@ -41,7 +41,7 @@ describe('createFormulaColumn', () => {
 
   const series = createSeries();
   const seriesWithValidFormatter = createSeries({ formatter: 'percent' });
-  const seriesWithInvalidFormatter = createSeries({ formatter: 'date' });
+  const seriesWithDefaultFormatter = createSeries({ formatter: '' });
 
   const metric: Metric = {
     id: 'some-id',
@@ -72,15 +72,6 @@ describe('createFormulaColumn', () => {
       },
     ],
     [
-      'formula column with format of the field',
-      [formula, { series, metric: metricWithField, dataView }],
-      {
-        meta: { metricId: 'some-id' },
-        operationType: 'formula',
-        params: { format: { id: 'bytes' }, formula },
-      },
-    ],
-    [
       'formula column with format of series',
       [formula, { series: seriesWithValidFormatter, metric: metricWithField, dataView }],
       {
@@ -91,7 +82,7 @@ describe('createFormulaColumn', () => {
     ],
     [
       'formula column without format if custom formatter is not supported',
-      [formula, { series: seriesWithInvalidFormatter, metric: metricWithField, dataView }],
+      [formula, { series: seriesWithDefaultFormatter, metric: metricWithField, dataView }],
       {
         meta: { metricId: 'some-id' },
         operationType: 'formula',

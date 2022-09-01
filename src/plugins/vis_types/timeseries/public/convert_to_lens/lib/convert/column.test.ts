@@ -48,9 +48,6 @@ describe('getFormat', () => {
     expect(getFormat(createSeries({ formatter }))).toEqual({
       format: {
         id: formatter,
-        params: {
-          suffix: '',
-        },
       },
     });
   });
@@ -60,9 +57,6 @@ describe('getFormat', () => {
     expect(getFormat(createSeries({ formatter }))).toEqual({
       format: {
         id: 'number',
-        params: {
-          suffix: '',
-        },
       },
     });
   });

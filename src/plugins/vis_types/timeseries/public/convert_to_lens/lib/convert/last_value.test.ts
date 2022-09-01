@@ -76,7 +76,7 @@ describe('convertToLastValueColumn', () => {
         {
           meta: { metricId: 'some-id-0' },
           operationType: 'last_value',
-          params: { format: { id: 'bytes' }, showArrayValues: false, sortField: '@timestamp' },
+          params: { showArrayValues: false, sortField: '@timestamp' },
         },
       ],
       [
@@ -85,7 +85,7 @@ describe('convertToLastValueColumn', () => {
         {
           meta: { metricId: 'some-id-0' },
           operationType: 'last_value',
-          params: { format: { id: 'bytes' }, showArrayValues: false, sortField: '@timestamp' },
+          params: { showArrayValues: false, sortField: '@timestamp' },
           reducedTimeRange: '10m',
         },
       ],

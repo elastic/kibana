@@ -14,7 +14,7 @@ export const createSeries = (partialSeries?: Partial<Series>): Series => ({
   chart_type: 'line',
   color: '#68BC00',
   fill: '0.5',
-  formatter: 'default',
+  formatter: '',
   id: '3bb3c1d2-5af8-44cc-9759-86725e34b157',
   label: '',
   line_width: 1,

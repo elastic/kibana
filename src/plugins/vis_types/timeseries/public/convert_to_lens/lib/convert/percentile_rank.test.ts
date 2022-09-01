@@ -97,7 +97,7 @@ describe('convertToPercentileRankColumn', () => {
       {
         meta: { metricId: 'some-id' },
         operationType: 'percentile_rank',
-        params: { format: { id: 'bytes' }, value: 50 },
+        params: { value: 50 },
         sourceField: 'bytes',
       } as Partial<PercentileRanksColumnWithCommonMeta>,
     ],
@@ -107,7 +107,7 @@ describe('convertToPercentileRankColumn', () => {
       {
         meta: { metricId: 'some-id', reference: 'some-id.0' },
         operationType: 'percentile_rank',
-        params: { format: { id: 'bytes' }, value: 50 },
+        params: { value: 50 },
         sourceField: 'bytes',
       } as Partial<PercentileRanksColumnWithExtendedMeta>,
     ],
@@ -123,7 +123,7 @@ describe('convertToPercentileRankColumn', () => {
       {
         meta: { metricId: 'some-id', reference: 'some-id.0' },
         operationType: 'percentile_rank',
-        params: { format: { id: 'bytes' }, value: 50 },
+        params: { value: 50 },
         sourceField: 'bytes',
         reducedTimeRange: '10m',
       } as Partial<PercentileRanksColumnWithExtendedMeta>,
@@ -173,7 +173,7 @@ describe('convertToPercentileRankColumns', () => {
         {
           meta: { metricId: 'some-id', reference: 'some-id.0' },
           operationType: 'percentile_rank',
-          params: { format: { id: 'bytes' }, value: 75 },
+          params: { value: 75 },
           sourceField: 'bytes',
         },
       ],
@@ -188,7 +188,7 @@ describe('convertToPercentileRankColumns', () => {
         {
           meta: { metricId: 'some-id', reference: 'some-id.0' },
           operationType: 'percentile_rank',
-          params: { format: { id: 'bytes' }, value: 75 },
+          params: { value: 75 },
           sourceField: 'bytes',
           reducedTimeRange: '50m',
         },

@@ -89,7 +89,7 @@ describe('convertToPercentileColumn', () => {
       {
         meta: { metricId: 'some-id' },
         operationType: 'percentile',
-        params: { format: { id: 'bytes' }, percentile: 50 },
+        params: { percentile: 50 },
         sourceField: 'bytes',
       } as Partial<PercentileColumnWithCommonMeta>,
     ],
@@ -103,7 +103,7 @@ describe('convertToPercentileColumn', () => {
       {
         meta: { metricId: 'some-id', reference: 'some-id.0' },
         operationType: 'percentile',
-        params: { format: { id: 'bytes' }, percentile: 50 },
+        params: { percentile: 50 },
         sourceField: 'bytes',
       } as Partial<PercentileColumnWithExtendedMeta>,
     ],
@@ -117,7 +117,7 @@ describe('convertToPercentileColumn', () => {
       {
         meta: { metricId: 'some-id', reference: 'some-id.0' },
         operationType: 'percentile',
-        params: { format: { id: 'bytes' }, percentile: 50 },
+        params: { percentile: 50 },
         sourceField: 'bytes',
         reducedTimeRange: '10m',
       } as Partial<PercentileColumnWithExtendedMeta>,
@@ -190,7 +190,7 @@ describe('convertToPercentileColumns', () => {
         {
           meta: { metricId: 'some-id', reference: 'some-id.0' },
           operationType: 'percentile',
-          params: { format: { id: 'bytes' }, percentile: 75 },
+          params: { percentile: 75 },
           sourceField: 'bytes',
         },
       ],
@@ -213,7 +213,7 @@ describe('convertToPercentileColumns', () => {
         {
           meta: { metricId: 'some-id', reference: 'some-id.0' },
           operationType: 'percentile',
-          params: { format: { id: 'bytes' }, percentile: 75 },
+          params: { percentile: 75 },
           sourceField: 'bytes',
           reducedTimeRange: '50m',
         },

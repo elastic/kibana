@@ -50,7 +50,7 @@ describe('convertFilterRatioToFormulaColumn', () => {
       {
         meta: { metricId: metricWithMetricAgg.id },
         operationType: 'formula',
-        params: { format: { id: 'bytes' }, formula: "count(kql='*') / count(kql='*')" },
+        params: { formula: "count(kql='*') / count(kql='*')" },
       },
     ],
     [
@@ -59,7 +59,7 @@ describe('convertFilterRatioToFormulaColumn', () => {
       {
         meta: { metricId: metric.id },
         operationType: 'formula',
-        params: { format: { id: 'bytes' }, formula: "count(kql='*') / count(kql='*')" },
+        params: { formula: "count(kql='*') / count(kql='*')" },
       },
     ],
   ])('should return %s', (_, input, expected) => {

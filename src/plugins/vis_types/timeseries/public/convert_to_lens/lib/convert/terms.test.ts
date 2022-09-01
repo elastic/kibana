@@ -254,7 +254,6 @@ describe('converToTermsColumn', () => {
           excludeIsRegex: true,
           include: [termsInclude],
           includeIsRegex: true,
-          format: { id: 'bytes' },
           orderAgg: {
             columnId: 'some-id-0',
             dataType: 'number',

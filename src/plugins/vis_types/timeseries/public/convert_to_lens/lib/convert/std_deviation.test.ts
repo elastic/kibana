@@ -58,7 +58,6 @@ describe('convertToStandartDeviationColumn', () => {
           meta: { metricId: 'some-id' },
           operationType: 'formula',
           params: {
-            format: { id: 'bytes' },
             formula: 'average(bytes) + 1.5 * standard_deviation(bytes)',
           },
         },
@@ -72,7 +71,6 @@ describe('convertToStandartDeviationColumn', () => {
           meta: { metricId: 'some-id' },
           operationType: 'formula',
           params: {
-            format: { id: 'bytes' },
             formula: 'average(bytes) - 1.5 * standard_deviation(bytes)',
           },
         },
@@ -86,7 +84,6 @@ describe('convertToStandartDeviationColumn', () => {
           meta: { metricId: 'some-id' },
           operationType: 'formula',
           params: {
-            format: { id: 'bytes' },
             formula: 'average(bytes) + 1.5 * standard_deviation(bytes)',
           },
         },
@@ -94,7 +91,6 @@ describe('convertToStandartDeviationColumn', () => {
           meta: { metricId: 'some-id' },
           operationType: 'formula',
           params: {
-            format: { id: 'bytes' },
             formula: 'average(bytes) - 1.5 * standard_deviation(bytes)',
           },
         },
@@ -113,7 +109,7 @@ describe('convertToStandartDeviationColumn', () => {
         {
           meta: { metricId: 'some-id' },
           operationType: 'standard_deviation',
-          params: { format: { id: 'bytes' } },
+          params: {},
         },
       ],
     ],

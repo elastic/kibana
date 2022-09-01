@@ -28,7 +28,7 @@ describe('convertToCounterRateFormulaColumn', () => {
       { series, metrics: [{ ...metric, field: dataView.fields[0].name }], dataView },
       {
         operationType: 'formula',
-        params: { formula: 'pick_max(differences(max(bytes)), 0)', format: { id: 'bytes' } },
+        params: { formula: 'pick_max(differences(max(bytes)), 0)' },
         meta: { metricId: 'some-id' },
       },
     ],
@@ -39,7 +39,6 @@ describe('convertToCounterRateFormulaColumn', () => {
         operationType: 'formula',
         params: {
           formula: 'pick_max(differences(max(bytes), shift=1h), 0)',
-          format: { id: 'bytes' },
         },
         meta: { metricId: 'some-id' },
       },

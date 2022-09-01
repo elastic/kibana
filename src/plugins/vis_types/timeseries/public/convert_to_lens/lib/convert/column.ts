@@ -32,21 +32,22 @@ interface ExtraColumnFields {
 const isSupportedFormat = (format: string) => ['bytes', 'number', 'percent'].includes(format);
 
 export const getFormat = (series: Series): FormatParams => {
-  let params;
+  let suffix;
+
+  if (!series.formatter) {
+    return {};
+  }
 
   if (series.value_template) {
-    const suffix = series.value_template.split('}}')[1];
-    params = {
-      suffix,
-    };
+    suffix = series.value_template.split('}}')[1];
   }
 
   // not supported formatters should be converted to number
   if (!isSupportedFormat(series.formatter)) {
-    return { format: { id: DATA_FORMATTERS.NUMBER, params } };
+    return { format: { id: DATA_FORMATTERS.NUMBER, ...(suffix && { params: { suffix } }) } };
   }
 
-  return { format: { id: series.formatter, params } };
+  return { format: { id: series.formatter, ...(suffix && { params: { suffix } }) } };
 };
 
 export const createColumn = (
