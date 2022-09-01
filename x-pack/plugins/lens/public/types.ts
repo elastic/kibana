@@ -46,7 +46,7 @@ import {
 import type { LensInspector } from './lens_inspector_service';
 import type { FormatSelectorOptions } from './indexpattern_datasource/dimension_panel/format_selector';
 import type { DataViewsState } from './state_management/types';
-import type { IndexPatternServiceAPI } from './indexpattern_service/service';
+import type { IndexPatternServiceAPI } from './data_views_service/service';
 import type { Document } from './persistence/saved_object_store';
 
 export interface IndexPatternRef {

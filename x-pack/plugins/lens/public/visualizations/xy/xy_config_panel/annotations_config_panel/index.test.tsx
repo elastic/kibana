@@ -17,7 +17,7 @@ import { Position } from '@elastic/charts';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import moment from 'moment';
 import { EventAnnotationConfig } from '@kbn/event-annotation-plugin/common';
-import { createMockDataViewsState } from '../../../../indexpattern_service/mocks';
+import { createMockDataViewsState } from '../../../../data_views_service/mocks';
 import { createMockedIndexPattern } from '../../../../indexpattern_datasource/mocks';
 
 jest.mock('lodash', () => {

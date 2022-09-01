@@ -39,7 +39,7 @@ import {
 } from '../error_helper';
 import type { DatasourceStates, DataViewsState, VisualizationState } from '../../state_management';
 import { readFromStorage } from '../../settings_storage';
-import { loadIndexPatternRefs, loadIndexPatterns } from '../../indexpattern_service/loader';
+import { loadIndexPatternRefs, loadIndexPatterns } from '../../data_views_service/loader';
 
 function getIndexPatterns(
   references?: SavedObjectReference[],

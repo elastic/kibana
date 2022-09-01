@@ -31,7 +31,7 @@ import { createIndexPatternServiceMock } from '../mocks/data_views_service_mock'
 import { createMockFramePublicAPI } from '../mocks';
 import { DataViewsState } from '../state_management';
 import { ExistingFieldsMap, FramePublicAPI, IndexPattern } from '../types';
-import { IndexPatternServiceProps } from '../indexpattern_service/service';
+import { IndexPatternServiceProps } from '../data_views_service/service';
 
 const fieldsOne = [
   {

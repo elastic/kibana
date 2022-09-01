@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createMockDataViewsState } from '../indexpattern_service/mocks';
+import { createMockDataViewsState } from '../data_views_service/mocks';
 import { FramePublicAPI, FrameDatasourceAPI } from '../types';
 export { mockDataPlugin } from './data_plugin_mock';
 export {

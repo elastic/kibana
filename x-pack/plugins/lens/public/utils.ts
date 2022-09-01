@@ -22,7 +22,7 @@ import type {
   IndexPatternRef,
 } from './types';
 import type { DatasourceStates, VisualizationState } from './state_management';
-import { IndexPatternServiceAPI } from './indexpattern_service/service';
+import { IndexPatternServiceAPI } from './data_views_service/service';
 
 export function getVisualizeGeoFieldMessage(fieldType: string) {
   return i18n.translate('xpack.lens.visualizeGeoFieldMessage', {
