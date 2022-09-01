@@ -6,13 +6,7 @@
  * Side Public License, v 1.
  */
 
-interface DashboardCapabilities {
-  showWriteControls: boolean;
-  saveQuery: boolean;
-  createNew: boolean;
-  show: boolean;
-  [key: string]: boolean;
-}
+import { DashboardCapabilities } from '../common/types';
 
 export const capabilitiesProvider = (): {
   dashboard: DashboardCapabilities;

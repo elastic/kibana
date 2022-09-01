@@ -52,7 +52,6 @@ export function makeDefaultServices(): DashboardAppServices {
 
   return {
     savedObjects: savedObjectsPluginMock.createStartContract(),
-    savedObjectsClient: core.savedObjects.client,
     scopedHistory: () => ({} as ScopedHistory),
     setHeaderActionMenu: (mountPoint) => {},
     restorePreviousUrl: () => {},

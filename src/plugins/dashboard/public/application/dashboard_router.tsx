@@ -81,7 +81,6 @@ export async function mountApp({
     restorePreviousUrl,
     setHeaderActionMenu,
     scopedHistory: () => scopedHistory,
-    savedObjectsClient: coreStart.savedObjects.client,
     savedDashboards: dashboardStart.getSavedDashboardLoader(),
     savedObjectsTagging: savedObjectsTaggingOss?.getTaggingApi(),
     dashboardSessionStorage: new DashboardSessionStorage(

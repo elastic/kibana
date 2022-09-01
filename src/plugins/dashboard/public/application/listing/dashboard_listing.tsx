@@ -58,13 +58,7 @@ export const DashboardListing = ({
   kbnUrlStateStorage,
 }: DashboardListingProps) => {
   const {
-    services: {
-      core,
-      savedDashboards,
-      savedObjectsClient,
-      savedObjectsTagging,
-      dashboardSessionStorage,
-    },
+    services: { core, savedDashboards, savedObjectsTagging, dashboardSessionStorage },
   } = useKibana<DashboardAppServices>();
 
   const {
@@ -106,7 +100,7 @@ export const DashboardListing = ({
       kbnUrlStateStorage
     );
     if (title) {
-      attemptLoadDashboardByTitle(title, savedObjectsClient).then((result) => {
+      attemptLoadDashboardByTitle(title, core.savedObjects.client).then((result) => {
         if (!result) return;
         redirectTo({
           destination: 'dashboard',
@@ -119,7 +113,7 @@ export const DashboardListing = ({
     return () => {
       stopSyncingQueryServiceStateWithUrl();
     };
-  }, [title, savedObjectsClient, redirectTo, query, kbnUrlStateStorage]);
+  }, [title, core.savedObjects.client, redirectTo, query, kbnUrlStateStorage]);
 
   const listingLimit = uiSettings.get(SAVED_OBJECTS_LIMIT_SETTING);
   const initialPageSize = uiSettings.get(SAVED_OBJECTS_PER_PAGE_SETTING);

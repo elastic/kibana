@@ -114,7 +114,7 @@ describe('after fetch', () => {
     const props = makeDefaultProps();
     props.title = title;
     const services = makeDefaultServices();
-    services.savedObjectsClient.find = <T extends unknown>() => {
+    services.core.savedObjects.client.find = <T extends unknown>() => {
       return Promise.resolve({
         perPage: 10,
         total: 2,
@@ -139,7 +139,7 @@ describe('after fetch', () => {
     const props = makeDefaultProps();
     props.title = title;
     const services = makeDefaultServices();
-    services.savedObjectsClient.find = <T extends unknown>() => {
+    services.core.savedObjects.client.find = <T extends unknown>() => {
       return Promise.resolve({
         perPage: 10,
         total: 1,

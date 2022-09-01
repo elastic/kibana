@@ -13,7 +13,6 @@ import { BehaviorSubject, Subject } from 'rxjs';
 import type {
   AppMountParameters,
   CoreStart,
-  SavedObjectsClientContract,
   ScopedHistory,
   KibanaExecutionContext,
 } from '@kbn/core/public';
@@ -166,11 +165,10 @@ export interface DashboardAppServices {
   core: CoreStart;
   restorePreviousUrl: () => void; // app mount context
   savedObjects: SavedObjectsStart; // make a service
-  savedDashboards: SavedObjectLoader;
+  savedDashboards: SavedObjectLoader; // TODO: Remove as part of https://github.com/elastic/kibana/pull/138774
   scopedHistory: () => ScopedHistory; // app mount context
   onAppLeave: AppMountParameters['onAppLeave']; // app mount  context
-  savedObjectsTagging?: SavedObjectsTaggingApi; // build a service foor this one
-  savedObjectsClient: SavedObjectsClientContract; // remove this
+  savedObjectsTagging?: SavedObjectsTaggingApi; // make a service
   dashboardSessionStorage: DashboardSessionStorage; // make a service
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu']; // app mount context
 }
