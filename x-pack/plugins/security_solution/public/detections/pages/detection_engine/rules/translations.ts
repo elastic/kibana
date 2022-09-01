@@ -1090,3 +1090,25 @@ export const NEW_TERMS_TOUR_CONTENT = i18n.translate(
     defaultMessage: '"New Terms" rules alert on values that have not previously been seen',
   }
 );
+
+export const RULE_PREVIEW_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.rulePreviewTitle',
+  {
+    defaultMessage: 'Rule preview',
+  }
+);
+
+export const RULE_PREVIEW_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.rulePreviewDescription',
+  {
+    defaultMessage:
+      'Rule preview reflects the current configuration of your rule settings and exceptions, click refresh icon to see the updated preview.',
+  }
+);
+
+export const CANCEL_BUTTON_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.cancelButtonLabel',
+  {
+    defaultMessage: 'Cancel',
+  }
+);

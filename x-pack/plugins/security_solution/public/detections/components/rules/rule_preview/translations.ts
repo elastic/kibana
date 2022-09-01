@@ -61,14 +61,7 @@ export const QUERY_PREVIEW_SELECT_ARIA = i18n.translate(
 export const QUERY_PREVIEW_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.queryPreview.queryPreviewLabel',
   {
-    defaultMessage: 'Timeframe',
-  }
-);
-
-export const QUERY_PREVIEW_HELP_TEXT = i18n.translate(
-  'xpack.securitySolution.detectionEngine.queryPreview.queryPreviewHelpText',
-  {
-    defaultMessage: 'Select a timeframe of data to preview query results.',
+    defaultMessage: 'Select a preview timeframe',
   }
 );
 
@@ -112,14 +105,6 @@ export const QUERY_PREVIEW_ERROR = i18n.translate(
   'xpack.securitySolution.detectionEngine.queryPreview.queryGraphPreviewError',
   {
     defaultMessage: 'Error fetching preview',
-  }
-);
-
-export const QUERY_PREVIEW_DISCLAIMER = i18n.translate(
-  'xpack.securitySolution.detectionEngine.queryPreview.queryPreviewDisclaimer',
-  {
-    defaultMessage:
-      'Note: This preview excludes effects of rule exceptions and timestamp overrides.',
   }
 );
 

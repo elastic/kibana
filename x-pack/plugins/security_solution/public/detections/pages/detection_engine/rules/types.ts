@@ -16,10 +16,9 @@ import type {
   SeverityMapping,
   Severity,
 } from '@kbn/securitysolution-io-ts-alerting-types';
-import type { Filter } from '@kbn/es-query';
+import type { DataViewBase, Filter } from '@kbn/es-query';
 import type { RuleAction } from '@kbn/alerting-plugin/common';
 import type { DataViewListItem } from '@kbn/data-views-plugin/common';
-import type { Unit } from '@kbn/datemath';
 
 import type { RuleAlertAction } from '../../../../../common/detection_engine/types';
 import type { FieldValueQueryBar } from '../../../components/rules/query_bar';
@@ -146,6 +145,7 @@ export enum DataSourceType {
 export interface DefineStepRule {
   anomalyThreshold: number;
   index: string[];
+  indexPattern?: DataViewBase;
   machineLearningJobId: string[];
   queryBar: FieldValueQueryBar;
   dataViewId?: string;
@@ -243,17 +243,7 @@ export interface ActionsStepRuleJson {
   meta?: unknown;
 }
 
-export interface QuickQueryPreviewOptions {
-  timeframe: Unit;
-  timeframeEnd: moment.Moment;
-}
-
-export interface AdvancedPreviewForm {
-  interval: string;
-  lookback: string;
-}
-
-export interface AdvancedPreviewOptions {
+export interface TimeframePreviewOptions {
   timeframeStart: moment.Moment;
   timeframeEnd: moment.Moment;
   interval: string;

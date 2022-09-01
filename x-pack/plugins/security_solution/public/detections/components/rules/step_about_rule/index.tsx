@@ -31,7 +31,6 @@ import {
 } from '../../../../shared_imports';
 
 import { defaultRiskScoreBySeverity, severityOptions } from './data';
-import { stepAboutDefaultValue } from './default_value';
 import { isUrlInvalid } from '../../../../common/utils/validators';
 import { schema as defaultSchema, threatIndicatorPathRequiredSchemaValue } from './schema';
 import * as I18n from './translations';
@@ -42,7 +41,6 @@ import { SeverityField } from '../severity_mapping';
 import { RiskScoreField } from '../risk_score_mapping';
 import { AutocompleteField } from '../autocomplete_field';
 import { useFetchIndex } from '../../../../common/containers/source';
-import { isThreatMatchRule } from '../../../../../common/detection_engine/utils';
 import { DEFAULT_INDICATOR_SOURCE_PATH } from '../../../../../common/constants';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useRuleIndices } from '../../../containers/detection_engine/rules/use_rule_indices';
@@ -50,8 +48,10 @@ import { useRuleIndices } from '../../../containers/detection_engine/rules/use_r
 const CommonUseField = getUseField({ component: Field });
 
 interface StepAboutRuleProps extends RuleStepProps {
-  defaultValues?: AboutStepRule;
-  defineRuleData?: DefineStepRule;
+  defaultValues: AboutStepRule;
+  defineRuleData: DefineStepRule;
+  isThreatMatchRuleValue: boolean;
+  onRuleDataChange?: (data: AboutStepRule) => void;
 }
 
 const ThreeQuartersContainer = styled.div`
@@ -68,30 +68,18 @@ TagContainer.displayName = 'TagContainer';
 
 const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
   addPadding = false,
-  defaultValues,
+  defaultValues: initialState,
   defineRuleData,
+  isThreatMatchRuleValue,
   descriptionColumns = 'singleSplit',
   isReadOnlyView,
   isUpdateView = false,
   isLoading,
   onSubmit,
   setForm,
+  onRuleDataChange,
 }) => {
   const { data } = useKibana().services;
-
-  const isThreatMatchRuleValue = useMemo(
-    () => isThreatMatchRule(defineRuleData?.ruleType),
-    [defineRuleData?.ruleType]
-  );
-
-  const initialState: AboutStepRule = useMemo(
-    () =>
-      defaultValues ??
-      (isThreatMatchRuleValue
-        ? { ...stepAboutDefaultValue, threatIndicatorPath: DEFAULT_INDICATOR_SOURCE_PATH }
-        : stepAboutDefaultValue),
-    [defaultValues, isThreatMatchRuleValue]
-  );
 
   const schema = useMemo(
     () =>
@@ -148,6 +136,15 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
     useFormData<AboutStepRule>({
       form,
       watch: ['severity', 'timestampOverride'],
+      onChange: (aboutData: AboutStepRule) => {
+        if (onRuleDataChange) {
+          onRuleDataChange({
+            threatIndicatorPath: undefined,
+            timestampOverrideFallbackDisabled: undefined,
+            ...aboutData,
+          });
+        }
+      },
     });
 
   useEffect(() => {
@@ -166,7 +163,14 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
   const getData = useCallback(async () => {
     const result = await submit();
     return result?.isValid
-      ? result
+      ? {
+          isValid: true,
+          data: {
+            threatIndicatorPath: undefined,
+            timestampOverrideFallbackDisabled: undefined,
+            ...result.data,
+          },
+        }
       : {
           isValid: false,
           data: getFormData(),

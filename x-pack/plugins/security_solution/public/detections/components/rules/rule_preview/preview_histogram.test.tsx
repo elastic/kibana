@@ -151,7 +151,7 @@ describe('PreviewHistogram', () => {
             spaceId={'default'}
             ruleType={'query'}
             indexPattern={getMockIndexPattern()}
-            advancedOptions={{
+            timeframeOptions={{
               timeframeStart: moment(start, format),
               timeframeEnd: moment(end, format),
               interval: '5m',

@@ -21,7 +21,7 @@ interface PreviewHistogramParams {
   startDate: string;
   spaceId: string;
   ruleType: Type;
-  indexPattern: DataViewBase;
+  indexPattern: DataViewBase | undefined;
 }
 
 export const usePreviewHistogram = ({

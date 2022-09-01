@@ -9,6 +9,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 import { StepDefineRule, aggregatableFields } from '.';
+import { stepDefineDefaultValue } from '../../../pages/detection_engine/rules/utils';
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../common/hooks/use_selector', () => {
@@ -84,7 +85,15 @@ test('aggregatableFields with aggregatable: true', function () {
 
 describe('StepDefineRule', () => {
   it('renders correctly', () => {
-    const wrapper = shallow(<StepDefineRule isReadOnlyView={false} isLoading={false} />);
+    const wrapper = shallow(
+      <StepDefineRule
+        isReadOnlyView={false}
+        isLoading={false}
+        indicesConfig={[]}
+        threatIndicesConfig={[]}
+        defaultValues={stepDefineDefaultValue}
+      />
+    );
 
     expect(wrapper.find('Form[data-test-subj="stepDefineRule"]')).toHaveLength(1);
   });
