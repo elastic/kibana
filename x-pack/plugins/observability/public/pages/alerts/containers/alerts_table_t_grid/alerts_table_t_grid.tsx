@@ -46,7 +46,7 @@ import type {
 } from '@kbn/timelines-plugin/common';
 import { getAlertsPermissions } from '../../../../hooks/use_alert_permission';
 
-import type { TopAlert } from '../alerts_page/alerts_page';
+import type { TopAlert } from '../alerts_page/types';
 
 import { getRenderCellValue } from '../../components/render_cell_value';
 import { observabilityAppId, observabilityFeatureId } from '../../../../../common';
