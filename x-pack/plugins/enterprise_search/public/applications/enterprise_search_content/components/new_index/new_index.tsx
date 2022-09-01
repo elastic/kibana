@@ -33,9 +33,10 @@ import { MethodConnector } from './method_connector/method_connector';
 import { MethodCrawler } from './method_crawler/method_crawler';
 
 export const enum IngestionMethodId {
+  api = 'api',
   connector = 'connector',
   crawler = 'crawler',
-  api = 'api',
+  native_connector = 'native_connector',
 }
 
 const METHOD_BUTTON_GROUP_OPTIONS: ButtonGroupOption[] = [
@@ -54,6 +55,28 @@ const METHOD_BUTTON_GROUP_OPTIONS: ButtonGroupOption[] = [
     label: i18n.translate('xpack.enterpriseSearch.content.newIndex.buttonGroup.crawler.label', {
       defaultMessage: 'Use the web crawler',
     }),
+  },
+  {
+    description: i18n.translate(
+      'xpack.enterpriseSearch.content.newIndex.buttonGroup.nativeConnector.description',
+      {
+        defaultMessage: 'Use our built-in connectors to connect to your data sources.',
+      }
+    ),
+    footer: i18n.translate(
+      'xpack.enterpriseSearch.content.newIndex.buttonGroup.nativeConnector.footer',
+      {
+        defaultMessage: 'No development required',
+      }
+    ),
+    icon: 'visVega',
+    id: IngestionMethodId.native_connector,
+    label: i18n.translate(
+      'xpack.enterpriseSearch.content.newIndex.buttonGroup.nativeConnector.label',
+      {
+        defaultMessage: 'Use a connector',
+      }
+    ),
   },
   {
     description: i18n.translate(
@@ -162,7 +185,12 @@ export const NewIndex: React.FC = () => {
             <>
               {selectedMethod.id === IngestionMethodId.crawler && <MethodCrawler />}
               {selectedMethod.id === IngestionMethodId.api && <MethodApi />}
-              {selectedMethod.id === IngestionMethodId.connector && <MethodConnector />}
+              {selectedMethod.id === IngestionMethodId.connector && (
+                <MethodConnector isNative={false} />
+              )}
+              {selectedMethod.id === IngestionMethodId.native_connector && (
+                <MethodConnector isNative />
+              )}
             </>
           ) : (
             <SearchIndexEmptyState />

@@ -11,6 +11,7 @@ export interface KeyValuePair {
 }
 
 export type ConnectorConfiguration = Record<string, KeyValuePair | null>;
+
 export interface ConnectorScheduling {
   enabled: boolean;
   interval: string;
@@ -34,6 +35,7 @@ export interface Connector {
   configuration: ConnectorConfiguration;
   id: string;
   index_name: string;
+  is_native: boolean;
   language: string | null;
   last_seen: string | null;
   last_sync_error: string | null;

@@ -15,64 +15,29 @@ import { i18n } from '@kbn/i18n';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { HttpError, Status } from '../../../../../../common/types/api';
-import { ErrorCode } from '../../../../../../common/types/error_codes';
+import { Status } from '../../../../../../common/types/api';
 import { docLinks } from '../../../../shared/doc_links';
-import { AddConnectorPackageApiLogic } from '../../../api/connector_package/add_connector_package_api_logic';
+import { AddConnectorApiLogic } from '../../../api/connector/add_connector_api_logic';
 
 import { CREATE_ELASTICSEARCH_INDEX_STEP, BUILD_SEARCH_EXPERIENCE_STEP } from '../method_steps';
 import { NewSearchIndexLogic } from '../new_search_index_logic';
 import { NewSearchIndexTemplate } from '../new_search_index_template';
 
-import { AddConnectorPackageLogic } from './add_connector_package_logic';
+import { errorToText } from '../utils/error_to_text';
 
-const errorToMessage = (error?: HttpError): string | undefined => {
-  if (!error) {
-    return undefined;
-  }
-  if (error.body?.attributes?.error_code === ErrorCode.INDEX_ALREADY_EXISTS) {
-    return i18n.translate(
-      'xpack.enterpriseSearch.content.newIndex.steps.buildConnector.error.indexAlreadyExists',
-      {
-        defaultMessage: 'This index already exists',
-      }
-    );
-  }
-  if (error.body?.attributes?.error_code === ErrorCode.CONNECTOR_DOCUMENT_ALREADY_EXISTS) {
-    return i18n.translate(
-      'xpack.enterpriseSearch.content.newIndex.steps.buildConnector.error.connectorAlreadyExists',
-      {
-        defaultMessage: 'A connector for this index already exists',
-      }
-    );
-  }
-  if (error?.body?.statusCode === 403) {
-    return i18n.translate(
-      'xpack.enterpriseSearch.content.newIndex.steps.buildConnector.error.unauthorizedError',
-      {
-        defaultMessage: 'You are not authorized to create this connector',
-      }
-    );
-  } else
-    return i18n.translate(
-      'xpack.enterpriseSearch.content.newIndex.steps.buildConnector.error.genericError',
-      {
-        defaultMessage: 'We were not able to create your index',
-      }
-    );
-};
+import { AddConnectorLogic } from './add_connector_logic';
 
-export const MethodConnector: React.FC = () => {
-  const { apiReset, makeRequest } = useActions(AddConnectorPackageApiLogic);
-  const { error, status } = useValues(AddConnectorPackageApiLogic);
-  const { isModalVisible } = useValues(AddConnectorPackageLogic);
-  const { setIsModalVisible } = useActions(AddConnectorPackageLogic);
+export const MethodConnector: React.FC<{ isNative: boolean }> = ({ isNative }) => {
+  const { apiReset, makeRequest } = useActions(AddConnectorApiLogic);
+  const { error, status } = useValues(AddConnectorApiLogic);
+  const { isModalVisible } = useValues(AddConnectorLogic);
+  const { setIsModalVisible } = useActions(AddConnectorLogic);
   const { fullIndexName, language } = useValues(NewSearchIndexLogic);
 
   return (
     <NewSearchIndexTemplate
       docsUrl="https://github.com/elastic/connectors-ruby/blob/main/README.md"
-      error={errorToMessage(error)}
+      error={errorToText(error)}
       title={i18n.translate('xpack.enterpriseSearch.content.newIndex.steps.buildConnector.title', {
         defaultMessage: 'Build a connector',
       })}
@@ -80,42 +45,72 @@ export const MethodConnector: React.FC = () => {
       onNameChange={() => {
         apiReset();
       }}
-      onSubmit={(name, lang) => makeRequest({ indexName: name, language: lang })}
+      onSubmit={(name, lang) => makeRequest({ indexName: name, isNative, language: lang })}
       buttonLoading={status === Status.LOADING}
     >
       <EuiSteps
         steps={[
           CREATE_ELASTICSEARCH_INDEX_STEP,
-          {
-            children: (
-              <EuiText size="s">
-                <p>
-                  <FormattedMessage
-                    id="xpack.enterpriseSearch.content.newIndex.steps.buildConnector.content"
-                    defaultMessage="Using our connector framework and connector client examples, you’ll be able to accelerate ingestion to the Elasticsearch {bulkApiDocLink} for any data source. After creating your index, you will be guided through the steps to access the connector framework and connect your first connector client."
-                    values={{
-                      bulkApiDocLink: (
-                        <EuiLink href={docLinks.bulkApi} target="_blank" external>
-                          {i18n.translate(
-                            'xpack.enterpriseSearch.content.newIndex.methodConnector.steps.buildConnector.bulkAPILink',
-                            { defaultMessage: 'Bulk API' }
-                          )}
-                        </EuiLink>
-                      ),
-                    }}
-                  />
-                </p>
-              </EuiText>
-            ),
-            status: 'incomplete',
-            title: i18n.translate(
-              'xpack.enterpriseSearch.content.newIndex.methodConnector.steps.buildConnector.title',
-              {
-                defaultMessage: 'Build and configure a connector',
+          isNative
+            ? {
+                children: (
+                  <EuiText size="s">
+                    <p>
+                      <FormattedMessage
+                        id="xpack.enterpriseSearch.content.newIndex.steps.nativeConnector.content"
+                        defaultMessage="Using our built-in connectors, you’ll be able to ingest data into your Elasticsearch index easily and swiftly using a number of Elastic-developed connectors."
+                      />
+                    </p>
+                  </EuiText>
+                ),
+                status: 'incomplete',
+                title: i18n.translate(
+                  'xpack.enterpriseSearch.content.newIndex.methodConnector.steps.nativeConnector.title',
+                  {
+                    defaultMessage: 'Use a pre-built connector to populate your index',
+                  }
+                ),
+                titleSize: 'xs',
               }
-            ),
-            titleSize: 'xs',
-          },
+            : {
+                children: isNative ? (
+                  <EuiText size="s">
+                    <p>
+                      <FormattedMessage
+                        id="xpack.enterpriseSearch.content.newIndex.steps.nativeConnector.content"
+                        defaultMessage="Using our built-in connectors, you’ll be able to ingest data into your Elasticsearch index easily and swiftly using a number of Elastic-developed connectors."
+                      />
+                    </p>
+                  </EuiText>
+                ) : (
+                  <EuiText size="s">
+                    <p>
+                      <FormattedMessage
+                        id="xpack.enterpriseSearch.content.newIndex.steps.buildConnector.content"
+                        defaultMessage="Using our connector framework and connector client examples, you’ll be able to accelerate ingestion to the Elasticsearch {bulkApiDocLink} for any data source. After creating your index, you will be guided through the steps to access the connector framework and connect your first connector client."
+                        values={{
+                          bulkApiDocLink: (
+                            <EuiLink href={docLinks.bulkApi} target="_blank" external>
+                              {i18n.translate(
+                                'xpack.enterpriseSearch.content.newIndex.methodConnector.steps.buildConnector.bulkAPILink',
+                                { defaultMessage: 'Bulk API' }
+                              )}
+                            </EuiLink>
+                          ),
+                        }}
+                      />
+                    </p>
+                  </EuiText>
+                ),
+                status: 'incomplete',
+                title: i18n.translate(
+                  'xpack.enterpriseSearch.content.newIndex.methodConnector.steps.buildConnector.title',
+                  {
+                    defaultMessage: 'Build and configure a connector',
+                  }
+                ),
+                titleSize: 'xs',
+              },
           BUILD_SEARCH_EXPERIENCE_STEP,
         ]}
       />
@@ -133,7 +128,12 @@ export const MethodConnector: React.FC = () => {
           }}
           onConfirm={(event) => {
             event.preventDefault();
-            makeRequest({ deleteExistingConnector: true, indexName: fullIndexName, language });
+            makeRequest({
+              deleteExistingConnector: true,
+              indexName: fullIndexName,
+              isNative,
+              language,
+            });
           }}
           cancelButtonText={i18n.translate(
             'xpack.enterpriseSearch.content.newIndex.steps.buildConnector.confirmModal.cancelButton.label',
@@ -150,7 +150,7 @@ export const MethodConnector: React.FC = () => {
           defaultFocusedButton="confirm"
         >
           {i18n.translate(
-            'xpack.enterpriseSearch.content..newIndex.steps.buildConnector.confirmModal.description',
+            'xpack.enterpriseSearch.content.newIndex.steps.buildConnector.confirmModal.description',
             {
               defaultMessage:
                 'A deleted index named {indexName} was originally tied to an existing connector configuration. Would you like to replace the existing connector configuration with a new one?',

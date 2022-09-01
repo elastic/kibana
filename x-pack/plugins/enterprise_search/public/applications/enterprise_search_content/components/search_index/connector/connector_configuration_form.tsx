@@ -23,7 +23,7 @@ import { i18n } from '@kbn/i18n';
 
 import { Status } from '../../../../../../common/types/api';
 
-import { ConnectorConfigurationApiLogic } from '../../../api/connector_package/update_connector_configuration_api_logic';
+import { ConnectorConfigurationApiLogic } from '../../../api/connector/update_connector_configuration_api_logic';
 
 import { ConnectorConfigurationLogic } from './connector_configuration_logic';
 

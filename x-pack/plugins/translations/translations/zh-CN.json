@@ -10139,7 +10139,7 @@
     "xpack.enterpriseSearch.appSearch.settings.logRetention.modal.crawler.subheading": "当前您的网络爬虫日志将存储 {minAgeDays} 天。",
     "xpack.enterpriseSearch.appSearch.settings.logRetention.modal.prompt": "键入“{target}”以确认。",
     "xpack.enterpriseSearch.appSearch.sourceEngines.removeEngineConfirmDialogue.description": "这将从此元引擎中移除引擎“{engineName}”。所有现有设置将丢失。是否确定？",
-    "xpack.enterpriseSearch.content..newIndex.steps.buildConnector.confirmModal.description": "名为 {indexName} 的已删除索引最初绑定到现有连接器配置。是否要将现有连接器配置替换成新的？\r\n",
+    "xpack.enterpriseSearch.content.newIndex.steps.buildConnector.confirmModal.description": "名为 {indexName} 的已删除索引最初绑定到现有连接器配置。是否要将现有连接器配置替换成新的？\r\n",
     "xpack.enterpriseSearch.content.indices.callout.text": "您的 Elasticsearch 索引如今在 Enterprise Search 中位于前排和中心位置。您可以创建新索引，直接通过它们构建搜索体验。有关如何在 Enterprise Search 中使用 Elasticsearch 索引的详情，{docLink}",
     "xpack.enterpriseSearch.content.indices.configurationConnector.apiKey.description": "首先，生成一个 Elasticsearch API 密钥。此 {apiKeyName} 密钥将为连接器启用读取和写入权限，以便将文档索引到已创建的 {indexName} 索引。请将该密钥保存到安全位置，因为您需要它来配置连接器。",
     "xpack.enterpriseSearch.content.indices.configurationConnector.config.description.firstParagraph": "部署连接器后，请为您的定制数据源增强已部署的连接器客户端。提供了 {link} 供您开始添加特定于数据源的实施逻辑。",
