@@ -100,8 +100,12 @@ export class File<M = unknown> implements IFile {
         mergeMap(({ size }) => {
           return this.updateFileState({ action: 'uploaded', payload: { size } });
         }),
-        catchError((e) => {
-          this.updateFileState({ action: 'uploadError' }).catch(() => {});
+        catchError(async (e) => {
+          await this.updateFileState({ action: 'uploadError' }).catch(() => {
+            this.logger.error(
+              `Could not update file ${this.id} after upload error ${e.message}. This file may be in an inconsistent state.`
+            );
+          });
           this.fileClient.deleteContent(this.id).catch(() => {});
           throw e;
         })

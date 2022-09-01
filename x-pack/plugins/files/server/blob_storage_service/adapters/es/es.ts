@@ -114,7 +114,7 @@ export class ElasticsearchBlobStorageClient implements BlobStorageClient {
           size: dest.getBytesWritten(),
         };
       } catch (e) {
-        this.logger.error(`Could not write chunks to Elasticsearch: ${e}`);
+        this.logger.error(`Could not write chunks to Elasticsearch for id ${id}: ${e}`);
         throw e;
       }
     };
