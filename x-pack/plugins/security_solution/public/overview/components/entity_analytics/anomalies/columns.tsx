@@ -145,10 +145,24 @@ const AnomaliesTabLink = ({
           usersType: UsersType.page,
         })
       );
+
+      dispatch(
+        usersActions.updateUsersAnomaliesInterval({
+          interval: 'second',
+          usersType: UsersType.page,
+        })
+      );
     } else {
       dispatch(
         hostsActions.updateHostsAnomaliesJobIdFilter({
           jobIds: [jobId],
+          hostsType: HostsType.page,
+        })
+      );
+
+      dispatch(
+        hostsActions.updateHostsAnomaliesInterval({
+          interval: 'second',
           hostsType: HostsType.page,
         })
       );
