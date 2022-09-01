@@ -21,9 +21,15 @@ export interface ScheduleFormData {
   lookback: string;
 }
 
-const formSchema: FormSchema<ScheduleFormData> = {
-  interval: 'INTERVAL',
-  lookback: 'LOOKBACK',
+export const formSchema: FormSchema<ScheduleFormData> = {
+  interval: {
+    label: i18n.INTERVAL_LABEL,
+    helpText: i18n.INTERVAL_HELP_TEXT,
+  },
+  lookback: {
+    label: i18n.LOOKBACK_LABEL,
+    helpText: i18n.LOOKBACK_HELP_TEXT,
+  },
 };
 
 const defaultFormData: ScheduleFormData = {
@@ -62,7 +68,7 @@ export const ScheduleForm = ({ rulesCount, onClose, onConfirm }: ScheduleFormCom
 
   const warningCallout = (
     <EuiCallOut color="warning" data-test-subj="bulkEditRulesTimelineTemplateWarning">
-      warning callout
+      {i18n.warningCalloutMessage(rulesCount)}
     </EuiCallOut>
   );
 

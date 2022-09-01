@@ -98,7 +98,7 @@ const applyBulkActionEditToRuleParams = (
       const interval = parseInterval(action.value.interval) ?? moment.duration(0);
       const parsedFrom = parseInterval(action.value.meta.from) ?? moment.duration(0);
 
-      const from = parsedFrom.seconds() + interval.seconds();
+      const from = parsedFrom.asSeconds() + interval.asSeconds();
 
       ruleParams = {
         ...ruleParams,
