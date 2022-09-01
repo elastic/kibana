@@ -4,40 +4,29 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 import type { PackagePolicy, PackagePolicyInput } from '../../types';
 
 import { storedPackagePoliciesToAgentInputs } from './package_policies_to_agent_inputs';
 
-async function mockedGetPackageInfo({ pkgName }: { pkgName: string }) {
-  const packages: Record<string, any> = {
-    'mock-package': {
-      name: 'mock-package',
-      version: '0.0.0',
-      policy_templates: [
-        {
-          multiple: true,
-        },
-      ],
+const packageInfoCache = new Map();
+packageInfoCache.set('mock_package-0.0.0', {
+  name: 'mock_package',
+  version: '0.0.0',
+  policy_templates: [
+    {
+      multiple: true,
     },
-    'limited-package': {
-      name: 'limited-package',
-      version: '0.0.0',
-      policy_templates: [
-        {
-          multiple: false,
-        },
-      ],
+  ],
+});
+packageInfoCache.set('limited_package-0.0.0', {
+  name: 'limited_package',
+  version: '0.0.0',
+  policy_templates: [
+    {
+      multiple: false,
     },
-  };
-  return Promise.resolve(packages[pkgName]);
-}
-
-jest.mock('../epm/packages', () => {
-  return {
-    getPackageInfo: jest.fn().mockImplementation(mockedGetPackageInfo),
-  };
+  ],
 });
 
 describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
@@ -139,46 +128,55 @@ describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
   };
 
   it('returns no inputs for package policy with no inputs, or only disabled inputs', async () => {
-    expect(
-      await storedPackagePoliciesToAgentInputs(savedObjectsClientMock.create(), [mockPackagePolicy])
-    ).toEqual([]);
+    expect(await storedPackagePoliciesToAgentInputs([mockPackagePolicy], packageInfoCache)).toEqual(
+      []
+    );
 
     expect(
-      await storedPackagePoliciesToAgentInputs(savedObjectsClientMock.create(), [
-        {
-          ...mockPackagePolicy,
-          package: {
-            name: 'mock-package',
-            title: 'Mock package',
-            version: '0.0.0',
+      await storedPackagePoliciesToAgentInputs(
+        [
+          {
+            ...mockPackagePolicy,
+            package: {
+              name: 'mock_package',
+              title: 'Mock package',
+              version: '0.0.0',
+            },
           },
-        },
-      ])
+        ],
+        packageInfoCache
+      )
     ).toEqual([]);
 
     expect(
-      await storedPackagePoliciesToAgentInputs(savedObjectsClientMock.create(), [
-        {
-          ...mockPackagePolicy,
-          inputs: [{ ...mockInput, enabled: false }],
-        },
-      ])
+      await storedPackagePoliciesToAgentInputs(
+        [
+          {
+            ...mockPackagePolicy,
+            inputs: [{ ...mockInput, enabled: false }],
+          },
+        ],
+        packageInfoCache
+      )
     ).toEqual([]);
   });
 
   it('returns agent inputs with streams', async () => {
     expect(
-      await storedPackagePoliciesToAgentInputs(savedObjectsClientMock.create(), [
-        {
-          ...mockPackagePolicy,
-          package: {
-            name: 'mock-package',
-            title: 'Mock package',
-            version: '0.0.0',
+      await storedPackagePoliciesToAgentInputs(
+        [
+          {
+            ...mockPackagePolicy,
+            package: {
+              name: 'mock_package',
+              title: 'Mock package',
+              version: '0.0.0',
+            },
+            inputs: [mockInput],
           },
-          inputs: [mockInput],
-        },
-      ])
+        ],
+        packageInfoCache
+      )
     ).toEqual([
       {
         id: 'test-logs-some-uuid',
@@ -189,7 +187,7 @@ describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
         use_output: 'default',
         meta: {
           package: {
-            name: 'mock-package',
+            name: 'mock_package',
             version: '0.0.0',
           },
         },
@@ -211,26 +209,29 @@ describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
 
   it('returns unique agent inputs IDs, with policy template name if one exists for non-limited packages', async () => {
     expect(
-      await storedPackagePoliciesToAgentInputs(savedObjectsClientMock.create(), [
-        {
-          ...mockPackagePolicy,
-          package: {
-            name: 'mock-package',
-            title: 'Mock package',
-            version: '0.0.0',
+      await storedPackagePoliciesToAgentInputs(
+        [
+          {
+            ...mockPackagePolicy,
+            package: {
+              name: 'mock_package',
+              title: 'Mock package',
+              version: '0.0.0',
+            },
+            inputs: [mockInput, mockInput2],
           },
-          inputs: [mockInput, mockInput2],
-        },
-        {
-          ...mockPackagePolicy,
-          package: {
-            name: 'limited-package',
-            title: 'Limited package',
-            version: '0.0.0',
+          {
+            ...mockPackagePolicy,
+            package: {
+              name: 'limited_package',
+              title: 'Limited package',
+              version: '0.0.0',
+            },
+            inputs: [mockInput2],
           },
-          inputs: [mockInput2],
-        },
-      ])
+        ],
+        packageInfoCache
+      )
     ).toEqual([
       {
         id: 'test-logs-some-uuid',
@@ -241,7 +242,7 @@ describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
         use_output: 'default',
         meta: {
           package: {
-            name: 'mock-package',
+            name: 'mock_package',
             version: '0.0.0',
           },
         },
@@ -267,7 +268,7 @@ describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
         use_output: 'default',
         meta: {
           package: {
-            name: 'mock-package',
+            name: 'mock_package',
             version: '0.0.0',
           },
         },
@@ -289,7 +290,7 @@ describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
         use_output: 'default',
         meta: {
           package: {
-            name: 'limited-package',
+            name: 'limited_package',
             version: '0.0.0',
           },
         },
@@ -307,25 +308,28 @@ describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
 
   it('returns agent inputs without streams', async () => {
     expect(
-      await storedPackagePoliciesToAgentInputs(savedObjectsClientMock.create(), [
-        {
-          ...mockPackagePolicy,
-          package: {
-            name: 'mock-package',
-            title: 'Mock package',
-            version: '0.0.0',
-          },
-          inputs: [
-            {
-              ...mockInput,
-              compiled_input: {
-                inputVar: 'input-value',
-              },
-              streams: [],
+      await storedPackagePoliciesToAgentInputs(
+        [
+          {
+            ...mockPackagePolicy,
+            package: {
+              name: 'mock_package',
+              title: 'Mock package',
+              version: '0.0.0',
             },
-          ],
-        },
-      ])
+            inputs: [
+              {
+                ...mockInput,
+                compiled_input: {
+                  inputVar: 'input-value',
+                },
+                streams: [],
+              },
+            ],
+          },
+        ],
+        packageInfoCache
+      )
     ).toEqual([
       {
         id: 'test-logs-some-uuid',
@@ -336,7 +340,7 @@ describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
         use_output: 'default',
         meta: {
           package: {
-            name: 'mock-package',
+            name: 'mock_package',
             version: '0.0.0',
           },
         },
@@ -347,17 +351,20 @@ describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
 
   it('returns agent inputs without disabled streams', async () => {
     expect(
-      await storedPackagePoliciesToAgentInputs(savedObjectsClientMock.create(), [
-        {
-          ...mockPackagePolicy,
-          inputs: [
-            {
-              ...mockInput,
-              streams: [{ ...mockInput.streams[0] }, { ...mockInput.streams[1], enabled: false }],
-            },
-          ],
-        },
-      ])
+      await storedPackagePoliciesToAgentInputs(
+        [
+          {
+            ...mockPackagePolicy,
+            inputs: [
+              {
+                ...mockInput,
+                streams: [{ ...mockInput.streams[0] }, { ...mockInput.streams[1], enabled: false }],
+              },
+            ],
+          },
+        ],
+        packageInfoCache
+      )
     ).toEqual([
       {
         id: 'test-logs-some-uuid',
@@ -380,46 +387,49 @@ describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
 
   it('returns agent inputs with deeply merged config values', async () => {
     expect(
-      await storedPackagePoliciesToAgentInputs(savedObjectsClientMock.create(), [
-        {
-          ...mockPackagePolicy,
-          inputs: [
-            {
-              ...mockInput,
-              compiled_input: {
-                agent_input_template_group1_vars: {
-                  inputVar: 'input-value',
-                },
-                agent_input_template_group2_vars: {
-                  inputVar3: {
-                    testFieldGroup: {
-                      subField1: 'subfield1',
-                    },
-                    testField: 'test',
+      await storedPackagePoliciesToAgentInputs(
+        [
+          {
+            ...mockPackagePolicy,
+            inputs: [
+              {
+                ...mockInput,
+                compiled_input: {
+                  agent_input_template_group1_vars: {
+                    inputVar: 'input-value',
                   },
-                },
-              },
-              config: {
-                agent_input_template_group1_vars: {
-                  value: {
-                    inputVar2: {},
-                  },
-                },
-                agent_input_template_group2_vars: {
-                  value: {
+                  agent_input_template_group2_vars: {
                     inputVar3: {
                       testFieldGroup: {
-                        subField2: 'subfield2',
+                        subField1: 'subfield1',
                       },
+                      testField: 'test',
                     },
-                    inputVar4: '',
+                  },
+                },
+                config: {
+                  agent_input_template_group1_vars: {
+                    value: {
+                      inputVar2: {},
+                    },
+                  },
+                  agent_input_template_group2_vars: {
+                    value: {
+                      inputVar3: {
+                        testFieldGroup: {
+                          subField2: 'subfield2',
+                        },
+                      },
+                      inputVar4: '',
+                    },
                   },
                 },
               },
-            },
-          ],
-        },
-      ])
+            ],
+          },
+        ],
+        packageInfoCache
+      )
     ).toEqual([
       {
         id: 'test-logs-some-uuid',

@@ -109,6 +109,7 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
       skipEnsureInstalled?: boolean;
       skipUniqueNameVerification?: boolean;
       overwrite?: boolean;
+      packageInfo?: PackageInfo;
     }
   ): Promise<PackagePolicy> {
     const agentPolicy = await agentPolicyService.get(soClient, packagePolicy.policy_id, true);
@@ -156,11 +157,13 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
         });
       }
 
-      const pkgInfo = await getPackageInfo({
-        savedObjectsClient: soClient,
-        pkgName: packagePolicy.package.name,
-        pkgVersion: packagePolicy.package.version,
-      });
+      const pkgInfo =
+        options?.packageInfo ??
+        (await getPackageInfo({
+          savedObjectsClient: soClient,
+          pkgName: packagePolicy.package.name,
+          pkgVersion: packagePolicy.package.version,
+        }));
 
       // Check if it is a limited package, and if so, check that the corresponding agent policy does not
       // already contain a package policy for this package
@@ -1252,6 +1255,7 @@ export interface PackagePolicyServiceInterface {
       skipEnsureInstalled?: boolean;
       skipUniqueNameVerification?: boolean;
       overwrite?: boolean;
+      packageInfo?: PackageInfo;
     }
   ): Promise<PackagePolicy>;
 
