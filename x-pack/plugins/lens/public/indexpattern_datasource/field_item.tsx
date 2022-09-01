@@ -39,6 +39,7 @@ import { LensFieldIcon } from '../shared_components/field_picker/lens_field_icon
 import { VisualizeGeoFieldButton } from './visualize_geo_field_button';
 import type { LensAppServices } from '../app_plugin/types';
 import { debouncedComponent } from '../debounced_component';
+import { getFieldType } from './pure_utils';
 
 export interface FieldItemProps {
   core: DatasourceDataPanelProps['core'];
@@ -136,7 +137,7 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
   );
   const order = useMemo(() => [0, groupIndex, itemIndex], [groupIndex, itemIndex]);
 
-  const lensFieldIcon = <LensFieldIcon type={field.type as DataType} />;
+  const lensFieldIcon = <LensFieldIcon type={getFieldType(field) as DataType} />;
   const lensInfoIcon = (
     <EuiIconTip
       anchorClassName="lnsFieldItem__infoIcon"

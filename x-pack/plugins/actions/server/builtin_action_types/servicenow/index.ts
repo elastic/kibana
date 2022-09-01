@@ -6,14 +6,14 @@
  */
 
 import { curry } from 'lodash';
-import { schema, TypeOf } from '@kbn/config-schema';
+import { TypeOf } from '@kbn/config-schema';
 
 import { Logger } from '@kbn/core/server';
 import { validate } from './validators';
 import {
-  ExternalIncidentServiceConfiguration,
-  ExternalIncidentServiceConfigurationBase,
-  ExternalIncidentServiceSecretConfiguration,
+  ExternalIncidentServiceConfigurationSchema,
+  ExternalIncidentServiceConfigurationBaseSchema,
+  ExternalIncidentServiceSecretConfigurationSchema,
   ExecutorParamsSchemaITSM,
   ExecutorParamsSchemaSIR,
   ExecutorParamsSchemaITOM,
@@ -105,14 +105,18 @@ export function getServiceNowITSMActionType(
       SecurityConnectorFeatureId,
     ],
     validate: {
-      config: schema.object(ExternalIncidentServiceConfiguration, {
-        validate: curry(validate.config)(configurationUtilities),
-      }),
-      secrets: schema.object(ExternalIncidentServiceSecretConfiguration, {
-        validate: curry(validate.secrets)(configurationUtilities),
-      }),
+      config: {
+        schema: ExternalIncidentServiceConfigurationSchema,
+        customValidator: validate.config,
+      },
+      secrets: {
+        schema: ExternalIncidentServiceSecretConfigurationSchema,
+        customValidator: validate.secrets,
+      },
       connector: validate.connector,
-      params: ExecutorParamsSchemaITSM,
+      params: {
+        schema: ExecutorParamsSchemaITSM,
+      },
     },
     executor: curry(executor)({
       logger,
@@ -138,14 +142,18 @@ export function getServiceNowSIRActionType(
       SecurityConnectorFeatureId,
     ],
     validate: {
-      config: schema.object(ExternalIncidentServiceConfiguration, {
-        validate: curry(validate.config)(configurationUtilities),
-      }),
-      secrets: schema.object(ExternalIncidentServiceSecretConfiguration, {
-        validate: curry(validate.secrets)(configurationUtilities),
-      }),
+      config: {
+        schema: ExternalIncidentServiceConfigurationSchema,
+        customValidator: validate.config,
+      },
+      secrets: {
+        schema: ExternalIncidentServiceSecretConfigurationSchema,
+        customValidator: validate.secrets,
+      },
       connector: validate.connector,
-      params: ExecutorParamsSchemaSIR,
+      params: {
+        schema: ExecutorParamsSchemaSIR,
+      },
     },
     executor: curry(executor)({
       logger,
@@ -167,14 +175,18 @@ export function getServiceNowITOMActionType(
     name: i18n.SERVICENOW_ITOM,
     supportedFeatureIds: [AlertingConnectorFeatureId, SecurityConnectorFeatureId],
     validate: {
-      config: schema.object(ExternalIncidentServiceConfigurationBase, {
-        validate: curry(validate.config)(configurationUtilities),
-      }),
-      secrets: schema.object(ExternalIncidentServiceSecretConfiguration, {
-        validate: curry(validate.secrets)(configurationUtilities),
-      }),
+      config: {
+        schema: ExternalIncidentServiceConfigurationBaseSchema,
+        customValidator: validate.config,
+      },
+      secrets: {
+        schema: ExternalIncidentServiceSecretConfigurationSchema,
+        customValidator: validate.secrets,
+      },
       connector: validate.connector,
-      params: ExecutorParamsSchemaITOM,
+      params: {
+        schema: ExecutorParamsSchemaITOM,
+      },
     },
     executor: curry(executorITOM)({
       logger,
