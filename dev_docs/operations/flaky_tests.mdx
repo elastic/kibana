@@ -18,21 +18,21 @@ In the <DocLink id="kibDevDocsOpsPackages" text="IDM project" /> we will be impr
 
 ## When is a test flaky enough to skip?
 
-Identifying when tests are flaky enough that they should be skipped is the responsibility of members of the Operations team. When making that decision we consider a few different criteria:
+Identifying when tests are flaky enough that they should be skipped is the responsibility of members of the Operations team. When making that decision we consider a few different questions:
 
-### flaky criteria: age of the test
+### Is this a very new test?
 
 When a test is very new (~ 3-4 business days) and has already started failing, then the test is likely flaky enough to skip. While we don't know how flaky this test really is, we know that it didn't take long for it to start failing. Additionally, we assume that the author of the test is still familiar with the context of the change and not deep in the middle of some other complicated work. In these cases we will assign and ping the author directly and expect the test to not be skipped for long.
 
 This is an ideal case for flaky tests, but isn't very common.
 
-### flaky criteria: frequency of failures
+### How often is this test failing?
 
 The frequency of failures is judged uniquely based on the type of test that is failing:
 
-**Jest Unit/Integration tests:** These tests are not retried, and shouldn't be doing anything complicated enough to introduce flakiness. Any number of failures in these tests will lead to them being skipped.
+*Jest Unit/Integration tests:* These tests are not retried, and shouldn't be doing anything complicated enough to introduce flakiness. Any number of failures in these tests will lead to them being skipped.
 
-**Functional/API Integration tests:** (aka. FTR configs) These tests involve running full Kibana and Elasticsearch instances and usually require interacting with the product through web browser automation. Because of this 100% stability is really unattainable, so any time there is a failure in an FTR config the tests in that config will be re-run automatically. If the test passes on the second time then the CI succeeds, but is "unstable" and requires that PR authors triage and interpret the failure to make sure their changes didn't cause this instability.
+*Functional/API Integration tests:* (aka. FTR configs) These tests involve running full Kibana and Elasticsearch instances and usually require interacting with the product through web browser automation. Because of this 100% stability is really unattainable, so any time there is a failure in an FTR config the tests in that config will be re-run automatically. If the test passes on the second time then the CI succeeds, but is "unstable" and requires that PR authors triage and interpret the failure to make sure their changes didn't cause this instability.
 
 Our goal is to balance reducing this overhead for "innocent" PR authors without creating too much work on teams who need to unskip flaky tests. To achieve this goal, one of these tests is "flaky enough to be skipped" when it is _failing at least four times in the last week or shows a consistent, and recent, historical pattern of failing_.
 
@@ -40,7 +40,7 @@ To understand how many times a test has failed we use a [Kibana dashboard](https
 
 Since PRs don't always contain complete code we don't immediately treat failures in PRs as failures, we try to verify that they're spread out over time and that they aren't all on the same PR or consistently triggered by the same PR author (indications that these failures might be change based, not caused by flakiness).
 
-### flaky criteria: the owning teams ability to fix the flakiness
+### Are the owning teams able to fix this source of flakiness?
 
 There are cases where tests will fail because of something that is outside of the test-authors' control.
 
