@@ -11,7 +11,6 @@ import {
   TIMELINE_FLYOUT_HEADER,
   GET_TIMELINE_GRID_CELL,
   TIMELINE_DATA_PROVIDERS_CONTAINER,
-  HOVER_ACTIONS,
 } from '../../screens/timeline';
 
 import { waitForAllHostsToBeLoaded } from '../../tasks/hosts/all_hosts';
@@ -80,8 +79,9 @@ describe('timeline data providers', () => {
 
   it('presists timeline when a field is added by hover action "Add To Timeline" in data provider ', () => {
     updateDataProviderByFieldHoverAction('host.name', 0);
-    cy.get(HOVER_ACTIONS.ADD_TO_TIMELINE).should('be.visible');
-    cy.get(HOVER_ACTIONS.ADD_TO_TIMELINE).trigger('click', { force: true });
+    waitForTimelineChanges();
+    cy.wait(1000);
+    cy.reload();
     cy.get(`${GET_TIMELINE_GRID_CELL('host.name')}`)
       .first()
       .then((hostname) => {

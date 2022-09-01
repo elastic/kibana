@@ -73,6 +73,7 @@ import {
   EMPTY_DATA_PROVIDER_AREA,
   EMPTY_DROPPABLE_DATA_PROVIDER_GROUP,
   GET_TIMELINE_GRID_CELL,
+  HOVER_ACTIONS,
 } from '../screens/timeline';
 import { REFRESH_BUTTON, TIMELINE } from '../screens/timelines';
 import { drag, drop } from './common';
@@ -213,6 +214,8 @@ export const updateDataProviderbyDraggingField = (fieldName: string, rowNumber: 
 export const updateDataProviderByFieldHoverAction = (fieldName: string, rowNumber: number) => {
   const fieldSelector = GET_TIMELINE_GRID_CELL(fieldName);
   cy.get(fieldSelector).eq(rowNumber).trigger('mouseover', { force: true });
+  cy.get(HOVER_ACTIONS.ADD_TO_TIMELINE).should('be.visible');
+  cy.get(HOVER_ACTIONS.ADD_TO_TIMELINE).trigger('click', { force: true });
 };
 
 export const addNewCase = () => {
