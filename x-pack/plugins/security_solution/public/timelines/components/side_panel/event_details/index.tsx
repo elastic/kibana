@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiSpacer } from '@elastic/eui';
+import { EuiSpacer, EuiFlyoutBody } from '@elastic/eui';
 import React from 'react';
 
 import deepEqual from 'fast-deep-equal';
@@ -22,6 +22,8 @@ import { useHostIsolationTools } from './use_host_isolation_tools';
 import { FlyoutBody, FlyoutHeader, FlyoutFooter } from './flyout';
 import { useBasicDataFromDetailsData, getAlertIndexAlias } from './helpers';
 import { useSpaceId } from '../../../../common/hooks/use_space_id';
+import { EndpointIsolateSuccess } from '../../../../common/components/endpoint/host_isolation';
+import { HostIsolationPanel } from '../../../../detections/components/host_isolation';
 
 interface EventDetailsPanelProps {
   browserFields: BrowserFields;
@@ -143,26 +145,57 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
     </>
   ) : (
     <>
-      <ExpandableEventTitle
-        isAlert={isAlert}
-        loading={loading}
-        ruleName={ruleName}
-        handleOnEventClosed={handleOnEventClosed}
-      />
-      <EuiSpacer size="m" />
-      <ExpandableEvent
-        browserFields={browserFields}
-        detailsData={detailsData}
-        event={expandedEvent}
-        isAlert={isAlert}
-        isDraggable={isDraggable}
-        loading={loading}
-        rawEventData={rawEventData}
-        timelineId={timelineId}
-        timelineTabType={tabType}
-        hostRisk={hostRisk}
-        handleOnEventClosed={handleOnEventClosed}
-      />
+      {isIsolateActionSuccessBannerVisible && (
+        <EndpointIsolateSuccess
+          hostName={hostName}
+          alertId={alertId}
+          isolateAction={isolateAction}
+        />
+      )}
+      {isHostIsolationPanelOpen ? (
+        <>
+          <FlyoutHeader
+            isHostIsolationPanelOpen={isHostIsolationPanelOpen}
+            isAlert={isAlert}
+            isolateAction={isolateAction}
+            loading={loading}
+            ruleName={ruleName}
+            showAlertDetails={showAlertDetails}
+            timestamp={timestamp}
+          />
+          <EuiFlyoutBody>
+            <HostIsolationPanel
+              details={detailsData}
+              cancelCallback={showAlertDetails}
+              successCallback={handleIsolationActionSuccess}
+              isolateAction={isolateAction}
+            />
+          </EuiFlyoutBody>
+        </>
+      ) : (
+        <>
+          <ExpandableEventTitle
+            isAlert={isAlert}
+            loading={loading}
+            ruleName={ruleName}
+            handleOnEventClosed={handleOnEventClosed}
+          />
+          <EuiSpacer size="m" />
+          <ExpandableEvent
+            browserFields={browserFields}
+            detailsData={detailsData}
+            event={expandedEvent}
+            isAlert={isAlert}
+            isDraggable={isDraggable}
+            loading={loading}
+            rawEventData={rawEventData}
+            timelineId={timelineId}
+            timelineTabType={tabType}
+            hostRisk={hostRisk}
+            handleOnEventClosed={handleOnEventClosed}
+          />
+        </>
+      )}
       <FlyoutFooter
         detailsData={detailsData}
         detailsEcsData={ecsData}
