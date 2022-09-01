@@ -571,7 +571,12 @@ export class SearchSource {
           }
         });
       }),
-      map((response) => onResponse(searchRequest, response, options))
+      map((response) => {
+        if (response.isPartial) {
+          return response;
+        }
+        return onResponse(searchRequest, response, options);
+      })
     );
   }
 
