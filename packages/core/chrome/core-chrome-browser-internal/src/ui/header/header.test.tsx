@@ -11,9 +11,9 @@ import { act } from 'react-dom/test-utils';
 import { BehaviorSubject } from 'rxjs';
 import { StubBrowserStorage, mountWithIntl } from '@kbn/test-jest-helpers';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
-import { applicationServiceMock } from '../../../mocks';
+import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
+import type { ChromeBreadcrumbsAppendExtension } from '@kbn/core-chrome-browser';
 import { Header } from './header';
-import type { ChromeBreadcrumbsAppendExtension } from '../../types';
 
 function mockProps() {
   const http = httpServiceMock.createSetupContract({ basePath: '/test' });
