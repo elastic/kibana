@@ -208,7 +208,7 @@ describe('disable()', () => {
         meta: {
           versionApiKeyLastmodified: 'v7.10.0',
         },
-        scheduledTaskId: null,
+        scheduledTaskId: 'task-123',
         apiKey: 'MTIzOmFiYw==',
         apiKeyOwner: 'elastic',
         updatedAt: '2019-02-12T21:01:22.479Z',
@@ -229,7 +229,7 @@ describe('disable()', () => {
         version: '123',
       }
     );
-    expect(taskManager.removeIfExists).toHaveBeenCalledWith('task-123');
+    expect(taskManager.bulkEnableDisable).toHaveBeenCalledWith(['task-123'], false);
   });
 
   test('disables the rule with calling event log to "recover" the alert instances from the task state', async () => {
@@ -278,7 +278,7 @@ describe('disable()', () => {
         meta: {
           versionApiKeyLastmodified: 'v7.10.0',
         },
-        scheduledTaskId: null,
+        scheduledTaskId: 'task-123',
         apiKey: 'MTIzOmFiYw==',
         apiKeyOwner: 'elastic',
         updatedAt: '2019-02-12T21:01:22.479Z',
@@ -299,7 +299,7 @@ describe('disable()', () => {
         version: '123',
       }
     );
-    expect(taskManager.removeIfExists).toHaveBeenCalledWith('task-123');
+    expect(taskManager.bulkEnableDisable).toHaveBeenCalledWith(['task-123'], false);
 
     expect(eventLogger.logEvent).toHaveBeenCalledTimes(1);
     expect(eventLogger.logEvent.mock.calls[0][0]).toStrictEqual({
@@ -359,7 +359,7 @@ describe('disable()', () => {
         meta: {
           versionApiKeyLastmodified: 'v7.10.0',
         },
-        scheduledTaskId: null,
+        scheduledTaskId: 'task-123',
         apiKey: 'MTIzOmFiYw==',
         apiKeyOwner: 'elastic',
         updatedAt: '2019-02-12T21:01:22.479Z',
@@ -380,7 +380,7 @@ describe('disable()', () => {
         version: '123',
       }
     );
-    expect(taskManager.removeIfExists).toHaveBeenCalledWith('task-123');
+    expect(taskManager.bulkEnableDisable).toHaveBeenCalledWith(['task-123'], false);
 
     expect(eventLogger.logEvent).toHaveBeenCalledTimes(0);
     expect(rulesClientParams.logger.warn).toHaveBeenCalledWith(
@@ -403,7 +403,7 @@ describe('disable()', () => {
         schedule: { interval: '10s' },
         alertTypeId: 'myType',
         enabled: false,
-        scheduledTaskId: null,
+        scheduledTaskId: 'task-123',
         updatedAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
         actions: [
@@ -422,10 +422,10 @@ describe('disable()', () => {
         version: '123',
       }
     );
-    expect(taskManager.removeIfExists).toHaveBeenCalledWith('task-123');
+    expect(taskManager.bulkEnableDisable).toHaveBeenCalledWith(['task-123'], false);
   });
 
-  test(`doesn't disable already disabled alerts`, async () => {
+  test(`doesn't update already disabled alerts but ensures task is disabled`, async () => {
     encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValueOnce({
       ...existingDecryptedAlert,
       attributes: {
@@ -437,7 +437,7 @@ describe('disable()', () => {
 
     await rulesClient.disable({ id: '1' });
     expect(unsecuredSavedObjectsClient.update).not.toHaveBeenCalled();
-    expect(taskManager.removeIfExists).not.toHaveBeenCalled();
+    expect(taskManager.bulkEnableDisable).toHaveBeenCalledWith(['task-123'], false);
   });
 
   test('swallows error when failing to load decrypted saved object', async () => {
@@ -445,7 +445,7 @@ describe('disable()', () => {
 
     await rulesClient.disable({ id: '1' });
     expect(unsecuredSavedObjectsClient.update).toHaveBeenCalled();
-    expect(taskManager.removeIfExists).toHaveBeenCalled();
+    expect(taskManager.bulkEnableDisable).toHaveBeenCalled();
     expect(rulesClientParams.logger.error).toHaveBeenCalledWith(
       'disable(): Failed to load API key of alert 1: Fail'
     );
@@ -457,13 +457,14 @@ describe('disable()', () => {
     await expect(rulesClient.disable({ id: '1' })).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Failed to update"`
     );
+    expect(taskManager.bulkEnableDisable).not.toHaveBeenCalled();
   });
 
-  test('throws when failing to remove task from task manager', async () => {
-    taskManager.removeIfExists.mockRejectedValueOnce(new Error('Failed to remove task'));
+  test('throws when failing to disable task', async () => {
+    taskManager.bulkEnableDisable.mockRejectedValueOnce(new Error('Failed to disable task'));
 
     await expect(rulesClient.disable({ id: '1' })).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Failed to remove task"`
+      `"Failed to disable task"`
     );
   });
 });

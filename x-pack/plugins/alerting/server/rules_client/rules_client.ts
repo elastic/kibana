@@ -2035,21 +2035,36 @@ export class RulesClient {
       } catch (e) {
         throw e;
       }
+    }
 
-      this.taskManager.bulkEnableDisable([id], true);
-      // const scheduledTask = await this.scheduleRule({
-      //   id,
-      //   consumer: attributes.consumer,
-      //   ruleTypeId: attributes.alertTypeId,
-      //   schedule: attributes.schedule as IntervalSchedule,
-      //   throwOnConflict: false,
-      // });
+    let scheduledTaskIdToCreate: string | null = null;
+    if (attributes.scheduledTaskId) {
+      // If scheduledTaskId defined in rule SO, make sure it exists
+      try {
+        await this.taskManager.get(attributes.scheduledTaskId);
+      } catch (err) {
+        scheduledTaskIdToCreate = id;
+      }
+    } else {
+      // If scheduledTaskId doesn't exist in rule SO, set it to rule ID
+      scheduledTaskIdToCreate = id;
+    }
 
-      // if (id !== scheduledTask.id) {
-      //   await this.unsecuredSavedObjectsClient.update('alert', id, {
-      //     scheduledTaskId: scheduledTask.id,
-      //   });
-      // }
+    if (scheduledTaskIdToCreate) {
+      // Schedule the task if it doesn't exist
+      const scheduledTask = await this.scheduleRule({
+        id,
+        consumer: attributes.consumer,
+        ruleTypeId: attributes.alertTypeId,
+        schedule: attributes.schedule as IntervalSchedule,
+        throwOnConflict: false,
+      });
+      await this.unsecuredSavedObjectsClient.update('alert', id, {
+        scheduledTaskId: scheduledTask.id,
+      });
+    } else {
+      // Task exists so set enabled to true
+      await this.taskManager.bulkEnableDisable([attributes.scheduledTaskId!], true);
     }
   }
 
@@ -2184,15 +2199,16 @@ export class RulesClient {
         this.updateMeta({
           ...attributes,
           enabled: false,
-          scheduledTaskId: null,
           updatedBy: await this.getUserName(),
           updatedAt: new Date().toISOString(),
         }),
         { version }
       );
-      if (attributes.scheduledTaskId) {
-        await this.taskManager.bulkEnableDisable([attributes.scheduledTaskId], false);
-      }
+    }
+
+    // Ensure the task is marked as disabled
+    if (attributes.scheduledTaskId) {
+      await this.taskManager.bulkEnableDisable([attributes.scheduledTaskId], false);
     }
   }
 
