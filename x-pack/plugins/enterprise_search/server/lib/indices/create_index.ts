@@ -68,7 +68,7 @@ export const createApiIndex = async (
   indexName: string,
   language: string | null
 ) => {
-  await addConnector(client, { index_name: indexName, language });
+  await addConnector(client, { index_name: indexName, is_native: false, language }, false);
   return await client.asCurrentUser.indices.create({
     body: {
       mappings: defaultMappings,

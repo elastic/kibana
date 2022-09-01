@@ -27,11 +27,12 @@ const createConnector = async (
   document: ConnectorDocument,
   client: IScopedClusterClient,
   language: string | null,
-  deleteExisting: boolean
+  deleteExisting: boolean,
+  createDocumentIndex: boolean = true
 ): Promise<{ id: string; index_name: string }> => {
   const index = document.index_name;
   const indexExists = await client.asCurrentUser.indices.exists({ index });
-  if (indexExists) {
+  if (indexExists && createDocumentIndex) {
     {
       throw new Error(ErrorCode.INDEX_ALREADY_EXISTS);
     }
@@ -55,10 +56,12 @@ const createConnector = async (
     document,
     index: CONNECTORS_INDEX,
   });
-  await client.asCurrentUser.indices.create({
-    index,
-    settings: textAnalysisSettings(language ?? undefined),
-  });
+  if (createDocumentIndex) {
+    await client.asCurrentUser.indices.create({
+      index,
+      settings: textAnalysisSettings(language ?? undefined),
+    });
+  }
   await client.asCurrentUser.indices.refresh({ index: CONNECTORS_INDEX });
 
   return { id: result._id, index_name: document.index_name };
@@ -71,7 +74,8 @@ export const addConnector = async (
     index_name: string;
     is_native: boolean;
     language: string | null;
-  }
+  },
+  createDocumentIndex: boolean = true
 ): Promise<{ id: string; index_name: string }> => {
   const connectorsIndexExists = await client.asCurrentUser.indices.exists({
     index: CONNECTORS_INDEX,
@@ -108,5 +112,11 @@ export const addConnector = async (
     status: ConnectorStatus.CREATED,
     sync_now: false,
   };
-  return await createConnector(document, client, input.language, !!input.delete_existing_connector);
+  return await createConnector(
+    document,
+    client,
+    input.language,
+    !!input.delete_existing_connector,
+    createDocumentIndex
+  );
 };
