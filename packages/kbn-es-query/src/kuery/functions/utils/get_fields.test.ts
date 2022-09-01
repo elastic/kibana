@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { DataViewBase } from '../../..';
+import { DataViewBase } from '../../../..';
 import { fields } from '../../../filters/stubs';
 
 import { nodeTypes } from '../..';

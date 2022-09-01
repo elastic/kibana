@@ -81,9 +81,11 @@ export function useAnomalyChartsInputResolver(
 
           anomalyExplorerService.setTimeRange(timeRangeInput);
 
-          let influencersFilterQuery: InfluencersFilterQuery;
+          let influencersFilterQuery: InfluencersFilterQuery | undefined;
           try {
-            influencersFilterQuery = processFilters(filters, query);
+            if (filters || query) {
+              influencersFilterQuery = processFilters(filters, query);
+            }
           } catch (e) {
             // handle query syntax errors
             setError(e);
