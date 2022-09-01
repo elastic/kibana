@@ -13,6 +13,8 @@ import { get, union, uniq } from 'lodash';
 import moment from 'moment-timezone';
 import { ES_FIELD_TYPES } from '@kbn/data-plugin/public';
 import { asyncForEach } from '@kbn/std';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 
 import { lastValueFrom } from 'rxjs';
 import {
@@ -57,9 +59,12 @@ export interface ExplorerJob {
   sourceIndices?: string[];
 }
 
-export function isExplorerJob(arg: any): arg is ExplorerJob {
+export function isExplorerJob(arg: unknown): arg is ExplorerJob {
   return (
-    typeof arg.id === 'string' && arg.selected !== undefined && arg.bucketSpanSeconds !== undefined
+    isPopulatedObject(arg) &&
+    typeof arg.id === 'string' &&
+    arg.selected !== undefined &&
+    arg.bucketSpanSeconds !== undefined
   );
 }
 
@@ -623,7 +628,7 @@ export function removeFilterFromQueryString(
 // Returns an object mapping job ids to source indices which map to geo fields for that index
 export async function getSourceIndicesWithGeoFields(
   selectedJobs: Array<CombinedJob | ExplorerJob>,
-  dataViewsService: any
+  dataViewsService: DataViewsContract
 ): Promise<SourceIndicesWithGeoFields> {
   const sourceIndicesWithGeoFieldsMap: SourceIndicesWithGeoFields = {};
   // Go through selected jobs
