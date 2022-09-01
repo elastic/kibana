@@ -8,6 +8,7 @@
 import { useCallback, useMemo, useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 
+import { InputsModelId } from '../../store/inputs/constants';
 import { SCROLLING_DISABLED_CLASS_NAME } from '../../../../common/constants';
 import { useShallowEqualSelector } from '../../hooks/use_selector';
 import { inputsSelectors } from '../../store';
@@ -36,7 +37,7 @@ export const useGlobalFullScreen = (): GlobalFullScreen => {
         document.body.classList.remove(SCROLLING_DISABLED_CLASS_NAME, 'euiDataGrid__restrictBody');
       }
 
-      dispatch(inputsActions.setFullScreen({ id: 'global', fullScreen }));
+      dispatch(inputsActions.setFullScreen({ id: InputsModelId.global, fullScreen }));
     },
     [dispatch]
   );
@@ -63,7 +64,7 @@ export const useTimelineFullScreen = (): TimelineFullScreen => {
       } else if (isDataGridFullScreen === false || fullScreen === false) {
         document.body.classList.remove('euiDataGrid__restrictBody');
       }
-      dispatch(inputsActions.setFullScreen({ id: 'timeline', fullScreen }));
+      dispatch(inputsActions.setFullScreen({ id: InputsModelId.timeline, fullScreen }));
     },
     [dispatch]
   );
