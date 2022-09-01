@@ -11,7 +11,7 @@ tags: ['kibana', 'onboarding', 'setup', 'performance', 'development', 'telemetry
 
 ### Simple performance events
 
-Lets assume we intend to report the performance of a specific action called `APP_ACTION`.
+Let's assume we intend to report the performance of a specific action called `APP_ACTION`.
 In order to do so, we need to first measure the timing of that action.
 Once we have the time measurement, we can use the `reportPerformanceMetricEvent` API to report it.
 
@@ -24,16 +24,16 @@ reportPerformanceMetricEvent(analytics, {
 });
 ```
 
-Once executed, the metric would be delivered to the `stack-telemetry` cluster, along side with the event's context.
+Once executed, the metric would be delivered to the `stack-telemetry` cluster, alongside with the event's context.
 The data is updated periodically, so you might have to wait up to 30 minutes to see your data in the index.
 
 Once indexed, this metric will appear in `ebt-kibana` index. 
-It is also be mapped into an additional index, dedicated to performance metrics.
+It is also mapped into an additional index, dedicated to performance metrics.
 We recommend using the performance metrics indices, where you can expect the following structure:
 
 ```typescript
 {
-  "_index": "backing-ebt-kibana-browser-performance-metrics-000001",    // Performance metrics are stored in a dedicated simplified index (browser \ server). 
+  "_index": "backing-ebt-kibana-browser-performance-metrics-000001",    // Performance metrics are stored at a dedicated simplified index (browser \ server). 
   "_source": {
     "timestamp": "2022-08-31T11:29:58.275Z"
     "event_type": "performance_metric",                                 // All events share a common event type to simplify mapping
@@ -59,10 +59,12 @@ We recommend using the performance metrics indices, where you can expect the fol
 ### Performance events with breakdowns and metadata
 
 Lets assume we are interested in benchmarking the performance of a more complex event `COMPLEX_APP_ACTION`, that is made up of two steps: 
- - `STEP_A` where there are two possible flows `flow1` or `flow2` 
- - `STEP_B` that depends on the flow chosen in step A.
+ - `INSPECT_DATA` measures the time it takes to retrieve a user's profile and check if there is a cached version of their data.
+    - If the cached data is fresh it proceeds with a flow `use-local-data`
+    - If data needs to be refreshed, it proceeds with a flow `load-data-from-api`.
+ - `PROCESS_DATA` loads and processes the data depending on the flow chosen in the previous step.
 
-We could utilise the additonal options supported by the `reportPerformanceMetricEvent` API:
+We could utilise the additional options supported by the `reportPerformanceMetricEvent` API:
 
 ```typescript
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
@@ -70,12 +72,12 @@ import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 reportPerformanceMetricEvent(analytics, {
   eventName: COMPLEX_APP_ACTION,     
   duration,                                   // Total duration in milliseconds
-  key1    : COMPLEX_APP_ACTION_STEP_A,        // Claiming free key1 to be used for APP_ACTION_STEP_A
-  value1  : durationOfStepA,                  // Total duration of step A in milliseconds
-  key2    : COMPLEX_APP_ACTION_STEP_B,        // Claiming free key2 to be used for APP_ACTION_STEP_B
-  value2  : durationOfStepB,                  // Total duration of step B in milliseconds
+  key1    : INSPECT_DATA,                     // Claiming free key1 to be used for INSPECT_DATA
+  value1  : durationOfStepA,                  // Total duration of step INSPECT_DATA in milliseconds
+  key2    : PROCESS_DATA,                     // Claiming free key2 to be used for PROCESS_DATA
+  value2  : durationOfStepB,                  // Total duration of step PROCESS_DATA in milliseconds
   meta: {
-    stepAChoice: 'flow2',                     // Providing event specific context. This can be useful to create meaningful aggregations.
+    dataSource: 'flow2',                     // Providing event specific context. This can be useful to create meaningful aggregations.
   },
 });
 ```
@@ -90,12 +92,12 @@ This event will be indexed with the following structure:
     "event_type": "performance_metric",                                 // All events share a common event type to simplify mapping
     "eventName": "dashboard_loaded",                                    // Event name as specified when reporting it
     "duration": 736,                                                    // Event duration as specified when reporting it
-    "key1": APP_ACTION_STEP_A,                                          // The key name of APP_ACTION_STEP_A
-    "value1": 250,                                                      // The duration of step A
-    "key2": APP_ACTION_STEP_B,                                          // The key name of APP_ACTION_STEP_B
-    "value2": 520,                                                      // The duration of step B
+    "key1": INSPECT_DATA,                                               // The key name of INSPECT_DATA
+    "value1": 250,                                                      // The duration of step INSPECT_DATA
+    "key2": PROCESS_DATA,                                               // The key name of PROCESS_DATA
+    "value2": 520,                                                      // The duration of step PROCESS_DATA
     "meta": {
-      "stepAChoice": 'flow2', 
+      "dataSource": 'load-data-from-api', 
     },    
     "context": {                                                        // Context holds information identifying the deployment, version, application and page that generated the event
       "version": "8.5.0-SNAPSHOT",
@@ -123,21 +125,22 @@ If you want to provide event specific context, you can add properties to the `me
 The `meta` object is stored as a [flattened field](https://www.elastic.co/guide/en/elasticsearch/reference/current/flattened.html) hence 
 it's searchable and can be used to further breakdown event metrics.
 
-**Note**: It's important to keep in mind `free field` values are integer otherwise they will be rounded.
+**Note**: It's important to keep in mind `free field` values are integers and floating point values will be rounded.
 
 ### How to choose and measure events
 
-Events should be meaningful and can have multiple sub metrics which will give specific information of certain action. For example 
-page-load event can be composed of render time, data load time during the page-load and so on. It's important to understand these 
+Events should be meaningful and can have multiple sub metrics which will give specific information of certain actions. For example 
+page-load events can be composed of render time, data load time during the page-load and so on. It's important to understand these 
 events will have meaning for performance investigations and that can be used in visualizations, aggregations. Considering this, 
 creating an event for cpuUsage does not bring any value because it doesn't bring any context with itself and reporting multiple of these 
 events in different places of code will have so much variability during performance analysis of your code. However it can be nice attribute
-to follow if it's important for you to look inside of specific event e.g. `page-load`. 
+to follow if it's important for you to look inside of a specific event e.g. `page-load`. 
 
 - Understand your events
-  Make sure that the event is clearly defined and consistent.
-  Consider the start point and end point of the measurment and what happens between those points.
+  Make sure that the event is clearly defined and consistent (i.e. same code flow is executed each time).
+  Consider the start point and endpoint of the measurement and what happens between those points.
   For example: a `app-data-load` event should not include the time it takes to render the data.
+
 - Choose event names
   Try to balance event names specificity. Calling an event `load` is too generic, calling an event `tsvb-data-load` is too specific (instead the visualization 
   type can be specified in a `meta` field)
@@ -148,8 +151,8 @@ to follow if it's important for you to look inside of specific event e.g. `page-
   Make sure that measurement and reporting happens in a point of the code that is executed only once. 
   For example, make sure that refresh events are reported only once per button click.
 - Measure as close to the event as possible
-  For example, if you're measuring the execution of a specific React Effect execution, place the measurment code inside the effect.
-  try to place the measurment start right before  the navigation is performed and stop measuring as soon as all resources are loaded
+  For example, if you're measuring the execution of a specific React Effect execution, place the measurement code inside the effect.
+  try to place the measurement start right before  the navigation is performed and stop measuring as soon as all resources are loaded
 - Use the `window.performance` API
   The [`performance.now()`](https://developer.mozilla.org/en-US/docs/Web/API/Performance/now) API can be used to accurate way to receive timestamps 
   The [`performance.mark()`](https://developer.mozilla.org/en-US/docs/Web/API/Performance/mark) API can be used to track performance without having to pollute the 
