@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-export const getSLOIndexTemplate = (indexPattern: string, composedOf: string[]) => ({
+export const getSLOIndexTemplate = (name: string, indexPattern: string, composedOf: string[]) => ({
+  name,
   index_patterns: [indexPattern],
   composed_of: composedOf,
   priority: 500,
   _meta: {
     description: 'Template for SLO rollup data',
+    version: 1,
   },
 });

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-export const getSLOPipelineTemplate = (indexNamePrefix: string) => ({
+export const getSLOPipelineTemplate = (id: string, indexNamePrefix: string) => ({
+  id,
   description: 'Monthly date-time index naming for SLO data',
   processors: [
     {
@@ -18,5 +19,6 @@ export const getSLOPipelineTemplate = (indexNamePrefix: string) => ({
   ],
   _meta: {
     description: 'SLO ingest pipeline',
+    version: 1,
   },
 });

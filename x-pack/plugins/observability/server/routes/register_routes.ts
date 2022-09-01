@@ -16,12 +16,14 @@ import { errors } from '@elastic/elasticsearch';
 import { RuleDataPluginService } from '@kbn/rule-registry-plugin/server';
 import { ObservabilityRequestHandlerContext } from '../types';
 import { AbstractObservabilityServerRouteRepository } from './types';
+import { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 
 export function registerRoutes({
   repository,
   core,
   logger,
   ruleDataService,
+  spacesService,
 }: {
   core: {
     setup: CoreSetup;
@@ -30,6 +32,7 @@ export function registerRoutes({
   repository: AbstractObservabilityServerRouteRepository;
   logger: Logger;
   ruleDataService: RuleDataPluginService;
+  spacesService: SpacesServiceStart;
 }) {
   const routes = Object.values(repository);
 
@@ -63,6 +66,7 @@ export function registerRoutes({
             logger,
             params: decodedParams,
             ruleDataService,
+            spacesService,
           })) as any;
 
           return response.ok({ body: data });

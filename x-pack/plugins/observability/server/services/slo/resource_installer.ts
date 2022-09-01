@@ -17,16 +17,17 @@ import {
   SLO_COMPONENT_TEMPLATE_SETTINGS_NAME,
   SLO_INDEX_TEMPLATE_NAME,
   SLO_INGEST_PIPELINE_NAME,
+  SLO_RESOURCES_VERSION,
 } from '../../assets/constants';
-import { sloMappingsTemplate } from '../../assets/component_templates/slo_mappings_template';
-import { sloSettingsTemplate } from '../../assets/component_templates/slo_settings_template';
+import { getSLOMappingsTemplate } from '../../assets/component_templates/slo_mappings_template';
+import { getSLOSettingsTemplate } from '../../assets/component_templates/slo_settings_template';
 import { getSLOIndexTemplate } from '../../assets/index_templates/slo_index_templates';
 import { getSLOPipelineTemplate } from '../../assets/ingest_templates/slo_pipeline_template';
 
 export class ResourceInstaller {
   constructor(private esClient: ElasticsearchClient, private logger: Logger) {}
 
-  public async ensureCommonResourcesInstalled(): Promise<void> {
+  public async ensureCommonResourcesInstalled(spaceId: string = 'default'): Promise<void> {
     const alreadyInstalled = await this.areResourcesAlreadyInstalled();
 
     if (alreadyInstalled) {
@@ -38,33 +39,35 @@ export class ResourceInstaller {
 
     try {
       await Promise.all([
-        this.createOrUpdateComponentTemplate({
-          name: SLO_COMPONENT_TEMPLATE_MAPPINGS_NAME,
-          ...sloMappingsTemplate,
-        }),
-
-        this.createOrUpdateComponentTemplate({
-          name: SLO_COMPONENT_TEMPLATE_SETTINGS_NAME,
-          ...sloSettingsTemplate,
-        }),
+        this.createOrUpdateComponentTemplate(
+          getSLOMappingsTemplate(SLO_COMPONENT_TEMPLATE_MAPPINGS_NAME)
+        ),
+        this.createOrUpdateComponentTemplate(
+          getSLOSettingsTemplate(SLO_COMPONENT_TEMPLATE_SETTINGS_NAME)
+        ),
       ]);
 
-      await this.createOrUpdateIndexTemplate({
-        name: SLO_INDEX_TEMPLATE_NAME,
-        ...getSLOIndexTemplate(`${SLO_INDEX_TEMPLATE_NAME}-*`, [
+      await this.createOrUpdateIndexTemplate(
+        getSLOIndexTemplate(SLO_INDEX_TEMPLATE_NAME, `${SLO_INDEX_TEMPLATE_NAME}-*`, [
           SLO_COMPONENT_TEMPLATE_MAPPINGS_NAME,
           SLO_COMPONENT_TEMPLATE_SETTINGS_NAME,
-        ]),
-      });
+        ])
+      );
 
-      await this.createOrUpdateIngestPipelineTemplate({
-        id: SLO_INGEST_PIPELINE_NAME,
-        ...getSLOPipelineTemplate(`${SLO_INDEX_TEMPLATE_NAME}-default-`),
-      });
+      await this.createOrUpdateIngestPipelineTemplate(
+        getSLOPipelineTemplate(
+          SLO_INGEST_PIPELINE_NAME,
+          this.getPipelinePrefix(SLO_RESOURCES_VERSION, spaceId)
+        )
+      );
     } catch (err) {
       this.logger.error(`Error installing resources shared for SLO - ${err.message}`);
       throw err;
     }
+  }
+
+  private getPipelinePrefix(version: number, spaceId: string): string {
+    return `${SLO_INDEX_TEMPLATE_NAME}-version-${version}-${spaceId}-`;
   }
 
   private async areResourcesAlreadyInstalled(): Promise<boolean> {
@@ -74,14 +77,18 @@ export class ResourceInstaller {
 
     let ingestPipelineExists = false;
     try {
-      await this.esClient.ingest.getPipeline({
+      const pipeline = await this.esClient.ingest.getPipeline({
         id: SLO_INGEST_PIPELINE_NAME,
       });
 
-      ingestPipelineExists = true;
+      ingestPipelineExists =
+        // @ts-ignore _meta is not defined on the type
+        pipeline && pipeline[SLO_INGEST_PIPELINE_NAME]._meta.version == SLO_RESOURCES_VERSION;
     } catch (err) {
       return false;
     }
+
+    this.logger.info(`ingestPipelineExists = ${ingestPipelineExists}`);
 
     return indexTemplateExists && ingestPipelineExists;
   }

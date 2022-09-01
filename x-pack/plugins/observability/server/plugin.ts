@@ -25,12 +25,14 @@ import { uiSettings } from './ui_settings';
 import { registerRoutes } from './routes/register_routes';
 import { getGlobalObservabilityServerRouteRepository } from './routes/get_global_observability_server_route_repository';
 import { casesFeatureId, observabilityFeatureId } from '../common';
+import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 
 export type ObservabilityPluginSetup = ReturnType<ObservabilityPlugin['setup']>;
 
 interface PluginSetup {
   features: FeaturesSetup;
   ruleRegistry: RuleRegistryPluginSetupContract;
+  spaces: SpacesPluginStart;
 }
 
 export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
@@ -137,6 +139,8 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
 
     const start = () => core.getStartServices().then(([coreStart]) => coreStart);
 
+    const { spacesService } = plugins.spaces;
+
     const { ruleDataService } = plugins.ruleRegistry;
 
     registerRoutes({
@@ -147,6 +151,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
       logger: this.initContext.logger.get(),
       repository: getGlobalObservabilityServerRouteRepository(config),
       ruleDataService,
+      spacesService,
     });
 
     return {

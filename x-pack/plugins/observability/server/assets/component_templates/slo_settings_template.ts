@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-export const sloSettingsTemplate = {
+export const getSLOSettingsTemplate = (name: string) => ({
+  name,
   template: {
     settings: {},
   },
   _meta: {
     description: 'Settings for SLO rollup data',
+    version: 1,
   },
-};
+});

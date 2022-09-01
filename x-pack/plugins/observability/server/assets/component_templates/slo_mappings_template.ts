@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-export const sloMappingsTemplate = {
+export const getSLOMappingsTemplate = (name: string) => ({
+  name,
   template: {
     mappings: {
       properties: {
@@ -35,5 +36,6 @@ export const sloMappingsTemplate = {
   },
   _meta: {
     description: 'Mappings for SLO rollup data',
+    version: 1,
   },
-};
+});
