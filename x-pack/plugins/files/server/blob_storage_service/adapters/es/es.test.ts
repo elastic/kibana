@@ -9,8 +9,7 @@ import { promisify } from 'util';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
-import { Semaphore } from '@kbn/semaphore';
-import * as sinon from 'sinon';
+import { Semaphore } from '@kbn/std';
 
 import { ElasticsearchBlobStorageClient } from './es';
 
@@ -34,7 +33,7 @@ describe('ElasticsearchBlobStorageClient', () => {
   });
 
   test('limits max concurrent uploads', async () => {
-    const acquireSpy = sinon.spy(semaphore, 'acquire');
+    const acquireSpy = jest.spyOn(semaphore, 'acquire');
     (esClient.index as jest.Mock).mockImplementation(() => {
       return new Promise((res, rej) => setTimeout(() => rej('failed'), 100));
     });
@@ -45,7 +44,7 @@ describe('ElasticsearchBlobStorageClient', () => {
       blobStoreClient.upload(Readable.from(['test'])).catch(() => {}),
     ];
     await setImmediate();
-    expect(acquireSpy.callCount).toBe(4);
+    expect(acquireSpy).toHaveBeenCalledTimes(4);
     await p1;
     expect(esClient.index).toHaveBeenCalledTimes(1);
     await p2;

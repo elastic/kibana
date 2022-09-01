@@ -7,7 +7,7 @@
  */
 
 import { TestScheduler } from 'rxjs/testing';
-import { Semaphore } from '.';
+import { Semaphore } from './semaphore';
 
 describe('Semaphore', () => {
   let testScheduler: TestScheduler;

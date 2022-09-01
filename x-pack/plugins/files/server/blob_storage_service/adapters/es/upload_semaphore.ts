@@ -6,7 +6,7 @@
  */
 
 import { once } from 'lodash';
-import { Semaphore } from '@kbn/semaphore';
+import { Semaphore } from '@kbn/std';
 import { createGetterSetter } from '@kbn/kibana-utils-plugin/common';
 
 const [getSingleton, setSingleton] = createGetterSetter<Semaphore>('esStoreSemaphore');

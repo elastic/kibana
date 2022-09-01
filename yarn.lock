@@ -3519,10 +3519,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/semaphore@link:bazel-bin/packages/kbn-semaphore":
-  version "0.0.0"
-  uid ""
-
 "@kbn/server-http-tools@link:bazel-bin/packages/kbn-server-http-tools":
   version "0.0.0"
   uid ""
@@ -7562,10 +7558,6 @@
   uid ""
 
 "@types/kbn__securitysolution-utils@link:bazel-bin/packages/kbn-securitysolution-utils/npm_module_types":
-  version "0.0.0"
-  uid ""
-
-"@types/kbn__semaphore@link:bazel-bin/packages/kbn-semaphore/npm_module_types":
   version "0.0.0"
   uid ""
 
