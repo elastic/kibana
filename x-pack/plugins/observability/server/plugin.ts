@@ -15,6 +15,7 @@ import {
 import { RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/server';
 import { PluginSetupContract as FeaturesSetup } from '@kbn/features-plugin/server';
 import { createUICapabilities } from '@kbn/cases-plugin/common';
+import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { ObservabilityConfig } from '.';
 import {
   bootstrapAnnotations,
@@ -25,7 +26,6 @@ import { uiSettings } from './ui_settings';
 import { registerRoutes } from './routes/register_routes';
 import { getGlobalObservabilityServerRouteRepository } from './routes/get_global_observability_server_route_repository';
 import { casesFeatureId, observabilityFeatureId } from '../common';
-import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 
 export type ObservabilityPluginSetup = ReturnType<ObservabilityPlugin['setup']>;
 

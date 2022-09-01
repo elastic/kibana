@@ -14,9 +14,9 @@ import { CoreSetup, CoreStart, Logger, RouteRegistrar } from '@kbn/core/server';
 import Boom from '@hapi/boom';
 import { errors } from '@elastic/elasticsearch';
 import { RuleDataPluginService } from '@kbn/rule-registry-plugin/server';
+import { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import { ObservabilityRequestHandlerContext } from '../types';
 import { AbstractObservabilityServerRouteRepository } from './types';
-import { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 
 export function registerRoutes({
   repository,

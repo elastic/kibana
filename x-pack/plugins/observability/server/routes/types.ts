@@ -8,9 +8,9 @@ import type { EndpointOf, ReturnOf, ServerRouteRepository } from '@kbn/server-ro
 import { CoreSetup, CoreStart, KibanaRequest, Logger } from '@kbn/core/server';
 import { RuleDataPluginService } from '@kbn/rule-registry-plugin/server';
 
+import { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import { ObservabilityServerRouteRepository } from './get_global_observability_server_route_repository';
 import { ObservabilityRequestHandlerContext } from '../types';
-import { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 
 export type { ObservabilityServerRouteRepository };
 
