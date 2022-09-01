@@ -20,6 +20,8 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     '../security_functional/fixtures/common/test_endpoints'
   );
 
+  const auditLogPath = resolve(__dirname, './fixtures/audit/kerberos.log');
+
   return {
     testFiles: [require.resolve('./tests/kerberos')],
     servers: xPackAPITestsConfig.get('servers'),
@@ -49,6 +51,14 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         ...xPackAPITestsConfig.get('kbnTestServer.serverArgs'),
         `--plugin-path=${testEndpointsPlugin}`,
         `--xpack.security.authc.providers=${JSON.stringify(['kerberos', 'basic'])}`,
+        '--xpack.security.audit.enabled=true',
+        '--xpack.security.audit.appender.type=file',
+        `--xpack.security.audit.appender.fileName=${auditLogPath}`,
+        '--xpack.security.audit.appender.layout.type=json',
+        `--xpack.security.audit.ignore_filters=${JSON.stringify([
+          { actions: ['http_request'] },
+          { categories: ['database'] },
+        ])}`,
       ],
     },
   };
