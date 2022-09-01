@@ -353,6 +353,7 @@ export async function getSimpleExamples(
       hits: simpleExamplesResult.hits.hits,
       field,
       dataView,
+      count: DEFAULT_TOP_VALUES_SIZE,
     });
 
     return {
