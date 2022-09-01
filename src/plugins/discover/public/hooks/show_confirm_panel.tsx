@@ -46,10 +46,10 @@ export const showConfirmPanel = ({
         onClose();
         onConfirm();
       }}
-      cancelButtonText={i18n.translate('discover.confirmDataViewPersist.cancel', {
+      cancelButtonText={i18n.translate('discover.confirmDataViewSave.cancel', {
         defaultMessage: 'Cancel',
       })}
-      confirmButtonText={i18n.translate('discover.confirmDataViewPersist.saveAndContinue', {
+      confirmButtonText={i18n.translate('discover.confirmDataViewSave.saveAndContinue', {
         defaultMessage: 'Save and continue',
       })}
       defaultFocusedButton="confirm"
