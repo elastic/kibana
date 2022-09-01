@@ -63,7 +63,7 @@ export function getConnectorType({ logger }: { logger: Logger }): TeamsConnector
   return {
     id: ConnectorTypeId,
     minimumLicenseRequired: 'gold',
-    name: i18n.translate('xpack.stack_connectors.teams.title', {
+    name: i18n.translate('xpack.stackConnectors.teams.title', {
       defaultMessage: 'Microsoft Teams',
     }),
     supportedFeatureIds: [
@@ -94,7 +94,7 @@ function validateConnectorTypeConfig(
     new URL(configuredUrl);
   } catch (err) {
     throw new Error(
-      i18n.translate('xpack.stack_connectors.teams.configurationErrorNoHostname', {
+      i18n.translate('xpack.stackConnectors.teams.configurationErrorNoHostname', {
         defaultMessage: 'error configuring teams action: unable to parse host name from webhookUrl',
       })
     );
@@ -104,7 +104,7 @@ function validateConnectorTypeConfig(
     configurationUtilities.ensureUriAllowed(configuredUrl);
   } catch (allowListError) {
     throw new Error(
-      i18n.translate('xpack.stack_connectors.teams.configurationError', {
+      i18n.translate('xpack.stackConnectors.teams.configurationError', {
         defaultMessage: 'error configuring teams action: {message}',
         values: {
           message: allowListError.message,
@@ -186,7 +186,7 @@ function successResult(actionId: string, data: unknown): ConnectorTypeExecutorRe
 }
 
 function errorResultUnexpectedError(actionId: string): ConnectorTypeExecutorResult<void> {
-  const errMessage = i18n.translate('xpack.stack_connectors.teams.unreachableErrorMessage', {
+  const errMessage = i18n.translate('xpack.stackConnectors.teams.unreachableErrorMessage', {
     defaultMessage: 'error posting to Microsoft Teams, unexpected error',
   });
   return {
@@ -200,7 +200,7 @@ function errorResultInvalid(
   actionId: string,
   serviceMessage: string
 ): ConnectorTypeExecutorResult<void> {
-  const errMessage = i18n.translate('xpack.stack_connectors.teams.invalidResponseErrorMessage', {
+  const errMessage = i18n.translate('xpack.stackConnectors.teams.invalidResponseErrorMessage', {
     defaultMessage: 'error posting to Microsoft Teams, invalid response',
   });
   return {
@@ -213,7 +213,7 @@ function errorResultInvalid(
 
 function retryResult(actionId: string, message: string): ConnectorTypeExecutorResult<void> {
   const errMessage = i18n.translate(
-    'xpack.stack_connectors.teams.errorPostingRetryLaterErrorMessage',
+    'xpack.stackConnectors.teams.errorPostingRetryLaterErrorMessage',
     {
       defaultMessage: 'error posting a Microsoft Teams message, retry later',
     }
@@ -235,7 +235,7 @@ function retryResultSeconds(
   const retry = new Date(retryEpoch);
   const retryString = retry.toISOString();
   const errMessage = i18n.translate(
-    'xpack.stack_connectors.teams.errorPostingRetryDateErrorMessage',
+    'xpack.stackConnectors.teams.errorPostingRetryDateErrorMessage',
     {
       defaultMessage: 'error posting a Microsoft Teams message, retry at {retryString}',
       values: {

@@ -74,7 +74,7 @@ export function getConnectorType({ logger }: { logger: Logger }): ESIndexConnect
   return {
     id: ConnectorTypeId,
     minimumLicenseRequired: 'basic',
-    name: i18n.translate('xpack.stack_connectors.esIndex.title', {
+    name: i18n.translate('xpack.stackConnectors.esIndex.title', {
       defaultMessage: 'Index',
     }),
     supportedFeatureIds: [
@@ -168,7 +168,7 @@ function wrapErr(
   actionId: string,
   logger: Logger
 ): ConnectorTypeExecutorResult<unknown> {
-  const message = i18n.translate('xpack.stack_connectors.esIndex.errorIndexingErrorMessage', {
+  const message = i18n.translate('xpack.stackConnectors.esIndex.errorIndexingErrorMessage', {
     defaultMessage: 'error indexing documents',
   });
   logger.error(`error indexing documents: ${errMessage}`);

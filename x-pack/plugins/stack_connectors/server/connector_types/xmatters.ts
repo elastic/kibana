@@ -64,7 +64,7 @@ export function getConnectorType({ logger }: { logger: Logger }): XmattersConnec
   return {
     id: ConnectorTypeId,
     minimumLicenseRequired: 'gold',
-    name: i18n.translate('xpack.stack_connectors.xmatters.title', {
+    name: i18n.translate('xpack.stackConnectors.xmatters.title', {
       defaultMessage: 'xMatters',
     }),
     supportedFeatureIds: [AlertingConnectorFeatureId],
@@ -100,7 +100,7 @@ function validateConnectorTypeConfig(
     }
   } catch (err) {
     throw new Error(
-      i18n.translate('xpack.stack_connectors.xmatters.configurationErrorNoHostname', {
+      i18n.translate('xpack.stackConnectors.xmatters.configurationErrorNoHostname', {
         defaultMessage: 'Error configuring xMatters action: unable to parse url: {err}',
         values: {
           err,
@@ -115,7 +115,7 @@ function validateConnectorTypeConfig(
     }
   } catch (allowListError) {
     throw new Error(
-      i18n.translate('xpack.stack_connectors.xmatters.configurationError', {
+      i18n.translate('xpack.stackConnectors.xmatters.configurationError', {
         defaultMessage: 'Error configuring xMatters action: {message}',
         values: {
           message: allowListError.message,
@@ -134,38 +134,38 @@ function validateConnector(
 
   if (usesBasic) {
     if (secretsUrl) {
-      return i18n.translate('xpack.stack_connectors.xmatters.shouldNotHaveSecretsUrl', {
+      return i18n.translate('xpack.stackConnectors.xmatters.shouldNotHaveSecretsUrl', {
         defaultMessage: 'secretsUrl should not be provided when usesBasic is true',
       });
     }
     if (user == null) {
-      return i18n.translate('xpack.stack_connectors.xmatters.missingUser', {
+      return i18n.translate('xpack.stackConnectors.xmatters.missingUser', {
         defaultMessage: 'Provide valid Username',
       });
     }
     if (password == null) {
-      return i18n.translate('xpack.stack_connectors.xmatters.missingPassword', {
+      return i18n.translate('xpack.stackConnectors.xmatters.missingPassword', {
         defaultMessage: 'Provide valid Password',
       });
     }
     if (configUrl == null) {
-      return i18n.translate('xpack.stack_connectors.xmatters.missingConfigUrl', {
+      return i18n.translate('xpack.stackConnectors.xmatters.missingConfigUrl', {
         defaultMessage: 'Provide valid configUrl',
       });
     }
   } else {
     if (user || password) {
-      return i18n.translate('xpack.stack_connectors.xmatters.shouldNotHaveUsernamePassword', {
+      return i18n.translate('xpack.stackConnectors.xmatters.shouldNotHaveUsernamePassword', {
         defaultMessage: 'Username and password should not be provided when usesBasic is false',
       });
     }
     if (configUrl) {
-      return i18n.translate('xpack.stack_connectors.xmatters.shouldNotHaveConfigUrl', {
+      return i18n.translate('xpack.stackConnectors.xmatters.shouldNotHaveConfigUrl', {
         defaultMessage: 'configUrl should not be provided when usesBasic is false',
       });
     }
     if (secretsUrl == null) {
-      return i18n.translate('xpack.stack_connectors.xmatters.missingSecretsUrl', {
+      return i18n.translate('xpack.stackConnectors.xmatters.missingSecretsUrl', {
         defaultMessage: 'Provide valid secretsUrl with API Key',
       });
     }
@@ -180,7 +180,7 @@ function validateConnectorTypeSecrets(
   const { configurationUtilities } = validatorServices;
   if (!secretsObject.secretsUrl && !secretsObject.user && !secretsObject.password) {
     throw new Error(
-      i18n.translate('xpack.stack_connectors.xmatters.noSecretsProvided', {
+      i18n.translate('xpack.stackConnectors.xmatters.noSecretsProvided', {
         defaultMessage: 'Provide either secretsUrl link or user/password to authenticate',
       })
     );
@@ -191,7 +191,7 @@ function validateConnectorTypeSecrets(
     // Neither user/password should be defined if secretsUrl is specified
     if (secretsObject.user || secretsObject.password) {
       throw new Error(
-        i18n.translate('xpack.stack_connectors.xmatters.noUserPassWhenSecretsUrl', {
+        i18n.translate('xpack.stackConnectors.xmatters.noUserPassWhenSecretsUrl', {
           defaultMessage:
             'Cannot use user/password for URL authentication. Provide valid secretsUrl or use Basic Authentication.',
         })
@@ -205,7 +205,7 @@ function validateConnectorTypeSecrets(
       }
     } catch (err) {
       throw new Error(
-        i18n.translate('xpack.stack_connectors.xmatters.invalidUrlError', {
+        i18n.translate('xpack.stackConnectors.xmatters.invalidUrlError', {
           defaultMessage: 'Invalid secretsUrl: {err}',
           values: {
             err,
@@ -221,7 +221,7 @@ function validateConnectorTypeSecrets(
       }
     } catch (allowListError) {
       throw new Error(
-        i18n.translate('xpack.stack_connectors.xmatters.hostnameNotAllowed', {
+        i18n.translate('xpack.stackConnectors.xmatters.hostnameNotAllowed', {
           defaultMessage: '{message}',
           values: {
             message: allowListError.message,
@@ -233,7 +233,7 @@ function validateConnectorTypeSecrets(
     // Username and password must both be set
     if (!secretsObject.user || !secretsObject.password) {
       throw new Error(
-        i18n.translate('xpack.stack_connectors.xmatters.invalidUsernamePassword', {
+        i18n.translate('xpack.stackConnectors.xmatters.invalidUsernamePassword', {
           defaultMessage: 'Both user and password must be specified.',
         })
       );
@@ -265,7 +265,7 @@ export async function executor(
     }
     result = await postXmatters({ url, data, basicAuth }, logger, configurationUtilities);
   } catch (err) {
-    const message = i18n.translate('xpack.stack_connectors.xmatters.postingErrorMessage', {
+    const message = i18n.translate('xpack.stackConnectors.xmatters.postingErrorMessage', {
       defaultMessage: 'Error triggering xMatters workflow',
     });
     logger.warn(`Error thrown triggering xMatters workflow: ${err.message}`);
@@ -285,7 +285,7 @@ export async function executor(
   }
 
   if (result.status === 429 || result.status >= 500) {
-    const message = i18n.translate('xpack.stack_connectors.xmatters.postingRetryErrorMessage', {
+    const message = i18n.translate('xpack.stackConnectors.xmatters.postingRetryErrorMessage', {
       defaultMessage: 'Error triggering xMatters flow: http status {status}, retry later',
       values: {
         status: result.status,
@@ -299,7 +299,7 @@ export async function executor(
       retry: true,
     };
   }
-  const message = i18n.translate('xpack.stack_connectors.xmatters.unexpectedStatusErrorMessage', {
+  const message = i18n.translate('xpack.stackConnectors.xmatters.unexpectedStatusErrorMessage', {
     defaultMessage: 'Error triggering xMatters flow: unexpected status {status}',
     values: {
       status: result.status,

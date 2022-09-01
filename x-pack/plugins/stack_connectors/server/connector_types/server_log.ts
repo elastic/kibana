@@ -53,7 +53,7 @@ export function getConnectorType({ logger }: { logger: Logger }): ServerLogConne
   return {
     id: ConnectorTypeId,
     minimumLicenseRequired: 'basic',
-    name: i18n.translate('xpack.stack_connectors.serverLog.title', {
+    name: i18n.translate('xpack.stackConnectors.serverLog.title', {
       defaultMessage: 'Server log',
     }),
     supportedFeatureIds: [AlertingConnectorFeatureId, UptimeConnectorFeatureId],
@@ -79,7 +79,7 @@ async function executor(
   try {
     (logger[params.level] as Logger['info'])<LogMeta>(`Server log: ${sanitizedMessage}`);
   } catch (err) {
-    const message = i18n.translate('xpack.stack_connectors.serverLog.errorLoggingErrorMessage', {
+    const message = i18n.translate('xpack.stackConnectors.serverLog.errorLoggingErrorMessage', {
       defaultMessage: 'error logging message',
     });
     return {
