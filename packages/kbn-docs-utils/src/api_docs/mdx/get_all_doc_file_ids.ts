@@ -37,7 +37,7 @@ export async function getAllDocFileIds(outputDir: string) {
 
     let fm;
     try {
-      fm = Yaml.safeLoad(fmYaml.slice(9, fmEnd.index));
+      fm = Yaml.safeLoad(fmYaml.slice(0, fmEnd.index));
       if (typeof fm !== 'object' || fm === null) {
         throw new Error('expected yaml to produce an object');
       }
