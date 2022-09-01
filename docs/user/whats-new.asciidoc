@@ -77,13 +77,9 @@ It’s now easier to work with multiple layers in *Lens*.
 Drag and drop fields between your layers when they are coming from the same data view.
 
 [discrete]
-==== Custom ranges in number histograms
-In *Lens*, you can now create custom ranges for your number histograms.
-This helps you understand the domain of your data for when you want to
-have a fixed set of histogram buckets.
-
-[role="screenshot"]
-image:images/highlights-histogram.png[Custom ranges in histogram in Lens, width=75%]
+==== Custom bounds for number histograms
+In *Lens*, set extended data bounds for your number histogram axis,
+so you can display a known domain regardless of what data is showing.
 
 [discrete]
 ==== Filter top values for specific terms
