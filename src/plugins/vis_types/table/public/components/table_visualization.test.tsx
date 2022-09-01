@@ -7,16 +7,27 @@
  */
 
 jest.mock('../utils', () => ({
-  useUiState: jest.fn(() => 'uiState'),
+  useUiState: jest.fn(() => ({
+    columnsWidth: [
+      { colIndex: 0, width: 77 },
+      { colIndex: 1, width: 22 },
+    ],
+    sort: {
+      columnIndex: null,
+      direction: null,
+    },
+  })),
+  usePagination: () => undefined,
 }));
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { mount, shallow } from 'enzyme';
 import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/common';
 import { coreMock } from '@kbn/core/public/mocks';
-import { TableVisConfig, TableVisData } from '../types';
+import { FormattedColumns, TableVisConfig, TableVisData } from '../types';
 import TableVisualizationComponent from './table_visualization';
 import { useUiState } from '../utils';
+import { TableVisSplit } from './table_vis_split';
 
 describe('TableVisualizationComponent', () => {
   const coreStartMock = coreMock.createStart();
@@ -67,5 +78,60 @@ describe('TableVisualizationComponent', () => {
     expect(comp.find('.tbvChart__splitColumns').exists()).toBeTruthy();
     expect(comp.find('.tbvChart__split').exists()).toBeFalsy();
     expect(comp.find('[data-test-subj="tbvChart"]').children().prop('tables')).toEqual([]);
+  });
+
+  it('should render split table and set minWidth for column split', () => {
+    const comp = mount(
+      <TableVisualizationComponent
+        core={coreStartMock}
+        handlers={handlers}
+        visData={{
+          direction: 'column',
+          tables: [
+            {
+              title: 'One',
+              table: {
+                columns: [
+                  { id: 'a', name: 'a', meta: { type: 'string' } },
+                  { id: 'b', name: 'b', meta: { type: 'string' } },
+                  { id: 'c', name: 'c', meta: { type: 'string' } },
+                ],
+                rows: [],
+                formattedColumns: {
+                  a: {},
+                  b: {},
+                  c: {},
+                } as unknown as FormattedColumns,
+              },
+            },
+            {
+              title: 'Two',
+              table: {
+                columns: [
+                  { id: 'a', name: 'a', meta: { type: 'string' } },
+                  { id: 'b', name: 'b', meta: { type: 'string' } },
+                  { id: 'c', name: 'c', meta: { type: 'string' } },
+                ],
+                rows: [],
+                formattedColumns: {
+                  a: {},
+                  b: {},
+                  c: {},
+                } as unknown as FormattedColumns,
+              },
+            },
+          ],
+        }}
+        visConfig={visConfig}
+        renderComplete={renderComplete}
+      />
+    );
+    const splits = comp.find(TableVisSplit).find('.tbvChart__split');
+    expect(splits.length).toBe(2);
+    splits.forEach((split) => {
+      expect((split.prop('css') as { minWidth: string }).minWidth).toEqual(
+        `calc(${77 + 22 + 25}px + 2 * 8px)`
+      );
+    });
   });
 });
