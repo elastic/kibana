@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { getRandomInt } from '../../tasks/helpers';
 import { login } from '../../tasks/login';
 import { navigateTo } from '../../tasks/navigation';
 import { ROLES } from '../../test';
@@ -21,8 +22,10 @@ import { getSavedQueriesComplexTest } from '../../tasks/saved_queries';
 
 describe('T2 Analyst - READ + Write Live/Saved + runSavedQueries ', () => {
   const SAVED_QUERY_ID = 'Saved-Query-Id';
-  const NEW_SAVED_QUERY_ID = 'Saved-Query-Id-T2';
-  const NEW_SAVED_QUERY_DESCRIPTION = 'Test saved query description T2';
+  const randomNumber = getRandomInt(9);
+
+  const NEW_SAVED_QUERY_ID = `Saved-Query-Id-${randomNumber}`;
+  const NEW_SAVED_QUERY_DESCRIPTION = `Test saved query description ${randomNumber}`;
   beforeEach(() => {
     login(ROLES.t2_analyst);
     navigateTo('/app/osquery');
