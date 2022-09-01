@@ -147,7 +147,7 @@ export function useMonitorsSortedByStatus(shouldUpdate: boolean) {
 
     return {
       monitorsSortedByStatus: [...upAndDownMonitors, ...monitorsSortedByStatus.disabled],
-      downMonitors,
+      downMonitors: downMonitors.current,
     };
   }, [downMonitors, monitorsSortedByStatus, sortOrder]);
 }
