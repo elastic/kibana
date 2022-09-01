@@ -68,9 +68,8 @@ import type {
   ChromeRecentlyAccessed,
   ChromeRecentlyAccessedHistoryItem,
   ChromeUserBanner,
-  NavType,
   ChromeHelpMenuActions,
-} from './chrome';
+} from '@kbn/core-chrome-browser';
 import type {
   Plugin,
   PluginInitializer,
