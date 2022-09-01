@@ -8,8 +8,7 @@
 
 import { EuiResizableContainer, useEuiTheme, useResizeObserver } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { RefObject, useCallback, useEffect, useState } from 'react';
-import { HtmlPortalNode, OutPortal } from 'react-reverse-portal';
+import React, { ReactElement, RefObject, useCallback, useEffect, useState } from 'react';
 
 const percentToPixels = (containerHeight: number, percentage: number) =>
   Math.round(containerHeight * (percentage / 100));
@@ -27,8 +26,8 @@ export const DiscoverResizablePanels = ({
   className?: string;
   histogramHeight: number;
   resizeRef: RefObject<HTMLDivElement>;
-  histogramPanel: HtmlPortalNode;
-  mainPanel: HtmlPortalNode;
+  histogramPanel: ReactElement;
+  mainPanel: ReactElement;
 }) => {
   const { euiTheme } = useEuiTheme();
   const minHistogramHeight = euiTheme.base * 8;
@@ -123,7 +122,7 @@ export const DiscoverResizablePanels = ({
               size={panelSizes.histogramSize}
               paddingSize="none"
             >
-              <OutPortal node={histogramPanel} />
+              {histogramPanel}
             </EuiResizablePanel>
             <EuiResizableButton css={resizeWithPortalsHackButtonCss}>
               <span
@@ -137,7 +136,7 @@ export const DiscoverResizablePanels = ({
               size={panelSizes.mainSize}
               paddingSize="none"
             >
-              <OutPortal node={mainPanel} />
+              {mainPanel}
             </EuiResizablePanel>
             {resizeWithPortalsHackIsResizing ? (
               <div css={resizeWithPortalsHackOverlayCss} />

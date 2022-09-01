@@ -18,7 +18,7 @@ import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import React, { RefObject, useCallback, useMemo } from 'react';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { createHtmlPortalNode, InPortal } from 'react-reverse-portal';
+import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DataTableRecord } from '../../../../types';
 import { DocumentViewModeToggle, VIEW_MODE } from '../../../../components/view_mode_toggle';
@@ -89,12 +89,12 @@ export const DiscoverMainContent = ({
     [trackUiMetric, stateContainer]
   );
 
-  const histogramPanel = useMemo(
+  const histogramPanelNode = useMemo(
     () => createHtmlPortalNode({ attributes: { class: 'eui-fullHeight' } }),
     []
   );
 
-  const mainPanel = useMemo(
+  const mainPanelNode = useMemo(
     () => createHtmlPortalNode({ attributes: { class: 'eui-fullHeight' } }),
     []
   );
@@ -104,13 +104,13 @@ export const DiscoverMainContent = ({
   const panelsProps = {
     className: 'dscPageContent__inner',
     histogramHeight: euiTheme.base * 12,
-    histogramPanel,
-    mainPanel,
+    histogramPanel: <OutPortal node={histogramPanelNode} />,
+    mainPanel: <OutPortal node={mainPanelNode} />,
   };
 
   return (
     <>
-      <InPortal node={histogramPanel}>
+      <InPortal node={histogramPanelNode}>
         <DiscoverChartMemoized
           resetSavedSearch={resetSavedSearch}
           savedSearch={savedSearch}
@@ -124,7 +124,7 @@ export const DiscoverMainContent = ({
           appendHistogram={showFixedPanels ? <EuiSpacer size="s" /> : <EuiSpacer size="m" />}
         />
       </InPortal>
-      <InPortal node={mainPanel}>
+      <InPortal node={mainPanelNode}>
         <EuiFlexGroup
           className="eui-fullHeight"
           direction="column"
