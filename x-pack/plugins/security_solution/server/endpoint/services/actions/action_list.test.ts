@@ -99,6 +99,7 @@ describe('When using `getActionList()', () => {
           isCompleted: true,
           isExpired: false,
           startedAt: '2022-04-27T16:08:47.449Z',
+          status: 'completed',
           comment: doc?.EndpointActions.data.comment,
           createdBy: doc?.user.id,
           parameters: doc?.EndpointActions.data.parameters,

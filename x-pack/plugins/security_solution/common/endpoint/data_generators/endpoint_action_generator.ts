@@ -118,6 +118,7 @@ export class EndpointActionGenerator extends BaseDataGenerator {
       wasSuccessful: true,
       errors: undefined,
       startedAt: '2022-04-27T16:08:47.449Z',
+      status: 'completed',
       comment: 'thisisacomment',
       createdBy: 'auserid',
       parameters: undefined,

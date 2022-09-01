@@ -47,6 +47,17 @@ const getCommand = (
 ): Exclude<ActionDetails['command'], 'unisolate'> | 'release' =>
   command === 'unisolate' ? 'release' : command;
 
+const getActionStatus = (status: ActionDetails['status']): string => {
+  if (status === 'failed') {
+    return UX_MESSAGES.badge.failed;
+  } else if (status === 'completed') {
+    return UX_MESSAGES.badge.completed;
+  } else if (status === 'pending') {
+    return UX_MESSAGES.badge.pending;
+  }
+  return '';
+};
+
 // Truncated usernames
 const StyledFacetButton = euiStyled(EuiFacetButton)`
   .euiText {
@@ -372,30 +383,18 @@ export const ResponseActionsLog = memo<
         },
       },
       {
-        field: 'isCompleted',
+        field: 'status',
         name: TABLE_COLUMN_NAMES.status,
         width: !showHostNames ? '15%' : '10%',
-        render: (isCompleted: ActionDetails['isCompleted'], data: ActionDetails) => {
-          const status = data.isExpired
-            ? UX_MESSAGES.badge.failed
-            : isCompleted
-            ? data.wasSuccessful
-              ? UX_MESSAGES.badge.completed
-              : UX_MESSAGES.badge.failed
-            : UX_MESSAGES.badge.pending;
+        render: (_status: ActionDetails['status']) => {
+          const status = getActionStatus(_status);
 
           return (
             <EuiToolTip content={status} anchorClassName="eui-textTruncate">
               <EuiBadge
                 data-test-subj={getTestId('column-status')}
                 color={
-                  data.isExpired
-                    ? 'danger'
-                    : isCompleted
-                    ? data.wasSuccessful
-                      ? 'success'
-                      : 'danger'
-                    : 'warning'
+                  _status === 'failed' ? 'danger' : _status === 'completed' ? 'success' : 'warning'
                 }
               >
                 <FormattedMessage

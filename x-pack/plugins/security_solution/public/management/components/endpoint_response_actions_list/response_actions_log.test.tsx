@@ -13,7 +13,11 @@ import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import type { AppContextTestRender } from '../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
 import { ResponseActionsLog } from './response_actions_log';
-import type { ActionDetails, ActionListApiResponse } from '../../../../common/endpoint/types';
+import type {
+  ActionDetails,
+  ActionListApiResponse,
+  ResponseActionStatus,
+} from '../../../../common/endpoint/types';
 import { MANAGEMENT_PATH } from '../../../../common/constants';
 import { EndpointActionGenerator } from '../../../../common/endpoint/data_generators/endpoint_action_generator';
 
@@ -328,7 +332,7 @@ describe('Response Actions Log', () => {
       return outputs;
     };
 
-    it('Shows completed status badge for successfully completed actions', async () => {
+    it('shows completed status badge for successfully completed actions', async () => {
       mockUseGetEndpointActionList = {
         ...baseMockedActionList,
         data: await getActionListMock({ actionCount: 2 }),
@@ -348,7 +352,7 @@ describe('Response Actions Log', () => {
     it('shows Failed status badge for failed actions', async () => {
       mockUseGetEndpointActionList = {
         ...baseMockedActionList,
-        data: await getActionListMock({ actionCount: 2, wasSuccessful: false }),
+        data: await getActionListMock({ actionCount: 2, wasSuccessful: false, status: 'failed' }),
       };
       render();
 
@@ -362,7 +366,12 @@ describe('Response Actions Log', () => {
     it('shows Failed status badge for expired actions', async () => {
       mockUseGetEndpointActionList = {
         ...baseMockedActionList,
-        data: await getActionListMock({ actionCount: 2, isCompleted: false, isExpired: true }),
+        data: await getActionListMock({
+          actionCount: 2,
+          isCompleted: false,
+          isExpired: true,
+          status: 'failed',
+        }),
       };
       render();
 
@@ -379,7 +388,7 @@ describe('Response Actions Log', () => {
     it('shows Pending status badge for pending actions', async () => {
       mockUseGetEndpointActionList = {
         ...baseMockedActionList,
-        data: await getActionListMock({ actionCount: 2, isCompleted: false }),
+        data: await getActionListMock({ actionCount: 2, isCompleted: false, status: 'pending' }),
       };
       render();
 
@@ -442,6 +451,7 @@ const getActionListMock = async ({
   isCompleted = true,
   isExpired = false,
   wasSuccessful = true,
+  status = 'completed',
 }: {
   agentIds?: string[];
   commands?: string[];
@@ -454,6 +464,7 @@ const getActionListMock = async ({
   isCompleted?: boolean;
   isExpired?: boolean;
   wasSuccessful?: boolean;
+  status?: ResponseActionStatus;
 }): Promise<ActionListApiResponse> => {
   const endpointActionGenerator = new EndpointActionGenerator('seed');
 
@@ -471,6 +482,7 @@ const getActionListMock = async ({
         isCompleted,
         isExpired,
         wasSuccessful,
+        status,
         completedAt: isExpired ? undefined : new Date().toISOString(),
       });
     });

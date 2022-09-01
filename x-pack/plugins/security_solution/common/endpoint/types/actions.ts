@@ -263,6 +263,8 @@ export interface PendingActionsResponse {
 
 export type PendingActionsRequestQuery = TypeOf<typeof ActionStatusRequestSchema.query>;
 
+export const RESPONSE_ACTION_STATUS = ['completed', 'failed', 'pending'] as const;
+export type ResponseActionStatus = typeof RESPONSE_ACTION_STATUS[number];
 export interface ActionDetails<TOutputContent extends object = object> {
   /** The action id */
   id: string;
@@ -311,6 +313,8 @@ export interface ActionDetails<TOutputContent extends object = object> {
       completedAt: string | undefined;
     }
   >;
+  /**  action status */
+  status: ResponseActionStatus;
   /** user that created the action */
   createdBy: string;
   /** comment submitted with action */

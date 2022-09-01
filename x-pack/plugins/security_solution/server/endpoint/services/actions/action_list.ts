@@ -19,6 +19,7 @@ import {
   getActionCompletionInfo,
   mapToNormalizedActionRequest,
   getAgentHostNamesWithIds,
+  getActionStatus,
 } from './utils';
 import type { EndpointMetadataService } from '../metadata';
 
@@ -198,6 +199,12 @@ const getActionDetailsList = async ({
       matchedResponses
     );
 
+    const { isExpired, status } = getActionStatus({
+      expirationDate: action.expiration,
+      isCompleted,
+      wasSuccessful,
+    });
+
     // NOTE: `outputs` is not returned in this service because including it on a list of data
     // could result in a very large response unnecessarily. In the future, we might include
     // an option to optionally include it.
@@ -215,7 +222,8 @@ const getActionDetailsList = async ({
       wasSuccessful,
       errors,
       agentState,
-      isExpired: !isCompleted && action.expiration < new Date().toISOString(),
+      isExpired,
+      status,
       createdBy: action.createdBy,
       comment: action.comment,
       parameters: action.parameters,

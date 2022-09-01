@@ -185,6 +185,27 @@ export const getActionCompletionInfo = (
   return completedInfo;
 };
 
+export const getActionStatus = ({
+  expirationDate,
+  isCompleted,
+  wasSuccessful,
+}: {
+  expirationDate: string;
+  isCompleted: boolean;
+  wasSuccessful: boolean;
+}): { status: ActionDetails['status']; isExpired: boolean } => {
+  const isExpired = !isCompleted && expirationDate < new Date().toISOString();
+  const status = isExpired
+    ? 'failed'
+    : isCompleted
+    ? wasSuccessful
+      ? 'completed'
+      : 'failed'
+    : 'pending';
+
+  return { isExpired, status };
+};
+
 interface NormalizedAgentActionResponse {
   isCompleted: boolean;
   completedAt: undefined | string;
