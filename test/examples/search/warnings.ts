@@ -6,15 +6,20 @@
  * Side Public License, v 1.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import expect from '@kbn/expect';
 import { asyncForEach } from '@kbn/std';
-import { FtrProviderContext } from '../../functional/ftr_provider_context';
+import assert from 'assert';
+import type { FtrProviderContext } from '../../functional/ftr_provider_context';
+import type { WebElementWrapper } from '../../functional/services/lib/web_element_wrapper';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'timePicker']);
   const testSubjects = getService('testSubjects');
   const find = getService('find');
+  const browser = getService('browser');
+  const retry = getService('retry');
   const es = getService('es');
   const log = getService('log');
   const indexPatterns = getService('indexPatterns');
@@ -22,8 +27,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
 
-  // Failing: See https://github.com/elastic/kibana/issues/139879
-  describe.skip('handling warnings with search source fetch', function () {
+  describe('handling warnings with search source fetch', function () {
     const dataViewTitle = 'sample-01,sample-01-rollup';
     const fromTime = 'Jun 17, 2022 @ 00:00:00.000';
     const toTime = 'Jun 23, 2022 @ 00:00:00.000';
@@ -76,6 +80,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         defaultIndex: '0ae0bc7a-e4ca-405c-ab67-f2b5913f2a51',
         'timepicker:timeDefaults': '{ "from": "now-1y", "to": "now" }',
       });
+
+      await PageObjects.common.navigateToApp('searchExamples');
+    });
+
+    beforeEach(async () => {
+      await browser.refresh(); // clear state from previous test
+      await comboBox.setCustom('dataViewSelector', dataViewTitle);
+      await comboBox.set('searchMetricField', testRollupField);
+      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
     });
 
     after(async () => {
@@ -84,18 +97,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.uiSettings.replace({});
     });
 
-    beforeEach(async () => {
-      // reload the page to clear toasts from previous test
-
-      await PageObjects.common.navigateToApp('searchExamples');
-
-      await comboBox.setCustom('dataViewSelector', dataViewTitle);
-      await comboBox.set('searchMetricField', testRollupField);
-      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+    afterEach(async () => {
+      await PageObjects.common.clearAllToasts();
     });
 
     it('shows shard failure warning notifications by default', async () => {
       await testSubjects.click('searchSourceWithOther');
+
+      // wait for response - toasts appear before the response is rendered
+      let response: estypes.SearchResponse | undefined;
+      await retry.try(async () => {
+        response = await getTestJson('responseTab', 'responseCodeBlock');
+        expect(response).not.to.eql({});
+      });
 
       // toasts
       const toasts = await find.allByCssSelector(toastsSelector);
@@ -119,12 +133,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const responseBlock = await testSubjects.find('shardsFailedModalResponseBlock');
       expect(await responseBlock.getVisibleText()).to.contain(shardFailureReason);
 
-      // close things
       await testSubjects.click('closeShardFailureModal');
-      await PageObjects.common.clearAllToasts();
 
       // response tab
-      const response = await getTestJson('responseTab', 'responseCodeBlock');
+      assert(response && response._shards.failures);
       expect(response._shards.total).to.be(4);
       expect(response._shards.successful).to.be(2);
       expect(response._shards.skipped).to.be(0);
@@ -142,9 +154,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('able to handle shard failure warnings and prevent default notifications', async () => {
       await testSubjects.click('searchSourceWithoutOther');
 
-      // toasts
-      const toasts = await find.allByCssSelector(toastsSelector);
-      expect(toasts.length).to.be(2);
+      // wait for toasts - toasts appear after the response is rendered
+      let toasts: WebElementWrapper[] = [];
+      await retry.try(async () => {
+        toasts = await find.allByCssSelector(toastsSelector);
+        expect(toasts.length).to.be(2);
+      });
       const expects = ['2 of 4 shards failed', 'Query result'];
       await asyncForEach(toasts, async (t, index) => {
         expect(await t.getVisibleText()).to.eql(expects[index]);
@@ -164,9 +179,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const responseBlock = await testSubjects.find('shardsFailedModalResponseBlock');
       expect(await responseBlock.getVisibleText()).to.contain(shardFailureReason);
 
-      // close things
       await testSubjects.click('closeShardFailureModal');
-      await PageObjects.common.clearAllToasts();
 
       // response tab
       const response = await getTestJson('responseTab', 'responseCodeBlock');
