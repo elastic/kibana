@@ -121,7 +121,7 @@ export const useHoverActionItems = ({
     dispatch(
       addProvider({
         id: TimelineId.active,
-        providers: dataProvider instanceof Array? dataProvider : [dataProvider],
+        providers: dataProvider instanceof Array ? dataProvider : [dataProvider],
       })
     );
   }, [dataProvider, dispatch]);
