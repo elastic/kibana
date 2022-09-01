@@ -31,7 +31,7 @@ export function getEventAnnotationService(): EventAnnotationServiceType {
   return {
     toExpression: (annotation) => {
       if (isRangeAnnotation(annotation)) {
-        const { label, isHidden, color, key, outside } = annotation;
+        const { label, isHidden, color, key, outside, id } = annotation;
         const { timestamp: time, endTimestamp: endTime } = key;
         return {
           type: 'expression',
@@ -40,6 +40,7 @@ export function getEventAnnotationService(): EventAnnotationServiceType {
               type: 'function',
               function: 'manual_range_event_annotation',
               arguments: {
+                id: [id],
                 time: [time],
                 endTime: [endTime],
                 label: [label || defaultAnnotationLabel],
@@ -52,6 +53,7 @@ export function getEventAnnotationService(): EventAnnotationServiceType {
         };
       } else if (isQueryAnnotationConfig(annotation)) {
         const {
+          id,
           extraFields,
           label,
           isHidden,
@@ -71,6 +73,7 @@ export function getEventAnnotationService(): EventAnnotationServiceType {
               type: 'function',
               function: 'query_point_event_annotation',
               arguments: {
+                id: [id],
                 filter: filter ? [queryToAst(filter)] : [],
                 timeField: [timeField],
                 textField: [textField],
@@ -87,7 +90,7 @@ export function getEventAnnotationService(): EventAnnotationServiceType {
           ],
         };
       } else {
-        const { label, isHidden, color, lineStyle, lineWidth, icon, key, textVisibility } =
+        const { label, isHidden, color, lineStyle, lineWidth, icon, key, textVisibility, id } =
           annotation;
         return {
           type: 'expression',
@@ -96,6 +99,7 @@ export function getEventAnnotationService(): EventAnnotationServiceType {
               type: 'function',
               function: 'manual_point_event_annotation',
               arguments: {
+                id: [id],
                 time: [key.timestamp],
                 label: [label || defaultAnnotationLabel],
                 color: [color || defaultAnnotationColor],

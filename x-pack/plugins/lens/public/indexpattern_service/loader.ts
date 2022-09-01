@@ -195,6 +195,7 @@ export async function loadIndexPatterns({
       });
       if (resp) {
         indexPatterns = [resp];
+        break;
       }
     }
   }
