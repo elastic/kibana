@@ -380,12 +380,12 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
               <DualBrushAnnotation
                 id="aiopsBaseline"
                 min={windowParameters.baselineMin}
-                max={windowParameters.baselineMax - interval}
+                max={windowParameters.baselineMax}
               />
               <DualBrushAnnotation
                 id="aiopsDeviation"
                 min={windowParameters.deviationMin}
-                max={windowParameters.deviationMax - interval}
+                max={windowParameters.deviationMax}
               />
             </>
           )}
