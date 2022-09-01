@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export const getRandomInt = (max: number) => Math.floor(Math.random() * max);
+export const getRandomInt = () => Math.floor(Math.random() * 100);

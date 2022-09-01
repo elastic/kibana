@@ -12,10 +12,8 @@ import { login } from '../../tasks/login';
 import { getSavedQueriesComplexTest } from '../../tasks/saved_queries';
 import { ROLES } from '../../test';
 
-
-
 describe('ALL - Saved queries', () => {
-  const randomNumber = getRandomInt(9);
+  const randomNumber = getRandomInt();
   const SAVED_QUERY_ID = `Saved-Query-Id-${randomNumber}`;
   const SAVED_QUERY_DESCRIPTION = `Test saved query description ${randomNumber}`;
 

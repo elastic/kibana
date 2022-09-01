@@ -252,7 +252,7 @@ describe('ALL - Packs', () => {
     beforeEach(() => {
       login();
     });
-    const randomNumber = getRandomInt(9);
+    const randomNumber = getRandomInt();
     const AGENT_NAME = `PackTest${randomNumber}`;
     const REMOVING_PACK = 'removing-pack';
     it('add integration', () => {

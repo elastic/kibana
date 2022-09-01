@@ -22,7 +22,7 @@ import { getSavedQueriesComplexTest } from '../../tasks/saved_queries';
 
 describe('T2 Analyst - READ + Write Live/Saved + runSavedQueries ', () => {
   const SAVED_QUERY_ID = 'Saved-Query-Id';
-  const randomNumber = getRandomInt(9);
+  const randomNumber = getRandomInt();
 
   const NEW_SAVED_QUERY_ID = `Saved-Query-Id-${randomNumber}`;
   const NEW_SAVED_QUERY_DESCRIPTION = `Test saved query description ${randomNumber}`;
