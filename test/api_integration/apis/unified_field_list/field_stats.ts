@@ -408,35 +408,10 @@ export default ({ getService }: FtrProviderContext) => {
           })
           .expect(200);
 
-        expect(body).to.eql({
-          totalDocuments: 4634,
-          sampledDocuments: 100,
-          sampledValues: 100,
-          topValues: {
-            buckets: [
-              {
-                count: 64,
-                key: 'jpg',
-              },
-              {
-                count: 17,
-                key: 'png',
-              },
-              {
-                count: 13,
-                key: 'css',
-              },
-              {
-                count: 4,
-                key: 'gif',
-              },
-              {
-                count: 2,
-                key: 'php',
-              },
-            ],
-          },
-        });
+        expect(body.totalDocuments).to.eql(4634);
+        expect(body.sampledDocuments).to.eql(100);
+        expect(body.sampledValues).to.eql(100);
+        expect(body.topValues.buckets.length).to.eql(5);
       });
 
       it('should return top values for index pattern runtime string fields', async () => {
