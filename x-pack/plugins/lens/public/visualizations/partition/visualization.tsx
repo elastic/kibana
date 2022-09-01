@@ -128,9 +128,9 @@ export const getPieVisualization = ({
       columnId: accessor,
     }));
 
-    if (sortedColumns.length) {
-      applyPaletteToColumnConfig(sortedColumns, state, paletteService);
-    }
+    // if (sortedColumns.length) {
+    //   applyPaletteToColumnConfig(sortedColumns, state, paletteService);
+    // }
 
     const getSliceByGroup = (): VisualizationDimensionGroupConfig => {
       const baseProps = {
@@ -138,7 +138,7 @@ export const getPieVisualization = ({
         groupId: 'groups',
         accessors: sortedColumns,
         enableDimensionEditor: true,
-        filterOperations: bucketedOperations,
+        filterOperations: numberMetricOperations,
       };
 
       switch (state.shape) {
@@ -147,24 +147,24 @@ export const getPieVisualization = ({
           return {
             ...baseProps,
             groupLabel: i18n.translate('xpack.lens.pie.sliceGroupLabel', {
-              defaultMessage: 'Slice by',
+              defaultMessage: 'Partitions',
             }),
             dimensionEditorGroupLabel: i18n.translate('xpack.lens.pie.sliceDimensionGroupLabel', {
               defaultMessage: 'Slice',
             }),
-            supportsMoreColumns: sortedColumns.length < PartitionChartsMeta.pie.maxBuckets,
+            supportsMoreColumns: true,
             dataTestSubj: 'lnsPie_sliceByDimensionPanel',
           };
         default:
           return {
             ...baseProps,
             groupLabel: i18n.translate('xpack.lens.pie.treemapGroupLabel', {
-              defaultMessage: 'Group by',
+              defaultMessage: 'Partitions',
             }),
             dimensionEditorGroupLabel: i18n.translate('xpack.lens.pie.treemapDimensionGroupLabel', {
               defaultMessage: 'Group',
             }),
-            supportsMoreColumns: sortedColumns.length < PartitionChartsMeta[state.shape].maxBuckets,
+            supportsMoreColumns: true,
             dataTestSubj: 'lnsPie_groupByDimensionPanel',
             requiredMinDimensionCount: PartitionChartsMeta[state.shape].requiredMinDimensionCount,
           };
@@ -192,7 +192,7 @@ export const getPieVisualization = ({
     });
 
     return {
-      groups: [getSliceByGroup(), getMetricGroup()],
+      groups: [getSliceByGroup()],
     };
   },
 
