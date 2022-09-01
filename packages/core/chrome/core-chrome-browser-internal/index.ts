@@ -6,6 +6,5 @@
  * Side Public License, v 1.
  */
 
-export function foo() {
-  return 'hello world';
-}
+export { ChromeService } from './src';
+export type { InternalChromeStart } from './src';
