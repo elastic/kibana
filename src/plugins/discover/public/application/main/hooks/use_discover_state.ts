@@ -17,6 +17,7 @@ import {
   Query,
 } from '@kbn/es-query';
 import { SavedSearch, getSavedSearch } from '@kbn/saved-search-plugin/public';
+import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import { getState } from '../services/discover_state';
 import { getStateDefaults } from '../utils/get_state_defaults';
 import { DiscoverServices } from '../../../build_services';
@@ -32,8 +33,8 @@ import { useSearchSession } from './use_search_session';
 import { useDataState } from './use_data_state';
 import { FetchStatus } from '../../types';
 import { getDataViewAppState } from '../utils/get_switch_data_view_app_state';
-import { SortPairArr } from '../../../components/doc_table/utils/get_sort';
 import { DataTableRecord } from '../../../types';
+import { restoreStateFromSavedSearch } from '../../../services/saved_searches/restore_from_saved_search';
 
 const MAX_NUM_OF_COLUMNS = 50;
 
@@ -193,6 +194,12 @@ export function useDiscoverState({
         savedSearch: newSavedSearch,
         storage,
       });
+
+      restoreStateFromSavedSearch({
+        savedSearch: newSavedSearch,
+        timefilter: services.timefilter,
+      });
+
       await stateContainer.replaceUrlAppState(newAppState);
       setState(newAppState);
     },
@@ -210,7 +217,7 @@ export function useDiscoverState({
           dataView,
           nextDataView,
           state.columns || [],
-          (state.sort || []) as SortPairArr[],
+          (state.sort || []) as SortOrder[],
           config.get(MODIFY_COLUMNS_ON_SWITCH),
           config.get(SORT_DEFAULT_ORDER_SETTING),
           state.query

@@ -33,8 +33,7 @@ export const Default: Story<void> = () => {
   return (
     <IndicatorsFieldSelector
       indexPattern={mockIndexPattern}
-      // eslint-disable-next-line no-console
-      valueChange={(value: string) => console.log(value)}
+      valueChange={(value: string) => window.alert(`${value} selected`)}
     />
   );
 };
@@ -43,19 +42,12 @@ export const WithDefaultValue: Story<void> = () => {
   return (
     <IndicatorsFieldSelector
       indexPattern={mockIndexPattern}
-      // eslint-disable-next-line no-console
-      valueChange={(value: string) => console.log(value)}
+      valueChange={(value: string) => window.alert(`${value} selected`)}
       defaultStackByValue={RawIndicatorFieldId.LastSeen}
     />
   );
 };
 
 export const NoData: Story<void> = () => {
-  return (
-    <IndicatorsFieldSelector
-      indexPattern={{ fields: [] } as any}
-      // eslint-disable-next-line no-console
-      valueChange={(value: string) => console.log(value)}
-    />
-  );
+  return <IndicatorsFieldSelector indexPattern={{ fields: [] } as any} valueChange={() => {}} />;
 };

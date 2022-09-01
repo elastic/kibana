@@ -25,18 +25,12 @@ import {
   policyResponseTitles,
 } from './policy_response_friendly_names';
 
+jest.setTimeout(10000);
+
 jest.mock('../../hooks/endpoint/use_get_endpoint_policy_response');
 jest.mock('../../hooks/endpoint/use_get_endpoint_details');
 
-// FLAKY: https://github.com/elastic/kibana/issues/136272
-// FLAKY: https://github.com/elastic/kibana/issues/139033
-// FLAKY: https://github.com/elastic/kibana/issues/139032
-// FLAKY: https://github.com/elastic/kibana/issues/139031
-// FLAKY: https://github.com/elastic/kibana/issues/139030
-// FLAKY: https://github.com/elastic/kibana/issues/139028
-// FLAKY: https://github.com/elastic/kibana/issues/139029
-// FLAKY: https://github.com/elastic/kibana/issues/139027
-describe.skip('when on the policy response', () => {
+describe('when on the policy response', () => {
   const docGenerator = new EndpointDocGenerator();
   const createPolicyResponse = (
     overallStatus: HostPolicyResponseActionStatus = HostPolicyResponseActionStatus.success,

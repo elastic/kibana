@@ -7,24 +7,36 @@
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
-import { MONITOR_ADD_ROUTE } from '../../../../../common/constants';
+import { MONITOR_ADD_ROUTE, MONITOR_EDIT_ROUTE } from '../../../../../common/constants';
 import { PLUGIN } from '../../../../../common/constants/plugin';
 
-export const useMonitorAddEditBreadcrumbs = () => {
+export const useMonitorAddEditBreadcrumbs = (isEdit?: boolean) => {
   const kibana = useKibana();
   const appPath = kibana.services.application?.getUrlForApp(PLUGIN.SYNTHETICS_PLUGIN_ID) ?? '';
 
-  useBreadcrumbs([
-    {
-      text: ADD_MONITOR_CRUMB,
-      href: `${appPath}/${MONITOR_ADD_ROUTE}`,
-    },
-  ]);
+  const config = isEdit
+    ? {
+        text: EDIT_MONITOR_CRUMB,
+        href: `${appPath}/${MONITOR_EDIT_ROUTE}`,
+      }
+    : {
+        text: ADD_MONITOR_CRUMB,
+        href: `${appPath}/${MONITOR_ADD_ROUTE}`,
+      };
+
+  useBreadcrumbs([config]);
 };
 
 export const ADD_MONITOR_CRUMB = i18n.translate(
   'xpack.synthetics.monitorManagement.addMonitorCrumb',
   {
     defaultMessage: 'Add monitor',
+  }
+);
+
+export const EDIT_MONITOR_CRUMB = i18n.translate(
+  'xpack.synthetics.monitorManagement.editMonitorCrumb',
+  {
+    defaultMessage: 'Edit monitor',
   }
 );

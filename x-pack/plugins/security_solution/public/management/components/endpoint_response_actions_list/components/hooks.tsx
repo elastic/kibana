@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import type {
   DurationRange,
   OnRefreshChangeProps,
 } from '@elastic/eui/src/components/date_picker/types';
-import type { DateRangePickerValues } from './action_list_date_range_picker';
+import type { DateRangePickerValues } from './actions_log_date_range_picker';
+import { RESPONSE_ACTION_COMMANDS } from '../../../../../common/endpoint/types';
+import type { FILTER_NAMES } from '../translations';
 
 const defaultDateRangeOptions = Object.freeze({
   autoRefreshOptions: {
@@ -84,4 +86,31 @@ export const useDateRangePicker = () => {
   );
 
   return { dateRangePickerState, onRefreshChange, onTimeChange };
+};
+
+export type FilterItems = Array<{
+  key: string;
+  label: string;
+  checked: 'on' | undefined;
+}>;
+
+// TODO: add more filter names here
+export type FilterName = keyof typeof FILTER_NAMES;
+export const useActionsLogFilter = () => {
+  const [items, setItems] = useState<FilterItems>(
+    RESPONSE_ACTION_COMMANDS.slice().map((filter) => ({
+      key: filter,
+      label: filter === 'unisolate' ? 'release' : filter,
+      checked: undefined,
+    }))
+  );
+
+  const hasActiveFilters = useMemo(() => !!items.find((item) => item.checked === 'on'), [items]);
+  const numActiveFilters = useMemo(
+    () => items.filter((item) => item.checked === 'on').length,
+    [items]
+  );
+  const numFilters = useMemo(() => items.filter((item) => item.checked !== 'on').length, [items]);
+
+  return { items, setItems, hasActiveFilters, numActiveFilters, numFilters };
 };

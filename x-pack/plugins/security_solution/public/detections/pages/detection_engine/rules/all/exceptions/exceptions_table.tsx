@@ -26,7 +26,7 @@ import { useFormatUrl } from '../../../../../../common/components/link_to';
 import { Loader } from '../../../../../../common/components/loader';
 
 import * as i18n from './translations';
-import { AllRulesUtilityBar } from '../utility_bar';
+import { ExceptionsTableUtilityBar } from './exceptions_table_utility_bar';
 import type { AllExceptionListsColumns } from './columns';
 import { getAllExceptionListsColumns } from './columns';
 import { useAllExceptionLists } from './use_all_exception_lists';
@@ -378,11 +378,8 @@ export const ExceptionListsTable = React.memo(() => {
           <EuiLoadingContent data-test-subj="initialLoadingPanelAllRulesTable" lines={10} />
         ) : (
           <>
-            <AllRulesUtilityBar
-              hasBulkActions={false}
-              canBulkEdit={hasPermissions}
-              paginationTotal={exceptionListsWithRuleRefs.length ?? 0}
-              numberSelectedItems={0}
+            <ExceptionsTableUtilityBar
+              totalExceptionLists={exceptionListsWithRuleRefs.length}
               onRefresh={handleRefresh}
             />
             <EuiBasicTable<ExceptionsTableItem>

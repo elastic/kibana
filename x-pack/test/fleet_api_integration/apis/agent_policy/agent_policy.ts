@@ -23,7 +23,7 @@ export default function (providerContext: FtrProviderContext) {
       let systemPkgVersion: string;
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
-        await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
+        await kibanaServer.savedObjects.cleanStandardList();
       });
       setupFleetAndAgents(providerContext);
       let packagePoliciesToDeleteIds: string[] = [];
@@ -41,7 +41,7 @@ export default function (providerContext: FtrProviderContext) {
         }
 
         await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
-        await esArchiver.unload('x-pack/test/functional/es_archives/empty_kibana');
+        await kibanaServer.savedObjects.cleanStandardList();
       });
       it('should work with valid minimum required values', async () => {
         const {

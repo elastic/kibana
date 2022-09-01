@@ -6,9 +6,9 @@
  */
 
 describe('APM tutorial', () => {
-  before(() => {
+  beforeEach(() => {
     cy.loginAsViewerUser();
-    cy.visit('/app/home#/tutorial/apm');
+    cy.visitKibana('/app/home#/tutorial/apm');
   });
 
   it('includes section for APM Server', () => {

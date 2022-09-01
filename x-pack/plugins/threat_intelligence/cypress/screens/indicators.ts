@@ -17,6 +17,8 @@ export const INDICATORS_TABLE = `[data-test-subj="tiIndicatorsTable"]`;
 
 export const TOGGLE_FLYOUT_BUTTON = `[data-test-subj="tiToggleIndicatorFlyoutButton"]`;
 
+export const FLYOUT_CLOSE_BUTTON = `[data-test-subj="euiFlyoutCloseButton"]`;
+
 export const FLYOUT_TITLE = `[data-test-subj="tiIndicatorFlyoutTitle"]`;
 
 export const FLYOUT_TABS = `[data-test-subj="tiIndicatorFlyoutTabs"]`;
@@ -46,3 +48,14 @@ export const FIELD_BROWSER_MODAL = `[data-test-subj="fields-browser-container"]`
 export const FIELD_BROWSER_MODAL_SOURCE_CHECKBOX = `[data-test-subj="field-_source-checkbox"]`;
 
 export const FIELD_BROWSER_CLOSE = `[data-test-subj="close"]`;
+
+export const BARCHART_TIMELINE_BUTTON = '[data-test-subj="tiTimelineButton"]';
+
+export const INDICATORS_TABLE_CELL_TIMELINE_BUTTON =
+  '[data-test-subj="tiIndicatorsTableCellTimelineButton"]';
+
+export const FLYOUT_TABLE_ROW_TIMELINE_BUTTON = '[data-test-subj="tiFlyoutTableRowTimelineButton"]';
+
+export const UNTITLED_TIMELINE_BUTTON = '[data-test-subj="flyoutOverlay"]';
+
+export const TIMELINE_DRAGGABLE_ITEM = '[data-test-subj="providerContainer"]';

@@ -34,7 +34,7 @@ export function dateHistogram(
     let bucketInterval;
 
     const overwriteDateHistogramForLastBucketMode = () => {
-      const { timezone } = capabilities;
+      const { timezone, forceFixedInterval } = capabilities;
 
       const { intervalString } = getBucketSize(
         req,
@@ -51,7 +51,7 @@ export function dateHistogram(
           min: from.valueOf(),
           max: to.valueOf(),
         },
-        ...dateHistogramInterval(intervalString),
+        ...dateHistogramInterval(intervalString, forceFixedInterval),
       });
 
       bucketInterval = intervalString;

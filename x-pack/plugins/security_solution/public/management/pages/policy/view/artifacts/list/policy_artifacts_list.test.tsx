@@ -36,6 +36,8 @@ const getDefaultQueryParameters = (customFilter: string | undefined = '') => ({
   },
 });
 
+jest.setTimeout(10000);
+
 describe('Policy details artifacts list', () => {
   let render: (externalPrivileges?: boolean) => Promise<ReturnType<AppContextTestRender['render']>>;
   let renderResult: ReturnType<AppContextTestRender['render']>;
@@ -68,6 +70,9 @@ describe('Policy details artifacts list', () => {
           />
         );
         await waitFor(() => expect(mockedApi.responseProvider.eventFiltersList).toHaveBeenCalled());
+        await waitFor(() =>
+          expect(renderResult.queryByTestId('artifacts-collapsed-list-loader')).toBeFalsy()
+        );
       });
       return renderResult;
     };

@@ -20,6 +20,7 @@ import {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
+import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
 import { setupRoutes } from './routes';
 import { getUiSettings } from './ui_settings';
 import { setupSavedObjects } from './saved_objects';
@@ -71,6 +72,7 @@ export class LensServerPlugin implements Plugin<LensServerPluginSetup, {}, {}, {
 
     const lensEmbeddableFactory = makeLensEmbeddableFactory(
       getFilterMigrations,
+      DataViewPersistableStateService.getAllMigrations.bind(DataViewPersistableStateService),
       this.customVisualizationMigrations
     );
     plugins.embeddable.registerEmbeddableFactory(lensEmbeddableFactory());

@@ -13,19 +13,17 @@ import {
   Indicator,
   RawIndicatorFieldId,
 } from '../../../../../common/types/indicator';
+import { generateFieldTypeMap } from '../../../../common/mocks/mock_field_type_map';
 import {
   EMPTY_PROMPT_TEST_ID,
   IndicatorsFlyoutTable,
   TABLE_TEST_ID,
 } from './indicators_flyout_table';
 import { unwrapValue } from '../../lib/unwrap_value';
-import { displayValue } from '../../lib/display_value';
+import { getDisplayName } from '../../lib/display_name';
 
 const mockIndicator: Indicator = generateMockIndicator();
-const mockFieldTypesMap: { [id: string]: string } = {
-  '@timestamp': 'date',
-  'threat.feed.name': 'string',
-};
+const mockFieldTypesMap = generateFieldTypeMap();
 
 describe('<IndicatorsFlyoutTable />', () => {
   it('should render fields and values in table', () => {
@@ -39,7 +37,7 @@ describe('<IndicatorsFlyoutTable />', () => {
 
     expect(getByText(RawIndicatorFieldId.Feed)).toBeInTheDocument();
 
-    expect(getByText(displayValue(mockIndicator) as string)).toBeInTheDocument();
+    expect(getByText(getDisplayName(mockIndicator).value as string)).toBeInTheDocument();
 
     expect(
       getByText(unwrapValue(mockIndicator, RawIndicatorFieldId.Feed) as string)

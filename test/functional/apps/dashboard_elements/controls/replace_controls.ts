@@ -6,17 +6,14 @@
  * Side Public License, v 1.
  */
 
-import {
-  OPTIONS_LIST_CONTROL,
-  RANGE_SLIDER_CONTROL,
-  TIME_SLIDER_CONTROL,
-} from '@kbn/controls-plugin/common';
+import { OPTIONS_LIST_CONTROL, RANGE_SLIDER_CONTROL } from '@kbn/controls-plugin/common';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
+  const security = getService('security');
 
   const { dashboardControls, timePicker, common, dashboard } = getPageObjects([
     'dashboardControls',
@@ -48,21 +45,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
   };
 
-  const replaceWithTimeSlider = async (controlId: string) => {
-    await changeFieldType(controlId, '@timestamp', TIME_SLIDER_CONTROL);
-    await testSubjects.waitForDeleted('timeSlider-loading-spinner');
-    await dashboardControls.verifyControlType(controlId, 'timeSlider');
-  };
-
   describe('Replacing controls', async () => {
     let controlId: string;
 
     before(async () => {
       await common.navigateToApp('dashboard');
+      await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader', 'animals']);
       await dashboard.gotoDashboardLandingPage();
       await dashboard.clickNewDashboard();
       await timePicker.setDefaultDataRange();
       await dashboard.saveDashboard(DASHBOARD_NAME, { exitFromEditMode: false });
+    });
+
+    after(async () => {
+      await security.testUser.restoreDefaults();
     });
 
     describe('Replace options list', async () => {
@@ -82,12 +78,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('with range slider', async () => {
         await replaceWithRangeSlider(controlId);
-      });
-
-      /** Because the time slider is temporarily disabled as of https://github.com/elastic/kibana/pull/130978,
-       ** I simply skipped all time slider tests for now :) **/
-      it.skip('with time slider', async () => {
-        await replaceWithTimeSlider(controlId);
       });
     });
 
@@ -109,35 +99,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('with options list', async () => {
         await replaceWithOptionsList(controlId);
-      });
-
-      it.skip('with time slider', async () => {
-        await replaceWithTimeSlider(controlId);
-      });
-    });
-
-    describe.skip('Replace time slider', async () => {
-      beforeEach(async () => {
-        await dashboardControls.clearAllControls();
-        await dashboardControls.createControl({
-          controlType: TIME_SLIDER_CONTROL,
-          dataViewTitle: 'animals-*',
-          fieldName: '@timestamp',
-        });
-        await testSubjects.waitForDeleted('timeSlider-loading-spinner');
-        controlId = (await dashboardControls.getAllControlIds())[0];
-      });
-
-      afterEach(async () => {
-        await dashboard.clearUnsavedChanges();
-      });
-
-      it('with options list', async () => {
-        await replaceWithOptionsList(controlId);
-      });
-
-      it('with range slider', async () => {
-        await replaceWithRangeSlider(controlId);
       });
     });
   });
