@@ -6,10 +6,9 @@
  */
 
 import React, { lazy, Suspense } from 'react';
+import type { ExternalReferenceAttachmentViewProps } from '@kbn/cases-plugin/public/client/attachment_framework/types';
 
-// @ts-expect-error update types
-// eslint-disable-next-line react/display-name
-export const getLazyFile = (props) => {
+export const getLazyFile: React.FC<ExternalReferenceAttachmentViewProps> = (props) => {
   const Content = lazy(() => import('./external_references_content'));
 
   return (

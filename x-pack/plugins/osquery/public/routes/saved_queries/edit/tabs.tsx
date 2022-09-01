@@ -6,9 +6,11 @@
  */
 
 import { EuiTabbedContent, EuiNotificationBadge } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import type { ReactElement } from 'react';
 
+import { SECURITY_SOLUTION_OWNER } from '@kbn/cases-plugin/common';
+import { useGetUserCasesPermissions } from '../../../cases/useGetCasesPermissions';
 import type { ECSMapping } from '../../../../common/schemas/common';
 import { AddToCaseButton } from '../../../cases/AddToCasesButton';
 import { useKibana } from '../../../common/lib/kibana';
@@ -35,7 +37,13 @@ const ResultTabsComponent: React.FC<ResultTabsProps> = ({
   addToTimeline,
 }) => {
   const { cases } = useKibana().services;
+  const casePermissions = useGetUserCasesPermissions();
   const CasesContext = cases!.ui.getCasesContext();
+
+  const addToCaseButton = useCallback(
+    () => <AddToCaseButton actionId={actionId} agentIds={agentIds} />,
+    [actionId, agentIds]
+  );
 
   const tabs = useMemo(
     () => [
@@ -50,8 +58,7 @@ const ResultTabsComponent: React.FC<ResultTabsProps> = ({
             startDate={startDate}
             endDate={endDate}
             addToTimeline={addToTimeline}
-            addToCase={() => <AddToCaseButton actionId={actionId} agentIds={agentIds} />}
-
+            addToCase={addToCaseButton}
           />
         ),
       },
@@ -68,22 +75,31 @@ const ResultTabsComponent: React.FC<ResultTabsProps> = ({
         ) : null,
       },
     ],
-    [actionId, agentIds, ecsMapping, startDate, endDate, addToTimeline, failedAgentsCount]
+    [
+      actionId,
+      agentIds,
+      ecsMapping,
+      startDate,
+      endDate,
+      addToTimeline,
+      addToCaseButton,
+      failedAgentsCount,
+    ]
   );
 
+  const casesOwner = useMemo(() => [SECURITY_SOLUTION_OWNER], []);
+
   return (
-    <CasesContext owner={['securitySolution']} permissions={{ all: true, read: true }}>
-
-    <EuiTabbedContent
-      // TODO: extend the EuiTabbedContent component to support EuiTabs props
-      // bottomBorder={false}
-      tabs={tabs}
-      initialSelectedTab={tabs[0]}
-      autoFocus="selected"
-      expand={false}
-    />
+    <CasesContext owner={casesOwner} permissions={casePermissions}>
+      <EuiTabbedContent
+        // TODO: extend the EuiTabbedContent component to support EuiTabs props
+        // bottomBorder={false}
+        tabs={tabs}
+        initialSelectedTab={tabs[0]}
+        autoFocus="selected"
+        expand={false}
+      />
     </CasesContext>
-
   );
 };
 

@@ -5,29 +5,32 @@
  * 2.0.
  */
 
-import React, { lazy } from 'react';
-import { EuiButtonIcon } from '@elastic/eui';
+import type { ExternalReferenceAttachmentType } from '@kbn/cases-plugin/public/client/attachment_framework/types';
+import { lazy } from 'react';
+// import { EuiButtonIcon } from '@elastic/eui';
 
 const AttachmentContentLazy = lazy(() => import('./external_references_content'));
 
-const AttachmentActions: React.FC = () => (
-  <EuiButtonIcon
-    data-test-subj="test-attachment-action"
-    onClick={() => {}}
-    iconType="arrowRight"
-    aria-label="See attachment"
-  />
-);
+// TODO not sure yet if we need it
+// const AttachmentActions: React.FC = () => (
+//   <EuiButtonIcon
+//     data-test-subj="test-attachment-action"
+//     onClick={() => {}}
+//     iconType="arrowRight"
+//     aria-label="See attachment"
+//   />
+// );
 
-export const getExternalReferenceAttachmentRegular = () => ({
-  id: '.test',
-  icon: 'casesApp',
+export const getExternalReferenceAttachmentRegular: () => ExternalReferenceAttachmentType = () => ({
+  id: 'osquery',
+  icon: 'osqueryApp',
   displayName: 'Test',
   getAttachmentViewObject: () => ({
     type: 'regular',
     event: 'added a chart',
     timelineIcon: 'casesApp',
-    actions: <AttachmentActions />,
+    // actions: <AttachmentActions />,
+    // @ts-expect-error update types
     children: AttachmentContentLazy,
   }),
 });

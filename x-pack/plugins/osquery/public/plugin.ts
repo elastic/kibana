@@ -14,7 +14,7 @@ import type {
 } from '@kbn/core/public';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { getLazyFile } from './results/attachments/lazyfile';
+import { getExternalReferenceAttachmentRegular } from './results/attachments/external_reference';
 import type {
   OsqueryPluginSetup,
   OsqueryPluginStart,
@@ -64,24 +64,15 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
         );
       },
     });
-    plugins.cases?.attachmentFramework.registerExternalReference({
-      id: 'osquery',
-      icon: 'osqueryApp',
-      displayName: 'TestOsquery',
-      getAttachmentViewObject: ({ externalReferenceMetadata }) => ({
-        type: 'regular',
-        event: 'added a query',
-        timelineIcon: 'casesApp',
-        children: () => getLazyFile({ externalReferenceMetadata }),
-      }),
-    });
+    plugins.cases?.attachmentFramework.registerExternalReference(
+      getExternalReferenceAttachmentRegular()
+    );
 
     // Return methods that should be available to other plugins
     return {};
   }
 
   public start(core: CoreStart, plugins: StartPlugins): OsqueryPluginStart {
-    console.log({ pluginsStart: plugins });
     if (plugins.fleet) {
       const { registerExtension } = plugins.fleet;
 

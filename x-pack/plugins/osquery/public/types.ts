@@ -16,9 +16,8 @@ import type {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
+import type { CasesUiStart, CasesUiSetup } from '@kbn/cases-plugin/public';
 import type { getLazyOsqueryAction } from './shared_components';
-import { CasesUiStart, CasesUiSetup } from '@kbn/cases-plugin/public';
-import { getLazyOsqueryAction } from './shared_components';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface OsqueryPluginSetup {}
@@ -39,7 +38,7 @@ export interface StartPlugins {
   lens?: LensPublicStart;
   security: SecurityPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
-  cases?: CasesUiStart;
+  cases: CasesUiStart;
 }
 
 export interface SetupPlugins {

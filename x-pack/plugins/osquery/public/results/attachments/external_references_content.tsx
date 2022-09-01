@@ -7,29 +7,32 @@
 
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { QueryClientProvider } from 'react-query';
+import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from '../../query_client';
 import { ResultsTable } from '../results_table';
 
-export const AttachmentContent: React.FC = (props: any) => {
-  console.log({ props });
+export interface AttachmentContentProps {
+  externalReferenceMetadata: {
+    actionId: string;
+    agentIds: string[];
+  };
+}
 
-  return (
-    <EuiFlexGroup data-test-subj="test-attachment-content">
-      <EuiFlexItem>
-        <QueryClientProvider client={queryClient}>
-          <ResultsTable
-            actionId={props.externalReferenceMetadata?.actionId}
-            agentIds={props.externalReferenceMetadata?.agentIds}
-            startDate={''}
-            // endDate={endDate}
-            // addToTimeline={addToTimeline}
-          />
-        </QueryClientProvider>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-};
+export const AttachmentContent = (props: AttachmentContentProps) => (
+  <EuiFlexGroup data-test-subj="test-attachment-content">
+    <EuiFlexItem>
+      <QueryClientProvider client={queryClient}>
+        <ResultsTable
+          actionId={props.externalReferenceMetadata.actionId}
+          agentIds={props.externalReferenceMetadata?.agentIds}
+          // startDate={''}
+          // endDate={endDate}
+          // addToTimeline={addToTimeline}
+        />
+      </QueryClientProvider>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+);
 
 // eslint-disable-next-line import/no-default-export
 export { AttachmentContent as default };

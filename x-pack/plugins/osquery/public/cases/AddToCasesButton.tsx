@@ -7,8 +7,17 @@
 
 import React, { useCallback } from 'react';
 import { CommentType, SECURITY_SOLUTION_OWNER } from '@kbn/cases-plugin/common';
+import { EuiButtonEmpty } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { useGetUserCasesPermissions } from './useGetCasesPermissions';
 import { useKibana } from '../common/lib/kibana';
+
+const ADD_TO_CASE = i18n.translate(
+  'xpack.osquery.pack.queriesTable.addToCaseResultsActionAriaLabel',
+  {
+    defaultMessage: 'Add to Case',
+  }
+);
 
 interface IProps {
   actionId: string;
@@ -16,27 +25,19 @@ interface IProps {
 }
 
 export const AddToCaseButton: React.FC<IProps> = ({ actionId, agentIds }) => {
-  const onClose = () => null;
-  const onSuccess = () => null;
   const { cases: casesUi } = useKibana().services;
 
   const casePermissions = useGetUserCasesPermissions();
-  const hasWritePermissions = casePermissions.crud;
+  const hasWritePermissions = casePermissions.all;
 
-  const createCaseFlyout = casesUi.hooks.getUseCasesAddToNewCaseFlyout({
-    onClose,
-    onSuccess,
-  });
-  const selectCaseModal = casesUi.hooks.getUseCasesAddToExistingCaseModal({
-    onClose,
-    onRowClick: onSuccess,
-  });
+  const createCaseFlyout = casesUi.hooks.getUseCasesAddToNewCaseFlyout({});
+  const selectCaseModal = casesUi.hooks.getUseCasesAddToExistingCaseModal({});
 
   const handleClick = useCallback(() => {
     const attachments = [
       {
-        type: CommentType.externalReference as const,
-        externalReferenceId: 'my-id',
+        type: CommentType.externalReference,
+        externalReferenceId: actionId,
         externalReferenceStorage: {
           type: 'elasticSearchDoc',
         },
@@ -47,11 +48,18 @@ export const AddToCaseButton: React.FC<IProps> = ({ actionId, agentIds }) => {
     ];
 
     if (!hasWritePermissions) {
+      // TODO
+      // @ts-expect-error update types
       createCaseFlyout.open({ attachments });
     } else {
+      // @ts-expect-error update types
       selectCaseModal.open({ attachments });
     }
   }, [actionId, agentIds, createCaseFlyout, hasWritePermissions, selectCaseModal]);
 
-  return <button onClick={handleClick}>ADD TO CASE</button>;
+  return (
+    <EuiButtonEmpty size="xs" iconType="casesApp" onClick={handleClick} isDisabled={false}>
+      {ADD_TO_CASE}
+    </EuiButtonEmpty>
+  );
 };
