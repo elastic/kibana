@@ -23,6 +23,7 @@ import { createStore } from '../../store';
 
 import { SuperDatePicker, makeMapStateToProps } from '.';
 import { cloneDeep } from 'lodash/fp';
+import { InputsModelId } from '../../store/inputs/constants';
 
 jest.mock('../../lib/kibana');
 const mockUseUiSetting$ = useUiSetting$ as jest.Mock;
@@ -100,13 +101,13 @@ describe('SIEM Super Date Picker', () => {
     describe('Pick Relative Date', () => {
       let wrapper = mount(
         <ReduxStoreProvider store={store}>
-          <SuperDatePicker id="global" />
+          <SuperDatePicker id={InputsModelId.global} />
         </ReduxStoreProvider>
       );
       beforeEach(() => {
         wrapper = mount(
           <ReduxStoreProvider store={store}>
-            <SuperDatePicker id="global" />
+            <SuperDatePicker id={InputsModelId.global} />
           </ReduxStoreProvider>
         );
         wrapper
@@ -170,13 +171,13 @@ describe('SIEM Super Date Picker', () => {
     describe('Recently used date ranges', () => {
       let wrapper = mount(
         <ReduxStoreProvider store={store}>
-          <SuperDatePicker id="global" />
+          <SuperDatePicker id={InputsModelId.global} />
         </ReduxStoreProvider>
       );
       beforeEach(() => {
         wrapper = mount(
           <ReduxStoreProvider store={store}>
-            <SuperDatePicker id="global" />
+            <SuperDatePicker id={InputsModelId.global} />
           </ReduxStoreProvider>
         );
         wrapper
@@ -233,13 +234,13 @@ describe('SIEM Super Date Picker', () => {
     describe('Refresh Every', () => {
       let wrapper = mount(
         <ReduxStoreProvider store={store}>
-          <SuperDatePicker id="global" />
+          <SuperDatePicker id={InputsModelId.global} />
         </ReduxStoreProvider>
       );
       beforeEach(() => {
         wrapper = mount(
           <ReduxStoreProvider store={store}>
-            <SuperDatePicker id="global" />
+            <SuperDatePicker id={InputsModelId.global} />
           </ReduxStoreProvider>
         );
         wrapper
@@ -292,8 +293,8 @@ describe('SIEM Super Date Picker', () => {
     describe('#makeMapStateToProps', () => {
       test('it should return the same shallow references given the same input twice', () => {
         const mapStateToProps = makeMapStateToProps();
-        const props1 = mapStateToProps(state, { id: 'global' });
-        const props2 = mapStateToProps(state, { id: 'global' });
+        const props1 = mapStateToProps(state, { id: InputsModelId.global });
+        const props2 = mapStateToProps(state, { id: InputsModelId.global });
         Object.keys(props1).forEach((key) => {
           expect((props1 as Record<string, {}>)[key]).toBe((props2 as Record<string, {}>)[key]);
         });
@@ -301,100 +302,100 @@ describe('SIEM Super Date Picker', () => {
 
       test('it should not return the same reference if policy kind is different', () => {
         const mapStateToProps = makeMapStateToProps();
-        const props1 = mapStateToProps(state, { id: 'global' });
+        const props1 = mapStateToProps(state, { id: InputsModelId.global });
         const clone = cloneDeep(state);
         clone.inputs.global.policy.kind = 'interval';
-        const props2 = mapStateToProps(clone, { id: 'global' });
+        const props2 = mapStateToProps(clone, { id: InputsModelId.global });
         expect(props1.policy).not.toBe(props2.policy);
       });
 
       test('it should not return the same reference if duration is different', () => {
         const mapStateToProps = makeMapStateToProps();
-        const props1 = mapStateToProps(state, { id: 'global' });
+        const props1 = mapStateToProps(state, { id: InputsModelId.global });
         const clone = cloneDeep(state);
         clone.inputs.global.policy.duration = 99999;
-        const props2 = mapStateToProps(clone, { id: 'global' });
+        const props2 = mapStateToProps(clone, { id: InputsModelId.global });
         expect(props1.duration).not.toBe(props2.duration);
       });
 
       test('it should not return the same reference if timerange kind is different', () => {
         const mapStateToProps = makeMapStateToProps();
-        const props1 = mapStateToProps(state, { id: 'global' });
+        const props1 = mapStateToProps(state, { id: InputsModelId.global });
         const clone = cloneDeep(state);
         clone.inputs.global.timerange.kind = 'absolute';
-        const props2 = mapStateToProps(clone, { id: 'global' });
+        const props2 = mapStateToProps(clone, { id: InputsModelId.global });
         expect(props1.kind).not.toBe(props2.kind);
       });
 
       test('it should not return the same reference if timerange from is different', () => {
         const mapStateToProps = makeMapStateToProps();
-        const props1 = mapStateToProps(state, { id: 'global' });
+        const props1 = mapStateToProps(state, { id: InputsModelId.global });
         const clone = cloneDeep(state);
         clone.inputs.global.timerange.from = '2020-07-07T09:20:18.966Z';
-        const props2 = mapStateToProps(clone, { id: 'global' });
+        const props2 = mapStateToProps(clone, { id: InputsModelId.global });
         expect(props1.start).not.toBe(props2.start);
       });
 
       test('it should not return the same reference if timerange to is different', () => {
         const mapStateToProps = makeMapStateToProps();
-        const props1 = mapStateToProps(state, { id: 'global' });
+        const props1 = mapStateToProps(state, { id: InputsModelId.global });
         const clone = cloneDeep(state);
         clone.inputs.global.timerange.to = '2020-07-08T09:20:18.966Z';
-        const props2 = mapStateToProps(clone, { id: 'global' });
+        const props2 = mapStateToProps(clone, { id: InputsModelId.global });
         expect(props1.end).not.toBe(props2.end);
       });
 
       test('it should not return the same reference of toStr if toStr different', () => {
         const mapStateToProps = makeMapStateToProps();
-        const props1 = mapStateToProps(state, { id: 'global' });
+        const props1 = mapStateToProps(state, { id: InputsModelId.global });
         const clone = cloneDeep(state);
         clone.inputs.global.timerange.toStr = 'some other string';
-        const props2 = mapStateToProps(clone, { id: 'global' });
+        const props2 = mapStateToProps(clone, { id: InputsModelId.global });
         expect(props1.toStr).not.toBe(props2.toStr);
       });
 
       test('it should not return the same reference of fromStr if fromStr different', () => {
         const mapStateToProps = makeMapStateToProps();
-        const props1 = mapStateToProps(state, { id: 'global' });
+        const props1 = mapStateToProps(state, { id: InputsModelId.global });
         const clone = cloneDeep(state);
         clone.inputs.global.timerange.fromStr = 'some other string';
-        const props2 = mapStateToProps(clone, { id: 'global' });
+        const props2 = mapStateToProps(clone, { id: InputsModelId.global });
         expect(props1.fromStr).not.toBe(props2.fromStr);
       });
 
       test('it should not return the same reference of isLoadingSelector if the query different', () => {
         const mapStateToProps = makeMapStateToProps();
-        const props1 = mapStateToProps(state, { id: 'global' });
+        const props1 = mapStateToProps(state, { id: InputsModelId.global });
         const clone = cloneDeep(state);
         clone.inputs.global.queries = [
           {
             loading: true,
-            id: '1',
+            id: 'kql',
             inspect: { dsl: [], response: [] },
             isInspected: false,
             refetch: null,
             selectedInspectIndex: 0,
           },
         ];
-        const props2 = mapStateToProps(clone, { id: 'global' });
+        const props2 = mapStateToProps(clone, { id: InputsModelId.global });
         expect(props1.isLoading).not.toBe(props2.isLoading);
       });
 
       test('it should not return the same reference of refetchSelector if the query different', () => {
         const mapStateToProps = makeMapStateToProps();
-        const props1 = mapStateToProps(state, { id: 'global' });
+        const props1 = mapStateToProps(state, { id: InputsModelId.global });
         const clone = cloneDeep(state);
         clone.inputs.global.queries = [
           {
             loading: true,
-            id: '1',
+            id: 'kql',
             inspect: { dsl: [], response: [] },
             isInspected: false,
             refetch: null,
             selectedInspectIndex: 0,
           },
         ];
-        const props2 = mapStateToProps(clone, { id: 'global' });
+        const props2 = mapStateToProps(clone, { id: InputsModelId.global });
         expect(props1.queries).not.toBe(props2.queries);
       });
     });

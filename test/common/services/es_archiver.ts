@@ -17,7 +17,7 @@ export function EsArchiverProvider({ getService }: FtrProviderContext): EsArchiv
   const log = getService('log');
   const kibanaServer = getService('kibanaServer');
   const retry = getService('retry');
-  const esArchives = config.get('testData.esArchives');
+  const esArchives: string[] = config.get('testData.esArchives');
 
   const esArchiver = new EsArchiver({
     client,
@@ -32,7 +32,7 @@ export function EsArchiverProvider({ getService }: FtrProviderContext): EsArchiv
     defaults: config.get('uiSettings.defaults'),
   });
 
-  if (esArchives) {
+  if (esArchives.length) {
     lifecycle.beforeTests.add(async () => {
       for (const archive of esArchives) {
         await esArchiver.load(archive);
