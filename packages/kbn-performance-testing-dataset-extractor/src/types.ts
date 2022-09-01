@@ -43,10 +43,16 @@ export interface ScalabilitySetup {
   maxDuration: string;
 }
 
+export interface TestData {
+  kbnArchives?: string[];
+  esArchives?: string[];
+}
+
 export interface CLIParams {
   param: {
     journeyName: string;
     scalabilitySetup: ScalabilitySetup;
+    testData: TestData;
     buildId: string;
     withoutStaticResources: boolean;
   };

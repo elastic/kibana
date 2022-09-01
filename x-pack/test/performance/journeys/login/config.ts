@@ -15,6 +15,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const testFiles = [require.resolve(`./${JOURNEY_LOGIN}`)];
 
   const config = {
+    ...performanceConfig.getAll(),
     testFiles,
     scalabilitySetup: {
       warmup: [
@@ -39,7 +40,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ],
       maxDuration: '10m',
     },
-    ...performanceConfig.getAll(),
   };
 
   const apmGlobalLabels = {
