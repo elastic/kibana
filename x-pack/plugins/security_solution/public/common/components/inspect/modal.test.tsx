@@ -10,8 +10,9 @@ import React from 'react';
 import { TestProviders } from '../../mock';
 
 import { NO_ALERT_INDEX } from '../../../../common/constants';
+import type { ModalInspectProps } from './modal';
 import { ModalInspectQuery, formatIndexPatternRequested } from './modal';
-import type { InputsModelId } from '../../store/inputs/constants';
+import { InputsModelId } from '../../store/inputs/constants';
 
 jest.mock('react-router-dom', () => {
   const original = jest.requireActual('react-router-dom');
@@ -36,9 +37,9 @@ const response =
 
 describe('Modal Inspect', () => {
   const closeModal = jest.fn();
-  const defaultProps = {
+  const defaultProps: ModalInspectProps = {
     closeModal,
-    inputId: 'timeline' as InputsModelId,
+    inputId: InputsModelId.timeline,
     request,
     response,
     title: 'My title',
