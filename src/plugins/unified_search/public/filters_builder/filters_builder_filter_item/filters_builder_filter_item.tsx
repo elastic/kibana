@@ -157,17 +157,19 @@ export function FilterItem({
   return (
     <>
       {conditionalOperationType ? (
-        <FilterGroup
-          path={path}
-          conditionType={conditionalOperationType}
-          filters={Array.isArray(filter) ? filter : filter.meta?.params}
-          timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
-          reverseBackground={!reverseBackground}
-        />
+        <EuiPanel color={color} hasShadow={false} hasBorder>
+          <FilterGroup
+            path={path}
+            conditionType={conditionalOperationType}
+            filters={Array.isArray(filter) ? filter : filter.meta?.params}
+            timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
+            reverseBackground={!reverseBackground}
+          />
+        </EuiPanel>
       ) : (
         <EuiDroppable
           droppableId={path}
-          spacing="s"
+          spacing="none"
           isCombineEnabled={!disableOr || !hideOr}
           className={cx({ [cursorAdd]: dropTarget === path })}
           isDropDisabled={disableAnd}
@@ -189,14 +191,18 @@ export function FilterItem({
                 className={cx({ [cursorOr]: dropTarget === path && !hideOr })}
               >
                 <EuiFlexItem>
-                  <EuiPanel color={color} paddingSize={'none'} hasShadow={false}>
+                  <EuiPanel color="transparent" paddingSize={'none'} hasShadow={false}>
                     <EuiFlexGroup
                       gutterSize="m"
                       responsive={false}
                       alignItems="center"
                       justifyContent="center"
                     >
-                      <EuiFlexItem grow={false} {...provided.dragHandleProps}>
+                      <EuiFlexItem
+                        grow={false}
+                        {...provided.dragHandleProps}
+                        style={{ marginLeft: '12.5px', marginRight: '12.5px' }}
+                      >
                         <EuiIcon type="grab" size="s" />
                       </EuiFlexItem>
                       <EuiFlexItem grow={10}>

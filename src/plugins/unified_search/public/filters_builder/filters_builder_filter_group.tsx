@@ -6,20 +6,12 @@
  * Side Public License, v 1.
  */
 
-import React, { useContext, useMemo } from 'react';
+import React, { useContext } from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
-  EuiText,
-  EuiPanel,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiText } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
-import { cx, css } from '@emotion/css';
 import type { Path } from './filters_builder_types';
-import { ConditionTypes, isOrFilter } from '../utils';
+import { ConditionTypes } from '../utils';
 import { FilterItem } from './filters_builder_filter_item';
 import { FiltersBuilderContextType } from './filters_builder_context';
 import { getPathInArray } from './filters_builder_utils';
@@ -32,23 +24,31 @@ export interface FilterGroupProps {
   reverseBackground?: boolean;
 }
 
-const Delimiter = () => (
-  <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
-    <EuiFlexItem grow={1} style={{ marginLeft: '-5px', flexGrow: 0.12 }}>
-      <EuiHorizontalRule margin="s" />
-    </EuiFlexItem>
-    <EuiFlexItem grow={false}>
-      <EuiText size="s" color="subdued">
-        {i18n.translate('unifiedSearch.filter.filtersBuilder.orDelimiterLabel', {
-          defaultMessage: 'OR',
-        })}
-      </EuiText>
-    </EuiFlexItem>
-    <EuiFlexItem grow={10} style={{ marginRight: '-5px' }}>
-      <EuiHorizontalRule margin="s" />
-    </EuiFlexItem>
-  </EuiFlexGroup>
-);
+const Delimiter = ({ conditionType }: { conditionType: ConditionTypes }) => {
+  return conditionType === ConditionTypes.OR ? (
+    <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
+      <EuiFlexItem grow={1} style={{ marginLeft: '-12px', flexGrow: 0.12 }}>
+        <EuiHorizontalRule margin="m" />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiText size="s" color="subdued">
+          {i18n.translate('unifiedSearch.filter.filtersBuilder.orDelimiterLabel', {
+            defaultMessage: 'OR',
+          })}
+        </EuiText>
+      </EuiFlexItem>
+      <EuiFlexItem grow={10} style={{ marginRight: '-12px' }}>
+        <EuiHorizontalRule margin="m" />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  ) : (
+    <EuiFlexGroup>
+      <EuiFlexItem grow={false} style={{ maxHeight: '8px' }}>
+        <EuiHorizontalRule margin="xs" />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
 
 export const FilterGroup = ({
   filters,
@@ -57,20 +57,9 @@ export const FilterGroup = ({
   timeRangeForSuggestionsOverride,
   reverseBackground = false,
 }: FilterGroupProps) => {
-  const { euiTheme } = useEuiTheme();
-
   const {
     globalParams: { maxDepth, hideOr },
   } = useContext(FiltersBuilderContextType);
-
-  const border = useMemo(
-    () =>
-      css`
-        border: ${euiTheme.border.thin};
-        border-radius: ${euiTheme.border.radius.medium};
-      `,
-    [euiTheme.border.thin, euiTheme.border.radius.medium]
-  );
 
   const pathInArray = getPathInArray(path);
   const isDepthReached = maxDepth <= pathInArray.length;
@@ -79,17 +68,11 @@ export const FilterGroup = ({
   const removeDisabled = pathInArray.length <= 1 && filters.length === 1;
   const color = !reverseBackground ? 'subdued' : 'plain';
 
-  const shouldDrawBorder = (filter: Filter) => Array.isArray(filter) || isOrFilter(filter);
-
   return (
-    <EuiPanel color={color} paddingSize="s" hasShadow={false}>
+    <>
       {filters.map((filter, index, acc) => (
         <EuiFlexGroup direction="column" gutterSize="none">
-          <EuiFlexItem
-            className={cx({
-              [border]: shouldDrawBorder(filter),
-            })}
-          >
+          <EuiFlexItem>
             <FilterItem
               filter={filter}
               path={`${path}${path ? '.' : ''}${index}`}
@@ -103,13 +86,13 @@ export const FilterGroup = ({
             />
           </EuiFlexItem>
 
-          {conditionType === ConditionTypes.OR && index + 1 < acc.length ? (
+          {conditionType && index + 1 < acc.length ? (
             <EuiFlexItem>
-              <Delimiter />
+              <Delimiter conditionType={conditionType} />
             </EuiFlexItem>
           ) : null}
         </EuiFlexGroup>
       ))}
-    </EuiPanel>
+    </>
   );
 };
