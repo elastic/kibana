@@ -39,7 +39,6 @@ describe('Add Integration - Real API', () => {
 
   afterEach(() => {
     cleanupAgentPolicies();
-    deleteIntegrations();
   });
 
   function addAndVerifyIntegration() {
@@ -134,7 +133,7 @@ describe('Add Integration - Real API', () => {
     installPackageWithVersion('apache', oldVersion);
     navigateTo(`app/integrations/detail/apache-${oldVersion}/policies`);
 
-    addIntegration({ useExistingPolicy: true });
+    addIntegration();
 
     cy.getBySel(INTEGRATION_NAME_LINK).contains('apache-');
     cy.getBySel(PACKAGE_VERSION).contains(oldVersion);
