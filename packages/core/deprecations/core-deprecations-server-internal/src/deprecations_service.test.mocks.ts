@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { mockDeprecationsFactory } from './deprecations_factory.mock';
+import { mockDeprecationsFactory } from './mocks';
 
 export const mockedDeprecationFactoryInstance = mockDeprecationsFactory.create();
 export const DeprecationsFactoryMock = jest
