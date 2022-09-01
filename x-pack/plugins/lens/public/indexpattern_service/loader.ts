@@ -110,13 +110,29 @@ export function convertDataViewIntoLensIndexPattern(
 
 export async function loadIndexPatternRefs(
   dataViews: MinimalDataViewsContract,
-  adHocDataViews?: Record<string, DataViewSpec>
+  adHocDataViews?: Record<string, DataViewSpec>,
+  contextDataViewSpec?: DataViewSpec
 ): Promise<IndexPatternRef[]> {
   const indexPatterns = await dataViews.getIdsWithTitle();
+  const missedIndexPatterns = Object.values(adHocDataViews || {});
+
+  // add data view from context
+  if (contextDataViewSpec) {
+    const existedDataView = indexPatterns.find(
+      (indexPattern) => indexPattern.id === contextDataViewSpec.id
+    );
+    if (!existedDataView) {
+      missedIndexPatterns.push({
+        id: contextDataViewSpec.id!,
+        name: contextDataViewSpec.name,
+        title: contextDataViewSpec.title!,
+      });
+    }
+  }
 
   return indexPatterns
     .concat(
-      Object.values(adHocDataViews || {}).map((dataViewSpec) => ({
+      missedIndexPatterns.map((dataViewSpec) => ({
         id: dataViewSpec.id!,
         name: dataViewSpec.name,
         title: dataViewSpec.title!,

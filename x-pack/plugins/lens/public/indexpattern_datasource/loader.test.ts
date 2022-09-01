@@ -124,7 +124,7 @@ describe('loader', () => {
       const state = loadInitialState({
         storage,
         initialContext: {
-          indexPatternId: '1',
+          dataViewSpec: { id: '1' },
           fieldName: '',
         },
         indexPatternRefs,

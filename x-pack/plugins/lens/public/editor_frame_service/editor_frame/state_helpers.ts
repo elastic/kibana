@@ -54,7 +54,7 @@ function getIndexPatterns(
         indexPatternIds.push(indexPatternId);
       }
     } else {
-      indexPatternIds.push(initialContext.indexPatternId);
+      indexPatternIds.push(initialContext.dataViewSpec.id!);
     }
   } else {
     // use the initialId only when no context is passed over
@@ -112,9 +112,10 @@ export async function initializeDataViews(
     })
   );
   const { isFullEditor } = options ?? {};
+  const contextDataViewSpec = (initialContext as VisualizeFieldContext)?.dataViewSpec;
   // make it explicit or TS will infer never[] and break few lines down
   const indexPatternRefs: IndexPatternRef[] = await (isFullEditor
-    ? loadIndexPatternRefs(dataViews, adHocDataViews)
+    ? loadIndexPatternRefs(dataViews, adHocDataViews, contextDataViewSpec)
     : []);
 
   // if no state is available, use the fallbackId

@@ -95,6 +95,7 @@ async function mountComponent(isTimeBased: boolean = false) {
       id: '123',
       getFieldByName: () => ({ type: 'date', name: 'timefield', visualizable: true }),
       timeFieldName: 'timefield',
+      toSpec: () => ({ id: '123', timeFieldName: 'timefield' }),
     } as unknown as DataView,
     resetSavedSearch: jest.fn(),
     savedSearch: savedSearchMock,

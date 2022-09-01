@@ -83,8 +83,8 @@ export function DiscoverChart({
     if (!timeField) {
       return;
     }
-    triggerVisualizeActions(timeField, dataView.id, savedSearch.columns || []);
-  }, [dataView.id, savedSearch, timeField]);
+    triggerVisualizeActions(timeField, savedSearch.columns || [], dataView);
+  }, [dataView, savedSearch.columns, timeField]);
 
   const onShowChartOptions = useCallback(() => {
     setShowChartOptionsPopover(!showChartOptionsPopover);

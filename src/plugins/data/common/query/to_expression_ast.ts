@@ -62,9 +62,11 @@ export async function queryStateToExpressionAst({
       const idsTitles = await dataViewsService.getIdsWithTitle();
 
       let dataViewId = idsTitles.find(({ title }) => title === idxPattern)?.id;
+      // use ad-hoc data view if exists
       if (!dataViewId && adHocDataView?.title === idxPattern) {
         dataViewId = adHocDataView.id;
       }
+
       if (dataViewId) {
         const dataView = await dataViewsService.get(dataViewId);
         const timeFieldName = dataView.timeFieldName;

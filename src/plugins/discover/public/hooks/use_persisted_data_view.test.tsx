@@ -40,7 +40,7 @@ describe('usePersistedDataView', () => {
       }
     );
 
-    const result = await hook.result.current(mockDataView);
+    const result = await hook.result.current.openConfirmSavePrompt(mockDataView);
 
     expect(mockDiscoverServices.dataViews.createAndSave).toHaveBeenCalledWith({
       id: mockDataView.id,
@@ -65,7 +65,7 @@ describe('usePersistedDataView', () => {
     );
 
     try {
-      await hook.result.current(mockDataView);
+      await hook.result.current.openConfirmSavePrompt(mockDataView);
     } catch (e) {
       expect(mockDiscoverServices.toastNotifications.addDanger).toHaveBeenCalled();
       expect(e.message).toEqual('failed to save');

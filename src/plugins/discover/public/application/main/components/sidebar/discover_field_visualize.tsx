@@ -52,7 +52,7 @@ export const DiscoverFieldVisualize: React.FC<Props> = React.memo(
       const trigger = getTriggerConstant(field.type);
       const triggerVisualization = (updatedDataView: DataView) => {
         trackUiMetric?.(METRIC_TYPE.CLICK, 'visualize_link_click');
-        triggerVisualizeActions(visualizeInfo.field, updatedDataView.id, details.columns);
+        triggerVisualizeActions(visualizeInfo.field, details.columns, updatedDataView);
       };
 
       if (trigger === VISUALIZE_GEO_FIELD_TRIGGER) {
