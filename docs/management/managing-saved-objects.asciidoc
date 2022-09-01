@@ -13,7 +13,7 @@ image::images/management-saved-objects.png[Saved Objects]
 
 To access *Saved Objects*, you must have the required `Saved Objects Management` {kib} privilege.
 
-To add the privilege, open the menu, then click *Stack Management > Roles*.
+To add the privilege, open the main menu, then click *Stack Management > Roles*.
 
 NOTE: Granting access to `Saved Objects Management` authorizes users to
 manage all saved objects in {kib}, including objects that are managed by
