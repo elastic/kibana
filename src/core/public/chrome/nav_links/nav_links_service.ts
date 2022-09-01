@@ -7,66 +7,18 @@
  */
 
 import { sortBy } from 'lodash';
-import { BehaviorSubject, type Observable, ReplaySubject } from 'rxjs';
+import { BehaviorSubject, ReplaySubject } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
 import type { HttpStart, IBasePath } from '@kbn/core-http-browser';
 import type { PublicAppDeepLinkInfo, PublicAppInfo } from '@kbn/core-application-browser';
 import type { InternalApplicationStart } from '@kbn/core-application-browser-internal';
-
-import type { ChromeNavLink, NavLinkWrapper } from './nav_link';
+import type { ChromeNavLinks } from '@kbn/core-chrome-browser';
+import type { NavLinkWrapper } from './nav_link';
 import { toNavLink } from './to_nav_link';
 
 interface StartDeps {
   application: InternalApplicationStart;
   http: HttpStart;
-}
-
-/**
- * {@link ChromeNavLinks | APIs} for manipulating nav links.
- *
- * @public
- */
-export interface ChromeNavLinks {
-  /**
-   * Get an observable for a sorted list of navlinks.
-   */
-  getNavLinks$(): Observable<Array<Readonly<ChromeNavLink>>>;
-
-  /**
-   * Get the state of a navlink at this point in time.
-   * @param id
-   */
-  get(id: string): ChromeNavLink | undefined;
-
-  /**
-   * Get the current state of all navlinks.
-   */
-  getAll(): Array<Readonly<ChromeNavLink>>;
-
-  /**
-   * Check whether or not a navlink exists.
-   * @param id
-   */
-  has(id: string): boolean;
-
-  /**
-   * Enable forced navigation mode, which will trigger a page refresh
-   * when a nav link is clicked and only the hash is updated.
-   *
-   * @remarks
-   * This is only necessary when rendering the status page in place of another
-   * app, as links to that app will set the current URL and change the hash, but
-   * the routes for the correct are not loaded so nothing will happen.
-   * https://github.com/elastic/kibana/pull/29770
-   *
-   * Used only by status_page plugin
-   */
-  enableForcedAppSwitcherNavigation(): void;
-
-  /**
-   * An observable of the forced app switcher state.
-   */
-  getForceAppSwitcherNavigation$(): Observable<boolean>;
 }
 
 export class NavLinksService {

@@ -6,4 +6,13 @@
  * Side Public License, v 1.
  */
 
-export { RecentlyAccessedService } from './recently_accessed_service';
+import type { EuiBreadcrumb } from '@elastic/eui';
+import type { MountPoint } from '@kbn/core-mount-utils-browser';
+
+/** @public */
+export type ChromeBreadcrumb = EuiBreadcrumb;
+
+/** @public */
+export interface ChromeBreadcrumbsAppendExtension {
+  content: MountPoint<HTMLDivElement>;
+}

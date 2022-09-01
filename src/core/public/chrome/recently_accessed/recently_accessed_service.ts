@@ -6,18 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { Observable } from 'rxjs';
 import type { HttpSetup } from '@kbn/core-http-browser';
-
+import type {
+  ChromeRecentlyAccessed,
+  ChromeRecentlyAccessedHistoryItem,
+} from '@kbn/core-chrome-browser';
 import { PersistedLog } from './persisted_log';
 import { createLogKey } from './create_log_key';
-
-/** @public */
-export interface ChromeRecentlyAccessedHistoryItem {
-  link: string;
-  label: string;
-  id: string;
-}
 
 interface StartDeps {
   http: HttpSetup;
@@ -49,44 +44,4 @@ export class RecentlyAccessedService {
       get$: () => history.get$(),
     };
   }
-}
-
-/**
- * {@link ChromeRecentlyAccessed | APIs} for recently accessed history.
- * @public
- */
-export interface ChromeRecentlyAccessed {
-  /**
-   * Adds a new item to the recently accessed history.
-   *
-   * @example
-   * ```js
-   * chrome.recentlyAccessed.add('/app/map/1234', 'Map 1234', '1234');
-   * ```
-   *
-   * @param link a relative URL to the resource (not including the {@link HttpStart.basePath | `http.basePath`})
-   * @param label the label to display in the UI
-   * @param id a unique string used to de-duplicate the recently accessed list.
-   */
-  add(link: string, label: string, id: string): void;
-
-  /**
-   * Gets an Array of the current recently accessed history.
-   *
-   * @example
-   * ```js
-   * chrome.recentlyAccessed.get().forEach(console.log);
-   * ```
-   */
-  get(): ChromeRecentlyAccessedHistoryItem[];
-
-  /**
-   * Gets an Observable of the array of recently accessed history.
-   *
-   * @example
-   * ```js
-   * chrome.recentlyAccessed.get$().subscribe(console.log);
-   * ```
-   */
-  get$(): Observable<ChromeRecentlyAccessedHistoryItem[]>;
 }

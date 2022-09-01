@@ -18,11 +18,17 @@ import type { HttpStart } from '@kbn/core-http-browser';
 import { mountReactNode } from '@kbn/core-mount-utils-browser-internal';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { InternalApplicationStart } from '@kbn/core-application-browser-internal';
+import type {
+  ChromeDocTitle,
+  ChromeNavControls,
+  ChromeNavLink,
+  ChromeRecentlyAccessed,
+} from '@kbn/core-chrome-browser';
 import { KIBANA_ASK_ELASTIC_LINK } from './constants';
-import { type ChromeDocTitle, DocTitleService } from './doc_title';
-import { type ChromeNavControls, NavControlsService } from './nav_controls';
-import { type ChromeNavLink, NavLinksService } from './nav_links';
-import { type ChromeRecentlyAccessed, RecentlyAccessedService } from './recently_accessed';
+import { DocTitleService } from './doc_title';
+import { NavControlsService } from './nav_controls';
+import { NavLinksService } from './nav_links';
+import { RecentlyAccessedService } from './recently_accessed';
 import { Header } from './ui';
 import type {
   ChromeBadge,

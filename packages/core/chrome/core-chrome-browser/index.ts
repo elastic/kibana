@@ -6,6 +6,25 @@
  * Side Public License, v 1.
  */
 
-export function foo() {
-  return 'hello world';
-}
+export type {
+  ChromeUserBanner,
+  ChromeBreadcrumb,
+  ChromeHelpExtension,
+  ChromeHelpExtensionMenuLink,
+  ChromeHelpExtensionLinkBase,
+  ChromeHelpMenuActions,
+  ChromeNavLink,
+  ChromeBreadcrumbsAppendExtension,
+  ChromeNavLinks,
+  ChromeNavControl,
+  ChromeNavControls,
+  ChromeBadge,
+  ChromeHelpExtensionMenuGitHubLink,
+  ChromeHelpExtensionMenuDocumentationLink,
+  ChromeHelpExtensionMenuDiscussLink,
+  ChromeHelpExtensionMenuCustomLink,
+  ChromeDocTitle,
+  ChromeStart,
+  ChromeRecentlyAccessed,
+  ChromeRecentlyAccessedHistoryItem,
+} from './src';

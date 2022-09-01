@@ -6,4 +6,17 @@
  * Side Public License, v 1.
  */
 
-export { RecentlyAccessedService } from './recently_accessed_service';
+import type { IconType } from '@elastic/eui';
+import type { MountPoint } from '@kbn/core-mount-utils-browser';
+
+/** @public */
+export interface ChromeBadge {
+  text: string;
+  tooltip: string;
+  iconType?: IconType;
+}
+
+/** @public */
+export interface ChromeUserBanner {
+  content: MountPoint<HTMLDivElement>;
+}

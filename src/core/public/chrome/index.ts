@@ -16,13 +16,6 @@ export type {
   ChromeHelpExtensionMenuGitHubLink,
 } from './ui/header/header_help_menu';
 export type { NavType } from './ui';
-export type { ChromeNavLink, ChromeNavLinks } from './nav_links';
-export type {
-  ChromeRecentlyAccessed,
-  ChromeRecentlyAccessedHistoryItem,
-} from './recently_accessed';
-export type { ChromeNavControl, ChromeNavControls } from './nav_controls';
-export type { ChromeDocTitle } from './doc_title';
 export type {
   InternalChromeStart,
   ChromeStart,
