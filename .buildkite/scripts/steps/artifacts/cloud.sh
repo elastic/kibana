@@ -18,11 +18,7 @@ KIBANA_TEST_IMAGE="docker.elastic.co/kibana-ci/kibana-cloud:$TAG"
 echo "$KIBANA_DOCKER_PASSWORD" | docker login -u "$KIBANA_DOCKER_USERNAME" --password-stdin docker.elastic.co
 trap 'docker logout docker.elastic.co' EXIT
 
-set +e
-DISTRIBUTION_EXISTS=$(docker manifest inspect $KIBANA_TEST_IMAGE &> /dev/null; echo $?)
-set -e
-
-if  [ $DISTRIBUTION_EXISTS -eq 0 ]; then
+if  docker manifest inspect $KIBANA_TEST_IMAGE &> /dev/null; then
   echo "Distribution already exists, skipping build"
 else
   node scripts/build \
