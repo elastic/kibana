@@ -11,6 +11,6 @@ interface BannerWrapperProps {
   nodes: ReactNode[];
 }
 
-export const BannerWrapper = memo(({ nodes }: BannerWrapperProps) => {
-  return <>{nodes.map((node) => node)}</>;
-});
+export const BannerWrapper = memo(({ nodes }: BannerWrapperProps) => (
+  <>{nodes.map((node) => node)}</>
+));
