@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FLEET_AGENT_LIST_PAGE, CURRENT_BULK_UPGRADES_CALLOUT } from '../screens/fleet';
+import { FLEET_AGENT_LIST_PAGE } from '../screens/fleet';
 
 import { createAgentDoc } from '../tasks/agents';
 import { setupFleetServer } from '../tasks/fleet_server';
