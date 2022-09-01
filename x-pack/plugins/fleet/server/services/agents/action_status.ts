@@ -6,11 +6,14 @@
  */
 import type { ElasticsearchClient } from '@kbn/core/server';
 
+import type { ActionStatus } from '../../../common/types';
+
+import { appContextService } from '..';
+
 import { SO_SEARCH_LIMIT } from '../../constants';
 
-import type { FleetServerAgentAction, ActionStatus, ListWithKuery } from '../../types';
+import type { FleetServerAgentAction, ListWithKuery } from '../../types';
 import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '../../../common';
-import { appContextService } from '..';
 
 /**
  * Return current bulk actions
@@ -112,6 +115,26 @@ export async function getActionStatuses(
       cancellationTime: cancelledAction?.timestamp,
       completionTime: complete ? completionTime : undefined,
     });
+
+    if (complete) {
+      // clean up percolator queries for this action
+      // this logic should live in FS to make sure it checks regularly (not only when the UI is running)
+      const hasPercolatorQuery = await esClient.exists({
+        id: action.actionId,
+        index: '.fleet-percolator-queries',
+      });
+      if (hasPercolatorQuery) {
+        await esClient.delete({
+          id: action.actionId,
+          index: '.fleet-percolator-queries',
+        });
+        appContextService
+          .getLogger()
+          .info(
+            new Date().toISOString() + ' Cleanup percolator query for actionId: ' + action.actionId
+          );
+      }
+    }
   }
 
   return results;
@@ -158,13 +181,6 @@ async function _getActions(
           {
             term: {
               type: 'CANCEL',
-            },
-          },
-        ],
-        must: [
-          {
-            exists: {
-              field: 'agents',
             },
           },
         ],

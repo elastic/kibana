@@ -21,6 +21,7 @@ import { errorsToResults, bulkUpdateAgents } from './crud';
 import { bulkCreateAgentActionResults, createAgentAction } from './actions';
 import { getHostedPolicies, isHostedAgent } from './hosted_agent';
 import { BulkActionTaskType } from './bulk_actions_resolver';
+import { createPercolateQuery } from './reassign_action_runner';
 
 export class UnenrollActionRunner extends ActionRunner {
   protected async processAgents(agents: Agent[]): Promise<{ items: BulkActionResult[] }> {
@@ -86,7 +87,7 @@ export async function unenrollBatch(
     // Create unenroll action for each agent
     await createAgentAction(esClient, {
       id: actionId,
-      agents: agentsToUpdate.map((agent) => agent.id),
+      agents: options.kuery !== undefined ? [] : agentsToUpdate.map((agent) => agent.id),
       created_at: now,
       type: 'UNENROLL',
       total,
@@ -121,9 +122,21 @@ export async function unenrollBatch(
     agentsToUpdate.map(({ id }) => ({ agentId: id, data: updateData }))
   );
 
-  return {
+  const result = {
     items: errorsToResults(givenAgents, outgoingErrors, undefined, skipSuccess),
   };
+
+  if (options.kuery === undefined) {
+    return result;
+  }
+
+  if (options.revoke) {
+    return result;
+  }
+
+  await createPercolateQuery(esClient, { ...options, actionId });
+
+  return result;
 }
 
 export async function invalidateAPIKeysForAgents(agents: Agent[]) {

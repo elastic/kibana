@@ -13,14 +13,9 @@ import { SO_SEARCH_LIMIT } from '../../constants';
 
 import { createAgentAction } from './actions';
 import type { GetAgentsOptions } from './crud';
-import { openPointInTime } from './crud';
 import { getAgentsByKuery } from './crud';
 import { getAgentById, getAgents, updateAgent, getAgentPolicyForAgent } from './crud';
-import {
-  invalidateAPIKeysForAgents,
-  UnenrollActionRunner,
-  unenrollBatch,
-} from './unenroll_action_runner';
+import { invalidateAPIKeysForAgents, unenrollBatch } from './unenroll_action_runner';
 
 async function unenrollAgentIsAllowed(
   soClient: SavedObjectsClientContract,
@@ -84,21 +79,11 @@ export async function unenrollAgents(
     page: 1,
     perPage: batchSize,
   });
-  if (res.total <= batchSize) {
-    const givenAgents = await getAgents(esClient, options);
-    return await unenrollBatch(soClient, esClient, givenAgents, options);
-  } else {
-    return await new UnenrollActionRunner(
-      esClient,
-      soClient,
-      {
-        ...options,
-        batchSize,
-        total: res.total,
-      },
-      { pitId: await openPointInTime(esClient) }
-    ).runActionAsyncWithRetry();
-  }
+  const givenAgents = await getAgents(esClient, options);
+  return await unenrollBatch(soClient, esClient, givenAgents, {
+    ...options,
+    total: res.total,
+  });
 }
 
 export async function forceUnenrollAgent(
