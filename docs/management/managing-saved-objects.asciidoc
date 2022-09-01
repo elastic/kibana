@@ -52,7 +52,7 @@ Import multiple objects in a single operation.
 
 . In the toolbar, click *Import*.
 . Select the NDJSON file that
-represents the objects to import.
+includes the objects you want to import.
 . Select the import options. By default,
 saved objects already in {kib} are overwritten.
 . Click *Import*.
