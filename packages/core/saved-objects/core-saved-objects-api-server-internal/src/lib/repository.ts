@@ -773,7 +773,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
   }
 
   /**
-   *  {@inheritDoc ISvedObjectsRepository.bulkDelete}
+   *  {@inheritDoc ISavedObjectsRepository.bulkDelete}
    */
   async bulkDelete(
     objects: SavedObjectsBulkDeleteObject[],
