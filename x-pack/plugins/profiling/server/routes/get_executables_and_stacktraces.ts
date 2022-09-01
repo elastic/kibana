@@ -58,6 +58,12 @@ export async function getExecutablesAndStackTraces({
       logger.info('unique downsampled stacktraces: ' + stackTraceEvents.size);
     }
 
+    // Adjust the sample counts from down-sampled to fully sampled.
+    for (const [id, count] of stackTraceEvents) {
+      stackTraceEvents.set(id, Math.floor(count / eventsIndex.sampleRate));
+    }
+    downsampledTotalCount = Math.floor(downsampledTotalCount / eventsIndex.sampleRate);
+
     const { stackTraces, stackFrameDocIDs, executableDocIDs } = await mgetStackTraces({
       logger,
       client,
