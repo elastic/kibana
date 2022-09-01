@@ -69,6 +69,6 @@ image:images/actions_icon.png[Actions icon], and then select *Delete*.
 
 . Click *Delete tag*.
 
-TIP: To assign, delete, or clear multiple tags at once,
+TIP: To assign, delete, or clear multiple tags,
 select their checkboxes in the *Tags* view, and then select
 the desired action from the *selected tags* menu.
