@@ -55,7 +55,6 @@ export interface AggregateEventsWithAuthFilter {
   namespace: string | undefined;
   type: string;
   authFilter: KueryNode;
-  legacyIds?: string[];
   aggregateOptions: AggregateOptionsType;
 }
 
@@ -440,7 +439,7 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
     );
 
     const body: estypes.SearchRequest['body'] = {
-      size: 1,
+      size: 0,
       query,
       aggs,
     };

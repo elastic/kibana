@@ -892,7 +892,7 @@ export class RulesClient {
     perPage,
     sort,
   }: GetGlobalExecutionLogParams): Promise<IExecutionLogResult> {
-    this.logger.debug(`getExecutionLogForRule(): getting global execution log`);
+    this.logger.debug(`getGlobalExecutionLogWithAuth(): getting global execution log`);
 
     let authorizationTuple;
     try {
@@ -916,20 +916,12 @@ export class RulesClient {
       throw error;
     }
 
-    // // getFindAuthorizationFilter doesn't return the exact property names needed to filter event logs, so find/replace them
-    // const authFilter = JSON.parse(
-    //   JSON.stringify(authorizationTuple.filter)
-    //     .replace(/alert\.attributes/g, 'kibana.alert.rule')
-    //     .replace(/alertTypeId/g, 'rule_type_id')
-    // );
-
     this.auditLogger?.log(
       ruleAuditEvent({
         action: RuleAuditAction.GET_GLOBAL_EXECUTION_LOG,
       })
     );
 
-    // default duration of instance summary is 60 * rule interval
     const dateNow = new Date();
     const parsedDateStart = parseDate(dateStart, 'dateStart', dateNow);
     const parsedDateEnd = parseDate(dateEnd, 'dateEnd', dateNow);
