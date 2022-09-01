@@ -701,7 +701,7 @@ export function getIndexPatternDatasource({
           >
             <FormattedMessage
               id="xpack.lens.indexPattern.useFieldExistenceSamplingBody"
-              defaultMessage="This setting is deprecated and will not be supported in a future version. You must disable the {link} setting."
+              defaultMessage="This setting is deprecated and will not be supported as of 8.6. You must disable the {link} setting."
               values={{ link }}
             />
           </EuiCallOut>

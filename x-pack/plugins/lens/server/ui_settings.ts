@@ -27,7 +27,7 @@ export const getUiSettings: () => Record<string, UiSettingsParams> = () => ({
     ),
     deprecation: {
       message: i18n.translate('xpack.lens.advancedSettings.useFieldExistenceSampling.deprecation', {
-        defaultMessage: 'This setting is deprecated and will not be supported in a future version.',
+        defaultMessage: 'This setting is deprecated and will not be supported as of 8.6.',
       }),
       docLinksKey: 'visualizationSettings',
     },
