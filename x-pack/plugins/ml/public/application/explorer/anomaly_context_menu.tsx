@@ -93,10 +93,7 @@ export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
           )}
           data-test-subj="mlAnomalyAttachChartsToCasesButton"
         >
-          <FormattedMessage
-            id="xpack.ml.explorer.attachToCaseLabel"
-            defaultMessage="Add to case"
-          />
+          <FormattedMessage id="xpack.ml.explorer.attachToCaseLabel" defaultMessage="Add to case" />
         </EuiContextMenuItem>
       );
     }
@@ -128,11 +125,11 @@ export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
             panelPaddingSize="none"
             anchorPosition="downLeft"
           >
-             <EuiPopoverTitle paddingSize="s">
-                {i18n.translate('xpack.ml.explorer.anomalies.actionsPopoverLabel', {
-                  defaultMessage: 'Anomaly charts',
-                })}
-              </EuiPopoverTitle>
+            <EuiPopoverTitle paddingSize="s">
+              {i18n.translate('xpack.ml.explorer.anomalies.actionsPopoverLabel', {
+                defaultMessage: 'Anomaly charts',
+              })}
+            </EuiPopoverTitle>
             <EuiContextMenuPanel items={menuItems} />
           </EuiPopover>
         </EuiFlexItem>
