@@ -33,6 +33,7 @@ const defaultProps = {
   caseServices: {},
   caseUserActions: [],
   userProfiles: new Map(),
+  currentUserProfile: undefined,
   connectors: [],
   actionsNavigation: { href: jest.fn(), onClick: jest.fn() },
   getRuleDetailsHref: jest.fn(),
