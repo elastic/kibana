@@ -30,6 +30,21 @@ export class TestSubjects extends FtrService {
   public readonly TRY_TIME = this.config.get('timeouts.try');
   public readonly WAIT_FOR_EXISTS_TIME = this.config.get('timeouts.waitForExists');
 
+  /**
+   * Get a promise that resolves with `true` when an element exists, if the element doesn't exist
+   * yet it will wait until the element does exist. If we wait until the timeout and the element
+   * still doesn't exist the promise will resolve with `false`.
+   *
+   * This method is intended to quickly answer the question "does this testSubject exist". Its
+   * 2.5 second timeout responds quickly, making it a good candidate for putting inside
+   * `retry.waitFor()` loops.
+   *
+   * When `options.timeout` is not passed the `timeouts.waitForExists` config is used as
+   * the timeout. The default value for that config is currently 2.5 seconds.
+   *
+   * If the element is hidden it is not treated as "existing", unless `options.allowHidden`
+   * is set to `true`.
+   */
   public async exists(selector: string, options: ExistsOptions = {}): Promise<boolean> {
     const { timeout = this.WAIT_FOR_EXISTS_TIME, allowHidden = false } = options;
 
@@ -39,6 +54,17 @@ export class TestSubjects extends FtrService {
       : this.findService.existsByDisplayedByCssSelector(testSubjSelector(selector), timeout));
   }
 
+  /**
+   * Get a promise that resolves when an element exists, if the element doesn't exist
+   * before the timeout is reached the promise will reject with an error.
+   *
+   * This method is intended to be used as success critieria when something is expected
+   * to exist. The default 2 minute timeout is not appropriate for all conditions, but
+   * hard-coding timeouts all over tests is also bad, so please use your best judgement.
+   *
+   * The options are equal to the options accepted by the {@link #exists} method except
+   * that `options.timeout` defaults to the `timeouts.try` config, or 2 minutes.
+   */
   public async existOrFail(selector: string, existsOptions?: ExistsOptions): Promise<void | never> {
     if (!(await this.exists(selector, { timeout: this.TRY_TIME, ...existsOptions }))) {
       throw new Error(`expected testSubject(${selector}) to exist`);
