@@ -20,7 +20,7 @@ import {
   getSavedSearch,
   getSavedSearchFullPathUrl,
 } from '@kbn/saved-search-plugin/public';
-import { getState } from './services/discover_state';
+import { getStateContainer } from './services/discover_state';
 import { loadDataView, resolveDataView } from './utils/resolve_data_view';
 import { DiscoverMainApp } from './discover_main_app';
 import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../../utils/breadcrumbs';
@@ -90,7 +90,11 @@ export function DiscoverMainRoute(props: Props) {
           return;
         }
 
-        const { appStateContainer } = getState({ savedSearch: nextSavedSearch, history, services });
+        const { appStateContainer } = getStateContainer({
+          savedSearch: nextSavedSearch,
+          history,
+          services,
+        });
         const { index } = appStateContainer.getState();
         const ip = await loadDataView(index || '', data.dataViews);
 

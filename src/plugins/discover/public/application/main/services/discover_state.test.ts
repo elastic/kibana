@@ -7,7 +7,7 @@
  */
 
 import {
-  getState,
+  getStateContainer,
   GetStateReturn,
   createSearchSessionRestorationDataProvider,
 } from './discover_state';
@@ -27,7 +27,7 @@ describe('Test discover state', () => {
   beforeEach(async () => {
     history = createBrowserHistory();
     history.push('/');
-    state = getState({
+    state = getStateContainer({
       savedSearch: savedSearchMock,
       history,
       services: discoverServiceMock,
@@ -93,7 +93,7 @@ describe('Test discover initial state sort handling', () => {
 
     const savedSearch = { ...savedSearchMock, sort: [['fallback', 'desc']] as SortOrder[] };
 
-    state = getState({
+    state = getStateContainer({
       savedSearch,
       history,
       services: discoverServiceMock,
@@ -115,7 +115,7 @@ describe('Test discover initial state sort handling', () => {
     history.push('/#?_a=(sort:!())');
     const savedSearch = { ...savedSearchMock, sort: [['extension', 'desc']] as SortOrder[] };
 
-    state = getState({
+    state = getStateContainer({
       savedSearch,
       history,
       services: discoverServiceMock,
@@ -140,7 +140,7 @@ describe('Test discover state with legacy migration', () => {
     history.push(
       "/#?_a=(query:(query_string:(analyze_wildcard:!t,query:'type:nice%20name:%22yeah%22')))"
     );
-    state = getState({
+    state = getStateContainer({
       savedSearch: savedSearchMock,
       history,
       services: discoverServiceMock,
@@ -178,7 +178,7 @@ describe('createSearchSessionRestorationDataProvider', () => {
   const mockDataPlugin = dataPluginMock.createStartContract();
   const searchSessionInfoProvider = createSearchSessionRestorationDataProvider({
     data: mockDataPlugin,
-    appStateContainer: getState({
+    appStateContainer: getStateContainer({
       savedSearch: savedSearchMock,
       history: createBrowserHistory(),
       services: discoverServiceMock,

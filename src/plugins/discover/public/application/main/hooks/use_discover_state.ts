@@ -11,7 +11,7 @@ import { History } from 'history';
 import { DataViewType, DataViewListItem } from '@kbn/data-views-plugin/public';
 import { SavedSearch, getSavedSearch } from '@kbn/saved-search-plugin/public';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
-import { getState } from '../services/discover_state';
+import { getStateContainer } from '../services/discover_state';
 import { getStateDefaults } from '../utils/get_state_defaults';
 import { DiscoverServices } from '../../../build_services';
 import { loadDataView } from '../utils/resolve_data_view';
@@ -55,7 +55,7 @@ export function useDiscoverState({
 
   const stateContainer = useMemo(
     () =>
-      getState({
+      getStateContainer({
         savedSearch,
         history,
         services,

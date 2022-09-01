@@ -27,13 +27,18 @@ export function useTextBasedQueryLanguage({
   query,
 }: {
   documents$: DataDocuments$;
+  dataViewList: DataViewListItem[];
   stateContainer: GetStateReturn;
   query: AggregateQuery | Query | undefined;
-  dataViewList: DataViewListItem[];
 }) {
-  const state = useRef<{ query: AggregateQuery | Query | undefined; columns: string[] }>({
+  const state = useRef<{
+    query: AggregateQuery | Query | undefined;
+    columns: string[];
+    dataViewId: string;
+  }>({
     columns: [],
     query: undefined,
+    dataViewId: '',
   });
 
   useEffect(() => {
@@ -53,17 +58,21 @@ export function useTextBasedQueryLanguage({
             !isEqual(query, state.current.query)
           ) {
             columns = firstRowColumns;
-            state.current = { columns, query };
+            state.current.columns = columns;
+            state.current.query = query;
           }
         }
         const indexPatternFromQuery = getIndexPatternFromSQLQuery(query.sql);
         const dataViewObj = dataViewList.find(({ title }) => title === indexPatternFromQuery);
         if (dataViewObj) {
           const nextState = {
-            index: dataViewObj.id,
+            ...(dataViewObj.id !== state.current.dataViewId && { index: dataViewObj.id }),
             ...(columns.length && { columns }),
           };
-          stateContainer.replaceUrlAppState(nextState);
+          if (Object.keys(nextState).length) {
+            stateContainer.replaceUrlAppState(nextState);
+            state.current.dataViewId = dataViewObj.id;
+          }
         }
       }
     });

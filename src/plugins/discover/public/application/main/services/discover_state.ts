@@ -182,7 +182,11 @@ const GLOBAL_STATE_URL_KEY = '_g';
  * Builds and returns appState and globalState containers and helper functions
  * Used to sync URL with UI state
  */
-export function getState({ savedSearch, history, services }: GetStateParams): GetStateReturn {
+export function getStateContainer({
+  savedSearch,
+  history,
+  services,
+}: GetStateParams): GetStateReturn {
   const { uiSettings, data, storage } = services;
   const toasts = services.core.notifications.toasts;
   const storeInSessionStorage = uiSettings.get('state:storeInSessionStorage');
