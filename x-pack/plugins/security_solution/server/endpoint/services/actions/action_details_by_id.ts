@@ -13,6 +13,7 @@ import {
   categorizeResponseResults,
   getActionCompletionInfo,
   mapToNormalizedActionRequest,
+  getAgentHostNamesWithIds,
 } from './utils';
 import type {
   ActionDetails,
@@ -27,9 +28,11 @@ import { catchAndWrapError } from '../../utils';
 import { EndpointError } from '../../../../common/endpoint/errors';
 import { NotFoundError } from '../../errors';
 import { ACTION_RESPONSE_INDICES, ACTIONS_SEARCH_PAGE_SIZE } from './constants';
+import type { EndpointMetadataService } from '../metadata';
 
 export const getActionDetailsById = async (
   esClient: ElasticsearchClient,
+  metadataService: EndpointMetadataService,
   actionId: string
 ): Promise<ActionDetails> => {
   let actionRequestsLogEntries: EndpointActivityLogAction[];
@@ -106,14 +109,23 @@ export const getActionDetailsById = async (
     throw new NotFoundError(`Action with id '${actionId}' not found.`);
   }
 
-  const { isCompleted, completedAt, wasSuccessful, errors, outputs } = getActionCompletionInfo(
-    normalizedActionRequest.agents,
-    actionResponses
-  );
+  // get host metadata info with queried agents
+  const agentsHostInfo = await getAgentHostNamesWithIds({
+    esClient,
+    metadataService,
+    agentIds: normalizedActionRequest.agents,
+  });
+
+  const { isCompleted, completedAt, wasSuccessful, errors, outputs, agentState } =
+    getActionCompletionInfo(normalizedActionRequest.agents, actionResponses);
 
   const actionDetails: ActionDetails = {
     id: actionId,
     agents: normalizedActionRequest.agents,
+    hosts: normalizedActionRequest.agents.reduce<ActionDetails['hosts']>((acc, id) => {
+      acc[id] = { name: agentsHostInfo[id] };
+      return acc;
+    }, {}),
     command: normalizedActionRequest.command,
     startedAt: normalizedActionRequest.createdAt,
     isCompleted,
@@ -122,6 +134,7 @@ export const getActionDetailsById = async (
     errors,
     isExpired: !isCompleted && normalizedActionRequest.expiration < new Date().toISOString(),
     outputs,
+    agentState,
     createdBy: normalizedActionRequest.createdBy,
     comment: normalizedActionRequest.comment,
     parameters: normalizedActionRequest.parameters,

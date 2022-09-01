@@ -6,7 +6,7 @@ NOTE:
 
     node scripts/build_plugin_list_docs
 
-  You can update the template within node_modules/@kbn/dev-utils/target_node/plugin_list/generate_plugin_list.js
+  You can update the template within node_modules/@kbn/dev-utils/target_node/src/plugin_list/generate_plugin_list.js
 
 ////
 
@@ -512,7 +512,7 @@ the infrastructure monitoring use-case within Kibana.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/kubernetes_security/README.md[kubernetesSecurity]
-|(under construction)
+|This plugin provides interactive visualizations of your Kubernetes workload and session data.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/lens/readme.md[lens]

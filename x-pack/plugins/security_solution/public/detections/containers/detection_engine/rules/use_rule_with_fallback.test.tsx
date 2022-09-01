@@ -18,6 +18,7 @@ import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 jest.mock('./api');
 jest.mock('../alerts/api');
 jest.mock('../../../../common/hooks/use_app_toasts');
+jest.mock('../../../../common/lib/kibana');
 
 const mockNotFoundErrorForRule = () => {
   (api.fetchRuleById as jest.Mock).mockImplementation(async () => {

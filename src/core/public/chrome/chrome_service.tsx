@@ -17,7 +17,7 @@ import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { HttpStart } from '@kbn/core-http-browser';
 import { mountReactNode } from '@kbn/core-mount-utils-browser-internal';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
-import type { InternalApplicationStart } from '../application';
+import type { InternalApplicationStart } from '@kbn/core-application-browser-internal';
 import { KIBANA_ASK_ELASTIC_LINK } from './constants';
 import { type ChromeDocTitle, DocTitleService } from './doc_title';
 import { type ChromeNavControls, NavControlsService } from './nav_controls';
