@@ -74,7 +74,7 @@ export default function ({ getService }: FtrProviderContext) {
     before(async () => {
       await supertest.post('/api/fleet/setup').set('kbn-xsrf', 'true').send().expect(200);
       await supertest
-        .post('/api/fleet/epm/packages/synthetics/0.9.4')
+        .post('/api/fleet/epm/packages/synthetics/0.10.2')
         .set('kbn-xsrf', 'true')
         .send({ force: true })
         .expect(200);
@@ -1011,7 +1011,18 @@ export default function ({ getService }: FtrProviderContext) {
         );
         expect(packagePolicy.policy_id).eql(testPolicyId);
 
-        comparePolicies(packagePolicy, getTestProjectSyntheticsPolicy());
+        const configId = monitorsResponse.body.monitors[0].id;
+        const id = monitorsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID];
+
+        comparePolicies(
+          packagePolicy,
+          getTestProjectSyntheticsPolicy({
+            inputs: {},
+            name: 'check if title is present-Test private location 0',
+            id,
+            configId,
+          })
+        );
       } finally {
         await deleteMonitor(projectMonitors.monitors[0].id, projectMonitors.project);
 
@@ -1056,7 +1067,18 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(packagePolicy.policy_id).eql(testPolicyId);
 
-        comparePolicies(packagePolicy, getTestProjectSyntheticsPolicy());
+        const configId = monitorsResponse.body.monitors[0].id;
+        const id = monitorsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID];
+
+        comparePolicies(
+          packagePolicy,
+          getTestProjectSyntheticsPolicy({
+            inputs: {},
+            name: 'check if title is present-Test private location 0',
+            id,
+            configId,
+          })
+        );
 
         await supertest
           .put(API_URLS.SYNTHETICS_MONITORS_PROJECT)
@@ -1124,7 +1146,18 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(packagePolicy.policy_id).eql(testPolicyId);
 
-        comparePolicies(packagePolicy, getTestProjectSyntheticsPolicy());
+        const configId = monitorsResponse.body.monitors[0].id;
+        const id = monitorsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID];
+
+        comparePolicies(
+          packagePolicy,
+          getTestProjectSyntheticsPolicy({
+            inputs: {},
+            name: 'check if title is present-Test private location 0',
+            id,
+            configId,
+          })
+        );
 
         await supertest
           .put(API_URLS.SYNTHETICS_MONITORS_PROJECT)
@@ -1199,17 +1232,25 @@ export default function ({ getService }: FtrProviderContext) {
           '/api/fleet/package_policies?page=1&perPage=2000&kuery=ingest-package-policies.package.name%3A%20synthetics'
         );
 
+        const configId = monitorsResponse.body.monitors[0].id;
+        const id = monitorsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID];
+        const policyId = `${id}-${testPolicyId}`;
+
         const packagePolicy = apiResponsePolicy.body.items.find(
-          (pkgPolicy: PackagePolicy) =>
-            pkgPolicy.id ===
-            monitorsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID] +
-              '-' +
-              testPolicyId
+          (pkgPolicy: PackagePolicy) => pkgPolicy.id === policyId
         );
 
         expect(packagePolicy.policy_id).eql(testPolicyId);
 
-        comparePolicies(packagePolicy, getTestProjectSyntheticsPolicy());
+        comparePolicies(
+          packagePolicy,
+          getTestProjectSyntheticsPolicy({
+            inputs: {},
+            name: 'check if title is present-Test private location 0',
+            id,
+            configId,
+          })
+        );
 
         await supertest
           .put(API_URLS.SYNTHETICS_MONITORS_PROJECT)
@@ -1229,18 +1270,21 @@ export default function ({ getService }: FtrProviderContext) {
           '/api/fleet/package_policies?page=1&perPage=2000&kuery=ingest-package-policies.package.name%3A%20synthetics'
         );
 
+        const configId2 = monitorsResponse.body.monitors[0].id;
+        const id2 = monitorsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID];
+        const policyId2 = `${id}-${testPolicyId}`;
+
         const packagePolicy2 = apiResponsePolicy2.body.items.find(
-          (pkgPolicy: PackagePolicy) =>
-            pkgPolicy.id ===
-            monitorsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID] +
-              '-' +
-              testPolicyId
+          (pkgPolicy: PackagePolicy) => pkgPolicy.id === policyId2
         );
 
         comparePolicies(
           packagePolicy2,
           getTestProjectSyntheticsPolicy({
             inputs: { enabled: { value: false, type: 'bool' } },
+            name: 'check if title is present-Test private location 0',
+            id: id2,
+            configId: configId2,
           })
         );
       } finally {

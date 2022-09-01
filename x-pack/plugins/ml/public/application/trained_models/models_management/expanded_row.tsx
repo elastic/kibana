@@ -11,6 +11,7 @@ import {
   EuiBadge,
   EuiCodeBlock,
   EuiDescriptionList,
+  EuiDescriptionListProps,
   EuiFlexGrid,
   EuiFlexItem,
   EuiNotificationBadge,
@@ -20,7 +21,6 @@ import {
   EuiTabbedContentTab,
   EuiTitle,
 } from '@elastic/eui';
-import type { EuiDescriptionListProps } from '@elastic/eui/src/components/description_list/description_list';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';

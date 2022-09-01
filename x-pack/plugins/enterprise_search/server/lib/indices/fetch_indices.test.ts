@@ -86,6 +86,7 @@ describe('fetchIndices lib function', () => {
         alias: false,
         count: 100,
         health: 'green',
+        hidden: false,
         name: 'search-regular-index',
         privileges: { manage: true, read: true },
         status: 'open',
@@ -135,6 +136,7 @@ describe('fetchIndices lib function', () => {
         alias: false,
         count: 100,
         health: 'green',
+        hidden: false,
         name: 'search-regular-index',
         privileges: { manage: true, read: true },
         status: 'open',
@@ -195,6 +197,7 @@ describe('fetchIndices lib function', () => {
       {
         count: 100,
         health: 'green',
+        hidden: false,
         name: 'index-without-prefix',
         status: 'open',
         alias: false,
@@ -213,6 +216,7 @@ describe('fetchIndices lib function', () => {
       {
         count: 100,
         health: 'green',
+        hidden: false,
         name: 'search-aliased',
         status: 'open',
         alias: true,
@@ -231,6 +235,7 @@ describe('fetchIndices lib function', () => {
       {
         count: 100,
         health: 'green',
+        hidden: false,
         name: 'search-double-aliased',
         status: 'open',
         alias: true,
@@ -249,6 +254,7 @@ describe('fetchIndices lib function', () => {
       {
         count: 100,
         health: 'green',
+        hidden: false,
         name: 'second-index',
         status: 'open',
         alias: false,
@@ -298,6 +304,7 @@ describe('fetchIndices lib function', () => {
       {
         count: 100,
         health: 'green',
+        hidden: false,
         name: 'index-without-prefix',
         status: 'open',
         alias: false,
@@ -316,6 +323,7 @@ describe('fetchIndices lib function', () => {
       {
         count: 100,
         health: 'green',
+        hidden: false,
         name: 'second-index',
         status: 'open',
         alias: false,
@@ -350,6 +358,7 @@ describe('fetchIndices lib function', () => {
       {
         count: 100,
         health: undefined,
+        hidden: false,
         name: 'search-regular-index',
         status: undefined,
         alias: false,

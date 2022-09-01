@@ -104,6 +104,9 @@
       "label": "Tutorials",
       "items": [
         {
+          "id": "kibDevTutorialAddingPerformanceMetrics"
+        },
+        {
           "id": "kibDevTutorialSetupWindowsDevWSL"
         },
         {
@@ -230,13 +233,7 @@
           "id": "kibCorePluginApi"
         },
         {
-          "id": "kibCoreApplicationPluginApi"
-        },
-        {
           "id": "kibCoreChromePluginApi"
-        },
-        {
-          "id": "kibCoreSavedObjectsPluginApi"
         },
         {
           "id": "kibFieldFormatsPluginApi"

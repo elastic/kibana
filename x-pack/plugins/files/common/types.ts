@@ -459,35 +459,41 @@ export interface FileKind {
   blobStoreSettings?: BlobStorageSettings;
 
   /**
-   * Optionally specify which HTTP routes to create for the file kind
+   * Specify which HTTP routes to create for the file kind.
+   *
+   * You can always create your own HTTP routes for working with files but
+   * this interface allows you to expose basic CRUD operations, upload, download
+   * and sharing of files over a RESTful-like interface.
+   *
+   * @note The public {@link FileClient} uses these endpoints.
    */
   http: {
     /**
-     * Enable creating this file type
+     * Expose file creation (and upload) over HTTP.
      */
     create?: HttpEndpointDefinition;
     /**
-     * Enable the file metadata to updated
+     * Expose file updates over HTTP.
      */
     update?: HttpEndpointDefinition;
     /**
-     * Enable the file to be deleted (metadata and contents)
+     * Expose file deletion over HTTP.
      */
     delete?: HttpEndpointDefinition;
     /**
-     * Enable file to be retrieved by ID.
+     * Expose "get by ID" functionality over HTTP.
      */
     getById?: HttpEndpointDefinition;
     /**
-     * Enable file to be listed
+     * Expose the ability to list all files of this kind over HTTP.
      */
     list?: HttpEndpointDefinition;
     /**
-     * Enable the file to be downloaded
+     * Expose the ability to download a file's contents over HTTP.
      */
     download?: HttpEndpointDefinition;
     /**
-     * Enable the file to be shared publicly
+     * Expose file share functionality over HTTP.
      */
     share?: HttpEndpointDefinition;
   };

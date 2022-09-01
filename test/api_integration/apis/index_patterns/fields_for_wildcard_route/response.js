@@ -85,6 +85,7 @@ export default function ({ getService }) {
         .query({ pattern: 'basic_index' })
         .expect(200, {
           fields: testFields,
+          indices: ['basic_index'],
         })
         .then(ensureFieldsAreSorted);
     });
@@ -176,6 +177,7 @@ export default function ({ getService }) {
               metadata_field: false,
             },
           ],
+          indices: ['basic_index'],
         })
         .then(ensureFieldsAreSorted);
     });
@@ -186,6 +188,7 @@ export default function ({ getService }) {
         .query({ pattern: 'bad_index,basic_index' })
         .expect(200, {
           fields: testFields,
+          indices: ['basic_index'],
         });
     });
     it('returns 404 when no patterns exist', async () => {
