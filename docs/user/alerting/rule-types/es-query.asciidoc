@@ -20,7 +20,7 @@ Fill in the <<defining-rules-general-details, rule details>>, then select
 Define properties to detect the condition.
 
 [role="screenshot"]
-image::user/alerting/images/rule-types-es-query-conditions-2.png[Six clauses define the condition to detect]
+image::user/alerting/images/rule-types-es-query-conditions.png[Six clauses define the condition to detect]
 
 Index:: Specifies an *index or data view* and a *time field* that is used for 
 the *time window*.
@@ -38,9 +38,8 @@ Time window:: Defines how far back to search for documents, using the
 value higher than the *check every* value in the 
 <<defining-rules-general-details, general rule details>>, to avoid gaps in 
 detection.
-Exclude the hits from previous run:: Defines if the documents that have already been
-detected by the previous rule run should be excluded (to avoid duplication) or not.
-
+Exclude the hits from previous run:: Turn on to avoid alert duplication by
+excluding documents that have already been detected by the previous rule run.
 
 [float]
 ==== Add action variables
