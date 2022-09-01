@@ -17,10 +17,10 @@ type QueryLanguageType = 'lucene' | 'kuery';
 
 export function AlertsSearchBar({
   dynamicIndexPatterns,
-  rangeFrom,
-  rangeTo,
   onQueryChange,
   query,
+  rangeFrom,
+  rangeTo,
 }: {
   dynamicIndexPatterns: DataViewBase[];
   rangeFrom?: string;
@@ -54,9 +54,6 @@ export function AlertsSearchBar({
       timeHistory={timeHistory}
       dateRangeFrom={rangeFrom}
       dateRangeTo={rangeTo}
-      onRefresh={({ dateRange }) => {
-        onQueryChange({ dateRange, query });
-      }}
       onQuerySubmit={({ dateRange, query: nextQuery }) => {
         onQueryChange({
           dateRange,
