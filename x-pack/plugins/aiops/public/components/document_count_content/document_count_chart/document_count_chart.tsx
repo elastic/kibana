@@ -10,10 +10,10 @@ import moment from 'moment';
 
 import {
   Axis,
-  BarSeries,
   BrushEndListener,
   Chart,
   ElementClickListener,
+  HistogramBarSeries,
   Position,
   ScaleType,
   Settings,
@@ -336,17 +336,19 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
             theme={chartTheme}
             baseTheme={chartBaseTheme}
             debugState={window._echDebugStateFlag ?? false}
+            showLegend={false}
+            showLegendExtra={false}
           />
+          <Axis id="aiops-histogram-left-axis" position={Position.Left} ticks={2} integersOnly />
           <Axis
-            id="bottom"
+            id="aiops-histogram-bottom-axis"
             position={Position.Bottom}
             showOverlappingTicks={true}
             tickFormat={(value) => xAxisFormatter.convert(value)}
             timeAxisLayerCount={useLegacyTimeAxis ? 0 : 2}
             style={useLegacyTimeAxis ? {} : MULTILAYER_TIME_AXIS_STYLE}
           />
-          <Axis id="left" position={Position.Left} />
-          <BarSeries
+          <HistogramBarSeries
             id={SPEC_ID}
             name={chartPointsSplit ? overallSeriesNameWithSplit : overallSeriesName}
             xScaleType={ScaleType.Time}
@@ -354,11 +356,11 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
             xAccessor="time"
             yAccessors={['value']}
             data={adjustedChartPoints}
-            stackAccessors={[0]}
             timeZone={timeZone}
+            yNice
           />
           {chartPointsSplit && (
-            <BarSeries
+            <HistogramBarSeries
               id={`${SPEC_ID}_split`}
               name={splitSeriesName}
               xScaleType={ScaleType.Time}
@@ -366,9 +368,9 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
               xAccessor="time"
               yAccessors={['value']}
               data={adjustedChartPointsSplit}
-              stackAccessors={[0]}
               timeZone={timeZone}
               color={['orange']}
+              yNice
             />
           )}
           {windowParameters && (
