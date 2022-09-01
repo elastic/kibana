@@ -272,6 +272,11 @@ export interface ActionDetails<TOutputContent extends object = object> {
    */
   agents: string[];
   /**
+   * A map of `Agent ID`'s to which the action was sent whose value contains more
+   * information about the host (currently the host name only).
+   */
+  hosts: Record<string, { name: string }>;
+  /**
    * The Endpoint type of action (ex. `isolate`, `release`) that is being requested to be
    * performed on the endpoint
    */
