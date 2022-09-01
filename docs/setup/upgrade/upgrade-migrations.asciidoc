@@ -123,7 +123,7 @@ Problems with your {es} cluster can prevent {kib} upgrades from succeeding. Ensu
 
 [float]
 ===== Unsupported routing allocation {es} cluster settings
-As part of upgrade migrations, Kibana creates indices with an auto-expanded replica. When routing allocation is disabled or restricted (`cluster.routing.allocation.enable: none/primaries/new_primaries`) the replica shard won't get assigned causing the upgrade to fail. 
+As part of upgrade migrations, {kib} creates indices with an auto-expanded replica. When routing allocation is disabled or restricted (`cluster.routing.allocation.enable: none/primaries/new_primaries`) the replica shard won't get assigned causing the upgrade to fail. 
 
 If routing allocation does not allow auto-expanded replica creation, you might see a log entry similar to:
 
