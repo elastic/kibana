@@ -205,6 +205,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
         }, 0);
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       collapseFn.current,
       panelsInitialized,
@@ -225,6 +226,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
         },
       });
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [anomalyExplorerPanelState]
   );
 
@@ -253,6 +255,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
         isCollapsed: !isCurrentlyCollapsed,
       },
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [anomalyExplorerPanelState]);
 
   const { displayWarningToast, displayDangerToast } = useToastNotificationService();
@@ -328,6 +331,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
         );
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [explorerState, language, filterSettings]
   );
 
@@ -343,6 +347,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
         })
       );
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const {
