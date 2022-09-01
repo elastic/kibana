@@ -70,10 +70,7 @@ export const getSavedQueriesComplexTest = (savedQueryId: string, savedQueryDescr
       cy.contains('Save query');
       findFormFieldByRowsLabelAndType('ID', savedQueryId);
       findFormFieldByRowsLabelAndType('Description (optional)', savedQueryDescription);
-      cy.react('EuiFlyoutFooter').within(() => {
-        cy.react('EuiButtonDisplay').contains('Save').click();
-      });
-
+      cy.react('EuiButtonDisplay').contains('Save').click();
       // visit Status results
       cy.react('EuiTab', { props: { id: 'status' } }).click();
       cy.react('EuiTableRow').should('have.lengthOf', 1);
