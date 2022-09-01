@@ -10,9 +10,9 @@ import React, { useCallback, useMemo } from 'react';
 import type { ReactElement } from 'react';
 
 import { SECURITY_SOLUTION_OWNER } from '@kbn/cases-plugin/common';
-import { useGetUserCasesPermissions } from '../../../cases/useGetCasesPermissions';
+import { useGetUserCasesPermissions } from '../../../cases/use_get_cases_permissions';
 import type { ECSMapping } from '../../../../common/schemas/common';
-import { AddToCaseButton } from '../../../cases/AddToCasesButton';
+import { AddToCaseButton } from '../../../cases/add_to_cases_button';
 import { useKibana } from '../../../common/lib/kibana';
 import { ResultsTable } from '../../../results/results_table';
 import { ActionResultsSummary } from '../../../action_results/action_results_summary';

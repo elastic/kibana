@@ -9,7 +9,7 @@ import React, { useCallback } from 'react';
 import { CommentType, SECURITY_SOLUTION_OWNER } from '@kbn/cases-plugin/common';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useGetUserCasesPermissions } from './useGetCasesPermissions';
+import { useGetUserCasesPermissions } from './use_get_cases_permissions';
 import { useKibana } from '../common/lib/kibana';
 
 const ADD_TO_CASE = i18n.translate(

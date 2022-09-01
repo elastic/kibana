@@ -11,7 +11,7 @@ import React, { useLayoutEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 
 import { SECURITY_SOLUTION_OWNER } from '@kbn/cases-plugin/common';
-import { useGetUserCasesPermissions } from '../../../cases/useGetCasesPermissions';
+import { useGetUserCasesPermissions } from '../../../cases/use_get_cases_permissions';
 import { useKibana, useRouterNavigate } from '../../../common/lib/kibana';
 import { WithHeaderLayout } from '../../../components/layouts';
 import { useLiveQueryDetails } from '../../../actions/use_live_query_details';
