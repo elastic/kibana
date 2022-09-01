@@ -18,8 +18,6 @@ rm -rf "${KIBANA_BUILD_LOCATION}"
 rm -rf "${KIBANA_LOAD_TESTING_DIR}"
 rm -rf "${GCS_ARTIFACTS_DIR}"
 
-echo "BUILDKITE_PIPELINE_SLUG=${BUILDKITE_PIPELINE_SLUG}"
-
 download_artifacts() {
   mkdir -p "${GCS_ARTIFACTS_DIR}"
 
