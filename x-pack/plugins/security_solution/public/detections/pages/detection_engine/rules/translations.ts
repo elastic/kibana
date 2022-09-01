@@ -190,7 +190,7 @@ export const BULK_ACTION_ADD_RULE_ACTIONS = i18n.translate(
 export const BULK_ACTION_SET_SCHEDULE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.setScheduleTitle',
   {
-    defaultMessage: 'Set schedule',
+    defaultMessage: 'Update rule schedules',
   }
 );
 
