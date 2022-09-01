@@ -117,3 +117,4 @@ export const WORKPLACE_SEARCH_URL = '/app/enterprise_search/workplace_search';
 export const ENTERPRISE_SEARCH_DOCUMENTS_DEFAULT_DOC_COUNT = 25;
 
 export const ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE = 'elastic-crawler';
+export const ENTERPRISE_SEARCH_INDEX_VIA_API_SERVICE_TYPE = 'elasticsearch-native';

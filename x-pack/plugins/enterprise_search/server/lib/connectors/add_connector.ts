@@ -75,7 +75,8 @@ export const addConnector = async (
     is_native: boolean;
     language: string | null;
   },
-  createDocumentIndex: boolean = true
+  createDocumentIndex: boolean = true,
+  serviceType: string | null = null
 ): Promise<{ id: string; index_name: string }> => {
   const connectorsIndexExists = await client.asCurrentUser.indices.exists({
     index: CONNECTORS_INDEX,
@@ -108,7 +109,7 @@ export const addConnector = async (
       run_ml_inference: connectorsPipelineMeta?.default_run_ml_inference,
     },
     scheduling: { enabled: false, interval: '0 0 0 * * ?' },
-    service_type: null,
+    service_type: serviceType,
     status: ConnectorStatus.CREATED,
     sync_now: false,
   };

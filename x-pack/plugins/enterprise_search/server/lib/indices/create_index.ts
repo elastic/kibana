@@ -8,6 +8,8 @@
 import { MappingKeywordProperty, MappingTextProperty } from '@elastic/elasticsearch/lib/api/types';
 import { IScopedClusterClient } from '@kbn/core/server';
 
+import { ENTERPRISE_SEARCH_INDEX_VIA_API_SERVICE_TYPE } from '../../../common/constants';
+
 import { addConnector } from '../connectors/add_connector';
 
 import { textAnalysisSettings } from './text_analysis';
@@ -68,7 +70,12 @@ export const createApiIndex = async (
   indexName: string,
   language: string | null
 ) => {
-  await addConnector(client, { index_name: indexName, is_native: false, language }, false);
+  await addConnector(
+    client,
+    { index_name: indexName, is_native: false, language },
+    false,
+    ENTERPRISE_SEARCH_INDEX_VIA_API_SERVICE_TYPE
+  );
   return await client.asCurrentUser.indices.create({
     body: {
       mappings: defaultMappings,
