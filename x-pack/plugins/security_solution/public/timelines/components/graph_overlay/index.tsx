@@ -23,7 +23,7 @@ import {
 } from '../../../common/containers/use_full_screen';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { TimelineId } from '../../../../common/types/timeline';
-import { timelineSelectors } from '../../store/timeline';
+import { timelineSelectors, timelineActions } from '../../store/timeline';
 import { timelineDefaults } from '../../store/timeline/defaults';
 import { isFullScreen } from '../timeline/body/column_headers';
 import { inputsActions } from '../../../common/store/actions';
@@ -98,6 +98,7 @@ const GraphOverlayComponent: React.FC<GraphOverlayProps> = ({
 
   useEffect(() => {
     return () => {
+      dispatch(timelineActions.updateTimelineGraphEventId({ id: timelineId, graphEventId: '' }));
       if (timelineId === TimelineId.active) {
         dispatch(inputsActions.setFullScreen({ id: InputsModelId.timeline, fullScreen: false }));
       } else {
