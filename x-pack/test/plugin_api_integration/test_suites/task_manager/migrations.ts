@@ -136,5 +136,27 @@ export default function createGetTests({ getService }: FtrProviderContext) {
       expect(response.body._source?.task.taskType).to.eql(`sampleTaskRemovedType`);
       expect(response.body._source?.task.status).to.eql(`unrecognized`);
     });
+
+    it('8.5.0 migrates all tasks to set enabled = true', async () => {
+      const response = await es.search<{ task: ConcreteTaskInstance }>(
+        {
+          index: '.kibana_task_manager',
+          size: 100,
+          body: {
+            query: {
+              match_all: {},
+            },
+          },
+        },
+        {
+          meta: true,
+        }
+      );
+      expect(response.statusCode).to.eql(200);
+      const tasks = response.body.hits.hits;
+      tasks.forEach((task) => {
+        expect(task._source?.task?.enabled).to.eql(true);
+      });
+    });
   });
 }
