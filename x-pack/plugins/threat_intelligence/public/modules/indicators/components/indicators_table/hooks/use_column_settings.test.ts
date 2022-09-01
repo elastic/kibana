@@ -28,7 +28,7 @@ describe('useColumnSettings()', () => {
             },
             Object {
               "displayAsText": "Indicator",
-              "id": "display_name",
+              "id": "threat.indicator.name",
             },
             Object {
               "displayAsText": "Indicator type",
@@ -52,7 +52,7 @@ describe('useColumnSettings()', () => {
         expect(result.current.columnVisibility.visibleColumns).toMatchInlineSnapshot(`
           Array [
             "@timestamp",
-            "display_name",
+            "threat.indicator.name",
             "threat.indicator.type",
             "threat.feed.name",
             "threat.indicator.first_seen",
@@ -133,7 +133,7 @@ describe('useColumnSettings()', () => {
       expect(result.current.columnVisibility.visibleColumns).toMatchInlineSnapshot(`
         Array [
           "@timestamp",
-          "display_name",
+          "threat.indicator.name",
           "threat.indicator.type",
           "threat.feed.name",
           "threat.indicator.first_seen",
@@ -148,7 +148,7 @@ describe('useColumnSettings()', () => {
           },
           Object {
             "displayAsText": "Indicator",
-            "id": "display_name",
+            "id": "threat.indicator.name",
           },
           Object {
             "displayAsText": "Indicator type",
@@ -176,7 +176,7 @@ describe('useColumnSettings()', () => {
       expect(result.current.columnVisibility.visibleColumns).toMatchInlineSnapshot(`
         Array [
           "@timestamp",
-          "display_name",
+          "threat.indicator.name",
           "threat.indicator.type",
           "threat.feed.name",
           "threat.indicator.first_seen",
@@ -192,7 +192,7 @@ describe('useColumnSettings()', () => {
           },
           Object {
             "displayAsText": "Indicator",
-            "id": "display_name",
+            "id": "threat.indicator.name",
           },
           Object {
             "displayAsText": "Indicator type",
@@ -224,7 +224,7 @@ describe('useColumnSettings()', () => {
       expect(result.current.columnVisibility.visibleColumns).toMatchInlineSnapshot(`
         Array [
           "@timestamp",
-          "display_name",
+          "threat.indicator.name",
           "threat.indicator.type",
           "threat.feed.name",
           "threat.indicator.first_seen",
@@ -239,7 +239,7 @@ describe('useColumnSettings()', () => {
           },
           Object {
             "displayAsText": "Indicator",
-            "id": "display_name",
+            "id": "threat.indicator.name",
           },
           Object {
             "displayAsText": "Indicator type",
