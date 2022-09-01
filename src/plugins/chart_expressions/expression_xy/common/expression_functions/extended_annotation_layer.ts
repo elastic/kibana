@@ -30,7 +30,11 @@ export function extendedAnnotationLayerFunction(): ExpressionFunctionDefinition<
         help: strings.getAnnotationLayerSimpleViewHelp(),
       },
       annotations: {
-        types: ['manual_point_event_annotation', 'manual_range_event_annotation'],
+        types: [
+          'manual_point_event_annotation',
+          'manual_range_event_annotation',
+          'query_point_event_annotation',
+        ],
         help: strings.getAnnotationLayerAnnotationsHelp(),
         multi: true,
       },
