@@ -9,19 +9,20 @@ import { i18n } from '@kbn/i18n';
 import { uniq } from 'lodash';
 import type { CoreStart } from '@kbn/core/public';
 import { buildEsQuery } from '@kbn/es-query';
-import { getEsQueryConfig } from '@kbn/data-plugin/public';
+import { getEsQueryConfig, DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { FieldStatsResponse, loadFieldStats } from '@kbn/unified-field-list-plugin/public';
 import { GenericIndexPatternColumn, operationDefinitionMap } from '..';
 import { defaultLabel } from '../filters';
 import { isReferenced } from '../../layer_helpers';
 
-import type { FieldStatsResponse } from '../../../../../common';
-import type { FrameDatasourceAPI } from '../../../../types';
+import type { FrameDatasourceAPI, IndexPattern, IndexPatternField } from '../../../../types';
 import type { FiltersIndexPatternColumn } from '..';
 import type { TermsIndexPatternColumn } from './types';
-import { LastValueIndexPatternColumn } from '../last_value';
+import type { LastValueIndexPatternColumn } from '../last_value';
 import type { PercentileRanksIndexPatternColumn } from '../percentile_ranks';
+import type { PercentileIndexPatternColumn } from '../percentile';
 
-import type { IndexPatternLayer, IndexPattern, IndexPatternField } from '../../../types';
+import type { IndexPatternLayer } from '../../../types';
 import { MULTI_KEY_VISUAL_SEPARATOR, supportedTypes } from './constants';
 import { isColumnOfType } from '../helpers';
 
@@ -108,7 +109,12 @@ export function getDisallowedTermsMessage(
       label: i18n.translate('xpack.lens.indexPattern.termsWithMultipleShiftsFixActionLabel', {
         defaultMessage: 'Use filters',
       }),
-      newState: async (core: CoreStart, frame: FrameDatasourceAPI, layerId: string) => {
+      newState: async (
+        data: DataPublicPluginStart,
+        core: CoreStart,
+        frame: FrameDatasourceAPI,
+        layerId: string
+      ) => {
         const currentColumn = layer.columns[columnId] as TermsIndexPatternColumn;
         const fieldNames = [
           currentColumn.sourceField,
@@ -132,23 +138,21 @@ export function getDisallowedTermsMessage(
         );
         if (!activeDataFieldNameMatch || currentTerms.length === 0) {
           if (fieldNames.length === 1) {
-            const response: FieldStatsResponse<string | number> = await core.http.post(
-              `/api/lens/index_stats/${indexPattern.id}/field`,
-              {
-                body: JSON.stringify({
-                  fieldName: fieldNames[0],
-                  dslQuery: buildEsQuery(
-                    indexPattern,
-                    frame.query,
-                    frame.filters,
-                    getEsQueryConfig(core.uiSettings)
-                  ),
-                  fromDate: frame.dateRange.fromDate,
-                  toDate: frame.dateRange.toDate,
-                  size: currentColumn.params.size,
-                }),
-              }
-            );
+            const currentDataView = await data.dataViews.get(indexPattern.id);
+            const response: FieldStatsResponse<string | number> = await loadFieldStats({
+              services: { data },
+              dataView: currentDataView,
+              field: indexPattern.getFieldByName(fieldNames[0])!,
+              dslQuery: buildEsQuery(
+                indexPattern,
+                frame.query,
+                frame.filters,
+                getEsQueryConfig(core.uiSettings)
+              ),
+              fromDate: frame.dateRange.fromDate,
+              toDate: frame.dateRange.toDate,
+              size: currentColumn.params.size,
+            });
             currentTerms = response.topValues?.buckets.map(({ key }) => String(key)) || [];
           }
         }
@@ -222,6 +226,31 @@ export function isPercentileRankSortable(column: GenericIndexPatternColumn) {
     (column.operationType === 'percentile_rank' &&
       Number.isInteger((column as PercentileRanksIndexPatternColumn).params.value))
   );
+}
+
+export function computeOrderForMultiplePercentiles(
+  column: GenericIndexPatternColumn,
+  layer: IndexPatternLayer,
+  orderedColumnIds: string[]
+) {
+  // compute the percentiles orderBy correctly for multiple percentiles
+  if (column.operationType === 'percentile') {
+    const percentileColumns = [];
+    for (const [key, value] of Object.entries(layer.columns)) {
+      if (
+        value.operationType === 'percentile' &&
+        (value as PercentileIndexPatternColumn).sourceField ===
+          (column as PercentileIndexPatternColumn).sourceField
+      ) {
+        percentileColumns.push(key);
+      }
+    }
+    if (percentileColumns.length > 1) {
+      const parentColumn = String(orderedColumnIds.indexOf(percentileColumns[0]));
+      return `${parentColumn}.${(column as PercentileIndexPatternColumn).params?.percentile}`;
+    }
+  }
+  return null;
 }
 
 export function isSortableByColumn(layer: IndexPatternLayer, columnId: string) {

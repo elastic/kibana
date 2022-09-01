@@ -79,48 +79,6 @@ export const GetStep: FunctionComponent<Props> = ({ display, readOnly }) => (
       </EuiFlexItem>
       <EuiFlexItem>
         <UseField
-          path="config.getIncidentResponseCreatedDateKey"
-          config={{
-            label: i18n.GET_INCIDENT_CREATED_KEY,
-            validations: [
-              {
-                validator: emptyField(i18n.GET_RESPONSE_EXTERNAL_CREATED_KEY_REQUIRED),
-              },
-            ],
-            helpText: i18n.GET_INCIDENT_CREATED_KEY_HELP,
-          }}
-          component={Field}
-          componentProps={{
-            euiFieldProps: {
-              readOnly,
-              'data-test-subj': 'getIncidentResponseCreatedDateKeyText',
-            },
-          }}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <UseField
-          path="config.getIncidentResponseUpdatedDateKey"
-          config={{
-            label: i18n.GET_INCIDENT_UPDATED_KEY,
-            validations: [
-              {
-                validator: emptyField(i18n.GET_RESPONSE_EXTERNAL_UPDATED_KEY_REQUIRED),
-              },
-            ],
-            helpText: i18n.GET_INCIDENT_UPDATED_KEY_HELP,
-          }}
-          component={Field}
-          componentProps={{
-            euiFieldProps: {
-              readOnly,
-              'data-test-subj': 'getIncidentResponseUpdatedDateKeyText',
-            },
-          }}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <UseField
           path="config.viewIncidentUrl"
           config={{
             label: i18n.EXTERNAL_INCIDENT_VIEW_URL,

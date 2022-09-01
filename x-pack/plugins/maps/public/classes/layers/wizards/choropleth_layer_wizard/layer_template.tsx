@@ -66,7 +66,6 @@ interface State {
   leftEmsJoinField: string | null;
   leftElasticsearchJoinField: string | null;
   rightIndexPatternId: string;
-  rightIndexPatternTitle: string | null;
   rightTermsFields: DataViewField[];
   rightJoinField: string | null;
 }
@@ -85,7 +84,6 @@ export class LayerTemplate extends Component<RenderWizardArguments, State> {
     leftEmsJoinField: null,
     leftElasticsearchJoinField: null,
     rightIndexPatternId: '',
-    rightIndexPatternTitle: null,
     rightTermsFields: [],
     rightJoinField: null,
   };
@@ -99,7 +97,7 @@ export class LayerTemplate extends Component<RenderWizardArguments, State> {
   }
 
   _loadRightFields = async (indexPatternId: string) => {
-    this.setState({ rightTermsFields: [], rightIndexPatternTitle: null });
+    this.setState({ rightTermsFields: [] });
 
     let indexPattern;
     try {
@@ -116,7 +114,6 @@ export class LayerTemplate extends Component<RenderWizardArguments, State> {
 
     this.setState({
       rightTermsFields: getTermsFields(indexPattern.fields),
-      rightIndexPatternTitle: indexPattern.title,
     });
   };
 
@@ -265,14 +262,12 @@ export class LayerTemplate extends Component<RenderWizardArguments, State> {
             leftGeoField: this.state.leftGeoField!,
             leftJoinField: this.state.leftElasticsearchJoinField!,
             rightIndexPatternId: this.state.rightIndexPatternId,
-            rightIndexPatternTitle: this.state.rightIndexPatternTitle!,
             rightTermField: this.state.rightJoinField!,
           })
         : createEmsChoroplethLayerDescriptor({
             leftEmsFileId: this.state.leftEmsFileId!,
             leftEmsField: this.state.leftEmsJoinField!,
             rightIndexPatternId: this.state.rightIndexPatternId,
-            rightIndexPatternTitle: this.state.rightIndexPatternTitle!,
             rightTermField: this.state.rightJoinField!,
           });
 

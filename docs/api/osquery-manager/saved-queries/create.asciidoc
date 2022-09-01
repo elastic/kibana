@@ -1,0 +1,83 @@
+[[osquery-manager-saved-queries-api-create]]
+=== Create saved query API
+++++
+<titleabbrev>Create saved query</titleabbrev>
+++++
+
+experimental[] Create saved queries.
+
+
+[[osquery-manager-saved-queries-api-create-request]]
+==== Request
+
+`POST <kibana host>:<port>/api/osquery/saved_queries`
+
+`POST <kibana host>:<port>/s/<space_id>/api/osquery/saved_queries`
+
+
+[[osquery-manager-saved-queries-api-create-path-params]]
+==== Path parameters
+
+`space_id`::
+  (Optional, string) The space identifier. When `space_id` is not provided in the URL, the default space is used.
+
+
+[[osquery-manager-saved-queries-api-create-body-params]]
+==== Request body
+
+`id`:: (Required, string) The saved query name.
+
+`description`:: (Optional, string) The saved query description.
+
+`platform`:: (Optional, string) Restricts the query to a specified platform. The default is 'all' platforms. To specify multiple platforms, use commas. For example, 'linux,darwin'.
+
+`query`:: (Required, string) The SQL query you want to run.
+
+`version`:: (Optional, string) Uses the Osquery versions greater than or equal to the specified version string.
+
+`internal`:: (Optional, string) An interval, in seconds, to run the query.
+
+`ecs_mapping`:: (Optional, object) Maps Osquery results columns or static values to ECS fields.
+
+
+[[osquery-manager-saved-queries-api-create-request-codes]]
+==== Response code
+
+`200`::
+    Indicates a successful call.
+
+
+[[osquery-manager-saved-queries-api-create-example]]
+==== Examples
+
+Create a saved query:
+
+[source,sh]
+--------------------------------------------------
+$ curl -X POST api/osquery/saved_queries \
+{
+  "id": "saved_query_id",
+  "description": "Saved query description",
+  "query": "select * from uptime;",
+  "interval": "60",
+  "version": "2.8.0",
+  "platform": "linux,darwin",
+  "ecs_mapping": {
+    "host.uptime": {
+      "field": "total_seconds"
+    }
+  }
+}
+
+--------------------------------------------------
+// KIBANA
+
+
+The API returns the saved query object:
+
+[source,sh]
+--------------------------------------------------
+{
+    "data": {...}
+}
+--------------------------------------------------

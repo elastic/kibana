@@ -7,10 +7,20 @@ PKG_REQUIRE_NAME = "@kbn/server-route-repository"
 
 SOURCE_FILES = glob(
   [
-    "src/**/*.ts",
+    "**/*.ts",
   ],
   exclude = [
+    "**/*.config.js",
+    "**/*.mock.*",
     "**/*.test.*",
+    "**/*.stories.*",
+    "**/__snapshots__/**",
+    "**/integration_tests/**",
+    "**/mocks/**",
+    "**/scripts/**",
+    "**/storybook/**",
+    "**/test_fixtures/**",
+    "**/test_helpers/**",
   ],
 )
 
@@ -56,7 +66,7 @@ jsts_transpiler(
 jsts_transpiler(
   name = "target_web",
   srcs = [
-    "src/web_index.ts",
+    "web_index.ts",
     "src/format_request.ts",
     "src/parse_endpoint.ts",
   ],
@@ -82,7 +92,6 @@ ts_project(
   declaration_map = True,
   emit_declaration_only = True,
   out_dir = "target_types",
-  root_dir = "src",
   tsconfig = ":tsconfig",
 )
 

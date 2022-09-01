@@ -9,6 +9,10 @@ import { act, render, screen } from '@testing-library/react';
 import React from 'react';
 import { IndicatorsTable, IndicatorsTableProps } from './indicators_table';
 import { TestProvidersComponent } from '../../../../common/mocks/test_providers';
+import { generateMockIndicator, Indicator } from '../../../../../common/types/indicator';
+import { BUTTON_TEST_ID } from '../open_indicator_flyout_button/open_indicator_flyout_button';
+import { TITLE_TEST_ID } from '../indicators_flyout/indicators_flyout';
+import { SecuritySolutionDataViewBase } from '../../../../types';
 
 const stub = () => {};
 
@@ -18,17 +22,20 @@ const tableProps: IndicatorsTableProps = {
   indicators: [],
   pagination: { pageSize: 10, pageIndex: 0, pageSizeOptions: [10] },
   indicatorCount: 0,
-  firstLoad: false,
   loading: false,
+  browserFields: {},
+  indexPattern: { fields: [], title: '' } as SecuritySolutionDataViewBase,
 };
 
-const indicatorsFixture = [
+const indicatorsFixture: Indicator[] = [
   {
+    ...generateMockIndicator(),
     fields: {
       'threat.indicator.type': ['url'],
     },
   },
   {
+    ...generateMockIndicator(),
     fields: {
       'threat.indicator.type': ['file'],
     },
@@ -36,11 +43,11 @@ const indicatorsFixture = [
 ];
 
 describe('<IndicatorsTable />', () => {
-  it('should render loading spinner on first load', async () => {
+  it('should render loading spinner when loading', async () => {
     await act(async () => {
       render(
         <TestProvidersComponent>
-          <IndicatorsTable {...tableProps} firstLoad={true} />
+          <IndicatorsTable {...tableProps} loading={true} />
         </TestProvidersComponent>
       );
     });
@@ -48,13 +55,13 @@ describe('<IndicatorsTable />', () => {
     expect(screen.queryByRole('progressbar')).toBeInTheDocument();
   });
 
-  it('should render datagrid when first load is done', async () => {
+  it('should render datagrid when loading is done', async () => {
     await act(async () => {
       render(
         <TestProvidersComponent>
           <IndicatorsTable
             {...tableProps}
-            firstLoad={false}
+            loading={false}
             indicatorCount={indicatorsFixture.length}
             indicators={indicatorsFixture}
           />
@@ -63,5 +70,14 @@ describe('<IndicatorsTable />', () => {
     });
 
     expect(screen.queryByRole('grid')).toBeInTheDocument();
+
+    // Two rows should be rendered
+    expect(screen.queryAllByTestId(BUTTON_TEST_ID).length).toEqual(2);
+
+    await act(async () => {
+      screen.getAllByTestId(BUTTON_TEST_ID)[0].click();
+    });
+
+    expect(screen.queryByTestId(TITLE_TEST_ID)).toBeInTheDocument();
   });
 });

@@ -97,6 +97,9 @@ describe('gauge', () => {
         groups: [
           {
             layerId: 'first',
+            paramEditorCustomProps: {
+              headingLabel: 'Value',
+            },
             groupId: GROUP_ID.METRIC,
             groupLabel: 'Metric',
             accessors: [{ columnId: 'metric-accessor', triggerIcon: 'none' }],
@@ -105,10 +108,14 @@ describe('gauge', () => {
             required: true,
             dataTestSubj: 'lnsGauge_metricDimensionPanel',
             enableDimensionEditor: true,
-            supportFieldFormat: true,
+            enableFormatSelector: true,
           },
           {
             layerId: 'first',
+            paramEditorCustomProps: {
+              headingLabel: 'Value',
+              labels: ['Minimum value'],
+            },
             groupId: GROUP_ID.MIN,
             groupLabel: 'Minimum value',
             accessors: [{ columnId: 'min-accessor' }],
@@ -117,11 +124,15 @@ describe('gauge', () => {
             dataTestSubj: 'lnsGauge_minDimensionPanel',
             prioritizedOperation: 'min',
             suggestedValue: expect.any(Function),
-            supportFieldFormat: false,
+            enableFormatSelector: false,
             supportStaticValue: true,
           },
           {
             layerId: 'first',
+            paramEditorCustomProps: {
+              headingLabel: 'Value',
+              labels: ['Maximum value'],
+            },
             groupId: GROUP_ID.MAX,
             groupLabel: 'Maximum value',
             accessors: [{ columnId: 'max-accessor' }],
@@ -130,11 +141,15 @@ describe('gauge', () => {
             dataTestSubj: 'lnsGauge_maxDimensionPanel',
             prioritizedOperation: 'max',
             suggestedValue: expect.any(Function),
-            supportFieldFormat: false,
+            enableFormatSelector: false,
             supportStaticValue: true,
           },
           {
             layerId: 'first',
+            paramEditorCustomProps: {
+              headingLabel: 'Value',
+              labels: ['Goal value'],
+            },
             groupId: GROUP_ID.GOAL,
             groupLabel: 'Goal value',
             accessors: [{ columnId: 'goal-accessor' }],
@@ -142,7 +157,7 @@ describe('gauge', () => {
             supportsMoreColumns: false,
             required: false,
             dataTestSubj: 'lnsGauge_goalDimensionPanel',
-            supportFieldFormat: false,
+            enableFormatSelector: false,
             supportStaticValue: true,
           },
         ],
@@ -164,6 +179,9 @@ describe('gauge', () => {
         groups: [
           {
             layerId: 'first',
+            paramEditorCustomProps: {
+              headingLabel: 'Value',
+            },
             groupId: GROUP_ID.METRIC,
             groupLabel: 'Metric',
             accessors: [],
@@ -172,10 +190,14 @@ describe('gauge', () => {
             required: true,
             dataTestSubj: 'lnsGauge_metricDimensionPanel',
             enableDimensionEditor: true,
-            supportFieldFormat: true,
+            enableFormatSelector: true,
           },
           {
             layerId: 'first',
+            paramEditorCustomProps: {
+              headingLabel: 'Value',
+              labels: ['Minimum value'],
+            },
             groupId: GROUP_ID.MIN,
             groupLabel: 'Minimum value',
             accessors: [{ columnId: 'min-accessor' }],
@@ -184,11 +206,15 @@ describe('gauge', () => {
             dataTestSubj: 'lnsGauge_minDimensionPanel',
             prioritizedOperation: 'min',
             suggestedValue: expect.any(Function),
-            supportFieldFormat: false,
+            enableFormatSelector: false,
             supportStaticValue: true,
           },
           {
             layerId: 'first',
+            paramEditorCustomProps: {
+              headingLabel: 'Value',
+              labels: ['Maximum value'],
+            },
             groupId: GROUP_ID.MAX,
             groupLabel: 'Maximum value',
             accessors: [],
@@ -197,11 +223,15 @@ describe('gauge', () => {
             dataTestSubj: 'lnsGauge_maxDimensionPanel',
             prioritizedOperation: 'max',
             suggestedValue: expect.any(Function),
-            supportFieldFormat: false,
+            enableFormatSelector: false,
             supportStaticValue: true,
           },
           {
             layerId: 'first',
+            paramEditorCustomProps: {
+              headingLabel: 'Value',
+              labels: ['Goal value'],
+            },
             groupId: GROUP_ID.GOAL,
             groupLabel: 'Goal value',
             accessors: [],
@@ -209,7 +239,7 @@ describe('gauge', () => {
             supportsMoreColumns: true,
             required: false,
             dataTestSubj: 'lnsGauge_goalDimensionPanel',
-            supportFieldFormat: false,
+            enableFormatSelector: false,
             supportStaticValue: true,
           },
         ],
@@ -237,6 +267,9 @@ describe('gauge', () => {
         groups: [
           {
             layerId: 'first',
+            paramEditorCustomProps: {
+              headingLabel: 'Value',
+            },
             groupId: GROUP_ID.METRIC,
             groupLabel: 'Metric',
             accessors: [{ columnId: 'metric-accessor', triggerIcon: 'none' }],
@@ -245,10 +278,14 @@ describe('gauge', () => {
             required: true,
             dataTestSubj: 'lnsGauge_metricDimensionPanel',
             enableDimensionEditor: true,
-            supportFieldFormat: true,
+            enableFormatSelector: true,
           },
           {
             layerId: 'first',
+            paramEditorCustomProps: {
+              headingLabel: 'Value',
+              labels: ['Minimum value'],
+            },
             groupId: GROUP_ID.MIN,
             groupLabel: 'Minimum value',
             accessors: [{ columnId: 'min-accessor' }],
@@ -257,11 +294,15 @@ describe('gauge', () => {
             dataTestSubj: 'lnsGauge_minDimensionPanel',
             prioritizedOperation: 'min',
             suggestedValue: expect.any(Function),
-            supportFieldFormat: false,
+            enableFormatSelector: false,
             supportStaticValue: true,
           },
           {
             layerId: 'first',
+            paramEditorCustomProps: {
+              headingLabel: 'Value',
+              labels: ['Maximum value'],
+            },
             groupId: GROUP_ID.MAX,
             groupLabel: 'Maximum value',
             accessors: [{ columnId: 'max-accessor' }],
@@ -270,11 +311,15 @@ describe('gauge', () => {
             dataTestSubj: 'lnsGauge_maxDimensionPanel',
             prioritizedOperation: 'max',
             suggestedValue: expect.any(Function),
-            supportFieldFormat: false,
+            enableFormatSelector: false,
             supportStaticValue: true,
           },
           {
             layerId: 'first',
+            paramEditorCustomProps: {
+              headingLabel: 'Value',
+              labels: ['Goal value'],
+            },
             groupId: GROUP_ID.GOAL,
             groupLabel: 'Goal value',
             accessors: [{ columnId: 'goal-accessor' }],
@@ -282,7 +327,7 @@ describe('gauge', () => {
             supportsMoreColumns: false,
             required: false,
             dataTestSubj: 'lnsGauge_goalDimensionPanel',
-            supportFieldFormat: false,
+            enableFormatSelector: false,
             supportStaticValue: true,
           },
         ],
@@ -315,6 +360,9 @@ describe('gauge', () => {
         groups: [
           {
             layerId: 'first',
+            paramEditorCustomProps: {
+              headingLabel: 'Value',
+            },
             groupId: GROUP_ID.METRIC,
             groupLabel: 'Metric',
             accessors: [{ columnId: 'metric-accessor', triggerIcon: 'none' }],
@@ -323,10 +371,14 @@ describe('gauge', () => {
             required: true,
             dataTestSubj: 'lnsGauge_metricDimensionPanel',
             enableDimensionEditor: true,
-            supportFieldFormat: true,
+            enableFormatSelector: true,
           },
           {
             layerId: 'first',
+            paramEditorCustomProps: {
+              headingLabel: 'Value',
+              labels: ['Minimum value'],
+            },
             groupId: GROUP_ID.MIN,
             groupLabel: 'Minimum value',
             accessors: [{ columnId: 'min-accessor' }],
@@ -335,13 +387,17 @@ describe('gauge', () => {
             dataTestSubj: 'lnsGauge_minDimensionPanel',
             prioritizedOperation: 'min',
             suggestedValue: expect.any(Function),
-            supportFieldFormat: false,
+            enableFormatSelector: false,
             supportStaticValue: true,
             invalid: true,
             invalidMessage: 'Minimum value may not be greater than maximum value',
           },
           {
             layerId: 'first',
+            paramEditorCustomProps: {
+              headingLabel: 'Value',
+              labels: ['Maximum value'],
+            },
             groupId: GROUP_ID.MAX,
             groupLabel: 'Maximum value',
             accessors: [{ columnId: 'max-accessor' }],
@@ -350,13 +406,17 @@ describe('gauge', () => {
             dataTestSubj: 'lnsGauge_maxDimensionPanel',
             prioritizedOperation: 'max',
             suggestedValue: expect.any(Function),
-            supportFieldFormat: false,
+            enableFormatSelector: false,
             supportStaticValue: true,
             invalid: true,
             invalidMessage: 'Minimum value may not be greater than maximum value',
           },
           {
             layerId: 'first',
+            paramEditorCustomProps: {
+              headingLabel: 'Value',
+              labels: ['Goal value'],
+            },
             groupId: GROUP_ID.GOAL,
             groupLabel: 'Goal value',
             accessors: [{ columnId: 'goal-accessor' }],
@@ -364,7 +424,7 @@ describe('gauge', () => {
             supportsMoreColumns: false,
             required: false,
             dataTestSubj: 'lnsGauge_goalDimensionPanel',
-            supportFieldFormat: false,
+            enableFormatSelector: false,
             supportStaticValue: true,
           },
         ],

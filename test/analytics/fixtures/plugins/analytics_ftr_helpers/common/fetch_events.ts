@@ -17,6 +17,7 @@ import {
   timer,
   toArray,
 } from 'rxjs';
+import { get } from 'lodash';
 import type { Event } from '@kbn/analytics-client';
 import type { GetEventsOptions } from './types';
 
@@ -25,7 +26,7 @@ export async function fetchEvents(
   takeNumberOfEvents: number,
   options: GetEventsOptions = {}
 ): Promise<Event[]> {
-  const { eventTypes = [], withTimeoutMs, fromTimestamp } = options;
+  const { eventTypes = [], withTimeoutMs, fromTimestamp, filters } = options;
 
   const filteredEvents$ = events$.pipe(
     filter((event) => {
@@ -37,6 +38,28 @@ export async function fetchEvents(
     filter((event) => {
       if (fromTimestamp) {
         return new Date(event.timestamp).getTime() - new Date(fromTimestamp).getTime() > 0;
+      }
+      return true;
+    }),
+    filter((event) => {
+      if (filters) {
+        return Object.entries(filters).every(([key, comparison]) => {
+          const value = get(event, key);
+          return Object.entries(comparison).every(([operation, valueToCompare]) => {
+            switch (operation) {
+              case 'eq':
+                return value === valueToCompare;
+              case 'gte':
+                return value >= (valueToCompare as typeof value);
+              case 'gt':
+                return value > (valueToCompare as typeof value);
+              case 'lte':
+                return value <= (valueToCompare as typeof value);
+              case 'lt':
+                return value < (valueToCompare as typeof value);
+            }
+          });
+        });
       }
       return true;
     })

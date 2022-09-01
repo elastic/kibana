@@ -6,15 +6,11 @@
  */
 
 import React from 'react';
-import { FC, useContext } from 'react';
-import { SecuritySolutionContext } from './security_solution_context';
+import { FC } from 'react';
+import { useSecurityContext } from '../hooks/use_security_context';
 
 export const FiltersGlobal: FC = ({ children }) => {
-  const contextValue = useContext(SecuritySolutionContext);
-
-  if (!contextValue) {
-    throw new Error('FiltersGlobal can only be used within Security Solution Context');
-  }
+  const contextValue = useSecurityContext();
 
   const Component = contextValue.getFiltersGlobalComponent();
 

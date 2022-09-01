@@ -8,6 +8,7 @@
 
 import React from 'react';
 import type { EuiButtonProps, EuiSelectableProps } from '@elastic/eui';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import { ChangeDataView } from './change_dataview';
 
@@ -45,6 +46,10 @@ export interface DataViewPickerProps {
    */
   currentDataViewId?: string;
   /**
+   * The adHocDataviews.
+   */
+  adHocDataViews?: DataView[];
+  /**
    * EuiSelectable properties.
    */
   selectableProps?: EuiSelectableProps;
@@ -58,10 +63,6 @@ export interface DataViewPickerProps {
    * Also works as a flag to show the create dataview button.
    */
   onDataViewCreated?: () => void;
-  /**
-   * Flag to show the tour component for the first time.
-   */
-  showNewMenuTour?: boolean;
   /**
    * List of the supported text based languages (SQL, ESQL) etc.
    * Defined per application, if not provided, no text based languages
@@ -88,12 +89,12 @@ export interface DataViewPickerPropsExtended extends DataViewPickerProps {
 export const DataViewPicker = ({
   isMissingCurrent,
   currentDataViewId,
+  adHocDataViews,
   onChangeDataView,
   onAddField,
   onDataViewCreated,
   trigger,
   selectableProps,
-  showNewMenuTour,
   textBasedLanguages,
   onSaveTextLanguageQuery,
   onTextLangQuerySubmit,
@@ -107,8 +108,8 @@ export const DataViewPicker = ({
       onAddField={onAddField}
       onDataViewCreated={onDataViewCreated}
       trigger={trigger}
+      adHocDataViews={adHocDataViews}
       selectableProps={selectableProps}
-      showNewMenuTour={showNewMenuTour}
       textBasedLanguages={textBasedLanguages}
       onSaveTextLanguageQuery={onSaveTextLanguageQuery}
       onTextLangQuerySubmit={onTextLangQuerySubmit}

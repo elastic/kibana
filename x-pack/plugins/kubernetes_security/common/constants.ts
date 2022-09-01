@@ -11,6 +11,7 @@ export const LOCAL_STORAGE_HIDE_WIDGETS_KEY = 'kubernetesSecurity:shouldHideWidg
 
 export const AGGREGATE_ROUTE = '/internal/kubernetes_security/aggregate';
 export const COUNT_ROUTE = '/internal/kubernetes_security/count';
+export const MULTI_TERMS_AGGREGATE_ROUTE = '/internal/kubernetes_security/multi_terms_aggregate';
 export const AGGREGATE_PAGE_SIZE = 10;
 
 // so, bucket sort can only page through what we request at the top level agg, which means there is a ceiling to how many aggs we can page through.
@@ -28,11 +29,12 @@ export const ENTRY_LEADER_INTERACTIVE = 'process.entry_leader.interactive';
 export const ENTRY_LEADER_USER_ID = 'process.entry_leader.user.id';
 export const ENTRY_LEADER_ENTITY_ID = 'process.entry_leader.entity_id';
 
-export const ORCHESTRATOR_CLUSTER_ID = 'orchestrator.cluster.name';
+export const ORCHESTRATOR_CLUSTER_ID = 'orchestrator.cluster.id';
+export const ORCHESTRATOR_CLUSTER_NAME = 'orchestrator.cluster.name';
 export const ORCHESTRATOR_NAMESPACE = 'orchestrator.namespace';
+export const CLOUD_INSTANCE_NAME = 'cloud.instance.name';
 export const ORCHESTRATOR_RESOURCE_ID = 'orchestrator.resource.name';
 export const CONTAINER_IMAGE_NAME = 'container.image.name';
-export const CLOUD_INSTANCE_NAME = 'cloud.instance.name';
 
 export const COUNT_WIDGET_KEY_CLUSTERS = 'CountClustersWidget';
 export const COUNT_WIDGET_KEY_NAMESPACE = 'CountNamespaceWidgets';

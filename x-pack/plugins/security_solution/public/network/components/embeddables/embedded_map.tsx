@@ -8,7 +8,7 @@
 import { EuiAccordion, EuiLink, EuiText } from '@elastic/eui';
 import deepEqual from 'fast-deep-equal';
 import React, { useCallback, useEffect, useState, useMemo } from 'react';
-import { createPortalNode, InPortal } from 'react-reverse-portal';
+import { createHtmlPortalNode, InPortal } from 'react-reverse-portal';
 import styled, { css } from 'styled-components';
 
 import type { Filter, Query } from '@kbn/es-query';
@@ -127,7 +127,7 @@ export const EmbeddedMapComponent = ({
   // own component tree instead of the embeddables (default). This is necessary to have access to
   // the Redux store, theme provider, etc, which is required to register and un-register the draggable
   // Search InPortal/OutPortal for implementation touch points
-  const portalNode = React.useMemo(() => createPortalNode(), []);
+  const portalNode = React.useMemo(() => createHtmlPortalNode(), []);
 
   useEffect(() => {
     setMapIndexPatterns((prevMapIndexPatterns) => {

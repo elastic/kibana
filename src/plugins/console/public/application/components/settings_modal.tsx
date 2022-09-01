@@ -93,7 +93,7 @@ export const DevToolsSettingsModal = (props: DevToolsSettingsModalProps) => {
     {
       id: 'indices',
       label: i18n.translate('console.settingsPage.indicesAndAliasesLabelText', {
-        defaultMessage: 'Indices & Aliases',
+        defaultMessage: 'Indices and aliases',
       }),
       stateSetter: setIndices,
     },
@@ -182,7 +182,7 @@ export const DevToolsSettingsModal = (props: DevToolsSettingsModalProps) => {
             <FormattedMessage
               id="console.settingsPage.refreshingDataDescription"
               defaultMessage="Console refreshes autocomplete suggestions by querying Elasticsearch.
-              Less frequent refresh is recommended to reduce bandwidth costs."
+              Use less frequent refreshes to reduce bandwidth costs."
             />
           }
         >
@@ -222,14 +222,14 @@ export const DevToolsSettingsModal = (props: DevToolsSettingsModalProps) => {
     >
       <EuiModalHeader>
         <EuiModalHeaderTitle>
-          <FormattedMessage id="console.settingsPage.pageTitle" defaultMessage="Console Settings" />
+          <FormattedMessage id="console.settingsPage.pageTitle" defaultMessage="Console settings" />
         </EuiModalHeaderTitle>
       </EuiModalHeader>
 
       <EuiModalBody>
         <EuiFormRow
           label={
-            <FormattedMessage id="console.settingsPage.fontSizeLabel" defaultMessage="Font Size" />
+            <FormattedMessage id="console.settingsPage.fontSizeLabel" defaultMessage="Font size" />
           }
         >
           <EuiFieldNumber
@@ -275,7 +275,7 @@ export const DevToolsSettingsModal = (props: DevToolsSettingsModalProps) => {
             id="tripleQuotes"
             label={
               <FormattedMessage
-                defaultMessage="Use triple quotes in output pane"
+                defaultMessage="Use triple quotes in output"
                 id="console.settingsPage.tripleQuotesMessage"
               />
             }

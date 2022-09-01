@@ -16,6 +16,7 @@ const TEST_FILTER_COLUMN_NAMES = [
 ];
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
+  const log = getService('log');
   const retry = getService('retry');
   const filterBar = getService('filterBar');
   const dataGrid = getService('dataGrid');
@@ -32,9 +33,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const browser = getService('browser');
+  const security = getService('security');
 
   describe('discover data grid context tests', () => {
     before(async () => {
+      await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
       await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover.json');
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
@@ -112,6 +115,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.header.waitUntilLoadingHasFinished();
       await retry.waitFor('document table has a length of 6', async () => {
         const nrOfDocs = (await dataGrid.getBodyRows()).length;
+        log.debug('document table length', nrOfDocs);
         return nrOfDocs === 6;
       });
     });

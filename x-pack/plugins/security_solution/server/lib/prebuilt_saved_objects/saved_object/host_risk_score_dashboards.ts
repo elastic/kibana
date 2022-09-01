@@ -330,7 +330,7 @@ export const hostRiskScoreDashboards: SavedObject[] = [
                     operationType: 'last_value',
                     params: { sortField: '@timestamp' },
                     scale: 'ordinal',
-                    sourceField: 'risk',
+                    sourceField: 'risk.keyword',
                   },
                 },
                 incompleteColumns: {},

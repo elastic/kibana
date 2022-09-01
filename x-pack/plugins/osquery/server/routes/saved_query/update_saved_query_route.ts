@@ -64,7 +64,10 @@ export const updateSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAp
         ecs_mapping,
       } = request.body;
 
-      const isPrebuilt = await isSavedQueryPrebuilt(osqueryContext, request.params.id);
+      const isPrebuilt = await isSavedQueryPrebuilt(
+        osqueryContext.service.getPackageService()?.asInternalUser,
+        request.params.id
+      );
 
       if (isPrebuilt) {
         return response.conflict({ body: `Elastic prebuilt Saved query cannot be updated.` });

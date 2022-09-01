@@ -8,7 +8,7 @@
 import { argv } from 'yargs';
 import pLimit from 'p-limit';
 import pRetry from 'p-retry';
-import { set } from '@elastic/safer-lodash-set';
+import { set } from '@kbn/safer-lodash-set';
 import { uniq, without, merge, flatten } from 'lodash';
 import * as histogram from 'hdr-histogram-js';
 import {

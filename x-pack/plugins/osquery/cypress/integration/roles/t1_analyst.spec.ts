@@ -12,7 +12,7 @@ import { checkResults, selectAllAgents, submitQuery } from '../../tasks/live_que
 import { ArchiverMethod, runKbnArchiverScript } from '../../tasks/archiver';
 import { getSavedQueriesDropdown, LIVE_QUERY_EDITOR } from '../../screens/live_query';
 
-describe.skip('T1 Analyst - READ + runSavedQueries ', () => {
+describe('T1 Analyst - READ + runSavedQueries ', () => {
   const SAVED_QUERY_ID = 'Saved-Query-Id';
 
   beforeEach(() => {
@@ -29,6 +29,7 @@ describe.skip('T1 Analyst - READ + runSavedQueries ', () => {
   it('should be able to run saved queries but not add new ones', () => {
     navigateTo('/app/osquery/saved_queries');
     cy.waitForReact(1000);
+    cy.getBySel('pagination-button-next').click();
     cy.contains(SAVED_QUERY_ID);
     cy.contains('Add saved query').should('be.disabled');
     cy.react('PlayButtonComponent', {
@@ -93,6 +94,7 @@ describe.skip('T1 Analyst - READ + runSavedQueries ', () => {
     cy.contains('New live query').click();
     selectAllAgents();
     cy.get(LIVE_QUERY_EDITOR).should('not.exist');
-    cy.contains('Submit').should('be.disabled');
+    submitQuery();
+    cy.contains('Query is a required field');
   });
 });

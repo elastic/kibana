@@ -7,13 +7,21 @@ PKG_REQUIRE_NAME = "@kbn/config"
 
 SOURCE_FILES = glob(
   [
-    "src/**/*.ts",
+    "**/*.ts",
   ],
   exclude = [
+    "**/*.config.js",
+    "**/*.mock.*",
     "**/*.test.*",
-    "**/__fixtures__",
-    "**/__mocks__",
-    "**/__snapshots__"
+    "**/*.stories.*",
+    "**/__fixtures__/**",
+    "**/__snapshots__/**",
+    "**/integration_tests/**",
+    "**/mocks/**",
+    "**/scripts/**",
+    "**/storybook/**",
+    "**/test_fixtures/**",
+    "**/test_helpers/**",
   ],
 )
 
@@ -30,7 +38,7 @@ NPM_MODULE_EXTRA_FILES = [
 ]
 
 RUNTIME_DEPS = [
-  "//packages/elastic-safer-lodash-set",
+  "//packages/kbn-safer-lodash-set",
   "//packages/kbn-config-schema",
   "//packages/kbn-logging",
   "//packages/kbn-logging-mocks",
@@ -47,7 +55,7 @@ RUNTIME_DEPS = [
 ]
 
 TYPES_DEPS = [
-  "//packages/elastic-safer-lodash-set:npm_module_types",
+  "//packages/kbn-safer-lodash-set:npm_module_types",
   "//packages/kbn-config-schema:npm_module_types",
   "//packages/kbn-logging:npm_module_types",
   "//packages/kbn-logging-mocks:npm_module_types",
@@ -89,7 +97,6 @@ ts_project(
   declaration_map = True,
   emit_declaration_only = True,
   out_dir = "target_types",
-  root_dir = "src",
   tsconfig = ":tsconfig",
 )
 

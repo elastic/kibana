@@ -7,7 +7,7 @@
 
 import { CoreStart, Plugin } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import React, { Suspense } from 'react';
+import React, { Suspense, VFC } from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from './hooks/use_kibana';
 import {
@@ -15,15 +15,26 @@ import {
   ThreatIntelligencePluginSetup,
   ThreatIntelligencePluginStart,
   ThreatIntelligencePluginStartDeps,
-  ThreatIntelligenceSecuritySolutionContext,
+  SecuritySolutionPluginContext,
 } from './types';
 import { SecuritySolutionContext } from './containers/security_solution_context';
+import { EnterpriseGuard } from './containers/enterprise_guard';
+import { SecuritySolutionPluginTemplateWrapper } from './containers/security_solution_plugin_template_wrapper';
+import { IntegrationsGuard } from './containers/integrations_guard';
 
 interface AppProps {
-  securitySolutionContext: ThreatIntelligenceSecuritySolutionContext;
+  securitySolutionContext: SecuritySolutionPluginContext;
 }
 
 const LazyIndicatorsPage = React.lazy(() => import('./modules/indicators/indicators_page'));
+
+const IndicatorsPage: VFC = () => (
+  <SecuritySolutionPluginTemplateWrapper>
+    <Suspense fallback={<div />}>
+      <LazyIndicatorsPage />
+    </Suspense>
+  </SecuritySolutionPluginTemplateWrapper>
+);
 
 /**
  * This is used here:
@@ -35,13 +46,15 @@ export const createApp =
   ({ securitySolutionContext }: AppProps) =>
     (
       <IntlProvider>
-        <KibanaContextProvider services={services}>
-          <SecuritySolutionContext.Provider value={securitySolutionContext}>
-            <Suspense fallback={<div />}>
-              <LazyIndicatorsPage />
-            </Suspense>
-          </SecuritySolutionContext.Provider>
-        </KibanaContextProvider>
+        <SecuritySolutionContext.Provider value={securitySolutionContext}>
+          <KibanaContextProvider services={services}>
+            <EnterpriseGuard>
+              <IntegrationsGuard>
+                <IndicatorsPage />
+              </IntegrationsGuard>
+            </EnterpriseGuard>
+          </KibanaContextProvider>
+        </SecuritySolutionContext.Provider>
       </IntlProvider>
     );
 

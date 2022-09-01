@@ -95,6 +95,9 @@ export function getOperationParams(
     if (operation.shiftable && name === 'shift') {
       args[name] = value;
     }
+    if (operation.canReduceTimeRange && name === 'reducedTimeRange') {
+      args.reducedTimeRange = value;
+    }
     return args;
   }, {});
 }

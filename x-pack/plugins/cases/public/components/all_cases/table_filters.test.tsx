@@ -7,6 +7,8 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
+import userEvent from '@testing-library/user-event';
+import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 
 import { CaseStatuses } from '../../../common/api';
 import { OBSERVABILITY_OWNER, SECURITY_SOLUTION_OWNER } from '../../../common/constants';
@@ -14,7 +16,6 @@ import { AppMockRenderer, createAppMockRenderer, TestProviders } from '../../com
 import { useGetReporters } from '../../containers/use_get_reporters';
 import { DEFAULT_FILTER_OPTIONS } from '../../containers/use_get_cases';
 import { CasesTableFilters } from './table_filters';
-import userEvent from '@testing-library/user-event';
 import { useGetTags } from '../../containers/use_get_tags';
 
 jest.mock('../../containers/use_get_reporters');
@@ -65,9 +66,10 @@ describe('CasesTableFilters ', () => {
     expect(result.getByTestId('case-severity-filter')).toBeTruthy();
   });
 
-  it('should call onFilterChange when the severity filter changes', () => {
+  it('should call onFilterChange when the severity filter changes', async () => {
     const result = appMockRender.render(<CasesTableFilters {...props} />);
     userEvent.click(result.getByTestId('case-severity-filter'));
+    await waitForEuiPopoverOpen();
     userEvent.click(result.getByTestId('case-severity-filter-high'));
 
     expect(onFilterChanged).toBeCalledWith({ severity: 'high' });
@@ -190,7 +192,7 @@ describe('CasesTableFilters ', () => {
     );
   });
 
-  describe('dynamic Solution filter', () => {
+  describe('Solution filter', () => {
     it('shows Solution filter when provided more than 1 availableSolutions', () => {
       const wrapper = mount(
         <TestProviders>
@@ -215,28 +217,58 @@ describe('CasesTableFilters ', () => {
         wrapper.find(`[data-test-subj="options-filter-popover-button-Solution"]`).exists()
       ).toBeFalsy();
     });
-  });
 
-  it('should call onFilterChange when selected solution changes', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <CasesTableFilters
-          {...props}
-          availableSolutions={[SECURITY_SOLUTION_OWNER, OBSERVABILITY_OWNER]}
-        />
-      </TestProviders>
-    );
-    wrapper
-      .find(`[data-test-subj="options-filter-popover-button-Solution"]`)
-      .last()
-      .simulate('click');
+    it('should call onFilterChange when selected solution changes', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <CasesTableFilters
+            {...props}
+            availableSolutions={[SECURITY_SOLUTION_OWNER, OBSERVABILITY_OWNER]}
+          />
+        </TestProviders>
+      );
+      wrapper
+        .find(`[data-test-subj="options-filter-popover-button-Solution"]`)
+        .last()
+        .simulate('click');
 
-    wrapper
-      .find(`[data-test-subj="options-filter-popover-item-${SECURITY_SOLUTION_OWNER}"]`)
-      .last()
-      .simulate('click');
+      wrapper
+        .find(`[data-test-subj="options-filter-popover-item-${SECURITY_SOLUTION_OWNER}"]`)
+        .last()
+        .simulate('click');
 
-    expect(onFilterChanged).toBeCalledWith({ owner: [SECURITY_SOLUTION_OWNER] });
+      expect(onFilterChanged).toBeCalledWith({ owner: [SECURITY_SOLUTION_OWNER] });
+    });
+
+    it('should deselect all solutions', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <CasesTableFilters
+            {...props}
+            availableSolutions={[SECURITY_SOLUTION_OWNER, OBSERVABILITY_OWNER]}
+          />
+        </TestProviders>
+      );
+
+      wrapper
+        .find(`[data-test-subj="options-filter-popover-button-Solution"]`)
+        .last()
+        .simulate('click');
+
+      wrapper
+        .find(`[data-test-subj="options-filter-popover-item-${SECURITY_SOLUTION_OWNER}"]`)
+        .last()
+        .simulate('click');
+
+      expect(onFilterChanged).toBeCalledWith({ owner: [SECURITY_SOLUTION_OWNER] });
+
+      wrapper
+        .find(`[data-test-subj="options-filter-popover-item-${SECURITY_SOLUTION_OWNER}"]`)
+        .last()
+        .simulate('click');
+
+      expect(onFilterChanged).toBeCalledWith({ owner: [] });
+    });
   });
 
   describe('create case button', () => {

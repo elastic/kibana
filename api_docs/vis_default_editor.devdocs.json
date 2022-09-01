@@ -310,7 +310,7 @@
             "section": "def-public.DefaultEditorSize",
             "text": "DefaultEditorSize"
           },
-          ") => 50 | 15 | 30"
+          ") => 15 | 50 | 30"
         ],
         "path": "src/plugins/vis_default_editor/public/editor_size.ts",
         "deprecated": false,

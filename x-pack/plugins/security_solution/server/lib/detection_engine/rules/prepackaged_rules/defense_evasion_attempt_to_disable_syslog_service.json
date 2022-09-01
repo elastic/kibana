@@ -12,6 +12,28 @@
   "license": "Elastic License v2",
   "name": "Attempt to Disable Syslog Service",
   "query": "event.category:process and event.type:(start or process_started) and\n  ((process.name:service and process.args:stop) or\n     (process.name:chkconfig and process.args:off) or\n     (process.name:systemctl and process.args:(disable or stop or kill)))\n  and process.args:(syslog or rsyslog or \"syslog-ng\")\n",
+  "required_fields": [
+    {
+      "ecs": true,
+      "name": "event.category",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "event.type",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.args",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.name",
+      "type": "keyword"
+    }
+  ],
   "risk_score": 47,
   "rule_id": "2f8a1226-5720-437d-9c20-e0029deb6194",
   "severity": "medium",
@@ -48,5 +70,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 7
+  "version": 8
 }

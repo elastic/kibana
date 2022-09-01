@@ -20,6 +20,7 @@ import {
 import classNames from 'classnames';
 import React, { MouseEvent, useState, useEffect, HTMLAttributes } from 'react';
 import { IUiSettingsClient } from '@kbn/core/public';
+
 import { DataView } from '@kbn/data-views-plugin/public';
 import {
   getIndexPatternFromFilter,
@@ -42,6 +43,7 @@ export interface FilterItemProps {
   uiSettings: IUiSettingsClient;
   hiddenPanelOptions?: FilterPanelOption[];
   timeRangeForSuggestionsOverride?: boolean;
+  readOnly?: boolean;
 }
 
 type FilterPopoverProps = HTMLAttributes<HTMLDivElement> & EuiPopoverProps;
@@ -67,7 +69,7 @@ export function FilterItem(props: FilterItemProps) {
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
   const [indexPatternExists, setIndexPatternExists] = useState<boolean | undefined>(undefined);
   const [renderedComponent, setRenderedComponent] = useState('menu');
-  const { id, filter, indexPatterns, hiddenPanelOptions } = props;
+  const { id, filter, indexPatterns, hiddenPanelOptions, readOnly = false } = props;
 
   useEffect(() => {
     if (isPopoverOpen) {
@@ -355,6 +357,7 @@ export function FilterItem(props: FilterItemProps) {
 
   const filterViewProps = {
     filter,
+    readOnly,
     valueLabel: valueLabelConfig.title,
     fieldLabel: getFieldDisplayValueFromFilter(filter, indexPatterns),
     filterLabelStatus: valueLabelConfig.status,
@@ -377,7 +380,9 @@ export function FilterItem(props: FilterItemProps) {
     panelPaddingSize: 'none',
   };
 
-  return (
+  return readOnly ? (
+    <FilterView {...filterViewProps} />
+  ) : (
     <EuiPopover anchorPosition="downLeft" {...popoverProps}>
       {renderedComponent === 'menu' ? (
         <EuiContextMenu initialPanelId={0} panels={getPanels()} />

@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import * as t from 'io-ts';
 import type { CreateRulesSchema, SavedQueryCreateSchema } from './rule_schemas';
-import { createRulesSchema } from './rule_schemas';
+import { createRulesSchema, responseSchema } from './rule_schemas';
 import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { left } from 'fp-ts/lib/Either';
@@ -20,7 +21,7 @@ import {
 } from './rule_schemas.mock';
 import { getListArrayMock } from '../types/lists.mock';
 
-describe('create rules schema', () => {
+describe('rules schema', () => {
   test('empty objects do not validate', () => {
     const payload = {};
 
@@ -1285,6 +1286,210 @@ describe('create rules schema', () => {
 
       expect(message.schema).toEqual({});
       expect(getPaths(left(message.errors))).toEqual(['invalid keys "data_view_id"']);
+    });
+  });
+
+  describe('response', () => {
+    const testSchema = {
+      required: {
+        testRequiredString: t.string,
+      },
+      optional: {
+        testOptionalString: t.string,
+      },
+      defaultable: {
+        testDefaultableString: t.string,
+      },
+    };
+    const schema = responseSchema(testSchema.required, testSchema.optional, testSchema.defaultable);
+
+    describe('required fields', () => {
+      test('should allow required fields with the correct type', () => {
+        const payload = {
+          testRequiredString: 'required_string',
+          testDefaultableString: 'defaultable_string',
+        };
+
+        const decoded = schema.decode(payload);
+        const checked = exactCheck(payload, decoded);
+        const message = pipe(checked, foldLeftRight);
+
+        expect(getPaths(left(message.errors))).toEqual([]);
+        expect(message.schema).toEqual(payload);
+      });
+
+      test('should not allow required fields to be undefined', () => {
+        const payload = {
+          testRequiredString: undefined,
+          testDefaultableString: 'defaultable_string',
+        };
+
+        const decoded = schema.decode(payload);
+        const checked = exactCheck(payload, decoded);
+        const message = pipe(checked, foldLeftRight);
+
+        expect(getPaths(left(message.errors))).toEqual([
+          'Invalid value "undefined" supplied to "testRequiredString"',
+        ]);
+        expect(message.schema).toEqual({});
+      });
+
+      test('should not allow required fields to be omitted entirely', () => {
+        const payload = {
+          testDefaultableString: 'defaultable_string',
+        };
+
+        const decoded = schema.decode(payload);
+        const checked = exactCheck(payload, decoded);
+        const message = pipe(checked, foldLeftRight);
+
+        expect(getPaths(left(message.errors))).toEqual([
+          'Invalid value "undefined" supplied to "testRequiredString"',
+        ]);
+        expect(message.schema).toEqual({});
+      });
+
+      test('should not allow required fields with an incorrect type', () => {
+        const payload = {
+          testRequiredString: 5,
+          testDefaultableString: 'defaultable_string',
+        };
+
+        const decoded = schema.decode(payload);
+        const checked = exactCheck(payload, decoded);
+        const message = pipe(checked, foldLeftRight);
+
+        expect(getPaths(left(message.errors))).toEqual([
+          'Invalid value "5" supplied to "testRequiredString"',
+        ]);
+        expect(message.schema).toEqual({});
+      });
+    });
+
+    describe('optional fields', () => {
+      test('should allow optional fields with the correct type', () => {
+        const payload: t.TypeOf<typeof schema> = {
+          testRequiredString: 'required_string',
+          testOptionalString: 'optional_string',
+          testDefaultableString: 'defaultable_string',
+        };
+
+        const decoded = schema.decode(payload);
+        const checked = exactCheck(payload, decoded);
+        const message = pipe(checked, foldLeftRight);
+
+        expect(getPaths(left(message.errors))).toEqual([]);
+        expect(message.schema).toEqual(payload);
+      });
+
+      test('should allow optional fields to be undefined', () => {
+        const payload: t.TypeOf<typeof schema> = {
+          testRequiredString: 'required_string',
+          testOptionalString: undefined,
+          testDefaultableString: 'defaultable_string',
+        };
+
+        const decoded = schema.decode(payload);
+        const checked = exactCheck(payload, decoded);
+        const message = pipe(checked, foldLeftRight);
+
+        expect(getPaths(left(message.errors))).toEqual([]);
+        expect(message.schema).toEqual(payload);
+      });
+
+      test('should allow optional fields to be omitted entirely', () => {
+        const payload = {
+          testRequiredString: 'required_string',
+          testDefaultableString: 'defaultable_string',
+        };
+
+        const decoded = schema.decode(payload);
+        const checked = exactCheck(payload, decoded);
+        const message = pipe(checked, foldLeftRight);
+
+        expect(getPaths(left(message.errors))).toEqual([]);
+        expect(message.schema).toEqual(payload);
+      });
+
+      test('should not allow optional fields with an incorrect type', () => {
+        const payload = {
+          testRequiredString: 'required_string',
+          testOptionalString: 5,
+          testDefaultableString: 'defaultable_string',
+        };
+
+        const decoded = schema.decode(payload);
+        const checked = exactCheck(payload, decoded);
+        const message = pipe(checked, foldLeftRight);
+
+        expect(getPaths(left(message.errors))).toEqual([
+          'Invalid value "5" supplied to "testOptionalString"',
+        ]);
+        expect(message.schema).toEqual({});
+      });
+    });
+
+    describe('defaultable fields', () => {
+      test('should allow defaultable fields with the correct type', () => {
+        const payload = {
+          testRequiredString: 'required_string',
+          testDefaultableString: 'defaultable_string',
+        };
+
+        const decoded = schema.decode(payload);
+        const checked = exactCheck(payload, decoded);
+        const message = pipe(checked, foldLeftRight);
+
+        expect(getPaths(left(message.errors))).toEqual([]);
+        expect(message.schema).toEqual(payload);
+      });
+
+      test('should not allow defaultable fields to be undefined', () => {
+        const payload = {
+          testRequiredString: 'required_string',
+          testDefaultableString: undefined,
+        };
+
+        const decoded = schema.decode(payload);
+        const checked = exactCheck(payload, decoded);
+        const message = pipe(checked, foldLeftRight);
+
+        expect(getPaths(left(message.errors))).toEqual([
+          'Invalid value "undefined" supplied to "testDefaultableString"',
+        ]);
+        expect(message.schema).toEqual({});
+      });
+
+      test('should allow defaultable fields to be omitted entirely', () => {
+        const payload = {
+          testRequiredString: 'required_string',
+        };
+
+        const decoded = schema.decode(payload);
+        const checked = exactCheck(payload, decoded);
+        const message = pipe(checked, foldLeftRight);
+
+        expect(getPaths(left(message.errors))).toEqual([
+          'Invalid value "undefined" supplied to "testDefaultableString"',
+        ]);
+        expect(message.schema).toEqual({});
+      });
+
+      test('should not allow defaultable fields with an incorrect type', () => {
+        const payload = {
+          testRequiredString: 'required_string',
+          testDefaultableString: 5,
+        };
+
+        const decoded = schema.decode(payload);
+        const checked = exactCheck(payload, decoded);
+        const message = pipe(checked, foldLeftRight);
+
+        expect(getPaths(left(message.errors))).toEqual([
+          'Invalid value "5" supplied to "testDefaultableString"',
+        ]);
+        expect(message.schema).toEqual({});
+      });
     });
   });
 });

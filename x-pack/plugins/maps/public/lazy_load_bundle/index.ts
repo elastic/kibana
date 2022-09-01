@@ -51,7 +51,6 @@ export interface LazyLoadedMapModules {
     termsSize,
     colorSchema,
     indexPatternId,
-    indexPatternTitle,
     metricAgg,
     metricFieldName,
   }: CreateRegionMapLayerDescriptorParams) => LayerDescriptor | null;

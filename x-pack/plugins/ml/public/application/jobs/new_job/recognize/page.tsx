@@ -101,7 +101,7 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
         })
       : i18n.translate('xpack.ml.newJob.recognize.dataViewPageTitle', {
           defaultMessage: 'data view {dataViewName}',
-          values: { dataViewName: dataView.title },
+          values: { dataViewName: dataView.getName() },
         });
   const displayQueryWarning = savedSearch !== null;
   const tempQuery = savedSearch === null ? undefined : combinedQuery;

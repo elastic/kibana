@@ -52,7 +52,7 @@ import { createBasemapLayerDescriptor } from '../../../classes/layers/create_bas
 import { whenLicenseInitialized } from '../../../licensed_features';
 import { SerializedMapState, SerializedUiState } from './types';
 import { setAutoOpenLayerWizardId } from '../../../actions/ui_actions';
-import { LayerStatsCollector } from '../../../../common/telemetry';
+import { LayerStatsCollector, MapSettingsCollector } from '../../../../common/telemetry';
 
 function setMapSettingsFromEncodedState(settings: Partial<MapSettings>) {
   const decodedCustomIcons = settings.customIcons
@@ -281,6 +281,8 @@ export class SavedMap {
       return;
     }
 
+    const mapSettingsStatsCollector = new MapSettingsCollector(this._attributes);
+
     const layerStatsCollector = new LayerStatsCollector(this._attributes);
 
     const uiCounterEvents = {
@@ -289,6 +291,9 @@ export class SavedMap {
       resolution: layerStatsCollector.getResolutionCounts(),
       join: layerStatsCollector.getJoinCounts(),
       ems_basemap: layerStatsCollector.getBasemapCounts(),
+      settings: {
+        custom_icons_count: mapSettingsStatsCollector.getCustomIconsCount(),
+      },
     };
 
     for (const [eventType, eventTypeMetrics] of Object.entries(uiCounterEvents)) {
@@ -332,6 +337,14 @@ export class SavedMap {
     return this._originatingApp ? this.getAppNameFromId(this._originatingApp) : undefined;
   }
 
+  public hasOriginatingApp(): boolean {
+    return !!this._originatingApp;
+  }
+
+  public getOriginatingPath(): string | undefined {
+    return this._originatingPath;
+  }
+
   public getAppNameFromId = (appId: string): string | undefined => {
     return this._getStateTransfer().getAppNameFromId(appId);
   };
@@ -341,7 +354,7 @@ export class SavedMap {
   }
 
   public hasSaveAndReturnConfig() {
-    const hasOriginatingApp = !!this._originatingApp;
+    const hasOriginatingApp = this.hasOriginatingApp();
     const isNewMap = !this.getSavedObjectId();
     return getIsAllowByValueEmbeddables() ? hasOriginatingApp : !isNewMap && hasOriginatingApp;
   }

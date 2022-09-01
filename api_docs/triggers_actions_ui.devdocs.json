@@ -1508,7 +1508,7 @@
         "label": "suspendedComponentWithProps",
         "description": [],
         "signature": [
-          "(ComponentToSuspend: React.ComponentType<T>, size: \"s\" | \"m\" | \"l\" | \"xl\" | \"xxl\" | undefined) => (props: T) => JSX.Element"
+          "(ComponentToSuspend: React.ComponentType<T>, size: \"m\" | \"s\" | \"l\" | \"xl\" | \"xxl\" | undefined) => (props: T) => JSX.Element"
         ],
         "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/suspended_component_with_props.tsx",
         "deprecated": false,
@@ -1535,7 +1535,7 @@
             "label": "size",
             "description": [],
             "signature": [
-              "\"s\" | \"m\" | \"l\" | \"xl\" | \"xxl\" | undefined"
+              "\"m\" | \"s\" | \"l\" | \"xl\" | \"xxl\" | undefined"
             ],
             "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/suspended_component_with_props.tsx",
             "deprecated": false,
@@ -1716,7 +1716,7 @@
           },
           "<string, string>[]; error: string | null; ruleTypeIndex: ",
           "RuleTypeIndex",
-          "; }"
+          "; ruleTypesIsLoading: boolean; }"
         ],
         "path": "x-pack/plugins/triggers_actions_ui/public/application/hooks/use_load_rule_types.ts",
         "deprecated": false,
@@ -1983,6 +1983,19 @@
             "description": [],
             "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.AlertsTableFlyoutBaseProps.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -2058,7 +2071,7 @@
             "label": "flyoutSize",
             "description": [],
             "signature": [
-              "\"s\" | \"m\" | \"l\" | undefined"
+              "\"m\" | \"s\" | \"l\" | undefined"
             ],
             "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
             "deprecated": false
@@ -2082,6 +2095,19 @@
             "description": [],
             "signature": [
               "number[]"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.AlertsTableProps.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "signature": [
+              "string | undefined"
             ],
             "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
             "deprecated": false
@@ -2815,7 +2841,7 @@
             "label": "ruleTypeRegistry",
             "description": [],
             "signature": [
-              "{ list: () => ",
+              "{ get: (id: string) => ",
               {
                 "pluginId": "triggersActionsUi",
                 "scope": "public",
@@ -2831,7 +2857,7 @@
                 "section": "def-common.RuleTypeParams",
                 "text": "RuleTypeParams"
               },
-              ">[]; get: (id: string) => ",
+              ">; list: () => ",
               {
                 "pluginId": "triggersActionsUi",
                 "scope": "public",
@@ -2847,7 +2873,7 @@
                 "section": "def-common.RuleTypeParams",
                 "text": "RuleTypeParams"
               },
-              ">; register: (objectType: ",
+              ">[]; register: (objectType: ",
               {
                 "pluginId": "triggersActionsUi",
                 "scope": "public",
@@ -2876,11 +2902,11 @@
             "label": "actionTypeRegistry",
             "description": [],
             "signature": [
-              "{ list: () => ",
+              "{ get: (id: string) => ",
               "ActionTypeModel",
-              "<unknown, unknown, any>[]; get: (id: string) => ",
+              "<unknown, unknown, any>; list: () => ",
               "ActionTypeModel",
-              "<unknown, unknown, any>; register: (objectType: ",
+              "<unknown, unknown, any>[]; register: (objectType: ",
               "ActionTypeModel",
               "<unknown, unknown, any>) => void; has: (id: string) => boolean; }"
             ],
@@ -3570,7 +3596,7 @@
             "label": "setRuleProperty",
             "description": [],
             "signature": [
-              "<Prop extends \"id\" | \"name\" | \"monitoring\" | \"tags\" | \"enabled\" | \"params\" | \"actions\" | \"throttle\" | \"consumer\" | \"schedule\" | \"mapped_params\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"muteAll\" | \"notifyWhen\" | \"mutedInstanceIds\" | \"executionStatus\" | \"snoozeSchedule\" | \"activeSnoozes\" | \"isSnoozedUntil\" | \"ruleTypeId\">(key: Prop, value: ",
+              "<Prop extends \"params\" | \"tags\" | \"id\" | \"monitoring\" | \"name\" | \"enabled\" | \"actions\" | \"throttle\" | \"consumer\" | \"schedule\" | \"mapped_params\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"muteAll\" | \"notifyWhen\" | \"mutedInstanceIds\" | \"executionStatus\" | \"snoozeSchedule\" | \"activeSnoozes\" | \"isSnoozedUntil\" | \"ruleTypeId\">(key: Prop, value: ",
               "SanitizedRule",
               "<Params>[Prop] | null) => void"
             ],
@@ -3954,7 +3980,7 @@
             "description": [],
             "signature": [
               "(crumbs: ",
-              "EuiBreadcrumb",
+              "EuiBreadcrumbProps",
               "[]) => void"
             ],
             "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx",
@@ -3968,7 +3994,7 @@
                 "label": "crumbs",
                 "description": [],
                 "signature": [
-                  "EuiBreadcrumb",
+                  "EuiBreadcrumbProps",
                   "[]"
                 ],
                 "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx",
@@ -3986,11 +4012,11 @@
             "label": "actionTypeRegistry",
             "description": [],
             "signature": [
-              "{ list: () => ",
+              "{ get: (id: string) => ",
               "ActionTypeModel",
-              "<unknown, unknown, any>[]; get: (id: string) => ",
+              "<unknown, unknown, any>; list: () => ",
               "ActionTypeModel",
-              "<unknown, unknown, any>; register: (objectType: ",
+              "<unknown, unknown, any>[]; register: (objectType: ",
               "ActionTypeModel",
               "<unknown, unknown, any>) => void; has: (id: string) => boolean; }"
             ],
@@ -4005,7 +4031,7 @@
             "label": "ruleTypeRegistry",
             "description": [],
             "signature": [
-              "{ list: () => ",
+              "{ get: (id: string) => ",
               {
                 "pluginId": "triggersActionsUi",
                 "scope": "public",
@@ -4021,7 +4047,7 @@
                 "section": "def-common.RuleTypeParams",
                 "text": "RuleTypeParams"
               },
-              ">[]; get: (id: string) => ",
+              ">; list: () => ",
               {
                 "pluginId": "triggersActionsUi",
                 "scope": "public",
@@ -4037,7 +4063,7 @@
                 "section": "def-common.RuleTypeParams",
                 "text": "RuleTypeParams"
               },
-              ">; register: (objectType: ",
+              ">[]; register: (objectType: ",
               {
                 "pluginId": "triggersActionsUi",
                 "scope": "public",
@@ -4066,11 +4092,11 @@
             "label": "alertsTableConfigurationRegistry",
             "description": [],
             "signature": [
-              "{ list: () => ",
+              "{ get: (id: string) => ",
               "AlertsTableConfigurationRegistry",
-              "[]; get: (id: string) => ",
+              "; list: () => ",
               "AlertsTableConfigurationRegistry",
-              "; register: (objectType: ",
+              "[]; register: (objectType: ",
               "AlertsTableConfigurationRegistry",
               ") => void; has: (id: string) => boolean; }"
             ],
@@ -4085,13 +4111,7 @@
             "label": "history",
             "description": [],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCoreApplicationPluginApi",
-                "section": "def-public.ScopedHistory",
-                "text": "ScopedHistory"
-              },
+              "ScopedHistory",
               "<unknown>"
             ],
             "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx",
@@ -4277,11 +4297,11 @@
         "label": "ActionTypeRegistryContract",
         "description": [],
         "signature": [
-          "{ list: () => ",
+          "{ get: (id: string) => ",
           "ActionTypeModel",
-          "<ActionConnector, ActionParams, any>[]; get: (id: string) => ",
+          "<ActionConnector, ActionParams, any>; list: () => ",
           "ActionTypeModel",
-          "<ActionConnector, ActionParams, any>; register: (objectType: ",
+          "<ActionConnector, ActionParams, any>[]; register: (objectType: ",
           "ActionTypeModel",
           "<ActionConnector, ActionParams, any>) => void; has: (id: string) => boolean; }"
         ],
@@ -4311,11 +4331,11 @@
         "label": "AlertsTableConfigurationRegistryContract",
         "description": [],
         "signature": [
-          "{ list: () => ",
+          "{ get: (id: string) => ",
           "AlertsTableConfigurationRegistry",
-          "[]; get: (id: string) => ",
+          "; list: () => ",
           "AlertsTableConfigurationRegistry",
-          "; register: (objectType: ",
+          "[]; register: (objectType: ",
           "AlertsTableConfigurationRegistry",
           ") => void; has: (id: string) => boolean; }"
         ],
@@ -4489,7 +4509,7 @@
         "label": "RuleTypeRegistryContract",
         "description": [],
         "signature": [
-          "{ list: () => ",
+          "{ get: (id: string) => ",
           {
             "pluginId": "triggersActionsUi",
             "scope": "public",
@@ -4505,7 +4525,7 @@
             "section": "def-common.RuleTypeParams",
             "text": "RuleTypeParams"
           },
-          ">[]; get: (id: string) => ",
+          ">; list: () => ",
           {
             "pluginId": "triggersActionsUi",
             "scope": "public",
@@ -4521,7 +4541,7 @@
             "section": "def-common.RuleTypeParams",
             "text": "RuleTypeParams"
           },
-          ">; register: (objectType: ",
+          ">[]; register: (objectType: ",
           {
             "pluginId": "triggersActionsUi",
             "scope": "public",
@@ -6224,7 +6244,7 @@
         "label": "CoreQueryParams",
         "description": [],
         "signature": [
-          "{ readonly aggField?: string | undefined; readonly termSize?: number | undefined; readonly termField?: string | undefined; readonly index: string | string[]; readonly aggType: string; readonly timeWindowSize: number; readonly timeWindowUnit: string; readonly groupBy: string; readonly timeField: string; }"
+          "{ readonly aggField?: string | undefined; readonly termSize?: number | undefined; readonly termField?: string | undefined; readonly index: string | string[]; readonly timeField: string; readonly aggType: string; readonly timeWindowSize: number; readonly timeWindowUnit: string; readonly groupBy: string; }"
         ],
         "path": "x-pack/plugins/triggers_actions_ui/server/data/lib/core_query_types.ts",
         "deprecated": false,
@@ -6280,7 +6300,7 @@
         "label": "TimeSeriesQuery",
         "description": [],
         "signature": [
-          "{ readonly interval?: string | undefined; readonly aggField?: string | undefined; readonly termSize?: number | undefined; readonly termField?: string | undefined; readonly dateStart?: string | undefined; readonly dateEnd?: string | undefined; readonly index: string | string[]; readonly aggType: string; readonly timeWindowSize: number; readonly timeWindowUnit: string; readonly groupBy: string; readonly timeField: string; }"
+          "{ readonly interval?: string | undefined; readonly aggField?: string | undefined; readonly termSize?: number | undefined; readonly termField?: string | undefined; readonly dateStart?: string | undefined; readonly dateEnd?: string | undefined; readonly index: string | string[]; readonly timeField: string; readonly aggType: string; readonly timeWindowSize: number; readonly timeWindowUnit: string; readonly groupBy: string; }"
         ],
         "path": "x-pack/plugins/triggers_actions_ui/server/data/lib/time_series_types.ts",
         "deprecated": false,

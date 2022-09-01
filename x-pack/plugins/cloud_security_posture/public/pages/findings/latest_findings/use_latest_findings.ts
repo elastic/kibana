@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { useContext } from 'react';
-import { useQuery } from 'react-query';
+import { useQuery } from '@tanstack/react-query';
 import { number } from 'io-ts';
 import { lastValueFrom } from 'rxjs';
 import type { IKibanaSearchRequest, IKibanaSearchResponse } from '@kbn/data-plugin/common';

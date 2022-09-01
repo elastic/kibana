@@ -14,7 +14,7 @@ import { Root } from '../../../root';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { LogRecord } from '@kbn/logging';
 import { getDocVersion } from './test_utils';
-import { retryAsync } from '../../../saved_objects/migrations/test_helpers/retry_async';
+import { retryAsync } from '@kbn/core-saved-objects-migration-server-mocks';
 
 const logFilePath = Path.join(__dirname, 'incompatible_cluster_routing_allocation.log');
 const docVersion = getDocVersion();
@@ -91,8 +91,7 @@ async function updateRoutingAllocations(
   });
 }
 
-// FLAKY: https://github.com/elastic/kibana/issues/136990
-describe.skip('incompatible_cluster_routing_allocation', () => {
+describe('incompatible_cluster_routing_allocation', () => {
   let client: ElasticsearchClient;
   let root: Root;
 

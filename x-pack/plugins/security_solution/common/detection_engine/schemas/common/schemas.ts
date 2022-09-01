@@ -401,7 +401,7 @@ const bulkActionEditPayloadIndexPatterns = t.intersection([
     ]),
     value: index,
   }),
-  t.exact(t.partial({ overwriteDataViews: t.boolean })),
+  t.exact(t.partial({ overwrite_data_views: t.boolean })),
 ]);
 
 export type BulkActionEditPayloadIndexPatterns = t.TypeOf<

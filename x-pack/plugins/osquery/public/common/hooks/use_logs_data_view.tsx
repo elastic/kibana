@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useQuery } from 'react-query';
+import { useQuery } from '@tanstack/react-query';
 import type { DataView } from '@kbn/data-plugin/common';
 
 import { useKibana } from '../lib/kibana';
@@ -45,6 +45,13 @@ export const useLogsDataView = (payload?: UseLogsDataView) => {
             timeFieldName: '@timestamp',
           });
         }
+      }
+
+      if (!dataView) {
+        dataView = await dataViews.create({
+          title: 'logs-osquery_manager.result*',
+          timeFieldName: '@timestamp',
+        });
       }
 
       return dataView as LogsDataView;

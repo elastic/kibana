@@ -22,7 +22,7 @@ export const PrivateLocationsTable = ({
   onDelete: (id: string) => void;
   privateLocations: PrivateLocation[];
 }) => {
-  const { locationMonitors } = useLocationMonitors();
+  const { locationMonitors, loading } = useLocationMonitors();
 
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
@@ -48,7 +48,12 @@ export const PrivateLocationsTable = ({
       name: ACTIONS_LABEL,
       align: 'right' as const,
       render: (id: string) => (
-        <DeleteLocation id={id} locationMonitors={locationMonitors} onDelete={onDelete} />
+        <DeleteLocation
+          id={id}
+          locationMonitors={locationMonitors}
+          onDelete={onDelete}
+          loading={loading}
+        />
       ),
     },
   ];

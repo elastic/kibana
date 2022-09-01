@@ -129,7 +129,7 @@ describe('New Terms rules', () => {
         getDetails(RULE_TYPE_DETAILS).should('have.text', 'New Terms');
         getDetails(TIMELINE_TEMPLATE_DETAILS).should('have.text', 'None');
         getDetails(NEW_TERMS_FIELDS_DETAILS).should('have.text', 'host.name');
-        getDetails(NEW_TERMS_HISTORY_WINDOW_DETAILS).should('have.text', '50000h');
+        getDetails(NEW_TERMS_HISTORY_WINDOW_DETAILS).should('have.text', '51000h');
       });
       cy.get(SCHEDULE_DETAILS).within(() => {
         getDetails(RUNS_EVERY_DETAILS).should(

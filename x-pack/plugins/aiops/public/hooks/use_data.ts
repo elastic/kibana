@@ -108,13 +108,13 @@ export const useData = (
   }, [fieldStatsRequest, selectedChangePoint]);
 
   const selectedChangePointStatsRequest = useMemo(() => {
-    return fieldStatsRequest
+    return fieldStatsRequest && selectedChangePoint
       ? { ...fieldStatsRequest, selectedChangePoint, includeSelectedChangePoint: true }
       : undefined;
   }, [fieldStatsRequest, selectedChangePoint]);
 
-  const { docStats: overallDocStats } = useDocumentCountStats(overallStatsRequest, lastRefresh);
-  const { docStats: selectedDocStats } = useDocumentCountStats(
+  const documentStats = useDocumentCountStats(
+    overallStatsRequest,
     selectedChangePointStatsRequest,
     lastRefresh
   );
@@ -177,8 +177,7 @@ export const useData = (
   }, [searchString, JSON.stringify(searchQuery)]);
 
   return {
-    overallDocStats,
-    selectedDocStats,
+    documentStats,
     timefilter,
     /** Start timestamp filter */
     earliest: fieldStatsRequest?.earliest,

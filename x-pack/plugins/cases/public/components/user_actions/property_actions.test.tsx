@@ -9,6 +9,7 @@ import React from 'react';
 import { UserActionPropertyActions, UserActionPropertyActionsProps } from './property_actions';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import {
   noCreateCasesPermissions,
   noDeleteCasesPermissions,
@@ -55,6 +56,7 @@ describe('UserActionPropertyActions ', () => {
     );
 
     userEvent.click(renderResult.getByTestId('property-actions-ellipses'));
+    await waitForEuiPopoverOpen();
     expect(screen.getByTestId('property-actions-pencil')).toBeInTheDocument();
     expect(screen.getByTestId('property-actions-quote')).toBeInTheDocument();
   });
@@ -67,6 +69,7 @@ describe('UserActionPropertyActions ', () => {
     );
 
     userEvent.click(renderResult.getByTestId('property-actions-ellipses'));
+    await waitForEuiPopoverOpen();
     userEvent.click(renderResult.getByTestId('property-actions-quote'));
 
     expect(onQuote).toHaveBeenCalledWith(props.id);
@@ -80,6 +83,7 @@ describe('UserActionPropertyActions ', () => {
     );
 
     userEvent.click(renderResult.getByTestId('property-actions-ellipses'));
+    await waitForEuiPopoverOpen();
     userEvent.click(renderResult.getByTestId('property-actions-pencil'));
     expect(onEdit).toHaveBeenCalledWith(props.id);
   });
@@ -110,7 +114,7 @@ describe('UserActionPropertyActions ', () => {
       };
     });
 
-    it('does not show the delete icon when the user does not have delete permissions', () => {
+    it('does not show the delete icon when the user does not have delete permissions', async () => {
       const renderResult = render(
         <TestProviders permissions={noDeleteCasesPermissions()}>
           <UserActionPropertyActions {...deleteProps} />
@@ -118,12 +122,13 @@ describe('UserActionPropertyActions ', () => {
       );
 
       userEvent.click(renderResult.getByTestId('property-actions-ellipses'));
+      await waitForEuiPopoverOpen();
       expect(renderResult.queryByTestId('property-actions-trash')).not.toBeInTheDocument();
       expect(renderResult.queryByTestId('property-actions-pencil')).toBeInTheDocument();
       expect(renderResult.queryByTestId('property-actions-quote')).toBeInTheDocument();
     });
 
-    it('does not show the pencil icon when the user does not have update permissions', () => {
+    it('does not show the pencil icon when the user does not have update permissions', async () => {
       const renderResult = render(
         <TestProviders permissions={noUpdateCasesPermissions()}>
           <UserActionPropertyActions {...deleteProps} />
@@ -131,12 +136,13 @@ describe('UserActionPropertyActions ', () => {
       );
 
       userEvent.click(renderResult.getByTestId('property-actions-ellipses'));
+      await waitForEuiPopoverOpen();
       expect(renderResult.queryByTestId('property-actions-trash')).toBeInTheDocument();
       expect(renderResult.queryByTestId('property-actions-pencil')).not.toBeInTheDocument();
       expect(renderResult.queryByTestId('property-actions-quote')).toBeInTheDocument();
     });
 
-    it('does not show the quote icon when the user does not have create permissions', () => {
+    it('does not show the quote icon when the user does not have create permissions', async () => {
       const renderResult = render(
         <TestProviders permissions={noCreateCasesPermissions()}>
           <UserActionPropertyActions {...deleteProps} />
@@ -144,6 +150,7 @@ describe('UserActionPropertyActions ', () => {
       );
 
       userEvent.click(renderResult.getByTestId('property-actions-ellipses'));
+      await waitForEuiPopoverOpen();
       expect(renderResult.queryByTestId('property-actions-trash')).toBeInTheDocument();
       expect(renderResult.queryByTestId('property-actions-pencil')).toBeInTheDocument();
       expect(renderResult.queryByTestId('property-actions-quote')).not.toBeInTheDocument();
@@ -160,7 +167,7 @@ describe('UserActionPropertyActions ', () => {
       expect(renderResult.getByTestId('property-actions-trash')).toBeTruthy();
     });
 
-    it('shows a confirm dialog when the delete button is clicked', () => {
+    it('shows a confirm dialog when the delete button is clicked', async () => {
       const renderResult = render(
         <TestProviders>
           <UserActionPropertyActions {...deleteProps} />
@@ -168,12 +175,13 @@ describe('UserActionPropertyActions ', () => {
       );
 
       userEvent.click(renderResult.getByTestId('property-actions-ellipses'));
+      await waitForEuiPopoverOpen();
       userEvent.click(renderResult.getByTestId('property-actions-trash'));
 
       expect(renderResult.getByTestId('property-actions-confirm-modal')).toBeTruthy();
     });
 
-    it('closes the confirm dialog when the cancel button is clicked', () => {
+    it('closes the confirm dialog when the cancel button is clicked', async () => {
       const renderResult = render(
         <TestProviders>
           <UserActionPropertyActions {...deleteProps} />
@@ -181,6 +189,7 @@ describe('UserActionPropertyActions ', () => {
       );
 
       userEvent.click(renderResult.getByTestId('property-actions-ellipses'));
+      await waitForEuiPopoverOpen();
       userEvent.click(renderResult.getByTestId('property-actions-trash'));
       expect(renderResult.getByTestId('property-actions-confirm-modal')).toBeTruthy();
 
@@ -188,7 +197,7 @@ describe('UserActionPropertyActions ', () => {
       expect(renderResult.queryByTestId('property-actions-confirm-modal')).toBe(null);
     });
 
-    it('calls onDelete when the confirm is pressed', () => {
+    it('calls onDelete when the confirm is pressed', async () => {
       const renderResult = render(
         <TestProviders>
           <UserActionPropertyActions {...deleteProps} />
@@ -196,6 +205,7 @@ describe('UserActionPropertyActions ', () => {
       );
 
       userEvent.click(renderResult.getByTestId('property-actions-ellipses'));
+      await waitForEuiPopoverOpen();
       userEvent.click(renderResult.getByTestId('property-actions-trash'));
       expect(renderResult.getByTestId('property-actions-confirm-modal')).toBeTruthy();
 

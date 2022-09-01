@@ -13,8 +13,9 @@ import userEvent from '@testing-library/user-event';
 import { FilterManager } from '@kbn/data-plugin/public';
 
 import { coreMock } from '@kbn/core/public/mocks';
-import { TestProvidersComponent } from '../../../../common/mocks/test_providers';
+import { TestProvidersComponent, unifiedSearch } from '../../../../common/mocks/test_providers';
 import { getByTestSubj } from '../../../../../common/test/utils';
+import { setAutocomplete } from '@kbn/unified-search-plugin/public/services';
 
 const mockUiSettingsForFilterManager = coreMock.createStart().uiSettings;
 
@@ -26,13 +27,17 @@ describe('QueryBar ', () => {
   const onSavedQuery = jest.fn();
   const onChangedQuery = jest.fn();
 
+  beforeEach(() => {
+    setAutocomplete(unifiedSearch.autocomplete);
+  });
+
   beforeEach(async () => {
     await act(async () => {
       render(
         <TestProvidersComponent>
           <QueryBar
             filterQuery={{ query: '', language: 'kuery' }}
-            indexPatterns={[]}
+            indexPattern={{ fields: [] } as any}
             filterManager={filterManager}
             filters={[]}
             onRefresh={jest.fn()}

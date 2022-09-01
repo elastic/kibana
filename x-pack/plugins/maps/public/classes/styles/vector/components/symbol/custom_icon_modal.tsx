@@ -25,6 +25,7 @@ import {
   EuiSpacer,
   EuiToolTip,
 } from '@elastic/eui';
+import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
 import { IconPreview } from './icon_preview';
 // @ts-expect-error
@@ -32,6 +33,8 @@ import { getCustomIconId } from '../../symbol_utils';
 // @ts-expect-error
 import { ValidatedRange } from '../../../../../components/validated_range';
 import { CustomIcon } from '../../../../../../common/descriptor_types';
+import { APP_ID } from '../../../../../../common';
+import { getUsageCollection } from '../../../../../kibana_services';
 
 const strings = {
   getAdvancedOptionsLabel: () =>
@@ -314,6 +317,7 @@ export class CustomIconModal extends Component<Props, State> {
   }
 
   public render() {
+    const usageCollector = getUsageCollection();
     const { symbolId, onSave, onCancel, onDelete, title } = this.props;
     const { label, svg, cutoff, radius, isFileInvalid } = this.state;
     const isComplete = label.length !== 0 && svg.length !== 0 && !isFileInvalid;
@@ -365,6 +369,11 @@ export class CustomIconModal extends Component<Props, State> {
                 <EuiButton
                   color="danger"
                   onClick={() => {
+                    usageCollector?.reportUiCounter(
+                      APP_ID,
+                      METRIC_TYPE.CLICK,
+                      'settings_custom_icons_delete'
+                    );
                     onDelete(symbolId);
                   }}
                   data-test-subj="mapsCustomIconForm-submit"
@@ -377,6 +386,14 @@ export class CustomIconModal extends Component<Props, State> {
               <EuiButton
                 fill
                 onClick={() => {
+                  if (!onDelete) {
+                    // Only report events when adding a new custom icon, not when editing an existing icon
+                    usageCollector?.reportUiCounter(
+                      APP_ID,
+                      METRIC_TYPE.CLICK,
+                      'settings_custom_icons_add'
+                    );
+                  }
                   onSave({ symbolId: symbolId ?? getCustomIconId(), label, svg, cutoff, radius });
                 }}
                 data-test-subj="mapsCustomIconForm-submit"

@@ -6,9 +6,9 @@
  */
 import React from 'react';
 import { Route, Switch } from 'react-router-dom';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { CloudPosturePageTitle } from '../../../components/cloud_posture_page_title';
 import { FindingsSearchBar } from '../layout/findings_search_bar';
 import * as TEST_SUBJECTS from '../test_subjects';
 import { useUrlQuery } from '../../../common/hooks/use_url_query';
@@ -92,9 +92,12 @@ const LatestFindingsByResource = ({ dataView }: FindingsBaseProps) => {
       <PageTitle>
         <PageTitleText
           title={
-            <FormattedMessage
-              id="xpack.csp.findings.findingsByResource.findingsByResourcePageTitle"
-              defaultMessage="Findings"
+            <CloudPosturePageTitle
+              isBeta
+              title={i18n.translate(
+                'xpack.csp.findings.findingsByResource.findingsByResourcePageTitle',
+                { defaultMessage: 'Findings' }
+              )}
             />
           }
         />

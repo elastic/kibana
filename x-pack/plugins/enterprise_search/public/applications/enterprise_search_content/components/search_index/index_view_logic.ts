@@ -29,11 +29,13 @@ import {
   getLastUpdated,
   indexToViewIndex,
   isConnectorIndex,
+  isCrawlerIndex,
 } from '../../utils/indices';
 
+import { CrawlerLogic } from './crawler/crawler_logic';
 import { IndexNameLogic } from './index_name_logic';
 
-const FETCH_INDEX_POLLING_DURATION = 5000; // 5 seconds
+const FETCH_INDEX_POLLING_DURATION = 5000; // 1 seconds
 const FETCH_INDEX_POLLING_DURATION_ON_FAILURE = 30000; // 30 seconds
 
 type FetchIndexApiValues = Actions<FetchIndexApiParams, FetchIndexApiResponse>;
@@ -42,10 +44,14 @@ type StartSyncApiValues = Actions<StartSyncArgs, {}>;
 export interface IndexViewActions {
   clearFetchIndexTimeout(): void;
   createNewFetchIndexTimeout(duration: number): { duration: number };
+  fetchCrawlerData: () => void;
+  fetchIndex: () => void;
   fetchIndexApiSuccess: FetchIndexApiValues['apiSuccess'];
   makeFetchIndexRequest: FetchIndexApiValues['makeRequest'];
   makeStartSyncRequest: StartSyncApiValues['makeRequest'];
+  recheckIndex: () => void;
   resetFetchIndexApi: FetchIndexApiValues['apiReset'];
+  resetRecheckIndexLoading: () => void;
   setFetchIndexTimeoutId(timeoutId: NodeJS.Timeout): { timeoutId: NodeJS.Timeout };
   startFetchIndexPoll(): void;
   startSync(): void;
@@ -58,12 +64,15 @@ export interface IndexViewValues {
   data: typeof FetchIndexApiLogic.values.data;
   fetchIndexTimeoutId: NodeJS.Timeout | null;
   index: ElasticsearchViewIndex | undefined;
+  indexName: string;
   ingestionMethod: IngestionMethod;
   ingestionStatus: IngestionStatus;
   isSyncing: boolean;
   isWaitingForSync: boolean;
   lastUpdated: string | null;
   localSyncNowValue: boolean; // holds local value after update so UI updates correctly
+  recheckIndexLoading: boolean;
+  resetFetchIndexLoading: boolean;
   syncStatus: SyncStatus | null;
 }
 
@@ -71,6 +80,9 @@ export const IndexViewLogic = kea<MakeLogicType<IndexViewValues, IndexViewAction
   actions: {
     clearFetchIndexTimeout: true,
     createNewFetchIndexTimeout: (duration) => ({ duration }),
+    fetchIndex: true,
+    recheckIndex: true,
+    resetRecheckIndexLoading: true,
     setFetchIndexTimeoutId: (timeoutId) => ({ timeoutId }),
     startFetchIndexPoll: true,
     startSync: true,
@@ -91,31 +103,70 @@ export const IndexViewLogic = kea<MakeLogicType<IndexViewValues, IndexViewAction
         'apiSuccess as fetchIndexApiSuccess',
         'makeRequest as makeFetchIndexRequest',
       ],
+      CrawlerLogic,
+      ['fetchCrawlerData'],
+      IndexNameLogic,
+      ['setIndexName'],
     ],
-    values: [FetchIndexApiLogic, ['data']],
+    values: [FetchIndexApiLogic, ['data'], IndexNameLogic, ['indexName']],
   },
+  events: ({ actions, values }) => ({
+    afterMount: () => {
+      actions.startFetchIndexPoll();
+    },
+    beforeUnmount: () => {
+      if (values.fetchIndexTimeoutId) {
+        clearTimeout(values.fetchIndexTimeoutId);
+      }
+    },
+  }),
   listeners: ({ actions, values }) => ({
     createNewFetchIndexTimeout: ({ duration }) => {
       if (values.fetchIndexTimeoutId) {
         clearTimeout(values.fetchIndexTimeoutId);
       }
-      const { indexName } = IndexNameLogic.values;
       const timeoutId = setTimeout(() => {
-        actions.makeFetchIndexRequest({ indexName });
+        actions.fetchIndex();
       }, duration);
       actions.setFetchIndexTimeoutId(timeoutId);
+    },
+    fetchIndex: () => {
+      const { indexName } = IndexNameLogic.values;
+      actions.makeFetchIndexRequest({ indexName });
     },
     fetchIndexApiError: () => {
       actions.createNewFetchIndexTimeout(FETCH_INDEX_POLLING_DURATION_ON_FAILURE);
     },
-    fetchIndexApiSuccess: () => {
+    fetchIndexApiSuccess: (index) => {
       actions.createNewFetchIndexTimeout(FETCH_INDEX_POLLING_DURATION);
+      if (isCrawlerIndex(index) && index.name === values.indexName) {
+        actions.fetchCrawlerData();
+      }
+      if (values.recheckIndexLoading) {
+        actions.resetRecheckIndexLoading();
+        flashSuccessToast(
+          i18n.translate(
+            'xpack.enterpriseSearch.content.searchIndex.index.recheckSuccess.message',
+            {
+              defaultMessage: 'Your connector has been rechecked.',
+            }
+          )
+        );
+      }
     },
     makeStartSyncRequest: () => clearFlashMessages(),
+    recheckIndex: () => actions.fetchIndex(),
+    setIndexName: () => {
+      if (values.fetchIndexTimeoutId) {
+        clearTimeout(values.fetchIndexTimeoutId);
+      }
+      actions.clearFetchIndexTimeout();
+      actions.resetFetchIndexApi();
+      actions.fetchIndex();
+    },
     startFetchIndexPoll: () => {
-      const { indexName } = IndexNameLogic.values;
       // we rely on listeners for fetchIndexApiError and fetchIndexApiSuccess to handle reccuring polling
-      actions.makeFetchIndexRequest({ indexName });
+      actions.fetchIndex();
     },
     startSync: () => {
       if (isConnectorIndex(values.data)) {
@@ -153,6 +204,13 @@ export const IndexViewLogic = kea<MakeLogicType<IndexViewValues, IndexViewAction
         fetchIndexApiSuccess: (_, index) =>
           isConnectorIndex(index) ? index.connector.sync_now : false,
         startSyncApiSuccess: () => true,
+      },
+    ],
+    recheckIndexLoading: [
+      false,
+      {
+        recheckIndex: () => true,
+        resetRecheckIndexLoading: () => false,
       },
     ],
   },

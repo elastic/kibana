@@ -12,7 +12,7 @@ import expect from '@kbn/expect';
 
 import type { ApiExplainLogRateSpikes } from '@kbn/aiops-plugin/common/api';
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 import { parseStream } from './parse_stream';
 
@@ -40,7 +40,7 @@ export default ({ getService }: FtrProviderContext) => {
     noIndexActionsLength: 3,
     changePointFilter: 'add_change_points',
     histogramFilter: 'add_change_points_histogram',
-    errorFilter: 'error',
+    errorFilter: 'add_error',
     changePoints: [
       {
         fieldName: 'day_of_week',

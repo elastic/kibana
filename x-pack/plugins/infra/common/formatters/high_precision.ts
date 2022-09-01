@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export const formatHighPercision = (val: number) => {
+export const formatHighPrecision = (val: number) => {
   return Number(val).toLocaleString('en', {
     maximumFractionDigits: 5,
   });

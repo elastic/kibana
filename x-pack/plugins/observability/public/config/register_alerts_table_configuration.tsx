@@ -6,7 +6,7 @@
  */
 
 import type { GetRenderCellValue } from '@kbn/triggers-actions-ui-plugin/public';
-import { observabilityFeatureId } from '../../common';
+import { casesFeatureId, observabilityFeatureId } from '../../common';
 import { useBulkAddToCaseActions } from '../hooks/use_alert_bulk_case_actions';
 import { TopAlert, useToGetInternalFlyout } from '../pages/alerts';
 import { getRenderCellValue } from '../pages/alerts/components/render_cell_value';
@@ -19,6 +19,7 @@ const getO11yAlertsTableConfiguration = (
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry
 ) => ({
   id: observabilityFeatureId,
+  casesFeatureId,
   columns: alertO11yColumns.map(addDisplayNames),
   useInternalFlyout: () => {
     const { header, body, footer } = useToGetInternalFlyout(observabilityRuleTypeRegistry);

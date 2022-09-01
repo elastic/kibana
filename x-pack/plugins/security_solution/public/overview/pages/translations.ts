@@ -49,6 +49,14 @@ export const DETECTION_RESPONSE_TITLE = i18n.translate(
     defaultMessage: 'Detection & Response',
   }
 );
+
+export const ENTITY_ANALYTICS_TITLE = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.pageTitle',
+  {
+    defaultMessage: 'Entity Analytics',
+  }
+);
+
 export const NO_PERMISSIONS_MSG = i18n.translate(
   'xpack.securitySolution.detectionResponse.noPagePermissionsMessage',
   {

@@ -72,5 +72,6 @@ export const browserFormatters: BrowserFormatMap = {
     stringToObjectFormatter(fields[ConfigKey.PLAYWRIGHT_OPTIONS] || ''),
   [ConfigKey.CUSTOM_HEARTBEAT_ID]: null,
   [ConfigKey.ORIGINAL_SPACE]: null,
+  [ConfigKey.TEXT_ASSERTION]: null,
   ...commonFormatters,
 };

@@ -11,6 +11,8 @@ const meta = getESAssetMetadata();
 
 export const FLEET_INSTALL_FORMAT_VERSION = '1.0.0';
 
+export const FLEET_AGENT_POLICIES_SCHEMA_VERSION = '1.0.0';
+
 export const FLEET_FINAL_PIPELINE_ID = '.fleet_final_pipeline-1';
 
 export const FLEET_GLOBALS_COMPONENT_TEMPLATE_NAME = '.fleet_globals-1';

@@ -39,6 +39,23 @@ export const ENTERPRISE_SEARCH_CONTENT_PLUGIN = {
   SUPPORT_URL: 'https://discuss.elastic.co/c/enterprise-search/',
 };
 
+export const ANALYTICS_PLUGIN = {
+  ID: 'enterpriseSearchAnalytics',
+  NAME: i18n.translate('xpack.enterpriseSearch.analytics.productName', {
+    defaultMessage: 'Analytics',
+  }),
+  DESCRIPTION: i18n.translate('xpack.enterpriseSearch.analytics.productDescription', {
+    defaultMessage:
+      'Dashboards and tools for visualizing end-user behavior and measuring the performance of your search applications.',
+  }),
+  CARD_DESCRIPTION: i18n.translate('xpack.enterpriseSearch.analytics.productCardDescription', {
+    defaultMessage:
+      'Dashboards and tools for visualizing end-user behavior and measuring the performance of your search applications.',
+  }),
+  URL: '/app/enterprise_search/analytics',
+  SUPPORT_URL: 'https://discuss.elastic.co/c/enterprise-search/',
+};
+
 export const ELASTICSEARCH_PLUGIN = {
   ID: 'elasticsearch',
   NAME: i18n.translate('xpack.enterpriseSearch.elasticsearch.productName', {
@@ -96,3 +113,7 @@ export const ENTERPRISE_SEARCH_AUDIT_LOGS_SOURCE_ID = 'ent-search-audit-logs';
 export const APP_SEARCH_URL = '/app/enterprise_search/app_search';
 export const ENTERPRISE_SEARCH_ELASTICSEARCH_URL = '/app/enterprise_search/elasticsearch';
 export const WORKPLACE_SEARCH_URL = '/app/enterprise_search/workplace_search';
+
+export const ENTERPRISE_SEARCH_DOCUMENTS_DEFAULT_DOC_COUNT = 25;
+
+export const ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE = 'elastic-crawler';

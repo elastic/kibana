@@ -6,36 +6,39 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiButtonEmpty, EuiIcon } from '@elastic/eui';
-import { TreeNavSelection, KubernetesCollection } from '../../../types';
+import { EuiButtonEmpty, EuiIcon, EuiToolTip } from '@elastic/eui';
+import { KubernetesCollectionMap, KubernetesCollection } from '../../../types';
 import { useStyles } from './styles';
+import { TreeViewIcon } from '../tree_view_icon';
+import { KUBERNETES_COLLECTION_ICONS_PROPS } from '../helpers';
 
 interface BreadcrumbDeps {
-  treeNavSelection: TreeNavSelection;
-  onSelect: (selection: TreeNavSelection) => void;
+  treeNavSelection: Partial<KubernetesCollectionMap>;
+  onSelect: (selection: Partial<KubernetesCollectionMap>) => void;
 }
 
 export const Breadcrumb = ({ treeNavSelection, onSelect }: BreadcrumbDeps) => {
   const styles = useStyles();
   const onBreadCrumbClick = useCallback(
-    (collectionType: string) => {
+    (collectionType: KubernetesCollection) => {
       const selectionCopy = { ...treeNavSelection };
       switch (collectionType) {
-        case KubernetesCollection.cluster: {
+        case 'clusterId': {
           onSelect({
-            [KubernetesCollection.cluster]: treeNavSelection[KubernetesCollection.cluster],
+            clusterId: treeNavSelection.clusterId,
+            clusterName: treeNavSelection.clusterName,
           });
           break;
         }
-        case KubernetesCollection.namespace:
-        case KubernetesCollection.node: {
-          delete selectionCopy[KubernetesCollection.pod];
-          delete selectionCopy[KubernetesCollection.containerImage];
+        case 'namespace':
+        case 'node': {
+          delete selectionCopy.pod;
+          delete selectionCopy.containerImage;
           onSelect(selectionCopy);
           break;
         }
-        case KubernetesCollection.pod: {
-          delete selectionCopy[KubernetesCollection.containerImage];
+        case 'pod': {
+          delete selectionCopy.containerImage;
           onSelect(selectionCopy);
           break;
         }
@@ -50,19 +53,28 @@ export const Breadcrumb = ({ treeNavSelection, onSelect }: BreadcrumbDeps) => {
       icon: JSX.Element,
       isBolded: boolean,
       hasRightArrow: boolean = true
-    ) => (
-      <>
-        {hasRightArrow && <EuiIcon css={styles.breadcrumbRightIcon} type="arrowRight" size="s" />}
-        {icon}
-        <EuiButtonEmpty
-          css={isBolded ? styles.breadcrumbButtonBold : styles.breadcrumbButton}
-          color="text"
-          onClick={() => onBreadCrumbClick(collectionType)}
-        >
-          {treeNavSelection[collectionType]}
-        </EuiButtonEmpty>
-      </>
-    ),
+    ) => {
+      const content =
+        collectionType === 'clusterId'
+          ? treeNavSelection.clusterName || treeNavSelection.clusterId
+          : treeNavSelection[collectionType];
+
+      return (
+        <>
+          {hasRightArrow && <EuiIcon css={styles.breadcrumbRightIcon} type="arrowRight" size="s" />}
+          {icon}
+          <EuiToolTip content={content}>
+            <EuiButtonEmpty
+              css={isBolded ? styles.breadcrumbButtonBold : styles.breadcrumbButton}
+              color="text"
+              onClick={() => onBreadCrumbClick(collectionType)}
+            >
+              {content}
+            </EuiButtonEmpty>
+          </EuiToolTip>
+        </>
+      );
+    },
     [
       onBreadCrumbClick,
       styles.breadcrumbButton,
@@ -72,43 +84,40 @@ export const Breadcrumb = ({ treeNavSelection, onSelect }: BreadcrumbDeps) => {
     ]
   );
 
-  if (!treeNavSelection[KubernetesCollection.cluster]) {
+  if (!treeNavSelection.clusterId) {
     return null;
   }
 
   return (
     <div css={styles.breadcrumb}>
       {renderBreadcrumbLink(
-        KubernetesCollection.cluster,
-        <EuiIcon type="heatmap" color="success" />,
-        !(
-          treeNavSelection[KubernetesCollection.namespace] ||
-          treeNavSelection[KubernetesCollection.node]
-        ),
+        'clusterId',
+        <TreeViewIcon {...KUBERNETES_COLLECTION_ICONS_PROPS.clusterId} />,
+        !(treeNavSelection.namespace || treeNavSelection.node),
         false
       )}
-      {treeNavSelection[KubernetesCollection.namespace] &&
+      {treeNavSelection.namespace &&
         renderBreadcrumbLink(
-          KubernetesCollection.namespace,
-          <EuiIcon type="nested" color="primary" />,
-          !treeNavSelection[KubernetesCollection.pod]
+          'namespace',
+          <TreeViewIcon {...KUBERNETES_COLLECTION_ICONS_PROPS.namespace} />,
+          !treeNavSelection.pod
         )}
-      {treeNavSelection[KubernetesCollection.node] &&
+      {treeNavSelection.node &&
         renderBreadcrumbLink(
-          KubernetesCollection.node,
-          <EuiIcon type="node" color="primary" />,
-          !treeNavSelection[KubernetesCollection.pod]
+          'node',
+          <TreeViewIcon {...KUBERNETES_COLLECTION_ICONS_PROPS.node} />,
+          !treeNavSelection.pod
         )}
-      {treeNavSelection[KubernetesCollection.pod] &&
+      {treeNavSelection.pod &&
         renderBreadcrumbLink(
-          KubernetesCollection.pod,
-          <EuiIcon type="package" color="warning" />,
-          !treeNavSelection[KubernetesCollection.containerImage]
+          'pod',
+          <TreeViewIcon {...KUBERNETES_COLLECTION_ICONS_PROPS.pod} />,
+          !treeNavSelection.containerImage
         )}
-      {treeNavSelection[KubernetesCollection.containerImage] &&
+      {treeNavSelection.containerImage &&
         renderBreadcrumbLink(
-          KubernetesCollection.containerImage,
-          <EuiIcon type="image" color="danger" />,
+          'containerImage',
+          <TreeViewIcon {...KUBERNETES_COLLECTION_ICONS_PROPS.containerImage} />,
           true
         )}
     </div>

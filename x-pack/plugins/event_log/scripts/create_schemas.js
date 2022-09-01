@@ -9,7 +9,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const { set } = require('@elastic/safer-lodash-set');
+const { set } = require('@kbn/safer-lodash-set');
 const lodash = require('lodash');
 
 const LineWriter = require('./lib/line_writer');

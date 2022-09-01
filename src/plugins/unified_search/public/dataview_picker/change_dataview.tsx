@@ -18,9 +18,7 @@ import {
   useEuiTheme,
   useGeneratedHtmlId,
   EuiIcon,
-  EuiLink,
   EuiText,
-  EuiTourStep,
   EuiContextMenuPanelProps,
   EuiFlexGroup,
   EuiFlexItem,
@@ -36,30 +34,8 @@ import type { TextBasedLanguagesListProps } from './text_languages_list';
 import type { TextBasedLanguagesTransitionModalProps } from './text_languages_transition_modal';
 import { changeDataViewStyles } from './change_dataview.styles';
 
-const hideAnnouncementsUISetting = 'hideAnnouncements';
-// local storage key for the tour component
-const NEW_DATA_VIEW_MENU_STORAGE_KEY = 'data.newDataViewMenu';
 // local storage key for the text based languages transition modal
 const TEXT_LANG_TRANSITION_MODAL_KEY = 'data.textLangTransitionModal';
-
-const newMenuTourTitle = i18n.translate('unifiedSearch.query.dataViewMenu.newMenuTour.title', {
-  defaultMessage: 'A better data view menu',
-});
-
-const newMenuTourDescription = i18n.translate(
-  'unifiedSearch.query.dataViewMenu.newMenuTour.description',
-  {
-    defaultMessage:
-      'This menu now offers all the tools you need to create, find, and edit your data views.',
-  }
-);
-
-const newMenuTourDismissLabel = i18n.translate(
-  'unifiedSearch.query.dataViewMenu.newMenuTour.dismissLabel',
-  {
-    defaultMessage: 'Got it',
-  }
-);
 
 const Fallback = () => <div />;
 
@@ -84,12 +60,12 @@ export const TextBasedLanguagesList = (props: TextBasedLanguagesListProps) => (
 export function ChangeDataView({
   isMissingCurrent,
   currentDataViewId,
+  adHocDataViews,
   onChangeDataView,
   onAddField,
   onDataViewCreated,
   trigger,
   selectableProps,
-  showNewMenuTour = false,
   textBasedLanguages,
   onSaveTextLanguageQuery,
   onTextLangQuerySubmit,
@@ -106,40 +82,11 @@ export function ChangeDataView({
   const [selectedDataViewId, setSelectedDataViewId] = useState(currentDataViewId);
 
   const kibana = useKibana<IDataPluginServices>();
-  const { application, data, storage, uiSettings } = kibana.services;
+  const { application, data, storage } = kibana.services;
   const styles = changeDataViewStyles({ fullWidth: trigger.fullWidth });
   const [isTextLangTransitionModalDismissed, setIsTextLangTransitionModalDismissed] = useState(() =>
     Boolean(storage.get(TEXT_LANG_TRANSITION_MODAL_KEY))
   );
-  const isHideAnnouncementSettingsOn = Boolean(uiSettings.get(hideAnnouncementsUISetting));
-
-  const [isTourDismissed, setIsTourDismissed] = useState(() =>
-    Boolean(storage.get(NEW_DATA_VIEW_MENU_STORAGE_KEY))
-  );
-  const [isTourOpen, setIsTourOpen] = useState(false);
-
-  useEffect(() => {
-    if (
-      showNewMenuTour &&
-      !isTourDismissed &&
-      !isHideAnnouncementSettingsOn &&
-      !isTextBasedLangSelected
-    ) {
-      setIsTourOpen(true);
-    }
-  }, [
-    isHideAnnouncementSettingsOn,
-    isTextBasedLangSelected,
-    isTourDismissed,
-    setIsTourOpen,
-    showNewMenuTour,
-  ]);
-
-  const onTourDismiss = () => {
-    storage.set(NEW_DATA_VIEW_MENU_STORAGE_KEY, true);
-    setIsTourDismissed(true);
-    setIsTourOpen(false);
-  };
 
   // Create a reusable id to ensure search input is the first focused item in the popover even though it's not the first item
   const searchListInputId = useGeneratedHtmlId({ prefix: 'dataviewPickerListSearchInput' });
@@ -147,10 +94,21 @@ export function ChangeDataView({
   useEffect(() => {
     const fetchDataViews = async () => {
       const dataViewsRefs = await data.dataViews.getIdsWithTitle();
+      if (adHocDataViews?.length) {
+        adHocDataViews.forEach((adHocDataView) => {
+          if (adHocDataView.id) {
+            dataViewsRefs.push({
+              title: adHocDataView.title,
+              name: adHocDataView.name,
+              id: adHocDataView.id,
+            });
+          }
+        });
+      }
       setDataViewsList(dataViewsRefs);
     };
     fetchDataViews();
-  }, [data, currentDataViewId]);
+  }, [data, currentDataViewId, adHocDataViews]);
 
   useEffect(() => {
     if (trigger.label) {
@@ -176,13 +134,11 @@ export function ChangeDataView({
         data-test-subj={dataTestSubj}
         onClick={() => {
           setPopoverIsOpen(!isPopoverOpen);
-          setIsTourOpen(false);
-          // onTourDismiss(); TODO: Decide if opening the menu should also dismiss the tour
         }}
         color={isMissingCurrent ? 'danger' : 'primary'}
         iconSide="right"
         iconType="arrowDown"
-        title={title}
+        title={triggerLabel}
         fullWidth={fullWidth}
         {...rest}
       >
@@ -427,47 +383,23 @@ export function ChangeDataView({
 
   return (
     <>
-      <EuiTourStep
-        title={
-          <>
-            <EuiIcon type="bell" size="s" /> &nbsp; {newMenuTourTitle}
-          </>
-        }
-        content={
-          <EuiText css={styles.popoverContent}>
-            <p>{newMenuTourDescription}</p>
-          </EuiText>
-        }
-        isStepOpen={isTourOpen}
-        onFinish={onTourDismiss}
-        step={1}
-        stepsTotal={1}
-        footerAction={
-          <EuiLink data-test-subj="dataViewPickerTourLink" onClick={onTourDismiss}>
-            {newMenuTourDismissLabel}
-          </EuiLink>
-        }
-        repositionOnScroll
+      <EuiPopover
+        panelClassName="changeDataViewPopover"
+        button={createTrigger()}
+        panelProps={{
+          ['data-test-subj']: 'changeDataViewPopover',
+        }}
+        isOpen={isPopoverOpen}
+        closePopover={() => setPopoverIsOpen(false)}
+        panelPaddingSize="none"
+        initialFocus={!isTextBasedLangSelected ? `#${searchListInputId}` : undefined}
         display="block"
+        buffer={8}
       >
-        <EuiPopover
-          panelClassName="changeDataViewPopover"
-          button={createTrigger()}
-          panelProps={{
-            ['data-test-subj']: 'changeDataViewPopover',
-          }}
-          isOpen={isPopoverOpen}
-          closePopover={() => setPopoverIsOpen(false)}
-          panelPaddingSize="none"
-          initialFocus={!isTextBasedLangSelected ? `#${searchListInputId}` : false}
-          display="block"
-          buffer={8}
-        >
-          <div css={styles.popoverContent}>
-            <EuiContextMenuPanel size="s" items={getPanelItems()} />
-          </div>
-        </EuiPopover>
-      </EuiTourStep>
+        <div css={styles.popoverContent}>
+          <EuiContextMenuPanel size="s" items={getPanelItems()} />
+        </div>
+      </EuiPopover>
       {modal}
     </>
   );

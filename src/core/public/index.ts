@@ -46,6 +46,9 @@ import type { UiSettingsState, IUiSettingsClient } from '@kbn/core-ui-settings-b
 import type { DeprecationsServiceStart } from '@kbn/core-deprecations-browser';
 import type { Capabilities } from '@kbn/core-capabilities-common';
 import type { OverlayStart } from '@kbn/core-overlays-browser';
+import type { SavedObjectsStart } from '@kbn/core-saved-objects-browser';
+import type { NotificationsSetup, NotificationsStart } from '@kbn/core-notifications-browser';
+import type { ApplicationSetup, ApplicationStart } from '@kbn/core-application-browser';
 import type {
   ChromeBadge,
   ChromeBreadcrumb,
@@ -68,21 +71,18 @@ import type {
   NavType,
   ChromeHelpMenuActions,
 } from './chrome';
-import type { NotificationsSetup, NotificationsStart } from './notifications';
 import type {
   Plugin,
   PluginInitializer,
   PluginInitializerContext,
   PluginOpaqueId,
 } from './plugins';
-import type { ApplicationSetup, ApplicationStart } from './application';
-import type { SavedObjectsStart } from './saved_objects';
 
 export type { PackageInfo, EnvironmentMode } from '@kbn/config';
 export type { DomainDeprecationDetails } from '@kbn/core-deprecations-common';
 export type { CoreContext } from '@kbn/core-base-browser-internal';
+export { DEFAULT_APP_CATEGORIES, APP_WRAPPER_CLASS } from '@kbn/core-application-common';
 export type { CoreSystem } from './core_system';
-export { DEFAULT_APP_CATEGORIES, APP_WRAPPER_CLASS } from '../utils';
 export type { AppCategory } from '../types';
 export type {
   UiSettingsParams,
@@ -106,7 +106,7 @@ export type {
   TelemetryCounterType,
 } from '@kbn/analytics-client';
 
-export { AppNavLinkStatus, AppStatus, ScopedHistory } from './application';
+export { AppNavLinkStatus, AppStatus } from '@kbn/core-application-browser';
 export type {
   ApplicationSetup,
   ApplicationStart,
@@ -127,9 +127,10 @@ export type {
   PublicAppDeepLinkInfo,
   NavigateToAppOptions,
   NavigateToUrlOptions,
-} from './application';
+  ScopedHistory,
+} from '@kbn/core-application-browser';
+export { CoreScopedHistory } from '@kbn/core-application-browser-internal';
 
-export { SimpleSavedObjectImpl } from './saved_objects';
 export type {
   SavedObjectsClientContract,
   SimpleSavedObject,
@@ -206,13 +207,14 @@ export type {
   Toast,
   ToastInput,
   IToasts,
-  ToastsApi,
   ToastInputFields,
   ToastsSetup,
   ToastsStart,
   ToastOptions,
   ErrorToastOptions,
-} from './notifications';
+} from '@kbn/core-notifications-browser';
+
+export type { ToastsApi } from '@kbn/core-notifications-browser-internal';
 
 export type { ThemeServiceSetup, ThemeServiceStart, CoreTheme } from '@kbn/core-theme-browser';
 

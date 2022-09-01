@@ -16,12 +16,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const dataGrid = getService('dataGrid');
   const PageObjects = getPageObjects(['common', 'discover', 'header', 'timePicker', 'settings']);
+  const security = getService('security');
   const defaultSettings = {
     defaultIndex: 'logstash-*',
     'discover:searchFieldsFromSource': false,
   };
   describe('discover uses fields API test', function describeIndexTests() {
     before(async function () {
+      await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
       log.debug('load kibana index with default index pattern');
       await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover.json');

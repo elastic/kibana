@@ -26,14 +26,14 @@ exports[`Transform: <AggLabelForm /> Date histogram aggregation 1`] = `
         button={
           <EuiButtonIcon
             aria-label="Edit aggregation"
-            data-test-subj="transformAggregationEntryEditButton"
+            data-test-subj="transformAggregationEntryEditButton_the-group-by-agg-name"
             iconType="pencil"
             onClick={[Function]}
             size="s"
           />
         }
         closePopover={[Function]}
-        display="inlineBlock"
+        display="inline-block"
         hasArrow={true}
         id="transformFormPopover"
         isOpen={false}

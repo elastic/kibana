@@ -183,6 +183,18 @@ export const BaseSnoozePanel: React.FunctionComponent<BaseSnoozePanelProps> = ({
               })}
             </EuiFlexItem>
           </EuiFlexGroup>
+          <EuiFlexGroup alignItems="center" justifyContent="flexStart" gutterSize="s">
+            <EuiFlexItem>
+              <EuiText textAlign="left" size="xs" color="subdued">
+                {i18n.translate(
+                  'xpack.triggersActionsUI.sections.rulesList.addScheduleDescription',
+                  {
+                    defaultMessage: 'Silence actions immediately or schedule downtimes.',
+                  }
+                )}
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiPopoverTitle>
       )}
       <EuiFlexGroup data-test-subj="snoozePanel" gutterSize="xs">
@@ -286,19 +298,6 @@ export const BaseSnoozePanel: React.FunctionComponent<BaseSnoozePanelProps> = ({
                   defaultMessage: 'Add schedule',
                 })}
               </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiFlexGroup gutterSize="m">
-            <EuiFlexItem>
-              <EuiText textAlign="center" size="xs" color="subdued">
-                {i18n.translate(
-                  'xpack.triggersActionsUI.sections.rulesList.addScheduleDescription',
-                  {
-                    defaultMessage:
-                      'Create recurring schedules to silence actions during expected downtimes',
-                  }
-                )}
-              </EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>
         </>

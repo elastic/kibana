@@ -5,26 +5,24 @@
  * 2.0.
  */
 
-import { PublicMethodsOf } from '@kbn/utility-types';
-import { AlertingEventLogger } from './alerting_event_logger';
-
 const createAlertingEventLoggerMock = () => {
-  const mock: jest.Mocked<PublicMethodsOf<AlertingEventLogger>> = {
-    initialize: jest.fn(),
-    start: jest.fn(),
-    getEvent: jest.fn(),
-    getStartAndDuration: jest.fn(),
-    setRuleName: jest.fn(),
-    setExecutionSucceeded: jest.fn(),
-    setExecutionFailed: jest.fn(),
-    logTimeout: jest.fn(),
-    logAlert: jest.fn(),
-    logAction: jest.fn(),
-    done: jest.fn(),
-  };
-  return mock;
+  return jest.fn().mockImplementation(() => {
+    return {
+      initialize: jest.fn(),
+      start: jest.fn(),
+      getEvent: jest.fn(),
+      getStartAndDuration: jest.fn(),
+      setRuleName: jest.fn(),
+      setExecutionSucceeded: jest.fn(),
+      setExecutionFailed: jest.fn(),
+      logTimeout: jest.fn(),
+      logAlert: jest.fn(),
+      logAction: jest.fn(),
+      done: jest.fn(),
+    };
+  });
 };
 
 export const alertingEventLoggerMock = {
-  create: createAlertingEventLoggerMock,
+  create: createAlertingEventLoggerMock(),
 };

@@ -9,11 +9,12 @@ export type { AsDuration, AsPercent, TimeUnitChar } from './utils/formatters';
 
 export { formatDurationFromTimeUnitChar } from './utils/formatters';
 
+export { ProcessorEvent } from './processor_event';
+
 export {
   enableInspectEsQueries,
   maxSuggestions,
   enableComparisonByDefault,
-  enableInfrastructureView,
   defaultApmServiceEnvironment,
   apmServiceInventoryOptimizedSorting,
   apmProgressiveLoading,

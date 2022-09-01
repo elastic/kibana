@@ -375,10 +375,9 @@ export const QueryBarTopRow = React.memo(
     }
 
     function renderUpdateButton() {
-      if (!shouldRenderUpdatebutton()) {
+      if (!shouldRenderUpdatebutton() && !shouldRenderDatePicker()) {
         return null;
       }
-
       const buttonLabelUpdate = i18n.translate('unifiedSearch.queryBarTopRow.submitButton.update', {
         defaultMessage: 'Needs updating',
       });
@@ -421,7 +420,8 @@ export const QueryBarTopRow = React.memo(
         </EuiFlexItem>
       );
 
-      if (!shouldRenderDatePicker()) {
+      // allows to render the button without the datepicker
+      if (!shouldRenderDatePicker() && shouldRenderUpdatebutton()) {
         return button;
       }
 
@@ -429,8 +429,8 @@ export const QueryBarTopRow = React.memo(
         <EuiFlexItem grow={false}>
           <NoDataPopover storage={storage} showNoDataPopover={props.indicateNoData}>
             <EuiFlexGroup alignItems="center" responsive={false} gutterSize="s">
-              {renderDatePicker()}
-              {button}
+              {shouldRenderDatePicker() ? renderDatePicker() : null}
+              {shouldRenderUpdatebutton() ? button : null}
             </EuiFlexGroup>
           </NoDataPopover>
         </EuiFlexItem>
@@ -447,7 +447,6 @@ export const QueryBarTopRow = React.memo(
       return (
         <EuiFlexItem style={{ maxWidth: '100%' }} grow={isMobile}>
           <DataViewPicker
-            showNewMenuTour
             {...props.dataViewPickerComponentProps}
             trigger={{ fullWidth: isMobile, ...props.dataViewPickerComponentProps.trigger }}
             onTextLangQuerySubmit={props.onTextLangQuerySubmit}

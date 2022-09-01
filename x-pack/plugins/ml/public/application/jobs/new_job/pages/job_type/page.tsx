@@ -72,7 +72,7 @@ export const Page: FC = () => {
       })
     : i18n.translate('xpack.ml.newJob.wizard.jobType.dataViewPageTitleLabel', {
         defaultMessage: 'data view {dataViewName}',
-        values: { dataViewName: currentDataView.title },
+        values: { dataViewName: currentDataView.getName() },
       });
 
   const recognizerResults = {

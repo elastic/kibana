@@ -14,6 +14,14 @@ export const NO_DATA_LABEL = i18n.translate(
   }
 );
 
+export const NO_DATA_REASON_LABEL = (stackByField1: string) =>
+  i18n.translate('xpack.securitySolution.components.alertsTreemap.noDataReasonLabel', {
+    values: {
+      stackByField1,
+    },
+    defaultMessage: 'The {stackByField1} field was not present in any groups',
+  });
+
 export const RISK_LABEL = (riskScore: number) =>
   i18n.translate('xpack.securitySolution.components.alertsTreemap.riskLabel', {
     values: {

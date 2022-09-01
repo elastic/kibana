@@ -11,7 +11,7 @@ import type {
   QueryDslQueryContainer,
   SearchRequest,
 } from '@elastic/elasticsearch/lib/api/types';
-import { Cluster } from '../../../common/types';
+import type { BenchmarkId, Cluster } from '../../../common/types';
 import {
   getFailedFindingsFromAggs,
   failedFindingsAggQuery,
@@ -29,7 +29,8 @@ export interface ClusterBucket extends FailedFindingsQueryResult, KeyDocCount {
   passed_findings: {
     doc_count: number;
   };
-  benchmarks: Aggregation<KeyDocCount>;
+  benchmarkName: Aggregation<KeyDocCount>;
+  benchmarkId: Aggregation<KeyDocCount<BenchmarkId>>;
   timestamps: Aggregation<KeyDocCount<UnixEpochTime>>;
 }
 
@@ -48,9 +49,14 @@ export const getClustersQuery = (query: QueryDslQueryContainer, pitId: string): 
         field: 'cluster_id',
       },
       aggs: {
-        benchmarks: {
+        benchmarkName: {
           terms: {
             field: 'rule.benchmark.name',
+          },
+        },
+        benchmarkId: {
+          terms: {
+            field: 'rule.benchmark.id',
           },
         },
         timestamps: {
@@ -75,14 +81,21 @@ export const getClustersQuery = (query: QueryDslQueryContainer, pitId: string): 
 export const getClustersFromAggs = (clusters: ClusterBucket[]): ClusterWithoutTrend[] =>
   clusters.map((cluster) => {
     // get cluster's meta data
-    const benchmarks = cluster.benchmarks.buckets;
-    if (!Array.isArray(benchmarks)) throw new Error('missing aggs by benchmarks per cluster');
+    const benchmarkNames = cluster.benchmarkName.buckets;
+    const benchmarkIds = cluster.benchmarkId.buckets;
+
+    if (!Array.isArray(benchmarkIds) || benchmarkIds.length === 0)
+      throw new Error('missing aggs by benchmarkIds per cluster');
+
+    if (!Array.isArray(benchmarkNames)) throw new Error('missing aggs by benchmarks per cluster');
+
     const timestamps = cluster.timestamps.buckets;
     if (!Array.isArray(timestamps)) throw new Error('missing aggs by timestamps per cluster');
 
     const meta = {
       clusterId: cluster.key,
-      benchmarkName: benchmarks[0].key,
+      benchmarkName: benchmarkNames[0].key,
+      benchmarkId: benchmarkIds[0].key,
       lastUpdate: timestamps[0].key,
     };
 

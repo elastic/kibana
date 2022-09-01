@@ -354,5 +354,18 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
     async clickGuidedSetupButton() {
       await testSubjects.click('guidedSetupButton');
     },
+
+    async clickQueryBar() {
+      await testSubjects.click('infraSearchField');
+    },
+
+    async inputQueryData() {
+      const queryBar = await testSubjects.find('infraSearchField');
+      await queryBar.type('h');
+    },
+
+    async ensureSuggestionsPanelVisible() {
+      await testSubjects.find('infraSuggestionsPanel');
+    },
   };
 }

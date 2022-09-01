@@ -3,7 +3,7 @@
 [RFC](https://github.com/elastic/kibana/blob/main/legacy_rfcs/text/0014_api_documentation.md))
 
 This is an experimental api documentation system that is managed by the Kibana Tech Leads until
-we determine the value of such a system and what kind of maintenance burder it will incur.
+we determine the value of such a system and what kind of maintenance burden it will incur.
 
 To generate the docs run 
 

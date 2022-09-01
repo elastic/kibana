@@ -5,9 +5,9 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import React from 'react';
 import { DEFAULT_PERCENTILE_THRESHOLD } from '../../../../common/correlations/constants';
-import { ProcessorEvent } from '../../../../common/processor_event';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useFetcher } from '../../../hooks/use_fetcher';
 import { useSampleChartSelection } from '../../../hooks/use_sample_chart_selection';

@@ -10,3 +10,4 @@ import { euiPaletteForStatus } from '@elastic/eui';
 const [success, warning, danger] = euiPaletteForStatus(3);
 
 export const statusColors = { success, warning, danger };
+export const CSP_MOMENT_FORMAT = 'MMMM D, YYYY @ HH:mm:ss.SSS';

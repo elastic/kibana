@@ -45,7 +45,8 @@ export const useUpdatePolicy = ({
     const { formattedPolicy, dataStream, currentInput } = formatSyntheticsPolicy(
       newPolicy,
       monitorType,
-      config
+      config,
+      true
     );
 
     // prevent an infinite loop of updating the policy
