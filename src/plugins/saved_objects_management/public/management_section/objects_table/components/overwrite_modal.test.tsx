@@ -23,6 +23,7 @@ describe('OverwriteModal', () => {
     const props: OverwriteModalProps = {
       conflict: { obj, error: { type: 'conflict', destinationId: 'qux' } },
       onFinish,
+      allowedTypes: [],
     };
 
     it('should render as expected', async () => {
@@ -65,6 +66,7 @@ describe('OverwriteModal', () => {
         },
       },
       onFinish,
+      allowedTypes: [],
     };
 
     it('should render as expected', async () => {
@@ -91,6 +93,26 @@ describe('OverwriteModal', () => {
       findTestSubject(wrapper, 'confirmModalConfirmButton').simulate('click');
       // first destination is selected by default
       expect(onFinish).toHaveBeenCalledWith(true, 'qux');
+    });
+  });
+
+  describe('displaying a type with a displayName', () => {
+    const props: OverwriteModalProps = {
+      conflict: { obj, error: { type: 'conflict', destinationId: 'qux' } },
+      onFinish,
+      allowedTypes: [
+        { name: 'foo', hidden: false, namespaceType: 'multiple', displayName: 'fooDisplayName' },
+      ],
+    };
+
+    it('should use the displayName for the title of the modal', async () => {
+      const wrapper = shallowWithI18nProvider<{ title: string }>(<OverwriteModal {...props} />);
+
+      expect(wrapper.props()).toEqual(
+        expect.objectContaining({
+          title: 'Overwrite fooDisplayName?',
+        })
+      );
     });
   });
 });
