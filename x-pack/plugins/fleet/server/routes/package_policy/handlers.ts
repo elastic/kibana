@@ -273,7 +273,10 @@ export const updatePackagePolicyHandler: RequestHandler<
   let newData: NewPackagePolicy;
 
   // TODO improve typing here
-  if (isSimplifiedCreatePackagePolicyRequest(body as unknown as SimplifiedPackagePolicy)) {
+  if (
+    body.inputs &&
+    isSimplifiedCreatePackagePolicyRequest(body as unknown as SimplifiedPackagePolicy)
+  ) {
     if (!pkg) {
       throw new Error('package is mandatory');
     }
