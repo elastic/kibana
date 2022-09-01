@@ -12,9 +12,9 @@
     ]
   },
   "include": [
-    "src/**/*"
+    "**/*.ts"
   ],
   "exclude": [
-    "src/template/*"
+    "template/*"
   ],
 }

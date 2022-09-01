@@ -237,7 +237,11 @@ describe('comments migrations', () => {
       it('should remove time zone param from date histogram', () => {
         const migrations = createCommentsMigrations({
           persistableStateAttachmentTypeRegistry: new PersistableStateAttachmentTypeRegistry(),
-          lensEmbeddableFactory: makeLensEmbeddableFactory(() => ({}), {}),
+          lensEmbeddableFactory: makeLensEmbeddableFactory(
+            () => ({}),
+            () => ({}),
+            {}
+          ),
         });
 
         expect(migrations['7.14.0']).toBeDefined();
@@ -574,7 +578,11 @@ describe('comments migrations', () => {
 
     const migrations = createCommentsMigrations({
       persistableStateAttachmentTypeRegistry,
-      lensEmbeddableFactory: makeLensEmbeddableFactory(() => ({}), {}),
+      lensEmbeddableFactory: makeLensEmbeddableFactory(
+        () => ({}),
+        () => ({}),
+        {}
+      ),
     });
 
     it('migrates a persistable state attachment correctly', () => {

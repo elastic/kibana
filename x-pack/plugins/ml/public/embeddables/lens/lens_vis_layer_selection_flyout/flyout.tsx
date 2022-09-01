@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React, { FC, useState, useEffect } from 'react';
 import type { Embeddable } from '@kbn/lens-plugin/public';
-import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
-
 import {
   EuiFlyoutFooter,
   EuiFlyoutHeader,
@@ -20,24 +18,39 @@ import {
   EuiTitle,
   EuiSpacer,
   EuiText,
+  useEuiTheme,
 } from '@elastic/eui';
 
-import { FlyoutBody } from './flyout_body';
+import { Layer } from './layer';
 import type { LayerResult } from '../../../application/jobs/new_job/job_from_lens';
+import { VisualizationExtractor } from '../../../application/jobs/new_job/job_from_lens';
+import { useMlFromLensKibanaContext } from '../context';
 
 interface Props {
-  layerResults: LayerResult[];
   embeddable: Embeddable;
-  share: SharePluginStart;
   onClose: () => void;
 }
 
-export const LensLayerSelectionFlyout: FC<Props> = ({
-  onClose,
-  layerResults,
-  embeddable,
-  share,
-}) => {
+export const LensLayerSelectionFlyout: FC<Props> = ({ onClose, embeddable }) => {
+  const { euiTheme } = useEuiTheme();
+  const {
+    services: { data, lens },
+  } = useMlFromLensKibanaContext();
+
+  const [layerResults, setLayerResults] = useState<LayerResult[]>([]);
+
+  useEffect(() => {
+    const visExtractor = new VisualizationExtractor(data.dataViews);
+    visExtractor
+      .getResultLayersFromEmbeddable(embeddable, lens)
+      .then(setLayerResults)
+      .catch((error) => {
+        // eslint-disable-next-line no-console
+        console.error('Layers could not be extracted from embeddable', error);
+        onClose();
+      });
+  }, [data, lens, embeddable]);
+
   return (
     <>
       <EuiFlyoutHeader hasBorder>
@@ -53,17 +66,15 @@ export const LensLayerSelectionFlyout: FC<Props> = ({
         <EuiText size="s">
           <FormattedMessage
             id="xpack.ml.embeddables.lensLayerFlyout.secondTitle"
-            defaultMessage="Select a compatible layer from the visualization to create an anomaly detection job."
+            defaultMessage="Select a compatible layer from the visualization {title} to create an anomaly detection job."
+            values={{ title: embeddable.getTitle() }}
           />
         </EuiText>
       </EuiFlyoutHeader>
-      <EuiFlyoutBody className="mlLensToJobFlyoutBody">
-        <FlyoutBody
-          onClose={onClose}
-          layerResults={layerResults}
-          embeddable={embeddable}
-          share={share}
-        />
+      <EuiFlyoutBody css={{ backgroundColor: euiTheme.colors.lightestShade }}>
+        {layerResults.map((layer, i) => (
+          <Layer layer={layer} layerIndex={i} embeddable={embeddable} />
+        ))}
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">

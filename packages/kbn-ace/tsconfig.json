@@ -8,5 +8,8 @@
     "stripInternal": true,
     "types": ["node"]
   },
-  "include": ["src/**/*"]
+  "include": [
+    "**/*.ts",
+    "src/ace/modes/x_json/worker/x_json.ace.worker.js"
+  ]
 }
