@@ -46,12 +46,7 @@ export function ServiceContents({
   const { query } = useApmParams('/*');
 
   if (
-    !(
-      'rangeFrom' in query &&
-      'rangeTo' in query &&
-      'comparisonEnabled' in query &&
-      'offset' in query
-    ) ||
+    !('rangeFrom' in query && 'rangeTo' in query) ||
     !query.rangeFrom ||
     !query.rangeTo
   ) {
