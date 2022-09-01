@@ -53,6 +53,7 @@ describe('esaggs expression function - public', () => {
       query: undefined,
       searchSessionId: 'abc123',
       searchSourceService: searchSourceCommonMock,
+      disableShardWarnings: false,
       timeFields: ['@timestamp', 'utc_time'],
       timeRange: undefined,
     };
@@ -138,6 +139,7 @@ describe('esaggs expression function - public', () => {
         description: 'This request queries Elasticsearch to fetch the data for the visualization.',
         adapter: undefined,
       },
+      disableShardFailureWarning: false,
     });
   });
 
