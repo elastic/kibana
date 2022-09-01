@@ -26,6 +26,13 @@ export const queryPointEventAnnotation: ExpressionFunctionDefinition<
   }),
   inputTypes: ['null'],
   args: {
+    id: {
+      required: true,
+      types: ['string'],
+      help: i18n.translate('eventAnnotation.queryAnnotation.args.id', {
+        defaultMessage: `The id of the annotation`,
+      }),
+    },
     filter: {
       types: ['kibana_query'],
       help: i18n.translate('eventAnnotation.queryAnnotation.args.filter', {
@@ -40,13 +47,8 @@ export const queryPointEventAnnotation: ExpressionFunctionDefinition<
         defaultMessage: `The extra fields of the annotation`,
       }),
     },
-    id: {
-      types: ['string'],
-      help: i18n.translate('eventAnnotation.queryAnnotation.args.id', {
-        defaultMessage: `The id of the annotation`,
-      }),
-    },
     timeField: {
+      required: true,
       types: ['string'],
       help: i18n.translate('eventAnnotation.queryAnnotation.args.timeField', {
         defaultMessage: `The time field of the annotation`,

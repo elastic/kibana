@@ -8,6 +8,7 @@ import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
+import { sum } from 'lodash/fp';
 import { useHostRiskScoreKpi, useUserRiskScoreKpi } from '../../../../risk_score/containers';
 import { LinkAnchor, useGetSecuritySolutionLinkProps } from '../../../../common/components/links';
 import { Direction, RiskScoreFields, RiskSeverity } from '../../../../../common/search_strategy';
@@ -20,6 +21,8 @@ import { usersActions } from '../../../../users/store';
 import { getTabsOnUsersUrl } from '../../../../common/components/link_to/redirect_to_users';
 import { UsersTableType } from '../../../../users/store/model';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { useNotableAnomaliesSearch } from '../../../../common/components/ml/anomaly/use_anomalies_search';
+import { useGlobalTime } from '../../../../common/containers/use_global_time';
 
 const StyledEuiTitle = styled(EuiTitle)`
   color: ${({ theme: { eui } }) => eui.euiColorVis9};
@@ -28,6 +31,8 @@ const StyledEuiTitle = styled(EuiTitle)`
 export const EntityAnalyticsHeader = () => {
   const { severityCount: hostsSeverityCount } = useHostRiskScoreKpi({});
   const { severityCount: usersSeverityCount } = useUserRiskScoreKpi({});
+  const { from, to } = useGlobalTime(false);
+  const { data } = useNotableAnomaliesSearch({ skip: false, from, to });
   const dispatch = useDispatch();
   const getSecuritySolutionLinkProps = useGetSecuritySolutionLinkProps();
   const riskyUsersFeatureEnabled = useIsExperimentalFeatureEnabled('riskyUsersEnabled');
@@ -78,11 +83,13 @@ export const EntityAnalyticsHeader = () => {
     return [onClick, href];
   }, [dispatch, getSecuritySolutionLinkProps]);
 
+  const totalAnomalies = useMemo(() => sum(data.map(({ count }) => count)), [data]);
+
   return (
     <EuiPanel hasBorder paddingSize="l">
-      <EuiFlexGroup>
+      <EuiFlexGroup justifyContent="spaceAround">
         {riskyHostsFeatureEnabled && (
-          <EuiFlexItem>
+          <EuiFlexItem grow={false}>
             <EuiFlexGroup direction="column" gutterSize="s">
               <EuiFlexItem>
                 <StyledEuiTitle data-test-subj="critical_hosts_quantity" size="l">
@@ -102,7 +109,7 @@ export const EntityAnalyticsHeader = () => {
           </EuiFlexItem>
         )}
         {riskyUsersFeatureEnabled && (
-          <EuiFlexItem>
+          <EuiFlexItem grow={false}>
             <EuiFlexGroup direction="column" gutterSize="s">
               <EuiFlexItem>
                 <StyledEuiTitle data-test-subj="critical_users_quantity" size="l">
@@ -121,6 +128,17 @@ export const EntityAnalyticsHeader = () => {
             </EuiFlexGroup>
           </EuiFlexItem>
         )}
+
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup direction="column" gutterSize="s">
+            <EuiFlexItem>
+              <EuiTitle data-test-subj="anomalies_quantity" size="l">
+                <span>{totalAnomalies}</span>
+              </EuiTitle>
+            </EuiFlexItem>
+            <EuiFlexItem>{i18n.ANOMALIES}</EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>
   );
