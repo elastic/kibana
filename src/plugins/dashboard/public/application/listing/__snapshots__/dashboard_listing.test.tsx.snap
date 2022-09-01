@@ -24,33 +24,11 @@ exports[`after fetch When given a title that matches multiple dashboards, filter
   <TableListView
     application={
       Object {
-        "applications$": BehaviorSubject {
-          "_value": Map {},
-          "closed": false,
-          "currentObservers": null,
-          "hasError": false,
-          "isStopped": false,
-          "observers": Array [],
-          "thrownError": null,
-        },
         "capabilities": Object {
-          "catalogue": Object {},
-          "management": Object {},
-          "navLinks": Object {},
-        },
-        "currentAppId$": Observable {
-          "source": Subject {
-            "closed": false,
-            "currentObservers": null,
-            "hasError": false,
-            "isStopped": false,
-            "observers": Array [],
-            "thrownError": null,
-          },
+          "advancedSettings": undefined,
         },
         "getUrlForApp": [MockFunction],
         "navigateToApp": [MockFunction],
-        "navigateToUrl": [MockFunction],
       }
     }
     createItem={[Function]}
@@ -173,33 +151,11 @@ exports[`after fetch initialFilter 1`] = `
   <TableListView
     application={
       Object {
-        "applications$": BehaviorSubject {
-          "_value": Map {},
-          "closed": false,
-          "currentObservers": null,
-          "hasError": false,
-          "isStopped": false,
-          "observers": Array [],
-          "thrownError": null,
-        },
         "capabilities": Object {
-          "catalogue": Object {},
-          "management": Object {},
-          "navLinks": Object {},
-        },
-        "currentAppId$": Observable {
-          "source": Subject {
-            "closed": false,
-            "currentObservers": null,
-            "hasError": false,
-            "isStopped": false,
-            "observers": Array [],
-            "thrownError": null,
-          },
+          "advancedSettings": undefined,
         },
         "getUrlForApp": [MockFunction],
         "navigateToApp": [MockFunction],
-        "navigateToUrl": [MockFunction],
       }
     }
     createItem={[Function]}
@@ -321,33 +277,11 @@ exports[`after fetch renders all table rows 1`] = `
   <TableListView
     application={
       Object {
-        "applications$": BehaviorSubject {
-          "_value": Map {},
-          "closed": false,
-          "currentObservers": null,
-          "hasError": false,
-          "isStopped": false,
-          "observers": Array [],
-          "thrownError": null,
-        },
         "capabilities": Object {
-          "catalogue": Object {},
-          "management": Object {},
-          "navLinks": Object {},
-        },
-        "currentAppId$": Observable {
-          "source": Subject {
-            "closed": false,
-            "currentObservers": null,
-            "hasError": false,
-            "isStopped": false,
-            "observers": Array [],
-            "thrownError": null,
-          },
+          "advancedSettings": undefined,
         },
         "getUrlForApp": [MockFunction],
         "navigateToApp": [MockFunction],
-        "navigateToUrl": [MockFunction],
       }
     }
     createItem={[Function]}
@@ -469,33 +403,11 @@ exports[`after fetch renders call to action when no dashboards exist 1`] = `
   <TableListView
     application={
       Object {
-        "applications$": BehaviorSubject {
-          "_value": Map {},
-          "closed": false,
-          "currentObservers": null,
-          "hasError": false,
-          "isStopped": false,
-          "observers": Array [],
-          "thrownError": null,
-        },
         "capabilities": Object {
-          "catalogue": Object {},
-          "management": Object {},
-          "navLinks": Object {},
-        },
-        "currentAppId$": Observable {
-          "source": Subject {
-            "closed": false,
-            "currentObservers": null,
-            "hasError": false,
-            "isStopped": false,
-            "observers": Array [],
-            "thrownError": null,
-          },
+          "advancedSettings": undefined,
         },
         "getUrlForApp": [MockFunction],
         "navigateToApp": [MockFunction],
-        "navigateToUrl": [MockFunction],
       }
     }
     createItem={[Function]}
@@ -617,33 +529,11 @@ exports[`after fetch renders call to action with continue when no dashboards exi
   <TableListView
     application={
       Object {
-        "applications$": BehaviorSubject {
-          "_value": Map {},
-          "closed": false,
-          "currentObservers": null,
-          "hasError": false,
-          "isStopped": false,
-          "observers": Array [],
-          "thrownError": null,
-        },
         "capabilities": Object {
-          "catalogue": Object {},
-          "management": Object {},
-          "navLinks": Object {},
-        },
-        "currentAppId$": Observable {
-          "source": Subject {
-            "closed": false,
-            "currentObservers": null,
-            "hasError": false,
-            "isStopped": false,
-            "observers": Array [],
-            "thrownError": null,
-          },
+          "advancedSettings": undefined,
         },
         "getUrlForApp": [MockFunction],
         "navigateToApp": [MockFunction],
-        "navigateToUrl": [MockFunction],
       }
     }
     createItem={[Function]}
@@ -776,33 +666,11 @@ exports[`after fetch renders warning when listingLimit is exceeded 1`] = `
   <TableListView
     application={
       Object {
-        "applications$": BehaviorSubject {
-          "_value": Map {},
-          "closed": false,
-          "currentObservers": null,
-          "hasError": false,
-          "isStopped": false,
-          "observers": Array [],
-          "thrownError": null,
-        },
         "capabilities": Object {
-          "catalogue": Object {},
-          "management": Object {},
-          "navLinks": Object {},
-        },
-        "currentAppId$": Observable {
-          "source": Subject {
-            "closed": false,
-            "currentObservers": null,
-            "hasError": false,
-            "isStopped": false,
-            "observers": Array [],
-            "thrownError": null,
-          },
+          "advancedSettings": undefined,
         },
         "getUrlForApp": [MockFunction],
         "navigateToApp": [MockFunction],
-        "navigateToUrl": [MockFunction],
       }
     }
     createItem={[Function]}
@@ -924,33 +792,11 @@ exports[`after fetch showWriteControls 1`] = `
   <TableListView
     application={
       Object {
-        "applications$": BehaviorSubject {
-          "_value": Map {},
-          "closed": false,
-          "currentObservers": null,
-          "hasError": false,
-          "isStopped": false,
-          "observers": Array [],
-          "thrownError": null,
-        },
         "capabilities": Object {
-          "catalogue": Object {},
-          "management": Object {},
-          "navLinks": Object {},
-        },
-        "currentAppId$": Observable {
-          "source": Subject {
-            "closed": false,
-            "currentObservers": null,
-            "hasError": false,
-            "isStopped": false,
-            "observers": Array [],
-            "thrownError": null,
-          },
+          "advancedSettings": undefined,
         },
         "getUrlForApp": [MockFunction],
         "navigateToApp": [MockFunction],
-        "navigateToUrl": [MockFunction],
       }
     }
     emptyPrompt={

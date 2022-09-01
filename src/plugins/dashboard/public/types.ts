@@ -164,13 +164,13 @@ export interface DashboardSaveOptions {
 
 export interface DashboardAppServices {
   core: CoreStart;
-  restorePreviousUrl: () => void;
-  savedObjects: SavedObjectsStart;
+  restorePreviousUrl: () => void; // app mount context
+  savedObjects: SavedObjectsStart; // make a service
   savedDashboards: SavedObjectLoader;
-  scopedHistory: () => ScopedHistory;
-  onAppLeave: AppMountParameters['onAppLeave'];
-  savedObjectsTagging?: SavedObjectsTaggingApi;
-  savedObjectsClient: SavedObjectsClientContract;
-  dashboardSessionStorage: DashboardSessionStorage;
-  setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
+  scopedHistory: () => ScopedHistory; // app mount context
+  onAppLeave: AppMountParameters['onAppLeave']; // app mount  context
+  savedObjectsTagging?: SavedObjectsTaggingApi; // build a service foor this one
+  savedObjectsClient: SavedObjectsClientContract; // remove this
+  dashboardSessionStorage: DashboardSessionStorage; // make a service
+  setHeaderActionMenu: AppMountParameters['setHeaderActionMenu']; // app mount context
 }

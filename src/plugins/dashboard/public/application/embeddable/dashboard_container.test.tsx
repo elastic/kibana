@@ -34,8 +34,10 @@ import { createEditModeAction } from '@kbn/embeddable-plugin/public/lib/test_sam
 import { DashboardContainer, DashboardContainerServices } from './dashboard_container';
 import { getSampleDashboardInput, getSampleDashboardPanel } from '../test_helpers';
 import { pluginServices } from '../../services/plugin_services';
+import { ApplicationStart } from '@kbn/core-application-browser';
 
 const theme = coreMock.createStart().theme;
+let application: ApplicationStart | undefined;
 
 const embeddableFactory = new ContactCardEmbeddableFactory((() => null) as any, {} as any);
 pluginServices.getServices().embeddable.getEmbeddableFactory = jest
@@ -44,14 +46,13 @@ pluginServices.getServices().embeddable.getEmbeddableFactory = jest
 
 const options: DashboardContainerServices = {
   // TODO: clean up use of any
-  application: {} as any,
   inspector: {} as any,
   SavedObjectFinder: () => null,
   ExitFullScreenButton: () => null,
 };
 
 beforeEach(() => {
-  options.application = applicationServiceMock.createStartContract();
+  application = applicationServiceMock.createStartContract();
 });
 
 test('DashboardContainer initializes embeddables', async (done) => {
@@ -235,7 +236,7 @@ test('DashboardContainer in edit mode shows edit mode actions', async () => {
             getAllEmbeddableFactories={(() => []) as any}
             getEmbeddableFactory={(() => null) as any}
             notifications={{} as any}
-            application={options.application}
+            application={application}
             inspector={inspector}
             SavedObjectFinder={() => null}
             theme={theme}

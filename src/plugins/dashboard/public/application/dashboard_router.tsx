@@ -183,6 +183,7 @@ export async function mountApp({
   });
 
   const app = (
+    // wrap new context provider
     <I18nProvider>
       <Provider store={dashboardStateStore}>
         <KibanaContextProvider services={dashboardServices}>

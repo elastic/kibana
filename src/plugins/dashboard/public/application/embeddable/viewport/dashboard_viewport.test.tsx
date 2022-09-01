@@ -14,7 +14,6 @@ import { mount } from 'enzyme';
 import { I18nProvider } from '@kbn/i18n-react';
 import { nextTick } from '@kbn/test-jest-helpers';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { applicationServiceMock } from '@kbn/core/public/mocks';
 import {
   ContactCardEmbeddableFactory,
   CONTACT_CARD_EMBEDDABLE,
@@ -40,7 +39,6 @@ function getProps(props?: Partial<DashboardViewportProps>): {
     .mockReturnValue(embeddableFactory);
 
   const options: DashboardContainerServices = {
-    application: applicationServiceMock.createStartContract(),
     inspector: {
       isAvailable: jest.fn(),
     } as any,

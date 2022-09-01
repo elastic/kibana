@@ -14,6 +14,7 @@ import {
 
 import { DashboardServices } from './types';
 
+import { applicationServiceFactory } from './application/application.stub';
 import { chromeServiceFactory } from './chrome/chrome.stub';
 import { dashboardCapabilitiesServiceFactory } from './dashboard_capabilities/dashboard_capabilities.stub';
 import { dataServiceFactory } from './data/data.stub';
@@ -33,6 +34,7 @@ import { urlForwardingServiceFactory } from './url_forwarding/url_fowarding.stub
 import { visualizationsServiceFactory } from './visualizations/visualizations.stub';
 
 export const providers: PluginServiceProviders<DashboardServices> = {
+  application: new PluginServiceProvider(applicationServiceFactory),
   chrome: new PluginServiceProvider(chromeServiceFactory),
   data: new PluginServiceProvider(dataServiceFactory),
   dashboardCapabilities: new PluginServiceProvider(dashboardCapabilitiesServiceFactory),

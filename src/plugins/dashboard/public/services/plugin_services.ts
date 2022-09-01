@@ -15,6 +15,7 @@ import {
 
 import { DashboardPluginServiceParams, DashboardServices } from './types';
 
+import { applicationServiceFactory } from './application/application_service';
 import { chromeServiceFactory } from './chrome/chrome_service';
 import { dashboardCapabilitiesServiceFactory } from './dashboard_capabilities/dashboard_capabilities_service';
 import { dataServiceFactory } from './data/data_service';
@@ -34,6 +35,7 @@ import { visualizationsServiceFactory } from './visualizations/visualizations_se
 import { usageCollectionServiceFactory } from './usage_collection/usage_collection_service';
 
 const providers: PluginServiceProviders<DashboardServices, DashboardPluginServiceParams> = {
+  application: new PluginServiceProvider(applicationServiceFactory),
   chrome: new PluginServiceProvider(chromeServiceFactory),
   data: new PluginServiceProvider(dataServiceFactory),
   dashboardCapabilities: new PluginServiceProvider(dashboardCapabilitiesServiceFactory),

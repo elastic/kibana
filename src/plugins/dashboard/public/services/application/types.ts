@@ -6,21 +6,12 @@
  * Side Public License, v 1.
  */
 
-interface DashboardCapabilities {
-  showWriteControls: boolean;
-  saveQuery: boolean;
-  createNew: boolean;
-  show: boolean;
-  [key: string]: boolean;
-}
+import type { CoreStart } from '@kbn/core/public';
 
-export const capabilitiesProvider = (): {
-  dashboard: DashboardCapabilities;
-} => ({
-  dashboard: {
-    createNew: true,
-    show: true,
-    showWriteControls: true,
-    saveQuery: true,
-  },
-});
+export interface DashboardApplicationService {
+  navigateToApp: CoreStart['application']['navigateToApp'];
+  getUrlForApp: CoreStart['application']['getUrlForApp'];
+  capabilities: {
+    advancedSettings: CoreStart['application']['capabilities']['advancedSettings'];
+  };
+}

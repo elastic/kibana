@@ -71,7 +71,6 @@ import {
   AddToLibraryAction,
   LibraryNotificationAction,
   CopyToDashboardAction,
-  DashboardCapabilities,
 } from './application';
 import { SavedObjectLoader } from './services/saved_object_loader';
 import { DashboardAppLocatorDefinition, DashboardAppLocator } from './locator';
@@ -270,6 +269,7 @@ export class DashboardPlugin
         const { mountApp } = await import('./application/dashboard_router');
         appMounted();
         return mountApp({
+          // pass in context object
           core,
           appUnMounted,
           restorePreviousUrl,
@@ -334,8 +334,7 @@ export class DashboardPlugin
     const { uiActions, data, share, presentationUtil, embeddable } = plugins;
     this.startDashboardKibanaServices(core, plugins, this.initializerContext);
 
-    const dashboardCapabilities: Readonly<DashboardCapabilities> = application.capabilities
-      .dashboard as DashboardCapabilities;
+    const dashboardCapabilities = application.capabilities.dashboard;
 
     const SavedObjectFinder = getSavedObjectFinder(core.savedObjects, uiSettings);
 

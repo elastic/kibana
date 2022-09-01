@@ -17,7 +17,7 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import type { ApplicationStart, SavedObjectsFindOptionsReference } from '@kbn/core/public';
+import type { SavedObjectsFindOptionsReference } from '@kbn/core/public';
 import useMount from 'react-use/lib/useMount';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
@@ -68,6 +68,7 @@ export const DashboardListing = ({
   } = useKibana<DashboardAppServices>();
 
   const {
+    application,
     dashboardCapabilities: { showWriteControls },
     data: { query },
     notifications: { toasts },
@@ -127,12 +128,11 @@ export const DashboardListing = ({
   const tableColumns = useMemo(
     () =>
       getTableColumns(
-        core.application,
         kbnUrlStateStorage,
         uiSettings.get('state:storeInSessionStorage'),
         savedObjectsTagging
       ),
-    [core.application, uiSettings, kbnUrlStateStorage, savedObjectsTagging]
+    [uiSettings, kbnUrlStateStorage, savedObjectsTagging]
   );
 
   const createItem = useCallback(() => {
@@ -225,7 +225,7 @@ export const DashboardListing = ({
                     sampleDataInstallLink: (
                       <EuiLink
                         onClick={() =>
-                          core.application.navigateToApp('home', {
+                          application.navigateToApp('home', {
                             path: '#/tutorial_directory/sampleData',
                           })
                         }
@@ -245,7 +245,7 @@ export const DashboardListing = ({
   }, [
     redirectTo,
     createItem,
-    core.application,
+    application,
     showWriteControls,
     unsavedDashboardIds,
     dashboardSessionStorage,
@@ -321,7 +321,7 @@ export const DashboardListing = ({
             tableColumns,
           }}
           theme={theme}
-          application={core.application}
+          application={application}
         >
           <DashboardUnsavedListing
             redirectTo={redirectTo}
@@ -337,7 +337,6 @@ export const DashboardListing = ({
 };
 
 const getTableColumns = (
-  application: ApplicationStart,
   kbnUrlStateStorage: IKbnUrlStateStorage,
   useHash: boolean,
   savedObjectsTagging?: SavedObjectsTaggingApi
@@ -350,7 +349,6 @@ const getTableColumns = (
       render: (field: string, record: { id: string; title: string; timeRestore: boolean }) => (
         <EuiLink
           href={getDashboardListItemLink(
-            application,
             kbnUrlStateStorage,
             useHash,
             record.id,

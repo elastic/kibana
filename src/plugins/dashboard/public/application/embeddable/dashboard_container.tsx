@@ -55,7 +55,6 @@ import { pluginServices } from '../../services/plugin_services';
 export interface DashboardContainerServices {
   ExitFullScreenButton: React.ComponentType<any>;
   SavedObjectFinder: React.ComponentType<any>;
-  application: CoreStart['application'];
   inspector: InspectorStartContract;
   analytics?: CoreStart['analytics'];
 }

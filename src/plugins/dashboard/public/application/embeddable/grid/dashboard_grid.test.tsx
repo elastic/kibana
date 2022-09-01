@@ -47,7 +47,6 @@ function prepare(props?: Partial<DashboardGridProps>) {
     },
   });
   const options: DashboardContainerServices = {
-    application: {} as any,
     inspector: {
       isAvailable: jest.fn(),
     } as any,
