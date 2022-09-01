@@ -1,12 +1,24 @@
 #!/bin/bash
 
+# ??? Should we migrate
+#     x-pack/test/functional/es_archives/dashboard/feature_controls/spaces
+# ### Yes, it needs migration
+#   ### Saved Object type(s) that we care about:
+#     dashboard
+#     index-pattern
+#     visualization
+#   ### Test file(s) that use it:
+#     x-pack/test/functional/apps/dashboard/group1/feature_controls/dashboard_spaces.ts
+#   ### Config(s) that govern the test file(s):
+#     x-pack/test/functional/apps/dashboard/group1/config.ts
+
 standard_list="url,index-pattern,query,graph-workspace,tag,visualization,canvas-element,canvas-workpad,dashboard,search,lens,map,cases,uptime-dynamic-settings,osquery-saved-query,osquery-pack,infrastructure-ui-source,metrics-explorer-view,inventory-view,infrastructure-monitoring-log-view,apm-indices"
 
-orig_archive="x-pack/test/functional/es_archives/dashboard/session_in_space"
-new_archive="x-pack/test/functional/fixtures/kbn_archiver/dashboard/session_in_space"
-newArchives=("x-pack/test/functional/fixtures/kbn_archiver/dashboard/session_in_space")
-newArchives+=("x-pack/test/functional/fixtures/kbn_archiver/dashboard/session_in_another_space")
-test_config="x-pack/test/search_sessions_integration/config.ts"
+orig_archive="x-pack/test/functional/es_archives/dashboard/feature_controls/spaces"
+new_archive="x-pack/test/functional/fixtures/kbn_archiver/dashboard/feature_controls/custom_space"
+newArchives=("x-pack/test/functional/fixtures/kbn_archiver/dashboard/feature_controls/custom_space")
+newArchives+=("x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce_kibana_non_timezone_space")
+test_config="x-pack/test/functional/apps/dashboard/group1/config.ts"
 
 curl_so_count() {
   local so=${1:-search-session}
@@ -72,6 +84,11 @@ delete_space() {
     -X DELETE \
     --user elastic:changeme http://localhost:5620/api/spaces/space/"$id"
 }
+
+# Just a note that this is using Gnu date.
+# On OSX if you don't install this, and instead use the native date you only get seconds.
+# With gdate you can something like nanoseconds.
+alias timestamp='while read line; do echo "[`gdate +%H:%M:%S.%N`] $line"; done'
 
 arrayify_csv() {
   local xs=${1}
@@ -339,29 +356,42 @@ save_kbn() {
 
 load_kbn() {
   local space=${1:-default}
-  local archive=${2:-${new_archive}}
 
   set -x
-  node scripts/kbn_archiver.js --config "$test_config" load "$archive" --space "$space"
+  node scripts/kbn_archiver.js --config "$test_config" load "$new_archive" --space "$space"
+  set +x
+}
+
+load_kbns() {
+  local space=${1:-default}
+
+  for x in "${newArchives[@]}"; do
+    set -x
+    node scripts/kbn_archiver.js --config "$test_config" load "$x" --space "$space"
+    set +x
+  done
+}
+
+load_created_kbn_archive() {
+  set -x
+  node scripts/kbn_archiver.js --config "$test_config" load "$new_archive"
   set +x
 }
 
 unload_kbn() {
-  local archive=${1:-${new_archive}}
   set -x
-  node scripts/kbn_archiver.js --config "$test_config" unload "$archive"
+  node scripts/kbn_archiver.js --config "$test_config" unload "$new_archive"
   set +x
 }
 
-load_kbn_custom() {
-  load_kbn default "${newArchives[1]}"
-  create_space another-space "Another Space"
-  load_kbn another-space "${newArchives[2]}"
-}
+unload_kbns() {
+  local space=${1:-default}
 
-unload_kbn_custom() {
-  unload_kbn "${newArchives[1]}"
-  delete_space another-space
+  for x in "${newArchives[@]}"; do
+    set -x
+    node scripts/kbn_archiver.js --config "$test_config" unload "$x"
+    set +x
+  done
 }
 
 ping_server() {
