@@ -18,7 +18,6 @@ import {
 import { useKibana } from '../../../../common/lib/kibana';
 import { LinkAnchor, SecuritySolutionLinkAnchor } from '../../../../common/components/links';
 import { SecurityPageName } from '../../../../app/types';
-import type { NotableAnomaliesJobId } from './config';
 import { usersActions } from '../../../../users/store';
 import { hostsActions } from '../../../../hosts/store';
 import { HostsType } from '../../../../hosts/store/model';
@@ -68,7 +67,7 @@ export const useAnomaliesColumns = (loading: boolean): AnomaliesColumns => {
           if (loading) return '';
 
           if (count > 0 || status === AnomalyJobStatus.enabled) {
-            return <AnomaliesTabLink count={count} jobId={jobId} jobName={name} entity={entity} />;
+            return <AnomaliesTabLink count={count} jobId={jobId} entity={entity} />;
           } else {
             if (status === AnomalyJobStatus.disabled && jobId) {
               return <EnableJobLink jobId={jobId} />;
@@ -124,12 +123,10 @@ const EnableJobLink = ({ jobId }: { jobId: string }) => {
 const AnomaliesTabLink = ({
   count,
   jobId,
-  jobName,
   entity,
 }: {
   count: number;
   jobId?: string;
-  jobName: NotableAnomaliesJobId;
   entity: AnomalyEntity;
 }) => {
   const dispatch = useDispatch();
