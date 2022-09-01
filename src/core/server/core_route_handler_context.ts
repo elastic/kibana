@@ -11,11 +11,9 @@ import type { ElasticsearchRequestHandlerContext } from '@kbn/core-elasticsearch
 import { CoreElasticsearchRouteHandlerContext } from '@kbn/core-elasticsearch-server-internal';
 import type { SavedObjectsRequestHandlerContext } from '@kbn/core-saved-objects-server';
 import { CoreSavedObjectsRouteHandlerContext } from '@kbn/core-saved-objects-server-internal';
+import type { DeprecationsRequestHandlerContext } from '@kbn/core-deprecations-server';
+import { CoreDeprecationsRouteHandlerContext } from '@kbn/core-deprecations-server-internal';
 import { CoreUiSettingsRouteHandlerContext, UiSettingsRequestHandlerContext } from './ui_settings';
-import {
-  CoreDeprecationsRouteHandlerContext,
-  DeprecationsRequestHandlerContext,
-} from './deprecations';
 import type { InternalCoreStart } from './internal_types';
 
 /**
