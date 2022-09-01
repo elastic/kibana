@@ -16,7 +16,7 @@ const percentToPixels = (containerHeight: number, percentage: number) =>
 const pixelsToPercent = (containerHeight: number, pixels: number) =>
   +((pixels / containerHeight) * 100).toFixed(4);
 
-export const DiscoverResizablePanels = ({
+export const DiscoverPanelsResizable = ({
   className,
   histogramHeight: preferredHistogramHeight,
   resizeRef,

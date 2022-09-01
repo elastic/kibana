@@ -10,7 +10,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { ReactElement } from 'react';
 
-export const DiscoverFixedPanels = ({
+export const DiscoverPanelsFixed = ({
   className,
   histogramHeight,
   isPlainRecord,
