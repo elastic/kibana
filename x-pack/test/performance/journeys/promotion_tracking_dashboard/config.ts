@@ -15,8 +15,12 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const testFiles = [require.resolve(`./${JOURNEY_PROMOTION_TRACKING_DASHBOARD}`)];
 
   const config = {
-    testFiles,
     ...performanceConfig.getAll(),
+    testFiles,
+    testData: {
+      kbnArchives: ['x-pack/test/performance/kbn_archives/promotion_tracking_dashboard'],
+      esArchives: ['x-pack/test/performance/es_archives/ecommerce_sample_data'],
+    },
     scalabilitySetup: {
       warmup: [
         {
