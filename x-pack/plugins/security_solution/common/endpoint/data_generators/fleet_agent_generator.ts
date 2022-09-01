@@ -8,8 +8,13 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { DeepPartial } from 'utility-types';
 import { merge } from 'lodash';
-import type { Agent, AgentStatus, FleetServerAgent } from '@kbn/fleet-plugin/common';
-import { AGENTS_INDEX } from '@kbn/fleet-plugin/common';
+import type {
+  Agent,
+  AgentStatus,
+  FleetServerAgent,
+  FleetServerAgentComponentStatus,
+} from '@kbn/fleet-plugin/common';
+import { AGENTS_INDEX, FleetServerAgentComponentStatuses } from '@kbn/fleet-plugin/common';
 import { BaseDataGenerator } from './base_data_generator';
 
 const agentStatusList: readonly AgentStatus[] = [
@@ -69,6 +74,18 @@ export class FleetAgentGenerator extends BaseDataGenerator<Agent> {
     const hostname = this.randomHostname();
     const now = new Date().toISOString();
     const osFamily = this.randomOSFamily();
+    const componentStatus = this.randomChoice<FleetServerAgentComponentStatus>(
+      FleetServerAgentComponentStatuses
+    );
+    const componentInputPayload =
+      componentStatus === 'failed'
+        ? {
+            error: {
+              code: 123,
+              message: 'Unable to connect to Elasticsearch',
+            },
+          }
+        : { extra: 'payload' };
 
     return merge<
       estypes.SearchHit<FleetServerAgent>,
@@ -128,6 +145,32 @@ export class FleetAgentGenerator extends BaseDataGenerator<Agent> {
           last_checkin: now,
           policy_revision_idx: 2,
           policy_coordinator_idx: 1,
+          components: [
+            {
+              id: 'endpoint-0',
+              type: 'endpoint',
+              status: componentStatus,
+              message: 'Running as external service',
+              units: [
+                {
+                  id: 'endpoint-1',
+                  type: 'input',
+                  status: componentStatus,
+                  message: 'Protecting machine',
+                  payload: componentInputPayload,
+                },
+                {
+                  id: 'shipper',
+                  type: 'output',
+                  status: componentStatus,
+                  message: 'Connected over GRPC',
+                  payload: {
+                    extra: 'payload',
+                  },
+                },
+              ],
+            },
+          ],
         },
       },
       overrides
