@@ -48,6 +48,7 @@ import { UserToolTip } from '../user_profiles/user_tooltip';
 import { CaseUserAvatar } from '../user_profiles/user_avatar';
 import { useAssignees } from '../../containers/user_profiles/use_assignees';
 import { getUsernameDataTestSubj } from '../user_profiles/data_test_subject';
+import { CurrentUserProfile } from '../types';
 
 export type CasesColumns =
   | EuiTableActionsColumnType<Case>
@@ -64,7 +65,7 @@ const renderStringField = (field: string, dataTestSubj: string) =>
 const AssigneesColumn: React.FC<{
   assignees: Case['assignees'];
   userProfiles: Map<string, UserProfileWithAvatar>;
-  currentUserProfile?: UserProfileWithAvatar;
+  currentUserProfile: CurrentUserProfile;
 }> = ({ assignees, userProfiles, currentUserProfile }) => {
   const { allAssignees } = useAssignees({
     caseAssignees: assignees,
@@ -99,7 +100,7 @@ AssigneesColumn.displayName = 'AssigneesColumn';
 export interface GetCasesColumn {
   filterStatus: string;
   userProfiles: Map<string, UserProfileWithAvatar>;
-  currentUserProfile?: UserProfileWithAvatar;
+  currentUserProfile: CurrentUserProfile;
   handleIsLoading: (a: boolean) => void;
   refreshCases?: (a?: boolean) => void;
   isSelectorView: boolean;

@@ -13,6 +13,7 @@ import { getPostCaseRequest } from '../../../../common/lib/mock';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   globalRead,
+  noKibanaPrivileges,
   obsOnly,
   obsOnlyRead,
   obsSec,
@@ -55,6 +56,38 @@ export default function ({ getService }: FtrProviderContext) {
         auth: { user: superUser, space: 'space1' },
         expectedHttpCode: 400,
       });
+    });
+
+    it('returns an empty array when no owners are supplied', async () => {
+      const suggestions = await suggestUserProfiles({
+        supertest: supertestWithoutAuth,
+        req: {
+          name: 'only',
+          owners: ['securitySolutionFixture'],
+          size: 2,
+        },
+        auth: { user: superUser, space: 'space1' },
+      });
+
+      await createCase(
+        supertestWithoutAuth,
+        getPostCaseRequest({
+          assignees: [{ uid: suggestions[0].uid }, { uid: suggestions[1].uid }],
+        }),
+        200,
+        { user: superUser, space: 'space1' }
+      );
+
+      const assignees = await findAssignees({
+        supertest: supertestWithoutAuth,
+        req: {
+          searchTerm: 'only',
+          owners: [],
+        },
+        auth: { user: superUser, space: 'space1' },
+      });
+
+      expect(assignees.length).to.be(0);
     });
 
     it('limits the results to one, when the size is specified as one', async () => {
@@ -232,6 +265,63 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('rbac', () => {
+      it('only retrieves the assignees for the owners the user is granted to', async () => {
+        const [secProf, obsProf] = await Promise.all([
+          suggestUserProfiles({
+            supertest: supertestWithoutAuth,
+            req: {
+              name: 'sec_only@elastic.co',
+              owners: ['securitySolutionFixture'],
+            },
+            auth: { user: superUser, space: 'space1' },
+          }),
+          suggestUserProfiles({
+            supertest: supertestWithoutAuth,
+            req: {
+              name: 'obs_only@elastic.co',
+              owners: ['observabilityFixture'],
+              size: 1,
+            },
+            auth: { user: superUser, space: 'space1' },
+          }),
+        ]);
+
+        const secOnlyProfile = secProf.find((prof) => prof.user.username === secOnly.username)!;
+        const obsOnlyProfile = obsProf.find((prof) => prof.user.username === obsOnly.username)!;
+
+        await Promise.all([
+          createCase(
+            supertestWithoutAuth,
+            getPostCaseRequest({
+              assignees: [{ uid: secOnlyProfile.uid }],
+              owner: 'securitySolutionFixture',
+            }),
+            200,
+            { user: superUser, space: 'space1' }
+          ),
+          createCase(
+            supertestWithoutAuth,
+            getPostCaseRequest({
+              assignees: [{ uid: obsOnlyProfile.uid }],
+              owner: 'observabilityFixture',
+            }),
+            200,
+            { user: superUser, space: 'space1' }
+          ),
+        ]);
+
+        const assignees = await findAssignees({
+          supertest: supertestWithoutAuth,
+          req: {
+            searchTerm: '',
+            owners: ['securitySolutionFixture', 'observabilityFixture'],
+          },
+          auth: { user: secOnly, space: 'space1' },
+        });
+
+        expect(assignees.map((assignee) => assignee.user.username)).to.eql(['sec_only']);
+      });
+
       it('should retrieve the correct assignees', async () => {
         const [secProf, obsProf] = await Promise.all([
           suggestUserProfiles({
@@ -279,8 +369,11 @@ export default function ({ getService }: FtrProviderContext) {
 
         for (const scenario of [
           { user: secOnly, expectedUsernames: ['sec_only'] },
+          { user: secOnlyRead, expectedUsernames: ['sec_only'] },
           { user: obsOnly, expectedUsernames: ['obs_only'] },
+          { user: obsOnlyRead, expectedUsernames: ['obs_only'] },
           { user: obsSec, expectedUsernames: ['sec_only', 'obs_only'] },
+          { user: globalRead, expectedUsernames: ['sec_only', 'obs_only'] },
         ]) {
           const assignees = await findAssignees({
             supertest: supertestWithoutAuth,
@@ -303,10 +396,7 @@ export default function ({ getService }: FtrProviderContext) {
       for (const scenario of [
         // this user does not have access in space2
         { user: secOnly, space: 'space2' },
-        // these users don't have the casesFindAssignedUsers permission for the _find_assignees route
-        { user: globalRead, space: 'space1' },
-        { user: secOnlyRead, space: 'space1' },
-        { user: obsOnlyRead, space: 'space1' },
+        { user: noKibanaPrivileges, space: 'space1' },
       ]) {
         it(`User ${scenario.user.username} with role(s) ${scenario.user.roles} and space ${scenario.space} - should NOT find assignees`, async () => {
           await findAssignees({

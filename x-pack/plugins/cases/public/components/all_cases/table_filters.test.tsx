@@ -36,6 +36,7 @@ const props = {
   setFilterRefetch,
   availableSolutions: [],
   isLoading: false,
+  currentUserProfile: undefined,
 };
 
 describe('CasesTableFilters ', () => {

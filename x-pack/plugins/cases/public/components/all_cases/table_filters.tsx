@@ -22,6 +22,7 @@ import { useGetTags } from '../../containers/use_get_tags';
 import { CASE_LIST_CACHE_KEY } from '../../containers/constants';
 import { DEFAULT_FILTER_OPTIONS } from '../../containers/use_get_cases';
 import { AssigneesFilterPopover } from './assignees_filter';
+import { CurrentUserProfile } from '../types';
 
 interface CasesTableFiltersProps {
   countClosedCases: number | null;
@@ -35,7 +36,7 @@ interface CasesTableFiltersProps {
   displayCreateCaseButton?: boolean;
   onCreateCasePressed?: () => void;
   isLoading: boolean;
-  currentUserProfile?: UserProfileWithAvatar;
+  currentUserProfile: CurrentUserProfile;
 }
 
 // Fix the width of the status dropdown to prevent hiding long text items

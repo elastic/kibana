@@ -35,6 +35,7 @@ describe('AssigneesFilterPopover', () => {
     appMockRender = createAppMockRenderer();
 
     defaultProps = {
+      currentUserProfile: undefined,
       selectedAssignees: [],
       isLoading: false,
       onSelectionChange: jest.fn(),

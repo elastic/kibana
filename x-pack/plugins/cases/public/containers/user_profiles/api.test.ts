@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { securityMock } from '@kbn/security-plugin/public/mocks';
+import { SecurityPluginStart } from '@kbn/security-plugin/public';
 import { GENERAL_CASES_OWNER } from '../../../common/constants';
 import { createStartServicesMock } from '../../common/lib/kibana/kibana_react.mock';
 import { bulkGetUserProfiles, getCurrentUserProfile, suggestUserProfiles } from './api';
@@ -47,11 +49,22 @@ describe('User profiles API', () => {
   });
 
   describe('bulkGetUserProfiles', () => {
-    const { security } = createStartServicesMock();
+    let security: SecurityPluginStart;
 
     beforeEach(() => {
       jest.clearAllMocks();
+      security = securityMock.createStart();
       security.userProfiles.bulkGet = jest.fn().mockResolvedValue(userProfiles);
+    });
+
+    it('returns an empty array when userProfiles is undefined', async () => {
+      security.userProfiles = undefined as unknown as SecurityPluginStart['userProfiles'];
+      const res = await bulkGetUserProfiles({
+        security,
+        uids: userProfilesIds,
+      });
+
+      expect(res).toEqual([]);
     });
 
     it('returns the user profiles correctly', async () => {
@@ -81,12 +94,24 @@ describe('User profiles API', () => {
   });
 
   describe('getCurrentUserProfile', () => {
-    const { security } = createStartServicesMock();
+    let security: SecurityPluginStart;
+
     const currentProfile = userProfiles[0];
 
     beforeEach(() => {
       jest.clearAllMocks();
+      security = securityMock.createStart();
       security.userProfiles.getCurrent = jest.fn().mockResolvedValue(currentProfile);
+    });
+
+    it('returns null when userProfiles is undefined', async () => {
+      security.userProfiles = undefined as unknown as SecurityPluginStart['userProfiles'];
+
+      const res = await getCurrentUserProfile({
+        security,
+      });
+
+      expect(res).toBeNull();
     });
 
     it('returns the current user profile correctly', async () => {

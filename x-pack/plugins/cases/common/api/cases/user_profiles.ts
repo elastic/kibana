@@ -10,7 +10,7 @@ import * as rt from 'io-ts';
 export const FindAssigneesRequestRt = rt.intersection([
   rt.type({
     searchTerm: rt.string,
-    owners: rt.union([rt.array(rt.string), rt.string]),
+    owners: rt.array(rt.string),
   }),
   rt.partial({
     size: rt.number,

@@ -135,7 +135,7 @@ export const findAssignees = async ({
     {
       method: 'GET',
       signal,
-      query: { ...(owners.length > 0 ? { owners } : {}), searchTerm, size },
+      query: { owners: JSON.stringify(owners), searchTerm, size },
     }
   );
   return response ?? [];

@@ -7,6 +7,7 @@
 
 import { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { sortBy } from 'lodash';
+import { CurrentUserProfile } from '../types';
 
 export const getSortField = (profile: UserProfileWithAvatar) =>
   profile.user.full_name?.toLowerCase() ??
@@ -14,7 +15,7 @@ export const getSortField = (profile: UserProfileWithAvatar) =>
   profile.user.username.toLowerCase();
 
 export const moveCurrentUserToBeginning = <T extends { uid: string }>(
-  currentUserProfile?: T,
+  currentUserProfile?: T | null,
   profiles?: T[]
 ) => {
   if (!profiles) {
@@ -39,7 +40,7 @@ export const moveCurrentUserToBeginning = <T extends { uid: string }>(
 };
 
 export const bringCurrentUserToFrontAndSort = (
-  currentUserProfile?: UserProfileWithAvatar,
+  currentUserProfile: CurrentUserProfile,
   profiles?: UserProfileWithAvatar[] | null
 ) => moveCurrentUserToBeginning(currentUserProfile, sortProfiles(profiles));
 

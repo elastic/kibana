@@ -18,6 +18,7 @@ import { bringCurrentUserToFrontAndSort } from '../../user_profiles/sort';
 import { SelectedStatusMessage } from '../../user_profiles/selected_status_message';
 import { EmptyMessage } from '../../user_profiles/empty_message';
 import { NoMatches } from '../../user_profiles/no_matches';
+import { CurrentUserProfile } from '../../types';
 
 const PopoverButton: React.FC<{ togglePopover: () => void; isLoading: boolean }> = ({
   togglePopover,
@@ -37,7 +38,7 @@ PopoverButton.displayName = 'PopoverButton';
 
 export interface SuggestUsersPopoverProps {
   assignedUsersWithProfiles: AssigneeWithProfile[];
-  currentUserProfile?: UserProfileWithAvatar;
+  currentUserProfile: CurrentUserProfile;
   isLoading: boolean;
   isPopoverOpen: boolean;
   onUsersChange: (users: UserProfileWithAvatar[]) => void;

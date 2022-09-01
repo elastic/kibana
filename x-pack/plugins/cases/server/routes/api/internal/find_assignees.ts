@@ -20,7 +20,7 @@ export const findAssigneesRoute = (userProfileService: UserProfileService) =>
     },
     params: {
       query: schema.object({
-        owners: schema.oneOf([schema.string(), schema.arrayOf(schema.string())]),
+        owners: schema.arrayOf(schema.string()),
         searchTerm: schema.string(),
         size: schema.maybe(schema.number()),
       }),

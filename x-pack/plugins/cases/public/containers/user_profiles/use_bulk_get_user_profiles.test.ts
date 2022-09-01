@@ -6,14 +6,17 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
-import { useToasts } from '../../common/lib/kibana';
+import { useToasts, useKibana } from '../../common/lib/kibana';
 import { AppMockRenderer, createAppMockRenderer } from '../../common/mock';
 import * as api from './api';
 import { useBulkGetUserProfiles } from './use_bulk_get_user_profiles';
 import { userProfilesIds } from './api.mock';
+import { createStartServicesMock } from '../../common/lib/kibana/kibana_react.mock';
 
 jest.mock('../../common/lib/kibana');
 jest.mock('./api');
+
+const useKibanaMock = useKibana as jest.Mock;
 
 describe('useBulkGetUserProfiles', () => {
   const props = {
@@ -28,6 +31,26 @@ describe('useBulkGetUserProfiles', () => {
   beforeEach(() => {
     appMockRender = createAppMockRenderer();
     jest.clearAllMocks();
+    useKibanaMock.mockReturnValue({
+      services: { ...createStartServicesMock() },
+    });
+  });
+
+  it('does not call bulkGetUserProfiles when security is undefined', async () => {
+    useKibanaMock.mockReturnValue({
+      services: { ...createStartServicesMock(), security: undefined },
+    });
+
+    const spyOnBulkGetUserProfiles = jest.spyOn(api, 'bulkGetUserProfiles');
+
+    const { result, waitFor } = renderHook(() => useBulkGetUserProfiles(props), {
+      wrapper: appMockRender.AppWrapper,
+    });
+
+    await waitFor(() => result.current.isSuccess);
+
+    expect(spyOnBulkGetUserProfiles).not.toBeCalled();
+    expect(result.current.data?.size).toBe(0);
   });
 
   it('calls bulkGetUserProfiles with correct arguments', async () => {

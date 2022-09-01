@@ -35,6 +35,7 @@ describe('SuggestUsersPopover', () => {
       onUsersChange: jest.fn(),
       togglePopover: jest.fn(),
       onClosePopover: jest.fn(),
+      currentUserProfile: undefined,
     };
   });
 

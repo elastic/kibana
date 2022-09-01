@@ -20,8 +20,10 @@ import {
 import {
   casesAllUser,
   casesOnlyDeleteUser,
+  casesReadUser,
   obsCasesAllUser,
   obsCasesOnlyDeleteUser,
+  obsCasesReadUser,
   secAllCasesReadUser,
   secAllUser,
 } from './common/users';
@@ -39,6 +41,9 @@ export default ({ getService }: FtrProviderContext): void => {
       { user: secAllUser, owner: SECURITY_SOLUTION_APP_ID },
       { user: casesAllUser, owner: CASES_APP_ID },
       { user: obsCasesAllUser, owner: OBSERVABILITY_APP_ID },
+      { user: secAllCasesReadUser, owner: SECURITY_SOLUTION_APP_ID },
+      { user: casesReadUser, owner: CASES_APP_ID },
+      { user: obsCasesReadUser, owner: OBSERVABILITY_APP_ID },
     ]) {
       it(`User ${
         user.username
@@ -71,7 +76,6 @@ export default ({ getService }: FtrProviderContext): void => {
     }
 
     for (const { user, owner } of [
-      { user: secAllCasesReadUser, owner: SECURITY_SOLUTION_APP_ID },
       { user: casesOnlyDeleteUser, owner: CASES_APP_ID },
       { user: obsCasesOnlyDeleteUser, owner: OBSERVABILITY_APP_ID },
     ]) {

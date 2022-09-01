@@ -101,7 +101,7 @@ export const findAssignees = async ({
     .get(`${getSpaceUrlPrefix(auth.space)}${INTERNAL_FIND_ASSIGNEES_URL}`)
     .auth(auth.user.username, auth.user.password)
     .set('kbn-xsrf', 'true')
-    .query(req)
+    .query({ ...req, owners: JSON.stringify(req.owners) })
     .expect(expectedHttpCode);
 
   return profiles;

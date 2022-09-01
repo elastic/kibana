@@ -9,6 +9,7 @@ import { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { sortBy } from 'lodash';
 import { useMemo } from 'react';
 import { CaseAssignees } from '../../../common/api';
+import { CurrentUserProfile } from '../../components/types';
 import { getSortField, moveCurrentUserToBeginning } from '../../components/user_profiles/sort';
 import { Assignee, AssigneeWithProfile } from '../../components/user_profiles/types';
 
@@ -19,7 +20,7 @@ export const useAssignees = ({
 }: {
   caseAssignees: CaseAssignees;
   userProfiles: Map<string, UserProfileWithAvatar>;
-  currentUserProfile?: UserProfileWithAvatar;
+  currentUserProfile: CurrentUserProfile;
 }) => {
   const currentUserAsAssignee = getCurrentUserProfileAsAssignee(currentUserProfile);
 
@@ -70,8 +71,8 @@ export const useAssignees = ({
   };
 };
 
-const getCurrentUserProfileAsAssignee = (currentUserProfile?: UserProfileWithAvatar) =>
-  currentUserProfile !== undefined
+const getCurrentUserProfileAsAssignee = (currentUserProfile: CurrentUserProfile) =>
+  currentUserProfile != null
     ? { uid: currentUserProfile.uid, profile: currentUserProfile }
     : undefined;
 

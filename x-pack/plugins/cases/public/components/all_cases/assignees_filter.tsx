@@ -10,7 +10,9 @@ import { UserProfilesPopover, UserProfileWithAvatar } from '@kbn/user-profile-co
 import React, { useCallback, useEffect, useState } from 'react';
 import { CASE_LIST_CACHE_KEY } from '../../containers/constants';
 import { useFindAssignees } from '../../containers/use_find_assignees';
+import { useAvailableCasesOwners } from '../app/use_available_owners';
 import { useCasesContext } from '../cases_context/use_cases_context';
+import { CurrentUserProfile } from '../types';
 import { EmptyMessage } from '../user_profiles/empty_message';
 import { NoMatches } from '../user_profiles/no_matches';
 import { SelectedStatusMessage } from '../user_profiles/selected_status_message';
@@ -19,7 +21,7 @@ import * as i18n from './translations';
 
 export interface AssigneesFilterPopoverProps {
   selectedAssignees: UserProfileWithAvatar[];
-  currentUserProfile?: UserProfileWithAvatar;
+  currentUserProfile: CurrentUserProfile;
   isLoading: boolean;
   onSelectionChange: (users: UserProfileWithAvatar[]) => void;
   setFetchAssignees: (fetcher: () => void) => void;
@@ -33,6 +35,8 @@ const AssigneesFilterPopoverComponent: React.FC<AssigneesFilterPopoverProps> = (
   setFetchAssignees,
 }) => {
   const { owner: owners } = useCasesContext();
+  const hasOwners = owners.length > 0;
+  const availableOwners = useAvailableCasesOwners(['read']);
   const [searchTerm, setSearchTerm] = useState('');
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [searchResultProfiles, setSearchResultProfiles] = useState<
@@ -64,7 +68,7 @@ const AssigneesFilterPopoverComponent: React.FC<AssigneesFilterPopoverProps> = (
     refetch: fetchAssignees,
     isLoading: isLoadingAssignees,
   } = useFindAssignees({
-    owners,
+    owners: hasOwners ? owners : availableOwners,
     searchTerm,
     // TODO: maybe use a different cache key?
     cacheKey: CASE_LIST_CACHE_KEY,

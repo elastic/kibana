@@ -21,7 +21,7 @@ export const useBulkGetUserProfiles = ({ uids }: { uids: string[] }) => {
   return useQuery<Map<string, UserProfileWithAvatar>, ServerError>(
     [USER_PROFILES_CACHE_KEY, USER_PROFILES_BULK_GET_CACHE_KEY, uids],
     async () => {
-      if (uids.length <= 0) {
+      if (uids.length <= 0 || !security) {
         return new Map<string, UserProfileWithAvatar>();
       }
 

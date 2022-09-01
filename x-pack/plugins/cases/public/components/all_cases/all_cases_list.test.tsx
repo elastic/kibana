@@ -153,6 +153,7 @@ describe('AllCasesListGeneric', () => {
     isLoadingCases: [],
     isSelectorView: false,
     userProfiles: new Map(),
+    currentUserProfile: undefined,
   };
 
   let appMockRenderer: AppMockRenderer;

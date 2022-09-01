@@ -25,7 +25,6 @@ import {
 import { Operations } from '../../authorization';
 import { createCaseError } from '../../common/error';
 import { CasesClient } from '../../client';
-import { asArray } from '../../common/utils';
 
 const MAX_PROFILES_SIZE = 100;
 const MIN_PROFILES_SIZE = 0;
@@ -58,8 +57,7 @@ export class UserProfileService {
       fold(throwErrors(Boom.badRequest), identity)
     );
 
-    const { searchTerm, size, owners: ownersStringOrArray } = params;
-    const owners = asArray(ownersStringOrArray);
+    const { searchTerm, size, owners } = params;
 
     try {
       if (this.options === undefined) {
@@ -75,7 +73,7 @@ export class UserProfileService {
 
       UserProfileService.validateSizeParam(size);
 
-      if (!UserProfileService.isSecurityEnabled(securityPluginFields)) {
+      if (!UserProfileService.isSecurityEnabled(securityPluginFields) || owners.length <= 0) {
         return [];
       }
 
@@ -167,7 +165,7 @@ export class UserProfileService {
 
       UserProfileService.validateSizeParam(size);
 
-      if (!UserProfileService.isSecurityEnabled(securityPluginFields)) {
+      if (!UserProfileService.isSecurityEnabled(securityPluginFields) || owners.length <= 0) {
         return [];
       }
 

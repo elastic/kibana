@@ -71,7 +71,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
           ui: casesCapabilities.all,
         },
         read: {
-          api: ['bulkGetUserProfiles'],
+          api: ['bulkGetUserProfiles', 'casesFindAssignedUsers'],
           app: [casesFeatureId, 'kibana'],
           catalogue: [observabilityFeatureId],
           cases: {
