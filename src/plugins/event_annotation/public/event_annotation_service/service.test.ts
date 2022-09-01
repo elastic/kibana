@@ -46,13 +46,14 @@ describe('Event Annotation Service', () => {
           {
             id: 'myEvent',
             type: 'query',
+            timeField: '@timestamp',
             key: {
               type: 'point_in_time',
-              field: '@timestamp',
             },
             label: 'Hello Range',
             isHidden: true,
-            query: { query: '', language: 'kql' },
+            filter: { type: 'kibana_query', query: '', language: 'kuery' },
+            textField: '',
           },
         ])
       ).toEqual([]);
@@ -78,6 +79,7 @@ describe('Event Annotation Service', () => {
               type: 'function',
               function: 'manual_point_event_annotation',
               arguments: {
+                id: ['myEvent'],
                 time: ['2022'],
                 label: ['Hello'],
                 color: ['#f04e98'],
@@ -114,6 +116,7 @@ describe('Event Annotation Service', () => {
               type: 'function',
               function: 'manual_range_event_annotation',
               arguments: {
+                id: ['myEvent'],
                 time: ['2021'],
                 endTime: ['2022'],
                 label: ['Hello'],
@@ -132,12 +135,13 @@ describe('Event Annotation Service', () => {
           {
             id: 'myEvent',
             type: 'query',
+            timeField: '@timestamp',
             key: {
               type: 'point_in_time',
-              field: '@timestamp',
             },
             label: 'Hello',
-            query: { query: '', language: 'kql' },
+            filter: { type: 'kibana_query', query: '', language: 'kuery' },
+            textField: '',
           },
         ])
       ).toEqual([
@@ -148,7 +152,8 @@ describe('Event Annotation Service', () => {
               type: 'function',
               function: 'query_point_event_annotation',
               arguments: {
-                field: ['@timestamp'],
+                id: ['myEvent'],
+                timeField: ['@timestamp'],
                 label: ['Hello'],
                 color: ['#f04e98'],
                 lineWidth: [1],
@@ -157,10 +162,18 @@ describe('Event Annotation Service', () => {
                 textVisibility: [false],
                 textField: [],
                 isHidden: [false],
-                query: [
+                filter: [
                   {
+                    chain: [
+                      {
+                        arguments: {
+                          q: [''],
+                        },
+                        function: 'kql',
+                        type: 'function',
+                      },
+                    ],
                     type: 'expression',
-                    chain: [{ arguments: { q: ['""'] }, function: 'lucene', type: 'function' }],
                   },
                 ],
                 extraFields: [],
@@ -195,12 +208,13 @@ describe('Event Annotation Service', () => {
           {
             id: 'myEvent',
             type: 'query',
+            timeField: '@timestamp',
             key: {
               type: 'point_in_time',
-              field: '@timestamp',
             },
             label: 'Hello',
-            query: { query: '', language: 'kql' },
+            filter: { type: 'kibana_query', query: '', language: 'kuery' },
+            textField: '',
           },
         ])
       ).toEqual([
@@ -211,6 +225,7 @@ describe('Event Annotation Service', () => {
               type: 'function',
               function: 'manual_point_event_annotation',
               arguments: {
+                id: ['myEvent'],
                 time: ['2022'],
                 label: ['Hello'],
                 color: ['#f04e98'],
@@ -230,6 +245,7 @@ describe('Event Annotation Service', () => {
               type: 'function',
               function: 'manual_range_event_annotation',
               arguments: {
+                id: ['myRangeEvent'],
                 time: ['2021'],
                 endTime: ['2022'],
                 label: ['Hello Range'],
@@ -247,7 +263,8 @@ describe('Event Annotation Service', () => {
               type: 'function',
               function: 'query_point_event_annotation',
               arguments: {
-                field: ['@timestamp'],
+                id: ['myEvent'],
+                timeField: ['@timestamp'],
                 label: ['Hello'],
                 color: ['#f04e98'],
                 lineWidth: [1],
@@ -256,10 +273,18 @@ describe('Event Annotation Service', () => {
                 textVisibility: [false],
                 textField: [],
                 isHidden: [false],
-                query: [
+                filter: [
                   {
+                    chain: [
+                      {
+                        arguments: {
+                          q: [''],
+                        },
+                        function: 'kql',
+                        type: 'function',
+                      },
+                    ],
                     type: 'expression',
-                    chain: [{ arguments: { q: ['""'] }, function: 'lucene', type: 'function' }],
                   },
                 ],
                 extraFields: [],
@@ -270,28 +295,26 @@ describe('Event Annotation Service', () => {
       ]);
     });
     it.each`
-      textSource | textField    | expected
-      ${''}      | ${''}        | ${''}
-      ${'name'}  | ${''}        | ${''}
-      ${'name'}  | ${'myField'} | ${''}
-      ${'field'} | ${''}        | ${''}
-      ${'field'} | ${'myField'} | ${'myField'}
+      textVisibility | textField    | expected
+      ${'true'}      | ${''}        | ${''}
+      ${'false'}     | ${''}        | ${''}
+      ${'true'}      | ${'myField'} | ${'myField'}
+      ${'false'}     | ${''}        | ${''}
     `(
-      "should handle correctly textVisibility when textSource is set to '$textSource' and textField to '$textField'",
-      ({ textSource, textField, expected }) => {
+      "should handle correctly textVisibility when set to '$textVisibility' and textField to '$textField'",
+      ({ textVisibility, textField, expected }) => {
         expect(
           eventAnnotationService.toExpression([
             {
               id: 'myEvent',
               type: 'query',
+              timeField: '@timestamp',
               key: {
                 type: 'point_in_time',
-                field: '@timestamp',
               },
               label: 'Hello',
-              query: { query: '', language: 'kql' },
-              textVisibility: true,
-              textSource,
+              filter: { type: 'kibana_query', query: '', language: 'kuery' },
+              textVisibility,
               textField,
             },
           ])
@@ -303,19 +326,28 @@ describe('Event Annotation Service', () => {
                 type: 'function',
                 function: 'query_point_event_annotation',
                 arguments: {
-                  field: ['@timestamp'],
+                  id: ['myEvent'],
+                  timeField: ['@timestamp'],
                   label: ['Hello'],
                   color: ['#f04e98'],
                   lineWidth: [1],
                   lineStyle: ['solid'],
                   icon: ['triangle'],
-                  textVisibility: [true],
+                  textVisibility: [textVisibility],
                   textField: expected ? [expected] : [],
                   isHidden: [false],
-                  query: [
+                  filter: [
                     {
+                      chain: [
+                        {
+                          arguments: {
+                            q: [''],
+                          },
+                          function: 'kql',
+                          type: 'function',
+                        },
+                      ],
                       type: 'expression',
-                      chain: [{ arguments: { q: ['""'] }, function: 'lucene', type: 'function' }],
                     },
                   ],
                   extraFields: [],
