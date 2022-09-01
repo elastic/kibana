@@ -15,8 +15,8 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const testFiles = [require.resolve(`./${JOURNEY_ECOMMERCE_DASHBOARD}`)];
 
   const config = {
-    testFiles,
     ...performanceConfig.getAll(),
+    testFiles,
   };
 
   const apmGlobalLabels = {
