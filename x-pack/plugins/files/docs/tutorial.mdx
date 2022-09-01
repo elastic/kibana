@@ -32,6 +32,7 @@ Blobs include any of the following:
   1. Only expose the needed actions against your files
   2. Control access to your files using security tags on your HTTP routes
   3. Do not ask users to store data in files that should not be visible to other users of the app
+  4. Do not store sensitive data in files - if you have a use case that requires this, please reach out to the Kibana App Services team
 </DocCallOut>
 
 ### Files and Saved Objects
@@ -40,23 +41,21 @@ Files are a composition of Saved Objects (SOs) and blobs. SOs contain all metada
 
 The file blob, or file content, is stored _separately_. When creating a file we first need to create the file metadata, which acts as an upload target, and then upload file content.
 
-#### Custom metadata
-
-Consumers of the file service are able to decide the shape of their metadata. The file service provides the ability to search custom data which is useful for tagging and filtering your files &mdash; all metadata must be serializable to JSON.
-
-_File metadata should be treated as external state that needs to be migrated_. Plugins should always be compatible with past version of their own custom metadata. Learn more about how to specify custom metadata below.
-
 <DocCallOut title="File contents are immutable">
   Once uploaded, the contents of a file do not change. Browsers, and other clients, should only need to download the contents of a file once, subsequent downloads should be served from the cache.
 
-  If you need to update the contents of a file, you should create a new file with the new contents.
+  If you need to update the contents of a file, you should create a new file with new contents.
 </DocCallOut>
+
+#### Custom metadata
+
+Consumers of the file service are able to decide what metadata they want to associate with a file. The file service provides the ability to search custom data which is useful for tagging and filtering your files &mdash; all metadata must be serializable to JSON. Learn more about how to specify custom metadata below.
 
 ### How to set up files for your plugin
 
 All setup examples are based on the [`filesExample` plugin](https://github.com/elastic/kibana/blob/d431e87f7ff43833bff085e5bb5b2ab603bfa05d/x-pack/examples/files_example/README.md).
 
-First add the  `files` plugin as a required dependency in your  `kibana.json`:
+First add the  `files` plugin as a required dependency in your `kibana.json`:
 
 ```json
   "requiredPlugins": ["files"],
@@ -110,7 +109,7 @@ To create a new file from the browser you can do the following:
 
 ```ts
   const { file } = await files.example.create({
-    name: names[Math.floor(Math.random() * names.length)],
+    name: 'my_file',
     alt: 'My image',
     /**
     * How you define metadata is entirely up to you. Just make sure that your application
