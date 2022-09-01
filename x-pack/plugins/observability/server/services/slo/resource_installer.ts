@@ -83,7 +83,7 @@ export class ResourceInstaller {
 
       ingestPipelineExists =
         // @ts-ignore _meta is not defined on the type
-        pipeline && pipeline[SLO_INGEST_PIPELINE_NAME]._meta.version == SLO_RESOURCES_VERSION;
+        pipeline && pipeline[SLO_INGEST_PIPELINE_NAME]._meta.version === SLO_RESOURCES_VERSION;
     } catch (err) {
       return false;
     }
