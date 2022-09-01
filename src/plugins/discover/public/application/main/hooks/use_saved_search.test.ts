@@ -9,10 +9,9 @@ import { Subject } from 'rxjs';
 import { renderHook } from '@testing-library/react-hooks';
 import { createSearchSessionMock } from '../../../__mocks__/search_session';
 import { discoverServiceMock } from '../../../__mocks__/services';
-import { savedSearchMock } from '../../../__mocks__/saved_search';
+import { savedSearchMock, savedSearchMockWithSQL } from '../../../__mocks__/saved_search';
 import { RecordRawType, useSavedSearch } from './use_saved_search';
-import { getState, AppState } from '../services/discover_state';
-import { uiSettingsMock } from '../../../__mocks__/ui_settings';
+import { getState } from '../services/discover_state';
 import { useDiscoverState } from './use_discover_state';
 import { FetchStatus } from '../../types';
 
@@ -20,9 +19,9 @@ describe('test useSavedSearch', () => {
   test('useSavedSearch return is valid', async () => {
     const { history, searchSessionManager } = createSearchSessionMock();
     const stateContainer = getState({
-      defaultState: { index: 'the-data-view-id' },
+      savedSearch: savedSearchMock,
       history,
-      uiSettings: uiSettingsMock,
+      services: discoverServiceMock,
     });
 
     const { result } = renderHook(() => {
@@ -46,9 +45,9 @@ describe('test useSavedSearch', () => {
   test('refetch$ triggers a search', async () => {
     const { history, searchSessionManager } = createSearchSessionMock();
     const stateContainer = getState({
-      defaultState: { index: 'the-data-view-id' },
+      savedSearch: savedSearchMock,
       history,
-      uiSettings: uiSettingsMock,
+      services: discoverServiceMock,
     });
 
     discoverServiceMock.data.query.timefilter.timefilter.getTime = jest.fn(() => {
@@ -90,9 +89,9 @@ describe('test useSavedSearch', () => {
   test('reset sets back to initial state', async () => {
     const { history, searchSessionManager } = createSearchSessionMock();
     const stateContainer = getState({
-      defaultState: { index: 'the-data-view-id' },
+      savedSearch: savedSearchMock,
       history,
-      uiSettings: uiSettingsMock,
+      services: discoverServiceMock,
     });
 
     discoverServiceMock.data.query.timefilter.timefilter.getTime = jest.fn(() => {
@@ -134,12 +133,9 @@ describe('test useSavedSearch', () => {
   test('useSavedSearch returns plain record raw type', async () => {
     const { history, searchSessionManager } = createSearchSessionMock();
     const stateContainer = getState({
-      defaultState: {
-        index: 'the-index-pattern-id',
-        query: { sql: 'SELECT * FROM test' },
-      } as unknown as AppState,
+      savedSearch: savedSearchMockWithSQL,
       history,
-      uiSettings: uiSettingsMock,
+      services: discoverServiceMock,
     });
 
     const { result } = renderHook(() => {

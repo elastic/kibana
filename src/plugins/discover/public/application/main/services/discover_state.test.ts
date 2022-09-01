@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { IUiSettingsClient } from '@kbn/core/public';
 import {
   getState,
   GetStateReturn,
@@ -14,16 +13,13 @@ import {
 } from './discover_state';
 import { createBrowserHistory, History } from 'history';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import type { SavedSearch } from '@kbn/saved-search-plugin/public';
-import { SEARCH_FIELDS_FROM_SOURCE } from '../../../../common';
+import type { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
+import { savedSearchMock } from '../../../__mocks__/saved_search';
+import { discoverServiceMock } from '../../../__mocks__/services';
 
 let history: History;
 let state: GetStateReturn;
 const getCurrentUrl = () => history.createHref(history.location);
-
-const uiSettingsMock = {
-  get: <T>(key: string) => (key === SEARCH_FIELDS_FROM_SOURCE ? true : ['_source']) as unknown as T,
-} as IUiSettingsClient;
 
 describe('Test discover state', () => {
   let stopSync = () => {};
@@ -32,9 +28,9 @@ describe('Test discover state', () => {
     history = createBrowserHistory();
     history.push('/');
     state = getState({
-      defaultState: { index: 'test' },
+      savedSearch: savedSearchMock,
       history,
-      uiSettings: uiSettingsMock,
+      services: discoverServiceMock,
     });
     await state.replaceUrlAppState({});
     stopSync = state.startSync();
@@ -46,7 +42,9 @@ describe('Test discover state', () => {
   test('setting app state and syncing to URL', async () => {
     state.setAppState({ index: 'modified' });
     state.flushToUrl();
-    expect(getCurrentUrl()).toMatchInlineSnapshot(`"/#?_a=(index:modified)"`);
+    expect(getCurrentUrl()).toMatchInlineSnapshot(
+      `"/#?_a=(columns:!(),index:modified,interval:auto,sort:!())"`
+    );
   });
 
   test('changing URL to be propagated to appState', async () => {
@@ -93,10 +91,12 @@ describe('Test discover initial state sort handling', () => {
     history = createBrowserHistory();
     history.push('/#?_a=(sort:!(!(order_date,desc)))');
 
+    const savedSearch = { ...savedSearchMock, sort: [['fallback', 'desc']] as SortOrder[] };
+
     state = getState({
-      defaultState: { sort: [['fallback', 'desc']] },
+      savedSearch,
       history,
-      uiSettings: uiSettingsMock,
+      services: discoverServiceMock,
     });
     await state.replaceUrlAppState({});
     const stopSync = state.startSync();
@@ -113,11 +113,12 @@ describe('Test discover initial state sort handling', () => {
   test('Empty sort in URL should allow fallback state defaults', async () => {
     history = createBrowserHistory();
     history.push('/#?_a=(sort:!())');
+    const savedSearch = { ...savedSearchMock, sort: [['fallback', 'desc']] as SortOrder[] };
 
     state = getState({
-      defaultState: { sort: [['fallback', 'desc']] },
+      savedSearch,
       history,
-      uiSettings: uiSettingsMock,
+      services: discoverServiceMock,
     });
     await state.replaceUrlAppState({});
     const stopSync = state.startSync();
@@ -140,13 +141,19 @@ describe('Test discover state with legacy migration', () => {
       "/#?_a=(query:(query_string:(analyze_wildcard:!t,query:'type:nice%20name:%22yeah%22')))"
     );
     state = getState({
-      defaultState: { index: 'test' },
+      savedSearch: savedSearchMock,
       history,
-      uiSettings: uiSettingsMock,
+      services: discoverServiceMock,
     });
     expect(state.appStateContainer.getState()).toMatchInlineSnapshot(`
       Object {
-        "index": "test",
+        "columns": Array [],
+        "filters": undefined,
+        "grid": undefined,
+        "hideAggregatedPreview": undefined,
+        "hideChart": undefined,
+        "index": "the-data-view-id",
+        "interval": "auto",
         "query": Object {
           "language": "lucene",
           "query": Object {
@@ -156,6 +163,11 @@ describe('Test discover state with legacy migration', () => {
             },
           },
         },
+        "rowHeight": undefined,
+        "rowsPerPage": undefined,
+        "savedQuery": undefined,
+        "sort": Array [],
+        "viewMode": undefined,
       }
     `);
   });
@@ -167,8 +179,9 @@ describe('createSearchSessionRestorationDataProvider', () => {
   const searchSessionInfoProvider = createSearchSessionRestorationDataProvider({
     data: mockDataPlugin,
     appStateContainer: getState({
+      savedSearch: savedSearchMock,
       history: createBrowserHistory(),
-      uiSettings: uiSettingsMock,
+      services: discoverServiceMock,
     }).appStateContainer,
     getSavedSearch: () => mockSavedSearch,
   });
