@@ -44,7 +44,7 @@ RUNTIME_DEPS = [
   "@npm//del",
   "@npm//execa",
   "@npm//getopts",
-  "@npm//glob",
+  "@npm//globby",
   "@npm//node-fetch",
   "@npm//simple-git",
   "@npm//tree-kill",
