@@ -5,26 +5,87 @@
  * 2.0.
  */
 
+import { IScopedClusterClient } from '@kbn/core/server';
+
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+
+import { CONNECTORS_INDEX } from '../..';
+import { ConnectorStatus } from '../../../common/types/connectors';
+import { fetchConnectorByIndexName } from '../connectors/fetch_connectors';
+
+import { fetchCrawlerByIndexName } from '../crawler/fetch_crawlers';
 
 import { createApiIndex } from './create_index';
 
+jest.mock('../../index_management/setup_indices', () => ({
+  setupConnectorsIndices: jest.fn(),
+}));
+
+jest.mock('../connectors/fetch_connectors', () => ({ fetchConnectorByIndexName: jest.fn() }));
+jest.mock('../crawler/fetch_crawlers', () => ({ fetchCrawlerByIndexName: jest.fn() }));
+
 describe('createApiIndex lib function', () => {
   const mockClient = elasticsearchServiceMock.createScopedClusterClient();
+
+  const createConnectorsIndexExistsFn =
+    (connectorsIndexExists: boolean, defaultValue: boolean) =>
+    ({ index }: { index: string }) =>
+      index === CONNECTORS_INDEX ? connectorsIndexExists : defaultValue;
 
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('successfully creates an index', async () => {
-    await expect(createApiIndex(mockClient, 'index_name', 'en')).resolves.toEqual({
-      body: {},
-      headers: {
-        'x-elastic-product': 'Elasticsearch',
+  const connectorsIndicesMapping = {
+    '.elastic-connectors-v1': {
+      mappings: {
+        _meta: {
+          pipeline: {
+            default_extract_binary_content: true,
+            default_name: 'ent-search-generic-ingestion',
+            default_reduce_whitespace: true,
+            default_run_ml_inference: false,
+          },
+          version: '1',
+        },
       },
-      meta: {},
-      statusCode: 200,
-      warnings: [],
+    },
+  };
+
+  it('successfully creates an index', async () => {
+    mockClient.asCurrentUser.index.mockImplementation(() => ({ _id: 'fakeId' } as any));
+    mockClient.asCurrentUser.indices.exists.mockImplementation(
+      createConnectorsIndexExistsFn(true, false) as any
+    );
+    (fetchConnectorByIndexName as jest.Mock).mockImplementation(() => undefined);
+    (fetchCrawlerByIndexName as jest.Mock).mockImplementation(() => undefined);
+    mockClient.asCurrentUser.indices.getMapping.mockImplementation(
+      async () => connectorsIndicesMapping
+    );
+    await createApiIndex(mockClient as unknown as IScopedClusterClient, 'index_name', 'en');
+    expect(mockClient.asCurrentUser.index).toHaveBeenCalledWith({
+      document: {
+        api_key_id: null,
+        configuration: {},
+        index_name: 'index_name',
+        language: 'en',
+        last_seen: null,
+        last_sync_error: null,
+        last_sync_status: null,
+        last_synced: null,
+        name: 'index_name',
+        pipeline: {
+          extract_binary_content: true,
+          name: 'ent-search-generic-ingestion',
+          reduce_whitespace: true,
+          run_ml_inference: false,
+        },
+        scheduling: { enabled: false, interval: '0 0 0 * * ?' },
+        service_type: null,
+        status: ConnectorStatus.CREATED,
+        sync_now: false,
+      },
+      index: CONNECTORS_INDEX,
     });
     expect(mockClient.asCurrentUser.indices.create).toHaveBeenCalledWith({
       body: {
