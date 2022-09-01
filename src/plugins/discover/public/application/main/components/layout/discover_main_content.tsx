@@ -29,8 +29,8 @@ import { DiscoverChart } from '../chart';
 import { FieldStatisticsTable } from '../field_stats_table';
 import { DiscoverDocuments } from './discover_documents';
 import { DOCUMENTS_VIEW_CLICK, FIELD_STATISTICS_VIEW_CLICK } from '../field_stats_table/constants';
-import { DiscoverResizablePanels } from './discover_panels_resizable';
-import { DiscoverFixedPanels } from './discover_panels_fixed';
+import { DiscoverPanelsResizable } from './discover_panels_resizable';
+import { DiscoverPanelsFixed } from './discover_panels_fixed';
 
 const DiscoverChartMemoized = React.memo(DiscoverChart);
 const FieldStatisticsTableMemoized = React.memo(FieldStatisticsTable);
@@ -171,13 +171,13 @@ export const DiscoverMainContent = ({
         </EuiFlexGroup>
       </InPortal>
       {showFixedPanels ? (
-        <DiscoverFixedPanels
+        <DiscoverPanelsFixed
           isPlainRecord={isPlainRecord}
           hideChart={state.hideChart}
           {...panelsProps}
         />
       ) : (
-        <DiscoverResizablePanels resizeRef={resizeRef} {...panelsProps} />
+        <DiscoverPanelsResizable resizeRef={resizeRef} {...panelsProps} />
       )}
     </>
   );
