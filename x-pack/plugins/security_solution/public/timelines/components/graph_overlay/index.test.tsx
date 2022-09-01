@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { render } from '@testing-library/react';
+import { render, cleanup } from '@testing-library/react';
 import React from 'react';
 
 import '@testing-library/jest-dom';
@@ -53,6 +53,16 @@ jest.mock('../../../common/lib/kibana', () => {
         },
       },
     }),
+  };
+});
+
+const mockDispatch = jest.fn();
+jest.mock('react-redux', () => {
+  const original = jest.requireActual('react-redux');
+
+  return {
+    ...original,
+    useDispatch: () => mockDispatch,
   };
 });
 
@@ -136,6 +146,9 @@ describe('GraphOverlay', () => {
 
   describe('when used in the active timeline', () => {
     const timelineId = TimelineId.active;
+    afterAll(() => {
+      cleanup();
+    });
 
     test('it has 100% width when NOT in full screen mode', () => {
       const wrapper = render(
@@ -247,6 +260,50 @@ describe('GraphOverlay', () => {
       );
 
       expect(wrapper.getByText('Close Session')).toBeTruthy();
+    });
+
+    test('it clears the graph event id on unmount', () => {
+      (useGlobalFullScreen as jest.Mock).mockReturnValue({
+        globalFullScreen: false,
+        setGlobalFullScreen: jest.fn(),
+      });
+      (useTimelineFullScreen as jest.Mock).mockReturnValue({
+        timelineFullScreen: true,
+        setTimelineFullScreen: jest.fn(),
+      });
+
+      const wrapper = render(
+        <TestProviders
+          store={createStore(
+            {
+              ...mockGlobalState,
+              timeline: {
+                ...mockGlobalState.timeline,
+                timelineById: {
+                  [timelineId]: {
+                    ...mockGlobalState.timeline.timelineById[timelineId],
+                    graphEventId: 'test_id',
+                  },
+                },
+              },
+            },
+            SUB_PLUGINS_REDUCER,
+            kibanaObservable,
+            storage
+          )}
+        >
+          <GraphOverlay
+            timelineId={timelineId}
+            SessionView={<div />}
+            Navigation={<div>{'Close Session'}</div>}
+          />
+        </TestProviders>
+      );
+      wrapper.unmount();
+      expect(mockDispatch).toHaveBeenCalledWith({
+        payload: { id: 'timeline-1', graphEventId: '' },
+        type: 'x-pack/security_solution/local/timeline/UPDATE_TIMELINE_GRAPH_EVENT_ID',
+      });
     });
   });
 });

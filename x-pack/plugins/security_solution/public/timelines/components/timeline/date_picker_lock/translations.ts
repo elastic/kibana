@@ -11,7 +11,7 @@ export const LOCK_SYNC_MAIN_DATE_PICKER_TOOL_TIP = i18n.translate(
   'xpack.securitySolution.timeline.properties.lockDatePickerTooltip',
   {
     defaultMessage:
-      'Disable syncing of date/time range bteween the currently viewed page and your timeline',
+      'Disable syncing of date/time range between the currently viewed page and your timeline',
   }
 );
 
