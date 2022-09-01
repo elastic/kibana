@@ -21,6 +21,9 @@ import {
   mockedSearchService,
   mockedTimefilterService,
 } from '../../../common/mocks/test_providers';
+import { useFilters } from './use_filters';
+
+jest.mock('./use_filters/use_filters');
 
 const aggregationResponse = {
   rawResponse: { aggregations: { [AGGREGATION_NAME]: { buckets: [] } } },
@@ -35,6 +38,8 @@ const useAggregatedIndicatorsParams: UseAggregatedIndicatorsParam = {
   timeRange: DEFAULT_TIME_RANGE,
 };
 
+const stub = () => {};
+
 describe('useAggregatedIndicators()', () => {
   beforeEach(jest.clearAllMocks);
 
@@ -45,6 +50,15 @@ describe('useAggregatedIndicators()', () => {
 
   describe('when mounted', () => {
     beforeEach(() => {
+      (useFilters as jest.MockedFunction<typeof useFilters>).mockReturnValue({
+        filters: [],
+        filterQuery: { language: 'kuery', query: '' },
+        filterManager: {} as any,
+        handleSavedQuery: stub,
+        handleSubmitQuery: stub,
+        handleSubmitTimeRange: stub,
+      });
+
       renderHook(() => useAggregatedIndicators(useAggregatedIndicatorsParams), {
         wrapper: TestProvidersComponent,
       });

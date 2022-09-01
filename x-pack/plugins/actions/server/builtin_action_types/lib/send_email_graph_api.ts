@@ -9,7 +9,7 @@
 import stringify from 'json-stringify-safe';
 import axios, { AxiosInstance, AxiosResponse } from 'axios';
 import { Logger } from '@kbn/core/server';
-import { request } from './axios_utils';
+import { request } from '../../lib/axios_utils';
 import { ActionsConfigurationUtilities } from '../../actions_config';
 import { SendEmailOptions } from './send_email';
 

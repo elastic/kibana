@@ -1486,7 +1486,7 @@
               "() => ",
               "Observable",
               "<",
-              "EuiBreadcrumb",
+              "EuiBreadcrumbProps",
               "[]>"
             ],
             "path": "src/core/public/chrome/types.ts",
@@ -1505,7 +1505,7 @@
             ],
             "signature": [
               "(newBreadcrumbs: ",
-              "EuiBreadcrumb",
+              "EuiBreadcrumbProps",
               "[]) => void"
             ],
             "path": "src/core/public/chrome/types.ts",
@@ -1519,7 +1519,7 @@
                 "label": "newBreadcrumbs",
                 "description": [],
                 "signature": [
-                  "EuiBreadcrumb",
+                  "EuiBreadcrumbProps",
                   "[]"
                 ],
                 "path": "src/core/public/chrome/types.ts",
@@ -1910,9 +1910,9 @@
         "label": "ChromeBreadcrumb",
         "description": [],
         "signature": [
-          "React.HTMLAttributes<HTMLElement> & ",
+          "Omit<React.HTMLAttributes<HTMLElement>, \"color\" | \"aria-current\"> & ",
           "CommonProps",
-          " & { href?: string | undefined; onClick?: React.MouseEventHandler<HTMLAnchorElement> | undefined; text: React.ReactNode; truncate?: boolean | undefined; color?: \"warning\" | \"subdued\" | \"primary\" | \"accent\" | \"success\" | \"danger\" | \"text\" | \"ghost\" | undefined; 'aria-current'?: boolean | \"date\" | \"location\" | \"time\" | \"page\" | \"false\" | \"true\" | \"step\" | undefined; }"
+          " & { href?: string | undefined; rel?: string | undefined; onClick?: React.MouseEventHandler<HTMLAnchorElement> | undefined; text: React.ReactNode; truncate?: boolean | undefined; color?: \"warning\" | \"subdued\" | \"primary\" | \"accent\" | \"success\" | \"danger\" | \"text\" | \"ghost\" | undefined; 'aria-current'?: boolean | \"date\" | \"location\" | \"time\" | \"page\" | \"false\" | \"true\" | \"step\" | undefined; }"
         ],
         "path": "src/core/public/chrome/types.ts",
         "deprecated": false,

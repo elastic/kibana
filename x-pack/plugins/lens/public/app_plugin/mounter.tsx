@@ -86,6 +86,7 @@ export async function getLensServices(
     attributeService,
     executionContext: coreStart.executionContext,
     http: coreStart.http,
+    uiActions: startDependencies.uiActions,
     chrome: coreStart.chrome,
     overlays: coreStart.overlays,
     uiSettings: coreStart.uiSettings,
@@ -96,6 +97,7 @@ export async function getLensServices(
     dataViewEditor: startDependencies.dataViewEditor,
     dataViewFieldEditor: startDependencies.dataViewFieldEditor,
     dashboard: startDependencies.dashboard,
+    charts: startDependencies.charts,
     getOriginatingAppName: () => {
       return embeddableEditorIncomingState?.originatingApp
         ? stateTransfer?.getAppNameFromId(embeddableEditorIncomingState.originatingApp)

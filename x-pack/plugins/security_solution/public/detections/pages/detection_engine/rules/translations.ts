@@ -437,10 +437,11 @@ export const SEARCH_PLACEHOLDER = i18n.translate(
   }
 );
 
-export const SHOWING_RULES = (totalRules: number) =>
+export const SHOWING_RULES = (firstInPage: number, lastOfPage: number, totalRules: number) =>
   i18n.translate('xpack.securitySolution.detectionEngine.rules.allRules.showingRulesTitle', {
-    values: { totalRules },
-    defaultMessage: 'Showing {totalRules} {totalRules, plural, =1 {rule} other {rules}}',
+    values: { firstInPage, lastOfPage, totalRules },
+    defaultMessage:
+      'Showing {firstInPage}-{lastOfPage} of {totalRules} {totalRules, plural, =1 {rule} other {rules}}',
   });
 
 export const SELECT_ALL_RULES = (totalRules: number) =>
@@ -838,12 +839,6 @@ export const REFRESH_RULE_POPOVER_LABEL = i18n.translate(
     defaultMessage: 'Refresh settings',
   }
 );
-
-export const SHOWING_EXCEPTION_LISTS = (totalLists: number) =>
-  i18n.translate('xpack.securitySolution.detectionEngine.rules.allRules.showingExceptionLists', {
-    values: { totalLists },
-    defaultMessage: 'Showing {totalLists} {totalLists, plural, =1 {list} other {lists}}',
-  });
 
 /**
  * Bulk Export

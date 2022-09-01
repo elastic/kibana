@@ -13,13 +13,16 @@ import {
 import { ByteSizeValue } from '@kbn/config-schema';
 import { IScopedClusterClient } from '@kbn/core/server';
 
-import { ElasticsearchIndexWithPrivileges } from '../../../common/types';
+import {
+  ElasticsearchIndex,
+  ElasticsearchIndexWithPrivileges,
+} from '../../../common/types/indices';
 
 export const mapIndexStats = (
   indexData: IndicesIndexState,
   indexStats: IndicesStatsIndicesStats,
   indexName: string
-) => {
+): Omit<ElasticsearchIndex, 'count'> & { aliases: string[] } => {
   const aliases = Object.keys(indexData.aliases!);
   const sizeInBytes = new ByteSizeValue(indexStats?.total?.store?.size_in_bytes ?? 0).toString();
 
@@ -38,6 +41,7 @@ export const mapIndexStats = (
   return {
     aliases,
     health: indexStats?.health,
+    hidden: Boolean(indexData.settings?.index?.hidden),
     name: indexName,
     status: indexStats?.status,
     total,
@@ -132,17 +136,17 @@ export const fetchIndices = async (
           return mapIndexStats(indexData, indexStats, indexName);
         })
         .flatMap(({ name, aliases, ...indexData }) => {
-          const indicesAndAliases = [] as ElasticsearchIndexWithPrivileges[];
+          const indicesAndAliases: ElasticsearchIndexWithPrivileges[] = [];
 
           if (includeAliases) {
             aliases.forEach((alias) => {
               if (alias.startsWith(alwaysShowSearchPattern)) {
                 indicesAndAliases.push({
+                  ...indexData,
                   alias: true,
                   count: indexCounts[alias] ?? 0,
                   name: alias,
                   privileges: { manage: false, read: false, ...indexPrivileges[name] },
-                  ...indexData,
                 });
               }
             });
@@ -160,23 +164,23 @@ export const fetchIndices = async (
     })
     .flatMap(({ name, aliases, ...indexData }) => {
       // expand aliases and add to results
-      const indicesAndAliases = [] as ElasticsearchIndexWithPrivileges[];
+      const indicesAndAliases: ElasticsearchIndexWithPrivileges[] = [];
       indicesAndAliases.push({
+        ...indexData,
         alias: false,
         count: indexCounts[name] ?? 0,
         name,
         privileges: { manage: false, read: false, ...indexPrivileges[name] },
-        ...indexData,
       });
 
       if (includeAliases) {
         aliases.forEach((alias) => {
           indicesAndAliases.push({
+            ...indexData,
             alias: true,
             count: indexCounts[alias] ?? 0,
             name: alias,
             privileges: { manage: false, read: false, ...indexPrivileges[name] },
-            ...indexData,
           });
         });
       }
@@ -191,7 +195,7 @@ export const fetchIndices = async (
   const itemsToInclude = alwaysShowIndices.filter(({ name }) => indexNamesToInclude.includes(name));
 
   const indicesData = alwaysShowSearchPattern
-    ? ([...regularIndexData, ...itemsToInclude] as ElasticsearchIndexWithPrivileges[])
+    ? [...regularIndexData, ...itemsToInclude]
     : regularIndexData;
 
   return indicesData.filter(

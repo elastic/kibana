@@ -93,149 +93,145 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   let throughputValues: Awaited<ReturnType<typeof getThroughputValues>>;
 
-  registry.when(
-    'Dependencies throughput value',
-    { config: 'basic', archives: ['apm_mappings_only_8.0.0'] },
-    () => {
-      describe('when data is loaded', () => {
-        const GO_PROD_RATE = 75;
-        const JAVA_PROD_RATE = 25;
+  registry.when('Dependencies throughput value', { config: 'basic', archives: [] }, () => {
+    describe('when data is loaded', () => {
+      const GO_PROD_RATE = 75;
+      const JAVA_PROD_RATE = 25;
+      before(async () => {
+        const serviceGoProdInstance = apm
+          .service('synth-go', 'production', 'go')
+          .instance('instance-a');
+        const serviceJavaInstance = apm
+          .service('synth-java', 'development', 'java')
+          .instance('instance-c');
+
+        await synthtraceEsClient.index([
+          timerange(start, end)
+            .interval('1m')
+            .rate(GO_PROD_RATE)
+            .generator((timestamp) =>
+              serviceGoProdInstance
+                .transaction('GET /api/product/list')
+                .duration(1000)
+                .timestamp(timestamp)
+                .children(
+                  serviceGoProdInstance
+                    .span('GET apm-*/_search', 'db', 'elasticsearch')
+                    .duration(1000)
+                    .success()
+                    .destination('elasticsearch')
+                    .timestamp(timestamp),
+                  serviceGoProdInstance
+                    .span('custom_operation', 'app')
+                    .duration(550)
+                    .children(
+                      serviceGoProdInstance
+                        .span('SELECT FROM products', 'db', 'postgresql')
+                        .duration(500)
+                        .success()
+                        .destination('postgresql')
+                        .timestamp(timestamp)
+                    )
+                    .success()
+                    .timestamp(timestamp)
+                )
+            ),
+          timerange(start, end)
+            .interval('1m')
+            .rate(JAVA_PROD_RATE)
+            .generator((timestamp) =>
+              serviceJavaInstance
+                .transaction('POST /api/product/buy')
+                .duration(1000)
+                .timestamp(timestamp)
+                .children(
+                  serviceJavaInstance
+                    .span('GET apm-*/_search', 'db', 'elasticsearch')
+                    .duration(1000)
+                    .success()
+                    .destination('elasticsearch')
+                    .timestamp(timestamp),
+                  serviceJavaInstance
+                    .span('custom_operation', 'app')
+                    .duration(50)
+                    .success()
+                    .timestamp(timestamp)
+                )
+            ),
+        ]);
+      });
+
+      after(() => synthtraceEsClient.clean());
+
+      describe('verify top dependencies', () => {
         before(async () => {
-          const serviceGoProdInstance = apm
-            .service('synth-go', 'production', 'go')
-            .instance('instance-a');
-          const serviceJavaInstance = apm
-            .service('synth-java', 'development', 'java')
-            .instance('instance-c');
-
-          await synthtraceEsClient.index([
-            timerange(start, end)
-              .interval('1m')
-              .rate(GO_PROD_RATE)
-              .generator((timestamp) =>
-                serviceGoProdInstance
-                  .transaction('GET /api/product/list')
-                  .duration(1000)
-                  .timestamp(timestamp)
-                  .children(
-                    serviceGoProdInstance
-                      .span('GET apm-*/_search', 'db', 'elasticsearch')
-                      .duration(1000)
-                      .success()
-                      .destination('elasticsearch')
-                      .timestamp(timestamp),
-                    serviceGoProdInstance
-                      .span('custom_operation', 'app')
-                      .duration(550)
-                      .children(
-                        serviceGoProdInstance
-                          .span('SELECT FROM products', 'db', 'postgresql')
-                          .duration(500)
-                          .success()
-                          .destination('postgresql')
-                          .timestamp(timestamp)
-                      )
-                      .success()
-                      .timestamp(timestamp)
-                  )
-              ),
-            timerange(start, end)
-              .interval('1m')
-              .rate(JAVA_PROD_RATE)
-              .generator((timestamp) =>
-                serviceJavaInstance
-                  .transaction('POST /api/product/buy')
-                  .duration(1000)
-                  .timestamp(timestamp)
-                  .children(
-                    serviceJavaInstance
-                      .span('GET apm-*/_search', 'db', 'elasticsearch')
-                      .duration(1000)
-                      .success()
-                      .destination('elasticsearch')
-                      .timestamp(timestamp),
-                    serviceJavaInstance
-                      .span('custom_operation', 'app')
-                      .duration(50)
-                      .success()
-                      .timestamp(timestamp)
-                  )
-              ),
-          ]);
+          throughputValues = await getThroughputValues();
         });
 
-        after(() => synthtraceEsClient.clean());
+        it('returns elasticsearch and postgresql as dependencies', () => {
+          const { topDependencies } = throughputValues;
+          const topDependenciesAsObj = Object.fromEntries(topDependencies);
+          expect(topDependenciesAsObj.elasticsearch).to.equal(
+            roundNumber(JAVA_PROD_RATE + GO_PROD_RATE)
+          );
+          expect(topDependenciesAsObj.postgresql).to.equal(roundNumber(GO_PROD_RATE));
+        });
+      });
 
-        describe('verify top dependencies', () => {
+      describe('compare throughput value between top backends, backend throughput chart and upstream services apis', () => {
+        describe('elasticsearch dependency', () => {
           before(async () => {
-            throughputValues = await getThroughputValues();
+            throughputValues = await getThroughputValues({ dependencyName: 'elasticsearch' });
           });
 
-          it('returns elasticsearch and postgresql as dependencies', () => {
-            const { topDependencies } = throughputValues;
+          it('matches throughput values between throughput chart and top dependency', () => {
+            const { topDependencies, dependencyThroughputChartMean } = throughputValues;
             const topDependenciesAsObj = Object.fromEntries(topDependencies);
-            expect(topDependenciesAsObj.elasticsearch).to.equal(
-              roundNumber(JAVA_PROD_RATE + GO_PROD_RATE)
+            const elasticsearchDependency = topDependenciesAsObj.elasticsearch;
+            [elasticsearchDependency, dependencyThroughputChartMean].forEach((value) =>
+              expect(value).to.be.equal(roundNumber(JAVA_PROD_RATE + GO_PROD_RATE))
             );
-            expect(topDependenciesAsObj.postgresql).to.equal(roundNumber(GO_PROD_RATE));
+          });
+
+          it('matches throughput values between upstream services and top dependency', () => {
+            const { topDependencies, upstreamServicesThroughput } = throughputValues;
+            const topDependenciesAsObj = Object.fromEntries(topDependencies);
+            const elasticsearchDependency = topDependenciesAsObj.elasticsearch;
+            const upstreamServiceThroughputSum = roundNumber(
+              sumBy(upstreamServicesThroughput, 'throughput')
+            );
+            [elasticsearchDependency, upstreamServiceThroughputSum].forEach((value) =>
+              expect(value).to.be.equal(roundNumber(JAVA_PROD_RATE + GO_PROD_RATE))
+            );
           });
         });
-
-        describe('compare throughput value between top backends, backend throughput chart and upstream services apis', () => {
-          describe('elasticsearch dependency', () => {
-            before(async () => {
-              throughputValues = await getThroughputValues({ dependencyName: 'elasticsearch' });
-            });
-
-            it('matches throughput values between throughput chart and top dependency', () => {
-              const { topDependencies, dependencyThroughputChartMean } = throughputValues;
-              const topDependenciesAsObj = Object.fromEntries(topDependencies);
-              const elasticsearchDependency = topDependenciesAsObj.elasticsearch;
-              [elasticsearchDependency, dependencyThroughputChartMean].forEach((value) =>
-                expect(value).to.be.equal(roundNumber(JAVA_PROD_RATE + GO_PROD_RATE))
-              );
-            });
-
-            it('matches throughput values between upstream services and top dependency', () => {
-              const { topDependencies, upstreamServicesThroughput } = throughputValues;
-              const topDependenciesAsObj = Object.fromEntries(topDependencies);
-              const elasticsearchDependency = topDependenciesAsObj.elasticsearch;
-              const upstreamServiceThroughputSum = roundNumber(
-                sumBy(upstreamServicesThroughput, 'throughput')
-              );
-              [elasticsearchDependency, upstreamServiceThroughputSum].forEach((value) =>
-                expect(value).to.be.equal(roundNumber(JAVA_PROD_RATE + GO_PROD_RATE))
-              );
-            });
+        describe('postgresql dependency', () => {
+          before(async () => {
+            throughputValues = await getThroughputValues({ dependencyName: 'postgresql' });
           });
-          describe('postgresql dependency', () => {
-            before(async () => {
-              throughputValues = await getThroughputValues({ dependencyName: 'postgresql' });
-            });
 
-            it('matches throughput values between throughput chart and top dependency', () => {
-              const { topDependencies, dependencyThroughputChartMean } = throughputValues;
-              const topDependenciesAsObj = Object.fromEntries(topDependencies);
-              const postgresqlDependency = topDependenciesAsObj.postgresql;
-              [postgresqlDependency, dependencyThroughputChartMean].forEach((value) =>
-                expect(value).to.be.equal(roundNumber(GO_PROD_RATE))
-              );
-            });
+          it('matches throughput values between throughput chart and top dependency', () => {
+            const { topDependencies, dependencyThroughputChartMean } = throughputValues;
+            const topDependenciesAsObj = Object.fromEntries(topDependencies);
+            const postgresqlDependency = topDependenciesAsObj.postgresql;
+            [postgresqlDependency, dependencyThroughputChartMean].forEach((value) =>
+              expect(value).to.be.equal(roundNumber(GO_PROD_RATE))
+            );
+          });
 
-            it('matches throughput values between upstream services and top dependency', () => {
-              const { topDependencies, upstreamServicesThroughput } = throughputValues;
-              const topDependenciesAsObj = Object.fromEntries(topDependencies);
-              const postgresqlDependency = topDependenciesAsObj.postgresql;
-              const upstreamServiceThroughputSum = roundNumber(
-                sumBy(upstreamServicesThroughput, 'throughput')
-              );
-              [postgresqlDependency, upstreamServiceThroughputSum].forEach((value) =>
-                expect(value).to.be.equal(roundNumber(GO_PROD_RATE))
-              );
-            });
+          it('matches throughput values between upstream services and top dependency', () => {
+            const { topDependencies, upstreamServicesThroughput } = throughputValues;
+            const topDependenciesAsObj = Object.fromEntries(topDependencies);
+            const postgresqlDependency = topDependenciesAsObj.postgresql;
+            const upstreamServiceThroughputSum = roundNumber(
+              sumBy(upstreamServicesThroughput, 'throughput')
+            );
+            [postgresqlDependency, upstreamServiceThroughputSum].forEach((value) =>
+              expect(value).to.be.equal(roundNumber(GO_PROD_RATE))
+            );
           });
         });
       });
-    }
-  );
+    });
+  });
 }

@@ -7,16 +7,18 @@
 
 import moment from 'moment/moment';
 import React, { FC } from 'react';
+import { BehaviorSubject } from 'rxjs';
 import { I18nProvider } from '@kbn/i18n-react';
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import type { IStorage } from '@kbn/kibana-utils-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
-import { BehaviorSubject } from 'rxjs';
-import { mockUiSetting } from './mock_kibana_ui_setting';
+import { createTGridMocks } from '@kbn/timelines-plugin/public/mock';
 import { KibanaContext } from '../../hooks/use_kibana';
 import { SecuritySolutionPluginContext } from '../../types';
+import { getSecuritySolutionContextMock } from './mock_security_context';
+import { mockUiSetting } from './mock_kibana_ui_settings_service';
 import { SecuritySolutionContext } from '../../containers/security_solution_context';
 
 export const localStorageMock = (): IStorage => {
@@ -89,28 +91,15 @@ const dataServiceMock = {
   },
 };
 
+const timelinesServiceMock = createTGridMocks();
+
 const core = coreMock.createStart();
 const coreServiceMock = {
   ...core,
   uiSettings: { get: jest.fn().mockImplementation(mockUiSetting) },
 };
 
-const mockSecurityContext: SecuritySolutionPluginContext = {
-  getFiltersGlobalComponent:
-    () =>
-    ({ children }) =>
-      <div>{children}</div>,
-  licenseService: {
-    isEnterprise() {
-      return true;
-    },
-  },
-  sourcererDataView: {
-    browserFields: {},
-    selectedPatterns: [],
-    indexPattern: { fields: [], title: '' },
-  },
-};
+const mockSecurityContext: SecuritySolutionPluginContext = getSecuritySolutionContextMock();
 
 export const mockedServices = {
   ...coreServiceMock,
@@ -119,6 +108,14 @@ export const mockedServices = {
   unifiedSearch,
   triggersActionsUi: {
     getFieldBrowser: jest.fn().mockReturnValue(null),
+  },
+  timelines: timelinesServiceMock,
+  securityLayout: {
+    getPluginWrapper:
+      () =>
+      ({ children }: any) => {
+        return <>{children}</>;
+      },
   },
 };
 
