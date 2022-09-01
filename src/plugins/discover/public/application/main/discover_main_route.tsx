@@ -8,7 +8,6 @@
 import React, { useEffect, useState, memo, useCallback } from 'react';
 import { useParams, useHistory } from 'react-router-dom';
 import { DataViewListItem } from '@kbn/data-plugin/public';
-import { ISearchSource } from '@kbn/data-plugin/public';
 import { DataViewSavedObjectConflictError } from '@kbn/data-views-plugin/public';
 import { redirectWhenMissing } from '@kbn/kibana-utils-plugin/public';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
@@ -48,7 +47,6 @@ export function DiscoverMainRoute(props: Props) {
   const {
     core,
     core: { chrome },
-    uiSettings,
     data,
     toastNotifications,
     http: { basePath },
@@ -70,7 +68,7 @@ export function DiscoverMainRoute(props: Props) {
   });
 
   const loadDefaultOrCurrentDataView = useCallback(
-    async (searchSource: ISearchSource) => {
+    async (nextSavedSearch: SavedSearch) => {
       try {
         const hasUserDataViewValue = await data.dataViews.hasData
           .hasUserDataView()
@@ -92,11 +90,15 @@ export function DiscoverMainRoute(props: Props) {
           return;
         }
 
-        const { appStateContainer } = getState({ history, uiSettings });
+        const { appStateContainer } = getState({ savedSearch: nextSavedSearch, history, services });
         const { index } = appStateContainer.getState();
         const ip = await loadDataView(index || '', data.dataViews);
 
-        const actualDataView = resolveDataView(ip, searchSource, toastNotifications);
+        const actualDataView = resolveDataView(
+          ip,
+          nextSavedSearch.searchSource,
+          toastNotifications
+        );
         await data.dataViews.refreshFields(ip.loaded!);
         setDataViewList(ip.list);
 
@@ -105,7 +107,7 @@ export function DiscoverMainRoute(props: Props) {
         setError(e);
       }
     },
-    [uiSettings, data.dataViews, history, isDev, toastNotifications]
+    [data.dataViews, isDev, history, services, toastNotifications]
   );
 
   const loadSavedSearch = useCallback(async () => {
@@ -116,7 +118,7 @@ export function DiscoverMainRoute(props: Props) {
         spaces: services.spaces,
       });
 
-      const currentDataView = await loadDefaultOrCurrentDataView(currentSavedSearch.searchSource);
+      const currentDataView = await loadDefaultOrCurrentDataView(currentSavedSearch);
 
       if (!currentDataView) {
         return;

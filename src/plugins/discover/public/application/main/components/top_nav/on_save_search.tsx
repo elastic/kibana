@@ -53,7 +53,7 @@ async function saveDataSource({
           navigateTo(`/view/${encodeURIComponent(id)}`);
         } else {
           // Update defaults so that "reload saved query" functions correctly
-          state.resetAppState();
+          state.resetAppState(savedSearch);
           services.core.chrome.docTitle.change(savedSearch.title!);
 
           setBreadcrumbsTitle(

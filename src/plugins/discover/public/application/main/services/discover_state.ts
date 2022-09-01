@@ -9,7 +9,6 @@
 import { cloneDeep, isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { History } from 'history';
-import { NotificationsStart, IUiSettingsClient } from '@kbn/core/public';
 import {
   Filter,
   FilterStateStore,
@@ -37,6 +36,8 @@ import {
 } from '@kbn/data-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { getStateDefaults } from '../utils/get_state_defaults';
+import { DiscoverServices } from '../../../build_services';
 import { DiscoverGridSettings } from '../../../components/discover_grid/types';
 import { handleSourceColumnState } from '../../../utils/state_helpers';
 import { DISCOVER_APP_LOCATOR, DiscoverAppLocatorParams } from '../../../locator';
@@ -106,10 +107,7 @@ export interface AppStateUrl extends Omit<AppState, 'sort'> {
 }
 
 interface GetStateParams {
-  /**
-   * Default state used for merging with with URL state to get the initial state
-   */
-  defaultState?: AppState;
+  savedSearch: SavedSearch;
   /**
    * Determins the use of long vs. short/hashed urls
    */
@@ -119,17 +117,7 @@ interface GetStateParams {
    */
   history: History;
 
-  /**
-   * Core's notifications.toasts service
-   * In case it is passed in,
-   * kbnUrlStateStorage will use it notifying about inner errors
-   */
-  toasts?: NotificationsStart['toasts'];
-
-  /**
-   * core ui settings service
-   */
-  uiSettings: IUiSettingsClient;
+  services: DiscoverServices;
 }
 
 export interface GetStateReturn {
@@ -180,7 +168,7 @@ export interface GetStateReturn {
   /**
    * Reset AppState to default, discarding all changes
    */
-  resetAppState: () => void;
+  resetAppState: (savedSearch: SavedSearch) => void;
   /**
    * Pause the auto refresh interval without pushing an entry to history
    */
@@ -194,14 +182,16 @@ const GLOBAL_STATE_URL_KEY = '_g';
  * Builds and returns appState and globalState containers and helper functions
  * Used to sync URL with UI state
  */
-export function getState({
-  defaultState,
-  storeInSessionStorage = false,
-  history,
-  toasts,
-  uiSettings,
-}: GetStateParams): GetStateReturn {
-  const defaultAppState = defaultState ? defaultState : {};
+export function getState({ savedSearch, history, services }: GetStateParams): GetStateReturn {
+  const { uiSettings, data, storage } = services;
+  const toasts = services.core.notifications.toasts;
+  const storeInSessionStorage = uiSettings.get('state:storeInSessionStorage');
+  const defaultAppState = getStateDefaults({
+    config: uiSettings,
+    data,
+    savedSearch,
+    storage,
+  });
   const stateStorage = createKbnUrlStateStorage({
     useHash: storeInSessionStorage,
     history,
@@ -274,19 +264,21 @@ export function getState({
     resetInitialAppState: () => {
       initialAppState = appStateContainer.getState();
     },
-    resetAppState: () => {
-      const nextState = handleSourceColumnState(defaultState ?? {}, uiSettings);
+    resetAppState: (nextSavedSearch: SavedSearch) => {
+      const nextDefaultState = getStateDefaults({
+        config: uiSettings,
+        data,
+        savedSearch: nextSavedSearch,
+        storage,
+      });
+      const nextState = handleSourceColumnState(nextDefaultState, uiSettings);
       setState(appStateContainerModified, nextState);
     },
     getPreviousAppState: () => previousAppState,
     flushToUrl: () => stateStorage.kbnUrlControls.flush(),
     isAppStateDirty: () => !isEqualState(initialAppState, appStateContainer.getState()),
     pauseAutoRefreshInterval,
-    initializeAndSync: (
-      dataView: DataView,
-      filterManager: FilterManager,
-      data: DataPublicPluginStart
-    ) => {
+    initializeAndSync: (dataView: DataView, filterManager: FilterManager) => {
       if (appStateContainer.getState().index !== dataView.id) {
         // used data view is different than the given by url/state which is invalid
         setState(appStateContainerModified, { index: dataView.id });
