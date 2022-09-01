@@ -139,7 +139,7 @@ to follow if it's important for you to look inside of specific event e.g. `page-
   Consider the start point and end point of the measurment and what happens between those points.
   For example: a `app-data-load` event should not include the time it takes to render the data.
 - Choose event names
-  Try to balance event names specificity. Calling an event `load` is too generic, naving an event `tsvb-data-load` is too specific (instad the visualization 
+  Try to balance event names specificity. Calling an event `load` is too generic, calling an event `tsvb-data-load` is too specific (instead the visualization 
   type can be specified in a `meta` field)
 - Distinguish between flows with event context
   If a function that loads data is called when an app loads, when the user changes filters and when the refresh button is clicked, you should distinguish between
