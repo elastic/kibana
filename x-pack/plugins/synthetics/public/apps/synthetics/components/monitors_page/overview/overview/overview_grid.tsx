@@ -44,7 +44,6 @@ export const OverviewGrid = () => {
     page,
     sortField,
   });
-  console.warn('currentMonitors', currentMonitors);
 
   const intersectionRef = useRef(null);
   const intersection = useIntersection(intersectionRef, {
