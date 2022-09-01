@@ -26,7 +26,7 @@ import { useHasData } from '../../../../hooks/use_has_data';
 import { usePluginContext } from '../../../../hooks/use_plugin_context';
 import { useTimefilterService } from '../../../../hooks/use_timefilter_service';
 import { getNoDataConfig } from '../../../../utils/no_data_config';
-import { LoadingObservability } from '../../../overview/loading_observability';
+import { LoadingObservability } from '../../../overview';
 import { AlertsTableTGrid } from '../alerts_table_t_grid';
 import {
   Provider,
