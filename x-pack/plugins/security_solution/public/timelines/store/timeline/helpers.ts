@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getOr, omit, uniq, isEmpty, isEqualWith } from 'lodash/fp';
+import { getOr, omit, uniq, isEmpty, isEqualWith, cloneDeep } from 'lodash/fp';
 
 import uuid from 'uuid';
 
@@ -310,82 +310,92 @@ const queryMatchCustomizer = (dp1: QueryMatch, dp2: QueryMatch) => {
   return false;
 };
 
-const addAndToProviderInTimeline = (
+const addAndToProvidersInTimeline = (
   id: string,
-  provider: DataProvider,
+  providers: DataProvider[],
   timeline: TimelineModel,
   timelineById: TimelineById
 ): TimelineById => {
-  const alreadyExistsProviderIndex = timeline.dataProviders.findIndex(
-    (p) => p.id === timeline.highlightedDropAndProviderId
-  );
-  const newProvider = timeline.dataProviders[alreadyExistsProviderIndex];
-  const alreadyExistsAndProviderIndex = newProvider.and.findIndex((p) => p.id === provider.id);
-  const { and, ...andProvider } = provider;
+  if (providers.length === 0) return timelineById;
+  let localDataProviders: DataProvider[] = cloneDeep(timeline.dataProviders);
 
-  if (
-    isEqualWith(queryMatchCustomizer, newProvider.queryMatch, andProvider.queryMatch) ||
-    (alreadyExistsAndProviderIndex === -1 &&
-      newProvider.and.filter((itemAndProvider) =>
-        isEqualWith(queryMatchCustomizer, itemAndProvider.queryMatch, andProvider.queryMatch)
-      ).length > 0)
-  ) {
-    return timelineById;
-  }
+  providers.forEach((provider) => {
+    const alreadyExistsProviderIndex = localDataProviders.findIndex(
+      (p) => p.id === timeline.highlightedDropAndProviderId
+    );
+    const newProvider = localDataProviders[alreadyExistsProviderIndex];
+    const alreadyExistsAndProviderIndex = newProvider.and.findIndex((p) => p.id === provider.id);
+    const { and, ...andProvider } = provider;
 
-  const dataProviders = [
-    ...timeline.dataProviders.slice(0, alreadyExistsProviderIndex),
-    {
-      ...timeline.dataProviders[alreadyExistsProviderIndex],
-      and:
-        alreadyExistsAndProviderIndex > -1
-          ? [
-              ...newProvider.and.slice(0, alreadyExistsAndProviderIndex),
-              andProvider,
-              ...newProvider.and.slice(alreadyExistsAndProviderIndex + 1),
-            ]
-          : [...newProvider.and, andProvider],
-    },
-    ...timeline.dataProviders.slice(alreadyExistsProviderIndex + 1),
-  ];
+    if (
+      isEqualWith(queryMatchCustomizer, newProvider.queryMatch, andProvider.queryMatch) ||
+      (alreadyExistsAndProviderIndex === -1 &&
+        newProvider.and.filter((itemAndProvider) =>
+          isEqualWith(queryMatchCustomizer, itemAndProvider.queryMatch, andProvider.queryMatch)
+        ).length > 0)
+    ) {
+      return timelineById;
+    }
 
+    localDataProviders = [
+      ...localDataProviders.slice(0, alreadyExistsProviderIndex),
+      {
+        ...localDataProviders[alreadyExistsProviderIndex],
+        and:
+          alreadyExistsAndProviderIndex > -1
+            ? [
+                ...newProvider.and.slice(0, alreadyExistsAndProviderIndex),
+                andProvider,
+                ...newProvider.and.slice(alreadyExistsAndProviderIndex + 1),
+              ]
+            : [...newProvider.and, andProvider],
+      },
+      ...localDataProviders.slice(alreadyExistsProviderIndex + 1),
+    ];
+  });
   return {
     ...timelineById,
     [id]: {
       ...timeline,
-      dataProviders,
+      dataProviders: localDataProviders,
     },
   };
 };
 
-const addProviderToTimeline = (
+const addProvidersToTimeline = (
   id: string,
-  provider: DataProvider,
+  providers: DataProvider[],
   timeline: TimelineModel,
   timelineById: TimelineById
 ): TimelineById => {
-  const alreadyExistsAtIndex = timeline.dataProviders.findIndex((p) => p.id === provider.id);
+  if (providers.length === 0) return timelineById;
 
-  if (alreadyExistsAtIndex > -1 && !isEmpty(timeline.dataProviders[alreadyExistsAtIndex].and)) {
-    provider.id = `${provider.id}-${
-      timeline.dataProviders.filter((p) => p.id === provider.id).length
-    }`;
-  }
+  let localDataProviders: DataProvider[] = cloneDeep(timeline.dataProviders);
 
-  const dataProviders =
-    alreadyExistsAtIndex > -1 && isEmpty(timeline.dataProviders[alreadyExistsAtIndex].and)
-      ? [
-          ...timeline.dataProviders.slice(0, alreadyExistsAtIndex),
-          provider,
-          ...timeline.dataProviders.slice(alreadyExistsAtIndex + 1),
-        ]
-      : [...timeline.dataProviders, provider];
+  providers.forEach((provider) => {
+    const alreadyExistsAtIndex = localDataProviders.findIndex((p) => p.id === provider.id);
+
+    if (alreadyExistsAtIndex > -1 && !isEmpty(localDataProviders[alreadyExistsAtIndex].and)) {
+      provider.id = `${provider.id}-${
+        localDataProviders.filter((p) => p.id === provider.id).length
+      }`;
+    }
+
+    localDataProviders =
+      alreadyExistsAtIndex > -1 && isEmpty(localDataProviders[alreadyExistsAtIndex].and)
+        ? [
+            ...localDataProviders.slice(0, alreadyExistsAtIndex),
+            provider,
+            ...localDataProviders.slice(alreadyExistsAtIndex + 1),
+          ]
+        : [...localDataProviders, provider];
+  });
 
   return {
     ...timelineById,
     [id]: {
       ...timeline,
-      dataProviders,
+      dataProviders: localDataProviders,
     },
   };
 };
@@ -513,21 +523,20 @@ export const applyDeltaToTimelineColumnWidth = ({
 
 interface AddTimelineProviderParams {
   id: string;
-  provider: DataProvider;
+  providers: DataProvider[];
   timelineById: TimelineById;
 }
 
-export const addTimelineProvider = ({
+export const addTimelineProviders = ({
   id,
-  provider,
+  providers,
   timelineById,
 }: AddTimelineProviderParams): TimelineById => {
   const timeline = timelineById[id];
-
   if (timeline.highlightedDropAndProviderId !== '') {
-    return addAndToProviderInTimeline(id, provider, timeline, timelineById);
+    return addAndToProvidersInTimeline(id, providers, timeline, timelineById);
   } else {
-    return addProviderToTimeline(id, provider, timeline, timelineById);
+    return addProvidersToTimeline(id, providers, timeline, timelineById);
   }
 };
 

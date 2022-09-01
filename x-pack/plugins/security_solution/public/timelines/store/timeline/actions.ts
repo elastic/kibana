@@ -62,7 +62,7 @@ export const showTimeline = actionCreator<{ id: string; show: boolean }>('SHOW_T
 
 export const setInsertTimeline = actionCreator<InsertTimeline | null>('SET_INSERT_TIMELINE');
 
-export const addProvider = actionCreator<{ id: string; provider: DataProvider }>('ADD_PROVIDER');
+export const addProvider = actionCreator<{ id: string; providers: DataProvider[] }>('ADD_PROVIDER');
 
 export const saveTimeline = actionCreator<TimelinePersistInput>('SAVE_TIMELINE');
 
