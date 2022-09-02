@@ -74,6 +74,7 @@ import { createPrebuiltSavedObjectsRoute } from '../lib/prebuilt_saved_objects/r
 import { readAlertsIndexExistsRoute } from '../lib/detection_engine/routes/index/read_alerts_index_exists_route';
 import { getInstalledIntegrationsRoute } from '../lib/detection_engine/routes/fleet/get_installed_integrations/get_installed_integrations_route';
 import { registerResolverRoutes } from '../endpoint/routes/resolver';
+import { createRuleExceptionsRoute } from '../lib/detection_engine/routes/rules/create_rule_exceptions_route';
 
 export const initRoutes = (
   router: SecuritySolutionPluginRouter,
@@ -109,6 +110,7 @@ export const initRoutes = (
     previewRuleDataClient,
     getStartServices
   );
+  createRuleExceptionsRoute(router);
 
   // Once we no longer have the legacy notifications system/"side car actions" this should be removed.
   legacyCreateLegacyNotificationRoute(router, logger);

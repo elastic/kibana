@@ -8,6 +8,7 @@
 import expect from '@kbn/expect';
 
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
+import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,
@@ -187,6 +188,80 @@ export default ({ getService }: FtrProviderContext) => {
 
         const bodyToCompare = removeServerGeneratedProperties(body);
         expect(bodyToCompare).to.eql(outputRule);
+      });
+
+      it('should overwrite exception list value on patch - non additive', async () => {
+        await createRule(supertest, log, getSimpleRule('rule-1'));
+
+        // patch a simple rule's exceptions_list
+        await supertest
+          .patch(DETECTION_ENGINE_RULES_URL)
+          .set('kbn-xsrf', 'true')
+          .send({
+            rule_id: 'rule-1',
+            exceptions_list: [
+              {
+                id: '1',
+                list_id: '123',
+                namespace_type: 'single',
+                type: ExceptionListTypeEnum.RULE_DEFAULT,
+              },
+            ],
+          })
+          .expect(200);
+
+        // patch a simple rule's exceptions_list
+        const { body } = await supertest
+          .patch(DETECTION_ENGINE_RULES_URL)
+          .set('kbn-xsrf', 'true')
+          .send({
+            rule_id: 'rule-1',
+            exceptions_list: [
+              {
+                id: '2',
+                list_id: '123',
+                namespace_type: 'single',
+                type: ExceptionListTypeEnum.DETECTION,
+              },
+            ],
+          })
+          .expect(200);
+
+        expect(body.exceptions_list).to.eql([
+          { id: '2', list_id: '123', namespace_type: 'single', type: 'detection' },
+        ]);
+      });
+
+      it('should throw error if trying to add more than one default exception list', async () => {
+        await createRule(supertest, log, getSimpleRule('rule-1'));
+
+        // patch a simple rule's exceptions_list
+        const { body } = await supertest
+          .patch(DETECTION_ENGINE_RULES_URL)
+          .set('kbn-xsrf', 'true')
+          .send({
+            rule_id: 'rule-1',
+            exceptions_list: [
+              {
+                id: '1',
+                list_id: '123',
+                namespace_type: 'single',
+                type: ExceptionListTypeEnum.RULE_DEFAULT,
+              },
+              {
+                id: '2',
+                list_id: '456',
+                namespace_type: 'single',
+                type: ExceptionListTypeEnum.RULE_DEFAULT,
+              },
+            ],
+          })
+          .expect(500);
+
+        expect(body).to.eql({
+          message: 'More than one default exception list found on rule',
+          status_code: 500,
+        });
       });
 
       it('should return the rule with migrated actions after the enable patch', async () => {

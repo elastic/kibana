@@ -19,6 +19,7 @@ import { createRulesSchema } from '../../../../../common/detection_engine/schema
 import { newTransformValidate } from './validate';
 import { createRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/create_rules_type_dependents';
 import { createRules } from '../../rules/create_rules';
+import { checkDefaultRuleExceptionListReferences } from './utils/check_for_default_rule_exception_list';
 
 export const createRulesRoute = (
   router: SecuritySolutionPluginRouter,
@@ -78,6 +79,9 @@ export const createRulesRoute = (
 
         // This will create the endpoint list if it does not exist yet
         await ctx.lists?.getExceptionListClient().createEndpointList();
+        checkDefaultRuleExceptionListReferences({
+          exceptionLists: request.body.exceptions_list,
+        });
         const createdRule = await createRules({
           rulesClient,
           params: request.body,
