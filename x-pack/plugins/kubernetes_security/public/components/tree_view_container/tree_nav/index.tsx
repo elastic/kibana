@@ -15,7 +15,6 @@ import {
   EuiFlexItem,
   EuiToolTip,
 } from '@elastic/eui';
-import { KubernetesCollection } from '../../../types';
 import {
   TREE_VIEW_INFRASTRUCTURE_VIEW,
   TREE_VIEW_LOGICAL_VIEW,
@@ -122,9 +121,7 @@ export const TreeNav = () => {
               const newSelectionDepth = {
                 ...selectionDepth,
                 [type]: key,
-                ...(clusterName && {
-                  [KubernetesCollection.clusterName]: clusterName,
-                }),
+                ...(clusterName && { clusterName }),
               };
               setSelected(
                 Object.entries(newSelectionDepth)

@@ -93,6 +93,7 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({
               if (updatedQuery.ecs_mapping) {
                 draft[showEditQueryFlyout].ecs_mapping = updatedQuery.ecs_mapping;
               } else {
+                // @ts-expect-error update types
                 delete draft[showEditQueryFlyout].ecs_mapping;
               }
 
@@ -231,6 +232,7 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({
       {showEditQueryFlyout != null && showEditQueryFlyout >= 0 && (
         <QueryFlyout
           uniqueQueryIds={uniqueQueryIds}
+          // @ts-expect-error update types
           defaultValue={field.value[showEditQueryFlyout]}
           onSave={handleEditQuery}
           onClose={handleHideEditFlyout}

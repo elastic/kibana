@@ -32,6 +32,7 @@ import { LoadingIndicator } from '../../components/common/loading_indicator';
 import { DiscoverError } from '../../components/common/error_alert';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { getUrlTracker } from '../../kibana_services';
+import { restoreStateFromSavedSearch } from '../../services/saved_searches/restore_from_saved_search';
 
 const DiscoverMainAppMemoized = memo(DiscoverMainApp);
 
@@ -117,6 +118,7 @@ export function DiscoverMainRoute(props: Props) {
         search: services.data.search,
         savedObjectsClient: core.savedObjects.client,
         spaces: services.spaces,
+        savedObjectsTagging: services.savedObjectsTagging,
       });
 
       const currentDataView = await loadDefaultOrCurrentDataView(currentSavedSearch.searchSource);
@@ -128,6 +130,11 @@ export function DiscoverMainRoute(props: Props) {
       if (!currentSavedSearch.searchSource.getField('index')) {
         currentSavedSearch.searchSource.setField('index', currentDataView);
       }
+
+      restoreStateFromSavedSearch({
+        savedSearch: currentSavedSearch,
+        timefilter: services.timefilter,
+      });
 
       setSavedSearch(currentSavedSearch);
 
@@ -163,8 +170,10 @@ export function DiscoverMainRoute(props: Props) {
     }
   }, [
     id,
-    services.data.search,
+    services.data,
     services.spaces,
+    services.timefilter,
+    services.savedObjectsTagging,
     core.savedObjects.client,
     core.application.navigateToApp,
     core.theme,

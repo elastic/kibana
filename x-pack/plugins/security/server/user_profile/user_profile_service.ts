@@ -28,7 +28,7 @@ import { getPrintableSessionId } from '../session_management';
 import type { UserProfileGrant } from './user_profile_grant';
 
 const KIBANA_DATA_ROOT = 'kibana';
-const ACTIVATION_MAX_RETRIES = 3;
+const ACTIVATION_MAX_RETRIES = 10;
 const ACTIVATION_RETRY_SCALE_DURATION_MS = 150;
 const MAX_SUGGESTIONS_COUNT = 100;
 const DEFAULT_SUGGESTIONS_COUNT = 10;
@@ -190,8 +190,6 @@ function parseUserProfile<D extends UserProfileData>(
       email: rawUserProfile.user.email ?? undefined,
       // @elastic/elasticsearch types support `null` values for the `full_name`, but we don't.
       full_name: rawUserProfile.user.full_name ?? undefined,
-      // @ts-expect-error @elastic/elasticsearch SecurityUserProfileUser.display_name?: string
-      display_name: rawUserProfile.user.display_name ?? undefined,
     },
   };
 }

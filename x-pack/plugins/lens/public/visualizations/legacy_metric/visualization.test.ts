@@ -6,7 +6,7 @@
  */
 
 import { getLegacyMetricVisualization } from './visualization';
-import type { MetricState } from '../../../common/types';
+import type { LegacyMetricState } from '../../../common/types';
 import { layerTypes } from '../../../common';
 import { createMockDatasource, createMockFramePublicAPI } from '../../mocks';
 import { generateId } from '../../id_generator';
@@ -17,7 +17,7 @@ import { themeServiceMock } from '@kbn/core/public/mocks';
 
 jest.mock('../../id_generator');
 
-function exampleState(): MetricState {
+function exampleState(): LegacyMetricState {
   return {
     accessor: 'a',
     layerId: 'l1',
