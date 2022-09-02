@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { METRIC_TYPES } from '@kbn/data-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { SupportedAggregation } from '../../../types';
 import {
@@ -19,6 +20,20 @@ import {
 } from '../../types';
 
 import { SchemaConfig } from '../../../types';
+
+export type MetricsWithField = Exclude<
+  METRIC_TYPES,
+  | METRIC_TYPES.FILTERED_METRIC
+  | METRIC_TYPES.AVG_BUCKET
+  | METRIC_TYPES.SUM_BUCKET
+  | METRIC_TYPES.MAX_BUCKET
+  | METRIC_TYPES.MIN_BUCKET
+  | METRIC_TYPES.MOVING_FN
+  | METRIC_TYPES.CUMULATIVE_SUM
+  | METRIC_TYPES.DERIVATIVE
+  | METRIC_TYPES.SERIAL_DIFF
+  | METRIC_TYPES.COUNT
+>;
 
 export interface CommonColumnConverterArgs<
   Agg extends SupportedAggregation = SupportedAggregation
