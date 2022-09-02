@@ -62,11 +62,11 @@ interface SchemaConfigParams {
 
 export type SupportedAggregation = typeof SUPPORTED_AGGREGATIONS[number];
 
-export interface SchemaConfig {
+export interface SchemaConfig<Agg extends SupportedAggregation = SupportedAggregation> {
   accessor: number;
   label: string;
   format: SerializedFieldFormat;
   params: SchemaConfigParams;
-  aggType: SupportedAggregation;
-  aggParams?: AggParamsMapping[SupportedAggregation];
+  aggType: Agg;
+  aggParams?: AggParamsMapping[Agg];
 }

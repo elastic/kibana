@@ -8,38 +8,31 @@
 
 import uuid from 'uuid';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
-import {
-  BaseColumn,
-  Operation,
-  DataType,
-  ColumnWithMeta as GenericColumnWithMeta,
-} from '../../types';
+import { DataType } from '../../types';
+import { SchemaConfig, SupportedAggregation } from '../../../types';
+import { AggId, ExtraColumnFields, GeneralColumnWithMeta } from './types';
 
-interface Meta {
-  metricId: string;
-}
+export const createAggregationId = (agg: SchemaConfig): AggId => `${agg.aggType}.${agg.accessor}`;
 
-type GeneralColumn = Omit<BaseColumn<Operation, unknown>, 'operationType' | 'params'>;
-type GeneralColumnWithMeta = GenericColumnWithMeta<GeneralColumn, Meta>;
-interface ExtraColumnFields {
-  isBucketed?: boolean;
-  isSplit?: boolean;
-  reducedTimeRange?: string;
-}
-
-export const createColumn = (
-  metricId: string,
+export const createColumn = <T extends SupportedAggregation>(
+  agg: SchemaConfig<T>,
   field?: DataViewField,
-  label?: string,
-  timeShift?: string,
   { isBucketed = false, isSplit = false, reducedTimeRange }: ExtraColumnFields = {}
-): GeneralColumnWithMeta => ({
-  columnId: uuid(),
-  dataType: (field?.type as DataType) ?? undefined,
-  label,
-  isBucketed,
-  isSplit,
-  reducedTimeRange,
-  timeShift,
-  meta: { metricId },
-});
+): GeneralColumnWithMeta => {
+  const label =
+    agg.aggParams && 'customLabel' in agg.aggParams
+      ? agg.aggParams.customLabel
+      : agg.label ?? field?.displayName;
+
+  const aggId = createAggregationId(agg);
+  return {
+    columnId: uuid(),
+    dataType: (field?.type as DataType) ?? undefined,
+    label,
+    isBucketed,
+    isSplit,
+    reducedTimeRange,
+    // timeShift, //TODO: do it later
+    meta: { aggId },
+  };
+};
