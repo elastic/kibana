@@ -81,7 +81,7 @@ describe('Assignees', () => {
     });
 
     await act(async () => {
-      await userEvent.type(result.getByTestId('comboBoxSearchInput'), 'dr', { delay: 200 });
+      await userEvent.type(result.getByTestId('comboBoxSearchInput'), 'dr', { delay: 1 });
     });
 
     await waitFor(() => {
