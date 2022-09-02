@@ -28,8 +28,11 @@ jest.mock('fs', () => ({
       };
     }
   }),
-  readdirSync: jest.fn().mockImplementation(() => {
-    return ['oldest.yml', 'newest.yml', 'middle.yml'];
+}));
+
+jest.mock('globby', () => ({
+  sync: jest.fn().mockImplementation(() => {
+    return ['/data/oldest.yml', '/data/newest.yml', '/data/middle.yml'];
   }),
 }));
 
