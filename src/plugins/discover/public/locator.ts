@@ -11,7 +11,10 @@ import type { Filter, TimeRange, Query, AggregateQuery } from '@kbn/es-query';
 import type { GlobalQueryStateFromUrl, RefreshInterval } from '@kbn/data-plugin/public';
 import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
+import { DataViewSpec } from '@kbn/data-views-plugin/public';
+import { CoreSetup } from '@kbn/core/public';
 import type { VIEW_MODE } from './components/view_mode_toggle';
+import { DiscoverStart, DiscoverStartPlugins } from './plugin';
 
 export const DISCOVER_APP_LOCATOR = 'DISCOVER_APP_LOCATOR';
 
@@ -30,6 +33,7 @@ export interface DiscoverAppLocatorParams extends SerializableRecord {
    * @deprecated
    */
   indexPatternId?: string;
+  dataViewSpec?: DataViewSpec;
 
   /**
    * Optionally set the time range in the time picker.
@@ -94,6 +98,7 @@ export interface DiscoverAppLocatorParams extends SerializableRecord {
 export type DiscoverAppLocator = LocatorPublic<DiscoverAppLocatorParams>;
 
 export interface DiscoverAppLocatorDependencies {
+  core: CoreSetup<DiscoverStartPlugins, DiscoverStart>;
   useHash: boolean;
 }
 
@@ -108,6 +113,7 @@ export class DiscoverAppLocatorDefinition implements LocatorDefinition<DiscoverA
       filters,
       dataViewId,
       indexPatternId,
+      dataViewSpec,
       query,
       refreshInterval,
       savedSearchId,
@@ -149,6 +155,14 @@ export class DiscoverAppLocatorDefinition implements LocatorDefinition<DiscoverA
     if (refreshInterval) queryState.refreshInterval = refreshInterval;
     if (viewMode) appState.viewMode = viewMode;
     if (hideAggregatedPreview) appState.hideAggregatedPreview = hideAggregatedPreview;
+
+    if (dataViewSpec) {
+      const [, discoverPlugins] = await this.deps.core.getStartServices();
+      const dataViews = discoverPlugins.data.dataViews;
+
+      const dataView = await dataViews.create(dataViewSpec);
+      appState.index = dataView.id!;
+    }
 
     let path = `#/${savedSearchPath}`;
     path = setStateToKbnUrl<GlobalQueryStateFromUrl>('_g', queryState, { useHash }, path);
