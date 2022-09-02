@@ -6,20 +6,12 @@
  * Side Public License, v 1.
  */
 
-import React, { useContext, useMemo } from 'react';
+import React, { useContext } from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
-  EuiPanel,
-  EuiText,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiPanel, EuiText } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
-import { cx, css } from '@emotion/css';
 import type { Path } from './filters_builder_types';
-import { ConditionTypes, isOrFilter } from '../utils';
+import { ConditionTypes } from '../utils';
 import { FilterItem } from './filters_builder_filter_item';
 import { FiltersBuilderContextType } from './filters_builder_context';
 import { getPathInArray } from './filters_builder_utils';
@@ -32,40 +24,23 @@ export interface FilterGroupProps {
   reverseBackground?: boolean;
 }
 
-const Delimiter = ({
-  conditionType,
-  isRootLevelFilterGroup,
-}: {
-  conditionType: ConditionTypes;
-  isRootLevelFilterGroup: boolean;
-}) => {
-  return conditionType === ConditionTypes.OR ? (
-    <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
-      <EuiFlexItem
-        grow={1}
-        style={{ marginLeft: isRootLevelFilterGroup ? '4px' : '-12px', flexGrow: 0.12 }}
-      >
-        <EuiHorizontalRule margin="m" />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiText size="s" color="subdued">
-          {i18n.translate('unifiedSearch.filter.filtersBuilder.orDelimiterLabel', {
-            defaultMessage: 'OR',
-          })}
-        </EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem grow={10} style={{ marginRight: isRootLevelFilterGroup ? '4px' : '-12px' }}>
-        <EuiHorizontalRule margin="m" />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  ) : (
-    <EuiFlexGroup>
-      <EuiFlexItem grow={false} style={{ maxHeight: '8px' }}>
-        <EuiHorizontalRule margin="xs" />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-};
+const OrDelimiter = () => (
+  <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
+    <EuiFlexItem grow={1} style={{ flexGrow: 0.12 }}>
+      <EuiHorizontalRule margin="xs" />
+    </EuiFlexItem>
+    <EuiFlexItem grow={false}>
+      <EuiText size="xs" color="subdued">
+        {i18n.translate('unifiedSearch.filter.filtersBuilder.orDelimiterLabel', {
+          defaultMessage: 'OR',
+        })}
+      </EuiText>
+    </EuiFlexItem>
+    <EuiFlexItem grow={10}>
+      <EuiHorizontalRule margin="xs" />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+);
 
 export const FilterGroup = ({
   filters,
@@ -74,17 +49,6 @@ export const FilterGroup = ({
   timeRangeForSuggestionsOverride,
   reverseBackground = true,
 }: FilterGroupProps) => {
-  const { euiTheme } = useEuiTheme();
-
-  const border = useMemo(
-    () =>
-      css`
-        border: ${euiTheme.border.thin};
-        border-radius: ${euiTheme.border.radius.medium};
-      `,
-    [euiTheme.border.thin, euiTheme.border.radius.medium]
-  );
-
   const {
     globalParams: { maxDepth, hideOr },
   } = useContext(FiltersBuilderContextType);
@@ -94,25 +58,19 @@ export const FilterGroup = ({
   const orDisabled = hideOr || (isDepthReached && conditionType === ConditionTypes.AND);
   const andDisabled = isDepthReached && conditionType === ConditionTypes.OR;
   const removeDisabled = pathInArray.length <= 1 && filters.length === 1;
-  const color = !reverseBackground ? 'subdued' : 'plain';
   const isRootLevelFilterGroup = pathInArray.length <= 1;
-
-  const shouldDrawBorder = (filter: Filter) => !isRootLevelFilterGroup && isOrFilter(filter);
+  const color = isRootLevelFilterGroup || !reverseBackground ? 'subdued' : 'plain';
 
   return (
     <EuiPanel
       color={color}
-      paddingSize={`${isRootLevelFilterGroup ? 'none' : 'm'}`}
       hasShadow={false}
       hasBorder={!isRootLevelFilterGroup}
+      paddingSize="none"
     >
       {filters.map((filter, index, acc) => (
         <EuiFlexGroup direction="column" gutterSize="none">
-          <EuiFlexItem
-            className={cx({
-              [border]: shouldDrawBorder(filter),
-            })}
-          >
+          <EuiFlexItem>
             <FilterItem
               filter={filter}
               path={`${path}${path ? '.' : ''}${index}`}
@@ -126,12 +84,9 @@ export const FilterGroup = ({
             />
           </EuiFlexItem>
 
-          {conditionType && index + 1 < acc.length ? (
+          {conditionType === ConditionTypes.OR && index + 1 < acc.length ? (
             <EuiFlexItem>
-              <Delimiter
-                conditionType={conditionType}
-                isRootLevelFilterGroup={isRootLevelFilterGroup}
-              />
+              <OrDelimiter />
             </EuiFlexItem>
           ) : null}
         </EuiFlexGroup>

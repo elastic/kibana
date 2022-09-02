@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useContext } from 'react';
+import React, { useCallback, useContext, useMemo } from 'react';
 import {
   EuiButtonIcon,
   EuiDraggable,
@@ -16,6 +16,7 @@ import {
   EuiFormRow,
   EuiIcon,
   EuiPanel,
+  useEuiPaddingSize,
 } from '@elastic/eui';
 import { buildEmptyFilter, FieldFilter, Filter, getFilterParams } from '@kbn/es-query';
 import { DataViewField } from '@kbn/data-views-plugin/common';
@@ -83,6 +84,15 @@ export function FilterItem({
     operator = getOperatorFromFilter(filter);
     params = getFilterParams(filter);
   }
+
+  const lPadding = useEuiPaddingSize('s');
+
+  const containerStyles = useMemo(() => {
+    return css`
+      padding-top: ${lPadding};
+      padding-bottom: ${lPadding};
+    `;
+  }, [lPadding]);
 
   const onHandleField = useCallback(
     (selectedField: DataViewField) => {
@@ -155,7 +165,7 @@ export function FilterItem({
   }
 
   return (
-    <>
+    <div className={containerStyles}>
       {conditionalOperationType ? (
         <FilterGroup
           path={path}
@@ -239,12 +249,12 @@ export function FilterItem({
                           </EuiFlexItem>
                         </EuiFlexGroup>
                       </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
+                      <EuiFlexItem grow={1}>
                         <EuiFlexGroup
                           responsive={false}
                           justifyContent="center"
                           alignItems="center"
-                          gutterSize="m"
+                          gutterSize="s"
                         >
                           <EuiFlexItem grow={false}>
                             <EuiButtonIcon
@@ -302,6 +312,6 @@ export function FilterItem({
           </EuiDraggable>
         </EuiDroppable>
       )}
-    </>
+    </div>
   );
 }
