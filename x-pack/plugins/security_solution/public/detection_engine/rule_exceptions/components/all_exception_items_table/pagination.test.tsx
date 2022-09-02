@@ -28,7 +28,7 @@ describe('ExceptionsViewerPagination', () => {
     wrapper.find('button[data-test-subj="tablePaginationPopoverButton"]').at(0).simulate('click');
     wrapper.find('button[data-test-subj="tablePagination-50-rows"]').at(0).simulate('click');
 
-    expect(mockOnPaginationChange).toHaveBeenCalledWith({ page: 0, perPage: 50 });
+    expect(mockOnPaginationChange).toHaveBeenCalledWith({ pagination: { page: 0, perPage: 50 } });
   });
 
   it('it invokes "onPaginationChange" when next clicked', () => {
@@ -47,7 +47,7 @@ describe('ExceptionsViewerPagination', () => {
 
     wrapper.find('button[data-test-subj="pagination-button-next"]').at(0).simulate('click');
 
-    expect(mockOnPaginationChange).toHaveBeenCalledWith({ page: 1, perPage: 5 });
+    expect(mockOnPaginationChange).toHaveBeenCalledWith({ pagination: { page: 1, perPage: 5 } });
   });
 
   it('it invokes "onPaginationChange" when page clicked', () => {
@@ -66,6 +66,6 @@ describe('ExceptionsViewerPagination', () => {
 
     wrapper.find('button[data-test-subj="pagination-button-2"]').simulate('click');
 
-    expect(mockOnPaginationChange).toHaveBeenCalledWith({ page: 2, perPage: 50 });
+    expect(mockOnPaginationChange).toHaveBeenCalledWith({ pagination: { page: 2, perPage: 50 } });
   });
 });

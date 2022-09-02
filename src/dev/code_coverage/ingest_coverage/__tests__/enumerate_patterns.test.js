@@ -37,14 +37,4 @@ describe(`enumeratePatterns`, () => {
       'src/plugins/charts/common/static/color_maps/color_maps.ts kibana-app'
     );
   });
-  it(`should resolve x-pack/plugins/security_solution/public/detection_engine/rule_exceptions/components/edit_exception_flyout/translations.ts to kibana-security`, () => {
-    const short = 'x-pack/plugins/security_solution';
-    const actual = enumeratePatterns(REPO_ROOT)(log)(new Map([[short, ['kibana-security']]]));
-
-    expect(
-      actual[0].includes(
-        `${short}/public/detection_engine/rule_exceptions/components/edit_exception_flyout/translations.ts`
-      )
-    ).toBe(true);
-  });
 });

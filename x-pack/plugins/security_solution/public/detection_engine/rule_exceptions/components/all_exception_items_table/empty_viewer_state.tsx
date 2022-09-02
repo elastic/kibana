@@ -21,12 +21,14 @@ import type { ViewerState } from './reducer';
 import illustration from '../../../../common/images/illustration_product_no_results_magnifying_glass.svg';
 
 interface ExeptionItemsViewerEmptyPromptsComponentProps {
+  isReadOnly: boolean;
   listType: ExceptionListTypeEnum;
   currentState: ViewerState;
   onCreateExceptionListItem: () => void;
 }
 
 const ExeptionItemsViewerEmptyPromptsComponent = ({
+  isReadOnly,
   listType,
   currentState,
   onCreateExceptionListItem,
@@ -69,6 +71,7 @@ const ExeptionItemsViewerEmptyPromptsComponent = ({
                 onClick={onCreateExceptionListItem}
                 iconType="plusInCircle"
                 color="primary"
+                isDisabled={isReadOnly}
                 fill
               >
                 {listType === ExceptionListTypeEnum.ENDPOINT
@@ -97,7 +100,7 @@ const ExeptionItemsViewerEmptyPromptsComponent = ({
           <EuiLoadingContent lines={4} data-test-subj="exceptionItemViewerEmptyPrompts-loading" />
         );
     }
-  }, [currentState, euiTheme.colors.darkestShade, listType, onCreateExceptionListItem]);
+  }, [currentState, euiTheme.colors.darkestShade, isReadOnly, listType, onCreateExceptionListItem]);
 
   return (
     <EuiPanel

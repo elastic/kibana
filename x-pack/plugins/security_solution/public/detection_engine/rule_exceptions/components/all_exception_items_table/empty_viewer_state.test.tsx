@@ -17,6 +17,7 @@ describe('ExeptionItemsViewerEmptyPrompts', () => {
   it('it renders loading screen when "currentState" is "loading"', () => {
     const wrapper = mount(
       <ExeptionItemsViewerEmptyPrompts
+        isReadOnly={false}
         listType={ExceptionListTypeEnum.DETECTION}
         currentState="loading"
         onCreateExceptionListItem={jest.fn()}
@@ -31,6 +32,7 @@ describe('ExeptionItemsViewerEmptyPrompts', () => {
   it('it renders empty search screen when "currentState" is "empty_search"', () => {
     const wrapper = mount(
       <ExeptionItemsViewerEmptyPrompts
+        isReadOnly={false}
         listType={ExceptionListTypeEnum.DETECTION}
         currentState="empty_search"
         onCreateExceptionListItem={jest.fn()}
@@ -45,6 +47,7 @@ describe('ExeptionItemsViewerEmptyPrompts', () => {
   it('it renders no endpoint items screen when "currentState" is "empty" and "listType" is "endpoint"', () => {
     const wrapper = mount(
       <ExeptionItemsViewerEmptyPrompts
+        isReadOnly={false}
         listType={ExceptionListTypeEnum.ENDPOINT}
         currentState="empty"
         onCreateExceptionListItem={jest.fn()}
@@ -65,6 +68,7 @@ describe('ExeptionItemsViewerEmptyPrompts', () => {
   it('it renders no exception items screen when "currentState" is "empty" and "listType" is "detection"', () => {
     const wrapper = mount(
       <ExeptionItemsViewerEmptyPrompts
+        isReadOnly={false}
         listType={ExceptionListTypeEnum.DETECTION}
         currentState="empty"
         onCreateExceptionListItem={jest.fn()}

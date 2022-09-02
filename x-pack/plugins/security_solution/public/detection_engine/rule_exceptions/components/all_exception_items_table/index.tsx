@@ -367,6 +367,7 @@ const ExceptionsViewerComponent = ({
           )}
 
           <ExceptionsViewerItems
+            isReadOnly={isReadOnly}
             disableActions={isReadOnly || viewerState === 'deleting'}
             exceptions={exceptions}
             listType={listType}

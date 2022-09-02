@@ -28,6 +28,7 @@ const MyFlexItem = styled(EuiFlexItem)`
 `;
 
 interface ExceptionItemsViewerProps {
+  isReadOnly: boolean;
   disableActions: boolean;
   exceptions: ExceptionListItemSchema[];
   listType: ExceptionListTypeEnum;
@@ -39,6 +40,7 @@ interface ExceptionItemsViewerProps {
 }
 
 const ExceptionItemsViewerComponent: React.FC<ExceptionItemsViewerProps> = ({
+  isReadOnly,
   exceptions,
   listType,
   disableActions,
@@ -52,6 +54,7 @@ const ExceptionItemsViewerComponent: React.FC<ExceptionItemsViewerProps> = ({
     <>
       {viewerState != null && viewerState !== 'deleting' ? (
         <ExeptionItemsViewerEmptyPrompts
+          isReadOnly={isReadOnly}
           listType={listType}
           currentState={viewerState}
           onCreateExceptionListItem={onCreateExceptionListItem}

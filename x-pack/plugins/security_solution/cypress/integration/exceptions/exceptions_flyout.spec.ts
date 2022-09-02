@@ -14,7 +14,7 @@ import { goToRuleDetails } from '../../tasks/alerts_detection_rules';
 import { esArchiverLoad, esArchiverResetKibana, esArchiverUnload } from '../../tasks/es_archiver';
 import { login, visitWithoutDateRange } from '../../tasks/login';
 import {
-  openExceptionFlyoutFromRuleSettings,
+  openExceptionFlyoutFromEmptyViewerPrompt,
   goToExceptionsTab,
   editException,
 } from '../../tasks/rule_details';
@@ -201,7 +201,7 @@ describe('Exceptions flyout', () => {
   });
 
   it('Does not overwrite values of nested entry items', () => {
-    openExceptionFlyoutFromRuleSettings();
+    openExceptionFlyoutFromEmptyViewerPrompt();
     cy.get(LOADING_SPINNER).should('not.exist');
 
     // exception item 1

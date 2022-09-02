@@ -64,7 +64,7 @@ const ExceptionsViewerSearchBarComponent = ({
 }: ExceptionsViewerSearchBarProps): JSX.Element => {
   const handleOnSearch = useCallback(
     ({ queryText }): void => {
-      onSearch(queryText);
+      onSearch({ search: queryText });
     },
     [onSearch]
   );
@@ -87,6 +87,7 @@ const ExceptionsViewerSearchBarComponent = ({
             placeholder: 'Search on the fields below: e.g. name:"my list"',
             incremental: false,
             schema: ITEMS_SCHEMA,
+            'data-test-subj': 'exceptionsViewerSearchBar',
           }}
           filters={[]}
           onChange={handleOnSearch}
