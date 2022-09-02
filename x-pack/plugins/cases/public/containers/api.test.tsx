@@ -397,7 +397,7 @@ describe('Cases API', () => {
         query: {
           searchTerm: 'user',
           size: 1,
-          owners: [SECURITY_SOLUTION_OWNER],
+          owners: JSON.stringify([SECURITY_SOLUTION_OWNER]),
         },
       });
     });

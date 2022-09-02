@@ -32,6 +32,7 @@ export default ({ getService }: FtrProviderContext): void => {
   describe('find_assignees', () => {
     const es = getService('es');
     const supertestWithoutAuth = getService('supertestWithoutAuth');
+    const supertest = getService('supertest');
 
     afterEach(async () => {
       await deleteAllCaseItems(es);
@@ -41,9 +42,6 @@ export default ({ getService }: FtrProviderContext): void => {
       { user: secAllUser, owner: SECURITY_SOLUTION_APP_ID },
       { user: casesAllUser, owner: CASES_APP_ID },
       { user: obsCasesAllUser, owner: OBSERVABILITY_APP_ID },
-      { user: secAllCasesReadUser, owner: SECURITY_SOLUTION_APP_ID },
-      { user: casesReadUser, owner: CASES_APP_ID },
-      { user: obsCasesReadUser, owner: OBSERVABILITY_APP_ID },
     ]) {
       it(`User ${
         user.username
@@ -72,6 +70,42 @@ export default ({ getService }: FtrProviderContext): void => {
 
         expect(assignees.length).to.be(1);
         expect(assignees[0].user.username).to.eql(user.username);
+      });
+    }
+
+    // these users do not have access to the _suggest_user_profiles api so they can't be included in the tests above
+    // but they should not receive a 403 like the tests below
+    for (const { user, owner } of [
+      { user: secAllCasesReadUser, owner: SECURITY_SOLUTION_APP_ID },
+      { user: casesReadUser, owner: CASES_APP_ID },
+      { user: obsCasesReadUser, owner: OBSERVABILITY_APP_ID },
+    ]) {
+      it(`User ${
+        user.username
+      } with role(s) ${user.roles.join()} can make requests to _find_assignees`, async () => {
+        const profiles = await suggestUserProfiles({
+          supertest,
+          req: {
+            name: '',
+            owners: [owner],
+            size: 1,
+          },
+        });
+
+        await createCase(
+          supertest,
+          getPostCaseRequest({ owner, assignees: [{ uid: profiles[0].uid }] }),
+          200
+        );
+
+        const assignees = await findAssignees({
+          supertest: supertestWithoutAuth,
+          req: { searchTerm: '', owners: [owner] },
+          auth: { user, space: null },
+        });
+
+        expect(assignees.length).to.be(1);
+        expect(assignees[0].user.username).to.eql(profiles[0].user.username);
       });
     }
 
