@@ -12,11 +12,16 @@ import { MetricAggType } from './metric_agg_type';
 import { makeNestedLabel } from './lib/make_nested_label';
 import { siblingPipelineAggHelper } from './lib/sibling_pipeline_agg_helper';
 import { METRIC_TYPES } from './metric_agg_types';
-import { AggConfigSerialized, BaseAggParams } from '../types';
+import { AggConfigSerialized, BaseAggParams, IAggConfig } from '../types';
 
-export interface AggParamsBucketMin extends BaseAggParams {
+export interface AggParamsBucketMinSerialized extends BaseAggParams {
   customMetric?: AggConfigSerialized;
   customBucket?: AggConfigSerialized;
+}
+
+export interface AggParamsBucketMin extends BaseAggParams {
+  customMetric?: IAggConfig;
+  customBucket?: IAggConfig;
 }
 
 const overallMinLabel = i18n.translate('data.search.aggs.metrics.overallMinLabel', {
