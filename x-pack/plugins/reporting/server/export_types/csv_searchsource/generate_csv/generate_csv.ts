@@ -84,7 +84,13 @@ export class CsvGenerator {
     try {
       results = (
         await lastValueFrom(
-          this.clients.data.search(searchParams, { strategy: ES_SEARCH_STRATEGY })
+          this.clients.data.search(searchParams, {
+            strategy: ES_SEARCH_STRATEGY,
+            transport: {
+              maxRetries: 1, // retrying reporting jobs is handled in the task manager scheduling logic
+              requestTimeout: this.config.get('csv', 'scroll', 'duration'),
+            },
+          })
         )
       ).rawResponse as estypes.SearchResponse<unknown>;
     } catch (err) {

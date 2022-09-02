@@ -28,7 +28,7 @@ export const esSearchStrategyProvider = (
    * @throws `KbnServerError`
    * @returns `Observable<IEsSearchResponse<any>>`
    */
-  search: (request, { abortSignal, ...options }, { esClient, uiSettingsClient }) => {
+  search: (request, { abortSignal, transport, ...options }, { esClient, uiSettingsClient }) => {
     // Only default index pattern type is supported here.
     // See ese for other type support.
     if (request.indexType) {
@@ -48,6 +48,7 @@ export const esSearchStrategyProvider = (
         };
         const body = await esClient.asCurrentUser.search(params, {
           signal: abortSignal,
+          ...transport,
         });
         const response = shimHitsTotal(body, options);
         return toKibanaSearchResponse(response);

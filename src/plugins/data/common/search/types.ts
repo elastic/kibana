@@ -5,6 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
+import { TransportRequestOptions } from '@elastic/elasticsearch';
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { Observable } from 'rxjs';
@@ -132,6 +134,11 @@ export interface ISearchOptions {
    * Index pattern reference is used for better error messages
    */
   indexPattern?: DataView;
+
+  /**
+   *
+   */
+  transport?: Omit<TransportRequestOptions, 'signal'>;
 }
 
 /**
