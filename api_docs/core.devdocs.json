@@ -17474,13 +17474,7 @@
               "{@link I18nServiceSetup}"
             ],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.I18nServiceSetup",
-                "text": "I18nServiceSetup"
-              }
+              "I18nServiceSetup"
             ],
             "path": "src/core/server/index.ts",
             "deprecated": false
@@ -22202,7 +22196,10 @@
         "tags": [],
         "label": "I18nServiceSetup",
         "description": [],
-        "path": "src/core/server/i18n/i18n_service.ts",
+        "signature": [
+          "I18nServiceSetup"
+        ],
+        "path": "node_modules/@types/kbn__core-i18n-server/index.d.ts",
         "deprecated": false,
         "children": [
           {
@@ -22217,7 +22214,7 @@
             "signature": [
               "() => string"
             ],
-            "path": "src/core/server/i18n/i18n_service.ts",
+            "path": "node_modules/@types/kbn__core-i18n-server/index.d.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
@@ -22234,7 +22231,7 @@
             "signature": [
               "() => string[]"
             ],
-            "path": "src/core/server/i18n/i18n_service.ts",
+            "path": "node_modules/@types/kbn__core-i18n-server/index.d.ts",
             "deprecated": false,
             "children": [],
             "returnComment": []
