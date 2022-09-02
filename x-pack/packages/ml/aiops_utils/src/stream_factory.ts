@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import crypto from 'crypto';
 import { Stream } from 'stream';
 import * as zlib from 'zlib';
 
@@ -101,36 +100,18 @@ export function streamFactory<T = unknown>(
     // Calling .flush() on a compression stream will
     // make zlib return as much output as currently possible.
     if (isCompressed) {
-      // This is a temporary fix for response streaming with proxy configurations that buffer responses up to 4KB in size.
-      if (streamType === 'ndjson') {
-        const buffer = crypto.randomBytes(4096);
-
-        stream.write(
-          `${JSON.stringify({
-            type: 'flush',
-            payload: buffer.toString('hex'),
-          })}${DELIMITER}`
-        );
-      }
       stream.flush();
     }
   }
 
-  const defaultHeaders = {
-    'x-accel-buffering': 'no',
-    'Transfer-Encoding': 'chunked',
-  };
-
   const responseWithHeaders: StreamFactoryReturnType['responseWithHeaders'] = {
     body: stream,
-    ...(isCompressed
-      ? {
-          headers: {
-            ...defaultHeaders,
-            'content-encoding': 'gzip',
-          },
-        }
-      : { headers: defaultHeaders }),
+    headers: {
+      Connection: 'keep-alive',
+      'Transfer-Encoding': 'chunked',
+      'x-accel-buffering': 'no',
+      ...(isCompressed ? { 'content-encoding': 'gzip' } : {}),
+    },
   };
 
   return { DELIMITER, end, push, responseWithHeaders };
