@@ -690,21 +690,26 @@ export function getIndexPatternDatasource({
         deprecatedMessages.push(
           <EuiCallOut
             color="warning"
-            iconType="help"
+            iconType="alert"
+            size="s"
             title={
               <FormattedMessage
-                id="xpack.lens.indexPattern.useFieldExistenceSamplingTitle"
-                defaultMessage="Caution: you are using deprecated {link} mode"
-                values={{ link }}
+                id="xpack.lens.indexPattern.useFieldExistenceSamplingBody"
+                defaultMessage="Use field existence sampling is deprecated and will be removed in 8.6.0. To disable, go to {advancedSettings} > {link}"
+                values={{
+                  advancedSettings: (
+                    <strong>
+                      <FormattedMessage
+                        id="xpack.lens.indexPattern.useFieldExistenceSampling.advancedSettings"
+                        defaultMessage="Advanced Settings"
+                      />
+                    </strong>
+                  ),
+                  link,
+                }}
               />
             }
-          >
-            <FormattedMessage
-              id="xpack.lens.indexPattern.useFieldExistenceSamplingBody"
-              defaultMessage="This setting is deprecated and will not be supported as of 8.6. You must disable the {link} setting."
-              values={{ link }}
-            />
-          </EuiCallOut>
+          />
         );
       }
 
