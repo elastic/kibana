@@ -117,3 +117,6 @@ for journey in scalability_traces/server/*; do
 done
 
 trap "kill -9 $esPid" EXIT
+
+echo "--- Upload test results"
+upload_test_results
