@@ -1662,9 +1662,9 @@
             "section": "def-common.FormattedBuilderEntry",
             "text": "FormattedBuilderEntry"
           },
-          ", type: \"endpoint\" | \"detection\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\", preFilter?: ((i: ",
+          ", type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\", preFilter?: ((i: ",
           "DataViewBase",
-          ", t: \"endpoint\" | \"detection\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\", o?: (\"windows\" | \"linux\" | \"macos\")[] | undefined) => ",
+          ", t: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\", o?: (\"windows\" | \"linux\" | \"macos\")[] | undefined) => ",
           "DataViewBase",
           ") | undefined, osTypes?: (\"windows\" | \"linux\" | \"macos\")[] | undefined) => ",
           "DataViewBase"
@@ -1718,7 +1718,7 @@
             "label": "type",
             "description": [],
             "signature": [
-              "\"endpoint\" | \"detection\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\""
+              "\"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\""
             ],
             "path": "packages/kbn-securitysolution-list-utils/src/helpers/index.ts",
             "deprecated": false,
@@ -1734,7 +1734,7 @@
             "signature": [
               "((i: ",
               "DataViewBase",
-              ", t: \"endpoint\" | \"detection\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\", o?: (\"windows\" | \"linux\" | \"macos\")[] | undefined) => ",
+              ", t: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\", o?: (\"windows\" | \"linux\" | \"macos\")[] | undefined) => ",
               "DataViewBase",
               ") | undefined"
             ],
@@ -2245,7 +2245,7 @@
             "section": "def-common.FormattedBuilderEntry",
             "text": "FormattedBuilderEntry"
           },
-          ", listType: \"endpoint\" | \"detection\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\", isBoolean: boolean, includeValueListOperators?: boolean) => ",
+          ", listType: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\", isBoolean: boolean, includeValueListOperators?: boolean) => ",
           {
             "pluginId": "@kbn/securitysolution-list-utils",
             "scope": "common",
@@ -2286,7 +2286,7 @@
             "label": "listType",
             "description": [],
             "signature": [
-              "\"endpoint\" | \"detection\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\""
+              "\"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\""
             ],
             "path": "packages/kbn-securitysolution-list-utils/src/helpers/index.ts",
             "deprecated": false,
