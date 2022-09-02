@@ -23,6 +23,7 @@ export class DiscoverPageObject extends FtrService {
   private readonly config = this.ctx.getService('config');
   private readonly dataGrid = this.ctx.getService('dataGrid');
   private readonly kibanaServer = this.ctx.getService('kibanaServer');
+  private readonly fieldEditor = this.ctx.getService('fieldEditor');
   private readonly queryBar = this.ctx.getService('queryBar');
 
   private readonly defaultFindTimeout = this.config.get('timeouts.find');
@@ -366,6 +367,7 @@ export class DiscoverPageObject extends FtrService {
     await this.testSubjects.click(`field-${field}`);
     await this.testSubjects.click(`discoverFieldListPanelDelete-${field}`);
     await this.testSubjects.existOrFail('runtimeFieldDeleteConfirmModal');
+    await this.fieldEditor.confirmDelete();
   }
 
   public async clickIndexPatternActions() {
@@ -399,6 +401,12 @@ export class DiscoverPageObject extends FtrService {
   async createAdHocDataView(name: string, hasTimeField = false) {
     await this.testSubjects.click('discover-dataView-switch-link');
     await this.unifiedSearch.createNewDataView(name, true, hasTimeField);
+  }
+
+  async clickAddField() {
+    await this.testSubjects.click('discover-dataView-switch-link');
+    await this.testSubjects.existOrFail('indexPattern-add-field');
+    await this.testSubjects.click('indexPattern-add-field');
   }
 
   public async hasNoResults() {

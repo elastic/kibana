@@ -79,10 +79,10 @@ export const DiscoverTopNav = ({
   }, []);
 
   const [adHocDataView, _setAdHocDataView] = useState(updateAdHocDataView(dataView));
-  useEffect(
-    () => _setAdHocDataView(updateAdHocDataView(dataView)),
-    [dataView, updateAdHocDataView]
-  );
+  useEffect(() => {
+    _setAdHocDataView(updateAdHocDataView(dataView));
+    return () => setAdHocDataView(undefined);
+  }, [dataView, updateAdHocDataView]);
 
   const { AggregateQueryTopNavMenu } = navigation.ui;
 

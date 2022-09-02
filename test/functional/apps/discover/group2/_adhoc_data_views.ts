@@ -13,6 +13,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dataGrid = getService('dataGrid');
   const esArchiver = getService('esArchiver');
   const filterBar = getService('filterBar');
+  const dashboardAddPanel = getService('dashboardAddPanel');
+  const fieldEditor = getService('fieldEditor');
   const kibanaServer = getService('kibanaServer');
   const browser = getService('browser');
   const retry = getService('retry');
@@ -26,6 +28,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'settings',
     'header',
     'context',
+    'dashboard',
   ]);
   const find = getService('find');
   const security = getService('security');
@@ -37,7 +40,22 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     return dataViewId;
   };
 
-  describe('ad hoc data views', function () {
+  const addRuntimeField = async (name: string, script: string) => {
+    await PageObjects.discover.clickAddField();
+    await fieldEditor.setName(name);
+    await fieldEditor.enableValue();
+    await fieldEditor.typeScript(script);
+    await fieldEditor.save();
+    await PageObjects.header.waitUntilLoadingHasFinished();
+  };
+
+  const addSearchToDashboard = async (name: string) => {
+    await dashboardAddPanel.addSavedSearch(name);
+    await PageObjects.header.waitUntilLoadingHasFinished();
+    await PageObjects.dashboard.waitForRenderComplete();
+  };
+
+  describe('adhoc data views', function () {
     before(async () => {
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover.json');
@@ -45,6 +63,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await PageObjects.common.navigateToApp('discover');
+    });
+
+    after(async () => {
+      await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
     });
 
     it('should navigate back correctly from to surrounding and single views', async () => {
@@ -93,7 +115,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should not update data view id when saving search first time', async () => {
       const prevDataViewId = await getCurrentDataViewId();
 
-      await PageObjects.discover.saveSearch('hoc-data-view-search');
+      await PageObjects.discover.saveSearch('logstash*-ss');
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       const newDataViewId = await getCurrentDataViewId();
@@ -104,7 +126,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should update data view id when saving new search copy', async () => {
       const prevDataViewId = await getCurrentDataViewId();
 
-      await PageObjects.discover.saveSearch('hoc-data-view-search-new', true);
+      await PageObjects.discover.saveSearch('logstash*-ss-new', true);
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       const newDataViewId = await getCurrentDataViewId();
@@ -122,6 +144,46 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const newDataViewId = await getCurrentDataViewId();
 
       expect(prevDataViewId).not.to.equal(newDataViewId);
+    });
+
+    it('search results should be different after data view update', async () => {
+      await PageObjects.discover.createAdHocDataView('logst', true);
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
+      await addRuntimeField('_bytes-runtimefield', `emit(doc["bytes"].value.toString())`);
+      await PageObjects.discover.clickFieldListItemToggle('_bytes-runtimefield');
+
+      // save first search
+      await PageObjects.discover.saveSearch('logst*-ss-_bytes-runtimefield');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
+      // remove field and create with the same name, but different value
+      await PageObjects.discover.clickFieldListItemRemove('_bytes-runtimefield');
+      await PageObjects.discover.removeField('_bytes-runtimefield');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
+      await addRuntimeField('_bytes-runtimefield', `emit((doc["bytes"].value * 2).toString())`);
+      await PageObjects.discover.clickFieldListItemToggle('_bytes-runtimefield');
+
+      // save second search
+      await PageObjects.discover.saveSearch('logst*-ss-_bytes-runtimefield-updated', true);
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
+      // open searches on dashboard
+      await PageObjects.common.navigateToApp('dashboard');
+      await filterBar.ensureFieldEditorModalIsClosed();
+      await PageObjects.dashboard.gotoDashboardLandingPage();
+      await PageObjects.dashboard.clickNewDashboard();
+      await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
+
+      await addSearchToDashboard('logst*-ss-_bytes-runtimefield');
+      await addSearchToDashboard('logst*-ss-_bytes-runtimefield-updated');
+
+      const [firstSearchCell, secondSearchCell] = await dataGrid.getAllCellElements(0, 3);
+      const first = await firstSearchCell.getVisibleText();
+      const second = await secondSearchCell.getVisibleText();
+
+      expect(+second).to.equal(+first * 2);
     });
   });
 }

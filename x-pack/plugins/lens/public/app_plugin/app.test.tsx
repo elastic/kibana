@@ -242,7 +242,7 @@ describe('Lens App', () => {
           topNavMenuEntryGenerators: [getterFn],
           initialContext: {
             fieldName: 'a',
-            indexPatternId: '1',
+            dataViewSpec: { id: '1' },
           },
         },
         preloadedState,
