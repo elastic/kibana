@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { ISearchSource } from '@kbn/data-plugin/public';
 import { getTopNavLinks } from './get_top_nav_links';
 import { dataViewMock } from '../../../../__mocks__/data_view';
 import { savedSearchMock } from '../../../../__mocks__/saved_search';
@@ -34,7 +33,6 @@ test('getTopNavLinks result', () => {
     savedSearch: savedSearchMock,
     services,
     state,
-    searchSource: {} as ISearchSource,
     onOpenSavedSearch: () => {},
     isPlainRecord: false,
   });
@@ -96,7 +94,6 @@ test('getTopNavLinks result for sql mode', () => {
     savedSearch: savedSearchMock,
     services,
     state,
-    searchSource: {} as ISearchSource,
     onOpenSavedSearch: () => {},
     isPlainRecord: true,
   });

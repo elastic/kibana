@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 import { Subject } from 'rxjs';
+import { waitFor } from '@testing-library/react';
 import { renderHook } from '@testing-library/react-hooks';
 import { createSearchSessionMock } from '../../../__mocks__/search_session';
 import { discoverServiceMock } from '../../../__mocks__/services';
@@ -29,7 +30,6 @@ describe('test useSavedSearch', () => {
         initialFetchStatus: FetchStatus.LOADING,
         savedSearch: savedSearchMock,
         searchSessionManager,
-        searchSource: savedSearchMock.searchSource.createCopy(),
         services: discoverServiceMock,
         stateContainer,
         useNewFieldsApi: true,
@@ -54,7 +54,7 @@ describe('test useSavedSearch', () => {
       return { from: '2021-05-01T20:00:00Z', to: '2021-05-02T20:00:00Z' };
     });
 
-    const { result: resultState } = renderHook(() => {
+    renderHook(() => {
       return useDiscoverState({
         services: discoverServiceMock,
         history,
@@ -64,12 +64,11 @@ describe('test useSavedSearch', () => {
       });
     });
 
-    const { result, waitForValueToChange } = renderHook(() => {
+    const { result } = renderHook(() => {
       return useSavedSearch({
         initialFetchStatus: FetchStatus.LOADING,
         savedSearch: savedSearchMock,
         searchSessionManager,
-        searchSource: resultState.current.searchSource,
         services: discoverServiceMock,
         stateContainer,
         useNewFieldsApi: true,
@@ -78,12 +77,20 @@ describe('test useSavedSearch', () => {
 
     result.current.refetch$.next(undefined);
 
-    await waitForValueToChange(() => {
-      return result.current.data$.main$.value.fetchStatus === 'complete';
+    await waitFor(() => {
+      expect(result.current.data$.main$.getValue().fetchStatus).toEqual(FetchStatus.COMPLETE);
     });
-
-    expect(result.current.data$.totalHits$.value.result).toBe(0);
-    expect(result.current.data$.documents$.value.result).toEqual([]);
+    await waitFor(() => {
+      return result.current.data$.main$.getValue().fetchStatus === FetchStatus.LOADING;
+    });
+    await waitFor(() => {
+      return result.current.data$.main$.getValue().fetchStatus === FetchStatus.COMPLETE;
+    });
+    await waitFor(() => {
+      return result.current.data$.totalHits$.getValue().fetchStatus === FetchStatus.COMPLETE;
+    });
+    expect(result.current.data$.documents$.getValue().result).toEqual([]);
+    expect(result.current.data$.totalHits$.getValue().result).toBe(0);
   });
 
   test('reset sets back to initial state', async () => {
@@ -98,7 +105,7 @@ describe('test useSavedSearch', () => {
       return { from: '2021-05-01T20:00:00Z', to: '2021-05-02T20:00:00Z' };
     });
 
-    const { result: resultState } = renderHook(() => {
+    renderHook(() => {
       return useDiscoverState({
         services: discoverServiceMock,
         history,
@@ -113,7 +120,6 @@ describe('test useSavedSearch', () => {
         initialFetchStatus: FetchStatus.LOADING,
         savedSearch: savedSearchMock,
         searchSessionManager,
-        searchSource: resultState.current.searchSource,
         services: discoverServiceMock,
         stateContainer,
         useNewFieldsApi: true,
@@ -143,7 +149,6 @@ describe('test useSavedSearch', () => {
         initialFetchStatus: FetchStatus.LOADING,
         savedSearch: savedSearchMock,
         searchSessionManager,
-        searchSource: savedSearchMock.searchSource.createCopy(),
         services: discoverServiceMock,
         stateContainer,
         useNewFieldsApi: true,

@@ -8,7 +8,6 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { BehaviorSubject, Subject } from 'rxjs';
 import type { AutoRefreshDoneFn } from '@kbn/data-plugin/public';
-import { ISearchSource } from '@kbn/data-plugin/public';
 import { RequestAdapter } from '@kbn/inspector-plugin/public';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { getRawRecordType } from '../utils/get_raw_record_type';
@@ -104,7 +103,6 @@ export const useSavedSearch = ({
   initialFetchStatus,
   savedSearch,
   searchSessionManager,
-  searchSource,
   services,
   stateContainer,
   useNewFieldsApi,
@@ -112,7 +110,6 @@ export const useSavedSearch = ({
   initialFetchStatus: FetchStatus;
   savedSearch: SavedSearch;
   searchSessionManager: DiscoverSearchSessionManager;
-  searchSource: ISearchSource;
   services: DiscoverServices;
   stateContainer: GetStateReturn;
   useNewFieldsApi: boolean;
@@ -178,7 +175,6 @@ export const useSavedSearch = ({
       main$,
       refetch$,
       searchSessionManager,
-      searchSource,
       initialFetchStatus,
     });
     let abortController: AbortController;
@@ -193,10 +189,9 @@ export const useSavedSearch = ({
       abortController = new AbortController();
       const autoRefreshDone = refs.current.autoRefreshDone;
 
-      await fetchAll(dataSubjects, searchSource, val === 'reset', {
+      await fetchAll(dataSubjects, val === 'reset', {
         abortController,
         appStateContainer: stateContainer.appStateContainer,
-        data,
         initialFetchStatus,
         inspectorAdapters,
         savedSearch,
@@ -230,10 +225,7 @@ export const useSavedSearch = ({
     refetch$,
     savedSearch,
     searchSessionManager,
-    searchSessionManager.newSearchSessionIdFromURL$,
-    searchSource,
     services,
-    services.toastNotifications,
     stateContainer.appStateContainer,
     timefilter,
     useNewFieldsApi,

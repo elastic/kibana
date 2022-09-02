@@ -20,7 +20,7 @@ import { onSaveSearch } from './on_save_search';
 
 export type DiscoverTopNavProps = Pick<
   DiscoverLayoutProps,
-  'dataView' | 'navigateTo' | 'savedSearch' | 'searchSource'
+  'dataView' | 'navigateTo' | 'savedSearch'
 > & {
   onOpenInspector: () => void;
   query?: Query | AggregateQuery;
@@ -44,7 +44,6 @@ export const DiscoverTopNav = ({
   savedQuery,
   stateContainer,
   updateQuery,
-  searchSource,
   navigateTo,
   savedSearch,
   resetSavedSearch,
@@ -143,7 +142,6 @@ export const DiscoverTopNav = ({
         services,
         state: stateContainer,
         onOpenInspector,
-        searchSource,
         onOpenSavedSearch,
         isPlainRecord,
       }),
@@ -154,7 +152,6 @@ export const DiscoverTopNav = ({
       services,
       stateContainer,
       onOpenInspector,
-      searchSource,
       onOpenSavedSearch,
       isPlainRecord,
     ]

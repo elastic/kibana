@@ -48,8 +48,7 @@ export function AlertsPopover({
    * Provides the default parameters used to initialize the new rule
    */
   const getParams = useCallback(() => {
-    const nextSearchSource = searchSource.createCopy();
-    updateSearchSource(nextSearchSource, true, {
+    const nextSearchSource = updateSearchSource(searchSource.createCopy(), true, {
       dataView: searchSource.getField('index')!,
       services,
       sort: [],

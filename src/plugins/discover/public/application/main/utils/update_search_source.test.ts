@@ -15,29 +15,25 @@ import { discoverServiceMock } from '../../../__mocks__/services';
 describe('updateSearchSource', () => {
   test('updates a given search source', async () => {
     const persistentSearchSourceMock = createSearchSourceMock({});
-    const volatileSearchSourceMock = createSearchSourceMock({});
-    volatileSearchSourceMock.setParent(persistentSearchSourceMock);
-    updateSearchSource(volatileSearchSourceMock, false, {
+    const volatileSearchSourceMock = updateSearchSource(persistentSearchSourceMock, false, {
       dataView: dataViewMock,
       services: discoverServiceMock,
       sort: [] as SortOrder[],
       useNewFieldsApi: false,
     });
-    expect(persistentSearchSourceMock.getField('index')).toEqual(dataViewMock);
+    expect(volatileSearchSourceMock.getParent()!.getField('index')).toEqual(dataViewMock);
     expect(volatileSearchSourceMock.getField('fields')).toBe(undefined);
   });
 
   test('updates a given search source with the usage of the new fields api', async () => {
     const persistentSearchSourceMock = createSearchSourceMock({});
-    const volatileSearchSourceMock = createSearchSourceMock({});
-    volatileSearchSourceMock.setParent(persistentSearchSourceMock);
-    updateSearchSource(volatileSearchSourceMock, false, {
+    const volatileSearchSourceMock = updateSearchSource(persistentSearchSourceMock, false, {
       dataView: dataViewMock,
       services: discoverServiceMock,
       sort: [] as SortOrder[],
       useNewFieldsApi: true,
     });
-    expect(persistentSearchSourceMock.getField('index')).toEqual(dataViewMock);
+    expect(volatileSearchSourceMock.getParent()!.getField('index')).toEqual(dataViewMock);
     expect(volatileSearchSourceMock.getField('fields')).toEqual([
       { field: '*', include_unmapped: 'true' },
     ]);
@@ -46,15 +42,13 @@ describe('updateSearchSource', () => {
 
   test('updates a given search source when showUnmappedFields option is set to true', async () => {
     const persistentSearchSourceMock = createSearchSourceMock({});
-    const volatileSearchSourceMock = createSearchSourceMock({});
-    volatileSearchSourceMock.setParent(persistentSearchSourceMock);
-    updateSearchSource(volatileSearchSourceMock, false, {
+    const volatileSearchSourceMock = updateSearchSource(persistentSearchSourceMock, false, {
       dataView: dataViewMock,
       services: discoverServiceMock,
       sort: [] as SortOrder[],
       useNewFieldsApi: true,
     });
-    expect(persistentSearchSourceMock.getField('index')).toEqual(dataViewMock);
+    expect(volatileSearchSourceMock.getParent()!.getField('index')).toEqual(dataViewMock);
     expect(volatileSearchSourceMock.getField('fields')).toEqual([
       { field: '*', include_unmapped: 'true' },
     ]);
@@ -63,15 +57,13 @@ describe('updateSearchSource', () => {
 
   test('does not explicitly request fieldsFromSource when not using fields API', async () => {
     const persistentSearchSourceMock = createSearchSourceMock({});
-    const volatileSearchSourceMock = createSearchSourceMock({});
-    volatileSearchSourceMock.setParent(persistentSearchSourceMock);
-    updateSearchSource(volatileSearchSourceMock, false, {
+    const volatileSearchSourceMock = updateSearchSource(persistentSearchSourceMock, false, {
       dataView: dataViewMock,
       services: discoverServiceMock,
       sort: [] as SortOrder[],
       useNewFieldsApi: false,
     });
-    expect(persistentSearchSourceMock.getField('index')).toEqual(dataViewMock);
+    expect(volatileSearchSourceMock.getParent()!.getField('index')).toEqual(dataViewMock);
     expect(volatileSearchSourceMock.getField('fields')).toEqual(undefined);
     expect(volatileSearchSourceMock.getField('fieldsFromSource')).toBe(undefined);
   });

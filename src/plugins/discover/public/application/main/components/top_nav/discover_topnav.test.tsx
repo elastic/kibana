@@ -12,7 +12,6 @@ import { dataViewMock } from '../../../../__mocks__/data_view';
 import { savedSearchMock } from '../../../../__mocks__/saved_search';
 import { DiscoverTopNav, DiscoverTopNavProps } from './discover_topnav';
 import { TopNavMenuData } from '@kbn/navigation-plugin/public';
-import { ISearchSource } from '@kbn/data-plugin/public';
 import { Query } from '@kbn/es-query';
 import { GetStateReturn } from '../../services/discover_state';
 import { setHeaderActionMenuMounter } from '../../../../kibana_services';
@@ -39,7 +38,6 @@ function getProps(savePermissions = true): DiscoverTopNavProps {
     savedQuery: '',
     updateQuery: jest.fn(),
     onOpenInspector: jest.fn(),
-    searchSource: {} as ISearchSource,
     resetSavedSearch: () => {},
     onFieldEdited: jest.fn(),
     onChangeDataView: jest.fn(),

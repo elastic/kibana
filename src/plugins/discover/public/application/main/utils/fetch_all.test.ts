@@ -65,7 +65,7 @@ function subjectCollector<T>(subject: Subject<T>): () => Promise<T[]> {
 
 describe('test fetchAll', () => {
   let subjects: SavedSearchData;
-  let deps: Parameters<typeof fetchAll>[3];
+  let deps: Parameters<typeof fetchAll>[2];
   let searchSource: SearchSource;
   beforeEach(() => {
     subjects = {
@@ -84,7 +84,6 @@ describe('test fetchAll', () => {
         },
       } as ReduxLikeStateContainer<AppState>,
       abortController: new AbortController(),
-      data: discoverServiceMock.data,
       inspectorAdapters: { requests: new RequestAdapter() },
       searchSessionId: '123',
       initialFetchStatus: FetchStatus.UNINITIALIZED,
@@ -93,6 +92,7 @@ describe('test fetchAll', () => {
       services: discoverServiceMock,
     };
     searchSource = savedSearchMock.searchSource.createChild();
+    deps.savedSearch.searchSource = searchSource;
 
     mockFetchDocuments.mockReset().mockResolvedValue([]);
     mockFetchSQL.mockReset().mockResolvedValue([]);
@@ -108,7 +108,7 @@ describe('test fetchAll', () => {
 
     subjects.main$.subscribe((value) => stateArr.push(value.fetchStatus));
 
-    await fetchAll(subjects, searchSource, false, deps);
+    await fetchAll(subjects, false, deps);
 
     expect(stateArr).toEqual([
       FetchStatus.UNINITIALIZED,
@@ -125,7 +125,7 @@ describe('test fetchAll', () => {
     ];
     const documents = hits.map((hit) => buildDataTableRecord(hit, dataViewMock));
     mockFetchDocuments.mockResolvedValue(documents);
-    await fetchAll(subjects, searchSource, false, deps);
+    await fetchAll(subjects, false, deps);
     expect(await collect()).toEqual([
       { fetchStatus: FetchStatus.UNINITIALIZED },
       { fetchStatus: FetchStatus.LOADING, recordRawType: 'document' },
@@ -148,7 +148,7 @@ describe('test fetchAll', () => {
     mockFetchDocuments.mockResolvedValue(documents);
 
     mockFetchTotalHits.mockResolvedValue(42);
-    await fetchAll(subjects, searchSource, false, deps);
+    await fetchAll(subjects, false, deps);
     expect(await collect()).toEqual([
       { fetchStatus: FetchStatus.UNINITIALIZED },
       { fetchStatus: FetchStatus.LOADING, recordRawType: 'document' },
@@ -160,7 +160,7 @@ describe('test fetchAll', () => {
   test('emits loading and chartData on charts$ correctly', async () => {
     const collect = subjectCollector(subjects.charts$);
     searchSource.getField('index')!.isTimeBased = () => true;
-    await fetchAll(subjects, searchSource, false, deps);
+    await fetchAll(subjects, false, deps);
     expect(await collect()).toEqual([
       { fetchStatus: FetchStatus.UNINITIALIZED },
       { fetchStatus: FetchStatus.LOADING, recordRawType: 'document' },
@@ -178,7 +178,7 @@ describe('test fetchAll', () => {
     searchSource.getField('index')!.isTimeBased = () => true;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     mockFetchChart.mockResolvedValue({ bucketInterval: {}, chartData: {} as any, totalHits: 32 });
-    await fetchAll(subjects, searchSource, false, deps);
+    await fetchAll(subjects, false, deps);
     expect(await collect()).toEqual([
       { fetchStatus: FetchStatus.UNINITIALIZED },
       { fetchStatus: FetchStatus.LOADING, recordRawType: 'document' },
@@ -196,7 +196,7 @@ describe('test fetchAll', () => {
     const hits = [{ _id: '1', _index: 'logs' }];
     const documents = hits.map((hit) => buildDataTableRecord(hit, dataViewMock));
     mockFetchDocuments.mockResolvedValue(documents);
-    await fetchAll(subjects, searchSource, false, deps);
+    await fetchAll(subjects, false, deps);
     expect(await collectTotalHits()).toEqual([
       { fetchStatus: FetchStatus.UNINITIALIZED },
       { fetchStatus: FetchStatus.LOADING, recordRawType: 'document' },
@@ -220,7 +220,7 @@ describe('test fetchAll', () => {
     const collectMain = subjectCollector(subjects.main$);
     searchSource.getField('index')!.isTimeBased = () => false;
     mockFetchDocuments.mockRejectedValue({ msg: 'This query failed' });
-    await fetchAll(subjects, searchSource, false, deps);
+    await fetchAll(subjects, false, deps);
     expect(await collectMain()).toEqual([
       { fetchStatus: FetchStatus.UNINITIALIZED },
       { fetchStatus: FetchStatus.LOADING, recordRawType: 'document' },
@@ -249,7 +249,6 @@ describe('test fetchAll', () => {
         },
       } as unknown as ReduxLikeStateContainer<AppState>,
       abortController: new AbortController(),
-      data: discoverServiceMock.data,
       inspectorAdapters: { requests: new RequestAdapter() },
       searchSessionId: '123',
       initialFetchStatus: FetchStatus.UNINITIALIZED,
@@ -257,7 +256,7 @@ describe('test fetchAll', () => {
       savedSearch: savedSearchMock,
       services: discoverServiceMock,
     };
-    await fetchAll(subjects, searchSource, false, deps);
+    await fetchAll(subjects, false, deps);
     expect(await collect()).toEqual([
       { fetchStatus: FetchStatus.UNINITIALIZED },
       { fetchStatus: FetchStatus.LOADING, recordRawType: 'plain' },

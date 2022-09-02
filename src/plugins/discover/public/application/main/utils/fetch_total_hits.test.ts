@@ -9,7 +9,6 @@ import { throwError as throwErrorRx, of } from 'rxjs';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { savedSearchMock, savedSearchMockWithTimeField } from '../../../__mocks__/saved_search';
 import { fetchTotalHits } from './fetch_total_hits';
-import { discoverServiceMock } from '../../../__mocks__/services';
 import { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { IKibanaSearchResponse } from '@kbn/data-plugin/public';
 import { FetchDeps } from './fetch_all';
@@ -19,7 +18,6 @@ const getDeps = () =>
     abortController: new AbortController(),
     inspectorAdapters: { requests: new RequestAdapter() },
     searchSessionId: '123',
-    data: discoverServiceMock.data,
     savedSearch: savedSearchMock,
   } as FetchDeps);
 
