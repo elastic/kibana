@@ -12,7 +12,6 @@ import { FetchStatus } from '../../types';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { createSearchSessionMock } from '../../../__mocks__/search_session';
 import { DataRefetch$ } from '../hooks/use_saved_search';
-import { savedSearchMock, savedSearchMockWithTimeField } from '../../../__mocks__/saved_search';
 
 function createDataMock(
   queryString$: Subject<unknown>,
@@ -62,7 +61,6 @@ describe('getFetchObservable', () => {
       refetch$,
       data: createDataMock(new Subject(), new Subject(), new Subject(), new Subject()),
       searchSessionManager: searchSessionManagerMock.searchSessionManager,
-      searchSource: savedSearchMock.searchSource,
       initialFetchStatus: FetchStatus.LOADING,
     });
 
@@ -94,7 +92,6 @@ describe('getFetchObservable', () => {
         refetch$,
         data: dataMock,
         searchSessionManager: searchSessionManagerMock.searchSessionManager,
-        searchSource: savedSearchMockWithTimeField.searchSource,
         initialFetchStatus: FetchStatus.LOADING,
       });
 

@@ -5,7 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { DataPublicPluginStart, ISearchSource } from '@kbn/data-plugin/public';
 import { Adapters } from '@kbn/inspector-plugin/common';
 import { ReduxLikeStateContainer } from '@kbn/kibana-utils-plugin/common';
 import { DataViewType } from '@kbn/data-views-plugin/public';
@@ -39,7 +38,6 @@ import { fetchSql } from './fetch_sql';
 export interface FetchDeps {
   abortController: AbortController;
   appStateContainer: ReduxLikeStateContainer<AppState>;
-  data: DataPublicPluginStart;
   initialFetchStatus: FetchStatus;
   inspectorAdapters: Adapters;
   savedSearch: SavedSearch;
@@ -58,14 +56,16 @@ export interface FetchDeps {
  */
 export function fetchAll(
   dataSubjects: SavedSearchData,
-  searchSource: ISearchSource,
   reset = false,
   fetchDeps: FetchDeps
 ): Promise<void> {
-  const { initialFetchStatus, appStateContainer, services, useNewFieldsApi, data } = fetchDeps;
+  const { initialFetchStatus, appStateContainer, services, useNewFieldsApi, savedSearch } =
+    fetchDeps;
+  const searchSource = savedSearch.searchSource;
+  const data = services.data;
 
   /**
-   * Method to create a an error handler that will forward the received error
+   * Method to create an error handler that will forward the received error
    * to the specified subjects. It will ignore AbortErrors and will use the data
    * plugin to show a toast for the error (e.g. allowing better insights into shard failures).
    */
@@ -76,7 +76,6 @@ export function fetchAll(
       if (error instanceof Error && error.name === 'AbortError') {
         return;
       }
-
       data.search.showError(error);
       errorSubjects.forEach((subject) => sendErrorMsg(subject, error));
     };
@@ -91,15 +90,16 @@ export function fetchAll(
     const recordRawType = getRawRecordType(query);
     const useSql = recordRawType === RecordRawType.PLAIN;
 
-    if (recordRawType === RecordRawType.DOCUMENT) {
-      // Update the base searchSource, base for all child fetches
-      updateSearchSource(searchSource, false, {
-        dataView,
-        services,
-        sort: sort as SortOrder[],
-        useNewFieldsApi,
-      });
-    }
+    // Update the base searchSource, base for all child fetches
+    const volatileSearchSource =
+      recordRawType === RecordRawType.DOCUMENT
+        ? updateSearchSource(searchSource, false, {
+            dataView,
+            services,
+            sort: sort as SortOrder[],
+            useNewFieldsApi,
+          })
+        : searchSource;
 
     // Mark all subjects as loading
     sendLoadingMsg(dataSubjects.main$, recordRawType);
@@ -114,11 +114,15 @@ export function fetchAll(
     const documents =
       useSql && query
         ? fetchSql(query, services.dataViews, data, services.expressions)
-        : fetchDocuments(searchSource.createCopy(), fetchDeps);
+        : fetchDocuments(volatileSearchSource.createCopy(), fetchDeps);
     const charts =
-      isChartVisible && !useSql ? fetchChart(searchSource.createCopy(), fetchDeps) : undefined;
+      isChartVisible && !useSql
+        ? fetchChart(volatileSearchSource.createCopy(), fetchDeps)
+        : undefined;
     const totalHits =
-      !isChartVisible && !useSql ? fetchTotalHits(searchSource.createCopy(), fetchDeps) : undefined;
+      !isChartVisible && !useSql
+        ? fetchTotalHits(volatileSearchSource.createCopy(), fetchDeps)
+        : undefined;
     /**
      * This method checks the passed in hit count and will send a PARTIAL message to main$
      * if there are results, indicating that we have finished some of the requests that have been

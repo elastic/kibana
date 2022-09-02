@@ -32,35 +32,37 @@ export function updateSearchSource(
   }
 ) {
   const { uiSettings, data } = services;
-  const parentSearchSource = persist ? searchSource : searchSource.getParent()!;
 
-  parentSearchSource
+  searchSource
     .setField('index', dataView)
     .setField('query', data.query.queryString.getQuery() || null)
     .setField('filter', data.query.filterManager.getFilters());
-
-  if (!persist) {
-    const usedSort = getSortForSearchSource(
-      sort,
-      dataView,
-      uiSettings.get(SORT_DEFAULT_ORDER_SETTING)
-    );
-    searchSource.setField('trackTotalHits', true).setField('sort', usedSort);
-
-    if (dataView.type !== DataViewType.ROLLUP) {
-      // Set the date range filter fields from timeFilter using the absolute format. Search sessions requires that it be converted from a relative range
-      searchSource.setField('filter', data.query.timefilter.timefilter.createFilter(dataView));
-    }
-
-    if (useNewFieldsApi) {
-      searchSource.removeField('fieldsFromSource');
-      const fields: Record<string, string> = { field: '*' };
-
-      fields.include_unmapped = 'true';
-
-      searchSource.setField('fields', [fields]);
-    } else {
-      searchSource.removeField('fields');
-    }
+  if (persist) {
+    return searchSource;
   }
+
+  const searchSourceChild = searchSource.createChild();
+  const usedSort = getSortForSearchSource(
+    sort,
+    dataView,
+    uiSettings.get(SORT_DEFAULT_ORDER_SETTING)
+  );
+  searchSourceChild.setField('trackTotalHits', true).setField('sort', usedSort);
+
+  if (dataView.type !== DataViewType.ROLLUP) {
+    // Set the date range filter fields from timeFilter using the absolute format. Search sessions requires that it be converted from a relative range
+    searchSourceChild.setField('filter', data.query.timefilter.timefilter.createFilter(dataView));
+  }
+
+  if (useNewFieldsApi) {
+    searchSourceChild.removeField('fieldsFromSource');
+    const fields: Record<string, string> = { field: '*' };
+
+    fields.include_unmapped = 'true';
+
+    searchSourceChild.setField('fields', [fields]);
+  } else {
+    searchSourceChild.removeField('fields');
+  }
+  return searchSourceChild;
 }

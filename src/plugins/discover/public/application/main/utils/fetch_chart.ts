@@ -28,10 +28,10 @@ interface Result {
 
 export function fetchChart(
   searchSource: ISearchSource,
-  { abortController, appStateContainer, data, inspectorAdapters, searchSessionId }: FetchDeps
+  { abortController, appStateContainer, inspectorAdapters, searchSessionId, services }: FetchDeps
 ): Promise<Result> {
   const interval = appStateContainer.getState().interval ?? 'auto';
-  const chartAggConfigs = updateSearchSource(searchSource, interval, data);
+  const chartAggConfigs = updateSearchSource(searchSource, interval, services.data);
 
   const executionContext = {
     description: 'fetch chart data and total hits',
@@ -58,7 +58,7 @@ export function fetchChart(
       map((res) => {
         const bucketAggConfig = chartAggConfigs.aggs[1];
         const tabifiedData = tabifyAggResponse(chartAggConfigs, res.rawResponse);
-        const dimensions = getDimensions(chartAggConfigs, data);
+        const dimensions = getDimensions(chartAggConfigs, services.data);
         const bucketInterval = search.aggs.isDateHistogramBucketAggConfig(bucketAggConfig)
           ? bucketAggConfig?.buckets?.getInterval()
           : undefined;

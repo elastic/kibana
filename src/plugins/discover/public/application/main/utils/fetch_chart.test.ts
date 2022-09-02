@@ -23,17 +23,18 @@ function getDeps() {
       },
     } as ReduxLikeStateContainer<AppState>,
     abortController: new AbortController(),
-    data: discoverServiceMock.data,
     inspectorAdapters: { requests: new RequestAdapter() },
     onResults: jest.fn(),
     savedSearch: savedSearchMockWithTimeField,
     searchSessionId: '123',
+    services: discoverServiceMock,
   } as unknown as FetchDeps;
-  deps.data.query.timefilter.timefilter.getTime = () => {
+  deps.services.data.query.timefilter.timefilter.getTime = () => {
     return { from: '2021-07-07T00:05:13.590', to: '2021-07-07T11:20:13.590' };
   };
 
-  deps.data.query.timefilter.timefilter.calculateBounds = (timeRange) => calculateBounds(timeRange);
+  deps.services.data.query.timefilter.timefilter.calculateBounds = (timeRange) =>
+    calculateBounds(timeRange);
   return deps;
 }
 

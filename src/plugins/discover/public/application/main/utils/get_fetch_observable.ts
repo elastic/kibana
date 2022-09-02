@@ -11,7 +11,6 @@ import { debounceTime, filter, skip, tap } from 'rxjs/operators';
 import type {
   AutoRefreshDoneFn,
   DataPublicPluginStart,
-  ISearchSource,
 } from '@kbn/data-plugin/public';
 import { FetchStatus } from '../../types';
 import { DataMain$, DataRefetch$ } from '../hooks/use_saved_search';
@@ -33,7 +32,6 @@ export function getFetch$({
   main$: DataMain$;
   refetch$: DataRefetch$;
   searchSessionManager: DiscoverSearchSessionManager;
-  searchSource: ISearchSource;
   initialFetchStatus: FetchStatus;
 }) {
   const { timefilter } = data.query.timefilter;

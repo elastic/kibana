@@ -72,7 +72,6 @@ export function DiscoverLayout({
   resetSavedSearch,
   savedSearchData$,
   savedSearch,
-  searchSource,
   state,
   stateContainer,
 }: DiscoverLayoutProps) {
@@ -246,7 +245,6 @@ export function DiscoverLayout({
         navigateTo={navigateTo}
         savedQuery={state.savedQuery}
         savedSearch={savedSearch}
-        searchSource={searchSource}
         stateContainer={stateContainer}
         updateQuery={onUpdateQuery}
         resetSavedSearch={resetSavedSearch}

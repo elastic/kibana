@@ -12,7 +12,6 @@ import { discoverServiceMock } from '../../../__mocks__/services';
 import { savedSearchMock } from '../../../__mocks__/saved_search';
 import { useDiscoverState } from './use_discover_state';
 import { dataViewMock } from '../../../__mocks__/data_view';
-import { SearchSource } from '@kbn/data-plugin/public';
 
 describe('test useDiscoverState', () => {
   const originalSavedObjectsClient = discoverServiceMock.core.savedObjects.client;
@@ -42,6 +41,5 @@ describe('test useDiscoverState', () => {
     });
     expect(result.current.state.index).toBe(dataViewMock.id);
     expect(result.current.stateContainer).toBeInstanceOf(Object);
-    expect(result.current.searchSource).toBeInstanceOf(SearchSource);
   });
 });

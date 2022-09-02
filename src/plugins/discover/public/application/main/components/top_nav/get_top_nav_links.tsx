@@ -7,7 +7,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { ISearchSource } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { unhashUrl } from '@kbn/kibana-utils-plugin/public';
 import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
@@ -30,7 +29,6 @@ export const getTopNavLinks = ({
   services,
   state,
   onOpenInspector,
-  searchSource,
   onOpenSavedSearch,
   isPlainRecord,
 }: {
@@ -40,7 +38,6 @@ export const getTopNavLinks = ({
   services: DiscoverServices;
   state: GetStateReturn;
   onOpenInspector: () => void;
-  searchSource: ISearchSource;
   onOpenSavedSearch: (id: string) => void;
   isPlainRecord: boolean;
 }): TopNavMenuData[] => {
@@ -150,7 +147,7 @@ export const getTopNavLinks = ({
         return;
       }
       const sharingData = await getSharingData(
-        searchSource,
+        savedSearch.searchSource,
         state.appStateContainer.getState(),
         services
       );
