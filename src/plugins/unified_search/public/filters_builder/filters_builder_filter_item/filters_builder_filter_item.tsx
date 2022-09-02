@@ -85,14 +85,15 @@ export function FilterItem({
     params = getFilterParams(filter);
   }
 
-  const lPadding = useEuiPaddingSize('s');
+  const sPadding = useEuiPaddingSize('s');
 
-  const containerStyles = useMemo(() => {
-    return css`
-      padding-top: ${lPadding};
-      padding-bottom: ${lPadding};
-    `;
-  }, [lPadding]);
+  const containerStyles = useMemo(
+    () =>
+      css`
+        margin: ${sPadding};
+      `,
+    [sPadding]
+  );
 
   const onHandleField = useCallback(
     (selectedField: DataViewField) => {
@@ -253,7 +254,7 @@ export function FilterItem({
                         <EuiFlexGroup
                           responsive={false}
                           justifyContent="center"
-                          alignItems="center"
+                          alignItems="flexStart"
                           gutterSize="s"
                         >
                           <EuiFlexItem grow={false}>
