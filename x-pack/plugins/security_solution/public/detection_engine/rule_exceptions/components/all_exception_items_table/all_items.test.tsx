@@ -37,6 +37,7 @@ describe('ExceptionsViewerItems', () => {
           onCreateExceptionListItem={jest.fn()}
           onDeleteException={jest.fn()}
           onEditExceptionItem={jest.fn()}
+          isReadOnly={false}
         />
       </TestProviders>
     );
@@ -60,6 +61,7 @@ describe('ExceptionsViewerItems', () => {
             onCreateExceptionListItem={jest.fn()}
             onDeleteException={jest.fn()}
             onEditExceptionItem={jest.fn()}
+            isReadOnly={false}
           />
         </ThemeProvider>
       </TestProviders>
@@ -84,6 +86,7 @@ describe('ExceptionsViewerItems', () => {
             onCreateExceptionListItem={jest.fn()}
             onDeleteException={jest.fn()}
             onEditExceptionItem={jest.fn()}
+            isReadOnly={false}
           />
         </ThemeProvider>
       </TestProviders>

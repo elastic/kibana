@@ -48,7 +48,7 @@ const ExceptionsViewerPaginationComponent = ({
   return (
     <EuiTablePagination
       aria-label={i18n.EXCEPTION_ITEMS_PAGINATION_ARIA_LABEL}
-      pageCount={Math.ceil(pagination.totalItemCount / pagination.pageSize)}
+      pageCount={Math.ceil(pagination.totalItemCount / pagination.pageSize) ?? 0}
       activePage={pagination.pageIndex}
       onChangePage={handlePageIndexChange}
       itemsPerPage={pagination.pageSize}

@@ -17,6 +17,7 @@ import {
   DETECTION_ENGINE_RULES_PREVIEW,
   DETECTION_ENGINE_INSTALLED_INTEGRATIONS_URL,
   DETECTION_ENGINE_RULES_URL_FIND,
+  DETECTION_ENGINE_RULES_EXCEPTIONS_REFERENCE_URL,
 } from '../../../../../common/constants';
 import type { BulkAction } from '../../../../../common/detection_engine/schemas/common';
 import type {
@@ -385,7 +386,7 @@ export const findRuleExceptionReferences = async ({
   signal,
 }: FindRulesReferencedByExceptionsProps): Promise<RulesReferencedByExceptionListsSchema> =>
   KibanaServices.get().http.fetch<RulesReferencedByExceptionListsSchema>(
-    `${DETECTION_ENGINE_RULES_URL}/exceptions/_find_references`,
+    DETECTION_ENGINE_RULES_EXCEPTIONS_REFERENCE_URL,
     {
       method: 'GET',
       query: {

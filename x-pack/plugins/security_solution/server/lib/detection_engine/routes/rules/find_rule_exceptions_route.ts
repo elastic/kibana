@@ -11,7 +11,7 @@ import { validate } from '@kbn/securitysolution-io-ts-utils';
 import type { FindResult } from '@kbn/alerting-plugin/server';
 
 import type { SecuritySolutionPluginRouter } from '../../../../types';
-import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
+import { DETECTION_ENGINE_RULES_EXCEPTIONS_REFERENCE_URL } from '../../../../../common/constants';
 import { buildSiemResponse } from '../utils';
 import { enrichFilterWithRuleTypeMapping } from '../../rules/enrich_filter_with_rule_type_mappings';
 import type { FindExceptionReferencesOnRuleSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/find_exception_list_references_schema';
@@ -24,7 +24,7 @@ import type { RuleParams } from '../../schemas/rule_schemas';
 export const findRuleExceptionReferencesRoute = (router: SecuritySolutionPluginRouter) => {
   router.get(
     {
-      path: `${DETECTION_ENGINE_RULES_URL}/exceptions/_find_references`,
+      path: DETECTION_ENGINE_RULES_EXCEPTIONS_REFERENCE_URL,
       validate: {
         query: buildRouteValidation<
           typeof findExceptionReferencesOnRuleSchema,
@@ -51,7 +51,7 @@ export const findRuleExceptionReferencesRoute = (router: SecuritySolutionPluginR
           });
         }
 
-        const results: Array<FindResult<RuleParams>> = await Promise.all(
+        const foundRules: Array<FindResult<RuleParams>> = await Promise.all(
           ids.map(async (id, index) => {
             return rulesClient.find({
               options: {
@@ -66,7 +66,7 @@ export const findRuleExceptionReferencesRoute = (router: SecuritySolutionPluginR
           })
         );
 
-        const references = results.map<RuleReferencesSchema>(({ data }, index) => {
+        const references = foundRules.map<RuleReferencesSchema>(({ data }, index) => {
           const wantedData = data.map(({ name, id, params }) => ({
             name,
             id,

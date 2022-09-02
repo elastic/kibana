@@ -20,7 +20,7 @@ describe('ExceptionsViewerSearchBar', () => {
         onSearch={jest.fn()}
         onAddExceptionClick={jest.fn()}
         isSearching={false}
-        isReadOnly
+        canAddException
       />
     );
 
@@ -31,7 +31,7 @@ describe('ExceptionsViewerSearchBar', () => {
     const mockOnAddExceptionClick = jest.fn();
     const wrapper = mount(
       <ExceptionsViewerSearchBar
-        isReadOnly={false}
+        canAddException={false}
         listType={ExceptionListTypeEnum.DETECTION}
         isSearching={false}
         onSearch={jest.fn()}
@@ -51,7 +51,7 @@ describe('ExceptionsViewerSearchBar', () => {
     const mockOnAddExceptionClick = jest.fn();
     const wrapper = mount(
       <ExceptionsViewerSearchBar
-        isReadOnly={false}
+        canAddException={false}
         listType={ExceptionListTypeEnum.ENDPOINT}
         isSearching={false}
         onSearch={jest.fn()}

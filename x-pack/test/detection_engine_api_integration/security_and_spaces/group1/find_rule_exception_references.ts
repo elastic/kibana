@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 
-import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
+import { DETECTION_ENGINE_RULES_EXCEPTIONS_REFERENCE_URL } from '@kbn/security-solution-plugin/common/constants';
 import {
   CreateExceptionListSchema,
   ExceptionListTypeEnum,
@@ -57,7 +57,7 @@ export default ({ getService }: FtrProviderContext) => {
       await createRule(supertest, log, getSimpleRule('rule-1'));
 
       const { body: references } = await supertest
-        .get(`${DETECTION_ENGINE_RULES_URL}/exceptions/_find_references`)
+        .get(DETECTION_ENGINE_RULES_EXCEPTIONS_REFERENCE_URL)
         .set('kbn-xsrf', 'true')
         .query({
           ids: `${exceptionList.id}`,
@@ -74,7 +74,7 @@ export default ({ getService }: FtrProviderContext) => {
       await createRule(supertest, log, getSimpleRule('rule-1'));
 
       const { body: references } = await supertest
-        .get(`${DETECTION_ENGINE_RULES_URL}/exceptions/_find_references`)
+        .get(DETECTION_ENGINE_RULES_EXCEPTIONS_REFERENCE_URL)
         .set('kbn-xsrf', 'true')
         .query({
           ids: `1234`,
@@ -120,7 +120,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       const { body: references } = await supertest
-        .get(`${DETECTION_ENGINE_RULES_URL}/exceptions/_find_references`)
+        .get(DETECTION_ENGINE_RULES_EXCEPTIONS_REFERENCE_URL)
         .set('kbn-xsrf', 'true')
         .query({
           ids: `${exceptionList.id},${exceptionList2.id}`,

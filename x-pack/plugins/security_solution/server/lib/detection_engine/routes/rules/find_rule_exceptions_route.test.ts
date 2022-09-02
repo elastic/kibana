@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
+import { DETECTION_ENGINE_RULES_EXCEPTIONS_REFERENCE_URL } from '../../../../../common/constants';
 import {
   getEmptyFindResult,
   getFindResultWithSingleHit,
@@ -49,7 +49,7 @@ describe('findRuleExceptionReferencesRoute', () => {
     test('returns 200 when adding an exception item and rule_default exception list already exists', async () => {
       const request = requestMock.create({
         method: 'get',
-        path: `${DETECTION_ENGINE_RULES_URL}/exceptions/_find_references?exception_list`,
+        path: `${DETECTION_ENGINE_RULES_EXCEPTIONS_REFERENCE_URL}?exception_list`,
         query: {
           ids: `4656dc92-5832-11ea-8e2d-0242ac130003`,
           list_ids: `my_default_list`,
@@ -85,7 +85,7 @@ describe('findRuleExceptionReferencesRoute', () => {
     test('returns 200 when no references found', async () => {
       const request = requestMock.create({
         method: 'get',
-        path: `${DETECTION_ENGINE_RULES_URL}/exceptions/_find_references`,
+        path: DETECTION_ENGINE_RULES_EXCEPTIONS_REFERENCE_URL,
         query: {
           ids: `4656dc92-5832-11ea-8e2d-0242ac130003`,
           list_ids: `my_default_list`,
@@ -112,7 +112,7 @@ describe('findRuleExceptionReferencesRoute', () => {
     test('returns 400 if query param lengths do not match', async () => {
       const request = requestMock.create({
         method: 'get',
-        path: `${DETECTION_ENGINE_RULES_URL}/exceptions/_find_references`,
+        path: DETECTION_ENGINE_RULES_EXCEPTIONS_REFERENCE_URL,
         query: {
           ids: `4656dc92-5832-11ea-8e2d-0242ac130003`,
           list_ids: `my_default_list`,
@@ -135,7 +135,7 @@ describe('findRuleExceptionReferencesRoute', () => {
     test('returns 500 if rules client fails', async () => {
       const request = requestMock.create({
         method: 'get',
-        path: `${DETECTION_ENGINE_RULES_URL}/exceptions/_find_references`,
+        path: DETECTION_ENGINE_RULES_EXCEPTIONS_REFERENCE_URL,
         query: {
           ids: `4656dc92-5832-11ea-8e2d-0242ac130003`,
           list_ids: `my_default_list`,

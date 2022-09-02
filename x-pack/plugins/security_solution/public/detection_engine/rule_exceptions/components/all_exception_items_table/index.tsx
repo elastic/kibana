@@ -301,11 +301,7 @@ const ExceptionsViewerComponent = ({
 
   // User privileges checks
   useEffect((): void => {
-    if (!canUserCRUD || !hasIndexWrite) {
-      setReadOnly(true);
-    } else {
-      setReadOnly(false);
-    }
+    setReadOnly(!canUserCRUD || !hasIndexWrite);
   }, [setReadOnly, canUserCRUD, hasIndexWrite]);
 
   useEffect(() => {
@@ -351,7 +347,7 @@ const ExceptionsViewerComponent = ({
         <>
           {!STATES_SEARCH_HIDDEN.includes(viewerState) && (
             <ExceptionsViewerSearchBar
-              isReadOnly={isReadOnly}
+              canAddException={isReadOnly}
               listType={listType}
               isSearching={viewerState === 'searching'}
               onSearch={handleSearch}

@@ -97,6 +97,6 @@ describe('Adds rule exception from alerts flow', () => {
     waitForAlertsToPopulate();
 
     cy.get(ALERTS_COUNT).should('exist');
-    cy.get(NUMBER_OF_ALERTS).should('have.text', `${NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS}`);
+    cy.get(NUMBER_OF_ALERTS).should('have.text', '2 alerts');
   });
 });

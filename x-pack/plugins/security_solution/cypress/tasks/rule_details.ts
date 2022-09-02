@@ -77,7 +77,12 @@ export const openExceptionFlyoutFromEmptyViewerPrompt = () => {
 };
 
 export const searchForExceptionItem = (query: string) => {
-  cy.get(EXCEPTION_ITEM_VIEWER_SEARCH).type(`${query}{enter}`).trigger('change');
+  cy.get(EXCEPTION_ITEM_VIEWER_SEARCH).type(`${query}`).trigger('keydown', {
+    key: 'Enter',
+    keyCode: 13,
+    code: 'Enter',
+    type: 'keydown',
+  });
 };
 
 export const addExceptionFlyoutFromViewerHeader = () => {

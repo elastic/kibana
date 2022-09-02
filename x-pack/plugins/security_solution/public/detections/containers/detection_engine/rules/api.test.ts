@@ -30,6 +30,7 @@ import {
 import { getPatchRulesSchemaMock } from '../../../../../common/detection_engine/schemas/request/patch_rules_schema.mock';
 import { rulesMock } from './mock';
 import type { FindRulesReferencedByExceptionsListProp } from './types';
+import { DETECTION_ENGINE_RULES_EXCEPTIONS_REFERENCE_URL } from '../../../../../common/constants';
 
 const abortCtrl = new AbortController();
 const mockKibanaServices = KibanaServices.get as jest.Mock;
@@ -687,18 +688,15 @@ describe('Detections Rules API', () => {
         },
       ];
       await findRuleExceptionReferences({ lists: payload, signal: abortCtrl.signal });
-      expect(fetchMock).toHaveBeenCalledWith(
-        '/api/detection_engine/rules/exceptions/_find_references',
-        {
-          query: {
-            ids: '123,456',
-            list_ids: 'list_id_1,list_id_2',
-            namespace_types: 'single,single',
-          },
-          method: 'GET',
-          signal: abortCtrl.signal,
-        }
-      );
+      expect(fetchMock).toHaveBeenCalledWith(DETECTION_ENGINE_RULES_EXCEPTIONS_REFERENCE_URL, {
+        query: {
+          ids: '123,456',
+          list_ids: 'list_id_1,list_id_2',
+          namespace_types: 'single,single',
+        },
+        method: 'GET',
+        signal: abortCtrl.signal,
+      });
     });
   });
 });
