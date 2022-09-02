@@ -28987,7 +28987,6 @@
     "xpack.securitySolution.timeline.properties.addTimelineButtonLabel": "Ajouter une nouvelle chronologie ou un nouveau modèle",
     "xpack.securitySolution.timeline.properties.addToFavoriteButtonLabel": "Ajouter aux favoris",
     "xpack.securitySolution.timeline.properties.attachToCaseButtonLabel": "Attacher à un cas",
-    "xpack.securitySolution.timeline.properties.attachToExistingCaseButtonLabel": "Attacher à un cas existant...",
     "xpack.securitySolution.timeline.properties.attachToNewCaseButtonLabel": "Attacher au nouveau cas",
     "xpack.securitySolution.timeline.properties.autosavedLabel": "Enregistré automatiquement",
     "xpack.securitySolution.timeline.properties.descriptionPlaceholder": "Ajouter une description",
