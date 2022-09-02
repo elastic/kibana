@@ -62,12 +62,18 @@ const createConnector = async (
 
 export const addConnector = async (
   client: IScopedClusterClient,
-  input: { delete_existing_connector?: boolean; index_name: string; language: string | null }
+  input: {
+    delete_existing_connector?: boolean;
+    index_name: string;
+    is_native: boolean;
+    language: string | null;
+  }
 ): Promise<{ id: string; index_name: string }> => {
   const document: ConnectorDocument = {
     api_key_id: null,
     configuration: {},
     index_name: input.index_name,
+    is_native: input.is_native,
     language: input.language,
     last_seen: null,
     last_sync_error: null,

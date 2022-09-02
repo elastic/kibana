@@ -7,6 +7,7 @@
  */
 
 import Fs from 'fs';
+import Fsp from 'fs/promises';
 import Path from 'path';
 
 import { run } from '@kbn/dev-cli-runner';
@@ -26,6 +27,8 @@ import { writePluginDirectoryDoc } from './mdx/write_plugin_directory_doc';
 import { collectApiStatsForPlugin } from './stats';
 import { countEslintDisableLine, EslintDisableCounts } from './count_eslint_disable';
 import { writeDeprecationDueByTeam } from './mdx/write_deprecations_due_by_team';
+import { trimDeletedDocsFromNav } from './trim_deleted_docs_from_nav';
+import { getAllDocFileIds } from './mdx/get_all_doc_file_ids';
 
 function isStringArray(arr: unknown | string[]): arr is string[] {
   return Array.isArray(arr) && arr.every((p) => typeof p === 'string');
@@ -53,30 +56,27 @@ export function runBuildApiDocsCli() {
         );
       }
 
+      const outputFolder = Path.resolve(REPO_ROOT, 'api_docs');
+
+      const initialDocIds =
+        !pluginFilter && Fs.existsSync(outputFolder)
+          ? await getAllDocFileIds(outputFolder)
+          : undefined;
+
       const project = getTsProject(REPO_ROOT);
 
       const plugins = findPlugins();
 
-      const outputFolder = Path.resolve(REPO_ROOT, 'api_docs');
-      if (!Fs.existsSync(outputFolder)) {
-        Fs.mkdirSync(outputFolder);
-
-        // Don't delete all the files if a plugin filter is being used.
-      } else if (!pluginFilter) {
-        // Delete all files except the README that warns about the auto-generated nature of
-        // the folder.
-        const files = Fs.readdirSync(outputFolder);
-        await Promise.all(
-          files
-            .filter((file) => file.indexOf('README.md') < 0)
-            .map(
-              (file) =>
-                new Promise<void>((resolve, reject) =>
-                  Fs.rm(Path.resolve(outputFolder, file), (err) => (err ? reject(err) : resolve()))
-                )
-            )
-        );
+      // if the output folder already exists and we don't have a plugin filter, delete all the files in the output folder
+      if (Fs.existsSync(outputFolder) && !pluginFilter) {
+        await Fsp.rm(outputFolder, { recursive: true });
       }
+
+      // if the output folder doesn't exist, create it
+      if (!Fs.existsSync(outputFolder)) {
+        await Fsp.mkdir(outputFolder, { recursive: true });
+      }
+
       const collectReferences = flags.references as boolean;
 
       const { pluginApiMap, missingApiItems, unreferencedDeprecations, referencedDeprecations } =
@@ -264,9 +264,14 @@ export function runBuildApiDocsCli() {
           log
         );
       });
+
       if (Object.values(pathsOutsideScopes).length > 0) {
         log.warning(`Found paths outside of normal scope folders:`);
         log.warning(pathsOutsideScopes);
+      }
+
+      if (initialDocIds) {
+        await trimDeletedDocsFromNav(log, initialDocIds, outputFolder);
       }
     },
     {

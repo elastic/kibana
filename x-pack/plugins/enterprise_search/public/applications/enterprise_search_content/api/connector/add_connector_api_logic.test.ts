@@ -9,30 +9,31 @@ import { mockHttpValues } from '../../../__mocks__/kea_logic';
 
 import { nextTick } from '@kbn/test-jest-helpers';
 
-import { addConnectorPackage } from './add_connector_package_api_logic';
+import { addConnector } from './add_connector_api_logic';
 
-describe('addConnectorPackageApiLogic', () => {
+describe('addConnectorApiLogic', () => {
   const { http } = mockHttpValues;
   beforeEach(() => {
     jest.clearAllMocks();
   });
-  describe('addConnectorPackage', () => {
+  describe('addConnector', () => {
     it('calls correct api', async () => {
       const promise = Promise.resolve({ id: 'unique id', index_name: 'indexName' });
       http.post.mockReturnValue(promise);
-      const result = addConnectorPackage({ indexName: 'indexName', language: 'en' });
+      const result = addConnector({ indexName: 'indexName', isNative: false, language: 'en' });
       await nextTick();
       expect(http.post).toHaveBeenCalledWith('/internal/enterprise_search/connectors', {
-        body: JSON.stringify({ index_name: 'indexName', language: 'en' }),
+        body: JSON.stringify({ index_name: 'indexName', is_native: false, language: 'en' }),
       });
       await expect(result).resolves.toEqual({ id: 'unique id', indexName: 'indexName' });
     });
     it('adds delete param if specific', async () => {
       const promise = Promise.resolve({ id: 'unique id', index_name: 'indexName' });
       http.post.mockReturnValue(promise);
-      const result = addConnectorPackage({
+      const result = addConnector({
         deleteExistingConnector: true,
         indexName: 'indexName',
+        isNative: false,
         language: null,
       });
       await nextTick();
@@ -40,6 +41,7 @@ describe('addConnectorPackageApiLogic', () => {
         body: JSON.stringify({
           delete_existing_connector: true,
           index_name: 'indexName',
+          is_native: false,
           language: null,
         }),
       });
