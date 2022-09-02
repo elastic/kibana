@@ -85,7 +85,7 @@ describe('#decryptOrStripResponseAttributes', () => {
     references: [],
   };
 
-  test('strips encrypted attributes except for ones with `dangerouslyExposeValue` set to `true` if type is registered', async () => {
+  test('does not alter response if type is not registered', async () => {
     const { extension } = setup();
 
     expect(extension.decryptOrStripResponseAttributes(unregisteredSO)).resolves.toEqual({
@@ -97,6 +97,10 @@ describe('#decryptOrStripResponseAttributes', () => {
         attrThree: 'three',
       },
     });
+  });
+
+  test('strips encrypted attributes except for ones with `dangerouslyExposeValue` set to `true` if type is registered', async () => {
+    const { extension } = setup();
 
     expect(extension.decryptOrStripResponseAttributes(registeredSO)).resolves.toEqual({
       ...registeredSO,
@@ -136,7 +140,7 @@ describe('#decryptOrStripResponseAttributes', () => {
 });
 
 describe('#encryptAttributes', () => {
-  test('encrypts attributes if the type is registered', async () => {
+  test('does not encrpyt attributes if type is not registered', async () => {
     const { extension } = setup();
 
     expect(
@@ -159,6 +163,10 @@ describe('#encryptAttributes', () => {
       attrNotSoSecret: 'not-so-secret',
       attrThree: 'three',
     });
+  });
+
+  test('encrypts attributes if the type is registered', async () => {
+    const { extension } = setup();
 
     expect(
       extension.encryptAttributes(
