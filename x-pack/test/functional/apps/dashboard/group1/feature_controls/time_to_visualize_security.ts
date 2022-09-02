@@ -28,13 +28,18 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const security = getService('security');
   const find = getService('find');
+  const kbnServer = getService('kibanaServer');
 
   describe('dashboard time to visualize security', () => {
     before(async () => {
-      await esArchiver.load(
-        'x-pack/test/functional/es_archives/dashboard/feature_controls/security'
-      );
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
+      await kbnServer.importExport.load(
+        'x-pack/test/functional/fixtures/kbn_archiver/dashboard/feature_controls/security/security.json'
+      );
+
+      await kbnServer.uiSettings.update({
+        defaultIndex: 'logstash-*',
+      });
 
       // ensure we're logged out so we can login as the appropriate users
       await PageObjects.security.forceLogout();
@@ -77,9 +82,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await security.role.delete('dashboard_write_vis_read');
       await security.user.delete('dashboard_write_vis_read_user');
 
-      await esArchiver.unload(
-        'x-pack/test/functional/es_archives/dashboard/feature_controls/security'
-      );
+      await kbnServer.savedObjects.cleanStandardList();
+      await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
     });
 
     describe('lens by value works without library save permissions', () => {
