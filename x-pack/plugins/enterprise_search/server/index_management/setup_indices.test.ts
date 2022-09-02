@@ -7,7 +7,7 @@
 
 import { CONNECTORS_INDEX, CONNECTORS_JOBS_INDEX, CONNECTORS_VERSION } from '..';
 
-import { setupConnectorsIndices } from './setup_indices';
+import { defaultConnectorsPipelineMeta, setupConnectorsIndices } from './setup_indices';
 
 describe('Setup Indices', () => {
   const mockClient = {
@@ -28,6 +28,7 @@ describe('Setup Indices', () => {
 
   const connectorsMappings = {
     _meta: {
+      pipeline: defaultConnectorsPipelineMeta,
       version: CONNECTORS_VERSION,
     },
     properties: {
