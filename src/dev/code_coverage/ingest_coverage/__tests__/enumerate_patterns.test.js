@@ -21,11 +21,8 @@ describe(`enumeratePatterns`, () => {
       new Map([['x-pack/plugins/screenshotting', ['kibana-screenshotting']]])
     );
 
-    expect(actual).toHaveProperty(
-      '0',
-      expect.arrayContaining([
-        'x-pack/plugins/screenshotting/server/browsers/extract/unzip.ts kibana-screenshotting',
-      ])
+    expect(actual.flat()).toContain(
+      'x-pack/plugins/screenshotting/server/browsers/extract/unzip.ts kibana-screenshotting'
     );
   });
   it(`should resolve src/plugins/charts/common/static/color_maps/color_maps.ts to kibana-app`, () => {
@@ -33,7 +30,7 @@ describe(`enumeratePatterns`, () => {
       new Map([['src/plugins/charts/common/static/color_maps', ['kibana-app']]])
     );
 
-    expect(actual[0][0]).toBe(
+    expect(actual.flat()).toContain(
       'src/plugins/charts/common/static/color_maps/color_maps.ts kibana-app'
     );
   });
