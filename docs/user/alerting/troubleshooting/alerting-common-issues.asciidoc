@@ -283,6 +283,6 @@ to later releases. The following error occurs:
 
 *Solution*:
 
-Go to *{stack-manage-app} > {rules-ui}* and multi-select the failed rules. Choose
+Upgrade to 8.3.2 or later releases, then go to *{stack-manage-app} > {rules-ui}* and multi-select the failed rules. Choose
 **Manage rules > Update API Keys** to generate new API keys. For more details
 about API key authorization, refer to <<alerting-authorization>>.
