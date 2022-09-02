@@ -7,7 +7,7 @@
 
 import { chunk } from 'lodash';
 import { resolve } from 'path';
-import glob from 'glob';
+import globby from 'globby';
 
 import Url from 'url';
 
@@ -26,7 +26,7 @@ const retrieveIntegrations = (chunksTotal: number, chunkIndex: number) => {
     __dirname,
     '../../plugins/threat_intelligence/cypress/integration/**/*.spec.ts'
   );
-  const integrationsPaths = glob.sync(pattern);
+  const integrationsPaths = globby.sync(pattern);
   const chunkSize = Math.ceil(integrationsPaths.length / chunksTotal);
 
   return chunk(integrationsPaths, chunkSize)[chunkIndex - 1];

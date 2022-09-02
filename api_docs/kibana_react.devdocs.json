@@ -1665,18 +1665,6 @@
           },
           {
             "plugin": "data",
-            "path": "src/plugins/data/public/search/session/session_indicator/connected_search_session_indicator/connected_search_session_indicator.tsx"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/public/search/session/session_indicator/connected_search_session_indicator/connected_search_session_indicator.tsx"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/public/search/session/session_indicator/connected_search_session_indicator/connected_search_session_indicator.tsx"
-          },
-          {
-            "plugin": "data",
             "path": "src/plugins/data/public/search/session/sessions_mgmt/lib/get_columns.tsx"
           },
           {
@@ -1686,6 +1674,18 @@
           {
             "plugin": "data",
             "path": "src/plugins/data/public/search/session/sessions_mgmt/lib/get_columns.tsx"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/public/search/session/session_indicator/connected_search_session_indicator/connected_search_session_indicator.tsx"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/public/search/session/session_indicator/connected_search_session_indicator/connected_search_session_indicator.tsx"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/public/search/session/session_indicator/connected_search_session_indicator/connected_search_session_indicator.tsx"
           },
           {
             "plugin": "spaces",
@@ -1698,6 +1698,30 @@
           {
             "plugin": "spaces",
             "path": "x-pack/plugins/spaces/public/management/spaces_management_app.tsx"
+          },
+          {
+            "plugin": "savedObjectsManagement",
+            "path": "src/plugins/saved_objects_management/public/management_section/saved_objects_edition_page.tsx"
+          },
+          {
+            "plugin": "savedObjectsManagement",
+            "path": "src/plugins/saved_objects_management/public/management_section/saved_objects_edition_page.tsx"
+          },
+          {
+            "plugin": "savedObjectsManagement",
+            "path": "src/plugins/saved_objects_management/public/management_section/saved_objects_edition_page.tsx"
+          },
+          {
+            "plugin": "savedObjectsManagement",
+            "path": "src/plugins/saved_objects_management/public/management_section/objects_table/saved_objects_table.tsx"
+          },
+          {
+            "plugin": "savedObjectsManagement",
+            "path": "src/plugins/saved_objects_management/public/management_section/objects_table/saved_objects_table.tsx"
+          },
+          {
+            "plugin": "savedObjectsManagement",
+            "path": "src/plugins/saved_objects_management/public/management_section/objects_table/saved_objects_table.tsx"
           },
           {
             "plugin": "fleet",
@@ -1886,30 +1910,6 @@
           {
             "plugin": "ux",
             "path": "x-pack/plugins/ux/public/application/ux_app.tsx"
-          },
-          {
-            "plugin": "savedObjectsManagement",
-            "path": "src/plugins/saved_objects_management/public/management_section/saved_objects_edition_page.tsx"
-          },
-          {
-            "plugin": "savedObjectsManagement",
-            "path": "src/plugins/saved_objects_management/public/management_section/saved_objects_edition_page.tsx"
-          },
-          {
-            "plugin": "savedObjectsManagement",
-            "path": "src/plugins/saved_objects_management/public/management_section/saved_objects_edition_page.tsx"
-          },
-          {
-            "plugin": "savedObjectsManagement",
-            "path": "src/plugins/saved_objects_management/public/management_section/objects_table/saved_objects_table.tsx"
-          },
-          {
-            "plugin": "savedObjectsManagement",
-            "path": "src/plugins/saved_objects_management/public/management_section/objects_table/saved_objects_table.tsx"
-          },
-          {
-            "plugin": "savedObjectsManagement",
-            "path": "src/plugins/saved_objects_management/public/management_section/objects_table/saved_objects_table.tsx"
           },
           {
             "plugin": "kibanaOverview",
