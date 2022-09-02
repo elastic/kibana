@@ -30,7 +30,7 @@ export type VisualizeEmbeddableFactoryContract = PublicContract<VisualizeEmbedda
 export type VisualizeEmbeddableContract = PublicContract<VisualizeEmbeddable>;
 export type { VisualizeInput } from './embeddable';
 export type { VisualizeEmbeddable } from './embeddable';
-export type { SchemaConfig } from './vis_schemas';
+export type { SchemaConfig } from '../common/types';
 export { updateOldState } from './legacy/vis_update_state';
 export type { PersistedState } from './persisted_state';
 export type {

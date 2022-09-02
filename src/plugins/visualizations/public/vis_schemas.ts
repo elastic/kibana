@@ -6,24 +6,23 @@
  * Side Public License, v 1.
  */
 
-import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
-import { IAggConfig, search } from '@kbn/data-plugin/public';
-
+import { BUCKET_TYPES, IAggConfig, METRIC_TYPES, search } from '@kbn/data-plugin/public';
 import { Vis, VisToExpressionAstParams } from './types';
+import { SchemaConfig } from '../common/types';
 
 const { isDateHistogramBucketAggConfig } = search.aggs;
+
+const SUPPORTED_AGGREGATIONS = [...Object.values(METRIC_TYPES), ...Object.values(BUCKET_TYPES)];
+
+type SupportedAggregation = typeof SUPPORTED_AGGREGATIONS[number];
+
+function isSupportedAggType(name: string): name is SupportedAggregation {
+  return SUPPORTED_AGGREGATIONS.includes(name as SupportedAggregation);
+}
 
 interface SchemaConfigParams {
   precision?: number;
   useGeocentroid?: boolean;
-}
-
-export interface SchemaConfig {
-  accessor: number;
-  label: string;
-  format: SerializedFieldFormat;
-  params: SchemaConfigParams;
-  aggType: string;
 }
 
 export interface Schemas {
@@ -46,6 +45,10 @@ export const getVisSchemas = <TVisParams>(
   { timeRange, timefilter }: VisToExpressionAstParams
 ): Schemas => {
   const createSchemaConfig = (accessor: number, agg: IAggConfig): SchemaConfig => {
+    const aggType = agg.type.name;
+    if (!isSupportedAggType(aggType)) {
+      throw new Error(`Unsupported agg type: ${aggType}`);
+    }
     if (isDateHistogramBucketAggConfig(agg)) {
       agg.params.timeRange = timeRange;
       const bounds =
@@ -65,7 +68,7 @@ export const getVisSchemas = <TVisParams>(
       'avg_bucket',
       'min_bucket',
       'max_bucket',
-    ].includes(agg.type.name);
+    ].includes(aggType);
 
     const formatAgg = hasSubAgg
       ? agg.params.customMetric || agg.aggConfigs.getRequestAggById(agg.params.metricAgg)
@@ -73,7 +76,7 @@ export const getVisSchemas = <TVisParams>(
 
     const params: SchemaConfigParams = {};
 
-    if (agg.type.name === 'geohash_grid') {
+    if (aggType === 'geohash_grid') {
       params.precision = agg.params.precision;
       params.useGeocentroid = agg.params.useGeocentroid;
     }
@@ -85,7 +88,8 @@ export const getVisSchemas = <TVisParams>(
       format: formatAgg.toSerializedFieldFormat(),
       params,
       label,
-      aggType: agg.type.name,
+      aggType,
+      aggParams: agg.params,
     };
   };
 

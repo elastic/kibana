@@ -7,8 +7,14 @@
  */
 
 import type { SerializableRecord } from '@kbn/utility-types';
-import type { AggConfigSerialized, SerializedSearchSourceFields } from '@kbn/data-plugin/common';
+import {
+  AggParamsMapping,
+  AggConfigSerialized,
+  SerializedSearchSourceFields,
+} from '@kbn/data-plugin/common';
+import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import type { SavedObjectAttributes } from '@kbn/core/types';
+import { SUPPORTED_AGGREGATIONS } from './constants';
 
 export interface VisParams {
   [key: string]: any;
@@ -48,4 +54,19 @@ export interface SerializedVis<T = VisParams> {
   params: T;
   uiState?: any;
   data: SerializedVisData;
+}
+interface SchemaConfigParams {
+  precision?: number;
+  useGeocentroid?: boolean;
+}
+
+export type SupportedAggregation = typeof SUPPORTED_AGGREGATIONS[number];
+
+export interface SchemaConfig {
+  accessor: number;
+  label: string;
+  format: SerializedFieldFormat;
+  params: SchemaConfigParams;
+  aggType: SupportedAggregation;
+  aggParams?: AggParamsMapping[SupportedAggregation];
 }

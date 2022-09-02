@@ -526,6 +526,7 @@ export class VisualizeEmbeddable
       },
       variables: {
         embeddableTitle: this.getTitle(),
+        ...(await this.vis.type.getExpressionVariables?.(this.vis, this.timefilter)),
       },
       searchSessionId: this.input.searchSessionId,
       syncColors: this.input.syncColors,
