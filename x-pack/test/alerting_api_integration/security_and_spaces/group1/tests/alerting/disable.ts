@@ -172,11 +172,11 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
               // task should still exist but be disabled
               const taskRecord = await getScheduledTask(createdAlert.scheduled_task_id);
               expect(taskRecord.type).to.eql('task');
-              expect(taskRecord.task.taskType).to.eql('alerting:test.noop');
+              expect(taskRecord.task.taskType).to.eql('alerting:test.restricted-noop');
               expect(JSON.parse(taskRecord.task.params)).to.eql({
                 alertId: createdAlert.id,
                 spaceId: space.id,
-                consumer: 'alertsFixture',
+                consumer: 'alertsRestrictedFixture',
               });
               expect(taskRecord.task.enabled).to.eql(false);
               break;
@@ -236,7 +236,7 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
               // task should still exist but be disabled
               const taskRecord = await getScheduledTask(createdAlert.scheduled_task_id);
               expect(taskRecord.type).to.eql('task');
-              expect(taskRecord.task.taskType).to.eql('alerting:test.noop');
+              expect(taskRecord.task.taskType).to.eql('alerting:test.unrestricted-noop');
               expect(JSON.parse(taskRecord.task.params)).to.eql({
                 alertId: createdAlert.id,
                 spaceId: space.id,
@@ -300,7 +300,7 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
               expect(JSON.parse(taskRecord.task.params)).to.eql({
                 alertId: createdAlert.id,
                 spaceId: space.id,
-                consumer: 'alertsFixture',
+                consumer: 'alerts',
               });
               expect(taskRecord.task.enabled).to.eql(false);
               break;
