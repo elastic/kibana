@@ -260,6 +260,7 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
           enabled: () => discoverUrlError === undefined,
         },
       ],
+      width: '60px'
     },
   ];
 
