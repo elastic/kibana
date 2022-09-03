@@ -30,7 +30,6 @@ import {
 
 describe('Exceptions viewer read only', () => {
   const exceptionList = getExceptionList();
-  const NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS = '1 alert';
 
   before(() => {
     esArchiverResetKibana();
