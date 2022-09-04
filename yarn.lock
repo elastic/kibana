@@ -2815,6 +2815,18 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-chrome-browser-internal@link:bazel-bin/packages/core/chrome/core-chrome-browser-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-chrome-browser-mocks@link:bazel-bin/packages/core/chrome/core-chrome-browser-mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-chrome-browser@link:bazel-bin/packages/core/chrome/core-chrome-browser":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-config-server-internal@link:bazel-bin/packages/core/config/core-config-server-internal":
   version "0.0.0"
   uid ""
@@ -6874,6 +6886,18 @@
   uid ""
 
 "@types/kbn__core-capabilities-server@link:bazel-bin/packages/core/capabilities/core-capabilities-server/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-chrome-browser-internal@link:bazel-bin/packages/core/chrome/core-chrome-browser-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-chrome-browser-mocks@link:bazel-bin/packages/core/chrome/core-chrome-browser-mocks/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-chrome-browser@link:bazel-bin/packages/core/chrome/core-chrome-browser/npm_module_types":
   version "0.0.0"
   uid ""
 

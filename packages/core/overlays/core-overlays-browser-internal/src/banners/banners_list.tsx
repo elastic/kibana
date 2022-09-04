@@ -10,6 +10,8 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Observable } from 'rxjs';
 import type { OverlayBanner } from './banners_service';
 
+import './banners_list.scss';
+
 interface Props {
   banners$: Observable<OverlayBanner[]>;
 }

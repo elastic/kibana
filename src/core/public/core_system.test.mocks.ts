@@ -11,7 +11,7 @@ import { docLinksServiceMock } from '@kbn/core-doc-links-browser-mocks';
 import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
-import { chromeServiceMock } from './chrome/chrome_service.mock';
+import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
 import { fatalErrorsServiceMock } from '@kbn/core-fatal-errors-browser-mocks';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';
@@ -82,7 +82,7 @@ jest.doMock('@kbn/core-ui-settings-browser-internal', () => ({
 
 export const MockChromeService = chromeServiceMock.create();
 export const ChromeServiceConstructor = jest.fn().mockImplementation(() => MockChromeService);
-jest.doMock('./chrome', () => ({
+jest.doMock('@kbn/core-chrome-browser-internal', () => ({
   ChromeService: ChromeServiceConstructor,
 }));
 
