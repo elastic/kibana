@@ -21,7 +21,7 @@ import {
   ConnectorConfigurationApiLogic,
   PostConnectorConfigurationArgs,
   PostConnectorConfigurationResponse,
-} from '../../../api/connector_package/update_connector_configuration_api_logic';
+} from '../../../api/connector/update_connector_configuration_api_logic';
 import {
   FetchIndexApiLogic,
   FetchIndexApiParams,
