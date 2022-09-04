@@ -7,14 +7,18 @@
 
 import type {
   CreateExceptionListItemSchema,
+  CreateRuleExceptionListItemSchema,
   ExceptionListItemSchema,
   ExceptionListSchema,
   OsTypeArray,
 } from '@kbn/securitysolution-io-ts-list-types';
+import type { AddToRuleListsRadioOptions } from './list_options';
 
 export interface State {
   exceptionItemMeta: { name: string };
-  exceptionItems: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>;
+  exceptionItems: Array<
+    ExceptionListItemSchema | CreateExceptionListItemSchema | CreateRuleExceptionListItemSchema
+  >;
   errorsExist: boolean;
   newComment: string;
   closeSingleAlert: boolean;
@@ -25,6 +29,8 @@ export interface State {
   selectedOs: OsTypeArray | undefined;
   addExceptionToRule: boolean;
   exceptionListsToAddTo: ExceptionListSchema[];
+  selectedRulesToAddTo: Rule[];
+  listsOptionsRadioSelection: AddToRuleListsRadioOptions;
 }
 
 export type Action =
@@ -75,6 +81,14 @@ export type Action =
   | {
       type: 'setAddExceptionToLists';
       listsToAddTo: ExceptionListSchema[];
+    }
+  | {
+      type: 'setListsRadioOption';
+      option: AddToRuleListsRadioOptions;
+    }
+  | {
+      type: 'setSelectedRulesToAddTo';
+      rules: Rule[];
     };
 
 export const createExceptionItemsReducer =
@@ -170,6 +184,22 @@ export const createExceptionItemsReducer =
         return {
           ...state,
           exceptionListsToAddTo: listsToAddTo,
+        };
+      }
+      case 'setListsRadioOption': {
+        const { option } = action;
+
+        return {
+          ...state,
+          listsOptionsRadioSelection: option,
+        };
+      }
+      case 'setSelectedRulesToAddTo': {
+        const { rules } = action;
+
+        return {
+          ...state,
+          selectedRulesToAddTo: rules,
         };
       }
       default:

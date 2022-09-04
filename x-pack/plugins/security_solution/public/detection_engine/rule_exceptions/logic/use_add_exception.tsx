@@ -6,27 +6,19 @@
  */
 
 import { useEffect, useRef, useState, useCallback } from 'react';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type {
   ExceptionListItemSchema,
   CreateExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { useApi } from '@kbn/securitysolution-list-hooks';
-import type { HttpStart } from '@kbn/core/public';
 
-import { updateAlertStatus } from '../../../detections/containers/detection_engine/alerts/api';
-import { getUpdateAlertsQuery } from '../../../detections/components/alerts_table/actions';
-import {
-  buildAlertsFilter,
-  buildAlertStatusesFilter,
-} from '../../../detections/components/alerts_table/default_config';
-import { getQueryFilter } from '../../../../common/detection_engine/get_query_filter';
-import type { Index } from '../../../../common/detection_engine/schemas/common/schemas';
-import { formatExceptionItemForUpdate, prepareExceptionItemsForBulkClose } from '../utils/helpers';
+import { formatExceptionItemForUpdate } from '../utils/helpers';
 import { useKibana } from '../../../common/lib/kibana';
+import { useAppToasts } from '../../../common/hooks/use_app_toasts';
+import * as i18n from './translations';
 
 /**
- * Adds exception items to the list. Also optionally closes alerts.
+ * Adds exception items to the list or updates exception if it's an existing one
  *
  * @param ruleStaticId static id of the rule (rule.ruleId, not rule.id) where the exception updates will be applied
  * @param exceptionItemsToAddOrUpdate array of ExceptionListItemSchema to add or update
@@ -35,49 +27,25 @@ import { useKibana } from '../../../common/lib/kibana';
  *
  */
 export type AddOrUpdateExceptionItemsFunc = (
-  ruleStaticId: string,
-  exceptionItemsToAddOrUpdate: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>,
-  alertIdToClose?: string,
-  bulkCloseIndex?: Index
+  exceptionItemsToAddOrUpdate: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>
 ) => Promise<void>;
 
-export type ReturnUseAddOrUpdateException = [
-  { isLoading: boolean },
-  AddOrUpdateExceptionItemsFunc | null
-];
-
-export interface UseAddOrUpdateExceptionProps {
-  http: HttpStart;
-  onError: (arg: Error, code: number | null, message: string | null) => void;
-  onSuccess: (updated: number, conficts: number) => void;
-}
+export type ReturnUseAddOrUpdateException = [boolean, AddOrUpdateExceptionItemsFunc | null];
 
 /**
  * Hook for adding and updating an exception item
  *
- * @param http Kibana http service
- * @param onError error callback
- * @param onSuccess callback when all lists fetched successfully
- *
  */
-export const useAddOrUpdateException = ({
-  http,
-  onError,
-  onSuccess,
-}: UseAddOrUpdateExceptionProps): ReturnUseAddOrUpdateException => {
+export const useAddOrUpdateException = (): ReturnUseAddOrUpdateException => {
   const { services } = useKibana();
+  const { addSuccess, addError } = useAppToasts();
   const [isLoading, setIsLoading] = useState(false);
   const addOrUpdateExceptionRef = useRef<AddOrUpdateExceptionItemsFunc | null>(null);
   const { addExceptionListItem, updateExceptionListItem } = useApi(services.http);
   const addOrUpdateException = useCallback<AddOrUpdateExceptionItemsFunc>(
-    async (ruleStaticId, exceptionItemsToAddOrUpdate, alertIdToClose, bulkCloseIndex) => {
+    async (exceptionItemsToAddOrUpdate) => {
       if (addOrUpdateExceptionRef.current != null) {
-        addOrUpdateExceptionRef.current(
-          ruleStaticId,
-          exceptionItemsToAddOrUpdate,
-          alertIdToClose,
-          bulkCloseIndex
-        );
+        addOrUpdateExceptionRef.current(exceptionItemsToAddOrUpdate);
       }
     },
     []
@@ -88,15 +56,12 @@ export const useAddOrUpdateException = ({
     const abortCtrl = new AbortController();
 
     const onUpdateExceptionItemsAndAlertStatus: AddOrUpdateExceptionItemsFunc = async (
-      ruleStaticId,
-      exceptionItemsToAddOrUpdate,
-      alertIdToClose,
-      bulkCloseIndex
+      exceptionItemsToAddOrUpdate
     ) => {
       const addOrUpdateItems = async (
         exceptionListItems: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>
-      ): Promise<void> => {
-        await Promise.all(
+      ): Promise<ExceptionListItemSchema[]> => {
+        return Promise.all(
           exceptionListItems.map(
             (item: ExceptionListItemSchema | CreateExceptionListItemSchema) => {
               if ('id' in item && item.id != null) {
@@ -116,63 +81,20 @@ export const useAddOrUpdateException = ({
 
       try {
         setIsLoading(true);
-        let alertIdResponse: estypes.UpdateByQueryResponse | undefined;
-        let bulkResponse: estypes.UpdateByQueryResponse | undefined;
-        if (alertIdToClose != null) {
-          alertIdResponse = await updateAlertStatus({
-            query: getUpdateAlertsQuery([alertIdToClose]),
-            status: 'closed',
-            signal: abortCtrl.signal,
-          });
-        }
 
-        if (bulkCloseIndex != null) {
-          const alertStatusFilter = buildAlertStatusesFilter([
-            'open',
-            'acknowledged',
-            'in-progress',
-          ]);
-
-          const filter = getQueryFilter(
-            '',
-            'kuery',
-            [...buildAlertsFilter(ruleStaticId), ...alertStatusFilter],
-            bulkCloseIndex,
-            prepareExceptionItemsForBulkClose(exceptionItemsToAddOrUpdate),
-            false
-          );
-
-          bulkResponse = await updateAlertStatus({
-            query: {
-              query: filter,
-            },
-            status: 'closed',
-            signal: abortCtrl.signal,
-          });
-        }
-
-        await addOrUpdateItems(exceptionItemsToAddOrUpdate);
-
-        // NOTE: there could be some overlap here... it's possible that the first response had conflicts
-        // but that the alert was closed in the second call. In this case, a conflict will be reported even
-        // though it was already resolved. I'm not sure that there's an easy way to solve this, but it should
-        // have minimal impact on the user... they'd see a warning that indicates a possible conflict, but the
-        // state of the alerts and their representation in the UI would be consistent.
-        const updated = (alertIdResponse?.updated ?? 0) + (bulkResponse?.updated ?? 0);
-        const conflicts =
-          alertIdResponse?.version_conflicts ?? 0 + (bulkResponse?.version_conflicts ?? 0);
+        const itemsAdded = await addOrUpdateItems(exceptionItemsToAddOrUpdate);
         if (isSubscribed) {
           setIsLoading(false);
-          onSuccess(updated, conflicts);
+          const sharedListNames = itemsAdded.map((item) => item.name);
+          addSuccess({
+            title: i18n.ADD_EXCEPTION_SUCCESS,
+            text: i18n.ADD_EXCEPTION_SUCCESS_DETAILS(sharedListNames.join(',')),
+          });
         }
       } catch (error) {
         if (isSubscribed) {
           setIsLoading(false);
-          if (error.body != null) {
-            onError(error, error.body.status_code, error.body.message);
-          } else {
-            onError(error, null, null);
-          }
+          addError(error, { title: i18n.ADD_EXCEPTION_ERROR });
         }
       }
     };
@@ -182,7 +104,7 @@ export const useAddOrUpdateException = ({
       isSubscribed = false;
       abortCtrl.abort();
     };
-  }, [addExceptionListItem, http, onSuccess, onError, updateExceptionListItem]);
+  }, [addExceptionListItem, updateExceptionListItem, addSuccess, addError]);
 
-  return [{ isLoading }, addOrUpdateException];
+  return [isLoading, addOrUpdateException];
 };

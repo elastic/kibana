@@ -18,6 +18,7 @@ import type {
   ExceptionListItemSchema,
   ListOperatorEnum as OperatorEnum,
   ListOperatorTypeEnum as OperatorTypeEnum,
+  NamespaceType,
 } from '@kbn/securitysolution-io-ts-list-types';
 import {
   EXCEPTION_LIST_NAMESPACE,
@@ -93,10 +94,12 @@ export type ExceptionListItemBuilderSchema = Omit<ExceptionListItemSchema, 'entr
 
 export type CreateExceptionListItemBuilderSchema = Omit<
   CreateExceptionListItemSchema,
-  'meta' | 'entries'
+  'meta' | 'entries' | 'list_id' | 'namespace_type'
 > & {
   meta: { temporaryUuid: string };
   entries: BuilderEntry[];
+  list_id: string | undefined;
+  namespace_type: NamespaceType | undefined;
 };
 
 export type ExceptionsBuilderExceptionItem =

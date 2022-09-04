@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useReducer } from 'react';
+import React, { useCallback, useEffect, useReducer, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import styled from 'styled-components';
 import { HttpStart } from '@kbn/core/public';
 import { addIdToItem } from '@kbn/securitysolution-utils';
 import {
   CreateExceptionListItemSchema,
+  CreateRuleExceptionListItemSchema,
   ExceptionListItemSchema,
   ExceptionListType,
   NamespaceType,
@@ -68,7 +69,9 @@ const initialState: State = {
 
 export interface OnChangeProps {
   errorExists: boolean;
-  exceptionItems: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>;
+  exceptionItems: Array<
+    ExceptionListItemSchema | CreateExceptionListItemSchema | CreateRuleExceptionListItemSchema
+  >;
   exceptionsToDelete: ExceptionListItemSchema[];
   warningExists: boolean;
 }
@@ -84,17 +87,18 @@ export interface ExceptionBuilderProps {
   isNestedDisabled: boolean;
   isOrDisabled: boolean;
   isOrHidden?: boolean;
-  listId: string;
-  listNamespaceType: NamespaceType;
+  listId: string | undefined;
+  listNamespaceType: NamespaceType | undefined;
   listType: ExceptionListType;
   listTypeSpecificIndexPatternFilter?: (
     pattern: DataViewBase,
     type: ExceptionListType
   ) => DataViewBase;
   onChange: (arg: OnChangeProps) => void;
-  ruleName: string;
+  ruleName?: string;
   isDisabled?: boolean;
   operatorsList?: OperatorOption[];
+  exceptionItemName?: string;
 }
 
 export const ExceptionBuilderComponent = ({
@@ -110,6 +114,7 @@ export const ExceptionBuilderComponent = ({
   listId,
   listNamespaceType,
   listType,
+  exceptionItemName,
   listTypeSpecificIndexPatternFilter,
   onChange,
   ruleName,
@@ -288,11 +293,11 @@ export const ExceptionBuilderComponent = ({
     // would then be arbitrary, decided to just create a new exception list item
     const newException = getNewExceptionItem({
       listId,
+      name: exceptionItemName ?? `${ruleName} - Exception item`,
       namespaceType: listNamespaceType,
-      ruleName,
     });
     setUpdateExceptions([...exceptions, { ...newException }]);
-  }, [setUpdateExceptions, exceptions, listId, listNamespaceType, ruleName]);
+  }, [setUpdateExceptions, exceptions, listId, listNamespaceType, ruleName, exceptionItemName]);
 
   // The builder can have existing exception items, or new exception items that have yet
   // to be created (and thus lack an id), this was creating some React bugs with relying
@@ -357,19 +362,24 @@ export const ExceptionBuilderComponent = ({
     handleAddNewExceptionItemEntry();
   }, [handleAddNewExceptionItemEntry, setUpdateOrDisabled, setUpdateAddNested]);
 
+  const memoExceptionItems = useMemo(() => {
+    console.log({exceptions})
+    return filterExceptionItems(exceptions);
+  }, [exceptions]);
+
   // Bubble up changes to parent
   useEffect(() => {
     onChange({
       errorExists: errorExists > 0,
-      exceptionItems: filterExceptionItems(exceptions),
+      exceptionItems: memoExceptionItems,
       exceptionsToDelete,
       warningExists: warningExists > 0,
     });
-  }, [onChange, exceptionsToDelete, exceptions, errorExists, warningExists]);
+  }, [onChange, exceptionsToDelete, memoExceptionItems, errorExists, warningExists]);
 
-  useEffect(() => {
-    setUpdateExceptions([]);
-  }, [osTypes, setUpdateExceptions]);
+  // useEffect(() => {
+  //   setUpdateExceptions([]);
+  // }, [osTypes, setUpdateExceptions]);
 
   // Defaults builder to never be sans entry, instead
   // always falls back to an empty entry if user deletes all

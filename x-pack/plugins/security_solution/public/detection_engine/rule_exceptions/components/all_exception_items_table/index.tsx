@@ -331,14 +331,13 @@ const ExceptionsViewerComponent = ({
 
       {currenFlyout === 'addException' && rule != null && (
         <AddExceptionFlyout
-          ruleName={rule.name}
-          ruleIndices={rule.index ?? DEFAULT_INDEX_PATTERN}
-          dataViewId={rule.data_view_id}
-          ruleId={rule.id}
+          rules={[rule]}
+          isBulkAction={false}
           exceptionListType={listType}
           onCancel={handleCancelExceptionItemFlyout}
           onConfirm={handleConfirmExceptionFlyout}
           onRuleChange={onRuleChange}
+          showAlertCloseOptions
           data-test-subj="addExceptionItemFlyout"
         />
       )}

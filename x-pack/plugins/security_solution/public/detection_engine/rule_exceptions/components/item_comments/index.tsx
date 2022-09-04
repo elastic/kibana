@@ -18,7 +18,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import type { Comment } from '@kbn/securitysolution-io-ts-list-types';
-import * as i18n from '../../utils/translations';
+import * as i18n from './translations';
 import { useCurrentUser } from '../../../../common/lib/kibana';
 import { getFormattedComments } from '../../utils/helpers';
 
@@ -52,6 +52,10 @@ export const ExceptionItemComments = memo(function ExceptionItemComments({
 }: ExceptionItemCommentsProps) {
   const [shouldShowComments, setShouldShowComments] = useState(false);
   const currentUser = useCurrentUser();
+  const fullName = currentUser?.fullName;
+  const userName = currentUser?.username;
+  const avatarName =
+    fullName && fullName.length > 0 ? fullName : userName ?? i18n.UNKNOWN_AVATAR_NAME;
 
   const handleOnChange = useCallback(
     (event: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -105,10 +109,7 @@ export const ExceptionItemComments = memo(function ExceptionItemComments({
       )}
       <EuiFlexGroup gutterSize={'none'}>
         <EuiFlexItem grow={false}>
-          <MyAvatar
-            name={currentUser != null ? currentUser.username.toUpperCase() ?? '' : ''}
-            size="l"
-          />
+          <MyAvatar name={avatarName} size="l" />
         </EuiFlexItem>
         <EuiFlexItem grow={1}>
           <EuiTextArea
@@ -117,6 +118,7 @@ export const ExceptionItemComments = memo(function ExceptionItemComments({
             value={newCommentValue}
             onChange={handleOnChange}
             fullWidth={true}
+            data-test-subj="newExceptionItemCommentTextArea"
           />
         </EuiFlexItem>
       </EuiFlexGroup>

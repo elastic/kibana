@@ -375,7 +375,7 @@ function filterEmptyExceptionEntries<T extends ExceptionEntry>(entries: T[]): T[
  */
 export const getPrepopulatedEndpointException = ({
   listId,
-  ruleName,
+  name,
   codeSignature,
   eventCode,
   listNamespace = 'agnostic',
@@ -383,7 +383,7 @@ export const getPrepopulatedEndpointException = ({
 }: {
   listId: string;
   listNamespace?: NamespaceType;
-  ruleName: string;
+  name: string;
   codeSignature: { subjectName: string; trusted: string };
   eventCode: string;
   alertEcsData: Flattened<Ecs>;
@@ -447,7 +447,7 @@ export const getPrepopulatedEndpointException = ({
   };
 
   return {
-    ...getNewExceptionItem({ listId, namespaceType: listNamespace, ruleName }),
+    ...getNewExceptionItem({ listId, namespaceType: listNamespace, name }),
     entries: entriesToAdd(),
   };
 };
@@ -457,7 +457,7 @@ export const getPrepopulatedEndpointException = ({
  */
 export const getPrepopulatedRansomwareException = ({
   listId,
-  ruleName,
+  name,
   codeSignature,
   eventCode,
   listNamespace = 'agnostic',
@@ -465,7 +465,7 @@ export const getPrepopulatedRansomwareException = ({
 }: {
   listId: string;
   listNamespace?: NamespaceType;
-  ruleName: string;
+  name: string;
   codeSignature: { subjectName: string; trusted: string };
   eventCode: string;
   alertEcsData: Flattened<Ecs>;
@@ -475,7 +475,7 @@ export const getPrepopulatedRansomwareException = ({
   const executable = process?.executable ?? '';
   const ransomwareFeature = Ransomware?.feature ?? '';
   return {
-    ...getNewExceptionItem({ listId, namespaceType: listNamespace, ruleName }),
+    ...getNewExceptionItem({ listId, namespaceType: listNamespace, name }),
     entries: addIdToEntries([
       {
         field: 'process.Ext.code_signature',
@@ -525,14 +525,14 @@ export const getPrepopulatedRansomwareException = ({
 
 export const getPrepopulatedMemorySignatureException = ({
   listId,
-  ruleName,
+  name,
   eventCode,
   listNamespace = 'agnostic',
   alertEcsData,
 }: {
   listId: string;
   listNamespace?: NamespaceType;
-  ruleName: string;
+  name: string;
   eventCode: string;
   alertEcsData: Flattened<Ecs>;
 }): ExceptionsBuilderExceptionItem => {
@@ -564,20 +564,20 @@ export const getPrepopulatedMemorySignatureException = ({
     },
   ]);
   return {
-    ...getNewExceptionItem({ listId, namespaceType: listNamespace, ruleName }),
+    ...getNewExceptionItem({ listId, namespaceType: listNamespace, name }),
     entries: addIdToEntries(entries),
   };
 };
 export const getPrepopulatedMemoryShellcodeException = ({
   listId,
-  ruleName,
+  name,
   eventCode,
   listNamespace = 'agnostic',
   alertEcsData,
 }: {
   listId: string;
   listNamespace?: NamespaceType;
-  ruleName: string;
+  name: string;
   eventCode: string;
   alertEcsData: Flattened<Ecs>;
 }): ExceptionsBuilderExceptionItem => {
@@ -616,21 +616,21 @@ export const getPrepopulatedMemoryShellcodeException = ({
   ]);
 
   return {
-    ...getNewExceptionItem({ listId, namespaceType: listNamespace, ruleName }),
+    ...getNewExceptionItem({ listId, namespaceType: listNamespace, name }),
     entries: addIdToEntries(entries),
   };
 };
 
 export const getPrepopulatedBehaviorException = ({
   listId,
-  ruleName,
+  name,
   eventCode,
   listNamespace = 'agnostic',
   alertEcsData,
 }: {
   listId: string;
   listNamespace?: NamespaceType;
-  ruleName: string;
+  name: string;
   eventCode: string;
   alertEcsData: Flattened<Ecs>;
 }): ExceptionsBuilderExceptionItem => {
@@ -746,7 +746,7 @@ export const getPrepopulatedBehaviorException = ({
     },
   ]);
   return {
-    ...getNewExceptionItem({ listId, namespaceType: listNamespace, ruleName }),
+    ...getNewExceptionItem({ listId, namespaceType: listNamespace, name }),
     entries: addIdToEntries(entries),
   };
 };
@@ -841,4 +841,54 @@ export const defaultEndpointExceptionItems = (
         })
       );
   }
+};
+
+/**
+ * Adds user defined name to all new exceptionItems
+ * @param exceptionItems new or existing ExceptionItem[]
+ * @param name new exception item name
+ */
+ export const enrichNewExceptionItemsWithName = (
+  exceptionItems: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>,
+  name: string
+): Array<ExceptionListItemSchema | CreateExceptionListItemSchema> => {
+  return exceptionItems.map((item: ExceptionListItemSchema | CreateExceptionListItemSchema) => {
+    return {
+      ...item,
+      name,
+    };
+  });
+};
+
+/**
+ * Adds user defined name to all new exceptionItems
+ * @param exceptionItems new or existing ExceptionItem[]
+ * @param name new exception item name
+ */
+export const enrichRuleExceptions = (
+  exceptionItems: Array<ExceptionListItemSchema | CreateRuleExceptionListItemSchema>
+): Array<ExceptionListItemSchema | CreateRuleExceptionListItemSchema> => {
+  return exceptionItems.map((item: ExceptionListItemSchema | CreateRuleExceptionListItemSchema) => {
+    const entries = item.entries.map(({ id, ...rest }) => ({ ...rest }));
+    return {
+      ...item,
+      entries,
+      namespace_type: 'single',
+    };
+  });
+};
+
+/**
+ * Adds user defined name to all new exceptionItems
+ * @param exceptionItems new or existing ExceptionItem[]
+ * @param name new exception item name
+ */
+export const enrichSharedExceptions = (
+  lists: ExceptionListSchema[],
+  exceptionItems: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>
+): Array<ExceptionListItemSchema | CreateExceptionListItemSchema> => {
+  return lists.reduce((items, list) => {
+    const updatedItems = exceptionItems.map((item) => ({ ...item, list_id: list.list_id }));
+    return [...items, ...updatedItems];
+  }, []);
 };

@@ -79,6 +79,7 @@ export const findExceptionListItemRoute = (router: ListsPluginRouter): void => {
           }
         }
       } catch (err) {
+        console.log(JSON.stringify(err))
         const error = transformError(err);
         return siemResponse.error({
           body: error.message,
