@@ -46,6 +46,8 @@ import type {
   SavedObjectsCollectMultiNamespaceReferencesResponse,
   SavedObjectsUpdateObjectsSpacesObject,
   SavedObjectsUpdateObjectsSpacesOptions,
+  SavedObjectsBulkDeleteObject,
+  SavedObjectsBulkDeleteOptions,
 } from '@kbn/core-saved-objects-api-server';
 import type {
   SavedObjectsType,
@@ -2041,6 +2043,223 @@ describe('SavedObjectsRepository', () => {
           ],
         });
       });
+    });
+  });
+
+  describe.only('#bulkDelete', () => {
+    const obj1: SavedObjectsBulkDeleteObject = {
+      type: 'config',
+      id: '6.0.0-alpha1',
+    };
+    const obj2: SavedObjectsBulkDeleteObject = {
+      type: 'index-pattern',
+      id: 'logstash-*',
+    };
+
+    const namespace = 'foo-namespace';
+
+    const getMockEsBulkDeleteResponse = (
+      objects: TypeIdTuple[],
+      options?: SavedObjectsBulkDeleteOptions
+    ) =>
+      ({
+        items: objects.map(({ type, id }) => ({
+          // es response returns more fields than what we're interested in.
+          delete: {
+            _id: `${
+              registry.isSingleNamespace(type) && options?.namespace ? `${options?.namespace}:` : ''
+            }${type}:${id}`,
+            ...mockVersionProps,
+            result: 'deleted',
+          },
+        })),
+      } as estypes.BulkResponse);
+
+    const repositoryBulkDeleteSuccess = async (
+      objects: SavedObjectsBulkDeleteObject[],
+      options?: SavedObjectsBulkDeleteOptions
+    ) => {
+      //
+      const multiNamespaceObjects = objects.filter(({ type }) => registry.isMultiNamespace(type));
+      if (multiNamespaceObjects?.length) {
+        const response = getMockMgetResponse(multiNamespaceObjects, options?.namespace);
+        client.mget.mockResponseOnce(response);
+      }
+      const response = getMockEsBulkDeleteResponse(objects, options); // we're not passing the version stuff along here.
+
+      client.bulk.mockResponseOnce(response);
+      const result = await savedObjectsRepository.bulkDelete(objects, options);
+      //
+      expect(client.mget).toHaveBeenCalledTimes(multiNamespaceObjects?.length ? 1 : 0);
+      return result;
+    };
+
+    // bulk delete calls only has one object for each source -- the action
+    const expectClientCallBulkDeleteArgsAction = (
+      objects: TypeIdTuple[],
+      {
+        method,
+        _index = expect.any(String),
+        getId = () => expect.any(String),
+        overrides = {},
+      }: {
+        method: string;
+        _index?: string;
+        getId?: (type: string, id: string) => string;
+        overrides?: Record<string, unknown>;
+      }
+    ) => {
+      const body = [];
+      for (const { type, id } of objects) {
+        body.push({
+          [method]: {
+            _index,
+            _id: getId(type, id),
+            ...overrides,
+          },
+        });
+      }
+
+      expect(client.bulk).toHaveBeenCalledWith(
+        expect.objectContaining({ body }),
+        expect.anything()
+      );
+    };
+
+    const expectBulkDeleteObjArgs = ({ type, id }: { type: string; id: string }) => [
+      {
+        delete: expect.objectContaining({
+          _id: `${
+            registry.isSingleNamespace(type) && namespace ? `${namespace}:` : ''
+          }${type}:${id}`,
+          _index: expect.any(String),
+        }),
+      },
+    ];
+
+    beforeEach(() => {
+      mockDeleteLegacyUrlAliases.mockClear();
+      mockDeleteLegacyUrlAliases.mockResolvedValue();
+    });
+
+    describe('client calls', () => {
+      it(`should use the ES bulk action by default`, async () => {
+        await repositoryBulkDeleteSuccess([obj1, obj2]);
+        expect(client.bulk).toHaveBeenCalled();
+      });
+
+      it(`should use the ES mget action before bulk action for any types that are multi-namespace`, async () => {
+        const objects = [obj1, { ...obj2, type: MULTI_NAMESPACE_ISOLATED_TYPE }];
+        await repositoryBulkDeleteSuccess(objects);
+        expect(client.bulk).toHaveBeenCalled();
+        expect(client.mget).toHaveBeenCalled();
+
+        const docs = [
+          expect.objectContaining({ _id: `${MULTI_NAMESPACE_ISOLATED_TYPE}:${obj2.id}` }),
+        ];
+        expect(client.mget).toHaveBeenCalledWith(
+          expect.objectContaining({ body: { docs } }),
+          expect.anything()
+        );
+      });
+
+      it(`should not use the ES bulk action when there are no valid documents to delete`, async () => {
+        const objects = [obj1, obj2].map((x) => ({ ...x, type: 'unknownType' }));
+        await savedObjectsRepository.bulkDelete(objects);
+        expect(client.bulk).toHaveBeenCalledTimes(0);
+      });
+
+      it(`formats the ES request`, async () => {
+        await repositoryBulkDeleteSuccess([obj1, obj2], { namespace });
+        const body = [...expectBulkDeleteObjArgs(obj1), ...expectBulkDeleteObjArgs(obj2)];
+        expect(client.bulk).toHaveBeenCalledWith(
+          expect.objectContaining({ body }),
+          expect.anything()
+        );
+      });
+
+      it(`formats the ES request for any types that are multi-namespace`, async () => {
+        const _obj2 = { ...obj2, type: MULTI_NAMESPACE_ISOLATED_TYPE };
+        await repositoryBulkDeleteSuccess([obj1, _obj2], { namespace });
+        const body = [...expectBulkDeleteObjArgs(obj1), ...expectBulkDeleteObjArgs(_obj2)];
+        expect(client.bulk).toHaveBeenCalledWith(
+          expect.objectContaining({ body }),
+          expect.anything()
+        );
+      });
+
+      it(`defaults to a refresh setting of wait_for`, async () => {
+        await repositoryBulkDeleteSuccess([obj1, obj2]);
+        expect(client.bulk).toHaveBeenCalledWith(
+          expect.objectContaining({ refresh: 'wait_for' }),
+          expect.anything()
+        );
+      });
+
+      // we don't call mget for single namespace docs so we can't get the version properties
+      it(`defaults to no version for types that are not multi-namespace`, async () => {
+        const objects = [obj1, { ...obj2, type: NAMESPACE_AGNOSTIC_TYPE }];
+        await repositoryBulkDeleteSuccess(objects);
+        expectClientCallBulkDeleteArgsAction(objects, { method: 'delete' });
+      });
+
+      // we only call mget for multinamespace docs and the implementation isn't handling the doc version correctly. I need help here.
+      it.skip(`accepts version for types that are multi-namespace`, async () => {
+        const version = encodeHitVersion({ _seq_no: 100, _primary_term: 200 });
+        // test with both non-multi-namespace and multi-namespace types
+        const objects = [
+          { ...obj1, version },
+          { ...obj2, type: MULTI_NAMESPACE_ISOLATED_TYPE, version },
+        ];
+        await repositoryBulkDeleteSuccess(objects);
+        const overrides = { if_seq_no: 100, if_primary_term: 200 };
+        expectClientCallBulkDeleteArgsAction(objects, { method: 'delete', overrides });
+      });
+
+      it.todo(`prepends namespace to the id when providing namespace for single-namespace type`);
+      it.todo(
+        `doesn't prepend namespace to the id when providing no namespace for single-namespace type`
+      );
+      it.todo(`normalizes options.namespace from 'default' to undefined`);
+      it.todo(`doesn't prepend namespace to the id when not using single-namespace type`);
+      it.todo(`defaults to not using the force option`);
+      it.todo(`accepts force option`);
+    });
+    describe('legacy URL aliases', () => {
+      it.todo(`doesn't delete legacy URL aliases for single-namespace object types`);
+      it.todo(`deletes legacy URL aliases for multi-namespace object types (all spaces)`);
+      it.todo(`deletes legacy URL aliases for multi-namespace object types (specific spaces)`);
+      it.todo(`logs a message when deleteLegacyUrlAliases returns an error`);
+    });
+
+    describe('errors', () => {
+      it.todo(`returns an error when options.namespace is '*'`);
+      it.todo(`returns an error when type is invalid`);
+      it.todo(`returns an error when type is hidden`);
+      it.todo(`returns an error when ES is unable to find the document during get`);
+      it.todo(`returns an error when ES is unable to find the index during get`);
+      it.todo(`returns error when document is not found`);
+      it.todo(
+        `returns an error when the type is multi-namespace and the document exists, but not in this namespace`
+      );
+      it.todo(
+        `returns an error when the type is multi-namespace and the document has multiple namespaces and the force option is not enabled`
+      );
+      it.todo(
+        `returns an error when the type is multi-namespace and the document has all namespaces and the force option is not enabled`
+      );
+      it.todo(`returns an error when ES is unable to find the document during delete`);
+      it.todo(`returns an error when ES is unable to find the index during delete`);
+      it.todo(`returns an error when ES returns an unexpected response`);
+      it.todo(
+        `returns error when type is multi-namespace and the document exists, but not in this namespace`
+      );
+    });
+
+    describe('returns', () => {
+      it.todo(`returns early for empty objects argument`);
+      it.todo(`formats the ES response`);
+      it.todo(`handles a mix of successful deletes and errors`);
     });
   });
 

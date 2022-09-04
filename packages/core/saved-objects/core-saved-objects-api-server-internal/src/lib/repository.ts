@@ -777,7 +777,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
    */
   async bulkDelete(
     objects: SavedObjectsBulkDeleteObject[],
-    options: SavedObjectsBulkDeleteOptions
+    options: SavedObjectsBulkDeleteOptions = {}
   ): Promise<SavedObjectsBulkDeleteResponse> {
     const { refresh = DEFAULT_REFRESH_SETTING, force } = options;
     const namespace = normalizeNamespace(options.namespace);
