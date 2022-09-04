@@ -111,9 +111,6 @@ paths:
     $ref: paths/package_policies@upgrade_dryrun.yaml
   '/package_policies/{packagePolicyId}':
     $ref: 'paths/package_policies@{package_policy_id}.yaml'
-  # Simplified package policies
-  /simplified_package_policies:
-    $ref: paths/simplified_package_policies.yaml
   # Outputs
   /outputs:
     $ref: paths/outputs.yaml
