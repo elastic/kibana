@@ -16,7 +16,6 @@ import {
   ActionLogDateRangePicker,
 } from './actions_log_date_range_picker';
 import { ActionsLogFilter } from './actions_log_filter';
-import type { FilterName } from './hooks';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 
 export const ActionsLogFilters = memo(
@@ -25,6 +24,7 @@ export const ActionsLogFilters = memo(
     isDataLoading,
     onClick,
     onChangeCommandsFilter,
+    onChangeStatusesFilter,
     onRefresh,
     onRefreshChange,
     onTimeChange,
@@ -32,6 +32,7 @@ export const ActionsLogFilters = memo(
     dateRangePickerState: DateRangePickerValues;
     isDataLoading: boolean;
     onChangeCommandsFilter: (selectedCommands: string[]) => void;
+    onChangeStatusesFilter: (selectedStatuses: string[]) => void;
     onRefresh: () => void;
     onRefreshChange: (evt: OnRefreshChangeProps) => void;
     onTimeChange: ({ start, end }: DurationRange) => void;
@@ -40,15 +41,16 @@ export const ActionsLogFilters = memo(
     const getTestId = useTestIdGenerator('response-actions-list');
     const filters = useMemo(() => {
       // TODO: add more filter names here (users, hosts, statuses)
-      const filterNames: FilterName[] = ['actions'];
-      return filterNames.map((filterName) => (
-        <ActionsLogFilter
-          key={filterName}
-          filterName={filterName}
-          onChangeCommandsFilter={onChangeCommandsFilter}
-        />
-      ));
-    }, [onChangeCommandsFilter]);
+      return (
+        <>
+          <ActionsLogFilter filterName={'actions'} onChangeFilterOptions={onChangeCommandsFilter} />
+          <ActionsLogFilter
+            filterName={'statuses'}
+            onChangeFilterOptions={onChangeStatusesFilter}
+          />
+        </>
+      );
+    }, [onChangeCommandsFilter, onChangeStatusesFilter]);
 
     const onClickRefreshButton = useCallback(() => onClick(), [onClick]);
 

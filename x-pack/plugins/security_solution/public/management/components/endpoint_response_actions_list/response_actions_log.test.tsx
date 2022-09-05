@@ -14,7 +14,6 @@ import type { AppContextTestRender } from '../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
 import { ResponseActionsLog } from './response_actions_log';
 import type {
-  ActionDetails,
   ActionListApiResponse,
   ResponseActionStatus,
 } from '../../../../common/endpoint/types';
@@ -470,12 +469,12 @@ const getActionListMock = async ({
 
   const agentIds = _agentIds ?? [uuid.v4()];
 
-  const data: ActionDetails[] = agentIds.map((id) => {
+  const data: ActionListApiResponse['data'] = agentIds.map((id) => {
     const actionIds = Array(actionCount)
       .fill(1)
       .map(() => uuid.v4());
 
-    const actionDetails: ActionDetails[] = actionIds.map((actionId) => {
+    const actionDetails: ActionListApiResponse['data'] = actionIds.map((actionId) => {
       return endpointActionGenerator.generateActionDetails({
         agents: [id],
         id: actionId,
@@ -498,6 +497,7 @@ const getActionListMock = async ({
     commands,
     data,
     userIds,
+    statuses: undefined,
     total: data.length ?? 0,
   };
 };

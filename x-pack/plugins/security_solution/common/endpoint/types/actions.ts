@@ -340,5 +340,6 @@ export interface ActionListApiResponse {
    * multiple agents
    */
   data: Array<Omit<ActionDetails, 'outputs'>>;
+  statuses: string[] | undefined;
   total: number;
 }

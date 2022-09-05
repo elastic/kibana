@@ -99,7 +99,7 @@ describe('When using `getActionList()', () => {
           isCompleted: true,
           isExpired: false,
           startedAt: '2022-04-27T16:08:47.449Z',
-          satus: 'completed',
+          status: 'completed',
           comment: doc?.EndpointActions.data.comment,
           createdBy: doc?.user.id,
           parameters: doc?.EndpointActions.data.parameters,
@@ -289,6 +289,131 @@ describe('When using `getActionList()', () => {
       expect.objectContaining({
         isExpired: false,
         isCompleted: true,
+      })
+    );
+  });
+
+  it('should show status as `completed` if NOT expired and action IS completed AND is successful', async () => {
+    // mock metadataService.findHostMetadataForFleetAgents resolved value
+    (endpointAppContextService.getEndpointMetadataService as jest.Mock) = jest
+      .fn()
+      .mockReturnValue({
+        findHostMetadataForFleetAgents: jest.fn().mockResolvedValue([]),
+      });
+    (
+      actionRequests.hits.hits[0]._source as LogsEndpointAction
+    ).EndpointActions.expiration = `2021-04-30T16:08:47.449Z`;
+
+    await expect(
+      await (
+        await getActionList({
+          esClient,
+          logger,
+          metadataService: endpointAppContextService.getEndpointMetadataService(),
+          elasticAgentIds: ['123'],
+        })
+      ).data[0]
+    ).toEqual(
+      expect.objectContaining({
+        isExpired: false,
+        isCompleted: true,
+        wasSuccessful: true,
+        status: 'completed',
+      })
+    );
+  });
+
+  it('should show status as `failed` if IS expired', async () => {
+    // mock metadataService.findHostMetadataForFleetAgents resolved value
+    (endpointAppContextService.getEndpointMetadataService as jest.Mock) = jest
+      .fn()
+      .mockReturnValue({
+        findHostMetadataForFleetAgents: jest.fn().mockResolvedValue([]),
+      });
+    (
+      actionRequests.hits.hits[0]._source as LogsEndpointAction
+    ).EndpointActions.expiration = `2021-04-30T16:08:47.449Z`;
+    actionResponses.hits.hits.pop(); // remove the endpoint response
+
+    await expect(
+      await (
+        await getActionList({
+          esClient,
+          logger,
+          metadataService: endpointAppContextService.getEndpointMetadataService(),
+          elasticAgentIds: ['123'],
+        })
+      ).data[0]
+    ).toEqual(
+      expect.objectContaining({
+        isExpired: true,
+        isCompleted: false,
+        wasSuccessful: false,
+        status: 'failed',
+      })
+    );
+  });
+
+  it('should show status as `failed` if IS completed AND was unsuccessful', async () => {
+    // mock metadataService.findHostMetadataForFleetAgents resolved value
+    (endpointAppContextService.getEndpointMetadataService as jest.Mock) = jest
+      .fn()
+      .mockReturnValue({
+        findHostMetadataForFleetAgents: jest.fn().mockResolvedValue([]),
+      });
+    (
+      actionRequests.hits.hits[0]._source as LogsEndpointAction
+    ).EndpointActions.expiration = `2021-04-30T16:08:47.449Z`;
+    (actionResponses.hits.hits[0]._source as LogsEndpointActionResponse).error = Error(
+      'Some error in action response'
+    );
+
+    await expect(
+      await (
+        await getActionList({
+          esClient,
+          logger,
+          metadataService: endpointAppContextService.getEndpointMetadataService(),
+          elasticAgentIds: ['123'],
+        })
+      ).data[0]
+    ).toEqual(
+      expect.objectContaining({
+        isExpired: false,
+        isCompleted: true,
+        wasSuccessful: false,
+        status: 'failed',
+      })
+    );
+  });
+
+  it('should show status as `pending` if no response and NOT expired', async () => {
+    // mock metadataService.findHostMetadataForFleetAgents resolved value
+    (endpointAppContextService.getEndpointMetadataService as jest.Mock) = jest
+      .fn()
+      .mockReturnValue({
+        findHostMetadataForFleetAgents: jest.fn().mockResolvedValue([]),
+      });
+    (actionRequests.hits.hits[0]._source as LogsEndpointAction).EndpointActions.expiration =
+      new Date(new Date().setDate(new Date().getDate() + 5)).toISOString();
+    // remove response
+    actionResponses.hits.hits.pop();
+
+    await expect(
+      await (
+        await getActionList({
+          esClient,
+          logger,
+          metadataService: endpointAppContextService.getEndpointMetadataService(),
+          elasticAgentIds: ['123'],
+        })
+      ).data[0]
+    ).toEqual(
+      expect.objectContaining({
+        isExpired: false,
+        isCompleted: false,
+        wasSuccessful: false,
+        status: 'pending',
       })
     );
   });

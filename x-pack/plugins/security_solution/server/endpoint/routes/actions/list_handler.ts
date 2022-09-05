@@ -13,7 +13,7 @@
 
 import type { RequestHandler } from '@kbn/core/server';
 import type { EndpointActionListRequestQuery } from '../../../../common/endpoint/schema/actions';
-import { getActionList } from '../../services';
+import { getActionList, getActionListByStatus } from '../../services';
 import type { SecuritySolutionRequestHandlerContext } from '../../../types';
 import type { EndpointAppContext } from '../../types';
 import { errorHandler } from '../error_handler';
@@ -33,12 +33,21 @@ export const actionListHandler = (
 
   return async (context, req, res) => {
     const {
-      query: { agentIds: elasticAgentIds, page, pageSize, startDate, endDate, userIds, commands },
+      query: {
+        agentIds: elasticAgentIds,
+        page,
+        pageSize,
+        startDate,
+        endDate,
+        userIds,
+        commands,
+        statuses,
+      },
     } = req;
     const esClient = (await context.core).elasticsearch.client.asInternalUser;
 
     try {
-      const body = await getActionList({
+      const getParams = {
         commands: formatStringIds(commands),
         esClient,
         elasticAgentIds: formatStringIds(elasticAgentIds),
@@ -49,7 +58,22 @@ export const actionListHandler = (
         endDate,
         userIds: formatStringIds(userIds),
         logger,
-      });
+      };
+
+      // wrapper method to branch logic for
+      // normal paged search via page, size
+      // vs full search for status filters
+      const getActionsLog = () => {
+        if (statuses?.length) {
+          return getActionListByStatus({
+            ...getParams,
+            statuses: formatStringIds(statuses) as string[],
+          });
+        }
+        return getActionList(getParams);
+      };
+
+      const body = await getActionsLog();
       return res.ok({
         body,
       });

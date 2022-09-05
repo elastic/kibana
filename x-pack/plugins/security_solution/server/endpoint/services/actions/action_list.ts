@@ -22,6 +22,7 @@ import {
   getActionStatus,
 } from './utils';
 import type { EndpointMetadataService } from '../metadata';
+import { ACTIONS_SEARCH_PAGE_SIZE } from './constants';
 
 interface OptionalFilterParams {
   commands?: string[];
@@ -34,6 +35,70 @@ interface OptionalFilterParams {
   /** Will filter out the action requests so that only those show `expiration` date is greater than now */
   unExpiredOnly?: boolean;
 }
+
+/**
+ * Similar to #getActionList but takes statuses filter options
+ * Retrieve a list of all (at most 10k) Actions from index (`ActionDetails`)
+ * filter out action details based on statuses filter options
+ */
+export const getActionListByStatus = async ({
+  commands,
+  elasticAgentIds,
+  esClient,
+  endDate,
+  logger,
+  metadataService,
+  page: _page,
+  pageSize,
+  startDate,
+  statuses,
+  userIds,
+  unExpiredOnly = false,
+}: OptionalFilterParams & {
+  statuses: string[];
+  esClient: ElasticsearchClient;
+  logger: Logger;
+  metadataService: EndpointMetadataService;
+}): Promise<ActionListApiResponse> => {
+  const size = pageSize ?? ENDPOINT_DEFAULT_PAGE_SIZE;
+  const page = _page ?? 1;
+
+  const { actionDetails: allActionDetails } = await getActionDetailsList({
+    commands,
+    elasticAgentIds,
+    esClient,
+    endDate,
+    from: 0,
+    logger,
+    metadataService,
+    size: ACTIONS_SEARCH_PAGE_SIZE,
+    startDate,
+    userIds,
+    unExpiredOnly,
+  });
+
+  // filter out search results based on status filter options
+  const actionDetailsByStatus = allActionDetails.filter((detail) =>
+    statuses.includes(detail.status)
+  );
+
+  // 0, 20;
+  // 21, 40;
+
+  return {
+    page,
+    pageSize: size,
+    startDate,
+    endDate,
+    elasticAgentIds,
+    userIds,
+    commands,
+    statuses,
+    // for size 20 -> page 1: (0, 19), page 2: (20,39) ...etc
+    data: actionDetailsByStatus.slice((page - 1) * size, size * page - 1),
+    total: actionDetailsByStatus.length,
+  };
+};
 
 /**
  * Retrieve a list of Actions (`ActionDetails`)
@@ -82,6 +147,7 @@ export const getActionList = async ({
     elasticAgentIds,
     userIds,
     commands,
+    statuses: undefined,
     data: actionDetails,
     total: totalRecords,
   };

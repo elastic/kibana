@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-import { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import type {
   DurationRange,
   OnRefreshChangeProps,
 } from '@elastic/eui/src/components/date_picker/types';
 import type { DateRangePickerValues } from './actions_log_date_range_picker';
+import type { ResponseActionStatus } from '../../../../../common/endpoint/types';
 import { RESPONSE_ACTION_COMMANDS } from '../../../../../common/endpoint/types';
 import type { FILTER_NAMES } from '../translations';
+import { StatusBadge } from './status_badge';
 
 const defaultDateRangeOptions = Object.freeze({
   autoRefreshOptions: {
@@ -96,13 +98,37 @@ export type FilterItems = Array<{
 
 // TODO: add more filter names here
 export type FilterName = keyof typeof FILTER_NAMES;
-export const useActionsLogFilter = () => {
+export const useActionsLogFilter = (
+  filterName: FilterName
+): {
+  items: FilterItems;
+  setItems: React.Dispatch<React.SetStateAction<FilterItems>>;
+  hasActiveFilters: boolean;
+  numActiveFilters: number;
+  numFilters: number;
+} => {
+  const isStatusesFilter = filterName === 'statuses';
   const [items, setItems] = useState<FilterItems>(
-    RESPONSE_ACTION_COMMANDS.slice().map((filter) => ({
-      key: filter,
-      label: filter === 'unisolate' ? 'release' : filter,
-      checked: undefined,
-    }))
+    isStatusesFilter
+      ? (['completed', 'failed', 'pending'] as ResponseActionStatus[]).map((filter) => ({
+          key: filter,
+          label: (
+            <StatusBadge
+              color={
+                filter === 'completed' ? 'success' : filter === 'failed' ? 'danger' : 'warning'
+              }
+              status={
+                filter.slice(0, 1).toUpperCase().concat(filter.slice(1)) as ResponseActionStatus
+              }
+            />
+          ) as unknown as string,
+          checked: undefined,
+        }))
+      : RESPONSE_ACTION_COMMANDS.slice().map((filter) => ({
+          key: filter,
+          label: filter === 'unisolate' ? 'release' : filter,
+          checked: undefined,
+        }))
   );
 
   const hasActiveFilters = useMemo(() => !!items.find((item) => item.checked === 'on'), [items]);
