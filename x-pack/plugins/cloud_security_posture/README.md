@@ -77,7 +77,7 @@ the Kibana repository:
 node scripts/functional_tests_server.js --config x-pack/test/api_integration/config.ts
 ```
 
-You should wait until the server is ready to accept connections before running the integration tests.
+** You should wait until the server is ready to accept connections before running the integration tests.
 
 Then, in a separate terminal, you can run the integration test.
 In order to do so, run the following command:
