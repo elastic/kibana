@@ -123,9 +123,11 @@ export function getDsIndexPattern({
   config,
   ccs,
 }: CommonIndexPatternArgs & { type?: string }): string {
-  const datasetsPattern = `${moduleType ?? '*'}.${
-    type === DS_INDEX_PATTERN_METRICS ? 'stack_monitoring.' : ''
-  }${dataset ?? '*'}`;
+  const datasetsPattern =
+    type === DS_INDEX_PATTERN_METRICS
+      ? getMetricsDatasetPattern(moduleType, dataset)
+      : getLogsDatasetPattern(moduleType, dataset);
+
   return prefixIndexPatternWithCcs(config, `${type}-${datasetsPattern}-${namespace ?? '*'}`, ccs);
 }
 
@@ -153,11 +155,27 @@ export function getNewIndexPatterns(indexPattern: IndexPatternArgs): string {
 }
 
 const getDataset = (moduleType: INDEX_PATTERN_TYPES) => (dataset: string) =>
-  `${moduleType}.stack_monitoring.${dataset}`;
+  getMetricsDatasetPattern(moduleType, dataset);
 
 export const getElasticsearchDataset = getDataset('elasticsearch');
 export const getKibanaDataset = getDataset('kibana');
 export const getLogstashDataset = getDataset('logstash');
+
+function buildDatasetPattern(
+  moduleType?: INDEX_PATTERN_TYPES,
+  dataset?: string,
+  prefix?: 'stack_monitoring'
+) {
+  return `${moduleType ?? '*'}.${prefix ? `${prefix}.` : ''}${dataset ?? '*'}`;
+}
+
+function getMetricsDatasetPattern(moduleType?: INDEX_PATTERN_TYPES, dataset?: string) {
+  return buildDatasetPattern(moduleType, dataset, 'stack_monitoring');
+}
+
+function getLogsDatasetPattern(moduleType?: INDEX_PATTERN_TYPES, dataset?: string) {
+  return buildDatasetPattern(moduleType, dataset);
+}
 
 const isLogIndexPattern = (args: IndexPatternArgs): args is LogsIndexPatternArgs => {
   return (args as LogsIndexPatternArgs).type === 'logs';
