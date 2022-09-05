@@ -157,6 +157,46 @@ describe('actions schemas', () => {
         });
       }).not.toThrow();
     });
+
+    it('should work with at least one `status` filter', () => {
+      expect(() => {
+        EndpointActionListRequestSchema.query.validate({
+          startDate: 'now-1d', // yesterday
+          endDate: 'now', // today
+          statuses: ['failed'],
+        });
+      }).not.toThrow();
+    });
+
+    it('should not work with empty list for `status` filter', () => {
+      expect(() => {
+        EndpointActionListRequestSchema.query.validate({
+          startDate: 'now-1d', // yesterday
+          endDate: 'now', // today
+          statuses: [],
+        });
+      }).toThrow();
+    });
+
+    it('should not work with more than allowed list for `status` filter', () => {
+      expect(() => {
+        EndpointActionListRequestSchema.query.validate({
+          startDate: 'now-1d', // yesterday
+          endDate: 'now', // today
+          statuses: ['failed', 'completed', 'pending', 'xyz'],
+        });
+      }).toThrow();
+    });
+
+    it('should work with at multiple `status` filter', () => {
+      expect(() => {
+        EndpointActionListRequestSchema.query.validate({
+          startDate: 'now-1d', // yesterday
+          endDate: 'now', // today
+          statuses: ['completed', 'failed', 'pending'],
+        });
+      }).not.toThrow();
+    });
   });
 
   describe('NoParametersRequestSchema', () => {
