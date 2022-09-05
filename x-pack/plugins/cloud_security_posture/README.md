@@ -5,6 +5,7 @@ Cloud Posture automates the identification and remediation of risks across cloud
 ---
 ## Table of contents
 - [Development](#development)
+  - [Local checks before creating a PR](#local-checks-before-creating-a-pr)
   - [Running unit tests](#running-unit-tests)
   - [Running integration tests](#running-integration-tests)
 ---
