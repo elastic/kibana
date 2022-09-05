@@ -63,7 +63,7 @@ export const ConfigPanelQueryAnnotation = ({
     currentIndexPattern
   );
 
-  const selectedField = annotation?.timeField;
+  const selectedField = annotation?.timeField || currentIndexPattern.timeFieldName;
   const fieldIsValid = selectedField
     ? Boolean(currentIndexPattern.getFieldByName(selectedField))
     : true;
