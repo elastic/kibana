@@ -34,6 +34,7 @@ import type {
 import { DOCUMENT_FIELD_NAME as RECORDS_FIELD } from '@kbn/lens-plugin/common/constants';
 import { FilterStateStore } from '@kbn/es-query';
 import styled from 'styled-components';
+import type { AddToTimelinePayload } from '../../timelines/use_add_to_timeline';
 import { PackResultsHeader } from './pack_results_header';
 import { Direction } from '../../../common/search_strategy';
 import { removeMultilines } from '../../../common/utils/build_query/remove_multilines';
@@ -532,10 +533,7 @@ interface PackQueriesStatusTableProps {
   data?: PackQueryStatusItem[];
   startDate?: string;
   expirationDate?: string;
-  addToTimeline?: (payload: {
-    queries: Array<{ field: string; value: string }>;
-    isIcon?: true;
-  }) => ReactElement;
+  addToTimeline?: (payload: AddToTimelinePayload) => ReactElement;
   addToCase?: ({
     actionId,
     isIcon,

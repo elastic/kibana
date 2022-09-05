@@ -26,6 +26,7 @@ import type {
   CasesMetricsRequest,
   CasesStatusRequest,
   CommentRequestAlertType,
+  CommentRequestExternalReferenceNoSOType,
   CommentRequestPersistableStateType,
   CommentRequestUserType,
 } from '../common/api';
@@ -148,7 +149,8 @@ export interface CasesUiStart {
 export type SupportedCaseAttachment =
   | CommentRequestAlertType
   | CommentRequestUserType
-  | CommentRequestPersistableStateType;
+  | CommentRequestPersistableStateType
+  | CommentRequestExternalReferenceNoSOType;
 
 export type CaseAttachments = SupportedCaseAttachment[];
 export type CaseAttachmentWithoutOwner = DistributiveOmit<SupportedCaseAttachment, 'owner'>;

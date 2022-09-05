@@ -9,6 +9,7 @@ import { EuiTabbedContent, EuiNotificationBadge } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import type { ReactElement } from 'react';
 
+import type { AddToTimelinePayload } from '../../../timelines/use_add_to_timeline';
 import type { ECSMapping } from '../../../../common/schemas/common';
 import { ResultsTable } from '../../../results/results_table';
 import { ActionResultsSummary } from '../../../action_results/action_results_summary';
@@ -20,10 +21,7 @@ interface ResultTabsProps {
   ecsMapping?: ECSMapping;
   failedAgentsCount?: number;
   endDate?: string;
-  addToTimeline?: (payload: {
-    queries: Array<{ field: string; value: string }>;
-    isIcon?: true;
-  }) => ReactElement;
+  addToTimeline?: (payload: AddToTimelinePayload) => ReactElement;
   addToCase?: ({ actionId }: { actionId?: string }) => ReactElement;
 }
 

@@ -13,6 +13,11 @@ import { useKibana } from '../common/lib/kibana';
 const TimelineComponent = React.memo((props) => <EuiButtonEmpty {...props} size="xs" />);
 TimelineComponent.displayName = 'TimelineComponent';
 
+export interface AddToTimelinePayload {
+  queries: Array<{ field: string; value: string }>;
+  isIcon?: boolean;
+}
+
 export const useAddToTimeline = () => {
   const {
     services: { timelines },
@@ -21,7 +26,7 @@ export const useAddToTimeline = () => {
   const { getAddToTimelineButton } = timelines.getHoverActions();
 
   const handleAddToTimeline = useCallback(
-    (payload: { queries: Array<{ field: string; value: string }>; isIcon?: true }) => {
+    (payload: AddToTimelinePayload) => {
       const { queries, isIcon } = payload;
 
       const providers = map(queries, ({ field, value }) => ({

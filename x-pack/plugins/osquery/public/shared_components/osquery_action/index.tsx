@@ -9,6 +9,7 @@ import { EuiErrorBoundary, EuiLoadingContent, EuiEmptyPrompt, EuiCode } from '@e
 import React, { useMemo } from 'react';
 import { QueryClientProvider } from '@tanstack/react-query';
 import type { CoreStart } from '@kbn/core/public';
+import type { AddToTimelinePayload } from '../../timelines/use_add_to_timeline';
 import {
   AGENT_STATUS_ERROR,
   EMPTY_PROMPT,
@@ -29,10 +30,7 @@ interface OsqueryActionProps {
   agentId?: string;
   formType: 'steps' | 'simple';
   hideAgentsField?: boolean;
-  addToTimeline?: (payload: {
-    queries: Array<{ field: string; value: string }>;
-    isIcon?: true;
-  }) => React.ReactElement;
+  addToTimeline?: (payload: AddToTimelinePayload) => React.ReactElement;
 }
 
 const OsqueryActionComponent: React.FC<OsqueryActionProps> = ({

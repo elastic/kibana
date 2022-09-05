@@ -9,6 +9,8 @@ import React, { useCallback } from 'react';
 import { CommentType, SECURITY_SOLUTION_OWNER } from '@kbn/cases-plugin/common';
 import { EuiButtonEmpty, EuiButtonIcon, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { JsonValue } from '@kbn/utility-types';
+import { ExternalReferenceStorageType } from '@kbn/cases-plugin/common/api';
 import { useGetUserCasesPermissions } from './use_get_cases_permissions';
 import { useKibana } from '../common/lib/kibana';
 
@@ -21,8 +23,8 @@ const ADD_TO_CASE = i18n.translate(
 
 interface IProps {
   queryId?: string;
-  agentIds?: string[];
-  actionId?: string;
+  agentIds: string[];
+  actionId: string;
   isIcon?: boolean;
   isDisabled?: boolean;
 }
@@ -52,23 +54,21 @@ export const AddToCaseButton: React.FC<IProps> = ({
 
   const handleClick = useCallback(() => {
     const attachments = [
+      // TODO could somebody please advise how to type this properly? Thank you!
       {
-        type: CommentType.externalReference,
+        type: CommentType.externalReference as const,
         externalReferenceId: actionId,
         externalReferenceStorage: {
-          type: 'elasticSearchDoc',
+          type: ExternalReferenceStorageType.elasticSearchDoc as const,
         },
         externalReferenceAttachmentTypeId: 'osquery',
-        externalReferenceMetadata: { actionId, agentIds, queryId },
+        externalReferenceMetadata: { actionId, agentIds, queryId } as { [x: string]: JsonValue },
         owner: SECURITY_SOLUTION_OWNER,
       },
     ];
     if (!hasWritePermissions) {
-      // TODO
-      // @ts-expect-error update types
       createCaseFlyout.open({ attachments });
     } else {
-      // @ts-expect-error update types
       selectCaseModal.open({ attachments });
     }
   }, [actionId, agentIds, createCaseFlyout, hasWritePermissions, queryId, selectCaseModal]);
@@ -76,14 +76,7 @@ export const AddToCaseButton: React.FC<IProps> = ({
   if (isIcon) {
     return (
       <EuiToolTip content={<EuiFlexItem>Add to Case</EuiFlexItem>}>
-        <EuiButtonIcon
-          iconType={'casesApp'}
-          // color="text"
-          // size="xs"
-          // iconSize="l"
-          onClick={handleClick}
-          isDisabled={isDisabled}
-        />
+        <EuiButtonIcon iconType={'casesApp'} onClick={handleClick} isDisabled={isDisabled} />
       </EuiToolTip>
     );
   }

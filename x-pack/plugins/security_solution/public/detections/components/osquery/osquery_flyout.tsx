@@ -42,7 +42,7 @@ export const OsqueryFlyoutComponent: React.FC<OsqueryFlyoutProps> = ({ agentId, 
   const { getAddToTimelineButton } = timelines.getHoverActions();
 
   const handleAddToTimeline = useCallback(
-    (payload: { queries: Array<{ field: string; value: string }>; isIcon?: true }) => {
+    (payload: { queries: Array<{ field: string; value: string }>; isIcon?: boolean }) => {
       const { queries, isIcon } = payload;
 
       const providers = map(queries, ({ field, value }) => ({

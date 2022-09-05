@@ -86,9 +86,9 @@ const ExternalReferenceStorageSORt = rt.type({
 });
 
 export const ExternalReferenceBaseRt = rt.type({
+  type: rt.literal(CommentType.externalReference),
   externalReferenceAttachmentTypeId: rt.string,
   externalReferenceMetadata: rt.union([rt.null, rt.record(rt.string, jsonValueRt)]),
-  type: rt.literal(CommentType.externalReference),
   owner: rt.string,
 });
 

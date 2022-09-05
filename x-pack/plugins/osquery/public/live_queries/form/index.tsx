@@ -24,6 +24,7 @@ import { useForm as useHookForm, FormProvider } from 'react-hook-form';
 import { isEmpty, map, find, pickBy } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { SECURITY_SOLUTION_OWNER } from '@kbn/cases-plugin/common';
+import type { AddToTimelinePayload } from '../../timelines/use_add_to_timeline';
 import { useGetUserCasesPermissions } from '../../cases/use_get_cases_permissions';
 import type { SavedQuerySOFormData } from '../../saved_queries/form/use_saved_query_form';
 import type {
@@ -119,10 +120,7 @@ interface LiveQueryFormProps {
   formType?: FormType;
   enabled?: boolean;
   hideAgentsField?: boolean;
-  addToTimeline?: (payload: {
-    queries: Array<{ field: string; value: string }>;
-    isIcon?: true;
-  }) => React.ReactElement;
+  addToTimeline?: (payload: AddToTimelinePayload) => React.ReactElement;
 }
 
 const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
@@ -416,7 +414,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
       <AddToCaseButton
         queryId={payload?.queryId}
         agentIds={agentIds}
-        actionId={liveQueryActionId}
+        actionId={liveQueryActionId || ''}
         isIcon={payload?.isIcon}
         isDisabled={payload?.isDisabled}
       />
