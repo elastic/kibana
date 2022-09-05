@@ -145,7 +145,7 @@ export const FilterGroup = ({
 
           {conditionType === ConditionTypes.OR && index + 1 < acc.length ? (
             <EuiFlexItem>
-              <OrDelimiter isRootLevelFilterGroup={isRootLevelFilterGroup && path === ''} />
+              <OrDelimiter isRootLevelFilterGroup={isRootLevelFilterGroup} />
             </EuiFlexItem>
           ) : null}
 
