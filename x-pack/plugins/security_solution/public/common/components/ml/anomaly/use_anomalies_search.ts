@@ -154,7 +154,6 @@ function formatResultData(
   buckets: Array<{
     key: string;
     doc_count: number;
-    // entity: EntityHits;
   }>,
   notableAnomaliesJobs: MlSummaryJob[]
 ): AnomaliesCount[] {

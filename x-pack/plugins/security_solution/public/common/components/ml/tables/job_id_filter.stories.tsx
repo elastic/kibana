@@ -19,6 +19,9 @@ const withTheme = (storyFn: () => ReactNode) => (
 
 storiesOf('JobIdFilter', module)
   .addDecorator(withTheme)
+  .add('empty', () => (
+    <JobIdFilter title="Job id" selectedJobIds={[]} jobIds={[]} onSelect={action('onSelect')} />
+  ))
   .add('one selected item', () => (
     <JobIdFilter
       title="Job id"

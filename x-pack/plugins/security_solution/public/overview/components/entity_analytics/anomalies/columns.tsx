@@ -63,7 +63,7 @@ export const useAnomaliesColumns = (loading: boolean): AnomaliesColumns => {
         mobileOptions: { show: true },
         width: '15%',
         'data-test-subj': 'anomalies-table-column-count',
-        render: (count, { status, jobId, name, entity }) => {
+        render: (count, { status, jobId, entity }) => {
           if (loading) return '';
 
           if (count > 0 || status === AnomalyJobStatus.enabled) {

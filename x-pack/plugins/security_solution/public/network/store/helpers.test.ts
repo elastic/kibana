@@ -163,6 +163,10 @@ describe('Network redux store', () => {
           limit: 10,
           sort: { field: 'bytes_out', direction: 'desc' },
         },
+        [NetworkDetailsTableType.anomalies]: {
+          jobIdSelection: [],
+          intervalSelection: 'auto',
+        },
         [NetworkTableType.dns]: {
           activePage: 0,
           limit: 10,
@@ -234,6 +238,10 @@ describe('Network redux store', () => {
             direction: 'desc',
             field: 'bytes_out',
           },
+        },
+        [NetworkDetailsTableType.anomalies]: {
+          jobIdSelection: [],
+          intervalSelection: 'auto',
         },
         [NetworkDetailsTableType.http]: {
           activePage: 0,

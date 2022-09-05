@@ -36,7 +36,6 @@ export const mockHostsState: HostsModel = {
         jobIdSelection: [],
         intervalSelection: 'auto',
       },
-
       [HostsTableType.risk]: {
         activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         limit: DEFAULT_TABLE_LIMIT,
@@ -103,7 +102,10 @@ describe('Hosts redux store', () => {
           limit: 10,
           sortField: 'lastSeen',
         },
-        [HostsTableType.anomalies]: null,
+        [HostsTableType.anomalies]: {
+          jobIdSelection: [],
+          intervalSelection: 'auto',
+        },
         [HostsTableType.authentications]: {
           activePage: 0,
           limit: 10,
@@ -140,7 +142,10 @@ describe('Hosts redux store', () => {
           limit: 10,
           sortField: 'lastSeen',
         },
-        [HostsTableType.anomalies]: null,
+        [HostsTableType.anomalies]: {
+          jobIdSelection: [],
+          intervalSelection: 'auto',
+        },
         [HostsTableType.authentications]: {
           activePage: 0,
           limit: 10,
