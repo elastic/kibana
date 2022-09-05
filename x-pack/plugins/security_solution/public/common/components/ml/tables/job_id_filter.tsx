@@ -39,7 +39,7 @@ export const JobIdFilter: React.FC<{
     () => (
       <EuiFilterButton
         disabled={jobIds.length === 0}
-        data-test-subj="risk-filter-button"
+        data-test-subj="job-id-filter-button"
         hasActiveFilters={selectedJobIds.length > 0}
         iconType="arrowDown"
         isSelected={isPopoverOpen}
@@ -64,7 +64,7 @@ export const JobIdFilter: React.FC<{
         <div className="euiFilterSelect__items">
           {jobIds.map((id) => (
             <EuiFilterSelectItem
-              data-test-subj={`risk-filter-item-${id}`}
+              data-test-subj={`job-id-filter-item-${id}`}
               checked={selectedJobIds.includes(id) ? 'on' : undefined}
               key={id}
               onClick={() => updateSelection(id)}
