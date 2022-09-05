@@ -9,9 +9,10 @@ import expect from '@kbn/expect';
 import { IO_EVENTS_PER_PAGE, IO_EVENTS_ROUTE } from '@kbn/session-view-plugin/common/constants';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
-const MOCK_SESSION_ENTITY_ID = '1';
+const MOCK_SESSION_ENTITY_ID =
+  'MDEwMTAxMDEtMDEwMS0wMTAxLTAxMDEtMDEwMTAxMDEwMTAxLTUyMDU3LTEzMjk2NDkxMDQwLjEzMDAwMDAwMA==';
 const MOCK_IO_EVENT_TOTAL = 8;
-const MOCK_CURSOR = '2022-07-14T11:16:35.570Z';
+const MOCK_CURSOR = '2022-05-08T13:44:35.570Z';
 
 // eslint-disable-next-line import/no-default-export
 export default function ioEventsTests({ getService }: FtrProviderContext) {
@@ -20,10 +21,12 @@ export default function ioEventsTests({ getService }: FtrProviderContext) {
 
   describe(`Session view - ${IO_EVENTS_ROUTE} - with a basic license`, () => {
     before(async () => {
+      await esArchiver.load('x-pack/test/functional/es_archives/session_view/process_events');
       await esArchiver.load('x-pack/test/functional/es_archives/session_view/io_events');
     });
 
     after(async () => {
+      await esArchiver.unload('x-pack/test/functional/es_archives/session_view/process_events');
       await esArchiver.unload('x-pack/test/functional/es_archives/session_view/io_events');
     });
 
