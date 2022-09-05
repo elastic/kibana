@@ -47,7 +47,11 @@ const OsqueryEditorComponent = ({
   };
 }>) => {
   const { osquery } = useKibana().services;
-  const formMethods = useForm({
+  const formMethods = useForm<{
+    label: string;
+    query: string;
+    ecs_mapping: Record<string, unknown>;
+  }>({
     defaultValues: {
       label: node?.configuration?.label,
       query: node?.configuration?.query,
