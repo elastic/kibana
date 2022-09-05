@@ -16,7 +16,7 @@ import {
   MovingAverageColumn,
   MovingAverageParams,
 } from '../../types';
-import { getFormulaForParentPipelineAgg } from '../metrics';
+import { getFormulaForPipelineAgg } from '../metrics';
 import { createColumn } from './column';
 import { createFormulaColumn } from './formula';
 import {
@@ -91,7 +91,7 @@ export const convertToParentPipelineAggColumns = (
       subMetric,
     ];
   } else {
-    const formula = getFormulaForParentPipelineAgg(agg, reducedTimeRange);
+    const formula = getFormulaForPipelineAgg(agg, reducedTimeRange);
     if (!formula) {
       return null;
     }

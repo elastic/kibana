@@ -39,6 +39,7 @@ export const convertMetricToColumns = <T extends METRIC_TYPES | BUCKET_TYPES>(
     case METRIC_TYPES.SUM:
     case METRIC_TYPES.COUNT:
     case METRIC_TYPES.CARDINALITY:
+    case METRIC_TYPES.VALUE_COUNT:
     case METRIC_TYPES.STD_DEV: {
       const columns = convertMetricAggregationColumnWithoutSpecialParams(supportedAgg, {
         agg: agg as SchemaConfig<MetricsWithoutSpecialParams>,
@@ -63,7 +64,6 @@ export const convertMetricToColumns = <T extends METRIC_TYPES | BUCKET_TYPES>(
 
     case METRIC_TYPES.TOP_HITS:
     case METRIC_TYPES.TOP_METRICS:
-    case METRIC_TYPES.VALUE_COUNT:
       return null; // TODO: add support of those metrics;
     case METRIC_TYPES.CUMULATIVE_SUM:
     case METRIC_TYPES.DERIVATIVE:

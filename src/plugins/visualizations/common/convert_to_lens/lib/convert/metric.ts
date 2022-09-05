@@ -57,7 +57,8 @@ export type MetricsWithoutSpecialParams =
   | METRIC_TYPES.MIN
   | METRIC_TYPES.SUM
   | METRIC_TYPES.CARDINALITY
-  | METRIC_TYPES.STD_DEV;
+  | METRIC_TYPES.STD_DEV
+  | METRIC_TYPES.VALUE_COUNT;
 
 const isSupportedAggregationWithoutParams = (
   agg: string
