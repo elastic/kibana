@@ -30,29 +30,29 @@ const percentileAgg: MakeSchemaFrom<PercentileAgg> = {
 
 interface CountAndSize {
   count: number;
-  size: PercentileAgg;
+  size: number;
 }
 
 const countAndSize: MakeSchemaFrom<CountAndSize> = {
   count: { type: 'long' },
-  size: percentileAgg,
+  size: { type: 'long' },
 };
 
-interface FileKindUsageSchema extends CountAndSize {
+interface FileKind extends CountAndSize {
+  kind: string;
+}
+
+export interface FileKindUsageSchema extends CountAndSize {
   bytes_used: number;
   share_count: number;
+  file_kind_breakdown: FileKind[];
   status: {
     [status in FileStatus]: CountAndSize;
   };
 }
 
 export const schema: MakeSchemaFrom<FileKindUsageSchema> = {
-  count: {
-    type: 'long',
-    _meta: {
-      description: 'Total number of files saved objects',
-    },
-  },
+  ...countAndSize,
   share_count: {
     type: 'long',
     _meta: {
@@ -65,7 +65,18 @@ export const schema: MakeSchemaFrom<FileKindUsageSchema> = {
       description: 'Total bytes used by files with saved objects',
     },
   },
-  size: percentileAgg,
+  file_kind_breakdown: {
+    type: 'array',
+    items: {
+      kind: {
+        type: 'keyword',
+        _meta: {
+          description: 'Name of the file kind',
+        },
+      },
+      ...countAndSize,
+    },
+  },
   status: {
     AWAITING_UPLOAD: countAndSize,
     DELETED: countAndSize,

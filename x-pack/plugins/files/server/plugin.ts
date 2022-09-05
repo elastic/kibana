@@ -56,10 +56,11 @@ export class FilesPlugin implements Plugin<FilesSetup, FilesStart, FilesPluginSe
       }
     );
 
+    const coreStartPromise = core.getStartServices().then(([coreStart]) => coreStart);
     const router: FilesRouter = core.http.createRouter();
     registerRoutes(router);
     setFileKindsRegistry(new FileKindsRegistryImpl(router));
-    registerUsageCollector({ usageCollection });
+    registerUsageCollector({ usageCollection, coreStartPromise });
 
     return {
       registerFileKind(fileKind) {
