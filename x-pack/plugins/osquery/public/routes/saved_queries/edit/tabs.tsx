@@ -20,8 +20,11 @@ interface ResultTabsProps {
   ecsMapping?: ECSMapping;
   failedAgentsCount?: number;
   endDate?: string;
-  addToTimeline?: (payload: { query: [string, string]; isIcon?: true }) => ReactElement;
-  addToCase?: (actionId?: string) => ReactElement;
+  addToTimeline?: (payload: {
+    queries: Array<{ field: string; value: string }>;
+    isIcon?: true;
+  }) => ReactElement;
+  addToCase?: ({ actionId }: { actionId?: string }) => ReactElement;
 }
 
 const ResultTabsComponent: React.FC<ResultTabsProps> = ({

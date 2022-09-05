@@ -12,7 +12,8 @@ import styled from 'styled-components';
 
 interface PackResultsHeadersProps {
   actionId?: string;
-  addToCase?: () => ReactElement;
+  addToCase?: ({ isIcon }: { isIcon: boolean }) => ReactElement;
+  queryIds: Array<{ value: string; field: string }>;
 }
 
 const StyledResultsHeading = styled(EuiFlexItem)`
@@ -25,6 +26,10 @@ const StyledIconsList = styled(EuiFlexItem)`
   justify-content: center;
   padding-left: 10px;
 `;
+
+// const IconComponent = () => (
+//   <EuiButtonIcon iconType={'casesApp'} color="text" size="xs" iconSize="l" />
+// );
 
 export const PackResultsHeader = ({ actionId, addToCase }: PackResultsHeadersProps) => (
   <>
@@ -40,7 +45,7 @@ export const PackResultsHeader = ({ actionId, addToCase }: PackResultsHeadersPro
         </EuiText>
       </StyledResultsHeading>
       <StyledIconsList grow={false}>
-        <span>{actionId && addToCase && addToCase()}</span>
+        <span>{actionId && addToCase && addToCase({ isIcon: true })}</span>
       </StyledIconsList>
     </EuiFlexGroup>
     <EuiSpacer size={'l'} />

@@ -11,7 +11,7 @@ import { lazy } from 'react';
 
 const AttachmentContentLazy = lazy(() => import('./external_references_content'));
 
-// TODO not sure yet if we need it
+// TODO waiting for Metadata to add "add to timeline" in here
 // const AttachmentActions: React.FC = () => (
 //   <EuiButtonIcon
 //     data-test-subj="test-attachment-action"

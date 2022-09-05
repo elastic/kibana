@@ -6,13 +6,9 @@
  */
 
 import React, { useCallback, useLayoutEffect, useState } from 'react';
-import { EuiButtonEmpty } from '@elastic/eui';
-import { useKibana } from '../../common/lib/kibana';
 import { useLiveQueryDetails } from '../../actions/use_live_query_details';
 import { PackQueriesStatusTable } from '../../live_queries/form/pack_queries_status_table';
-
-const TimelineComponent = React.memo((props) => <EuiButtonEmpty {...props} size="xs" />);
-TimelineComponent.displayName = 'TimelineComponent';
+import { useAddToTimeline } from '../../timelines/useAddToTimeline';
 
 interface PackQueriesAttachmentWrapperProps {
   actionId?: string;
@@ -26,6 +22,7 @@ export const PackQueriesAttachmentWrapper = ({
   queryId,
 }: PackQueriesAttachmentWrapperProps) => {
   const [isLive, setIsLive] = useState(false);
+  const handleAddToTimeline = useAddToTimeline();
 
   const { data } = useLiveQueryDetails({
     actionId,
@@ -37,51 +34,16 @@ export const PackQueriesAttachmentWrapper = ({
     setIsLive(() => !(data?.status === 'completed'));
   }, [data?.status]);
 
-  const {
-    services: { timelines },
-  } = useKibana();
+  const addToTimeline = useCallback(
+    (payload) => {
+      if (actionId) {
+        return handleAddToTimeline(payload);
+      }
 
-  const { getAddToTimelineButton } = timelines.getHoverActions();
-
-  const handleAddToTimeline = useCallback(
-    (payload: { query: [string, string]; isIcon?: true }) => {
-      const {
-        query: [field, value],
-        isIcon,
-      } = payload;
-      const providerA = {
-        and: [],
-        enabled: true,
-        excluded: false,
-        id: value,
-        kqlQuery: '',
-        name: value,
-        queryMatch: {
-          field,
-          value,
-          operator: ':' as const,
-        },
-      };
-
-      return getAddToTimelineButton({
-        dataProvider: providerA,
-        field: value,
-        ownFocus: false,
-        ...(isIcon ? { showTooltip: true } : { Component: TimelineComponent }),
-      });
+      return <></>;
     },
-    [getAddToTimelineButton]
+    [handleAddToTimeline, actionId]
   );
-
-  const addToTimeline = useCallback(() => {
-    if (actionId) {
-      return handleAddToTimeline({
-        query: ['action_id', actionId],
-      });
-    }
-
-    return <></>;
-  }, [handleAddToTimeline, actionId]);
 
   return (
     <PackQueriesStatusTable

@@ -23,10 +23,25 @@ interface IProps {
   queryId?: string;
   agentIds?: string[];
   actionId?: string;
+  isIcon?: boolean;
+  isDisabled?: boolean;
 }
 
-export const AddToCaseButton: React.FC<IProps> = ({ actionId, agentIds, queryId }) => {
-  const isButton = !!queryId;
+// interface OsqueryCasesButtonComponentProps {
+//   onClick: () => void;
+// }
+//
+// const OsqueryCasesButtonComponent: React.FC<OsqueryCasesButtonComponentProps> = (props) => (
+//   <EuiButtonIcon iconType={'casesApp'} color="text" size="xs" iconSize="l" {...props} />
+// );
+
+export const AddToCaseButton: React.FC<IProps> = ({
+  actionId,
+  agentIds,
+  queryId,
+  isIcon = false,
+  isDisabled,
+}) => {
   const { cases: casesUi } = useKibana().services;
 
   const casePermissions = useGetUserCasesPermissions();
@@ -58,22 +73,23 @@ export const AddToCaseButton: React.FC<IProps> = ({ actionId, agentIds, queryId 
     }
   }, [actionId, agentIds, createCaseFlyout, hasWritePermissions, queryId, selectCaseModal]);
 
-  if (!isButton) {
+  if (isIcon) {
     return (
       <EuiToolTip content={<EuiFlexItem>Add to Case</EuiFlexItem>}>
         <EuiButtonIcon
           iconType={'casesApp'}
-          color="text"
-          size="xs"
-          iconSize="l"
+          // color="text"
+          // size="xs"
+          // iconSize="l"
           onClick={handleClick}
+          isDisabled={isDisabled}
         />
       </EuiToolTip>
     );
   }
 
   return (
-    <EuiButtonEmpty size="xs" iconType="casesApp" onClick={handleClick} isDisabled={false}>
+    <EuiButtonEmpty size="xs" iconType="casesApp" onClick={handleClick} isDisabled={isDisabled}>
       {ADD_TO_CASE}
     </EuiButtonEmpty>
   );

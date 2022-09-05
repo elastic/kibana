@@ -60,8 +60,14 @@ const LiveQueryDetailsPageComponent = () => {
   }, [data?.status]);
   const casesOwner = useMemo(() => [SECURITY_SOLUTION_OWNER], []);
   const addToCaseButton = useCallback(
-    (queryId?: string) => (
-      <AddToCaseButton queryId={queryId} actionId={actionId} agentIds={data?.agents} />
+    (payload) => (
+      <AddToCaseButton
+        queryId={payload?.queryId}
+        actionId={actionId}
+        agentIds={data?.agents}
+        isIcon={payload?.isIcon}
+        isDisabled={payload?.isDisabled}
+      />
     ),
     [data?.agents, actionId]
   );

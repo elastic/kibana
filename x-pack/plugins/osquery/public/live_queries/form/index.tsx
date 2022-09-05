@@ -119,7 +119,10 @@ interface LiveQueryFormProps {
   formType?: FormType;
   enabled?: boolean;
   hideAgentsField?: boolean;
-  addToTimeline?: (payload: { query: [string, string]; isIcon?: true }) => React.ReactElement;
+  addToTimeline?: (payload: {
+    queries: Array<{ field: string; value: string }>;
+    isIcon?: true;
+  }) => React.ReactElement;
 }
 
 const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
@@ -409,8 +412,14 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
   const liveQueryActionId = useMemo(() => liveQueryDetails?.action_id, [liveQueryDetails]);
 
   const addToCaseButton = useCallback(
-    (queryId?: string) => (
-      <AddToCaseButton queryId={queryId} agentIds={agentIds} actionId={liveQueryActionId} />
+    (payload) => (
+      <AddToCaseButton
+        queryId={payload?.queryId}
+        agentIds={agentIds}
+        actionId={liveQueryActionId}
+        isIcon={payload?.isIcon}
+        isDisabled={payload?.isDisabled}
+      />
     ),
     [agentIds, liveQueryActionId]
   );
@@ -600,7 +609,6 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
                         agentIds={agentIds}
                         // @ts-expect-error version string !+ string[]
                         data={liveQueryDetails?.queries ?? selectedPackData?.attributes?.queries}
-                        addToTimeline={addToTimeline}
                         addToCase={addToCaseButton}
                         showResultsHeader
                       />

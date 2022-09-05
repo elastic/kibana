@@ -15,10 +15,10 @@ import {
   EuiButtonEmpty,
   EuiTitle,
 } from '@elastic/eui';
+import { map } from 'lodash';
 import { useKibana } from '../../../common/lib/kibana';
 import { OsqueryEventDetailsFooter } from './osquery_flyout_footer';
 import { ACTION_OSQUERY } from './translations';
-import type { DataProvider } from '../../../timelines/components/timeline/data_providers/data_provider';
 
 const OsqueryActionWrapper = styled.div`
   padding: 8px;
@@ -42,12 +42,10 @@ export const OsqueryFlyoutComponent: React.FC<OsqueryFlyoutProps> = ({ agentId, 
   const { getAddToTimelineButton } = timelines.getHoverActions();
 
   const handleAddToTimeline = useCallback(
-    (payload: { query: [string, string]; isIcon?: true }) => {
-      const {
-        query: [field, value],
-        isIcon,
-      } = payload;
-      const providerA: DataProvider = {
+    (payload: { queries: Array<{ field: string; value: string }>; isIcon?: true }) => {
+      const { queries, isIcon } = payload;
+
+      const providers = map(queries, ({ field, value }) => ({
         and: [],
         enabled: true,
         excluded: false,
@@ -57,13 +55,13 @@ export const OsqueryFlyoutComponent: React.FC<OsqueryFlyoutProps> = ({ agentId, 
         queryMatch: {
           field,
           value,
-          operator: ':',
+          operator: ':' as const,
         },
-      };
+      }));
 
       return getAddToTimelineButton({
-        dataProvider: providerA,
-        field: value,
+        dataProvider: providers,
+        field: 'action_id',
         ownFocus: false,
         ...(isIcon ? { showTooltip: true } : { Component: TimelineComponent }),
       });

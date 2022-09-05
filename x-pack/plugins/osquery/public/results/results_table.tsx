@@ -52,8 +52,11 @@ interface ResultsTableComponentProps {
   ecsMapping?: ECSMapping;
   endDate?: string;
   startDate?: string;
-  addToTimeline?: (payload: { query: [string, string]; isIcon?: true }) => React.ReactElement;
-  addToCase?: (actionId?: string) => React.ReactElement;
+  addToTimeline?: (payload: {
+    queries: Array<{ field: string; value: string }>;
+    isIcon?: true;
+  }) => React.ReactElement;
+  addToCase?: ({ actionId }: { actionId?: string }) => React.ReactElement;
 }
 
 const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
@@ -317,7 +320,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
             };
             const eventId = data[visibleRowIndex]?._id;
 
-            return addToTimeline({ query: ['_id', eventId], isIcon: true });
+            return addToTimeline({ queries: [{ field: '_id', value: eventId }], isIcon: true });
           },
         },
       ];
@@ -344,8 +347,8 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
             endDate={endDate}
             startDate={startDate}
           />
-          {addToTimeline && addToTimeline({ query: ['action_id', actionId] })}
-          {addToCase && addToCase(actionId)}
+          {addToTimeline && addToTimeline({ queries: [{ field: 'action_id', value: actionId }] })}
+          {addToCase && addToCase({ actionId })}
         </>
       ),
     }),

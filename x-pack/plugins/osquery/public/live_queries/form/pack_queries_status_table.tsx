@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { get } from 'lodash';
+import { get, map } from 'lodash';
 import type { ReactElement } from 'react';
 import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import {
@@ -532,8 +532,19 @@ interface PackQueriesStatusTableProps {
   data?: PackQueryStatusItem[];
   startDate?: string;
   expirationDate?: string;
-  addToTimeline?: (payload: { query: [string, string]; isIcon?: true }) => ReactElement;
-  addToCase?: (actionId?: string) => ReactElement;
+  addToTimeline?: (payload: {
+    queries: Array<{ field: string; value: string }>;
+    isIcon?: true;
+  }) => ReactElement;
+  addToCase?: ({
+    actionId,
+    isIcon,
+    isDisabled,
+  }: {
+    actionId?: string;
+    isIcon?: boolean;
+    isDisabled?: boolean;
+  }) => ReactElement;
   showResultsHeader?: boolean;
 }
 
@@ -603,14 +614,15 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
 
   const renderLensResultsAction = useCallback((item) => <PackViewInLensAction item={item} />, []);
   const handleAddToCase = useCallback(
-    // eslint-disable-next-line react/display-name
-    (queryId: string) => () => {
-      if (addToCase) {
-        return addToCase(queryId);
-      }
+    (payload: { actionId: string; isIcon?: boolean }) =>
+      // eslint-disable-next-line react/display-name
+      () => {
+        if (addToCase) {
+          return addToCase({ actionId: payload.actionId, isIcon: payload?.isIcon });
+        }
 
-      return <></>;
-    },
+        return <></>;
+      },
     [addToCase]
   );
   const getHandleErrorsToggle = useCallback(
@@ -631,7 +643,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
                   agentIds={agentIds}
                   failedAgentsCount={item?.failed ?? 0}
                   addToTimeline={addToTimeline}
-                  addToCase={handleAddToCase(item.action_id)}
+                  addToCase={handleAddToCase({ actionId: item.action_id })}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -660,8 +672,30 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
 
   const getItemId = useCallback((item: PackItem) => get(item, 'id'), []);
 
-  const columns = useMemo(
-    () => [
+  const columns = useMemo(() => {
+    const resultActions = [
+      {
+        render: renderDiscoverResultsAction,
+      },
+      {
+        render: renderLensResultsAction,
+      },
+    ];
+    if (addToCase) {
+      resultActions.push({
+        render: (item) =>
+          addToCase({ actionId: item.action_id, isIcon: true, isDisabled: !item.action_id }),
+      });
+    }
+
+    if (addToTimeline) {
+      resultActions.push({
+        render: (item) =>
+          addToTimeline({ queries: [{ field: 'action_id', value: item.action_id }], isIcon: true }),
+      });
+    }
+
+    return [
       {
         field: 'id',
         name: i18n.translate('xpack.osquery.pack.queriesTable.idColumnTitle', {
@@ -697,14 +731,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
           defaultMessage: 'View results',
         }),
         width: '90px',
-        actions: [
-          {
-            render: renderDiscoverResultsAction,
-          },
-          {
-            render: renderLensResultsAction,
-          },
-        ],
+        actions: resultActions,
       },
       {
         id: 'actions',
@@ -717,17 +744,18 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
           },
         ],
       },
-    ],
-    [
-      renderIDColumn,
-      renderQueryColumn,
-      renderDocsColumn,
-      renderAgentsColumn,
-      renderDiscoverResultsAction,
-      renderLensResultsAction,
-      renderToggleResultsAction,
-    ]
-  );
+    ];
+  }, [
+    renderDiscoverResultsAction,
+    renderLensResultsAction,
+    addToCase,
+    addToTimeline,
+    renderIDColumn,
+    renderQueryColumn,
+    renderDocsColumn,
+    renderAgentsColumn,
+    renderToggleResultsAction,
+  ]);
 
   const sorting = useMemo(
     () => ({
@@ -755,9 +783,20 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
     }
   }, [agentIds?.length, data, getHandleErrorsToggle, itemIdToExpandedRowMap]);
 
+  const queryIds = useMemo(
+    () =>
+      map(data, (query) => ({
+        value: query.action_id || '',
+        field: 'action_id',
+      })),
+    [data]
+  );
+
   return (
     <>
-      {showResultsHeader && <PackResultsHeader actionId={actionId} addToCase={addToCase} />}
+      {showResultsHeader && (
+        <PackResultsHeader queryIds={queryIds} actionId={actionId} addToCase={addToCase} />
+      )}
 
       <StyledEuiBasicTable
         items={data ?? EMPTY_ARRAY}
