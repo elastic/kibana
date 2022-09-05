@@ -17,7 +17,7 @@ import {
 import {
   BulkAction,
   BulkActionEditType,
-} from '@kbn/security-solution-plugin/common/detection_engine/schemas/common/schemas';
+} from '@kbn/security-solution-plugin/common/detection_engine/schemas/request/perform_bulk_action_schema';
 import { RulesSchema } from '@kbn/security-solution-plugin/common/detection_engine/schemas/response';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
