@@ -20,14 +20,8 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import DateMath from '@kbn/datemath';
-import {
-  EuiButtonGroup,
-  EuiLoadingSpinner,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiButtonGroup, EuiLoadingSpinner, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   Axis,
   Chart,
@@ -241,47 +235,39 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
   let title = <></>;
 
   function combineWithTitleAndFooter(el: React.ReactElement) {
-    const percentage =
-      sampledDocuments && totalDocuments
-        ? Math.round((sampledDocuments / totalDocuments) * 100)
-        : 0;
     const countsElement = totalDocuments ? (
       <EuiText color="subdued" size="xs" data-test-subj={`${dataTestSubject}-statsFooter`}>
-        {sampledDocuments && percentage < 100 && (
-          <>
-            <EuiToolTip
-              content={i18n.translate('unifiedFieldList.fieldStats.sampleDocumentsTooltip', {
-                defaultMessage:
-                  '{percentage}% ({sampledDocuments, plural, one {# record} other {# records}})',
-                values: {
-                  percentage,
-                  sampledDocuments,
-                },
-              })}
-              delay="long"
-            >
-              <span>
-                {i18n.translate('unifiedFieldList.fieldStats.basedOnPercentageOfLabel', {
-                  defaultMessage: 'Based on {percentage}% of',
-                  values: {
-                    percentage,
-                  },
-                })}
-              </span>
-            </EuiToolTip>{' '}
-          </>
+        {sampledDocuments && sampledDocuments < totalDocuments ? (
+          <FormattedMessage
+            id="unifiedFieldList.fieldStats.calculatedFromSampleRecordsLabel"
+            defaultMessage="Calculated from sample of {sampledDocumentsFormatted} {sampledDocuments, plural, one {record} other {records}}"
+            values={{
+              sampledDocuments,
+              sampledDocumentsFormatted: (
+                <strong>
+                  {fieldFormats
+                    .getDefaultInstance(KBN_FIELD_TYPES.NUMBER, [ES_FIELD_TYPES.INTEGER])
+                    .convert(sampledDocuments)}
+                </strong>
+              ),
+            }}
+          />
+        ) : (
+          <FormattedMessage
+            id="unifiedFieldList.fieldStats.calculatedFromTotalRecordsLabel"
+            defaultMessage="Calculated from {totalDocumentsFormatted} {totalDocuments, plural, one {record} other {records}}"
+            values={{
+              totalDocuments,
+              totalDocumentsFormatted: (
+                <strong>
+                  {fieldFormats
+                    .getDefaultInstance(KBN_FIELD_TYPES.NUMBER, [ES_FIELD_TYPES.INTEGER])
+                    .convert(totalDocuments)}
+                </strong>
+              ),
+            }}
+          />
         )}
-        <strong>
-          {fieldFormats
-            .getDefaultInstance(KBN_FIELD_TYPES.NUMBER, [ES_FIELD_TYPES.INTEGER])
-            .convert(totalDocuments)}
-        </strong>{' '}
-        {i18n.translate('unifiedFieldList.fieldStats.ofRecordsLabel', {
-          defaultMessage: '{totalDocuments, plural, one {record} other {records}}',
-          values: {
-            totalDocuments,
-          },
-        })}
       </EuiText>
     ) : (
       <></>

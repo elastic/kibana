@@ -324,11 +324,11 @@ describe('UnifiedFieldList <FieldStats />', () => {
     ).toBe('41.5%');
 
     expect(wrapper.find('[data-test-subj="testing-statsFooter"]').first().text()).toBe(
-      '1624 records'
+      'Calculated from 1624 records'
     );
 
     expect(wrapper.text()).toBe(
-      'Top values"success"41.5%"info"37.1%"security"10.1%"warning"5.0%"error"3.4%"login"2.7%1624 records'
+      'Top values"success"41.5%"info"37.1%"security"10.1%"warning"5.0%"error"3.4%"login"2.7%Calculated from 1624 records'
     );
   });
 
@@ -402,7 +402,7 @@ describe('UnifiedFieldList <FieldStats />', () => {
     expect(loadFieldStats).toHaveBeenCalledTimes(1);
 
     expect(wrapper.text()).toBe(
-      'Examples"success"41.5%"info"37.1%"security"10.1%"warning"5.0%"error"3.4%"login"2.7%1624 records'
+      'Examples"success"41.5%"info"37.1%"security"10.1%"warning"5.0%"error"3.4%"login"2.7%Calculated from 1624 records'
     );
   });
 
@@ -506,10 +506,10 @@ describe('UnifiedFieldList <FieldStats />', () => {
     expect(wrapper.find('[data-test-subj="testing-topValues"]')).toHaveLength(0);
     expect(wrapper.find('[data-test-subj="testing-histogram"]')).toHaveLength(1);
     expect(wrapper.find('[data-test-subj="testing-statsFooter"]').first().text()).toBe(
-      '13 records'
+      'Calculated from 13 records'
     );
 
-    expect(wrapper.text()).toBe('Time distribution13 records');
+    expect(wrapper.text()).toBe('Time distributionCalculated from 13 records');
   });
 
   it('should render Top Values & Distribution field stats correctly for a number field', async () => {
@@ -594,7 +594,7 @@ describe('UnifiedFieldList <FieldStats />', () => {
     expect(loadFieldStats).toHaveBeenCalledTimes(1);
 
     expect(wrapper.text()).toBe(
-      'Toggle either theTop valuesDistribution1273.9%1326.1%Based on 23% of 100 records'
+      'Toggle either theTop valuesDistribution1273.9%1326.1%Calculated from sample of 23 records'
     );
   });
 });
