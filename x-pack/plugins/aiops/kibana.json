@@ -10,13 +10,10 @@
   "server": true,
   "ui": true,
   "requiredPlugins": [
-    "charts",
     "data",
-    "discover",
-    "licensing",
-    "unifiedSearch"
+    "licensing"
   ],
   "optionalPlugins": [],
-  "requiredBundles": ["kibanaReact", "fieldFormats"],
+  "requiredBundles": [],
   "extraPublicDirs": ["common"]
 }

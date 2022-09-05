@@ -13,7 +13,6 @@ import type { TimeRange } from '@kbn/es-query';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { SearchQueryLanguage } from '../../application/utils/search_utils';
 import { useAiOpsKibana } from '../../kibana_context';
-import { getPluginsStart } from '../../kibana_services';
 import { createMergedEsQuery } from '../../application/utils/search_utils';
 interface Props {
   dataView: DataView;
@@ -40,15 +39,15 @@ export const SearchPanel: FC<Props> = ({
   searchQueryLanguage,
   setSearchParams,
 }) => {
-  const { unifiedSearch } = getPluginsStart();
-  const { SearchBar } = unifiedSearch?.ui;
   const {
     services: {
       uiSettings,
+      unifiedSearch,
       notifications: { toasts },
       data: { query: queryManager },
     },
   } = useAiOpsKibana();
+  const { SearchBar } = unifiedSearch?.ui;
   // The internal state of the input query bar updated on every key stroke.
   const [searchInput, setSearchInput] = useState<Query>({
     query: searchString || '',

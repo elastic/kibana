@@ -53,6 +53,7 @@ export const FullTimeRangeSelector: FC<Props> = ({
 }) => {
   const {
     services: {
+      http,
       notifications: { toasts },
     },
   } = useAiOpsKibana();
@@ -61,7 +62,14 @@ export const FullTimeRangeSelector: FC<Props> = ({
   const setRange = useCallback(
     async (i: DataView, q?: QueryDslQueryContainer, excludeFrozenData?: boolean) => {
       try {
-        const fullTimeRange = await setFullTimeRange(timefilter, i, q, excludeFrozenData, toasts);
+        const fullTimeRange = await setFullTimeRange(
+          timefilter,
+          i,
+          toasts,
+          http,
+          q,
+          excludeFrozenData
+        );
         if (typeof callback === 'function') {
           callback(fullTimeRange);
         }
@@ -76,7 +84,7 @@ export const FullTimeRangeSelector: FC<Props> = ({
         );
       }
     },
-    [callback, timefilter, toasts]
+    [callback, http, timefilter, toasts]
   );
 
   const [isPopoverOpen, setPopover] = useState(false);
