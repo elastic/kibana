@@ -209,12 +209,7 @@ export default function (providerContext: FtrProviderContext) {
           })
           .expect(200);
 
-        expect(unenrolledBody).to.eql({
-          agent1: { success: true },
-          agent2: { success: true },
-          agent3: { success: true },
-          agent4: { success: true },
-        });
+        expect(unenrolledBody).to.eql({});
 
         const { body } = await supertest.get(`/api/fleet/agents`).set('kbn-xsrf', 'xxx');
         expect(body.total).to.eql(4);

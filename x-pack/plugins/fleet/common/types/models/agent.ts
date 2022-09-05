@@ -30,13 +30,7 @@ export type AgentStatus =
 
 export type SimplifiedAgentStatus = 'healthy' | 'unhealthy' | 'updating' | 'offline' | 'inactive';
 
-export type AgentActionType =
-  | 'UNENROLL'
-  | 'UPGRADE'
-  | 'SETTINGS'
-  | 'POLICY_REASSIGN'
-  | 'CANCEL'
-  | 'UPDATE_TAGS';
+export type AgentActionType = 'UNENROLL' | 'UPGRADE' | 'SETTINGS' | 'POLICY_REASSIGN' | 'CANCEL';
 
 type FleetServerAgentComponentStatusTuple = typeof FleetServerAgentComponentStatuses;
 export type FleetServerAgentComponentStatus = FleetServerAgentComponentStatusTuple[number];
