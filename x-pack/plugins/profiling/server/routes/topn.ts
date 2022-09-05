@@ -78,7 +78,7 @@ export async function topNElasticSearchQuery({
     });
   }
 
-  let topN = createTopNSamples(aggregations);
+  const topN = createTopNSamples(aggregations);
 
   for (let i = 0; i < topN.length; i++) {
     topN[i].Count = (topN[i].Count ?? 0) / eventsIndex.sampleRate;

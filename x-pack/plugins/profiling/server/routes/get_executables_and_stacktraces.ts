@@ -47,22 +47,27 @@ export async function getExecutablesAndStackTraces({
     });
 
     // Manual downsampling if totalCount exceeds sampleSize by 10%.
-    let downsampledTotalCount = totalCount;
+    let p = 1.0;
     if (totalCount > sampleSize * 1.1) {
-      const p = sampleSize / totalCount;
+      p = sampleSize / totalCount;
       logger.info('downsampling events with p=' + p);
       await logExecutionLatency(logger, 'downsampling events', async () => {
-        downsampledTotalCount = downsampleEventsRandomly(stackTraceEvents, p, filter.toString());
+        const downsampledTotalCount = downsampleEventsRandomly(
+          stackTraceEvents,
+          p,
+          filter.toString()
+        );
+        logger.info('downsampled total count: ' + downsampledTotalCount);
       });
-      logger.info('downsampled total count: ' + downsampledTotalCount);
       logger.info('unique downsampled stacktraces: ' + stackTraceEvents.size);
     }
 
     // Adjust the sample counts from down-sampled to fully sampled.
+    // Be aware that downsampling drops entries from stackTraceEvents, so that
+    // the sum of the upscaled count values is less that totalCount.
     for (const [id, count] of stackTraceEvents) {
-      stackTraceEvents.set(id, Math.floor(count / eventsIndex.sampleRate));
+      stackTraceEvents.set(id, Math.floor(count / (eventsIndex.sampleRate * p)));
     }
-    downsampledTotalCount = Math.floor(downsampledTotalCount / eventsIndex.sampleRate);
 
     const { stackTraces, stackFrameDocIDs, executableDocIDs } = await mgetStackTraces({
       logger,
@@ -81,7 +86,7 @@ export async function getExecutablesAndStackTraces({
         executables,
         stackFrames,
         stackTraceEvents,
-        downsampledTotalCount,
+        totalCount,
         eventsIndex,
       };
     });
