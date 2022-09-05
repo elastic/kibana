@@ -433,15 +433,15 @@ export const validateDatasourceAndVisualization = (
   currentDatasourceState: unknown | null,
   currentVisualization: Visualization | null,
   currentVisualizationState: unknown | undefined,
-  { datasourceLayers, dataViews }: Pick<FramePublicAPI, 'datasourceLayers' | 'dataViews'>
+  frame: Pick<FramePublicAPI, 'datasourceLayers' | 'dataViews'>
 ): ErrorMessage[] | undefined => {
   try {
     const datasourceValidationErrors = currentDatasourceState
-      ? currentDataSource?.getErrorMessages(currentDatasourceState, dataViews.indexPatterns)
+      ? currentDataSource?.getErrorMessages(currentDatasourceState, frame.dataViews.indexPatterns)
       : undefined;
 
     const visualizationValidationErrors = currentVisualizationState
-      ? currentVisualization?.getErrorMessages(currentVisualizationState, datasourceLayers)
+      ? currentVisualization?.getErrorMessages(currentVisualizationState, frame)
       : undefined;
 
     if (datasourceValidationErrors?.length || visualizationValidationErrors?.length) {

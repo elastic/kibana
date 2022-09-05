@@ -524,8 +524,13 @@ export function LayerPanel(
                                       columnId,
                                       label: columnLabelMap?.[columnId] ?? '',
                                       hideTooltip,
-                                      invalid: group.invalid,
-                                      invalidMessage: group.invalidMessage,
+                                      ...(activeVisualization?.validateColumn?.(
+                                        visualizationState,
+                                        { dataViews },
+                                        layerId,
+                                        columnId,
+                                        group
+                                      ) || { invalid: false }),
                                     })}
                                   </>
                                 )}

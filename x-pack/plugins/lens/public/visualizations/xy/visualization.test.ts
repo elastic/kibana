@@ -35,6 +35,7 @@ import { eventAnnotationServiceMock } from '@kbn/event-annotation-plugin/public/
 import { EventAnnotationConfig } from '@kbn/event-annotation-plugin/common';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import { DataViewsState } from '../../state_management';
 
 const exampleAnnotation: EventAnnotationConfig = {
   id: 'an1',
@@ -2311,7 +2312,7 @@ describe('xy_visualization', () => {
               },
             ],
           },
-          frame.datasourceLayers
+          { datasourceLayers: frame.datasourceLayers, dataViews: {} as DataViewsState }
         )
       ).toEqual([
         {
@@ -2367,7 +2368,7 @@ describe('xy_visualization', () => {
               },
             ],
           },
-          datasourceLayers
+          { datasourceLayers, dataViews: {} as DataViewsState }
         )
       ).toEqual([
         {
@@ -2423,7 +2424,7 @@ describe('xy_visualization', () => {
               },
             ],
           },
-          datasourceLayers
+          { datasourceLayers, dataViews: {} as DataViewsState }
         )
       ).toEqual([
         {

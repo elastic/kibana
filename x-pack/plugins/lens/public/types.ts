@@ -1088,13 +1088,21 @@ export interface Visualization<T = unknown, P = unknown> {
    */
   getErrorMessages: (
     state: T,
-    datasourceLayers?: DatasourceLayers
+    frame?: Pick<FramePublicAPI, 'datasourceLayers' | 'dataViews'>
   ) =>
     | Array<{
         shortMessage: string;
         longMessage: React.ReactNode;
       }>
     | undefined;
+
+  validateColumn?: (
+    state: T,
+    frame: Pick<FramePublicAPI, 'dataViews'>,
+    layerId: string,
+    columnId: string,
+    group?: VisualizationDimensionGroupConfig
+  ) => { invalid: boolean; invalidMessage?: string };
 
   /**
    * The frame calls this function to display warnings about visualization

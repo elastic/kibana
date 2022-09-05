@@ -137,7 +137,13 @@ export const selectSavedObjectFormat = createSelector(
       const { state: persistableState, savedObjectReferences } =
         activeVisualization.getPersistableState(visualization.state);
       persistibleVisualizationState = persistableState;
-      references.push(...savedObjectReferences);
+      savedObjectReferences.forEach((r) => {
+        if (r.type === 'index-pattern' && adHocDataViews[r.id]) {
+          internalReferences.push(r);
+        } else {
+          references.push(r);
+        }
+      });
     }
 
     const persistableAdHocDataViews = Object.fromEntries(

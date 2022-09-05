@@ -13,7 +13,10 @@ import { i18n } from '@kbn/i18n';
 import type { PaletteRegistry } from '@kbn/coloring';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { CoreStart, ThemeServiceStart } from '@kbn/core/public';
-import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
+import {
+  EventAnnotationServiceType,
+  isQueryAnnotationConfig,
+} from '@kbn/event-annotation-plugin/public';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import { FillStyle } from '@kbn/expression-xy-plugin/common';
@@ -56,6 +59,7 @@ import {
 import {
   checkXAccessorCompatibility,
   defaultSeriesType,
+  getAnnotationsLayers,
   getAxisName,
   getDataLayers,
   getDescription,
@@ -79,6 +83,7 @@ import { AnnotationsPanel } from './xy_config_panel/annotations_config_panel';
 import { DimensionTrigger } from '../../shared_components/dimension_trigger';
 import { defaultAnnotationLabel } from './annotations/helpers';
 import { onDropForVisualization } from '../../editor_frame_service/editor_frame/config_panel/buttons/drop_targets_utils';
+import { validateQuery } from '../../shared_components';
 
 const XY_ID = 'lnsXY';
 export const getXyVisualization = ({
@@ -630,7 +635,78 @@ export const getXyVisualization = ({
       eventAnnotationService
     ),
 
-  getErrorMessages(state, datasourceLayers) {
+  validateColumn(state, frame, layerId, columnId, group) {
+    if (group?.invalid) {
+      return {
+        invalid: true,
+        invalidMessage: group.invalidMessage,
+      };
+    }
+    const validColumn = { invalid: false };
+    const layer = state.layers.find((l) => l.layerId === layerId);
+    if (!layer || !isAnnotationsLayer(layer)) {
+      return validColumn;
+    }
+    const annotation = layer.annotations.find(({ id }) => id === columnId);
+    if (!annotation || !isQueryAnnotationConfig(annotation)) {
+      return validColumn;
+    }
+    const { dataViews } = frame || {};
+    const layerDataView = dataViews.indexPatterns[layer.indexPatternId];
+
+    if (annotation.timeField && !Boolean(layerDataView.getFieldByName(annotation.timeField))) {
+      return {
+        invalid: !Boolean(layerDataView.getFieldByName(annotation.timeField)),
+        invalidMessage: i18n.translate('xpack.lens.xyChart.annotationError.timeFieldNotFound', {
+          defaultMessage: 'Time field {timeField} not found in data view {dataView}',
+          values: { timeField: annotation.timeField, dataView: layerDataView.title },
+        }),
+      };
+    }
+    const { isValid, error } = validateQuery(annotation?.filter, layerDataView);
+    return {
+      invalid: !isValid,
+      invalidMessage: error,
+    };
+  },
+
+  getErrorMessages(state, frame) {
+    const { datasourceLayers, dataViews } = frame || {};
+    const errors: Array<{
+      shortMessage: string;
+      longMessage: React.ReactNode;
+    }> = [];
+
+    const annotationLayers = getAnnotationsLayers(state.layers);
+
+    if (dataViews) {
+      annotationLayers.forEach((layer) => {
+        layer.annotations.forEach((annotation) => {
+          const validatedColumn = this.validateColumn?.(
+            state,
+            { dataViews },
+            layer.layerId,
+            annotation.id
+          );
+          if (validatedColumn?.invalid && validatedColumn.invalidMessage) {
+            errors.push({
+              shortMessage: validatedColumn.invalidMessage,
+              longMessage: (
+                <FormattedMessage
+                  id="xpack.lens.xyChart.annotationError"
+                  defaultMessage="Annotation {annotationName} has an error: {errorMessage}"
+                  values={{
+                    annotationName: annotation.label,
+                    errorMessage: validatedColumn.invalidMessage,
+                  }}
+                />
+              ),
+            });
+          }
+        });
+      });
+    }
+
     // Data error handling below here
     const hasNoAccessors = ({ accessors }: XYDataLayerConfig) =>
       accessors == null || accessors.length === 0;
@@ -638,11 +714,6 @@ export const getXyVisualization = ({
     const dataLayers = getDataLayers(state.layers);
     const hasNoSplitAccessor = ({ splitAccessor, seriesType }: XYDataLayerConfig) =>
       seriesType.includes('percentage') && splitAccessor == null;
-
-    const errors: Array<{
-      shortMessage: string;
-      longMessage: React.ReactNode;
-    }> = [];
 
     // check if the layers in the state are compatible with this type of chart
     if (state && state.layers.length > 1) {
