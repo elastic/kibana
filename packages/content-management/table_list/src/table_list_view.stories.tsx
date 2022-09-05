@@ -16,7 +16,7 @@ import { Params, getStoryArgTypes, getStoryServices } from './mocks';
 import { TableListView as Component, UserContentCommonSchema } from './table_list_view';
 import { TableListViewProvider } from './services';
 
-import mdx from '../../README.mdx';
+import mdx from '../README.mdx';
 
 const chance = new Chance();
 
@@ -30,18 +30,18 @@ export default {
   },
 };
 
-const createMockItems = (total: number) => {
+const createMockItems = (total: number): UserContentCommonSchema[] => {
   return [...Array(total)].map((_, i) => {
     const type = itemTypes[Math.floor(Math.random() * 4)];
 
     return {
       id: i.toString(),
+      type,
       references: [],
       updatedAt: moment().subtract(i, 'day').format('YYYY-MM-DDTHH:mm:ss'),
       attributes: {
         title: chance.sentence({ words: 5 }),
         description: `Description of item ${i}`,
-        type,
       },
     };
   });

@@ -11,15 +11,18 @@ import {
   EuiLink,
   EuiButton,
   EuiEmptyPrompt,
-  EuiBasicTableColumn,
   EuiFlexGroup,
   EuiFlexItem,
   EuiButtonEmpty,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { ApplicationStart, SavedObjectsFindOptionsReference } from '@kbn/core/public';
+import { SavedObjectsFindOptionsReference } from '@kbn/core/public';
+import type { SavedObjectReference } from '@kbn/core/types';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import useMount from 'react-use/lib/useMount';
+import { TableListView } from '@kbn/content-management-table-list';
+import type { UserContentCommonSchema } from '@kbn/content-management-table-list';
+
 import { attemptLoadDashboardByTitle } from '../lib';
 import { DashboardAppServices, DashboardRedirect } from '../../types';
 import {
@@ -31,8 +34,7 @@ import {
 } from '../../dashboard_strings';
 import { syncQueryStateWithUrl } from '../../services/data';
 import { IKbnUrlStateStorage } from '../../services/kibana_utils';
-import { TableListView, useKibana } from '../../services/kibana_react';
-import { SavedObjectsTaggingApi } from '../../services/saved_objects_tagging_oss';
+import { useKibana } from '../../services/kibana_react';
 import { DashboardUnsavedListing } from './dashboard_unsaved_listing';
 import { confirmCreateWithUnsaved, confirmDiscardUnsavedChanges } from './confirm_overlays';
 import { getDashboardListItemLink } from './get_dashboard_list_item_link';
@@ -41,6 +43,28 @@ import { DashboardAppNoDataPage, isDashboardAppInNoDataState } from '../dashboar
 
 const SAVED_OBJECTS_LIMIT_SETTING = 'savedObjects:listingLimit';
 const SAVED_OBJECTS_PER_PAGE_SETTING = 'savedObjects:perPage';
+
+interface DashboardSavedObjectUserContent extends UserContentCommonSchema {
+  attributes: {
+    title: string;
+    timeRestore: boolean;
+  };
+}
+
+const toTableListViewSavedObject = (
+  savedObject: Record<string, unknown>
+): DashboardSavedObjectUserContent => {
+  return {
+    id: savedObject.id as string,
+    updatedAt: savedObject.updatedAt! as string,
+    references: savedObject.references as SavedObjectReference[],
+    type: 'dashboard',
+    attributes: {
+      title: (savedObject.title as string) ?? '',
+      timeRestore: savedObject.timeRestore as boolean,
+    },
+  };
+};
 
 export interface DashboardListingProps {
   kbnUrlStateStorage: IKbnUrlStateStorage;
@@ -62,7 +86,6 @@ export const DashboardListing = ({
       dataViews,
       savedDashboards,
       savedObjectsClient,
-      savedObjectsTagging,
       dashboardCapabilities,
       dashboardSessionStorage,
       chrome: { setBreadcrumbs },
@@ -118,17 +141,6 @@ export const DashboardListing = ({
   const listingLimit = core.uiSettings.get(SAVED_OBJECTS_LIMIT_SETTING);
   const initialPageSize = core.uiSettings.get(SAVED_OBJECTS_PER_PAGE_SETTING);
   const defaultFilter = title ? `"${title}"` : '';
-
-  const tableColumns = useMemo(
-    () =>
-      getTableColumns(
-        core.application,
-        kbnUrlStateStorage,
-        core.uiSettings.get('state:storeInSessionStorage'),
-        savedObjectsTagging
-      ),
-    [core.application, core.uiSettings, kbnUrlStateStorage, savedObjectsTagging]
-  );
 
   const createItem = useCallback(() => {
     if (!dashboardSessionStorage.dashboardHasUnsavedEdits()) {
@@ -250,23 +262,20 @@ export const DashboardListing = ({
   ]);
 
   const fetchItems = useCallback(
-    (filter: string) => {
-      let searchTerm = filter;
-      let references: SavedObjectsFindOptionsReference[] | undefined;
-      if (savedObjectsTagging) {
-        const parsed = savedObjectsTagging.ui.parseSearchQuery(filter, {
-          useName: true,
+    (searchTerm: string, references?: SavedObjectsFindOptionsReference[]) => {
+      return savedDashboards
+        .find(searchTerm, {
+          hasReference: references,
+          size: listingLimit,
+        })
+        .then(({ total, hits }) => {
+          return {
+            total,
+            hits: hits.map(toTableListViewSavedObject),
+          };
         });
-        searchTerm = parsed.searchTerm;
-        references = parsed.tagReferences;
-      }
-
-      return savedDashboards.find(searchTerm, {
-        size: listingLimit,
-        hasReference: references,
-      });
     },
-    [listingLimit, savedDashboards, savedObjectsTagging]
+    [listingLimit, savedDashboards]
   );
 
   const deleteItems = useCallback(
@@ -284,42 +293,38 @@ export const DashboardListing = ({
     [redirectTo]
   );
 
-  const searchFilters = useMemo(() => {
-    return savedObjectsTagging
-      ? [savedObjectsTagging.ui.getSearchBarFilter({ useName: true })]
-      : [];
-  }, [savedObjectsTagging]);
-
-  const { getEntityName, getTableCaption, getTableListTitle, getEntityNamePlural } =
-    dashboardListingTable;
+  const { getEntityName, getTableListTitle, getEntityNamePlural } = dashboardListingTable;
   return (
     <>
       {showNoDataPage && (
         <DashboardAppNoDataPage onDataViewCreated={() => setShowNoDataPage(false)} />
       )}
       {!showNoDataPage && (
-        <TableListView
+        <TableListView<DashboardSavedObjectUserContent>
           createItem={!showWriteControls ? undefined : createItem}
           deleteItems={!showWriteControls ? undefined : deleteItems}
           initialPageSize={initialPageSize}
           editItem={!showWriteControls ? undefined : editItem}
           initialFilter={initialFilter ?? defaultFilter}
-          toastNotifications={core.notifications.toasts}
           headingId="dashboardListingHeading"
           findItems={fetchItems}
-          rowHeader="title"
           entityNamePlural={getEntityNamePlural()}
           tableListTitle={getTableListTitle()}
-          tableCaption={getTableCaption()}
           entityName={getEntityName()}
           {...{
             emptyPrompt,
-            searchFilters,
             listingLimit,
-            tableColumns,
           }}
-          theme={core.theme}
-          application={core.application}
+          id="dashboard"
+          getDetailViewLink={({ id, attributes: { timeRestore } }) =>
+            getDashboardListItemLink(
+              core.application,
+              kbnUrlStateStorage,
+              core.uiSettings.get('state:storeInSessionStorage'), // use hash
+              id,
+              timeRestore
+            )
+          }
         >
           <DashboardUnsavedListing
             redirectTo={redirectTo}
@@ -332,40 +337,4 @@ export const DashboardListing = ({
       )}
     </>
   );
-};
-
-const getTableColumns = (
-  application: ApplicationStart,
-  kbnUrlStateStorage: IKbnUrlStateStorage,
-  useHash: boolean,
-  savedObjectsTagging?: SavedObjectsTaggingApi
-) => {
-  return [
-    {
-      field: 'title',
-      name: dashboardListingTable.getTitleColumnName(),
-      sortable: true,
-      render: (field: string, record: { id: string; title: string; timeRestore: boolean }) => (
-        <EuiLink
-          href={getDashboardListItemLink(
-            application,
-            kbnUrlStateStorage,
-            useHash,
-            record.id,
-            record.timeRestore
-          )}
-          data-test-subj={`dashboardListingTitleLink-${record.title.split(' ').join('-')}`}
-        >
-          {field}
-        </EuiLink>
-      ),
-    },
-    {
-      field: 'description',
-      name: dashboardListingTable.getDescriptionColumnName(),
-      render: (field: string, record: { description: string }) => <span>{record.description}</span>,
-      sortable: true,
-    },
-    ...(savedObjectsTagging ? [savedObjectsTagging.ui.getTableColumnDefinition()] : []),
-  ] as unknown as Array<EuiBasicTableColumn<Record<string, unknown>>>;
 };

@@ -27,13 +27,9 @@ import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 
 import { Table, ConfirmDeleteModal, ListingLimitWarning } from './components';
 import { useServices } from './services';
+import type { SavedObjectsReference, SavedObjectsFindOptionsReference } from './services';
 import type { Action } from './actions';
-import { reducer } from './reducer';
-
-interface SavedObjectsReference {
-  type: string;
-  id: string;
-}
+import { getReducer } from './reducer';
 
 export interface Props<T extends UserContentCommonSchema = UserContentCommonSchema> {
   entityName: string;
@@ -50,10 +46,12 @@ export interface Props<T extends UserContentCommonSchema = UserContentCommonSche
    * If the table is not empty, this component renders its own h1 element using the same id.
    */
   headingId?: string;
+  /** An optional id for the listing. Used to generate unique data-test-subj. Default: "userContent" */
+  id?: string;
   children?: ReactNode | undefined;
   findItems(
     searchQuery: string,
-    references?: SavedObjectsReference[]
+    references?: SavedObjectsFindOptionsReference[]
   ): Promise<{ total: number; hits: T[] }>;
   getDetailViewLink(entity: T): string;
   createItem?(): void;
@@ -83,6 +81,7 @@ export interface UserContentCommonSchema {
   id: string;
   updatedAt: string;
   references: SavedObjectsReference[];
+  type: string;
   attributes: {
     title: string;
     description?: string;
@@ -104,6 +103,7 @@ function TableListViewComp<T extends UserContentCommonSchema>({
   editItem,
   deleteItems,
   getDetailViewLink,
+  id = 'userContent',
   children,
 }: Props<T>) {
   const isMounted = useRef(false);
@@ -115,7 +115,12 @@ function TableListViewComp<T extends UserContentCommonSchema>({
     getTagsColumnDefinition,
     searchQueryParser,
     notifyError,
+    DateFormatterComp,
   } = useServices();
+
+  const reducer = useMemo(() => {
+    return getReducer<T>({ DateFormatterComp });
+  }, [DateFormatterComp]);
 
   const [state, dispatch] = useReducer<(state: State<T>, action: Action<T>) => State<T>>(reducer, {
     items: [],
@@ -135,9 +140,7 @@ function TableListViewComp<T extends UserContentCommonSchema>({
         render: (field: keyof T, record: T) => (
           <EuiLink
             href={getDetailViewLink(record)}
-            data-test-subj={`userContentListingTitleLink-${record.attributes.title
-              .split(' ')
-              .join('-')}`}
+            data-test-subj={`${id}ListingTitleLink-${record.attributes.title.split(' ').join('-')}`}
           >
             {record.attributes.title}
           </EuiLink>
@@ -226,11 +229,13 @@ function TableListViewComp<T extends UserContentCommonSchema>({
 
     return columns;
   }, [stateTableColumns, customTableColumn, getTagsColumnDefinition, editItem]);
+
   const itemsById = useMemo(() => {
     return keyBy(items, 'id');
   }, [items]);
+
   const selectedItems = useMemo(() => {
-    return selectedIds.map((id) => itemsById[id]);
+    return selectedIds.map((selectedId) => itemsById[selectedId]);
   }, [selectedIds, itemsById]);
 
   // ------------
@@ -278,16 +283,14 @@ function TableListViewComp<T extends UserContentCommonSchema>({
     try {
       await deleteItems!(selectedItems);
     } catch (error) {
-      notifyError({
-        title: (
-          <FormattedMessage
-            id="contentManagement.tableList.listing.unableToDeleteDangerMessage"
-            defaultMessage="Unable to delete {entityName}(s)"
-            values={{ entityName }}
-          />
-        ),
-        text: error,
-      });
+      notifyError(
+        <FormattedMessage
+          id="contentManagement.tableList.listing.unableToDeleteDangerMessage"
+          defaultMessage="Unable to delete {entityName}(s)"
+          values={{ entityName }}
+        />,
+        error
+      );
     }
 
     fetchItems();
@@ -460,7 +463,7 @@ function TableListViewComp<T extends UserContentCommonSchema>({
   );
 }
 
-const TableListView = React.memo(TableListViewComp);
+const TableListView = React.memo(TableListViewComp) as typeof TableListViewComp;
 
 export { TableListView };
 

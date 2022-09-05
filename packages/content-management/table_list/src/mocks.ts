@@ -20,7 +20,7 @@ export const getStoryServices = (params: Params, action: ActionFn = () => {}) =>
   const services: Services = {
     canEditAdvancedSettings: true,
     getListingLimitSettingsUrl: () => 'http://elastic.co',
-    notifyError: ({ title, text }) => {
+    notifyError: (title, text) => {
       action('notifyError')({ title, text });
     },
     ...params,

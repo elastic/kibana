@@ -8,7 +8,8 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
-import { I18nProvider } from '@kbn/i18n-react';
+import { I18nProvider, FormattedRelative } from '@kbn/i18n-react';
+import { TableListViewKibanaProvider } from '@kbn/content-management-table-list';
 
 import { DashboardAppServices } from '../../types';
 import { SimpleSavedObject } from '@kbn/core/public';
@@ -39,7 +40,16 @@ function mountWith({
   }> = ({ children }) => {
     return (
       <I18nProvider>
-        <KibanaContextProvider services={services}>{children}</KibanaContextProvider>
+        <KibanaContextProvider services={services}>
+          <TableListViewKibanaProvider
+            core={services.core as any}
+            savedObjectsTagging={services.savedObjectsTagging}
+            FormattedRelative={FormattedRelative}
+            toMountPoint={() => () => () => undefined}
+          >
+            {children}
+          </TableListViewKibanaProvider>
+        </KibanaContextProvider>
       </I18nProvider>
     );
   };

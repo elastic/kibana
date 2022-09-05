@@ -12,7 +12,7 @@ import React, { useEffect } from 'react';
 import moment, { Moment } from 'moment';
 import { act } from 'react-dom/test-utils';
 
-import { WithServices } from '../__jest__';
+import { WithServices } from './__jest__';
 import { TableListView, Props as TableListViewProps } from './table_list_view';
 
 const mockUseEffect = useEffect;
@@ -54,12 +54,13 @@ describe('TableListView', () => {
     jest.useRealTimers();
   });
 
-  type Props = TableListViewProps;
-
-  const setup = registerTestBed<string, Props>(WithServices(TableListView), {
-    defaultProps: { ...requiredProps },
-    memoryRouter: { wrapComponent: false },
-  });
+  const setup = registerTestBed<string, TableListViewProps>(
+    WithServices<TableListViewProps>(TableListView),
+    {
+      defaultProps: { ...requiredProps },
+      memoryRouter: { wrapComponent: false },
+    }
+  );
 
   test('render default empty prompt', async () => {
     let testBed: TestBed;
