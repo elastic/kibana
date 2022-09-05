@@ -5,14 +5,10 @@
  * 2.0.
  */
 
-import type {
-  SavedObjectsClientContract,
-  SimpleSavedObject,
-  SavedObjectAttributes,
-} from '@kbn/core/public';
+import type { SavedObjectsClientContract, SimpleSavedObject } from '@kbn/core/public';
 
 /** Returns an object matching a given title */
-export async function findObjectByTitle<T extends SavedObjectAttributes>(
+export async function findObjectByTitle<T>(
   savedObjectsClient: SavedObjectsClientContract,
   type: string,
   title: string
