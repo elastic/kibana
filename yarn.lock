@@ -2815,6 +2815,18 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-chrome-browser-internal@link:bazel-bin/packages/core/chrome/core-chrome-browser-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-chrome-browser-mocks@link:bazel-bin/packages/core/chrome/core-chrome-browser-mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-chrome-browser@link:bazel-bin/packages/core/chrome/core-chrome-browser":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-config-server-internal@link:bazel-bin/packages/core/config/core-config-server-internal":
   version "0.0.0"
   uid ""
@@ -3000,6 +3012,18 @@
   uid ""
 
 "@kbn/core-i18n-browser@link:bazel-bin/packages/core/i18n/core-i18n-browser":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-i18n-server-internal@link:bazel-bin/packages/core/i18n/core-i18n-server-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-i18n-server-mocks@link:bazel-bin/packages/core/i18n/core-i18n-server-mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-i18n-server@link:bazel-bin/packages/core/i18n/core-i18n-server":
   version "0.0.0"
   uid ""
 
@@ -6865,6 +6889,18 @@
   version "0.0.0"
   uid ""
 
+"@types/kbn__core-chrome-browser-internal@link:bazel-bin/packages/core/chrome/core-chrome-browser-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-chrome-browser-mocks@link:bazel-bin/packages/core/chrome/core-chrome-browser-mocks/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-chrome-browser@link:bazel-bin/packages/core/chrome/core-chrome-browser/npm_module_types":
+  version "0.0.0"
+  uid ""
+
 "@types/kbn__core-common-internal-base@link:bazel-bin/packages/core/common/internal-base/npm_module_types":
   version "0.0.0"
   uid ""
@@ -7054,6 +7090,18 @@
   uid ""
 
 "@types/kbn__core-i18n-browser@link:bazel-bin/packages/core/i18n/core-i18n-browser/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-i18n-server-internal@link:bazel-bin/packages/core/i18n/core-i18n-server-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-i18n-server-mocks@link:bazel-bin/packages/core/i18n/core-i18n-server-mocks/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-i18n-server@link:bazel-bin/packages/core/i18n/core-i18n-server/npm_module_types":
   version "0.0.0"
   uid ""
 
