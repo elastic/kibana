@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import type { KibanaRequest, IBasePath } from '@kbn/core-http-server';
+import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import type { CoreUsageStats } from '@kbn/core-usage-data-server';
 import {
@@ -18,7 +20,6 @@ import {
   CORE_USAGE_STATS_ID,
   REPOSITORY_RESOLVE_OUTCOME_STATS,
 } from '@kbn/core-usage-data-base-server-internal';
-import { ISavedObjectsRepository, KibanaRequest, IBasePath } from '..';
 
 export const BULK_CREATE_STATS_PREFIX = 'apiCalls.savedObjectsBulkCreate';
 export const BULK_GET_STATS_PREFIX = 'apiCalls.savedObjectsBulkGet';
