@@ -49,7 +49,11 @@ export class DiscoverPageObject extends FtrService {
     await fieldSearch.clearValue();
   }
 
-  public async saveSearch(searchName: string, saveAsNew?: boolean) {
+  public async saveSearch(
+    searchName: string,
+    saveAsNew?: boolean,
+    options: { tags: string[] } = { tags: [] }
+  ) {
     await this.clickSaveSearchButton();
     // preventing an occasional flakiness when the saved object wasn't set and the form can't be submitted
     await this.retry.waitFor(
@@ -60,6 +64,14 @@ export class DiscoverPageObject extends FtrService {
         return (await saveButton.getAttribute('disabled')) !== 'true';
       }
     );
+
+    if (options.tags.length) {
+      await this.testSubjects.click('savedObjectTagSelector');
+      for (const tagName of options.tags) {
+        await this.testSubjects.click(`tagSelectorOption-${tagName.replace(' ', '_')}`);
+      }
+      await this.testSubjects.click('savedObjectTitle');
+    }
 
     if (saveAsNew !== undefined) {
       await this.retry.waitFor(`save as new switch is set`, async () => {
