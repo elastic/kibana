@@ -79,7 +79,7 @@ function collectStatsForApi(doc: ApiDeclaration, stats: ApiStats, pluginApi: Plu
       collectStatsForApi(child, stats, pluginApi);
     });
   }
-  if (doc.references?.length === 0) {
+  if (!doc.references || doc.references.length === 0) {
     stats.noReferences.push(doc);
   }
 }
