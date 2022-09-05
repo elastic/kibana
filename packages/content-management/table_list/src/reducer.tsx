@@ -88,7 +88,6 @@ export function getReducer<T extends UserContentCommonSchema>({ DateFormatterCom
       case 'onFetchItemsError': {
         return {
           ...state,
-          hasInitialFetchReturned: true,
           isFetchingItems: false,
           items: [],
           totalItems: 0,
