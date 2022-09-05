@@ -175,7 +175,6 @@ export class ElasticsearchService
   ) {
     const config = mergeConfig(baseConfig, clientConfig);
 
-    // tweak config to inject agent
     return new ClusterClient({
       config,
       logger: this.coreContext.logger.get('elasticsearch'),
