@@ -3,7 +3,9 @@
 exports[`ShardFailureModal renders matching snapshot given valid properties 1`] = `
 <Fragment>
   <EuiModalHeader>
-    <EuiModalHeaderTitle>
+    <EuiModalHeaderTitle
+      data-test-subj="shardFailureModalTitle"
+    >
       test
     </EuiModalHeaderTitle>
   </EuiModalHeader>
@@ -37,6 +39,7 @@ exports[`ShardFailureModal renders matching snapshot given valid properties 1`] 
               ]
             }
           />,
+          "data-test-subj": "shardFailuresModalShardButton",
           "id": "table",
           "name": "Shard failures",
         }
@@ -69,11 +72,13 @@ exports[`ShardFailureModal renders matching snapshot given valid properties 1`] 
                 ]
               }
             />,
+            "data-test-subj": "shardFailuresModalShardButton",
             "id": "table",
             "name": "Shard failures",
           },
           Object {
             "content": <EuiCodeBlock
+              data-test-subj="shardsFailedModalRequestBlock"
               isCopyable={true}
               language="json"
             >
@@ -93,11 +98,13 @@ exports[`ShardFailureModal renders matching snapshot given valid properties 1`] 
   "highlight": {}
 }
             </EuiCodeBlock>,
+            "data-test-subj": "shardFailuresModalRequestButton",
             "id": "json-request",
             "name": "Request",
           },
           Object {
             "content": <EuiCodeBlock
+              data-test-subj="shardsFailedModalResponseBlock"
               isCopyable={true}
               language="json"
             >
@@ -131,6 +138,7 @@ exports[`ShardFailureModal renders matching snapshot given valid properties 1`] 
   }
 }
             </EuiCodeBlock>,
+            "data-test-subj": "shardFailuresModalResponseButton",
             "id": "json-response",
             "name": "Response",
           },
@@ -174,7 +182,7 @@ exports[`ShardFailureModal renders matching snapshot given valid properties 1`] 
       <Component />
     </EuiCopy>
     <EuiButton
-      data-test-sub="closeShardFailureModal"
+      data-test-subj="closeShardFailureModal"
       fill={true}
       onClick={[Function]}
     >

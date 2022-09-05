@@ -7116,13 +7116,7 @@
             "label": "application",
             "description": [],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCoreApplicationPluginApi",
-                "section": "def-public.ApplicationStart",
-                "text": "ApplicationStart"
-              }
+              "ApplicationStart"
             ],
             "path": "src/plugins/data/public/types.ts",
             "deprecated": false
@@ -8730,7 +8724,7 @@
             "section": "def-common.TimeRange",
             "text": "TimeRange"
           },
-          " | undefined; }"
+          " | undefined; disableShardWarnings?: boolean | undefined; }"
         ],
         "path": "src/plugins/data/common/search/expressions/kibana_context_type.ts",
         "deprecated": false,

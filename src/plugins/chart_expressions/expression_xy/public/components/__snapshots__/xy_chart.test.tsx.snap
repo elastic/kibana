@@ -12,20 +12,22 @@ exports[`XYChart component annotations should render basic line annotation 1`] =
     ]
   }
   domainType="xDomain"
-  id="annotation"
-  key="annotation"
+  id="annotation_2022_03_18_t_08_25_17_140_z"
+  key="annotation_2022_03_18_t_08_25_17_140_z"
   marker={
     <Marker
       config={
         Object {
+          "icon": "triangle",
+          "id": "annotation",
           "label": "Annotation",
           "position": "bottom",
-          "roundedTimestamp": 1647591917100,
           "time": "2022-03-18T08:25:17.140Z",
-          "type": "manual_point_event_annotation",
+          "timebucket": 1647591917100,
+          "type": "point",
         }
       }
-      hasReducedPadding={false}
+      hasReducedPadding={true}
       isHorizontal={true}
       label="Annotation"
     />
@@ -79,8 +81,8 @@ Array [
         },
       ]
     }
-    id="event_range"
-    key="event_range"
+    id="range_annotation"
+    key="range_annotation"
     outside={false}
     outsideDimension={4}
     style={
@@ -106,8 +108,8 @@ exports[`XYChart component annotations should render grouped line annotations pr
     ]
   }
   domainType="xDomain"
-  id="event_1"
-  key="event_1"
+  id="event_1_2022_03_18_t_08_25_00_000_z"
+  key="event_1_2022_03_18_t_08_25_00_000_z"
   marker={
     <Marker
       config={
@@ -115,14 +117,15 @@ exports[`XYChart component annotations should render grouped line annotations pr
           "color": "red",
           "customTooltipDetails": [Function],
           "icon": "3",
+          "id": "event1",
           "label": "Event 1",
           "lineStyle": "dashed",
           "lineWidth": 3,
           "position": "bottom",
-          "roundedTimestamp": 1647591900000,
           "textVisibility": undefined,
           "time": "2022-03-18T08:25:00.000Z",
-          "type": "manual_point_event_annotation",
+          "timebucket": 1647591900000,
+          "type": "point",
         }
       }
       hasReducedPadding={true}
@@ -165,8 +168,8 @@ exports[`XYChart component annotations should render grouped line annotations wi
     ]
   }
   domainType="xDomain"
-  id="event_1"
-  key="event_1"
+  id="event_1_2022_03_18_t_08_25_00_000_z"
+  key="event_1_2022_03_18_t_08_25_00_000_z"
   marker={
     <Marker
       config={
@@ -174,14 +177,15 @@ exports[`XYChart component annotations should render grouped line annotations wi
           "color": "#f04e98",
           "customTooltipDetails": [Function],
           "icon": "2",
+          "id": "event1",
           "label": "Event 1",
           "lineStyle": "solid",
           "lineWidth": 1,
           "position": "bottom",
-          "roundedTimestamp": 1647591900000,
           "textVisibility": undefined,
           "time": "2022-03-18T08:25:00.000Z",
-          "type": "manual_point_event_annotation",
+          "timebucket": 1647591900000,
+          "type": "point",
         }
       }
       hasReducedPadding={true}
@@ -220,8 +224,8 @@ exports[`XYChart component annotations should render simplified annotations when
     ]
   }
   domainType="xDomain"
-  id="annotation"
-  key="annotation"
+  id="annotation_2022_03_18_t_08_25_17_140_z"
+  key="annotation_2022_03_18_t_08_25_17_140_z"
   markerPosition="top"
   style={
     Object {
@@ -266,8 +270,8 @@ Array [
         },
       ]
     }
-    id="event_range"
-    key="event_range"
+    id="range_annotation"
+    key="range_annotation"
     outside={false}
     outsideDimension={2}
     style={
