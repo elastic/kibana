@@ -19,7 +19,7 @@ const deleteAllCustomLinks = () => {
     },
     auth: { user: 'editor', pass: 'changeme' },
   }).then((response) => {
-    response.body.customLinks.map((item: any) => {
+    const promises = response.body.customLinks.map((item: any) => {
       if (item.id) {
         return cy.request({
           log: false,
@@ -34,6 +34,7 @@ const deleteAllCustomLinks = () => {
         });
       }
     });
+    return Promise.all(promises);
   });
 };
 
