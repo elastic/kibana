@@ -76,6 +76,8 @@ cd "$KIBANA_DIR"
 node scripts/es snapshot&
 
 esPid=$!
+# Set trap on EXIT to stop Elasticsearch process
+trap "kill -9 $esPid" EXIT
 
 # unset env vars defined in other parts of CI for automatic APM collection of
 # Kibana. We manage APM config in our FTR config and performance service, and
@@ -115,8 +117,6 @@ for journey in scalability_traces/server/*; do
       --kibana-install-dir "$KIBANA_BUILD_LOCATION" \
       --debug
 done
-
-trap "kill -9 $esPid" EXIT
 
 echo "--- Upload test results"
 upload_test_results
