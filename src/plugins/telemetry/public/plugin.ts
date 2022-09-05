@@ -198,6 +198,7 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
     analytics,
     http,
     overlays,
+    theme,
     application,
     savedObjects,
     docLinks,
@@ -213,6 +214,7 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
     const telemetryNotifications = new TelemetryNotifications({
       http,
       overlays,
+      theme,
       telemetryService: this.telemetryService,
       telemetryConstants,
     });
