@@ -28,7 +28,7 @@ download_artifacts() {
   export KIBANA_BUILD_HASH=`cat ${GCS_ARTIFACTS_DIR}/latest`
   gsutil cp -r "${GCS_BUCKET_DATA}/${KIBANA_BUILD_HASH}" "${GCS_ARTIFACTS_DIR}/"
 
-  export LATEST_RUN_ARTIFACTS_DIR="${GCS_ARTIFACTS_DIR}/${KIBANA_BUILD_HASH}"
+  export LATEST_RUN_ARTIFACTS_DIR="${GCS_ARTIFACTS_DIR}/${HASH}"
 
   echo "Unzip kibana build, plugins and scalability traces"
   cd "${WORKSPACE}"
