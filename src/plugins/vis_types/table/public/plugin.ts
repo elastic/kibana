@@ -15,9 +15,9 @@ import type {
 } from '@kbn/usage-collection-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { setDataViewsStart, setFormatService } from './services';
 import { registerTableVis } from './register_vis';
-import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 
 /** @internal */
 export interface TablePluginSetupDependencies {

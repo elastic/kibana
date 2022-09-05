@@ -7,9 +7,9 @@
  */
 
 import { TimefilterContract } from '@kbn/data-plugin/public';
-import { TableVisParams } from '@kbn/vis-type-table-plugin/common';
 import { NavigateToLensContext, TableVisConfiguration } from '@kbn/visualizations-plugin/common';
 import { Vis } from '@kbn/visualizations-plugin/public';
+import { TableVisParams } from '../../common';
 
 export type ConvertTableToLensVisualization = (
   vis: Vis<TableVisParams>,

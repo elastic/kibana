@@ -143,6 +143,7 @@ export interface XYConfiguration {
   valuesInLegend?: boolean;
 }
 
-export type TableVisConfiguration = {};
+/* eslint-disable @typescript-eslint/no-empty-interface */
+export interface TableVisConfiguration {}
 
 export type Configuration = XYConfiguration | TableVisConfiguration;
