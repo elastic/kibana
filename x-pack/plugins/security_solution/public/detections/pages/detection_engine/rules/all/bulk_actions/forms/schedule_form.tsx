@@ -7,8 +7,8 @@
 
 import React, { useCallback } from 'react';
 import { EuiCallOut } from '@elastic/eui';
-import { BulkActionEditType } from '../../../../../../../../common/detection_engine/schemas/common';
 import type { BulkActionEditPayload } from '../../../../../../../../common/detection_engine/schemas/request';
+import { BulkActionEditType } from '../../../../../../../../common/detection_engine/schemas/request';
 import { useForm, UseField } from '../../../../../../../shared_imports';
 import type { FormSchema } from '../../../../../../../shared_imports';
 import { BulkEditFormWrapper } from './bulk_edit_form_wrapper';
