@@ -23,7 +23,7 @@ const ADD_TO_CASE = i18n.translate(
 
 interface IProps {
   queryId?: string;
-  agentIds: string[];
+  agentIds?: string[];
   actionId: string;
   isIcon?: boolean;
   isDisabled?: boolean;
