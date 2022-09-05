@@ -41,7 +41,8 @@ node scripts/register_git_hook
 
 ### Running unit tests
 
-Our [unit tests](https://docs.elastic.dev/kibana-dev-docs/tutorials/testing-plugins#unit-testing) are written using [jest](https://jestjs.io/) framework.
+Our [unit tests](https://docs.elastic.dev/kibana-dev-docs/tutorials/testing-plugins#unit-testing) are written
+using [jest](https://jestjs.io/) framework.
 
 As a convention, we use the `.test.ts` suffix for all our tests.
 
@@ -59,7 +60,9 @@ yarn jest --config x-pack/plugins/cloud_security_posture/jest.config.js --testNa
 
 ### Running integration tests
 
-The cloud security posture plugin has also [integration tests](https://docs.elastic.dev/kibana-dev-docs/tutorials/testing-plugins#integration-tests) that run against a real Elasticsearch and Kibana instances.
+The cloud security posture plugin has
+also [integration tests](https://docs.elastic.dev/kibana-dev-docs/tutorials/testing-plugins#integration-tests) that run
+against a real Elasticsearch and Kibana instances.
 We use these tests to verify that the plugin works as expected when running in a real environment.
 In order to run the integration tests, you need to have a running Elasticsearch and Kibana instances with the
 integration test configuration.
