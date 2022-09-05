@@ -13,14 +13,6 @@ This library can currently be used in two ways:
 - Imported as a Node.js module, for instance to be used in Kibana's functional test suite.
 - With a command line interface, to index data based on a specified scenario.
 
-## Testing
-
-Run the Jest tests:
-
-```
-node scripts/jest --config ./packages/kbn-apm-synthtrace/jest.config.js
-```
-
 ### Using the Node.js module
 
 #### Concepts
@@ -163,3 +155,19 @@ Note:
 | `--logLevel`      | [enum]    | `info`  | Log level                                                                                               |
 | `--gcpRepository` | [string]  |         | Allows you to register a GCP repository in <client_name>:<bucket>[:base_path] format                    |
 | `-p`              | [string]  |         | Specify multiple sets of streamaggregators to be included in the StreamProcessor                        |
+
+## Testing
+
+Run the Jest tests:
+
+```
+node scripts/jest --config ./packages/kbn-apm-synthtrace/jest.config.js
+```
+
+## Typescript
+
+Run the type checker:
+
+```
+node scripts/type_check.js --project packages/kbn-apm-synthtrace/tsconfig.json
+```
