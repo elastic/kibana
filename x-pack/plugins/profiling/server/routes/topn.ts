@@ -78,7 +78,11 @@ export async function topNElasticSearchQuery({
     });
   }
 
-  const topN = createTopNSamples(aggregations);
+  let topN = createTopNSamples(aggregations);
+
+  for (let i = 0; i < topN.length; i++) {
+    topN[i].Count = (topN[i].Count ?? 0) / eventsIndex.sampleRate;
+  }
 
   let totalSampledStackTraces = aggregations.total_count.value ?? 0;
   logger.info('total sampled stacktraces: ' + totalSampledStackTraces);
