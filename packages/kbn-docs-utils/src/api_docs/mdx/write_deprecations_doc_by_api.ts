@@ -9,7 +9,7 @@
 import moment from 'moment';
 import { ToolingLog } from '@kbn/tooling-log';
 import dedent from 'dedent';
-import fs from 'fs/promises';
+import Fsp from 'fs/promises';
 import Path from 'path';
 import {
   ApiReference,
@@ -111,5 +111,5 @@ ${Object.values(unReferencedDeprecations)
 
 `);
 
-  await fs.writeFile(Path.resolve(folder, 'deprecations_by_api.mdx'), mdx);
+  await Fsp.writeFile(Path.resolve(folder, 'deprecations_by_api.mdx'), mdx);
 }

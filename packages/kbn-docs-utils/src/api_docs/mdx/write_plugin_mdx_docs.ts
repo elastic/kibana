@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import moment from 'moment';
-import fs from 'fs/promises';
+import Fsp from 'fs/promises';
 import Path from 'path';
 import dedent from 'dedent';
 import { PluginApi, ScopeApi } from '../types';
@@ -113,7 +113,7 @@ ${
     common: groupPluginApi(doc.common),
     server: groupPluginApi(doc.server),
   };
-  await fs.writeFile(
+  await Fsp.writeFile(
     Path.resolve(folder, fileName + '.devdocs.json'),
     JSON.stringify(scopedDoc, null, 2)
   );
@@ -122,7 +122,7 @@ ${
   mdx += scopApiToMdx(scopedDoc.server, 'Server', json, 'server');
   mdx += scopApiToMdx(scopedDoc.common, 'Common', json, 'common');
 
-  await fs.writeFile(Path.resolve(folder, fileName + '.mdx'), mdx);
+  await Fsp.writeFile(Path.resolve(folder, fileName + '.mdx'), mdx);
 }
 
 function getJsonName(name: string): string {

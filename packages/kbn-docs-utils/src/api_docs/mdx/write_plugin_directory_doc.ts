@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import moment from 'moment';
-import fs from 'fs/promises';
+import Fsp from 'fs/promises';
 import Path from 'path';
 import dedent from 'dedent';
 import { ToolingLog } from '@kbn/tooling-log';
@@ -112,7 +112,7 @@ ${getDirectoryTable(pluginApiMap, pluginStatsMap, false)}
 
 `) + '\n\n';
 
-  await fs.writeFile(Path.resolve(folder, 'plugin_directory.mdx'), mdx);
+  await Fsp.writeFile(Path.resolve(folder, 'plugin_directory.mdx'), mdx);
 }
 
 function getDirectoryTable(
