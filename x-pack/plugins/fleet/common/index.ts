@@ -36,6 +36,7 @@ export {
   AGENTS_PREFIX,
   AGENT_UPDATE_LAST_CHECKIN_INTERVAL_MS,
   agentPolicyStatuses,
+  FleetServerAgentComponentStatuses,
   // Routes
   PACKAGE_POLICY_API_ROOT,
   AGENT_API_ROUTES,
@@ -101,6 +102,8 @@ export type {
   UpgradePackagePolicyResponseItem,
   UpgradePackagePolicyBaseResponse,
   UpgradePackagePolicyDryRunResponseItem,
+  BulkGetPackagePoliciesResponse,
+  BulkGetAgentPoliciesResponse,
   // Models
   Agent,
   AgentStatus,
@@ -175,6 +178,7 @@ export type {
   InstallFailed,
   // Fleet server models
   FleetServerAgent,
+  FleetServerAgentComponentStatus,
 } from './types';
 
 export { ElasticsearchAssetType } from './types';

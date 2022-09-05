@@ -13,12 +13,11 @@ import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { HttpSetup, HttpStart } from '@kbn/core-http-browser';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { NotificationsSetup, NotificationsStart } from '@kbn/core-notifications-browser';
-import {
-  type InternalApplicationSetup,
-  type InternalApplicationStart,
-  AppNavLinkStatus,
-  type AppMountParameters,
-} from '../application';
+import { AppNavLinkStatus, type AppMountParameters } from '@kbn/core-application-browser';
+import type {
+  InternalApplicationSetup,
+  InternalApplicationStart,
+} from '@kbn/core-application-browser-internal';
 import {
   renderApp as renderErrorApp,
   setupPublicBaseUrlConfigWarning,

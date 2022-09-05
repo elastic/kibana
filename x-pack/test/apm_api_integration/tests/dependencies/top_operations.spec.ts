@@ -65,154 +65,150 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
   });
 
-  registry.when(
-    'Top operations when data is generated',
-    { config: 'basic', archives: ['apm_mappings_only_8.0.0'] },
-    () => {
-      before(() =>
-        generateOperationData({
-          synthtraceEsClient,
-          start,
-          end,
-        })
-      );
+  registry.when('Top operations when data is generated', { config: 'basic', archives: [] }, () => {
+    before(() =>
+      generateOperationData({
+        synthtraceEsClient,
+        start,
+        end,
+      })
+    );
 
-      after(() => synthtraceEsClient.clean());
+    after(() => synthtraceEsClient.clean());
 
-      describe('requested for elasticsearch', () => {
-        let response: TopOperations;
-        let searchOperation: ValuesType<TopOperations>;
-        let bulkOperation: ValuesType<TopOperations>;
+    describe('requested for elasticsearch', () => {
+      let response: TopOperations;
+      let searchOperation: ValuesType<TopOperations>;
+      let bulkOperation: ValuesType<TopOperations>;
 
-        before(async () => {
-          response = await callApi({ dependencyName: 'elasticsearch' });
-          searchOperation = response.find((op) => op.spanName === '/_search')!;
-          bulkOperation = response.find((op) => op.spanName === '/_bulk')!;
-        });
-
-        it('returns the correct operations', () => {
-          expect(response.length).to.eql(2);
-
-          expect(searchOperation).to.be.ok();
-          expect(bulkOperation).to.be.ok();
-        });
-
-        it('returns the correct latency', () => {
-          expect(searchOperation.latency).to.eql(ES_SEARCH_DURATION * 1000);
-          expect(bulkOperation.latency).to.eql(ES_BULK_DURATION * 1000);
-        });
-
-        it('returns the correct throughput', () => {
-          const expectedSearchThroughput = roundNumber(
-            ES_SEARCH_UNKNOWN_RATE + ES_SEARCH_SUCCESS_RATE + ES_SEARCH_FAILURE_RATE
-          );
-          const expectedBulkThroughput = ES_BULK_RATE;
-
-          expect(roundNumber(searchOperation.throughput)).to.eql(expectedSearchThroughput);
-          expect(roundNumber(bulkOperation.throughput)).to.eql(expectedBulkThroughput);
-
-          expect(
-            searchOperation.timeseries.throughput
-              .map((bucket) => bucket.y)
-              .every((val) => val === expectedSearchThroughput)
-          );
-        });
-
-        it('returns the correct failure rate', () => {
-          const expectedSearchFailureRate =
-            ES_SEARCH_FAILURE_RATE / (ES_SEARCH_SUCCESS_RATE + ES_SEARCH_FAILURE_RATE);
-          const expectedBulkFailureRate = null;
-
-          expect(searchOperation.failureRate).to.be(expectedSearchFailureRate);
-
-          expect(bulkOperation.failureRate).to.be(expectedBulkFailureRate);
-
-          expect(
-            searchOperation.timeseries.failureRate
-              .map((bucket) => bucket.y)
-              .every((val) => val === expectedSearchFailureRate)
-          );
-
-          expect(
-            bulkOperation.timeseries.failureRate
-              .map((bucket) => bucket.y)
-              .every((val) => val === expectedBulkFailureRate)
-          );
-        });
-
-        it('returns the correct impact', () => {
-          expect(searchOperation.impact).to.eql(0);
-          expect(bulkOperation.impact).to.eql(100);
-        });
+      before(async () => {
+        response = await callApi({ dependencyName: 'elasticsearch' });
+        searchOperation = response.find((op) => op.spanName === '/_search')!;
+        bulkOperation = response.find((op) => op.spanName === '/_bulk')!;
       });
 
-      describe('requested for redis', () => {
-        let response: TopOperations;
-        let setOperation: ValuesType<TopOperations>;
+      it('returns the correct operations', () => {
+        expect(response.length).to.eql(2);
 
-        before(async () => {
-          response = await callApi({ dependencyName: 'redis' });
-          setOperation = response.find((op) => op.spanName === 'SET')!;
-        });
-
-        it('returns the correct operations', () => {
-          expect(response.length).to.eql(1);
-
-          expect(setOperation).to.be.ok();
-        });
-
-        it('returns the correct latency', () => {
-          expect(setOperation.latency).to.eql(REDIS_SET_DURATION * 1000);
-        });
-
-        it('returns the correct throughput', () => {
-          expect(roundNumber(setOperation.throughput)).to.eql(roundNumber(REDIS_SET_RATE));
-        });
+        expect(searchOperation).to.be.ok();
+        expect(bulkOperation).to.be.ok();
       });
 
-      describe('requested for a specific service', () => {
-        let response: TopOperations;
-        let searchOperation: ValuesType<TopOperations>;
-        let bulkOperation: ValuesType<TopOperations> | undefined;
-
-        before(async () => {
-          response = await callApi({
-            dependencyName: 'elasticsearch',
-            kuery: `service.name:"synth-go"`,
-          });
-          searchOperation = response.find((op) => op.spanName === '/_search')!;
-          bulkOperation = response.find((op) => op.spanName === '/_bulk');
-        });
-
-        it('returns the correct operations', () => {
-          expect(response.length).to.eql(1);
-
-          expect(searchOperation).to.be.ok();
-          expect(bulkOperation).not.to.be.ok();
-        });
+      it('returns the correct latency', () => {
+        expect(searchOperation.latency).to.eql(ES_SEARCH_DURATION * 1000);
+        expect(bulkOperation.latency).to.eql(ES_BULK_DURATION * 1000);
       });
 
-      describe('requested for a specific environment', () => {
-        let response: TopOperations;
-        let searchOperation: ValuesType<TopOperations> | undefined;
-        let bulkOperation: ValuesType<TopOperations>;
+      it('returns the correct throughput', () => {
+        const expectedSearchThroughput = roundNumber(
+          ES_SEARCH_UNKNOWN_RATE + ES_SEARCH_SUCCESS_RATE + ES_SEARCH_FAILURE_RATE
+        );
+        const expectedBulkThroughput = ES_BULK_RATE;
 
-        before(async () => {
-          response = await callApi({
-            dependencyName: 'elasticsearch',
-            environment: 'development',
-          });
-          searchOperation = response.find((op) => op.spanName === '/_search');
-          bulkOperation = response.find((op) => op.spanName === '/_bulk')!;
-        });
+        expect(roundNumber(searchOperation.throughput)).to.eql(expectedSearchThroughput);
+        expect(roundNumber(bulkOperation.throughput)).to.eql(expectedBulkThroughput);
 
-        it('returns the correct operations', () => {
-          expect(response.length).to.eql(1);
-
-          expect(searchOperation).not.to.be.ok();
-          expect(bulkOperation).to.be.ok();
-        });
+        expect(
+          searchOperation.timeseries.throughput
+            .map((bucket) => bucket.y)
+            .every((val) => val === expectedSearchThroughput)
+        );
       });
-    }
-  );
+
+      it('returns the correct failure rate', () => {
+        const expectedSearchFailureRate =
+          ES_SEARCH_FAILURE_RATE / (ES_SEARCH_SUCCESS_RATE + ES_SEARCH_FAILURE_RATE);
+        const expectedBulkFailureRate = null;
+
+        expect(searchOperation.failureRate).to.be(expectedSearchFailureRate);
+
+        expect(bulkOperation.failureRate).to.be(expectedBulkFailureRate);
+
+        expect(
+          searchOperation.timeseries.failureRate
+            .map((bucket) => bucket.y)
+            .every((val) => val === expectedSearchFailureRate)
+        );
+
+        expect(
+          bulkOperation.timeseries.failureRate
+            .map((bucket) => bucket.y)
+            .every((val) => val === expectedBulkFailureRate)
+        );
+      });
+
+      it('returns the correct impact', () => {
+        expect(searchOperation.impact).to.eql(0);
+        expect(bulkOperation.impact).to.eql(100);
+      });
+    });
+
+    describe('requested for redis', () => {
+      let response: TopOperations;
+      let setOperation: ValuesType<TopOperations>;
+
+      before(async () => {
+        response = await callApi({ dependencyName: 'redis' });
+        setOperation = response.find((op) => op.spanName === 'SET')!;
+      });
+
+      it('returns the correct operations', () => {
+        expect(response.length).to.eql(1);
+
+        expect(setOperation).to.be.ok();
+      });
+
+      it('returns the correct latency', () => {
+        expect(setOperation.latency).to.eql(REDIS_SET_DURATION * 1000);
+      });
+
+      it('returns the correct throughput', () => {
+        expect(roundNumber(setOperation.throughput)).to.eql(roundNumber(REDIS_SET_RATE));
+      });
+    });
+
+    describe('requested for a specific service', () => {
+      let response: TopOperations;
+      let searchOperation: ValuesType<TopOperations>;
+      let bulkOperation: ValuesType<TopOperations> | undefined;
+
+      before(async () => {
+        response = await callApi({
+          dependencyName: 'elasticsearch',
+          kuery: `service.name:"synth-go"`,
+        });
+        searchOperation = response.find((op) => op.spanName === '/_search')!;
+        bulkOperation = response.find((op) => op.spanName === '/_bulk');
+      });
+
+      it('returns the correct operations', () => {
+        expect(response.length).to.eql(1);
+
+        expect(searchOperation).to.be.ok();
+        expect(bulkOperation).not.to.be.ok();
+      });
+    });
+
+    describe('requested for a specific environment', () => {
+      let response: TopOperations;
+      let searchOperation: ValuesType<TopOperations> | undefined;
+      let bulkOperation: ValuesType<TopOperations>;
+
+      before(async () => {
+        response = await callApi({
+          dependencyName: 'elasticsearch',
+          environment: 'development',
+        });
+        searchOperation = response.find((op) => op.spanName === '/_search');
+        bulkOperation = response.find((op) => op.spanName === '/_bulk')!;
+      });
+
+      it('returns the correct operations', () => {
+        expect(response.length).to.eql(1);
+
+        expect(searchOperation).not.to.be.ok();
+        expect(bulkOperation).to.be.ok();
+      });
+    });
+  });
 }

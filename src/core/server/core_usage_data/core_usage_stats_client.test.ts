@@ -7,12 +7,15 @@
  */
 
 import { httpServerMock, httpServiceMock, savedObjectsRepositoryMock } from '../mocks';
-import { CORE_USAGE_STATS_TYPE, CORE_USAGE_STATS_ID } from './constants';
 import {
+  CORE_USAGE_STATS_TYPE,
+  CORE_USAGE_STATS_ID,
   BaseIncrementOptions,
   IncrementSavedObjectsImportOptions,
   IncrementSavedObjectsResolveImportErrorsOptions,
   IncrementSavedObjectsExportOptions,
+} from '@kbn/core-usage-data-base-server-internal';
+import {
   BULK_CREATE_STATS_PREFIX,
   BULK_GET_STATS_PREFIX,
   BULK_UPDATE_STATS_PREFIX,

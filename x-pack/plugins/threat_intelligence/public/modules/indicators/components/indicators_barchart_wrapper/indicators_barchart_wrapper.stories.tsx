@@ -15,6 +15,7 @@ import { TimeRange } from '@kbn/es-query';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { IUiSettingsClient } from '@kbn/core/public';
 import { StoryProvidersComponent } from '../../../../common/mocks/story_providers';
+import { mockKibanaTimelinesService } from '../../../../common/mocks/mock_kibana_timelines_service';
 import { Aggregation, AGGREGATION_NAME } from '../../hooks/use_aggregated_indicators';
 import { DEFAULT_TIME_RANGE } from '../../hooks/use_filters/utils';
 import { IndicatorsBarChartWrapper } from './indicators_barchart_wrapper';
@@ -24,93 +25,101 @@ export default {
   title: 'IndicatorsBarChartWrapper',
 };
 
-const mockTimeRange: TimeRange = DEFAULT_TIME_RANGE;
-const mockIndexPattern: DataView = {
-  fields: [
-    {
-      name: '@timestamp',
-      type: 'date',
-    } as DataViewField,
-    {
-      name: 'threat.feed.name',
-      type: 'string',
-    } as DataViewField,
-  ],
-} as DataView;
+export const Default: Story<void> = () => {
+  const mockTimeRange: TimeRange = DEFAULT_TIME_RANGE;
 
-const validDate: string = '1 Jan 2022 00:00:00 GMT';
-const numberOfDays: number = 1;
-const aggregation1: Aggregation = {
-  events: {
-    buckets: [
+  const mockIndexPattern: DataView = {
+    fields: [
       {
-        doc_count: 0,
-        key: 1641016800000,
-        key_as_string: '1 Jan 2022 06:00:00 GMT',
-      },
+        name: '@timestamp',
+        type: 'date',
+      } as DataViewField,
       {
-        doc_count: 10,
-        key: 1641038400000,
-        key_as_string: '1 Jan 2022 12:00:00 GMT',
-      },
+        name: 'threat.feed.name',
+        type: 'string',
+      } as DataViewField,
     ],
-  },
-  doc_count: 0,
-  key: '[Filebeat] AbuseCH Malware',
-};
-const aggregation2: Aggregation = {
-  events: {
-    buckets: [
-      {
-        doc_count: 20,
-        key: 1641016800000,
-        key_as_string: '1 Jan 2022 06:00:00 GMT',
-      },
-      {
-        doc_count: 8,
-        key: 1641038400000,
-        key_as_string: '1 Jan 2022 12:00:00 GMT',
-      },
-    ],
-  },
-  doc_count: 0,
-  key: '[Filebeat] AbuseCH MalwareBazaar',
-};
-const mockData = {
-  search: {
-    search: () =>
-      of({
-        rawResponse: {
-          aggregations: {
-            [AGGREGATION_NAME]: {
-              buckets: [aggregation1, aggregation2],
+  } as DataView;
+
+  const validDate: string = '1 Jan 2022 00:00:00 GMT';
+  const numberOfDays: number = 1;
+  const aggregation1: Aggregation = {
+    events: {
+      buckets: [
+        {
+          doc_count: 0,
+          key: 1641016800000,
+          key_as_string: '1 Jan 2022 06:00:00 GMT',
+        },
+        {
+          doc_count: 10,
+          key: 1641038400000,
+          key_as_string: '1 Jan 2022 12:00:00 GMT',
+        },
+      ],
+    },
+    doc_count: 0,
+    key: '[Filebeat] AbuseCH Malware',
+  };
+  const aggregation2: Aggregation = {
+    events: {
+      buckets: [
+        {
+          doc_count: 20,
+          key: 1641016800000,
+          key_as_string: '1 Jan 2022 06:00:00 GMT',
+        },
+        {
+          doc_count: 8,
+          key: 1641038400000,
+          key_as_string: '1 Jan 2022 12:00:00 GMT',
+        },
+      ],
+    },
+    doc_count: 0,
+    key: '[Filebeat] AbuseCH MalwareBazaar',
+  };
+
+  const dataServiceMock = {
+    search: {
+      search: () =>
+        of({
+          rawResponse: {
+            aggregations: {
+              [AGGREGATION_NAME]: {
+                buckets: [aggregation1, aggregation2],
+              },
             },
           },
-        },
-      }),
-  },
-  query: {
-    timefilter: {
-      timefilter: {
-        calculateBounds: () => ({
-          min: moment(validDate),
-          max: moment(validDate).add(numberOfDays, 'days'),
         }),
+    },
+    query: {
+      timefilter: {
+        timefilter: {
+          calculateBounds: () => ({
+            min: moment(validDate),
+            max: moment(validDate).add(numberOfDays, 'days'),
+          }),
+        },
+      },
+      filterManager: {
+        getFilters: () => {},
+        setFilters: () => {},
+        getUpdates$: () => of(),
       },
     },
-    filterManager: {
-      getFilters: () => {},
-      setFilters: () => {},
-      getUpdates$: () => of(),
-    },
-  },
-} as unknown as DataPublicPluginStart;
+  } as unknown as DataPublicPluginStart;
 
-const mockUiSettings = { get: () => {} } as unknown as IUiSettingsClient;
+  const uiSettingsMock = {
+    get: () => {},
+  } as unknown as IUiSettingsClient;
 
-export const Default: Story<void> = () => {
+  const timelinesMock = mockKibanaTimelinesService;
+
   return (
-    <StoryProvidersComponent kibana={{ data: mockData, uiSettings: mockUiSettings }}>
+    <StoryProvidersComponent
+      kibana={{ data: dataServiceMock, uiSettings: uiSettingsMock, timelines: timelinesMock }}
+    >
       <IndicatorsBarChartWrapper timeRange={mockTimeRange} indexPattern={mockIndexPattern} />
     </StoryProvidersComponent>
   );
