@@ -46,7 +46,7 @@ export const getToolbarVisibility = ({
   alerts,
   isLoading,
   updatedAt,
-  showAlertCount = true,
+  showAlertCount,
 }: {
   bulkActions: BulkActionsConfig[];
   alertsCount: number;
