@@ -260,7 +260,7 @@ export function ChangeDataView({
               setIsTextBasedLangSelected(false);
               // clean up the Text based language query
               onTextLangQuerySubmit?.({
-                language: 'kql',
+                language: 'kuery',
                 query: '',
               });
               onChangeDataView(newId);
@@ -333,7 +333,7 @@ export function ChangeDataView({
       setIsTextBasedLangSelected(false);
       // clean up the Text based language query
       onTextLangQuerySubmit?.({
-        language: 'kql',
+        language: 'kuery',
         query: '',
       });
       if (selectedDataViewId) {

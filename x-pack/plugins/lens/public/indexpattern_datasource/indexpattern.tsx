@@ -8,7 +8,6 @@
 import React from 'react';
 import { render } from 'react-dom';
 import { I18nProvider } from '@kbn/i18n-react';
-import type { Query, AggregateQuery } from '@kbn/es-query';
 import type { CoreStart, SavedObjectReference } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { TimeRange } from '@kbn/es-query';
@@ -148,7 +147,6 @@ export function getIndexPatternDatasource({
       persistedState?: IndexPatternPersistedState,
       references?: SavedObjectReference[],
       initialContext?: VisualizeFieldContext | VisualizeEditorContext,
-      query?: Query | AggregateQuery,
       indexPatternRefs?: IndexPatternRef[],
       indexPatterns?: Record<string, IndexPattern>
     ) {

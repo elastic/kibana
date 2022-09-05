@@ -12,7 +12,7 @@ import { CoreStart } from '@kbn/core/public';
 // import { i18n } from '@kbn/i18n';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 // import { isOfAggregateQueryType, getIndexPatternFromSQLQuery } from '@kbn/es-query';
-import { EuiButton, EuiSelect } from '@elastic/eui';
+import { EuiSelect, EuiButtonEmpty } from '@elastic/eui';
 import { DatatableColumn, ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -48,69 +48,42 @@ export function getSQLDatasource({
     return Object.entries(state.layers).map(([id, layer]) => {
       const reducedState: EsSQLPrivateState = {
         ...state,
-        cachedFieldList: {
-          [id]: state.cachedFieldList[id],
-        },
+        fieldList: state.fieldList,
         layers: {
           [id]: state.layers[id],
         },
       };
-      return !state.autoMap
-        ? {
-            state: reducedState,
-            table: {
-              changeType: 'unchanged' as TableChangeType,
-              isMultiRow: !state.cachedFieldList[id].singleRow,
-              layerId: id,
-              columns: layer.columns.map((column) => {
-                const field = state.cachedFieldList[id].fields.find(
-                  (f) => f.name === column.fieldName
-                )!;
-                const operation = {
-                  dataType: field?.meta.type as DataType,
-                  label: field?.name,
-                  isBucketed: false,
-                  noBucketInfo: true,
-                };
-                return {
-                  columnId: column.columnId,
-                  operation,
-                };
-              }),
+      return {
+        state: {
+          ...reducedState,
+          layers: {
+            [id]: {
+              ...state.layers[id],
+              columns: state.fieldList.map((f) => ({
+                columnId: f.name,
+                fieldName: f.name,
+              })),
             },
-            keptLayerIds: [id],
-          }
-        : {
-            state: {
-              ...reducedState,
-              layers: {
-                [id]: {
-                  ...state.layers[id],
-                  columns: state.cachedFieldList[id].fields.map((f) => ({
-                    columnId: f.name,
-                    fieldName: f.name,
-                  })),
-                },
+          },
+        },
+        table: {
+          changeType: 'unchanged' as TableChangeType,
+          isMultiRow: false,
+          layerId: id,
+          columns: state.fieldList.map((f) => {
+            return {
+              columnId: f.name,
+              operation: {
+                dataType: f.meta.type,
+                label: f.name,
+                isBucketed: false,
+                noBucketInfo: true,
               },
-            },
-            table: {
-              changeType: 'unchanged' as TableChangeType,
-              isMultiRow: !state.cachedFieldList[id].singleRow,
-              layerId: id,
-              columns: state.cachedFieldList[id].fields.map((f) => {
-                return {
-                  columnId: f.name,
-                  operation: {
-                    dataType: f.meta.type,
-                    label: f.name,
-                    isBucketed: false,
-                    noBucketInfo: true,
-                  },
-                };
-              }),
-            },
-            keptLayerIds: [id],
-          };
+            };
+          }),
+        },
+        keptLayerIds: [id],
+      };
     });
   };
   const sqlDatasource: Datasource<EsSQLPrivateState, EsSQLPersistedState> = {
@@ -125,22 +98,8 @@ export function getSQLDatasource({
     initialize(state?: EsSQLPersistedState) {
       const initState = state || { layers: {} };
       // const indexPatternRefs: IndexPatternRef[] = await loadIndexPatternRefs(dataViews);
-      const cachedFieldList: Record<string, { fields: DatatableColumn[]; singleRow: boolean }> = {};
-      // if (query && isOfAggregateQueryType(query) && 'sql' in query) {
-      //   const table = await fetchSql(query, dataViews, data, expressions);
-      //   const index = getIndexPatternFromSQLQuery(query.sql);
-      //   const columns = table?.columns ?? [];
-      //   cachedFieldList['123'] = {
-      //     fields: columns ?? [],
-      //     singleRow: table?.rows.length === 1,
-      //   };
-      //   initState.layers['123'] = {
-      //     hideFilterBar: true,
-      //     index,
-      //     query: query.sql,
-      //     columns: columns.map((c) => ({ columnId: c.id, fieldName: c.id })),
-      //   };
-      // }
+      // const cachedFieldList: Record<string, { fields: DatatableColumn[]; singleRow: boolean }> = {};
+      const fieldList: DatatableColumn[] = [];
       // if (context && 'sql' in context) {
       //   const table = await fetchSql(context, dataViews, data, expressions);
       //   const index = getIndexPatternFromSQLQuery(context.sql);
@@ -159,7 +118,8 @@ export function getSQLDatasource({
       // }
       return {
         ...initState,
-        cachedFieldList,
+        // cachedFieldList,
+        fieldList,
         removedLayers: [],
         indexPatternRefs: [],
       };
@@ -176,15 +136,16 @@ export function getSQLDatasource({
       const newRemovedList = removedLayer ? state.removedLayers.slice(1) : state.removedLayers;
       return {
         ...state,
-        cachedFieldList: {
-          ...state.cachedFieldList,
-          [newLayerId]: removedLayer
-            ? removedLayer.fieldList
-            : {
-                fields: [],
-                singleRow: false,
-              },
-        },
+        // cachedFieldList: {
+        //   ...state.cachedFieldList,
+        //   [newLayerId]: removedLayer
+        //     ? removedLayer.fieldList
+        //     : {
+        //         fields: [],
+        //         singleRow: false,
+        //       },
+        // },
+        fieldList: [],
         layers: {
           ...state.layers,
           [newLayerId]: removedLayer
@@ -222,7 +183,8 @@ export function getSQLDatasource({
         indexPatternRefs: [],
         layers: {},
         removedLayers: [],
-        cachedFieldList: {},
+        // cachedFieldList: {},
+        fieldList: [],
       };
     },
 
@@ -231,14 +193,12 @@ export function getSQLDatasource({
       const newLayers = { ...state.layers };
       delete newLayers[layerId];
 
-      const deletedFieldList = state.cachedFieldList[layerId];
-      const newFieldList = { ...state.cachedFieldList };
-      delete newFieldList[layerId];
+      const deletedFieldList = state.fieldList;
 
       return {
         ...state,
         layers: newLayers,
-        cachedFieldList: newFieldList,
+        fieldList: state.fieldList,
         removedLayers: deletedLayer.query
           ? [
               { layer: { ...deletedLayer, columns: [] }, fieldList: deletedFieldList },
@@ -301,7 +261,9 @@ export function getSQLDatasource({
       };
     },
 
-    toExpression,
+    toExpression: (state, layerId, indexPatterns, timeRange) => {
+      return toExpression(state, layerId, timeRange);
+    },
 
     getMetaData(state: EsSQLPrivateState) {
       return {
@@ -325,14 +287,21 @@ export function getSQLDatasource({
       const selectedField = props.state.layers[props.layerId].columns.find(
         (column) => column.columnId === props.columnId
       )!;
-      render(<EuiButton onClick={() => {}}>{selectedField.fieldName}</EuiButton>, domElement);
+      render(
+        <EuiButtonEmpty onClick={() => {}}>{selectedField?.fieldName}</EuiButtonEmpty>,
+        domElement
+      );
+    },
+
+    getRenderEventCounters(state: EsSQLPrivateState): string[] {
+      return [];
     },
 
     renderDimensionEditor: (
       domElement: Element,
       props: DatasourceDimensionEditorProps<EsSQLPrivateState>
     ) => {
-      const fields = props.state.cachedFieldList[props.layerId].fields;
+      const fields = props.state.fieldList;
       const selectedField = props.state.layers[props.layerId].columns.find(
         (column) => column.columnId === props.columnId
       );
@@ -459,9 +428,7 @@ export function getSQLDatasource({
           const column = layer?.columns.find((c) => c.columnId === columnId);
 
           if (column) {
-            const field = state.cachedFieldList[layerId]?.fields?.find(
-              (f) => f.name === column.fieldName
-            )!;
+            const field = state.fieldList?.find((f) => f.name === column.fieldName)!;
             const overwrite = layer.overwrittenFieldTypes?.[column.fieldName];
             return {
               dataType: overwrite || (field?.meta?.type as DataType),

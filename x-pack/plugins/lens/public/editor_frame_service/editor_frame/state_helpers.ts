@@ -232,7 +232,6 @@ export function initializeDatasources({
         datasourceStates[datasourceId].state || undefined,
         references,
         initialContext,
-        query,
         indexPatternRefs,
         indexPatterns
       );

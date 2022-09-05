@@ -192,12 +192,15 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   const onRender$ = useCallback(() => {
     if (renderDeps.current) {
       const datasourceEvents = Object.values(renderDeps.current.datasourceMap).reduce<string[]>(
-        (acc, datasource) => [
-          ...acc,
-          ...(datasource.getRenderEventCounters?.(
-            renderDeps.current!.datasourceStates[datasource.id].state
-          ) ?? []),
-        ],
+        (acc, datasource) => {
+          if (!renderDeps.current!.datasourceStates[datasource.id]) return [];
+          return [
+            ...acc,
+            ...(datasource.getRenderEventCounters?.(
+              renderDeps.current!.datasourceStates[datasource.id]?.state
+            ) ?? []),
+          ];
+        },
         []
       );
       let visualizationEvents: string[] = [];
@@ -280,6 +283,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     [activeVisualization, visualization.state, activeDatasourceId, datasourceMap, datasourceStates]
   );
 
+  const timeRange = plugins.data.query.timefilter.timefilter.getTime();
   // if the expression is undefined, it means we hit an error that should be displayed to the user
   const unappliedExpression = useMemo(() => {
     if (!configurationValidationError?.length && !missingRefsErrors.length && !unknownVisError) {
@@ -291,6 +295,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
           datasourceStates,
           datasourceLayers,
           indexPatterns: dataViews.indexPatterns,
+          timeRange,
         });
 
         if (ast) {
@@ -333,6 +338,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     unknownVisError,
     visualization.activeId,
     dataViews.indexPatterns,
+    timeRange,
   ]);
 
   useEffect(() => {

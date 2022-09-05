@@ -6,51 +6,55 @@
  */
 
 import { Ast } from '@kbn/interpreter';
-import type { IndexPatternRef } from '../types';
-import { EsSQLPrivateState, EsSQLLayer } from './types';
-// used by getDatasourceExpressionsByLayers
-function getExpressionForLayer(layer: EsSQLLayer, refs: IndexPatternRef[]): Ast | null {
+import type { TimeRange } from '@kbn/es-query';
+import { timerangeToAst, aggregateQueryToAst } from '@kbn/data-plugin/common';
+import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/common';
+import { EsSQLPrivateState, EsSQLLayer, IndexPatternRef } from './types';
+
+function getExpressionForLayer(
+  layer: EsSQLLayer,
+  refs: IndexPatternRef[],
+  timeRange?: TimeRange
+): Ast | null {
   if (layer.columns.length === 0) {
     return null;
   }
 
-  // const idMap = layer.columns.reduce((currentIdMap, column, index) => {
-  //   return {
-  //     ...currentIdMap,
-  //     [column.fieldName]: {
-  //       id: column.columnId,
-  //     },
-  //   };
-  // }, {} as Record<string, { id: string }>);
-
-  return {
-    type: 'expression',
-    chain: [
-      {
-        type: 'function',
-        function: 'essql',
-        arguments: {
-          query: [layer.query],
-          timefield: [refs.find((r) => r.id === layer.index)?.timeField].filter(Boolean),
+  const idMap = layer.columns.reduce((currentIdMap, column, index) => {
+    return {
+      ...currentIdMap,
+      [column.fieldName]: [
+        {
+          id: column.columnId,
         },
-      },
-      // {
-      //   type: 'function',
-      //   function: 'lens_rename_columns',
-      //   arguments: {
-      //     idMap: [JSON.stringify(idMap)],
-      //     overwriteTypes: layer.overwrittenFieldTypes
-      //       ? [JSON.stringify(layer.overwrittenFieldTypes)]
-      //       : [],
-      //   },
-      // },
-    ],
-  };
+      ],
+    };
+  });
+  const kibana = buildExpressionFunction('kibana', {});
+  const kibanaContext = buildExpressionFunction('kibana_context', {
+    timeRange: timeRange && timerangeToAst(timeRange),
+  });
+  const ast = buildExpression([kibana, kibanaContext]).toAst();
+  const timeFieldName = refs.find((r) => r.id === layer.index)?.timeField;
+  // do this dynamic
+  const essql = aggregateQueryToAst({ sql: layer.query }, timeFieldName);
+
+  if (essql) {
+    ast.chain.push(essql);
+  }
+  ast.chain.push({
+    type: 'function',
+    function: 'lens_map_to_columns',
+    arguments: {
+      idMap: [JSON.stringify(idMap)],
+    },
+  });
+  return ast;
 }
 
-export function toExpression(state: EsSQLPrivateState, layerId: string) {
+export function toExpression(state: EsSQLPrivateState, layerId: string, timeRange?: TimeRange) {
   if (state.layers[layerId]) {
-    return getExpressionForLayer(state.layers[layerId], state.indexPatternRefs);
+    return getExpressionForLayer(state.layers[layerId], state.indexPatternRefs, timeRange);
   }
 
   return null;

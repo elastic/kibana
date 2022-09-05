@@ -18,7 +18,7 @@ import type {
   Datatable,
 } from '@kbn/expressions-plugin/public';
 import type { VisualizeEditorLayersContext } from '@kbn/visualizations-plugin/public';
-import type { Query, AggregateQuery } from '@kbn/es-query';
+import type { Query } from '@kbn/es-query';
 import type {
   UiActionsStart,
   RowClickContext,
@@ -273,7 +273,6 @@ export interface Datasource<T = unknown, P = unknown> {
     state?: P,
     savedObjectReferences?: SavedObjectReference[],
     initialContext?: VisualizeFieldContext | VisualizeEditorContext,
-    query?: Query | AggregateQuery,
     indexPatternRefs?: IndexPatternRef[],
     indexPatterns?: IndexPatternMap
   ) => T;
@@ -362,7 +361,8 @@ export interface Datasource<T = unknown, P = unknown> {
   toExpression: (
     state: T,
     layerId: string,
-    indexPatterns: IndexPatternMap
+    indexPatterns: IndexPatternMap,
+    timeRange?: TimeRange
   ) => ExpressionAstExpression | string | null;
 
   getDatasourceSuggestionsForField: (

@@ -259,6 +259,7 @@ export const LensTopNavMenu = ({
   const [indexPatterns, setIndexPatterns] = useState<DataView[]>([]);
   const [dataViewsList, setDataViewsList] = useState<DataView[]>([]);
   const [currentIndexPattern, setCurrentIndexPattern] = useState<DataView>();
+  const [isOnTextBasedMode, setIsOnTextBasedMode] = useState(false);
   const [rejectedIndexPatterns, setRejectedIndexPatterns] = useState<string[]>([]);
 
   const dispatchChangeIndexPattern = React.useCallback(
@@ -630,6 +631,7 @@ export const LensTopNavMenu = ({
           dispatchSetState({ query: newQuery });
           // check if query is text-based (sql, essql etc) and switchAndCleanDatasource
           if (isOfAggregateQueryType(newQuery)) {
+            setIsOnTextBasedMode(true);
             dispatch(
               switchAndCleanDatasource({
                 newDatasourceId: getAggregateQueryMode(newQuery),
@@ -638,23 +640,27 @@ export const LensTopNavMenu = ({
               })
             );
           } else {
-            dispatch(
-              switchAndCleanDatasource({
-                newDatasourceId: 'indexpattern',
-                visualizationId: visualization?.activeId,
-                currentIndexPatternId: currentIndexPattern?.id,
-              })
-            );
+            if (isOnTextBasedMode) {
+              dispatch(
+                switchAndCleanDatasource({
+                  newDatasourceId: 'indexpattern',
+                  visualizationId: visualization?.activeId,
+                  currentIndexPatternId: currentIndexPattern?.id,
+                })
+              );
+            }
+            setIsOnTextBasedMode(false);
           }
         }
       }
     },
     [
-      currentIndexPattern,
+      currentIndexPattern?.id,
       data.query.timefilter.timefilter,
       data.search.session,
       dispatch,
       dispatchSetState,
+      isOnTextBasedMode,
       query,
       visualization?.activeId,
     ]
