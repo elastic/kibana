@@ -132,11 +132,6 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
   // TODO Let user choose between ZOOM and BRUSH mode.
   const [viewMode] = useState<VIEW_MODE>(VIEW_MODE.BRUSH);
 
-  const xDomain = {
-    min: timeRangeEarliest,
-    max: timeRangeLatest,
-  };
-
   const adjustedChartPoints = useMemo(() => {
     // Display empty chart when no data in range
     if (chartPoints.length < 1) return [{ time: timeRangeEarliest, value: 0 }];
@@ -174,12 +169,16 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
   }, [chartPointsSplit, timeRangeEarliest, timeRangeLatest, interval]);
 
   const snapTimestamps = useMemo(() => {
-    return adjustedChartPoints
-      .map((d) => d.time)
-      .filter(function (arg: unknown): arg is number {
-        return typeof arg === 'number';
-      });
-  }, [adjustedChartPoints]);
+    const timestamps: number[] = [];
+    let n = timeRangeEarliest;
+
+    while (n <= timeRangeLatest + interval) {
+      timestamps.push(n);
+      n += interval;
+    }
+
+    return timestamps;
+  }, [timeRangeEarliest, timeRangeLatest, interval]);
 
   const timefilterUpdateHandler = useCallback(
     (ranges: { from: number; to: number }) => {
@@ -219,8 +218,8 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
       ) {
         const wp = getWindowParameters(
           startRange + interval / 2,
-          xDomain.min,
-          xDomain.max + interval
+          timeRangeEarliest,
+          timeRangeLatest + interval
         );
         const wpSnap = getSnappedWindowParameters(wp, snapTimestamps);
         setOriginalWindowParameters(wpSnap);
@@ -326,7 +325,6 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
           }}
         >
           <Settings
-            xDomain={xDomain}
             onBrushEnd={viewMode !== VIEW_MODE.BRUSH ? (onBrushEnd as BrushEndListener) : undefined}
             onElementClick={onElementClick}
             onProjectionAreaChange={({ projection }) => {
