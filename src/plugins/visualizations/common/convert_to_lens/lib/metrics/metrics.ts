@@ -26,7 +26,7 @@ import { getValidColumns } from '../utils';
 export const convertMetricToColumns = <T extends METRIC_TYPES | BUCKET_TYPES>(
   agg: SchemaConfig<T>,
   dataView: DataView
-): Column[] | null | undefined => {
+): Column[] | null => {
   const supportedAgg = SUPPORTED_METRICS[agg.aggType];
   if (!supportedAgg) {
     return null;
@@ -75,6 +75,8 @@ export const convertMetricToColumns = <T extends METRIC_TYPES | BUCKET_TYPES>(
       return getValidColumns(columns);
     }
     case METRIC_TYPES.SERIAL_DIFF:
+      return null;
+    default:
       return null;
   }
 };

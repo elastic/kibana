@@ -143,4 +143,6 @@ export interface XYConfiguration {
   valuesInLegend?: boolean;
 }
 
-export type Configuration = XYConfiguration;
+export type TableVisConfiguration = {};
+
+export type Configuration = XYConfiguration | TableVisConfiguration;

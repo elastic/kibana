@@ -15,8 +15,9 @@ import type {
 } from '@kbn/usage-collection-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 
-import { setFormatService } from './services';
+import { setDataViewsStart, setFormatService } from './services';
 import { registerTableVis } from './register_vis';
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 
 /** @internal */
 export interface TablePluginSetupDependencies {
@@ -28,6 +29,7 @@ export interface TablePluginSetupDependencies {
 /** @internal */
 export interface TablePluginStartDependencies {
   fieldFormats: FieldFormatsStart;
+  dataViews: DataViewsPublicPluginStart;
   usageCollection?: UsageCollectionStart;
 }
 
@@ -39,7 +41,8 @@ export class TableVisPlugin
     registerTableVis(core, deps);
   }
 
-  public start(core: CoreStart, { fieldFormats }: TablePluginStartDependencies) {
+  public start(core: CoreStart, { fieldFormats, dataViews }: TablePluginStartDependencies) {
     setFormatService(fieldFormats);
+    setDataViewsStart(dataViews);
   }
 }

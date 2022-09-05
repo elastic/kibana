@@ -11,8 +11,9 @@ import { TimefilterContract } from '@kbn/data-plugin/public';
 import { convertMetricToColumns } from '../../common/convert_to_lens/lib/metrics';
 import { Vis } from '../types';
 import { getVisSchemas } from '../vis_schemas';
+import { Column } from '@kbn/visualizations-plugin/common';
 
-export const getColumnsFromVis = (vis: Vis, timefilter: TimefilterContract, dataView: DataView) => {
+export const getColumnsFromVis = <T>(vis: Vis<T>, timefilter: TimefilterContract, dataView: DataView) => {
   const { metric } = getVisSchemas(vis, {
     timefilter,
     timeRange: timefilter.getAbsoluteTime(),
@@ -22,4 +23,7 @@ export const getColumnsFromVis = (vis: Vis, timefilter: TimefilterContract, data
   if (metricColumns.includes(null)) {
     return null;
   }
+
+  const columns = [...metricColumns as Column[]];
+  return columns;
 };
