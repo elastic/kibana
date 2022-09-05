@@ -427,6 +427,7 @@ export interface AlertsTableProps {
   visibleColumns: string[];
   'data-test-subj': string;
   updatedAt: number;
+  showAlertCount: boolean;
 }
 
 // TODO We need to create generic type between our plugin, right now we have different one because of the old alerts table

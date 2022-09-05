@@ -57,6 +57,7 @@ export interface AlertsTableStateProps {
   pageSize?: number;
   refreshNow?: number;
   showExpandToDetails: boolean;
+  showAlertCount: boolean;
 }
 
 interface AlertsTableStorage {
@@ -104,6 +105,7 @@ const AlertsTableState = ({
   pageSize,
   refreshNow,
   showExpandToDetails,
+  showAlertCount,
 }: AlertsTableStateProps) => {
   const { cases } = useKibana<{ cases: CaseUi }>().services;
   const hasAlertsTableConfiguration =
@@ -255,6 +257,7 @@ const AlertsTableState = ({
       visibleColumns: storageAlertsTable.current.visibleColumns ?? [],
       'data-test-subj': 'internalAlertsState',
       updatedAt,
+      showAlertCount,
     }),
     [
       alertsTableConfiguration,
@@ -265,6 +268,7 @@ const AlertsTableState = ({
       showExpandToDetails,
       useFetchAlertsData,
       updatedAt,
+      showAlertCount,
     ]
   );
 

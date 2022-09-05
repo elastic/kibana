@@ -74,8 +74,17 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
       alerts: alertsData.alerts,
       updatedAt: props.updatedAt,
       isLoading,
+      showAlertCount: props.showAlertCount,
     });
-  }, [bulkActionsState, bulkActions, alertsCount, alertsData.alerts, props.updatedAt, isLoading])();
+  }, [
+    bulkActionsState,
+    bulkActions,
+    alertsCount,
+    alertsData.alerts,
+    props.updatedAt,
+    props.showAlertCount,
+    isLoading,
+  ])();
 
   const {
     pagination,

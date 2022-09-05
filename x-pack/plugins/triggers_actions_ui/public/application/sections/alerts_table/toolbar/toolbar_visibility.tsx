@@ -10,16 +10,32 @@ import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strat
 import React, { lazy, Suspense } from 'react';
 import { BulkActionsConfig } from '../../../../types';
 import { LastUpdatedAt } from './components/last_updated_at';
+import { AlertsCount } from './components/alert_count';
 
 const BulkActionsToolbar = lazy(() => import('../bulk_actions/components/toolbar'));
 
-const getDefaultVisibility = (updatedAt: number) => {
+const getDefaultVisibility = ({
+  updatedAt,
+  alertsCount,
+  showAlertCount,
+}: {
+  updatedAt: number;
+  alertsCount: number;
+  showAlertCount: boolean;
+}) => {
+  const additionalControls = {
+    right: <LastUpdatedAt updatedAt={updatedAt} />,
+    left: showAlertCount
+      ? {
+          append: <AlertsCount>{alertsCount}</AlertsCount>,
+        }
+      : undefined,
+  };
+
   return {
     showColumnSelector: true,
     showSortSelector: true,
-    additionalControls: {
-      right: <LastUpdatedAt updatedAt={updatedAt} />,
-    },
+    additionalControls,
   };
 };
 
@@ -30,6 +46,7 @@ export const getToolbarVisibility = ({
   alerts,
   isLoading,
   updatedAt,
+  showAlertCount = true,
 }: {
   bulkActions: BulkActionsConfig[];
   alertsCount: number;
@@ -37,9 +54,10 @@ export const getToolbarVisibility = ({
   alerts: EcsFieldsResponse[];
   isLoading: boolean;
   updatedAt: number;
+  showAlertCount: boolean;
 }): EuiDataGridToolBarVisibilityOptions => {
   const selectedRowsCount = rowSelection.size;
-  const defaultVisibility = getDefaultVisibility(updatedAt);
+  const defaultVisibility = getDefaultVisibility({ updatedAt, alertsCount, showAlertCount });
 
   if (selectedRowsCount === 0 || selectedRowsCount === undefined || bulkActions.length === 0)
     return defaultVisibility;
@@ -51,9 +69,12 @@ export const getToolbarVisibility = ({
       ...defaultVisibility.additionalControls,
       left: {
         append: (
-          <Suspense fallback={null}>
-            <BulkActionsToolbar totalItems={alertsCount} items={bulkActions} alerts={alerts} />
-          </Suspense>
+          <>
+            <AlertsCount>{alertsCount}</AlertsCount>
+            <Suspense fallback={null}>
+              <BulkActionsToolbar totalItems={alertsCount} items={bulkActions} alerts={alerts} />
+            </Suspense>
+          </>
         ),
       },
     },
