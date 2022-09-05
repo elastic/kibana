@@ -94,13 +94,21 @@ export const FilterGroup = ({
   const orDisabled = hideOr || (isDepthReached && conditionType === ConditionTypes.AND);
   const andDisabled = isDepthReached && conditionType === ConditionTypes.OR;
   const removeDisabled = pathInArray.length <= 1 && filters.length === 1;
-  const isRootLevelFilterGroup = pathInArray.length <= 1;
+  const isRootLevelFilterGroup = pathInArray.length <= 1 && path;
   const color = isRootLevelFilterGroup || !reverseBackground ? 'subdued' : 'plain';
 
-  const shouldDrawBorder = (filter: Filter) => Array.isArray(filter) || isOrFilter(filter);
+  const shouldDrawBorder = (filter: Filter) =>
+    path !== '' && (Array.isArray(filter) || isOrFilter(filter));
 
   return (
-    <EuiPanel color={color} hasShadow={false} className={boderPadding}>
+    <EuiPanel
+      color={color}
+      hasShadow={false}
+      paddingSize="none"
+      className={cx({
+        [boderPadding]: !isRootLevelFilterGroup,
+      })}
+    >
       {filters.map((filter, index, acc) => (
         <EuiFlexGroup direction="column" gutterSize="none">
           <EuiFlexItem
