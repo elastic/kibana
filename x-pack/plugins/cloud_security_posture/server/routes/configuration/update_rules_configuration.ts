@@ -6,7 +6,7 @@
  */
 import { schema as rt, TypeOf } from '@kbn/config-schema';
 import yaml from 'js-yaml';
-import type { PackagePolicy } from '@kbn/fleet-plugin/common';
+import { type PackagePolicy, PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import type {
   ElasticsearchClient,
   SavedObject,
@@ -25,6 +25,7 @@ import {
   UPDATE_RULES_CONFIG_ROUTE_PATH,
 } from '../../../common/constants';
 import type { CspApiRequestHandlerContext, CspRouter, CspRequestHandler } from '../../types';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 export type UpdateRulesConfigBodySchema = TypeOf<typeof updateRulesConfigurationBodySchema>;
 
@@ -209,15 +210,19 @@ const runUpdate = async ({
 }) => {
   logger.info(`Start updating rules`);
 
-  await updateSO();
+  try {
+    await updateSO();
+  } catch (e) {
+    logger.error(`Failed updating saved objects: ${e?.message || ''}`);
+    throw e;
+  }
 
   try {
     const updatedPolicy = await updatePackagePolicy();
     logger.info('Finish updating rules');
     return updatedPolicy;
   } catch (e) {
-    logger.error('Failed updating rules in package policy vars');
-    logger.error(e);
+    logger.error(`Failed updating package policy vars: ${e?.message || ''}`);
 
     logger.info('Rollback to previous saved-objects rules');
     await rollbackSO();
@@ -281,8 +286,15 @@ export const updateRulesConfigurationHandler: CspRequestHandler<
       cspContext.soClient,
       request.body.package_policy_id
     );
-    if (!packagePolicy)
-      throw new Error(`Missing package policy - ${request.body.package_policy_id}`);
+    if (!packagePolicy) {
+      // packagePolicyService.get() throws a 404 if the package policy is not found
+      // we consider returning null as the same, and utilize the same error
+      // so testing for the policy-not-found case is the same.
+      throw SavedObjectsErrorHelpers.createGenericNotFoundError(
+        PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+        request.body.package_policy_id
+      );
+    }
 
     const updatedPackagePolicy = await updatePackagePolicyCspRules(
       cspContext,

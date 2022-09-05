@@ -207,15 +207,7 @@ describe('Update rules configuration API', () => {
     setupSoClientFindMock(mocks);
     setupPackagePolicyServiceGetMock(mocks);
 
-    const {
-      enabledRules,
-      requestMock,
-      packagePolicyMock,
-      soClientMock,
-      // packagePolicyServiceMock,
-      cspContext,
-    } = mocks;
-    // packagePolicyServiceMock.update.mockReturnValue(Promise.resolve(packagePolicyMock));
+    const { enabledRules, requestMock, packagePolicyMock, soClientMock, cspContext } = mocks;
 
     await updatePackagePolicyCspRules(cspContext, packagePolicyMock, requestMock.body.rules);
 
@@ -377,6 +369,28 @@ describe('Update rules configuration API', () => {
       expect(responseMock.customError).toHaveBeenCalledWith(
         expect.objectContaining({
           message,
+        })
+      );
+    }
+  });
+
+  it('throws a 404 Saved-Object Error when packagePolicyService returns a null', async () => {
+    const mocks = getMocks();
+    setupRequestMock(mocks);
+
+    mocks.packagePolicyServiceMock.get.mockReturnValue(Promise.resolve(null));
+    const { requestMock, responseMock, contextMock } = mocks;
+
+    try {
+      await updateRulesConfigurationHandler(
+        contextMock as unknown as CspRequestHandlerContext,
+        requestMock,
+        responseMock
+      );
+    } catch (e) {
+      expect(responseMock.customError).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message: `Saved object [ingest-package-policies/${requestMock.body.package_policy_id}] not found`,
         })
       );
     }
