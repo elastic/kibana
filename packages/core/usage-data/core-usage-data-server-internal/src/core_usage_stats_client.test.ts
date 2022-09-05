@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { httpServerMock, httpServiceMock, savedObjectsRepositoryMock } from '../mocks';
+import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
+import { savedObjectsRepositoryMock } from '@kbn/core-saved-objects-api-server-mocks';
 import {
   CORE_USAGE_STATS_TYPE,
   CORE_USAGE_STATS_ID,

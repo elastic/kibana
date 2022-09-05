@@ -10,7 +10,7 @@ import { BehaviorSubject } from 'rxjs';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { CoreUsageData, CoreUsageDataStart } from '@kbn/core-usage-data-server';
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
-import { CoreUsageDataService } from './core_usage_data_service';
+import type { CoreUsageDataService } from '@kbn/core-usage-data-server-internal';
 import { coreUsageStatsClientMock } from './core_usage_stats_client.mock';
 
 const createSetupContractMock = (usageStatsClient = coreUsageStatsClientMock.create()) => {

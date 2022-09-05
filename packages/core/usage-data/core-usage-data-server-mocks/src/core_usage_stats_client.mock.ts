@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { CoreUsageStatsClient } from '.';
+import type { ICoreUsageStatsClient } from '@kbn/core-usage-data-base-server-internal';
 
 const createUsageStatsClientMock = () =>
   ({
@@ -26,7 +26,7 @@ const createUsageStatsClientMock = () =>
     incrementSavedObjectsExport: jest.fn().mockResolvedValue(null),
     incrementLegacyDashboardsImport: jest.fn().mockResolvedValue(null),
     incrementLegacyDashboardsExport: jest.fn().mockResolvedValue(null),
-  } as unknown as jest.Mocked<CoreUsageStatsClient>);
+  } as unknown as jest.Mocked<ICoreUsageStatsClient>);
 
 export const coreUsageStatsClientMock = {
   create: createUsageStatsClientMock,
