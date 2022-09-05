@@ -11,33 +11,43 @@ import { Agent as HttpsAgent } from 'https';
 import { ConnectionOptions, HttpAgentOptions, UndiciAgentOptions } from '@elastic/elasticsearch';
 import { Logger } from '@kbn/logging';
 
+const HTTP = 'http:';
+const HTTPS = 'https:';
+
+export type Protocol = typeof HTTP | typeof HTTPS;
 export type NetworkAgent = HttpAgent | HttpsAgent;
 export type AgentFactory = (connectionOpts: ConnectionOptions) => NetworkAgent;
 
-/** @internal **/
+/**
+ * Allows obtaining Agent factories, which can then be fed into elasticsearch-js's Client class.
+ * Ideally, we should obtain one Agent factory for each ES Client class.
+ * This allows using the same Agent across all the Pools and Connections of the Client (one per ES node).
+ *
+ * Agent instances are stored internally to allow collecting metrics (nbr of active/idle connections to ES).
+ *
+ * Using the same Agent factory across multiple ES Client instances is strongly discouraged, cause ES Client
+ * exposes methods that can modify the underlying pools, effectively impacting the connections of other Clients.
+ * @internal
+ **/
 export class AgentManager {
   /**
-   * Store Agent instances by protocol => type => ES client creation date, e.g.:
-   * {
-   *   'https:': {
-   *     data: (1661863534353 => dataAgentInstance1, 1661863564280 => dataAgentInstance2)
-   *     monitoring: (1661863651758 => monitoringAgentInstance1)
-   *   }
-   * }
+   * Store Agent instances by type and protocol, e.g.:
    *
-   * Note that:
-   * - a new ES Client will be creating a new Cluster.
-   * - a Cluster will be creating a new ConnectionPool.
-   * - a ConnectionPool creates a bunch of HttpConnections (one per ES node).
-   * Even if we could reuse the Agent, new connections would established anyway,
-   * and the pool would not rely in the existing ones.
+   * data: {
+   *   'http:': [agentInstance1, agentInstance2],
+   *   'https:': [agentInstance3, agentInstance4]
+   * },
+   * monitoring: {
+   *   'http:': [],
+   *   'https:': [agentInstance5]
+   * }
    */
-  private agentStore: Record<string, Record<string, Map<number, NetworkAgent>>>;
+  private agentStore: Record<string, Record<Protocol, Array<NetworkAgent | undefined>>>;
   private logger: Logger;
 
   constructor(
     logger: Logger,
-    private defaultAgentConfig: HttpAgentOptions = {
+    private defaultConfig: HttpAgentOptions = {
       keepAlive: true,
       keepAliveMsecs: 50000,
       maxSockets: 256,
@@ -46,10 +56,7 @@ export class AgentManager {
     }
   ) {
     this.logger = logger;
-    this.agentStore = {
-      'http:': {},
-      'https:': {},
-    };
+    this.agentStore = {};
   }
 
   public getAgentFactory(
@@ -61,57 +68,93 @@ export class AgentManager {
       return agentOptions;
     }
 
-    const createdAt = Date.now();
-    const validAgentConfig = assertValidAgentConfig(agentOptions);
+    const agentConfig = assertValidAgentConfig(agentOptions);
+
+    // a given agent factory (of a given type) always provides the same Agent instances (for the same protocol)
+    // we keep the indexes for each protocol, so that we can access them later on, when the factory is invoked
+    const { httpInstanceIndex, httpsInstanceIndex } = this.initTypeStore(type);
 
     return (connectionOpts: ConnectionOptions): NetworkAgent => {
-      const agentsByType = this.agentStore[connectionOpts.url.protocol];
+      const agents = this.getAgentInstances(type, connectionOpts);
 
-      if (!agentsByType) {
-        throw new Error(`Unsupported protocol: '${connectionOpts.url.protocol}'`);
+      // when the factory is called for a given connection (and protocol), we use the appropriate index
+      const agentIndex = isHttps(connectionOpts) ? httpsInstanceIndex : httpInstanceIndex;
+
+      let agent = agents[agentIndex];
+
+      if (!agent) {
+        agent = this.createAgent(agentConfig, connectionOpts);
+
+        // Allow GC'ing the Agent after it has been terminated
+        const doDestroy = agent.destroy.bind(agent);
+        agent.destroy = () => {
+          doDestroy();
+          agents[agentIndex] = undefined;
+        };
+
+        // add the new Agent instance to the list of instances of that type
+        agents[agentIndex] = agent;
       }
-
-      let agentInstances = agentsByType[type];
-      const firstOfType = !agentInstances;
-
-      if (firstOfType) {
-        agentInstances = new Map();
-        agentsByType[type] = agentInstances;
-      }
-
-      const currentAgentConfig = Object.assign(
-        {},
-        this.defaultAgentConfig,
-        validAgentConfig,
-        connectionOpts.tls
-      );
-
-      const agentTuple = agentInstances.get(createdAt);
-
-      if (agentTuple) {
-        return agentTuple;
-      }
-
-      // we did NOT find an agent for the same protocol, type and Client instance => create one
-      if (!firstOfType) {
-        this.logger.warn(
-          `Requesting HTTP Agent of type ${type} for a new ES Client.
-          This is not optimal since the existing instance cannot be reused.
-          Please consider reusing the existing ES Client instance instead`
-        );
-      }
-      const agent =
-        connectionOpts.url.protocol === 'http:'
-          ? new HttpAgent(currentAgentConfig)
-          : new HttpsAgent(currentAgentConfig);
-
-      // add the new Agent instance (createdAt => instance) to the Map of instances of that type
-      agentInstances.set(createdAt, agent);
 
       return agent;
     };
   }
+
+  private initTypeStore(type: string): { httpInstanceIndex: number; httpsInstanceIndex: number } {
+    let agentsOfType = this.agentStore[type];
+
+    if (!agentsOfType) {
+      agentsOfType = {
+        [HTTP]: [],
+        [HTTPS]: [],
+      };
+
+      this.agentStore[type] = agentsOfType;
+    } else {
+      this.logger.warn(
+        `An Agent factory for type ${type} has already been retrieved.
+        This is not optimal since the existing instance cannot be reused.
+        Please consider reusing the previously retrieved factory instead`
+      );
+    }
+
+    const httpInstanceIndex = agentsOfType[HTTP].length;
+    const httpsInstanceIndex = agentsOfType[HTTPS].length;
+
+    agentsOfType[HTTP].push(undefined);
+    agentsOfType[HTTPS].push(undefined);
+    return { httpInstanceIndex, httpsInstanceIndex };
+  }
+
+  private getAgentInstances(
+    type: string,
+    connectionOpts: ConnectionOptions
+  ): Array<NetworkAgent | undefined> {
+    let protocol: Protocol;
+
+    switch (connectionOpts.url.protocol) {
+      case 'http:':
+        protocol = HTTP;
+        break;
+      case 'https:':
+        protocol = HTTPS;
+        break;
+      default:
+        throw new Error(`Unsupported protocol: '${connectionOpts.url.protocol}'`);
+    }
+
+    return this.agentStore[type][protocol];
+  }
+
+  private createAgent(agentConfig: HttpAgentOptions, connectionOpts: ConnectionOptions) {
+    const config = Object.assign({}, this.defaultConfig, agentConfig, connectionOpts.tls);
+    return isHttps(connectionOpts) ? new HttpsAgent(config) : new HttpAgent(config);
+  }
 }
+
+const isHttps = (connectionOpts: ConnectionOptions): boolean => {
+  return connectionOpts.url.protocol === HTTPS;
+};
 
 const assertValidAgentConfig = (
   agentOptions?: HttpAgentOptions | UndiciAgentOptions | false
