@@ -43,7 +43,15 @@ const baseColumns: Array<
   },
   {
     columnHeaderType: defaultColumnHeaderType,
+    id: 'host.risk.calculated_level',
+  },
+  {
+    columnHeaderType: defaultColumnHeaderType,
     id: 'user.name',
+  },
+  {
+    columnHeaderType: defaultColumnHeaderType,
+    id: 'user.risk.calculated_level',
   },
   {
     columnHeaderType: defaultColumnHeaderType,
