@@ -30,22 +30,21 @@ export const ActionStatusCallout: React.FunctionComponent<{ refreshActionStatus:
   }, [refreshActionStatus, refreshActions]);
 
   const actionNames: { [key: string]: string } = {
-    POLICY_REASSIGN: 'Reassign',
-    UPGRADE: 'Upgrade',
-    UNENROLL: 'Unenroll',
-    CANCEL: 'Cancel',
-    ACTION: 'Action',
+    POLICY_REASSIGN: 'reassigned',
+    UPGRADE: 'upgraded',
+    UNENROLL: 'unenrolled',
+    CANCEL: 'cancelled',
+    ACTION: 'actioned',
   };
 
   const calloutTitle = (currentAction: CurrentAction) => (
     <FormattedMessage
       id="xpack.fleet.currentAction.calloutTitle"
-      defaultMessage="{type} {status}, {nbAgentsActioned} actioned, {nbAgentsActionCreated} started, {nbAgentsAck} acknowledged, actionId: {actionId}"
+      defaultMessage="{nbAgentsAck} of {nbAgentsActioned} {type}, status: {status}, actionId: {actionId}"
       values={{
         status: currentAction.status,
         type: actionNames[currentAction.type ?? 'ACTION'],
         nbAgentsActioned: currentAction.nbAgentsActioned,
-        nbAgentsActionCreated: currentAction.nbAgentsActionCreated,
         nbAgentsAck: currentAction.nbAgentsAck,
         actionId: currentAction.actionId,
       }}

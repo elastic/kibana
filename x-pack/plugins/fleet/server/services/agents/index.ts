@@ -18,3 +18,4 @@ export * from './action_status';
 export { AgentServiceImpl } from './agent_service';
 export type { AgentClient, AgentService } from './agent_service';
 export { BulkActionsResolver } from './bulk_actions_resolver';
+export { getCurrentBulkUpgrades } from './current_upgrades';
