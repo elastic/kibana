@@ -246,9 +246,6 @@
           "id": "kibCorePluginApi"
         },
         {
-          "id": "kibCoreChromePluginApi"
-        },
-        {
           "id": "kibFieldFormatsPluginApi"
         },
         {
