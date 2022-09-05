@@ -49,7 +49,7 @@ const emptyValue = getEmptyValue();
 const getCommand = (command: ResponseActions): Exclude<ResponseActions, 'unisolate'> | 'release' =>
   command === 'unisolate' ? 'release' : command;
 
-const getActionStatus = (status: ActionDetails['status']): string => {
+const getActionStatus = (status: ResponseActionStatus): string => {
   if (status === 'failed') {
     return UX_MESSAGES.badge.failed;
   } else if (status === 'completed') {
@@ -175,6 +175,14 @@ export const ResponseActionsLog = memo<
         ...prevState,
         statuses: selectedStatuses as ResponseActionStatus[],
       }));
+    },
+    [setQueryParams]
+  );
+
+  // handle on change actions filter
+  const onChangeStatusesFilter = useCallback(
+    (selectedStatuses: string[]) => {
+      setQueryParams((prevState) => ({ ...prevState, statuses: selectedStatuses }));
     },
     [setQueryParams]
   );
