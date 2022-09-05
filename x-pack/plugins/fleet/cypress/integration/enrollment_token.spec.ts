@@ -6,14 +6,24 @@
  */
 
 import { FLEET, navigateTo } from '../tasks/navigation';
-import { createAgentPolicy } from '../tasks/fleet';
 import { cleanupAgentPolicies } from '../tasks/cleanup';
 import { ENROLLMENT_TOKENS_TAB, ENROLLMENT_TOKENS } from '../screens/fleet';
 
-describe('Home page', () => {
+describe('Enrollment token page', () => {
   before(() => {
     navigateTo(FLEET);
-    createAgentPolicy();
+    cy.request({
+      method: 'POST',
+      url: '/api/fleet/agent_policies',
+      body: {
+        name: 'Agent policy 1',
+        namespace: 'default',
+        description: '',
+        monitoring_enabled: ['logs', 'metrics'],
+        id: 'agent-policy-1',
+      },
+      headers: { 'kbn-xsrf': 'cypress' },
+    });
     cy.getBySel(ENROLLMENT_TOKENS_TAB).click();
   });
 
