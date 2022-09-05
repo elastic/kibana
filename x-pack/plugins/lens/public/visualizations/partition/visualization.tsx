@@ -160,17 +160,14 @@ export const getPieVisualization = ({
         case 'mosaic':
           return {
             ...primaryGroupConfigBaseProps,
-            groupLabel: i18n.translate('xpack.lens.pie.horizontalAxisLabel', {
-              defaultMessage: 'Horizontal axis',
+            groupLabel: i18n.translate('xpack.lens.pie.verticalAxisLabel', {
+              defaultMessage: 'Vertical axis',
             }),
-            dimensionEditorGroupLabel: i18n.translate(
-              'xpack.lens.pie.horizontalAxisDimensionLabel',
-              {
-                defaultMessage: 'Horizontal axis',
-              }
-            ),
+            dimensionEditorGroupLabel: i18n.translate('xpack.lens.pie.verticalAxisDimensionLabel', {
+              defaultMessage: 'Vertical axis',
+            }),
             supportsMoreColumns: accessors.length === 0,
-            dataTestSubj: 'lnsPie_horizontalAxisDimensionPanel',
+            dataTestSubj: 'lnsPie_verticalAxisDimensionPanel',
           };
         default:
           return {
@@ -205,14 +202,17 @@ export const getPieVisualization = ({
         case 'mosaic':
           return {
             ...secondaryGroupConfigBaseProps,
-            groupLabel: i18n.translate('xpack.lens.pie.verticalAxisLabel', {
-              defaultMessage: 'Vertical axis',
+            groupLabel: i18n.translate('xpack.lens.pie.horizontalAxisLabel', {
+              defaultMessage: 'Horizontal axis',
             }),
-            dimensionEditorGroupLabel: i18n.translate('xpack.lens.pie.verticalAxisDimensionLabel', {
-              defaultMessage: 'Vertical axis',
-            }),
+            dimensionEditorGroupLabel: i18n.translate(
+              'xpack.lens.pie.horizontalAxisDimensionLabel',
+              {
+                defaultMessage: 'Horizontal axis',
+              }
+            ),
             supportsMoreColumns: accessors.length === 0,
-            dataTestSubj: 'lnsPie_verticalAxisDimensionPanel',
+            dataTestSubj: 'lnsPie_horizontalAxisDimensionPanel',
           };
         default:
           return undefined;
