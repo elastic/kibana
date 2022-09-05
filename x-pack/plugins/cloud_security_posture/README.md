@@ -42,12 +42,6 @@ node scripts/register_git_hook
 ### Running unit tests
 
 Our [unit tests](https://docs.elastic.dev/kibana-dev-docs/tutorials/testing-plugins#unit-testing) are written using [jest](https://jestjs.io/) framework.
-Jest provides you a fast and easy test framework that allow you to run test in parallel, collect code coverage
-information and create mocks for any object inside/outside your test scope.
-
-Jest runs all tests that found in any file within a `__tests__` directory or any file that matches `**/*.test.{js,mjs,ts,tsx}`.
-
-
 
 As a convention, we use the `.test.ts` suffix for all our tests.
 
