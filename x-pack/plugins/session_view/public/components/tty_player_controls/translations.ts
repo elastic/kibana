@@ -29,3 +29,7 @@ export const TTY_NEXT = i18n.translate('xpack.sessionView.ttyNext', {
 export const TTY_END = i18n.translate('xpack.sessionView.ttyEnd', {
   defaultMessage: 'End',
 });
+
+export const VIEW_IN_SESSION = i18n.translate('xpack.sessionView.ttyViewInSession', {
+  defaultMessage: 'View in session',
+});
