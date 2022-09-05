@@ -143,6 +143,27 @@ describe('DatatableComponent', () => {
     ).toMatchSnapshot();
   });
 
+  test('it renders custom row height if set to another value than 1', () => {
+    const { data, args } = sampleArgs();
+
+    expect(
+      shallow(
+        <DatatableComponent
+          data={data}
+          args={{ ...args, rowHeightLines: 5 }}
+          formatFactory={(x) => x as unknown as IFieldFormat}
+          dispatchEvent={onDispatchEvent}
+          getType={jest.fn()}
+          paletteService={chartPluginMock.createPaletteRegistry()}
+          uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
+          renderMode="edit"
+          interactive
+          renderComplete={renderComplete}
+        />
+      )
+    ).toMatchSnapshot();
+  });
+
   test('it should render hide, reset, and sort actions on header even when it is in read only mode', () => {
     const { data, args } = sampleArgs();
 

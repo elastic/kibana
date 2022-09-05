@@ -14,7 +14,8 @@ export default function ({ getService }: FtrProviderContext) {
   const chance = new Chance();
   const kibanaServer = getService('kibanaServer');
 
-  describe('POST /internal/cloud_security_posture/update_rules_config', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/139683
+  describe.skip('POST /internal/cloud_security_posture/update_rules_config', () => {
     let agentPolicyId: string;
 
     before(async () => {
