@@ -18,6 +18,7 @@ import type { PackagePolicyServiceInterface } from '@kbn/fleet-plugin/server';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { unset } from 'lodash';
 import produce from 'immer';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { createCspRuleSearchFilterByPackagePolicy } from '../../../common/utils/helpers';
 import type { CspRule, CspRulesConfiguration } from '../../../common/schemas';
 import {
@@ -25,7 +26,6 @@ import {
   UPDATE_RULES_CONFIG_ROUTE_PATH,
 } from '../../../common/constants';
 import type { CspApiRequestHandlerContext, CspRouter, CspRequestHandler } from '../../types';
-import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 export type UpdateRulesConfigBodySchema = TypeOf<typeof updateRulesConfigurationBodySchema>;
 
