@@ -6,9 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { METRIC_TYPES } from '@kbn/data-plugin/common';
+import { IAggConfig, METRIC_TYPES } from '@kbn/data-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { Operations } from '../../constants';
-import { createColumn } from './column';
+import { createColumn, createColumnFromCustomAgg } from './column';
 import { SupportedMetric } from './supported_metrics';
 import { CommonColumnConverterArgs, MetricsWithField } from './types';
 import { SchemaConfig } from '../../../types';
@@ -41,7 +42,7 @@ const SUPPORTED_METRICS_AGGS_WITHOUT_PARAMS: MetricAggregationWithoutParams[] = 
   Operations.STANDARD_DEVIATION,
 ];
 
-type MetricAggregationColumnWithoutSpecialParams =
+export type MetricAggregationColumnWithoutSpecialParams =
   | AvgColumn
   | CountColumn
   | CardinalityColumn
@@ -104,5 +105,35 @@ export const convertMetricAggregationColumnWithoutSpecialParams = (
         },
       }),
     },
+  } as MetricAggregationColumnWithoutSpecialParams;
+};
+
+export const convertСustomMetricAggregationColumnWithoutSpecialParams = (
+  aggregation: SupportedMetric,
+  { agg, dataView }: { agg: IAggConfig; dataView: DataView },
+  reducedTimeRange?: string
+): MetricAggregationColumnWithoutSpecialParams | null => {
+  if (!isSupportedAggregationWithoutParams(aggregation.name)) {
+    return null;
+  }
+
+  let sourceField;
+
+  if (agg) {
+    sourceField = agg.params?.field ?? 'document';
+  }
+
+  const field = dataView.getFieldByName(sourceField);
+  if (!field && aggregation.isFieldRequired) {
+    return null;
+  }
+
+  return {
+    operationType: aggregation.name,
+    sourceField,
+    ...createColumnFromCustomAgg(agg, field, {
+      reducedTimeRange,
+    }),
+    params: {},
   } as MetricAggregationColumnWithoutSpecialParams;
 };

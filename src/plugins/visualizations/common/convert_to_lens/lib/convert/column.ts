@@ -8,6 +8,7 @@
 
 import uuid from 'uuid';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
+import { IAggConfig } from '@kbn/data-plugin/common';
 import { DataType } from '../../types';
 import { SchemaConfig, SupportedAggregation } from '../../../types';
 import { AggId, ExtraColumnFields, GeneralColumnWithMeta } from './types';
@@ -29,6 +30,27 @@ export const createColumn = <T extends SupportedAggregation>(
     columnId: uuid(),
     dataType: (field?.type as DataType) ?? undefined,
     label,
+    isBucketed,
+    isSplit,
+    reducedTimeRange,
+    // timeShift, //TODO: do it later
+    meta: { aggId },
+  };
+};
+
+export const createAggregationIdFromCustomAgg = (agg: IAggConfig): AggId =>
+  `${agg.type.dslName}.${0}`;
+
+export const createColumnFromCustomAgg = (
+  agg: IAggConfig,
+  field?: DataViewField,
+  { isBucketed = false, isSplit = false, reducedTimeRange }: ExtraColumnFields = {}
+): GeneralColumnWithMeta => {
+  const aggId = createAggregationIdFromCustomAgg(agg);
+  return {
+    columnId: uuid(),
+    dataType: (field?.type as DataType) ?? undefined,
+    label: field?.displayName,
     isBucketed,
     isSplit,
     reducedTimeRange,

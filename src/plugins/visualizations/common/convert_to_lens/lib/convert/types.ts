@@ -42,7 +42,7 @@ export interface CommonColumnConverterArgs<
   dataView: DataView;
 }
 
-export type AggId = `${SupportedAggregation}.${number}`;
+export type AggId = `${string}.${number}`;
 
 export interface Meta {
   aggId: AggId;
