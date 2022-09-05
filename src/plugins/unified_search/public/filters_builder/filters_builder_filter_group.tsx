@@ -32,6 +32,10 @@ export interface FilterGroupProps {
   reverseBackground?: boolean;
 }
 
+const boderPadding = css`
+  padding: 14px;
+`;
+
 const OrDelimiter = () => (
   <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
     <EuiFlexItem grow={1} style={{ marginLeft: '-10px', flexGrow: 0.12 }}>
@@ -50,10 +54,15 @@ const OrDelimiter = () => (
   </EuiFlexGroup>
 );
 
+const marginAndDelimiter = css`
+  margin: 4px;
+  block-size: 0px;
+`;
+
 const AndDelimiter = () => (
   <EuiFlexGroup>
     <EuiFlexItem grow={false}>
-      <EuiHorizontalRule style={{ margin: '4px', blockSize: '0px' }} />
+      <EuiHorizontalRule className={marginAndDelimiter} />
     </EuiFlexItem>
   </EuiFlexGroup>
 );
@@ -91,7 +100,7 @@ export const FilterGroup = ({
   const shouldDrawBorder = (filter: Filter) => Array.isArray(filter) || isOrFilter(filter);
 
   return (
-    <EuiPanel color={color} hasShadow={false} style={{ padding: '14px' }} paddingSize="m">
+    <EuiPanel color={color} hasShadow={false} className={boderPadding}>
       {filters.map((filter, index, acc) => (
         <EuiFlexGroup direction="column" gutterSize="none">
           <EuiFlexItem
