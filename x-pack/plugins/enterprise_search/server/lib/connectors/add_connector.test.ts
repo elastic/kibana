@@ -60,6 +60,7 @@ describe('addConnector lib function', () => {
     await expect(
       addConnector(mockClient as unknown as IScopedClusterClient, {
         index_name: 'index_name',
+        is_native: false,
         language: 'fr',
       })
     ).resolves.toEqual({ id: 'fakeId', index_name: 'index_name' });
@@ -68,6 +69,7 @@ describe('addConnector lib function', () => {
         api_key_id: null,
         configuration: {},
         index_name: 'index_name',
+        is_native: false,
         language: 'fr',
         last_seen: null,
         last_sync_error: null,
@@ -98,6 +100,7 @@ describe('addConnector lib function', () => {
     await expect(
       addConnector(mockClient as unknown as IScopedClusterClient, {
         index_name: 'index_name',
+        is_native: true,
         language: 'en',
       })
     ).rejects.toEqual(new Error(ErrorCode.INDEX_ALREADY_EXISTS));
@@ -115,6 +118,7 @@ describe('addConnector lib function', () => {
     await expect(
       addConnector(mockClient as unknown as IScopedClusterClient, {
         index_name: 'index_name',
+        is_native: false,
         language: 'en',
       })
     ).rejects.toEqual(new Error(ErrorCode.CONNECTOR_DOCUMENT_ALREADY_EXISTS));
@@ -132,6 +136,7 @@ describe('addConnector lib function', () => {
     await expect(
       addConnector(mockClient as unknown as IScopedClusterClient, {
         index_name: 'index_name',
+        is_native: false,
         language: 'en',
       })
     ).rejects.toEqual(new Error(ErrorCode.CRAWLER_ALREADY_EXISTS));
@@ -149,6 +154,7 @@ describe('addConnector lib function', () => {
     await expect(
       addConnector(mockClient as unknown as IScopedClusterClient, {
         index_name: 'index_name',
+        is_native: true,
         language: 'en',
       })
     ).rejects.toEqual(new Error(ErrorCode.INDEX_ALREADY_EXISTS));
@@ -167,6 +173,7 @@ describe('addConnector lib function', () => {
       addConnector(mockClient as unknown as IScopedClusterClient, {
         delete_existing_connector: true,
         index_name: 'index_name',
+        is_native: true,
         language: null,
       })
     ).resolves.toEqual({ id: 'fakeId', index_name: 'index_name' });
@@ -179,6 +186,7 @@ describe('addConnector lib function', () => {
         api_key_id: null,
         configuration: {},
         index_name: 'index_name',
+        is_native: true,
         language: null,
         last_seen: null,
         last_sync_error: null,
@@ -207,6 +215,7 @@ describe('addConnector lib function', () => {
     await expect(
       addConnector(mockClient as unknown as IScopedClusterClient, {
         index_name: 'search-index_name',
+        is_native: false,
         language: 'en',
       })
     ).resolves.toEqual({ id: 'fakeId', index_name: 'search-index_name' });
@@ -216,6 +225,7 @@ describe('addConnector lib function', () => {
         api_key_id: null,
         configuration: {},
         index_name: 'search-index_name',
+        is_native: false,
         language: 'en',
         last_seen: null,
         last_sync_error: null,
