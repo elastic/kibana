@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import type { HttpStart, OverlayStart } from '@kbn/core/public';
+import type { HttpStart, OverlayStart, ThemeServiceStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { withSuspense } from '@kbn/shared-ux-utility';
 import type { TelemetryConstants } from '../..';
@@ -15,13 +15,16 @@ import type { TelemetryConstants } from '../..';
 interface RenderBannerConfig {
   http: HttpStart;
   overlays: OverlayStart;
+  theme: ThemeServiceStart;
   onSeen: () => void;
   telemetryConstants: TelemetryConstants;
 }
+
 export function renderOptedInNoticeBanner({
   onSeen,
   overlays,
   http,
+  theme,
   telemetryConstants,
 }: RenderBannerConfig) {
   const OptedInNoticeBannerLazy = withSuspense(
@@ -36,7 +39,8 @@ export function renderOptedInNoticeBanner({
       onSeenBanner={onSeen}
       http={http}
       telemetryConstants={telemetryConstants}
-    />
+    />,
+    { theme$: theme.theme$ }
   );
   const bannerId = overlays.banners.add(mount, 10000);
 
