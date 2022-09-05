@@ -19,7 +19,19 @@ jest.mock('react-router-dom', () => ({
 
 jest.mock('../../../../containers/metrics_source', () => ({
   useSourceContext: () => ({
-    createDerivedIndexPattern: () => 'jestbeat-*',
+    source: {
+      id: 'default',
+      configuration: {
+        metricAlias: 'metrics-*',
+      },
+    },
+  }),
+}));
+
+jest.mock('../../../../hooks/use_derived_data_view', () => ({
+  useDerivedDataView: (indexPattern?: string) => ({
+    fields: [],
+    title: indexPattern || 'unknown',
   }),
 }));
 

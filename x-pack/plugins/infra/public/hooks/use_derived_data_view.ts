@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useEffect, useMemo, useState } from 'react';
 import {
   getIndexFieldsRequestParamsRT,
@@ -14,6 +13,7 @@ import {
 } from '../../common/http_api/index_fields';
 import { decodeOrThrow } from '../../common/runtime_types';
 import { useTrackedPromise } from '../utils/use_tracked_promise';
+import { useKibanaContextForPlugin } from './use_kibana';
 
 export interface DerivedDataView {
   title: string;
@@ -70,7 +70,7 @@ export const useDerivedDataView = (indexPattern?: string): DerivedDataView => {
 };
 
 function useKibanaFetch() {
-  const kibana = useKibana();
+  const kibana = useKibanaContextForPlugin();
   const fetch = kibana.services.http?.fetch;
 
   if (!fetch) {

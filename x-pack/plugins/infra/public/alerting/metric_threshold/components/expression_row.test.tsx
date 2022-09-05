@@ -15,7 +15,6 @@ import { ExpressionRow } from './expression_row';
 jest.mock('../../../containers/metrics_source/use_source_via_http', () => ({
   useSourceViaHttp: () => ({
     source: { id: 'default' },
-    createDerivedIndexPattern: () => ({ fields: [], title: 'metricbeat-*' }),
   }),
 }));
 

@@ -17,8 +17,19 @@ import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 
 jest.mock('../../../containers/metrics_source/use_source_via_http', () => ({
   useSourceViaHttp: () => ({
-    source: { id: 'default' },
-    createDerivedIndexPattern: () => ({ fields: [], title: 'metricbeat-*' }),
+    source: {
+      id: 'default',
+      configuration: {
+        metricAlias: 'metrics-*',
+      },
+    },
+  }),
+}));
+
+jest.mock('../../../hooks/use_derived_data_view', () => ({
+  useDerivedDataView: (indexPattern?: string) => ({
+    fields: [],
+    title: indexPattern || 'unknown',
   }),
 }));
 
