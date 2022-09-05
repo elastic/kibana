@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useContext, useMemo } from 'react';
+import React, { useCallback, useContext } from 'react';
 import {
   EuiButtonIcon,
   EuiDraggable,
@@ -16,7 +16,6 @@ import {
   EuiFormRow,
   EuiIcon,
   EuiPanel,
-  useEuiPaddingSize,
 } from '@elastic/eui';
 import { buildEmptyFilter, FieldFilter, Filter, getFilterParams } from '@kbn/es-query';
 import { DataViewField } from '@kbn/data-views-plugin/common';
@@ -84,16 +83,6 @@ export function FilterItem({
     operator = getOperatorFromFilter(filter);
     params = getFilterParams(filter);
   }
-
-  const sPadding = useEuiPaddingSize('s');
-
-  const containerStyles = useMemo(
-    () =>
-      css`
-        margin: ${sPadding};
-      `,
-    [sPadding]
-  );
 
   const onHandleField = useCallback(
     (selectedField: DataViewField) => {
@@ -166,7 +155,7 @@ export function FilterItem({
   }
 
   return (
-    <div className={containerStyles}>
+    <>
       {conditionalOperationType ? (
         <FilterGroup
           path={path}
@@ -313,6 +302,6 @@ export function FilterItem({
           </EuiDraggable>
         </EuiDroppable>
       )}
-    </div>
+    </>
   );
 }
