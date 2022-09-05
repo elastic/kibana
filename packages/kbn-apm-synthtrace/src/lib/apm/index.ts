@@ -7,7 +7,6 @@
  */
 import { service } from './service';
 import { browser } from './browser';
-import { trace } from './trace';
 import { getTransactionMetrics } from './processors/get_transaction_metrics';
 import { getSpanDestinationMetrics } from './processors/get_span_destination_metrics';
 import { getChromeUserAgentDefaults } from './defaults/get_chrome_user_agent_defaults';
@@ -19,7 +18,6 @@ import { ApmSynthtraceKibanaClient } from './client/apm_synthtrace_kibana_client
 import type { ApmException } from './apm_fields';
 
 export const apm = {
-  trace,
   service,
   browser,
   getTransactionMetrics,

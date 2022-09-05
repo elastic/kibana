@@ -12,6 +12,7 @@ import { Scenario } from '../cli/scenario';
 
 import { RunOptions } from '../cli/utils/parse_run_cli_flags';
 import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
+import { httpExitSpan } from '../lib/apm/span';
 
 const ENVIRONMENT = getSynthtraceEnvironment(__filename);
 
@@ -37,10 +38,12 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
           .children(
             // opbeans-rum -> opbeans-node
             opbeansRum
-              .httpExitSpan({
-                spanName: 'GET /api/products/top',
-                destination: 'http://opbeans-node:3000',
-              })
+              .span(
+                ...httpExitSpan({
+                  spanName: 'GET /api/products/top',
+                  destinationUrl: 'http://opbeans-node:3000',
+                })
+              )
               .duration(300)
               .timestamp(timestamp)
 
@@ -53,10 +56,12 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
                   .children(
                     opbeansNode
                       // opbeans-node -> opbeans-go
-                      .httpExitSpan({
-                        spanName: 'GET opbeans-go:3000',
-                        destination: 'http://opbeans-go:3000',
-                      })
+                      .span(
+                        ...httpExitSpan({
+                          spanName: 'GET opbeans-go:3000',
+                          destinationUrl: 'http://opbeans-go:3000',
+                        })
+                      )
                       .timestamp(timestamp)
                       .duration(400)
 
