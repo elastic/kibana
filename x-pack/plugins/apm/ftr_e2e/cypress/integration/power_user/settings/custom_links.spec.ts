@@ -19,21 +19,21 @@ const deleteCustomLink = () => {
     },
     auth: { user: 'editor', pass: 'changeme' },
   }).then((response) => {
-    const customLinkId =
-      response.body.customLinks.length > 0 && response.body.customLinks[0].id;
-    if (customLinkId) {
-      cy.request({
-        log: false,
-        method: 'DELETE',
-        url: `${kibanaUrl}/internal/apm/settings/custom_links/${customLinkId}`,
-        body: {},
-        headers: {
-          'kbn-xsrf': 'e2e_test',
-        },
-        auth: { user: 'editor', pass: 'changeme' },
-        failOnStatusCode: false,
-      });
-    }
+    response.body.customLinks.map((item: any) => {
+      if (item.id) {
+        cy.request({
+          log: false,
+          method: 'DELETE',
+          url: `${kibanaUrl}/internal/apm/settings/custom_links/${item.id}`,
+          body: {},
+          headers: {
+            'kbn-xsrf': 'e2e_test',
+          },
+          auth: { user: 'editor', pass: 'changeme' },
+          failOnStatusCode: false,
+        });
+      }
+    });
   });
 };
 
@@ -62,6 +62,8 @@ describe('Custom links', () => {
     emptyPrompt.should('not.exist');
     cy.contains('foo');
     cy.contains('https://foo.com');
+    cy.get('[data-test-subj="editCustomLink"]').click();
+    cy.contains('Delete').click();
   });
 
   it('clears filter values when field is selected', () => {

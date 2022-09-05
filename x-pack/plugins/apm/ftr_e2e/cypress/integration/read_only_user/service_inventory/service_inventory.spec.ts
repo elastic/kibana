@@ -95,7 +95,7 @@ describe('Service inventory', () => {
 
       cy.get('[data-test-subj="environmentFilter"]').type('production');
 
-      cy.contains('button', 'production').click({ force: true });
+      cy.contains('button', 'production').click();
 
       cy.expectAPIsToHaveBeenCalledWith({
         apisIntercepted: mainAliasNames,
@@ -126,6 +126,8 @@ describe('Service inventory', () => {
 
   describe('Check detailed statistics API with multiple services', () => {
     before(() => {
+      // clean previous data created
+      synthtrace.clean();
       const { rangeFrom, rangeTo } = timeRange;
       synthtrace.index(
         generateMultipleServicesData({
@@ -156,7 +158,7 @@ describe('Service inventory', () => {
       );
       cy.wait('@mainStatisticsRequest');
       cy.contains('Services');
-      cy.get('.euiPagination__list').children().should('have.length', 6);
+      cy.get('.euiPagination__list').children().should('have.length', 5);
       cy.wait('@detailedStatisticsRequest').then((payload) => {
         expect(payload.request.body.serviceNames).eql(
           JSON.stringify([
