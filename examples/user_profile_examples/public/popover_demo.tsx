@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import React, { FunctionComponent, useState } from 'react';
-import { EuiButtonEmpty } from '@elastic/eui';
+import { EuiButtonEmpty, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { UserProfilesPopover, UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { PanelWithCodeBlock } from './panel_with_code_block';
 
@@ -57,6 +57,9 @@ export const PopoverDemo: FunctionComponent = () => {
     },
   ];
 
+  const [isOpen2, setIsOpen2] = useState(false);
+  const [selectedOptions2, setSelectedOptions2] = useState<UserProfileWithAvatar[] | null>([]);
+
   return (
     <PanelWithCodeBlock title="Popover" code={code}>
       <UserProfilesPopover
@@ -73,6 +76,31 @@ export const PopoverDemo: FunctionComponent = () => {
           defaultOptions,
           onChange: setSelectedOptions,
           height: 32 * 8,
+        }}
+        panelStyle={{
+          width: 32 * 16,
+        }}
+      />
+      <EuiSpacer size="l" />
+      <EuiTitle size="xs">
+        <h3>Unassigned option</h3>
+      </EuiTitle>
+      <EuiSpacer size="s" />
+      <UserProfilesPopover
+        button={
+          <EuiButtonEmpty iconType="userAvatar" onClick={() => setIsOpen2((value) => !value)}>
+            Filter by assignee
+          </EuiButtonEmpty>
+        }
+        isOpen={isOpen2}
+        closePopover={() => setIsOpen2(false)}
+        selectableProps={{
+          selectedOptions: selectedOptions2,
+          defaultOptions,
+          onChange: setSelectedOptions2,
+          height: 32 * 8,
+          allowNull: true,
+          nullOptionLabel: 'Unassigned',
         }}
         panelStyle={{
           width: 32 * 16,
