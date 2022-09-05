@@ -43,7 +43,7 @@ describe('Enrollment token page', () => {
   it('Delete Token', () => {
     cy.visit('app/fleet/enrollment-tokens');
     cy.getBySel(ENROLLMENT_TOKENS.LIST_TABLE).find('tr').should('have.length', 2);
-    cy.getBySel(ENROLLMENT_TOKENS.TABLE_REVOKE_BTN).click();
+    cy.getBySel(ENROLLMENT_TOKENS.TABLE_REVOKE_BTN).first().click();
     cy.get('.euiPanel').contains('Are you sure you want to revoke');
     cy.get('.euiButton').contains('Revoke enrollment token').click({ force: true });
 
