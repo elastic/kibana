@@ -30,7 +30,7 @@ interface ScheduleItemProps {
   isDisabled: boolean;
   minimumValue?: number;
   timeTypes?: string[];
-  fullWidth: boolean;
+  fullWidth?: boolean;
 }
 
 const timeTypeOptions = [
