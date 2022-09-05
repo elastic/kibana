@@ -43,6 +43,8 @@ export enum RawIndicatorFieldId {
   MacAddress = 'threat.indicator.mac',
   TimeStamp = '@timestamp',
   Id = '_id',
+  Name = 'threat.indicator.name',
+  NameOrigin = 'threat.indicator.name_origin',
 }
 
 /**
@@ -73,136 +75,7 @@ export const generateMockIndicator = (): Indicator => {
 
   indicator.fields['threat.indicator.type'] = ['ipv4-addr'];
   indicator.fields['threat.indicator.ip'] = ['12.68.554.87'];
-
-  return indicator;
-};
-
-export const generateMockIpIndicator = generateMockIndicator;
-
-export const generateMockUrlIndicator = (): Indicator => {
-  const indicator = generateMockBaseIndicator();
-
-  indicator.fields['threat.indicator.type'] = ['url'];
-  indicator.fields['threat.indicator.url.original'] = ['https://google.com'];
-
-  return indicator;
-};
-
-export const generateMockFileIndicator = (): Indicator => {
-  const indicator = generateMockBaseIndicator();
-
-  indicator.fields['threat.indicator.type'] = ['file'];
-  indicator.fields['threat.indicator.file.hash.sha256'] = ['sample_sha256_hash'];
-  indicator.fields['threat.indicator.file.hash.md5'] = ['sample_md5_hash'];
-  indicator.fields['threat.indicator.file.hash.sha1'] = ['sample_sha1_hash'];
-
-  return indicator;
-};
-
-export const generateMockFileMd5Indicator = (): Indicator => {
-  const indicator = generateMockBaseIndicator();
-
-  indicator.fields['threat.indicator.type'] = ['file'];
-  indicator.fields['threat.indicator.file.hash.md5'] = ['sample_md5_hash'];
-  indicator.fields['threat.indicator.file.hash.sha1'] = ['sample_sha1_hash'];
-
-  return indicator;
-};
-
-export const generateMockEmailAddrIndicator = (): Indicator => {
-  const indicator = generateMockBaseIndicator();
-
-  indicator.fields['threat.indicator.type'] = ['email-addr'];
-  indicator.fields['threat.indicator.email.address'] = ['sample@example.com'];
-
-  return indicator;
-};
-
-export const generateMockDomainIndicator = (): Indicator => {
-  const indicator = generateMockBaseIndicator();
-
-  indicator.fields['threat.indicator.type'] = ['domain'];
-  indicator.fields['threat.indicator.url.domain'] = ['google.com'];
-
-  return indicator;
-};
-
-export const generateMockDomainNameIndicator = (): Indicator => {
-  const indicator = generateMockBaseIndicator();
-
-  indicator.fields['threat.indicator.type'] = ['domain-name'];
-  indicator.fields['threat.indicator.url.domain'] = ['google.com'];
-
-  return indicator;
-};
-
-export const generateMockX509CertificateIndicator = (): Indicator => {
-  const indicator = generateMockBaseIndicator();
-
-  indicator.fields['threat.indicator.type'] = ['x509-certificate'];
-  indicator.fields['threat.indicator.x509.serial_number'] = ['sample_serial_number'];
-
-  return indicator;
-};
-
-export const generateMockX509SerialIndicator = (): Indicator => {
-  const indicator = generateMockBaseIndicator();
-
-  indicator.fields['threat.indicator.type'] = ['x509 Serial'];
-  indicator.fields['threat.indicator.x509.serial_number'] = ['sample_serial_bla'];
-
-  return indicator;
-};
-
-export const generateMockUnknownIndicator = (): Indicator => {
-  const indicator = generateMockBaseIndicator();
-
-  indicator.fields['threat.indicator.type'] = ['unknown'];
-  indicator.fields._id = ['sample_id'];
-
-  return indicator;
-};
-
-export const generateMockEmailIndicator = (): Indicator => {
-  const indicator = generateMockBaseIndicator();
-
-  indicator.fields['threat.indicator.type'] = ['email'];
-  indicator.fields['threat.indicator.email.address'] = ['sample@example.com'];
-
-  return indicator;
-};
-
-export const generateMockEmailMessageIndicator = (): Indicator => {
-  const indicator = generateMockBaseIndicator();
-
-  indicator.fields['threat.indicator.type'] = ['email-message'];
-
-  return indicator;
-};
-
-export const generateMockWindowsRegistryKeyIndicator = (): Indicator => {
-  const indicator = generateMockBaseIndicator();
-
-  indicator.fields['threat.indicator.type'] = ['windows-registry-key'];
-  indicator.fields['threat.indicator.registry.key'] = ['sample_registry_key'];
-
-  return indicator;
-};
-
-export const generateMockAutonomousSystemIndicator = (): Indicator => {
-  const indicator = generateMockBaseIndicator();
-
-  indicator.fields['threat.indicator.type'] = ['autonomous-system'];
-  indicator.fields['threat.indicator.as.number'] = ['sample_as_number'];
-
-  return indicator;
-};
-
-export const generateMockMacAddressIndicator = (): Indicator => {
-  const indicator = generateMockBaseIndicator();
-
-  indicator.fields['threat.indicator.type'] = ['mac-addr'];
-  indicator.fields['threat.indicator.mac'] = ['sample_mac_address'];
+  indicator.fields['threat.indicator.name'] = ['12.68.554.87'];
 
   return indicator;
 };
