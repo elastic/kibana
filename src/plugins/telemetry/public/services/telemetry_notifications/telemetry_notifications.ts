@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { HttpStart, OverlayStart } from '@kbn/core/public';
+import { HttpStart, OverlayStart, ThemeServiceStart } from '@kbn/core/public';
 import { renderOptedInNoticeBanner } from './render_opted_in_notice_banner';
 import { renderOptInBanner } from './render_opt_in_banner';
 import { TelemetryService } from '../telemetry_service';
@@ -15,6 +15,7 @@ import { TelemetryConstants } from '../..';
 interface TelemetryNotificationsConstructor {
   http: HttpStart;
   overlays: OverlayStart;
+  theme: ThemeServiceStart;
   telemetryService: TelemetryService;
   telemetryConstants: TelemetryConstants;
 }
@@ -25,6 +26,7 @@ interface TelemetryNotificationsConstructor {
 export class TelemetryNotifications {
   private readonly http: HttpStart;
   private readonly overlays: OverlayStart;
+  private readonly theme: ThemeServiceStart;
   private readonly telemetryConstants: TelemetryConstants;
   private readonly telemetryService: TelemetryService;
   private optedInNoticeBannerId?: string;
@@ -33,12 +35,14 @@ export class TelemetryNotifications {
   constructor({
     http,
     overlays,
+    theme,
     telemetryService,
     telemetryConstants,
   }: TelemetryNotificationsConstructor) {
     this.telemetryService = telemetryService;
     this.http = http;
     this.overlays = overlays;
+    this.theme = theme;
     this.telemetryConstants = telemetryConstants;
   }
 
@@ -59,6 +63,7 @@ export class TelemetryNotifications {
       http: this.http,
       onSeen: this.setOptedInNoticeSeen,
       overlays: this.overlays,
+      theme: this.theme,
       telemetryConstants: this.telemetryConstants,
     });
 
