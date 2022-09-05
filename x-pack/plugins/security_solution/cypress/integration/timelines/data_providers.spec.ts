@@ -9,14 +9,24 @@ import {
   TIMELINE_DROPPED_DATA_PROVIDERS,
   TIMELINE_DATA_PROVIDERS_ACTION_MENU,
   TIMELINE_FLYOUT_HEADER,
+  GET_TIMELINE_GRID_CELL,
+  TIMELINE_DATA_PROVIDERS_CONTAINER,
 } from '../../screens/timeline';
 
 import { waitForAllHostsToBeLoaded } from '../../tasks/hosts/all_hosts';
 
 import { login, visit } from '../../tasks/login';
-import { openTimelineUsingToggle } from '../../tasks/security_main';
-import { addDataProvider } from '../../tasks/timeline';
-
+import {
+  addDataProvider,
+  updateDataProviderbyDraggingField,
+  addNameAndDescriptionToTimeline,
+  populateTimeline,
+  waitForTimelineChanges,
+  closeTimeline,
+  createNewTimeline,
+  updateDataProviderByFieldHoverAction,
+} from '../../tasks/timeline';
+import { getTimeline } from '../../objects/timeline';
 import { HOSTS_URL } from '../../urls/navigation';
 import { cleanKibana, scrollToBottom } from '../../tasks/common';
 
@@ -29,11 +39,19 @@ describe('timeline data providers', () => {
     scrollToBottom();
   });
 
+  beforeEach(() => {
+    createNewTimeline();
+    addNameAndDescriptionToTimeline(getTimeline());
+    populateTimeline();
+  });
+
+  afterEach(() => {
+    closeTimeline();
+  });
+
   it('displays the data provider action menu when Enter is pressed', (done) => {
-    openTimelineUsingToggle();
     addDataProvider({ field: 'host.name', operator: 'exists' }).then(() => {
       cy.get(TIMELINE_DATA_PROVIDERS_ACTION_MENU).should('not.exist');
-
       cy.get(`${TIMELINE_FLYOUT_HEADER} ${TIMELINE_DROPPED_DATA_PROVIDERS}`)
         .pipe(($el) => $el.trigger('focus'))
         .should('exist');
@@ -45,5 +63,31 @@ describe('timeline data providers', () => {
       cy.get(TIMELINE_DATA_PROVIDERS_ACTION_MENU).should('exist');
       done();
     });
+  });
+
+  it('persists timeline when data provider is updated by dragging a field from data grid', () => {
+    updateDataProviderbyDraggingField('host.name', 0);
+    waitForTimelineChanges();
+    cy.wait(1000);
+    cy.reload();
+    cy.get(`${GET_TIMELINE_GRID_CELL('host.name')}`)
+      .first()
+      .then((hostname) => {
+        cy.get(TIMELINE_DATA_PROVIDERS_CONTAINER).contains(`host.name: "${hostname.text()}"`);
+      });
+  });
+
+  it('presists timeline when a field is added by hover action "Add To Timeline" in data provider ', () => {
+    updateDataProviderByFieldHoverAction('host.name', 0);
+    waitForTimelineChanges();
+    cy.wait(1000);
+    cy.reload();
+    cy.get(`${GET_TIMELINE_GRID_CELL('host.name')}`)
+      .first()
+      .then((hostname) => {
+        cy.get(TIMELINE_DATA_PROVIDERS_CONTAINER).should((dataProviderContainer) => {
+          expect(dataProviderContainer).to.contain(`host.name: "${hostname.text()}"`);
+        });
+      });
   });
 });
