@@ -5,39 +5,6 @@
     "functions": [
       {
         "parentPluginId": "visTypeXy",
-        "id": "def-public.getAggId",
-        "type": "Function",
-        "tags": [],
-        "label": "getAggId",
-        "description": [
-          "\nGet agg id from accessor\n\nFor now this is determined by the esaggs column name. Could be cleaned up in the future."
-        ],
-        "signature": [
-          "(accessor: string) => string"
-        ],
-        "path": "src/plugins/vis_types/xy/public/config/get_agg_id.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "visTypeXy",
-            "id": "def-public.getAggId.$1",
-            "type": "string",
-            "tags": [],
-            "label": "accessor",
-            "description": [],
-            "signature": [
-              "string"
-            ],
-            "path": "src/plugins/vis_types/xy/public/config/get_agg_id.ts",
-            "deprecated": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "visTypeXy",
         "id": "def-public.getPositions",
         "type": "Function",
         "tags": [],
@@ -824,29 +791,6 @@
         "path": "src/plugins/vis_types/xy/public/types/param.ts",
         "deprecated": false,
         "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "visTypeXy",
-        "id": "def-public.XyVisType",
-        "type": "Type",
-        "tags": [],
-        "label": "XyVisType",
-        "description": [
-          "\nType of xy visualizations"
-        ],
-        "signature": [
-          {
-            "pluginId": "visTypeXy",
-            "scope": "common",
-            "docId": "kibVisTypeXyPluginApi",
-            "section": "def-common.ChartType",
-            "text": "ChartType"
-          },
-          " | \"horizontal_bar\""
-        ],
-        "path": "src/plugins/vis_types/xy/common/index.ts",
-        "deprecated": false,
-        "initialIsOpen": false
       }
     ],
     "objects": [],
@@ -891,31 +835,7 @@
         "initialIsOpen": false
       }
     ],
-    "misc": [
-      {
-        "parentPluginId": "visTypeXy",
-        "id": "def-common.XyVisType",
-        "type": "Type",
-        "tags": [],
-        "label": "XyVisType",
-        "description": [
-          "\nType of xy visualizations"
-        ],
-        "signature": [
-          {
-            "pluginId": "visTypeXy",
-            "scope": "common",
-            "docId": "kibVisTypeXyPluginApi",
-            "section": "def-common.ChartType",
-            "text": "ChartType"
-          },
-          " | \"horizontal_bar\""
-        ],
-        "path": "src/plugins/vis_types/xy/common/index.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      }
-    ],
+    "misc": [],
     "objects": []
   }
 }

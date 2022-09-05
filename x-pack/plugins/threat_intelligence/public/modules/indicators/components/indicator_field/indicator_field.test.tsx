@@ -11,12 +11,10 @@ import { IndicatorField } from './indicator_field';
 import { generateMockIndicator } from '../../../../../common/types/indicator';
 import { EMPTY_VALUE } from '../../../../../common/constants';
 import { TestProvidersComponent } from '../../../../common/mocks/test_providers';
+import { generateFieldTypeMap } from '../../../../common/mocks/mock_field_type_map';
 
 const mockIndicator = generateMockIndicator();
-const mockFieldTypesMap: { [id: string]: string } = {
-  'threat.indicator.ip': 'ip',
-  'threat.indicator.first_seen': 'date',
-};
+const mockFieldTypesMap = generateFieldTypeMap();
 
 describe('<IndicatorField />', () => {
   beforeEach(() => {});

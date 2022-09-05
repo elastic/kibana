@@ -48,7 +48,7 @@ jest.mock('../../../common/containers/sourcerer/use_signal_helpers', () => ({
 jest.mock('react-reverse-portal', () => ({
   InPortal: ({ children }: { children: React.ReactNode }) => <>{children}</>,
   OutPortal: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-  createPortalNode: () => ({ unmount: jest.fn() }),
+  createHtmlPortalNode: () => ({ unmount: jest.fn() }),
 }));
 
 describe('global header', () => {

@@ -248,30 +248,6 @@ describe('test endpoint routes', () => {
             must: [
               {
                 bool: {
-                  filter: [
-                    {
-                      terms: {
-                        'united.agent.policy_id': [],
-                      },
-                    },
-                    {
-                      exists: {
-                        field: 'united.endpoint.agent.id',
-                      },
-                    },
-                    {
-                      exists: {
-                        field: 'united.agent.agent.id',
-                      },
-                    },
-                    {
-                      term: {
-                        'united.agent.active': {
-                          value: true,
-                        },
-                      },
-                    },
-                  ],
                   must_not: {
                     terms: {
                       'agent.id': [
@@ -280,6 +256,12 @@ describe('test endpoint routes', () => {
                       ],
                     },
                   },
+                  filter: [
+                    { terms: { 'united.agent.policy_id': [] } },
+                    { exists: { field: 'united.endpoint.agent.id' } },
+                    { exists: { field: 'united.agent.agent.id' } },
+                    { term: { 'united.agent.active': { value: true } } },
+                  ],
                 },
               },
               {
@@ -290,13 +272,7 @@ describe('test endpoint routes', () => {
                         filter: [
                           {
                             bool: {
-                              should: [
-                                {
-                                  exists: {
-                                    field: 'united.agent.upgrade_started_at',
-                                  },
-                                },
-                              ],
+                              should: [{ exists: { field: 'united.agent.upgrade_started_at' } }],
                               minimum_should_match: 1,
                             },
                           },
@@ -304,13 +280,7 @@ describe('test endpoint routes', () => {
                             bool: {
                               must_not: {
                                 bool: {
-                                  should: [
-                                    {
-                                      exists: {
-                                        field: 'united.agent.upgraded_at',
-                                      },
-                                    },
-                                  ],
+                                  should: [{ exists: { field: 'united.agent.upgraded_at' } }],
                                   minimum_should_match: 1,
                                 },
                               },
@@ -323,13 +293,7 @@ describe('test endpoint routes', () => {
                       bool: {
                         must_not: {
                           bool: {
-                            should: [
-                              {
-                                exists: {
-                                  field: 'united.agent.last_checkin',
-                                },
-                              },
-                            ],
+                            should: [{ exists: { field: 'united.agent.last_checkin' } }],
                             minimum_should_match: 1,
                           },
                         },
@@ -337,14 +301,18 @@ describe('test endpoint routes', () => {
                     },
                     {
                       bool: {
-                        should: [
-                          {
-                            exists: {
-                              field: 'united.agent.unenrollment_started_at',
-                            },
-                          },
-                        ],
+                        should: [{ exists: { field: 'united.agent.unenrollment_started_at' } }],
                         minimum_should_match: 1,
+                      },
+                    },
+                    {
+                      bool: {
+                        must_not: {
+                          bool: {
+                            should: [{ exists: { field: 'united.agent.policy_revision_idx' } }],
+                            minimum_should_match: 1,
+                          },
+                        },
                       },
                     },
                   ],
@@ -355,13 +323,7 @@ describe('test endpoint routes', () => {
                 bool: {
                   must_not: {
                     bool: {
-                      should: [
-                        {
-                          match: {
-                            'host.ip': '10.140.73.246',
-                          },
-                        },
-                      ],
+                      should: [{ match: { 'host.ip': '10.140.73.246' } }],
                       minimum_should_match: 1,
                     },
                   },

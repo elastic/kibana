@@ -1077,10 +1077,11 @@ describe('embeddable', () => {
 
   it('should call onload after rerender and onData$ call ', async () => {
     const onLoad = jest.fn();
+    const adapters = { tables: {} };
 
     expressionRenderer = jest.fn(({ onData$ }) => {
       setTimeout(() => {
-        onData$?.({});
+        onData$?.({}, adapters);
       }, 10);
 
       return null;
@@ -1157,9 +1158,7 @@ describe('embeddable', () => {
 
     // loading should become false
     expect(onLoad).toHaveBeenCalledTimes(2);
-
-    expect(onLoad.mock.calls[1][0]).toEqual(false);
-    expect(onLoad.mock.calls[1][1]).toMatchInlineSnapshot(`undefined`);
+    expect(onLoad).toHaveBeenNthCalledWith(2, false, adapters);
 
     expect(expressionRenderer).toHaveBeenCalledTimes(1);
 
@@ -1206,9 +1205,7 @@ describe('embeddable', () => {
 
     // loading should again become false
     expect(onLoad).toHaveBeenCalledTimes(4);
-
-    expect(onLoad.mock.calls[3][0]).toEqual(false);
-    expect(onLoad.mock.calls[3][1]).toMatchInlineSnapshot(`undefined`);
+    expect(onLoad).toHaveBeenNthCalledWith(4, false, adapters);
   });
 
   it('should call onFilter event on filter call ', async () => {

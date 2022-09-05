@@ -22,7 +22,7 @@ exports[`#start() returns \`Context\` component 1`] = `
           "euiBottomBar.customScreenReaderAnnouncement": [Function],
           "euiBottomBar.screenReaderAnnouncement": "There is a new region landmark with page level controls at the end of the document.",
           "euiBottomBar.screenReaderHeading": "Page level controls",
-          "euiBreadcrumbs.collapsedBadge.ariaLabel": "See collapsed breadcrumbs",
+          "euiBreadcrumb.collapsedBadge.ariaLabel": "See collapsed breadcrumbs",
           "euiBreadcrumbs.nav.ariaLabel": "Breadcrumbs",
           "euiCardSelect.select": "Select",
           "euiCardSelect.selected": "Selected",

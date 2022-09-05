@@ -21,6 +21,8 @@ export interface BuildSortedEventsQuery extends BuildSortedEventsQueryOpts {
   sortOrder?: 'asc' | 'desc';
   searchAfterSortId: string | number | undefined;
   timeField: string;
+  fields?: string[];
+  runtime_mappings?: unknown;
 }
 
 export const buildSortedEventsQuery = ({
@@ -35,6 +37,9 @@ export const buildSortedEventsQuery = ({
   timeField,
   // eslint-disable-next-line @typescript-eslint/naming-convention
   track_total_hits,
+  fields,
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  runtime_mappings,
 }: BuildSortedEventsQuery): ESSearchRequest => {
   const sortField = timeField;
   const docFields = [timeField].map((tstamp) => ({
@@ -82,6 +87,8 @@ export const buildSortedEventsQuery = ({
         },
       ],
     },
+    ...(runtime_mappings ? { runtime_mappings } : {}),
+    ...(fields ? { fields } : {}),
   };
 
   if (searchAfterSortId) {

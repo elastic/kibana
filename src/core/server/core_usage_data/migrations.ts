@@ -8,7 +8,7 @@
 
 import { cloneDeep } from 'lodash';
 import type { SavedObjectUnsanitizedDoc } from '@kbn/core-saved-objects-server';
-import type { CoreUsageStats } from './types';
+import type { CoreUsageStats } from '@kbn/core-usage-data-server';
 
 export const migrateTo7141 = (doc: SavedObjectUnsanitizedDoc<CoreUsageStats>) => {
   try {

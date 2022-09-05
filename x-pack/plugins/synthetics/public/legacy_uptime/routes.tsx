@@ -49,7 +49,6 @@ import { MonitorPageTitle, MonitorPageTitleContent } from './components/monitor/
 import { UptimeDatePicker } from './components/common/uptime_date_picker';
 import { CertRefreshBtn } from './components/certificates/cert_refresh_btn';
 import { CertificateTitle } from './components/certificates/certificate_title';
-import { SyntheticsCallout } from './components/overview/synthetics_callout';
 import {
   StepDetailPageChildren,
   StepDetailPageHeader,
@@ -314,7 +313,6 @@ export const PageRouter: FC = () => {
         }) => (
           <Route path={path} key={telemetryId} exact={true}>
             <div className={APP_WRAPPER_CLASS} data-test-subj={dataTestSubj}>
-              <SyntheticsCallout />
               <RouteInit title={title} path={path} telemetryId={telemetryId} />
               <UptimePageTemplateComponent
                 path={path}

@@ -54,7 +54,7 @@ Tell {kib} where to find the data you want to explore, and then specify the time
 +
 {kib} uses a <<data-views,{data-source}>> to tell it where to find
 your {es} data.
-To view the ecommerce sample data, open the {data-source} menu, and select **kibana_sample_data_ecommerce**.
+To view the ecommerce sample data, open the {data-source} menu, and then select **Kibana Sample Data Ecommerce**.
 +
 [role="screenshot"]
 image::images/discover-data-view.png[How to set the {data-source} in Discover, width=50%]
@@ -118,7 +118,7 @@ You can add a runtime field to your {data-source} from inside of **Discover**,
 and then use that field for analysis and visualizations,
 the same way you do with other fields.
 
-. Open the data view menu, and then click *Add a field to this data view*.
+. In the sidebar, click *Add a field*.
 
 . In the *Create field* form, enter `hello` for the name.
 
@@ -191,7 +191,7 @@ and more.
 
 Exclude documents where day of week is not Wednesday:
 
-. Click image:images/add-icon.png[Add icon] to the left of the query bar.
+. Click image:images/add-icon.png[Add icon] next to the query bar.
 . In the *Add filter* pop-up, set *Field* to *day_of_week*, *Operator* to *is not*, and *Value* to *Wednesday*.
 +
 [role="screenshot"]
@@ -289,7 +289,7 @@ The *Create rule* form is pre-filled with the latest query sent to {es}.
 
 . Click *Save*.
 
-For more about this and other rules provided in {kib} {alert-features}, go to <<alerting-getting-started>>.
+For more about this and other rules provided in {alert-features}, go to <<alerting-getting-started>>.
 
 
 [float]

@@ -42,6 +42,7 @@ export default async function ({ readConfigFile, log }: FtrConfigProviderContext
     ...(prId !== undefined ? { prId } : {}),
     testJobId,
     testBuildId,
+    ciBuildName: process.env.BUILDKITE_PIPELINE_SLUG,
   };
 
   return {
@@ -59,6 +60,7 @@ export default async function ({ readConfigFile, log }: FtrConfigProviderContext
       ...functionalConfig.get('kbnTestServer'),
       serverArgs: [
         ...functionalConfig.get('kbnTestServer.serverArgs'),
+        `--telemetry.optIn=true`,
         `--telemetry.labels=${JSON.stringify(telemetryLabels)}`,
       ],
       env: {

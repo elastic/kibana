@@ -554,6 +554,15 @@ export function updateFittableFlag(id: string, includeInFitToBounds: boolean) {
   };
 }
 
+export function updateDisableTooltips(id: string, disableTooltips: boolean) {
+  return {
+    type: UPDATE_LAYER_PROP,
+    id,
+    propName: 'disableTooltips',
+    newValue: disableTooltips,
+  };
+}
+
 export function setLayerQuery(id: string, query: Query) {
   return (dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) => {
     dispatch({

@@ -13,4 +13,10 @@ describe('stringHash', () => {
     const hash2 = stringHash('the-string-2');
     expect(hash1).not.toBe(hash2);
   });
+
+  test('should return the same number for identical strings', () => {
+    const hash1 = stringHash('the-string-1');
+    const hash2 = stringHash('the-string-1');
+    expect(hash1).toBe(hash2);
+  });
 });

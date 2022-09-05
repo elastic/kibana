@@ -15,7 +15,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const PageObjects = getPageObjects(['common', 'console', 'header']);
 
-  describe('console app', function testComments() {
+  // Failing: See https://github.com/elastic/kibana/issues/139295
+  describe.skip('console app', function testComments() {
     this.tags('includeFirefox');
     before(async () => {
       log.debug('navigateTo console');
@@ -46,7 +47,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       }
 
-      describe('with single line comments', async () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/138160
+      describe.skip('with single line comments', async () => {
         await runTests(
           [
             {

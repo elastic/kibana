@@ -5,14 +5,11 @@
  * 2.0.
  */
 
-import { DataViewBase, Filter, Query, TimeRange } from '@kbn/es-query';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Filter, Query, TimeRange } from '@kbn/es-query';
+import { useCallback, useEffect, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import deepEqual from 'fast-deep-equal';
-import useAsync from 'react-use/lib/useAsync';
 import type { FilterManager, SavedQuery } from '@kbn/data-plugin/public';
-import { DataView } from '@kbn/data-views-plugin/common';
-import { DEFAULT_THREAT_INDEX_KEY } from '../../../../../common/constants';
 import { useKibana } from '../../../../hooks/use_kibana';
 import {
   DEFAULT_QUERY,
@@ -24,7 +21,6 @@ import {
 
 export interface UseFiltersValue {
   timeRange?: TimeRange;
-  indexPatterns: DataView[];
   filters: Filter[];
   filterQuery: Query;
   handleSavedQuery: (savedQuery: SavedQuery | undefined) => void;
@@ -48,38 +44,8 @@ export const useFilters = (): UseFiltersValue => {
       data: {
         query: { filterManager },
       },
-      dataViews,
-      uiSettings,
     },
   } = useKibana();
-
-  const indexNames = useMemo(() => uiSettings.get(DEFAULT_THREAT_INDEX_KEY), [uiSettings]);
-
-  const dynamicIndexPatternsAsyncState = useAsync(async (): Promise<DataViewBase[]> => {
-    if (indexNames.length === 0) {
-      return [];
-    }
-
-    return [
-      {
-        title: indexNames.join(','),
-        fields: await dataViews.getFieldsForWildcard({
-          pattern: indexNames.join(','),
-          allowNoIndex: true,
-        }),
-      },
-    ];
-  }, [indexNames]);
-
-  const indexPatterns = useMemo(
-    () =>
-      dynamicIndexPatternsAsyncState.value?.map((dynamicIndexPattern) => ({
-        title: dynamicIndexPattern.title ?? '',
-        id: dynamicIndexPattern.id ?? '',
-        fields: dynamicIndexPattern.fields,
-      })) || [],
-    [dynamicIndexPatternsAsyncState.value]
-  ) as DataView[];
 
   // Filters are picked using the UI widgets
   const [filters, setFilters] = useState<Filter[]>([]);
@@ -138,7 +104,6 @@ export const useFilters = (): UseFiltersValue => {
 
   return {
     timeRange,
-    indexPatterns,
     filters,
     filterQuery,
     handleSavedQuery: onSavedQuery,

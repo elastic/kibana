@@ -18,12 +18,17 @@ export const PREVIEW_ALERTS_INDEX = '.preview.alerts-security.alerts-default';
 
 // field properties
 export const ENTRY_SESSION_ENTITY_ID_PROPERTY = 'process.entry_leader.entity_id';
+export const PROCESS_ENTITY_ID_PROPERTY = 'process.entity_id';
 export const ALERT_UUID_PROPERTY = 'kibana.alert.uuid';
 export const ALERT_ORIGINAL_TIME_PROPERTY = 'kibana.alert.original_time';
 export const TOTAL_BYTES_CAPTURED_PROPERTY = 'process.io.total_bytes_captured';
+export const TTY_CHAR_DEVICE_MAJOR_PROPERTY = 'process.tty.char_device.major';
+export const TTY_CHAR_DEVICE_MINOR_PROPERTY = 'process.tty.char_device.minor';
+export const HOST_BOOT_ID_PROPERTY = 'host.boot.id';
+export const TIMESTAMP_PROPERTY = '@timestamp';
 
 // page sizes
-export const PROCESS_EVENTS_PER_PAGE = 500;
+export const PROCESS_EVENTS_PER_PAGE = 400;
 export const ALERTS_PER_PROCESS_EVENTS_PAGE = 1500;
 export const ALERTS_PER_PAGE = 100;
 export const IO_EVENTS_PER_PAGE = 2;
@@ -43,7 +48,15 @@ export const ALERT_STATUS = {
 export const LOCAL_STORAGE_DISPLAY_OPTIONS_KEY = 'sessionView:displayOptions';
 export const MOUSE_EVENT_PLACEHOLDER = { stopPropagation: () => undefined } as React.MouseEvent;
 export const DEBOUNCE_TIMEOUT = 500;
-export const DEFAULT_TTY_PLAYSPEED_MS = 40; // milli seconds per line of tty output.
+export const DEFAULT_TTY_PLAYSPEED_MS = 80; // milli seconds per line of tty output.
+export const DEFAULT_TTY_FONT_SIZE = 11;
+
+// we split terminal output on both newlines and cursor movements.
+export const TTY_LINE_SPLITTER_REGEX = /(\r?\n|\x1b\[\d+;\d+[Hf])/gi;
+
+// used when searching output
+export const TTY_STRIP_CONTROL_CODES_REGEX =
+  /[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/gi;
 
 // when showing the count of alerts in details panel tab, if the number
 // exceeds ALERT_COUNT_THRESHOLD we put a + next to it, e.g  999+
