@@ -7,10 +7,11 @@
 
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useLayoutEffect, useMemo, useState } from 'react';
+import React, { useCallback, useLayoutEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 
 import { SECURITY_SOLUTION_OWNER } from '@kbn/cases-plugin/common';
+import { AddToCaseButton } from '../../../cases/add_to_cases_button';
 import { useGetUserCasesPermissions } from '../../../cases/use_get_cases_permissions';
 import { useKibana, useRouterNavigate } from '../../../common/lib/kibana';
 import { WithHeaderLayout } from '../../../components/layouts';
@@ -58,6 +59,12 @@ const LiveQueryDetailsPageComponent = () => {
     setIsLive(() => !(data?.status === 'completed'));
   }, [data?.status]);
   const casesOwner = useMemo(() => [SECURITY_SOLUTION_OWNER], []);
+  const addToCaseButton = useCallback(
+    (queryId?: string) => (
+      <AddToCaseButton queryId={queryId} actionId={actionId} agentIds={data?.agents} />
+    ),
+    [data?.agents, actionId]
+  );
 
   return (
     <CasesContext owner={casesOwner} permissions={casePermissions}>
@@ -68,6 +75,8 @@ const LiveQueryDetailsPageComponent = () => {
           startDate={data?.['@timestamp']}
           expirationDate={data?.expiration}
           agentIds={data?.agents}
+          addToCase={addToCaseButton}
+          showResultsHeader
         />
       </WithHeaderLayout>
     </CasesContext>

@@ -6,14 +6,10 @@
  */
 
 import { EuiTabbedContent, EuiNotificationBadge } from '@elastic/eui';
-import React, { useCallback, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import type { ReactElement } from 'react';
 
-import { SECURITY_SOLUTION_OWNER } from '@kbn/cases-plugin/common';
-import { useGetUserCasesPermissions } from '../../../cases/use_get_cases_permissions';
 import type { ECSMapping } from '../../../../common/schemas/common';
-import { AddToCaseButton } from '../../../cases/add_to_cases_button';
-import { useKibana } from '../../../common/lib/kibana';
 import { ResultsTable } from '../../../results/results_table';
 import { ActionResultsSummary } from '../../../action_results/action_results_summary';
 
@@ -25,6 +21,7 @@ interface ResultTabsProps {
   failedAgentsCount?: number;
   endDate?: string;
   addToTimeline?: (payload: { query: [string, string]; isIcon?: true }) => ReactElement;
+  addToCase?: (actionId?: string) => ReactElement;
 }
 
 const ResultTabsComponent: React.FC<ResultTabsProps> = ({
@@ -35,16 +32,8 @@ const ResultTabsComponent: React.FC<ResultTabsProps> = ({
   failedAgentsCount,
   startDate,
   addToTimeline,
+  addToCase,
 }) => {
-  const { cases } = useKibana().services;
-  const casePermissions = useGetUserCasesPermissions();
-  const CasesContext = cases!.ui.getCasesContext();
-
-  const addToCaseButton = useCallback(
-    () => <AddToCaseButton actionId={actionId} agentIds={agentIds} />,
-    [actionId, agentIds]
-  );
-
   const tabs = useMemo(
     () => [
       {
@@ -58,7 +47,7 @@ const ResultTabsComponent: React.FC<ResultTabsProps> = ({
             startDate={startDate}
             endDate={endDate}
             addToTimeline={addToTimeline}
-            addToCase={addToCaseButton}
+            addToCase={addToCase}
           />
         ),
       },
@@ -82,24 +71,20 @@ const ResultTabsComponent: React.FC<ResultTabsProps> = ({
       startDate,
       endDate,
       addToTimeline,
-      addToCaseButton,
+      addToCase,
       failedAgentsCount,
     ]
   );
 
-  const casesOwner = useMemo(() => [SECURITY_SOLUTION_OWNER], []);
-
   return (
-    <CasesContext owner={casesOwner} permissions={casePermissions}>
-      <EuiTabbedContent
-        // TODO: extend the EuiTabbedContent component to support EuiTabs props
-        // bottomBorder={false}
-        tabs={tabs}
-        initialSelectedTab={tabs[0]}
-        autoFocus="selected"
-        expand={false}
-      />
-    </CasesContext>
+    <EuiTabbedContent
+      // TODO: extend the EuiTabbedContent component to support EuiTabs props
+      // bottomBorder={false}
+      tabs={tabs}
+      initialSelectedTab={tabs[0]}
+      autoFocus="selected"
+      expand={false}
+    />
   );
 };
 

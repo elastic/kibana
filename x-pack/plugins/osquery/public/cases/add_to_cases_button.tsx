@@ -7,7 +7,7 @@
 
 import React, { useCallback } from 'react';
 import { CommentType, SECURITY_SOLUTION_OWNER } from '@kbn/cases-plugin/common';
-import { EuiButtonEmpty } from '@elastic/eui';
+import { EuiButtonEmpty, EuiButtonIcon, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useGetUserCasesPermissions } from './use_get_cases_permissions';
 import { useKibana } from '../common/lib/kibana';
@@ -20,11 +20,13 @@ const ADD_TO_CASE = i18n.translate(
 );
 
 interface IProps {
-  actionId: string;
+  queryId?: string;
   agentIds?: string[];
+  actionId?: string;
 }
 
-export const AddToCaseButton: React.FC<IProps> = ({ actionId, agentIds }) => {
+export const AddToCaseButton: React.FC<IProps> = ({ actionId, agentIds, queryId }) => {
+  const isButton = !!queryId;
   const { cases: casesUi } = useKibana().services;
 
   const casePermissions = useGetUserCasesPermissions();
@@ -42,11 +44,10 @@ export const AddToCaseButton: React.FC<IProps> = ({ actionId, agentIds }) => {
           type: 'elasticSearchDoc',
         },
         externalReferenceAttachmentTypeId: 'osquery',
-        externalReferenceMetadata: { actionId, agentIds },
+        externalReferenceMetadata: { actionId, agentIds, queryId },
         owner: SECURITY_SOLUTION_OWNER,
       },
     ];
-
     if (!hasWritePermissions) {
       // TODO
       // @ts-expect-error update types
@@ -55,7 +56,21 @@ export const AddToCaseButton: React.FC<IProps> = ({ actionId, agentIds }) => {
       // @ts-expect-error update types
       selectCaseModal.open({ attachments });
     }
-  }, [actionId, agentIds, createCaseFlyout, hasWritePermissions, selectCaseModal]);
+  }, [actionId, agentIds, createCaseFlyout, hasWritePermissions, queryId, selectCaseModal]);
+
+  if (!isButton) {
+    return (
+      <EuiToolTip content={<EuiFlexItem>Add to Case</EuiFlexItem>}>
+        <EuiButtonIcon
+          iconType={'casesApp'}
+          color="text"
+          size="xs"
+          iconSize="l"
+          onClick={handleClick}
+        />
+      </EuiToolTip>
+    );
+  }
 
   return (
     <EuiButtonEmpty size="xs" iconType="casesApp" onClick={handleClick} isDisabled={false}>

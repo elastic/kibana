@@ -53,7 +53,7 @@ interface ResultsTableComponentProps {
   endDate?: string;
   startDate?: string;
   addToTimeline?: (payload: { query: [string, string]; isIcon?: true }) => React.ReactElement;
-  addToCase?: () => React.ReactElement;
+  addToCase?: (actionId?: string) => React.ReactElement;
 }
 
 const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
@@ -345,7 +345,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
             startDate={startDate}
           />
           {addToTimeline && addToTimeline({ query: ['action_id', actionId] })}
-          {addToCase && addToCase()}
+          {addToCase && addToCase(actionId)}
         </>
       ),
     }),

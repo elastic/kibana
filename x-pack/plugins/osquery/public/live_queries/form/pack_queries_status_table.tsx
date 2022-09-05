@@ -34,6 +34,7 @@ import type {
 import { DOCUMENT_FIELD_NAME as RECORDS_FIELD } from '@kbn/lens-plugin/common/constants';
 import { FilterStateStore } from '@kbn/es-query';
 import styled from 'styled-components';
+import { PackResultsHeader } from './pack_results_header';
 import { Direction } from '../../../common/search_strategy';
 import { removeMultilines } from '../../../common/utils/build_query/remove_multilines';
 import { useKibana } from '../../common/lib/kibana';
@@ -526,20 +527,26 @@ type PackQueryStatusItem = Partial<{
 
 interface PackQueriesStatusTableProps {
   agentIds?: string[];
+  queryId?: string;
   actionId?: string;
   data?: PackQueryStatusItem[];
   startDate?: string;
   expirationDate?: string;
   addToTimeline?: (payload: { query: [string, string]; isIcon?: true }) => ReactElement;
+  addToCase?: (actionId?: string) => ReactElement;
+  showResultsHeader?: boolean;
 }
 
 const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = ({
   actionId,
+  queryId,
   agentIds,
   data,
   startDate,
   expirationDate,
   addToTimeline,
+  addToCase,
+  showResultsHeader,
 }) => {
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, unknown>>({});
 
@@ -595,7 +602,17 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
   );
 
   const renderLensResultsAction = useCallback((item) => <PackViewInLensAction item={item} />, []);
+  const handleAddToCase = useCallback(
+    // eslint-disable-next-line react/display-name
+    (queryId: string) => () => {
+      if (addToCase) {
+        return addToCase(queryId);
+      }
 
+      return <></>;
+    },
+    [addToCase]
+  );
   const getHandleErrorsToggle = useCallback(
     (item) => () => {
       setItemIdToExpandedRowMap((prevValue) => {
@@ -614,6 +631,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
                   agentIds={agentIds}
                   failedAgentsCount={item?.failed ?? 0}
                   addToTimeline={addToTimeline}
+                  addToCase={handleAddToCase(item.action_id)}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -623,7 +641,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
         return itemIdToExpandedRowMapValues;
       });
     },
-    [agentIds, expirationDate, startDate, addToTimeline]
+    [startDate, expirationDate, agentIds, addToTimeline, handleAddToCase]
   );
 
   const renderToggleResultsAction = useCallback(
@@ -724,7 +742,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
   useEffect(() => {
     // reset the expanded row map when the data changes
     setItemIdToExpandedRowMap({});
-  }, [actionId]);
+  }, [queryId, actionId]);
 
   useEffect(() => {
     if (
@@ -738,14 +756,18 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
   }, [agentIds?.length, data, getHandleErrorsToggle, itemIdToExpandedRowMap]);
 
   return (
-    <StyledEuiBasicTable
-      items={data ?? EMPTY_ARRAY}
-      itemId={getItemId}
-      columns={columns}
-      sorting={sorting}
-      itemIdToExpandedRowMap={itemIdToExpandedRowMap}
-      isExpandable
-    />
+    <>
+      {showResultsHeader && <PackResultsHeader actionId={actionId} addToCase={addToCase} />}
+
+      <StyledEuiBasicTable
+        items={data ?? EMPTY_ARRAY}
+        itemId={getItemId}
+        columns={columns}
+        sorting={sorting}
+        itemIdToExpandedRowMap={itemIdToExpandedRowMap}
+        isExpandable
+      />
+    </>
   );
 };
 
