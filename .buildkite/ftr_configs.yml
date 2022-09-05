@@ -58,6 +58,9 @@ disabled:
   - x-pack/test/screenshot_creation/config.ts
   - x-pack/test/fleet_packages/config.ts
 
+  # Scalability testing config that we run in its own pipeline
+  - x-pack/test/performance/scalability/config.ts
+
 defaultQueue: 'n2-4-spot'
 enabled:
   - test/accessibility/config.ts
