@@ -239,6 +239,8 @@ function getFrameAPIMock({ indexPatterns, existingFields, ...rest }: Partial<Dat
       hasRestrictions: false,
       fields: fieldsOne,
       getFieldByName: getFieldByNameFactory(fieldsOne),
+      isPersisted: true,
+      spec: {},
     },
     '2': {
       id: '2',
@@ -247,6 +249,8 @@ function getFrameAPIMock({ indexPatterns, existingFields, ...rest }: Partial<Dat
       hasRestrictions: true,
       fields: fieldsTwo,
       getFieldByName: getFieldByNameFactory(fieldsTwo),
+      isPersisted: true,
+      spec: {},
     },
     '3': {
       id: '3',
@@ -255,6 +259,8 @@ function getFrameAPIMock({ indexPatterns, existingFields, ...rest }: Partial<Dat
       hasRestrictions: false,
       fields: fieldsThree,
       getFieldByName: getFieldByNameFactory(fieldsThree),
+      isPersisted: true,
+      spec: {},
     },
   };
   return {

@@ -101,7 +101,8 @@ export const createMockedIndexPattern = (): IndexPattern => {
     hasRestrictions: false,
     fields,
     getFieldByName: getFieldByNameFactory(fields),
-    spec: undefined,
+    isPersisted: true,
+    spec: {},
   };
 };
 
@@ -141,7 +142,8 @@ export const createMockedRestrictedIndexPattern = () => {
     fieldFormatMap: { bytes: { id: 'bytes', params: { pattern: '0.0' } } },
     fields,
     getFieldByName: getFieldByNameFactory(fields),
-    spec: undefined,
+    isPersisted: true,
+    spec: {},
     typeMeta: {
       params: {
         rollup_index: 'my-fake-index-pattern',
