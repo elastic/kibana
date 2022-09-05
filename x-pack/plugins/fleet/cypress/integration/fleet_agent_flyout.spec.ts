@@ -72,7 +72,7 @@ describe('Fleet add agent flyout', () => {
       cy.getBySel(ADD_AGENT_BUTTON).click();
       cy.intercept('POST', '/api/fleet/agent_policies?sys_monitoring=true').as('createAgentPolicy');
 
-      cy.getBySel('createPolicyBtn').click();
+      cy.getBySel(AGENT_FLYOUT.CREATE_POLICY_BUTTON).click();
 
       let agentPolicyId: string;
       const startTime = Date.now();
@@ -81,7 +81,7 @@ describe('Fleet add agent flyout', () => {
         agentPolicyId = xhr.response.body.item.id;
       });
       // verify create button changed to dropdown
-      cy.getBySel('agentPolicyDropdown');
+      cy.getBySel(AGENT_FLYOUT.POLICY_DROPDOWN);
 
       cy.wrap(null).then(() => {
         cy.task('insertDoc', {
