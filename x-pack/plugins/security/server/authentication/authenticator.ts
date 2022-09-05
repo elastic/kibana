@@ -164,7 +164,11 @@ function isLoginAttemptWithProviderType(
   );
 }
 
-function isSessionAuthenticated(sessionValue?: Readonly<SessionValue> | null) {
+type WithRequiredProperty<T, K extends keyof T> = T & Required<Pick<T, K>>;
+
+function isSessionAuthenticated(
+  sessionValue?: Readonly<SessionValue> | null
+): sessionValue is WithRequiredProperty<SessionValue, 'username'> {
   return !!sessionValue?.username;
 }
 
@@ -792,7 +796,7 @@ export class Authenticator {
     sessionValue,
     skipAuditEvent,
   }: InvalidateSessionValueParams) {
-    if (sessionValue && isSessionAuthenticated(sessionValue) && !skipAuditEvent) {
+    if (isSessionAuthenticated(sessionValue) && !skipAuditEvent) {
       const auditLogger = this.options.audit.asScoped(request);
       auditLogger.log(
         userLogoutEvent({
