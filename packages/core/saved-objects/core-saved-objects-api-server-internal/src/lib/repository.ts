@@ -838,9 +838,9 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     let bulkDeleteRequestIndexCounter = 0;
     const bulkDeleteParams: BulkDeleteParams[] = [];
 
-    const expectedBulkDeleteMultiNamespaceDocsResults = await Promise.all(
-      expectedBulkGetAllDocsWithNamespaceChecksFlag.map<Promise<ExpectedBulkDeleteResult>>(
-        async (expectedBulkGetResult) => {
+    const expectedBulkDeleteMultiNamespaceDocsResults =
+      expectedBulkGetAllDocsWithNamespaceChecksFlag.map<ExpectedBulkDeleteResult>(
+        (expectedBulkGetResult) => {
           if (isLeft(expectedBulkGetResult)) {
             return { ...expectedBulkGetResult };
           }
@@ -929,8 +929,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
 
           return { tag: 'Right', value: expectedResult };
         }
-      )
-    );
+      );
 
     const bulkDeleteResponse = bulkDeleteParams.length
       ? await this.client.bulk({
