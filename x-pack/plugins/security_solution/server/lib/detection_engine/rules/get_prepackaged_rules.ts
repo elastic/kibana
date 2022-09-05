@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { SavedObjectAttributes } from '@kbn/core/types';
 import { BadRequestError } from '@kbn/securitysolution-es-utils';
 import { exactCheck, formatErrors } from '@kbn/securitysolution-io-ts-utils';
 import { fold } from 'fp-ts/lib/Either';
@@ -56,7 +55,7 @@ export const validateAllPrepackagedRules = (
  * Validate the rules from Saved Objects created by Fleet.
  */
 export const validateAllRuleSavedObjects = (
-  rules: Array<IRuleAssetSOAttributes & SavedObjectAttributes>
+  rules: IRuleAssetSOAttributes[]
 ): AddPrepackagedRulesSchema[] => {
   return rules.map((rule) => {
     const decoded = addPrepackagedRulesSchema.decode(rule);
