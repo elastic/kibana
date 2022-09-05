@@ -9,7 +9,6 @@ import { errors } from '@elastic/elasticsearch';
 import {
   BENCHMARK_SCORE_INDEX_DEFAULT_NS,
   BENCHMARK_SCORE_INDEX_PATTERN,
-  BENCHMARK_SCORE_INDEX_ROLLOVER_ALIAS,
   BENCHMARK_SCORE_INDEX_TEMPLATE_NAME,
   CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
   CSP_INGEST_TIMESTAMP_PIPELINE,
@@ -49,7 +48,7 @@ const createBenchmarkScoreIndex = async (esClient: ElasticsearchClient, logger: 
           lifecycle: {
             // This is the default lifecycle name, it is named on the data-stream type (e.g, logs/ metrics)
             name: 'logs',
-            rollover_alias: BENCHMARK_SCORE_INDEX_ROLLOVER_ALIAS,
+            rollover_alias: BENCHMARK_SCORE_INDEX_DEFAULT_NS,
           },
         },
       },
