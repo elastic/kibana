@@ -12,6 +12,7 @@ import {
   EuiFormRow,
   EuiSelect,
   EuiFormControlLayout,
+  transparentize,
 } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -29,6 +30,7 @@ interface ScheduleItemProps {
   isDisabled: boolean;
   minimumValue?: number;
   timeTypes?: string[];
+  fullWidth: boolean;
 }
 
 const timeTypeOptions = [
@@ -49,12 +51,24 @@ const StyledEuiFormRow = styled(EuiFormRow)`
   max-width: none;
 
   .euiFormControlLayout {
-    max-width: 200px !important;
+    max-width: ${({ fullWidth }) => (fullWidth ? 'auto' : '200px !important')};
+    width: ${({ fullWidth }) => (fullWidth ? 'auto' : 'inherit')};
   }
 
   .euiFormControlLayout__childrenWrapper > *:first-child {
     box-shadow: none;
     height: 38px;
+    width: ${({ fullWidth }) => (fullWidth ? '100%' : 'auto')};
+  }
+
+  .euiFormControlLayout__childrenWrapper > select {
+    background-color: ${({ fullWidth, theme }) =>
+      fullWidth ? transparentize(theme.eui.euiColorPrimary, 0.1) : 'inherit'};
+    color: ${({ fullWidth, theme }) => (fullWidth ? theme.eui.euiColorPrimary : 'inherit')};
+  }
+
+  .euiFormControlLayoutIcons {
+    color: ${({ fullWidth, theme }) => (fullWidth ? theme.eui.euiColorPrimary : 'inherit')};
   }
 
   .euiFormControlLayout:not(:first-child) {
@@ -82,6 +96,7 @@ export const ScheduleItem = ({
   isDisabled,
   minimumValue = 0,
   timeTypes = ['s', 'm', 'h'],
+  fullWidth = false,
 }: ScheduleItemProps) => {
   const [timeType, setTimeType] = useState(timeTypes[0]);
   const [timeVal, setTimeVal] = useState<number>(0);
@@ -150,7 +165,7 @@ export const ScheduleItem = ({
       helpText={field.helpText}
       error={errorMessage}
       isInvalid={isInvalid}
-      fullWidth={false}
+      fullWidth={fullWidth}
       data-test-subj={dataTestSubj}
       describedByIds={idAria ? [idAria] : undefined}
     >
