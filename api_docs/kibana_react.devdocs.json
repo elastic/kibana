@@ -2547,13 +2547,7 @@
             "label": "chrome",
             "description": [],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCoreChromePluginApi",
-                "section": "def-public.ChromeStart",
-                "text": "ChromeStart"
-              }
+              "ChromeStart"
             ],
             "path": "src/plugins/kibana_react/public/exit_full_screen_button/exit_full_screen_button.tsx",
             "deprecated": false
@@ -3960,13 +3954,7 @@
           " | undefined; application?: ",
           "ApplicationStart",
           " | undefined; chrome?: ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCoreChromePluginApi",
-            "section": "def-public.ChromeStart",
-            "text": "ChromeStart"
-          },
+          "ChromeStart",
           " | undefined; docLinks?: ",
           "DocLinksStart",
           " | undefined; executionContext?: ",
