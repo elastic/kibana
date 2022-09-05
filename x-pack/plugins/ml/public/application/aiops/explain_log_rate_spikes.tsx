@@ -6,6 +6,7 @@
  */
 
 import React, { FC } from 'react';
+import { pick } from 'lodash';
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
@@ -26,9 +27,6 @@ export const ExplainLogRateSpikesPage: FC = () => {
   const dataView = context.currentDataView;
   const savedSearch = context.currentSavedSearch;
 
-  const { data, charts, fieldFormats, http, notifications, storage, uiSettings, unifiedSearch } =
-    services;
-
   return (
     <>
       <MlPageHeader>
@@ -48,16 +46,16 @@ export const ExplainLogRateSpikesPage: FC = () => {
         <ExplainLogRateSpikes
           dataView={dataView}
           savedSearch={savedSearch}
-          appDependencies={{
-            data,
-            charts,
-            fieldFormats,
-            http,
-            notifications,
-            storage,
-            uiSettings,
-            unifiedSearch,
-          }}
+          appDependencies={pick(services, [
+            'data',
+            'charts',
+            'fieldFormats',
+            'http',
+            'notifications',
+            'storage',
+            'uiSettings',
+            'unifiedSearch',
+          ])}
         />
       )}
       <HelpMenu docLink={services.docLinks.links.ml.guide} />
