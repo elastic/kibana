@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { asyncMapWithLimit } from '@kbn/std';
 import Fs from 'fs';
 import Path from 'path';
 
@@ -51,8 +52,8 @@ async function countEsLintDisableInFile(path: string): Promise<EslintDisableCoun
 export async function countEslintDisableLines(path: string): Promise<EslintDisableCounts> {
   const filePaths = await fetchAllFilePaths(path);
 
-  const allEslintDisableCounts = await Promise.all(
-    filePaths.map((filePath) => countEsLintDisableInFile(filePath))
+  const allEslintDisableCounts = await asyncMapWithLimit(filePaths, 100, (filePath) =>
+    countEsLintDisableInFile(filePath)
   );
 
   return allEslintDisableCounts.reduce(
