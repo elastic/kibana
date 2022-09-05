@@ -16,7 +16,7 @@ import type { SavedSearch } from '@kbn/discover-plugin/public';
 
 import { TimeBuckets } from '../../common/time_buckets';
 
-import { useAiOpsKibana } from '../kibana_context';
+import { useAiopsContext } from './use_app_context';
 import { aiopsRefresh$ } from '../application/services/timefilter_refresh_service';
 import type { DocumentStatsSearchStrategyParams } from '../get_document_stats';
 import type { AiOpsIndexBasedAppState } from '../components/explain_log_rate_spikes/explain_log_rate_spikes_app_state';
@@ -27,7 +27,7 @@ import {
 
 import { useTimefilter } from './use_time_filter';
 import { useDocumentCountStats } from './use_document_count_stats';
-import type { Dictionary } from './url_state';
+import type { Dictionary } from './use_url_state';
 
 export const useData = (
   {
@@ -38,8 +38,7 @@ export const useData = (
   onUpdate: (params: Dictionary<unknown>) => void,
   selectedChangePoint?: ChangePoint
 ) => {
-  const { services } = useAiOpsKibana();
-  const { uiSettings, data } = services;
+  const { uiSettings, data } = useAiopsContext();
   const [lastRefresh, setLastRefresh] = useState(0);
   const [fieldStatsRequest, setFieldStatsRequest] = useState<
     DocumentStatsSearchStrategyParams | undefined

@@ -20,13 +20,14 @@ import { TechnicalPreviewBadge } from '../components/technical_preview_badge';
 import { MlPageHeader } from '../components/page_header';
 
 export const ExplainLogRateSpikesPage: FC = () => {
-  const {
-    services: { docLinks },
-  } = useMlKibana();
+  const { services } = useMlKibana();
 
   const context = useMlContext();
   const dataView = context.currentDataView;
   const savedSearch = context.currentSavedSearch;
+
+  const { data, charts, fieldFormats, http, notifications, storage, uiSettings, unifiedSearch } =
+    services;
 
   return (
     <>
@@ -43,8 +44,23 @@ export const ExplainLogRateSpikesPage: FC = () => {
           </EuiFlexItem>
         </EuiFlexGroup>
       </MlPageHeader>
-      {dataView && <ExplainLogRateSpikes dataView={dataView} savedSearch={savedSearch} />}
-      <HelpMenu docLink={docLinks.links.ml.guide} />
+      {dataView && (
+        <ExplainLogRateSpikes
+          dataView={dataView}
+          savedSearch={savedSearch}
+          appDependencies={{
+            data,
+            charts,
+            fieldFormats,
+            http,
+            notifications,
+            storage,
+            uiSettings,
+            unifiedSearch,
+          }}
+        />
+      )}
+      <HelpMenu docLink={services.docLinks.links.ml.guide} />
     </>
   );
 };

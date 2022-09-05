@@ -23,6 +23,7 @@ import type { DashboardSetup } from '@kbn/dashboard-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { CasesUiStart } from '@kbn/cases-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { MlServicesContext } from '../../app';
 
 interface StartPlugins {
@@ -41,6 +42,7 @@ interface StartPlugins {
   spacesApi: SpacesPluginStart;
   charts: ChartsPluginStart;
   cases?: CasesUiStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
 }
 export type StartServices = CoreStart &
   StartPlugins & {

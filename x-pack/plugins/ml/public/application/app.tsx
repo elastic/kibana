@@ -91,6 +91,7 @@ const App: FC<AppProps> = ({ coreStart, deps, appMountParams }) => {
     dashboard: deps.dashboard,
     charts: deps.charts,
     cases: deps.cases,
+    unifiedSearch: deps.unifiedSearch,
     ...coreStart,
   };
 
