@@ -46,7 +46,7 @@ export const getToolbarVisibility = ({
   alerts,
   isLoading,
   updatedAt,
-  showAlertCount,
+  showAlertCount = false,
 }: {
   bulkActions: BulkActionsConfig[];
   alertsCount: number;
@@ -54,7 +54,7 @@ export const getToolbarVisibility = ({
   alerts: EcsFieldsResponse[];
   isLoading: boolean;
   updatedAt: number;
-  showAlertCount: boolean;
+  showAlertCount?: boolean;
 }): EuiDataGridToolBarVisibilityOptions => {
   const selectedRowsCount = rowSelection.size;
   const defaultVisibility = getDefaultVisibility({ updatedAt, alertsCount, showAlertCount });

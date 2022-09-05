@@ -57,7 +57,7 @@ export interface AlertsTableStateProps {
   pageSize?: number;
   refreshNow?: number;
   showExpandToDetails: boolean;
-  showAlertCount: boolean;
+  showAlertCount?: boolean;
 }
 
 interface AlertsTableStorage {
