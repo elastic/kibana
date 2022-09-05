@@ -52,8 +52,8 @@ export const usePackageInstallations = () => {
   const updatableIntegrations = useMemo<Map<string, UpdatableIntegration>>(
     () =>
       (agentPolicyData?.items || []).reduce((result, policy) => {
-        policy.package_policies.forEach((pkgPolicy: PackagePolicy | string) => {
-          if (typeof pkgPolicy === 'string' || !pkgPolicy.package) return false;
+        policy.package_policies?.forEach((pkgPolicy: PackagePolicy) => {
+          if (!pkgPolicy.package) return false;
           const { name, version } = pkgPolicy.package;
           const installedPackage = allInstalledPackages.find(
             (installedPkg) =>

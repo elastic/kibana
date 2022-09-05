@@ -28,6 +28,15 @@ export const EXCEPTION_LIST_ACTIONS = i18n.translate(
   }
 );
 
+export const SHOWING_EXCEPTION_LISTS = (totalLists: number) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.all.exceptions.showingExceptionLists',
+    {
+      values: { totalLists },
+      defaultMessage: 'Showing {totalLists} {totalLists, plural, =1 {list} other {lists}}',
+    }
+  );
+
 export const RULES_ASSIGNED_TO_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.all.exceptions.rulesAssignedTitle',
   {
@@ -149,5 +158,12 @@ export const EXCEPTION_LIST_SEARCH_PLACEHOLDER = i18n.translate(
   'xpack.securitySolution.exceptions.searchPlaceholder',
   {
     defaultMessage: 'e.g. Example List Name',
+  }
+);
+
+export const REFRESH_EXCEPTIONS_TABLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.all.exceptions.refresh',
+  {
+    defaultMessage: 'Refresh',
   }
 );

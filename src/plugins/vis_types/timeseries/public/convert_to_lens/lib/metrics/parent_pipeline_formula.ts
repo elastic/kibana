@@ -8,14 +8,15 @@
 
 import type { Metric, MetricType } from '../../../../common/types';
 import { SUPPORTED_METRICS } from './supported_metrics';
-import { getFilterRatioFormula } from './filter_ratio_formula';
+import { getFormulaEquivalent } from './metrics_helpers';
 
 export const getParentPipelineSeriesFormula = (
   metrics: Metric[],
   subFunctionMetric: Metric,
   pipelineAgg: string,
   aggregation: MetricType,
-  percentileValue?: number
+  percentileValue?: number,
+  window?: string
 ) => {
   let formula = '';
   const aggregationMap = SUPPORTED_METRICS[aggregation];
@@ -42,28 +43,13 @@ export const getParentPipelineSeriesFormula = (
       additionalSubFunction.field ?? ''
     }${additionalFunctionArgs ?? ''})))`;
   } else {
-    let additionalFunctionArgs;
-    if (pipelineAgg === 'percentile' && percentileValue) {
-      additionalFunctionArgs = `, percentile=${percentileValue}`;
+    const subFormula = getFormulaEquivalent(subFunctionMetric, metrics, percentileValue, window);
+
+    if (!subFormula) {
+      return null;
     }
-    if (pipelineAgg === 'percentile_rank' && percentileValue) {
-      additionalFunctionArgs = `, value=${percentileValue}`;
-    }
-    if (pipelineAgg === 'filter_ratio') {
-      const script = getFilterRatioFormula(subFunctionMetric);
-      if (!script) {
-        return null;
-      }
-      formula = `${aggregationMap.name}(${script}${additionalFunctionArgs ?? ''})`;
-    } else if (pipelineAgg === 'counter_rate') {
-      formula = `${aggregationMap.name}(${pipelineAgg}(max(${subFunctionMetric.field}${
-        additionalFunctionArgs ? `${additionalFunctionArgs}` : ''
-      })))`;
-    } else {
-      formula = `${aggregationMap.name}(${pipelineAgg}(${subFunctionMetric.field}${
-        additionalFunctionArgs ? `${additionalFunctionArgs}` : ''
-      }))`;
-    }
+
+    formula = `${aggregationMap.name}(${subFormula})`;
   }
   return formula;
 };

@@ -23,7 +23,7 @@ import type {
   GetByIdArgs,
   ListFilesArgs,
 } from './file_action_types';
-import { FileClientImpl } from '../file_client/file_client';
+import { createFileClient, FileClientImpl } from '../file_client/file_client';
 /**
  * Service containing methods for working with files.
  *
@@ -42,16 +42,7 @@ export class InternalFileService {
   ) {}
 
   public async createFile(args: CreateFileArgs): Promise<IFile> {
-    const fileKind = this.getFileKind(args.fileKind);
-    return await File.create(
-      { ...args, fileKind },
-      this,
-      new FileClientImpl(
-        fileKind,
-        this.metadataClient,
-        this.blobStorageService.createBlobStorageClient(fileKind.blobStoreSettings)
-      )
-    );
+    return this.createFileClient(args.fileKind).create({ metadata: { ...args } });
   }
 
   public writeAuditLog(event: AuditEvent) {
@@ -79,7 +70,7 @@ export class InternalFileService {
       if (metadata.Status === 'DELETED') {
         throw new FileNotFoundError('File has been deleted');
       }
-      return this.toFile(id, metadata, this.getFileKind(metadata.FileKind));
+      return this.toFile(id, metadata, metadata.FileKind);
     } catch (e) {
       if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
         throw new FileNotFoundError('File not found');
@@ -91,8 +82,8 @@ export class InternalFileService {
 
   public async getById({ fileKind, id }: GetByIdArgs): Promise<IFile> {
     const file = await this.get(id);
-    if (file.fileKind !== fileKind) {
-      throw new Error(`Unexpected file kind "${file.fileKind}", expected "${fileKind}".`);
+    if (file.data.fileKind !== fileKind) {
+      throw new Error(`Unexpected file kind "${file.data.fileKind}", expected "${fileKind}".`);
     }
     return file;
   }
@@ -108,28 +99,8 @@ export class InternalFileService {
       page,
       perPage,
     });
-    return result.map((file) => this.toFile(file.id, file.metadata, fileKind));
-  }
-
-  public toFile(
-    id: string,
-    fileMetadata: FileMetadata,
-    fileKind: FileKind,
-    fileClient?: FileClientImpl
-  ): IFile {
-    return new File(
-      id,
-      fileMetadata,
-      fileClient ??
-        new FileClientImpl(
-          fileKind,
-          this.metadataClient,
-          this.blobStorageService.createBlobStorageClient(fileKind.blobStoreSettings)
-        ),
-      this,
-      this.fileShareService,
-      this.logger.get(`file-${id}`)
-    );
+    const fileClient = this.createFileClient(fileKind.id);
+    return result.map((file) => this.toFile(file.id, file.metadata, fileKind.id, fileClient));
   }
 
   public getFileKind(id: string): FileKind {
@@ -152,5 +123,33 @@ export class InternalFileService {
   public async getByToken(token: string) {
     const { fileId } = await this.fileShareService.getByToken(token);
     return this.get(fileId);
+  }
+
+  private toFile(
+    id: string,
+    fileMetadata: FileMetadata,
+    fileKind: string,
+    fileClient?: FileClientImpl
+  ): IFile {
+    return new File(
+      id,
+      toJSON(id, fileMetadata),
+      fileClient ?? this.createFileClient(fileKind),
+      this.logger.get(`file-${id}`)
+    );
+  }
+
+  private createFileClient(fileKindId: string) {
+    const fileKind = this.fileKindRegistry.get(fileKindId);
+    return createFileClient({
+      auditLogger: this.auditLogger,
+      blobStorageClient: this.blobStorageService.createBlobStorageClient(
+        fileKind.blobStoreSettings
+      ),
+      fileKindDescriptor: fileKind,
+      internalFileShareService: this.fileShareService,
+      logger: this.logger,
+      metadataClient: this.metadataClient,
+    });
   }
 }

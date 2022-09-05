@@ -31,7 +31,7 @@ export const PackagesBuildManifestCommand: GenerateCommand = {
   async run({ log, render, flags }) {
     const validate = !!flags.validate;
 
-    const packages = await discoverBazelPackages();
+    const packages = await discoverBazelPackages(REPO_ROOT);
     const dest = Path.resolve(REPO_ROOT, 'packages/BUILD.bazel');
     const relDest = Path.relative(process.cwd(), dest);
 

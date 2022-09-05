@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import Chance from 'chance';
-import type { UseQueryResult } from 'react-query';
+import type { UseQueryResult } from '@tanstack/react-query';
 import { of } from 'rxjs';
 import { useLatestFindingsDataView } from '../../common/api/use_latest_findings_data_view';
 import { Findings } from './findings';

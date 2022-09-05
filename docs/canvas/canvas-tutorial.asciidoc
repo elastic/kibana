@@ -9,9 +9,11 @@ To familiarize yourself with *Canvas*, add the Sample eCommerce orders data, the
 
 To create a workpad of the eCommerce store data, add the data set, then create the workpad.
 
-. Go to the {kib} *Home* page, then click *Try our sample data*.
+. On the home page, click *Try sample data*.
 
-. On the *Sample eCommerce orders data* card, click *Add data*.
+. Click *Other sample data sets*. 
+
+. On the *Sample eCommerce orders* card, click *Add data*.
 
 . Open the main menu, then click *Canvas*.
 

@@ -5,8 +5,5 @@
  * 2.0.
  */
 
-Cypress.on('uncaught:exception', (err, runnable) => {
-  return false;
-});
-
 import './commands';
+// import './output_command_timings';

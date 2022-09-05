@@ -26,7 +26,6 @@ import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { HomePublicPluginSetup, HomePublicPluginStart } from '@kbn/home-plugin/public';
 import { CasesDeepLinkId, CasesUiStart, getCasesDeepLinks } from '@kbn/cases-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
-import type { SharedUXPluginStart } from '@kbn/shared-ux-plugin/public';
 import {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
@@ -72,7 +71,6 @@ export interface ObservabilityPublicPluginsStart {
   dataViews: DataViewsPublicPluginStart;
   lens: LensPublicStart;
   discover: DiscoverStart;
-  sharedUX: SharedUXPluginStart;
   ruleTypeRegistry: RuleTypeRegistryContract;
   actionTypeRegistry: ActionTypeRegistryContract;
   security: SecurityPluginStart;
@@ -282,7 +280,7 @@ export class Plugin
       getUrlForApp: application.getUrlForApp,
       navigateToApp: application.navigateToApp,
       navigationSections$: this.navigationRegistry.sections$,
-      getSharedUXContext: pluginsStart.sharedUX.getContextServices,
+      getPageTemplateServices: () => ({ coreStart }),
     });
 
     const getAsyncO11yAlertsTableConfiguration = async () => {

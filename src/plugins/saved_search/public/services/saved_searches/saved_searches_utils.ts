@@ -27,6 +27,7 @@ export const throwErrorOnSavedSearchUrlConflict = async (savedSearch: SavedSearc
 export const fromSavedSearchAttributes = (
   id: string,
   attributes: SavedSearchAttributes,
+  tags: string[] | undefined,
   searchSource: SavedSearch['searchSource'],
   sharingSavedObjectProps: SavedSearch['sharingSavedObjectProps']
 ): SavedSearch => ({
@@ -37,12 +38,16 @@ export const fromSavedSearchAttributes = (
   sort: attributes.sort,
   columns: attributes.columns,
   description: attributes.description,
+  tags,
   grid: attributes.grid,
   hideChart: attributes.hideChart,
   viewMode: attributes.viewMode,
   hideAggregatedPreview: attributes.hideAggregatedPreview,
   rowHeight: attributes.rowHeight,
   isTextBasedQuery: attributes.isTextBasedQuery,
+  timeRestore: attributes.timeRestore,
+  timeRange: attributes.timeRange,
+  refreshInterval: attributes.refreshInterval,
   rowsPerPage: attributes.rowsPerPage,
 });
 
@@ -61,5 +66,8 @@ export const toSavedSearchAttributes = (
   hideAggregatedPreview: savedSearch.hideAggregatedPreview,
   rowHeight: savedSearch.rowHeight,
   isTextBasedQuery: savedSearch.isTextBasedQuery ?? false,
+  timeRestore: savedSearch.timeRestore ?? false,
+  timeRange: savedSearch.timeRange,
+  refreshInterval: savedSearch.refreshInterval,
   rowsPerPage: savedSearch.rowsPerPage,
 });

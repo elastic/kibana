@@ -82,4 +82,14 @@ describe('File', () => {
     await setImmediate();
     expect(blobStoreSpy.calledOnce).toBe(true);
   });
+
+  it('updates file data after upload', async () => {
+    const fileSO = { attributes: { Status: 'AWAITING_UPLOAD' } };
+    (soClient.create as jest.Mock).mockResolvedValue(fileSO);
+    (soClient.update as jest.Mock).mockResolvedValue(fileSO);
+
+    const file = await fileService.createFile({ name: 'test', fileKind });
+    await file.uploadContent(Readable.from(['test']));
+    expect(file.data.status).toBe('READY');
+  });
 });

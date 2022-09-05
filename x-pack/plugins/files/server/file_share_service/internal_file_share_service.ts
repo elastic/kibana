@@ -85,9 +85,9 @@ export type GetArgs = IdArg;
  */
 export interface DeleteForFileArgs {
   /**
-   * The file object to delete the shares for.
+   * The file id to delete the shares for.
    */
-  file: File;
+  id: string;
 }
 
 /**
@@ -144,7 +144,7 @@ export class InternalFileShareService implements FileShareServiceStart {
         token: generateShareToken(),
       },
       {
-        references: [{ name: file.name, id: file.id, type: FILE_SO_TYPE }],
+        references: [{ name: file.data.name, id: file.data.id, type: FILE_SO_TYPE }],
       }
     );
 
@@ -183,8 +183,8 @@ export class InternalFileShareService implements FileShareServiceStart {
     return result.saved_objects;
   }
 
-  public async deleteForFile({ file }: DeleteForFileArgs): Promise<void> {
-    const savedObjects = await this.internalList({ fileId: file.id });
+  public async deleteForFile({ id: fileId }: DeleteForFileArgs): Promise<void> {
+    const savedObjects = await this.internalList({ fileId });
     await Promise.all(savedObjects.map(({ id }) => this.delete({ id })));
   }
 

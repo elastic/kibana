@@ -122,11 +122,14 @@ const Tooltip: FC<{ service: ChartTooltipService }> = React.memo(({ service }) =
 
   return (
     <TooltipTrigger
-      modifiers={{
-        preventOverflow: {
-          boundariesElement: 'window',
+      modifiers={[
+        {
+          name: 'preventOverflow',
+          options: {
+            rootBoundary: 'window',
+          },
         },
-      }}
+      ]}
       placement="right-start"
       trigger="none"
       tooltipShown={isTooltipShown}

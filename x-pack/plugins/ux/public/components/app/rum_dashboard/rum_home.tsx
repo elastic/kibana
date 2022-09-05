@@ -8,7 +8,7 @@
 import React, { Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiTitle, EuiFlexItem } from '@elastic/eui';
-import { KibanaPageTemplateProps } from '@kbn/shared-ux-components';
+import type { NoDataConfig } from '@kbn/shared-ux-page-kibana-template';
 import { WebApplicationSelect } from './panels/web_application_select';
 import { UserPercentile } from './user_percentile';
 import { useBreakpoints } from '../../../hooks/use_breakpoints';
@@ -30,7 +30,7 @@ export function RumHome() {
 
   const { hasData, loading: isLoading } = useHasRumData();
 
-  const noDataConfig: KibanaPageTemplateProps['noDataConfig'] = !hasData
+  const noDataConfig: NoDataConfig | undefined = !hasData
     ? {
         solution: i18n.translate('xpack.ux.overview.solutionName', {
           defaultMessage: 'Observability',
