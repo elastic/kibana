@@ -13,7 +13,7 @@ import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import type { ApplicationStart } from '@kbn/core/public';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-plugin/common';
 import type { ViewMode } from '@kbn/embeddable-plugin/common';
-import type { RenderMode } from '@kbn/expressions-plugin';
+import type { RenderMode } from '@kbn/expressions-plugin/common';
 
 interface VisualizationMissedSavedObjectErrorProps {
   savedObjectMeta: {

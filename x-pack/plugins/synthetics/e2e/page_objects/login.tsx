@@ -24,7 +24,7 @@ export function loginPageProvider({
         await page.waitForTimeout(5 * 1000);
       }
     },
-    async loginToKibana(usernameT?: string, passwordT?: string) {
+    async loginToKibana(usernameT?: 'editor' | 'viewer', passwordT?: string) {
       if (isRemote) {
         await page.click('text="Log in with Elasticsearch"');
       }

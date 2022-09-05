@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { TypeOf } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
+import type { ScopedClusterClientMock } from '@kbn/core/server/mocks';
 import {
-  ScopedClusterClientMock,
   elasticsearchServiceMock,
   savedObjectsClientMock,
   httpServerMock,
@@ -18,7 +18,7 @@ import { applyActionsEsSearchMock } from '../../services/actions/mocks';
 import { requestContextMock } from '../../../lib/detection_engine/routes/__mocks__';
 import { getActionDetailsRequestHandler } from './details';
 import { NotFoundError } from '../../errors';
-import { ActionDetailsRequestSchema } from '../../../../common/endpoint/schema/actions';
+import type { ActionDetailsRequestSchema } from '../../../../common/endpoint/schema/actions';
 import { EndpointActionGenerator } from '../../../../common/endpoint/data_generators/endpoint_action_generator';
 
 describe('when calling the Action Details route handler', () => {
@@ -28,10 +28,15 @@ describe('when calling the Action Details route handler', () => {
   let actionDetailsRouteHandler: ReturnType<typeof getActionDetailsRequestHandler>;
 
   beforeEach(() => {
+    const mockContext = createMockEndpointAppContext();
+    (mockContext.service.getEndpointMetadataService as jest.Mock) = jest.fn().mockReturnValue({
+      findHostMetadataForFleetAgents: jest.fn().mockResolvedValue([]),
+    });
     mockScopedEsClient = elasticsearchServiceMock.createScopedClusterClient();
     mockSavedObjectClient = savedObjectsClientMock.create();
     mockResponse = httpServerMock.createResponseFactory();
-    actionDetailsRouteHandler = getActionDetailsRequestHandler(createMockEndpointAppContext());
+
+    actionDetailsRouteHandler = getActionDetailsRequestHandler(mockContext);
   });
 
   it('should call service using action id from request', async () => {
@@ -40,6 +45,7 @@ describe('when calling the Action Details route handler', () => {
     const mockContext = requestContextMock.convertContext(
       createRouteHandlerContext(mockScopedEsClient, mockSavedObjectClient)
     );
+
     const mockRequest = httpServerMock.createKibanaRequest<
       TypeOf<typeof ActionDetailsRequestSchema.params>,
       never,

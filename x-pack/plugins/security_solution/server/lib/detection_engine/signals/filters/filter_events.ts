@@ -6,7 +6,7 @@
  */
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { partition } from 'lodash';
-import { FilterEventsOptions } from './types';
+import type { FilterEventsOptions } from './types';
 
 /**
  * Check if for each tuple, the entry is not in both for when two or more value list entries exist.

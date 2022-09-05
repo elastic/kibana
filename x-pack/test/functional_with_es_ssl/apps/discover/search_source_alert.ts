@@ -31,6 +31,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const queryBar = getService('queryBar');
   const security = getService('security');
   const filterBar = getService('filterBar');
+  const find = getService('find');
 
   const SOURCE_DATA_INDEX = 'search-source-alert';
   const OUTPUT_DATA_INDEX = 'search-source-alert-output';
@@ -146,10 +147,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await testSubjects.click('discoverAlertsButton');
     await testSubjects.click('discoverCreateAlertButton');
 
-    await testSubjects.setValue('ruleNameInput', alertName);
+    await retry.waitFor('rule name value is correct', async () => {
+      await testSubjects.setValue('ruleNameInput', alertName);
+      const ruleName = await testSubjects.getAttribute('ruleNameInput', 'value');
+      return ruleName === alertName;
+    });
     await testSubjects.click('thresholdPopover');
     await testSubjects.setValue('alertThresholdInput', '3');
-    await testSubjects.click('.index-ActionTypeSelectOption');
+    await retry.waitFor('actions accordion to exist', async () => {
+      await testSubjects.click('.index-alerting-ActionTypeSelectOption');
+      return await testSubjects.exists('alertActionAccordion-0');
+    });
 
     await monacoEditor.setCodeEditorValue(`{
       "rule_id": "{{ruleId}}",
@@ -162,13 +170,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   const getLastToast = async () => {
     const toastList = await testSubjects.find('globalToastList');
-    const titles = await toastList.findAllByCssSelector('.euiToastHeader');
+    const titles = await toastList.findAllByTestSubject('euiToastHeader');
     const lastTitleElement = last(titles)!;
     const title = await lastTitleElement.getVisibleText();
-    const messages = await toastList.findAllByCssSelector('.euiToastBody');
+    const messages = await toastList.findAllByTestSubject('euiToastBody');
     const lastMessageElement = last(messages)!;
     const message = await lastMessageElement.getVisibleText();
     return { message, title };
+  };
+
+  const getErrorToastTitle = async () => {
+    const toastList = await testSubjects.find('globalToastList');
+    const title = await (
+      await toastList.findByCssSelector(
+        '[class*="euiToast-danger"] > [data-test-subj="euiToastHeader"]'
+      )
+    ).getVisibleText();
+    return title;
   };
 
   const openOutputIndex = async () => {
@@ -327,6 +345,39 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
     });
 
+    it('should display warning about recently updated data view', async () => {
+      await PageObjects.common.navigateToUrlWithBrowserHistory(
+        'management',
+        `/kibana/dataViews/dataView/${sourceDataViewId}`,
+        undefined
+      );
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
+      await testSubjects.click('tab-sourceFilters');
+      await testSubjects.click('fieldFilterInput');
+
+      await PageObjects.common.sleep(15000);
+
+      const input = await find.activeElement();
+      await input.type('message');
+
+      await testSubjects.click('addFieldFilterButton');
+
+      await openOutputIndex();
+      await navigateToResults();
+
+      await openOutputIndex();
+      await navigateToResults();
+
+      const { message, title } = await getLastToast();
+
+      expect(await dataGrid.getDocCount()).to.be(1);
+      expect(title).to.be.equal('Data View has changed');
+      expect(message).to.be.equal(
+        'Data view has been updated after the last update of the alert rule.'
+      );
+    });
+
     it('should display not found index error', async () => {
       await openOutputIndex();
       const link = await getResultsLink();
@@ -340,7 +391,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await navigateToDiscover(link);
 
-      const { title } = await getLastToast();
+      const title = await getErrorToastTitle();
       expect(title).to.be.equal(
         'No matching indices found: No indices match "search-source-alert"'
       );

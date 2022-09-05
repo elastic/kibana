@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import {
+import type {
   SavedObjectAttribute,
   SavedObjectAttributes,
   SavedObjectsResolveResponse,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '@kbn/core/server';
 import { RuleNotifyWhenType } from './rule_notify_when_type';
 import { RuleSnooze } from './rule_snooze_type';
@@ -41,10 +40,12 @@ export enum RuleExecutionStatusErrorReasons {
   License = 'license',
   Timeout = 'timeout',
   Disabled = 'disabled',
+  Validate = 'validate',
 }
 
 export enum RuleExecutionStatusWarningReasons {
   MAX_EXECUTABLE_ACTIONS = 'maxExecutableActions',
+  MAX_ALERTS = 'maxAlerts',
 }
 
 export interface RuleExecutionStatus {
@@ -111,6 +112,7 @@ export interface Rule<Params extends RuleTypeParams = never> {
   executionStatus: RuleExecutionStatus;
   monitoring?: RuleMonitoring;
   snoozeSchedule?: RuleSnooze; // Remove ? when this parameter is made available in the public API
+  activeSnoozes?: string[];
   isSnoozedUntil?: Date | null;
 }
 

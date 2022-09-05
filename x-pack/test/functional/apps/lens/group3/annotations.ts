@@ -13,8 +13,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const find = getService('find');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
+  const from = 'Sep 19, 2015 @ 06:31:44.000';
+  const to = 'Sep 23, 2015 @ 18:31:44.000';
 
   describe('lens annotations tests', () => {
+    before(async () => {
+      await PageObjects.common.setTime({ from, to });
+    });
+    after(async () => {
+      await PageObjects.common.unsetTime();
+    });
+
     it('should show a disabled annotation layer button if there is no date histogram in data layer', async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
@@ -51,10 +60,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should duplicate the style when duplicating an annotation and group them in the chart', async () => {
       // drag and drop to the empty field to generate a duplicate
-      await PageObjects.lens.dragDimensionToDimension(
-        'lnsXY_xAnnotationsPanel > lns-dimensionTrigger',
-        'lnsXY_xAnnotationsPanel > lns-empty-dimension'
-      );
+      await PageObjects.lens.dragDimensionToDimension({
+        from: 'lnsXY_xAnnotationsPanel > lns-dimensionTrigger',
+        to: 'lnsXY_xAnnotationsPanel > lns-empty-dimension',
+      });
 
       await (
         await find.byCssSelector(

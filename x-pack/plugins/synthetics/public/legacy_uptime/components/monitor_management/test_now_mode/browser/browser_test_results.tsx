@@ -74,12 +74,13 @@ export const BrowserTestRunResult = ({ monitorId, isMonitorSaved, expectPings, o
                 <StdErrorLogs checkGroup={summaryDoc.monitor.check_group} hideTitle={true} />
               )}
 
-            {summaryDoc && completedSteps > 0 && (
+            {completedSteps > 0 && (
               <StepsList
                 data={steps}
                 compactView={true}
                 showStepDurationTrend={isMonitorSaved}
                 loading={Boolean(stepLoadingInProgress)}
+                allStepsLoaded={expectedSummariesLoaded}
                 error={undefined}
               />
             )}

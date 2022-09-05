@@ -735,7 +735,7 @@
             "section": "def-public.SavedObject",
             "text": "SavedObject"
           },
-          ", \"title\" | \"id\" | \"getDisplayName\" | \"lastSavedTitle\" | \"copyOnSave\" | \"getEsType\">, isTitleDuplicateConfirmed: boolean, onTitleDuplicate: (() => void) | undefined, services: Pick<",
+          ", \"id\" | \"title\" | \"getDisplayName\" | \"lastSavedTitle\" | \"copyOnSave\" | \"getEsType\">, isTitleDuplicateConfirmed: boolean, onTitleDuplicate: (() => void) | undefined, services: Pick<",
           "SavedObjectKibanaServices",
           ", \"overlays\" | \"savedObjectsClient\">) => Promise<true>"
         ],
@@ -758,7 +758,7 @@
                 "section": "def-public.SavedObject",
                 "text": "SavedObject"
               },
-              ", \"title\" | \"id\" | \"getDisplayName\" | \"lastSavedTitle\" | \"copyOnSave\" | \"getEsType\">"
+              ", \"id\" | \"title\" | \"getDisplayName\" | \"lastSavedTitle\" | \"copyOnSave\" | \"getEsType\">"
             ],
             "path": "src/plugins/saved_objects/public/saved_object/helpers/check_for_duplicate_title.ts",
             "deprecated": false,
@@ -821,21 +821,9 @@
         "description": [],
         "signature": [
           "(savedObject: ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCoreSavedObjectsPluginApi",
-            "section": "def-public.SavedObjectsStart",
-            "text": "SavedObjectsStart"
-          },
+          "SavedObjectsStart",
           ", uiSettings: ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.IUiSettingsClient",
-            "text": "IUiSettingsClient"
-          },
+          "IUiSettingsClient",
           ") => (props: ",
           "SavedObjectFinderProps",
           ") => JSX.Element"
@@ -851,13 +839,7 @@
             "label": "savedObject",
             "description": [],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-public.SavedObjectsStart",
-                "text": "SavedObjectsStart"
-              }
+              "SavedObjectsStart"
             ],
             "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
             "deprecated": false,
@@ -871,13 +853,7 @@
             "label": "uiSettings",
             "description": [],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.IUiSettingsClient",
-                "text": "IUiSettingsClient"
-              }
+              "IUiSettingsClient"
             ],
             "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
             "deprecated": false,
@@ -988,37 +964,13 @@
           "(source: ",
           "SavedObjectAttributes",
           ", savedObject: { getEsType(): string; title: string; displayName: string; }, options: ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCoreSavedObjectsPluginApi",
-            "section": "def-public.SavedObjectsCreateOptions",
-            "text": "SavedObjectsCreateOptions"
-          },
+          "SavedObjectsCreateOptions",
           ", services: { savedObjectsClient: ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCoreSavedObjectsPluginApi",
-            "section": "def-public.SavedObjectsClientContract",
-            "text": "SavedObjectsClientContract"
-          },
+          "SavedObjectsClientContract",
           "; overlays: ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.OverlayStart",
-            "text": "OverlayStart"
-          },
+          "OverlayStart",
           "; }) => Promise<",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCoreSavedObjectsPluginApi",
-            "section": "def-public.SimpleSavedObject",
-            "text": "SimpleSavedObject"
-          },
+          "SimpleSavedObject",
           "<",
           "SavedObjectAttributes",
           ">>"
@@ -1099,13 +1051,7 @@
               "- options to pass to the saved object create method"
             ],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-public.SavedObjectsCreateOptions",
-                "text": "SavedObjectsCreateOptions"
-              }
+              "SavedObjectsCreateOptions"
             ],
             "path": "src/plugins/saved_objects/public/saved_object/helpers/save_with_confirmation.ts",
             "deprecated": false,
@@ -1129,121 +1075,7 @@
                 "label": "savedObjectsClient",
                 "description": [],
                 "signature": [
-                  "{ create: <T = unknown>(type: string, attributes: T, options?: ",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-public.SavedObjectsCreateOptions",
-                    "text": "SavedObjectsCreateOptions"
-                  },
-                  ") => Promise<",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-public.SimpleSavedObject",
-                    "text": "SimpleSavedObject"
-                  },
-                  "<T>>; bulkCreate: (objects?: ",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-public.SavedObjectsBulkCreateObject",
-                    "text": "SavedObjectsBulkCreateObject"
-                  },
-                  "<unknown>[], options?: ",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-public.SavedObjectsBulkCreateOptions",
-                    "text": "SavedObjectsBulkCreateOptions"
-                  },
-                  ") => Promise<",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-public.SavedObjectsBatchResponse",
-                    "text": "SavedObjectsBatchResponse"
-                  },
-                  "<unknown>>; delete: (type: string, id: string, options?: ",
-                  "SavedObjectsDeleteOptions",
-                  " | undefined) => Promise<{}>; find: <T = unknown, A = unknown>(options: SavedObjectsFindOptions) => Promise<",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-public.SavedObjectsFindResponsePublic",
-                    "text": "SavedObjectsFindResponsePublic"
-                  },
-                  "<T, unknown>>; bulkGet: (objects?: { id: string; type: string; }[]) => Promise<",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-public.SavedObjectsBatchResponse",
-                    "text": "SavedObjectsBatchResponse"
-                  },
-                  "<unknown>>; bulkResolve: <T = unknown>(objects?: { id: string; type: string; }[]) => Promise<{ resolved_objects: ",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-public.ResolvedSimpleSavedObject",
-                    "text": "ResolvedSimpleSavedObject"
-                  },
-                  "<T>[]; }>; get: <T = unknown>(type: string, id: string) => Promise<",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-public.SimpleSavedObject",
-                    "text": "SimpleSavedObject"
-                  },
-                  "<T>>; resolve: <T = unknown>(type: string, id: string) => Promise<",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-public.ResolvedSimpleSavedObject",
-                    "text": "ResolvedSimpleSavedObject"
-                  },
-                  "<T>>; update: <T = unknown>(type: string, id: string, attributes: T, { version, references, upsert }?: ",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-public.SavedObjectsUpdateOptions",
-                    "text": "SavedObjectsUpdateOptions"
-                  },
-                  "<unknown>) => Promise<",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-public.SimpleSavedObject",
-                    "text": "SimpleSavedObject"
-                  },
-                  "<T>>; bulkUpdate: <T = unknown>(objects?: ",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-public.SavedObjectsBulkUpdateObject",
-                    "text": "SavedObjectsBulkUpdateObject"
-                  },
-                  "<unknown>[]) => Promise<",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-public.SavedObjectsBatchResponse",
-                    "text": "SavedObjectsBatchResponse"
-                  },
-                  "<T>>; }"
+                  "SavedObjectsClientContract"
                 ],
                 "path": "src/plugins/saved_objects/public/saved_object/helpers/save_with_confirmation.ts",
                 "deprecated": false
@@ -1256,13 +1088,7 @@
                 "label": "overlays",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.OverlayStart",
-                    "text": "OverlayStart"
-                  }
+                  "OverlayStart"
                 ],
                 "path": "src/plugins/saved_objects/public/saved_object/helpers/save_with_confirmation.ts",
                 "deprecated": false
@@ -1624,22 +1450,6 @@
             "path": "src/plugins/saved_objects_tagging_oss/public/api.ts"
           },
           {
-            "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/utils/saved_objects_utils/display_duplicate_title_confirm_modal.ts"
-          },
-          {
-            "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/utils/saved_objects_utils/display_duplicate_title_confirm_modal.ts"
-          },
-          {
-            "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/utils/saved_objects_utils/check_for_duplicate_title.ts"
-          },
-          {
-            "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/utils/saved_objects_utils/check_for_duplicate_title.ts"
-          },
-          {
             "plugin": "dashboard",
             "path": "src/plugins/dashboard/public/services/saved_object_loader.ts"
           },
@@ -1682,22 +1492,6 @@
           {
             "plugin": "dashboard",
             "path": "src/plugins/dashboard/public/application/actions/clone_panel_action.tsx"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/persistence/saved_objects_utils/display_duplicate_title_confirm_modal.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/persistence/saved_objects_utils/display_duplicate_title_confirm_modal.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/persistence/saved_objects_utils/check_for_duplicate_title.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/persistence/saved_objects_utils/check_for_duplicate_title.ts"
           }
         ],
         "children": [
@@ -1916,8 +1710,8 @@
                 "pluginId": "dataViews",
                 "scope": "common",
                 "docId": "kibDataViewsPluginApi",
-                "section": "def-common.IndexPattern",
-                "text": "IndexPattern"
+                "section": "def-common.DataView",
+                "text": "DataView"
               },
               " | null>) | undefined"
             ],
@@ -2350,8 +2144,8 @@
                 "pluginId": "dataViews",
                 "scope": "common",
                 "docId": "kibDataViewsPluginApi",
-                "section": "def-common.IndexPattern",
-                "text": "IndexPattern"
+                "section": "def-common.DataView",
+                "text": "DataView"
               },
               " | undefined"
             ],
@@ -2689,13 +2483,7 @@
             "description": [],
             "signature": [
               "(savedObject: ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-public.SimpleSavedObject",
-                "text": "SimpleSavedObject"
-              },
+              "SimpleSavedObject",
               "<T>) => ",
               "IconType"
             ],
@@ -2710,13 +2498,7 @@
                 "label": "savedObject",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-public.SimpleSavedObject",
-                    "text": "SimpleSavedObject"
-                  },
+                  "SimpleSavedObject",
                   "<T>"
                 ],
                 "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
@@ -2735,13 +2517,7 @@
             "description": [],
             "signature": [
               "((savedObject: ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-public.SimpleSavedObject",
-                "text": "SimpleSavedObject"
-              },
+              "SimpleSavedObject",
               "<T>) => string) | undefined"
             ],
             "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
@@ -2755,13 +2531,7 @@
                 "label": "savedObject",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-public.SimpleSavedObject",
-                    "text": "SimpleSavedObject"
-                  },
+                  "SimpleSavedObject",
                   "<T>"
                 ],
                 "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
@@ -2780,13 +2550,7 @@
             "description": [],
             "signature": [
               "((savedObject: ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-public.SimpleSavedObject",
-                "text": "SimpleSavedObject"
-              },
+              "SimpleSavedObject",
               "<T>) => boolean) | undefined"
             ],
             "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
@@ -2800,13 +2564,7 @@
                 "label": "savedObject",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-public.SimpleSavedObject",
-                    "text": "SimpleSavedObject"
-                  },
+                  "SimpleSavedObject",
                   "<T>"
                 ],
                 "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
@@ -2825,13 +2583,7 @@
             "description": [],
             "signature": [
               "((savedObject: ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-public.SimpleSavedObject",
-                "text": "SimpleSavedObject"
-              },
+              "SimpleSavedObject",
               "<T>) => string) | undefined"
             ],
             "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
@@ -2845,13 +2597,7 @@
                 "label": "savedObject",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-public.SimpleSavedObject",
-                    "text": "SimpleSavedObject"
-                  },
+                  "SimpleSavedObject",
                   "<T>"
                 ],
                 "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
@@ -2870,6 +2616,19 @@
             "description": [],
             "signature": [
               "string[] | undefined"
+            ],
+            "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "savedObjects",
+            "id": "def-public.SavedObjectMetaData.defaultSearchField",
+            "type": "string",
+            "tags": [],
+            "label": "defaultSearchField",
+            "description": [],
+            "signature": [
+              "string | undefined"
             ],
             "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
             "deprecated": false
@@ -3097,21 +2856,9 @@
         "description": [],
         "signature": [
           "{ savedObjects: ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCoreSavedObjectsPluginApi",
-            "section": "def-public.SavedObjectsStart",
-            "text": "SavedObjectsStart"
-          },
+          "SavedObjectsStart",
           "; uiSettings: ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.IUiSettingsClient",
-            "text": "IUiSettingsClient"
-          },
+          "IUiSettingsClient",
           "; } & ",
           "SavedObjectFinderProps"
         ],

@@ -16,7 +16,8 @@ import {
   createSecuritySolutionStorageMock,
 } from '../../../common/mock';
 import '../../../common/mock/match_media';
-import { createStore, State } from '../../../common/store';
+import type { State } from '../../../common/store';
+import { createStore } from '../../../common/store';
 import { NetworkKpiComponent } from '.';
 
 describe('NetworkKpiComponent', () => {
@@ -25,7 +26,7 @@ describe('NetworkKpiComponent', () => {
     filterQuery: '',
     from: '2019-06-15T06:00:00.000Z',
     indexNames: [],
-    narrowDateRange: jest.fn(),
+    updateDateRange: jest.fn(),
     setQuery: jest.fn(),
     skip: true,
     to: '2019-06-18T06:00:00.000Z',

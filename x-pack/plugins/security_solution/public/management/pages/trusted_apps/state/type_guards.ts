@@ -6,7 +6,7 @@
  */
 
 import { ConditionEntryField } from '@kbn/securitysolution-utils';
-import {
+import type {
   TrustedAppConditionEntry,
   MacosLinuxConditionEntry,
   WindowsConditionEntry,

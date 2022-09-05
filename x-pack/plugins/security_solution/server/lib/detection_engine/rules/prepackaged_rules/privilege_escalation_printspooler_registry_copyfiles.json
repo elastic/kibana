@@ -16,6 +16,23 @@
     "https://github.com/sbousseaden/EVTX-ATTACK-SAMPLES/blob/master/Privilege%20Escalation/privesc_sysmon_cve_20201030_spooler.evtx",
     "https://msrc.microsoft.com/update-guide/en-US/vulnerability/CVE-2020-1030"
   ],
+  "required_fields": [
+    {
+      "ecs": true,
+      "name": "host.id",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "registry.data.strings",
+      "type": "wildcard"
+    },
+    {
+      "ecs": true,
+      "name": "registry.path",
+      "type": "keyword"
+    }
+  ],
   "risk_score": 73,
   "rule_id": "bd7eefee-f671-494e-98df-f01daf9e5f17",
   "severity": "high",
@@ -44,5 +61,5 @@
     }
   ],
   "type": "eql",
-  "version": 3
+  "version": 4
 }

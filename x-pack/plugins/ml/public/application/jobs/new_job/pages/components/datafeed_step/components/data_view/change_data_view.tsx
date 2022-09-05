@@ -165,6 +165,7 @@ export const ChangeDataViewModal: FC<Props> = ({ onClose }) => {
                         defaultMessage: 'Data view',
                       }
                     ),
+                    defaultSearchField: 'name',
                   },
                 ]}
                 fixedPageSize={fixedPageSize}

@@ -5,14 +5,19 @@
  * 2.0.
  */
 
-import { ChromeBreadcrumb } from '@kbn/core/public';
-import { getRuleDetailsUrl } from '../../../../common/components/link_to/redirect_to_detection_engine';
+import type { ChromeBreadcrumb } from '@kbn/core/public';
+import {
+  getRuleDetailsTabUrl,
+  getRuleDetailsUrl,
+} from '../../../../common/components/link_to/redirect_to_detection_engine';
 import * as i18nRules from './translations';
-import { RouteSpyState } from '../../../../common/utils/route/types';
+import type { RouteSpyState } from '../../../../common/utils/route/types';
 import { SecurityPageName } from '../../../../app/types';
 import { RULES_PATH } from '../../../../../common/constants';
-import { RuleStep, RuleStepsOrder } from './types';
-import { GetSecuritySolutionUrl } from '../../../../common/components/link_to';
+import type { RuleStepsOrder } from './types';
+import { RuleStep } from './types';
+import type { GetSecuritySolutionUrl } from '../../../../common/components/link_to';
+import { RuleDetailTabs, RULE_DETAILS_TAB_NAME } from './details';
 
 export const ruleStepsOrder: RuleStepsOrder = [
   RuleStep.defineRule,
@@ -20,6 +25,10 @@ export const ruleStepsOrder: RuleStepsOrder = [
   RuleStep.scheduleRule,
   RuleStep.ruleActions,
 ];
+
+const getRuleDetailsTabName = (tabName: string): string => {
+  return RULE_DETAILS_TAB_NAME[tabName] ?? RULE_DETAILS_TAB_NAME[RuleDetailTabs.alerts];
+};
 
 const isRuleCreatePage = (pathname: string) =>
   pathname.includes(RULES_PATH) && pathname.includes('/create');
@@ -41,6 +50,19 @@ export const getTrailingBreadcrumbs = (
         href: getSecuritySolutionUrl({
           deepLinkId: SecurityPageName.rules,
           path: getRuleDetailsUrl(params.detailName, ''),
+        }),
+      },
+    ];
+  }
+
+  if (params.detailName && params.state?.ruleName && params.tabName) {
+    breadcrumb = [
+      ...breadcrumb,
+      {
+        text: getRuleDetailsTabName(params.tabName),
+        href: getSecuritySolutionUrl({
+          deepLinkId: SecurityPageName.rules,
+          path: getRuleDetailsTabUrl(params.detailName, params.tabName, ''),
         }),
       },
     ];

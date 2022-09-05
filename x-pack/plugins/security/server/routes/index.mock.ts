@@ -18,11 +18,13 @@ import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 
 import type { RouteDefinitionParams } from '.';
 import { licenseMock } from '../../common/licensing/index.mock';
+import { analyticsServiceMock } from '../analytics/analytics_service.mock';
 import { authenticationServiceMock } from '../authentication/authentication_service.mock';
 import { authorizationMock } from '../authorization/index.mock';
 import { ConfigSchema, createConfig } from '../config';
 import { sessionMock } from '../session_management/session.mock';
 import type { SecurityRequestHandlerContext } from '../types';
+import { userProfileServiceMock } from '../user_profile/user_profile_service.mock';
 
 export const routeDefinitionParamsMock = {
   create: (rawConfig: Record<string, unknown> = {}) => {
@@ -46,6 +48,8 @@ export const routeDefinitionParamsMock = {
       getSession: jest.fn().mockReturnValue(sessionMock.create()),
       getAuthenticationService: jest.fn().mockReturnValue(authenticationServiceMock.createStart()),
       getAnonymousAccessService: jest.fn(),
+      getUserProfileService: jest.fn().mockReturnValue(userProfileServiceMock.createStart()),
+      analyticsService: analyticsServiceMock.createSetup(),
     } as unknown as DeeplyMockedKeys<RouteDefinitionParams>;
   },
 };

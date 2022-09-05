@@ -30,7 +30,8 @@
     "timelines",
     "triggersActionsUi",
     "inspector",
-    "unifiedSearch"
+    "unifiedSearch",
+    "security"
   ],
   "ui": true,
   "server": true,

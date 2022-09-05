@@ -8,7 +8,7 @@
 
 import { createDynamicAssetHandlerMock } from './bundle_route.test.mocks';
 
-import { httpServiceMock } from '../../http/http_service.mock';
+import { httpServiceMock } from '@kbn/core-http-server-mocks';
 import { FileHashCache } from './file_hash_cache';
 import { registerRouteForBundle } from './bundles_route';
 

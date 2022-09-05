@@ -5,35 +5,19 @@
  * 2.0.
  */
 
-import { EuiFlexItem, EuiFlexGroup, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import React from 'react';
-import { NoImageAvailable } from './no_image_available';
-import { imageLoadingSpinnerAriaLabel } from './translations';
+import { LoadingImageState, NoImageAvailable } from './no_image_available';
 
 export interface NoImageDisplayProps {
   imageCaption: JSX.Element;
-  isLoading: boolean;
-  isPending: boolean;
+  isLoading?: boolean;
 }
 
-export const NoImageDisplay: React.FC<NoImageDisplayProps> = ({
-  imageCaption,
-  isLoading,
-  isPending,
-}) => {
+export const NoImageDisplay: React.FC<NoImageDisplayProps> = ({ imageCaption, isLoading }) => {
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center">
-      <EuiFlexItem>
-        {isLoading || isPending ? (
-          <EuiLoadingSpinner
-            aria-label={imageLoadingSpinnerAriaLabel}
-            size="l"
-            data-test-subj="pingTimestampSpinner"
-          />
-        ) : (
-          <NoImageAvailable />
-        )}
-      </EuiFlexItem>
+      <EuiFlexItem>{isLoading ? <LoadingImageState /> : <NoImageAvailable />}</EuiFlexItem>
       <EuiFlexItem>{imageCaption}</EuiFlexItem>
     </EuiFlexGroup>
   );

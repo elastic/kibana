@@ -224,6 +224,7 @@ describe('ESGeoGridSource', () => {
             disabled: false,
             key: 'bar',
             negate: false,
+            type: 'spatial_filter',
           },
           query: {
             bool: {

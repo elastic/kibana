@@ -19,7 +19,11 @@ const fallbackPreviousPeriodText = i18n.translate(
 export const usePreviousPeriodLabel = () => {
   const {
     query: { rangeFrom, rangeTo, offset },
-  } = useAnyOfApmParams('/services', '/backends/*', '/services/{serviceName}');
+  } = useAnyOfApmParams(
+    '/services',
+    '/dependencies/*',
+    '/services/{serviceName}'
+  );
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 

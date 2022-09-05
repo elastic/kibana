@@ -7,9 +7,10 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+
 import type { EsIndex } from '../types/es_index';
 import type { EsIngestPipeline } from '../types/es_ingest_pipeline';
-import { isPopulatedObject } from '../shared_imports';
 
 // To be able to use the type guards on the client side, we need to make sure we don't import
 // the code of '@kbn/config-schema' but just its types, otherwise the client side code will
@@ -102,7 +103,7 @@ export const isFieldHistogramsResponseSchema = (
 export const isGetTransformsAuditMessagesResponseSchema = (
   arg: unknown
 ): arg is GetTransformsAuditMessagesResponseSchema => {
-  return Array.isArray(arg);
+  return isPopulatedObject(arg, ['messages', 'total']);
 };
 
 export const isPostTransformsPreviewResponseSchema = (

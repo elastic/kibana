@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { ChangeEventHandler, memo, ReactNode, useCallback } from 'react';
+import type { ChangeEventHandler, ReactNode } from 'react';
+import React, { memo, useCallback } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,

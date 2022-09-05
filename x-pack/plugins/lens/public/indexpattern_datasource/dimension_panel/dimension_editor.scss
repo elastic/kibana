@@ -16,21 +16,19 @@
   right: 0;
   top: 0;
   bottom: 0;
-
-  .lnsIndexPatternDimensionEditor__section {
-    height: 100%;
-  }
 }
 
-.lnsIndexPatternDimensionEditor__section--padded {
+.lnsIndexPatternDimensionEditor--padded {
   padding: $euiSize;
 }
 
-.lnsIndexPatternDimensionEditor__section--collapseNext {
+.lnsIndexPatternDimensionEditor--collapseNext {
   margin-bottom: -$euiSizeL;
+  border-top: $euiBorderThin;
+  margin-top: 0 !important;
 }
 
-.lnsIndexPatternDimensionEditor__section--shaded {
+.lnsIndexPatternDimensionEditor--shaded {
   background-color: $euiColorLightestShade;
   border-bottom: $euiBorderThin;
 }
@@ -47,4 +45,24 @@
 .lnsIndexPatternDimensionEditor__operation > button {
   padding-top: 0;
   padding-bottom: 0;
+}
+
+.lnsIndexPatternDimensionEditor__warning {
+  margin-bottom: $euiSize;
+  margin-top: $euiSizeS;
+}
+
+.lnsIndexPatternDimensionEditor__droppable {
+  padding: $euiSizeXS;
+  border-radius: $euiBorderRadius;
+}
+
+.lnsIndexPatternDimensionEditor__droppableItem {
+  margin-right: $euiSizeS;
+}
+
+.lnsIndexPatternDimensionEditor-advancedOptions button {
+  &:hover, &:focus {
+    text-decoration-color: $euiColorPrimary;
+  }
 }

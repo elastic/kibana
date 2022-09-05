@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiBasicTableColumn, EuiLink, EuiIcon, EuiThemeComputed } from '@elastic/eui';
+import { EuiBadge, EuiBasicTableColumn, EuiIcon, EuiThemeComputed } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import moment from 'moment';
 import React from 'react';
+import { MonitorDetailsLink } from './monitor_details_link';
 
 import {
   ConfigKey,
@@ -32,6 +33,7 @@ export function getMonitorListColumns({
   errorSummariesById,
   canEditSynthetics,
   reloadPage,
+  loading,
   syntheticsMonitors,
 }: {
   basePath: string;
@@ -40,6 +42,7 @@ export function getMonitorListColumns({
   errorSummariesById: Map<string, Ping>;
   canEditSynthetics: boolean;
   syntheticsMonitors: EncryptedSyntheticsSavedMonitor[];
+  loading: boolean;
   reloadPage: () => void;
 }) {
   const getIsMonitorUnHealthy = (monitor: EncryptedSyntheticsSavedMonitor) => {
@@ -60,8 +63,8 @@ export function getMonitorListColumns({
         defaultMessage: 'Monitor name',
       }),
       sortable: true,
-      render: (name: string, { id }: EncryptedSyntheticsSavedMonitor) => (
-        <EuiLink href={`${basePath}/app/uptime/monitor/${btoa(id)}`}>{name}</EuiLink>
+      render: (_: string, monitor: EncryptedSyntheticsSavedMonitor) => (
+        <MonitorDetailsLink basePath={basePath} monitor={monitor} />
       ),
     },
     {
@@ -118,6 +121,7 @@ export function getMonitorListColumns({
     {
       align: 'left' as const,
       field: ConfigKey.SCHEDULE,
+      sortable: true,
       name: i18n.translate('xpack.synthetics.management.monitorList.frequency', {
         defaultMessage: 'Frequency',
       }),
@@ -133,8 +137,8 @@ export function getMonitorListColumns({
         <MonitorEnabled
           id={monitor.id}
           monitor={monitor}
-          isDisabled={!canEditSynthetics}
           reloadPage={reloadPage}
+          isSwitchable={!loading}
         />
       ),
     },

@@ -11,6 +11,7 @@ import {
   BrowserFields,
   ConfigKey,
   DataStream,
+  FormMonitorType,
   Locations,
   ProjectBrowserMonitor,
   ScheduleUnit,
@@ -44,11 +45,13 @@ type NormalizedPublicFields = Omit<
 
 export const normalizeProjectMonitor = ({
   locations = [],
+  privateLocations = [],
   monitor,
   projectId,
   namespace,
 }: {
   locations: Locations;
+  privateLocations: Locations;
   monitor: ProjectBrowserMonitor;
   projectId: string;
   namespace: string;
@@ -56,6 +59,7 @@ export const normalizeProjectMonitor = ({
   const defaultFields = DEFAULT_FIELDS[DataStream.BROWSER];
   const normalizedFields: NormalizedPublicFields = {
     [ConfigKey.MONITOR_TYPE]: DataStream.BROWSER,
+    [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.MULTISTEP,
     [ConfigKey.MONITOR_SOURCE_TYPE]: SourceType.PROJECT,
     [ConfigKey.NAME]: monitor.name || '',
     [ConfigKey.SCHEDULE]: {
@@ -66,11 +70,11 @@ export const normalizeProjectMonitor = ({
     [ConfigKey.JOURNEY_ID]: monitor.id || defaultFields[ConfigKey.JOURNEY_ID],
     [ConfigKey.SOURCE_PROJECT_CONTENT]:
       monitor.content || defaultFields[ConfigKey.SOURCE_PROJECT_CONTENT],
-    [ConfigKey.LOCATIONS]: monitor.locations
-      ?.map((key) => {
-        return locations.find((location) => location.id === key);
-      })
-      .filter((location) => location !== undefined) as BrowserFields[ConfigKey.LOCATIONS],
+    [ConfigKey.LOCATIONS]: getMonitorLocations({
+      monitor,
+      privateLocations,
+      publicLocations: locations,
+    }),
     [ConfigKey.THROTTLING_CONFIG]: monitor.throttling
       ? `${monitor.throttling.download}d/${monitor.throttling.upload}u/${monitor.throttling.latency}l`
       : defaultFields[ConfigKey.THROTTLING_CONFIG],
@@ -101,7 +105,7 @@ export const normalizeProjectMonitor = ({
     [ConfigKey.ORIGINAL_SPACE]: namespace || defaultFields[ConfigKey.ORIGINAL_SPACE],
     [ConfigKey.CUSTOM_HEARTBEAT_ID]: `${monitor.id}-${projectId}-${namespace}`,
     [ConfigKey.TIMEOUT]: null,
-    [ConfigKey.ENABLED]: monitor.enabled || defaultFields[ConfigKey.ENABLED],
+    [ConfigKey.ENABLED]: monitor.enabled ?? defaultFields[ConfigKey.ENABLED],
   };
   return {
     ...DEFAULT_FIELDS[DataStream.BROWSER],
@@ -111,16 +115,42 @@ export const normalizeProjectMonitor = ({
 
 export const normalizeProjectMonitors = ({
   locations = [],
+  privateLocations = [],
   monitors = [],
   projectId,
   namespace,
 }: {
   locations: Locations;
+  privateLocations: Locations;
   monitors: ProjectBrowserMonitor[];
   projectId: string;
   namespace: string;
 }) => {
   return monitors.map((monitor) => {
-    return normalizeProjectMonitor({ monitor, locations, projectId, namespace });
+    return normalizeProjectMonitor({ monitor, locations, privateLocations, projectId, namespace });
   });
+};
+
+export const getMonitorLocations = ({
+  privateLocations,
+  publicLocations,
+  monitor,
+}: {
+  monitor: ProjectBrowserMonitor;
+  privateLocations: Locations;
+  publicLocations: Locations;
+}) => {
+  const publicLocs =
+    monitor.locations?.map((id) => {
+      return publicLocations.find((location) => location.id === id);
+    }) || [];
+  const privateLocs =
+    monitor.privateLocations?.map((locationName) => {
+      return privateLocations.find(
+        (location) => location.label.toLowerCase() === locationName.toLowerCase()
+      );
+    }) || [];
+  return [...publicLocs, ...privateLocs].filter(
+    (location) => location !== undefined
+  ) as BrowserFields[ConfigKey.LOCATIONS];
 };

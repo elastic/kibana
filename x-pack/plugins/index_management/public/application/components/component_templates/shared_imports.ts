@@ -65,6 +65,7 @@ export type {
   ComponentTemplateSerialized,
   ComponentTemplateDeserialized,
   ComponentTemplateListItem,
+  ComponentTemplateDatastreams,
 } from '../../../../common';
 
 export { serializeComponentTemplate } from '../../../../common/lib';

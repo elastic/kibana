@@ -39,7 +39,11 @@ export default function (providerContext: FtrProviderContext) {
         .set('kbn-xsrf', 'xxxx')
         .expect(200);
 
-      const templateName = body.items[0].id;
+      const templateName = body.items.filter((item: any) => item.type === 'index_template')?.[0].id;
+
+      if (!templateName) {
+        throw new Error('index template not found in package assets');
+      }
 
       const { body: indexTemplateResponse } = await es.transport.request<any>(
         {

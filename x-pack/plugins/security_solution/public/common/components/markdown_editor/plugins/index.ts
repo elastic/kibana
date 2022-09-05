@@ -5,18 +5,17 @@
  * 2.0.
  */
 
+import type { EuiLinkAnchorProps } from '@elastic/eui';
 import {
-  EuiLinkAnchorProps,
   getDefaultEuiMarkdownParsingPlugins,
   getDefaultEuiMarkdownProcessingPlugins,
   getDefaultEuiMarkdownUiPlugins,
 } from '@elastic/eui';
 // Remove after this issue is resolved: https://github.com/elastic/eui/issues/4688
-import { Options as Remark2RehypeOptions } from 'mdast-util-to-hast';
-import { FunctionComponent } from 'react';
-// eslint-disable-next-line import/no-extraneous-dependencies
-import rehype2react from 'rehype-react';
-import { Plugin, PluggableList } from 'unified';
+import type { Options as Remark2RehypeOptions } from 'mdast-util-to-hast';
+import type { FunctionComponent } from 'react';
+import type rehype2react from 'rehype-react';
+import type { Plugin, PluggableList } from 'unified';
 import * as timelineMarkdownPlugin from './timeline';
 
 export const { uiPlugins, parsingPlugins, processingPlugins } = {

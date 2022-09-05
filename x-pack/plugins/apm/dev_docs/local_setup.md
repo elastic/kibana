@@ -44,7 +44,7 @@ elasticsearch.username: kibana_system
 elasticsearch.password: changeme
 ```
 
-Documentation for [Synthtrace](https://github.com/elastic/kibana/blob/main/packages/elastic-apm-synthtrace/README.md)
+Documentation for [Synthtrace](https://github.com/elastic/kibana/blob/main/packages/kbn-apm-synthtrace/README.md)
 
 ## 2. Cloud-based ES Cluster (internal devs only)
 
@@ -90,8 +90,8 @@ node x-pack/plugins/apm/scripts/create_apm_users.js --username admin --password 
 
 This will create:
 
-- **viewer_user**: User with `viewer` role (read-only)
-- **editor_user**: User with `editor` role (read/write)
+- **viewer**: User with `viewer` role (read-only)
+- **editor**: User with `editor` role (read/write)
 
 # Debugging Elasticsearch queries
 

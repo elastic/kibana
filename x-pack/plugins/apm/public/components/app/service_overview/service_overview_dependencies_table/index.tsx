@@ -16,20 +16,18 @@ import { useApmServiceContext } from '../../../../context/apm_service/use_apm_se
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../../hooks/use_time_range';
-import { BackendLink } from '../../../shared/backend_link';
+import { DependencyLink } from '../../../shared/dependency_link';
 import { DependenciesTable } from '../../../shared/dependencies_table';
 import { ServiceLink } from '../../../shared/service_link';
 
 interface ServiceOverviewDependenciesTableProps {
   fixedHeight?: boolean;
-  isSingleColumn?: boolean;
   link?: ReactNode;
   showPerPageOptions?: boolean;
 }
 
 export function ServiceOverviewDependenciesTable({
   fixedHeight,
-  isSingleColumn = true,
   link,
   showPerPageOptions = true,
 }: ServiceOverviewDependenciesTableProps) {
@@ -85,12 +83,12 @@ export function ServiceOverviewDependenciesTable({
       const { location } = dependency;
       const name = getNodeName(location);
       const itemLink =
-        location.type === NodeType.backend ? (
-          <BackendLink
+        location.type === NodeType.dependency ? (
+          <DependencyLink
             type={location.spanType}
             subtype={location.spanSubtype}
             query={{
-              backendName: location.backendName,
+              dependencyName: location.dependencyName,
               comparisonEnabled,
               offset,
               environment,
@@ -102,7 +100,7 @@ export function ServiceOverviewDependenciesTable({
               trackEvent({
                 app: 'apm',
                 metricType: METRIC_TYPE.CLICK,
-                metric: 'service_dependencies_to_backend_detail',
+                metric: 'service_dependencies_to_dependency_detail',
               });
             }}
           />
@@ -136,7 +134,6 @@ export function ServiceOverviewDependenciesTable({
     <DependenciesTable
       dependencies={dependencies}
       fixedHeight={fixedHeight}
-      isSingleColumn={isSingleColumn}
       title={
         <EuiToolTip
           content={i18n.translate(
@@ -173,6 +170,7 @@ export function ServiceOverviewDependenciesTable({
       status={status}
       link={link}
       showPerPageOptions={showPerPageOptions}
+      initialPageSize={5}
     />
   );
 }

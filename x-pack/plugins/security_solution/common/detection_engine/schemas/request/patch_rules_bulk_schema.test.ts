@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { patchRulesBulkSchema, PatchRulesBulkSchema } from './patch_rules_bulk_schema';
+import type { PatchRulesBulkSchema } from './patch_rules_bulk_schema';
+import { patchRulesBulkSchema } from './patch_rules_bulk_schema';
 import { exactCheck, formatErrors, foldLeftRight } from '@kbn/securitysolution-io-ts-utils';
-import { PatchRulesSchema } from './patch_rules_schema';
+import type { PatchRulesSchema } from './patch_rules_schema';
 
 // only the basics of testing are here.
 // see: patch_rules_schema.test.ts for the bulk of the validation tests
@@ -21,16 +22,6 @@ describe('patch_rules_bulk_schema', () => {
     const output = foldLeftRight(checked);
     expect(output.errors).toEqual([]);
     expect(output.schema).toEqual([]);
-  });
-
-  test('made up values do not validate for a single element', () => {
-    const payload: Array<{ madeUp: string }> = [{ madeUp: 'hi' }];
-
-    const decoded = patchRulesBulkSchema.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const output = foldLeftRight(checked);
-    expect(formatErrors(output.errors)).toEqual(['invalid keys "madeUp"']);
-    expect(output.schema).toEqual({});
   });
 
   test('single array of [id] does validate', () => {

@@ -25,7 +25,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
-import { ThemeServiceStart, HttpFetchError, ToastsStart, ApplicationStart } from '@kbn/core/public';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
+import type { ThemeServiceStart, ToastsStart, ApplicationStart } from '@kbn/core/public';
 import { debounce, keyBy, sortBy, uniq, get } from 'lodash';
 import React from 'react';
 import moment from 'moment';
@@ -75,7 +76,7 @@ export interface TableListViewState<V> {
   isDeletingItems: boolean;
   showDeleteModal: boolean;
   showLimitError: boolean;
-  fetchError?: HttpFetchError;
+  fetchError?: IHttpFetchError<Error>;
   filter: string;
   selectedIds: string[];
   totalItems: number;

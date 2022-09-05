@@ -78,9 +78,9 @@ export async function performInnerJoins(
   }
 
   const joinStatusesWithoutAnyMatches = joinStatuses.filter((joinStatus) => {
-    return (
-      !joinStatus.joinedWithAtLeastOneFeature && joinStatus.joinState.propertiesMap !== undefined
-    );
+    const hasTerms =
+      joinStatus.joinState.propertiesMap && joinStatus.joinState.propertiesMap.size > 0;
+    return !joinStatus.joinedWithAtLeastOneFeature && hasTerms;
   });
 
   if (joinStatusesWithoutAnyMatches.length) {

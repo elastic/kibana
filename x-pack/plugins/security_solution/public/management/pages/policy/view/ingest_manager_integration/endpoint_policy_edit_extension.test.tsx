@@ -7,13 +7,13 @@
 
 import React from 'react';
 import { waitFor } from '@testing-library/react';
-import { PackagePolicy, NewPackagePolicy } from '@kbn/fleet-plugin/common';
+import type { PackagePolicy, NewPackagePolicy } from '@kbn/fleet-plugin/common';
 
 import { useEndpointPrivileges } from '../../../../../common/components/user_privileges/endpoint/use_endpoint_privileges';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import { getEndpointPrivilegesInitialStateMock } from '../../../../../common/components/user_privileges/endpoint/mocks';
 import { composeHttpHandlerMocks } from '../../../../../common/mock/endpoint/http_handler_mock_factory';
-import { AppContextTestRender } from '../../../../../common/mock/endpoint';
+import type { AppContextTestRender } from '../../../../../common/mock/endpoint';
 import {
   fleetGetAgentStatusHttpMock,
   fleetGetEndpointPackagePolicyHttpMock,

@@ -10,7 +10,7 @@ import {
   LayerTypes,
   REFERENCE_LINE,
   REFERENCE_LINE_LAYER,
-  REFERENCE_LINE_Y_CONFIG,
+  EXTENDED_REFERENCE_LINE_DECORATION_CONFIG,
 } from '../../common/constants';
 import {
   CommonXYLayerConfig,
@@ -19,8 +19,8 @@ import {
   CommonXYAnnotationLayerConfig,
   ReferenceLineLayerConfig,
   ReferenceLineConfig,
-  ExtendedYConfigResult,
-  ReferenceLineYConfig,
+  ReferenceLineDecorationConfigResult,
+  ExtendedReferenceLineDecorationConfig,
 } from '../../common/types';
 
 export const isDataLayer = (layer: CommonXYLayerConfig): layer is CommonXYDataLayerConfig =>
@@ -35,9 +35,10 @@ export const isReferenceLayer = (layer: CommonXYLayerConfig): layer is Reference
 export const isReferenceLine = (layer: CommonXYLayerConfig): layer is ReferenceLineConfig =>
   layer.type === REFERENCE_LINE;
 
-export const isReferenceLineYConfig = (
-  yConfig: ReferenceLineYConfig | ExtendedYConfigResult
-): yConfig is ReferenceLineYConfig => yConfig.type === REFERENCE_LINE_Y_CONFIG;
+export const isReferenceLineDecorationConfig = (
+  decoration: ExtendedReferenceLineDecorationConfig | ReferenceLineDecorationConfigResult
+): decoration is ExtendedReferenceLineDecorationConfig =>
+  decoration.type === EXTENDED_REFERENCE_LINE_DECORATION_CONFIG;
 
 export const isReferenceLineOrLayer = (
   layer: CommonXYLayerConfig

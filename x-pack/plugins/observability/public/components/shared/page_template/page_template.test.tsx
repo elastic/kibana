@@ -10,6 +10,8 @@ import { render } from '@testing-library/react';
 import { shallow } from 'enzyme';
 import React from 'react';
 import { of } from 'rxjs';
+import { getKibanaPageTemplateKibanaDependenciesMock as getPageTemplateServices } from '@kbn/shared-ux-page-kibana-template-mocks';
+
 import { createNavigationRegistry } from '../../../services/navigation_registry';
 import { createLazyObservabilityPageTemplate } from './lazy_page_template';
 import { ObservabilityPageTemplate } from './page_template';
@@ -51,6 +53,7 @@ describe('Page template', () => {
       getUrlForApp: () => '/test-url',
       navigateToApp: async () => {},
       navigationSections$: navigationRegistry.sections$,
+      getPageTemplateServices,
     });
 
     const component = shallow(
@@ -78,6 +81,7 @@ describe('Page template', () => {
           pageTitle: 'Test title',
           rightSideItems: [<span>Test side item</span>],
         }}
+        getPageTemplateServices={getPageTemplateServices}
       >
         <div>Test structure</div>
       </ObservabilityPageTemplate>
@@ -98,6 +102,7 @@ describe('Page template', () => {
             pageTitle: 'Test title',
             rightSideItems: [<span>Test side item</span>],
           }}
+          getPageTemplateServices={getPageTemplateServices}
         >
           <div>Test structure</div>
         </ObservabilityPageTemplate>

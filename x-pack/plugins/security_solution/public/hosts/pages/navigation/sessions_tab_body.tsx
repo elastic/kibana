@@ -9,7 +9,7 @@ import React, { useMemo } from 'react';
 import { TimelineId } from '../../../../common/types/timeline';
 import { SessionsView } from '../../../common/components/sessions_viewer';
 import { hostNameExistsFilter } from '../../../common/components/visualization_actions/utils';
-import { AlertsComponentQueryProps } from './types';
+import type { AlertsComponentQueryProps } from './types';
 
 export const SessionsTabBody = React.memo((alertsProps: AlertsComponentQueryProps) => {
   const { pageFilters, filterQuery, ...rest } = alertsProps;

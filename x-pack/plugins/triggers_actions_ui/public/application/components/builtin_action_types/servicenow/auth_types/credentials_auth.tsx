@@ -5,104 +5,52 @@
  * 2.0.
  */
 
-import React, { memo, useCallback } from 'react';
-import { EuiFormRow, EuiFieldText, EuiFieldPassword } from '@elastic/eui';
-import type { ActionConnectorFieldsProps } from '../../../../../types';
+import React, { memo } from 'react';
+import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
+import { TextField } from '@kbn/es-ui-shared-plugin/static/forms/components';
+import { PasswordField } from '../../../password_field';
 import * as i18n from '../translations';
-import type { ServiceNowActionConnector } from '../types';
-import { isFieldInvalid } from '../helpers';
-import { getEncryptedFieldNotifyLabel } from '../../../get_encrypted_field_notify_label';
 
 interface Props {
-  action: ActionConnectorFieldsProps<ServiceNowActionConnector>['action'];
-  errors: ActionConnectorFieldsProps<ServiceNowActionConnector>['errors'];
   readOnly: boolean;
   isLoading: boolean;
-  editActionSecrets: ActionConnectorFieldsProps<ServiceNowActionConnector>['editActionSecrets'];
+  pathPrefix?: string;
 }
 
-const NUMBER_OF_FIELDS = 2;
+const { emptyField } = fieldValidators;
 
-const CredentialsAuthComponent: React.FC<Props> = ({
-  action,
-  errors,
-  isLoading,
-  readOnly,
-  editActionSecrets,
-}) => {
-  const { username, password } = action.secrets;
-
-  const isUsernameInvalid = isFieldInvalid(username, errors.username);
-  const isPasswordInvalid = isFieldInvalid(password, errors.password);
-
-  const onChangeUsernameEvent = useCallback(
-    (event?: React.ChangeEvent<HTMLInputElement>) =>
-      editActionSecrets('username', event?.target.value ?? ''),
-    [editActionSecrets]
-  );
-
-  const onChangePasswordEvent = useCallback(
-    (event?: React.ChangeEvent<HTMLInputElement>) =>
-      editActionSecrets('password', event?.target.value ?? ''),
-    [editActionSecrets]
-  );
-
+const CredentialsAuthComponent: React.FC<Props> = ({ isLoading, readOnly, pathPrefix = '' }) => {
   return (
     <>
-      <EuiFormRow fullWidth>
-        {getEncryptedFieldNotifyLabel(
-          !action.id,
-          NUMBER_OF_FIELDS,
-          action.isMissingSecrets ?? false,
-          i18n.REENTER_VALUES_LABEL
-        )}
-      </EuiFormRow>
-      <EuiFormRow
-        id="connector-servicenow-username"
-        fullWidth
-        error={errors.username}
-        isInvalid={isUsernameInvalid}
-        label={i18n.USERNAME_LABEL}
-      >
-        <EuiFieldText
-          fullWidth
-          isInvalid={isUsernameInvalid}
-          readOnly={readOnly}
-          name="connector-servicenow-username"
-          value={username || ''} // Needed to prevent uncontrolled input error when value is undefined
-          data-test-subj="connector-servicenow-username-form-input"
-          onChange={onChangeUsernameEvent}
-          onBlur={() => {
-            if (!username) {
-              onChangeUsernameEvent();
-            }
-          }}
-          disabled={isLoading}
-        />
-      </EuiFormRow>
-      <EuiFormRow
-        id="connector-servicenow-password"
-        fullWidth
-        error={errors.password}
-        isInvalid={isPasswordInvalid}
+      <UseField
+        path={`${pathPrefix}secrets.username`}
+        component={TextField}
+        config={{
+          label: i18n.USERNAME_LABEL,
+          validations: [
+            {
+              validator: emptyField(i18n.USERNAME_REQUIRED),
+            },
+          ],
+        }}
+        componentProps={{
+          euiFieldProps: {
+            'data-test-subj': 'connector-servicenow-username-form-input',
+            isLoading,
+            readOnly,
+            disabled: readOnly || isLoading,
+          },
+        }}
+      />
+      <PasswordField
+        path={`${pathPrefix}secrets.password`}
         label={i18n.PASSWORD_LABEL}
-      >
-        <EuiFieldPassword
-          fullWidth
-          readOnly={readOnly}
-          isInvalid={isPasswordInvalid}
-          name="connector-servicenow-password"
-          value={password || ''} // Needed to prevent uncontrolled input error when value is undefined
-          data-test-subj="connector-servicenow-password-form-input"
-          onChange={onChangePasswordEvent}
-          onBlur={() => {
-            if (!password) {
-              onChangePasswordEvent();
-            }
-          }}
-          disabled={isLoading}
-        />
-      </EuiFormRow>
+        readOnly={readOnly}
+        data-test-subj="connector-servicenow-password-form-input"
+        isLoading={isLoading}
+        disabled={readOnly || isLoading}
+      />
     </>
   );
 };

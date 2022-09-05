@@ -6,7 +6,7 @@
  */
 import { useState, useEffect } from 'react';
 import { useKibana } from '../../../common/lib/kibana';
-import { LinkPanelListItem } from '../../components/link_panel';
+import type { LinkPanelListItem } from '../../components/link_panel';
 import { useRiskyHostsDashboardId } from './use_risky_hosts_dashboard_id';
 
 export const useRiskyHostsDashboardLinks = (

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   EuiEmptyPrompt,
   EuiBasicTable,
@@ -13,6 +13,7 @@ import {
   type CriteriaWithPagination,
   type Pagination,
   EuiToolTip,
+  EuiBasicTableProps,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -20,35 +21,69 @@ import numeral from '@elastic/numeral';
 import { Link, generatePath } from 'react-router-dom';
 import { ColumnNameWithTooltip } from '../../../components/column_name_with_tooltip';
 import * as TEST_SUBJECTS from '../test_subjects';
-import * as TEXT from '../translations';
 import type { FindingsByResourcePage } from './use_findings_by_resource';
 import { findingsNavigation } from '../../../common/navigation/constants';
+import { createColumnWithFilters, type OnAddFilter } from '../layout/findings_layout';
 
 export const formatNumber = (value: number) =>
   value < 1000 ? value : numeral(value).format('0.0a');
+
+type Sorting = Required<
+  EuiBasicTableProps<Pick<FindingsByResourcePage, 'failed_findings'>>
+>['sorting'];
 
 interface Props {
   items: FindingsByResourcePage[];
   loading: boolean;
   pagination: Pagination;
+  sorting: Sorting;
   setTableOptions(options: CriteriaWithPagination<FindingsByResourcePage>): void;
+  onAddFilter: OnAddFilter;
 }
 
-export const getResourceId = (resource: FindingsByResourcePage) =>
-  [resource.resource_id, ...resource.cis_sections].join('/');
+export const getResourceId = (resource: FindingsByResourcePage) => {
+  return [resource.resource_id, ...resource['rule.section']].join('/');
+};
 
 const FindingsByResourceTableComponent = ({
   items,
   loading,
   pagination,
+  sorting,
   setTableOptions,
+  onAddFilter,
 }: Props) => {
   const getRowProps = (row: FindingsByResourcePage) => ({
     'data-test-subj': TEST_SUBJECTS.getFindingsByResourceTableRowTestId(getResourceId(row)),
   });
 
+  const columns = useMemo(
+    () => [
+      findingsByResourceColumns.resource_id,
+      createColumnWithFilters(findingsByResourceColumns['resource.sub_type'], { onAddFilter }),
+      createColumnWithFilters(findingsByResourceColumns['resource.name'], { onAddFilter }),
+      findingsByResourceColumns['rule.section'],
+      createColumnWithFilters(findingsByResourceColumns.cluster_id, { onAddFilter }),
+      findingsByResourceColumns.failed_findings,
+    ],
+    [onAddFilter]
+  );
+
   if (!loading && !items.length)
-    return <EuiEmptyPrompt iconType="logoKibana" title={<h2>{TEXT.NO_FINDINGS}</h2>} />;
+    return (
+      <EuiEmptyPrompt
+        data-test-subj={TEST_SUBJECTS.FINDINGS_BY_RESOURCE_TABLE_NO_FINDINGS_EMPTY_STATE}
+        iconType="logoKibana"
+        title={
+          <h2>
+            <FormattedMessage
+              id="xpack.csp.findings.findingsByResource.noFindingsTitle"
+              defaultMessage="There are no Findings"
+            />
+          </h2>
+        }
+      />
+    );
 
   return (
     <EuiBasicTable
@@ -57,22 +92,24 @@ const FindingsByResourceTableComponent = ({
       columns={columns}
       rowProps={getRowProps}
       pagination={pagination}
+      sorting={sorting}
       onChange={setTableOptions}
     />
   );
 };
 
-const columns: Array<EuiTableFieldDataColumnType<FindingsByResourcePage>> = [
+const baseColumns: Array<EuiTableFieldDataColumnType<FindingsByResourcePage>> = [
   {
     field: 'resource_id',
     name: (
       <ColumnNameWithTooltip
-        columnName={TEXT.RESOURCE_ID}
+        columnName={i18n.translate(
+          'xpack.csp.findings.findingsByResourceTable.findingsByResourceTableColumn.resourceIdColumnLabel',
+          { defaultMessage: 'Resource ID' }
+        )}
         tooltipContent={i18n.translate(
-          'xpack.csp.findings.resourceTable.resourceTableColumn.resourceIdColumnTooltipLabel',
-          {
-            defaultMessage: 'Custom Elastic Resource ID',
-          }
+          'xpack.csp.findings.findingsByResourceTable.findingsByResourceTableColumn.resourceIdColumnTooltipLabel',
+          { defaultMessage: 'Custom Elastic Resource ID' }
         )}
       />
     ),
@@ -83,31 +120,31 @@ const columns: Array<EuiTableFieldDataColumnType<FindingsByResourcePage>> = [
     ),
   },
   {
-    field: 'resource_subtype',
+    field: 'resource.sub_type',
     truncateText: true,
     name: (
       <FormattedMessage
-        id="xpack.csp.findings.groupByResourceTable.resourceTypeColumnLabel"
+        id="xpack.csp.findings.findingsByResourceTable.resourceTypeColumnLabel"
         defaultMessage="Resource Type"
       />
     ),
   },
   {
-    field: 'resource_name',
+    field: 'resource.name',
     truncateText: true,
     name: (
       <FormattedMessage
-        id="xpack.csp.findings.groupByResourceTable.resourceNameColumnLabel"
+        id="xpack.csp.findings.findingsByResourceTable.resourceNameColumnLabel"
         defaultMessage="Resource Name"
       />
     ),
   },
   {
-    field: 'cis_sections',
+    field: 'rule.section',
     truncateText: true,
     name: (
       <FormattedMessage
-        id="xpack.csp.findings.groupByResourceTable.cisSectionsColumnLabel"
+        id="xpack.csp.findings.findingsByResourceTable.cisSectionsColumnLabel"
         defaultMessage="CIS Sections"
       />
     ),
@@ -117,12 +154,13 @@ const columns: Array<EuiTableFieldDataColumnType<FindingsByResourcePage>> = [
     field: 'cluster_id',
     name: (
       <ColumnNameWithTooltip
-        columnName={TEXT.CLUSTER_ID}
+        columnName={i18n.translate(
+          'xpack.csp.findings.findingsTable.findingsTableColumn.clusterIdColumnLabel',
+          { defaultMessage: 'Cluster ID' }
+        )}
         tooltipContent={i18n.translate(
-          'xpack.csp.findings.resourceTable.resourceTableColumn.clusterIdColumnTooltipLabel',
-          {
-            defaultMessage: 'Kube-System Namespace ID',
-          }
+          'xpack.csp.findings.findingsTable.findingsTableColumn.clusterIdColumnTooltipLabel',
+          { defaultMessage: 'Kube-System Namespace ID' }
         )}
       />
     ),
@@ -132,21 +170,25 @@ const columns: Array<EuiTableFieldDataColumnType<FindingsByResourcePage>> = [
     field: 'failed_findings',
     width: '150px',
     truncateText: true,
+    sortable: true,
     name: (
       <FormattedMessage
-        id="xpack.csp.findings.groupByResourceTable.failedFindingsColumnLabel"
+        id="xpack.csp.findings.findingsByResourceTable.failedFindingsColumnLabel"
         defaultMessage="Failed Findings"
       />
     ),
     render: (failedFindings: FindingsByResourcePage['failed_findings']) => (
       <EuiToolTip
-        content={i18n.translate('xpack.csp.findings.groupByResourceTable.failedFindingsToolTip', {
-          defaultMessage: '{failed} out of {total}',
-          values: {
-            failed: failedFindings.count,
-            total: failedFindings.total_findings,
-          },
-        })}
+        content={i18n.translate(
+          'xpack.csp.findings.findingsByResourceTable.failedFindingsToolTip',
+          {
+            defaultMessage: '{failed} out of {total}',
+            values: {
+              failed: failedFindings.count,
+              total: failedFindings.total_findings,
+            },
+          }
+        )}
       >
         <>
           <EuiTextColor color={failedFindings.count === 0 ? '' : 'danger'}>
@@ -159,5 +201,11 @@ const columns: Array<EuiTableFieldDataColumnType<FindingsByResourcePage>> = [
     dataType: 'number',
   },
 ];
+
+type BaseFindingColumnName = typeof baseColumns[number]['field'];
+
+export const findingsByResourceColumns = Object.fromEntries(
+  baseColumns.map((column) => [column.field, column])
+) as Record<BaseFindingColumnName, typeof baseColumns[number]>;
 
 export const FindingsByResourceTable = React.memo(FindingsByResourceTableComponent);

@@ -59,6 +59,7 @@ export const ValueExpression = ({
           onClick={() => {
             setValuePopoverOpen(true);
           }}
+          isInvalid={errors.length > 0}
         />
       }
       isOpen={valuePopoverOpen}
@@ -66,7 +67,7 @@ export const ValueExpression = ({
         setValuePopoverOpen(false);
       }}
       ownFocus
-      display={display === 'fullWidth' ? 'block' : 'inlineBlock'}
+      display={display === 'fullWidth' ? 'block' : 'inline-block'}
       anchorPosition={popupPosition ?? 'downLeft'}
       repositionOnScroll
     >

@@ -79,6 +79,7 @@ export const ExecutionDurationChart: React.FunctionComponent<ComponentOpts> = ({
           <EuiFlexItem grow={false}>
             <EuiSelect
               id="select-number-execution-durations"
+              data-test-subj="executionDurationChartPanelSelect"
               options={NUM_EXECUTIONS_OPTIONS}
               value={numberOfExecutions}
               aria-label={i18n.translate(

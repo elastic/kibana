@@ -58,7 +58,7 @@ describe('esaggs expression function - server', () => {
     mockHandlers = {
       abortSignal: jest.fn() as unknown as jest.Mocked<AbortSignal>,
       getKibanaRequest: jest.fn().mockReturnValue({ id: 'hi' } as KibanaRequest),
-      getSearchContext: jest.fn(),
+      getSearchContext: jest.fn().mockReturnValue({}),
       getSearchSessionId: jest.fn().mockReturnValue('abc123'),
       getExecutionContext: jest.fn(),
       inspectorAdapters: jest.fn(),
@@ -95,14 +95,18 @@ describe('esaggs expression function - server', () => {
 
     expect(startDependencies.aggs.createAggConfigs).toHaveBeenCalledWith(
       {},
-      args.aggs.map((agg) => agg.value)
+      args.aggs.map((agg) => agg.value),
+      { hierarchical: true, partialRows: false }
     );
   });
 
   test('calls aggs.createAggConfigs with the empty aggs array when not provided', async () => {
     await definition().fn(null, omit(args, 'aggs'), mockHandlers).toPromise();
 
-    expect(startDependencies.aggs.createAggConfigs).toHaveBeenCalledWith({}, []);
+    expect(startDependencies.aggs.createAggConfigs).toHaveBeenCalledWith({}, [], {
+      hierarchical: true,
+      partialRows: false,
+    });
   });
 
   test('calls getEsaggsMeta to retrieve meta', () => {
@@ -119,8 +123,6 @@ describe('esaggs expression function - server', () => {
       abortSignal: mockHandlers.abortSignal,
       aggs: {
         foo: 'bar',
-        hierarchical: args.metricsAtAllLevels,
-        partialRows: args.partialRows,
       },
       filters: undefined,
       indexPattern: {},
@@ -128,6 +130,7 @@ describe('esaggs expression function - server', () => {
       query: undefined,
       searchSessionId: 'abc123',
       searchSourceService: startDependencies.searchSource,
+      disableShardWarnings: false,
       timeFields: args.timeFields,
       timeRange: undefined,
     });

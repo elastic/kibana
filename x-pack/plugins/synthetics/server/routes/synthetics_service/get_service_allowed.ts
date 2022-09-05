@@ -5,17 +5,19 @@
  * 2.0.
  */
 
-import { UMRestApiRouteFactory } from '../../legacy_uptime/routes/types';
+import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes/types';
 import { API_URLS } from '../../../common/constants';
 
-export const getServiceAllowedRoute: UMRestApiRouteFactory = () => ({
+export const getServiceAllowedRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'GET',
   path: API_URLS.SERVICE_ALLOWED,
   validate: {},
-  handler: async ({ server }): Promise<any> => {
+  handler: async ({ syntheticsMonitorClient, server }): Promise<any> => {
+    const isESS = Boolean(server.cloud?.isCloudEnabled) && server.config.service?.manifestUrl;
+
     return {
-      serviceAllowed: server.syntheticsService.isAllowed,
-      signupUrl: server.syntheticsService.signupUrl,
+      serviceAllowed: isESS ? syntheticsMonitorClient.syntheticsService.isAllowed : true,
+      signupUrl: syntheticsMonitorClient.syntheticsService.signupUrl,
     };
   },
 });

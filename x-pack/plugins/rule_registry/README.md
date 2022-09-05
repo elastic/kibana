@@ -99,7 +99,8 @@ const ruleDataClient = new RuleDataClient({
 // to start writing data, call `getWriter().bulk()`. It supports a `namespace`
 // property as well, that for instance can be used to write data to a space-specific
 // index.
-await ruleDataClient.getWriter().bulk({
+const writer = await ruleDataClient.getWriter();
+await writer.bulk({
   body: eventsToIndex.flatMap((event) => [{ index: {} }, event]),
 });
 

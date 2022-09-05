@@ -7,7 +7,7 @@
 
 import type { ISearchRequestParams } from '@kbn/data-plugin/common';
 import { createQueryFilterClauses } from '../../../../../utils/build_query';
-import { HostOverviewRequestOptions } from '../../../../../../common/search_strategy/security_solution/hosts';
+import type { HostOverviewRequestOptions } from '../../../../../../common/search_strategy/security_solution/hosts';
 
 export const buildOverviewHostQuery = ({
   filterQuery,

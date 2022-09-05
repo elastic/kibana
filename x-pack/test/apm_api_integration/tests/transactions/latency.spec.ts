@@ -6,9 +6,9 @@
  */
 
 import expect from '@kbn/expect';
-import url from 'url';
 import moment from 'moment';
 import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
+import { LatencyAggregationType } from '@kbn/apm-plugin/common/latency_aggregation_types';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import archives_metadata from '../../common/fixtures/es_archiver/archives_metadata';
 
@@ -17,62 +17,52 @@ type LatencyChartReturnType =
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
-  const supertest = getService('legacySupertestAsApmReadUser');
+  const apmApiClient = getService('apmApiClient');
 
   const archiveName = 'apm_8.0.0';
 
   const { start, end } = archives_metadata[archiveName];
 
+  async function fetchLatencyCharts({
+    serviceName,
+    query,
+  }: {
+    serviceName: string;
+    query: {
+      start: string;
+      end: string;
+      latencyAggregationType: LatencyAggregationType;
+      transactionType: string;
+      environment: string;
+      kuery: string;
+      offset?: string;
+    };
+  }) {
+    return await apmApiClient.readUser({
+      endpoint: `GET /internal/apm/services/{serviceName}/transactions/charts/latency`,
+      params: {
+        path: { serviceName },
+        query,
+      },
+    });
+  }
+
   registry.when(
     'Latency with a basic license when data is not loaded ',
     { config: 'basic', archives: [] },
     () => {
-      it('returns 400 when latencyAggregationType is not informed', async () => {
-        const response = await supertest.get(
-          url.format({
-            pathname: `/internal/apm/services/opbeans-node/transactions/charts/latency`,
-            query: {
-              start,
-              end,
-              transactionType: 'request',
-              environment: 'testing',
-            },
-          })
-        );
-
-        expect(response.status).to.be(400);
-      });
-
-      it('returns 400 when transactionType is not informed', async () => {
-        const response = await supertest.get(
-          url.format({
-            pathname: `/internal/apm/services/opbeans-node/transactions/charts/latency`,
-            query: {
-              start,
-              end,
-              latencyAggregationType: 'avg',
-              environment: 'testing',
-            },
-          })
-        );
-
-        expect(response.status).to.be(400);
-      });
-
       it('handles the empty state', async () => {
-        const response = await supertest.get(
-          url.format({
-            pathname: `/internal/apm/services/opbeans-node/transactions/charts/latency`,
-            query: {
-              start,
-              end,
-              latencyAggregationType: 'avg',
-              transactionType: 'request',
-              environment: 'testing',
-              kuery: '',
-            },
-          })
-        );
+        const response = await fetchLatencyCharts({
+          serviceName: 'opbeans-node',
+          query: {
+            start,
+            end,
+            latencyAggregationType: LatencyAggregationType.avg,
+            transactionType: 'request',
+            environment: 'testing',
+            kuery: '',
+          },
+        });
 
         expect(response.status).to.be(200);
 
@@ -89,26 +79,20 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     'Latency with a basic license when data is loaded',
     { config: 'basic', archives: [archiveName] },
     () => {
-      let response: Awaited<ReturnType<typeof supertest.get>>;
-
       describe('average latency type', () => {
-        before(async () => {
-          response = await supertest.get(
-            url.format({
-              pathname: `/internal/apm/services/opbeans-node/transactions/charts/latency`,
-              query: {
-                start,
-                end,
-                latencyAggregationType: 'avg',
-                transactionType: 'request',
-                environment: 'testing',
-                kuery: '',
-              },
-            })
-          );
-        });
-
         it('returns average duration and timeseries', async () => {
+          const response = await fetchLatencyCharts({
+            serviceName: 'opbeans-node',
+            query: {
+              start,
+              end,
+              latencyAggregationType: LatencyAggregationType.avg,
+              transactionType: 'request',
+              environment: 'testing',
+              kuery: '',
+            },
+          });
+
           expect(response.status).to.be(200);
           const latencyChartReturn = response.body as LatencyChartReturnType;
           expect(latencyChartReturn.currentPeriod.overallAvgDuration).not.to.be(null);
@@ -117,23 +101,19 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       describe('95th percentile latency type', () => {
-        before(async () => {
-          response = await supertest.get(
-            url.format({
-              pathname: `/internal/apm/services/opbeans-node/transactions/charts/latency`,
-              query: {
-                start,
-                end,
-                latencyAggregationType: 'p95',
-                transactionType: 'request',
-                environment: 'testing',
-                kuery: '',
-              },
-            })
-          );
-        });
-
         it('returns average duration and timeseries', async () => {
+          const response = await fetchLatencyCharts({
+            serviceName: 'opbeans-node',
+            query: {
+              start,
+              end,
+              latencyAggregationType: LatencyAggregationType.p95,
+              transactionType: 'request',
+              environment: 'testing',
+              kuery: '',
+            },
+          });
+
           expect(response.status).to.be(200);
           const latencyChartReturn = response.body as LatencyChartReturnType;
           expect(latencyChartReturn.currentPeriod.overallAvgDuration).not.to.be(null);
@@ -142,23 +122,19 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       describe('99th percentile latency type', () => {
-        before(async () => {
-          response = await supertest.get(
-            url.format({
-              pathname: `/internal/apm/services/opbeans-node/transactions/charts/latency`,
-              query: {
-                start,
-                end,
-                latencyAggregationType: 'p99',
-                transactionType: 'request',
-                environment: 'testing',
-                kuery: '',
-              },
-            })
-          );
-        });
-
         it('returns average duration and timeseries', async () => {
+          const response = await fetchLatencyCharts({
+            serviceName: 'opbeans-node',
+            query: {
+              start,
+              end,
+              latencyAggregationType: LatencyAggregationType.p99,
+              transactionType: 'request',
+              environment: 'testing',
+              kuery: '',
+            },
+          });
+
           expect(response.status).to.be(200);
           const latencyChartReturn = response.body as LatencyChartReturnType;
 
@@ -172,24 +148,24 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       describe('time comparison', () => {
+        let response: Awaited<ReturnType<typeof fetchLatencyCharts>>;
+
         before(async () => {
-          response = await supertest.get(
-            url.format({
-              pathname: `/internal/apm/services/opbeans-node/transactions/charts/latency`,
-              query: {
-                latencyAggregationType: 'avg',
-                transactionType: 'request',
-                start: moment(end).subtract(15, 'minutes').toISOString(),
-                end,
-                offset: '15m',
-                environment: 'ENVIRONMENT_ALL',
-                kuery: '',
-              },
-            })
-          );
+          response = await fetchLatencyCharts({
+            serviceName: 'opbeans-node',
+            query: {
+              latencyAggregationType: LatencyAggregationType.avg,
+              transactionType: 'request',
+              start: moment(end).subtract(15, 'minutes').toISOString(),
+              end,
+              offset: '15m',
+              environment: 'ENVIRONMENT_ALL',
+              kuery: '',
+            },
+          });
         });
 
-        it('returns some data', async () => {
+        it('returns some data', () => {
           expect(response.status).to.be(200);
           const latencyChartReturn = response.body as LatencyChartReturnType;
           const currentPeriodNonNullDataPoints =
@@ -212,20 +188,20 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       describe('with a non-existing environment', () => {
+        let response: Awaited<ReturnType<typeof fetchLatencyCharts>>;
+
         before(async () => {
-          response = await supertest.get(
-            url.format({
-              pathname: `/internal/apm/services/opbeans-node/transactions/charts/latency`,
-              query: {
-                start,
-                end,
-                latencyAggregationType: 'avg',
-                transactionType: 'request',
-                environment: 'does-not-exist',
-                kuery: '',
-              },
-            })
-          );
+          response = await fetchLatencyCharts({
+            serviceName: 'opbeans-node',
+            query: {
+              start,
+              end,
+              latencyAggregationType: LatencyAggregationType.avg,
+              transactionType: 'request',
+              environment: 'does-not-exist',
+              kuery: '',
+            },
+          });
         });
 
         it('returns average duration and timeseries', async () => {
@@ -247,25 +223,23 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     'Transaction latency with a trial license when data is loaded',
     { config: 'trial', archives: [archiveName] },
     () => {
-      let response: Awaited<ReturnType<typeof supertest.get>>;
+      let response: Awaited<ReturnType<typeof fetchLatencyCharts>>;
 
       const transactionType = 'request';
 
       describe('without an environment', () => {
         before(async () => {
-          response = await supertest.get(
-            url.format({
-              pathname: `/internal/apm/services/opbeans-java/transactions/charts/latency`,
-              query: {
-                start,
-                end,
-                latencyAggregationType: 'avg',
-                transactionType,
-                environment: 'ENVIRONMENT_ALL',
-                kuery: '',
-              },
-            })
-          );
+          response = await fetchLatencyCharts({
+            serviceName: 'opbeans-node',
+            query: {
+              start,
+              end,
+              latencyAggregationType: LatencyAggregationType.avg,
+              transactionType,
+              environment: 'ENVIRONMENT_ALL',
+              kuery: '',
+            },
+          });
         });
 
         it('returns an ok response', () => {
@@ -275,19 +249,17 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       describe('with environment selected', () => {
         before(async () => {
-          response = await supertest.get(
-            url.format({
-              pathname: `/internal/apm/services/opbeans-python/transactions/charts/latency`,
-              query: {
-                start,
-                end,
-                latencyAggregationType: 'avg',
-                transactionType,
-                environment: 'production',
-                kuery: '',
-              },
-            })
-          );
+          response = await fetchLatencyCharts({
+            serviceName: 'opbeans-node',
+            query: {
+              start,
+              end,
+              latencyAggregationType: LatencyAggregationType.avg,
+              transactionType,
+              environment: 'production',
+              kuery: '',
+            },
+          });
         });
 
         it('should have a successful response', () => {
@@ -297,19 +269,17 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       describe('with all environments selected', () => {
         before(async () => {
-          response = await supertest.get(
-            url.format({
-              pathname: `/internal/apm/services/opbeans-java/transactions/charts/latency`,
-              query: {
-                start,
-                end,
-                latencyAggregationType: 'avg',
-                transactionType,
-                environment: 'ENVIRONMENT_ALL',
-                kuery: '',
-              },
-            })
-          );
+          response = await fetchLatencyCharts({
+            serviceName: 'opbeans-node',
+            query: {
+              start,
+              end,
+              latencyAggregationType: LatencyAggregationType.avg,
+              transactionType,
+              environment: 'ENVIRONMENT_ALL',
+              kuery: '',
+            },
+          });
         });
 
         it('should have a successful response', () => {

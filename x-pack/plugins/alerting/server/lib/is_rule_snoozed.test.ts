@@ -17,6 +17,7 @@ const DATE_2019_PLUS_6_HOURS = '2019-01-01T06:00:00.000Z';
 const DATE_2020 = '2020-01-01T00:00:00.000Z';
 const DATE_2020_MINUS_1_HOUR = '2019-12-31T23:00:00.000Z';
 const DATE_2020_MINUS_1_MONTH = '2019-12-01T00:00:00.000Z';
+const DATE_2020_MINUS_6_HOURS = '2019-12-31T18:00:00.000Z';
 
 const NOW = DATE_2020;
 
@@ -75,8 +76,7 @@ describe('isRuleSnoozed', () => {
   test('returns true when snooze is indefinite', () => {
     const snoozeSchedule = [
       {
-        duration: 100000000,
-
+        duration: -1,
         rRule: {
           dtstart: DATE_9999,
           tzid: 'UTC',
@@ -315,5 +315,60 @@ describe('isRuleSnoozed', () => {
       },
     ];
     expect(isRuleSnoozed({ snoozeSchedule: snoozeScheduleB, muteAll: false })).toBe(true);
+  });
+
+  test('returns as expected for a manually skipped recurring snooze', () => {
+    const snoozeScheduleA = [
+      {
+        duration: 60 * 1000,
+        rRule: {
+          dtstart: DATE_2019,
+          tzid: 'UTC',
+          freq: RRule.DAILY,
+          interval: 1,
+        } as RRuleRecord,
+        skipRecurrences: [DATE_2020],
+      },
+    ];
+    expect(isRuleSnoozed({ snoozeSchedule: snoozeScheduleA, muteAll: false })).toBe(false);
+    const snoozeScheduleB = [
+      {
+        duration: 60 * 1000,
+        rRule: {
+          dtstart: DATE_2019,
+          tzid: 'UTC',
+          freq: RRule.DAILY,
+          interval: 1,
+        } as RRuleRecord,
+        skipRecurrences: [DATE_2020_MINUS_1_MONTH],
+      },
+    ];
+    expect(isRuleSnoozed({ snoozeSchedule: snoozeScheduleB, muteAll: false })).toBe(true);
+    const snoozeScheduleC = [
+      {
+        duration: 60 * 1000,
+        rRule: {
+          dtstart: DATE_2020,
+          tzid: 'UTC',
+          freq: RRule.DAILY,
+          interval: 1,
+        } as RRuleRecord,
+        skipRecurrences: [DATE_2020],
+      },
+    ];
+    expect(isRuleSnoozed({ snoozeSchedule: snoozeScheduleC, muteAll: false })).toBe(false);
+    const snoozeScheduleD = [
+      {
+        duration: 2 * 60 * 60 * 1000,
+        rRule: {
+          dtstart: DATE_2020_MINUS_6_HOURS,
+          tzid: 'UTC',
+          freq: RRule.HOURLY,
+          interval: 5,
+        } as RRuleRecord,
+        skipRecurrences: [DATE_2020_MINUS_1_HOUR],
+      },
+    ];
+    expect(isRuleSnoozed({ snoozeSchedule: snoozeScheduleD, muteAll: false })).toBe(false);
   });
 });

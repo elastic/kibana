@@ -6,7 +6,7 @@
 const semver = require('semver');
 const { kibanaPackageJson: PKG } = require('@kbn/utils');
 
-const eslintConfigPrettierTypescriptEslintRules = require('eslint-config-prettier/@typescript-eslint').rules;
+const eslintConfigPrettierRules = require('eslint-config-prettier').rules;
 
 // The current implementation excluded all the variables matching the regexp.
 // We should remove it as soon as multiple underscores are supported by the linter.
@@ -259,7 +259,7 @@ module.exports = {
           'eslint-comments/no-unused-disable': 'error',
           'eslint-comments/no-unused-enable': 'error'
         },
-        eslintConfigPrettierTypescriptEslintRules
+        eslintConfigPrettierRules
       )
     },
   ]

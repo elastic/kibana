@@ -7,3 +7,9 @@
  */
 
 export * from '../../../common/types';
+
+export type DashboardLoadedEventStatus = 'done' | 'error';
+
+export interface DashboardLoadedEventMeta {
+  status: DashboardLoadedEventStatus;
+}

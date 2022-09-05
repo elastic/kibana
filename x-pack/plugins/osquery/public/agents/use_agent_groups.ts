@@ -4,17 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useQuery } from 'react-query';
+import { useQuery } from '@tanstack/react-query';
 import { i18n } from '@kbn/i18n';
 import { lastValueFrom } from 'rxjs';
 import { useKibana } from '../common/lib/kibana';
 import { useAgentPolicies } from './use_agent_policies';
 
-import {
-  OsqueryQueries,
-  AgentsRequestOptions,
-  AgentsStrategyResponse,
-} from '../../common/search_strategy';
+import type { AgentsRequestOptions, AgentsStrategyResponse } from '../../common/search_strategy';
+import { OsqueryQueries } from '../../common/search_strategy';
 
 import { processAggregations } from './helpers';
 import { generateTablePaginationOptions } from '../common/helpers';
@@ -32,7 +29,7 @@ export const useAgentGroups = () => {
     AgentsStrategyResponse,
     unknown,
     {
-      totalCount: number;
+      total: number;
       groups: ReturnType<typeof processAggregations>;
     }
   >(
@@ -83,7 +80,7 @@ export const useAgentGroups = () => {
         );
 
         return {
-          totalCount: response.totalCount,
+          total: response.total ?? 0,
           groups: {
             platforms,
             overlap,
@@ -99,13 +96,8 @@ export const useAgentGroups = () => {
         };
       },
       placeholderData: {
-        totalCount: 0,
+        total: 0,
         edges: [],
-        pageInfo: {
-          activePage: 1,
-          fakeTotalCount: 100,
-          showMorePagesIndicator: true,
-        },
         rawResponse: {
           took: 0,
           timed_out: false,

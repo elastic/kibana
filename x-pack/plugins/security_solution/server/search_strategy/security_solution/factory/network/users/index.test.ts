@@ -6,7 +6,7 @@
  */
 
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../common/constants';
-import { NetworkUsersRequestOptions } from '../../../../../../common/search_strategy/security_solution/network';
+import type { NetworkUsersRequestOptions } from '../../../../../../common/search_strategy/security_solution/network';
 
 import * as buildQuery from './query.users_network.dsl';
 import { networkUsers } from '.';

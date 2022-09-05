@@ -12,7 +12,7 @@ import { coreMock } from '@kbn/core/server/mocks';
 import { syntheticsServiceApiKey } from '../legacy_uptime/lib/saved_objects/service_api_key';
 import { KibanaRequest } from '@kbn/core/server';
 import { UptimeServerSetup } from '../legacy_uptime/lib/adapters';
-import { getUptimeESMockClient } from '../legacy_uptime/lib/requests/helper';
+import { getUptimeESMockClient } from '../legacy_uptime/lib/requests/test_helpers';
 
 describe('getAPIKeyTest', function () {
   const core = coreMock.createStart();

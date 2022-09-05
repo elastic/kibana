@@ -7,7 +7,7 @@
 
 import { shallowEqual, useSelector } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
-import { State } from '../store';
+import type { State } from '../store';
 
 export type TypedUseSelectorHook = <TSelected, TState = State>(
   selector: (state: TState) => TSelected,

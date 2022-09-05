@@ -69,7 +69,7 @@ If capturing a report fails for any reason, {kib} will re-queue the report job f
 `xpack.reporting.queue.indexInterval`::
 How often the index that stores reporting jobs rolls over to a new index. Valid values are `year`, `month`, `week`, `day`, and `hour`. Defaults to `week`.
 
-[[xpack-reportingQueue-pollEnabled]] `xpack.reporting.queue.pollEnabled` {ess-icon}::
+[[xpack-reportingQueue-pollEnabled]] `xpack.reporting.queue.pollEnabled` ::
 When `true`, enables the {kib} instance to poll {es} for pending jobs and claim them for
 execution. When `false`, allows the {kib} instance to only add new jobs to the reporting queue, list
 jobs, and provide the downloads to completed reports through the UI. This requires a deployment where at least

@@ -8,6 +8,7 @@
 import { set } from 'lodash';
 import { ActionsCompletion } from '../types';
 import { ActionsConfigMap } from './get_actions_config_map';
+import { SearchMetrics } from './types';
 
 interface State {
   numSearches: number;
@@ -18,6 +19,7 @@ interface State {
   numberOfActiveAlerts: number;
   numberOfRecoveredAlerts: number;
   numberOfNewAlerts: number;
+  hasReachedAlertLimit: boolean;
   connectorTypes: {
     [key: string]: {
       triggeredActionsStatus: ActionsCompletion;
@@ -40,6 +42,7 @@ export class RuleRunMetricsStore {
     numberOfActiveAlerts: 0,
     numberOfRecoveredAlerts: 0,
     numberOfNewAlerts: 0,
+    hasReachedAlertLimit: false,
     connectorTypes: {},
   };
 
@@ -84,8 +87,18 @@ export class RuleRunMetricsStore {
       triggeredActionsStatus: this.getTriggeredActionsStatus(),
     };
   };
+  public getHasReachedAlertLimit = () => {
+    return this.state.hasReachedAlertLimit;
+  };
 
   // Setters
+  public setSearchMetrics = (searchMetrics: SearchMetrics[]) => {
+    for (const metric of searchMetrics) {
+      this.incrementNumSearches(metric.numSearches ?? 0);
+      this.incrementTotalSearchDurationMs(metric.totalSearchDurationMs ?? 0);
+      this.incrementEsSearchDurationMs(metric.esSearchDurationMs ?? 0);
+    }
+  };
   public setNumSearches = (numSearches: number) => {
     this.state.numSearches = numSearches;
   };
@@ -119,6 +132,9 @@ export class RuleRunMetricsStore {
   }) => {
     set(this.state, `connectorTypes["${actionTypeId}"].triggeredActionsStatus`, status);
   };
+  public setHasReachedAlertLimit = (hasReachedAlertLimit: boolean) => {
+    this.state.hasReachedAlertLimit = hasReachedAlertLimit;
+  };
 
   // Checkers
   public hasReachedTheExecutableActionsLimit = (actionsConfigMap: ActionsConfigMap): boolean =>
@@ -143,6 +159,15 @@ export class RuleRunMetricsStore {
     this.state.connectorTypes[actionTypeId]?.triggeredActionsStatus === ActionsCompletion.PARTIAL;
 
   // Incrementer
+  public incrementNumSearches = (incrementBy: number) => {
+    this.state.numSearches += incrementBy;
+  };
+  public incrementTotalSearchDurationMs = (incrementBy: number) => {
+    this.state.totalSearchDurationMs += incrementBy;
+  };
+  public incrementEsSearchDurationMs = (incrementBy: number) => {
+    this.state.esSearchDurationMs += incrementBy;
+  };
   public incrementNumberOfTriggeredActions = () => {
     this.state.numberOfTriggeredActions++;
   };

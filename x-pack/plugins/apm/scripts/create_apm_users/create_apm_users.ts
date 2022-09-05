@@ -42,8 +42,8 @@ export async function createApmUsers({
 
   // user definitions
   const users = [
-    { username: 'viewer_user', roles: ['viewer'] },
-    { username: 'editor_user', roles: ['editor'] },
+    { username: 'viewer', roles: ['viewer'] },
+    { username: 'editor', roles: ['editor'] },
   ];
 
   // create users

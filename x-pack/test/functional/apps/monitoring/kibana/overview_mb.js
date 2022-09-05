@@ -44,7 +44,7 @@ export default function ({ getService, getPageObjects }) {
         requests: 'Requests\n174',
         connections: 'Connections\n174',
         maxResponseTime: 'Max. Response Time\n2203 ms',
-        health: 'Health: green',
+        health: 'Status\nStale\nView all instances',
       });
     });
   });

@@ -7,10 +7,20 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { TimelineNonEcsData } from '@kbn/timelines-plugin/common';
+import type { TimelineNonEcsData } from '@kbn/timelines-plugin/common';
 import { getAddToTimelineCellAction } from './add_to_timeline';
 
 jest.mock('../kibana');
+
+const mockDispatch = jest.fn;
+jest.mock('react-redux', () => {
+  const original = jest.requireActual('react-redux');
+
+  return {
+    ...original,
+    useDispatch: () => mockDispatch,
+  };
+});
 
 describe('getAddToTimelineCellAction', () => {
   const sampleData: TimelineNonEcsData = {

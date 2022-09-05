@@ -7,7 +7,7 @@
 
 import { agentPolicyRouteService } from '../../services';
 
-import type { GetFullAgentManifestResponse } from '../../../common';
+import type { GetFullAgentManifestResponse } from '../../../common/types';
 
 import { sendRequest } from './use_request';
 

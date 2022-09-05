@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { MouseEventHandler, useCallback } from 'react';
+import type { MouseEventHandler } from 'react';
+import { useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
-import { LocationDescriptorObject } from 'history';
+import type { LocationDescriptorObject } from 'history';
 
 type EventHandlerCallback = MouseEventHandler<HTMLButtonElement | HTMLAnchorElement>;
 

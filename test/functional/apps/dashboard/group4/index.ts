@@ -11,6 +11,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const browser = getService('browser');
   const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
 
   async function loadLogstash() {
     await browser.setWindowSize(1200, 900);
@@ -19,6 +20,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
 
   async function unloadLogstash() {
     await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
+    await kibanaServer.savedObjects.cleanStandardList();
   }
 
   describe('dashboard app - group 4', function () {

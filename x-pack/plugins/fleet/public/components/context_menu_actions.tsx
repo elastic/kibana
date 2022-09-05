@@ -13,6 +13,7 @@ import {
   EuiContextMenuPanel,
   EuiPopover,
   EuiButton,
+  EuiToolTip,
 } from '@elastic/eui';
 import type { EuiButtonProps } from '@elastic/eui/src/components/button/button';
 import type { EuiContextMenuProps } from '@elastic/eui/src/components/context_menu/context_menu';
@@ -24,6 +25,7 @@ type Props = {
     children: JSX.Element;
   };
   isOpen?: boolean;
+  isManaged?: boolean;
   onChange?: (isOpen: boolean) => void;
 } & (
   | {
@@ -51,24 +53,37 @@ export const ContextMenuActions = React.memo<Props>(({ button, onChange, isOpen,
     }
   }, [isOpenState, onChange, isOpen]);
 
+  const actionButton = button ? (
+    <EuiButton {...button.props} onClick={handleToggleMenu} isDisabled={props.isManaged}>
+      {button.children}
+    </EuiButton>
+  ) : (
+    <EuiButtonIcon
+      isDisabled={props.isManaged}
+      iconType="boxesHorizontal"
+      onClick={handleToggleMenu}
+      aria-label={i18n.translate('xpack.fleet.genericActionsMenuText', {
+        defaultMessage: 'Open',
+      })}
+      data-test-subj="agentActionsBtn"
+    />
+  );
+
   return (
     <EuiPopover
       anchorPosition="downRight"
       panelPaddingSize="none"
       button={
-        button ? (
-          <EuiButton {...button.props} onClick={handleToggleMenu}>
-            {button.children}
-          </EuiButton>
-        ) : (
-          <EuiButtonIcon
-            iconType="boxesHorizontal"
-            onClick={handleToggleMenu}
-            aria-label={i18n.translate('xpack.fleet.genericActionsMenuText', {
-              defaultMessage: 'Open',
+        props.isManaged ? (
+          <EuiToolTip
+            title={i18n.translate('xpack.fleet.externallyManagedLabel', {
+              defaultMessage: 'This is externally managed integration policy.',
             })}
-            data-test-subj="agentActionsBtn"
-          />
+          >
+            {actionButton}
+          </EuiToolTip>
+        ) : (
+          actionButton
         )
       }
       isOpen={isOpen === undefined ? isOpenState : isOpen}

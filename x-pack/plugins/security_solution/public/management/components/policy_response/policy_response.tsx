@@ -9,21 +9,24 @@ import React, { memo, useCallback } from 'react';
 import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiHealth, EuiText, EuiTreeView, EuiNotificationBadge } from '@elastic/eui';
-import {
-  HostPolicyResponseActionStatus,
+import { useKibana } from '../../../common/lib/kibana';
+import type {
   HostPolicyResponseAppliedAction,
   HostPolicyResponseConfiguration,
   Immutable,
   ImmutableArray,
   ImmutableObject,
 } from '../../../../common/endpoint/types';
-import { formatResponse } from './policy_response_friendly_names';
+import { HostPolicyResponseActionStatus } from '../../../../common/endpoint/types';
+import { formatResponse, PolicyResponseActionFormatter } from './policy_response_friendly_names';
 import { PolicyResponseActionItem } from './policy_response_action_item';
 
 // Most of them are needed in order to display large react nodes (PolicyResponseActionItem) in child levels.
 const StyledEuiTreeView = styled(EuiTreeView)`
   .policy-response-action-item-expanded {
     height: auto;
+    padding-top: ${({ theme }) => theme.eui.euiSizeS};
+    padding-bottom: ${({ theme }) => theme.eui.euiSizeS};
     .euiTreeView__nodeLabel {
       width: 100%;
     }
@@ -37,14 +40,24 @@ const StyledEuiTreeView = styled(EuiTreeView)`
       .euiTreeView__node {
         // When response action item displays a callout, this needs to be overwritten to remove the default max height of EuiTreeView
         max-height: none !important;
-        padding-top: ${({ theme }) => theme.eui.paddingSizes.s};
-        padding-bottom: ${({ theme }) => theme.eui.paddingSizes.s};
+      }
+    }
+  }
+  .euiTreeView__node {
+    max-height: none !important;
+    .euiNotificationBadge {
+      margin-right: 5px;
+    }
+    .euiTreeView__nodeLabel {
+      .euiText {
+        font-size: ${({ theme }) => theme.eui.euiFontSize};
       }
     }
   }
 `;
 
 interface PolicyResponseProps {
+  hostOs: string;
   policyResponseConfig: Immutable<HostPolicyResponseConfiguration>;
   policyResponseActions: Immutable<HostPolicyResponseAppliedAction[]>;
   policyResponseAttentionCount: Map<string, number>;
@@ -55,10 +68,12 @@ interface PolicyResponseProps {
  */
 export const PolicyResponse = memo(
   ({
+    hostOs,
     policyResponseConfig,
     policyResponseActions,
     policyResponseAttentionCount,
   }: PolicyResponseProps) => {
+    const { docLinks } = useKibana().services;
     const getEntryIcon = useCallback(
       (status: HostPolicyResponseActionStatus, unsuccessCounts: number) =>
         status === HostPolicyResponseActionStatus.success ? (
@@ -88,6 +103,11 @@ export const PolicyResponse = memo(
             (currentAction) => currentAction.name === actionKey
           ) as ImmutableObject<HostPolicyResponseAppliedAction>;
 
+          const policyResponseActionFormatter = new PolicyResponseActionFormatter(
+            action || {},
+            docLinks.links.securitySolution.policyResponseTroubleshooting,
+            hostOs
+          );
           return {
             label: (
               <EuiText
@@ -99,7 +119,7 @@ export const PolicyResponse = memo(
                 }
                 data-test-subj="endpointPolicyResponseAction"
               >
-                {formatResponse(actionKey)}
+                {policyResponseActionFormatter.title}
               </EuiText>
             ),
             id: actionKey,
@@ -116,26 +136,23 @@ export const PolicyResponse = memo(
               {
                 label: (
                   <PolicyResponseActionItem
-                    status={action.status}
-                    actionTitle={action.name}
-                    actionMessage={action.message}
-                    // actionButtonLabel="Do something" // TODO
-                    // actionButtonOnClick={() => {}} // TODO
+                    policyResponseActionFormatter={policyResponseActionFormatter}
                   />
                 ),
                 id: `action_message_${actionKey}`,
                 isExpanded: true,
-                className:
-                  action.status !== HostPolicyResponseActionStatus.success &&
-                  action.status !== HostPolicyResponseActionStatus.unsupported
-                    ? 'policy-response-action-item-expanded'
-                    : '',
+                className: 'policy-response-action-item-expanded',
               },
             ],
           };
         });
       },
-      [getEntryIcon, policyResponseActions]
+      [
+        docLinks.links.securitySolution.policyResponseTroubleshooting,
+        getEntryIcon,
+        policyResponseActions,
+        hostOs,
+      ]
     );
 
     const getResponseConfigs = useCallback(

@@ -7,8 +7,8 @@
 
 /*
  * This script will create two users
- * - editor_user
- * - viewer_user
+ * - editor
+ * - viewer
  *
  * Usage: node create-apm-users.js
  ******************************/

@@ -5,40 +5,26 @@
  * 2.0.
  */
 
-import React, { memo, useCallback } from 'react';
+import React, { memo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiFormRow, EuiLink, EuiFieldText, EuiSpacer } from '@elastic/eui';
+import { EuiFormRow, EuiLink, EuiSpacer } from '@elastic/eui';
+import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
+import { TextField } from '@kbn/es-ui-shared-plugin/static/forms/components';
+
 import { useKibana } from '../../../../common/lib/kibana';
-import type { ActionConnectorFieldsProps } from '../../../../types';
 import * as i18n from './translations';
-import type { ServiceNowActionConnector } from './types';
-import { isFieldInvalid } from './helpers';
 
 interface Props {
-  action: ActionConnectorFieldsProps<ServiceNowActionConnector>['action'];
-  errors: ActionConnectorFieldsProps<ServiceNowActionConnector>['errors'];
   readOnly: boolean;
   isLoading: boolean;
-  editActionConfig: ActionConnectorFieldsProps<ServiceNowActionConnector>['editActionConfig'];
+  pathPrefix?: string;
 }
 
-const CredentialsApiUrlComponent: React.FC<Props> = ({
-  action,
-  errors,
-  isLoading,
-  readOnly,
-  editActionConfig,
-}) => {
+const { urlField } = fieldValidators;
+
+const CredentialsApiUrlComponent: React.FC<Props> = ({ isLoading, readOnly, pathPrefix = '' }) => {
   const { docLinks } = useKibana().services;
-  const { apiUrl } = action.config;
-
-  const isApiUrlInvalid = isFieldInvalid(apiUrl, errors.apiUrl);
-
-  const onChangeApiUrlEvent = useCallback(
-    (event?: React.ChangeEvent<HTMLInputElement>) =>
-      editActionConfig('apiUrl', event?.target.value ?? ''),
-    [editActionConfig]
-  );
 
   return (
     <>
@@ -58,30 +44,26 @@ const CredentialsApiUrlComponent: React.FC<Props> = ({
         </p>
       </EuiFormRow>
       <EuiSpacer size="l" />
-      <EuiFormRow
-        id="apiUrl"
-        fullWidth
-        error={errors.apiUrl}
-        isInvalid={isApiUrlInvalid}
-        label={i18n.API_URL_LABEL}
-        helpText={i18n.API_URL_HELPTEXT}
-      >
-        <EuiFieldText
-          fullWidth
-          isInvalid={isApiUrlInvalid}
-          name="apiUrl"
-          readOnly={readOnly}
-          value={apiUrl || ''} // Needed to prevent uncontrolled input error when value is undefined
-          data-test-subj="credentialsApiUrlFromInput"
-          onChange={onChangeApiUrlEvent}
-          onBlur={() => {
-            if (!apiUrl) {
-              onChangeApiUrlEvent();
-            }
-          }}
-          disabled={isLoading}
-        />
-      </EuiFormRow>
+      <UseField
+        path={`${pathPrefix}config.apiUrl`}
+        component={TextField}
+        config={{
+          label: i18n.API_URL_LABEL,
+          validations: [
+            {
+              validator: urlField(i18n.API_URL_INVALID),
+            },
+          ],
+        }}
+        componentProps={{
+          euiFieldProps: {
+            'data-test-subj': 'credentialsApiUrlFromInput',
+            isLoading,
+            readOnly,
+            disabled: readOnly || isLoading,
+          },
+        }}
+      />
     </>
   );
 };

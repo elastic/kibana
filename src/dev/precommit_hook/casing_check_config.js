@@ -53,11 +53,8 @@ export const IGNORE_FILE_GLOBS = [
   '**/preview-body.html',
   '**/preview-head.html',
 
-  // filename required by api-extractor
-  'api-documenter.json',
-
   // filename must match upstream filenames from lodash
-  'packages/elastic-safer-lodash-set/**/*',
+  'packages/kbn-safer-lodash-set/**/*',
 
   // filename must match upstream filenames from handlebars
   'packages/kbn-handlebars/src/upstream/**/*',

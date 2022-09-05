@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { useQuery } from 'react-query';
+import { useQuery } from '@tanstack/react-query';
 
 import { useKibana } from '../lib/kibana';
 import { useErrorToast } from './use_error_toast';
@@ -16,7 +16,7 @@ export const useOsqueryIntegrationStatus = () => {
   const setErrorToast = useErrorToast();
 
   return useQuery(
-    'integration',
+    ['integration'],
     () =>
       http.get<{ name: string; version: string; title: string; install_status: string }>(
         '/internal/osquery/status'

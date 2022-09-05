@@ -46,6 +46,7 @@ export function CollapseSetting({
       fullWidth
     >
       <EuiSelect
+        fullWidth
         compressed
         data-test-subj="indexPattern-terms-orderBy"
         options={options}

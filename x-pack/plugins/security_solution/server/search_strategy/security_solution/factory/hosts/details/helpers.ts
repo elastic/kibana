@@ -5,12 +5,16 @@
  * 2.0.
  */
 
-import { set } from '@elastic/safer-lodash-set/fp';
+import { set } from '@kbn/safer-lodash-set/fp';
 import { get, has, head } from 'lodash/fp';
-import { IScopedClusterClient, KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
+import type {
+  IScopedClusterClient,
+  KibanaRequest,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 import { hostFieldsMap } from '../../../../../../common/ecs/ecs_fields';
 import { Direction } from '../../../../../../common/search_strategy/common';
-import {
+import type {
   AggregationRequest,
   EndpointFields,
   HostAggEsItem,
@@ -19,8 +23,8 @@ import {
   HostValue,
 } from '../../../../../../common/search_strategy/security_solution/hosts';
 import { toObjectArrayOfStrings } from '../../../../../../common/utils/to_array';
-import { EndpointAppContext } from '../../../../../endpoint/types';
-import { getPendingActionCounts } from '../../../../../endpoint/services';
+import type { EndpointAppContext } from '../../../../../endpoint/types';
+import { getPendingActionsSummary } from '../../../../../endpoint/services';
 
 export const HOST_DETAILS_FIELDS = [
   '_id',
@@ -178,9 +182,10 @@ export const getHostEndpoint = async (
     const fleetAgentId = endpointData.metadata.elastic.agent.id;
 
     const pendingActions = fleetAgentId
-      ? getPendingActionCounts(
+      ? getPendingActionsSummary(
           esClient.asInternalUser,
           endpointMetadataService,
+          logger,
           [fleetAgentId],
           endpointContext.experimentalFeatures.pendingActionResponsesWithAck
         )

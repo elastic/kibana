@@ -31,7 +31,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const elasticChart = getService('elasticChart');
   const kibanaServer = getService('kibanaServer');
   const dashboardAddPanel = getService('dashboardAddPanel');
-  const xyChartSelector = 'visTypeXyChart';
+  const xyChartSelector = 'xyVisChart';
 
   const enableNewChartLibraryDebug = async (force = false) => {
     if ((await PageObjects.visChart.isNewChartsLibraryEnabled()) || force) {
@@ -48,7 +48,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       isNewChartsLibraryEnabled = await PageObjects.visChart.isNewChartsLibraryEnabled();
       await PageObjects.dashboard.initTests();
       await PageObjects.dashboard.preserveCrossAppState();
-      await browser.setLocalStorageItem('data.newDataViewMenu', 'true');
 
       if (!isNewChartsLibraryEnabled) {
         await kibanaServer.uiSettings.update({

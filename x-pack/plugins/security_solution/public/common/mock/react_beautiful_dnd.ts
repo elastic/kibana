@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import {
+import type {
   DraggableProvided,
   DraggableStateSnapshot,
   DroppableProvided,
   DroppableStateSnapshot,
 } from 'react-beautiful-dnd';
-import React from 'react';
+import type React from 'react';
 
 jest.mock('react-beautiful-dnd', () => ({
   Droppable: ({

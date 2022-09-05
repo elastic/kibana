@@ -14,10 +14,28 @@ import JsYaml from 'js-yaml';
 
 export const FTR_CONFIGS_MANIFEST_REL = '.buildkite/ftr_configs.yml';
 
-const ftrConfigsManifest = JsYaml.safeLoad(
+interface FtrConfigWithOptions {
+  [configPath: string]: {
+    queue: string;
+  };
+}
+
+interface FtrConfigsManifest {
+  defaultQueue: string;
+  disabled: string[];
+  enabled: Array<string | FtrConfigWithOptions>;
+}
+
+const ftrConfigsManifest: FtrConfigsManifest = JsYaml.safeLoad(
   Fs.readFileSync(Path.resolve(REPO_ROOT, FTR_CONFIGS_MANIFEST_REL), 'utf8')
 );
 
-export const FTR_CONFIGS_MANIFEST_PATHS = (Object.values(ftrConfigsManifest) as string[][])
+export const FTR_CONFIGS_MANIFEST_PATHS = [
+  Object.values(ftrConfigsManifest.enabled),
+  Object.values(ftrConfigsManifest.disabled),
+]
   .flat()
-  .map((rel) => Path.resolve(REPO_ROOT, rel));
+  .map((config) => {
+    const rel = typeof config === 'string' ? config : Object.keys(config)[0];
+    return Path.resolve(REPO_ROOT, rel);
+  });

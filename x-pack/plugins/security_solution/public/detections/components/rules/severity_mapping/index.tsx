@@ -19,7 +19,7 @@ import {
 import { noop } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
-import {
+import type {
   Severity,
   SeverityMapping,
   SeverityMappingItem,
@@ -30,10 +30,10 @@ import {
 } from '@kbn/securitysolution-autocomplete';
 
 import type { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
-import { FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import type { FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import * as i18n from './translations';
-import { SeverityOptionItem } from '../step_about_rule/data';
-import { AboutStepSeverity } from '../../../pages/detection_engine/rules/types';
+import type { SeverityOptionItem } from '../step_about_rule/data';
+import type { AboutStepSeverity } from '../../../pages/detection_engine/rules/types';
 import { useKibana } from '../../../../common/lib/kibana';
 
 const NestedContent = styled.div`

@@ -80,7 +80,6 @@ export const Network = React.memo<{
             <EuiFlexItemMarginRight grow={false} key={proto}>
               <DraggableBadge
                 contextId={contextId}
-                data-test-subj="network-protocol"
                 eventId={eventId}
                 field={NETWORK_PROTOCOL_FIELD_NAME}
                 isDraggable={isDraggable}
@@ -103,7 +102,7 @@ export const Network = React.memo<{
                   value={b}
                 >
                   <Stats size="xs">
-                    <span data-test-subj="network-bytes">
+                    <span>
                       <PreferenceFormattedBytes value={b} />
                     </span>
                   </Stats>
@@ -123,7 +122,7 @@ export const Network = React.memo<{
                 value={p}
               >
                 <Stats size="xs">
-                  <span data-test-subj="network-packets">{`${p} ${i18n.PACKETS}`}</span>
+                  <span>{`${p} ${i18n.PACKETS}`}</span>
                 </Stats>
               </DefaultDraggable>
             </EuiFlexItemMarginRight>
@@ -152,7 +151,6 @@ export const Network = React.memo<{
             <EuiFlexItem grow={false} key={trans}>
               <DraggableBadge
                 contextId={contextId}
-                data-test-subj="network-community-id"
                 eventId={eventId}
                 field={NETWORK_COMMUNITY_ID_FIELD_NAME}
                 isDraggable={isDraggable}

@@ -68,7 +68,7 @@ export default function ({ getPageObjects, getService, updateBaselines }) {
     describe('ecommerce', () => {
       before(async () => {
         await PageObjects.maps.loadSavedMap('[eCommerce] Orders by Country');
-        await PageObjects.maps.toggleLayerVisibility('Road map - desaturated');
+        await PageObjects.maps.toggleEmsBasemapLayerVisibility();
         await PageObjects.maps.toggleLayerVisibility('United Kingdom');
         await PageObjects.maps.toggleLayerVisibility('France');
         await PageObjects.maps.toggleLayerVisibility('United States');
@@ -96,7 +96,7 @@ export default function ({ getPageObjects, getService, updateBaselines }) {
     describe('flights', () => {
       before(async () => {
         await PageObjects.maps.loadSavedMap('[Flights] Origin Time Delayed');
-        await PageObjects.maps.toggleLayerVisibility('Road map - desaturated');
+        await PageObjects.maps.toggleEmsBasemapLayerVisibility();
         await PageObjects.timePicker.setCommonlyUsedTime('sample_data range');
         await PageObjects.maps.enterFullScreen();
         await PageObjects.maps.closeLegend();
@@ -121,7 +121,7 @@ export default function ({ getPageObjects, getService, updateBaselines }) {
       before(async () => {
         await PageObjects.maps.loadSavedMap('[Logs] Total Requests and Bytes');
         await PageObjects.maps.toggleLayerVisibility('Total Requests by Destination');
-        await PageObjects.maps.toggleLayerVisibility('Road map - desaturated');
+        await PageObjects.maps.toggleEmsBasemapLayerVisibility();
         await PageObjects.timePicker.setCommonlyUsedTime('sample_data range');
         await PageObjects.maps.enterFullScreen();
         await PageObjects.maps.closeLegend();

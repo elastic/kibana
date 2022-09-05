@@ -7,7 +7,7 @@
 
 import { all } from 'deepmerge';
 import type { DataViewBase } from '@kbn/es-query';
-import { Immutable } from '../../../../../common/endpoint/types';
+import type { Immutable } from '../../../../../common/endpoint/types';
 
 export function clone(value: DataViewBase | Immutable<DataViewBase>): DataViewBase {
   return all([value]) as DataViewBase;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
+import { EuiFlyoutFooter, EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { FlyoutProps } from './types';
 import { translations } from '../../../../config';
@@ -18,16 +18,18 @@ export default function AlertsFlyoutFooter({ alert, isInApp }: FlyoutProps & { i
 
   if (!alert.link || isInApp) return <></>;
   return (
-    <EuiFlexGroup justifyContent="flexEnd">
-      <EuiFlexItem grow={false}>
-        <EuiButton
-          href={prepend && prepend(alert.link)}
-          data-test-subj="alertsFlyoutViewInAppButton"
-          fill
-        >
-          {translations.alertsFlyout.viewInAppButtonText}
-        </EuiButton>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <EuiFlyoutFooter>
+      <EuiFlexGroup justifyContent="flexEnd">
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            href={prepend && prepend(alert.link)}
+            data-test-subj="alertsFlyoutViewInAppButton"
+            fill
+          >
+            {translations.alertsFlyout.viewInAppButtonText}
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiFlyoutFooter>
   );
 }

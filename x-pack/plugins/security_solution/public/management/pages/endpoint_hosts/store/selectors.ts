@@ -10,14 +10,10 @@ import querystring from 'querystring';
 import { createSelector } from 'reselect';
 import { matchPath } from 'react-router-dom';
 import { decode } from 'rison-node';
-import { Query } from '@kbn/es-query';
-import {
-  Immutable,
-  HostStatus,
-  ActivityLog,
-  HostMetadata,
-} from '../../../../../common/endpoint/types';
-import { EndpointState, EndpointIndexUIQueryParams } from '../types';
+import type { Query } from '@kbn/es-query';
+import type { Immutable, HostMetadata } from '../../../../../common/endpoint/types';
+import { HostStatus } from '../../../../../common/endpoint/types';
+import type { EndpointState, EndpointIndexUIQueryParams } from '../types';
 import { extractListPaginationParams } from '../../../common/routing';
 import {
   MANAGEMENT_DEFAULT_PAGE,
@@ -25,16 +21,15 @@ import {
   MANAGEMENT_ROUTING_ENDPOINTS_PATH,
 } from '../../../common/constants';
 import {
-  getLastLoadedResourceState,
   isFailedResourceState,
   isLoadedResourceState,
   isLoadingResourceState,
   isUninitialisedResourceState,
 } from '../../../state';
 
-import { ServerApiError } from '../../../../common/types';
+import type { ServerApiError } from '../../../../common/types';
 import { isEndpointHostIsolated } from '../../../../common/utils/validators';
-import { EndpointHostIsolationStatusProps } from '../../../../common/components/endpoint/host_isolation';
+import type { EndpointHostIsolationStatusProps } from '../../../../common/components/endpoint/host_isolation';
 import { EndpointDetailsTabsTypes } from '../view/details/components/endpoint_details_tabs';
 
 export const listData = (state: Immutable<EndpointState>) => state.hosts;
@@ -176,23 +171,10 @@ export const showView: (state: EndpointState) => EndpointIndexUIQueryParams['sho
   });
 
 /**
- * Returns the selected endpoint's elastic agent Id
- * used for fetching endpoint actions log
- */
-export const selectedAgent = (state: Immutable<EndpointState>): string => {
-  const hostList = state.hosts;
-  const { selected_endpoint: selectedEndpoint } = uiQueryParams(state);
-  return (
-    hostList.find((host) => host.metadata.agent.id === selectedEndpoint)?.metadata.elastic.agent
-      .id || ''
-  );
-};
-
-/**
  * Returns the Host Status which is connected the fleet agent
  */
 export const hostStatusInfo: (state: Immutable<EndpointState>) => HostStatus = createSelector(
-  (state) => state.hostStatus,
+  (state: Immutable<EndpointState>) => state.hostStatus,
   (hostStatus) => {
     return hostStatus ? hostStatus : HostStatus.UNHEALTHY;
   }
@@ -202,7 +184,7 @@ export const hostStatusInfo: (state: Immutable<EndpointState>) => HostStatus = c
  * Returns the Policy Response overall status
  */
 export const policyResponseStatus: (state: Immutable<EndpointState>) => string = createSelector(
-  (state) => state.policyResponse,
+  (state: Immutable<EndpointState>) => state.policyResponse,
   (policyResponse) => {
     return (policyResponse && policyResponse?.Endpoint?.policy?.applied?.status) || '';
   }
@@ -257,7 +239,7 @@ export const searchBarQuery: (state: Immutable<EndpointState>) => Query = create
 export const getCurrentIsolationRequestState = (
   state: Immutable<EndpointState>
 ): EndpointState['isolationRequestState'] => {
-  return state.isolationRequestState;
+  return state.isolationRequestState as EndpointState['isolationRequestState'];
 };
 
 export const getIsIsolationRequestPending: (state: Immutable<EndpointState>) => boolean =
@@ -283,59 +265,6 @@ export const getIsOnEndpointDetailsActivityLog: (state: Immutable<EndpointState>
     return searchParams.show === EndpointDetailsTabsTypes.activityLog;
   });
 
-export const getActivityLogDataPaging = (
-  state: Immutable<EndpointState>
-): Immutable<EndpointState['endpointDetails']['activityLog']['paging']> => {
-  return state.endpointDetails.activityLog.paging;
-};
-
-export const getActivityLogData = (
-  state: Immutable<EndpointState>
-): Immutable<EndpointState['endpointDetails']['activityLog']['logData']> =>
-  state.endpointDetails.activityLog.logData;
-
-export const getLastLoadedActivityLogData: (
-  state: Immutable<EndpointState>
-) => Immutable<ActivityLog> | undefined = createSelector(getActivityLogData, (activityLog) => {
-  return getLastLoadedResourceState(activityLog)?.data;
-});
-
-export const getActivityLogUninitialized: (state: Immutable<EndpointState>) => boolean =
-  createSelector(getActivityLogData, (activityLog) => isUninitialisedResourceState(activityLog));
-
-export const getActivityLogRequestLoading: (state: Immutable<EndpointState>) => boolean =
-  createSelector(getActivityLogData, (activityLog) => isLoadingResourceState(activityLog));
-
-export const getActivityLogRequestLoaded: (state: Immutable<EndpointState>) => boolean =
-  createSelector(getActivityLogData, (activityLog) => isLoadedResourceState(activityLog));
-
-export const getActivityLogIterableData: (
-  state: Immutable<EndpointState>
-) => Immutable<ActivityLog['data']> = createSelector(getActivityLogData, (activityLog) => {
-  const emptyArray: ActivityLog['data'] = [];
-  return isLoadedResourceState(activityLog) ? activityLog.data.data : emptyArray;
-});
-
-export const getActivityLogError: (state: Immutable<EndpointState>) => ServerApiError | undefined =
-  createSelector(getActivityLogData, (activityLog) => {
-    if (isFailedResourceState(activityLog)) {
-      return activityLog.error;
-    }
-  });
-
-// returns a true if either lgo is uninitialised
-// or if it has failed an api call after having fetched a non empty log list earlier
-export const getActivityLogIsUninitializedOrHasSubsequentAPIError: (
-  state: Immutable<EndpointState>
-) => boolean = createSelector(
-  getActivityLogUninitialized,
-  getLastLoadedActivityLogData,
-  getActivityLogError,
-  (isUninitialized, lastLoadedLogData, isAPIError) => {
-    return isUninitialized || (!isAPIError && !!lastLoadedLogData?.data.length);
-  }
-);
-
 export const getIsEndpointHostIsolated = createSelector(detailsData, (details) => {
   return (details && isEndpointHostIsolated(details)) || false;
 });
@@ -358,6 +287,9 @@ export const getEndpointHostIsolationStatusPropsCallback: (
     return (endpoint: HostMetadata) => {
       let pendingIsolate = 0;
       let pendingUnIsolate = 0;
+      let pendingKillProcess = 0;
+      let pendingSuspendProcess = 0;
+      let pendingRunningProcesses = 0;
 
       if (isLoadedResourceState(pendingActionsState)) {
         const endpointPendingActions = pendingActionsState.data.get(endpoint.elastic.agent.id);
@@ -365,13 +297,21 @@ export const getEndpointHostIsolationStatusPropsCallback: (
         if (endpointPendingActions) {
           pendingIsolate = endpointPendingActions?.isolate ?? 0;
           pendingUnIsolate = endpointPendingActions?.unisolate ?? 0;
+          pendingKillProcess = endpointPendingActions?.['kill-process'] ?? 0;
+          pendingSuspendProcess = endpointPendingActions?.['suspend-process'] ?? 0;
+          pendingRunningProcesses = endpointPendingActions?.['running-processes'] ?? 0;
         }
       }
 
       return {
         isIsolated: isEndpointHostIsolated(endpoint),
-        pendingIsolate,
-        pendingUnIsolate,
+        pendingActions: {
+          pendingIsolate,
+          pendingUnIsolate,
+          pendingKillProcess,
+          pendingSuspendProcess,
+          pendingRunningProcesses,
+        },
       };
     };
   }

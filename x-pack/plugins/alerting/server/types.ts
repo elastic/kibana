@@ -80,6 +80,7 @@ export interface RuleExecutorServices<
   scopedClusterClient: IScopedClusterClient;
   alertFactory: {
     create: (id: string) => PublicAlert<InstanceState, InstanceContext, ActionGroupIds>;
+    hasReachedAlertLimit: () => boolean;
     done: () => AlertFactoryDoneUtils<InstanceState, InstanceContext, ActionGroupIds>;
   };
   shouldWriteAlerts: () => boolean;
@@ -280,3 +281,5 @@ export interface InvalidatePendingApiKey {
 }
 
 export type RuleTypeRegistry = PublicMethodsOf<OrigruleTypeRegistry>;
+
+export type RulesClientApi = PublicMethodsOf<RulesClient>;

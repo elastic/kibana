@@ -11,10 +11,10 @@ import type { ISearchSource } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { unhashUrl } from '@kbn/kibana-utils-plugin/public';
 import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
+import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { showOpenSearchPanel } from './show_open_search_panel';
 import { getSharingData, showPublicUrlSwitch } from '../../../../utils/get_sharing_data';
 import { DiscoverServices } from '../../../../build_services';
-import { SavedSearch } from '../../../../services/saved_searches';
 import { onSaveSearch } from './on_save_search';
 import { GetStateReturn } from '../../services/discover_state';
 import { openOptionsPopover } from './open_options_popover';
@@ -24,7 +24,7 @@ import { openAlertsPopover } from './open_alerts_popover';
  * Helper function to build the top nav links
  */
 export const getTopNavLinks = ({
-  indexPattern,
+  dataView,
   navigateTo,
   savedSearch,
   services,
@@ -32,8 +32,9 @@ export const getTopNavLinks = ({
   onOpenInspector,
   searchSource,
   onOpenSavedSearch,
+  isPlainRecord,
 }: {
-  indexPattern: DataView;
+  dataView: DataView;
   navigateTo: (url: string) => void;
   savedSearch: SavedSearch;
   services: DiscoverServices;
@@ -41,6 +42,7 @@ export const getTopNavLinks = ({
   onOpenInspector: () => void;
   searchSource: ISearchSource;
   onOpenSavedSearch: (id: string) => void;
+  isPlainRecord: boolean;
 }): TopNavMenuData[] => {
   const options = {
     id: 'options',
@@ -103,7 +105,17 @@ export const getTopNavLinks = ({
     testId: 'discoverSaveButton',
     iconType: 'save',
     emphasize: true,
-    run: () => onSaveSearch({ savedSearch, services, indexPattern, navigateTo, state }),
+    run: (anchorElement: HTMLElement) =>
+      onSaveSearch({
+        savedSearch,
+        services,
+        dataView,
+        navigateTo,
+        state,
+        onClose: () => {
+          anchorElement?.focus();
+        },
+      }),
   };
 
   const openSearch = {
@@ -161,6 +173,9 @@ export const getTopNavLinks = ({
         },
         isDirty: !savedSearch.id || state.isAppStateDirty(),
         showPublicUrlSwitch,
+        onClose: () => {
+          anchorElement?.focus();
+        },
       });
     },
   };
@@ -183,8 +198,12 @@ export const getTopNavLinks = ({
     ...(services.capabilities.advancedSettings.save ? [options] : []),
     newSearch,
     openSearch,
-    ...(services.triggersActionsUi ? [alerts] : []),
-    shareSearch,
+    ...(!isPlainRecord ? [shareSearch] : []),
+    ...(services.triggersActionsUi &&
+    services.capabilities.management?.insightsAndAlerting?.triggersActions &&
+    !isPlainRecord
+      ? [alerts]
+      : []),
     inspectSearch,
     ...(services.capabilities.discover.save ? [saveSearch] : []),
   ];

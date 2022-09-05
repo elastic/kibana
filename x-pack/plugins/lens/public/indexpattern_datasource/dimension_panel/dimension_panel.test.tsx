@@ -6,19 +6,20 @@
  */
 
 import { ReactWrapper, ShallowWrapper } from 'enzyme';
-import React from 'react';
+import React, { ChangeEvent } from 'react';
 import { act } from 'react-dom/test-utils';
+import { findTestSubject } from '@elastic/eui/lib/test';
 import {
   EuiComboBox,
   EuiListGroupItemProps,
   EuiListGroup,
   EuiRange,
   EuiSelect,
-  EuiButtonIcon,
 } from '@elastic/eui';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import {
   IndexPatternDimensionEditorComponent,
   IndexPatternDimensionEditorProps,
@@ -45,15 +46,21 @@ import { DateHistogramIndexPatternColumn } from '../operations/definitions/date_
 import { getFieldByNameFactory } from '../pure_helpers';
 import { Filtering, setFilter } from './filtering';
 import { TimeShift } from './time_shift';
+import { ReducedTimeRange } from './reduced_time_range';
 import { DimensionEditor } from './dimension_editor';
 import { AdvancedOptions } from './advanced_options';
 import { layerTypes } from '../../../common';
 
+jest.mock('./reference_editor', () => ({
+  ReferenceEditor: () => null,
+}));
 jest.mock('../loader');
 jest.mock('../query_input', () => ({
   QueryInput: () => null,
 }));
+
 jest.mock('../operations');
+
 jest.mock('lodash', () => {
   const original = jest.requireActual('lodash');
 
@@ -153,18 +160,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
 
   beforeEach(() => {
     state = {
-      indexPatternRefs: [],
-      indexPatterns: expectedIndexPatterns,
       currentIndexPatternId: '1',
-      isFirstExistenceFetch: false,
-      existingFields: {
-        'my-fake-index-pattern': {
-          timestamp: true,
-          bytes: true,
-          memory: true,
-          source: true,
-        },
-      },
       layers: {
         first: {
           indexPatternId: '1',
@@ -198,6 +194,15 @@ describe('IndexPatternDimensionEditorPanel', () => {
     });
 
     defaultProps = {
+      indexPatterns: expectedIndexPatterns,
+      existingFields: {
+        'my-fake-index-pattern': {
+          timestamp: true,
+          bytes: true,
+          memory: true,
+          source: true,
+        },
+      },
       state,
       setState,
       dateRange: { fromDate: 'now-1d', toDate: 'now' },
@@ -210,6 +215,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
       uiSettings: {} as IUiSettingsClient,
       savedObjectsClient: {} as SavedObjectsClientContract,
       http: {} as HttpSetup,
+      fieldFormats: fieldFormatsServiceMock.createStartContract(),
       unifiedSearch: unifiedSearchPluginMock.createStartContract(),
       dataViews: dataViewPluginMocks.createStartContract(),
       data: {
@@ -238,6 +244,8 @@ describe('IndexPatternDimensionEditorPanel', () => {
       isFullscreen: false,
       supportStaticValue: false,
       toggleFullscreen: jest.fn(),
+      enableFormatSelector: true,
+      formatSelectorOptions: undefined,
     };
 
     jest.clearAllMocks();
@@ -331,13 +339,10 @@ describe('IndexPatternDimensionEditorPanel', () => {
   it('should hide fields that have no data', () => {
     const props = {
       ...defaultProps,
-      state: {
-        ...defaultProps.state,
-        existingFields: {
-          'my-fake-index-pattern': {
-            timestamp: true,
-            source: true,
-          },
+      existingFields: {
+        'my-fake-index-pattern': {
+          timestamp: true,
+          source: true,
         },
       },
     };
@@ -982,26 +987,16 @@ describe('IndexPatternDimensionEditorPanel', () => {
       });
     });
 
-    it('should select the Records field when count is selected', () => {
+    it('should select the Records field when count is selected on non-existing column', () => {
       wrapper = mount(
         <IndexPatternDimensionEditorComponent
           {...defaultProps}
-          state={getStateWithColumns({
-            col2: {
-              dataType: 'number',
-              isBucketed: false,
-              label: '',
-              operationType: 'average',
-              sourceField: 'bytes',
-            },
-          })}
+          state={getStateWithColumns({})}
           columnId="col2"
         />
       );
 
-      wrapper
-        .find('button[data-test-subj="lns-indexPatternDimension-count incompatible"]')
-        .simulate('click');
+      wrapper.find('button[data-test-subj="lns-indexPatternDimension-count"]').simulate('click');
 
       const newColumnState = setState.mock.calls[0][0](state).layers.first.columns.col2;
       expect(newColumnState.operationType).toEqual('count');
@@ -1112,37 +1107,21 @@ describe('IndexPatternDimensionEditorPanel', () => {
       };
     }
 
-    it('should not show custom options if time scaling is not available', () => {
-      wrapper = mount(
-        <IndexPatternDimensionEditorComponent
-          {...getProps({
-            operationType: 'average',
-            sourceField: 'bytes',
-          })}
-        />
-      );
-      wrapper
-        .find('[data-test-subj="indexPattern-advanced-popover"]')
-        .hostNodes()
-        .simulate('click');
-      expect(
-        wrapper.find('[data-test-subj="indexPattern-time-scaling-enable"]').hostNodes()
-      ).toHaveLength(0);
-    });
-
-    it('should show custom options if time scaling is available', () => {
+    it('should default to None if time scaling is not set', () => {
       wrapper = mount(<IndexPatternDimensionEditorComponent {...getProps({})} />);
-      wrapper
-        .find('[data-test-subj="indexPattern-advanced-popover"]')
-        .hostNodes()
-        .simulate('click');
+      findTestSubject(wrapper, 'indexPattern-advanced-accordion').simulate('click');
+      expect(wrapper.find('[data-test-subj="indexPattern-time-scaling-enable"]')).toHaveLength(1);
       expect(
-        wrapper.find('[data-test-subj="indexPattern-time-scaling-enable"]').hostNodes()
-      ).toHaveLength(1);
+        wrapper
+          .find('[data-test-subj="indexPattern-time-scaling-unit"]')
+          .find(EuiSelect)
+          .prop('value')
+      ).toBe('');
     });
 
     it('should show current time scaling if set', () => {
       wrapper = mount(<IndexPatternDimensionEditorComponent {...getProps({ timeScale: 'd' })} />);
+      findTestSubject(wrapper, 'indexPattern-advanced-accordion').simulate('click');
       expect(
         wrapper
           .find('[data-test-subj="indexPattern-time-scaling-unit"]')
@@ -1154,14 +1133,13 @@ describe('IndexPatternDimensionEditorPanel', () => {
     it('should allow to set time scaling initially', () => {
       const props = getProps({});
       wrapper = mount(<IndexPatternDimensionEditorComponent {...props} />);
+      findTestSubject(wrapper, 'indexPattern-advanced-accordion').simulate('click');
       wrapper
-        .find('[data-test-subj="indexPattern-advanced-popover"]')
-        .hostNodes()
-        .simulate('click');
-      wrapper
-        .find('[data-test-subj="indexPattern-time-scaling-enable"]')
-        .hostNodes()
-        .simulate('click');
+        .find('[data-test-subj="indexPattern-time-scaling-unit"]')
+        .find(EuiSelect)
+        .prop('onChange')!({
+        target: { value: 's' },
+      } as ChangeEvent<HTMLSelectElement>);
       expect(setState.mock.calls[0]).toEqual([expect.any(Function), { isDimensionComplete: true }]);
       expect(setState.mock.calls[0][0](props.state)).toEqual({
         ...props.state,
@@ -1188,9 +1166,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
         label: 'Sum of bytes per hour',
       });
       wrapper = mount(<IndexPatternDimensionEditorComponent {...props} />);
-      wrapper
-        .find('button[data-test-subj="lns-indexPatternDimension-count incompatible"]')
-        .simulate('click');
+      wrapper.find('button[data-test-subj="lns-indexPatternDimension-count"]').simulate('click');
       expect(setState.mock.calls[0]).toEqual([expect.any(Function), { isDimensionComplete: true }]);
       expect(setState.mock.calls[0][0](props.state)).toEqual({
         ...props.state,
@@ -1201,7 +1177,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
               ...props.state.layers.first.columns,
               col2: expect.objectContaining({
                 timeScale: 'h',
-                label: 'Count of records per hour',
+                label: 'Count of bytes per hour',
               }),
             },
           },
@@ -1239,10 +1215,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
     it('should allow to change time scaling', () => {
       const props = getProps({ timeScale: 's', label: 'Count of records per second' });
       wrapper = mount(<IndexPatternDimensionEditorComponent {...props} />);
-      wrapper
-        .find('button[data-test-subj="indexPattern-advanced-popover"]')
-        .hostNodes()
-        .simulate('click');
+      findTestSubject(wrapper, 'indexPattern-advanced-accordion').simulate('click');
 
       wrapper.find('[data-test-subj="indexPattern-time-scaling-unit"] select').simulate('change', {
         target: { value: 'h' },
@@ -1289,13 +1262,75 @@ describe('IndexPatternDimensionEditorPanel', () => {
         },
       });
     });
+  });
 
-    it('should allow to remove time scaling', () => {
-      const props = getProps({ timeScale: 's', label: 'Count of records per second' });
+  describe('reduced time range', () => {
+    function getProps(colOverrides: Partial<GenericIndexPatternColumn>) {
+      return {
+        ...defaultProps,
+        state: getStateWithColumns({
+          col2: {
+            dataType: 'number',
+            isBucketed: false,
+            label: 'Count of records',
+            operationType: 'count',
+            sourceField: '___records___',
+            ...colOverrides,
+          } as GenericIndexPatternColumn,
+        }),
+        columnId: 'col2',
+      };
+    }
+
+    it('should not show the reduced time range component if reduced time range is not available', () => {
+      const props = {
+        ...defaultProps,
+        state: getStateWithColumns({
+          datecolumn: {
+            dataType: 'date',
+            isBucketed: true,
+            label: '',
+            customLabel: true,
+            operationType: 'date_histogram',
+            sourceField: 'ts',
+            params: {
+              interval: '1d',
+            },
+          } as DateHistogramIndexPatternColumn,
+          col2: {
+            dataType: 'number',
+            isBucketed: false,
+            label: 'Count of records',
+            operationType: 'count',
+            sourceField: '___records___',
+          } as GenericIndexPatternColumn,
+        }),
+        columnId: 'col2',
+      };
       wrapper = mount(<IndexPatternDimensionEditorComponent {...props} />);
-      wrapper.find('[data-test-subj="indexPattern-time-scaling-remove"] button').simulate('click');
-      expect(setState.mock.calls[0]).toEqual([expect.any(Function), { isDimensionComplete: true }]);
-      expect(setState.mock.calls[0][0](props.state)).toEqual({
+      findTestSubject(wrapper, 'indexPattern-advanced-accordion').simulate('click');
+      expect(
+        wrapper.find('[data-test-subj="indexPattern-dimension-reducedTimeRange-row"]')
+      ).toHaveLength(0);
+    });
+
+    it('should show current reduced time range if set', () => {
+      wrapper = mount(
+        <IndexPatternDimensionEditorComponent {...getProps({ reducedTimeRange: '5m' })} />
+      );
+      expect(
+        wrapper.find(ReducedTimeRange).find(EuiComboBox).prop('selectedOptions')[0].value
+      ).toEqual('5m');
+    });
+
+    it('should allow to set reduced time range initially', () => {
+      const props = getProps({});
+      wrapper = mount(<IndexPatternDimensionEditorComponent {...props} />);
+      findTestSubject(wrapper, 'indexPattern-advanced-accordion').simulate('click');
+      wrapper.find(ReducedTimeRange).find(EuiComboBox).prop('onChange')!([
+        { value: '1h', label: '' },
+      ]);
+      expect((props.setState as jest.Mock).mock.calls[0][0](props.state)).toEqual({
         ...props.state,
         layers: {
           first: {
@@ -1303,13 +1338,76 @@ describe('IndexPatternDimensionEditorPanel', () => {
             columns: {
               ...props.state.layers.first.columns,
               col2: expect.objectContaining({
-                timeScale: undefined,
-                label: 'Count of records',
+                reducedTimeRange: '1h',
               }),
             },
           },
         },
       });
+    });
+
+    it('should carry over reduced time range to other operation if possible', () => {
+      const props = getProps({
+        reducedTimeRange: '1d',
+        sourceField: 'bytes',
+        operationType: 'sum',
+        label: 'Sum of bytes per hour',
+      });
+      wrapper = mount(<IndexPatternDimensionEditorComponent {...props} />);
+      wrapper.find('button[data-test-subj="lns-indexPatternDimension-count"]').simulate('click');
+      expect((props.setState as jest.Mock).mock.calls[0][0](props.state)).toEqual({
+        ...props.state,
+        layers: {
+          first: {
+            ...props.state.layers.first,
+            columns: {
+              ...props.state.layers.first.columns,
+              col2: expect.objectContaining({
+                reducedTimeRange: '1d',
+              }),
+            },
+          },
+        },
+      });
+    });
+
+    it('should allow to change reduced time range', () => {
+      const props = getProps({
+        timeShift: '1d',
+      });
+      wrapper = mount(<IndexPatternDimensionEditorComponent {...props} />);
+      wrapper.find(ReducedTimeRange).find(EuiComboBox).prop('onCreateOption')!('7m', []);
+      expect((props.setState as jest.Mock).mock.calls[0][0](props.state)).toEqual({
+        ...props.state,
+        layers: {
+          first: {
+            ...props.state.layers.first,
+            columns: {
+              ...props.state.layers.first.columns,
+              col2: expect.objectContaining({
+                reducedTimeRange: '7m',
+              }),
+            },
+          },
+        },
+      });
+    });
+
+    it('should report a generic error for invalid reduced time range string', () => {
+      const props = getProps({
+        reducedTimeRange: '5 months',
+      });
+      wrapper = mount(<IndexPatternDimensionEditorComponent {...props} />);
+
+      expect(wrapper.find(ReducedTimeRange).find(EuiComboBox).prop('isInvalid')).toBeTruthy();
+
+      expect(
+        wrapper
+          .find(ReducedTimeRange)
+          .find('[data-test-subj="indexPattern-dimension-reducedTimeRange-row"]')
+          .first()
+          .prop('error')
+      ).toBe('Time range value is not valid.');
     });
   });
 
@@ -1342,7 +1440,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
       };
     }
 
-    it('should not show custom options if time shift is not available', () => {
+    it('should not show the TimeShift component if time shift is not available', () => {
       const props = {
         ...defaultProps,
         state: getStateWithColumns({
@@ -1356,28 +1454,20 @@ describe('IndexPatternDimensionEditorPanel', () => {
         }),
         columnId: 'col2',
       };
-      wrapper = shallow(
+      wrapper = mount(
         <IndexPatternDimensionEditorComponent
           {...props}
-          state={{
-            ...props.state,
-            indexPatterns: {
-              '1': {
-                ...props.state.indexPatterns['1'],
-                timeFieldName: undefined,
-              },
+          indexPatterns={{
+            '1': {
+              ...props.indexPatterns['1'],
+              timeFieldName: undefined,
             },
           }}
         />
       );
-      expect(
-        wrapper
-          .find(DimensionEditor)
-          .dive()
-          .find(AdvancedOptions)
-          .dive()
-          .find('[data-test-subj="indexPattern-time-shift-enable"]')
-      ).toHaveLength(0);
+      findTestSubject(wrapper, 'indexPattern-advanced-accordion').simulate('click');
+      expect(wrapper.find('[data-test-subj="indexPattern-time-shift-enable"]')).toHaveLength(1);
+      expect(wrapper.find(TimeShift)).toHaveLength(0);
     });
 
     it('should show custom options if time shift is available', () => {
@@ -1401,14 +1491,9 @@ describe('IndexPatternDimensionEditorPanel', () => {
 
     it('should allow to set time shift initially', () => {
       const props = getProps({});
-      wrapper = shallow(<IndexPatternDimensionEditorComponent {...props} />);
-      wrapper
-        .find(DimensionEditor)
-        .dive()
-        .find(AdvancedOptions)
-        .dive()
-        .find('[data-test-subj="indexPattern-time-shift-enable"]')
-        .simulate('click');
+      wrapper = mount(<IndexPatternDimensionEditorComponent {...props} />);
+      findTestSubject(wrapper, 'indexPattern-advanced-accordion').simulate('click');
+      wrapper.find(TimeShift).find(EuiComboBox).prop('onChange')!([{ value: '1h', label: '' }]);
       expect((props.setState as jest.Mock).mock.calls[0][0](props.state)).toEqual({
         ...props.state,
         layers: {
@@ -1417,7 +1502,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
             columns: {
               ...props.state.layers.first.columns,
               col2: expect.objectContaining({
-                timeShift: '',
+                timeShift: '1h',
               }),
             },
           },
@@ -1433,9 +1518,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
         label: 'Sum of bytes per hour',
       });
       wrapper = mount(<IndexPatternDimensionEditorComponent {...props} />);
-      wrapper
-        .find('button[data-test-subj="lns-indexPatternDimension-count incompatible"]')
-        .simulate('click');
+      wrapper.find('button[data-test-subj="lns-indexPatternDimension-count"]').simulate('click');
       expect((props.setState as jest.Mock).mock.calls[0][0](props.state)).toEqual({
         ...props.state,
         layers: {
@@ -1467,31 +1550,6 @@ describe('IndexPatternDimensionEditorPanel', () => {
               ...props.state.layers.first.columns,
               col2: expect.objectContaining({
                 timeShift: '1h',
-              }),
-            },
-          },
-        },
-      });
-    });
-
-    it('should allow to time shift', () => {
-      const props = getProps({
-        timeShift: '1h',
-      });
-      wrapper = mount(<IndexPatternDimensionEditorComponent {...props} />);
-      wrapper
-        .find('[data-test-subj="indexPattern-time-shift-remove"]')
-        .find(EuiButtonIcon)
-        .simulate('click');
-      expect((props.setState as jest.Mock).mock.calls[0][0](props.state)).toEqual({
-        ...props.state,
-        layers: {
-          first: {
-            ...props.state.layers.first,
-            columns: {
-              ...props.state.layers.first.columns,
-              col2: expect.objectContaining({
-                timeShift: undefined,
               }),
             },
           },
@@ -1561,16 +1619,13 @@ describe('IndexPatternDimensionEditorPanel', () => {
         />
       );
       expect(
-        wrapper.find('[data-test-subj="indexPattern-advanced-popover"]').hostNodes()
+        wrapper.find('[data-test-subj="indexPattern-advanced-accordion"]').hostNodes()
       ).toHaveLength(0);
     });
 
     it('should show custom options if filtering is available', () => {
       wrapper = mount(<IndexPatternDimensionEditorComponent {...getProps({})} />);
-      wrapper
-        .find('[data-test-subj="indexPattern-advanced-popover"]')
-        .hostNodes()
-        .simulate('click');
+      findTestSubject(wrapper, 'indexPattern-advanced-accordion').simulate('click');
       expect(
         wrapper.find('[data-test-subj="indexPattern-filter-by-enable"]').hostNodes()
       ).toHaveLength(1);
@@ -1591,37 +1646,6 @@ describe('IndexPatternDimensionEditorPanel', () => {
       ).toBe(`a: b`);
     });
 
-    it('should allow to set filter initially', () => {
-      const props = getProps({});
-      wrapper = mount(<IndexPatternDimensionEditorComponent {...props} />);
-      wrapper
-        .find('[data-test-subj="indexPattern-advanced-popover"]')
-        .hostNodes()
-        .simulate('click');
-      wrapper
-        .find('[data-test-subj="indexPattern-filter-by-enable"]')
-        .hostNodes()
-        .simulate('click');
-      expect(setState.mock.calls[0]).toEqual([expect.any(Function), { isDimensionComplete: true }]);
-      expect(setState.mock.calls[0][0](props.state)).toEqual({
-        ...props.state,
-        layers: {
-          first: {
-            ...props.state.layers.first,
-            columns: {
-              ...props.state.layers.first.columns,
-              col2: expect.objectContaining({
-                filter: {
-                  language: 'kuery',
-                  query: '',
-                },
-              }),
-            },
-          },
-        },
-      });
-    });
-
     it('should carry over filter to other operation if possible', () => {
       const props = getProps({
         filter: { language: 'kuery', query: 'a: b' },
@@ -1630,9 +1654,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
         label: 'Sum of bytes per hour',
       });
       wrapper = mount(<IndexPatternDimensionEditorComponent {...props} />);
-      wrapper
-        .find('button[data-test-subj="lns-indexPatternDimension-count incompatible"]')
-        .simulate('click');
+      wrapper.find('button[data-test-subj="lns-indexPatternDimension-count"]').simulate('click');
       expect(setState.mock.calls[0]).toEqual([expect.any(Function), { isDimensionComplete: true }]);
       expect(setState.mock.calls[0][0](props.state)).toEqual({
         ...props.state,
@@ -1673,33 +1695,6 @@ describe('IndexPatternDimensionEditorPanel', () => {
               ...props.state.layers.first.columns,
               col2: expect.objectContaining({
                 filter: { language: 'kuery', query: 'c: d' },
-              }),
-            },
-          },
-        },
-      });
-    });
-
-    it('should allow to remove filter', () => {
-      const props = getProps({
-        filter: { language: 'kuery', query: 'a: b' },
-      });
-      wrapper = mount(<IndexPatternDimensionEditorComponent {...props} />);
-      wrapper
-        .find('[data-test-subj="indexPattern-filter-by-remove"]')
-        .find(EuiButtonIcon)
-        .simulate('click');
-
-      expect(setState.mock.calls[0]).toEqual([expect.any(Function), { isDimensionComplete: true }]);
-      expect(setState.mock.calls[0][0](props.state)).toEqual({
-        ...props.state,
-        layers: {
-          first: {
-            ...props.state.layers.first,
-            columns: {
-              ...props.state.layers.first.columns,
-              col2: expect.objectContaining({
-                filter: undefined,
               }),
             },
           },
@@ -1786,34 +1781,31 @@ describe('IndexPatternDimensionEditorPanel', () => {
   });
 
   it('should select operation directly if only one field is possible', () => {
-    const initialState = {
-      ...state,
-      indexPatterns: {
-        1: {
-          ...state.indexPatterns['1'],
-          fields: state.indexPatterns['1'].fields.filter((field) => field.name !== 'memory'),
-        },
-      },
-    };
-
     wrapper = mount(
       <IndexPatternDimensionEditorComponent
         {...defaultProps}
-        state={initialState}
         columnId={'col2'}
+        indexPatterns={{
+          1: {
+            ...defaultProps.indexPatterns['1'],
+            fields: defaultProps.indexPatterns['1'].fields.filter(
+              (field) => field.name !== 'memory'
+            ),
+          },
+        }}
       />
     );
 
     wrapper.find('button[data-test-subj="lns-indexPatternDimension-average"]').simulate('click');
 
     expect(setState.mock.calls[0]).toEqual([expect.any(Function), { isDimensionComplete: true }]);
-    expect(setState.mock.calls[0][0](initialState)).toEqual({
-      ...initialState,
+    expect(setState.mock.calls[0][0](state)).toEqual({
+      ...state,
       layers: {
         first: {
-          ...initialState.layers.first,
+          ...state.layers.first,
           columns: {
-            ...initialState.layers.first.columns,
+            ...state.layers.first.columns,
             col2: expect.objectContaining({
               sourceField: 'bytes',
               operationType: 'average',
@@ -1898,10 +1890,6 @@ describe('IndexPatternDimensionEditorPanel', () => {
       .prop('options');
 
     expect(options![0]['data-test-subj']).not.toContain('Incompatible');
-
-    options![1].options!.map((operation) =>
-      expect(operation['data-test-subj']).toContain('Incompatible')
-    );
   });
 
   it('should not update when selecting the current field again', () => {
@@ -1932,21 +1920,23 @@ describe('IndexPatternDimensionEditorPanel', () => {
 
     const items: EuiListGroupItemProps[] = wrapper.find(EuiListGroup).prop('listItems') || [];
 
-    expect(items.map(({ label }: { label: React.ReactNode }) => label)).toEqual([
-      'Average',
-      'Count',
-      'Counter rate',
-      'Cumulative sum',
-      'Differences',
-      'Last value',
-      'Maximum',
-      'Median',
-      'Minimum',
-      'Moving average',
-      'Percentile',
-      'Percentile rank',
-      'Sum',
-      'Unique count',
+    expect(items.map(({ id }) => id)).toEqual([
+      'average',
+      'count',
+      'counter_rate',
+      'cumulative_sum',
+      'differences',
+      'last_value',
+      'max',
+      'median',
+      'min',
+      'moving_average',
+      'percentile',
+      'percentile_rank',
+      'standard_deviation',
+      'sum',
+      'unique_count',
+      undefined,
     ]);
   });
 
@@ -2223,35 +2213,38 @@ describe('IndexPatternDimensionEditorPanel', () => {
           sourceField: 'bytes',
         },
       }),
-      indexPatterns: {
-        1: {
-          id: '1',
-          title: 'my-fake-index-pattern',
-          hasRestrictions: false,
-          fields: [
-            {
-              name: 'bytes',
-              displayName: 'bytes',
-              type: 'number',
-              aggregatable: true,
-              searchable: true,
-            },
-          ],
-          getFieldByName: getFieldByNameFactory([
-            {
-              name: 'bytes',
-              displayName: 'bytes',
-              type: 'number',
-              aggregatable: true,
-              searchable: true,
-            },
-          ]),
-        },
-      },
     };
 
     wrapper = mount(
-      <IndexPatternDimensionEditorComponent {...defaultProps} state={stateWithoutTime} />
+      <IndexPatternDimensionEditorComponent
+        {...defaultProps}
+        state={stateWithoutTime}
+        indexPatterns={{
+          1: {
+            id: '1',
+            title: 'my-fake-index-pattern',
+            hasRestrictions: false,
+            fields: [
+              {
+                name: 'bytes',
+                displayName: 'bytes',
+                type: 'number',
+                aggregatable: true,
+                searchable: true,
+              },
+            ],
+            getFieldByName: getFieldByNameFactory([
+              {
+                name: 'bytes',
+                displayName: 'bytes',
+                type: 'number',
+                aggregatable: true,
+                searchable: true,
+              },
+            ]),
+          },
+        }}
+      />
     );
 
     expect(wrapper.find('[data-test-subj="lns-indexPatternDimension-differences"]')).toHaveLength(

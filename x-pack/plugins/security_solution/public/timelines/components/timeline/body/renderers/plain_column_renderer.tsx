@@ -9,10 +9,10 @@ import { head } from 'lodash/fp';
 import React from 'react';
 import type { Filter } from '@kbn/es-query';
 
-import { ColumnHeaderOptions } from '../../../../../../common/types';
-import { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
+import type { ColumnHeaderOptions } from '../../../../../../common/types';
+import type { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
 import { getEmptyTagValue } from '../../../../../common/components/empty_value';
-import { ColumnRenderer } from './column_renderer';
+import type { ColumnRenderer } from './column_renderer';
 import { FormattedFieldValue } from './formatted_field';
 
 export const dataExistsAtColumn = (columnName: string, data: TimelineNonEcsData[]): boolean =>

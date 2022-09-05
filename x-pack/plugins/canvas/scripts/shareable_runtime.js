@@ -58,10 +58,7 @@ run(
           '--config',
           webpackConfig,
           ...(process.stdout.isTTY && !process.env.CI ? ['--progress'] : []),
-          '--hide-modules',
-          '--display-entrypoints',
-          'false',
-          '--content-base',
+          '--static',
           SHAREABLE_RUNTIME_SRC,
         ],
         options
@@ -94,7 +91,6 @@ run(
         require.resolve('webpack/bin/webpack'),
         '--config',
         webpackConfig,
-        '--hide-modules',
         ...(process.stdout.isTTY && !process.env.CI ? ['--progress'] : []),
       ],
       {

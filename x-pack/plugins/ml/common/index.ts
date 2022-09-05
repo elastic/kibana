@@ -14,7 +14,6 @@ export {
   SEVERITY_COLORS,
 } from './constants/anomalies';
 export { getSeverityColor, getSeverityType } from './util/anomaly_utils';
-export { isPopulatedObject } from './util/object_utils';
 export { composeValidators, patternValidator } from './util/validators';
 export { isRuntimeMappings, isRuntimeField } from './util/runtime_field_utils';
 export { extractErrorMessage } from './util/errors';

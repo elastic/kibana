@@ -41,8 +41,8 @@ export const MonitorConfig = ({ isEdit = false }: { isEdit: boolean }) => {
   const { isValid, config } = useFormatMonitor({
     monitorType,
     validate,
-    config: policyConfig[monitorType],
-    defaultConfig: DEFAULT_FIELDS[monitorType],
+    config: policyConfig[monitorType] as Partial<MonitorFieldsType>,
+    defaultConfig: DEFAULT_FIELDS[monitorType] as Partial<MonitorFieldsType>,
   });
 
   const [hasBeenSubmitted, setHasBeenSubmitted] = useState(false);

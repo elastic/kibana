@@ -17,7 +17,7 @@ import {
 } from '@kbn/data-plugin/public';
 import { getChartAggConfigs, getDimensions } from '.';
 import { buildPointSeriesData, Chart } from '../components/chart/point_series';
-import { TimechartBucketInterval } from './use_saved_search';
+import { TimechartBucketInterval } from '../hooks/use_saved_search';
 import { FetchDeps } from './fetch_all';
 
 interface Result {
@@ -28,14 +28,7 @@ interface Result {
 
 export function fetchChart(
   searchSource: ISearchSource,
-  {
-    abortController,
-    appStateContainer,
-    data,
-    inspectorAdapters,
-    searchSessionId,
-    savedSearch,
-  }: FetchDeps
+  { abortController, appStateContainer, data, inspectorAdapters, searchSessionId }: FetchDeps
 ): Promise<Result> {
   const interval = appStateContainer.getState().interval ?? 'auto';
   const chartAggConfigs = updateSearchSource(searchSource, interval, data);
@@ -86,8 +79,8 @@ export function updateSearchSource(
   interval: string,
   data: DataPublicPluginStart
 ) {
-  const indexPattern = searchSource.getField('index')!;
-  searchSource.setField('filter', data.query.timefilter.timefilter.createFilter(indexPattern));
+  const dataView = searchSource.getField('index')!;
+  searchSource.setField('filter', data.query.timefilter.timefilter.createFilter(dataView));
   searchSource.setField('size', 0);
   searchSource.setField('trackTotalHits', true);
   const chartAggConfigs = getChartAggConfigs(searchSource, interval, data);

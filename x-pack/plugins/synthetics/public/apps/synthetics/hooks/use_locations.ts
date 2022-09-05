@@ -11,13 +11,15 @@ import { getServiceLocations, selectServiceLocationsState } from '../state';
 
 export function useLocations() {
   const dispatch = useDispatch();
-  const { error, loading, locations, throttling } = useSelector(selectServiceLocationsState);
+  const { error, loading, locations, throttling, locationsLoaded } = useSelector(
+    selectServiceLocationsState
+  );
 
   useEffect(() => {
-    if (!locations.length) {
+    if (!locationsLoaded) {
       dispatch(getServiceLocations());
     }
-  }, [dispatch, locations]);
+  }, [dispatch, locations, locationsLoaded]);
 
   return {
     error,

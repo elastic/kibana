@@ -10,6 +10,7 @@ import {
   overlayServiceMock,
   httpServiceMock,
   notificationServiceMock,
+  themeServiceMock,
 } from '@kbn/core/public/mocks';
 import { TelemetryService } from './services/telemetry_service';
 import { TelemetryNotifications } from './services/telemetry_notifications/telemetry_notifications';
@@ -33,7 +34,6 @@ export function mockTelemetryService({
   config: configOverride = {},
 }: TelemetryServiceMockOptions = {}) {
   const config = {
-    enabled: true,
     sendUsageTo: 'staging' as const,
     sendUsageFrom: 'browser' as const,
     optIn: true,
@@ -41,6 +41,7 @@ export function mockTelemetryService({
     allowChangingOptInStatus: true,
     telemetryNotifyUserAboutOptInDefault: true,
     userCanChangeSettings: true,
+    labels: {},
     ...configOverride,
   };
 
@@ -75,6 +76,7 @@ export function mockTelemetryNotifications({
   return new TelemetryNotifications({
     http: httpServiceMock.createSetupContract(),
     overlays: overlayServiceMock.createStartContract(),
+    theme: themeServiceMock.createStartContract(),
     telemetryService,
     telemetryConstants: mockTelemetryConstants(),
   });

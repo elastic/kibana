@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { ColorMode, ColorSchemas } from '@kbn/charts-plugin/public';
 import { TimefilterContract } from '@kbn/data-plugin/public';
 import { Vis } from '@kbn/visualizations-plugin/public';
 
@@ -40,5 +41,51 @@ describe('metric vis toExpressionAst function', () => {
       timefilter: {} as TimefilterContract,
     });
     expect(actual).toMatchSnapshot();
+  });
+
+  it('should pass color mode if color ranges are set', async () => {
+    vis.params = {
+      metric: {
+        metricColorMode: ColorMode.Background,
+        colorSchema: ColorSchemas.Greens,
+        colorsRange: [
+          {
+            type: 'range',
+            from: 0,
+            to: 1,
+          },
+          {
+            type: 'range',
+            from: 1,
+            to: 2,
+          },
+        ],
+      },
+    } as VisParams;
+    const actual = await toExpressionAst(vis, {
+      timefilter: {} as TimefilterContract,
+    });
+    expect(actual.chain[0].arguments.colorMode).toEqual([ColorMode.Background]);
+  });
+
+  it('should not pass color mode if there is just a single range, but still pass palette for percentage mode', async () => {
+    vis.params = {
+      metric: {
+        metricColorMode: ColorMode.Background,
+        colorSchema: ColorSchemas.Greens,
+        colorsRange: [
+          {
+            type: 'range',
+            from: 0,
+            to: 1,
+          },
+        ],
+      },
+    } as VisParams;
+    const actual = await toExpressionAst(vis, {
+      timefilter: {} as TimefilterContract,
+    });
+    expect(actual.chain[0].arguments.colorMode).toEqual([ColorMode.None]);
+    expect(actual.chain[0].arguments.palette.length).toEqual(1);
   });
 });

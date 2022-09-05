@@ -12,14 +12,12 @@ import type { IUiSettingsClient } from '@kbn/core/public';
 import type { ExpressionsServiceSetup } from '@kbn/expressions-plugin/common';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { DataViewsContract } from '@kbn/data-views-plugin/common';
-import { calculateBounds, TimeRange } from '../../../common';
 import {
-  AggConfigs,
   aggsRequiredUiSettings,
   AggsCommonStartDependencies,
   AggsCommonService,
-  AggTypesDependencies,
 } from '../../../common/search/aggs';
+import { calculateBounds, TimeRange } from '../../../common';
 import type { AggsSetup, AggsStart } from './types';
 import type { NowProviderInternalContract } from '../../now_provider';
 
@@ -50,15 +48,14 @@ export function createGetConfig(
 
 /** @internal */
 export interface AggsSetupDependencies {
-  registerFunction: ExpressionsServiceSetup['registerFunction'];
   uiSettings: IUiSettingsClient;
+  registerFunction: ExpressionsServiceSetup['registerFunction'];
   nowProvider: NowProviderInternalContract;
 }
 
 /** @internal */
 export interface AggsStartDependencies {
   fieldFormats: FieldFormatsStart;
-  uiSettings: IUiSettingsClient;
   indexPatterns: DataViewsContract;
 }
 
@@ -68,8 +65,9 @@ export interface AggsStartDependencies {
  * output the correct DSL when you are ready to send your request to ES.
  */
 export class AggsService {
-  private readonly aggsCommonService = new AggsCommonService();
-  private readonly initializedAggTypes = new Map();
+  private readonly aggsCommonService = new AggsCommonService({
+    shouldDetectTimeZone: true,
+  });
   private getConfig?: AggsCommonStartDependencies['getConfig'];
   private subscriptions: Subscription[] = [];
   private nowProvider!: NowProviderInternalContract;
@@ -85,67 +83,23 @@ export class AggsService {
     this.nowProvider = nowProvider;
     this.getConfig = createGetConfig(uiSettings, aggsRequiredUiSettings, this.subscriptions);
 
-    return this.aggsCommonService.setup({ registerFunction });
+    return this.aggsCommonService.setup({
+      registerFunction,
+    });
   }
 
-  public start({ fieldFormats, indexPatterns }: AggsStartDependencies): AggsStart {
-    const aggExecutionContext: AggTypesDependencies['aggExecutionContext'] = {
-      shouldDetectTimeZone: true,
-    };
-
-    const { calculateAutoTimeExpression, types } = this.aggsCommonService.start({
+  public start({ indexPatterns, fieldFormats }: AggsStartDependencies): AggsStart {
+    const { calculateAutoTimeExpression, types, createAggConfigs } = this.aggsCommonService.start({
       getConfig: this.getConfig!,
       getIndexPattern: indexPatterns.get,
-      aggExecutionContext,
-    });
-
-    const aggTypesDependencies: AggTypesDependencies = {
       calculateBounds: this.calculateBounds,
-      getConfig: this.getConfig!,
-      getFieldFormatsStart: () => ({
-        deserialize: fieldFormats.deserialize,
-        getDefaultInstance: fieldFormats.getDefaultInstance,
-      }),
-      aggExecutionContext,
-    };
-
-    // initialize each agg type and store in memory
-    types.getAll().buckets.forEach((type) => {
-      const agg = type(aggTypesDependencies);
-      this.initializedAggTypes.set(agg.name, agg);
+      fieldFormats,
     });
-    types.getAll().metrics.forEach((type) => {
-      const agg = type(aggTypesDependencies);
-      this.initializedAggTypes.set(agg.name, agg);
-    });
-
-    const typesRegistry = {
-      get: (name: string) => {
-        return this.initializedAggTypes.get(name);
-      },
-      getAll: () => {
-        return {
-          buckets: Array.from(this.initializedAggTypes.values()).filter(
-            (agg) => agg.type === 'buckets'
-          ),
-          metrics: Array.from(this.initializedAggTypes.values()).filter(
-            (agg) => agg.type === 'metrics'
-          ),
-        };
-      },
-    };
 
     return {
       calculateAutoTimeExpression,
-      createAggConfigs: (indexPattern, configStates = []) => {
-        return new AggConfigs(
-          indexPattern,
-          configStates,
-          { typesRegistry, aggExecutionContext },
-          this.getConfig!
-        );
-      },
-      types: typesRegistry,
+      createAggConfigs,
+      types,
     };
   }
 

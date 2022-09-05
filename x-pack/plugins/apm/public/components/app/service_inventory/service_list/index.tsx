@@ -50,7 +50,7 @@ import {
 } from '../../../../../common/service_inventory';
 
 type ServicesDetailedStatisticsAPIResponse =
-  APIReturnType<'GET /internal/apm/services/detailed_statistics'>;
+  APIReturnType<'POST /internal/apm/services/detailed_statistics'>;
 
 function formatString(value?: string | null) {
   return value || NOT_AVAILABLE_LABEL;
@@ -243,6 +243,7 @@ interface Props {
   isFailure?: boolean;
   displayHealthStatus: boolean;
   initialSortField: ServiceInventoryFieldName;
+  initialPageSize: number;
   initialSortDirection: 'asc' | 'desc';
   sortFn: (
     sortItems: ServiceListItem[],
@@ -261,6 +262,7 @@ export function ServiceList({
   displayHealthStatus,
   initialSortField,
   initialSortDirection,
+  initialPageSize,
   sortFn,
 }: Props) {
   const breakpoints = useBreakpoints();
@@ -271,7 +273,16 @@ export function ServiceList({
       transactionType !== TRANSACTION_PAGE_LOAD
   );
 
-  const { query } = useApmParams('/services');
+  const {
+    // removes pagination and sort instructions from the query so it won't be passed down to next route
+    query: {
+      page,
+      pageSize,
+      sortDirection: direction,
+      sortField: field,
+      ...query
+    },
+  } = useApmParams('/services');
 
   const { kuery } = query;
   const { fallbackToTransactions } = useFallbackToTransactionsFetcher({
@@ -344,6 +355,7 @@ export function ServiceList({
           noItemsMessage={noItemsMessage}
           initialSortField={initialSortField}
           initialSortDirection={initialSortDirection}
+          initialPageSize={initialPageSize}
           sortFn={(itemsToSort, sortField, sortDirection) =>
             sortFn(
               itemsToSort,

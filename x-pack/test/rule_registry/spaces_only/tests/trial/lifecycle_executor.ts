@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { type Subject, ReplaySubject } from 'rxjs';
 import type { ElasticsearchClient, Logger, LogMeta } from '@kbn/core/server';
 import sinon from 'sinon';
 import expect from '@kbn/expect';
@@ -58,9 +59,13 @@ export default function createLifecycleExecutorApiTest({ getService }: FtrProvid
   // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/125851
   describe.skip('createLifecycleExecutor', () => {
     let ruleDataClient: IRuleDataClient;
+    let pluginStop$: Subject<void>;
+
     before(async () => {
       // First we need to setup the data service. This happens within the
       // Rule Registry plugin as part of the server side setup phase.
+      pluginStop$ = new ReplaySubject(1);
+
       const ruleDataService = new RuleDataService({
         getClusterClient,
         logger,
@@ -68,6 +73,7 @@ export default function createLifecycleExecutorApiTest({ getService }: FtrProvid
         isWriteEnabled: true,
         isWriterCacheEnabled: false,
         disabledRegistrationContexts: [] as string[],
+        pluginStop$,
       });
 
       // This initializes the service. This happens immediately after the creation
@@ -102,6 +108,8 @@ export default function createLifecycleExecutorApiTest({ getService }: FtrProvid
 
     after(async () => {
       cleanupRegistryIndices(getService, ruleDataClient);
+      pluginStop$.next();
+      pluginStop$.complete();
     });
 
     it('should work with object fields', async () => {

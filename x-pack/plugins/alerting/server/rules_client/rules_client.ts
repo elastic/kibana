@@ -8,7 +8,18 @@
 import Semver from 'semver';
 import pMap from 'p-map';
 import Boom from '@hapi/boom';
-import { omit, isEqual, map, uniq, pick, truncate, trim, mapValues, cloneDeep } from 'lodash';
+import {
+  omit,
+  isEqual,
+  map,
+  uniq,
+  pick,
+  truncate,
+  trim,
+  mapValues,
+  cloneDeep,
+  isEmpty,
+} from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { fromKueryExpression, KueryNode, nodeBuilder } from '@kbn/es-query';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -55,6 +66,7 @@ import {
   SanitizedRuleWithLegacyId,
   PartialRuleWithLegacyId,
   RuleSnooze,
+  RuleSnoozeSchedule,
   RawAlertInstance as RawAlert,
 } from '../types';
 import {
@@ -64,6 +76,7 @@ import {
   validateMutatedRuleTypeParams,
   convertRuleIdsToKueryNode,
   getRuleSnoozeEndTime,
+  convertEsSortToEventLogSort,
 } from '../lib';
 import { taskInstanceToAlertTaskInstance } from '../task_runner/alert_task_instance';
 import { RegistryRuleType, UntypedNormalizedRuleType } from '../rule_type_registry';
@@ -87,6 +100,7 @@ import {
   validateOperationOnAttributes,
   retryIfBulkEditConflicts,
   applyBulkEditOperation,
+  buildKueryNodeFilter,
 } from './lib';
 import { getRuleExecutionStatusPending } from '../lib/rule_execution_status';
 import { Alert } from '../alert';
@@ -105,10 +119,12 @@ import {
   formatExecutionLogResult,
   getExecutionLogAggregation,
 } from '../lib/get_execution_log_aggregation';
-import { IExecutionLogWithErrorsResult } from '../../common';
-import { validateSnoozeDate } from '../lib/validate_snooze_date';
+import { IExecutionLogResult, IExecutionErrorsResult } from '../../common';
+import { validateSnoozeStartDate } from '../lib/validate_snooze_date';
 import { RuleMutedError } from '../lib/errors/rule_muted';
 import { formatExecutionErrorsResult } from '../lib/format_execution_log_errors';
+import { getActiveScheduledSnoozes } from '../lib/is_rule_snoozed';
+import { isSnoozeExpired } from '../lib';
 
 export interface RegistryAlertTypeWithAuth extends RegistryRuleType {
   authorizedConsumers: string[];
@@ -143,11 +159,9 @@ export interface RuleAggregation {
     }>;
   };
   snoozed: {
-    buckets: Array<{
-      key: number;
-      key_as_string: string;
+    count: {
       doc_count: number;
-    }>;
+    };
   };
   tags: {
     buckets: Array<{
@@ -192,7 +206,7 @@ export interface MuteOptions extends IndexType {
 }
 
 export interface SnoozeOptions extends IndexType {
-  snoozeEndTime: string | -1;
+  snoozeSchedule: RuleSnoozeSchedule;
 }
 
 export interface FindOptions extends IndexType {
@@ -208,10 +222,13 @@ export interface FindOptions extends IndexType {
     id: string;
   };
   fields?: string[];
-  filter?: string;
+  filter?: string | KueryNode;
 }
 
-export type BulkEditFields = keyof Pick<Rule, 'actions' | 'tags'>;
+export type BulkEditFields = keyof Pick<
+  Rule,
+  'actions' | 'tags' | 'schedule' | 'throttle' | 'notifyWhen'
+>;
 
 export type BulkEditOperation =
   | {
@@ -223,24 +240,22 @@ export type BulkEditOperation =
       operation: 'add' | 'set';
       field: Extract<BulkEditFields, 'actions'>;
       value: NormalizedAlertAction[];
+    }
+  | {
+      operation: 'set';
+      field: Extract<BulkEditFields, 'schedule'>;
+      value: Rule['schedule'];
+    }
+  | {
+      operation: 'set';
+      field: Extract<BulkEditFields, 'throttle'>;
+      value: Rule['throttle'];
+    }
+  | {
+      operation: 'set';
+      field: Extract<BulkEditFields, 'notifyWhen'>;
+      value: Rule['notifyWhen'];
     };
-
-// schedule, throttle, notifyWhen is commented out before https://github.com/elastic/kibana/issues/124850 will be implemented
-// | {
-//     operation: 'set';
-//     field: Extract<BulkEditFields, 'schedule'>;
-//     value: Rule['schedule'];
-//   }
-// | {
-//     operation: 'set';
-//     field: Extract<BulkEditFields, 'throttle'>;
-//     value: Rule['throttle'];
-//   }
-// | {
-//     operation: 'set';
-//     field: Extract<BulkEditFields, 'notifyWhen'>;
-//     value: Rule['notifyWhen'];
-//   };
 
 type RuleParamsModifier<Params extends RuleTypeParams> = (params: Params) => Promise<Params>;
 
@@ -276,7 +291,7 @@ export interface AggregateOptions extends IndexType {
     type: string;
     id: string;
   };
-  filter?: string;
+  filter?: string | KueryNode;
 }
 
 interface IndexType {
@@ -350,6 +365,16 @@ export interface GetExecutionLogByIdParams {
   sort: estypes.Sort;
 }
 
+export interface GetActionErrorLogByIdParams {
+  id: string;
+  dateStart: string;
+  dateEnd?: string;
+  filter?: string;
+  page: number;
+  perPage: number;
+  sort: estypes.Sort;
+}
+
 interface ScheduleRuleOptions {
   id: string;
   consumer: string;
@@ -395,6 +420,7 @@ export class RulesClient {
     'monitoring',
     'mapped_params',
     'snoozeSchedule',
+    'activeSnoozes',
   ];
 
   constructor({
@@ -507,7 +533,6 @@ export class RulesClient {
       updatedBy: username,
       createdAt: new Date(createTime).toISOString(),
       updatedAt: new Date(createTime).toISOString(),
-      isSnoozedUntil: null,
       snoozeSchedule: [],
       params: updatedParams as RawRule['params'],
       muteAll: false,
@@ -600,10 +625,12 @@ export class RulesClient {
   public async get<Params extends RuleTypeParams = never>({
     id,
     includeLegacyId = false,
+    includeSnoozeData = false,
     excludeFromPublicApi = false,
   }: {
     id: string;
     includeLegacyId?: boolean;
+    includeSnoozeData?: boolean;
     excludeFromPublicApi?: boolean;
   }): Promise<SanitizedRule<Params> | SanitizedRuleWithLegacyId<Params>> {
     const result = await this.unsecuredSavedObjectsClient.get<RawRule>('alert', id);
@@ -636,7 +663,8 @@ export class RulesClient {
       result.attributes,
       result.references,
       includeLegacyId,
-      excludeFromPublicApi
+      excludeFromPublicApi,
+      includeSnoozeData
     );
   }
 
@@ -784,7 +812,7 @@ export class RulesClient {
     page,
     perPage,
     sort,
-  }: GetExecutionLogByIdParams): Promise<IExecutionLogWithErrorsResult> {
+  }: GetExecutionLogByIdParams): Promise<IExecutionLogResult> {
     this.logger.debug(`getExecutionLogForRule(): getting execution log for rule ${id}`);
     const rule = (await this.get({ id, includeLegacyId: true })) as SanitizedRuleWithLegacyId;
 
@@ -822,40 +850,23 @@ export class RulesClient {
     const eventLogClient = await this.getEventLogClient();
 
     try {
-      const [aggResult, errorResult] = await Promise.all([
-        eventLogClient.aggregateEventsBySavedObjectIds(
-          'alert',
-          [id],
-          {
-            start: parsedDateStart.toISOString(),
-            end: parsedDateEnd.toISOString(),
+      const aggResult = await eventLogClient.aggregateEventsBySavedObjectIds(
+        'alert',
+        [id],
+        {
+          start: parsedDateStart.toISOString(),
+          end: parsedDateEnd.toISOString(),
+          aggs: getExecutionLogAggregation({
             filter,
-            aggs: getExecutionLogAggregation({
-              page,
-              perPage,
-              sort,
-            }),
-          },
-          rule.legacyId !== null ? [rule.legacyId] : undefined
-        ),
-        eventLogClient.findEventsBySavedObjectIds(
-          'alert',
-          [id],
-          {
-            start: parsedDateStart.toISOString(),
-            end: parsedDateEnd.toISOString(),
-            per_page: 500,
-            filter: `(event.action:execute AND (event.outcome:failure OR kibana.alerting.status:warning)) OR (event.action:execute-timeout)`,
-            sort: [{ sort_field: '@timestamp', sort_order: 'desc' }],
-          },
-          rule.legacyId !== null ? [rule.legacyId] : undefined
-        ),
-      ]);
+            page,
+            perPage,
+            sort,
+          }),
+        },
+        rule.legacyId !== null ? [rule.legacyId] : undefined
+      );
 
-      return {
-        ...formatExecutionLogResult(aggResult),
-        ...formatExecutionErrorsResult(errorResult),
-      };
+      return formatExecutionLogResult(aggResult);
     } catch (err) {
       this.logger.debug(
         `rulesClient.getExecutionLogForRule(): error searching event log for rule ${id}: ${err.message}`
@@ -864,10 +875,85 @@ export class RulesClient {
     }
   }
 
+  public async getActionErrorLog({
+    id,
+    dateStart,
+    dateEnd,
+    filter,
+    page,
+    perPage,
+    sort,
+  }: GetActionErrorLogByIdParams): Promise<IExecutionErrorsResult> {
+    this.logger.debug(`getActionErrorLog(): getting action error logs for rule ${id}`);
+    const rule = (await this.get({ id, includeLegacyId: true })) as SanitizedRuleWithLegacyId;
+
+    try {
+      await this.authorization.ensureAuthorized({
+        ruleTypeId: rule.alertTypeId,
+        consumer: rule.consumer,
+        operation: ReadOperations.GetActionErrorLog,
+        entity: AlertingAuthorizationEntity.Rule,
+      });
+    } catch (error) {
+      this.auditLogger?.log(
+        ruleAuditEvent({
+          action: RuleAuditAction.GET_ACTION_ERROR_LOG,
+          savedObject: { type: 'alert', id },
+          error,
+        })
+      );
+      throw error;
+    }
+
+    this.auditLogger?.log(
+      ruleAuditEvent({
+        action: RuleAuditAction.GET_ACTION_ERROR_LOG,
+        savedObject: { type: 'alert', id },
+      })
+    );
+
+    const defaultFilter =
+      'event.provider:actions AND ((event.action:execute AND (event.outcome:failure OR kibana.alerting.status:warning)) OR (event.action:execute-timeout))';
+
+    // default duration of instance summary is 60 * rule interval
+    const dateNow = new Date();
+    const parsedDateStart = parseDate(dateStart, 'dateStart', dateNow);
+    const parsedDateEnd = parseDate(dateEnd, 'dateEnd', dateNow);
+
+    const eventLogClient = await this.getEventLogClient();
+
+    try {
+      const errorResult = await eventLogClient.findEventsBySavedObjectIds(
+        'alert',
+        [id],
+        {
+          start: parsedDateStart.toISOString(),
+          end: parsedDateEnd.toISOString(),
+          page,
+          per_page: perPage,
+          filter: filter ? `(${defaultFilter}) AND (${filter})` : defaultFilter,
+          sort: convertEsSortToEventLogSort(sort),
+        },
+        rule.legacyId !== null ? [rule.legacyId] : undefined
+      );
+      return formatExecutionErrorsResult(errorResult);
+    } catch (err) {
+      this.logger.debug(
+        `rulesClient.getActionErrorLog(): error searching event log for rule ${id}: ${err.message}`
+      );
+      throw err;
+    }
+  }
+
   public async find<Params extends RuleTypeParams = never>({
     options: { fields, ...options } = {},
     excludeFromPublicApi = false,
-  }: { options?: FindOptions; excludeFromPublicApi?: boolean } = {}): Promise<FindResult<Params>> {
+    includeSnoozeData = false,
+  }: {
+    options?: FindOptions;
+    excludeFromPublicApi?: boolean;
+    includeSnoozeData?: boolean;
+  } = {}): Promise<FindResult<Params>> {
     let authorizationTuple;
     try {
       authorizationTuple = await this.authorization.getFindAuthorizationFilter(
@@ -885,7 +971,8 @@ export class RulesClient {
     }
 
     const { filter: authorizationFilter, ensureRuleTypeIsAuthorized } = authorizationTuple;
-    const filterKueryNode = options.filter ? fromKueryExpression(options.filter) : null;
+
+    const filterKueryNode = buildKueryNodeFilter(options.filter);
     let sortField = mapSortField(options.sortField);
     if (excludeFromPublicApi) {
       try {
@@ -957,7 +1044,8 @@ export class RulesClient {
         fields ? (pick(attributes, fields) as RawRule) : attributes,
         references,
         false,
-        excludeFromPublicApi
+        excludeFromPublicApi,
+        includeSnoozeData
       );
     });
 
@@ -998,12 +1086,14 @@ export class RulesClient {
     }
 
     const { filter: authorizationFilter } = authorizationTuple;
+    const filterKueryNode = buildKueryNodeFilter(filter);
+
     const resp = await this.unsecuredSavedObjectsClient.find<RawRule, RuleAggregation>({
       ...options,
       filter:
-        (authorizationFilter && filter
-          ? nodeBuilder.and([fromKueryExpression(filter), authorizationFilter as KueryNode])
-          : authorizationFilter) ?? filter,
+        authorizationFilter && filterKueryNode
+          ? nodeBuilder.and([filterKueryNode, authorizationFilter as KueryNode])
+          : authorizationFilter,
       page: 1,
       perPage: 0,
       type: 'alert',
@@ -1021,10 +1111,17 @@ export class RulesClient {
           terms: { field: 'alert.attributes.tags', order: { _key: 'asc' } },
         },
         snoozed: {
-          date_range: {
-            field: 'alert.attributes.snoozeSchedule.rRule.dtstart',
-            format: 'strict_date_time',
-            ranges: [{ from: 'now' }],
+          nested: {
+            path: 'alert.attributes.snoozeSchedule',
+          },
+          aggs: {
+            count: {
+              filter: {
+                exists: {
+                  field: 'alert.attributes.snoozeSchedule.duration',
+                },
+              },
+            },
           },
         },
       },
@@ -1084,9 +1181,8 @@ export class RulesClient {
       unmuted: mutedBuckets.find((bucket) => bucket.key === 0)?.doc_count ?? 0,
     };
 
-    const snoozedBuckets = resp.aggregations.snoozed.buckets;
     ret.ruleSnoozedStatus = {
-      snoozed: snoozedBuckets.reduce((acc, bucket) => acc + bucket.doc_count, 0),
+      snoozed: resp.aggregations.snoozed?.count?.doc_count ?? 0,
     };
 
     const tagsBuckets = resp.aggregations.tags?.buckets || [];
@@ -1152,7 +1248,6 @@ export class RulesClient {
         savedObject: { type: 'alert', id },
       })
     );
-
     const removeResult = await this.unsecuredSavedObjectsClient.delete('alert', id);
 
     await Promise.all([
@@ -1244,20 +1339,23 @@ export class RulesClient {
       (async () => {
         if (
           updateResult.scheduledTaskId &&
+          updateResult.schedule &&
           !isEqual(alertSavedObject.attributes.schedule, updateResult.schedule)
         ) {
-          this.taskManager
-            .runNow(updateResult.scheduledTaskId)
-            .then(() => {
-              this.logger.debug(
-                `Alert update has rescheduled the underlying task: ${updateResult.scheduledTaskId}`
-              );
-            })
-            .catch((err: Error) => {
-              this.logger.error(
-                `Alert update failed to run its underlying task. TaskManager runNow failed with Error: ${err.message}`
-              );
-            });
+          try {
+            const { tasks } = await this.taskManager.bulkUpdateSchedules(
+              [updateResult.scheduledTaskId],
+              updateResult.schedule
+            );
+
+            this.logger.debug(
+              `Rule update has rescheduled the underlying task: ${updateResult.scheduledTaskId} to run at: ${tasks?.[0]?.runAt}`
+            );
+          } catch (err) {
+            this.logger.error(
+              `Rule update failed to run its underlying task. TaskManager bulkUpdateSchedules failed with Error: ${err.message}`
+            );
+          }
         }
       })(),
     ]);
@@ -1494,6 +1592,36 @@ export class RulesClient {
       );
     });
 
+    // update schedules only if schedule operation is present
+    const scheduleOperation = options.operations.find(
+      (
+        operation
+      ): operation is Extract<BulkEditOperation, { field: Extract<BulkEditFields, 'schedule'> }> =>
+        operation.field === 'schedule'
+    );
+
+    if (scheduleOperation?.value) {
+      const taskIds = updatedRules.reduce<string[]>((acc, rule) => {
+        if (rule.scheduledTaskId) {
+          acc.push(rule.scheduledTaskId);
+        }
+        return acc;
+      }, []);
+
+      try {
+        await this.taskManager.bulkUpdateSchedules(taskIds, scheduleOperation.value);
+        this.logger.debug(
+          `Successfully updated schedules for underlying tasks: ${taskIds.join(', ')}`
+        );
+      } catch (error) {
+        this.logger.error(
+          `Failure to update schedules for underlying tasks: ${taskIds.join(
+            ', '
+          )}. TaskManager bulkUpdateSchedules failed with Error: ${error.message}`
+        );
+      }
+    }
+
     return { rules: updatedRules, errors, total };
   }
 
@@ -1668,7 +1796,7 @@ export class RulesClient {
 
     let result;
     try {
-      result = await this.unsecuredSavedObjectsClient.bulkUpdate(rules);
+      result = await this.unsecuredSavedObjectsClient.bulkCreate(rules, { overwrite: true });
     } catch (e) {
       // avoid unused newly generated API keys
       if (apiKeysMap.size > 0) {
@@ -2065,29 +2193,35 @@ export class RulesClient {
 
   public async snooze({
     id,
-    snoozeEndTime,
+    snoozeSchedule,
   }: {
     id: string;
-    snoozeEndTime: string | -1;
+    snoozeSchedule: RuleSnoozeSchedule;
   }): Promise<void> {
-    if (typeof snoozeEndTime === 'string') {
-      const snoozeDateValidationMsg = validateSnoozeDate(snoozeEndTime);
-      if (snoozeDateValidationMsg) {
-        throw new RuleMutedError(snoozeDateValidationMsg);
-      }
+    const snoozeDateValidationMsg = validateSnoozeStartDate(snoozeSchedule.rRule.dtstart);
+    if (snoozeDateValidationMsg) {
+      throw new RuleMutedError(snoozeDateValidationMsg);
     }
+
     return await retryIfConflicts(
       this.logger,
-      `rulesClient.snooze('${id}', ${snoozeEndTime})`,
-      async () => await this.snoozeWithOCC({ id, snoozeEndTime })
+      `rulesClient.snooze('${id}', ${JSON.stringify(snoozeSchedule, null, 4)})`,
+      async () => await this.snoozeWithOCC({ id, snoozeSchedule })
     );
   }
 
-  private async snoozeWithOCC({ id, snoozeEndTime }: { id: string; snoozeEndTime: string | -1 }) {
+  private async snoozeWithOCC({
+    id,
+    snoozeSchedule,
+  }: {
+    id: string;
+    snoozeSchedule: RuleSnoozeSchedule;
+  }) {
     const { attributes, version } = await this.unsecuredSavedObjectsClient.get<RawRule>(
       'alert',
       id
     );
+    const { id: snoozeId, duration } = snoozeSchedule;
 
     try {
       await this.authorization.ensureAuthorized({
@@ -2121,22 +2255,18 @@ export class RulesClient {
 
     this.ruleTypeRegistry.ensureRuleTypeEnabled(attributes.alertTypeId);
 
-    // If snoozeEndTime is -1, instead mute all
+    // If duration is -1, instead mute all
     const newAttrs =
-      snoozeEndTime === -1
+      duration === -1
         ? {
             muteAll: true,
             snoozeSchedule: clearUnscheduledSnooze(attributes),
           }
         : {
-            snoozeSchedule: clearUnscheduledSnooze(attributes).concat({
-              duration: Date.parse(snoozeEndTime) - Date.now(),
-              rRule: {
-                dtstart: new Date().toISOString(),
-                tzid: 'UTC',
-                count: 1,
-              },
-            }),
+            snoozeSchedule: (snoozeId
+              ? clearScheduledSnoozesById(attributes, [snoozeId])
+              : clearUnscheduledSnooze(attributes)
+            ).concat(snoozeSchedule),
             muteAll: false,
           };
 
@@ -2152,18 +2282,24 @@ export class RulesClient {
       id,
       updateAttributes,
       updateOptions
-    ).then(() => this.updateSnoozedUntilTime({ id }));
-  }
-
-  public async unsnooze({ id }: { id: string }): Promise<void> {
-    return await retryIfConflicts(
-      this.logger,
-      `rulesClient.unsnooze('${id}')`,
-      async () => await this.unsnoozeWithOCC({ id })
     );
   }
 
-  private async unsnoozeWithOCC({ id }: { id: string }) {
+  public async unsnooze({
+    id,
+    scheduleIds,
+  }: {
+    id: string;
+    scheduleIds?: string[];
+  }): Promise<void> {
+    return await retryIfConflicts(
+      this.logger,
+      `rulesClient.unsnooze('${id}')`,
+      async () => await this.unsnoozeWithOCC({ id, scheduleIds })
+    );
+  }
+
+  private async unsnoozeWithOCC({ id, scheduleIds }: { id: string; scheduleIds?: string[] }) {
     const { attributes, version } = await this.unsecuredSavedObjectsClient.get<RawRule>(
       'alert',
       id
@@ -2200,12 +2336,15 @@ export class RulesClient {
     );
 
     this.ruleTypeRegistry.ensureRuleTypeEnabled(attributes.alertTypeId);
+    const snoozeSchedule = scheduleIds
+      ? clearScheduledSnoozesById(attributes, scheduleIds)
+      : clearCurrentActiveSnooze(attributes);
 
     const updateAttributes = this.updateMeta({
-      snoozeSchedule: clearUnscheduledSnooze(attributes),
-      muteAll: false,
+      snoozeSchedule,
       updatedBy: await this.getUserName(),
       updatedAt: new Date().toISOString(),
+      ...(!scheduleIds ? { muteAll: false } : {}),
     });
     const updateOptions = { version };
 
@@ -2214,20 +2353,38 @@ export class RulesClient {
       id,
       updateAttributes,
       updateOptions
-    ).then(() => this.updateSnoozedUntilTime({ id }));
+    );
   }
 
-  public async updateSnoozedUntilTime({ id }: { id: string }): Promise<void> {
+  public calculateIsSnoozedUntil(rule: {
+    muteAll: boolean;
+    snoozeSchedule?: RuleSnooze;
+  }): string | null {
+    const isSnoozedUntil = getRuleSnoozeEndTime(rule);
+    return isSnoozedUntil ? isSnoozedUntil.toISOString() : null;
+  }
+
+  public async clearExpiredSnoozes({ id }: { id: string }): Promise<void> {
     const { attributes, version } = await this.unsecuredSavedObjectsClient.get<RawRule>(
       'alert',
       id
     );
 
-    const isSnoozedUntil = getRuleSnoozeEndTime(attributes);
-    if (!isSnoozedUntil && !attributes.isSnoozedUntil) return;
+    const snoozeSchedule = attributes.snoozeSchedule
+      ? attributes.snoozeSchedule.filter((s) => {
+          try {
+            return !isSnoozeExpired(s);
+          } catch (e) {
+            this.logger.error(`Error checking for expiration of snooze ${s.id}: ${e}`);
+            return true;
+          }
+        })
+      : [];
+
+    if (snoozeSchedule.length === attributes.snoozeSchedule?.length) return;
 
     const updateAttributes = this.updateMeta({
-      isSnoozedUntil: isSnoozedUntil ? isSnoozedUntil.toISOString() : null,
+      snoozeSchedule,
       updatedBy: await this.getUserName(),
       updatedAt: new Date().toISOString(),
     });
@@ -2565,7 +2722,8 @@ export class RulesClient {
     rawRule: RawRule,
     references: SavedObjectReference[] | undefined,
     includeLegacyId: boolean = false,
-    excludeFromPublicApi: boolean = false
+    excludeFromPublicApi: boolean = false,
+    includeSnoozeData: boolean = false
   ): Rule | RuleWithLegacyId {
     const ruleType = this.ruleTypeRegistry.get(ruleTypeId);
     // In order to support the partial update API of Saved Objects we have to support
@@ -2577,7 +2735,8 @@ export class RulesClient {
       rawRule,
       references,
       includeLegacyId,
-      excludeFromPublicApi
+      excludeFromPublicApi,
+      includeSnoozeData
     );
     // include to result because it is for internal rules client usage
     if (includeLegacyId) {
@@ -2602,12 +2761,12 @@ export class RulesClient {
       schedule,
       actions,
       snoozeSchedule,
-      isSnoozedUntil,
       ...partialRawRule
     }: Partial<RawRule>,
     references: SavedObjectReference[] | undefined,
     includeLegacyId: boolean = false,
-    excludeFromPublicApi: boolean = false
+    excludeFromPublicApi: boolean = false,
+    includeSnoozeData: boolean = false
   ): PartialRule<Params> | PartialRuleWithLegacyId<Params> {
     const snoozeScheduleDates = snoozeSchedule?.map((s) => ({
       ...s,
@@ -2617,7 +2776,14 @@ export class RulesClient {
         ...(s.rRule.until ? { until: new Date(s.rRule.until) } : {}),
       },
     }));
-    const includeSnoozeSchedule = snoozeSchedule !== undefined;
+    const includeSnoozeSchedule =
+      snoozeSchedule !== undefined && !isEmpty(snoozeSchedule) && !excludeFromPublicApi;
+    const isSnoozedUntil = includeSnoozeSchedule
+      ? this.calculateIsSnoozedUntil({
+          muteAll: partialRawRule.muteAll ?? false,
+          snoozeSchedule,
+        })
+      : null;
     const rule = {
       id,
       notifyWhen,
@@ -2627,10 +2793,18 @@ export class RulesClient {
       schedule: schedule as IntervalSchedule,
       actions: actions ? this.injectReferencesIntoActions(id, actions, references || []) : [],
       params: this.injectReferencesIntoParams(id, ruleType, params, references || []) as Params,
-      ...(includeSnoozeSchedule ? { snoozeSchedule: snoozeScheduleDates } : {}),
+      ...(excludeFromPublicApi ? {} : { snoozeSchedule: snoozeScheduleDates ?? [] }),
+      ...(includeSnoozeData && !excludeFromPublicApi
+        ? {
+            activeSnoozes: getActiveScheduledSnoozes({
+              snoozeSchedule,
+              muteAll: partialRawRule.muteAll ?? false,
+            })?.map((s) => s.id),
+            isSnoozedUntil,
+          }
+        : {}),
       ...(updatedAt ? { updatedAt: new Date(updatedAt) } : {}),
       ...(createdAt ? { createdAt: new Date(createdAt) } : {}),
-      ...(isSnoozedUntil ? { isSnoozedUntil: new Date(isSnoozedUntil) } : {}),
       ...(scheduledTaskId ? { scheduledTaskId } : {}),
       ...(executionStatus
         ? { executionStatus: ruleExecutionStatusFromRaw(this.logger, id, executionStatus) }
@@ -2847,7 +3021,41 @@ function parseDate(dateString: string | undefined, propertyName: string, default
 }
 
 function clearUnscheduledSnooze(attributes: { snoozeSchedule?: RuleSnooze }) {
+  // Clear any snoozes that have no ID property. These are "simple" snoozes created with the quick UI, e.g. snooze for 3 days starting now
   return attributes.snoozeSchedule
     ? attributes.snoozeSchedule.filter((s) => typeof s.id !== 'undefined')
     : [];
+}
+
+function clearScheduledSnoozesById(attributes: { snoozeSchedule?: RuleSnooze }, ids: string[]) {
+  return attributes.snoozeSchedule
+    ? attributes.snoozeSchedule.filter((s) => s.id && !ids.includes(s.id))
+    : [];
+}
+
+function clearCurrentActiveSnooze(attributes: { snoozeSchedule?: RuleSnooze; muteAll: boolean }) {
+  // First attempt to cancel a simple (unscheduled) snooze
+  const clearedUnscheduledSnoozes = clearUnscheduledSnooze(attributes);
+  // Now clear any scheduled snoozes that are currently active and never recur
+  const activeSnoozes = getActiveScheduledSnoozes(attributes);
+  const activeSnoozeIds = activeSnoozes?.map((s) => s.id) ?? [];
+  const recurringSnoozesToSkip: string[] = [];
+  const clearedNonRecurringActiveSnoozes = clearedUnscheduledSnoozes.filter((s) => {
+    if (!activeSnoozeIds.includes(s.id!)) return true;
+    // Check if this is a recurring snooze, and return true if so
+    if (s.rRule.freq && s.rRule.count !== 1) {
+      recurringSnoozesToSkip.push(s.id!);
+      return true;
+    }
+  });
+  const clearedSnoozesAndSkippedRecurringSnoozes = clearedNonRecurringActiveSnoozes.map((s) => {
+    if (s.id && !recurringSnoozesToSkip.includes(s.id)) return s;
+    const currentRecurrence = activeSnoozes?.find((a) => a.id === s.id)?.lastOccurrence;
+    if (!currentRecurrence) return s;
+    return {
+      ...s,
+      skipRecurrences: (s.skipRecurrences ?? []).concat(currentRecurrence.toISOString()),
+    };
+  });
+  return clearedSnoozesAndSkippedRecurringSnoozes;
 }

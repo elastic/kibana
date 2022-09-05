@@ -7,7 +7,8 @@
 
 import { renderHook, act } from '@testing-library/react-hooks';
 
-import { useCreateRule, ReturnCreateRule } from './use_create_rule';
+import type { ReturnCreateRule } from './use_create_rule';
+import { useCreateRule } from './use_create_rule';
 import { getCreateRulesSchemaMock } from '../../../../../common/detection_engine/schemas/request/rule_schemas.mock';
 import { getRulesSchemaMock } from '../../../../../common/detection_engine/schemas/response/rules_schema.mocks';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';

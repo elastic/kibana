@@ -10,12 +10,7 @@ import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { act } from 'react-dom/test-utils';
 import { coreMock } from '@kbn/core/public/mocks';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
-import {
-  ValidationResult,
-  Rule,
-  ConnectorValidationResult,
-  GenericValidationResult,
-} from '../../../types';
+import { ValidationResult, Rule, GenericValidationResult } from '../../../types';
 import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
 import { ReactWrapper } from 'enzyme';
 import RuleEdit from './rule_edit';
@@ -130,9 +125,6 @@ describe('rule_edit', () => {
       id: 'my-action-type',
       iconClass: 'test',
       selectMessage: 'test',
-      validateConnector: (): Promise<ConnectorValidationResult<unknown, unknown>> => {
-        return Promise.resolve({});
-      },
       validateParams: (): Promise<GenericValidationResult<unknown>> => {
         const validationResult = { errors: {} };
         return Promise.resolve(validationResult);

@@ -80,6 +80,7 @@ export interface RolloverAction {
   max_age?: string;
   max_docs?: number;
   max_primary_shard_size?: string;
+  max_primary_shard_docs?: number;
   /**
    * @deprecated This will be removed in versions 8+ of the stack
    */

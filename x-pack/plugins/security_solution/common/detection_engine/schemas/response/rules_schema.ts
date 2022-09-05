@@ -7,7 +7,8 @@
 
 import * as t from 'io-ts';
 import { isObject } from 'lodash/fp';
-import { Either, left, fold } from 'fp-ts/lib/Either';
+import type { Either } from 'fp-ts/lib/Either';
+import { left, fold } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 
 import {
@@ -33,12 +34,14 @@ import {
   max_signals,
 } from '@kbn/securitysolution-io-ts-alerting-types';
 import { DefaultStringArray, version } from '@kbn/securitysolution-io-ts-types';
-
 import { DefaultListArray } from '@kbn/securitysolution-io-ts-list-types';
+
 import { isMlRule } from '../../../machine_learning/helpers';
 import { isThresholdRule } from '../../utils';
+import { RuleExecutionSummary } from '../../rule_monitoring';
 import {
   anomaly_threshold,
+  data_view_id,
   description,
   enabled,
   timestamp_field,
@@ -75,13 +78,13 @@ import {
   rule_name_override,
   timestamp_override,
   namespace,
-  ruleExecutionSummary,
   RelatedIntegrationArray,
   RequiredFieldArray,
   SetupGuide,
 } from '../common';
 
-import { typeAndTimelineOnlySchema, TypeAndTimelineOnly } from './type_timeline_only_schema';
+import type { TypeAndTimelineOnly } from './type_timeline_only_schema';
+import { typeAndTimelineOnlySchema } from './type_timeline_only_schema';
 
 /**
  * This is the required fields for the rules schema response. Put all required properties on
@@ -128,6 +131,9 @@ export type RequiredRulesSchema = t.TypeOf<typeof requiredRulesSchema>;
  * check_type_dependents file for whichever REST flow it is going through.
  */
 export const dependentRulesSchema = t.partial({
+  // All but ML
+  data_view_id,
+
   // query fields
   language,
   query,
@@ -183,7 +189,7 @@ export const partialRulesSchema = t.partial({
   namespace,
   note,
   uuid: id, // Move to 'required' post-migration
-  execution_summary: ruleExecutionSummary,
+  execution_summary: RuleExecutionSummary,
 });
 
 /**
@@ -221,7 +227,10 @@ export type RulesSchema = t.TypeOf<typeof rulesSchema>;
 
 export const addSavedId = (typeAndTimelineOnly: TypeAndTimelineOnly): t.Mixed[] => {
   if (typeAndTimelineOnly.type === 'saved_query') {
-    return [t.exact(t.type({ saved_id: dependentRulesSchema.props.saved_id }))];
+    return [
+      t.exact(t.type({ saved_id: dependentRulesSchema.props.saved_id })),
+      t.exact(t.partial({ data_view_id: dependentRulesSchema.props.data_view_id })),
+    ];
   } else {
     return [];
   }
@@ -243,6 +252,7 @@ export const addQueryFields = (typeAndTimelineOnly: TypeAndTimelineOnly): t.Mixe
     return [
       t.exact(t.type({ query: dependentRulesSchema.props.query })),
       t.exact(t.type({ language: dependentRulesSchema.props.language })),
+      t.exact(t.partial({ data_view_id: dependentRulesSchema.props.data_view_id })),
     ];
   } else {
     return [];
@@ -267,6 +277,7 @@ export const addThresholdFields = (typeAndTimelineOnly: TypeAndTimelineOnly): t.
     return [
       t.exact(t.type({ threshold: dependentRulesSchema.props.threshold })),
       t.exact(t.partial({ saved_id: dependentRulesSchema.props.saved_id })),
+      t.exact(t.partial({ data_view_id: dependentRulesSchema.props.data_view_id })),
     ];
   } else {
     return [];
@@ -283,6 +294,7 @@ export const addEqlFields = (typeAndTimelineOnly: TypeAndTimelineOnly): t.Mixed[
       t.exact(t.partial({ tiebreaker_field: dependentRulesSchema.props.tiebreaker_field })),
       t.exact(t.type({ query: dependentRulesSchema.props.query })),
       t.exact(t.type({ language: dependentRulesSchema.props.language })),
+      t.exact(t.partial({ data_view_id: dependentRulesSchema.props.data_view_id })),
     ];
   } else {
     return [];
@@ -292,6 +304,7 @@ export const addEqlFields = (typeAndTimelineOnly: TypeAndTimelineOnly): t.Mixed[
 export const addThreatMatchFields = (typeAndTimelineOnly: TypeAndTimelineOnly): t.Mixed[] => {
   if (typeAndTimelineOnly.type === 'threat_match') {
     return [
+      t.exact(t.partial({ data_view_id: dependentRulesSchema.props.data_view_id })),
       t.exact(t.type({ threat_query: dependentRulesSchema.props.threat_query })),
       t.exact(t.type({ threat_index: dependentRulesSchema.props.threat_index })),
       t.exact(t.type({ threat_mapping: dependentRulesSchema.props.threat_mapping })),

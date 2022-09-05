@@ -36,23 +36,28 @@ export function getFunctionDefinition({
 }) {
   return (): EsaggsExpressionFunctionDefinition => ({
     ...getEsaggsMeta(),
-    fn(input, args, { inspectorAdapters, abortSignal, getSearchSessionId, getExecutionContext }) {
+    fn(
+      input,
+      args,
+      { inspectorAdapters, abortSignal, getSearchSessionId, getExecutionContext, getSearchContext }
+    ) {
       return defer(async () => {
         const { aggs, indexPatterns, searchSource, getNow } = await getStartDependencies();
 
         const indexPattern = await indexPatterns.create(args.index.value, true);
         const aggConfigs = aggs.createAggConfigs(
           indexPattern,
-          args.aggs?.map((agg) => agg.value) ?? []
+          args.aggs?.map((agg) => agg.value) ?? [],
+          { hierarchical: args.metricsAtAllLevels, partialRows: args.partialRows }
         );
-        aggConfigs.hierarchical = args.metricsAtAllLevels;
-        aggConfigs.partialRows = args.partialRows;
 
         const { handleEsaggsRequest } = await import('../../../common/search/expressions');
 
         return { aggConfigs, indexPattern, searchSource, getNow, handleEsaggsRequest };
       }).pipe(
         switchMap(({ aggConfigs, indexPattern, searchSource, getNow, handleEsaggsRequest }) => {
+          const { disableShardWarnings } = getSearchContext();
+
           return handleEsaggsRequest({
             abortSignal,
             aggs: aggConfigs,
@@ -64,6 +69,7 @@ export function getFunctionDefinition({
             searchSourceService: searchSource,
             timeFields: args.timeFields,
             timeRange: get(input, 'timeRange', undefined),
+            disableShardWarnings: (disableShardWarnings || false) as boolean,
             getNow,
             executionContext: getExecutionContext(),
           });

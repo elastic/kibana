@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { TimelineNonEcsData } from '@kbn/timelines-plugin/common';
+import type { TimelineNonEcsData } from '@kbn/timelines-plugin/common';
 import { getFilterOutCellAction } from './filter_out';
 
 jest.mock('../kibana');

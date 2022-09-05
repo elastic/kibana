@@ -12,9 +12,61 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Incoming DCOM Lateral Movement via MSHTA",
-  "query": "sequence with maxspan=1m\n  [process where event.type in (\"start\", \"process_started\") and\n     process.name : \"mshta.exe\" and process.args : \"-Embedding\"\n  ] by host.id, process.entity_id\n  [network where event.type == \"start\" and process.name : \"mshta.exe\" and \n     network.direction : (\"incoming\", \"ingress\") and network.transport == \"tcp\" and\n     source.port > 49151 and destination.port > 49151 and source.ip != \"127.0.0.1\" and source.ip != \"::1\"\n  ] by host.id, process.entity_id\n",
+  "query": "sequence with maxspan=1m\n  [process where event.type in (\"start\", \"process_started\") and\n     process.name : \"mshta.exe\" and process.args : \"-Embedding\"\n  ] by host.id, process.entity_id\n  [network where event.type == \"start\" and process.name : \"mshta.exe\" and\n     network.direction : (\"incoming\", \"ingress\") and network.transport == \"tcp\" and\n     source.port > 49151 and destination.port > 49151 and source.ip != \"127.0.0.1\" and source.ip != \"::1\"\n  ] by host.id, process.entity_id\n",
   "references": [
     "https://codewhitesec.blogspot.com/2018/07/lethalhta.html"
+  ],
+  "required_fields": [
+    {
+      "ecs": true,
+      "name": "destination.port",
+      "type": "long"
+    },
+    {
+      "ecs": true,
+      "name": "event.type",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "host.id",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "network.direction",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "network.transport",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.args",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.entity_id",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.name",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "source.ip",
+      "type": "ip"
+    },
+    {
+      "ecs": true,
+      "name": "source.port",
+      "type": "long"
+    }
   ],
   "risk_score": 73,
   "rule_id": "622ecb68-fa81-4601-90b5-f8cd661e4520",
@@ -59,7 +111,7 @@
       "technique": [
         {
           "id": "T1218",
-          "name": "Signed Binary Proxy Execution",
+          "name": "System Binary Proxy Execution",
           "reference": "https://attack.mitre.org/techniques/T1218/",
           "subtechnique": [
             {
@@ -73,5 +125,5 @@
     }
   ],
   "type": "eql",
-  "version": 6
+  "version": 8
 }

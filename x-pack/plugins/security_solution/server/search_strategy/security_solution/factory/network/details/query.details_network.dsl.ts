@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { NetworkDetailsRequestOptions } from '../../../../../../common/search_strategy/security_solution/network';
+import type { NetworkDetailsRequestOptions } from '../../../../../../common/search_strategy/security_solution/network';
 
 const getAggs = (type: string, ip: string) => {
   return {
@@ -16,16 +16,6 @@ const getAggs = (type: string, ip: string) => {
         },
       },
       aggs: {
-        firstSeen: {
-          min: {
-            field: '@timestamp',
-          },
-        },
-        lastSeen: {
-          max: {
-            field: '@timestamp',
-          },
-        },
         as: {
           filter: {
             exists: {

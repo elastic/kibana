@@ -5,20 +5,32 @@
  * 2.0.
  */
 import { HttpSetup } from '@kbn/core/public';
+import { SnoozeSchedule } from '../../../types';
 import { INTERNAL_BASE_ALERTING_API_PATH } from '../../constants';
+
+function rewriteSnoozeSchedule({ id, duration, rRule }: SnoozeSchedule) {
+  return {
+    ...(id ? { id } : {}),
+    duration,
+    rRule: {
+      ...rRule,
+      ...(rRule.until ? { until: rRule.until.toISOString() } : {}),
+    },
+  };
+}
 
 export async function snoozeRule({
   id,
-  snoozeEndTime,
+  snoozeSchedule,
   http,
 }: {
   id: string;
-  snoozeEndTime: string | -1;
+  snoozeSchedule: SnoozeSchedule;
   http: HttpSetup;
 }): Promise<void> {
   await http.post(`${INTERNAL_BASE_ALERTING_API_PATH}/rule/${encodeURIComponent(id)}/_snooze`, {
     body: JSON.stringify({
-      snooze_end_time: snoozeEndTime,
+      snooze_schedule: rewriteSnoozeSchedule(snoozeSchedule),
     }),
   });
 }

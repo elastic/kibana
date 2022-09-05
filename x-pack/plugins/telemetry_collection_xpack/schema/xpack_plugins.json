@@ -2,6 +2,15 @@
   "properties": {
     "actions": {
       "properties": {
+        "has_errors": {
+          "type": "boolean"
+        },
+        "error_messages": {
+          "type": "array",
+          "items": {
+            "type": "text"
+          }
+        },
         "alert_history_connector_enabled": {
           "type": "boolean",
           "_meta": {
@@ -261,6 +270,15 @@
     },
     "alerts": {
       "properties": {
+        "has_errors": {
+          "type": "boolean"
+        },
+        "error_messages": {
+          "type": "array",
+          "items": {
+            "type": "text"
+          }
+        },
         "count_total": {
           "type": "long"
         },
@@ -2602,6 +2620,9 @@
       "properties": {
         "services_per_agent": {
           "properties": {
+            "android/java": {
+              "type": "long"
+            },
             "dotnet": {
               "type": "long"
             },
@@ -2672,6 +2693,90 @@
         },
         "agents": {
           "properties": {
+            "android/java": {
+              "properties": {
+                "agent": {
+                  "properties": {
+                    "version": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
+                    }
+                  }
+                },
+                "service": {
+                  "properties": {
+                    "framework": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    },
+                    "language": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    },
+                    "runtime": {
+                      "properties": {
+                        "name": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "version": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        },
+                        "composite": {
+                          "type": "array",
+                          "items": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
             "dotnet": {
               "properties": {
                 "agent": {
@@ -3928,6 +4033,117 @@
             }
           }
         },
+        "per_service": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "service_id": {
+                "type": "keyword"
+              },
+              "timed_out": {
+                "type": "boolean"
+              },
+              "cloud": {
+                "properties": {
+                  "availability_zones": {
+                    "type": "array",
+                    "items": {
+                      "type": "keyword"
+                    }
+                  },
+                  "regions": {
+                    "type": "array",
+                    "items": {
+                      "type": "keyword"
+                    }
+                  },
+                  "providers": {
+                    "type": "array",
+                    "items": {
+                      "type": "keyword"
+                    }
+                  }
+                }
+              },
+              "faas": {
+                "properties": {
+                  "trigger": {
+                    "properties": {
+                      "type": {
+                        "type": "array",
+                        "items": {
+                          "type": "keyword"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "agent": {
+                "properties": {
+                  "name": {
+                    "type": "keyword"
+                  },
+                  "version": {
+                    "type": "keyword"
+                  }
+                }
+              },
+              "service": {
+                "properties": {
+                  "language": {
+                    "properties": {
+                      "name": {
+                        "type": "keyword"
+                      },
+                      "version": {
+                        "type": "keyword"
+                      }
+                    }
+                  },
+                  "framework": {
+                    "properties": {
+                      "name": {
+                        "type": "keyword"
+                      },
+                      "version": {
+                        "type": "keyword"
+                      }
+                    }
+                  },
+                  "runtime": {
+                    "properties": {
+                      "name": {
+                        "type": "keyword"
+                      },
+                      "version": {
+                        "type": "keyword"
+                      }
+                    }
+                  }
+                }
+              },
+              "kubernetes": {
+                "properties": {
+                  "pod": {
+                    "properties": {
+                      "name": {
+                        "type": "keyword"
+                      }
+                    }
+                  }
+                }
+              },
+              "container": {
+                "properties": {
+                  "id": {
+                    "type": "keyword"
+                  }
+                }
+              }
+            }
+          }
+        },
         "tasks": {
           "properties": {
             "aggregated_transactions": {
@@ -4074,6 +4290,17 @@
               }
             },
             "service_groups": {
+              "properties": {
+                "took": {
+                  "properties": {
+                    "ms": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "per_service": {
               "properties": {
                 "took": {
                   "properties": {
@@ -4834,758 +5061,6 @@
         }
       }
     },
-    "lens": {
-      "properties": {
-        "events_30_days": {
-          "properties": {
-            "app_query_change": {
-              "type": "long"
-            },
-            "open_help_popover": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of times the user opened one of the in-product help popovers."
-              }
-            },
-            "error_fix_action": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of times the user used the fix action of an error displayed in the workspace."
-              }
-            },
-            "open_formula_popover": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of times the user opened the in-product formula help popover."
-              }
-            },
-            "toggle_autoapply": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of times the user toggled auto-apply."
-              }
-            },
-            "toggle_fullscreen_formula": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of times the user toggled fullscreen mode on formula."
-              }
-            },
-            "indexpattern_field_info_click": {
-              "type": "long"
-            },
-            "loaded": {
-              "type": "long"
-            },
-            "app_filters_updated": {
-              "type": "long"
-            },
-            "app_date_change": {
-              "type": "long"
-            },
-            "save_failed": {
-              "type": "long"
-            },
-            "loaded_404": {
-              "type": "long"
-            },
-            "drop_total": {
-              "type": "long"
-            },
-            "chart_switch": {
-              "type": "long"
-            },
-            "suggestion_confirmed": {
-              "type": "long"
-            },
-            "suggestion_clicked": {
-              "type": "long"
-            },
-            "drop_onto_workspace": {
-              "type": "long"
-            },
-            "drop_non_empty": {
-              "type": "long"
-            },
-            "drop_empty": {
-              "type": "long"
-            },
-            "indexpattern_changed": {
-              "type": "long"
-            },
-            "indexpattern_filters_cleared": {
-              "type": "long"
-            },
-            "indexpattern_type_filter_toggled": {
-              "type": "long"
-            },
-            "indexpattern_existence_toggled": {
-              "type": "long"
-            },
-            "indexpattern_show_all_fields_clicked": {
-              "type": "long"
-            },
-            "drop_onto_dimension": {
-              "type": "long"
-            },
-            "indexpattern_dimension_removed": {
-              "type": "long"
-            },
-            "indexpattern_dimension_field_changed": {
-              "type": "long"
-            },
-            "xy_change_layer_display": {
-              "type": "long"
-            },
-            "xy_layer_removed": {
-              "type": "long"
-            },
-            "xy_layer_added": {
-              "type": "long"
-            },
-            "open_field_editor_edit": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of times the user opened the editor flyout to edit a field from within Lens."
-              }
-            },
-            "open_field_editor_add": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of times the user opened the editor flyout to add a field from within Lens."
-              }
-            },
-            "save_field_edit": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of times the user edited a field from within Lens."
-              }
-            },
-            "save_field_add": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of times the user added a field from within Lens."
-              }
-            },
-            "open_field_delete_modal": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of times the user opened the field delete modal from within Lens."
-              }
-            },
-            "delete_field": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of times the user deleted a field from within Lens."
-              }
-            },
-            "indexpattern_dimension_operation_terms": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of times the top values function was selected"
-              }
-            },
-            "indexpattern_dimension_operation_date_histogram": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of times the date histogram function was selected"
-              }
-            },
-            "indexpattern_dimension_operation_avg": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of times the average function was selected"
-              }
-            },
-            "indexpattern_dimension_operation_min": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of times the min function was selected"
-              }
-            },
-            "indexpattern_dimension_operation_max": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of times the max function was selected"
-              }
-            },
-            "indexpattern_dimension_operation_sum": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of times the sum function was selected"
-              }
-            },
-            "indexpattern_dimension_operation_count": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of times the count function was selected"
-              }
-            },
-            "indexpattern_dimension_operation_cardinality": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of times the cardinality function was selected"
-              }
-            },
-            "indexpattern_dimension_operation_filters": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of times the filters function was selected"
-              }
-            },
-            "indexpattern_dimension_operation_range": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of times the range function was selected"
-              }
-            },
-            "indexpattern_dimension_operation_median": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of times the median function was selected"
-              }
-            },
-            "indexpattern_dimension_operation_percentile": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of times the percentile function was selected"
-              }
-            },
-            "indexpattern_dimension_operation_last_value": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of times the last value function was selected"
-              }
-            },
-            "indexpattern_dimension_operation_cumulative_sum": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of times the cumulative sum function was selected"
-              }
-            },
-            "indexpattern_dimension_operation_counter_rate": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of times the counter rate function was selected"
-              }
-            },
-            "indexpattern_dimension_operation_derivative": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of times the derivative function was selected"
-              }
-            },
-            "indexpattern_dimension_operation_moving_average": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of times the moving average function was selected"
-              }
-            },
-            "indexpattern_dimension_operation_formula": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of times the formula function was selected"
-              }
-            }
-          }
-        },
-        "events_90_days": {
-          "properties": {
-            "app_query_change": {
-              "type": "long"
-            },
-            "open_help_popover": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of times the user opened one of the in-product help popovers."
-              }
-            },
-            "error_fix_action": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of times the user used the fix action of an error displayed in the workspace."
-              }
-            },
-            "open_formula_popover": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of times the user opened the in-product formula help popover."
-              }
-            },
-            "toggle_autoapply": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of times the user toggled auto-apply."
-              }
-            },
-            "toggle_fullscreen_formula": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of times the user toggled fullscreen mode on formula."
-              }
-            },
-            "indexpattern_field_info_click": {
-              "type": "long"
-            },
-            "loaded": {
-              "type": "long"
-            },
-            "app_filters_updated": {
-              "type": "long"
-            },
-            "app_date_change": {
-              "type": "long"
-            },
-            "save_failed": {
-              "type": "long"
-            },
-            "loaded_404": {
-              "type": "long"
-            },
-            "drop_total": {
-              "type": "long"
-            },
-            "chart_switch": {
-              "type": "long"
-            },
-            "suggestion_confirmed": {
-              "type": "long"
-            },
-            "suggestion_clicked": {
-              "type": "long"
-            },
-            "drop_onto_workspace": {
-              "type": "long"
-            },
-            "drop_non_empty": {
-              "type": "long"
-            },
-            "drop_empty": {
-              "type": "long"
-            },
-            "indexpattern_changed": {
-              "type": "long"
-            },
-            "indexpattern_filters_cleared": {
-              "type": "long"
-            },
-            "indexpattern_type_filter_toggled": {
-              "type": "long"
-            },
-            "indexpattern_existence_toggled": {
-              "type": "long"
-            },
-            "indexpattern_show_all_fields_clicked": {
-              "type": "long"
-            },
-            "drop_onto_dimension": {
-              "type": "long"
-            },
-            "indexpattern_dimension_removed": {
-              "type": "long"
-            },
-            "indexpattern_dimension_field_changed": {
-              "type": "long"
-            },
-            "xy_change_layer_display": {
-              "type": "long"
-            },
-            "xy_layer_removed": {
-              "type": "long"
-            },
-            "xy_layer_added": {
-              "type": "long"
-            },
-            "open_field_editor_edit": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of times the user opened the editor flyout to edit a field from within Lens."
-              }
-            },
-            "open_field_editor_add": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of times the user opened the editor flyout to add a field from within Lens."
-              }
-            },
-            "save_field_edit": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of times the user edited a field from within Lens."
-              }
-            },
-            "save_field_add": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of times the user added a field from within Lens."
-              }
-            },
-            "open_field_delete_modal": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of times the user opened the field delete modal from within Lens."
-              }
-            },
-            "delete_field": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of times the user deleted a field from within Lens."
-              }
-            },
-            "indexpattern_dimension_operation_terms": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of times the top values function was selected"
-              }
-            },
-            "indexpattern_dimension_operation_date_histogram": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of times the date histogram function was selected"
-              }
-            },
-            "indexpattern_dimension_operation_avg": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of times the average function was selected"
-              }
-            },
-            "indexpattern_dimension_operation_min": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of times the min function was selected"
-              }
-            },
-            "indexpattern_dimension_operation_max": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of times the max function was selected"
-              }
-            },
-            "indexpattern_dimension_operation_sum": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of times the sum function was selected"
-              }
-            },
-            "indexpattern_dimension_operation_count": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of times the count function was selected"
-              }
-            },
-            "indexpattern_dimension_operation_cardinality": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of times the cardinality function was selected"
-              }
-            },
-            "indexpattern_dimension_operation_filters": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of times the filters function was selected"
-              }
-            },
-            "indexpattern_dimension_operation_range": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of times the range function was selected"
-              }
-            },
-            "indexpattern_dimension_operation_median": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of times the median function was selected"
-              }
-            },
-            "indexpattern_dimension_operation_percentile": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of times the percentile function was selected"
-              }
-            },
-            "indexpattern_dimension_operation_last_value": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of times the last value function was selected"
-              }
-            },
-            "indexpattern_dimension_operation_cumulative_sum": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of times the cumulative sum function was selected"
-              }
-            },
-            "indexpattern_dimension_operation_counter_rate": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of times the counter rate function was selected"
-              }
-            },
-            "indexpattern_dimension_operation_derivative": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of times the derivative function was selected"
-              }
-            },
-            "indexpattern_dimension_operation_moving_average": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of times the moving average function was selected"
-              }
-            },
-            "indexpattern_dimension_operation_formula": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of times the formula function was selected"
-              }
-            }
-          }
-        },
-        "suggestion_events_30_days": {
-          "properties": {
-            "back_to_current": {
-              "type": "long"
-            },
-            "reload": {
-              "type": "long"
-            }
-          }
-        },
-        "suggestion_events_90_days": {
-          "properties": {
-            "back_to_current": {
-              "type": "long"
-            },
-            "reload": {
-              "type": "long"
-            }
-          }
-        },
-        "saved_overall_total": {
-          "type": "long"
-        },
-        "saved_30_days_total": {
-          "type": "long"
-        },
-        "saved_90_days_total": {
-          "type": "long"
-        },
-        "saved_overall": {
-          "properties": {
-            "bar": {
-              "type": "long"
-            },
-            "bar_horizontal": {
-              "type": "long"
-            },
-            "line": {
-              "type": "long"
-            },
-            "area": {
-              "type": "long"
-            },
-            "bar_stacked": {
-              "type": "long"
-            },
-            "bar_percentage_stacked": {
-              "type": "long"
-            },
-            "bar_horizontal_stacked": {
-              "type": "long"
-            },
-            "bar_horizontal_percentage_stacked": {
-              "type": "long"
-            },
-            "area_stacked": {
-              "type": "long"
-            },
-            "area_percentage_stacked": {
-              "type": "long"
-            },
-            "lnsDatatable": {
-              "type": "long"
-            },
-            "lnsPie": {
-              "type": "long"
-            },
-            "lnsMetric": {
-              "type": "long"
-            },
-            "formula": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of saved lens visualizations which are using at least one formula"
-              }
-            }
-          }
-        },
-        "saved_30_days": {
-          "properties": {
-            "bar": {
-              "type": "long"
-            },
-            "bar_horizontal": {
-              "type": "long"
-            },
-            "line": {
-              "type": "long"
-            },
-            "area": {
-              "type": "long"
-            },
-            "bar_stacked": {
-              "type": "long"
-            },
-            "bar_percentage_stacked": {
-              "type": "long"
-            },
-            "bar_horizontal_stacked": {
-              "type": "long"
-            },
-            "bar_horizontal_percentage_stacked": {
-              "type": "long"
-            },
-            "area_stacked": {
-              "type": "long"
-            },
-            "area_percentage_stacked": {
-              "type": "long"
-            },
-            "lnsDatatable": {
-              "type": "long"
-            },
-            "lnsPie": {
-              "type": "long"
-            },
-            "lnsMetric": {
-              "type": "long"
-            },
-            "formula": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of saved lens visualizations which are using at least one formula"
-              }
-            }
-          }
-        },
-        "saved_90_days": {
-          "properties": {
-            "bar": {
-              "type": "long"
-            },
-            "bar_horizontal": {
-              "type": "long"
-            },
-            "line": {
-              "type": "long"
-            },
-            "area": {
-              "type": "long"
-            },
-            "bar_stacked": {
-              "type": "long"
-            },
-            "bar_percentage_stacked": {
-              "type": "long"
-            },
-            "bar_horizontal_stacked": {
-              "type": "long"
-            },
-            "bar_horizontal_percentage_stacked": {
-              "type": "long"
-            },
-            "area_stacked": {
-              "type": "long"
-            },
-            "area_percentage_stacked": {
-              "type": "long"
-            },
-            "lnsDatatable": {
-              "type": "long"
-            },
-            "lnsPie": {
-              "type": "long"
-            },
-            "lnsMetric": {
-              "type": "long"
-            },
-            "formula": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of saved lens visualizations which are using at least one formula"
-              }
-            }
-          }
-        },
-        "saved_multiterms_overall": {
-          "properties": {
-            "multiterms_docs": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of saved lens visualizations which are using at least one multiterms operation"
-              }
-            },
-            "multiterms_terms_count": {
-              "type": "long",
-              "_meta": {
-                "description": "Sum of terms used for multiterms operations of saved lens visualizations"
-              }
-            },
-            "multiterms_operations_count": {
-              "type": "long",
-              "_meta": {
-                "description": "Sum of operations using multiterms of saved lens visualizations"
-              }
-            }
-          }
-        },
-        "saved_multiterms_30_days": {
-          "properties": {
-            "multiterms_docs": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of saved lens visualizations which are using at least one multiterms operation"
-              }
-            },
-            "multiterms_terms_count": {
-              "type": "long",
-              "_meta": {
-                "description": "Sum of terms used for multiterms operations of saved lens visualizations"
-              }
-            },
-            "multiterms_operations_count": {
-              "type": "long",
-              "_meta": {
-                "description": "Sum of operations using multiterms of saved lens visualizations"
-              }
-            }
-          }
-        },
-        "saved_multiterms_90_days": {
-          "properties": {
-            "multiterms_docs": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of saved lens visualizations which are using at least one multiterms operation"
-              }
-            },
-            "multiterms_terms_count": {
-              "type": "long",
-              "_meta": {
-                "description": "Sum of terms used for multiterms operations of saved lens visualizations"
-              }
-            },
-            "multiterms_operations_count": {
-              "type": "long",
-              "_meta": {
-                "description": "Sum of operations using multiterms of saved lens visualizations"
-              }
-            }
-          }
-        }
-      }
-    },
     "maps": {
       "properties": {
         "indexPatternsWithGeoFieldCount": {
@@ -5828,6 +5303,34 @@
                   "type": "long",
                   "_meta": {
                     "description": "total number of es document layers in cluster"
+                  }
+                }
+              }
+            },
+            "es_ml_anomalies": {
+              "properties": {
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "min number of es machine learning anomaly layers per map"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "max number of es machine learning anomaly layers per map"
+                  }
+                },
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "avg number of es machine learning anomaly layers per map"
+                  }
+                },
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "total number of es machine learning anomaly layers in cluster"
                   }
                 }
               }
@@ -6415,6 +5918,19 @@
                   }
                 }
               }
+            },
+            "customIconsCount": {
+              "properties": {
+                "min": {
+                  "type": "long"
+                },
+                "max": {
+                  "type": "long"
+                },
+                "avg": {
+                  "type": "float"
+                }
+              }
             }
           }
         }
@@ -6759,6 +6275,19 @@
                 }
               }
             },
+            "execution_times": {
+              "properties": {
+                "min": {
+                  "type": "long"
+                },
+                "max": {
+                  "type": "long"
+                },
+                "avg": {
+                  "type": "float"
+                }
+              }
+            },
             "metrics": {
               "properties": {
                 "csv_rows": {
@@ -6849,6 +6378,19 @@
                 }
               }
             },
+            "execution_times": {
+              "properties": {
+                "min": {
+                  "type": "long"
+                },
+                "max": {
+                  "type": "long"
+                },
+                "avg": {
+                  "type": "float"
+                }
+              }
+            },
             "metrics": {
               "properties": {
                 "csv_rows": {
@@ -6936,6 +6478,19 @@
                 },
                 "visualization": {
                   "type": "long"
+                }
+              }
+            },
+            "execution_times": {
+              "properties": {
+                "min": {
+                  "type": "long"
+                },
+                "max": {
+                  "type": "long"
+                },
+                "avg": {
+                  "type": "float"
                 }
               }
             },
@@ -7060,6 +6615,19 @@
                 }
               }
             },
+            "execution_times": {
+              "properties": {
+                "min": {
+                  "type": "long"
+                },
+                "max": {
+                  "type": "long"
+                },
+                "avg": {
+                  "type": "float"
+                }
+              }
+            },
             "metrics": {
               "properties": {
                 "png_cpu": {
@@ -7178,6 +6746,19 @@
                 },
                 "visualization": {
                   "type": "long"
+                }
+              }
+            },
+            "execution_times": {
+              "properties": {
+                "min": {
+                  "type": "long"
+                },
+                "max": {
+                  "type": "long"
+                },
+                "avg": {
+                  "type": "float"
                 }
               }
             },
@@ -7331,6 +6912,19 @@
                 },
                 "visualization": {
                   "type": "long"
+                }
+              }
+            },
+            "execution_times": {
+              "properties": {
+                "min": {
+                  "type": "long"
+                },
+                "max": {
+                  "type": "long"
+                },
+                "avg": {
+                  "type": "float"
                 }
               }
             },
@@ -7986,6 +7580,19 @@
             }
           }
         },
+        "queue_times": {
+          "properties": {
+            "min": {
+              "type": "long"
+            },
+            "max": {
+              "type": "long"
+            },
+            "avg": {
+              "type": "float"
+            }
+          }
+        },
         "available": {
           "type": "boolean"
         },
@@ -8043,6 +7650,19 @@
                     },
                     "visualization": {
                       "type": "long"
+                    }
+                  }
+                },
+                "execution_times": {
+                  "properties": {
+                    "min": {
+                      "type": "long"
+                    },
+                    "max": {
+                      "type": "long"
+                    },
+                    "avg": {
+                      "type": "float"
                     }
                   }
                 },
@@ -8136,6 +7756,19 @@
                     }
                   }
                 },
+                "execution_times": {
+                  "properties": {
+                    "min": {
+                      "type": "long"
+                    },
+                    "max": {
+                      "type": "long"
+                    },
+                    "avg": {
+                      "type": "float"
+                    }
+                  }
+                },
                 "metrics": {
                   "properties": {
                     "csv_rows": {
@@ -8223,6 +7856,19 @@
                     },
                     "visualization": {
                       "type": "long"
+                    }
+                  }
+                },
+                "execution_times": {
+                  "properties": {
+                    "min": {
+                      "type": "long"
+                    },
+                    "max": {
+                      "type": "long"
+                    },
+                    "avg": {
+                      "type": "float"
                     }
                   }
                 },
@@ -8347,6 +7993,19 @@
                     }
                   }
                 },
+                "execution_times": {
+                  "properties": {
+                    "min": {
+                      "type": "long"
+                    },
+                    "max": {
+                      "type": "long"
+                    },
+                    "avg": {
+                      "type": "float"
+                    }
+                  }
+                },
                 "metrics": {
                   "properties": {
                     "png_cpu": {
@@ -8465,6 +8124,19 @@
                     },
                     "visualization": {
                       "type": "long"
+                    }
+                  }
+                },
+                "execution_times": {
+                  "properties": {
+                    "min": {
+                      "type": "long"
+                    },
+                    "max": {
+                      "type": "long"
+                    },
+                    "avg": {
+                      "type": "float"
                     }
                   }
                 },
@@ -8618,6 +8290,19 @@
                     },
                     "visualization": {
                       "type": "long"
+                    }
+                  }
+                },
+                "execution_times": {
+                  "properties": {
+                    "min": {
+                      "type": "long"
+                    },
+                    "max": {
+                      "type": "long"
+                    },
+                    "avg": {
+                      "type": "float"
                     }
                   }
                 },
@@ -9272,6 +8957,19 @@
                   "type": "long"
                 }
               }
+            },
+            "queue_times": {
+              "properties": {
+                "min": {
+                  "type": "long"
+                },
+                "max": {
+                  "type": "long"
+                },
+                "avg": {
+                  "type": "float"
+                }
+              }
             }
           }
         }
@@ -9374,6 +9072,16 @@
               }
             },
             "map": {
+              "properties": {
+                "usedTags": {
+                  "type": "integer"
+                },
+                "taggedObjects": {
+                  "type": "integer"
+                }
+              }
+            },
+            "search": {
               "properties": {
                 "usedTags": {
                   "type": "integer"
@@ -9627,6 +9335,58 @@
                           "type": "long",
                           "_meta": {
                             "description": "Number of cases attached to threat_match detection rule alerts"
+                          }
+                        },
+                        "legacy_notifications_enabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of legacy notifications enabled"
+                          }
+                        },
+                        "legacy_notifications_disabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of legacy notifications disabled"
+                          }
+                        },
+                        "notifications_enabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of notifications enabled"
+                          }
+                        },
+                        "notifications_disabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of notifications enabled"
+                          }
+                        }
+                      }
+                    },
+                    "new_terms": {
+                      "properties": {
+                        "enabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of new_terms rules enabled"
+                          }
+                        },
+                        "disabled": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of new_terms rules disabled"
+                          }
+                        },
+                        "alerts": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of alerts generated by new_terms rules"
+                          }
+                        },
+                        "cases": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of cases attached to new_terms detection rule alerts"
                           }
                         },
                         "legacy_notifications_enabled": {

@@ -19,9 +19,28 @@ import {
   createSecuritySolutionStorageMock,
 } from '../../../common/mock';
 import { useMountAppended } from '../../../common/utils/use_mount_appended';
-import { createStore, State } from '../../../common/store';
+import type { State } from '../../../common/store';
+import { createStore } from '../../../common/store';
 import { NetworkDetails } from '.';
-import { FlowTarget } from '../../../../common/search_strategy';
+import { FlowTargetSourceDest } from '../../../../common/search_strategy';
+
+jest.mock('../../../common/containers/use_search_strategy', () => ({
+  useSearchStrategy: jest.fn().mockReturnValue({
+    loading: false,
+    result: {
+      edges: [],
+      pageInfo: {
+        activePage: 0,
+        fakeTotalCount: 0,
+        showMorePagesIndicator: false,
+      },
+      totalCount: -1,
+    },
+    search: jest.fn(),
+    refetch: jest.fn(),
+    inspect: {},
+  }),
+}));
 
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
@@ -45,7 +64,6 @@ jest.mock('react-router-dom', () => {
 jest.mock('../../containers/details', () => ({
   useNetworkDetails: jest.fn().mockReturnValue([true, { networkDetails: {} }]),
 }));
-jest.mock('../../../common/lib/kibana');
 jest.mock('../../../common/containers/sourcerer');
 jest.mock('../../../common/containers/use_global_time', () => ({
   useGlobalTime: jest.fn().mockReturnValue({
@@ -55,6 +73,27 @@ jest.mock('../../../common/containers/use_global_time', () => ({
     setQuery: jest.fn(),
   }),
 }));
+
+jest.mock('../../../common/lib/kibana', () => {
+  const original = jest.requireActual('../../../common/lib/kibana');
+  return {
+    ...original,
+    useNavigation: () => ({
+      getAppUrl: jest.fn,
+    }),
+    useKibana: () => ({
+      services: {
+        ...original.useKibana().services,
+        timelines: {
+          getUseDraggableKeyboardWrapper: () => () => ({
+            onBlur: jest.fn,
+            onKeyDown: jest.fn,
+          }),
+        },
+      },
+    }),
+  };
+});
 
 // Test will fail because we will to need to mock some core services to make the test work
 // For now let's forget about SiemSearchBar and QueryBar
@@ -117,7 +156,7 @@ describe('Network Details', () => {
     const ip = '123.456.78.90';
     (useParams as jest.Mock).mockReturnValue({
       detailName: ip,
-      flowTarget: FlowTarget.source,
+      flowTarget: FlowTargetSourceDest.source,
     });
     const wrapper = mount(
       <TestProviders store={store}>
@@ -137,7 +176,7 @@ describe('Network Details', () => {
     });
     (useParams as jest.Mock).mockReturnValue({
       detailName: ip,
-      flowTarget: FlowTarget.source,
+      flowTarget: FlowTargetSourceDest.source,
     });
     const wrapper = mount(
       <TestProviders store={store}>

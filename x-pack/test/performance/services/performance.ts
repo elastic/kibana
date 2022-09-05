@@ -9,15 +9,10 @@
 
 import Url from 'url';
 import { inspect } from 'util';
+import { setTimeout } from 'timers/promises';
 import apm, { Span, Transaction } from 'elastic-apm-node';
 import playwright, { ChromiumBrowser, Page, BrowserContext, CDPSession } from 'playwright';
 import { FtrService, FtrProviderContext } from '../ftr_provider_context';
-
-apm.start({
-  serviceName: 'functional test runner',
-  serverUrl: 'https://kibana-ops-e2e-perf.apm.us-central1.gcp.cloud.es.io:443',
-  secretToken: 'CTs9y3cvcfq13bQqsB',
-});
 
 export interface StepCtx {
   page: Page;
@@ -38,8 +33,48 @@ export class PerformanceTestingService extends FtrService {
   constructor(ctx: FtrProviderContext) {
     super(ctx);
 
+    ctx.getService('lifecycle').beforeTests.add(() => {
+      apm.start({
+        serviceName: 'functional test runner',
+        environment: process.env.CI ? 'ci' : 'development',
+        active: this.config.get(`kbnTestServer.env`).ELASTIC_APM_ACTIVE !== 'false',
+        serverUrl: this.config.get(`kbnTestServer.env`).ELASTIC_APM_SERVER_URL,
+        secretToken: this.config.get(`kbnTestServer.env`).ELASTIC_APM_SECRET_TOKEN,
+        globalLabels: this.config.get(`kbnTestServer.env`).ELASTIC_APM_GLOBAL_LABELS,
+        transactionSampleRate:
+          this.config.get(`kbnTestServer.env`).ELASTIC_APM_TRANSACTION_SAMPLE_RATE,
+        logger: process.env.VERBOSE_APM_LOGGING
+          ? {
+              warn(...args: any[]) {
+                console.log('APM WARN', ...args);
+              },
+              info(...args: any[]) {
+                console.log('APM INFO', ...args);
+              },
+              fatal(...args: any[]) {
+                console.log('APM FATAL', ...args);
+              },
+              error(...args: any[]) {
+                console.log('APM ERROR', ...args);
+              },
+              debug(...args: any[]) {
+                console.log('APM DEBUG', ...args);
+              },
+              trace(...args: any[]) {
+                console.log('APM TRACE', ...args);
+              },
+            }
+          : undefined,
+      });
+    });
+
     ctx.getService('lifecycle').cleanup.add(async () => {
       await this.shutdownBrowser();
+      await new Promise<void>((resolve) => apm.flush(() => resolve()));
+      // wait for the HTTP request that apm.flush() starts, which we
+      // can't track but hope is complete within 3 seconds
+      // https://github.com/elastic/apm-agent-nodejs/issues/2088
+      await setTimeout(3000);
     });
   }
 
@@ -170,7 +205,6 @@ export class PerformanceTestingService extends FtrService {
 
   private async tearDown(page: Page, client: CDPSession, context: BrowserContext) {
     if (page) {
-      apm.flush();
       await client.detach();
       await page.close();
       await context.close();

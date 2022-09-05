@@ -23,7 +23,7 @@ interface ExecutedStepProps {
 }
 
 const Label = euiStyled.div`
-  margin-bottom: ${(props) => props.theme.eui.paddingSizes.xs};
+  margin-bottom: ${(props) => props.theme.eui.euiSizeXS};
   font-size: ${({ theme }) => theme.eui.euiFontSizeS};
   color: ${({ theme }) => theme.eui.euiColorDarkShade};
 `;
@@ -31,7 +31,7 @@ const Label = euiStyled.div`
 const Message = euiStyled.div`
   font-weight: bold;
   font-size:${({ theme }) => theme.eui.euiFontSizeM};
-  margin-bottom: ${(props) => props.theme.eui.paddingSizes.m};
+  margin-bottom: ${(props) => props.theme.eui.euiSizeM};
 `;
 
 const ExpandedRow = euiStyled.div`

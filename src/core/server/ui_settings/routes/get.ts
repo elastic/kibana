@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { IRouter } from '../../http';
-import { SavedObjectsErrorHelpers } from '../../saved_objects';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-utils-server';
+import type { InternalUiSettingsRouter } from '../internal_types';
 
-export function registerGetRoute(router: IRouter) {
+export function registerGetRoute(router: InternalUiSettingsRouter) {
   router.get(
     { path: '/api/kibana/settings', validate: false },
     async (context, request, response) => {

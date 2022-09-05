@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { DataLayerConfig } from '../../common';
+import { FieldFormat } from '@kbn/field-formats-plugin/common';
+import { DataLayerConfig, YAxisConfigResult, DataDecorationConfigResult } from '../../common';
 import { LayerTypes } from '../../common/constants';
 import { Datatable } from '@kbn/expressions-plugin/public';
 import { getAxesConfiguration } from './axes_configuration';
@@ -217,9 +218,36 @@ describe('axes_configuration', () => {
             params: { id: 'currency' },
           },
         },
+        {
+          id: 'yAccessorId5',
+          name: 'Other column',
+          meta: {
+            type: 'number',
+            source: 'esaggs',
+            index: 'indexPatternId',
+            sourceParams: {
+              indexPatternId: 'indexPatternId',
+              type: 'count',
+            },
+            params: { id: 'number' },
+          },
+        },
       ],
     },
   };
+
+  const yAxisConfigs: YAxisConfigResult[] = [
+    {
+      id: '1',
+      position: 'right',
+      type: 'yAxisConfig',
+    },
+    {
+      id: '2',
+      position: 'left',
+      type: 'yAxisConfig',
+    },
+  ];
 
   const sampleLayer: DataLayerConfig = {
     layerId: 'first',
@@ -229,10 +257,13 @@ describe('axes_configuration', () => {
     seriesType: 'line',
     xAccessor: 'c',
     accessors: ['yAccessorId'],
-    splitAccessor: 'd',
+    splitAccessors: ['d'],
     columnToLabel: '{"a": "Label A", "b": "Label B", "d": "Label D"}',
     xScaleType: 'ordinal',
     isHistogram: false,
+    isPercentage: false,
+    isStacked: false,
+    isHorizontal: false,
     palette: { type: 'palette', name: 'default' },
     table: tables.first,
   };
@@ -244,8 +275,11 @@ describe('axes_configuration', () => {
         yAccessorId: { id: 'number', params: {} },
         yAccessorId3: { id: 'currency', params: {} },
         yAccessorId4: { id: 'currency', params: {} },
+        yAccessorId5: { id: 'number', params: {} },
       },
-      splitSeriesAccessors: { d: { id: 'number', params: {} } },
+      splitSeriesAccessors: {
+        d: { format: { id: 'number', params: {} }, formatter: {} as FieldFormat },
+      },
       splitColumnAccessors: {},
       splitRowAccessors: {},
     },
@@ -253,17 +287,41 @@ describe('axes_configuration', () => {
 
   it('should map auto series to left axis', () => {
     const formatFactory = jest.fn();
-    const groups = getAxesConfiguration([sampleLayer], false, formatFactory, fieldFormats);
+    const groups = getAxesConfiguration([sampleLayer], false, formatFactory, fieldFormats, []);
     expect(groups.length).toEqual(1);
+    expect(groups[0].groupId).toEqual('left');
     expect(groups[0].position).toEqual('left');
     expect(groups[0].series[0].accessor).toEqual('yAccessorId');
+    expect(groups[0].series[0].layer).toEqual('first');
+  });
+
+  it('should map auto series to defined left axis if formatters match', () => {
+    const formatFactory = jest.fn();
+    const groups = getAxesConfiguration(
+      [
+        {
+          ...sampleLayer,
+          accessors: ['yAccessorId', 'yAccessorId5'],
+          decorations: [{ type: 'dataDecorationConfig', forAccessor: 'yAccessorId', axisId: '2' }],
+        },
+      ],
+      false,
+      formatFactory,
+      fieldFormats,
+      yAxisConfigs
+    );
+    expect(groups.length).toEqual(1);
+    expect(groups[0].groupId).toEqual('axis-2');
+    expect(groups[0].position).toEqual('left');
+    expect(groups[0].series[0].accessor).toEqual('yAccessorId');
+    expect(groups[0].series[1].accessor).toEqual('yAccessorId5');
     expect(groups[0].series[0].layer).toEqual('first');
   });
 
   it('should map auto series to right axis if formatters do not match', () => {
     const formatFactory = jest.fn();
     const twoSeriesLayer = { ...sampleLayer, accessors: ['yAccessorId', 'yAccessorId2'] };
-    const groups = getAxesConfiguration([twoSeriesLayer], false, formatFactory, fieldFormats);
+    const groups = getAxesConfiguration([twoSeriesLayer], false, formatFactory, fieldFormats, []);
     expect(groups.length).toEqual(2);
     expect(groups[0].position).toEqual('left');
     expect(groups[1].position).toEqual('right');
@@ -271,13 +329,72 @@ describe('axes_configuration', () => {
     expect(groups[1].series[0].accessor).toEqual('yAccessorId2');
   });
 
-  it('should map auto series to left if left and right are already filled with non-matching series', () => {
+  it('should map auto series to left axis if formatters do not match with defined left axis', () => {
+    const formatFactory = jest.fn();
+    const groups = getAxesConfiguration(
+      [
+        {
+          ...sampleLayer,
+          accessors: ['yAccessorId', 'yAccessorId3'],
+          decorations: [{ type: 'dataDecorationConfig', forAccessor: 'yAccessorId', axisId: '2' }],
+        },
+      ],
+      false,
+      formatFactory,
+      fieldFormats,
+      yAxisConfigs
+    );
+    expect(groups.length).toEqual(2);
+    expect(groups[0].groupId).toEqual('axis-2');
+    expect(groups[0].position).toEqual('left');
+    expect(groups[0].series[0].accessor).toEqual('yAccessorId');
+    expect(groups[0].series[0].layer).toEqual('first');
+    expect(groups[1].groupId).toEqual('right');
+    expect(groups[1].position).toEqual('right');
+    expect(groups[1].series[0].accessor).toEqual('yAccessorId3');
+    expect(groups[1].series[0].layer).toEqual('first');
+  });
+
+  it('should map auto series to defined left axis if defined left and right are already filled with non-matching series', () => {
+    const formatFactory = jest.fn();
+    const threeSeriesLayer = {
+      ...sampleLayer,
+      accessors: ['yAccessorId', 'yAccessorId2', 'yAccessorId3'],
+      decorations: [
+        { type: 'dataDecorationConfig', forAccessor: 'yAccessorId', axisId: '1' },
+        { type: 'dataDecorationConfig', forAccessor: 'yAccessorId2', axisId: '2' },
+      ] as DataDecorationConfigResult[],
+    };
+    const groups = getAxesConfiguration(
+      [threeSeriesLayer],
+      false,
+      formatFactory,
+      fieldFormats,
+      yAxisConfigs
+    );
+    expect(groups.length).toEqual(2);
+    expect(groups[0].groupId).toEqual('axis-1');
+    expect(groups[0].position).toEqual('right');
+    expect(groups[1].groupId).toEqual('axis-2');
+    expect(groups[1].position).toEqual('left');
+    expect(groups[0].series[0].accessor).toEqual('yAccessorId');
+    expect(groups[1].series[0].accessor).toEqual('yAccessorId2');
+    expect(groups[1].series[1].accessor).toEqual('yAccessorId3');
+  });
+
+  it('should map auto series to left if not-defined left and right are already filled with non-matching series', () => {
     const formatFactory = jest.fn();
     const threeSeriesLayer = {
       ...sampleLayer,
       accessors: ['yAccessorId', 'yAccessorId2', 'yAccessorId3'],
     };
-    const groups = getAxesConfiguration([threeSeriesLayer], false, formatFactory, fieldFormats);
+    const groups = getAxesConfiguration(
+      [threeSeriesLayer],
+      false,
+      formatFactory,
+      fieldFormats,
+      yAxisConfigs
+    );
     expect(groups.length).toEqual(2);
     expect(groups[0].position).toEqual('left');
     expect(groups[1].position).toEqual('right');
@@ -292,12 +409,13 @@ describe('axes_configuration', () => {
       [
         {
           ...sampleLayer,
-          yConfig: [{ type: 'yConfig', forAccessor: 'yAccessorId', axisMode: 'right' }],
+          decorations: [{ type: 'dataDecorationConfig', forAccessor: 'yAccessorId', axisId: '1' }],
         },
       ],
       false,
       formatFactory,
-      fieldFormats
+      fieldFormats,
+      yAxisConfigs
     );
     expect(groups.length).toEqual(1);
     expect(groups[0].position).toEqual('right');
@@ -312,19 +430,20 @@ describe('axes_configuration', () => {
         {
           ...sampleLayer,
           accessors: ['yAccessorId', 'yAccessorId3', 'yAccessorId4'],
-          yConfig: [{ type: 'yConfig', forAccessor: 'yAccessorId', axisMode: 'right' }],
+          decorations: [{ type: 'dataDecorationConfig', forAccessor: 'yAccessorId', axisId: '1' }],
         },
       ],
       false,
       formatFactory,
-      fieldFormats
+      fieldFormats,
+      yAxisConfigs
     );
     expect(groups.length).toEqual(2);
-    expect(groups[0].position).toEqual('left');
-    expect(groups[0].series[0].accessor).toEqual('yAccessorId3');
-    expect(groups[0].series[1].accessor).toEqual('yAccessorId4');
-    expect(groups[1].position).toEqual('right');
-    expect(groups[1].series[0].accessor).toEqual('yAccessorId');
+    expect(groups[0].position).toEqual('right');
+    expect(groups[0].series[0].accessor).toEqual('yAccessorId');
+    expect(groups[1].position).toEqual('left');
+    expect(groups[1].series[0].accessor).toEqual('yAccessorId3');
+    expect(groups[1].series[1].accessor).toEqual('yAccessorId4');
     expect(formatFactory).toHaveBeenCalledWith({ id: 'number', params: {} });
     expect(formatFactory).toHaveBeenCalledWith({ id: 'currency', params: {} });
   });
@@ -336,12 +455,13 @@ describe('axes_configuration', () => {
         {
           ...sampleLayer,
           accessors: ['yAccessorId', 'yAccessorId3', 'yAccessorId4'],
-          yConfig: [{ type: 'yConfig', forAccessor: 'yAccessorId', axisMode: 'right' }],
+          decorations: [{ type: 'dataDecorationConfig', forAccessor: 'yAccessorId', axisId: '1' }],
         },
       ],
       false,
       formatFactory,
-      fieldFormats
+      fieldFormats,
+      yAxisConfigs
     );
     expect(formatFactory).toHaveBeenCalledTimes(2);
     expect(formatFactory).toHaveBeenCalledWith({ id: 'number', params: {} });

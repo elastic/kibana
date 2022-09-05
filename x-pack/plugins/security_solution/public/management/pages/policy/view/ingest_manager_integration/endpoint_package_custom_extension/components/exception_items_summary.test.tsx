@@ -11,11 +11,11 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { ExceptionItemsSummary } from './exception_items_summary';
 import * as reactTestingLibrary from '@testing-library/react';
 import { getMockTheme } from '../../../../../../../common/lib/kibana/kibana_react.mock';
-import { GetExceptionSummaryResponse } from '../../../../../../../../common/endpoint/types';
+import type { GetExceptionSummaryResponse } from '../../../../../../../../common/endpoint/types';
 
 const mockTheme = getMockTheme({
   eui: {
-    paddingSizes: { m: '2' },
+    euiSizeM: '2',
   },
 });
 

@@ -11,15 +11,16 @@ import { fromKueryExpression, luceneStringToDsl, toElasticsearchQuery } from '@k
 import { omit } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiLink, htmlIdGenerator } from '@elastic/eui';
-import type { AggFunctionsMapping, Query } from '@kbn/data-plugin/public';
+import type { Query } from '@kbn/es-query';
+import type { AggFunctionsMapping } from '@kbn/data-plugin/public';
 import { queryFilterToAst } from '@kbn/data-plugin/common';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
+import { IndexPattern } from '../../../../types';
 import { updateColumnParam } from '../../layer_helpers';
 import type { OperationDefinition } from '..';
 import type { BaseIndexPatternColumn } from '../column_types';
 import { FilterPopover } from './filter_popover';
-import type { IndexPattern } from '../../../types';
-import { NewBucketButton, DragDropBuckets, DraggableBucketContainer } from '../shared_components';
+import { DragDropBuckets, DraggableBucketContainer, NewBucketButton } from '../shared_components';
 
 const generateId = htmlIdGenerator();
 const OPERATION_NAME = 'filters';
@@ -53,15 +54,17 @@ const defaultFilter: Filter = {
   label: '',
 };
 
-export const validateQuery = (input: Query, indexPattern: IndexPattern) => {
+export const validateQuery = (input: Query | undefined, indexPattern: IndexPattern) => {
   let isValid = true;
   let error: string | undefined;
 
   try {
-    if (input.language === 'kuery') {
-      toElasticsearchQuery(fromKueryExpression(input.query), indexPattern);
-    } else {
-      luceneStringToDsl(input.query);
+    if (input) {
+      if (input.language === 'kuery') {
+        toElasticsearchQuery(fromKueryExpression(input.query), indexPattern);
+      } else {
+        luceneStringToDsl(input.query);
+      }
     }
   } catch (e) {
     isValid = false;
@@ -144,11 +147,11 @@ export const filtersOperation: OperationDefinition<FiltersIndexPatternColumn, 'n
     }).toAst();
   },
 
-  paramEditor: ({ layer, columnId, currentColumn, indexPattern, updateLayer, data }) => {
+  paramEditor: ({ layer, columnId, currentColumn, indexPattern, paramEditorUpdater }) => {
     const filters = currentColumn.params.filters;
 
     const setFilters = (newFilters: Filter[]) =>
-      updateLayer(
+      paramEditorUpdater(
         updateColumnParam({
           layer,
           columnId,
@@ -158,7 +161,7 @@ export const filtersOperation: OperationDefinition<FiltersIndexPatternColumn, 'n
       );
 
     return (
-      <EuiFormRow>
+      <EuiFormRow fullWidth>
         <FilterList
           filters={filters}
           setFilters={setFilters}
@@ -168,6 +171,8 @@ export const filtersOperation: OperationDefinition<FiltersIndexPatternColumn, 'n
       </EuiFormRow>
     );
   },
+
+  getMaxPossibleNumValues: (column) => column.params.filters.length,
 };
 
 export const FilterList = ({

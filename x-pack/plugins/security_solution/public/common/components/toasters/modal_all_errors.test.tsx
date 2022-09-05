@@ -10,7 +10,7 @@ import { shallow } from 'enzyme';
 import React from 'react';
 
 import { ModalAllErrors } from './modal_all_errors';
-import { AppToast } from '.';
+import type { AppToast } from '.';
 import { cloneDeep } from 'lodash/fp';
 
 const mockToast: AppToast = {

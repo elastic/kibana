@@ -1,0 +1,81 @@
+[
+  {
+    "cluster_uuid": "SvjwrFv6Rvuqjm9-cSSVEg",
+    "cluster_name": "elasticsearch",
+    "version": "8.4.0",
+    "license": { "status": "active", "type": "basic" },
+    "elasticsearch": {
+      "cluster_stats": {
+        "indices": {
+          "count": 13,
+          "docs": { "count": 2922 },
+          "shards": { "total": 13, "primaries": 13 },
+          "store": { "size_in_bytes": 10225568 }
+        },
+        "nodes": {
+          "fs": { "total_in_bytes": 499963174912, "available_in_bytes": 85294256128 },
+          "count": { "total": 1 },
+          "jvm": {
+            "max_uptime_in_millis": 16567476,
+            "mem": { "heap_max_in_bytes": 1610612736, "heap_used_in_bytes": 984250168 }
+          }
+        },
+        "status": "yellow"
+      },
+      "logs": {
+        "enabled": false,
+        "types": [],
+        "reason": {
+          "indexPatternExists": false,
+          "indexPatternInTimeRangeExists": false,
+          "typeExistsAtAnyTime": false,
+          "typeExists": false,
+          "usingStructuredLogs": false,
+          "clusterExists": false,
+          "nodeExists": null,
+          "indexExists": null
+        }
+      }
+    },
+    "logstash": {},
+    "kibana": {
+      "status": "green",
+      "some_status_is_stale": true,
+      "requests_total": 59,
+      "concurrent_connections": 17,
+      "response_time_max": 418,
+      "memory_size": 632569856,
+      "memory_limit": 8438939648,
+      "count": 1,
+      "rules": {
+        "cluster": { "overdue": { "count": 1, "delay": { "p50": 1586, "p99": 1586 } } },
+        "instance": { "failures": 0, "executions": 51, "timeouts": 0 }
+      }
+    },
+    "beats": { "totalEvents": 0, "bytesSent": 0, "beats": { "total": 0, "types": [] } },
+    "apm": {
+      "totalEvents": 0,
+      "memRss": 0,
+      "apms": { "total": 0 },
+      "versions": [],
+      "config": { "container": false }
+    },
+    "enterpriseSearch": {
+      "clusterUuid": "SvjwrFv6Rvuqjm9-cSSVEg",
+      "stats": {
+        "appSearchEngines": 0,
+        "workplaceSearchOrgSources": 0,
+        "workplaceSearchPrivateSources": 0,
+        "totalInstances": 0,
+        "uptime": 0,
+        "memUsed": 0,
+        "memCommitted": 0,
+        "memTotal": 0,
+        "versions": []
+      }
+    },
+    "isPrimary": true,
+    "status": "yellow",
+    "isCcrEnabled": false
+  }
+]

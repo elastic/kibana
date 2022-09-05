@@ -18,7 +18,9 @@ export const useApplication = (): UseApplicationReturn => {
   const appId = useObservable(currentAppId$);
   const applications = useObservable(applications$);
 
-  const appTitle = appId ? applications?.get(appId)?.category?.label : undefined;
+  const appTitle = appId
+    ? applications?.get(appId)?.category?.label ?? applications?.get(appId)?.title
+    : undefined;
 
   return { appId, appTitle };
 };

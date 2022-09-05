@@ -5,285 +5,92 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
-  EuiFieldPassword,
-  EuiFieldText,
-  EuiFormRow,
-  EuiSelect,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
   EuiButtonIcon,
-  EuiDescriptionList,
-  EuiDescriptionListDescription,
-  EuiDescriptionListTitle,
   EuiTitle,
-  EuiSwitch,
   EuiButtonEmpty,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import {
+  UseArray,
+  UseField,
+  useFormContext,
+  useFormData,
+} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import {
+  Field,
+  SelectField,
+  TextField,
+  ToggleField,
+} from '@kbn/es-ui-shared-plugin/static/forms/components';
+import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import { ActionConnectorFieldsProps } from '../../../../types';
-import { WebhookActionConnector } from '../types';
-import { getEncryptedFieldNotifyLabel } from '../../get_encrypted_field_notify_label';
+import * as i18n from './translations';
+import { PasswordField } from '../../password_field';
 
 const HTTP_VERBS = ['post', 'put'];
+const { emptyField, urlField } = fieldValidators;
 
-const WebhookActionConnectorFields: React.FunctionComponent<
-  ActionConnectorFieldsProps<WebhookActionConnector>
-> = ({ action, editActionConfig, editActionSecrets, errors, readOnly }) => {
-  const { user, password } = action.secrets;
-  const { method, url, headers, hasAuth } = action.config;
-
-  const [httpHeaderKey, setHttpHeaderKey] = useState<string>('');
-  const [httpHeaderValue, setHttpHeaderValue] = useState<string>('');
-  const [hasHeaders, setHasHeaders] = useState<boolean>(false);
-
-  useEffect(() => {
-    if (!action.id) {
-      editActionConfig('hasAuth', true);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  if (!method) {
-    editActionConfig('method', 'post'); // set method to POST by default
-  }
-
-  const headerErrors = {
-    keyHeader: new Array<string>(),
-    valueHeader: new Array<string>(),
-  };
-  if (!httpHeaderKey && httpHeaderValue) {
-    headerErrors.keyHeader.push(
-      i18n.translate(
-        'xpack.triggersActionsUI.sections.addAction.webhookAction.error.requiredHeaderKeyText',
-        {
-          defaultMessage: 'Key is required.',
-        }
-      )
-    );
-  }
-  if (httpHeaderKey && !httpHeaderValue) {
-    headerErrors.valueHeader.push(
-      i18n.translate(
-        'xpack.triggersActionsUI.sections.addAction.webhookAction.error.requiredHeaderValueText',
-        {
-          defaultMessage: 'Value is required.',
-        }
-      )
-    );
-  }
-  const hasHeaderErrors: boolean =
-    (headerErrors.keyHeader !== undefined &&
-      headerErrors.valueHeader !== undefined &&
-      headerErrors.keyHeader.length > 0) ||
-    headerErrors.valueHeader.length > 0;
-
-  function addHeader() {
-    if (headers && !!Object.keys(headers).find((key) => key === httpHeaderKey)) {
-      return;
-    }
-    const updatedHeaders = headers
-      ? { ...headers, [httpHeaderKey]: httpHeaderValue }
-      : { [httpHeaderKey]: httpHeaderValue };
-    editActionConfig('headers', updatedHeaders);
-    setHttpHeaderKey('');
-    setHttpHeaderValue('');
-  }
-
-  function viewHeaders() {
-    setHasHeaders(!hasHeaders);
-    if (!hasHeaders && !headers) {
-      editActionConfig('headers', {});
-    }
-  }
-
-  function removeHeader(keyToRemove: string) {
-    const updatedHeaders = Object.keys(headers)
-      .filter((key) => key !== keyToRemove)
-      .reduce((headerToRemove: Record<string, string>, key: string) => {
-        headerToRemove[key] = headers[key];
-        return headerToRemove;
-      }, {});
-    editActionConfig('headers', updatedHeaders);
-  }
-
-  let headerControl;
-  if (hasHeaders) {
-    headerControl = (
-      <>
-        <EuiTitle size="xxs">
-          <h5>
-            <FormattedMessage
-              defaultMessage="Add header"
-              id="xpack.triggersActionsUI.components.builtinActionTypes.webhookAction.addHeader"
-            />
-          </h5>
-        </EuiTitle>
-        <EuiSpacer size="m" />
-        <EuiFlexGroup gutterSize="s" alignItems="flexStart">
-          <EuiFlexItem grow={false}>
-            <EuiFormRow
-              id="webhookHeaderKey"
-              fullWidth
-              error={headerErrors.keyHeader}
-              isInvalid={hasHeaderErrors && httpHeaderKey !== undefined}
-              label={i18n.translate(
-                'xpack.triggersActionsUI.components.builtinActionTypes.webhookAction.keyTextFieldLabel',
-                {
-                  defaultMessage: 'Key',
-                }
-              )}
-            >
-              <EuiFieldText
-                fullWidth
-                isInvalid={hasHeaderErrors && httpHeaderKey !== undefined}
-                name="keyHeader"
-                readOnly={readOnly}
-                value={httpHeaderKey}
-                data-test-subj="webhookHeadersKeyInput"
-                onChange={(e) => {
-                  setHttpHeaderKey(e.target.value);
-                }}
-              />
-            </EuiFormRow>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiFormRow
-              id="webhookHeaderValue"
-              fullWidth
-              error={headerErrors.valueHeader}
-              isInvalid={hasHeaderErrors && httpHeaderValue !== undefined}
-              label={i18n.translate(
-                'xpack.triggersActionsUI.components.builtinActionTypes.webhookAction.valueTextFieldLabel',
-                {
-                  defaultMessage: 'Value',
-                }
-              )}
-            >
-              <EuiFieldText
-                fullWidth
-                isInvalid={hasHeaderErrors && httpHeaderValue !== undefined}
-                name="valueHeader"
-                readOnly={readOnly}
-                value={httpHeaderValue}
-                data-test-subj="webhookHeadersValueInput"
-                onChange={(e) => {
-                  setHttpHeaderValue(e.target.value);
-                }}
-              />
-            </EuiFormRow>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiFormRow hasEmptyLabelSpace>
-              <EuiButtonEmpty
-                isDisabled={hasHeaders && (hasHeaderErrors || !httpHeaderKey || !httpHeaderValue)}
-                data-test-subj="webhookAddHeaderButton"
-                onClick={() => addHeader()}
-              >
-                <FormattedMessage
-                  defaultMessage="Add"
-                  id="xpack.triggersActionsUI.components.builtinActionTypes.webhookAction.addHeaderButton"
-                />
-              </EuiButtonEmpty>
-            </EuiFormRow>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </>
-    );
-  }
-
-  const headersList = Object.keys(headers || {}).map((key: string) => {
-    return (
-      <EuiFlexGroup key={key} data-test-subj="webhookHeaderText" gutterSize="s">
-        <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            aria-label={i18n.translate(
-              'xpack.triggersActionsUI.components.builtinActionTypes.webhookAction.deleteHeaderButton',
-              {
-                defaultMessage: 'Delete',
-                description: 'Delete HTTP header',
-              }
-            )}
-            iconType="trash"
-            color="danger"
-            onClick={() => removeHeader(key)}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiDescriptionList compressed>
-            <EuiDescriptionListTitle>{key}</EuiDescriptionListTitle>
-            <EuiDescriptionListDescription>{headers[key]}</EuiDescriptionListDescription>
-          </EuiDescriptionList>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
+const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps> = ({
+  readOnly,
+}) => {
+  const { getFieldDefaultValue } = useFormContext();
+  const [{ config, __internal__ }] = useFormData({
+    watch: ['config.hasAuth', '__internal__.hasHeaders'],
   });
 
-  const isUrlInvalid: boolean =
-    errors.url !== undefined && errors.url.length > 0 && url !== undefined;
-  const isPasswordInvalid: boolean =
-    password !== undefined && errors.password !== undefined && errors.password.length > 0;
-  const isUserInvalid: boolean =
-    user !== undefined && errors.user !== undefined && errors.user.length > 0;
+  const hasHeadersDefaultValue = !!getFieldDefaultValue<boolean | undefined>('config.headers');
+
+  const hasAuth = config == null ? true : config.hasAuth;
+  const hasHeaders = __internal__ != null ? __internal__.hasHeaders : false;
 
   return (
     <>
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
-          <EuiFormRow
-            label={i18n.translate(
-              'xpack.triggersActionsUI.components.builtinActionTypes.webhookAction.methodTextFieldLabel',
-              {
-                defaultMessage: 'Method',
-              }
-            )}
-          >
-            <EuiSelect
-              name="method"
-              value={method || 'post'}
-              disabled={readOnly}
-              data-test-subj="webhookMethodSelect"
-              options={HTTP_VERBS.map((verb) => ({ text: verb.toUpperCase(), value: verb }))}
-              onChange={(e) => {
-                editActionConfig('method', e.target.value);
-              }}
-            />
-          </EuiFormRow>
+          <UseField
+            path="config.method"
+            component={SelectField}
+            config={{
+              label: i18n.METHOD_LABEL,
+              defaultValue: 'post',
+              validations: [
+                {
+                  validator: emptyField(i18n.METHOD_REQUIRED),
+                },
+              ],
+            }}
+            componentProps={{
+              euiFieldProps: {
+                'data-test-subj': 'webhookMethodSelect',
+                options: HTTP_VERBS.map((verb) => ({ text: verb.toUpperCase(), value: verb })),
+                fullWidth: true,
+                readOnly,
+              },
+            }}
+          />
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFormRow
-            id="url"
-            fullWidth
-            error={errors.url}
-            isInvalid={isUrlInvalid}
-            label={i18n.translate(
-              'xpack.triggersActionsUI.components.builtinActionTypes.webhookAction.urlTextFieldLabel',
-              {
-                defaultMessage: 'URL',
-              }
-            )}
-          >
-            <EuiFieldText
-              name="url"
-              isInvalid={isUrlInvalid}
-              fullWidth
-              readOnly={readOnly}
-              value={url || ''}
-              data-test-subj="webhookUrlText"
-              onChange={(e) => {
-                editActionConfig('url', e.target.value);
-              }}
-              onBlur={() => {
-                if (!url) {
-                  editActionConfig('url', '');
-                }
-              }}
-            />
-          </EuiFormRow>
+          <UseField
+            path="config.url"
+            config={{
+              label: i18n.URL_LABEL,
+              validations: [
+                {
+                  validator: urlField(i18n.URL_INVALID),
+                },
+              ],
+            }}
+            component={Field}
+            componentProps={{
+              euiFieldProps: { readOnly, 'data-test-subj': 'webhookUrlText', fullWidth: true },
+            }}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiFlexGroup>
@@ -298,140 +105,115 @@ const WebhookActionConnectorFields: React.FunctionComponent<
             </h4>
           </EuiTitle>
           <EuiSpacer size="s" />
-          <EuiSwitch
-            label={i18n.translate(
-              'xpack.triggersActionsUI.components.builtinActionTypes.webhookAction.hasAuthSwitchLabel',
-              {
-                defaultMessage: 'Require authentication for this webhook',
-              }
-            )}
-            disabled={readOnly}
-            checked={hasAuth}
-            onChange={(e) => {
-              editActionConfig('hasAuth', e.target.checked);
-              if (!e.target.checked) {
-                editActionSecrets('user', null);
-                editActionSecrets('password', null);
-              }
+          <UseField
+            path="config.hasAuth"
+            component={ToggleField}
+            config={{ defaultValue: true }}
+            componentProps={{
+              euiFieldProps: {
+                label: i18n.HAS_AUTH_LABEL,
+                disabled: readOnly,
+              },
             }}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
       {hasAuth ? (
-        <>
-          {getEncryptedFieldNotifyLabel(
-            !action.id,
-            2,
-            action.isMissingSecrets ?? false,
-            i18n.translate(
-              'xpack.triggersActionsUI.components.builtinActionTypes.webhookAction.reenterValuesLabel',
-              {
-                defaultMessage:
-                  'Username and password are encrypted. Please reenter values for these fields.',
-              }
-            )
-          )}
-          <EuiFlexGroup justifyContent="spaceBetween">
-            <EuiFlexItem>
-              <EuiFormRow
-                id="webhookUser"
-                fullWidth
-                error={errors.user}
-                isInvalid={isUserInvalid}
-                label={i18n.translate(
-                  'xpack.triggersActionsUI.components.builtinActionTypes.webhookAction.userTextFieldLabel',
+        <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiFlexItem>
+            <UseField
+              path="secrets.user"
+              config={{
+                label: i18n.USERNAME_LABEL,
+                validations: [
                   {
-                    defaultMessage: 'Username',
-                  }
-                )}
-              >
-                <EuiFieldText
-                  fullWidth
-                  isInvalid={isUserInvalid}
-                  name="user"
-                  readOnly={readOnly}
-                  value={user || ''}
-                  data-test-subj="webhookUserInput"
-                  onChange={(e) => {
-                    editActionSecrets('user', e.target.value);
-                  }}
-                  onBlur={() => {
-                    if (!user) {
-                      editActionSecrets('user', '');
-                    }
-                  }}
-                />
-              </EuiFormRow>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiFormRow
-                id="webhookPassword"
-                fullWidth
-                error={errors.password}
-                isInvalid={isPasswordInvalid}
-                label={i18n.translate(
-                  'xpack.triggersActionsUI.components.builtinActionTypes.webhookAction.passwordTextFieldLabel',
-                  {
-                    defaultMessage: 'Password',
-                  }
-                )}
-              >
-                <EuiFieldPassword
-                  fullWidth
-                  name="password"
-                  readOnly={readOnly}
-                  isInvalid={isPasswordInvalid}
-                  value={password || ''}
-                  data-test-subj="webhookPasswordInput"
-                  onChange={(e) => {
-                    editActionSecrets('password', e.target.value);
-                  }}
-                  onBlur={() => {
-                    if (!password) {
-                      editActionSecrets('password', '');
-                    }
-                  }}
-                />
-              </EuiFormRow>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </>
+                    validator: emptyField(i18n.USERNAME_REQUIRED),
+                  },
+                ],
+              }}
+              component={Field}
+              componentProps={{
+                euiFieldProps: { readOnly, 'data-test-subj': 'webhookUserInput', fullWidth: true },
+              }}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <PasswordField
+              path="secrets.password"
+              label={i18n.PASSWORD_LABEL}
+              readOnly={readOnly}
+              data-test-subj="webhookPasswordInput"
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       ) : null}
       <EuiSpacer size="m" />
-      <EuiSwitch
-        data-test-subj="webhookViewHeadersSwitch"
-        disabled={readOnly}
-        label={i18n.translate(
-          'xpack.triggersActionsUI.components.builtinActionTypes.webhookAction.viewHeadersSwitch',
-          {
-            defaultMessage: 'Add HTTP header',
-          }
-        )}
-        checked={hasHeaders}
-        onChange={() => viewHeaders()}
+      <UseField
+        path="__internal__.hasHeaders"
+        component={ToggleField}
+        config={{ defaultValue: hasHeadersDefaultValue, label: i18n.ADD_HEADERS_LABEL }}
+        componentProps={{
+          euiFieldProps: {
+            disabled: readOnly,
+            'data-test-subj': 'webhookViewHeadersSwitch',
+          },
+        }}
       />
-
       <EuiSpacer size="m" />
-      <div>
-        {Object.keys(headers || {}).length > 0 ? (
-          <>
-            <EuiSpacer size="m" />
-            <EuiTitle size="xxs">
-              <h5>
-                <FormattedMessage
-                  defaultMessage="Headers in use"
-                  id="xpack.triggersActionsUI.components.builtinActionTypes.webhookAction.httpHeadersTitle"
-                />
-              </h5>
-            </EuiTitle>
-            <EuiSpacer size="s" />
-            {headersList}
-          </>
-        ) : null}
-        <EuiSpacer size="m" />
-        {hasHeaders && headerControl}
-        <EuiSpacer size="m" />
-      </div>
+      {hasHeaders ? (
+        <UseArray path="config.headers" initialNumberOfItems={1}>
+          {({ items, addItem, removeItem }) => {
+            return (
+              <>
+                {items.map((item) => (
+                  <EuiFlexGroup key={item.id}>
+                    <EuiFlexItem>
+                      <UseField
+                        path={`${item.path}.key`}
+                        config={{
+                          label: i18n.HEADER_KEY_LABEL,
+                        }}
+                        component={TextField}
+                        // This is needed because when you delete
+                        // a row and add a new one, the stale values will appear
+                        readDefaultValueOnForm={!item.isNew}
+                        componentProps={{
+                          euiFieldProps: { readOnly },
+                        }}
+                      />
+                    </EuiFlexItem>
+                    <EuiFlexItem>
+                      <UseField
+                        path={`${item.path}.value`}
+                        config={{ label: i18n.HEADER_VALUE_LABEL }}
+                        component={TextField}
+                        readDefaultValueOnForm={!item.isNew}
+                        componentProps={{
+                          euiFieldProps: { readOnly },
+                        }}
+                      />
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiButtonIcon
+                        color="danger"
+                        onClick={() => removeItem(item.id)}
+                        iconType="minusInCircle"
+                        aria-label={i18n.REMOVE_ITEM_LABEL}
+                        style={{ marginTop: '28px' }}
+                      />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                ))}
+                <EuiSpacer size="m" />
+                <EuiButtonEmpty iconType="plusInCircle" onClick={addItem}>
+                  {i18n.ADD_HEADER_BTN}
+                </EuiButtonEmpty>
+                <EuiSpacer />
+              </>
+            );
+          }}
+        </UseArray>
+      ) : null}
     </>
   );
 };

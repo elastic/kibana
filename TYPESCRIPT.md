@@ -4,7 +4,7 @@
 
 To convert existing code over to TypeScript:
 1. rename the file from `.js` to either `.ts` (if there is no html or jsx in the file) or `.tsx` (if there is).
-2. Ensure eslint is running and installed in the IDE of your choice.  There will usually be some linter errors after the file rename.
+2. Ensure eslint is running and installed in the IDE of your choice. There will usually be some linter errors after the file rename.
 3. Auto-fix what you can. This will save you a lot of time! VSCode can be set to auto fix eslint errors when files are saved.
 
 ### How to fix common TypeScript errors
@@ -14,7 +14,7 @@ The first thing that will probably happen when you convert a `.js` file in our s
 #### EUI component is missing types
 
 1. Check https://github.com/elastic/eui/issues/256 to see if they know it’s missing, if it’s not on there, add it.
-2. Temporarily get around the issue by adding the missing type in the `typings/@elastic/eui/index.d.ts` file. Bonus points if you write a PR yourself to the EUI repo to add the types, but having them available back in Kibana will take some time, as a new EUI release will need to be generated, then that new release pointed to in Kibana.  Best, to make forward progress, to do a temporary workaround.
+2. Temporarily get around the issue by adding the missing type in the `typings/@elastic/eui/index.d.ts` file. Bonus points if you write a PR yourself to the EUI repo to add the types, but having them available back in Kibana will take some time, as a new EUI release will need to be generated, then that new release pointed to in Kibana. Best, to make forward progress, to do a temporary workaround.
 
 ```ts
 // typings/@elastic/eui/index.d.ts
@@ -61,8 +61,8 @@ declare module '@elastic/eui' {
 
 1. Open up the file and see how easy it would be to convert to TypeScript.
 2. If it's very straightforward, go for it.
-3. If it's not and you wish to stay focused on your own PR, get around the error by adding a type definition file in the same folder as the dependency, with the same name.
-4. Minimally you will need to type what you are using in your PR.  No need to go crazy to fully type the thing or you might be there for a while depending on what's available.
+3. If it's not, and you wish to stay focused on your own PR, get around the error by adding a type definition file in the same folder as the dependency, with the same name.
+4. Minimally you will need to type what you are using in your PR.
 
 For example:
 
@@ -107,15 +107,15 @@ Use the version number that we have installed in package.json. This may not alwa
 
 If that happens, just pick the closest one.
 
-If yarn doesn't find the module it may not have types.  For example, our `rison_node` package doesn't have types. In this case you have a few options:
+If yarn doesn't find the module it may not have types. For example, our `rison_node` package doesn't have types. In this case you have a few options:
 
 1. Contribute types into the DefinitelyTyped repo itself, or
-2. Create a top level `types` folder and point to that in the tsconfig. For example, Infra team already handled this for `rison_node` and added: `x-pack/legacy/plugins/infra/types/rison_node.d.ts`. Other code uses it too so we will need to pull it up. Or,
+2. Create a top level `types` folder and point to that in the tsconfig. For example, Infra team already handled this for `rison_node` and added: `x-pack/legacy/plugins/infra/types/rison_node.d.ts`. Other code uses it too, so we will need to pull it up. Or,
 3. Add a `// @ts-ignore` line above the import. This should be used minimally, the above options are better. However, sometimes you have to resort to this method.
 
 ### TypeScripting react files
 
-React has it's own concept of runtime types via `proptypes`. TypeScript gives you compile time types so I prefer those.
+React has its own concept of runtime types via `proptypes`. TypeScript gives you compile time types so I prefer those.
 
 Before:
 ```jsx
@@ -159,11 +159,11 @@ interface State {
  }
 ```
 
-Note that the name of `Props` and `State` doesn't matter, the order does.  If you are exporting those interfaces to be used elsewhere, you probably should give them more fleshed out names, such as `ButtonProps` and `ButtonState`.
+Note that the name of `Props` and `State` doesn't matter, the order does. If you are exporting those interfaces to be used elsewhere, you probably should give them more fleshed out names, such as `ButtonProps` and `ButtonState`.
 
 ### Typing functions
 
-In react proptypes, we often will use `PropTypes.func`.  In TypeScript, a function is `() => void`, or you can more fully flesh it out, for example:
+In react proptypes, we often will use `PropTypes.func`. In TypeScript, a function is `() => void`, or you can more fully flesh it out, for example:
 
 - `(inputParamName: string) => string`
 - `(newLanguage: string) => void`
@@ -186,7 +186,7 @@ function ({ title, description }: {title: string, description: string}) {
   ...
 }
 
-or, use an interface
+// or use an interface
 
 interface Options {
   title: string;
@@ -200,9 +200,9 @@ function ({ title, description }: Options) {
 
 ## Use `any` as little as possible
 
-Using any is sometimes valid, but should rarely be used, even if to make quicker progress. Even `Unknown` is better than using `any` if you aren't sure of an input parameter.
+Using any is sometimes valid, but should rarely be used, even if to make quicker progress. Even `unknown` is better than using `any` if you aren't sure of an input parameter.
 
-If you use a variable that isn't initially defined, you should give it a type or it will be `any` by default (and strangely this isn't a warning, even though I think it should be)
+If you use a variable that isn't initially defined, you should give it a type, or it will be `any` by default (and strangely this isn't a warning, even though I think it should be)
 
 Before - `color` will be type `any`:
 ```js

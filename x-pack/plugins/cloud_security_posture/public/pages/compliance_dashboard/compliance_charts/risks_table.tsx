@@ -15,9 +15,10 @@ import {
   EuiLink,
   EuiText,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { ComplianceDashboardData, GroupedFindingsEvaluation } from '../../../../common/types';
 import { CompactFormattedNumber } from '../../../components/compact_formatted_number';
-import * as TEXT from '../translations';
 
 export interface RisksTableProps {
   data: ComplianceDashboardData['groupedFindingsEvaluation'];
@@ -47,7 +48,9 @@ export const RisksTable = ({
       {
         field: 'name',
         truncateText: true,
-        name: TEXT.CIS_SECTION,
+        name: i18n.translate('xpack.csp.dashboard.risksTable.cisSectionColumnLabel', {
+          defaultMessage: 'CIS Section',
+        }),
         render: (name: GroupedFindingsEvaluation['name']) => (
           <EuiLink onClick={() => onCellClick(name)} className="eui-textTruncate">
             {name}
@@ -56,7 +59,9 @@ export const RisksTable = ({
       },
       {
         field: 'totalFailed',
-        name: TEXT.FINDINGS,
+        name: i18n.translate('xpack.csp.dashboard.risksTable.findingsColumnLabel', {
+          defaultMessage: 'Findings',
+        }),
         render: (
           totalFailed: GroupedFindingsEvaluation['totalFailed'],
           resource: GroupedFindingsEvaluation
@@ -91,7 +96,10 @@ export const RisksTable = ({
         <EuiFlexGroup justifyContent="center" gutterSize="none">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty onClick={onViewAllClick} iconType="search">
-              {TEXT.VIEW_ALL_FAILED_FINDINGS}
+              <FormattedMessage
+                id="xpack.csp.dashboard.risksTable.viewAllButtonTitle"
+                defaultMessage="View all failed findings"
+              />
             </EuiButtonEmpty>
           </EuiFlexItem>
         </EuiFlexGroup>

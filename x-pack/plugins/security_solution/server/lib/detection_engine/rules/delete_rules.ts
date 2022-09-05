@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DeleteRuleOptions } from './types';
+import type { DeleteRuleOptions } from './types';
 
 export const deleteRules = async ({ ruleId, rulesClient, ruleExecutionLog }: DeleteRuleOptions) => {
   await rulesClient.delete({ id: ruleId });

@@ -29,8 +29,8 @@ export interface ITableColumn<T> {
 interface Props<T> {
   items: T[];
   columns: Array<ITableColumn<T>>;
+  initialPageSize: number;
   initialPageIndex?: number;
-  initialPageSize?: number;
   initialSortField?: ITableColumn<T>['field'];
   initialSortDirection?: 'asc' | 'desc';
   showPerPageOptions?: boolean;
@@ -48,7 +48,6 @@ interface Props<T> {
 }
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50];
-const INITIAL_PAGE_SIZE = 25;
 
 function defaultSortFn<T extends any>(
   items: T[],
@@ -64,7 +63,7 @@ function UnoptimizedManagedTable<T>(props: Props<T>) {
     items,
     columns,
     initialPageIndex = 0,
-    initialPageSize = INITIAL_PAGE_SIZE,
+    initialPageSize,
     initialSortField = props.columns[0]?.field || '',
     initialSortDirection = 'asc',
     showPerPageOptions = true,

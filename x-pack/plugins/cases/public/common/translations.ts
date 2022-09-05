@@ -293,6 +293,6 @@ export const READ_ACTIONS_PERMISSIONS_ERROR_MSG = i18n.translate(
   'xpack.cases.configure.readPermissionsErrorDescription',
   {
     defaultMessage:
-      'You do not have permissions to view connectors. If you would like to view connectors, contact your Kibana administrator.',
+      'You do not have permission to view connectors. If you would like to view connectors, contact your Kibana administrator.',
   }
 );

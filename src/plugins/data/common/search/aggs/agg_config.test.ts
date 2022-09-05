@@ -7,7 +7,7 @@
  */
 
 import { identity } from 'lodash';
-import type { ExpressionAstExpression } from '@kbn/expressions-plugin';
+import type { ExpressionAstExpression } from '@kbn/expressions-plugin/common';
 
 import { AggConfig, IAggConfig } from './agg_config';
 import { AggConfigs, CreateAggConfigParams } from './agg_configs';
@@ -15,7 +15,11 @@ import { AggType } from './agg_type';
 import { AggTypesRegistryStart } from './agg_types_registry';
 import { mockAggTypesRegistry } from './test_helpers';
 import { MetricAggType } from './metrics/metric_agg_type';
-import type { DataView, DataViewField, IIndexPatternFieldList } from '../..';
+import type {
+  DataView,
+  DataViewField,
+  IIndexPatternFieldList,
+} from '@kbn/data-views-plugin/common';
 
 describe('AggConfig', () => {
   let indexPattern: DataView;
@@ -559,11 +563,17 @@ describe('AggConfig', () => {
                 "enabled": Array [
                   true,
                 ],
+                "excludeIsRegex": Array [
+                  true,
+                ],
                 "field": Array [
                   "machine.os.keyword",
                 ],
                 "id": Array [
                   "1",
+                ],
+                "includeIsRegex": Array [
+                  true,
                 ],
                 "missingBucket": Array [
                   false,
@@ -625,11 +635,17 @@ describe('AggConfig', () => {
                   "enabled": Array [
                     true,
                   ],
+                  "excludeIsRegex": Array [
+                    true,
+                  ],
                   "field": Array [
                     "bytes",
                   ],
                   "id": Array [
                     "1-orderAgg",
+                  ],
+                  "includeIsRegex": Array [
+                    true,
                   ],
                   "missingBucket": Array [
                     false,

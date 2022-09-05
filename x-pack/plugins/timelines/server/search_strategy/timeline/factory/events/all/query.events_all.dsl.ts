@@ -20,7 +20,6 @@ import { getPreferredEsType } from './helpers';
 export const buildTimelineEventsAllQuery = ({
   authFilter,
   defaultIndex,
-  docValueFields,
   fields,
   filterQuery,
   pagination: { activePage, querySize },
@@ -69,7 +68,6 @@ export const buildTimelineEventsAllQuery = ({
     index: defaultIndex,
     ignore_unavailable: true,
     body: {
-      ...(!isEmpty(docValueFields) ? { docvalue_fields: docValueFields } : {}),
       aggregations: {
         producers: {
           terms: { field: ALERT_RULE_PRODUCER, exclude: ['alerts'] },
@@ -85,8 +83,16 @@ export const buildTimelineEventsAllQuery = ({
       size: querySize,
       track_total_hits: true,
       sort: getSortField(sort),
-      fields,
-      _source: ['signal.*', 'kibana.alert.*'],
+      fields: [
+        'signal.*',
+        'kibana.alert.*',
+        ...fields,
+        {
+          field: '@timestamp',
+          format: 'strict_date_optional_time',
+        },
+      ],
+      _source: false,
     },
   };
 

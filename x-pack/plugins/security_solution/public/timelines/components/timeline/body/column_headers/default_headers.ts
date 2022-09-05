@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ColumnHeaderOptions } from '../../../../../../common/types';
-import { ColumnHeaderType } from '../../../../store/timeline/model';
+import type { ColumnHeaderOptions } from '../../../../../../common/types';
+import type { ColumnHeaderType } from '../../../../store/timeline/model';
 import { DEFAULT_COLUMN_MIN_WIDTH, DEFAULT_DATE_COLUMN_MIN_WIDTH } from '../constants';
 
 export const defaultColumnHeaderType: ColumnHeaderType = 'not-filtered';
@@ -55,6 +55,3 @@ export const defaultHeaders: ColumnHeaderOptions[] = [
     initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
   },
 ];
-
-/** The default category of fields shown in the Timeline */
-export const DEFAULT_CATEGORY_NAME = 'default ECS';

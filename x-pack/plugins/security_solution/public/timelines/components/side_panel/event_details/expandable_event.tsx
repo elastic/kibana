@@ -18,13 +18,13 @@ import {
 import React from 'react';
 import styled from 'styled-components';
 
-import { TimelineTabs } from '../../../../../common/types/timeline';
-import { BrowserFields } from '../../../../common/containers/source';
+import type { TimelineTabs } from '../../../../../common/types/timeline';
+import type { BrowserFields } from '../../../../common/containers/source';
 import { EventDetails } from '../../../../common/components/event_details/event_details';
-import { TimelineEventsDetailsItem } from '../../../../../common/search_strategy/timeline';
+import type { TimelineEventsDetailsItem } from '../../../../../common/search_strategy/timeline';
 import * as i18n from './translations';
 import { PreferenceFormattedDate } from '../../../../common/components/formatted_date';
-import { HostRisk } from '../../../../risk_score/containers';
+import type { HostRisk } from '../../../../risk_score/containers';
 
 export type HandleOnEventClosed = () => void;
 interface Props {

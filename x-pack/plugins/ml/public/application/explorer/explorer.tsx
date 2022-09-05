@@ -25,10 +25,13 @@ import {
   EuiBadge,
   EuiResizableContainer,
   useIsWithinBreakpoints,
+  useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import useObservable from 'react-use/lib/useObservable';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
+import { HelpPopover } from '../components/help_popover';
 import { AnnotationFlyout } from '../components/annotations/annotation_flyout';
 // @ts-ignore
 import { AnnotationsTable } from '../components/annotations/annotations_table';
@@ -51,6 +54,8 @@ import {
   escapeDoubleQuotes,
   OverallSwimlaneData,
   AppStateSelectedCells,
+  getSourceIndicesWithGeoFields,
+  SourceIndicesWithGeoFields,
 } from './explorer_utils';
 import { AnomalyTimeline } from './anomaly_timeline';
 import { FILTER_ACTION, FilterAction } from './explorer_constants';
@@ -70,6 +75,7 @@ import type { ExplorerState } from './reducers';
 import type { TimeBuckets } from '../util/time_buckets';
 import { useToastNotificationService } from '../services/toast_notification_service';
 import { useMlKibana, useMlLocator } from '../contexts/kibana';
+import { useMlContext } from '../contexts/ml';
 import { useAnomalyExplorerContext } from './anomaly_explorer_context';
 import {
   AnomalyExplorerPanelsState,
@@ -104,10 +110,7 @@ const ExplorerPage: FC<ExplorerPageProps> = ({
       <EuiPageHeaderSection style={{ width: '100%' }}>
         <JobSelector {...jobSelectorProps} />
 
-        {noInfluencersConfigured === false &&
-        influencers !== undefined &&
-        indexPattern &&
-        updateLanguage ? (
+        {indexPattern && updateLanguage ? (
           <>
             <ExplorerQueryBar
               filterActive={!!filterActive}
@@ -262,6 +265,8 @@ export const Explorer: FC<ExplorerUIProps> = ({
   const htmlIdGen = useMemo(() => htmlIdGenerator(), []);
 
   const [language, updateLanguage] = useState<string>(DEFAULT_QUERY_LANG);
+  const [sourceIndicesWithGeoFields, setSourceIndicesWithGeoFields] =
+    useState<SourceIndicesWithGeoFields>({});
 
   const filterSettings = useObservable(
     anomalyExplorerCommonStateService.getFilterSettings$(),
@@ -348,8 +353,10 @@ export const Explorer: FC<ExplorerUIProps> = ({
   const {
     services: { charts: chartsService },
   } = useMlKibana();
-
+  const { euiTheme } = useEuiTheme();
   const mlLocator = useMlLocator();
+  const context = useMlContext();
+  const dataViewsService = context.dataViewsContract;
 
   const {
     annotations,
@@ -418,6 +425,17 @@ export const Explorer: FC<ExplorerUIProps> = ({
     tableData.anomalies?.length > 0;
 
   const hasActiveFilter = isDefined(swimLaneSeverity);
+  const selectedJobIds = Array.isArray(selectedJobs) ? selectedJobs.map((job) => job.id) : [];
+
+  useEffect(() => {
+    if (!noJobsSelected) {
+      getSourceIndicesWithGeoFields(selectedJobs, dataViewsService)
+        .then((sourceIndicesWithGeoFieldsMap) =>
+          setSourceIndicesWithGeoFields(sourceIndicesWithGeoFieldsMap)
+        )
+        .catch(console.error); // eslint-disable-line no-console
+    }
+  }, [JSON.stringify(selectedJobIds)]);
 
   if (noJobsSelected && !loading) {
     return (
@@ -436,7 +454,6 @@ export const Explorer: FC<ExplorerUIProps> = ({
   }
 
   const bounds = timefilter.getActiveBounds();
-  const selectedJobIds = Array.isArray(selectedJobs) ? selectedJobs.map((job) => job.id) : [];
 
   const mainPanelContent = (
     <div>
@@ -462,10 +479,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
 
       {annotationsError !== undefined && (
         <>
-          <EuiTitle
-            className="panel-title"
-            data-test-subj="mlAnomalyExplorerAnnotationsPanel error"
-          >
+          <EuiTitle data-test-subj="mlAnomalyExplorerAnnotationsPanel error" size={'xs'}>
             <h2>
               <FormattedMessage
                 id="xpack.ml.explorer.annotationsErrorTitle"
@@ -500,10 +514,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
             <EuiAccordion
               id={htmlIdGen()}
               buttonContent={
-                <EuiTitle
-                  className="panel-title"
-                  data-test-subj="mlAnomalyExplorerAnnotationsPanelButton"
-                >
+                <EuiTitle data-test-subj="mlAnomalyExplorerAnnotationsPanelButton" size={'xs'}>
                   <h2>
                     <FormattedMessage
                       id="xpack.ml.explorer.annotationsTitle"
@@ -517,6 +528,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
               }
             >
               <>
+                <EuiSpacer size={'m'} />
                 <AnnotationsTable
                   jobIds={selectedJobIds}
                   annotations={annotationsData}
@@ -534,7 +546,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
         <EuiPanel hasBorder hasShadow={false}>
           <EuiFlexGroup direction="row" gutterSize="m" responsive={false} alignItems="center">
             <EuiFlexItem grow={false}>
-              <EuiTitle className="panel-title">
+              <EuiTitle size={'xs'}>
                 <h2>
                   <FormattedMessage
                     id="xpack.ml.explorer.anomaliesTitle"
@@ -571,23 +583,28 @@ export const Explorer: FC<ExplorerUIProps> = ({
 
           <EuiSpacer size="m" />
 
-          <div className="euiText explorer-charts">
-            {showCharts ? (
-              <ExplorerChartsContainer
-                {...{
-                  ...chartsData,
-                  severity,
-                  timefilter,
-                  mlLocator,
-                  timeBuckets,
-                  onSelectEntity: applyFilter,
-                  chartsService,
-                }}
-              />
-            ) : null}
-          </div>
+          {showCharts ? (
+            <ExplorerChartsContainer
+              {...{
+                ...chartsData,
+                severity,
+                timefilter,
+                mlLocator,
+                timeBuckets,
+                onSelectEntity: applyFilter,
+                chartsService,
+              }}
+            />
+          ) : null}
 
-          <AnomaliesTable bounds={bounds} tableData={tableData} influencerFilter={applyFilter} />
+          <EuiSpacer size="m" />
+
+          <AnomaliesTable
+            bounds={bounds}
+            tableData={tableData}
+            influencerFilter={applyFilter}
+            sourceIndicesWithGeoFields={sourceIndicesWithGeoFields}
+          />
         </EuiPanel>
       )}
     </div>
@@ -604,25 +621,24 @@ export const Explorer: FC<ExplorerUIProps> = ({
       queryString={queryString}
       updateLanguage={updateLanguage}
     >
+      <EuiSpacer size={'m'} />
+
       {noInfluencersConfigured ? (
         <EuiFlexGroup gutterSize={'s'}>
           <EuiFlexItem grow={false}>
-            <div className="no-influencers-warning">
-              <EuiIconTip
-                content={i18n.translate('xpack.ml.explorer.noConfiguredInfluencersTooltip', {
-                  defaultMessage:
-                    'The Top Influencers list is hidden because no influencers have been configured for the selected jobs.',
-                })}
-                position="right"
-                type="iInCircle"
-              />
-            </div>
+            <EuiIconTip
+              content={i18n.translate('xpack.ml.explorer.noConfiguredInfluencersTooltip', {
+                defaultMessage:
+                  'The Top Influencers list is hidden because no influencers have been configured for the selected jobs.',
+              })}
+              position="right"
+              type="iInCircle"
+            />
           </EuiFlexItem>
           <EuiFlexItem>{mainPanelContent}</EuiFlexItem>
         </EuiFlexGroup>
       ) : (
         <div>
-          <EuiSpacer size={'s'} />
           <EuiResizableContainer
             direction={isMobile ? 'vertical' : 'horizontal'}
             onPanelWidthChange={onPanelWidthChange}
@@ -645,28 +661,51 @@ export const Explorer: FC<ExplorerUIProps> = ({
                     ]}
                     minSize={'200px'}
                     initialSize={20}
-                    paddingSize={'s'}
+                    paddingSize={'none'}
                     onToggleCollapsed={onToggleCollapsed}
                   >
-                    <div data-test-subj="mlAnomalyExplorerInfluencerList">
-                      <EuiSpacer size={'s'} />
-                      <EuiTitle className="panel-title">
-                        <h2>
-                          <FormattedMessage
-                            id="xpack.ml.explorer.topInfuencersTitle"
-                            defaultMessage="Top influencers"
-                          />
-                          <EuiIconTip
-                            content={
+                    <div
+                      data-test-subj="mlAnomalyExplorerInfluencerList"
+                      css={css`
+                        padding: calc(${euiTheme.size.base} + ${euiTheme.border.width.thin})
+                          ${euiTheme.size.l} ${euiTheme.size.l} 0;
+                      `}
+                    >
+                      <EuiFlexGroup
+                        direction="row"
+                        gutterSize="xs"
+                        responsive={false}
+                        alignItems="baseline"
+                      >
+                        <EuiFlexItem grow={false}>
+                          <EuiTitle size={'xs'}>
+                            <h2>
+                              <FormattedMessage
+                                id="xpack.ml.explorer.topInfuencersTitle"
+                                defaultMessage="Top influencers"
+                              />
+                            </h2>
+                          </EuiTitle>
+                        </EuiFlexItem>
+                        <EuiFlexItem grow={false}>
+                          <HelpPopover
+                            anchorPosition="upCenter"
+                            title={i18n.translate('xpack.ml.explorer.topInfluencersPopoverTitle', {
+                              defaultMessage: 'Top influencers',
+                            })}
+                          >
+                            <p>
                               <FormattedMessage
                                 id="xpack.ml.explorer.topInfluencersTooltip"
                                 defaultMessage="View the relative impact of the top influencers in the selected time period and add them as filters on the results. Each influencer has a maximum anomaly score between 0-100 and a total anomaly score for that period."
                               />
-                            }
-                            position="right"
-                          />
-                        </h2>
-                      </EuiTitle>
+                            </p>
+                          </HelpPopover>
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+
+                      <EuiSpacer size={'m'} />
+
                       {loading ? (
                         <EuiLoadingContent lines={10} />
                       ) : (
@@ -682,7 +721,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
                     mode="main"
                     minSize={'70%'}
                     initialSize={80}
-                    paddingSize={'s'}
+                    paddingSize={'none'}
                   >
                     {mainPanelContent}
                   </EuiResizablePanel>

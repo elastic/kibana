@@ -113,6 +113,7 @@ describe('resolve()', () => {
         "schedule": Object {
           "interval": "10s",
         },
+        "snoozeSchedule": Array [],
         "updatedAt": 2019-02-12T21:01:22.479Z,
       }
     `);
@@ -187,6 +188,7 @@ describe('resolve()', () => {
         "schedule": Object {
           "interval": "10s",
         },
+        "snoozeSchedule": Array [],
         "updatedAt": 2019-02-12T21:01:22.479Z,
       }
     `);
@@ -293,6 +295,7 @@ describe('resolve()', () => {
         "schedule": Object {
           "interval": "10s",
         },
+        "snoozeSchedule": Array [],
         "updatedAt": 2019-02-12T21:01:22.479Z,
       }
     `);

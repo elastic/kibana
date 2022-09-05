@@ -1,0 +1,134 @@
+{
+  "id": "@kbn/core-analytics-server-internal",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [
+      {
+        "parentPluginId": "@kbn/core-analytics-server-internal",
+        "id": "def-server.AnalyticsService",
+        "type": "Class",
+        "tags": [],
+        "label": "AnalyticsService",
+        "description": [],
+        "path": "packages/core/analytics/core-analytics-server-internal/src/analytics_service.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-analytics-server-internal",
+            "id": "def-server.AnalyticsService.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/core/analytics/core-analytics-server-internal/src/analytics_service.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-analytics-server-internal",
+                "id": "def-server.AnalyticsService.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "core",
+                "description": [],
+                "signature": [
+                  "CoreContext"
+                ],
+                "path": "packages/core/analytics/core-analytics-server-internal/src/analytics_service.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-analytics-server-internal",
+            "id": "def-server.AnalyticsService.preboot",
+            "type": "Function",
+            "tags": [],
+            "label": "preboot",
+            "description": [],
+            "signature": [
+              "() => ",
+              "AnalyticsServicePreboot"
+            ],
+            "path": "packages/core/analytics/core-analytics-server-internal/src/analytics_service.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-analytics-server-internal",
+            "id": "def-server.AnalyticsService.setup",
+            "type": "Function",
+            "tags": [],
+            "label": "setup",
+            "description": [],
+            "signature": [
+              "() => ",
+              "AnalyticsServiceSetup"
+            ],
+            "path": "packages/core/analytics/core-analytics-server-internal/src/analytics_service.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-analytics-server-internal",
+            "id": "def-server.AnalyticsService.start",
+            "type": "Function",
+            "tags": [],
+            "label": "start",
+            "description": [],
+            "signature": [
+              "() => ",
+              "AnalyticsServiceStart"
+            ],
+            "path": "packages/core/analytics/core-analytics-server-internal/src/analytics_service.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-analytics-server-internal",
+            "id": "def-server.AnalyticsService.stop",
+            "type": "Function",
+            "tags": [],
+            "label": "stop",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "packages/core/analytics/core-analytics-server-internal/src/analytics_service.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

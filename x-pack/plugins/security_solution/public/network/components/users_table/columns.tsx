@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { FlowTarget, NetworkUsersItem } from '../../../../common/search_strategy';
+import type { FlowTargetSourceDest, NetworkUsersItem } from '../../../../common/search_strategy';
 import { defaultToEmptyTag } from '../../../common/components/empty_value';
-import { Columns } from '../../../common/components/paginated_table';
+import type { Columns } from '../../../common/components/paginated_table';
 
 import * as i18n from './translations';
 import {
@@ -23,7 +23,10 @@ export type UsersColumns = [
   Columns<NetworkUsersItem['count']>
 ];
 
-export const getUsersColumns = (flowTarget: FlowTarget, tableId: string): UsersColumns => [
+export const getUsersColumns = (
+  flowTarget: FlowTargetSourceDest,
+  tableId: string
+): UsersColumns => [
   {
     field: 'node.user.name',
     name: i18n.USER_NAME,

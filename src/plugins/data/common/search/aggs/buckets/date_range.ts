@@ -55,7 +55,7 @@ export const getDateRangeBucketAgg = ({ aggExecutionContext, getConfig }: AggTyp
         type: 'field',
         filterFieldTypes: [KBN_FIELD_TYPES.DATE, KBN_FIELD_TYPES.DATE_RANGE],
         default(agg: IBucketAggConfig) {
-          return agg.getIndexPattern().timeFieldName;
+          return agg.getIndexPattern().getTimeField?.()?.name;
         },
       },
       {

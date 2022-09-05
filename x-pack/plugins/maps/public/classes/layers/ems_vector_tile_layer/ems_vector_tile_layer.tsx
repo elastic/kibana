@@ -5,26 +5,27 @@
  * 2.0.
  */
 
+import React from 'react';
 import type { Map as MbMap, LayerSpecification, StyleSpecification } from '@kbn/mapbox-gl';
-import { type EmsSpriteSheet, TMSService } from '@elastic/ems-client';
+import { type blendMode, type EmsSpriteSheet, TMSService } from '@elastic/ems-client';
 import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
+import { EuiIcon } from '@elastic/eui';
 // @ts-expect-error
 import { RGBAImage } from './image_utils';
-import { AbstractLayer } from '../layer';
+import { AbstractLayer, type LayerIcon } from '../layer';
 import {
   AUTOSELECT_EMS_LOCALE,
   NO_EMS_LOCALE,
   SOURCE_DATA_REQUEST_ID,
   LAYER_TYPE,
-  LAYER_STYLE_TYPE,
 } from '../../../../common/constants';
-import { LayerDescriptor } from '../../../../common/descriptor_types';
+import { EMSVectorTileLayerDescriptor } from '../../../../common/descriptor_types';
 import { DataRequest } from '../../util/data_request';
 import { isRetina } from '../../../util';
 import { DataRequestContext } from '../../../actions';
 import { EMSTMSSource } from '../../sources/ems_tms_source';
-import { TileStyle } from '../../styles/tile/tile_style';
+import { EMSVectorTileStyle } from '../../styles/ems/ems_vector_tile_style';
 
 interface SourceRequestMeta {
   tileLayerId: string;
@@ -40,26 +41,35 @@ interface SourceRequestData {
 }
 
 export class EmsVectorTileLayer extends AbstractLayer {
-  static createDescriptor(options: Partial<LayerDescriptor>) {
-    const tileLayerDescriptor = super.createDescriptor(options);
-    tileLayerDescriptor.type = LAYER_TYPE.EMS_VECTOR_TILE;
-    tileLayerDescriptor.alpha = _.get(options, 'alpha', 1);
-    tileLayerDescriptor.locale = _.get(options, 'locale', AUTOSELECT_EMS_LOCALE);
-    tileLayerDescriptor.style = { type: LAYER_STYLE_TYPE.TILE };
-    return tileLayerDescriptor;
-  }
+  private readonly _style: EMSVectorTileStyle;
 
-  private readonly _style: TileStyle;
+  static createDescriptor(
+    options: Partial<EMSVectorTileLayerDescriptor>
+  ): EMSVectorTileLayerDescriptor {
+    const emsVectorTileLayerDescriptor = super.createDescriptor(
+      options
+    ) as EMSVectorTileLayerDescriptor;
+    emsVectorTileLayerDescriptor.type = LAYER_TYPE.EMS_VECTOR_TILE;
+    emsVectorTileLayerDescriptor.alpha = _.get(options, 'alpha', 1);
+    emsVectorTileLayerDescriptor.locale = _.get(options, 'locale', AUTOSELECT_EMS_LOCALE);
+    emsVectorTileLayerDescriptor.style = EMSVectorTileStyle.createDescriptor();
+    return emsVectorTileLayerDescriptor;
+  }
 
   constructor({
     source,
     layerDescriptor,
   }: {
     source: EMSTMSSource;
-    layerDescriptor: LayerDescriptor;
+    layerDescriptor: EMSVectorTileLayerDescriptor;
   }) {
     super({ source, layerDescriptor });
-    this._style = new TileStyle();
+    if (!layerDescriptor.style) {
+      const defaultStyle = EMSVectorTileStyle.createDescriptor();
+      this._style = new EMSVectorTileStyle(defaultStyle);
+    } else {
+      this._style = new EMSVectorTileStyle(layerDescriptor.style);
+    }
   }
 
   isInitialDataLoadComplete(): boolean {
@@ -377,6 +387,26 @@ export class EmsVectorTileLayer extends AbstractLayer {
     return [];
   }
 
+  _setColorFilter(mbMap: MbMap, mbLayer: LayerSpecification, mbLayerId: string) {
+    const color = this.getCurrentStyle().getColor();
+
+    const colorOperation = TMSService.colorOperationDefaults.find(({ style }) => {
+      return style === this.getSource().getTileLayerId();
+    });
+    if (!colorOperation) return;
+    const { operation, percentage } = colorOperation;
+
+    const properties = TMSService.transformColorProperties(
+      mbLayer,
+      color,
+      operation as unknown as blendMode,
+      percentage
+    );
+    for (const { property, color: newColor } of properties) {
+      mbMap.setPaintProperty(mbLayerId, property, newColor);
+    }
+  }
+
   _setOpacityForType(mbMap: MbMap, mbLayer: LayerSpecification, mbLayerId: string) {
     this._getOpacityProps(mbLayer.type).forEach((opacityProp) => {
       const mbPaint = mbLayer.paint as { [key: string]: unknown } | undefined;
@@ -433,6 +463,7 @@ export class EmsVectorTileLayer extends AbstractLayer {
       this.syncVisibilityWithMb(mbMap, mbLayerId);
       this._setLayerZoomRange(mbMap, mbLayer, mbLayerId);
       this._setOpacityForType(mbMap, mbLayer, mbLayerId);
+      this._setColorFilter(mbMap, mbLayer, mbLayerId);
       this._setLanguage(mbMap, mbLayer, mbLayerId);
     });
   }
@@ -455,6 +486,15 @@ export class EmsVectorTileLayer extends AbstractLayer {
 
   getLayerTypeIconName() {
     return 'grid';
+  }
+
+  getLayerIcon(): LayerIcon {
+    return {
+      icon: <EuiIcon size="m" type="grid" />,
+      tooltipContent: i18n.translate('xpack.maps.emsVectorTileLayer.layerDescription', {
+        defaultMessage: `Reference map provided by Elastic Maps Service (EMS).`,
+      }),
+    };
   }
 
   isBasemap(order: number) {

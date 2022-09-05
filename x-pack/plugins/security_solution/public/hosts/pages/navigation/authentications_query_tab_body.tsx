@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { HostsComponentsQueryProps } from './types';
+import type { HostsComponentsQueryProps } from './types';
 import { MatrixHistogram } from '../../../common/components/matrix_histogram';
 import { AuthenticationsHostTable } from '../../../common/components/authentication/authentications_host_table';
 import { histogramConfigs } from '../../../common/components/authentication/helpers';

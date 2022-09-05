@@ -6,7 +6,8 @@
  */
 
 import { DEFAULT_TABLE_ACTIVE_PAGE, DEFAULT_TABLE_LIMIT } from '../../common/store/constants';
-import { HostsModel, HostsTableType, HostsType } from './model';
+import type { HostsModel } from './model';
+import { HostsTableType, HostsType } from './model';
 import { setHostsQueriesActivePageToZero } from './helpers';
 import { Direction, HostsFields, RiskScoreFields } from '../../../common/search_strategy';
 
@@ -32,10 +33,6 @@ export const mockHostsState: HostsModel = {
         limit: DEFAULT_TABLE_LIMIT,
       },
       [HostsTableType.anomalies]: null,
-      [HostsTableType.alerts]: {
-        activePage: 4,
-        limit: DEFAULT_TABLE_LIMIT,
-      },
       [HostsTableType.risk]: {
         activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         limit: DEFAULT_TABLE_LIMIT,
@@ -72,10 +69,6 @@ export const mockHostsState: HostsModel = {
         limit: DEFAULT_TABLE_LIMIT,
       },
       [HostsTableType.anomalies]: null,
-      [HostsTableType.alerts]: {
-        activePage: 4,
-        limit: DEFAULT_TABLE_LIMIT,
-      },
       [HostsTableType.risk]: {
         activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         limit: DEFAULT_TABLE_LIMIT,
@@ -116,10 +109,6 @@ describe('Hosts redux store', () => {
           activePage: 0,
           limit: 10,
         },
-        [HostsTableType.alerts]: {
-          activePage: 0,
-          limit: 10,
-        },
         [HostsTableType.risk]: {
           activePage: 0,
           limit: 10,
@@ -154,10 +143,6 @@ describe('Hosts redux store', () => {
           limit: 10,
         },
         [HostsTableType.uncommonProcesses]: {
-          activePage: 0,
-          limit: 10,
-        },
-        [HostsTableType.alerts]: {
           activePage: 0,
           limit: 10,
         },

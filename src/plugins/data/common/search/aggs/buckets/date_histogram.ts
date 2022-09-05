@@ -9,15 +9,9 @@
 import { get, noop, find, every, omitBy, isNil } from 'lodash';
 import moment from 'moment-timezone';
 import { i18n } from '@kbn/i18n';
-import { DataViewFieldBase } from '@kbn/es-query';
+import { DataViewFieldBase, TimeRange } from '@kbn/es-query';
 
-import {
-  AggTypesDependencies,
-  KBN_FIELD_TYPES,
-  TimeRange,
-  TimeRangeBounds,
-  UI_SETTINGS,
-} from '../../..';
+import { AggTypesDependencies, KBN_FIELD_TYPES, TimeRangeBounds, UI_SETTINGS } from '../../..';
 
 import { ExtendedBounds, extendedBoundsToAst, timerangeToAst } from '../../expressions';
 import { intervalOptions, autoInterval, isAutoInterval } from './_interval_options';
@@ -225,9 +219,12 @@ export const getDateHistogramBucketAgg = ({
             // this DSL will anyway not be used before we're passing this code with an actual interval.
             return;
           }
+
+          const shouldForceFixedInterval: boolean = agg.params.field?.fixedInterval?.length;
+
           output.params = {
             ...output.params,
-            ...dateHistogramInterval(interval.expression),
+            ...dateHistogramInterval(interval.expression, shouldForceFixedInterval),
           };
 
           const scaleMetrics =
@@ -278,7 +275,10 @@ export const getDateHistogramBucketAgg = ({
             getConfig,
             aggExecutionContext
           );
-          output.params.time_zone = tz;
+
+          const shouldForceTimeZone = agg.params.field?.timeZone?.includes('UTC');
+
+          output.params.time_zone = shouldForceTimeZone ? 'UTC' : tz;
         },
       },
       {

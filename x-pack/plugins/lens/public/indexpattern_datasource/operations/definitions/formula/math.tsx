@@ -8,7 +8,7 @@
 import type { TinymathAST } from '@kbn/tinymath';
 import { OperationDefinition } from '..';
 import { ValueFormatConfig, ReferenceBasedIndexPatternColumn } from '../column_types';
-import { IndexPattern } from '../../../types';
+import { IndexPattern } from '../../../../types';
 
 export interface MathIndexPatternColumn extends ReferenceBasedIndexPatternColumn {
   operationType: 'math';
@@ -67,8 +67,8 @@ export const mathOperation: OperationDefinition<MathIndexPatternColumn, 'managed
     // TODO has to check all children
     return true;
   },
-  createCopy: (layer) => {
-    return { ...layer };
+  createCopy: (layers) => {
+    return { ...layers };
   },
 };
 

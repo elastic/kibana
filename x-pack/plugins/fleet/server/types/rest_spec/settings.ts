@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { isDiffPathProtocol } from '../../../common';
+import { isDiffPathProtocol } from '../../../common/services';
 
 export const GetSettingsRequestSchema = {};
 

@@ -13,6 +13,13 @@ import {
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { User } from '../../../rule_registry/common/lib/authentication/types';
 
+const ALERTS_IN_FIRST_PAGE = 8;
+
+// Only events where event.action IN fork, exec, end
+// There are a number of uid_change, session_id_change events in the mock data
+// which session view does not use atm.
+const MOCK_TOTAL_PROCESS_EVENTS = 419;
+
 import {
   superUser,
   globalRead,
@@ -53,8 +60,8 @@ export default function processEventsTests({ getService }: FtrProviderContext) {
         sessionEntityId: MOCK_SESSION_ENTITY_ID,
       });
       expect(response.status).to.be(200);
-      expect(response.body.total).to.be(504);
-      expect(response.body.events.length).to.be(PROCESS_EVENTS_PER_PAGE);
+      expect(response.body.total).to.be(MOCK_TOTAL_PROCESS_EVENTS);
+      expect(response.body.events.length).to.be(PROCESS_EVENTS_PER_PAGE + ALERTS_IN_FIRST_PAGE);
     });
 
     it(`${PROCESS_EVENTS_ROUTE} returns a page of process events (w alerts) (paging forward)`, async () => {

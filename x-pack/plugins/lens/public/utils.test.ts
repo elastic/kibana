@@ -5,8 +5,11 @@
  * 2.0.
  */
 
+import { createDatatableUtilitiesMock } from '@kbn/data-plugin/common/mocks';
 import { Datatable } from '@kbn/expressions-plugin/public';
 import { inferTimeField } from './utils';
+
+const datatableUtilities = createDatatableUtilitiesMock();
 
 const table: Datatable = {
   type: 'datatable',
@@ -52,7 +55,7 @@ describe('utils', () => {
   describe('inferTimeField', () => {
     test('infer time field for brush event', () => {
       expect(
-        inferTimeField({
+        inferTimeField(datatableUtilities, {
           table,
           column: 0,
           range: [1, 2],
@@ -62,7 +65,7 @@ describe('utils', () => {
 
     test('do not return time field if time range is not bound', () => {
       expect(
-        inferTimeField({
+        inferTimeField(datatableUtilities, {
           table: tableWithoutAppliedTimeRange,
           column: 0,
           range: [1, 2],
@@ -72,7 +75,7 @@ describe('utils', () => {
 
     test('infer time field for click event', () => {
       expect(
-        inferTimeField({
+        inferTimeField(datatableUtilities, {
           data: [
             {
               table,
@@ -87,7 +90,7 @@ describe('utils', () => {
 
     test('do not return time field for negated click event', () => {
       expect(
-        inferTimeField({
+        inferTimeField(datatableUtilities, {
           data: [
             {
               table,
@@ -103,7 +106,7 @@ describe('utils', () => {
 
     test('do not return time field for click event without bound time field', () => {
       expect(
-        inferTimeField({
+        inferTimeField(datatableUtilities, {
           data: [
             {
               table: tableWithoutAppliedTimeRange,

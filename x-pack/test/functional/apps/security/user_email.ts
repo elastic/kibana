@@ -13,13 +13,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['security', 'settings', 'common', 'accountSetting']);
   const log = getService('log');
   const security = getService('security');
-  const kibanaServer = getService('kibanaServer');
 
   describe('useremail', function () {
     before(async () => {
-      await kibanaServer.importExport.load(
-        'x-pack/test/functional/fixtures/kbn_archiver/security/discover'
-      );
       await security.testUser.setRoles(['cluster_security_manager']);
       await PageObjects.settings.navigateTo();
       await PageObjects.security.clickElasticsearchUsers();
@@ -45,26 +41,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('login as new user and verify email', async function () {
       await PageObjects.security.login('newuser', 'changeme');
-      await PageObjects.accountSetting.verifyAccountSettings('newuser@myEmail.com', 'newuser');
+      await PageObjects.accountSetting.verifyAccountSettings('newuser');
     });
 
     it('click changepassword link, change the password and re-login', async function () {
-      await PageObjects.accountSetting.verifyAccountSettings('newuser@myEmail.com', 'newuser');
+      await PageObjects.accountSetting.verifyAccountSettings('newuser');
       await PageObjects.accountSetting.changePassword('changeme', 'mechange');
       await PageObjects.security.forceLogout();
     });
 
     it('login as new user with changed password', async function () {
       await PageObjects.security.login('newuser', 'mechange');
-      await PageObjects.accountSetting.verifyAccountSettings('newuser@myEmail.com', 'newuser');
+      await PageObjects.accountSetting.verifyAccountSettings('newuser');
     });
 
     after(async function () {
       // NOTE: Logout needs to happen before anything else to avoid flaky behavior
       await PageObjects.security.forceLogout();
-      await kibanaServer.importExport.unload(
-        'x-pack/test/functional/fixtures/kbn_archiver/security/discover'
-      );
       await security.testUser.restoreDefaults();
     });
   });

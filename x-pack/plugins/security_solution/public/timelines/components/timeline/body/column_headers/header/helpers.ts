@@ -6,8 +6,11 @@
  */
 
 import { Direction } from '../../../../../../../common/search_strategy';
-import { ColumnHeaderOptions, SortDirection } from '../../../../../../../common/types/timeline';
-import { Sort } from '../../sort';
+import type {
+  ColumnHeaderOptions,
+  SortDirection,
+} from '../../../../../../../common/types/timeline';
+import type { Sort } from '../../sort';
 
 interface GetNewSortDirectionOnClickParams {
   clickedHeader: ColumnHeaderOptions;

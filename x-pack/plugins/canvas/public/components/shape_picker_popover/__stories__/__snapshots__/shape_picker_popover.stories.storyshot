@@ -2,16 +2,16 @@
 
 exports[`Storyshots components/Shapes/ShapePickerPopover default 1`] = `
 <div
-  className="euiPopover euiPopover--anchorDownCenter"
+  className="euiPopover emotion-euiPopover"
 >
   <div
-    className="euiPopover__anchor"
+    className="euiPopover__anchor css-16vtueo-render"
   >
     <div
-      className="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow"
+      className="euiPanel euiPanel--plain euiPanel--paddingSmall emotion-euiPanel-grow-m-s-plain"
     >
       <button
-        className="euiLink euiLink--primary"
+        className="euiLink emotion-euiLink-primary"
         disabled={false}
         onClick={[Function]}
         style={
@@ -32,16 +32,16 @@ exports[`Storyshots components/Shapes/ShapePickerPopover default 1`] = `
 
 exports[`Storyshots components/Shapes/ShapePickerPopover interactive 1`] = `
 <div
-  className="euiPopover euiPopover--anchorDownCenter"
+  className="euiPopover emotion-euiPopover"
 >
   <div
-    className="euiPopover__anchor"
+    className="euiPopover__anchor css-16vtueo-render"
   >
     <div
-      className="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow"
+      className="euiPanel euiPanel--plain euiPanel--paddingSmall emotion-euiPanel-grow-m-s-plain"
     >
       <button
-        className="euiLink euiLink--primary"
+        className="euiLink emotion-euiLink-primary"
         disabled={false}
         onClick={[Function]}
         style={
@@ -76,16 +76,16 @@ exports[`Storyshots components/Shapes/ShapePickerPopover interactive 1`] = `
 
 exports[`Storyshots components/Shapes/ShapePickerPopover shape selected 1`] = `
 <div
-  className="euiPopover euiPopover--anchorDownCenter"
+  className="euiPopover emotion-euiPopover"
 >
   <div
-    className="euiPopover__anchor"
+    className="euiPopover__anchor css-16vtueo-render"
   >
     <div
-      className="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow"
+      className="euiPanel euiPanel--plain euiPanel--paddingSmall emotion-euiPanel-grow-m-s-plain"
     >
       <button
-        className="euiLink euiLink--primary"
+        className="euiLink emotion-euiLink-primary"
         disabled={false}
         onClick={[Function]}
         style={

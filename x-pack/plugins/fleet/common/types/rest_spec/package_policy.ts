@@ -14,13 +14,14 @@ import type {
   FullAgentPolicyInput,
 } from '../models';
 
-import type { ListResult, ListWithKuery } from './common';
+import type { BulkGetResult, ListResult, ListWithKuery } from './common';
 
 export interface GetPackagePoliciesRequest {
   query: ListWithKuery;
 }
 
 export type GetPackagePoliciesResponse = ListResult<PackagePolicy>;
+export type BulkGetPackagePoliciesResponse = BulkGetResult<PackagePolicy>;
 
 export interface GetOnePackagePolicyRequest {
   params: {
@@ -33,7 +34,7 @@ export interface GetOnePackagePolicyResponse {
 }
 
 export interface CreatePackagePolicyRequest {
-  body: NewPackagePolicy;
+  body: NewPackagePolicy & { force?: boolean };
 }
 
 export interface CreatePackagePolicyResponse {
@@ -49,6 +50,7 @@ export type UpdatePackagePolicyResponse = CreatePackagePolicyResponse;
 export interface DeletePackagePoliciesRequest {
   body: {
     packagePolicyIds: string[];
+    force?: boolean;
   };
 }
 
@@ -58,6 +60,11 @@ export type DeletePackagePoliciesResponse = Array<{
   success: boolean;
   package?: PackagePolicyPackage;
   policy_id?: string;
+  // Support generic errors
+  statusCode?: number;
+  body?: {
+    message: string;
+  };
 }>;
 
 export interface UpgradePackagePolicyBaseResponse {

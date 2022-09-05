@@ -58,7 +58,7 @@ const stories: Meta<Args> = {
           },
           uiSettings: { get: () => '' },
         },
-        plugins: { observability: { isAlertingExperienceEnabled: () => true } },
+        plugins: {},
         observabilityRuleTypeRegistry: { getFormatter: () => undefined },
       } as unknown as ApmPluginContextValue;
 

@@ -16,6 +16,7 @@ import {
   getColumnWidthFromType,
   getColumnHeaders,
   getSchema,
+  getColumnHeader,
 } from './helpers';
 import {
   DEFAULT_ACTION_BUTTON_WIDTH,
@@ -69,6 +70,40 @@ describe('helpers', () => {
 
     test('it returns `undefined` when `type` is undefined', () => {
       expect(getSchema(undefined)).toBeUndefined();
+    });
+  });
+
+  describe('getColumnHeader', () => {
+    test('it should return column header non existing in defaultHeaders', () => {
+      const field = 'test_field_1';
+
+      expect(getColumnHeader(field, [])).toEqual({
+        columnHeaderType: 'not-filtered',
+        id: field,
+        initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
+      });
+    });
+
+    test('it should return column header existing in defaultHeaders', () => {
+      const field = 'test_field_1';
+
+      expect(
+        getColumnHeader(field, [
+          {
+            columnHeaderType: 'not-filtered',
+            id: field,
+            initialWidth: DEFAULT_DATE_COLUMN_MIN_WIDTH,
+            esTypes: ['date'],
+            type: 'date',
+          },
+        ])
+      ).toEqual({
+        columnHeaderType: 'not-filtered',
+        id: field,
+        initialWidth: DEFAULT_DATE_COLUMN_MIN_WIDTH,
+        esTypes: ['date'],
+        type: 'date',
+      });
     });
   });
 

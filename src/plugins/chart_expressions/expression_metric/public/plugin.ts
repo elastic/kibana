@@ -10,9 +10,13 @@ import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { Plugin as ExpressionsPublicPlugin } from '@kbn/expressions-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import { createStartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import { metricVisFunction } from '../common';
 import { setFormatService, setPaletteService } from './services';
 import { getMetricVisRenderer } from './expression_renderers';
+import { setThemeService } from './services/theme_service';
+import { setUiSettingsService } from './services/ui_settings';
 
 /** @internal */
 export interface ExpressionMetricPluginSetup {
@@ -23,16 +27,28 @@ export interface ExpressionMetricPluginSetup {
 /** @internal */
 export interface ExpressionMetricPluginStart {
   fieldFormats: FieldFormatsStart;
+  usageCollection?: UsageCollectionStart;
 }
 
 /** @internal */
-export class ExpressionMetricPlugin implements Plugin<void, void> {
-  public setup(core: CoreSetup, { expressions, charts }: ExpressionMetricPluginSetup) {
-    expressions.registerFunction(metricVisFunction);
-    expressions.registerRenderer(getMetricVisRenderer(core.theme));
+export class ExpressionMetricPlugin implements Plugin {
+  public setup(
+    core: CoreSetup<ExpressionMetricPluginStart, void>,
+    { expressions, charts }: ExpressionMetricPluginSetup
+  ) {
+    const getStartDeps = createStartServicesGetter<ExpressionMetricPluginStart, void>(
+      core.getStartServices
+    );
+
     charts.palettes.getPalettes().then((palettes) => {
       setPaletteService(palettes);
     });
+
+    expressions.registerFunction(metricVisFunction);
+    expressions.registerRenderer(getMetricVisRenderer({ getStartDeps }));
+
+    setUiSettingsService(core.uiSettings);
+    setThemeService(charts.theme);
   }
 
   public start(core: CoreStart, { fieldFormats }: ExpressionMetricPluginStart) {

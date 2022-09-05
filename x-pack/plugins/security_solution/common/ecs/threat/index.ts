@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EventEcs } from '../event';
-import { UrlEcs } from '../url';
+import type { EventEcs } from '../event';
+import type { UrlEcs } from '../url';
 
 interface ThreatMatchEcs {
   atomic?: string[];

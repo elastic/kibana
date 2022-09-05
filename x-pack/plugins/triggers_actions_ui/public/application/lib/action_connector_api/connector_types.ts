@@ -18,17 +18,34 @@ const rewriteBodyReq: RewriteRequestCase<ActionType> = ({
   enabled_in_config: enabledInConfig,
   enabled_in_license: enabledInLicense,
   minimum_license_required: minimumLicenseRequired,
+  supported_feature_ids: supportedFeatureIds,
   ...res
 }: AsApiContract<ActionType>) => ({
   enabledInConfig,
   enabledInLicense,
   minimumLicenseRequired,
+  supportedFeatureIds,
   ...res,
 });
 
-export async function loadActionTypes({ http }: { http: HttpSetup }): Promise<ActionType[]> {
-  const res = await http.get<Parameters<typeof rewriteResponseRes>[0]>(
-    `${BASE_ACTION_API_PATH}/connector_types`
-  );
+export async function loadActionTypes({
+  http,
+  featureId,
+}: {
+  http: HttpSetup;
+  featureId?: string;
+}): Promise<ActionType[]> {
+  const res = featureId
+    ? await http.get<Parameters<typeof rewriteResponseRes>[0]>(
+        `${BASE_ACTION_API_PATH}/connector_types`,
+        {
+          query: {
+            feature_id: featureId,
+          },
+        }
+      )
+    : await http.get<Parameters<typeof rewriteResponseRes>[0]>(
+        `${BASE_ACTION_API_PATH}/connector_types`
+      );
   return rewriteResponseRes(res);
 }

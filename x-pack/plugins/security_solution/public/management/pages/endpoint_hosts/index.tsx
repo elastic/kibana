@@ -25,5 +25,3 @@ export const EndpointsContainer = memo(() => {
 });
 
 EndpointsContainer.displayName = 'EndpointsContainer';
-export { endpointListFleetApisHttpMock } from './mocks';
-export type { EndpointListFleetApisHttpMockInterface } from './mocks';

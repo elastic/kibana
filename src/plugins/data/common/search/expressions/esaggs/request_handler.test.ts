@@ -8,7 +8,7 @@
 
 import { from } from 'rxjs';
 import type { MockedKeys } from '@kbn/utility-types-jest';
-import type { Filter } from '../../../es_query';
+import type { Filter } from '@kbn/es-query';
 import type { IAggConfigs } from '../../aggs';
 import type { ISearchSource } from '../../search_source';
 import { searchSourceCommonMock, searchSourceInstanceMock } from '../../search_source/mocks';
@@ -53,6 +53,7 @@ describe('esaggs expression function - public', () => {
       query: undefined,
       searchSessionId: 'abc123',
       searchSourceService: searchSourceCommonMock,
+      disableShardWarnings: false,
       timeFields: ['@timestamp', 'utc_time'],
       timeRange: undefined,
     };
@@ -138,6 +139,7 @@ describe('esaggs expression function - public', () => {
         description: 'This request queries Elasticsearch to fetch the data for the visualization.',
         adapter: undefined,
       },
+      disableShardFailureWarning: false,
     });
   });
 

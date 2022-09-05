@@ -400,7 +400,7 @@
             "label": "categories",
             "description": [],
             "signature": [
-              "(\"custom\" | \"enterprise_search\" | \"sample_data\" | \"aws\" | \"azure\" | \"cloud\" | \"config_management\" | \"containers\" | \"crm\" | \"datastore\" | \"elastic_stack\" | \"google_cloud\" | \"kubernetes\" | \"languages\" | \"message_queue\" | \"microsoft_365\" | \"monitoring\" | \"network\" | \"notification\" | \"os_system\" | \"productivity\" | \"security\" | \"support\" | \"ticketing\" | \"version_control\" | \"web\" | \"communications\" | \"file_storage\" | \"language_client\" | \"upload_file\" | \"website_search\" | \"geo\")[]"
+              "(\"custom\" | \"enterprise_search\" | \"sample_data\" | \"aws\" | \"azure\" | \"cloud\" | \"config_management\" | \"containers\" | \"crm\" | \"datastore\" | \"elastic_stack\" | \"google_cloud\" | \"kubernetes\" | \"languages\" | \"message_queue\" | \"microsoft_365\" | \"monitoring\" | \"network\" | \"notification\" | \"os_system\" | \"productivity\" | \"security\" | \"support\" | \"threat_intel\" | \"ticketing\" | \"version_control\" | \"web\" | \"communications\" | \"file_storage\" | \"language_client\" | \"upload_file\" | \"website_search\" | \"geo\")[]"
             ],
             "path": "src/plugins/custom_integrations/common/index.ts",
             "deprecated": false
@@ -447,7 +447,7 @@
           "\nA category applicable to an Integration."
         ],
         "signature": [
-          "\"custom\" | \"enterprise_search\" | \"sample_data\" | \"aws\" | \"azure\" | \"cloud\" | \"config_management\" | \"containers\" | \"crm\" | \"datastore\" | \"elastic_stack\" | \"google_cloud\" | \"kubernetes\" | \"languages\" | \"message_queue\" | \"microsoft_365\" | \"monitoring\" | \"network\" | \"notification\" | \"os_system\" | \"productivity\" | \"security\" | \"support\" | \"ticketing\" | \"version_control\" | \"web\" | \"communications\" | \"file_storage\" | \"language_client\" | \"upload_file\" | \"website_search\" | \"geo\""
+          "\"custom\" | \"enterprise_search\" | \"sample_data\" | \"aws\" | \"azure\" | \"cloud\" | \"config_management\" | \"containers\" | \"crm\" | \"datastore\" | \"elastic_stack\" | \"google_cloud\" | \"kubernetes\" | \"languages\" | \"message_queue\" | \"microsoft_365\" | \"monitoring\" | \"network\" | \"notification\" | \"os_system\" | \"productivity\" | \"security\" | \"support\" | \"threat_intel\" | \"ticketing\" | \"version_control\" | \"web\" | \"communications\" | \"file_storage\" | \"language_client\" | \"upload_file\" | \"website_search\" | \"geo\""
         ],
         "path": "src/plugins/custom_integrations/common/index.ts",
         "deprecated": false,
@@ -672,7 +672,7 @@
             "label": "categories",
             "description": [],
             "signature": [
-              "(\"custom\" | \"enterprise_search\" | \"sample_data\" | \"aws\" | \"azure\" | \"cloud\" | \"config_management\" | \"containers\" | \"crm\" | \"datastore\" | \"elastic_stack\" | \"google_cloud\" | \"kubernetes\" | \"languages\" | \"message_queue\" | \"microsoft_365\" | \"monitoring\" | \"network\" | \"notification\" | \"os_system\" | \"productivity\" | \"security\" | \"support\" | \"ticketing\" | \"version_control\" | \"web\" | \"communications\" | \"file_storage\" | \"language_client\" | \"upload_file\" | \"website_search\" | \"geo\")[]"
+              "(\"custom\" | \"enterprise_search\" | \"sample_data\" | \"aws\" | \"azure\" | \"cloud\" | \"config_management\" | \"containers\" | \"crm\" | \"datastore\" | \"elastic_stack\" | \"google_cloud\" | \"kubernetes\" | \"languages\" | \"message_queue\" | \"microsoft_365\" | \"monitoring\" | \"network\" | \"notification\" | \"os_system\" | \"productivity\" | \"security\" | \"support\" | \"threat_intel\" | \"ticketing\" | \"version_control\" | \"web\" | \"communications\" | \"file_storage\" | \"language_client\" | \"upload_file\" | \"website_search\" | \"geo\")[]"
             ],
             "path": "src/plugins/custom_integrations/common/index.ts",
             "deprecated": false
@@ -774,7 +774,7 @@
             "label": "id",
             "description": [],
             "signature": [
-              "\"custom\" | \"enterprise_search\" | \"sample_data\" | \"aws\" | \"azure\" | \"cloud\" | \"config_management\" | \"containers\" | \"crm\" | \"datastore\" | \"elastic_stack\" | \"google_cloud\" | \"kubernetes\" | \"languages\" | \"message_queue\" | \"microsoft_365\" | \"monitoring\" | \"network\" | \"notification\" | \"os_system\" | \"productivity\" | \"security\" | \"support\" | \"ticketing\" | \"version_control\" | \"web\" | \"communications\" | \"file_storage\" | \"language_client\" | \"upload_file\" | \"website_search\" | \"geo\""
+              "\"custom\" | \"enterprise_search\" | \"sample_data\" | \"aws\" | \"azure\" | \"cloud\" | \"config_management\" | \"containers\" | \"crm\" | \"datastore\" | \"elastic_stack\" | \"google_cloud\" | \"kubernetes\" | \"languages\" | \"message_queue\" | \"microsoft_365\" | \"monitoring\" | \"network\" | \"notification\" | \"os_system\" | \"productivity\" | \"security\" | \"support\" | \"threat_intel\" | \"ticketing\" | \"version_control\" | \"web\" | \"communications\" | \"file_storage\" | \"language_client\" | \"upload_file\" | \"website_search\" | \"geo\""
             ],
             "path": "src/plugins/custom_integrations/common/index.ts",
             "deprecated": false
@@ -795,7 +795,7 @@
           "\nThe list of all available categories."
         ],
         "signature": [
-          "(\"custom\" | \"enterprise_search\" | \"sample_data\" | \"aws\" | \"azure\" | \"cloud\" | \"config_management\" | \"containers\" | \"crm\" | \"datastore\" | \"elastic_stack\" | \"google_cloud\" | \"kubernetes\" | \"languages\" | \"message_queue\" | \"microsoft_365\" | \"monitoring\" | \"network\" | \"notification\" | \"os_system\" | \"productivity\" | \"security\" | \"support\" | \"ticketing\" | \"version_control\" | \"web\" | \"communications\" | \"file_storage\" | \"language_client\" | \"upload_file\" | \"website_search\" | \"geo\")[]"
+          "(\"custom\" | \"enterprise_search\" | \"sample_data\" | \"aws\" | \"azure\" | \"cloud\" | \"config_management\" | \"containers\" | \"crm\" | \"datastore\" | \"elastic_stack\" | \"google_cloud\" | \"kubernetes\" | \"languages\" | \"message_queue\" | \"microsoft_365\" | \"monitoring\" | \"network\" | \"notification\" | \"os_system\" | \"productivity\" | \"security\" | \"support\" | \"threat_intel\" | \"ticketing\" | \"version_control\" | \"web\" | \"communications\" | \"file_storage\" | \"language_client\" | \"upload_file\" | \"website_search\" | \"geo\")[]"
         ],
         "path": "src/plugins/custom_integrations/common/index.ts",
         "deprecated": false,
@@ -811,7 +811,7 @@
           "\nA category applicable to an Integration."
         ],
         "signature": [
-          "\"custom\" | \"enterprise_search\" | \"sample_data\" | \"aws\" | \"azure\" | \"cloud\" | \"config_management\" | \"containers\" | \"crm\" | \"datastore\" | \"elastic_stack\" | \"google_cloud\" | \"kubernetes\" | \"languages\" | \"message_queue\" | \"microsoft_365\" | \"monitoring\" | \"network\" | \"notification\" | \"os_system\" | \"productivity\" | \"security\" | \"support\" | \"ticketing\" | \"version_control\" | \"web\" | \"communications\" | \"file_storage\" | \"language_client\" | \"upload_file\" | \"website_search\" | \"geo\""
+          "\"custom\" | \"enterprise_search\" | \"sample_data\" | \"aws\" | \"azure\" | \"cloud\" | \"config_management\" | \"containers\" | \"crm\" | \"datastore\" | \"elastic_stack\" | \"google_cloud\" | \"kubernetes\" | \"languages\" | \"message_queue\" | \"microsoft_365\" | \"monitoring\" | \"network\" | \"notification\" | \"os_system\" | \"productivity\" | \"security\" | \"support\" | \"threat_intel\" | \"ticketing\" | \"version_control\" | \"web\" | \"communications\" | \"file_storage\" | \"language_client\" | \"upload_file\" | \"website_search\" | \"geo\""
         ],
         "path": "src/plugins/custom_integrations/common/index.ts",
         "deprecated": false,
@@ -1129,6 +1129,16 @@
             "type": "string",
             "tags": [],
             "label": "support",
+            "description": [],
+            "path": "src/plugins/custom_integrations/common/index.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "customIntegrations",
+            "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.threat_intel",
+            "type": "string",
+            "tags": [],
+            "label": "threat_intel",
             "description": [],
             "path": "src/plugins/custom_integrations/common/index.ts",
             "deprecated": false

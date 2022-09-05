@@ -12,7 +12,7 @@ import { ReactRouterEuiLink } from '../../../common/react_router_helpers';
 import { Ping } from '../../../../../../common/runtime_types/ping/ping';
 
 const LabelLink = euiStyled.div`
-  margin-bottom: ${(props) => props.theme.eui.paddingSizes.xs};
+  margin-bottom: ${(props) => props.theme.eui.euiSizeXS};
   font-size: ${({ theme }) => theme.eui.euiFontSizeS};
 `;
 

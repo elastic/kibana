@@ -152,6 +152,9 @@ describe('Case Configuration API', () => {
       expect(fetchMock).toHaveBeenCalledWith('/api/actions/connector_types', {
         method: 'GET',
         signal: abortCtrl.signal,
+        query: {
+          feature_id: 'cases',
+        },
       });
     });
 

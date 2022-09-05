@@ -104,7 +104,7 @@ describe('HostName', () => {
       </TestProviders>
     );
 
-    wrapper.find('[data-test-subj="host-details-button"]').first().simulate('click');
+    wrapper.find('[data-test-subj="host-details-button"]').last().simulate('click');
     await waitFor(() => {
       expect(timelineActions.toggleDetailPanel).not.toHaveBeenCalled();
       expect(toggleExpandedDetail).not.toHaveBeenCalled();
@@ -126,7 +126,7 @@ describe('HostName', () => {
       </TestProviders>
     );
 
-    wrapper.find('[data-test-subj="host-details-button"]').first().simulate('click');
+    wrapper.find('[data-test-subj="host-details-button"]').last().simulate('click');
     await waitFor(() => {
       expect(timelineActions.toggleDetailPanel).toHaveBeenCalledWith({
         panelView: 'hostDetail',
@@ -154,7 +154,7 @@ describe('HostName', () => {
       </TestProviders>
     );
 
-    wrapper.find('[data-test-subj="host-details-button"]').first().simulate('click');
+    wrapper.find('[data-test-subj="host-details-button"]').last().simulate('click');
     await waitFor(() => {
       expect(toggleExpandedDetail).toHaveBeenCalledWith({
         panelView: 'hostDetail',
@@ -180,7 +180,7 @@ describe('HostName', () => {
       </TestProviders>
     );
 
-    wrapper.find('[data-test-subj="host-details-button"]').first().simulate('click');
+    wrapper.find('[data-test-subj="host-details-button"]').last().simulate('click');
     await waitFor(() => {
       expect(timelineActions.toggleDetailPanel).toHaveBeenCalledWith({
         panelView: 'hostDetail',

@@ -6,12 +6,11 @@
  */
 
 import { createSelector } from 'reselect';
-import { State } from '../types';
-import {
+import type { State } from '../types';
+import type {
   SourcererDataView,
   SourcererModel,
   SourcererScope,
-  SourcererScopeById,
   SourcererScopeName,
 } from './model';
 
@@ -38,11 +37,6 @@ export const sourcererScopeIdSelector = (
 ): SourcererScope => sourcerer.sourcererScopes[scopeId];
 
 export const scopeIdSelector = () => createSelector(sourcererScopeIdSelector, (scope) => scope);
-
-export const sourcererScopesSelector = ({ sourcerer }: State): SourcererScopeById =>
-  sourcerer.sourcererScopes;
-
-export const scopesSelector = () => createSelector(sourcererScopesSelector, (scopes) => scopes);
 
 export const kibanaDataViewsSelector = () =>
   createSelector(sourcererKibanaDataViewsSelector, (dataViews) => dataViews);

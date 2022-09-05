@@ -6,11 +6,11 @@
  */
 
 import React, { useCallback, useMemo, useState, useRef, useContext } from 'react';
-import { DraggableProvided, DraggableStateSnapshot } from 'react-beautiful-dnd';
+import type { DraggableProvided, DraggableStateSnapshot } from 'react-beautiful-dnd';
 import { TimelineContext } from '@kbn/timelines-plugin/public';
 import { HoverActions } from '.';
 
-import { DataProvider } from '../../../../common/types';
+import type { DataProvider } from '../../../../common/types';
 import { ProviderContentWrapper } from '../drag_and_drop/draggable_wrapper';
 import { getDraggableId } from '../drag_and_drop/helpers';
 

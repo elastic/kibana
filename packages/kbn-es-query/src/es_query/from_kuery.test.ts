@@ -10,7 +10,7 @@ import { buildQueryFromKuery } from './from_kuery';
 import { fromKueryExpression, toElasticsearchQuery } from '../kuery';
 import { fields } from '../filters/stubs';
 import { DataViewBase } from './types';
-import { Query } from '..';
+import { Query } from '../..';
 
 jest.mock('../kuery/grammar');
 
@@ -22,7 +22,7 @@ describe('build query', () => {
 
   describe('buildQueryFromKuery', () => {
     test('should return the parameters of an Elasticsearch bool query', () => {
-      const result = buildQueryFromKuery(undefined, [], true);
+      const result = buildQueryFromKuery(undefined, [], { allowLeadingWildcards: true });
       const expected = {
         must: [],
         filter: [],
@@ -42,7 +42,7 @@ describe('build query', () => {
         return toElasticsearchQuery(fromKueryExpression(query.query), indexPattern);
       });
 
-      const result = buildQueryFromKuery(indexPattern, queries, true);
+      const result = buildQueryFromKuery(indexPattern, queries, { allowLeadingWildcards: true });
 
       expect(result.filter).toEqual(expectedESQueries);
     });
@@ -55,7 +55,14 @@ describe('build query', () => {
         });
       });
 
-      const result = buildQueryFromKuery(indexPattern, queries, true, 'America/Phoenix');
+      const result = buildQueryFromKuery(
+        indexPattern,
+        queries,
+        { allowLeadingWildcards: true },
+        {
+          dateFormatTZ: 'America/Phoenix',
+        }
+      );
 
       expect(result.filter).toEqual(expectedESQueries);
     });
@@ -68,7 +75,7 @@ describe('build query', () => {
         return toElasticsearchQuery(fromKueryExpression(query.query), indexPattern);
       });
 
-      const result = buildQueryFromKuery(indexPattern, queries, true);
+      const result = buildQueryFromKuery(indexPattern, queries, { allowLeadingWildcards: true });
 
       expect(result.filter).toEqual(expectedESQueries);
     });

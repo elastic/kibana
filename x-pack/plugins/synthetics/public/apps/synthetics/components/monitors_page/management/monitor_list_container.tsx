@@ -18,6 +18,8 @@ export const MonitorListContainer = ({ isEnabled }: { isEnabled?: boolean }) => 
     error,
     loading: monitorsLoading,
     syntheticsMonitors,
+    total,
+    absoluteTotal,
     loadPage,
     reloadPage,
   } = useMonitorList();
@@ -28,7 +30,7 @@ export const MonitorListContainer = ({ isEnabled }: { isEnabled?: boolean }) => 
     sortOrder: pageState.sortOrder,
   });
 
-  if (!isEnabled && syntheticsMonitors.length === 0) {
+  if (!isEnabled && absoluteTotal === 0) {
     return null;
   }
 
@@ -37,6 +39,7 @@ export const MonitorListContainer = ({ isEnabled }: { isEnabled?: boolean }) => 
       <MonitorAsyncError />
       <MonitorList
         syntheticsMonitors={syntheticsMonitors}
+        total={total}
         pageState={pageState}
         error={error}
         loading={monitorsLoading || errorsLoading}

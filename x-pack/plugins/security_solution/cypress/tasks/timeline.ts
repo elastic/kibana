@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Timeline, TimelineFilter } from '../objects/timeline';
+import type { Timeline, TimelineFilter } from '../objects/timeline';
 
 import { ALL_CASES_CREATE_NEW_CASE_TABLE_BTN } from '../screens/all_cases';
 import { FIELDS_BROWSER_CHECKBOX } from '../screens/fields_browser';
@@ -68,10 +68,15 @@ import {
   TIMELINE_COLLAPSED_ITEMS_BTN,
   TIMELINE_TAB_CONTENT_EQL,
   TIMESTAMP_HOVER_ACTION_OVERFLOW_BTN,
-  PINNED_TAB_BUTTON,
   TIMELINE_DATA_PROVIDER_FIELD_INPUT,
+  ACTIVE_TIMELINE_BOTTOM_BAR,
+  EMPTY_DATA_PROVIDER_AREA,
+  EMPTY_DROPPABLE_DATA_PROVIDER_GROUP,
+  GET_TIMELINE_GRID_CELL,
+  HOVER_ACTIONS,
 } from '../screens/timeline';
 import { REFRESH_BUTTON, TIMELINE } from '../screens/timelines';
+import { drag, drop } from './common';
 
 import { closeFieldsBrowser, filterFieldsBrowser } from './fields_browser';
 
@@ -132,15 +137,6 @@ export const goToQueryTab = () => {
     .should('have.class', 'euiTab-isSelected');
 };
 
-export const goToPinnedTab = () => {
-  cy.root()
-    .pipe(($el) => {
-      $el.find(PINNED_TAB_BUTTON).trigger('click');
-      return $el.find(PINNED_TAB_BUTTON);
-    })
-    .should('have.class', 'euiTab-isSelected');
-};
-
 export const addNotesToTimeline = (notes: string) => {
   goToNotesTab().then(() => {
     cy.get(NOTES_TAB_BUTTON)
@@ -177,7 +173,7 @@ export const addFilter = (filter: TimelineFilter): Cypress.Chainable<JQuery<HTML
 export const addDataProvider = (filter: TimelineFilter): Cypress.Chainable<JQuery<HTMLElement>> => {
   cy.get(TIMELINE_ADD_FIELD_BUTTON).click();
   cy.get(LOADING_INDICATOR).should('not.exist');
-  cy.focused().should('have.class', 'euiPopover__panel');
+  cy.get('[data-popover-open]').should('exist');
   cy.get(TIMELINE_DATA_PROVIDER_FIELD).click();
   cy.get(TIMELINE_DATA_PROVIDER_FIELD)
     .find(TIMELINE_DATA_PROVIDER_FIELD_INPUT)
@@ -192,6 +188,34 @@ export const addDataProvider = (filter: TimelineFilter): Cypress.Chainable<JQuer
     cy.get(TIMELINE_DATA_PROVIDER_VALUE).type(`${filter.value}{enter}`);
   }
   return cy.get(SAVE_DATA_PROVIDER_BTN).click();
+};
+
+export const updateDataProviderbyDraggingField = (fieldName: string, rowNumber: number) => {
+  const dragTargetSelector = GET_TIMELINE_GRID_CELL(fieldName);
+  const dragTarget = cy.get(dragTargetSelector);
+  dragTarget.eq(rowNumber).then((currentSubject) => {
+    drag(currentSubject);
+  });
+  let dropTarget: Cypress.Chainable<JQuery<HTMLElement>>;
+
+  cy.get('body').then((body) => {
+    if (body.find(EMPTY_DATA_PROVIDER_AREA).length > 0) {
+      dropTarget = cy.get(EMPTY_DATA_PROVIDER_AREA);
+    } else {
+      dropTarget = cy.get(EMPTY_DROPPABLE_DATA_PROVIDER_GROUP);
+    }
+
+    dropTarget.then((currentEl) => {
+      drop(currentEl);
+    });
+  });
+};
+
+export const updateDataProviderByFieldHoverAction = (fieldName: string, rowNumber: number) => {
+  const fieldSelector = GET_TIMELINE_GRID_CELL(fieldName);
+  cy.get(fieldSelector).eq(rowNumber).trigger('mouseover', { force: true });
+  cy.get(HOVER_ACTIONS.ADD_TO_TIMELINE).should('be.visible');
+  cy.get(HOVER_ACTIONS.ADD_TO_TIMELINE).trigger('click', { force: true });
 };
 
 export const addNewCase = () => {
@@ -304,6 +328,10 @@ export const openTimelineById = (timelineId: string): Cypress.Chainable<JQuery<H
   // We avoid use cypress.pipe() here and multiple clicks because each of these clicks
   // can result in a new URL async operation occurring and then we get indeterminism as the URL loads multiple times.
   return cy.get(TIMELINE_TITLE_BY_ID(timelineId)).should('be.visible').click({ force: true });
+};
+
+export const openActiveTimeline = () => {
+  cy.get(ACTIVE_TIMELINE_BOTTOM_BAR).click({ force: true });
 };
 
 export const pinFirstEvent = (): Cypress.Chainable<JQuery<HTMLElement>> => {

@@ -36,47 +36,40 @@ export const InstallationMessage: React.FunctionComponent<Props> = ({
   return (
     <>
       <EuiText>
-        {isK8s === 'IS_KUBERNETES' ? (
-          <FormattedMessage
-            id="xpack.fleet.agentEnrollment.stepRunAgentDescriptionk8s"
-            defaultMessage="From the directory where the Kubernetes manifest is downloaded, run the apply command."
-          />
-        ) : (
-          <FormattedMessage
-            id="xpack.fleet.enrollmentInstructions.installationMessage"
-            defaultMessage="Select the appropriate platform and run commands to install, enroll, and start Elastic Agent. Reuse commands to set up agents on more than one host. For aarch64, see our {downloadLink}. For additional guidance, see our {installationLink}."
-            values={{
-              downloadLink: (
-                <EuiLink
-                  target="_blank"
-                  external
-                  href={`https://www.elastic.co/downloads/past-releases/elastic-agent-${kibanaVersionURLString}`}
-                >
-                  <FormattedMessage
-                    id="xpack.fleet.enrollmentInstructions.downloadLink"
-                    defaultMessage="downloads page"
-                  />
-                </EuiLink>
-              ),
-              installationLink: (
-                <EuiLink
-                  target="_blank"
-                  external
-                  href={
-                    isManaged
-                      ? docLinks.links.fleet.installElasticAgent
-                      : docLinks.links.fleet.installElasticAgentStandalone
-                  }
-                >
-                  <FormattedMessage
-                    id="xpack.fleet.enrollmentInstructions.installationMessage.link"
-                    defaultMessage="installation docs"
-                  />
-                </EuiLink>
-              ),
-            }}
-          />
-        )}
+        <FormattedMessage
+          id="xpack.fleet.enrollmentInstructions.installationMessage"
+          defaultMessage="Select the appropriate platform and run commands to install, enroll, and start Elastic Agent. Reuse commands to set up agents on more than one host. For aarch64, see our {downloadLink}. For additional guidance, see our {installationLink}."
+          values={{
+            downloadLink: (
+              <EuiLink
+                target="_blank"
+                external
+                href={`https://www.elastic.co/downloads/past-releases/elastic-agent-${kibanaVersionURLString}`}
+              >
+                <FormattedMessage
+                  id="xpack.fleet.enrollmentInstructions.downloadLink"
+                  defaultMessage="downloads page"
+                />
+              </EuiLink>
+            ),
+            installationLink: (
+              <EuiLink
+                target="_blank"
+                external
+                href={
+                  isManaged
+                    ? docLinks.links.fleet.installElasticAgent
+                    : docLinks.links.fleet.installElasticAgentStandalone
+                }
+              >
+                <FormattedMessage
+                  id="xpack.fleet.enrollmentInstructions.installationMessage.link"
+                  defaultMessage="installation docs"
+                />
+              </EuiLink>
+            ),
+          }}
+        />
       </EuiText>
       <EuiSpacer size="l" />
     </>

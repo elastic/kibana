@@ -9,8 +9,10 @@
 import type { IconType } from '@elastic/eui';
 import type { ReactNode } from 'react';
 import type { PaletteOutput } from '@kbn/coloring';
-import type { Adapters } from '@kbn/inspector-plugin';
-import type { AggGroupNames, AggParam, AggGroupName, Query } from '@kbn/data-plugin/public';
+import type { Adapters } from '@kbn/inspector-plugin/common';
+import { TimeRange } from '@kbn/data-plugin/common';
+import type { Query } from '@kbn/es-query';
+import type { AggGroupNames, AggParam, AggGroupName } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { Vis, VisEditorOptionsProps, VisParams, VisToExpressionAst } from '../types';
 import { VisGroups } from './vis_groups_enum';
@@ -91,12 +93,14 @@ interface VisualizeEditorMetricContext {
 export interface VisualizeEditorLayersContext {
   indexPatternId: string;
   splitWithDateHistogram?: boolean;
-  timeFieldName?: string;
+  xFieldName?: string;
+  xMode?: string;
   chartType?: string;
   axisPosition?: string;
   termsParams?: Record<string, unknown>;
   splitFields?: string[];
   splitMode?: string;
+  collapseFn?: string;
   splitFilters?: SplitByFilters[];
   palette?: PaletteOutput;
   metrics: VisualizeEditorMetricContext[];
@@ -132,7 +136,18 @@ export interface NavigateToLensContext {
       yLeft: boolean;
       yRight: boolean;
     };
-    extents: {
+    tickLabelsVisibility?: {
+      x: boolean;
+      yLeft: boolean;
+      yRight: boolean;
+    };
+    axisTitlesVisibility?: {
+      x: boolean;
+      yLeft: boolean;
+      yRight: boolean;
+    };
+    valueLabels?: boolean;
+    extents?: {
       yLeftExtent: AxisExtents;
       yRightExtent: AxisExtents;
     };
@@ -171,7 +186,8 @@ export interface VisTypeDefinition<TVisParams> {
    * in order to be displayed in the Lens editor.
    */
   readonly navigateToLens?: (
-    params?: VisParams
+    params?: VisParams,
+    timeRange?: TimeRange
   ) => Promise<NavigateToLensContext | null> | undefined;
 
   /**

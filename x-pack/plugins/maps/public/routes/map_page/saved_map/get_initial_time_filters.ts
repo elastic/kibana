@@ -10,13 +10,15 @@ import { getUiSettings } from '../../../kibana_services';
 import { SerializedMapState } from './types';
 
 export function getInitialTimeFilters({
+  hasSaveAndReturnConfig,
   serializedMapState,
   globalState,
 }: {
+  hasSaveAndReturnConfig: boolean;
   serializedMapState?: SerializedMapState;
   globalState: GlobalQueryStateFromUrl;
 }) {
-  if (serializedMapState?.timeFilters) {
+  if (!hasSaveAndReturnConfig && serializedMapState?.timeFilters) {
     return serializedMapState.timeFilters;
   }
 

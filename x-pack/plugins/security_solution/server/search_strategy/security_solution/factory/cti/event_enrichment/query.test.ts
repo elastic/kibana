@@ -58,9 +58,17 @@ describe('buildEventEnrichmentQuery', () => {
     const options = buildEventEnrichmentRequestOptionsMock();
     const query = buildEventEnrichmentQuery(options);
     expect(query.body?.fields).toEqual([
-      '*',
+      { field: '*', include_unmapped: true },
       {
         field: '@timestamp',
+        format: 'strict_date_optional_time',
+      },
+      {
+        field: 'code_signature.timestamp',
+        format: 'strict_date_optional_time',
+      },
+      {
+        field: 'dll.code_signature.timestamp',
         format: 'strict_date_optional_time',
       },
     ]);

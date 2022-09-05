@@ -10,7 +10,7 @@ import React from 'react';
 
 import { SourceDestinationArrows } from './source_destination_arrows';
 import { SourceDestinationIp } from './source_destination_ip';
-import { SourceDestinationWithArrowsProps } from './types';
+import type { SourceDestinationWithArrowsProps } from './types';
 
 /**
  * Visualizes the communication between a source and a destination by

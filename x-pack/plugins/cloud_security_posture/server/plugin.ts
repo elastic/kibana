@@ -20,18 +20,15 @@ import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import { CspAppService } from './lib/csp_app_services';
 import type {
   CspServerPluginSetup,
   CspServerPluginStart,
   CspServerPluginSetupDeps,
   CspServerPluginStartDeps,
-  CspRequestHandlerContext,
   CspServerPluginStartServices,
 } from './types';
-import { defineRoutes } from './routes';
-import { cspRuleTemplateAssetType } from './saved_objects/csp_rule_template';
-import { cspRuleAssetType } from './saved_objects/csp_rule_type';
+import { setupRoutes } from './routes/setup_routes';
+import { setupSavedObjects } from './saved_objects';
 import { initializeCspIndices } from './create_indices/create_indices';
 import { initializeCspTransforms } from './create_transforms/create_transforms';
 import {
@@ -48,11 +45,6 @@ import {
   setupFindingsStatsTask,
 } from './tasks/findings_stats_task';
 
-export interface CspAppContext {
-  logger: Logger;
-  service: CspAppService;
-}
-
 export class CspPlugin
   implements
     Plugin<
@@ -68,24 +60,16 @@ export class CspPlugin
     this.logger = initializerContext.logger.get();
   }
 
-  private readonly CspAppService = new CspAppService();
-
   public setup(
     core: CoreSetup<CspServerPluginStartDeps, CspServerPluginStart>,
     plugins: CspServerPluginSetupDeps
   ): CspServerPluginSetup {
-    const cspAppContext: CspAppContext = {
+    setupSavedObjects(core.savedObjects);
+
+    setupRoutes({
+      core,
       logger: this.logger,
-      service: this.CspAppService,
-    };
-
-    core.savedObjects.registerType(cspRuleAssetType);
-    core.savedObjects.registerType(cspRuleTemplateAssetType);
-
-    const router = core.http.createRouter<CspRequestHandlerContext>();
-
-    // Register server side APIs
-    defineRoutes(router, cspAppContext);
+    });
 
     const coreStartServices = core.getStartServices();
     this.setupCspTasks(plugins.taskManager, coreStartServices, this.logger);
@@ -94,10 +78,6 @@ export class CspPlugin
   }
 
   public start(core: CoreStart, plugins: CspServerPluginStartDeps): CspServerPluginStart {
-    this.CspAppService.start({
-      ...plugins.fleet,
-    });
-
     plugins.fleet.fleetSetupCompleted().then(async () => {
       const packageInfo = await plugins.fleet.packageService.asInternalUser.getInstallation(
         CLOUD_SECURITY_POSTURE_PACKAGE_NAME
@@ -114,7 +94,7 @@ export class CspPlugin
         async (
           packagePolicy: PackagePolicy,
           context: RequestHandlerContext,
-          _: KibanaRequest
+          request: KibanaRequest
         ): Promise<PackagePolicy> => {
           if (packagePolicy.package?.name === CLOUD_SECURITY_POSTURE_PACKAGE_NAME) {
             await this.initialize(core, plugins.taskManager);
@@ -122,12 +102,13 @@ export class CspPlugin
             const soClient = (await context.core).savedObjects.client;
             const esClient = (await context.core).elasticsearch.client.asCurrentUser;
             await onPackagePolicyPostCreateCallback(this.logger, packagePolicy, soClient);
-
+            const userAuth = await plugins.security.authc.getCurrentUser(request);
             const updatedPackagePolicy = await updateAgentConfiguration(
               plugins.fleet.packagePolicyService,
               packagePolicy,
               esClient,
-              soClient
+              soClient,
+              userAuth
             );
             return updatedPackagePolicy;
           }
@@ -162,8 +143,9 @@ export class CspPlugin
 
   async initialize(core: CoreStart, taskManager: TaskManagerStartContract): Promise<void> {
     this.logger.debug('initialize');
-    await initializeCspIndices(core.elasticsearch.client.asInternalUser, this.logger);
-    await initializeCspTransforms(core.elasticsearch.client.asInternalUser, this.logger);
+    const esClient = core.elasticsearch.client.asInternalUser;
+    await initializeCspIndices(esClient, this.logger);
+    await initializeCspTransforms(esClient, this.logger);
     await scheduleFindingsStatsTask(taskManager, this.logger);
   }
 

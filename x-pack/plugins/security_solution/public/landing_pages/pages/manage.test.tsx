@@ -10,7 +10,7 @@ import React from 'react';
 import { SecurityPageName } from '../../app/types';
 import { TestProviders } from '../../common/mock';
 import { ManagementCategories } from './manage';
-import { NavLinkItem } from '../../common/components/navigation/types';
+import type { NavLinkItem } from '../../common/components/navigation/types';
 
 const RULES_ITEM_LABEL = 'elastic rules!';
 const EXCEPTIONS_ITEM_LABEL = 'exceptional!';
@@ -45,11 +45,6 @@ const defaultAppManageLink: NavLinkItem = {
     },
   ],
 };
-
-const mockedUseCanSeeHostIsolationExceptionsMenu = jest.fn();
-jest.mock('../../management/pages/host_isolation_exceptions/view/hooks', () => ({
-  useCanSeeHostIsolationExceptionsMenu: () => mockedUseCanSeeHostIsolationExceptionsMenu(),
-}));
 
 const mockAppManageLink = jest.fn(() => defaultAppManageLink);
 jest.mock('../../common/components/navigation/nav_links', () => ({
@@ -133,65 +128,5 @@ describe('ManagementCategories', () => {
 
     expect(queryByText(CATEGORY_1_LABEL)).not.toBeInTheDocument();
     expect(queryByText(CATEGORY_2_LABEL)).not.toBeInTheDocument();
-  });
-
-  it('should not render hostIsolationExceptionsLink when useCanSeeHostIsolationExceptionsMenu is false', () => {
-    mockedUseCanSeeHostIsolationExceptionsMenu.mockReturnValueOnce(false);
-    mockAppManageLink.mockReturnValueOnce({
-      ...defaultAppManageLink,
-      categories: [
-        {
-          label: CATEGORY_1_LABEL,
-          linkIds: [SecurityPageName.hostIsolationExceptions],
-        },
-      ],
-      links: [
-        {
-          id: SecurityPageName.hostIsolationExceptions,
-          title: 'test hostIsolationExceptions title',
-          description: 'test hostIsolationExceptions description',
-          icon: 'testIcon1',
-        },
-      ],
-    });
-    const { queryByText } = render(
-      <TestProviders>
-        <ManagementCategories />
-      </TestProviders>
-    );
-
-    expect(queryByText(CATEGORY_1_LABEL)).not.toBeInTheDocument();
-  });
-
-  it('should render hostIsolationExceptionsLink when useCanSeeHostIsolationExceptionsMenu is true', () => {
-    const HOST_ISOLATION_EXCEPTIONS_ITEM_LABEL = 'test hostIsolationExceptions title';
-    mockedUseCanSeeHostIsolationExceptionsMenu.mockReturnValueOnce(true);
-    mockAppManageLink.mockReturnValueOnce({
-      ...defaultAppManageLink,
-      categories: [
-        {
-          label: CATEGORY_1_LABEL,
-          linkIds: [SecurityPageName.hostIsolationExceptions],
-        },
-      ],
-      links: [
-        {
-          id: SecurityPageName.hostIsolationExceptions,
-          title: HOST_ISOLATION_EXCEPTIONS_ITEM_LABEL,
-          description: 'test hostIsolationExceptions description',
-          icon: 'testIcon1',
-        },
-      ],
-    });
-    const { queryAllByTestId } = render(
-      <TestProviders>
-        <ManagementCategories />
-      </TestProviders>
-    );
-
-    const renderedItems = queryAllByTestId('LandingItem');
-
-    expect(renderedItems).toHaveLength(1);
-    expect(renderedItems[0]).toHaveTextContent(HOST_ISOLATION_EXCEPTIONS_ITEM_LABEL);
   });
 });

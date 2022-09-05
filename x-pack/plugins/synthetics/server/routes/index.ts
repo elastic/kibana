@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { createGetMonitorStatusRoute } from './monitor_summary/monitor_status';
 import { getAPIKeySyntheticsRoute } from './monitor_cruds/get_api_key';
 import { getServiceLocationsRoute } from './synthetics_service/get_service_locations';
 import { deleteSyntheticsMonitorRoute } from './monitor_cruds/delete_monitor';
@@ -15,6 +16,7 @@ import {
 } from './synthetics_service/enablement';
 import {
   getAllSyntheticsMonitorRoute,
+  getSyntheticsMonitorOverviewRoute,
   getSyntheticsMonitorRoute,
 } from './monitor_cruds/get_monitor';
 import { runOnceSyntheticsMonitorRoute } from './synthetics_service/run_once_monitor';
@@ -24,10 +26,12 @@ import { installIndexTemplatesRoute } from './synthetics_service/install_index_t
 import { editSyntheticsMonitorRoute } from './monitor_cruds/edit_monitor';
 import { addSyntheticsMonitorRoute } from './monitor_cruds/add_monitor';
 import { addSyntheticsProjectMonitorRoute } from './monitor_cruds/add_monitor_project';
-import { UMRestApiRouteFactory } from '../legacy_uptime/routes';
+import {
+  SyntheticsRestApiRouteFactory,
+  SyntheticsStreamingRouteFactory,
+} from '../legacy_uptime/routes';
 
-export const syntheticsAppRestApiRoutes: UMRestApiRouteFactory[] = [
-  addSyntheticsProjectMonitorRoute,
+export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   addSyntheticsMonitorRoute,
   getSyntheticsEnablementRoute,
   deleteSyntheticsMonitorRoute,
@@ -37,9 +41,15 @@ export const syntheticsAppRestApiRoutes: UMRestApiRouteFactory[] = [
   getServiceLocationsRoute,
   getSyntheticsMonitorRoute,
   getAllSyntheticsMonitorRoute,
+  getSyntheticsMonitorOverviewRoute,
   installIndexTemplatesRoute,
   runOnceSyntheticsMonitorRoute,
   testNowMonitorRoute,
   getServiceAllowedRoute,
   getAPIKeySyntheticsRoute,
+  createGetMonitorStatusRoute,
+];
+
+export const syntheticsAppStreamingApiRoutes: SyntheticsStreamingRouteFactory[] = [
+  addSyntheticsProjectMonitorRoute,
 ];

@@ -167,11 +167,11 @@ function SidebarTitle({ savedSearch, vis, isLinkedSearch, eventEmitter }: Sideba
         title={i18n.translate('visDefaultEditor.sidebar.indexPatternAriaLabel', {
           defaultMessage: 'Index pattern: {title}',
           values: {
-            title: vis.data.indexPattern!.title,
+            title: vis.data.indexPattern!.getName(),
           },
         })}
       >
-        {vis.data.indexPattern!.title}
+        {vis.data.indexPattern!.getName()}
       </h2>
     </EuiTitle>
   ) : (

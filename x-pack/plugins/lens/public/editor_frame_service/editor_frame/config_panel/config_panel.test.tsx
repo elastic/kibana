@@ -18,11 +18,14 @@ import { Visualization } from '../../../types';
 import { LayerPanels } from './config_panel';
 import { LayerPanel } from './layer_panel';
 import { coreMock } from '@kbn/core/public/mocks';
+import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { generateId } from '../../../id_generator';
 import { mountWithProvider } from '../../../mocks';
 import { LayerType, layerTypes } from '../../../../common';
 import { ReactWrapper } from 'enzyme';
 import { addLayer } from '../../../state_management';
+import { createIndexPatternServiceMock } from '../../../mocks/data_views_service_mock';
 
 jest.mock('../../../id_generator');
 
@@ -46,6 +49,13 @@ afterEach(() => {
 
 describe('ConfigPanel', () => {
   const frame = createMockFramePublicAPI();
+
+  let uiActions: UiActionsStart;
+
+  beforeEach(() => {
+    uiActions = uiActionsPluginMock.createStartContract();
+  });
+
   function prepareAndMountComponent(
     props: ReturnType<typeof getDefaultProps>,
     customStoreProps?: Partial<MountStoreProps>
@@ -98,6 +108,7 @@ describe('ConfigPanel', () => {
           state: 'state',
         },
       },
+      indexPatternService: createIndexPatternServiceMock(),
       visualizationState: 'state',
       updateVisualization: jest.fn(),
       updateDatasource: jest.fn(),
@@ -107,6 +118,7 @@ describe('ConfigPanel', () => {
       core: coreMock.createStart(),
       isFullscreen: false,
       toggleFullscreen: jest.fn(),
+      uiActions,
     };
   }
 
@@ -156,6 +168,10 @@ describe('ConfigPanel', () => {
       act(() => {
         instance.find('[data-test-subj="lnsLayerRemove"]').first().simulate('click');
       });
+      instance.update();
+      act(() => {
+        instance.find('[data-test-subj="lnsLayerRemoveConfirmButton"]').first().simulate('click');
+      });
       const focusedEl = document.activeElement;
       expect(focusedEl).toEqual(firstLayerFocusable);
     });
@@ -179,6 +195,10 @@ describe('ConfigPanel', () => {
       act(() => {
         instance.find('[data-test-subj="lnsLayerRemove"]').at(0).simulate('click');
       });
+      instance.update();
+      act(() => {
+        instance.find('[data-test-subj="lnsLayerRemoveConfirmButton"]').first().simulate('click');
+      });
       const focusedEl = document.activeElement;
       expect(focusedEl).toEqual(secondLayerFocusable);
     });
@@ -200,6 +220,10 @@ describe('ConfigPanel', () => {
         .instance();
       act(() => {
         instance.find('[data-test-subj="lnsLayerRemove"]').at(2).simulate('click');
+      });
+      instance.update();
+      act(() => {
+        instance.find('[data-test-subj="lnsLayerRemoveConfirmButton"]').first().simulate('click');
       });
       const focusedEl = document.activeElement;
       expect(focusedEl).toEqual(firstLayerFocusable);
@@ -332,11 +356,16 @@ describe('ConfigPanel', () => {
       await clickToAddLayer(instance);
 
       expect(lensStore.dispatch).toHaveBeenCalledTimes(1);
-      expect(datasourceMap.testDatasource.initializeDimension).toHaveBeenCalledWith({}, 'newId', {
-        columnId: 'myColumn',
-        groupId: 'testGroup',
-        staticValue: 100,
-      });
+      expect(datasourceMap.testDatasource.initializeDimension).toHaveBeenCalledWith(
+        {},
+        'newId',
+        frame.dataViews.indexPatterns,
+        {
+          columnId: 'myColumn',
+          groupId: 'testGroup',
+          staticValue: 100,
+        }
+      );
     });
 
     it('should add an initial dimension value when clicking on the empty dimension button', async () => {
@@ -366,6 +395,7 @@ describe('ConfigPanel', () => {
       expect(datasourceMap.testDatasource.initializeDimension).toHaveBeenCalledWith(
         'state',
         'first',
+        frame.dataViews.indexPatterns,
         {
           groupId: 'a',
           columnId: 'newId',
@@ -423,6 +453,7 @@ describe('ConfigPanel', () => {
             a: expect.anything(),
           },
           dateRange: expect.anything(),
+          dataViews: expect.anything(),
         },
         groupId: 'a',
         layerId: 'newId',

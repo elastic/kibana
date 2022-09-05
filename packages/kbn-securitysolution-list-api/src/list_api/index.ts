@@ -61,6 +61,10 @@ const findLists = async ({
   // eslint-disable-next-line @typescript-eslint/naming-convention
   per_page,
   signal,
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  sort_field,
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  sort_order,
 }: ApiParams & FindListSchemaEncoded): Promise<FoundListSchema> => {
   return http.fetch(`${LIST_URL}/_find`, {
     method: 'GET',
@@ -68,6 +72,8 @@ const findLists = async ({
       cursor,
       page,
       per_page,
+      sort_field,
+      sort_order,
     },
     signal,
   });
@@ -79,12 +85,16 @@ const findListsWithValidation = async ({
   pageIndex,
   pageSize,
   signal,
+  sortField,
+  sortOrder,
 }: FindListsParams): Promise<FoundListSchema> =>
   pipe(
     {
       cursor: cursor != null ? cursor.toString() : undefined,
       page: pageIndex != null ? pageIndex.toString() : undefined,
       per_page: pageSize != null ? pageSize.toString() : undefined,
+      sort_field: sortField != null ? sortField.toString() : undefined,
+      sort_order: sortOrder,
     },
     (payload) => fromEither(validateEither(findListSchema, payload)),
     chain((payload) => tryCatch(() => findLists({ http, signal, ...payload }), toError)),

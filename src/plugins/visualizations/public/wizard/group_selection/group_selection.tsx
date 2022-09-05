@@ -95,6 +95,7 @@ function GroupSelection(props: GroupSelectionProps) {
                 <EuiCard
                   titleSize="xs"
                   layout="horizontal"
+                  display="transparent"
                   onClick={() => props.toggleGroups(false)}
                   title={
                     <span data-test-subj="visGroupAggBasedTitle">
@@ -112,7 +113,6 @@ function GroupSelection(props: GroupSelectionProps) {
                     }
                   )}
                   icon={<EuiIcon type="heatmap" size="xl" color="success" />}
-                  className="visNewVisDialog__groupsCard"
                 >
                   <EuiLink
                     data-test-subj="visGroupAggBasedExploreLink"
@@ -186,6 +186,7 @@ const VisGroup = ({ visType, onVisTypeSelected }: VisCardProps) => {
     <EuiFlexItem className="visNewVisDialog__groupsCardWrapper">
       <EuiCard
         titleSize="xs"
+        hasBorder={true}
         title={
           <span data-test-subj="visTypeTitle">
             {'titleInWizard' in visType && visType.titleInWizard
@@ -205,7 +206,6 @@ const VisGroup = ({ visType, onVisTypeSelected }: VisCardProps) => {
         }
         layout="horizontal"
         icon={<EuiIcon type={visType.icon || 'empty'} size="xl" color="success" />}
-        className="visNewVisDialog__groupsCard"
       />
     </EuiFlexItem>
   );
@@ -227,7 +227,11 @@ const ToolsGroup = ({ visType, onVisTypeSelected, showExperimental }: VisCardPro
       <EuiFlexItem>
         <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false}>
-            <EuiLink data-test-subj={`visType-${visType.name}`} onClick={onClick}>
+            <EuiLink
+              data-test-subj={`visType-${visType.name}`}
+              data-vis-stage={visType.stage}
+              onClick={onClick}
+            >
               {'titleInWizard' in visType && visType.titleInWizard
                 ? visType.titleInWizard
                 : visType.title}

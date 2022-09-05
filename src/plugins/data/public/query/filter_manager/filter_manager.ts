@@ -10,6 +10,7 @@ import _ from 'lodash';
 import { Subject } from 'rxjs';
 
 import { IUiSettingsClient } from '@kbn/core/public';
+import { FilterStateStore } from '@kbn/es-query';
 
 import {
   isFilterPinned,
@@ -23,7 +24,7 @@ import { PersistableStateService } from '@kbn/kibana-utils-plugin/common/persist
 import { sortFilters } from './lib/sort_filters';
 import { mapAndFlattenFilters } from './lib/map_and_flatten_filters';
 
-import { FilterStateStore, UI_SETTINGS } from '../../../common';
+import { UI_SETTINGS } from '../../../common';
 import {
   getAllMigrations,
   inject,

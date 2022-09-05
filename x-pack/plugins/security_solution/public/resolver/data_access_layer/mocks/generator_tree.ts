@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { TreeOptions } from '../../../../common/endpoint/generate_data';
-import { DataAccessLayer, GeneratedTreeMetadata, TimeRange } from '../../types';
+import type { TreeOptions } from '../../../../common/endpoint/generate_data';
+import type { DataAccessLayer, GeneratedTreeMetadata, TimeRange } from '../../types';
 
-import {
+import type {
   ResolverRelatedEvents,
   ResolverEntityIndex,
   SafeResolverEvent,

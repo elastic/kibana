@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { EuiAccordion, EuiAccordionProps } from '@elastic/eui';
+import type { EuiAccordionProps } from '@elastic/eui';
+import { EuiAccordion } from '@elastic/eui';
 import React, { useState, useCallback } from 'react';
 
 type Props = Pick<EuiAccordionProps, Exclude<keyof EuiAccordionProps, 'initialIsOpen'>> & {

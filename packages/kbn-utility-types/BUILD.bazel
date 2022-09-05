@@ -5,10 +5,26 @@ load("//src/dev/bazel:index.bzl", "jsts_transpiler", "pkg_npm", "pkg_npm_types",
 PKG_BASE_NAME = "kbn-utility-types"
 PKG_REQUIRE_NAME = "@kbn/utility-types"
 
-SOURCE_FILES = glob([
-  "src/serializable/**",
-  "src/index.ts"
-])
+SOURCE_FILES = glob(
+  [
+    "src/serializable/**",
+    "src/dot.ts",
+    "index.ts"
+  ],
+  exclude = [
+    "**/*.config.js",
+    "**/*.mock.*",
+    "**/*.test.*",
+    "**/*.stories.*",
+    "**/__snapshots__/**",
+    "**/integration_tests/**",
+    "**/mocks/**",
+    "**/scripts/**",
+    "**/storybook/**",
+    "**/test_fixtures/**",
+    "**/test_helpers/**",
+  ],
+)
 
 SRCS = SOURCE_FILES
 
@@ -51,9 +67,9 @@ ts_project(
   srcs = SRCS,
   deps = TYPES_DEPS,
   declaration = True,
+  declaration_map = True,
   emit_declaration_only = True,
   out_dir = "target_types",
-  root_dir = "src",
   tsconfig = ":tsconfig",
 )
 

@@ -20,7 +20,7 @@ import type { CoreContext } from '@kbn/core-base-server-internal';
 import { Logger } from '@kbn/logging';
 import { Env } from '@kbn/config';
 import { configServiceMock, getEnvOptions } from '@kbn/config-mocks';
-import { loggingSystemMock } from '../logging/logging_system.mock';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
 import { PluginWrapper } from './plugin';
 import { PluginType } from './types';

@@ -7,7 +7,7 @@
  */
 
 import { ArrayEntry } from '@elastic/charts';
-import { Datatable } from '@kbn/expressions-plugin';
+import { Datatable } from '@kbn/expressions-plugin/common';
 import { BucketColumns, ChartTypes, PartitionVisParams } from '../../../common/types';
 
 type SortFn = (([name1, node1]: ArrayEntry, [name2, node2]: ArrayEntry) => number) | undefined;

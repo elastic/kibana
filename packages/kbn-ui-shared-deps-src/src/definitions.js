@@ -12,7 +12,7 @@ const Path = require('path');
 /**
  * Absolute path to the distributable directory
  */
-const distDir = Path.resolve(__dirname, '../shared_built_assets');
+const distDir = Path.resolve(__dirname, '../../shared_built_assets');
 
 /**
  * Filename of the main bundle file in the distributable directory
@@ -34,6 +34,7 @@ const externals = {
   '@kbn/ui-theme': '__kbnSharedDeps__.KbnUiTheme',
   '@kbn/i18n': '__kbnSharedDeps__.KbnI18n',
   '@kbn/i18n-react': '__kbnSharedDeps__.KbnI18nReact',
+  '@emotion/cache': '__kbnSharedDeps__.EmotionCache',
   '@emotion/react': '__kbnSharedDeps__.EmotionReact',
   jquery: '__kbnSharedDeps__.Jquery',
   moment: '__kbnSharedDeps__.Moment',
@@ -74,7 +75,7 @@ const externals = {
   tslib: '__kbnSharedDeps__.TsLib',
   '@kbn/analytics': '__kbnSharedDeps__.KbnAnalytics',
   '@kbn/std': '__kbnSharedDeps__.KbnStd',
-  '@elastic/safer-lodash-set': '__kbnSharedDeps__.SaferLodashSet',
+  '@kbn/safer-lodash-set': '__kbnSharedDeps__.SaferLodashSet',
   'rison-node': '__kbnSharedDeps__.RisonNode',
   history: '__kbnSharedDeps__.History',
   classnames: '__kbnSharedDeps__.Classnames',

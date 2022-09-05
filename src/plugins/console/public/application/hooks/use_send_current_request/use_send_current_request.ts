@@ -16,10 +16,13 @@ import { useRequestActionContext, useServicesContext } from '../../contexts';
 import { StorageQuotaError } from '../../components/storage_quota_error';
 import { sendRequest } from './send_request';
 import { track } from './track';
+import { replaceVariables } from '../../../lib/utils';
+import { StorageKeys } from '../../../services';
+import { DEFAULT_VARIABLES } from '../../../../common/constants';
 
 export const useSendCurrentRequest = () => {
   const {
-    services: { history, settings, notifications, trackUiMetric, http, autocompleteInfo },
+    services: { history, settings, notifications, trackUiMetric, http, autocompleteInfo, storage },
     theme$,
   } = useServicesContext();
 
@@ -28,7 +31,9 @@ export const useSendCurrentRequest = () => {
   return useCallback(async () => {
     try {
       const editor = registry.getInputEditor();
-      const requests = await editor.getRequestsInRange();
+      const variables = storage.get(StorageKeys.VARIABLES, DEFAULT_VARIABLES);
+      let requests = await editor.getRequestsInRange();
+      requests = replaceVariables(requests, variables);
       if (!requests.length) {
         notifications.toasts.add(
           i18n.translate('console.notification.error.noRequestSelectedTitle', {
@@ -128,6 +133,7 @@ export const useSendCurrentRequest = () => {
       }
     }
   }, [
+    storage,
     dispatch,
     http,
     settings,

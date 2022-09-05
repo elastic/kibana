@@ -7,7 +7,7 @@ Currently with Cypress you can develop `functional` tests and coming soon `CCS` 
 If you are still having doubts, questions or queries, please feel free to ping our Cypress champions:
 
 - Functional Tests:
-  - Gloria Hornero, Frank Hassanabad and Patryk Kopycinsky 
+  - Gloria Hornero and Patryk Kopycinsky 
   
 - CCS Tests:
   - Technical questions around the https://github.com/elastic/integration-test repo:
@@ -343,7 +343,7 @@ The data the tests need:
 - Is generated on the fly using our application APIs (preferred way)
 - Is ingested on the ELS instance using the `es_archiver` utility
 
-By default, when running the tests in Jenkins mode, a base set of data is ingested on the ELS instance: an empty kibana index and a set of auditbeat data (the `empty_kibana` and `auditbeat` archives, respectively). This is usually enough to cover most of the scenarios that we are testing.
+By default, when running the tests in Jenkins mode, a base set of data is ingested on the ELS instance: a set of auditbeat data (the `auditbeat` archive). This is usually enough to cover most of the scenarios that we are testing.
 
 ### How to generate a new archive
 

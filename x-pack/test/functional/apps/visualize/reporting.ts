@@ -18,7 +18,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
   const config = getService('config');
   const kibanaServer = getService('kibanaServer');
-  const reporting = getService('reporting');
+  const png = getService('png');
 
   const PageObjects = getPageObjects([
     'reporting',
@@ -91,7 +91,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       before(async () => {
         await kibanaServer.uiSettings.replace({
-          defaultIndex: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
+          'timepicker:timeDefaults':
+            '{ "from": "2022-04-15T00:00:00.000Z", "to": "2022-05-22T00:00:00.000Z"}',
+          defaultIndex: '5193f870-d861-11e9-a311-0fa548c5f953',
         });
 
         await esArchiver.load('x-pack/test/functional/es_archives/reporting/ecommerce_76');
@@ -116,11 +118,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           '[K7.6-eCommerce] Sold Products per Day',
           { navigateToVisualize: false }
         );
-        log.debug('set time range');
-        await PageObjects.timePicker.setAbsoluteRange(
-          'Apr 15, 2022 @ 00:00:00.000',
-          'May 22, 2022 @ 00:00:00.000'
-        );
 
         log.debug('open png reporting panel');
         await PageObjects.reporting.openPngReportingPanel();
@@ -139,11 +136,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
 
         // check the file
-        const percentDiff = await reporting.checkIfPngsMatch(
+        const percentDiff = await png.checkIfPngsMatch(
           sessionReportPath,
           PageObjects.reporting.getBaselineReportPath(reportFileName, 'png', REPORTS_FOLDER),
-          config.get('screenshots.directory'),
-          log
+          config.get('screenshots.directory')
         );
 
         expect(percentDiff).to.be.lessThan(0.09);

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Query } from '@kbn/data-plugin/public';
+import type { Query } from '@kbn/es-query';
 import type { Operation } from '../../../types';
 import type { TimeScaleUnit } from '../../../../common/expressions';
 import type { OperationType } from '.';
@@ -16,6 +16,7 @@ export interface BaseIndexPatternColumn extends Operation {
   customLabel?: boolean;
   timeScale?: TimeScaleUnit;
   filter?: Query;
+  reducedTimeRange?: string;
   timeShift?: string;
 }
 

@@ -6,17 +6,12 @@
  */
 
 import React, { useCallback, memo } from 'react';
-import {
-  EuiSelectableOption,
-  EuiModalBody,
-  EuiModalHeader,
-  EuiMarkdownEditorUiPlugin,
-  EuiCodeBlock,
-} from '@elastic/eui';
+import type { EuiSelectableOption, EuiMarkdownEditorUiPlugin } from '@elastic/eui';
+import { EuiModalBody, EuiModalHeader, EuiCodeBlock } from '@elastic/eui';
 
 import { TimelineType } from '../../../../../../common/types/timeline';
 import { SelectableTimeline } from '../../../../../timelines/components/timeline/selectable_timeline';
-import { OpenTimelineResult } from '../../../../../timelines/components/open_timeline/types';
+import type { OpenTimelineResult } from '../../../../../timelines/components/open_timeline/types';
 import { getTimelineUrl, useFormatUrl } from '../../../link_to';
 
 import { ID } from './constants';

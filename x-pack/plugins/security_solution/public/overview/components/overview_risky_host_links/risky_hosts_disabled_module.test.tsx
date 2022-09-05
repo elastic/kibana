@@ -11,7 +11,8 @@ import { cloneDeep } from 'lodash/fp';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { ThemeProvider } from 'styled-components';
-import { createStore, State } from '../../../common/store';
+import type { State } from '../../../common/store';
+import { createStore } from '../../../common/store';
 import {
   createSecuritySolutionStorageMock,
   kibanaObservable,
@@ -46,7 +47,8 @@ describe('RiskyHostsModule', () => {
     );
 
     expect(screen.getByTestId('risky-hosts-dashboard-links')).toBeInTheDocument();
-    expect(screen.getByTestId('risky-hosts-view-dashboard-button')).toBeInTheDocument();
-    expect(screen.getByTestId('risky-hosts-enable-module-button')).toBeInTheDocument();
+    expect(screen.getByTestId('risky-hosts-inner-panel-danger-learn-more')).toBeInTheDocument();
+
+    expect(screen.getByTestId('disabled-open-in-console-button-with-tooltip')).toBeInTheDocument();
   });
 });

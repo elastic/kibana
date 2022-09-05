@@ -8,8 +8,8 @@
 import React from 'react';
 import moment from 'moment';
 
-import { NetworkTlsNode } from '../../../../common/search_strategy';
-import { Columns } from '../../../common/components/paginated_table';
+import type { NetworkTlsNode } from '../../../../common/search_strategy';
+import type { Columns } from '../../../common/components/paginated_table';
 import {
   getRowItemDraggables,
   getRowItemDraggable,

@@ -26,16 +26,3 @@ export const getTimelinesQuerySchema = rt.partial({
   status: unionWithNullType(TimelineStatusLiteralRt),
   timeline_type: unionWithNullType(TimelineTypeLiteralRt),
 });
-
-export const getTimelinesArgsSchema = rt.partial({
-  onlyUserFavorite: unionWithNullType(BoolFromString),
-  pageIndex: unionWithNullType(rt.string),
-  pageSize: unionWithNullType(rt.string),
-  search: unionWithNullType(rt.string),
-  sortField: sortFieldTimeline,
-  sortOrder: direction,
-  status: unionWithNullType(TimelineStatusLiteralRt),
-  timelineType: unionWithNullType(TimelineTypeLiteralRt),
-});
-
-export type GetTimelinesArgs = rt.TypeOf<typeof getTimelinesQuerySchema>;

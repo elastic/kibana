@@ -132,23 +132,6 @@ const PieWarningFormatMessage: FC<WarningMessageProps> = (props) => {
   );
 };
 
-const TimelionWarningFormatMessage: FC<WarningMessageProps> = (props) => {
-  return (
-    <FormattedMessage
-      id="visualizations.oldTimelionChart.notificationMessage"
-      defaultMessage="You are using the legacy charts library, which will be removed in 8.4. {conditionalMessage}"
-      values={{
-        conditionalMessage: (
-          <>
-            <SwitchToOldLibraryMessage {...props} />
-            <ContactAdminMessage {...props} />
-          </>
-        ),
-      }}
-    />
-  );
-};
-
 const ControlsWarningFormatMessage: FC<WarningMessageProps> = (props) => {
   return (
     <FormattedMessage
@@ -162,7 +145,6 @@ const warningMessages = {
   [CHARTS_WITHOUT_SMALL_MULTIPLES.heatmap]: HeatmapWarningFormatMessage,
   [CHARTS_WITHOUT_SMALL_MULTIPLES.gauge]: GaugeWarningFormatMessage,
   [CHARTS_TO_BE_DEPRECATED.pie]: PieWarningFormatMessage,
-  [CHARTS_TO_BE_DEPRECATED.timelion]: TimelionWarningFormatMessage,
   [CHARTS_TO_BE_DEPRECATED.controls]: ControlsWarningFormatMessage,
 };
 

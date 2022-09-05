@@ -11,7 +11,7 @@ import { render, screen } from '@testing-library/react';
 
 import '../../common/mock/match_media';
 import { usePushToService, ReturnUsePushToService, UsePushToService } from '.';
-import { TestProviders } from '../../common/mock';
+import { noPushCasesPermissions, readCasesPermissions, TestProviders } from '../../common/mock';
 import { CaseStatuses, ConnectorTypes } from '../../../common/api';
 import { usePostPushToService } from '../../containers/use_post_push_to_service';
 import { basicPush, actionLicenses, connectorsMock } from '../../containers/mock';
@@ -19,7 +19,11 @@ import { CLOSED_CASE_PUSH_ERROR_ID } from './callout/types';
 import * as i18n from './translations';
 import { useGetActionLicense } from '../../containers/use_get_action_license';
 
-jest.mock('../../containers/use_get_action_license');
+jest.mock('../../containers/use_get_action_license', () => {
+  return {
+    useGetActionLicense: jest.fn(),
+  };
+});
 jest.mock('../../containers/use_post_push_to_service');
 jest.mock('../../containers/configure/api');
 jest.mock('../../common/navigation/hooks');
@@ -66,7 +70,6 @@ describe('usePushToService', () => {
     hasDataToPush: true,
     onEditClick,
     isValidConnector: true,
-    userCanCrud: true,
   };
 
   beforeEach(() => {
@@ -277,7 +280,23 @@ describe('usePushToService', () => {
   });
 
   describe('user does not have write permissions', () => {
-    const noWriteProps = { ...defaultArgs, userCanCrud: false };
+    it('disables the push button when the user does not have push permissions', async () => {
+      await act(async () => {
+        const { result, waitForNextUpdate } = renderHook<UsePushToService, ReturnUsePushToService>(
+          () => usePushToService(defaultArgs),
+          {
+            wrapper: ({ children }) => (
+              <TestProviders permissions={noPushCasesPermissions()}> {children}</TestProviders>
+            ),
+          }
+        );
+        await waitForNextUpdate();
+
+        const { getByTestId } = render(result.current.pushButton);
+
+        expect(getByTestId('push-to-external-service')).toBeDisabled();
+      });
+    });
 
     it('does not display a message when user does not have a premium license', async () => {
       useFetchActionLicenseMock.mockImplementation(() => ({
@@ -289,9 +308,11 @@ describe('usePushToService', () => {
       }));
       await act(async () => {
         const { result, waitForNextUpdate } = renderHook<UsePushToService, ReturnUsePushToService>(
-          () => usePushToService(noWriteProps),
+          () => usePushToService(defaultArgs),
           {
-            wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
+            wrapper: ({ children }) => (
+              <TestProviders permissions={readCasesPermissions()}> {children}</TestProviders>
+            ),
           }
         );
         await waitForNextUpdate();
@@ -309,9 +330,11 @@ describe('usePushToService', () => {
       }));
       await act(async () => {
         const { result, waitForNextUpdate } = renderHook<UsePushToService, ReturnUsePushToService>(
-          () => usePushToService(noWriteProps),
+          () => usePushToService(defaultArgs),
           {
-            wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
+            wrapper: ({ children }) => (
+              <TestProviders permissions={readCasesPermissions()}> {children}</TestProviders>
+            ),
           }
         );
         await waitForNextUpdate();
@@ -324,7 +347,7 @@ describe('usePushToService', () => {
         const { result, waitForNextUpdate } = renderHook<UsePushToService, ReturnUsePushToService>(
           () =>
             usePushToService({
-              ...noWriteProps,
+              ...defaultArgs,
               connectors: [],
               connector: {
                 id: 'none',
@@ -334,7 +357,9 @@ describe('usePushToService', () => {
               },
             }),
           {
-            wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
+            wrapper: ({ children }) => (
+              <TestProviders permissions={readCasesPermissions()}> {children}</TestProviders>
+            ),
           }
         );
         await waitForNextUpdate();
@@ -347,7 +372,7 @@ describe('usePushToService', () => {
         const { result, waitForNextUpdate } = renderHook<UsePushToService, ReturnUsePushToService>(
           () =>
             usePushToService({
-              ...noWriteProps,
+              ...defaultArgs,
               connector: {
                 id: 'none',
                 name: 'none',
@@ -356,7 +381,9 @@ describe('usePushToService', () => {
               },
             }),
           {
-            wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
+            wrapper: ({ children }) => (
+              <TestProviders permissions={readCasesPermissions()}> {children}</TestProviders>
+            ),
           }
         );
         await waitForNextUpdate();
@@ -369,7 +396,7 @@ describe('usePushToService', () => {
         const { result, waitForNextUpdate } = renderHook<UsePushToService, ReturnUsePushToService>(
           () =>
             usePushToService({
-              ...noWriteProps,
+              ...defaultArgs,
               connector: {
                 id: 'not-exist',
                 name: 'not-exist',
@@ -379,7 +406,9 @@ describe('usePushToService', () => {
               isValidConnector: false,
             }),
           {
-            wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
+            wrapper: ({ children }) => (
+              <TestProviders permissions={readCasesPermissions()}> {children}</TestProviders>
+            ),
           }
         );
         await waitForNextUpdate();
@@ -392,7 +421,7 @@ describe('usePushToService', () => {
         const { result, waitForNextUpdate } = renderHook<UsePushToService, ReturnUsePushToService>(
           () =>
             usePushToService({
-              ...noWriteProps,
+              ...defaultArgs,
               connectors: [],
               connector: {
                 id: 'not-exist',
@@ -403,7 +432,9 @@ describe('usePushToService', () => {
               isValidConnector: false,
             }),
           {
-            wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
+            wrapper: ({ children }) => (
+              <TestProviders permissions={readCasesPermissions()}> {children}</TestProviders>
+            ),
           }
         );
         await waitForNextUpdate();
@@ -416,11 +447,13 @@ describe('usePushToService', () => {
         const { result, waitForNextUpdate } = renderHook<UsePushToService, ReturnUsePushToService>(
           () =>
             usePushToService({
-              ...noWriteProps,
+              ...defaultArgs,
               caseStatus: CaseStatuses.closed,
             }),
           {
-            wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
+            wrapper: ({ children }) => (
+              <TestProviders permissions={readCasesPermissions()}> {children}</TestProviders>
+            ),
           }
         );
         await waitForNextUpdate();

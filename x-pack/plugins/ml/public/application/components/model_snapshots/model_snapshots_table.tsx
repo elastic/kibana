@@ -218,7 +218,7 @@ export const ModelSnapshotTable: FC<Props> = ({ job, refreshJobList }) => {
   return (
     <>
       <EuiInMemoryTable
-        className="eui-textOverflowWrap"
+        className="eui-textBreakWord"
         compressed={true}
         items={snapshots}
         columns={columns}

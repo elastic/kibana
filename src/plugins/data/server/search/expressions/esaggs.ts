@@ -56,11 +56,9 @@ export function getFunctionDefinition({
         const indexPattern = await indexPatterns.create(args.index.value, true);
         const aggConfigs = aggs.createAggConfigs(
           indexPattern,
-          args.aggs?.map((agg) => agg.value) ?? []
+          args.aggs?.map((agg) => agg.value) ?? [],
+          { hierarchical: args.metricsAtAllLevels, partialRows: args.partialRows }
         );
-
-        aggConfigs.hierarchical = args.metricsAtAllLevels;
-        aggConfigs.partialRows = args.partialRows;
 
         return { aggConfigs, indexPattern, searchSource };
       }).pipe(
@@ -74,6 +72,7 @@ export function getFunctionDefinition({
             query: get(input, 'query', undefined) as any,
             searchSessionId: getSearchSessionId(),
             searchSourceService: searchSource,
+            disableShardWarnings: false,
             timeFields: args.timeFields,
             timeRange: get(input, 'timeRange', undefined),
           })

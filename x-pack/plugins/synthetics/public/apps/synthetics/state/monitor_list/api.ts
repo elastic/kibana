@@ -11,6 +11,7 @@ import {
   FetchMonitorManagementListQueryArgs,
   MonitorManagementListResult,
   MonitorManagementListResultCodec,
+  MonitorOverviewItem,
   ServiceLocationErrors,
   SyntheticsMonitor,
 } from '../../../../../common/runtime_types';
@@ -26,7 +27,10 @@ function toMonitorManagementListQueryArgs(
     page: pageState.pageIndex + 1,
     sortOrder: pageState.sortOrder,
     sortField: pageState.sortField,
-    search: '',
+    query: pageState.query,
+    tags: pageState.tags,
+    locations: pageState.locations,
+    monitorType: pageState.monitorType,
     searchFields: [],
   };
 }
@@ -51,7 +55,7 @@ export const fetchUpsertMonitor = async ({
   monitor,
   id,
 }: {
-  monitor: SyntheticsMonitor | EncryptedSyntheticsMonitor;
+  monitor: SyntheticsMonitor | EncryptedSyntheticsMonitor | MonitorOverviewItem;
   id?: string;
 }): Promise<{ attributes: { errors: ServiceLocationErrors } } | SyntheticsMonitor> => {
   if (id) {

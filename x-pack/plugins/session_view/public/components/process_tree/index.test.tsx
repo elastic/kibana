@@ -111,7 +111,7 @@ describe('ProcessTree component', () => {
 
     it('When Verbose mode is ON, it should show all childrens', () => {
       renderResult = mockedContext.render(<ProcessTree {...props} verboseMode={true} />);
-      expect(renderResult.queryByText('cat')).toBeTruthy();
+      expect(renderResult.queryByRole('document', { name: '/home/vagrant cat' })).toBeTruthy();
     });
   });
 });

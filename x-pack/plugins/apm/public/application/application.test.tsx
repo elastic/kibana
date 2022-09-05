@@ -18,10 +18,6 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 import { ApmPluginSetupDeps, ApmPluginStartDeps } from '../plugin';
 
-jest.mock('../services/rest/data_view', () => ({
-  createStaticDataView: () => Promise.resolve(undefined),
-}));
-
 describe('renderApp (APM)', () => {
   let mockConsole: jest.SpyInstance;
   beforeAll(() => {
@@ -126,13 +122,19 @@ describe('renderApp (APM)', () => {
     };
   };
 
-  it('renders the app', () => {
+  it('renders the app', async () => {
+    const promise = Promise.resolve();
     const mountProps = getApmMountProps();
 
     let unmount: () => void;
 
     act(() => {
       unmount = renderApmApp(mountProps);
+    });
+
+    // fake promise to wait for to ensure the app is mounted
+    await act(async () => {
+      await promise;
     });
 
     expect(() => {

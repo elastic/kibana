@@ -5,43 +5,49 @@
  * 2.0.
  */
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import type {
   MetricsExplorerRow,
   MetricsExplorerSeries,
 } from '../../../../common/http_api/metrics_explorer';
-import type { MetricsMap, SortState, UseNodeMetricsTableOptions } from '../shared';
-import { metricsToApiOptions, useInfrastructureNodeMetrics } from '../shared';
+import type { MetricsQueryOptions, SortState, UseNodeMetricsTableOptions } from '../shared';
+import {
+  averageOfValues,
+  createMetricByFieldLookup,
+  makeUnpackMetric,
+  metricsToApiOptions,
+  scaleUpPercentage,
+  useInfrastructureNodeMetrics,
+} from '../shared';
 
 type ContainerMetricsField =
-  | 'kubernetes.container.start_time'
-  | 'kubernetes.container.cpu.usage.node.pct'
+  | 'kubernetes.container.cpu.usage.limit.pct'
   | 'kubernetes.container.memory.usage.bytes';
 
-const containerMetricsMap: MetricsMap<ContainerMetricsField> = {
-  'kubernetes.container.start_time': {
-    aggregation: 'max',
-    field: 'kubernetes.container.start_time',
+const containerMetricsQueryConfig: MetricsQueryOptions<ContainerMetricsField> = {
+  sourceFilter: {
+    term: {
+      'event.dataset': 'kubernetes.container',
+    },
   },
-  'kubernetes.container.cpu.usage.node.pct': {
-    aggregation: 'avg',
-    field: 'kubernetes.container.cpu.usage.node.pct',
-  },
-  'kubernetes.container.memory.usage.bytes': {
-    aggregation: 'avg',
-    field: 'kubernetes.container.memory.usage.bytes',
+  groupByField: 'container.id',
+  metricsMap: {
+    'kubernetes.container.cpu.usage.limit.pct': {
+      aggregation: 'avg',
+      field: 'kubernetes.container.cpu.usage.limit.pct',
+    },
+    'kubernetes.container.memory.usage.bytes': {
+      aggregation: 'avg',
+      field: 'kubernetes.container.memory.usage.bytes',
+    },
   },
 };
 
-const { options: containerMetricsOptions, metricByField } = metricsToApiOptions(
-  containerMetricsMap,
-  'container.id'
-);
-export { metricByField };
+export const metricByField = createMetricByFieldLookup(containerMetricsQueryConfig.metricsMap);
+const unpackMetric = makeUnpackMetric(metricByField);
 
 export interface ContainerNodeMetricsRow {
-  name: string;
-  uptime: number | null;
+  id: string;
   averageCpuUsagePercent: number | null;
   averageMemoryUsageMegabytes: number | null;
 }
@@ -56,28 +62,26 @@ export function useContainerMetricsTable({
     direction: 'desc',
   });
 
-  const {
-    isLoading,
-    nodes: containers,
-    pageCount,
-  } = useInfrastructureNodeMetrics<ContainerNodeMetricsRow>({
+  const { options: containerMetricsOptions } = useMemo(
+    () => metricsToApiOptions(containerMetricsQueryConfig, filterClauseDsl),
+    [filterClauseDsl]
+  );
+
+  const { data, isLoading } = useInfrastructureNodeMetrics<ContainerNodeMetricsRow>({
     metricsExplorerOptions: containerMetricsOptions,
     timerange,
-    filterClauseDsl,
     transform: seriesToContainerNodeMetricsRow,
     sortState,
     currentPageIndex,
   });
 
   return {
-    timerange,
+    data,
     isLoading,
-    containers,
-    pageCount,
-    currentPageIndex,
     setCurrentPageIndex,
-    sortState,
     setSortState,
+    sortState,
+    timerange,
   };
 }
 
@@ -87,32 +91,26 @@ function seriesToContainerNodeMetricsRow(series: MetricsExplorerSeries): Contain
   }
 
   return {
-    name: series.id,
+    id: series.id,
     ...calculateMetricAverages(series.rows),
   };
 }
 
-function rowWithoutMetrics(name: string) {
+function rowWithoutMetrics(id: string) {
   return {
-    name,
-    uptime: null,
+    id,
     averageCpuUsagePercent: null,
     averageMemoryUsageMegabytes: null,
   };
 }
 
 function calculateMetricAverages(rows: MetricsExplorerRow[]) {
-  const { uptimeValues, averageCpuUsagePercentValues, averageMemoryUsageMegabytesValues } =
+  const { averageCpuUsagePercentValues, averageMemoryUsageMegabytesValues } =
     collectMetricValues(rows);
-
-  let uptime = null;
-  if (uptimeValues.length !== 0) {
-    uptime = averageOfValues(uptimeValues);
-  }
 
   let averageCpuUsagePercent = null;
   if (averageCpuUsagePercentValues.length !== 0) {
-    averageCpuUsagePercent = averageOfValues(averageCpuUsagePercentValues);
+    averageCpuUsagePercent = scaleUpPercentage(averageOfValues(averageCpuUsagePercentValues));
   }
 
   let averageMemoryUsageMegabytes = null;
@@ -123,23 +121,17 @@ function calculateMetricAverages(rows: MetricsExplorerRow[]) {
   }
 
   return {
-    uptime,
     averageCpuUsagePercent,
     averageMemoryUsageMegabytes,
   };
 }
 
 function collectMetricValues(rows: MetricsExplorerRow[]) {
-  const uptimeValues: number[] = [];
   const averageCpuUsagePercentValues: number[] = [];
   const averageMemoryUsageMegabytesValues: number[] = [];
 
   rows.forEach((row) => {
-    const { uptime, averageCpuUsagePercent, averageMemoryUsageMegabytes } = unpackMetrics(row);
-
-    if (uptime !== null) {
-      uptimeValues.push(uptime);
-    }
+    const { averageCpuUsagePercent, averageMemoryUsageMegabytes } = unpackMetrics(row);
 
     if (averageCpuUsagePercent !== null) {
       averageCpuUsagePercentValues.push(averageCpuUsagePercent);
@@ -151,25 +143,14 @@ function collectMetricValues(rows: MetricsExplorerRow[]) {
   });
 
   return {
-    uptimeValues,
     averageCpuUsagePercentValues,
     averageMemoryUsageMegabytesValues,
   };
 }
 
-function unpackMetrics(row: MetricsExplorerRow): Omit<ContainerNodeMetricsRow, 'name'> {
+function unpackMetrics(row: MetricsExplorerRow): Omit<ContainerNodeMetricsRow, 'id'> {
   return {
-    uptime: row[metricByField['kubernetes.container.start_time']] as number | null,
-    averageCpuUsagePercent: row[metricByField['kubernetes.container.cpu.usage.node.pct']] as
-      | number
-      | null,
-    averageMemoryUsageMegabytes: row[metricByField['kubernetes.container.memory.usage.bytes']] as
-      | number
-      | null,
+    averageCpuUsagePercent: unpackMetric(row, 'kubernetes.container.cpu.usage.limit.pct'),
+    averageMemoryUsageMegabytes: unpackMetric(row, 'kubernetes.container.memory.usage.bytes'),
   };
-}
-
-function averageOfValues(values: number[]) {
-  const sum = values.reduce((acc, value) => acc + value, 0);
-  return sum / values.length;
 }

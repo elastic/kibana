@@ -1,0 +1,69 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "This rule detects when a user creates a pod/container running in privileged mode. A highly privileged container has access to the node's resources and breaks the isolation between containers. If compromised, an attacker can use the privileged container to gain access to the underlying host. Gaining access to the host may provide the adversary with the opportunity to achieve follow-on objectives, such as establishing persistence, moving laterally within the environment, or setting up a command and control channel on the host.",
+  "false_positives": [
+    "By default a container is not allowed to access any devices on the host, but a \"privileged\" container is given access to all devices on the host. This allows the container nearly all the same access as processes running on the host. An administrator may want to run a privileged container to use operating system administrative capabilities such as manipulating the network stack or accessing hardware devices from within the cluster."
+  ],
+  "index": [
+    "logs-kubernetes.*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License v2",
+  "name": "Kubernetes Privileged Pod Created",
+  "note": "",
+  "query": "kubernetes.audit.objectRef.resource:pods and kubernetes.audit.verb:create and\n  kubernetes.audit.requestObject.spec.containers.securityContext.privileged:true\n",
+  "references": [
+    "https://media.defense.gov/2021/Aug/03/2002820425/-1/-1/1/CTR_KUBERNETES%20HARDENING%20GUIDANCE.PDF",
+    "https://kubernetes.io/docs/tasks/configure-pod-container/security-context/"
+  ],
+  "required_fields": [
+    {
+      "ecs": false,
+      "name": "kubernetes.audit.objectRef.resource",
+      "type": "unknown"
+    },
+    {
+      "ecs": false,
+      "name": "kubernetes.audit.requestObject.spec.containers.securityContext.privileged",
+      "type": "unknown"
+    },
+    {
+      "ecs": false,
+      "name": "kubernetes.audit.verb",
+      "type": "unknown"
+    }
+  ],
+  "risk_score": 47,
+  "rule_id": "c7908cac-337a-4f38-b50d-5eeb78bdb531",
+  "setup": "The Kubernetes Fleet integration with Audit Logs enabled or similarly structured data is required to be compatible with this rule.",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Kubernetes",
+    "Continuous Monitoring",
+    "Execution",
+    "Privilege Escalation"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0004",
+        "name": "Privilege Escalation",
+        "reference": "https://attack.mitre.org/tactics/TA0004/"
+      },
+      "technique": [
+        {
+          "id": "T1611",
+          "name": "Escape to Host",
+          "reference": "https://attack.mitre.org/techniques/T1611/"
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "query",
+  "version": 2
+}

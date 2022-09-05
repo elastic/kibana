@@ -1,0 +1,338 @@
+{
+  "id": "@kbn/core-base-common",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/core-base-common",
+        "id": "def-server.DiscoveredPlugin",
+        "type": "Interface",
+        "tags": [],
+        "label": "DiscoveredPlugin",
+        "description": [
+          "\nSmall container object used to expose information about discovered plugins that may\nor may not have been started."
+        ],
+        "path": "packages/core/base/core-base-common/src/plugins.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-base-common",
+            "id": "def-server.DiscoveredPlugin.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [
+              "\nIdentifier of the plugin."
+            ],
+            "path": "packages/core/base/core-base-common/src/plugins.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/core-base-common",
+            "id": "def-server.DiscoveredPlugin.configPath",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "configPath",
+            "description": [
+              "\nRoot configuration path used by the plugin, defaults to \"id\" in snake_case format."
+            ],
+            "signature": [
+              "string | string[]"
+            ],
+            "path": "packages/core/base/core-base-common/src/plugins.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/core-base-common",
+            "id": "def-server.DiscoveredPlugin.type",
+            "type": "Enum",
+            "tags": [],
+            "label": "type",
+            "description": [
+              "\nType of the plugin, defaults to `standard`."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-base-common",
+                "scope": "server",
+                "docId": "kibKbnCoreBaseCommonPluginApi",
+                "section": "def-server.PluginType",
+                "text": "PluginType"
+              }
+            ],
+            "path": "packages/core/base/core-base-common/src/plugins.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/core-base-common",
+            "id": "def-server.DiscoveredPlugin.requiredPlugins",
+            "type": "Object",
+            "tags": [],
+            "label": "requiredPlugins",
+            "description": [
+              "\nAn optional list of the other plugins that **must be** installed and enabled\nfor this plugin to function properly."
+            ],
+            "signature": [
+              "readonly string[]"
+            ],
+            "path": "packages/core/base/core-base-common/src/plugins.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/core-base-common",
+            "id": "def-server.DiscoveredPlugin.optionalPlugins",
+            "type": "Object",
+            "tags": [],
+            "label": "optionalPlugins",
+            "description": [
+              "\nAn optional list of the other plugins that if installed and enabled **may be**\nleveraged by this plugin for some additional functionality but otherwise are\nnot required for this plugin to work properly."
+            ],
+            "signature": [
+              "readonly string[]"
+            ],
+            "path": "packages/core/base/core-base-common/src/plugins.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/core-base-common",
+            "id": "def-server.DiscoveredPlugin.requiredBundles",
+            "type": "Object",
+            "tags": [],
+            "label": "requiredBundles",
+            "description": [
+              "\nList of plugin ids that this plugin's UI code imports modules from that are\nnot in `requiredPlugins`.\n"
+            ],
+            "signature": [
+              "readonly string[]"
+            ],
+            "path": "packages/core/base/core-base-common/src/plugins.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/core-base-common",
+            "id": "def-server.DiscoveredPlugin.enabledOnAnonymousPages",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "enabledOnAnonymousPages",
+            "description": [
+              "\nSpecifies whether this plugin - and its required dependencies - will be enabled for anonymous pages (login page, status page when\nconfigured, etc.) Default is false."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/core/base/core-base-common/src/plugins.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-base-common",
+        "id": "def-server.ServiceStatus",
+        "type": "Interface",
+        "tags": [],
+        "label": "ServiceStatus",
+        "description": [
+          "\nThe current status of a service at a point in time.\n"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-base-common",
+            "scope": "server",
+            "docId": "kibKbnCoreBaseCommonPluginApi",
+            "section": "def-server.ServiceStatus",
+            "text": "ServiceStatus"
+          },
+          "<Meta>"
+        ],
+        "path": "packages/core/base/core-base-common/src/service_status.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-base-common",
+            "id": "def-server.ServiceStatus.level",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "level",
+            "description": [
+              "\nThe current availability level of the service."
+            ],
+            "signature": [
+              "Readonly<{ toString: () => \"available\"; valueOf: () => 0; toJSON: () => \"available\"; }> | Readonly<{ toString: () => \"degraded\"; valueOf: () => 1; toJSON: () => \"degraded\"; }> | Readonly<{ toString: () => \"unavailable\"; valueOf: () => 2; toJSON: () => \"unavailable\"; }> | Readonly<{ toString: () => \"critical\"; valueOf: () => 3; toJSON: () => \"critical\"; }>"
+            ],
+            "path": "packages/core/base/core-base-common/src/service_status.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/core-base-common",
+            "id": "def-server.ServiceStatus.summary",
+            "type": "string",
+            "tags": [],
+            "label": "summary",
+            "description": [
+              "\nA high-level summary of the service status."
+            ],
+            "path": "packages/core/base/core-base-common/src/service_status.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/core-base-common",
+            "id": "def-server.ServiceStatus.detail",
+            "type": "string",
+            "tags": [],
+            "label": "detail",
+            "description": [
+              "\nA more detailed description of the service status."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/base/core-base-common/src/service_status.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/core-base-common",
+            "id": "def-server.ServiceStatus.documentationUrl",
+            "type": "string",
+            "tags": [],
+            "label": "documentationUrl",
+            "description": [
+              "\nA URL to open in a new tab about how to resolve or troubleshoot the problem."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/base/core-base-common/src/service_status.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/core-base-common",
+            "id": "def-server.ServiceStatus.meta",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "meta",
+            "description": [
+              "\nAny JSON-serializable data to be included in the HTTP API response. Useful for providing more fine-grained,\nmachine-readable information about the service status. May include status information for underlying features."
+            ],
+            "signature": [
+              "Meta | undefined"
+            ],
+            "path": "packages/core/base/core-base-common/src/service_status.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [
+      {
+        "parentPluginId": "@kbn/core-base-common",
+        "id": "def-server.PluginType",
+        "type": "Enum",
+        "tags": [],
+        "label": "PluginType",
+        "description": [],
+        "path": "packages/core/base/core-base-common/src/plugins.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/core-base-common",
+        "id": "def-server.EUI_STYLES_GLOBAL",
+        "type": "string",
+        "tags": [],
+        "label": "EUI_STYLES_GLOBAL",
+        "description": [],
+        "signature": [
+          "\"eui-global\""
+        ],
+        "path": "packages/core/base/core-base-common/src/eui.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-base-common",
+        "id": "def-server.PluginName",
+        "type": "Type",
+        "tags": [],
+        "label": "PluginName",
+        "description": [
+          "\nDedicated type for plugin name/id that is supposed to make Map/Set/Arrays\nthat use it as a key or value more obvious.\n"
+        ],
+        "signature": [
+          "string"
+        ],
+        "path": "packages/core/base/core-base-common/src/plugins.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-base-common",
+        "id": "def-server.PluginOpaqueId",
+        "type": "Type",
+        "tags": [],
+        "label": "PluginOpaqueId",
+        "description": [],
+        "signature": [
+          "symbol"
+        ],
+        "path": "packages/core/base/core-base-common/src/plugins.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-base-common",
+        "id": "def-server.ServiceStatusLevel",
+        "type": "Type",
+        "tags": [],
+        "label": "ServiceStatusLevel",
+        "description": [
+          "\nA convenience type that represents the union of each value in {@link ServiceStatusLevels}."
+        ],
+        "signature": [
+          "Readonly<{ toString: () => \"available\"; valueOf: () => 0; toJSON: () => \"available\"; }> | Readonly<{ toString: () => \"degraded\"; valueOf: () => 1; toJSON: () => \"degraded\"; }> | Readonly<{ toString: () => \"unavailable\"; valueOf: () => 2; toJSON: () => \"unavailable\"; }> | Readonly<{ toString: () => \"critical\"; valueOf: () => 3; toJSON: () => \"critical\"; }>"
+        ],
+        "path": "packages/core/base/core-base-common/src/service_status.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/core-base-common",
+        "id": "def-server.ServiceStatusLevels",
+        "type": "Object",
+        "tags": [],
+        "label": "ServiceStatusLevels",
+        "description": [
+          "\nThe current \"level\" of availability of a service.\n"
+        ],
+        "signature": [
+          "{ readonly available: Readonly<{ toString: () => \"available\"; valueOf: () => 0; toJSON: () => \"available\"; }>; readonly degraded: Readonly<{ toString: () => \"degraded\"; valueOf: () => 1; toJSON: () => \"degraded\"; }>; readonly unavailable: Readonly<{ toString: () => \"unavailable\"; valueOf: () => 2; toJSON: () => \"unavailable\"; }>; readonly critical: Readonly<{ toString: () => \"critical\"; valueOf: () => 3; toJSON: () => \"critical\"; }>; }"
+        ],
+        "path": "packages/core/base/core-base-common/src/service_status.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ]
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

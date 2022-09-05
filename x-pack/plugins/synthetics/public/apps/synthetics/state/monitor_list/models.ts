@@ -13,8 +13,12 @@ import {
 export type MonitorListSortField = `${keyof EncryptedSyntheticsSavedMonitor}.keyword`;
 
 export interface MonitorListPageState {
+  query?: string;
   pageIndex: number;
   pageSize: number;
   sortField: MonitorListSortField;
   sortOrder: NonNullable<FetchMonitorManagementListQueryArgs['sortOrder']>;
+  tags?: string[];
+  monitorType?: string[];
+  locations?: string[];
 }

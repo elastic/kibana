@@ -15,7 +15,7 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { PAGE_SEARCH_ERROR_MESSAGE } from '../translations';
+import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../../common/hooks/use_kibana';
 
 export const ErrorCallout = ({ error }: { error: Error }) => {
@@ -27,11 +27,17 @@ export const ErrorCallout = ({ error }: { error: Error }) => {
     <EuiFlexGroup justifyContent="center" alignItems="center">
       <EuiFlexItem grow={false}>
         <EuiPanel paddingSize="l" grow>
-          <EuiCallOut title={PAGE_SEARCH_ERROR_MESSAGE} color="danger" iconType="alert">
+          <EuiCallOut
+            title={i18n.translate('xpack.csp.findings.errorCallout.pageSearchErrorTitle', {
+              defaultMessage: 'We encountered an error retrieving search results',
+            })}
+            color="danger"
+            iconType="alert"
+          >
             <EuiSpacer />
             <EuiButton size="s" color="danger" onClick={() => search.showError(error)}>
               <FormattedMessage
-                id="xpack.csp.findings.showErrorButtonLabel"
+                id="xpack.csp.findings.errorCallout.showErrorButtonLabel"
                 defaultMessage="Show error message"
               />
             </EuiButton>

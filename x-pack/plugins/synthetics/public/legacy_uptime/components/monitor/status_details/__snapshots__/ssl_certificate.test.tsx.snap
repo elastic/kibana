@@ -8,12 +8,12 @@ Array [
 }
 
 <dt
-    class="euiDescriptionList__title c0"
+    class="euiDescriptionList__title c0 emotion-euiDescriptionList__title-row-normal"
   >
     TLS Certificate
   </dt>,
   <div
-    class="euiSpacer euiSpacer--s css-i2qclb-euiSpacer-s"
+    class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
   />,
   .c0.c0.c0 {
   width: 70%;
@@ -27,7 +27,7 @@ Array [
 }
 
 <dd
-    class="euiDescriptionList__description c0"
+    class="euiDescriptionList__description c0 emotion-euiDescriptionList__description-row-normal"
   >
     <a
       class="eui-displayInline"
@@ -37,7 +37,7 @@ Array [
         class="euiToolTipAnchor"
       >
         <div
-          class="euiText euiText--small"
+          class="euiText emotion-euiText-s"
         >
           <span
             color="success"
@@ -63,12 +63,12 @@ Array [
 }
 
 <dt
-    class="euiDescriptionList__title c0"
+    class="euiDescriptionList__title c0 emotion-euiDescriptionList__title-row-normal"
   >
     TLS Certificate
   </dt>,
   <div
-    class="euiSpacer euiSpacer--s css-i2qclb-euiSpacer-s"
+    class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
   />,
   .c0.c0.c0 {
   width: 70%;
@@ -76,7 +76,7 @@ Array [
 }
 
 <dd
-    class="euiDescriptionList__description c0"
+    class="euiDescriptionList__description c0 emotion-euiDescriptionList__description-row-normal"
   >
     <a
       class="eui-displayInline"

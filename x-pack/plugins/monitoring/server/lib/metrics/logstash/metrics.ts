@@ -402,6 +402,7 @@ export const metrics = {
   }),
   logstash_pipeline_queue_size: new LogstashPipelineQueueSizeMetric({
     field: 'logstash_stats.pipelines.queue.queue_size_in_bytes',
+    mbField: 'logstash.node.stats.pipelines.queue.queue_size_in_bytes',
     label: i18n.translate('xpack.monitoring.metrics.logstashInstance.queueSizeLabel', {
       defaultMessage: 'Queue Size',
     }),
@@ -417,6 +418,7 @@ export const metrics = {
   }),
   logstash_pipeline_max_queue_size: new LogstashPipelineQueueSizeMetric({
     field: 'logstash_stats.pipelines.queue.max_queue_size_in_bytes',
+    mbField: 'logstash.node.stats.pipelines.queue.max_queue_size_in_bytes',
     label: i18n.translate('xpack.monitoring.metrics.logstashInstance.maxQueueSizeLabel', {
       defaultMessage: 'Max Queue Size',
     }),

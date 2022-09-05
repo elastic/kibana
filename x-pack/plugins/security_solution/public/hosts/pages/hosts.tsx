@@ -11,11 +11,12 @@ import { noop } from 'lodash/fp';
 import React, { useCallback, useMemo, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import { useParams } from 'react-router-dom';
-import { Filter } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
 import { isTab } from '@kbn/timelines-plugin/public';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
+import { InputsModelId } from '../../common/store/inputs/constants';
 import { SecurityPageName } from '../../app/types';
-import { UpdateDateRange } from '../../common/components/charts/common';
+import type { UpdateDateRange } from '../../common/components/charts/common';
 import { FiltersGlobal } from '../../common/components/filters_global';
 import { HeaderPage } from '../../common/components/header_page';
 import { LastEventTime } from '../../common/components/last_event_time';
@@ -30,7 +31,8 @@ import { TimelineId } from '../../../common/types/timeline';
 import { LastEventIndexKey } from '../../../common/search_strategy';
 import { useKibana } from '../../common/lib/kibana';
 import { convertToBuildEsQuery } from '../../common/lib/keury';
-import { inputsSelectors, State } from '../../common/store';
+import type { State } from '../../common/store';
+import { inputsSelectors } from '../../common/store';
 import { setAbsoluteRangeDatePicker } from '../../common/store/inputs/actions';
 
 import { SpyRoute } from '../../common/utils/route/spy_routes';
@@ -73,12 +75,7 @@ const HostsComponent = () => {
   const containerElement = useRef<HTMLDivElement | null>(null);
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const graphEventId = useShallowEqualSelector(
-    (state) =>
-      (
-        getTimeline(state, TimelineId.hostsPageEvents) ??
-        getTimeline(state, TimelineId.hostsPageExternalAlerts) ??
-        timelineDefaults
-      ).graphEventId
+    (state) => (getTimeline(state, TimelineId.hostsPageEvents) ?? timelineDefaults).graphEventId
   );
   const getGlobalFiltersQuerySelector = useMemo(
     () => inputsSelectors.globalFiltersQuerySelector(),
@@ -101,7 +98,7 @@ const HostsComponent = () => {
   const { uiSettings } = useKibana().services;
   const { tabName } = useParams<{ tabName: string }>();
   const tabsFilters: Filter[] = React.useMemo(() => {
-    if (tabName === HostsTableType.alerts || tabName === HostsTableType.events) {
+    if (tabName === HostsTableType.events) {
       return filters.length > 0 ? [...filters, ...hostNameExistsFilter] : hostNameExistsFilter;
     }
 
@@ -112,7 +109,7 @@ const HostsComponent = () => {
     }
     return filters;
   }, [severitySelection, tabName, filters]);
-  const narrowDateRange = useCallback<UpdateDateRange>(
+  const updateDateRange = useCallback<UpdateDateRange>(
     ({ x }) => {
       if (!x) {
         return;
@@ -120,7 +117,7 @@ const HostsComponent = () => {
       const [min, max] = x;
       dispatch(
         setAbsoluteRangeDatePicker({
-          id: 'global',
+          id: InputsModelId.global,
           from: new Date(min).toISOString(),
           to: new Date(max).toISOString(),
         })
@@ -128,8 +125,7 @@ const HostsComponent = () => {
     },
     [dispatch]
   );
-  const { docValueFields, indicesExist, indexPattern, selectedPatterns, loading } =
-    useSourcererDataView();
+  const { indicesExist, indexPattern, selectedPatterns, loading } = useSourcererDataView();
   const [filterQuery, kqlError] = useMemo(
     () =>
       convertToBuildEsQuery({
@@ -152,7 +148,6 @@ const HostsComponent = () => {
   );
 
   const riskyHostsFeatureEnabled = useIsExperimentalFeatureEnabled('riskyHostsEnabled');
-  const usersEnabled = useIsExperimentalFeatureEnabled('usersEnabled');
 
   useInvalidFilterQuery({ id: ID, filterQuery, kqlError, query, startDate: from, endDate: to });
 
@@ -190,18 +185,14 @@ const HostsComponent = () => {
         <StyledFullHeightContainer onKeyDown={onKeyDown} ref={containerElement}>
           <EuiWindowEvent event="resize" handler={noop} />
           <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId })}>
-            <SiemSearchBar indexPattern={indexPattern} id="global" />
+            <SiemSearchBar indexPattern={indexPattern} id={InputsModelId.global} />
           </FiltersGlobal>
 
           <SecuritySolutionPageWrapper noPadding={globalFullScreen}>
             <Display show={!globalFullScreen}>
               <HeaderPage
                 subtitle={
-                  <LastEventTime
-                    docValueFields={docValueFields}
-                    indexKey={LastEventIndexKey.hosts}
-                    indexNames={selectedPatterns}
-                  />
+                  <LastEventTime indexKey={LastEventIndexKey.hosts} indexNames={selectedPatterns} />
                 }
                 title={i18n.PAGE_TITLE}
                 border
@@ -214,7 +205,7 @@ const HostsComponent = () => {
                 setQuery={setQuery}
                 to={to}
                 skip={isInitializing || !filterQuery}
-                narrowDateRange={narrowDateRange}
+                updateDateRange={updateDateRange}
               />
 
               <EuiSpacer />
@@ -223,7 +214,6 @@ const HostsComponent = () => {
                 navTabs={navTabsHosts({
                   hasMlUserPermissions: hasMlUserPermissions(capabilities),
                   isRiskyHostsEnabled: riskyHostsFeatureEnabled,
-                  isUsersEnabled: usersEnabled,
                 })}
               />
 
@@ -236,7 +226,6 @@ const HostsComponent = () => {
               filterQuery={tabsFilterQuery || ''}
               isInitializing={isInitializing}
               indexNames={selectedPatterns}
-              setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
               setQuery={setQuery}
               from={from}
               type={hostsModel.HostsType.page}

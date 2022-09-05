@@ -24,6 +24,7 @@
   "optionalPlugins": [
     "actions",
     "alerting",
+    "cases",
     "cloud",
     "fleet",
     "home",

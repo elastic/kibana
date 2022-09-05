@@ -65,9 +65,11 @@ describe('Background Search Session management status labels', () => {
         </LocaleWrapper>
       );
 
-      const label = statusIndicator.find(
-        `.euiText[data-test-subj="sessionManagementStatusLabel"][data-test-status="in_progress"]`
-      );
+      const label = statusIndicator
+        .find(
+          `.euiText[data-test-subj="sessionManagementStatusLabel"][data-test-status="in_progress"]`
+        )
+        .last();
       expect(label.text()).toMatchInlineSnapshot(`"In progress"`);
     });
 

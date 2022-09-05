@@ -90,7 +90,7 @@ export function useInlineErrors({
           },
         },
         collapse: { field: 'config_id' },
-        sort: [{ [sortFieldMap[sortField]]: sortOrder }],
+        sort: sortFieldMap[sortField] ? [{ [sortFieldMap[sortField]]: sortOrder }] : undefined,
       },
     },
     [syntheticsMonitors, lastRefresh, doFetch, sortField, sortOrder],

@@ -12,9 +12,11 @@ import { useDispatch } from 'react-redux';
 
 import type { Filter } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
-import { HostItem, LastEventIndexKey } from '../../../../common/search_strategy';
+import { InputsModelId } from '../../../common/store/inputs/constants';
+import type { HostItem } from '../../../../common/search_strategy';
+import { LastEventIndexKey } from '../../../../common/search_strategy';
 import { SecurityPageName } from '../../../app/types';
-import { UpdateDateRange } from '../../../common/components/charts/common';
+import type { UpdateDateRange } from '../../../common/components/charts/common';
 import { FiltersGlobal } from '../../../common/components/filters_global';
 import { HeaderPage } from '../../../common/components/header_page';
 import { LastEventTime } from '../../../common/components/last_event_time';
@@ -38,7 +40,7 @@ import { SpyRoute } from '../../../common/utils/route/spy_routes';
 
 import { HostDetailsTabs } from './details_tabs';
 import { navTabsHostDetails } from './nav_tabs';
-import { HostDetailsProps } from './types';
+import type { HostDetailsProps } from './types';
 import { type } from './utils';
 import { getHostDetailsPageFilters } from './helpers';
 import { showGlobalFilters } from '../../../timelines/components/timeline/helpers';
@@ -82,7 +84,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
   );
   const getFilters = () => [...hostDetailsPageFilters, ...filters];
 
-  const narrowDateRange = useCallback<UpdateDateRange>(
+  const updateDateRange = useCallback<UpdateDateRange>(
     ({ x }) => {
       if (!x) {
         return;
@@ -90,7 +92,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
       const [min, max] = x;
       dispatch(
         setAbsoluteRangeDatePicker({
-          id: 'global',
+          id: InputsModelId.global,
           from: new Date(min).toISOString(),
           to: new Date(max).toISOString(),
         })
@@ -98,8 +100,21 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
     },
     [dispatch]
   );
+  const narrowDateRange = useCallback(
+    (score, interval) => {
+      const fromTo = scoreIntervalToDateTime(score, interval);
+      dispatch(
+        setAbsoluteRangeDatePicker({
+          id: InputsModelId.global,
+          from: fromTo.from,
+          to: fromTo.to,
+        })
+      );
+    },
+    [dispatch]
+  );
 
-  const { docValueFields, indexPattern, indicesExist, selectedPatterns } = useSourcererDataView();
+  const { indexPattern, indicesExist, selectedPatterns } = useSourcererDataView();
   const [loading, { inspect, hostDetails: hostOverview, id, refetch }] = useHostDetails({
     endDate: to,
     startDate: from,
@@ -128,7 +143,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
         <>
           <EuiWindowEvent event="resize" handler={noop} />
           <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId })}>
-            <SiemSearchBar indexPattern={indexPattern} id="global" />
+            <SiemSearchBar indexPattern={indexPattern} id={InputsModelId.global} />
           </FiltersGlobal>
 
           <SecuritySolutionPageWrapper
@@ -140,7 +155,6 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
                 border
                 subtitle={
                   <LastEventTime
-                    docValueFields={docValueFields}
                     indexKey={LastEventIndexKey.hostDetails}
                     hostName={detailName}
                     indexNames={selectedPatterns}
@@ -157,28 +171,20 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
               >
                 {({ isLoadingAnomaliesData, anomaliesData }) => (
                   <HostOverviewManage
-                    docValueFields={docValueFields}
                     id={id}
                     isInDetailsSidePanel={false}
                     data={hostOverview as HostItem}
                     anomaliesData={anomaliesData}
                     isLoadingAnomaliesData={isLoadingAnomaliesData}
-                    indexNames={selectedPatterns}
                     loading={loading}
                     startDate={from}
                     endDate={to}
-                    narrowDateRange={(score, interval) => {
-                      const fromTo = scoreIntervalToDateTime(score, interval);
-                      setAbsoluteRangeDatePicker({
-                        id: 'global',
-                        from: fromTo.from,
-                        to: fromTo.to,
-                      });
-                    }}
+                    narrowDateRange={narrowDateRange}
                     setQuery={setQuery}
                     refetch={refetch}
                     inspect={inspect}
                     hostName={detailName}
+                    indexNames={selectedPatterns}
                   />
                 )}
               </AnomalyTableProvider>
@@ -191,7 +197,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
                 indexNames={selectedPatterns}
                 setQuery={setQuery}
                 to={to}
-                narrowDateRange={narrowDateRange}
+                updateDateRange={updateDateRange}
                 skip={isInitializing}
               />
 
@@ -221,7 +227,6 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
               filterQuery={filterQuery}
               hostDetailsPagePath={hostDetailsPagePath}
               indexPattern={indexPattern}
-              setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
             />
           </SecuritySolutionPageWrapper>
         </>

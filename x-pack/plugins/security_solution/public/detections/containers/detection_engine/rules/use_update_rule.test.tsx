@@ -7,7 +7,8 @@
 
 import { renderHook, act } from '@testing-library/react-hooks';
 
-import { useUpdateRule, ReturnUpdateRule } from './use_update_rule';
+import type { ReturnUpdateRule } from './use_update_rule';
+import { useUpdateRule } from './use_update_rule';
 import { getUpdateRulesSchemaMock } from '../../../../../common/detection_engine/schemas/request/rule_schemas.mock';
 import { useAppToastsMock } from '../../../../common/hooks/use_app_toasts.mock';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';

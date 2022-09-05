@@ -433,6 +433,27 @@ export const getClosedInfoForUpdate = ({
   }
 };
 
+export const getDurationInSeconds = ({
+  closedAt,
+  createdAt,
+}: {
+  closedAt: string;
+  createdAt: CaseAttributes['created_at'];
+}) => {
+  try {
+    if (createdAt != null && closedAt != null) {
+      const createdAtMillis = new Date(createdAt).getTime();
+      const closedAtMillis = new Date(closedAt).getTime();
+
+      if (!isNaN(createdAtMillis) && !isNaN(closedAtMillis) && closedAtMillis >= createdAtMillis) {
+        return { duration: Math.floor((closedAtMillis - createdAtMillis) / 1000) };
+      }
+    }
+  } catch (err) {
+    // Silence date errors
+  }
+};
+
 export const getDurationForUpdate = ({
   status,
   closedAt,
@@ -443,22 +464,7 @@ export const getDurationForUpdate = ({
   status?: CaseStatuses;
 }): Pick<CaseAttributes, 'duration'> | undefined => {
   if (status && status === CaseStatuses.closed) {
-    try {
-      if (createdAt != null && closedAt != null) {
-        const createdAtMillis = new Date(createdAt).getTime();
-        const closedAtMillis = new Date(closedAt).getTime();
-
-        if (
-          !isNaN(createdAtMillis) &&
-          !isNaN(closedAtMillis) &&
-          closedAtMillis >= createdAtMillis
-        ) {
-          return { duration: Math.floor((closedAtMillis - createdAtMillis) / 1000) };
-        }
-      }
-    } catch (err) {
-      // Silence date errors
-    }
+    return getDurationInSeconds({ createdAt, closedAt });
   }
 
   if (status && (status === CaseStatuses.open || status === CaseStatuses['in-progress'])) {

@@ -37,4 +37,10 @@ export const performBulkActionSchema = t.intersection([
   ]),
 ]);
 
+export const performBulkActionQuerySchema = t.exact(
+  t.partial({
+    dry_run: t.union([t.literal('true'), t.literal('false')]),
+  })
+);
+
 export type PerformBulkActionSchema = t.TypeOf<typeof performBulkActionSchema>;

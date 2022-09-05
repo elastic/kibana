@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { rowCount } from '../../../canvas_plugin_src/functions/common/rowCount';
+import type { rowCount } from '../../../canvas_plugin_src/functions/common/rowCount';
 import { FunctionHelp } from '../function_help';
 import { FunctionFactory } from '../../../types';
 

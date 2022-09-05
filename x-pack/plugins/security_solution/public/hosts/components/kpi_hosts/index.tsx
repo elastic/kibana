@@ -8,20 +8,17 @@
 import React from 'react';
 import { EuiFlexItem, EuiFlexGroup, EuiSpacer, EuiLink } from '@elastic/eui';
 
-import { HostsKpiAuthentications } from './authentications';
 import { HostsKpiHosts } from './hosts';
 import { HostsKpiUniqueIps } from './unique_ips';
-import { HostsKpiProps } from './types';
+import type { HostsKpiProps } from './types';
 import { CallOutSwitcher } from '../../../common/components/callouts';
 import { RISKY_HOSTS_DOC_LINK } from '../../../overview/components/overview_risky_host_links/risky_hosts_disabled_module';
 import * as i18n from './translations';
 import { useHostRiskScore } from '../../../risk_score/containers';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 
 export const HostsKpiComponent = React.memo<HostsKpiProps>(
-  ({ filterQuery, from, indexNames, to, setQuery, skip, narrowDateRange }) => {
+  ({ filterQuery, from, indexNames, to, setQuery, skip, updateDateRange }) => {
     const [_, { isModuleEnabled }] = useHostRiskScore({});
-    const usersEnabled = useIsExperimentalFeatureEnabled('usersEnabled');
 
     return (
       <>
@@ -56,31 +53,18 @@ export const HostsKpiComponent = React.memo<HostsKpiProps>(
               from={from}
               indexNames={indexNames}
               to={to}
-              narrowDateRange={narrowDateRange}
+              updateDateRange={updateDateRange}
               setQuery={setQuery}
               skip={skip}
             />
           </EuiFlexItem>
-          {!usersEnabled && (
-            <EuiFlexItem grow={2}>
-              <HostsKpiAuthentications
-                filterQuery={filterQuery}
-                from={from}
-                indexNames={indexNames}
-                to={to}
-                narrowDateRange={narrowDateRange}
-                setQuery={setQuery}
-                skip={skip}
-              />
-            </EuiFlexItem>
-          )}
           <EuiFlexItem grow={2}>
             <HostsKpiUniqueIps
               filterQuery={filterQuery}
               from={from}
               indexNames={indexNames}
               to={to}
-              narrowDateRange={narrowDateRange}
+              updateDateRange={updateDateRange}
               setQuery={setQuery}
               skip={skip}
             />
@@ -94,30 +78,16 @@ export const HostsKpiComponent = React.memo<HostsKpiProps>(
 HostsKpiComponent.displayName = 'HostsKpiComponent';
 
 export const HostsDetailsKpiComponent = React.memo<HostsKpiProps>(
-  ({ filterQuery, from, indexNames, to, setQuery, skip, narrowDateRange }) => {
-    const usersEnabled = useIsExperimentalFeatureEnabled('usersEnabled');
+  ({ filterQuery, from, indexNames, to, setQuery, skip, updateDateRange }) => {
     return (
       <EuiFlexGroup wrap>
-        {!usersEnabled && (
-          <EuiFlexItem grow={1}>
-            <HostsKpiAuthentications
-              filterQuery={filterQuery}
-              from={from}
-              indexNames={indexNames}
-              to={to}
-              narrowDateRange={narrowDateRange}
-              setQuery={setQuery}
-              skip={skip}
-            />
-          </EuiFlexItem>
-        )}
         <EuiFlexItem grow={1}>
           <HostsKpiUniqueIps
             filterQuery={filterQuery}
             from={from}
             indexNames={indexNames}
             to={to}
-            narrowDateRange={narrowDateRange}
+            updateDateRange={updateDateRange}
             setQuery={setQuery}
             skip={skip}
           />

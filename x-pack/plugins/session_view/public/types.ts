@@ -107,15 +107,29 @@ export interface DetailPanelOrchestrator {
     name: string;
     type: string;
     ip: string;
+    parent: {
+      type: string;
+    };
   };
   namespace: string;
   cluster: {
     name: string;
     id: string;
   };
-  parent: {
-    type: string;
+}
+
+export interface DetailPanelCloud {
+  instance: {
+    name: string;
   };
+  account: {
+    id: string;
+  };
+  project: {
+    id: string;
+  };
+  provider: string;
+  region: string;
 }
 
 export interface SessionViewStart {

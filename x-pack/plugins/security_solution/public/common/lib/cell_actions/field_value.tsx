@@ -5,20 +5,19 @@
  * 2.0.
  */
 
-import { EuiDataGridColumnCellActionProps } from '@elastic/eui';
+import type { EuiDataGridColumnCellActionProps } from '@elastic/eui';
 import { head, getOr, get, isEmpty } from 'lodash/fp';
 import React, { useMemo } from 'react';
 
 import type { TimelineNonEcsData } from '@kbn/timelines-plugin/common/search_strategy';
-import { ColumnHeaderOptions } from '@kbn/timelines-plugin/common/types';
+import type { ColumnHeaderOptions } from '@kbn/timelines-plugin/common/types';
 import { getPageRowIndex } from '@kbn/timelines-plugin/public';
-import { Ecs } from '../../../../common/ecs';
+import type { Ecs } from '../../../../common/ecs';
 import { useGetMappedNonEcsValue } from '../../../timelines/components/timeline/body/data_driven_columns';
 import { FormattedFieldValue } from '../../../timelines/components/timeline/body/renderers/formatted_field';
 import { parseValue } from '../../../timelines/components/timeline/body/renderers/parse_value';
 import { EmptyComponent, getLinkColumnDefinition } from './helpers';
 import { getField, getFieldKey } from '../../../helpers';
-import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 
 const useFormattedFieldProps = ({
   rowIndex,
@@ -36,9 +35,8 @@ const useFormattedFieldProps = ({
   pageSize: number;
 }) => {
   const pageRowIndex = getPageRowIndex(rowIndex, pageSize);
-  const usersEnabled = useIsExperimentalFeatureEnabled('usersEnabled');
   const ecs = ecsData[pageRowIndex];
-  const link = getLinkColumnDefinition(columnId, header?.type, header?.linkField, usersEnabled);
+  const link = getLinkColumnDefinition(columnId, header?.type, header?.linkField);
   const linkField = header?.linkField ? header?.linkField : link?.linkField;
   const linkValues = header && getOr([], linkField ?? '', ecs);
   const eventId = (header && get('_id' ?? '', ecs)) || '';
@@ -60,8 +58,7 @@ const useFormattedFieldProps = ({
     const normalizedLink = getLinkColumnDefinition(
       normalizedColumnId,
       header?.type,
-      normalizedLinkField,
-      usersEnabled
+      normalizedLinkField
     );
     return {
       pageRowIndex,
