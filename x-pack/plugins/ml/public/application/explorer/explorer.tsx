@@ -440,6 +440,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
         )
         .catch(console.error); // eslint-disable-line no-console
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(selectedJobIds)]);
 
   if (noJobsSelected && !loading) {
