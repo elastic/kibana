@@ -16,6 +16,9 @@ See the [kibana contributing guide](https://github.com/elastic/kibana/blob/main/
 We use [pre-commit](https://docs.elastic.dev/kibana-dev-docs/getting-started/setup-dev-env#install-pre-commit-hook-optional) to run linters and tests before each commit. To install the pre-commit hooks, run the following command from the root of the repository:
 
 ```bash
+node scripts/register_git_hook
+```
+
 ### Local checks before creating a PR
 Kibana has a pretty long CI process.
 Therefore, we suggest running the following commands locally before creating a PR:
@@ -27,9 +30,7 @@ Therefore, we suggest running the following commands locally before creating a P
 Our unit tests are written using [jest](https://jestjs.io/) framework.
 Jest provides you a fast and easy test framework that allow you to run test in parallel, collect code coverage information and a custom resolver for imports making it simple to mock any object outside of your test scope.
 
-Jest runs all tests found in any file wit
-
-hin a `__tests__` directory or any file with a suffix of `.test.js`, `.test.ts`, `.test.jsx`, or `.test.tsx`.
+Jest runs all tests found in any file within a `__tests__` directory or any file with a suffix of `.test.js`, `.test.ts`, `.test.jsx`, or `.test.tsx`.
 As a convention, we use the `.test.ts` suffix for all our tests.
 
 You can run the unit tests with the following command:
