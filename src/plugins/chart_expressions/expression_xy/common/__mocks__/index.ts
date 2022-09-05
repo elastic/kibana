@@ -132,6 +132,14 @@ export const createArgsWithLayers = (
     },
   ],
   layers: Array.isArray(layers) ? layers : [layers],
+  annotations: {
+    layers: [],
+    datatable: {
+      type: 'datatable',
+      columns: [],
+      rows: [],
+    },
+  },
 });
 
 export function sampleArgs() {

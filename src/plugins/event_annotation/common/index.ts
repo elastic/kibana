@@ -26,6 +26,7 @@ export type { EventAnnotationGroupArgs } from './event_annotation_group';
 export type { FetchEventAnnotationsArgs } from './fetch_event_annotations/types';
 export type {
   EventAnnotationConfig,
+  EventAnnotationGroupConfig,
   EventAnnotationArgs,
   RangeEventAnnotationConfig,
   PointInTimeEventAnnotationConfig,

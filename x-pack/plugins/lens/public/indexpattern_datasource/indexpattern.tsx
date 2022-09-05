@@ -103,6 +103,9 @@ export function columnToOperation(
         ? 'version'
         : undefined,
     hasTimeShift: Boolean(timeShift),
+    interval: isColumnOfType<DateHistogramIndexPatternColumn>('date_histogram', column)
+      ? column.params.interval
+      : undefined,
   };
 }
 

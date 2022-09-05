@@ -10,19 +10,22 @@ import { defer, firstValueFrom } from 'rxjs';
 import { partition } from 'lodash';
 import {
   AggsStart,
-  DataViewsContract,
+  DataView,
   DataViewSpec,
   ExpressionValueSearchContext,
   parseEsInterval,
   AggConfigs,
-  IndexPatternExpressionType,
+  TimeBuckets,
+  UI_SETTINGS,
 } from '@kbn/data-plugin/common';
+import type { TimeRange } from '@kbn/es-query';
 import { ExecutionContext } from '@kbn/expressions-plugin/common';
 import moment from 'moment';
 import { ESCalendarInterval, ESFixedInterval, roundDateToESInterval } from '@elastic/charts';
 import { Adapters } from '@kbn/inspector-plugin/common';
 import { SerializableRecord } from '@kbn/utility-types';
 import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import dateMath from '@kbn/datemath';
 import { handleRequest } from './handle_request';
 import {
   ANNOTATIONS_PER_BUCKET,
@@ -45,9 +48,9 @@ interface ManualGroup {
 interface QueryGroup {
   type: 'query';
   annotations: QueryPointEventAnnotationOutput[];
-  allFields?: string[];
-  dataView: IndexPatternExpressionType;
   timeField: string;
+  dataView: DataView;
+  allFields?: string[];
 }
 
 export function getTimeZone(uiSettings: IUiSettingsClient) {
@@ -57,6 +60,20 @@ export function getTimeZone(uiSettings: IUiSettingsClient) {
   }
 
   return configuredTimeZone;
+}
+
+export function toAbsoluteDates(range: TimeRange) {
+  const fromDate = dateMath.parse(range.from);
+  const toDate = dateMath.parse(range.to, { roundUp: true });
+
+  if (!fromDate || !toDate) {
+    return;
+  }
+
+  return {
+    from: fromDate.toDate(),
+    to: toDate.toDate(),
+  };
 }
 
 export const requestEventAnnotations = (
@@ -72,14 +89,46 @@ export const requestEventAnnotations = (
 ) => {
   return defer(async () => {
     const { aggs, dataViews, searchSource, getNow, uiSettings } = await getStartDependencies();
+    if (!input?.timeRange) {
+      return;
+    }
+    const dates = toAbsoluteDates(input?.timeRange);
+    if (!dates) {
+      return;
+    }
+    const buckets = new TimeBuckets({
+      'histogram:maxBars': uiSettings.get(UI_SETTINGS.HISTOGRAM_MAX_BARS),
+      'histogram:barTarget': uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET),
+      dateFormat: uiSettings.get('dateFormat'),
+      'dateFormat:scaled': uiSettings.get('dateFormat:scaled'),
+    });
+
+    buckets.setInterval(args.interval);
+    buckets.setBounds({
+      min: moment(dates.from),
+      max: moment(dates.to),
+    });
+
+    const interval = buckets.getInterval().expression;
+
+    const uniqueDataViewsToLoad = args.groups
+      .map((g) => g.dataView.value)
+      .reduce<DataViewSpec[]>((acc, current) => {
+        if (acc.find((el) => el.id === current.id)) return acc;
+        return [...acc, current];
+      }, []);
+
+    const loadedDataViews = await Promise.all(
+      uniqueDataViewsToLoad.map((dataView) => dataViews.create(dataView, true))
+    );
 
     const [manualGroups, queryGroups] = partition(
-      regroupForRequestOptimization(args, input),
+      regroupForRequestOptimization(args, input, loadedDataViews),
       isManualSubGroup
     );
 
     const manualAnnotationDatatableRows = manualGroups.length
-      ? convertManualToDatatableRows(manualGroups[0], args.interval, getTimeZone(uiSettings))
+      ? convertManualToDatatableRows(manualGroups[0], interval, getTimeZone(uiSettings))
       : [];
     if (!queryGroups.length) {
       return manualAnnotationDatatableRows.length
@@ -92,7 +141,7 @@ export const requestEventAnnotations = (
       aggConfigs,
       timeFields,
     }: {
-      dataView: any;
+      dataView: DataView;
       aggConfigs: AggConfigs;
       timeFields: string[];
     }) =>
@@ -113,12 +162,7 @@ export const requestEventAnnotations = (
         })
       );
 
-    const esaggsGroups = await prepareEsaggsForQueryGroups(
-      queryGroups,
-      args.interval,
-      dataViews,
-      aggs
-    );
+    const esaggsGroups = await prepareEsaggsForQueryGroups(queryGroups, interval, aggs);
 
     const allQueryAnnotationsConfigs = queryGroups.flatMap((group) => group.annotations);
 
@@ -169,23 +213,9 @@ const convertManualToDatatableRows = (
 const prepareEsaggsForQueryGroups = async (
   queryGroups: QueryGroup[],
   interval: string,
-  dataViews: DataViewsContract,
   aggs: AggsStart
 ) => {
-  const uniqueDataViewsToLoad = queryGroups
-    .map((g) => g.dataView.value)
-    .reduce<DataViewSpec[]>((acc, current) => {
-      if (acc.find((el) => el.id === current.id)) return acc;
-      return [...acc, current];
-    }, []);
-
-  const loadedDataViews = await Promise.all(
-    uniqueDataViewsToLoad.map((dataView) => dataViews.create(dataView, true))
-  );
-
   return queryGroups.map((group) => {
-    const dataView = loadedDataViews.find((dv) => dv.id === group.dataView.value.id)!;
-
     const annotationsFilters = {
       type: 'agg_type',
       value: {
@@ -260,9 +290,12 @@ const prepareEsaggsForQueryGroups = async (
       ...fieldsTopMetric,
     ];
 
-    const aggConfigs = aggs.createAggConfigs(dataView, aggregations?.map((agg) => agg.value) ?? []);
+    const aggConfigs = aggs.createAggConfigs(
+      group.dataView,
+      aggregations?.map((agg) => agg.value) ?? []
+    );
     return {
-      esaggsParams: { dataView, aggConfigs, timeFields: [group.timeField] },
+      esaggsParams: { dataView: group.dataView, aggConfigs, timeFields: [group.timeField] },
       fieldsColIdMap:
         group.allFields?.reduce<Record<string, string>>(
           (acc, fieldName, i) => ({
@@ -278,7 +311,8 @@ const prepareEsaggsForQueryGroups = async (
 
 function regroupForRequestOptimization(
   { groups }: FetchEventAnnotationsArgs,
-  input: ExpressionValueSearchContext | null
+  input: ExpressionValueSearchContext | null,
+  loadedDataViews: DataView[]
 ) {
   const outputGroups = groups
     .map((g) => {
@@ -297,7 +331,10 @@ function regroupForRequestOptimization(
           (acc.manual as ManualGroup).annotations.push(current);
           return acc;
         } else {
-          const key = `${g.dataView.value.id}-${current.timeField}`;
+          const dataView = loadedDataViews.find((dv) => dv.id === g.dataView.value.id)!;
+          const timeField = current.timeField ?? dataView.timeFieldName;
+          // get default timefield if not defined
+          const key = `${g.dataView.value.id}-${timeField}`;
           const subGroup = acc[key] as QueryGroup;
           if (subGroup) {
             let allFields = [...(subGroup.allFields || []), ...(current.extraFields || [])];
@@ -321,8 +358,8 @@ function regroupForRequestOptimization(
             ...acc,
             [key]: {
               type: 'query',
-              dataView: g.dataView,
-              timeField: current.timeField,
+              dataView,
+              timeField: timeField!,
               allFields,
               annotations: [current],
             },

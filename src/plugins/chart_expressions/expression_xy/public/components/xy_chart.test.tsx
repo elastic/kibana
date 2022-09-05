@@ -54,11 +54,7 @@ import {
   sampleLayer,
 } from '../../common/__mocks__';
 import { XYChart, XYChartRenderProps } from './xy_chart';
-import {
-  CommonXYAnnotationLayerConfig,
-  ExtendedDataLayerConfig,
-  XYProps,
-} from '../../common/types';
+import { ExtendedDataLayerConfig, XYProps, AnnotationLayerConfigResult } from '../../common/types';
 import { DataLayers } from './data_layers';
 import { Annotations } from './annotations';
 import { SplitChart } from './split_chart';
@@ -3070,10 +3066,9 @@ describe('XYChart component', () => {
     };
     const createLayerWithAnnotations = (
       annotations: EventAnnotationOutput[] = [defaultLineStaticAnnotation]
-    ): CommonXYAnnotationLayerConfig => ({
+    ): AnnotationLayerConfigResult => ({
       type: 'annotationLayer',
       layerType: LayerTypes.ANNOTATIONS,
-      layerId: 'annotation',
       annotations,
     });
     function sampleArgsWithAnnotations(annotationLayers = [createLayerWithAnnotations()]) {
@@ -3081,7 +3076,15 @@ describe('XYChart component', () => {
       return {
         args: {
           ...args,
-          layers: [dateHistogramLayer, ...annotationLayers],
+          layers: [dateHistogramLayer],
+          annotations: {
+            layers: annotationLayers,
+            datatable: {
+              type: 'datatable' as const,
+              columns: [],
+              rows: [],
+            },
+          },
         },
       };
     }
@@ -3102,7 +3105,7 @@ describe('XYChart component', () => {
       const { args } = sampleArgsWithAnnotations([
         createLayerWithAnnotations([defaultLineStaticAnnotation, defaultRangeStaticAnnotation]),
       ]);
-      (args.layers[1] as CommonXYAnnotationLayerConfig).simpleView = true;
+      args.annotations.layers[0].simpleView = true;
       const component = mount(<XYChart {...defaultProps} args={args} />);
       expect(component.find('LineAnnotation')).toMatchSnapshot();
       expect(component.find('RectAnnotation')).toMatchSnapshot();

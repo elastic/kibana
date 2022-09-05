@@ -342,10 +342,36 @@ export const buildExpression = (
                 datasourceExpressionsByLayers[layer.layerId]
               )
             ),
-            ...validAnnotationsLayers.map((layer) =>
-              annotationLayerToExpression(layer, eventAnnotationService)
-            ),
           ],
+          annotations: validAnnotationsLayers.length
+            ? [
+                {
+                  type: 'expression',
+                  chain: [
+                    {
+                      type: 'function',
+                      function: 'event_annotations_result',
+                      arguments: {
+                        layers: validAnnotationsLayers.map((layer) =>
+                          annotationLayerToExpression(layer, eventAnnotationService)
+                        ),
+                        datatable: eventAnnotationService.toFetchExpression({
+                          interval:
+                            (validDataLayers[0]?.xAccessor &&
+                              metadata[validDataLayers[0]?.layerId]?.[validDataLayers[0]?.xAccessor]
+                                ?.interval) ||
+                            'auto',
+                          groups: validAnnotationsLayers.map((layer) => ({
+                            indexPatternId: layer.indexPatternId,
+                            annotations: layer.annotations,
+                          })),
+                        }),
+                      },
+                    },
+                  ],
+                },
+              ]
+            : [],
         },
       },
     ],

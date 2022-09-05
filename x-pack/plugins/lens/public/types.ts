@@ -631,6 +631,7 @@ export interface Operation extends OperationMetadata {
 }
 
 export interface OperationMetadata {
+  interval?: string;
   // The output of this operation will have this data type
   dataType: DataType;
   // A bucketed operation is grouped by duplicate values, otherwise each row is

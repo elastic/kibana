@@ -47,7 +47,6 @@ export const queryPointEventAnnotation: ExpressionFunctionDefinition<
       }),
     },
     timeField: {
-      required: true,
       types: ['string'],
       help: i18n.translate('eventAnnotation.queryAnnotation.args.timeField', {
         defaultMessage: `The time field of the annotation`,

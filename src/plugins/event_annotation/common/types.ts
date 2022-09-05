@@ -69,7 +69,7 @@ export type QueryPointEventAnnotationConfig = {
   id: string;
   type: QueryAnnotationType;
   filter: KibanaQueryOutput;
-  timeField: string;
+  timeField?: string;
   textField?: string;
   extraFields?: string[];
   key: {
@@ -81,6 +81,11 @@ export type EventAnnotationConfig =
   | PointInTimeEventAnnotationConfig
   | RangeEventAnnotationConfig
   | QueryPointEventAnnotationConfig;
+
+export interface EventAnnotationGroupConfig {
+  annotations: EventAnnotationConfig[];
+  indexPatternId: string;
+}
 
 export type EventAnnotationArgs =
   | ManualPointEventAnnotationArgs

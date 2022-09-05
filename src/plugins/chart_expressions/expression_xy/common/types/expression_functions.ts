@@ -215,7 +215,6 @@ export interface XYArgs extends DataLayerArgs {
   emphasizeFitting?: boolean;
   valueLabels: ValueLabelMode;
   referenceLines: ReferenceLineConfigResult[];
-  annotationLayers: AnnotationLayerConfigResult[];
   fittingFunction?: FittingFunction;
   fillOpacity?: number;
   hideEndzones?: boolean;
@@ -239,6 +238,10 @@ export interface LayeredXYArgs {
   emphasizeFitting?: boolean;
   valueLabels: ValueLabelMode;
   layers?: XYExtendedLayerConfigResult[];
+  annotations?: {
+    layers: AnnotationLayerConfigResult[];
+    datatable: Datatable;
+  };
   fittingFunction?: FittingFunction;
   fillOpacity?: number;
   hideEndzones?: boolean;
@@ -279,6 +282,10 @@ export interface XYProps {
   orderBucketsBySum?: boolean;
   showTooltip: boolean;
   singleTable?: boolean;
+  annotations?: {
+    layers: AnnotationLayerConfigResult[];
+    datatable: Datatable;
+  };
 }
 
 export interface AnnotationLayerArgs {
@@ -326,7 +333,6 @@ export type XYExtendedLayerConfig =
 export type XYExtendedLayerConfigResult =
   | ExtendedDataLayerConfigResult
   | ReferenceLineLayerConfigResult
-  | ExtendedAnnotationLayerConfigResult
   | ReferenceLineConfigResult;
 
 export interface ExtendedReferenceLineDecorationConfig extends ReferenceLineArgs {

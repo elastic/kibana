@@ -5,6 +5,7 @@ Object {
   "chain": Array [
     Object {
       "arguments": Object {
+        "annotations": Array [],
         "emphasizeFitting": Array [
           true,
         ],
