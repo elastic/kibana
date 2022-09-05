@@ -64,6 +64,10 @@ export const getSavedQueriesComplexTest = (savedQueryId: string, savedQueryDescr
       cy.getBySel(RESULTS_TABLE_BUTTON).trigger('mouseover');
       cy.contains(/Enter fullscreen$/).should('exist');
 
+      // visit Status results
+      cy.react('EuiTab', { props: { id: 'status' } }).click();
+      cy.react('EuiTableRow').should('have.lengthOf', 1);
+
       // save new query
       cy.contains('Exit full screen').should('not.exist');
       cy.contains('Save for later').click();
@@ -71,10 +75,7 @@ export const getSavedQueriesComplexTest = (savedQueryId: string, savedQueryDescr
       findFormFieldByRowsLabelAndType('ID', savedQueryId);
       findFormFieldByRowsLabelAndType('Description (optional)', savedQueryDescription);
       cy.react('EuiButtonDisplay').contains('Save').click();
-      // visit Status results
-      cy.react('EuiTab', { props: { id: 'status' } }).click();
-      cy.react('EuiTableRow').should('have.lengthOf', 1);
-      // cy.contains('Successful').siblings().contains(1);
+      cy.contains('Successfully saved');
 
       // play saved query
       cy.contains('Saved queries').click();
