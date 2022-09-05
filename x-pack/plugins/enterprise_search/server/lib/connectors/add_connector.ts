@@ -11,7 +11,6 @@ import { CONNECTORS_INDEX } from '../..';
 import { ConnectorDocument, ConnectorStatus } from '../../../common/types/connectors';
 import { ErrorCode } from '../../../common/types/error_codes';
 import { setupConnectorsIndices } from '../../index_management/setup_indices';
-import { isIndexNotFoundException } from '../../utils/identify_exceptions';
 
 import { fetchCrawlerByIndexName } from '../crawler/fetch_crawlers';
 import { textAnalysisSettings } from '../indices/text_analysis';
@@ -63,12 +62,18 @@ const createConnector = async (
 
 export const addConnector = async (
   client: IScopedClusterClient,
-  input: { delete_existing_connector?: boolean; index_name: string; language: string | null }
+  input: {
+    delete_existing_connector?: boolean;
+    index_name: string;
+    is_native: boolean;
+    language: string | null;
+  }
 ): Promise<{ id: string; index_name: string }> => {
   const document: ConnectorDocument = {
     api_key_id: null,
     configuration: {},
     index_name: input.index_name,
+    is_native: input.is_native,
     language: input.language,
     last_seen: null,
     last_sync_error: null,
@@ -80,21 +85,11 @@ export const addConnector = async (
     status: ConnectorStatus.CREATED,
     sync_now: false,
   };
-  try {
-    return await createConnector(
-      document,
-      client,
-      input.language,
-      !!input.delete_existing_connector
-    );
-  } catch (error) {
-    if (isIndexNotFoundException(error)) {
-      // This means .ent-search-connectors index doesn't exist yet
-      // So we first have to create it, and then try inserting the document again
-      await setupConnectorsIndices(client.asCurrentUser);
-      return await createConnector(document, client, input.language, false);
-    } else {
-      throw error;
-    }
+  const connectorsIndexExists = await client.asCurrentUser.indices.exists({
+    index: CONNECTORS_INDEX,
+  });
+  if (!connectorsIndexExists) {
+    await setupConnectorsIndices(client.asCurrentUser);
   }
+  return await createConnector(document, client, input.language, !!input.delete_existing_connector);
 };

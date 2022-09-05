@@ -17,6 +17,7 @@ import {
   farequoteLuceneSearchTestData,
   sampleLogTestData,
 } from './index_test_data';
+
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const PageObjects = getPageObjects(['common', 'discover', 'timePicker', 'settings']);

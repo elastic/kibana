@@ -11,6 +11,7 @@ import styled from 'styled-components';
 import type { Filter } from '@kbn/es-query';
 import type { EntityType } from '@kbn/timelines-plugin/common';
 import type { TGridCellAction } from '@kbn/timelines-plugin/common/types';
+import { InputsModelId } from '../../store/inputs/constants';
 import { useBulkAddToCaseActions } from '../../../detections/components/alerts_table/timeline_actions/use_bulk_add_to_case_actions';
 import type { inputsModel, State } from '../../store';
 import { inputsActions } from '../../store/actions';
@@ -61,7 +62,6 @@ export interface Props {
   onRuleChange?: () => void;
   renderCellValue: (props: CellValueElementProps) => React.ReactNode;
   rowRenderers: RowRenderer[];
-  utilityBar?: (refetch: inputsModel.Refetch, totalCount: number) => React.ReactNode;
   additionalFilters?: React.ReactNode;
   hasAlertsCrud?: boolean;
   unit?: (n: number) => string;
@@ -86,7 +86,6 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   rowRenderers,
   start,
   scopeId,
-  utilityBar,
   additionalFilters,
   hasAlertsCrud = false,
   unit,
@@ -147,7 +146,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
     );
 
     return () => {
-      dispatch(inputsActions.deleteOneQuery({ id, inputId: 'global' }));
+      dispatch(inputsActions.deleteOneQuery({ id, inputId: InputsModelId.global }));
       if (editorActionsRef.current) {
         // eslint-disable-next-line react-hooks/exhaustive-deps
         editorActionsRef.current.closeEditor();
@@ -177,7 +176,9 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   }, [graphEventId, id, sessionViewConfig, SessionView, Navigation]);
   const setQuery = useCallback(
     (inspect, loading, refetch) => {
-      dispatch(inputsActions.setQuery({ id, inputId: 'global', inspect, loading, refetch }));
+      dispatch(
+        inputsActions.setQuery({ id, inputId: InputsModelId.global, inspect, loading, refetch })
+      );
     },
     [dispatch, id]
   );

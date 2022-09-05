@@ -13,3 +13,4 @@ export * from './parent_pipeline_formula';
 export * from './sibling_pipeline_formula';
 export * from './filter_ratio_formula';
 export * from './parent_pipeline_series';
+export * from './validate_metrics';

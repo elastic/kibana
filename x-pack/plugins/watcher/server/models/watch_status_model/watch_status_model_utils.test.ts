@@ -9,10 +9,10 @@ import moment from 'moment';
 
 import { ACTION_STATES, WATCH_STATES, WATCH_STATE_COMMENTS } from '../../../common/constants';
 import { ClientActionStatusModel } from '../../../common/types';
-import { deriveState, deriveComment, deriveLastFired } from './watch_status_model_utils';
+import { deriveState, deriveComment, deriveLastExecution } from './watch_status_model_utils';
 
 const mockActionStatus = (opts: Partial<ClientActionStatusModel>): ClientActionStatusModel => ({
-  state: ACTION_STATES.OK,
+  state: ACTION_STATES.ACTIVE,
   id: 'no-id',
   isAckable: false,
   lastAcknowledged: null,
@@ -25,13 +25,13 @@ const mockActionStatus = (opts: Partial<ClientActionStatusModel>): ClientActionS
 });
 
 describe('WatchStatusModel utils', () => {
-  describe('deriveLastFired', () => {
+  describe('deriveLastExecution', () => {
     it(`is the latest lastExecution from the client action statuses`, () => {
       const actionStatuses = [
         mockActionStatus({ lastExecution: moment('2017-07-05T00:00:00.000Z') }),
         mockActionStatus({ lastExecution: moment('2015-05-26T18:21:08.630Z') }),
       ];
-      expect(deriveLastFired(actionStatuses)).toEqual(moment('2017-07-05T00:00:00.000Z'));
+      expect(deriveLastExecution(actionStatuses)).toEqual(moment('2017-07-05T00:00:00.000Z'));
     });
   });
 
@@ -45,8 +45,7 @@ describe('WatchStatusModel utils', () => {
       const isActive = true;
       const actionStatuses = [
         mockActionStatus({ state: ACTION_STATES.THROTTLED }),
-        mockActionStatus({ state: ACTION_STATES.FIRING }),
-        mockActionStatus({ state: ACTION_STATES.OK }),
+        mockActionStatus({ state: ACTION_STATES.ACTIVE }),
       ];
       expect(deriveComment(isActive, actionStatuses)).toBe(
         WATCH_STATE_COMMENTS.PARTIALLY_THROTTLED
@@ -67,9 +66,8 @@ describe('WatchStatusModel utils', () => {
       const isActive = true;
       const actionStatuses = [
         mockActionStatus({ state: ACTION_STATES.ACKNOWLEDGED }),
-        mockActionStatus({ state: ACTION_STATES.OK }),
+        mockActionStatus({ state: ACTION_STATES.ACTIVE }),
         mockActionStatus({ state: ACTION_STATES.THROTTLED }),
-        mockActionStatus({ state: ACTION_STATES.FIRING }),
       ];
       expect(deriveComment(isActive, actionStatuses)).toBe(
         WATCH_STATE_COMMENTS.PARTIALLY_ACKNOWLEDGED
@@ -89,10 +87,9 @@ describe('WatchStatusModel utils', () => {
     it(`is FAILING when one action state is failing`, () => {
       const isActive = true;
       const actionStatuses = [
-        mockActionStatus({ state: ACTION_STATES.OK }),
+        mockActionStatus({ state: ACTION_STATES.ACTIVE }),
         mockActionStatus({ state: ACTION_STATES.ACKNOWLEDGED }),
         mockActionStatus({ state: ACTION_STATES.THROTTLED }),
-        mockActionStatus({ state: ACTION_STATES.FIRING }),
         mockActionStatus({ state: ACTION_STATES.ERROR }),
       ];
       expect(deriveComment(isActive, actionStatuses)).toBe(WATCH_STATE_COMMENTS.FAILING);
@@ -101,10 +98,9 @@ describe('WatchStatusModel utils', () => {
     it(`is OK when watch is inactive`, () => {
       const isActive = false;
       const actionStatuses = [
-        mockActionStatus({ state: ACTION_STATES.OK }),
+        mockActionStatus({ state: ACTION_STATES.ACTIVE }),
         mockActionStatus({ state: ACTION_STATES.ACKNOWLEDGED }),
         mockActionStatus({ state: ACTION_STATES.THROTTLED }),
-        mockActionStatus({ state: ACTION_STATES.FIRING }),
         mockActionStatus({ state: ACTION_STATES.ERROR }),
       ];
       expect(deriveComment(isActive, actionStatuses)).toBe(WATCH_STATE_COMMENTS.OK);
@@ -112,43 +108,37 @@ describe('WatchStatusModel utils', () => {
   });
 
   describe('deriveState', () => {
-    it(`is OK there are no actions`, () => {
+    it(`is ACTIVE there are no actions`, () => {
       const isActive = true;
       const watchState = 'awaits_execution';
-      expect(deriveState(isActive, watchState, [])).toBe(WATCH_STATES.OK);
+      expect(deriveState(isActive, watchState, [])).toBe(WATCH_STATES.ACTIVE);
     });
 
-    it(`is FIRING when at least one action state is firing`, () => {
+    it(`is ACTIVE when at least one action state is active`, () => {
       const isActive = true;
       const watchState = 'awaits_execution';
-      let actionStatuses = [
-        mockActionStatus({ state: ACTION_STATES.OK }),
-        mockActionStatus({ state: ACTION_STATES.FIRING }),
-      ];
-      expect(deriveState(isActive, watchState, actionStatuses)).toBe(WATCH_STATES.FIRING);
+      let actionStatuses = [mockActionStatus({ state: ACTION_STATES.ACTIVE })];
+      expect(deriveState(isActive, watchState, actionStatuses)).toBe(WATCH_STATES.ACTIVE);
 
       actionStatuses = [
-        mockActionStatus({ state: ACTION_STATES.OK }),
-        mockActionStatus({ state: ACTION_STATES.FIRING }),
+        mockActionStatus({ state: ACTION_STATES.ACTIVE }),
         mockActionStatus({ state: ACTION_STATES.THROTTLED }),
       ];
-      expect(deriveState(isActive, watchState, actionStatuses)).toBe(WATCH_STATES.FIRING);
+      expect(deriveState(isActive, watchState, actionStatuses)).toBe(WATCH_STATES.ACTIVE);
 
       actionStatuses = [
-        mockActionStatus({ state: ACTION_STATES.OK }),
-        mockActionStatus({ state: ACTION_STATES.FIRING }),
+        mockActionStatus({ state: ACTION_STATES.ACTIVE }),
         mockActionStatus({ state: ACTION_STATES.THROTTLED }),
         mockActionStatus({ state: ACTION_STATES.ACKNOWLEDGED }),
       ];
-      expect(deriveState(isActive, watchState, actionStatuses)).toBe(WATCH_STATES.FIRING);
+      expect(deriveState(isActive, watchState, actionStatuses)).toBe(WATCH_STATES.ACTIVE);
     });
 
     it(`is ERROR when at least one action state is error`, () => {
       const isActive = true;
       const watchState = 'awaits_execution';
       const actionStatuses = [
-        mockActionStatus({ state: ACTION_STATES.OK }),
-        mockActionStatus({ state: ACTION_STATES.FIRING }),
+        mockActionStatus({ state: ACTION_STATES.ACTIVE }),
         mockActionStatus({ state: ACTION_STATES.THROTTLED }),
         mockActionStatus({ state: ACTION_STATES.ACKNOWLEDGED }),
         mockActionStatus({ state: ACTION_STATES.ERROR }),
@@ -161,23 +151,22 @@ describe('WatchStatusModel utils', () => {
       const isActive = true;
       const watchState = 'awaits_execution';
       const actionStatuses = [
-        mockActionStatus({ state: ACTION_STATES.OK }),
+        mockActionStatus({ state: ACTION_STATES.ACTIVE }),
         mockActionStatus({ state: ACTION_STATES.CONFIG_ERROR }),
       ];
       expect(deriveState(isActive, watchState, actionStatuses)).toBe(WATCH_STATES.CONFIG_ERROR);
     });
 
-    it(`is DISABLED when watch is inactive`, () => {
+    it(`is INACTIVE when watch is inactive`, () => {
       const isActive = false;
       const watchState = 'awaits_execution';
       const actionStatuses = [
-        mockActionStatus({ state: ACTION_STATES.OK }),
-        mockActionStatus({ state: ACTION_STATES.FIRING }),
+        mockActionStatus({ state: ACTION_STATES.ACTIVE }),
         mockActionStatus({ state: ACTION_STATES.THROTTLED }),
         mockActionStatus({ state: ACTION_STATES.ACKNOWLEDGED }),
         mockActionStatus({ state: ACTION_STATES.ERROR }),
       ];
-      expect(deriveState(isActive, watchState, actionStatuses)).toBe(WATCH_STATES.DISABLED);
+      expect(deriveState(isActive, watchState, actionStatuses)).toBe(WATCH_STATES.INACTIVE);
     });
   });
 });

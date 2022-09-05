@@ -17,8 +17,8 @@ const timeRange = {
 };
 
 describe.skip('Dependencies', () => {
-  before(async () => {
-    await synthtrace.index(
+  before(() => {
+    synthtrace.index(
       opbeans({
         from: new Date(start).getTime(),
         to: new Date(end).getTime(),
@@ -26,8 +26,8 @@ describe.skip('Dependencies', () => {
     );
   });
 
-  after(async () => {
-    await synthtrace.clean();
+  after(() => {
+    synthtrace.clean();
   });
 
   beforeEach(() => {
@@ -36,7 +36,7 @@ describe.skip('Dependencies', () => {
 
   describe('top-level dependencies page', () => {
     it('has a list of dependencies and you can navigate to the page for one', () => {
-      cy.visit(`/app/apm/services?${new URLSearchParams(timeRange)}`);
+      cy.visitKibana(`/app/apm/services?${new URLSearchParams(timeRange)}`);
       cy.contains('nav a', 'Dependencies').click();
 
       // `force: true` because Cypress says the element is 0x0
@@ -46,7 +46,7 @@ describe.skip('Dependencies', () => {
     });
 
     it('has no detectable a11y violations on load', () => {
-      cy.visit(
+      cy.visitKibana(
         `/app/apm/services/opbeans-java/dependencies?${new URLSearchParams(
           timeRange
         )}`
@@ -59,7 +59,7 @@ describe.skip('Dependencies', () => {
 
   describe.skip('dependency overview page', () => {
     it('shows dependency information and you can navigate to a page for an upstream service', () => {
-      cy.visit(
+      cy.visitKibana(
         `/app/apm/dependencies/overview?${new URLSearchParams({
           ...timeRange,
           dependencyName: 'postgresql',
@@ -76,7 +76,7 @@ describe.skip('Dependencies', () => {
     });
 
     it('has no detectable a11y violations on load', () => {
-      cy.visit(
+      cy.visitKibana(
         `/app/apm/dependencies/overview?${new URLSearchParams({
           ...timeRange,
           dependencyName: 'postgresql',
@@ -90,7 +90,7 @@ describe.skip('Dependencies', () => {
 
   describe('service overview page', () => {
     it('shows dependency information and you can navigate to a page for a dependency', () => {
-      cy.visit(
+      cy.visitKibana(
         `/app/apm/services/opbeans-java/overview?${new URLSearchParams(
           timeRange
         )}`
@@ -104,7 +104,7 @@ describe.skip('Dependencies', () => {
 
   describe('service dependencies tab', () => {
     it('shows dependency information and you can navigate to a page for a dependency', () => {
-      cy.visit(
+      cy.visitKibana(
         `/app/apm/services/opbeans-java/overview?${new URLSearchParams(
           timeRange
         )}`

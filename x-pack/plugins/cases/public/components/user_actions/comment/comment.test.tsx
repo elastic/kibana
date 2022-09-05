@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiCommentList } from '@elastic/eui';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 
 import { Actions } from '../../../../common/api';
 import {
@@ -190,9 +190,7 @@ describe('createCommentUserActionBuilder', () => {
 
     it('renders correctly an external reference', async () => {
       const externalReferenceAttachmentTypeRegistry = new ExternalReferenceAttachmentTypeRegistry();
-      externalReferenceAttachmentTypeRegistry.register(
-        getExternalReferenceAttachment({ type: 'regular' })
-      );
+      externalReferenceAttachmentTypeRegistry.register(getExternalReferenceAttachment());
 
       const userAction = getExternalReferenceUserAction();
       const builder = createCommentUserActionBuilder({
@@ -242,7 +240,6 @@ describe('createCommentUserActionBuilder', () => {
       };
 
       const attachment = getExternalReferenceAttachment({
-        type: 'regular',
         actions: <ActionsView />,
       });
 
@@ -276,29 +273,78 @@ describe('createCommentUserActionBuilder', () => {
     });
 
     it('renders correctly a persistable state attachment', async () => {
+      const MockComponent = jest.fn((props) => {
+        return (
+          <div data-test-subj={`attachment_${props.persistableStateAttachmentState.test_foo}`} />
+        );
+      });
+
+      const SpyLazyFactory = jest.fn(() => {
+        return Promise.resolve().then(() => {
+          return {
+            default: React.memo(MockComponent),
+          };
+        });
+      });
+
       const persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTypeRegistry();
       persistableStateAttachmentTypeRegistry.register(
-        getPersistableStateAttachment({ type: 'regular' })
+        getPersistableStateAttachment({
+          children: React.lazy(SpyLazyFactory),
+        })
       );
 
       const userAction = getPersistableStateUserAction();
+      const attachment01 = {
+        ...persistableStateAttachment,
+        persistableStateAttachmentState: { test_foo: '01' },
+      };
       const builder = createCommentUserActionBuilder({
         ...builderArgs,
         persistableStateAttachmentTypeRegistry,
         caseData: {
           ...builderArgs.caseData,
-          comments: [persistableStateAttachment],
+          comments: [attachment01],
         },
         userAction,
       });
 
-      const createdUserAction = builder.build();
-      const result = appMockRender.render(<EuiCommentList comments={createdUserAction} />);
+      const result = appMockRender.render(<EuiCommentList comments={builder.build()} />);
+
+      await waitFor(() => {
+        expect(result.getByTestId('attachment_01')).toBeInTheDocument();
+        expect(MockComponent).toHaveBeenCalledTimes(1);
+        expect(SpyLazyFactory).toHaveBeenCalledTimes(1);
+      });
 
       expect(result.getByTestId('comment-persistableState-.test')).toBeInTheDocument();
       expect(result.getByTestId('copy-link-persistable-state-comment-id')).toBeInTheDocument();
       expect(result.getByTestId('user-action-username-with-avatar')).toBeInTheDocument();
       expect(screen.getByText('added an embeddable')).toBeInTheDocument();
+
+      result.unmount();
+
+      const attachment02 = {
+        ...persistableStateAttachment,
+        persistableStateAttachmentState: { test_foo: '02' },
+      };
+      const updateBuilder = createCommentUserActionBuilder({
+        ...builderArgs,
+        persistableStateAttachmentTypeRegistry,
+        caseData: {
+          ...builderArgs.caseData,
+          comments: [attachment02],
+        },
+        userAction,
+      });
+
+      const result2 = appMockRender.render(<EuiCommentList comments={updateBuilder.build()} />);
+
+      await waitFor(() => {
+        expect(result2.getByTestId('attachment_02')).toBeInTheDocument();
+        expect(MockComponent).toHaveBeenCalledTimes(2);
+        expect(SpyLazyFactory).toHaveBeenCalledTimes(1);
+      });
     });
 
     it('renders correctly if the reference is not registered', async () => {
@@ -329,7 +375,6 @@ describe('createCommentUserActionBuilder', () => {
       };
 
       const attachment = getPersistableStateAttachment({
-        type: 'regular',
         actions: <ActionsView />,
       });
 

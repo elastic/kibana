@@ -5,3 +5,4 @@
  * 2.0.
  */
 export { hostRiskScoreDashboards } from './host_risk_score_dashboards';
+export { userRiskScoreDashboards } from './user_risk_score_dashboards';

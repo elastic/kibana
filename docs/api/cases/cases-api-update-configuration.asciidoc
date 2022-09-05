@@ -35,6 +35,7 @@ The identifier for the configuration. To retrieve the configuration IDs, use
 (Optional, string) An identifier for the space. If it is not specified, the
 default space is used.
 
+[role="child_attributes"]
 === Request body
 
 `closure_type`::
@@ -69,8 +70,8 @@ use <<cases-api-find-connectors>>.
 (Required, string) The name of the connector.
 
 `type`::
-(Required, string) The type of the connector. Valid values are: `.servicenow`,
-`.servicenow-sir`, `.jira`, `.resilient`, `.swimlane`, and `.none`.
+(Required, string) The type of the connector. Valid values are: `.cases-webhook`,
+`.jira`, `.none`, `.resilient`,`.servicenow`, `.servicenow-sir`, and `.swimlane`.
 ====
 
 `version`::

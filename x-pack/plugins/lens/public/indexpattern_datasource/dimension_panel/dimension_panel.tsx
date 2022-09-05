@@ -53,7 +53,7 @@ export const IndexPatternDimensionTriggerComponent = function IndexPatternDimens
 ) {
   const layerId = props.layerId;
   const layer = props.state.layers[layerId];
-  const currentIndexPattern = props.state.indexPatterns[layer.indexPatternId];
+  const currentIndexPattern = props.indexPatterns[layer.indexPatternId];
   const { columnId, uniqueLabel, invalid, invalidMessage, hideTooltip } = props;
 
   const currentColumnHasErrors = useMemo(
@@ -83,8 +83,7 @@ export const IndexPatternDimensionEditorComponent = function IndexPatternDimensi
   props: IndexPatternDimensionEditorProps
 ) {
   const layerId = props.layerId;
-  const currentIndexPattern =
-    props.state.indexPatterns[props.state.layers[layerId]?.indexPatternId];
+  const currentIndexPattern = props.indexPatterns[props.state.layers[layerId]?.indexPatternId];
   if (!currentIndexPattern) {
     return null;
   }

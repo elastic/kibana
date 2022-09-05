@@ -253,7 +253,6 @@ describe('when on the package policy create page', () => {
       ],
       name: 'nginx-1',
       namespace: 'default',
-      output_id: '',
       package: {
         name: 'nginx',
         title: 'Nginx',

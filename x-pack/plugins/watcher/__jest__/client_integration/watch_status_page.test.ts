@@ -16,8 +16,8 @@ import { API_BASE_PATH } from '../../common/constants';
 
 const { setup } = pageHelpers.watchStatusPage;
 
-const watchHistory1 = getWatchHistory({ startTime: '2019-06-04T01:11:11.294' });
-const watchHistory2 = getWatchHistory({ startTime: '2019-06-04T01:10:10.987Z' });
+const watchHistory1 = getWatchHistory({ id: 'a', startTime: '2019-06-04T01:11:11.294' });
+const watchHistory2 = getWatchHistory({ id: 'b', startTime: '2019-06-04T01:10:10.987Z' });
 
 const watchHistoryItems = { watchHistoryItems: [watchHistory1, watchHistory2] };
 
@@ -26,13 +26,15 @@ const ACTION_ID = 'my_logging_action_1';
 const watch = {
   ...WATCH.watch,
   watchStatus: {
-    state: WATCH_STATES.FIRING,
+    state: WATCH_STATES.ACTIVE,
     isActive: true,
+    lastExecution: moment('2019-06-03T19:44:11.088Z'),
     actionStatuses: [
       {
         id: ACTION_ID,
-        state: ACTION_STATES.FIRING,
+        state: ACTION_STATES.OK,
         isAckable: true,
+        lastExecution: moment('2019-06-03T19:44:11.088Z'),
       },
     ],
   },
@@ -100,7 +102,8 @@ describe('<WatchStatusPage />', () => {
           expect(row).toEqual([
             getExpectedValue(moment(startTime).format()),
             getExpectedValue(watchStatus.state),
-            getExpectedValue(watchStatus.comment),
+            '',
+            '',
           ]);
         });
       });
@@ -112,11 +115,11 @@ describe('<WatchStatusPage />', () => {
           ...watchHistory1,
           watchId: watch.id,
           watchStatus: {
-            state: WATCH_STATES.FIRING,
+            state: WATCH_STATES.ACTIVE,
             actionStatuses: [
               {
                 id: 'my_logging_action_1',
-                state: ACTION_STATES.FIRING,
+                state: ACTION_STATES.OK,
                 isAckable: true,
               },
             ],
@@ -204,7 +207,7 @@ describe('<WatchStatusPage />', () => {
 
         httpRequestsMockHelpers.setActivateWatchResponse(WATCH_ID, {
           watchStatus: {
-            state: WATCH_STATES.FIRING,
+            state: WATCH_STATES.ACTIVE,
             isActive: true,
           },
         });
@@ -231,18 +234,22 @@ describe('<WatchStatusPage />', () => {
 
         tableCellsValues.forEach((row, i) => {
           const action = watch.watchStatus.actionStatuses[i];
-          const { id, state, isAckable } = action;
+          const { id, state, lastExecution, isAckable } = action;
 
-          expect(row).toEqual([id, state, isAckable ? 'Acknowledge' : '']);
+          expect(row).toEqual([
+            id, // Name
+            state, // State
+            lastExecution.format(), // Last executed
+            isAckable ? 'Acknowledge' : '', // Row actions
+          ]);
         });
       });
 
       test('should allow an action to be acknowledged', async () => {
         const { actions, table } = testBed;
-
-        httpRequestsMockHelpers.setAcknowledgeWatchResponse(WATCH_ID, ACTION_ID, {
+        const watchHistoryItem = {
           watchStatus: {
-            state: WATCH_STATES.FIRING,
+            state: WATCH_STATES.ACTIVE,
             isActive: true,
             comment: 'Acked',
             actionStatuses: [
@@ -250,10 +257,13 @@ describe('<WatchStatusPage />', () => {
                 id: ACTION_ID,
                 state: ACTION_STATES.ACKNOWLEDGED,
                 isAckable: false,
+                lastExecution: moment('2019-06-03T19:44:11.088Z'),
               },
             ],
           },
-        });
+        };
+
+        httpRequestsMockHelpers.setAcknowledgeWatchResponse(WATCH_ID, ACTION_ID, watchHistoryItem);
 
         await actions.clickAcknowledgeButton(0);
 
@@ -268,7 +278,12 @@ describe('<WatchStatusPage />', () => {
         const { tableCellsValues } = table.getMetaData('watchActionStatusTable');
 
         tableCellsValues.forEach((row) => {
-          expect(row).toEqual([ACTION_ID, ACTION_STATES.ACKNOWLEDGED, '']);
+          expect(row).toEqual([
+            ACTION_ID, // Name
+            ACTION_STATES.ACKNOWLEDGED, // State
+            watchHistoryItem.watchStatus.actionStatuses[0].lastExecution.format(), // Last executed
+            '', // Row actions
+          ]);
         });
       });
     });

@@ -79,6 +79,6 @@ export interface ClientWatchStatusModel {
   lastMetCondition: Moment | null;
   state: keyof typeof WATCH_STATES;
   comment: keyof typeof WATCH_STATE_COMMENTS;
-  lastFired?: Moment | null;
+  lastExecution?: Moment | null;
   actionStatuses: ClientActionStatusModel[];
 }

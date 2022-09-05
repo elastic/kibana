@@ -32,7 +32,7 @@ export default function (ftrContext: FtrProviderContext) {
     });
 
     const assignablePerUser = {
-      [USERS.SUPERUSER.username]: ['dashboard', 'visualization', 'map', 'lens'],
+      [USERS.SUPERUSER.username]: ['dashboard', 'visualization', 'map', 'lens', 'search'],
       [USERS.DEFAULT_SPACE_SO_TAGGING_READ_USER.username]: [],
       [USERS.DEFAULT_SPACE_READ_USER.username]: [],
       [USERS.DEFAULT_SPACE_ADVANCED_SETTINGS_READ_USER.username]: [],

@@ -86,7 +86,9 @@ export const useTransactionDistributionChartData = () => {
           params.serviceName &&
           params.environment &&
           params.start &&
-          params.end
+          params.end &&
+          overallLatencyData.durationMin &&
+          overallLatencyData.durationMax
         ) {
           return callApmApi(
             'POST /internal/apm/latency/overall_distribution/transactions',
@@ -94,6 +96,8 @@ export const useTransactionDistributionChartData = () => {
               params: {
                 body: {
                   ...params,
+                  durationMin: overallLatencyData.durationMin,
+                  durationMax: overallLatencyData.durationMax,
                   percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD,
                   termFilters: [
                     {
@@ -108,7 +112,7 @@ export const useTransactionDistributionChartData = () => {
           );
         }
       },
-      [params]
+      [params, overallLatencyData.durationMin, overallLatencyData.durationMax]
     );
 
   useEffect(() => {

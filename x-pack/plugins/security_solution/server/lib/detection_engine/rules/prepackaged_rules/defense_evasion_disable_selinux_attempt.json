@@ -12,6 +12,28 @@
   "license": "Elastic License v2",
   "name": "Potential Disabling of SELinux",
   "query": "event.category:process and event.type:(start or process_started) and process.name:setenforce and process.args:0\n",
+  "required_fields": [
+    {
+      "ecs": true,
+      "name": "event.category",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "event.type",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.args",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.name",
+      "type": "keyword"
+    }
+  ],
   "risk_score": 47,
   "rule_id": "eb9eb8ba-a983-41d9-9c93-a1c05112ca5e",
   "severity": "medium",
@@ -48,5 +70,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 7
+  "version": 8
 }

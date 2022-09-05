@@ -360,14 +360,6 @@ describe('geoPointToGeometry', () => {
     expect(points[0].coordinates).toEqual([lon, lat]);
   });
 
-  it('Should convert runtime geo_point value', () => {
-    const points = [];
-    geoPointToGeometry(`${lat},${lon}`, points);
-    expect(points.length).toBe(1);
-    expect(points[0].type).toBe('Point');
-    expect(points[0].coordinates).toEqual([lon, lat]);
-  });
-
   it('Should convert array of values', () => {
     const lat2 = 30;
     const lon2 = -60;

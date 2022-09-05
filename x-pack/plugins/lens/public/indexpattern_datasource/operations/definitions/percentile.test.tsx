@@ -18,7 +18,7 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { createMockedIndexPattern } from '../../mocks';
 import { percentileOperation } from '.';
-import { IndexPattern, IndexPatternLayer } from '../../types';
+import { IndexPatternLayer } from '../../types';
 import { PercentileIndexPatternColumn } from './percentile';
 import { TermsIndexPatternColumn } from './terms';
 import {
@@ -27,6 +27,7 @@ import {
   ExpressionAstExpressionBuilder,
 } from '@kbn/expressions-plugin/public';
 import type { OriginalColumn } from '../../to_expression';
+import { IndexPattern } from '../../../types';
 
 jest.mock('lodash', () => {
   const original = jest.requireActual('lodash');

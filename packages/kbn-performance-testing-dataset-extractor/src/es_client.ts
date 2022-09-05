@@ -8,7 +8,7 @@
 
 import { Client } from '@elastic/elasticsearch';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { SearchRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { SearchRequest, MsearchRequestItem } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ToolingLog } from '@kbn/tooling-log';
 
 interface ClientOptions {
@@ -36,6 +36,7 @@ interface Transaction {
   name: string;
   type: string;
   duration: { us: number };
+  span_count: { started: number };
 }
 
 export interface Document {
@@ -98,6 +99,7 @@ const addRangeFilter = (range: { startTime: string; endTime: string }): QueryDsl
 export class ESClient {
   client: Client;
   log: ToolingLog;
+  tracesIndex: string = '.ds-traces-apm-default*';
 
   constructor(options: ClientOptions, log: ToolingLog) {
     this.client = new Client({
@@ -112,6 +114,7 @@ export class ESClient {
 
   async getTransactions<T>(queryFilters: QueryDslQueryContainer[]) {
     const searchRequest: SearchRequest = {
+      index: this.tracesIndex,
       body: {
         sort: [
           {
@@ -172,9 +175,44 @@ export class ESClient {
     return await this.getTransactions<TransactionDocument>(queryFilters);
   }
 
-  async getSpans(transactionId: string) {
-    const filters = [{ field: 'parent.id', value: transactionId }];
-    const queryFilters = filters.map((filter) => addBooleanFilter(filter));
-    return await this.getTransactions<SpanDocument>(queryFilters);
+  getMsearchRequestItem = (queryFilters: QueryDslQueryContainer[]): MsearchRequestItem => {
+    return {
+      query: {
+        bool: {
+          filter: [
+            {
+              bool: {
+                filter: queryFilters,
+              },
+            },
+          ],
+        },
+      },
+    };
+  };
+
+  async getSpans(transactionIds: string[]) {
+    const searches = new Array<MsearchRequestItem>();
+
+    for (const transactionId of transactionIds) {
+      const filters = [{ field: 'parent.id', value: transactionId }];
+      const queryFilters = filters.map((filter) => addBooleanFilter(filter));
+      const requestItem = this.getMsearchRequestItem(queryFilters);
+      searches.push({ index: this.tracesIndex }, requestItem);
+    }
+    this.log.debug(`Msearch request: ${JSON.stringify(searches)}`);
+    const result = await this.client.msearch<SpanDocument>({
+      searches,
+    });
+    this.log.debug(`Msearch result: ${JSON.stringify(result)}`);
+    return result.responses.flatMap((response) => {
+      if ('error' in response) {
+        throw new Error(`Msearch failure: ${JSON.stringify(response.error)}`);
+      } else if (response.hits.hits.length > 0) {
+        return response.hits.hits;
+      } else {
+        return [];
+      }
+    });
   }
 }

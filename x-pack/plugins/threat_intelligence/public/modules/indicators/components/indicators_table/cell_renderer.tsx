@@ -10,15 +10,13 @@ import { useContext, useEffect } from 'react';
 import { euiLightVars as themeLight, euiDarkVars as themeDark } from '@kbn/ui-theme';
 import React from 'react';
 import { useKibana } from '../../../../hooks/use_kibana';
-import { EMPTY_VALUE } from '../../../../../common/constants';
-import { Indicator, RawIndicatorFieldId } from '../../../../../common/types/indicator';
-import { displayValue } from '../../lib/display_value';
-import { unwrapValue } from '../../lib/unwrap_value';
+import { Indicator } from '../../../../../common/types/indicator';
+import { IndicatorField } from '../indicator_field/indicator_field';
 import { IndicatorsTableContext } from './context';
 import { ActionsRowCell } from './actions_row_cell';
 
 export enum ComputedIndicatorFieldId {
-  DisplayValue = 'display_value',
+  DisplayName = 'threat.indicator.name',
 }
 
 export const cellRendererFactory = (from: number) => {
@@ -35,7 +33,7 @@ export const cellRendererFactory = (from: number) => {
 
     const darkMode = uiSettings.get('theme:darkMode');
 
-    const { indicators, expanded } = indicatorsTableContext;
+    const { indicators, expanded, fieldTypesMap } = indicatorsTableContext;
 
     const indicator: Indicator | undefined = indicators[rowIndex - from];
 
@@ -59,10 +57,6 @@ export const cellRendererFactory = (from: number) => {
       return <ActionsRowCell indicator={indicator} />;
     }
 
-    if (columnId === ComputedIndicatorFieldId.DisplayValue) {
-      return displayValue(indicator) || EMPTY_VALUE;
-    }
-
-    return unwrapValue(indicator, columnId as RawIndicatorFieldId) || EMPTY_VALUE;
+    return <IndicatorField indicator={indicator} field={columnId} fieldTypesMap={fieldTypesMap} />;
   };
 };

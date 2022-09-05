@@ -15,7 +15,7 @@ import {
 } from '../../../common/types';
 import { getMoment } from '../../../common/lib/get_moment';
 import { buildServerActionStatusModel, buildClientActionStatusModel } from '../action_status_model';
-import { deriveState, deriveComment, deriveLastFired } from './watch_status_model_utils';
+import { deriveState, deriveComment, deriveLastExecution } from './watch_status_model_utils';
 
 export const buildServerWatchStatusModel = (
   watchStatusModelEs: WatchStatusModelEs
@@ -80,7 +80,7 @@ export const buildClientWatchStatusModel = (
     lastMetCondition,
     state: deriveState(isActive, watchState, clientActionStatuses),
     comment: deriveComment(isActive, clientActionStatuses),
-    lastFired: deriveLastFired(clientActionStatuses),
+    lastExecution: deriveLastExecution(clientActionStatuses),
     actionStatuses: clientActionStatuses,
   };
 };

@@ -34,6 +34,7 @@ export { createFormulaPublicApi } from './indexpattern_datasource/operations/def
 
 export * from './indexpattern_datasource';
 export * from './lens_ui_telemetry';
+export * from './lens_ui_errors';
 export * from './editor_frame_service/editor_frame';
 export * from './editor_frame_service';
 export * from './embeddable';

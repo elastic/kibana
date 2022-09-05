@@ -32,7 +32,7 @@ import { docLinks } from '../../../../shared/doc_links';
 import { generateEncodedPath } from '../../../../shared/encode_path_params';
 import { EuiButtonTo, EuiLinkTo } from '../../../../shared/react_router_helpers';
 
-import { GenerateConnectorApiKeyApiLogic } from '../../../api/connector_package/generate_connector_api_key_api_logic';
+import { GenerateConnectorApiKeyApiLogic } from '../../../api/connector/generate_connector_api_key_api_logic';
 import { SEARCH_INDEX_TAB_PATH } from '../../../routes';
 import { isConnectorIndex } from '../../../utils/indices';
 
@@ -146,8 +146,8 @@ export const ConnectorConfiguration: React.FC = () => {
                         {`${
                           apiKeyData?.encoded
                             ? `elasticsearch:
-              api_key: "${apiKeyData?.encoded}"
-            `
+  api_key: "${apiKeyData?.encoded}"
+`
                             : ''
                         }connector_id: "${indexData.connector.id}"
             `}

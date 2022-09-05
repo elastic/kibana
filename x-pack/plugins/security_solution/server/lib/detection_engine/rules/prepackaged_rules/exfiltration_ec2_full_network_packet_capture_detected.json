@@ -16,14 +16,44 @@
   "language": "kuery",
   "license": "Elastic License v2",
   "name": "AWS EC2 Full Network Packet Capture Detected",
-  "note": "## Config\n\nThe AWS Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
-  "query": "event.dataset:aws.cloudtrail and event.provider:ec2.amazonaws.com and \nevent.action:(CreateTrafficMirrorFilter or CreateTrafficMirrorFilterRule or CreateTrafficMirrorSession or CreateTrafficMirrorTarget) and \nevent.outcome:success\n",
+  "note": "",
+  "query": "event.dataset:aws.cloudtrail and event.provider:ec2.amazonaws.com and\nevent.action:(CreateTrafficMirrorFilter or CreateTrafficMirrorFilterRule or CreateTrafficMirrorSession or CreateTrafficMirrorTarget) and\nevent.outcome:success\n",
   "references": [
     "https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_TrafficMirrorFilter.html",
     "https://github.com/easttimor/aws-incident-response"
   ],
+  "related_integrations": [
+    {
+      "integration": "cloudtrail",
+      "package": "aws",
+      "version": "1.10.2"
+    }
+  ],
+  "required_fields": [
+    {
+      "ecs": true,
+      "name": "event.action",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "event.dataset",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "event.outcome",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "event.provider",
+      "type": "keyword"
+    }
+  ],
   "risk_score": 47,
   "rule_id": "c1812764-0788-470f-8e74-eb4a14d47573",
+  "setup": "The AWS Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
   "severity": "medium",
   "tags": [
     "Elastic",
@@ -67,5 +97,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 2
+  "version": 4
 }

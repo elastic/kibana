@@ -43,6 +43,7 @@ import {
   MAP_EXTENT_CHANGED,
   MAP_READY,
   ROLLBACK_MAP_SETTINGS,
+  SET_EMBEDDABLE_SEARCH_CONTEXT,
   SET_GOTO,
   SET_MAP_INIT_ERROR,
   SET_MAP_SETTINGS,
@@ -337,6 +338,19 @@ export function setQuery({
     } else {
       await dispatch(syncDataForAllLayers(forceRefresh));
     }
+  };
+}
+
+export function setEmbeddableSearchContext({
+  query,
+  filters,
+}: {
+  filters: Filter[];
+  query?: Query;
+}) {
+  return {
+    type: SET_EMBEDDABLE_SEARCH_CONTEXT,
+    embeddableSearchContext: { filters, query },
   };
 }
 

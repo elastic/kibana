@@ -15,6 +15,28 @@
   "references": [
     "https://www.fireeye.com/blog/threat-research/2020/12/evasive-attacker-leverages-solarwinds-supply-chain-compromises-with-sunburst-backdoor.html"
   ],
+  "required_fields": [
+    {
+      "ecs": true,
+      "name": "event.type",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "http.request.body.content",
+      "type": "wildcard"
+    },
+    {
+      "ecs": true,
+      "name": "network.protocol",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.name",
+      "type": "keyword"
+    }
+  ],
   "risk_score": 73,
   "rule_id": "22599847-5d13-48cb-8872-5796fee8692b",
   "severity": "high",
@@ -73,5 +95,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 6
+  "version": 7
 }

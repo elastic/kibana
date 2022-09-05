@@ -36,6 +36,9 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ['security']: {
         pathname: '/app/security',
       },
+      ['securitySolutionTimelines']: {
+        pathname: '/app/security/timelines',
+      },
     },
     kbnTestServer: {
       ...xpackFunctionalConfig.get('kbnTestServer'),

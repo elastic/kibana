@@ -35,8 +35,7 @@ export default ({ getService }: FtrProviderContext) => {
     return true;
   }
 
-  // FLAKY: https://github.com/elastic/kibana/issues/136000
-  describe.skip('Observability Rule Details page', function () {
+  describe('Observability Rule Details page', function () {
     this.tags('includeFirefox');
 
     let uptimeRuleId: string;
@@ -133,6 +132,10 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('maps correctly the rule type with the human readable rule type', async () => {
+        await retry.waitFor(
+          'ruleTypeIndex to be loaded from hook',
+          async () => await testSubjects.exists('ruleSummaryRuleType')
+        );
         const ruleType = await testSubjects.getVisibleText('ruleSummaryRuleType');
         expect(ruleType).to.be('Log threshold');
       });

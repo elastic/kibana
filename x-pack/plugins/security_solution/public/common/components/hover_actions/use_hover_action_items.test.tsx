@@ -16,6 +16,15 @@ jest.mock('../../hooks/use_selector');
 jest.mock('../../containers/sourcerer', () => ({
   useSourcererDataView: jest.fn().mockReturnValue({ browserFields: {} }),
 }));
+const mockDispatch = jest.fn();
+jest.mock('react-redux', () => {
+  const original = jest.requireActual('react-redux');
+
+  return {
+    ...original,
+    useDispatch: () => mockDispatch,
+  };
+});
 
 describe('useHoverActionItems', () => {
   const defaultProps: UseHoverActionItemsProps = {

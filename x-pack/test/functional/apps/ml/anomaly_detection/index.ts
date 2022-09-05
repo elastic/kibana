@@ -49,5 +49,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./custom_urls'));
     loadTestFile(require.resolve('./forecasts'));
     loadTestFile(require.resolve('./lens_to_ml'));
+    loadTestFile(require.resolve('./lens_to_ml_with_wizard'));
   });
 }

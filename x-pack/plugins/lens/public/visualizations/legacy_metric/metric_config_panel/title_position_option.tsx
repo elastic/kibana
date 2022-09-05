@@ -8,11 +8,11 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonGroup, EuiFormRow } from '@elastic/eui';
-import type { MetricState } from '../../../../common/types';
+import type { LegacyMetricState } from '../../../../common/types';
 
 export interface TitlePositionProps {
-  state: MetricState;
-  setState: (newState: MetricState) => void;
+  state: LegacyMetricState;
+  setState: (newState: LegacyMetricState) => void;
 }
 
 export const DEFAULT_TITLE_POSITION = 'top';
@@ -52,7 +52,7 @@ export const TitlePositionOptions: React.FC<TitlePositionProps> = ({ state, setS
         options={titlePositions}
         idSelected={state.titlePosition ?? DEFAULT_TITLE_POSITION}
         onChange={(value) => {
-          setState({ ...state, titlePosition: value as MetricState['titlePosition'] });
+          setState({ ...state, titlePosition: value as LegacyMetricState['titlePosition'] });
         }}
         buttonSize="compressed"
       />
