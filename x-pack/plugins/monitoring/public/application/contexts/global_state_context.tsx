@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { createContext } from 'react';
+import React, { createContext, useState } from 'react';
 import type { TimeRange } from '@kbn/es-query';
 import { RefreshInterval } from '@kbn/data-plugin/public';
 import useUnmount from 'react-use/lib/useUnmount';
@@ -43,9 +43,11 @@ export const GlobalStateProvider: React.FC<GlobalStateProviderProps> = ({
   children,
 }) => {
   const localState: State = {};
-  const state = new GlobalState(query, toasts, localState as { [key: string]: unknown });
+  const [globalState] = useState(
+    new GlobalState(query, toasts, localState as { [key: string]: unknown })
+  );
 
-  const initialState: any = state.getState();
+  const initialState: any = globalState.getState();
   for (const key in initialState) {
     if (!initialState.hasOwnProperty(key)) {
       continue;
@@ -56,7 +58,7 @@ export const GlobalStateProvider: React.FC<GlobalStateProviderProps> = ({
   localState.save = () => {
     const newState = { ...localState };
     delete newState.save;
-    state.setState(newState);
+    globalState.setState(newState);
   };
 
   // default to an active refresh interval if it's not conflicting with user-defined values
@@ -67,7 +69,7 @@ export const GlobalStateProvider: React.FC<GlobalStateProviderProps> = ({
   }
 
   useUnmount(() => {
-    state.destroy();
+    globalState.destroy();
   });
 
   return <GlobalStateContext.Provider value={localState}>{children}</GlobalStateContext.Provider>;
