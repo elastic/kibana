@@ -124,7 +124,6 @@ export class SavedObjectLoader {
   }: {
     attributes: Record<string, unknown>;
     id: string;
-    type: string;
     references?: SavedObjectReference[];
     updatedAt?: string;
   }) {

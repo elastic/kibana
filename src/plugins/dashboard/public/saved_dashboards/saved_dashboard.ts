@@ -25,7 +25,6 @@ export interface DashboardSavedObject extends SavedObject {
   timeRestore: boolean;
   timeTo?: string;
   timeFrom?: string;
-  title: string;
   description?: string;
   panelsJSON: string;
   optionsJSON?: string;
@@ -40,6 +39,7 @@ export interface DashboardSavedObject extends SavedObject {
   outcome?: ResolvedSimpleSavedObject['outcome'];
   aliasId?: ResolvedSimpleSavedObject['alias_target_id'];
   aliasPurpose?: ResolvedSimpleSavedObject['alias_purpose'];
+
   controlGroupInput?: Omit<RawControlGroupAttributes, 'id'>;
 }
 
