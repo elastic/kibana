@@ -6,7 +6,7 @@
  */
 
 import * as t from 'io-ts';
-import { NonEmptyArray } from '@kbn/securitysolution-io-ts-types';
+import { NonEmptyArray, enumeration } from '@kbn/securitysolution-io-ts-types';
 
 import {
   throttle,
@@ -15,15 +15,30 @@ import {
   action_id as actionId,
 } from '@kbn/securitysolution-io-ts-alerting-types';
 
-import {
-  BulkAction,
-  queryOrUndefined,
-  BulkActionEditType,
-  tags,
-  index,
-  timeline_id,
-  timeline_title,
-} from '../common/schemas';
+import { queryOrUndefined, tags, index, timeline_id, timeline_title } from '../common/schemas';
+
+export enum BulkAction {
+  'enable' = 'enable',
+  'disable' = 'disable',
+  'export' = 'export',
+  'delete' = 'delete',
+  'duplicate' = 'duplicate',
+  'edit' = 'edit',
+}
+
+export const bulkAction = enumeration('BulkAction', BulkAction);
+
+export enum BulkActionEditType {
+  'add_tags' = 'add_tags',
+  'delete_tags' = 'delete_tags',
+  'set_tags' = 'set_tags',
+  'add_index_patterns' = 'add_index_patterns',
+  'delete_index_patterns' = 'delete_index_patterns',
+  'set_index_patterns' = 'set_index_patterns',
+  'set_timeline' = 'set_timeline',
+  'add_rule_actions' = 'add_rule_actions',
+  'set_rule_actions' = 'set_rule_actions',
+}
 
 const bulkActionEditPayloadTags = t.type({
   type: t.union([

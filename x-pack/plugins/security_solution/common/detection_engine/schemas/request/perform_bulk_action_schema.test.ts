@@ -6,10 +6,13 @@
  */
 
 import type { PerformBulkActionSchema } from './perform_bulk_action_schema';
-import { performBulkActionSchema } from './perform_bulk_action_schema';
+import {
+  performBulkActionSchema,
+  BulkAction,
+  BulkActionEditType,
+} from './perform_bulk_action_schema';
 import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 import { left } from 'fp-ts/lib/Either';
-import { BulkAction, BulkActionEditType } from '../common/schemas';
 
 const retrieveValidationMessage = (payload: unknown) => {
   const decoded = performBulkActionSchema.decode(payload);

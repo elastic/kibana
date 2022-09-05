@@ -18,7 +18,7 @@ import type { BulkActionEditPayload } from '../../../../../../../common/detectio
 import {
   BulkAction,
   BulkActionEditType,
-} from '../../../../../../../common/detection_engine/schemas/common/schemas';
+} from '../../../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema';
 import { isMlRule } from '../../../../../../../common/machine_learning/helpers';
 import { canEditRuleWithActions } from '../../../../../../common/utils/privileges';
 import { useRulesTableContext } from '../rules_table/rules_table_context';

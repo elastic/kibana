@@ -10,7 +10,7 @@ import { invariant } from '../../../../../common/utils/invariant';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
 import { BulkActionsDryRunErrCode } from '../../../../../common/constants';
 import type { BulkActionEditPayload } from '../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema';
-import { BulkActionEditType } from '../../../../../common/detection_engine/schemas/common/schemas';
+import { BulkActionEditType } from '../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema';
 import type { RuleAlertType } from '../types';
 import { isIndexPatternsBulkEditAction } from './utils';
 import { throwDryRunError } from './dry_run';

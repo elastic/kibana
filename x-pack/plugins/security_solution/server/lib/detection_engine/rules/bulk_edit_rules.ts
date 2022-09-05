@@ -21,7 +21,7 @@ import {
   NOTIFICATION_THROTTLE_NO_ACTIONS,
   MAX_RULES_TO_UPDATE_IN_PARALLEL,
 } from '../../../../common/constants';
-import { BulkActionEditType } from '../../../../common/detection_engine/schemas/common/schemas';
+import { BulkActionEditType } from '../../../../common/detection_engine/schemas/request/perform_bulk_action_schema';
 import { readRules } from './read_rules';
 
 import type { RuleAlertType } from './types';

@@ -8,7 +8,6 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
 import {
-  enumeration,
   IsoDateString,
   NonEmptyString,
   PositiveInteger,
@@ -359,26 +358,3 @@ export const privilege = t.type({
 });
 
 export type Privilege = t.TypeOf<typeof privilege>;
-
-export enum BulkAction {
-  'enable' = 'enable',
-  'disable' = 'disable',
-  'export' = 'export',
-  'delete' = 'delete',
-  'duplicate' = 'duplicate',
-  'edit' = 'edit',
-}
-
-export const bulkAction = enumeration('BulkAction', BulkAction);
-
-export enum BulkActionEditType {
-  'add_tags' = 'add_tags',
-  'delete_tags' = 'delete_tags',
-  'set_tags' = 'set_tags',
-  'add_index_patterns' = 'add_index_patterns',
-  'delete_index_patterns' = 'delete_index_patterns',
-  'set_index_patterns' = 'set_index_patterns',
-  'set_timeline' = 'set_timeline',
-  'add_rule_actions' = 'add_rule_actions',
-  'set_rule_actions' = 'set_rule_actions',
-}

@@ -22,7 +22,7 @@ import {
   Field,
 } from '../../../../../../../shared_imports';
 import type { BulkActionEditPayload } from '../../../../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema';
-import { BulkActionEditType } from '../../../../../../../../common/detection_engine/schemas/common/schemas';
+import { BulkActionEditType } from '../../../../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema';
 import { NOTIFICATION_THROTTLE_NO_ACTIONS } from '../../../../../../../../common/constants';
 
 import { BulkEditFormWrapper } from './bulk_edit_form_wrapper';

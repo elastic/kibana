@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { BulkActionEditType } from '../../../../../common/detection_engine/schemas/common/schemas';
+import { BulkActionEditType } from '../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema';
 
 import { bulkEditActionToRulesClientOperation } from './action_to_rules_client_operation';
 

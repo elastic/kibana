@@ -9,7 +9,7 @@ import type { BulkActionEditPayload } from '../../../../../../../../common/detec
 import {
   BulkAction,
   BulkActionEditType,
-} from '../../../../../../../../common/detection_engine/schemas/common/schemas';
+} from '../../../../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema';
 import { assertUnreachable } from '../../../../../../../../common/utility_types';
 
 /**
