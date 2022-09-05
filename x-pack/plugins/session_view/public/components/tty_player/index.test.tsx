@@ -49,6 +49,7 @@ describe('TTYPlayer component', () => {
     props = {
       sessionEntityId: mockSessionEntityId,
       onClose: jest.fn(),
+      onJumpToEvent: jest.fn(),
       isFullscreen: false,
     };
   });
