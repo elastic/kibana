@@ -346,26 +346,6 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
           />
         </EuiFormRow>
       )}
-      {setCurrentTimeMarkerVisibility && (
-        <EuiFormRow
-          display="columnCompressedSwitch"
-          label={i18n.translate('xpack.lens.xyChart.showCurrenTimeMarker', {
-            defaultMessage: 'Show current time marker',
-          })}
-          fullWidth
-        >
-          <EuiSwitch
-            compressed
-            data-test-subj="lnsshowCurrentTimeMarker"
-            label={i18n.translate('xpack.lens.xyChart.showCurrenTimeMarker', {
-              defaultMessage: 'Show current time marker',
-            })}
-            onChange={() => setCurrentTimeMarkerVisibility(!Boolean(currentTimeMarkerVisible))}
-            checked={Boolean(currentTimeMarkerVisible)}
-            showLabel={false}
-          />
-        </EuiFormRow>
-      )}
       {setEndzoneVisibility && (
         <EuiFormRow
           display="columnCompressedSwitch"
@@ -382,6 +362,26 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
             })}
             onChange={() => setEndzoneVisibility(!Boolean(endzonesVisible))}
             checked={Boolean(endzonesVisible)}
+            showLabel={false}
+          />
+        </EuiFormRow>
+      )}
+      {setCurrentTimeMarkerVisibility && (
+        <EuiFormRow
+          display="columnCompressedSwitch"
+          label={i18n.translate('xpack.lens.xyChart.showCurrenTimeMarker', {
+            defaultMessage: 'Show current time marker',
+          })}
+          fullWidth
+        >
+          <EuiSwitch
+            compressed
+            data-test-subj="lnsshowCurrentTimeMarker"
+            label={i18n.translate('xpack.lens.xyChart.showCurrenTimeMarker', {
+              defaultMessage: 'Show current time marker',
+            })}
+            onChange={() => setCurrentTimeMarkerVisibility(!Boolean(currentTimeMarkerVisible))}
+            checked={Boolean(currentTimeMarkerVisible)}
             showLabel={false}
           />
         </EuiFormRow>
