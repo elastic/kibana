@@ -416,14 +416,19 @@ export function getIndexPatternDatasource({
     getDropProps,
     onDrop,
 
-    getCustomWorkspaceRenderer: (state: IndexPatternPrivateState, dragging: DraggingIdentifier) => {
-      if (dragging.field === undefined || dragging.indexPattern === undefined) {
+    getCustomWorkspaceRenderer: (
+      state: IndexPatternPrivateState,
+      dragging: DraggingIdentifier,
+      indexPatterns: Record<string, IndexPattern>
+    ) => {
+      if (dragging.field === undefined || dragging.indexPatternId === undefined) {
         return undefined;
       }
 
+      const indexPattern = indexPatterns[dragging.indexPatternId as string];
       const draggedField = dragging as DraggingIdentifier & {
         field: IndexPatternField;
-        indexPattern: IndexPattern;
+        indexPatternId: string;
       };
       const geoFieldType =
         draggedField.field.esTypes &&
@@ -436,7 +441,7 @@ export function getIndexPatternDatasource({
               <GeoFieldWorkspacePanel
                 uiActions={uiActions}
                 fieldType={geoFieldType}
-                indexPattern={draggedField.indexPattern}
+                indexPattern={indexPattern}
                 fieldName={draggedField.field.name}
               />
             );
@@ -579,6 +584,8 @@ export function getIndexPatternDatasource({
       };
     },
     getDatasourceSuggestionsForField(state, draggedField, filterLayers, indexPatterns) {
+      // eslint-disable-next-line no-console
+      console.log('getDatasourceSuggestionsForField', draggedField);
       return isDraggedField(draggedField)
         ? getDatasourceSuggestionsForField(
             state,

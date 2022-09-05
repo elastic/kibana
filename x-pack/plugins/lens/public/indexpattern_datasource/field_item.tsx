@@ -128,14 +128,14 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
   const value = useMemo(
     () => ({
       field,
-      indexPattern,
+      indexPatternId: indexPattern.id,
       id: field.name,
       humanData: {
         label: field.displayName,
         position: itemIndex + 1,
       },
     }),
-    [field, indexPattern, itemIndex]
+    [field, indexPattern.id, itemIndex]
   );
   const order = useMemo(() => [0, groupIndex, itemIndex], [groupIndex, itemIndex]);
 
