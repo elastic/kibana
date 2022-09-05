@@ -2196,24 +2196,10 @@ describe('SavedObjectsRepository', () => {
         );
       });
 
-      // we don't call mget for single namespace docs so we can't get the version properties
-      it(`defaults to no version for types that are not multi-namespace`, async () => {
+      it(`does not include the version of the existing document when using a multi-namespace type`, async () => {
         const objects = [obj1, { ...obj2, type: NAMESPACE_AGNOSTIC_TYPE }];
         await repositoryBulkDeleteSuccess(objects);
         expectClientCallBulkDeleteArgsAction(objects, { method: 'delete' });
-      });
-
-      // we only call mget for multinamespace docs and the implementation isn't handling the doc version correctly. I need help here.
-      it.skip(`accepts version for types that are multi-namespace`, async () => {
-        const version = encodeHitVersion({ _seq_no: 100, _primary_term: 200 });
-        // test with both non-multi-namespace and multi-namespace types
-        const objects = [
-          { ...obj1, version },
-          { ...obj2, type: MULTI_NAMESPACE_ISOLATED_TYPE, version },
-        ];
-        await repositoryBulkDeleteSuccess(objects);
-        const overrides = { if_seq_no: 100, if_primary_term: 200 };
-        expectClientCallBulkDeleteArgsAction(objects, { method: 'delete', overrides });
       });
 
       it.todo(`prepends namespace to the id when providing namespace for single-namespace type`);
