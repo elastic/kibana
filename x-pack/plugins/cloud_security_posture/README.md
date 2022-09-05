@@ -4,21 +4,20 @@ Cloud Posture automates the identification and remediation of risks across cloud
 
 ---
 
+## Table of contents
+
+- [Development](#development)
+  - [Local checks before creating a PR](#local-checks-before-creating-a-pr)
+  - [Install pre-commit hooks (optional)](#install-pre-commit-hooks-optional)
+  - [Running unit tests](#running-unit-tests)
+  - [Running integration tests](#running-integration-tests)
+
+---
+
 ## Development
 
 See the [kibana contributing guide](https://github.com/elastic/kibana/blob/main/CONTRIBUTING.md) for instructions
 setting up your development environment.
-
-### Install pre-commit hooks
-
-We
-use [pre-commit](https://docs.elastic.dev/kibana-dev-docs/getting-started/setup-dev-env#install-pre-commit-hook-optional)
-to run linters and tests before each commit. To install the pre-commit hooks, run the following command from the root of
-the repository:
-
-```bash
-node scripts/register_git_hook
-```
 
 ### Local checks before creating a PR
 
@@ -28,6 +27,17 @@ Therefore, we suggest running the following commands locally before creating a P
 1. Typescript check: `node_modules/.bin/tsc -b x-pack/plugins/cloud_security_posture/tsconfig.json --pretty`
 2. Linter check: `yarn lint:es x-pack/plugins/cloud_security_posture`
 3. Unit tests: `yarn jest --config x-pack/plugins/cloud_security_posture/jest.config.js`
+
+### Install pre-commit hooks (optional)
+
+We
+use [pre-commit](https://docs.elastic.dev/kibana-dev-docs/getting-started/setup-dev-env#install-pre-commit-hook-optional)
+to run linters and tests before each commit. To install the pre-commit hooks, run the following command from the root of
+the repository:
+
+```bash
+node scripts/register_git_hook
+```
 
 ### Running unit tests
 
