@@ -45,6 +45,11 @@ export const createUserRiskEnrichments: CreateRiskEnrichment = async ({
       }
       const newEvent = cloneDeep(event);
       set(newEvent, '_source.user.risk.calculated_level', risk);
+      set(
+        newEvent,
+        '_source.user.risk.calculated_score_norm',
+        enrichment?._source?.risk_stats?.risk_score 
+      );
       return newEvent;
     },
   });
