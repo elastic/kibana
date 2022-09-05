@@ -29,7 +29,10 @@ interface OsqueryActionProps {
   agentId?: string;
   formType: 'steps' | 'simple';
   hideAgentsField?: boolean;
-  addToTimeline?: (payload: { query: [string, string]; isIcon?: true }) => React.ReactElement;
+  addToTimeline?: (payload: {
+    queries: Array<{ field: string; value: string }>;
+    isIcon?: true;
+  }) => React.ReactElement;
 }
 
 const OsqueryActionComponent: React.FC<OsqueryActionProps> = ({
