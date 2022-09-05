@@ -108,14 +108,14 @@ export const bulkActionEditPayload = t.union([
 export type BulkActionEditPayload = t.TypeOf<typeof bulkActionEditPayload>;
 
 /**
- * actions that modifies rules attributes
+ * actions that modify rules attributes
  */
 export type BulkActionEditForRuleAttributes =
   | BulkActionEditPayloadTags
   | BulkActionEditPayloadRuleActions;
 
 /**
- * actions that modifies rules params
+ * actions that modify rules params
  */
 export type BulkActionEditForRuleParams =
   | BulkActionEditPayloadIndexPatterns
