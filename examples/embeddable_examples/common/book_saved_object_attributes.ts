@@ -5,12 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import type { SavedObjectAttributes } from '@kbn/core/types';
-
 export const BOOK_SAVED_OBJECT = 'book';
 
-export interface BookSavedObjectAttributes extends SavedObjectAttributes {
+export interface BookSavedObjectAttributes {
   title: string;
   author?: string;
   readIt?: boolean;
