@@ -135,7 +135,7 @@ export const getContent = (
       addTitle: i18n.translate('xpack.observability.statusVisualization.alert.link', {
         defaultMessage: 'Create rules',
       }),
-      addLink: http.basePath.prepend('/app/management/insightsAndAlerting/triggersActions/rules'),
+      addLink: http.basePath.prepend('/app/observability/alerts'),
       learnMoreLink: docLinks.links.observability.createAlerts,
       goToAppTitle: i18n.translate('xpack.observability.statusVisualization.alert.goToAppTitle', {
         defaultMessage: 'Show alerts',

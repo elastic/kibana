@@ -97,7 +97,7 @@ export const getEmptySections = ({ http }: { http: HttpSetup }): ISection[] => {
       linkTitle: i18n.translate('xpack.observability.emptySection.apps.alert.link', {
         defaultMessage: 'Create rule',
       }),
-      href: http.basePath.prepend('/app/management/insightsAndAlerting/triggersActions/alerts'),
+      href: http.basePath.prepend('/app/observability/alerts'),
     },
   ];
 };
