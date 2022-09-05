@@ -101,8 +101,10 @@ export const FilterGroup = ({
   const color = (isRootLevelFilterGroup && path !== '') || !reverseBackground ? 'plain' : 'subdued';
 
   const shouldDrawBorder = (filter: Filter) =>
+    (path === '' && isOrFilter(filter) && filters.length !== 1) ||
+    Array.isArray(filter) ||
     (!isRootLevelFilterGroup && (Array.isArray(filter) || isOrFilter(filter))) ||
-    (isRootLevelFilterGroup && (Array.isArray(filter) || isOrFilter(filter)));
+    (isRootLevelFilterGroup && Array.isArray(filter));
 
   return (
     <EuiPanel
