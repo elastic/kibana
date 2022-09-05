@@ -6,7 +6,7 @@
  */
 
 const basePath = '/app/apm/settings/custom-links';
-const deleteCustomLink = () => {
+const deleteAllCustomLinks = () => {
   // delete customLink if exists
   const kibanaUrl = Cypress.env('KIBANA_URL');
   cy.request({
@@ -21,7 +21,7 @@ const deleteCustomLink = () => {
   }).then((response) => {
     response.body.customLinks.map((item: any) => {
       if (item.id) {
-        cy.request({
+        return cy.request({
           log: false,
           method: 'DELETE',
           url: `${kibanaUrl}/internal/apm/settings/custom_links/${item.id}`,
@@ -40,7 +40,7 @@ const deleteCustomLink = () => {
 describe('Custom links', () => {
   beforeEach(() => {
     cy.loginAsEditorUser();
-    deleteCustomLink();
+    deleteAllCustomLinks();
   });
 
   it('shows empty message and create button', () => {
