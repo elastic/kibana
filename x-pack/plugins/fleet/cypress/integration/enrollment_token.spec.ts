@@ -6,7 +6,7 @@
  */
 
 import { FLEET, navigateTo } from '../tasks/navigation';
-import { cleanupAgentPolicies } from '../tasks/cleanup';
+import { cleanupAgentPolicies, cleanupEnrollmentTokens } from '../tasks/cleanup';
 import { ENROLLMENT_TOKENS_TAB, ENROLLMENT_TOKENS } from '../screens/fleet';
 
 describe('Enrollment token page', () => {
@@ -29,6 +29,7 @@ describe('Enrollment token page', () => {
 
   after(() => {
     cleanupAgentPolicies();
+    cleanupEnrollmentTokens();
   });
 
   it('Create new Token', () => {
