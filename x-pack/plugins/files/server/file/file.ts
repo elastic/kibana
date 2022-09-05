@@ -7,15 +7,27 @@
 
 import { Logger } from '@kbn/core/server';
 import { Readable } from 'stream';
+import {
+  map,
+  from,
+  race,
+  defer,
+  NEVER,
+  mergeMap,
+  catchError,
+  Observable,
+  lastValueFrom,
+} from 'rxjs';
 import type { FileShareJSON, FileShareJSONWithToken } from '../../common/types';
 import type { File as IFile, UpdatableFileMetadata, FileJSON } from '../../common';
 import { fileAttributesReducer, Action } from './file_attributes_reducer';
 import type { FileClientImpl } from '../file_client/file_client';
 import {
+  AbortedUploadError,
   AlreadyDeletedError,
-  ContentAlreadyUploadedError,
-  NoDownloadAvailableError,
   UploadInProgressError,
+  NoDownloadAvailableError,
+  ContentAlreadyUploadedError,
 } from './errors';
 
 /**
@@ -57,7 +69,14 @@ export class File<M = unknown> implements IFile {
     return this;
   }
 
-  public async uploadContent(content: Readable): Promise<IFile<M>> {
+  private upload(content: Readable): Observable<{ size: number }> {
+    return defer(() => this.fileClient.upload(this.id, content));
+  }
+
+  public async uploadContent(
+    content: Readable,
+    abort$: Observable<unknown> = NEVER
+  ): Promise<IFile<M>> {
     if (this.uploadInProgress()) {
       throw new UploadInProgressError('Upload already in progress.');
     }
@@ -65,22 +84,37 @@ export class File<M = unknown> implements IFile {
       throw new ContentAlreadyUploadedError('Already uploaded file content.');
     }
     this.logger.debug(`Uploading file [id = ${this.id}][name = ${this.data.name}].`);
-    await this.updateFileState({
-      action: 'uploading',
-    });
 
-    try {
-      const { size } = await this.fileClient.upload(this.id, content);
-      await this.updateFileState({
-        action: 'uploaded',
-        payload: { size },
-      });
-      return this;
-    } catch (e) {
-      await this.updateFileState({ action: 'uploadError' });
-      this.fileClient.deleteContent(this.id).catch(() => {}); // Best effort to remove any uploaded content
-      throw e;
-    }
+    await lastValueFrom(
+      from(this.updateFileState({ action: 'uploading' })).pipe(
+        mergeMap(() =>
+          race(
+            this.upload(content),
+            abort$.pipe(
+              map(() => {
+                throw new AbortedUploadError(`Aborted upload of ${this.id}!`);
+              })
+            )
+          )
+        ),
+        mergeMap(({ size }) => {
+          return this.updateFileState({ action: 'uploaded', payload: { size } });
+        }),
+        catchError(async (e) => {
+          try {
+            await this.updateFileState({ action: 'uploadError' });
+          } catch (updateError) {
+            this.logger.error(
+              `Could not update file ${this.id} after upload error (${e.message}). Update failed with: ${updateError.message}. This file may be in an inconsistent state.`
+            );
+          }
+          this.fileClient.deleteContent(this.id).catch(() => {});
+          throw e;
+        })
+      )
+    );
+
+    return this;
   }
 
   public downloadContent(): Promise<Readable> {
