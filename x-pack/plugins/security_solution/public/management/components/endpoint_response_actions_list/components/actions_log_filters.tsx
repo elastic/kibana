@@ -57,6 +57,9 @@ export const ActionsLogFilters = memo(
     return (
       <EuiFlexGroup responsive gutterSize="s">
         <EuiFlexItem>
+          <EuiFilterGroup>{filters}</EuiFilterGroup>
+        </EuiFlexItem>
+        <EuiFlexItem>
           <ActionLogDateRangePicker
             dateRangePickerState={dateRangePickerState}
             isDataLoading={isDataLoading}
@@ -65,16 +68,13 @@ export const ActionsLogFilters = memo(
             onTimeChange={onTimeChange}
           />
         </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiFilterGroup>{filters}</EuiFilterGroup>
-        </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiSuperUpdateButton
+            iconOnly
             data-test-subj={getTestId('super-refresh-button')}
             fill={false}
             isLoading={isDataLoading}
             onClick={onClickRefreshButton}
-            responsive={false}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
