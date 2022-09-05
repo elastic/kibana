@@ -364,6 +364,8 @@ describe('Terms Agg', () => {
       expect(params.order).toEqual({ 'test-orderAgg.50': 'desc' });
     });
 
+    // 25 is the default shard size set for size:10 by Elasticsearch.
+    // Setting it to 25 for every size below 10 makes sure the shard size doesn't change for sizes 1-10, keeping the top terms stable.
     test('set shard_size to 25 if size is smaller or equal than 10', () => {
       const aggConfigs = getAggConfigs({
         field: 'string_field',
