@@ -26,7 +26,7 @@ const LabelFieldComponent = ({ euiFieldProps }: QueryDescriptionFieldProps) => {
 
   return (
     <EuiFormRow
-      label={i18n.translate('xpack.security_solution.markdown.osquery.labelFieldText', {
+      label={i18n.translate('xpack.securitySolution.markdown.osquery.labelFieldText', {
         defaultMessage: 'Label',
       })}
       error={error?.message}
