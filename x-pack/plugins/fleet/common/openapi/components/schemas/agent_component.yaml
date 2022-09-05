@@ -1,0 +1,15 @@
+title: Agent component
+type: object
+properties:
+  id:
+    type: string
+  type:
+    type: string
+  status:
+    $ref: ./agent_component_status.yaml
+  message:
+    type: string
+  units:
+    type: array
+    items:
+      $ref: ./agent_component_unit.yaml
