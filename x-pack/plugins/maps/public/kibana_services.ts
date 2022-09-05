@@ -59,6 +59,7 @@ export const getCoreI18n = () => coreStart.i18n;
 export const getSearchService = () => pluginsStart.data.search;
 export const getEmbeddableService = () => pluginsStart.embeddable;
 export const getNavigateToApp = () => coreStart.application.navigateToApp;
+export const getUrlForApp = () => coreStart.application.getUrlForApp;
 export const getNavigateToUrl = () => coreStart.application.navigateToUrl;
 export const getSavedObjectsTagging = () => pluginsStart.savedObjectsTagging;
 export const getPresentationUtilContext = () => pluginsStart.presentationUtil.ContextProvider;
