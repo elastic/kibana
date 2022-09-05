@@ -147,6 +147,7 @@ describe('ruleType', () => {
         thresholdComparator: Comparator.BETWEEN,
         threshold: [0],
         searchType: 'esQuery',
+        excludeHitsFromPreviousRun: true,
       };
       const ruleServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
 
@@ -177,6 +178,7 @@ describe('ruleType', () => {
         thresholdComparator: Comparator.GT,
         threshold: [0],
         searchType: 'esQuery',
+        excludeHitsFromPreviousRun: true,
       };
       const ruleServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
 
@@ -223,6 +225,7 @@ describe('ruleType', () => {
         thresholdComparator: Comparator.GT,
         threshold: [0],
         searchType: 'esQuery',
+        excludeHitsFromPreviousRun: true,
       };
       const ruleServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
 
@@ -272,6 +275,7 @@ describe('ruleType', () => {
         thresholdComparator: Comparator.GT,
         threshold: [0],
         searchType: 'esQuery',
+        excludeHitsFromPreviousRun: true,
       };
       const ruleServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
 
@@ -315,6 +319,7 @@ describe('ruleType', () => {
         thresholdComparator: Comparator.GT,
         threshold: [0],
         searchType: 'esQuery',
+        excludeHitsFromPreviousRun: true,
       };
       const ruleServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
 
@@ -387,6 +392,7 @@ describe('ruleType', () => {
         thresholdComparator: Comparator.GT,
         threshold: [0],
         searchType: 'esQuery',
+        excludeHitsFromPreviousRun: true,
       };
       const ruleServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
 
@@ -433,6 +439,7 @@ describe('ruleType', () => {
         thresholdComparator: Comparator.GT,
         threshold: [0],
         searchType: 'esQuery',
+        excludeHitsFromPreviousRun: true,
       };
       const ruleServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
 
@@ -502,6 +509,7 @@ describe('ruleType', () => {
       threshold: [0],
       searchConfiguration: {},
       searchType: 'searchSource',
+      excludeHitsFromPreviousRun: true,
     };
 
     afterAll(() => {
