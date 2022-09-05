@@ -128,14 +128,14 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
   const value = useMemo(
     () => ({
       field,
-      indexPatternId: indexPattern.id,
+      indexPattern,
       id: field.name,
       humanData: {
         label: field.displayName,
         position: itemIndex + 1,
       },
     }),
-    [field, indexPattern.id, itemIndex]
+    [field, indexPattern, itemIndex]
   );
   const order = useMemo(() => [0, groupIndex, itemIndex], [groupIndex, itemIndex]);
 
@@ -359,7 +359,7 @@ function FieldItemPopoverContents(props: FieldItemProps) {
                 <EuiSpacer size="m" />
                 <VisualizeGeoFieldButton
                   uiActions={uiActions}
-                  indexPatternId={indexPattern.id}
+                  indexPattern={indexPattern}
                   fieldName={field.name}
                 />
               </>

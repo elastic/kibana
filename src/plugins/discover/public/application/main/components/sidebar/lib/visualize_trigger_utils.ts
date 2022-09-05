@@ -30,12 +30,12 @@ function getTrigger(type: string) {
 
 async function getCompatibleActions(
   fieldName: string,
-  dataViewId: string,
+  dataView: DataView,
   contextualFields: string[],
   trigger: typeof VISUALIZE_FIELD_TRIGGER | typeof VISUALIZE_GEO_FIELD_TRIGGER
 ) {
   const compatibleActions = await getUiActions().getTriggerCompatibleActions(trigger, {
-    indexPatternId: dataViewId,
+    dataViewSpec: dataView.toSpec(),
     fieldName,
     contextualFields,
   });
@@ -49,20 +49,11 @@ export function triggerVisualizeActions(
 ) {
   if (!dataView) return;
   const trigger = getTriggerConstant(field.type);
-  let triggerOptions;
-  if (trigger === VISUALIZE_FIELD_TRIGGER) {
-    triggerOptions = {
-      dataViewSpec: dataView.toSpec(),
-      fieldName: field.name,
-      contextualFields,
-    };
-  } else {
-    triggerOptions = {
-      indexPatternId: dataView.id,
-      fieldName: field.name,
-      contextualFields,
-    };
-  }
+  const triggerOptions = {
+    dataViewSpec: dataView.toSpec(),
+    fieldName: field.name,
+    contextualFields,
+  };
   getUiActions().getTrigger(trigger).exec(triggerOptions);
 }
 
@@ -77,11 +68,11 @@ export interface VisualizeInformation {
  */
 export async function getVisualizeInformation(
   field: DataViewField,
-  dataViewId: string | undefined,
+  dataView: DataView | undefined,
   contextualFields: string[],
   multiFields: DataViewField[] = []
 ): Promise<VisualizeInformation | undefined> {
-  if (field.name === '_id' || !dataViewId) {
+  if (field.name === '_id' || !dataView?.id) {
     // _id fields are not visualizeable in ES
     return undefined;
   }
@@ -93,7 +84,7 @@ export async function getVisualizeInformation(
     // Retrieve compatible actions for the specific field
     const actions = await getCompatibleActions(
       f.name,
-      dataViewId,
+      dataView,
       contextualFields,
       getTriggerConstant(f.type)
     );
@@ -101,7 +92,7 @@ export async function getVisualizeInformation(
     // if the field has compatible actions use this field for visualizing
     if (actions.length > 0) {
       const triggerOptions = {
-        indexPatternId: dataViewId,
+        dataViewSpec: dataView?.toSpec(),
         fieldName: f.name,
         contextualFields,
         trigger: getTrigger(f.type),

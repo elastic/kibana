@@ -34,9 +34,7 @@ export const DiscoverFieldVisualize: React.FC<Props> = React.memo(
     const [visualizeInfo, setVisualizeInfo] = useState<VisualizeInformation>();
 
     useEffect(() => {
-      getVisualizeInformation(field, dataView.id, details.columns, multiFields).then(
-        setVisualizeInfo
-      );
+      getVisualizeInformation(field, dataView, details.columns, multiFields).then(setVisualizeInfo);
     }, [details.columns, field, dataView, multiFields]);
 
     if (!visualizeInfo) {

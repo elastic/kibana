@@ -70,7 +70,8 @@ export interface IndexPattern {
     }
   >;
   hasRestrictions: boolean;
-  spec?: DataViewSpec;
+  spec: DataViewSpec;
+  isPersisted: boolean;
 }
 
 export type IndexPatternField = FieldSpec & {

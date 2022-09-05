@@ -36,6 +36,7 @@ jest.mock('../../../../kibana_services', () => ({
 
 function getCompProps(): DiscoverSidebarProps {
   const dataView = stubLogstashDataView;
+  dataView.toSpec = jest.fn(() => ({}));
   const hits = getDataTableRecords(dataView);
 
   const dataViewList = [

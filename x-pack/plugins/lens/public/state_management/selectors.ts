@@ -21,7 +21,7 @@ export const selectResolvedDateRange = (state: LensState) => state.lens.resolved
 export const selectAdHocDataViews = (state: LensState) =>
   Object.fromEntries(
     Object.values(state.lens.dataViews.indexPatterns)
-      .filter((indexPattern) => indexPattern.spec)
+      .filter((indexPattern) => !indexPattern.isPersisted)
       .map((indexPattern) => [indexPattern.id, indexPattern.spec!])
   );
 export const selectVisualization = (state: LensState) => state.lens.visualization;

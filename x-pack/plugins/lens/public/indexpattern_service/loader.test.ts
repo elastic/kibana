@@ -65,6 +65,7 @@ describe('loader', () => {
             title: 'Foo index',
             metaFields: [],
             isPersisted: () => true,
+            toSpec: () => ({}),
             typeMeta: {
               aggs: {
                 date_histogram: {
@@ -123,6 +124,7 @@ describe('loader', () => {
             title: 'Foo index',
             metaFields: ['timestamp'],
             isPersisted: () => true,
+            toSpec: () => ({}),
             typeMeta: {
               aggs: {
                 date_histogram: {
@@ -203,6 +205,7 @@ describe('loader', () => {
               hasRestrictions: false,
               fields: [],
               isPersisted: () => true,
+              toSpec: () => ({}),
             };
           }
           return Promise.reject();

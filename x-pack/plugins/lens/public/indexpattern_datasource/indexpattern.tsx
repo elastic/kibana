@@ -417,13 +417,13 @@ export function getIndexPatternDatasource({
     onDrop,
 
     getCustomWorkspaceRenderer: (state: IndexPatternPrivateState, dragging: DraggingIdentifier) => {
-      if (dragging.field === undefined || dragging.indexPatternId === undefined) {
+      if (dragging.field === undefined || dragging.indexPattern === undefined) {
         return undefined;
       }
 
       const draggedField = dragging as DraggingIdentifier & {
         field: IndexPatternField;
-        indexPatternId: string;
+        indexPattern: IndexPattern;
       };
       const geoFieldType =
         draggedField.field.esTypes &&
@@ -436,7 +436,7 @@ export function getIndexPatternDatasource({
               <GeoFieldWorkspacePanel
                 uiActions={uiActions}
                 fieldType={geoFieldType}
-                indexPatternId={draggedField.indexPatternId}
+                indexPattern={draggedField.indexPattern}
                 fieldName={draggedField.field.name}
               />
             );
