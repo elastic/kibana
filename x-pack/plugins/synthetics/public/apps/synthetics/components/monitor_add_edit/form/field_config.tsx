@@ -52,6 +52,7 @@ import { ComboBox } from '../fields/combo_box';
 import { SourceField } from '../fields/source_field';
 import { getDefaultFormFields } from './defaults';
 import { validate, validateHeaders, WHOLE_NUMBERS_ONLY, FLOATS_ONLY } from './validation';
+import { JSONEditor } from '../fields/code_editor';
 
 const getScheduleContent = (value: number) => {
   if (value > 60) {
@@ -975,6 +976,55 @@ export const FIELD: Record<string, FieldMeta> = {
     }),
     validation: () => ({
       required: true,
+    }),
+  },
+  [ConfigKey.PLAYWRIGHT_OPTIONS]: {
+    fieldKey: ConfigKey.PLAYWRIGHT_OPTIONS,
+    component: JSONEditor,
+    label: i18n.translate('xpack.synthetics.monitorConfig.playwrightOptions.label', {
+      defaultMessage: 'Playwright options',
+    }),
+    helpText: (
+      <span>
+        {i18n.translate('xpack.synthetics.monitorConfig.playwrightOptions.helpText', {
+          defaultMessage: 'Configure Playwright agent with custom options. ',
+        })}
+        <EuiLink href="#" target="_blank">
+          {i18n.translate('xpack.synthetics.monitorConfig.playwrightOptions.learnMore', {
+            defaultMessage: 'Learn more',
+          })}
+        </EuiLink>
+      </span>
+    ),
+    error: i18n.translate('xpack.synthetics.monitorConfig.playwrightOptions.error', {
+      defaultMessage: 'Invalid JSON format',
+    }),
+    ariaLabel: i18n.translate(
+      'xpack.synthetics.monitorConfig.playwrightOptions.codeEditor.json.ariaLabel',
+      {
+        defaultMessage: 'Playwright options JSON code editor',
+      }
+    ),
+    controlled: true,
+    required: false,
+    props: ({
+      field,
+      setValue,
+    }: {
+      field?: ControllerRenderProps;
+      setValue: UseFormReturn['setValue'];
+    }) => ({
+      onChange: (json: string) => setValue(ConfigKey.PLAYWRIGHT_OPTIONS, json),
+    }),
+    validation: () => ({
+      validate: (value) => {
+        const validateFn = validate[DataStream.BROWSER][ConfigKey.PLAYWRIGHT_OPTIONS];
+        if (validateFn) {
+          return !validateFn({
+            [ConfigKey.PLAYWRIGHT_OPTIONS]: value,
+          });
+        }
+      },
     }),
   },
 };
