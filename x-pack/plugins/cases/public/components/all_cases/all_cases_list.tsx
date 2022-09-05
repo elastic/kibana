@@ -183,18 +183,24 @@ export const AllCasesList = React.memo<AllCasesListProps>(
            * If the user selects and deselects all solutions
            * then the owner is set to an empty array. This results in fetching all cases the user has access to including
            * the ones with read access. We want to show only the cases the user has full access to.
-           * For that reason we fallback to availableSolutions if the owner is empty
+           * For that reason we fallback to availableSolutions if the owner is empty.
+           *
+           * If the consumer of cases has passed an owner we fallback to the provided owner
            */
-          ...(newFilterOptions.owner != null
+          ...(newFilterOptions.owner != null && !hasOwner
             ? {
                 owner:
                   newFilterOptions.owner.length === 0 ? availableSolutions : newFilterOptions.owner,
+              }
+            : newFilterOptions.owner != null && hasOwner
+            ? {
+                owner: newFilterOptions.owner.length === 0 ? owner : newFilterOptions.owner,
               }
             : {}),
         }));
         refreshCases(false);
       },
-      [deselectCases, refreshCases, availableSolutions]
+      [deselectCases, refreshCases, hasOwner, availableSolutions, owner]
     );
 
     /**

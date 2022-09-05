@@ -967,5 +967,36 @@ describe('AllCasesListGeneric', () => {
         queryParams: { page: 1, perPage: 5, sortField: 'createdAt', sortOrder: 'desc' },
       });
     });
+
+    it('should hide the solutions filter if the owner is provided', async () => {
+      const { queryByTestId } = appMockRenderer.render(
+        <TestProviders owner={[SECURITY_SOLUTION_OWNER]}>
+          <AllCasesList />
+        </TestProviders>
+      );
+
+      expect(queryByTestId('options-filter-popover-button-Solution')).toBeFalsy();
+    });
+
+    it('should call useGetCases with the correct owner on initial render', async () => {
+      appMockRenderer.render(
+        <TestProviders owner={[SECURITY_SOLUTION_OWNER]}>
+          <AllCasesList />
+        </TestProviders>
+      );
+
+      expect(useGetCasesMock).toHaveBeenCalledWith({
+        filterOptions: {
+          search: '',
+          searchFields: [],
+          severity: 'all',
+          reporters: [],
+          status: 'all',
+          tags: [],
+          owner: ['securitySolution'],
+        },
+        queryParams: { page: 1, perPage: 5, sortField: 'createdAt', sortOrder: 'desc' },
+      });
+    });
   });
 });
