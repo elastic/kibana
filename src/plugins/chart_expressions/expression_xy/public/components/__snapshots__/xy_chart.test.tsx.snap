@@ -101,9 +101,9 @@ exports[`XYChart component annotations should render grouped line annotations pr
   dataValues={
     Array [
       Object {
-        "dataValue": 1647591900025,
+        "dataValue": 1647591917125,
         "details": "Event 1",
-        "header": 1647591900000,
+        "header": 1647591917100,
       },
     ]
   }
@@ -124,7 +124,7 @@ exports[`XYChart component annotations should render grouped line annotations pr
           "position": "bottom",
           "textVisibility": undefined,
           "time": "2022-03-18T08:25:00.000Z",
-          "timebucket": 1647591900000,
+          "timebucket": 1647591917100,
           "type": "point",
         }
       }
@@ -161,9 +161,9 @@ exports[`XYChart component annotations should render grouped line annotations wi
   dataValues={
     Array [
       Object {
-        "dataValue": 1647591900025,
+        "dataValue": 1647591917125,
         "details": "Event 1",
-        "header": 1647591900000,
+        "header": 1647591917100,
       },
     ]
   }
@@ -184,7 +184,7 @@ exports[`XYChart component annotations should render grouped line annotations wi
           "position": "bottom",
           "textVisibility": undefined,
           "time": "2022-03-18T08:25:00.000Z",
-          "timebucket": 1647591900000,
+          "timebucket": 1647591917100,
           "type": "point",
         }
       }
