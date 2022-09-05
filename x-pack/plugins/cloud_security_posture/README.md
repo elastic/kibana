@@ -42,14 +42,15 @@ Therefore, we suggest running the following commands locally before creating a P
 
 Our unit tests are written using [jest](https://jestjs.io/) framework.
 Jest provides you a fast and easy test framework that allow you to run test in parallel, collect code coverage
-information and a custom resolver for imports making it simple to mock any object outside of your test scope.
+information and create mocks for any object inside/outside your test scope.
 
-Jest runs all tests found in any file wit
+Jest runs all tests that: found in any file within a `__tests__` directory or any file with a suffix of `.test.js`
+, `.test.ts`
+, `.test.jsx`, or `.test.tsx`.
 
-hin a `__tests__` directory or any file with a suffix of `.test.js`, `.test.ts`, `.test.jsx`, or `.test.tsx`.
 As a convention, we use the `.test.ts` suffix for all our tests.
 
-You can run the unit tests with the following command:
+You can run all cloud security posture tests with the following command:
 
 ```bash
 yarn jest --config x-pack/plugins/cloud_security_posture/jest.config.js
@@ -77,7 +78,7 @@ node scripts/functional_tests_server.js --config x-pack/test/api_integration/con
 
 You should wait until the server is ready to accept connections before running the integration tests.
 
-Then, in a separate terminal,we will run the integration test.
+Then, in a separate terminal, you can run the integration test.
 In order to do so, run the following command:
 
 ``` bash  
