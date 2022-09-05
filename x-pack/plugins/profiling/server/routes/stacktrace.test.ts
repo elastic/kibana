@@ -9,8 +9,8 @@ import { createStackFrameID, StackTrace } from '../../common/profiling';
 import {
   decodeStackTrace,
   EncodedStackTrace,
-  runLengthDecodeReverse,
-  runLengthEncodeReverse,
+  runLengthDecode,
+  runLengthEncode,
 } from './stacktrace';
 
 enum fileID {
@@ -56,14 +56,14 @@ describe('Stack trace operations', () => {
           Stacktrace: {
             frame: {
               ids: frameID.A + frameID.B + frameID.C,
-              types: runLengthEncodeReverse(frameTypeA).toString('base64url'),
+              types: runLengthEncode(frameTypeA).toString('base64url'),
             },
           },
         } as EncodedStackTrace,
         expected: {
-          FrameIDs: [frameID.C, frameID.B, frameID.A],
-          FileIDs: [fileID.C, fileID.B, fileID.A],
-          AddressOrLines: [addressOrLine.C, addressOrLine.B, addressOrLine.A],
+          FrameIDs: [frameID.A, frameID.B, frameID.C],
+          FileIDs: [fileID.A, fileID.B, fileID.C],
+          AddressOrLines: [addressOrLine.A, addressOrLine.B, addressOrLine.C],
           Types: frameTypeA,
         } as StackTrace,
       },
@@ -72,14 +72,14 @@ describe('Stack trace operations', () => {
           Stacktrace: {
             frame: {
               ids: frameID.D + frameID.E + frameID.F + frameID.G,
-              types: runLengthEncodeReverse(frameTypeB).toString('base64url'),
+              types: runLengthEncode(frameTypeB).toString('base64url'),
             },
           },
         } as EncodedStackTrace,
         expected: {
-          FrameIDs: [frameID.G, frameID.F, frameID.E, frameID.D],
-          FileIDs: [fileID.F, fileID.F, fileID.E, fileID.D],
-          AddressOrLines: [addressOrLine.G, addressOrLine.F, addressOrLine.E, addressOrLine.D],
+          FrameIDs: [frameID.D, frameID.E, frameID.F, frameID.G],
+          FileIDs: [fileID.D, fileID.E, fileID.F, fileID.F],
+          AddressOrLines: [addressOrLine.D, addressOrLine.E, addressOrLine.F, addressOrLine.G],
           Types: frameTypeB,
         } as StackTrace,
       },
@@ -94,7 +94,7 @@ describe('Stack trace operations', () => {
     const tests: number[][] = [[], [0], [0, 1, 2, 3], [0, 1, 1, 2, 2, 2, 3, 3, 3, 3]];
 
     for (const t of tests) {
-      expect(runLengthDecodeReverse(runLengthEncodeReverse(t))).toEqual(t);
+      expect(runLengthDecode(runLengthEncode(t))).toEqual(t);
     }
   });
 
@@ -105,7 +105,7 @@ describe('Stack trace operations', () => {
     }> = [
       {
         bytes: Buffer.from([0x5, 0x0, 0x2, 0x2]),
-        expected: [2, 2, 0, 0, 0, 0, 0],
+        expected: [0, 0, 0, 0, 0, 2, 2],
       },
       {
         bytes: Buffer.from([0x1, 0x8]),
@@ -114,7 +114,7 @@ describe('Stack trace operations', () => {
     ];
 
     for (const t of tests) {
-      expect(runLengthDecodeReverse(t.bytes, t.expected.length)).toEqual(t.expected);
+      expect(runLengthDecode(t.bytes, t.expected.length)).toEqual(t.expected);
     }
   });
 
@@ -125,7 +125,7 @@ describe('Stack trace operations', () => {
     }> = [
       {
         bytes: Buffer.from([0x5, 0x0, 0x2, 0x2]),
-        expected: [2, 2, 0, 0, 0, 0, 0],
+        expected: [0, 0, 0, 0, 0, 2, 2],
       },
       {
         bytes: Buffer.from([0x1, 0x8]),
@@ -134,7 +134,7 @@ describe('Stack trace operations', () => {
     ];
 
     for (const t of tests) {
-      expect(runLengthDecodeReverse(t.bytes)).toEqual(t.expected);
+      expect(runLengthDecode(t.bytes)).toEqual(t.expected);
     }
   });
 });

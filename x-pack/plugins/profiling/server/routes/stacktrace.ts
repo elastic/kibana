@@ -54,16 +54,15 @@ export type EncodedStackTrace = DedotObject<{
   [ProfilingESField.StacktraceFrameTypes]: string;
 }>;
 
-// runLengthEncodeReverse encodes the reversed input array using a
-// run-length encoding.
+// runLengthEncode run-length encodes the input array.
 //
 // The input is a list of uint8s. The output is a binary stream of
 // 2-byte pairs (first byte is the length and the second byte is the
 // binary representation of the object) in reverse order.
 //
-// E.g. uint8 array [2, 2, 0, 0, 0, 0, 0] is converted into the byte
-// array [5, 0, 2, 2].
-export function runLengthEncodeReverse(input: number[]): Buffer {
+// E.g. uint8 array [0, 0, 0, 0, 0, 2, 2, 2] is converted into the byte
+// array [5, 0, 3, 2].
+export function runLengthEncode(input: number[]): Buffer {
   const output: number[] = [];
 
   if (input.length === 0) {
@@ -71,9 +70,9 @@ export function runLengthEncodeReverse(input: number[]): Buffer {
   }
 
   let count = 0;
-  let current = input[input.length - 1];
+  let current = input[0];
 
-  for (let i = input.length - 2; i >= 0; i--) {
+  for (let i = 1; i < input.length; i++) {
     const next = input[i];
 
     if (next === current && count < 255) {
@@ -92,15 +91,15 @@ export function runLengthEncodeReverse(input: number[]): Buffer {
   return Buffer.from(output);
 }
 
-// runLengthDecodeReverse decodes a run-length encoding for the reversed input array.
+// runLengthDecode decodes a run-length encoding for the input array.
 //
 // The input is a binary stream of 2-byte pairs (first byte is the length and the
 // second byte is the binary representation of the object). The output is a list of
-// uint8s in reverse order.
+// uint8s.
 //
-// E.g. byte array [5, 0, 2, 2] is converted into an uint8 array like
-// [2, 2, 0, 0, 0, 0, 0].
-export function runLengthDecodeReverse(input: Buffer, outputSize?: number): number[] {
+// E.g. byte array [5, 0, 3, 2] is converted into an uint8 array like
+// [0, 0, 0, 0, 0, 2, 2, 2].
+export function runLengthDecode(input: Buffer, outputSize?: number): number[] {
   let size;
 
   if (typeof outputSize === 'undefined') {
@@ -115,9 +114,9 @@ export function runLengthDecodeReverse(input: Buffer, outputSize?: number): numb
   const output: number[] = new Array(size);
 
   let idx = 0;
-  for (let i = input.length - 1; i >= 1; i -= 2) {
-    for (let j = 0; j < input[i - 1]; j++) {
-      output[idx] = input[i];
+  for (let i = 0; i < input.length; i += 2) {
+    for (let j = 0; j < input[i]; j++) {
+      output[idx] = input[i + 1];
       idx++;
     }
   }
@@ -144,21 +143,19 @@ export function decodeStackTrace(input: EncodedStackTrace): StackTrace {
   // However, since the file ID is base64-encoded using 21.33 bytes
   // (16 * 4 / 3), then the 22 bytes have an extra 4 bits from the
   // address (see diagram in definition of EncodedStackTrace).
-  for (let i = 0; i < inputFrameIDs.length; i += BASE64_FRAME_ID_LENGTH) {
-    const frameID = inputFrameIDs.slice(i, i + BASE64_FRAME_ID_LENGTH);
+  for (let i = 0; i < countsFrameIDs; i++) {
+    const pos = i * BASE64_FRAME_ID_LENGTH;
+    const frameID = inputFrameIDs.slice(pos, pos + BASE64_FRAME_ID_LENGTH);
     const buf = Buffer.from(frameID, 'base64url');
 
-    // the frames are stored in reverse order, leaf frame first
-    const j = countsFrameIDs - Math.floor(i / BASE64_FRAME_ID_LENGTH) - 1;
-
-    fileIDs[j] = buf.toString('base64url', 0, 16);
-    addressOrLines[j] = Number(buf.readBigUInt64BE(16));
-    frameIDs[j] = frameID;
+    fileIDs[i] = buf.toString('base64url', 0, 16);
+    addressOrLines[i] = Number(buf.readBigUInt64BE(16));
+    frameIDs[i] = frameID;
   }
 
   // Step 2: Convert the run-length byte encoding into a list of uint8s.
-  const types = Buffer.from(inputFrameTypes.toString(), 'base64url');
-  const typeIDs = runLengthDecodeReverse(types, countsFrameIDs);
+  const types = Buffer.from(inputFrameTypes, 'base64url');
+  const typeIDs = runLengthDecode(types, countsFrameIDs);
 
   return {
     AddressOrLines: addressOrLines,
