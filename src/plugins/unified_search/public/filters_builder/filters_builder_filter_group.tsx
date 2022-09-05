@@ -36,9 +36,12 @@ const boderPadding = css`
   padding: 14px;
 `;
 
-const OrDelimiter = () => (
+const OrDelimiter = ({ isRootLevelFilterGroup }: { isRootLevelFilterGroup: boolean }) => (
   <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
-    <EuiFlexItem grow={1} style={{ marginLeft: '-10px', flexGrow: 0.12 }}>
+    <EuiFlexItem
+      grow={1}
+      style={{ marginLeft: isRootLevelFilterGroup ? '4px' : '-10px', flexGrow: 0.12 }}
+    >
       <EuiHorizontalRule margin="s" />
     </EuiFlexItem>
     <EuiFlexItem grow={false}>
@@ -48,7 +51,7 @@ const OrDelimiter = () => (
         })}
       </EuiText>
     </EuiFlexItem>
-    <EuiFlexItem grow={10} style={{ marginRight: '-10px' }}>
+    <EuiFlexItem grow={10} style={{ marginRight: isRootLevelFilterGroup ? '4px' : '-10px' }}>
       <EuiHorizontalRule margin="s" />
     </EuiFlexItem>
   </EuiFlexGroup>
@@ -94,7 +97,7 @@ export const FilterGroup = ({
   const orDisabled = hideOr || (isDepthReached && conditionType === ConditionTypes.AND);
   const andDisabled = isDepthReached && conditionType === ConditionTypes.OR;
   const removeDisabled = pathInArray.length <= 1 && filters.length === 1;
-  const isRootLevelFilterGroup = pathInArray.length <= 1 && path;
+  const isRootLevelFilterGroup = pathInArray.length <= 1;
   const color = isRootLevelFilterGroup || !reverseBackground ? 'subdued' : 'plain';
 
   const shouldDrawBorder = (filter: Filter) =>
@@ -106,7 +109,7 @@ export const FilterGroup = ({
       hasShadow={false}
       paddingSize="none"
       className={cx({
-        [boderPadding]: !isRootLevelFilterGroup,
+        [boderPadding]: path !== '' && !isRootLevelFilterGroup,
       })}
     >
       {filters.map((filter, index, acc) => (
@@ -131,7 +134,7 @@ export const FilterGroup = ({
 
           {conditionType === ConditionTypes.OR && index + 1 < acc.length ? (
             <EuiFlexItem>
-              <OrDelimiter />
+              <OrDelimiter isRootLevelFilterGroup={isRootLevelFilterGroup && path !== ''} />
             </EuiFlexItem>
           ) : null}
 
