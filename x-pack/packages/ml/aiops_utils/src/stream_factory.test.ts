@@ -45,9 +45,10 @@ describe('streamFactory', () => {
     }
 
     expect(responseWithHeaders.headers).toStrictEqual({
+      'Cache-Control': 'no-cache',
       Connection: 'keep-alive',
       'Transfer-Encoding': 'chunked',
-      'x-accel-buffering': 'no',
+      'X-Accel-Buffering': 'no',
     });
     expect(streamResult).toBe('push1push2');
   });
@@ -70,9 +71,10 @@ describe('streamFactory', () => {
     const parsedItems = streamItems.map((d) => JSON.parse(d));
 
     expect(responseWithHeaders.headers).toStrictEqual({
+      'Cache-Control': 'no-cache',
       Connection: 'keep-alive',
       'Transfer-Encoding': 'chunked',
-      'x-accel-buffering': 'no',
+      'X-Accel-Buffering': 'no',
     });
     expect(parsedItems).toHaveLength(2);
     expect(parsedItems[0]).toStrictEqual(mockItem1);
@@ -114,10 +116,11 @@ describe('streamFactory', () => {
         const streamResult = decoded.toString('utf8');
 
         expect(responseWithHeaders.headers).toStrictEqual({
+          'Cache-Control': 'no-cache',
           Connection: 'keep-alive',
           'content-encoding': 'gzip',
           'Transfer-Encoding': 'chunked',
-          'x-accel-buffering': 'no',
+          'X-Accel-Buffering': 'no',
         });
         expect(streamResult).toBe('push1push2');
 
@@ -157,10 +160,11 @@ describe('streamFactory', () => {
         const parsedItems = streamItems.map((d) => JSON.parse(d));
 
         expect(responseWithHeaders.headers).toStrictEqual({
+          'Cache-Control': 'no-cache',
           Connection: 'keep-alive',
           'content-encoding': 'gzip',
           'Transfer-Encoding': 'chunked',
-          'x-accel-buffering': 'no',
+          'X-Accel-Buffering': 'no',
         });
         expect(parsedItems).toHaveLength(2);
         expect(parsedItems[0]).toStrictEqual(mockItem1);

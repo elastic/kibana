@@ -107,10 +107,14 @@ export function streamFactory<T = unknown>(
   const responseWithHeaders: StreamFactoryReturnType['responseWithHeaders'] = {
     body: stream,
     headers: {
+      ...(isCompressed ? { 'content-encoding': 'gzip' } : {}),
+
+      // This disables response buffering on proxy servers (Nginx, uwsgi, fastcgi, etc.)
+      // Otherwise, those proxies buffer responses up to 4/8 KiB.
+      'X-Accel-Buffering': 'no',
+      'Cache-Control': 'no-cache',
       Connection: 'keep-alive',
       'Transfer-Encoding': 'chunked',
-      'x-accel-buffering': 'no',
-      ...(isCompressed ? { 'content-encoding': 'gzip' } : {}),
     },
   };
 
