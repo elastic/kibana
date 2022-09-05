@@ -219,16 +219,18 @@ export const XyToolbar = memo(function XyToolbar(
       ) !== 'ordinal'
   );
 
-  // only allow changing endzone visibility if it could show up theoretically (if it's a time viz)
-  const onChangeEndzoneVisiblity = dataLayers.every(
+  const isTimeVis = dataLayers.every(
     (layer) =>
       layer.xAccessor &&
       getScaleType(
         props.frame.datasourceLayers[layer.layerId]?.getOperationForColumnId(layer.xAccessor) ??
           null,
         ScaleType.Linear
-      ) === 'time'
-  )
+      ) === ScaleType.Time
+  );
+
+  // only allow changing endzone visibility if it could show up theoretically (if it's a time viz)
+  const onChangeEndzoneVisiblity = isTimeVis
     ? (checked: boolean): void => {
         setState({
           ...state,
@@ -237,16 +239,7 @@ export const XyToolbar = memo(function XyToolbar(
       }
     : undefined;
 
-  // only allow changing showCurrentTimeMarker visibility if it could show up theoretically (if it's a time viz)
-  const onChangeCurrentTimeMarkerVisibility = dataLayers.every(
-    (layer) =>
-      layer.xAccessor &&
-      getScaleType(
-        props.frame.datasourceLayers[layer.layerId]?.getOperationForColumnId(layer.xAccessor) ??
-          null,
-        ScaleType.Linear
-      ) === 'time'
-  )
+  const onChangeCurrentTimeMarkerVisibility = isTimeVis
     ? (checked: boolean): void => {
         setState({
           ...state,
