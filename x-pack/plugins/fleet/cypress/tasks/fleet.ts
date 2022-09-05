@@ -22,7 +22,7 @@ export function createAgentPolicy() {
   }).as('postAgentPolicy');
   cy.getBySel(ADD_AGENT_BUTTON_TOP).click();
   cy.getBySel(AGENT_FLYOUT.STANDALONE_TAB).click();
-  cy.getBySel(AGENT_FLYOUT.CREATE_POLICY_BUTTON).click();
+  cy.getBySel(AGENT_FLYOUT.CREATE_POLICY_BUTTON, { timeout: 10000 }).click();
 
   cy.wait('@postAgentPolicy');
   cy.getBySel(AGENT_FLYOUT.CLOSE_BUTTON).click();
