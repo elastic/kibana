@@ -13,7 +13,6 @@ import {
   SavedObjectReference,
 } from '@kbn/core/public';
 import { SavedObject } from '@kbn/saved-objects-plugin/public';
-import { DashboardAttributes } from '../saved_dashboards';
 import { upperFirst } from './string_utils';
 
 /**
@@ -97,13 +96,13 @@ export class SavedObjectLoader {
    * @returns {source} The modified source object, with an id and url field.
    */
   mapHitSource(
-    attributes: DashboardAttributes,
+    source: Record<string, unknown>,
     id: string,
     references: SavedObjectReference[] = [],
     updatedAt?: string
-  ) {
+  ): Record<string, unknown> {
     return {
-      ...attributes,
+      ...source,
       id,
       url: this.urlFor(id),
       references,
@@ -123,7 +122,7 @@ export class SavedObjectLoader {
     references = [],
     updatedAt,
   }: {
-    attributes: DashboardAttributes;
+    attributes: Record<string, unknown>;
     id: string;
     type: string;
     references?: SavedObjectReference[];
@@ -146,7 +145,7 @@ export class SavedObjectLoader {
     { size = 100, fields, hasReference }: SavedObjectLoaderFindOptions
   ) {
     return this.savedObjectsClient
-      .find<DashboardAttributes>({
+      .find<Record<string, unknown>>({
         type: this.lowercaseType,
         search: search ? `${search}*` : undefined,
         perPage: size,

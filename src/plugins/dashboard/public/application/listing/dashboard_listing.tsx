@@ -17,16 +17,14 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { SavedObjectsFindOptionsReference } from '@kbn/core/public';
+import type { SavedObjectReference } from '@kbn/core/types';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import useMount from 'react-use/lib/useMount';
 import { TableListView } from '@kbn/content-management-table-list';
+import type { UserContentCommonSchema } from '@kbn/content-management-table-list';
 
 import { attemptLoadDashboardByTitle } from '../lib';
-import {
-  DashboardAppServices,
-  DashboardRedirect,
-  DashboardSavedObjectUserContent,
-} from '../../types';
+import { DashboardAppServices, DashboardRedirect } from '../../types';
 import {
   getDashboardBreadcrumb,
   dashboardListingTable,
@@ -35,7 +33,6 @@ import {
   getNewDashboardTitle,
 } from '../../dashboard_strings';
 import { syncQueryStateWithUrl } from '../../services/data';
-import { SavedObjectLoader } from '../../services/saved_objects';
 import { IKbnUrlStateStorage } from '../../services/kibana_utils';
 import { useKibana } from '../../services/kibana_react';
 import { DashboardUnsavedListing } from './dashboard_unsaved_listing';
@@ -47,17 +44,24 @@ import { DashboardAppNoDataPage, isDashboardAppInNoDataState } from '../dashboar
 const SAVED_OBJECTS_LIMIT_SETTING = 'savedObjects:listingLimit';
 const SAVED_OBJECTS_PER_PAGE_SETTING = 'savedObjects:perPage';
 
+interface DashboardSavedObjectUserContent extends UserContentCommonSchema {
+  attributes: {
+    title: string;
+    timeRestore: boolean;
+  };
+}
+
 const toTableListViewSavedObject = (
-  savedObject: ReturnType<SavedObjectLoader['mapSavedObjectApiHits']>
+  savedObject: Record<string, unknown>
 ): DashboardSavedObjectUserContent => {
   return {
-    id: savedObject.id,
-    updatedAt: savedObject.updatedAt!,
-    references: savedObject.references,
+    id: savedObject.id as string,
+    updatedAt: savedObject.updatedAt! as string,
+    references: savedObject.references as SavedObjectReference[],
     type: 'dashboard',
     attributes: {
-      title: savedObject.title ?? '',
-      timeRestore: savedObject.timeRestore,
+      title: (savedObject.title as string) ?? '',
+      timeRestore: savedObject.timeRestore as boolean,
     },
   };
 };

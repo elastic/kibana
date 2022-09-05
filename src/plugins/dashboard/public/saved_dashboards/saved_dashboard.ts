@@ -10,6 +10,7 @@ import { assign, cloneDeep } from 'lodash';
 import { SavedObjectsClientContract } from '@kbn/core/public';
 import type { ResolvedSimpleSavedObject } from '@kbn/core/public';
 import { SavedObjectAttributes, SavedObjectReference } from '@kbn/core/types';
+import { RawControlGroupAttributes } from '@kbn/controls-plugin/common';
 import { EmbeddableStart } from '../services/embeddable';
 import { SavedObject, SavedObjectsStart } from '../services/saved_objects';
 import { Filter, ISearchSource, Query, RefreshInterval } from '../services/data';
@@ -19,7 +20,7 @@ import { extractReferences, injectReferences } from '../../common/saved_dashboar
 
 import { DashboardOptions } from '../types';
 
-export interface DashboardAttributes {
+export interface DashboardSavedObject extends SavedObject {
   id?: string;
   timeRestore: boolean;
   timeTo?: string;
@@ -32,21 +33,14 @@ export interface DashboardAttributes {
   uiStateJSON?: string;
   lastSavedTitle: string;
   refreshInterval?: RefreshInterval;
-  outcome?: ResolvedSimpleSavedObject['outcome'];
-  aliasId?: ResolvedSimpleSavedObject['alias_target_id'];
-  aliasPurpose?: ResolvedSimpleSavedObject['alias_purpose'];
-
-  error?: string;
-  [key: string]: any;
-}
-
-export interface DashboardSavedObject
-  extends DashboardAttributes,
-    SavedObject<DashboardAttributes> {
   searchSource: ISearchSource;
   getQuery(): Query;
   getFilters(): Filter[];
   getFullEditPath: (editMode?: boolean) => string;
+  outcome?: ResolvedSimpleSavedObject['outcome'];
+  aliasId?: ResolvedSimpleSavedObject['alias_target_id'];
+  aliasPurpose?: ResolvedSimpleSavedObject['alias_purpose'];
+  controlGroupInput?: Omit<RawControlGroupAttributes, 'id'>;
 }
 
 const defaults = {
