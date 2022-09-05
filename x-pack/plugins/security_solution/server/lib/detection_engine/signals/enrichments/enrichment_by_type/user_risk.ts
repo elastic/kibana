@@ -48,7 +48,7 @@ export const createUserRiskEnrichments: CreateRiskEnrichment = async ({
       set(
         newEvent,
         '_source.user.risk.calculated_score_norm',
-        enrichment?._source?.risk_stats?.risk_score 
+        enrichment?._source?.risk_stats?.risk_score
       );
       return newEvent;
     },
