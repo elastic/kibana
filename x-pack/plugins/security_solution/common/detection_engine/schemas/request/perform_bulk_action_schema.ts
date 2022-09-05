@@ -77,6 +77,18 @@ const bulkActionEditPayloadTimeline = t.type({
 
 export type BulkActionEditPayloadTimeline = t.TypeOf<typeof bulkActionEditPayloadTimeline>;
 
+/**
+ * per rulesClient.bulkEdit rules actions operation contract (x-pack/plugins/alerting/server/rules_client/rules_client.ts)
+ * normalized rule action object is expected (NormalizedAlertAction) as value for the edit operation
+ */
+const normalizedRuleAction = t.exact(
+  t.type({
+    group: actionGroup,
+    id: actionId,
+    params: actionParams,
+  })
+);
+
 const bulkActionEditPayloadRuleActions = t.type({
   type: t.union([
     t.literal(BulkActionEditType.add_rule_actions),
@@ -84,15 +96,7 @@ const bulkActionEditPayloadRuleActions = t.type({
   ]),
   value: t.type({
     throttle,
-    actions: t.array(
-      t.exact(
-        t.type({
-          group: actionGroup,
-          id: actionId,
-          params: actionParams,
-        })
-      )
-    ),
+    actions: t.array(normalizedRuleAction),
   }),
 });
 
