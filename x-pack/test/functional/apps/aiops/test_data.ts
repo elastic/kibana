@@ -19,7 +19,7 @@ export const farequoteDataViewTestData: TestData = {
         fieldName: 'airline',
         fieldValue: 'AAL',
         logRate: 'Chart type:bar chart',
-        pValue: '1.32e-13',
+        pValue: '1.26e-13',
         impact: 'High',
       },
     ],
