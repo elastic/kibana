@@ -9,7 +9,7 @@ import React, { useMemo } from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-export const ALERTS_UNIT = (totalCount: number) =>
+export const translateUnit = (totalCount: number) =>
   i18n.translate('xpack.triggersActionsUI.alertsTable.alertsCountUnit', {
     values: { totalCount },
     defaultMessage: `{totalCount, plural, =1 {alert} other {alerts}}`,
@@ -19,7 +19,7 @@ export const AlertsCount = ({ children: alertsCount }: { children: number }) => 
   const { euiTheme } = useEuiTheme();
 
   const alertCountText = useMemo(
-    () => `${alertsCount.toLocaleString()} ${ALERTS_UNIT(alertsCount)}`,
+    () => `${alertsCount.toLocaleString()} ${translateUnit(alertsCount)}`,
     [alertsCount]
   );
 
