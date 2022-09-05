@@ -4,16 +4,6 @@ Cloud Posture automates the identification and remediation of risks across cloud
 
 ---
 
-## Table of contents
-
-- [Development](#development)
-  - [Install pre-commit hooks](#install-pre-commit-hooks)
-  - [Local checks before creating a PR](#local-checks-before-creating-a-pr)
-  - [Running unit tests](#running-unit-tests)
-  - [Running integration tests](#running-integration-tests)
-
----
-
 ## Development
 
 See the [kibana contributing guide](https://github.com/elastic/kibana/blob/main/CONTRIBUTING.md) for instructions
@@ -41,7 +31,7 @@ Therefore, we suggest running the following commands locally before creating a P
 
 ### Running unit tests
 
-Our unit tests are written using [jest](https://jestjs.io/) framework.
+Our [unit tests](https://docs.elastic.dev/kibana-dev-docs/tutorials/testing-plugins#unit-testing) are written using [jest](https://jestjs.io/) framework.
 Jest provides you a fast and easy test framework that allow you to run test in parallel, collect code coverage
 information and create mocks for any object inside/outside your test scope.
 
@@ -65,7 +55,7 @@ yarn jest --config x-pack/plugins/cloud_security_posture/jest.config.js --testNa
 
 ### Running integration tests
 
-The cloud security posture plugin has also integration tests that run against a real Elasticsearch and Kibana instances.
+The cloud security posture plugin has also [integration tests](https://docs.elastic.dev/kibana-dev-docs/tutorials/testing-plugins#integration-tests) that run against a real Elasticsearch and Kibana instances.
 We use these tests to verify that the plugin works as expected when running in a real environment.
 In order to run the integration tests, you need to have a running Elasticsearch and Kibana instances with the
 integration test configuration.
