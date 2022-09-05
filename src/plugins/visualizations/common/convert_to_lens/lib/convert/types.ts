@@ -35,6 +35,12 @@ export type MetricsWithField = Exclude<
   | METRIC_TYPES.COUNT
 >;
 
+export type SiblingPipelineAggs =
+  | METRIC_TYPES.AVG_BUCKET
+  | METRIC_TYPES.SUM_BUCKET
+  | METRIC_TYPES.MIN_BUCKET
+  | METRIC_TYPES.MAX_BUCKET;
+
 export interface CommonColumnConverterArgs<
   Agg extends SupportedAggregation = SupportedAggregation
 > {

@@ -20,6 +20,7 @@ const PARENT_PIPELINE_AGGS: string[] = [
   Operations.DIFFERENCES,
   Operations.MOVING_AVERAGE,
 ];
+
 const METRIC_AGGS_WITHOUT_PARAMS: string[] = [
   Operations.AVERAGE,
   Operations.MAX,
@@ -66,7 +67,7 @@ const getFormulaForSubMetric = (agg: IAggConfig, reducedTimeRange?: string): str
   }
 
   if (PARENT_PIPELINE_AGGS.includes(op.name)) {
-    return getFormulaForParentPipelineAgg(agg, reducedTimeRange);
+    return getFormulaForPipelineAgg(agg, reducedTimeRange);
   }
 
   if (METRIC_AGGS_WITHOUT_PARAMS.includes(op.name)) {
@@ -87,11 +88,15 @@ const isSchemaConfig = (agg: SchemaConfig | IAggConfig): agg is SchemaConfig => 
   return false;
 };
 
-export const getFormulaForParentPipelineAgg = (
+export const getFormulaForPipelineAgg = (
   agg:
     | SchemaConfig<METRIC_TYPES.CUMULATIVE_SUM>
     | SchemaConfig<METRIC_TYPES.DERIVATIVE>
     | SchemaConfig<METRIC_TYPES.MOVING_FN>
+    | SchemaConfig<METRIC_TYPES.AVG_BUCKET>
+    | SchemaConfig<METRIC_TYPES.MAX_BUCKET>
+    | SchemaConfig<METRIC_TYPES.MIN_BUCKET>
+    | SchemaConfig<METRIC_TYPES.SUM_BUCKET>
     | IAggConfig,
   reducedTimeRange?: string
 ) => {
