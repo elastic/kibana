@@ -67,6 +67,7 @@ export const addConnector = async (
     index_name: string;
     is_native: boolean;
     language: string | null;
+    service_type?: string | null;
   }
 ): Promise<{ id: string; index_name: string }> => {
   const document: ConnectorDocument = {
@@ -81,7 +82,7 @@ export const addConnector = async (
     last_synced: null,
     name: input.index_name.startsWith('search-') ? input.index_name.substring(7) : input.index_name,
     scheduling: { enabled: false, interval: '0 0 0 * * ?' },
-    service_type: null,
+    service_type: input.service_type || null,
     status: ConnectorStatus.CREATED,
     sync_now: false,
   };
