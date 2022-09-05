@@ -205,7 +205,7 @@
             "label": "list",
             "description": [],
             "signature": [
-              "{ description: string; name: string; type: \"endpoint\" | \"detection\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; } & { list_id?: string | undefined; meta?: object | undefined; namespace_type?: \"single\" | \"agnostic\" | undefined; os_types?: (\"windows\" | \"linux\" | \"macos\")[] | undefined; tags?: string[] | undefined; version?: number | undefined; }"
+              "{ description: string; name: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; } & { list_id?: string | undefined; meta?: object | undefined; namespace_type?: \"single\" | \"agnostic\" | undefined; os_types?: (\"windows\" | \"linux\" | \"macos\")[] | undefined; tags?: string[] | undefined; version?: number | undefined; }"
             ],
             "path": "packages/kbn-securitysolution-io-ts-list-types/src/typescript_types/index.ts",
             "deprecated": false
@@ -820,7 +820,7 @@
             "section": "def-common.ExceptionList",
             "text": "ExceptionList"
           },
-          " extends { _version: string | undefined; created_at: string; created_by: string; description: string; id: string; immutable: boolean; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"endpoint\" | \"detection\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; updated_at: string; updated_by: string; version: number; }"
+          " extends { _version: string | undefined; created_at: string; created_by: string; description: string; id: string; immutable: boolean; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; updated_at: string; updated_by: string; version: number; }"
         ],
         "path": "packages/kbn-securitysolution-io-ts-list-types/src/typescript_types/index.ts",
         "deprecated": false,
@@ -967,7 +967,7 @@
             "label": "type",
             "description": [],
             "signature": [
-              "\"endpoint\" | \"detection\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\""
+              "\"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\""
             ],
             "path": "packages/kbn-securitysolution-io-ts-list-types/src/typescript_types/index.ts",
             "deprecated": false
@@ -1268,7 +1268,7 @@
             "label": "list",
             "description": [],
             "signature": [
-              "{ description: string; name: string; type: \"endpoint\" | \"detection\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; } & { _version?: string | undefined; id?: string | undefined; list_id?: string | undefined; meta?: object | undefined; namespace_type?: \"single\" | \"agnostic\" | undefined; os_types?: (\"windows\" | \"linux\" | \"macos\")[] | undefined; tags?: string[] | undefined; version?: number | undefined; }"
+              "{ description: string; name: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; } & { _version?: string | undefined; id?: string | undefined; list_id?: string | undefined; meta?: object | undefined; namespace_type?: \"single\" | \"agnostic\" | undefined; os_types?: (\"windows\" | \"linux\" | \"macos\")[] | undefined; tags?: string[] | undefined; version?: number | undefined; }"
             ],
             "path": "packages/kbn-securitysolution-io-ts-list-types/src/typescript_types/index.ts",
             "deprecated": false
@@ -1657,7 +1657,7 @@
             "label": "exceptions",
             "description": [],
             "signature": [
-              "{ _version: string | undefined; created_at: string; created_by: string; description: string; id: string; immutable: boolean; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"endpoint\" | \"detection\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; updated_at: string; updated_by: string; version: number; }[]"
+              "{ _version: string | undefined; created_at: string; created_by: string; description: string; id: string; immutable: boolean; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; updated_at: string; updated_by: string; version: number; }[]"
             ],
             "path": "packages/kbn-securitysolution-io-ts-list-types/src/typescript_types/index.ts",
             "deprecated": false
@@ -1757,7 +1757,7 @@
         "label": "AddExceptionList",
         "description": [],
         "signature": [
-          "({ description: string; name: string; type: \"endpoint\" | \"detection\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; } & { list_id?: string | undefined; meta?: object | undefined; namespace_type?: \"single\" | \"agnostic\" | undefined; os_types?: (\"windows\" | \"linux\" | \"macos\")[] | undefined; tags?: string[] | undefined; version?: number | undefined; }) | ({ description: string; name: string; type: \"endpoint\" | \"detection\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; } & { _version?: string | undefined; id?: string | undefined; list_id?: string | undefined; meta?: object | undefined; namespace_type?: \"single\" | \"agnostic\" | undefined; os_types?: (\"windows\" | \"linux\" | \"macos\")[] | undefined; tags?: string[] | undefined; version?: number | undefined; })"
+          "({ description: string; name: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; } & { list_id?: string | undefined; meta?: object | undefined; namespace_type?: \"single\" | \"agnostic\" | undefined; os_types?: (\"windows\" | \"linux\" | \"macos\")[] | undefined; tags?: string[] | undefined; version?: number | undefined; }) | ({ description: string; name: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; } & { _version?: string | undefined; id?: string | undefined; list_id?: string | undefined; meta?: object | undefined; namespace_type?: \"single\" | \"agnostic\" | undefined; os_types?: (\"windows\" | \"linux\" | \"macos\")[] | undefined; tags?: string[] | undefined; version?: number | undefined; })"
         ],
         "path": "packages/kbn-securitysolution-io-ts-list-types/src/typescript_types/index.ts",
         "deprecated": false,
@@ -1911,7 +1911,7 @@
         "label": "CreateEndpointListSchema",
         "description": [],
         "signature": [
-          "{ _version: string | undefined; created_at: string; created_by: string; description: string; id: string; immutable: boolean; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"endpoint\" | \"detection\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; updated_at: string; updated_by: string; version: number; } | {}"
+          "{ _version: string | undefined; created_at: string; created_by: string; description: string; id: string; immutable: boolean; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; updated_at: string; updated_by: string; version: number; } | {}"
         ],
         "path": "packages/kbn-securitysolution-io-ts-list-types/src/response/create_endpoint_list_schema/index.ts",
         "deprecated": false,
@@ -1953,7 +1953,7 @@
         "label": "CreateExceptionListSchema",
         "description": [],
         "signature": [
-          "{ description: string; name: string; type: \"endpoint\" | \"detection\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; } & { list_id?: string | undefined; meta?: object | undefined; namespace_type?: \"single\" | \"agnostic\" | undefined; os_types?: (\"windows\" | \"linux\" | \"macos\")[] | undefined; tags?: string[] | undefined; version?: number | undefined; }"
+          "{ description: string; name: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; } & { list_id?: string | undefined; meta?: object | undefined; namespace_type?: \"single\" | \"agnostic\" | undefined; os_types?: (\"windows\" | \"linux\" | \"macos\")[] | undefined; tags?: string[] | undefined; version?: number | undefined; }"
         ],
         "path": "packages/kbn-securitysolution-io-ts-list-types/src/request/create_exception_list_schema/index.ts",
         "deprecated": false,
@@ -1967,7 +1967,7 @@
         "label": "CreateExceptionListSchemaDecoded",
         "description": [],
         "signature": [
-          "Omit<{ description: string; name: string; type: \"endpoint\" | \"detection\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; list_id: string | undefined; meta: object | undefined; namespace_type: \"single\" | \"agnostic\" | undefined; os_types: (\"windows\" | \"linux\" | \"macos\")[] | undefined; tags: string[] | undefined; version: number | undefined; }, \"tags\" | \"list_id\" | \"namespace_type\" | \"os_types\"> & { tags: string[]; list_id: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; version: number; }"
+          "Omit<{ description: string; name: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; list_id: string | undefined; meta: object | undefined; namespace_type: \"single\" | \"agnostic\" | undefined; os_types: (\"windows\" | \"linux\" | \"macos\")[] | undefined; tags: string[] | undefined; version: number | undefined; }, \"tags\" | \"list_id\" | \"namespace_type\" | \"os_types\"> & { tags: string[]; list_id: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; version: number; }"
         ],
         "path": "packages/kbn-securitysolution-io-ts-list-types/src/request/create_exception_list_schema/index.ts",
         "deprecated": false,
@@ -2026,6 +2026,34 @@
           "{ type: \"boolean\" | \"date\" | \"keyword\" | \"ip\" | \"text\" | \"geo_point\" | \"geo_shape\" | \"date_nanos\" | \"long\" | \"double\" | \"date_range\" | \"ip_range\" | \"shape\" | \"short\" | \"binary\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; id: string | undefined; description: string; name: string; meta: object | undefined; serializer: string | undefined; deserializer: string | undefined; } & { version: number; }"
         ],
         "path": "packages/kbn-securitysolution-io-ts-list-types/src/request/create_list_schema/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-io-ts-list-types",
+        "id": "def-common.CreateRuleExceptionListItemSchema",
+        "type": "Type",
+        "tags": [],
+        "label": "CreateRuleExceptionListItemSchema",
+        "description": [],
+        "signature": [
+          "{ description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"ip\" | \"text\" | \"geo_point\" | \"geo_shape\" | \"date_nanos\" | \"long\" | \"double\" | \"date_range\" | \"ip_range\" | \"shape\" | \"short\" | \"binary\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; })[]; field: string; type: \"nested\"; })[]; name: string; type: \"simple\"; } & { comments?: { comment: string; }[] | undefined; item_id?: string | undefined; list_id?: undefined; meta?: object | undefined; namespace_type?: \"single\" | \"agnostic\" | undefined; os_types?: (\"windows\" | \"linux\" | \"macos\")[] | undefined; tags?: string[] | undefined; }"
+        ],
+        "path": "packages/kbn-securitysolution-io-ts-list-types/src/request/create_rule_exception_item_schema/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-io-ts-list-types",
+        "id": "def-common.CreateRuleExceptionListItemSchemaDecoded",
+        "type": "Type",
+        "tags": [],
+        "label": "CreateRuleExceptionListItemSchemaDecoded",
+        "description": [],
+        "signature": [
+          "Omit<{ description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"ip\" | \"text\" | \"geo_point\" | \"geo_shape\" | \"date_nanos\" | \"long\" | \"double\" | \"date_range\" | \"ip_range\" | \"shape\" | \"short\" | \"binary\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; })[]; field: string; type: \"nested\"; })[]; name: string; type: \"simple\"; comments: { comment: string; }[] | undefined; item_id: string | undefined; list_id: undefined; meta: object | undefined; namespace_type: \"single\" | \"agnostic\" | undefined; os_types: (\"windows\" | \"linux\" | \"macos\")[] | undefined; tags: string[] | undefined; }, \"tags\" | \"entries\" | \"comments\" | \"item_id\" | \"namespace_type\"> & { comments: { comment: string; }[]; tags: string[]; item_id: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"ip\" | \"text\" | \"geo_point\" | \"geo_shape\" | \"date_nanos\" | \"long\" | \"double\" | \"date_range\" | \"ip_range\" | \"shape\" | \"short\" | \"binary\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; })[]; field: string; type: \"nested\"; })[]; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; }"
+        ],
+        "path": "packages/kbn-securitysolution-io-ts-list-types/src/request/create_rule_exception_item_schema/index.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -2485,7 +2513,7 @@
         "label": "ExceptionListSchema",
         "description": [],
         "signature": [
-          "{ _version: string | undefined; created_at: string; created_by: string; description: string; id: string; immutable: boolean; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"endpoint\" | \"detection\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; updated_at: string; updated_by: string; version: number; }"
+          "{ _version: string | undefined; created_at: string; created_by: string; description: string; id: string; immutable: boolean; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; updated_at: string; updated_by: string; version: number; }"
         ],
         "path": "packages/kbn-securitysolution-io-ts-list-types/src/response/exception_list_schema/index.ts",
         "deprecated": false,
@@ -2513,7 +2541,7 @@
         "label": "ExceptionListType",
         "description": [],
         "signature": [
-          "\"endpoint\" | \"detection\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\""
+          "\"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\""
         ],
         "path": "packages/kbn-securitysolution-io-ts-list-types/src/common/exception_list/index.ts",
         "deprecated": false,
@@ -2527,7 +2555,7 @@
         "label": "ExceptionListTypeOrUndefined",
         "description": [],
         "signature": [
-          "\"endpoint\" | \"detection\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\" | undefined"
+          "\"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\" | undefined"
         ],
         "path": "packages/kbn-securitysolution-io-ts-list-types/src/common/exception_list/index.ts",
         "deprecated": false,
@@ -2779,7 +2807,7 @@
         "label": "FoundExceptionListSchema",
         "description": [],
         "signature": [
-          "{ data: { _version: string | undefined; created_at: string; created_by: string; description: string; id: string; immutable: boolean; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"endpoint\" | \"detection\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; updated_at: string; updated_by: string; version: number; }[]; page: number; per_page: number; total: number; } & { pit?: string | undefined; }"
+          "{ data: { _version: string | undefined; created_at: string; created_by: string; description: string; id: string; immutable: boolean; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; updated_at: string; updated_by: string; version: number; }[]; page: number; per_page: number; total: number; } & { pit?: string | undefined; }"
         ],
         "path": "packages/kbn-securitysolution-io-ts-list-types/src/response/found_exception_list_schema/index.ts",
         "deprecated": false,
@@ -2947,7 +2975,7 @@
         "label": "ImportExceptionListSchemaDecoded",
         "description": [],
         "signature": [
-          "Omit<{ description: string; name: string; type: \"endpoint\" | \"detection\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; list_id: string; } & { id?: string | undefined; immutable?: boolean | undefined; meta?: object | undefined; namespace_type?: \"single\" | \"agnostic\" | undefined; os_types?: (\"windows\" | \"linux\" | \"macos\")[] | undefined; tags?: string[] | undefined; created_at?: string | undefined; updated_at?: string | undefined; created_by?: string | undefined; updated_by?: string | undefined; _version?: string | undefined; tie_breaker_id?: string | undefined; version?: number | undefined; }, \"tags\" | \"list_id\" | \"namespace_type\" | \"os_types\" | \"immutable\"> & { immutable: false; tags: string[]; list_id: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; version: number; }"
+          "Omit<{ description: string; name: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; list_id: string; } & { id?: string | undefined; immutable?: boolean | undefined; meta?: object | undefined; namespace_type?: \"single\" | \"agnostic\" | undefined; os_types?: (\"windows\" | \"linux\" | \"macos\")[] | undefined; tags?: string[] | undefined; created_at?: string | undefined; updated_at?: string | undefined; created_by?: string | undefined; updated_by?: string | undefined; _version?: string | undefined; tie_breaker_id?: string | undefined; version?: number | undefined; }, \"tags\" | \"list_id\" | \"namespace_type\" | \"os_types\" | \"immutable\"> & { immutable: false; tags: string[]; list_id: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; version: number; }"
         ],
         "path": "packages/kbn-securitysolution-io-ts-list-types/src/request/import_exception_list_schema/index.ts",
         "deprecated": false,
@@ -2961,7 +2989,7 @@
         "label": "ImportExceptionsListSchema",
         "description": [],
         "signature": [
-          "{ description: string; name: string; type: \"endpoint\" | \"detection\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; list_id: string; } & { id?: string | undefined; immutable?: boolean | undefined; meta?: object | undefined; namespace_type?: \"single\" | \"agnostic\" | undefined; os_types?: (\"windows\" | \"linux\" | \"macos\")[] | undefined; tags?: string[] | undefined; created_at?: string | undefined; updated_at?: string | undefined; created_by?: string | undefined; updated_by?: string | undefined; _version?: string | undefined; tie_breaker_id?: string | undefined; version?: number | undefined; }"
+          "{ description: string; name: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; list_id: string; } & { id?: string | undefined; immutable?: boolean | undefined; meta?: object | undefined; namespace_type?: \"single\" | \"agnostic\" | undefined; os_types?: (\"windows\" | \"linux\" | \"macos\")[] | undefined; tags?: string[] | undefined; created_at?: string | undefined; updated_at?: string | undefined; created_by?: string | undefined; updated_by?: string | undefined; _version?: string | undefined; tie_breaker_id?: string | undefined; version?: number | undefined; }"
         ],
         "path": "packages/kbn-securitysolution-io-ts-list-types/src/request/import_exception_list_schema/index.ts",
         "deprecated": false,
@@ -3073,7 +3101,7 @@
         "label": "List",
         "description": [],
         "signature": [
-          "{ id: string; list_id: string; type: \"endpoint\" | \"detection\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; namespace_type: \"single\" | \"agnostic\"; }"
+          "{ id: string; list_id: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; namespace_type: \"single\" | \"agnostic\"; }"
         ],
         "path": "packages/kbn-securitysolution-io-ts-list-types/src/common/lists/index.ts",
         "deprecated": false,
@@ -3087,7 +3115,7 @@
         "label": "ListArray",
         "description": [],
         "signature": [
-          "{ id: string; list_id: string; type: \"endpoint\" | \"detection\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; namespace_type: \"single\" | \"agnostic\"; }[]"
+          "{ id: string; list_id: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; namespace_type: \"single\" | \"agnostic\"; }[]"
         ],
         "path": "packages/kbn-securitysolution-io-ts-list-types/src/common/lists/index.ts",
         "deprecated": false,
@@ -3101,7 +3129,7 @@
         "label": "ListArrayOrUndefined",
         "description": [],
         "signature": [
-          "{ id: string; list_id: string; type: \"endpoint\" | \"detection\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; namespace_type: \"single\" | \"agnostic\"; }[] | undefined"
+          "{ id: string; list_id: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; namespace_type: \"single\" | \"agnostic\"; }[] | undefined"
         ],
         "path": "packages/kbn-securitysolution-io-ts-list-types/src/common/lists/index.ts",
         "deprecated": false,
@@ -4109,7 +4137,7 @@
         "label": "UpdateExceptionListSchema",
         "description": [],
         "signature": [
-          "{ description: string; name: string; type: \"endpoint\" | \"detection\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; } & { _version?: string | undefined; id?: string | undefined; list_id?: string | undefined; meta?: object | undefined; namespace_type?: \"single\" | \"agnostic\" | undefined; os_types?: (\"windows\" | \"linux\" | \"macos\")[] | undefined; tags?: string[] | undefined; version?: number | undefined; }"
+          "{ description: string; name: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; } & { _version?: string | undefined; id?: string | undefined; list_id?: string | undefined; meta?: object | undefined; namespace_type?: \"single\" | \"agnostic\" | undefined; os_types?: (\"windows\" | \"linux\" | \"macos\")[] | undefined; tags?: string[] | undefined; version?: number | undefined; }"
         ],
         "path": "packages/kbn-securitysolution-io-ts-list-types/src/request/update_exception_list_schema/index.ts",
         "deprecated": false,
@@ -4123,7 +4151,7 @@
         "label": "UpdateExceptionListSchemaDecoded",
         "description": [],
         "signature": [
-          "Omit<{ description: string; name: string; type: \"endpoint\" | \"detection\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; _version: string | undefined; id: string | undefined; list_id: string | undefined; meta: object | undefined; namespace_type: \"single\" | \"agnostic\" | undefined; os_types: (\"windows\" | \"linux\" | \"macos\")[] | undefined; tags: string[] | undefined; version: number | undefined; }, \"os_types\" | \"tags | namespace_type\"> & { tags: string[]; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; }"
+          "Omit<{ description: string; name: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; _version: string | undefined; id: string | undefined; list_id: string | undefined; meta: object | undefined; namespace_type: \"single\" | \"agnostic\" | undefined; os_types: (\"windows\" | \"linux\" | \"macos\")[] | undefined; tags: string[] | undefined; version: number | undefined; }, \"os_types\" | \"tags | namespace_type\"> & { tags: string[]; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; }"
         ],
         "path": "packages/kbn-securitysolution-io-ts-list-types/src/request/update_exception_list_schema/index.ts",
         "deprecated": false,
@@ -4595,7 +4623,7 @@
           "StringC",
           "; type: ",
           "KeyofC",
-          "<{ detection: null; endpoint: null; endpoint_trusted_apps: null; endpoint_events: null; endpoint_host_isolation_exceptions: null; endpoint_blocklists: null; }>; updated_at: ",
+          "<{ detection: null; rule_default: null; endpoint: null; endpoint_trusted_apps: null; endpoint_events: null; endpoint_host_isolation_exceptions: null; endpoint_blocklists: null; }>; updated_at: ",
           "StringC",
           "; updated_by: ",
           "StringC",
@@ -4679,7 +4707,7 @@
           "StringC",
           "; type: ",
           "KeyofC",
-          "<{ detection: null; endpoint: null; endpoint_trusted_apps: null; endpoint_events: null; endpoint_host_isolation_exceptions: null; endpoint_blocklists: null; }>; }>>, ",
+          "<{ detection: null; rule_default: null; endpoint: null; endpoint_trusted_apps: null; endpoint_events: null; endpoint_host_isolation_exceptions: null; endpoint_blocklists: null; }>; }>>, ",
           "ExactC",
           "<",
           "PartialC",
@@ -4777,6 +4805,55 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-io-ts-list-types",
+        "id": "def-common.createRuleExceptionListItemSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "createRuleExceptionListItemSchema",
+        "description": [],
+        "signature": [
+          "IntersectionC",
+          "<[",
+          "ExactC",
+          "<",
+          "TypeC",
+          "<{ description: ",
+          "StringC",
+          "; entries: ",
+          "Type",
+          "<({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"ip\" | \"text\" | \"geo_point\" | \"geo_shape\" | \"date_nanos\" | \"long\" | \"double\" | \"date_range\" | \"ip_range\" | \"shape\" | \"short\" | \"binary\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; })[]; field: string; type: \"nested\"; })[], ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"ip\" | \"text\" | \"geo_point\" | \"geo_shape\" | \"date_nanos\" | \"long\" | \"double\" | \"date_range\" | \"ip_range\" | \"shape\" | \"short\" | \"binary\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; })[]; field: string; type: \"nested\"; })[], unknown>; name: ",
+          "StringC",
+          "; type: ",
+          "KeyofC",
+          "<{ simple: null; }>; }>>, ",
+          "ExactC",
+          "<",
+          "PartialC",
+          "<{ comments: ",
+          "Type",
+          "<{ comment: string; }[], { comment: string; }[], unknown>; item_id: ",
+          "Type",
+          "<string, string | undefined, unknown>; list_id: ",
+          "UndefinedC",
+          "; meta: ",
+          "ObjectC",
+          "; namespace_type: ",
+          "KeyofC",
+          "<{ agnostic: null; single: null; }>; os_types: ",
+          "UnionC",
+          "<[",
+          "Type",
+          "<(\"windows\" | \"linux\" | \"macos\")[], (\"windows\" | \"linux\" | \"macos\")[] | undefined, unknown>, ",
+          "UndefinedC",
+          "]>; tags: ",
+          "Type",
+          "<string[], string[] | undefined, unknown>; }>>]>"
+        ],
+        "path": "packages/kbn-securitysolution-io-ts-list-types/src/request/create_rule_exception_item_schema/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-io-ts-list-types",
         "id": "def-common.cursor",
         "type": "Object",
         "tags": [],
@@ -4810,6 +4887,23 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-io-ts-list-types",
+        "id": "def-common.DefaultCreateCommentsArray",
+        "type": "Object",
+        "tags": [],
+        "label": "DefaultCreateCommentsArray",
+        "description": [
+          "\nTypes the DefaultCreateComments as:\n  - If null or undefined, then a default array of type entry will be set"
+        ],
+        "signature": [
+          "Type",
+          "<{ comment: string; }[], { comment: string; }[], unknown>"
+        ],
+        "path": "packages/kbn-securitysolution-io-ts-list-types/src/common/default_create_comments_array/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-io-ts-list-types",
         "id": "def-common.DefaultImportCommentsArray",
         "type": "Object",
         "tags": [],
@@ -4836,7 +4930,7 @@
         ],
         "signature": [
           "Type",
-          "<{ id: string; list_id: string; type: \"endpoint\" | \"detection\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; namespace_type: \"single\" | \"agnostic\"; }[], { id: string; list_id: string; type: \"endpoint\" | \"detection\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; namespace_type: \"single\" | \"agnostic\"; }[] | undefined, unknown>"
+          "<{ id: string; list_id: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; namespace_type: \"single\" | \"agnostic\"; }[], { id: string; list_id: string; type: \"endpoint\" | \"detection\" | \"rule_default\" | \"endpoint_trusted_apps\" | \"endpoint_events\" | \"endpoint_host_isolation_exceptions\" | \"endpoint_blocklists\"; namespace_type: \"single\" | \"agnostic\"; }[] | undefined, unknown>"
         ],
         "path": "packages/kbn-securitysolution-io-ts-list-types/src/common/lists_default_array/index.ts",
         "deprecated": false,
@@ -5832,7 +5926,7 @@
           "StringC",
           "; type: ",
           "KeyofC",
-          "<{ detection: null; endpoint: null; endpoint_trusted_apps: null; endpoint_events: null; endpoint_host_isolation_exceptions: null; endpoint_blocklists: null; }>; updated_at: ",
+          "<{ detection: null; rule_default: null; endpoint: null; endpoint_trusted_apps: null; endpoint_events: null; endpoint_host_isolation_exceptions: null; endpoint_blocklists: null; }>; updated_at: ",
           "StringC",
           "; updated_by: ",
           "StringC",
@@ -5878,7 +5972,7 @@
         "description": [],
         "signature": [
           "KeyofC",
-          "<{ detection: null; endpoint: null; endpoint_trusted_apps: null; endpoint_events: null; endpoint_host_isolation_exceptions: null; endpoint_blocklists: null; }>"
+          "<{ detection: null; rule_default: null; endpoint: null; endpoint_trusted_apps: null; endpoint_events: null; endpoint_host_isolation_exceptions: null; endpoint_blocklists: null; }>"
         ],
         "path": "packages/kbn-securitysolution-io-ts-list-types/src/common/exception_list/index.ts",
         "deprecated": false,
@@ -5895,7 +5989,7 @@
           "UnionC",
           "<[",
           "KeyofC",
-          "<{ detection: null; endpoint: null; endpoint_trusted_apps: null; endpoint_events: null; endpoint_host_isolation_exceptions: null; endpoint_blocklists: null; }>, ",
+          "<{ detection: null; rule_default: null; endpoint: null; endpoint_trusted_apps: null; endpoint_events: null; endpoint_host_isolation_exceptions: null; endpoint_blocklists: null; }>, ",
           "UndefinedC",
           "]>"
         ],
@@ -6517,7 +6611,7 @@
           "StringC",
           "; type: ",
           "KeyofC",
-          "<{ detection: null; endpoint: null; endpoint_trusted_apps: null; endpoint_events: null; endpoint_host_isolation_exceptions: null; endpoint_blocklists: null; }>; updated_at: ",
+          "<{ detection: null; rule_default: null; endpoint: null; endpoint_trusted_apps: null; endpoint_events: null; endpoint_host_isolation_exceptions: null; endpoint_blocklists: null; }>; updated_at: ",
           "StringC",
           "; updated_by: ",
           "StringC",
@@ -6981,7 +7075,7 @@
           "StringC",
           "; type: ",
           "KeyofC",
-          "<{ detection: null; endpoint: null; endpoint_trusted_apps: null; endpoint_events: null; endpoint_host_isolation_exceptions: null; endpoint_blocklists: null; }>; list_id: ",
+          "<{ detection: null; rule_default: null; endpoint: null; endpoint_trusted_apps: null; endpoint_events: null; endpoint_host_isolation_exceptions: null; endpoint_blocklists: null; }>; list_id: ",
           "Type",
           "<string, string, unknown>; }>>, ",
           "ExactC",
@@ -7171,7 +7265,7 @@
           "Type",
           "<string, string, unknown>; type: ",
           "KeyofC",
-          "<{ detection: null; endpoint: null; endpoint_trusted_apps: null; endpoint_events: null; endpoint_host_isolation_exceptions: null; endpoint_blocklists: null; }>; namespace_type: ",
+          "<{ detection: null; rule_default: null; endpoint: null; endpoint_trusted_apps: null; endpoint_events: null; endpoint_host_isolation_exceptions: null; endpoint_blocklists: null; }>; namespace_type: ",
           "KeyofC",
           "<{ agnostic: null; single: null; }>; }>>"
         ],
@@ -7247,7 +7341,7 @@
           "Type",
           "<string, string, unknown>; type: ",
           "KeyofC",
-          "<{ detection: null; endpoint: null; endpoint_trusted_apps: null; endpoint_events: null; endpoint_host_isolation_exceptions: null; endpoint_blocklists: null; }>; namespace_type: ",
+          "<{ detection: null; rule_default: null; endpoint: null; endpoint_trusted_apps: null; endpoint_events: null; endpoint_host_isolation_exceptions: null; endpoint_blocklists: null; }>; namespace_type: ",
           "KeyofC",
           "<{ agnostic: null; single: null; }>; }>>>"
         ],
@@ -7276,7 +7370,7 @@
           "Type",
           "<string, string, unknown>; type: ",
           "KeyofC",
-          "<{ detection: null; endpoint: null; endpoint_trusted_apps: null; endpoint_events: null; endpoint_host_isolation_exceptions: null; endpoint_blocklists: null; }>; namespace_type: ",
+          "<{ detection: null; rule_default: null; endpoint: null; endpoint_trusted_apps: null; endpoint_events: null; endpoint_host_isolation_exceptions: null; endpoint_blocklists: null; }>; namespace_type: ",
           "KeyofC",
           "<{ agnostic: null; single: null; }>; }>>>, ",
           "UndefinedC",
@@ -8890,7 +8984,7 @@
           "StringC",
           "; type: ",
           "KeyofC",
-          "<{ detection: null; endpoint: null; endpoint_trusted_apps: null; endpoint_events: null; endpoint_host_isolation_exceptions: null; endpoint_blocklists: null; }>; }>>, ",
+          "<{ detection: null; rule_default: null; endpoint: null; endpoint_trusted_apps: null; endpoint_events: null; endpoint_host_isolation_exceptions: null; endpoint_blocklists: null; }>; }>>, ",
           "ExactC",
           "<",
           "PartialC",
