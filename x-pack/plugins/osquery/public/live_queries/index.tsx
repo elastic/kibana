@@ -33,7 +33,10 @@ interface LiveQueryProps {
   hideAgentsField?: boolean;
   packId?: string;
   agentSelection?: AgentSelection;
-  addToTimeline?: (payload: { query: [string, string]; isIcon?: true }) => React.ReactElement;
+  addToTimeline?: (payload: {
+    queries: Array<{ field: string; value: string }>;
+    isIcon?: true;
+  }) => React.ReactElement;
 }
 
 const LiveQueryComponent: React.FC<LiveQueryProps> = ({
