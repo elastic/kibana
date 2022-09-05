@@ -844,15 +844,9 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
           if (isLeft(expectedBulkGetResult)) {
             return { ...expectedBulkGetResult };
           }
-          const {
-            esRequestIndex: esBulkGetRequestIndex,
-            id,
-            type,
-            version,
-          } = expectedBulkGetResult.value;
+          const { esRequestIndex: esBulkGetRequestIndex, id, type } = expectedBulkGetResult.value;
 
           let namespaces;
-          let versionProperties;
 
           if (esBulkGetRequestIndex !== undefined) {
             const indexFound = bulkGetMultiNamespaceDocsResponse?.statusCode !== 404;
@@ -895,7 +889,6 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
               SavedObjectsUtils.namespaceIdToString(namespace),
             ];
 
-            versionProperties = getExpectedVersionProperties(version);
             // the document exists but is multinamespace and there are more than one namespaces present and can only be deleted by force.
             if (!force && (namespaces.length > 1 || namespaces.includes(ALL_NAMESPACES_STRING))) {
               return {
@@ -917,7 +910,6 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
             if (this._registry.isSingleNamespace(type)) {
               namespaces = [SavedObjectsUtils.namespaceIdToString(namespace)];
             }
-            versionProperties = getExpectedVersionProperties(version);
           }
 
           const expectedResult = {
@@ -931,7 +923,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
             delete: {
               _id: this._serializer.generateRawId(namespace, type, id),
               _index: this.getIndexForType(type),
-              ...versionProperties,
+              ...getExpectedVersionProperties(undefined),
             },
           });
 
