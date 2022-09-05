@@ -59,7 +59,7 @@ export class QueryThresholdHelpPopover extends Component<{}, State> {
           <p>
             <FormattedMessage
               id="xpack.stackAlerts.esQuery.ui.thresholdHelp.timeWindow"
-              defaultMessage="The time window indicates how far back in time to search. 
+              defaultMessage="The time window indicates how far back in time to search.
               To avoid gaps in detection, set this value greater than or equal to the value you chose for the {checkField} field."
               values={{
                 checkField: <b>Check every</b>,
@@ -73,7 +73,7 @@ export class QueryThresholdHelpPopover extends Component<{}, State> {
           size="s"
           title={i18n.translate('xpack.stackAlerts.esQuery.ui.thresholdHelp.duplicateMatches', {
             defaultMessage:
-              'If the time window is greater than the check interval and a document matches the query in multiple runs, it is used in only the first threshold calculation.',
+              "If the 'Exclude the hits from previous rule runs' option is checked and the time window is greater than the check interval, a document that matches the query in multiple runs will be used in only the first threshold calculation.",
           })}
         />
       </div>

@@ -34,6 +34,7 @@ export const SearchSourceExpression = ({
     size,
     savedQueryId,
     searchConfiguration,
+    excludeHitsFromPreviousRun,
   } = ruleParams;
   const { data } = useTriggersAndActionsUiDeps();
 
@@ -69,6 +70,8 @@ export const SearchSourceExpression = ({
         threshold: threshold ?? DEFAULT_VALUES.THRESHOLD,
         thresholdComparator: thresholdComparator ?? DEFAULT_VALUES.THRESHOLD_COMPARATOR,
         size: size ?? DEFAULT_VALUES.SIZE,
+        excludeHitsFromPreviousRun:
+          excludeHitsFromPreviousRun ?? DEFAULT_VALUES.EXCLUDE_PREVIOUS_HITS,
       });
 
       data.search.searchSource

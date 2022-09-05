@@ -71,13 +71,16 @@ export function updateSearchSource(
   const dateEnd = timerangeFilter?.query.range[timeFieldName].lte;
   const filters = [timerangeFilter];
 
-  if (latestTimestamp && latestTimestamp > dateStart) {
-    // add additional filter for documents with a timestamp greater then
-    // the timestamp of the previous run, so that those documents are not counted twice
-    const field = index.fields.find((f) => f.name === timeFieldName);
-    const addTimeRangeField = buildRangeFilter(field!, { gt: latestTimestamp }, index);
-    filters.push(addTimeRangeField);
+  if (params.excludeHitsFromPreviousRun) {
+    if (latestTimestamp && latestTimestamp > dateStart) {
+      // add additional filter for documents with a timestamp greater then
+      // the timestamp of the previous run, so that those documents are not counted twice
+      const field = index.fields.find((f) => f.name === timeFieldName);
+      const addTimeRangeField = buildRangeFilter(field!, { gt: latestTimestamp }, index);
+      filters.push(addTimeRangeField);
+    }
   }
+
   const searchSourceChild = searchSource.createChild();
   searchSourceChild.setField('filter', filters as Filter[]);
   searchSourceChild.setField('sort', [{ [timeFieldName]: SortDirection.desc }]);

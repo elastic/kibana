@@ -19,6 +19,7 @@ export const DEFAULT_VALUES = {
   TIME_WINDOW_SIZE: 5,
   TIME_WINDOW_UNIT: 'm',
   THRESHOLD: [1000],
+  EXCLUDE_PREVIOUS_HITS: true,
 };
 
 export const EXPRESSION_ERRORS = {
