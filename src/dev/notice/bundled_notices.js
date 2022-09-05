@@ -8,15 +8,12 @@
 
 import { resolve } from 'path';
 import { readFile } from 'fs/promises';
-import { promisify } from 'util';
 
-import glob from 'glob';
-
-const globAsync = promisify(glob);
+import globby from 'globby';
 
 export async function getBundledNotices(packageDirectory) {
   const pattern = resolve(packageDirectory, '*{LICENSE,NOTICE}*');
-  const paths = await globAsync(pattern);
+  const paths = await globby(pattern);
   return Promise.all(
     paths.map(async (path) => ({
       path,
