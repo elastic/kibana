@@ -67,11 +67,11 @@ import type {
 import type { DeprecationsServiceSetup } from '@kbn/core-deprecations-server';
 import type { CoreUsageDataStart, CoreUsageDataSetup } from '@kbn/core-usage-data-server';
 
+import { I18nServiceSetup } from '@kbn/core-i18n-server';
 import { HttpResources } from './http_resources';
 import { PluginsServiceSetup, PluginsServiceStart, PluginOpaqueId } from './plugins';
 import { UiSettingsServiceSetup, UiSettingsServiceStart } from './ui_settings';
 import { StatusServiceSetup } from './status';
-import { I18nServiceSetup } from './i18n';
 import type { CoreRequestHandlerContext } from './core_route_handler_context';
 import type { PrebootCoreRequestHandlerContext } from './preboot_core_route_handler_context';
 
@@ -420,7 +420,7 @@ export type {
 } from '@kbn/core-metrics-server';
 export { EventLoopDelaysMonitor } from '@kbn/core-metrics-collectors-server-internal';
 
-export type { I18nServiceSetup } from './i18n';
+export type { I18nServiceSetup } from '@kbn/core-i18n-server';
 export type {
   RegisterDeprecationsConfig,
   GetDeprecationsContext,

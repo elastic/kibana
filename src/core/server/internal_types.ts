@@ -51,6 +51,7 @@ import {
 } from '@kbn/core-deprecations-server-internal';
 import type { CoreUsageDataStart } from '@kbn/core-usage-data-server';
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
+import type { I18nServiceSetup } from '@kbn/core-i18n-server';
 import {
   InternalUiSettingsServicePreboot,
   InternalUiSettingsServiceSetup,
@@ -59,7 +60,6 @@ import {
 import { InternalRenderingServiceSetup } from './rendering';
 import { InternalHttpResourcesPreboot, InternalHttpResourcesSetup } from './http_resources';
 import { InternalStatusServiceSetup } from './status';
-import { I18nServiceSetup } from './i18n';
 
 /** @internal */
 export interface InternalCorePreboot {
