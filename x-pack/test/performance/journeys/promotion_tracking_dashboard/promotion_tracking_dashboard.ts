@@ -10,22 +10,6 @@ import { StepCtx } from '../../services/performance';
 export default function ({ getService }: FtrProviderContext) {
   describe('promotion_tracking_dashboard', () => {
     const performance = getService('performance');
-    const esArchiver = getService('esArchiver');
-    const kibanaServer = getService('kibanaServer');
-
-    before(async () => {
-      await kibanaServer.importExport.load(
-        'x-pack/test/performance/kbn_archives/promotion_tracking_dashboard'
-      );
-      await esArchiver.loadIfNeeded('x-pack/test/performance/es_archives/ecommerce_sample_data');
-    });
-
-    after(async () => {
-      await kibanaServer.importExport.unload(
-        'x-pack/test/performance/kbn_archives/promotion_tracking_dashboard'
-      );
-      await esArchiver.unload('x-pack/test/performance/es_archives/ecommerce_sample_data');
-    });
 
     it('promotion_tracking_dashboard', async () => {
       await performance.runUserJourney(
