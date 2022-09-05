@@ -24,6 +24,7 @@ const DefaultParams: Writable<Partial<EsQueryRuleParams>> = {
   thresholdComparator: Comparator.GT,
   threshold: [0],
   searchType: 'esQuery',
+  excludeHitsFromPreviousRun: true,
 };
 
 describe('alertType Params validate()', () => {
@@ -214,6 +215,18 @@ describe('alertType Params validate()', () => {
     expect(onValidate()).toThrowErrorMatchingInlineSnapshot(
       `"[threshold]: must have two elements for the \\"between\\" comparator"`
     );
+  });
+
+  it('fails for invalid excludeHitsFromPreviousRun', async () => {
+    params.excludeHitsFromPreviousRun = '';
+    expect(onValidate()).toThrowErrorMatchingInlineSnapshot(
+      `"[excludeHitsFromPreviousRun]: expected value of type [boolean] but got [string]"`
+    );
+  });
+
+  it('uses default value "true" if excludeHitsFromPreviousRun is undefined', async () => {
+    params.excludeHitsFromPreviousRun = undefined;
+    expect(onValidate()).not.toThrow();
   });
 
   function onValidate(): () => void {
