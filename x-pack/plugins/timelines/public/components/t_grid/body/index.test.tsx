@@ -103,7 +103,6 @@ describe('Body', () => {
     tableView: 'gridView',
     totalItems: 1,
     leadingControlColumns: [],
-    trailingControlColumns: [],
     filterStatus: 'open',
     filterQuery: '',
     refetch: jest.fn(),

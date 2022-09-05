@@ -117,7 +117,6 @@ export interface TGridStandaloneProps {
   sort: SortColumnTimeline[];
   graphEventId?: string;
   leadingControlColumns: ControlColumnProps[];
-  trailingControlColumns: ControlColumnProps[];
   bulkActions?: BulkActionsProp;
   data?: DataPublicPluginStart;
   unit?: (total: number) => React.ReactNode;
@@ -152,7 +151,6 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
   sort,
   graphEventId,
   leadingControlColumns,
-  trailingControlColumns,
   data,
   unit,
   showCheckboxes = true,
@@ -381,7 +379,6 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
                       totalSelectAllAlerts={totalSelectAllAlerts}
                       unit={unit}
                       filterStatus={filterStatus}
-                      trailingControlColumns={trailingControlColumns}
                       showCheckboxes={showCheckboxes}
                       bulkActions={bulkActions}
                     />

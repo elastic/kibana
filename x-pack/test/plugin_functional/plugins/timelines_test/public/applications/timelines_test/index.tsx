@@ -79,7 +79,6 @@ const AppRoot = React.memo(
                   renderCellValue: () => <div data-test-subj="timeline-wrapper">test</div>,
                   sort: [],
                   leadingControlColumns: [],
-                  trailingControlColumns: [],
                   query: {
                     query: '',
                     language: 'kuery',

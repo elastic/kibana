@@ -128,7 +128,6 @@ export const tGridIntegratedProps: TGridIntegratedProps = {
   ],
   start: '2021-05-01T18:14:07.522Z',
   tGridEventRenderedViewEnabled: true,
-  trailingControlColumns: [],
 };
 
 export const eventRenderedProps: EventRenderedViewProps = {

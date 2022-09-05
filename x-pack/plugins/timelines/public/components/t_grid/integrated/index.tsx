@@ -142,7 +142,6 @@ export interface TGridIntegratedProps {
   sort: Sort[];
   start: string;
   tGridEventRenderedViewEnabled: boolean;
-  trailingControlColumns?: ControlColumnProps[];
   unit?: (n: number) => string;
 }
 
@@ -185,7 +184,6 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
   sort,
   start,
   tGridEventRenderedViewEnabled,
-  trailingControlColumns,
   unit,
 }) => {
   const dispatch = useDispatch();
@@ -380,7 +378,6 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
                         tableView={viewSelection}
                         tabType={TimelineTabs.query}
                         totalItems={totalCountMinusDeleted}
-                        trailingControlColumns={trailingControlColumns}
                         unit={unit}
                       />
                     </ScrollableFlexItem>

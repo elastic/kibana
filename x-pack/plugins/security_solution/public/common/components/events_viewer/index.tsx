@@ -39,8 +39,6 @@ import {
   useSessionView,
 } from '../../../timelines/components/timeline/session_tab_content/use_session_view';
 
-const EMPTY_CONTROL_COLUMNS: ControlColumnProps[] = [];
-
 const FullScreenContainer = styled.div<{ $isFullScreen: boolean }>`
   height: ${({ $isFullScreen }) => ($isFullScreen ? '100%' : undefined)};
   flex: 1 1 auto;
@@ -157,7 +155,6 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   }, []);
 
   const globalFilters = useMemo(() => [...filters, ...(pageFilters ?? [])], [filters, pageFilters]);
-  const trailingControlColumns: ControlColumnProps[] = EMPTY_CONTROL_COLUMNS;
 
   const { Navigation } = useSessionViewNavigation({
     timelineId: id,
@@ -254,7 +251,6 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
             sort,
             start,
             tGridEventRenderedViewEnabled,
-            trailingControlColumns,
             type: 'embedded',
             unit,
           })}

@@ -5,42 +5,14 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
-import {
-  EuiCheckbox,
-  EuiButtonIcon,
-  EuiPopover,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPopoverTitle,
-  EuiSpacer,
-} from '@elastic/eui';
+import React from 'react';
+import { EuiCheckbox } from '@elastic/eui';
 import type { ControlColumnProps } from '../../common/types/timeline';
 
 const SelectionHeaderCell = () => {
   return (
     <div data-test-subj="test-header-control-column-cell">
       <EuiCheckbox id="selection-toggle" aria-label="Select all rows" onChange={() => null} />
-    </div>
-  );
-};
-
-const SimpleHeaderCell = () => {
-  return (
-    <div
-      style={{
-        fontSize: '12px',
-        fontWeight: 600,
-        lineHeight: 1.5,
-        minWidth: 0,
-        padding: '4px',
-        width: '100%',
-        display: 'flex',
-        alignItems: 'center',
-      }}
-      data-test-subj="test-header-action-cell"
-    >
-      {'Additional Actions'}
     </div>
   );
 };
@@ -57,57 +29,6 @@ const SelectionRowCell = ({ rowIndex }: { rowIndex: number }) => {
     </div>
   );
 };
-
-const TestTrailingColumn = () => {
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  return (
-    <EuiPopover
-      isOpen={isPopoverOpen}
-      anchorPosition="upCenter"
-      panelPaddingSize="s"
-      button={
-        <EuiButtonIcon
-          aria-label="show actions"
-          iconType="boxesHorizontal"
-          color="text"
-          onClick={() => setIsPopoverOpen(!isPopoverOpen)}
-        />
-      }
-      data-test-subj="test-trailing-column-popover-button"
-      closePopover={() => setIsPopoverOpen(false)}
-    >
-      <EuiPopoverTitle>{'Actions'}</EuiPopoverTitle>
-      <div style={{ width: 150 }}>
-        <button type="button" onClick={() => {}}>
-          <EuiFlexGroup alignItems="center" component="span" gutterSize="s">
-            <EuiFlexItem grow={false}>
-              <EuiButtonIcon aria-label="Pin selected items" iconType="pin" color="text" />
-            </EuiFlexItem>
-            <EuiFlexItem>{'Pin'}</EuiFlexItem>
-          </EuiFlexGroup>
-        </button>
-        <EuiSpacer size="s" />
-        <button type="button" onClick={() => {}}>
-          <EuiFlexGroup alignItems="center" component="span" gutterSize="s">
-            <EuiFlexItem grow={false}>
-              <EuiButtonIcon aria-label="Delete selected items" iconType="trash" color="text" />
-            </EuiFlexItem>
-            <EuiFlexItem>{'Delete'}</EuiFlexItem>
-          </EuiFlexGroup>
-        </button>
-      </div>
-    </EuiPopover>
-  );
-};
-
-export const testTrailingControlColumns = [
-  {
-    id: 'actions',
-    width: 96,
-    headerCellRender: SimpleHeaderCell,
-    rowCellRender: TestTrailingColumn,
-  },
-];
 
 export const testLeadingControlColumn: ControlColumnProps = {
   id: 'test-leading-control',

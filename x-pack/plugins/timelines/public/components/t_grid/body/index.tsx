@@ -119,7 +119,6 @@ interface OwnProps {
   tableView: ViewSelection;
   tabType: TimelineTabs;
   totalItems: number;
-  trailingControlColumns?: ControlColumnProps[];
   unit?: (total: number) => React.ReactNode;
   hasAlertsCrud?: boolean;
   hasAlertsCrudPermissions?: ({
@@ -345,7 +344,6 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     tabType,
     totalItems,
     totalSelectAllAlerts,
-    trailingControlColumns = EMPTY_CONTROL_COLUMNS,
     unit = defaultUnit,
   }) => {
     const { triggersActionsUi } = useKibana<TimelinesStartPlugins>().services;
@@ -685,40 +683,37 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
       [dispatch, id]
     );
 
-    const [leadingTGridControlColumns, trailingTGridControlColumns] = useMemo(() => {
-      return [
-        showCheckboxes ? [checkBoxControlColumn, ...leadingControlColumns] : leadingControlColumns,
-        trailingControlColumns,
-      ].map((controlColumns) =>
-        transformControlColumns({
-          columnHeaders,
-          controlColumns,
-          data,
-          disabledCellActions,
-          fieldBrowserOptions,
-          isEventViewer,
-          loadingEventIds,
-          onRowSelected,
-          onRuleChange,
-          selectedEventIds,
-          showCheckboxes,
-          tabType,
-          timelineId: id,
-          isSelectAllChecked,
-          sort,
-          browserFields,
-          onSelectPage,
-          theme,
-          setEventsLoading,
-          setEventsDeleted,
-          pageSize,
-          hasAlertsCrudPermissions,
-        })
-      );
+    const leadingTGridControlColumns = useMemo(() => {
+      const controlColumns = showCheckboxes
+        ? [checkBoxControlColumn, ...leadingControlColumns]
+        : leadingControlColumns;
+      return transformControlColumns({
+        columnHeaders,
+        controlColumns,
+        data,
+        disabledCellActions,
+        fieldBrowserOptions,
+        isEventViewer,
+        loadingEventIds,
+        onRowSelected,
+        onRuleChange,
+        selectedEventIds,
+        showCheckboxes,
+        tabType,
+        timelineId: id,
+        isSelectAllChecked,
+        sort,
+        browserFields,
+        onSelectPage,
+        theme,
+        setEventsLoading,
+        setEventsDeleted,
+        pageSize,
+        hasAlertsCrudPermissions,
+      });
     }, [
       showCheckboxes,
       leadingControlColumns,
-      trailingControlColumns,
       columnHeaders,
       data,
       disabledCellActions,
@@ -898,7 +893,6 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
                   columnVisibility={{ visibleColumns, setVisibleColumns: onSetVisibleColumns }}
                   gridStyle={gridStyle}
                   leadingControlColumns={leadingTGridControlColumns}
-                  trailingControlColumns={trailingTGridControlColumns}
                   toolbarVisibility={toolbarVisibility}
                   rowCount={totalItems}
                   renderCellValue={renderTGridCellValue}
