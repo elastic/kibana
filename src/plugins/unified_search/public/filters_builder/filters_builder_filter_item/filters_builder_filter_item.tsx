@@ -55,6 +55,11 @@ const cursorOr = css`
   cursor: url(${or}), auto;
 `;
 
+const indent = css`
+  margin-left: 6px;
+  margin-right: 6px;
+`;
+
 export function FilterItem({
   filter,
   path,
@@ -196,12 +201,8 @@ export function FilterItem({
                       alignItems="center"
                       justifyContent="center"
                     >
-                      <EuiFlexItem
-                        grow={false}
-                        {...provided.dragHandleProps}
-                        style={{ marginLeft: '12.5px', marginRight: '12.5px' }}
-                      >
-                        <EuiIcon type="grab" size="s" />
+                      <EuiFlexItem grow={false} {...provided.dragHandleProps}>
+                        <EuiIcon type="grab" size="s" className={indent} />
                       </EuiFlexItem>
                       <EuiFlexItem grow={10}>
                         <EuiFlexGroup gutterSize="m" alignItems="center" justifyContent="center">
