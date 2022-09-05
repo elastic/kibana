@@ -6,6 +6,7 @@
  */
 import React, { useRef, useState, useCallback } from 'react';
 import { EuiPanel, EuiFlexGroup, EuiFlexItem, EuiButtonIcon } from '@elastic/eui';
+import { ProcessEvent } from '../../../common/types/process_tree';
 import { TTYSearchBar } from '../tty_search_bar';
 import { TTYTextSizer } from '../tty_text_sizer';
 import { useStyles } from './styles';
@@ -16,11 +17,17 @@ export interface TTYPlayerDeps {
   sessionEntityId: string; // TODO: we should not load by session id, but instead a combo of process.tty.major+minor, session time range, and host.boot_id (see Rabbitholes section of epic).
   onClose(): void;
   isFullscreen: boolean;
+  onJumpToEvent(event: ProcessEvent): void;
 }
 
 const DEFAULT_FONT_SIZE = 11;
 
-export const TTYPlayer = ({ sessionEntityId, onClose, isFullscreen }: TTYPlayerDeps) => {
+export const TTYPlayer = ({
+  sessionEntityId,
+  onClose,
+  isFullscreen,
+  onJumpToEvent,
+}: TTYPlayerDeps) => {
   const ref = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -41,7 +48,7 @@ export const TTYPlayer = ({ sessionEntityId, onClose, isFullscreen }: TTYPlayerD
   });
 
   const tty = lines?.[currentLine]?.event?.process?.tty;
-  const currentProcessEntityId = lines[currentLine]?.event.process?.entity_id;
+  const currentProcessEvent = lines[currentLine]?.event;
   const styles = useStyles(tty);
 
   const onSeekLine = useCallback(
@@ -82,7 +89,7 @@ export const TTYPlayer = ({ sessionEntityId, onClose, isFullscreen }: TTYPlayerD
       </div>
 
       <TTYPlayerControls
-        currentProcessEntityId={currentProcessEntityId}
+        currentProcessEvent={currentProcessEvent}
         processIdLineMap={processIdLineMap}
         lastProcessEntityId={lines[lines.length - 1]?.event.process?.entity_id}
         isPlaying={isPlaying}
@@ -90,6 +97,8 @@ export const TTYPlayer = ({ sessionEntityId, onClose, isFullscreen }: TTYPlayerD
         linesLength={lines.length}
         onSeekLine={onSeekLine}
         onTogglePlayback={onTogglePlayback}
+        onClose={onClose}
+        onJumpToEvent={onJumpToEvent}
         textSizer={
           <TTYTextSizer
             tty={tty}

@@ -14,6 +14,7 @@ import { i18n } from '@kbn/i18n';
 
 import { getViewableDetectors } from '../../timeseriesexplorer/timeseriesexplorer_utils/get_viewable_detectors';
 import { NavigateToPath, useNotifications } from '../../contexts/kibana';
+import { useMlContext } from '../../contexts/ml';
 
 import { MlJobWithTimeRange } from '../../../../common/types/anomaly_detection_jobs';
 
@@ -108,6 +109,7 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
   config,
   jobsWithTimeRange,
 }) => {
+  const dataViewsService = useMlContext().dataViewsContract;
   const { toasts } = useNotifications();
   const toastNotificationService = useToastNotificationService();
   const [timeSeriesExplorerUrlState, setTimeSeriesExplorerUrlState] =
@@ -342,6 +344,7 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
   return (
     <TimeSeriesExplorer
       {...{
+        dataViewsService,
         toastNotificationService,
         appStateHandler,
         autoZoomDuration,
