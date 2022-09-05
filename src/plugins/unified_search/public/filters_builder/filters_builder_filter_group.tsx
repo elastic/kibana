@@ -36,6 +36,10 @@ const boderPadding = css`
   padding: 14px;
 `;
 
+const maginAndFilterGroup = css`
+  margin: 2px;
+`;
+
 const OrDelimiter = ({ isRootLevelFilterGroup }: { isRootLevelFilterGroup: boolean }) => (
   <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
     <EuiFlexItem
@@ -150,7 +154,11 @@ export const FilterGroup = ({
           ) : null}
 
           {conditionType === ConditionTypes.AND && index + 1 < acc.length ? (
-            <EuiFlexItem>
+            <EuiFlexItem
+              className={cx({
+                [maginAndFilterGroup]: shouldDrawBorder(filter),
+              })}
+            >
               <AndDelimiter />
             </EuiFlexItem>
           ) : null}
