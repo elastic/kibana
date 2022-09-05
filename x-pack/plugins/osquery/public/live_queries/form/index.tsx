@@ -174,7 +174,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
   const [isLive, setIsLive] = useState(false);
   const { cases } = useKibana().services;
   const casePermissions = useGetUserCasesPermissions();
-  const CasesContext = cases!.ui.getCasesContext();
+  const CasesContext = cases.ui.getCasesContext();
 
   const queryState = getFieldState('query');
   const watchedValues = watch();
