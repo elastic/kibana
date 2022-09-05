@@ -12,7 +12,7 @@ import remarkGfm from 'remark-gfm';
 
 import { useLinks, sendGetFileByPath } from '../../../../../hooks';
 
-import { markdownComponents } from './markdown_components';
+import { markdownRenderers } from './markdown_renderers';
 
 export function Readme({
   readmePath,
@@ -47,7 +47,7 @@ export function Readme({
         <EuiText grow={true}>
           <ReactMarkdown
             transformImageUri={handleImageUri}
-            components={markdownComponents}
+            components={markdownRenderers}
             remarkPlugins={[remarkGfm]}
           >
             {markdown}
