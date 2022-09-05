@@ -13,6 +13,7 @@ exports[`DatatableComponent it renders actions column when there are row actions
           "c": "right",
         },
         "getColorForValue": [MockFunction],
+        "handleFilterClick": [Function],
         "minMaxByColumnId": Object {
           "c": Object {
             "max": 3,
@@ -291,6 +292,7 @@ exports[`DatatableComponent it renders custom row height if set to another value
           "c": "right",
         },
         "getColorForValue": [MockFunction],
+        "handleFilterClick": [Function],
         "minMaxByColumnId": Object {
           "c": Object {
             "max": 3,
@@ -558,6 +560,7 @@ exports[`DatatableComponent it renders the title and value 1`] = `
           "c": "right",
         },
         "getColorForValue": [MockFunction],
+        "handleFilterClick": [Function],
         "minMaxByColumnId": Object {
           "c": Object {
             "max": 3,
@@ -823,6 +826,7 @@ exports[`DatatableComponent it should render hide, reset, and sort actions on he
           "c": "right",
         },
         "getColorForValue": [MockFunction],
+        "handleFilterClick": [Function],
         "minMaxByColumnId": Object {
           "c": Object {
             "max": 3,
