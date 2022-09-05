@@ -35,9 +35,9 @@ node scripts/register_git_hook
 Kibana has a pretty long CI process.
 Therefore, we suggest running the following commands locally before creating a PR:
 
-1. typescript check: `node_modules/.bin/tsc -b x-pack/plugins/cloud_security_posture/tsconfig.json --pretty`
-2. linter check: `yarn lint:es x-pack/plugins/cloud_security_posture`
-3. unit tests: `yarn jest --config x-pack/plugins/cloud_security_posture/jest.config.js`
+1. Typescript check: `node_modules/.bin/tsc -b x-pack/plugins/cloud_security_posture/tsconfig.json --pretty`
+2. Linter check: `yarn lint:es x-pack/plugins/cloud_security_posture`
+3. Unit tests: `yarn jest --config x-pack/plugins/cloud_security_posture/jest.config.js`
 
 ### Running unit tests
 
