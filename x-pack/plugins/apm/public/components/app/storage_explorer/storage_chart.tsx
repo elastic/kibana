@@ -14,7 +14,6 @@ import {
   Position,
   ScaleType,
   Settings,
-  StackMode,
 } from '@elastic/charts';
 import { useChartTheme } from '@kbn/observability-plugin/public';
 import { useProgressiveFetcher } from '../../../hooks/use_progressive_fetcher';
@@ -26,6 +25,7 @@ import { getTimeZone } from '../../shared/charts/helper/timezone';
 import { isTimeseriesEmpty } from '../../shared/charts/helper/helper';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { Coordinate, TimeSeries } from '../../../../typings/timeseries';
+import { asDynamicBytes } from '../../../../common/utils/formatters';
 
 interface Props {
   indexLifecyclePhase: IndexLifecyclePhaseSelectOption;
@@ -101,6 +101,7 @@ export function StorageChart({ indexLifecyclePhase }: Props) {
               {
                 areaSeriesStyle: {
                   line: { visible: false },
+                  area: { opacity: 1 },
                 },
               },
               ...chartTheme,
@@ -119,7 +120,7 @@ export function StorageChart({ indexLifecyclePhase }: Props) {
             id="y-axis"
             position={Position.Left}
             showGridLines
-            tickFormat={(d) => `${Number(d * 100).toFixed(2)} %`}
+            tickFormat={asDynamicBytes}
           />
           {storageTimeSeries.map((serie) => (
             <AreaSeries
@@ -132,7 +133,6 @@ export function StorageChart({ indexLifecyclePhase }: Props) {
               yAccessors={['y']}
               data={isEmpty ? [] : serie.data}
               color={serie.color}
-              stackMode={StackMode.Percentage}
               stackAccessors={['x']}
             />
           ))}
