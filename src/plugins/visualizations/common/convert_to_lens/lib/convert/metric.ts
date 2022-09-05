@@ -50,13 +50,14 @@ export type MetricAggregationColumnWithoutSpecialParams =
   | MinColumn
   | SumColumn;
 
-type MetricsWithoutSpecialParams =
+export type MetricsWithoutSpecialParams =
   | METRIC_TYPES.AVG
   | METRIC_TYPES.COUNT
   | METRIC_TYPES.MAX
   | METRIC_TYPES.MIN
   | METRIC_TYPES.SUM
-  | METRIC_TYPES.CARDINALITY;
+  | METRIC_TYPES.CARDINALITY
+  | METRIC_TYPES.STD_DEV;
 
 const isSupportedAggregationWithoutParams = (
   agg: string

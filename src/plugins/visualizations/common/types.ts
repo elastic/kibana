@@ -11,10 +11,11 @@ import {
   AggParamsMapping,
   AggConfigSerialized,
   SerializedSearchSourceFields,
+  METRIC_TYPES,
+  BUCKET_TYPES,
 } from '@kbn/data-plugin/common';
 import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import type { SavedObjectAttributes } from '@kbn/core/types';
-import { SUPPORTED_AGGREGATIONS } from './constants';
 
 export interface VisParams {
   [key: string]: any;
@@ -60,7 +61,7 @@ interface SchemaConfigParams {
   useGeocentroid?: boolean;
 }
 
-export type SupportedAggregation = typeof SUPPORTED_AGGREGATIONS[number];
+export type SupportedAggregation = METRIC_TYPES | BUCKET_TYPES;
 
 export interface SchemaConfig<Agg extends SupportedAggregation = SupportedAggregation> {
   accessor: number;

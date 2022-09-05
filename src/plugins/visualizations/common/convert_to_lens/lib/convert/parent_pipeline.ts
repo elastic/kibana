@@ -34,14 +34,13 @@ export const convertToMovingAverageParams = (
   window: agg.aggParams!.window ?? 0,
 });
 
+export type ParentPipelineMetric =
+  | METRIC_TYPES.CUMULATIVE_SUM
+  | METRIC_TYPES.DERIVATIVE
+  | METRIC_TYPES.MOVING_FN;
+
 export const convertToParentPipelineAggColumns = (
-  {
-    agg,
-    dataView,
-  }:
-    | CommonColumnConverterArgs<METRIC_TYPES.CUMULATIVE_SUM>
-    | CommonColumnConverterArgs<METRIC_TYPES.DERIVATIVE>
-    | CommonColumnConverterArgs<METRIC_TYPES.MOVING_FN>,
+  { agg, dataView }: CommonColumnConverterArgs<ParentPipelineMetric>,
   reducedTimeRange?: string
 ):
   | FormulaColumn

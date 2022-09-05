@@ -6,5 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { getFormulaForParentPipelineAgg } from './formula';
-export { convertMetricToColumns } from './metrics';
+export { getColumnsFromVis } from './schemas';

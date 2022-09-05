@@ -50,4 +50,4 @@ export const DEFAULT_LEGEND_SIZE = LegendSize.MEDIUM;
 export const SUPPORTED_AGGREGATIONS = [
   ...Object.values(METRIC_TYPES),
   ...Object.values(BUCKET_TYPES),
-];
+] as const;

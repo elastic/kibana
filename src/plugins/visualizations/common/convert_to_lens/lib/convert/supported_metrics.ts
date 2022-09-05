@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { METRIC_TYPES } from '@kbn/data-plugin/common';
+import { BUCKET_TYPES, METRIC_TYPES } from '@kbn/data-plugin/common';
 import { Operation } from '../../types';
 import { Operations } from '../../constants';
 
@@ -49,7 +49,10 @@ interface LocalSupportedMetrics {
   [METRIC_TYPES.MOVING_FN]: Metric<typeof Operations.MOVING_AVERAGE>;
 }
 
-type UnsupportedSupportedMetrics = Exclude<METRIC_TYPES, keyof LocalSupportedMetrics>;
+type UnsupportedSupportedMetrics = Exclude<
+  METRIC_TYPES | BUCKET_TYPES,
+  keyof LocalSupportedMetrics
+>;
 export type SupportedMetrics = LocalSupportedMetrics & {
   [Key in UnsupportedSupportedMetrics]?: null;
 };
