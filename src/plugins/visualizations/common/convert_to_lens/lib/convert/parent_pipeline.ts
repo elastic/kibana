@@ -7,8 +7,15 @@
  */
 
 import { METRIC_TYPES } from '@kbn/data-plugin/common';
+import { SchemaConfig } from '../../..';
 import { Operations } from '../../constants';
-import { CumulativeSumColumn, FormulaColumn } from '../../types';
+import {
+  CumulativeSumColumn,
+  DerivativeColumn,
+  FormulaColumn,
+  MovingAverageColumn,
+  MovingAverageParams,
+} from '../../types';
 import { getFormulaForParentPipelineAgg } from '../metrics';
 import { createColumn } from './column';
 import { createFormulaColumn } from './formula';
@@ -19,11 +26,28 @@ import {
 import { SUPPORTED_METRICS } from './supported_metrics';
 import { CommonColumnConverterArgs } from './types';
 
-export const convertToCumulativeSumColumns = (
-  { agg, dataView }: CommonColumnConverterArgs<METRIC_TYPES.CUMULATIVE_SUM>,
+export type ParentPipelineAggColumn = MovingAverageColumn | DerivativeColumn | CumulativeSumColumn;
+
+export const convertToMovingAverageParams = (
+  agg: SchemaConfig<METRIC_TYPES.MOVING_FN>
+): MovingAverageParams => ({
+  window: agg.aggParams!.window ?? 0,
+});
+
+export const convertToParentPipelineAggColumns = (
+  {
+    agg,
+    dataView,
+  }:
+    | CommonColumnConverterArgs<METRIC_TYPES.CUMULATIVE_SUM>
+    | CommonColumnConverterArgs<METRIC_TYPES.DERIVATIVE>
+    | CommonColumnConverterArgs<METRIC_TYPES.MOVING_FN>,
   reducedTimeRange?: string
-): FormulaColumn | [CumulativeSumColumn, MetricAggregationColumnWithoutSpecialParams] | null => {
-  const { aggParams } = agg;
+):
+  | FormulaColumn
+  | [ParentPipelineAggColumn, MetricAggregationColumnWithoutSpecialParams]
+  | null => {
+  const { aggParams, aggType } = agg;
   if (!aggParams) {
     return null;
   }
@@ -50,13 +74,21 @@ export const convertToCumulativeSumColumns = (
       return null;
     }
 
+    const op = SUPPORTED_METRICS[aggType];
+    if (!op) {
+      return null;
+    }
+
     return [
       {
-        operationType: Operations.CUMULATIVE_SUM,
+        operationType: op.name,
         references: [subMetric?.columnId],
         ...createColumn(agg),
-        params: {},
-      },
+        params:
+          op.name === Operations.MOVING_AVERAGE
+            ? convertToMovingAverageParams(agg as SchemaConfig<METRIC_TYPES.MOVING_FN>)
+            : {},
+      } as ParentPipelineAggColumn,
       subMetric,
     ];
   } else {
