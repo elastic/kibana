@@ -49,6 +49,17 @@ const emptyValue = getEmptyValue();
 const getCommand = (command: ResponseActions): Exclude<ResponseActions, 'unisolate'> | 'release' =>
   command === 'unisolate' ? 'release' : command;
 
+const getActionStatus = (status: ActionDetails['status']): string => {
+  if (status === 'failed') {
+    return UX_MESSAGES.badge.failed;
+  } else if (status === 'completed') {
+    return UX_MESSAGES.badge.completed;
+  } else if (status === 'pending') {
+    return UX_MESSAGES.badge.pending;
+  }
+  return '';
+};
+
 // Truncated usernames
 const StyledFacetButton = euiStyled(EuiFacetButton)`
   .euiText {
