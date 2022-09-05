@@ -98,10 +98,11 @@ export const FilterGroup = ({
   const andDisabled = isDepthReached && conditionType === ConditionTypes.OR;
   const removeDisabled = pathInArray.length <= 1 && filters.length === 1;
   const isRootLevelFilterGroup = pathInArray.length <= 1;
-  const color = isRootLevelFilterGroup || !reverseBackground ? 'subdued' : 'plain';
+  const color = (isRootLevelFilterGroup && path !== '') || !reverseBackground ? 'plain' : 'subdued';
 
   const shouldDrawBorder = (filter: Filter) =>
-    path !== '' && (Array.isArray(filter) || isOrFilter(filter));
+    (!isRootLevelFilterGroup && (Array.isArray(filter) || isOrFilter(filter))) ||
+    (isRootLevelFilterGroup && (Array.isArray(filter) || isOrFilter(filter)));
 
   return (
     <EuiPanel
@@ -109,7 +110,7 @@ export const FilterGroup = ({
       hasShadow={false}
       paddingSize="none"
       className={cx({
-        [boderPadding]: path !== '' && !isRootLevelFilterGroup,
+        [boderPadding]: path !== '',
       })}
     >
       {filters.map((filter, index, acc) => (
@@ -134,7 +135,7 @@ export const FilterGroup = ({
 
           {conditionType === ConditionTypes.OR && index + 1 < acc.length ? (
             <EuiFlexItem>
-              <OrDelimiter isRootLevelFilterGroup={isRootLevelFilterGroup && path !== ''} />
+              <OrDelimiter isRootLevelFilterGroup={isRootLevelFilterGroup && path === ''} />
             </EuiFlexItem>
           ) : null}
 
