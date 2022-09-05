@@ -73,7 +73,7 @@ Change the fields list to display a different {data-source}, different time rang
 * To add fields, open the {data-source} dropdown, then select *Add a field to this {data-source}*.
 +
 [role="screenshot"]
-image:images/lens_dataViewDropDown_8.3.png[Dropdown menu located next to {data-source} field with items for adding and managing fields]
+image:images/lens_dataViewDropDown_8.4.0.png[Dropdown menu located next to {data-source} field with items for adding and managing fields]
 +
 For more information about adding fields to {data-sources} and examples, refer to <<runtime-fields>>.
 

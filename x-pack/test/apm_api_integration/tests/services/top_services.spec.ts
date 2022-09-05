@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { sortBy } from 'lodash';
-import { apm, timerange } from '@elastic/apm-synthtrace';
+import { apm, timerange } from '@kbn/apm-synthtrace';
 import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import { ENVIRONMENT_ALL } from '@kbn/apm-plugin/common/environment_filter_values';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
@@ -33,7 +33,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   registry.when(
     'APM Services Overview with a basic license when data is not generated',
-    { config: 'basic', archives: ['apm_mappings_only_8.0.0'] },
+    { config: 'basic', archives: [] },
     () => {
       it('handles the empty state', async () => {
         const response = await apmApiClient.readUser({
@@ -57,7 +57,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   registry.when(
     'APM Services Overview with a basic license when data is generated',
-    { config: 'basic', archives: ['apm_mappings_only_8.0.0'] },
+    { config: 'basic', archives: [] },
     () => {
       let response: {
         status: number;

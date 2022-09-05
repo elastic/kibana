@@ -24,8 +24,8 @@ const serviceInventoryHref = url.format({
 });
 
 describe.skip('Home page', () => {
-  before(async () => {
-    await synthtrace.index(
+  before(() => {
+    synthtrace.index(
       opbeans({
         from: new Date(start).getTime(),
         to: new Date(end).getTime(),
@@ -33,8 +33,8 @@ describe.skip('Home page', () => {
     );
   });
 
-  after(async () => {
-    await synthtrace.clean();
+  after(() => {
+    synthtrace.clean();
   });
 
   beforeEach(() => {
@@ -42,7 +42,7 @@ describe.skip('Home page', () => {
   });
 
   it('Redirects to service page with comparisonEnabled, environment, rangeFrom, rangeTo and offset added to the URL', () => {
-    cy.visit('/app/apm');
+    cy.visitKibana('/app/apm');
 
     cy.url().should(
       'include',
@@ -51,7 +51,7 @@ describe.skip('Home page', () => {
   });
 
   it('includes services with only metric documents', () => {
-    cy.visit(
+    cy.visitKibana(
       `${serviceInventoryHref}&kuery=not%20(processor.event%3A%22transaction%22)`
     );
     cy.contains('opbeans-java');
@@ -60,7 +60,7 @@ describe.skip('Home page', () => {
 
   describe('navigations', () => {
     it('navigates to service overview page with transaction type', () => {
-      cy.visit(serviceInventoryHref);
+      cy.visitKibana(serviceInventoryHref);
 
       cy.contains('Services');
       cy.contains('opbeans-rum').click({ force: true });

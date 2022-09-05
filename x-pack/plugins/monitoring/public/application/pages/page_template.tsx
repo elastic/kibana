@@ -20,7 +20,7 @@ import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser'
 import { HeaderMenuPortal } from '@kbn/observability-plugin/public';
 import { useTitle } from '../hooks/use_title';
 import { MonitoringToolbar } from '../../components/shared/toolbar';
-import { MonitoringTimeContainer } from '../hooks/use_monitoring_time';
+import { useMonitoringTimeContainerContext } from '../hooks/use_monitoring_time';
 import { PageLoading } from '../../components';
 import {
   getSetupModeState,
@@ -58,7 +58,7 @@ export const PageTemplate: React.FC<PageTemplateProps> = ({
 }) => {
   useTitle('', title);
 
-  const { currentTimerange } = useContext(MonitoringTimeContainer.Context);
+  const { currentTimerange } = useMonitoringTimeContainerContext();
   const [loaded, setLoaded] = useState(false);
   const [isRequestPending, setIsRequestPending] = useState(false);
   const history = useHistory();

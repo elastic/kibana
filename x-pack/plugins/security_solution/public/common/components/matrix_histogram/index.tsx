@@ -29,7 +29,7 @@ import type {
 import type { MatrixHistogramType } from '../../../../common/search_strategy/security_solution';
 import type { GlobalTimeArgs } from '../../containers/use_global_time';
 import { setAbsoluteRangeDatePicker } from '../../store/inputs/actions';
-import type { InputsModelId } from '../../store/inputs/constants';
+import { InputsModelId } from '../../store/inputs/constants';
 import { HoverVisibilityContainer } from '../hover_visibility_container';
 import { HISTOGRAM_ACTIONS_BUTTON_CLASS, VisualizationActions } from '../visualization_actions';
 import type { GetLensAttributes, LensAttributes } from '../visualization_actions/types';
@@ -72,7 +72,6 @@ const HistogramPanel = styled(Panel)<{ height?: number }>`
 export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> = ({
   chartHeight,
   defaultStackByOption,
-  docValueFields,
   endDate,
   errorMessage,
   filterQuery,
@@ -90,7 +89,7 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
   onError,
   paddingSize = 'm',
   panelHeight = DEFAULT_PANEL_HEIGHT,
-  setAbsoluteRangeDatePickerTarget = 'global',
+  setAbsoluteRangeDatePickerTarget = InputsModelId.global,
   setQuery,
   showInspectButton = false,
   showLegend,
@@ -176,7 +175,6 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
     stackByField: selectedStackByOption.value,
     runtimeMappings,
     isPtrIncluded,
-    docValueFields,
     skip: querySkip,
   };
   const [loading, { data, inspect, totalCount, refetch }] =

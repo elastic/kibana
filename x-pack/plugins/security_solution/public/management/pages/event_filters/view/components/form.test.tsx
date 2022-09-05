@@ -5,8 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { act, cleanup } from '@testing-library/react';
-import { fireEvent } from '@testing-library/dom';
+import { act, cleanup, fireEvent } from '@testing-library/react';
 import { stubIndexPattern } from '@kbn/data-plugin/common/stubs';
 import { useFetchIndex } from '../../../../../common/containers/source';
 import { NAME_ERROR } from '../event_filters_list';
@@ -187,9 +186,7 @@ describe('Event filter form', () => {
       render();
       expect(renderResult.queryByText(NAME_ERROR)).toBeNull();
       const nameInput = renderResult.getByTestId(`${formPrefix}-name-input`);
-      act(() => {
-        fireEvent.blur(nameInput);
-      });
+      fireEvent.blur(nameInput);
       rerenderWithLatestProps();
       expect(renderResult.queryByText(NAME_ERROR)).not.toBeNull();
     });

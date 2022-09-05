@@ -17,7 +17,8 @@ import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { createMockedIndexPattern } from '../../mocks';
 import { LastValueIndexPatternColumn } from './last_value';
 import { lastValueOperation } from '.';
-import type { IndexPattern, IndexPatternLayer } from '../../types';
+import type { IndexPatternLayer } from '../../types';
+import type { IndexPattern } from '../../../types';
 import { TermsIndexPatternColumn } from './terms';
 import { EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
 

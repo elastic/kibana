@@ -7,6 +7,7 @@
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import { BenchmarkId } from '../../../common/types';
+import { CLOUDBEAT_EKS, CLOUDBEAT_VANILLA } from '../../../common/constants';
 
 export const getCspNewPolicyMock = (type: BenchmarkId = 'cis_k8s'): NewPackagePolicy => ({
   name: 'some-cloud_security_posture-policy',
@@ -14,15 +15,14 @@ export const getCspNewPolicyMock = (type: BenchmarkId = 'cis_k8s'): NewPackagePo
   namespace: 'default',
   policy_id: '',
   enabled: true,
-  output_id: '',
   inputs: [
     {
-      type: 'cloudbeat/vanilla',
+      type: CLOUDBEAT_VANILLA,
       policy_template: 'kspm',
       enabled: type === 'cis_k8s',
       streams: [
         {
-          enabled: true,
+          enabled: type === 'cis_k8s',
           data_stream: {
             type: 'logs',
             dataset: 'cloud_security_posture.findings',
@@ -31,12 +31,12 @@ export const getCspNewPolicyMock = (type: BenchmarkId = 'cis_k8s'): NewPackagePo
       ],
     },
     {
-      type: 'cloudbeat/eks',
+      type: CLOUDBEAT_EKS,
       policy_template: 'kspm',
       enabled: type === 'cis_eks',
       streams: [
         {
-          enabled: false,
+          enabled: type === 'cis_eks',
           data_stream: {
             type: 'logs',
             dataset: 'cloud_security_posture.findings',
@@ -62,7 +62,7 @@ export const getCspNewPolicyMock = (type: BenchmarkId = 'cis_k8s'): NewPackagePo
     version: '0.0.21',
   },
   vars: {
-    dataYaml: {
+    runtimeCfg: {
       type: 'yaml',
     },
   },
@@ -100,7 +100,7 @@ export const getCspPolicyMock = (type: BenchmarkId = 'cis_k8s'): PackagePolicy =
           enabled: true,
         },
       ],
-      type: 'cloudbeat/vanilla',
+      type: CLOUDBEAT_VANILLA,
       enabled: type === 'cis_k8s',
     },
     {
@@ -126,7 +126,7 @@ export const getCspPolicyMock = (type: BenchmarkId = 'cis_k8s'): PackagePolicy =
           enabled: false,
         },
       ],
-      type: 'cloudbeat/eks',
+      type: CLOUDBEAT_EKS,
       enabled: type === 'cis_eks',
     },
   ],

@@ -30,7 +30,7 @@ import { isIndexNotFoundError } from '../../../common/utils/exceptions';
 import type { ESTermQuery } from '../../../../common/typed_json';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import type { SeverityCount } from '../../../common/components/severity/types';
-import { useSpaceId } from '../common';
+import { useSpaceId } from '../../../common/hooks/use_space_id';
 
 type GetHostsRiskScoreProps = KpiRiskScoreRequestOptions & {
   data: DataPublicPluginStart;

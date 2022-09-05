@@ -12,13 +12,36 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "ImageLoad via Windows Update Auto Update Client",
-  "note": "## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
+  "note": "",
   "query": "process where event.type in (\"start\", \"process_started\") and\n  (process.pe.original_file_name == \"wuauclt.exe\" or process.name : \"wuauclt.exe\") and\n   /* necessary windows update client args to load a dll */\n   process.args : \"/RunHandlerComServer\" and process.args : \"/UpdateDeploymentProvider\" and\n   /* common paths writeable by a standard user where the target DLL can be placed */\n   process.args : (\"C:\\\\Users\\\\*.dll\", \"C:\\\\ProgramData\\\\*.dll\", \"C:\\\\Windows\\\\Temp\\\\*.dll\", \"C:\\\\Windows\\\\Tasks\\\\*.dll\")\n",
   "references": [
     "https://dtm.uk/wuauclt/"
   ],
+  "required_fields": [
+    {
+      "ecs": true,
+      "name": "event.type",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.args",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.name",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.pe.original_file_name",
+      "type": "keyword"
+    }
+  ],
   "risk_score": 47,
   "rule_id": "edf8ee23-5ea7-4123-ba19-56b41e424ae3",
+  "setup": "If enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.",
   "severity": "medium",
   "tags": [
     "Elastic",
@@ -38,7 +61,7 @@
       "technique": [
         {
           "id": "T1218",
-          "name": "Signed Binary Proxy Execution",
+          "name": "System Binary Proxy Execution",
           "reference": "https://attack.mitre.org/techniques/T1218/"
         }
       ]
@@ -48,5 +71,5 @@
   "timeline_title": "Comprehensive Process Timeline",
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 7
+  "version": 9
 }

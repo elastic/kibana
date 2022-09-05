@@ -16,7 +16,7 @@ import { buildMlAuthz } from '../../../machine_learning/authz';
 import { throwAuthzError } from '../../../machine_learning/validation';
 import { patchRules } from '../../rules/patch_rules';
 import { buildSiemResponse } from '../utils';
-
+import { checkDefaultRuleExceptionListReferences } from './utils/check_for_default_rule_exception_list';
 import { getIdError } from './utils';
 import { transformValidate } from './validate';
 import { readRules } from '../../rules/read_rules';
@@ -69,6 +69,8 @@ export const patchRulesRoute = (router: SecuritySolutionPluginRouter, ml: SetupP
           throwAuthzError(await mlAuthz.validateRuleType(existingRule?.params.type));
         }
 
+        checkDefaultRuleExceptionListReferences({ exceptionLists: params.exceptions_list });
+
         const migratedRule = await legacyMigrate({
           rulesClient,
           savedObjectsClient,
@@ -77,8 +79,8 @@ export const patchRulesRoute = (router: SecuritySolutionPluginRouter, ml: SetupP
 
         const rule = await patchRules({
           rulesClient,
-          rule: migratedRule,
-          params,
+          existingRule: migratedRule,
+          nextParams: params,
         });
         if (rule != null && rule.enabled != null && rule.name != null) {
           const ruleExecutionSummary = await ruleExecutionLog.getExecutionSummary(rule.id);

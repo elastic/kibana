@@ -7,7 +7,8 @@
 
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import { ThreatIntelligenceSecuritySolutionContext } from '../../types';
+import { TestProvidersComponent } from '../../common/mocks/test_providers';
+import { SecuritySolutionPluginContext } from '../../types';
 import { SecuritySolutionContext } from '../security_solution_context';
 import { EnterpriseGuard } from './enterprise_guard';
 
@@ -15,17 +16,19 @@ describe('<EnterpriseGuard />', () => {
   describe('when on enterprise plan', () => {
     it('should render specified children', () => {
       render(
-        <SecuritySolutionContext.Provider
-          value={
-            {
-              licenseService: { isEnterprise: jest.fn().mockReturnValue(true) },
-            } as unknown as ThreatIntelligenceSecuritySolutionContext
-          }
-        >
-          <EnterpriseGuard>
-            <div>enterprise only content</div>
-          </EnterpriseGuard>
-        </SecuritySolutionContext.Provider>
+        <TestProvidersComponent>
+          <SecuritySolutionContext.Provider
+            value={
+              {
+                licenseService: { isEnterprise: jest.fn().mockReturnValue(true) },
+              } as unknown as SecuritySolutionPluginContext
+            }
+          >
+            <EnterpriseGuard>
+              <div>enterprise only content</div>
+            </EnterpriseGuard>
+          </SecuritySolutionContext.Provider>
+        </TestProvidersComponent>
       );
 
       expect(screen.queryByText('enterprise only content')).toBeInTheDocument();
@@ -35,21 +38,23 @@ describe('<EnterpriseGuard />', () => {
   describe('when not on enterprise plan', () => {
     it('should render specified children', () => {
       render(
-        <SecuritySolutionContext.Provider
-          value={
-            {
-              licenseService: { isEnterprise: jest.fn().mockReturnValue(false) },
-            } as unknown as ThreatIntelligenceSecuritySolutionContext
-          }
-        >
-          <EnterpriseGuard fallback={<div>fallback for non enterprise</div>}>
-            <div>enterprise only content</div>
-          </EnterpriseGuard>
-        </SecuritySolutionContext.Provider>
+        <TestProvidersComponent>
+          <SecuritySolutionContext.Provider
+            value={
+              {
+                licenseService: { isEnterprise: jest.fn().mockReturnValue(false) },
+              } as unknown as SecuritySolutionPluginContext
+            }
+          >
+            <EnterpriseGuard>
+              <div>enterprise only content</div>
+            </EnterpriseGuard>
+          </SecuritySolutionContext.Provider>
+        </TestProvidersComponent>
       );
 
       expect(screen.queryByText('enterprise only content')).not.toBeInTheDocument();
-      expect(screen.queryByText('fallback for non enterprise')).toBeInTheDocument();
+      expect(screen.queryByTestId('tiPaywall')).toBeInTheDocument();
     });
   });
 });

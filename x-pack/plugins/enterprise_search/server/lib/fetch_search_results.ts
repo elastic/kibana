@@ -21,7 +21,7 @@ export const fetchSearchResults = async (
     from,
     index: indexName,
     size,
-    ...(!!query ? { q: query } : {}),
+    ...(!!query ? { q: JSON.stringify(query) } : {}),
   });
   return results;
 };

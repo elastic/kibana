@@ -265,10 +265,10 @@
           },
           {
             "parentPluginId": "infra",
-            "id": "def-public.FORMATTERS.highPercision",
+            "id": "def-public.FORMATTERS.highPrecision",
             "type": "Function",
             "tags": [],
-            "label": "highPercision",
+            "label": "highPrecision",
             "description": [],
             "signature": [
               "(val: number) => string"
@@ -279,7 +279,7 @@
             "children": [
               {
                 "parentPluginId": "infra",
-                "id": "def-public.FORMATTERS.highPercision.$1",
+                "id": "def-public.FORMATTERS.highPrecision.$1",
                 "type": "number",
                 "tags": [],
                 "label": "val",

@@ -17,10 +17,11 @@ import {
   EuiSpacer,
   EuiConfirmModal,
 } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
 
 import { Status } from '../../../../../../common/types/api';
-import { GenerateConnectorApiKeyApiLogic } from '../../../api/connector_package/generate_connector_api_key_api_logic';
+import { GenerateConnectorApiKeyApiLogic } from '../../../api/connector/generate_connector_api_key_api_logic';
 import { ApiKey } from '../../api_key/api_key';
 
 const ConfirmModal: React.FC<{

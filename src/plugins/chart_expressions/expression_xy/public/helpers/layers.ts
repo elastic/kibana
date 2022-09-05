@@ -61,6 +61,7 @@ export interface LayerAccessorsTitles {
   splitSeriesTitles?: AccessorsTitles;
   splitColumnTitles?: AccessorsTitles;
   splitRowTitles?: AccessorsTitles;
+  markSizeTitles?: AccessorsTitles;
 }
 
 export type LayersAccessorsTitles = Record<string, LayerAccessorsTitles>;
@@ -80,7 +81,9 @@ export function getFilteredLayers(layers: CommonXYLayerConfig[]) {
 
       if (isDataLayer(layer)) {
         xAccessor =
-          layer.xAccessor && table && getAccessorByDimension(layer.xAccessor, table.columns);
+          layer.xAccessor !== undefined && table
+            ? getAccessorByDimension(layer.xAccessor, table.columns)
+            : undefined;
         splitAccessors = table
           ? layer.splitAccessors?.map((splitAccessor) =>
               getAccessorByDimension(splitAccessor, table!.columns)
@@ -190,11 +193,18 @@ const getTitleForYAccessor = (
     group.series.some(({ accessor, layer }) => accessor === yAccessor && layer === layerId)
   );
 
-  return axisGroup?.title || column!.name;
+  return column?.name ?? axisGroup?.title;
 };
 
 export const getLayerTitles = (
-  { xAccessor, accessors, splitAccessors = [], table, layerId }: CommonXYDataLayerConfig,
+  {
+    xAccessor,
+    accessors,
+    splitAccessors = [],
+    table,
+    layerId,
+    markSizeAccessor,
+  }: CommonXYDataLayerConfig,
   { splitColumnAccessor, splitRowAccessor }: SplitAccessors,
   { xTitle }: CustomTitles,
   groups: GroupsConfiguration
@@ -212,8 +222,8 @@ export const getLayerTitles = (
     [accessor]: getTitleForYAccessor(layerId, accessor, groups, table.columns),
   });
 
-  const xColumnId = xAccessor && getAccessorByDimension(xAccessor, table.columns);
-  const yColumnIds = accessors.map((a) => a && getAccessorByDimension(a, table.columns));
+  const xColumnId = xAccessor ? getAccessorByDimension(xAccessor, table.columns) : undefined;
+  const yColumnIds = accessors.map((a) => getAccessorByDimension(a, table.columns));
   const splitColumnAccessors: Array<string | ExpressionValueVisDimension> = splitAccessors;
 
   return {
@@ -229,6 +239,7 @@ export const getLayerTitles = (
       }),
       {}
     ),
+    markSizeTitles: mapTitle(markSizeAccessor),
     splitColumnTitles: mapTitle(splitColumnAccessor),
     splitRowTitles: mapTitle(splitRowAccessor),
   };

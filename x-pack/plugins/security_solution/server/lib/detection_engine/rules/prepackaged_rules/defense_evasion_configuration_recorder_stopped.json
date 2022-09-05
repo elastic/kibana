@@ -15,14 +15,44 @@
   "language": "kuery",
   "license": "Elastic License v2",
   "name": "AWS Configuration Recorder Stopped",
-  "note": "## Config\n\nThe AWS Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+  "note": "",
   "query": "event.dataset:aws.cloudtrail and event.provider:config.amazonaws.com and event.action:StopConfigurationRecorder and event.outcome:success\n",
   "references": [
     "https://awscli.amazonaws.com/v2/documentation/api/latest/reference/configservice/stop-configuration-recorder.html",
     "https://docs.aws.amazon.com/config/latest/APIReference/API_StopConfigurationRecorder.html"
   ],
+  "related_integrations": [
+    {
+      "integration": "cloudtrail",
+      "package": "aws",
+      "version": "1.10.2"
+    }
+  ],
+  "required_fields": [
+    {
+      "ecs": true,
+      "name": "event.action",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "event.dataset",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "event.outcome",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "event.provider",
+      "type": "keyword"
+    }
+  ],
   "risk_score": 73,
   "rule_id": "fbd44836-0d69-4004-a0b4-03c20370c435",
+  "setup": "The AWS Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
   "severity": "high",
   "tags": [
     "Elastic",
@@ -58,5 +88,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 6
+  "version": 8
 }

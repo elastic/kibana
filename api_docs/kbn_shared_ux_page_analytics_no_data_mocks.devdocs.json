@@ -9,10 +9,18 @@
     "objects": []
   },
   "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
     "classes": [
       {
         "parentPluginId": "@kbn/shared-ux-page-analytics-no-data-mocks",
-        "id": "def-server.StorybookMock",
+        "id": "def-common.StorybookMock",
         "type": "Class",
         "tags": [],
         "label": "StorybookMock",
@@ -20,9 +28,9 @@
         "signature": [
           {
             "pluginId": "@kbn/shared-ux-page-analytics-no-data-mocks",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnSharedUxPageAnalyticsNoDataMocksPluginApi",
-            "section": "def-server.StorybookMock",
+            "section": "def-common.StorybookMock",
             "text": "StorybookMock"
           },
           " extends ",
@@ -38,7 +46,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/shared-ux-page-analytics-no-data-mocks",
-            "id": "def-server.StorybookMock.propArguments",
+            "id": "def-common.StorybookMock.propArguments",
             "type": "Object",
             "tags": [],
             "label": "propArguments",
@@ -49,7 +57,7 @@
           },
           {
             "parentPluginId": "@kbn/shared-ux-page-analytics-no-data-mocks",
-            "id": "def-server.StorybookMock.serviceArguments",
+            "id": "def-common.StorybookMock.serviceArguments",
             "type": "Object",
             "tags": [],
             "label": "serviceArguments",
@@ -59,7 +67,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/shared-ux-page-analytics-no-data-mocks",
-                "id": "def-server.StorybookMock.serviceArguments.kibanaGuideDocLink",
+                "id": "def-common.StorybookMock.serviceArguments.kibanaGuideDocLink",
                 "type": "Object",
                 "tags": [],
                 "label": "kibanaGuideDocLink",
@@ -69,7 +77,7 @@
                 "children": [
                   {
                     "parentPluginId": "@kbn/shared-ux-page-analytics-no-data-mocks",
-                    "id": "def-server.StorybookMock.serviceArguments.kibanaGuideDocLink.control",
+                    "id": "def-common.StorybookMock.serviceArguments.kibanaGuideDocLink.control",
                     "type": "string",
                     "tags": [],
                     "label": "control",
@@ -79,7 +87,7 @@
                   },
                   {
                     "parentPluginId": "@kbn/shared-ux-page-analytics-no-data-mocks",
-                    "id": "def-server.StorybookMock.serviceArguments.kibanaGuideDocLink.defaultValue",
+                    "id": "def-common.StorybookMock.serviceArguments.kibanaGuideDocLink.defaultValue",
                     "type": "string",
                     "tags": [],
                     "label": "defaultValue",
@@ -93,7 +101,7 @@
           },
           {
             "parentPluginId": "@kbn/shared-ux-page-analytics-no-data-mocks",
-            "id": "def-server.StorybookMock.dependencies",
+            "id": "def-common.StorybookMock.dependencies",
             "type": "Array",
             "tags": [],
             "label": "dependencies",
@@ -107,7 +115,7 @@
           },
           {
             "parentPluginId": "@kbn/shared-ux-page-analytics-no-data-mocks",
-            "id": "def-server.StorybookMock.getServices",
+            "id": "def-common.StorybookMock.getServices",
             "type": "Function",
             "tags": [],
             "label": "getServices",
@@ -116,9 +124,9 @@
               "(params: ",
               {
                 "pluginId": "@kbn/shared-ux-page-analytics-no-data-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnSharedUxPageAnalyticsNoDataMocksPluginApi",
-                "section": "def-server.Params",
+                "section": "def-common.Params",
                 "text": "Params"
               },
               ") => ",
@@ -129,7 +137,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/shared-ux-page-analytics-no-data-mocks",
-                "id": "def-server.StorybookMock.getServices.$1",
+                "id": "def-common.StorybookMock.getServices.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "params",
@@ -137,9 +145,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/shared-ux-page-analytics-no-data-mocks",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnSharedUxPageAnalyticsNoDataMocksPluginApi",
-                    "section": "def-server.Params",
+                    "section": "def-common.Params",
                     "text": "Params"
                   }
                 ],
@@ -152,7 +160,7 @@
           },
           {
             "parentPluginId": "@kbn/shared-ux-page-analytics-no-data-mocks",
-            "id": "def-server.StorybookMock.getProps",
+            "id": "def-common.StorybookMock.getProps",
             "type": "Function",
             "tags": [],
             "label": "getProps",
@@ -174,7 +182,7 @@
     "functions": [
       {
         "parentPluginId": "@kbn/shared-ux-page-analytics-no-data-mocks",
-        "id": "def-server.getServicesMock",
+        "id": "def-common.getServicesMock",
         "type": "Function",
         "tags": [],
         "label": "getServicesMock",
@@ -195,7 +203,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/shared-ux-page-analytics-no-data-mocks",
-        "id": "def-server.Params",
+        "id": "def-common.Params",
         "type": "Type",
         "tags": [],
         "label": "Params",
@@ -218,14 +226,6 @@
         "initialIsOpen": false
       }
     ],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
     "objects": []
   }
 }

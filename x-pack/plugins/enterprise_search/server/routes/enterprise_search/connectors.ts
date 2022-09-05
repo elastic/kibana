@@ -26,6 +26,7 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
         body: schema.object({
           delete_existing_connector: schema.maybe(schema.boolean()),
           index_name: schema.string(),
+          is_native: schema.boolean(),
           language: schema.nullable(schema.string()),
         }),
       },
@@ -73,17 +74,8 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
-      try {
-        await updateConnectorConfiguration(client, request.params.connectorId, request.body);
-        return response.ok();
-      } catch (error) {
-        return response.customError({
-          body: i18n.translate('xpack.enterpriseSearch.server.routes.updateConnector.error', {
-            defaultMessage: 'Error fetching data from Enterprise Search',
-          }),
-          statusCode: 502,
-        });
-      }
+      await updateConnectorConfiguration(client, request.params.connectorId, request.body);
+      return response.ok();
     })
   );
 
@@ -99,17 +91,8 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
-      try {
-        await updateConnectorScheduling(client, request.params.connectorId, request.body);
-        return response.ok();
-      } catch (error) {
-        return response.customError({
-          body: i18n.translate('xpack.enterpriseSearch.server.routes.updateConnector.error', {
-            defaultMessage: 'Error fetching data from Enterprise Search',
-          }),
-          statusCode: 502,
-        });
-      }
+      await updateConnectorScheduling(client, request.params.connectorId, request.body);
+      return response.ok();
     })
   );
 
@@ -124,17 +107,8 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
-      try {
-        await startConnectorSync(client, request.params.connectorId);
-        return response.ok();
-      } catch (error) {
-        return response.customError({
-          body: i18n.translate('xpack.enterpriseSearch.server.routes.updateConnector.error', {
-            defaultMessage: 'Error fetching data from Enterprise Search',
-          }),
-          statusCode: 502,
-        });
-      }
+      await startConnectorSync(client, request.params.connectorId);
+      return response.ok();
     })
   );
 }

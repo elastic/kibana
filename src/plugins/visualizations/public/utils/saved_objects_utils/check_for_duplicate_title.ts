@@ -7,13 +7,13 @@
  */
 
 import type { OverlayStart, SavedObjectsClientContract } from '@kbn/core/public';
-import type { SavedObject } from '@kbn/saved-objects-plugin/public';
+import type { VisSavedObject } from '../../types';
 import { SAVE_DUPLICATE_REJECTED } from './constants';
 import { findObjectByTitle } from './find_object_by_title';
 import { displayDuplicateTitleConfirmModal } from './display_duplicate_title_confirm_modal';
 
 /**
- * check for an existing SavedObject with the same title in ES
+ * check for an existing VisSavedObject with the same title in ES
  * returns Promise<true> when it's no duplicate, or the modal displaying the warning
  * that's there's a duplicate is confirmed, else it returns a rejected Promise<ErrorMsg>
  * @param savedObject
@@ -23,16 +23,17 @@ import { displayDuplicateTitleConfirmModal } from './display_duplicate_title_con
  */
 export async function checkForDuplicateTitle(
   savedObject: Pick<
-    SavedObject,
-    'id' | 'title' | 'getDisplayName' | 'lastSavedTitle' | 'copyOnSave' | 'getEsType'
+    VisSavedObject,
+    'id' | 'title' | 'lastSavedTitle' | 'getDisplayName' | 'getEsType'
   >,
+  copyOnSave: boolean,
   isTitleDuplicateConfirmed: boolean,
   onTitleDuplicate: (() => void) | undefined,
   services: {
     savedObjectsClient: SavedObjectsClientContract;
     overlays: OverlayStart;
   }
-): Promise<true> {
+): Promise<boolean> {
   const { savedObjectsClient, overlays } = services;
   // Don't check for duplicates if user has already confirmed save with duplicate title
   if (isTitleDuplicateConfirmed) {
@@ -41,7 +42,7 @@ export async function checkForDuplicateTitle(
 
   // Don't check if the user isn't updating the title, otherwise that would become very annoying to have
   // to confirm the save every time, except when copyOnSave is true, then we do want to check.
-  if (savedObject.title === savedObject.lastSavedTitle && !savedObject.copyOnSave) {
+  if (savedObject.title === savedObject.lastSavedTitle && !copyOnSave) {
     return true;
   }
 

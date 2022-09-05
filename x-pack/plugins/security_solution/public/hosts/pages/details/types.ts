@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import type { ActionCreator } from 'typescript-fsa';
 import type { DataViewBase, Filter } from '@kbn/es-query';
-import type { InputsModelId } from '../../../common/store/inputs/constants';
 import type { HostsTableType } from '../../store/model';
 import type { HostsQueryProps } from '../types';
 import type { NavTab } from '../../../common/components/navigation/types';
@@ -15,11 +13,6 @@ import type { KeyHostsNavTabWithoutMlPermission } from '../navigation/types';
 import type { hostsModel } from '../../store';
 
 interface HostBodyComponentDispatchProps {
-  setAbsoluteRangeDatePicker: ActionCreator<{
-    id: InputsModelId;
-    from: string;
-    to: string;
-  }>;
   detailName: string;
   hostDetailsPagePath: string;
 }
@@ -50,9 +43,3 @@ export type HostDetailsTabsProps = HostBodyComponentDispatchProps &
     indexPattern: DataViewBase;
     type: hostsModel.HostsType;
   };
-
-export type SetAbsoluteRangeDatePicker = ActionCreator<{
-  id: InputsModelId;
-  from: string;
-  to: string;
-}>;

@@ -18,7 +18,13 @@ import { i18n } from '@kbn/i18n';
 import { isEqual } from 'lodash';
 import { AxisExtentConfig, YScaleType } from '@kbn/expression-xy-plugin/common';
 import { ToolbarButtonProps } from '@kbn/kibana-react-plugin/public';
-import { XYLayerConfig, AxesSettingsConfig } from '../types';
+import {
+  EuiIconAxisBottom,
+  EuiIconAxisLeft,
+  EuiIconAxisRight,
+  EuiIconAxisTop,
+} from '@kbn/chart-icons';
+import { isHorizontalChart } from '../state_helpers';
 import {
   ToolbarPopover,
   useDebouncedValue,
@@ -26,11 +32,7 @@ import {
   RangeInputField,
   BucketAxisBoundsControl,
 } from '../../../shared_components';
-import { isHorizontalChart } from '../state_helpers';
-import { EuiIconAxisBottom } from '../../../assets/axis_bottom';
-import { EuiIconAxisLeft } from '../../../assets/axis_left';
-import { EuiIconAxisRight } from '../../../assets/axis_right';
-import { EuiIconAxisTop } from '../../../assets/axis_top';
+import { XYLayerConfig, AxesSettingsConfig } from '../types';
 import { validateExtent } from '../axes_configuration';
 
 import './axis_settings_popover.scss';

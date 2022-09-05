@@ -15,14 +15,39 @@
   "language": "kuery",
   "license": "Elastic License v2",
   "name": "AWS WAF Access Control List Deletion",
-  "note": "## Config\n\nThe AWS Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+  "note": "",
   "query": "event.dataset:aws.cloudtrail and event.action:DeleteWebACL and event.outcome:success\n",
   "references": [
     "https://awscli.amazonaws.com/v2/documentation/api/latest/reference/waf-regional/delete-web-acl.html",
     "https://docs.aws.amazon.com/waf/latest/APIReference/API_wafRegional_DeleteWebACL.html"
   ],
+  "related_integrations": [
+    {
+      "integration": "cloudtrail",
+      "package": "aws",
+      "version": "1.10.2"
+    }
+  ],
+  "required_fields": [
+    {
+      "ecs": true,
+      "name": "event.action",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "event.dataset",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "event.outcome",
+      "type": "keyword"
+    }
+  ],
   "risk_score": 47,
   "rule_id": "91d04cd4-47a9-4334-ab14-084abe274d49",
+  "setup": "The AWS Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
   "severity": "medium",
   "tags": [
     "Elastic",
@@ -58,5 +83,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 7
+  "version": 9
 }

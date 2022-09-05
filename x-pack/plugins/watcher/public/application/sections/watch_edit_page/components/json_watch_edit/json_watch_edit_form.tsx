@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment, useContext, useState } from 'react';
+import React, { Fragment, useContext, useEffect, useState } from 'react';
 
 import {
   EuiButton,
@@ -67,9 +67,11 @@ export const JsonWatchEditForm = () => {
     json: hasActionErrors ? [...errors.json, invalidActionMessage] : [...errors.json],
   };
 
-  if (errors.json.length === 0) {
-    setWatchProperty('watch', JSON.parse(watch.watchString));
-  }
+  useEffect(() => {
+    if (errors.json.length === 0) {
+      setWatchProperty('watch', JSON.parse(watch.watchString));
+    }
+  }, [setWatchProperty, errors, watch]);
 
   return (
     <Fragment>

@@ -11,13 +11,31 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Apple Scripting Execution with Administrator Privileges",
-  "note": "## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
+  "note": "",
   "query": "process where event.type in (\"start\", \"process_started\") and process.name : \"osascript\" and\n  process.command_line : \"osascript*with administrator privileges\"\n",
   "references": [
     "https://discussions.apple.com/thread/2266150"
   ],
+  "required_fields": [
+    {
+      "ecs": true,
+      "name": "event.type",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.command_line",
+      "type": "wildcard"
+    },
+    {
+      "ecs": true,
+      "name": "process.name",
+      "type": "keyword"
+    }
+  ],
   "risk_score": 47,
   "rule_id": "827f8d8f-4117-4ae4-b551-f56d54b9da6b",
+  "setup": "If enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.",
   "severity": "medium",
   "tags": [
     "Elastic",
@@ -61,5 +79,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 2
+  "version": 4
 }

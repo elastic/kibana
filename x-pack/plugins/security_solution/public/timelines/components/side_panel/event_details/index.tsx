@@ -20,7 +20,8 @@ import type { HostRisk } from '../../../../risk_score/containers';
 import { useHostRiskScore } from '../../../../risk_score/containers';
 import { useHostIsolationTools } from './use_host_isolation_tools';
 import { FlyoutBody, FlyoutHeader, FlyoutFooter } from './flyout';
-import { useBasicDataFromDetailsData } from './helpers';
+import { useBasicDataFromDetailsData, getAlertIndexAlias } from './helpers';
+import { useSpaceId } from '../../../../common/hooks/use_space_id';
 
 interface EventDetailsPanelProps {
   browserFields: BrowserFields;
@@ -51,10 +52,13 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
   timelineId,
   isReadOnly,
 }) => {
+  const currentSpaceId = useSpaceId();
+  const { indexName } = expandedEvent;
+  const eventIndex = getAlertIndexAlias(indexName, currentSpaceId) ?? indexName;
   const [loading, detailsData, rawEventData, ecsData, refetchFlyoutData] = useTimelineEventsDetails(
     {
       entityType,
-      indexName: expandedEvent.indexName ?? '',
+      indexName: eventIndex ?? '',
       eventId: expandedEvent.eventId ?? '',
       runtimeMappings,
       skip: !expandedEvent.eventId,

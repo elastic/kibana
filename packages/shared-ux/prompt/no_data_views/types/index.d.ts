@@ -42,7 +42,7 @@ export interface NoDataViewsPromptServices {
 /**
  * Kibana-specific service types.
  */
-export interface NoDataViewsPromptKibanaServices {
+export interface NoDataViewsPromptKibanaDependencies {
   coreStart: {
     docLinks: {
       links: {

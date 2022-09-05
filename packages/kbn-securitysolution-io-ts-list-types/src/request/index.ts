@@ -8,6 +8,7 @@
 export * from './create_endpoint_list_item_schema';
 export * from './create_exception_list_item_schema';
 export * from './create_exception_list_schema';
+export * from './create_rule_exception_item_schema';
 export * from './create_list_item_schema';
 export * from './create_list_schema';
 export * from './delete_endpoint_list_item_schema';

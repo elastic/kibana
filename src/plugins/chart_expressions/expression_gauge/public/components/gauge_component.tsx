@@ -21,7 +21,6 @@ import {
 } from '../../common';
 import {
   getAccessorsFromArgs,
-  getIcons,
   getMaxValue,
   getMinValue,
   getValueFromAccessor,
@@ -29,6 +28,7 @@ import {
   getGoalConfig,
   computeMinMax,
 } from './utils';
+import { getIcons } from './utils/icons';
 import './index.scss';
 import { GaugeCentralMajorMode } from '../../common/types';
 import { isBulletShape, isRoundShape } from '../../common/utils';

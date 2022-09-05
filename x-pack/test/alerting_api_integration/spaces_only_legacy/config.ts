@@ -16,4 +16,5 @@ export default createTestConfig('spaces_only', {
   verificationMode: undefined,
   customizeLocalHostSsl: true,
   preconfiguredAlertHistoryEsIndex: true,
+  useDedicatedTaskRunner: true,
 });

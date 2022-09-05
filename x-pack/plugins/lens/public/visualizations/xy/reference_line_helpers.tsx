@@ -8,6 +8,7 @@
 import { groupBy, partition } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { Datatable } from '@kbn/expressions-plugin/public';
+import { IconChartBarReferenceLine } from '@kbn/chart-icons';
 import { layerTypes } from '../../../common';
 import type { DatasourceLayers, FramePublicAPI, Visualization } from '../../types';
 import { groupAxesByType } from './axes_configuration';
@@ -28,7 +29,6 @@ import {
   isReferenceLayer,
 } from './visualization_helpers';
 import { generateId } from '../../id_generator';
-import { LensIconChartBarReferenceLine } from '../../assets/chart_bar_reference_line';
 import { defaultReferenceLineColor } from './color_assignment';
 
 export interface ReferenceLineBase {
@@ -318,7 +318,7 @@ export const getReferenceSupportedLayer = (
     label: i18n.translate('xpack.lens.xyChart.addReferenceLineLayerLabel', {
       defaultMessage: 'Reference lines',
     }),
-    icon: LensIconChartBarReferenceLine,
+    icon: IconChartBarReferenceLine,
     disabled:
       !filledDataLayers.length ||
       (!dataLayers.some(layerHasNumberHistogram) &&

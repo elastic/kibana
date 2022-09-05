@@ -3,11 +3,11 @@
 exports[`Storyshots components/Color/ColorPickerPopover interactive 1`] = `
 <div>
   <div
-    className="euiPopover euiPopover--anchorDownCenter"
+    className="euiPopover emotion-euiPopover"
     id="color-picker-popover"
   >
     <div
-      className="euiPopover__anchor"
+      className="euiPopover__anchor css-16vtueo-render"
     >
       <button
         aria-label="Color Picker black"
@@ -60,11 +60,11 @@ exports[`Storyshots components/Color/ColorPickerPopover interactive 1`] = `
 
 exports[`Storyshots components/Color/ColorPickerPopover six colors 1`] = `
 <div
-  className="euiPopover euiPopover--anchorDownCenter"
+  className="euiPopover emotion-euiPopover"
   id="color-picker-popover"
 >
   <div
-    className="euiPopover__anchor"
+    className="euiPopover__anchor css-16vtueo-render"
   >
     <button
       aria-label="Color Picker white"
@@ -100,11 +100,11 @@ exports[`Storyshots components/Color/ColorPickerPopover six colors 1`] = `
 
 exports[`Storyshots components/Color/ColorPickerPopover six colors, value missing 1`] = `
 <div
-  className="euiPopover euiPopover--anchorDownCenter"
+  className="euiPopover emotion-euiPopover"
   id="color-picker-popover"
 >
   <div
-    className="euiPopover__anchor"
+    className="euiPopover__anchor css-16vtueo-render"
   >
     <button
       aria-label="Color Picker #a1b2c3"
@@ -140,11 +140,11 @@ exports[`Storyshots components/Color/ColorPickerPopover six colors, value missin
 
 exports[`Storyshots components/Color/ColorPickerPopover three colors 1`] = `
 <div
-  className="euiPopover euiPopover--anchorDownCenter"
+  className="euiPopover emotion-euiPopover"
   id="color-picker-popover"
 >
   <div
-    className="euiPopover__anchor"
+    className="euiPopover__anchor css-16vtueo-render"
   >
     <button
       aria-label="Color Picker white"

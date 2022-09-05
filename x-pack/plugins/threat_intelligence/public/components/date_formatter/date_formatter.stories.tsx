@@ -8,7 +8,7 @@
 import React from 'react';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { CoreStart } from '@kbn/core/public';
-import { DEFAULT_DATE_FORMAT, DEFAULT_DATE_FORMAT_TZ } from '../../../common/constants';
+import { mockUiSettingsService } from '../../common/mocks/mock_kibana_ui_settings_service';
 import { DateFormatter } from './date_formatter';
 
 const mockValidStringDate = '1 Jan 2022 00:00:00 GMT';
@@ -21,19 +21,9 @@ export default {
 };
 
 export function Default() {
-  const coreMock = {
-    uiSettings: {
-      get: (key: string) => {
-        const settings = {
-          [DEFAULT_DATE_FORMAT]: '',
-          [DEFAULT_DATE_FORMAT_TZ]: 'UTC',
-        };
-        // @ts-expect-error
-        return settings[key];
-      },
-    },
-  } as unknown as CoreStart;
-  const KibanaReactContext = createKibanaReactContext(coreMock);
+  const KibanaReactContext = createKibanaReactContext({
+    uiSettings: mockUiSettingsService(),
+  } as unknown as CoreStart);
 
   return (
     <KibanaReactContext.Provider>
@@ -43,19 +33,9 @@ export function Default() {
 }
 
 export function UserTimeZone() {
-  const coreMock = {
-    uiSettings: {
-      get: (key: string) => {
-        const settings = {
-          [DEFAULT_DATE_FORMAT]: '',
-          [DEFAULT_DATE_FORMAT_TZ]: 'America/New_York',
-        };
-        // @ts-expect-error
-        return settings[key];
-      },
-    },
-  } as unknown as CoreStart;
-  const KibanaReactContext = createKibanaReactContext(coreMock);
+  const KibanaReactContext = createKibanaReactContext({
+    uiSettings: mockUiSettingsService('', 'America/New York'),
+  });
 
   return (
     <KibanaReactContext.Provider>
@@ -65,19 +45,9 @@ export function UserTimeZone() {
 }
 
 export function UserDateFormat() {
-  const coreMock = {
-    uiSettings: {
-      get: (key: string) => {
-        const settings = {
-          [DEFAULT_DATE_FORMAT]: 'MMM Do YY',
-          [DEFAULT_DATE_FORMAT_TZ]: 'UTC',
-        };
-        // @ts-expect-error
-        return settings[key];
-      },
-    },
-  } as unknown as CoreStart;
-  const KibanaReactContext = createKibanaReactContext(coreMock);
+  const KibanaReactContext = createKibanaReactContext({
+    uiSettings: mockUiSettingsService('MMM Do YY', 'UTC'),
+  });
 
   return (
     <KibanaReactContext.Provider>
@@ -87,18 +57,9 @@ export function UserDateFormat() {
 }
 
 export function CustomDateFormat() {
-  const coreMock = {
-    uiSettings: {
-      get: (key: string) => {
-        const settings = {
-          [DEFAULT_DATE_FORMAT_TZ]: 'UTC',
-        };
-        // @ts-expect-error
-        return settings[key];
-      },
-    },
-  } as unknown as CoreStart;
-  const KibanaReactContext = createKibanaReactContext(coreMock);
+  const KibanaReactContext = createKibanaReactContext({
+    uiSettings: mockUiSettingsService('', 'UTC'),
+  });
 
   return (
     <KibanaReactContext.Provider>
@@ -108,19 +69,9 @@ export function CustomDateFormat() {
 }
 
 export function InvalidStringDate() {
-  const coreMock = {
-    uiSettings: {
-      get: (key: string) => {
-        const settings = {
-          [DEFAULT_DATE_FORMAT]: '',
-          [DEFAULT_DATE_FORMAT_TZ]: 'UTC',
-        };
-        // @ts-expect-error
-        return settings[key];
-      },
-    },
-  } as unknown as CoreStart;
-  const KibanaReactContext = createKibanaReactContext(coreMock);
+  const KibanaReactContext = createKibanaReactContext({
+    uiSettings: mockUiSettingsService(),
+  });
 
   return (
     <KibanaReactContext.Provider>

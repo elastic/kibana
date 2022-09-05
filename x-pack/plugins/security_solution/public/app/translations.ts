@@ -18,6 +18,13 @@ export const DETECTION_RESPONSE = i18n.translate(
   }
 );
 
+export const ENTITY_ANALYTICS = i18n.translate(
+  'xpack.securitySolution.navigation.entityAnalytics',
+  {
+    defaultMessage: 'Entity Analytics',
+  }
+);
+
 export const HOSTS = i18n.translate('xpack.securitySolution.navigation.hosts', {
   defaultMessage: 'Hosts',
 });
@@ -145,6 +152,6 @@ export const NO_PERMISSIONS_TITLE = i18n.translate('xpack.securitySolution.noPer
 export const THREAT_INTELLIGENCE = i18n.translate(
   'xpack.securitySolution.navigation.threatIntelligence',
   {
-    defaultMessage: 'Threat Intelligence',
+    defaultMessage: 'Intelligence',
   }
 );

@@ -102,7 +102,7 @@ export function mockDataPlugin(
       extract: (filtersIn: Filter[]) => {
         const state = filtersIn.map((filter) => ({
           ...filter,
-          meta: { ...filter.meta, index: 'extracted!' },
+          meta: { ...filter.meta },
         }));
         return { state, references: [] };
       },
@@ -126,6 +126,13 @@ export function mockDataPlugin(
     },
     indexPatterns: {
       get: jest.fn().mockImplementation((id) => Promise.resolve({ id, isTimeBased: () => true })),
+    },
+    dataViews: {
+      get: jest
+        .fn()
+        .mockImplementation((id) =>
+          Promise.resolve({ id, isTimeBased: () => true, isPersisted: () => true })
+        ),
     },
     search: createMockSearchService(),
     nowProvider: {

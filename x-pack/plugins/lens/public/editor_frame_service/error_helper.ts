@@ -143,6 +143,8 @@ export function getOriginalRequestErrorMessages(error?: ExpressionRenderError | 
         }
       }
     }
+  } else if (error?.message) {
+    errorMessages.push(error?.message);
   }
   return errorMessages;
 }

@@ -90,13 +90,12 @@
               "SavedObjectsClientContract",
               ", savedObject: ",
               "SavedObject",
-              "<unknown>) => ",
-              "SimpleSavedObjectImpl",
-              "<unknown>"
+              "<unknown>) => jest.Mocked<",
+              "SimpleSavedObject",
+              "<unknown>>"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/simple_saved_object.mock.ts",
             "deprecated": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-browser-mocks",
@@ -109,7 +108,8 @@
                   "SavedObjectsClientContract"
                 ],
                 "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/simple_saved_object.mock.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               },
               {
                 "parentPluginId": "@kbn/core-saved-objects-browser-mocks",
@@ -123,9 +123,11 @@
                   "<unknown>"
                 ],
                 "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/simple_saved_object.mock.ts",
-                "deprecated": false
+                "deprecated": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false

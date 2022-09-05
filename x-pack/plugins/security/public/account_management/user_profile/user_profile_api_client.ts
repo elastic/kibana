@@ -94,7 +94,8 @@ export class UserProfileAPIClient {
    */
   public bulkGet<D extends UserProfileData>(params: UserProfileBulkGetParams) {
     return this.http.post<Array<UserProfile<D>>>('/internal/security/user_profile/_bulk_get', {
-      body: JSON.stringify(params),
+      // Convert `Set` with UIDs to an array to make it serializable.
+      body: JSON.stringify({ ...params, uids: [...params.uids] }),
     });
   }
 

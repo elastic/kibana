@@ -37,7 +37,7 @@ describe('QueryBar ', () => {
         <TestProvidersComponent>
           <QueryBar
             filterQuery={{ query: '', language: 'kuery' }}
-            indexPatterns={[]}
+            indexPattern={{ fields: [] } as any}
             filterManager={filterManager}
             filters={[]}
             onRefresh={jest.fn()}

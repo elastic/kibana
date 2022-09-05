@@ -14,13 +14,14 @@ import type {
   FullAgentPolicyInput,
 } from '../models';
 
-import type { ListResult, ListWithKuery } from './common';
+import type { BulkGetResult, ListResult, ListWithKuery } from './common';
 
 export interface GetPackagePoliciesRequest {
   query: ListWithKuery;
 }
 
 export type GetPackagePoliciesResponse = ListResult<PackagePolicy>;
+export type BulkGetPackagePoliciesResponse = BulkGetResult<PackagePolicy>;
 
 export interface GetOnePackagePolicyRequest {
   params: {
@@ -59,6 +60,11 @@ export type DeletePackagePoliciesResponse = Array<{
   success: boolean;
   package?: PackagePolicyPackage;
   policy_id?: string;
+  // Support generic errors
+  statusCode?: number;
+  body?: {
+    message: string;
+  };
 }>;
 
 export interface UpgradePackagePolicyBaseResponse {

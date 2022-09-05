@@ -45,6 +45,7 @@ export default function (providerContext: FtrProviderContext) {
       },
     },
     name,
+    package_policy_id: getSyntheticsPolicy(agentFullPolicy)?.package_policy_id,
     revision: 1,
     streams: [
       {

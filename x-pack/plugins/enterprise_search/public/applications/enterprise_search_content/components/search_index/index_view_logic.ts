@@ -16,7 +16,7 @@ import {
   clearFlashMessages,
   flashSuccessToast,
 } from '../../../shared/flash_messages';
-import { StartSyncApiLogic, StartSyncArgs } from '../../api/connector_package/start_sync_api_logic';
+import { StartSyncApiLogic, StartSyncArgs } from '../../api/connector/start_sync_api_logic';
 import {
   FetchIndexApiLogic,
   FetchIndexApiParams,
@@ -35,7 +35,7 @@ import {
 import { CrawlerLogic } from './crawler/crawler_logic';
 import { IndexNameLogic } from './index_name_logic';
 
-const FETCH_INDEX_POLLING_DURATION = 1000; // 1 seconds
+const FETCH_INDEX_POLLING_DURATION = 5000; // 1 seconds
 const FETCH_INDEX_POLLING_DURATION_ON_FAILURE = 30000; // 30 seconds
 
 type FetchIndexApiValues = Actions<FetchIndexApiParams, FetchIndexApiResponse>;
@@ -148,7 +148,7 @@ export const IndexViewLogic = kea<MakeLogicType<IndexViewValues, IndexViewAction
           i18n.translate(
             'xpack.enterpriseSearch.content.searchIndex.index.recheckSuccess.message',
             {
-              defaultMessage: 'Successfully rechecked your connector',
+              defaultMessage: 'Your connector has been rechecked.',
             }
           )
         );

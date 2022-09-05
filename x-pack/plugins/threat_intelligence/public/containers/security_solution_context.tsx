@@ -6,8 +6,8 @@
  */
 
 import { createContext } from 'react';
-import { ThreatIntelligenceSecuritySolutionContext } from '../types';
+import { SecuritySolutionPluginContext } from '../types';
 
-export const SecuritySolutionContext = createContext<
-  ThreatIntelligenceSecuritySolutionContext | undefined
->(undefined);
+export const SecuritySolutionContext = createContext<SecuritySolutionPluginContext | undefined>(
+  undefined
+);

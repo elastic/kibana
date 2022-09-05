@@ -27,18 +27,17 @@ const exportObjects = [
   },
 ];
 
-jest.mock('../../../../saved_objects/routes/legacy_import_export/lib/export_dashboards', () => ({
-  exportDashboards: jest.fn().mockResolvedValue({ version: 'mockversion', objects: exportObjects }),
-}));
-
 import supertest from 'supertest';
 import { CoreUsageStatsClient } from '../../../../core_usage_data';
 import { coreUsageStatsClientMock } from '../../../../core_usage_data/core_usage_stats_client.mock';
 import { coreUsageDataServiceMock } from '../../../../core_usage_data/core_usage_data_service.mock';
-import { registerLegacyExportRoute } from '../../../../saved_objects/routes/legacy_import_export/export';
-import { setupServer } from '../../../../saved_objects/routes/test_utils';
+import { setupServer } from '../test_utils';
 import { loggerMock } from '@kbn/logging-mocks';
-import type { InternalSavedObjectsRequestHandlerContext } from '../../../../saved_objects/internal_types';
+import { SavedObjectsBulkResponse } from '@kbn/core-saved-objects-api-server';
+import {
+  registerLegacyExportRoute,
+  type InternalSavedObjectsRequestHandlerContext,
+} from '@kbn/core-saved-objects-server-internal';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 let coreUsageStatsClient: jest.Mocked<CoreUsageStatsClient>;
@@ -46,9 +45,10 @@ let coreUsageStatsClient: jest.Mocked<CoreUsageStatsClient>;
 describe('POST /api/dashboards/export', () => {
   let server: SetupServerReturn['server'];
   let httpSetup: SetupServerReturn['httpSetup'];
+  let handlerContext: SetupServerReturn['handlerContext'];
 
   beforeEach(async () => {
-    ({ server, httpSetup } = await setupServer());
+    ({ server, httpSetup, handlerContext } = await setupServer());
 
     const router = httpSetup.createRouter<InternalSavedObjectsRequestHandlerContext>('');
 
@@ -56,10 +56,18 @@ describe('POST /api/dashboards/export', () => {
     coreUsageStatsClient.incrementLegacyDashboardsExport.mockRejectedValue(new Error('Oh no!')); // intentionally throw this error, which is swallowed, so we can assert that the operation does not fail
     const coreUsageData = coreUsageDataServiceMock.createSetupContract(coreUsageStatsClient);
     registerLegacyExportRoute(router, {
-      kibanaVersion: '7.14.0',
+      kibanaVersion: 'mockversion',
       coreUsageData,
       logger: loggerMock.create(),
     });
+
+    handlerContext.savedObjects.client.bulkGet
+      .mockResolvedValueOnce({
+        saved_objects: exportObjects,
+      } as SavedObjectsBulkResponse)
+      .mockResolvedValueOnce({
+        saved_objects: [],
+      } as SavedObjectsBulkResponse);
 
     await server.start();
   });
