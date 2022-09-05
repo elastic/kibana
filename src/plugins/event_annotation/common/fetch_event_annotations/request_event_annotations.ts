@@ -90,11 +90,11 @@ export const requestEventAnnotations = (
   return defer(async () => {
     const { aggs, dataViews, searchSource, getNow, uiSettings } = await getStartDependencies();
     if (!input?.timeRange) {
-      return;
+      return null;
     }
     const dates = toAbsoluteDates(input?.timeRange);
     if (!dates) {
-      return;
+      return null;
     }
     const buckets = new TimeBuckets({
       'histogram:maxBars': uiSettings.get(UI_SETTINGS.HISTOGRAM_MAX_BARS),
