@@ -72,15 +72,17 @@ export const bulkEditRules = async ({
   // - mute/unmute if needed, refetch rule
   // calling mute for rule needed only when rule was unmuted before and throttle value is  NOTIFICATION_THROTTLE_NO_ACTIONS
   // calling unmute needed only if rule was muted and throttle value is not NOTIFICATION_THROTTLE_NO_ACTIONS
-  const rulesAction = attributesActions
-    .reverse()
-    .find(({ type }) =>
-      [BulkActionEditType.set_rule_actions, BulkActionEditType.add_rule_actions].includes(type)
-    ) as BulkActionEditPayloadRuleActions;
+  const ruleActions = attributesActions.filter((rule): rule is BulkActionEditPayloadRuleActions =>
+    [BulkActionEditType.set_rule_actions, BulkActionEditType.add_rule_actions].includes(rule.type)
+  );
+
+  // bulk edit actions are applying in a historical order.
+  // So, we need to find a rule action that will be applied the last, to be able to check if rule should be muted/unmuted
+  const rulesAction = ruleActions.pop();
 
   if (rulesAction) {
-    const errors: BulkEditError[] = [];
-    const rules = await pMap(
+    const muteOrUnmuteErrors: BulkEditError[] = [];
+    const rulesToMuteOrUnmute = await pMap(
       result.rules,
       async (rule) => {
         try {
@@ -97,7 +99,7 @@ export const bulkEditRules = async ({
 
           return rule;
         } catch (err) {
-          errors.push({
+          muteOrUnmuteErrors.push({
             message: err.message,
             rule: {
               id: rule.id,
@@ -113,8 +115,8 @@ export const bulkEditRules = async ({
 
     return {
       ...result,
-      rules: rules.filter((rule): rule is RuleAlertType => rule != null),
-      errors: [...result.errors, ...errors],
+      rules: rulesToMuteOrUnmute.filter((rule): rule is RuleAlertType => rule != null),
+      errors: [...result.errors, ...muteOrUnmuteErrors],
     };
   }
 
