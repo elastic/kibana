@@ -174,7 +174,7 @@ as stable and reproducible as possible.
 The machine has these [specs](https://www.hetzner.com/dedicated-rootserver/ex100).
 
 Since the tests are run on a local machine, there is also realistic throttling applied to the network to 
-simulate real life internet connection. This means that all requests have a 100 ms latency and 6 mb/s bandwidth.
+simulate real life internet connection. This means that all requests have a [fixed latency and limited bandwidth](https://github.com/elastic/kibana/blob/main/x-pack/test/performance/services/performance.ts#L157).
 
 #### Journey implementation
 
