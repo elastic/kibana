@@ -6,11 +6,14 @@
  */
 
 import React, { useCallback } from 'react';
-import { CommentType, SECURITY_SOLUTION_OWNER } from '@kbn/cases-plugin/common';
+import {
+  CommentType,
+  SECURITY_SOLUTION_OWNER,
+  ExternalReferenceStorageType,
+} from '@kbn/cases-plugin/common';
 import { EuiButtonEmpty, EuiButtonIcon, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { JsonValue } from '@kbn/utility-types';
-import { ExternalReferenceStorageType } from '@kbn/cases-plugin/common/api';
 import { useGetUserCasesPermissions } from './use_get_cases_permissions';
 import { useKibana } from '../common/lib/kibana';
 

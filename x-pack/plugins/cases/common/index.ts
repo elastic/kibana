@@ -25,7 +25,13 @@ export {
   UPDATE_CASES_CAPABILITY,
 } from './constants';
 
-export { CommentType, CaseStatuses, getCasesFromAlertsUrl, throwErrors } from './api';
+export {
+  CommentType,
+  CaseStatuses,
+  getCasesFromAlertsUrl,
+  throwErrors,
+  ExternalReferenceStorageType,
+} from './api';
 
 export type {
   Case,
