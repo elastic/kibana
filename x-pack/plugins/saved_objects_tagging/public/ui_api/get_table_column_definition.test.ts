@@ -63,7 +63,6 @@ describe('getTableColumnDefinition', () => {
   it('returns a non-sortable definition when `serverPaging` is `true`', () => {
     const { sortable } = getTableColumnDefinition({ serverPaging: true });
 
-    // we know this returns a function even if the generic column signature allows other types
     expect(sortable).toEqual(false);
   });
 });
