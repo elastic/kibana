@@ -32,25 +32,29 @@ export default ({ getService }: FtrProviderContext) => {
         async () => await testSubjects.exists('alertsPageWithData')
       );
     });
-
-    describe('Alert Detail / Alert Flyout', () => {
-      before(async () => {
-        await observability.alerts.common.setKibanaTimeZoneToUTC();
-        await observability.alerts.common.navigateToTimeWithData();
-      });
-
-      it('should open the flyout instead of the alerts details page when clicking on "View alert details" from the... (3 dots) button when the feature flag is disabled', async () => {
-        await observability.alerts.common.openActionsMenuForRow(0);
-        await testSubjects.click('viewAlertDetailsFlyout');
-        await retry.waitFor(
-          'Alert flyout to be visible',
-          async () => await testSubjects.exists('alertsFlyout')
-        );
-      });
-      /* TODO: Add more test cases regarding the feature flag for:
-       - alert details URL from the Action variable
-       - alert details button from the alert flyout.
-      */
+  });
+  describe('Alert Detail / Alert Flyout', () => {
+    before(async () => {
+      await esArchiver.load('x-pack/test/functional/es_archives/observability/alerts');
+      await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
+      await observability.alerts.common.setKibanaTimeZoneToUTC();
+      await observability.alerts.common.navigateToTimeWithData();
     });
+    after(async () => {
+      await esArchiver.unload('x-pack/test/functional/es_archives/observability/alerts');
+      await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs');
+    });
+    it('should open the flyout instead of the alerts details page when clicking on "View alert details" from the... (3 dots) button when the feature flag is disabled', async () => {
+      await observability.alerts.common.openActionsMenuForRow(0);
+      await testSubjects.click('viewAlertDetailsFlyout');
+      await retry.waitFor(
+        'Alert flyout to be visible',
+        async () => await testSubjects.exists('alertsFlyout')
+      );
+    });
+    /* TODO: Add more test cases regarding the feature flag for:
+     - alert details URL from the Action variable
+     - alert details button from the alert flyout.
+    */
   });
 };
