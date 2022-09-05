@@ -8,7 +8,7 @@
 import React, { useCallback, useLayoutEffect, useState } from 'react';
 import { useLiveQueryDetails } from '../../actions/use_live_query_details';
 import { PackQueriesStatusTable } from '../../live_queries/form/pack_queries_status_table';
-import { useAddToTimeline } from '../../timelines/useAddToTimeline';
+import { useAddToTimeline } from '../../timelines/use_add_to_timeline';
 
 interface PackQueriesAttachmentWrapperProps {
   actionId?: string;
