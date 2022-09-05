@@ -137,7 +137,7 @@ beforeAll(async () => {
       log,
     }),
   ]);
-}, 15000); // For some reason in local it takes a couple of ms, but in CI it times out :shrug:
+});
 
 it('Stats', () => {
   // Type "imAnAny"
