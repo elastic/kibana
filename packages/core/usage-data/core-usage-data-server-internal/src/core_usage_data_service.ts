@@ -43,7 +43,7 @@ import type { SavedObjectTypeRegistry } from '@kbn/core-saved-objects-base-serve
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 
 import { isConfigured } from './is_configured';
-import { coreUsageStatsType } from './core_usage_stats';
+import { coreUsageStatsType } from './saved_objects';
 import { CoreUsageStatsClient } from './core_usage_stats_client';
 
 export type ExposedConfigsToUsage = Map<string, Record<string, boolean>>;
