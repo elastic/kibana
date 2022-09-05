@@ -35,7 +35,9 @@ import { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
-import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
+import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
+import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import { PLUGIN_ID } from '../common';
 import { DocViewInput, DocViewInputFn } from './services/doc_views/doc_views_types';
 import { DocViewsRegistry } from './services/doc_views/doc_views_registry';
@@ -176,6 +178,8 @@ export interface DiscoverStartPlugins {
   spaces?: SpacesPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   expressions: ExpressionsStart;
+  savedObjectsTaggingOss?: SavedObjectTaggingOssPluginStart;
+  savedObjectsManagement: SavedObjectsManagementPluginStart;
 }
 
 /**
