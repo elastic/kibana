@@ -17,6 +17,9 @@ import {
   PercentileColumn as BasePercentileColumn,
   PercentileRanksColumn as BasePercentileRanksColumn,
   ColumnWithMeta,
+  DateHistogramColumn,
+  TermsColumn,
+  FiltersColumn,
 } from '../../types';
 
 import { SchemaConfig } from '../../../types';
@@ -35,12 +38,13 @@ export type MetricsWithField = Exclude<
   | METRIC_TYPES.COUNT
 >;
 
-export type SiblingPipelineAggs =
+export type SiblingPipelineMetric =
   | METRIC_TYPES.AVG_BUCKET
   | METRIC_TYPES.SUM_BUCKET
   | METRIC_TYPES.MIN_BUCKET
   | METRIC_TYPES.MAX_BUCKET;
 
+export type BucketColumn = DateHistogramColumn | TermsColumn | FiltersColumn;
 export interface CommonColumnConverterArgs<
   Agg extends SupportedAggregation = SupportedAggregation
 > {

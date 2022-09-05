@@ -6,9 +6,16 @@
  * Side Public License, v 1.
  */
 
+import { SchemaConfig } from '../../types';
 import { Column } from '../types';
 
 type UnwrapArray<T> = T extends Array<infer P> ? P : T;
+
+export const getLabel = (agg: SchemaConfig) => {
+  return agg.aggParams && 'customLabel' in agg.aggParams
+    ? agg.aggParams.customLabel ?? agg.label
+    : agg.label;
+};
 
 export const getValidColumns = (columns: Array<Column | null> | Column | null | undefined) => {
   if (columns && Array.isArray(columns)) {

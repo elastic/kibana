@@ -12,6 +12,7 @@ import { IAggConfig } from '@kbn/data-plugin/common';
 import { DataType } from '../../types';
 import { SchemaConfig, SupportedAggregation } from '../../../types';
 import { AggId, ExtraColumnFields, GeneralColumnWithMeta } from './types';
+import { getLabel } from '../utils';
 
 export const createAggregationId = (agg: SchemaConfig): AggId => `${agg.aggType}.${agg.accessor}`;
 
@@ -20,16 +21,11 @@ export const createColumn = <T extends SupportedAggregation>(
   field?: DataViewField,
   { isBucketed = false, isSplit = false, reducedTimeRange }: ExtraColumnFields = {}
 ): GeneralColumnWithMeta => {
-  const label =
-    agg.aggParams && 'customLabel' in agg.aggParams
-      ? agg.aggParams.customLabel
-      : agg.label ?? field?.displayName;
-
   const aggId = createAggregationId(agg);
   return {
     columnId: uuid(),
     dataType: (field?.type as DataType) ?? undefined,
-    label,
+    label: getLabel(agg),
     isBucketed,
     isSplit,
     reducedTimeRange,

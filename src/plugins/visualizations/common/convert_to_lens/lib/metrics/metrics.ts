@@ -22,6 +22,8 @@ import { convertToPercentileRankColumns } from '../convert/percentile_rank';
 import { SUPPORTED_METRICS } from '../convert/supported_metrics';
 import { Column } from '../../types';
 import { getValidColumns } from '../utils';
+import { convertToSiblingPipelineColumns } from '../convert/sibling_pipeline';
+import { SiblingPipelineMetric } from '../convert/types';
 
 export const convertMetricToColumns = <T extends METRIC_TYPES | BUCKET_TYPES>(
   agg: SchemaConfig<T>,
@@ -70,6 +72,16 @@ export const convertMetricToColumns = <T extends METRIC_TYPES | BUCKET_TYPES>(
     case METRIC_TYPES.MOVING_FN: {
       const columns = convertToParentPipelineAggColumns({
         agg: agg as SchemaConfig<ParentPipelineMetric>,
+        dataView,
+      });
+      return getValidColumns(columns);
+    }
+    case METRIC_TYPES.SUM_BUCKET:
+    case METRIC_TYPES.MIN_BUCKET:
+    case METRIC_TYPES.MAX_BUCKET:
+    case METRIC_TYPES.AVG_BUCKET: {
+      const columns = convertToSiblingPipelineColumns({
+        agg: agg as SchemaConfig<SiblingPipelineMetric>,
         dataView,
       });
       return getValidColumns(columns);

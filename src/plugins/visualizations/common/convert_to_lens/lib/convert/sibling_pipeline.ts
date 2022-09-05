@@ -11,10 +11,10 @@ import { FormulaColumn } from '../../types';
 import { getBucketColumns } from '../buckets';
 import { getFormulaForPipelineAgg } from '../metrics/formula';
 import { createFormulaColumn } from './formula';
-import { BucketColumn, CommonColumnConverterArgs, SiblingPipelineAggs } from './types';
+import { BucketColumn, CommonColumnConverterArgs, SiblingPipelineMetric } from './types';
 
 export const convertToSiblingPipelineColumns = (
-  columnConverterArgs: CommonColumnConverterArgs<SiblingPipelineAggs>,
+  columnConverterArgs: CommonColumnConverterArgs<SiblingPipelineMetric>,
   reducedTimeRange?: string
 ): Array<BucketColumn | FormulaColumn> | null => {
   const { aggParams } = columnConverterArgs.agg;
