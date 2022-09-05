@@ -75,7 +75,7 @@ export const FilterGroup = ({
   conditionType,
   path,
   timeRangeForSuggestionsOverride,
-  reverseBackground = true,
+  reverseBackground = false,
 }: FilterGroupProps) => {
   const {
     globalParams: { maxDepth, hideOr },
@@ -98,7 +98,15 @@ export const FilterGroup = ({
   const andDisabled = isDepthReached && conditionType === ConditionTypes.OR;
   const removeDisabled = pathInArray.length <= 1 && filters.length === 1;
   const isRootLevelFilterGroup = pathInArray.length <= 1;
-  const color = (isRootLevelFilterGroup && path !== '') || !reverseBackground ? 'plain' : 'subdued';
+
+  const firstLevel = !path && filters.length === 1;
+  let color: 'subdued' | 'plain' = 'subdued';
+
+  if (!firstLevel) {
+    color = !reverseBackground ? 'subdued' : 'plain';
+  } else {
+    reverseBackground = true;
+  }
 
   const shouldDrawBorder = (filter: Filter) =>
     (path === '' && isOrFilter(filter) && filters.length !== 1) ||
