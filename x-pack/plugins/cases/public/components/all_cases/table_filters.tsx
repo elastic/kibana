@@ -65,7 +65,7 @@ const CasesTableFiltersComponent = ({
   );
   const [search, setSearch] = useState(initial.search);
   const [selectedTags, setSelectedTags] = useState(initial.tags);
-  const [selectedOwner, setSelectedOwner] = useState(initial.owner);
+  const [selectedOwner, setSelectedOwner] = useState([]);
   const { data: tags = [], refetch: fetchTags } = useGetTags(CASE_LIST_CACHE_KEY);
   const { reporters, respReporters, fetchReporters } = useGetReporters();
 

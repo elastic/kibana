@@ -70,7 +70,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
     const firstAvailableStatus = head(difference(caseStatuses, hiddenStatuses));
     const initialFilterOptions = {
       ...(!isEmpty(hiddenStatuses) && firstAvailableStatus && { status: firstAvailableStatus }),
-      owner: hasOwner ? owner : [],
+      owner: hasOwner ? owner : availableSolutions,
     };
     const [filterOptions, setFilterOptions] = useState<FilterOptions>({
       ...DEFAULT_FILTER_OPTIONS,
@@ -179,10 +179,22 @@ export const AllCasesList = React.memo<AllCasesListProps>(
         setFilterOptions((prevFilterOptions) => ({
           ...prevFilterOptions,
           ...newFilterOptions,
+          /**
+           * If the user selects and deselects all solutions
+           * then the owner is set to an empty array. This results in fetching all cases the user has access to including
+           * the ones with read access. We want to show only the cases the user has full access to.
+           * For that reason we fallback to availableSolutions if the owner is empty
+           */
+          ...(newFilterOptions.owner != null
+            ? {
+                owner:
+                  newFilterOptions.owner.length === 0 ? availableSolutions : newFilterOptions.owner,
+              }
+            : {}),
         }));
         refreshCases(false);
       },
-      [deselectCases, setFilterOptions, refreshCases, setQueryParams]
+      [deselectCases, refreshCases, availableSolutions]
     );
 
     /**

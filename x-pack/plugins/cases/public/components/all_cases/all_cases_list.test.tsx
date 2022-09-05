@@ -899,4 +899,73 @@ describe('AllCasesListGeneric', () => {
 
     expect(alertCounts.length).toBeGreaterThan(0);
   });
+
+  describe('Solutions', () => {
+    it('should set the owner to all available solutions when deselecting all solutions', async () => {
+      const { getByTestId } = appMockRenderer.render(
+        <TestProviders owner={[]}>
+          <AllCasesList />
+        </TestProviders>
+      );
+
+      expect(useGetCasesMock).toHaveBeenCalledWith({
+        filterOptions: {
+          search: '',
+          searchFields: [],
+          severity: 'all',
+          reporters: [],
+          status: 'all',
+          tags: [],
+          owner: ['securitySolution', 'observability'],
+        },
+        queryParams: { page: 1, perPage: 5, sortField: 'createdAt', sortOrder: 'desc' },
+      });
+
+      userEvent.click(getByTestId('options-filter-popover-button-Solution'));
+
+      await waitForEuiPopoverOpen();
+
+      userEvent.click(
+        getByTestId(`options-filter-popover-item-${SECURITY_SOLUTION_OWNER}`),
+        undefined,
+        {
+          skipPointerEventsCheck: true,
+        }
+      );
+
+      expect(useGetCasesMock).toBeCalledWith({
+        filterOptions: {
+          search: '',
+          searchFields: [],
+          severity: 'all',
+          reporters: [],
+          status: 'all',
+          tags: [],
+          owner: ['securitySolution'],
+        },
+        queryParams: { page: 1, perPage: 5, sortField: 'createdAt', sortOrder: 'desc' },
+      });
+
+      userEvent.click(
+        getByTestId(`options-filter-popover-item-${SECURITY_SOLUTION_OWNER}`),
+        undefined,
+        {
+          skipPointerEventsCheck: true,
+        }
+      );
+
+      expect(useGetCasesMock).toHaveBeenLastCalledWith({
+        filterOptions: {
+          search: '',
+          searchFields: [],
+          severity: 'all',
+          reporters: [],
+          status: 'all',
+          tags: [],
+          owner: ['securitySolution', 'observability'],
+        },
+        queryParams: { page: 1, perPage: 5, sortField: 'createdAt', sortOrder: 'desc' },
+      });
+    });
+  });
 });
