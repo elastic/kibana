@@ -200,6 +200,37 @@ describe('Security UsageCollector', () => {
   });
 
   describe('access agreement', () => {
+    it('reports if the global access agreement message is configured', async () => {
+      const config = createSecurityConfig(
+        ConfigSchema.validate({
+          accessAgreement: { message: 'Bar' },
+          authc: {
+            providers: {
+              saml: {
+                saml1: {
+                  realm: 'foo',
+                  order: 1,
+                },
+              },
+            },
+          },
+        })
+      );
+      const usageCollection = usageCollectionPluginMock.createSetupContract();
+      const license = createSecurityLicense({ isLicenseAvailable: true });
+      registerSecurityUsageCollector({ usageCollection, config, license });
+
+      const usage = await usageCollection
+        .getCollectorByType('security')
+        ?.fetch(collectorFetchContext);
+
+      expect(usage).toEqual({
+        ...DEFAULT_USAGE,
+        accessAgreementEnabled: true,
+        enabledAuthProviders: ['saml'],
+      });
+    });
+
     it('reports if the access agreement message is configured for any provider', async () => {
       const config = createSecurityConfig(
         ConfigSchema.validate({

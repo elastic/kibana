@@ -33,35 +33,36 @@ export async function fetchEsQuery(
     dateEnd,
   } = getSearchParams(params);
 
-  const filter = timestamp
-    ? {
-        bool: {
-          filter: [
-            query,
-            {
-              bool: {
-                must_not: [
-                  {
-                    bool: {
-                      filter: [
-                        {
-                          range: {
-                            [params.timeField]: {
-                              lte: timestamp,
-                              format: 'strict_date_optional_time',
+  const filter =
+    timestamp && params.excludeHitsFromPreviousRun
+      ? {
+          bool: {
+            filter: [
+              query,
+              {
+                bool: {
+                  must_not: [
+                    {
+                      bool: {
+                        filter: [
+                          {
+                            range: {
+                              [params.timeField]: {
+                                lte: timestamp,
+                                format: 'strict_date_optional_time',
+                              },
                             },
                           },
-                        },
-                      ],
+                        ],
+                      },
                     },
-                  },
-                ],
+                  ],
+                },
               },
-            },
-          ],
-        },
-      }
-    : query;
+            ],
+          },
+        }
+      : query;
 
   const sortedQuery = buildSortedEventsQuery({
     index: params.index,

@@ -7,6 +7,7 @@
 import type { Criteria } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { BoolQuery, Filter, Query } from '@kbn/es-query';
+import type { EcsEvent } from '@kbn/logging';
 import type { CspRuleMetadata } from '../../../common/schemas';
 
 export type FindingsGroupByKind = 'default' | 'resource';
@@ -29,11 +30,11 @@ export interface FindingsBaseEsQuery {
 // TODO: this needs to be defined in a versioned schema
 export interface CspFinding {
   '@timestamp': string;
-  cycle_id: string;
   result: CspFindingResult;
   resource: CspFindingResource;
   rule: CspRuleMetadata;
   host: CspFindingHost;
+  event: EcsEvent;
   agent: CspFindingAgent;
   ecs: {
     version: string;
