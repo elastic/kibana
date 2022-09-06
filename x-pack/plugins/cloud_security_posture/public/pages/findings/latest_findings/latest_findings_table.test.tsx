@@ -12,6 +12,7 @@ import { FindingsTable } from './latest_findings_table';
 import type { PropsOf } from '@elastic/eui';
 import Chance from 'chance';
 import type { CspFinding } from '../types';
+import type { EcsEvent } from '@kbn/logging';
 import { TestProvider } from '../../../test/test_provider';
 
 const chance = new Chance();
@@ -61,9 +62,9 @@ const getFakeFindings = (name: string): CspFinding & { id: string } => ({
     sub_type: chance.string(),
     id: chance.string(),
   },
-  cycle_id: chance.string(),
   host: {} as any,
   ecs: {} as any,
+  event: {} as EcsEvent,
   '@timestamp': new Date().toISOString(),
 });
 
