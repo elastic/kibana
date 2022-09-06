@@ -178,6 +178,7 @@ export function AnalyticsIdSelector({
     if (jobsOnly === false) {
       fetchAnalyticsModels();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const applySelection = useCallback(() => {
@@ -185,6 +186,7 @@ export function AnalyticsIdSelector({
       setAnalyticsId(selected);
     }
     closeFlyout();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selected?.model_id, selected?.job_id]);
 
   const pagination = {
