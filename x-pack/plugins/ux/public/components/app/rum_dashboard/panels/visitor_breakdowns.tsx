@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
+import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import { VisitorBreakdown } from '../visitor_breakdown';
 import { VisitorBreakdownMap } from '../visitor_breakdown_map';
 
@@ -15,7 +16,9 @@ export function VisitorBreakdownsPanel() {
     <EuiFlexGroup gutterSize="s" wrap>
       <EuiFlexItem style={{ flexBasis: 650 }}>
         <EuiPanel hasBorder={true}>
-          <VisitorBreakdownMap />
+          <TrackApplicationView viewId="visitor-breakdown-map">
+            <VisitorBreakdownMap />
+          </TrackApplicationView>
         </EuiPanel>
       </EuiFlexItem>
       <EuiFlexItem style={{ flexBasis: 650 }}>
