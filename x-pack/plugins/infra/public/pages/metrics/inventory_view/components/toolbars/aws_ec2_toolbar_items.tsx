@@ -6,18 +6,10 @@
  */
 
 import React from 'react';
-import type { ToolbarProps } from '../../../public/pages/metrics/inventory_view/components/toolbars/toolbar';
-import { MetricsAndGroupByToolbarItems } from '../shared/components/metrics_and_groupby_toolbar_items';
-import { CloudToolbarItems } from '../shared/components/cloud_toolbar_items';
-import { SnapshotMetricType } from '../types';
-
-export const ec2MetricTypes: SnapshotMetricType[] = [
-  'cpu',
-  'rx',
-  'tx',
-  'diskIOReadBytes',
-  'diskIOWriteBytes',
-];
+import { awsEC2SnapshotMetricTypes } from '../../../../../../common/inventory_models/aws_ec2';
+import { MetricsAndGroupByToolbarItems } from './metrics_and_groupby_toolbar_items';
+import { CloudToolbarItems } from './cloud_toolbar_items';
+import { ToolbarProps } from './types';
 
 export const ec2groupByFields = [
   'cloud.availability_zone',
@@ -32,7 +24,7 @@ export const AwsEC2ToolbarItems = (props: ToolbarProps) => {
       <CloudToolbarItems {...props} />
       <MetricsAndGroupByToolbarItems
         {...props}
-        metricTypes={ec2MetricTypes}
+        metricTypes={awsEC2SnapshotMetricTypes}
         groupByFields={ec2groupByFields}
       />
     </>
