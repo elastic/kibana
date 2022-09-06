@@ -14,7 +14,6 @@ describe('createSessionRestorationDataProvider', () => {
   const searchSessionInfoProvider = createSessionRestorationDataProvider({
     getAppState: () =>
       savedObjectToDashboardState({
-        savedObjectsTagging: undefined,
         savedDashboard: getSavedDashboardMock(),
       }),
     getDashboardTitle: () => 'Dashboard',

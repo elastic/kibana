@@ -61,7 +61,7 @@ export async function mountApp({
 }: DashboardMountProps) {
   const [coreStart, pluginsStart, dashboardStart] = await core.getStartServices();
 
-  const { data: dataStart, spaces: spacesApi, savedObjectsTaggingOss, embeddable } = pluginsStart;
+  const { data: dataStart, spaces: spacesApi, embeddable } = pluginsStart;
 
   const activeSpaceId =
     spacesApi && (await spacesApi.getActiveSpace$().pipe(first()).toPromise())?.id;
@@ -75,7 +75,6 @@ export async function mountApp({
     setHeaderActionMenu,
     scopedHistory: () => scopedHistory,
     savedDashboards: dashboardStart.getSavedDashboardLoader(),
-    savedObjectsTagging: savedObjectsTaggingOss?.getTaggingApi(),
     dashboardSessionStorage: new DashboardSessionStorage(
       core.notifications.toasts,
       activeSpaceId || 'default'

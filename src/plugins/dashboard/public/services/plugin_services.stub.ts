@@ -26,6 +26,7 @@ import { navigationServiceFactory } from './navigation/navigation.stub';
 import { notificationsServiceFactory } from './notifications/notifications.stub';
 import { overlaysServiceFactory } from './overlays/overlays.stub';
 import { savedObjectsServiceFactory } from './saved_objects/saved_objects.stub';
+import { savedObjectsTaggingServiceFactory } from './saved_objects_tagging/saved_objects_tagging.stub';
 import { screenshotModeServiceFactory } from './screenshot_mode/screenshot_mode.stub';
 import { settingsServiceFactory } from './settings/settings.stub';
 import { shareServiceFactory } from './share/share.stub';
@@ -47,6 +48,7 @@ export const providers: PluginServiceProviders<DashboardServices> = {
   notifications: new PluginServiceProvider(notificationsServiceFactory),
   overlays: new PluginServiceProvider(overlaysServiceFactory),
   savedObjects: new PluginServiceProvider(savedObjectsServiceFactory),
+  savedObjectsTagging: new PluginServiceProvider(savedObjectsTaggingServiceFactory),
   screenshotMode: new PluginServiceProvider(screenshotModeServiceFactory),
   settings: new PluginServiceProvider(settingsServiceFactory),
   share: new PluginServiceProvider(shareServiceFactory),

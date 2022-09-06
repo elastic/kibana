@@ -22,7 +22,6 @@ import { type EmbeddableInput, ViewMode } from '@kbn/embeddable-plugin/common';
 import type { ContainerInput } from '@kbn/embeddable-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
-import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { RefreshInterval } from '@kbn/data-plugin/public';
 import type { Query, TimeRange } from '@kbn/es-query';
 
@@ -114,10 +113,7 @@ export interface DashboardAppState {
  * The shared services and tools used to build a dashboard from a saved object ID.
  */
 // TODO: Delete this maybe?
-export type DashboardBuildContext = Pick<
-  DashboardAppServices,
-  'savedDashboards' | 'savedObjectsTagging'
-> & {
+export type DashboardBuildContext = Pick<DashboardAppServices, 'savedDashboards'> & {
   locatorState?: DashboardAppLocatorParams;
   history: History;
   isEmbeddedExternally: boolean;
@@ -165,8 +161,7 @@ export interface DashboardAppServices {
   restorePreviousUrl: () => void; // app mount context
   savedDashboards: SavedObjectLoader; // TODO: Remove as part of https://github.com/elastic/kibana/pull/138774
   scopedHistory: () => ScopedHistory; // app mount context
-  onAppLeave: AppMountParameters['onAppLeave']; // app mount  context
-  savedObjectsTagging?: SavedObjectsTaggingApi; // make a service
+  onAppLeave: AppMountParameters['onAppLeave']; // app mount context
   dashboardSessionStorage: DashboardSessionStorage; // make a service
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu']; // app mount context
 }

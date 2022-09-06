@@ -23,7 +23,6 @@ import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
 import { TableListView, useKibana } from '@kbn/kibana-react-plugin/public';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
-import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 
 import { attemptLoadDashboardByTitle } from '../lib';
 import { DashboardAppServices, DashboardRedirect } from '../../types';
@@ -58,16 +57,17 @@ export const DashboardListing = ({
   kbnUrlStateStorage,
 }: DashboardListingProps) => {
   const {
-    services: { core, savedDashboards, savedObjectsTagging, dashboardSessionStorage },
+    services: { core, savedDashboards, dashboardSessionStorage },
   } = useKibana<DashboardAppServices>();
   const {
     application,
+    chrome: { setBreadcrumbs },
     dashboardCapabilities: { showWriteControls },
     data: { query },
     notifications: { toasts },
     savedObjects: { client },
+    savedObjectsTagging: { getSearchBarFilter, parseSearchQuery },
     settings: { uiSettings, theme },
-    chrome: { setBreadcrumbs },
   } = pluginServices.getServices();
 
   const [showNoDataPage, setShowNoDataPage] = useState<boolean>(false);
@@ -120,13 +120,8 @@ export const DashboardListing = ({
   const defaultFilter = title ? `"${title}"` : '';
 
   const tableColumns = useMemo(
-    () =>
-      getTableColumns(
-        kbnUrlStateStorage,
-        uiSettings.get('state:storeInSessionStorage'),
-        savedObjectsTagging
-      ),
-    [uiSettings, kbnUrlStateStorage, savedObjectsTagging]
+    () => getTableColumns(kbnUrlStateStorage, uiSettings.get('state:storeInSessionStorage')),
+    [uiSettings, kbnUrlStateStorage]
   );
 
   const createItem = useCallback(() => {
@@ -249,8 +244,8 @@ export const DashboardListing = ({
     (filter: string) => {
       let searchTerm = filter;
       let references: SavedObjectsFindOptionsReference[] | undefined;
-      if (savedObjectsTagging) {
-        const parsed = savedObjectsTagging.ui.parseSearchQuery(filter, {
+      if (parseSearchQuery) {
+        const parsed = parseSearchQuery(filter, {
           useName: true,
         });
         searchTerm = parsed.searchTerm;
@@ -262,7 +257,7 @@ export const DashboardListing = ({
         hasReference: references,
       });
     },
-    [listingLimit, savedDashboards, savedObjectsTagging]
+    [listingLimit, savedDashboards, parseSearchQuery]
   );
 
   const deleteItems = useCallback(
@@ -281,10 +276,9 @@ export const DashboardListing = ({
   );
 
   const searchFilters = useMemo(() => {
-    return savedObjectsTagging
-      ? [savedObjectsTagging.ui.getSearchBarFilter({ useName: true })]
-      : [];
-  }, [savedObjectsTagging]);
+    const searchBarFilter = getSearchBarFilter?.({ useName: true });
+    return searchBarFilter ? [searchBarFilter] : [];
+  }, [getSearchBarFilter]);
 
   const { getEntityName, getTableCaption, getTableListTitle, getEntityNamePlural } =
     dashboardListingTable;
@@ -330,11 +324,12 @@ export const DashboardListing = ({
   );
 };
 
-const getTableColumns = (
-  kbnUrlStateStorage: IKbnUrlStateStorage,
-  useHash: boolean,
-  savedObjectsTagging?: SavedObjectsTaggingApi
-) => {
+const getTableColumns = (kbnUrlStateStorage: IKbnUrlStateStorage, useHash: boolean) => {
+  const {
+    savedObjectsTagging: { getTableColumnDefinition },
+  } = pluginServices.getServices();
+  const tableColumnDefinition = getTableColumnDefinition?.();
+
   return [
     {
       field: 'title',
@@ -360,6 +355,6 @@ const getTableColumns = (
       render: (field: string, record: { description: string }) => <span>{record.description}</span>,
       sortable: true,
     },
-    ...(savedObjectsTagging ? [savedObjectsTagging.ui.getTableColumnDefinition()] : []),
+    ...(tableColumnDefinition ? [tableColumnDefinition] : []),
   ] as unknown as Array<EuiBasicTableColumn<Record<string, unknown>>>;
 };

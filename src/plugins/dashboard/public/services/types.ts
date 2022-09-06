@@ -22,6 +22,7 @@ import { DashboardNavigationService } from './navigation/types';
 import { DashboardNotificationsService } from './notifications/types';
 import { DashboardOverlaysService } from './overlays/types';
 import { DashboardSavedObjectsService } from './saved_objects/types';
+import { DashboardSavedObjectsTaggingService } from './saved_objects_tagging/types';
 import { DashboardScreenshotModeService } from './screenshot_mode/types';
 import { DashboardSettingsService } from './settings/types';
 import { DashboardShareService } from './share/types';
@@ -46,6 +47,7 @@ export interface DashboardServices {
   notifications: DashboardNotificationsService;
   overlays: DashboardOverlaysService;
   savedObjects: DashboardSavedObjectsService;
+  savedObjectsTagging: DashboardSavedObjectsTaggingService; // TODO: make this optional in follow up
   screenshotMode: DashboardScreenshotModeService;
   settings: DashboardSettingsService;
   share: DashboardShareService; // TODO: make this optional in follow up

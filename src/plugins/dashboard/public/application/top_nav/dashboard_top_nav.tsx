@@ -99,7 +99,7 @@ export function DashboardTopNav({
   redirectTo,
   printMode,
 }: DashboardTopNavProps) {
-  const { core, savedObjectsTagging, setHeaderActionMenu, dashboardSessionStorage } =
+  const { core, setHeaderActionMenu, dashboardSessionStorage } =
     useKibana<DashboardAppServices>().services;
   const {
     chrome: {
@@ -115,6 +115,7 @@ export function DashboardTopNav({
     notifications,
     overlays,
     savedObjects,
+    savedObjectsTagging: { hasTagDecoration, hasApi },
     settings: { uiSettings, theme },
     share,
     usageCollection,
@@ -268,7 +269,7 @@ export function DashboardTopNav({
         timeRestore: newTimeRestore,
         tags: [] as string[],
       };
-      if (savedObjectsTagging && newTags) {
+      if (hasApi && newTags) {
         stateFromSaveModal.tags = newTags;
       }
 
@@ -276,7 +277,6 @@ export function DashboardTopNav({
       const saveResult = await saveDashboard({
         redirectTo,
         saveOptions,
-        savedObjectsTagging,
         dashboardSessionStorage,
         savedDashboard: dashboardAppState.savedDashboard,
         currentState: { ...currentState, ...stateFromSaveModal },
@@ -290,7 +290,7 @@ export function DashboardTopNav({
     };
 
     const lastDashboardId = dashboardAppState.savedDashboard.id;
-    const savedTags = savedObjectsTagging?.ui.hasTagDecoration(dashboardAppState.savedDashboard)
+    const savedTags = hasTagDecoration?.(dashboardAppState.savedDashboard)
       ? dashboardAppState.savedDashboard.getTags()
       : [];
     const currentTagsSet = new Set([...savedTags, ...currentState.tags]);
@@ -303,7 +303,6 @@ export function DashboardTopNav({
         title={currentState.title}
         timeRestore={currentState.timeRestore}
         description={currentState.description}
-        savedObjectsTagging={savedObjectsTagging}
         showCopyOnSave={lastDashboardId ? true : false}
       />
     );
@@ -312,7 +311,8 @@ export function DashboardTopNav({
   }, [
     dispatchDashboardStateChange,
     dashboardSessionStorage,
-    savedObjectsTagging,
+    hasApi,
+    hasTagDecoration,
     dashboardAppState,
     core.i18n.Context,
     docTitle,
@@ -327,7 +327,6 @@ export function DashboardTopNav({
       redirectTo,
       currentState,
       saveOptions: {},
-      savedObjectsTagging,
       dashboardSessionStorage,
       savedDashboard: dashboardAppState.savedDashboard,
     });
@@ -339,7 +338,7 @@ export function DashboardTopNav({
       if (!mounted) return;
       setState((s) => ({ ...s, isSaveInProgress: false }));
     }, DashboardConstants.CHANGE_CHECK_DEBOUNCE);
-  }, [dashboardSessionStorage, savedObjectsTagging, dashboardAppState, redirectTo, mounted]);
+  }, [dashboardSessionStorage, dashboardAppState, redirectTo, mounted]);
 
   const runClone = useCallback(() => {
     const currentState = dashboardAppState.getLatestDashboardState();
@@ -357,7 +356,6 @@ export function DashboardTopNav({
       const saveResult = await saveDashboard({
         redirectTo,
         saveOptions,
-        savedObjectsTagging,
         dashboardSessionStorage,
         savedDashboard: dashboardAppState.savedDashboard,
         currentState: { ...currentState, title: newTitle },
@@ -365,7 +363,7 @@ export function DashboardTopNav({
       return saveResult.id ? { id: saveResult.id } : { error: saveResult.error };
     };
     showCloneModal({ onClone, title: currentState.title });
-  }, [dashboardSessionStorage, savedObjectsTagging, dashboardAppState, redirectTo]);
+  }, [dashboardSessionStorage, dashboardAppState, redirectTo]);
 
   const showOptions = useCallback(
     (anchorElement: HTMLElement) => {

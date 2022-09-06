@@ -28,6 +28,7 @@ import { notificationsServiceFactory } from './notifications/notifications_servi
 import { overlaysServiceFactory } from './overlays/overlays_service';
 import { screenshotModeServiceFactory } from './screenshot_mode/screenshot_mode_service';
 import { savedObjectsServiceFactory } from './saved_objects/saved_objects_service';
+import { savedObjectsTaggingServiceFactory } from './saved_objects_tagging/saved_objects_tagging_service';
 import { settingsServiceFactory } from './settings/settings_service';
 import { shareServiceFactory } from './share/share_services';
 import { spacesServiceFactory } from './spaces/spaces_service';
@@ -48,6 +49,7 @@ const providers: PluginServiceProviders<DashboardServices, DashboardPluginServic
   notifications: new PluginServiceProvider(notificationsServiceFactory),
   overlays: new PluginServiceProvider(overlaysServiceFactory),
   savedObjects: new PluginServiceProvider(savedObjectsServiceFactory),
+  savedObjectsTagging: new PluginServiceProvider(savedObjectsTaggingServiceFactory),
   screenshotMode: new PluginServiceProvider(screenshotModeServiceFactory),
   settings: new PluginServiceProvider(settingsServiceFactory),
   share: new PluginServiceProvider(shareServiceFactory),

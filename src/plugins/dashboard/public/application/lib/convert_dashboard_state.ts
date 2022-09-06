@@ -23,19 +23,13 @@ import type { TimeRange } from '@kbn/es-query';
 import type { DashboardSavedObject } from '../../saved_dashboards';
 import { getTagsFromSavedDashboard, migrateAppState } from '.';
 import { convertPanelStateToSavedDashboardPanel } from '../../../common/embeddable/embeddable_saved_object_converters';
-import type {
-  DashboardState,
-  RawDashboardState,
-  DashboardAppServices,
-  DashboardContainerInput,
-} from '../../types';
+import type { DashboardState, RawDashboardState, DashboardContainerInput } from '../../types';
 import { convertSavedPanelsToPanelMap } from './convert_dashboard_panels';
 import { deserializeControlGroupFromDashboardSavedObject } from './dashboard_control_group';
 import { pluginServices } from '../../services/plugin_services';
 
 interface SavedObjectToDashboardStateProps {
   savedDashboard: DashboardSavedObject;
-  savedObjectsTagging: DashboardAppServices['savedObjectsTagging'];
 }
 
 interface StateToDashboardContainerInputProps {
@@ -57,7 +51,6 @@ interface StateToRawDashboardStateProps {
  */
 export const savedObjectToDashboardState = ({
   savedDashboard,
-  savedObjectsTagging,
 }: SavedObjectToDashboardStateProps): DashboardState => {
   const {
     dashboardCapabilities: { showWriteControls },
@@ -72,7 +65,7 @@ export const savedObjectToDashboardState = ({
       filters: savedDashboard.getFilters(),
       timeRestore: savedDashboard.timeRestore,
       description: savedDashboard.description || '',
-      tags: getTagsFromSavedDashboard(savedDashboard, savedObjectsTagging),
+      tags: getTagsFromSavedDashboard(savedDashboard),
       panels: savedDashboard.panelsJSON ? JSON.parse(savedDashboard.panelsJSON) : [],
       viewMode: savedDashboard.id || showWriteControls ? ViewMode.EDIT : ViewMode.VIEW,
       options: savedDashboard.optionsJSON ? JSON.parse(savedDashboard.optionsJSON) : {},

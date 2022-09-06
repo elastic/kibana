@@ -82,7 +82,7 @@ export const useDashboardAppState = ({
    * Unpack services
    */
   const services = useKibana<DashboardAppServices>().services;
-  const { savedDashboards, savedObjectsTagging, dashboardSessionStorage, scopedHistory } = services;
+  const { savedDashboards, dashboardSessionStorage, scopedHistory } = services;
 
   const {
     chrome: { docTitle },
@@ -118,7 +118,6 @@ export const useDashboardAppState = ({
       history,
       savedDashboards,
       kbnUrlStateStorage,
-      savedObjectsTagging,
       isEmbeddedExternally,
       dispatchDashboardStateChange,
       $checkForUnsavedChanges: new Subject(),
@@ -318,7 +317,6 @@ export const useDashboardAppState = ({
       const updateLastSavedState = () => {
         setLastSavedState(
           savedObjectToDashboardState({
-            savedObjectsTagging,
             savedDashboard,
           })
         );
@@ -363,7 +361,6 @@ export const useDashboardAppState = ({
     dashboardCapabilities,
     isEmbeddedExternally,
     kbnUrlStateStorage,
-    savedObjectsTagging,
     savedDashboardId,
     getStateTransfer,
     savedDashboards,

@@ -9,7 +9,6 @@
 import _ from 'lodash';
 
 import { isFilterPinned } from '@kbn/es-query';
-import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { RefreshInterval } from '@kbn/data-plugin/public';
 import type { SavedObjectSaveOpts } from '@kbn/saved-objects-plugin/public';
 
@@ -30,7 +29,6 @@ interface SaveDashboardProps {
   currentState: DashboardState;
   saveOptions: SavedDashboardSaveOpts;
   savedDashboard: DashboardSavedObject;
-  savedObjectsTagging?: SavedObjectsTaggingApi;
   dashboardSessionStorage: DashboardSessionStorage;
 }
 
@@ -39,7 +37,6 @@ export const saveDashboard = async ({
   saveOptions,
   currentState,
   savedDashboard,
-  savedObjectsTagging,
   dashboardSessionStorage,
 }: SaveDashboardProps): Promise<{ id?: string; redirected?: boolean; error?: any }> => {
   const {
@@ -47,7 +44,7 @@ export const saveDashboard = async ({
   } = pluginServices.getServices();
 
   const lastDashboardId = savedDashboard.id;
-  const hasTaggingCapabilities = getHasTaggingCapabilitiesGuard(savedObjectsTagging);
+  const hasTaggingCapabilities = getHasTaggingCapabilitiesGuard();
 
   const { panels, title, tags, description, timeRestore, options } = currentState;
 
