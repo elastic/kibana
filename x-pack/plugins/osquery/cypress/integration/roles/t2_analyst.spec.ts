@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { getRandomInt } from '../../tasks/helpers';
 import { login } from '../../tasks/login';
 import { navigateTo } from '../../tasks/navigation';
 import { ROLES } from '../../test';
@@ -21,10 +20,10 @@ import { ArchiverMethod, runKbnArchiverScript } from '../../tasks/archiver';
 
 describe('T2 Analyst - READ + Write Live/Saved + runSavedQueries ', () => {
   const SAVED_QUERY_ID = 'Saved-Query-Id';
-  const randomNumber = getRandomInt();
-
-  const NEW_SAVED_QUERY_ID = `Saved-Query-Id-${randomNumber}`;
-  const NEW_SAVED_QUERY_DESCRIPTION = `Test saved query description ${randomNumber}`;
+  // const randomNumber = getRandomInt();
+  //
+  // const NEW_SAVED_QUERY_ID = `Saved-Query-Id-${randomNumber}`;
+  // const NEW_SAVED_QUERY_DESCRIPTION = `Test saved query description ${randomNumber}`;
   beforeEach(() => {
     login(ROLES.t2_analyst);
     navigateTo('/app/osquery');
