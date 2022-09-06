@@ -74,7 +74,7 @@ export function DiscoverChart({
 
   useEffect(() => {
     if (!timeField) return;
-    getVisualizeInformation(timeField, dataView.id, savedSearch.columns || []).then((info) => {
+    getVisualizeInformation(timeField, dataView, savedSearch.columns || []).then((info) => {
       setCanVisualize(Boolean(info));
     });
   }, [dataView, savedSearch.columns, timeField]);

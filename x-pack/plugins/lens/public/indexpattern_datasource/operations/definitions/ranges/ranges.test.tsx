@@ -125,6 +125,8 @@ const defaultOptions = {
         aggregatable: true,
       },
     ]),
+    isPersisted: true,
+    spec: {},
   },
   operationDefinitionMap: {},
   isFullscreen: false,

@@ -70,7 +70,8 @@ export interface IndexPattern {
     }
   >;
   hasRestrictions: boolean;
-  spec?: DataViewSpec;
+  spec: DataViewSpec;
+  isPersisted: boolean;
 }
 
 export type IndexPatternField = FieldSpec & {
@@ -329,7 +330,8 @@ export interface Datasource<T = unknown, P = unknown> {
   canCloseDimensionEditor?: (state: T) => boolean;
   getCustomWorkspaceRenderer?: (
     state: T,
-    dragging: DraggingIdentifier
+    dragging: DraggingIdentifier,
+    indexPatterns: Record<string, IndexPattern>
   ) => undefined | (() => JSX.Element);
   updateStateOnCloseDimension?: (props: {
     layerId: string;

@@ -104,7 +104,8 @@ export function convertDataViewIntoLensIndexPattern(
     fields: newFields,
     getFieldByName: getFieldByNameFactory(newFields),
     hasRestrictions: !!typeMeta?.aggs,
-    spec: dataView.isPersisted() ? undefined : dataView.toSpec(false),
+    spec: dataView.toSpec(false),
+    isPersisted: dataView.isPersisted(),
   };
 }
 

@@ -117,6 +117,4 @@ export const discoverServiceMock = {
   expressions: expressionsPlugin,
   savedObjectsTagging: {},
   dataViews: dataPlugin.dataViews,
-  savedObjectsTagging: {},
-  dataViews: dataPlugin.dataViews,
 } as unknown as DiscoverServices;

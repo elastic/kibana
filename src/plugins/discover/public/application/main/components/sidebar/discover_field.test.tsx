@@ -46,6 +46,8 @@ function getComponent({
       aggregatable: true,
       readFromDocValues: true,
     });
+  const dataView = stubDataView;
+  dataView.toSpec = () => ({});
 
   const props = {
     dataView: stubDataView,

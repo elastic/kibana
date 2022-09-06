@@ -43,6 +43,7 @@ const indexPattern1 = {
   timeFieldName: 'timestamp',
   hasRestrictions: false,
   isPersisted: () => true,
+  toSpec: () => ({}),
   fields: [
     {
       name: 'timestamp',
@@ -129,6 +130,7 @@ const indexPattern2 = {
   timeFieldName: 'timestamp',
   hasRestrictions: true,
   isPersisted: () => true,
+  toSpec: () => ({}),
   fieldFormatMap: { bytes: { id: 'bytes', params: { pattern: '0.0' } } },
   fields: [
     {
@@ -204,6 +206,7 @@ export function mockDataViewsService() {
         ...sampleIndexPatternsFromService[id],
         metaFields: [],
         isPersisted: () => true,
+        toSpec: () => ({}),
       };
       if (!result.fields) {
         result.fields = [];
