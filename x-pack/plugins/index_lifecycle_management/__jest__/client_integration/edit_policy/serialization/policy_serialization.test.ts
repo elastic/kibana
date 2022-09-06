@@ -201,6 +201,8 @@ describe('<EditPolicy /> serialization', () => {
       await actions.hot.setShrinkCount('2');
       await actions.hot.toggleReadonly();
       await actions.hot.setIndexPriority('123');
+      await actions.hot.downsample.toggle();
+      await actions.hot.downsample.setDownsampleInterval('2', 'h');
 
       await actions.savePolicy();
 
@@ -231,6 +233,7 @@ describe('<EditPolicy /> serialization', () => {
                     priority: 123,
                   },
                   readonly: {},
+                  rollup: { fixed_interval: '2h' },
                 },
               },
             },
@@ -323,6 +326,8 @@ describe('<EditPolicy /> serialization', () => {
       await actions.warm.setBestCompression(true);
       await actions.warm.toggleReadonly();
       await actions.warm.setIndexPriority('123');
+      await actions.warm.downsample.toggle();
+      await actions.warm.downsample.setDownsampleInterval('20', 'm');
       await actions.savePolicy();
 
       expect(httpSetup.post).toHaveBeenLastCalledWith(
@@ -360,6 +365,7 @@ describe('<EditPolicy /> serialization', () => {
                     number_of_replicas: 123,
                   },
                   readonly: {},
+                  rollup: { fixed_interval: '20m' },
                 },
               },
             },
@@ -463,6 +469,8 @@ describe('<EditPolicy /> serialization', () => {
       await actions.cold.setReplicas('123');
       await actions.cold.toggleReadonly();
       await actions.cold.setIndexPriority('123');
+      await actions.cold.downsample.toggle();
+      await actions.cold.downsample.setDownsampleInterval('5');
 
       await actions.savePolicy();
 
@@ -494,6 +502,7 @@ describe('<EditPolicy /> serialization', () => {
                     number_of_replicas: 123,
                   },
                   readonly: {},
+                  rollup: { fixed_interval: '5d' },
                 },
               },
             },
@@ -538,6 +547,8 @@ describe('<EditPolicy /> serialization', () => {
       await actions.togglePhase('frozen');
       await actions.frozen.setMinAgeValue('13');
       await actions.frozen.setSearchableSnapshot('myRepo');
+      await actions.frozen.downsample.toggle();
+      await actions.frozen.downsample.setDownsampleInterval('5', 'd');
 
       await actions.savePolicy();
 
@@ -549,6 +560,9 @@ describe('<EditPolicy /> serialization', () => {
       expect(parsedReqBody.phases.frozen).toEqual({
         min_age: '13d',
         actions: {
+          rollup: {
+            fixed_interval: '5d',
+          },
           searchable_snapshot: { snapshot_repository: 'myRepo' },
         },
       });

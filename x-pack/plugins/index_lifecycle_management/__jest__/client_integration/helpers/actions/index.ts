@@ -21,6 +21,7 @@ export { createForceMergeActions } from './forcemerge_actions';
 export { createReadonlyActions } from './readonly_actions';
 export { createIndexPriorityActions } from './index_priority_actions';
 export { createShrinkActions } from './shrink_actions';
+export { createDownsampleActions } from './downsample_actions';
 export {
   createHotPhaseActions,
   createWarmPhaseActions,

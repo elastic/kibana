@@ -7,14 +7,21 @@
 
 import React, { FunctionComponent } from 'react';
 
-import { SearchableSnapshotField } from '../shared_fields';
+import { DownsampleField, SearchableSnapshotField } from '../shared_fields';
 import { Phase } from '../phase';
+import { useConfiguration } from '../../../form';
 
 export const FrozenPhase: FunctionComponent = () => {
+  const { isUsingSearchableSnapshotInHotPhase, isUsingSearchableSnapshotInColdPhase } =
+    useConfiguration();
   return (
     <Phase
       phase="frozen"
       topLevelSettings={<SearchableSnapshotField phase="frozen" canBeDisabled={false} />}
-    />
+    >
+      {!(isUsingSearchableSnapshotInHotPhase || isUsingSearchableSnapshotInColdPhase) && (
+        <DownsampleField phase="frozen" />
+      )}
+    </Phase>
   );
 };

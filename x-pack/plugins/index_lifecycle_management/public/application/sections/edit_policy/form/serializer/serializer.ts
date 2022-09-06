@@ -124,6 +124,19 @@ export const createSerializer =
             } else {
               delete hotPhaseActions.shrink!.max_primary_shard_size;
             }
+
+            /**
+             * HOT PHASE ROLLUP
+             */
+            if (_meta.hot?.downsample?.enabled) {
+              hotPhaseActions.rollup = {
+                ...hotPhaseActions.rollup,
+                fixed_interval: `${_meta.hot.downsample.fixedIntervalSize!}${_meta.hot.downsample
+                  .fixedIntervalUnits!}`,
+              };
+            } else {
+              delete hotPhaseActions.rollup;
+            }
           } else {
             delete hotPhaseActions.rollover;
             delete hotPhaseActions.forcemerge;
@@ -214,6 +227,19 @@ export const createSerializer =
         } else {
           delete warmPhase.actions.shrink!.max_primary_shard_size;
         }
+
+        /**
+         * WARM PHASE ROLLUP
+         */
+        if (_meta.warm?.downsample?.enabled) {
+          warmPhase.actions.rollup = {
+            ...warmPhase.actions.rollup,
+            fixed_interval: `${_meta.warm.downsample.fixedIntervalSize!}${_meta.warm.downsample
+              .fixedIntervalUnits!}`,
+          };
+        } else {
+          delete warmPhase.actions.rollup;
+        }
       } else {
         delete draft.phases.warm;
       }
@@ -278,6 +304,19 @@ export const createSerializer =
         } else {
           delete coldPhase.actions.searchable_snapshot;
         }
+
+        /**
+         * COLD PHASE ROLLUP
+         */
+        if (_meta.cold?.downsample?.enabled) {
+          coldPhase.actions.rollup = {
+            ...coldPhase.actions.rollup,
+            fixed_interval: `${_meta.cold.downsample.fixedIntervalSize!}${_meta.cold.downsample
+              .fixedIntervalUnits!}`,
+          };
+        } else {
+          delete coldPhase.actions.rollup;
+        }
       } else {
         delete draft.phases.cold;
       }
@@ -306,6 +345,19 @@ export const createSerializer =
           };
         } else {
           delete frozenPhase.actions.searchable_snapshot;
+        }
+
+        /**
+         * FROZEN PHASE ROLLUP
+         */
+        if (_meta.frozen?.downsample?.enabled) {
+          frozenPhase.actions.rollup = {
+            ...frozenPhase.actions.rollup,
+            fixed_interval: `${_meta.frozen.downsample.fixedIntervalSize!}${_meta.frozen.downsample
+              .fixedIntervalUnits!}`,
+          };
+        } else {
+          delete frozenPhase.actions.rollup;
         }
       } else {
         delete draft.phases.frozen;

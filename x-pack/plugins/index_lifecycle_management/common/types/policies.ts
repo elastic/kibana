@@ -15,6 +15,8 @@ export type PhaseWithTiming = keyof Omit<Phases, 'hot'>;
 
 export type PhaseExceptDelete = keyof Omit<Phases, 'delete'>;
 
+export type PhaseWithDownsample = 'hot' | 'warm' | 'cold' | 'frozen';
+
 export interface SerializedPolicy {
   name: string;
   phases: Phases;
@@ -93,6 +95,8 @@ export interface SerializedHotPhase extends SerializedPhase {
     forcemerge?: ForcemergeAction;
     readonly?: {};
     shrink?: ShrinkAction;
+    // TODO: rename the key to "downsample" when renamed in es
+    rollup?: DownsampleAction;
 
     set_priority?: {
       priority: number | null;
@@ -110,6 +114,8 @@ export interface SerializedWarmPhase extends SerializedPhase {
     shrink?: ShrinkAction;
     forcemerge?: ForcemergeAction;
     readonly?: {};
+    // TODO: rename the key to "downsample" when renamed in es
+    rollup?: DownsampleAction;
     set_priority?: {
       priority: number | null;
     };
@@ -121,6 +127,8 @@ export interface SerializedColdPhase extends SerializedPhase {
   actions: {
     freeze?: {};
     readonly?: {};
+    // TODO: rename the key to "downsample" when renamed in es
+    rollup?: DownsampleAction;
     allocate?: AllocateAction;
     set_priority?: {
       priority: number | null;
@@ -144,6 +152,9 @@ export interface SerializedFrozenPhase extends SerializedPhase {
      * Only available on enterprise license
      */
     searchable_snapshot?: SearchableSnapshotAction;
+    // TODO: rename the key to "downsample" when renamed in es
+    // TODO: check that this is fixed and allowed in es
+    rollup?: DownsampleAction;
   };
 }
 
@@ -176,6 +187,10 @@ export interface ForcemergeAction {
   max_num_segments: number;
   // only accepted value for index_codec
   index_codec?: 'best_compression';
+}
+
+export interface DownsampleAction {
+  fixed_interval: string;
 }
 
 export interface LegacyPolicy {

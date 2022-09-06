@@ -40,6 +40,9 @@ export const createDeserializer =
         bestCompression: hot?.actions?.forcemerge?.index_codec === 'best_compression',
         readonlyEnabled: Boolean(hot?.actions?.readonly),
         shrink: { isUsingShardSize: Boolean(hot?.actions.shrink?.max_primary_shard_size) },
+        downsample: {
+          enabled: Boolean(hot?.actions?.rollup),
+        },
       },
       warm: {
         enabled: Boolean(warm),
@@ -49,17 +52,26 @@ export const createDeserializer =
         readonlyEnabled: Boolean(warm?.actions?.readonly),
         minAgeToMilliSeconds: -1,
         shrink: { isUsingShardSize: Boolean(warm?.actions.shrink?.max_primary_shard_size) },
+        downsample: {
+          enabled: Boolean(warm?.actions?.rollup),
+        },
       },
       cold: {
         enabled: Boolean(cold),
         dataTierAllocationType: determineDataTierAllocationType(cold?.actions),
         readonlyEnabled: Boolean(cold?.actions?.readonly),
         minAgeToMilliSeconds: -1,
+        downsample: {
+          enabled: Boolean(cold?.actions?.rollup),
+        },
       },
       frozen: {
         enabled: Boolean(frozen),
         dataTierAllocationType: determineDataTierAllocationType(frozen?.actions),
         minAgeToMilliSeconds: -1,
+        downsample: {
+          enabled: Boolean(frozen?.actions?.rollup),
+        },
       },
       delete: {
         enabled: Boolean(deletePhase),
@@ -105,6 +117,14 @@ export const createDeserializer =
           draft._meta.hot.shrink.maxPrimaryShardSizeUnits = primaryShardSize.units;
         }
 
+        if (draft.phases.hot?.actions.rollup?.fixed_interval) {
+          const downsampleInterval = splitSizeAndUnits(
+            draft.phases.hot.actions.rollup.fixed_interval
+          );
+          draft._meta.hot.downsample.fixedIntervalUnits = downsampleInterval.units;
+          draft._meta.hot.downsample.fixedIntervalSize = downsampleInterval.size;
+        }
+
         if (draft.phases.warm) {
           if (draft.phases.warm.actions?.allocate?.require) {
             Object.entries(draft.phases.warm.actions.allocate.require).forEach((entry) => {
@@ -125,6 +145,14 @@ export const createDeserializer =
             draft.phases.warm.actions.shrink.max_primary_shard_size = primaryShardSize.size;
             draft._meta.warm.shrink.maxPrimaryShardSizeUnits = primaryShardSize.units;
           }
+
+          if (draft.phases.warm?.actions.rollup?.fixed_interval) {
+            const downsampleInterval = splitSizeAndUnits(
+              draft.phases.warm.actions.rollup.fixed_interval
+            );
+            draft._meta.warm.downsample.fixedIntervalUnits = downsampleInterval.units;
+            draft._meta.warm.downsample.fixedIntervalSize = downsampleInterval.size;
+          }
         }
 
         if (draft.phases.cold) {
@@ -139,6 +167,14 @@ export const createDeserializer =
             draft.phases.cold.min_age = minAge.size;
             draft._meta.cold.minAgeUnit = minAge.units;
           }
+
+          if (draft.phases.cold?.actions.rollup?.fixed_interval) {
+            const downsampleInterval = splitSizeAndUnits(
+              draft.phases.cold.actions.rollup.fixed_interval
+            );
+            draft._meta.cold.downsample.fixedIntervalUnits = downsampleInterval.units;
+            draft._meta.cold.downsample.fixedIntervalSize = downsampleInterval.size;
+          }
         }
 
         if (draft.phases.frozen) {
@@ -146,6 +182,14 @@ export const createDeserializer =
             const minAge = splitSizeAndUnits(draft.phases.frozen.min_age);
             draft.phases.frozen.min_age = minAge.size;
             draft._meta.frozen.minAgeUnit = minAge.units;
+          }
+
+          if (draft.phases.frozen?.actions.rollup?.fixed_interval) {
+            const downsampleInterval = splitSizeAndUnits(
+              draft.phases.frozen.actions.rollup.fixed_interval
+            );
+            draft._meta.frozen.downsample.fixedIntervalUnits = downsampleInterval.units;
+            draft._meta.frozen.downsample.fixedIntervalSize = downsampleInterval.size;
           }
         }
 
