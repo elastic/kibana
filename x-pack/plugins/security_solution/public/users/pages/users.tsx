@@ -78,7 +78,7 @@ const UsersComponent = () => {
   const filters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
 
   const getUserRiskScoreFilterQuerySelector = useMemo(
-    () => usersSelectors.UserRiskScoreSeverityFilterSelector(),
+    () => usersSelectors.userRiskScoreSeverityFilterSelector(),
     []
   );
   const severitySelection = useDeepEqualSelector((state: State) =>

@@ -170,7 +170,7 @@ const UserRiskScoreTableComponent: React.FC<UserRiskScoreTableProps> = ({
   );
 
   const getUserRiskScoreFilterQuerySelector = useMemo(
-    () => usersSelectors.UserRiskScoreSeverityFilterSelector(),
+    () => usersSelectors.userRiskScoreSeverityFilterSelector(),
     []
   );
   const severitySelectionRedux = useDeepEqualSelector((state: State) =>
