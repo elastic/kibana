@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useState, useEffect, useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { DEFAULT_ANOMALY_SCORE } from '../../../../../common/constants';
 import { anomaliesTableData } from '../api/anomalies_table_data';
@@ -15,6 +15,7 @@ import * as i18n from './translations';
 import { useTimeZone, useUiSetting$ } from '../../../lib/kibana';
 import { useAppToasts } from '../../../hooks/use_app_toasts';
 import { useInstalledSecurityJobs } from '../hooks/use_installed_security_jobs';
+import { QUERY_NAMES, useQuery } from '../../../hooks/use_query';
 
 interface Args {
   influencers?: InfluencerInput[];
@@ -58,9 +59,7 @@ export const useAnomaliesTableData = ({
   skip = false,
   filterQuery,
 }: Args): Return => {
-  const [tableData, setTableData] = useState<Anomalies | null>(null);
   const { isMlUser, jobs } = useInstalledSecurityJobs();
-  const [loading, setLoading] = useState(true);
   const { addError } = useAppToasts();
   const timeZone = useTimeZone();
   const [anomalyScore] = useUiSetting$<number>(DEFAULT_ANOMALY_SCORE);
@@ -69,62 +68,35 @@ export const useAnomaliesTableData = ({
   const startDateMs = useMemo(() => new Date(startDate).getTime(), [startDate]);
   const endDateMs = useMemo(() => new Date(endDate).getTime(), [endDate]);
 
+  const {
+    query,
+    data = null,
+    isLoading,
+    error,
+  } = useQuery(QUERY_NAMES.ANOMALIES_TABLE, anomaliesTableData, { disabled: skip });
+
   useEffect(() => {
-    let isSubscribed = true;
-    const abortCtrl = new AbortController();
-    setLoading(true);
-
-    async function fetchAnomaliesTableData(
-      influencersInput: InfluencerInput[],
-      criteriaFieldsInput: CriteriaFields[],
-      earliestMs: number,
-      latestMs: number
-    ) {
-      if (skip) {
-        setLoading(false);
-      } else if (isMlUser && !skip && jobIds.length > 0) {
-        try {
-          const data = await anomaliesTableData(
-            {
-              jobIds,
-              criteriaFields: criteriaFieldsInput,
-              influencersFilterQuery: filterQuery,
-              aggregationInterval: 'auto',
-              threshold: getThreshold(anomalyScore, threshold),
-              earliestMs,
-              latestMs,
-              influencers: influencersInput,
-              dateFormatTz: timeZone,
-              maxRecords: 500,
-              maxExamples: 10,
-            },
-            abortCtrl.signal
-          );
-          if (isSubscribed) {
-            setTableData(data);
-            setLoading(false);
-          }
-        } catch (error) {
-          if (isSubscribed) {
-            addError(error, { title: i18n.SIEM_TABLE_FETCH_FAILURE });
-            setLoading(false);
-          }
-        }
-      } else if (!isMlUser && isSubscribed) {
-        setLoading(false);
-      } else if (jobIds.length === 0 && isSubscribed) {
-        setLoading(false);
-      } else if (isSubscribed) {
-        setTableData(null);
-        setLoading(true);
-      }
+    if (error) {
+      addError(error, { title: i18n.SIEM_TABLE_FETCH_FAILURE });
     }
+  }, [error, addError]);
 
-    fetchAnomaliesTableData(influencers, criteriaFields, startDateMs, endDateMs);
-    return () => {
-      isSubscribed = false;
-      abortCtrl.abort();
-    };
+  useEffect(() => {
+    if (isMlUser && jobIds.length > 0) {
+      query({
+        jobIds,
+        criteriaFields,
+        influencersFilterQuery: filterQuery,
+        aggregationInterval: 'auto',
+        threshold: getThreshold(anomalyScore, threshold),
+        earliestMs: startDateMs,
+        latestMs: endDateMs,
+        influencers,
+        dateFormatTz: timeZone,
+        maxRecords: 500,
+        maxExamples: 10,
+      });
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -133,11 +105,10 @@ export const useAnomaliesTableData = ({
     influencersOrCriteriaToString(criteriaFields),
     startDateMs,
     endDateMs,
-    skip,
     isMlUser,
     // eslint-disable-next-line react-hooks/exhaustive-deps
     jobIds.sort().join(),
   ]);
 
-  return [loading, tableData];
+  return [isLoading, data];
 };
