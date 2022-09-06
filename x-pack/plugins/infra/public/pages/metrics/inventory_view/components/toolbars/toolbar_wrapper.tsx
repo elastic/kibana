@@ -12,7 +12,7 @@ import { useDerivedDataView } from '../../../../../hooks/use_derived_data_view';
 import { useWaffleOptionsContext } from '../../hooks/use_waffle_options';
 import { fieldToName } from '../../lib/field_to_display_name';
 import { WaffleInventorySwitcher } from '../waffle/waffle_inventory_switcher';
-import { ToolbarProps } from './toolbar';
+import { ToolbarProps } from './types';
 
 interface Props {
   children: (props: Omit<ToolbarProps, 'accounts' | 'regions'>) => React.ReactElement;
