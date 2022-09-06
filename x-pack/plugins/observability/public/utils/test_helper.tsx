@@ -18,6 +18,7 @@ import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { PluginContext } from '../context/plugin_context';
 import { createObservabilityRuleTypeRegistryMock } from '../rules/observability_rule_type_registry_mock';
+import { ConfigSchema } from '../plugin';
 
 const appMountParameters = { setHeaderActionMenu: () => {} } as unknown as AppMountParameters;
 
@@ -26,6 +27,12 @@ export const data = dataPluginMock.createStartContract();
 
 const observabilityRuleTypeRegistry = createObservabilityRuleTypeRegistryMock();
 
+const config = {
+  unsafe: {
+    alertDetails: { enabled: false },
+  },
+} as ConfigSchema;
+
 export const render = (component: React.ReactNode) => {
   return testLibRender(
     <IntlProvider locale="en-US" messages={translations.messages}>
@@ -33,6 +40,7 @@ export const render = (component: React.ReactNode) => {
         <PluginContext.Provider
           value={{
             appMountParameters,
+            config,
             observabilityRuleTypeRegistry,
             ObservabilityPageTemplate: KibanaPageTemplate,
           }}

@@ -10,7 +10,7 @@ import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { act } from 'react-dom/test-utils';
 import { ReactWrapper } from 'enzyme';
 import { CoreStart } from '@kbn/core/public';
-import { ObservabilityPublicPluginsStart } from '../../plugin';
+import { ConfigSchema, ObservabilityPublicPluginsStart } from '../../plugin';
 import { RulesPage } from '.';
 import { kibanaStartMock } from '../../utils/kibana_react.mock';
 import * as pluginContext from '../../hooks/use_plugin_context';
@@ -34,8 +34,15 @@ jest.mock('@kbn/triggers-actions-ui-plugin/public', () => ({
   useLoadRuleTypes: jest.fn(),
 }));
 
+const config = {
+  unsafe: {
+    alertDetails: { enabled: false },
+  },
+} as ConfigSchema;
+
 jest.spyOn(pluginContext, 'usePluginContext').mockImplementation(() => ({
   appMountParameters: {} as AppMountParameters,
+  config,
   observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
   ObservabilityPageTemplate: KibanaPageTemplate,
   kibanaFeatures: [],

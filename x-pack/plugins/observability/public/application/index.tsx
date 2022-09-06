@@ -23,7 +23,7 @@ import { DatePickerContextProvider } from '../context/date_picker_context';
 import { HasDataContextProvider } from '../context/has_data_context';
 import { PluginContext } from '../context/plugin_context';
 import { useRouteParams } from '../hooks/use_route_params';
-import { ObservabilityPublicPluginsStart } from '../plugin';
+import { ConfigSchema, ObservabilityPublicPluginsStart } from '../plugin';
 import { routes } from '../routes';
 import { ObservabilityRuleTypeRegistry } from '../rules/create_observability_rule_type_registry';
 
@@ -47,6 +47,7 @@ function App() {
 
 export const renderApp = ({
   core,
+  config,
   plugins,
   appMountParameters,
   observabilityRuleTypeRegistry,
@@ -55,6 +56,7 @@ export const renderApp = ({
   isDev,
 }: {
   core: CoreStart;
+  config: ConfigSchema;
   plugins: ObservabilityPublicPluginsStart;
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;
   appMountParameters: AppMountParameters;
@@ -86,6 +88,7 @@ export const renderApp = ({
         >
           <PluginContext.Provider
             value={{
+              config,
               appMountParameters,
               observabilityRuleTypeRegistry,
               ObservabilityPageTemplate,

@@ -220,7 +220,7 @@ function AlertsPage() {
     <ObservabilityPageTemplate
       noDataConfig={noDataConfig}
       isPageDataLoaded={isAllRequestsComplete}
-      data-test-subj={noDataConfig ? 'noDataPage' : undefined}
+      data-test-subj={noDataConfig ? 'noDataPage' : 'alertsPageWithData'}
       pageHeader={{
         pageTitle: (
           <>{i18n.translate('xpack.observability.alertsTitle', { defaultMessage: 'Alerts' })} </>
