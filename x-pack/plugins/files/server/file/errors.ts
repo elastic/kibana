@@ -18,3 +18,4 @@ export class ContentAlreadyUploadedError extends FileError {}
 export class NoDownloadAvailableError extends FileError {}
 export class UploadInProgressError extends FileError {}
 export class AlreadyDeletedError extends FileError {}
+export class AbortedUploadError extends FileError {}

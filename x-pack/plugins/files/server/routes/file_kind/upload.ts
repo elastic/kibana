@@ -6,6 +6,7 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
+import { ReplaySubject } from 'rxjs';
 import type { Ensure } from '@kbn/utility-types';
 import { Readable } from 'stream';
 import type { FileKind } from '../../../common/types';
@@ -32,6 +33,12 @@ export const handler: FileKindsRequestHandler<Params, unknown, Body> = async (
   req,
   res
 ) => {
+  // Ensure that we are listening to the abort stream as early as possible.
+  // In local testing I found that there is a chance for us to miss the abort event
+  // if we subscribe too late.
+  const abort$ = new ReplaySubject();
+  const sub = req.events.aborted$.subscribe(abort$);
+
   const { fileService } = await files;
   const {
     body: stream,
@@ -40,15 +47,20 @@ export const handler: FileKindsRequestHandler<Params, unknown, Body> = async (
   const { error, result: file } = await getById(fileService.asCurrentUser(), id, fileKind);
   if (error) return error;
   try {
-    await file.uploadContent(stream as Readable);
+    await file.uploadContent(stream as Readable, abort$);
   } catch (e) {
     if (
       e instanceof fileErrors.ContentAlreadyUploadedError ||
       e instanceof fileErrors.UploadInProgressError
     ) {
       return res.badRequest({ body: { message: e.message } });
+    } else if (e instanceof fileErrors.AbortedUploadError) {
+      fileService.logger.error(e);
+      return res.customError({ body: { message: e.message }, statusCode: 499 });
     }
     throw e;
+  } finally {
+    sub.unsubscribe();
   }
   const body: Response = { ok: true, size: file.data.size! };
   return res.ok({ body });
