@@ -22,6 +22,15 @@ describe('exceptionListType', () => {
     expect(message.schema).toEqual(payload);
   });
 
+  test('it should validate for "rule_default"', () => {
+    const payload = 'rule_default';
+    const decoded = exceptionListType.decode(payload);
+    const message = pipe(decoded, foldLeftRight);
+
+    expect(getPaths(left(message.errors))).toEqual([]);
+    expect(message.schema).toEqual(payload);
+  });
+
   test('it should validate for "endpoint"', () => {
     const payload = 'endpoint';
     const decoded = exceptionListType.decode(payload);
