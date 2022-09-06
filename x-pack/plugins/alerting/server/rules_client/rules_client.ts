@@ -2652,15 +2652,7 @@ export class RulesClient {
     }
   }
 
-  public async runSoon({ id }: { id: string }): Promise<void> {
-    return await retryIfConflicts(
-      this.logger,
-      `rulesClient.runSoon('${id}')`,
-      async () => await this.runSoonWithOCC({ id })
-    );
-  }
-
-  private async runSoonWithOCC({ id }: { id: string }) {
+  private async runSoon({ id }: { id: string }) {
     const { attributes } = await this.unsecuredSavedObjectsClient.get<Rule>('alert', id);
 
     try {

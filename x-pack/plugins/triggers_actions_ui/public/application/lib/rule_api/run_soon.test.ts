@@ -11,14 +11,14 @@ import { runSoon } from './run_soon';
 const http = httpServiceMock.createStartContract();
 beforeEach(() => jest.resetAllMocks());
 
-describe('disableRule', () => {
-  test('should call disable rule API', async () => {
+describe('runSoon', () => {
+  test('should call run soon API', async () => {
     const result = await runSoon({ http, id: '1/' });
     expect(result).toEqual(undefined);
     expect(http.post.mock.calls).toMatchInlineSnapshot(`
       Array [
         Array [
-          "/api/alerting/rule/1%2F/_run_soon",
+          "/internal/alerting/rule/1%2F/_run_soon",
         ],
       ]
     `);

@@ -16,10 +16,6 @@ jest.mock('../lib/license_api_access', () => ({
   verifyApiAccess: jest.fn(),
 }));
 
-jest.mock('../lib/track_deprecated_route_usage', () => ({
-  trackDeprecatedRouteUsage: jest.fn(),
-}));
-
 beforeEach(() => {
   jest.resetAllMocks();
 });
@@ -33,7 +29,7 @@ describe('runSoonRuleRoute', () => {
 
     const [config, handler] = router.post.mock.calls[0];
 
-    expect(config.path).toMatchInlineSnapshot(`"/api/alerting/rule/{id}/_run_soon"`);
+    expect(config.path).toMatchInlineSnapshot(`"/internal/alerting/rule/{id}/_run_soon"`);
 
     rulesClient.runSoon.mockResolvedValueOnce();
 

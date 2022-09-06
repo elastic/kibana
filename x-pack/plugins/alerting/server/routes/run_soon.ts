@@ -9,7 +9,7 @@ import { IRouter } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { ILicenseState } from '../lib';
 import { verifyAccessAndContext } from './lib';
-import { AlertingRequestHandlerContext, BASE_ALERTING_API_PATH } from '../types';
+import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../types';
 
 const paramSchema = schema.object({
   id: schema.string(),
@@ -21,7 +21,7 @@ export const runSoonRoute = (
 ) => {
   router.post(
     {
-      path: `${BASE_ALERTING_API_PATH}/rule/{id}/_run_soon`,
+      path: `${INTERNAL_BASE_ALERTING_API_PATH}/rule/{id}/_run_soon`,
       validate: {
         params: paramSchema,
       },
