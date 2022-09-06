@@ -22,6 +22,7 @@ import {
   getPackagePolicyCreateCallback,
   getPackagePolicyUpdateCallback,
   getPackagePolicyDeleteCallback,
+  getPackagePolicyPostCreateCallback,
 } from '../fleet_integration/fleet_integration';
 import type { ManifestManager } from './services/artifacts';
 import type { ConfigType } from '../config';
@@ -117,6 +118,11 @@ export class EndpointAppContextService {
           licenseService,
           exceptionListsClient
         )
+      );
+
+      registerIngestCallback(
+        'packagePolicyPostCreate',
+        getPackagePolicyPostCreateCallback(logger, exceptionListsClient)
       );
 
       registerIngestCallback(

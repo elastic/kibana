@@ -12,10 +12,14 @@ import type {
   PostPackagePolicyCreateCallback,
   PostPackagePolicyDeleteCallback,
   PutPackagePolicyUpdateCallback,
+  PostPackagePolicyPostCreateCallback,
 } from '@kbn/fleet-plugin/server';
 
-import type { NewPackagePolicy, UpdatePackagePolicy } from '@kbn/fleet-plugin/common';
-
+import type {
+  NewPackagePolicy,
+  PackagePolicy,
+  UpdatePackagePolicy,
+} from '@kbn/fleet-plugin/common';
 import type { NewPolicyData, PolicyConfig } from '../../common/endpoint/types';
 import type { LicenseService } from '../../common/license';
 import type { ManifestManager } from '../endpoint/services';
@@ -31,6 +35,7 @@ import type { EndpointMetadataService } from '../endpoint/services/metadata';
 import { notifyProtectionFeatureUsage } from './notify_protection_feature_usage';
 import type { Config } from './types';
 import { ENDPOINT_INTEGRATION_CONFIG_KEY } from './constants';
+import { createEventFilters } from './handlers/create_event_filters';
 
 const isEndpointPackagePolicy = <T extends { package?: { name: string } }>(
   packagePolicy: T
@@ -113,6 +118,10 @@ export const getPackagePolicyCreateCallback = (
           enabled: true,
           streams: [],
           config: {
+            integration_config: {
+              value: endpointIntegrationConfig,
+              type: ENDPOINT_INTEGRATION_CONFIG_KEY,
+            },
             artifact_manifest: {
               value: manifestValue,
             },
@@ -153,6 +162,34 @@ export const getPackagePolicyUpdateCallback = (
     notifyProtectionFeatureUsage(newPackagePolicy, featureUsageService, endpointMetadataService);
 
     return newPackagePolicy;
+  };
+};
+
+export const getPackagePolicyPostCreateCallback = (
+  logger: Logger,
+  exceptionsClient: ExceptionListClient | undefined
+): PostPackagePolicyPostCreateCallback => {
+  return async (packagePolicy: PackagePolicy): Promise<PackagePolicy> => {
+    if (!exceptionsClient) {
+      return packagePolicy;
+    }
+
+    // We only care about Endpoint package policies
+    if (!isEndpointPackagePolicy(packagePolicy)) {
+      return packagePolicy;
+    }
+
+    const integrationConfig = packagePolicy?.inputs[0].config?.integration_config;
+
+    if (integrationConfig && integrationConfig?.value?.eventFilters !== undefined) {
+      createEventFilters(
+        logger,
+        exceptionsClient,
+        integrationConfig.value.eventFilters,
+        packagePolicy
+      );
+    }
+    return packagePolicy;
   };
 };
 
