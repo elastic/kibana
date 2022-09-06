@@ -6,18 +6,10 @@
  */
 
 import React from 'react';
-import type { ToolbarProps } from '../../../public/pages/metrics/inventory_view/components/toolbars/toolbar';
-import { MetricsAndGroupByToolbarItems } from '../shared/components/metrics_and_groupby_toolbar_items';
-import { CloudToolbarItems } from '../shared/components/cloud_toolbar_items';
-import { SnapshotMetricType } from '../types';
-
-export const s3MetricTypes: SnapshotMetricType[] = [
-  's3BucketSize',
-  's3NumberOfObjects',
-  's3TotalRequests',
-  's3DownloadBytes',
-  's3UploadBytes',
-];
+import { awsS3SnapshotMetricTypes } from '../../../../../../common/inventory_models/aws_s3';
+import { CloudToolbarItems } from './cloud_toolbar_items';
+import { MetricsAndGroupByToolbarItems } from './metrics_and_groupby_toolbar_items';
+import type { ToolbarProps } from './types';
 
 export const s3GroupByFields = ['cloud.region'];
 
@@ -27,7 +19,7 @@ export const AwsS3ToolbarItems = (props: ToolbarProps) => {
       <CloudToolbarItems {...props} />
       <MetricsAndGroupByToolbarItems
         {...props}
-        metricTypes={s3MetricTypes}
+        metricTypes={awsS3SnapshotMetricTypes}
         groupByFields={s3GroupByFields}
       />
     </>
