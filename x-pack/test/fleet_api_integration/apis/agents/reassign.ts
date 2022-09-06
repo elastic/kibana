@@ -211,10 +211,17 @@ export default function (providerContext: FtrProviderContext) {
 
         expect(unenrolledBody).to.eql({});
 
-        const { body } = await supertest.get(`/api/fleet/agents`).set('kbn-xsrf', 'xxx');
-        expect(body.total).to.eql(4);
-        body.items.forEach((agent: any) => {
-          expect(agent.policy_id).to.eql('policy2');
+        await new Promise((resolve, reject) => {
+          setTimeout(async () => {
+            const { body } = await supertest.get(`/api/fleet/agents`).set('kbn-xsrf', 'xxx');
+            expect(body.total).to.eql(4);
+            body.items.forEach((agent: any) => {
+              expect(agent.policy_id).to.eql('policy2');
+            });
+            resolve({});
+          }, 2500);
+        }).catch((e) => {
+          throw e;
         });
       });
 
