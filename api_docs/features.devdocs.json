@@ -320,15 +320,15 @@
             "references": [
               {
                 "plugin": "security",
+                "path": "x-pack/plugins/security/server/lib/role_utils.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/plugins/security/server/lib/role_utils.ts"
+              },
+              {
+                "plugin": "security",
                 "path": "x-pack/plugins/security/server/authorization/roles/elasticsearch_role.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/routes/authorization/roles/model/put_payload.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/routes/authorization/roles/model/put_payload.ts"
               },
               {
                 "plugin": "security",
@@ -1554,15 +1554,15 @@
             "references": [
               {
                 "plugin": "security",
+                "path": "x-pack/plugins/security/server/lib/role_utils.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/plugins/security/server/lib/role_utils.ts"
+              },
+              {
+                "plugin": "security",
                 "path": "x-pack/plugins/security/server/authorization/roles/elasticsearch_role.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/routes/authorization/roles/model/put_payload.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/routes/authorization/roles/model/put_payload.ts"
               },
               {
                 "plugin": "security",
@@ -3254,15 +3254,15 @@
             "references": [
               {
                 "plugin": "security",
+                "path": "x-pack/plugins/security/server/lib/role_utils.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/plugins/security/server/lib/role_utils.ts"
+              },
+              {
+                "plugin": "security",
                 "path": "x-pack/plugins/security/server/authorization/roles/elasticsearch_role.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/routes/authorization/roles/model/put_payload.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/server/routes/authorization/roles/model/put_payload.ts"
               },
               {
                 "plugin": "security",

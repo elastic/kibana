@@ -8,6 +8,10 @@
 
 import type { Event } from '@kbn/analytics-client';
 
+/**
+ * Converts an array of events to a single ndjson string.
+ * @param events An array of events {@link Event}
+ */
 export function eventsToNDJSON(events: Event[]): string {
   return `${events.map((event) => JSON.stringify(event)).join('\n')}\n`;
 }

@@ -30,6 +30,7 @@ const Wrapper = styled.div`
     position: absolute;
     top: 0;
     right: 0;
+    z-index: 1;
   }
   &.histogram-viz-actions {
     padding: ${({ theme }) => theme.eui.paddingSizes.s};

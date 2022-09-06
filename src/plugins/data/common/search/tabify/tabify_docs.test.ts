@@ -7,7 +7,7 @@
  */
 
 import { tabifyDocs, flattenHit } from './tabify_docs';
-import { IndexPattern, DataView } from '../..';
+import { DataView } from '@kbn/data-views-plugin/common';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
@@ -127,7 +127,7 @@ describe('tabify_docs', () => {
       getDefaultInstance: (id: string) => ({ toJSON: () => ({ id }) }),
     };
 
-    const index = new IndexPattern({
+    const index = new DataView({
       spec: {
         id: 'test-index',
         fields: {

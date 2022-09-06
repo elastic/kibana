@@ -370,7 +370,9 @@ export function getFormStateFromJobConfig(
     runtimeMappings: analyticsJobConfig.source.runtime_mappings,
     modelMemoryLimit: analyticsJobConfig.model_memory_limit,
     maxNumThreads: analyticsJobConfig.max_num_threads,
-    includes: analyticsJobConfig.analyzed_fields?.includes ?? [],
+    includes: Array.isArray(analyticsJobConfig.analyzed_fields?.includes)
+      ? analyticsJobConfig.analyzed_fields?.includes
+      : [],
     jobConfigQuery: analyticsJobConfig.source.query || defaultSearchQuery,
   };
 

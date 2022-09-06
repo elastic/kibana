@@ -29,6 +29,7 @@
     "xpack.infra": "plugins/infra",
     "xpack.fleet": "plugins/fleet",
     "xpack.ingestPipelines": "plugins/ingest_pipelines",
+    "xpack.kubernetesSecurity": "plugins/kubernetes_security",
     "xpack.lens": "plugins/lens",
     "xpack.licenseApiGuard": "plugins/license_api_guard",
     "xpack.licenseMgmt": "plugins/license_management",

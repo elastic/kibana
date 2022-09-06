@@ -537,7 +537,7 @@ describe('ClusterClient', () => {
       expect(scopedClient.close).toHaveBeenCalledTimes(1);
     });
 
-    it('waits for both clients to close', async (done) => {
+    it('waits for both clients to close', (done) => {
       expect.assertions(4);
 
       const clusterClient = new ClusterClient({

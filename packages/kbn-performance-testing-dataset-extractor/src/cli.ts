@@ -12,7 +12,8 @@
  *
  *************************************************************/
 
-import { run, createFlagError } from '@kbn/dev-utils';
+import { run } from '@kbn/dev-cli-runner';
+import { createFlagError } from '@kbn/dev-cli-errors';
 import { extractor } from './extractor';
 
 export async function runExtractor() {

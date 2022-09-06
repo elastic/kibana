@@ -91,7 +91,7 @@ describe('RuleAlertsTable', () => {
       </TestProviders>
     );
 
-    expect(result.getByText('Updated now')).toBeInTheDocument();
+    expect(result.getByText(/Updated/)).toBeInTheDocument();
   });
 
   it('should render the table columns', () => {

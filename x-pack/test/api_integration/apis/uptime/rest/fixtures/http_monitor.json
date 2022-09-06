@@ -60,5 +60,6 @@
     "isServiceManaged": true
   }],
   "namespace": "testnamespace",
-  "revision": 1
+  "revision": 1,
+  "origin": "ui"
 }

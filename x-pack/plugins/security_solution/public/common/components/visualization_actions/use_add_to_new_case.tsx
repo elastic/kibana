@@ -44,7 +44,6 @@ export const useAddToNewCase = ({
   }, [lensAttributes, timeRange]);
 
   const createCaseFlyout = cases.hooks.getUseCasesAddToNewCaseFlyout({
-    attachments,
     toastContent: ADD_TO_CASE_SUCCESS,
   });
 
@@ -53,8 +52,8 @@ export const useAddToNewCase = ({
       onClick();
     }
 
-    createCaseFlyout.open();
-  }, [createCaseFlyout, onClick]);
+    createCaseFlyout.open({ attachments });
+  }, [attachments, createCaseFlyout, onClick]);
 
   return {
     onAddToNewCaseClicked,

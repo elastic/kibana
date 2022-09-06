@@ -10,19 +10,23 @@ import {
   EuiFlexItem,
   EuiFlyoutBody,
   EuiFlyoutHeader,
+  EuiHorizontalRule,
   EuiPortal,
   EuiSpacer,
+  EuiTabbedContent,
   EuiTitle,
-  EuiHorizontalRule,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { ProcessorEvent } from '../../../../../../../../common/processor_event';
 import { Transaction } from '../../../../../../../../typings/es_schemas/ui/transaction';
-import { TransactionActionMenu } from '../../../../../../shared/transaction_action_menu/transaction_action_menu';
+import { TransactionMetadata } from '../../../../../../shared/metadata_table/transaction_metadata';
+import { getSpanLinksTabContent } from '../../../../../../shared/span_links/span_links_tab_content';
 import { TransactionSummary } from '../../../../../../shared/summary/transaction_summary';
+import { TransactionActionMenu } from '../../../../../../shared/transaction_action_menu/transaction_action_menu';
 import { FlyoutTopLevelProperties } from '../flyout_top_level_properties';
 import { ResponsiveFlyout } from '../responsive_flyout';
-import { TransactionMetadata } from '../../../../../../shared/metadata_table/transaction_metadata';
+import { SpanLinksCount } from '../waterfall_helpers/waterfall_helpers';
 import { DroppedSpansWarning } from './dropped_spans_warning';
 
 interface Props {
@@ -30,21 +34,7 @@ interface Props {
   transaction?: Transaction;
   errorCount?: number;
   rootTransactionDuration?: number;
-}
-
-function TransactionPropertiesTable({
-  transaction,
-}: {
-  transaction: Transaction;
-}) {
-  return (
-    <div>
-      <EuiTitle size="s">
-        <h4>Metadata</h4>
-      </EuiTitle>
-      <TransactionMetadata transaction={transaction} />
-    </div>
-  );
+  spanLinksCount: SpanLinksCount;
 }
 
 export function TransactionFlyout({
@@ -52,10 +42,18 @@ export function TransactionFlyout({
   onClose,
   errorCount = 0,
   rootTransactionDuration,
+  spanLinksCount,
 }: Props) {
   if (!transactionDoc) {
     return null;
   }
+
+  const spanLinksTabContent = getSpanLinksTabContent({
+    spanLinksCount,
+    traceId: transactionDoc.trace.id,
+    spanId: transactionDoc.transaction.id,
+    processorEvent: ProcessorEvent.transaction,
+  });
 
   return (
     <EuiPortal>
@@ -94,7 +92,26 @@ export function TransactionFlyout({
           />
           <EuiHorizontalRule margin="m" />
           <DroppedSpansWarning transactionDoc={transactionDoc} />
-          <TransactionPropertiesTable transaction={transactionDoc} />
+          <EuiTabbedContent
+            tabs={[
+              {
+                id: 'metadata',
+                name: i18n.translate(
+                  'xpack.apm.propertiesTable.tabs.metadataLabel',
+                  {
+                    defaultMessage: 'Metadata',
+                  }
+                ),
+                content: (
+                  <>
+                    <EuiSpacer size="m" />
+                    <TransactionMetadata transaction={transactionDoc} />
+                  </>
+                ),
+              },
+              ...(spanLinksTabContent ? [spanLinksTabContent] : []),
+            ]}
+          />
         </EuiFlyoutBody>
       </ResponsiveFlyout>
     </EuiPortal>

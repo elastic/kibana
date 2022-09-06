@@ -8,15 +8,13 @@
 
 import { i18n } from '@kbn/i18n';
 import type { ThemeVersion } from '@kbn/ui-shared-deps-npm';
-
+import type { InjectedMetadata } from '@kbn/core-injected-metadata-common-internal';
 import { InternalElasticsearchServiceSetup } from '../elasticsearch';
-import { EnvironmentMode, PackageInfo } from '../config';
 import { ICspConfig } from '../csp';
 import { InternalHttpServicePreboot, InternalHttpServiceSetup, KibanaRequest } from '../http';
-import { UiPlugins, DiscoveredPlugin } from '../plugins';
-import { IUiSettingsClient, UserProvidedValues } from '../ui_settings';
+import { UiPlugins } from '../plugins';
+import { IUiSettingsClient } from '../ui_settings';
 import type { InternalStatusServiceSetup } from '../status';
-import { IExternalUrlPolicy } from '../external_url';
 
 /** @internal */
 export interface RenderingMetadata {
@@ -29,47 +27,6 @@ export interface RenderingMetadata {
   themeVersion: ThemeVersion;
   stylesheetPaths: string[];
   injectedMetadata: InjectedMetadata;
-}
-
-/** @internal */
-export interface InjectedMetadata {
-  version: string;
-  buildNumber: number;
-  branch: string;
-  basePath: string;
-  serverBasePath: string;
-  publicBaseUrl?: string;
-  clusterInfo: {
-    cluster_uuid?: string;
-    cluster_name?: string;
-    cluster_version?: string;
-  };
-  env: {
-    mode: EnvironmentMode;
-    packageInfo: PackageInfo;
-  };
-  anonymousStatusPage: boolean;
-  i18n: {
-    translationsUrl: string;
-  };
-  theme: {
-    darkMode: boolean;
-    version: ThemeVersion;
-  };
-  csp: Pick<ICspConfig, 'warnLegacyBrowsers'>;
-  externalUrl: { policy: IExternalUrlPolicy[] };
-  vars: Record<string, any>;
-  uiPlugins: Array<{
-    id: string;
-    plugin: DiscoveredPlugin;
-    config?: Record<string, unknown>;
-  }>;
-  legacyMetadata: {
-    uiSettings: {
-      defaults: Record<string, any>;
-      user: Record<string, UserProvidedValues<any>>;
-    };
-  };
 }
 
 /** @internal */

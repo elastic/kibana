@@ -31,7 +31,7 @@ export const MethodJson: React.FC = () => {
         }
       )}
       docsUrl="#"
-      type="JSON"
+      type="json"
       onNameChange={(value: string) => onNameChange(value)}
     >
       <EuiPanel

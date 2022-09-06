@@ -9,6 +9,11 @@ import { isLeft } from 'fp-ts/lib/Either';
 import * as t from 'io-ts';
 import { tEnum } from '../../utils/t_enum';
 
+export enum LocationStatus {
+  GA = 'ga',
+  EXPERIMENTAL = 'experimental',
+}
+
 export enum BandwidthLimitKey {
   DOWNLOAD = 'download',
   UPLOAD = 'upload',
@@ -36,13 +41,16 @@ export const LocationGeoCodec = t.interface({
   lon: t.number,
 });
 
+export const LocationStatusCodec = tEnum<LocationStatus>('LocationStatus', LocationStatus);
+export type LocationStatusType = t.TypeOf<typeof LocationStatusCodec>;
+
 export const ManifestLocationCodec = t.interface({
   url: t.string,
   geo: t.interface({
     name: t.string,
     location: LocationGeoCodec,
   }),
-  status: t.string,
+  status: LocationStatusCodec,
 });
 
 export const ServiceLocationCodec = t.interface({
@@ -51,6 +59,7 @@ export const ServiceLocationCodec = t.interface({
   geo: LocationGeoCodec,
   url: t.string,
   isServiceManaged: t.boolean,
+  status: LocationStatusCodec,
 });
 
 export const MonitorServiceLocationCodec = t.intersection([

@@ -111,7 +111,7 @@ export function getEsaggs({
 
       return {
         aggs: await search.aggs.asScopedToClient(savedObjectsClient, esClient.asCurrentUser),
-        indexPatterns: await indexPatterns.indexPatternsServiceFactory(
+        indexPatterns: await indexPatterns.dataViewsServiceFactory(
           savedObjectsClient,
           esClient.asCurrentUser
         ),

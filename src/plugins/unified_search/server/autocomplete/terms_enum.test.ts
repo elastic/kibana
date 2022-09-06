@@ -12,12 +12,19 @@ import { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/serve
 import { ConfigSchema } from '../../config';
 import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
 import { TermsEnumResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { DataViewField } from '@kbn/data-views-plugin/common';
 
 let savedObjectsClientMock: jest.Mocked<SavedObjectsClientContract>;
 let esClientMock: DeeplyMockedKeys<ElasticsearchClient>;
 const configMock = {
   autocomplete: { valueSuggestions: { tiers: ['data_hot', 'data_warm', 'data_content'] } },
 } as ConfigSchema;
+const dataViewFieldMock = {
+  name: 'field_name',
+  type: 'string',
+  searchable: true,
+  aggregatable: true,
+} as DataViewField;
 const mockResponse = { terms: ['whoa', 'amazing'] };
 
 jest.mock('../data_views');
@@ -39,7 +46,7 @@ describe('_terms_enum suggestions', () => {
       'fieldName',
       'query',
       [],
-      { name: 'field_name', type: 'string', searchable: true, aggregatable: true }
+      dataViewFieldMock
     );
 
     const [[args]] = esClientMock.termsEnum.mock.calls;

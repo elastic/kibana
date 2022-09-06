@@ -8,6 +8,7 @@
 
 export { buildHeaders } from './build_headers';
 export { buildUrl } from './build_url';
+export type { BuildUrlOptions } from './build_url';
 export { ErrorWithCode } from './error_with_code';
 export { eventsToNDJSON } from './events_to_ndjson';
 export { createTelemetryCounterHelper } from './report_telemetry_counters';

@@ -467,6 +467,93 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "encryptedSavedObjects",
+            "id": "def-server.EncryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser",
+            "type": "Function",
+            "tags": [],
+            "label": "createPointInTimeFinderDecryptedAsInternalUser",
+            "description": [
+              "\nAPI method, that can be used to help page through large sets of saved objects and returns decrypted properties in result SO.\nIts interface matches interface of the corresponding Saved Objects API `createPointInTimeFinder` method:\n"
+            ],
+            "signature": [
+              "<T = unknown, A = unknown>(findOptions: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsCreatePointInTimeFinderOptions",
+                "text": "SavedObjectsCreatePointInTimeFinderOptions"
+              },
+              ", dependencies?: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsCreatePointInTimeFinderDependencies",
+                "text": "SavedObjectsCreatePointInTimeFinderDependencies"
+              },
+              " | undefined) => Promise<",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.ISavedObjectsPointInTimeFinder",
+                "text": "ISavedObjectsPointInTimeFinder"
+              },
+              "<T, A>>"
+            ],
+            "path": "x-pack/plugins/encrypted_saved_objects/server/saved_objects/index.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "encryptedSavedObjects",
+                "id": "def-server.EncryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "findOptions",
+                "description": [
+                  "matches interface of corresponding argument of Saved Objects API `createPointInTimeFinder` {@link SavedObjectsCreatePointInTimeFinderOptions }"
+                ],
+                "signature": [
+                  {
+                    "pluginId": "core",
+                    "scope": "server",
+                    "docId": "kibCoreSavedObjectsPluginApi",
+                    "section": "def-server.SavedObjectsCreatePointInTimeFinderOptions",
+                    "text": "SavedObjectsCreatePointInTimeFinderOptions"
+                  }
+                ],
+                "path": "x-pack/plugins/encrypted_saved_objects/server/saved_objects/index.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "encryptedSavedObjects",
+                "id": "def-server.EncryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "dependencies",
+                "description": [
+                  "matches interface of corresponding argument of Saved Objects API `createPointInTimeFinder` {@link SavedObjectsCreatePointInTimeFinderDependencies }"
+                ],
+                "signature": [
+                  {
+                    "pluginId": "core",
+                    "scope": "server",
+                    "docId": "kibCoreSavedObjectsPluginApi",
+                    "section": "def-server.SavedObjectsCreatePointInTimeFinderDependencies",
+                    "text": "SavedObjectsCreatePointInTimeFinderDependencies"
+                  },
+                  " | undefined"
+                ],
+                "path": "x-pack/plugins/encrypted_saved_objects/server/saved_objects/index.ts",
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false

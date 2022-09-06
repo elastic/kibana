@@ -6,6 +6,7 @@
  */
 
 import * as t from 'io-ts';
+import { NonEmptyArray } from '@kbn/securitysolution-io-ts-types';
 import { BulkAction, queryOrUndefined, bulkActionEditPayload } from '../common/schemas';
 
 export const performBulkActionSchema = t.intersection([
@@ -14,7 +15,7 @@ export const performBulkActionSchema = t.intersection([
       query: queryOrUndefined,
     })
   ),
-  t.exact(t.partial({ ids: t.array(t.string) })),
+  t.exact(t.partial({ ids: NonEmptyArray(t.string) })),
   t.union([
     t.exact(
       t.type({
@@ -30,7 +31,7 @@ export const performBulkActionSchema = t.intersection([
     t.exact(
       t.type({
         action: t.literal(BulkAction.edit),
-        [BulkAction.edit]: t.array(bulkActionEditPayload),
+        [BulkAction.edit]: NonEmptyArray(bulkActionEditPayload),
       })
     ),
   ]),

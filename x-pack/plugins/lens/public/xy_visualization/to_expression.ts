@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Ast } from '@kbn/interpreter';
+import { Ast, AstFunction } from '@kbn/interpreter';
 import { ScaleType } from '@elastic/charts';
 import type { PaletteRegistry } from '@kbn/coloring';
 
@@ -250,6 +250,8 @@ export const buildExpression = (
           fillOpacity: [state.fillOpacity || 0.3],
           yLeftExtent: [axisExtentConfigToExpression(state.yLeftExtent, validDataLayers)],
           yRightExtent: [axisExtentConfigToExpression(state.yRightExtent, validDataLayers)],
+          yLeftScale: [state.yLeftScale || 'linear'],
+          yRightScale: [state.yRightScale || 'linear'],
           axisTitlesVisibilitySettings: [
             {
               type: 'expression',
@@ -354,7 +356,7 @@ const referenceLineLayerToExpression = (
     chain: [
       {
         type: 'function',
-        function: 'extendedReferenceLineLayer',
+        function: 'referenceLineLayer',
         arguments: {
           layerId: [layer.layerId],
           yConfig: layer.yConfig
@@ -421,19 +423,40 @@ const dataLayerToExpression = (
           layerId: [layer.layerId],
           hide: [Boolean(layer.hide)],
           xAccessor: layer.xAccessor ? [layer.xAccessor] : [],
-          yScaleType: [
-            getScaleType(metadata[layer.layerId][layer.accessors[0]], ScaleType.Ordinal),
-          ],
           xScaleType: [getScaleType(metadata[layer.layerId][layer.xAccessor], ScaleType.Linear)],
           isHistogram: [isHistogramDimension],
-          splitAccessor: layer.splitAccessor ? [layer.splitAccessor] : [],
+          splitAccessor: layer.collapseFn || !layer.splitAccessor ? [] : [layer.splitAccessor],
           yConfig: layer.yConfig
             ? layer.yConfig.map((yConfig) => yConfigToExpression(yConfig))
             : [],
           seriesType: [layer.seriesType],
           accessors: layer.accessors,
           columnToLabel: [JSON.stringify(columnToLabel)],
-          ...(datasourceExpression ? { table: [datasourceExpression] } : {}),
+          ...(datasourceExpression
+            ? {
+                table: [
+                  {
+                    ...datasourceExpression,
+                    chain: [
+                      ...datasourceExpression.chain,
+                      ...(layer.collapseFn
+                        ? [
+                            {
+                              type: 'function',
+                              function: 'lens_collapse',
+                              arguments: {
+                                by: layer.xAccessor ? [layer.xAccessor] : [],
+                                metric: layer.accessors,
+                                fn: [layer.collapseFn!],
+                              },
+                            } as AstFunction,
+                          ]
+                        : []),
+                    ],
+                  },
+                ],
+              }
+            : {}),
           palette: [
             {
               type: 'expression',

@@ -83,9 +83,13 @@ export class ApmSynthtraceKibanaClient {
       },
       body: '{"force":true}',
     });
+
     const responseJson = await response.json();
+
     if (responseJson.statusCode) {
-      throw Error(`unable to install apm package ${packageVersion}`);
+      throw Error(
+        `unable to install apm package ${packageVersion}. Received status code: ${responseJson.statusCode} and message: ${responseJson.message}`
+      );
     }
     if (responseJson.items) {
       this.logger.info(`Installed apm package ${packageVersion}`);

@@ -127,6 +127,7 @@ export const lineVisTypeDefinition = {
     },
   },
   editorConfig: {
+    enableDataViewChange: true,
     optionTabs,
     schemas: [
       {
@@ -134,7 +135,13 @@ export const lineVisTypeDefinition = {
         name: 'metric',
         title: i18n.translate('visTypeXy.line.metricTitle', { defaultMessage: 'Y-axis' }),
         min: 1,
-        aggFilter: ['!geo_centroid', '!geo_bounds', '!filtered_metric', '!single_percentile'],
+        aggFilter: [
+          '!geo_centroid',
+          '!geo_bounds',
+          '!filtered_metric',
+          '!single_percentile',
+          '!single_percentile_rank',
+        ],
         defaults: [{ schema: 'metric', type: 'count' }],
       },
       {

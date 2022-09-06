@@ -276,10 +276,12 @@ export const getXyVisualization = ({
             ? [
                 {
                   columnId: dataLayer.splitAccessor,
-                  triggerIcon: 'colorBy' as const,
-                  palette: paletteService
-                    .get(dataLayer.palette?.name || 'default')
-                    .getCategoricalColors(10, dataLayer.palette?.params),
+                  triggerIcon: dataLayer.collapseFn ? ('aggregate' as const) : ('colorBy' as const),
+                  palette: dataLayer.collapseFn
+                    ? undefined
+                    : paletteService
+                        .get(dataLayer.palette?.name || 'default')
+                        .getCategoricalColors(10, dataLayer.palette?.params),
                 },
               ]
             : [],

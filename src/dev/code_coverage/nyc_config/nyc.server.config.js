@@ -11,8 +11,8 @@ const path = require('path');
 module.exports = {
   extends: '@istanbuljs/nyc-config-typescript',
   'report-dir': process.env.KIBANA_DIR
-    ? path.resolve(process.env.KIBANA_DIR, 'target/kibana-coverage/server')
-    : 'target/kibana-coverage/server',
+    ? path.resolve(process.env.KIBANA_DIR, 'target/kibana-coverage/functional')
+    : 'target/kibana-coverage/functional',
   reporter: ['json'],
   all: true,
   include: [

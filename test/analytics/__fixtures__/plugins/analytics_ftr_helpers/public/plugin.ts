@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ReplaySubject, firstValueFrom, filter, take, toArray } from 'rxjs';
+import { ReplaySubject, firstValueFrom, filter, take, toArray, map } from 'rxjs';
 import type { Plugin, CoreSetup, Event } from '@kbn/core/public';
 import { CustomShipper } from './custom_shipper';
 import './types';
@@ -21,7 +21,7 @@ export class AnalyticsFTRHelpers implements Plugin {
       setOptIn(optIn: boolean) {
         analytics.optIn({ global: { enabled: optIn } });
       },
-      getLastEvents: async (takeNumberOfEvents, eventTypes = []) =>
+      getEvents: async (takeNumberOfEvents, eventTypes = []) =>
         firstValueFrom(
           this.events$.pipe(
             filter((event) => {
@@ -31,7 +31,13 @@ export class AnalyticsFTRHelpers implements Plugin {
               return true;
             }),
             take(takeNumberOfEvents),
-            toArray()
+            toArray(),
+            // Sorting the events by timestamp... on CI it's happening an event may occur while the client is still forwarding the early ones...
+            map((_events) =>
+              _events.sort(
+                (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+              )
+            )
           )
         ),
     };

@@ -12,7 +12,7 @@ import Fsp from 'fs/promises';
 import { REPO_ROOT } from '@kbn/utils';
 import dedent from 'dedent';
 
-import { run } from '../run';
+import { run } from '@kbn/dev-cli-runner';
 
 import { MANAGED_CONFIG_KEYS, MANAGED_CONFIG_FILES } from './managed_config_keys';
 import { updateVscodeConfig } from './update_vscode_config';

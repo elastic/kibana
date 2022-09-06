@@ -5,5 +5,7 @@
  * 2.0.
  */
 
+export * from './installed_integrations';
 export * from './rule_monitoring';
+export * from './rule_params';
 export * from './schemas';

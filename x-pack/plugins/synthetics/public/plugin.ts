@@ -263,7 +263,7 @@ function registerSyntheticsRoutesWithNavigation(
                   }),
                   app: 'synthetics',
                   path: '/manage-monitors',
-                  matchFullPath: true,
+                  matchFullPath: false,
                   ignoreTrailingSlash: true,
                 },
               ],

@@ -62,7 +62,7 @@ describe('When on the policy list page', () => {
     it('should show instruction text and a button to add the Endpoint Security integration', () => {
       expect(
         renderResult.findByText(
-          'From this page, you’ll be able to view and manage the Endpoint Security Integration policies in your environment running Endpoint Security.'
+          'From this page, you’ll be able to view and manage the Endpoint and Cloud Security Integration policies in your environment running Endpoint and Cloud Security.'
         )
       ).toBeTruthy();
       expect(renderResult.getByTestId('onboardingStartButton')).toBeTruthy();

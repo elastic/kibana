@@ -20,5 +20,5 @@ export const getSavedObjectClient = (extraTypes?: string[]) => {
 };
 
 export const getIndexPatternsServiceFactory = () =>
-  pluginsStart.data.indexPatterns.indexPatternsServiceFactory;
+  pluginsStart.data.indexPatterns.dataViewsServiceFactory;
 export const getElasticsearch = () => coreStart.elasticsearch;

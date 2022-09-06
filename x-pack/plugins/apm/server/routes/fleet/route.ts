@@ -15,7 +15,7 @@ import {
 } from '../../../common/apm_saved_object_constants';
 import { createCloudApmPackgePolicy } from './create_cloud_apm_package_policy';
 import { getFleetAgents } from './get_agents';
-import { getApmPackgePolicies } from './get_apm_package_policies';
+import { getApmPackagePolicies } from './get_apm_package_policies';
 import {
   getApmPackagePolicy,
   getCloudAgentPolicy,
@@ -35,7 +35,7 @@ const hasFleetDataRoute = createApmServerRoute({
     if (!fleetPluginStart) {
       return { hasApmPolicies: false };
     }
-    const packagePolicies = await getApmPackgePolicies({
+    const packagePolicies = await getApmPackagePolicies({
       core,
       fleetPluginStart,
     });
@@ -89,7 +89,7 @@ const fleetAgentsRoute = createApmServerRoute({
       return { cloudStandaloneSetup, fleetAgents: [], isFleetEnabled: false };
     }
     // fetches package policies that contains APM integrations
-    const packagePolicies = await getApmPackgePolicies({
+    const packagePolicies = await getApmPackagePolicies({
       core,
       fleetPluginStart,
     });
@@ -198,7 +198,7 @@ const getMigrationCheckRoute = createApmServerRoute({
         })
       : undefined;
     const apmPackagePolicy = getApmPackagePolicy(cloudAgentPolicy);
-    const packagePolicies = await getApmPackgePolicies({
+    const packagePolicies = await getApmPackagePolicies({
       core,
       fleetPluginStart,
     });

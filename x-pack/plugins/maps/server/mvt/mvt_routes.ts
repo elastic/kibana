@@ -44,6 +44,7 @@ export function initMVTRoutes({
         }),
         query: schema.object({
           geometryFieldName: schema.string(),
+          hasLabels: schema.boolean(),
           requestBody: schema.string(),
           index: schema.string(),
           token: schema.maybe(schema.string()),
@@ -65,6 +66,7 @@ export function initMVTRoutes({
         tileRequest = getHitsTileRequest({
           encodedRequestBody: query.requestBody as string,
           geometryFieldName: query.geometryFieldName as string,
+          hasLabels: query.hasLabels as boolean,
           index: query.index as string,
           x,
           y,
@@ -102,6 +104,7 @@ export function initMVTRoutes({
         }),
         query: schema.object({
           geometryFieldName: schema.string(),
+          hasLabels: schema.boolean(),
           requestBody: schema.string(),
           index: schema.string(),
           renderAs: schema.string(),
@@ -126,6 +129,7 @@ export function initMVTRoutes({
           encodedRequestBody: query.requestBody as string,
           geometryFieldName: query.geometryFieldName as string,
           gridPrecision: parseInt(query.gridPrecision, 10),
+          hasLabels: query.hasLabels as boolean,
           index: query.index as string,
           renderAs: query.renderAs as RENDER_AS,
           x,

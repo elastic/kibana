@@ -7,6 +7,7 @@
 
 /* eslint-disable react/display-name */
 
+import { alertComment } from '../../../containers/mock';
 import { renderHook } from '@testing-library/react-hooks';
 import React from 'react';
 import { CasesContext } from '../../cases_context';
@@ -41,17 +42,17 @@ describe('use cases add to new case flyout hook', () => {
 
   it('should throw if called outside of a cases context', () => {
     const { result } = renderHook(() => {
-      useCasesAddToNewCaseFlyout({});
+      useCasesAddToNewCaseFlyout();
     });
     expect(result.error?.message).toContain(
       'useCasesContext must be used within a CasesProvider and have a defined value'
     );
   });
 
-  it('should dispatch the open action when invoked', () => {
+  it('should dispatch the open action when invoked without attachments', () => {
     const { result } = renderHook(
       () => {
-        return useCasesAddToNewCaseFlyout({});
+        return useCasesAddToNewCaseFlyout();
       },
       { wrapper }
     );
@@ -59,6 +60,27 @@ describe('use cases add to new case flyout hook', () => {
     expect(dispatch).toHaveBeenCalledWith(
       expect.objectContaining({
         type: CasesContextStoreActionsList.OPEN_CREATE_CASE_FLYOUT,
+        payload: expect.objectContaining({
+          attachments: undefined,
+        }),
+      })
+    );
+  });
+
+  it('should dispatch the open action when invoked with attachments', () => {
+    const { result } = renderHook(
+      () => {
+        return useCasesAddToNewCaseFlyout();
+      },
+      { wrapper }
+    );
+    result.current.open({ attachments: [alertComment] });
+    expect(dispatch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: CasesContextStoreActionsList.OPEN_CREATE_CASE_FLYOUT,
+        payload: expect.objectContaining({
+          attachments: [alertComment],
+        }),
       })
     );
   });
@@ -66,7 +88,7 @@ describe('use cases add to new case flyout hook', () => {
   it('should dispatch the close action when invoked', () => {
     const { result } = renderHook(
       () => {
-        return useCasesAddToNewCaseFlyout({});
+        return useCasesAddToNewCaseFlyout();
       },
       { wrapper }
     );

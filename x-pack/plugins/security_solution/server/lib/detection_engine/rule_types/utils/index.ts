@@ -25,3 +25,4 @@ export const createResultObject = <TState extends RuleTypeState>(state: TState) 
 };
 
 export * from './get_list_client';
+export * from './validate_mutated_params';

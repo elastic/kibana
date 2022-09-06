@@ -6,9 +6,10 @@
  * Side Public License, v 1.
  */
 
+import { DataViewsContract } from '@kbn/data-views-plugin/common';
 import { migrateLegacyQuery } from './migrate_legacy_query';
 import { SearchSource, SearchSourceDependencies } from './search_source';
-import { IndexPatternsContract, SerializedSearchSourceFields } from '../..';
+import { SerializedSearchSourceFields } from '../..';
 import { SearchSourceFields } from './types';
 
 /**
@@ -29,7 +30,7 @@ import { SearchSourceFields } from './types';
  *
  * @public */
 export const createSearchSource = (
-  indexPatterns: IndexPatternsContract,
+  indexPatterns: DataViewsContract,
   searchSourceDependencies: SearchSourceDependencies
 ) => {
   const createFields = async (searchSourceFields: SerializedSearchSourceFields = {}) => {

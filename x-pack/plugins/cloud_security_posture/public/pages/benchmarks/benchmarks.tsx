@@ -46,6 +46,7 @@ const AddCisIntegrationButton = () => {
       fill
       iconType="plusInCircle"
       href={cisIntegrationLink}
+      isDisabled={!cisIntegrationLink}
     >
       <FormattedMessage
         id="xpack.csp.benchmarks.addCisIntegrationButtonLabel"
@@ -134,7 +135,7 @@ export const Benchmarks = () => {
   const [query, setQuery] = useState<UseCspBenchmarkIntegrationsProps>({
     name: '',
     page: 1,
-    perPage: 5,
+    perPage: 10,
     sortField: 'package_policy.name',
     sortOrder: 'asc',
   });

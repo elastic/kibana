@@ -7,7 +7,6 @@
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useMemo } from 'react';
-import styled from 'styled-components';
 
 import type { DataViewBase, Filter, Query } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
@@ -22,10 +21,6 @@ import {
   hostNameExistsFilter,
   filterNetworkExternalAlertData,
 } from '../../../common/components/visualization_actions/utils';
-
-const HorizontalSpacer = styled(EuiFlexItem)`
-  width: 24px;
-`;
 
 interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'setQuery'> {
   filters: Filter[];
@@ -77,8 +72,8 @@ const EventCountsComponent: React.FC<Props> = ({
   });
 
   return (
-    <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween">
-      <EuiFlexItem grow={true}>
+    <EuiFlexGroup direction="row">
+      <EuiFlexItem grow={1}>
         <OverviewHost
           endDate={to}
           filterQuery={hostFilterQuery}
@@ -88,9 +83,7 @@ const EventCountsComponent: React.FC<Props> = ({
         />
       </EuiFlexItem>
 
-      <HorizontalSpacer grow={false} />
-
-      <EuiFlexItem grow={true}>
+      <EuiFlexItem grow={1}>
         <OverviewNetwork
           endDate={to}
           filterQuery={networkFilterQuery}

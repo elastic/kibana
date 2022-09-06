@@ -53,6 +53,7 @@ export interface ILayer {
   supportsFitToBounds(): Promise<boolean>;
   getAttributions(): Promise<Attribution[]>;
   getLabel(): string;
+  getLocale(): string | null;
   hasLegendDetails(): Promise<boolean>;
   renderLegendDetails(): ReactElement<any> | null;
   showAtZoomLevel(zoom: number): boolean;
@@ -98,10 +99,10 @@ export interface ILayer {
   ): ReactElement<any> | null;
   getInFlightRequestTokens(): symbol[];
   getPrevRequestToken(dataId: string): symbol | undefined;
-  destroy: () => void;
   isPreviewLayer: () => boolean;
   areLabelsOnTop: () => boolean;
   supportsLabelsOnTop: () => boolean;
+  supportsLabelLocales: () => boolean;
   isFittable(): Promise<boolean>;
   isIncludeInFitToBounds(): boolean;
   getLicensedFeatures(): Promise<LICENSED_FEATURES[]>;
@@ -149,12 +150,6 @@ export class AbstractLayer implements ILayer {
       includeInFitToBounds:
         typeof options.includeInFitToBounds === 'boolean' ? options.includeInFitToBounds : true,
     };
-  }
-
-  destroy() {
-    if (this._source) {
-      this._source.destroy();
-    }
   }
 
   constructor({ layerDescriptor, source }: ILayerArguments) {
@@ -255,6 +250,10 @@ export class AbstractLayer implements ILayer {
 
   getLabel(): string {
     return this._descriptor.label ? this._descriptor.label : '';
+  }
+
+  getLocale(): string | null {
+    return null;
   }
 
   getLayerIcon(isTocIcon: boolean): LayerIcon {
@@ -465,6 +464,10 @@ export class AbstractLayer implements ILayer {
   }
 
   supportsLabelsOnTop(): boolean {
+    return false;
+  }
+
+  supportsLabelLocales(): boolean {
     return false;
   }
 

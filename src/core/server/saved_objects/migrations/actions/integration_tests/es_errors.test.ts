@@ -10,7 +10,7 @@ import { ElasticsearchClient } from '../../../..';
 import { InternalCoreStart } from '../../../../internal_types';
 import * as kbnTestServer from '../../../../../test_helpers/kbn_server';
 import { Root } from '../../../../root';
-import { isWriteBlockException } from '../es_errors';
+import { isWriteBlockException, isClusterShardLimitExceeded } from '../es_errors';
 import { createIndex } from '../create_index';
 import { setWriteBlock } from '../set_write_block';
 
@@ -125,6 +125,38 @@ describe('Elasticsearch Errors', () => {
       const cause = res.items[0].create!.error! as estypes.ErrorCause;
 
       expect(isWriteBlockException(cause)).toEqual(true);
+    });
+  });
+  describe('isClusterShardLimitExceeded', () => {
+    beforeAll(async () => {
+      await client.cluster.putSettings({ persistent: { cluster: { max_shards_per_node: 1 } } });
+    });
+    afterAll(async () => {
+      await client.cluster.putSettings({ persistent: { cluster: { max_shards_per_node: null } } });
+    });
+
+    it('correctly identify errors from create index operation', async () => {
+      const res = await client.indices.create(
+        {
+          index: 'new_test_index',
+        },
+        { ignore: [400] }
+      );
+
+      // @ts-expect-error @elastic/elasticsearch doesn't declare error on response
+      expect(isClusterShardLimitExceeded(res.error)).toEqual(true);
+    });
+    it('correctly identify errors from clone index operation', async () => {
+      const res = await client.indices.clone(
+        {
+          index: 'existing_index_with_write_block',
+          target: 'new_test_index_2',
+        },
+        { ignore: [400] }
+      );
+
+      // @ts-expect-error @elastic/elasticsearch doesn't declare error on response
+      expect(isClusterShardLimitExceeded(res.error)).toEqual(true);
     });
   });
 });

@@ -28,20 +28,18 @@ import {
   EuiFormRow,
   EuiButtonEmpty,
   EuiSpacer,
-  EuiCheckbox,
   EuiForm,
   EuiSwitch,
   EuiText,
   EuiHorizontalRule,
 } from '@elastic/eui';
 
-import { CONTROL_LAYOUT_OPTIONS, CONTROL_WIDTH_OPTIONS } from './editor_constants';
+import { CONTROL_LAYOUT_OPTIONS } from './editor_constants';
 import { ControlGroupStrings } from '../control_group_strings';
-import { ControlStyle, ControlWidth } from '../../types';
+import { ControlStyle } from '../../types';
 import { ParentIgnoreSettings } from '../..';
-import { ControlsPanels } from '../types';
 import { ControlGroupInput } from '..';
-import { DEFAULT_CONTROL_WIDTH, getDefaultControlGroupInput } from '../../../common';
+import { getDefaultControlGroupInput } from '../../../common';
 
 interface EditControlGroupProps {
   initialInput: ControlGroupInput;
@@ -51,8 +49,7 @@ interface EditControlGroupProps {
   onClose: () => void;
 }
 
-type EditorControlGroupInput = ControlGroupInput &
-  Required<Pick<ControlGroupInput, 'defaultControlWidth'>>;
+type EditorControlGroupInput = ControlGroupInput;
 
 const editorControlGroupInputIsEqual = (a: ControlGroupInput, b: ControlGroupInput) =>
   fastIsEqual(a, b);
@@ -64,10 +61,7 @@ export const ControlGroupEditor = ({
   onDeleteAll,
   onClose,
 }: EditControlGroupProps) => {
-  const [resetAllWidths, setResetAllWidths] = useState(false);
-
   const [controlGroupEditorState, setControlGroupEditorState] = useState<EditorControlGroupInput>({
-    defaultControlWidth: DEFAULT_CONTROL_WIDTH,
     ...getDefaultControlGroupInput(),
     ...initialInput,
   });
@@ -97,19 +91,8 @@ export const ControlGroupEditor = ({
 
   const applyChangesToInput = useCallback(() => {
     const inputToApply = { ...controlGroupEditorState };
-    if (resetAllWidths) {
-      const newPanels = {} as ControlsPanels;
-      Object.entries(initialInput.panels).forEach(
-        ([id, panel]) =>
-          (newPanels[id] = {
-            ...panel,
-            width: inputToApply.defaultControlWidth,
-          })
-      );
-      inputToApply.panels = newPanels;
-    }
     if (!editorControlGroupInputIsEqual(inputToApply, initialInput)) updateInput(inputToApply);
-  }, [controlGroupEditorState, resetAllWidths, initialInput, updateInput]);
+  }, [controlGroupEditorState, initialInput, updateInput]);
 
   return (
     <>
@@ -132,37 +115,6 @@ export const ControlGroupEditor = ({
                 updateControlGroupEditorSetting({ controlStyle: newControlStyle as ControlStyle });
               }}
             />
-          </EuiFormRow>
-          <EuiSpacer size="m" />
-          <EuiFormRow label={ControlGroupStrings.management.getDefaultWidthTitle()}>
-            <>
-              <EuiButtonGroup
-                color="primary"
-                data-test-subj="control-group-default-size-options"
-                idSelected={controlGroupEditorState.defaultControlWidth}
-                legend={ControlGroupStrings.management.controlWidth.getWidthSwitchLegend()}
-                options={CONTROL_WIDTH_OPTIONS}
-                onChange={(newWidth: string) => {
-                  updateControlGroupEditorSetting({
-                    defaultControlWidth: newWidth as ControlWidth,
-                  });
-                }}
-              />
-              {controlCount > 0 && (
-                <>
-                  <EuiSpacer size="s" />
-                  <EuiCheckbox
-                    id="editControls_setAllSizesCheckbox"
-                    data-test-subj="set-all-control-sizes-checkbox"
-                    label={ControlGroupStrings.management.getSetAllWidthsToDefaultTitle()}
-                    checked={resetAllWidths}
-                    onChange={(e) => {
-                      setResetAllWidths(e.target.checked);
-                    }}
-                  />
-                </>
-              )}
-            </>
           </EuiFormRow>
           <EuiHorizontalRule margin="m" />
           <EuiFlexGroup>

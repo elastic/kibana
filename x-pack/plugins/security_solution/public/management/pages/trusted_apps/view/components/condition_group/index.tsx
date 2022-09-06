@@ -13,7 +13,7 @@ import { OperatingSystem } from '@kbn/securitysolution-utils';
 import { TrustedAppConditionEntry } from '../../../../../../../common/endpoint/types';
 import { AndOrBadge } from '../../../../../../common/components/and_or_badge';
 import { ConditionEntryInput, ConditionEntryInputProps } from '../condition_entry_input';
-import { useTestIdGenerator } from '../../../../../components/hooks/use_test_id_generator';
+import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
 
 const ConditionGroupFlexGroup = styled(EuiFlexGroup)`
   // The positioning of the 'and-badge' is done by using the EuiButton's height and adding on to it

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import type { CoreService } from '@kbn/core-base-browser-internal';
 import { IAnonymousPaths, IBasePath } from '..';
-import { CoreService } from '../../types';
 
 interface Deps {
   basePath: IBasePath;

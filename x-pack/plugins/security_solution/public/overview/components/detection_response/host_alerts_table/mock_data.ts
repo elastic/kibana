@@ -9,6 +9,9 @@ import { buildVulnerableHostAggregationQuery } from './use_host_alerts_items';
 
 export const mockVulnerableHostsBySeverityResult = {
   aggregations: {
+    host_count: {
+      value: 4,
+    },
     hostsBySeverity: {
       buckets: [
         {
@@ -119,6 +122,7 @@ export const mockQuery = () => ({
   query: buildVulnerableHostAggregationQuery({
     from: '2020-07-07T08:20:18.966Z',
     to: '2020-07-08T08:20:18.966Z',
+    currentPage: 0,
   }),
   indexName: 'signal-alerts',
   skip: false,

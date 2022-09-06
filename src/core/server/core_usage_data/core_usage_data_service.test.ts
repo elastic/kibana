@@ -13,8 +13,7 @@ import { TestScheduler } from 'rxjs/testing';
 // eslint-disable-next-line @kbn/imports/no_unresolvable_imports
 import { HotObservable } from 'rxjs/internal/testing/HotObservable';
 
-import { configServiceMock } from '../config/mocks';
-
+import { configServiceMock } from '@kbn/config-mocks';
 import { mockCoreContext } from '../core_context.mock';
 import { config as RawElasticsearchConfig } from '../elasticsearch/elasticsearch_config';
 import { config as RawHttpConfig } from '../http/http_config';

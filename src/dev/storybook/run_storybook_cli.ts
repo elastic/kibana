@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { run, createFlagError } from '@kbn/dev-utils';
+import { run } from '@kbn/dev-cli-runner';
+import { createFlagError } from '@kbn/dev-cli-errors';
 import { runStorybookCli } from '@kbn/storybook';
 import { storybookAliases } from './aliases';
 import { clean } from './commands/clean';

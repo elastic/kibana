@@ -10,7 +10,8 @@ import React from 'react';
 import { mount, shallow } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 
-import { IndexPattern, IAggType, AggGroupNames } from '@kbn/data-plugin/public';
+import { IAggType, AggGroupNames } from '@kbn/data-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import type { Schema } from '@kbn/visualizations-plugin/public';
 
 import { DefaultEditorAgg, DefaultEditorAggProps } from './agg';
@@ -41,7 +42,7 @@ describe('DefaultEditorAgg component', () => {
       agg: {
         id: '1',
         brandNew: true,
-        getIndexPattern: () => ({} as IndexPattern),
+        getIndexPattern: () => ({} as DataView),
         schema: 'metric',
         title: 'Metrics',
         params: {},

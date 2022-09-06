@@ -14,26 +14,23 @@ import {
   EuiAccordion,
   EuiAccordionProps,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useMutation } from 'react-query';
-import deepMerge from 'deepmerge';
 import styled from 'styled-components';
 
 import { pickBy, isEmpty, map } from 'lodash';
 import { convertECSMappingToObject } from '../../../common/schemas/common/utils';
-import { UseField, Form, FormData, useForm, useFormData, FIELD_TYPES } from '../../shared_imports';
+import { UseField, Form, FormData, useForm, useFormData } from '../../shared_imports';
 import { AgentsTableField } from './agents_table_field';
 import { LiveQueryQueryField } from './live_query_query_field';
 import { useKibana } from '../../common/lib/kibana';
 import { ResultTabs } from '../../routes/saved_queries/edit/tabs';
-import { queryFieldValidation } from '../../common/validations';
-import { fieldValidators } from '../../shared_imports';
 import { SavedQueryFlyout } from '../../saved_queries';
 import { useErrorToast } from '../../common/hooks/use_error_toast';
 import { ECSMappingEditorField } from '../../packs/queries/lazy_ecs_mapping_editor_field';
 import { SavedQueriesDropdown } from '../../saved_queries/saved_queries_dropdown';
+import { liveQueryFormSchema } from './schema';
 
 const FORM_ID = 'liveQueryForm';
 
@@ -43,8 +40,6 @@ const StyledEuiAccordion = styled(EuiAccordion)`
     color: ${({ theme }) => theme.eui.euiColorPrimary};
   }
 `;
-
-export const MAX_QUERY_LENGTH = 2000;
 
 const GhostFormField = () => <></>;
 
@@ -100,46 +95,9 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
     }
   );
 
-  const formSchema = {
-    agentSelection: {
-      defaultValue: {
-        agents: [],
-        allAgentsSelected: false,
-        platformsSelected: [],
-        policiesSelected: [],
-      },
-      type: FIELD_TYPES.JSON,
-      validations: [],
-    },
-    savedQueryId: {
-      type: FIELD_TYPES.TEXT,
-      validations: [],
-    },
-    query: {
-      type: FIELD_TYPES.TEXT,
-      validations: [
-        {
-          validator: fieldValidators.maxLengthField({
-            length: MAX_QUERY_LENGTH,
-            message: i18n.translate('xpack.osquery.liveQuery.queryForm.largeQueryError', {
-              defaultMessage: 'Query is too large (max {maxLength} characters)',
-              values: { maxLength: MAX_QUERY_LENGTH },
-            }),
-          }),
-        },
-        { validator: queryFieldValidation },
-      ],
-    },
-    ecs_mapping: {
-      defaultValue: [],
-      type: FIELD_TYPES.JSON,
-      validations: [],
-    },
-  };
-
   const { form } = useForm({
     id: FORM_ID,
-    schema: formSchema,
+    schema: liveQueryFormSchema,
     onSubmit: async (formData, isValid) => {
       if (isValid) {
         try {
@@ -151,8 +109,12 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
     options: {
       stripEmptyFields: false,
     },
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    serializer: ({ savedQueryId, ecs_mapping, ...formData }) =>
+    serializer: ({
+      savedQueryId,
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      ecs_mapping,
+      ...formData
+    }) =>
       pickBy(
         {
           ...formData,
@@ -161,31 +123,20 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
         },
         (value) => !isEmpty(value)
       ),
-    defaultValue: deepMerge(
-      {
-        agentSelection: {
-          agents: [],
-          allAgentsSelected: false,
-          platformsSelected: [],
-          policiesSelected: [],
-        },
-        query: '',
-        savedQueryId: null,
-        ecs_mapping: [],
-      },
-      defaultValue ?? {}
-    ),
   });
 
   const { updateFieldValues, setFieldValue, submit, isSubmitting } = form;
 
   const actionId = useMemo(() => data?.actions[0].action_id, [data?.actions]);
   const agentIds = useMemo(() => data?.actions[0].agents, [data?.actions]);
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  const [{ agentSelection, ecs_mapping, query, savedQueryId }] = useFormData({
-    form,
-    watch: ['agentSelection', 'ecs_mapping', 'query', 'savedQueryId'],
-  });
+  const [{ agentSelection, ecs_mapping: ecsMapping, query, savedQueryId }, formDataSerializer] =
+    useFormData({
+      form,
+    });
+
+  /* recalculate the form data when ecs_mapping changes */
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const serializedFormData = useMemo(() => formDataSerializer(), [ecsMapping, formDataSerializer]);
 
   const agentSelected = useMemo(
     () =>
@@ -260,8 +211,8 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
   );
 
   const flyoutFormDefaultValue = useMemo(
-    () => ({ savedQueryId, query, ecs_mapping }),
-    [savedQueryId, ecs_mapping, query]
+    () => ({ savedQueryId, query, ecs_mapping: serializedFormData.ecs_mapping }),
+    [savedQueryId, serializedFormData.ecs_mapping, query]
   );
 
   const handleToggle = useCallback((isOpen) => {
@@ -292,9 +243,9 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
                   disabled={isSavedQueryDisabled}
                   onChange={handleSavedQueryChange}
                 />
-                <EuiSpacer />
               </>
             )}
+            <UseField path="savedQueryId" component={GhostFormField} />
             <UseField
               path="query"
               component={LiveQueryQueryField}
@@ -424,7 +375,6 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
           <EuiFlexItem>{queryFieldStepContent}</EuiFlexItem>
           <EuiFlexItem>{resultsStepContent}</EuiFlexItem>
         </EuiFlexGroup>
-        <UseField path="savedQueryId" component={GhostFormField} />
       </Form>
       {showSavedQueryFlyout ? (
         <SavedQueryFlyout

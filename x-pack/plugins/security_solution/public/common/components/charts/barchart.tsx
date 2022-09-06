@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexItem } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { Chart, BarSeries, Axis, Position, ScaleType, Settings } from '@elastic/charts';
 import { getOr, get, isNumber } from 'lodash/fp';
@@ -32,6 +32,7 @@ import {
   WrappedByAutoSizer,
   useTheme,
   Wrapper,
+  ChartWrapper,
 } from './common';
 import { DraggableLegend } from './draggable_legend';
 import { LegendItem } from './draggable_legend_item';
@@ -210,7 +211,7 @@ export const BarChartComponent: React.FC<BarChartComponentProps> = ({
     <Wrapper>
       <HoverVisibilityContainer targetClassNames={[HISTOGRAM_ACTIONS_BUTTON_CLASS]}>
         {isValidSeriesExist && barChart && (
-          <EuiFlexGroup gutterSize="none">
+          <ChartWrapper gutterSize="none">
             <EuiFlexItem grow={true}>
               <WrappedByAutoSizer ref={measureRef} height={chartHeight}>
                 <BarChartBase
@@ -227,7 +228,7 @@ export const BarChartComponent: React.FC<BarChartComponentProps> = ({
             <LegendFlexItem grow={false}>
               <DraggableLegend legendItems={legendItems} height={height} />
             </LegendFlexItem>
-          </EuiFlexGroup>
+          </ChartWrapper>
         )}
         {!isValidSeriesExist && (
           <ChartPlaceHolder height={chartHeight} width={chartWidth} data={barChart} />

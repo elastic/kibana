@@ -19,6 +19,7 @@ import { termsOperation } from './terms';
 import { filtersOperation } from './filters';
 import { cardinalityOperation } from './cardinality';
 import { percentileOperation } from './percentile';
+import { percentileRanksOperation } from './percentile_ranks';
 import {
   minOperation,
   averageOperation,
@@ -65,6 +66,7 @@ export type { TermsIndexPatternColumn } from './terms';
 export type { FiltersIndexPatternColumn, Filter } from './filters';
 export type { CardinalityIndexPatternColumn } from './cardinality';
 export type { PercentileIndexPatternColumn } from './percentile';
+export type { PercentileRanksIndexPatternColumn } from './percentile_ranks';
 export type {
   MinIndexPatternColumn,
   AvgIndexPatternColumn,
@@ -104,6 +106,7 @@ const internalOperationDefinitions = [
   sumOperation,
   medianOperation,
   percentileOperation,
+  percentileRanksOperation,
   lastValueOperation,
   countOperation,
   rangeOperation,
@@ -127,6 +130,7 @@ export { filtersOperation } from './filters';
 export { dateHistogramOperation } from './date_histogram';
 export { minOperation, averageOperation, sumOperation, maxOperation } from './metrics';
 export { percentileOperation } from './percentile';
+export { percentileRanksOperation } from './percentile_ranks';
 export { countOperation } from './count';
 export { lastValueOperation } from './last_value';
 export {

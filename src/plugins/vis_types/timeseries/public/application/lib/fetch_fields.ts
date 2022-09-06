@@ -26,17 +26,21 @@ export async function fetchFields(
   try {
     const indexFields = await Promise.all(
       patterns.map(async (pattern) => {
-        if (typeof pattern !== 'string' && pattern?.id) {
-          return toSanitizedFieldType(
-            (await getDataViewsStart().get(pattern.id)).getNonScriptedFields()
-          );
-        } else {
-          return coreStart.http.get(ROUTES.FIELDS, {
-            query: {
-              index: `${pattern ?? ''}`,
-            },
-            signal,
-          });
+        try {
+          if (typeof pattern !== 'string' && pattern?.id) {
+            return toSanitizedFieldType(
+              (await getDataViewsStart().get(pattern.id)).getNonScriptedFields()
+            );
+          } else {
+            return coreStart.http.get(ROUTES.FIELDS, {
+              query: {
+                index: `${pattern ?? ''}`,
+              },
+              signal,
+            });
+          }
+        } catch (e) {
+          return [];
         }
       })
     );

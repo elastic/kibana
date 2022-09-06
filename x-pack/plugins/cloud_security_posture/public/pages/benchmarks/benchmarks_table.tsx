@@ -16,6 +16,7 @@ import React from 'react';
 import moment from 'moment';
 import { Link, useHistory, generatePath } from 'react-router-dom';
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { TABLE_COLUMN_HEADERS } from './translations';
 import type { Benchmark } from '../../../common/types';
 import { useKibana } from '../../common/hooks/use_kibana';
@@ -69,6 +70,18 @@ const BENCHMARKS_TABLE_COLUMNS: Array<EuiBasicTableColumn<Benchmark>> = [
     sortable: true,
   },
   {
+    field: 'rules',
+    name: TABLE_COLUMN_HEADERS.ACTIVE_RULES,
+    truncateText: true,
+    render: ({ enabled, all }: Benchmark['rules']) => (
+      <FormattedMessage
+        id="xpack.csp.benchmark.benchmarkTable.activeRulesColumnRenderTitle"
+        defaultMessage="{enabled} of {all}"
+        values={{ enabled, all }}
+      />
+    ),
+  },
+  {
     field: 'package_policy.package.title',
     name: TABLE_COLUMN_HEADERS.INTEGRATION_TYPE,
     dataType: 'string',
@@ -102,13 +115,6 @@ const BENCHMARKS_TABLE_COLUMNS: Array<EuiBasicTableColumn<Benchmark>> = [
     truncateText: true,
     render: (date: Benchmark['package_policy']['created_at']) => moment(date).fromNow(),
     sortable: true,
-  },
-  {
-    field: 'package_policy.rules', // TODO: add fields
-    name: TABLE_COLUMN_HEADERS.ACTIVE_RULES,
-    truncateText: true,
-    // render: (benchmarkIntegration) =>
-    //   `${benchmarkIntegration.rules.active} of ${benchmarkIntegration.rules.total}`,
   },
 ];
 

@@ -28,6 +28,7 @@ import {
   EVENT_RATE_FIELD_ID,
   mlCategory,
 } from '../../../../../../../../../common/types/fields';
+import { filterCategoryFields } from '../../../../../../../../../common/util/fields_utils';
 import { RichDetector } from '../../../../../common/job_creator/advanced_job_creator';
 import { ModalWrapper } from './modal_wrapper';
 import { detectorToString } from '../../../../../../../util/string_utils';
@@ -104,7 +105,7 @@ export const AdvancedDetectorModal: FC<Props> = ({
   // fields available for the selected agg
   const { currentFieldOptions, setCurrentFieldOptions } = useCurrentFieldOptions(
     detector.agg,
-    jobCreator.additionalFields,
+    filterCategoryFields(jobCreator.additionalFields, false),
     fields
   );
 

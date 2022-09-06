@@ -10,7 +10,7 @@ import { EuiButtonIcon } from '@elastic/eui';
 import { isEmpty } from 'lodash';
 import { useDispatch } from 'react-redux';
 
-import { AlertSummaryRow } from '../helpers';
+import { AlertSummaryRow, hasHoverOrRowActions } from '../helpers';
 import { inputsActions } from '../../../store/inputs';
 import { updateProviders } from '../../../../timelines/store/timeline/actions';
 import { sourcererActions } from '../../../store/actions';
@@ -66,7 +66,9 @@ const AddToTimelineCell = React.memo<AlertSummaryRow['description']>(
       }
     }, [dispatch, clearTimeline, actionCellConfig]);
 
-    const showButton = values != null && !isEmpty(actionCellConfig?.dataProvider);
+    const fieldHasActionsEnabled = hasHoverOrRowActions(data.field);
+    const showButton =
+      values != null && !isEmpty(actionCellConfig?.dataProvider) && fieldHasActionsEnabled;
 
     if (showButton) {
       return (

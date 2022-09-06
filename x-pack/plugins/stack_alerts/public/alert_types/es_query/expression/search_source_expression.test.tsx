@@ -10,22 +10,23 @@ import React from 'react';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
-import { DataPublicPluginStart, ISearchStart } from '@kbn/data-plugin/public';
 import { EsQueryAlertParams, SearchType } from '../types';
 import { SearchSourceExpression } from './search_source_expression';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { act } from 'react-dom/test-utils';
-import { EuiCallOut, EuiLoadingSpinner } from '@elastic/eui';
-import { ReactWrapper } from 'enzyme';
-
-const dataMock = dataPluginMock.createStartContract() as DataPublicPluginStart & {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  search: ISearchStart & { searchSource: { create: jest.MockedFunction<any> } };
-};
+import { of } from 'rxjs';
+import { IKibanaSearchResponse, ISearchSource } from '@kbn/data-plugin/common';
+import { IUiSettingsClient } from '@kbn/core/public';
+import { findTestSubject } from '@elastic/eui/lib/test';
+import { EuiLoadingSpinner } from '@elastic/eui';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
 const dataViewPluginMock = dataViewPluginMocks.createStartContract();
 const chartsStartMock = chartPluginMock.createStartContract();
 const unifiedSearchMock = unifiedSearchPluginMock.createStartContract();
+export const uiSettingsMock = {
+  get: jest.fn(),
+} as unknown as IUiSettingsClient;
 
 const defaultSearchSourceExpressionParams: EsQueryAlertParams<SearchType.searchSource> = {
   size: 100,
@@ -40,15 +41,68 @@ const defaultSearchSourceExpressionParams: EsQueryAlertParams<SearchType.searchS
 };
 
 const searchSourceMock = {
+  id: 'data_source6',
+  fields: {
+    query: {
+      query: '',
+      language: 'kuery',
+    },
+    filter: [],
+    index: {
+      id: '90943e30-9a47-11e8-b64d-95841ca0b247',
+      title: 'kibana_sample_data_logs',
+    },
+  },
   getField: (name: string) => {
     if (name === 'filter') {
       return [];
     }
     return '';
   },
+  setField: jest.fn(),
+  createCopy: jest.fn(() => {
+    return searchSourceMock;
+  }),
+  setParent: jest.fn(() => {
+    return searchSourceMock;
+  }),
+  fetch$: jest.fn(() => {
+    return of<IKibanaSearchResponse>({
+      rawResponse: {
+        hits: {
+          total: 1234,
+        },
+      },
+    });
+  }),
+} as unknown as ISearchSource;
+
+const savedQueryMock = {
+  id: 'test-id',
+  attributes: {
+    title: 'test-filter-set',
+    description: '',
+    query: {
+      query: 'category.keyword : "Men\'s Shoes" ',
+      language: 'kuery',
+    },
+    filters: [],
+  },
 };
 
-const setup = async (alertParams: EsQueryAlertParams<SearchType.searchSource>) => {
+const dataMock = dataPluginMock.createStartContract();
+(dataMock.search.searchSource.create as jest.Mock).mockImplementation(() =>
+  Promise.resolve(searchSourceMock)
+);
+(dataMock.dataViews.getIdsWithTitle as jest.Mock).mockImplementation(() => Promise.resolve([]));
+(dataMock.query.savedQueries.getSavedQuery as jest.Mock).mockImplementation(() =>
+  Promise.resolve(savedQueryMock)
+);
+dataMock.query.savedQueries.findSavedQueries = jest.fn(() =>
+  Promise.resolve({ total: 0, queries: [] })
+);
+
+const setup = (alertParams: EsQueryAlertParams<SearchType.searchSource>) => {
   const errors = {
     size: [],
     timeField: [],
@@ -56,68 +110,77 @@ const setup = async (alertParams: EsQueryAlertParams<SearchType.searchSource>) =
     searchConfiguration: [],
   };
 
-  const wrapper = mountWithIntl(
-    <SearchSourceExpression
-      ruleInterval="1m"
-      ruleThrottle="1m"
-      alertNotifyWhen="onThrottleInterval"
-      ruleParams={alertParams}
-      setRuleParams={() => {}}
-      setRuleProperty={() => {}}
-      errors={errors}
-      unifiedSearch={unifiedSearchMock}
-      data={dataMock}
-      dataViews={dataViewPluginMock}
-      defaultActionGroupId=""
-      actionGroups={[]}
-      charts={chartsStartMock}
-    />
+  return mountWithIntl(
+    <KibanaContextProvider services={{ data: dataMock, uiSettings: uiSettingsMock }}>
+      <SearchSourceExpression
+        ruleInterval="1m"
+        ruleThrottle="1m"
+        alertNotifyWhen="onThrottleInterval"
+        ruleParams={alertParams}
+        setRuleParams={() => {}}
+        setRuleProperty={() => {}}
+        errors={errors}
+        unifiedSearch={unifiedSearchMock}
+        data={dataMock}
+        dataViews={dataViewPluginMock}
+        defaultActionGroupId=""
+        actionGroups={[]}
+        charts={chartsStartMock}
+      />
+    </KibanaContextProvider>
   );
-
-  return wrapper;
 };
 
-const rerender = async (wrapper: ReactWrapper) => {
-  const update = async () =>
+describe('SearchSourceAlertTypeExpression', () => {
+  test('should render correctly', async () => {
+    let wrapper = setup(defaultSearchSourceExpressionParams);
+
+    expect(wrapper.find(EuiLoadingSpinner).exists()).toBeTruthy();
+
+    await act(async () => {
+      await nextTick();
+    });
+    wrapper = await wrapper.update();
+    expect(findTestSubject(wrapper, 'thresholdExpression')).toBeTruthy();
+  });
+  test('should show success message if Test Query is successful', async () => {
+    let wrapper = setup(defaultSearchSourceExpressionParams);
+    await act(async () => {
+      await nextTick();
+    });
+    wrapper = await wrapper.update();
+    await act(async () => {
+      findTestSubject(wrapper, 'testQuery').simulate('click');
+      wrapper.update();
+    });
+    wrapper = await wrapper.update();
+
     await act(async () => {
       await nextTick();
       wrapper.update();
     });
-  await update();
-};
 
-describe('SearchSourceAlertTypeExpression', () => {
-  test('should render loading prompt', async () => {
-    dataMock.search.searchSource.create.mockImplementation(() =>
-      Promise.resolve(() => searchSourceMock)
+    expect(wrapper.find('[data-test-subj="testQuerySuccess"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="testQueryError"]').exists()).toBeFalsy();
+    expect(wrapper.find('EuiText[data-test-subj="testQuerySuccess"]').text()).toEqual(
+      `Query matched 1234 documents in the last 15s.`
     );
-
-    const wrapper = await setup(defaultSearchSourceExpressionParams);
-
-    expect(wrapper.find(EuiLoadingSpinner).exists()).toBeTruthy();
   });
 
   test('should render error prompt', async () => {
-    dataMock.search.searchSource.create.mockImplementation(() =>
-      Promise.reject(() => 'test error')
+    (dataMock.search.searchSource.create as jest.Mock).mockImplementationOnce(() =>
+      Promise.reject(new Error('Cant find searchSource'))
     );
+    let wrapper = setup(defaultSearchSourceExpressionParams);
 
-    const wrapper = await setup(defaultSearchSourceExpressionParams);
-    await rerender(wrapper);
+    expect(wrapper.find(EuiLoadingSpinner).exists()).toBeTruthy();
+    expect(wrapper.text().includes('Cant find searchSource')).toBeFalsy();
 
-    expect(wrapper.find(EuiCallOut).exists()).toBeTruthy();
-  });
+    await act(async () => {
+      await nextTick();
+    });
+    wrapper = await wrapper.update();
 
-  test('should render SearchSourceAlertTypeExpression with expected components', async () => {
-    dataMock.search.searchSource.create.mockImplementation(() =>
-      Promise.resolve(() => searchSourceMock)
-    );
-
-    const wrapper = await setup(defaultSearchSourceExpressionParams);
-    await rerender(wrapper);
-
-    expect(wrapper.find('[data-test-subj="sizeValueExpression"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="thresholdExpression"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="forLastExpression"]').exists()).toBeTruthy();
+    expect(wrapper.text().includes('Cant find searchSource')).toBeTruthy();
   });
 });

@@ -24,7 +24,7 @@ const ES_TEST_INDEX_REFERENCE = '-na-';
 const ES_TEST_OUTPUT_INDEX_NAME = `${ES_TEST_INDEX_NAME}-output`;
 
 const ALERT_INTERVALS_TO_WRITE = 5;
-const ALERT_INTERVAL_SECONDS = 3;
+const ALERT_INTERVAL_SECONDS = 4;
 const ALERT_INTERVAL_MILLIS = ALERT_INTERVAL_SECONDS * 1000;
 const ES_GROUPS_TO_WRITE = 3;
 
@@ -37,8 +37,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
   const esTestIndexTool = new ESTestIndexTool(es, retry);
   const esTestIndexToolOutput = new ESTestIndexTool(es, retry, ES_TEST_OUTPUT_INDEX_NAME);
 
-  // FLAKY: https://github.com/elastic/kibana/issues/129380
-  describe.skip('alert', async () => {
+  describe('alert', async () => {
     let endDate: string;
     let actionId: string;
     const objectRemover = new ObjectRemover(supertest);
@@ -138,7 +137,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
           expect(name).to.be('always fire');
           expect(title).to.be(`alert 'always fire' matched query`);
           const messagePattern =
-            /alert 'always fire' is active:\n\n- Value: \d+\n- Conditions Met: Number of matching documents is greater than -1 over 15s\n- Timestamp: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
+            /alert 'always fire' is active:\n\n- Value: \d+\n- Conditions Met: Number of matching documents is greater than -1 over 20s\n- Timestamp: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
           expect(message).to.match(messagePattern);
           expect(hits).not.to.be.empty();
 
@@ -230,7 +229,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
           expect(name).to.be('always fire');
           expect(title).to.be(`alert 'always fire' matched query`);
           const messagePattern =
-            /alert 'always fire' is active:\n\n- Value: \d+\n- Conditions Met: Number of matching documents is greater than -1 over 15s\n- Timestamp: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
+            /alert 'always fire' is active:\n\n- Value: \d+\n- Conditions Met: Number of matching documents is greater than -1 over 20s\n- Timestamp: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
           expect(message).to.match(messagePattern);
           expect(hits).not.to.be.empty();
 
@@ -340,7 +339,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
           expect(name).to.be('fires once');
           expect(title).to.be(`alert 'fires once' matched query`);
           const messagePattern =
-            /alert 'fires once' is active:\n\n- Value: \d+\n- Conditions Met: Number of matching documents is greater than or equal to 0 over 15s\n- Timestamp: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
+            /alert 'fires once' is active:\n\n- Value: \d+\n- Conditions Met: Number of matching documents is greater than or equal to 0 over 20s\n- Timestamp: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
           expect(message).to.match(messagePattern);
           expect(hits).not.to.be.empty();
           expect(previousTimestamp).to.be.empty();
@@ -400,7 +399,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
           expect(name).to.be('always fire');
           expect(title).to.be(`alert 'always fire' matched query`);
           const messagePattern =
-            /alert 'always fire' is active:\n\n- Value: 0+\n- Conditions Met: Number of matching documents is less than 1 over 15s\n- Timestamp: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
+            /alert 'always fire' is active:\n\n- Value: 0+\n- Conditions Met: Number of matching documents is less than 1 over 20s\n- Timestamp: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
           expect(message).to.match(messagePattern);
           expect(hits).to.be.empty();
 

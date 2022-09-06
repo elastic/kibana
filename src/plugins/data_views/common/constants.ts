@@ -6,6 +6,10 @@
  * Side Public License, v 1.
  */
 
+/**
+ * All runtime field types.
+ * @public
+ */
 export const RUNTIME_FIELD_TYPES = [
   'keyword',
   'long',
@@ -32,9 +36,20 @@ export const DEFAULT_ASSETS_TO_IGNORE = {
   METRICS_ENDPOINT_INDEX_TO_IGNORE: 'metrics-endpoint.metadata_current_default', // ignore index created by Fleet endpoint package installed by default in Cloud
 };
 
+/**
+ * UiSettings key for metaFields list.
+ * @public
+ */
 export const META_FIELDS = 'metaFields';
 
-/** @public **/
+/**
+ * Data view saved object type.
+ * @public
+ */
 export const DATA_VIEW_SAVED_OBJECT_TYPE = 'index-pattern';
 
+/**
+ * Data views plugin name.
+ * @public
+ */
 export const PLUGIN_NAME = 'DataViews';

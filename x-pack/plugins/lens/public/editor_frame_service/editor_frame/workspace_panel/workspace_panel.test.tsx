@@ -492,6 +492,42 @@ describe('workspace_panel', () => {
     expect(trigger.exec).toHaveBeenCalledWith({ data: { ...eventData, timeFieldName: undefined } });
   });
 
+  it('should call getTriggerCompatibleActions on hasCompatibleActions call from within renderer', async () => {
+    const framePublicAPI = createMockFramePublicAPI();
+    framePublicAPI.datasourceLayers = {
+      first: mockDatasource.publicAPIMock,
+    };
+    mockDatasource.toExpression.mockReturnValue('datasource');
+    mockDatasource.getLayers.mockReturnValue(['first']);
+    const props = defaultProps;
+
+    const mounted = await mountWithProvider(
+      <WorkspacePanel
+        {...props}
+        datasourceMap={{
+          testDatasource: mockDatasource,
+        }}
+        framePublicAPI={framePublicAPI}
+        visualizationMap={{
+          testVis: { ...mockVisualization, toExpression: () => 'testVis' },
+        }}
+        ExpressionRenderer={expressionRendererMock}
+        plugins={{ ...props.plugins, uiActions: uiActionsMock }}
+      />
+    );
+    instance = mounted.instance;
+
+    const hasCompatibleActions = expressionRendererMock.mock.calls[0][0].hasCompatibleActions!;
+
+    const eventData = { myData: true, table: { rows: [], columns: [] }, column: 0 };
+    hasCompatibleActions({ name: 'filter', data: eventData });
+
+    expect(uiActionsMock.getTriggerCompatibleActions).toHaveBeenCalledWith(
+      VIS_EVENT_TO_TRIGGER.filter,
+      expect.objectContaining({ data: eventData })
+    );
+  });
+
   it('should push add current data table to state on data$ emitting value', async () => {
     const framePublicAPI = createMockFramePublicAPI();
     framePublicAPI.datasourceLayers = {

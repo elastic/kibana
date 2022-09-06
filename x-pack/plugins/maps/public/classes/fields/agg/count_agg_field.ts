@@ -5,6 +5,11 @@
  * 2.0.
  */
 
+import type {
+  AggregationsExtendedStatsAggregation,
+  AggregationsPercentilesAggregation,
+  AggregationsTermsAggregation,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { DataView } from '@kbn/data-plugin/common';
 import { IESAggSource } from '../../sources/es_agg_source';
 import { IVectorSource } from '../../sources/vector_source';
@@ -100,15 +105,22 @@ export class CountAggField implements IESAggField {
     return false;
   }
 
-  async getExtendedStatsFieldMetaRequest(): Promise<unknown | null> {
+  async getExtendedStatsFieldMetaRequest(): Promise<Record<
+    string,
+    { extended_stats: AggregationsExtendedStatsAggregation }
+  > | null> {
     return null;
   }
 
-  async getPercentilesFieldMetaRequest(percentiles: number[]): Promise<unknown | null> {
+  async getPercentilesFieldMetaRequest(
+    percentiles: number[]
+  ): Promise<Record<string, { percentiles: AggregationsPercentilesAggregation }> | null> {
     return null;
   }
 
-  async getCategoricalFieldMetaRequest(size: number): Promise<unknown> {
+  async getCategoricalFieldMetaRequest(
+    size: number
+  ): Promise<Record<string, { terms: AggregationsTermsAggregation }> | null> {
     return null;
   }
 

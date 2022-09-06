@@ -23,7 +23,7 @@ import { wrapErrorAndRejectPromise } from './utils';
 const defaultFleetAgentGenerator = new FleetAgentGenerator();
 
 export interface IndexedFleetAgentResponse {
-  agents: Agent[];
+  agents: Array<Agent & FleetServerAgent>;
   fleetAgentsIndex: string;
 }
 

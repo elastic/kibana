@@ -109,7 +109,9 @@ export const getCommandListMock = (): CommandDefinition[] => {
       if (status !== 'success') {
         new Promise((r) => setTimeout(r, 500)).then(() => {
           setStatus('success');
-          setStore({ foo: 'bar' });
+          setStore((prevState) => {
+            return { foo: 'bar' };
+          });
         });
       }
     }, [setStatus, setStore, status]);

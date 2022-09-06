@@ -9,7 +9,7 @@ const basePath = '/app/apm/settings/custom-links';
 
 describe('Custom links', () => {
   beforeEach(() => {
-    cy.loginAsPowerUser();
+    cy.loginAsEditorUser();
   });
 
   it('shows empty message and create button', () => {

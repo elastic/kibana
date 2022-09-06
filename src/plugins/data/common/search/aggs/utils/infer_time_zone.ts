@@ -7,12 +7,12 @@
  */
 
 import moment from 'moment';
-import { IndexPattern } from '../../..';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { AggParamsDateHistogram } from '../buckets';
 
 export function inferTimeZone(
   params: AggParamsDateHistogram,
-  indexPattern: IndexPattern,
+  indexPattern: DataView,
   isDefaultTimezone: () => boolean,
   getConfig: <T = any>(key: string) => T
 ) {

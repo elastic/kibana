@@ -72,6 +72,12 @@ export interface IRuleDataService {
    * Note: features are used in RBAC.
    */
   findIndexByFeature(featureId: ValidFeatureId, dataset: Dataset): IndexInfo | null;
+
+  /**
+   * Looks up Kibana "feature" associated with the given registration context.
+   * Note: features are used in RBAC.
+   */
+  findFeatureIdsByRegistrationContexts(registrationContexts: string[]): string[];
 }
 
 // TODO: This is a leftover. Remove its usage from the "observability" plugin and delete it.
@@ -89,6 +95,7 @@ interface ConstructorOptions {
 export class RuleDataService implements IRuleDataService {
   private readonly indicesByBaseName: Map<string, IndexInfo>;
   private readonly indicesByFeatureId: Map<string, IndexInfo[]>;
+  private readonly registrationContextByFeatureId: Map<string, string>;
   private readonly resourceInstaller: IResourceInstaller;
   private installCommonResources: Promise<Either<Error, 'ok'>>;
   private isInitialized: boolean;
@@ -96,6 +103,7 @@ export class RuleDataService implements IRuleDataService {
   constructor(private readonly options: ConstructorOptions) {
     this.indicesByBaseName = new Map();
     this.indicesByFeatureId = new Map();
+    this.registrationContextByFeatureId = new Map();
     this.resourceInstaller = new ResourceInstaller({
       getResourceName: (name) => this.getResourceName(name),
       getClusterClient: options.getClusterClient,
@@ -162,6 +170,8 @@ export class RuleDataService implements IRuleDataService {
     this.indicesByFeatureId.set(indexOptions.feature, [...indicesAssociatedWithFeature, indexInfo]);
     this.indicesByBaseName.set(indexInfo.baseName, indexInfo);
 
+    this.registrationContextByFeatureId.set(registrationContext, indexOptions.feature);
+
     const waitUntilClusterClientAvailable = async (): Promise<WaitResult> => {
       try {
         const clusterClient = await this.options.getClusterClient();
@@ -212,6 +222,17 @@ export class RuleDataService implements IRuleDataService {
   public findIndexByName(registrationContext: string, dataset: Dataset): IndexInfo | null {
     const baseName = this.getResourceName(`${registrationContext}.${dataset}`);
     return this.indicesByBaseName.get(baseName) ?? null;
+  }
+
+  public findFeatureIdsByRegistrationContexts(registrationContexts: string[]): string[] {
+    const featureIds: string[] = [];
+    registrationContexts.forEach((rc) => {
+      const featureId = this.registrationContextByFeatureId.get(rc);
+      if (featureId) {
+        featureIds.push(featureId);
+      }
+    });
+    return featureIds;
   }
 
   public findIndexByFeature(featureId: ValidFeatureId, dataset: Dataset): IndexInfo | null {

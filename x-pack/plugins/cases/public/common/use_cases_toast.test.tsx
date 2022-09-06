@@ -72,7 +72,7 @@ describe('Use cases toast hook', () => {
       validateTitle('Custom title');
     });
 
-    it('should display the alert sync title when called with an alert attachment ', () => {
+    it('should display the alert sync title when called with an alert attachment (1 alert)', () => {
       const { result } = renderHook(
         () => {
           return useCasesToast();
@@ -84,6 +84,25 @@ describe('Use cases toast hook', () => {
         attachments: [alertComment as SupportedCaseAttachment],
       });
       validateTitle('An alert was added to "Another horrible breach!!');
+    });
+
+    it('should display the alert sync title when called with an alert attachment (multiple alerts)', () => {
+      const { result } = renderHook(
+        () => {
+          return useCasesToast();
+        },
+        { wrapper: TestProviders }
+      );
+      const alert = {
+        ...alertComment,
+        alertId: ['1234', '54321'],
+      } as SupportedCaseAttachment;
+
+      result.current.showSuccessAttach({
+        theCase: mockCase,
+        attachments: [alert],
+      });
+      validateTitle('Alerts were added to "Another horrible breach!!');
     });
 
     it('should display a generic title when called with a non-alert attachament', () => {

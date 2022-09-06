@@ -11,6 +11,7 @@ import { Subscription } from 'rxjs';
 import { IUiSettingsClient } from '@kbn/core/public';
 import { ExpressionsServiceSetup } from '@kbn/expressions-plugin/common';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { DataViewsContract } from '@kbn/data-views-plugin/common';
 import { calculateBounds, TimeRange } from '../../../common';
 import {
   aggsRequiredUiSettings,
@@ -20,7 +21,6 @@ import {
   AggTypesDependencies,
 } from '../../../common/search/aggs';
 import { AggsSetup, AggsStart } from './types';
-import { IndexPatternsContract } from '../..';
 import { NowProviderInternalContract } from '../../now_provider';
 
 /**
@@ -59,7 +59,7 @@ export interface AggsSetupDependencies {
 export interface AggsStartDependencies {
   fieldFormats: FieldFormatsStart;
   uiSettings: IUiSettingsClient;
-  indexPatterns: IndexPatternsContract;
+  indexPatterns: DataViewsContract;
 }
 
 /**

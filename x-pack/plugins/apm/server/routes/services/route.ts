@@ -52,7 +52,7 @@ import { ConnectionStatsItemWithImpact } from '../../../common/connections';
 import { getSortedAndFilteredServices } from './get_services/get_sorted_and_filtered_services';
 import { ServiceHealthStatus } from '../../../common/service_health_status';
 import { getServiceGroup } from '../service_groups/get_service_group';
-import { offsetRt } from '../../../common/offset_rt';
+import { offsetRt } from '../../../common/comparison_rt';
 
 const servicesRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/services',
@@ -1118,8 +1118,10 @@ const serviceProfilingStatisticsRoute = createApmServerRoute({
   },
 });
 
+// TODO: remove this endpoint in favour of
 const serviceInfrastructureRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/services/{serviceName}/infrastructure',
+  endpoint:
+    'GET /internal/apm/services/{serviceName}/infrastructure_attributes_for_logs',
   params: t.type({
     path: t.type({
       serviceName: t.string,
@@ -1159,7 +1161,11 @@ const serviceAnomalyChartsRoute = createApmServerRoute({
     path: t.type({
       serviceName: t.string,
     }),
-    query: t.intersection([rangeRt, t.type({ transactionType: t.string })]),
+    query: t.intersection([
+      rangeRt,
+      environmentRt,
+      t.type({ transactionType: t.string }),
+    ]),
   }),
   options: {
     tags: ['access:apm'],
@@ -1179,7 +1185,7 @@ const serviceAnomalyChartsRoute = createApmServerRoute({
 
     const {
       path: { serviceName },
-      query: { start, end, transactionType },
+      query: { start, end, transactionType, environment },
     } = resources.params;
 
     try {
@@ -1190,6 +1196,7 @@ const serviceAnomalyChartsRoute = createApmServerRoute({
         end,
         mlSetup: setup.ml,
         logger: resources.logger,
+        environment,
       });
 
       return {

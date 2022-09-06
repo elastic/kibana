@@ -86,6 +86,7 @@ describe('test actions handlers', () => {
         id: 'agent',
       }),
       createAgentAction: jest.fn().mockReturnValueOnce(agentAction),
+      cancelAgentAction: jest.fn(),
     } as jest.Mocked<ActionsService>;
 
     const postNewAgentActionHandler = postNewAgentActionHandlerBuilder(actionsService);

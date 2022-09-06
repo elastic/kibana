@@ -30,6 +30,7 @@ import {
   SecurityPageName,
   APP_HOST_ISOLATION_EXCEPTIONS_PATH,
   APP_USERS_PATH,
+  APP_KUBERNETES_PATH,
   APP_LANDING_PATH,
 } from '../../../common/constants';
 
@@ -96,6 +97,13 @@ export const navTabs: SecurityNav = {
     href: APP_NETWORK_PATH,
     disabled: false,
     urlKey: 'network',
+  },
+  [SecurityPageName.kubernetes]: {
+    id: SecurityPageName.kubernetes,
+    name: i18n.KUBERNETES,
+    href: APP_KUBERNETES_PATH,
+    disabled: false,
+    urlKey: 'kubernetes',
   },
   [SecurityPageName.timelines]: {
     id: SecurityPageName.timelines,

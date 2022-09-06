@@ -32,6 +32,7 @@ export class CspPlugin
     core.application.register({
       id: PLUGIN_ID,
       title: PLUGIN_NAME,
+      euiIconType: 'logoSecurity',
       category: DEFAULT_APP_CATEGORIES.security,
       async mount(params: AppMountParameters) {
         // Load application bundle

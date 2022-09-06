@@ -9,7 +9,7 @@ import React, { memo } from 'react';
 import { CommonProps, EuiText, EuiPanel } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ConditionGroup, ConditionGroupProps } from '../condition_group';
-import { useTestIdGenerator } from '../../../../../components/hooks/use_test_id_generator';
+import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
 
 export type LogicalConditionBuilderProps = CommonProps & ConditionGroupProps;
 export const LogicalConditionBuilder = memo<LogicalConditionBuilderProps>(

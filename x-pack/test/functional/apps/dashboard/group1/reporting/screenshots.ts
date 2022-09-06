@@ -24,14 +24,21 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const reporting = getService('reporting');
   const ecommerceSOPath = 'x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce.json';
 
+  const loadEcommerce = async () => {
+    await esArchiver.load('x-pack/test/functional/es_archives/reporting/ecommerce');
+    await kibanaServer.importExport.load(ecommerceSOPath);
+    await kibanaServer.uiSettings.replace({
+      defaultIndex: '5193f870-d861-11e9-a311-0fa548c5f953',
+    });
+  };
+  const unloadEcommerce = async () => {
+    await esArchiver.unload('x-pack/test/functional/es_archives/reporting/ecommerce');
+    await kibanaServer.importExport.unload(ecommerceSOPath);
+  };
+
   describe('Dashboard Reporting Screenshots', () => {
     before('initialize tests', async () => {
-      await kibanaServer.uiSettings.replace({
-        defaultIndex: '5193f870-d861-11e9-a311-0fa548c5f953',
-      });
-
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/reporting/ecommerce');
-      await kibanaServer.importExport.load(ecommerceSOPath);
+      await loadEcommerce();
       await browser.setWindowSize(1600, 850);
 
       await security.role.create('test_dashboard_user', {
@@ -39,7 +46,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           cluster: [],
           indices: [
             {
-              names: ['ecommerce'],
+              names: ['ecommerce', 'kibana_sample_data_ecommerce'],
               privileges: ['read'],
               field_security: { grant: ['*'], except: [] },
             },
@@ -61,8 +68,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       ]);
     });
     after('clean up archives', async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/reporting/ecommerce');
-      await kibanaServer.importExport.unload(ecommerceSOPath);
+      await unloadEcommerce();
       await es.deleteByQuery({
         index: '.reporting-*',
         refresh: true,
@@ -88,6 +94,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     describe('Print Layout', () => {
+      before(async () => {
+        await loadEcommerce();
+      });
+      after(async () => {
+        await unloadEcommerce();
+      });
+
       it('downloads a PDF file', async function () {
         // Generating and then comparing reports can take longer than the default 60s timeout because the comparePngs
         // function is taking about 15 seconds per comparison in jenkins.
@@ -107,6 +120,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     describe('Print PNG button', () => {
+      before(async () => {
+        await loadEcommerce();
+      });
+      after(async () => {
+        await unloadEcommerce();
+      });
+
       it('is available if new', async () => {
         await PageObjects.common.navigateToApp('dashboard');
         await PageObjects.dashboard.clickNewDashboard();
@@ -123,7 +143,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     describe('PNG Layout', () => {
-      it('downloads a PNG file: small dashboard', async function () {
+      before(async () => {
+        await loadEcommerce();
+      });
+      after(async () => {
+        await unloadEcommerce();
+      });
+
+      it('PNG file matches the baseline: small dashboard', async function () {
         this.timeout(300000);
 
         await PageObjects.common.navigateToApp('dashboard');
@@ -152,7 +179,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(percentDiff).to.be.lessThan(0.09);
       });
 
-      it('downloads a PNG file: large dashboard', async function () {
+      it('PNG file matches the baseline: large dashboard', async function () {
         this.timeout(300000);
 
         await PageObjects.common.navigateToApp('dashboard');
@@ -183,6 +210,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     describe('Preserve Layout', () => {
+      before(async () => {
+        await loadEcommerce();
+      });
+      after(async () => {
+        await unloadEcommerce();
+      });
+
       it('downloads a PDF file: small dashboard', async function () {
         this.timeout(300000);
         await PageObjects.common.navigateToApp('dashboard');
@@ -225,6 +259,58 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(res.status).to.equal(200);
         expect(res.get('content-type')).to.equal('application/pdf');
         await kibanaServer.uiSettings.replace({});
+      });
+    });
+
+    describe('Sample data from Kibana 7.6', () => {
+      const reportFileName = 'sample_data_ecommerce_76';
+      let sessionReportPath: string;
+
+      before(async () => {
+        await kibanaServer.uiSettings.replace({
+          defaultIndex: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
+        });
+
+        await esArchiver.load('x-pack/test/functional/es_archives/reporting/ecommerce_76');
+        await kibanaServer.importExport.load(
+          'x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce_76.json'
+        );
+
+        await PageObjects.common.navigateToApp('dashboard');
+        await PageObjects.dashboard.loadSavedDashboard('[K7.6-eCommerce] Revenue Dashboard');
+
+        await PageObjects.reporting.openPngReportingPanel();
+        await PageObjects.reporting.forceSharedItemsContainerSize({ width: 1405 });
+        await PageObjects.reporting.clickGenerateReportButton();
+        await PageObjects.reporting.removeForceSharedItemsContainerSize();
+
+        const url = await PageObjects.reporting.getReportURL(60000);
+        const reportData = await PageObjects.reporting.getRawPdfReportData(url);
+        sessionReportPath = await PageObjects.reporting.writeSessionReport(
+          reportFileName,
+          'png',
+          reportData,
+          REPORTS_FOLDER
+        );
+      });
+
+      after(async () => {
+        await esArchiver.unload('x-pack/test/functional/es_archives/reporting/ecommerce_76');
+        await kibanaServer.importExport.unload(
+          'x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce_76.json'
+        );
+      });
+
+      it('PNG file matches the baseline image', async function () {
+        this.timeout(300000);
+        const percentDiff = await reporting.checkIfPngsMatch(
+          sessionReportPath,
+          PageObjects.reporting.getBaselineReportPath(reportFileName, 'png', REPORTS_FOLDER),
+          config.get('screenshots.directory'),
+          log
+        );
+
+        expect(percentDiff).to.be.lessThan(0.09);
       });
     });
   });

@@ -26,12 +26,12 @@ interface SaveDashboardOptions {
 }
 
 export class DashboardPageObject extends FtrService {
+  private readonly config = this.ctx.getService('config');
   private readonly log = this.ctx.getService('log');
   private readonly find = this.ctx.getService('find');
   private readonly retry = this.ctx.getService('retry');
   private readonly browser = this.ctx.getService('browser');
   private readonly globalNav = this.ctx.getService('globalNav');
-  private readonly esArchiver = this.ctx.getService('esArchiver');
   private readonly kibanaServer = this.ctx.getService('kibanaServer');
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly dashboardAddPanel = this.ctx.getService('dashboardAddPanel');
@@ -39,16 +39,24 @@ export class DashboardPageObject extends FtrService {
   private readonly listingTable = this.ctx.getService('listingTable');
   private readonly elasticChart = this.ctx.getService('elasticChart');
   private readonly common = this.ctx.getPageObject('common');
+  private readonly esArchiver = this.ctx.getService('esArchiver');
   private readonly header = this.ctx.getPageObject('header');
   private readonly visualize = this.ctx.getPageObject('visualize');
   private readonly discover = this.ctx.getPageObject('discover');
+  private readonly logstashIndex = this.config.get('esTestCluster.ccs')
+    ? 'ftr-remote:logstash-*'
+    : 'logstash-*';
+  private readonly kibanaIndex = this.config.get('esTestCluster.ccs')
+    ? 'test/functional/fixtures/kbn_archiver/ccs/dashboard/legacy/legacy.json'
+    : 'test/functional/fixtures/es_archiver/dashboard/legacy';
 
-  async initTests({
-    kibanaIndex = 'test/functional/fixtures/es_archiver/dashboard/legacy',
-    defaultIndex = 'logstash-*',
-  } = {}) {
+  async initTests({ kibanaIndex = this.kibanaIndex, defaultIndex = this.logstashIndex } = {}) {
     this.log.debug('load kibana index with visualizations and log data');
-    await this.esArchiver.load(kibanaIndex);
+    if (this.config.get('esTestCluster.ccs')) {
+      await this.kibanaServer.importExport.load(kibanaIndex);
+    } else {
+      await this.esArchiver.loadIfNeeded(kibanaIndex);
+    }
     await this.kibanaServer.uiSettings.replace({ defaultIndex });
     await this.common.navigateToApp('dashboard');
   }

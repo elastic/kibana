@@ -14,6 +14,7 @@ import {
   EuiFlexItem,
   EuiText,
   EuiBasicTableColumn,
+  EuiToolTip,
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
@@ -145,6 +146,16 @@ const SavedQueriesPageComponent = () => {
     return updatedAt ? `${moment(updatedAt).fromNow()}${updatedBy}` : '-';
   }, []);
 
+  const renderDescriptionColumn = useCallback((description?: string) => {
+    const content =
+      description && description.length > 80 ? `${description?.substring(0, 80)}...` : description;
+
+    return (
+      <EuiToolTip content={<EuiFlexItem>{description}</EuiFlexItem>}>
+        <EuiFlexItem grow={false}>{content}</EuiFlexItem>
+      </EuiToolTip>
+    );
+  }, []);
   const columns: Array<EuiBasicTableColumn<SavedQuerySO>> = useMemo(
     () => [
       {
@@ -154,19 +165,22 @@ const SavedQueriesPageComponent = () => {
         }),
         sortable: (item) => item.attributes.id.toLowerCase(),
         truncateText: true,
+        width: '15%',
       },
       {
         field: 'attributes.description',
         name: i18n.translate('xpack.osquery.savedQueries.table.descriptionColumnTitle', {
           defaultMessage: 'Description',
         }),
-        truncateText: true,
+        render: renderDescriptionColumn,
+        width: '50%',
       },
       {
         field: 'attributes.created_by',
         name: i18n.translate('xpack.osquery.savedQueries.table.createdByColumnTitle', {
           defaultMessage: 'Created by',
         }),
+        width: '15%',
         sortable: true,
         truncateText: true,
       },
@@ -175,6 +189,7 @@ const SavedQueriesPageComponent = () => {
         name: i18n.translate('xpack.osquery.savedQueries.table.updatedAtColumnTitle', {
           defaultMessage: 'Last updated at',
         }),
+        width: '10%',
         sortable: (item) =>
           item.attributes.updated_at ? Date.parse(item.attributes.updated_at) : 0,
         truncateText: true,
@@ -187,7 +202,7 @@ const SavedQueriesPageComponent = () => {
         actions: [{ render: renderPlayAction }, { render: renderEditAction }],
       },
     ],
-    [renderEditAction, renderPlayAction, renderUpdatedAt]
+    [renderDescriptionColumn, renderEditAction, renderPlayAction, renderUpdatedAt]
   );
 
   const onTableChange = useCallback(({ page = {}, sort = {} }) => {

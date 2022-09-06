@@ -18,14 +18,16 @@ import {
 } from '@elastic/eui';
 import styled from 'styled-components';
 import * as i18n from './translations';
-import endpointSvg from '../../images/endpoint.svg';
-import siemPng from '../../images/siem.png';
+import endpointSvg from '../../images/endpoint1.svg';
+import cloudSvg from '../../images/cloud1.svg';
+import siemSvg from '../../images/siem1.svg';
 import videoSvg from '../../images/video.svg';
 import { ADD_DATA_PATH } from '../../../../common/constants';
 import { useKibana } from '../../lib/kibana';
 
 const imgUrls = {
-  siem: siemPng,
+  cloud: cloudSvg,
+  siem: siemSvg,
   video: videoSvg,
   endpoint: endpointSvg,
 };
@@ -115,7 +117,7 @@ export const LandingCards = memo(() => {
         </EuiFlexGroup>
       </EuiFlexItem>
       <StyledEuiFlexItem>
-        <EuiFlexGroup gutterSize="xl">
+        <EuiFlexGroup gutterSize="m">
           <EuiFlexItem>
             <StyledImgEuiCard
               hasBorder
@@ -132,6 +134,15 @@ export const LandingCards = memo(() => {
               image={imgUrls.endpoint}
               textAlign="center"
               title={i18n.ENDPOINT_TITLE}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <StyledImgEuiCard
+              hasBorder
+              description={i18n.CLOUD_CARD_DESCRIPTION}
+              image={imgUrls.cloud}
+              textAlign="center"
+              title={i18n.CLOUD_CARD_TITLE}
             />
           </EuiFlexItem>
         </EuiFlexGroup>

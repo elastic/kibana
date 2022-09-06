@@ -1014,6 +1014,13 @@ exports[`APM telemetry helpers getApmTelemetry generates a JSON object with the 
                         }
                       }
                     },
+                    "service_groups": {
+                      "properties": {
+                        "kuery_fields": {
+                          "type": "keyword"
+                        }
+                      }
+                    },
                     "tasks": {
                       "properties": {
                         "aggregated_transactions": {
@@ -1149,6 +1156,17 @@ exports[`APM telemetry helpers getApmTelemetry generates a JSON object with the 
                           }
                         },
                         "environments": {
+                          "properties": {
+                            "took": {
+                              "properties": {
+                                "ms": {
+                                  "type": "long"
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "service_groups": {
                           "properties": {
                             "took": {
                               "properties": {

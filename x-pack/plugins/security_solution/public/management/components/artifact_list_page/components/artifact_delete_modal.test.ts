@@ -6,7 +6,7 @@
  */
 
 import { AppContextTestRender } from '../../../../common/mock/endpoint';
-import { trustedAppsAllHttpMocks } from '../../../pages/mocks';
+import { trustedAppsAllHttpMocks } from '../../../mocks';
 import {
   ArtifactListPageRenderingSetup,
   getArtifactListPageRenderingSetup,

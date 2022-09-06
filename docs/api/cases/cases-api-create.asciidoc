@@ -140,6 +140,10 @@ An object that contains the case settings.
 (Required, boolean) Turns alert syncing on or off.
 ====
 
+`severity`::
+(Optional,string) The severity of the case. Valid values are: `critical`, `high`,
+`low`, and `medium`.
+
 `tags`::
 (Required, string array) The words and phrases that help
 categorize cases. It can be an empty array.
@@ -205,6 +209,8 @@ the case identifier, version, and creation time. For example:
   },
   "owner": "securitySolution",
   "description": "James Bond clicked on a highly suspicious email banner advertising cheap holidays for underpaid civil servants. Operation bubblegum is active. Repeat - operation bubblegum is now active",
+  "duration": null,
+  "severity": "low",
   "closed_at": null,
   "closed_by": null,
   "created_at": "2022-05-13T09:16:17.416Z",

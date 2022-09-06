@@ -19,6 +19,7 @@ import {
   enableServiceGroups,
   apmServiceInventoryOptimizedSorting,
   enableNewSyntheticsView,
+  apmTraceExplorerTab,
 } from '../common/ui_settings_keys';
 
 const technicalPreviewLabel = i18n.translate(
@@ -185,6 +186,21 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
     schema: schema.boolean(),
     value: false,
     requiresPageReload: false,
+    type: 'boolean',
+  },
+  [apmTraceExplorerTab]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.apmTraceExplorerTab', {
+      defaultMessage: 'APM Trace Explorer',
+    }),
+    description: i18n.translate('xpack.observability.apmTraceExplorerTabDescription', {
+      defaultMessage:
+        '{technicalPreviewLabel} Enable the APM Trace Explorer feature, that allows you to search and inspect traces with KQL or EQL',
+      values: { technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>` },
+    }),
+    schema: schema.boolean(),
+    value: false,
+    requiresPageReload: true,
     type: 'boolean',
   },
 };

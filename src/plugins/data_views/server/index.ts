@@ -8,13 +8,12 @@
 
 export { getFieldByName, findIndexPatternById } from './utils';
 export type { FieldDescriptor } from './fetcher';
-export {
-  IndexPatternsFetcher,
-  shouldReadFieldFromDocValues,
-  mergeCapabilitiesWithFields,
-  getCapabilitiesForRollupIndices,
-} from './fetcher';
-export type { IndexPatternsServiceStart } from './types';
+export { IndexPatternsFetcher, getCapabilitiesForRollupIndices } from './fetcher';
+export type {
+  DataViewsServerPluginStart,
+  DataViewsServerPluginSetupDependencies,
+  DataViewsServerPluginStartDependencies,
+} from './types';
 
 import { PluginInitializerContext } from '@kbn/core/server';
 import { DataViewsServerPlugin } from './plugin';
@@ -56,3 +55,6 @@ export {
 } from './constants';
 
 export type { SERVICE_KEY_TYPE } from './constants';
+
+export type { FieldSpec, SavedObjectsClientCommon } from '../common/types';
+export { DataViewsService, DataView } from '../common/data_views';

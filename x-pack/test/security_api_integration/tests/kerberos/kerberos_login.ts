@@ -97,9 +97,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         // If browser and Kibana can successfully negotiate this HTML won't rendered, but if not
         // users will see a proper `Unauthenticated` page.
-        expect(spnegoResponse.headers['content-security-policy']).to.be(
-          `script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`
-        );
+        expect(spnegoResponse.headers['content-security-policy']).to.be.a('string');
         expect(spnegoResponse.text).to.contain('We couldn&#x27;t log you in');
       });
 

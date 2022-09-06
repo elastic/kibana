@@ -10,16 +10,14 @@ import { noop } from 'lodash/fp';
 import React, { useMemo, useState, useCallback } from 'react';
 import styled from 'styled-components';
 import type { Filter } from '@kbn/es-query';
-import { BrowserFields } from '@kbn/timelines-plugin/common/search_strategy';
+import { ColumnHeaderOptions } from '@kbn/timelines-plugin/common/types';
 import { allowTopN } from '../../components/drag_and_drop/helpers';
 import { ShowTopNButton } from '../../components/hover_actions/actions/show_top_n';
-import { getAllFieldsByName } from '../../containers/source';
 import { useKibana } from '../kibana';
 import { SHOW_TOP_VALUES, HIDE_TOP_VALUES } from './translations';
 
 interface Props {
-  browserFields: BrowserFields;
-  field: string;
+  field: ColumnHeaderOptions;
   globalFilters?: Filter[];
   timelineId: string;
   value: string[] | undefined;
@@ -37,7 +35,6 @@ export const StyledContent = styled.div<{ $isDetails: boolean }>`
 `;
 
 const ExpandedCellValueActionsComponent: React.FC<Props> = ({
-  browserFields,
   field,
   globalFilters,
   onFilterAdded,
@@ -53,11 +50,12 @@ const ExpandedCellValueActionsComponent: React.FC<Props> = ({
   const showButton = useMemo(
     () =>
       allowTopN({
-        browserField: getAllFieldsByName(browserFields)[field],
-        fieldName: field,
+        fieldName: field.id,
+        fieldType: field.type ?? '',
+        isAggregatable: field.aggregatable ?? false,
         hideTopN: false,
       }),
-    [browserFields, field]
+    [field]
   );
 
   const [showTopN, setShowTopN] = useState(false);
@@ -71,7 +69,7 @@ const ExpandedCellValueActionsComponent: React.FC<Props> = ({
             className="eui-displayBlock expandable-top-value-button"
             Component={EuiButtonEmpty}
             data-test-subj="data-grid-expanded-show-top-n"
-            field={field}
+            field={field.id}
             flush="both"
             globalFilters={globalFilters}
             iconSide="right"
@@ -94,7 +92,7 @@ const ExpandedCellValueActionsComponent: React.FC<Props> = ({
         <EuiFlexItem>
           {timelines.getHoverActions().getFilterForValueButton({
             Component: EuiButtonEmpty,
-            field,
+            field: field.id,
             filterManager,
             onFilterAdded,
             ownFocus: false,
@@ -106,7 +104,7 @@ const ExpandedCellValueActionsComponent: React.FC<Props> = ({
         <EuiFlexItem>
           {timelines.getHoverActions().getFilterOutValueButton({
             Component: EuiButtonEmpty,
-            field,
+            field: field.id,
             filterManager,
             onFilterAdded,
             ownFocus: false,

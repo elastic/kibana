@@ -346,7 +346,10 @@ export class AlertingPlugin {
         );
       },
       getConfig: () => {
-        return pick(this.config.rules, 'minimumScheduleInterval');
+        return {
+          ...pick(this.config.rules, 'minimumScheduleInterval'),
+          isUsingSecurity: this.licenseState ? !!this.licenseState.getIsSecurityEnabled() : false,
+        };
       },
     };
   }

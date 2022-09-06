@@ -14,6 +14,7 @@ import { SqlSearchStrategyResponse } from '../../../../common';
  */
 export function toAsyncKibanaSearchResponse(
   response: SqlQueryResponse,
+  startTime: number,
   warning?: string
 ): SqlSearchStrategyResponse {
   return {
@@ -21,6 +22,7 @@ export function toAsyncKibanaSearchResponse(
     rawResponse: response,
     isPartial: response.is_partial,
     isRunning: response.is_running,
+    took: Date.now() - startTime,
     ...(warning ? { warning } : {}),
   };
 }

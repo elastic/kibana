@@ -10,11 +10,6 @@ import { ControlGroupStrings } from '../control_group_strings';
 
 export const CONTROL_WIDTH_OPTIONS = [
   {
-    id: `auto`,
-    'data-test-subj': 'control-editor-width-auto',
-    label: ControlGroupStrings.management.controlWidth.getAutoWidthTitle(),
-  },
-  {
     id: `small`,
     'data-test-subj': 'control-editor-width-small',
     label: ControlGroupStrings.management.controlWidth.getSmallWidthTitle(),

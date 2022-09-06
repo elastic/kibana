@@ -34,7 +34,7 @@ export const MethodEs: React.FC = () => {
         }
       )}
       docsUrl="#"
-      type="Elasticsearch index"
+      type="elasticsearch"
       onNameChange={(value: string) => onNameChange(value)}
     >
       <EuiPanel

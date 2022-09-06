@@ -81,7 +81,6 @@ export const UserActions = React.memo(
     caseServices,
     caseUserActions,
     data: caseData,
-    fetchUserActions,
     getRuleDetailsHref,
     actionsNavigation,
     isLoadingDescription,
@@ -90,7 +89,6 @@ export const UserActions = React.memo(
     onShowAlertDetails,
     onUpdateField,
     statusActionButton,
-    updateCase,
     useFetchAlertData,
     userCanCrud,
   }: UserActionTreeProps) => {
@@ -116,7 +114,7 @@ export const UserActions = React.memo(
       handleManageQuote,
       handleDeleteComment,
       handleUpdate,
-    } = useUserActionsHandler({ fetchUserActions, updateCase });
+    } = useUserActionsHandler();
 
     const MarkdownNewComment = useMemo(
       () => (

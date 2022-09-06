@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { IndexPatternField } from '@kbn/data-plugin/public';
+import { DataViewField } from '@kbn/data-views-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getDataViewSelectPlaceholder } from '../../../../../common/i18n_getters';
 import { DEFAULT_MAX_BUCKETS_LIMIT } from '../../../../../common/constants';
@@ -55,7 +55,7 @@ interface Props {
   // Right field props
   rightValue: string;
   rightSize?: number;
-  rightFields: IndexPatternField[];
+  rightFields: DataViewField[];
   onRightFieldChange: (term?: string) => void;
   onRightSizeChange: (size: number) => void;
 }

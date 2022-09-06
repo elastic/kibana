@@ -35,7 +35,8 @@ const rewriteBodyRes: RewriteResponseCase<SanitizedRule<RuleTypeParams>> = ({
   executionStatus,
   actions,
   scheduledTaskId,
-  snoozeEndTime,
+  snoozeSchedule,
+  isSnoozedUntil,
   ...rest
 }) => ({
   ...rest,
@@ -46,10 +47,10 @@ const rewriteBodyRes: RewriteResponseCase<SanitizedRule<RuleTypeParams>> = ({
   updated_at: updatedAt,
   api_key_owner: apiKeyOwner,
   notify_when: notifyWhen,
-  mute_all: muteAll,
   muted_alert_ids: mutedInstanceIds,
-  // Remove this object spread boolean check after snoozeEndTime is added to the public API
-  ...(snoozeEndTime !== undefined ? { snooze_end_time: snoozeEndTime } : {}),
+  mute_all: muteAll,
+  ...(isSnoozedUntil !== undefined ? { is_snoozed_until: isSnoozedUntil } : {}),
+  snooze_schedule: snoozeSchedule,
   scheduled_task_id: scheduledTaskId,
   execution_status: executionStatus && {
     ...omit(executionStatus, 'lastExecutionDate', 'lastDuration'),

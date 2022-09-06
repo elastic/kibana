@@ -16,19 +16,24 @@ import {
 import { mappingFromFieldMap } from '@kbn/rule-registry-plugin/common/mapping_from_field_map';
 import { experimentalRuleFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/experimental_rule_field_map';
 import { Dataset } from '@kbn/rule-registry-plugin/server';
+import { initSyntheticsServer } from './server';
+import { initUptimeServer } from './legacy_uptime/uptime_server';
+import { uptimeFeature } from './feature';
 import { uptimeRuleFieldMap } from '../common/rules/uptime_rule_field_map';
-import { initServerWithKibana } from './kibana.index';
 import {
   KibanaTelemetryAdapter,
   UptimeCorePluginsSetup,
   UptimeCorePluginsStart,
   UptimeServerSetup,
-} from './lib/adapters';
-import { TelemetryEventsSender } from './lib/telemetry/sender';
-import { registerUptimeSavedObjects, savedObjectsAdapter } from './lib/saved_objects/saved_objects';
+} from './legacy_uptime/lib/adapters';
+import { TelemetryEventsSender } from './legacy_uptime/lib/telemetry/sender';
+import {
+  registerUptimeSavedObjects,
+  savedObjectsAdapter,
+} from './legacy_uptime/lib/saved_objects/saved_objects';
 import { UptimeConfig } from '../common/config';
-import { SyntheticsService } from './lib/synthetics_service/synthetics_service';
-import { syntheticsServiceApiKey } from './lib/saved_objects/service_api_key';
+import { SyntheticsService } from './synthetics_service/synthetics_service';
+import { syntheticsServiceApiKey } from './legacy_uptime/lib/saved_objects/service_api_key';
 
 export type UptimeRuleRegistry = ReturnType<Plugin['setup']>['ruleRegistry'];
 
@@ -79,6 +84,7 @@ export class Plugin implements PluginType {
       logger: this.logger,
       telemetry: this.telemetryEventsSender,
       isDev: this.initContext.env.mode.dev,
+      spaces: plugins.spaces,
     } as UptimeServerSetup;
 
     if (this.server.config.service) {
@@ -92,7 +98,11 @@ export class Plugin implements PluginType {
       this.telemetryEventsSender.setup(plugins.telemetry);
     }
 
-    initServerWithKibana(this.server, plugins, ruleDataClient, this.logger);
+    plugins.features.registerKibanaFeature(uptimeFeature);
+
+    initUptimeServer(this.server, plugins, ruleDataClient, this.logger);
+
+    initSyntheticsServer(this.server);
 
     registerUptimeSavedObjects(
       core.savedObjects,

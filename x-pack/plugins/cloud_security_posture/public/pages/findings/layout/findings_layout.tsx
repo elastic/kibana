@@ -16,6 +16,8 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import moment from 'moment';
+import { i18n } from '@kbn/i18n';
+import { ColumnNameWithTooltip } from '../../../components/column_name_with_tooltip';
 import { CspEvaluationBadge } from '../../../components/csp_evaluation_badge';
 import * as TEXT from '../translations';
 import { CspFinding } from '../types';
@@ -52,8 +54,10 @@ export const getExpandColumn = <T extends unknown>({
   width: '40px',
   actions: [
     {
-      name: 'Expand',
-      description: 'Expand',
+      name: i18n.translate('xpack.csp.expandColumnNameLabel', { defaultMessage: 'Expand' }),
+      description: i18n.translate('xpack.csp.expandColumnDescriptionLabel', {
+        defaultMessage: 'Expand',
+      }),
       type: 'icon',
       icon: 'expand',
       onClick,
@@ -64,7 +68,17 @@ export const getExpandColumn = <T extends unknown>({
 export const getFindingsColumns = (): Array<EuiBasicTableColumn<CspFinding>> => [
   {
     field: 'resource_id',
-    name: TEXT.RESOURCE_ID,
+    name: (
+      <ColumnNameWithTooltip
+        columnName={TEXT.RESOURCE_ID}
+        tooltipContent={i18n.translate(
+          'xpack.csp.findings.findingsTable.findingsTableColumn.resourceIdColumnTooltipLabel',
+          {
+            defaultMessage: 'Custom Elastic Resource ID',
+          }
+        )}
+      />
+    ),
     truncateText: true,
     width: '15%',
     sortable: true,
@@ -84,14 +98,19 @@ export const getFindingsColumns = (): Array<EuiBasicTableColumn<CspFinding>> => 
     ),
   },
   {
-    field: 'rule.name',
-    name: TEXT.RULE,
+    field: 'resource.sub_type',
+    name: TEXT.RESOURCE_TYPE,
+    sortable: true,
+    width: '150px',
+  },
+  {
+    field: 'resource.name',
+    name: TEXT.RESOURCE_NAME,
     sortable: true,
   },
   {
-    field: 'cluster_id',
-    name: TEXT.CLUSTER_ID,
-    truncateText: true,
+    field: 'rule.name',
+    name: TEXT.RULE,
     sortable: true,
   },
   {
@@ -101,7 +120,24 @@ export const getFindingsColumns = (): Array<EuiBasicTableColumn<CspFinding>> => 
     truncateText: true,
   },
   {
+    field: 'cluster_id',
+    name: (
+      <ColumnNameWithTooltip
+        columnName={TEXT.CLUSTER_ID}
+        tooltipContent={i18n.translate(
+          'xpack.csp.findings.resourceTable.resourceTableColumn.clusterIdColumnTooltipLabel',
+          {
+            defaultMessage: 'Kube-System Namespace ID',
+          }
+        )}
+      />
+    ),
+    truncateText: true,
+    sortable: true,
+  },
+  {
     field: '@timestamp',
+    width: '150px',
     name: TEXT.LAST_CHECKED,
     truncateText: true,
     sortable: true,

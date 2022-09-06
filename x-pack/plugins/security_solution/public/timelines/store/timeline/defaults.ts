@@ -71,7 +71,8 @@ export const timelineDefaults: SubsetTimelineModel &
   sort: [
     {
       columnId: '@timestamp',
-      columnType: 'number',
+      columnType: 'date',
+      esTypes: ['date'],
       sortDirection: 'desc',
     },
   ],

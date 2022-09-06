@@ -11,8 +11,13 @@ import { useQueryInspector } from '../../../../common/components/page/manage_que
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { GenericBuckets } from '../../../../../common/search_strategy';
 import { useQueryAlerts } from '../../../../detections/containers/detection_engine/alerts/use_query';
+import { getPageCount, ITEMS_PER_PAGE } from '../utils';
 
 const HOSTS_BY_SEVERITY_AGG = 'hostsBySeverity';
+const defaultPagination = {
+  pageCount: 0,
+  currentPage: 0,
+};
 
 interface TimeRange {
   from: string;
@@ -24,6 +29,7 @@ export interface UseHostAlertsItemsProps {
   queryId: string;
   signalIndexName: string | null;
 }
+
 export interface HostAlertsItem {
   hostName: string;
   totalAlerts: number;
@@ -37,11 +43,18 @@ export type UseHostAlertsItems = (props: UseHostAlertsItemsProps) => {
   items: HostAlertsItem[];
   isLoading: boolean;
   updatedAt: number;
+  pagination: Pagination & { setPage: (pageNumber: number) => void };
 };
+
+interface Pagination {
+  pageCount: number;
+  currentPage: number;
+}
 
 export const useHostAlertsItems: UseHostAlertsItems = ({ skip, queryId, signalIndexName }) => {
   const [updatedAt, setUpdatedAt] = useState(Date.now());
   const [items, setItems] = useState<HostAlertsItem[]>([]);
+  const [paginationData, setPaginationData] = useState<Pagination>(defaultPagination);
 
   const { to, from, setQuery: setGlobalQuery, deleteQuery } = useGlobalTime();
 
@@ -53,20 +66,31 @@ export const useHostAlertsItems: UseHostAlertsItems = ({ skip, queryId, signalIn
     loading,
     refetch: refetchQuery,
   } = useQueryAlerts<{}, AlertCountersBySeverityAndHostAggregation>({
-    query: buildVulnerableHostAggregationQuery({ from, to }),
+    query: buildVulnerableHostAggregationQuery({
+      from,
+      to,
+      currentPage: paginationData.currentPage,
+    }),
     indexName: signalIndexName,
     skip,
   });
 
   useEffect(() => {
-    setQuery(buildVulnerableHostAggregationQuery({ from, to }));
-  }, [setQuery, from, to]);
+    setQuery(
+      buildVulnerableHostAggregationQuery({ from, to, currentPage: paginationData.currentPage })
+    );
+  }, [setQuery, from, to, paginationData.currentPage]);
 
   useEffect(() => {
     if (data == null || !data.aggregations) {
       setItems([]);
     } else {
       setItems(parseHostsData(data.aggregations));
+
+      setPaginationData((p) => ({
+        ...p,
+        pageCount: getPageCount(data.aggregations?.host_count.value),
+      }));
     }
     setUpdatedAt(Date.now());
   }, [data]);
@@ -76,6 +100,13 @@ export const useHostAlertsItems: UseHostAlertsItems = ({ skip, queryId, signalIn
       refetchQuery();
     }
   }, [skip, refetchQuery]);
+
+  const setPage = (pageNumber: number) => {
+    setPaginationData((p) => ({
+      ...p,
+      currentPage: pageNumber,
+    }));
+  };
 
   useQueryInspector({
     deleteQuery,
@@ -88,87 +119,112 @@ export const useHostAlertsItems: UseHostAlertsItems = ({ skip, queryId, signalIn
     queryId,
     loading,
   });
-  return { items, isLoading: loading, updatedAt };
+
+  return {
+    items,
+    isLoading: loading,
+    updatedAt,
+    pagination: {
+      ...paginationData,
+      setPage,
+    },
+  };
 };
 
-export const buildVulnerableHostAggregationQuery = ({ from, to }: TimeRange) => ({
-  query: {
-    bool: {
-      filter: [
-        {
-          term: {
-            'kibana.alert.workflow_status': 'open',
-          },
-        },
-        {
-          range: {
-            '@timestamp': {
-              gte: from,
-              lte: to,
+export const buildVulnerableHostAggregationQuery = ({
+  from,
+  to,
+  currentPage,
+}: TimeRange & { currentPage: number }) => {
+  const fromValue = ITEMS_PER_PAGE * currentPage;
+
+  return {
+    query: {
+      bool: {
+        filter: [
+          {
+            term: {
+              'kibana.alert.workflow_status': 'open',
             },
           },
-        },
-      ],
-    },
-  },
-  size: 0,
-  aggs: {
-    [HOSTS_BY_SEVERITY_AGG]: {
-      terms: {
-        field: 'host.name',
-        order: [
           {
-            'critical.doc_count': 'desc',
-          },
-          {
-            'high.doc_count': 'desc',
-          },
-          {
-            'medium.doc_count': 'desc',
-          },
-          {
-            'low.doc_count': 'desc',
+            range: {
+              '@timestamp': {
+                gte: from,
+                lte: to,
+              },
+            },
           },
         ],
-        size: 4,
       },
-      aggs: {
-        critical: {
-          filter: {
-            term: {
-              'kibana.alert.severity': 'critical',
+    },
+    size: 0,
+    aggs: {
+      host_count: { cardinality: { field: 'host.name' } },
+      [HOSTS_BY_SEVERITY_AGG]: {
+        terms: {
+          size: 100,
+          field: 'host.name',
+          order: [
+            {
+              'critical.doc_count': 'desc',
+            },
+            {
+              'high.doc_count': 'desc',
+            },
+            {
+              'medium.doc_count': 'desc',
+            },
+            {
+              'low.doc_count': 'desc',
+            },
+          ],
+        },
+        aggs: {
+          critical: {
+            filter: {
+              term: {
+                'kibana.alert.severity': 'critical',
+              },
             },
           },
-        },
-        high: {
-          filter: {
-            term: {
-              'kibana.alert.severity': 'high',
+          high: {
+            filter: {
+              term: {
+                'kibana.alert.severity': 'high',
+              },
             },
           },
-        },
-        medium: {
-          filter: {
-            term: {
-              'kibana.alert.severity': 'medium',
+          medium: {
+            filter: {
+              term: {
+                'kibana.alert.severity': 'medium',
+              },
             },
           },
-        },
-        low: {
-          filter: {
-            term: {
-              'kibana.alert.severity': 'low',
+          low: {
+            filter: {
+              term: {
+                'kibana.alert.severity': 'low',
+              },
+            },
+          },
+          bucketOfPagination: {
+            bucket_sort: {
+              from: fromValue,
+              size: 4,
             },
           },
         },
       },
     },
-  },
-});
+  };
+};
 
 interface SeverityContainer {
   doc_count: number;
 }
+
 interface AlertBySeverityBucketData extends GenericBuckets {
   low: SeverityContainer;
   medium: SeverityContainer;
@@ -180,6 +236,7 @@ interface AlertCountersBySeverityAndHostAggregation {
   [HOSTS_BY_SEVERITY_AGG]: {
     buckets: AlertBySeverityBucketData[];
   };
+  host_count: { value: number };
 }
 
 function parseHostsData(
@@ -188,16 +245,15 @@ function parseHostsData(
   const buckets = rawAggregation?.[HOSTS_BY_SEVERITY_AGG].buckets ?? [];
 
   return buckets.reduce<HostAlertsItem[]>((accumalatedAlertsByHost, currentHost) => {
-    return [
-      ...accumalatedAlertsByHost,
-      {
-        hostName: currentHost.key || '—',
-        totalAlerts: currentHost.doc_count,
-        low: currentHost.low.doc_count,
-        medium: currentHost.medium.doc_count,
-        high: currentHost.high.doc_count,
-        critical: currentHost.critical.doc_count,
-      },
-    ];
+    accumalatedAlertsByHost.push({
+      hostName: currentHost.key || '—',
+      totalAlerts: currentHost.doc_count,
+      low: currentHost.low.doc_count,
+      medium: currentHost.medium.doc_count,
+      high: currentHost.high.doc_count,
+      critical: currentHost.critical.doc_count,
+    });
+
+    return accumalatedAlertsByHost;
   }, []);
 }

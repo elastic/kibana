@@ -19,7 +19,7 @@ import * as i18n from '../translations';
 
 export interface CaseItem {
   name: string;
-  note: string;
+  totalAlerts: number;
   createdAt: string;
   createdBy: string;
   status: CaseStatuses;
@@ -99,7 +99,7 @@ function parseCases(casesResponse: Cases): CaseItem[] {
     accumulated.push({
       id: currentCase.id,
       name: currentCase.title,
-      note: currentCase.description,
+      totalAlerts: currentCase.totalAlerts,
       createdAt: currentCase.createdAt,
       createdBy: currentCase.createdBy.username || '—',
       status: currentCase.status,

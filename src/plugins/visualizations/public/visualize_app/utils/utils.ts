@@ -11,6 +11,7 @@ import type { History } from 'history';
 import type { ChromeStart, DocLinksStart } from '@kbn/core/public';
 import type { Filter } from '@kbn/es-query';
 import { redirectWhenMissing } from '@kbn/kibana-utils-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { VisualizeConstants } from '../../../common/constants';
 import { convertFromSerializedVis } from '../../utils/saved_visualize_utils';
 import type { VisualizeServices, VisualizeEditorVisInstance } from '../types';
@@ -98,4 +99,8 @@ export const redirectToSavedObjectPage = (
 
 export function getVizEditorOriginatingAppUrl(history: History) {
   return `#/${history.location.pathname}${history.location.search}`;
+}
+
+export function isFallbackDataView(dataView?: DataView): dataView is DataView {
+  return Boolean(dataView && !Object.keys(dataView.getOriginalSavedObjectBody() ?? {}).length);
 }

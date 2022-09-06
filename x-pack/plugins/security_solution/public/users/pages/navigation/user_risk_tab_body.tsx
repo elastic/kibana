@@ -27,7 +27,7 @@ const StyledEuiFlexGroup = styled(EuiFlexGroup)`
   margin-top: ${({ theme }) => theme.eui.paddingSizes.l};
 `;
 
-const RISKY_USERS_DASHBOARD_TITLE = 'User Risk Score (Start Here)';
+const RISKY_USERS_DASHBOARD_TITLE = 'Current Risk Score For Users';
 
 const UserRiskTabBodyComponent: React.FC<
   Pick<UsersComponentsQueryProps, 'startDate' | 'endDate' | 'setQuery' | 'deleteQuery'> & {

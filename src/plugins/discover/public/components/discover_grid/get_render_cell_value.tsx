@@ -8,6 +8,7 @@
 
 import React, { Fragment, useContext, useEffect, useMemo } from 'react';
 import classnames from 'classnames';
+import { i18n } from '@kbn/i18n';
 import { euiLightVars as themeLight, euiDarkVars as themeDark } from '@kbn/ui-theme';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import {
@@ -15,6 +16,9 @@ import {
   EuiDescriptionList,
   EuiDescriptionListTitle,
   EuiDescriptionListDescription,
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { DiscoverGridContext } from './discover_grid_context';
@@ -36,7 +40,8 @@ export const getRenderCellValueFn =
     rowsFlattened: Array<Record<string, unknown>>,
     useNewFieldsApi: boolean,
     fieldsToShow: string[],
-    maxDocFieldsDisplayed: number
+    maxDocFieldsDisplayed: number,
+    closePopover: () => void
   ) =>
   ({ rowIndex, columnId, isDetails, setCellProps }: EuiDataGridCellValueElementProps) => {
     const { uiSettings, fieldFormats } = useDiscoverServices();
@@ -93,6 +98,7 @@ export const getRenderCellValueFn =
         dataView,
         useTopLevelObjectColumns,
         fieldFormats,
+        closePopover,
       });
     }
 
@@ -147,6 +153,13 @@ function getInnerColumns(fields: Record<string, unknown[]>, columnId: string) {
   );
 }
 
+function getJSON(columnId: string, rowRaw: ElasticSearchHit, useTopLevelObjectColumns: boolean) {
+  const json = useTopLevelObjectColumns
+    ? getInnerColumns(rowRaw.fields as Record<string, unknown[]>, columnId)
+    : rowRaw;
+  return json as Record<string, unknown>;
+}
+
 /**
  * Helper function for the cell popover
  */
@@ -158,6 +171,7 @@ function renderPopoverContent({
   dataView,
   useTopLevelObjectColumns,
   fieldFormats,
+  closePopover,
 }: {
   rowRaw: ElasticSearchHit;
   rowFlattened: Record<string, unknown>;
@@ -166,25 +180,53 @@ function renderPopoverContent({
   dataView: DataView;
   useTopLevelObjectColumns: boolean;
   fieldFormats: FieldFormatsStart;
+  closePopover: () => void;
 }) {
+  const closeButton = (
+    <EuiButtonIcon
+      aria-label={i18n.translate('discover.grid.closePopover', {
+        defaultMessage: `Close popover`,
+      })}
+      data-test-subj="docTableClosePopover"
+      iconSize="s"
+      iconType="cross"
+      size="xs"
+      onClick={closePopover}
+    />
+  );
   if (useTopLevelObjectColumns || field?.type === '_source') {
-    const json = useTopLevelObjectColumns
-      ? getInnerColumns(rowRaw.fields as Record<string, unknown[]>, columnId)
-      : rowRaw;
     return (
-      <JsonCodeEditor json={json as Record<string, unknown>} width={defaultMonacoEditorWidth} />
+      <EuiFlexGroup gutterSize="none" direction="column" justifyContent="flexEnd">
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup justifyContent="flexEnd" gutterSize="none">
+            <EuiFlexItem grow={false}>{closeButton}</EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <JsonCodeEditor
+            json={getJSON(columnId, rowRaw, useTopLevelObjectColumns)}
+            width={defaultMonacoEditorWidth}
+            height={200}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   }
 
   return (
-    <span
-      className="dscDiscoverGrid__cellPopoverValue"
-      // formatFieldValue guarantees sanitized values
-      // eslint-disable-next-line react/no-danger
-      dangerouslySetInnerHTML={{
-        __html: formatFieldValue(rowFlattened[columnId], rowRaw, fieldFormats, dataView, field),
-      }}
-    />
+    <EuiFlexGroup gutterSize="none" direction="row" responsive={false}>
+      <EuiFlexItem>
+        <span
+          className="dscDiscoverGrid__cellPopoverValue eui-textBreakWord"
+          // formatFieldValue guarantees sanitized values
+          // eslint-disable-next-line react/no-danger
+          dangerouslySetInnerHTML={{
+            __html: formatFieldValue(rowFlattened[columnId], rowRaw, fieldFormats, dataView, field),
+          }}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>{closeButton}</EuiFlexItem>
+    </EuiFlexGroup>
   );
 }
 /**

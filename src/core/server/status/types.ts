@@ -8,7 +8,7 @@
 
 import { Observable } from 'rxjs';
 import { deepFreeze } from '@kbn/std';
-import { PluginName } from '../plugins';
+import type { PluginName } from '@kbn/core-base-common';
 
 /**
  * The current status of a service at a point in time.

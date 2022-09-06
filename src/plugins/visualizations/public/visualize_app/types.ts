@@ -25,6 +25,7 @@ import type {
   IKbnUrlStateStorage,
   ReduxLikeStateContainer,
 } from '@kbn/kibana-utils-plugin/public';
+import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 
 import type { NavigationPublicPluginStart as NavigationStart } from '@kbn/navigation-plugin/public';
 import type { Filter } from '@kbn/es-query';
@@ -51,6 +52,7 @@ import type { createVisEmbeddableFromObject } from '../embeddable';
 import type { VisEditorsRegistry } from '../vis_editors_registry';
 
 export interface VisualizeAppState {
+  dataView?: string;
   filters: Filter[];
   uiState: SerializableRecord;
   vis: SavedVisState;
@@ -72,6 +74,7 @@ export interface VisualizeAppStateTransitions {
   ) => ({ query, parentFilters }: { query?: Query; parentFilters?: Filter[] }) => VisualizeAppState;
   updateVisState: (state: VisualizeAppState) => (vis: SavedVisState) => VisualizeAppState;
   updateSavedQuery: (state: VisualizeAppState) => (savedQueryId?: string) => VisualizeAppState;
+  updateDataView: (state: VisualizeAppState) => (dataViewId?: string) => VisualizeAppState;
 }
 
 export type VisualizeAppStateContainer = ReduxLikeStateContainer<
@@ -83,7 +86,9 @@ export interface VisualizeServices extends CoreStart {
   stateTransferService: EmbeddableStateTransfer;
   embeddable: EmbeddableStart;
   history: History;
+  dataViewEditor: DataViewEditorStart;
   kbnUrlStateStorage: IKbnUrlStateStorage;
+  core: CoreStart;
   urlForwarding: UrlForwardingStart;
   pluginInitializerContext: PluginInitializerContext;
   chrome: ChromeStart;

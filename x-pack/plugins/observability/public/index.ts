@@ -17,6 +17,7 @@ import {
   ObservabilityPublicStart,
   ObservabilityPublicSetup,
 } from './plugin';
+export { ALL_VALUES_SELECTED } from './components/shared/exploratory_view/configurations/constants/url_constants';
 export type {
   ObservabilityPublicSetup,
   ObservabilityPublicStart,
@@ -90,8 +91,7 @@ export type { LinkDescriptor } from './hooks/use_link_props';
 
 export { NavigationWarningPromptProvider, Prompt } from './utils/navigation_warning_prompt';
 export { getApmTraceUrl } from './utils/get_apm_trace_url';
-export { createExploratoryViewUrl } from './components/shared/exploratory_view/configurations/utils';
-export { ALL_VALUES_SELECTED } from './components/shared/field_value_suggestions/field_value_combobox';
+export { createExploratoryViewUrl } from './components/shared/exploratory_view/configurations/exploratory_view_url';
 export type { AllSeries } from './components/shared/exploratory_view/hooks/use_series_storage';
 export type { SeriesUrl } from './components/shared/exploratory_view/types';
 
@@ -110,9 +110,13 @@ export { useInspectorContext } from './context/inspector/use_inspector_context';
 export type { SeriesConfig, ConfigProps } from './components/shared/exploratory_view/types';
 export {
   ReportTypes,
+  FILTER_RECORDS,
   REPORT_METRIC_FIELD,
-  RECORDS_PERCENTAGE_FIELD,
+  USE_BREAK_DOWN_COLUMN,
   RECORDS_FIELD,
+  OPERATION_COLUMN,
+  TERMS_COLUMN,
+  RECORDS_PERCENTAGE_FIELD,
 } from './components/shared/exploratory_view/configurations/constants';
 export { ExploratoryViewContextProvider } from './components/shared/exploratory_view/contexts/exploratory_view_config';
 export { fromQuery, toQuery } from './utils/url';

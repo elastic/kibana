@@ -2,11 +2,20 @@
 
 [Home](./index.md) &gt; [kibana-plugin-core-server](./kibana-plugin-core-server.md) &gt; [ISavedObjectsImporter](./kibana-plugin-core-server.isavedobjectsimporter.md)
 
-## ISavedObjectsImporter type
+## ISavedObjectsImporter interface
 
+Utility class used to import savedObjects.
 
 <b>Signature:</b>
 
 ```typescript
-export declare type ISavedObjectsImporter = PublicMethodsOf<SavedObjectsImporter>;
+export interface ISavedObjectsImporter 
 ```
+
+## Methods
+
+|  Method | Description |
+|  --- | --- |
+|  [import(options)](./kibana-plugin-core-server.isavedobjectsimporter.import.md) | Import saved objects from given stream. See the [options](./kibana-plugin-core-server.savedobjectsimportoptions.md) for more detailed information. |
+|  [resolveImportErrors(options)](./kibana-plugin-core-server.isavedobjectsimporter.resolveimporterrors.md) | Resolve and return saved object import errors. See the [options](./kibana-plugin-core-server.savedobjectsresolveimporterrorsoptions.md) for more detailed information. |
+

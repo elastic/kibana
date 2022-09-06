@@ -227,7 +227,7 @@ export function OverviewPage({ routeParams }: Props) {
           <EuiFlexGroup>
             <EuiFlexItem>
               {/* Resources / What's New sections */}
-              <EuiFlexGroup direction="row">
+              <EuiFlexGroup>
                 <EuiFlexItem grow={4}>
                   {!!newsFeed?.items?.length && <NewsFeed items={newsFeed.items.slice(0, 3)} />}
                 </EuiFlexItem>

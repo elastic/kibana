@@ -29,7 +29,7 @@ jest.doMock('./elasticsearch/elasticsearch_service', () => ({
 
 const realKbnConfig = jest.requireActual('@kbn/config');
 
-import { configServiceMock } from './config/mocks';
+import { configServiceMock } from '@kbn/config-mocks';
 
 export const mockConfigService = configServiceMock.create();
 jest.doMock('@kbn/config', () => ({

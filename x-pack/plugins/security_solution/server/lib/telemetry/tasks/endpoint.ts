@@ -256,6 +256,7 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
             malicious_behavior_rules: maliciousBehaviorRules,
             system_impact: systemImpact,
             threads,
+            event_filter: eventFilter,
           } = endpoint.endpoint_metrics.Endpoint.metrics;
           const endpointPolicyDetail = extractEndpointPolicyConfig(policyConfig);
 
@@ -275,6 +276,7 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
               maliciousBehaviorRules,
               systemImpact,
               threads,
+              eventFilter,
             },
             endpoint_meta: {
               os: endpoint.endpoint_metrics.host.os,

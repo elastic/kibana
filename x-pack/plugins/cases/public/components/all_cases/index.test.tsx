@@ -14,11 +14,11 @@ import { TestProviders } from '../../common/mock';
 import { useGetTags } from '../../containers/use_get_tags';
 import { useGetReporters } from '../../containers/use_get_reporters';
 import { useGetActionLicense } from '../../containers/use_get_action_license';
-import { useConnectors } from '../../containers/configure/use_connectors';
 import { CaseStatuses } from '../../../common/api';
 import { casesStatus, connectorsMock, useGetCasesMockState } from '../../containers/mock';
 import { useGetCases } from '../../containers/use_get_cases';
 import { useGetCasesStatus } from '../../containers/use_get_cases_status';
+import { useGetConnectors } from '../../containers/configure/use_connectors';
 
 jest.mock('../../containers/use_get_reporters');
 jest.mock('../../containers/use_get_tags');
@@ -28,7 +28,7 @@ jest.mock('../../containers/api');
 jest.mock('../../containers/use_get_cases');
 jest.mock('../../containers/use_get_cases_status');
 
-const useConnectorsMock = useConnectors as jest.Mock;
+const useGetConnectorsMock = useGetConnectors as jest.Mock;
 const useGetCasesMock = useGetCases as jest.Mock;
 const useGetCasesStatusMock = useGetCasesStatus as jest.Mock;
 const useGetActionLicenseMock = useGetActionLicense as jest.Mock;
@@ -58,7 +58,7 @@ describe('AllCases', () => {
   };
 
   const defaultActionLicense = {
-    actionLicense: null,
+    data: null,
     isLoading: false,
     isError: false,
   };
@@ -72,11 +72,7 @@ describe('AllCases', () => {
       isError: false,
       fetchReporters: jest.fn(),
     });
-    (useGetActionLicense as jest.Mock).mockReturnValue({
-      actionLicense: null,
-      isLoading: false,
-    });
-    useConnectorsMock.mockImplementation(() => ({ connectors: connectorsMock, loading: false }));
+    useGetConnectorsMock.mockImplementation(() => ({ data: connectorsMock, isLoading: false }));
     useGetCasesStatusMock.mockReturnValue(defaultCasesStatus);
     useGetActionLicenseMock.mockReturnValue(defaultActionLicense);
     useGetCasesMock.mockReturnValue(defaultGetCases);
@@ -150,7 +146,7 @@ describe('AllCases', () => {
   it('should not allow the user to enter configuration page with basic license', async () => {
     useGetActionLicenseMock.mockReturnValue({
       ...defaultActionLicense,
-      actionLicense: {
+      data: {
         id: '.jira',
         name: 'Jira',
         minimumLicenseRequired: 'gold',
@@ -176,7 +172,7 @@ describe('AllCases', () => {
   it('should allow the user to enter configuration page with gold license and above', async () => {
     useGetActionLicenseMock.mockReturnValue({
       ...defaultActionLicense,
-      actionLicense: {
+      data: {
         id: '.jira',
         name: 'Jira',
         minimumLicenseRequired: 'gold',

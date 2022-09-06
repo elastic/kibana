@@ -312,12 +312,6 @@ export class LensPlugin {
     const getPresentationUtilContext = () =>
       startServices().plugins.presentationUtil.ContextProvider;
 
-    const ensureDefaultDataView = () => {
-      // make sure a default index pattern exists
-      // if not, the page will be redirected to management and visualize won't be rendered
-      startServices().plugins.dataViews.ensureDefaultDataView();
-    };
-
     core.application.register({
       id: APP_ID,
       title: NOT_INTERNATIONALIZED_PRODUCT_NAME,
@@ -325,18 +319,15 @@ export class LensPlugin {
       mount: async (params: AppMountParameters) => {
         const { core: coreStart, plugins: deps } = startServices();
 
-        await Promise.all([
-          this.initParts(
-            core,
-            data,
-            charts,
-            expressions,
-            fieldFormats,
-            deps.fieldFormats.deserialize,
-            eventAnnotation
-          ),
-          ensureDefaultDataView(),
-        ]);
+        await this.initParts(
+          core,
+          data,
+          charts,
+          expressions,
+          fieldFormats,
+          deps.fieldFormats.deserialize,
+          eventAnnotation
+        );
 
         const { mountApp, stopReportManager, getLensAttributeService } = await import(
           './async_services'

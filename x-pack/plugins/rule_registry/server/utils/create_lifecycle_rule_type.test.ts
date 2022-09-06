@@ -118,7 +118,7 @@ function createRule(shouldWriteAlerts: boolean = true) {
           shouldWriteAlerts: () => shouldWriteAlerts,
           shouldStopExecution: () => false,
           search: {} as any,
-          searchSourceClient: Promise.resolve({} as ISearchStartSearchSource),
+          searchSourceClient: {} as ISearchStartSearchSource,
         },
         spaceId: 'spaceId',
         state,

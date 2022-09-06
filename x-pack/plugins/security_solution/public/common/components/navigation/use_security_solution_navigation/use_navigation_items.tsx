@@ -79,10 +79,7 @@ function usePrimaryNavigationItemsToDisplay(navTabs: Record<string, NavTab>) {
               items: [
                 navTabs[SecurityPageName.landing],
                 navTabs[SecurityPageName.overview],
-                // Temporary check for detectionAndResponse while page is feature flagged
-                ...(navTabs[SecurityPageName.detectionAndResponse] != null
-                  ? [navTabs[SecurityPageName.detectionAndResponse]]
-                  : []),
+                navTabs[SecurityPageName.detectionAndResponse],
               ],
             },
             {
@@ -100,6 +97,9 @@ function usePrimaryNavigationItemsToDisplay(navTabs: Record<string, NavTab>) {
                 navTabs[SecurityPageName.network],
                 ...(navTabs[SecurityPageName.users] != null
                   ? [navTabs[SecurityPageName.users]]
+                  : []),
+                ...(navTabs[SecurityPageName.kubernetes] != null
+                  ? [navTabs[SecurityPageName.kubernetes]]
                   : []),
               ],
             },

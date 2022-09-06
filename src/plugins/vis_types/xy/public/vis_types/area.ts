@@ -127,6 +127,7 @@ export const areaVisTypeDefinition = {
     },
   },
   editorConfig: {
+    enableDataViewChange: true,
     optionTabs,
     schemas: [
       {
@@ -135,7 +136,13 @@ export const areaVisTypeDefinition = {
         title: i18n.translate('visTypeXy.area.metricsTitle', {
           defaultMessage: 'Y-axis',
         }),
-        aggFilter: ['!geo_centroid', '!geo_bounds', '!filtered_metric', '!single_percentile'],
+        aggFilter: [
+          '!geo_centroid',
+          '!geo_bounds',
+          '!filtered_metric',
+          '!single_percentile',
+          '!single_percentile_rank',
+        ],
         min: 1,
         defaults: [{ schema: 'metric', type: 'count' }],
       },

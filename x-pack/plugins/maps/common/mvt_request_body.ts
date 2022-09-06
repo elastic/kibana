@@ -21,6 +21,7 @@ export function getAggsTileRequest({
   encodedRequestBody,
   geometryFieldName,
   gridPrecision,
+  hasLabels,
   index,
   renderAs = RENDER_AS.POINT,
   x,
@@ -30,6 +31,7 @@ export function getAggsTileRequest({
   encodedRequestBody: string;
   geometryFieldName: string;
   gridPrecision: number;
+  hasLabels: boolean;
   index: string;
   renderAs: RENDER_AS;
   x: number;
@@ -50,6 +52,7 @@ export function getAggsTileRequest({
       aggs: requestBody.aggs,
       fields: requestBody.fields,
       runtime_mappings: requestBody.runtime_mappings,
+      with_labels: hasLabels,
     },
   };
 }
@@ -57,6 +60,7 @@ export function getAggsTileRequest({
 export function getHitsTileRequest({
   encodedRequestBody,
   geometryFieldName,
+  hasLabels,
   index,
   x,
   y,
@@ -64,6 +68,7 @@ export function getHitsTileRequest({
 }: {
   encodedRequestBody: string;
   geometryFieldName: string;
+  hasLabels: boolean;
   index: string;
   x: number;
   y: number;
@@ -86,6 +91,7 @@ export function getHitsTileRequest({
       ),
       runtime_mappings: requestBody.runtime_mappings,
       track_total_hits: typeof requestBody.size === 'number' ? requestBody.size + 1 : false,
+      with_labels: hasLabels,
     },
   };
 }

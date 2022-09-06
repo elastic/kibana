@@ -1361,6 +1361,21 @@
             ],
             "path": "src/plugins/home/server/services/sample_data/lib/sample_dataset_registry_types.ts",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "home",
+            "id": "def-server.AppLinkData.order",
+            "type": "number",
+            "tags": [],
+            "label": "order",
+            "description": [
+              "\nIndex of the links (ascending order, smallest will be displayed first).\nUsed for ordering in the dropdown.\n"
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/plugins/home/server/services/sample_data/lib/sample_dataset_registry_types.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false

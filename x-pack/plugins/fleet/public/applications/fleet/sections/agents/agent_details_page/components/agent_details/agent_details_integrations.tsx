@@ -22,8 +22,8 @@ import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 
 import type { Agent, AgentPolicy, PackagePolicy, PackagePolicyInput } from '../../../../../types';
-import { useLink } from '../../../../../hooks';
-import { PackageIcon } from '../../../../../components';
+import { useLink, useUIExtension } from '../../../../../hooks';
+import { ExtensionWrapper, PackageIcon } from '../../../../../components';
 
 import { displayInputType, getLogsQueryByInputType } from './input_type_utils';
 
@@ -70,6 +70,11 @@ export const AgentDetailsIntegration: React.FunctionComponent<{
   packagePolicy: PackagePolicy;
 }> = memo(({ agent, agentPolicy, packagePolicy }) => {
   const { getHref } = useLink();
+
+  const extensionView = useUIExtension(
+    packagePolicy.package?.name ?? '',
+    'package-policy-response'
+  );
 
   const inputs = useMemo(() => {
     return packagePolicy.inputs.filter((input) => input.enabled);
@@ -154,6 +159,11 @@ export const AgentDetailsIntegration: React.FunctionComponent<{
       }
     >
       <EuiBasicTable<PackagePolicyInput> tableLayout="auto" items={inputs} columns={columns} />
+      {extensionView && (
+        <ExtensionWrapper>
+          <extensionView.Component endpointId={agent.id} />
+        </ExtensionWrapper>
+      )}
     </CollapsablePanel>
   );
 });

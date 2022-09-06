@@ -9,3 +9,4 @@
 export const TAB_INDEXED_FIELDS = 'indexedFields';
 export const TAB_SCRIPTED_FIELDS = 'scriptedFields';
 export const TAB_SOURCE_FILTERS = 'sourceFilters';
+export const TAB_RELATIONSHIPS = 'relationships';

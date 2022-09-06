@@ -5,8 +5,13 @@
  * 2.0.
  */
 
-import type { IndexPatternField } from '@kbn/data-plugin/public';
+import type { DataViewField } from '@kbn/data-views-plugin/public';
 import { indexPatterns } from '@kbn/data-plugin/public';
+import type {
+  AggregationsExtendedStatsAggregation,
+  AggregationsPercentilesAggregation,
+  AggregationsTermsAggregation,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { FIELD_ORIGIN } from '../../../common/constants';
 import { ESTooltipProperty } from '../tooltips/es_tooltip_property';
 import { ITooltipProperty, TooltipProperty } from '../tooltips/tooltip_property';
@@ -47,7 +52,7 @@ export class ESDocField extends AbstractField implements IField {
     return this._source;
   }
 
-  async _getIndexPatternField(): Promise<IndexPatternField | undefined> {
+  async _getIndexPatternField(): Promise<DataViewField | undefined> {
     const indexPattern = await this._source.getIndexPattern();
     const indexPatternField = indexPattern.fields.getByName(this.getName());
     return indexPatternField && indexPatterns.isNestedField(indexPatternField)
@@ -78,7 +83,10 @@ export class ESDocField extends AbstractField implements IField {
       : super.getLabel();
   }
 
-  async getExtendedStatsFieldMetaRequest(): Promise<unknown | null> {
+  async getExtendedStatsFieldMetaRequest(): Promise<Record<
+    string,
+    { extended_stats: AggregationsExtendedStatsAggregation }
+  > | null> {
     const indexPatternField = await this._getIndexPatternField();
 
     if (
@@ -88,10 +96,8 @@ export class ESDocField extends AbstractField implements IField {
       return null;
     }
 
-    // TODO remove local typing once Kibana has figured out a core place for Elasticsearch aggregation request types
-    // https://github.com/elastic/kibana/issues/60102
-    const metricAggConfig: { script?: unknown; field?: string } = {};
-    if (indexPatternField.scripted) {
+    const metricAggConfig: AggregationsExtendedStatsAggregation = {};
+    if (indexPatternField.scripted && indexPatternField.script) {
       metricAggConfig.script = {
         source: indexPatternField.script,
         lang: indexPatternField.lang,
@@ -106,17 +112,19 @@ export class ESDocField extends AbstractField implements IField {
     };
   }
 
-  async getPercentilesFieldMetaRequest(percentiles: number[]): Promise<unknown | null> {
+  async getPercentilesFieldMetaRequest(
+    percentiles: number[]
+  ): Promise<Record<string, { percentiles: AggregationsPercentilesAggregation }> | null> {
     const indexPatternField = await this._getIndexPatternField();
 
     if (!indexPatternField || indexPatternField.type !== 'number') {
       return null;
     }
 
-    const metricAggConfig: { script?: unknown; field?: string; percents: number[] } = {
+    const metricAggConfig: AggregationsPercentilesAggregation = {
       percents: [0, ...percentiles],
     };
-    if (indexPatternField.scripted) {
+    if (indexPatternField.scripted && indexPatternField.script) {
       metricAggConfig.script = {
         source: indexPatternField.script,
         lang: indexPatternField.lang,
@@ -131,18 +139,18 @@ export class ESDocField extends AbstractField implements IField {
     };
   }
 
-  async getCategoricalFieldMetaRequest(size: number): Promise<unknown> {
+  async getCategoricalFieldMetaRequest(
+    size: number
+  ): Promise<Record<string, { terms: AggregationsTermsAggregation }> | null> {
     const indexPatternField = await this._getIndexPatternField();
     if (!indexPatternField || size <= 0) {
       return null;
     }
 
-    // TODO remove local typing once Kibana has figured out a core place for Elasticsearch aggregation request types
-    // https://github.com/elastic/kibana/issues/60102
-    const topTerms: { size: number; script?: unknown; field?: string } = {
+    const topTerms: AggregationsTermsAggregation = {
       size: size - 1, // need additional color for the "other"-value
     };
-    if (indexPatternField.scripted) {
+    if (indexPatternField.scripted && indexPatternField.script) {
       topTerms.script = {
         source: indexPatternField.script,
         lang: indexPatternField.lang,

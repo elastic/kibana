@@ -7,7 +7,7 @@
  */
 
 export { RedirectAppLinks as RedirectAppLinksContainer } from './redirect_app_links';
-export { RedirectAppLinks as RedirectAppLinksComponent } from './redirect_app_links';
+export { RedirectAppLinks as RedirectAppLinksComponent } from './redirect_app_links.component';
 export { RedirectAppLinksKibanaProvider, RedirectAppLinksProvider } from './services';
 
 import React, { FC } from 'react';

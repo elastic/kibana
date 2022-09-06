@@ -46,7 +46,6 @@ export function handleEvents(): RequestHandler<
       timeRange: body.timeRange,
     });
     const results = await query.search(client, body.filter);
-
     return res.ok({
       body: createEvents(results, PaginationBuilder.buildCursorRequestLimit(limit, results)),
     });

@@ -187,6 +187,9 @@ export const apmSchema: MakeSchemaFrom<APMUsage> = {
       },
     },
   },
+  service_groups: {
+    kuery_fields: { type: 'array', items: { type: 'keyword' } },
+  },
   tasks: {
     aggregated_transactions: { took: { ms: long } },
     cloud: { took: { ms: long } },
@@ -201,5 +204,6 @@ export const apmSchema: MakeSchemaFrom<APMUsage> = {
     indices_stats: { took: { ms: long } },
     cardinality: { took: { ms: long } },
     environments: { took: { ms: long } },
+    service_groups: { took: { ms: long } },
   },
 };

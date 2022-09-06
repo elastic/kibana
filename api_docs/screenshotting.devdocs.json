@@ -520,6 +520,20 @@
       },
       {
         "parentPluginId": "screenshotting",
+        "id": "def-common.PLUGIN_ID",
+        "type": "string",
+        "tags": [],
+        "label": "PLUGIN_ID",
+        "description": [],
+        "signature": [
+          "\"screenshotting\""
+        ],
+        "path": "x-pack/plugins/screenshotting/common/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "screenshotting",
         "id": "def-common.SCREENSHOTTING_APP_ID",
         "type": "string",
         "tags": [],

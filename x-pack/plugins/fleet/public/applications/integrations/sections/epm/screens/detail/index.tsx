@@ -34,8 +34,10 @@ import {
   useStartServices,
   useAuthz,
   usePermissionCheck,
+  useIntegrationsStateContext,
 } from '../../../../hooks';
 import { INTEGRATIONS_ROUTING_PATHS } from '../../../../constants';
+import { ExperimentalFeaturesService } from '../../../../services';
 import { useGetPackageInfoByKey, useLink, useAgentPolicyContext } from '../../../../hooks';
 import { pkgKeyFromPackageInfo } from '../../../../services';
 import type { DetailViewPanelName, PackageInfo } from '../../../../types';
@@ -45,6 +47,7 @@ import type { WithHeaderLayoutProps } from '../../../../layouts';
 import { WithHeaderLayout } from '../../../../layouts';
 import { RELEASE_BADGE_DESCRIPTION, RELEASE_BADGE_LABEL } from '../../components/release_badge';
 
+import { useIsFirstTimeAgentUser } from './hooks';
 import { getInstallPkgRouteOptions } from './utils';
 
 import {
@@ -92,6 +95,7 @@ function Breadcrumbs({ packageTitle }: { packageTitle: string }) {
 
 export function Detail() {
   const { getId: getAgentPolicyId } = useAgentPolicyContext();
+  const { getFromIntegrations } = useIntegrationsStateContext();
   const { pkgkey, panel } = useParams<DetailParams>();
   const { getHref } = useLink();
   const canInstallPackages = useAuthz().integrations.installPackages;
@@ -106,6 +110,9 @@ export function Detail() {
   const queryParams = useMemo(() => new URLSearchParams(search), [search]);
   const integration = useMemo(() => queryParams.get('integration'), [queryParams]);
   const services = useStartServices();
+  const isCloud = !!services?.cloud?.cloudId;
+  const { createPackagePolicyMultiPageLayout: isExperimentalAddIntegrationPageEnabled } =
+    ExperimentalFeaturesService.get();
   const agentPolicyIdFromContext = getAgentPolicyId();
 
   // Package info state
@@ -138,6 +145,9 @@ export function Detail() {
     resendRequest: refreshPackageInfo,
   } = useGetPackageInfoByKey(pkgName, pkgVersion);
 
+  const { isFirstTimeAgentUser = false, isLoading: firstTimeUserLoading } =
+    useIsFirstTimeAgentUser();
+
   // Refresh package info when status change
   const [oldPackageInstallStatus, setOldPackageStatus] = useState(packageInstallStatus);
 
@@ -151,7 +161,10 @@ export function Detail() {
     }
   }, [packageInstallStatus, oldPackageInstallStatus, refreshPackageInfo]);
 
-  const isLoading = (packageInfoLoading && !packageIsInitialRequest) || permissionCheck.isLoading;
+  const isLoading =
+    (packageInfoLoading && !packageIsInitialRequest) ||
+    permissionCheck.isLoading ||
+    firstTimeUserLoading;
 
   const showCustomTab =
     useUIExtension(packageInfoData?.item.name ?? '', 'package-detail-custom') !== undefined;
@@ -184,21 +197,25 @@ export function Detail() {
     [integration, packageInfo]
   );
 
+  const fromIntegrations = getFromIntegrations();
+
+  const href =
+    fromIntegrations === 'updates_available'
+      ? getHref('integrations_installed_updates_available')
+      : fromIntegrations === 'installed'
+      ? getHref('integrations_installed')
+      : getHref('integrations_all');
+
   const headerLeftContent = useMemo(
     () => (
       <EuiFlexGroup direction="column" gutterSize="m">
         <EuiFlexItem>
           {/* Allows button to break out of full width */}
           <div>
-            <EuiButtonEmpty
-              iconType="arrowLeft"
-              size="xs"
-              flush="left"
-              href={getHref('integrations_all')}
-            >
+            <EuiButtonEmpty iconType="arrowLeft" size="xs" flush="left" href={href}>
               <FormattedMessage
                 id="xpack.fleet.epm.browseAllButtonText"
-                defaultMessage="Browse all integrations"
+                defaultMessage="Back to integrations"
               />
             </EuiButtonEmpty>
           </div>
@@ -250,7 +267,7 @@ export function Detail() {
         </EuiFlexItem>
       </EuiFlexGroup>
     ),
-    [getHref, integrationInfo, isLoading, packageInfo]
+    [integrationInfo, isLoading, packageInfo, href]
   );
 
   const handleAddIntegrationPolicyClick = useCallback<ReactEventHandler>(
@@ -265,23 +282,29 @@ export function Detail() {
       });
 
       const navigateOptions = getInstallPkgRouteOptions({
+        agentPolicyId: agentPolicyIdFromContext,
         currentPath,
         integration,
-        agentPolicyId: agentPolicyIdFromContext,
+        isCloud,
+        isExperimentalAddIntegrationPageEnabled,
+        isFirstTimeAgentUser,
         pkgkey,
       });
 
       services.application.navigateToApp(...navigateOptions);
     },
     [
-      history,
-      hash,
-      pathname,
-      search,
-      pkgkey,
-      integration,
-      services.application,
       agentPolicyIdFromContext,
+      hash,
+      history,
+      integration,
+      isCloud,
+      isExperimentalAddIntegrationPageEnabled,
+      isFirstTimeAgentUser,
+      pathname,
+      pkgkey,
+      search,
+      services.application,
     ]
   );
 

@@ -40,6 +40,7 @@ export const getTagCloudVisTypeDefinition = ({ palettes }: TagCloudVisDependenci
     },
     toExpressionAst,
     editorConfig: {
+      enableDataViewChange: true,
       optionsTemplate: getTagCloudOptions({
         palettes,
       }),
@@ -61,6 +62,7 @@ export const getTagCloudVisTypeDefinition = ({ palettes }: TagCloudVisDependenci
             '!geo_centroid',
             '!filtered_metric',
             '!single_percentile',
+            '!single_percentile_rank',
           ],
           defaults: [{ schema: 'metric', type: 'count' }],
         },

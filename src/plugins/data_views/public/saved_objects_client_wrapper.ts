@@ -7,15 +7,18 @@
  */
 
 import { omit } from 'lodash';
-import { SavedObjectsClient, SimpleSavedObject } from '@kbn/core/public';
+import { SavedObjectsClientContract, SimpleSavedObject } from '@kbn/core/public';
 import {
   SavedObjectsClientCommon,
   SavedObjectsClientCommonFindArgs,
   SavedObject,
-  DataViewSavedObjectConflictError,
-} from '../common';
+} from '../common/types';
+import { DataViewSavedObjectConflictError } from '../common/errors';
 
-type SOClient = Pick<SavedObjectsClient, 'find' | 'resolve' | 'update' | 'create' | 'delete'>;
+type SOClient = Pick<
+  SavedObjectsClientContract,
+  'find' | 'resolve' | 'update' | 'create' | 'delete'
+>;
 
 const simpleSavedObjectToSavedObject = <T>(simpleSavedObject: SimpleSavedObject): SavedObject<T> =>
   ({
@@ -25,9 +28,11 @@ const simpleSavedObjectToSavedObject = <T>(simpleSavedObject: SimpleSavedObject)
 
 export class SavedObjectsClientPublicToCommon implements SavedObjectsClientCommon {
   private savedObjectClient: SOClient;
+
   constructor(savedObjectClient: SOClient) {
     this.savedObjectClient = savedObjectClient;
   }
+
   async find<T = unknown>(options: SavedObjectsClientCommonFindArgs) {
     const response = (await this.savedObjectClient.find<T>(options)).savedObjects;
     return response.map<SavedObject<T>>(simpleSavedObjectToSavedObject);
@@ -40,6 +45,7 @@ export class SavedObjectsClientPublicToCommon implements SavedObjectsClientCommo
     }
     return simpleSavedObjectToSavedObject<T>(response.saved_object);
   }
+
   async update(
     type: string,
     id: string,
@@ -49,10 +55,12 @@ export class SavedObjectsClientPublicToCommon implements SavedObjectsClientCommo
     const response = await this.savedObjectClient.update(type, id, attributes, options);
     return simpleSavedObjectToSavedObject(response);
   }
+
   async create(type: string, attributes: Record<string, any>, options: Record<string, any>) {
     const response = await this.savedObjectClient.create(type, attributes, options);
     return simpleSavedObjectToSavedObject(response);
   }
+
   delete(type: string, id: string) {
     return this.savedObjectClient.delete(type, id, { force: true });
   }

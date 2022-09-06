@@ -7,7 +7,7 @@
  */
 
 import type { Observable } from 'rxjs';
-import { BehaviorSubject, Subject, combineLatest, from } from 'rxjs';
+import { BehaviorSubject, Subject, combineLatest, from, merge } from 'rxjs';
 import {
   buffer,
   bufferCount,
@@ -267,7 +267,11 @@ export class AnalyticsClient implements IAnalyticsClient {
     // Observer that will emit when both events occur: the OptInConfig is set + a shipper has been registered
     const configReceivedAndShipperReceivedObserver$ = combineLatest([
       this.optInConfigWithReplay$,
-      this.shipperRegistered$,
+      merge([
+        this.shipperRegistered$,
+        // Merging shipperRegistered$ with the optInConfigWithReplay$ when optedIn is false, so that we don't need to wait for the shipper if opted-in === false
+        this.optInConfigWithReplay$.pipe(filter((cfg) => cfg?.isOptedIn() === false)),
+      ]),
     ]);
 
     // Flush the internal queue when we get any optInConfig and, at least, 1 shipper

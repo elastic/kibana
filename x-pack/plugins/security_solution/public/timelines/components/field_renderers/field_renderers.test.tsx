@@ -28,6 +28,7 @@ import { mockData } from '../../../network/components/details/mock';
 import { useMountAppended } from '../../../common/utils/use_mount_appended';
 import { AutonomousSystem, FlowTarget } from '../../../../common/search_strategy';
 import { HostEcs } from '../../../../common/ecs/host';
+import { DataProvider } from '../../../../common/types';
 
 jest.mock('../../../common/lib/kibana');
 
@@ -273,10 +274,12 @@ describe('Field Renderers', () => {
     test('it should only render the items after overflowIndexStart', () => {
       const wrapper = mount(
         <MoreContainer
+          fieldType="keyword"
           idPrefix={idPrefix}
-          rowItems={rowItems}
+          isAggregatable={true}
           moreMaxHeight={DEFAULT_MORE_MAX_HEIGHT}
           overflowIndexStart={5}
+          rowItems={rowItems}
         />
       );
 
@@ -286,38 +289,44 @@ describe('Field Renderers', () => {
     test('it should render all the items when overflowIndexStart is zero', () => {
       const wrapper = mount(
         <MoreContainer
+          fieldType="keyword"
           idPrefix={idPrefix}
-          rowItems={rowItems}
+          isAggregatable={true}
           moreMaxHeight={DEFAULT_MORE_MAX_HEIGHT}
           overflowIndexStart={0}
+          rowItems={rowItems}
         />
       );
 
       expect(wrapper.text()).toEqual('item1item2item3item4item5item6item7');
     });
 
-    test('it should have the overflow `auto` style to enable scrolling when necessary', () => {
+    test('it should have the eui-yScroll to enable scrolling when necessary', () => {
       const wrapper = mount(
         <MoreContainer
+          fieldType="keyword"
           idPrefix={idPrefix}
-          rowItems={rowItems}
+          isAggregatable={true}
           moreMaxHeight={DEFAULT_MORE_MAX_HEIGHT}
           overflowIndexStart={5}
+          rowItems={rowItems}
         />
       );
 
-      expect(
-        wrapper.find('[data-test-subj="more-container"]').first().props().style?.overflow
-      ).toEqual('auto');
+      expect(wrapper.find('[data-test-subj="more-container"]').first().props().className).toEqual(
+        'eui-yScroll'
+      );
     });
 
     test('it should use the moreMaxHeight prop as the value for the max-height style', () => {
       const wrapper = mount(
         <MoreContainer
+          fieldType="keyword"
           idPrefix={idPrefix}
-          rowItems={rowItems}
+          isAggregatable={true}
           moreMaxHeight={DEFAULT_MORE_MAX_HEIGHT}
           overflowIndexStart={5}
+          rowItems={rowItems}
         />
       );
 
@@ -326,16 +335,70 @@ describe('Field Renderers', () => {
       ).toEqual(DEFAULT_MORE_MAX_HEIGHT);
     });
 
+    test('it should render with correct attrName prop', () => {
+      const wrapper = mount(
+        <MoreContainer
+          fieldType="keyword"
+          idPrefix={idPrefix}
+          isAggregatable={true}
+          moreMaxHeight={DEFAULT_MORE_MAX_HEIGHT}
+          overflowIndexStart={5}
+          rowItems={rowItems}
+          attrName="mock.attr"
+        />
+      );
+
+      expect(
+        wrapper.find('DraggableWrapper').first().prop<DataProvider>('dataProvider').queryMatch.field
+      ).toEqual('mock.attr');
+    });
+
+    test('it should render with correct fieldType prop', () => {
+      const wrapper = mount(
+        <MoreContainer
+          fieldType="keyword"
+          idPrefix={idPrefix}
+          isAggregatable={true}
+          moreMaxHeight={DEFAULT_MORE_MAX_HEIGHT}
+          overflowIndexStart={5}
+          rowItems={rowItems}
+          attrName="mock.attr"
+        />
+      );
+
+      expect(wrapper.find('DraggableWrapper').first().prop<string>('fieldType')).toEqual('keyword');
+    });
+
+    test('it should render with correct isAggregatable prop', () => {
+      const wrapper = mount(
+        <MoreContainer
+          fieldType="keyword"
+          idPrefix={idPrefix}
+          isAggregatable={true}
+          moreMaxHeight={DEFAULT_MORE_MAX_HEIGHT}
+          overflowIndexStart={5}
+          rowItems={rowItems}
+          attrName="mock.attr"
+        />
+      );
+
+      expect(wrapper.find('DraggableWrapper').first().prop<boolean>('isAggregatable')).toEqual(
+        true
+      );
+    });
+
     test('it should only invoke the optional render function, when provided, for the items after overflowIndexStart', () => {
       const render = jest.fn();
 
       mount(
         <MoreContainer
+          fieldType="keyword"
           idPrefix={idPrefix}
-          render={render}
-          rowItems={rowItems}
+          isAggregatable={true}
           moreMaxHeight={DEFAULT_MORE_MAX_HEIGHT}
           overflowIndexStart={5}
+          render={render}
+          rowItems={rowItems}
         />
       );
 
@@ -351,10 +414,12 @@ describe('Field Renderers', () => {
       const wrapper = mount(
         <TestProviders>
           <DefaultFieldRendererOverflow
+            fieldType="keyword"
             idPrefix={idPrefix}
-            rowItems={rowItems}
+            isAggregatable={true}
             moreMaxHeight={DEFAULT_MORE_MAX_HEIGHT}
             overflowIndexStart={5}
+            rowItems={rowItems}
           />
         </TestProviders>
       );
@@ -367,10 +432,12 @@ describe('Field Renderers', () => {
       const wrapper = mount(
         <TestProviders>
           <DefaultFieldRendererOverflow
+            fieldType="keyword"
             idPrefix={idPrefix}
-            rowItems={rowItems}
+            isAggregatable={true}
             moreMaxHeight={DEFAULT_MORE_MAX_HEIGHT}
             overflowIndexStart={5}
+            rowItems={rowItems}
           />
         </TestProviders>
       );

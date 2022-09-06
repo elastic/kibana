@@ -46,6 +46,12 @@ const triggersActionsUiStartMock = {
         get: jest.fn(),
         list: jest.fn(),
       },
+      actionTypeRegistry: {
+        has: jest.fn((x) => true),
+        register: jest.fn(),
+        get: jest.fn(),
+        list: jest.fn(),
+      },
     };
   },
 };

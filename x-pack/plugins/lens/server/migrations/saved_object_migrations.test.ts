@@ -181,7 +181,7 @@ describe('Lens migrations', () => {
   });
 
   describe('7.8.0 auto timestamp', () => {
-    const context = { log: { warning: () => {} } } as unknown as SavedObjectMigrationContext;
+    const context = { log: { warn: () => {} } } as unknown as SavedObjectMigrationContext;
 
     const example = {
       type: 'lens',
@@ -533,7 +533,7 @@ describe('Lens migrations', () => {
   });
 
   describe('7.11.0 remove suggested priority', () => {
-    const context = { log: { warning: () => {} } } as unknown as SavedObjectMigrationContext;
+    const context = { log: { warn: () => {} } } as unknown as SavedObjectMigrationContext;
 
     const example = {
       type: 'lens',
@@ -618,7 +618,7 @@ describe('Lens migrations', () => {
   });
 
   describe('7.12.0 restructure datatable state', () => {
-    const context = { log: { warning: () => {} } } as unknown as SavedObjectMigrationContext;
+    const context = { log: { warn: () => {} } } as unknown as SavedObjectMigrationContext;
     const example = {
       type: 'lens',
       id: 'mock-saved-object-id',
@@ -691,7 +691,7 @@ describe('Lens migrations', () => {
   });
 
   describe('7.13.0 rename operations for Formula', () => {
-    const context = { log: { warning: () => {} } } as unknown as SavedObjectMigrationContext;
+    const context = { log: { warn: () => {} } } as unknown as SavedObjectMigrationContext;
     const example = {
       type: 'lens',
       id: 'mocked-saved-object-id',
@@ -869,7 +869,7 @@ describe('Lens migrations', () => {
   });
 
   describe('7.14.0 remove time zone from date histogram', () => {
-    const context = { log: { warning: () => {} } } as unknown as SavedObjectMigrationContext;
+    const context = { log: { warn: () => {} } } as unknown as SavedObjectMigrationContext;
     const example = {
       type: 'lens',
       id: 'mocked-saved-object-id',
@@ -961,7 +961,7 @@ describe('Lens migrations', () => {
   });
 
   describe('7.15.0 add layer type information', () => {
-    const context = { log: { warning: () => {} } } as unknown as SavedObjectMigrationContext;
+    const context = { log: { warn: () => {} } } as unknown as SavedObjectMigrationContext;
     const example = {
       type: 'lens',
       id: 'mocked-saved-object-id',
@@ -1143,7 +1143,7 @@ describe('Lens migrations', () => {
   });
 
   describe('7.16.0 move reversed default palette to custom palette', () => {
-    const context = { log: { warning: () => {} } } as unknown as SavedObjectMigrationContext;
+    const context = { log: { warn: () => {} } } as unknown as SavedObjectMigrationContext;
     const example = {
       type: 'lens',
       id: 'mocked-saved-object-id',
@@ -1417,7 +1417,7 @@ describe('Lens migrations', () => {
   });
 
   describe('8.1.0 update filter reference schema', () => {
-    const context = { log: { warning: () => {} } } as unknown as SavedObjectMigrationContext;
+    const context = { log: { warn: () => {} } } as unknown as SavedObjectMigrationContext;
     const example = {
       type: 'lens',
       id: 'mocked-saved-object-id',
@@ -1523,7 +1523,7 @@ describe('Lens migrations', () => {
   });
 
   describe('8.1.0 rename records field', () => {
-    const context = { log: { warning: () => {} } } as unknown as SavedObjectMigrationContext;
+    const context = { log: { warn: () => {} } } as unknown as SavedObjectMigrationContext;
     const example = {
       type: 'lens',
       id: 'mocked-saved-object-id',
@@ -1709,7 +1709,7 @@ describe('Lens migrations', () => {
   });
 
   describe('8.1.0 add parentFormat to terms operation', () => {
-    const context = { log: { warning: () => {} } } as unknown as SavedObjectMigrationContext;
+    const context = { log: { warn: () => {} } } as unknown as SavedObjectMigrationContext;
     const example = {
       type: 'lens',
       id: 'mocked-saved-object-id',
@@ -1785,7 +1785,7 @@ describe('Lens migrations', () => {
 
   describe('8.2.0', () => {
     describe('last_value columns', () => {
-      const context = { log: { warning: () => {} } } as unknown as SavedObjectMigrationContext;
+      const context = { log: { warn: () => {} } } as unknown as SavedObjectMigrationContext;
       const example = {
         type: 'lens',
         id: 'mocked-saved-object-id',
@@ -1877,7 +1877,7 @@ describe('Lens migrations', () => {
     });
 
     describe('rename fitRowToContent to new detailed rowHeight and rowHeightLines', () => {
-      const context = { log: { warning: () => {} } } as unknown as SavedObjectMigrationContext;
+      const context = { log: { warn: () => {} } } as unknown as SavedObjectMigrationContext;
       function getExample(fitToContent: boolean) {
         return {
           type: 'lens',
@@ -1996,7 +1996,7 @@ describe('Lens migrations', () => {
   });
 
   describe('8.2.0 include empty rows for date histogram columns', () => {
-    const context = { log: { warning: () => {} } } as unknown as SavedObjectMigrationContext;
+    const context = { log: { warn: () => {} } } as unknown as SavedObjectMigrationContext;
     const example = {
       type: 'lens',
       id: 'mocked-saved-object-id',
@@ -2067,7 +2067,7 @@ describe('Lens migrations', () => {
   });
 
   describe('8.3.0 old metric visualization defaults', () => {
-    const context = { log: { warning: () => {} } } as unknown as SavedObjectMigrationContext;
+    const context = { log: { warn: () => {} } } as unknown as SavedObjectMigrationContext;
     const example = {
       type: 'lens',
       id: 'mocked-saved-object-id',
@@ -2117,7 +2117,7 @@ describe('Lens migrations', () => {
   });
 
   describe('8.3.0 - convert legend sizes to strings', () => {
-    const context = { log: { warning: () => {} } } as unknown as SavedObjectMigrationContext;
+    const context = { log: { warn: () => {} } } as unknown as SavedObjectMigrationContext;
     const migrate = migrations['8.3.0'];
 
     const autoLegendSize = 'auto';
@@ -2185,7 +2185,7 @@ describe('Lens migrations', () => {
   });
 
   describe('8.3.0 valueLabels in XY', () => {
-    const context = { log: { warning: () => {} } } as unknown as SavedObjectMigrationContext;
+    const context = { log: { warn: () => {} } } as unknown as SavedObjectMigrationContext;
     const example = {
       type: 'lens',
       id: 'mocked-saved-object-id',

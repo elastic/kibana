@@ -6,6 +6,7 @@
   "requiredPlugins": [
     "data",
     "expressions",
+    "fieldFormats",
     "uiActions",
     "urlForwarding",
     "navigation",
@@ -14,7 +15,8 @@
     "savedObjects",
     "screenshotMode",
     "presentationUtil",
-    "dataViews"
+    "dataViews",
+    "dataViewEditor"
   ],
   "optionalPlugins": ["home", "share", "usageCollection", "spaces", "savedObjectsTaggingOss"],
   "requiredBundles": ["kibanaUtils", "discover", "kibanaReact"],

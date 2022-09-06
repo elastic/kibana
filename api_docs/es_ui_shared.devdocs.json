@@ -1042,6 +1042,39 @@
             ],
             "path": "src/plugins/es_ui_shared/public/components/code_editor/code_editor.tsx",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "esUiShared",
+            "id": "def-public.EuiCodeEditorProps.onAceEditorRef",
+            "type": "Function",
+            "tags": [],
+            "label": "onAceEditorRef",
+            "description": [],
+            "signature": [
+              "((editor: ",
+              "default",
+              " | null) => void) | undefined"
+            ],
+            "path": "src/plugins/es_ui_shared/public/components/code_editor/code_editor.tsx",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "esUiShared",
+                "id": "def-public.EuiCodeEditorProps.onAceEditorRef.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "editor",
+                "description": [],
+                "signature": [
+                  "default",
+                  " | null"
+                ],
+                "path": "src/plugins/es_ui_shared/public/components/code_editor/code_editor.tsx",
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false

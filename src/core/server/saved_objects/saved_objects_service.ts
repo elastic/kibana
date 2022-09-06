@@ -8,14 +8,14 @@
 
 import { Subject, Observable, firstValueFrom } from 'rxjs';
 import { filter, take, switchMap } from 'rxjs/operators';
-import { CoreService } from '../../types';
+import type { Logger } from '@kbn/logging';
+import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
 import {
   SavedObjectsClient,
   SavedObjectsClientProvider,
   SavedObjectsClientProviderOptions,
 } from '.';
 import { KibanaMigrator, IKibanaMigrator } from './migrations';
-import { CoreContext } from '../core_context';
 import { InternalCoreUsageDataSetup } from '../core_usage_data';
 import {
   ElasticsearchClient,
@@ -40,7 +40,6 @@ import {
   SavedObjectsClientFactoryProvider,
   SavedObjectsClientWrapperFactory,
 } from './service/lib/scoped_client_provider';
-import { Logger } from '../logging';
 import { SavedObjectTypeRegistry, ISavedObjectTypeRegistry } from './saved_objects_type_registry';
 import { SavedObjectsSerializer } from './serialization';
 import { SavedObjectsExporter, ISavedObjectsExporter } from './export';

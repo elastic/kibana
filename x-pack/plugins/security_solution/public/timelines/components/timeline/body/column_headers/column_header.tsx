@@ -117,6 +117,8 @@ const ColumnHeaderComponent: React.FC<ColumneHeaderProps> = ({
   const onColumnSort = useCallback(
     (sortDirection: Direction) => {
       const columnId = header.id;
+      const columnType = header.type ?? '';
+      const esTypes = header.esTypes ?? [];
       const headerIndex = sort.findIndex((col) => col.columnId === columnId);
       const newSort =
         headerIndex === -1
@@ -124,7 +126,8 @@ const ColumnHeaderComponent: React.FC<ColumneHeaderProps> = ({
               ...sort,
               {
                 columnId,
-                columnType: `${header.type}`,
+                columnType,
+                esTypes,
                 sortDirection,
               },
             ]
@@ -132,7 +135,8 @@ const ColumnHeaderComponent: React.FC<ColumneHeaderProps> = ({
               ...sort.slice(0, headerIndex),
               {
                 columnId,
-                columnType: `${header.type}`,
+                columnType,
+                esTypes,
                 sortDirection,
               },
               ...sort.slice(headerIndex + 1),

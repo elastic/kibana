@@ -17,7 +17,6 @@ export const OPTIONS_LIST_CONTROL = 'optionsListControl';
 export interface OptionsListEmbeddableInput extends DataControlInput {
   selectedOptions?: string[];
   runPastTimeout?: boolean;
-  textFieldName?: string;
   singleSelect?: boolean;
   loading?: boolean;
 }

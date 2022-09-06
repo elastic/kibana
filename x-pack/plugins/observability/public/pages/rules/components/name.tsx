@@ -9,12 +9,11 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiText } from '@elastic/eui';
 import { RuleNameProps } from '../types';
 import { useKibana } from '../../../utils/kibana_react';
+import { paths } from '../../../config/paths';
 
 export function Name({ name, rule }: RuleNameProps) {
   const { http } = useKibana().services;
-  const detailsLink = http.basePath.prepend(
-    `/app/management/insightsAndAlerting/triggersActions/rule/${rule.id}`
-  );
+  const detailsLink = http.basePath.prepend(paths.observability.ruleDetails(rule.id));
   const link = (
     <EuiFlexGroup direction="column" gutterSize="xs">
       <EuiFlexItem grow={false}>

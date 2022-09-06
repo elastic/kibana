@@ -131,7 +131,7 @@ export function checksFactory(
     );
 
     const dfaJobsCreateTimeMap = dfaJobs.data_frame_analytics.reduce((acc, cur) => {
-      acc.set(cur.id, cur.create_time);
+      acc.set(cur.id, cur.create_time!);
       return acc;
     }, new Map<string, number>());
 

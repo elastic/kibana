@@ -56,7 +56,7 @@ describe('when navigating to integration page', () => {
   beforeEach(() => {
     const integrationsPath = '/app/integrations/browse';
 
-    cy.loginAsPowerUser();
+    cy.loginAsEditorUser();
     cy.visit(integrationsPath);
 
     // open integration policy form
@@ -134,5 +134,10 @@ describe('when navigating to integration page', () => {
   it('should hide Tail-based section for 8.0.0 apm package', () => {
     cy.visit('/app/fleet/integrations/apm-8.0.0/add-integration');
     cy.contains('Tail-based sampling').should('not.exist');
+  });
+
+  it('should Display Debug section', () => {
+    cy.visit('/app/fleet/integrations/apm-8.0.0/add-integration');
+    cy.contains('Debug settings').should('exist');
   });
 });

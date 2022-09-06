@@ -12,6 +12,7 @@ import { patchCase } from './api';
 import { UpdateKey, UpdateByKey } from '../../common/ui/types';
 import * as i18n from './translations';
 import { createUpdateSuccessToaster } from './utils';
+import { useRefreshCaseViewPage } from '../components/case_view/use_on_refresh_case_view_page';
 
 interface NewCaseState {
   isLoading: boolean;
@@ -65,17 +66,10 @@ export const useUpdateCase = ({ caseId }: { caseId: string }): UseUpdateCase => 
   const toasts = useToasts();
   const isCancelledRef = useRef(false);
   const abortCtrlRef = useRef(new AbortController());
+  const refreshCaseViewPage = useRefreshCaseViewPage();
 
   const dispatchUpdateCaseProperty = useCallback(
-    async ({
-      fetchCaseUserActions,
-      updateKey,
-      updateValue,
-      updateCase,
-      caseData,
-      onSuccess,
-      onError,
-    }: UpdateByKey) => {
+    async ({ updateKey, updateValue, caseData, onSuccess, onError }: UpdateByKey) => {
       try {
         isCancelledRef.current = false;
         abortCtrlRef.current.abort();
@@ -90,12 +84,7 @@ export const useUpdateCase = ({ caseId }: { caseId: string }): UseUpdateCase => 
         );
 
         if (!isCancelledRef.current) {
-          if (fetchCaseUserActions != null) {
-            fetchCaseUserActions(caseId, response[0].connector.id);
-          }
-          if (updateCase != null) {
-            updateCase(response[0]);
-          }
+          refreshCaseViewPage();
           dispatch({ type: 'FETCH_SUCCESS' });
           toasts.addSuccess(
             createUpdateSuccessToaster(caseData, response[0], updateKey, updateValue)

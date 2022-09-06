@@ -24,7 +24,7 @@ export const severityRuleAlertsQuery = {
     alertsByRule: {
       terms: {
         // top 4 rules sorted by severity counters
-        field: 'kibana.alert.rule.uuid',
+        field: 'kibana.alert.rule.name',
         size: 4,
         order: [{ critical: 'desc' }, { high: 'desc' }, { medium: 'desc' }, { low: 'desc' }],
       },
@@ -53,7 +53,7 @@ export const mockSeverityRuleAlertsResponse: { aggregations: SeverityRuleAlertsA
     alertsByRule: {
       buckets: [
         {
-          key: '79ec0270-b4c5-11ec-970e-8f7c5a7144f7',
+          key: 'RULE_1',
           doc_count: 54,
           lastRuleAlert: {
             hits: {
@@ -64,6 +64,7 @@ export const mockSeverityRuleAlertsResponse: { aggregations: SeverityRuleAlertsA
                 {
                   _source: {
                     'kibana.alert.rule.name': 'RULE_1',
+                    'kibana.alert.rule.uuid': '79ec0270-b4c5-11ec-970e-8f7c5a7144f7',
                     '@timestamp': '2022-04-05T15:58:35.079Z',
                     'kibana.alert.severity': 'critical',
                   },
@@ -73,7 +74,7 @@ export const mockSeverityRuleAlertsResponse: { aggregations: SeverityRuleAlertsA
           },
         },
         {
-          key: '955c79d0-b403-11ec-b5a7-6dc1ed01bdd7',
+          key: 'RULE_2',
           doc_count: 112,
           lastRuleAlert: {
             hits: {
@@ -83,6 +84,7 @@ export const mockSeverityRuleAlertsResponse: { aggregations: SeverityRuleAlertsA
               hits: [
                 {
                   _source: {
+                    'kibana.alert.rule.uuid': '955c79d0-b403-11ec-b5a7-6dc1ed01bdd7',
                     'kibana.alert.rule.name': 'RULE_2',
                     '@timestamp': '2022-04-05T15:58:47.164Z',
                     'kibana.alert.severity': 'high',
@@ -93,7 +95,7 @@ export const mockSeverityRuleAlertsResponse: { aggregations: SeverityRuleAlertsA
           },
         },
         {
-          key: '13bc7bc0-b1d6-11ec-a799-67811b37527a',
+          key: 'RULE_3',
           doc_count: 170,
           lastRuleAlert: {
             hits: {
@@ -104,6 +106,7 @@ export const mockSeverityRuleAlertsResponse: { aggregations: SeverityRuleAlertsA
                 {
                   _source: {
                     'kibana.alert.rule.name': 'RULE_3',
+                    'kibana.alert.rule.uuid': '13bc7bc0-b1d6-11ec-a799-67811b37527a',
                     '@timestamp': '2022-04-05T15:56:16.606Z',
                     'kibana.alert.severity': 'low',
                   },

@@ -18,8 +18,6 @@ describe('useAddToNewCase', () => {
     from: '2022-03-06T16:00:00.000Z',
     to: '2022-03-07T15:59:59.999Z',
   };
-  const owner = 'securitySolution';
-  const type = 'user';
   beforeEach(() => {
     (useKibana as jest.Mock).mockReturnValue({
       services: {
@@ -37,16 +35,6 @@ describe('useAddToNewCase', () => {
       })
     );
     expect(mockCases.hooks.getUseCasesAddToNewCaseFlyout).toHaveBeenCalledWith({
-      attachments: [
-        {
-          comment: `!{lens${JSON.stringify({
-            timeRange,
-            attributes: kpiHostMetricLensAttributes,
-          })}}`,
-          owner,
-          type,
-        },
-      ],
       toastContent: 'Successfully added visualization to the case',
     });
     expect(result.current.disabled).toEqual(false);

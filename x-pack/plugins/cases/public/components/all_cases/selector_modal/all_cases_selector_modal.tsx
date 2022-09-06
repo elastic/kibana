@@ -15,9 +15,11 @@ import {
   EuiModalHeaderTitle,
 } from '@elastic/eui';
 import styled from 'styled-components';
+import { QueryClientProvider } from 'react-query';
 import { Case, CaseStatusWithAllStatus } from '../../../../common/ui/types';
 import * as i18n from '../../../common/translations';
 import { AllCasesList } from '../all_cases_list';
+import { casesQueryClient } from '../../cases_context/query_client';
 
 export interface AllCasesSelectorModalProps {
   hiddenStatuses?: CaseStatusWithAllStatus[];
@@ -53,23 +55,25 @@ export const AllCasesSelectorModal = React.memo<AllCasesSelectorModalProps>(
     );
 
     return isModalOpen ? (
-      <Modal onClose={closeModal} data-test-subj="all-cases-modal">
-        <EuiModalHeader>
-          <EuiModalHeaderTitle>{i18n.SELECT_CASE_TITLE}</EuiModalHeaderTitle>
-        </EuiModalHeader>
-        <EuiModalBody>
-          <AllCasesList
-            hiddenStatuses={hiddenStatuses}
-            isSelectorView={true}
-            onRowClick={onClick}
-          />
-        </EuiModalBody>
-        <EuiModalFooter>
-          <EuiButton color="text" onClick={closeModal}>
-            {i18n.CANCEL}
-          </EuiButton>
-        </EuiModalFooter>
-      </Modal>
+      <QueryClientProvider client={casesQueryClient}>
+        <Modal onClose={closeModal} data-test-subj="all-cases-modal">
+          <EuiModalHeader>
+            <EuiModalHeaderTitle>{i18n.SELECT_CASE_TITLE}</EuiModalHeaderTitle>
+          </EuiModalHeader>
+          <EuiModalBody>
+            <AllCasesList
+              hiddenStatuses={hiddenStatuses}
+              isSelectorView={true}
+              onRowClick={onClick}
+            />
+          </EuiModalBody>
+          <EuiModalFooter>
+            <EuiButton color="text" onClick={closeModal}>
+              {i18n.CANCEL}
+            </EuiButton>
+          </EuiModalFooter>
+        </Modal>
+      </QueryClientProvider>
     ) : null;
   }
 );

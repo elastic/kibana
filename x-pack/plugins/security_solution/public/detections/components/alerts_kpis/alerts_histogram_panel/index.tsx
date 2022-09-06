@@ -186,7 +186,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
               ),
               field: selectedStackByOption,
               timelineId,
-              value: bucket.key,
+              value: bucket?.key_as_string ?? bucket.key,
             }))
           : NO_LEGEND_DATA,
       [
@@ -295,7 +295,6 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
         >
           <HeaderSection
             id={uniqueQueryId}
-            height={!toggleStatus ? 30 : undefined}
             title={titleText}
             titleSize={titleSize}
             toggleStatus={toggleStatus}

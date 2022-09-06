@@ -4739,6 +4739,17 @@
     "enums": [
       {
         "parentPluginId": "visualizations",
+        "id": "def-public.LegendSize",
+        "type": "Enum",
+        "tags": [],
+        "label": "LegendSize",
+        "description": [],
+        "path": "src/plugins/visualizations/common/constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
         "id": "def-public.VisGroups",
         "type": "Enum",
         "tags": [],
@@ -4761,6 +4772,27 @@
           "\"ACTION_CONVERT_TO_LENS\""
         ],
         "path": "src/plugins/visualizations/public/triggers/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
+        "id": "def-public.DEFAULT_LEGEND_SIZE",
+        "type": "string",
+        "tags": [],
+        "label": "DEFAULT_LEGEND_SIZE",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "visualizations",
+            "scope": "common",
+            "docId": "kibVisualizationsPluginApi",
+            "section": "def-common.LegendSize",
+            "text": "LegendSize"
+          },
+          ".MEDIUM"
+        ],
+        "path": "src/plugins/visualizations/common/constants.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -5422,6 +5454,20 @@
     "objects": [
       {
         "parentPluginId": "visualizations",
+        "id": "def-public.LegendSizeToPixels",
+        "type": "Object",
+        "tags": [],
+        "label": "LegendSizeToPixels",
+        "description": [],
+        "signature": [
+          "{ readonly auto: undefined; readonly small: 80; readonly medium: 130; readonly large: 180; readonly xlarge: 230; }"
+        ],
+        "path": "src/plugins/visualizations/common/constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
         "id": "def-public.VIS_EVENT_TO_TRIGGER",
         "type": "Object",
         "tags": [],
@@ -5991,7 +6037,23 @@
             "section": "def-common.DatatableColumn",
             "text": "DatatableColumn"
           },
-          "[]) => ",
+          "[], defaultColumnFormat: ",
+          {
+            "pluginId": "fieldFormats",
+            "scope": "common",
+            "docId": "kibFieldFormatsPluginApi",
+            "section": "def-common.SerializedFieldFormat",
+            "text": "SerializedFieldFormat"
+          },
+          "<",
+          {
+            "pluginId": "fieldFormats",
+            "scope": "common",
+            "docId": "kibFieldFormatsPluginApi",
+            "section": "def-common.FieldFormatParams",
+            "text": "FieldFormatParams"
+          },
+          "> | undefined) => ",
           {
             "pluginId": "fieldFormats",
             "scope": "common",
@@ -6053,6 +6115,35 @@
             "path": "src/plugins/visualizations/common/utils/accessors.ts",
             "deprecated": false,
             "isRequired": true
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.getFormatByAccessor.$3",
+            "type": "Object",
+            "tags": [],
+            "label": "defaultColumnFormat",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "fieldFormats",
+                "scope": "common",
+                "docId": "kibFieldFormatsPluginApi",
+                "section": "def-common.SerializedFieldFormat",
+                "text": "SerializedFieldFormat"
+              },
+              "<",
+              {
+                "pluginId": "fieldFormats",
+                "scope": "common",
+                "docId": "kibFieldFormatsPluginApi",
+                "section": "def-common.FieldFormatParams",
+                "text": "FieldFormatParams"
+              },
+              "> | undefined"
+            ],
+            "path": "src/plugins/visualizations/common/utils/accessors.ts",
+            "deprecated": false,
+            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -6822,8 +6913,41 @@
         "initialIsOpen": false
       }
     ],
-    "enums": [],
+    "enums": [
+      {
+        "parentPluginId": "visualizations",
+        "id": "def-common.LegendSize",
+        "type": "Enum",
+        "tags": [],
+        "label": "LegendSize",
+        "description": [],
+        "path": "src/plugins/visualizations/common/constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
     "misc": [
+      {
+        "parentPluginId": "visualizations",
+        "id": "def-common.DEFAULT_LEGEND_SIZE",
+        "type": "string",
+        "tags": [],
+        "label": "DEFAULT_LEGEND_SIZE",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "visualizations",
+            "scope": "common",
+            "docId": "kibVisualizationsPluginApi",
+            "section": "def-common.LegendSize",
+            "text": "LegendSize"
+          },
+          ".MEDIUM"
+        ],
+        "path": "src/plugins/visualizations/common/constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "visualizations",
         "id": "def-common.Dimension",
@@ -6877,6 +7001,21 @@
         "initialIsOpen": false
       }
     ],
-    "objects": []
+    "objects": [
+      {
+        "parentPluginId": "visualizations",
+        "id": "def-common.LegendSizeToPixels",
+        "type": "Object",
+        "tags": [],
+        "label": "LegendSizeToPixels",
+        "description": [],
+        "signature": [
+          "{ readonly auto: undefined; readonly small: 80; readonly medium: 130; readonly large: 180; readonly xlarge: 230; }"
+        ],
+        "path": "src/plugins/visualizations/common/constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ]
   }
 }

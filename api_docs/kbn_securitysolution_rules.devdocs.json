@@ -10,10 +10,18 @@
   },
   "server": {
     "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
     "functions": [
       {
         "parentPluginId": "@kbn/securitysolution-rules",
-        "id": "def-server.flattenWithPrefix",
+        "id": "def-common.flattenWithPrefix",
         "type": "Function",
         "tags": [],
         "label": "flattenWithPrefix",
@@ -26,7 +34,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-rules",
-            "id": "def-server.flattenWithPrefix.$1",
+            "id": "def-common.flattenWithPrefix.$1",
             "type": "string",
             "tags": [],
             "label": "prefix",
@@ -40,7 +48,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-rules",
-            "id": "def-server.flattenWithPrefix.$2",
+            "id": "def-common.flattenWithPrefix.$2",
             "type": "Unknown",
             "tags": [],
             "label": "maybeObj",
@@ -58,7 +66,7 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-rules",
-        "id": "def-server.isRuleType",
+        "id": "def-common.isRuleType",
         "type": "Function",
         "tags": [],
         "label": "isRuleType",
@@ -71,7 +79,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-rules",
-            "id": "def-server.isRuleType.$1",
+            "id": "def-common.isRuleType.$1",
             "type": "Unknown",
             "tags": [],
             "label": "ruleType",
@@ -89,7 +97,7 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-rules",
-        "id": "def-server.isRuleTypeId",
+        "id": "def-common.isRuleTypeId",
         "type": "Function",
         "tags": [],
         "label": "isRuleTypeId",
@@ -98,9 +106,9 @@
           "(ruleTypeId: unknown) => ruleTypeId is ",
           {
             "pluginId": "@kbn/securitysolution-rules",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnSecuritysolutionRulesPluginApi",
-            "section": "def-server.RuleTypeId",
+            "section": "def-common.RuleTypeId",
             "text": "RuleTypeId"
           }
         ],
@@ -109,7 +117,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-rules",
-            "id": "def-server.isRuleTypeId.$1",
+            "id": "def-common.isRuleTypeId.$1",
             "type": "Unknown",
             "tags": [],
             "label": "ruleTypeId",
@@ -131,7 +139,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/securitysolution-rules",
-        "id": "def-server.EQL_RULE_TYPE_ID",
+        "id": "def-common.EQL_RULE_TYPE_ID",
         "type": "string",
         "tags": [],
         "label": "EQL_RULE_TYPE_ID",
@@ -145,7 +153,7 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-rules",
-        "id": "def-server.INDICATOR_RULE_TYPE_ID",
+        "id": "def-common.INDICATOR_RULE_TYPE_ID",
         "type": "string",
         "tags": [],
         "label": "INDICATOR_RULE_TYPE_ID",
@@ -159,7 +167,7 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-rules",
-        "id": "def-server.MAX_EXECUTION_EVENTS_DISPLAYED",
+        "id": "def-common.MAX_EXECUTION_EVENTS_DISPLAYED",
         "type": "number",
         "tags": [],
         "label": "MAX_EXECUTION_EVENTS_DISPLAYED",
@@ -175,7 +183,7 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-rules",
-        "id": "def-server.ML_RULE_TYPE_ID",
+        "id": "def-common.ML_RULE_TYPE_ID",
         "type": "string",
         "tags": [],
         "label": "ML_RULE_TYPE_ID",
@@ -189,7 +197,7 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-rules",
-        "id": "def-server.QUERY_RULE_TYPE_ID",
+        "id": "def-common.QUERY_RULE_TYPE_ID",
         "type": "string",
         "tags": [],
         "label": "QUERY_RULE_TYPE_ID",
@@ -203,7 +211,7 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-rules",
-        "id": "def-server.RuleType",
+        "id": "def-common.RuleType",
         "type": "Type",
         "tags": [],
         "label": "RuleType",
@@ -217,7 +225,7 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-rules",
-        "id": "def-server.RuleTypeId",
+        "id": "def-common.RuleTypeId",
         "type": "Type",
         "tags": [],
         "label": "RuleTypeId",
@@ -231,7 +239,7 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-rules",
-        "id": "def-server.SAVED_QUERY_RULE_TYPE_ID",
+        "id": "def-common.SAVED_QUERY_RULE_TYPE_ID",
         "type": "string",
         "tags": [],
         "label": "SAVED_QUERY_RULE_TYPE_ID",
@@ -245,7 +253,7 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-rules",
-        "id": "def-server.SIGNALS_ID",
+        "id": "def-common.SIGNALS_ID",
         "type": "string",
         "tags": [],
         "label": "SIGNALS_ID",
@@ -261,7 +269,7 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-rules",
-        "id": "def-server.THRESHOLD_RULE_TYPE_ID",
+        "id": "def-common.THRESHOLD_RULE_TYPE_ID",
         "type": "string",
         "tags": [],
         "label": "THRESHOLD_RULE_TYPE_ID",
@@ -277,7 +285,7 @@
     "objects": [
       {
         "parentPluginId": "@kbn/securitysolution-rules",
-        "id": "def-server.ruleTypeMappings",
+        "id": "def-common.ruleTypeMappings",
         "type": "Object",
         "tags": [],
         "label": "ruleTypeMappings",
@@ -289,7 +297,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-rules",
-            "id": "def-server.ruleTypeMappings.eql",
+            "id": "def-common.ruleTypeMappings.eql",
             "type": "string",
             "tags": [],
             "label": "eql",
@@ -302,7 +310,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-rules",
-            "id": "def-server.ruleTypeMappings.machine_learning",
+            "id": "def-common.ruleTypeMappings.machine_learning",
             "type": "string",
             "tags": [],
             "label": "machine_learning",
@@ -315,7 +323,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-rules",
-            "id": "def-server.ruleTypeMappings.query",
+            "id": "def-common.ruleTypeMappings.query",
             "type": "string",
             "tags": [],
             "label": "query",
@@ -328,7 +336,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-rules",
-            "id": "def-server.ruleTypeMappings.saved_query",
+            "id": "def-common.ruleTypeMappings.saved_query",
             "type": "string",
             "tags": [],
             "label": "saved_query",
@@ -341,7 +349,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-rules",
-            "id": "def-server.ruleTypeMappings.threat_match",
+            "id": "def-common.ruleTypeMappings.threat_match",
             "type": "string",
             "tags": [],
             "label": "threat_match",
@@ -354,7 +362,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-rules",
-            "id": "def-server.ruleTypeMappings.threshold",
+            "id": "def-common.ruleTypeMappings.threshold",
             "type": "string",
             "tags": [],
             "label": "threshold",
@@ -369,13 +377,5 @@
         "initialIsOpen": false
       }
     ]
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
   }
 }

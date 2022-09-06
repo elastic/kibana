@@ -6,7 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { isIncompatibleMappingException, isWriteBlockException } from './es_errors';
+import {
+  isClusterShardLimitExceeded,
+  isIncompatibleMappingException,
+  isWriteBlockException,
+} from './es_errors';
 
 describe('isWriteBlockError', () => {
   it('returns true for a `index write` cluster_block_exception', () => {
@@ -52,5 +56,25 @@ describe('isIncompatibleMappingExceptionError', () => {
         reason: 'idk',
       })
     ).toEqual(true);
+  });
+});
+
+describe('isClusterShardLimitExceeded', () => {
+  it('returns true with validation_exception and reason is maximum normal shards open', () => {
+    expect(
+      isClusterShardLimitExceeded({
+        type: 'validation_exception',
+        reason:
+          'Validation Failed: 1: this action would add [2] shards, but this cluster currently has [3]/[1] maximum normal shards open;',
+      })
+    ).toEqual(true);
+  });
+  it('returns false for validation_exception with another reason', () => {
+    expect(
+      isClusterShardLimitExceeded({
+        type: 'validation_exception',
+        reason: 'Validation Failed: 1: this action would do something its not allowed to do',
+      })
+    ).toEqual(false);
   });
 });

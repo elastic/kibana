@@ -70,7 +70,6 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
           <AgentUpgradeAgentModal
             agents={[agent]}
             agentCount={1}
-            version={kibanaVersion}
             onClose={() => {
               setIsUpgradeModalOpen(false);
               refreshAgent();

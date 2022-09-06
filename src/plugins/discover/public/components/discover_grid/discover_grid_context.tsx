@@ -15,6 +15,7 @@ export interface GridContext {
   expanded?: ElasticSearchHit;
   setExpanded: (hit?: ElasticSearchHit) => void;
   rows: ElasticSearchHit[];
+  rowsFlattened: Array<Record<string, unknown>>;
   onFilter: DocViewFilterFn;
   indexPattern: DataView;
   isDarkMode: boolean;

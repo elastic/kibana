@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import { ObjectRemover as ActionsRemover } from '../../../../../alerting_api_integration/common/lib';
 import {
@@ -25,6 +25,7 @@ import {
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const actionsRemover = new ActionsRemover(supertest);
   const authSpace1 = getAuthWithSuperUser();
   const space = getActionsSpace(authSpace1.space);
@@ -36,35 +37,35 @@ export default ({ getService }: FtrProviderContext): void => {
 
     it('should return the correct connectors in space1', async () => {
       const snConnector = await createConnector({
-        supertest,
+        supertest: supertestWithoutAuth,
         req: getServiceNowConnector(),
         auth: authSpace1,
       });
       const snOAuthConnector = await createConnector({
-        supertest,
+        supertest: supertestWithoutAuth,
         req: getServiceNowOAuthConnector(),
         auth: authSpace1,
       });
       const emailConnector = await createConnector({
-        supertest,
+        supertest: supertestWithoutAuth,
         req: getEmailConnector(),
         auth: authSpace1,
       });
 
       const jiraConnector = await createConnector({
-        supertest,
+        supertest: supertestWithoutAuth,
         req: getJiraConnector(),
         auth: authSpace1,
       });
 
       const resilientConnector = await createConnector({
-        supertest,
+        supertest: supertestWithoutAuth,
         req: getResilientConnector(),
         auth: authSpace1,
       });
 
       const sir = await createConnector({
-        supertest,
+        supertest: supertestWithoutAuth,
         req: getServiceNowSIRConnector(),
         auth: authSpace1,
       });
@@ -76,7 +77,10 @@ export default ({ getService }: FtrProviderContext): void => {
       actionsRemover.add(space, jiraConnector.id, 'action', 'actions');
       actionsRemover.add(space, resilientConnector.id, 'action', 'actions');
 
-      const connectors = await getCaseConnectors({ supertest, auth: authSpace1 });
+      const connectors = await getCaseConnectors({
+        supertest: supertestWithoutAuth,
+        auth: authSpace1,
+      });
       const sortedConnectors = connectors.sort((a, b) => a.name.localeCompare(b.name));
 
       expect(sortedConnectors).to.eql([
@@ -174,37 +178,37 @@ export default ({ getService }: FtrProviderContext): void => {
 
     it('should not return any connectors when looking in the wrong space', async () => {
       const snConnector = await createConnector({
-        supertest,
+        supertest: supertestWithoutAuth,
         req: getServiceNowConnector(),
         auth: authSpace1,
       });
 
       const snOAuthConnector = await createConnector({
-        supertest,
+        supertest: supertestWithoutAuth,
         req: getServiceNowOAuthConnector(),
         auth: authSpace1,
       });
 
       const emailConnector = await createConnector({
-        supertest,
+        supertest: supertestWithoutAuth,
         req: getEmailConnector(),
         auth: authSpace1,
       });
 
       const jiraConnector = await createConnector({
-        supertest,
+        supertest: supertestWithoutAuth,
         req: getJiraConnector(),
         auth: authSpace1,
       });
 
       const resilientConnector = await createConnector({
-        supertest,
+        supertest: supertestWithoutAuth,
         req: getResilientConnector(),
         auth: authSpace1,
       });
 
       const sir = await createConnector({
-        supertest,
+        supertest: supertestWithoutAuth,
         req: getServiceNowSIRConnector(),
         auth: authSpace1,
       });
@@ -217,7 +221,7 @@ export default ({ getService }: FtrProviderContext): void => {
       actionsRemover.add(space, resilientConnector.id, 'action', 'actions');
 
       const connectors = await getCaseConnectors({
-        supertest,
+        supertest: supertestWithoutAuth,
         auth: getAuthWithSuperUser('space2'),
       });
 

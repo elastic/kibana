@@ -11,6 +11,8 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['visualize', 'lens', 'common', 'header']);
   const listingTable = getService('listingTable');
+  const retry = getService('retry');
+  const filterBar = getService('filterBar');
   const testSubjects = getService('testSubjects');
 
   describe('lens metrics', () => {
@@ -20,6 +22,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.clickVisualizeListItemTitle('Artistpreviouslyknownaslens');
       await PageObjects.lens.goToTimeRange();
       await PageObjects.lens.assertMetric('Maximum of bytes', '19,986');
+    });
+
+    it('should allow to filter metric', async () => {
+      let filterCount = 0;
+      await retry.try(async function tryingForTime() {
+        // click first metric bucket
+        await PageObjects.lens.clickMetric();
+        filterCount = await filterBar.getFilterCount();
+        await filterBar.removeAllFilters();
+        expect(filterCount).to.equal(1);
+      });
     });
 
     it('should color the metric text based on value', async () => {

@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
+import { injectedMetadataServiceMock } from '@kbn/core-injected-metadata-browser-mocks';
 import { applicationServiceMock } from './application/application_service.mock';
 import { chromeServiceMock } from './chrome/chrome_service.mock';
 import { fatalErrorsServiceMock } from './fatal_errors/fatal_errors_service.mock';
 import { httpServiceMock } from './http/http_service.mock';
 import { i18nServiceMock } from './i18n/i18n_service.mock';
-import { injectedMetadataServiceMock } from './injected_metadata/injected_metadata_service.mock';
 import { notificationServiceMock } from './notifications/notifications_service.mock';
 import { overlayServiceMock } from './overlays/overlay_service.mock';
 import { pluginsServiceMock } from './plugins/plugins_service.mock';
@@ -40,7 +40,7 @@ export const MockInjectedMetadataService = injectedMetadataServiceMock.create();
 export const InjectedMetadataServiceConstructor = jest
   .fn()
   .mockImplementation(() => MockInjectedMetadataService);
-jest.doMock('./injected_metadata', () => ({
+jest.doMock('@kbn/core-injected-metadata-browser-internal', () => ({
   InjectedMetadataService: InjectedMetadataServiceConstructor,
 }));
 

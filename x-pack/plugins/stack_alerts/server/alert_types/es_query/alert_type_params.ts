@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { validateTimeWindowUnits } from '@kbn/triggers-actions-ui-plugin/server';
 import { RuleTypeState } from '@kbn/alerting-plugin/server';
+import { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import { Comparator } from '../../../common/comparator_types';
 import { ComparatorFnNames } from '../lib';
 import { getComparatorSchemaType } from '../lib/comparator';
@@ -21,13 +22,21 @@ export interface EsQueryAlertState extends RuleTypeState {
   latestTimestamp: string | undefined;
 }
 
+export type EsQueryAlertParamsExtractedParams = Omit<EsQueryAlertParams, 'searchConfiguration'> & {
+  searchConfiguration: SerializedSearchSourceFields & {
+    indexRefName: string;
+  };
+};
+
 const EsQueryAlertParamsSchemaProperties = {
   size: schema.number({ min: 0, max: ES_QUERY_MAX_HITS_PER_EXECUTION }),
   timeWindowSize: schema.number({ min: 1 }),
   timeWindowUnit: schema.string({ validate: validateTimeWindowUnits }),
   threshold: schema.arrayOf(schema.number(), { minSize: 1, maxSize: 2 }),
   thresholdComparator: getComparatorSchemaType(validateComparator),
-  searchType: schema.nullable(schema.literal('searchSource')),
+  searchType: schema.oneOf([schema.literal('searchSource'), schema.literal('esQuery')], {
+    defaultValue: 'esQuery',
+  }),
   // searchSource alert param only
   searchConfiguration: schema.conditional(
     schema.siblingRef('searchType'),
@@ -38,21 +47,21 @@ const EsQueryAlertParamsSchemaProperties = {
   // esQuery alert params only
   esQuery: schema.conditional(
     schema.siblingRef('searchType'),
-    schema.literal('searchSource'),
-    schema.never(),
-    schema.string({ minLength: 1 })
+    schema.literal('esQuery'),
+    schema.string({ minLength: 1 }),
+    schema.never()
   ),
   index: schema.conditional(
     schema.siblingRef('searchType'),
-    schema.literal('searchSource'),
-    schema.never(),
-    schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1 })
+    schema.literal('esQuery'),
+    schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1 }),
+    schema.never()
   ),
   timeField: schema.conditional(
     schema.siblingRef('searchType'),
-    schema.literal('searchSource'),
-    schema.never(),
-    schema.string({ minLength: 1 })
+    schema.literal('esQuery'),
+    schema.string({ minLength: 1 }),
+    schema.never()
   ),
 };
 

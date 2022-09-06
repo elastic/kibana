@@ -29,6 +29,8 @@ export const hostDetailsUrl = (hostName: string) =>
 
 export const USERS_URL = '/app/security/users/allUsers';
 
+export const DETECTIONS_RESPONSE_URL = '/app/security/detection_response';
+
 export const userDetailsUrl = (userName: string) => `/app/security/users/${userName}/allUsers`;
 
 export const HOSTS_PAGE_TAB_URLS = {

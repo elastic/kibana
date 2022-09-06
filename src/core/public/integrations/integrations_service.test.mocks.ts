@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { CoreService } from '../../types';
+import type { CoreService } from '@kbn/core-base-browser-internal';
 
 const createCoreServiceMock = (): jest.Mocked<CoreService> => {
   return {

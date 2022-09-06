@@ -7,10 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const THREAT_HUNTING_PAGE_TITLE = i18n.translate(
+export const EXPLORE_PAGE_TITLE = i18n.translate(
   'xpack.securitySolution.landing.threatHunting.pageTitle',
   {
-    defaultMessage: 'Threat hunting',
+    defaultMessage: 'Explore',
   }
 );
 

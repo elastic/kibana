@@ -41,7 +41,9 @@ import {
   anomaly_threshold,
   description,
   enabled,
+  timestamp_field,
   event_category_override,
+  tiebreaker_field,
   false_positives,
   id,
   immutable,
@@ -74,6 +76,9 @@ import {
   timestamp_override,
   namespace,
   ruleExecutionSummary,
+  RelatedIntegrationArray,
+  RequiredFieldArray,
+  SetupGuide,
 } from '../common';
 
 import { typeAndTimelineOnlySchema, TypeAndTimelineOnly } from './type_timeline_only_schema';
@@ -111,6 +116,9 @@ export const requiredRulesSchema = t.type({
   created_by,
   version,
   exceptions_list: DefaultListArray,
+  related_integrations: RelatedIntegrationArray,
+  required_fields: RequiredFieldArray,
+  setup: SetupGuide,
 });
 
 export type RequiredRulesSchema = t.TypeOf<typeof requiredRulesSchema>;
@@ -125,7 +133,9 @@ export const dependentRulesSchema = t.partial({
   query,
 
   // eql only fields
+  timestamp_field,
   event_category_override,
+  tiebreaker_field,
 
   // when type = saved_query, saved_id is required
   saved_id,
@@ -266,9 +276,11 @@ export const addThresholdFields = (typeAndTimelineOnly: TypeAndTimelineOnly): t.
 export const addEqlFields = (typeAndTimelineOnly: TypeAndTimelineOnly): t.Mixed[] => {
   if (typeAndTimelineOnly.type === 'eql') {
     return [
+      t.exact(t.partial({ timestamp_field: dependentRulesSchema.props.timestamp_field })),
       t.exact(
         t.partial({ event_category_override: dependentRulesSchema.props.event_category_override })
       ),
+      t.exact(t.partial({ tiebreaker_field: dependentRulesSchema.props.tiebreaker_field })),
       t.exact(t.type({ query: dependentRulesSchema.props.query })),
       t.exact(t.type({ language: dependentRulesSchema.props.language })),
     ];

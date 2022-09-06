@@ -12,7 +12,6 @@ import {
 import { getClientMetrics } from './get_client_metrics';
 import { getPageViewTrends } from './get_page_view_trends';
 import { getPageLoadDistribution } from './get_page_load_distribution';
-import { getRumServices } from './get_rum_services';
 import { getLongTaskMetrics } from './get_long_task_metrics';
 import { getWebCoreVitals } from './get_web_core_vitals';
 import { getJSErrors } from './get_js_errors';
@@ -64,17 +63,6 @@ describe('rum client dashboard queries', () => {
           end: 50000,
         }),
       { uiFilters: { environment: 'staging' } }
-    );
-    expect(mock.params).toMatchSnapshot();
-  });
-
-  it('fetches rum services', async () => {
-    mock = await inspectSearchParams((setup) =>
-      getRumServices({
-        setup,
-        start: 0,
-        end: 50000,
-      })
     );
     expect(mock.params).toMatchSnapshot();
   });

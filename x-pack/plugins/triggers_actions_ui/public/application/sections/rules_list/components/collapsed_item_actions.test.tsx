@@ -21,6 +21,7 @@ const disableRule = jest.fn();
 const enableRule = jest.fn();
 const unmuteRule = jest.fn();
 const muteRule = jest.fn();
+const onUpdateAPIKey = jest.fn();
 
 export const tick = (ms = 0) =>
   new Promise((resolve) => {
@@ -91,6 +92,7 @@ describe('CollapsedItemActions', () => {
       enableRule,
       unmuteRule,
       muteRule,
+      onUpdateAPIKey,
     };
   };
 
@@ -118,6 +120,7 @@ describe('CollapsedItemActions', () => {
     expect(wrapper.find('[data-test-subj="disableButton"]').exists()).toBeFalsy();
     expect(wrapper.find('[data-test-subj="editRule"]').exists()).toBeFalsy();
     expect(wrapper.find('[data-test-subj="deleteRule"]').exists()).toBeFalsy();
+    expect(wrapper.find('[data-test-subj="updateApiKey"]').exists()).toBeFalsy();
 
     wrapper.find('[data-test-subj="selectActionButton"]').first().simulate('click');
     await act(async () => {
@@ -130,6 +133,7 @@ describe('CollapsedItemActions', () => {
     expect(wrapper.find('[data-test-subj="disableButton"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="editRule"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="deleteRule"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="updateApiKey"]').exists()).toBeTruthy();
 
     expect(
       wrapper.find('[data-test-subj="selectActionButton"]').first().props().disabled
@@ -143,6 +147,7 @@ describe('CollapsedItemActions', () => {
     expect(wrapper.find(`[data-test-subj="editRule"] button`).text()).toEqual('Edit rule');
     expect(wrapper.find(`[data-test-subj="deleteRule"] button`).prop('disabled')).toBeFalsy();
     expect(wrapper.find(`[data-test-subj="deleteRule"] button`).text()).toEqual('Delete rule');
+    expect(wrapper.find(`[data-test-subj="updateApiKey"] button`).text()).toEqual('Update API key');
   });
 
   test('handles case when rule is unmuted and enabled and mute is clicked', async () => {

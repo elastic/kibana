@@ -5,6 +5,16 @@
  * 2.0.
  */
 
+import { PluginSetup, PluginStart } from '@kbn/data-plugin/server';
+
+export interface AiopsPluginSetupDeps {
+  data: PluginSetup;
+}
+
+export interface AiopsPluginStartDeps {
+  data: PluginStart;
+}
+
 /**
  * aiops plugin server setup contract
  */

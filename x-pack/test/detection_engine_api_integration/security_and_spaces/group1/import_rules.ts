@@ -131,6 +131,7 @@ export default ({ getService }: FtrProviderContext): void => {
           errors: [],
           success: true,
           success_count: 1,
+          rules_count: 1,
           exceptions_errors: [],
           exceptions_success: true,
           exceptions_success_count: 0,
@@ -165,6 +166,7 @@ export default ({ getService }: FtrProviderContext): void => {
           errors: [],
           success: true,
           success_count: 1,
+          rules_count: 1,
           exceptions_errors: [],
           exceptions_success: true,
           exceptions_success_count: 0,
@@ -214,6 +216,7 @@ export default ({ getService }: FtrProviderContext): void => {
               rule_id: 'rule-1',
             },
           ],
+          rules_count: 1,
           exceptions_errors: [],
           exceptions_success: true,
           exceptions_success_count: 0,
@@ -360,6 +363,7 @@ export default ({ getService }: FtrProviderContext): void => {
           errors: [],
           success: true,
           success_count: 1,
+          rules_count: 1,
           exceptions_errors: [],
           exceptions_success: true,
           exceptions_success_count: 0,
@@ -396,6 +400,7 @@ export default ({ getService }: FtrProviderContext): void => {
           errors: [],
           success: true,
           success_count: 2,
+          rules_count: 2,
           exceptions_errors: [],
           exceptions_success: true,
           exceptions_success_count: 0,
@@ -421,6 +426,7 @@ export default ({ getService }: FtrProviderContext): void => {
           ],
           success: false,
           success_count: 1,
+          rules_count: 2,
           exceptions_errors: [],
           exceptions_success: true,
           exceptions_success_count: 0,
@@ -438,6 +444,7 @@ export default ({ getService }: FtrProviderContext): void => {
           errors: [],
           success: true,
           success_count: 1,
+          rules_count: 2,
           exceptions_errors: [],
           exceptions_success: true,
           exceptions_success_count: 0,
@@ -469,6 +476,7 @@ export default ({ getService }: FtrProviderContext): void => {
           ],
           success: false,
           success_count: 0,
+          rules_count: 1,
           exceptions_errors: [],
           exceptions_success: true,
           exceptions_success_count: 0,
@@ -492,6 +500,7 @@ export default ({ getService }: FtrProviderContext): void => {
           errors: [],
           success: true,
           success_count: 1,
+          rules_count: 1,
           exceptions_errors: [],
           exceptions_success: true,
           exceptions_success_count: 0,
@@ -555,6 +564,7 @@ export default ({ getService }: FtrProviderContext): void => {
           ],
           success: false,
           success_count: 2,
+          rules_count: 3,
           exceptions_errors: [],
           exceptions_success: true,
           exceptions_success_count: 0,
@@ -593,6 +603,7 @@ export default ({ getService }: FtrProviderContext): void => {
           ],
           success: false,
           success_count: 1,
+          rules_count: 3,
           exceptions_errors: [],
           exceptions_success: true,
           exceptions_success_count: 0,
@@ -664,6 +675,7 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(body).to.eql({
           success: false,
           success_count: 0,
+          rules_count: 1,
           errors: [
             {
               rule_id: 'rule-1',
@@ -705,6 +717,7 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(body).to.eql({
           success: true,
           success_count: 1,
+          rules_count: 1,
           errors: [],
           exceptions_errors: [],
           exceptions_success: true,
@@ -756,6 +769,7 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(body).to.eql({
           success: true,
           success_count: 2,
+          rules_count: 2,
           errors: [],
           exceptions_errors: [],
           exceptions_success: true,
@@ -807,6 +821,7 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(body).to.eql({
           success: false,
           success_count: 1,
+          rules_count: 2,
           errors: [
             {
               rule_id: 'rule-2',
@@ -954,6 +969,7 @@ export default ({ getService }: FtrProviderContext): void => {
           expect(body).to.eql({
             success: true,
             success_count: 1,
+            rules_count: 1,
             errors: [],
             exceptions_errors: [],
             exceptions_success: true,
@@ -1015,6 +1031,7 @@ export default ({ getService }: FtrProviderContext): void => {
           expect(body).to.eql({
             success: false,
             success_count: 1,
+            rules_count: 1,
             errors: [
               {
                 rule_id: 'rule-1',
@@ -1122,6 +1139,7 @@ export default ({ getService }: FtrProviderContext): void => {
           expect(body).to.eql({
             success: true,
             success_count: 1,
+            rules_count: 1,
             errors: [],
             exceptions_errors: [],
             exceptions_success: true,
@@ -1251,6 +1269,7 @@ export default ({ getService }: FtrProviderContext): void => {
           expect(body).to.eql({
             success: true,
             success_count: 1,
+            rules_count: 1,
             errors: [],
             exceptions_errors: [],
             exceptions_success: true,

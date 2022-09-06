@@ -7,7 +7,7 @@
 
 export const ADD_POLICY_BTN = 'addIntegrationPolicyButton';
 export const CREATE_PACKAGE_POLICY_SAVE_BTN = 'createPackagePolicySaveButton';
-export const INTEGRATIONS_CARD = '.euiCard__titleAnchor';
+export const INTEGRATIONS_CARD = '.euiCard__titleButton';
 
 export const INTEGRATION_NAME_LINK = 'integrationNameLink';
 export const AGENT_POLICY_NAME_LINK = 'agentPolicyNameLink';

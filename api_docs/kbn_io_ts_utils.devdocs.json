@@ -10,10 +10,18 @@
   },
   "server": {
     "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
     "functions": [
       {
         "parentPluginId": "@kbn/io-ts-utils",
-        "id": "def-server.deepExactRt",
+        "id": "def-common.deepExactRt",
         "type": "Function",
         "tags": [],
         "label": "deepExactRt",
@@ -26,7 +34,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/io-ts-utils",
-            "id": "def-server.deepExactRt.$1",
+            "id": "def-common.deepExactRt.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "type",
@@ -44,7 +52,7 @@
       },
       {
         "parentPluginId": "@kbn/io-ts-utils",
-        "id": "def-server.deepExactRt",
+        "id": "def-common.deepExactRt",
         "type": "Function",
         "tags": [],
         "label": "deepExactRt",
@@ -91,7 +99,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/io-ts-utils",
-            "id": "def-server.deepExactRt.$1",
+            "id": "def-common.deepExactRt.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "type",
@@ -111,7 +119,7 @@
       },
       {
         "parentPluginId": "@kbn/io-ts-utils",
-        "id": "def-server.mergeRt",
+        "id": "def-common.mergeRt",
         "type": "Function",
         "tags": [],
         "label": "mergeRt",
@@ -126,7 +134,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/io-ts-utils",
-            "id": "def-server.mergeRt.$1",
+            "id": "def-common.mergeRt.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "a",
@@ -140,7 +148,7 @@
           },
           {
             "parentPluginId": "@kbn/io-ts-utils",
-            "id": "def-server.mergeRt.$2",
+            "id": "def-common.mergeRt.$2",
             "type": "Uncategorized",
             "tags": [],
             "label": "b",
@@ -158,7 +166,7 @@
       },
       {
         "parentPluginId": "@kbn/io-ts-utils",
-        "id": "def-server.mergeRt",
+        "id": "def-common.mergeRt",
         "type": "Function",
         "tags": [],
         "label": "mergeRt",
@@ -181,7 +189,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/io-ts-utils",
-            "id": "def-server.mergeRt.$1",
+            "id": "def-common.mergeRt.$1",
             "type": "Array",
             "tags": [],
             "label": "types",
@@ -200,7 +208,7 @@
       },
       {
         "parentPluginId": "@kbn/io-ts-utils",
-        "id": "def-server.strictKeysRt",
+        "id": "def-common.strictKeysRt",
         "type": "Function",
         "tags": [],
         "label": "strictKeysRt",
@@ -215,7 +223,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/io-ts-utils",
-            "id": "def-server.strictKeysRt.$1",
+            "id": "def-common.strictKeysRt.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "type",
@@ -233,7 +241,7 @@
       },
       {
         "parentPluginId": "@kbn/io-ts-utils",
-        "id": "def-server.toJsonSchema",
+        "id": "def-common.toJsonSchema",
         "type": "Function",
         "tags": [],
         "label": "toJsonSchema",
@@ -248,7 +256,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/io-ts-utils",
-            "id": "def-server.toJsonSchema.$1",
+            "id": "def-common.toJsonSchema.$1",
             "type": "Object",
             "tags": [],
             "label": "type",
@@ -268,7 +276,7 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/io-ts-utils",
-        "id": "def-server.NonEmptyStringBrand",
+        "id": "def-common.NonEmptyStringBrand",
         "type": "Interface",
         "tags": [],
         "label": "NonEmptyStringBrand",
@@ -278,7 +286,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/io-ts-utils",
-            "id": "def-server.NonEmptyStringBrand.NonEmptyString",
+            "id": "def-common.NonEmptyStringBrand.NonEmptyString",
             "type": "Uncategorized",
             "tags": [],
             "label": "NonEmptyString",
@@ -287,9 +295,9 @@
               "typeof ",
               {
                 "pluginId": "@kbn/io-ts-utils",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnIoTsUtilsPluginApi",
-                "section": "def-server.NonEmptyStringBrand",
+                "section": "def-common.NonEmptyStringBrand",
                 "text": "NonEmptyStringBrand"
               },
               "[\"NonEmptyString\"]"
@@ -306,7 +314,7 @@
     "objects": [
       {
         "parentPluginId": "@kbn/io-ts-utils",
-        "id": "def-server.isoToEpochRt",
+        "id": "def-common.isoToEpochRt",
         "type": "Object",
         "tags": [],
         "label": "isoToEpochRt",
@@ -321,7 +329,7 @@
       },
       {
         "parentPluginId": "@kbn/io-ts-utils",
-        "id": "def-server.jsonRt",
+        "id": "def-common.jsonRt",
         "type": "Object",
         "tags": [],
         "label": "jsonRt",
@@ -336,7 +344,7 @@
       },
       {
         "parentPluginId": "@kbn/io-ts-utils",
-        "id": "def-server.nonEmptyStringRt",
+        "id": "def-common.nonEmptyStringRt",
         "type": "Object",
         "tags": [],
         "label": "nonEmptyStringRt",
@@ -348,9 +356,9 @@
           ", ",
           {
             "pluginId": "@kbn/io-ts-utils",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnIoTsUtilsPluginApi",
-            "section": "def-server.NonEmptyStringBrand",
+            "section": "def-common.NonEmptyStringBrand",
             "text": "NonEmptyStringBrand"
           },
           ">"
@@ -361,7 +369,7 @@
       },
       {
         "parentPluginId": "@kbn/io-ts-utils",
-        "id": "def-server.toBooleanRt",
+        "id": "def-common.toBooleanRt",
         "type": "Object",
         "tags": [],
         "label": "toBooleanRt",
@@ -376,7 +384,7 @@
       },
       {
         "parentPluginId": "@kbn/io-ts-utils",
-        "id": "def-server.toNumberRt",
+        "id": "def-common.toNumberRt",
         "type": "Object",
         "tags": [],
         "label": "toNumberRt",
@@ -390,13 +398,5 @@
         "initialIsOpen": false
       }
     ]
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
   }
 }

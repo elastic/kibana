@@ -6,8 +6,13 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useTrackPageview } from '@kbn/observability-plugin/public';
+import { useDispatch, useSelector } from 'react-redux';
+import { Redirect } from 'react-router-dom';
+import { monitorListSelector } from '../../state/monitor_management/selectors';
+import { GETTING_STARTED_ROUTE } from '../../../../../common/constants';
+import { fetchMonitorListAction } from '../../state/monitor_management/monitor_list';
 import { useSyntheticsSettingsContext } from '../../contexts';
 import { useOverviewBreadcrumbs } from './use_breadcrumbs';
 
@@ -16,6 +21,18 @@ export const OverviewPage: React.FC = () => {
   useTrackPageview({ app: 'synthetics', path: 'overview', delay: 15000 });
   useOverviewBreadcrumbs();
   const { basePath } = useSyntheticsSettingsContext();
+
+  const dispatch = useDispatch();
+
+  const { total } = useSelector(monitorListSelector);
+
+  useEffect(() => {
+    dispatch(fetchMonitorListAction.get());
+  }, [dispatch]);
+
+  if (total === 0) {
+    return <Redirect to={GETTING_STARTED_ROUTE} />;
+  }
 
   return (
     <EuiFlexGroup direction={'column'}>

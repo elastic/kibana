@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { CoreService } from '../../types';
+import type { CoreService } from '@kbn/core-base-browser-internal';
 import type { HttpStart } from '../http';
 import { DeprecationsClient, ResolveDeprecationResponse } from './deprecations_client';
 import type { DomainDeprecationDetails } from '../../server/types';

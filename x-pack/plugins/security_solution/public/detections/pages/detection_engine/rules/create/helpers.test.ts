@@ -290,6 +290,40 @@ describe('helpers', () => {
       expect(result).toEqual(expect.objectContaining(expected));
     });
 
+    test('returns option fields if specified for eql type', () => {
+      const mockStepData: DefineStepRule = {
+        ...mockData,
+        ruleType: 'eql',
+        queryBar: {
+          ...mockData.queryBar,
+          query: {
+            ...mockData.queryBar.query,
+            language: 'eql',
+            query: 'process where process_name == "explorer.exe"',
+          },
+        },
+        eqlOptions: {
+          timestampField: 'event.created',
+          tiebreakerField: 'process.name',
+          eventCategoryField: 'event.action',
+        },
+      };
+      const result = formatDefineStepData(mockStepData);
+
+      const expected: DefineStepRuleJson = {
+        filters: mockStepData.queryBar.filters,
+        index: mockStepData.index,
+        language: 'eql',
+        query: 'process where process_name == "explorer.exe"',
+        type: 'eql',
+        timestamp_field: 'event.created',
+        tiebreaker_field: 'process.name',
+        event_category_override: 'event.action',
+      };
+
+      expect(result).toEqual(expect.objectContaining(expected));
+    });
+
     test('returns expected indicator matching rule type if all fields are filled out', () => {
       const threatFilters: DefineStepRule['threatQueryBar']['filters'] = [
         {
@@ -330,6 +364,7 @@ describe('helpers', () => {
         threatQueryBar: {
           query: { language: 'kql', query: 'threat_host: *' },
           filters: threatFilters,
+          saved_id: null,
         },
         threatMapping,
       };

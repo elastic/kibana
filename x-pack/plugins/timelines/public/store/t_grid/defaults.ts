@@ -20,8 +20,9 @@ export const defaultHeaders: ColumnHeaderOptions[] = [
   {
     columnHeaderType: defaultColumnHeaderType,
     id: '@timestamp',
-    type: 'number',
     initialWidth: DEFAULT_DATE_COLUMN_MIN_WIDTH,
+    esTypes: ['date'],
+    type: 'date',
   },
   {
     columnHeaderType: defaultColumnHeaderType,
@@ -84,6 +85,7 @@ export const tGridDefaults: SubsetTGridModel = {
     {
       columnId: '@timestamp',
       columnType: 'date',
+      esTypes: ['date'],
       sortDirection: Direction.desc,
     },
   ],

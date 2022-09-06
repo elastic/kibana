@@ -1886,7 +1886,7 @@
         "signature": [
           "{ iconType?: ",
           "IconType",
-          " | undefined; 'data-test-subj'?: string | undefined; rel?: string | undefined; target?: string | undefined; }"
+          " | undefined; 'data-test-subj'?: string | undefined; rel?: string | undefined; target?: string | (string & {}) | undefined; }"
         ],
         "path": "src/core/public/chrome/ui/header/header_help_menu.tsx",
         "deprecated": false,

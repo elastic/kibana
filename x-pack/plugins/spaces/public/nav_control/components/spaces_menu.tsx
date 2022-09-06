@@ -69,7 +69,6 @@ class SpacesMenuUI extends Component<Props, State> {
         id: 'xpack.spaces.navControl.spacesMenu.changeCurrentSpaceTitle',
         defaultMessage: 'Change current space',
       }),
-      watchedItemProps: ['data-search-term'],
     };
 
     if (this.props.spaces.length >= SPACE_SEARCH_COUNT_THRESHOLD) {

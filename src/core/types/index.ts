@@ -10,7 +10,6 @@
  * Use * syntax so that these exports do not break when internal
  * types are stripped.
  */
-export * from './core_service';
 export * from './capabilities';
 export * from './app_category';
 export * from './ui_settings';

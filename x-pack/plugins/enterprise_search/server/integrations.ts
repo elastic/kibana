@@ -338,24 +338,6 @@ const workplaceSearchIntegrations: WorkplaceSearchIntegration[] = [
     categories: ['enterprise_search', 'communications', 'productivity'],
     uiInternalPath: '/app/enterprise_search/workplace_search/sources/add/zoom',
   },
-  {
-    id: 'custom_api_source',
-    title: i18n.translate(
-      'xpack.enterpriseSearch.workplaceSearch.integrations.customApiSourceName',
-      {
-        defaultMessage: 'Custom API Source',
-      }
-    ),
-    description: i18n.translate(
-      'xpack.enterpriseSearch.workplaceSearch.integrations.customApiSourceDescription',
-      {
-        defaultMessage:
-          'Search over anything by building your own integration with Workplace Search.',
-      }
-    ),
-    categories: ['custom'],
-    uiInternalPath: '/app/enterprise_search/workplace_search/sources/add/custom',
-  },
 ];
 
 export const registerEnterpriseSearchIntegrations = (

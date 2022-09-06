@@ -6,14 +6,37 @@
  * Side Public License, v 1.
  */
 
+import { existsSync } from 'fs';
 import { pick } from 'lodash';
+import path from 'path';
 import { LogLevel } from '../../lib/utils/create_logger';
 import { RunCliFlags } from '../run_synthtrace';
 
-export function parseRunCliFlags(flags: RunCliFlags) {
-  const { file, _, logLevel } = flags;
+function getParsedFile(flags: RunCliFlags) {
+  const { file, _ } = flags;
+  const parsedFile = (file || _[0]) as string;
 
-  const parsedFile = String(file || _[0]);
+  if (!parsedFile) {
+    throw new Error('Please specify a scenario to run');
+  }
+
+  const result = [
+    path.resolve(parsedFile),
+    path.resolve(`${parsedFile}.ts`),
+    path.resolve(__dirname, '../../scenarios', parsedFile),
+    path.resolve(__dirname, '../../scenarios', `${parsedFile}.ts`),
+  ].find((filepath) => existsSync(filepath));
+
+  if (result) {
+    return result;
+  }
+
+  throw new Error(`Could not find scenario file: "${parsedFile}"`);
+}
+
+export function parseRunCliFlags(flags: RunCliFlags) {
+  const { logLevel } = flags;
+  const parsedFile = getParsedFile(flags);
 
   let parsedLogLevel = LogLevel.info;
   switch (logLevel) {
@@ -50,7 +73,8 @@ export function parseRunCliFlags(flags: RunCliFlags) {
       'scenarioOpts',
       'forceLegacyIndices',
       'dryRun',
-      'gcpRepository'
+      'gcpRepository',
+      'streamProcessors'
     ),
     logLevel: parsedLogLevel,
     file: parsedFile,

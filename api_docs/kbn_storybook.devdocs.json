@@ -98,7 +98,264 @@
         "initialIsOpen": false
       }
     ],
-    "interfaces": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/storybook",
+        "id": "def-server.StorybookConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "StorybookConfig",
+        "description": [
+          "\nThe interface for Storybook configuration in `main.ts` files."
+        ],
+        "path": "node_modules/@storybook/core-common/dist/ts3.9/types.d.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/storybook",
+            "id": "def-server.StorybookConfig.addons",
+            "type": "Array",
+            "tags": [],
+            "label": "addons",
+            "description": [
+              "\nSets the addons you want to use with Storybook.\n"
+            ],
+            "signature": [
+              "Preset",
+              "[] | undefined"
+            ],
+            "path": "node_modules/@storybook/core-common/dist/ts3.9/types.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/storybook",
+            "id": "def-server.StorybookConfig.core",
+            "type": "Object",
+            "tags": [],
+            "label": "core",
+            "description": [],
+            "signature": [
+              "CoreConfig",
+              " | undefined"
+            ],
+            "path": "node_modules/@storybook/core-common/dist/ts3.9/types.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/storybook",
+            "id": "def-server.StorybookConfig.staticDirs",
+            "type": "Array",
+            "tags": [],
+            "label": "staticDirs",
+            "description": [
+              "\nSets a list of directories of static files to be loaded by Storybook server\n"
+            ],
+            "signature": [
+              "(string | DirectoryMapping)[] | undefined"
+            ],
+            "path": "node_modules/@storybook/core-common/dist/ts3.9/types.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/storybook",
+            "id": "def-server.StorybookConfig.logLevel",
+            "type": "string",
+            "tags": [],
+            "label": "logLevel",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "node_modules/@storybook/core-common/dist/ts3.9/types.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/storybook",
+            "id": "def-server.StorybookConfig.features",
+            "type": "Object",
+            "tags": [],
+            "label": "features",
+            "description": [],
+            "signature": [
+              "{ postcss?: boolean | undefined; emotionAlias?: boolean | undefined; buildStoriesJson?: boolean | undefined; previewCsfV3?: boolean | undefined; modernInlineRender?: boolean | undefined; storyStoreV7?: boolean | undefined; breakingChangesV7?: boolean | undefined; interactionsDebugger?: boolean | undefined; babelModeV7?: boolean | undefined; argTypeTargetsV7?: boolean | undefined; warnOnLegacyHierarchySeparator?: boolean | undefined; } | undefined"
+            ],
+            "path": "node_modules/@storybook/core-common/dist/ts3.9/types.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/storybook",
+            "id": "def-server.StorybookConfig.stories",
+            "type": "Array",
+            "tags": [],
+            "label": "stories",
+            "description": [
+              "\nTells Storybook where to find stories.\n"
+            ],
+            "signature": [
+              "StoriesEntry",
+              "[]"
+            ],
+            "path": "node_modules/@storybook/core-common/dist/ts3.9/types.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/storybook",
+            "id": "def-server.StorybookConfig.framework",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "framework",
+            "description": [
+              "\nFramework, e.g. '@storybook/react', required in v7"
+            ],
+            "signature": [
+              "Preset",
+              " | undefined"
+            ],
+            "path": "node_modules/@storybook/core-common/dist/ts3.9/types.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/storybook",
+            "id": "def-server.StorybookConfig.typescript",
+            "type": "Object",
+            "tags": [],
+            "label": "typescript",
+            "description": [
+              "\nControls how Storybook handles TypeScript files."
+            ],
+            "signature": [
+              "Partial<",
+              "TypescriptOptions",
+              "> | undefined"
+            ],
+            "path": "node_modules/@storybook/core-common/dist/ts3.9/types.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/storybook",
+            "id": "def-server.StorybookConfig.refs",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "refs",
+            "description": [
+              "\nReferences external Storybooks"
+            ],
+            "signature": [
+              "StorybookRefs | ((config: ",
+              "Configuration",
+              ", options: ",
+              "Options",
+              ") => StorybookRefs) | undefined"
+            ],
+            "path": "node_modules/@storybook/core-common/dist/ts3.9/types.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/storybook",
+            "id": "def-server.StorybookConfig.webpackFinal",
+            "type": "Function",
+            "tags": [],
+            "label": "webpackFinal",
+            "description": [
+              "\nModify or return a custom Webpack config."
+            ],
+            "signature": [
+              "((config: ",
+              "Configuration",
+              ", options: ",
+              "Options",
+              ") => ",
+              "Configuration",
+              " | Promise<",
+              "Configuration",
+              ">) | undefined"
+            ],
+            "path": "node_modules/@storybook/core-common/dist/ts3.9/types.d.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/storybook",
+                "id": "def-server.StorybookConfig.webpackFinal.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "config",
+                "description": [],
+                "signature": [
+                  "Configuration"
+                ],
+                "path": "node_modules/@storybook/core-common/dist/ts3.9/types.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/storybook",
+                "id": "def-server.StorybookConfig.webpackFinal.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "Options"
+                ],
+                "path": "node_modules/@storybook/core-common/dist/ts3.9/types.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/storybook",
+            "id": "def-server.StorybookConfig.config",
+            "type": "Function",
+            "tags": [],
+            "label": "config",
+            "description": [
+              "\nAdd additional scripts to run in the preview a la `.storybook/preview.js`"
+            ],
+            "signature": [
+              "((entries: string[], options: ",
+              "Options",
+              ") => string[]) | undefined"
+            ],
+            "path": "node_modules/@storybook/core-common/dist/ts3.9/types.d.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/storybook",
+                "id": "def-server.StorybookConfig.config.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "entries",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "node_modules/@storybook/core-common/dist/ts3.9/types.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/storybook",
+                "id": "def-server.StorybookConfig.config.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "Options"
+                ],
+                "path": "node_modules/@storybook/core-common/dist/ts3.9/types.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "enums": [],
     "misc": [],
     "objects": [

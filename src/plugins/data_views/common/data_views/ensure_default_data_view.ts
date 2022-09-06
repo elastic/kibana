@@ -7,18 +7,21 @@
  */
 
 import { DataViewsContract } from './data_views';
-import { UiSettingsCommon } from '../types';
+/**
+ * Checks whether a default data view is set and exists and defines
+ * one otherwise.
+ * @public
+ */
+export type EnsureDefaultDataView = () => Promise<void> | void;
 
-export type EnsureDefaultDataView = () => Promise<unknown> | undefined;
-
-export const createEnsureDefaultDataView = (
-  uiSettings: UiSettingsCommon,
-  onRedirectNoDefaultView: () => Promise<unknown> | void
-) => {
-  /**
-   * Checks whether a default data view is set and exists and defines
-   * one otherwise.
-   */
+/**
+ * Checks whether a default data view is set and exists and defines
+ * one otherwise.
+ * @public
+ * @param onRedirectNoDefaultView - Callback to redirect to a new data view
+ * @return returned promise resolves when the default data view is set
+ */
+export const createEnsureDefaultDataView = (onRedirectNoDefaultView: EnsureDefaultDataView) => {
   return async function ensureDefaultDataView(this: DataViewsContract) {
     if (!(await this.getDefaultDataView())) {
       return onRedirectNoDefaultView();

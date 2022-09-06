@@ -19,6 +19,8 @@ if [[ "$KIBANA_DOCKER_CONTEXT" == "default" ]]; then
   DOCKER_CONTEXT_FILE="kibana-$FULL_VERSION-docker-build-context.tar.gz"
 elif [[ "$KIBANA_DOCKER_CONTEXT" == "cloud" ]]; then
   DOCKER_CONTEXT_FILE="kibana-cloud-$FULL_VERSION-docker-build-context.tar.gz"
+elif [[ "$KIBANA_DOCKER_CONTEXT" == "ubi" ]]; then
+  DOCKER_CONTEXT_FILE="kibana-ubi8-$FULL_VERSION-docker-build-context.tar.gz"
 fi
 
 tar -xf "target/$DOCKER_CONTEXT_FILE" -C "$DOCKER_BUILD_FOLDER"

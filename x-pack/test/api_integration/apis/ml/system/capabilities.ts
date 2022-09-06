@@ -12,7 +12,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
 import { USER } from '../../../../functional/services/ml/security_common';
 
-const NUMBER_OF_CAPABILITIES = 36;
+const NUMBER_OF_CAPABILITIES = 37;
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertestWithoutAuth');
@@ -87,6 +87,7 @@ export default ({ getService }: FtrProviderContext) => {
           canDeleteAnnotation: true,
           canViewMlNodes: false,
           canGetTrainedModels: true,
+          canTestTrainedModels: true,
           canCreateTrainedModels: false,
           canDeleteTrainedModels: false,
           canStartStopTrainedModels: false,
@@ -130,6 +131,7 @@ export default ({ getService }: FtrProviderContext) => {
           canDeleteAnnotation: true,
           canViewMlNodes: true,
           canGetTrainedModels: true,
+          canTestTrainedModels: true,
           canCreateTrainedModels: true,
           canDeleteTrainedModels: true,
           canStartStopTrainedModels: true,

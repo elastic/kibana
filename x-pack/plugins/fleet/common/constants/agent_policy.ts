@@ -24,4 +24,5 @@ export const AGENT_POLICY_DEFAULT_MONITORING_DATASETS = [
   'elastic_agent.endpoint_security',
   'elastic_agent.auditbeat',
   'elastic_agent.heartbeat',
+  'elastic_agent.cloudbeat',
 ];

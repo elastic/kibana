@@ -11,12 +11,12 @@ import { AggConfig } from './agg_config';
 import { AggConfigs } from './agg_configs';
 import { AggTypesRegistryStart } from './agg_types_registry';
 import { mockAggTypesRegistry } from './test_helpers';
-import { IndexPattern } from '../..';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { stubIndexPattern } from '../../stubs';
 import { IEsSearchResponse } from '..';
 
 describe('AggConfigs', () => {
-  const indexPattern: IndexPattern = stubIndexPattern;
+  const indexPattern: DataView = stubIndexPattern;
   let typesRegistry: AggTypesRegistryStart;
 
   beforeEach(() => {

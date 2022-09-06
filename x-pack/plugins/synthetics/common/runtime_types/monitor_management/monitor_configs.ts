@@ -119,3 +119,10 @@ export enum ThrottlingSuffix {
 
 export const ThrottlingSuffixCodec = tEnum<ThrottlingSuffix>('ThrottlingSuffix', ThrottlingSuffix);
 export type ThrottlingSuffixType = t.TypeOf<typeof ThrottlingSuffixCodec>;
+
+export enum SourceType {
+  UI = 'ui',
+  PROJECT = 'project',
+}
+
+export const SourceTypeCodec = tEnum<SourceType>('SourceType', SourceType);

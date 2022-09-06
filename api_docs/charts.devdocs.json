@@ -970,7 +970,7 @@
             "label": "name",
             "description": [],
             "signature": [
-              "\"filterBucket\""
+              "\"filter\""
             ],
             "path": "src/plugins/charts/public/static/utils/transform_click_event.ts",
             "deprecated": false

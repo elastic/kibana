@@ -21,7 +21,7 @@ import {
   PluginsServiceSetupDeps,
 } from './plugins_service';
 
-import { InjectedPluginMetadata } from '../injected_metadata';
+import type { InjectedMetadataPlugin } from '@kbn/core-injected-metadata-common-internal';
 import { notificationServiceMock } from '../notifications/notifications_service.mock';
 import { applicationServiceMock } from '../application/application_service.mock';
 import { i18nServiceMock } from '../i18n/i18n_service.mock';
@@ -29,7 +29,7 @@ import { overlayServiceMock } from '../overlays/overlay_service.mock';
 import { chromeServiceMock } from '../chrome/chrome_service.mock';
 import { fatalErrorsServiceMock } from '../fatal_errors/fatal_errors_service.mock';
 import { uiSettingsServiceMock } from '../ui_settings/ui_settings_service.mock';
-import { injectedMetadataServiceMock } from '../injected_metadata/injected_metadata_service.mock';
+import { injectedMetadataServiceMock } from '@kbn/core-injected-metadata-browser-mocks';
 import { httpServiceMock } from '../http/http_service.mock';
 import { CoreSetup, CoreStart, PluginInitializerContext } from '..';
 import { docLinksServiceMock } from '../doc_links/doc_links_service.mock';
@@ -45,7 +45,7 @@ mockPluginInitializerProvider.mockImplementation(
   (pluginName) => mockPluginInitializers.get(pluginName)!
 );
 
-let plugins: InjectedPluginMetadata[];
+let plugins: InjectedMetadataPlugin[];
 
 type DeeplyMocked<T> = { [P in keyof T]: jest.Mocked<T[P]> };
 

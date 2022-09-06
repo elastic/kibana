@@ -29,6 +29,7 @@ interface StatsParams {
   schema: ResolverSchema;
   indexPatterns: string | string[];
   timeRange: TimeRange;
+  isInternalRequest: boolean;
 }
 
 /**
@@ -38,10 +39,13 @@ export class StatsQuery {
   private readonly schema: ResolverSchema;
   private readonly indexPatterns: string | string[];
   private readonly timeRange: TimeRange;
-  constructor({ schema, indexPatterns, timeRange }: StatsParams) {
+  private readonly isInternalRequest: boolean;
+
+  constructor({ schema, indexPatterns, timeRange, isInternalRequest }: StatsParams) {
     this.schema = schema;
     this.indexPatterns = indexPatterns;
     this.timeRange = timeRange;
+    this.isInternalRequest = isInternalRequest;
   }
 
   private query(nodes: NodeID[]): JsonObject {
@@ -122,8 +126,10 @@ export class StatsQuery {
       return {};
     }
 
+    const esClient = this.isInternalRequest ? client.asInternalUser : client.asCurrentUser;
+
     // leaving unknown here because we don't actually need the hits part of the body
-    const body = await client.asCurrentUser.search({
+    const body = await esClient.search({
       body: this.query(nodes),
       index: this.indexPatterns,
     });

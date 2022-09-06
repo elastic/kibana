@@ -32,18 +32,15 @@ const metricExamples = [
 
 class TestESAggSource extends AbstractESAggSource {
   constructor(metrics: AggDescriptor[]) {
-    super(
-      {
-        type: 'test',
-        id: 'foobar',
-        indexPatternId: 'foobarid',
-        metrics,
-        applyGlobalQuery: true,
-        applyGlobalTime: true,
-        applyForceRefresh: true,
-      },
-      []
-    );
+    super({
+      type: 'test',
+      id: 'foobar',
+      indexPatternId: 'foobarid',
+      metrics,
+      applyGlobalQuery: true,
+      applyGlobalTime: true,
+      applyForceRefresh: true,
+    });
   }
 }
 

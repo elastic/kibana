@@ -36,7 +36,7 @@ interface StackedBySelectProps {
 }
 
 export const StackByComboBoxWrapper = styled.div`
-  width: 400px;
+  max-width: 400px;
 `;
 
 export const StackByComboBox: React.FC<StackedBySelectProps> = ({ selected, onSelect }) => {

@@ -8,3 +8,4 @@
 
 export { Config } from './config';
 export { readConfigFile } from './read_config_file';
+export { runCheckFtrConfigsCli } from './run_check_ftr_configs_cli';

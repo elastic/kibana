@@ -8,61 +8,34 @@
 import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
-  GenericValidationResult,
   ActionTypeModel,
   ConnectorValidationResult,
+  GenericValidationResult,
 } from '../../../../types';
 import {
   ServiceNowActionConnector,
   ServiceNowConfig,
-  ServiceNowSecrets,
-  ServiceNowITSMActionParams,
-  ServiceNowSIRActionParams,
   ServiceNowITOMActionParams,
+  ServiceNowITSMActionParams,
+  ServiceNowSecrets,
+  ServiceNowSIRActionParams,
 } from './types';
 import { isValidUrl } from '../../../lib/value_validators';
 import { getConnectorDescriptiveTitle, getSelectedConnectorIcon } from './helpers';
 
-const validateConnector = async (
-  action: ServiceNowActionConnector
-): Promise<ConnectorValidationResult<ServiceNowConfig, ServiceNowSecrets>> => {
-  const translations = await import('./translations');
-  const configErrors = {
-    apiUrl: new Array<string>(),
-    usesTableApi: new Array<string>(),
-  };
-  const secretsErrors = {
-    username: new Array<string>(),
-    password: new Array<string>(),
-  };
-
-  const validationResult = {
-    config: { errors: configErrors },
-    secrets: { errors: secretsErrors },
-  };
-
-  if (!action.config.apiUrl) {
-    configErrors.apiUrl = [...configErrors.apiUrl, translations.API_URL_REQUIRED];
+export const SERVICENOW_ITOM_TITLE = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.serviceNowITOM.actionTypeTitle',
+  {
+    defaultMessage: 'ServiceNow ITOM',
   }
+);
 
-  if (action.config.apiUrl) {
-    if (!isValidUrl(action.config.apiUrl)) {
-      configErrors.apiUrl = [...configErrors.apiUrl, translations.API_URL_INVALID];
-    } else if (!isValidUrl(action.config.apiUrl, 'https:')) {
-      configErrors.apiUrl = [...configErrors.apiUrl, translations.API_URL_REQUIRE_HTTPS];
-    }
+export const SERVICENOW_ITOM_DESC = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.serviceNowITOM.selectMessageText',
+  {
+    defaultMessage: 'Create an event in ServiceNow ITOM.',
   }
-
-  if (!action.secrets.username) {
-    secretsErrors.username = [...secretsErrors.username, translations.USERNAME_REQUIRED];
-  }
-
-  if (!action.secrets.password) {
-    secretsErrors.password = [...secretsErrors.password, translations.PASSWORD_REQUIRED];
-  }
-
-  return validationResult;
-};
+);
 
 export const SERVICENOW_ITSM_DESC = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.serviceNowITSM.selectMessageText',
@@ -92,19 +65,83 @@ export const SERVICENOW_SIR_TITLE = i18n.translate(
   }
 );
 
-export const SERVICENOW_ITOM_TITLE = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.serviceNowITOM.actionTypeTitle',
-  {
-    defaultMessage: 'ServiceNow ITOM',
-  }
-);
+const validateConnector = async (
+  action: ServiceNowActionConnector
+): Promise<
+  ConnectorValidationResult<
+    Omit<ServiceNowConfig, 'isOAuth'>,
+    Omit<ServiceNowSecrets, 'privateKeyPassword'>
+  >
+> => {
+  const translations = await import('./translations');
 
-export const SERVICENOW_ITOM_DESC = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.serviceNowITOM.selectMessageText',
-  {
-    defaultMessage: 'Create an event in ServiceNow ITOM.',
+  const configErrors = {
+    apiUrl: new Array<string>(),
+    usesTableApi: new Array<string>(),
+    clientId: new Array<string>(),
+    userIdentifierValue: new Array<string>(),
+    jwtKeyId: new Array<string>(),
+  };
+
+  const secretsErrors = {
+    username: new Array<string>(),
+    password: new Array<string>(),
+    clientSecret: new Array<string>(),
+    privateKey: new Array<string>(),
+  };
+
+  if (!action.config.apiUrl) {
+    configErrors.apiUrl = [...configErrors.apiUrl, translations.API_URL_REQUIRED];
   }
-);
+
+  if (action.config.apiUrl) {
+    if (!isValidUrl(action.config.apiUrl)) {
+      configErrors.apiUrl = [...configErrors.apiUrl, translations.API_URL_INVALID];
+    } else if (!isValidUrl(action.config.apiUrl, 'https:')) {
+      configErrors.apiUrl = [...configErrors.apiUrl, translations.API_URL_REQUIRE_HTTPS];
+    }
+  }
+
+  if (action.config.isOAuth) {
+    if (!action.config.clientId) {
+      configErrors.clientId = [...configErrors.clientId, translations.CLIENTID_REQUIRED];
+    }
+
+    if (!action.config.userIdentifierValue) {
+      configErrors.userIdentifierValue = [
+        ...configErrors.userIdentifierValue,
+        translations.USER_EMAIL_REQUIRED,
+      ];
+    }
+
+    if (!action.config.jwtKeyId) {
+      configErrors.jwtKeyId = [...configErrors.jwtKeyId, translations.KEYID_REQUIRED];
+    }
+
+    if (!action.secrets.clientSecret) {
+      secretsErrors.clientSecret = [
+        ...secretsErrors.clientSecret,
+        translations.CLIENTSECRET_REQUIRED,
+      ];
+    }
+
+    if (!action.secrets.privateKey) {
+      secretsErrors.privateKey = [...secretsErrors.privateKey, translations.PRIVATE_KEY_REQUIRED];
+    }
+  } else {
+    if (!action.secrets.username) {
+      secretsErrors.username = [...secretsErrors.username, translations.USERNAME_REQUIRED];
+    }
+    if (!action.secrets.password) {
+      secretsErrors.password = [...secretsErrors.password, translations.PASSWORD_REQUIRED];
+    }
+  }
+
+  return {
+    config: { errors: configErrors },
+    secrets: { errors: secretsErrors },
+  };
+};
 
 export function getServiceNowITSMActionType(): ActionTypeModel<
   ServiceNowConfig,

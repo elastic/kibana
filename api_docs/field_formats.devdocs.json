@@ -485,7 +485,7 @@
             "label": "textConvert",
             "description": [],
             "signature": [
-              "(val: string | number) => any"
+              "(val: string | number, options?: { timezone?: string | undefined; } | undefined) => any"
             ],
             "path": "src/plugins/field_formats/server/lib/converters/date_server.ts",
             "deprecated": false,
@@ -503,6 +503,31 @@
                 "path": "src/plugins/field_formats/server/lib/converters/date_server.ts",
                 "deprecated": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "fieldFormats",
+                "id": "def-server.DateFormat.textConvert.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "path": "src/plugins/field_formats/server/lib/converters/date_server.ts",
+                "deprecated": false,
+                "children": [
+                  {
+                    "parentPluginId": "fieldFormats",
+                    "id": "def-server.DateFormat.textConvert.$2.timezone",
+                    "type": "string",
+                    "tags": [],
+                    "label": "timezone",
+                    "description": [],
+                    "signature": [
+                      "string | undefined"
+                    ],
+                    "path": "src/plugins/field_formats/server/lib/converters/date_server.ts",
+                    "deprecated": false
+                  }
+                ]
               }
             ],
             "returnComment": []
@@ -533,7 +558,7 @@
             "label": "textConvert",
             "description": [],
             "signature": [
-              "(val: string | number) => any"
+              "(val: string | number, options?: { timezone?: string | undefined; } | undefined) => any"
             ],
             "path": "src/plugins/field_formats/server/lib/converters/date_nanos_server.ts",
             "deprecated": false,
@@ -551,6 +576,31 @@
                 "path": "src/plugins/field_formats/server/lib/converters/date_nanos_server.ts",
                 "deprecated": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "fieldFormats",
+                "id": "def-server.DateNanosFormatServer.textConvert.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "path": "src/plugins/field_formats/server/lib/converters/date_nanos_server.ts",
+                "deprecated": false,
+                "children": [
+                  {
+                    "parentPluginId": "fieldFormats",
+                    "id": "def-server.DateNanosFormatServer.textConvert.$2.timezone",
+                    "type": "string",
+                    "tags": [],
+                    "label": "timezone",
+                    "description": [],
+                    "signature": [
+                      "string | undefined"
+                    ],
+                    "path": "src/plugins/field_formats/server/lib/converters/date_nanos_server.ts",
+                    "deprecated": false
+                  }
+                ]
               }
             ],
             "returnComment": []

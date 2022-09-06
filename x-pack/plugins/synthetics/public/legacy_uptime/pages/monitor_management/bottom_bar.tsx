@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { OutPortal } from 'react-reverse-portal';
-import { ActionBarPortalNode } from './action_bar_portal_node';
+import { ActionBarPortalNode } from './portals';
 
 export const MonitorManagementBottomBar = () => {
   return (

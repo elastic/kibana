@@ -8,7 +8,8 @@
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import { Observable } from 'rxjs';
 import type { RequestAdapter } from '@kbn/inspector-plugin/common';
-import { IEsSearchRequest, IEsSearchResponse, IndexPattern } from '..';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import { IEsSearchRequest, IEsSearchResponse } from '..';
 
 export type ISearchGeneric = <
   SearchStrategyRequest extends IKibanaSearchRequest = IEsSearchRequest,
@@ -133,7 +134,7 @@ export interface ISearchOptions {
   /**
    * Index pattern reference is used for better error messages
    */
-  indexPattern?: IndexPattern;
+  indexPattern?: DataView;
 
   /**
    * Inspector integration options

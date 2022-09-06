@@ -70,6 +70,7 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
           ml_module: [],
           tag: [],
           osquery_pack_asset: [],
+          osquery_saved_query: [],
         },
         elasticsearch: {
           component_template: [],
@@ -184,6 +185,7 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
           ml_module: [],
           tag: [],
           osquery_pack_asset: [],
+          osquery_saved_query: [],
         },
         elasticsearch: {
           component_template: [],
@@ -278,6 +280,7 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
           ml_module: [],
           tag: [],
           osquery_pack_asset: [],
+          osquery_saved_query: [],
         },
         elasticsearch: {
           component_template: [],
@@ -388,7 +391,6 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
         },
       ],
       latestVersion: '0.3.0',
-      removable: true,
       notice: undefined,
       status: 'not_installed',
       assets: {
@@ -404,6 +406,7 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
           ml_module: [],
           tag: [],
           osquery_pack_asset: [],
+          osquery_saved_query: [],
         },
         elasticsearch: {
           component_template: [],

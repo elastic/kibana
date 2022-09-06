@@ -258,7 +258,7 @@ export class AnomalyTimelineService {
     swimlaneLimit: number,
     perPage: number,
     fromPage: number,
-    swimlaneContainerWidth: number,
+    bucketInterval: TimeBucketsInterval,
     selectionInfluencers: EntityField[],
     influencersFilterQuery: InfluencersFilterQuery
   ) {
@@ -296,7 +296,7 @@ export class AnomalyTimelineService {
         selectedJobIds,
         earliestMs,
         latestMs,
-        this.getSwimlaneBucketInterval(selectedJobs, swimlaneContainerWidth).asMilliseconds(),
+        bucketInterval.asMilliseconds(),
         perPage,
         fromPage,
         swimlaneLimit

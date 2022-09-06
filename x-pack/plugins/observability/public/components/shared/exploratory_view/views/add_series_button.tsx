@@ -55,7 +55,8 @@ export function AddSeriesButton() {
   const isAddDisabled =
     !reportType ||
     ((reportType === ReportTypes.CORE_WEB_VITAL ||
-      reportType === ReportTypes.DEVICE_DISTRIBUTION) &&
+      reportType === ReportTypes.DEVICE_DISTRIBUTION ||
+      reportType === ReportTypes.SINGLE_METRIC) &&
       allSeries.length > 0);
 
   return (

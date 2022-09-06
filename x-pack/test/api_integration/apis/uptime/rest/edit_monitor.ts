@@ -13,7 +13,9 @@ import { API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { getFixtureJson } from './helper/get_fixture_json';
 export default function ({ getService }: FtrProviderContext) {
-  describe('[PUT] /internal/uptime/service/monitors', () => {
+  describe('[PUT] /internal/uptime/service/monitors', function () {
+    this.tags('skipCloud');
+
     const supertest = getService('supertest');
 
     let _httpMonitorJson: HTTPFields;

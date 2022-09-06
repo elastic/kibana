@@ -4076,6 +4076,10 @@
             "path": "src/plugins/data/public/query/query_service.ts"
           },
           {
+            "plugin": "data",
+            "path": "src/plugins/data/public/query/query_service.ts"
+          },
+          {
             "plugin": "savedObjects",
             "path": "src/plugins/saved_objects/public/types.ts"
           },
@@ -4220,106 +4224,6 @@
         "path": "src/plugins/data_views/common/fields/data_view_field.ts",
         "deprecated": true,
         "references": [
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/common/search/aggs/param_types/field.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/common/search/aggs/param_types/field.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/common/search/aggs/param_types/field.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/common/search/aggs/param_types/field.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/common/index.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/common/search/expressions/kibana_context_type.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/common/search/expressions/kibana_context_type.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/common/search/search_source/search_source.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/common/search/search_source/search_source.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/common/search/search_source/search_source.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/server/index.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/common/search/aggs/agg_config.test.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/common/search/aggs/agg_config.test.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/common/search/aggs/buckets/_terms_other_bucket_helper.test.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/common/search/aggs/buckets/_terms_other_bucket_helper.test.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/common/search/aggs/buckets/multi_terms.test.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/common/search/aggs/buckets/multi_terms.test.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/common/search/aggs/buckets/multi_terms.test.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/common/search/aggs/buckets/rare_terms.test.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/common/search/aggs/buckets/rare_terms.test.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/common/search/aggs/buckets/terms.test.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/common/search/aggs/buckets/terms.test.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/common/search/aggs/buckets/terms.test.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/common/search/aggs/utils/infer_time_zone.test.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/common/search/aggs/utils/infer_time_zone.test.ts"
-          },
           {
             "plugin": "data",
             "path": "src/plugins/data/public/index.ts"
@@ -4607,6 +4511,106 @@
           {
             "plugin": "dataViewEditor",
             "path": "src/plugins/data_view_editor/public/lib/extract_time_fields.test.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/common/index.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/common/search/expressions/kibana_context_type.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/common/search/expressions/kibana_context_type.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/common/search/search_source/search_source.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/common/search/search_source/search_source.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/common/search/search_source/search_source.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/server/index.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/common/search/aggs/agg_config.test.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/common/search/aggs/agg_config.test.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/common/search/aggs/buckets/_terms_other_bucket_helper.test.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/common/search/aggs/buckets/_terms_other_bucket_helper.test.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/common/search/aggs/buckets/multi_terms.test.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/common/search/aggs/buckets/multi_terms.test.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/common/search/aggs/buckets/multi_terms.test.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/common/search/aggs/buckets/rare_terms.test.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/common/search/aggs/buckets/rare_terms.test.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/common/search/aggs/buckets/terms.test.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/common/search/aggs/buckets/terms.test.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/common/search/aggs/buckets/terms.test.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/common/search/aggs/utils/infer_time_zone.test.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/common/search/aggs/utils/infer_time_zone.test.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/common/search/aggs/param_types/field.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/common/search/aggs/param_types/field.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/common/search/aggs/param_types/field.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/common/search/aggs/param_types/field.ts"
           }
         ],
         "children": [],
@@ -6639,6 +6643,29 @@
       },
       {
         "parentPluginId": "dataViews",
+        "id": "def-public.IndicesViaSearchResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "IndicesViaSearchResponse",
+        "description": [],
+        "path": "src/plugins/data_views/public/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-public.IndicesViaSearchResponse.total",
+            "type": "number",
+            "tags": [],
+            "label": "total",
+            "description": [],
+            "path": "src/plugins/data_views/public/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dataViews",
         "id": "def-public.TypeMeta",
         "type": "Interface",
         "tags": [],
@@ -7083,22 +7110,6 @@
           {
             "plugin": "data",
             "path": "src/plugins/data/public/search/search_service.ts"
-          },
-          {
-            "plugin": "unifiedSearch",
-            "path": "src/plugins/unified_search/public/index_pattern_select/index_pattern_select.tsx"
-          },
-          {
-            "plugin": "unifiedSearch",
-            "path": "src/plugins/unified_search/public/index_pattern_select/index_pattern_select.tsx"
-          },
-          {
-            "plugin": "unifiedSearch",
-            "path": "src/plugins/unified_search/public/index_pattern_select/create_index_pattern_select.tsx"
-          },
-          {
-            "plugin": "unifiedSearch",
-            "path": "src/plugins/unified_search/public/index_pattern_select/create_index_pattern_select.tsx"
           },
           {
             "plugin": "maps",
@@ -15712,6 +15723,10 @@
             "path": "src/plugins/data/public/query/query_service.ts"
           },
           {
+            "plugin": "data",
+            "path": "src/plugins/data/public/query/query_service.ts"
+          },
+          {
             "plugin": "savedObjects",
             "path": "src/plugins/saved_objects/public/types.ts"
           },
@@ -15856,106 +15871,6 @@
         "path": "src/plugins/data_views/common/fields/data_view_field.ts",
         "deprecated": true,
         "references": [
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/common/search/aggs/param_types/field.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/common/search/aggs/param_types/field.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/common/search/aggs/param_types/field.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/common/search/aggs/param_types/field.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/common/index.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/common/search/expressions/kibana_context_type.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/common/search/expressions/kibana_context_type.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/common/search/search_source/search_source.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/common/search/search_source/search_source.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/common/search/search_source/search_source.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/server/index.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/common/search/aggs/agg_config.test.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/common/search/aggs/agg_config.test.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/common/search/aggs/buckets/_terms_other_bucket_helper.test.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/common/search/aggs/buckets/_terms_other_bucket_helper.test.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/common/search/aggs/buckets/multi_terms.test.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/common/search/aggs/buckets/multi_terms.test.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/common/search/aggs/buckets/multi_terms.test.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/common/search/aggs/buckets/rare_terms.test.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/common/search/aggs/buckets/rare_terms.test.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/common/search/aggs/buckets/terms.test.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/common/search/aggs/buckets/terms.test.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/common/search/aggs/buckets/terms.test.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/common/search/aggs/utils/infer_time_zone.test.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/common/search/aggs/utils/infer_time_zone.test.ts"
-          },
           {
             "plugin": "data",
             "path": "src/plugins/data/public/index.ts"
@@ -16243,6 +16158,106 @@
           {
             "plugin": "dataViewEditor",
             "path": "src/plugins/data_view_editor/public/lib/extract_time_fields.test.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/common/index.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/common/search/expressions/kibana_context_type.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/common/search/expressions/kibana_context_type.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/common/search/search_source/search_source.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/common/search/search_source/search_source.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/common/search/search_source/search_source.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/server/index.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/common/search/aggs/agg_config.test.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/common/search/aggs/agg_config.test.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/common/search/aggs/buckets/_terms_other_bucket_helper.test.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/common/search/aggs/buckets/_terms_other_bucket_helper.test.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/common/search/aggs/buckets/multi_terms.test.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/common/search/aggs/buckets/multi_terms.test.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/common/search/aggs/buckets/multi_terms.test.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/common/search/aggs/buckets/rare_terms.test.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/common/search/aggs/buckets/rare_terms.test.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/common/search/aggs/buckets/terms.test.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/common/search/aggs/buckets/terms.test.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/common/search/aggs/buckets/terms.test.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/common/search/aggs/utils/infer_time_zone.test.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/common/search/aggs/utils/infer_time_zone.test.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/common/search/aggs/param_types/field.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/common/search/aggs/param_types/field.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/common/search/aggs/param_types/field.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/common/search/aggs/param_types/field.ts"
           }
         ],
         "children": [],
@@ -18925,27 +18940,27 @@
           },
           {
             "plugin": "data",
+            "path": "src/plugins/data/public/query/filter_manager/lib/generate_filters.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/public/query/filter_manager/lib/generate_filters.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/public/query/filter_manager/lib/generate_filters.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/public/query/filter_manager/lib/generate_filters.ts"
+          },
+          {
+            "plugin": "data",
             "path": "src/plugins/data/common/search/aggs/buckets/date_histogram.ts"
           },
           {
             "plugin": "data",
             "path": "src/plugins/data/common/search/aggs/buckets/date_histogram.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/public/query/filter_manager/lib/generate_filters.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/public/query/filter_manager/lib/generate_filters.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/public/query/filter_manager/lib/generate_filters.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/public/query/filter_manager/lib/generate_filters.ts"
           },
           {
             "plugin": "data",
@@ -18972,94 +18987,6 @@
             "path": "src/plugins/unified_search/public/autocomplete/providers/kql_query_suggestion/field.tsx"
           },
           {
-            "plugin": "unifiedSearch",
-            "path": "src/plugins/unified_search/public/autocomplete/providers/kql_query_suggestion/value.ts"
-          },
-          {
-            "plugin": "unifiedSearch",
-            "path": "src/plugins/unified_search/public/autocomplete/providers/kql_query_suggestion/value.ts"
-          },
-          {
-            "plugin": "unifiedSearch",
-            "path": "src/plugins/unified_search/public/autocomplete/providers/query_suggestion_provider.ts"
-          },
-          {
-            "plugin": "unifiedSearch",
-            "path": "src/plugins/unified_search/public/autocomplete/providers/query_suggestion_provider.ts"
-          },
-          {
-            "plugin": "unifiedSearch",
-            "path": "src/plugins/unified_search/public/autocomplete/providers/value_suggestion_provider.ts"
-          },
-          {
-            "plugin": "unifiedSearch",
-            "path": "src/plugins/unified_search/public/autocomplete/providers/value_suggestion_provider.ts"
-          },
-          {
-            "plugin": "unifiedSearch",
-            "path": "src/plugins/unified_search/public/autocomplete/providers/value_suggestion_provider.ts"
-          },
-          {
-            "plugin": "unifiedSearch",
-            "path": "src/plugins/unified_search/public/autocomplete/providers/value_suggestion_provider.ts"
-          },
-          {
-            "plugin": "unifiedSearch",
-            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/lib/filter_editor_utils.ts"
-          },
-          {
-            "plugin": "unifiedSearch",
-            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/lib/filter_editor_utils.ts"
-          },
-          {
-            "plugin": "unifiedSearch",
-            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/lib/filter_editor_utils.ts"
-          },
-          {
-            "plugin": "unifiedSearch",
-            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/lib/filter_editor_utils.ts"
-          },
-          {
-            "plugin": "unifiedSearch",
-            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/phrase_suggestor.tsx"
-          },
-          {
-            "plugin": "unifiedSearch",
-            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/phrase_suggestor.tsx"
-          },
-          {
-            "plugin": "unifiedSearch",
-            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/range_value_input.tsx"
-          },
-          {
-            "plugin": "unifiedSearch",
-            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/range_value_input.tsx"
-          },
-          {
-            "plugin": "unifiedSearch",
-            "path": "src/plugins/unified_search/server/autocomplete/terms_enum.ts"
-          },
-          {
-            "plugin": "unifiedSearch",
-            "path": "src/plugins/unified_search/server/autocomplete/terms_enum.ts"
-          },
-          {
-            "plugin": "unifiedSearch",
-            "path": "src/plugins/unified_search/server/autocomplete/terms_agg.ts"
-          },
-          {
-            "plugin": "unifiedSearch",
-            "path": "src/plugins/unified_search/server/autocomplete/terms_agg.ts"
-          },
-          {
-            "plugin": "unifiedSearch",
-            "path": "src/plugins/unified_search/server/autocomplete/terms_agg.ts"
-          },
-          {
-            "plugin": "unifiedSearch",
-            "path": "src/plugins/unified_search/server/autocomplete/terms_agg.ts"
-          },
-          {
             "plugin": "data",
             "path": "src/plugins/data/public/query/timefilter/lib/extract_time_filter.test.ts"
           },
@@ -19085,43 +19012,27 @@
           },
           {
             "plugin": "unifiedSearch",
-            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/lib/filter_operators.ts"
+            "path": "src/plugins/unified_search/public/autocomplete/providers/value_suggestion_provider.ts"
           },
           {
             "plugin": "unifiedSearch",
-            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/lib/filter_operators.ts"
+            "path": "src/plugins/unified_search/public/autocomplete/providers/value_suggestion_provider.ts"
           },
           {
             "plugin": "unifiedSearch",
-            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/lib/filter_operators.ts"
+            "path": "src/plugins/unified_search/public/autocomplete/providers/value_suggestion_provider.ts"
           },
           {
             "plugin": "unifiedSearch",
-            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/lib/filter_operators.ts"
+            "path": "src/plugins/unified_search/public/autocomplete/providers/value_suggestion_provider.ts"
           },
           {
             "plugin": "unifiedSearch",
-            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/value_input_type.tsx"
+            "path": "src/plugins/unified_search/public/autocomplete/providers/kql_query_suggestion/value.ts"
           },
           {
             "plugin": "unifiedSearch",
-            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/value_input_type.tsx"
-          },
-          {
-            "plugin": "unifiedSearch",
-            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/index.tsx"
-          },
-          {
-            "plugin": "unifiedSearch",
-            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/index.tsx"
-          },
-          {
-            "plugin": "unifiedSearch",
-            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/index.tsx"
-          },
-          {
-            "plugin": "unifiedSearch",
-            "path": "src/plugins/unified_search/public/filter_bar/filter_editor/index.tsx"
+            "path": "src/plugins/unified_search/public/autocomplete/providers/kql_query_suggestion/value.ts"
           }
         ],
         "children": [
@@ -19429,6 +19340,30 @@
           },
           {
             "plugin": "data",
+            "path": "src/plugins/data/public/query/filter_manager/lib/generate_filters.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/public/query/filter_manager/lib/generate_filters.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/public/query/filter_manager/lib/generate_filters.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/public/query/timefilter/timefilter.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/public/query/timefilter/timefilter.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/public/query/timefilter/timefilter.ts"
+          },
+          {
+            "plugin": "data",
             "path": "src/plugins/data/common/search/search_source/normalize_sort_request.ts"
           },
           {
@@ -19446,64 +19381,12 @@
           {
             "plugin": "data",
             "path": "src/plugins/data/common/search/search_source/search_source.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/public/query/filter_manager/lib/generate_filters.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/public/query/filter_manager/lib/generate_filters.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/public/query/filter_manager/lib/generate_filters.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/public/query/timefilter/timefilter.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/public/query/timefilter/timefilter.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/public/query/timefilter/timefilter.ts"
           },
           {
             "plugin": "data",
             "path": "src/plugins/data/public/index.ts"
           },
           {
-            "plugin": "unifiedSearch",
-            "path": "src/plugins/unified_search/public/autocomplete/providers/kql_query_suggestion/value.ts"
-          },
-          {
-            "plugin": "unifiedSearch",
-            "path": "src/plugins/unified_search/public/autocomplete/providers/kql_query_suggestion/value.ts"
-          },
-          {
-            "plugin": "unifiedSearch",
-            "path": "src/plugins/unified_search/public/autocomplete/providers/query_suggestion_provider.ts"
-          },
-          {
-            "plugin": "unifiedSearch",
-            "path": "src/plugins/unified_search/public/autocomplete/providers/query_suggestion_provider.ts"
-          },
-          {
-            "plugin": "unifiedSearch",
-            "path": "src/plugins/unified_search/public/autocomplete/providers/value_suggestion_provider.ts"
-          },
-          {
-            "plugin": "unifiedSearch",
-            "path": "src/plugins/unified_search/public/autocomplete/providers/value_suggestion_provider.ts"
-          },
-          {
-            "plugin": "unifiedSearch",
-            "path": "src/plugins/unified_search/public/autocomplete/providers/value_suggestion_provider.ts"
-          },
-          {
             "plugin": "data",
             "path": "src/plugins/data/common/query/timefilter/get_time.test.ts"
           },
@@ -19566,6 +19449,34 @@
           {
             "plugin": "data",
             "path": "src/plugins/data/public/query/filter_manager/lib/mappers/map_exists.test.ts"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/autocomplete/providers/query_suggestion_provider.ts"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/autocomplete/providers/query_suggestion_provider.ts"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/autocomplete/providers/value_suggestion_provider.ts"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/autocomplete/providers/value_suggestion_provider.ts"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/autocomplete/providers/value_suggestion_provider.ts"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/autocomplete/providers/kql_query_suggestion/value.ts"
+          },
+          {
+            "plugin": "unifiedSearch",
+            "path": "src/plugins/unified_search/public/autocomplete/providers/kql_query_suggestion/value.ts"
           }
         ],
         "children": [
@@ -21905,22 +21816,6 @@
             "path": "src/plugins/data/public/search/search_service.ts"
           },
           {
-            "plugin": "unifiedSearch",
-            "path": "src/plugins/unified_search/public/index_pattern_select/index_pattern_select.tsx"
-          },
-          {
-            "plugin": "unifiedSearch",
-            "path": "src/plugins/unified_search/public/index_pattern_select/index_pattern_select.tsx"
-          },
-          {
-            "plugin": "unifiedSearch",
-            "path": "src/plugins/unified_search/public/index_pattern_select/create_index_pattern_select.tsx"
-          },
-          {
-            "plugin": "unifiedSearch",
-            "path": "src/plugins/unified_search/public/index_pattern_select/create_index_pattern_select.tsx"
-          },
-          {
             "plugin": "maps",
             "path": "x-pack/plugins/maps/public/lazy_load_bundle/index.ts"
           },
@@ -21977,7 +21872,7 @@
             "section": "def-public.ErrorToastOptions",
             "text": "ErrorToastOptions"
           },
-          ") => void"
+          ", key: string) => void"
         ],
         "path": "src/plugins/data_views/common/types.ts",
         "deprecated": false,
@@ -22014,6 +21909,16 @@
             ],
             "path": "src/plugins/data_views/common/types.ts",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-common.OnError.$3",
+            "type": "string",
+            "tags": [],
+            "label": "key",
+            "description": [],
+            "path": "src/plugins/data_views/common/types.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -22034,7 +21939,7 @@
             "section": "def-public.ToastInputFields",
             "text": "ToastInputFields"
           },
-          ") => void"
+          ", key: string) => void"
         ],
         "path": "src/plugins/data_views/common/types.ts",
         "deprecated": false,
@@ -22068,6 +21973,16 @@
               },
               "<HTMLElement> | undefined; }"
             ],
+            "path": "src/plugins/data_views/common/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-common.OnNotification.$2",
+            "type": "string",
+            "tags": [],
+            "label": "key",
+            "description": [],
             "path": "src/plugins/data_views/common/types.ts",
             "deprecated": false
           }

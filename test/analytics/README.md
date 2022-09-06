@@ -13,8 +13,8 @@ There are 2 FTR helpers to allow you to retrieve the generated events:
 
 The API is the same for both of them:
 ```typescript
-// To retrieve the last 2 events of type "my-event-type
-const events = await getService('kibana_ebt_ui').getLastEvents(2, ['my-event-type']);
+// To retrieve 2 events of type "my-event-type"
+const events = await getService('kibana_ebt_ui').getEvents(2, ['my-event-type']);
 expect(events).to...
 ```
 

@@ -11,7 +11,7 @@ import {
   SavedObjectsClientContract,
   SavedObjectsFindResponse,
 } from '@kbn/core/server';
-import { IndexPatternSavedObjectAttrs } from '../common/data_views';
+import { DataViewSavedObjectAttrs } from '../common/data_views';
 import { DEFAULT_ASSETS_TO_IGNORE } from '../common/constants';
 
 interface Deps {
@@ -22,8 +22,8 @@ interface Deps {
 export const getIndexPattern = async ({
   esClient,
   soClient,
-}: Deps): Promise<SavedObjectsFindResponse<IndexPatternSavedObjectAttrs, unknown>> =>
-  soClient.find<IndexPatternSavedObjectAttrs>({
+}: Deps): Promise<SavedObjectsFindResponse<DataViewSavedObjectAttrs, unknown>> =>
+  soClient.find<DataViewSavedObjectAttrs>({
     type: 'index-pattern',
     fields: ['title'],
     search: `*`,
@@ -33,7 +33,7 @@ export const getIndexPattern = async ({
 
 export const hasUserIndexPattern = async (
   { esClient, soClient }: Deps,
-  indexPatterns?: SavedObjectsFindResponse<IndexPatternSavedObjectAttrs, unknown>
+  indexPatterns?: SavedObjectsFindResponse<DataViewSavedObjectAttrs, unknown>
 ): Promise<boolean> => {
   if (!indexPatterns) {
     indexPatterns = await getIndexPattern({ esClient, soClient });

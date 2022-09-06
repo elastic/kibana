@@ -11,6 +11,7 @@ import {
   EuiLink,
   EuiPanel,
   EuiSpacer,
+  EuiToolTip,
 } from '@elastic/eui';
 import { EuiTableSortingType } from '@elastic/eui/src/components/basic_table/table_types';
 import { i18n } from '@kbn/i18n';
@@ -23,8 +24,10 @@ import {
   ICMPSimpleFields,
   Ping,
   ServiceLocations,
+  SourceType,
   EncryptedSyntheticsMonitorWithId,
   TCPSimpleFields,
+  BrowserFields,
 } from '../../../../../common/runtime_types';
 import { UptimeSettingsContext } from '../../../contexts';
 import { useBreakpoints } from '../../../../hooks/use_breakpoints';
@@ -33,6 +36,7 @@ import * as labels from '../../overview/monitor_list/translations';
 import { Actions } from './actions';
 import { MonitorEnabled } from './monitor_enabled';
 import { MonitorLocations } from './monitor_locations';
+import { ManagementSettingsPortal } from './management_settings_portal';
 import { MonitorTags } from './tags';
 
 export interface MonitorManagementListPageState {
@@ -119,8 +123,14 @@ export const MonitorManagementList = ({
         defaultMessage: 'Monitor name',
       }),
       sortable: true,
-      render: (name: string, { id }: EncryptedSyntheticsMonitorWithId) => (
-        <EuiLink href={`${basePath}/app/uptime/monitor/${btoa(id)}`}>{name}</EuiLink>
+      render: (name: string, monitor: EncryptedSyntheticsMonitorWithId) => (
+        <EuiLink
+          href={`${basePath}/app/uptime/monitor/${btoa(
+            (monitor as unknown as BrowserFields)[ConfigKey.CUSTOM_HEARTBEAT_ID] || monitor.id
+          )}`}
+        >
+          {name}
+        </EuiLink>
       ),
     },
     {
@@ -174,12 +184,23 @@ export const MonitorManagementList = ({
         defaultMessage: 'Enabled',
       }),
       render: (_enabled: boolean, monitor: EncryptedSyntheticsMonitorWithId) => (
-        <MonitorEnabled
-          id={monitor.id}
-          monitor={monitor}
-          isDisabled={!canEdit}
-          onUpdate={onUpdate}
-        />
+        <EuiToolTip
+          content={
+            monitor[ConfigKey.MONITOR_SOURCE_TYPE] === SourceType.PROJECT
+              ? i18n.translate('xpack.synthetics.monitorManagement.monitorList.enabled.tooltip', {
+                  defaultMessage:
+                    'This monitor was added from an external project. Configuration is read only.',
+                })
+              : ''
+          }
+        >
+          <MonitorEnabled
+            id={monitor.id}
+            monitor={monitor}
+            isDisabled={!canEdit || monitor[ConfigKey.MONITOR_SOURCE_TYPE] === SourceType.PROJECT}
+            onUpdate={onUpdate}
+          />
+        </EuiToolTip>
       ),
     },
     {
@@ -202,6 +223,7 @@ export const MonitorManagementList = ({
 
   return (
     <EuiPanel hasBorder>
+      <ManagementSettingsPortal />
       <EuiSpacer size="m" />
       <EuiBasicTable
         aria-label={i18n.translate('xpack.synthetics.monitorManagement.monitorList.title', {

@@ -45,7 +45,7 @@ export class Instance extends Entity<ApmFields> {
   }
 
   appMetrics(metrics: ApmApplicationMetricFields) {
-    return new Metricset({
+    return new Metricset<ApmFields>({
       ...this.fields,
       'metricset.name': 'app',
       ...metrics,

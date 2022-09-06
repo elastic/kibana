@@ -9,7 +9,8 @@
 import Fs from 'fs';
 import Path from 'path';
 
-import { run, createFlagError } from '@kbn/dev-utils';
+import { run } from '@kbn/dev-cli-runner';
+import { createFlagError } from '@kbn/dev-cli-errors';
 import { CiStatsReporter } from '@kbn/ci-stats-reporter';
 import { REPO_ROOT } from '@kbn/utils';
 import { Project } from 'ts-morph';

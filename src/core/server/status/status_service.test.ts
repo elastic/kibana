@@ -22,7 +22,7 @@ import { environmentServiceMock } from '../environment/environment_service.mock'
 import { httpServiceMock } from '../http/http_service.mock';
 import { mockRouter, RouterMock } from '../http/router/router.mock';
 import { metricsServiceMock } from '../metrics/metrics_service.mock';
-import { configServiceMock } from '../config/mocks';
+import { configServiceMock } from '@kbn/config-mocks';
 import { coreUsageDataServiceMock } from '../core_usage_data/core_usage_data_service.mock';
 import { analyticsServiceMock } from '../analytics/analytics_service.mock';
 import { AnalyticsServiceSetup } from '..';

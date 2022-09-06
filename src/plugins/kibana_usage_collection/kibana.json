@@ -10,5 +10,7 @@
   "requiredPlugins": [
     "usageCollection"
   ],
-  "optionalPlugins": []
+  "optionalPlugins": [
+    "telemetry"
+  ]
 }

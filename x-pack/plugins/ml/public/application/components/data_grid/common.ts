@@ -205,6 +205,7 @@ export const getDataGridSchemaFromESFieldType = (
       break;
     // keep schema undefined for text based columns
     case ES_FIELD_TYPES.KEYWORD:
+    case ES_FIELD_TYPES.VERSION:
     case ES_FIELD_TYPES.TEXT:
       break;
   }

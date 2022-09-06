@@ -5,44 +5,32 @@
  * 2.0.
  */
 
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { ExplainLogRateSpikesSpec } from '@kbn/aiops-plugin/public';
-import { useMlKibana, useTimefilter } from '../contexts/kibana';
+import { ExplainLogRateSpikes } from '@kbn/aiops-plugin/public';
+
+import { useMlContext } from '../contexts/ml';
+import { useMlKibana } from '../contexts/kibana';
 import { HelpMenu } from '../components/help_menu';
 
 import { MlPageHeader } from '../components/page_header';
 
 export const ExplainLogRateSpikesPage: FC = () => {
-  useTimefilter({ timeRangeSelector: false, autoRefreshSelector: false });
   const {
-    services: { docLinks, aiops },
+    services: { docLinks },
   } = useMlKibana();
 
-  const [ExplainLogRateSpikes, setExplainLogRateSpikes] = useState<ExplainLogRateSpikesSpec | null>(
-    null
-  );
-
-  useEffect(() => {
-    if (aiops !== undefined) {
-      const { getExplainLogRateSpikesComponent } = aiops;
-      getExplainLogRateSpikesComponent().then(setExplainLogRateSpikes);
-    }
-  }, []);
+  const context = useMlContext();
 
   return (
     <>
-      {ExplainLogRateSpikes !== null ? (
-        <>
-          <MlPageHeader>
-            <FormattedMessage
-              id="xpack.ml.explainLogRateSpikes.pageHeader"
-              defaultMessage="Explain log rate spikes"
-            />
-          </MlPageHeader>
-          <ExplainLogRateSpikes />
-        </>
-      ) : null}
+      <MlPageHeader>
+        <FormattedMessage
+          id="xpack.ml.explainLogRateSpikes.pageHeader"
+          defaultMessage="Explain log rate spikes"
+        />
+      </MlPageHeader>
+      <ExplainLogRateSpikes dataView={context.currentDataView} />
       <HelpMenu docLink={docLinks.links.ml.guide} />
     </>
   );

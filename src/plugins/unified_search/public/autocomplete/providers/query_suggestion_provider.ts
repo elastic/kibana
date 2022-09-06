@@ -7,7 +7,8 @@
  */
 
 import { ValueSuggestionsMethod } from '@kbn/data-plugin/common';
-import { IFieldType, IIndexPattern } from '@kbn/data-plugin/common';
+// for replace IIndexPattern => DataView need to fix the issue https://github.com/elastic/kibana/issues/131292
+import type { DataViewField, DataView } from '@kbn/data-views-plugin/common';
 
 export enum QuerySuggestionTypes {
   Field = 'field',
@@ -24,7 +25,7 @@ export type QuerySuggestionGetFn = (
 /** @public **/
 export interface QuerySuggestionGetFnArgs {
   language: string;
-  indexPatterns: IIndexPattern[];
+  indexPatterns: DataView[];
   query: string;
   selectionStart: number;
   selectionEnd: number;
@@ -47,7 +48,7 @@ export interface QuerySuggestionBasic {
 /** @public **/
 export interface QuerySuggestionField extends QuerySuggestionBasic {
   type: QuerySuggestionTypes.Field;
-  field: IFieldType;
+  field: DataViewField;
 }
 
 /** @public **/

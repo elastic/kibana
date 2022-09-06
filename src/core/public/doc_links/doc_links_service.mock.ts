@@ -7,7 +7,7 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { injectedMetadataServiceMock } from '../injected_metadata/injected_metadata_service.mock';
+import { injectedMetadataServiceMock } from '@kbn/core-injected-metadata-browser-mocks';
 import { DocLinksService, DocLinksStart } from './doc_links_service';
 
 const createStartContractMock = (): DocLinksStart => {

@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { ValidationFunc, fieldValidators } from '../../shared_imports';
+import { ValidationConfig, ValidationFunc, fieldValidators } from '../../shared_imports';
 export { queryFieldValidation } from '../../common/validations';
 
 const idPattern = /^[a-zA-Z0-9-_]+$/;
@@ -48,14 +48,30 @@ export const createIdFieldValidations = (ids: Set<string>) => [
   createUniqueIdValidation(ids),
 ];
 
-export const intervalFieldValidation: ValidationFunc<
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  any,
-  string,
-  number
-> = fieldValidators.numberGreaterThanField({
-  than: 0,
-  message: i18n.translate('xpack.osquery.pack.queryFlyoutForm.invalidIntervalField', {
-    defaultMessage: 'A positive interval value is required',
-  }),
-});
+export const intervalFieldValidations: Array<
+  ValidationConfig<
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    any,
+    string,
+    number
+  >
+> = [
+  {
+    validator: fieldValidators.numberGreaterThanField({
+      than: 0,
+      message: i18n.translate('xpack.osquery.pack.queryFlyoutForm.intervalFieldMinNumberError', {
+        defaultMessage: 'A positive interval value is required',
+      }),
+    }),
+  },
+  {
+    validator: fieldValidators.numberSmallerThanField({
+      than: 604800,
+      message: ({ than }) =>
+        i18n.translate('xpack.osquery.pack.queryFlyoutForm.intervalFieldMaxNumberError', {
+          defaultMessage: 'An interval value must be lower than {than}',
+          values: { than },
+        }),
+    }),
+  },
+];

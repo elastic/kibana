@@ -211,7 +211,9 @@ export class StreamProcessor<TFields extends Fields = ApmFields> {
     const eventType = d.processor.event as keyof ApmElasticsearchOutputWriteTargets;
     let dataStream = writeTargets[eventType];
     if (eventType === 'metric') {
-      if (!d.service?.name) {
+      if (d.metricset?.name === 'agent_config') {
+        dataStream = 'metrics-apm.internal-default';
+      } else if (!d.service?.name) {
         dataStream = 'metrics-apm.app-default';
       } else {
         if (!d.transaction && !d.span) {

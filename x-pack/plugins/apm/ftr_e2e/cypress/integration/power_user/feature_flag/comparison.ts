@@ -30,7 +30,7 @@ describe('Comparison feature flag', () => {
   });
 
   beforeEach(() => {
-    cy.loginAsPowerUser();
+    cy.loginAsEditorUser();
   });
 
   describe('when comparison feature is enabled', () => {

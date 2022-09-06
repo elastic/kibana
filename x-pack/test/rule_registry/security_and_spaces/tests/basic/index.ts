@@ -25,6 +25,7 @@ export default ({ loadTestFile, getService }: FtrProviderContext): void => {
     // loadTestFile(require.resolve('./update_alert'));
     // loadTestFile(require.resolve('./bulk_update_alerts'));
 
+    loadTestFile(require.resolve('./get_feature_ids_by_registration_contexts'));
     loadTestFile(require.resolve('./get_alerts_index'));
     loadTestFile(require.resolve('./find_alerts'));
     loadTestFile(require.resolve('./search_strategy'));

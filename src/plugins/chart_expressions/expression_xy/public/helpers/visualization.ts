@@ -6,12 +6,21 @@
  * Side Public License, v 1.
  */
 
-import { LayerTypes } from '../../common/constants';
+import {
+  LayerTypes,
+  REFERENCE_LINE,
+  REFERENCE_LINE_LAYER,
+  REFERENCE_LINE_Y_CONFIG,
+} from '../../common/constants';
 import {
   CommonXYLayerConfig,
   CommonXYDataLayerConfig,
   CommonXYReferenceLineLayerConfig,
   CommonXYAnnotationLayerConfig,
+  ReferenceLineLayerConfig,
+  ReferenceLineConfig,
+  ExtendedYConfigResult,
+  ReferenceLineYConfig,
 } from '../../common/types';
 
 export const isDataLayer = (layer: CommonXYLayerConfig): layer is CommonXYDataLayerConfig =>
@@ -20,13 +29,24 @@ export const isDataLayer = (layer: CommonXYLayerConfig): layer is CommonXYDataLa
 export const getDataLayers = (layers: CommonXYLayerConfig[]) =>
   (layers || []).filter((layer): layer is CommonXYDataLayerConfig => isDataLayer(layer));
 
-export const isReferenceLayer = (
+export const isReferenceLayer = (layer: CommonXYLayerConfig): layer is ReferenceLineLayerConfig =>
+  layer.layerType === LayerTypes.REFERENCELINE && layer.type === REFERENCE_LINE_LAYER;
+
+export const isReferenceLine = (layer: CommonXYLayerConfig): layer is ReferenceLineConfig =>
+  layer.type === REFERENCE_LINE;
+
+export const isReferenceLineYConfig = (
+  yConfig: ReferenceLineYConfig | ExtendedYConfigResult
+): yConfig is ReferenceLineYConfig => yConfig.type === REFERENCE_LINE_Y_CONFIG;
+
+export const isReferenceLineOrLayer = (
   layer: CommonXYLayerConfig
 ): layer is CommonXYReferenceLineLayerConfig => layer.layerType === LayerTypes.REFERENCELINE;
 
 export const getReferenceLayers = (layers: CommonXYLayerConfig[]) =>
-  (layers || []).filter((layer): layer is CommonXYReferenceLineLayerConfig =>
-    isReferenceLayer(layer)
+  (layers || []).filter(
+    (layer): layer is CommonXYReferenceLineLayerConfig =>
+      isReferenceLayer(layer) || isReferenceLine(layer)
   );
 
 const isAnnotationLayerCommon = (

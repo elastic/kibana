@@ -7,15 +7,21 @@
 
 import { EuiCheckbox, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { useUiTracker } from '@kbn/observability-plugin/public';
+import { useEnvironmentsContext } from '../../../context/environments_context/use_environments_context';
+import { useAnomalyDetectionJobsContext } from '../../../context/anomaly_detection_jobs/use_anomaly_detection_jobs_context';
+import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { useBreakpoints } from '../../../hooks/use_breakpoints';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import * as urlHelpers from '../links/url_helpers';
-import { getComparisonOptions } from './get_comparison_options';
+import {
+  getComparisonOptions,
+  TimeRangeComparisonEnum,
+} from './get_comparison_options';
 
 const PrependContainer = euiStyled.div`
   display: flex;
@@ -34,16 +40,48 @@ export function TimeComparison() {
     query: { rangeFrom, rangeTo, comparisonEnabled, offset },
   } = useAnyOfApmParams('/services', '/backends/*', '/services/{serviceName}');
 
+  const { anomalyDetectionJobsStatus, anomalyDetectionJobsData } =
+    useAnomalyDetectionJobsContext();
+  const { core } = useApmPluginContext();
+  const { preferredEnvironment } = useEnvironmentsContext();
+
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
-  const comparisonOptions = getComparisonOptions({ start, end });
+  const canGetJobs = !!core.application.capabilities.ml?.canGetJobs;
+  const comparisonOptions = useMemo(() => {
+    const timeComparisonOptions = getComparisonOptions({
+      start,
+      end,
+      canGetJobs,
+      anomalyDetectionJobsStatus,
+      anomalyDetectionJobsData,
+      preferredEnvironment,
+    });
+
+    return timeComparisonOptions;
+  }, [
+    canGetJobs,
+    anomalyDetectionJobsStatus,
+    anomalyDetectionJobsData,
+    start,
+    end,
+    preferredEnvironment,
+  ]);
 
   const isSelectedComparisonTypeAvailable = comparisonOptions.some(
     ({ value }) => value === offset
   );
 
   // Replaces type when current one is no longer available in the select options
-  if (comparisonOptions.length !== 0 && !isSelectedComparisonTypeAvailable) {
+  if (
+    (comparisonOptions.length !== 0 && !isSelectedComparisonTypeAvailable) ||
+    // If user changes environment and there's no ML jobs that match the new environment
+    // then also default to first comparison option as well
+    (offset === TimeRangeComparisonEnum.ExpectedBounds &&
+      comparisonOptions.find(
+        (d) => d.value === TimeRangeComparisonEnum.ExpectedBounds
+      )?.disabled === true)
+  ) {
     urlHelpers.replace(history, {
       query: { offset: comparisonOptions[0].value },
     });
@@ -54,7 +92,7 @@ export function TimeComparison() {
     <EuiSelect
       fullWidth={isSmall}
       data-test-subj="comparisonSelect"
-      disabled={!comparisonEnabled}
+      disabled={comparisonEnabled === false}
       options={comparisonOptions}
       value={offset}
       prepend={

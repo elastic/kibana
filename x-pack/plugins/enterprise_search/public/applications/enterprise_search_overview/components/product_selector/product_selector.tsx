@@ -74,6 +74,10 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({
 
   const productCards = (
     <>
+      <ElasticsearchCard />
+
+      <EuiSpacer size="xxl" />
+
       <EuiFlexGroup justifyContent="center" gutterSize="xl">
         {shouldShowAppSearchCard && (
           <EuiFlexItem grow={false}>
@@ -90,10 +94,6 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
-
-      <EuiSpacer size="xxl" />
-
-      <ElasticsearchCard />
 
       <EuiSpacer size="xxl" />
 

@@ -18,6 +18,7 @@ export type {
   SavedObjectsFindResponsePublic,
   SavedObjectsUpdateOptions,
   SavedObjectsBulkUpdateOptions,
+  SavedObjectsBulkResolveResponse,
 } from './saved_objects_client';
 export { SimpleSavedObject } from './simple_saved_object';
 export type { ResolvedSimpleSavedObject } from './types';
@@ -43,7 +44,6 @@ export type {
   SavedObjectReferenceWithContext,
   SavedObjectsCollectMultiNamespaceReferencesResponse,
   SavedObjectsBulkResolveObject,
-  SavedObjectsBulkResolveResponse,
   SavedObjectsResolveResponse,
 } from '../../server';
 

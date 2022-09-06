@@ -48,12 +48,6 @@ export class HeatmapLayer extends AbstractLayer {
     }
   }
 
-  destroy() {
-    if (this.getSource()) {
-      this.getSource().destroy();
-    }
-  }
-
   getLayerIcon(isTocIcon: boolean) {
     const { docCount } = getAggsMeta(this._getMetaFromTiles());
     return docCount === 0 ? NO_RESULTS_ICON_AND_TOOLTIPCONTENT : super.getLayerIcon(isTocIcon);
@@ -93,6 +87,7 @@ export class HeatmapLayer extends AbstractLayer {
 
   async syncData(syncContext: DataRequestContext) {
     await syncMvtSourceData({
+      hasLabels: false,
       layerId: this.getId(),
       layerName: await this.getDisplayName(),
       prevDataRequest: this.getSourceDataRequest(),

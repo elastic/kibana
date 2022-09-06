@@ -9,8 +9,6 @@ import { isEmpty } from 'lodash/fp';
 import { Location } from 'history';
 
 import type { Filter, Query } from '@kbn/es-query';
-import { useUiSetting$ } from '../../lib/kibana';
-import { ENABLE_GROUPED_NAVIGATION } from '../../../../common/constants';
 import { UrlInputsModel } from '../../store/inputs/model';
 import { TimelineUrl } from '../../../timelines/store/timeline/model';
 import { CONSTANTS } from '../url_state/constants';
@@ -24,6 +22,8 @@ import {
 import { SearchNavTab } from './types';
 import { SourcererUrlState } from '../../store/sourcerer/model';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
+import { useUiSetting$ } from '../../lib/kibana';
+import { ENABLE_GROUPED_NAVIGATION } from '../../../../common/constants';
 
 export const getSearch = (tab: SearchNavTab, urlState: UrlState): string => {
   if (tab && tab.urlKey != null && !isAdministration(tab.urlKey)) {

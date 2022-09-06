@@ -271,7 +271,7 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
       }
     }
 
-    const resp = await client?.asCurrentUser.search(esSearchRequest);
+    const resp = await client?.asCurrentUser.search(esSearchRequest, { maxRetries: 0 });
 
     const obj: MetricData = { success: true, results: {} };
     // @ts-ignore
@@ -1551,7 +1551,7 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
       body.aggs.sample.aggs.byTime.aggs.entities.aggs.metric = metricAgg;
     }
 
-    const resp = await client!.asCurrentUser.search(body);
+    const resp = await client!.asCurrentUser.search(body, { maxRetries: 0 });
 
     // Because of the sampling, results of metricFunctions which use sum or count
     // can be significantly skewed. Taking into account totalHits we calculate a

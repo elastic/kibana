@@ -80,9 +80,7 @@ import { ViewSelection } from '../event_rendered_view/selector';
 import { EventRenderedView } from '../event_rendered_view';
 import { REMOVE_COLUMN } from './column_headers/translations';
 
-const StatefulAlertStatusBulkActions = lazy(
-  () => import('../toolbar/bulk_actions/alert_status_bulk_actions')
-);
+const StatefulAlertBulkActions = lazy(() => import('../toolbar/bulk_actions/alert_bulk_actions'));
 
 interface OwnProps {
   activePage: number;
@@ -425,6 +423,32 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
       }
     }, [bulkActions]);
 
+    const additionalBulkActions = useMemo(() => {
+      if (bulkActions && bulkActions !== true && bulkActions.customBulkActions !== undefined) {
+        return bulkActions.customBulkActions.map((action) => {
+          return {
+            ...action,
+            onClick: (eventIds: string[]) => {
+              const items = data.filter((item) => {
+                return eventIds.find((event) => item._id === event);
+              });
+              action.onClick(items);
+            },
+          };
+        });
+      }
+    }, [bulkActions, data]);
+
+    const showAlertStatusActions = useMemo(() => {
+      if (!hasAlertsCrud) {
+        return false;
+      }
+      if (typeof bulkActions === 'boolean') {
+        return bulkActions;
+      }
+      return bulkActions.alertStatusActions ?? true;
+    }, [bulkActions, hasAlertsCrud]);
+
     const showBulkActions = useMemo(() => {
       if (!hasAlertsCrud) {
         return false;
@@ -436,7 +460,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
       if (typeof bulkActions === 'boolean') {
         return bulkActions;
       }
-      return bulkActions.alertStatusActions ?? true;
+      return (bulkActions?.customBulkActions?.length || bulkActions?.alertStatusActions) ?? true;
     }, [hasAlertsCrud, selectedCount, showCheckboxes, bulkActions]);
 
     const alertToolbar = useMemo(
@@ -447,7 +471,8 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
           </EuiFlexItem>
           {showBulkActions && (
             <Suspense fallback={<EuiLoadingSpinner />}>
-              <StatefulAlertStatusBulkActions
+              <StatefulAlertBulkActions
+                showAlertStatusActions={showAlertStatusActions}
                 data-test-subj="bulk-actions"
                 id={id}
                 totalItems={totalSelectAllAlerts ?? totalItems}
@@ -456,6 +481,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
                 indexName={indexNames.join()}
                 onActionSuccess={onAlertStatusActionSuccess}
                 onActionFailure={onAlertStatusActionFailure}
+                customBulkActions={additionalBulkActions}
                 refetch={refetch}
               />
             </Suspense>
@@ -463,6 +489,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
         </EuiFlexGroup>
       ),
       [
+        additionalBulkActions,
         alertCountText,
         filterQuery,
         filterStatus,
@@ -471,6 +498,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
         onAlertStatusActionFailure,
         onAlertStatusActionSuccess,
         refetch,
+        showAlertStatusActions,
         showBulkActions,
         totalItems,
         totalSelectAllAlerts,
@@ -486,7 +514,8 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
             {showBulkActions ? (
               <>
                 <Suspense fallback={<EuiLoadingSpinner />}>
-                  <StatefulAlertStatusBulkActions
+                  <StatefulAlertBulkActions
+                    showAlertStatusActions={showAlertStatusActions}
                     data-test-subj="bulk-actions"
                     id={id}
                     totalItems={totalSelectAllAlerts ?? totalItems}
@@ -495,6 +524,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
                     indexName={indexNames.join()}
                     onActionSuccess={onAlertStatusActionSuccess}
                     onActionFailure={onAlertStatusActionFailure}
+                    customBulkActions={additionalBulkActions}
                     refetch={refetch}
                   />
                 </Suspense>
@@ -528,21 +558,23 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
         showDisplaySelector: false,
       }),
       [
+        isLoading,
         alertCountText,
         showBulkActions,
+        showAlertStatusActions,
         id,
         totalSelectAllAlerts,
         totalItems,
-        fieldBrowserOptions,
         filterStatus,
         filterQuery,
         indexNames,
         onAlertStatusActionSuccess,
         onAlertStatusActionFailure,
+        additionalBulkActions,
         refetch,
-        isLoading,
         additionalControls,
         browserFields,
+        fieldBrowserOptions,
         columnHeaders,
       ]
     );

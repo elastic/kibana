@@ -36,7 +36,7 @@ export async function callAsyncWithDebug<T>({
   requestParams: Record<string, any>;
   operationName: string;
   isCalledWithInternalUser: boolean; // only allow inspection of queries that were retrieved with credentials of the end user
-}) {
+}): Promise<T> {
   if (!debug) {
     return cb();
   }

@@ -18,6 +18,7 @@ const baseContextMock = {
   expanded: undefined,
   setExpanded: jest.fn(),
   rows: esHits,
+  rowsFlattened: esHits,
   onFilter: jest.fn(),
   indexPattern: indexPatternMock,
   isDarkMode: false,

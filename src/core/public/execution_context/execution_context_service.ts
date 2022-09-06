@@ -8,8 +8,9 @@
 
 import { compact, isEqual, isUndefined, omitBy } from 'lodash';
 import { BehaviorSubject, Observable, Subscription, map } from 'rxjs';
+import type { CoreService } from '@kbn/core-base-browser-internal';
 import { AnalyticsServiceSetup } from '../analytics';
-import { CoreService, KibanaExecutionContext } from '../../types';
+import { KibanaExecutionContext } from '../../types';
 
 // Should be exported from elastic/apm-rum
 export type LabelValue = string | number | boolean;

@@ -7,9 +7,13 @@
  */
 
 import { gt, valid } from 'semver';
-import { State } from '../state';
-import { IndexMapping } from '../../mappings';
-import { FetchIndexResponse } from '../actions';
+import type {
+  QueryDslBoolQuery,
+  QueryDslQueryContainer,
+} from '@elastic/elasticsearch/lib/api/types';
+import type { State } from '../state';
+import type { IndexMapping } from '../../mappings';
+import type { FetchIndexResponse } from '../actions';
 
 /**
  * A helper function/type for ensuring that all control state's are handled.
@@ -66,6 +70,75 @@ export function mergeMigrationMappingPropertyHashes(
 export function indexBelongsToLaterVersion(indexName: string, kibanaVersion: string): boolean {
   const version = valid(indexVersion(indexName));
   return version != null ? gt(version, kibanaVersion) : false;
+}
+
+/**
+ * Add new must_not clauses to the given query
+ * in order to filter out the specified types
+ * @param boolQuery the bool query to be enriched
+ * @param types the types to be filtered out
+ * @returns a new query container with the enriched query
+ */
+export function addExcludedTypesToBoolQuery(
+  types: string[],
+  boolQuery?: QueryDslBoolQuery
+): QueryDslQueryContainer {
+  return addMustNotClausesToBoolQuery(
+    types.map((type) => ({ term: { type } })),
+    boolQuery
+  );
+}
+
+/**
+ * Add the given clauses to the 'must' of the given query
+ * @param boolQuery the bool query to be enriched
+ * @param mustClauses the clauses to be added to a 'must'
+ * @returns a new query container with the enriched query
+ */
+export function addMustClausesToBoolQuery(
+  mustClauses: QueryDslQueryContainer[],
+  boolQuery?: QueryDslBoolQuery
+): QueryDslQueryContainer {
+  let must: QueryDslQueryContainer[] = [];
+
+  if (boolQuery?.must) {
+    must = must.concat(boolQuery.must);
+  }
+
+  must.push(...mustClauses);
+
+  return {
+    bool: {
+      ...boolQuery,
+      must,
+    },
+  };
+}
+
+/**
+ * Add the given clauses to the 'must_not' of the given query
+ * @param boolQuery the bool query to be enriched
+ * @param mustNotClauses the clauses to be added to a 'must_not'
+ * @returns a new query container with the enriched query
+ */
+export function addMustNotClausesToBoolQuery(
+  mustNotClauses: QueryDslQueryContainer[],
+  boolQuery?: QueryDslBoolQuery
+): QueryDslQueryContainer {
+  let mustNot: QueryDslQueryContainer[] = [];
+
+  if (boolQuery?.must_not) {
+    mustNot = mustNot.concat(boolQuery.must_not);
+  }
+
+  mustNot.push(...mustNotClauses);
+
+  return {
+    bool: {
+      ...boolQuery,
+      must_not: mustNot,
+    },
+  };
 }
 
 /**

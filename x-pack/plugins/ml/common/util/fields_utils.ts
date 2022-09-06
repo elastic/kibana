@@ -16,6 +16,13 @@ import {
 } from '../types/fields';
 import { ML_JOB_AGGREGATION } from '../constants/aggregation_types';
 
+const categoryFieldTypes = [
+  ES_FIELD_TYPES.TEXT,
+  ES_FIELD_TYPES.KEYWORD,
+  ES_FIELD_TYPES.IP,
+  ES_FIELD_TYPES.VERSION,
+];
+
 // cross reference fields and aggs.
 // fields contain a list of aggs that are compatible, and vice versa.
 export function combineFieldsAndAggs(
@@ -92,7 +99,9 @@ function mixFactory(isRollup: boolean, rollupFields: RollupFields) {
 }
 
 function getKeywordFields(fields: Field[]): Field[] {
-  return fields.filter((f) => f.type === ES_FIELD_TYPES.KEYWORD);
+  return fields.filter(
+    (f) => f.type === ES_FIELD_TYPES.KEYWORD || f.type === ES_FIELD_TYPES.VERSION
+  );
 }
 
 function getTextFields(fields: Field[]): Field[] {
@@ -141,4 +150,8 @@ export function sortFields(fields: Field[]) {
     fields.splice(0, 0, eventRate);
   }
   return fields;
+}
+
+export function filterCategoryFields(fields: Field[], include = true) {
+  return fields.filter((f) => categoryFieldTypes.includes(f.type) === include);
 }

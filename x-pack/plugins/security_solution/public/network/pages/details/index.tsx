@@ -50,7 +50,7 @@ import { SecurityPageName } from '../../../app/types';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
 import { LandingPageComponent } from '../../../common/components/landing_page';
-export { getBreadcrumbs } from './utils';
+export { getTrailingBreadcrumbs } from './utils';
 
 const NetworkDetailsManage = manageQuery(IpOverview);
 
@@ -104,7 +104,6 @@ const NetworkDetailsComponent: React.FC = () => {
   useInvalidFilterQuery({ id: ID, filterQuery, kqlError, query, startDate: from, endDate: to });
 
   const [loading, { id, inspect, networkDetails, refetch }] = useNetworkDetails({
-    docValueFields,
     skip: isInitializing,
     filterQuery,
     indexNames: selectedPatterns,

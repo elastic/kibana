@@ -16,7 +16,6 @@ import { inputsModel } from '../../../common/store';
 import { useKibana } from '../../../common/lib/kibana';
 import { createFilter } from '../../../common/containers/helpers';
 import {
-  DocValueFields,
   NetworkQueries,
   NetworkDetailsRequestOptions,
   NetworkDetailsStrategyResponse,
@@ -38,7 +37,6 @@ export interface NetworkDetailsArgs {
 
 interface UseNetworkDetails {
   id?: string;
-  docValueFields: DocValueFields[];
   ip: string;
   indexNames: string[];
   filterQuery?: ESTermQuery | string;
@@ -46,7 +44,6 @@ interface UseNetworkDetails {
 }
 
 export const useNetworkDetails = ({
-  docValueFields,
   filterQuery,
   indexNames,
   id = ID,
@@ -126,7 +123,6 @@ export const useNetworkDetails = ({
       const myRequest = {
         ...(prevRequest ?? {}),
         defaultIndex: indexNames,
-        docValueFields: docValueFields ?? [],
         factoryQueryType: NetworkQueries.details,
         filterQuery: createFilter(filterQuery),
         ip,
@@ -136,7 +132,7 @@ export const useNetworkDetails = ({
       }
       return prevRequest;
     });
-  }, [indexNames, filterQuery, ip, docValueFields, id]);
+  }, [indexNames, filterQuery, ip, id]);
 
   useEffect(() => {
     networkDetailsSearch(networkDetailsRequest);

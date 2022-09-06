@@ -455,6 +455,7 @@ export function replaceColumn({
       if (
         !shouldResetLabel &&
         previousColumn.customLabel &&
+        hypotheticalLayer.columns[columnId] &&
         previousColumn.label !==
           previousDefinition.getDefaultLabel(previousColumn, indexPattern, tempLayer.columns)
       ) {

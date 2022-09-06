@@ -1,0 +1,25 @@
+{
+  "type": "doc",
+  "value": {
+    "id": "1",
+    "index": "recipes",
+    "source": {
+      "text":"text1",
+      "unmapped": "unmapped1"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "2",
+    "index": "recipes",
+    "source": {
+      "text":"text2",
+      "nested": {
+        "unmapped": "unmapped2"
+      }
+    }
+  }
+}

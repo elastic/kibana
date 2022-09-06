@@ -19,6 +19,7 @@ import { appContextService } from '../services';
 
 import {
   AgentNotFoundError,
+  AgentActionNotFoundError,
   AgentPolicyNameExistsError,
   ConcurrentInstallOperationError,
   IngestManagerError,
@@ -63,6 +64,9 @@ const getHTTPResponseCode = (error: IngestManagerError): number => {
     return 409; // Conflict
   }
   if (error instanceof AgentNotFoundError) {
+    return 404;
+  }
+  if (error instanceof AgentActionNotFoundError) {
     return 404;
   }
   return 400; // Bad Request

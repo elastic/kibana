@@ -13,7 +13,7 @@ import type { Datatable, ExpressionFunctionDefinition } from '@kbn/expressions-p
 import { buildExpressionFunction } from '@kbn/expressions-plugin/common';
 
 import { IndexPatternExpressionType } from '@kbn/data-views-plugin/common/expressions';
-import { IndexPatternsContract } from '../../..';
+import { DataViewsContract } from '@kbn/data-views-plugin/common';
 
 import { AggsStart, AggExpressionType, aggCountFnName } from '../../aggs';
 import { ISearchStartSearchSource } from '../../search_source';
@@ -44,7 +44,7 @@ export type EsaggsExpressionFunctionDefinition = ExpressionFunctionDefinition<
 /** @internal */
 export interface EsaggsStartDependencies {
   aggs: AggsStart;
-  indexPatterns: IndexPatternsContract;
+  indexPatterns: DataViewsContract;
   searchSource: ISearchStartSearchSource;
   getNow?: () => Date;
 }

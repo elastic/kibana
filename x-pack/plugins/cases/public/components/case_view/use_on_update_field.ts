@@ -14,15 +14,7 @@ import { useUpdateCase } from '../../containers/use_update_case';
 import { getTypedPayload } from '../../containers/utils';
 import { OnUpdateFields } from './types';
 
-export const useOnUpdateField = ({
-  caseData,
-  caseId,
-  handleUpdateField,
-}: {
-  caseData: Case;
-  caseId: string;
-  handleUpdateField: (newCase: Case, updateKey: UpdateKey) => void;
-}) => {
+export const useOnUpdateField = ({ caseData, caseId }: { caseData: Case; caseId: string }) => {
   const { isLoading, updateKey: loadingKey, updateCaseProperty } = useUpdateCase({ caseId });
 
   const onUpdateField = useCallback(
@@ -31,7 +23,6 @@ export const useOnUpdateField = ({
         updateCaseProperty({
           updateKey,
           updateValue,
-          updateCase: (newCase) => handleUpdateField(newCase, updateKey),
           caseData,
           onSuccess,
           onError,
@@ -81,7 +72,7 @@ export const useOnUpdateField = ({
           return null;
       }
     },
-    [updateCaseProperty, handleUpdateField, caseData]
+    [updateCaseProperty, caseData]
   );
   return { onUpdateField, isLoading, loadingKey };
 };

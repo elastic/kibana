@@ -8,7 +8,7 @@
 
 import { defer, throwError, iif, timer } from 'rxjs';
 import { concatMap, retryWhen } from 'rxjs/operators';
-import { Logger } from '../../logging';
+import type { Logger } from '@kbn/logging';
 
 const retryResponseStatuses = [
   503, // ServiceUnavailable

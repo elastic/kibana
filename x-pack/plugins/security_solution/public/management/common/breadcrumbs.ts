@@ -20,7 +20,7 @@ const TabNameMappedToI18nKey: Record<AdministrationSubTab, string> = {
   [AdministrationSubTab.blocklist]: BLOCKLIST,
 };
 
-export function getBreadcrumbs(params: AdministrationRouteSpyState): ChromeBreadcrumb[] {
+export function getTrailingBreadcrumbs(params: AdministrationRouteSpyState): ChromeBreadcrumb[] {
   return [
     ...(params?.tabName ? [params?.tabName] : []).map((tabName) => ({
       text: TabNameMappedToI18nKey[tabName],

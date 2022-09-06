@@ -1,0 +1,18 @@
+{
+  "id": "kubernetesSecurity",
+  "version": "1.0.0",
+  "kibanaVersion": "kibana",
+  "owner": {
+    "name": "Security Team",
+    "githubTeam": "security-team"
+  },
+  "requiredPlugins": [
+    "data",
+    "timelines",
+    "ruleRegistry",
+    "sessionView"
+  ],
+  "requiredBundles": [],
+  "server": true,
+  "ui": true
+}

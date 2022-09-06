@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { QueryState } from '@kbn/data-plugin/public';
+import { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
 import { getUiSettings } from '../../../kibana_services';
 import { SerializedMapState } from './types';
 
@@ -14,7 +14,7 @@ export function getInitialTimeFilters({
   globalState,
 }: {
   serializedMapState?: SerializedMapState;
-  globalState: QueryState;
+  globalState: GlobalQueryStateFromUrl;
 }) {
   if (serializedMapState?.timeFilters) {
     return serializedMapState.timeFilters;

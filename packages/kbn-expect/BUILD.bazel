@@ -19,7 +19,6 @@ filegroup(
 NPM_MODULE_EXTRA_FILES = [
   "LICENSE.txt",
   "package.json",
-  "README.md",
 ]
 
 js_library(

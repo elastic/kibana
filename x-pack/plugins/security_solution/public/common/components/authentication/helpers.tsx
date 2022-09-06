@@ -97,6 +97,8 @@ const FAILURES_COLUMN: Columns<AuthenticationsEdges, AuthenticationsEdges> = {
             operator: IS_OPERATOR,
           },
         }}
+        isAggregatable={true}
+        fieldType={'keyword'}
         render={(dataProvider, _, snapshot) =>
           snapshot.isDragging ? (
             <DragEffects>
@@ -129,6 +131,8 @@ const LAST_SUCCESSFUL_SOURCE_COLUMN: Columns<AuthenticationsEdges, Authenticatio
   render: ({ node }) =>
     getRowItemDraggables({
       rowItems: node.lastSuccess?.source?.ip || null,
+      isAggregatable: true,
+      fieldType: 'ip',
       attrName: 'source.ip',
       idPrefix: `authentications-table-${node._id}-lastSuccessSource`,
       render: (item) => <NetworkDetailsLink ip={item} />,
@@ -141,6 +145,8 @@ const LAST_SUCCESSFUL_DESTINATION_COLUMN: Columns<AuthenticationsEdges, Authenti
   render: ({ node }) =>
     getRowItemDraggables({
       rowItems: node.lastSuccess?.host?.name ?? null,
+      isAggregatable: true,
+      fieldType: 'keyword',
       attrName: 'host.name',
       idPrefix: `authentications-table-${node._id}-lastSuccessfulDestination`,
       render: (item) => <HostDetailsLink hostName={item} />,
@@ -164,6 +170,8 @@ const LAST_FAILED_SOURCE_COLUMN: Columns<AuthenticationsEdges, AuthenticationsEd
   render: ({ node }) =>
     getRowItemDraggables({
       rowItems: node.lastFailure?.source?.ip || null,
+      isAggregatable: true,
+      fieldType: 'ip',
       attrName: 'source.ip',
       idPrefix: `authentications-table-${node._id}-lastFailureSource`,
       render: (item) => <NetworkDetailsLink ip={item} />,
@@ -179,6 +187,8 @@ const LAST_FAILED_DESTINATION_COLUMN: Columns<AuthenticationsEdges, Authenticati
       attrName: 'host.name',
       idPrefix: `authentications-table-${node._id}-lastFailureDestination`,
       render: (item) => <HostDetailsLink hostName={item} />,
+      isAggregatable: true,
+      fieldType: 'ip',
     }),
 };
 
@@ -192,6 +202,8 @@ const getUserColumn = (
     getRowItemDraggables({
       rowItems: node.stackedValue,
       attrName: 'user.name',
+      isAggregatable: true,
+      fieldType: 'keyword',
       idPrefix: `authentications-table-${node._id}-userName`,
       render: (item) => (usersEnabled ? <UserDetailsLink userName={item} /> : <>{item}</>),
     }),
@@ -205,6 +217,8 @@ const HOST_COLUMN: Columns<AuthenticationsEdges, AuthenticationsEdges> = {
     getRowItemDraggables({
       rowItems: node.stackedValue,
       attrName: 'host.name',
+      isAggregatable: true,
+      fieldType: 'keyword',
       idPrefix: `authentications-table-${node._id}-hostName`,
       render: (item) => <HostDetailsLink hostName={item} />,
     }),
@@ -234,6 +248,8 @@ const SUCCESS_COLUMN: Columns<AuthenticationsEdges, AuthenticationsEdges> = {
             operator: IS_OPERATOR,
           },
         }}
+        isAggregatable={true}
+        fieldType="keyword"
         render={(dataProvider, _, snapshot) =>
           snapshot.isDragging ? (
             <DragEffects>

@@ -54,6 +54,7 @@ import {
   RuleWithLegacyId,
   SanitizedRuleWithLegacyId,
   PartialRuleWithLegacyId,
+  RuleSnooze,
   RawAlertInstance as RawAlert,
 } from '../types';
 import {
@@ -62,6 +63,7 @@ import {
   getRuleNotifyWhenType,
   validateMutatedRuleTypeParams,
   convertRuleIdsToKueryNode,
+  getRuleSnoozeEndTime,
 } from '../lib';
 import { taskInstanceToAlertTaskInstance } from '../task_runner/alert_task_instance';
 import { RegistryRuleType, UntypedNormalizedRuleType } from '../rule_type_registry';
@@ -310,7 +312,8 @@ export interface CreateOptions<Params extends RuleTypeParams> {
     | 'mutedInstanceIds'
     | 'actions'
     | 'executionStatus'
-    | 'snoozeEndTime'
+    | 'snoozeSchedule'
+    | 'isSnoozedUntil'
   > & { actions: NormalizedAlertAction[] };
   options?: {
     id?: string;
@@ -391,7 +394,7 @@ export class RulesClient {
   private readonly fieldsToExcludeFromPublicApi: Array<keyof SanitizedRule> = [
     'monitoring',
     'mapped_params',
-    'snoozeEndTime',
+    'snoozeSchedule',
   ];
 
   constructor({
@@ -504,7 +507,8 @@ export class RulesClient {
       updatedBy: username,
       createdAt: new Date(createTime).toISOString(),
       updatedAt: new Date(createTime).toISOString(),
-      snoozeEndTime: null,
+      isSnoozedUntil: null,
+      snoozeSchedule: [],
       params: updatedParams as RawRule['params'],
       muteAll: false,
       mutedInstanceIds: [],
@@ -1018,7 +1022,7 @@ export class RulesClient {
         },
         snoozed: {
           date_range: {
-            field: 'alert.attributes.snoozeEndTime',
+            field: 'alert.attributes.snoozeSchedule.rRule.dtstart',
             format: 'strict_date_time',
             ranges: [{ from: 'now' }],
           },
@@ -1828,7 +1832,7 @@ export class RulesClient {
   }
 
   private async enableWithOCC({ id }: { id: string }) {
-    let apiKeyToInvalidate: string | null = null;
+    let existingApiKey: string | null = null;
     let attributes: RawRule;
     let version: string | undefined;
 
@@ -1837,14 +1841,11 @@ export class RulesClient {
         await this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawRule>('alert', id, {
           namespace: this.namespace,
         });
-      apiKeyToInvalidate = decryptedAlert.attributes.apiKey;
+      existingApiKey = decryptedAlert.attributes.apiKey;
       attributes = decryptedAlert.attributes;
       version = decryptedAlert.version;
     } catch (e) {
-      // We'll skip invalidating the API key since we failed to load the decrypted saved object
-      this.logger.error(
-        `enable(): Failed to load API key to invalidate on alert ${id}: ${e.message}`
-      );
+      this.logger.error(`enable(): Failed to load API key of alert ${id}: ${e.message}`);
       // Still attempt to load the attributes and version using SOC
       const alert = await this.unsecuredSavedObjectsClient.get<RawRule>('alert', id);
       attributes = alert.attributes;
@@ -1886,19 +1887,10 @@ export class RulesClient {
     if (attributes.enabled === false) {
       const username = await this.getUserName();
 
-      let createdAPIKey = null;
-      try {
-        createdAPIKey = await this.createAPIKey(
-          this.generateAPIKeyName(attributes.alertTypeId, attributes.name)
-        );
-      } catch (error) {
-        throw Boom.badRequest(`Error enabling rule: could not create API key - ${error.message}`);
-      }
-
       const updateAttributes = this.updateMeta({
         ...attributes,
+        ...(!existingApiKey && (await this.createNewAPIKeySet({ attributes, username }))),
         enabled: true,
-        ...this.apiKeyAsAlertAttributes(createdAPIKey, username),
         updatedBy: username,
         updatedAt: new Date().toISOString(),
         executionStatus: {
@@ -1909,15 +1901,10 @@ export class RulesClient {
           warning: null,
         },
       });
+
       try {
         await this.unsecuredSavedObjectsClient.update('alert', id, updateAttributes, { version });
       } catch (e) {
-        // Avoid unused API key
-        await bulkMarkApiKeysForInvalidation(
-          { apiKeys: updateAttributes.apiKey ? [updateAttributes.apiKey] : [] },
-          this.logger,
-          this.unsecuredSavedObjectsClient
-        );
         throw e;
       }
       const scheduledTask = await this.scheduleRule({
@@ -1930,14 +1917,26 @@ export class RulesClient {
       await this.unsecuredSavedObjectsClient.update('alert', id, {
         scheduledTaskId: scheduledTask.id,
       });
-      if (apiKeyToInvalidate) {
-        await bulkMarkApiKeysForInvalidation(
-          { apiKeys: [apiKeyToInvalidate] },
-          this.logger,
-          this.unsecuredSavedObjectsClient
-        );
-      }
     }
+  }
+
+  private async createNewAPIKeySet({
+    attributes,
+    username,
+  }: {
+    attributes: RawRule;
+    username: string | null;
+  }): Promise<Pick<RawRule, 'apiKey' | 'apiKeyOwner'>> {
+    let createdAPIKey = null;
+    try {
+      createdAPIKey = await this.createAPIKey(
+        this.generateAPIKeyName(attributes.alertTypeId, attributes.name)
+      );
+    } catch (error) {
+      throw Boom.badRequest(`Error creating API key for rule: ${error.message}`);
+    }
+
+    return this.apiKeyAsAlertAttributes(createdAPIKey, username);
   }
 
   public async disable({ id }: { id: string }): Promise<void> {
@@ -1949,7 +1948,6 @@ export class RulesClient {
   }
 
   private async disableWithOCC({ id }: { id: string }) {
-    let apiKeyToInvalidate: string | null = null;
     let attributes: RawRule;
     let version: string | undefined;
 
@@ -1958,14 +1956,10 @@ export class RulesClient {
         await this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawRule>('alert', id, {
           namespace: this.namespace,
         });
-      apiKeyToInvalidate = decryptedAlert.attributes.apiKey;
       attributes = decryptedAlert.attributes;
       version = decryptedAlert.version;
     } catch (e) {
-      // We'll skip invalidating the API key since we failed to load the decrypted saved object
-      this.logger.error(
-        `disable(): Failed to load API key to invalidate on alert ${id}: ${e.message}`
-      );
+      this.logger.error(`disable(): Failed to load API key of alert ${id}: ${e.message}`);
       // Still attempt to load the attributes and version using SOC
       const alert = await this.unsecuredSavedObjectsClient.get<RawRule>('alert', id);
       attributes = alert.attributes;
@@ -2058,26 +2052,14 @@ export class RulesClient {
           ...attributes,
           enabled: false,
           scheduledTaskId: null,
-          apiKey: null,
-          apiKeyOwner: null,
           updatedBy: await this.getUserName(),
           updatedAt: new Date().toISOString(),
         }),
         { version }
       );
-
-      await Promise.all([
-        attributes.scheduledTaskId
-          ? this.taskManager.removeIfExists(attributes.scheduledTaskId)
-          : null,
-        apiKeyToInvalidate
-          ? await bulkMarkApiKeysForInvalidation(
-              { apiKeys: [apiKeyToInvalidate] },
-              this.logger,
-              this.unsecuredSavedObjectsClient
-            )
-          : null,
-      ]);
+      if (attributes.scheduledTaskId) {
+        await this.taskManager.removeIfExists(attributes.scheduledTaskId);
+      }
     }
   }
 
@@ -2142,8 +2124,21 @@ export class RulesClient {
     // If snoozeEndTime is -1, instead mute all
     const newAttrs =
       snoozeEndTime === -1
-        ? { muteAll: true, snoozeEndTime: null }
-        : { snoozeEndTime: new Date(snoozeEndTime).toISOString(), muteAll: false };
+        ? {
+            muteAll: true,
+            snoozeSchedule: clearUnscheduledSnooze(attributes),
+          }
+        : {
+            snoozeSchedule: clearUnscheduledSnooze(attributes).concat({
+              duration: Date.parse(snoozeEndTime) - Date.now(),
+              rRule: {
+                dtstart: new Date().toISOString(),
+                tzid: 'UTC',
+                count: 1,
+              },
+            }),
+            muteAll: false,
+          };
 
     const updateAttributes = this.updateMeta({
       ...newAttrs,
@@ -2157,7 +2152,7 @@ export class RulesClient {
       id,
       updateAttributes,
       updateOptions
-    );
+    ).then(() => this.updateSnoozedUntilTime({ id }));
   }
 
   public async unsnooze({ id }: { id: string }): Promise<void> {
@@ -2207,8 +2202,32 @@ export class RulesClient {
     this.ruleTypeRegistry.ensureRuleTypeEnabled(attributes.alertTypeId);
 
     const updateAttributes = this.updateMeta({
-      snoozeEndTime: null,
+      snoozeSchedule: clearUnscheduledSnooze(attributes),
       muteAll: false,
+      updatedBy: await this.getUserName(),
+      updatedAt: new Date().toISOString(),
+    });
+    const updateOptions = { version };
+
+    await partiallyUpdateAlert(
+      this.unsecuredSavedObjectsClient,
+      id,
+      updateAttributes,
+      updateOptions
+    ).then(() => this.updateSnoozedUntilTime({ id }));
+  }
+
+  public async updateSnoozedUntilTime({ id }: { id: string }): Promise<void> {
+    const { attributes, version } = await this.unsecuredSavedObjectsClient.get<RawRule>(
+      'alert',
+      id
+    );
+
+    const isSnoozedUntil = getRuleSnoozeEndTime(attributes);
+    if (!isSnoozedUntil && !attributes.isSnoozedUntil) return;
+
+    const updateAttributes = this.updateMeta({
+      isSnoozedUntil: isSnoozedUntil ? isSnoozedUntil.toISOString() : null,
       updatedBy: await this.getUserName(),
       updatedAt: new Date().toISOString(),
     });
@@ -2271,7 +2290,7 @@ export class RulesClient {
     const updateAttributes = this.updateMeta({
       muteAll: true,
       mutedInstanceIds: [],
-      snoozeEndTime: null,
+      snoozeSchedule: clearUnscheduledSnooze(attributes),
       updatedBy: await this.getUserName(),
       updatedAt: new Date().toISOString(),
     });
@@ -2334,7 +2353,7 @@ export class RulesClient {
     const updateAttributes = this.updateMeta({
       muteAll: false,
       mutedInstanceIds: [],
-      snoozeEndTime: null,
+      snoozeSchedule: clearUnscheduledSnooze(attributes),
       updatedBy: await this.getUserName(),
       updatedAt: new Date().toISOString(),
     });
@@ -2582,15 +2601,23 @@ export class RulesClient {
       executionStatus,
       schedule,
       actions,
-      snoozeEndTime,
+      snoozeSchedule,
+      isSnoozedUntil,
       ...partialRawRule
     }: Partial<RawRule>,
     references: SavedObjectReference[] | undefined,
     includeLegacyId: boolean = false,
     excludeFromPublicApi: boolean = false
   ): PartialRule<Params> | PartialRuleWithLegacyId<Params> {
-    const snoozeEndTimeDate = snoozeEndTime != null ? new Date(snoozeEndTime) : snoozeEndTime;
-    const includeSnoozeEndTime = snoozeEndTimeDate !== undefined && !excludeFromPublicApi;
+    const snoozeScheduleDates = snoozeSchedule?.map((s) => ({
+      ...s,
+      rRule: {
+        ...s.rRule,
+        dtstart: new Date(s.rRule.dtstart),
+        ...(s.rRule.until ? { until: new Date(s.rRule.until) } : {}),
+      },
+    }));
+    const includeSnoozeSchedule = snoozeSchedule !== undefined;
     const rule = {
       id,
       notifyWhen,
@@ -2600,9 +2627,10 @@ export class RulesClient {
       schedule: schedule as IntervalSchedule,
       actions: actions ? this.injectReferencesIntoActions(id, actions, references || []) : [],
       params: this.injectReferencesIntoParams(id, ruleType, params, references || []) as Params,
-      ...(includeSnoozeEndTime ? { snoozeEndTime: snoozeEndTimeDate } : {}),
+      ...(includeSnoozeSchedule ? { snoozeSchedule: snoozeScheduleDates } : {}),
       ...(updatedAt ? { updatedAt: new Date(updatedAt) } : {}),
       ...(createdAt ? { createdAt: new Date(createdAt) } : {}),
+      ...(isSnoozedUntil ? { isSnoozedUntil: new Date(isSnoozedUntil) } : {}),
       ...(scheduledTaskId ? { scheduledTaskId } : {}),
       ...(executionStatus
         ? { executionStatus: ruleExecutionStatusFromRaw(this.logger, id, executionStatus) }
@@ -2816,4 +2844,10 @@ function parseDate(dateString: string | undefined, propertyName: string, default
   }
 
   return parsedDate;
+}
+
+function clearUnscheduledSnooze(attributes: { snoozeSchedule?: RuleSnooze }) {
+  return attributes.snoozeSchedule
+    ? attributes.snoozeSchedule.filter((s) => typeof s.id !== 'undefined')
+    : [];
 }

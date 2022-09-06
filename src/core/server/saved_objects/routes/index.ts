@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import type { Logger } from '@kbn/logging';
 import { InternalHttpServiceSetup } from '../../http';
 import { InternalCoreUsageDataSetup } from '../../core_usage_data';
-import { Logger } from '../../logging';
 import { SavedObjectConfig } from '../saved_objects_config';
 import { IKibanaMigrator } from '../migrations';
 import { registerGetRoute } from './get';

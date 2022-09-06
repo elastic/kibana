@@ -30,6 +30,7 @@ import { useBreakpoints } from '../../../hooks/use_breakpoints';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
 import { fromQuery, toQuery } from '../links/url_helpers';
+import { isTimeComparison } from '../time_comparison/get_comparison_options';
 
 type ApiResponse =
   APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/groups/main_statistics'>;
@@ -221,7 +222,10 @@ export function TransactionsTable({
                 transactionNames: JSON.stringify(
                   transactionGroups.map(({ name }) => name).sort()
                 ),
-                offset: comparisonEnabled ? offset : undefined,
+                offset:
+                  comparisonEnabled && isTimeComparison(offset)
+                    ? offset
+                    : undefined,
               },
             },
           }

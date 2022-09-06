@@ -21,6 +21,8 @@ export const TELEMETRY_CHANNEL_ENDPOINT_META = 'endpoint-metadata';
 
 export const TELEMETRY_CHANNEL_DETECTION_ALERTS = 'alerts-detections';
 
+export const TELEMETRY_CHANNEL_TIMELINE = 'alerts-timeline';
+
 export const LIST_DETECTION_RULE_EXCEPTION = 'detection_rule_exception';
 
 export const LIST_ENDPOINT_EXCEPTION = 'endpoint_exception';

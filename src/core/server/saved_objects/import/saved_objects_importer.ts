@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { PublicMethodsOf } from '@kbn/utility-types';
 import { SavedObjectsClientContract } from '../types';
 import { ISavedObjectTypeRegistry } from '../saved_objects_type_registry';
 import { importSavedObjectsFromStream } from './import_saved_objects';
@@ -19,14 +18,34 @@ import {
 } from './types';
 
 /**
+ * Utility class used to import savedObjects.
+ *
  * @public
  */
-export type ISavedObjectsImporter = PublicMethodsOf<SavedObjectsImporter>;
+export interface ISavedObjectsImporter {
+  /**
+   * Import saved objects from given stream. See the {@link SavedObjectsImportOptions | options} for more
+   * detailed information.
+   *
+   * @throws SavedObjectsImportError
+   */
+  import(options: SavedObjectsImportOptions): Promise<SavedObjectsImportResponse>;
+
+  /**
+   * Resolve and return saved object import errors.
+   * See the {@link SavedObjectsResolveImportErrorsOptions | options} for more detailed information.
+   *
+   * @throws SavedObjectsImportError
+   */
+  resolveImportErrors(
+    options: SavedObjectsResolveImportErrorsOptions
+  ): Promise<SavedObjectsImportResponse>;
+}
 
 /**
- * @public
+ * @internal
  */
-export class SavedObjectsImporter {
+export class SavedObjectsImporter implements ISavedObjectsImporter {
   readonly #savedObjectsClient: SavedObjectsClientContract;
   readonly #typeRegistry: ISavedObjectTypeRegistry;
   readonly #importSizeLimit: number;
@@ -55,13 +74,7 @@ export class SavedObjectsImporter {
     }, {} as Record<string, SavedObjectsImportHook[]>);
   }
 
-  /**
-   * Import saved objects from given stream. See the {@link SavedObjectsImportOptions | options} for more
-   * detailed information.
-   *
-   * @throws SavedObjectsImportError
-   */
-  import({
+  public import({
     readStream,
     createNewCopies,
     namespace,
@@ -81,13 +94,7 @@ export class SavedObjectsImporter {
     });
   }
 
-  /**
-   * Resolve and return saved object import errors.
-   * See the {@link SavedObjectsResolveImportErrorsOptions | options} for more detailed information.
-   *
-   * @throws SavedObjectsImportError
-   */
-  resolveImportErrors({
+  public resolveImportErrors({
     readStream,
     createNewCopies,
     namespace,

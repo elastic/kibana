@@ -98,7 +98,7 @@ export const ExpandableNetworkDetails = ({
     services: { uiSettings },
   } = useKibana();
 
-  const { docValueFields, indicesExist, indexPattern, selectedPatterns } = useSourcererDataView();
+  const { indicesExist, indexPattern, selectedPatterns } = useSourcererDataView();
   const [filterQuery, kqlError] = convertToBuildEsQuery({
     config: getEsQueryConfig(uiSettings),
     indexPattern,
@@ -107,7 +107,6 @@ export const ExpandableNetworkDetails = ({
   });
 
   const [loading, { id, networkDetails }] = useNetworkDetails({
-    docValueFields,
     skip: isInitializing || filterQuery === undefined,
     filterQuery,
     indexNames: selectedPatterns,

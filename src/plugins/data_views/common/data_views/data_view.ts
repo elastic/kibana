@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-/* eslint-disable max-classes-per-file */
-
 import _, { each, reject } from 'lodash';
 import { castEsToKbnFieldTypeName, ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -17,10 +15,9 @@ import {
   FieldFormat,
   SerializedFieldFormat,
 } from '@kbn/field-formats-plugin/common';
+import type { DataViewBase } from '@kbn/es-query';
 import { FieldAttrs, FieldAttrSet, DataViewAttributes } from '..';
 import type { RuntimeField, RuntimeFieldSpec, RuntimeType, FieldConfiguration } from '../types';
-
-import { IIndexPattern, IFieldType } from '..';
 import { DataViewField, IIndexPatternFieldList, fieldList } from '../fields';
 import { flattenHitWrapper } from './flatten_hit';
 import { DataViewSpec, TypeMeta, SourceFilter, DataViewFieldMap } from '../types';
@@ -48,47 +45,102 @@ interface SavedObjectBody {
  * An interface representing a data view that is time based.
  */
 export interface TimeBasedDataView extends DataView {
+  /**
+   * The timestamp field name.
+   */
   timeFieldName: NonNullable<DataView['timeFieldName']>;
+  /**
+   * The timestamp field.
+   */
   getTimeField: () => DataViewField;
 }
 
-export class DataView implements IIndexPattern {
+/**
+ * Data view class. Central kibana abstraction around multiple indices.
+ */
+export class DataView implements DataViewBase {
+  /**
+   * Saved object id
+   */
   public id?: string;
+  /**
+   * Title of data view
+   */
   public title: string = '';
+  /**
+   * Map of field formats by field name
+   */
   public fieldFormatMap: Record<string, any>;
   /**
-   * Only used by rollup indices, used by rollup specific endpoint to load field list
+   * Only used by rollup indices, used by rollup specific endpoint to load field list.
    */
   public typeMeta?: TypeMeta;
+  /**
+   * Field list, in extended array format
+   */
   public fields: IIndexPatternFieldList & { toSpec: () => DataViewFieldMap };
+  /**
+   * Timestamp field name
+   */
   public timeFieldName: string | undefined;
   /**
-   * Type is used to identify rollup index patterns
+   * Type is used to identify rollup index patterns.
    */
   public type: string | undefined;
   /**
    * @deprecated Use `flattenHit` utility method exported from data plugin instead.
    */
   public flattenHit: (hit: Record<string, any>, deep?: boolean) => Record<string, any>;
+  /**
+   * List of meta fields by name
+   */
   public metaFields: string[];
   /**
    * SavedObject version
    */
   public version: string | undefined;
+  /**
+   * Array of filters - hides fields in discover
+   */
   public sourceFilters?: SourceFilter[];
+  /**
+   * Array of namespace ids
+   */
   public namespaces: string[];
+  /**
+   * Original saved object body. Used to check for saved object changes.
+   */
   private originalSavedObjectBody: SavedObjectBody = {};
+  /**
+   * Returns true if short dot notation is enabled
+   */
   private shortDotsEnable: boolean = false;
+  /**
+   * FieldFormats service interface
+   */
   private fieldFormats: FieldFormatsStartCommon;
+  /**
+   * Map of field attributes by field name. Currently count and customLabel.
+   */
   private fieldAttrs: FieldAttrs;
+  /**
+   * Map of runtime field definitions by field name
+   */
   private runtimeFieldMap: Record<string, RuntimeFieldSpec>;
 
   /**
-   * prevents errors when index pattern exists before indices
+   * Prevents errors when index pattern exists before indices
    */
   public readonly allowNoIndex: boolean = false;
 
-  constructor({ spec = {}, fieldFormats, shortDotsEnable = false, metaFields = [] }: DataViewDeps) {
+  /**
+   * constructor
+   * @param config - config data and dependencies
+   */
+
+  constructor(config: DataViewDeps) {
+    const { spec = {}, fieldFormats, shortDotsEnable = false, metaFields = [] } = config;
+
     // set dependencies
     this.fieldFormats = fieldFormats;
     // set config
@@ -123,12 +175,15 @@ export class DataView implements IIndexPattern {
   getOriginalSavedObjectBody = () => ({ ...this.originalSavedObjectBody });
 
   /**
-   * Reset last saved saved object fields. used after saving
+   * Reset last saved saved object fields. Used after saving.
    */
   resetOriginalSavedObjectBody = () => {
     this.originalSavedObjectBody = this.getAsSavedObjectBody();
   };
 
+  /**
+   * Returns field attributes map
+   */
   getFieldAttrs = () => {
     const newFieldAttrs = { ...this.fieldAttrs };
 
@@ -153,6 +208,10 @@ export class DataView implements IIndexPattern {
 
     return newFieldAttrs;
   };
+
+  /**
+   * Returns scripted fields
+   */
 
   getComputedFields() {
     const scriptFields: Record<string, estypes.ScriptField> = {};
@@ -198,7 +257,7 @@ export class DataView implements IIndexPattern {
   }
 
   /**
-   * Create static representation of index pattern
+   * Creates static representation of the data view.
    */
   public toSpec(): DataViewSpec {
     return {
@@ -228,8 +287,8 @@ export class DataView implements IIndexPattern {
   }
 
   /**
-   * Remove scripted field from field list
-   * @param fieldName
+   * Removes scripted field from field list.
+   * @param fieldName name of scripted field to remove
    * @deprecated use runtime field instead
    */
 
@@ -242,7 +301,7 @@ export class DataView implements IIndexPattern {
 
   /**
    *
-   * @deprecated Will be removed when scripted fields are removed
+   * @deprecated Will be removed when scripted fields are removed.
    */
   getNonScriptedFields() {
     return [...this.fields.getAll().filter((field) => !field.scripted)];
@@ -250,30 +309,50 @@ export class DataView implements IIndexPattern {
 
   /**
    *
-   * @deprecated use runtime field instead
+   * @deprecated Use runtime field instead.
    */
   getScriptedFields() {
     return [...this.fields.getAll().filter((field) => field.scripted)];
   }
 
+  /**
+   * Does the data view have a timestamp field?
+   */
+
   isTimeBased(): this is TimeBasedDataView {
     return !!this.timeFieldName && (!this.fields || !!this.getTimeField());
   }
+
+  /**
+   * Does the data view have a timestamp field and is it a date nanos field?
+   */
 
   isTimeNanosBased(): this is TimeBasedDataView {
     const timeField = this.getTimeField();
     return !!(timeField && timeField.esTypes && timeField.esTypes.indexOf('date_nanos') !== -1);
   }
 
+  /**
+   * Get timestamp field as DataViewField or return undefined
+   */
   getTimeField() {
     if (!this.timeFieldName || !this.fields || !this.fields.getByName) return undefined;
     return this.fields.getByName(this.timeFieldName);
   }
 
+  /**
+   * Get field by name.
+   * @param name field name
+   */
+
   getFieldByName(name: string): DataViewField | undefined {
     if (!this.fields || !this.fields.getByName) return undefined;
     return this.fields.getByName(name);
   }
+
+  /**
+   * Get aggregation restrictions. Rollup fields can only perform a subset of aggregations.
+   */
 
   getAggregationRestrictions() {
     return this.typeMeta?.aggs;
@@ -305,9 +384,9 @@ export class DataView implements IIndexPattern {
 
   /**
    * Provide a field, get its formatter
-   * @param field
+   * @param field field to get formatter for
    */
-  getFormatterForField(field: DataViewField | DataViewField['spec'] | IFieldType): FieldFormat {
+  getFormatterForField(field: DataViewField | DataViewField['spec']): FieldFormat {
     const fieldFormat = this.getFormatterForFieldNoDefault(field.name);
     if (fieldFormat) {
       return fieldFormat;
@@ -353,7 +432,7 @@ export class DataView implements IIndexPattern {
 
   /**
    * Checks if runtime field exists
-   * @param name
+   * @param name field name
    */
   hasRuntimeField(name: string): boolean {
     return !!this.runtimeFieldMap[name];
@@ -361,7 +440,7 @@ export class DataView implements IIndexPattern {
 
   /**
    * Returns runtime field if exists
-   * @param name
+   * @param name Runtime field name
    */
   getRuntimeField(name: string): RuntimeField | null {
     if (!this.runtimeFieldMap[name]) {
@@ -381,6 +460,11 @@ export class DataView implements IIndexPattern {
     return runtimeField;
   }
 
+  /**
+   * Get all runtime field definitions.
+   * @returns map of runtime field definitions by field name
+   */
+
   getAllRuntimeFields(): Record<string, RuntimeField> {
     return Object.keys(this.runtimeFieldMap).reduce<Record<string, RuntimeField>>(
       (acc, fieldName) => ({
@@ -390,6 +474,12 @@ export class DataView implements IIndexPattern {
       {}
     );
   }
+
+  /**
+   * Returns data view fields backed by runtime fields.
+   * @param name runtime field name
+   * @returns map of DataViewFields (that are runtime fields) by field name
+   */
 
   getFieldsByRuntimeFieldName(name: string): Record<string, DataViewField> | undefined {
     const runtimeField = this.getRuntimeField(name);
@@ -421,8 +511,8 @@ export class DataView implements IIndexPattern {
   }
 
   /**
-   * Replaces all existing runtime fields with new fields
-   * @param newFields
+   * Replaces all existing runtime fields with new fields.
+   * @param newFields Map of runtime field definitions by field name
    */
   replaceAllRuntimeFields(newFields: Record<string, RuntimeField>) {
     const oldRuntimeFieldNames = Object.keys(this.runtimeFieldMap);
@@ -455,7 +545,7 @@ export class DataView implements IIndexPattern {
   }
 
   /**
-   * Return the "runtime_mappings" section of the ES search query
+   * Return the "runtime_mappings" section of the ES search query.
    */
   getRuntimeMappings(): estypes.MappingRuntimeFields {
     // @ts-expect-error The ES client does not yet include the "composite" runtime type
@@ -463,8 +553,8 @@ export class DataView implements IIndexPattern {
   }
 
   /**
-   * Get formatter for a given field name. Return undefined if none exists
-   * @param field
+   * Get formatter for a given field name. Return undefined if none exists.
+   * @param fieldname name of field to get formatter for
    */
   getFormatterForFieldNoDefault(fieldname: string) {
     const formatSpec = this.fieldFormatMap[fieldname];
@@ -472,6 +562,13 @@ export class DataView implements IIndexPattern {
       return this.fieldFormats.getInstance(formatSpec.id, formatSpec.params);
     }
   }
+
+  /**
+   * Set field attribute
+   * @param fieldName name of field to set attribute on
+   * @param attrName name of attribute to set
+   * @param value value of attribute
+   */
 
   protected setFieldAttrs<K extends keyof FieldAttrSet>(
     fieldName: string,
@@ -484,6 +581,12 @@ export class DataView implements IIndexPattern {
     this.fieldAttrs[fieldName][attrName] = value;
   }
 
+  /**
+   * Set field custom label
+   * @param fieldName name of field to set custom label on
+   * @param customLabel custom label value. If undefined, custom label is removed
+   */
+
   public setFieldCustomLabel(fieldName: string, customLabel: string | undefined | null) {
     const fieldObject = this.fields.getByName(fieldName);
     const newCustomLabel: string | undefined = customLabel === null ? undefined : customLabel;
@@ -494,6 +597,12 @@ export class DataView implements IIndexPattern {
 
     this.setFieldAttrs(fieldName, 'customLabel', newCustomLabel);
   }
+
+  /**
+   * Set field count
+   * @param fieldName name of field to set count on
+   * @param count count value. If undefined, count is removed
+   */
 
   public setFieldCount(fieldName: string, count: number | undefined | null) {
     const fieldObject = this.fields.getByName(fieldName);
@@ -506,13 +615,30 @@ export class DataView implements IIndexPattern {
     this.setFieldAttrs(fieldName, 'count', newCount);
   }
 
+  /**
+   * Set field formatter
+   * @param fieldName name of field to set format on
+   * @param format field format in serialized form
+   */
   public readonly setFieldFormat = (fieldName: string, format: SerializedFieldFormat) => {
     this.fieldFormatMap[fieldName] = format;
   };
 
+  /**
+   * Remove field format from the field format map.
+   * @param fieldName field name associated with the format for removal
+   */
+
   public readonly deleteFieldFormat = (fieldName: string) => {
     delete this.fieldFormatMap[fieldName];
   };
+
+  /**
+   * Add composite runtime field and all subfields.
+   * @param name field name
+   * @param runtimeField runtime field definition
+   * @returns data view field instance
+   */
 
   private addCompositeRuntimeField(name: string, runtimeField: RuntimeField): DataViewField[] {
     const { fields } = runtimeField;
@@ -600,8 +726,3 @@ export class DataView implements IIndexPattern {
     return createdField ?? existingField!;
   }
 }
-
-/**
- * @deprecated Use DataView instead. All index pattern interfaces were renamed.
- */
-export class IndexPattern extends DataView {}

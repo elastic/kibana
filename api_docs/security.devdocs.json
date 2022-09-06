@@ -1214,7 +1214,7 @@
                 "section": "def-server.KibanaRequest",
                 "text": "KibanaRequest"
               },
-              "<unknown, unknown, unknown, any>, params: ",
+              "<unknown, unknown, unknown, any>, createParams: ",
               {
                 "pluginId": "security",
                 "scope": "server",
@@ -1389,70 +1389,6 @@
               "{ cluster: string[]; index: Record<string, string[]>; } | undefined"
             ],
             "path": "x-pack/plugins/security/server/authorization/types.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "security",
-        "id": "def-server.CreateAPIKeyParams",
-        "type": "Interface",
-        "tags": [],
-        "label": "CreateAPIKeyParams",
-        "description": [
-          "\nRepresents the params for creating an API key"
-        ],
-        "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "security",
-            "id": "def-server.CreateAPIKeyParams.name",
-            "type": "string",
-            "tags": [],
-            "label": "name",
-            "description": [],
-            "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "security",
-            "id": "def-server.CreateAPIKeyParams.role_descriptors",
-            "type": "Object",
-            "tags": [],
-            "label": "role_descriptors",
-            "description": [],
-            "signature": [
-              "{ [x: string]: any; }"
-            ],
-            "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "security",
-            "id": "def-server.CreateAPIKeyParams.expiration",
-            "type": "string",
-            "tags": [],
-            "label": "expiration",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "security",
-            "id": "def-server.CreateAPIKeyParams.metadata",
-            "type": "Object",
-            "tags": [],
-            "label": "metadata",
-            "description": [],
-            "signature": [
-              "Record<string, any> | undefined"
-            ],
-            "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
             "deprecated": false
           }
         ],
@@ -1703,6 +1639,22 @@
       },
       {
         "parentPluginId": "security",
+        "id": "def-server.CreateAPIKeyParams",
+        "type": "Type",
+        "tags": [],
+        "label": "CreateAPIKeyParams",
+        "description": [
+          "\nRepresents the params for creating an API key"
+        ],
+        "signature": [
+          "Omit<BaseCreateAPIKeyParams, \"role_descriptors\" | \"kibana_role_descriptors\"> & ((Pick<Required<BaseCreateAPIKeyParams>, \"role_descriptors\"> & { kibana_role_descriptors?: undefined; }) | (Pick<Required<BaseCreateAPIKeyParams>, \"kibana_role_descriptors\"> & { role_descriptors?: undefined; }))"
+        ],
+        "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "security",
         "id": "def-server.ROUTE_TAG_CAN_REDIRECT",
         "type": "string",
         "tags": [],
@@ -1775,16 +1727,16 @@
               "path": "x-pack/plugins/actions/server/plugin.ts"
             },
             {
+              "plugin": "data",
+              "path": "src/plugins/data/server/search/session/session_service.ts"
+            },
+            {
               "plugin": "cloud",
               "path": "x-pack/plugins/cloud/server/routes/chat.ts"
             },
             {
               "plugin": "ml",
               "path": "x-pack/plugins/ml/server/routes/annotations.ts"
-            },
-            {
-              "plugin": "dataEnhanced",
-              "path": "x-pack/plugins/data_enhanced/server/search/session/session_service.ts"
             },
             {
               "plugin": "logstash",

@@ -15,7 +15,7 @@ import {
   getDefaultChartsData,
 } from './explorer_charts/explorer_charts_container_service';
 import { AnomalyExplorerChartsService } from '../services/anomaly_explorer_charts_service';
-import { getSelectionInfluencers } from './explorer_utils';
+import { getSelectionInfluencers, getSelectionJobIds } from './explorer_utils';
 import type { PageUrlStateService } from '../util/url_state';
 import type { TableSeverity } from '../components/controls/select_severity/select_severity';
 import { AnomalyExplorerUrlStateService } from './hooks/use_explorer_url_state';
@@ -49,12 +49,12 @@ export class AnomalyChartsStateService extends StateService {
         .subscribe(this._showCharts$)
     );
 
-    subscription.add(this.initChartDataSubscribtion());
+    subscription.add(this.initChartDataSubscription());
 
     return subscription;
   }
 
-  private initChartDataSubscribtion() {
+  private initChartDataSubscription() {
     return combineLatest([
       this._anomalyExplorerCommonStateService.getSelectedJobs$(),
       this._anomalyExplorerCommonStateService.getInfluencerFilterQuery$(),
@@ -74,7 +74,8 @@ export class AnomalyChartsStateService extends StateService {
             severityState,
           ]) => {
             if (!selectedCells) return of(getDefaultChartsData());
-            const jobIds = selectedJobs.map((v) => v.id);
+
+            const jobIds = getSelectionJobIds(selectedCells, selectedJobs);
             this._isChartsDataLoading$.next(true);
 
             const selectionInfluencers = getSelectionInfluencers(

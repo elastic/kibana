@@ -6,7 +6,7 @@
  */
 
 import { AppContextTestRender } from '../../../common/mock/endpoint';
-import { trustedAppsAllHttpMocks } from '../../pages/mocks';
+import { trustedAppsAllHttpMocks } from '../../mocks';
 import { ArtifactListPageProps } from './artifact_list_page';
 import { act, fireEvent, waitFor, waitForElementToBeRemoved } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';

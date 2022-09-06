@@ -28,22 +28,27 @@ export const stringifyEvent = (ecs: Ecs): string => JSON.stringify(ecs, omitType
 export const eventHasNotes = (noteIds: string[]): boolean => !isEmpty(noteIds);
 
 export const getPinTooltip = ({
+  isAlert,
   isPinned,
   // eslint-disable-next-line @typescript-eslint/no-shadow
   eventHasNotes,
   timelineType,
 }: {
+  isAlert: boolean;
   isPinned: boolean;
   eventHasNotes: boolean;
   timelineType: TimelineTypeLiteral;
-}) =>
-  timelineType === TimelineType.template
-    ? i18n.DISABLE_PIN
-    : isPinned && eventHasNotes
-    ? i18n.PINNED_WITH_NOTES
-    : isPinned
-    ? i18n.PINNED
-    : i18n.UNPINNED;
+}) => {
+  if (timelineType === TimelineType.template) {
+    return i18n.DISABLE_PIN(isAlert);
+  } else if (isPinned && eventHasNotes) {
+    return i18n.PINNED_WITH_NOTES(isAlert);
+  } else if (isPinned) {
+    return i18n.PINNED(isAlert);
+  } else {
+    return i18n.UNPINNED(isAlert);
+  }
+};
 
 export interface IsPinnedParams {
   eventId: string;

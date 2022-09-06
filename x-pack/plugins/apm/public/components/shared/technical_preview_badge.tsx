@@ -5,11 +5,15 @@
  * 2.0.
  */
 
-import { EuiBetaBadge } from '@elastic/eui';
+import { EuiBetaBadge, IconType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 
-export function TechnicalPreviewBadge() {
+interface Props {
+  icon?: IconType;
+}
+
+export function TechnicalPreviewBadge({ icon }: Props) {
   return (
     <EuiBetaBadge
       label={i18n.translate('xpack.apm.technicalPreviewBadgeLabel', {
@@ -22,6 +26,7 @@ export function TechnicalPreviewBadge() {
             'This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will take a best effort approach to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
         }
       )}
+      iconType={icon}
     />
   );
 }

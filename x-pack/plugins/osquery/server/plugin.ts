@@ -45,7 +45,6 @@ const registerFeatures = (features: SetupPlugins['features']) => {
     app: [PLUGIN_ID, 'kibana'],
     catalogue: [PLUGIN_ID],
     order: 2300,
-    excludeFromBasePrivileges: true,
     privileges: {
       all: {
         api: [`${PLUGIN_ID}-read`, `${PLUGIN_ID}-write`],

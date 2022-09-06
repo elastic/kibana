@@ -129,7 +129,12 @@ const ComplianceTrendChart = ({ trend }: { trend: PostureTrend[] }) => {
         xAccessor={'timestamp'}
         yAccessors={['postureScore']}
       />
-      <Axis id="bottom-axis" position="bottom" tickFormat={timeFormatter(niceTimeFormatByDay(2))} />
+      <Axis
+        id="bottom-axis"
+        position="bottom"
+        tickFormat={timeFormatter(niceTimeFormatByDay(2))}
+        ticks={4}
+      />
       <Axis
         ticks={3}
         id="left-axis"

@@ -105,11 +105,14 @@ export const DataStreamListPage: React.FunctionComponent<{}> = () => {
         },
       },
       {
-        field: 'size_in_bytes_formatted',
+        field: 'size_in_bytes',
         sortable: true,
         name: i18n.translate('xpack.fleet.dataStreamList.sizeColumnTitle', {
           defaultMessage: 'Size',
         }),
+        render: (_, datastream: DataStream) => {
+          return <>{datastream.size_in_bytes_formatted}</>;
+        },
       },
       {
         name: i18n.translate('xpack.fleet.dataStreamList.actionsColumnTitle', {

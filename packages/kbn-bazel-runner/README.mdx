@@ -1,0 +1,37 @@
+---
+id: kibDevDocsOpsBazelRunner
+slug: /kibana-dev-docs/ops/bazel-runner
+title: "@kbn/bazel-runner"
+description: A package holding helpers to invoke Bazel
+date: 2022-05-24
+tags: ['kibana', 'dev', 'contributor', 'operations', 'bazel', 'runner']
+---
+
+This is a package with helpers for invoking bazel and iBazel commands, used everywhere we programmatically run bazel.
+
+## async runBazel(options: BazelRunOptions)
+
+It runs bazel on the background with the given options
+
+## async runIBazel(options: BazelRunOptions)
+
+It runs a IBazel on the background with the given options
+
+### BazelRunOptions
+
+```
+{
+  // a logger to print the command output
+  log: ToolingLog;
+  // the arguments to run the bazel or ibazel with
+  bazelArgs: string[];
+  // run bazel with the no connection compatible config or not
+  offline?: boolean;
+  // additional options to pass into execa process
+  execaOpts?: execa.Options;
+}
+```
+
+### execa.Options
+
+Info around available execa options can be found [here](https://github.com/sindresorhus/execa/blob/9a157b3bc247b19d55cc6fbec77800a5ac348d19/readme.md#options)

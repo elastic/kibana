@@ -75,7 +75,7 @@ describe('query_preview/helpers', () => {
           { entries: [{ field: 'test-field', value: 'test-value', type: 'mapping' }] },
         ],
         machineLearningJobId: ['test-ml-job-id'],
-        queryBar: { filters: [], query: { query: '', language: 'testlang' } },
+        queryBar: { filters: [], query: { query: '', language: 'testlang' }, saved_id: null },
       });
       expect(isDisabled).toEqual(true);
     });
@@ -91,7 +91,7 @@ describe('query_preview/helpers', () => {
           { entries: [{ field: 'test-field', value: 'test-value', type: 'mapping' }] },
         ],
         machineLearningJobId: ['test-ml-job-id'],
-        queryBar: { filters: [], query: { query: '', language: 'testlang' } },
+        queryBar: { filters: [], query: { query: '', language: 'testlang' }, saved_id: null },
       });
       expect(isDisabled).toEqual(true);
     });
@@ -107,7 +107,7 @@ describe('query_preview/helpers', () => {
           { entries: [{ field: 'test-field', value: 'test-value', type: 'mapping' }] },
         ],
         machineLearningJobId: ['test-ml-job-id'],
-        queryBar: { filters: [], query: { query: '', language: 'testlang' } },
+        queryBar: { filters: [], query: { query: '', language: 'testlang' }, saved_id: null },
       });
       expect(isDisabled).toEqual(true);
     });
@@ -123,7 +123,7 @@ describe('query_preview/helpers', () => {
           { entries: [{ field: 'test-field', value: 'test-value', type: 'mapping' }] },
         ],
         machineLearningJobId: ['test-ml-job-id'],
-        queryBar: { filters: [], query: { query: '', language: 'testlang' } },
+        queryBar: { filters: [], query: { query: '', language: 'testlang' }, saved_id: null },
       });
       expect(isDisabled).toEqual(true);
     });
@@ -137,7 +137,7 @@ describe('query_preview/helpers', () => {
         threatIndex: ['threat-*'],
         threatMapping: [],
         machineLearningJobId: ['test-ml-job-id'],
-        queryBar: { filters: [], query: { query: '', language: 'testlang' } },
+        queryBar: { filters: [], query: { query: '', language: 'testlang' }, saved_id: null },
       });
       expect(isDisabled).toEqual(true);
     });
@@ -151,7 +151,7 @@ describe('query_preview/helpers', () => {
         threatIndex: ['threat-*'],
         threatMapping: [],
         machineLearningJobId: [],
-        queryBar: { filters: [], query: { query: '', language: 'testlang' } },
+        queryBar: { filters: [], query: { query: '', language: 'testlang' }, saved_id: null },
       });
       expect(isDisabled).toEqual(true);
     });
@@ -165,7 +165,7 @@ describe('query_preview/helpers', () => {
         threatIndex: ['threat-*'],
         threatMapping: [],
         machineLearningJobId: [],
-        queryBar: { filters: [], query: { query: '', language: 'testlang' } },
+        queryBar: { filters: [], query: { query: '', language: 'testlang' }, saved_id: null },
       });
       expect(isDisabled).toEqual(true);
     });
@@ -181,7 +181,7 @@ describe('query_preview/helpers', () => {
           { entries: [{ field: 'test-field', value: 'test-value', type: 'mapping' }] },
         ],
         machineLearningJobId: ['test-ml-job-id'],
-        queryBar: { filters: [], query: { query: '', language: 'testlang' } },
+        queryBar: { filters: [], query: { query: '', language: 'testlang' }, saved_id: null },
       });
       expect(isDisabled).toEqual(false);
     });
@@ -195,7 +195,11 @@ describe('query_preview/helpers', () => {
         threatIndex: ['threat-*'],
         threatMapping: [],
         machineLearningJobId: [],
-        queryBar: { filters: [], query: { query: 'any where true', language: 'testlang' } },
+        queryBar: {
+          filters: [],
+          query: { query: 'any where true', language: 'testlang' },
+          saved_id: null,
+        },
       });
       expect(isDisabled).toEqual(false);
     });
@@ -234,6 +238,7 @@ describe('query_preview/helpers', () => {
         {
           query: { query: 'host.name:*', language: 'kuery' },
           filters: [{ meta: { alias: '', disabled: false, negate: false } }],
+          saved_id: null,
         },
         ['foo-*'],
         'query'
@@ -260,6 +265,7 @@ describe('query_preview/helpers', () => {
         {
           query: { query: 'host.name:*', language: 'kuery' },
           filters: [{ meta: { alias: '', disabled: false, negate: false } }],
+          saved_id: null,
         },
         ['foo-*'],
         'saved_query'
@@ -286,6 +292,7 @@ describe('query_preview/helpers', () => {
         {
           query: { query: 'host.name:*', language: 'kuery' },
           filters: [{ meta: { alias: '', disabled: false, negate: false } }],
+          saved_id: null,
         },
         ['foo-*'],
         'threshold'
@@ -312,6 +319,7 @@ describe('query_preview/helpers', () => {
         {
           query: { query: 'file where true', language: 'eql' },
           filters: [{ meta: { alias: '', disabled: false, negate: false } }],
+          saved_id: null,
         },
         ['foo-*'],
         'eql'
@@ -329,6 +337,7 @@ describe('query_preview/helpers', () => {
         {
           query: { query: 'host.name:', language: 'kuery' },
           filters: [{ meta: { alias: '', disabled: false, negate: false } }],
+          saved_id: null,
         },
         ['foo-*'],
         'threshold'

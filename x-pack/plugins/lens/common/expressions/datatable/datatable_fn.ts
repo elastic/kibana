@@ -47,6 +47,7 @@ export const datatableFn =
     let untransposedData: Datatable | undefined;
     // do the sorting at this level to propagate it also at CSV download
     const [layerId] = Object.keys(context.inspectorAdapters.tables || {});
+
     const formatters: Record<string, ReturnType<FormatFactory>> = {};
     const formatFactory = await getFormatFactory(context);
 

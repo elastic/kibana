@@ -29,7 +29,6 @@ exports[`TOCEntryActionsPopover is rendered 1`] = `
             "_descriptor": Object {
               "type": "mySourceType",
             },
-            "_inspectorAdapters": undefined,
           },
         }
       }
@@ -144,7 +143,6 @@ exports[`TOCEntryActionsPopover should disable Edit features when edit mode acti
             "_descriptor": Object {
               "type": "mySourceType",
             },
-            "_inspectorAdapters": undefined,
           },
         }
       }
@@ -259,7 +257,6 @@ exports[`TOCEntryActionsPopover should disable fit to data when supportsFitToBou
             "_descriptor": Object {
               "type": "mySourceType",
             },
-            "_inspectorAdapters": undefined,
           },
         }
       }
@@ -374,7 +371,6 @@ exports[`TOCEntryActionsPopover should have "show layer" action when layer is no
             "_descriptor": Object {
               "type": "mySourceType",
             },
-            "_inspectorAdapters": undefined,
           },
           "isVisible": [Function],
         }
@@ -490,7 +486,6 @@ exports[`TOCEntryActionsPopover should not show edit actions in read only mode 1
             "_descriptor": Object {
               "type": "mySourceType",
             },
-            "_inspectorAdapters": undefined,
           },
         }
       }
@@ -574,7 +569,6 @@ exports[`TOCEntryActionsPopover should show "show this layer only" action when t
             "_descriptor": Object {
               "type": "mySourceType",
             },
-            "_inspectorAdapters": undefined,
           },
         }
       }

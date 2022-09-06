@@ -11,7 +11,7 @@ import { SimpleSavedObject } from './simple_saved_object';
 
 /**
  * This interface is a very simple wrapper for SavedObjects resolved from the server
- * with the {@link SavedObjectsClient}.
+ * with the {@link SavedObjectsClientContract}.
  *
  * @public
  */

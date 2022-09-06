@@ -43,7 +43,8 @@ export const HeaderComponent: React.FC<Props> = ({
 
   const onColumnSort = useCallback(() => {
     const columnId = header.id;
-    const columnType = header.type ?? 'text';
+    const columnType = header.type ?? '';
+    const esTypes = header.esTypes ?? [];
     const sortDirection = getNewSortDirectionOnClick({
       clickedHeader: header,
       currentSort: sort,
@@ -56,6 +57,7 @@ export const HeaderComponent: React.FC<Props> = ({
         {
           columnId,
           columnType,
+          esTypes,
           sortDirection,
         },
       ];
@@ -65,6 +67,7 @@ export const HeaderComponent: React.FC<Props> = ({
         {
           columnId,
           columnType,
+          esTypes,
           sortDirection,
         },
         ...sort.slice(headerIndex + 1),

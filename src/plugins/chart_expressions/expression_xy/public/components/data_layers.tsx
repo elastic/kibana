@@ -15,12 +15,15 @@ import {
 import React, { FC } from 'react';
 import { PaletteRegistry } from '@kbn/coloring';
 import { FormatFactory } from '@kbn/field-formats-plugin/common';
+import { getAccessorByDimension } from '@kbn/visualizations-plugin/common/utils';
+
 import {
   CommonXYDataLayerConfig,
   EndValue,
   FittingFunction,
   ValueLabelMode,
   XYCurveType,
+  XScaleType,
 } from '../../common';
 import { SeriesTypes, ValueLabelModes } from '../../common/constants';
 import {
@@ -29,9 +32,11 @@ import {
   GroupsConfiguration,
   getSeriesProps,
   DatatablesWithFormatInfo,
+  LayersAccessorsTitles,
 } from '../helpers';
 
 interface Props {
+  titles?: LayersAccessorsTitles;
   layers: CommonXYDataLayerConfig[];
   formatFactory: FormatFactory;
   chartHasMoreThanOneBarSeries?: boolean;
@@ -47,9 +52,11 @@ interface Props {
   fillOpacity?: number;
   shouldShowValueLabels?: boolean;
   valueLabels: ValueLabelMode;
+  defaultXScaleType: XScaleType;
 }
 
 export const DataLayers: FC<Props> = ({
+  titles = {},
   layers,
   endValue,
   timeZone,
@@ -65,13 +72,15 @@ export const DataLayers: FC<Props> = ({
   shouldShowValueLabels,
   formattedDatatables,
   chartHasMoreThanOneBarSeries,
+  defaultXScaleType,
 }) => {
   const colorAssignments = getColorAssignments(layers, formatFactory);
   return (
     <>
       {layers.flatMap((layer) =>
         layer.accessors.map((accessor, accessorIndex) => {
-          const { seriesType, columnToLabel, layerId } = layer;
+          const { seriesType, columnToLabel, layerId, table } = layer;
+          const yColumnId = getAccessorByDimension(accessor, table.columns);
           const columnToLabelMap: Record<string, string> = columnToLabel
             ? JSON.parse(columnToLabel)
             : {};
@@ -84,12 +93,13 @@ export const DataLayers: FC<Props> = ({
           const isPercentage = seriesType.includes('percentage');
 
           const yAxis = yAxesConfiguration.find((axisConfiguration) =>
-            axisConfiguration.series.find((currentSeries) => currentSeries.accessor === accessor)
+            axisConfiguration.series.find((currentSeries) => currentSeries.accessor === yColumnId)
           );
 
           const seriesProps = getSeriesProps({
             layer,
-            accessor,
+            titles: titles[layer.layerId],
+            accessor: yColumnId,
             chartHasMoreThanOneBarSeries,
             colorAssignments,
             formatFactory,
@@ -101,6 +111,7 @@ export const DataLayers: FC<Props> = ({
             timeZone,
             emphasizeFitting,
             fillOpacity,
+            defaultXScaleType,
           });
 
           const index = `${layer.layerId}-${accessorIndex}`;

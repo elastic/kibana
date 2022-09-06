@@ -6,7 +6,7 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
-import { IRouter, Logger } from '@kbn/core/server';
+import { IRouter } from '@kbn/core/server';
 import { ILicenseState } from '../lib';
 import { INTERNAL_BASE_ACTION_API_PATH } from '../../common';
 import { ActionsRequestHandlerContext } from '../types';
@@ -58,7 +58,6 @@ export type OAuthParams = TypeOf<typeof bodySchema>;
 export const getOAuthAccessToken = (
   router: IRouter<ActionsRequestHandlerContext>,
   licenseState: ILicenseState,
-  logger: Logger,
   configurationUtilities: ActionsConfigurationUtilities
 ) => {
   router.post(
@@ -71,9 +70,8 @@ export const getOAuthAccessToken = (
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         const actionsClient = (await context.actions).getActionsClient();
-
         return res.ok({
-          body: await actionsClient.getOAuthAccessToken(req.body, logger, configurationUtilities),
+          body: await actionsClient.getOAuthAccessToken(req.body, configurationUtilities),
         });
       })
     )

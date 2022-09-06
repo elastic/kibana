@@ -105,6 +105,7 @@ export const QueryBar = memo<QueryBarComponentProps>(
     );
 
     const indexPatterns = useMemo(() => [indexPattern], [indexPattern]);
+    const timeHistory = useMemo(() => new TimeHistory(new Storage(localStorage)), []);
 
     return (
       <SearchBar
@@ -129,7 +130,7 @@ export const QueryBar = memo<QueryBarComponentProps>(
         showQueryBar={true}
         showQueryInput={true}
         showSaveQuery={true}
-        timeHistory={new TimeHistory(new Storage(localStorage))}
+        timeHistory={timeHistory}
         dataTestSubj={dataTestSubj}
         savedQuery={savedQuery}
         displayStyle={displayStyle}

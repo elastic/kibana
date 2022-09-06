@@ -70,6 +70,8 @@ export const DirectionBadge = React.memo<{
     iconType={getDirectionIcon(direction)}
     isDraggable={isDraggable}
     value={direction}
+    isAggregatable={true}
+    fieldType="keyword"
   />
 ));
 

@@ -31,7 +31,17 @@ export const TableRowActions = memo<TableRowActionProps>(({ endpointMetadata }) 
 
   const menuItems: EuiContextMenuPanelProps['items'] = useMemo(() => {
     return endpointActions.map((itemProps) => {
-      return <ContextMenuItemNavByRouter {...itemProps} onClick={handleCloseMenu} />;
+      return (
+        <ContextMenuItemNavByRouter
+          {...itemProps}
+          onClick={(ev) => {
+            handleCloseMenu();
+            if (itemProps.onClick) {
+              itemProps.onClick(ev);
+            }
+          }}
+        />
+      );
     });
   }, [handleCloseMenu, endpointActions]);
 

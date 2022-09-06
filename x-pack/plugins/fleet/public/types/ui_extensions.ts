@@ -46,12 +46,30 @@ export interface PackagePolicyEditExtensionComponentProps {
   }) => void;
 }
 
+/**
+ * UI Component Extension is used on the pages displaying the ability to see
+ * Policy response view
+ */
+export type PackagePolicyResponseExtensionComponent =
+  ComponentType<PackagePolicyResponseExtensionComponentProps>;
+
+export interface PackagePolicyResponseExtensionComponentProps {
+  /** The current host id to retrieve response from */
+  endpointId: string;
+}
+
 /** Extension point registration contract for Integration Policy Edit views */
 export interface PackagePolicyEditExtension {
   package: string;
   view: 'package-policy-edit';
   useLatestPackageVersion?: boolean;
   Component: LazyExoticComponent<PackagePolicyEditExtensionComponent>;
+}
+
+export interface PackagePolicyResponseExtension {
+  package: string;
+  view: 'package-policy-response';
+  Component: LazyExoticComponent<PackagePolicyResponseExtensionComponent>;
 }
 
 /** Extension point registration contract for Integration Policy Edit tabs views */
@@ -133,6 +151,7 @@ export interface AgentEnrollmentFlyoutFinalStepExtension {
 /** Fleet UI Extension Point */
 export type UIExtensionPoint =
   | PackagePolicyEditExtension
+  | PackagePolicyResponseExtension
   | PackagePolicyEditTabsExtension
   | PackageCustomExtension
   | PackagePolicyCreateExtension

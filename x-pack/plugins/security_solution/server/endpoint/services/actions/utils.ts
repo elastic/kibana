@@ -85,6 +85,8 @@ export const mapToNormalizedActionRequest = (
 interface ActionCompletionInfo {
   isCompleted: boolean;
   completedAt: undefined | string;
+  wasSuccessful: boolean;
+  errors: undefined | string[];
 }
 
 export const getActionCompletionInfo = (
@@ -96,6 +98,8 @@ export const getActionCompletionInfo = (
   const completedInfo: ActionCompletionInfo = {
     isCompleted: Boolean(agentIds.length),
     completedAt: undefined,
+    wasSuccessful: Boolean(agentIds.length),
+    errors: undefined,
   };
 
   const responsesByAgentId = mapActionResponsesByAgentId(actionResponses);
@@ -103,12 +107,15 @@ export const getActionCompletionInfo = (
   for (const agentId of agentIds) {
     if (!responsesByAgentId[agentId] || !responsesByAgentId[agentId].isCompleted) {
       completedInfo.isCompleted = false;
+      completedInfo.wasSuccessful = false;
       break;
     }
   }
 
-  // If completed, then get the completed at date
+  // If completed, then get the completed at date and determine if action was successful or not
   if (completedInfo.isCompleted) {
+    const responseErrors: ActionCompletionInfo['errors'] = [];
+
     for (const normalizedAgentResponse of Object.values(responsesByAgentId)) {
       if (
         !completedInfo.completedAt ||
@@ -116,6 +123,17 @@ export const getActionCompletionInfo = (
       ) {
         completedInfo.completedAt = normalizedAgentResponse.completedAt;
       }
+
+      if (!normalizedAgentResponse.wasSuccessful) {
+        completedInfo.wasSuccessful = false;
+        responseErrors.push(
+          ...(normalizedAgentResponse.errors ? normalizedAgentResponse.errors : [])
+        );
+      }
+    }
+
+    if (responseErrors.length) {
+      completedInfo.errors = responseErrors;
     }
   }
 
@@ -125,6 +143,8 @@ export const getActionCompletionInfo = (
 interface NormalizedAgentActionResponse {
   isCompleted: boolean;
   completedAt: undefined | string;
+  wasSuccessful: boolean;
+  errors: undefined | string[];
   fleetResponse: undefined | ActivityLogActionResponse;
   endpointResponse: undefined | EndpointActivityLogActionResponse;
 }
@@ -150,6 +170,8 @@ const mapActionResponsesByAgentId = (
         response[agentId] = {
           isCompleted: false,
           completedAt: undefined,
+          wasSuccessful: false,
+          errors: undefined,
           fleetResponse: undefined,
           endpointResponse: undefined,
         };
@@ -172,21 +194,42 @@ const mapActionResponsesByAgentId = (
         // endpoint, so we are unlikely to ever receive an Endpoint Response.
         Boolean(thisAgentActionResponses.fleetResponse?.item.data.error);
 
+      // When completed, calculate additional properties about the action
       if (thisAgentActionResponses.isCompleted) {
         if (thisAgentActionResponses.endpointResponse) {
           thisAgentActionResponses.completedAt =
             thisAgentActionResponses.endpointResponse?.item.data['@timestamp'];
+          thisAgentActionResponses.wasSuccessful = true;
         } else if (
-          thisAgentActionResponses.fleetResponse &&
-          thisAgentActionResponses.fleetResponse?.item.data.error
-        ) {
           // Check if perhaps the Fleet action response returned an error, in which case, the Fleet Agent
           // failed to deliver the Action to the Endpoint. If that's the case, we are not going to get
           // a Response from endpoint, thus mark the Action as completed and use the Fleet Message's
           // timestamp for the complete data/time.
+          thisAgentActionResponses.fleetResponse &&
+          thisAgentActionResponses.fleetResponse.item.data.error
+        ) {
           thisAgentActionResponses.isCompleted = true;
           thisAgentActionResponses.completedAt =
-            thisAgentActionResponses.fleetResponse?.item.data['@timestamp'];
+            thisAgentActionResponses.fleetResponse.item.data['@timestamp'];
+        }
+
+        const errors: NormalizedAgentActionResponse['errors'] = [];
+
+        if (thisAgentActionResponses.endpointResponse?.item.data.error?.message) {
+          errors.push(
+            `Endpoint action response error: ${thisAgentActionResponses.endpointResponse.item.data.error.message}`
+          );
+        }
+
+        if (thisAgentActionResponses.fleetResponse?.item.data.error) {
+          errors.push(
+            `Fleet action response error: ${thisAgentActionResponses.fleetResponse?.item.data.error}`
+          );
+        }
+
+        if (errors.length) {
+          thisAgentActionResponses.wasSuccessful = false;
+          thisAgentActionResponses.errors = errors;
         }
       }
     }

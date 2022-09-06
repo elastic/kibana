@@ -9,7 +9,7 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
 import { createMockGraphStore } from '../state_management/mocks';
 import { Workspace } from '../types';
-import { SavedObjectsClientCommon } from '@kbn/data-plugin/common';
+import { SavedObjectsClientCommon } from '@kbn/data-views-plugin/public';
 import { renderHook, act, RenderHookOptions } from '@testing-library/react-hooks';
 
 jest.mock('react-router-dom', () => {

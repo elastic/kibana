@@ -14,7 +14,7 @@ expect.addSnapshotSerializer({
 });
 
 import { mockRender } from './fatal_errors_service.test.mocks';
-import { injectedMetadataServiceMock } from '../injected_metadata/injected_metadata_service.mock';
+import { injectedMetadataServiceMock } from '@kbn/core-injected-metadata-browser-mocks';
 import { themeServiceMock } from '../theme/theme_service.mock';
 
 import { FatalErrorsService } from './fatal_errors_service';

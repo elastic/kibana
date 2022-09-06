@@ -47,6 +47,8 @@ export { TableListView } from './table_list_view';
 export type { ToolbarButtonProps } from './toolbar_button';
 export { POSITIONS, WEIGHTS, TOOLBAR_BUTTON_SIZES, ToolbarButton } from './toolbar_button';
 
+export { Route } from './router';
+
 export { reactRouterNavigate, reactRouterOnClickHandler } from './react_router_navigate';
 
 export type {

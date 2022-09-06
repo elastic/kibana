@@ -64,6 +64,18 @@ A headless browser is a browser simulation program that does not have a user int
 
 This is the configuration used by CI. It uses the FTR to spawn both a Kibana instance (http://localhost:5620) and an Elasticsearch instance (http://localhost:9220) with a preloaded minimum set of data (see preceding "Test data" section), and then executes cypress against this stack. You can find this configuration in `x-pack/test/security_solution_cypress`
 
+Tests run on buildkite PR pipeline is parallelized(current value = 4 parallel jobs). It can be configured in [.buildkite/pipelines/pull_request/security_solution.yml](https://github.com/elastic/kibana/blob/main/.buildkite/pipelines/pull_request/security_solution.yml) with property `parallelism` 
+
+```yml
+    ...
+    agents:
+      queue: ci-group-6
+    depends_on: build
+    timeout_in_minutes: 120
+    parallelism: 4
+    ...
+```
+
 #### Custom Targets
 
 This configuration runs cypress tests against an arbitrary host.

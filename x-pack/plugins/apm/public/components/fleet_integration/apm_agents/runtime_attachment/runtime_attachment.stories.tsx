@@ -210,6 +210,10 @@ const policy = {
           value: false,
           type: 'bool',
         },
+        pprof_enabled: {
+          value: false,
+          type: 'bool',
+        },
         tls_enabled: {
           value: false,
           type: 'bool',
@@ -435,6 +439,10 @@ const newPolicy = {
           type: 'yaml',
         },
         expvar_enabled: {
+          value: false,
+          type: 'bool',
+        },
+        pprof_enabled: {
           value: false,
           type: 'bool',
         },

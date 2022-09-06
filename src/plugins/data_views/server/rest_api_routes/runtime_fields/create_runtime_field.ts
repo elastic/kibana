@@ -9,7 +9,8 @@
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { schema } from '@kbn/config-schema';
 import { IRouter, StartServicesAccessor } from '@kbn/core/server';
-import { DataViewsService, RuntimeField } from '../../../common';
+import { DataViewsService } from '../../../common/data_views';
+import { RuntimeField } from '../../../common/types';
 import { handleErrors } from '../util/handle_errors';
 import { runtimeFieldSchema } from '../util/schemas';
 import type {

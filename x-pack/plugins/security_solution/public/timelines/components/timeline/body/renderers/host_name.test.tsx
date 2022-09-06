@@ -57,6 +57,8 @@ describe('HostName', () => {
     contextId: 'test-context-id',
     eventId: 'test-event-id',
     isDraggable: false,
+    fieldType: 'keyword',
+    isAggregatable: true,
     value: 'Mock Host',
   };
 

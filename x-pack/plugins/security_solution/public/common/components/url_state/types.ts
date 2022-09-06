@@ -32,6 +32,7 @@ export type LocationTypes =
   | CONSTANTS.alertsPage
   | CONSTANTS.hostsDetails
   | CONSTANTS.hostsPage
+  | CONSTANTS.kubernetesPage
   | CONSTANTS.networkDetails
   | CONSTANTS.networkPage
   | CONSTANTS.overviewPage

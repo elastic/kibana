@@ -9,7 +9,8 @@
 import chalk from 'chalk';
 import Listr from 'listr';
 
-import { createFailError, run } from '@kbn/dev-utils';
+import { createFailError } from '@kbn/dev-cli-errors';
+import { run } from '@kbn/dev-cli-runner';
 import { ErrorReporter, integrateLocaleFiles } from './i18n';
 import { extractDefaultMessages, mergeConfigs } from './i18n/tasks';
 

@@ -521,6 +521,7 @@ describe('utils', () => {
         apiUrl: 'https://elastic.jira.com',
       },
       isPreconfigured: false,
+      isDeprecated: false,
     };
 
     it('creates an external incident', async () => {

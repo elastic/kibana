@@ -5,46 +5,35 @@
  * 2.0.
  */
 
-import {
-  EuiEmptyPrompt,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingLogo,
-  EuiSpacer,
-  EuiTab,
-  EuiTabs,
-} from '@elastic/eui';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Case, UpdateKey } from '../../../common/ui';
+import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import styled from 'styled-components';
 import { useCaseViewNavigation, useUrlParams } from '../../common/navigation';
-import { useGetCaseMetrics } from '../../containers/use_get_case_metrics';
-import { useGetCaseUserActions } from '../../containers/use_get_case_user_actions';
 import { useCasesContext } from '../cases_context/use_cases_context';
-import { useCasesFeatures } from '../cases_context/use_cases_features';
 import { CaseActionBar } from '../case_action_bar';
 import { HeaderPage } from '../header_page';
 import { EditableTitle } from '../header_page/editable_title';
+import { EXPERIMENTAL_DESC, EXPERIMENTAL_LABEL } from '../header_page/translations';
 import { useTimelineContext } from '../timeline_context/use_timeline_context';
 import { useCasesTitleBreadcrumbs } from '../use_breadcrumbs';
 import { WhitePageWrapperNoBorder } from '../wrappers';
 import { CaseViewActivity } from './components/case_view_activity';
+import { CaseViewAlerts } from './components/case_view_alerts';
 import { CaseViewMetrics } from './metrics';
 import { ACTIVITY_TAB, ALERTS_TAB } from './translations';
 import { CaseViewPageProps, CASE_VIEW_PAGE_TABS } from './types';
+import { useRefreshCaseViewPage } from './use_on_refresh_case_view_page';
 import { useOnUpdateField } from './use_on_update_field';
 
-// This hardcoded constant is left here intentionally
-// as a way to hide a wip functionality
-// that will be merge in the 8.3 release.
-const ENABLE_ALERTS_TAB = false;
+const ExperimentalBadge = styled(EuiBetaBadge)`
+  margin-left: 5px;
+`;
 
 export const CaseViewPage = React.memo<CaseViewPageProps>(
   ({
     caseData,
     caseId,
-    fetchCase,
     onComponentInitialized,
-    updateCase,
     refreshRef,
     ruleDetailsNavigation,
     actionsNavigation,
@@ -52,11 +41,12 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
     useFetchAlertData,
   }) => {
     const { userCanCrud, features } = useCasesContext();
-    const { metricsFeatures } = useCasesFeatures();
-    useCasesTitleBreadcrumbs(caseData.title);
-
     const { navigateToCaseView } = useCaseViewNavigation();
     const { urlParams } = useUrlParams();
+    const refreshCaseViewPage = useRefreshCaseViewPage();
+
+    useCasesTitleBreadcrumbs(caseData.title);
+
     const activeTabId = useMemo(() => {
       if (urlParams.tabId && Object.values(CASE_VIEW_PAGE_TABS).includes(urlParams.tabId)) {
         return urlParams.tabId;
@@ -64,47 +54,12 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
       return CASE_VIEW_PAGE_TABS.ACTIVITY;
     }, [urlParams.tabId]);
 
-    const [initLoadingData, setInitLoadingData] = useState(true);
     const init = useRef(true);
     const timelineUi = useTimelineContext()?.ui;
-
-    const getCaseUserActions = useGetCaseUserActions(caseId, caseData.connector.id);
-
-    const {
-      fetchCaseUserActions,
-      caseServices,
-      isLoading: isLoadingUserActions,
-    } = getCaseUserActions;
-
-    const refetchCaseUserActions = useCallback(() => {
-      fetchCaseUserActions(caseId, caseData.connector.id);
-    }, [caseId, fetchCaseUserActions, caseData]);
-
-    const {
-      metrics,
-      isLoading: isLoadingMetrics,
-      fetchCaseMetrics,
-    } = useGetCaseMetrics(caseId, metricsFeatures);
-
-    const handleRefresh = useCallback(() => {
-      fetchCase();
-      fetchCaseMetrics();
-      refetchCaseUserActions();
-    }, [fetchCase, refetchCaseUserActions, fetchCaseMetrics]);
-
-    const handleUpdateField = useCallback(
-      (newCase: Case, _updateKey: UpdateKey) => {
-        updateCase({ ...newCase, comments: caseData.comments });
-        fetchCaseUserActions(caseId, newCase.connector.id);
-        fetchCaseMetrics();
-      },
-      [updateCase, caseData, fetchCaseUserActions, caseId, fetchCaseMetrics]
-    );
 
     const { onUpdateField, isLoading, loadingKey } = useOnUpdateField({
       caseId,
       caseData,
-      handleUpdateField,
     });
 
     // Set `refreshRef` if needed
@@ -114,10 +69,10 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
         refreshRef.current = {
           refreshCase: async () => {
             // Do nothing if component (or instance of this render cycle) is stale or it is already loading
-            if (isStale || isLoading || isLoadingMetrics || isLoadingUserActions) {
+            if (isStale || isLoading) {
               return;
             }
-            await Promise.all([fetchCase(true), fetchCaseMetrics(true), refetchCaseUserActions()]);
+            refreshCaseViewPage();
           },
         };
         return () => {
@@ -125,24 +80,7 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
           refreshRef.current = null;
         };
       }
-    }, [
-      fetchCase,
-      fetchCaseMetrics,
-      refetchCaseUserActions,
-      isLoadingUserActions,
-      isLoadingMetrics,
-      isLoading,
-      refreshRef,
-      updateCase,
-    ]);
-
-    const currentExternalIncident = useMemo(
-      () =>
-        caseServices != null && caseServices[caseData.connector.id] != null
-          ? caseServices[caseData.connector.id]
-          : null,
-      [caseServices, caseData.connector]
-    );
+    }, [isLoading, refreshRef, refreshCaseViewPage]);
 
     const onSubmitTitle = useCallback(
       (newTitle) =>
@@ -152,12 +90,6 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
         }),
       [onUpdateField]
     );
-
-    useEffect(() => {
-      if (initLoadingData && !isLoadingUserActions) {
-        setInitLoadingData(false);
-      }
-    }, [initLoadingData, isLoadingUserActions]);
 
     // useEffect used for component's initialization
     useEffect(() => {
@@ -176,30 +108,31 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
           name: ACTIVITY_TAB,
           content: (
             <CaseViewActivity
-              getCaseUserActions={getCaseUserActions}
-              initLoadingData={initLoadingData}
               ruleDetailsNavigation={ruleDetailsNavigation}
-              caseId={caseId}
               caseData={caseData}
               actionsNavigation={actionsNavigation}
               showAlertDetails={showAlertDetails}
-              updateCase={updateCase}
-              fetchCaseMetrics={fetchCaseMetrics}
               useFetchAlertData={useFetchAlertData}
             />
           ),
         },
-        ...(features.alerts.enabled && ENABLE_ALERTS_TAB
+        ...(features.alerts.enabled
           ? [
               {
                 id: CASE_VIEW_PAGE_TABS.ALERTS,
-                name: ALERTS_TAB,
-                content: (
-                  <EuiEmptyPrompt
-                    icon={<EuiLoadingLogo logo="logoKibana" size="xl" />}
-                    title={<h2>{'Alerts table placeholder'}</h2>}
-                  />
+                name: (
+                  <>
+                    {ALERTS_TAB}
+                    <ExperimentalBadge
+                      label={EXPERIMENTAL_LABEL}
+                      size="s"
+                      iconType="beaker"
+                      tooltipContent={EXPERIMENTAL_DESC}
+                      tooltipPosition="bottom"
+                    />
+                  </>
                 ),
+                content: <CaseViewAlerts caseData={caseData} />,
               },
             ]
           : []),
@@ -207,14 +140,9 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
       [
         actionsNavigation,
         caseData,
-        caseId,
         features.alerts.enabled,
-        fetchCaseMetrics,
-        getCaseUserActions,
-        initLoadingData,
         ruleDetailsNavigation,
         showAlertDetails,
-        updateCase,
         useFetchAlertData,
       ]
     );
@@ -253,32 +181,25 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
         >
           <CaseActionBar
             caseData={caseData}
-            currentExternalIncident={currentExternalIncident}
             userCanCrud={userCanCrud}
             isLoading={isLoading && (loadingKey === 'status' || loadingKey === 'settings')}
-            onRefresh={handleRefresh}
             onUpdateField={onUpdateField}
           />
         </HeaderPage>
 
         <WhitePageWrapperNoBorder>
-          {!initLoadingData && metricsFeatures.length > 0 ? (
-            <>
-              <EuiFlexGroup>
-                <EuiFlexItem>
-                  <CaseViewMetrics
-                    data-test-subj="case-view-metrics"
-                    isLoading={isLoadingMetrics}
-                    metrics={metrics}
-                    features={metricsFeatures}
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-              <EuiSpacer size="xs" />
-            </>
-          ) : null}
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <CaseViewMetrics data-test-subj="case-view-metrics" caseId={caseData.id} />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+
+          <EuiSpacer size="xs" />
+
           <EuiTabs>{renderTabs()}</EuiTabs>
+
           <EuiSpacer size="l" />
+
           <EuiFlexGroup data-test-subj={`case-view-tab-content-${activeTabId}`}>
             {selectedTabContent}
           </EuiFlexGroup>

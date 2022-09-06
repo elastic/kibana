@@ -28,14 +28,10 @@ describe('calculateExcludeFilters', () => {
     expect(hook2).toHaveBeenCalledWith({ readonlyEsClient: { search: expect.any(Function) } });
     expect(Either.isRight(result)).toBe(true);
     expect((result as Either.Right<any>).right).toEqual({
-      excludeFilter: {
-        bool: {
-          must_not: [
-            { bool: { must: { term: { fieldA: '123' } } } },
-            { bool: { must: { term: { fieldB: 'abc' } } } },
-          ],
-        },
-      },
+      mustNotClauses: [
+        { bool: { must: { term: { fieldA: '123' } } } },
+        { bool: { must: { term: { fieldB: 'abc' } } } },
+      ],
       errorsByType: {},
     });
   });
@@ -53,11 +49,7 @@ describe('calculateExcludeFilters', () => {
 
     expect(Either.isRight(result)).toBe(true);
     expect((result as Either.Right<any>).right).toEqual({
-      excludeFilter: {
-        bool: {
-          must_not: [{ bool: { must: { term: { fieldB: 'abc' } } } }],
-        },
-      },
+      mustNotClauses: [{ bool: { must: { term: { fieldB: 'abc' } } } }],
       errorsByType: { type1: error },
     });
   });
@@ -99,11 +91,7 @@ describe('calculateExcludeFilters', () => {
 
     expect(Either.isRight(result)).toBe(true);
     expect((result as Either.Right<any>).right).toEqual({
-      excludeFilter: {
-        bool: {
-          must_not: [{ bool: { must: { term: { fieldB: 'abc' } } } }],
-        },
-      },
+      mustNotClauses: [{ bool: { must: { term: { fieldB: 'abc' } } } }],
       errorsByType: expect.any(Object),
     });
     expect((result as Either.Right<any>).right.errorsByType.type1.toString()).toMatchInlineSnapshot(

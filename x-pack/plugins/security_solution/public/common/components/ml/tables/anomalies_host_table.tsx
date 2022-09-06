@@ -79,7 +79,6 @@ const AnomaliesHostTableComponent: React.FC<AnomaliesHostTableProps> = ({
     return (
       <Panel loading={loading}>
         <HeaderSection
-          height={!toggleStatus ? 40 : undefined}
           subtitle={`${i18n.SHOWING}: ${pagination.totalItemCount.toLocaleString()} ${i18n.UNIT(
             pagination.totalItemCount
           )}`}

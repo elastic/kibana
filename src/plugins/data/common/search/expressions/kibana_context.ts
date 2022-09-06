@@ -14,10 +14,10 @@ import { Filter } from '@kbn/es-query';
 import { Query, uniqFilters } from '@kbn/es-query';
 import { unboxExpressionValue } from '@kbn/expressions-plugin/common';
 import { SavedObjectReference } from '@kbn/core/types';
+import { SavedObjectsClientCommon } from '@kbn/data-views-plugin/common';
 import { ExecutionContextSearch, KibanaContext, KibanaFilter } from './kibana_context_type';
 import { KibanaQueryOutput } from './kibana_context_type';
 import { KibanaTimerangeOutput } from './timerange';
-import { SavedObjectsClientCommon } from '../..';
 
 export interface KibanaContextStartDependencies {
   savedObjectsClient: SavedObjectsClientCommon;

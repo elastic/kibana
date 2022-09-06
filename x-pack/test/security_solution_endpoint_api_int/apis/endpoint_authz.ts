@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { IndexedHostsAndAlertsResponse } from '@kbn/security-solution-plugin/common/endpoint/index_data';
 import { wrapErrorAndRejectPromise } from '@kbn/security-solution-plugin/common/endpoint/data_loaders/utils';
 import { FtrProviderContext } from '../ftr_provider_context';
 import {
@@ -15,23 +14,15 @@ import {
 } from '../../common/services/security_solution';
 
 export default function ({ getService }: FtrProviderContext) {
-  const endpointTestResources = getService('endpointTestResources');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
   describe('When attempting to call an endpoint api with no authz', () => {
-    let loadedData: IndexedHostsAndAlertsResponse;
-
     before(async () => {
       // create role/user
       await createUserAndRole(getService, ROLES.t1_analyst);
-      loadedData = await endpointTestResources.loadEndpointData();
     });
 
     after(async () => {
-      if (loadedData) {
-        await endpointTestResources.unloadEndpointData(loadedData);
-      }
-
       // delete role/user
       await deleteUserAndRole(getService, ROLES.t1_analyst);
     });

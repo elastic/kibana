@@ -13,7 +13,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const PageObjects = getPageObjects(['common', 'triggersActionsUI', 'header']);
   const esArchiver = getService('esArchiver');
 
-  describe('Rule tag badge', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/132739
+  describe.skip('Rule tag badge', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/observability/alerts');
       await PageObjects.common.navigateToUrlWithBrowserHistory(

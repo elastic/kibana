@@ -16,8 +16,11 @@ const getTabsOnUsersDetailsUrl = (userName: string, tabName: UsersTableType) =>
 
 export const navTabsUsersDetails = (
   userName: string,
-  hasMlUserPermissions: boolean
+  hasMlUserPermissions: boolean,
+  isRiskyUserEnabled: boolean
 ): UsersDetailsNavTab => {
+  const hiddenTabs = [];
+
   const userDetailsNavTabs = {
     [UsersTableType.authentications]: {
       id: UsersTableType.authentications,
@@ -51,7 +54,13 @@ export const navTabsUsersDetails = (
     },
   };
 
-  return hasMlUserPermissions
-    ? userDetailsNavTabs
-    : omit([UsersTableType.anomalies], userDetailsNavTabs);
+  if (!hasMlUserPermissions) {
+    hiddenTabs.push(UsersTableType.anomalies);
+  }
+
+  if (!isRiskyUserEnabled) {
+    hiddenTabs.push(UsersTableType.risk);
+  }
+
+  return omit(hiddenTabs, userDetailsNavTabs);
 };

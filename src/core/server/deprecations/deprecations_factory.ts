@@ -7,8 +7,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { Logger } from '@kbn/logging';
 import { DeprecationsRegistry } from './deprecations_registry';
-import type { Logger } from '../logging';
 import type {
   DomainDeprecationDetails,
   DeprecationsDetails,

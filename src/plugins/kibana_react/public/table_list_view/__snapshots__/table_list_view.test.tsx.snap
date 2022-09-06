@@ -129,16 +129,17 @@ exports[`TableListView render list view 1`] = `
         }
       />
     }
+    onChange={[Function]}
     pagination={
       Object {
-        "initialPageIndex": 0,
-        "initialPageSize": 5,
+        "pageIndex": 0,
+        "pageSize": 20,
         "pageSizeOptions": Array [
           10,
           20,
-          5,
           50,
         ],
+        "totalItemCount": 1,
       }
     }
     responsive={true}
@@ -155,7 +156,6 @@ exports[`TableListView render list view 1`] = `
         "toolsLeft": undefined,
       }
     }
-    sorting={true}
     tableCaption="test caption"
     tableLayout="fixed"
   />

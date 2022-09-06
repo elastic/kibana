@@ -1171,85 +1171,6 @@ describe('when on the endpoint list page', () => {
         ).not.toBeNull();
       });
 
-      it('should include the sub-panel title', async () => {
-        expect(
-          (await renderResult.findByTestId('endpointDetailsPolicyResponseFlyoutTitle')).textContent
-        ).toBe('Policy Response');
-      });
-
-      it('should display timestamp', () => {
-        const timestamp = renderResult.queryByTestId('endpointDetailsPolicyResponseTimestamp');
-        expect(timestamp).not.toBeNull();
-      });
-
-      it('should show a configuration section for each protection', async () => {
-        const configAccordions = await renderResult.findAllByTestId(
-          'endpointDetailsPolicyResponseConfigAccordion'
-        );
-        expect(configAccordions).not.toBeNull();
-      });
-
-      it('should show an actions section for each configuration', async () => {
-        const actionAccordions = await renderResult.findAllByTestId(
-          'endpointDetailsPolicyResponseActionsAccordion'
-        );
-        const action = await renderResult.findAllByTestId('policyResponseAction');
-        const statusHealth = await renderResult.findAllByTestId('policyResponseStatusHealth');
-        const message = await renderResult.findAllByTestId('policyResponseMessage');
-        expect(actionAccordions).not.toBeNull();
-        expect(action).not.toBeNull();
-        expect(statusHealth).not.toBeNull();
-        expect(message).not.toBeNull();
-      });
-
-      it('should not show any numbered badges if all actions are successful', () => {
-        const policyResponse = docGenerator.generatePolicyResponse({
-          ts: new Date().getTime(),
-          allStatus: HostPolicyResponseActionStatus.success,
-        });
-        reactTestingLibrary.act(() => {
-          store.dispatch({
-            type: 'serverReturnedEndpointPolicyResponse',
-            payload: {
-              policy_response: policyResponse,
-            },
-          });
-        });
-        return renderResult
-          .findAllByTestId('endpointDetailsPolicyResponseAttentionBadge')
-          .catch((e) => {
-            expect(e).not.toBeNull();
-          });
-      });
-
-      it('should show a numbered badge if at least one action failed', async () => {
-        const policyResponseActionDispatched = middlewareSpy.waitForAction(
-          'serverReturnedEndpointPolicyResponse'
-        );
-        reactTestingLibrary.act(() => {
-          dispatchServerReturnedEndpointPolicyResponse(HostPolicyResponseActionStatus.failure);
-        });
-        await policyResponseActionDispatched;
-        const attentionBadge = await renderResult.findAllByTestId(
-          'endpointDetailsPolicyResponseAttentionBadge'
-        );
-        expect(attentionBadge).not.toBeNull();
-      });
-
-      it('should show a numbered badge if at least one action has a warning', async () => {
-        const policyResponseActionDispatched = middlewareSpy.waitForAction(
-          'serverReturnedEndpointPolicyResponse'
-        );
-        reactTestingLibrary.act(() => {
-          dispatchServerReturnedEndpointPolicyResponse(HostPolicyResponseActionStatus.warning);
-        });
-        await policyResponseActionDispatched;
-        const attentionBadge = await renderResult.findAllByTestId(
-          'endpointDetailsPolicyResponseAttentionBadge'
-        );
-        expect(attentionBadge).not.toBeNull();
-      });
-
       it('should include the back to details link', async () => {
         const subHeaderBackLink = await renderResult.findByTestId('flyoutSubHeaderBackButton');
         expect(subHeaderBackLink.textContent).toBe('Endpoint details');
@@ -1268,10 +1189,6 @@ describe('when on the endpoint list page', () => {
         expect(changedUrlAction.payload.search).toEqual(
           '?page_index=0&page_size=10&selected_endpoint=1&show=details'
         );
-      });
-
-      it('should format unknown policy action names', async () => {
-        expect(renderResult.getByText('A New Unknown Action')).not.toBeNull();
       });
     });
 

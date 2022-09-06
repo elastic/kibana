@@ -74,7 +74,7 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       it('should upgrade package policy on setup if keep policies up to date set to true', async () => {
-        const oldVersion = '1.9.0';
+        const oldVersion = '1.11.0';
         await supertest
           .post(`/api/fleet/epm/packages/system/${oldVersion}`)
           .set('kbn-xsrf', 'xxxx')

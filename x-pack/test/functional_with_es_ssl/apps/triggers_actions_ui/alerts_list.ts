@@ -31,7 +31,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     await testSubjects.click('rulesTab');
   }
 
-  describe('rules list', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/132704
+  describe.skip('rules list', function () {
     const assertRulesLength = async (length: number) => {
       return await retry.try(async () => {
         const rules = await pageObjects.triggersActionsUI.getAlertsList();
@@ -727,6 +728,29 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('ruleTagFilterOption-c');
       await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
       await assertRulesLength(2);
+    });
+
+    it('should not prevent rules with action execution capabilities from being edited', async () => {
+      const action = await createAction({ supertest, objectRemover });
+      await createAlert({
+        supertest,
+        objectRemover,
+        overwrites: {
+          actions: [
+            {
+              id: action.id,
+              group: 'default',
+              params: { level: 'info', message: 'gfghfhg' },
+            },
+          ],
+        },
+      });
+      await refreshAlertsList();
+      await retry.try(async () => {
+        const actionButton = await testSubjects.find('selectActionButton');
+        const disabled = await actionButton.getAttribute('disabled');
+        expect(disabled).to.equal(null);
+      });
     });
   });
 };

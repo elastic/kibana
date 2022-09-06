@@ -63,7 +63,7 @@ export const BenchmarksSection = ({
         const shortId = cluster.meta.clusterId.slice(0, 6);
 
         return (
-          <>
+          <React.Fragment key={cluster.meta.clusterId}>
             <EuiPanel hasBorder hasShadow={false} paddingSize="none">
               <EuiFlexGroup gutterSize="none" style={{ height: cardHeight }}>
                 <EuiFlexItem grow={2} style={getIntegrationBoxStyle(euiTheme)}>
@@ -122,7 +122,7 @@ export const BenchmarksSection = ({
               </EuiFlexGroup>
             </EuiPanel>
             <EuiSpacer />
-          </>
+          </React.Fragment>
         );
       })}
     </>

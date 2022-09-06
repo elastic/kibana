@@ -81,7 +81,8 @@ describe('useExpViewTimeRange', function () {
         expect.objectContaining({
           seriesConfig: expect.objectContaining({ reportType: ReportTypes.KPI }),
         }),
-      ])
+      ]),
+      'kpi-over-time'
     );
   });
 });

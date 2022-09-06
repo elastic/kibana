@@ -28,10 +28,10 @@ export function KibanaEBTServerProvider({ getService }: FtrProviderContext) {
     setOptIn,
     /**
      * Returns the last events of the specified types.
-     * @param numberOfEvents - number of events to return
+     * @param takeNumberOfEvents - number of events to return
      * @param eventTypes (Optional) array of event types to return
      */
-    getLastEvents: async (takeNumberOfEvents: number, eventTypes: string[] = []) => {
+    getEvents: async (takeNumberOfEvents: number, eventTypes: string[] = []) => {
       await setOptIn(true);
       const resp = await supertest
         .get(`/internal/analytics_ftr_helpers/events`)
@@ -66,11 +66,11 @@ export function KibanaEBTUIProvider({ getService, getPageObjects }: FtrProviderC
      * @param numberOfEvents - number of events to return
      * @param eventTypes (Optional) array of event types to return
      */
-    getLastEvents: async (numberOfEvents: number, eventTypes: string[] = []) => {
+    getEvents: async (numberOfEvents: number, eventTypes: string[] = []) => {
       await setOptIn(true);
       const events = await browser.execute(
         ({ eventTypes: _eventTypes, numberOfEvents: _numberOfEvents }) =>
-          window.__analytics_ftr_helpers__.getLastEvents(_numberOfEvents, _eventTypes),
+          window.__analytics_ftr_helpers__.getEvents(_numberOfEvents, _eventTypes),
         {
           eventTypes,
           numberOfEvents,

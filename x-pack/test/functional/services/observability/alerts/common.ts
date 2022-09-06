@@ -23,7 +23,7 @@ const ALERTS_TABLE_CONTAINER_SELECTOR = 'events-viewer-panel';
 const VIEW_RULE_DETAILS_SELECTOR = 'viewRuleDetails';
 const VIEW_RULE_DETAILS_FLYOUT_SELECTOR = 'viewRuleDetailsFlyout';
 
-const ACTION_COLUMN_INDEX = 0;
+const ACTION_COLUMN_INDEX = 1;
 
 type WorkflowStatus = 'open' | 'acknowledged' | 'closed';
 
@@ -44,6 +44,15 @@ export function ObservabilityAlertsCommonProvider({
       'observability',
       '/alerts',
       `?_a=(rangeFrom:'${DATE_WITH_DATA.rangeFrom}',rangeTo:'${DATE_WITH_DATA.rangeTo}')`,
+      { ensureCurrentUrl: false }
+    );
+  };
+
+  const navigateToRulesPage = async () => {
+    return await pageObjects.common.navigateToUrlWithBrowserHistory(
+      'observability',
+      '/alerts/rules',
+      '?',
       { ensureCurrentUrl: false }
     );
   };
@@ -326,5 +335,6 @@ export function ObservabilityAlertsCommonProvider({
     viewRuleDetailsLinkClick,
     getAlertsFlyoutViewRuleDetailsLinkOrFail,
     getRuleStatValue,
+    navigateToRulesPage,
   };
 }

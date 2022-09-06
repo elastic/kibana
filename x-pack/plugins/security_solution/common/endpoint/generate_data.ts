@@ -1764,7 +1764,6 @@ export class EndpointDocGenerator extends BaseDataGenerator {
           name: 'endpoint',
           version: '0.5.0',
           internal: false,
-          removable: false,
           install_version: '0.5.0',
           install_status: 'installed',
           install_started_at: '2020-06-24T14:41:23.098Z',

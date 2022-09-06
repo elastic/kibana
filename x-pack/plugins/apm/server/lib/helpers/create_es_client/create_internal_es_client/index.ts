@@ -74,7 +74,11 @@ export async function createInternalESClient({
     ): Promise<ESSearchResponse<TDocument, TSearchRequest>> => {
       return callEs(operationName, {
         requestType: 'search',
-        cb: (signal) => asInternalUser.search(params, { signal, meta: true }),
+        cb: (signal) =>
+          asInternalUser.search(params, {
+            signal,
+            meta: true,
+          }) as Promise<{ body: any }>,
         params,
       });
     },

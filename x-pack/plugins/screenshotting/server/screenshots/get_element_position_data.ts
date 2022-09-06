@@ -60,9 +60,8 @@ export const getElementPositionAndAttributes = async (
             results.push({
               position: {
                 boundingClientRect: {
-                  // modern browsers support x/y, but older ones don't
-                  top: boundingClientRect.y || boundingClientRect.top,
-                  left: boundingClientRect.x || boundingClientRect.left,
+                  top: boundingClientRect.y,
+                  left: boundingClientRect.x,
                   width: boundingClientRect.width,
                   height: boundingClientRect.height,
                 },

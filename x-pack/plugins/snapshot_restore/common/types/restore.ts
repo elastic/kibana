@@ -10,6 +10,7 @@ export interface RestoreSettings {
   renamePattern?: string;
   renameReplacement?: string;
   includeGlobalState?: boolean;
+  featureStates?: string[];
   partial?: boolean;
   indexSettings?: string;
   ignoreIndexSettings?: string[];
@@ -22,6 +23,7 @@ export interface RestoreSettingsEs {
   rename_pattern?: string;
   rename_replacement?: string;
   include_global_state?: boolean;
+  feature_states?: string[];
   partial?: boolean;
   index_settings?: { [key: string]: any };
   ignore_index_settings?: string[];

@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { AppState } from '../../../state';
+import { SyntheticsAppState } from '../../../state/root_reducer';
+import { LocationStatus } from '../../../../../../common/runtime_types';
 
 /**
  * NOTE: This variable name MUST start with 'mock*' in order for
  * Jest to accept its use within a jest.mock()
  */
-export const mockState: AppState = {
+export const mockState: SyntheticsAppState = {
   ui: {
     alertFlyoutVisible: false,
     basePath: 'yyz',
@@ -22,6 +23,45 @@ export const mockState: AppState = {
   },
   indexStatus: {
     data: null,
+    error: null,
+    loading: false,
+  },
+  serviceLocations: {
+    locations: [
+      {
+        id: 'us_central',
+        label: 'US Central',
+        geo: {
+          lat: 41.25,
+          lon: -95.86,
+        },
+        url: 'https://test.elastic.dev',
+        isServiceManaged: true,
+        status: LocationStatus.GA,
+      },
+      {
+        id: 'us_east',
+        label: 'US East',
+        geo: {
+          lat: 41.25,
+          lon: -95.86,
+        },
+        url: 'https://test.elastic.dev',
+        isServiceManaged: true,
+        status: LocationStatus.EXPERIMENTAL,
+      },
+    ],
+    loading: false,
+    error: null,
+  },
+  monitorList: {
+    data: {
+      total: 0,
+      monitors: [],
+      perPage: 0,
+      page: 0,
+      syncErrors: [],
+    },
     error: null,
     loading: false,
   },

@@ -9,11 +9,13 @@ import React from 'react';
 import styled, { createGlobalStyle } from 'styled-components';
 import { EuiFlyout, EuiFlyoutHeader, EuiTitle, EuiFlyoutBody } from '@elastic/eui';
 
+import { QueryClientProvider } from 'react-query';
 import * as i18n from '../translations';
 import { Case } from '../../../../common/ui/types';
 import { CreateCaseForm } from '../form';
 import { UseCreateAttachments } from '../../../containers/use_create_attachments';
 import { CaseAttachments } from '../../../types';
+import { casesQueryClient } from '../../cases_context/query_client';
 
 export interface CreateCaseFlyoutProps {
   afterCaseCreated?: (
@@ -73,7 +75,7 @@ export const CreateCaseFlyout = React.memo<CreateCaseFlyoutProps>(
     const handleCancel = onClose || function () {};
     const handleOnSuccess = onSuccess || async function () {};
     return (
-      <>
+      <QueryClientProvider client={casesQueryClient}>
         <GlobalStyle />
         <StyledFlyout
           onClose={onClose}
@@ -98,7 +100,7 @@ export const CreateCaseFlyout = React.memo<CreateCaseFlyoutProps>(
             </FormWrapper>
           </StyledEuiFlyoutBody>
         </StyledFlyout>
-      </>
+      </QueryClientProvider>
     );
   }
 );

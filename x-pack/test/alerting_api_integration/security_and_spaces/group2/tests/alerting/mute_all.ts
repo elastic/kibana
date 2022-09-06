@@ -99,7 +99,7 @@ export default function createMuteAlertTests({ getService }: FtrProviderContext)
                 .auth(user.username, user.password)
                 .expect(200);
               expect(updatedAlert.mute_all).to.eql(true);
-              expect(updatedAlert.snooze_end_time).to.eql(undefined);
+              expect(updatedAlert.snooze_schedule.length).to.eql(0);
               // Ensure AAD isn't broken
               await checkAAD({
                 supertest,
@@ -156,7 +156,7 @@ export default function createMuteAlertTests({ getService }: FtrProviderContext)
                 .auth(user.username, user.password)
                 .expect(200);
               expect(updatedAlert.mute_all).to.eql(true);
-              expect(updatedAlert.snooze_end_time).to.eql(undefined);
+              expect(updatedAlert.snooze_schedule.length).to.eql(0);
               // Ensure AAD isn't broken
               await checkAAD({
                 supertest,
@@ -224,7 +224,7 @@ export default function createMuteAlertTests({ getService }: FtrProviderContext)
                 .auth(user.username, user.password)
                 .expect(200);
               expect(updatedAlert.mute_all).to.eql(true);
-              expect(updatedAlert.snooze_end_time).to.eql(undefined);
+              expect(updatedAlert.snooze_schedule.length).to.eql(0);
               // Ensure AAD isn't broken
               await checkAAD({
                 supertest,
@@ -292,7 +292,7 @@ export default function createMuteAlertTests({ getService }: FtrProviderContext)
                 .auth(user.username, user.password)
                 .expect(200);
               expect(updatedAlert.mute_all).to.eql(true);
-              expect(updatedAlert.snooze_end_time).to.eql(undefined);
+              expect(updatedAlert.snooze_schedule.length).to.eql(0);
               // Ensure AAD isn't broken
               await checkAAD({
                 supertest,

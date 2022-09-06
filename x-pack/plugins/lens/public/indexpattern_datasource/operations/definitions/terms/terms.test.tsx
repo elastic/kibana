@@ -227,6 +227,42 @@ describe('terms', () => {
       );
     });
 
+    it('should default percentile rank with non integer value to alphabetical sort', () => {
+      const newLayer = {
+        ...layer,
+        columns: {
+          ...layer.columns,
+          col2: {
+            ...layer.columns.col2,
+            operationType: 'percentile_rank',
+            params: {
+              value: 100.2,
+            },
+          },
+        },
+      };
+      const termsColumn = layer.columns.col1 as TermsIndexPatternColumn;
+      const esAggsFn = termsOperation.toEsAggsFn(
+        {
+          ...termsColumn,
+          params: { ...termsColumn.params, orderBy: { type: 'column', columnId: 'col2' } },
+        },
+        'col1',
+        {} as IndexPattern,
+        newLayer,
+        uiSettingsMock,
+        ['col1', 'col2']
+      );
+      expect(esAggsFn).toEqual(
+        expect.objectContaining({
+          function: 'aggTerms',
+          arguments: expect.objectContaining({
+            orderBy: ['_key'],
+          }),
+        })
+      );
+    });
+
     it('should not enable missing bucket if other bucket is not set', () => {
       const termsColumn = layer.columns.col1 as TermsIndexPatternColumn;
       const esAggsFn = termsOperation.toEsAggsFn(

@@ -1,0 +1,375 @@
+{
+  "id": "@kbn/analytics-shippers-elastic-v3-common",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [
+      {
+        "parentPluginId": "@kbn/analytics-shippers-elastic-v3-common",
+        "id": "def-common.ErrorWithCode",
+        "type": "Class",
+        "tags": [],
+        "label": "ErrorWithCode",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/analytics-shippers-elastic-v3-common",
+            "scope": "common",
+            "docId": "kibKbnAnalyticsShippersElasticV3CommonPluginApi",
+            "section": "def-common.ErrorWithCode",
+            "text": "ErrorWithCode"
+          },
+          " extends Error"
+        ],
+        "path": "packages/analytics/shippers/elastic_v3/common/src/error_with_code.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/analytics-shippers-elastic-v3-common",
+            "id": "def-common.ErrorWithCode.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/analytics/shippers/elastic_v3/common/src/error_with_code.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/analytics-shippers-elastic-v3-common",
+                "id": "def-common.ErrorWithCode.Unnamed.$1",
+                "type": "string",
+                "tags": [],
+                "label": "message",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/analytics/shippers/elastic_v3/common/src/error_with_code.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/analytics-shippers-elastic-v3-common",
+                "id": "def-common.ErrorWithCode.Unnamed.$2",
+                "type": "string",
+                "tags": [],
+                "label": "code",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/analytics/shippers/elastic_v3/common/src/error_with_code.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/analytics-shippers-elastic-v3-common",
+        "id": "def-common.buildHeaders",
+        "type": "Function",
+        "tags": [],
+        "label": "buildHeaders",
+        "description": [],
+        "signature": [
+          "(clusterUuid: string, version: string, licenseId: string | undefined) => { 'x-elastic-license-id'?: string | undefined; 'content-type': string; 'x-elastic-cluster-id': string; 'x-elastic-stack-version': string; }"
+        ],
+        "path": "packages/analytics/shippers/elastic_v3/common/src/build_headers.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/analytics-shippers-elastic-v3-common",
+            "id": "def-common.buildHeaders.$1",
+            "type": "string",
+            "tags": [],
+            "label": "clusterUuid",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/analytics/shippers/elastic_v3/common/src/build_headers.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/analytics-shippers-elastic-v3-common",
+            "id": "def-common.buildHeaders.$2",
+            "type": "string",
+            "tags": [],
+            "label": "version",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/analytics/shippers/elastic_v3/common/src/build_headers.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/analytics-shippers-elastic-v3-common",
+            "id": "def-common.buildHeaders.$3",
+            "type": "string",
+            "tags": [],
+            "label": "licenseId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/analytics/shippers/elastic_v3/common/src/build_headers.ts",
+            "deprecated": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/analytics-shippers-elastic-v3-common",
+        "id": "def-common.buildUrl",
+        "type": "Function",
+        "tags": [],
+        "label": "buildUrl",
+        "description": [
+          "\nBuilds the URL for the V3 API."
+        ],
+        "signature": [
+          "({\n  sendTo,\n  channelName,\n}: { sendTo: \"staging\" | \"production\"; channelName: string; }) => string"
+        ],
+        "path": "packages/analytics/shippers/elastic_v3/common/src/build_url.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/analytics-shippers-elastic-v3-common",
+            "id": "def-common.buildUrl.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  sendTo,\n  channelName,\n}",
+            "description": [],
+            "path": "packages/analytics/shippers/elastic_v3/common/src/build_url.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/analytics-shippers-elastic-v3-common",
+                "id": "def-common.buildUrl.$1.sendTo",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "sendTo",
+                "description": [],
+                "signature": [
+                  "\"staging\" | \"production\""
+                ],
+                "path": "packages/analytics/shippers/elastic_v3/common/src/build_url.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "@kbn/analytics-shippers-elastic-v3-common",
+                "id": "def-common.buildUrl.$1.channelName",
+                "type": "string",
+                "tags": [],
+                "label": "channelName",
+                "description": [],
+                "path": "packages/analytics/shippers/elastic_v3/common/src/build_url.ts",
+                "deprecated": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/analytics-shippers-elastic-v3-common",
+        "id": "def-common.createTelemetryCounterHelper",
+        "type": "Function",
+        "tags": [],
+        "label": "createTelemetryCounterHelper",
+        "description": [
+          "\nCreates a telemetry counter helper to make it easier to generate them"
+        ],
+        "signature": [
+          "(telemetryCounter$: ",
+          "Subject",
+          "<",
+          "TelemetryCounter",
+          ">, source: string) => (events: ",
+          "Event",
+          "[], { type, code, error }?: { type?: ",
+          "TelemetryCounterType",
+          " | undefined; code?: string | undefined; error?: Error | undefined; }) => void"
+        ],
+        "path": "packages/analytics/shippers/elastic_v3/common/src/report_telemetry_counters.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/analytics-shippers-elastic-v3-common",
+            "id": "def-common.createTelemetryCounterHelper.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "telemetryCounter$",
+            "description": [
+              "The observable that will be used to emit the telemetry counters"
+            ],
+            "signature": [
+              "Subject",
+              "<",
+              "TelemetryCounter",
+              ">"
+            ],
+            "path": "packages/analytics/shippers/elastic_v3/common/src/report_telemetry_counters.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/analytics-shippers-elastic-v3-common",
+            "id": "def-common.createTelemetryCounterHelper.$2",
+            "type": "string",
+            "tags": [],
+            "label": "source",
+            "description": [
+              "The name of the shipper that is sending the events."
+            ],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/analytics/shippers/elastic_v3/common/src/report_telemetry_counters.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/analytics-shippers-elastic-v3-common",
+        "id": "def-common.eventsToNDJSON",
+        "type": "Function",
+        "tags": [],
+        "label": "eventsToNDJSON",
+        "description": [],
+        "signature": [
+          "(events: ",
+          "Event",
+          "[]) => string"
+        ],
+        "path": "packages/analytics/shippers/elastic_v3/common/src/events_to_ndjson.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/analytics-shippers-elastic-v3-common",
+            "id": "def-common.eventsToNDJSON.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "events",
+            "description": [],
+            "signature": [
+              "Event",
+              "[]"
+            ],
+            "path": "packages/analytics/shippers/elastic_v3/common/src/events_to_ndjson.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/analytics-shippers-elastic-v3-common",
+        "id": "def-common.ElasticV3ShipperOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "ElasticV3ShipperOptions",
+        "description": [
+          "\nOptions for the Elastic V3 shipper"
+        ],
+        "path": "packages/analytics/shippers/elastic_v3/common/src/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/analytics-shippers-elastic-v3-common",
+            "id": "def-common.ElasticV3ShipperOptions.channelName",
+            "type": "string",
+            "tags": [],
+            "label": "channelName",
+            "description": [
+              "\nThe name of the channel to stream all the events to."
+            ],
+            "path": "packages/analytics/shippers/elastic_v3/common/src/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/analytics-shippers-elastic-v3-common",
+            "id": "def-common.ElasticV3ShipperOptions.version",
+            "type": "string",
+            "tags": [],
+            "label": "version",
+            "description": [
+              "\nThe product's version."
+            ],
+            "path": "packages/analytics/shippers/elastic_v3/common/src/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/analytics-shippers-elastic-v3-common",
+            "id": "def-common.ElasticV3ShipperOptions.sendTo",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "sendTo",
+            "description": [
+              "\nProvide it to override the Analytics client's default configuration."
+            ],
+            "signature": [
+              "\"staging\" | \"production\" | undefined"
+            ],
+            "path": "packages/analytics/shippers/elastic_v3/common/src/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/analytics-shippers-elastic-v3-common",
+            "id": "def-common.ElasticV3ShipperOptions.debug",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "debug",
+            "description": [
+              "\nShould show debug information about the requests it makes to the V3 API."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/analytics/shippers/elastic_v3/common/src/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

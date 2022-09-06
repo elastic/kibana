@@ -18,7 +18,7 @@ import { shallow, ShallowWrapper } from 'enzyme';
 
 import { EuiSteps } from '@elastic/eui';
 
-import { ENTERPRISE_SEARCH_OVERVIEW_PLUGIN } from '../../../../common/constants';
+import { ELASTICSEARCH_PLUGIN } from '../../../../common/constants';
 
 import { EuiLinkTo } from '../react_router_helpers';
 
@@ -50,9 +50,7 @@ describe('GettingStartedSteps', () => {
 
     expect(steps[1].title).toEqual('Build a search experience');
     expect(steps[1].status).toEqual('incomplete');
-    expect(steps[1].children.find(EuiLinkTo).prop('to')).toEqual(
-      ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.URL + '/elasticsearch_guide'
-    );
+    expect(steps[1].children.find(EuiLinkTo).prop('to')).toEqual(ELASTICSEARCH_PLUGIN.URL);
 
     expect(steps[2].title).toEqual('Tune your search relevance');
     expect(steps[2].status).toEqual('incomplete');

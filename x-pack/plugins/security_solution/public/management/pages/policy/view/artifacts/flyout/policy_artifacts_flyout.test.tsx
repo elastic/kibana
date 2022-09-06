@@ -27,7 +27,7 @@ import {
   UpdateExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { cleanEventFilterToUpdate } from '../../../../event_filters/service/service_actions';
-import { EventFiltersApiClient } from '../../../../event_filters/service/event_filters_api_client';
+import { EventFiltersApiClient } from '../../../../event_filters/service/api_client';
 import { POLICY_ARTIFACT_FLYOUT_LABELS } from './translations';
 
 const getDefaultQueryParameters = (customFilter: string | undefined = '') => ({

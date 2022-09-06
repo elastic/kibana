@@ -7,8 +7,8 @@
 
 declare namespace Cypress {
   interface Chainable {
-    loginAsReadOnlyUser(): void;
-    loginAsPowerUser(): void;
+    loginAsViewerUser(): void;
+    loginAsEditorUser(): void;
     loginAs(params: { username: string; password: string }): void;
     changeTimeRange(value: string): void;
     selectAbsoluteTimeRange(start: string, end: string): void;

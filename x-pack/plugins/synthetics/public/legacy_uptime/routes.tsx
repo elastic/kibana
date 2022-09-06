@@ -34,6 +34,7 @@ import {
   NotFoundPage,
   SettingsPage,
   MonitorManagementBottomBar,
+  APIKeysButton,
 } from './pages';
 import { CertificatesPage } from './pages/certificates';
 import { UptimePage, useUptimeTelemetry } from './hooks';
@@ -272,7 +273,7 @@ const getRoutes = (): RouteProps[] => {
             </EuiFlexItem>
           </EuiFlexGroup>
         ),
-        rightSideItems: [<AddMonitorBtn />],
+        rightSideItems: [<AddMonitorBtn />, <APIKeysButton />],
       },
     },
   ];

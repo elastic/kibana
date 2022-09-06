@@ -158,13 +158,22 @@ def functionalXpack(Map params = [:]) {
     }
 
     whenChanged([
-      'x-pack/plugins/uptime/',
+      'x-pack/plugins/synthetics/',
     ]) {
       if (githubPr.isPr()) {
         task(kibanaPipeline.functionalTestProcess('xpack-UptimePlaywright', './test/scripts/jenkins_uptime_playwright.sh'))
       }
     }
-    
+
+    whenChanged([
+      'x-pack/plugins/ux/',
+    ]) {
+      if (githubPr.isPr()) {
+        task(kibanaPipeline.functionalTestProcess('xpack-uxPluginSynthetics', './test/scripts/jenkins_ux_synthetics.sh'))
+      }
+    }
+
+
     whenChanged([
       'x-pack/plugins/fleet/',
     ]) {

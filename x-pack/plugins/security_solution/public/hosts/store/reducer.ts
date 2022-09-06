@@ -165,6 +165,7 @@ export const hostsReducer = reducerWithInitialState(initialHostsState)
           ...state[hostsType].queries[HostsTableType.hosts],
           direction: sort.direction,
           sortField: sort.field,
+          activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         },
       },
     },

@@ -11,7 +11,7 @@ import React from 'react';
 import { HOST_ISOLATION_EXCEPTIONS_PATH } from '../../../../../common/constants';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../../../common/mock/endpoint';
 import { HostIsolationExceptionsList } from './host_isolation_exceptions_list';
-import { exceptionsListAllHttpMocks } from '../../mocks/exceptions_list_http_mocks';
+import { exceptionsListAllHttpMocks } from '../../../mocks/exceptions_list_http_mocks';
 import { SEARCHABLE_FIELDS } from '../constants';
 import { parseQueryFilterToKQL } from '../../../common/utils';
 import { useUserPrivileges as _useUserPrivileges } from '../../../../common/components/user_privileges';

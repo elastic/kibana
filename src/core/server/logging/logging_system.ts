@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import type { PublicMethodsOf } from '@kbn/utility-types';
 import { DisposableAppender, LogLevel, Logger, LoggerFactory } from '@kbn/logging';
 import { Appenders } from './appenders/appenders';
 import { BufferAppender } from './appenders/buffer/buffer_appender';
@@ -22,13 +21,19 @@ import {
   config as loggingConfig,
 } from './logging_config';
 
-export type ILoggingSystem = PublicMethodsOf<LoggingSystem>;
+/** @internal */
+export interface ILoggingSystem extends LoggerFactory {
+  asLoggerFactory(): LoggerFactory;
+  upgrade(rawConfig?: LoggingConfigType): Promise<void>;
+  setContextConfig(baseContextParts: string[], rawConfig: LoggerContextConfigInput): Promise<void>;
+  stop(): Promise<void>;
+}
 
 /**
  * System that is responsible for maintaining loggers and logger appenders.
  * @internal
  */
-export class LoggingSystem implements LoggerFactory {
+export class LoggingSystem implements ILoggingSystem {
   /** The configuration set by the user. */
   private baseConfig?: LoggingConfig;
   /** The fully computed configuration extended by context-specific configurations set programmatically */

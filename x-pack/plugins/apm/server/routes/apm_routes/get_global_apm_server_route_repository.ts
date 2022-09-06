@@ -15,6 +15,7 @@ import { alertsChartPreviewRouteRepository } from '../alerts/route';
 import { backendsRouteRepository } from '../backends/route';
 import { environmentsRouteRepository } from '../environments/route';
 import { errorsRouteRepository } from '../errors/route';
+import { infrastructureRouteRepository } from '../infrastructure/route';
 import { apmFleetRouteRepository } from '../fleet/route';
 import { dataViewRouteRepository } from '../data_view/route';
 import { latencyDistributionRouteRepository } from '../latency_distribution/route';
@@ -37,7 +38,8 @@ import { historicalDataRouteRepository } from '../historical_data/route';
 import { eventMetadataRouteRepository } from '../event_metadata/route';
 import { suggestionsRouteRepository } from '../suggestions/route';
 import { agentKeysRouteRepository } from '../agent_keys/route';
-
+import { spanLinksRouteRepository } from '../span_links/route';
+import { debugTelemetryRoute } from '../debug_telemetry/route';
 function getTypedGlobalApmServerRouteRepository() {
   const repository = {
     ...dataViewRouteRepository,
@@ -67,6 +69,9 @@ function getTypedGlobalApmServerRouteRepository() {
     ...historicalDataRouteRepository,
     ...eventMetadataRouteRepository,
     ...agentKeysRouteRepository,
+    ...spanLinksRouteRepository,
+    ...infrastructureRouteRepository,
+    ...debugTelemetryRoute,
   };
 
   return repository;

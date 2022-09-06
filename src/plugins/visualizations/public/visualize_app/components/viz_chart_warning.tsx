@@ -23,7 +23,7 @@ import type {
 
 interface Props {
   chartType: CHART_WITHOUT_SMALL_MULTIPLES | CHART_TO_BE_DEPRECATED;
-  chartConfigToken: string;
+  chartConfigToken?: string;
   mode?: 'old' | 'new';
 }
 
@@ -149,11 +149,21 @@ const TimelionWarningFormatMessage: FC<WarningMessageProps> = (props) => {
   );
 };
 
+const ControlsWarningFormatMessage: FC<WarningMessageProps> = (props) => {
+  return (
+    <FormattedMessage
+      id="visualizations.controls.notificationMessage"
+      defaultMessage="Input controls are deprecated and will be removed in a future release. Use the new Controls to filter and interact with your dashboard data. "
+    />
+  );
+};
+
 const warningMessages = {
   [CHARTS_WITHOUT_SMALL_MULTIPLES.heatmap]: HeatmapWarningFormatMessage,
   [CHARTS_WITHOUT_SMALL_MULTIPLES.gauge]: GaugeWarningFormatMessage,
   [CHARTS_TO_BE_DEPRECATED.pie]: PieWarningFormatMessage,
   [CHARTS_TO_BE_DEPRECATED.timelion]: TimelionWarningFormatMessage,
+  [CHARTS_TO_BE_DEPRECATED.controls]: ControlsWarningFormatMessage,
 };
 
 export const VizChartWarning: FC<Props> = ({ chartType, chartConfigToken, mode }) => {

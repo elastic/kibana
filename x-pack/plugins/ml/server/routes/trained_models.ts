@@ -371,7 +371,7 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
         body: inferTrainedModelBody,
       },
       options: {
-        tags: ['access:ml:canStartStopTrainedModels'],
+        tags: ['access:ml:canTestTrainedModels'],
       },
     },
     routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {

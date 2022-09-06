@@ -60,8 +60,10 @@ import {
   license,
   rule_name_override,
   timestamp_override,
+  timestamp_field,
   event_category_override,
-} from '../common/schemas';
+  tiebreaker_field,
+} from '../common';
 
 /**
  * All of the patch elements should default to undefined if not set
@@ -79,7 +81,9 @@ export const patchRulesSchema = t.exact(
     actions,
     anomaly_threshold,
     enabled,
+    timestamp_field,
     event_category_override,
+    tiebreaker_field,
     false_positives,
     filters,
     from,

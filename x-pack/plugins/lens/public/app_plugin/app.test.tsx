@@ -118,6 +118,7 @@ describe('Lens App', () => {
     );
 
     const frame = props.editorFrame as ReturnType<typeof createMockFrame>;
+    lensStore.dispatch(setState({ ...preloadedState }));
     return { instance, frame, props, services, lensStore };
   }
 
@@ -997,7 +998,7 @@ describe('Lens App', () => {
         min: moment('2021-01-09T04:00:00.000Z'),
         max: moment('2021-01-09T08:00:00.000Z'),
       });
-      act(() =>
+      await act(async () =>
         instance.find(services.navigation.ui.TopNavMenu).prop('onQuerySubmit')!({
           dateRange: { from: 'now-14d', to: 'now-7d' },
           query: { query: 'new', language: 'lucene' },

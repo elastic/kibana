@@ -55,7 +55,7 @@ export class DataSearchTestPlugin
 
         // Since the index pattern ID can change on each test run, we need
         // to look it up on the fly and insert it into the request.
-        const indexPatterns = await data.indexPatterns.indexPatternsServiceFactory(
+        const indexPatterns = await data.indexPatterns.dataViewsServiceFactory(
           savedObjectsClient,
           clusterClient,
           req

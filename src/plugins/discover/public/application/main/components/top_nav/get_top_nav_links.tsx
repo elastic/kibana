@@ -74,6 +74,7 @@ export const getTopNavLinks = ({
         anchorElement,
         searchSource: savedSearch.searchSource,
         services,
+        savedQueryId: state.appStateContainer.getState().savedQuery,
       });
     },
     testId: 'discoverAlertsButton',

@@ -97,4 +97,7 @@ export const getComplexRuleOutput = (ruleId = 'rule-1'): Partial<RulesSchema> =>
   version: 1,
   query: 'user.name: root or user.name: admin',
   exceptions_list: [],
+  related_integrations: [],
+  required_fields: [],
+  setup: '',
 });

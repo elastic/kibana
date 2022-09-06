@@ -57,6 +57,8 @@ export const FileDraggable = React.memo<Props>(
               isDraggable={isDraggable}
               value={fileName}
               iconType="document"
+              isAggregatable={true}
+              fieldType="keyword"
             />
           </TokensFlexItem>
         ) : !isNillEmptyOrNotFinite(endgameFileName) ? (
@@ -68,6 +70,8 @@ export const FileDraggable = React.memo<Props>(
               isDraggable={isDraggable}
               value={endgameFileName}
               iconType="document"
+              isAggregatable={true}
+              fieldType="keyword"
             />
           </TokensFlexItem>
         ) : null}
@@ -87,6 +91,8 @@ export const FileDraggable = React.memo<Props>(
               isDraggable={isDraggable}
               value={filePath}
               iconType="document"
+              isAggregatable={true}
+              fieldType="keyword"
             />
           </TokensFlexItem>
         ) : !isNillEmptyOrNotFinite(endgameFilePath) ? (
@@ -98,6 +104,8 @@ export const FileDraggable = React.memo<Props>(
               isDraggable={isDraggable}
               value={endgameFilePath}
               iconType="document"
+              isAggregatable={true}
+              fieldType="keyword"
             />
           </TokensFlexItem>
         ) : null}
@@ -115,6 +123,8 @@ export const FileDraggable = React.memo<Props>(
                 isDraggable={isDraggable}
                 value={fileExtOriginalPath}
                 iconType="document"
+                isAggregatable={true}
+                fieldType="keyword"
               />
             </TokensFlexItem>
           </>

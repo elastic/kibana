@@ -8,7 +8,7 @@
 
 import { getDocLinksMock, getDocLinksMetaMock } from './doc_links_service.test.mocks';
 import { DocLinksService } from './doc_links_service';
-import { injectedMetadataServiceMock } from '../injected_metadata/injected_metadata_service.mock';
+import { injectedMetadataServiceMock } from '@kbn/core-injected-metadata-browser-mocks';
 
 describe('DocLinksService', () => {
   let injectedMetadata: ReturnType<typeof injectedMetadataServiceMock.createStartContract>;

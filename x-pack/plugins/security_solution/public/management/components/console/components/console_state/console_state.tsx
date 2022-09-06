@@ -24,9 +24,6 @@ export const ConsoleStateProvider = memo<ConsoleStateProviderProps>(
       initiateState
     );
 
-    // FIXME:PT should handle cases where props that are in the store change
-    //          Probably need to have a `useAffect()` that just does a `dispatch()` to update those.
-
     return (
       <ConsoleStateContext.Provider value={{ state, dispatch }}>
         {children}

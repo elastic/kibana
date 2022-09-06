@@ -7,7 +7,7 @@
  */
 
 import { Lifecycle, Request, ResponseToolkit } from '@hapi/hapi';
-import { Logger } from '../../logging';
+import type { Logger } from '@kbn/logging';
 import {
   HapiResponseAdapter,
   KibanaRequest,

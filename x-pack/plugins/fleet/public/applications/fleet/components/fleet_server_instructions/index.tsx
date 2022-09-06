@@ -7,14 +7,13 @@
 
 import React, { useState } from 'react';
 import {
+  EuiButtonGroup,
   EuiFlexGroup,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
   EuiLink,
   EuiSpacer,
-  EuiTab,
-  EuiTabs,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
@@ -41,14 +40,16 @@ const useFleetServerTabs = () => {
 
   const quickStartTab = {
     id: 'quickStart',
-    name: 'Quick Start',
+    label: 'Quick Start',
     content: <QuickStartTab />,
+    'data-test-subj': 'fleetServerFlyoutTab-quickStart',
   };
 
   const advancedTab = {
     id: 'advanced',
-    name: 'Advanced',
+    label: 'Advanced',
     content: <AdvancedTab />,
+    'data-test-subj': 'fleetServerFlyoutTab-advanced',
   };
 
   const currentTabContent =
@@ -60,7 +61,7 @@ const useFleetServerTabs = () => {
 const Header: React.FunctionComponent<{
   isFlyout?: boolean;
   currentTab: string;
-  tabs: Array<{ id: string; name: string; content: React.ReactNode }>;
+  tabs: Array<{ id: string; label: string; content: React.ReactNode }>;
   onTabClick: (id: string) => void;
 }> = ({ isFlyout = false, currentTab: currentTabId, tabs, onTabClick }) => {
   const { docLinks } = useStartServices();
@@ -99,21 +100,16 @@ const Header: React.FunctionComponent<{
         />
       </EuiText>
 
-      <EuiSpacer size="m" />
+      <EuiSpacer size="xl" />
 
-      <EuiTabs style={{ marginBottom: isFlyout ? '-25px' : '' }}>
-        {tabs.map((tab) => (
-          <EuiTab
-            key={`fleetServerFlyoutTab-${tab.id}`}
-            data-test-subj={`fleetServerFlyoutTab-${tab.id}`}
-            id={tab.id}
-            isSelected={tab.id === currentTabId}
-            onClick={() => onTabClick(tab.id)}
-          >
-            {tab.name}
-          </EuiTab>
-        ))}
-      </EuiTabs>
+      <EuiButtonGroup
+        legend="Fleet Server instructions"
+        isFullWidth
+        options={tabs}
+        idSelected={currentTabId}
+        onChange={(id) => onTabClick(id)}
+        style={{ maxWidth: '500px' }}
+      />
     </>
   );
 };

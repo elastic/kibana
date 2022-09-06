@@ -6,10 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Type } from '@kbn/config-schema';
-
 import { CapabilitiesSetup, CapabilitiesStart } from './capabilities';
-import { ConfigDeprecationProvider } from './config';
 import { InternalContextPreboot, ContextSetup } from './context';
 import {
   InternalElasticsearchServicePreboot,
@@ -100,19 +97,4 @@ export interface InternalCoreStart {
   coreUsageData: CoreUsageDataStart;
   executionContext: InternalExecutionContextStart;
   deprecations: InternalDeprecationsServiceStart;
-}
-
-/**
- * @internal
- */
-export interface ServiceConfigDescriptor<T = any> {
-  path: string;
-  /**
-   * Schema to use to validate the configuration.
-   */
-  schema: Type<T>;
-  /**
-   * Provider for the {@link ConfigDeprecation} to apply to the plugin configuration.
-   */
-  deprecations?: ConfigDeprecationProvider;
 }

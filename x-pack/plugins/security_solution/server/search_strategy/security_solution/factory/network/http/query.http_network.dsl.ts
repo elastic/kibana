@@ -66,6 +66,19 @@ export const buildHttpQuery = ({
               filter,
             },
       },
+      _source: false,
+      fields: [
+        'host.name',
+        'source.ip',
+        'url.path',
+        'http.request.method',
+        'url.domain',
+        'http.response.status_code',
+        {
+          field: '@timestamp',
+          format: 'strict_date_optional_time',
+        },
+      ],
     },
     size: 0,
     track_total_hits: false,
@@ -77,7 +90,7 @@ export const buildHttpQuery = ({
 const getHttpAggs = (sortField: SortField, querySize: number) => ({
   url: {
     terms: {
-      field: `url.path`,
+      field: 'url.path',
       size: querySize,
       order: {
         _count: sortField.direction,
@@ -105,9 +118,7 @@ const getHttpAggs = (sortField: SortField, querySize: number) => ({
       source: {
         top_hits: {
           size: 1,
-          _source: {
-            includes: ['host.name', 'source.ip'],
-          },
+          _source: false,
         },
       },
     },

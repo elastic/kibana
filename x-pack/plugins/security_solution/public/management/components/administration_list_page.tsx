@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import { SecurityPageName } from '../../../common/constants';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
-import { useTestIdGenerator } from './hooks/use_test_id_generator';
+import { useTestIdGenerator } from '../hooks/use_test_id_generator';
 
 interface AdministrationListPageProps {
   title: React.ReactNode;

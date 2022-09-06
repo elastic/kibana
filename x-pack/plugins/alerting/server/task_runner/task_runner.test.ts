@@ -470,17 +470,42 @@ describe('Task Runner', () => {
   const snoozeTestParams: SnoozeTestParams[] = [
     [false, null, false],
     [false, undefined, false],
-    [false, DATE_1970, false],
-    [false, DATE_9999, true],
+    // Stringify the snooze schedules for better failure reporting
+    [
+      false,
+      JSON.stringify([
+        { rRule: { dtstart: DATE_9999, tzid: 'UTC', count: 1 }, duration: 100000000 },
+      ]),
+      false,
+    ],
+    [
+      false,
+      JSON.stringify([
+        { rRule: { dtstart: DATE_1970, tzid: 'UTC', count: 1 }, duration: 100000000 },
+      ]),
+      true,
+    ],
     [true, null, true],
     [true, undefined, true],
-    [true, DATE_1970, true],
-    [true, DATE_9999, true],
+    [
+      true,
+      JSON.stringify([
+        { rRule: { dtstart: DATE_9999, tzid: 'UTC', count: 1 }, duration: 100000000 },
+      ]),
+      true,
+    ],
+    [
+      true,
+      JSON.stringify([
+        { rRule: { dtstart: DATE_1970, tzid: 'UTC', count: 1 }, duration: 100000000 },
+      ]),
+      true,
+    ],
   ];
 
   test.each(snoozeTestParams)(
-    'snoozing works as expected with muteAll: %s; snoozeEndTime: %s',
-    async (muteAll, snoozeEndTime, shouldBeSnoozed) => {
+    'snoozing works as expected with muteAll: %s; snoozeSchedule: %s',
+    async (muteAll, snoozeSchedule, shouldBeSnoozed) => {
       taskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(true);
       taskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(true);
       ruleType.executor.mockImplementation(
@@ -507,7 +532,7 @@ describe('Task Runner', () => {
       rulesClient.get.mockResolvedValue({
         ...mockedRuleTypeSavedObject,
         muteAll,
-        snoozeEndTime: snoozeEndTime != null ? new Date(snoozeEndTime) : snoozeEndTime,
+        snoozeSchedule: snoozeSchedule != null ? JSON.parse(snoozeSchedule) : [],
       });
       encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(SAVED_OBJECT);
       await taskRunner.run();

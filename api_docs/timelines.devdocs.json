@@ -527,7 +527,7 @@
             "section": "def-common.ColumnHeaderType",
             "text": "ColumnHeaderType"
           },
-          "; description?: string | null | undefined; example?: string | number | null | undefined; format?: string | undefined; linkField?: string | undefined; placeholder?: string | undefined; subType?: ",
+          "; description?: string | null | undefined; esTypes?: string[] | undefined; example?: string | number | null | undefined; format?: string | undefined; linkField?: string | undefined; placeholder?: string | undefined; subType?: ",
           "IFieldSubType",
           " | undefined; type?: string | undefined; })[]; isLoading: boolean; filterManager: ",
           {
@@ -559,7 +559,7 @@
             "section": "def-common.ColumnHeaderType",
             "text": "ColumnHeaderType"
           },
-          "; description?: string | null | undefined; example?: string | number | null | undefined; format?: string | undefined; linkField?: string | undefined; placeholder?: string | undefined; subType?: ",
+          "; description?: string | null | undefined; esTypes?: string[] | undefined; example?: string | number | null | undefined; format?: string | undefined; linkField?: string | undefined; placeholder?: string | undefined; subType?: ",
           "IFieldSubType",
           " | undefined; type?: string | undefined; })[]; isLoading: boolean; filterManager: ",
           {
@@ -1979,30 +1979,30 @@
       },
       {
         "parentPluginId": "timelines",
-        "id": "def-public.useStatusBulkActionItems",
+        "id": "def-public.useBulkActionItems",
         "type": "Function",
         "tags": [],
-        "label": "useStatusBulkActionItems",
+        "label": "useBulkActionItems",
         "description": [],
         "signature": [
-          "({ eventIds, currentStatus, query, indexName, setEventsLoading, setEventsDeleted, onUpdateSuccess, onUpdateFailure, timelineId, }: ",
-          "StatusBulkActionsProps",
+          "({ eventIds, currentStatus, query, indexName, setEventsLoading, showAlertStatusActions, setEventsDeleted, onUpdateSuccess, onUpdateFailure, customBulkActions, timelineId, }: ",
+          "BulkActionsProps",
           ") => JSX.Element[]"
         ],
-        "path": "x-pack/plugins/timelines/public/hooks/use_status_bulk_action_items.tsx",
+        "path": "x-pack/plugins/timelines/public/hooks/use_bulk_action_items.tsx",
         "deprecated": false,
         "children": [
           {
             "parentPluginId": "timelines",
-            "id": "def-public.useStatusBulkActionItems.$1",
+            "id": "def-public.useBulkActionItems.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  eventIds,\n  currentStatus,\n  query,\n  indexName,\n  setEventsLoading,\n  setEventsDeleted,\n  onUpdateSuccess,\n  onUpdateFailure,\n  timelineId,\n}",
+            "label": "{\n  eventIds,\n  currentStatus,\n  query,\n  indexName,\n  setEventsLoading,\n  showAlertStatusActions = true,\n  setEventsDeleted,\n  onUpdateSuccess,\n  onUpdateFailure,\n  customBulkActions,\n  timelineId,\n}",
             "description": [],
             "signature": [
-              "StatusBulkActionsProps"
+              "BulkActionsProps"
             ],
-            "path": "x-pack/plugins/timelines/public/hooks/use_status_bulk_action_items.tsx",
+            "path": "x-pack/plugins/timelines/public/hooks/use_bulk_action_items.tsx",
             "deprecated": false,
             "isRequired": true
           }
@@ -2057,7 +2057,7 @@
                 "section": "def-common.ColumnHeaderType",
                 "text": "ColumnHeaderType"
               },
-              "; description?: string | null | undefined; example?: string | number | null | undefined; format?: string | undefined; linkField?: string | undefined; placeholder?: string | undefined; subType?: ",
+              "; description?: string | null | undefined; esTypes?: string[] | undefined; example?: string | number | null | undefined; format?: string | undefined; linkField?: string | undefined; placeholder?: string | undefined; subType?: ",
               "IFieldSubType",
               " | undefined; type?: string | undefined; })[]"
             ],
@@ -2608,7 +2608,7 @@
             "section": "def-common.ColumnHeaderType",
             "text": "ColumnHeaderType"
           },
-          "; description?: string | null | undefined; example?: string | number | null | undefined; format?: string | undefined; linkField?: string | undefined; placeholder?: string | undefined; subType?: ",
+          "; description?: string | null | undefined; esTypes?: string[] | undefined; example?: string | number | null | undefined; format?: string | undefined; linkField?: string | undefined; placeholder?: string | undefined; subType?: ",
           "IFieldSubType",
           " | undefined; type?: string | undefined; })[]; id: string; filters?: ",
           "Filter",
@@ -2636,7 +2636,7 @@
             "section": "def-common.ColumnHeaderType",
             "text": "ColumnHeaderType"
           },
-          "; description?: string | null | undefined; example?: string | number | null | undefined; format?: string | undefined; linkField?: string | undefined; placeholder?: string | undefined; subType?: ",
+          "; description?: string | null | undefined; esTypes?: string[] | undefined; example?: string | number | null | undefined; format?: string | undefined; linkField?: string | undefined; placeholder?: string | undefined; subType?: ",
           "IFieldSubType",
           " | undefined; type?: string | undefined; })[]; savedObjectId: string | null; isLoading: boolean; dataProviders: ",
           {
@@ -3572,6 +3572,19 @@
           },
           {
             "parentPluginId": "timelines",
+            "id": "def-common.BrowserField.esTypes",
+            "type": "Array",
+            "tags": [],
+            "label": "esTypes",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "timelines",
             "id": "def-common.BrowserField.subType",
             "type": "CompoundType",
             "tags": [],
@@ -3757,7 +3770,7 @@
                         "section": "def-common.ColumnHeaderType",
                         "text": "ColumnHeaderType"
                       },
-                      "; description?: string | null | undefined; example?: string | number | null | undefined; format?: string | undefined; linkField?: string | undefined; placeholder?: string | undefined; subType?: ",
+                      "; description?: string | null | undefined; esTypes?: string[] | undefined; example?: string | number | null | undefined; format?: string | undefined; linkField?: string | undefined; placeholder?: string | undefined; subType?: ",
                       "IFieldSubType",
                       " | undefined; type?: string | undefined; }"
                     ],
@@ -6212,6 +6225,17 @@
         "path": "x-pack/plugins/timelines/common/types/timeline/index.ts",
         "deprecated": false,
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "timelines",
+        "id": "def-common.TimelineType",
+        "type": "Enum",
+        "tags": [],
+        "label": "TimelineType",
+        "description": [],
+        "path": "x-pack/plugins/timelines/common/types/timeline/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
       }
     ],
     "misc": [
@@ -6348,7 +6372,7 @@
             "section": "def-common.ColumnHeaderType",
             "text": "ColumnHeaderType"
           },
-          "; description?: string | null | undefined; example?: string | number | null | undefined; format?: string | undefined; linkField?: string | undefined; placeholder?: string | undefined; subType?: ",
+          "; description?: string | null | undefined; esTypes?: string[] | undefined; example?: string | number | null | undefined; format?: string | undefined; linkField?: string | undefined; placeholder?: string | undefined; subType?: ",
           "IFieldSubType",
           " | undefined; type?: string | undefined; }"
         ],
@@ -6504,7 +6528,7 @@
         "label": "EntityType",
         "description": [],
         "signature": [
-          "\"alerts\" | \"events\" | \"sessions\""
+          "\"sessions\" | \"alerts\" | \"events\""
         ],
         "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/index.ts",
         "deprecated": false,

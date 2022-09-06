@@ -68,7 +68,6 @@ import {
   BackToExternalAppButton,
   BackToExternalAppButtonProps,
 } from '../../../components/back_to_external_app_button/back_to_external_app_button';
-import { DevConsole } from './dev_console';
 import { ManagementEmptyStateWrapper } from '../../../components/management_empty_state_wrapper';
 
 const MAX_PAGINATED_ITEM = 9999;
@@ -689,9 +688,6 @@ export const EndpointList = () => {
       }
       headerBackComponent={routeState.backLink && backToPolicyList}
     >
-      {/* FIXME: Remove once Console is implemented via ConsoleManagementProvider */}
-      <DevConsole />
-
       {hasSelectedEndpoint && <EndpointDetailsFlyout />}
       <>
         {areEndpointsEnrolling && !hasErrorFindingTotals && (
@@ -726,7 +722,7 @@ export const EndpointList = () => {
           </>
         )}
         {transformFailedCallout}
-        <EuiFlexGroup gutterSize="s">
+        <EuiFlexGroup gutterSize="s" alignItems="center">
           {shouldShowKQLBar && (
             <EuiFlexItem>
               <AdminSearchBar />

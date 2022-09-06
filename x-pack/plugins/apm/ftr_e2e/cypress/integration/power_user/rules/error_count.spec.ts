@@ -37,7 +37,7 @@ describe('Rules', () => {
     describe('when created from APM', () => {
       describe('when created from Service Inventory', () => {
         before(() => {
-          cy.loginAsPowerUser();
+          cy.loginAsEditorUser();
           deleteAllRules();
         });
 
@@ -68,7 +68,7 @@ describe('Rules', () => {
 
     describe('when created from Stack management', () => {
       before(() => {
-        cy.loginAsPowerUser();
+        cy.loginAsEditorUser();
         deleteAllRules();
       });
 

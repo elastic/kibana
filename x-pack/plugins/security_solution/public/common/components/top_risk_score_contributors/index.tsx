@@ -83,7 +83,6 @@ const TopRiskScoreContributorsComponent: React.FC<TopRiskScoreContributorsProps>
         <EuiFlexGroup gutterSize={'none'}>
           <EuiFlexItem grow={1}>
             <HeaderSection
-              height={!toggleStatus ? 40 : undefined}
               title={i18n.TOP_RISK_SCORE_CONTRIBUTORS}
               hideSubtitle
               toggleQuery={toggleQuery}

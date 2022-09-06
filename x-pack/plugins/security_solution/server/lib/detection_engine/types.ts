@@ -51,7 +51,9 @@ import {
   LicenseOrUndefined,
   RuleNameOverrideOrUndefined,
   TimestampOverrideOrUndefined,
+  TimestampFieldOrUndefined,
   EventCategoryOverrideOrUndefined,
+  TiebreakerFieldOrUndefined,
 } from '../../../common/detection_engine/schemas/common/schemas';
 
 export type PartialFilter = Partial<Filter>;
@@ -62,7 +64,9 @@ export interface RuleTypeParams extends AlertingRuleTypeParams {
   buildingBlockType: BuildingBlockTypeOrUndefined;
   description: Description;
   note: NoteOrUndefined;
+  timestampField?: TimestampFieldOrUndefined;
   eventCategoryOverride?: EventCategoryOverrideOrUndefined;
+  tiebreakerField?: TiebreakerFieldOrUndefined;
   falsePositives: FalsePositives;
   from: From;
   ruleId: RuleId;

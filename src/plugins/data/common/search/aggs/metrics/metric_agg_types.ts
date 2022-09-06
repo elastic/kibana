@@ -21,6 +21,7 @@ export enum METRIC_TYPES {
   GEO_CENTROID = 'geo_centroid',
   MEDIAN = 'median',
   SINGLE_PERCENTILE = 'single_percentile',
+  SINGLE_PERCENTILE_RANK = 'single_percentile_rank',
   MIN = 'min',
   MAX = 'max',
   MOVING_FN = 'moving_avg',

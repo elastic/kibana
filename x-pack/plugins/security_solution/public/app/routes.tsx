@@ -7,7 +7,8 @@
 
 import { History } from 'history';
 import React, { FC, memo, useEffect } from 'react';
-import { Route, Router, Switch } from 'react-router-dom';
+import { Router, Switch } from 'react-router-dom';
+import { Route } from '@kbn/kibana-react-plugin/public';
 import { useDispatch } from 'react-redux';
 
 import { AppLeaveHandler, AppMountParameters } from '@kbn/core/public';

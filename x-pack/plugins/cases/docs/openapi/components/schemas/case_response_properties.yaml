@@ -26,22 +26,26 @@ connector:
 created_at:
   type: string
   format: date-time
-  example: "2022-05-13T09:16:17.416Z"
+  example: 2022-05-13T09:16:17.416Z
 created_by:
   type: object
   properties:
     email:
       type: string
-      example: "ahunley@imf.usa.gov"
+      example: null
     full_name:
       type: string
-      example: "Alan Hunley"
+      example: null
     username: 
       type: string
-      example: "ahunley"
+      example: elastic
 description:
   type: string
   example: "James Bond clicked on a highly suspicious email banner advertising cheap holidays for underpaid civil servants. Operation bubblegum is active. Repeat - operation bubblegum is now active"
+duration:
+  type: integer
+  description: The elapsed time from the creation of the case to its closure (in seconds). If the case has not been closed, the duration is set to null.
+  example: 120
 external_service:
   type: object
   properties:
@@ -71,7 +75,7 @@ external_service:
       example: null
 id:
   type: string
-  example: "66b9aa00-94fa-11ea-9f74-e7e108796192"
+  example: 66b9aa00-94fa-11ea-9f74-e7e108796192
 owner:
   $ref: 'owners.yaml'
 settings:
@@ -80,6 +84,8 @@ settings:
     syncAlerts:
       type: boolean
       example: true
+severity:
+  $ref: 'severity_property.yaml'
 status:
   $ref: 'status.yaml'
 tags:
@@ -89,7 +95,7 @@ tags:
   example: ["phishing","social engineering","bubblegum"]
 title:
   type: string
-  example: "This case will self-destruct in 5 seconds"
+  example: This case will self-destruct in 5 seconds
 totalAlerts:
   type: integer
   example: 0
@@ -114,4 +120,4 @@ updated_by:
   example: null
 version:
   type: string
-  example: "WzUzMiwxXQ=="
+  example: WzUzMiwxXQ==

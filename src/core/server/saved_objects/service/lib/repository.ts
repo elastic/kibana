@@ -9,9 +9,9 @@
 import { omit, isObject } from 'lodash';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import * as esKuery from '@kbn/es-query';
+import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '../../../elasticsearch';
 import { isSupportedEsServer, isNotFoundFromUnsupportedServer } from '../../../elasticsearch';
-import type { Logger } from '../../../logging';
 import { getRootPropertiesObjects, IndexMapping } from '../../mappings';
 import {
   ISavedObjectsPointInTimeFinder,
@@ -151,6 +151,7 @@ export interface SavedObjectsDeleteByNamespaceOptions extends SavedObjectsBaseOp
 }
 
 export const DEFAULT_REFRESH_SETTING = 'wait_for';
+export const DEFAULT_RETRY_COUNT = 3;
 
 /**
  * See {@link SavedObjectsRepository}
@@ -523,7 +524,7 @@ export class SavedObjectsRepository {
         }
         savedObjectNamespaces =
           initialNamespaces || getSavedObjectNamespaces(namespace, existingDocument);
-        versionProperties = getExpectedVersionProperties(version, existingDocument);
+        versionProperties = getExpectedVersionProperties(version);
       } else {
         if (this._registry.isSingleNamespace(object.type)) {
           savedObjectNamespace = initialNamespaces
@@ -761,7 +762,7 @@ export class SavedObjectsRepository {
       {
         id: rawId,
         index: this.getIndexForType(type),
-        ...getExpectedVersionProperties(undefined, preflightResult?.rawDocSource),
+        ...getExpectedVersionProperties(undefined),
         refresh,
       },
       { ignore: [404], meta: true }
@@ -1312,7 +1313,13 @@ export class SavedObjectsRepository {
       throw SavedObjectsErrorHelpers.createBadRequestError('id cannot be empty'); // prevent potentially upserting a saved object with an empty ID
     }
 
-    const { version, references, upsert, refresh = DEFAULT_REFRESH_SETTING } = options;
+    const {
+      version,
+      references,
+      upsert,
+      refresh = DEFAULT_REFRESH_SETTING,
+      retryOnConflict = version ? 0 : DEFAULT_RETRY_COUNT,
+    } = options;
     const namespace = normalizeNamespace(options.namespace);
 
     let preflightResult: PreflightCheckNamespacesResult | undefined;
@@ -1373,8 +1380,9 @@ export class SavedObjectsRepository {
       .update<unknown, unknown, SavedObjectsRawDocSource>({
         id: this._serializer.generateRawId(namespace, type, id),
         index: this.getIndexForType(type),
-        ...getExpectedVersionProperties(version, preflightResult?.rawDocSource),
+        ...getExpectedVersionProperties(version),
         refresh,
+        retry_on_conflict: retryOnConflict,
         body: {
           doc,
           ...(rawUpsert && { upsert: rawUpsert._source }),
@@ -1608,8 +1616,7 @@ export class SavedObjectsRepository {
             // @ts-expect-error MultiGetHit is incorrectly missing _id, _source
             SavedObjectsUtils.namespaceIdToString(actualResult!._source.namespace),
           ];
-          // @ts-expect-error MultiGetHit is incorrectly missing _id, _source
-          versionProperties = getExpectedVersionProperties(version, actualResult!);
+          versionProperties = getExpectedVersionProperties(version);
         } else {
           if (this._registry.isSingleNamespace(type)) {
             // if `objectNamespace` is undefined, fall back to `options.namespace`

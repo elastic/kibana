@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { handleSidePanel } from './state_update_handlers/handle_side_panel';
 import { handleUpdateCommandState } from './state_update_handlers/handle_update_command_state';
 import type { ConsoleDataState, ConsoleStoreReducer } from './types';
 import { handleExecuteCommand } from './state_update_handlers/handle_execute_command';
@@ -27,6 +28,7 @@ export const initiateState = ({
     HelpComponent,
     dataTestSubj,
     commandHistory: [],
+    sidePanel: { show: null },
   };
 };
 
@@ -42,6 +44,9 @@ export const stateDataReducer: ConsoleStoreReducer = (state, action) => {
     case 'updateCommandStatusState':
     case 'updateCommandStoreState':
       return handleUpdateCommandState(state, action);
+
+    case 'showSidePanel':
+      return handleSidePanel(state, action);
 
     case 'clear':
       return { ...state, commandHistory: [] };

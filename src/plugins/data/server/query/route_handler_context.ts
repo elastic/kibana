@@ -9,7 +9,7 @@
 import { CustomRequestHandlerContext, RequestHandlerContext, SavedObject } from '@kbn/core/server';
 import { isFilters } from '@kbn/es-query';
 import { isQuery, SavedQueryAttributes } from '../../common';
-import { extract, inject } from '../../common/query/persistable_state';
+import { extract, inject } from '../../common/query/filters/persistable_state';
 
 function injectReferences({
   id,

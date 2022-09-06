@@ -144,6 +144,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
               actionTypeId: '.servicenow',
               config: {
                 apiUrl: 'https://example.com',
+                usesTableApi: false,
               },
               secrets: {
                 username: 'elastic',

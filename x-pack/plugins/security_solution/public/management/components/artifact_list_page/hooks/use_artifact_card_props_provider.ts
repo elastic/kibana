@@ -12,7 +12,7 @@ import {
   ArtifactEntryCardProps,
   useEndpointPoliciesToArtifactPolicies,
 } from '../../artifact_entry_card';
-import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
+import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 import { useGetEndpointSpecificPolicies } from '../../../services/policies/hooks';
 import { getLoadPoliciesError } from '../../../common/translations';
 import { useToasts } from '../../../../common/lib/kibana';

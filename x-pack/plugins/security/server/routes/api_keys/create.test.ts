@@ -42,6 +42,7 @@ describe('Create API Key route', () => {
   });
 
   describe('failure', () => {
+    test.todo('actually exercise different types of payload validation');
     test('returns result of license checker', async () => {
       const mockContext = getMockContext({ state: 'invalid', message: 'test forbidden message' });
       const response = await routeHandler(

@@ -7,7 +7,7 @@
  */
 
 import './annotations.scss';
-import './reference_lines.scss';
+import './reference_lines/reference_lines.scss';
 
 import React from 'react';
 import { snakeCase } from 'lodash';
@@ -34,7 +34,6 @@ import type {
   CommonXYAnnotationLayerConfig,
   CollectiveConfig,
 } from '../../common';
-
 import { AnnotationIcon, hasIcon, Marker, MarkerBody } from '../helpers';
 import { mapVerticalToHorizontalPlacement, LINES_MARKER_SIZE } from '../helpers';
 

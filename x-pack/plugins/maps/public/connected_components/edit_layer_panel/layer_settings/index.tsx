@@ -12,6 +12,7 @@ import {
   clearLayerAttribution,
   setLayerAttribution,
   updateLayerLabel,
+  updateLayerLocale,
   updateLayerMaxZoom,
   updateLayerMinZoom,
   updateLayerAlpha,
@@ -26,6 +27,7 @@ function mapDispatchToProps(dispatch: Dispatch<AnyAction>) {
     setLayerAttribution: (id: string, attribution: Attribution) =>
       dispatch(setLayerAttribution(id, attribution)),
     updateLabel: (id: string, label: string) => dispatch(updateLayerLabel(id, label)),
+    updateLocale: (id: string, locale: string) => dispatch(updateLayerLocale(id, locale)),
     updateMinZoom: (id: string, minZoom: number) => dispatch(updateLayerMinZoom(id, minZoom)),
     updateMaxZoom: (id: string, maxZoom: number) => dispatch(updateLayerMaxZoom(id, maxZoom)),
     updateAlpha: (id: string, alpha: number) => dispatch(updateLayerAlpha(id, alpha)),

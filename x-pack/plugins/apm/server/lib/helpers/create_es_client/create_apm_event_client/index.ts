@@ -6,6 +6,7 @@
  */
 
 import type {
+  EqlSearchRequest,
   TermsEnumRequest,
   TermsEnumResponse,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -30,7 +31,10 @@ import {
   getDebugTitle,
 } from '../call_async_with_debug';
 import { cancelEsRequestOnAbort } from '../cancel_es_request_on_abort';
-import { unpackProcessorEvents } from './unpack_processor_events';
+import {
+  unpackProcessorEvents,
+  processorEventsToIndex,
+} from './unpack_processor_events';
 
 export type APMEventESSearchRequest = Omit<ESSearchRequest, 'index'> & {
   apm: {
@@ -43,6 +47,10 @@ export type APMEventESSearchRequest = Omit<ESSearchRequest, 'index'> & {
 };
 
 export type APMEventESTermsEnumRequest = Omit<TermsEnumRequest, 'index'> & {
+  apm: { events: ProcessorEvent[] };
+};
+
+export type APMEventEqlSearchRequest = Omit<EqlSearchRequest, 'index'> & {
   apm: { events: ProcessorEvent[] };
 };
 
@@ -114,7 +122,7 @@ export class APMEventClient {
             this.esClient.search(searchParams, {
               signal: controller.signal,
               meta: true,
-            }),
+            }) as Promise<any>,
             this.request,
             controller
           );
@@ -136,6 +144,48 @@ export class APMEventClient {
       requestType,
       operationName,
       requestParams: searchParams,
+    });
+  }
+
+  async eqlSearch(operationName: string, params: APMEventEqlSearchRequest) {
+    const requestType = 'eql_search';
+    const index = processorEventsToIndex(params.apm.events, this.indices);
+
+    return callAsyncWithDebug({
+      cb: () => {
+        const { apm, ...rest } = params;
+
+        const eqlSearchPromise = withApmSpan(operationName, () => {
+          const controller = new AbortController();
+          return cancelEsRequestOnAbort(
+            this.esClient.eql.search(
+              {
+                index,
+                ...rest,
+              },
+              { signal: controller.signal, meta: true }
+            ),
+            this.request,
+            controller
+          );
+        });
+
+        return unwrapEsResponse(eqlSearchPromise);
+      },
+      getDebugMessage: () => ({
+        body: getDebugBody({
+          params,
+          requestType,
+          operationName,
+        }),
+        title: getDebugTitle(this.request),
+      }),
+      isCalledWithInternalUser: false,
+      debug: this.debug,
+      request: this.request,
+      requestType,
+      operationName,
+      requestParams: params,
     });
   }
 

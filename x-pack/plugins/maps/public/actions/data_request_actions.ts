@@ -13,6 +13,7 @@ import bbox from '@turf/bbox';
 import uuid from 'uuid/v4';
 import { multiPoint } from '@turf/helpers';
 import { FeatureCollection } from 'geojson';
+import { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import { MapStoreState } from '../reducers/store';
 import {
   KBN_IS_CENTROID_FEATURE,
@@ -31,6 +32,7 @@ import {
   registerCancelCallback,
   unregisterCancelCallback,
   getEventHandlers,
+  getInspectorAdapters,
   ResultMeta,
 } from '../reducers/non_serializable_instances';
 import { updateTooltipStateForLayer } from './tooltip_actions';
@@ -69,6 +71,7 @@ export type DataRequestContext = {
   forceRefreshDueToDrawing: boolean; // Boolean signaling data request triggered by a user updating layer features via drawing tools. When true, layer will re-load regardless of "source.applyForceRefresh" flag.
   isForceRefresh: boolean; // Boolean signaling data request triggered by auto-refresh timer or user clicking refresh button. When true, layer will re-load only when "source.applyForceRefresh" flag is set to true.
   isFeatureEditorOpenForLayer: boolean; // Boolean signaling that feature editor menu is open for a layer. When true, layer will ignore all global and layer filtering so drawn features are displayed and not filtered out.
+  inspectorAdapters: Adapters;
 };
 
 export function clearDataRequests(layer: ILayer) {
@@ -148,6 +151,7 @@ function getDataRequestContext(
     forceRefreshDueToDrawing,
     isForceRefresh,
     isFeatureEditorOpenForLayer: getEditState(getState())?.layerId === layerId,
+    inspectorAdapters: getInspectorAdapters(getState()),
   };
 }
 

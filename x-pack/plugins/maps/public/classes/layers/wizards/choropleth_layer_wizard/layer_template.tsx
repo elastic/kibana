@@ -121,10 +121,15 @@ export class LayerTemplate extends Component<RenderWizardArguments, State> {
   };
 
   _loadEmsFileFields = async () => {
-    const emsFileLayers = await getEmsFileLayers();
-    const emsFileLayer = emsFileLayers.find((fileLayer: FileLayer) => {
-      return fileLayer.getId() === this.state.leftEmsFileId;
-    });
+    let emsFileLayer: FileLayer | undefined;
+    try {
+      const emsFileLayers = await getEmsFileLayers();
+      emsFileLayer = emsFileLayers.find((fileLayer: FileLayer) => {
+        return fileLayer.getId() === this.state.leftEmsFileId;
+      });
+    } catch (error) {
+      // ignore error, lack of EMS file layers will be surfaced in EMS file select
+    }
 
     if (!this._isMounted || !emsFileLayer) {
       return;

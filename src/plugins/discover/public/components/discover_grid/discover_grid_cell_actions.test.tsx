@@ -5,17 +5,50 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+const mockCopyToClipboard = jest.fn();
+jest.mock('@elastic/eui', () => {
+  const original = jest.requireActual('@elastic/eui');
+  return {
+    ...original,
+    copyToClipboard: (value: string) => mockCopyToClipboard(value),
+  };
+});
+
+jest.mock('../../utils/use_discover_services', () => {
+  const services = {
+    toastNotifications: {
+      addInfo: jest.fn(),
+    },
+  };
+  const originalModule = jest.requireActual('../../utils/use_discover_services');
+  return {
+    ...originalModule,
+    useDiscoverServices: () => services,
+  };
+});
 
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
-import { FilterInBtn, FilterOutBtn, buildCellActions } from './discover_grid_cell_actions';
+import { FilterInBtn, FilterOutBtn, buildCellActions, CopyBtn } from './discover_grid_cell_actions';
 import { DiscoverGridContext } from './discover_grid_context';
-
+import { EuiButton } from '@elastic/eui';
 import { indexPatternMock } from '../../__mocks__/index_pattern';
 import { esHits } from '../../__mocks__/es_hits';
-import { EuiButton } from '@elastic/eui';
 import { DataViewField } from '@kbn/data-views-plugin/public';
+import { flattenHit } from '@kbn/data-plugin/common';
+
+const contextMock = {
+  expanded: undefined,
+  setExpanded: jest.fn(),
+  rows: esHits,
+  rowsFlattened: esHits.map((hit) => flattenHit(hit, indexPatternMock)),
+  onFilter: jest.fn(),
+  indexPattern: indexPatternMock,
+  isDarkMode: false,
+  selectedDocs: [],
+  setSelectedDocs: jest.fn(),
+};
 
 describe('Discover cell actions ', function () {
   it('should not show cell actions for unfilterable fields', async () => {
@@ -23,17 +56,6 @@ describe('Discover cell actions ', function () {
   });
 
   it('triggers filter function when FilterInBtn is clicked', async () => {
-    const contextMock = {
-      expanded: undefined,
-      setExpanded: jest.fn(),
-      rows: esHits,
-      onFilter: jest.fn(),
-      indexPattern: indexPatternMock,
-      isDarkMode: false,
-      selectedDocs: [],
-      setSelectedDocs: jest.fn(),
-    };
-
     const component = mountWithIntl(
       <DiscoverGridContext.Provider value={contextMock}>
         <FilterInBtn
@@ -55,17 +77,6 @@ describe('Discover cell actions ', function () {
     );
   });
   it('triggers filter function when FilterOutBtn is clicked', async () => {
-    const contextMock = {
-      expanded: undefined,
-      setExpanded: jest.fn(),
-      rows: esHits,
-      onFilter: jest.fn(),
-      indexPattern: indexPatternMock,
-      isDarkMode: false,
-      selectedDocs: [],
-      setSelectedDocs: jest.fn(),
-    };
-
     const component = mountWithIntl(
       <DiscoverGridContext.Provider value={contextMock}>
         <FilterOutBtn
@@ -85,5 +96,22 @@ describe('Discover cell actions ', function () {
       'jpg',
       '-'
     );
+  });
+  it('triggers clipboard copy when CopyBtn is clicked', async () => {
+    const component = mountWithIntl(
+      <DiscoverGridContext.Provider value={contextMock}>
+        <CopyBtn
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          Component={(props: any) => <EuiButton {...props} />}
+          rowIndex={1}
+          colIndex={1}
+          columnId="extension"
+          isExpanded={false}
+        />
+      </DiscoverGridContext.Provider>
+    );
+    const button = findTestSubject(component, 'copyClipboardButton');
+    await button.simulate('click');
+    expect(mockCopyToClipboard).toHaveBeenCalledWith('jpg');
   });
 });

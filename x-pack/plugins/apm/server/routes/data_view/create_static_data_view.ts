@@ -6,7 +6,7 @@
  */
 
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import { APM_STATIC_INDEX_PATTERN_ID } from '../../../common/index_pattern_constants';
+import { APM_STATIC_DATA_VIEW_ID } from '../../../common/data_view_constants';
 import { hasHistoricalAgentData } from '../historical_data/has_historical_agent_data';
 import { Setup } from '../../lib/helpers/setup_request';
 import { APMRouteHandlerResources } from '../typings';
@@ -55,7 +55,7 @@ export async function createStaticDataView({
           'index-pattern',
           getApmDataViewAttributes(apmDataViewTitle),
           {
-            id: APM_STATIC_INDEX_PATTERN_ID,
+            id: APM_STATIC_DATA_VIEW_ID,
             overwrite: forceOverwrite,
             namespace: spaceId,
           }
@@ -86,7 +86,7 @@ async function getForceOverwrite({
     const existingDataView =
       await savedObjectsClient.get<ApmDataViewAttributes>(
         'index-pattern',
-        APM_STATIC_INDEX_PATTERN_ID
+        APM_STATIC_DATA_VIEW_ID
       );
 
     // if the existing data view does not matches the new one, force an update

@@ -21,13 +21,11 @@ export const prebuiltRuleAllowlistFields: AllowlistFields = {
   'kibana.alert.original_event.module': true,
   'kibana.alert.original_event.type': true,
   'kibana.alert.original_time': true,
-  'kibana.alert.reason': true,
   'kibana.alert.risk_score': true,
   'kibana.alert.rule.actions': true,
   'kibana.alert.rule.category': true,
   'kibana.alert.rule.consumer': true,
   'kibana.alert.rule.created_at': true,
-  'kibana.alert.rule.description': true,
   'kibana.alert.rule.enabled': true,
   'kibana.alert.rule.exceptions_list': true,
   'kibana.alert.rule.execution.uuid': true,
@@ -56,6 +54,24 @@ export const prebuiltRuleAllowlistFields: AllowlistFields = {
   'kibana.alert.workflow_status': true,
   'kibana.space_ids': true,
   'kibana.version': true,
+  // Event specific fileter entries
+  'event.ingested': true,
+  'event.provider': true,
+  'event.created': true,
+  'event.kind': true,
+  'event.action': true,
+  'event.id': true,
+  'event.type': true,
+  'event.category': true,
+  'event.dataset': true,
+  'event.outcome': true,
+  'event.module': true,
+  job_id: true,
+  causes: true,
+  typical: true,
+  multi_bucket_impact: true,
+  partition_field_name: true,
+  partition_field_value: true,
   // Alert specific filter entries
   agent: {
     id: true,
@@ -74,6 +90,7 @@ export const prebuiltRuleAllowlistFields: AllowlistFields = {
       name: true,
     },
   },
+  event: true,
   group: {
     name: true,
   },
@@ -210,18 +227,6 @@ export const prebuiltRuleAllowlistFields: AllowlistFields = {
       type: true,
     },
   },
-  event: {
-    action: true,
-    agent_id_status: true,
-    category: true,
-    code: true,
-    dataset: true,
-    kind: true,
-    module: true,
-    outcome: true,
-    provider: true,
-    type: true,
-  },
   file: {
     Ext: {
       windows: {
@@ -276,7 +281,26 @@ export const prebuiltRuleAllowlistFields: AllowlistFields = {
     },
   },
   // winlog
-  winlog: true,
+  winlog: {
+    api: true,
+    channel: true,
+    event_data: true,
+    event_id: true,
+    keywords: true,
+    logon: true,
+    opcode: true,
+    process: true,
+    provider_guid: true,
+    provider_name: true,
+    record_id: true,
+    task: true,
+    user: {
+      identifier: true,
+      domain: true,
+      type: true,
+    },
+    version: true,
+  },
   // ml signal fields
   influencers: true,
   signal: {

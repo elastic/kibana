@@ -15,6 +15,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
+import { IntegrationsPopover } from '../../../../../common/components/integrations_popover';
 import {
   APP_UI_ID,
   DEFAULT_RELATIVE_DATE_THRESHOLD,
@@ -157,6 +158,21 @@ const TAGS_COLUMN: TableColumn = {
   truncateText: true,
 };
 
+const INTEGRATIONS_COLUMN: TableColumn = {
+  field: 'related_integrations',
+  name: null,
+  align: 'center',
+  render: (integrations: Rule['related_integrations']) => {
+    if (integrations?.length === 0) {
+      return null;
+    }
+
+    return <IntegrationsPopover integrations={integrations} />;
+  },
+  width: '143px',
+  truncateText: true,
+};
+
 const useActionsColumn = (): EuiTableActionsColumnType<Rule> => {
   const { navigateToApp } = useKibana().services.application;
   const hasActionsPrivileges = useHasActionsPrivileges();
@@ -187,6 +203,7 @@ export const useRulesColumns = ({ hasPermissions }: ColumnsProps): TableColumn[]
   return useMemo(
     () => [
       ruleNameColumn,
+      INTEGRATIONS_COLUMN,
       TAGS_COLUMN,
       {
         field: 'risk_score',
@@ -292,6 +309,7 @@ export const useMonitoringColumns = ({ hasPermissions }: ColumnsProps): TableCol
         ...ruleNameColumn,
         width: '28%',
       },
+      INTEGRATIONS_COLUMN,
       TAGS_COLUMN,
       {
         field: 'execution_summary.last_execution.metrics.total_indexing_duration_ms',

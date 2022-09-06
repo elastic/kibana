@@ -9,7 +9,7 @@
 import { schema } from '@kbn/config-schema';
 import { SavedObjectsTypeValidator, SavedObjectsValidationMap } from '.';
 import { SavedObjectSanitizedDoc } from '../serialization';
-import { loggerMock, MockedLogger } from '../../logging/logger.mock';
+import { loggerMock, MockedLogger } from '@kbn/logging-mocks';
 
 describe('Saved Objects type validator', () => {
   let validator: SavedObjectsTypeValidator;

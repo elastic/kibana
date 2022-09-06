@@ -21,7 +21,6 @@ const rightSource = {
 };
 
 const mockSource = {
-  getInspectorAdapters() {},
   createField({ fieldName: name }) {
     return {
       getName() {

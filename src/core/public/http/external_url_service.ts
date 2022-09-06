@@ -6,16 +6,15 @@
  * Side Public License, v 1.
  */
 
+import type { CoreService } from '@kbn/core-base-browser-internal';
+import type { InternalInjectedMetadataSetup } from '@kbn/core-injected-metadata-browser-internal';
 import { IExternalUrlPolicy } from '../../server/types';
-
-import { CoreService } from '../../types';
 import { IExternalUrl } from './types';
-import { InjectedMetadataSetup } from '../injected_metadata';
 import { Sha256 } from '../utils';
 
 interface SetupDeps {
   location: Pick<Location, 'href'>;
-  injectedMetadata: InjectedMetadataSetup;
+  injectedMetadata: InternalInjectedMetadataSetup;
 }
 
 function* getHostHashes(actualHost: string) {

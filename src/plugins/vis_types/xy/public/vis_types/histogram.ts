@@ -130,6 +130,7 @@ export const histogramVisTypeDefinition = {
     },
   },
   editorConfig: {
+    enableDataViewChange: true,
     optionTabs,
     schemas: [
       {
@@ -139,7 +140,13 @@ export const histogramVisTypeDefinition = {
           defaultMessage: 'Y-axis',
         }),
         min: 1,
-        aggFilter: ['!geo_centroid', '!geo_bounds', '!filtered_metric', '!single_percentile'],
+        aggFilter: [
+          '!geo_centroid',
+          '!geo_bounds',
+          '!filtered_metric',
+          '!single_percentile',
+          '!single_percentile_rank',
+        ],
         defaults: [{ schema: 'metric', type: 'count' }],
       },
       {

@@ -57,7 +57,7 @@ export const useExplorationResults = (
   const columns: EuiDataGridColumn[] = [];
 
   if (jobConfig !== undefined) {
-    const resultsField = jobConfig.dest.results_field;
+    const resultsField = jobConfig.dest.results_field!;
     const { fieldTypes } = getIndexFields(jobConfig, needsDestIndexFields);
     columns.push(
       ...getDataGridSchemasFromFieldTypes(fieldTypes, resultsField).sort((a: any, b: any) =>

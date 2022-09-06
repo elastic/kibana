@@ -32,7 +32,7 @@ import {
   CONDITION_OPERATOR_TYPE_NOT_MATCH,
 } from './translations';
 import { ArtifactInfo, ArtifactInfoEntry } from '../types';
-import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
+import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 
 const OS_LABELS = Object.freeze({
   linux: OS_LINUX,

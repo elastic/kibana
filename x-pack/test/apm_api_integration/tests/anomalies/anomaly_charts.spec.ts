@@ -10,6 +10,7 @@ import { range, omit } from 'lodash';
 import { apm, timerange } from '@elastic/apm-synthtrace';
 import { ServiceAnomalyTimeseries } from '@kbn/apm-plugin/common/anomaly_detection/service_anomaly_timeseries';
 import { ApmMlDetectorType } from '@kbn/apm-plugin/common/anomaly_detection/apm_ml_detectors';
+import { Environment } from '@kbn/apm-plugin/common/environment_rt';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { ApmApiError } from '../../common/apm_api_supertest';
 import { createAndRunApmMlJob } from '../../common/utils/create_and_run_apm_ml_job';
@@ -40,11 +41,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       end,
       transactionType,
       serviceName,
+      environment,
     }: {
       start: string;
       end: string;
       transactionType: string;
       serviceName: string;
+      environment: Environment;
     },
     user = apmApiClient.readUser
   ) {
@@ -58,6 +61,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           start,
           end,
           transactionType,
+          environment,
         },
       },
     });
@@ -74,6 +78,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             transactionType: 'request',
             start: '2021-01-01T00:00:00.000Z',
             end: '2021-01-01T00:15:00.000Z',
+            environment: 'ENVIRONMENT_ALL',
           })
         );
 
@@ -141,6 +146,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 transactionType: 'request',
                 start,
                 end,
+                environment: 'ENVIRONMENT_ALL',
               },
               apmApiClient.noMlAccessUser
             )
@@ -156,6 +162,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               transactionType: 'request',
               start,
               end,
+              environment: 'ENVIRONMENT_ALL',
             })
           );
 
@@ -182,6 +189,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               transactionType: 'request',
               start,
               end,
+              environment: 'ENVIRONMENT_ALL',
             })
           );
 
@@ -202,6 +210,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 transactionType: 'request',
                 start,
                 end,
+                environment: 'ENVIRONMENT_ALL',
               })
             ).body.allAnomalyTimeseries;
 

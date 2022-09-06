@@ -4,7 +4,7 @@
 
 ## SavedObjectsStart.client property
 
-[SavedObjectsClient](./kibana-plugin-core-public.savedobjectsclient.md)
+[SavedObjectsClientContract](./kibana-plugin-core-public.savedobjectsclientcontract.md)
 
 <b>Signature:</b>
 

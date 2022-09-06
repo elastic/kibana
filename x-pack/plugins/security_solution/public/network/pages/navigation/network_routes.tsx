@@ -6,7 +6,8 @@
  */
 
 import React, { useCallback } from 'react';
-import { Route, Switch } from 'react-router-dom';
+import { Switch } from 'react-router-dom';
+import { Route } from '@kbn/kibana-react-plugin/public';
 import { EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
 import { FlowTargetSourceDest } from '../../../../common/search_strategy/security_solution/network';

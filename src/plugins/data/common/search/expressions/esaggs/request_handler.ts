@@ -10,8 +10,9 @@ import { i18n } from '@kbn/i18n';
 import { defer } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 import { Adapters } from '@kbn/inspector-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
 
-import { calculateBounds, Filter, IndexPattern, Query, TimeRange } from '../../..';
+import { calculateBounds, Filter, Query, TimeRange } from '../../..';
 
 import { IAggConfigs } from '../../aggs';
 import { ISearchStartSearchSource } from '../../search_source';
@@ -21,7 +22,7 @@ interface RequestHandlerParams {
   abortSignal?: AbortSignal;
   aggs: IAggConfigs;
   filters?: Filter[];
-  indexPattern?: IndexPattern;
+  indexPattern?: DataView;
   inspectorAdapters: Adapters;
   metricsAtAllLevels?: boolean;
   partialRows?: boolean;

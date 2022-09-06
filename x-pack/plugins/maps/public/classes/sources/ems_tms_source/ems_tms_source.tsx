@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { Adapters } from '@kbn/inspector-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { AbstractSource, SourceEditorArgs } from '../source';
 import { ITMSSource } from '../tms_source';
@@ -56,9 +55,9 @@ export class EMSTMSSource extends AbstractSource implements ITMSSource {
 
   readonly _descriptor: EMSTMSSourceDescriptor;
 
-  constructor(descriptor: Partial<EMSTMSSourceDescriptor>, inspectorAdapters?: Adapters) {
+  constructor(descriptor: Partial<EMSTMSSourceDescriptor>) {
     const emsTmsDescriptor = EMSTMSSource.createDescriptor(descriptor);
-    super(emsTmsDescriptor, inspectorAdapters);
+    super(emsTmsDescriptor);
     this._descriptor = emsTmsDescriptor;
   }
 

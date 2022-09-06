@@ -110,6 +110,7 @@ describe('alertType', () => {
         timeWindowUnit: 'm',
         thresholdComparator: Comparator.LT,
         threshold: [0],
+        searchType: 'esQuery',
       };
 
       expect(alertType.validate?.params?.validate(params)).toBeTruthy();
@@ -128,6 +129,7 @@ describe('alertType', () => {
         timeWindowUnit: 'm',
         thresholdComparator: Comparator.BETWEEN,
         threshold: [0],
+        searchType: 'esQuery',
       };
 
       expect(() => paramsSchema.validate(params)).toThrowErrorMatchingInlineSnapshot(
@@ -145,6 +147,7 @@ describe('alertType', () => {
         timeWindowUnit: 'm',
         thresholdComparator: Comparator.BETWEEN,
         threshold: [0],
+        searchType: 'esQuery',
       };
       const alertServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
 
@@ -174,6 +177,7 @@ describe('alertType', () => {
         timeWindowUnit: 'm',
         thresholdComparator: Comparator.GT,
         threshold: [0],
+        searchType: 'esQuery',
       };
       const alertServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
 
@@ -219,6 +223,7 @@ describe('alertType', () => {
         timeWindowUnit: 'm',
         thresholdComparator: Comparator.GT,
         threshold: [0],
+        searchType: 'esQuery',
       };
       const alertServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
 
@@ -267,6 +272,7 @@ describe('alertType', () => {
         timeWindowUnit: 'm',
         thresholdComparator: Comparator.GT,
         threshold: [0],
+        searchType: 'esQuery',
       };
       const alertServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
 
@@ -309,6 +315,7 @@ describe('alertType', () => {
         timeWindowUnit: 'm',
         thresholdComparator: Comparator.GT,
         threshold: [0],
+        searchType: 'esQuery',
       };
       const alertServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
 
@@ -380,6 +387,7 @@ describe('alertType', () => {
         timeWindowUnit: 'm',
         thresholdComparator: Comparator.GT,
         threshold: [0],
+        searchType: 'esQuery',
       };
       const alertServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
 
@@ -425,6 +433,7 @@ describe('alertType', () => {
         timeWindowUnit: 'm',
         thresholdComparator: Comparator.GT,
         threshold: [0],
+        searchType: 'esQuery',
       };
       const alertServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
 

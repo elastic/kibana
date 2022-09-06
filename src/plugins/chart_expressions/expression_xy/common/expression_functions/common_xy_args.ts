@@ -17,6 +17,7 @@ import {
   TICK_LABELS_CONFIG,
   ValueLabelModes,
   XYCurveTypes,
+  YScaleTypes,
 } from '../constants';
 import { strings } from '../i18n';
 import { LayeredXyVisFn, XyVisFn } from '../types';
@@ -45,6 +46,18 @@ export const commonXYArgs: CommonXYFn['args'] = {
     types: [AXIS_EXTENT_CONFIG],
     help: strings.getYRightExtentHelp(),
     default: `{${AXIS_EXTENT_CONFIG}}`,
+  },
+  yLeftScale: {
+    options: [...Object.values(YScaleTypes)],
+    help: strings.getYLeftScaleTypeHelp(),
+    default: YScaleTypes.LINEAR,
+    strict: true,
+  },
+  yRightScale: {
+    options: [...Object.values(YScaleTypes)],
+    help: strings.getYRightScaleTypeHelp(),
+    default: YScaleTypes.LINEAR,
+    strict: true,
   },
   legend: {
     types: [LEGEND_CONFIG],
@@ -114,5 +127,32 @@ export const commonXYArgs: CommonXYFn['args'] = {
   ariaLabel: {
     types: ['string'],
     help: strings.getAriaLabelHelp(),
+  },
+  detailedTooltip: {
+    types: ['boolean'],
+    help: strings.getDetailedTooltipHelp(),
+  },
+  showTooltip: {
+    types: ['boolean'],
+    default: true,
+    help: strings.getShowTooltipHelp(),
+  },
+  orderBucketsBySum: {
+    types: ['boolean'],
+    default: false,
+    help: strings.getOrderBucketsBySum(),
+  },
+  addTimeMarker: {
+    types: ['boolean'],
+    default: false,
+    help: strings.getAddTimeMakerHelp(),
+  },
+  markSizeRatio: {
+    types: ['number'],
+    help: strings.getMarkSizeRatioHelp(),
+  },
+  minTimeBarInterval: {
+    types: ['string'],
+    help: strings.getMinTimeBarIntervalHelp(),
   },
 };

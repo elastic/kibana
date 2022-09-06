@@ -27,6 +27,7 @@ kibana_vars=(
     console.proxyFilter
     csp.strict
     csp.warnLegacyBrowsers
+    csp.disableUnsafeEval
     csp.script_src
     csp.worker_src
     csp.style_src

@@ -155,8 +155,6 @@ export type UpdateKey = keyof Pick<
 export interface UpdateByKey {
   updateKey: UpdateKey;
   updateValue: CasePatchRequest[UpdateKey];
-  fetchCaseUserActions?: (caseId: string, caseConnectorId: string) => void;
-  updateCase?: (newCase: Case) => void;
   caseData: Case;
   onSuccess?: () => void;
   onError?: () => void;

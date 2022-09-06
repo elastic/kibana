@@ -7,13 +7,7 @@
 
 import React from 'react';
 import { IEmbeddable, EmbeddableInput } from '@kbn/embeddable-plugin/public';
-import {
-  Query,
-  Filter,
-  TimeRange,
-  extractTimeRange,
-  APPLY_FILTER_TRIGGER,
-} from '@kbn/data-plugin/public';
+import { Query, Filter, TimeRange, APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
 import { CollectConfigProps as CollectConfigPropsBase } from '@kbn/kibana-utils-plugin/public';
 import { reactToUiComponent } from '@kbn/kibana-react-plugin/public';
 import {
@@ -122,6 +116,7 @@ export class OpenInDiscoverDrilldown
   };
 
   public readonly execute = async (config: Config, context: ActionContext) => {
+    const { extractTimeRange } = await import('@kbn/es-query');
     const { restOfFilters: filters, timeRange: timeRange } = extractTimeRange(
       context.filters,
       context.timeFieldName

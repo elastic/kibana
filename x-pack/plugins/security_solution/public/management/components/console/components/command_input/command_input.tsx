@@ -11,10 +11,14 @@ import styled from 'styled-components';
 import classNames from 'classnames';
 import { KeyCapture, KeyCaptureProps } from './key_capture';
 import { useConsoleStateDispatch } from '../../hooks/state_selectors/use_console_state_dispatch';
-import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
+import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
 import { useDataTestSubj } from '../../hooks/state_selectors/use_data_test_subj';
 
 const CommandInputContainer = styled.div`
+  background-color: ${({ theme: { eui } }) => eui.euiColorGhost};
+  border-radius: ${({ theme: { eui } }) => eui.euiBorderRadius};
+  padding: ${({ theme: { eui } }) => eui.paddingSizes.s};
+
   .prompt {
     padding-right: 1ch;
   }

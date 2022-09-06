@@ -19,7 +19,6 @@ interface Props {
   fieldLabel?: string;
   filterLabelStatus: FilterLabelStatus;
   errorMessage?: string;
-  readonly?: boolean;
   hideAlias?: boolean;
   [propName: string]: any;
 }
@@ -32,7 +31,6 @@ export const FilterView: FC<Props> = ({
   fieldLabel,
   errorMessage,
   filterLabelStatus,
-  readonly,
   hideAlias,
   ...rest
 }: Props) => {
@@ -56,45 +54,29 @@ export const FilterView: FC<Props> = ({
     })} ${title}`;
   }
 
-  const badgeProps: EuiBadgeProps = readonly
-    ? {
-        title,
-        color: 'hollow',
-        onClick,
-        onClickAriaLabel: i18n.translate(
-          'unifiedSearch.filter.filterBar.filterItemReadOnlyBadgeAriaLabel',
-          {
-            defaultMessage: 'Filter entry',
-          }
-        ),
-        iconOnClick,
+  const badgeProps: EuiBadgeProps = {
+    title,
+    color: 'hollow',
+    iconType: 'cross',
+    iconSide: 'right',
+    closeButtonProps: {
+      // Removing tab focus on close button because the same option can be obtained through the context menu
+      // Also, we may want to add a `DEL` keyboard press functionality
+      tabIndex: -1,
+    },
+    iconOnClick,
+    iconOnClickAriaLabel: i18n.translate(
+      'unifiedSearch.filter.filterBar.filterItemBadgeIconAriaLabel',
+      {
+        defaultMessage: 'Delete {filter}',
+        values: { filter: innerText },
       }
-    : {
-        title,
-        color: 'hollow',
-        iconType: 'cross',
-        iconSide: 'right',
-        closeButtonProps: {
-          // Removing tab focus on close button because the same option can be obtained through the context menu
-          // Also, we may want to add a `DEL` keyboard press functionality
-          tabIndex: -1,
-        },
-        iconOnClick,
-        iconOnClickAriaLabel: i18n.translate(
-          'unifiedSearch.filter.filterBar.filterItemBadgeIconAriaLabel',
-          {
-            defaultMessage: 'Delete {filter}',
-            values: { filter: innerText },
-          }
-        ),
-        onClick,
-        onClickAriaLabel: i18n.translate(
-          'unifiedSearch.filter.filterBar.filterItemBadgeAriaLabel',
-          {
-            defaultMessage: 'Filter actions',
-          }
-        ),
-      };
+    ),
+    onClick,
+    onClickAriaLabel: i18n.translate('unifiedSearch.filter.filterBar.filterItemBadgeAriaLabel', {
+      defaultMessage: 'Filter actions',
+    }),
+  };
 
   return (
     <EuiBadge {...badgeProps} {...rest}>

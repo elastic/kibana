@@ -55,6 +55,7 @@ export const validatePackagePolicy = (
     description: null,
     namespace: null,
     inputs: {},
+    vars: {},
   };
   const namespaceValidation = isValidNamespace(packagePolicy.namespace);
 

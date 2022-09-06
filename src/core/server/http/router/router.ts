@@ -10,7 +10,7 @@ import { Request, ResponseObject, ResponseToolkit } from '@hapi/hapi';
 import Boom from '@hapi/boom';
 
 import { isConfigSchema } from '@kbn/config-schema';
-import { Logger } from '../../logging';
+import type { Logger } from '@kbn/logging';
 import {
   isUnauthorizedError as isElasticsearchUnauthorizedError,
   UnauthorizedError as EsNotAuthorizedError,

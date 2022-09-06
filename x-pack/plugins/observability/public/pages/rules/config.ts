@@ -42,20 +42,6 @@ export const rulesStatusesTranslationsMapping = {
   warning: RULE_STATUS_WARNING,
 };
 
-export const OBSERVABILITY_RULE_TYPES = [
-  'xpack.uptime.alerts.monitorStatus',
-  'xpack.uptime.alerts.tls',
-  'xpack.uptime.alerts.tlsCertificate',
-  'xpack.uptime.alerts.durationAnomaly',
-  'apm.error_rate',
-  'apm.transaction_error_rate',
-  'apm.transaction_duration',
-  'apm.transaction_duration_anomaly',
-  'metrics.alert.inventory.threshold',
-  'metrics.alert.threshold',
-  'logs.alert.document.count',
-];
-
 export const OBSERVABILITY_SOLUTIONS = ['logs', 'uptime', 'infrastructure', 'apm'];
 
 export type InitialRule = Partial<Rule> &

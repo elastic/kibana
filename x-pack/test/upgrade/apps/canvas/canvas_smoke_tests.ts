@@ -39,14 +39,16 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             await PageObjects.header.waitUntilLoadingHasFinished();
           });
           it('renders elements on workpad ' + name + ' page ' + page, async () => {
-            const currentUrl = await browser.getCurrentUrl();
-            const [, hash] = currentUrl.split('#/');
-            if (hash.length === 0) {
+            const browserUrl = await browser.getCurrentUrl();
+            const currentUrl = new URL(browserUrl);
+            const pathname = currentUrl.pathname;
+            const hash = currentUrl.hash;
+            if (hash.length === 0 && pathname.replace(/\/$/, '') === basePath + '/app/canvas') {
               throw new Error('Did not launch canvas sample data for ' + name);
             }
             if (name === 'ecommerce') {
-              if (!currentUrl.includes('page/' + page)) {
-                await browser.get(currentUrl.replace(/\/[^\/]*$/, '/' + page), false);
+              if (!browserUrl.includes('page/' + page)) {
+                await browser.get(browserUrl.replace(/\/[^\/]*$/, '/' + page), false);
                 await PageObjects.header.waitUntilLoadingHasFinished();
               }
             }

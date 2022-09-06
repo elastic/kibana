@@ -46,7 +46,7 @@ describe('useSecurityJobs', () => {
       (checkRecognizer as jest.Mock).mockResolvedValue(checkRecognizerSuccess);
     });
 
-    it('combines multiple ML calls into an array of SecurityJobs', async () => {
+    it.skip('combines multiple ML calls into an array of SecurityJobs', async () => {
       const expectedSecurityJob: SecurityJob = {
         datafeedId: 'datafeed-siem-api-rare_process_linux_ecs',
         datafeedIndices: ['auditbeat-*'],
@@ -78,7 +78,7 @@ describe('useSecurityJobs', () => {
       expect(result.current.jobs).toEqual(expect.arrayContaining([expectedSecurityJob]));
     });
 
-    it('returns those permissions', async () => {
+    it.skip('returns those permissions', async () => {
       const { result, waitForNextUpdate } = renderHook(() => useSecurityJobs(false));
       await waitForNextUpdate();
 
@@ -86,7 +86,7 @@ describe('useSecurityJobs', () => {
       expect(result.current.isLicensed).toEqual(true);
     });
 
-    it('renders a toast error if an ML call fails', async () => {
+    it.skip('renders a toast error if an ML call fails', async () => {
       (getModules as jest.Mock).mockRejectedValue('whoops');
       const { waitForNextUpdate } = renderHook(() => useSecurityJobs(false));
       await waitForNextUpdate();
@@ -103,7 +103,7 @@ describe('useSecurityJobs', () => {
       (hasMlLicense as jest.Mock).mockReturnValue(false);
     });
 
-    it('returns empty jobs and false predicates', () => {
+    it.skip('returns empty jobs and false predicates', () => {
       const { result } = renderHook(() => useSecurityJobs(false));
 
       expect(result.current.jobs).toEqual([]);

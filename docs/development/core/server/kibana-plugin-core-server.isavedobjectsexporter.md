@@ -2,11 +2,20 @@
 
 [Home](./index.md) &gt; [kibana-plugin-core-server](./kibana-plugin-core-server.md) &gt; [ISavedObjectsExporter](./kibana-plugin-core-server.isavedobjectsexporter.md)
 
-## ISavedObjectsExporter type
+## ISavedObjectsExporter interface
 
+Utility class used to export savedObjects.
 
 <b>Signature:</b>
 
 ```typescript
-export declare type ISavedObjectsExporter = PublicMethodsOf<SavedObjectsExporter>;
+export interface ISavedObjectsExporter 
 ```
+
+## Methods
+
+|  Method | Description |
+|  --- | --- |
+|  [exportByObjects(options)](./kibana-plugin-core-server.isavedobjectsexporter.exportbyobjects.md) | Generates an export stream for given object references.<!-- -->See the [options](./kibana-plugin-core-server.savedobjectsexportbyobjectoptions.md) for more detailed information. |
+|  [exportByTypes(options)](./kibana-plugin-core-server.isavedobjectsexporter.exportbytypes.md) | Generates an export stream for given types.<!-- -->See the [options](./kibana-plugin-core-server.savedobjectsexportbytypeoptions.md) for more detailed information. |
+

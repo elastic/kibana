@@ -671,7 +671,6 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
               }
             >
               <EuiContextMenuPanel
-                watchedItemProps={['icon', 'disabled']}
                 data-test-subj="lnsIndexPatternTypeFilterOptions"
                 items={(availableFieldTypes as DataType[]).map((type) => (
                   <EuiContextMenuItem

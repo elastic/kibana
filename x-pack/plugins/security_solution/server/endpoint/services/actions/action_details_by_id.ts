@@ -110,7 +110,7 @@ export const getActionDetailsById = async (
     throw new NotFoundError(`Action with id '${actionId}' not found.`);
   }
 
-  const { isCompleted, completedAt } = getActionCompletionInfo(
+  const { isCompleted, completedAt, wasSuccessful, errors } = getActionCompletionInfo(
     normalizedActionRequest.agents,
     actionResponses
   );
@@ -123,6 +123,8 @@ export const getActionDetailsById = async (
     logEntries: [...actionRequestsLogEntries, ...actionResponses],
     isCompleted,
     completedAt,
+    wasSuccessful,
+    errors,
     isExpired: !isCompleted && normalizedActionRequest.expiration < new Date().toISOString(),
   };
 

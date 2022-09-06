@@ -58,7 +58,7 @@ const SelectAgentPolicyStepContent: React.FunctionComponent<{
 }) => {
   useEffect(() => {
     // Select default value
-    if (eligibleFleetServerPolicies.length && !policyId) {
+    if (eligibleFleetServerPolicies.length === 1 && !policyId) {
       setPolicyId(eligibleFleetServerPolicies[0].id);
     }
   }, [eligibleFleetServerPolicies, policyId, setPolicyId]);

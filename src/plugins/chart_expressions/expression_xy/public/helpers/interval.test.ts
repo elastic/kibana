@@ -86,4 +86,18 @@ describe('calculateMinInterval', () => {
     const result = await calculateMinInterval(xyProps);
     expect(result).toEqual(undefined);
   });
+
+  it('should return specified interval if user provided it as `xAxisInterval`', async () => {
+    layer.table.columns[2].meta.source = 'esaggs';
+    layer.table.columns[2].meta.sourceParams = {
+      type: 'date_histogram',
+      params: {
+        used_interval: '5m',
+      },
+    };
+    xyProps.args.layers[0] = layer;
+    xyProps.args.minTimeBarInterval = '1h';
+    const result = await calculateMinInterval(xyProps);
+    expect(result).toEqual(60 * 60 * 1000);
+  });
 });

@@ -884,4 +884,34 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       }
     ),
   },
+  {
+    key: 'linux.advanced.event_filter.default',
+    first_supported_version: '8.3',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.event_filter.default',
+      {
+        defaultMessage: 'Download default event filter rules from Elastic.  Default: true',
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.event_filter.default',
+    first_supported_version: '8.3',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.event_filter.default',
+      {
+        defaultMessage: 'Download default event filter rules from Elastic.  Default: true',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.event_filter.default',
+    first_supported_version: '8.3',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.event_filter.default',
+      {
+        defaultMessage: 'Download default event filter rules from Elastic.  Default: true',
+      }
+    ),
+  },
 ];

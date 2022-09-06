@@ -13,21 +13,7 @@ import {
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { searchAlertByUuid } from './alert_status_route';
 import { mockAlerts } from '../../common/mocks/constants/session_view_process.mock';
-
-import {
-  AlertsClient,
-  ConstructorOptions,
-} from '@kbn/rule-registry-plugin/server/alert_data_client/alerts_client';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { alertingAuthorizationMock } from '@kbn/alerting-plugin/server/authorization/alerting_authorization.mock';
-import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
-import { AlertingAuthorizationEntity } from '@kbn/alerting-plugin/server';
-import { ruleDataServiceMock } from '@kbn/rule-registry-plugin/server/rule_data_plugin_service/rule_data_plugin_service.mock';
-
-const alertingAuthMock = alertingAuthorizationMock.create();
-const auditLogger = auditLoggerMock.create();
-
-const DEFAULT_SPACE = 'test_default_space_id';
+import { getAlertsClientMockInstance, resetAlertingAuthMock } from './alerts_client_mock.test';
 
 const getEmptyResponse = async () => {
   return {
@@ -65,57 +51,16 @@ const getResponse = async () => {
   };
 };
 
-const esClientMock = elasticsearchServiceMock.createElasticsearchClient(getResponse());
-
-const alertsClientParams: jest.Mocked<ConstructorOptions> = {
-  logger: loggingSystemMock.create().get(),
-  authorization: alertingAuthMock,
-  auditLogger,
-  ruleDataService: ruleDataServiceMock.create(),
-  esClient: esClientMock,
-};
-
 describe('alert_status_route.ts', () => {
   beforeEach(() => {
     jest.resetAllMocks();
-
-    alertingAuthMock.getSpaceId.mockImplementation(() => DEFAULT_SPACE);
-    // @ts-expect-error
-    alertingAuthMock.getAuthorizationFilter.mockImplementation(async () =>
-      Promise.resolve({ filter: [] })
-    );
-    // @ts-expect-error
-    alertingAuthMock.getAugmentedRuleTypesWithAuthorization.mockImplementation(async () => {
-      const authorizedRuleTypes = new Set();
-      authorizedRuleTypes.add({ producer: 'apm' });
-      return Promise.resolve({ authorizedRuleTypes });
-    });
-
-    alertingAuthMock.ensureAuthorized.mockImplementation(
-      // @ts-expect-error
-      async ({
-        ruleTypeId,
-        consumer,
-        operation,
-        entity,
-      }: {
-        ruleTypeId: string;
-        consumer: string;
-        operation: string;
-        entity: typeof AlertingAuthorizationEntity.Alert;
-      }) => {
-        if (ruleTypeId === 'apm.error_rate' && consumer === 'apm') {
-          return Promise.resolve();
-        }
-        return Promise.reject(new Error(`Unauthorized for ${ruleTypeId} and ${consumer}`));
-      }
-    );
+    resetAlertingAuthMock();
   });
 
   describe('searchAlertByUuid(client, alertUuid)', () => {
     it('should return an empty events array for a non existant alert uuid', async () => {
       const esClient = elasticsearchServiceMock.createElasticsearchClient(getEmptyResponse());
-      const alertsClient = new AlertsClient({ ...alertsClientParams, esClient });
+      const alertsClient = getAlertsClientMockInstance(esClient);
       const body = await searchAlertByUuid(alertsClient, mockAlerts[0].kibana!.alert!.uuid!);
 
       expect(body.events.length).toBe(0);
@@ -123,7 +68,7 @@ describe('alert_status_route.ts', () => {
 
     it('returns results for a particular alert uuid', async () => {
       const esClient = elasticsearchServiceMock.createElasticsearchClient(getResponse());
-      const alertsClient = new AlertsClient({ ...alertsClientParams, esClient });
+      const alertsClient = getAlertsClientMockInstance(esClient);
       const body = await searchAlertByUuid(alertsClient, mockAlerts[0].kibana!.alert!.uuid!);
 
       expect(body.events.length).toBe(1);

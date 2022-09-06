@@ -19,14 +19,14 @@ servers:
 paths:
   /api/cases:
     $ref: paths/api@cases.yaml
-#  /api/cases/_find:
-#    $ref: paths/api@cases@_find.yaml
-#  '/api/cases/alerts/{alertId}':
-#    $ref: 'paths/api@cases@alerts@{alertid}.yaml'
-#  '/api/cases/configure':
-#    $ref: paths/api@cases@configure.yaml
-#  '/api/cases/configure/{configurationId}':
-#    $ref: paths/api@cases@configure@{configurationid}.yaml
+  /api/cases/_find:
+    $ref: paths/api@cases@_find.yaml
+  '/api/cases/alerts/{alertId}':
+    $ref: 'paths/api@cases@alerts@{alertid}.yaml'
+  '/api/cases/configure':
+    $ref: paths/api@cases@configure.yaml
+  '/api/cases/configure/{configurationId}':
+    $ref: paths/api@cases@configure@{configurationid}.yaml
 #  '/api/cases/configure/connectors/_find':
 #    $ref: paths/api@cases@configure@connectors@_find.yaml
 #  '/api/cases/reporters':
@@ -50,14 +50,14 @@ paths:
   
   '/s/{spaceId}/api/cases':
     $ref: 'paths/s@{spaceid}@api@cases.yaml'
- # '/s/{spaceId}/api/cases/_find':
- #   $ref: 'paths/s@{spaceid}@api@cases@_find.yaml'
- # '/s/{spaceId}/api/cases/alerts/{alertId}':
- #   $ref: 'paths/s@{spaceid}@api@cases@alerts@{alertid}.yaml'
- # '/s/{spaceId}/api/cases/configure':
- #   $ref: paths/s@{spaceid}@api@cases@configure.yaml
- # '/s/{spaceId}/api/cases/configure/{configurationId}':
- #   $ref: paths/s@{spaceid}@api@cases@configure@{configurationid}.yaml
+  '/s/{spaceId}/api/cases/_find':
+    $ref: 'paths/s@{spaceid}@api@cases@_find.yaml'
+  '/s/{spaceId}/api/cases/alerts/{alertId}':
+    $ref: 'paths/s@{spaceid}@api@cases@alerts@{alertid}.yaml'
+  '/s/{spaceId}/api/cases/configure':
+    $ref: paths/s@{spaceid}@api@cases@configure.yaml
+  '/s/{spaceId}/api/cases/configure/{configurationId}':
+    $ref: paths/s@{spaceid}@api@cases@configure@{configurationid}.yaml
  # '/s/{spaceId}/api/cases/configure/connectors/_find':
  #   $ref: paths/s@{spaceid}@api@cases@configure@connectors@_find.yaml
  # '/s/{spaceId}/api/cases/reporters':

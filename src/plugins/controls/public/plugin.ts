@@ -61,10 +61,11 @@ export class ControlsPlugin
     factoryDef: IEditableControlFactory<I>,
     factory: EmbeddableFactory
   ) {
-    (factory as IEditableControlFactory<I>).controlEditorComponent =
-      factoryDef.controlEditorComponent;
+    (factory as IEditableControlFactory<I>).controlEditorOptionsComponent =
+      factoryDef.controlEditorOptionsComponent ?? undefined;
     (factory as IEditableControlFactory<I>).presaveTransformFunction =
       factoryDef.presaveTransformFunction;
+    (factory as IEditableControlFactory<I>).isFieldCompatible = factoryDef.isFieldCompatible;
   }
 
   public setup(

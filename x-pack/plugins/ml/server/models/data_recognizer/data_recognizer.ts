@@ -304,11 +304,14 @@ export class DataRecognizer {
       query: moduleConfig.query,
     };
 
-    const body = await this._client.asCurrentUser.search({
-      index,
-      size,
-      body: searchBody,
-    });
+    const body = await this._client.asCurrentUser.search(
+      {
+        index,
+        size,
+        body: searchBody,
+      },
+      { maxRetries: 0 }
+    );
 
     // @ts-expect-error incorrect search response type
     return body.hits.total.value > 0;

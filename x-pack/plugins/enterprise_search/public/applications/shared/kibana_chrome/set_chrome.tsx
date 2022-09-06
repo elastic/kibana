@@ -14,11 +14,17 @@ import { KibanaLogic } from '../kibana';
 import {
   useGenerateBreadcrumbs,
   useEnterpriseSearchBreadcrumbs,
+  useElasticsearchBreadcrumbs,
   useAppSearchBreadcrumbs,
   useWorkplaceSearchBreadcrumbs,
   BreadcrumbTrail,
 } from './generate_breadcrumbs';
-import { enterpriseSearchTitle, appSearchTitle, workplaceSearchTitle } from './generate_title';
+import {
+  enterpriseSearchTitle,
+  elasticsearchTitle,
+  appSearchTitle,
+  workplaceSearchTitle,
+} from './generate_title';
 
 /**
  * Helpers for setting Kibana chrome (breadcrumbs, doc titles) on React view mount
@@ -47,6 +53,23 @@ export const SetEnterpriseSearchChrome: React.FC<SetChromeProps> = ({ trail = []
 
   const crumbs = useGenerateBreadcrumbs(trail);
   const breadcrumbs = useEnterpriseSearchBreadcrumbs(crumbs);
+
+  useEffect(() => {
+    setBreadcrumbs(breadcrumbs);
+    setDocTitle(docTitle);
+  }, [trail]);
+
+  return null;
+};
+
+export const SetElasticsearchChrome: React.FC<SetChromeProps> = ({ trail = [] }) => {
+  const { setBreadcrumbs, setDocTitle } = useValues(KibanaLogic);
+
+  const title = reverseArray(trail);
+  const docTitle = elasticsearchTitle(title);
+
+  const crumbs = useGenerateBreadcrumbs(trail);
+  const breadcrumbs = useElasticsearchBreadcrumbs(crumbs);
 
   useEffect(() => {
     setBreadcrumbs(breadcrumbs);

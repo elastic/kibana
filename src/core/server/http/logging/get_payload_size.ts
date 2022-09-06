@@ -11,7 +11,7 @@ import { ReadStream } from 'fs';
 import { Zlib } from 'zlib';
 import { isBoom } from '@hapi/boom';
 import type { Request } from '@hapi/hapi';
-import { Logger } from '../../logging';
+import type { Logger } from '@kbn/logging';
 
 type Response = Request['response'];
 

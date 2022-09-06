@@ -21,7 +21,7 @@ import { HOST_ISOLATION_EXCEPTIONS_PATH } from '../../../../../../common/constan
 import {
   exceptionsListAllHttpMocks,
   fleetGetEndpointPackagePolicyListHttpMock,
-} from '../../../mocks';
+} from '../../../../mocks';
 import {
   clickOnEffectedPolicy,
   isEffectedPolicySelected,

@@ -49,6 +49,7 @@ import {
   MatchAllFilter as oldMatchAllFilter,
   RangeFilter as oldRangeFilter,
   KueryNode as oldKueryNode,
+  TimeRange as oldTimeRange,
   FilterMeta as oldFilterMeta,
   FILTERS as oldFILTERS,
   EsQueryConfig as oldEsQueryConfig,
@@ -339,6 +340,12 @@ type EsQueryConfig = oldEsQueryConfig;
  * @removeBy 8.1
  */
 
+/**
+ * @deprecated Import from the "@kbn/es-query" package directly instead.
+ * @removeBy 8.3
+ */
+type TimeRange = oldTimeRange;
+
 export type {
   Filter,
   RangeFilterParams,
@@ -349,6 +356,7 @@ export type {
   KueryNode,
   FilterMeta,
   EsQueryConfig,
+  TimeRange,
 };
 export {
   COMPARE_ALL_OPTIONS,

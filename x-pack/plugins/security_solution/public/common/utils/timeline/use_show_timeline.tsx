@@ -5,30 +5,51 @@
  * 2.0.
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { matchPath, useLocation } from 'react-router-dom';
 
-const HIDDEN_TIMELINE_ROUTES: readonly string[] = [
+import { getLinksWithHiddenTimeline } from '../../links';
+import { useIsGroupedNavigationEnabled } from '../../components/navigation/helpers';
+import { SourcererScopeName } from '../../store/sourcerer/model';
+import { useSourcererDataView } from '../../containers/sourcerer';
+
+const DEPRECATED_HIDDEN_TIMELINE_ROUTES: readonly string[] = [
   `/cases/configure`,
   '/administration',
   '/rules/create',
   '/get_started',
-  '/threat_hunting',
+  '/explore',
   '/dashboards',
   '/manage',
 ];
 
-const isHiddenTimelinePath = (currentPath: string): boolean => {
-  return !!HIDDEN_TIMELINE_ROUTES.find((route) => matchPath(currentPath, route));
+const isTimelineHidden = (currentPath: string, isGroupedNavigationEnabled: boolean): boolean => {
+  const groupLinksWithHiddenTimelinePaths = getLinksWithHiddenTimeline().map((l) => l.path);
+
+  const hiddenTimelineRoutes = isGroupedNavigationEnabled
+    ? groupLinksWithHiddenTimelinePaths
+    : DEPRECATED_HIDDEN_TIMELINE_ROUTES;
+
+  return !!hiddenTimelineRoutes.find((route) => matchPath(currentPath, route));
 };
 
 export const useShowTimeline = () => {
+  const isGroupedNavigationEnabled = useIsGroupedNavigationEnabled();
   const { pathname } = useLocation();
-  const [showTimeline, setShowTimeline] = useState(!isHiddenTimelinePath(pathname));
+  const { indicesExist, dataViewId } = useSourcererDataView(SourcererScopeName.timeline);
+
+  const [isTimelinePath, setIsTimelinePath] = useState(
+    !isTimelineHidden(pathname, isGroupedNavigationEnabled)
+  );
 
   useEffect(() => {
-    setShowTimeline(!isHiddenTimelinePath(pathname));
-  }, [pathname]);
+    setIsTimelinePath(!isTimelineHidden(pathname, isGroupedNavigationEnabled));
+  }, [pathname, isGroupedNavigationEnabled]);
+
+  const showTimeline = useMemo(
+    () => isTimelinePath && (dataViewId === null || indicesExist),
+    [isTimelinePath, indicesExist, dataViewId]
+  );
 
   return [showTimeline];
 };

@@ -69,6 +69,7 @@ import { translations, paths } from '../../../../config';
 import { addDisplayNames } from './add_display_names';
 import { ADD_TO_EXISTING_CASE, ADD_TO_NEW_CASE } from './translations';
 import { ObservabilityAppServices } from '../../../../application/types';
+import { useBulkAddToCaseActions } from '../../../../hooks/use_alert_bulk_case_actions';
 
 interface AlertsTableTGridProps {
   indexNames: string[];
@@ -169,8 +170,7 @@ function ObservabilityActions({
 
   const casePermissions = useGetUserCasesPermissions();
   const ruleId = alert.fields['kibana.alert.rule.uuid'] ?? null;
-  const linkToRule = ruleId ? http.basePath.prepend(paths.management.ruleDetails(ruleId)) : null;
-
+  const linkToRule = ruleId ? http.basePath.prepend(paths.observability.ruleDetails(ruleId)) : null;
   const caseAttachments: CaseAttachments = useMemo(() => {
     return ecsData?._id
       ? [
@@ -185,23 +185,19 @@ function ObservabilityActions({
       : [];
   }, [ecsData, cases.helpers, data]);
 
-  const createCaseFlyout = cases.hooks.getUseCasesAddToNewCaseFlyout({
-    attachments: caseAttachments,
-  });
+  const createCaseFlyout = cases.hooks.getUseCasesAddToNewCaseFlyout();
 
-  const selectCaseModal = cases.hooks.getUseCasesAddToExistingCaseModal({
-    attachments: caseAttachments,
-  });
+  const selectCaseModal = cases.hooks.getUseCasesAddToExistingCaseModal();
 
   const handleAddToNewCaseClick = useCallback(() => {
-    createCaseFlyout.open();
+    createCaseFlyout.open({ attachments: caseAttachments });
     closeActionsPopover();
-  }, [createCaseFlyout, closeActionsPopover]);
+  }, [createCaseFlyout, caseAttachments, closeActionsPopover]);
 
   const handleAddToExistingCaseClick = useCallback(() => {
-    selectCaseModal.open();
+    selectCaseModal.open({ attachments: caseAttachments });
     closeActionsPopover();
-  }, [closeActionsPopover, selectCaseModal]);
+  }, [caseAttachments, closeActionsPopover, selectCaseModal]);
 
   const actionsMenuItems = useMemo(() => {
     return [
@@ -404,6 +400,14 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
     [tGridState]
   );
 
+  const addToCaseBulkActions = useBulkAddToCaseActions();
+  const bulkActions = useMemo(
+    () => ({
+      alertStatusActions: false,
+      customBulkActions: addToCaseBulkActions,
+    }),
+    [addToCaseBulkActions]
+  );
   const tGridProps = useMemo(() => {
     const type: TGridType = 'standalone';
     const sortDirection: SortDirection = 'desc';
@@ -434,7 +438,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
       runtimeMappings: {},
       start: rangeFrom,
       setRefetch,
-      showCheckboxes: false,
+      bulkActions,
       sort: tGridState?.sort ?? [
         {
           columnId: '@timestamp',
@@ -460,17 +464,19 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
     };
   }, [
     casePermissions,
+    tGridState?.columns,
+    tGridState?.sort,
+    deletedEventIds,
     rangeTo,
     hasAlertsCrudPermissions,
     indexNames,
+    itemsPerPage,
+    onStateChange,
     kuery,
     rangeFrom,
     setRefetch,
+    bulkActions,
     leadingControlColumns,
-    deletedEventIds,
-    onStateChange,
-    tGridState,
-    itemsPerPage,
   ]);
 
   const handleFlyoutClose = () => setFlyoutAlert(undefined);
