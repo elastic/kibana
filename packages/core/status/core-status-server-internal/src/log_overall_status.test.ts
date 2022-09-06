@@ -7,7 +7,7 @@
  */
 
 import { TestScheduler } from 'rxjs/testing';
-import { ServiceStatus, ServiceStatusLevels } from './types';
+import { ServiceStatus, ServiceStatusLevels } from '@kbn/core-status-common';
 import { getOverallStatusChanges } from './log_overall_status';
 
 const getTestScheduler = () =>

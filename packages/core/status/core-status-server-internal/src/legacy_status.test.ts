@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ServiceStatus, ServiceStatusLevels } from './types';
+import { ServiceStatus, ServiceStatusLevels } from '@kbn/core-status-common';
 import { calculateLegacyStatus } from './legacy_status';
 
 const available: ServiceStatus = { level: ServiceStatusLevels.available, summary: 'Available' };

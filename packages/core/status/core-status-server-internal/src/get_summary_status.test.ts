@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ServiceStatus, ServiceStatusLevels } from './types';
+import { ServiceStatus, ServiceStatusLevels } from '@kbn/core-status-common';
 import { getSummaryStatus } from './get_summary_status';
 
 describe('getSummaryStatus', () => {
