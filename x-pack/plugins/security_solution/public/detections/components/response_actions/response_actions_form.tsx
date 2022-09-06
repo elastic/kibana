@@ -14,8 +14,11 @@ import { useSupportedResponseActionTypes } from './use_supported_response_action
 import { UseField } from '../../../shared_imports';
 
 const GhostFormField = () => <></>;
+
 export interface ResponseActionValidatorRef {
-  validation?: (actions: unknown) => Promise<{ [key: number]: { isValid: boolean } }>;
+  validation?: (
+    actions: unknown
+  ) => Promise<{ [key: number]: { errors: Record<string, unknown> } }>;
   actions?: unknown;
 }
 interface IProps {

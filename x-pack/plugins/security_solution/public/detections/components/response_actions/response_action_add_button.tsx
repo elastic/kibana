@@ -9,6 +9,7 @@ import React, { useMemo, useState, useCallback } from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiKeyPadMenuItem } from '@elastic/eui';
 import { suspendedComponentWithProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useLicense } from '../../../common/hooks/use_license';
 import type { ResponseActionType } from './get_supported_response_actions';
 import { useFormData } from '../../../shared_imports';
 
@@ -27,6 +28,8 @@ export const ResponseActionAddButton = ({
   const [isAddResponseActionButtonShown, setAddResponseActionButtonShown] = useState(
     data.responseActions && data.responseActions.length > 0
   );
+  const isGoldLicense = useLicense().isGoldPlus();
+
   const handleAddActionType = useCallback(
     (item) => {
       setAddResponseActionButtonShown(false);
@@ -63,7 +66,7 @@ export const ResponseActionAddButton = ({
         const keyPadItem = (
           <EuiKeyPadMenuItem
             key={index}
-            isDisabled={false}
+            isDisabled={!isGoldLicense}
             data-test-subj={`${item.id}-ResponseActionTypeSelectOption`}
             label={item.name}
             onClick={() => handleAddActionType(item)}

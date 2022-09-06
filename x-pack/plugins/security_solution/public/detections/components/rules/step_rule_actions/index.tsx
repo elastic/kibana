@@ -15,7 +15,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { findIndex } from 'lodash/fp';
-import { some } from 'lodash';
+import { some, isEmpty } from 'lodash';
 import type { FC } from 'react';
 import React, { memo, useCallback, useEffect, useMemo, useRef } from 'react';
 
@@ -129,7 +129,7 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
       // eslint-disable-next-line require-atomic-updates
       responseActionsValidationRef.current.actions = actionsMap;
 
-      return some(actionsMap, (item) => !item.isValid);
+      return some(actionsMap, (item) => !isEmpty(item.errors));
     }
   };
 

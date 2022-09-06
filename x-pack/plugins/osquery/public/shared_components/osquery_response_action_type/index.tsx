@@ -117,12 +117,12 @@ const OsqueryResponseActionParamsFormComponent: React.FunctionComponent<OsqueryR
           return {
             ...actions,
             [item.id]: {
-              isValid,
+              errors,
             },
           };
         };
       }
-    }, [handleSubmit, isValid, item.id, onSubmit, ref]);
+    }, [errors, handleSubmit, isValid, item.id, onSubmit, ref, watchedValues]);
 
     useEffect(() => {
       register('savedQueryId');
@@ -144,7 +144,7 @@ const OsqueryResponseActionParamsFormComponent: React.FunctionComponent<OsqueryR
     );
 
     useEffectOnce(() => {
-      if (defaultParams) {
+      if (defaultParams && defaultParams.id) {
         const { packId, ...restParams } = defaultParams;
         map(restParams, (value, key: keyof OsqueryResponseActionsParamsFormFields) => {
           if (!isEmpty(value)) {
