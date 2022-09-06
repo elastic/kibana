@@ -10,8 +10,7 @@ import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { first } from 'lodash';
 import { useEffect, useMemo, useCallback } from 'react';
-// eslint-disable-next-line @kbn/imports/no_boundary_crossing
-import { getIntervalInSeconds } from '../../../../../server/utils/get_interval_in_seconds';
+import { getIntervalInSeconds } from '../../../../../common/utils/get_interval_in_seconds';
 import { throwErrors, createPlainError } from '../../../../../common/runtime_types';
 import { useHTTPRequest } from '../../../../hooks/use_http_request';
 import {
