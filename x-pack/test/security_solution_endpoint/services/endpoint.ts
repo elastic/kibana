@@ -12,6 +12,8 @@ import {
   metadataTransformPrefix,
   METADATA_UNITED_INDEX,
   METADATA_UNITED_TRANSFORM,
+  HOST_METADATA_GET_ROUTE,
+  METADATA_DATASTREAM,
 } from '@kbn/security-solution-plugin/common/endpoint/constants';
 import {
   deleteIndexedHostsAndAlerts,
@@ -24,6 +26,10 @@ import { catchAndWrapError } from '@kbn/security-solution-plugin/server/endpoint
 import { installOrUpgradeEndpointFleetPackage } from '@kbn/security-solution-plugin/common/endpoint/data_loaders/setup_fleet_for_endpoint';
 import { EndpointError } from '@kbn/security-solution-plugin/common/endpoint/errors';
 import { STARTED_TRANSFORM_STATES } from '@kbn/security-solution-plugin/common/constants';
+import { DeepPartial } from 'utility-types';
+import { HostInfo, HostMetadata } from '@kbn/security-solution-plugin/common/endpoint/types';
+import { EndpointDocGenerator } from '@kbn/security-solution-plugin/common/endpoint/generate_data';
+import { merge } from 'lodash';
 import { FtrService } from '../../functional/ftr_provider_context';
 
 export class EndpointTestResources extends FtrService {
@@ -32,6 +38,8 @@ export class EndpointTestResources extends FtrService {
   private readonly kbnClient = this.ctx.getService('kibanaServer');
   private readonly transform = this.ctx.getService('transform');
   private readonly config = this.ctx.getService('config');
+  private readonly supertest = this.ctx.getService('supertest');
+  private readonly log = this.ctx.getService('log');
 
   private generateTransformId(endpointPackageVersion?: string): string {
     return `${metadataTransformPrefix}-${endpointPackageVersion ?? ''}`;
@@ -290,5 +298,68 @@ export class EndpointTestResources extends FtrService {
     typeof installOrUpgradeEndpointFleetPackage
   > {
     return installOrUpgradeEndpointFleetPackage(this.kbnClient);
+  }
+
+  /**
+   * Fetch (GET) the details of an endpoint
+   * @param endpointAgentId
+   */
+  async fetchEndpointMetadata(endpointAgentId: string): Promise<HostInfo> {
+    const metadata = this.supertest
+      .get(HOST_METADATA_GET_ROUTE.replace('{id}', endpointAgentId))
+      .set('kbn-xsrf', 'true')
+      .send()
+      .expect(200)
+      .then((response) => response.body as HostInfo);
+
+    return metadata;
+  }
+
+  /**
+   * Sends an updated metadata document for a given endpoint to the datastream and waits for the
+   * update to show up on the Metadata API (after transform runs)
+   */
+  async sendEndpointMetadataUpdate(
+    endpointAgentId: string,
+    updates: DeepPartial<HostMetadata> = {}
+  ): Promise<HostInfo> {
+    const currentMetadata = await this.fetchEndpointMetadata(endpointAgentId);
+    const generatedMetadataDoc = new EndpointDocGenerator().generateHostMetadata();
+
+    const updatedMetadataDoc = merge(
+      { ...currentMetadata.metadata },
+      // Grab the updated `event` and timestamp from the generator data
+      {
+        event: generatedMetadataDoc.event,
+        '@timestamp': generatedMetadataDoc['@timestamp'],
+      },
+      updates
+    );
+
+    await this.esClient.index({
+      index: METADATA_DATASTREAM,
+      body: updatedMetadataDoc,
+      op_type: 'create',
+    });
+
+    let response: HostInfo | undefined;
+
+    // Wait for the update to show up on Metadata API (after transform runs)
+    await this.retry.waitFor(
+      `Waiting for update to endpoint id [${endpointAgentId}] to be processed by transform`,
+      async () => {
+        response = await this.fetchEndpointMetadata(endpointAgentId);
+
+        return response.metadata.event.id === updatedMetadataDoc.event.id;
+      }
+    );
+
+    if (!response) {
+      throw new Error(`Response object not set. Issue fetching endpoint metadata`);
+    }
+
+    this.log.info(`Endpoint metadata doc update done: \n${JSON.stringify(response)}`);
+
+    return response;
   }
 }
