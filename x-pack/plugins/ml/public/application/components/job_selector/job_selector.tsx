@@ -110,6 +110,7 @@ export function JobSelector({ dateFormatTz, singleSelection, timeseriesOnly }: J
   // Ensure JobSelectionBar gets updated when selection via globalState changes.
   useEffect(() => {
     setSelectedIds(mergeSelection(selectedJobIds, selectedGroups, singleSelection));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify([selectedJobIds, selectedGroups])]);
 
   function closeFlyout() {
