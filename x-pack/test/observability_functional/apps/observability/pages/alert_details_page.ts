@@ -38,18 +38,7 @@ export default ({ getService }: FtrProviderContext) => {
         await observability.alerts.common.navigateToTimeWithData();
       });
       it('should open the flyout instead of the alerts details page when clicking on "View alert details" from the... (3 dots) button when the feature flag is disabled', async () => {
-        await observability.alerts.common.openActionsMenuForRow(0);
-        await retry.waitFor(
-          'Action drop down menu',
-          async () => await testSubjects.exists('viewAlertDetailsFlyout')
-        );
-
-        await testSubjects.isDisplayed('viewAlertDetailsFlyout');
-        await testSubjects.click('viewAlertDetailsFlyout');
-        await retry.waitFor(
-          'Alert flyout to be visible',
-          async () => await testSubjects.exists('alertsFlyout')
-        );
+        await observability.alerts.common.openAlertsFlyout();
       });
       /* TODO: Add more test cases regarding the feature flag for:
        - alert details URL from the Action variable
