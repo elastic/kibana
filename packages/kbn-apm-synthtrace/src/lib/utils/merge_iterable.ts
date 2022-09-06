@@ -17,7 +17,7 @@ export function merge<TField extends Fields>(
   if (iterables.length === 1) return iterables[0];
 
   const iterators = iterables.map<{ it: Iterator<ApmFields>; weight: number }>((i) => {
-    return { it: i[Symbol.iterator](), weight: Math.max(1, i.ratePerMinute()) };
+    return { it: i[Symbol.iterator](), weight: Math.max(1, i.estimatedRatePerMinute()) };
   });
   let done = false;
   const myIterable: Iterable<TField> = {

@@ -29,7 +29,7 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
     generate: ({ from, to }) => {
       const range = timerange(from, to);
 
-      const successfulTimestamps = range.interval('1s').rate(3);
+      const successfulTimestamps = range.ratePerMinute(180);
 
       const instances = [...Array(numServices).keys()].map((index) =>
         apm
