@@ -56,6 +56,7 @@ export const IndexDataVisualizerPage: FC = () => {
       const { getIndexDataVisualizerComponent } = dataVisualizer;
       getIndexDataVisualizerComponent().then(setIndexDataVisualizer);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const getAsyncMLCards = async ({
@@ -178,6 +179,7 @@ export const IndexDataVisualizerPage: FC = () => {
 
   const getAdditionalLinks: GetAdditionalLinks = useMemo(
     () => [getAsyncRecognizedModuleCards, getAsyncMLCards],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [mlLocator]
   );
   return IndexDataVisualizer ? (

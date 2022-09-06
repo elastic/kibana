@@ -17,6 +17,7 @@ export const MMLCallout: FC = () => {
   useEffect(() => {
     const value = jobValidator.latestValidationResult?.highCardinality?.value ?? null;
     setHighCardinality(value);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobValidatorUpdated]);
 
   return jobCreator.modelPlot && highCardinality !== null ? (

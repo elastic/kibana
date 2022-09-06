@@ -128,6 +128,7 @@ export const ColorRangeLegend: FC<ColorRangeLegendProps> = ({
     if (!showTicks) {
       wrapper.selectAll('.axis line').style('display', 'none');
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(scale), d3Container.current]);
 
   if (title === undefined) {

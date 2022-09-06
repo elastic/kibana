@@ -264,6 +264,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
     return () => {
       unmounted = true;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(props.anomaly)]);
 
   const openCustomUrl = (customUrl: KibanaUrlConfig) => {
@@ -759,6 +760,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
       );
     }
     return items;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     openInDiscoverUrl,
     discoverUrlError,

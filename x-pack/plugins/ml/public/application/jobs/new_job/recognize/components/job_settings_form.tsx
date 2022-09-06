@@ -89,10 +89,12 @@ export const JobSettingsForm: FC<JobSettingsFormProps> = ({
 
   useEffect(() => {
     handleValidation();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formState.jobPrefix]);
 
   useEffect(() => {
     onChange(formState);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formState]);
 
   return (

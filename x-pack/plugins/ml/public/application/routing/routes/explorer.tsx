@@ -131,6 +131,7 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
         setInValidTimeRangeError(true);
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [globalState?.time?.from, globalState?.time?.to, globalState?.time?.ts]);
 
   const getJobsWithStoppedPartitions = useCallback(async (selectedJobIds: string[]) => {
@@ -163,6 +164,7 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
         explorerService.clearJobs();
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [JSON.stringify(jobIds)]
   );
 
@@ -176,6 +178,7 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
       anomalyExplorerContext.anomalyTimelineStateService.destroy();
       anomalyExplorerContext.chartsStateService.destroy();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const [explorerData, loadExplorerData] = useExplorerData();
@@ -232,12 +235,14 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
         loadExplorerDataConfig?.selectedJobs!
       );
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [loadExplorerDataConfig]
   );
 
   useEffect(() => {
     if (!loadExplorerDataConfig || loadExplorerDataConfig?.selectedCells === undefined) return;
     loadExplorerData(loadExplorerDataConfig);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(loadExplorerDataConfig)]);
 
   const overallSwimlaneData = useObservable(

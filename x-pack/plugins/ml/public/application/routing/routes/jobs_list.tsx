@@ -67,6 +67,7 @@ const PageWrapper: FC<PageProps> = ({ deps }) => {
         ? { pause: false, value: DEFAULT_REFRESH_INTERVAL_MS }
         : { pause: refreshPause, value: refreshValue };
     timefilter.setRefreshInterval(refreshInterval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const annotationUpdatesService = useMemo(() => new AnnotationUpdatesService(), []);

@@ -47,6 +47,7 @@ export const DetectorList: FC<Props> = ({ isActive, onEditJob, onDeleteJob }) =>
 
   useEffect(() => {
     setDetectors(jobCreator.detectors);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobCreatorUpdated]);
 
   useEffect(() => {
@@ -59,6 +60,7 @@ export const DetectorList: FC<Props> = ({ isActive, onEditJob, onDeleteJob }) =>
     if (!jobValidator.categorizerMissingPerPartition.valid) {
       setValidation(jobValidator.categorizerMissingPerPartition);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobValidatorUpdated]);
 
   const Buttons: FC<{ index: number }> = ({ index }) => {

@@ -100,6 +100,7 @@ export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
       );
     }
     return items;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [canEditDashboards, globalTimeRange, closePopoverOnAction, selectedJobs]);
 
   const jobIds = selectedJobs.map(({ id }) => id);

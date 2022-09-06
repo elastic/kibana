@@ -23,12 +23,14 @@ export const PopulationFieldSelector: FC = () => {
   const { jobCreator: jc, jobCreatorUpdate, jobCreatorUpdated } = useContext(JobCreatorContext);
   const jobCreator = jc as PopulationJobCreator | RareJobCreator;
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const runtimeCategoryFields = useMemo(() => filterCategoryFields(jobCreator.runtimeFields), []);
   const allCategoryFields = useMemo(
     () =>
       [...newJobCapsService.categoryFields, ...runtimeCategoryFields].sort((a, b) =>
         a.name.localeCompare(b.name)
       ),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
   const categoryFields = useFilteredCategoryFields(
@@ -49,10 +51,12 @@ export const PopulationFieldSelector: FC = () => {
       jobCreator.addInfluencer(populationField.name);
     }
     jobCreatorUpdate();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [populationField]);
 
   useEffect(() => {
     setPopulationField(jobCreator.populationField);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobCreatorUpdated]);
 
   return (
@@ -88,6 +92,7 @@ function useFilteredCategoryFields(
         setFields(allCategoryFields);
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobCreatorUpdated]);
 
   return fields;

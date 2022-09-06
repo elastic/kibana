@@ -57,6 +57,7 @@ export const ModelSnapshotTable: FC<Props> = ({ job, refreshJobList }) => {
     return () => {
       isMounted.current = false;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function loadModelSnapshots() {
@@ -115,6 +116,7 @@ export const ModelSnapshotTable: FC<Props> = ({ job, refreshJobList }) => {
     if (reload) {
       loadModelSnapshots();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const closeRevertFlyout = useCallback(() => {
@@ -125,6 +127,7 @@ export const ModelSnapshotTable: FC<Props> = ({ job, refreshJobList }) => {
     loadModelSnapshots();
     // wait half a second before refreshing the jobs list
     setTimeout(refreshJobList, 500);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const columns: Array<EuiBasicTableColumn<any>> = [

@@ -130,10 +130,12 @@ export const Controls: FC<Props> = React.memo(
           })
         );
       }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [nodeLabel]);
 
     const onCloneJobClick = useCallback(async () => {
       navigateToWizardWithClonedJob({ config: details[nodeId], stats: details[nodeId]?.stats });
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [nodeId]);
 
     const onActionsButtonClick = () => {
@@ -177,6 +179,7 @@ export const Controls: FC<Props> = React.memo(
           setShowFlyout(false);
         }
       },
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       [isModalVisible, deleteItem, didUntag]
     );
 

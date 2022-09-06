@@ -252,6 +252,7 @@ const DatePickerWithInput = ({ date, onChange, minDate, setIsValid, tab }) => {
       setDateString(date.format(TIME_FORMAT));
       setCurrentTab(tab);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tab]);
 
   function onTextChange(e) {

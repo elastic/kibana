@@ -52,6 +52,7 @@ export const CreateAnalyticsAdvancedEditor: FC<CreateAnalyticsFormProps> = (prop
           );
         }
       }, 400),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [jobId]
   );
 
@@ -75,6 +76,7 @@ export const CreateAnalyticsAdvancedEditor: FC<CreateAnalyticsFormProps> = (prop
     return () => {
       debouncedJobIdCheck.cancel();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobId]);
 
   return (

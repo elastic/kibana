@@ -86,8 +86,10 @@ export const JobsListPage: FC<{
 
   useEffect(() => {
     check();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const ContextWrapper = useCallback(
     spacesApi ? spacesApi.ui.components.getSpacesContextProvider : getEmptyFunctionComponent,
     [spacesApi]

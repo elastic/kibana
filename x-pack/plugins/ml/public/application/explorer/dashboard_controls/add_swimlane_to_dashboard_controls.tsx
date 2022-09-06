@@ -67,6 +67,7 @@ export const AddSwimlaneToDashboardControl: FC<AddToDashboardControlProps> = ({
       swimlaneType: selectedSwimlane,
       ...(selectedSwimlane === SWIMLANE_TYPE.VIEW_BY ? { viewBy } : {}),
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedSwimlane]);
 
   const { addToDashboardAndEditCallback } = useAddToDashboardActions(

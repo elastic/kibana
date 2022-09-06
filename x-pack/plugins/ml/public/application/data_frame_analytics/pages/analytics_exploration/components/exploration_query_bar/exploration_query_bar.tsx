@@ -84,6 +84,7 @@ export const ExplorationQueryBar: FC<ExplorationQueryBarProps> = ({
         setIdToSelectedMap({ [filterKeyInEffect]: true });
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   /**
@@ -120,6 +121,7 @@ export const ExplorationQueryBar: FC<ExplorationQueryBarProps> = ({
     } catch (e) {
       setErrorMessage({ query: query.query as string, message: e.message });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [query.query]);
 
   const searchSubmitHandler = (q: Query, filtering?: boolean) => {

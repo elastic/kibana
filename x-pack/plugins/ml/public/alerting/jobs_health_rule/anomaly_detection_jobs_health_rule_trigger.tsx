@@ -54,6 +54,7 @@ const AnomalyDetectionJobsHealthRuleTrigger: FC<MlAnomalyAlertTriggerProps> = ({
       (update: MlAnomalyDetectionJobsHealthRuleParams[T]) => {
         setRuleParams(param, update);
       },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
 
@@ -119,6 +120,7 @@ const AnomalyDetectionJobsHealthRuleTrigger: FC<MlAnomalyAlertTriggerProps> = ({
       <JobSelectorControl
         jobsAndGroupIds={includeJobsAndGroupIds}
         adJobsApiService={adJobsApiService}
+        // eslint-disable-next-line react-hooks/exhaustive-deps
         onChange={useCallback(onAlertParamChange('includeJobs'), [])}
         errors={Array.isArray(errors.includeJobs) ? errors.includeJobs : []}
         multiSelect
@@ -143,6 +145,7 @@ const AnomalyDetectionJobsHealthRuleTrigger: FC<MlAnomalyAlertTriggerProps> = ({
           } else {
             callback(null);
           }
+          // eslint-disable-next-line react-hooks/exhaustive-deps
         }, [])}
         errors={Array.isArray(errors.excludeJobs) ? errors.excludeJobs : []}
         multiSelect
@@ -159,6 +162,7 @@ const AnomalyDetectionJobsHealthRuleTrigger: FC<MlAnomalyAlertTriggerProps> = ({
 
       <TestsSelectionControl
         config={ruleParams.testsConfig}
+        // eslint-disable-next-line react-hooks/exhaustive-deps
         onChange={useCallback(onAlertParamChange('testsConfig'), [])}
         errors={Array.isArray(errors.testsConfig) ? errors.testsConfig : []}
       />

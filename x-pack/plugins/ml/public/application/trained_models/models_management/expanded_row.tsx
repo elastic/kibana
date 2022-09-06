@@ -62,6 +62,7 @@ export function useListItemsFormatter() {
         model_size_bytes: bytesFormatter,
         required_native_memory_bytes: bytesFormatter,
       }),
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       []
     );
 
@@ -167,6 +168,7 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
         setModelItems(items);
       })();
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [stats.deployment_stats]
   );
 

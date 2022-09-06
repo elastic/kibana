@@ -41,6 +41,7 @@ export const AdvancedDetectors: FC<Props> = ({ setIsValid }) => {
 
   useEffect(() => {
     setIsValid(jobCreator.detectors.length > 0);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobCreatorUpdated]);
 
   function closeModal() {

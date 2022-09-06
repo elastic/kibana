@@ -29,11 +29,13 @@ export const GroupsInput: FC = () => {
       valid,
       message,
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobValidatorUpdated]);
 
   useEffect(() => {
     jobCreator.groups = selectedGroups;
     jobCreatorUpdate();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedGroups.join()]);
 
   const options: EuiComboBoxOptionOption[] = existingJobsAndGroups.groupIds.map((g: string) => ({

@@ -287,12 +287,6 @@ module.exports = {
         'jsx-a11y/click-events-have-key-events': 'off',
       },
     },
-    {
-      files: ['x-pack/plugins/ml/**/*.{js,mjs,ts,tsx}'],
-      rules: {
-        'react-hooks/exhaustive-deps': 'off',
-      },
-    },
 
     /**
      * Files that require dual-license headers, settings

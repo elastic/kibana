@@ -28,6 +28,7 @@ export function useStorage<T>(key: MlStorageKey, initValue?: T): [T, (value: T) 
     } catch (e) {
       throw new Error('Unable to update storage with provided value');
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return [val, setStorage];

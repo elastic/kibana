@@ -67,6 +67,7 @@ export const useStartAction = (canStartStopDataFrameAnalytics: boolean) => {
       onClick: openModal,
       'data-test-subj': 'mlAnalyticsJobStartButton',
     }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
 

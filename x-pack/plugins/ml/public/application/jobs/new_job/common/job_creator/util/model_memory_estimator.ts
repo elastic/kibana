@@ -92,6 +92,7 @@ export const useModelMemoryEstimator = (
   // Initialize model memory estimator only once
   const modelMemoryEstimator = useMemo<ModelMemoryEstimator>(
     () => modelMemoryEstimatorProvider(jobCreator, jobValidator),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
 
@@ -129,6 +130,7 @@ export const useModelMemoryEstimator = (
     return () => {
       subscription.unsubscribe();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Update model memory estimation payload on the job creator updates
@@ -142,5 +144,6 @@ export const useModelMemoryEstimator = (
       earliestMs: jobCreator.start,
       latestMs: jobCreator.end,
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobCreatorUpdated]);
 };

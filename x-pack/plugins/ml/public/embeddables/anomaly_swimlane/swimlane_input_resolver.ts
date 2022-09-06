@@ -78,6 +78,7 @@ export function useSwimlaneInputResolver(
     return getJobsObservable(embeddableInput$, anomalyDetectorService, setError).pipe(
       shareReplay(1)
     );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const bucketInterval$ = useMemo(() => {
@@ -95,6 +96,7 @@ export function useSwimlaneInputResolver(
         return prev.asSeconds() === curr.asSeconds();
       })
     );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fromPage$ = useMemo(() => new Subject<number>(), []);
@@ -107,6 +109,7 @@ export function useSwimlaneInputResolver(
       dateFormat: uiSettings.get('dateFormat'),
       'dateFormat:scaled': uiSettings.get('dateFormat:scaled'),
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -222,31 +225,37 @@ export function useSwimlaneInputResolver(
     return () => {
       subscription.unsubscribe();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
     fromPage$.next(fromPage);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fromPage]);
 
   useEffect(() => {
     if (perPage === undefined) return;
     perPage$.next(perPage);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [perPage]);
 
   useEffect(() => {
     chartWidth$.next(chartWidth);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chartWidth]);
 
   useEffect(() => {
     if (error) {
       renderCallbacks.onError(error);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [error]);
 
   useEffect(() => {
     if (swimlaneData) {
       renderCallbacks.onRenderComplete();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [swimlaneData]);
 
   return [

@@ -62,6 +62,7 @@ export const JobMessagesPane: FC<JobMessagesPaneProps> = React.memo(
       }
     };
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     const refreshMessage = useCallback(fetchMessages, [jobId]);
 
     // Clear messages for last 24hrs and refresh jobs list
@@ -82,10 +83,12 @@ export const JobMessagesPane: FC<JobMessagesPaneProps> = React.memo(
           })
         );
       }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [jobId, JSON.stringify(notificationIndices)]);
 
     useEffect(() => {
       fetchMessages();
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const disabled = notificationIndices.length === 0;

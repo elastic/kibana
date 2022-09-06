@@ -52,8 +52,10 @@ export function ResultLinks({ jobs }) {
   const { createLinkWithUserDefaults } = useCreateADLinks();
   const timeSeriesExplorerLink = useMemo(
     () => createLinkWithUserDefaults('timeseriesexplorer', jobs),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [jobs]
   );
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const anomalyExplorerLink = useMemo(() => createLinkWithUserDefaults('explorer', jobs), [jobs]);
 
   return (

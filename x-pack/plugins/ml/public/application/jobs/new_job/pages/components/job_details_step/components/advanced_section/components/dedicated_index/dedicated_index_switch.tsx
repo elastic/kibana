@@ -18,6 +18,7 @@ export const DedicatedIndexSwitch: FC = () => {
   useEffect(() => {
     jobCreator.useDedicatedIndex = useDedicatedIndex;
     jobCreatorUpdate();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [useDedicatedIndex]);
 
   function toggleModelPlot() {

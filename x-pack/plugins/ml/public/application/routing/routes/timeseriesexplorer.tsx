@@ -140,6 +140,7 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
         setBounds(timefilter.getBounds());
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [globalState?.time?.from, globalState?.time?.to, globalState?.time?.ts]);
 
   const selectedJobIds = globalState?.ml?.jobIds;
@@ -239,7 +240,9 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
 
       setTimeSeriesExplorerUrlState({ mlTimeSeriesExplorer }, isInitUpdate);
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       JSON.stringify(timeSeriesExplorerUrlState?.mlTimeSeriesExplorer),
       setTimeSeriesExplorerUrlState,
     ]
@@ -262,6 +265,7 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
     if (typeof validatedJobId === 'string') {
       setSelectedJobId(validatedJobId);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(selectedJobIds)]);
 
   const boundsMinMs = bounds?.min?.valueOf();
@@ -312,6 +316,7 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
           );
         });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedForecastId]);
 
   const [tableInterval] = useTableInterval();

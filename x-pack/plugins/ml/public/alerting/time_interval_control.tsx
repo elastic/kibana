@@ -25,6 +25,7 @@ export const TimeIntervalControl: FC<TimeIntervalControlProps> = ({
 }) => {
   const validators = useMemo(() => composeValidators(timeIntervalInputValidator()), []);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const validationErrors = useMemo(() => validators(value), [value]);
 
   const isInvalid = !!value && !!validationErrors;

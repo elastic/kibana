@@ -257,6 +257,7 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
       options.didCancel = true;
     };
     // stringify the fields array and search, otherwise the comparator will trigger on new but identical instances.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fetchSize, JSON.stringify({ fields, searchQuery }), index, randomizeQuery, resultsField]);
 
   const vegaSpec = useMemo(() => {
@@ -275,6 +276,7 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
       legendType,
       dynamicSize
     );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [resultsField, splom, color, legendType, dynamicSize]);
 
   return (

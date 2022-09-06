@@ -136,20 +136,24 @@ export function useAnomalyChartsInputResolver(
     return () => {
       subscription.unsubscribe();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
     chartWidth$.next(chartWidth);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chartWidth]);
 
   useEffect(() => {
     severity$.next(severity);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [severity]);
 
   useEffect(() => {
     if (error) {
       renderCallbacks.onError(error);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [error]);
 
   return { chartsData, isLoading, error };

@@ -66,6 +66,7 @@ export const MemoryPreviewChart: FC<MemoryPreviewChartProps> = ({ memoryOverview
         colour: euiPaletteGray(5)[0],
       },
     }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
 

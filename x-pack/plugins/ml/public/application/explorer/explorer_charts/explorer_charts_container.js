@@ -123,6 +123,7 @@ function ExplorerChartContainer({
     });
 
     return location;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [series?.jobId]);
 
   useEffect(() => {
@@ -141,6 +142,7 @@ function ExplorerChartContainer({
     return () => {
       isCancelled = true;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mlLocator, series]);
 
   useEffect(
@@ -164,6 +166,7 @@ function ExplorerChartContainer({
         isCancelled = true;
       };
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [series]
   );
 
@@ -187,6 +190,7 @@ function ExplorerChartContainer({
         recentlyAccessed
       );
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [explorerSeriesLink, recentlyAccessed]);
   const { detectorLabel, entityFields } = series;
 

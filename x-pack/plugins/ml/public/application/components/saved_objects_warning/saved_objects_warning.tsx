@@ -47,6 +47,7 @@ export const SavedObjectsWarning: FC<Props> = ({
     } catch (error) {
       console.log('Saved object synchronization check could not be performed.'); // eslint-disable-line no-console
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [showSyncFlyout, setShowWarning]);
 
   useEffect(
@@ -70,6 +71,7 @@ export const SavedObjectsWarning: FC<Props> = ({
     if (typeof onCloseFlyout === 'function') {
       onCloseFlyout();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [checkStatus, onCloseFlyout, setShowSyncFlyout]);
 
   useEffect(

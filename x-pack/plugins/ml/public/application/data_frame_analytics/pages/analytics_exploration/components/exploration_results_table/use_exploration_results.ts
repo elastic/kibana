@@ -84,11 +84,13 @@ export const useExplorationResults = (
       options.didCancel = true;
     };
     // custom comparison
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobConfig && jobConfig.id, dataGrid.pagination, searchQuery, dataGrid.sortingColumns]);
 
   const dataLoader = useMemo(
     () =>
       indexPattern !== undefined ? new DataLoader(indexPattern, toastNotifications) : undefined,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [indexPattern]
   );
 
@@ -116,9 +118,11 @@ export const useExplorationResults = (
       fetchColumnChartsData();
     }
     // custom comparison
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     dataGrid.chartsVisible,
     jobConfig?.dest.index,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     JSON.stringify([searchQuery, dataGrid.visibleColumns]),
   ]);
   const predictionFieldName = useMemo(() => {
@@ -163,10 +167,12 @@ export const useExplorationResults = (
         text: error,
       });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mlApiServices, jobConfig]);
 
   useEffect(() => {
     getAnalyticsBaseline();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobConfig]);
 
   const resultsField = jobConfig?.dest.results_field ?? DEFAULT_RESULTS_FIELD;

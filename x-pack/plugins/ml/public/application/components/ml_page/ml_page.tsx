@@ -54,6 +54,7 @@ export const MlPage: FC<{ pageDeps: PageDependencies }> = React.memo(({ pageDeps
       Object.values(routes)
         .map((routeFactory) => routeFactory(navigateToPath, basePath.get()))
         .filter((d) => !d.disabled),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
 

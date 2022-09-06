@@ -22,6 +22,7 @@ export const CategorizationFieldSelect: FC<Props> = ({ fields, changeHandler, se
   const { jobCreator, jobCreatorUpdated } = useContext(JobCreatorContext);
   const options: EuiComboBoxOptionOption[] = useMemo(
     () => [...createFieldOptions(fields, jobCreator.additionalFields)],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [fields, jobCreatorUpdated]
   );
 

@@ -255,6 +255,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
       }
 
       return panels;
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [canEditDashboards, openCasesModal, viewBySwimlaneFieldName]);
 
     // If selecting a cell in the 'view by' swimlane, indicate the corresponding time in the Overall swimlane.
@@ -284,6 +285,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
 
     const onResize = useCallback((value: number) => {
       anomalyTimelineStateService.setContainerWidth(value);
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     return (
