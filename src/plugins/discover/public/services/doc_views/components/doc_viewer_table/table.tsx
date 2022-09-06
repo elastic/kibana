@@ -314,7 +314,7 @@ export const DocViewerTable = ({
                   align="left"
                   // align="center"
                   // width={62}
-                  // className="kbnDocViewer__tableActionsCell"
+                  className="kbnDocViewer__tableActionsCell"
                   textOnly={false}
                   mobileOptions={MOBILE_OPTIONS}
                 >

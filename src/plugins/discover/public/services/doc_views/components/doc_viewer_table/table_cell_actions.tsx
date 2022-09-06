@@ -170,15 +170,15 @@ export const TableActions = ({
 
   // TODO: add tooltips and show only for larger screens
   return (
-    <EuiFlexGroup responsive={false} gutterSize="none">
+    <EuiFlexGroup responsive={false} gutterSize="none" className="kbnDocViewer__buttons">
       {panels[0].items.map((item) => (
         <EuiFlexItem key={item.icon} grow={false}>
           <EuiButtonIcon
+            className="kbnDocViewer__actionButton"
             data-test-subj={item['data-test-subj']}
             aria-label={item['aria-label']}
             onClick={item.onClick}
             iconType={item.icon}
-            color="text"
             disabled={item.disabled}
           />
         </EuiFlexItem>
