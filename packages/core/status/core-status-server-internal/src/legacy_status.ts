@@ -10,8 +10,7 @@ import { pick } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { deepFreeze } from '@kbn/std';
 import type { PluginName } from '@kbn/core-base-common';
-import { ServiceStatusLevels, type ServiceStatus } from '@kbn/core-status-common';
-import type { CoreStatus } from '@kbn/core-status-server';
+import { ServiceStatusLevels, type ServiceStatus, type CoreStatus } from '@kbn/core-status-common';
 
 interface Deps {
   overall: ServiceStatus;
