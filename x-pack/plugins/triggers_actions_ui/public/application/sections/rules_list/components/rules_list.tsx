@@ -270,7 +270,6 @@ export const RulesList = ({
           defaultMessage: 'Your rule is scheduled to run soon',
         }),
       });
-      await loadData();
     } catch (e) {
       toasts.addError(e, {
         title: i18n.translate('xpack.triggersActionsUI.sections.rulesList.unableToRunRuleSoon', {

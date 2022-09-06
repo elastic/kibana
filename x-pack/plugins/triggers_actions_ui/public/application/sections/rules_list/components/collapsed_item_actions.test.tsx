@@ -156,6 +156,22 @@ describe('CollapsedItemActions', () => {
     expect(wrapper.find(`[data-test-subj="runRule"] button`).text()).toEqual('Run rule');
   });
 
+  test('handles case when run rule is clicked', async () => {
+    await setup();
+    const wrapper = mountWithIntl(<CollapsedItemActions {...getPropsWithRule()} />);
+    wrapper.find('[data-test-subj="selectActionButton"]').first().simulate('click');
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+    wrapper.find('button[data-test-subj="runRule"]').simulate('click');
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+    expect(onRunRule).toHaveBeenCalled();
+  });
+
   test('handles case when rule is unmuted and enabled and disable is clicked', async () => {
     await setup();
     const wrapper = mountWithIntl(<CollapsedItemActions {...getPropsWithRule()} />);
