@@ -11,12 +11,11 @@ import userEvent from '@testing-library/user-event';
 import RecentCases, { RecentCasesProps } from '.';
 import { AppMockRenderer, createAppMockRenderer, TestProviders } from '../../common/mock';
 import { useGetCasesMockState } from '../../containers/mock';
+import { useCurrentUser } from '../../common/lib/kibana/hooks';
 import { useGetCases } from '../../containers/use_get_cases';
-import { useGetCurrentUserProfile } from '../../containers/user_profiles/use_get_current_user_profile';
-import { userProfiles } from '../../containers/user_profiles/api.mock';
 
 jest.mock('../../containers/use_get_cases');
-jest.mock('../../containers/user_profiles/use_get_current_user_profile');
+jest.mock('../../common/lib/kibana/hooks');
 jest.mock('../../common/navigation/hooks');
 
 configure({ testIdAttribute: 'data-test-subj' });
@@ -29,14 +28,18 @@ const mockData = {
 };
 
 const useGetCasesMock = useGetCases as jest.Mock;
-const useGetCurrentUserProfileMock = useGetCurrentUserProfile as jest.Mock;
+const useCurrentUserMock = useCurrentUser as jest.Mock;
 
 describe('RecentCases', () => {
   let appMockRender: AppMockRenderer;
   beforeEach(() => {
     jest.clearAllMocks();
     useGetCasesMock.mockImplementation(() => mockData);
-    useGetCurrentUserProfileMock.mockReturnValue({ data: userProfiles[0] });
+    useCurrentUserMock.mockResolvedValue({
+      email: 'elastic@elastic.co',
+      fullName: 'Elastic',
+      username: 'elastic',
+    });
     appMockRender = createAppMockRenderer();
   });
 
@@ -70,7 +73,7 @@ describe('RecentCases', () => {
       </TestProviders>
     );
     expect(useGetCasesMock).toHaveBeenCalledWith({
-      filterOptions: { assignees: [] },
+      filterOptions: { reporters: [] },
       queryParams: { perPage: 2 },
     });
   });
@@ -83,7 +86,7 @@ describe('RecentCases', () => {
     );
 
     expect(useGetCasesMock).toHaveBeenCalledWith({
-      filterOptions: { assignees: [] },
+      filterOptions: { reporters: [] },
       queryParams: { perPage: 10 },
     });
 
@@ -93,7 +96,7 @@ describe('RecentCases', () => {
 
     expect(useGetCasesMock).toHaveBeenLastCalledWith({
       filterOptions: {
-        assignees: [userProfiles[0].uid],
+        reporters: [{ email: undefined, full_name: undefined, username: undefined }],
       },
       queryParams: { perPage: 10 },
     });
@@ -104,7 +107,7 @@ describe('RecentCases', () => {
 
     expect(useGetCasesMock).toHaveBeenLastCalledWith({
       filterOptions: {
-        assignees: [],
+        reporters: [],
       },
       queryParams: { perPage: 10 },
     });

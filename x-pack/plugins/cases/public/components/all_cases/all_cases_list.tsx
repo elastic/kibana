@@ -270,6 +270,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
             search: filterOptions.search,
             searchFields: filterOptions.searchFields,
             assignees: filterOptions.assignees,
+            reporters: filterOptions.reporters,
             tags: filterOptions.tags,
             status: filterOptions.status,
             owner: filterOptions.owner,
