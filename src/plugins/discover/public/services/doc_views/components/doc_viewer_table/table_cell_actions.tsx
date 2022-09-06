@@ -7,7 +7,14 @@
  */
 
 import React, { useCallback, useState } from 'react';
-import { EuiButtonIcon, EuiContextMenu, EuiPopover, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiContextMenu,
+  EuiPopover,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiToolTip,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DataViewField } from '@kbn/data-views-plugin/public';
 import { DocViewFilterFn } from '../../doc_views_types';
@@ -170,20 +177,21 @@ export const TableActions = ({
     },
   ];
 
-  // TODO: add tooltips
   if (mode === 'inline') {
     return (
       <EuiFlexGroup responsive={false} gutterSize="xs" className="kbnDocViewer__buttons">
         {panels[0].items.map((item) => (
           <EuiFlexItem key={item.icon} grow={false}>
-            <EuiButtonIcon
-              className="kbnDocViewer__actionButton"
-              data-test-subj={item['data-test-subj']}
-              aria-label={item['aria-label']}
-              onClick={item.onClick}
-              iconType={item.icon}
-              disabled={item.disabled}
-            />
+            <EuiToolTip content={item.name}>
+              <EuiButtonIcon
+                className="kbnDocViewer__actionButton"
+                data-test-subj={item['data-test-subj']}
+                aria-label={item['aria-label']}
+                onClick={item.onClick}
+                iconType={item.icon}
+                disabled={item.disabled}
+              />
+            </EuiToolTip>
           </EuiFlexItem>
         ))}
       </EuiFlexGroup>
