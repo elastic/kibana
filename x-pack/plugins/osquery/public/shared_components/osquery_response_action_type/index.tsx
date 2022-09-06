@@ -45,7 +45,6 @@ interface OsqueryResponseActionsParamsFormFields {
 
 const OsqueryResponseActionParamsFormComponent: React.FunctionComponent<OsqueryResponseActionsParamsFormProps> =
   forwardRef(({ item }, ref) => {
-    console.log({ item });
     const uniqueId = useMemo(() => uuid.v4(), []);
     const hooksForm = useHookForm<OsqueryResponseActionsParamsFormFields>({
       defaultValues: {
@@ -110,17 +109,20 @@ const OsqueryResponseActionParamsFormComponent: React.FunctionComponent<OsqueryR
 
     useEffect(() => {
       // @ts-expect-error update types
-      ref.current.validation = async (actions: Record<number, { isValid: boolean }>) => {
-        await handleSubmit(onSubmit)();
+      if (ref && ref.current) {
+        // @ts-expect-error update types
+        ref.current.validation = async (actions: Record<number, { isValid: boolean }>) => {
+          await handleSubmit(onSubmit)();
 
-        return {
-          ...actions,
-          [item.id]: {
-            isValid,
-          },
+          return {
+            ...actions,
+            [item.id]: {
+              isValid,
+            },
+          };
         };
-      };
-    }, [errors, handleSubmit, isValid, item.id, onSubmit, ref]);
+      }
+    }, [handleSubmit, isValid, item.id, onSubmit, ref]);
 
     useEffect(() => {
       register('savedQueryId');

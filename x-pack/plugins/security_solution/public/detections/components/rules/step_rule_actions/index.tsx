@@ -122,9 +122,10 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
 
   const validateResponseActions = async () => {
     if (responseActionsValidationRef.current?.validation) {
-      const actionsMap = await responseActionsValidationRef?.current?.validation(
+      const actionsMap = await responseActionsValidationRef.current?.validation(
         responseActionsValidationRef.current?.actions
       );
+
       // eslint-disable-next-line require-atomic-updates
       responseActionsValidationRef.current.actions = actionsMap;
 
