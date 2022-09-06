@@ -90,7 +90,7 @@ export const bulkAddRuleActions = {
     'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.addRuleActions.ruleVariablesDetail',
     {
       defaultMessage:
-        'Rule variables may only affect some of the rules that you selected based on the rule types(for example \\u007b\\u007bcontext.rule.threshold\\u007d\\u007d will only work for threshold rule type).',
+        'Rule variables may affect only some of the rules you select, based on the rule types (for example, \\u007b\\u007bcontext.rule.threshold\\u007d\\u007d will only work for threshold rules).',
     }
   ),
 };
