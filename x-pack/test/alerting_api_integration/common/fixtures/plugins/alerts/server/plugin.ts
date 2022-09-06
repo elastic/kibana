@@ -72,6 +72,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
         'test.patternSuccessOrFailure',
         'test.throw',
         'test.longRunning',
+        'test.exceedsAlertLimit',
       ],
       privileges: {
         all: {
@@ -98,6 +99,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
                 'test.patternSuccessOrFailure',
                 'test.throw',
                 'test.longRunning',
+                'test.exceedsAlertLimit',
               ],
             },
           },
@@ -127,6 +129,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
                 'test.patternSuccessOrFailure',
                 'test.throw',
                 'test.longRunning',
+                'test.exceedsAlertLimit',
               ],
             },
           },

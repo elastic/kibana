@@ -185,7 +185,10 @@ export const previewRulesRoute = async (
               | 'getContext'
               | 'hasContext'
             >;
-            hasReachedAlertLimit: () => boolean;
+            alertLimit: {
+              getValue: () => number;
+              setLimitReached: () => void;
+            };
             done: () => { getRecoveredAlerts: () => [] };
           }
         ) => {
@@ -287,7 +290,10 @@ export const previewRulesRoute = async (
               () => true,
               {
                 create: alertInstanceFactoryStub,
-                hasReachedAlertLimit: () => false,
+                alertLimit: {
+                  getValue: () => 1000,
+                  setLimitReached: () => {},
+                },
                 done: () => ({ getRecoveredAlerts: () => [] }),
               }
             );
@@ -304,7 +310,10 @@ export const previewRulesRoute = async (
               () => true,
               {
                 create: alertInstanceFactoryStub,
-                hasReachedAlertLimit: () => false,
+                alertLimit: {
+                  getValue: () => 1000,
+                  setLimitReached: () => {},
+                },
                 done: () => ({ getRecoveredAlerts: () => [] }),
               }
             );
@@ -321,7 +330,10 @@ export const previewRulesRoute = async (
               () => true,
               {
                 create: alertInstanceFactoryStub,
-                hasReachedAlertLimit: () => false,
+                alertLimit: {
+                  getValue: () => 1000,
+                  setLimitReached: () => {},
+                },
                 done: () => ({ getRecoveredAlerts: () => [] }),
               }
             );
@@ -338,7 +350,10 @@ export const previewRulesRoute = async (
               () => true,
               {
                 create: alertInstanceFactoryStub,
-                hasReachedAlertLimit: () => false,
+                alertLimit: {
+                  getValue: () => 1000,
+                  setLimitReached: () => {},
+                },
                 done: () => ({ getRecoveredAlerts: () => [] }),
               }
             );
@@ -353,7 +368,10 @@ export const previewRulesRoute = async (
               () => true,
               {
                 create: alertInstanceFactoryStub,
-                hasReachedAlertLimit: () => false,
+                alertLimit: {
+                  getValue: () => 1000,
+                  setLimitReached: () => {},
+                },
                 done: () => ({ getRecoveredAlerts: () => [] }),
               }
             );
@@ -368,7 +386,10 @@ export const previewRulesRoute = async (
               () => true,
               {
                 create: alertInstanceFactoryStub,
-                hasReachedAlertLimit: () => false,
+                alertLimit: {
+                  getValue: () => 1000,
+                  setLimitReached: () => {},
+                },
                 done: () => ({ getRecoveredAlerts: () => [] }),
               }
             );
@@ -383,7 +404,10 @@ export const previewRulesRoute = async (
               () => true,
               {
                 create: alertInstanceFactoryStub,
-                hasReachedAlertLimit: () => false,
+                alertLimit: {
+                  getValue: () => 1000,
+                  setLimitReached: () => {},
+                },
                 done: () => ({ getRecoveredAlerts: () => [] }),
               }
             );
