@@ -5,64 +5,54 @@
  * 2.0.
  */
 
-import { EuiText } from '@elastic/eui';
 import { CoreStart } from '@kbn/core/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
 import { DataView } from '@kbn/data-views-plugin/common';
-import { DEFAULT_DATE_FORMAT, DEFAULT_DATE_FORMAT_TZ } from '../../../../../common/constants';
+import { mockIndicatorsFiltersContext } from '../../../../common/mocks/mock_indicators_filters_context';
+import { mockTriggersActionsUiService } from '../../../../common/mocks/mock_kibana_triggers_actions_ui_service';
+import { mockUiSettingsService } from '../../../../common/mocks/mock_kibana_ui_settings_service';
+import { mockKibanaTimelinesService } from '../../../../common/mocks/mock_kibana_timelines_service';
 import { generateMockIndicator, Indicator } from '../../../../../common/types/indicator';
 import { IndicatorsTable } from './indicators_table';
+import { IndicatorsFiltersContext } from '../../context';
 
 export default {
   component: IndicatorsTable,
   title: 'IndicatorsTable',
 };
 
-const indicatorsFixture: Indicator[] = Array(10).fill(generateMockIndicator());
 const mockIndexPattern: DataView = undefined as unknown as DataView;
 
 const stub = () => void 0;
 
-const coreMock = {
-  uiSettings: {
-    get: (key: string) => {
-      const settings = {
-        [DEFAULT_DATE_FORMAT]: '',
-        [DEFAULT_DATE_FORMAT_TZ]: 'UTC',
-      };
-      // @ts-expect-error
-      return settings[key];
-    },
-  },
-  triggersActionsUi: {
-    getFieldBrowser: () => (
-      <EuiText style={{ display: 'inline' }} size="xs">
-        Fields
-      </EuiText>
-    ),
-  },
-} as unknown as CoreStart;
-
-const KibanaReactContext = createKibanaReactContext(coreMock);
-
 export function WithIndicators() {
+  const indicatorsFixture: Indicator[] = Array(10).fill(generateMockIndicator());
+
+  const KibanaReactContext = createKibanaReactContext({
+    uiSettings: mockUiSettingsService(),
+    timelines: mockKibanaTimelinesService,
+    triggersActionsUi: mockTriggersActionsUiService,
+  } as unknown as CoreStart);
+
   return (
     <KibanaReactContext.Provider>
-      <IndicatorsTable
-        browserFields={{}}
-        loading={false}
-        pagination={{
-          pageSize: 10,
-          pageIndex: 0,
-          pageSizeOptions: [10, 25, 50],
-        }}
-        indicators={indicatorsFixture}
-        onChangePage={stub}
-        onChangeItemsPerPage={stub}
-        indicatorCount={indicatorsFixture.length * 2}
-        indexPattern={mockIndexPattern}
-      />
+      <IndicatorsFiltersContext.Provider value={mockIndicatorsFiltersContext}>
+        <IndicatorsTable
+          browserFields={{}}
+          loading={false}
+          pagination={{
+            pageSize: 10,
+            pageIndex: 0,
+            pageSizeOptions: [10, 25, 50],
+          }}
+          indicators={indicatorsFixture}
+          onChangePage={stub}
+          onChangeItemsPerPage={stub}
+          indicatorCount={indicatorsFixture.length * 2}
+          indexPattern={mockIndexPattern}
+        />
+      </IndicatorsFiltersContext.Provider>
     </KibanaReactContext.Provider>
   );
 }

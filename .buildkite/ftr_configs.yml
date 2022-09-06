@@ -58,6 +58,9 @@ disabled:
   - x-pack/test/screenshot_creation/config.ts
   - x-pack/test/fleet_packages/config.ts
 
+  # Scalability testing config that we run in its own pipeline
+  - x-pack/test/performance/scalability/config.ts
+
 defaultQueue: 'n2-4-spot'
 enabled:
   - test/accessibility/config.ts
@@ -117,6 +120,7 @@ enabled:
   - x-pack/test/alerting_api_integration/basic/config.ts
   - x-pack/test/alerting_api_integration/security_and_spaces/group1/config.ts
   - x-pack/test/alerting_api_integration/security_and_spaces/group2/config.ts
+  - x-pack/test/alerting_api_integration/security_and_spaces/group2/config_non_dedicated_task_runner.ts
   - x-pack/test/alerting_api_integration/spaces_only/config.ts
   - x-pack/test/api_integration_basic/config.ts
   - x-pack/test/api_integration/config_security_basic.ts

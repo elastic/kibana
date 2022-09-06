@@ -8135,7 +8135,7 @@
         "signature": [
           "any"
         ],
-        "path": "packages/kbn-mapbox-gl/src/index.ts",
+        "path": "packages/kbn-mapbox-gl/index.ts",
         "deprecated": false,
         "initialIsOpen": false
       },

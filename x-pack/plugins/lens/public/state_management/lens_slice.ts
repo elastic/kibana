@@ -12,7 +12,7 @@ import { Query } from '@kbn/es-query';
 import { History } from 'history';
 import { LensEmbeddableInput } from '..';
 import { TableInspectorAdapter } from '../editor_frame_service/types';
-import type { VisualizeEditorContext, Suggestion } from '../types';
+import type { VisualizeEditorContext, Suggestion, IndexPattern } from '../types';
 import { getInitialDatasourceId, getResolvedDateRange, getRemoveOperation } from '../utils';
 import type { DataViewsState, LensAppState, LensStoreDeps, VisualizationState } from './types';
 import type { Datasource, Visualization } from '../types';
@@ -172,6 +172,9 @@ export const setLayerDefaultDimension = createAction<{
 export const updateIndexPatterns = createAction<Partial<DataViewsState>>(
   'lens/updateIndexPatterns'
 );
+export const replaceIndexpattern = createAction<{ newIndexPattern: IndexPattern; oldId: string }>(
+  'lens/replaceIndexPattern'
+);
 export const changeIndexPattern = createAction<{
   visualizationIds?: string[];
   datasourceIds?: string[];
@@ -206,6 +209,7 @@ export const lensActions = {
   addLayer,
   setLayerDefaultDimension,
   updateIndexPatterns,
+  replaceIndexpattern,
   changeIndexPattern,
 };
 
@@ -316,7 +320,25 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
       }
     ) => {
       const { visualizationIds, datasourceIds, layerId, indexPatternId, dataViews } = payload;
-      const newState: Partial<LensAppState> = { dataViews: { ...state.dataViews, ...dataViews } };
+      const newIndexPatternRefs = [...state.dataViews.indexPatternRefs];
+      const availableRefs = new Set(newIndexPatternRefs.map((ref) => ref.id));
+      // check for missing refs
+      Object.values(dataViews.indexPatterns || {}).forEach((indexPattern) => {
+        if (!availableRefs.has(indexPattern.id)) {
+          newIndexPatternRefs.push({
+            id: indexPattern.id!,
+            name: indexPattern.name,
+            title: indexPattern.title,
+          });
+        }
+      });
+      const newState: Partial<LensAppState> = {
+        dataViews: {
+          ...state.dataViews,
+          indexPatterns: dataViews.indexPatterns,
+          indexPatternRefs: newIndexPatternRefs,
+        },
+      };
       if (visualizationIds?.length) {
         for (const visualizationId of visualizationIds) {
           const activeVisualization =
@@ -401,6 +423,38 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
         ...state,
         dataViews: { ...state.dataViews, ...payload },
       };
+    },
+    [replaceIndexpattern.type]: (
+      state,
+      { payload }: { payload: { newIndexPattern: IndexPattern; oldId: string } }
+    ) => {
+      state.dataViews.indexPatterns[payload.newIndexPattern.id] = payload.newIndexPattern;
+      delete state.dataViews.indexPatterns[payload.oldId];
+      state.dataViews.indexPatternRefs = state.dataViews.indexPatternRefs.filter(
+        (r) => r.id !== payload.oldId
+      );
+      state.dataViews.indexPatternRefs.push({
+        id: payload.newIndexPattern.id,
+        title: payload.newIndexPattern.title,
+        name: payload.newIndexPattern.name,
+      });
+      const visualization = visualizationMap[state.visualization.activeId!];
+      state.visualization.state =
+        visualization.onIndexPatternRename?.(
+          state.visualization.state,
+          payload.oldId,
+          payload.newIndexPattern.id
+        ) ?? state.visualization.state;
+
+      Object.entries(state.datasourceStates).forEach(([datasourceId, datasourceState]) => {
+        const datasource = datasourceMap[datasourceId];
+        state.datasourceStates[datasourceId].state =
+          datasource?.onIndexPatternRename?.(
+            datasourceState.state,
+            payload.oldId,
+            payload.newIndexPattern.id!
+          ) ?? datasourceState.state;
+      });
     },
     [updateDatasourceState.type]: (
       state,

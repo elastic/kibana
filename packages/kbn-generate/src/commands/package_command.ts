@@ -162,7 +162,7 @@ ${BAZEL_PACKAGE_DIRS.map((dir) => `                          ./${dir}/*\n`).join
       Path.resolve(TEMPLATE_DIR, 'packages_BUILD.bazel.ejs'),
       Path.resolve(REPO_ROOT, 'packages/BUILD.bazel'),
       {
-        packages: await discoverBazelPackages(),
+        packages: await discoverBazelPackages(REPO_ROOT),
       }
     );
     log.info('Updated packages/BUILD.bazel');

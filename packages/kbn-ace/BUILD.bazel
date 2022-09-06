@@ -7,12 +7,22 @@ PKG_REQUIRE_NAME = "@kbn/ace"
 
 SOURCE_FILES = glob(
   [
-    "src/**/*.ts",
+    "**/*.ts",
     "src/ace/modes/x_json/worker/x_json.ace.worker.js",
   ],
   exclude = [
     "src/ace/modes/x_json/worker/worker.d.ts",
+    "**/*.config.js",
+    "**/*.mock.*",
     "**/*.test.*",
+    "**/*.stories.*",
+    "**/__snapshots__/**",
+    "**/integration_tests/**",
+    "**/mocks/**",
+    "**/scripts/**",
+    "**/storybook/**",
+    "**/test_fixtures/**",
+    "**/test_helpers/**",
   ],
 )
 
@@ -50,7 +60,6 @@ jsts_transpiler(
     "--quiet"
   ],
   build_pkg_name = package_name(),
-  root_input_dir = "src",
 )
 
 jsts_transpiler(
@@ -63,7 +72,6 @@ jsts_transpiler(
     "--quiet"
   ],
   build_pkg_name = package_name(),
-  root_input_dir = "src",
   web = True,
 )
 
@@ -85,7 +93,6 @@ ts_project(
   declaration_map = True,
   emit_declaration_only = True,
   out_dir = "target_types",
-  root_dir = "src",
   tsconfig = ":tsconfig",
 )
 

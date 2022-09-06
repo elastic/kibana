@@ -15,7 +15,7 @@ import {
   SwimlaneSecretsConfigurationSchema,
   SwimlaneServiceConfigurationSchema,
 } from './schema';
-import { ActionsConfigurationUtilities } from '../../actions_config';
+import { ValidatorServices } from '../../types';
 
 export type SwimlanePublicConfigurationType = TypeOf<typeof SwimlaneServiceConfigurationSchema>;
 export type SwimlaneSecretConfigurationType = TypeOf<typeof SwimlaneSecretsConfigurationSchema>;
@@ -30,8 +30,8 @@ export interface ExternalServiceCredentials {
 }
 
 export interface ExternalServiceValidation {
-  config: (configurationUtilities: ActionsConfigurationUtilities, configObject: any) => void;
-  secrets: (configurationUtilities: ActionsConfigurationUtilities, secrets: any) => void;
+  config: (configObject: any, validatorServices: ValidatorServices) => void;
+  secrets: (secrets: any, validatorServices: ValidatorServices) => void;
 }
 
 export interface CreateRecordParams {

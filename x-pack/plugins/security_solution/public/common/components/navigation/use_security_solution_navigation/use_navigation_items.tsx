@@ -21,6 +21,9 @@ import { SecurityPageName } from '../../../../../common/constants';
 import { useCanSeeHostIsolationExceptionsMenu } from '../../../../management/pages/host_isolation_exceptions/view/hooks';
 import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental_features';
 import { useGlobalQueryString } from '../../../utils/global_query_string';
+import { useMlCapabilities } from '../../ml/hooks/use_ml_capabilities';
+import { hasMlUserPermissions } from '../../../../../common/machine_learning/has_ml_user_permissions';
+import { hasMlLicense } from '../../../../../common/machine_learning/has_ml_license';
 
 export const usePrimaryNavigationItems = ({
   navTabs,
@@ -72,6 +75,11 @@ function usePrimaryNavigationItemsToDisplay(navTabs: Record<string, NavTab>) {
   const hasCasesReadPermissions = useGetUserCasesPermissions().read;
   const canSeeHostIsolationExceptions = useCanSeeHostIsolationExceptionsMenu();
   const isPolicyListEnabled = useIsExperimentalFeatureEnabled('policyListEnabled');
+  const mlCapabilities = useMlCapabilities();
+  const hasMlPermissions = hasMlLicense(mlCapabilities) && hasMlUserPermissions(mlCapabilities);
+  const isEntityAnalyticsDashboardEnabled = useIsExperimentalFeatureEnabled(
+    'entityAnalyticsDashboardEnabled'
+  );
   const uiCapabilities = useKibana().services.application.capabilities;
   return useMemo(
     () =>
@@ -90,6 +98,9 @@ function usePrimaryNavigationItemsToDisplay(navTabs: Record<string, NavTab>) {
                 navTabs[SecurityPageName.cloudSecurityPostureDashboard],
                 ...(navTabs[SecurityPageName.kubernetes] != null
                   ? [navTabs[SecurityPageName.kubernetes]]
+                  : []),
+                ...(isEntityAnalyticsDashboardEnabled && hasMlPermissions
+                  ? [navTabs[SecurityPageName.entityAnalytics]]
                   : []),
               ],
             },
@@ -151,9 +162,11 @@ function usePrimaryNavigationItemsToDisplay(navTabs: Record<string, NavTab>) {
     [
       uiCapabilities.siem.show,
       navTabs,
+      isEntityAnalyticsDashboardEnabled,
       hasCasesReadPermissions,
       canSeeHostIsolationExceptions,
       isPolicyListEnabled,
+      hasMlPermissions,
     ]
   );
 }

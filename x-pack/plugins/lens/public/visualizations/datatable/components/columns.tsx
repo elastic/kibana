@@ -63,7 +63,8 @@ export const createGridColumns = (
     rowIndex,
     columnId,
   }: Pick<EuiDataGridColumnCellActionProps, 'rowIndex' | 'columnId'>) => {
-    const rowValue = table.rows[rowIndex][columnId];
+    // incoming data might change and put the current page out of bounds - check whether row actually exists
+    const rowValue = table.rows[rowIndex]?.[columnId];
     const column = columnsReverseLookup?.[columnId];
     const contentsIsDefined = rowValue != null;
 
@@ -75,8 +76,10 @@ export const createGridColumns = (
     const filterable = bucketLookup.has(field);
     const { name, index: colIndex } = columnsReverseLookup[field];
 
+    const columnArgs = columnConfig.columns.find(({ columnId }) => columnId === field);
+
     const cellActions =
-      filterable && handleFilterClick
+      filterable && handleFilterClick && !columnArgs?.oneClickFilter
         ? [
             ({ rowIndex, columnId, Component }: EuiDataGridColumnCellActionProps) => {
               const { rowValue, contentsIsDefined, cellContent } = getContentData({
@@ -157,7 +160,6 @@ export const createGridColumns = (
           ]
         : undefined;
 
-    const columnArgs = columnConfig.columns.find(({ columnId }) => columnId === field);
     const isTransposed = Boolean(columnArgs?.originalColumnId);
     const initialWidth = columnArgs?.width;
     const isHidden = columnArgs?.hidden;
