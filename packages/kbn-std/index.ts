@@ -27,3 +27,4 @@ export {
   asyncForEach,
   asyncForEachWithLimit,
 } from './src/iteration';
+export { Semaphore } from './src/semaphore';

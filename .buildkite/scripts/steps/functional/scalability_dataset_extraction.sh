@@ -51,6 +51,6 @@ cd -
 
 echo "--- Promoting '${BUILD_ID}' dataset to LATEST"
 cd "${OUTPUT_DIR}/.."
-echo "${BUILD_ID}" > LATEST
-gsutil cp LATEST "${GCS_BUCKET}"
+echo "${BUILD_ID}" > latest
+gsutil cp latest "${GCS_BUCKET}"
 cd -
