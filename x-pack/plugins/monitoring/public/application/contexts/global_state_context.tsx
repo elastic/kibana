@@ -44,7 +44,7 @@ export const GlobalStateProvider: React.FC<GlobalStateProviderProps> = ({
 }) => {
   const localState: State = {};
   const [globalState] = useState(
-   () => new GlobalState(query, toasts, localState as { [key: string]: unknown })
+    () => new GlobalState(query, toasts, localState as { [key: string]: unknown })
   );
 
   const initialState: any = globalState.getState();
