@@ -6,7 +6,11 @@
  * Side Public License, v 1.
  */
 
-import type { Type } from '@kbn/securitysolution-io-ts-list-types';
+import type {
+  SortFieldOrUndefined,
+  SortOrderOrUndefined,
+  Type,
+} from '@kbn/securitysolution-io-ts-list-types';
 
 // TODO: Replace these with kbn packaged versions once we have those available to us
 // These originally came from this location below before moving them to this hacked "any" types:
@@ -25,6 +29,8 @@ export interface FindListsParams extends ApiParams {
   cursor?: string | undefined;
   pageSize: number | undefined;
   pageIndex: number | undefined;
+  sortOrder?: SortOrderOrUndefined;
+  sortField?: SortFieldOrUndefined;
 }
 
 export interface ImportListParams extends ApiParams {

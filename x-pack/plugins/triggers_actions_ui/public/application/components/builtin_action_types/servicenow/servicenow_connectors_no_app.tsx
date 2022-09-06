@@ -6,27 +6,23 @@
  */
 
 import React from 'react';
+import { useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 
 import { ActionConnectorFieldsProps } from '../../../../types';
-
-import { ServiceNowActionConnector } from './types';
 import { Credentials } from './credentials';
+import { ConnectorFormSchema } from '../../../sections/action_connector_form/types';
+import { ServiceNowConfig, ServiceNowSecrets } from './types';
 
-const ServiceNowConnectorFieldsNoApp: React.FC<
-  ActionConnectorFieldsProps<ServiceNowActionConnector>
-> = ({ action, editActionSecrets, editActionConfig, errors, readOnly }) => {
-  return (
-    <>
-      <Credentials
-        action={action}
-        errors={errors}
-        readOnly={readOnly}
-        isLoading={false}
-        editActionSecrets={editActionSecrets}
-        editActionConfig={editActionConfig}
-      />
-    </>
-  );
+const ServiceNowConnectorFieldsNoApp: React.FC<ActionConnectorFieldsProps> = ({
+  isEdit,
+  readOnly,
+}) => {
+  const [{ config }] = useFormData<ConnectorFormSchema<ServiceNowConfig, ServiceNowSecrets>>({
+    watch: ['config.isOAuth'],
+  });
+  const { isOAuth = false } = config ?? {};
+
+  return <Credentials readOnly={readOnly} isLoading={false} isOAuth={isOAuth} />;
 };
 
 // eslint-disable-next-line import/no-default-export

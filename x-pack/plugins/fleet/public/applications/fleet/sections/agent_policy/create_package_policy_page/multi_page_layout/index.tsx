@@ -8,7 +8,7 @@ import React, { useMemo, useState } from 'react';
 import { useRouteMatch } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 
-import { splitPkgKey } from '../../../../../../../common';
+import { splitPkgKey } from '../../../../../../../common/services';
 
 import { useGetPackageInfoByKey, useGetSettings } from '../../../../hooks';
 

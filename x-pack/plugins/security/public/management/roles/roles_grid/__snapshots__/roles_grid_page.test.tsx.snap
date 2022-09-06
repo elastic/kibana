@@ -2,11 +2,11 @@
 
 exports[`<RolesGridPage /> renders permission denied if required 1`] = `
 <div
-  class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--danger euiPanel--noShadow euiPanel--noBorder euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
+  class="euiPanel euiPanel--danger euiPanel--paddingLarge euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter emotion-euiPanel-grow-m-l-danger"
   role="main"
 >
   <div
-    class="euiPanel euiPanel--borderRadiusMedium euiPanel--transparent euiPanel--noShadow euiEmptyPrompt euiEmptyPrompt--vertical euiEmptyPrompt--paddingLarge"
+    class="euiPanel euiPanel--transparent euiEmptyPrompt euiEmptyPrompt--vertical euiEmptyPrompt--paddingLarge emotion-euiPanel-m-transparent"
   >
     <div
       class="euiEmptyPrompt__main"
@@ -26,26 +26,22 @@ exports[`<RolesGridPage /> renders permission denied if required 1`] = `
           class="euiEmptyPrompt__contentInner"
         >
           <h2
-            class="euiTitle euiTitle--medium"
+            class="euiTitle emotion-euiTitle-m"
           >
             You need permission to manage roles
           </h2>
-          <span
-            class="euiTextColor euiTextColor--subdued"
+          <div
+            class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+          />
+          <div
+            class="euiText emotion-euiText-m-euiTextColor-subdued"
           >
-            <div
-              class="euiSpacer euiSpacer--m css-hg1jdf-euiSpacer-m"
-            />
-            <div
-              class="euiText euiText--medium"
+            <p
+              data-test-subj="permissionDeniedMessage"
             >
-              <p
-                data-test-subj="permissionDeniedMessage"
-              >
-                Contact your system administrator.
-              </p>
-            </div>
-          </span>
+              Contact your system administrator.
+            </p>
+          </div>
         </div>
       </div>
     </div>

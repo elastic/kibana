@@ -28,14 +28,8 @@ export default ({ getService }: FtrProviderContext) => {
       expected: {
         responseCode: 200,
         responseBody: {
-          start: {
-            epoch: 1560297859000,
-            string: '2019-06-12T00:04:19.000Z',
-          },
-          end: {
-            epoch: 1562975136000,
-            string: '2019-07-12T23:45:36.000Z',
-          },
+          start: 1560297859000,
+          end: 1562975136000,
           success: true,
         },
       },
@@ -57,14 +51,8 @@ export default ({ getService }: FtrProviderContext) => {
       expected: {
         responseCode: 200,
         responseBody: {
-          start: {
-            epoch: 1560298982000,
-            string: '2019-06-12T00:23:02.000Z',
-          },
-          end: {
-            epoch: 1562973754000,
-            string: '2019-07-12T23:22:34.000Z',
-          },
+          start: 1560298982000,
+          end: 1562973754000,
           success: true,
         },
       },

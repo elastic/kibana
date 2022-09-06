@@ -62,7 +62,7 @@
             "label": "experimentalFeatures",
             "description": [],
             "signature": [
-              "{ readonly tGridEnabled: boolean; readonly tGridEventRenderedViewEnabled: boolean; readonly excludePoliciesInFilterEnabled: boolean; readonly usersEnabled: boolean; readonly detectionResponseEnabled: boolean; readonly disableIsolationUIPendingStatuses: boolean; readonly riskyHostsEnabled: boolean; readonly riskyUsersEnabled: boolean; readonly pendingActionResponsesWithAck: boolean; readonly policyListEnabled: boolean; readonly groupedNavigation: boolean; readonly previewTelemetryUrlEnabled: boolean; readonly responseActionsConsoleEnabled: boolean; }"
+              "{ readonly tGridEnabled: boolean; readonly tGridEventRenderedViewEnabled: boolean; readonly excludePoliciesInFilterEnabled: boolean; readonly kubernetesEnabled: boolean; readonly disableIsolationUIPendingStatuses: boolean; readonly riskyHostsEnabled: boolean; readonly riskyUsersEnabled: boolean; readonly pendingActionResponsesWithAck: boolean; readonly policyListEnabled: boolean; readonly policyResponseInFleetEnabled: boolean; readonly threatIntelligenceEnabled: boolean; readonly entityAnalyticsDashboardEnabled: boolean; readonly previewTelemetryUrlEnabled: boolean; readonly responseActionsConsoleEnabled: boolean; readonly insightsRelatedAlertsByProcessAncestry: boolean; readonly extendedRuleExecutionLoggingEnabled: boolean; readonly socTrendsEnabled: boolean; }"
             ],
             "path": "x-pack/plugins/security_solution/public/plugin.tsx",
             "deprecated": false
@@ -121,7 +121,7 @@
                 "text": "CoreSetup"
               },
               "<",
-              "StartPlugins",
+              "StartPluginsDependencies",
               ", ",
               "PluginStart",
               ">, plugins: ",
@@ -154,7 +154,7 @@
                     "text": "CoreSetup"
                   },
                   "<",
-                  "StartPlugins",
+                  "StartPluginsDependencies",
                   ", ",
                   "PluginStart",
                   ">"
@@ -253,6 +253,68 @@
             "path": "x-pack/plugins/security_solution/public/plugin.tsx",
             "deprecated": false,
             "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-public.Plugin.registerAppLinks",
+            "type": "Function",
+            "tags": [],
+            "label": "registerAppLinks",
+            "description": [
+              "\nRegister deepLinks and appUpdater for all app links, to change deepLinks as needed when licensing changes."
+            ],
+            "signature": [
+              "(core: ",
+              {
+                "pluginId": "core",
+                "scope": "public",
+                "docId": "kibCorePluginApi",
+                "section": "def-public.CoreStart",
+                "text": "CoreStart"
+              },
+              ", plugins: ",
+              "StartPlugins",
+              ") => Promise<void>"
+            ],
+            "path": "x-pack/plugins/security_solution/public/plugin.tsx",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "securitySolution",
+                "id": "def-public.Plugin.registerAppLinks.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "core",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "core",
+                    "scope": "public",
+                    "docId": "kibCorePluginApi",
+                    "section": "def-public.CoreStart",
+                    "text": "CoreStart"
+                  }
+                ],
+                "path": "x-pack/plugins/security_solution/public/plugin.tsx",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "securitySolution",
+                "id": "def-public.Plugin.registerAppLinks.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "plugins",
+                "description": [],
+                "signature": [
+                  "StartPlugins"
+                ],
+                "path": "x-pack/plugins/security_solution/public/plugin.tsx",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
             "returnComment": []
           }
         ],
@@ -856,6 +918,47 @@
           },
           {
             "parentPluginId": "securitySolution",
+            "id": "def-server.SecuritySolutionApiRequestHandlerContext.getRacClient",
+            "type": "Function",
+            "tags": [],
+            "label": "getRacClient",
+            "description": [],
+            "signature": [
+              "(req: ",
+              "KibanaRequest",
+              "<unknown, unknown, unknown, any>) => Promise<",
+              {
+                "pluginId": "ruleRegistry",
+                "scope": "server",
+                "docId": "kibRuleRegistryPluginApi",
+                "section": "def-server.AlertsClient",
+                "text": "AlertsClient"
+              },
+              ">"
+            ],
+            "path": "x-pack/plugins/security_solution/server/types.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "securitySolution",
+                "id": "def-server.SecuritySolutionApiRequestHandlerContext.getRacClient.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "req",
+                "description": [],
+                "signature": [
+                  "KibanaRequest",
+                  "<unknown, unknown, unknown, any>"
+                ],
+                "path": "x-pack/plugins/security_solution/server/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "securitySolution",
             "id": "def-server.SecuritySolutionApiRequestHandlerContext.getExceptionListClient",
             "type": "Function",
             "tags": [],
@@ -902,13 +1005,7 @@
             "description": [],
             "signature": [
               "(req: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.KibanaRequest",
-                "text": "KibanaRequest"
-              },
+              "KibanaRequest",
               "<unknown, unknown, unknown, any>) => ",
               "EndpointScopedFleetServicesInterface"
             ],
@@ -923,13 +1020,7 @@
                 "label": "req",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreHttpPluginApi",
-                    "section": "def-server.KibanaRequest",
-                    "text": "KibanaRequest"
-                  },
+                  "KibanaRequest",
                   "<unknown, unknown, unknown, any>"
                 ],
                 "path": "x-pack/plugins/security_solution/server/types.ts",
@@ -953,7 +1044,7 @@
         "label": "ConfigType",
         "description": [],
         "signature": [
-          "Readonly<{} & { signalsIndex: string; maxRuleImportExportSize: number; maxRuleImportPayloadBytes: number; maxTimelineImportExportSize: number; maxTimelineImportPayloadBytes: number; alertMergeStrategy: \"allFields\" | \"missingFields\" | \"noFields\"; alertIgnoreFields: string[]; enableExperimental: string[]; packagerTaskInterval: string; prebuiltRulesFromFileSystem: boolean; prebuiltRulesFromSavedObjects: boolean; }> & { experimentalFeatures: Readonly<{ tGridEnabled: boolean; tGridEventRenderedViewEnabled: boolean; excludePoliciesInFilterEnabled: boolean; usersEnabled: boolean; detectionResponseEnabled: boolean; disableIsolationUIPendingStatuses: boolean; riskyHostsEnabled: boolean; riskyUsersEnabled: boolean; pendingActionResponsesWithAck: boolean; policyListEnabled: boolean; groupedNavigation: boolean; previewTelemetryUrlEnabled: boolean; responseActionsConsoleEnabled: boolean; }>; }"
+          "Readonly<{} & { signalsIndex: string; maxRuleImportExportSize: number; maxRuleImportPayloadBytes: number; maxTimelineImportExportSize: number; maxTimelineImportPayloadBytes: number; alertMergeStrategy: \"allFields\" | \"missingFields\" | \"noFields\"; alertIgnoreFields: string[]; enableExperimental: string[]; packagerTaskInterval: string; prebuiltRulesFromFileSystem: boolean; prebuiltRulesFromSavedObjects: boolean; }> & { experimentalFeatures: Readonly<{ tGridEnabled: boolean; tGridEventRenderedViewEnabled: boolean; excludePoliciesInFilterEnabled: boolean; kubernetesEnabled: boolean; disableIsolationUIPendingStatuses: boolean; riskyHostsEnabled: boolean; riskyUsersEnabled: boolean; pendingActionResponsesWithAck: boolean; policyListEnabled: boolean; policyResponseInFleetEnabled: boolean; threatIntelligenceEnabled: boolean; entityAnalyticsDashboardEnabled: boolean; previewTelemetryUrlEnabled: boolean; responseActionsConsoleEnabled: boolean; insightsRelatedAlertsByProcessAncestry: boolean; extendedRuleExecutionLoggingEnabled: boolean; socTrendsEnabled: boolean; }>; }"
         ],
         "path": "x-pack/plugins/security_solution/server/config.ts",
         "deprecated": false,

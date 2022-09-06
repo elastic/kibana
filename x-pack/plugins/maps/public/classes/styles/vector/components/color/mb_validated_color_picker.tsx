@@ -15,6 +15,7 @@ interface Props {
   color: string;
   swatches?: string[];
   append?: EuiFormControlLayoutProps['append'];
+  prepend?: EuiFormControlLayoutProps['prepend'];
 }
 
 interface State {
@@ -45,6 +46,7 @@ export class MbValidatedColorPicker extends Component<Props, State> {
         color={this.state.colorInputValue}
         swatches={this.props.swatches}
         append={this.props.append}
+        prepend={this.props.prepend}
         compressed
       />
     );

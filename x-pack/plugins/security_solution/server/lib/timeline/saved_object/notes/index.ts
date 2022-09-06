@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { FrameworkRequest } from '../../../framework';
-import {
+import type { FrameworkRequest } from '../../../framework';
+import type {
   SavedNote,
   NoteSavedObject,
   PageInfoNote,

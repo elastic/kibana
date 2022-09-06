@@ -29,7 +29,6 @@ export type { ValidationVisOptionsProps } from './editor/components/common/valid
 export { TruncateLabelsOption } from './editor/components/common/truncate_labels';
 export { getPositions } from './editor/positions';
 export { getScaleTypes } from './editor/scale_types';
-export { getAggId } from './config/get_agg_id';
 
 // Export common types
 export * from '../common';

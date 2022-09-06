@@ -5,16 +5,15 @@
  * 2.0.
  */
 
-import { ActionCreator } from 'typescript-fsa';
+import type { ActionCreator } from 'typescript-fsa';
+
 import type { DataViewBase, Filter, Query } from '@kbn/es-query';
-import { InputsModelId } from '../../../common/store/inputs/constants';
-import { UsersQueryProps } from '../types';
-import { NavTab } from '../../../common/components/navigation/types';
 
-import { DocValueFields } from '../../../common/containers/source';
+import type { UsersQueryProps } from '../types';
+import type { NavTab } from '../../../common/components/navigation/types';
 
-import { UsersTableType } from '../../store/model';
-import { usersModel } from '../../store';
+import type { UsersDetailsTableType } from '../../store/model';
+import type { usersModel } from '../../store';
 
 interface UsersDetailsComponentReduxProps {
   query: Query;
@@ -22,11 +21,6 @@ interface UsersDetailsComponentReduxProps {
 }
 
 interface UserBodyComponentDispatchProps {
-  setAbsoluteRangeDatePicker: ActionCreator<{
-    id: InputsModelId;
-    from: string;
-    to: string;
-  }>;
   detailName: string;
   usersDetailsPagePath: string;
 }
@@ -44,30 +38,15 @@ export type UsersDetailsComponentProps = UsersDetailsComponentReduxProps &
   UsersDetailsComponentDispatchProps &
   UsersQueryProps;
 
-export type KeyUsersDetailsNavTabWithoutMlPermission = UsersTableType.events &
-  UsersTableType.alerts;
+type KeyUsersDetailsNavTab = `${UsersDetailsTableType}`;
 
-type KeyUsersDetailsNavTabWithMlPermission = KeyUsersDetailsNavTabWithoutMlPermission &
-  UsersTableType.anomalies;
-
-type KeyUsersDetailsNavTab =
-  | KeyUsersDetailsNavTabWithoutMlPermission
-  | KeyUsersDetailsNavTabWithMlPermission;
-
-export type UsersDetailsNavTab = Record<KeyUsersDetailsNavTab, NavTab>;
+export type UsersDetailsNavTab = Partial<Record<KeyUsersDetailsNavTab, NavTab>>;
 
 export type UsersDetailsTabsProps = UserBodyComponentDispatchProps &
   UsersQueryProps & {
-    docValueFields?: DocValueFields[];
     indexNames: string[];
     pageFilters?: Filter[];
     filterQuery?: string;
     indexPattern: DataViewBase;
     type: usersModel.UsersType;
   };
-
-export type SetAbsoluteRangeDatePicker = ActionCreator<{
-  id: InputsModelId;
-  from: string;
-  to: string;
-}>;

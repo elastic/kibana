@@ -28,6 +28,7 @@ import { i18n } from '@kbn/i18n';
 
 import { useUiTracker } from '@kbn/observability-plugin/public';
 
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import {
   asPercent,
   asPreciseDecimal,
@@ -45,7 +46,7 @@ import { CorrelationsTable } from './correlations_table';
 import { FailedTransactionsCorrelationsHelpPopover } from './failed_transactions_correlations_help_popover';
 import { getFailedTransactionsCorrelationImpactLabel } from './utils/get_failed_transactions_correlation_impact_label';
 import { getOverallHistogram } from './utils/get_overall_histogram';
-import { TransactionDistributionChart } from '../../shared/charts/transaction_distribution_chart';
+import { DurationDistributionChart } from '../../shared/charts/duration_distribution_chart';
 import { CorrelationsEmptyStatePrompt } from './empty_state_prompt';
 import { CrossClusterSearchCompatibilityWarning } from './cross_cluster_search_warning';
 import { CorrelationsProgressControls } from './progress_controls';
@@ -55,7 +56,8 @@ import { OnAddFilter } from './context_popover/top_values';
 import { useFailedTransactionsCorrelations } from './use_failed_transactions_correlations';
 import { getTransactionDistributionChartData } from './get_transaction_distribution_chart_data';
 import { ChartTitleToolTip } from './chart_title_tool_tip';
-import { MIN_TAB_TITLE_HEIGHT } from '../transaction_details/distribution';
+import { MIN_TAB_TITLE_HEIGHT } from '../../shared/charts/duration_distribution_chart_with_scrubber';
+import { TotalDocCountLabel } from '../../shared/charts/duration_distribution_chart/total_doc_count_label';
 
 export function FailedTransactionsCorrelations({
   onFilter,
@@ -478,8 +480,16 @@ export function FailedTransactionsCorrelations({
             </h5>
           </EuiTitle>
         </EuiFlexItem>
-        <EuiFlexItem>
+
+        <EuiFlexItem grow={false}>
           <ChartTitleToolTip />
+        </EuiFlexItem>
+
+        <EuiFlexItem>
+          <TotalDocCountLabel
+            eventType={ProcessorEvent.transaction}
+            totalDocCount={response.totalDocCount}
+          />
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
@@ -489,11 +499,12 @@ export function FailedTransactionsCorrelations({
 
       <EuiSpacer size="s" />
 
-      <TransactionDistributionChart
+      <DurationDistributionChart
         markerValue={response.percentileThresholdValue ?? 0}
         data={transactionDistributionChartData}
         hasData={hasData}
         status={status}
+        eventType={ProcessorEvent.transaction}
       />
 
       <EuiSpacer size="s" />
@@ -513,7 +524,7 @@ export function FailedTransactionsCorrelations({
           style={{
             display: 'flex',
             flexDirection: 'row',
-            paddingLeft: euiTheme.eui.paddingSizes.s,
+            paddingLeft: euiTheme.eui.euiSizeS,
           }}
         >
           <EuiSwitch
@@ -530,7 +541,7 @@ export function FailedTransactionsCorrelations({
           <EuiIconTip
             size="m"
             iconProps={{
-              style: { marginLeft: euiTheme.eui.paddingSizes.xs },
+              style: { marginLeft: euiTheme.eui.euiSizeXS },
             }}
             content={i18n.translate(
               'xpack.apm.correlations.latencyCorrelations.advancedStatisticsTooltipContent',

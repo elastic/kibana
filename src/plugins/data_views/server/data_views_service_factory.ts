@@ -59,5 +59,11 @@ export const dataViewsServiceFactory = (deps: DataViewsServiceFactoryDeps) =>
           : request
           ? (await capabilities.resolveCapabilities(request)).indexPatterns.save === true
           : false,
+      getCanSaveAdvancedSettings: async () =>
+        byPassCapabilities
+          ? true
+          : request
+          ? (await capabilities.resolveCapabilities(request)).advancedSettings.save === true
+          : false,
     });
   };

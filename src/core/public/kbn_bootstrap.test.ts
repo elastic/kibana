@@ -22,6 +22,7 @@ describe('kbn_bootstrap', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    window.performance.mark = jest.fn();
   });
 
   it('does not report a fatal error if apm load fails', async () => {

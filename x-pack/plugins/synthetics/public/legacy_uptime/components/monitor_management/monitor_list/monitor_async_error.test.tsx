@@ -24,6 +24,7 @@ describe('<MonitorAsyncError />', () => {
       throttling: DEFAULT_THROTTLING,
       enablement: null,
       list: {
+        absoluteTotal: 6,
         perPage: 5,
         page: 1,
         total: 6,

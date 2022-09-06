@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { CombinedState } from 'redux';
-import { SecurityPageName } from '../app/types';
-import { PolicyDetailsState } from './pages/policy/types';
-import { EndpointState } from './pages/endpoint_hosts/types';
+import type { CombinedState } from 'redux';
+import type { SecurityPageName } from '../app/types';
+import type { PolicyDetailsState } from './pages/policy/types';
+import type { EndpointState } from './pages/endpoint_hosts/types';
 
 /**
  * The type for the management store global namespace. Used mostly internally to reference
@@ -31,6 +31,7 @@ export enum AdministrationSubTab {
   eventFilters = 'event_filters',
   hostIsolationExceptions = 'host_isolation_exceptions',
   blocklist = 'blocklist',
+  responseActions = 'response_actions',
 }
 
 /**

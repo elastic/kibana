@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import { Chart, BarSeries, Axis, ScaleType, AxisStyle } from '@elastic/charts';
-import { mount, ReactWrapper, shallow, ShallowWrapper } from 'enzyme';
+import type { AxisStyle } from '@elastic/charts';
+import { Chart, BarSeries, Axis, ScaleType } from '@elastic/charts';
+import type { ReactWrapper, ShallowWrapper } from 'enzyme';
+import { mount, shallow } from 'enzyme';
 import React from 'react';
 
 import { escapeDataProviderId } from '../drag_and_drop/helpers';
@@ -15,7 +17,7 @@ import '../../mock/match_media';
 import '../../mock/react_beautiful_dnd';
 
 import { BarChartBaseComponent, BarChartComponent } from './barchart';
-import { ChartSeriesData } from './common';
+import type { ChartSeriesData } from './common';
 
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');

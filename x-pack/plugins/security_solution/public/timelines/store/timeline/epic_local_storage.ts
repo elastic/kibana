@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { Action } from 'redux';
+import type { Action } from 'redux';
 import { map, filter, ignoreElements, tap, withLatestFrom, delay } from 'rxjs/operators';
-import { Epic } from 'redux-observable';
+import type { Epic } from 'redux-observable';
 import { get } from 'lodash/fp';
 
-import { TimelineIdLiteral } from '../../../../common/types/timeline';
+import type { TimelineIdLiteral } from '../../../../common/types/timeline';
 import { addTimelineInStorage } from '../../containers/local_storage';
 
 import {
@@ -24,7 +24,7 @@ import {
   updateItemsPerPage,
   updateSort,
 } from './actions';
-import { TimelineEpicDependencies } from './types';
+import type { TimelineEpicDependencies } from './types';
 import { isNotNull } from './helpers';
 
 const timelineActionTypes = [

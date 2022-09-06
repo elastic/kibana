@@ -103,20 +103,27 @@ export class TelemetryEventsSender {
     this.isSending = false;
   }
 
-  private async fetchClusterInfo(): Promise<InfoResponse> {
+  private async fetchClusterInfo(): Promise<InfoResponse | undefined> {
     if (this.esClient === undefined || this.esClient === null) {
       throw Error('elasticsearch client is unavailable: cannot retrieve cluster information');
     }
 
-    return await this.esClient.info();
+    try {
+      return await this.esClient.info();
+    } catch (e) {
+      this.logger.debug(`Error fetching cluster information: ${e}`);
+    }
   }
 
   private async fetchLicenseInfo() {
     if (this.esClient === undefined || this.esClient === null) {
       throw Error('elasticsearch client is unavailable: cannot retrieve license information');
     }
-
-    return await this.esClient.license.get();
+    try {
+      return await this.esClient.license.get();
+    } catch (e) {
+      this.logger.debug(`Error fetching license information: ${e}`);
+    }
   }
 
   public async sendEvents(telemetryUrl: string, queue: TelemetryQueue<any>) {
@@ -176,6 +183,7 @@ export class TelemetryEventsSender {
           ...(clusterName ? { 'X-Elastic-Cluster-Name': clusterName } : undefined),
           'X-Elastic-Stack-Version': clusterVersion?.number ? clusterVersion.number : '8.2.0',
         },
+        timeout: 5000,
       });
       this.logger.debug(`Events sent!. Response: ${resp.status} ${JSON.stringify(resp.data)}`);
     } catch (err) {

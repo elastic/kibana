@@ -5,49 +5,54 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
+import { toBooleanRt, toNumberRt } from '@kbn/io-ts-utils';
 import { Outlet, Route } from '@kbn/typed-react-router-config';
 import * as t from 'io-ts';
 import React, { ComponentProps } from 'react';
-import { toBooleanRt } from '@kbn/io-ts-utils';
+import { offsetRt } from '../../../../common/comparison_rt';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { environmentRt } from '../../../../common/environment_rt';
 import { TraceSearchType } from '../../../../common/trace_explorer';
-import { BackendDetailOverview } from '../../app/backend_detail_overview';
-import { BackendInventory } from '../../app/backend_inventory';
+import { TimeRangeMetadataContextProvider } from '../../../context/time_range_metadata/time_range_metadata_context';
 import { Breadcrumb } from '../../app/breadcrumb';
 import { ServiceInventory } from '../../app/service_inventory';
 import { ServiceMapHome } from '../../app/service_map';
-import { TraceOverview } from '../../app/trace_overview';
-import { TraceExplorer } from '../../app/trace_explorer';
 import { TopTracesOverview } from '../../app/top_traces_overview';
-import { ApmMainTemplate } from '../templates/apm_main_template';
-import { RedirectToBackendOverviewRouteView } from './redirect_to_backend_overview_route_view';
-import { ServiceGroupTemplate } from '../templates/service_group_template';
-import { ServiceGroupsRedirect } from '../service_groups_redirect';
-import { RedirectTo } from '../redirect_to';
-import { offsetRt } from '../../../../common/comparison_rt';
+import { TraceExplorer } from '../../app/trace_explorer';
+import { TraceOverview } from '../../app/trace_overview';
 import { TransactionTab } from '../../app/transaction_details/waterfall_with_summary/transaction_tabs';
+import { RedirectTo } from '../redirect_to';
+import { ServiceGroupsRedirect } from '../service_groups_redirect';
+import { ApmMainTemplate } from '../templates/apm_main_template';
+import { ServiceGroupTemplate } from '../templates/service_group_template';
+import { dependencies } from './dependencies';
+import { legacyBackends } from './legacy_backends';
+import { storageExplorer } from './storage_explorer';
 
-function page<
+export function page<
   TPath extends string,
-  TChildren extends Record<string, Route> | undefined = undefined
+  TChildren extends Record<string, Route> | undefined = undefined,
+  TParams extends t.Type<any> | undefined = undefined
 >({
   path,
   element,
   children,
   title,
   showServiceGroupSaveButton = false,
+  params,
 }: {
   path: TPath;
   element: React.ReactElement<any, any>;
   children?: TChildren;
   title: string;
   showServiceGroupSaveButton?: boolean;
+  params?: TParams;
 }): Record<
   TPath,
   {
     element: React.ReactElement<any, any>;
-  } & (TChildren extends Record<string, Route> ? { children: TChildren } : {})
+  } & (TChildren extends Record<string, Route> ? { children: TChildren } : {}) &
+    (TParams extends t.Type<any> ? { params: TParams } : {})
 > {
   return {
     [path]: {
@@ -62,6 +67,7 @@ function page<
         </Breadcrumb>
       ),
       children,
+      params,
     },
   } as any;
 }
@@ -126,16 +132,20 @@ export const ServiceMapTitle = i18n.translate(
   }
 );
 
-export const DependenciesInventoryTitle = i18n.translate(
-  'xpack.apm.views.dependenciesInventory.title',
+export const DependenciesOperationsTitle = i18n.translate(
+  'xpack.apm.views.dependenciesOperations.title',
   {
-    defaultMessage: 'Dependencies',
+    defaultMessage: 'Operations',
   }
 );
 
 export const home = {
   '/': {
-    element: <Outlet />,
+    element: (
+      <TimeRangeMetadataContextProvider>
+        <Outlet />
+      </TimeRangeMetadataContextProvider>
+    ),
     params: t.type({
       query: t.intersection([
         environmentRt,
@@ -148,6 +158,10 @@ export const home = {
         t.partial({
           refreshPaused: t.union([t.literal('true'), t.literal('false')]),
           refreshInterval: t.string,
+          page: toNumberRt,
+          pageSize: toNumberRt,
+          sortField: t.string,
+          sortDirection: t.union([t.literal('asc'), t.literal('desc')]),
         }),
         offsetRt,
       ]),
@@ -217,40 +231,9 @@ export const home = {
           },
         },
       }),
-      '/backends': {
-        element: <Outlet />,
-        params: t.partial({
-          query: t.intersection([
-            t.type({
-              comparisonEnabled: toBooleanRt,
-            }),
-            offsetRt,
-          ]),
-        }),
-        children: {
-          '/backends/{backendName}/overview': {
-            element: <RedirectToBackendOverviewRouteView />,
-            params: t.type({
-              path: t.type({
-                backendName: t.string,
-              }),
-            }),
-          },
-          '/backends/overview': {
-            element: <BackendDetailOverview />,
-            params: t.type({
-              query: t.type({
-                backendName: t.string,
-              }),
-            }),
-          },
-          ...page({
-            path: '/backends',
-            title: DependenciesInventoryTitle,
-            element: <BackendInventory />,
-          }),
-        },
-      },
+      ...dependencies,
+      ...legacyBackends,
+      ...storageExplorer,
       '/': {
         element: (
           <ServiceGroupsRedirect>

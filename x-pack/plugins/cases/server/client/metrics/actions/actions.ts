@@ -24,8 +24,12 @@ export class Actions extends SingleCaseAggregationHandler {
   }
 
   public async compute(): Promise<SingleCaseMetricsResponse> {
-    const { unsecuredSavedObjectsClient, authorization, attachmentService, logger } =
-      this.options.clientArgs;
+    const {
+      unsecuredSavedObjectsClient,
+      authorization,
+      services: { attachmentService },
+      logger,
+    } = this.options.clientArgs;
     const { casesClient } = this.options;
 
     try {

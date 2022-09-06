@@ -5,30 +5,34 @@
  * 2.0.
  */
 
-import React, { ChangeEventHandler, memo, useCallback, useEffect, useMemo, useState } from 'react';
+import type { ChangeEventHandler } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
+import type { EuiSuperSelectOption } from '@elastic/eui';
 import {
   EuiFieldText,
   EuiForm,
   EuiFormRow,
   EuiHorizontalRule,
   EuiSuperSelect,
-  EuiSuperSelectOption,
   EuiTextArea,
   EuiText,
   EuiTitle,
   EuiSpacer,
 } from '@elastic/eui';
+import type { AllConditionEntryFields, EntryTypes } from '@kbn/securitysolution-utils';
 import {
   hasSimpleExecutableName,
   isPathValid,
   ConditionEntryField,
   OperatingSystem,
-  AllConditionEntryFields,
-  EntryTypes,
 } from '@kbn/securitysolution-utils';
-import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 
-import { TrustedAppConditionEntry, NewTrustedApp } from '../../../../../../common/endpoint/types';
+import type {
+  TrustedAppConditionEntry,
+  NewTrustedApp,
+  PolicyData,
+} from '../../../../../../common/endpoint/types';
 import {
   isValidHash,
   getDuplicateFields,
@@ -55,19 +59,17 @@ import {
   SELECT_OS_LABEL,
 } from '../translations';
 import { OS_TITLES } from '../../../../common/translations';
-import { LogicalConditionBuilder, LogicalConditionBuilderProps } from './logical_condition';
+import type { LogicalConditionBuilderProps } from './logical_condition';
+import { LogicalConditionBuilder } from './logical_condition';
 import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
 import { useLicense } from '../../../../../common/hooks/use_license';
-import {
-  EffectedPolicySelect,
-  EffectedPolicySelection,
-} from '../../../../components/effected_policy_select';
+import type { EffectedPolicySelection } from '../../../../components/effected_policy_select';
+import { EffectedPolicySelect } from '../../../../components/effected_policy_select';
 import {
   GLOBAL_ARTIFACT_TAG,
   BY_POLICY_ARTIFACT_TAG_PREFIX,
 } from '../../../../../../common/endpoint/service/artifacts/constants';
-import type { PolicyData } from '../../../../../../common/endpoint/types';
-import { ArtifactFormComponentProps } from '../../../../components/artifact_list_page';
+import type { ArtifactFormComponentProps } from '../../../../components/artifact_list_page';
 import { isGlobalPolicyEffected } from '../../../../components/effected_policy_select/utils';
 
 interface FieldValidationState {

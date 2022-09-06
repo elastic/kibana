@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { UseListsConfigReturn } from './use_lists_config';
+import type { UseListsConfigReturn } from './use_lists_config';
 
 export const getUseListsConfigMock: () => jest.Mocked<UseListsConfigReturn> = () => ({
   canManageIndex: null,

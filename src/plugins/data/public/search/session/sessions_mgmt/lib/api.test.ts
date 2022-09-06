@@ -6,11 +6,10 @@
  * Side Public License, v 1.
  */
 
-import type { MockedKeys } from '@kbn/utility-types/jest';
+import type { MockedKeys } from '@kbn/utility-types-jest';
 import { CoreSetup, CoreStart } from '@kbn/core/public';
 import moment from 'moment';
 import { coreMock } from '@kbn/core/public/mocks';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import type { SavedObjectsFindResponse } from '@kbn/core/server';
 import { SessionsClient } from '../../..';
 import { SearchSessionStatus } from '../../../../../common';

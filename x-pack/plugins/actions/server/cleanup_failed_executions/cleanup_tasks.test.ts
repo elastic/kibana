@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SavedObjectsFindResult, SavedObjectsSerializer } from '@kbn/core/server';
+import type { SavedObjectsFindResult, ISavedObjectsSerializer } from '@kbn/core/server';
 import { loggingSystemMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
 import { CleanupTasksOpts, cleanupTasks } from './cleanup_tasks';
@@ -23,7 +23,7 @@ describe('cleanupTasks', () => {
         const namespacePrefix = namespace ? `${namespace}:` : '';
         return `${namespacePrefix}${type}:${id}`;
       }),
-  } as unknown as SavedObjectsSerializer;
+  } as unknown as ISavedObjectsSerializer;
 
   const cleanupTasksOpts: CleanupTasksOpts = {
     logger,

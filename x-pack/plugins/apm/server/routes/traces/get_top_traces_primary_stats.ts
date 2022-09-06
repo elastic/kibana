@@ -32,6 +32,7 @@ import {
   TRANSACTION_NAME,
   TRANSACTION_ROOT,
 } from '../../../common/elasticsearch_fieldnames';
+import { RandomSampler } from '../../lib/helpers/get_random_sampler';
 
 export type BucketKey = Record<
   typeof TRANSACTION_NAME | typeof SERVICE_NAME,
@@ -41,22 +42,22 @@ export type BucketKey = Record<
 interface TopTracesParams {
   environment: string;
   kuery: string;
-  probability: number;
   transactionName?: string;
   searchAggregatedTransactions: boolean;
   start: number;
   end: number;
   setup: Setup;
+  randomSampler: RandomSampler;
 }
-export function getTopTracesPrimaryStats({
+export async function getTopTracesPrimaryStats({
   environment,
   kuery,
-  probability,
   transactionName,
   searchAggregatedTransactions,
   start,
   end,
   setup,
+  randomSampler,
 }: TopTracesParams) {
   return withApmSpan('get_top_traces_primary_stats', async () => {
     const response = await setup.apmEventClient.search(
@@ -104,7 +105,7 @@ export function getTopTracesPrimaryStats({
           },
           aggs: {
             sample: {
-              random_sampler: { probability },
+              random_sampler: randomSampler,
               aggs: {
                 transaction_groups: {
                   composite: {

@@ -6,15 +6,19 @@
  * Side Public License, v 1.
  */
 
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  SavedObject,
+  SavedObjectsCreateOptions,
+  SavedObjectsUpdateOptions,
+} from '@kbn/core/public';
+import type { ErrorToastOptions, ToastInputFields } from '@kbn/core-notifications-browser';
 import type { DataViewFieldBase } from '@kbn/es-query';
-import { ToastInputFields, ErrorToastOptions } from '@kbn/core/public/notifications';
-// eslint-disable-next-line
-import type { SavedObject } from 'src/core/server';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import { RUNTIME_FIELD_TYPES } from './constants';
 
 export type { QueryDslQueryContainer };
+export type { SavedObject };
 
 export type FieldFormatMap = Record<string, SerializedFieldFormat>;
 
@@ -36,7 +40,8 @@ export type RuntimeTypeExceptComposite = Exclude<RuntimeType, 'composite'>;
  * Runtime field definition
  * @public
  */
-export interface RuntimeFieldBase {
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type RuntimeFieldBase = {
   /**
    * Type of runtime field
    */
@@ -50,12 +55,12 @@ export interface RuntimeFieldBase {
      */
     source: string;
   };
-}
+};
 
 /**
  * The RuntimeField that will be sent in the ES Query "runtime_mappings" object
  */
-export interface RuntimeFieldSpec extends RuntimeFieldBase {
+export type RuntimeFieldSpec = RuntimeFieldBase & {
   fields?: Record<
     string,
     {
@@ -63,7 +68,7 @@ export interface RuntimeFieldSpec extends RuntimeFieldBase {
       type: RuntimeTypeExceptComposite;
     }
   >;
-}
+};
 
 /**
  * Field attributes that are user configurable
@@ -152,6 +157,10 @@ export interface DataViewAttributes {
    * Prevents errors when index pattern exists before indices
    */
   allowNoIndex?: boolean;
+  /**
+   * Name of the data view. Human readable name used to differentiate data view.
+   */
+  name?: string;
 }
 
 /**
@@ -159,15 +168,17 @@ export interface DataViewAttributes {
  * @public
  * Storage of field attributes. Necessary since the field list isn't saved.
  */
-export interface FieldAttrs {
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type FieldAttrs = {
   [key: string]: FieldAttrSet;
-}
+};
 
 /**
  * Field attributes that are stored on the data view
  * @public
  */
-export interface FieldAttrSet {
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type FieldAttrSet = {
   /**
    * Custom field label
    */
@@ -176,7 +187,7 @@ export interface FieldAttrSet {
    * Popularity count - used for discover
    */
   count?: number;
-}
+};
 
 /**
  * Handler for data view notifications
@@ -203,7 +214,7 @@ export interface UiSettingsCommon {
    * Get a setting value
    * @param key name of value
    */
-  get: <T = any>(key: string) => Promise<T>;
+  get: <T = unknown>(key: string) => Promise<T | undefined>;
   /**
    * Get all settings values
    */
@@ -213,7 +224,7 @@ export interface UiSettingsCommon {
    * @param key name of value
    * @param value value to set
    */
-  set: <T = any>(key: string, value: T) => Promise<void>;
+  set: <T = unknown>(key: string, value: T) => Promise<void>;
   /**
    * Remove a setting value
    * @param key name of value
@@ -274,8 +285,8 @@ export interface SavedObjectsClientCommon {
   update: (
     type: string,
     id: string,
-    attributes: Record<string, any>,
-    options: Record<string, any>
+    attributes: DataViewAttributes,
+    options: SavedObjectsUpdateOptions
   ) => Promise<SavedObject>;
   /**
    * Create a saved object
@@ -285,8 +296,8 @@ export interface SavedObjectsClientCommon {
    */
   create: (
     type: string,
-    attributes: Record<string, any>,
-    options: Record<string, any>
+    attributes: DataViewAttributes,
+    options: SavedObjectsCreateOptions
   ) => Promise<SavedObject>;
   /**
    * Delete a saved object by id
@@ -306,12 +317,18 @@ export interface GetFieldsOptions {
   filter?: QueryDslQueryContainer;
 }
 
-export interface IDataViewsApiClient {
-  getFieldsForWildcard: (options: GetFieldsOptions) => Promise<any>;
-  hasUserIndexPattern: () => Promise<boolean>;
+/**
+ * FieldsForWildcard response
+ */
+export interface FieldsForWildcardResponse {
+  fields: FieldSpec[];
+  indices: string[];
 }
 
-export type { SavedObject };
+export interface IDataViewsApiClient {
+  getFieldsForWildcard: (options: GetFieldsOptions) => Promise<FieldsForWildcardResponse>;
+  hasUserDataView: () => Promise<boolean>;
+}
 
 export type AggregationRestrictions = Record<
   string,
@@ -328,7 +345,8 @@ export type AggregationRestrictions = Record<
 /**
  * Interface for metadata about rollup indices
  */
-export interface TypeMeta {
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type TypeMeta = {
   /**
    * Aggregation restrictions for rollup fields
    */
@@ -342,7 +360,7 @@ export interface TypeMeta {
      */
     rollup_index: string;
   };
-}
+};
 
 /**
  * Data View type. Default or rollup
@@ -352,21 +370,13 @@ export enum DataViewType {
   ROLLUP = 'rollup',
 }
 
-/**
- * @deprecated Use DataViewType. All index pattern interfaces were renamed.
- */
-export enum IndexPatternType {
-  DEFAULT = DataViewType.DEFAULT,
-  ROLLUP = DataViewType.ROLLUP,
-}
-
 export type FieldSpecConflictDescriptions = Record<string, string[]>;
 
 /**
  * Serialized version of DataViewField
  * @public
  */
-export interface FieldSpec extends DataViewFieldBase {
+export type FieldSpec = DataViewFieldBase & {
   /**
    * Popularity count is used by discover
    */
@@ -408,6 +418,26 @@ export interface FieldSpec extends DataViewFieldBase {
    */
   runtimeField?: RuntimeFieldSpec;
 
+  /**
+   * list of allowed field intervals for the field
+   */
+  fixedInterval?: string[];
+
+  /**
+   * List of allowed timezones for the field
+   */
+  timeZone?: string[];
+
+  /**
+   * set to true if field is a TSDB dimension field
+   */
+  timeSeriesDimension?: boolean;
+
+  /**
+   * set if field is a TSDB metric field
+   */
+  timeSeriesMetric?: 'histogram' | 'summary' | 'gauge' | 'counter';
+
   // not persisted
 
   /**
@@ -418,7 +448,7 @@ export interface FieldSpec extends DataViewFieldBase {
    * Is this field in the mapping? False if a scripted or runtime field defined on the data view.
    */
   isMapped?: boolean;
-}
+};
 
 export type DataViewFieldMap = Record<string, FieldSpec>;
 
@@ -426,9 +456,10 @@ export type DataViewFieldMap = Record<string, FieldSpec>;
  * Static data view format
  * Serialized data object, representing data view attributes and state
  */
-export interface DataViewSpec {
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type DataViewSpec = {
   /**
-   * Saved object id
+   * Saved object id (or generated id if in-memory only)
    */
   id?: string;
   /**
@@ -479,11 +510,16 @@ export interface DataViewSpec {
    * Array of namespace ids
    */
   namespaces?: string[];
-}
+  /**
+   * Name of the data view. Human readable name used to differentiate data view.
+   */
+  name?: string;
+};
 
-export interface SourceFilter {
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type SourceFilter = {
   value: string;
-}
+};
 
 export interface HasDataService {
   hasESData: () => Promise<boolean>;

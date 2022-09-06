@@ -10,7 +10,7 @@ import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/
 import { appContextService } from '../../..';
 import { ElasticsearchAssetType } from '../../../../types';
 import { IngestManagerError } from '../../../../errors';
-import type { EsAssetReference } from '../../../../../common';
+import type { EsAssetReference } from '../../../../../common/types';
 import { updateEsAssetReferences } from '../../packages/install';
 
 export const deletePreviousPipelines = async (

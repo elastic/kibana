@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { Dispatch } from 'redux';
-import { State, ImmutableMiddlewareFactory } from './types';
-import { AppAction } from './actions';
+import type { Dispatch } from 'redux';
+import type { State, ImmutableMiddlewareFactory } from './types';
+import type { AppAction } from './actions';
 
 interface WaitForActionOptions<T extends A['type'], A extends AppAction = AppAction> {
   validate?: (action: A extends { type: T } ? A : never) => boolean;

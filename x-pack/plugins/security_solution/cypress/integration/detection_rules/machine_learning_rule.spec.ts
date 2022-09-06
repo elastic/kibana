@@ -66,7 +66,7 @@ describe('Detection rules, machine learning', () => {
     visitWithoutDateRange(RULE_CREATION);
   });
 
-  it.skip('Creates and enables a new ml rule', () => {
+  it('Creates and enables a new ml rule', () => {
     selectMachineLearningRuleType();
     fillDefineMachineLearningRuleAndContinue(getMachineLearningRule());
     fillAboutRuleAndContinue(getMachineLearningRule());

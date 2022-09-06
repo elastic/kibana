@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { EuiTabbedContentTab } from '@elastic/eui';
 import {
   EuiButton,
   EuiCallOut,
@@ -12,13 +13,14 @@ import {
   EuiFlexItem,
   EuiSpacer,
   EuiTabbedContent,
-  EuiTabbedContentTab,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { FC, memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type { FC } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 
-import { UpdateRulesSchema } from '../../../../../../common/detection_engine/schemas/request';
+import type { DataViewListItem } from '@kbn/data-views-plugin/common';
+import type { UpdateRulesSchema } from '../../../../../../common/detection_engine/schemas/request';
 import { useRule, useUpdateRule } from '../../../../containers/detection_engine/rules';
 import { useListsConfig } from '../../../../containers/detection_engine/lists/use_lists_config';
 import { SecuritySolutionPageWrapper } from '../../../../../common/components/page_wrapper';
@@ -50,13 +52,16 @@ import {
   MaxWidthEuiFlexItem,
 } from '../helpers';
 import * as ruleI18n from '../translations';
-import { RuleStep, RuleStepsFormHooks, RuleStepsFormData, RuleStepsData } from '../types';
+import type { RuleStepsFormHooks, RuleStepsFormData, RuleStepsData } from '../types';
+import { RuleStep } from '../types';
 import * as i18n from './translations';
 import { SecurityPageName } from '../../../../../app/types';
 import { ruleStepsOrder } from '../utils';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { APP_UI_ID } from '../../../../../../common/constants';
 import { HeaderPage } from '../../../../../common/components/header_page';
+import { useStartTransaction } from '../../../../../common/lib/apm/use_start_transaction';
+import { SINGLE_RULE_ACTIONS } from '../../../../../common/lib/apm/user_actions';
 
 const formHookNoop = async (): Promise<undefined> => undefined;
 
@@ -73,6 +78,7 @@ const EditRulePageComponent: FC = () => {
   ] = useUserData();
   const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
     useListsConfig();
+  const { data: dataServices } = useKibana().services;
   const { navigateToApp } = useKibana().services.application;
 
   const { detailName: ruleId } = useParams<{ detailName: string | undefined }>();
@@ -101,6 +107,22 @@ const EditRulePageComponent: FC = () => {
     return stepData.data != null && !stepIsValid(stepData);
   });
   const [{ isLoading, isSaved }, setRule] = useUpdateRule();
+  const [dataViewOptions, setDataViewOptions] = useState<{ [x: string]: DataViewListItem }>({});
+
+  useEffect(() => {
+    const fetchDataViews = async () => {
+      const dataViewsRefs = await dataServices.dataViews.getIdsWithTitle();
+      const dataViewIdIndexPatternMap = dataViewsRefs.reduce(
+        (acc, item) => ({
+          ...acc,
+          [item.id]: item,
+        }),
+        {}
+      );
+      setDataViewOptions(dataViewIdIndexPatternMap);
+    };
+    fetchDataViews();
+  }, [dataServices.dataViews]);
   const actionMessageParams = useMemo(() => getActionMessageParams(rule?.type), [rule?.type]);
   const setFormHook = useCallback(
     <K extends keyof RuleStepsFormHooks>(step: K, hook: RuleStepsFormHooks[K]) => {
@@ -136,6 +158,7 @@ const EditRulePageComponent: FC = () => {
                   isUpdateView
                   defaultValues={defineStep.data}
                   setForm={setFormHook}
+                  kibanaDataViews={dataViewOptions}
                 />
               )}
               <EuiSpacer />
@@ -224,8 +247,11 @@ const EditRulePageComponent: FC = () => {
       scheduleStep.data,
       actionsStep.data,
       actionMessageParams,
+      dataViewOptions,
     ]
   );
+
+  const { startTransaction } = useStartTransaction();
 
   const onSubmit = useCallback(async () => {
     const activeStepData = await formHooks.current[activeStep]();
@@ -243,6 +269,7 @@ const EditRulePageComponent: FC = () => {
       stepIsValid(schedule) &&
       stepIsValid(actions)
     ) {
+      startTransaction({ name: SINGLE_RULE_ACTIONS.SAVE });
       setRule({
         ...formatRule<UpdateRulesSchema>(
           define.data,
@@ -265,6 +292,7 @@ const EditRulePageComponent: FC = () => {
     scheduleStep,
     setRule,
     setStepData,
+    startTransaction,
   ]);
 
   useEffect(() => {

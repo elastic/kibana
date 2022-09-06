@@ -6,14 +6,14 @@
  */
 
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
-import { ManifestSchemaVersion } from '../../../../common/endpoint/schema/common';
+import type { ManifestSchemaVersion } from '../../../../common/endpoint/schema/common';
 import { ManifestConstants } from '../../lib/artifacts';
 import { getInternalManifestMock } from '../../schemas/artifacts/saved_objects.mock';
 import { getManifestClientMock } from './mocks';
 import { ManifestClient } from './manifest_client';
 
 describe('manifest_client', () => {
-  describe('ManifestClient sanity checks', () => {
+  describe('ManifestClient checks', () => {
     test('can create ManifestClient', () => {
       const manifestClient = new ManifestClient(savedObjectsClientMock.create(), 'v1');
       expect(manifestClient).toBeInstanceOf(ManifestClient);

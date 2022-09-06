@@ -5,71 +5,18 @@
  * 2.0.
  */
 
-// 8.1.0 is not significant its just a version < current version
-const createAgentDoc = (
-  id: string,
-  policy: string,
-  status = 'online',
-  version: string = '8.1.0'
-) => ({
-  access_api_key_id: 'abcdefghijklmn',
-  action_seq_no: [-1],
-  active: true,
-  agent: {
-    id,
-    version,
-  },
-  enrolled_at: '2022-03-07T14:02:00Z',
-  local_metadata: {
-    elastic: {
-      agent: {
-        'build.original': version,
-        id,
-        log_level: 'info',
-        snapshot: true,
-        upgradeable: true,
-        version,
-      },
-    },
-    host: {
-      architecture: 'x86_64',
-      hostname: id,
-      id: 'AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE',
-      ip: ['127.0.0.1/8'],
-      mac: ['ab:cd:12:34:56:78'],
-      name: id,
-    },
-    os: {
-      family: 'darwin',
-      full: 'Mac OS X(10.16)',
-      kernel: '21.3.0',
-      name: 'Mac OS X',
-      platform: 'darwin',
-      version: '10.16',
-    },
-  },
-  policy_id: policy,
-  type: 'PERMANENT',
-  default_api_key: 'abcdefg',
-  default_api_key_id: 'abcd',
-  policy_output_permissions_hash: 'somehash',
-  updated_at: '2022-03-07T16:35:03Z',
-  last_checkin_status: status,
-  last_checkin: new Date(),
-  policy_revision_idx: 1,
-  policy_coordinator_idx: 1,
-  policy_revision: 1,
-  status,
-  packages: [],
-});
+import { createAgentDoc } from '../tasks/agents';
 
 const createAgentDocs = (kibanaVersion: string) => [
   createAgentDoc('agent-1', 'policy-1'), // this agent will have upgrade available
   createAgentDoc('agent-2', 'policy-2', 'error', kibanaVersion),
+  ...[...Array(15).keys()].map((_, index) => createAgentDoc(`agent-${index + 2}`, 'policy-3')),
 ];
 
 let docs: any[] = [];
-describe('View agents', () => {
+// TODO: create fleet server, fix version of agent to upgrade to an allowed version (>= fleet server's, < kibana)
+// https://github.com/elastic/kibana/issues/138121
+describe.skip('View agents', () => {
   before(() => {
     cy.task('deleteDocsByQuery', {
       index: '.fleet-agents',
@@ -116,6 +63,14 @@ describe('View agents', () => {
           monitoring_enabled: ['logs', 'metrics'],
           status: 'active',
         },
+        {
+          id: 'policy-4',
+          name: 'Agent policy 4',
+          description: '',
+          namespace: 'default',
+          monitoring_enabled: ['logs', 'metrics'],
+          status: 'active',
+        },
       ],
     });
   });
@@ -123,7 +78,7 @@ describe('View agents', () => {
   describe('Agent filter suggestions', () => {
     it('should filter based on agent id', () => {
       cy.visit('/app/fleet/agents');
-      cy.getBySel('agentList.queryInput').type('agent.id: agent-1{enter}');
+      cy.getBySel('agentList.queryInput').type('agent.id: "agent-1"{enter}');
       cy.getBySel('fleetAgentListTable');
       cy.getBySel('fleetAgentListTable').find('tr').should('have.length', 2);
       cy.getBySel('fleetAgentListTable').contains('agent-1');
@@ -135,7 +90,7 @@ describe('View agents', () => {
       cy.visit('/app/fleet/agents');
 
       cy.getBySel('agentList.showUpgradeable').click();
-      cy.getBySel('fleetAgentListTable').find('tr').should('have.length', 2);
+      cy.getBySel('fleetAgentListTable').find('tr').should('have.length', 17);
       cy.getBySel('fleetAgentListTable').contains('agent-1');
     });
 
@@ -144,7 +99,7 @@ describe('View agents', () => {
 
       cy.getBySel('agentList.showUpgradeable').click();
       cy.getBySel('agentList.showUpgradeable').click();
-      cy.getBySel('fleetAgentListTable').find('tr').should('have.length', 3);
+      cy.getBySel('fleetAgentListTable').find('tr').should('have.length', 18);
       cy.getBySel('fleetAgentListTable').contains('agent-1');
       cy.getBySel('fleetAgentListTable').contains('agent-2');
     });
@@ -165,7 +120,7 @@ describe('View agents', () => {
 
       cy.getBySel('agentList.policyFilter').click();
 
-      cy.get('button').contains('Agent policy 3').click();
+      cy.get('button').contains('Agent policy 4').click();
 
       cy.getBySel('fleetAgentListTable').contains('No agents found');
     });
@@ -193,14 +148,14 @@ describe('View agents', () => {
     });
   });
   describe('Agent status filter', () => {
-    it('should filter on healthy (1 result)', () => {
+    it('should filter on healthy (16 result)', () => {
       cy.visit('/app/fleet/agents');
 
       cy.getBySel('agentList.statusFilter').click();
 
       cy.get('button').contains('Healthy').click();
 
-      cy.getBySel('fleetAgentListTable').find('tr').should('have.length', 2);
+      cy.getBySel('fleetAgentListTable').find('tr').should('have.length', 17);
       cy.getBySel('fleetAgentListTable').contains('agent-1');
     });
     it('should filter on unhealthy (1 result)', () => {
@@ -230,9 +185,29 @@ describe('View agents', () => {
       cy.get('button').contains('healthy').click();
       cy.get('button').contains('Unhealthy').click();
 
-      cy.getBySel('fleetAgentListTable').find('tr').should('have.length', 3);
+      cy.getBySel('fleetAgentListTable').find('tr').should('have.length', 18);
       cy.getBySel('fleetAgentListTable').contains('agent-1');
       cy.getBySel('fleetAgentListTable').contains('agent-2');
+    });
+  });
+
+  describe('Bulk actions', () => {
+    it('should allow to bulk upgrade agents', () => {
+      cy.visit('/app/fleet/agents');
+
+      cy.getBySel('agentList.policyFilter').click();
+
+      cy.get('button').contains('Agent policy 3').click();
+      cy.getBySel('fleetAgentListTable').find('tr').should('have.length', 16);
+
+      cy.getBySel('checkboxSelectAll').click();
+      // Trigger a bulk upgrade
+      cy.getBySel('agentBulkActionsButton').click();
+      cy.get('button').contains('Upgrade 15 agents').click();
+      cy.get('.euiModalFooter button').contains('Upgrade 15 agents').click();
+      // Cancel upgrade
+      cy.getBySel('abortUpgradeBtn').click();
+      cy.get('button').contains('Confirm').click();
     });
   });
 });

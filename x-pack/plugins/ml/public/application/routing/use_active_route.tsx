@@ -11,6 +11,7 @@ import React, { useEffect, useMemo, useRef } from 'react';
 import { toMountPoint, useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { EuiCallOut } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { PLUGIN_ID } from '../../../common/constants/app';
 import { useMlKibana } from '../contexts/kibana';
 import type { MlRoute } from './router';
 
@@ -31,6 +32,7 @@ export const useActiveRoute = (routesList: MlRoute[]): MlRoute => {
   const editCalendarMatch = useRouteMatch('/settings/calendars_list/edit_calendar/:calendarId');
   const editFilterMatch = useRouteMatch('/settings/filter_lists/edit_filter_list/:filterId');
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const routesMap = useMemo(() => keyBy(routesList, 'path'), []);
 
   const activeRoute = useMemo(() => {
@@ -43,6 +45,7 @@ export const useActiveRoute = (routesList: MlRoute[]): MlRoute => {
     // Remove trailing slash from the pathname
     const pathnameKey = pathname.replace(/\/$/, '');
     return routesMap[pathnameKey];
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname]);
 
   const bannerId = useRef<string | undefined>();
@@ -90,7 +93,7 @@ export const useActiveRoute = (routesList: MlRoute[]): MlRoute => {
   );
 
   useExecutionContext(executionContext, {
-    name: 'Machine Learning',
+    name: PLUGIN_ID,
     type: 'application',
     page: activeRoute?.path ?? '/overview',
   });

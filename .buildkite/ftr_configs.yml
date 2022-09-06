@@ -32,6 +32,7 @@ disabled:
   - x-pack/test/security_solution_cypress/response_ops_cli_config.ts
   - x-pack/test/security_solution_cypress/upgrade_config.ts
   - x-pack/test/security_solution_cypress/visual_config.ts
+  - x-pack/test/threat_intelligence_cypress/visual_config.ts
   - x-pack/test/functional_enterprise_search/with_host_configured.config.ts
   - x-pack/plugins/apm/ftr_e2e/ftr_config_open.ts
   - x-pack/plugins/apm/ftr_e2e/ftr_config_run.ts
@@ -41,6 +42,7 @@ disabled:
   - x-pack/plugins/synthetics/e2e/config.ts
   - x-pack/plugins/synthetics/e2e/synthetics_run.ts
   - x-pack/plugins/ux/e2e/synthetics_run.ts
+  - x-pack/plugins/observability/e2e/synthetics_run.ts
 
   # Configs that exist but weren't running in CI when this file was introduced
   - test/visual_regression/config.ts
@@ -54,7 +56,12 @@ disabled:
   - x-pack/test/load/config.ts
   - x-pack/test/plugin_api_perf/config.js
   - x-pack/test/screenshot_creation/config.ts
+  - x-pack/test/fleet_packages/config.ts
 
+  # Scalability testing config that we run in its own pipeline
+  - x-pack/test/performance/scalability/config.ts
+
+defaultQueue: 'n2-4-spot'
 enabled:
   - test/accessibility/config.ts
   - test/analytics/config.ts
@@ -70,9 +77,14 @@ enabled:
   - test/functional/apps/dashboard/group4/config.ts
   - test/functional/apps/dashboard/group5/config.ts
   - test/functional/apps/dashboard/group6/config.ts
-  - test/functional/apps/discover/config.ts
+  - test/functional/apps/discover/ccs_compatibility/config.ts
+  - test/functional/apps/discover/classic/config.ts
+  - test/functional/apps/discover/embeddable/config.ts
+  - test/functional/apps/discover/group1/config.ts
+  - test/functional/apps/discover/group2/config.ts
   - test/functional/apps/getting_started/config.ts
   - test/functional/apps/home/config.ts
+  - test/functional/apps/kibana_overview/config.ts
   - test/functional/apps/management/config.ts
   - test/functional/apps/saved_objects_management/config.ts
   - test/functional/apps/status_page/config.ts
@@ -93,7 +105,9 @@ enabled:
   - test/interactive_setup_functional/manual_configuration_without_tls.config.ts
   - test/interactive_setup_functional/manual_configuration.config.ts
   - test/interpreter_functional/config.ts
-  - test/new_visualize_flow/config.ts
+  - test/node_roles_functional/all.config.ts
+  - test/node_roles_functional/background_tasks.config.ts
+  - test/node_roles_functional/ui.config.ts
   - test/plugin_functional/config.ts
   - test/server_integration/http/platform/config.status.ts
   - test/server_integration/http/platform/config.ts
@@ -106,6 +120,7 @@ enabled:
   - x-pack/test/alerting_api_integration/basic/config.ts
   - x-pack/test/alerting_api_integration/security_and_spaces/group1/config.ts
   - x-pack/test/alerting_api_integration/security_and_spaces/group2/config.ts
+  - x-pack/test/alerting_api_integration/security_and_spaces/group2/config_non_dedicated_task_runner.ts
   - x-pack/test/alerting_api_integration/spaces_only/config.ts
   - x-pack/test/api_integration_basic/config.ts
   - x-pack/test/api_integration/config_security_basic.ts
@@ -140,12 +155,14 @@ enabled:
   - x-pack/test/functional_synthetics/config.js
   - x-pack/test/functional_with_es_ssl/config.ts
   - x-pack/test/functional/apps/advanced_settings/config.ts
+  - x-pack/test/functional/apps/aiops/config.ts
   - x-pack/test/functional/apps/api_keys/config.ts
   - x-pack/test/functional/apps/apm/config.ts
   - x-pack/test/functional/apps/canvas/config.ts
   - x-pack/test/functional/apps/cross_cluster_replication/config.ts
   - x-pack/test/functional/apps/dashboard/group1/config.ts
   - x-pack/test/functional/apps/dashboard/group2/config.ts
+  - x-pack/test/functional/apps/dashboard/group3/config.ts
   - x-pack/test/functional/apps/data_views/config.ts
   - x-pack/test/functional/apps/dev_tools/config.ts
   - x-pack/test/functional/apps/discover/config.ts
@@ -203,6 +220,7 @@ enabled:
   - x-pack/test/reporting_functional/reporting_and_deprecated_security.config.ts
   - x-pack/test/reporting_functional/reporting_and_security.config.ts
   - x-pack/test/reporting_functional/reporting_without_security.config.ts
+  - x-pack/test/reporting_functional/reporting_and_timeout.config.ts
   - x-pack/test/rule_registry/security_and_spaces/config_basic.ts
   - x-pack/test/rule_registry/security_and_spaces/config_trial.ts
   - x-pack/test/rule_registry/spaces_only/config_basic.ts
@@ -231,9 +249,12 @@ enabled:
   - x-pack/test/security_api_integration/session_invalidate.config.ts
   - x-pack/test/security_api_integration/session_lifespan.config.ts
   - x-pack/test/security_api_integration/token.config.ts
+  - x-pack/test/security_api_integration/user_profiles.config.ts
   - x-pack/test/security_functional/login_selector.config.ts
   - x-pack/test/security_functional/oidc.config.ts
   - x-pack/test/security_functional/saml.config.ts
+  - x-pack/test/security_functional/insecure_cluster_warning.config.ts
+  - x-pack/test/security_functional/user_profiles.config.ts
   - x-pack/test/security_solution_endpoint_api_int/config.ts
   - x-pack/test/security_solution_endpoint/config.ts
   - x-pack/test/session_view/basic/config.ts
@@ -245,3 +266,9 @@ enabled:
   - x-pack/test/ui_capabilities/spaces_only/config.ts
   - x-pack/test/upgrade_assistant_integration/config.js
   - x-pack/test/usage_collection/config.ts
+  - x-pack/test/performance/journeys/ecommerce_dashboard/config.ts
+  - x-pack/test/performance/journeys/flight_dashboard/config.ts
+  - x-pack/test/performance/journeys/login/config.ts
+  - x-pack/test/performance/journeys/many_fields_discover/config.ts
+  - x-pack/test/performance/journeys/promotion_tracking_dashboard/config.ts
+  - x-pack/test/performance/journeys/web_logs_dashboard/config.ts

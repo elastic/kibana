@@ -7,11 +7,7 @@
 
 import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  ActionTypeModel,
-  GenericValidationResult,
-  ConnectorValidationResult,
-} from '../../../../types';
+import { ActionTypeModel, GenericValidationResult } from '../../../../types';
 import { ServerLogActionParams } from '../types';
 
 export function getActionType(): ActionTypeModel<unknown, unknown, ServerLogActionParams> {
@@ -30,9 +26,6 @@ export function getActionType(): ActionTypeModel<unknown, unknown, ServerLogActi
         defaultMessage: 'Send to Server log',
       }
     ),
-    validateConnector: (): Promise<ConnectorValidationResult<unknown, unknown>> => {
-      return Promise.resolve({ config: { errors: {} }, secrets: { errors: {} } });
-    },
     validateParams: (
       actionParams: ServerLogActionParams
     ): Promise<GenericValidationResult<Pick<ServerLogActionParams, 'message'>>> => {

@@ -5,7 +5,10 @@
  * 2.0.
  */
 
+import { UserProfileService } from '../../services';
 import { bulkCreateAttachmentsRoute } from './internal/bulk_create_attachments';
+import { suggestUserProfilesRoute } from './internal/suggest_user_profiles';
 import { CaseRoute } from './types';
 
-export const getInternalRoutes = () => [bulkCreateAttachmentsRoute] as CaseRoute[];
+export const getInternalRoutes = (userProfileService: UserProfileService) =>
+  [bulkCreateAttachmentsRoute, suggestUserProfilesRoute(userProfileService)] as CaseRoute[];

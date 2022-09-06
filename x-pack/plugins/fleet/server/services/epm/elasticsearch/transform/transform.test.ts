@@ -22,10 +22,8 @@ import { errors } from '@elastic/elasticsearch';
 import type { SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { savedObjectsClientMock } from '@kbn/core/server/saved_objects/service/saved_objects_client.mock';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { elasticsearchClientMock } from '@kbn/core/server/elasticsearch/client/mocks';
+import { savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
 import { getInstallation, getInstallationObject } from '../../packages';
 import type { Installation, RegistryPackage } from '../../../../types';

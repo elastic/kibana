@@ -7,15 +7,16 @@
 
 import React, { useMemo } from 'react';
 
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiBasicTable,
-  EuiBasicTableColumn,
   EuiEmptyPrompt,
   EuiHealth,
   EuiLink,
   EuiPanel,
   EuiSpacer,
   EuiTablePagination,
+  EuiToolTip,
 } from '@elastic/eui';
 
 import { FormattedCount } from '../../../../common/components/formatted_number';
@@ -27,7 +28,8 @@ import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { useNavigateToTimeline } from '../hooks/use_navigate_to_timeline';
 import * as i18n from '../translations';
 import { ITEMS_PER_PAGE, LastUpdatedAt, SEVERITY_COLOR } from '../utils';
-import { HostAlertsItem, useHostAlertsItems } from './use_host_alerts_items';
+import type { HostAlertsItem } from './use_host_alerts_items';
+import { useHostAlertsItems } from './use_host_alerts_items';
 
 interface HostAlertsTableProps {
   signalIndexName: string | null;
@@ -99,10 +101,16 @@ const getTableColumns: GetTableColumns = (handleClick) => [
   {
     field: 'hostName',
     name: i18n.HOST_ALERTS_HOSTNAME_COLUMN,
-    truncateText: true,
-    textOnly: true,
     'data-test-subj': 'hostSeverityAlertsTable-hostName',
-    render: (hostName: string) => <HostDetailsLink hostName={hostName} />,
+    render: (hostName: string) => (
+      <EuiToolTip
+        title={i18n.OPEN_HOST_DETAIL_TOOLTIP}
+        content={hostName}
+        anchorClassName="eui-textTruncate"
+      >
+        <HostDetailsLink hostName={hostName} />
+      </EuiToolTip>
+    ),
   },
   {
     field: 'totalAlerts',

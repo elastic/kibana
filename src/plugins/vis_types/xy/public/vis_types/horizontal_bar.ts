@@ -37,6 +37,7 @@ export const horizontalBarVisTypeDefinition = {
   description: i18n.translate('visTypeXy.horizontalBar.horizontalBarDescription', {
     defaultMessage: 'Present data in horizontal bars on an axis.',
   }),
+  fetchDatatable: true,
   toExpressionAst,
   getSupportedTriggers: () => [VIS_EVENT_TO_TRIGGER.filter, VIS_EVENT_TO_TRIGGER.brush],
   updateVisTypeOnParamsChange: getVisTypeFromParams,

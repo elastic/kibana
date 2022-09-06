@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import {
+import type {
   Logger,
   CoreStart,
   IScopedClusterClient,
   ElasticsearchClient,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
-import {
+import type {
   AggregationsAggregate,
   SearchRequest,
   SearchResponse,
@@ -22,29 +22,27 @@ import {
   EQL_RULE_TYPE_ID,
   INDICATOR_RULE_TYPE_ID,
   ML_RULE_TYPE_ID,
+  NEW_TERMS_RULE_TYPE_ID,
   QUERY_RULE_TYPE_ID,
   SAVED_QUERY_RULE_TYPE_ID,
   SIGNALS_ID,
   THRESHOLD_RULE_TYPE_ID,
 } from '@kbn/securitysolution-rules';
-import { TransportResult } from '@elastic/elasticsearch';
-import { Agent, AgentPolicy } from '@kbn/fleet-plugin/common';
-import { AgentClient, AgentPolicyServiceInterface } from '@kbn/fleet-plugin/server';
-import { ExceptionListClient } from '@kbn/lists-plugin/server';
-import { EndpointAppContextService } from '../../endpoint/endpoint_app_context_services';
+import type { TransportResult } from '@elastic/elasticsearch';
+import type { Agent, AgentPolicy } from '@kbn/fleet-plugin/common';
+import type { AgentClient, AgentPolicyServiceInterface } from '@kbn/fleet-plugin/server';
+import type { ExceptionListClient } from '@kbn/lists-plugin/server';
+import type { EndpointAppContextService } from '../../endpoint/endpoint_app_context_services';
 import { TELEMETRY_MAX_BUFFER_SIZE } from './constants';
 import {
   exceptionListItemToTelemetryEntry,
   trustedApplicationToTelemetryEntry,
   ruleExceptionListItemToTelemetryEvent,
+  metricsResponseToValueListMetaData,
 } from './helpers';
 import { Fetcher } from '../../endpoint/routes/resolver/tree/utils/fetch';
-import type { TreeOptions } from '../../endpoint/routes/resolver/tree/utils/fetch';
-import type {
-  ResolverNode,
-  SafeEndpointEvent,
-  ResolverSchema,
-} from '../../../common/endpoint/types';
+import type { TreeOptions, TreeResponse } from '../../endpoint/routes/resolver/tree/utils/fetch';
+import type { SafeEndpointEvent, ResolverSchema } from '../../../common/endpoint/types';
 import type {
   TelemetryEvent,
   EnhancedAlertEvent,
@@ -53,6 +51,11 @@ import type {
   GetEndpointListResponse,
   RuleSearchResult,
   ExceptionListItem,
+  ValueListMetaData,
+  ValueListResponseAggregation,
+  ValueListItemsResponseAggregation,
+  ValueListExceptionListResponseAggregation,
+  ValueListIndicatorMatchResponseAggregation,
 } from './types';
 
 export interface ITelemetryReceiver {
@@ -142,7 +145,7 @@ export interface ITelemetryReceiver {
     type: string;
   };
 
-  fetchPrebuiltRuleAlerts(): Promise<TelemetryEvent[]>;
+  fetchPrebuiltRuleAlerts(): Promise<{ events: TelemetryEvent[]; count: number }>;
 
   fetchTimelineEndpointAlerts(
     interval: number
@@ -153,11 +156,13 @@ export interface ITelemetryReceiver {
     resolverSchema: ResolverSchema,
     startOfDay: string,
     endOfDay: string
-  ): Promise<ResolverNode[]>;
+  ): TreeResponse;
 
   fetchTimelineEvents(
     nodeIds: string[]
   ): Promise<SearchResponse<SafeEndpointEvent, Record<string, AggregationsAggregate>>>;
+
+  fetchValueListMetaData(interval: number): Promise<ValueListMetaData>;
 }
 
 export class TelemetryReceiver implements ITelemetryReceiver {
@@ -302,6 +307,11 @@ export class TelemetryReceiver implements ITelemetryReceiver {
                   ],
                 },
               },
+            },
+          },
+          endpoint_count: {
+            cardinality: {
+              field: 'agent.id',
             },
           },
         },
@@ -482,6 +492,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
                         SAVED_QUERY_RULE_TYPE_ID,
                         INDICATOR_RULE_TYPE_ID,
                         THRESHOLD_RULE_TYPE_ID,
+                        NEW_TERMS_RULE_TYPE_ID,
                       ],
                     },
                   },
@@ -645,6 +656,13 @@ export class TelemetryReceiver implements ITelemetryReceiver {
             ],
           },
         },
+        aggs: {
+          prebuilt_rule_alert_count: {
+            cardinality: {
+              field: 'event.id',
+            },
+          },
+        },
       },
     };
 
@@ -655,7 +673,11 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       h._source != null ? ([h._source] as TelemetryEvent[]) : []
     );
 
-    return telemetryEvents;
+    const aggregations = response.body?.aggregations as unknown as {
+      prebuilt_rule_alert_count: { value: number };
+    };
+
+    return { events: telemetryEvents, count: aggregations?.prebuilt_rule_alert_count.value ?? 0 };
   }
 
   public async fetchTimelineEndpointAlerts(interval: number) {
@@ -667,7 +689,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       expand_wildcards: ['open' as const, 'hidden' as const],
       index: `${this.alertsIndex}*`,
       ignore_unavailable: true,
-      size: 100,
+      size: 30,
       body: {
         query: {
           bool: {
@@ -705,6 +727,13 @@ export class TelemetryReceiver implements ITelemetryReceiver {
             ],
           },
         },
+        aggs: {
+          endpoint_alert_count: {
+            cardinality: {
+              field: 'event.id',
+            },
+          },
+        },
       },
     };
 
@@ -716,7 +745,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     resolverSchema: ResolverSchema,
     startOfDay: string,
     endOfDay: string
-  ): Promise<ResolverNode[]> {
+  ): TreeResponse {
     if (this.processTreeFetcher === undefined || this.processTreeFetcher === null) {
       throw Error(
         'resolver tree builder is unavailable: cannot build encoded endpoint event graph'
@@ -781,6 +810,109 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     };
 
     return this.esClient.search<SafeEndpointEvent>(query);
+  }
+
+  public async fetchValueListMetaData(interval: number) {
+    if (this.esClient === undefined || this.esClient === null) {
+      throw Error('elasticsearch client is unavailable: cannot retrieve diagnostic alerts');
+    }
+
+    const listQuery: SearchRequest = {
+      expand_wildcards: ['open' as const, 'hidden' as const],
+      index: '.lists-*',
+      ignore_unavailable: true,
+      size: 0, // no query results required - only aggregation quantity
+      body: {
+        aggs: {
+          total_value_list_count: {
+            cardinality: {
+              field: 'name',
+            },
+          },
+          type_breakdown: {
+            terms: {
+              field: 'type',
+              size: 50,
+            },
+          },
+        },
+      },
+    };
+    const itemQuery: SearchRequest = {
+      expand_wildcards: ['open' as const, 'hidden' as const],
+      index: '.items-*',
+      ignore_unavailable: true,
+      size: 0, // no query results required - only aggregation quantity
+      body: {
+        aggs: {
+          value_list_item_count: {
+            terms: {
+              field: 'list_id',
+              size: 100,
+            },
+          },
+        },
+      },
+    };
+    const exceptionListQuery: SearchRequest = {
+      expand_wildcards: ['open' as const, 'hidden' as const],
+      index: `${this.kibanaIndex}*`,
+      ignore_unavailable: true,
+      size: 0, // no query results required - only aggregation quantity
+      body: {
+        query: {
+          bool: {
+            must: [{ match: { 'exception-list.entries.type': 'list' } }],
+          },
+        },
+        aggs: {
+          vl_included_in_exception_lists_count: {
+            cardinality: {
+              field: 'exception-list.entries.list.id',
+            },
+          },
+        },
+      },
+    };
+    const indicatorMatchRuleQuery: SearchRequest = {
+      expand_wildcards: ['open' as const, 'hidden' as const],
+      index: `${this.kibanaIndex}*`,
+      ignore_unavailable: true,
+      size: 0,
+      body: {
+        query: {
+          bool: {
+            must: [{ prefix: { 'alert.params.threatIndex': '.items' } }],
+          },
+        },
+        aggs: {
+          vl_used_in_indicator_match_rule_count: {
+            cardinality: {
+              field: 'alert.params.ruleId',
+            },
+          },
+        },
+      },
+    };
+    const [listMetrics, itemMetrics, exceptionListMetrics, indicatorMatchMetrics] =
+      await Promise.all([
+        this.esClient.search(listQuery),
+        this.esClient.search(itemQuery),
+        this.esClient.search(exceptionListQuery),
+        this.esClient.search(indicatorMatchRuleQuery),
+      ]);
+    const listMetricsResponse = listMetrics as unknown as ValueListResponseAggregation;
+    const itemMetricsResponse = itemMetrics as unknown as ValueListItemsResponseAggregation;
+    const exceptionListMetricsResponse =
+      exceptionListMetrics as unknown as ValueListExceptionListResponseAggregation;
+    const indicatorMatchMetricsResponse =
+      indicatorMatchMetrics as unknown as ValueListIndicatorMatchResponseAggregation;
+    return metricsResponseToValueListMetaData({
+      listMetricsResponse,
+      itemMetricsResponse,
+      exceptionListMetricsResponse,
+      indicatorMatchMetricsResponse,
+    });
   }
 
   public async fetchClusterInfo(): Promise<ESClusterInfo> {

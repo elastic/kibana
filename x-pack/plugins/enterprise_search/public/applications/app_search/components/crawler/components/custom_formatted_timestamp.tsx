@@ -5,24 +5,4 @@
  * 2.0.
  */
 
-import React from 'react';
-
-import { FormattedRelative } from '@kbn/i18n-react';
-
-import { FormattedDateTime } from '../../../utils/formatted_date_time';
-
-interface CustomFormattedTimestampProps {
-  timestamp: string;
-}
-
-export const CustomFormattedTimestamp: React.FC<CustomFormattedTimestampProps> = ({
-  timestamp,
-}) => {
-  const date = new Date(timestamp);
-  const isDateToday = date >= new Date(new Date(Date.now()).toDateString());
-  return isDateToday ? (
-    <FormattedRelative value={date} />
-  ) : (
-    <FormattedDateTime date={date} hideTime />
-  );
-};
+export { CustomFormattedTimestamp } from '../../../../shared/custom_formatted_timestamp/custom_formatted_timestamp';

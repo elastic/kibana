@@ -6,7 +6,7 @@
  */
 
 import { isString } from 'lodash/fp';
-import {
+import type {
   SavedObjectUnsanitizedDoc,
   SavedObjectSanitizedDoc,
   SavedObjectAttributes,
@@ -14,7 +14,7 @@ import {
 } from '@kbn/core/server';
 
 // eslint-disable-next-line no-restricted-imports
-import {
+import type {
   LegacyIRuleActionsAttributesSavedObjectAttributes,
   LegacyRuleAlertAction,
   LegacyRuleAlertSavedObjectAction,

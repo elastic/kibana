@@ -26,4 +26,8 @@ export const metricSet: MetricDescriptor[] = [
     keys: ['kibana_requests_total', 'kibana_requests_disconnects'],
     name: 'kibana_requests',
   },
+  'kibana_instance_rule_failures',
+  'kibana_instance_rule_executions',
+  'kibana_instance_action_failures',
+  'kibana_instance_action_executions',
 ];

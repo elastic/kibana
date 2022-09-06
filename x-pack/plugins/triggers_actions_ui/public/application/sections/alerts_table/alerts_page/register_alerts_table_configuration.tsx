@@ -13,6 +13,12 @@ import { TypeRegistry } from '../../../type_registry';
 const AlertsPageFlyoutHeader = lazy(() => import('./alerts_page_flyout_header'));
 const AlertsPageFlyoutBody = lazy(() => import('./alerts_page_flyout_body'));
 
+const useInternalFlyout = () => ({
+  body: AlertsPageFlyoutBody,
+  header: AlertsPageFlyoutHeader,
+  footer: null,
+});
+
 export function registerAlertsTableConfiguration({
   alertsTableConfigurationRegistry,
 }: {
@@ -20,6 +26,7 @@ export function registerAlertsTableConfiguration({
 }) {
   alertsTableConfigurationRegistry.register({
     id: PLUGIN_ID,
+    casesFeatureId: `${PLUGIN_ID}Cases`,
     columns: [
       {
         id: 'event.action',
@@ -41,14 +48,7 @@ export function registerAlertsTableConfiguration({
         displayAsText: 'Reason',
       },
     ],
-    internalFlyout: {
-      header: AlertsPageFlyoutHeader,
-      body: AlertsPageFlyoutBody,
-    },
-    externalFlyout: {
-      header: AlertsPageFlyoutHeader,
-      body: AlertsPageFlyoutBody,
-    },
+    useInternalFlyout,
     getRenderCellValue: () => (props) => {
       const myProps = props as any;
       const value = myProps.data.find((d: any) => d.field === myProps.columnId)?.value ?? [];

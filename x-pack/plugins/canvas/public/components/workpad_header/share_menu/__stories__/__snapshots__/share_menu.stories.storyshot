@@ -3,10 +3,10 @@
 exports[`Storyshots components/WorkpadHeader/ShareMenu minimal 1`] = `
 <div>
   <div
-    className="euiPopover euiPopover--anchorDownLeft"
+    className="euiPopover emotion-euiPopover"
   >
     <div
-      className="euiPopover__anchor"
+      className="euiPopover__anchor css-16vtueo-render"
     >
       <button
         aria-label="Share this workpad"
@@ -34,10 +34,10 @@ exports[`Storyshots components/WorkpadHeader/ShareMenu minimal 1`] = `
 exports[`Storyshots components/WorkpadHeader/ShareMenu with Reporting 1`] = `
 <div>
   <div
-    className="euiPopover euiPopover--anchorDownLeft"
+    className="euiPopover emotion-euiPopover"
   >
     <div
-      className="euiPopover__anchor"
+      className="euiPopover__anchor css-16vtueo-render"
     >
       <button
         aria-label="Share this workpad"

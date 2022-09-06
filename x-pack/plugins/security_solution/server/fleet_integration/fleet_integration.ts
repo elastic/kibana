@@ -5,28 +5,28 @@
  * 2.0.
  */
 
-import { KibanaRequest, Logger, RequestHandlerContext } from '@kbn/core/server';
-import { ExceptionListClient } from '@kbn/lists-plugin/server';
-import { PluginStartContract as AlertsStartContract } from '@kbn/alerting-plugin/server';
-import {
+import type { KibanaRequest, Logger, RequestHandlerContext } from '@kbn/core/server';
+import type { ExceptionListClient } from '@kbn/lists-plugin/server';
+import type { PluginStartContract as AlertsStartContract } from '@kbn/alerting-plugin/server';
+import type {
   PostPackagePolicyCreateCallback,
   PostPackagePolicyDeleteCallback,
   PutPackagePolicyUpdateCallback,
 } from '@kbn/fleet-plugin/server';
 
-import { NewPackagePolicy, UpdatePackagePolicy } from '@kbn/fleet-plugin/common';
+import type { NewPackagePolicy, UpdatePackagePolicy } from '@kbn/fleet-plugin/common';
 
-import { NewPolicyData, PolicyConfig } from '../../common/endpoint/types';
-import { LicenseService } from '../../common/license';
-import { ManifestManager } from '../endpoint/services';
-import { IRequestContextFactory } from '../request_context_factory';
+import type { NewPolicyData, PolicyConfig } from '../../common/endpoint/types';
+import type { LicenseService } from '../../common/license';
+import type { ManifestManager } from '../endpoint/services';
+import type { IRequestContextFactory } from '../request_context_factory';
 import { installPrepackagedRules } from './handlers/install_prepackaged_rules';
 import { createPolicyArtifactManifest } from './handlers/create_policy_artifact_manifest';
 import { createDefaultPolicy } from './handlers/create_default_policy';
 import { validatePolicyAgainstLicense } from './handlers/validate_policy_against_license';
 import { removePolicyFromArtifacts } from './handlers/remove_policy_from_artifacts';
-import { FeatureUsageService } from '../endpoint/services/feature_usage/service';
-import { EndpointMetadataService } from '../endpoint/services/metadata';
+import type { FeatureUsageService } from '../endpoint/services/feature_usage/service';
+import type { EndpointMetadataService } from '../endpoint/services/metadata';
 import { notifyProtectionFeatureUsage } from './notify_protection_feature_usage';
 
 const isEndpointPackagePolicy = <T extends { package?: { name: string } }>(

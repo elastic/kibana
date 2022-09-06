@@ -9,18 +9,22 @@ import { useFetcher } from '@kbn/observability-plugin/public';
 import { useEffect } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useSelector } from 'react-redux';
-import { serviceLocationsSelector } from '../../state/monitor_management/selectors';
-import { showSyncErrors } from '../monitor_management/show_sync_errors';
-import { createMonitorAPI } from '../../state/monitor_management/api';
+import { selectServiceLocationsState } from '../../state';
+import { showSyncErrors } from '../monitors_page/management/show_sync_errors';
+import { fetchCreateMonitor } from '../../state';
 import { DEFAULT_FIELDS } from '../../../../../common/constants/monitor_defaults';
 import { ConfigKey } from '../../../../../common/constants/monitor_management';
-import { DataStream, SyntheticsMonitorWithId } from '../../../../../common/runtime_types';
+import {
+  DataStream,
+  ServiceLocationErrors,
+  SyntheticsMonitorWithId,
+} from '../../../../../common/runtime_types';
 import { MONITOR_SUCCESS_LABEL, MY_FIRST_MONITOR, SimpleFormData } from './simple_monitor_form';
 import { kibanaService } from '../../../../utils/kibana_service';
 
 export const useSimpleMonitor = ({ monitorData }: { monitorData?: SimpleFormData }) => {
   const { application } = useKibana().services;
-  const locationsList = useSelector(serviceLocationsSelector);
+  const { locations: serviceLocations } = useSelector(selectServiceLocationsState);
 
   const { data, loading } = useFetcher(() => {
     if (!monitorData) {
@@ -28,7 +32,7 @@ export const useSimpleMonitor = ({ monitorData }: { monitorData?: SimpleFormData
     }
     const { urls, locations } = monitorData;
 
-    return createMonitorAPI({
+    return fetchCreateMonitor({
       monitor: {
         ...DEFAULT_FIELDS.browser,
         'source.inline.script': `step('Go to ${urls}', async () => {
@@ -46,7 +50,11 @@ export const useSimpleMonitor = ({ monitorData }: { monitorData?: SimpleFormData
     const newMonitor = data as SyntheticsMonitorWithId;
     const hasErrors = data && 'attributes' in data && data.attributes.errors?.length > 0;
     if (hasErrors && !loading) {
-      showSyncErrors(data.attributes.errors, locationsList, kibanaService.toasts);
+      showSyncErrors(
+        (data as { attributes: { errors: ServiceLocationErrors } })?.attributes.errors ?? [],
+        serviceLocations,
+        kibanaService.toasts
+      );
     }
 
     if (!loading && newMonitor?.id) {
@@ -56,7 +64,7 @@ export const useSimpleMonitor = ({ monitorData }: { monitorData?: SimpleFormData
       });
       application?.navigateToApp('uptime', { path: `/monitor/${btoa(newMonitor.id)}` });
     }
-  }, [application, data, loading, locationsList]);
+  }, [application, data, loading, serviceLocations]);
 
   return { data, loading };
 };

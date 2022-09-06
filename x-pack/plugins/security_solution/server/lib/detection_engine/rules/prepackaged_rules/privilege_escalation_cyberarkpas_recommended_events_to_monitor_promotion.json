@@ -14,14 +14,38 @@
   "language": "kuery",
   "license": "Elastic License v2",
   "name": "CyberArk Privileged Access Security Recommended Monitor",
-  "note": "## Config\n\nThe CyberArk Privileged Access Security (PAS) Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.\n\n## Triage and analysis\n\nThis is a promotion rule for CyberArk events, which the vendor recommends should be monitored.\nConsult vendor documentation on interpreting specific events.\n",
+  "note": "## Triage and analysis\n\nThis is a promotion rule for CyberArk events, which the vendor recommends should be monitored.\nConsult vendor documentation on interpreting specific events.",
   "query": "event.dataset:cyberarkpas.audit and\n  event.code:(4 or 22 or 24 or 31 or 38 or 57 or 60 or 130 or 295 or 300 or 302 or\n              308 or 319 or 344 or 346 or 359 or 361 or 378 or 380 or 411) and\n  not event.type:error\n",
   "references": [
     "https://docs.cyberark.com/Product-Doc/OnlineHelp/PAS/Latest/en/Content/PASREF/Vault%20Audit%20Action%20Codes.htm?tocpath=Administration%7CReferences%7C_____3#RecommendedActionCodesforMonitoring"
   ],
+  "related_integrations": [
+    {
+      "package": "cyberarkpas",
+      "version": "2.2.0"
+    }
+  ],
+  "required_fields": [
+    {
+      "ecs": true,
+      "name": "event.code",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "event.dataset",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "event.type",
+      "type": "keyword"
+    }
+  ],
   "risk_score": 73,
   "rule_id": "c5f81243-56e0-47f9-b5bb-55a5ed89ba57",
   "rule_name_override": "event.action",
+  "setup": "The CyberArk Privileged Access Security (PAS) Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
   "severity": "high",
   "tags": [
     "Elastic",
@@ -59,5 +83,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 1
+  "version": 3
 }

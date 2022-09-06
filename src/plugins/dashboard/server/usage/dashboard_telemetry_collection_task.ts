@@ -46,10 +46,8 @@ export function initializeDashboardTelemetryTask(
   registerDashboardTelemetryTask(logger, core, taskManager, embeddable);
 }
 
-export function scheduleDashboardTelemetry(logger: Logger, taskManager?: TaskManagerStartContract) {
-  if (taskManager) {
-    scheduleTasks(logger, taskManager);
-  }
+export function scheduleDashboardTelemetry(logger: Logger, taskManager: TaskManagerStartContract) {
+  return scheduleTasks(logger, taskManager);
 }
 
 function registerDashboardTelemetryTask(
@@ -69,7 +67,7 @@ function registerDashboardTelemetryTask(
 
 async function scheduleTasks(logger: Logger, taskManager: TaskManagerStartContract) {
   try {
-    await taskManager.ensureScheduled({
+    return await taskManager.ensureScheduled({
       id: TASK_ID,
       taskType: TELEMETRY_TASK_TYPE,
       state: { byDate: {}, suggestionsByDate: {}, saved: {}, runs: 0 },

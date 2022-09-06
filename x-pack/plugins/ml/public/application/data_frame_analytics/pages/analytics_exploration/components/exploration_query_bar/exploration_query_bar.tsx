@@ -13,7 +13,7 @@ import { debounce } from 'lodash';
 import { fromKueryExpression, luceneStringToDsl, toElasticsearchQuery } from '@kbn/es-query';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { DataView } from '@kbn/data-views-plugin/common';
-import { Query } from '@kbn/data-plugin/public';
+import type { Query } from '@kbn/es-query';
 import { QueryStringInput } from '@kbn/unified-search-plugin/public';
 import { Dictionary } from '../../../../../../../common/types/common';
 
@@ -84,6 +84,7 @@ export const ExplorationQueryBar: FC<ExplorationQueryBarProps> = ({
         setIdToSelectedMap({ [filterKeyInEffect]: true });
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   /**
@@ -120,6 +121,7 @@ export const ExplorationQueryBar: FC<ExplorationQueryBarProps> = ({
     } catch (e) {
       setErrorMessage({ query: query.query as string, message: e.message });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [query.query]);
 
   const searchSubmitHandler = (q: Query, filtering?: boolean) => {

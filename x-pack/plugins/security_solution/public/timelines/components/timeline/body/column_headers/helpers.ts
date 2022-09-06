@@ -6,10 +6,11 @@
  */
 
 import { has, get } from 'lodash/fp';
-import { ColumnHeaderOptions } from '../../../../../../common/types';
+import type { ColumnHeaderOptions } from '../../../../../../common/types';
 
-import { BrowserFields } from '../../../../../common/containers/source';
+import type { BrowserFields } from '../../../../../common/containers/source';
 import { DEFAULT_COLUMN_MIN_WIDTH, DEFAULT_DATE_COLUMN_MIN_WIDTH } from '../constants';
+import { defaultColumnHeaderType } from './default_headers';
 
 /**
  * Returns the root category for fields that are only one level, e.g. `_id` or `test_field_1`
@@ -50,3 +51,16 @@ export const getColumnHeaders = (
 
 export const getColumnWidthFromType = (type: string): number =>
   type !== 'date' ? DEFAULT_COLUMN_MIN_WIDTH : DEFAULT_DATE_COLUMN_MIN_WIDTH;
+
+/**
+ * Returns the column header with field details from the defaultHeaders
+ */
+export const getColumnHeader = (
+  fieldName: string,
+  defaultHeaders: ColumnHeaderOptions[]
+): ColumnHeaderOptions => ({
+  columnHeaderType: defaultColumnHeaderType,
+  id: fieldName,
+  initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
+  ...(defaultHeaders.find((c) => c.id === fieldName) ?? {}),
+});

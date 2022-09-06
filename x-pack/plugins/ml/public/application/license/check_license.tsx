@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
+import type { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
+import type { CoreStart } from '@kbn/core/public';
 import { MlLicense } from '../../../common/license';
 import { MlClientLicense } from './ml_client_license';
 
@@ -16,13 +17,16 @@ let mlLicense: MlClientLicense | null = null;
  *
  * @export
  * @param {LicensingPluginSetup} licensingSetup
+ * @param application
+ * @param postInitFunctions
  * @returns {MlClientLicense}
  */
 export function setLicenseCache(
   licensingSetup: LicensingPluginSetup,
+  application: CoreStart['application'],
   postInitFunctions?: Array<(lic: MlLicense) => void>
 ) {
-  mlLicense = new MlClientLicense();
+  mlLicense = new MlClientLicense(application);
   mlLicense.setup(licensingSetup.license$, postInitFunctions);
   return mlLicense;
 }
@@ -37,7 +41,7 @@ export function setLicenseCache(
 export async function checkFullLicense() {
   if (mlLicense === null) {
     // this should never happen
-    console.error('ML Licensing not initialized'); // eslint-disable-line
+    console.error('ML Licensing not initialized'); // eslint-disable-line no-console
     return Promise.reject();
   }
 
@@ -54,7 +58,7 @@ export async function checkFullLicense() {
 export async function checkBasicLicense() {
   if (mlLicense === null) {
     // this should never happen
-    console.error('ML Licensing not initialized'); // eslint-disable-line
+    console.error('ML Licensing not initialized'); // eslint-disable-line no-console
     return Promise.reject();
   }
 

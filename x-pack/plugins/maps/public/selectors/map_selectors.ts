@@ -10,7 +10,7 @@ import { FeatureCollection } from 'geojson';
 import _ from 'lodash';
 import type { Query } from '@kbn/data-plugin/common';
 import { Filter } from '@kbn/es-query';
-import { TimeRange } from '@kbn/data-plugin/public';
+import type { TimeRange } from '@kbn/es-query';
 import { RasterTileLayer } from '../classes/layers/raster_tile_layer/raster_tile_layer';
 import { EmsVectorTileLayer } from '../classes/layers/ems_vector_tile_layer/ems_vector_tile_layer';
 import {
@@ -42,16 +42,17 @@ import {
   DataRequestDescriptor,
   CustomIcon,
   DrawState,
+  EMSVectorTileLayerDescriptor,
   EditState,
   Goto,
   HeatmapLayerDescriptor,
   LayerDescriptor,
   MapCenter,
   MapExtent,
+  MapSettings,
   TooltipState,
   VectorLayerDescriptor,
 } from '../../common/descriptor_types';
-import { MapSettings } from '../reducers/map';
 import { ISource } from '../classes/sources/source';
 import { ITMSSource } from '../classes/sources/tms_source';
 import { IVectorSource } from '../classes/sources/vector_source';
@@ -79,7 +80,10 @@ export function createLayerInstance(
     case LAYER_TYPE.RASTER_TILE:
       return new RasterTileLayer({ layerDescriptor, source: source as ITMSSource });
     case LAYER_TYPE.EMS_VECTOR_TILE:
-      return new EmsVectorTileLayer({ layerDescriptor, source: source as EMSTMSSource });
+      return new EmsVectorTileLayer({
+        layerDescriptor: layerDescriptor as EMSVectorTileLayerDescriptor,
+        source: source as EMSTMSSource,
+      });
     case LAYER_TYPE.HEATMAP:
       return new HeatmapLayer({
         layerDescriptor: layerDescriptor as HeatmapLayerDescriptor,
@@ -169,8 +173,6 @@ export const getLayerListRaw = ({ map }: MapStoreState): LayerDescriptor[] =>
 export const getWaitingForMapReadyLayerListRaw = ({ map }: MapStoreState): LayerDescriptor[] =>
   map.waitingForMapReadyLayerList ? map.waitingForMapReadyLayerList : [];
 
-export const getScrollZoom = ({ map }: MapStoreState): boolean => map.mapState.scrollZoom;
-
 export const getMapExtent = ({ map }: MapStoreState): MapExtent | undefined => map.mapState.extent;
 
 export const getMapBuffer = ({ map }: MapStoreState): MapExtent | undefined => map.mapState.buffer;
@@ -195,6 +197,9 @@ export const getCustomIcons = ({ map }: MapStoreState): CustomIcon[] => {
 export const getQuery = ({ map }: MapStoreState): Query | undefined => map.mapState.query;
 
 export const getFilters = ({ map }: MapStoreState): Filter[] => map.mapState.filters;
+
+export const getEmbeddableSearchContext = ({ map }: MapStoreState) =>
+  map.mapState.embeddableSearchContext;
 
 export const getSearchSessionId = ({ map }: MapStoreState): string | undefined =>
   map.mapState.searchSessionId;
@@ -237,6 +242,7 @@ export const getDataFilters = createSelector(
   getTimeslice,
   getQuery,
   getFilters,
+  getEmbeddableSearchContext,
   getSearchSessionId,
   getSearchSessionMapBuffer,
   getIsReadOnly,
@@ -248,6 +254,7 @@ export const getDataFilters = createSelector(
     timeslice,
     query,
     filters,
+    embeddableSearchContext,
     searchSessionId,
     searchSessionMapBuffer,
     isReadOnly
@@ -260,6 +267,7 @@ export const getDataFilters = createSelector(
       timeslice,
       query,
       filters,
+      embeddableSearchContext,
       searchSessionId,
       isReadOnly,
     };

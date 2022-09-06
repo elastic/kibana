@@ -8,7 +8,7 @@
 import { isEmpty, uniqBy } from 'lodash/fp';
 import deepEqual from 'fast-deep-equal';
 
-import { useQuery } from 'react-query';
+import { useQuery } from '@tanstack/react-query';
 import { CaseUserActions, CaseExternalService } from '../../common/ui/types';
 import { ActionTypes, CaseConnector, NONE_CONNECTOR_ID } from '../../common/api';
 import { getCaseUserActions } from './api';

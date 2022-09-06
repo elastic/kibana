@@ -7,7 +7,7 @@
 
 import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { RULE_EXECUTION_LOG_PROVIDER } from '../../../lib/detection_engine/rule_execution_log/event_log/constants';
+import { RULE_EXECUTION_LOG_PROVIDER } from '../../../lib/detection_engine/rule_monitoring';
 
 /**
  * Given an aggregation of "aggs" this will return a search for all rules within 24 hours.

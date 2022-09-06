@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { MockedKeys } from '@kbn/utility-types/jest';
+import type { MockedKeys } from '@kbn/utility-types-jest';
 import { act, waitFor } from '@testing-library/react';
 import { mount, ReactWrapper } from 'enzyme';
 import { CoreSetup, CoreStart } from '@kbn/core/public';

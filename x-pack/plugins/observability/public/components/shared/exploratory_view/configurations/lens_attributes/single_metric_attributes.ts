@@ -5,8 +5,18 @@
  * 2.0.
  */
 
-import { MetricState, TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import {
+  FormulaPublicApi,
+  MetricState,
+  OperationType,
+  TypedLensByValueInput,
+} from '@kbn/lens-plugin/public';
 
+import type { DataView } from '@kbn/data-views-plugin/common';
+
+import { FORMULA_COLUMN } from '../constants';
+import { ColumnFilter, MetricOption } from '../../types';
+import { SeriesConfig } from '../../../../..';
 import {
   buildNumberColumn,
   LayerConfig,
@@ -16,9 +26,14 @@ import {
 
 export class SingleMetricLensAttributes extends LensAttributes {
   columnId: string;
+  metricStateOptions?: MetricOption['metricStateOptions'];
 
-  constructor(layerConfigs: LayerConfig[], reportType: string) {
-    super(layerConfigs, reportType);
+  constructor(
+    layerConfigs: LayerConfig[],
+    reportType: string,
+    lensFormulaHelper: FormulaPublicApi
+  ) {
+    super(layerConfigs, reportType, lensFormulaHelper);
     this.layers = {};
     this.reportType = reportType;
 
@@ -32,12 +47,16 @@ export class SingleMetricLensAttributes extends LensAttributes {
   }
 
   getSingleMetricLayer() {
-    const { seriesConfig, selectedMetricField, operationType } = this.layerConfigs[0];
+    const { seriesConfig, selectedMetricField, operationType, indexPattern } = this.layerConfigs[0];
 
-    const { columnFilter, columnField, columnLabel } = parseCustomFieldName(
-      seriesConfig,
-      selectedMetricField
-    );
+    const { columnFilter, columnField, columnLabel, columnType, formula, metricStateOptions } =
+      parseCustomFieldName(seriesConfig, selectedMetricField);
+
+    this.metricStateOptions = metricStateOptions;
+
+    if (columnType === FORMULA_COLUMN && formula) {
+      return this.getFormulaLayer({ formula, label: columnLabel, dataView: indexPattern });
+    }
 
     const getSourceField = () => {
       if (selectedMetricField.startsWith('Records') || selectedMetricField.startsWith('records')) {
@@ -51,19 +70,13 @@ export class SingleMetricLensAttributes extends LensAttributes {
     const isPercentileColumn = operationType?.includes('th');
 
     if (isPercentileColumn) {
-      return {
-        layer0: {
-          columns: {
-            [this.columnId]: {
-              ...this.getPercentileNumberColumn(sourceField, operationType!, seriesConfig),
-              label: columnLabel ?? '',
-              filter: columnFilter,
-            },
-          },
-          columnOrder: [this.columnId],
-          incompleteColumns: {},
-        },
-      };
+      return this.getPercentileLayer({
+        sourceField,
+        operationType,
+        seriesConfig,
+        columnLabel,
+        columnFilter,
+      });
     }
 
     return {
@@ -82,11 +95,71 @@ export class SingleMetricLensAttributes extends LensAttributes {
     };
   }
 
+  getFormulaLayer({
+    formula,
+    label,
+    dataView,
+  }: {
+    formula: string;
+    label?: string;
+    dataView: DataView;
+  }) {
+    const layer = this.lensFormulaHelper?.insertOrReplaceFormulaColumn(
+      this.columnId,
+      {
+        formula,
+        label,
+        format: {
+          id: 'percent',
+          params: {
+            decimals: 1,
+          },
+        },
+      },
+      { columns: {}, columnOrder: [] },
+      dataView
+    );
+
+    return {
+      layer0: layer!,
+    };
+  }
+
+  getPercentileLayer({
+    sourceField,
+    operationType,
+    seriesConfig,
+    columnLabel,
+    columnFilter,
+  }: {
+    sourceField: string;
+    operationType?: OperationType;
+    seriesConfig: SeriesConfig;
+    columnLabel?: string;
+    columnFilter?: ColumnFilter;
+  }) {
+    return {
+      layer0: {
+        columns: {
+          [this.columnId]: {
+            ...this.getPercentileNumberColumn(sourceField, operationType!, seriesConfig),
+            label: columnLabel ?? '',
+            filter: columnFilter,
+          },
+        },
+        columnOrder: [this.columnId],
+        incompleteColumns: {},
+      },
+    };
+  }
+
   getMetricState(): MetricState {
     return {
       accessor: this.columnId,
       layerId: 'layer0',
       layerType: 'data',
+      ...(this.metricStateOptions ?? {}),
+      size: 's',
     };
   }
 

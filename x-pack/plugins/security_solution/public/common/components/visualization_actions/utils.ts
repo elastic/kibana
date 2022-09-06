@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Filter } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
 
 export const getHostDetailsPageFilter = (hostName?: string): Filter[] =>
   hostName
@@ -61,6 +61,41 @@ export const hostNameExistsFilter: Filter[] = [
     },
   },
 ];
+
+export const getNetworkDetailsPageFilter = (ipAddress?: string): Filter[] =>
+  ipAddress
+    ? [
+        {
+          meta: {
+            alias: null,
+            negate: false,
+            disabled: false,
+            type: 'phrase',
+            key: 'source.ip',
+            params: {
+              query: ipAddress,
+            },
+          },
+          query: {
+            bool: {
+              should: [
+                {
+                  match_phrase: {
+                    'source.ip': ipAddress,
+                  },
+                },
+                {
+                  match_phrase: {
+                    'destination.ip': ipAddress,
+                  },
+                },
+              ],
+              minimum_should_match: 1,
+            },
+          },
+        },
+      ]
+    : [];
 
 export const filterNetworkExternalAlertData: Filter[] = [
   {

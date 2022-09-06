@@ -11,6 +11,7 @@ export default function ({ loadTestFile }: FtrProviderContext) {
   describe('filters', function () {
     loadTestFile(require.resolve('./create_filters'));
     loadTestFile(require.resolve('./get_filters'));
+    loadTestFile(require.resolve('./get_filters_stats'));
     loadTestFile(require.resolve('./delete_filters'));
     loadTestFile(require.resolve('./update_filters'));
   });

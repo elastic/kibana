@@ -7,10 +7,21 @@ PKG_REQUIRE_NAME = "@kbn/plugin-discovery"
 
 SOURCE_FILES = glob(
   [
-    "src/**/*.ts",
+    "**/*.js",
+    "**/*.ts",
   ],
   exclude = [
+    "**/*.config.js",
+    "**/*.mock.*",
     "**/*.test.*",
+    "**/*.stories.*",
+    "**/__snapshots__/**",
+    "**/integration_tests/**",
+    "**/mocks/**",
+    "**/scripts/**",
+    "**/storybook/**",
+    "**/test_fixtures/**",
+    "**/test_helpers/**",
   ],
 )
 
@@ -36,10 +47,6 @@ NPM_MODULE_EXTRA_FILES = [
 #    "@npm//name-of-package"
 #    eg. "@npm//lodash"
 RUNTIME_DEPS = [
-  "@npm//globby",
-  "@npm//load-json-file",
-  "@npm//normalize-path",
-  "@npm//tslib",
 ]
 
 # In this array place dependencies necessary to build the types, which will include the
@@ -54,11 +61,6 @@ RUNTIME_DEPS = [
 TYPES_DEPS = [
   "@npm//@types/jest",
   "@npm//@types/node",
-  "@npm//@types/normalize-path",
-  "@npm//globby",
-  "@npm//load-json-file",
-  "@npm//normalize-path",
-  "@npm//tslib",
 ]
 
 jsts_transpiler(
@@ -83,9 +85,9 @@ ts_project(
   deps = TYPES_DEPS,
   declaration = True,
   declaration_map = True,
+  allow_js = True,
   emit_declaration_only = True,
   out_dir = "target_types",
-  root_dir = "src",
   tsconfig = ":tsconfig",
 )
 

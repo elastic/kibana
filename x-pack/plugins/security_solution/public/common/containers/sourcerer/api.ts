@@ -7,7 +7,7 @@
 
 import { KibanaServices } from '../../lib/kibana';
 import { SOURCERER_API_URL } from '../../../../common/constants';
-import { KibanaDataView } from '../../store/sourcerer/model';
+import type { KibanaDataView } from '../../store/sourcerer/model';
 
 export interface GetSourcererDataView {
   signal: AbortSignal;

@@ -9,8 +9,9 @@ import { coreMock } from '@kbn/core/server/mocks';
 import { HostStatus } from '../../../../common/endpoint/types';
 import { createMockMetadataRequestContext } from '../../mocks';
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
-import { enrichHostMetadata, MetadataRequestContext } from './handlers';
-import { AgentClient } from '@kbn/fleet-plugin/server';
+import type { MetadataRequestContext } from './handlers';
+import { enrichHostMetadata } from './handlers';
+import type { AgentClient } from '@kbn/fleet-plugin/server';
 
 describe('test document enrichment', () => {
   let metaReqCtx: ReturnType<typeof createMockMetadataRequestContext>;

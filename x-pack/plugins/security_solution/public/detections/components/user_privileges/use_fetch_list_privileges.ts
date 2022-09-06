@@ -9,7 +9,7 @@ import { useEffect, useRef } from 'react';
 import { useReadListPrivileges } from '@kbn/securitysolution-list-hooks';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import { useHttp, useKibana } from '../../../common/lib/kibana';
-import { Privilege } from '../../containers/detection_engine/alerts/types';
+import type { Privilege } from '../../containers/detection_engine/alerts/types';
 import * as i18n from './translations';
 
 interface ListPrivileges {

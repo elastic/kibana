@@ -6,10 +6,10 @@
  */
 
 import moment from 'moment';
-import { Logger } from '@kbn/core/server';
-import { SafeEndpointEvent } from '../../../../common/endpoint/types';
-import { ITelemetryEventsSender } from '../sender';
-import { ITelemetryReceiver } from '../receiver';
+import type { Logger } from '@kbn/core/server';
+import type { SafeEndpointEvent } from '../../../../common/endpoint/types';
+import type { ITelemetryEventsSender } from '../sender';
+import type { ITelemetryReceiver } from '../receiver';
 import type { TaskExecutionPeriod } from '../task';
 import type {
   ESClusterInfo,
@@ -68,8 +68,16 @@ export function createTelemetryTimelineTaskConfig() {
 
       const endpointAlerts = await receiver.fetchTimelineEndpointAlerts(3);
 
-      // No EP Alerts -> Nothing to do
+      const aggregations = endpointAlerts?.aggregations as unknown as {
+        endpoint_alert_count: { value: number };
+      };
+      sender.getTelemetryUsageCluster()?.incrementCounter({
+        counterName: 'telemetry_endpoint_alert',
+        counterType: 'endpoint_alert_count',
+        incrementBy: aggregations?.endpoint_alert_count.value,
+      });
 
+      // No EP Alerts -> Nothing to do
       if (
         endpointAlerts.hits.hits?.length === 0 ||
         endpointAlerts.hits.hits?.length === undefined
@@ -96,10 +104,18 @@ export function createTelemetryTimelineTaskConfig() {
         );
 
         const nodeIds = [] as string[];
-        for (const node of tree) {
-          const nodeId = node?.id.toString();
-          nodeIds.push(nodeId);
+        if (Array.isArray(tree)) {
+          for (const node of tree) {
+            const nodeId = node?.id.toString();
+            nodeIds.push(nodeId);
+          }
         }
+
+        sender.getTelemetryUsageCluster()?.incrementCounter({
+          counterName: 'telemetry_timeline',
+          counterType: 'timeline_node_count',
+          incrementBy: nodeIds.length,
+        });
 
         // Fetch event lineage
 
@@ -115,34 +131,46 @@ export function createTelemetryTimelineTaskConfig() {
           }
         }
 
+        sender.getTelemetryUsageCluster()?.incrementCounter({
+          counterName: 'telemetry_timeline',
+          counterType: 'timeline_event_count',
+          incrementBy: eventsStore.size,
+        });
+
         // Create telemetry record
 
         const telemetryTimeline: TimelineTelemetryEvent[] = [];
-        for (const node of tree) {
-          const id = node.id.toString();
-          const event = eventsStore.get(id);
+        if (Array.isArray(tree)) {
+          for (const node of tree) {
+            const id = node.id.toString();
+            const event = eventsStore.get(id);
 
-          const timelineTelemetryEvent: TimelineTelemetryEvent = {
-            ...node,
-            event,
-          };
+            const timelineTelemetryEvent: TimelineTelemetryEvent = {
+              ...node,
+              event,
+            };
 
-          telemetryTimeline.push(timelineTelemetryEvent);
+            telemetryTimeline.push(timelineTelemetryEvent);
+          }
         }
 
-        const record: TimelineTelemetryTemplate = {
-          '@timestamp': moment().toISOString(),
-          ...baseDocument,
-          alert_id: alertUUID,
-          event_id: eventId,
-          timeline: telemetryTimeline,
-        };
+        if (telemetryTimeline.length >= 1) {
+          const record: TimelineTelemetryTemplate = {
+            '@timestamp': moment().toISOString(),
+            ...baseDocument,
+            alert_id: alertUUID,
+            event_id: eventId,
+            timeline: telemetryTimeline,
+          };
 
-        sender.sendOnDemand(TELEMETRY_CHANNEL_TIMELINE, [record]);
-        counter += 1;
+          sender.sendOnDemand(TELEMETRY_CHANNEL_TIMELINE, [record]);
+          counter += 1;
+        } else {
+          logger.debug('no events in timeline');
+        }
       }
 
-      logger.debug(`sent ${counter} timelines. exiting telemetry task.`);
+      logger.debug(`sent ${counter} timelines. concluding timeline task.`);
       return counter;
     },
   };

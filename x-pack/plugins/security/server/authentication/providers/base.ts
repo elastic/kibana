@@ -38,12 +38,18 @@ export interface AuthenticationProviderOptions {
   urls: {
     loggedOut: (request: KibanaRequest) => string;
   };
+  isElasticCloudDeployment: () => boolean;
 }
 
 /**
  * Represents available provider specific options.
  */
 export type AuthenticationProviderSpecificOptions = Record<string, unknown>;
+
+/**
+ * Name of the Elastic Cloud built-in SSO realm.
+ */
+export const ELASTIC_CLOUD_SSO_REALM_NAME = 'cloud-saml-kibana';
 
 /**
  * Base class that all authentication providers should extend.
@@ -133,6 +139,10 @@ export abstract class BaseAuthenticationProvider {
     return deepFreeze({
       ...authenticationInfo,
       authentication_provider: { type: this.type, name: this.options.name },
+      elastic_cloud_user:
+        this.options.isElasticCloudDeployment() &&
+        authenticationInfo.authentication_realm.type === 'saml' &&
+        authenticationInfo.authentication_realm.name === ELASTIC_CLOUD_SSO_REALM_NAME,
     } as AuthenticatedUser);
   }
 }

@@ -91,6 +91,9 @@ function fetchPipelineVersions({
               ignore_unmapped: true,
               query: {
                 bool: {
+                  // NOTE: Due to a historical bug it's possible to have documents indexed with an empty hash. This is due to a race condition between Metricbeat / Agent
+                  // and the Logstash API (the API being polled before setup is complete).
+                  must_not: { match: { 'logstash_stats.pipelines.hash': '' } },
                   filter: [{ term: { 'logstash_stats.pipelines.id': pipelineId } }],
                 },
               },
@@ -102,6 +105,9 @@ function fetchPipelineVersions({
               ignore_unmapped: true,
               query: {
                 bool: {
+                  // NOTE: Due to a historical bug it's possible to have documents indexed with an empty hash. This is due to a race condition between Metricbeat / Agent
+                  // and the Logstash API (the API being polled before setup is complete).
+                  must_not: { match: { 'logstash.node.stats.pipelines.hash': '' } },
                   filter: [{ term: { 'logstash.node.stats.pipelines.id': pipelineId } }],
                 },
               },

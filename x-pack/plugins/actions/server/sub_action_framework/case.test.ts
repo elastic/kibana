@@ -13,7 +13,7 @@ import { TestCaseConnector } from './mocks';
 import { ActionsConfigurationUtilities } from '../actions_config';
 
 describe('CaseConnector', () => {
-  const pushToServiceParams = { externalId: null, comments: [] };
+  const pushToServiceParams = { incident: { externalId: null }, comments: [] };
   let logger: MockedLogger;
   let services: ReturnType<typeof actionsMock.createServices>;
   let mockedActionsConfig: jest.Mocked<ActionsConfigurationUtilities>;
@@ -57,11 +57,11 @@ describe('CaseConnector', () => {
       const subAction = subActions.get('pushToService');
       expect(
         subAction?.schema?.validate({
-          externalId: 'test',
+          incident: { externalId: 'test' },
           comments: [{ comment: 'comment', commentId: 'comment-id' }],
         })
       ).toEqual({
-        externalId: 'test',
+        incident: { externalId: 'test' },
         comments: [{ comment: 'comment', commentId: 'comment-id' }],
       });
     });
@@ -69,7 +69,7 @@ describe('CaseConnector', () => {
     it('should accept null for externalId', async () => {
       const subActions = service.getSubActions();
       const subAction = subActions.get('pushToService');
-      expect(subAction?.schema?.validate({ externalId: null, comments: [] }));
+      expect(subAction?.schema?.validate({ incident: { externalId: null }, comments: [] }));
     });
 
     it.each([[undefined], [1], [false], [{ test: 'hello' }], [['test']], [{ test: 'hello' }]])(
@@ -84,7 +84,7 @@ describe('CaseConnector', () => {
     it('should accept null for comments', async () => {
       const subActions = service.getSubActions();
       const subAction = subActions.get('pushToService');
-      expect(subAction?.schema?.validate({ externalId: 'test', comments: null }));
+      expect(subAction?.schema?.validate({ incident: { externalId: 'test' }, comments: null }));
     });
 
     it.each([
@@ -98,30 +98,35 @@ describe('CaseConnector', () => {
     ])('should throw if comments %p', async (comments) => {
       const subActions = service.getSubActions();
       const subAction = subActions.get('pushToService');
-      expect(() => subAction?.schema?.validate({ externalId: 'test', comments }));
+      expect(() => subAction?.schema?.validate({ incident: { externalId: 'test' }, comments }));
     });
 
     it('should allow any field in the params', async () => {
       const subActions = service.getSubActions();
       const subAction = subActions.get('pushToService');
+
       expect(
         subAction?.schema?.validate({
-          externalId: 'test',
+          incident: {
+            externalId: 'test',
+            foo: 'foo',
+            bar: 1,
+            baz: [{ test: 'hello' }, 1, 'test', false],
+            isValid: false,
+            val: null,
+          },
           comments: [{ comment: 'comment', commentId: 'comment-id' }],
+        })
+      ).toEqual({
+        incident: {
+          externalId: 'test',
           foo: 'foo',
           bar: 1,
           baz: [{ test: 'hello' }, 1, 'test', false],
           isValid: false,
           val: null,
-        })
-      ).toEqual({
-        externalId: 'test',
+        },
         comments: [{ comment: 'comment', commentId: 'comment-id' }],
-        foo: 'foo',
-        bar: 1,
-        baz: [{ test: 'hello' }, 1, 'test', false],
-        isValid: false,
-        val: null,
       });
     });
   });
@@ -138,7 +143,11 @@ describe('CaseConnector', () => {
     });
 
     it('should update an incident if externalId is not null', async () => {
-      const res = await service.pushToService({ ...pushToServiceParams, externalId: 'test-id' });
+      const res = await service.pushToService({
+        ...pushToServiceParams,
+        incident: { externalId: 'test-id' },
+      });
+
       expect(res).toEqual({
         id: 'update-incident',
         title: 'Test incident',

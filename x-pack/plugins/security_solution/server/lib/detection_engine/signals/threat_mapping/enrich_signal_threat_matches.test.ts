@@ -8,7 +8,7 @@
 import { get } from 'lodash';
 import { ENRICHMENT_DESTINATION_PATH } from '../../../../../common/constants';
 import { ENRICHMENT_TYPES } from '../../../../../common/cti/constants';
-import { SignalSourceHit } from '../types';
+import type { SignalSourceHit } from '../types';
 
 import { getThreatListItemMock } from './build_threat_mapping_filter.mock';
 import {
@@ -18,7 +18,7 @@ import {
   getSignalMatchesFromThreatList,
 } from './enrich_signal_threat_matches';
 import { getNamedQueryMock, getSignalHitMock } from './enrich_signal_threat_matches.mock';
-import { GetMatchedThreats, ThreatListItem, ThreatMatchNamedQuery } from './types';
+import type { GetMatchedThreats, ThreatListItem, ThreatMatchNamedQuery } from './types';
 import { encodeThreatMatchNamedQuery } from './utils';
 
 describe('groupAndMergeSignalMatches', () => {

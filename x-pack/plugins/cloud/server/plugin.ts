@@ -50,6 +50,10 @@ export class CloudPlugin implements Plugin<CloudSetup> {
     registerCloudDeploymentIdAnalyticsContext(core.analytics, this.config.id);
     registerCloudUsageCollector(usageCollection, { isCloudEnabled });
 
+    if (isCloudEnabled) {
+      security?.setIsElasticCloudDeployment();
+    }
+
     if (this.config.full_story.enabled) {
       registerFullstoryRoute({
         httpResources: core.http.resources,

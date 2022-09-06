@@ -8,15 +8,17 @@
 
 import type { Logger } from '@kbn/logging';
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
-import { RequestHandlerContext } from '..';
-import {
+import type {
   IRouter,
   RouteConfig,
-  InternalHttpServiceSetup,
   KibanaRequest,
   KibanaResponseFactory,
+} from '@kbn/core-http-server';
+import type {
+  InternalHttpServiceSetup,
   InternalHttpServicePreboot,
-} from '../http';
+} from '@kbn/core-http-server-internal';
+import { RequestHandlerContext } from '..';
 import { InternalRenderingServicePreboot, InternalRenderingServiceSetup } from '../rendering';
 import {
   InternalHttpResourcesSetup,
@@ -63,7 +65,10 @@ export class HttpResourcesService implements CoreService<InternalHttpResourcesSe
 
   stop() {}
 
-  private createRegistrar(deps: SetupDeps | PrebootDeps, router: IRouter): HttpResources {
+  private createRegistrar(
+    deps: SetupDeps | PrebootDeps,
+    router: IRouter<RequestHandlerContext>
+  ): HttpResources {
     return {
       register: <P, Q, B, Context extends RequestHandlerContext = RequestHandlerContext>(
         route: RouteConfig<P, Q, B, 'get'>,

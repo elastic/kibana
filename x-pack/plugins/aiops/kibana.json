@@ -9,8 +9,14 @@
   "description": "AIOps plugin maintained by ML team.",
   "server": true,
   "ui": true,
-  "requiredPlugins": ["data"],
+  "requiredPlugins": [
+    "charts",
+    "data",
+    "discover",
+    "licensing",
+    "unifiedSearch"
+  ],
   "optionalPlugins": [],
-  "requiredBundles": ["kibanaReact"],
+  "requiredBundles": ["kibanaReact", "fieldFormats"],
   "extraPublicDirs": ["common"]
 }

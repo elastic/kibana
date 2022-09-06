@@ -8,31 +8,29 @@
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { Credentials } from './credentials';
-import { ServiceNowActionConnector } from './types';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { ConnectorFormTestProvider } from '../test_utils';
+
 jest.mock('../../../../common/lib/kibana');
 
-const editActionConfigMock = jest.fn();
-const editActionSecretsMock = jest.fn();
-
-const basicAuthConnector: ServiceNowActionConnector = {
-  secrets: { username: 'test', password: 'test' },
-  config: { isOAuth: false, apiUrl: 'https://example.com', usesTableApi: false },
-} as ServiceNowActionConnector;
-
 describe('Credentials', () => {
+  const connector = {
+    id: 'test',
+    actionTypeId: '.servicenow',
+    isPreconfigured: false,
+    isDeprecated: true,
+    name: 'SN',
+    config: {},
+    secrets: {},
+  };
+
   it('renders basic auth form', async () => {
     render(
-      <IntlProvider locale="en">
-        <Credentials
-          action={basicAuthConnector}
-          errors={{}}
-          readOnly={false}
-          isLoading={false}
-          editActionSecrets={() => {}}
-          editActionConfig={() => {}}
-        />
-      </IntlProvider>
+      <ConnectorFormTestProvider connector={connector}>
+        <IntlProvider locale="en">
+          <Credentials isOAuth={false} readOnly={false} isLoading={false} />
+        </IntlProvider>
+      </ConnectorFormTestProvider>
     );
     expect(screen.getByRole('switch')).toBeInTheDocument();
     expect((await screen.findByRole('switch')).getAttribute('aria-checked')).toEqual('false');
@@ -50,23 +48,14 @@ describe('Credentials', () => {
 
   it('switches to oauth form', async () => {
     render(
-      <IntlProvider locale="en">
-        <Credentials
-          action={basicAuthConnector}
-          errors={{}}
-          readOnly={false}
-          isLoading={false}
-          editActionSecrets={editActionSecretsMock}
-          editActionConfig={editActionConfigMock}
-        />
-      </IntlProvider>
+      <ConnectorFormTestProvider connector={connector}>
+        <IntlProvider locale="en">
+          <Credentials isOAuth={true} readOnly={false} isLoading={false} />
+        </IntlProvider>
+      </ConnectorFormTestProvider>
     );
 
     fireEvent.click(screen.getByRole('switch'));
-
-    expect(editActionConfigMock).toHaveBeenCalledWith('isOAuth', true);
-    expect(editActionSecretsMock).toHaveBeenCalledWith('username', null);
-    expect(editActionSecretsMock).toHaveBeenCalledWith('password', null);
 
     expect((await screen.findByRole('switch')).getAttribute('aria-checked')).toEqual('true');
 

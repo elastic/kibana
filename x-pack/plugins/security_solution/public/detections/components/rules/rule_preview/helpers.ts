@@ -5,17 +5,20 @@
  * 2.0.
  */
 
+import { isEmpty } from 'lodash';
 import { Position, ScaleType } from '@elastic/charts';
-import { EuiSelectOption } from '@elastic/eui';
-import { Type, Language, ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
-import { Unit } from '@kbn/datemath';
+import type { EuiSelectOption } from '@elastic/eui';
+import type { Type, Language, ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { Unit } from '@kbn/datemath';
 import type { Filter } from '@kbn/es-query';
 import * as i18n from './translations';
 import { histogramDateTimeFormatter } from '../../../../common/components/utils';
-import { ChartSeriesConfigs } from '../../../../common/components/charts/common';
+import type { ChartSeriesConfigs } from '../../../../common/components/charts/common';
 import { getQueryFilter } from '../../../../../common/detection_engine/get_query_filter';
-import { FieldValueQueryBar } from '../query_bar';
-import { ESQuery } from '../../../../../common/typed_json';
+import type { FieldValueQueryBar } from '../query_bar';
+import type { ESQuery } from '../../../../../common/typed_json';
+import { DataSourceType } from '../../../pages/detection_engine/rules/types';
+
 /**
  * Determines whether or not to display noise warning.
  * Is considered noisy if alerts/hour rate > 1
@@ -159,68 +162,38 @@ export const getHistogramConfig = (
   };
 };
 
-/**
- * Threshold histogram is displayed a bit differently,
- * x-axis is not time based, but ordinal.
- */
-export const getThresholdHistogramConfig = (): ChartSeriesConfigs => {
-  return {
-    series: {
-      xScaleType: ScaleType.Ordinal,
-      yScaleType: ScaleType.Linear,
-      stackAccessors: ['g'],
-    },
-    axis: {
-      yTickFormatter: (value: string | number): string => value.toLocaleString(),
-      tickSize: 8,
-    },
-    yAxisTitle: i18n.THRESHOLD_QUERY_GRAPH_COUNT,
-    settings: {
-      legendPosition: Position.Right,
-      showLegend: true,
-      showLegendExtra: true,
-      theme: {
-        scales: {
-          barsPadding: 0.08,
-        },
-        chartMargins: {
-          left: 0,
-          right: 0,
-          top: 0,
-          bottom: 0,
-        },
-        chartPaddings: {
-          left: 0,
-          right: 0,
-          top: 0,
-          bottom: 0,
-        },
-      },
-    },
-    customHeight: 200,
-  };
-};
-
 export const getIsRulePreviewDisabled = ({
   ruleType,
   isQueryBarValid,
   isThreatQueryBarValid,
   index,
+  dataViewId,
+  dataSourceType,
   threatIndex,
   threatMapping,
   machineLearningJobId,
   queryBar,
+  newTermsFields,
 }: {
   ruleType: Type;
   isQueryBarValid: boolean;
   isThreatQueryBarValid: boolean;
   index: string[];
+  dataViewId: string | undefined;
+  dataSourceType: DataSourceType;
   threatIndex: string[];
   threatMapping: ThreatMapping;
   machineLearningJobId: string[];
   queryBar: FieldValueQueryBar;
+  newTermsFields: string[];
 }) => {
-  if (!isQueryBarValid || index.length === 0) return true;
+  if (
+    !isQueryBarValid ||
+    (dataSourceType === DataSourceType.DataView && !dataViewId) ||
+    (dataSourceType === DataSourceType.IndexPatterns && index.length === 0)
+  ) {
+    return true;
+  }
   if (ruleType === 'threat_match') {
     if (!isThreatQueryBarValid || !threatIndex.length || !threatMapping) return true;
     if (
@@ -235,7 +208,10 @@ export const getIsRulePreviewDisabled = ({
     return machineLearningJobId.length === 0;
   }
   if (ruleType === 'eql' || ruleType === 'query' || ruleType === 'threshold') {
-    return queryBar.query.query.length === 0;
+    return isEmpty(queryBar.query.query) && isEmpty(queryBar.filters);
+  }
+  if (ruleType === 'new_terms') {
+    return newTermsFields.length === 0;
   }
   return false;
 };

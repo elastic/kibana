@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { KpiRiskScoreRequestOptions } from '../../../../../../common/search_strategy';
+import type { KpiRiskScoreRequestOptions } from '../../../../../../common/search_strategy';
 import { createQueryFilterClauses } from '../../../../../utils/build_query';
 
 export const buildKpiRiskScoreQuery = ({

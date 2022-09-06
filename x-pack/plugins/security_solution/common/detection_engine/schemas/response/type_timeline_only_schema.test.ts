@@ -8,7 +8,8 @@
 import { left } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 
-import { TypeAndTimelineOnly, typeAndTimelineOnlySchema } from './type_timeline_only_schema';
+import type { TypeAndTimelineOnly } from './type_timeline_only_schema';
+import { typeAndTimelineOnlySchema } from './type_timeline_only_schema';
 import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 
 describe('prepackaged_rule_schema', () => {

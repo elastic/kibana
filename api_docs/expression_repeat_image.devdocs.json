@@ -14,13 +14,7 @@
           "(theme$?: ",
           "Observable",
           "<",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.CoreTheme",
-            "text": "CoreTheme"
-          },
+          "CoreTheme",
           ">) => () => ",
           {
             "pluginId": "expressions",
@@ -52,13 +46,7 @@
             "signature": [
               "Observable",
               "<",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.CoreTheme",
-                "text": "CoreTheme"
-              },
+              "CoreTheme",
               ">"
             ],
             "path": "src/plugins/expression_repeat_image/public/expression_renderers/repeat_image_renderer.tsx",
@@ -186,7 +174,7 @@
         "label": "repeatImageFunction",
         "description": [],
         "signature": [
-          "() => { name: \"repeatImage\"; aliases: never[]; type: \"render\"; inputTypes: \"number\"[]; help: string; args: { emptyImage: { types: (\"string\" | \"null\")[]; help: string; default: null; }; image: { types: (\"string\" | \"null\")[]; help: string; default: null; }; max: { types: (\"number\" | \"null\")[]; help: string; default: number; }; size: { types: \"number\"[]; default: number; help: string; }; }; fn: (count: number, args: Arguments) => Promise<{ type: \"render\"; as: string; value: { image: string | null; emptyImage: string | null; size: number; max: number | null; count: number; }; }>; }"
+          "() => { name: \"repeatImage\"; aliases: never[]; type: \"render\"; inputTypes: \"number\"[]; help: string; args: { emptyImage: { types: (\"null\" | \"string\")[]; help: string; default: null; }; image: { types: (\"null\" | \"string\")[]; help: string; default: null; }; max: { types: (\"number\" | \"null\")[]; help: string; default: number; }; size: { types: \"number\"[]; default: number; help: string; }; }; fn: (count: number, args: Arguments) => Promise<{ type: \"render\"; as: string; value: { image: string | null; emptyImage: string | null; size: number; max: number | null; count: number; }; }>; }"
         ],
         "path": "src/plugins/expression_repeat_image/common/expression_functions/repeat_image_function.ts",
         "deprecated": false,

@@ -7,8 +7,7 @@
 
 import React, { useMemo } from 'react';
 
-import { AlertsTableFlyoutState } from '@kbn/triggers-actions-ui-plugin/public';
-import { EuiFlexItem, EuiFlexGroup, EuiProgress } from '@elastic/eui';
+import { EuiFlexItem, EuiFlexGroup, EuiProgress, EuiFlyoutSize } from '@elastic/eui';
 import { Case } from '../../../../common';
 import { useKibana } from '../../../common/lib/kibana';
 import { getManualAlertIds, getRegistrationContextFromAlerts } from './helpers';
@@ -41,9 +40,7 @@ export const CaseViewAlerts = ({ caseData }: CaseViewAlertsProps) => {
     alertsTableConfigurationRegistry: triggersActionsUi.alertsTableConfigurationRegistry,
     configurationId: caseData.owner,
     id: `case-details-alerts-${caseData.owner}`,
-    flyoutState: alertFeatureIds.includes('siem')
-      ? AlertsTableFlyoutState.internal
-      : AlertsTableFlyoutState.external,
+    flyoutSize: (alertFeatureIds.includes('siem') ? 'm' : 's') as EuiFlyoutSize,
     featureIds: alertFeatureIds,
     query: alertIdsQuery,
     showExpandToDetails: alertFeatureIds.includes('siem'),

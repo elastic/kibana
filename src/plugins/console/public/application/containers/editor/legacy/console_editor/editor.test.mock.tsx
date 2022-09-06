@@ -26,6 +26,8 @@ jest.mock('../../../../models/sense_editor', () => {
           focus: () => {},
         }),
         on: jest.fn(),
+        addFoldsAtRanges: jest.fn(),
+        getAllFoldRanges: jest.fn(),
       }),
       update: jest.fn(),
       commands: {

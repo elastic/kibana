@@ -259,6 +259,7 @@ export function JobsList({
         columns={columns}
         items={filteredJobs}
         tableLayout="auto"
+        initialPageSize={25}
       />
       <EuiSpacer size="l" />
     </>

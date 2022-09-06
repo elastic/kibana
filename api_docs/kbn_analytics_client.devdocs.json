@@ -46,7 +46,7 @@
             "text": "IAnalyticsClient"
           }
         ],
-        "path": "packages/analytics/client/src/index.ts",
+        "path": "packages/analytics/client/index.ts",
         "deprecated": false,
         "children": [
           {
@@ -67,7 +67,7 @@
                 "text": "AnalyticsClientInitContext"
               }
             ],
-            "path": "packages/analytics/client/src/index.ts",
+            "path": "packages/analytics/client/index.ts",
             "deprecated": false,
             "isRequired": true
           }
@@ -219,6 +219,16 @@
         "description": [
           "\nDefinition of the full event structure"
         ],
+        "signature": [
+          {
+            "pluginId": "@kbn/analytics-client",
+            "scope": "common",
+            "docId": "kibKbnAnalyticsClientPluginApi",
+            "section": "def-common.Event",
+            "text": "Event"
+          },
+          "<Properties>"
+        ],
         "path": "packages/analytics/client/src/events/types.ts",
         "deprecated": false,
         "children": [
@@ -249,14 +259,14 @@
           {
             "parentPluginId": "@kbn/analytics-client",
             "id": "def-common.Event.properties",
-            "type": "Object",
+            "type": "Uncategorized",
             "tags": [],
             "label": "properties",
             "description": [
               "\nThe specific properties of the event type."
             ],
             "signature": [
-              "{ [x: string]: unknown; }"
+              "Properties"
             ],
             "path": "packages/analytics/client/src/events/types.ts",
             "deprecated": false
@@ -368,6 +378,21 @@
             ],
             "signature": [
               "string | undefined"
+            ],
+            "path": "packages/analytics/client/src/events/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/analytics-client",
+            "id": "def-common.EventContext.isElasticCloudUser",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isElasticCloudUser",
+            "description": [
+              "\n`true` if the user is logged in via the Elastic Cloud authentication provider."
+            ],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "packages/analytics/client/src/events/types.ts",
             "deprecated": false
@@ -532,7 +557,7 @@
               "\nReports a telemetry event."
             ],
             "signature": [
-              "<EventTypeData extends Record<string, unknown>>(eventType: string, eventData: EventTypeData) => void"
+              "<EventTypeData extends object>(eventType: string, eventData: EventTypeData) => void"
             ],
             "path": "packages/analytics/client/src/analytics_client/types.ts",
             "deprecated": false,
@@ -930,7 +955,7 @@
                 "section": "def-common.Event",
                 "text": "Event"
               },
-              "[]) => void"
+              "<Record<string, unknown>>[]) => void"
             ],
             "path": "packages/analytics/client/src/shippers/types.ts",
             "deprecated": false,
@@ -952,7 +977,7 @@
                     "section": "def-common.Event",
                     "text": "Event"
                   },
-                  "[]"
+                  "<Record<string, unknown>>[]"
                 ],
                 "path": "packages/analytics/client/src/shippers/types.ts",
                 "deprecated": false,
@@ -1238,7 +1263,9 @@
             "type": "string",
             "tags": [],
             "label": "type",
-            "description": [],
+            "description": [
+              "The type must be an array"
+            ],
             "signature": [
               "\"array\""
             ],
@@ -1251,7 +1278,9 @@
             "type": "CompoundType",
             "tags": [],
             "label": "items",
-            "description": [],
+            "description": [
+              "The schema of the items in the array is defined in the `items` property"
+            ],
             "signature": [
               "{ type: \"pass_through\"; _meta: { description: string; } & ",
               {
@@ -1331,7 +1360,9 @@
         "type": "Interface",
         "tags": [],
         "label": "SchemaChildValue",
-        "description": [],
+        "description": [
+          "\nSchema to define a primitive value"
+        ],
         "signature": [
           {
             "pluginId": "@kbn/analytics-client",
@@ -1351,7 +1382,9 @@
             "type": "Uncategorized",
             "tags": [],
             "label": "type",
-            "description": [],
+            "description": [
+              "The type of the value"
+            ],
             "signature": [
               "NonNullable<Value> extends string | Date ? ",
               {
@@ -1387,7 +1420,9 @@
             "type": "CompoundType",
             "tags": [],
             "label": "_meta",
-            "description": [],
+            "description": [
+              "Meta properties of the value: description and is optional"
+            ],
             "signature": [
               "{ description: string; } & ",
               {
@@ -1433,7 +1468,9 @@
             "type": "CompoundType",
             "tags": [],
             "label": "_meta",
-            "description": [],
+            "description": [
+              "Meta properties of the pass through: description and is optional"
+            ],
             "signature": [
               "({ description?: string | undefined; } & ",
               {
@@ -1487,7 +1524,9 @@
             "type": "Object",
             "tags": [],
             "label": "properties",
-            "description": [],
+            "description": [
+              "\nThe schemas of the keys of the object are defined in the `properties` object."
+            ],
             "signature": [
               "{ [Key in keyof Required<Value>]: ",
               {
@@ -1613,20 +1652,14 @@
           {
             "parentPluginId": "@kbn/analytics-client",
             "id": "def-common.TelemetryCounter.type",
-            "type": "Enum",
+            "type": "CompoundType",
             "tags": [],
             "label": "type",
             "description": [
-              "\nIndicates if the event contains data about succeeded, failed or dropped events."
+              "\n{@link TelemetryCounterType}"
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/analytics-client",
-                "scope": "common",
-                "docId": "kibKbnAnalyticsClientPluginApi",
-                "section": "def-common.TelemetryCounterType",
-                "text": "TelemetryCounterType"
-              }
+              "\"failed\" | \"enqueued\" | \"sent_to_shipper\" | \"succeeded\" | \"dropped\""
             ],
             "path": "packages/analytics/client/src/events/types.ts",
             "deprecated": false
@@ -1683,21 +1716,7 @@
         "initialIsOpen": false
       }
     ],
-    "enums": [
-      {
-        "parentPluginId": "@kbn/analytics-client",
-        "id": "def-common.TelemetryCounterType",
-        "type": "Enum",
-        "tags": [],
-        "label": "TelemetryCounterType",
-        "description": [
-          "\nTypes of the Telemetry Counter: It allows to differentiate what happened to the events"
-        ],
-        "path": "packages/analytics/client/src/events/types.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      }
-    ],
+    "enums": [],
     "misc": [
       {
         "parentPluginId": "@kbn/analytics-client",
@@ -1725,7 +1744,7 @@
           "Types matching number values"
         ],
         "signature": [
-          "\"date\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"double\""
+          "\"date\" | \"long\" | \"double\" | \"short\" | \"float\" | \"integer\" | \"byte\""
         ],
         "path": "packages/analytics/client/src/schema/types.ts",
         "deprecated": false,
@@ -1741,7 +1760,7 @@
           "Types matching string values"
         ],
         "signature": [
-          "\"keyword\" | \"text\" | \"date\""
+          "\"date\" | \"keyword\" | \"text\""
         ],
         "path": "packages/analytics/client/src/schema/types.ts",
         "deprecated": false,
@@ -1757,7 +1776,7 @@
           "\nPossible type values in the schema"
         ],
         "signature": [
-          "\"boolean\" | \"keyword\" | \"text\" | \"date\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"double\""
+          "\"boolean\" | \"date\" | \"keyword\" | \"text\" | \"long\" | \"double\" | \"short\" | \"float\" | \"integer\" | \"byte\""
         ],
         "path": "packages/analytics/client/src/schema/types.ts",
         "deprecated": false,
@@ -1865,7 +1884,7 @@
         "tags": [],
         "label": "SchemaValue",
         "description": [
-          "\nType that defines all the possible values that the  Schema accepts.\nThese types definitions are helping to identify earlier the possible missing `properties` nesting when\nmanually defining the schemas."
+          "\nType that defines all the possible values that the Schema accepts.\nThese types definitions are helping to identify earlier the possible missing `properties` nesting when\nmanually defining the schemas."
         ],
         "signature": [
           "{ type: \"pass_through\"; _meta: { description: string; } & ",
@@ -1951,6 +1970,22 @@
           "string"
         ],
         "path": "packages/analytics/client/src/analytics_client/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/analytics-client",
+        "id": "def-common.TelemetryCounterType",
+        "type": "Type",
+        "tags": [],
+        "label": "TelemetryCounterType",
+        "description": [
+          "\nIndicates if the event contains data about succeeded, failed or dropped events:\n- enqueued: The event was accepted and will be sent to the shippers when they become available (and opt-in === true).\n- sent_to_shipper: The event was sent to at least one shipper.\n- succeeded: The event was successfully sent by the shipper.\n- failed: There was an error when processing/shipping the event. Refer to the Telemetry Counter's code for the reason.\n- dropped: The event was dropped from the queue. Refer to the Telemetry Counter's code for the reason."
+        ],
+        "signature": [
+          "\"failed\" | \"enqueued\" | \"sent_to_shipper\" | \"succeeded\" | \"dropped\""
+        ],
+        "path": "packages/analytics/client/src/events/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       }

@@ -26,7 +26,8 @@ export const useLogViewConfiguration = () => {
   };
 };
 
-export const LogViewConfiguration = createContainer(useLogViewConfiguration);
+export const [LogViewConfigurationProvider, useLogViewConfigurationContext] =
+  createContainer(useLogViewConfiguration);
 
 /**
  * constants

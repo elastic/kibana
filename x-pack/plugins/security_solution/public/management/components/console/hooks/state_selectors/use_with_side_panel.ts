@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ConsoleDataState } from '../../components/console_state/types';
+import type { ConsoleDataState } from '../../components/console_state/types';
 import { useConsoleStore } from '../../components/console_state/console_state';
 
 export const useWithSidePanel = (): ConsoleDataState['sidePanel'] => {

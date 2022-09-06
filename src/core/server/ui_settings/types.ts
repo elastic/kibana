@@ -5,16 +5,21 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { SavedObjectsClientContract } from '../saved_objects/types';
-import { UiSettingsParams, UserProvidedValues, PublicUiSettingsParams } from '../../types';
+
+import {
+  UiSettingsParams,
+  UserProvidedValues,
+  PublicUiSettingsParams,
+} from '@kbn/core-ui-settings-common';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 
 export type {
   UiSettingsParams,
-  PublicUiSettingsParams,
   DeprecationSettings,
+  PublicUiSettingsParams,
   UiSettingsType,
   UserProvidedValues,
-} from '../../types';
+} from '@kbn/core-ui-settings-common';
 
 /**
  * Server-side client that provides access to the advanced settings stored in elasticsearch.

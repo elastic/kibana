@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { Ecs } from '../../../common/ecs';
-import { TimelineNonEcsData } from '../../../common/search_strategy';
+import type { Ecs } from '../../../common/ecs';
 
 export const getDetectionAlertMock = (overrides: Partial<Ecs> = {}): Ecs => ({
   ...{
@@ -22,6 +21,7 @@ export const getDetectionAlertMock = (overrides: Partial<Ecs> = {}): Ecs => ({
       category: ['Access'],
       module: ['nginx'],
       severity: [3],
+      kind: ['signal'],
     },
     source: {
       ip: ['192.168.0.1'],
@@ -102,11 +102,3 @@ export const getThreatMatchDetectionAlert = (overrides: Partial<Ecs> = {}): Ecs 
   },
   ...overrides,
 });
-
-export const getDetectionAlertFieldsMock = (
-  fields: TimelineNonEcsData[] = []
-): TimelineNonEcsData[] => [
-  { field: '@timestamp', value: ['2021-03-27T06:28:47.292Z'] },
-  { field: 'signal.rule.type', value: ['threat_match'] },
-  ...fields,
-];

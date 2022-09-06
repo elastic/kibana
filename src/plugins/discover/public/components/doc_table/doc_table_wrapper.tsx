@@ -9,20 +9,21 @@
 import React, { forwardRef, useCallback, useMemo } from 'react';
 import { EuiIcon, EuiSpacer, EuiText } from '@elastic/eui';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { TableHeader } from './components/table_header/table_header';
 import { SHOW_MULTIFIELDS } from '../../../common';
-import { SortOrder } from './components/table_header/helpers';
-import { DocTableRow, TableRow } from './components/table_row';
+import { TableRow } from './components/table_row';
 import { DocViewFilterFn } from '../../services/doc_views/doc_views_types';
 import { getFieldsToShow } from '../../utils/get_fields_to_show';
-import { useDiscoverServices } from '../../utils/use_discover_services';
+import { useDiscoverServices } from '../../hooks/use_discover_services';
+import type { DataTableRecord } from '../../types';
 
 export interface DocTableProps {
   /**
    * Rows of classic table
    */
-  rows: DocTableRow[];
+  rows: DataTableRecord[];
   /**
    * Columns of classic table
    */
@@ -30,7 +31,7 @@ export interface DocTableProps {
   /**
    * Current DataView
    */
-  indexPattern: DataView;
+  dataView: DataView;
   /**
    * Current sorting
    */
@@ -79,8 +80,8 @@ export interface DocTableProps {
 
 export interface DocTableRenderProps {
   columnLength: number;
-  rows: DocTableRow[];
-  renderRows: (row: DocTableRow[]) => JSX.Element[];
+  rows: DataTableRecord[];
+  renderRows: (row: DataTableRecord[]) => JSX.Element[];
   renderHeader: () => JSX.Element;
   onSkipBottomButtonClick: () => void;
 }
@@ -100,7 +101,7 @@ export const DocTableWrapper = forwardRef(
       render,
       columns,
       rows,
-      indexPattern,
+      dataView,
       onSort,
       onAddColumn,
       onMoveColumn,
@@ -133,35 +134,35 @@ export const DocTableWrapper = forwardRef(
     const fieldsToShow = useMemo(
       () =>
         getFieldsToShow(
-          indexPattern.fields.map((field: DataViewField) => field.name),
-          indexPattern,
+          dataView.fields.map((field: DataViewField) => field.name),
+          dataView,
           showMultiFields
         ),
-      [indexPattern, showMultiFields]
+      [dataView, showMultiFields]
     );
 
     const renderHeader = useCallback(
       () => (
         <TableHeader
           columns={columns}
-          indexPattern={indexPattern}
+          dataView={dataView}
           onChangeSortOrder={onSort}
           onMoveColumn={onMoveColumn}
           onRemoveColumn={onRemoveColumn}
           sortOrder={sort as SortOrder[]}
         />
       ),
-      [columns, indexPattern, onMoveColumn, onRemoveColumn, onSort, sort]
+      [columns, dataView, onMoveColumn, onRemoveColumn, onSort, sort]
     );
 
     const renderRows = useCallback(
-      (rowsToRender: DocTableRow[]) => {
+      (rowsToRender: DataTableRecord[]) => {
         return rowsToRender.map((current) => (
           <TableRow
-            key={`${current._index}${current._id}${current._score}${current._version}${current._routing}`}
+            key={`${current.id}${current.raw._score}${current.raw._version}`}
             columns={columns}
             filter={onFilter}
-            indexPattern={indexPattern}
+            dataView={dataView}
             row={current}
             useNewFieldsApi={useNewFieldsApi}
             fieldsToShow={fieldsToShow}
@@ -170,7 +171,7 @@ export const DocTableWrapper = forwardRef(
           />
         ));
       },
-      [columns, onFilter, indexPattern, useNewFieldsApi, fieldsToShow, onAddColumn, onRemoveColumn]
+      [columns, onFilter, dataView, useNewFieldsApi, fieldsToShow, onAddColumn, onRemoveColumn]
     );
 
     return (

@@ -9,13 +9,13 @@ import { uniq } from 'lodash';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import { OSQUERY_INTEGRATION_NAME } from '../../common';
-import { OsqueryAppContext } from './osquery_app_context_services';
+import type { OsqueryAppContext } from './osquery_app_context_services';
 
 export interface AgentSelection {
-  agents: string[];
-  allAgentsSelected: boolean;
-  platformsSelected: string[];
-  policiesSelected: string[];
+  agents?: string[];
+  allAgentsSelected?: boolean;
+  platformsSelected?: string[];
+  policiesSelected?: string[];
 }
 
 const PER_PAGE = 9000;
@@ -41,7 +41,12 @@ export const parseAgentSelection = async (
 ) => {
   const selectedAgents: Set<string> = new Set();
   const addAgent = selectedAgents.add.bind(selectedAgents);
-  const { allAgentsSelected, platformsSelected, policiesSelected, agents } = agentSelection;
+  const {
+    allAgentsSelected = false,
+    platformsSelected = [],
+    policiesSelected = [],
+    agents = [],
+  } = agentSelection;
   const agentService = context.service.getAgentService()?.asInternalUser;
   const packagePolicyService = context.service.getPackagePolicyService();
   const kueryFragments = [];

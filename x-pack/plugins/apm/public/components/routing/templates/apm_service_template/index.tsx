@@ -6,7 +6,6 @@
  */
 
 import {
-  EuiBetaBadge,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPageHeaderProps,
@@ -15,9 +14,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { omit } from 'lodash';
 import React from 'react';
-import { enableInfrastructureView } from '@kbn/observability-plugin/public';
 import {
-  isIosAgentName,
+  isMobileAgentName,
   isJavaAgentName,
   isJRubyAgent,
   isRumAgentName,
@@ -35,6 +33,9 @@ import { SearchBar } from '../../../shared/search_bar';
 import { ServiceIcons } from '../../../shared/service_icons';
 import { ApmMainTemplate } from '../apm_main_template';
 import { AnalyzeDataButton } from './analyze_data_button';
+import { getAlertingCapabilities } from '../../../alerting/get_alerting_capabilities';
+import { BetaBadge } from '../../../shared/beta_badge';
+import { TechnicalPreviewBadge } from '../../../shared/technical_preview_badge';
 
 type Tab = NonNullable<EuiPageHeaderProps['tabs']>[0] & {
   key:
@@ -47,7 +48,8 @@ type Tab = NonNullable<EuiPageHeaderProps['tabs']>[0] & {
     | 'infrastructure'
     | 'service-map'
     | 'logs'
-    | 'profiling';
+    | 'profiling'
+    | 'alerts';
   hidden?: boolean;
 };
 
@@ -84,13 +86,16 @@ function TemplateWithContext({
 
   const tabs = useTabs({ selectedTab });
 
-  useBreadcrumb({
-    title,
-    href: router.link(`/services/{serviceName}/${selectedTab}` as const, {
-      path: { serviceName },
-      query,
+  useBreadcrumb(
+    () => ({
+      title,
+      href: router.link(`/services/{serviceName}/${selectedTab}` as const, {
+        path: { serviceName },
+        query,
+      }),
     }),
-  });
+    [query, router, selectedTab, serviceName, title]
+  );
 
   return (
     <ApmMainTemplate
@@ -143,13 +148,13 @@ export function isMetricsTabHidden({
     !agentName ||
     isRumAgentName(agentName) ||
     isJavaAgentName(agentName) ||
-    isIosAgentName(agentName) ||
+    isMobileAgentName(agentName) ||
     isJRubyAgent(agentName, runtimeName) ||
     isServerlessAgent(runtimeName)
   );
 }
 
-export function isJVMsTabHidden({
+export function isMetricsJVMsTabHidden({
   agentName,
   runtimeName,
 }: {
@@ -162,10 +167,29 @@ export function isJVMsTabHidden({
   );
 }
 
+export function isInfraTabHidden({
+  agentName,
+  runtimeName,
+}: {
+  agentName?: string;
+  runtimeName?: string;
+}) {
+  return (
+    !agentName ||
+    isRumAgentName(agentName) ||
+    isMobileAgentName(agentName) ||
+    isServerlessAgent(runtimeName)
+  );
+}
+
 function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
   const { agentName, runtimeName } = useApmServiceContext();
-  const { config, core } = useApmPluginContext();
-  const showInfraTab = core.uiSettings.get<boolean>(enableInfrastructureView);
+  const { config, core, plugins } = useApmPluginContext();
+  const { capabilities } = core.application;
+  const { isAlertingAvailable, canReadAlerts } = getAlertingCapabilities(
+    plugins,
+    capabilities
+  );
 
   const router = useApmRouter();
 
@@ -213,7 +237,7 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
         defaultMessage: 'Dependencies',
       }),
       hidden:
-        !agentName || isRumAgentName(agentName) || isIosAgentName(agentName),
+        !agentName || isRumAgentName(agentName) || isMobileAgentName(agentName),
     },
     {
       key: 'errors',
@@ -243,9 +267,9 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
         query,
       }),
       label: i18n.translate('xpack.apm.serviceDetails.nodesTabLabel', {
-        defaultMessage: 'JVMs',
+        defaultMessage: 'Metrics',
       }),
-      hidden: isJVMsTabHidden({ agentName, runtimeName }),
+      hidden: isMetricsJVMsTabHidden({ agentName, runtimeName }),
     },
     {
       key: 'infrastructure',
@@ -253,10 +277,11 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
         path: { serviceName },
         query,
       }),
+      append: <BetaBadge icon="beaker" />,
       label: i18n.translate('xpack.apm.home.infraTabLabel', {
         defaultMessage: 'Infrastructure',
       }),
-      hidden: !showInfraTab,
+      hidden: isInfraTabHidden({ agentName, runtimeName }),
     },
     {
       key: 'service-map',
@@ -278,7 +303,7 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
         defaultMessage: 'Logs',
       }),
       hidden:
-        !agentName || isRumAgentName(agentName) || isIosAgentName(agentName),
+        !agentName || isRumAgentName(agentName) || isMobileAgentName(agentName),
     },
     {
       key: 'profiling',
@@ -289,40 +314,31 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
         query,
       }),
       hidden: !config.profilingEnabled,
-      label: (
-        <EuiFlexGroup direction="row" gutterSize="s">
-          <EuiFlexItem>
-            {i18n.translate('xpack.apm.serviceDetails.profilingTabLabel', {
-              defaultMessage: 'Profiling',
-            })}
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiBetaBadge
-              label={i18n.translate(
-                'xpack.apm.serviceDetails.profilingTabExperimentalLabel',
-                {
-                  defaultMessage: 'Technical preview',
-                }
-              )}
-              tooltipContent={i18n.translate(
-                'xpack.apm.serviceDetails.profilingTabExperimentalDescription',
-                {
-                  defaultMessage:
-                    'This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will take a best effort approach to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
-                }
-              )}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      ),
+      append: <TechnicalPreviewBadge icon="beaker" />,
+      label: i18n.translate('xpack.apm.serviceDetails.profilingTabLabel', {
+        defaultMessage: 'Profiling',
+      }),
+    },
+    {
+      key: 'alerts',
+      href: router.link('/services/{serviceName}/alerts', {
+        path: { serviceName },
+        query,
+      }),
+      append: <TechnicalPreviewBadge icon="beaker" />,
+      label: i18n.translate('xpack.apm.home.alertsTabLabel', {
+        defaultMessage: 'Alerts',
+      }),
+      hidden: !(isAlertingAvailable && canReadAlerts),
     },
   ];
 
   return tabs
     .filter((t) => !t.hidden)
-    .map(({ href, key, label }) => ({
+    .map(({ href, key, label, append }) => ({
       href,
       label,
+      append,
       isSelected: key === selectedTab,
     }));
 }

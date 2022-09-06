@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Datatable } from '@kbn/expressions-plugin';
+import { Datatable } from '@kbn/expressions-plugin/common';
 import { extractUniqTermsMap, sortPredicateByType } from './sort_predicate';
 import { ChartTypes, PartitionVisParams } from '../../../common/types';
 import { ArrayEntry } from '@elastic/charts';

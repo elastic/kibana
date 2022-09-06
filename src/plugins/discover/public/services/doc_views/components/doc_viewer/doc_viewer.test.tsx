@@ -12,6 +12,7 @@ import { DocViewer } from './doc_viewer';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { getDocViewsRegistry } from '../../../../kibana_services';
 import { DocViewRenderProps } from '../../doc_views_types';
+import { buildDataTableRecord } from '../../../../utils/build_data_record';
 
 jest.mock('../../../../kibana_services', () => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -32,7 +33,7 @@ jest.mock('../../../../kibana_services', () => {
   };
 });
 
-jest.mock('../../../../utils/use_discover_services', () => {
+jest.mock('../../../../hooks/use_discover_services', () => {
   return {
     useDiscoverServices: {
       uiSettings: {
@@ -75,7 +76,9 @@ test('Render <DocViewer/> with 1 tab displaying error message', () => {
     component: SomeComponent,
   });
 
-  const renderProps = { hit: {} } as DocViewRenderProps;
+  const renderProps = {
+    hit: buildDataTableRecord({ _index: 't', _id: '1' }),
+  } as DocViewRenderProps;
   const errorMsg = 'Catch me if you can!';
 
   const wrapper = mount(<DocViewer {...renderProps} />);

@@ -8,7 +8,6 @@ import React, { useState, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { isEqual } from 'lodash';
 import {
-  EuiButtonIcon,
   EuiLink,
   EuiPanel,
   EuiPopover,
@@ -18,12 +17,13 @@ import {
   EuiPopoverProps,
   EuiIconTip,
 } from '@elastic/eui';
-import type { Query } from '@kbn/data-plugin/public';
+import type { Query } from '@kbn/es-query';
 import { GenericIndexPatternColumn, operationDefinitionMap } from '../operations';
 import { validateQuery } from '../operations/definitions/filters';
 import { QueryInput } from '../query_input';
-import type { IndexPattern, IndexPatternLayer } from '../types';
+import type { IndexPatternLayer } from '../types';
 import { useDebouncedValue } from '../../shared_components';
+import type { IndexPattern } from '../../types';
 
 const filterByLabel = i18n.translate('xpack.lens.indexPattern.filterBy.label', {
   defaultMessage: 'Filter by',
@@ -54,7 +54,6 @@ export function Filtering({
   layer,
   updateLayer,
   indexPattern,
-  isInitiallyOpen,
   helpMessage,
 }: {
   selectedColumn: GenericIndexPatternColumn;
@@ -62,7 +61,6 @@ export function Filtering({
   columnId: string;
   layer: IndexPatternLayer;
   updateLayer: (newLayer: IndexPatternLayer) => void;
-  isInitiallyOpen: boolean;
   helpMessage: string | null;
 }) {
   const inputFilter = selectedColumn.filter;
@@ -79,7 +77,7 @@ export function Filtering({
     value: inputFilter ?? defaultFilter,
     onChange,
   });
-  const [filterPopoverOpen, setFilterPopoverOpen] = useState(isInitiallyOpen);
+  const [filterPopoverOpen, setFilterPopoverOpen] = useState(false);
 
   const onClosePopup: EuiPopoverProps['closePopover'] = useCallback(() => {
     setFilterPopoverOpen(false);
@@ -90,7 +88,7 @@ export function Filtering({
 
   const selectedOperation = operationDefinitionMap[selectedColumn.operationType];
 
-  if (!selectedOperation.filterable || !inputFilter) {
+  if (!selectedOperation.filterable) {
     return null;
   }
 
@@ -143,24 +141,11 @@ export function Filtering({
                         defaultMessage: 'Click to edit',
                       })}
                     >
-                      {inputFilter.query ||
+                      {inputFilter?.query ||
                         i18n.translate('xpack.lens.indexPattern.filterBy.emptyFilterQuery', {
                           defaultMessage: '(empty)',
                         })}
                     </EuiLink>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiButtonIcon
-                      data-test-subj="indexPattern-filter-by-remove"
-                      color="danger"
-                      aria-label={i18n.translate('xpack.lens.filterBy.removeLabel', {
-                        defaultMessage: 'Remove filter',
-                      })}
-                      onClick={() => {
-                        updateLayer(setFilter(columnId, layer, undefined));
-                      }}
-                      iconType="cross"
-                    />
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiPanel>
@@ -175,6 +160,7 @@ export function Filtering({
             >
               <QueryInput
                 indexPatternTitle={indexPattern.title}
+                disableAutoFocus={true}
                 value={queryInput}
                 onChange={setQueryInput}
                 isInvalid={!isQueryInputValid}

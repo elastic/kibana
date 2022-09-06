@@ -9,11 +9,13 @@ import { omit, partition, isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import semverLt from 'semver/functions/lt';
 import { getFlattenedObject } from '@kbn/std';
-import type { KibanaRequest } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type {
+  KibanaRequest,
   ElasticsearchClient,
   RequestHandlerContext,
   SavedObjectsClientContract,
+  Logger,
 } from '@kbn/core/server';
 import uuid from 'uuid';
 import { safeLoad } from 'js-yaml';
@@ -29,10 +31,8 @@ import {
   doesAgentPolicyAlreadyIncludePackage,
   validatePackagePolicy,
   validationHasErrors,
-  SO_SEARCH_LIMIT,
-  FLEET_APM_PACKAGE,
-  outputType,
-} from '../../common';
+} from '../../common/services';
+import { SO_SEARCH_LIMIT, FLEET_APM_PACKAGE, outputType } from '../../common/constants';
 import type {
   DeletePackagePoliciesResponse,
   UpgradePackagePolicyResponse,
@@ -46,13 +46,16 @@ import type {
   UpgradePackagePolicyDryRunResponseItem,
   RegistryDataStream,
   PackagePolicyPackage,
-} from '../../common';
+} from '../../common/types';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../constants';
 import {
   IngestManagerError,
   ingestErrorToResponseOptions,
   PackagePolicyIneligibleForUpgradeError,
   PackagePolicyValidationError,
+  PackagePolicyRestrictionRelatedError,
+  PackagePolicyNotFoundError,
+  HostedAgentPolicyRestrictionRelatedError,
 } from '../errors';
 import { NewPackagePolicySchema, PackagePolicySchema, UpdatePackagePolicySchema } from '../types';
 import type {
@@ -69,11 +72,10 @@ import type { ExternalCallback } from '..';
 import { storedPackagePolicyToAgentInputs } from './agent_policies';
 import { agentPolicyService } from './agent_policy';
 import { getDataOutputForAgentPolicy } from './agent_policies';
-import { outputService } from './output';
 import { getPackageInfo, getInstallation, ensureInstalledPackage } from './epm/packages';
 import { getAssetsData } from './epm/packages/assets';
 import { compileTemplate } from './epm/agent/agent';
-import { normalizeKuery } from './saved_object';
+import { escapeSearchQueryPhrase, normalizeKuery } from './saved_object';
 import { appContextService } from '.';
 import { removeOldAssets } from './epm/packages/cleanup';
 import type { PackageUpdateEvent, UpdateEventType } from './upgrade_sender';
@@ -108,6 +110,7 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
       skipEnsureInstalled?: boolean;
       skipUniqueNameVerification?: boolean;
       overwrite?: boolean;
+      packageInfo?: PackageInfo;
     }
   ): Promise<PackagePolicy> {
     const agentPolicy = await agentPolicyService.get(soClient, packagePolicy.policy_id, true);
@@ -118,6 +121,7 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
         throw new IngestManagerError('You cannot add APM to a policy using a logstash output');
       }
     }
+    await validateIsNotHostedPolicy(soClient, packagePolicy.policy_id, options?.force);
 
     // trailing whitespace causes issues creating API keys
     packagePolicy.name = packagePolicy.name.trim();
@@ -144,35 +148,31 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
 
     // Make sure the associated package is installed
     if (packagePolicy.package?.name) {
-      const pkgInfoPromise = getPackageInfo({
-        savedObjectsClient: soClient,
-        pkgName: packagePolicy.package.name,
-        pkgVersion: packagePolicy.package.version,
-      });
-
-      let pkgInfo: PackageInfo;
-
-      if (options?.skipEnsureInstalled) pkgInfo = await pkgInfoPromise;
-      else {
-        const [, packageInfo] = await Promise.all([
-          ensureInstalledPackage({
-            esClient,
-            spaceId: options?.spaceId || DEFAULT_SPACE_ID,
-            savedObjectsClient: soClient,
-            pkgName: packagePolicy.package.name,
-            pkgVersion: packagePolicy.package.version,
-          }),
-          pkgInfoPromise,
-        ]);
-        pkgInfo = packageInfo;
+      if (!options?.skipEnsureInstalled) {
+        await ensureInstalledPackage({
+          esClient,
+          spaceId: options?.spaceId || DEFAULT_SPACE_ID,
+          savedObjectsClient: soClient,
+          pkgName: packagePolicy.package.name,
+          pkgVersion: packagePolicy.package.version,
+          force: options?.force,
+        });
       }
+
+      const pkgInfo =
+        options?.packageInfo ??
+        (await getPackageInfo({
+          savedObjectsClient: soClient,
+          pkgName: packagePolicy.package.name,
+          pkgVersion: packagePolicy.package.version,
+        }));
 
       // Check if it is a limited package, and if so, check that the corresponding agent policy does not
       // already contain a package policy for this package
       if (isPackageLimited(pkgInfo)) {
         if (agentPolicy && doesAgentPolicyAlreadyIncludePackage(agentPolicy, pkgInfo.name)) {
           throw new IngestManagerError(
-            `Unable to create package policy. Package '${pkgInfo.name}' already exists on this agent policy.`
+            `Unable to create integration policy. Integration '${pkgInfo.name}' already exists on this agent policy.`
           );
         }
       }
@@ -200,18 +200,11 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
       { ...options, id: packagePolicyId }
     );
 
-    // Assign it to the given agent policy
-    await agentPolicyService.assignPackagePolicies(
-      soClient,
-      esClient,
-      packagePolicy.policy_id,
-      [newSo.id],
-      {
+    if (options?.bumpRevision ?? true) {
+      await agentPolicyService.bumpRevision(soClient, esClient, packagePolicy.policy_id, {
         user: options?.user,
-        bumpRevision: options?.bumpRevision ?? true,
-        force: options?.force,
-      }
-    );
+      });
+    }
 
     return {
       id: newSo.id,
@@ -225,8 +218,9 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
     esClient: ElasticsearchClient,
     packagePolicies: NewPackagePolicy[],
     agentPolicyId: string,
-    options?: { user?: AuthenticatedUser; bumpRevision?: boolean }
+    options?: { user?: AuthenticatedUser; bumpRevision?: boolean; force: true }
   ): Promise<PackagePolicy[]> {
+    await validateIsNotHostedPolicy(soClient, agentPolicyId);
     const isoDate = new Date().toISOString();
     // eslint-disable-next-line @typescript-eslint/naming-convention
     const { saved_objects } = await soClient.bulkCreate<PackagePolicySOAttributes>(
@@ -258,16 +252,12 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
     const newSos = saved_objects.filter((so) => !so.error && so.attributes);
 
     // Assign it to the given agent policy
-    await agentPolicyService.assignPackagePolicies(
-      soClient,
-      esClient,
-      agentPolicyId,
-      newSos.map((newSo) => newSo.id),
-      {
+
+    if (options?.bumpRevision ?? true) {
+      await agentPolicyService.bumpRevision(soClient, esClient, agentPolicyId, {
         user: options?.user,
-        bumpRevision: options?.bumpRevision ?? true,
-      }
-    );
+      });
+    }
 
     return newSos.map((newSo) => ({
       id: newSo.id,
@@ -296,9 +286,30 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
     };
   }
 
+  public async findAllForAgentPolicy(
+    soClient: SavedObjectsClientContract,
+    agentPolicyId: string
+  ): Promise<PackagePolicy[]> {
+    const packagePolicySO = await soClient.find<PackagePolicySOAttributes>({
+      type: SAVED_OBJECT_TYPE,
+      filter: `${SAVED_OBJECT_TYPE}.attributes.policy_id:${escapeSearchQueryPhrase(agentPolicyId)}`,
+      perPage: SO_SEARCH_LIMIT,
+    });
+    if (!packagePolicySO) {
+      return [];
+    }
+
+    return packagePolicySO.saved_objects.map((so) => ({
+      id: so.id,
+      version: so.version,
+      ...so.attributes,
+    }));
+  }
+
   public async getByIDs(
     soClient: SavedObjectsClientContract,
-    ids: string[]
+    ids: string[],
+    options: { ignoreMissing?: boolean } = {}
   ): Promise<PackagePolicy[] | null> {
     const packagePolicySO = await soClient.bulkGet<PackagePolicySOAttributes>(
       ids.map((id) => ({
@@ -310,11 +321,25 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
       return null;
     }
 
-    return packagePolicySO.saved_objects.map((so) => ({
-      id: so.id,
-      version: so.version,
-      ...so.attributes,
-    }));
+    return packagePolicySO.saved_objects
+      .map((so): PackagePolicy | null => {
+        if (so.error) {
+          if (options.ignoreMissing && so.error.statusCode === 404) {
+            return null;
+          } else if (so.error.statusCode === 404) {
+            throw new PackagePolicyNotFoundError(`Package policy ${so.id} not found`);
+          } else {
+            throw new Error(so.error.message);
+          }
+        }
+
+        return {
+          id: so.id,
+          version: so.version,
+          ...so.attributes,
+        };
+      })
+      .filter((packagePolicy): packagePolicy is PackagePolicy => packagePolicy !== null);
   }
 
   public async list(
@@ -379,6 +404,10 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
     const packagePolicy = { ...packagePolicyUpdate, name: packagePolicyUpdate.name.trim() };
     const oldPackagePolicy = await this.get(soClient, id);
     const { version, ...restOfPackagePolicy } = packagePolicy;
+
+    if (packagePolicyUpdate.is_managed && !options?.force) {
+      throw new PackagePolicyRestrictionRelatedError(`Cannot update package policy ${id}`);
+    }
 
     if (!oldPackagePolicy) {
       throw new Error('Package policy not found');
@@ -481,19 +510,36 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
         if (!packagePolicy) {
           throw new Error('Package policy not found');
         }
-        if (!options?.skipUnassignFromAgentPolicies) {
-          await agentPolicyService.unassignPackagePolicies(
-            soClient,
-            esClient,
-            packagePolicy.policy_id,
-            [packagePolicy.id],
-            {
-              user: options?.user,
-              force: options?.force,
-            }
-          );
+
+        if (packagePolicy.is_managed && !options?.force) {
+          throw new PackagePolicyRestrictionRelatedError(`Cannot delete package policy ${id}`);
         }
+
+        await validateIsNotHostedPolicy(
+          soClient,
+          packagePolicy?.policy_id,
+          options?.force,
+          'Cannot remove integrations of hosted agent policy'
+        );
+
+        const agentPolicy = await agentPolicyService
+          .get(soClient, packagePolicy.policy_id)
+          .catch((err) => {
+            if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
+              appContextService
+                .getLogger()
+                .warn(`Agent policy ${packagePolicy.policy_id} not found`);
+              return null;
+            }
+            throw err;
+          });
+
         await soClient.delete(SAVED_OBJECT_TYPE, id);
+        if (agentPolicy && !options?.skipUnassignFromAgentPolicies) {
+          await agentPolicyService.bumpRevision(soClient, esClient, packagePolicy.policy_id, {
+            user: options?.user,
+          });
+        }
         result.push({
           id,
           name: packagePolicy.name,
@@ -605,7 +651,7 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
     ids: string[],
-    options?: { user?: AuthenticatedUser },
+    options?: { user?: AuthenticatedUser; force?: boolean },
     packagePolicy?: PackagePolicy,
     pkgVersion?: string
   ): Promise<UpgradePackagePolicyResponse> {
@@ -613,15 +659,22 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
 
     for (const id of ids) {
       try {
-        let packageInfo: PackageInfo;
-        ({ packagePolicy, packageInfo } = await this.getUpgradePackagePolicyInfo(
-          soClient,
-          id,
-          packagePolicy,
-          pkgVersion
-        ));
+        const { packagePolicy: currentPackagePolicy, packageInfo } =
+          await this.getUpgradePackagePolicyInfo(soClient, id, packagePolicy, pkgVersion);
 
-        await this.doUpgrade(soClient, esClient, id, packagePolicy!, result, packageInfo, options);
+        if (currentPackagePolicy.is_managed && !options?.force) {
+          throw new PackagePolicyRestrictionRelatedError(`Cannot upgrade package policy ${id}`);
+        }
+
+        await this.doUpgrade(
+          soClient,
+          esClient,
+          id,
+          currentPackagePolicy,
+          result,
+          packageInfo,
+          options
+        );
       } catch (error) {
         result.push({
           id,
@@ -821,7 +874,6 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
           description: newPolicy.description ?? '',
           enabled: newPolicy.enabled ?? true,
           policy_id: newPolicy.policy_id ?? agentPolicyId,
-          output_id: newPolicy.output_id ?? '',
           inputs: newPolicy.inputs[0]?.streams ? newPolicy.inputs : inputs,
           vars: newPolicy.vars || newPP.vars,
         };
@@ -839,31 +891,28 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
       savedObjectsClient: soClient,
       pkgName,
       pkgVersion,
+      skipArchive: true,
     });
     if (packageInfo) {
-      return packageToPackagePolicy(packageInfo, '', '');
+      return packageToPackagePolicy(packageInfo, '');
     }
   }
 
   public async buildPackagePolicyFromPackage(
     soClient: SavedObjectsClientContract,
-    pkgName: string
+    pkgName: string,
+    logger?: Logger
   ): Promise<NewPackagePolicy | undefined> {
-    const pkgInstall = await getInstallation({ savedObjectsClient: soClient, pkgName });
+    const pkgInstall = await getInstallation({ savedObjectsClient: soClient, pkgName, logger });
     if (pkgInstall) {
-      const [packageInfo, defaultOutputId] = await Promise.all([
-        getPackageInfo({
-          savedObjectsClient: soClient,
-          pkgName: pkgInstall.name,
-          pkgVersion: pkgInstall.version,
-        }),
-        outputService.getDefaultDataOutputId(soClient),
-      ]);
+      const packageInfo = await getPackageInfo({
+        savedObjectsClient: soClient,
+        pkgName: pkgInstall.name,
+        pkgVersion: pkgInstall.version,
+      });
+
       if (packageInfo) {
-        if (!defaultOutputId) {
-          throw new Error('Default output is not set');
-        }
-        return packageToPackagePolicy(packageInfo, '', defaultOutputId);
+        return packageToPackagePolicy(packageInfo, '');
       }
     }
   }
@@ -1230,6 +1279,7 @@ export interface PackagePolicyServiceInterface {
       skipEnsureInstalled?: boolean;
       skipUniqueNameVerification?: boolean;
       overwrite?: boolean;
+      packageInfo?: PackageInfo;
     }
   ): Promise<PackagePolicy>;
 
@@ -1243,7 +1293,16 @@ export interface PackagePolicyServiceInterface {
 
   get(soClient: SavedObjectsClientContract, id: string): Promise<PackagePolicy | null>;
 
-  getByIDs(soClient: SavedObjectsClientContract, ids: string[]): Promise<PackagePolicy[] | null>;
+  findAllForAgentPolicy(
+    soClient: SavedObjectsClientContract,
+    agentPolicyId: string
+  ): Promise<PackagePolicy[]>;
+
+  getByIDs(
+    soClient: SavedObjectsClientContract,
+    ids: string[],
+    options?: { ignoreMissing?: boolean }
+  ): Promise<PackagePolicy[] | null>;
 
   list(
     soClient: SavedObjectsClientContract,
@@ -1294,7 +1353,8 @@ export interface PackagePolicyServiceInterface {
 
   buildPackagePolicyFromPackage(
     soClient: SavedObjectsClientContract,
-    pkgName: string
+    pkgName: string,
+    logger?: Logger
   ): Promise<NewPackagePolicy | undefined>;
 
   runExternalCallbacks<A extends ExternalCallback[0]>(
@@ -1321,6 +1381,7 @@ export interface PackagePolicyServiceInterface {
     id: string
   ): Promise<{ packagePolicy: PackagePolicy; packageInfo: PackageInfo }>;
 }
+
 export const packagePolicyService: PackagePolicyServiceInterface = new PackagePolicyService();
 
 export type { PackagePolicyService };
@@ -1561,6 +1622,25 @@ export function preconfigurePackageInputs(
   validatePackagePolicyOrThrow(resultingPackagePolicy, packageInfo);
 
   return resultingPackagePolicy;
+}
+
+async function validateIsNotHostedPolicy(
+  soClient: SavedObjectsClientContract,
+  id: string,
+  force = false,
+  errorMessage?: string
+) {
+  const agentPolicy = await agentPolicyService.get(soClient, id, false);
+
+  if (!agentPolicy) {
+    throw new Error('Agent policy not found');
+  }
+
+  if (agentPolicy.is_managed && !force) {
+    throw new HostedAgentPolicyRestrictionRelatedError(
+      errorMessage ?? `Cannot update integrations of hosted agent policy ${id}`
+    );
+  }
 }
 
 function deepMergeVars(original: any, override: any, keepOriginalValue = false): any {

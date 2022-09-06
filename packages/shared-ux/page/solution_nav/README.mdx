@@ -1,0 +1,17 @@
+---
+id: sharedUX/Page/SolutionNav
+slug: /shared-ux/page/solution-nav
+title: Solution Page Navigation
+description: A customized `EuiSideNav` for pages within Solutions in Kibana.
+tags: ['shared-ux', 'component']
+date: 2022-06-30
+---
+
+This is a customized `EuiSideNav` for pages within Solutions in Kibana.  It also includes a Higher-order Component (HOC) to supply Side Navigation to an existing component.  It is currently used in the Kibana Page Template for solutions that provide side navigation, (e.g. Observability).  It does not currently depend on any Kibana services.
+
+## API
+
+| Export | Description |
+|---|---|
+| `SolutionNav` | The `SolutionNav` component |
+| `withSolutionNav` | The HOC which can provide the navigation to any component aligning with `KibanaPageTemplate` and its props. |

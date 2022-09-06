@@ -6,14 +6,15 @@
  */
 
 import { get } from 'lodash/fp';
-import { Action } from 'redux';
-import { Epic } from 'redux-observable';
-import { from, empty, Observable } from 'rxjs';
+import type { Action } from 'redux';
+import type { Epic } from 'redux-observable';
+import type { Observable } from 'rxjs';
+import { from, empty } from 'rxjs';
 import { filter, mergeMap, switchMap, withLatestFrom, startWith, takeUntil } from 'rxjs/operators';
 
 import { updateNote, addError } from '../../../common/store/app/actions';
-import { NotesById } from '../../../common/store/app/model';
-import { inputsModel } from '../../../common/store/inputs';
+import type { NotesById } from '../../../common/store/app/model';
+import type { inputsModel } from '../../../common/store/inputs';
 
 import {
   addNote,
@@ -25,9 +26,9 @@ import {
 } from './actions';
 import { myEpicTimelineId } from './my_epic_timeline_id';
 import { dispatcherTimelinePersistQueue } from './epic_dispatcher_timeline_persistence_queue';
-import { ActionTimeline, TimelineById } from './types';
+import type { ActionTimeline, TimelineById } from './types';
 import { persistNote } from '../../containers/notes/api';
-import { ResponseNote } from '../../../../common/types/timeline/note';
+import type { ResponseNote } from '../../../../common/types/timeline/note';
 
 export const timelineNoteActionsType = [addNote.type, addNoteToEvent.type];
 

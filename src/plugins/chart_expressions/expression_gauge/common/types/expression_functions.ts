@@ -12,8 +12,8 @@ import {
   Datatable,
   ExpressionFunctionDefinition,
   ExpressionValueRender,
-} from '@kbn/expressions-plugin';
-import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/public';
+} from '@kbn/expressions-plugin/common';
+import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
 import { CustomPaletteState } from '@kbn/charts-plugin/common';
 import {
   EXPRESSION_GAUGE_NAME,
@@ -24,7 +24,6 @@ import {
   GaugeColorModes,
   GaugeCentralMajorModes,
 } from '../constants';
-
 export type GaugeColorMode = $Values<typeof GaugeColorModes>;
 export type GaugeShape = $Values<typeof GaugeShapes>;
 export type GaugeLabelMajorMode = $Values<typeof GaugeLabelMajorModes>;

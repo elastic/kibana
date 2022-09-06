@@ -634,6 +634,258 @@
           ]
         ]
       }
+    ],
+    "kibana_instance_rule_failures": [
+      {
+        "bucket_size": "10 seconds",
+        "timeRange": {
+          "min": 1504027457000,
+          "max": 1504027568000
+        },
+        "metric": {
+          "app": "kibana",
+          "field": "kibana.node_rules.failures",
+          "metricAgg": "max",
+          "label": "Rule Failures",
+          "description": "Total rule failures for the Kibana instance.",
+          "units": "",
+          "format": "0.[00]",
+          "technicalPreview": true,
+          "hasCalculation": false,
+          "isDerivative": true
+        },
+        "indices_found": {
+          "internal": true,
+          "ecs": false
+        },
+        "data": [
+          [
+            1504027460000,
+            null
+          ],
+          [
+            1504027470000,
+            null
+          ],
+          [
+            1504027480000,
+            null
+          ],
+          [
+            1504027490000,
+            null
+          ],
+          [
+            1504027500000,
+            null
+          ],
+          [
+            1504027510000,
+            null
+          ],
+          [
+            1504027520000,
+            null
+          ],
+          [
+            1504027530000,
+            null
+          ],
+          [
+            1504027540000,
+            null
+          ]
+        ]
+      }
+    ],
+    "kibana_instance_rule_executions": [
+      {
+        "bucket_size": "10 seconds",
+        "timeRange": {
+          "min": 1504027457000,
+          "max": 1504027568000
+        },
+        "metric": {
+          "app": "kibana",
+          "field": "kibana.node_rules.executions",
+          "metricAgg": "max",
+          "label": "Rule Executions",
+          "description": "Total rule executions for the Kibana instance.",
+          "units": "",
+          "format": "0.[00]",
+          "technicalPreview": true,
+          "hasCalculation": false,
+          "isDerivative": true
+        },
+        "indices_found": {
+          "internal": true,
+          "ecs": false
+        },
+        "data": [
+          [
+            1504027460000,
+            null
+          ],
+          [
+            1504027470000,
+            null
+          ],
+          [
+            1504027480000,
+            null
+          ],
+          [
+            1504027490000,
+            null
+          ],
+          [
+            1504027500000,
+            null
+          ],
+          [
+            1504027510000,
+            null
+          ],
+          [
+            1504027520000,
+            null
+          ],
+          [
+            1504027530000,
+            null
+          ],
+          [
+            1504027540000,
+            null
+          ]
+        ]
+      }
+    ],
+    "kibana_instance_action_failures": [
+      {
+        "bucket_size": "10 seconds",
+        "timeRange": {
+          "min": 1504027457000,
+          "max": 1504027568000
+        },
+        "metric": {
+          "app": "kibana",
+          "field": "kibana.node_actions.failures",
+          "metricAgg": "max",
+          "label": "Action Failures",
+          "description": "Total action failures for the Kibana instance.",
+          "units": "",
+          "format": "0.[00]",
+          "technicalPreview": true,
+          "hasCalculation": false,
+          "isDerivative": true
+        },
+        "indices_found": {
+          "internal": true,
+          "ecs": false
+        },
+        "data": [
+          [
+            1504027460000,
+            null
+          ],
+          [
+            1504027470000,
+            null
+          ],
+          [
+            1504027480000,
+            null
+          ],
+          [
+            1504027490000,
+            null
+          ],
+          [
+            1504027500000,
+            null
+          ],
+          [
+            1504027510000,
+            null
+          ],
+          [
+            1504027520000,
+            null
+          ],
+          [
+            1504027530000,
+            null
+          ],
+          [
+            1504027540000,
+            null
+          ]
+        ]
+      }
+    ],
+    "kibana_instance_action_executions": [
+      {
+        "bucket_size": "10 seconds",
+        "timeRange": {
+          "min": 1504027457000,
+          "max": 1504027568000
+        },
+        "metric": {
+          "app": "kibana",
+          "field": "kibana.node_actions.executions",
+          "metricAgg": "max",
+          "label": "Action Executions",
+          "description": "Total action executions for the Kibana instance.",
+          "units": "",
+          "format": "0.[00]",
+          "technicalPreview": true,
+          "hasCalculation": false,
+          "isDerivative": true
+        },
+        "indices_found": {
+          "internal": true,
+          "ecs": false
+        },
+        "data": [
+          [
+            1504027460000,
+            null
+          ],
+          [
+            1504027470000,
+            null
+          ],
+          [
+            1504027480000,
+            null
+          ],
+          [
+            1504027490000,
+            null
+          ],
+          [
+            1504027500000,
+            null
+          ],
+          [
+            1504027510000,
+            null
+          ],
+          [
+            1504027520000,
+            null
+          ],
+          [
+            1504027530000,
+            null
+          ],
+          [
+            1504027540000,
+            null
+          ]
+        ]
+      }
     ]
   },
   "kibanaSummary": {
@@ -645,7 +897,8 @@
     "transport_address": "tsullivan.local:5601",
     "uuid": "de3b8f2a-7bb9-4931-9bf3-997ba7824cf9",
     "version": "7.0.0-alpha1",
-    "availability": false,
+    "statusIsStale": true,
+    "lastSeenTimestamp": "2017-08-29T17:25:43.192Z",
     "os_memory_free": 1645989888,
     "uptime": 200102
   }

@@ -59,6 +59,7 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
 
       await navigateToPath(path, false);
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [pageState]
   );
 
@@ -227,6 +228,7 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
         name: i18n.translate('xpack.ml.navMenu.aiopsTabLinkText', {
           defaultMessage: 'AIOps',
         }),
+        disabled: disableLinks,
         items: [
           {
             id: 'explainlogratespikes',

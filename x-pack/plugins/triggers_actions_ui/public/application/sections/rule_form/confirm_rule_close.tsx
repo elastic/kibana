@@ -26,6 +26,7 @@ export const ConfirmRuleClose: React.FC<Props> = ({ onConfirm, onCancel }) => {
       )}
       onCancel={onCancel}
       onConfirm={onConfirm}
+      buttonColor="danger"
       confirmButtonText={i18n.translate(
         'xpack.triggersActionsUI.sections.confirmRuleClose.confirmRuleCloseConfirmButtonText',
         {

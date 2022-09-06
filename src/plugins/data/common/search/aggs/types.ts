@@ -15,6 +15,7 @@ import {
   aggBucketMin,
   aggBucketSum,
   aggCardinality,
+  aggValueCount,
   AggConfigs,
   AggConfigSerialized,
   aggCount,
@@ -41,6 +42,7 @@ import {
   AggParamsBucketSum,
   AggParamsFilteredMetric,
   AggParamsCardinality,
+  AggParamsValueCount,
   AggParamsCumulativeSum,
   AggParamsDateHistogram,
   AggParamsDateRange,
@@ -91,6 +93,7 @@ import {
   aggFilteredMetric,
   aggSinglePercentile,
   aggSinglePercentileRank,
+  AggConfigsOptions,
 } from '.';
 import { AggParamsSampler } from './buckets/sampler';
 import { AggParamsDiversifiedSampler } from './buckets/diversified_sampler';
@@ -100,7 +103,7 @@ import { aggTopMetrics } from './metrics/top_metrics_fn';
 import { AggParamsCount } from './metrics';
 
 export type { IAggConfig, AggConfigSerialized } from './agg_config';
-export type { CreateAggConfigParams, IAggConfigs } from './agg_configs';
+export type { CreateAggConfigParams, IAggConfigs, AggConfigsOptions } from './agg_configs';
 export type { IAggType } from './agg_type';
 export type { AggParam, AggParamOption } from './agg_params';
 export type { IFieldParamType } from './param_types';
@@ -116,7 +119,8 @@ export interface AggsCommonStart {
   calculateAutoTimeExpression: ReturnType<typeof getCalculateAutoTimeExpression>;
   createAggConfigs: (
     indexPattern: DataView,
-    configStates?: CreateAggConfigParams[]
+    configStates?: CreateAggConfigParams[],
+    options?: Partial<AggConfigsOptions>
   ) => InstanceType<typeof AggConfigs>;
   types: ReturnType<AggTypesRegistry['start']>;
 }
@@ -172,6 +176,7 @@ export interface AggParamsMapping {
   [METRIC_TYPES.AVG]: AggParamsAvg;
   [METRIC_TYPES.CARDINALITY]: AggParamsCardinality;
   [METRIC_TYPES.COUNT]: AggParamsCount;
+  [METRIC_TYPES.VALUE_COUNT]: AggParamsValueCount;
   [METRIC_TYPES.GEO_BOUNDS]: AggParamsGeoBounds;
   [METRIC_TYPES.GEO_CENTROID]: AggParamsGeoCentroid;
   [METRIC_TYPES.MAX]: AggParamsMax;
@@ -220,6 +225,7 @@ export interface AggFunctionsMapping {
   aggBucketSum: ReturnType<typeof aggBucketSum>;
   aggFilteredMetric: ReturnType<typeof aggFilteredMetric>;
   aggCardinality: ReturnType<typeof aggCardinality>;
+  aggValueCount: ReturnType<typeof aggValueCount>;
   aggCount: ReturnType<typeof aggCount>;
   aggCumulativeSum: ReturnType<typeof aggCumulativeSum>;
   aggDerivative: ReturnType<typeof aggDerivative>;

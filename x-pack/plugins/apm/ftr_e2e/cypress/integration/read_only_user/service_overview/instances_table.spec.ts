@@ -12,8 +12,18 @@ import { opbeans } from '../../../fixtures/synthtrace/opbeans';
 const start = '2021-10-10T00:00:00.000Z';
 const end = '2021-10-10T00:15:00.000Z';
 
-const serviceOverviewHref = url.format({
+const serviceJavaOverviewHref = url.format({
   pathname: '/app/apm/services/opbeans-java/overview',
+  query: { rangeFrom: start, rangeTo: end },
+});
+
+const serviceRumOverviewHref = url.format({
+  pathname: '/app/apm/services/opbeans-rum/overview',
+  query: { rangeFrom: start, rangeTo: end },
+});
+
+const testServiveHref = url.format({
+  pathname: '/app/apm/services/test-service/overview',
   query: { rangeFrom: start, rangeTo: end },
 });
 
@@ -37,36 +47,53 @@ const apisToIntercept = [
 ];
 
 describe('Instances table', () => {
-  beforeEach(() => {
-    cy.loginAsViewerUser();
+  before(() => {
+    synthtrace.index(
+      opbeans({
+        from: new Date(start).getTime(),
+        to: new Date(end).getTime(),
+      })
+    );
   });
 
-  // describe('when data is not loaded', () => {
-  //   it('shows empty message', () => {
-  //     cy.visit(serviceOverviewHref);
-  //     cy.contains('opbeans-java');
-  //     cy.get('[data-test-subj="serviceInstancesTableContainer"]').contains(
-  //       'No items found'
-  //     );
-  //   });
-  // });
-
-  describe('when data is loaded', () => {
-    before(async () => {
-      await synthtrace.index(
-        opbeans({
-          from: new Date(start).getTime(),
-          to: new Date(end).getTime(),
-        })
+  describe('when there is no data', () => {
+    beforeEach(() => {
+      cy.loginAsViewerUser();
+    });
+    it('shows empty message', () => {
+      cy.visitKibana(testServiveHref);
+      cy.contains('test-service');
+      cy.get('[data-test-subj="serviceInstancesTableContainer"]').contains(
+        'No instances found'
       );
     });
+  });
 
-    after(async () => {
-      await synthtrace.clean();
+  describe('when is RUM service', () => {
+    beforeEach(() => {
+      cy.loginAsViewerUser();
+    });
+
+    it('hides instances table', () => {
+      cy.visitKibana(serviceRumOverviewHref);
+      cy.contains('opbeans-rum');
+      cy.get('[data-test-subj="serviceInstancesTableContainer"]').should(
+        'not.exist'
+      );
+    });
+  });
+
+  describe('when data is loaded', () => {
+    beforeEach(() => {
+      cy.loginAsViewerUser();
+    });
+
+    after(() => {
+      synthtrace.clean();
     });
 
     it('has data in the table', () => {
-      cy.visit(serviceOverviewHref);
+      cy.visitKibana(serviceJavaOverviewHref);
       cy.contains('opbeans-java');
       cy.contains(serviceNodeName);
     });
@@ -75,7 +102,7 @@ describe('Instances table', () => {
         cy.intercept('GET', endpoint).as(name);
       });
 
-      cy.visit(serviceOverviewHref);
+      cy.visitKibana(serviceJavaOverviewHref);
       cy.contains('opbeans-java');
 
       cy.wait('@instancesMainRequest');
@@ -90,12 +117,13 @@ describe('Instances table', () => {
         cy.contains('Service');
       });
     });
+
     it('shows actions available', () => {
       apisToIntercept.map(({ endpoint, name }) => {
         cy.intercept('GET', endpoint).as(name);
       });
 
-      cy.visit(serviceOverviewHref);
+      cy.visitKibana(serviceJavaOverviewHref);
       cy.contains('opbeans-java');
 
       cy.wait('@instancesMainRequest');
@@ -107,8 +135,8 @@ describe('Instances table', () => {
       ).click();
       cy.contains('Pod logs');
       cy.contains('Pod metrics');
-      cy.contains('Container logs');
-      cy.contains('Container metrics');
+      // cy.contains('Container logs');
+      // cy.contains('Container metrics');
       cy.contains('Filter overview by instance');
       cy.contains('Metrics');
     });

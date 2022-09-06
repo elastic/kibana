@@ -12,7 +12,6 @@ import { i18n } from '@kbn/i18n';
 import {
   FieldFormat,
   FieldFormatInstanceType,
-  FieldFormatParams,
   FieldFormatsContentType,
   IFieldFormat,
   SerializedFieldFormat,
@@ -129,13 +128,13 @@ export function getAggsFormats(getFieldFormat: GetFieldFormat): FieldFormatInsta
 
       convert = (val: string, type: FieldFormatsContentType) => {
         const params = this._params;
-        const format = getFieldFormat({ id: params.id, params });
+        const format = getFieldFormat({ id: `${params.id}`, params });
 
         if (val === '__other__') {
-          return params.otherBucketLabel;
+          return `${params.otherBucketLabel}`;
         }
         if (val === '__missing__') {
-          return params.missingBucketLabel;
+          return `${params.missingBucketLabel}`;
         }
 
         return format.convert(val, type);
@@ -146,7 +145,7 @@ export function getAggsFormats(getFieldFormat: GetFieldFormat): FieldFormatInsta
       static id = 'multi_terms';
       static hidden = true;
 
-      private formatCache: Map<SerializedFieldFormat<FieldFormatParams>, FieldFormat> = new Map();
+      private formatCache: Map<SerializedFieldFormat, FieldFormat> = new Map();
 
       convert = (val: unknown, type: FieldFormatsContentType) => {
         const params = this._params;
@@ -160,10 +159,10 @@ export function getAggsFormats(getFieldFormat: GetFieldFormat): FieldFormatInsta
         });
 
         if (String(val) === '__other__') {
-          return params.otherBucketLabel;
+          return `${params.otherBucketLabel}`;
         }
 
-        const joinTemplate = params.separator ?? ' › ';
+        const joinTemplate = `${params.separator ?? ' › '}`;
 
         return (val as MultiFieldKey).keys
           .map((valPart, i) => formats[i].convert(valPart, type))

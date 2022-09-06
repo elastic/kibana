@@ -15,7 +15,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import {
   SavedObject,
-  SavedObjectsSerializer,
+  ISavedObjectsSerializer,
   SavedObjectsRawDoc,
   ISavedObjectsRepository,
   SavedObjectsUpdateResponse,
@@ -40,7 +40,7 @@ export interface StoreOpts {
   taskManagerId: string;
   definitions: TaskTypeDictionary;
   savedObjectsRepository: ISavedObjectsRepository;
-  serializer: SavedObjectsSerializer;
+  serializer: ISavedObjectsSerializer;
 }
 
 export interface SearchOpts {
@@ -54,6 +54,7 @@ export interface SearchOpts {
 export interface AggregationOpts {
   aggs: Record<string, estypes.AggregationsAggregationContainer>;
   query?: estypes.QueryDslQueryContainer;
+  runtime_mappings?: estypes.MappingRuntimeFields;
   size?: number;
 }
 
@@ -92,7 +93,7 @@ export class TaskStore {
   private esClient: ElasticsearchClient;
   private definitions: TaskTypeDictionary;
   private savedObjectsRepository: ISavedObjectsRepository;
-  private serializer: SavedObjectsSerializer;
+  private serializer: ISavedObjectsSerializer;
 
   /**
    * Constructs a new TaskStore.
@@ -144,6 +145,35 @@ export class TaskStore {
     }
 
     return savedObjectToConcreteTaskInstance(savedObject);
+  }
+
+  /**
+   * Bulk schedules a task.
+   *
+   * @param tasks - The tasks being scheduled.
+   */
+  public async bulkSchedule(taskInstances: TaskInstance[]): Promise<ConcreteTaskInstance[]> {
+    const objects = taskInstances.map((taskInstance) => {
+      this.definitions.ensureHas(taskInstance.taskType);
+      return {
+        type: 'task',
+        attributes: taskInstanceToAttributes(taskInstance),
+        id: taskInstance.id,
+      };
+    });
+
+    let savedObjects;
+    try {
+      savedObjects = await this.savedObjectsRepository.bulkCreate<SerializedConcreteTaskInstance>(
+        objects,
+        { refresh: false }
+      );
+    } catch (e) {
+      this.errors$.next(e);
+      throw e;
+    }
+
+    return savedObjects.saved_objects.map((so) => savedObjectToConcreteTaskInstance(so));
   }
 
   /**
@@ -332,6 +362,8 @@ export class TaskStore {
   public async aggregate<TSearchRequest extends AggregationOpts>({
     aggs,
     query,
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    runtime_mappings,
     size = 0,
   }: TSearchRequest): Promise<estypes.SearchResponse<ConcreteTaskInstance>> {
     const body = await this.esClient.search<
@@ -344,6 +376,7 @@ export class TaskStore {
       body: ensureAggregationOnlyReturnsTaskObjects({
         query,
         aggs,
+        runtime_mappings,
         size,
       }),
     });

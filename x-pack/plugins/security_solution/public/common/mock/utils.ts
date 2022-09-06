@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AnyAction, Reducer } from 'redux';
+import type { AnyAction, Reducer } from 'redux';
 import reduceReducers from 'reduce-reducers';
 
 import { tGridReducer } from '@kbn/timelines-plugin/public';
@@ -15,10 +15,10 @@ import { networkReducer } from '../../network/store';
 import { usersReducer } from '../../users/store';
 import { timelineReducer } from '../../timelines/store/timeline/reducer';
 import { managementReducer } from '../../management/store/reducer';
-import { ManagementPluginReducer } from '../../management';
-import { SubPluginsInitReducer } from '../store';
+import type { ManagementPluginReducer } from '../../management';
+import type { SubPluginsInitReducer } from '../store';
 import { mockGlobalState } from './global_state';
-import { TimelineState } from '../../timelines/store/timeline/types';
+import type { TimelineState } from '../../timelines/store/timeline/types';
 import { defaultHeaders } from '../../timelines/components/timeline/body/column_headers/default_headers';
 
 type GlobalThis = typeof globalThis;

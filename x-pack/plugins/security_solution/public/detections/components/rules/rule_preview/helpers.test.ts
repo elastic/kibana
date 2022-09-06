@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { DataSourceType } from '../../../pages/detection_engine/rules/types';
 import {
   isNoisy,
   getTimeframeOptions,
@@ -70,12 +71,15 @@ describe('query_preview/helpers', () => {
         isQueryBarValid: true,
         isThreatQueryBarValid: true,
         index: [],
+        dataViewId: undefined,
+        dataSourceType: DataSourceType.IndexPatterns,
         threatIndex: ['threat-*'],
         threatMapping: [
           { entries: [{ field: 'test-field', value: 'test-value', type: 'mapping' }] },
         ],
         machineLearningJobId: ['test-ml-job-id'],
         queryBar: { filters: [], query: { query: '', language: 'testlang' }, saved_id: null },
+        newTermsFields: [],
       });
       expect(isDisabled).toEqual(true);
     });
@@ -86,12 +90,15 @@ describe('query_preview/helpers', () => {
         isQueryBarValid: false,
         isThreatQueryBarValid: true,
         index: ['test-*'],
+        dataViewId: undefined,
+        dataSourceType: DataSourceType.IndexPatterns,
         threatIndex: ['threat-*'],
         threatMapping: [
           { entries: [{ field: 'test-field', value: 'test-value', type: 'mapping' }] },
         ],
         machineLearningJobId: ['test-ml-job-id'],
         queryBar: { filters: [], query: { query: '', language: 'testlang' }, saved_id: null },
+        newTermsFields: [],
       });
       expect(isDisabled).toEqual(true);
     });
@@ -102,12 +109,15 @@ describe('query_preview/helpers', () => {
         isQueryBarValid: true,
         isThreatQueryBarValid: false,
         index: ['test-*'],
+        dataViewId: undefined,
+        dataSourceType: DataSourceType.IndexPatterns,
         threatIndex: ['threat-*'],
         threatMapping: [
           { entries: [{ field: 'test-field', value: 'test-value', type: 'mapping' }] },
         ],
         machineLearningJobId: ['test-ml-job-id'],
         queryBar: { filters: [], query: { query: '', language: 'testlang' }, saved_id: null },
+        newTermsFields: [],
       });
       expect(isDisabled).toEqual(true);
     });
@@ -118,12 +128,15 @@ describe('query_preview/helpers', () => {
         isQueryBarValid: true,
         isThreatQueryBarValid: true,
         index: ['test-*'],
+        dataViewId: undefined,
+        dataSourceType: DataSourceType.IndexPatterns,
         threatIndex: [],
         threatMapping: [
           { entries: [{ field: 'test-field', value: 'test-value', type: 'mapping' }] },
         ],
         machineLearningJobId: ['test-ml-job-id'],
         queryBar: { filters: [], query: { query: '', language: 'testlang' }, saved_id: null },
+        newTermsFields: [],
       });
       expect(isDisabled).toEqual(true);
     });
@@ -134,10 +147,13 @@ describe('query_preview/helpers', () => {
         isQueryBarValid: true,
         isThreatQueryBarValid: true,
         index: ['test-*'],
+        dataViewId: undefined,
+        dataSourceType: DataSourceType.IndexPatterns,
         threatIndex: ['threat-*'],
         threatMapping: [],
         machineLearningJobId: ['test-ml-job-id'],
         queryBar: { filters: [], query: { query: '', language: 'testlang' }, saved_id: null },
+        newTermsFields: [],
       });
       expect(isDisabled).toEqual(true);
     });
@@ -148,10 +164,13 @@ describe('query_preview/helpers', () => {
         isQueryBarValid: true,
         isThreatQueryBarValid: true,
         index: ['test-*'],
+        dataViewId: undefined,
+        dataSourceType: DataSourceType.IndexPatterns,
         threatIndex: ['threat-*'],
         threatMapping: [],
         machineLearningJobId: [],
         queryBar: { filters: [], query: { query: '', language: 'testlang' }, saved_id: null },
+        newTermsFields: [],
       });
       expect(isDisabled).toEqual(true);
     });
@@ -162,10 +181,30 @@ describe('query_preview/helpers', () => {
         isQueryBarValid: true,
         isThreatQueryBarValid: true,
         index: ['test-*'],
+        dataViewId: undefined,
+        dataSourceType: DataSourceType.IndexPatterns,
         threatIndex: ['threat-*'],
         threatMapping: [],
         machineLearningJobId: [],
         queryBar: { filters: [], query: { query: '', language: 'testlang' }, saved_id: null },
+        newTermsFields: [],
+      });
+      expect(isDisabled).toEqual(true);
+    });
+
+    test('disabled when new_terms rule with no fields', () => {
+      const isDisabled = getIsRulePreviewDisabled({
+        ruleType: 'new_terms',
+        isQueryBarValid: true,
+        isThreatQueryBarValid: true,
+        index: ['test-*'],
+        dataViewId: undefined,
+        dataSourceType: DataSourceType.IndexPatterns,
+        threatIndex: [],
+        threatMapping: [],
+        machineLearningJobId: [],
+        queryBar: { filters: [], query: { query: '', language: 'testlang' }, saved_id: null },
+        newTermsFields: [],
       });
       expect(isDisabled).toEqual(true);
     });
@@ -176,12 +215,15 @@ describe('query_preview/helpers', () => {
         isQueryBarValid: true,
         isThreatQueryBarValid: true,
         index: ['test-*'],
+        dataViewId: undefined,
+        dataSourceType: DataSourceType.IndexPatterns,
         threatIndex: ['threat-*'],
         threatMapping: [
           { entries: [{ field: 'test-field', value: 'test-value', type: 'mapping' }] },
         ],
         machineLearningJobId: ['test-ml-job-id'],
         queryBar: { filters: [], query: { query: '', language: 'testlang' }, saved_id: null },
+        newTermsFields: [],
       });
       expect(isDisabled).toEqual(false);
     });
@@ -192,6 +234,8 @@ describe('query_preview/helpers', () => {
         isQueryBarValid: true,
         isThreatQueryBarValid: true,
         index: ['test-*'],
+        dataViewId: undefined,
+        dataSourceType: DataSourceType.IndexPatterns,
         threatIndex: ['threat-*'],
         threatMapping: [],
         machineLearningJobId: [],
@@ -200,6 +244,7 @@ describe('query_preview/helpers', () => {
           query: { query: 'any where true', language: 'testlang' },
           saved_id: null,
         },
+        newTermsFields: [],
       });
       expect(isDisabled).toEqual(false);
     });

@@ -10,8 +10,8 @@ import React from 'react';
 
 import { timelineActions } from '../../../../../store/timeline';
 import { TestProviders } from '../../../../../../common/mock';
-import { ColumnHeaderType } from '../../../../../store/timeline/model';
-import { Sort } from '../../sort';
+import type { ColumnHeaderType } from '../../../../../store/timeline/model';
+import type { Sort } from '../../sort';
 import { CloseButton } from '../actions';
 import { defaultHeaders } from '../default_headers';
 

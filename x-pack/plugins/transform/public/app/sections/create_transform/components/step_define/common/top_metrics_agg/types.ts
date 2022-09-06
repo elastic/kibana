@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type {
   PivotAggsConfigWithExtra,
   SortDirection,
@@ -18,7 +19,15 @@ export interface TopMetricsAggConfig {
     order?: SortDirection;
     mode?: SortMode;
     numericType?: SortNumericFieldType;
+    [unsupported: string]: unknown;
   };
 }
 
-export type PivotAggsConfigTopMetrics = PivotAggsConfigWithExtra<TopMetricsAggConfig>;
+export type PivotAggsConfigTopMetrics = PivotAggsConfigWithExtra<
+  TopMetricsAggConfig,
+  {
+    metrics?: estypes.AggregationsTopMetricsValue | estypes.AggregationsTopMetricsValue[];
+    size?: estypes.integer;
+    sort?: estypes.SortCombinations;
+  }
+>;

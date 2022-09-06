@@ -20,7 +20,7 @@ export const stubEndpointAlertResponse = () => {
     },
     hits: {
       total: {
-        value: 47,
+        value: 1,
         relation: 'eq',
       },
       max_score: 0,
@@ -283,6 +283,11 @@ export const stubEndpointAlertResponse = () => {
           },
         },
       ],
+    },
+    aggregations: {
+      endpoint_alert_count: {
+        value: 1,
+      },
     },
   };
 };

@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { Reducer, combineReducers } from 'redux';
+import type { Reducer } from 'redux';
+import { combineReducers } from 'redux';
 import { animatePanning } from './camera/methods';
 import { layout } from './selectors';
 import { cameraReducer } from './camera/reducer';
 import { dataReducer } from './data/reducer';
-import { ResolverAction } from './actions';
-import { ResolverState, ResolverUIState } from '../types';
+import type { ResolverAction } from './actions';
+import type { ResolverState, ResolverUIState } from '../types';
 import { panAnimationDuration } from './camera/scaling_constants';
 import { nodePosition } from '../models/indexed_process_tree/isometric_taxi_layout';
 

@@ -109,11 +109,13 @@ describe('modifyFilterKueryNode', () => {
     expect(astFilter.arguments[2].arguments[0]).toEqual({
       type: 'literal',
       value: 'alert.attributes.params.severity',
+      isQuoted: false,
     });
 
     expect(astFilter.arguments[2].arguments[2]).toEqual({
       type: 'literal',
       value: 'medium',
+      isQuoted: false,
     });
 
     modifyFilterKueryNode({ astFilter });
@@ -121,11 +123,13 @@ describe('modifyFilterKueryNode', () => {
     expect(astFilter.arguments[2].arguments[0]).toEqual({
       type: 'literal',
       value: 'alert.attributes.mapped_params.severity',
+      isQuoted: false,
     });
 
     expect(astFilter.arguments[2].arguments[2]).toEqual({
       type: 'literal',
       value: '40-medium',
+      isQuoted: false,
     });
   });
 
@@ -140,11 +144,13 @@ describe('modifyFilterKueryNode', () => {
     expect(astFilter.arguments[2].arguments[0]).toEqual({
       type: 'literal',
       value: 'alert.attributes.params.threat.tactic.name',
+      isQuoted: false,
     });
 
     expect(astFilter.arguments[2].arguments[1]).toEqual({
       type: 'literal',
       value: 'Exfiltration',
+      isQuoted: false,
     });
   });
 });

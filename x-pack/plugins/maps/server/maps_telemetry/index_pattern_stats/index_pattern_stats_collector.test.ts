@@ -7,7 +7,7 @@
 
 import { asyncForEach } from '@kbn/std';
 // @ts-ignore
-import mapSavedObjects from '../test_resources/sample_map_saved_objects.json';
+import mapSavedObjects from '../../../common/telemetry/test_resources/sample_map_saved_objects.json';
 import { DataViewsService } from '@kbn/data-views-plugin/common';
 import { IndexPatternStatsCollector } from './index_pattern_stats_collector';
 

@@ -6,9 +6,17 @@
  */
 
 import React from 'react';
-import { ConnectorEditFlyout } from '../application/sections/action_connector_form';
-import type { ConnectorEditFlyoutProps } from '../types';
+import { ConnectorProvider } from '../application/context/connector_context';
+import { EditConnectorFlyout } from '../application/sections/action_connector_form';
+import { EditConnectorFlyoutProps } from '../application/sections/action_connector_form/edit_connector_flyout';
+import { ConnectorServices } from '../types';
 
-export const getEditConnectorFlyoutLazy = (props: ConnectorEditFlyoutProps) => {
-  return <ConnectorEditFlyout {...props} />;
+export const getEditConnectorFlyoutLazy = (
+  props: EditConnectorFlyoutProps & { connectorServices: ConnectorServices }
+) => {
+  return (
+    <ConnectorProvider value={{ services: props.connectorServices }}>
+      <EditConnectorFlyout {...props} />
+    </ConnectorProvider>
+  );
 };

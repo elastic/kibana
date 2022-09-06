@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { UMRestApiRouteFactory } from '../../legacy_uptime/routes/types';
+import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes/types';
 import { API_URLS } from '../../../common/constants';
 import { UptimeServerSetup } from '../../legacy_uptime/lib/adapters';
 
-export const installIndexTemplatesRoute: UMRestApiRouteFactory = () => ({
+export const installIndexTemplatesRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'GET',
   path: API_URLS.INDEX_TEMPLATES,
   validate: {},

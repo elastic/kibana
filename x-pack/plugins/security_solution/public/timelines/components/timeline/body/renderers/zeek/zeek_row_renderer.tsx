@@ -8,7 +8,8 @@
 import { get } from 'lodash/fp';
 import React from 'react';
 
-import { RowRendererId, RowRenderer } from '../../../../../../../common/types/timeline';
+import type { RowRenderer } from '../../../../../../../common/types/timeline';
+import { RowRendererId } from '../../../../../../../common/types/timeline';
 
 import { RowRendererContainer } from '../row_renderer';
 import { ZeekDetails } from './zeek_details';

@@ -1,9 +1,0 @@
-{
-  "prefix": "sharedUX",
-  "paths": {
-    "sharedUX": "."
-  },
-  "translations": [
-    "translations/ja-JP.json"
-  ]
-}

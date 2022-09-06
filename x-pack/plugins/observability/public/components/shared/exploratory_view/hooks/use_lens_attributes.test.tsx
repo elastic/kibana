@@ -20,6 +20,9 @@ import * as theme from '../../../../hooks/use_theme';
 import { dataTypes, obsvReportConfigMap, reportTypesList } from '../obsv_exploratory_view';
 import { ExploratoryViewContextProvider } from '../contexts/exploratory_view_config';
 import { themeServiceMock } from '@kbn/core/public/mocks';
+import * as lensHook from './use_lens_formula_helper';
+import { lensPluginMock } from '@kbn/lens-plugin/public/mocks';
+import { FormulaPublicApi } from '@kbn/lens-plugin/public';
 
 const mockSingleSeries = [
   {
@@ -51,6 +54,16 @@ describe('useExpViewTimeRange', function () {
       euiColorVis1: '#111111',
     },
   });
+
+  let formulaHelper: FormulaPublicApi;
+
+  beforeAll(async () => {
+    const lensPluginMockStart = lensPluginMock.createStartContract();
+    formulaHelper = (await lensPluginMockStart.stateHelperApi()).formula;
+
+    jest.spyOn(lensHook, 'useLensFormulaHelper').mockReturnValue(formulaHelper);
+  });
+
   const lensAttributesSpy = jest.spyOn(lensAttributes, 'LensAttributes');
 
   function Wrapper({ children }: { children: JSX.Element }) {
@@ -82,7 +95,8 @@ describe('useExpViewTimeRange', function () {
           seriesConfig: expect.objectContaining({ reportType: ReportTypes.KPI }),
         }),
       ]),
-      'kpi-over-time'
+      'kpi-over-time',
+      formulaHelper
     );
   });
 });

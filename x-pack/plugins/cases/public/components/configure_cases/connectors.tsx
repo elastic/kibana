@@ -43,7 +43,7 @@ export interface Props {
   isLoading: boolean;
   mappings: CaseConnectorMapping[];
   onChangeConnector: (id: string) => void;
-  selectedConnector: { id: string; type: string };
+  selectedConnector: { id: string; type: ConnectorTypes };
   updateConnectorDisabled: boolean;
 }
 const ConnectorsComponent: React.FC<Props> = ({
@@ -129,6 +129,7 @@ const ConnectorsComponent: React.FC<Props> = ({
               <EuiFlexItem grow={false}>
                 <Mapping
                   actionTypeName={actionTypeName}
+                  connectorType={selectedConnector.type}
                   isLoading={isLoading}
                   mappings={mappings}
                 />

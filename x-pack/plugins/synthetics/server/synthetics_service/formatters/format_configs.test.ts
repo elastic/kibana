@@ -269,6 +269,28 @@ describe('formatHeartbeatRequest', () => {
     });
   });
 
+  it('sets project fields as null when project id is empty', () => {
+    const monitorId = 'test-monitor-id';
+    const monitor = { ...testBrowserConfig, project_id: '' } as SyntheticsMonitor;
+    const actual = formatHeartbeatRequest({
+      monitor,
+      monitorId,
+    });
+
+    expect(actual).toEqual({
+      ...monitor,
+      id: monitorId,
+      fields: {
+        config_id: monitorId,
+        'monitor.project.name': undefined,
+        'monitor.project.id': undefined,
+        run_once: undefined,
+        test_run_id: undefined,
+      },
+      fields_under_root: true,
+    });
+  });
+
   it('supports run once', () => {
     const monitorId = 'test-monitor-id';
     const actual = formatHeartbeatRequest({

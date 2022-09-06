@@ -5,19 +5,15 @@
  * 2.0.
  */
 
-import { ServiceLocationsState } from './service_locations';
 import { apiService } from '../../../../utils/api_service';
 import {
   EncryptedSyntheticsMonitor,
-  FetchMonitorManagementListQueryArgs,
-  MonitorManagementListResult,
-  MonitorManagementListResultCodec,
   ServiceLocationErrors,
-  ServiceLocationsApiResponseCodec,
   SyntheticsMonitor,
   SyntheticsMonitorWithId,
 } from '../../../../../common/runtime_types';
 import { API_URLS } from '../../../../../common/constants';
+import { DecryptedSyntheticsMonitorSavedObject } from '../../../../../common/types';
 
 export const createMonitorAPI = async ({
   monitor,
@@ -37,21 +33,10 @@ export const updateMonitorAPI = async ({
   return await apiService.put(`${API_URLS.SYNTHETICS_MONITORS}/${id}`, monitor);
 };
 
-export const fetchServiceLocations = async (): Promise<ServiceLocationsState> => {
-  const { throttling, locations } = await apiService.get(
-    API_URLS.SERVICE_LOCATIONS,
-    undefined,
-    ServiceLocationsApiResponseCodec
-  );
-  return { throttling, locations };
-};
-
-export const fetchMonitorManagementList = async (
-  params: FetchMonitorManagementListQueryArgs
-): Promise<MonitorManagementListResult> => {
-  return await apiService.get(
-    API_URLS.SYNTHETICS_MONITORS,
-    params,
-    MonitorManagementListResultCodec
-  );
+export const getMonitorAPI = async ({
+  id,
+}: {
+  id: string;
+}): Promise<DecryptedSyntheticsMonitorSavedObject> => {
+  return await apiService.get(`${API_URLS.SYNTHETICS_MONITORS}/${id}`);
 };

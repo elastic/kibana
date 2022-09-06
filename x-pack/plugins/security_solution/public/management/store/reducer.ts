@@ -14,9 +14,9 @@ import {
   MANAGEMENT_STORE_ENDPOINTS_NAMESPACE,
   MANAGEMENT_STORE_POLICY_DETAILS_NAMESPACE,
 } from '../common/constants';
-import { ImmutableCombineReducers } from '../../common/store';
-import { Immutable } from '../../../common/endpoint/types';
-import { ManagementState } from '../types';
+import type { ImmutableCombineReducers } from '../../common/store';
+import type { Immutable } from '../../../common/endpoint/types';
+import type { ManagementState } from '../types';
 import { endpointListReducer } from '../pages/endpoint_hosts/store/reducer';
 import { initialEndpointPageState } from '../pages/endpoint_hosts/store/builders';
 

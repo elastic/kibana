@@ -10,7 +10,8 @@
       "outDir": "target/types",
       "types": [
         "cypress",
-        "node"
+        "node",
+        "cypress-real-events"
       ],
       "resolveJsonModule": true,
       "target": "ES2019",

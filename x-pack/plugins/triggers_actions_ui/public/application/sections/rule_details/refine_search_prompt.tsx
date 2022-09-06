@@ -15,7 +15,7 @@ interface RefineSearchFooterProps {
   backToTopAnchor: string;
 }
 
-const DEFAULT_VISIBLE_THRESHOLD = 500;
+const DEFAULT_VISIBLE_THRESHOLD = 1000;
 
 export const RefineSearchPrompt = (props: RefineSearchFooterProps) => {
   const {
@@ -43,8 +43,8 @@ export const RefineSearchPrompt = (props: RefineSearchFooterProps) => {
     <EuiText style={textStyles} textAlign="center" size="s">
       <FormattedMessage
         id="xpack.triggersActionsUI.sections.ruleDetails.refineSearchPrompt.prompt"
-        defaultMessage="These are the first {documentSize} matching your search, refine your search to see others."
-        values={{ documentSize }}
+        defaultMessage="These are the first {visibleDocumentSize} documents matching your search, refine your search to see others."
+        values={{ visibleDocumentSize }}
       />
       &nbsp;
       <EuiLink href={`#${backToTopAnchor}`}>

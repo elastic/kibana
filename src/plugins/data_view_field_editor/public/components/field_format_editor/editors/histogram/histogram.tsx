@@ -67,7 +67,7 @@ export class HistogramFormatEditor extends DefaultFormatEditor<HistogramFormatEd
             options={numberOptions}
             value={formatParams.id || 'number'}
             onChange={(e) => {
-              this.onChange({ id: e.target.value });
+              this.onChange({ id: e.target.value as HistogramFormatEditorParams['id'] });
             }}
           />
         </EuiFormRow>

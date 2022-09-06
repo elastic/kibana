@@ -6,7 +6,7 @@
  */
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
+import { DETECTION_ENGINE_RULES_URL_FIND } from '../../../../../common/constants';
 import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
 import { requestContextMock, requestMock, serverMock } from '../__mocks__';
 import {
@@ -14,7 +14,6 @@ import {
   getFindRequest,
   getFindResultWithSingleHit,
   getEmptySavedObjectsResponse,
-  getRuleExecutionSummaries,
 } from '../__mocks__/request_responses';
 import { findRulesRoute } from './find_rules_route';
 
@@ -31,9 +30,6 @@ describe('find_rules', () => {
     clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
     clients.rulesClient.get.mockResolvedValue(getRuleMock(getQueryRuleParams()));
     clients.savedObjectsClient.find.mockResolvedValue(getEmptySavedObjectsResponse());
-    clients.ruleExecutionLog.getExecutionSummariesBulk.mockResolvedValue(
-      getRuleExecutionSummaries()
-    );
 
     findRulesRoute(server.router, logger);
   });
@@ -67,7 +63,7 @@ describe('find_rules', () => {
     test('allows optional query params', async () => {
       const request = requestMock.create({
         method: 'get',
-        path: `${DETECTION_ENGINE_RULES_URL}/_find`,
+        path: DETECTION_ENGINE_RULES_URL_FIND,
         query: {
           page: 2,
           per_page: 20,
@@ -83,7 +79,7 @@ describe('find_rules', () => {
     test('rejects unknown query params', async () => {
       const request = requestMock.create({
         method: 'get',
-        path: `${DETECTION_ENGINE_RULES_URL}/_find`,
+        path: DETECTION_ENGINE_RULES_URL_FIND,
         query: {
           invalid_value: 'hi mom',
         },

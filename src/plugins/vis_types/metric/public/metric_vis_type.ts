@@ -21,6 +21,7 @@ export const createMetricVisTypeDefinition = (): VisTypeDefinition<VisParams> =>
   description: i18n.translate('visTypeMetric.metricDescription', {
     defaultMessage: 'Show a calculation as a single number.',
   }),
+  fetchDatatable: true,
   toExpressionAst,
   visConfig: {
     defaults: {

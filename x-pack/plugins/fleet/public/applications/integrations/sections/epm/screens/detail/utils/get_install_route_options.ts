@@ -7,8 +7,21 @@
 import type { CreatePackagePolicyRouteState } from '../../../../../types';
 import { PLUGIN_ID, INTEGRATIONS_PLUGIN_ID, pagePathGetters } from '../../../../../constants';
 
-// TODO: (in following PR) decide better way to infer this list of "special" integrations
-const SPECIAL_PACKAGES = ['apm', 'endpoint', 'synthetics'];
+// List of packages that shouldn't use the multi-step onboarding UI because they use custom policy interfaces
+// or are otherwise not accounted for by verbiage and elements throughout the multi-step UI
+const EXCLUDED_PACKAGES = [
+  'apm',
+  'cloud_security_posture',
+  'dga',
+  'endpoint',
+  'fleet_server',
+  'kubernetes',
+  'osquery_manager',
+  'problemchild',
+  'security_detection_engine',
+  'synthetics',
+];
+
 interface GetInstallPkgRouteOptionsParams {
   currentPath: string;
   integration: string | null;
@@ -20,7 +33,7 @@ interface GetInstallPkgRouteOptionsParams {
 }
 
 const isPackageExemptFromStepsLayout = (pkgkey: string) =>
-  SPECIAL_PACKAGES.some((pkgname) => pkgkey.startsWith(pkgname));
+  EXCLUDED_PACKAGES.some((pkgname) => pkgkey.startsWith(pkgname));
 /*
  * When the install package button is pressed, this fn decides which page to navigate to
  * by generating the options to be passed to `services.application.navigateToApp`.

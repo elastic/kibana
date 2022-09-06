@@ -95,11 +95,10 @@ export const ControlEditor = ({
   getRelevantDataViewId,
   setLastUsedDataViewId,
 }: EditControlProps) => {
-  const { dataViews } = pluginServices.getHooks();
-  const { getIdsWithTitle, getDefaultId, get } = dataViews.useService();
-
-  const { controls } = pluginServices.getServices();
-  const { getControlTypes, getControlFactory } = controls;
+  const {
+    dataViews: { getIdsWithTitle, getDefaultId, get },
+    controls: { getControlTypes, getControlFactory },
+  } = pluginServices.getServices();
   const [state, setState] = useState<ControlEditorState>({
     dataViewListItems: [],
   });
@@ -222,7 +221,7 @@ export const ControlEditor = ({
               }}
               trigger={{
                 label:
-                  state.selectedDataView?.title ??
+                  state.selectedDataView?.getName() ??
                   ControlGroupStrings.manageControl.getSelectDataViewMessage(),
               }}
             />

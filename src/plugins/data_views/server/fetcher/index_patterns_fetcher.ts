@@ -25,6 +25,10 @@ export interface FieldDescriptor {
   esTypes: string[];
   subType?: FieldSubType;
   metadata_field?: boolean;
+  fixedInterval?: string[];
+  timeZone?: string[];
+  timeSeriesMetric?: 'histogram' | 'summary' | 'counter' | 'gauge';
+  timeSeriesDimension?: boolean;
 }
 
 interface FieldSubType {
@@ -57,7 +61,7 @@ export class IndexPatternsFetcher {
     type?: string;
     rollupIndex?: string;
     filter?: QueryDslQueryContainer;
-  }): Promise<FieldDescriptor[]> {
+  }): Promise<{ fields: FieldDescriptor[]; indices: string[] }> {
     const { pattern, metaFields = [], fieldCapsOptions, type, rollupIndex, filter } = options;
     const patternList = Array.isArray(pattern) ? pattern : pattern.split(',');
     const allowNoIndices = fieldCapsOptions
@@ -79,22 +83,31 @@ export class IndexPatternsFetcher {
     });
     if (type === 'rollup' && rollupIndex) {
       const rollupFields: FieldDescriptor[] = [];
-      const rollupIndexCapabilities = getCapabilitiesForRollupIndices(
+      const capabilityCheck = getCapabilitiesForRollupIndices(
         await this.elasticsearchClient.rollup.getRollupIndexCaps({
           index: rollupIndex,
         })
-      )[rollupIndex].aggs;
-      const fieldCapsResponseObj = keyBy(fieldCapsResponse, 'name');
+      )[rollupIndex];
+
+      if (capabilityCheck.error) {
+        throw new Error(capabilityCheck.error);
+      }
+
+      const rollupIndexCapabilities = capabilityCheck.aggs;
+      const fieldCapsResponseObj = keyBy(fieldCapsResponse.fields, 'name');
       // Keep meta fields
       metaFields!.forEach(
         (field: string) =>
           fieldCapsResponseObj[field] && rollupFields.push(fieldCapsResponseObj[field])
       );
-      return mergeCapabilitiesWithFields(
-        rollupIndexCapabilities,
-        fieldCapsResponseObj,
-        rollupFields
-      );
+      return {
+        fields: mergeCapabilitiesWithFields(
+          rollupIndexCapabilities!,
+          fieldCapsResponseObj,
+          rollupFields
+        ),
+        indices: fieldCapsResponse.indices,
+      };
     }
     return fieldCapsResponse;
   }

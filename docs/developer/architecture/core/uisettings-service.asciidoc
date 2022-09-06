@@ -26,6 +26,16 @@ Configuration through the Advanced Settings UI is restricted to users authorised
 === Configuration with UI settings overrides
 experimental[] When a setting is configured as an override in kibana.yml, it will override any other value stored in the config saved object. If an override is misconfigured, it will fail config validation and prevent Kibana from starting up. The override applies to Kibana as a whole for all spaces and users and the option will be disabled in the Advanced Settings page. We refer to these as "global" overrides.
 
+Use the top-level `uiSettings` key for this, for example:
+
+[source,yaml]
+----
+# Display times in UTC
+uiSettings:
+  overrides:
+    "dateFormat:tz": "UTC"
+----
+
 [[client-side-usage]]
 === Client side usage
 On the client, the `uiSettings` service is exposed directly from `core` and the {kib-repo}blob/{branch}/docs/development/core/public/kibana-plugin-core-public.iuisettingsclient.md[client] provides plugins access to the `config` entries stored in {es}.
@@ -72,7 +82,7 @@ The following example shows how to {kib-repo}blob/{branch}/docs/development/core
 [source,typescript]
 ----
 import { schema } from '@kbn/config-schema';
-import type { CoreSetup,Plugin } from 'kibana/server';
+import type { CoreSetup,Plugin } from '@kbn/core/server';
 
 export class MyPlugin implements Plugin {
   public setup(core: CoreSetup) {

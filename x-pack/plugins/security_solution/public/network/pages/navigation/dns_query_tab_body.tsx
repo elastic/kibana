@@ -12,13 +12,13 @@ import { NetworkDnsTable } from '../../components/network_dns_table';
 import { useNetworkDns, ID } from '../../containers/network_dns';
 import { manageQuery } from '../../../common/components/page/manage_query';
 
-import { NetworkComponentQueryProps } from './types';
+import type { NetworkComponentQueryProps } from './types';
 
-import {
+import type {
   MatrixHistogramOption,
   MatrixHistogramConfigs,
 } from '../../../common/components/matrix_histogram/types';
-import * as i18n from '../translations';
+import * as i18n from './translations';
 import { MatrixHistogram } from '../../../common/components/matrix_histogram';
 import { MatrixHistogramType } from '../../../../common/search_strategy/security_solution';
 import { networkSelectors } from '../../store';
@@ -51,7 +51,6 @@ export const histogramConfigs: Omit<MatrixHistogramConfigs, 'title'> = {
 
 const DnsQueryTabBodyComponent: React.FC<NetworkComponentQueryProps> = ({
   deleteQuery,
-  docValueFields,
   endDate,
   filterQuery,
   indexNames,
@@ -72,8 +71,8 @@ const DnsQueryTabBodyComponent: React.FC<NetworkComponentQueryProps> = ({
       }
     };
   }, [deleteQuery]);
-
-  const { toggleStatus } = useQueryToggle(ID);
+  const queryId = `${ID}-${type}`;
+  const { toggleStatus } = useQueryToggle(queryId);
   const [querySkip, setQuerySkip] = useState(skip || !toggleStatus);
   useEffect(() => {
     setQuerySkip(skip || !toggleStatus);
@@ -82,13 +81,12 @@ const DnsQueryTabBodyComponent: React.FC<NetworkComponentQueryProps> = ({
     loading,
     { totalCount, networkDns, pageInfo, loadPage, id, inspect, isInspected, refetch },
   ] = useNetworkDns({
-    docValueFields: docValueFields ?? [],
     endDate,
     filterQuery,
+    id: queryId,
     indexNames,
     skip: querySkip,
     startDate,
-    type,
   });
 
   const getTitle = useCallback(
@@ -109,7 +107,6 @@ const DnsQueryTabBodyComponent: React.FC<NetworkComponentQueryProps> = ({
       <MatrixHistogram
         id={HISTOGRAM_ID}
         isPtrIncluded={isPtrIncluded}
-        docValueFields={docValueFields}
         endDate={endDate}
         filterQuery={filterQuery}
         indexNames={indexNames}

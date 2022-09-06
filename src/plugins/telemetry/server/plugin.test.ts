@@ -14,6 +14,26 @@ import { TelemetryPlugin } from './plugin';
 
 describe('TelemetryPlugin', () => {
   describe('setup', () => {
+    describe('when initial config does not allow changing opt in status', () => {
+      it('calls analytics optIn', () => {
+        const initializerContext = coreMock.createPluginInitializerContext({
+          optIn: true,
+          allowChangingOptInStatus: false,
+        });
+        const coreSetupMock = coreMock.createSetup();
+
+        new TelemetryPlugin(initializerContext).setup(coreSetupMock, {
+          usageCollection: usageCollectionPluginMock.createSetupContract(),
+          telemetryCollectionManager: telemetryCollectionManagerPluginMock.createSetupContract(),
+        });
+
+        expect(coreSetupMock.analytics.optIn).toHaveBeenCalledTimes(1);
+        expect(coreSetupMock.analytics.optIn).toHaveBeenCalledWith({
+          global: { enabled: true },
+        });
+      });
+    });
+
     describe('EBT shipper registration', () => {
       it('registers the Server telemetry shipper', () => {
         const initializerContext = coreMock.createPluginInitializerContext();

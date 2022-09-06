@@ -7,6 +7,7 @@
 
 import type { ReactNode, FunctionComponent } from 'react';
 import React, { useCallback, useState, useRef, useEffect } from 'react';
+
 import {
   EuiFlexGrid,
   EuiFlexGroup,
@@ -16,7 +17,9 @@ import {
   EuiTitle,
   EuiSearchBar,
   EuiText,
+  EuiBadge,
 } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -25,6 +28,8 @@ import { Loading } from '../../../components';
 import { useLocalSearch, searchIdField } from '../../../hooks';
 
 import type { IntegrationCardItem } from '../../../../../../common/types/models';
+
+import type { ExtendedIntegrationCategory, CategoryFacet } from '../screens/home/category_facets';
 
 import { PackageCard } from './package_card';
 
@@ -35,10 +40,13 @@ export interface Props {
   list: IntegrationCardItem[];
   featuredList?: JSX.Element | null;
   initialSearch?: string;
+  selectedCategory: ExtendedIntegrationCategory;
   setSelectedCategory: (category: string) => void;
+  categories: CategoryFacet[];
   onSearchChange: (search: string) => void;
   showMissingIntegrationMessage?: boolean;
   callout?: JSX.Element | null;
+  showCardLabels?: boolean;
 }
 
 export const PackageListGrid: FunctionComponent<Props> = ({
@@ -48,10 +56,13 @@ export const PackageListGrid: FunctionComponent<Props> = ({
   list,
   initialSearch,
   onSearchChange,
+  selectedCategory,
   setSelectedCategory,
+  categories,
   showMissingIntegrationMessage = false,
   featuredList = null,
   callout,
+  showCardLabels = true,
 }) => {
   const [searchTerm, setSearchTerm] = useState(initialSearch || '');
   const localSearchRef = useLocalSearch(list);
@@ -71,21 +82,25 @@ export const PackageListGrid: FunctionComponent<Props> = ({
   }, [windowScrollY, isSticky]);
 
   const onQueryChange = ({
-    queryText: userInput,
+    queryText,
     error,
   }: {
     queryText: string;
     error: { message: string } | null;
   }) => {
     if (!error) {
-      onSearchChange(userInput);
-      setSearchTerm(userInput);
+      onSearchChange(queryText);
+      setSearchTerm(queryText);
     }
   };
 
   const resetQuery = () => {
     setSearchTerm('');
   };
+
+  const selectedCategoryTitle = selectedCategory
+    ? categories.find((category) => category.id === selectedCategory)?.title
+    : undefined;
 
   const controlsContent = <ControlsColumn title={title} controls={controls} sticky={isSticky} />;
   let gridContent: JSX.Element;
@@ -104,6 +119,7 @@ export const PackageListGrid: FunctionComponent<Props> = ({
       <GridColumn
         list={filteredList}
         showMissingIntegrationMessage={showMissingIntegrationMessage}
+        showCardLabels={showCardLabels}
       />
     );
   }
@@ -120,12 +136,31 @@ export const PackageListGrid: FunctionComponent<Props> = ({
             <EuiSearchBar
               query={searchTerm || undefined}
               box={{
+                'data-test-subj': 'epmList.searchBar',
                 placeholder: i18n.translate('xpack.fleet.epmList.searchPackagesPlaceholder', {
                   defaultMessage: 'Search for integrations',
                 }),
                 incremental: true,
               }}
               onChange={onQueryChange}
+              toolsRight={
+                selectedCategoryTitle ? (
+                  <div>
+                    <EuiBadge
+                      color="accent"
+                      iconType="cross"
+                      iconSide="right"
+                      iconOnClick={() => {
+                        setSelectedCategory('');
+                      }}
+                      iconOnClickAriaLabel="Remove category"
+                      data-test-sub="epmList.categoryBadge"
+                    >
+                      {selectedCategoryTitle}
+                    </EuiBadge>
+                  </div>
+                ) : undefined
+              }
             />
             {callout ? (
               <>
@@ -180,16 +215,21 @@ function ControlsColumn({ controls, title, sticky }: ControlsColumnProps) {
 interface GridColumnProps {
   list: IntegrationCardItem[];
   showMissingIntegrationMessage?: boolean;
+  showCardLabels?: boolean;
 }
 
-function GridColumn({ list, showMissingIntegrationMessage = false }: GridColumnProps) {
+function GridColumn({
+  list,
+  showMissingIntegrationMessage = false,
+  showCardLabels = false,
+}: GridColumnProps) {
   return (
     <EuiFlexGrid gutterSize="l" columns={3}>
       {list.length ? (
         list.map((item) => {
           return (
             <EuiFlexItem key={item.id}>
-              <PackageCard {...item} />
+              <PackageCard {...item} showLabels={showCardLabels} />
             </EuiFlexItem>
           );
         })

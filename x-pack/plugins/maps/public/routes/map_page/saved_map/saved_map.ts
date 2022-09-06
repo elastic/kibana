@@ -6,13 +6,14 @@
  */
 
 import _ from 'lodash';
+import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
 import { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
 import { OnSaveProps } from '@kbn/saved-objects-plugin/public';
 import { MapSavedObjectAttributes } from '../../../../common/map_saved_object_type';
 import { APP_ID, MAP_PATH, MAP_SAVED_OBJECT_TYPE } from '../../../../common/constants';
 import { createMapStore, MapStore, MapStoreState } from '../../../reducers/store';
-import { MapSettings } from '../../../reducers/map';
+import { MapSettings } from '../../../../common/descriptor_types';
 import {
   getTimeFilters,
   getMapZoom,
@@ -40,6 +41,7 @@ import {
   getIsAllowByValueEmbeddables,
   getSavedObjectsTagging,
   getTimeFilter,
+  getUsageCollection,
 } from '../../../kibana_services';
 import { goToSpecifiedPath } from '../../../render_app';
 import { LayerDescriptor } from '../../../../common/descriptor_types';
@@ -50,6 +52,7 @@ import { createBasemapLayerDescriptor } from '../../../classes/layers/create_bas
 import { whenLicenseInitialized } from '../../../licensed_features';
 import { SerializedMapState, SerializedUiState } from './types';
 import { setAutoOpenLayerWizardId } from '../../../actions/ui_actions';
+import { LayerStatsCollector, MapSettingsCollector } from '../../../../common/telemetry';
 
 function setMapSettingsFromEncodedState(settings: Partial<MapSettings>) {
   const decodedCustomIcons = settings.customIcons
@@ -135,6 +138,8 @@ export class SavedMap {
         this._tags = savedObjectsTagging.ui.getTagIdsFromReferences(references);
       }
     }
+
+    this._reportUsage();
 
     if (this._mapEmbeddableInput && this._mapEmbeddableInput.mapSettings !== undefined) {
       this._store.dispatch(setMapSettingsFromEncodedState(this._mapEmbeddableInput.mapSettings));
@@ -270,6 +275,39 @@ export class SavedMap {
       : this._attributes!.title;
   }
 
+  private _reportUsage(): void {
+    const usageCollector = getUsageCollection();
+    if (!usageCollector || !this._attributes) {
+      return;
+    }
+
+    const mapSettingsStatsCollector = new MapSettingsCollector(this._attributes);
+
+    const layerStatsCollector = new LayerStatsCollector(this._attributes);
+
+    const uiCounterEvents = {
+      layer: layerStatsCollector.getLayerCounts(),
+      scaling: layerStatsCollector.getScalingCounts(),
+      resolution: layerStatsCollector.getResolutionCounts(),
+      join: layerStatsCollector.getJoinCounts(),
+      ems_basemap: layerStatsCollector.getBasemapCounts(),
+      settings: {
+        custom_icons_count: mapSettingsStatsCollector.getCustomIconsCount(),
+      },
+    };
+
+    for (const [eventType, eventTypeMetrics] of Object.entries(uiCounterEvents)) {
+      for (const [eventName, count] of Object.entries(eventTypeMetrics)) {
+        usageCollector.reportUiCounter(
+          APP_ID,
+          METRIC_TYPE.LOADED,
+          `${eventType}_${eventName}`,
+          count
+        );
+      }
+    }
+  }
+
   setBreadcrumbs() {
     if (!this._attributes) {
       throw new Error('Invalid usage, must await whenReady before calling hasUnsavedChanges');
@@ -299,6 +337,14 @@ export class SavedMap {
     return this._originatingApp ? this.getAppNameFromId(this._originatingApp) : undefined;
   }
 
+  public hasOriginatingApp(): boolean {
+    return !!this._originatingApp;
+  }
+
+  public getOriginatingPath(): string | undefined {
+    return this._originatingPath;
+  }
+
   public getAppNameFromId = (appId: string): string | undefined => {
     return this._getStateTransfer().getAppNameFromId(appId);
   };
@@ -308,7 +354,7 @@ export class SavedMap {
   }
 
   public hasSaveAndReturnConfig() {
-    const hasOriginatingApp = !!this._originatingApp;
+    const hasOriginatingApp = this.hasOriginatingApp();
     const isNewMap = !this.getSavedObjectId();
     return getIsAllowByValueEmbeddables() ? hasOriginatingApp : !isNewMap && hasOriginatingApp;
   }
@@ -326,6 +372,30 @@ export class SavedMap {
     }
 
     return this._attributes;
+  }
+
+  public getAutoFitToBounds(): boolean {
+    if (
+      this._mapEmbeddableInput &&
+      this._mapEmbeddableInput?.mapSettings?.autoFitToDataBounds !== undefined
+    ) {
+      return this._mapEmbeddableInput.mapSettings.autoFitToDataBounds;
+    }
+
+    if (!this._attributes || !this._attributes.mapStateJSON) {
+      return false;
+    }
+
+    try {
+      const mapState = JSON.parse(this._attributes.mapStateJSON) as SerializedMapState;
+      if (mapState?.settings.autoFitToDataBounds !== undefined) {
+        return mapState.settings.autoFitToDataBounds;
+      }
+    } catch (e) {
+      // ignore malformed mapStateJSON, not a critical error for viewing map - map will just use defaults
+    }
+
+    return false;
   }
 
   public getSharingSavedObjectProps(): SharingSavedObjectProps | null {

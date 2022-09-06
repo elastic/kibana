@@ -5,22 +5,10 @@
  * 2.0.
  */
 
-import { isEmpty } from 'lodash';
 import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  ActionTypeModel,
-  ConnectorValidationResult,
-  GenericValidationResult,
-} from '../../../../types';
-import {
-  SwimlaneActionConnector,
-  SwimlaneConfig,
-  SwimlaneSecrets,
-  SwimlaneActionParams,
-} from './types';
-import { isValidUrl } from '../../../lib/value_validators';
-import { validateMappingForConnector } from './helpers';
+import { ActionTypeModel, GenericValidationResult } from '../../../../types';
+import { SwimlaneConfig, SwimlaneSecrets, SwimlaneActionParams } from './types';
 
 export const SW_SELECT_MESSAGE_TEXT = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.selectMessageText',
@@ -46,55 +34,6 @@ export function getActionType(): ActionTypeModel<
     iconClass: lazy(() => import('./logo')),
     selectMessage: SW_SELECT_MESSAGE_TEXT,
     actionTypeTitle: SW_ACTION_TYPE_TITLE,
-    validateConnector: async (
-      action: SwimlaneActionConnector
-    ): Promise<ConnectorValidationResult<SwimlaneConfig, SwimlaneSecrets>> => {
-      const translations = await import('./translations');
-      const configErrors = {
-        apiUrl: new Array<string>(),
-        appId: new Array<string>(),
-        connectorType: new Array<string>(),
-        mappings: new Array<Record<string, string>>(),
-      };
-      const secretsErrors = {
-        apiToken: new Array<string>(),
-      };
-
-      const validationResult = {
-        config: { errors: configErrors },
-        secrets: { errors: secretsErrors },
-      };
-
-      if (!action.config.apiUrl) {
-        configErrors.apiUrl = [...configErrors.apiUrl, translations.SW_API_URL_REQUIRED];
-      } else if (action.config.apiUrl) {
-        if (!isValidUrl(action.config.apiUrl)) {
-          configErrors.apiUrl = [...configErrors.apiUrl, translations.SW_API_URL_INVALID];
-        }
-      }
-
-      if (!action.secrets.apiToken) {
-        secretsErrors.apiToken = [
-          ...secretsErrors.apiToken,
-          translations.SW_REQUIRED_API_TOKEN_TEXT,
-        ];
-      }
-
-      if (!action.config.appId) {
-        configErrors.appId = [...configErrors.appId, translations.SW_REQUIRED_APP_ID_TEXT];
-      }
-
-      const mappingErrors = validateMappingForConnector(
-        action.config.connectorType,
-        action.config.mappings
-      );
-
-      if (!isEmpty(mappingErrors)) {
-        configErrors.mappings = [...configErrors.mappings, mappingErrors];
-      }
-
-      return validationResult;
-    },
     validateParams: async (
       actionParams: SwimlaneActionParams
     ): Promise<GenericValidationResult<unknown>> => {

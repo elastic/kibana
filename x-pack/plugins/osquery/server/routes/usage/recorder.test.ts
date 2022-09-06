@@ -9,14 +9,8 @@ import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 import { usageMetricSavedObjectType } from '../../../common/types';
 
-import {
-  CounterValue,
-  getOrCreateMetricObject,
-  getRouteMetric,
-  incrementCount,
-  RouteString,
-  routeStrings,
-} from './recorder';
+import type { CounterValue, RouteString } from './recorder';
+import { getOrCreateMetricObject, getRouteMetric, incrementCount, routeStrings } from './recorder';
 
 const savedObjectsClient = savedObjectsClientMock.create();
 

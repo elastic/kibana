@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MatrixHistogramType } from '../../../../../common/search_strategy';
+import type { MatrixHistogramType } from '../../../../../common/search_strategy';
 import { getGenericData } from './helpers';
 import { stackedByBooleanField, stackedByTextField, result, textResult } from './mock_data';
 

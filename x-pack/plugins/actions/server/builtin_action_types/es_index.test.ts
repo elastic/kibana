@@ -19,18 +19,20 @@ import {
   ESIndexActionTypeExecutorOptions,
 } from './es_index';
 import { AlertHistoryEsIndexConnectorId } from '../../common';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { elasticsearchClientMock } from '@kbn/core/server/elasticsearch/client/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { ActionsConfigurationUtilities } from '../actions_config';
 
 const ACTION_TYPE_ID = '.index';
 
 const services = actionsMock.createServices();
 
 let actionType: ESIndexActionType;
+let configurationUtilities: ActionsConfigurationUtilities;
 
 beforeAll(() => {
   const { actionTypeRegistry } = createActionTypeRegistry();
   actionType = actionTypeRegistry.get<ActionTypeConfigType, {}, ActionParamsType>(ACTION_TYPE_ID);
+  configurationUtilities = actionTypeRegistry.getUtils();
 });
 
 beforeEach(() => {
@@ -51,7 +53,7 @@ describe('config validation', () => {
       refresh: false,
     };
 
-    expect(validateConfig(actionType, config)).toEqual({
+    expect(validateConfig(actionType, config, { configurationUtilities })).toEqual({
       ...config,
       index: 'testing-123',
       refresh: false,
@@ -59,7 +61,7 @@ describe('config validation', () => {
     });
 
     config.executionTimeField = 'field-123';
-    expect(validateConfig(actionType, config)).toEqual({
+    expect(validateConfig(actionType, config, { configurationUtilities })).toEqual({
       ...config,
       index: 'testing-123',
       refresh: false,
@@ -67,7 +69,7 @@ describe('config validation', () => {
     });
 
     config.executionTimeField = null;
-    expect(validateConfig(actionType, config)).toEqual({
+    expect(validateConfig(actionType, config, { configurationUtilities })).toEqual({
       ...config,
       index: 'testing-123',
       refresh: false,
@@ -77,14 +79,18 @@ describe('config validation', () => {
     delete config.index;
 
     expect(() => {
-      validateConfig(actionType, { index: 666 });
+      validateConfig(actionType, { index: 666 }, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
       `"error validating action type config: [index]: expected value of type [string] but got [number]"`
     );
     delete config.executionTimeField;
 
     expect(() => {
-      validateConfig(actionType, { index: 'testing-123', executionTimeField: true });
+      validateConfig(
+        actionType,
+        { index: 'testing-123', executionTimeField: true },
+        { configurationUtilities }
+      );
     }).toThrowErrorMatchingInlineSnapshot(`
 "error validating action type config: [executionTimeField]: types that failed validation:
 - [executionTimeField.0]: expected value of type [string] but got [boolean]
@@ -93,7 +99,11 @@ describe('config validation', () => {
 
     delete config.refresh;
     expect(() => {
-      validateConfig(actionType, { index: 'testing-123', refresh: 'foo' });
+      validateConfig(
+        actionType,
+        { index: 'testing-123', refresh: 'foo' },
+        { configurationUtilities }
+      );
     }).toThrowErrorMatchingInlineSnapshot(
       `"error validating action type config: [refresh]: expected value of type [boolean] but got [string]"`
     );
@@ -105,7 +115,7 @@ describe('config validation', () => {
     };
 
     expect(() => {
-      validateConfig(actionType, baseConfig);
+      validateConfig(actionType, baseConfig, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
       `"error validating action type config: [index]: expected value of type [string] but got [undefined]"`
     );
@@ -118,7 +128,7 @@ describe('params validation', () => {
       documents: [{ rando: 'thing' }],
       indexOverride: null,
     };
-    expect(validateParams(actionType, params)).toMatchInlineSnapshot(`
+    expect(validateParams(actionType, params, { configurationUtilities })).toMatchInlineSnapshot(`
         Object {
           "documents": Array [
             Object {
@@ -132,19 +142,23 @@ describe('params validation', () => {
 
   test('params validation fails when params is not valid', () => {
     expect(() => {
-      validateParams(actionType, { documents: [{}], jim: 'bob' });
+      validateParams(actionType, { documents: [{}], jim: 'bob' }, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
       `"error validating action params: [jim]: definition for this key is missing"`
     );
 
     expect(() => {
-      validateParams(actionType, {});
+      validateParams(actionType, {}, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
       `"error validating action params: [documents]: expected value of type [array] but got [undefined]"`
     );
 
     expect(() => {
-      validateParams(actionType, { documents: ['should be an object'] });
+      validateParams(
+        actionType,
+        { documents: ['should be an object'] },
+        { configurationUtilities }
+      );
     }).toThrowErrorMatchingInlineSnapshot(
       `"error validating action params: [documents.0]: could not parse record value from json input"`
     );
@@ -188,7 +202,9 @@ describe('execute()', () => {
               Object {
                 "body": Array [
                   Object {
-                    "index": Object {},
+                    "index": Object {
+                      "op_type": "create",
+                    },
                   },
                   Object {
                     "jim": "bob",
@@ -228,7 +244,9 @@ describe('execute()', () => {
             Object {
               "body": Array [
                 Object {
-                  "index": Object {},
+                  "index": Object {
+                    "op_type": "create",
+                  },
                 },
                 Object {
                   "jimbob": "jr",
@@ -262,7 +280,9 @@ describe('execute()', () => {
           Object {
             "body": Array [
               Object {
-                "index": Object {},
+                "index": Object {
+                  "op_type": "create",
+                },
               },
               Object {
                 "jim": "bob",
@@ -295,13 +315,17 @@ describe('execute()', () => {
               Object {
                 "body": Array [
                   Object {
-                    "index": Object {},
+                    "index": Object {
+                      "op_type": "create",
+                    },
                   },
                   Object {
                     "a": 1,
                   },
                   Object {
-                    "index": Object {},
+                    "index": Object {
+                      "op_type": "create",
+                    },
                   },
                   Object {
                     "b": 2,

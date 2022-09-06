@@ -5,18 +5,13 @@
  * 2.0.
  */
 
-import { Client } from '@elastic/elasticsearch';
-import { AxiosResponse } from 'axios';
-import { DeleteByQueryResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-// eslint-disable-next-line import/no-extraneous-dependencies
-import { KbnClient } from '@kbn/test';
-import {
-  Agent,
-  AGENT_API_ROUTES,
-  FleetServerAgent,
-  GetOneAgentResponse,
-} from '@kbn/fleet-plugin/common';
-import { HostMetadata } from '../types';
+import type { Client } from '@elastic/elasticsearch';
+import type { AxiosResponse } from 'axios';
+import type { DeleteByQueryResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { KbnClient } from '@kbn/test';
+import type { Agent, FleetServerAgent, GetOneAgentResponse } from '@kbn/fleet-plugin/common';
+import { AGENT_API_ROUTES } from '@kbn/fleet-plugin/common';
+import type { HostMetadata } from '../types';
 import { FleetAgentGenerator } from '../data_generators/fleet_agent_generator';
 import { wrapErrorAndRejectPromise } from './utils';
 

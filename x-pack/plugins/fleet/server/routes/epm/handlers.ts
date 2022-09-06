@@ -24,7 +24,7 @@ import type {
   IBulkInstallPackageHTTPError,
   GetStatsResponse,
   UpdatePackageResponse,
-} from '../../../common';
+} from '../../../common/types';
 import type {
   GetCategoriesRequestSchema,
   GetPackagesRequestSchema,

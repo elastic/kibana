@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { Dispatch, MiddlewareAPI } from 'redux';
-import { ResolverState, DataAccessLayer } from '../../types';
+import type { Dispatch, MiddlewareAPI } from 'redux';
+import type { ResolverState, DataAccessLayer } from '../../types';
 import { ResolverTreeFetcher } from './resolver_tree_fetcher';
 
-import { ResolverAction } from '../actions';
+import type { ResolverAction } from '../actions';
 import { RelatedEventsFetcher } from './related_events_fetcher';
 import { CurrentRelatedEventFetcher } from './current_related_event_fetcher';
 import { NodeDataFetcher } from './node_data_fetcher';

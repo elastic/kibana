@@ -22,7 +22,7 @@ import React, { useState, useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
-import { State } from '../../../common/store';
+import type { State } from '../../../common/store';
 import { RowRendererId } from '../../../../common/types/timeline';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { setExcludedRowRendererIds as dispatchSetExcludedRowRendererIds } from '../../store/timeline/actions';

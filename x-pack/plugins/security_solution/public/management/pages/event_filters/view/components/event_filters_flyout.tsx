@@ -23,14 +23,14 @@ import {
 import { lastValueFrom } from 'rxjs';
 
 import { useWithArtifactSubmitData } from '../../../../components/artifact_list_page/hooks/use_with_artifact_submit_data';
-import {
+import type {
   ArtifactFormComponentOnChangeCallbackProps,
   ArtifactFormComponentProps,
 } from '../../../../components/artifact_list_page/types';
 import { EventFiltersForm } from './form';
 
 import { getInitialExceptionFromEvent } from '../utils';
-import { Ecs } from '../../../../../../common/ecs';
+import type { Ecs } from '../../../../../../common/ecs';
 import { useHttp, useKibana, useToasts } from '../../../../../common/lib/kibana';
 import { useGetEndpointSpecificPolicies } from '../../../../services/policies/hooks';
 import { getLoadPoliciesError } from '../../../../common/translations';

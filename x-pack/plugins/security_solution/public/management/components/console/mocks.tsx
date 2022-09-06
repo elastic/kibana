@@ -194,6 +194,48 @@ export const getCommandListMock = (): CommandDefinition[] => {
         },
       },
     },
+    {
+      name: 'cmd5',
+      about: 'has custom hint text',
+      RenderComponent: jest.fn(RenderComponent),
+      mustHaveArgs: true,
+      exampleUsage: 'cmd5 --foo 123',
+      exampleInstruction: 'Enter --foo to execute',
+      args: {
+        foo: {
+          about: 'foo stuff',
+          required: false,
+          allowMultiples: true,
+        },
+        bar: {
+          about: 'bar stuff',
+          required: false,
+          allowMultiples: true,
+        },
+      },
+    },
+    {
+      name: 'cmd6',
+      about: 'has custom hint text',
+      RenderComponent: jest.fn(RenderComponent),
+      mustHaveArgs: true,
+      exampleUsage: 'cmd6 --foo 123',
+      exampleInstruction: 'Enter --foo to execute',
+      args: {
+        foo: {
+          about: 'foo stuff',
+          required: false,
+          exclusiveOr: true,
+          allowMultiples: false,
+        },
+        bar: {
+          about: 'bar stuff',
+          required: false,
+          exclusiveOr: true,
+          allowMultiples: false,
+        },
+      },
+    },
   ];
 
   return commands;

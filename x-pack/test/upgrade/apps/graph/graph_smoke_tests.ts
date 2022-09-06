@@ -6,12 +6,22 @@
  */
 
 import expect from '@kbn/expect';
+import semver from 'semver';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'header', 'home', 'graph']);
+  const log = getService('log');
 
   describe('upgrade graph smoke tests', function describeIndexTests() {
+    before(async function () {
+      log.debug(process.env.ORIGINAL_VERSION!);
+      if (semver.lt(process.env.ORIGINAL_VERSION!, '7.6.0-SNAPSHOT')) {
+        log.debug('Skipping! These tests are valid only for 7.6+ versions');
+        this.skip();
+      }
+    });
+
     const spaces = [
       { space: 'default', basePath: '' },
       { space: 'automation', basePath: 's/automation' },

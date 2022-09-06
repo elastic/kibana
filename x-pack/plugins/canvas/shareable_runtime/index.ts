@@ -6,7 +6,6 @@
  */
 
 export * from './api';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import '@kbn/core/server/core_app/assets/legacy_light_theme.css';
 import '../public/style/index.scss';
 import '@elastic/eui/dist/eui_theme_light.css';

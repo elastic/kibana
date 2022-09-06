@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { PluginInitializerContext } from '@kbn/core/server';
+import type { PluginInitializerContext } from '@kbn/core/server';
 
-import { ConfigType } from './config';
+import type { ConfigType } from './config';
 
 export const createConfig = (context: PluginInitializerContext): Readonly<ConfigType> =>
   context.config.get<ConfigType>();

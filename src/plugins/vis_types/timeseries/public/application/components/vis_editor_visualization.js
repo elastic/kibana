@@ -12,6 +12,8 @@ import { keys, EuiFlexGroup, EuiFlexItem, EuiButton, EuiText, EuiSwitch } from '
 import { FormattedMessage, injectI18n } from '@kbn/i18n-react';
 import { pluck } from 'rxjs/operators';
 
+import './_vis_editor_visualization.scss';
+
 const MIN_CHART_HEIGHT = 300;
 
 class VisEditorVisualizationUI extends Component {

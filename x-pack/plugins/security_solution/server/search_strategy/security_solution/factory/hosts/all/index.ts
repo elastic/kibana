@@ -8,9 +8,9 @@
 import { getOr } from 'lodash/fp';
 
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
-import { IScopedClusterClient } from '@kbn/core/server';
+import type { IScopedClusterClient } from '@kbn/core/server';
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../common/constants';
-import {
+import type {
   HostAggEsItem,
   HostsStrategyResponse,
   HostsQueries,
@@ -18,18 +18,15 @@ import {
   HostsEdges,
 } from '../../../../../../common/search_strategy/security_solution/hosts';
 
-import {
-  getHostRiskIndex,
-  buildHostNamesFilter,
-  HostsRiskScore,
-} from '../../../../../../common/search_strategy';
+import type { HostsRiskScore } from '../../../../../../common/search_strategy';
+import { getHostRiskIndex, buildHostNamesFilter } from '../../../../../../common/search_strategy';
 
 import { inspectStringifyObject } from '../../../../../utils/build_query';
-import { SecuritySolutionFactory } from '../../types';
+import type { SecuritySolutionFactory } from '../../types';
 import { buildHostsQuery } from './query.all_hosts.dsl';
 import { formatHostEdgesData, HOSTS_FIELDS } from './helpers';
 
-import { EndpointAppContext } from '../../../../../endpoint/types';
+import type { EndpointAppContext } from '../../../../../endpoint/types';
 import { buildRiskScoreQuery } from '../../risk_score/all/query.risk_score.dsl';
 
 export const allHosts: SecuritySolutionFactory<HostsQueries.hosts> = {

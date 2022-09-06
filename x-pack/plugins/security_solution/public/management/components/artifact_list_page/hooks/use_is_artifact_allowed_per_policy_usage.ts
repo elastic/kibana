@@ -7,7 +7,7 @@
 
 import { useMemo } from 'react';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { ArtifactFormComponentProps } from '../types';
+import type { ArtifactFormComponentProps } from '../types';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { isArtifactByPolicy } from '../../../../../common/endpoint/service/artifacts';
 

@@ -8,7 +8,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiShowFor } from '@elastic/eui';
 import React, { useCallback, useState, useMemo } from 'react';
 
-import { AlertsByCategory } from '../components/alerts_by_category';
+import { InputsModelId } from '../../common/store/inputs/constants';
 import { FiltersGlobal } from '../../common/components/filters_global';
 import { SiemSearchBar } from '../../common/components/search_bar';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
@@ -70,12 +70,19 @@ const OverviewComponent = () => {
 
   const riskyHostsEnabled = useIsExperimentalFeatureEnabled('riskyHostsEnabled');
 
+  const timerange = useMemo(
+    () => ({
+      from,
+      to,
+    }),
+    [from, to]
+  );
   return (
     <>
       {indicesExist ? (
         <>
           <FiltersGlobal>
-            <SiemSearchBar id="global" indexPattern={indexPattern} />
+            <SiemSearchBar id={InputsModelId.global} indexPattern={indexPattern} />
           </FiltersGlobal>
 
           <SecuritySolutionPageWrapper>
@@ -95,25 +102,10 @@ const OverviewComponent = () => {
               <EuiFlexItem grow={3}>
                 <EuiFlexGroup direction="column" responsive={false} gutterSize="none">
                   {hasIndexRead && hasKibanaREAD && (
-                    <>
-                      <EuiFlexItem grow={false}>
-                        <SignalsByCategory filters={filters} query={query} />
-                        <EuiSpacer size="l" />
-                      </EuiFlexItem>
-
-                      <EuiFlexItem grow={false}>
-                        <AlertsByCategory
-                          deleteQuery={deleteQuery}
-                          filters={filters}
-                          from={from}
-                          indexPattern={indexPattern}
-                          indexNames={selectedPatterns}
-                          query={query}
-                          setQuery={setQuery}
-                          to={to}
-                        />
-                      </EuiFlexItem>
-                    </>
+                    <EuiFlexItem grow={false}>
+                      <SignalsByCategory filters={filters} query={query} />
+                      <EuiSpacer size="l" />
+                    </EuiFlexItem>
                   )}
 
                   <EuiFlexItem grow={false}>
@@ -159,10 +151,7 @@ const OverviewComponent = () => {
                           <RiskyHostLinks
                             deleteQuery={deleteQuery}
                             setQuery={setQuery}
-                            timerange={{
-                              from,
-                              to,
-                            }}
+                            timerange={timerange}
                           />
                         )}
                       </EuiFlexItem>

@@ -10,7 +10,7 @@ import { ALERT_REASON } from '@kbn/rule-data-utils';
 
 import React, { useMemo } from 'react';
 
-import { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
+import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
 import { EVENT_DETAILS_PLACEHOLDER } from '../../../timelines/components/side_panel/event_details/translations';
 import { getFieldValue } from '../../../detections/components/host_isolation/helpers';
 

@@ -6,3 +6,4 @@
  */
 
 export { useCurrentUpgrades } from './use_current_upgrades';
+export { useUpdateTags } from './use_update_tags';

@@ -19,7 +19,8 @@ import {
   OnRefreshProps,
   OnTimeChangeProps,
 } from '@elastic/eui';
-import { TimeHistoryContract, TimeRange } from '@kbn/data-plugin/public';
+import type { TimeRange } from '@kbn/es-query';
+import { TimeHistoryContract } from '@kbn/data-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 
 import { wrapWithTheme, toMountPoint } from '@kbn/kibana-react-plugin/public';
@@ -91,6 +92,7 @@ export const DatePickerWrapper: FC = () => {
         });
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [globalState?.time?.from, globalState?.time?.to, globalState?.time?.ts]
   );
 
@@ -103,9 +105,11 @@ export const DatePickerWrapper: FC = () => {
         });
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [globalState?.refreshInterval]
   );
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const setRefreshInterval = useCallback(
     debounce((refreshIntervalUpdate: RefreshInterval) => {
       setGlobalState('refreshInterval', refreshIntervalUpdate, true);
@@ -132,6 +136,7 @@ export const DatePickerWrapper: FC = () => {
     const value = resultInterval.value;
 
     return { value, pause };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(globalState?.refreshInterval), timeFilterRefreshInterval]);
 
   useEffect(
@@ -176,8 +181,11 @@ export const DatePickerWrapper: FC = () => {
         { toastLifeTimeMs: 30000 }
       );
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       JSON.stringify(refreshInterval),
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       JSON.stringify(globalState?.refreshInterval),
       setRefreshInterval,
     ]
@@ -220,6 +228,7 @@ export const DatePickerWrapper: FC = () => {
     return function cleanup() {
       subscriptions.unsubscribe();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const updateTimeFilter = useCallback(
@@ -231,6 +240,7 @@ export const DatePickerWrapper: FC = () => {
         ...(start === 'now' || end === 'now' ? { ts: Date.now() } : {}),
       });
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [setGlobalState]
   );
 

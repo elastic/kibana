@@ -5,13 +5,15 @@
  * 2.0.
  */
 import React from 'react';
-import type { UseQueryResult } from 'react-query';
+import type { UseQueryResult } from '@tanstack/react-query';
 import { Redirect, Switch, Route, useLocation } from 'react-router-dom';
+import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
+import { NoFindingsStates } from '../../components/no_findings_states';
+import { CloudPosturePage } from '../../components/cloud_posture_page';
 import { useFindingsEsPit } from './es_pit/use_findings_es_pit';
 import { FindingsEsPitContext } from './es_pit/findings_es_pit_context';
 import { useLatestFindingsDataView } from '../../common/api/use_latest_findings_data_view';
-import { allNavigationItems, findingsNavigation } from '../../common/navigation/constants';
-import { CspPageTemplate } from '../../components/csp_page_template';
+import { cloudPosturePages, findingsNavigation } from '../../common/navigation/constants';
 import { FindingsByResourceContainer } from './latest_findings_by_resource/findings_by_resource_container';
 import { LatestFindingsContainer } from './latest_findings/latest_findings_container';
 
@@ -20,14 +22,18 @@ export const Findings = () => {
   const dataViewQuery = useLatestFindingsDataView();
   // TODO: Consider splitting the PIT window so that each "group by" view has its own PIT
   const { pitQuery, pitIdRef, setPitId } = useFindingsEsPit('findings');
+  const getSetupStatus = useCspSetupStatusApi();
 
-  let queryForPageTemplate: UseQueryResult = dataViewQuery;
-  if (pitQuery.isError || pitQuery.isLoading || pitQuery.isIdle) {
-    queryForPageTemplate = pitQuery;
+  const hasFindings = getSetupStatus.data?.status === 'indexed';
+  if (!hasFindings) return <NoFindingsStates />;
+
+  let queryForCloudPosturePage: UseQueryResult = dataViewQuery;
+  if (pitQuery.isError || pitQuery.isLoading) {
+    queryForCloudPosturePage = pitQuery;
   }
 
   return (
-    <CspPageTemplate paddingSize="none" query={queryForPageTemplate}>
+    <CloudPosturePage query={queryForCloudPosturePage}>
       <FindingsEsPitContext.Provider
         value={{
           pitQuery,
@@ -39,7 +45,7 @@ export const Findings = () => {
         <Switch>
           <Route
             exact
-            path={allNavigationItems.findings.path}
+            path={cloudPosturePages.findings.path}
             component={() => (
               <Redirect
                 to={{
@@ -63,6 +69,6 @@ export const Findings = () => {
           />
         </Switch>
       </FindingsEsPitContext.Provider>
-    </CspPageTemplate>
+    </CloudPosturePage>
   );
 };

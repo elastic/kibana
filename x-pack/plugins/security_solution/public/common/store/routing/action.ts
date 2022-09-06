@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AppLocation, Immutable } from '../../../../common/endpoint/types';
+import type { AppLocation, Immutable } from '../../../../common/endpoint/types';
 
 export interface UserChangedUrl {
   readonly type: 'userChangedUrl';

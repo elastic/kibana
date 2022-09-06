@@ -6,14 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { EuiText, EuiIcon, EuiSpacer } from '@elastic/eui';
-import React from 'react';
+import { EuiText, EuiIcon, EuiPopover, EuiLink, EuiEmptyPrompt } from '@elastic/eui';
+import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
 import { KibanaThemeProvider, Markdown } from '@kbn/kibana-react-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { Embeddable } from './embeddable';
 import { EmbeddableInput, EmbeddableOutput, IEmbeddable } from './i_embeddable';
 import { IContainer } from '../containers';
 import { getTheme } from '../../services';
+import './error_embedabble.scss';
 
 export const ERROR_EMBEDDABLE_TYPE = 'error';
 
@@ -28,7 +30,12 @@ export class ErrorEmbeddable extends Embeddable<EmbeddableInput, EmbeddableOutpu
   public error: Error | string;
   private dom?: HTMLElement;
 
-  constructor(error: Error | string, input: EmbeddableInput, parent?: IContainer) {
+  constructor(
+    error: Error | string,
+    input: EmbeddableInput,
+    parent?: IContainer,
+    private compact: boolean = false
+  ) {
     super(input, {}, parent);
     this.error = error;
   }
@@ -44,17 +51,20 @@ export class ErrorEmbeddable extends Embeddable<EmbeddableInput, EmbeddableOutpu
     } catch (err) {
       theme = {};
     }
-    const node = (
-      <div className="embPanel__error embPanel__content" data-test-subj="embeddableStackError">
-        <EuiText color="subdued" size="xs">
-          <EuiIcon type="alert" color="danger" />
-          <EuiSpacer size="s" />
-          <Markdown
-            markdown={title}
-            openLinksInNewTab={true}
-            data-test-subj="errorMessageMarkdown"
-          />
-        </EuiText>
+    const errorMarkdown = (
+      <Markdown markdown={title} openLinksInNewTab={true} data-test-subj="errorMessageMarkdown" />
+    );
+
+    const node = this.compact ? (
+      <CompactEmbeddableError>{errorMarkdown}</CompactEmbeddableError>
+    ) : (
+      <div className="embPanel__content" data-test-subj="embeddableStackError">
+        <EuiEmptyPrompt
+          className="embPanel__error"
+          iconType="alert"
+          iconColor="danger"
+          body={errorMarkdown}
+        />
       </div>
     );
     const content =
@@ -73,3 +83,33 @@ export class ErrorEmbeddable extends Embeddable<EmbeddableInput, EmbeddableOutpu
     }
   }
 }
+
+const CompactEmbeddableError = ({ children }: { children?: React.ReactNode }) => {
+  const [isPopoverOpen, setPopoverOpen] = useState(false);
+
+  const popoverButton = (
+    <EuiText className="errorEmbeddableCompact__button" size="xs">
+      <EuiLink
+        className="eui-textTruncate"
+        color="subdued"
+        onClick={() => setPopoverOpen((open) => !open)}
+      >
+        <EuiIcon type="alert" color="danger" />
+        {i18n.translate('embeddableApi.panel.errorEmbeddable.message', {
+          defaultMessage: 'An error has occurred. Read more',
+        })}
+      </EuiLink>
+    </EuiText>
+  );
+
+  return (
+    <EuiPopover
+      button={popoverButton}
+      isOpen={isPopoverOpen}
+      anchorClassName="errorEmbeddableCompact__popoverAnchor"
+      closePopover={() => setPopoverOpen(false)}
+    >
+      {children}
+    </EuiPopover>
+  );
+};

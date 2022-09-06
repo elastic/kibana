@@ -9,25 +9,36 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
   const PageObjects = getPageObjects(['common', 'dashboard', 'spaceSelector', 'header']);
   const appsMenu = getService('appsMenu');
   const globalNav = getService('globalNav');
+  const kibanaServer = getService('kibanaServer');
+  const spacesService = getService('spaces');
 
   describe('preserve url', function () {
-    before(async function () {
-      await esArchiver.load('x-pack/test/functional/es_archives/spaces/multi_space');
+    const anotherSpace = 'another-space';
+
+    before(async () => {
+      await kibanaServer.importExport.load(
+        'x-pack/test/functional/fixtures/kbn_archiver/spaces/multi_space_default_space'
+      );
+      await spacesService.create({ id: anotherSpace, name: 'Another Space' });
+      await kibanaServer.importExport.load(
+        'x-pack/test/functional/fixtures/kbn_archiver/spaces/multi_space_another_space',
+        { space: anotherSpace }
+      );
     });
 
-    after(function () {
-      return esArchiver.unload('x-pack/test/functional/es_archives/spaces/multi_space');
+    after(async () => {
+      await spacesService.delete(anotherSpace);
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     it('goes back to last opened url', async function () {
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.loadSavedDashboard('A Dashboard');
       await PageObjects.common.navigateToApp('home');
-      await appsMenu.clickLink('Dashboard');
+      await appsMenu.clickLink('Dashboard', { category: 'kibana' });
       await PageObjects.dashboard.loadSavedDashboard('A Dashboard');
       await PageObjects.header.waitUntilLoadingHasFinished();
       const activeTitle = await globalNav.getLastBreadcrumb();
@@ -44,7 +55,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.spaceSelector.expectHomePage('another-space');
 
       // other space
-      await appsMenu.clickLink('Dashboard');
+      await appsMenu.clickLink('Dashboard', { category: 'kibana' });
       await PageObjects.dashboard.loadSavedDashboard('A Dashboard in another space');
 
       await PageObjects.spaceSelector.openSpacesNav();
@@ -52,7 +63,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.spaceSelector.expectHomePage('default');
 
       // default space
-      await appsMenu.clickLink('Dashboard');
+      await appsMenu.clickLink('Dashboard', { category: 'kibana' });
       await PageObjects.dashboard.waitForRenderComplete();
       const activeTitleDefaultSpace = await globalNav.getLastBreadcrumb();
       expect(activeTitleDefaultSpace).to.be('A Dashboard');
@@ -62,7 +73,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.spaceSelector.expectHomePage('another-space');
 
       // other space
-      await appsMenu.clickLink('Dashboard');
+      await appsMenu.clickLink('Dashboard', { category: 'kibana' });
       await PageObjects.dashboard.waitForRenderComplete();
       const activeTitleOtherSpace = await globalNav.getLastBreadcrumb();
       expect(activeTitleOtherSpace).to.be('A Dashboard in another space');

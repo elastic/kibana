@@ -9,6 +9,7 @@ import { sum } from 'lodash';
 import objectHash from 'object-hash';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { rangeQuery } from '@kbn/observability-plugin/server';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 import { getOffsetInMs } from '../../../../common/utils/get_offset_in_ms';
 import { ENVIRONMENT_NOT_DEFINED } from '../../../../common/environment_filter_values';
@@ -24,7 +25,6 @@ import {
   SPAN_SUBTYPE,
   SPAN_TYPE,
 } from '../../../../common/elasticsearch_fieldnames';
-import { ProcessorEvent } from '../../../../common/processor_event';
 import { getBucketSize } from '../../helpers/get_bucket_size';
 import { EventOutcome } from '../../../../common/event_outcome';
 import { Setup } from '../../helpers/setup_request';
@@ -88,7 +88,7 @@ export const getStats = async ({
                 },
               },
               {
-                backendName: {
+                dependencyName: {
                   terms: {
                     field: SPAN_DESTINATION_SERVICE_RESOURCE,
                   },
@@ -178,7 +178,7 @@ export const getStats = async ({
     response.aggregations?.connections.buckets.map((bucket) => {
       const sample = bucket.sample.top[0].metrics;
       const serviceName = bucket.key.serviceName as string;
-      const backendName = bucket.key.backendName as string;
+      const dependencyName = bucket.key.dependencyName as string;
 
       return {
         from: {
@@ -190,11 +190,11 @@ export const getStats = async ({
           type: NodeType.service as const,
         },
         to: {
-          id: objectHash({ backendName }),
-          backendName,
+          id: objectHash({ dependencyName }),
+          dependencyName,
           spanType: sample[SPAN_TYPE] as string,
           spanSubtype: (sample[SPAN_SUBTYPE] || '') as string,
-          type: NodeType.backend as const,
+          type: NodeType.dependency as const,
         },
         value: {
           count: sum(

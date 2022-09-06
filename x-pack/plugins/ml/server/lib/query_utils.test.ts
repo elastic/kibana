@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import {
-  buildBaseFilterCriteria,
-  buildSamplerAggregation,
-  getSamplerAggregationsResponsePath,
-} from './query_utils';
+import { buildBaseFilterCriteria } from './query_utils';
 
 describe('ML - query utils', () => {
   describe('buildBaseFilterCriteria', () => {
@@ -50,39 +46,6 @@ describe('ML - query utils', () => {
         },
         query,
       ]);
-    });
-  });
-
-  describe('buildSamplerAggregation', () => {
-    const testAggs = {
-      bytes_stats: {
-        stats: { field: 'bytes' },
-      },
-    };
-
-    test('returns wrapped sampler aggregation for sampler shard size of 1000', () => {
-      expect(buildSamplerAggregation(testAggs, 1000)).toEqual({
-        sample: {
-          sampler: {
-            shard_size: 1000,
-          },
-          aggs: testAggs,
-        },
-      });
-    });
-
-    test('returns un-sampled aggregation as-is for sampler shard size of 0', () => {
-      expect(buildSamplerAggregation(testAggs, 0)).toEqual(testAggs);
-    });
-  });
-
-  describe('getSamplerAggregationsResponsePath', () => {
-    test('returns correct path for sampler shard size of 1000', () => {
-      expect(getSamplerAggregationsResponsePath(1000)).toEqual(['sample']);
-    });
-
-    test('returns correct path for sampler shard size of 0', () => {
-      expect(getSamplerAggregationsResponsePath(0)).toEqual([]);
     });
   });
 });

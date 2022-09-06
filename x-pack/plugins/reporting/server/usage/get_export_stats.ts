@@ -29,6 +29,7 @@ const defaultTotalsForFeature: Omit<AvailableTotal, 'available'> & { layout: Lay
     {} as SizePercentiles
   ),
   layout: { canvas: 0, print: 0, preserve_layout: 0 },
+  execution_times: { min: null, max: null, avg: null },
 };
 
 const jobTypeIsPdf = (jobType: keyof JobTypes) => {
@@ -85,6 +86,7 @@ function getAvailableTotalForFeature(
     metrics: { ...metricsForFeature[exportType], ...jobType?.metrics },
     app: { ...defaultTotalsForFeature.app, ...jobType?.app },
     error_codes: jobType?.error_codes,
+    execution_times: jobType?.execution_times,
     layout: jobTypeIsPdf(exportType)
       ? { ...defaultTotalsForFeature.layout, ...jobType?.layout }
       : undefined,
@@ -114,6 +116,7 @@ export const getExportStats = (
     status: rangeStatus,
     statuses: rangeStatusByApp,
     output_size: outputSize,
+    queue_times: queueTimes,
     ...rangeStats
   } = rangeStatsInput;
 
@@ -127,7 +130,7 @@ export const getExportStats = (
         featureAvailability
       ),
     }),
-    {}
+    {} as JobTypes
   );
 
   const resultStats = {
@@ -136,7 +139,8 @@ export const getExportStats = (
     status: { completed: 0, failed: 0, ...rangeStatus },
     statuses: rangeStatusByApp,
     output_size: outputSize,
-  } as RangeStats;
+    queue_times: queueTimes,
+  };
 
   return resultStats;
 };

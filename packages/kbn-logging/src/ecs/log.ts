@@ -25,7 +25,13 @@ interface Origin {
 }
 
 interface Syslog {
+  appname?: string;
   facility?: { code?: number; name?: string };
+  hostname?: string;
+  msgid?: string;
   priority?: number;
+  procid?: string;
   severity?: { code?: number; name?: string };
+  structured_data?: Record<string, string>;
+  version?: string;
 }

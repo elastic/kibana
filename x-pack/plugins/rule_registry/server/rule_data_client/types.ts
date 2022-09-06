@@ -19,7 +19,7 @@ export interface IRuleDataClient {
   kibanaVersion: string;
   isWriteEnabled(): boolean;
   getReader(options?: { namespace?: string }): IRuleDataReader;
-  getWriter(options?: { namespace?: string }): IRuleDataWriter;
+  getWriter(options?: { namespace?: string }): Promise<IRuleDataWriter>;
 }
 
 export interface IRuleDataReader {

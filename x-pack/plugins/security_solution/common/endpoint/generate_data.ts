@@ -5,28 +5,26 @@
  * 2.0.
  */
 
-import seedrandom from 'seedrandom';
-import semverLte from 'semver/functions/lte';
+import type seedrandom from 'seedrandom';
 import { assertNever } from '@kbn/std';
-import {
+import type {
   GetAgentPoliciesResponseItem,
   GetPackagesResponse,
   EsAssetReference,
   KibanaAssetReference,
-  agentPolicyStatuses,
 } from '@kbn/fleet-plugin/common';
-import {
+import { agentPolicyStatuses } from '@kbn/fleet-plugin/common';
+import type {
   AlertEvent,
   DataStream,
-  EndpointStatus,
   Host,
   HostMetadata,
   HostPolicyResponse,
-  HostPolicyResponseActionStatus,
   OSFields,
   PolicyData,
   SafeEndpointEvent,
 } from './types';
+import { EndpointStatus, HostPolicyResponseActionStatus } from './types';
 import { policyFactory } from './models/policy_config';
 import {
   ancestryArray,
@@ -36,7 +34,7 @@ import {
   timestampSafeVersion,
 } from './models/event';
 import { firstNonNullValue } from './models/ecs_safety_helpers';
-import { EventOptions } from './types/generator';
+import type { EventOptions } from './types/generator';
 import { BaseDataGenerator } from './data_generators/base_data_generator';
 
 export type Event = AlertEvent | SafeEndpointEvent;
@@ -462,8 +460,7 @@ export class EndpointDocGenerator extends BaseDataGenerator {
     const hostName = this.randomHostname();
     const isIsolated = this.randomBoolean(0.3);
     const agentVersion = this.randomVersion();
-    const minCapabilitiesVersion = '7.15.0';
-    const capabilities = ['isolation'];
+    const capabilities = ['isolation', 'kill_process', 'suspend_process', 'running_processes'];
     const agentId = this.seededUUIDv4();
 
     return {
@@ -497,7 +494,7 @@ export class EndpointDocGenerator extends BaseDataGenerator {
         state: {
           isolation: isIsolated,
         },
-        capabilities: semverLte(minCapabilitiesVersion, agentVersion) ? capabilities : [],
+        capabilities,
       },
     };
   }
@@ -1646,7 +1643,6 @@ export class EndpointDocGenerator extends BaseDataGenerator {
       updated_by: 'elastic',
       policy_id: this.seededUUIDv4(),
       enabled: true,
-      output_id: '',
       inputs: [
         {
           type: 'endpoint',
@@ -1692,7 +1688,6 @@ export class EndpointDocGenerator extends BaseDataGenerator {
       revision: 2,
       updated_at: '2020-07-22T16:36:49.196Z',
       updated_by: 'elastic',
-      package_policies: ['852491f0-cc39-11ea-bac2-cdbf95b4b41a'],
       agents: 0,
     };
   }
@@ -1769,6 +1764,7 @@ export class EndpointDocGenerator extends BaseDataGenerator {
           install_started_at: '2020-06-24T14:41:23.098Z',
           install_source: 'registry',
           keep_policies_up_to_date: false,
+          verification_status: 'unknown',
         },
         references: [],
         updated_at: '2020-06-24T14:41:23.098Z',

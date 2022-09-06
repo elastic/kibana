@@ -57,6 +57,7 @@ export interface HealthRouteParams {
   config: TaskManagerConfig;
   kibanaVersion: string;
   kibanaIndexName: string;
+  shouldRunTasks: boolean;
   getClusterClient: () => Promise<IClusterClient>;
   usageCounter?: UsageCounter;
 }
@@ -75,6 +76,7 @@ export function healthRoute(params: HealthRouteParams): {
     kibanaIndexName,
     getClusterClient,
     usageCounter,
+    shouldRunTasks,
   } = params;
 
   // if "hot" health stats are any more stale than monitored_stats_required_freshness (pollInterval +1s buffer by default)
@@ -83,7 +85,7 @@ export function healthRoute(params: HealthRouteParams): {
 
   function getHealthStatus(monitoredStats: MonitoringStats) {
     const summarizedStats = summarizeMonitoringStats(logger, monitoredStats, config);
-    const status = calculateHealthStatus(summarizedStats, config, logger);
+    const status = calculateHealthStatus(summarizedStats, config, shouldRunTasks, logger);
     const now = Date.now();
     const timestamp = new Date(now).toISOString();
     return { id: taskManagerId, timestamp, status, ...summarizedStats };
@@ -109,7 +111,7 @@ export function healthRoute(params: HealthRouteParams): {
     .subscribe(([monitoredHealth, serviceStatus]) => {
       serviceStatus$.next(serviceStatus);
       monitoredHealth$.next(monitoredHealth);
-      logHealthMetrics(monitoredHealth, logger, config);
+      logHealthMetrics(monitoredHealth, logger, config, shouldRunTasks);
     });
 
   router.get(

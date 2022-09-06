@@ -32,7 +32,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { getUserDisplayName } from '../../../../common/model';
 import { UserAPIClient } from '../user_api_client';
 import { isUserDeprecated, isUserReserved } from '../user_utils';
-import { ChangePasswordFlyout } from './change_password_flyout';
+import { ChangePasswordModal } from './change_password_modal';
 import { ConfirmDeleteUsers } from './confirm_delete_users';
 import { ConfirmDisableUsers } from './confirm_disable_users';
 import { ConfirmEnableUsers } from './confirm_enable_users';
@@ -76,8 +76,9 @@ export const EditUserPage: FunctionComponent<EditUserPageProps> = ({ username })
 
   const isReservedUser = isUserReserved(user);
   const isDeprecatedUser = isUserDeprecated(user);
-  const displayName = getUserDisplayName(user);
 
+  // We render email below the title already and don't need to duplicate it in the title itself.
+  const title = getUserDisplayName({ full_name: user.full_name, username: user.username });
   return (
     <>
       <EuiPageHeader
@@ -85,11 +86,11 @@ export const EditUserPage: FunctionComponent<EditUserPageProps> = ({ username })
         pageTitle={
           <EuiFlexGroup alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>
-              <EuiAvatar name={displayName!} size="xl" />
+              <EuiAvatar name={getUserDisplayName(user)} size="xl" />
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiTitle>
-                <h1>{displayName}</h1>
+                <h1>{title}</h1>
               </EuiTitle>
               <EuiText>{user.email}</EuiText>
             </EuiFlexItem>
@@ -157,7 +158,7 @@ export const EditUserPage: FunctionComponent<EditUserPageProps> = ({ username })
       />
 
       {action === 'changePassword' ? (
-        <ChangePasswordFlyout
+        <ChangePasswordModal
           username={username!}
           onCancel={() => setAction('none')}
           onSuccess={() => setAction('none')}
@@ -204,8 +205,7 @@ export const EditUserPage: FunctionComponent<EditUserPageProps> = ({ username })
               <EuiDescriptionListDescription>
                 <FormattedMessage
                   id="xpack.security.management.users.editUserPage.changePasswordDescription"
-                  defaultMessage="The user will not be able to log in using their previous
-                    password."
+                  defaultMessage="The user will not be able to log in using their previous password."
                 />
               </EuiDescriptionListDescription>
             </EuiDescriptionList>

@@ -128,23 +128,10 @@ export const CLIENT_GEO_COUNTRY_ISO_CODE = 'client.geo.country_iso_code';
 
 // RUM Labels
 export const TRANSACTION_URL = 'url.full';
-export const CLIENT_GEO = 'client.geo';
 export const USER_AGENT_DEVICE = 'user_agent.device.name';
 export const USER_AGENT_OS = 'user_agent.os.name';
 
-export const TRANSACTION_TIME_TO_FIRST_BYTE =
-  'transaction.marks.agent.timeToFirstByte';
-export const TRANSACTION_DOM_INTERACTIVE =
-  'transaction.marks.agent.domInteractive';
-
-export const FCP_FIELD = 'transaction.marks.agent.firstContentfulPaint';
-export const LCP_FIELD = 'transaction.marks.agent.largestContentfulPaint';
-export const TBT_FIELD = 'transaction.experience.tbt';
-export const FID_FIELD = 'transaction.experience.fid';
-export const CLS_FIELD = 'transaction.experience.cls';
-
 export const PROFILE_ID = 'profile.id';
-export const PROFILE_DURATION = 'profile.duration';
 export const PROFILE_TOP_ID = 'profile.top.id';
 export const PROFILE_STACK = 'profile.stack';
 
@@ -160,3 +147,7 @@ export const PROFILE_INUSE_SPACE = 'profile.inuse_space.bytes';
 export const FAAS_ID = 'faas.id';
 export const FAAS_COLDSTART = 'faas.coldstart';
 export const FAAS_TRIGGER_TYPE = 'faas.trigger.type';
+
+// Metadata
+export const TIER = '_tier';
+export const INDEX = '_index';

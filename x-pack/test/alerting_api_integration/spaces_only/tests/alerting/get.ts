@@ -45,7 +45,6 @@ const getTestUtils = (
         params: {},
         created_by: null,
         scheduled_task_id: response.body.scheduled_task_id,
-        snooze_schedule: response.body.snooze_schedule,
         updated_by: null,
         api_key_owner: null,
         throttle: '1m',
@@ -56,7 +55,11 @@ const getTestUtils = (
         updated_at: response.body.updated_at,
         execution_status: response.body.execution_status,
         ...(describeType === 'internal'
-          ? { monitoring: response.body.monitoring, snooze_schedule: response.body.snooze_schedule }
+          ? {
+              monitoring: response.body.monitoring,
+              snooze_schedule: response.body.snooze_schedule,
+              is_snoozed_until: response.body.is_snoozed_until,
+            }
           : {}),
       });
       expect(Date.parse(response.body.created_at)).to.be.greaterThan(0);
@@ -137,7 +140,6 @@ export default function createGetTests({ getService }: FtrProviderContext) {
           params: {},
           createdBy: null,
           scheduledTaskId: response.body.scheduledTaskId,
-          snoozeSchedule: response.body.snoozeSchedule,
           updatedBy: null,
           apiKeyOwner: null,
           throttle: '1m',

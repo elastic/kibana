@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isEmpty } from 'lodash';
 import { SwimlaneConnectorType, SwimlaneMappingConfig, MappingConfigurationKeys } from './types';
 import * as i18n from './translations';
 
@@ -18,7 +19,7 @@ const casesFields = [...casesRequiredFields];
 const alertsRequiredFields: MappingConfigurationKeys[] = ['ruleNameConfig', 'alertIdConfig'];
 const alertsFields = ['severityConfig', 'commentsConfig', ...alertsRequiredFields];
 
-const translationMapping: Record<string, string> = {
+export const translationMapping: Record<string, string> = {
   caseIdConfig: i18n.SW_REQUIRED_CASE_ID,
   alertIdConfig: i18n.SW_REQUIRED_ALERT_ID,
   caseNameConfig: i18n.SW_REQUIRED_CASE_NAME,
@@ -29,16 +30,33 @@ const translationMapping: Record<string, string> = {
 };
 
 export const isValidFieldForConnector = (
-  connector: SwimlaneConnectorType,
-  field: MappingConfigurationKeys
+  connectorType: SwimlaneConnectorType,
+  fieldId: MappingConfigurationKeys
 ): boolean => {
-  if (connector === SwimlaneConnectorType.All) {
+  if (connectorType === SwimlaneConnectorType.All) {
     return true;
   }
 
-  return connector === SwimlaneConnectorType.Alerts
-    ? alertsFields.includes(field)
-    : casesFields.includes(field);
+  return connectorType === SwimlaneConnectorType.Alerts
+    ? alertsFields.includes(fieldId)
+    : casesFields.includes(fieldId);
+};
+
+export const isRequiredField = (
+  connectorType: SwimlaneConnectorType,
+  fieldId: MappingConfigurationKeys | undefined
+) => {
+  if (connectorType === SwimlaneConnectorType.All) {
+    return false;
+  }
+
+  if (fieldId == null || isEmpty(fieldId)) {
+    return true;
+  }
+
+  return connectorType === SwimlaneConnectorType.Alerts
+    ? alertsFields.includes(fieldId)
+    : casesFields.includes(fieldId);
 };
 
 export const validateMappingForConnector = (

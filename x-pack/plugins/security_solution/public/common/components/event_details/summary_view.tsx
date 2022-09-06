@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
-  EuiBasicTableColumn,
   EuiLink,
   EuiTitle,
   EuiFlexGroup,
@@ -23,7 +23,6 @@ import { VIEW_ALL_FIELDS } from './translations';
 import { SummaryTable } from './table/summary_table';
 import { SummaryValueCell } from './table/summary_value_cell';
 import { PrevalenceCellRenderer } from './table/prevalence_cell';
-import { AddToTimelineCellRenderer } from './table/add_to_timeline_cell';
 
 const baseColumns: Array<EuiBasicTableColumn<AlertSummaryRow>> = [
   {
@@ -59,13 +58,6 @@ const allColumns: Array<EuiBasicTableColumn<AlertSummaryRow>> = [
     ),
     align: 'right',
     width: '130px',
-  },
-  {
-    field: 'description',
-    truncateText: true,
-    render: AddToTimelineCellRenderer,
-    name: '',
-    width: '30px',
   },
 ];
 

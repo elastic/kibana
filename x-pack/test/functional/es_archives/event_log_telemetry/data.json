@@ -30,6 +30,35 @@
 {
   "type": "doc",
   "value": {
+    "id": "task:Actions-actions_telemetry",
+    "index": ".kibana_task_manager_1",
+    "source": {
+      "migrationVersion": {
+        "task": "8.2.0"
+      },
+      "references": [
+      ],
+      "task": {
+        "attempts": 0,
+        "params": "{}",
+        "retryAt": null,
+        "runAt": "2020-09-04T11:51:05.197Z",
+        "scheduledAt": "2020-09-04T11:51:05.197Z",
+        "startedAt": null,
+        "state": "{}",
+        "ownerId": null,
+        "status": "idle",
+        "taskType": "actions_telemetry"
+      },
+      "type": "task",
+      "updated_at": "2020-09-04T11:51:05.197Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
     "id": "X6bLb3UBt6Z_MVvSTfYk",
     "index": ".kibana-event-log-8.0.0-000001",
     "source": {

@@ -17,6 +17,7 @@ import type {
 import moment from 'moment';
 import { merge } from 'lodash';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { AnalysisLimits } from '../../../common/types/anomaly_detection_jobs';
 import { getAuthorizationHeader } from '../../lib/request_authorization';
 import type { MlClient } from '../../lib/ml_client';
@@ -54,7 +55,6 @@ import type { JobExistResult, JobStat } from '../../../common/types/data_recogni
 import type { Datafeed } from '../../../common/types/anomaly_detection_jobs';
 import type { MLSavedObjectService } from '../../saved_objects';
 import { isDefined } from '../../../common/types/guards';
-import { isPopulatedObject } from '../../../common/util/object_utils';
 
 const ML_DIR = 'ml';
 const KIBANA_DIR = 'kibana';
@@ -1109,8 +1109,8 @@ export class DataRecognizer {
     );
 
     return {
-      start: timeFieldRange.end.epoch - moment.duration(3, 'months').asMilliseconds(),
-      end: timeFieldRange.end.epoch,
+      start: timeFieldRange.end - moment.duration(3, 'months').asMilliseconds(),
+      end: timeFieldRange.end,
     };
   }
 

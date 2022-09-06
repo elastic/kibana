@@ -26,10 +26,11 @@ import { UiCounterMetricType } from '@kbn/analytics';
 import classNames from 'classnames';
 import { FieldButton, FieldIcon } from '@kbn/react-field';
 import type { DataViewField, DataView } from '@kbn/data-views-plugin/public';
+import { getFieldCapabilities } from '../../../../utils/get_field_capabilities';
 import { getTypeForFieldIcon } from '../../../../utils/get_type_for_field_icon';
 import { DiscoverFieldDetails } from './discover_field_details';
 import { FieldDetails } from './types';
-import { getFieldTypeName } from './lib/get_field_type_name';
+import { getFieldTypeName } from '../../../../utils/get_field_type_name';
 import { DiscoverFieldVisualize } from './discover_field_visualize';
 
 function wrapOnDot(str?: string) {
@@ -166,10 +167,11 @@ interface MultiFieldsProps {
   multiFields: NonNullable<DiscoverFieldProps['multiFields']>;
   toggleDisplay: (field: DataViewField) => void;
   alwaysShowActionButton: boolean;
+  isDocumentRecord: boolean;
 }
 
 const MultiFields: React.FC<MultiFieldsProps> = memo(
-  ({ multiFields, toggleDisplay, alwaysShowActionButton }) => (
+  ({ multiFields, toggleDisplay, alwaysShowActionButton, isDocumentRecord }) => (
     <React.Fragment>
       <EuiTitle size="xxxs">
         <h5>
@@ -185,7 +187,7 @@ const MultiFields: React.FC<MultiFieldsProps> = memo(
           className="dscSidebarItem dscSidebarItem--multi"
           isActive={false}
           dataTestSubj={`field-${entry.field.name}-showDetails`}
-          fieldIcon={<DiscoverFieldTypeIcon field={entry.field} />}
+          fieldIcon={isDocumentRecord && <DiscoverFieldTypeIcon field={entry.field} />}
           fieldAction={
             <ActionButton
               field={entry.field}
@@ -212,9 +214,9 @@ export interface DiscoverFieldProps {
    */
   field: DataViewField;
   /**
-   * The currently selected index pattern
+   * The currently selected data view
    */
-  indexPattern: DataView;
+  dataView: DataView;
   /**
    * Callback to add/select the field
    */
@@ -222,7 +224,7 @@ export interface DiscoverFieldProps {
   /**
    * Callback to add a filter to filter bar
    */
-  onAddFilter: (field: DataViewField | string, value: string, type: '+' | '-') => void;
+  onAddFilter?: (field: DataViewField | string, value: string, type: '+' | '-') => void;
   /**
    * Callback to remove/deselect a the field
    * @param fieldName
@@ -246,13 +248,13 @@ export interface DiscoverFieldProps {
   multiFields?: Array<{ field: DataViewField; isSelected: boolean }>;
 
   /**
-   * Callback to edit a runtime field from index pattern
+   * Callback to edit a field from data view
    * @param fieldName name of the field to edit
    */
   onEditField?: (fieldName: string) => void;
 
   /**
-   * Callback to delete a runtime field from index pattern
+   * Callback to delete a runtime field from data view
    * @param fieldName name of the field to delete
    */
   onDeleteField?: (fieldName: string) => void;
@@ -266,7 +268,7 @@ export interface DiscoverFieldProps {
 function DiscoverFieldComponent({
   alwaysShowActionButton = false,
   field,
-  indexPattern,
+  dataView,
   onAddField,
   onRemoveField,
   onAddFilter,
@@ -279,6 +281,7 @@ function DiscoverFieldComponent({
   showFieldStats,
 }: DiscoverFieldProps) {
   const [infoIsOpen, setOpen] = useState(false);
+  const isDocumentRecord = !!onAddFilter;
 
   const toggleDisplay = useCallback(
     (f: DataViewField) => {
@@ -303,7 +306,7 @@ function DiscoverFieldComponent({
         size="s"
         className="dscSidebarItem"
         dataTestSubj={`field-${field.name}-showDetails`}
-        fieldIcon={<DiscoverFieldTypeIcon field={field} />}
+        fieldIcon={isDocumentRecord && <DiscoverFieldTypeIcon field={field} />}
         fieldAction={
           <ActionButton
             field={field}
@@ -317,10 +320,9 @@ function DiscoverFieldComponent({
     );
   }
 
-  const isRuntimeField = Boolean(indexPattern.getFieldByName(field.name)?.runtimeField);
-  const isUnknownField = field.type === 'unknown' || field.type === 'unknown_selected';
-  const canEditField = onEditField && (!isUnknownField || isRuntimeField);
-  const canDeleteField = onDeleteField && isRuntimeField;
+  const { canEdit, canDelete } = getFieldCapabilities(dataView, field);
+  const canEditField = onEditField && canEdit;
+  const canDeleteField = onDeleteField && canDelete;
   const popoverTitle = (
     <EuiPopoverTitle style={{ textTransform: 'none' }} className="eui-textBreakWord">
       <EuiFlexGroup responsive={false} gutterSize="s">
@@ -369,8 +371,35 @@ function DiscoverFieldComponent({
     </EuiPopoverTitle>
   );
 
+  const button = (
+    <FieldButton
+      size="s"
+      className="dscSidebarItem"
+      isActive={infoIsOpen}
+      onClick={togglePopover}
+      dataTestSubj={`field-${field.name}-showDetails`}
+      fieldIcon={isDocumentRecord && <DiscoverFieldTypeIcon field={field} />}
+      fieldAction={
+        <ActionButton
+          field={field}
+          isSelected={selected}
+          alwaysShow={alwaysShowActionButton}
+          toggleDisplay={toggleDisplay}
+        />
+      }
+      fieldName={<FieldName field={field} />}
+      fieldInfoIcon={field.type === 'conflict' && <FieldInfoIcon />}
+    />
+  );
+  if (!isDocumentRecord) {
+    return button;
+  }
+
   const renderPopover = () => {
     const details = getDetails(field);
+
+    // TODO: integrate <FieldStats .../>
+
     return (
       <>
         {showFieldStats && (
@@ -383,7 +412,7 @@ function DiscoverFieldComponent({
               </h5>
             </EuiTitle>
             <DiscoverFieldDetails
-              indexPattern={indexPattern}
+              dataView={dataView}
               field={field}
               details={details}
               onAddFilter={onAddFilter}
@@ -398,13 +427,14 @@ function DiscoverFieldComponent({
               multiFields={multiFields}
               alwaysShowActionButton={alwaysShowActionButton}
               toggleDisplay={toggleDisplay}
+              isDocumentRecord={isDocumentRecord}
             />
           </>
         )}
         {(showFieldStats || multiFields) && <EuiHorizontalRule margin="m" />}
         <DiscoverFieldVisualize
           field={field}
-          indexPattern={indexPattern}
+          dataView={dataView}
           multiFields={rawMultiFields}
           trackUiMetric={trackUiMetric}
           details={details}
@@ -415,28 +445,10 @@ function DiscoverFieldComponent({
   return (
     <EuiPopover
       display="block"
-      button={
-        <FieldButton
-          size="s"
-          className="dscSidebarItem"
-          isActive={infoIsOpen}
-          onClick={togglePopover}
-          dataTestSubj={`field-${field.name}-showDetails`}
-          fieldIcon={<DiscoverFieldTypeIcon field={field} />}
-          fieldAction={
-            <ActionButton
-              field={field}
-              isSelected={selected}
-              alwaysShow={alwaysShowActionButton}
-              toggleDisplay={toggleDisplay}
-            />
-          }
-          fieldName={<FieldName field={field} />}
-          fieldInfoIcon={field.type === 'conflict' && <FieldInfoIcon />}
-        />
-      }
+      button={button}
       isOpen={infoIsOpen}
       closePopover={() => setOpen(false)}
+      data-test-subj="discoverFieldListPanelPopover"
       anchorPosition="rightUp"
       panelClassName="dscSidebarItem__fieldPopoverPanel"
     >

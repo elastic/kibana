@@ -2,15 +2,27 @@
 
 set -euo pipefail
 
+header() {
+  local fileName=$1
+
+  echo "" >"$fileName"
+
+  echo "### File Name:" >>"$fileName"
+  printf "  %s\n\n" "$fileName" >>"$fileName"
+}
+
 # $1 file name, ex: "target/dir-listing-jest.txt"
 # $2 directory to be listed, ex: target/kibana-coverage/jest
 dirListing() {
   local fileName=$1
   local dir=$2
 
-  ls -l "$dir" >"$fileName"
+  header "$fileName"
+
+  ls -l "$dir" >>"$fileName"
 
   printf "\n### %s \n\tlisted to: %s\n" "$dir" "$fileName"
+
   buildkite-agent artifact upload "$fileName"
 
   printf "\n### %s Uploaded\n" "$fileName"
@@ -22,20 +34,11 @@ replacePaths() {
   local replace=$3
 
   for x in $(find "$dirName" -maxdepth 1 -type f -name '*.json'); do
-    node .buildkite/scripts/steps/code_coverage/clean_coverage_paths.js \
+    ts-node .buildkite/scripts/steps/code_coverage/clean_coverage_paths.ts \
       "$x" \
       "$search" \
       "$replace"
   done
-}
-
-header() {
-  local fileName=$1
-
-  echo "" >"$fileName"
-
-  echo "### File Name:" >>"$fileName"
-  printf "\t%s\n" "$fileName" >>"$fileName"
 }
 
 fileHeads() {

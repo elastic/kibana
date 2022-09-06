@@ -409,12 +409,13 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
     return AuthenticationResult.redirectTo(
       redirectURLFromRelayState || stateRedirectURL || `${this.options.basePath.get(request)}/`,
       {
+        user: this.authenticationInfoToAuthenticatedUser(result.authentication),
+        userProfileGrant: { type: 'accessToken', accessToken: result.access_token },
         state: {
           accessToken: result.access_token,
           refreshToken: result.refresh_token,
           realm: result.realm,
         },
-        user: this.authenticationInfoToAuthenticatedUser(result.authentication),
       }
     );
   }

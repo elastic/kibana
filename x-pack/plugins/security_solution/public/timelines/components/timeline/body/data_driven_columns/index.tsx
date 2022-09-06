@@ -11,9 +11,9 @@ import { getOr } from 'lodash/fp';
 import { DRAGGABLE_KEYBOARD_WRAPPER_CLASS_NAME } from '@kbn/securitysolution-t-grid';
 
 import type { SetEventsLoading, SetEventsDeleted } from '@kbn/timelines-plugin/common';
-import { Ecs } from '../../../../../../common/ecs';
-import { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
-import {
+import type { Ecs } from '../../../../../../common/ecs';
+import type { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
+import type {
   ColumnHeaderOptions,
   CellValueElementProps,
   ActionProps,
@@ -22,8 +22,8 @@ import {
   RowCellRender,
 } from '../../../../../../common/types/timeline';
 import { ARIA_COLUMN_INDEX_OFFSET } from '../../helpers';
-import { OnRowSelected } from '../../events';
-import { inputsModel } from '../../../../../common/store';
+import type { OnRowSelected } from '../../events';
+import type { inputsModel } from '../../../../../common/store';
 import {
   EventsTd,
   EVENTS_TD_CLASS_NAME,

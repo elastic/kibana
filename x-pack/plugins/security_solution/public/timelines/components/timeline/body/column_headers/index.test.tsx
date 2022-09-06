@@ -12,11 +12,12 @@ import '../../../../../common/mock/match_media';
 import { getActionsColumnWidth } from '@kbn/timelines-plugin/public';
 import { defaultHeaders } from './default_headers';
 import { mockBrowserFields } from '../../../../../common/containers/source/mock';
-import { Sort } from '../sort';
+import type { Sort } from '../sort';
 import { TestProviders } from '../../../../../common/mock/test_providers';
 import { useMountAppended } from '../../../../../common/utils/use_mount_appended';
 
-import { ColumnHeadersComponent, ColumnHeadersComponentProps } from '.';
+import type { ColumnHeadersComponentProps } from '.';
+import { ColumnHeadersComponent } from '.';
 import { cloneDeep } from 'lodash/fp';
 import { timelineActions } from '../../../../store/timeline';
 import { TimelineTabs } from '../../../../../../common/types/timeline';
@@ -24,9 +25,18 @@ import { Direction } from '../../../../../../common/search_strategy';
 import { getDefaultControlColumn } from '../control_columns';
 import { testTrailingControlColumns } from '../../../../../common/mock/mock_timeline_control_columns';
 import { HeaderActions } from '../actions/header_actions';
-import { UseFieldBrowserOptionsProps } from '../../../fields_browser';
+import type { UseFieldBrowserOptionsProps } from '../../../fields_browser';
+import { mockTriggersActionsUi } from '../../../../../common/mock/mock_triggers_actions_ui_plugin';
+import { mockTimelines } from '../../../../../common/mock/mock_timelines_plugin';
 
-jest.mock('../../../../../common/lib/kibana');
+jest.mock('../../../../../common/lib/kibana', () => ({
+  useKibana: () => ({
+    services: {
+      timelines: mockTimelines,
+      triggersActionsUi: mockTriggersActionsUi,
+    },
+  }),
+}));
 
 const mockUseFieldBrowserOptions = jest.fn();
 jest.mock('../../../fields_browser', () => ({

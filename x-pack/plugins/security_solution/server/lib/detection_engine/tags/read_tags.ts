@@ -6,7 +6,7 @@
  */
 
 import { has } from 'lodash/fp';
-import { RulesClient } from '@kbn/alerting-plugin/server';
+import type { RulesClient } from '@kbn/alerting-plugin/server';
 import { findRules } from '../rules/find_rules';
 
 export interface TagType {

@@ -1,0 +1,23 @@
+---
+id: sharedUX/Components/Toolbar
+slug: /shared-ux/components/button_toolbar
+title: Toolbar
+summary: An implementation of the popover, primary button, icon button group and add from library button
+tags: ['shared-ux', 'component', 'toolbar']
+date: 2022-07-28
+---
+
+This `toolbar` component accepts a `children` prop. Children can include a `popover` or a generic `button`. It can also include the `IconButtonGroup` and `AddFromLibrary` component for soltuions. 
+Styling of the popover and button follow the primary styles.
+
+
+```jsx
+   <Toolbar>
+      {{
+        primaryButton,
+        iconButtonGroup,
+        extraButtons,
+        addFromLibraryButton,
+      }}
+    </Toolbar>
+```

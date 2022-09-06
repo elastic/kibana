@@ -91,3 +91,38 @@ export const THREAT_MATCH_EMPTIES = i18n.translate(
     defaultMessage: 'All matches require both a field and threat index field.',
   }
 );
+
+export const SOURCE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.source',
+  {
+    defaultMessage: 'Source',
+  }
+);
+
+export const DATA_SOURCE_GUIDE_SUB_TITLE = i18n.translate(
+  'xpack.securitySolution.detections.dataSource.popover.title',
+  {
+    defaultMessage: 'Select a data source',
+  }
+);
+
+export const DATA_SOURCE_GUIDE_TITLE = i18n.translate(
+  'xpack.securitySolution.detections.dataSource.popover.subTitle',
+  {
+    defaultMessage: 'Data sources',
+  }
+);
+
+export const DATA_SOURCE_GUIDE_CONTENT = i18n.translate(
+  'xpack.securitySolution.detections.dataSource.popover.content',
+  {
+    defaultMessage: 'Rules can now query index patterns or data views.',
+  }
+);
+
+export const RULE_PREVIEW_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.rulePreviewTitle',
+  {
+    defaultMessage: 'Rule Preview',
+  }
+);

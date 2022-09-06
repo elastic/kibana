@@ -35,6 +35,7 @@ export const areaVisTypeDefinition = {
   description: i18n.translate('visTypeXy.area.areaDescription', {
     defaultMessage: 'Emphasize the data between an axis and a line.',
   }),
+  fetchDatatable: true,
   toExpressionAst,
   getSupportedTriggers: () => [VIS_EVENT_TO_TRIGGER.filter, VIS_EVENT_TO_TRIGGER.brush],
   updateVisTypeOnParamsChange: getVisTypeFromParams,

@@ -153,9 +153,9 @@ const getStyle = (
         'text-background-color': theme.eui.euiColorPrimary,
         'text-background-opacity': (el: cytoscape.NodeSingular) =>
           el.hasClass('primary') || el.selected() ? 0.1 : 0,
-        'text-background-padding': theme.eui.paddingSizes.xs,
+        'text-background-padding': theme.eui.euiSizeXS,
         'text-background-shape': 'roundrectangle',
-        'text-margin-y': parseInt(theme.eui.paddingSizes.s, 10),
+        'text-margin-y': parseInt(theme.eui.euiSizeS, 10),
         'text-max-width': '200px',
         'text-valign': 'bottom',
         'text-wrap': 'ellipsis',
@@ -175,9 +175,7 @@ const getStyle = (
         // fairly new.
         //
         // @ts-expect-error
-        'target-distance-from-node': isIE11
-          ? undefined
-          : theme.eui.paddingSizes.xs,
+        'target-distance-from-node': isIE11 ? undefined : theme.eui.euiSizeXS,
         width: 1,
         'source-arrow-shape': 'none',
         'z-index': zIndexEdge,
@@ -192,10 +190,10 @@ const getStyle = (
         // @ts-expect-error
         'source-distance-from-node': isIE11
           ? undefined
-          : parseInt(theme.eui.paddingSizes.xs, 10),
+          : parseInt(theme.eui.euiSizeXS, 10),
         'target-distance-from-node': isIE11
           ? undefined
-          : parseInt(theme.eui.paddingSizes.xs, 10),
+          : parseInt(theme.eui.euiSizeXS, 10),
       },
     },
     {

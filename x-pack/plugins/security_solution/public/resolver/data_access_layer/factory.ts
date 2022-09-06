@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { KibanaReactContextValue } from '@kbn/kibana-react-plugin/public';
-import { StartServices } from '../../types';
-import { DataAccessLayer, TimeRange } from '../types';
-import {
+import type { KibanaReactContextValue } from '@kbn/kibana-react-plugin/public';
+import type { StartServices } from '../../types';
+import type { DataAccessLayer, TimeRange } from '../types';
+import type {
   ResolverNode,
   ResolverRelatedEvents,
   ResolverEntityIndex,
@@ -79,24 +79,41 @@ export function dataAccessLayerFactory(
       timeRange: TimeRange;
       indexPatterns: string[];
     }): Promise<ResolverPaginatedEvents> {
-      return context.services.http.post('/api/endpoint/resolver/events', {
+      const commonFields = {
         query: { afterEvent: after, limit: 25 },
-        body: JSON.stringify({
+        body: {
           timeRange: {
             from: timeRange.from,
             to: timeRange.to,
           },
           indexPatterns,
-          filter: JSON.stringify({
-            bool: {
-              filter: [
-                { term: { 'process.entity_id': entityID } },
-                { term: { 'event.category': category } },
-              ],
-            },
+        },
+      };
+      if (category === 'alert') {
+        return context.services.http.post('/api/endpoint/resolver/events', {
+          query: commonFields.query,
+          body: JSON.stringify({
+            ...commonFields.body,
+            entityType: 'alerts',
+            eventID: entityID,
           }),
-        }),
-      });
+        });
+      } else {
+        return context.services.http.post('/api/endpoint/resolver/events', {
+          query: commonFields.query,
+          body: JSON.stringify({
+            ...commonFields.body,
+            filter: JSON.stringify({
+              bool: {
+                filter: [
+                  { term: { 'process.entity_id': entityID } },
+                  { term: { 'event.category': category } },
+                ],
+              },
+            }),
+          }),
+        });
+      }
     },
 
     /**
@@ -176,22 +193,42 @@ export function dataAccessLayerFactory(
                 filter: [{ term: { 'event.id': eventID } }],
               },
             };
-      const response: ResolverPaginatedEvents = await context.services.http.post(
-        '/api/endpoint/resolver/events',
-        {
-          query: { limit: 1 },
-          body: JSON.stringify({
-            indexPatterns,
-            timeRange: {
-              from: timeRange.from,
-              to: timeRange.to,
-            },
-            filter: JSON.stringify(filter),
-          }),
-        }
-      );
-      const [oneEvent] = response.events;
-      return oneEvent ?? null;
+      if (eventCategory.includes('alert') === false) {
+        const response: ResolverPaginatedEvents = await context.services.http.post(
+          '/api/endpoint/resolver/events',
+          {
+            query: { limit: 1 },
+            body: JSON.stringify({
+              indexPatterns,
+              timeRange: {
+                from: timeRange.from,
+                to: timeRange.to,
+              },
+              filter: JSON.stringify(filter),
+            }),
+          }
+        );
+        const [oneEvent] = response.events;
+        return oneEvent ?? null;
+      } else {
+        const response: ResolverPaginatedEvents = await context.services.http.post(
+          '/api/endpoint/resolver/events',
+          {
+            query: { limit: 1 },
+            body: JSON.stringify({
+              indexPatterns,
+              timeRange: {
+                from: timeRange.from,
+                to: timeRange.to,
+              },
+              entityType: 'alertDetail',
+              eventID,
+            }),
+          }
+        );
+        const [oneEvent] = response.events;
+        return oneEvent ?? null;
+      }
     },
 
     /**

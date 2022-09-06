@@ -8,7 +8,7 @@
 
 import { omit } from 'lodash';
 import { of as mockOf } from 'rxjs';
-import type { MockedKeys } from '@kbn/utility-types/jest';
+import type { MockedKeys } from '@kbn/utility-types-jest';
 import type { ExecutionContext } from '@kbn/expressions-plugin/public';
 import { DataViewsContract } from '@kbn/data-views-plugin/common';
 import type {
@@ -56,7 +56,7 @@ describe('esaggs expression function - public', () => {
     jest.clearAllMocks();
     mockHandlers = {
       abortSignal: jest.fn() as unknown as jest.Mocked<AbortSignal>,
-      getSearchContext: jest.fn(),
+      getSearchContext: jest.fn().mockReturnValue({}),
       getSearchSessionId: jest.fn().mockReturnValue('abc123'),
       getExecutionContext: jest.fn(),
       inspectorAdapters: jest.fn(),
@@ -87,14 +87,18 @@ describe('esaggs expression function - public', () => {
 
     expect(startDependencies.aggs.createAggConfigs).toHaveBeenCalledWith(
       {},
-      args.aggs.map((agg) => agg.value)
+      args.aggs.map((agg) => agg.value),
+      { hierarchical: true, partialRows: false }
     );
   });
 
   test('calls aggs.createAggConfigs with the empty aggs array when not provided', async () => {
     await definition().fn(null, omit(args, 'aggs'), mockHandlers).toPromise();
 
-    expect(startDependencies.aggs.createAggConfigs).toHaveBeenCalledWith({}, []);
+    expect(startDependencies.aggs.createAggConfigs).toHaveBeenCalledWith({}, [], {
+      hierarchical: true,
+      partialRows: false,
+    });
   });
 
   test('calls getEsaggsMeta to retrieve meta', () => {
@@ -111,16 +115,15 @@ describe('esaggs expression function - public', () => {
       abortSignal: mockHandlers.abortSignal,
       aggs: {
         foo: 'bar',
-        hierarchical: true,
       },
       filters: undefined,
       indexPattern: {},
       inspectorAdapters: mockHandlers.inspectorAdapters,
-      partialRows: args.partialRows,
       query: undefined,
       searchSessionId: 'abc123',
       searchSourceService: startDependencies.searchSource,
       timeFields: args.timeFields,
+      disableShardWarnings: false,
       timeRange: undefined,
       getNow: undefined,
     });

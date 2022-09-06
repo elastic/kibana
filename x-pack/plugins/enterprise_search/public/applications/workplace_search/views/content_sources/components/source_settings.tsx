@@ -102,6 +102,8 @@ export const SourceSettings: React.FC = () => {
     serviceType === GITHUB_VIA_APP_SERVICE_TYPE ||
     serviceType === GITHUB_ENTERPRISE_SERVER_VIA_APP_SERVICE_TYPE;
 
+  const isCustomSource = serviceType === 'custom';
+
   const editPath = isGithubApp
     ? undefined // undefined for GitHub apps, as they are configured source-wide, and don't use a connector where you can edit the configuration
     : getEditPath(serviceType);
@@ -111,7 +113,7 @@ export const SourceSettings: React.FC = () => {
   const showConfirm = () => setModalVisibility(true);
   const hideConfirm = () => setModalVisibility(false);
 
-  const showOauthConfig = !isGithubApp && isOrganization;
+  const showSourceConfig = !isGithubApp && !isCustomSource && isOrganization;
   const showGithubAppConfig = isGithubApp;
 
   const handleNameChange = (e: ChangeEvent<HTMLInputElement>) => setValue(e.target.value);
@@ -192,7 +194,7 @@ export const SourceSettings: React.FC = () => {
           </EuiFlexGroup>
         </form>
       </ContentSection>
-      {showOauthConfig && (
+      {showSourceConfig && (
         <ContentSection title={SOURCE_CONFIG_TITLE}>
           <SourceConfigFields isOauth1={isOauth1} sourceConfigData={sourceConfigData} />
           <EuiFormRow>

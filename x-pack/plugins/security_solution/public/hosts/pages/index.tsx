@@ -19,12 +19,10 @@ import { hostDetailsPagePath } from './types';
 const getHostsTabPath = () =>
   `${HOSTS_PATH}/:tabName(` +
   `${HostsTableType.hosts}|` +
-  `${HostsTableType.authentications}|` +
   `${HostsTableType.uncommonProcesses}|` +
   `${HostsTableType.anomalies}|` +
   `${HostsTableType.events}|` +
   `${HostsTableType.risk}|` +
-  `${HostsTableType.alerts}|` +
   `${HostsTableType.sessions})`;
 
 const getHostDetailsTabPath = () =>
@@ -34,7 +32,6 @@ const getHostDetailsTabPath = () =>
   `${HostsTableType.anomalies}|` +
   `${HostsTableType.events}|` +
   `${HostsTableType.risk}|` +
-  `${HostsTableType.alerts}|` +
   `${HostsTableType.sessions})`;
 
 export const HostsContainer = React.memo(() => (
@@ -58,7 +55,7 @@ export const HostsContainer = React.memo(() => (
         />
       )}
     />
-    <Route
+    <Route // Redirect to the first tab when tabName is not present.
       path={hostDetailsPagePath}
       render={({
         match: {
@@ -68,14 +65,29 @@ export const HostsContainer = React.memo(() => (
       }) => (
         <Redirect
           to={{
-            pathname: `${HOSTS_PATH}/${detailName}/${HostsTableType.authentications}`,
+            pathname: `${HOSTS_PATH}/name/${detailName}/${HostsTableType.authentications}`,
             search,
           }}
         />
       )}
     />
-
-    <Route
+    <Route // Compatibility redirect for the old user detail path.
+      path={`${HOSTS_PATH}/:detailName/:tabName?`}
+      render={({
+        match: {
+          params: { detailName, tabName = HostsTableType.authentications },
+        },
+        location: { search = '' },
+      }) => (
+        <Redirect
+          to={{
+            pathname: `${HOSTS_PATH}/name/${detailName}/${tabName}`,
+            search,
+          }}
+        />
+      )}
+    />
+    <Route // Redirect to the first tab when tabName is not present.
       path={HOSTS_PATH}
       render={({ location: { search = '' } }) => (
         <Redirect to={{ pathname: `${HOSTS_PATH}/${HostsTableType.hosts}`, search }} />

@@ -50,6 +50,9 @@ export class ESTestIndexTool {
               testedValue: {
                 type: 'long',
               },
+              testedValueUnsigned: {
+                type: 'unsigned_long',
+              },
               group: {
                 type: 'keyword',
               },

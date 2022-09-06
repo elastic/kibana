@@ -123,6 +123,20 @@ const dependenciesTitle = i18n.translate(
   }
 );
 
+const apmSettingsTitle = i18n.translate(
+  'xpack.apm.navigation.apmSettingsTitle',
+  {
+    defaultMessage: 'Settings',
+  }
+);
+
+const apmStorageExplorerTitle = i18n.translate(
+  'xpack.apm.navigation.apmStorageExplorerTitle',
+  {
+    defaultMessage: 'Storage Explorer',
+  }
+);
+
 export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
   constructor(
     private readonly initializerContext: PluginInitializerContext<ConfigSchema>
@@ -178,7 +192,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
                   {
                     label: dependenciesTitle,
                     app: 'apm',
-                    path: '/backends',
+                    path: '/dependencies/inventory',
                     onClick: () => {
                       const { usageCollection } = pluginsStart as {
                         usageCollection?: UsageCollectionStart;
@@ -188,7 +202,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
                         usageCollection.reportUiCounter(
                           'apm',
                           METRIC_TYPE.CLICK,
-                          'side_nav_backend'
+                          'side_nav_dependency'
                         );
                       }
                     },
@@ -298,7 +312,17 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
         },
         { id: 'traces', title: tracesTitle, path: '/traces' },
         { id: 'service-map', title: serviceMapTitle, path: '/service-map' },
-        { id: 'backends', title: dependenciesTitle, path: '/backends' },
+        {
+          id: 'dependencies',
+          title: dependenciesTitle,
+          path: '/dependencies/inventory',
+        },
+        { id: 'settings', title: apmSettingsTitle, path: '/settings' },
+        {
+          id: 'storage-explorer',
+          title: apmStorageExplorerTitle,
+          path: '/storage-explorer',
+        },
       ],
 
       async mount(appMountParameters: AppMountParameters<unknown>) {

@@ -53,8 +53,31 @@ export const syntheticsMonitor: SavedObjectsType = {
       origin: {
         type: 'keyword',
       },
+      locations: {
+        properties: {
+          id: {
+            type: 'keyword',
+            ignore_above: 256,
+            fields: {
+              text: {
+                type: 'text',
+              },
+            },
+          },
+        },
+      },
       custom_heartbeat_id: {
         type: 'keyword',
+      },
+      tags: {
+        type: 'keyword',
+      },
+      schedule: {
+        properties: {
+          number: {
+            type: 'integer',
+          },
+        },
       },
     },
   },

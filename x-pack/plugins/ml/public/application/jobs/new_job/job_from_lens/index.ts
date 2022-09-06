@@ -5,8 +5,12 @@
  * 2.0.
  */
 
-export type { LayerResult } from './create_job';
+export type { LayerResult } from './visualization_extractor';
+export { VisualizationExtractor } from './visualization_extractor';
 export { resolver } from './route_resolver';
-export { getResultLayersFromEmbeddable } from './create_job';
-export { convertLensToADJob } from './convert_lens_to_job_action';
-export { getJobsItemsFromEmbeddable, isCompatibleVisualizationType } from './utils';
+export { QuickJobCreator } from './quick_create_job';
+export {
+  getJobsItemsFromEmbeddable,
+  isCompatibleVisualizationType,
+  redirectToADJobWizards,
+} from './utils';

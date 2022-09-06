@@ -7,12 +7,12 @@
 
 import * as t from 'io-ts';
 import { get } from 'lodash/fp';
-import {
+import type {
   Meta,
   Name,
   RuleNameOverrideOrUndefined,
 } from '../../../../../common/detection_engine/schemas/common/schemas';
-import { SignalSource } from '../types';
+import type { SignalSource } from '../types';
 
 interface BuildRuleNameFromMappingProps {
   eventSource: SignalSource;

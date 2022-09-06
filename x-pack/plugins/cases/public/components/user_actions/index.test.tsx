@@ -44,7 +44,6 @@ const defaultProps = {
   selectedAlertPatterns: ['some-test-pattern'],
   statusActionButton: null,
   updateCase,
-  userCanCrud: true,
   useFetchAlertData: (): [boolean, Record<string, unknown>] => [
     false,
     { 'some-id': { _id: 'some-id' } },
@@ -54,7 +53,9 @@ const defaultProps = {
 };
 
 jest.mock('../../containers/use_update_comment');
-jest.mock('./timestamp');
+jest.mock('./timestamp', () => ({
+  UserActionTimestamp: () => <></>,
+}));
 jest.mock('../../common/lib/kibana');
 
 const useUpdateCommentMock = useUpdateComment as jest.Mock;

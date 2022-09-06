@@ -20,15 +20,19 @@ import type {
   UnifiedSearchPublicPluginStart,
   QuerySuggestion,
 } from '@kbn/unified-search-plugin/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { parseTimeShift } from '@kbn/data-plugin/common';
-import type { DataView } from '@kbn/data-views-plugin/public';
-import { IndexPattern } from '../../../../types';
+import type { IndexPattern } from '../../../../../types';
 import { memoizedGetAvailableOperationsByMetadata } from '../../../operations';
 import { tinymathFunctions, groupArgsByType, unquotedStringRegex } from '../util';
 import type { GenericOperationDefinition } from '../..';
 import { getFunctionSignatureLabel, getHelpTextContent } from './formula_help';
 import { hasFunctionFieldArgument } from '../validation';
 import { timeShiftOptions, timeShiftOptionOrder } from '../../../../time_shift_utils';
+import {
+  reducedTimeRangeOptionOrder,
+  reducedTimeRangeOptions,
+} from '../../../../reduced_time_range_utils';
 
 export enum SUGGESTION_TYPE {
   FIELD = 'field',
@@ -36,6 +40,7 @@ export enum SUGGESTION_TYPE {
   FUNCTIONS = 'functions',
   KQL = 'kql',
   SHIFTS = 'shifts',
+  REDUCED_TIME_RANGES = 'reducedTimeRanges',
 }
 
 export type LensMathSuggestion =
@@ -121,6 +126,7 @@ export async function suggest({
   context,
   indexPattern,
   operationDefinitionMap,
+  dataViews,
   unifiedSearch,
   dateHistogramInterval,
 }: {
@@ -130,6 +136,7 @@ export async function suggest({
   indexPattern: IndexPattern;
   operationDefinitionMap: Record<string, GenericOperationDefinition>;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  dataViews: DataViewsPublicPluginStart;
   dateHistogramInterval?: number;
 }): Promise<LensMathSuggestions> {
   const text =
@@ -150,6 +157,7 @@ export async function suggest({
       return await getNamedArgumentSuggestions({
         ast: tokenAst as TinymathNamedArgument,
         unifiedSearch,
+        dataViews,
         indexPattern,
         dateHistogramInterval,
       });
@@ -255,6 +263,11 @@ function getArgumentSuggestions(
         list.push('shift');
       }
     }
+    if (operation.canReduceTimeRange) {
+      if (!namedArguments.find((arg) => arg.name === 'reducedTimeRange')) {
+        list.push('reducedTimeRange');
+      }
+    }
     if ('operationParams' in operation) {
       // Exclude any previously used named args
       list.push(
@@ -333,12 +346,14 @@ function getArgumentSuggestions(
 export async function getNamedArgumentSuggestions({
   ast,
   unifiedSearch,
+  dataViews,
   indexPattern,
   dateHistogramInterval,
 }: {
   ast: TinymathNamedArgument;
   indexPattern: IndexPattern;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  dataViews: DataViewsPublicPluginStart;
   dateHistogramInterval?: number;
 }) {
   if (ast.name === 'shift') {
@@ -357,6 +372,12 @@ export async function getNamedArgumentSuggestions({
       type: SUGGESTION_TYPE.SHIFTS,
     };
   }
+  if (ast.name === 'reducedTimeRange') {
+    return {
+      list: reducedTimeRangeOptions.map(({ value }) => value),
+      type: SUGGESTION_TYPE.REDUCED_TIME_RANGES,
+    };
+  }
   if (ast.name !== 'kql' && ast.name !== 'lucene') {
     return { list: [], type: SUGGESTION_TYPE.KQL };
   }
@@ -372,7 +393,7 @@ export async function getNamedArgumentSuggestions({
     query,
     selectionStart: position,
     selectionEnd: position,
-    indexPatterns: [indexPattern as unknown as DataView],
+    indexPatterns: [await dataViews.get(indexPattern.id)],
     boolFilter: [],
   });
   return {
@@ -411,6 +432,9 @@ export function getSuggestion(
     case SUGGESTION_TYPE.SHIFTS:
       sortText = String(timeShiftOptionOrder[label]).padStart(4, '0');
       break;
+    case SUGGESTION_TYPE.REDUCED_TIME_RANGES:
+      sortText = String(reducedTimeRangeOptionOrder[label]).padStart(4, '0');
+      break;
     case SUGGESTION_TYPE.FIELD:
       kind = monaco.languages.CompletionItemKind.Value;
       // Look for unsafe characters
@@ -439,7 +463,12 @@ export function getSuggestion(
       break;
     case SUGGESTION_TYPE.NAMED_ARGUMENT:
       kind = monaco.languages.CompletionItemKind.Keyword;
-      if (label === 'kql' || label === 'lucene' || label === 'shift') {
+      if (
+        label === 'kql' ||
+        label === 'lucene' ||
+        label === 'shift' ||
+        label === 'reducedTimeRange'
+      ) {
         command = TRIGGER_SUGGESTION_COMMAND;
         insertText = `${label}='$0'`;
         insertTextRules = monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet;

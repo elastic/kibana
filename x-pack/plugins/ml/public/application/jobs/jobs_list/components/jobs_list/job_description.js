@@ -9,24 +9,19 @@ import PropTypes from 'prop-types';
 import React from 'react';
 
 import { JobGroup } from '../job_group';
-import { AnomalyDetectionJobIdLink } from './job_id_link';
 
-export function JobDescription({ job, isManagementTable }) {
+export function JobDescription({ job }) {
   return (
     <React.Fragment>
       <div className="job-description">
         {job.description} &nbsp;
-        {job.groups.map((group) => {
-          if (isManagementTable === true) {
-            return <AnomalyDetectionJobIdLink key={group} groupId={group} />;
-          }
-          return <JobGroup key={group} name={group} />;
-        })}
+        {job.groups.map((group) => (
+          <JobGroup key={group} name={group} />
+        ))}
       </div>
     </React.Fragment>
   );
 }
 JobDescription.propTypes = {
   job: PropTypes.object.isRequired,
-  isManagementTable: PropTypes.bool,
 };

@@ -4,19 +4,22 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { SyntheticEvent, useCallback, useMemo, useState } from 'react';
+import type { SyntheticEvent } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
+import type {
+  EuiButtonIcon,
+  EuiButtonProps,
+  EuiLinkProps,
+  PropsForAnchor,
+  PropsForButton,
+} from '@elastic/eui';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiButtonIcon,
-  EuiButtonProps,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
-  EuiLinkProps,
   EuiPopover,
-  PropsForAnchor,
-  PropsForButton,
 } from '@elastic/eui';
 import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n-react';

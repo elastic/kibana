@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { ServiceLocationErrors } from '../../../../common/runtime_types/monitor_management';
-import { MONITOR_ERROR_EVENT_CHANNEL } from './constants';
+import { MONITOR_ERROR_EVENTS_CHANNEL } from './constants';
 
 export interface MonitorSyncEvent {
   total: number;
@@ -41,13 +41,14 @@ export interface MonitorErrorEvent {
   code?: string;
   status?: number;
   url?: string;
+  kibanaVersion: string;
 }
 
 export interface MonitorUpdateTelemetryChannelEvents {
   // channel name => event type
   'synthetics-monitor-update': MonitorUpdateEvent;
   'synthetics-monitor-current': MonitorUpdateEvent;
-  [MONITOR_ERROR_EVENT_CHANNEL]: MonitorErrorEvent;
+  [MONITOR_ERROR_EVENTS_CHANNEL]: MonitorErrorEvent;
   'synthetics-monitor-sync-state': MonitorSyncEvent;
   'synthetics-monitor-sync-events': MonitorSyncEvent;
 }

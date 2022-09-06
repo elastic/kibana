@@ -6,11 +6,17 @@
  */
 
 import React from 'react';
-import { Redirect, RouteProps, RouteComponentProps } from 'react-router-dom';
+import type { RouteProps, RouteComponentProps } from 'react-router-dom';
+import { Redirect } from 'react-router-dom';
 import { ALERTS_PATH, DETECTIONS_PATH } from '../../common/constants';
+import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
 import { Alerts } from './pages/alerts';
 
-const renderAlertsRoutes = () => <Alerts />;
+const AlertsRoutes = () => (
+  <PluginTemplateWrapper>
+    <Alerts />
+  </PluginTemplateWrapper>
+);
 
 const DetectionsRedirects = ({ location }: RouteComponentProps) =>
   location.pathname === DETECTIONS_PATH ? (
@@ -26,6 +32,6 @@ export const routes: RouteProps[] = [
   },
   {
     path: ALERTS_PATH,
-    render: renderAlertsRoutes,
+    component: AlertsRoutes,
   },
 ];

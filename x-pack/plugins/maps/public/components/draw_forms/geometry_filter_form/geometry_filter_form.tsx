@@ -37,17 +37,12 @@ interface Props {
     geometryLabel: string;
     relation: ES_SPATIAL_RELATIONS;
   }) => void;
-  isFilterGeometryClosed?: boolean;
   errorMsg?: string;
   className?: string;
   isLoading?: boolean;
 }
 
 export class GeometryFilterForm extends Component<Props> {
-  static defaultProps = {
-    isFilterGeometryClosed: true,
-  };
-
   state = {
     actionId: ACTION_GLOBAL_APPLY_FILTER,
     geometryLabel: this.props.intitialGeometryLabel,

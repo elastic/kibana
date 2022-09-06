@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EsQueryAlertParams } from './alert_type_params';
+import { EsQueryRuleParams } from './rule_type_params';
 
-export function isEsQueryAlert(searchType: EsQueryAlertParams['searchType']) {
+export function isEsQueryRule(searchType: EsQueryRuleParams['searchType']) {
   return searchType !== 'searchSource';
 }

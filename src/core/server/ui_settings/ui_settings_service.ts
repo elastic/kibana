@@ -11,9 +11,9 @@ import { mapToObject } from '@kbn/std';
 
 import type { Logger } from '@kbn/logging';
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
-import { SavedObjectsClientContract } from '../saved_objects/types';
-import { InternalSavedObjectsServiceSetup } from '../saved_objects';
-import { InternalHttpServiceSetup } from '../http';
+import type { InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import { InternalSavedObjectsServiceSetup } from '@kbn/core-saved-objects-server-internal';
 import { UiSettingsConfigType, config as uiConfigDefinition } from './ui_settings_config';
 import { UiSettingsClient } from './ui_settings_client';
 import {
@@ -26,6 +26,7 @@ import { uiSettingsType } from './saved_objects';
 import { registerRoutes } from './routes';
 import { getCoreSettings } from './settings';
 import { UiSettingsDefaultsClient } from './ui_settings_defaults_client';
+import type { InternalUiSettingsRequestHandlerContext } from './internal_types';
 
 export interface SetupDeps {
   http: InternalHttpServiceSetup;
@@ -70,7 +71,7 @@ export class UiSettingsService
     this.log.debug('Setting up ui settings service');
 
     savedObjects.registerType(uiSettingsType);
-    registerRoutes(http.createRouter(''));
+    registerRoutes(http.createRouter<InternalUiSettingsRequestHandlerContext>(''));
 
     const config = await firstValueFrom(this.config$);
     this.overrides = config.overrides;

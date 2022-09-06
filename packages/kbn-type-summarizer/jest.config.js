@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-/** @typedef {import("@jest/types").Config.InitialOptions} JestConfig */
-/** @type {JestConfig} */
 module.exports = {
   preset: '@kbn/test/jest_node',
   rootDir: '../..',

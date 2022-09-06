@@ -15,7 +15,7 @@ import { FLEET_APM_PACKAGE } from '../../../../common/constants';
 function findReplacementsForEprPackage(
   replacements: CustomIntegration[],
   packageName: string,
-  release: 'beta' | 'experimental' | 'ga'
+  release?: 'beta' | 'experimental' | 'ga'
 ): CustomIntegration[] {
   if (release === 'ga') {
     return [];

@@ -1,0 +1,400 @@
+{
+  "attributes": {
+    "color": "#FF00FF",
+    "description": "My first tag!",
+    "name": "tag-1"
+  },
+  "coreMigrationVersion": "8.4.0",
+  "id": "tag-1",
+  "migrationVersion": {
+    "tag": "8.0.0"
+  },
+  "references": [],
+  "type": "tag",
+  "updated_at": "2017-09-21T18:49:16.270Z",
+  "version": "WzE3LDJd"
+}
+
+{
+  "attributes": {
+    "color": "#11FF22",
+    "description": "Another awesome tag",
+    "name": "tag-2"
+  },
+  "coreMigrationVersion": "8.4.0",
+  "id": "tag-2",
+  "migrationVersion": {
+    "tag": "8.0.0"
+  },
+  "references": [],
+  "type": "tag",
+  "updated_at": "2017-09-21T18:49:16.270Z",
+  "version": "WzE4LDJd"
+}
+
+{
+  "attributes": {
+    "color": "#AA0077",
+    "description": "Last but not least",
+    "name": "tag-3"
+  },
+  "coreMigrationVersion": "8.4.0",
+  "id": "tag-3",
+  "migrationVersion": {
+    "tag": "8.0.0"
+  },
+  "references": [],
+  "type": "tag",
+  "updated_at": "2017-09-21T18:49:16.270Z",
+  "version": "WzE5LDJd"
+}
+
+{
+  "attributes": {
+    "color": "#AA0077",
+    "description": "Last",
+    "name": "tag-4"
+  },
+  "coreMigrationVersion": "8.4.0",
+  "id": "tag-4",
+  "migrationVersion": {
+    "tag": "8.0.0"
+  },
+  "references": [],
+  "type": "tag",
+  "updated_at": "2017-09-21T18:49:16.270Z",
+  "version": "WzIwLDJd"
+}
+
+{
+  "attributes": {
+    "color": "#AA0077",
+    "description": "Special chars",
+    "name": "my%tag"
+  },
+  "coreMigrationVersion": "8.4.0",
+  "id": "tag-special-chars",
+  "migrationVersion": {
+    "tag": "8.0.0"
+  },
+  "references": [],
+  "type": "tag",
+  "updated_at": "2017-09-21T18:49:16.270Z",
+  "version": "WzIxLDJd"
+}
+
+{
+  "attributes": {
+    "fieldFormatMap": "{\"bytes\":{\"id\":\"bytes\"}}",
+    "fields": "[{\"name\":\"referer\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"agent\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":true,\"doc_values\":false},{\"name\":\"relatedContent.og:image:width\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":true,\"doc_values\":false},{\"name\":\"relatedContent.og:type\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":true,\"doc_values\":false},{\"name\":\"xss.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"headings.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"relatedContent.og:description\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":true,\"doc_values\":false},{\"name\":\"meta.user.lastname\",\"type\":\"number\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"relatedContent.article:tag.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"geo.dest\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"relatedContent.twitter:image\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":true,\"doc_values\":false},{\"name\":\"relatedContent.article:section.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"utc_time\",\"type\":\"date\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"relatedContent.twitter:card\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":true,\"doc_values\":false},{\"name\":\"meta.char\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"clientip\",\"type\":\"ip\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"relatedContent.og:image:height\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":true,\"doc_values\":false},{\"name\":\"host\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":true,\"doc_values\":false},{\"name\":\"machine.ram\",\"type\":\"number\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"links\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":true,\"doc_values\":false},{\"name\":\"id\",\"type\":\"number\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"@tags.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"phpmemory\",\"type\":\"number\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"relatedContent.twitter:card.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"ip\",\"type\":\"ip\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"relatedContent.og:image\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":true,\"doc_values\":false},{\"name\":\"relatedContent.article:modified_time\",\"type\":\"date\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"index\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":true,\"doc_values\":false},{\"name\":\"relatedContent.url\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":true,\"doc_values\":false},{\"name\":\"relatedContent.og:site_name.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"request.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"relatedContent.article:tag\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":true,\"doc_values\":false},{\"name\":\"agent.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"spaces\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":true,\"doc_values\":false},{\"name\":\"relatedContent.twitter:site.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"headings\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":true,\"doc_values\":false},{\"name\":\"_source\",\"type\":\"_source\",\"count\":0,\"scripted\":false,\"indexed\":false,\"analyzed\":false,\"doc_values\":false},{\"name\":\"relatedContent.og:image.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"request\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":true,\"doc_values\":false},{\"name\":\"index.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"extension\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":true,\"doc_values\":false},{\"name\":\"memory\",\"type\":\"number\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"_index\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":false,\"analyzed\":false,\"doc_values\":false},{\"name\":\"relatedContent.twitter:site\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":true,\"doc_values\":false},{\"name\":\"relatedContent.twitter:description\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":true,\"doc_values\":false},{\"name\":\"relatedContent.og:url\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":true,\"doc_values\":false},{\"name\":\"geo.coordinates\",\"type\":\"geo_point\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"relatedContent.url.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"meta.related\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":true,\"doc_values\":false},{\"name\":\"relatedContent.twitter:title.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"relatedContent.og:title.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"response.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"@message.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"machine.os\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":true,\"doc_values\":false},{\"name\":\"relatedContent.article:section\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":true,\"doc_values\":false},{\"name\":\"relatedContent.og:url.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"xss\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":true,\"doc_values\":false},{\"name\":\"links.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"relatedContent.og:title\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":true,\"doc_values\":false},{\"name\":\"geo.srcdest\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"url.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"extension.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"machine.os.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"@tags\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":true,\"doc_values\":false},{\"name\":\"host.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"relatedContent.og:type.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"geo.src\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"spaces.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"relatedContent.og:image:height.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"url\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":true,\"doc_values\":false},{\"name\":\"relatedContent.twitter:description.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"relatedContent.og:site_name\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":true,\"doc_values\":false},{\"name\":\"relatedContent.twitter:title\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":true,\"doc_values\":false},{\"name\":\"@message\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":true,\"doc_values\":false},{\"name\":\"relatedContent.twitter:image.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"@timestamp\",\"type\":\"date\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"bytes\",\"type\":\"number\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"response\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":true,\"doc_values\":false},{\"name\":\"meta.user.firstname\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":true,\"doc_values\":false},{\"name\":\"relatedContent.og:image:width.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"relatedContent.og:description.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"relatedContent.article:published_time\",\"type\":\"date\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"_id\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":false,\"analyzed\":false,\"doc_values\":false},{\"name\":\"_type\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":false,\"analyzed\":false,\"doc_values\":false},{\"name\":\"_score\",\"type\":\"number\",\"count\":0,\"scripted\":false,\"indexed\":false,\"analyzed\":false,\"doc_values\":false}]",
+    "timeFieldName": "@timestamp",
+    "title": "logstash-*"
+  },
+  "coreMigrationVersion": "8.4.0",
+  "id": "logstash-*",
+  "migrationVersion": {
+    "index-pattern": "8.0.0"
+  },
+  "references": [],
+  "type": "index-pattern",
+  "version": "WzIyLDJd"
+}
+
+{
+  "attributes": {
+    "description": "AreaChart",
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"query\":{\"query_string\":{\"query\":\"*\",\"analyze_wildcard\":true}},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+    },
+    "title": "Visualization 1 (tag-1)",
+    "uiStateJSON": "{}",
+    "version": 1,
+    "visState": "{\"title\":\"Visualization AreaChart\",\"type\":\"area\",\"params\":{\"legendSize\":\"auto\"}}"
+  },
+  "coreMigrationVersion": "8.4.0",
+  "id": "vis-area-1",
+  "migrationVersion": {
+    "visualization": "8.3.0"
+  },
+  "references": [
+    {
+      "id": "tag-1",
+      "name": "tag-1-ref",
+      "type": "tag"
+    },
+    {
+      "id": "logstash-*",
+      "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "visualization",
+  "version": "WzIzLDJd"
+}
+
+{
+  "attributes": {
+    "description": "AreaChart",
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"query\":{\"query_string\":{\"query\":\"*\",\"analyze_wildcard\":true}},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+    },
+    "title": "Visualization 2 (tag-2)",
+    "uiStateJSON": "{}",
+    "version": 1,
+    "visState": "{\"title\":\"Visualization AreaChart\",\"type\":\"area\",\"params\":{\"legendSize\":\"auto\"}}"
+  },
+  "coreMigrationVersion": "8.4.0",
+  "id": "vis-area-2",
+  "migrationVersion": {
+    "visualization": "8.3.0"
+  },
+  "references": [
+    {
+      "id": "tag-2",
+      "name": "tag-2-ref",
+      "type": "tag"
+    },
+    {
+      "id": "logstash-*",
+      "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "visualization",
+  "version": "WzI0LDJd"
+}
+
+{
+  "attributes": {
+    "description": "AreaChart",
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"query\":{\"query_string\":{\"query\":\"*\",\"analyze_wildcard\":true}},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+    },
+    "title": "Visualization 3 (tag-1 + tag-3)",
+    "uiStateJSON": "{}",
+    "version": 1,
+    "visState": "{\"title\":\"Visualization AreaChart\",\"type\":\"area\",\"params\":{\"legendSize\":\"auto\"}}"
+  },
+  "coreMigrationVersion": "8.4.0",
+  "id": "vis-area-3",
+  "migrationVersion": {
+    "visualization": "8.3.0"
+  },
+  "references": [
+    {
+      "id": "tag-1",
+      "name": "tag-1-ref",
+      "type": "tag"
+    },
+    {
+      "id": "tag-3",
+      "name": "tag-3-ref",
+      "type": "tag"
+    },
+    {
+      "id": "logstash-*",
+      "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "visualization",
+  "version": "WzI1LDJd"
+}
+
+{
+  "attributes": {
+    "description": "AreaChart",
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"query\":{\"query_string\":{\"query\":\"*\",\"analyze_wildcard\":true}},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+    },
+    "title": "Visualization 4 (tag-2)",
+    "uiStateJSON": "{}",
+    "version": 1,
+    "visState": "{\"title\":\"Visualization AreaChart\",\"type\":\"area\",\"params\":{\"legendSize\":\"auto\"}}"
+  },
+  "coreMigrationVersion": "8.4.0",
+  "id": "vis-area-4",
+  "migrationVersion": {
+    "visualization": "8.3.0"
+  },
+  "references": [
+    {
+      "id": "tag-2",
+      "name": "tag-2-ref",
+      "type": "tag"
+    },
+    {
+      "id": "logstash-*",
+      "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "visualization",
+  "version": "WzI2LDJd"
+}
+
+{
+  "attributes": {
+    "description": "AreaChart",
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"query\":{\"query_string\":{\"query\":\"*\",\"analyze_wildcard\":true}},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+    },
+    "title": "My awesome vis (tag-4)",
+    "uiStateJSON": "{}",
+    "version": 1,
+    "visState": "{\"title\":\"Visualization AreaChart\",\"type\":\"area\",\"params\":{\"legendSize\":\"auto\"}}"
+  },
+  "coreMigrationVersion": "8.4.0",
+  "id": "vis-area-5",
+  "migrationVersion": {
+    "visualization": "8.3.0"
+  },
+  "references": [
+    {
+      "id": "tag-4",
+      "name": "tag-4-ref",
+      "type": "tag"
+    },
+    {
+      "id": "logstash-*",
+      "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "visualization",
+  "version": "WzI3LDJd"
+}
+
+{
+  "attributes": {
+    "description": "",
+    "hits": 0,
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"lucene\"},\"filter\":[{\"meta\":{\"negate\":false,\"disabled\":false,\"alias\":null,\"type\":\"phrase\",\"key\":\"animal\",\"value\":\"dog\",\"params\":{\"query\":\"dog\",\"type\":\"phrase\"},\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index\"},\"query\":{\"match\":{\"animal\":{\"query\":\"dog\",\"type\":\"phrase\"}}},\"$state\":{\"store\":\"appState\"}}],\"highlightAll\":true,\"version\":true}"
+    },
+    "optionsJSON": "{\"darkTheme\":false,\"useMargins\":true,\"hidePanelTitles\":false}",
+    "panelsJSON": "[]",
+    "timeFrom": "Mon Apr 09 2018 17:56:08 GMT-0400",
+    "timeRestore": true,
+    "timeTo": "Wed Apr 11 2018 17:56:08 GMT-0400",
+    "title": "dashboard 1 (tag-2)",
+    "version": 1
+  },
+  "coreMigrationVersion": "8.4.0",
+  "id": "ref-to-tag-2",
+  "migrationVersion": {
+    "dashboard": "8.3.0"
+  },
+  "references": [
+    {
+      "id": "tag-2",
+      "name": "tag-2-ref",
+      "type": "tag"
+    }
+  ],
+  "type": "dashboard",
+  "updated_at": "2018-04-11T21:57:52.253Z",
+  "version": "WzI4LDJd"
+}
+
+{
+  "attributes": {
+    "description": "",
+    "hits": 0,
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"lucene\"},\"filter\":[{\"meta\":{\"negate\":false,\"disabled\":false,\"alias\":null,\"type\":\"phrase\",\"key\":\"animal\",\"value\":\"dog\",\"params\":{\"query\":\"dog\",\"type\":\"phrase\"},\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index\"},\"query\":{\"match\":{\"animal\":{\"query\":\"dog\",\"type\":\"phrase\"}}},\"$state\":{\"store\":\"appState\"}}],\"highlightAll\":true,\"version\":true}"
+    },
+    "optionsJSON": "{\"darkTheme\":false,\"useMargins\":true,\"hidePanelTitles\":false}",
+    "panelsJSON": "[]",
+    "timeFrom": "Mon Apr 09 2018 17:56:08 GMT-0400",
+    "timeRestore": true,
+    "timeTo": "Wed Apr 11 2018 17:56:08 GMT-0400",
+    "title": "dashboard 2 (tag-3)",
+    "version": 1
+  },
+  "coreMigrationVersion": "8.4.0",
+  "id": "ref-to-tag-3",
+  "migrationVersion": {
+    "dashboard": "8.3.0"
+  },
+  "references": [
+    {
+      "id": "tag-3",
+      "name": "tag-3-ref",
+      "type": "tag"
+    }
+  ],
+  "type": "dashboard",
+  "updated_at": "2018-04-11T21:57:52.253Z",
+  "version": "WzI5LDJd"
+}
+
+
+{
+  "attributes": {
+    "description": "",
+    "hits": 0,
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"lucene\"},\"filter\":[{\"meta\":{\"negate\":false,\"disabled\":false,\"alias\":null,\"type\":\"phrase\",\"key\":\"animal\",\"value\":\"dog\",\"params\":{\"query\":\"dog\",\"type\":\"phrase\"},\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index\"},\"query\":{\"match\":{\"animal\":{\"query\":\"dog\",\"type\":\"phrase\"}}},\"$state\":{\"store\":\"appState\"}}],\"highlightAll\":true,\"version\":true}"
+    },
+    "optionsJSON": "{\"darkTheme\":false,\"useMargins\":true,\"hidePanelTitles\":false}",
+    "panelsJSON": "[]",
+    "timeFrom": "Mon Apr 09 2018 17:56:08 GMT-0400",
+    "timeRestore": true,
+    "timeTo": "Wed Apr 11 2018 17:56:08 GMT-0400",
+    "title": "dashboard 3 (tag-1 and tag-3)",
+    "version": 1
+  },
+  "coreMigrationVersion": "8.4.0",
+  "id": "ref-to-tag-1-and-tag-3",
+  "migrationVersion": {
+    "dashboard": "8.3.0"
+  },
+  "references": [
+    {
+      "id": "tag-1",
+      "name": "tag-1-ref",
+      "type": "tag"
+    },
+    {
+      "id": "tag-3",
+      "name": "tag-3-ref",
+      "type": "tag"
+    }
+  ],
+  "type": "dashboard",
+  "updated_at": "2018-04-11T21:57:52.253Z",
+  "version": "WzMwLDJd"
+}
+
+{
+  "attributes": {
+    "description": "",
+    "hits": 0,
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"lucene\"},\"filter\":[{\"meta\":{\"negate\":false,\"disabled\":false,\"alias\":null,\"type\":\"phrase\",\"key\":\"animal\",\"value\":\"dog\",\"params\":{\"query\":\"dog\",\"type\":\"phrase\"},\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index\"},\"query\":{\"match\":{\"animal\":{\"query\":\"dog\",\"type\":\"phrase\"}}},\"$state\":{\"store\":\"appState\"}}],\"highlightAll\":true,\"version\":true}"
+    },
+    "optionsJSON": "{\"darkTheme\":false,\"useMargins\":true,\"hidePanelTitles\":false}",
+    "panelsJSON": "[]",
+    "timeFrom": "Mon Apr 09 2018 17:56:08 GMT-0400",
+    "timeRestore": true,
+    "timeTo": "Wed Apr 11 2018 17:56:08 GMT-0400",
+    "title": "dashboard 4 (tag-special-chars)",
+    "version": 1
+  },
+  "coreMigrationVersion": "8.4.0",
+  "id": "ref-to-tag-special-chars",
+  "migrationVersion": {
+    "dashboard": "8.3.0"
+  },
+  "references": [
+    {
+      "id": "tag-special-chars",
+      "name": "tag-special-ref",
+      "type": "tag"
+    }
+  ],
+  "type": "dashboard",
+  "updated_at": "2018-04-11T21:57:52.253Z",
+  "version": "WzMxLDJd"
+}

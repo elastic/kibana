@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { KibanaRequest } from '@kbn/core/server';
+import type { KibanaRequest } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { isEqual } from 'lodash/fp';
-import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { OperatingSystem } from '@kbn/securitysolution-utils';
-import { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
-import { ExceptionItemLikeOptions } from '../types';
+import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
+import type { ExceptionItemLikeOptions } from '../types';
 import { getEndpointAuthzInitialState } from '../../../../common/endpoint/service/authz';
 import {
   getPolicyIdsFromArtifact,
@@ -131,7 +131,9 @@ export class BaseValidator {
         return;
       }
 
-      const policiesFromFleet = await packagePolicy.getByIDs(internalReadonlySoClient, policyIds);
+      const policiesFromFleet = await packagePolicy.getByIDs(internalReadonlySoClient, policyIds, {
+        ignoreMissing: true,
+      });
 
       if (!policiesFromFleet) {
         throw new EndpointArtifactExceptionValidationError(
@@ -139,9 +141,9 @@ export class BaseValidator {
         );
       }
 
-      const invalidPolicyIds = policiesFromFleet
-        .filter((policy) => policy.version === undefined)
-        .map((policy) => policy.id);
+      const invalidPolicyIds = policyIds.filter(
+        (policyId) => !policiesFromFleet.some((policy) => policyId === policy.id)
+      );
 
       if (invalidPolicyIds.length) {
         throw new EndpointArtifactExceptionValidationError(

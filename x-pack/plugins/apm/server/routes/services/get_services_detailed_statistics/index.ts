@@ -8,6 +8,7 @@
 import { withApmSpan } from '../../../utils/with_apm_span';
 import { Setup } from '../../../lib/helpers/setup_request';
 import { getServiceTransactionDetailedStatistics } from './get_service_transaction_detailed_statistics';
+import { RandomSampler } from '../../../lib/helpers/get_random_sampler';
 
 export async function getServicesDetailedStatistics({
   serviceNames,
@@ -18,7 +19,7 @@ export async function getServicesDetailedStatistics({
   offset,
   start,
   end,
-  probability,
+  randomSampler,
 }: {
   serviceNames: string[];
   environment: string;
@@ -28,7 +29,7 @@ export async function getServicesDetailedStatistics({
   offset?: string;
   start: number;
   end: number;
-  probability: number;
+  randomSampler: RandomSampler;
 }) {
   return withApmSpan('get_service_detailed_statistics', async () => {
     const commonProps = {
@@ -39,7 +40,7 @@ export async function getServicesDetailedStatistics({
       searchAggregatedTransactions,
       start,
       end,
-      probability,
+      randomSampler,
     };
 
     const [currentPeriod, previousPeriod] = await Promise.all([

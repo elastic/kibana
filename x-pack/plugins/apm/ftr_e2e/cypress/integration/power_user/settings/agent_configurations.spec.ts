@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { apm, timerange } from '@elastic/apm-synthtrace';
+import { apm, timerange } from '@kbn/apm-synthtrace';
 import url from 'url';
 import { synthtrace } from '../../../../synthtrace';
 
@@ -55,10 +55,10 @@ function generateData({
 }
 
 describe('Agent configuration', () => {
-  before(async () => {
+  before(() => {
     const { rangeFrom, rangeTo } = timeRange;
 
-    await synthtrace.index(
+    synthtrace.index(
       generateData({
         from: new Date(rangeFrom).getTime(),
         to: new Date(rangeTo).getTime(),
@@ -67,13 +67,13 @@ describe('Agent configuration', () => {
     );
   });
 
-  after(async () => {
-    await synthtrace.clean();
+  after(() => {
+    synthtrace.clean();
   });
 
   beforeEach(() => {
     cy.loginAsEditorUser();
-    cy.visit(agentConfigHref);
+    cy.visitKibana(agentConfigHref);
   });
 
   it('persists service enviroment when clicking on edit button', () => {
@@ -100,5 +100,30 @@ describe('Agent configuration', () => {
     cy.contains('Edit').click();
     cy.wait('@serviceEnvironmentApi');
     cy.contains('production');
+  });
+  it('displays All label when selecting all option', () => {
+    cy.intercept(
+      'GET',
+      '/api/apm/settings/agent-configuration/environments'
+    ).as('serviceEnvironmentApi');
+    cy.contains('Create configuration').click();
+    cy.get('[data-test-subj="serviceNameComboBox"]')
+      .click()
+      .type('All')
+      .type('{enter}');
+    cy.contains('All').realClick();
+    cy.wait('@serviceEnvironmentApi');
+
+    cy.get('[data-test-subj="serviceEnviromentComboBox"]')
+      .click({ force: true })
+      .type('All');
+
+    cy.get('mark').contains('All').click();
+    cy.contains('Next step').click();
+    cy.contains('Service name All');
+    cy.contains('Environment All');
+    cy.contains('Edit').click();
+    cy.wait('@serviceEnvironmentApi');
+    cy.contains('All');
   });
 });

@@ -24,5 +24,5 @@ export { KQLSyntaxError } from './kuery_syntax_error';
 export { nodeTypes, nodeBuilder } from './node_types';
 export { fromKueryExpression } from './ast';
 export { escapeKuery } from './utils';
-export type { FunctionTypeBuildNode, NodeTypes } from './node_types';
+export type { FunctionTypeBuildNode } from './node_types';
 export type { DslQuery, KueryNode, KueryQueryOptions, KueryParseOptions } from './types';

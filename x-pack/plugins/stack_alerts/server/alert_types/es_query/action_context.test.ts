@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { EsQueryAlertActionContext, addMessages } from './action_context';
-import { EsQueryAlertParamsSchema } from './alert_type_params';
-import { OnlyEsQueryAlertParams } from './types';
+import { EsQueryRuleActionContext, addMessages } from './action_context';
+import { EsQueryRuleParamsSchema } from './rule_type_params';
+import { OnlyEsQueryRuleParams } from './types';
 
 describe('ActionContext', () => {
   it('generates expected properties', async () => {
-    const params = EsQueryAlertParamsSchema.validate({
+    const params = EsQueryRuleParamsSchema.validate({
       index: ['[index]'],
       timeField: '[timeField]',
       esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
@@ -21,18 +21,18 @@ describe('ActionContext', () => {
       thresholdComparator: '>',
       threshold: [4],
       searchType: 'esQuery',
-    }) as OnlyEsQueryAlertParams;
-    const base: EsQueryAlertActionContext = {
+    }) as OnlyEsQueryRuleParams;
+    const base: EsQueryRuleActionContext = {
       date: '2020-01-01T00:00:00.000Z',
       value: 42,
       conditions: 'count greater than 4',
       hits: [],
       link: 'link-mock',
     };
-    const context = addMessages({ name: '[alert-name]' }, base, params);
-    expect(context.title).toMatchInlineSnapshot(`"alert '[alert-name]' matched query"`);
+    const context = addMessages({ name: '[rule-name]' }, base, params);
+    expect(context.title).toMatchInlineSnapshot(`"rule '[rule-name]' matched query"`);
     expect(context.message).toEqual(
-      `alert '[alert-name]' is active:
+      `rule '[rule-name]' is active:
 
 - Value: 42
 - Conditions Met: count greater than 4 over 5m
@@ -41,8 +41,39 @@ describe('ActionContext', () => {
     );
   });
 
+  it('generates expected properties when isRecovered is true', async () => {
+    const params = EsQueryRuleParamsSchema.validate({
+      index: ['[index]'],
+      timeField: '[timeField]',
+      esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
+      size: 100,
+      timeWindowSize: 5,
+      timeWindowUnit: 'm',
+      thresholdComparator: '>',
+      threshold: [4],
+      searchType: 'esQuery',
+    }) as OnlyEsQueryRuleParams;
+    const base: EsQueryRuleActionContext = {
+      date: '2020-01-01T00:00:00.000Z',
+      value: 42,
+      conditions: 'count not greater than 4',
+      hits: [],
+      link: 'link-mock',
+    };
+    const context = addMessages({ name: '[rule-name]' }, base, params, true);
+    expect(context.title).toMatchInlineSnapshot(`"rule '[rule-name]' recovered"`);
+    expect(context.message).toEqual(
+      `rule '[rule-name]' is recovered:
+
+- Value: 42
+- Conditions Met: count not greater than 4 over 5m
+- Timestamp: 2020-01-01T00:00:00.000Z
+- Link: link-mock`
+    );
+  });
+
   it('generates expected properties if comparator is between', async () => {
-    const params = EsQueryAlertParamsSchema.validate({
+    const params = EsQueryRuleParamsSchema.validate({
       index: ['[index]'],
       timeField: '[timeField]',
       esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
@@ -52,18 +83,18 @@ describe('ActionContext', () => {
       thresholdComparator: 'between',
       threshold: [4, 5],
       searchType: 'esQuery',
-    }) as OnlyEsQueryAlertParams;
-    const base: EsQueryAlertActionContext = {
+    }) as OnlyEsQueryRuleParams;
+    const base: EsQueryRuleActionContext = {
       date: '2020-01-01T00:00:00.000Z',
       value: 4,
       conditions: 'count between 4 and 5',
       hits: [],
       link: 'link-mock',
     };
-    const context = addMessages({ name: '[alert-name]' }, base, params);
-    expect(context.title).toMatchInlineSnapshot(`"alert '[alert-name]' matched query"`);
+    const context = addMessages({ name: '[rule-name]' }, base, params);
+    expect(context.title).toMatchInlineSnapshot(`"rule '[rule-name]' matched query"`);
     expect(context.message).toEqual(
-      `alert '[alert-name]' is active:
+      `rule '[rule-name]' is active:
 
 - Value: 4
 - Conditions Met: count between 4 and 5 over 5m

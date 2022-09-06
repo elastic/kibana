@@ -5,24 +5,21 @@
  * 2.0.
  */
 
-import { EuiImage, EuiLoadingSpinner, EuiPopover } from '@elastic/eui';
+import { EuiImage, EuiPopover } from '@elastic/eui';
 import React from 'react';
-import styled from 'styled-components';
-import { ScreenshotRefImageData } from '../../../../../../../common/runtime_types/ping/synthetics';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { LoadingImageState } from './no_image_available';
+import { ScreenshotRefImageData } from '../../../../../../../common/runtime_types';
 import { fullSizeImageAlt } from './translations';
 import { useCompositeImage } from '../../../../../hooks/use_composite_image';
 
 const POPOVER_IMG_HEIGHT = 360;
 const POPOVER_IMG_WIDTH = 640;
 
-const StepImage = styled(EuiImage)`
-  &&& {
-    display: flex;
-    figure.euiImage-isFullScreen {
+const StepImage = euiStyled(EuiImage)`
+  &&& .euiImageFullScreenWrapper {
+    figcaption {
       display: flex;
-      div.stepArrowsFullScreen {
-        display: flex;
-      }
     }
   }
 `;
@@ -49,7 +46,7 @@ const DefaultImage: React.FC<ScreenshotImageProps & { imageData?: string }> = ({
       className="syntheticsStepImage"
     />
   ) : (
-    <EuiLoadingSpinner size="l" />
+    <LoadingImageState />
   );
 
 /**
@@ -155,7 +152,7 @@ export const StepImagePopover: React.FC<StepImagePopoverProps> = ({
           style={{ height: POPOVER_IMG_HEIGHT, width: POPOVER_IMG_WIDTH, objectFit: 'contain' }}
         />
       ) : (
-        <EuiLoadingSpinner size="l" />
+        <LoadingImageState />
       )}
     </EuiPopover>
   );

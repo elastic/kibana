@@ -24,8 +24,6 @@ export class DiscoverPageObject extends FtrService {
   private readonly kibanaServer = this.ctx.getService('kibanaServer');
   private readonly queryBar = this.ctx.getService('queryBar');
 
-  private readonly unifiedSearch = this.ctx.getPageObject('unifiedSearch');
-
   private readonly defaultFindTimeout = this.config.get('timeouts.find');
 
   public async getChartTimespan() {
@@ -51,7 +49,11 @@ export class DiscoverPageObject extends FtrService {
     await fieldSearch.clearValue();
   }
 
-  public async saveSearch(searchName: string, saveAsNew?: boolean) {
+  public async saveSearch(
+    searchName: string,
+    saveAsNew?: boolean,
+    options: { tags: string[] } = { tags: [] }
+  ) {
     await this.clickSaveSearchButton();
     // preventing an occasional flakiness when the saved object wasn't set and the form can't be submitted
     await this.retry.waitFor(
@@ -62,6 +64,14 @@ export class DiscoverPageObject extends FtrService {
         return (await saveButton.getAttribute('disabled')) !== 'true';
       }
     );
+
+    if (options.tags.length) {
+      await this.testSubjects.click('savedObjectTagSelector');
+      for (const tagName of options.tags) {
+        await this.testSubjects.click(`tagSelectorOption-${tagName.replace(' ', '_')}`);
+      }
+      await this.testSubjects.click('savedObjectTitle');
+    }
 
     if (saveAsNew !== undefined) {
       await this.retry.waitFor(`save as new switch is set`, async () => {
@@ -507,6 +517,23 @@ export class DiscoverPageObject extends FtrService {
     await this.header.waitUntilLoadingHasFinished();
   }
 
+  public async getIndexPatterns() {
+    await this.testSubjects.click('discover-dataView-switch-link');
+    const indexPatternSwitcher = await this.testSubjects.find('indexPattern-switcher');
+    const li = await indexPatternSwitcher.findAllByTagName('li');
+    const items = await Promise.all(li.map((lis) => lis.getVisibleText()));
+    await this.testSubjects.click('discover-dataView-switch-link');
+    return items;
+  }
+
+  public async selectTextBaseLang(lang: 'SQL') {
+    await this.testSubjects.click('discover-dataView-switch-link');
+    await this.find.clickByCssSelector(
+      `[data-test-subj="text-based-languages-switcher"] [title="${lang}"]`
+    );
+    await this.header.waitUntilLoadingHasFinished();
+  }
+
   public async removeHeaderColumn(name: string) {
     const isLegacyDefault = await this.useLegacyTable();
     if (isLegacyDefault) {
@@ -562,7 +589,6 @@ export class DiscoverPageObject extends FtrService {
     await this.retry.waitFor('Discover app on screen', async () => {
       return await this.isDiscoverAppOnScreen();
     });
-    await this.unifiedSearch.closeTourPopoverByLocalStorage();
   }
 
   public async showAllFilterActions() {
@@ -632,7 +658,7 @@ export class DiscoverPageObject extends FtrService {
   public async clickViewModeFieldStatsButton() {
     await this.retry.tryForTime(2 * 1000, async () => {
       await this.testSubjects.existOrFail('dscViewModeFieldStatsButton');
-      await this.testSubjects.clickWhenNotDisabled('dscViewModeFieldStatsButton');
+      await this.testSubjects.clickWhenNotDisabledWithoutRetry('dscViewModeFieldStatsButton');
       await this.testSubjects.existOrFail('dscFieldStatsEmbeddedContent');
     });
   }

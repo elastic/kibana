@@ -7,11 +7,12 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { getQueryFilter } from '../../../../../common/detection_engine/get_query_filter';
-import {
+import type {
   GetThreatListOptions,
   ThreatListCountOptions,
   ThreatListDoc,
   ThreatListItem,
+  GetSortForThreatList,
 } from './types';
 
 /**
@@ -21,18 +22,19 @@ export const INDICATOR_PER_PAGE = 1000;
 
 export const getThreatList = async ({
   esClient,
-  query,
-  language,
-  index,
-  searchAfter,
   exceptionItems,
+  index,
+  language,
+  perPage,
+  query,
+  ruleExecutionLogger,
+  searchAfter,
   threatFilters,
-  buildRuleMessage,
-  logger,
   threatListConfig,
   pitId,
   reassignPitId,
-  perPage,
+  runtimeMappings,
+  listClient,
 }: GetThreatListOptions): Promise<estypes.SearchResponse<ThreatListDoc>> => {
   const calculatedPerPage = perPage ?? INDICATOR_PER_PAGE;
   if (calculatedPerPage > 10000) {
@@ -46,10 +48,8 @@ export const getThreatList = async ({
     exceptionItems
   );
 
-  logger.debug(
-    buildRuleMessage(
-      `Querying the indicator items from the index: "${index}" with searchAfter: "${searchAfter}" for up to ${calculatedPerPage} indicator items`
-    )
+  ruleExecutionLogger.debug(
+    `Querying the indicator items from the index: "${index}" with searchAfter: "${searchAfter}" for up to ${calculatedPerPage} indicator items`
   );
 
   const response = await esClient.search<
@@ -60,18 +60,34 @@ export const getThreatList = async ({
       ...threatListConfig,
       query: queryFilter,
       search_after: searchAfter,
-      sort: ['_shard_doc', { '@timestamp': 'asc' }],
+      runtime_mappings: runtimeMappings,
+      sort: getSortForThreatList({
+        index,
+        listItemIndex: listClient.getListItemIndex(),
+      }),
     },
     track_total_hits: false,
     size: calculatedPerPage,
     pit: { id: pitId },
   });
 
-  logger.debug(buildRuleMessage(`Retrieved indicator items of size: ${response.hits.hits.length}`));
+  ruleExecutionLogger.debug(`Retrieved indicator items of size: ${response.hits.hits.length}`);
 
   reassignPitId(response.pit_id);
 
   return response;
+};
+
+export const getSortForThreatList = ({
+  index,
+  listItemIndex,
+}: GetSortForThreatList): estypes.Sort => {
+  const defaultSort = ['_shard_doc'];
+  if (index.length === 1 && index[0] === listItemIndex) {
+    return defaultSort;
+  }
+
+  return [...defaultSort, { '@timestamp': 'asc' }];
 };
 
 export const getThreatListCount = async ({

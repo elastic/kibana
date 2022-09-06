@@ -6,13 +6,14 @@
  */
 
 import expect from '@kbn/expect';
+import { LatencyDistributionChartType } from '@kbn/apm-plugin/common/latency_distribution_chart_types';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
   const apmApiClient = getService('apmApiClient');
 
-  const endpoint = 'POST /internal/apm/latency/overall_distribution';
+  const endpoint = 'POST /internal/apm/latency/overall_distribution/transactions';
 
   // This matches the parameters used for the other tab's search strategy approach in `../correlations/*`.
   const getOptions = () => ({
@@ -23,6 +24,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         end: '2021',
         kuery: '',
         percentileThreshold: 95,
+        chartType: LatencyDistributionChartType.transactionLatency,
       },
     },
   });

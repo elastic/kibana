@@ -35,7 +35,11 @@ import {
   sendGetOneAgentPolicy,
   useFleetStatus,
 } from '../../../../../hooks';
-import { FLEET_APM_PACKAGE, SO_SEARCH_LIMIT, outputType } from '../../../../../../../../common';
+import {
+  FLEET_APM_PACKAGE,
+  SO_SEARCH_LIMIT,
+  outputType,
+} from '../../../../../../../../common/constants';
 
 const AgentPolicyFormRow = styled(EuiFormRow)`
   .euiFormRow__label {

@@ -349,76 +349,6 @@
         ],
         "returnComment": [],
         "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "expressionGauge",
-        "id": "def-public.HorizontalBulletIcon",
-        "type": "Function",
-        "tags": [],
-        "label": "HorizontalBulletIcon",
-        "description": [],
-        "signature": [
-          "({ title, titleId, ...props }: Omit<",
-          "EuiIconProps",
-          ", \"type\">) => JSX.Element"
-        ],
-        "path": "src/plugins/chart_expressions/expression_gauge/public/components/icons/horizontal_bullet_icon.tsx",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "expressionGauge",
-            "id": "def-public.HorizontalBulletIcon.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "{ title, titleId, ...props }",
-            "description": [],
-            "signature": [
-              "Omit<",
-              "EuiIconProps",
-              ", \"type\">"
-            ],
-            "path": "src/plugins/chart_expressions/expression_gauge/public/components/icons/horizontal_bullet_icon.tsx",
-            "deprecated": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "expressionGauge",
-        "id": "def-public.VerticalBulletIcon",
-        "type": "Function",
-        "tags": [],
-        "label": "VerticalBulletIcon",
-        "description": [],
-        "signature": [
-          "({ title, titleId, ...props }: Omit<",
-          "EuiIconProps",
-          ", \"type\">) => JSX.Element"
-        ],
-        "path": "src/plugins/chart_expressions/expression_gauge/public/components/icons/vertical_bullet_icon.tsx",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "expressionGauge",
-            "id": "def-public.VerticalBulletIcon.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "{ title, titleId, ...props }",
-            "description": [],
-            "signature": [
-              "Omit<",
-              "EuiIconProps",
-              ", \"type\">"
-            ],
-            "path": "src/plugins/chart_expressions/expression_gauge/public/components/icons/vertical_bullet_icon.tsx",
-            "deprecated": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
       }
     ],
     "interfaces": [],
@@ -714,7 +644,7 @@
             "label": "labelMajorMode",
             "description": [],
             "signature": [
-              "\"none\" | \"custom\" | \"auto\""
+              "\"none\" | \"auto\" | \"custom\""
             ],
             "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
             "deprecated": false
@@ -810,7 +740,7 @@
             "label": "shape",
             "description": [],
             "signature": [
-              "\"arc\" | \"circle\" | \"horizontalBullet\" | \"verticalBullet\""
+              "\"horizontalBullet\" | \"verticalBullet\" | \"arc\" | \"circle\""
             ],
             "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
             "deprecated": false
@@ -898,14 +828,8 @@
             "section": "def-common.SerializedFieldFormat",
             "text": "SerializedFieldFormat"
           },
-          "<",
-          {
-            "pluginId": "fieldFormats",
-            "scope": "common",
-            "docId": "kibFieldFormatsPluginApi",
-            "section": "def-common.FieldFormatParams",
-            "text": "FieldFormatParams"
-          },
+          "<{}, ",
+          "SerializableRecord",
           "> | undefined) => ",
           {
             "pluginId": "fieldFormats",
@@ -934,14 +858,8 @@
                 "section": "def-common.SerializedFieldFormat",
                 "text": "SerializedFieldFormat"
               },
-              "<",
-              {
-                "pluginId": "fieldFormats",
-                "scope": "common",
-                "docId": "kibFieldFormatsPluginApi",
-                "section": "def-common.FieldFormatParams",
-                "text": "FieldFormatParams"
-              },
+              "<{}, ",
+              "SerializableRecord",
               "> | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_renderers.ts",
@@ -1070,7 +988,7 @@
         "label": "GaugeLabelMajorMode",
         "description": [],
         "signature": [
-          "\"none\" | \"custom\" | \"auto\""
+          "\"none\" | \"auto\" | \"custom\""
         ],
         "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
         "deprecated": false,
@@ -1103,7 +1021,7 @@
           "Theme",
           "; paletteService: ",
           "PaletteRegistry",
-          "; uiState: ",
+          "; renderComplete: () => void; uiState: ",
           {
             "pluginId": "visualizations",
             "scope": "public",
@@ -1125,7 +1043,7 @@
         "label": "GaugeShape",
         "description": [],
         "signature": [
-          "\"arc\" | \"circle\" | \"horizontalBullet\" | \"verticalBullet\""
+          "\"horizontalBullet\" | \"verticalBullet\" | \"arc\" | \"circle\""
         ],
         "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
         "deprecated": false,

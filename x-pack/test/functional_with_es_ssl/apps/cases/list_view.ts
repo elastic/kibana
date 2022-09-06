@@ -85,7 +85,11 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       const caseTitle = 'matchme';
 
       before(async () => {
-        await cases.api.createCase({ title: caseTitle, tags: ['one'] });
+        await cases.api.createCase({
+          title: caseTitle,
+          tags: ['one'],
+          description: 'lots of information about an incident',
+        });
         await cases.api.createCase({ title: 'test2', tags: ['two'] });
         await cases.api.createCase({ title: 'test3' });
         await cases.api.createCase({ title: 'test4' });
@@ -106,12 +110,60 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await cases.casesTable.waitForCasesToBeDeleted();
       });
 
-      it('filters cases from the list with partial match', async () => {
+      it('filters cases from the list using a full string match', async () => {
         await testSubjects.missingOrFail('cases-table-loading', { timeout: 5000 });
 
         // search
         const input = await testSubjects.find('search-cases');
         await input.type(caseTitle);
+        await input.pressKeys(browser.keys.ENTER);
+
+        await cases.casesTable.validateCasesTableHasNthRows(1);
+        await testSubjects.click('clearSearchButton');
+        await cases.casesTable.validateCasesTableHasNthRows(4);
+      });
+
+      it('only shows cases with a wildcard query "test*" matching the title', async () => {
+        await testSubjects.missingOrFail('cases-table-loading', { timeout: 5000 });
+
+        const input = await testSubjects.find('search-cases');
+        await input.type('test*');
+        await input.pressKeys(browser.keys.ENTER);
+
+        await cases.casesTable.validateCasesTableHasNthRows(3);
+        await testSubjects.click('clearSearchButton');
+        await cases.casesTable.validateCasesTableHasNthRows(4);
+      });
+
+      it('does not search the owner field', async () => {
+        await testSubjects.missingOrFail('cases-table-loading', { timeout: 5000 });
+
+        const input = await testSubjects.find('search-cases');
+        await input.type('cases');
+        await input.pressKeys(browser.keys.ENTER);
+
+        await cases.casesTable.validateCasesTableHasNthRows(0);
+        await testSubjects.click('clearSearchButton');
+        await cases.casesTable.validateCasesTableHasNthRows(4);
+      });
+
+      it('only shows cases by matching the word "information" from the cases description', async () => {
+        await testSubjects.missingOrFail('cases-table-loading', { timeout: 5000 });
+
+        const input = await testSubjects.find('search-cases');
+        await input.type('information');
+        await input.pressKeys(browser.keys.ENTER);
+
+        await cases.casesTable.validateCasesTableHasNthRows(1);
+        await testSubjects.click('clearSearchButton');
+        await cases.casesTable.validateCasesTableHasNthRows(4);
+      });
+
+      it('only shows cases with a wildcard query "informa*" matching the cases description', async () => {
+        await testSubjects.missingOrFail('cases-table-loading', { timeout: 5000 });
+
+        const input = await testSubjects.find('search-cases');
+        await input.type('informa*');
         await input.pressKeys(browser.keys.ENTER);
 
         await cases.casesTable.validateCasesTableHasNthRows(1);

@@ -60,7 +60,7 @@ in the _constructor_ of the plugin:
 *plugins/my_plugin/(public|server)/index.ts*
 [source,typescript]
 ----
-import type { PluginInitializerContext } from 'kibana/server';
+import type { PluginInitializerContext } from '@kbn/core/server';
 import { MyPlugin } from './plugin';
 
 export function plugin(initializerContext: PluginInitializerContext) {
@@ -71,7 +71,7 @@ export function plugin(initializerContext: PluginInitializerContext) {
 *plugins/my_plugin/(public|server)/plugin.ts*
 [source,typescript]
 ----
-import { CoreSetup, Logger, Plugin, PluginInitializerContext, PluginName } from 'kibana/server';
+import { CoreSetup, Logger, Plugin, PluginInitializerContext, PluginName } from '@kbn/core/server';
 import type { MyPluginConfig } from './config';
 
 export class MyPlugin implements Plugin {
@@ -118,13 +118,13 @@ same name in `plugins/demoplugin` with the following files:
 [source,typescript]
 ----
 import { schema, TypeOf } from '@kbn/config-schema';
-import type { PluginInitializerContext } from 'kibana/server';
+import type { PluginInitializerContext } from '@kbn/core/server';
 import { DemoPlugin } from './plugin';
 
 export const config = {
   schema: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
-  });
+  }),
 }
 
 export const plugin = (initContext: PluginInitializerContext) => new DemoPlugin(initContext);
@@ -136,7 +136,7 @@ export { DemoPluginSetup } from './plugin';
 *plugins/demoplugin/server/plugin.ts*
 [source,typescript]
 ----
-import type { PluginInitializerContext, Plugin, CoreSetup } from 'kibana/server';
+import type { PluginInitializerContext, Plugin, CoreSetup } from '@kbn/core/server';
 import type { DemoPluginConfig } from '.';
 export interface DemoPluginSetup {};
 
@@ -205,7 +205,7 @@ to the {kib} platform format:
 [source,typescript]
 ----
 import { schema } from '@kbn/config-schema';
-import type { CoreSetup } from 'kibana/server';
+import type { CoreSetup } from '@kbn/core/server';
 
 export class DemoPlugin {
   public setup(core: CoreSetup) {
@@ -239,7 +239,7 @@ migration is complete:
 [source,typescript]
 ----
 import { schema } from '@kbn/config-schema';
-import { CoreSetup } from 'kibana/server';
+import { CoreSetup } from '@kbn/core/server';
 import Boom from '@hapi/boom';
 
 export class DemoPlugin {
@@ -706,7 +706,7 @@ First type:
 *plugins/demoplugin/server/saved_objects/first_type.ts*
 [source,typescript]
 ----
-import type { SavedObjectsType } from 'kibana/server';
+import type { SavedObjectsType } from '@kbn/core/server';
 
 export const firstType: SavedObjectsType = {
   name: 'first-type',
@@ -744,7 +744,7 @@ Second type:
 *plugins/demoplugin/server/saved_objects/second_type.ts*
 [source,typescript]
 ----
-import type { SavedObjectsType } from 'kibana/server';
+import type { SavedObjectsType } from '@kbn/core/server';
 
 export const secondType: SavedObjectsType = {
   name: 'second-type',
@@ -979,7 +979,7 @@ Legacy Elasticsearch library until the additional announcements.
 [source,typescript]
 ----
 // Kibana provides a few typings for internal purposes
-import type { SearchResponse } from 'kibana/server';
+import type { SearchResponse } from '@kbn/core/server';
 type SearchSource = {...};
 type SearchBody = SearchResponse<SearchSource>;
 const { body } = await client.search<SearchBody>(...);

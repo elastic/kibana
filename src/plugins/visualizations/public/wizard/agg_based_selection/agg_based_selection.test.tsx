@@ -77,7 +77,7 @@ describe('AggBasedSelection', () => {
         onVisTypeSelected={jest.fn()}
       />
     );
-    const aggBasedGroupCard = wrapper.find('[data-test-subj="goBackLink"]').at(0);
+    const aggBasedGroupCard = wrapper.find('[data-test-subj="goBackLink"]').last();
     aggBasedGroupCard.simulate('click');
     expect(toggleGroups).toHaveBeenCalled();
   });

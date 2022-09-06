@@ -47,10 +47,7 @@ describe('MetricsTimeControls', () => {
       .find('[data-test-subj="superDatePickerToggleQuickMenuButton"]')
       .first()
       .simulate('click');
-    component
-      .find('[data-test-subj="superDatePickerCommonlyUsed_Today"]')
-      .first()
-      .simulate('click');
+    component.find('[data-test-subj="superDatePickerCommonlyUsed_Today"]').last().simulate('click');
     expect(handleTimeChange.mock.calls.length).toBe(1);
     const timeRangeInput = handleTimeChange.mock.calls[0][0];
     expect(timeRangeInput.from).toBe('now/d');
