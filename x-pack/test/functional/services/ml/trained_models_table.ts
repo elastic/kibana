@@ -284,12 +284,18 @@ export function TrainedModelsTableProvider(
     }
 
     public async openStartDeploymentModal(modelId: string) {
-      await testSubjects.click(this.rowSelector(modelId, 'mlModelsTableRowStartDeploymentAction'));
+      await testSubjects.clickWhenNotDisabled(
+        this.rowSelector(modelId, 'mlModelsTableRowStartDeploymentAction'),
+        { timeout: 5000 }
+      );
       await this.assertStartDeploymentModalExists(true);
     }
 
     public async clickStopDeploymentAction(modelId: string) {
-      await testSubjects.click(this.rowSelector(modelId, 'mlModelsTableRowStopDeploymentAction'));
+      await testSubjects.clickWhenNotDisabled(
+        this.rowSelector(modelId, 'mlModelsTableRowStopDeploymentAction'),
+        { timeout: 5000 }
+      );
     }
 
     public async ensureRowIsExpanded(modelId: string) {

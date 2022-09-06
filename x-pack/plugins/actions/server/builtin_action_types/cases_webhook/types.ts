@@ -7,7 +7,7 @@
 
 import { TypeOf } from '@kbn/config-schema';
 import { Logger } from '@kbn/core/server';
-import { ActionsConfigurationUtilities } from '../../actions_config';
+import { ValidatorServices } from '../../types';
 import {
   ExecutorParamsSchema,
   ExecutorSubActionPushParamsSchema,
@@ -40,10 +40,13 @@ export interface ExternalServiceCredentials {
 
 export interface ExternalServiceValidation {
   config: (
-    configurationUtilities: ActionsConfigurationUtilities,
-    configObject: CasesWebhookPublicConfigurationType
+    configObject: CasesWebhookPublicConfigurationType,
+    validatorServices: ValidatorServices
   ) => void;
-  secrets: (secrets: CasesWebhookSecretConfigurationType) => void;
+  secrets: (
+    secrets: CasesWebhookSecretConfigurationType,
+    validatorServices: ValidatorServices
+  ) => void;
   connector: (
     configObject: CasesWebhookPublicConfigurationType,
     secrets: CasesWebhookSecretConfigurationType
