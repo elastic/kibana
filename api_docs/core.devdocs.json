@@ -33527,6 +33527,18 @@
                 "path": "packages/core/metrics/core-metrics-server-internal/src/logging/get_ops_metrics_log.ts"
               },
               {
+                "plugin": "@kbn/core-usage-data-server-internal",
+                "path": "packages/core/usage-data/core-usage-data-server-internal/src/core_usage_data_service.ts"
+              },
+              {
+                "plugin": "@kbn/core-usage-data-server-internal",
+                "path": "packages/core/usage-data/core-usage-data-server-internal/src/core_usage_data_service.ts"
+              },
+              {
+                "plugin": "@kbn/core-usage-data-server-internal",
+                "path": "packages/core/usage-data/core-usage-data-server-internal/src/core_usage_data_service.ts"
+              },
+              {
                 "plugin": "@kbn/core-metrics-server-internal",
                 "path": "packages/core/metrics/core-metrics-server-internal/src/logging/get_ops_metrics_log.test.ts"
               }

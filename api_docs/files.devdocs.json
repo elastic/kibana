@@ -5063,7 +5063,9 @@
             "signature": [
               "(content: ",
               "Readable",
-              ") => Promise<",
+              ", abort$?: ",
+              "Observable",
+              "<unknown> | undefined) => Promise<",
               {
                 "pluginId": "files",
                 "scope": "common",
@@ -5091,6 +5093,23 @@
                 "path": "x-pack/plugins/files/common/types.ts",
                 "deprecated": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "files",
+                "id": "def-common.File.uploadContent.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "abort$",
+                "description": [
+                  "- An observable that can be used to abort the upload at any time."
+                ],
+                "signature": [
+                  "Observable",
+                  "<unknown> | undefined"
+                ],
+                "path": "x-pack/plugins/files/common/types.ts",
+                "deprecated": false,
+                "isRequired": false
               }
             ],
             "returnComment": []
