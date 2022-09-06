@@ -6,21 +6,35 @@
  */
 import type { HttpSetup } from '@kbn/core/public';
 
-export interface CreateIngestPipeline {
+interface CreateIngestPipeline {
   http: HttpSetup;
   signal?: AbortSignal;
   spaceId?: string;
   options: { name: string; processors: Array<Record<string, unknown>> };
 }
 
-export interface CreateIndices {
+interface DeleteIngestPipeline {
+  http: HttpSetup;
+  signal?: AbortSignal;
+  spaceId?: string;
+  names: string;
+}
+
+interface CreateIndices {
   http: HttpSetup;
   signal?: AbortSignal;
   spaceId?: string;
   options: { index: string; mappings: Record<string, unknown> };
 }
 
-export interface CreateTransforms {
+interface DeleteIndices {
+  http: HttpSetup;
+  signal?: AbortSignal;
+  spaceId?: string;
+  options: { indices: string[] };
+}
+
+interface CreateTransforms {
   http: HttpSetup;
   signal?: AbortSignal;
   spaceId?: string;
@@ -28,32 +42,51 @@ export interface CreateTransforms {
   options: Record<string, unknown>;
 }
 
-export interface StartTransforms {
+interface StartTransforms {
   http: HttpSetup;
   signal?: AbortSignal;
   spaceId?: string;
   transformIds: string[];
 }
 
-export interface StopTransforms {
+interface StopTransforms {
   http: HttpSetup;
   signal?: AbortSignal;
   spaceId?: string;
   transformIds: string[];
 }
 
-export interface GetTransformState {
+interface GetTransformState {
   http: HttpSetup;
   signal?: AbortSignal;
   spaceId?: string;
   transformId: string;
 }
 
-export interface RestartTransforms {
+interface GetTransformsState {
   http: HttpSetup;
   signal?: AbortSignal;
   spaceId?: string;
   transformIds: string[];
+}
+
+interface RestartTransforms {
+  http: HttpSetup;
+  signal?: AbortSignal;
+  spaceId?: string;
+  transformIds: string[];
+}
+
+interface DeleteTransforms {
+  http: HttpSetup;
+  signal?: AbortSignal;
+  spaceId?: string;
+  transformIds: string[];
+  options: {
+    deleteDestIndex?: boolean;
+    deleteDestDataView?: boolean;
+    forceDelete?: boolean;
+  };
 }
 
 export async function createIngestPipeline({
@@ -70,8 +103,30 @@ export async function createIngestPipeline({
   return res;
 }
 
+export async function deleteIngestPipelines({
+  http,
+  signal,
+  spaceId = 'default',
+  names, // separate with ','
+}: DeleteIngestPipeline) {
+  const res = await http.delete(`/api/ingest_pipelines/${names}`, {
+    signal,
+  });
+
+  return res;
+}
+
 export async function createIndices({ http, signal, spaceId = 'default', options }: CreateIndices) {
   const res = await http.put('/api/index_management/indices/create', {
+    body: JSON.stringify(options),
+    signal,
+  });
+
+  return res;
+}
+
+export async function deleteIndices({ http, signal, spaceId = 'default', options }: DeleteIndices) {
+  const res = await http.post('/api/index_management/indices/delete', {
     body: JSON.stringify(options),
     signal,
   });
@@ -118,11 +173,35 @@ export async function getTransformState({
   spaceId = 'default',
   transformId,
 }: GetTransformState) {
-  const res = await http.get(`/api/transform/transforms/${transformId}/_stats`, {
-    signal,
-  });
+  const res = await http.get<{ transforms: Array<{ id: string; state: string }> }>(
+    `/api/transform/transforms/${transformId}/_stats`,
+    {
+      signal,
+    }
+  );
 
   return res;
+}
+
+export async function getTransformsState({
+  http,
+  signal,
+  spaceId = 'default',
+  transformIds,
+}: GetTransformsState) {
+  const unresolvedPromises: Array<Promise<{ transforms: Array<{ id: string; state: string }> }>> =
+    transformIds.map(async (transformId) => {
+      const transformState = await getTransformState({
+        http,
+        signal,
+        spaceId,
+        transformId,
+      });
+      return transformState;
+    });
+
+  const states = await Promise.all(unresolvedPromises);
+  return states;
 }
 
 export async function stopTransforms({
@@ -131,22 +210,37 @@ export async function stopTransforms({
   spaceId = 'default',
   transformIds,
 }: StopTransforms) {
-  transformIds.map(async (transformId) => {
-    const { id, state } = await getTransformState({
-      http,
-      signal,
-      spaceId,
-      transformId,
-    });
-    return { id, state };
-  });
-  const res = await http.post(`/api/transform/start_transforms`, {
+  const states = await getTransformsState({ http, signal, spaceId, transformIds });
+  const res = await http.post(`/api/transform/stop_transforms`, {
     body: JSON.stringify(
-      transformIds.map((id) => ({
-        id,
-        state,
+      states.map((state) => ({
+        id: state.transforms[0].id,
+        state: state.transforms[0].state,
       }))
     ),
+    signal,
+  });
+
+  return res;
+}
+
+export async function deleteTransforms({
+  http,
+  signal,
+  spaceId = 'default',
+  transformIds,
+  options,
+}: DeleteTransforms) {
+  await stopTransforms({ http, signal, spaceId, transformIds });
+
+  const res = await http.post(`/api/transform/delete_transforms`, {
+    body: JSON.stringify({
+      ...options,
+      transformsInfo: transformIds.map((id) => ({
+        id,
+        state: 'stopped',
+      })),
+    }),
     signal,
   });
 
