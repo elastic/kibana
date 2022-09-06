@@ -86,7 +86,9 @@ export const MLSavedObjectsSpacesList: FC<Props> = ({
     });
   }
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const LazySpaceList = useCallback(spacesApi.ui.components.getSpaceList, [spacesApi]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const LazyShareToSpaceFlyout = useCallback(spacesApi.ui.components.getShareToSpaceFlyout, [
     spacesApi,
   ]);

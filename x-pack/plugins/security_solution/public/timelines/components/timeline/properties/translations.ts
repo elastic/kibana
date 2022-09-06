@@ -90,6 +90,6 @@ export const ATTACH_TO_NEW_CASE = i18n.translate(
 export const ATTACH_TO_EXISTING_CASE = i18n.translate(
   'xpack.securitySolution.timeline.properties.attachToExistingCaseButtonLabel',
   {
-    defaultMessage: 'Attach to existing case...',
+    defaultMessage: 'Attach to existing case',
   }
 );
