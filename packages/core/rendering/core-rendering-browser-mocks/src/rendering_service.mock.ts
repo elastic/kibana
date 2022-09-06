@@ -7,9 +7,10 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { RenderingService } from './rendering_service';
+import type { RenderingService } from '@kbn/core-rendering-browser-internal';
 
 type RenderingServiceContract = PublicMethodsOf<RenderingService>;
+
 const createMock = () => {
   const mocked: jest.Mocked<RenderingServiceContract> = {
     start: jest.fn(),
