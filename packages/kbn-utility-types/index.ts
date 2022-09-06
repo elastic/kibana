@@ -136,3 +136,5 @@ export type DeepPartial<T> = T extends any[]
 export interface DeepPartialArray<T> extends Array<DeepPartial<T>> {}
 
 export type DeepPartialObject<T> = { [P in keyof T]+?: DeepPartial<T[P]> };
+
+export type { DotObject, DedotObject } from './src/dot';
