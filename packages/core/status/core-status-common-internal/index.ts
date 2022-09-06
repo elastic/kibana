@@ -6,5 +6,11 @@
  * Side Public License, v 1.
  */
 
-export { statusConfig, StatusService } from './src';
-export type { StatusConfigType, InternalStatusServiceSetup } from './src';
+export type {
+  StatusInfoCoreStatus,
+  StatusInfoServiceStatus,
+  StatusInfo,
+  StatusResponse,
+  ServerVersion,
+  ServerMetrics,
+} from './src';

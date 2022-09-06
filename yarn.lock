@@ -3211,6 +3211,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-status-common-internal@link:bazel-bin/packages/core/status/core-status-common-internal":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-status-common@link:bazel-bin/packages/core/status/core-status-common":
   version "0.0.0"
   uid ""
@@ -7318,6 +7322,10 @@
   uid ""
 
 "@types/kbn__core-server-internal-base@link:bazel-bin/packages/core/server/internal-base/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-status-common-internal@link:bazel-bin/packages/core/status/core-status-common-internal/npm_module_types":
   version "0.0.0"
   uid ""
 

@@ -13,9 +13,9 @@ import type { PluginName } from '@kbn/core-base-common';
 import type { IRouter } from '@kbn/core-http-server';
 import type { MetricsServiceSetup } from '@kbn/core-metrics-server';
 import type { CoreIncrementUsageCounter } from '@kbn/core-usage-data-server';
+import type { StatusResponse } from '@kbn/core-status-common-internal';
 import { ServiceStatus, CoreStatus, ServiceStatusLevels } from '@kbn/core-status-server';
 import { calculateLegacyStatus, LegacyStatusInfo } from '../legacy_status';
-import { StatusResponse } from '../../../types/status';
 
 const SNAPSHOT_POSTFIX = /-SNAPSHOT$/;
 

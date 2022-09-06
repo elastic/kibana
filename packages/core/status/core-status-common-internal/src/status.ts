@@ -6,29 +6,19 @@
  * Side Public License, v 1.
  */
 
-import type {
-  CoreStatus as CoreStatusFromServer,
-  ServiceStatus as ServiceStatusFromServer,
-  ServiceStatusLevel as ServiceStatusLevelFromServer,
-  OpsMetrics,
-} from '../server';
+import type { ServiceStatusLevelId, ServiceStatus, CoreStatus } from '@kbn/core-status-common';
+import type { OpsMetrics } from '@kbn/core-metrics-server';
 
-/**
- * We need this type to convert the object `ServiceStatusLevel` to a union of the possible strings.
- * This is because of the "stringification" that occurs when serving HTTP requests.
- */
-export type ServiceStatusLevel = ReturnType<ServiceStatusLevelFromServer['toString']>;
-
-export interface ServiceStatus extends Omit<ServiceStatusFromServer, 'level'> {
-  level: ServiceStatusLevel;
+export interface StatusInfoServiceStatus extends Omit<ServiceStatus, 'level'> {
+  level: ServiceStatusLevelId;
 }
 
 /**
  * Copy all the services listed in CoreStatus with their specific ServiceStatus declarations
  * but overwriting the `level` to its stringified version.
  */
-export type CoreStatus = {
-  [ServiceName in keyof CoreStatusFromServer]: ServiceStatus;
+export type StatusInfoCoreStatus = {
+  [ServiceName in keyof CoreStatus]: StatusInfoServiceStatus;
 };
 
 export type ServerMetrics = Omit<OpsMetrics, 'collected_at'> & {
@@ -47,9 +37,9 @@ export interface ServerVersion {
 }
 
 export interface StatusInfo {
-  overall: ServiceStatus;
-  core: CoreStatus;
-  plugins: Record<string, ServiceStatus>;
+  overall: StatusInfoServiceStatus;
+  core: StatusInfoCoreStatus;
+  plugins: Record<string, StatusInfoServiceStatus>;
 }
 
 export interface StatusResponse {
