@@ -5,8 +5,26 @@
  * 2.0.
  */
 
+import { Page } from 'playwright';
+
 export function serializeApmGlobalLabels(obj: any) {
   return Object.entries(obj)
     .filter(([, v]) => !!v)
     .reduce((acc, [k, v]) => (acc ? `${acc},${k}=${v}` : `${k}=${v}`), '');
+}
+
+export async function waitForVisualizations(page: Page, visCount: number) {
+  let finish = false;
+
+  do {
+    finish = await page.evaluate((cnt) => {
+      const visualizations = Array.from(document.querySelectorAll('[data-rendering-count]'));
+      const visualizationElementsLoaded = visualizations.length === cnt;
+      const visualizationAnimationsFinished = visualizations.every(
+        (e) => e.getAttribute('data-render-complete') === 'true'
+      );
+
+      return visualizationElementsLoaded && visualizationAnimationsFinished;
+    }, visCount);
+  } while (!finish);
 }
