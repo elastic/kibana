@@ -3139,6 +3139,14 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-rendering-browser-internal@link:bazel-bin/packages/core/rendering/core-rendering-browser-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-rendering-browser-mocks@link:bazel-bin/packages/core/rendering/core-rendering-browser-mocks":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-saved-objects-api-browser@link:bazel-bin/packages/core/saved-objects/core-saved-objects-api-browser":
   version "0.0.0"
   uid ""
@@ -7226,6 +7234,14 @@
   uid ""
 
 "@types/kbn__core-public-internal-base@link:bazel-bin/packages/core/public/internal-base/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-rendering-browser-internal@link:bazel-bin/packages/core/rendering/core-rendering-browser-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-rendering-browser-mocks@link:bazel-bin/packages/core/rendering/core-rendering-browser-mocks/npm_module_types":
   version "0.0.0"
   uid ""
 
