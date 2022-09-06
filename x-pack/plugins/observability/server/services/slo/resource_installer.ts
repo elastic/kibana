@@ -88,8 +88,6 @@ export class ResourceInstaller {
       return false;
     }
 
-    this.logger.info(`ingestPipelineExists = ${ingestPipelineExists}`);
-
     return indexTemplateExists && ingestPipelineExists;
   }
 
