@@ -135,7 +135,7 @@ export const getPieVisualization = ({
     //   applyPaletteToColumnConfig(sortedColumns, state, paletteService);
     // }
 
-    const getSliceByGroup = (): VisualizationDimensionGroupConfig => {
+    const getPartitionsGroup = (): VisualizationDimensionGroupConfig => {
       const baseProps = {
         required: true,
         groupId: 'groups',
@@ -144,30 +144,52 @@ export const getPieVisualization = ({
         filterOperations: numberMetricOperations,
       };
 
+      return {
+        ...baseProps,
+        groupLabel: i18n.translate('xpack.lens.pie.sliceGroupLabel', {
+          defaultMessage: 'Partitions',
+        }),
+        dimensionEditorGroupLabel: i18n.translate('xpack.lens.pie.sliceDimensionGroupLabel', {
+          defaultMessage: 'Slice',
+        }),
+        supportsMoreColumns: true,
+        dataTestSubj: 'lnsPie_sliceByDimensionPanel',
+      };
+    };
+
+    const getSliceByGroup = (): VisualizationDimensionGroupConfig => {
+      const baseProps = {
+        required: true,
+        groupId: 'groups',
+        accessors: sortedColumns,
+        enableDimensionEditor: true,
+        filterOperations: bucketedOperations,
+      };
+
       switch (state.shape) {
         case 'donut':
         case 'pie':
           return {
             ...baseProps,
             groupLabel: i18n.translate('xpack.lens.pie.sliceGroupLabel', {
-              defaultMessage: 'Partitions',
+              defaultMessage: 'Slice by',
             }),
             dimensionEditorGroupLabel: i18n.translate('xpack.lens.pie.sliceDimensionGroupLabel', {
               defaultMessage: 'Slice',
             }),
-            supportsMoreColumns: true,
+            supportsMoreColumns: sortedColumns.length < PartitionChartsMeta.pie.maxBuckets,
             dataTestSubj: 'lnsPie_sliceByDimensionPanel',
           };
         default:
           return {
             ...baseProps,
             groupLabel: i18n.translate('xpack.lens.pie.treemapGroupLabel', {
-              defaultMessage: 'Partitions',
+              defaultMessage: 'Group by',
             }),
             dimensionEditorGroupLabel: i18n.translate('xpack.lens.pie.treemapDimensionGroupLabel', {
               defaultMessage: 'Group',
             }),
-            supportsMoreColumns: true,
+            supportsMoreColumns: sortedColumns.length < PartitionChartsMeta[state.shape].maxBuckets,
             dataTestSubj: 'lnsPie_groupByDimensionPanel',
             requiredMinDimensionCount: PartitionChartsMeta[state.shape].requiredMinDimensionCount,
           };
@@ -195,7 +217,9 @@ export const getPieVisualization = ({
     });
 
     return {
-      groups: [getSliceByGroup()],
+      groups: layer.partitionByDimension
+        ? [getPartitionsGroup()]
+        : [getSliceByGroup(), getMetricGroup()],
     };
   },
 

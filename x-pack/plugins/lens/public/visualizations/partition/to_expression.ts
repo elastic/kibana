@@ -142,7 +142,7 @@ const generateCommonArguments: GenerateExpressionAstArguments = (
     labels: generateCommonLabelsAstArgs(state, attributes, layer),
     buckets: operations.map((o) => o.columnId).map(prepareDimension),
     metric: layer.metric ? [prepareDimension(layer.metric)] : [],
-    partitionByColumn: [true],
+    partitionByColumn: [Boolean(layer.partitionByDimension)],
     legendDisplay: [attributes.isPreview ? LegendDisplay.HIDE : layer.legendDisplay],
     legendPosition: [layer.legendPosition || Position.Right],
     maxLegendLines: [layer.legendMaxLines ?? 1],
