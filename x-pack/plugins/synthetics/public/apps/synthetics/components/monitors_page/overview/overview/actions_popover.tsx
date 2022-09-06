@@ -41,7 +41,7 @@ const Container = styled.div<ActionContainerProps>`
         ''}
 
   border-radius: ${({ theme }) => theme.eui.euiBorderRadius};
-  ${({ boxShadow }) => boxShadow}
+  ${({ boxShadow, position }) => (position === 'relative' ? boxShadow : '')}
 `;
 
 interface Props {
