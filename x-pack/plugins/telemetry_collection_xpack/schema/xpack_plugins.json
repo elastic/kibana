@@ -9080,6 +9080,16 @@
                   "type": "integer"
                 }
               }
+            },
+            "search": {
+              "properties": {
+                "usedTags": {
+                  "type": "integer"
+                },
+                "taggedObjects": {
+                  "type": "integer"
+                }
+              }
             }
           }
         }

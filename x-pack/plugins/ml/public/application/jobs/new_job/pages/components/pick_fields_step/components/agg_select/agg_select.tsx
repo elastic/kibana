@@ -63,6 +63,7 @@ export const AggSelect: FC<Props> = ({ fields, changeHandler, selectedOptions, r
 
   useEffect(() => {
     setValidation(jobValidator.duplicateDetectors);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobValidatorUpdated]);
 
   return (
