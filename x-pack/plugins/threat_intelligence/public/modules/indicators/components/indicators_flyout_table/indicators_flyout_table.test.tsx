@@ -13,23 +13,20 @@ import {
   Indicator,
   RawIndicatorFieldId,
 } from '../../../../../common/types/indicator';
+import { generateFieldTypeMap } from '../../../../common/mocks/mock_field_type_map';
 import {
   EMPTY_PROMPT_TEST_ID,
   IndicatorsFlyoutTable,
   TABLE_TEST_ID,
 } from './indicators_flyout_table';
 import { unwrapValue } from '../../lib/unwrap_value';
-import { displayValue } from '../../lib/display_value';
 
 const mockIndicator: Indicator = generateMockIndicator();
-const mockFieldTypesMap: { [id: string]: string } = {
-  '@timestamp': 'date',
-  'threat.feed.name': 'string',
-};
+const mockFieldTypesMap = generateFieldTypeMap();
 
 describe('<IndicatorsFlyoutTable />', () => {
   it('should render fields and values in table', () => {
-    const { getByTestId, getByText } = render(
+    const { getByTestId, getByText, getAllByText } = render(
       <TestProvidersComponent>
         <IndicatorsFlyoutTable indicator={mockIndicator} fieldTypesMap={mockFieldTypesMap} />
       </TestProvidersComponent>
@@ -39,7 +36,10 @@ describe('<IndicatorsFlyoutTable />', () => {
 
     expect(getByText(RawIndicatorFieldId.Feed)).toBeInTheDocument();
 
-    expect(getByText(displayValue(mockIndicator) as string)).toBeInTheDocument();
+    // There should be two occureces of 'threat.indicator.name' value on the page
+    expect(
+      getAllByText(unwrapValue(mockIndicator, RawIndicatorFieldId.Name) as string)
+    ).toHaveLength(2);
 
     expect(
       getByText(unwrapValue(mockIndicator, RawIndicatorFieldId.Feed) as string)

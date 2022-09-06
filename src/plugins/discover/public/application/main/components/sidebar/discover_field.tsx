@@ -397,6 +397,9 @@ function DiscoverFieldComponent({
 
   const renderPopover = () => {
     const details = getDetails(field);
+
+    // TODO: integrate <FieldStats .../>
+
     return (
       <>
         {showFieldStats && (

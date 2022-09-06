@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { useEffect, useState, useMemo } from 'react';
-import { useQuery, useInfiniteQuery } from 'react-query';
+import { useQuery, useInfiniteQuery } from '@tanstack/react-query';
 import { EuiSearchBarOnChangeArgs } from '@elastic/eui';
 import { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -189,14 +189,13 @@ export const useFetchAlertStatus = (
   return query;
 };
 
-// TODO: we should not load by session id, but instead a combo of process.tty.major+minor, session time range, and host.boot_id (see Rabbitholes section of epic).
 export const useFetchGetTotalIOBytes = (sessionEntityId: string) => {
   const { http } = useKibana<CoreStart>().services;
   const cachingKeys = [QUERY_KEY_GET_TOTAL_IO_BYTES, sessionEntityId];
-  const query = useQuery<number, Error>(
+  const query = useQuery<{ total: number }, Error>(
     cachingKeys,
     async () => {
-      return http.get<number>(GET_TOTAL_IO_BYTES_ROUTE, {
+      return http.get<{ total: number }>(GET_TOTAL_IO_BYTES_ROUTE, {
         query: {
           sessionEntityId,
         },

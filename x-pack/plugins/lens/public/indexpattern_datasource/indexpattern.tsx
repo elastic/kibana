@@ -41,6 +41,7 @@ import {
   injectReferences,
   loadInitialState,
   onRefreshIndexPattern,
+  renameIndexPattern,
   triggerActionOnIndexPatternChange,
 } from './loader';
 import { toExpression } from './to_expression';
@@ -248,17 +249,27 @@ export function getIndexPatternDatasource({
       render(
         <KibanaThemeProvider theme$={core.theme.theme$}>
           <I18nProvider>
-            <IndexPatternDataPanel
-              data={data}
-              dataViews={dataViews}
-              fieldFormats={fieldFormats}
-              charts={charts}
-              indexPatternFieldEditor={dataViewFieldEditor}
-              {...otherProps}
-              core={core}
-              uiActions={uiActions}
-              onIndexPatternRefresh={onRefreshIndexPattern}
-            />
+            <KibanaContextProvider
+              services={{
+                ...core,
+                data,
+                dataViews,
+                fieldFormats,
+                charts,
+              }}
+            >
+              <IndexPatternDataPanel
+                data={data}
+                dataViews={dataViews}
+                fieldFormats={fieldFormats}
+                charts={charts}
+                indexPatternFieldEditor={dataViewFieldEditor}
+                {...otherProps}
+                core={core}
+                uiActions={uiActions}
+                onIndexPatternRefresh={onRefreshIndexPattern}
+              />
+            </KibanaContextProvider>
           </I18nProvider>
         </KibanaThemeProvider>,
         domElement
@@ -454,6 +465,9 @@ export function getIndexPatternDatasource({
       }
       return changeIndexPattern({ indexPatternId, state, storage, indexPatterns });
     },
+    onIndexPatternRename: (state, oldIndexPatternId, newIndexPatternId) => {
+      return renameIndexPattern({ state, oldIndexPatternId, newIndexPatternId });
+    },
     getRenderEventCounters(state: IndexPatternPrivateState): string[] {
       const additionalEvents = {
         time_shift: false,
@@ -540,15 +554,18 @@ export function getIndexPatternDatasource({
           }
           return null;
         },
-        getSourceId: () => layer.indexPatternId,
-        getFilters: (activeData: FramePublicAPI['activeData'], timeRange?: TimeRange) =>
-          getFiltersInLayer(
+        getSourceId: () => {
+          return layer.indexPatternId;
+        },
+        getFilters: (activeData: FramePublicAPI['activeData'], timeRange?: TimeRange) => {
+          return getFiltersInLayer(
             layer,
             visibleColumnIds,
             activeData?.[layerId],
             indexPatterns[layer.indexPatternId],
             timeRange
-          ),
+          );
+        },
         getVisualDefaults: () => getVisualDefaultsForLayer(layer),
         getMaxPossibleNumValues: (columnId) => {
           if (layer && layer.columns[columnId]) {
@@ -586,7 +603,14 @@ export function getIndexPatternDatasource({
         .filter(([_, layer]) => !!indexPatterns[layer.indexPatternId])
         .map(([layerId, layer]) =>
           (
-            getErrorMessages(layer, indexPatterns[layer.indexPatternId], state, layerId, core) ?? []
+            getErrorMessages(
+              layer,
+              indexPatterns[layer.indexPatternId],
+              state,
+              layerId,
+              core,
+              data
+            ) ?? []
           ).map((message) => ({
             shortMessage: '', // Not displayed currently
             longMessage: typeof message === 'string' ? message : message.message,

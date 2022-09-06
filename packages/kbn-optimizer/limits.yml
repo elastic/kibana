@@ -101,7 +101,7 @@ pageLoadAssetSize:
   visTypeMetric: 23332
   bfetch: 22837
   kibanaUtils: 79713
-  dataViews: 43532
+  dataViews: 44532
   expressions: 140958
   fieldFormats: 65209
   kibanaReact: 74422
@@ -125,6 +125,7 @@ pageLoadAssetSize:
   cloudSecurityPosture: 19109
   visTypeGauge: 24113
   unifiedSearch: 71059
+  unifiedFieldList: 65500
   data: 454087
   eventAnnotation: 19334
   screenshotting: 22870
@@ -134,3 +135,4 @@ pageLoadAssetSize:
   kubernetesSecurity: 77234
   threatIntelligence: 29195
   files: 22673
+  savedObjectsFinder: 21691

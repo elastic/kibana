@@ -22,7 +22,7 @@ import {
 } from './mock';
 import { Actions } from '../../common/api';
 import React from 'react';
-import { QueryClientProvider } from 'react-query';
+import { QueryClientProvider } from '@tanstack/react-query';
 import { testQueryClient } from '../common/mock';
 import { waitFor } from '@testing-library/dom';
 import * as api from './api';

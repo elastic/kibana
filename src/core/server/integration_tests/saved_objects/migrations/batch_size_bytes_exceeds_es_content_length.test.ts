@@ -10,8 +10,8 @@ import Path from 'path';
 import fs from 'fs/promises';
 import JSON5 from 'json5';
 import * as kbnTestServer from '../../../../test_helpers/kbn_server';
+import { retryAsync } from '@kbn/core-saved-objects-migration-server-mocks';
 import { Root } from '../../../root';
-import { retryAsync } from '../../../saved_objects/migrations/test_helpers/retry_async';
 
 const logFilePath = Path.join(__dirname, 'batch_size_bytes_exceeds_es_content_length.log');
 

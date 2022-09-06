@@ -7,6 +7,7 @@
  */
 
 import { VisualizeEditorLayersContext } from '@kbn/visualizations-plugin/public';
+import { PANEL_TYPES } from '../../../common/enums';
 import { getDataViewsStart } from '../../services';
 import { getDataSourceInfo } from '../lib/datasource';
 import { getSeries } from '../lib/series';
@@ -15,6 +16,7 @@ import { ConvertTsvbToLensVisualization } from '../types';
 import { convertChartType, getYExtents } from '../lib/xy';
 import { getLayerConfiguration } from '../lib/layers';
 import { isSplitWithDateHistogram } from '../lib/split_chart';
+import { isValidMetrics } from '../lib/metrics';
 
 export const convertToLens: ConvertTsvbToLensVisualization = async (model) => {
   const layersConfiguration: { [key: string]: VisualizeEditorLayersContext } = {};
@@ -30,6 +32,10 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (model) => {
       continue;
     }
 
+    if (!isValidMetrics(layer.metrics, PANEL_TYPES.TIMESERIES)) {
+      return null;
+    }
+
     const { indexPatternId, timeField } = await getDataSourceInfo(
       model.index_pattern,
       model.time_field,
@@ -39,7 +45,7 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (model) => {
     );
 
     // handle multiple metrics
-    const series = getSeries(layer.metrics, seriesNum);
+    const series = getSeries(layer.metrics, seriesNum, layer.split_mode, layer.color);
     if (!series || !series.metrics) {
       return null;
     }
@@ -68,6 +74,7 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (model) => {
       series,
       splitFields,
       timeField,
+      'date_histogram',
       splitWithDateHistogram
     );
   }

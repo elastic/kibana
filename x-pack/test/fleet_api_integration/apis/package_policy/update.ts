@@ -12,6 +12,7 @@ export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
   const dockerServers = getService('dockerServers');
+  const kibanaServer = getService('kibanaServer');
 
   const getPackagePolicyById = async (id: string) => {
     const { body } = await supertest.get(`/api/fleet/package_policies/${id}`);
@@ -30,7 +31,7 @@ export default function (providerContext: FtrProviderContext) {
     let packagePolicyId: string;
     let packagePolicyId2: string;
     before(async () => {
-      await getService('esArchiver').load('x-pack/test/functional/es_archives/empty_kibana');
+      await kibanaServer.savedObjects.cleanStandardList();
       await getService('esArchiver').load(
         'x-pack/test/functional/es_archives/fleet/empty_fleet_server'
       );
@@ -80,7 +81,6 @@ export default function (providerContext: FtrProviderContext) {
           namespace: 'default',
           policy_id: agentPolicyId,
           enabled: true,
-          output_id: '',
           inputs: [],
           package: {
             name: 'filetest',
@@ -99,7 +99,6 @@ export default function (providerContext: FtrProviderContext) {
           namespace: 'default',
           policy_id: agentPolicyId,
           enabled: true,
-          output_id: '',
           inputs: [],
           package: {
             name: 'filetest',
@@ -121,7 +120,7 @@ export default function (providerContext: FtrProviderContext) {
       await getService('esArchiver').unload(
         'x-pack/test/functional/es_archives/fleet/empty_fleet_server'
       );
-      await getService('esArchiver').unload('x-pack/test/functional/es_archives/empty_kibana');
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     it('should work with valid values on "regular" policies', async function () {
@@ -134,7 +133,6 @@ export default function (providerContext: FtrProviderContext) {
           namespace: 'updated_namespace',
           policy_id: agentPolicyId,
           enabled: true,
-          output_id: '',
           inputs: [],
           package: {
             name: 'filetest',
@@ -154,7 +152,6 @@ export default function (providerContext: FtrProviderContext) {
           namespace: 'updated_namespace',
           policy_id: agentPolicyId,
           enabled: true,
-          output_id: '',
           inputs: [],
           package: {
             name: 'filetest',
@@ -178,7 +175,6 @@ export default function (providerContext: FtrProviderContext) {
           namespace: 'updated_namespace',
           policy_id: managedAgentPolicyId,
           enabled: true,
-          output_id: '',
           inputs: [],
           package: {
             name: 'filetest',
@@ -198,7 +194,6 @@ export default function (providerContext: FtrProviderContext) {
           namespace: 'updated_namespace',
           policy_id: agentPolicyId,
           enabled: true,
-          output_id: '',
           inputs: [],
           package: {
             name: 'filetest',
@@ -228,7 +223,6 @@ export default function (providerContext: FtrProviderContext) {
           namespace: 'updated_namespace',
           policy_id: otherAgentPolicyId,
           enabled: true,
-          output_id: '',
           inputs: [],
           package: {
             name: 'filetest',
@@ -249,7 +243,6 @@ export default function (providerContext: FtrProviderContext) {
           namespace: 'updated_namespace',
           policy_id: agentPolicyId,
           enabled: true,
-          output_id: '',
           inputs: [
             {
               enabled: true,

@@ -22,7 +22,7 @@ import { DatasetsSelector } from '../../../components/logging/log_analysis_resul
 import { RecreateJobButton } from '../../../components/logging/log_analysis_setup/create_job_button';
 import { useLogAnalysisCapabilitiesContext } from '../../../containers/logs/log_analysis/log_analysis_capabilities';
 import { useLogEntryCategoriesModuleContext } from '../../../containers/logs/log_analysis/modules/log_entry_categories';
-import { ViewLogInContext } from '../../../containers/logs/view_log_in_context';
+import { ViewLogInContextProvider } from '../../../containers/logs/view_log_in_context';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { useLogViewContext } from '../../../hooks/use_log_view';
 import { LogsPageTemplate } from '../page_template';
@@ -205,7 +205,7 @@ export const LogEntryCategoriesResultsContent: React.FunctionComponent<
   });
 
   return (
-    <ViewLogInContext.Provider
+    <ViewLogInContextProvider
       sourceId={sourceId}
       startTimestamp={categoryQueryTimeRange.timeRange.startTime}
       endTimestamp={categoryQueryTimeRange.timeRange.endTime}
@@ -275,7 +275,7 @@ export const LogEntryCategoriesResultsContent: React.FunctionComponent<
         </EuiFlexGroup>
       </LogsPageTemplate>
       <PageViewLogInContext />
-    </ViewLogInContext.Provider>
+    </ViewLogInContextProvider>
   );
 };
 

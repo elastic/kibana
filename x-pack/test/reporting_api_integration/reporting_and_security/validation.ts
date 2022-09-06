@@ -43,7 +43,7 @@ export default function ({ getService }: FtrProviderContext) {
           { jobParams: createPdfV2Params(1541.5999755859375) }
         );
 
-        await retry.tryForTime(48000, async () => {
+        await retry.tryForTime(60000, async () => {
           const response: supertest.Response = await supertestSvc
             .get(downloadReportPath)
             .responseType('blob')

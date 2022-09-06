@@ -59,14 +59,14 @@ const apisToIntercept = [
 ];
 
 describe('Service overview - header filters', () => {
-  before(async () => {
-    await synthtrace.index(
+  before(() => {
+    synthtrace.index(
       opbeans({ from: new Date(start).getTime(), to: new Date(end).getTime() })
     );
   });
 
-  after(async () => {
-    await synthtrace.clean();
+  after(() => {
+    synthtrace.clean();
   });
 
   describe('Filtering by transaction type', () => {
@@ -74,7 +74,7 @@ describe('Service overview - header filters', () => {
       cy.loginAsViewerUser();
     });
     it('changes url when selecting different value', () => {
-      cy.visit(serviceOverviewHref);
+      cy.visitKibana(serviceOverviewHref);
       cy.contains('opbeans-node');
       cy.url().should('not.include', 'transactionType');
       cy.get('[data-test-subj="headerFilterTransactionType"]').should(
@@ -89,11 +89,11 @@ describe('Service overview - header filters', () => {
       );
     });
 
-    it.skip('calls APIs with correct transaction type', () => {
+    it('calls APIs with correct transaction type', () => {
       apisToIntercept.map(({ endpoint, name }) => {
         cy.intercept('GET', endpoint).as(name);
       });
-      cy.visit(serviceOverviewHref);
+      cy.visitKibana(serviceOverviewHref);
       cy.get('[data-test-subj="headerFilterTransactionType"]').should(
         'have.value',
         'request'
@@ -117,12 +117,12 @@ describe('Service overview - header filters', () => {
     });
   });
 
-  describe.skip('Filtering by kuerybar', () => {
+  describe('Filtering by kuerybar', () => {
     beforeEach(() => {
       cy.loginAsViewerUser();
     });
     it('filters by transaction.name', () => {
-      cy.visit(
+      cy.visitKibana(
         url.format({
           pathname: '/app/apm/services/opbeans-java/overview',
           query: { rangeFrom: start, rangeTo: end },

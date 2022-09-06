@@ -12,6 +12,7 @@ import { TestProvidersComponent } from '../../../../common/mocks/test_providers'
 import { generateMockIndicator, Indicator } from '../../../../../common/types/indicator';
 import { BUTTON_TEST_ID } from '../open_indicator_flyout_button/open_indicator_flyout_button';
 import { TITLE_TEST_ID } from '../indicators_flyout/indicators_flyout';
+import { SecuritySolutionDataViewBase } from '../../../../types';
 
 const stub = () => {};
 
@@ -22,7 +23,8 @@ const tableProps: IndicatorsTableProps = {
   pagination: { pageSize: 10, pageIndex: 0, pageSizeOptions: [10] },
   indicatorCount: 0,
   loading: false,
-  indexPatterns: [],
+  browserFields: {},
+  indexPattern: { fields: [], title: '' } as SecuritySolutionDataViewBase,
 };
 
 const indicatorsFixture: Indicator[] = [

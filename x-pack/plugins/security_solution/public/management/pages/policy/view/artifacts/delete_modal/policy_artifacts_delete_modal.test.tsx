@@ -20,6 +20,7 @@ import { PolicyArtifactsDeleteModal } from './policy_artifacts_delete_modal';
 import { exceptionsListAllHttpMocks } from '../../../../../mocks/exceptions_list_http_mocks';
 import { ExceptionsListApiClient } from '../../../../../services/exceptions_list/exceptions_list_api_client';
 import { POLICY_ARTIFACT_DELETE_MODAL_LABELS } from './translations';
+import { getDeferred } from '../../../../../components/mocks';
 
 const listType: Array<CreateExceptionListSchema['type']> = [
   'endpoint_events',
@@ -80,12 +81,18 @@ describe.each(listType)('Policy details %s artifact delete modal', (type) => {
   });
 
   it('should disable the submit button while deleting ', async () => {
+    const deferred = getDeferred();
+    mockedApi.responseProvider.exceptionUpdate.mockDelay.mockReturnValue(deferred.promise);
     await render();
     const confirmButton = renderResult.getByTestId('confirmModalConfirmButton');
     userEvent.click(confirmButton);
 
     await waitFor(() => {
       expect(confirmButton).toBeDisabled();
+    });
+
+    await act(async () => {
+      deferred.resolve(); // cleanup
     });
   });
 

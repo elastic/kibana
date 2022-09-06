@@ -6,7 +6,7 @@
  */
 
 import type { SavedObjectsFindResponse } from '@kbn/core/public';
-import { useQuery } from 'react-query';
+import { useQuery } from '@tanstack/react-query';
 
 import { useKibana } from '../common/lib/kibana';
 import { PACKS_ID } from './constants';

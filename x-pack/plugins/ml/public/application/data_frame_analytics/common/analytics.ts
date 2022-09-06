@@ -270,6 +270,7 @@ export const useRefreshAnalyticsList = (
     return () => {
       subscriptions.map((sub) => sub.unsubscribe());
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [callback.onRefresh]);
 
   return {

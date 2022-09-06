@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import type { UseQueryResult } from 'react-query';
+import type { UseQueryResult } from '@tanstack/react-query';
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { NoDataPage } from '@kbn/kibana-react-plugin/public';
@@ -166,7 +166,7 @@ export const CloudPosturePage = <TData, TError>({
       return defaultErrorRenderer(getSetupStatus.error);
     }
 
-    if (getSetupStatus.isLoading || getSetupStatus.isIdle) {
+    if (getSetupStatus.isLoading) {
       return defaultLoadingRenderer();
     }
 
@@ -182,7 +182,7 @@ export const CloudPosturePage = <TData, TError>({
       return errorRender(query.error);
     }
 
-    if (query.isLoading || query.isIdle) {
+    if (query.isLoading) {
       return loadingRender();
     }
 

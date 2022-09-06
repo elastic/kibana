@@ -156,8 +156,8 @@ export class ActionTypeRegistry {
           if (error instanceof ExecutorError) {
             return error.retry == null ? false : error.retry;
           }
-          // Don't retry other kinds of errors
-          return false;
+          // Only retry other kinds of errors based on attempts
+          return attempts < (actionType.maxAttempts ?? 0);
         },
         createTaskRunner: (context: RunContext) =>
           this.taskRunnerFactory.create(context, actionType.maxAttempts),
@@ -211,5 +211,12 @@ export class ActionTypeRegistry {
         enabledInLicense: !!this.licenseState.isLicenseValidForActionType(actionType).isValid,
         supportedFeatureIds: actionType.supportedFeatureIds,
       }));
+  }
+
+  /**
+   * Returns the actions configuration utilities
+   */
+  public getUtils(): ActionsConfigurationUtilities {
+    return this.actionsConfigUtils;
   }
 }

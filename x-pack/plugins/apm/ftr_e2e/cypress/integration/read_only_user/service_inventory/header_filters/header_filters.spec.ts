@@ -20,8 +20,8 @@ const specialServiceName =
   'service 1 / ? # [ ] @ ! $ &  ( ) * + , ; = < > % {} | ^ ` <>';
 
 describe('Service inventory - header filters', () => {
-  before(async () => {
-    await synthtrace.index(
+  before(() => {
+    synthtrace.index(
       generateData({
         from: new Date(start).getTime(),
         to: new Date(end).getTime(),
@@ -30,8 +30,8 @@ describe('Service inventory - header filters', () => {
     );
   });
 
-  after(async () => {
-    await synthtrace.clean();
+  after(() => {
+    synthtrace.clean();
   });
 
   beforeEach(() => {
@@ -40,7 +40,7 @@ describe('Service inventory - header filters', () => {
 
   describe('Filtering by kuerybar', () => {
     it('filters by service.name with special characters', () => {
-      cy.visit(serviceOverviewHref);
+      cy.visitKibana(serviceOverviewHref);
       cy.contains('Services');
       cy.contains('opbeans-node');
       cy.contains('service 1');
