@@ -71,6 +71,7 @@ export function DiscoverLogExplorerRoute({ isDev }: Props) {
     id: id || 'new',
   });
 
+  /**
   useEffect(() => {
     const xstateInspector = inspect({
       iframe: false,
@@ -78,6 +79,7 @@ export function DiscoverLogExplorerRoute({ isDev }: Props) {
 
     return xstateInspector?.disconnect;
   }, []);
+   **/
 
   const loadDefaultOrCurrentdataView = useCallback(
     async (searchSource: ISearchSource) => {
