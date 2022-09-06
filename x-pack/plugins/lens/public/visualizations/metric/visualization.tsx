@@ -349,7 +349,6 @@ export const getMetricVisualization = ({
           enableFormatSelector: false,
           formatSelectorOptions: formatterOptions,
           supportStaticValue: true,
-          prioritizedOperation: 'max',
           required: false,
           groupTooltip: i18n.translate('xpack.lens.metric.maxTooltip', {
             defaultMessage:
