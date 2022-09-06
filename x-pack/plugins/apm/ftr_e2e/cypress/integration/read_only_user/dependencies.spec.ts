@@ -16,7 +16,7 @@ const timeRange = {
   rangeTo: end,
 };
 
-describe.skip('Dependencies', () => {
+describe('Dependencies', () => {
   before(() => {
     synthtrace.index(
       opbeans({
@@ -57,7 +57,7 @@ describe.skip('Dependencies', () => {
     });
   });
 
-  describe.skip('dependency overview page', () => {
+  describe('dependency overview page', () => {
     it('shows dependency information and you can navigate to a page for an upstream service', () => {
       cy.visitKibana(
         `/app/apm/dependencies/overview?${new URLSearchParams({
