@@ -61,7 +61,7 @@ export const getIndexData = async (
       );
   return {
     allIndexMatches: totalIndices,
-    alwaysShowMatchNames: Array.from(alwaysShowPatternMatches || []),
+    alwaysShowMatchNames: Array.from(alwaysShowPatternMatches),
     expandWildcards,
     indexAndAliasNames,
     indicesNames,
