@@ -24,15 +24,14 @@ import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
 import { CoreScopedHistory } from '@kbn/core-application-browser-internal';
 import type { AppMountParameters } from '@kbn/core-application-browser';
+import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
 import type { PluginInitializerContext } from '.';
-// Import values from their individual modules instead.
-import { chromeServiceMock } from './chrome/chrome_service.mock';
 
 export { injectedMetadataServiceMock } from '@kbn/core-injected-metadata-browser-mocks';
 export { docLinksServiceMock } from '@kbn/core-doc-links-browser-mocks';
 export { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 export { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
-export { chromeServiceMock } from './chrome/chrome_service.mock';
+export { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
 export { executionContextServiceMock } from '@kbn/core-execution-context-browser-mocks';
 export { fatalErrorsServiceMock } from '@kbn/core-fatal-errors-browser-mocks';
 export { httpServiceMock } from '@kbn/core-http-browser-mocks';

@@ -138,7 +138,7 @@
           "label": "data.search"
         },
         {
-          "id": "kibDevTutorialFilesService",
+          "id": "kibDevTutorialFileService",
           "label": "File service"
         },
         {
@@ -244,9 +244,6 @@
         },
         {
           "id": "kibCorePluginApi"
-        },
-        {
-          "id": "kibCoreChromePluginApi"
         },
         {
           "id": "kibFieldFormatsPluginApi"
