@@ -14,6 +14,7 @@ import { EuiRangeTick } from '@elastic/eui/src/components/form/range/range_ticks
 interface Props {
   value: [number, number];
   onChange: (value?: [number, number]) => void;
+  onClear: () => void;
   ticks: EuiRangeTick[];
   timeRangeMin: number;
   timeRangeMax: number;
@@ -55,9 +56,7 @@ export function TimeSliderPopoverContent(props: Props) {
           <EuiButtonIcon
             iconType="eraser"
             color="danger"
-            onClick={() => {
-              onChange();
-            }}
+            onClick={props.onClear}
             aria-label={i18n.translate('controls.timeSlider.popover.clearTimeTitle', {
               defaultMessage: 'Clear time selection',
             })}

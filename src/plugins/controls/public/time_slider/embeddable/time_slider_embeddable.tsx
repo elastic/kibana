@@ -189,8 +189,14 @@ export class TimeSliderControlEmbeddable extends Embeddable<
   };
 
   private onRangeChange = (range?: number) => {
-    const { actions, dispatch } = this.reduxEmbeddableTools;
-    dispatch(actions.setRange({ range }));
+    const { actions, dispatch, getState } = this.reduxEmbeddableTools;
+    const timeRangeBounds = getState().componentState.timeRangeBounds;
+    const timeRange = timeRangeBounds[TO_INDEX] - timeRangeBounds[FROM_INDEX];
+    dispatch(
+      actions.setRange({
+        range: range !== undefined && range < timeRange ? range : undefined,
+      })
+    );
   };
 
   private onNext = () => {
