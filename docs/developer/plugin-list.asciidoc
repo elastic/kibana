@@ -6,7 +6,7 @@ NOTE:
 
     node scripts/build_plugin_list_docs
 
-  You can update the template within node_modules/@kbn/dev-utils/target_node/plugin_list/generate_plugin_list.js
+  You can update the template within node_modules/@kbn/dev-utils/target_node/src/plugin_list/generate_plugin_list.js
 
 ////
 
@@ -235,6 +235,10 @@ Content is fetched from the remote (https://feeds.elastic.co) once a day, with p
 
 |{kib-repo}blob/{branch}/src/plugins/saved_objects/README.md[savedObjects]
 |NOTE: This plugin is deprecated and will be removed in 8.0. See https://github.com/elastic/kibana/issues/46435 for more information.
+
+
+|{kib-repo}blob/{branch}/src/plugins/saved_objects_finder/README.md[savedObjectsFinder]
+|The savedObjectsFinder plugin exposes a UI for finding saved objects on the client side.
 
 
 |{kib-repo}blob/{branch}/src/plugins/saved_objects_management/README.md[savedObjectsManagement]
@@ -516,7 +520,7 @@ the infrastructure monitoring use-case within Kibana.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/kubernetes_security/README.md[kubernetesSecurity]
-|(under construction)
+|This plugin provides interactive visualizations of your Kubernetes workload and session data.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/lens/readme.md[lens]

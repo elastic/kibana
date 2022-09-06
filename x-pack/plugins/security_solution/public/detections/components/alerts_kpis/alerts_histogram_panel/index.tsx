@@ -25,6 +25,7 @@ import type { LegendItem } from '../../../../common/components/charts/draggable_
 import { escapeDataProviderId } from '../../../../common/components/drag_and_drop/helpers';
 import { HeaderSection } from '../../../../common/components/header_section';
 import { useQueryAlerts } from '../../../containers/detection_engine/alerts/use_query';
+import { ALERTS_QUERY_NAMES } from '../../../containers/detection_engine/alerts/constants';
 import { getDetectionEngineUrl, useFormatUrl } from '../../../../common/components/link_to';
 import { defaultLegendColors } from '../../../../common/components/matrix_histogram/utils';
 import { InspectButtonContainer } from '../../../../common/components/inspect';
@@ -191,6 +192,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
       ),
       indexName: signalIndexName,
       skip: querySkip,
+      queryName: ALERTS_QUERY_NAMES.HISTOGRAM,
     });
 
     const kibana = useKibana();

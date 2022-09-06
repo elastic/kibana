@@ -8,6 +8,7 @@
 import { createSelector } from '@reduxjs/toolkit';
 import { FilterManager } from '@kbn/data-plugin/public';
 import { SavedObjectReference } from '@kbn/core/public';
+import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
 import { LensState } from './types';
 import { Datasource, DatasourceMap, VisualizationMap } from '../types';
 import { getDatasourceLayers } from '../editor_frame_service/editor_frame';
@@ -17,6 +18,12 @@ export const selectQuery = (state: LensState) => state.lens.query;
 export const selectSearchSessionId = (state: LensState) => state.lens.searchSessionId;
 export const selectFilters = (state: LensState) => state.lens.filters;
 export const selectResolvedDateRange = (state: LensState) => state.lens.resolvedDateRange;
+export const selectAdHocDataViews = (state: LensState) =>
+  Object.fromEntries(
+    Object.values(state.lens.dataViews.indexPatterns)
+      .filter((indexPattern) => indexPattern.spec)
+      .map((indexPattern) => [indexPattern.id, indexPattern.spec!])
+  );
 export const selectVisualization = (state: LensState) => state.lens.visualization;
 export const selectStagedPreview = (state: LensState) => state.lens.stagedPreview;
 export const selectStagedActiveData = (state: LensState) =>
@@ -69,6 +76,7 @@ export const selectSavedObjectFormat = createSelector(
     selectQuery,
     selectFilters,
     selectActiveDatasourceId,
+    selectAdHocDataViews,
     selectInjectedDependencies as SelectInjectedDependenciesFunction<{
       datasourceMap: DatasourceMap;
       visualizationMap: VisualizationMap;
@@ -82,6 +90,7 @@ export const selectSavedObjectFormat = createSelector(
     query,
     filters,
     activeDatasourceId,
+    adHocDataViews,
     { datasourceMap, visualizationMap, extractFilterReferences }
   ) => {
     const activeVisualization =
@@ -105,16 +114,40 @@ export const selectSavedObjectFormat = createSelector(
 
     const persistibleDatasourceStates: Record<string, unknown> = {};
     const references: SavedObjectReference[] = [];
+    const internalReferences: SavedObjectReference[] = [];
     Object.entries(activeDatasources).forEach(([id, datasource]) => {
       const { state: persistableState, savedObjectReferences } = datasource.getPersistableState(
         datasourceStates[id].state
       );
       persistibleDatasourceStates[id] = persistableState;
-      references.push(...savedObjectReferences);
+      savedObjectReferences.forEach((r) => {
+        if (r.type === 'index-pattern' && adHocDataViews[r.id]) {
+          internalReferences.push(r);
+        } else {
+          references.push(r);
+        }
+      });
     });
 
+    const persistableAdHocDataViews = Object.fromEntries(
+      Object.entries(adHocDataViews).map(([id, dataView]) => {
+        const { references: dataViewReferences, state } =
+          DataViewPersistableStateService.extract(dataView);
+        references.push(...dataViewReferences);
+        return [id, state];
+      })
+    );
+
+    const adHocFilters = filters
+      .filter((f) => !references.some((r) => r.type === 'index-pattern' && r.id === f.meta.index))
+      .map((f) => ({ ...f, meta: { ...f.meta, value: undefined } }));
+
+    const referencedFilters = filters.filter((f) =>
+      references.some((r) => r.type === 'index-pattern' && r.id === f.meta.index)
+    );
+
     const { state: persistableFilters, references: filterReferences } =
-      extractFilterReferences(filters);
+      extractFilterReferences(referencedFilters);
 
     references.push(...filterReferences);
 
@@ -128,8 +161,10 @@ export const selectSavedObjectFormat = createSelector(
       state: {
         visualization: visualization.state,
         query,
-        filters: persistableFilters,
+        filters: [...persistableFilters, ...adHocFilters],
         datasourceStates: persistibleDatasourceStates,
+        internalReferences,
+        adHocDataViews: persistableAdHocDataViews,
       },
     };
   }

@@ -8,6 +8,8 @@
 import { ByteSizeValue } from '@kbn/config-schema';
 import { IScopedClusterClient } from '@kbn/core/server';
 
+import { ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE } from '../../../common/constants';
+
 import { fetchConnectorByIndexName } from '../connectors/fetch_connectors';
 import { fetchCrawlerByIndexName } from '../crawler/fetch_crawlers';
 
@@ -103,13 +105,16 @@ describe('fetchIndex lib function', () => {
       })
     );
     (fetchConnectorByIndexName as jest.Mock).mockImplementationOnce(() =>
-      Promise.resolve({ doc: 'doc' })
+      Promise.resolve({
+        doc: 'doc',
+        service_type: 'some-service-type',
+      })
     );
     mockClient.asCurrentUser.indices.stats.mockImplementation(() => Promise.resolve(statsResponse));
 
     await expect(
       fetchIndex(mockClient as unknown as IScopedClusterClient, 'index_name')
-    ).resolves.toEqual({ ...result, connector: { doc: 'doc' } });
+    ).resolves.toEqual({ ...result, connector: { doc: 'doc', service_type: 'some-service-type' } });
   });
 
   it('should return data and stats for index and crawler if crawler is present', async () => {
@@ -137,6 +142,35 @@ describe('fetchIndex lib function', () => {
       },
     });
   });
+
+  it('should return data and stats for index and crawler if a crawler registered as a connector is present', async () => {
+    mockClient.asCurrentUser.indices.get.mockImplementation(() =>
+      Promise.resolve({
+        index_name: { aliases: [], data: 'full index' },
+      })
+    );
+    (fetchCrawlerByIndexName as jest.Mock).mockImplementationOnce(() =>
+      Promise.resolve({
+        id: '1234',
+      })
+    );
+    (fetchConnectorByIndexName as jest.Mock).mockImplementationOnce(() =>
+      Promise.resolve({
+        doc: 'doc',
+        service_type: ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE,
+      })
+    );
+    mockClient.asCurrentUser.indices.stats.mockImplementation(() => Promise.resolve(statsResponse));
+
+    await expect(
+      fetchIndex(mockClient as unknown as IScopedClusterClient, 'index_name')
+    ).resolves.toEqual({
+      ...result,
+      connector: { doc: 'doc', service_type: ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE },
+      crawler: { id: '1234' },
+    });
+  });
+
   it('should throw a 404 error if the index cannot be fonud', async () => {
     mockClient.asCurrentUser.indices.get.mockImplementation(() => Promise.resolve({}));
     (fetchConnectorByIndexName as jest.Mock).mockImplementationOnce(() =>
