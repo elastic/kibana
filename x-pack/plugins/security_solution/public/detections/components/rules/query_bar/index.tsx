@@ -280,9 +280,7 @@ export const QueryBarDefineRule = ({
                 isRefreshPaused={false}
                 filterQuery={fieldValue.query}
                 filterManager={filterManager}
-                filters={
-                  filterManager.getFilters().map((f) => ({ ...f, readOnly: isDisabled })) || []
-                }
+                filters={filterManager.getFilters() || []}
                 onChangedQuery={onChangedQuery}
                 onSubmitQuery={onSubmitQuery}
                 savedQuery={savedQuery}
