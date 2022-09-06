@@ -122,6 +122,31 @@ Problems with your {es} cluster can prevent {kib} upgrades from succeeding. Ensu
  * a "green" cluster status
 
 [float]
+===== Unsupported routing allocation {es} cluster settings
+As part of upgrade migrations, {kib} creates indices with an auto-expanded replica. When routing allocation is disabled or restricted (`cluster.routing.allocation.enable: none/primaries/new_primaries`) the replica shard won't get assigned causing the upgrade to fail. 
+
+If routing allocation does not allow auto-expanded replica creation, you might see a log entry similar to:
+
+[source,sh]
+--------------------------------------------
+Action failed with 'Timeout waiting for the status of the [.kibana_task_manager_7.17.1_reindex_temp] index to become 'yellow''. Retrying attempt 11 in 64 seconds.
+--------------------------------------------
+
+To prevent the issue, remove the transient and persisted routing allocation settings if they are set:
+[source,sh]
+--------------------------------------------
+PUT /_cluster/settings
+{
+  "transient": {
+    "cluster.routing.allocation.enable": null
+  },
+  "persistent": {
+    "cluster.routing.allocation.enable": null
+  }
+}
+--------------------------------------------
+
+[float]
 ===== Different versions of {kib} connected to the same {es} index
 When different versions of {kib} are attempting an upgrade migration in parallel this can lead to migration failures. Ensure that all {kib} instances are running the same version, configuration and plugins.
 
