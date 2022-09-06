@@ -6,12 +6,7 @@
  */
 
 import React, { Component } from 'react';
-import {
-  EuiButtonIcon,
-  EuiPopover,
-  EuiPopoverTitle,
-  EuiText,
-} from '@elastic/eui';
+import { EuiButtonIcon, EuiPopover, EuiPopoverTitle, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
