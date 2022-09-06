@@ -162,7 +162,7 @@ to follow if it's important for you to look inside of a specific event e.g. `pag
 ### Benchmarking performance on CI
 
 One of the use cases for event based telemetry is benchmarking the performance of features over time.
-In order to keep track of their stability, the #kibana-operations team has developed a special set of
+In order to keep track of their stability, the #kibana-performance team has developed a special set of
 functional tests called `Journeys`. These journeys execute a UI workflow and allow the telemetry to be
 reported to a cluster where it can then be analysed.
 
@@ -172,6 +172,13 @@ as stable and reproducible as possible.
 #### Machine specifications
 
 The machine has these [specs](https://www.hetzner.com/dedicated-rootserver/ex100).
+
+All benchmarks are run on bare-metal machines with the following specifications:
+
+CPU: Intel® Core™ i9-12900K
+RAM: 128 GB
+SSD: 1.92 TB Datacenter Gen4 NVMe 
+All machines are connected via a dedicated 1 GBit switched network.
 
 Since the tests are run on a local machine, there is also realistic throttling applied to the network to 
 simulate real life internet connection. This means that all requests have a [fixed latency and limited bandwidth](https://github.com/elastic/kibana/blob/main/x-pack/test/performance/services/performance.ts#L157).
@@ -188,6 +195,7 @@ from performance runs and visualize the duration of events (or their breakdowns)
 Run the test locally for troubleshooting purposes by running 
 
 ```
+node scripts/functional_test_runner --config x-pack/test/performance/journeys/$YOUR_JOURNEY_NAME/config.ts
 ```
 
 #### Analyzing journey results
@@ -196,7 +204,7 @@ Run the test locally for troubleshooting purposes by running
    Otherwise you might be looking at results originating from different hardware.
  - You can look at the results of a specific journey by filtering on `context.labels.journeyName`.
 
-Please contact the #kibana-operations team if you need more help visualising and tracking the results.
+Please contact the #kibana-performance team if you need more help visualising and tracking the results.
 
 ### Production performance tracking
 
