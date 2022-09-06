@@ -18,7 +18,6 @@ export const getTimeScale = (
     dateColumnId: {
       types: ['string'],
       help: '',
-      required: true,
     },
     inputColumnId: {
       types: ['string'],

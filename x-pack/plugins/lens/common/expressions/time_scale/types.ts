@@ -10,10 +10,10 @@ import type { Datatable, ExpressionFunctionDefinition } from '@kbn/expressions-p
 export type TimeScaleUnit = 's' | 'm' | 'h' | 'd';
 
 export interface TimeScaleArgs {
-  dateColumnId: string;
   inputColumnId: string;
   outputColumnId: string;
   targetUnit: TimeScaleUnit;
+  dateColumnId?: string;
   outputColumnName?: string;
 }
 
