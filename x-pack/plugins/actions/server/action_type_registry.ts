@@ -212,4 +212,11 @@ export class ActionTypeRegistry {
         supportedFeatureIds: actionType.supportedFeatureIds,
       }));
   }
+
+  /**
+   * Returns the actions configuration utilities
+   */
+  public getUtils(): ActionsConfigurationUtilities {
+    return this.actionsConfigUtils;
+  }
 }

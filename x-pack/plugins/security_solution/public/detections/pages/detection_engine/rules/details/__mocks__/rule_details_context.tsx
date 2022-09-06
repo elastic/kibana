@@ -7,10 +7,11 @@
 
 import React from 'react';
 import type { RuleDetailsContextType } from '../rule_details_context';
+import { RuleDetailTabs } from '..';
 
 export const useRuleDetailsContextMock = {
   create: (): jest.Mocked<RuleDetailsContextType> => ({
-    executionResults: {
+    [RuleDetailTabs.executionResults]: {
       state: {
         superDatePicker: {
           recentlyUsedRanges: [],
