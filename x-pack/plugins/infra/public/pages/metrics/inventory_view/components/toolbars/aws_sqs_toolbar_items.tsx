@@ -6,18 +6,11 @@
  */
 
 import React from 'react';
-import type { ToolbarProps } from '../../../public/pages/metrics/inventory_view/components/toolbars/toolbar';
-import { MetricsAndGroupByToolbarItems } from '../shared/components/metrics_and_groupby_toolbar_items';
-import { CloudToolbarItems } from '../shared/components/cloud_toolbar_items';
-import { SnapshotMetricType } from '../types';
+import { awsSQSSnapshotMetricTypes } from '../../../../../../common/inventory_models/aws_sqs';
+import { CloudToolbarItems } from './cloud_toolbar_items';
+import { MetricsAndGroupByToolbarItems } from './metrics_and_groupby_toolbar_items';
+import type { ToolbarProps } from './types';
 
-export const sqsMetricTypes: SnapshotMetricType[] = [
-  'sqsMessagesVisible',
-  'sqsMessagesDelayed',
-  'sqsMessagesSent',
-  'sqsMessagesEmpty',
-  'sqsOldestMessage',
-];
 export const sqsGroupByFields = ['cloud.region'];
 
 export const AwsSQSToolbarItems = (props: ToolbarProps) => {
@@ -26,7 +19,7 @@ export const AwsSQSToolbarItems = (props: ToolbarProps) => {
       <CloudToolbarItems {...props} />
       <MetricsAndGroupByToolbarItems
         {...props}
-        metricTypes={sqsMetricTypes}
+        metricTypes={awsSQSSnapshotMetricTypes}
         groupByFields={sqsGroupByFields}
       />
     </>

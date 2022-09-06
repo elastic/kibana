@@ -15419,8 +15419,6 @@
     "xpack.infra.inventoryModels.awsSQS.displayName": "SQSキュー",
     "xpack.infra.inventoryModels.awsSQS.singularDisplayName": "SQS キュー",
     "xpack.infra.inventoryModels.findInventoryModel.error": "検索しようとしたインベントリモデルは存在しません",
-    "xpack.infra.inventoryModels.findLayout.error": "検索しようとしたレイアウトは存在しません",
-    "xpack.infra.inventoryModels.findToolbar.error": "検索しようとしたツールバーは存在しません。",
     "xpack.infra.inventoryModels.host.singularDisplayName": "ホスト",
     "xpack.infra.inventoryModels.pod.singularDisplayName": "Kubernetes ポッド",
     "xpack.infra.inventoryTimeline.checkNewDataButtonLabel": "新規データを確認",

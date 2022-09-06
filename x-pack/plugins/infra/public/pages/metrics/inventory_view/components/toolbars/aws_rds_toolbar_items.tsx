@@ -6,18 +6,10 @@
  */
 
 import React from 'react';
-import type { ToolbarProps } from '../../../public/pages/metrics/inventory_view/components/toolbars/toolbar';
-import { MetricsAndGroupByToolbarItems } from '../shared/components/metrics_and_groupby_toolbar_items';
-import { CloudToolbarItems } from '../shared/components/cloud_toolbar_items';
-import { SnapshotMetricType } from '../types';
-
-export const rdsMetricTypes: SnapshotMetricType[] = [
-  'cpu',
-  'rdsConnections',
-  'rdsQueriesExecuted',
-  'rdsActiveTransactions',
-  'rdsLatency',
-];
+import { awsRDSSnapshotMetricTypes } from '../../../../../../common/inventory_models/aws_rds';
+import { CloudToolbarItems } from './cloud_toolbar_items';
+import { MetricsAndGroupByToolbarItems } from './metrics_and_groupby_toolbar_items';
+import type { ToolbarProps } from './types';
 
 export const rdsGroupByFields = [
   'cloud.availability_zone',
@@ -31,7 +23,7 @@ export const AwsRDSToolbarItems = (props: ToolbarProps) => {
       <CloudToolbarItems {...props} />
       <MetricsAndGroupByToolbarItems
         {...props}
-        metricTypes={rdsMetricTypes}
+        metricTypes={awsRDSSnapshotMetricTypes}
         groupByFields={rdsGroupByFields}
       />
     </>

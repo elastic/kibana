@@ -15432,8 +15432,6 @@
     "xpack.infra.inventoryModels.awsSQS.displayName": "Files d'attente SQS",
     "xpack.infra.inventoryModels.awsSQS.singularDisplayName": "File d'attente SQS",
     "xpack.infra.inventoryModels.findInventoryModel.error": "Le modèle d'inventaire que vous recherchez n'existe pas",
-    "xpack.infra.inventoryModels.findLayout.error": "La couche que vous recherchez n'existe pas",
-    "xpack.infra.inventoryModels.findToolbar.error": "La barre d'outils que vous recherchez n'existe pas.",
     "xpack.infra.inventoryModels.host.singularDisplayName": "Hôte",
     "xpack.infra.inventoryModels.pod.singularDisplayName": "Pod Kubernetes",
     "xpack.infra.inventoryTimeline.checkNewDataButtonLabel": "Rechercher de nouvelles données",

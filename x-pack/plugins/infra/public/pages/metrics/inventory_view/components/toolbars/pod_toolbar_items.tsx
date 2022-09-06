@@ -6,18 +6,17 @@
  */
 
 import React from 'react';
-import type { ToolbarProps } from '../../../public/pages/metrics/inventory_view/components/toolbars/toolbar';
-import { MetricsAndGroupByToolbarItems } from '../shared/components/metrics_and_groupby_toolbar_items';
-import { SnapshotMetricType } from '../types';
+import { podSnapshotMetricTypes } from '../../../../../../common/inventory_models/pod';
+import { MetricsAndGroupByToolbarItems } from './metrics_and_groupby_toolbar_items';
+import type { ToolbarProps } from './types';
 
-export const podMetricTypes: SnapshotMetricType[] = ['cpu', 'memory', 'rx', 'tx'];
 export const podGroupByFields = ['kubernetes.namespace', 'kubernetes.node.name', 'service.type'];
 
 export const PodToolbarItems = (props: ToolbarProps) => {
   return (
     <MetricsAndGroupByToolbarItems
       {...props}
-      metricTypes={podMetricTypes}
+      metricTypes={podSnapshotMetricTypes}
       groupByFields={podGroupByFields}
     />
   );

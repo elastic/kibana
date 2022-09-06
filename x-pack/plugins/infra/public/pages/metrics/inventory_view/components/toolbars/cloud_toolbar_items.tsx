@@ -5,17 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiFlexItem } from '@elastic/eui';
-import type { ToolbarProps } from '../../../../public/pages/metrics/inventory_view/components/toolbars/toolbar';
-// eslint-disable-next-line @kbn/imports/no_boundary_crossing
-import { WaffleAccountsControls } from '../../../../public/pages/metrics/inventory_view/components/waffle/waffle_accounts_controls';
-// eslint-disable-next-line @kbn/imports/no_boundary_crossing
-import { WaffleRegionControls } from '../../../../public/pages/metrics/inventory_view/components/waffle/waffle_region_controls';
+import React from 'react';
+import { WaffleAccountsControls } from '../waffle/waffle_accounts_controls';
+import { WaffleRegionControls } from '../waffle/waffle_region_controls';
+import type { ToolbarProps } from './types';
 
-type Props = ToolbarProps;
-
-export const CloudToolbarItems = (props: Props) => {
+export const CloudToolbarItems = (props: ToolbarProps) => {
   return (
     <>
       {props.accounts.length > 0 && (

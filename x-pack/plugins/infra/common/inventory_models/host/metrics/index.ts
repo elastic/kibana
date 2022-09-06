@@ -33,6 +33,14 @@ import { hostDockerInfo } from './tsvb/host_docker_info';
 
 import { InventoryMetrics } from '../../types';
 
+const exposedHostSnapshotMetrics = { cpu, load, logRate, memory, rx, tx };
+// not sure why this is the only model with "count"
+const hostSnapshotMetrics = { count, ...exposedHostSnapshotMetrics };
+
+export const hostSnapshotMetricTypes = Object.keys(exposedHostSnapshotMetrics) as Array<
+  keyof typeof exposedHostSnapshotMetrics
+>;
+
 export const metrics: InventoryMetrics = {
   tsvb: {
     hostSystemOverview,
@@ -51,7 +59,7 @@ export const metrics: InventoryMetrics = {
     hostDockerTop5ByMemory,
     hostDockerTop5ByCpu,
   },
-  snapshot: { count, cpu, load, logRate, memory, rx, tx },
+  snapshot: hostSnapshotMetrics,
   defaultSnapshot: 'cpu',
   defaultTimeRangeInSeconds: 3600, // 1 hour
 };

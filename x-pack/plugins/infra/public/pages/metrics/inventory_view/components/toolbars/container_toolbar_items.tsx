@@ -6,11 +6,10 @@
  */
 
 import React from 'react';
-import type { ToolbarProps } from '../../../public/pages/metrics/inventory_view/components/toolbars/toolbar';
-import { MetricsAndGroupByToolbarItems } from '../shared/components/metrics_and_groupby_toolbar_items';
-import { SnapshotMetricType } from '../types';
+import { containerSnapshotMetricTypes } from '../../../../../../common/inventory_models/container';
+import { MetricsAndGroupByToolbarItems } from './metrics_and_groupby_toolbar_items';
+import type { ToolbarProps } from './types';
 
-export const containerMetricTypes: SnapshotMetricType[] = ['cpu', 'memory', 'rx', 'tx'];
 export const containerGroupByFields = [
   'host.name',
   'cloud.availability_zone',
@@ -24,7 +23,7 @@ export const ContainerToolbarItems = (props: ToolbarProps) => {
   return (
     <MetricsAndGroupByToolbarItems
       {...props}
-      metricTypes={containerMetricTypes}
+      metricTypes={containerSnapshotMetricTypes}
       groupByFields={containerGroupByFields}
     />
   );

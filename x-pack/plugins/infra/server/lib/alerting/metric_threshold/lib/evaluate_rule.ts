@@ -10,7 +10,7 @@ import moment from 'moment';
 import type { Logger } from '@kbn/logging';
 import { MetricExpressionParams } from '../../../../../common/alerting/metrics';
 import { InfraSource } from '../../../../../common/source_configuration/source_configuration';
-import { getIntervalInSeconds } from '../../../../utils/get_interval_in_seconds';
+import { getIntervalInSeconds } from '../../../../../common/utils/get_interval_in_seconds';
 import { DOCUMENT_COUNT_I18N } from '../../common/messages';
 import { createTimerange } from './create_timerange';
 import { getData } from './get_data';

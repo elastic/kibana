@@ -5,41 +5,30 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
 import { EuiFlexItem } from '@elastic/eui';
-import { useSourceContext } from '../../../../../containers/metrics_source';
-import {
-  SnapshotMetricInput,
-  SnapshotGroupBy,
-  SnapshotCustomMetricInput,
-} from '../../../../../../common/http_api/snapshot_api';
-import { InventoryCloudAccount } from '../../../../../../common/http_api/inventory_meta_api';
-import { findToolbar } from '../../../../../../common/inventory_models/toolbars';
-import { ToolbarWrapper } from './toolbar_wrapper';
-
-import { InfraGroupByOptions } from '../../../../../lib/lib';
+import React from 'react';
 import { InventoryItemType } from '../../../../../../common/inventory_models/types';
-import { WaffleOptionsState, WaffleSortOption } from '../../hooks/use_waffle_options';
+import { useSourceContext } from '../../../../../containers/metrics_source';
 import { useInventoryMeta } from '../../hooks/use_inventory_meta';
-import { CreateDerivedIndexPattern } from '../../../../../containers/metrics_source';
-export interface ToolbarProps extends Omit<WaffleOptionsState, 'boundsOverride' | 'autoBounds'> {
-  createDerivedIndexPattern: CreateDerivedIndexPattern;
-  changeMetric: (payload: SnapshotMetricInput) => void;
-  changeGroupBy: (payload: SnapshotGroupBy) => void;
-  changeCustomOptions: (payload: InfraGroupByOptions[]) => void;
-  changeAccount: (id: string) => void;
-  changeRegion: (name: string) => void;
-  changeSort: (sort: WaffleSortOption) => void;
-  accounts: InventoryCloudAccount[];
-  regions: string[];
-  changeCustomMetrics: (payload: SnapshotCustomMetricInput[]) => void;
+import { AwsEC2ToolbarItems } from './aws_ec2_toolbar_items';
+import { AwsRDSToolbarItems } from './aws_rds_toolbar_items';
+import { AwsS3ToolbarItems } from './aws_s3_toolbar_items';
+import { AwsSQSToolbarItems } from './aws_sqs_toolbar_items';
+import { ContainerToolbarItems } from './container_toolbar_items';
+import { HostToolbarItems } from './host_toolbar_items';
+import { PodToolbarItems } from './pod_toolbar_items';
+import { ToolbarWrapper } from './toolbar_wrapper';
+import { ToolbarProps } from './types';
+
+interface Props {
+  nodeType: InventoryItemType;
+  currentTime: number;
 }
 
-const wrapToolbarItems = (
-  ToolbarItems: FunctionComponent<ToolbarProps>,
-  accounts: InventoryCloudAccount[],
-  regions: string[]
-) => {
+export const Toolbar = ({ nodeType, currentTime }: Props) => {
+  const { sourceId } = useSourceContext();
+  const { accounts, regions } = useInventoryMeta(sourceId, nodeType, currentTime);
+
   return (
     <ToolbarWrapper>
       {(props) => (
@@ -52,14 +41,21 @@ const wrapToolbarItems = (
   );
 };
 
-interface Props {
-  nodeType: InventoryItemType;
-  currentTime: number;
-}
-
-export const Toolbar = ({ nodeType, currentTime }: Props) => {
-  const { sourceId } = useSourceContext();
-  const { accounts, regions } = useInventoryMeta(sourceId, nodeType, currentTime);
-  const ToolbarItems = findToolbar(nodeType);
-  return wrapToolbarItems(ToolbarItems, accounts, regions);
+export const ToolbarItems = (props: ToolbarProps) => {
+  switch (props.nodeType) {
+    case 'awsEC2':
+      return <AwsEC2ToolbarItems {...props} />;
+    case 'awsRDS':
+      return <AwsRDSToolbarItems {...props} />;
+    case 'awsS3':
+      return <AwsS3ToolbarItems {...props} />;
+    case 'awsSQS':
+      return <AwsSQSToolbarItems {...props} />;
+    case 'container':
+      return <ContainerToolbarItems {...props} />;
+    case 'host':
+      return <HostToolbarItems {...props} />;
+    case 'pod':
+      return <PodToolbarItems {...props} />;
+  }
 };

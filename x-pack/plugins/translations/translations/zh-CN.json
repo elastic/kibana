@@ -15437,8 +15437,6 @@
     "xpack.infra.inventoryModels.awsSQS.displayName": "SQS 队列",
     "xpack.infra.inventoryModels.awsSQS.singularDisplayName": "SQS 队列",
     "xpack.infra.inventoryModels.findInventoryModel.error": "您尝试查找的库存模型不存在",
-    "xpack.infra.inventoryModels.findLayout.error": "您尝试查找的布局不存在",
-    "xpack.infra.inventoryModels.findToolbar.error": "您尝试查找的工具栏不存在。",
     "xpack.infra.inventoryModels.host.singularDisplayName": "主机",
     "xpack.infra.inventoryModels.pod.singularDisplayName": "Kubernetes Pod",
     "xpack.infra.inventoryTimeline.checkNewDataButtonLabel": "检查新数据",
