@@ -219,7 +219,7 @@ describe('Service Overview', () => {
       cy.visitKibana(baseUrl);
     });
 
-    it.skip('with the correct environment when changing the environment', () => {
+    it('with the correct environment when changing the environment', () => {
       cy.wait(aliasNames);
 
       cy.intercept('GET', 'internal/apm/suggestions?*').as(
@@ -250,7 +250,7 @@ describe('Service Overview', () => {
       cy.wait(aliasNames);
     });
 
-    it.skip('when selecting a different time range and clicking the update button', () => {
+    it('when selecting a different time range and clicking the update button', () => {
       cy.wait(aliasNames);
 
       const timeStart = moment(start).subtract(5, 'm').toISOString();
