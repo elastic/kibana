@@ -150,35 +150,39 @@ const RuleActionsFormComponent = ({ rulesCount, onClose, onConfirm }: RuleAction
           />
         }
       >
-        <FormattedMessage
-          id="xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.addRuleActions.actionFrequencyDetail"
-          defaultMessage="The actions frequency you select below is applied to all actions (both new and existing) for all selected rules."
-        />
-        <EuiSpacer size="xs" />
-        <FormattedMessage
-          id="xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.addRuleActions.deleteActionsDetail"
-          defaultMessage="To delete actions for all selected rules, select {noActionsOption} in the menu and check {overwriteActionsCheckbox}."
-          values={{
-            noActionsOption: (
-              <strong>
-                <FormattedMessage
-                  id="xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.addRuleActions.deleteActionsDetail.menuOptionLabel"
-                  defaultMessage="Perform no actions"
-                />
-              </strong>
-            ),
-            overwriteActionsCheckbox: (
-              <strong>
-                <FormattedMessage
-                  id="xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.addRuleActions.deleteActionsDetail.overwriteActionsCheckboxLabel"
-                  defaultMessage="Overwrite all selected rule actions"
-                />
-              </strong>
-            ),
-          }}
-        />
-        <EuiSpacer size="xs" />
-        {i18n.RULE_VARIABLES_DETAIL}
+        <ul>
+          <li>
+            <FormattedMessage
+              id="xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.addRuleActions.actionFrequencyDetail"
+              defaultMessage="The actions frequency you select below is applied to all actions (both new and existing) for all selected rules."
+            />
+          </li>
+          <li>
+            <FormattedMessage
+              id="xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.addRuleActions.deleteActionsDetail"
+              defaultMessage="To delete actions for all selected rules, select {noActionsOption} in the menu and check {overwriteActionsCheckbox}."
+              values={{
+                noActionsOption: (
+                  <strong>
+                    <FormattedMessage
+                      id="xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.addRuleActions.deleteActionsDetail.menuOptionLabel"
+                      defaultMessage="Perform no actions"
+                    />
+                  </strong>
+                ),
+                overwriteActionsCheckbox: (
+                  <strong>
+                    <FormattedMessage
+                      id="xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.addRuleActions.deleteActionsDetail.overwriteActionsCheckboxLabel"
+                      defaultMessage="Overwrite all selected rule actions"
+                    />
+                  </strong>
+                ),
+              }}
+            />
+          </li>
+          <li>{i18n.RULE_VARIABLES_DETAIL}</li>
+        </ul>
       </EuiCallOut>
       <EuiSpacer size="m" />
 
