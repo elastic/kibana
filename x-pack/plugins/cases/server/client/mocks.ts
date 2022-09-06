@@ -29,7 +29,6 @@ const createCasesSubClientMock = (): CasesSubClientMock => {
     getTags: jest.fn(),
     getReporters: jest.fn(),
     getCasesByAlertID: jest.fn(),
-    getAssignees: jest.fn(),
   };
 };
 

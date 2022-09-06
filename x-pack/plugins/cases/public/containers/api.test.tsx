@@ -198,6 +198,7 @@ describe('Cases API', () => {
           ...DEFAULT_QUERY_PARAMS,
           searchFields: DEFAULT_FILTER_OPTIONS.searchFields,
           assignees: [],
+          reporters: [],
           tags: [],
           owner: [SECURITY_SOLUTION_OWNER],
         },
@@ -210,6 +211,7 @@ describe('Cases API', () => {
         filterOptions: {
           ...DEFAULT_FILTER_OPTIONS,
           assignees: ['123'],
+          reporters: [{ username: 'username', full_name: null, email: null }],
           tags,
           status: CaseStatuses.open,
           search: 'hello',
@@ -223,6 +225,7 @@ describe('Cases API', () => {
         query: {
           ...DEFAULT_QUERY_PARAMS,
           assignees: ['123'],
+          reporters: ['username'],
           tags: ['coke', 'pepsi'],
           search: 'hello',
           searchFields: DEFAULT_FILTER_OPTIONS.searchFields,
@@ -248,6 +251,7 @@ describe('Cases API', () => {
           ...DEFAULT_QUERY_PARAMS,
           searchFields: DEFAULT_FILTER_OPTIONS.searchFields,
           assignees: [],
+          reporters: [],
           tags: [],
           severity: CaseSeverity.HIGH,
         },
@@ -270,6 +274,7 @@ describe('Cases API', () => {
           ...DEFAULT_QUERY_PARAMS,
           searchFields: DEFAULT_FILTER_OPTIONS.searchFields,
           assignees: [],
+          reporters: [],
           tags: [],
         },
         signal: abortCtrl.signal,
@@ -283,6 +288,7 @@ describe('Cases API', () => {
         filterOptions: {
           ...DEFAULT_FILTER_OPTIONS,
           assignees: ['123'],
+          reporters: [{ username: undefined, full_name: undefined, email: undefined }],
           tags: weirdTags,
           status: CaseStatuses.open,
           search: 'hello',
@@ -296,6 +302,7 @@ describe('Cases API', () => {
         query: {
           ...DEFAULT_QUERY_PARAMS,
           assignees: ['123'],
+          reporters: [],
           tags: ['(', '"double"'],
           search: 'hello',
           searchFields: DEFAULT_FILTER_OPTIONS.searchFields,

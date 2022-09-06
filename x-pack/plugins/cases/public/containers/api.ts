@@ -115,13 +115,6 @@ export const getTags = async (signal: AbortSignal, owner: string[]): Promise<str
   return response ?? [];
 };
 
-export interface FindAssigneesProps {
-  searchTerm: string;
-  owners: string[];
-  size?: number;
-  signal: AbortSignal;
-}
-
 export const getReporters = async (signal: AbortSignal, owner: string[]): Promise<User[]> => {
   const response = await KibanaServices.get().http.fetch<User[]>(CASE_REPORTERS_URL, {
     method: 'GET',
@@ -172,6 +165,7 @@ export const getCases = async ({
     searchFields: [],
     severity: SeverityAll,
     assignees: [],
+    reporters: [],
     status: StatusAll,
     tags: [],
     owner: [],
@@ -188,6 +182,7 @@ export const getCases = async ({
     ...(filterOptions.status !== StatusAll ? { status: filterOptions.status } : {}),
     ...(filterOptions.severity !== SeverityAll ? { severity: filterOptions.severity } : {}),
     assignees: filterOptions.assignees,
+    reporters: filterOptions.reporters.map((r) => r.username ?? '').filter((r) => r !== ''),
     tags: filterOptions.tags,
     ...(filterOptions.search.length > 0 ? { search: filterOptions.search } : {}),
     ...(filterOptions.searchFields.length > 0 ? { searchFields: filterOptions.searchFields } : {}),

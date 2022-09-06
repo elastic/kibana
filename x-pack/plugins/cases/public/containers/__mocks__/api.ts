@@ -75,6 +75,7 @@ export const getCases = async ({
     search: '',
     searchFields: [],
     assignees: [],
+    reporters: [],
     status: CaseStatuses.open,
     tags: [],
     owner: [],

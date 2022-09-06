@@ -293,14 +293,6 @@ export const Operations: Record<ReadOperations | WriteOperations, OperationDetai
     docType: 'case',
     savedObjectType: CASE_SAVED_OBJECT,
   },
-  [ReadOperations.GetAssignees]: {
-    ecsType: EVENT_TYPES.access,
-    name: ReadOperations.GetAssignees as const,
-    action: 'case_assignees_get',
-    verbs: accessVerbs,
-    docType: 'case',
-    savedObjectType: CASE_SAVED_OBJECT,
-  },
   [ReadOperations.GetCaseStatuses]: {
     ecsType: EVENT_TYPES.access,
     name: ACCESS_CASE_OPERATION,

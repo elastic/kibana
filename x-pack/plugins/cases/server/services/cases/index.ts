@@ -127,8 +127,6 @@ interface GetReportersArgs {
   filter?: KueryNode;
 }
 
-type GetAssigneesArgs = GetReportersArgs;
-
 export class CasesService {
   private readonly log: Logger;
   private readonly authentication?: SecurityPluginSetup['authc'];
@@ -449,41 +447,6 @@ export class CasesService {
       });
     } catch (error) {
       this.log.error(`Error on GET all comments for case ${JSON.stringify(id)}: ${error}`);
-      throw error;
-    }
-  }
-
-  public async getAssignees({ filter }: GetAssigneesArgs): Promise<string[]> {
-    try {
-      this.log.debug(`Attempting to GET all assignees`);
-
-      const results = await this.unsecuredSavedObjectsClient.find<
-        ESCaseAttributes,
-        {
-          assignees: {
-            buckets: Array<{
-              key: string;
-            }>;
-          };
-        }
-      >({
-        type: CASE_SAVED_OBJECT,
-        page: 1,
-        perPage: 1,
-        filter,
-        aggs: {
-          assignees: {
-            terms: {
-              field: `${CASE_SAVED_OBJECT}.attributes.assignees.uid`,
-              size: MAX_DOCS_PER_PAGE,
-            },
-          },
-        },
-      });
-
-      return results?.aggregations?.assignees?.buckets.map(({ key }) => key) ?? [];
-    } catch (error) {
-      this.log.error(`Error on GET all assignees: ${error}`);
       throw error;
     }
   }

@@ -23,7 +23,6 @@ const readOperations = [
   'getComment',
   'getTags',
   'getReporters',
-  'getAssignees',
   'getUserActions',
   'findConfigurations',
 ] as const;
