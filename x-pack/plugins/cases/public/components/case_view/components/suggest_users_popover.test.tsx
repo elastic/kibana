@@ -6,26 +6,21 @@
  */
 
 import React from 'react';
-import { useSuggestUserProfiles } from '../../../containers/user_profiles/use_suggest_user_profiles';
 import { AppMockRenderer, createAppMockRenderer } from '../../../common/mock';
-import { screen, fireEvent } from '@testing-library/react';
+import { screen, fireEvent, waitFor } from '@testing-library/react';
 import { SuggestUsersPopoverProps, SuggestUsersPopover } from './suggest_users_popover';
 import { userProfiles } from '../../../containers/user_profiles/api.mock';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { AssigneeWithProfile } from '../../user_profiles/types';
 
-jest.mock('../../../containers/user_profiles/use_suggest_user_profiles');
-
-const useSuggestUserProfilesMock = useSuggestUserProfiles as jest.Mock;
+jest.mock('../../../containers/user_profiles/api');
 
 describe('SuggestUsersPopover', () => {
   let appMockRender: AppMockRenderer;
   let defaultProps: SuggestUsersPopoverProps;
 
   beforeEach(() => {
-    useSuggestUserProfilesMock.mockReturnValue({ data: userProfiles, isLoading: false });
-
     appMockRender = createAppMockRenderer();
 
     defaultProps = {
@@ -46,6 +41,11 @@ describe('SuggestUsersPopover', () => {
     await waitForEuiPopoverOpen();
 
     fireEvent.change(screen.getByPlaceholderText('Search users'), { target: { value: 'dingo' } });
+
+    await waitFor(() => {
+      expect(screen.getByText('wet_dingo@elastic.co')).toBeInTheDocument();
+    });
+
     fireEvent.click(screen.getByText('wet_dingo@elastic.co'));
 
     expect(onUsersChange.mock.calls[0][0]).toMatchInlineSnapshot(`
@@ -72,6 +72,12 @@ describe('SuggestUsersPopover', () => {
     await waitForEuiPopoverOpen();
 
     fireEvent.change(screen.getByPlaceholderText('Search users'), { target: { value: 'elastic' } });
+
+    await waitFor(() => {
+      expect(screen.getByText('wet_dingo@elastic.co')).toBeInTheDocument();
+      expect(screen.getByText('damaged_raccoon@elastic.co')).toBeInTheDocument();
+    });
+
     fireEvent.click(screen.getByText('wet_dingo@elastic.co'));
     fireEvent.click(screen.getByText('damaged_raccoon@elastic.co'));
 
@@ -114,6 +120,11 @@ describe('SuggestUsersPopover', () => {
     await waitForEuiPopoverOpen();
 
     fireEvent.change(screen.getByPlaceholderText('Search users'), { target: { value: 'elastic' } });
+
+    await waitFor(() => {
+      expect(screen.getByText('wet_dingo@elastic.co')).toBeInTheDocument();
+    });
+
     fireEvent.click(screen.getByText('wet_dingo@elastic.co'));
 
     expect(onUsersChange.mock.calls[0][0]).toMatchInlineSnapshot(`
@@ -159,6 +170,11 @@ describe('SuggestUsersPopover', () => {
 
     expect(screen.queryByTestId('case-view-assignees-popover-totals')).not.toBeInTheDocument();
     fireEvent.change(screen.getByPlaceholderText('Search users'), { target: { value: 'dingo' } });
+
+    await waitFor(() => {
+      expect(screen.getByText('wet_dingo@elastic.co')).toBeInTheDocument();
+    });
+
     fireEvent.click(screen.getByText('wet_dingo@elastic.co'));
   });
 
@@ -186,13 +202,16 @@ describe('SuggestUsersPopover', () => {
 
     await waitForEuiPopoverOpen();
 
+    await waitFor(() => {
+      expect(screen.getByTestId('case-view-assignees-edit-button')).not.toBeDisabled();
+    });
+
     fireEvent.click(screen.getByTestId('case-view-assignees-edit-button'));
 
     expect(togglePopover).toBeCalled();
   });
 
   it('shows the empty message initially', async () => {
-    useSuggestUserProfilesMock.mockReturnValue({ data: [], isLoading: false });
     appMockRender.render(<SuggestUsersPopover {...defaultProps} />);
 
     await waitForEuiPopoverOpen();
@@ -203,7 +222,6 @@ describe('SuggestUsersPopover', () => {
   });
 
   it('shows the no matches component', async () => {
-    useSuggestUserProfilesMock.mockReturnValue({ data: [], isLoading: false });
     appMockRender.render(<SuggestUsersPopover {...defaultProps} />);
 
     await waitForEuiPopoverOpen();
@@ -211,7 +229,9 @@ describe('SuggestUsersPopover', () => {
     fireEvent.click(screen.getByTestId('case-view-assignees-edit-button'));
     fireEvent.change(screen.getByPlaceholderText('Search users'), { target: { value: 'bananas' } });
 
-    expect(screen.getAllByTestId('case-view-assignees-popover-no-matches')[0]).toBeInTheDocument();
+    await waitFor(() =>
+      expect(screen.getAllByTestId('case-view-assignees-popover-no-matches')[0]).toBeInTheDocument()
+    );
   });
 });
 

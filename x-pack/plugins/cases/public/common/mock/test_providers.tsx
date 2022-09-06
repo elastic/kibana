@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable no-console */
+
 import React from 'react';
 import { euiDarkVars } from '@kbn/ui-theme';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -56,6 +58,11 @@ const TestProvidersComponent: React.FC<TestProviderProps> = ({
         retry: false,
       },
     },
+    logger: {
+      log: console.log,
+      warn: console.warn,
+      error: () => {},
+    },
   });
 
   return (
@@ -97,6 +104,15 @@ export const testQueryClient = new QueryClient({
     queries: {
       retry: false,
     },
+  },
+  /**
+   * React query prints the errors in the console even though
+   * all tests are passings. We turn them off for testing.
+   */
+  logger: {
+    log: console.log,
+    warn: console.warn,
+    error: () => {},
   },
 });
 
@@ -175,6 +191,11 @@ export const createAppMockRenderer = ({
       queries: {
         retry: false,
       },
+    },
+    logger: {
+      log: console.log,
+      warn: console.warn,
+      error: () => {},
     },
   });
 

@@ -28,7 +28,7 @@ describe('useColumnSettings()', () => {
             },
             Object {
               "displayAsText": "Indicator",
-              "id": "display_name",
+              "id": "threat.indicator.name",
             },
             Object {
               "displayAsText": "Indicator type",
@@ -52,7 +52,7 @@ describe('useColumnSettings()', () => {
         expect(result.current.columnVisibility.visibleColumns).toMatchInlineSnapshot(`
           Array [
             "@timestamp",
-            "display_name",
+            "threat.indicator.name",
             "threat.indicator.type",
             "threat.feed.name",
             "threat.indicator.first_seen",
@@ -65,9 +65,9 @@ describe('useColumnSettings()', () => {
     describe('when initial state is present in the plugin storage service', () => {
       beforeEach(() => {
         mockedServices.storage.set('indicatorsTable', {
-          visibleColumns: ['display_name', 'threat.indicator.last_seen', 'tags', 'stream'],
+          visibleColumns: ['threat.indicator.name', 'threat.indicator.last_seen', 'tags', 'stream'],
           columns: [
-            { id: 'display_name', displayAsText: 'Indicator' },
+            { id: 'threat.indicator.name', displayAsText: 'Indicator' },
             { id: 'threat.indicator.type', displayAsText: 'Indicator type' },
             { id: 'threat.feed.name', displayAsText: 'Feed' },
             { id: 'threat.indicator.first_seen', displayAsText: 'First seen' },
@@ -83,7 +83,7 @@ describe('useColumnSettings()', () => {
 
         expect(result.current.columnVisibility.visibleColumns).toMatchInlineSnapshot(`
           Array [
-            "display_name",
+            "threat.indicator.name",
             "threat.indicator.last_seen",
             "tags",
             "stream",
@@ -94,7 +94,7 @@ describe('useColumnSettings()', () => {
           Array [
             Object {
               "displayAsText": "Indicator",
-              "id": "display_name",
+              "id": "threat.indicator.name",
             },
             Object {
               "displayAsText": "Indicator type",
@@ -133,7 +133,7 @@ describe('useColumnSettings()', () => {
       expect(result.current.columnVisibility.visibleColumns).toMatchInlineSnapshot(`
         Array [
           "@timestamp",
-          "display_name",
+          "threat.indicator.name",
           "threat.indicator.type",
           "threat.feed.name",
           "threat.indicator.first_seen",
@@ -148,7 +148,7 @@ describe('useColumnSettings()', () => {
           },
           Object {
             "displayAsText": "Indicator",
-            "id": "display_name",
+            "id": "threat.indicator.name",
           },
           Object {
             "displayAsText": "Indicator type",
@@ -176,7 +176,7 @@ describe('useColumnSettings()', () => {
       expect(result.current.columnVisibility.visibleColumns).toMatchInlineSnapshot(`
         Array [
           "@timestamp",
-          "display_name",
+          "threat.indicator.name",
           "threat.indicator.type",
           "threat.feed.name",
           "threat.indicator.first_seen",
@@ -192,7 +192,7 @@ describe('useColumnSettings()', () => {
           },
           Object {
             "displayAsText": "Indicator",
-            "id": "display_name",
+            "id": "threat.indicator.name",
           },
           Object {
             "displayAsText": "Indicator type",
@@ -224,7 +224,7 @@ describe('useColumnSettings()', () => {
       expect(result.current.columnVisibility.visibleColumns).toMatchInlineSnapshot(`
         Array [
           "@timestamp",
-          "display_name",
+          "threat.indicator.name",
           "threat.indicator.type",
           "threat.feed.name",
           "threat.indicator.first_seen",
@@ -239,7 +239,7 @@ describe('useColumnSettings()', () => {
           },
           Object {
             "displayAsText": "Indicator",
-            "id": "display_name",
+            "id": "threat.indicator.name",
           },
           Object {
             "displayAsText": "Indicator type",

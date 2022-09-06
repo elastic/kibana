@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { UserProfilesPopover, UserProfileWithAvatar } from '@kbn/user-profile-components';
 
 import {
@@ -118,10 +118,7 @@ const SuggestUsersPopoverComponent: React.FC<SuggestUsersPopoverProps> = ({
   }, [assignedUsersWithProfiles, currentUserProfile]);
 
   const [selectedUsers, setSelectedUsers] = useState<UserProfileWithAvatar[] | undefined>();
-
-  const [searchResultProfiles, setSearchResultProfiles] = useState<
-    UserProfileWithAvatar[] | undefined
-  >();
+  const [isUserTyping, setIsUserTyping] = useState(false);
 
   const onChange = useCallback(
     (users: UserProfileWithAvatar[]) => {
@@ -137,21 +134,17 @@ const SuggestUsersPopoverComponent: React.FC<SuggestUsersPopoverProps> = ({
     []
   );
 
-  const { data: userProfiles, isFetching: isLoadingSuggest } = useSuggestUserProfiles({
+  const onDebounce = useCallback(() => setIsUserTyping(false), []);
+
+  const { data: userProfiles, isLoading: isLoadingSuggest } = useSuggestUserProfiles({
     name: searchTerm,
     owners: owner,
+    onDebounce,
   });
 
   const isLoadingData = isLoadingSuggest || isLoading;
 
-  useEffect(() => {
-    const sortedUserProfiles = sortProfiles(userProfiles);
-    if (!isEmpty(searchTerm)) {
-      setSearchResultProfiles(sortedUserProfiles);
-    } else {
-      setSearchResultProfiles(undefined);
-    }
-  }, [searchTerm, userProfiles]);
+  const searchResultProfiles = useMemo(() => sortProfiles(userProfiles), [userProfiles]);
 
   return (
     <UserProfilesPopover
@@ -164,16 +157,22 @@ const SuggestUsersPopoverComponent: React.FC<SuggestUsersPopoverProps> = ({
       }}
       selectableProps={{
         onChange,
-        onSearchChange: setSearchTerm,
+        onSearchChange: (term) => {
+          setSearchTerm(term);
+
+          if (!isEmpty(term)) {
+            setIsUserTyping(true);
+          }
+        },
         selectedStatusMessage,
-        options: searchResultProfiles,
+        options: !isEmpty(searchResultProfiles) ? searchResultProfiles : undefined,
         selectedOptions: selectedUsers ?? selectedProfiles,
-        isLoading: isLoadingData,
+        isLoading: isLoadingData || isUserTyping,
         height: 'full',
         searchPlaceholder: i18n.SEARCH_USERS,
         clearButtonLabel: i18n.REMOVE_ASSIGNEES,
         emptyMessage: <EmptyMessage />,
-        noMatchesMessage: searchResultProfiles ? <NoMatches /> : <EmptyMessage />,
+        noMatchesMessage: !isUserTyping && !isLoadingData ? <NoMatches /> : <EmptyMessage />,
       }}
     />
   );

@@ -13895,7 +13895,7 @@
         "label": "handleRequest",
         "description": [],
         "signature": [
-          "({ abortSignal, aggs, filters, indexPattern, inspectorAdapters, query, searchSessionId, searchSourceService, timeFields, timeRange, getNow, executionContext, }: ",
+          "({ abortSignal, aggs, filters, indexPattern, inspectorAdapters, query, searchSessionId, searchSourceService, timeFields, timeRange, disableShardWarnings, getNow, executionContext, }: ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -13923,7 +13923,7 @@
             "id": "def-common.handleRequest.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  abortSignal,\n  aggs,\n  filters,\n  indexPattern,\n  inspectorAdapters,\n  query,\n  searchSessionId,\n  searchSourceService,\n  timeFields,\n  timeRange,\n  getNow,\n  executionContext,\n}",
+            "label": "{\n  abortSignal,\n  aggs,\n  filters,\n  indexPattern,\n  inspectorAdapters,\n  query,\n  searchSessionId,\n  searchSourceService,\n  timeFields,\n  timeRange,\n  disableShardWarnings,\n  getNow,\n  executionContext,\n}",
             "description": [],
             "signature": [
               {
@@ -24766,6 +24766,19 @@
           },
           {
             "parentPluginId": "data",
+            "id": "def-common.RequestHandlerParams.disableShardWarnings",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "disableShardWarnings",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/data/common/search/expressions/esaggs/request_handler.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
             "id": "def-common.RequestHandlerParams.getNow",
             "type": "Function",
             "tags": [],
@@ -27560,7 +27573,7 @@
             "section": "def-common.TimeRange",
             "text": "TimeRange"
           },
-          " | undefined; }"
+          " | undefined; disableShardWarnings?: boolean | undefined; }"
         ],
         "path": "src/plugins/data/common/search/expressions/kibana_context_type.ts",
         "deprecated": false,
@@ -35203,7 +35216,7 @@
                 "section": "def-common.TimeRange",
                 "text": "TimeRange"
               },
-              " | undefined; }"
+              " | undefined; disableShardWarnings?: boolean | undefined; }"
             ],
             "path": "src/plugins/data/common/search/expressions/remove_filter.ts",
             "deprecated": false,
@@ -35506,7 +35519,7 @@
                 "section": "def-common.TimeRange",
                 "text": "TimeRange"
               },
-              " | undefined; }"
+              " | undefined; disableShardWarnings?: boolean | undefined; }"
             ],
             "path": "src/plugins/data/common/search/expressions/select_filter.ts",
             "deprecated": false,

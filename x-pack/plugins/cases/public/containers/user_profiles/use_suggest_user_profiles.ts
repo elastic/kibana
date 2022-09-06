@@ -9,7 +9,7 @@ import { useState } from 'react';
 import { useQuery, UseQueryResult } from '@tanstack/react-query';
 import useDebounce from 'react-use/lib/useDebounce';
 import { UserProfile } from '@kbn/security-plugin/common';
-import { isEmpty } from 'lodash';
+import { isEmpty, noop } from 'lodash';
 import { DEFAULT_USER_SIZE } from '../../../common/constants';
 import * as i18n from '../translations';
 import { useKibana, useToasts } from '../../common/lib/kibana';
@@ -19,19 +19,29 @@ import { suggestUserProfiles, SuggestUserProfilesArgs } from './api';
 
 const DEBOUNCE_MS = 500;
 
+type Props = Omit<SuggestUserProfilesArgs, 'signal' | 'http'> & { onDebounce?: () => void };
+
 export const useSuggestUserProfiles = ({
   name,
   owners,
   size = DEFAULT_USER_SIZE,
-}: Omit<SuggestUserProfilesArgs, 'signal' | 'http'>) => {
+  onDebounce = noop,
+}: Props) => {
   const { http } = useKibana().services;
   const [debouncedName, setDebouncedName] = useState(name);
 
-  useDebounce(() => setDebouncedName(name), DEBOUNCE_MS, [name]);
+  useDebounce(
+    () => {
+      setDebouncedName(name);
+      onDebounce();
+    },
+    DEBOUNCE_MS,
+    [name]
+  );
 
   const toasts = useToasts();
 
-  return useQuery<UserProfile[] | null, ServerError>(
+  return useQuery<UserProfile[], ServerError>(
     [
       USER_PROFILES_CACHE_KEY,
       USER_PROFILES_SUGGEST_CACHE_KEY,
@@ -39,7 +49,7 @@ export const useSuggestUserProfiles = ({
     ],
     () => {
       if (isEmpty(name)) {
-        return null;
+        return [];
       }
 
       const abortCtrlRef = new AbortController();
@@ -68,4 +78,4 @@ export const useSuggestUserProfiles = ({
   );
 };
 
-export type UseSuggestUserProfiles = UseQueryResult<UserProfile[] | null, ServerError>;
+export type UseSuggestUserProfiles = UseQueryResult<UserProfile[], ServerError>;
