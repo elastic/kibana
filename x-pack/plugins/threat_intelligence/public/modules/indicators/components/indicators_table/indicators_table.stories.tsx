@@ -9,11 +9,13 @@ import { CoreStart } from '@kbn/core/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
 import { DataView } from '@kbn/data-views-plugin/common';
+import { mockIndicatorsFiltersContext } from '../../../../common/mocks/mock_indicators_filters_context';
 import { mockTriggersActionsUiService } from '../../../../common/mocks/mock_kibana_triggers_actions_ui_service';
 import { mockUiSettingsService } from '../../../../common/mocks/mock_kibana_ui_settings_service';
 import { mockKibanaTimelinesService } from '../../../../common/mocks/mock_kibana_timelines_service';
 import { generateMockIndicator, Indicator } from '../../../../../common/types/indicator';
 import { IndicatorsTable } from './indicators_table';
+import { IndicatorsFiltersContext } from '../../context';
 
 export default {
   component: IndicatorsTable,
@@ -35,20 +37,22 @@ export function WithIndicators() {
 
   return (
     <KibanaReactContext.Provider>
-      <IndicatorsTable
-        browserFields={{}}
-        loading={false}
-        pagination={{
-          pageSize: 10,
-          pageIndex: 0,
-          pageSizeOptions: [10, 25, 50],
-        }}
-        indicators={indicatorsFixture}
-        onChangePage={stub}
-        onChangeItemsPerPage={stub}
-        indicatorCount={indicatorsFixture.length * 2}
-        indexPattern={mockIndexPattern}
-      />
+      <IndicatorsFiltersContext.Provider value={mockIndicatorsFiltersContext}>
+        <IndicatorsTable
+          browserFields={{}}
+          loading={false}
+          pagination={{
+            pageSize: 10,
+            pageIndex: 0,
+            pageSizeOptions: [10, 25, 50],
+          }}
+          indicators={indicatorsFixture}
+          onChangePage={stub}
+          onChangeItemsPerPage={stub}
+          indicatorCount={indicatorsFixture.length * 2}
+          indexPattern={mockIndexPattern}
+        />
+      </IndicatorsFiltersContext.Provider>
     </KibanaReactContext.Provider>
   );
 }

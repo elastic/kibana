@@ -8,6 +8,7 @@
 import { EuiEmptyPrompt, EuiInMemoryTable } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { VFC } from 'react';
+import { FilterInOut } from '../../../query_bar/components/filter_in_out';
 import { Indicator } from '../../../../../common/types/indicator';
 import { AddToTimeline } from '../../../timeline/components/add_to_timeline';
 import { IndicatorField } from '../indicator_field/indicator_field';
@@ -54,7 +55,10 @@ export const IndicatorsFlyoutTable: VFC<IndicatorsFlyoutTableProps> = ({
       actions: [
         {
           render: (field: string) => (
-            <AddToTimeline data={indicator} field={field} testId={TIMELINE_BUTTON_TEST_ID} />
+            <>
+              <FilterInOut data={indicator} field={field} />
+              <AddToTimeline data={indicator} field={field} testId={TIMELINE_BUTTON_TEST_ID} />
+            </>
           ),
         },
       ],

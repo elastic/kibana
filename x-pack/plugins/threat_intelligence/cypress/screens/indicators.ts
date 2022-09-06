@@ -59,3 +59,13 @@ export const FLYOUT_TABLE_ROW_TIMELINE_BUTTON = '[data-test-subj="tiFlyoutTableR
 export const UNTITLED_TIMELINE_BUTTON = '[data-test-subj="flyoutOverlay"]';
 
 export const TIMELINE_DRAGGABLE_ITEM = '[data-test-subj="providerContainer"]';
+
+export const FILTER_IN_BUTTON = '[data-test-subj="tiFilterInIcon"]';
+
+export const FILTER_OUT_BUTTON = '[data-test-subj="tiFilterOutIcon"]';
+
+export const FILTER_IN_COMPONENT = '[data-test-subj="tiFilterInComponent"]';
+
+export const FILTER_OUT_COMPONENT = '[data-test-subj="tiFilterOutComponent"]';
+
+export const KQL_FILTER = '[id="popoverFor_filter0"]';

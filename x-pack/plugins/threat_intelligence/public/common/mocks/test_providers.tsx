@@ -20,6 +20,8 @@ import { SecuritySolutionPluginContext } from '../../types';
 import { getSecuritySolutionContextMock } from './mock_security_context';
 import { mockUiSetting } from './mock_kibana_ui_settings_service';
 import { SecuritySolutionContext } from '../../containers/security_solution_context';
+import { IndicatorsFiltersContext } from '../../modules/indicators/context';
+import { mockIndicatorsFiltersContext } from './mock_indicators_filters_context';
 
 export const localStorageMock = (): IStorage => {
   let store: Record<string, unknown> = {};
@@ -122,7 +124,11 @@ export const mockedServices = {
 export const TestProvidersComponent: FC = ({ children }) => (
   <SecuritySolutionContext.Provider value={mockSecurityContext}>
     <KibanaContext.Provider value={{ services: mockedServices } as any}>
-      <I18nProvider>{children}</I18nProvider>
+      <I18nProvider>
+        <IndicatorsFiltersContext.Provider value={mockIndicatorsFiltersContext}>
+          {children}
+        </IndicatorsFiltersContext.Provider>
+      </I18nProvider>
     </KibanaContext.Provider>
   </SecuritySolutionContext.Provider>
 );

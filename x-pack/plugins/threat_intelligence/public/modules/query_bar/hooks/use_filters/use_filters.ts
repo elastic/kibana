@@ -59,7 +59,6 @@ export const useFilters = (): UseFiltersValue => {
   // Serialize filters into query string
   useEffect(() => {
     const filterStateAsString = encodeState({ filters, filterQuery, timeRange });
-
     if (!deepEqual(filterManager.getFilters(), filters)) {
       filterManager.setFilters(filters);
     }
