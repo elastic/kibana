@@ -132,7 +132,9 @@ export const QueryBar = memo<QueryBarComponentProps>(
     }, [filterManager, onSubmitQuery, onSavedQuery, savedQuery]);
 
     const onFiltersUpdated = useCallback(
-      (newFilters: Filter[]) => filterManager.setFilters(newFilters),
+      (newFilters: Filter[]) => {
+        return filterManager.setFilters(newFilters);
+      },
       [filterManager]
     );
 
