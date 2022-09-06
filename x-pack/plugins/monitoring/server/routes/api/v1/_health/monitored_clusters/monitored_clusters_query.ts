@@ -9,7 +9,8 @@ import { TimeRange } from '../../../../../../common/http_api/shared';
 
 const MAX_BUCKET_SIZE = 100;
 
-const getDataset = (product: string) => (metricset: string) => `${product}.${metricset}`;
+const getDataset = (product: string) => (metricset: string) =>
+  `${product}.stack_monitoring.${metricset}`;
 const getElasticsearchDataset = getDataset('elasticsearch');
 const getKibanaDataset = getDataset('kibana');
 const getLogstashDataset = getDataset('logstash');
