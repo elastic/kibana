@@ -168,7 +168,6 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) 
     //   if (data.internal.name !== fieldName$.getValue()) {
     //     fieldName$.next(data.internal.name);
     //   }
-
     //   if (
     //     data.internal.type[0].value !== 'composite' &&
     //     Object.keys(data.internal.fields || {}).length > 0
@@ -177,7 +176,6 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) 
     //     form.updateFieldValues({ ...form.getFormData(), fields: {} });
     //   }
     // });
-
     // return () => {
     //   sub.unsubscribe();
     // };
