@@ -150,21 +150,35 @@ const RuleActionsFormComponent = ({ rulesCount, onClose, onConfirm }: RuleAction
           />
         }
       >
-        <ul>
-          <li>
-            <FormattedMessage
-              id="xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.addRuleActions.actionFrequencyDetail"
-              defaultMessage="The actions frequency you select below is applied to all actions (both new and existing) for all selected rules."
-            />
-          </li>
-          <li>
-            <FormattedMessage
-              id="xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.addRuleActions.deleteActionsDetail"
-              defaultMessage='To delete actions for all selected rules, select "Perform no actions" in the menu and check "Overwrite all selected rule actions".'
-            />
-          </li>
-          <li>{i18n.RULE_VARIABLES_DETAIL}</li>
-        </ul>
+        <FormattedMessage
+          id="xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.addRuleActions.actionFrequencyDetail"
+          defaultMessage="The actions frequency you select below is applied to all actions (both new and existing) for all selected rules."
+        />
+        <EuiSpacer size="xs" />
+        <FormattedMessage
+          id="xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.addRuleActions.deleteActionsDetail"
+          defaultMessage="To delete actions for all selected rules, select {noActionsOption} in the menu and check {overwriteActionsCheckbox}."
+          values={{
+            noActionsOption: (
+              <strong>
+                <FormattedMessage
+                  id="xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.addRuleActions.deleteActionsDetail.menuOptionLabel"
+                  defaultMessage="Perform no actions"
+                />
+              </strong>
+            ),
+            overwriteActionsCheckbox: (
+              <strong>
+                <FormattedMessage
+                  id="xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.addRuleActions.deleteActionsDetail.overwriteActionsCheckboxLabel"
+                  defaultMessage="Overwrite all selected rule actions"
+                />
+              </strong>
+            ),
+          }}
+        />
+        <EuiSpacer size="xs" />
+        {i18n.RULE_VARIABLES_DETAIL}
       </EuiCallOut>
       <EuiSpacer size="m" />
 
@@ -202,8 +216,18 @@ const RuleActionsFormComponent = ({ rulesCount, onClose, onConfirm }: RuleAction
           <EuiCallOut color="warning" data-test-subj="bulkEditRulesRuleActionsWarning">
             <FormattedMessage
               id="xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.addRuleActions.warningCalloutMessage"
-              defaultMessage="You're about to overwrite rule actions for {rulesCount, plural, one {# selected rule} other {# selected rules}}. Click "Save" to apply changes."
-              values={{ rulesCount }}
+              defaultMessage="You're about to overwrite rule actions for {rulesCount, plural, one {# selected rule} other {# selected rules}}. Click {saveButton} to apply changes."
+              values={{
+                rulesCount,
+                saveButton: (
+                  <strong>
+                    <FormattedMessage
+                      id="xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.addRuleActions.warningCalloutMessage.buttonLabel"
+                      defaultMessage="Save"
+                    />
+                  </strong>
+                ),
+              }}
             />
           </EuiCallOut>
         </>
