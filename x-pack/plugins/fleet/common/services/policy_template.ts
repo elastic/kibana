@@ -48,6 +48,7 @@ export const getNormalizedInputs = (policyTemplate: RegistryPolicyTemplate): Reg
     type: policyTemplate.input,
     title: policyTemplate.title,
     description: policyTemplate.description,
+    template_path: policyTemplate.template_path,
   };
 
   return [input];

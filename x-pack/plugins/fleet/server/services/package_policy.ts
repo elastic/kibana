@@ -33,6 +33,7 @@ import {
   validationHasErrors,
   isInputOnlyPolicyTemplate,
   getNormalizedDataStreams,
+  getNormalizedInputs,
 } from '../../common/services';
 import { SO_SEARCH_LIMIT, FLEET_APM_PACKAGE, outputType } from '../../common/constants';
 import type {
@@ -1069,21 +1070,20 @@ async function _compilePackagePolicyInput(
       )
     : pkgInfo.policy_templates?.[0];
 
-  if (
-    !input.enabled ||
-    !packagePolicyTemplate ||
-    isInputOnlyPolicyTemplate(packagePolicyTemplate) || // TODO: handle input packages
-    !packagePolicyTemplate.inputs?.length
-  ) {
+  if (!input.enabled || !packagePolicyTemplate) {
     return undefined;
   }
 
-  const packageInputs = packagePolicyTemplate.inputs;
+  const packageInputs = getNormalizedInputs(packagePolicyTemplate);
+
+  if (!packageInputs.length) {
+    return undefined;
+  }
+
   const packageInput = packageInputs.find((pkgInput) => pkgInput.type === input.type);
   if (!packageInput) {
     throw new Error(`Input template not found, unable to find input type ${input.type}`);
   }
-
   if (!packageInput.template_path) {
     return undefined;
   }
