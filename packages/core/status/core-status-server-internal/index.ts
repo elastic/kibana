@@ -8,3 +8,6 @@
 
 export { statusConfig, StatusService } from './src';
 export type { StatusConfigType, InternalStatusServiceSetup } from './src';
+
+// exported only for integration tests
+export { registerStatusRoute } from './src/routes/status';
