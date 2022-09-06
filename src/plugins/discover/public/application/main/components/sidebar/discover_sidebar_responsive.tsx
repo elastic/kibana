@@ -28,11 +28,10 @@ import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { getDefaultFieldFilter } from './lib/field_filter';
 import { DiscoverSidebar } from './discover_sidebar';
 import { AppState } from '../../services/discover_state';
-import { AvailableFields$, DataDocuments$, RecordRawType } from '../../hooks/use_saved_search';
-import { calcFieldCounts } from '../../utils/calc_field_counts';
+import { RecordRawType } from '../../hooks/use_saved_search';
 import { VIEW_MODE } from '../../../../components/view_mode_toggle';
-import { FetchStatus } from '../../../types';
 import { DISCOVER_TOUR_STEP_ANCHOR_IDS } from '../../../../components/discover_tour';
+import type { DataTableRecord } from '../../../../types';
 import { getRawRecordType } from '../../utils/get_raw_record_type';
 
 export interface DiscoverSidebarResponsiveProps {
@@ -47,7 +46,11 @@ export interface DiscoverSidebarResponsiveProps {
   /**
    * hits fetched from ES, displayed in the doc table
    */
-  documents$: DataDocuments$;
+  documents?: DataTableRecord[];
+  /**
+   * a statistics of the distribution of fields in the given hits
+   */
+  fieldCounts?: Record<string, number>;
   /**
    * List of available data views
    */
@@ -103,10 +106,6 @@ export interface DiscoverSidebarResponsiveProps {
    * Discover view mode
    */
   viewMode: VIEW_MODE;
-  /**
-   * list of available fields fetched from ES
-   */
-  availableFields$: AvailableFields$;
 }
 
 /**
@@ -120,36 +119,9 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     () => getRawRecordType(props.state.query) === RecordRawType.PLAIN,
     [props.state.query]
   );
-  const { selectedDataView, onFieldEdited, onDataViewCreated } = props;
+  const { documents, fieldCounts, selectedDataView, onFieldEdited, onDataViewCreated } = props;
   const [fieldFilter, setFieldFilter] = useState(getDefaultFieldFilter());
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
-  /**
-   * fieldCounts are used to determine which fields are actually used in the given set of documents
-   */
-  const fieldCounts = useRef<Record<string, number> | null>(null);
-  if (fieldCounts.current === null) {
-    fieldCounts.current = calcFieldCounts(props.documents$.getValue().result!, selectedDataView);
-  }
-
-  const [documentState, setDocumentState] = useState(props.documents$.getValue());
-  useEffect(() => {
-    const subscription = props.documents$.subscribe((next) => {
-      if (next.fetchStatus !== documentState.fetchStatus) {
-        if (next.result) {
-          fieldCounts.current = calcFieldCounts(next.result, selectedDataView!);
-        }
-        setDocumentState({ ...documentState, ...next });
-      }
-    });
-    return () => subscription.unsubscribe();
-  }, [props.documents$, selectedDataView, documentState, setDocumentState]);
-
-  useEffect(() => {
-    // when data view changes fieldCounts needs to be cleaned up to prevent displaying
-    // fields of the previous data view
-    fieldCounts.current = {};
-  }, [selectedDataView]);
-
   const closeFieldEditor = useRef<() => void | undefined>();
   const closeDataViewEditor = useRef<() => void | undefined>();
 
@@ -181,34 +153,8 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
   }, []);
 
   const { dataViewFieldEditor, dataViewEditor } = services;
-  const { availableFields$ } = props;
 
   const canEditDataView = Boolean(dataViewEditor?.userPermissions.editDataView());
-
-  useEffect(
-    () => {
-      // For an external embeddable like the Field stats
-      // it is useful to know what fields are populated in the docs fetched
-      // or what fields are selected by the user
-
-      const fieldCnts = fieldCounts.current ?? {};
-
-      const availableFields = props.columns.length > 0 ? props.columns : Object.keys(fieldCnts);
-      availableFields$.next({
-        fetchStatus: FetchStatus.COMPLETE,
-        fields: availableFields,
-      });
-    },
-    // Using columns.length here instead of columns to avoid array reference changing
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [
-      selectedDataView,
-      availableFields$,
-      fieldCounts.current,
-      documentState.result,
-      props.columns.length,
-    ]
-  );
 
   const editField = useMemo(
     () =>
@@ -272,9 +218,9 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
         <EuiHideFor sizes={['xs', 's']}>
           <DiscoverSidebar
             {...props}
-            documents={documentState.result!}
+            documents={documents}
             fieldFilter={fieldFilter}
-            fieldCounts={fieldCounts.current}
+            fieldCounts={fieldCounts}
             setFieldFilter={setFieldFilter}
             editField={editField}
             createNewDataView={createNewDataView}
@@ -335,8 +281,8 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
               <div className="euiFlyoutBody">
                 <DiscoverSidebar
                   {...props}
-                  documents={documentState.result}
-                  fieldCounts={fieldCounts.current}
+                  documents={documents}
+                  fieldCounts={fieldCounts}
                   fieldFilter={fieldFilter}
                   setFieldFilter={setFieldFilter}
                   alwaysShowActionButtons={true}

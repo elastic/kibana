@@ -39,7 +39,7 @@ export interface ISearchStartSearchSource
   createEmpty: () => ISearchSource;
 }
 
-export type EsQuerySearchAfter = [string | number, string | number];
+export type EsQuerySearchAfter = [string | number, string | number, ...Array<string | number>];
 
 export enum SortDirection {
   asc = 'asc',

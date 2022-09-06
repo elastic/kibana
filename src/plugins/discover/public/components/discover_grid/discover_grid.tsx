@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useMemo, useState, useRef, useEffect } from 'react';
+import React, { useCallback, useMemo, useState, useRef, useEffect, RefObject } from 'react';
 import classnames from 'classnames';
 import { FormattedMessage } from '@kbn/i18n-react';
 import './discover_grid.scss';
@@ -21,6 +21,7 @@ import {
   EuiIcon,
   EuiDataGridRefProps,
   EuiLink,
+  EuiDataGridProps,
 } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
@@ -178,11 +179,17 @@ export interface DiscoverGridProps {
    * Callback to execute on edit runtime field
    */
   onFieldEdited?: () => void;
+  generationId?: string;
+  gridRef?: RefObject<EuiDataGridRefProps>;
+  gridPropOverrides?: EuiDataGridPropOverrides;
 }
+
+export type EuiDataGridPropOverrides = Partial<Omit<EuiDataGridProps, 'aria-label'>>;
 
 export const EuiDataGridMemoized = React.memo(EuiDataGrid);
 
 const CONTROL_COLUMN_IDS_DEFAULT = ['openDetails', 'select'];
+const DEFAULT_GENERATION_ID = 'default_generation';
 
 export const DiscoverGrid = ({
   ariaLabelledBy,
@@ -215,8 +222,12 @@ export const DiscoverGrid = ({
   rowsPerPageState,
   onUpdateRowsPerPage,
   onFieldEdited,
+  generationId = DEFAULT_GENERATION_ID,
+  gridRef,
+  gridPropOverrides,
 }: DiscoverGridProps) => {
-  const dataGridRef = useRef<EuiDataGridRefProps>(null);
+  const internalDataGridRef = useRef<EuiDataGridRefProps>(null);
+  const dataGridRef = gridRef ?? internalDataGridRef;
   const services = useDiscoverServices();
   const [selectedDocs, setSelectedDocs] = useState<string[]>([]);
   const [isFilterActive, setIsFilterActive] = useState(false);
@@ -341,14 +352,13 @@ export const DiscoverGrid = ({
   const renderCellValue = useMemo(
     () =>
       getRenderCellValueFn(
-        dataView,
-        displayedRows,
         useNewFieldsApi,
         fieldsToShow,
         services.uiSettings.get(MAX_DOC_FIELDS_DISPLAYED),
-        () => dataGridRef.current?.closeCellPopover()
+        () => dataGridRef.current?.closeCellPopover(),
+        services.fieldFormats
       ),
-    [dataView, displayedRows, useNewFieldsApi, fieldsToShow, services.uiSettings]
+    [useNewFieldsApi, fieldsToShow, services.uiSettings, services.fieldFormats, dataGridRef]
   );
 
   /**
@@ -569,6 +579,8 @@ export const DiscoverGrid = ({
             toolbarVisibility={toolbarVisibility}
             rowHeightsOptions={rowHeightsOptions}
             gridStyle={GRID_STYLE}
+            key={generationId}
+            {...gridPropOverrides}
           />
         </div>
         {showDisclaimer && (
