@@ -40,6 +40,7 @@ interface VisualizeUserContent extends VisualizationListItem, UserContentCommonS
   type: string;
   attributes: {
     title: string;
+    description?: string;
     editApp: string;
     editUrl: string;
   };
@@ -59,6 +60,7 @@ const toTableListViewSavedObject = (savedObject: Record<string, unknown>): Visua
     title: (savedObject.title as string) ?? '',
     attributes: {
       title: (savedObject.title as string) ?? '',
+      description: savedObject.description as string,
       editApp: savedObject.editApp as string,
       editUrl: savedObject.editUrl as string,
     },
