@@ -32,8 +32,10 @@ export function ExplainLogRateSpikesProvider({ getService }: FtrProviderContext)
 
     async clickUseFullDataButton(expectedFormattedTotalDocCount: string) {
       await retry.tryForTime(30 * 1000, async () => {
-        await testSubjects.clickWhenNotDisabled('aiopsExplainLogRatesSpikeButtonUseFullData');
-        await testSubjects.clickWhenNotDisabled('superDatePickerApplyTimeButton');
+        await testSubjects.clickWhenNotDisabledWithoutRetry(
+          'aiopsExplainLogRatesSpikeButtonUseFullData'
+        );
+        await testSubjects.clickWhenNotDisabledWithoutRetry('superDatePickerApplyTimeButton');
         await this.assertTotalDocumentCount(expectedFormattedTotalDocCount);
       });
     },
@@ -72,7 +74,7 @@ export function ExplainLogRateSpikesProvider({ getService }: FtrProviderContext)
     },
 
     async clickRerunAnalysisButton(shouldRerun: boolean) {
-      await testSubjects.clickWhenNotDisabled(
+      await testSubjects.clickWhenNotDisabledWithoutRetry(
         `aiopsRerunAnalysisButton${shouldRerun ? ' shouldRerun' : ''}`
       );
 
