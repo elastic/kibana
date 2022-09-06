@@ -25,7 +25,6 @@ import { useGetCases } from '../../containers/use_get_cases';
 import { useGetCurrentUserProfile } from '../../containers/user_profiles/use_get_current_user_profile';
 import { userProfiles, userProfilesMap } from '../../containers/user_profiles/api.mock';
 import { useBulkGetUserProfiles } from '../../containers/user_profiles/use_bulk_get_user_profiles';
-import { useFindAssignees } from '../../containers/use_find_assignees';
 
 jest.mock('../../containers/use_get_tags');
 jest.mock('../../containers/use_get_action_license', () => {
@@ -37,7 +36,6 @@ jest.mock('../../containers/configure/use_connectors');
 jest.mock('../../containers/api');
 jest.mock('../../containers/use_get_cases');
 jest.mock('../../containers/use_get_cases_status');
-jest.mock('../../containers/use_find_assignees');
 jest.mock('../../containers/user_profiles/use_get_current_user_profile');
 jest.mock('../../containers/user_profiles/use_bulk_get_user_profiles');
 
@@ -45,7 +43,6 @@ const useGetConnectorsMock = useGetConnectors as jest.Mock;
 const useGetCasesMock = useGetCases as jest.Mock;
 const useGetCasesStatusMock = useGetCasesStatus as jest.Mock;
 const useGetActionLicenseMock = useGetActionLicense as jest.Mock;
-const useFindAssigneesMock = useFindAssignees as jest.Mock;
 const useGetCurrentUserProfileMock = useGetCurrentUserProfile as jest.Mock;
 const useBulkGetUserProfilesMock = useBulkGetUserProfiles as jest.Mock;
 
@@ -83,11 +80,7 @@ describe('AllCases', () => {
     useGetCasesStatusMock.mockReturnValue(defaultCasesStatus);
     useGetActionLicenseMock.mockReturnValue(defaultActionLicense);
     useGetCasesMock.mockReturnValue(defaultGetCases);
-    useFindAssigneesMock.mockReturnValue({
-      data: userProfiles,
-      refetch: jest.fn(),
-      isLoading: false,
-    });
+
     useGetCurrentUserProfileMock.mockReturnValue({ data: userProfiles[0], isLoading: false });
     useBulkGetUserProfilesMock.mockReturnValue({ data: userProfilesMap });
   });

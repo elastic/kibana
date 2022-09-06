@@ -17,11 +17,11 @@ import { AppMockRenderer, createAppMockRenderer, TestProviders } from '../../com
 import { DEFAULT_FILTER_OPTIONS } from '../../containers/use_get_cases';
 import { CasesTableFilters } from './table_filters';
 import { useGetTags } from '../../containers/use_get_tags';
-import { useFindAssignees } from '../../containers/use_find_assignees';
+import { useSuggestUserProfiles } from '../../containers/user_profiles/use_suggest_user_profiles';
 import { userProfiles } from '../../containers/user_profiles/api.mock';
 
-jest.mock('../../containers/use_find_assignees');
 jest.mock('../../containers/use_get_tags');
+jest.mock('../../containers/user_profiles/use_suggest_user_profiles');
 
 const onFilterChanged = jest.fn();
 const refetch = jest.fn();
@@ -45,11 +45,7 @@ describe('CasesTableFilters ', () => {
     appMockRender = createAppMockRenderer();
     jest.clearAllMocks();
     (useGetTags as jest.Mock).mockReturnValue({ data: ['coke', 'pepsi'], refetch });
-    (useFindAssignees as jest.Mock).mockReturnValue({
-      data: userProfiles,
-      refetch,
-      isLoading: false,
-    });
+    (useSuggestUserProfiles as jest.Mock).mockReturnValue({ data: userProfiles, isLoading: false });
   });
 
   it('should render the case status filter dropdown', () => {

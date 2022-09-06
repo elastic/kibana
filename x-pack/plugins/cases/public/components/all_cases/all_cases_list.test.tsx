@@ -37,7 +37,6 @@ import { registerConnectorsToMockActionRegistry } from '../../common/mock/regist
 import { createStartServicesMock } from '../../common/lib/kibana/kibana_react.mock';
 import { waitForComponentToUpdate } from '../../common/test_utils';
 import { useCreateAttachments } from '../../containers/use_create_attachments';
-import { useFindAssignees } from '../../containers/use_find_assignees';
 import { useGetCasesMetrics } from '../../containers/use_get_cases_metrics';
 import { useGetConnectors } from '../../containers/configure/use_connectors';
 import { useGetTags } from '../../containers/use_get_tags';
@@ -55,7 +54,6 @@ jest.mock('../../containers/use_get_cases_status');
 jest.mock('../../containers/use_get_cases_metrics');
 jest.mock('../../containers/use_get_action_license');
 jest.mock('../../containers/use_get_tags');
-jest.mock('../../containers/use_find_assignees');
 jest.mock('../../containers/user_profiles/use_get_current_user_profile');
 jest.mock('../../containers/user_profiles/use_bulk_get_user_profiles');
 jest.mock('../../containers/configure/use_connectors');
@@ -72,7 +70,6 @@ const useGetCasesStatusMock = useGetCasesStatus as jest.Mock;
 const useGetCasesMetricsMock = useGetCasesMetrics as jest.Mock;
 const useUpdateCasesMock = useUpdateCases as jest.Mock;
 const useGetTagsMock = useGetTags as jest.Mock;
-const useFindAssigneesMock = useFindAssignees as jest.Mock;
 const useGetCurrentUserProfileMock = useGetCurrentUserProfile as jest.Mock;
 const useBulkGetUserProfilesMock = useBulkGetUserProfiles as jest.Mock;
 const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
@@ -173,11 +170,6 @@ describe('AllCasesListGeneric', () => {
     useGetCasesStatusMock.mockReturnValue(defaultCasesStatus);
     useGetCasesMetricsMock.mockReturnValue(defaultCasesMetrics);
     useGetTagsMock.mockReturnValue({ data: ['coke', 'pepsi'], refetch: jest.fn() });
-    useFindAssigneesMock.mockReturnValue({
-      data: userProfiles,
-      refetch: jest.fn(),
-      isLoading: false,
-    });
     useGetCurrentUserProfileMock.mockReturnValue({ data: userProfiles[0], isLoading: false });
     useBulkGetUserProfilesMock.mockReturnValue({ data: userProfilesMap });
     useGetConnectorsMock.mockImplementation(() => ({ data: connectorsMock, isLoading: false }));
