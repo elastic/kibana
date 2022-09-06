@@ -64,6 +64,7 @@ describe('loader', () => {
             id: 'foo',
             title: 'Foo index',
             metaFields: [],
+            isPersisted: () => true,
             typeMeta: {
               aggs: {
                 date_histogram: {
@@ -100,7 +101,8 @@ describe('loader', () => {
             id: 'foo',
             title: 'Foo index',
           })),
-        } as unknown as Pick<DataViewsContract, 'get' | 'getIdsWithTitle'>,
+          create: jest.fn(),
+        } as unknown as Pick<DataViewsContract, 'get' | 'getIdsWithTitle' | 'create'>,
       });
 
       expect(cache.foo.getFieldByName('bytes')!.aggregationRestrictions).toEqual({
@@ -120,6 +122,7 @@ describe('loader', () => {
             id: 'foo',
             title: 'Foo index',
             metaFields: ['timestamp'],
+            isPersisted: () => true,
             typeMeta: {
               aggs: {
                 date_histogram: {
@@ -156,7 +159,8 @@ describe('loader', () => {
             id: 'foo',
             title: 'Foo index',
           })),
-        } as unknown as Pick<DataViewsContract, 'get' | 'getIdsWithTitle'>,
+          create: jest.fn(),
+        } as unknown as Pick<DataViewsContract, 'get' | 'getIdsWithTitle' | 'create'>,
       });
 
       expect(cache.foo.getFieldByName('timestamp')!.meta).toEqual(true);
@@ -198,16 +202,17 @@ describe('loader', () => {
               timeFieldName: 'timestamp',
               hasRestrictions: false,
               fields: [],
+              isPersisted: () => true,
             };
           }
           return Promise.reject();
         }),
         getIdsWithTitle: jest.fn(),
-      } as unknown as Pick<DataViewsContract, 'get' | 'getIdsWithTitle'>;
+      } as unknown as Pick<DataViewsContract, 'get' | 'getIdsWithTitle' | 'create'>;
       const cache = await loadIndexPatterns({
         cache: {},
         patterns: ['1', '2'],
-        notUsedPatterns: ['3'],
+        notUsedPatterns: ['11', '3', '4', '5', '6', '7', '8', '9', '10'],
         dataViews: dataViewsService,
       });
 
@@ -220,6 +225,8 @@ describe('loader', () => {
           fields: [documentField],
         }),
       });
+      // trying to load the used patterns 1 and 2, then trying the not used pattern 11 and succeeding with the pattern 3 - 4 loads
+      expect(dataViewsService.get).toHaveBeenCalledTimes(4);
     });
   });
 
@@ -234,7 +241,7 @@ describe('loader', () => {
             throw err;
           }),
           getIdsWithTitle: jest.fn(),
-        } as unknown as Pick<DataViewsContract, 'get' | 'getIdsWithTitle'>,
+        } as unknown as Pick<DataViewsContract, 'get' | 'getIdsWithTitle' | 'create'>,
         onError,
       });
 

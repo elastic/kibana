@@ -3,7 +3,7 @@
   "tsd": {
     "directory": "test_d",
     "compilerOptions": {
-      "rootDir": ".."
+      "rootDir": "../.."
     }
   }
 }
