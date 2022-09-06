@@ -128,7 +128,7 @@ export function getEventAnnotationService(): EventAnnotationServiceType {
       if (groups.length === 0) {
         return [];
       }
-      // types correction
+
       const groupsExpressions = groups.map(
         ({ annotations, indexPatternId }): ExpressionAstExpression => {
           const indexPatternExpression: ExpressionAstExpression = {

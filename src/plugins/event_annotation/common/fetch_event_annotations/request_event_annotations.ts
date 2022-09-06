@@ -15,20 +15,18 @@ import {
   ExpressionValueSearchContext,
   parseEsInterval,
   AggConfigs,
-  TimeBuckets,
-  UI_SETTINGS,
 } from '@kbn/data-plugin/common';
-import type { TimeRange } from '@kbn/es-query';
+
 import { ExecutionContext } from '@kbn/expressions-plugin/common';
 import moment from 'moment';
 import { ESCalendarInterval, ESFixedInterval, roundDateToESInterval } from '@elastic/charts';
 import { Adapters } from '@kbn/inspector-plugin/common';
 import { SerializableRecord } from '@kbn/utility-types';
 import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
-import dateMath from '@kbn/datemath';
 import { handleRequest } from './handle_request';
 import {
   ANNOTATIONS_PER_BUCKET,
+  getCalculatedInterval,
   isInRange,
   isManualAnnotation,
   isManualPointAnnotation,
@@ -61,20 +59,7 @@ export function getTimeZone(uiSettings: IUiSettingsClient) {
 
   return configuredTimeZone;
 }
-
-export function toAbsoluteDates(range: TimeRange) {
-  const fromDate = dateMath.parse(range.from);
-  const toDate = dateMath.parse(range.to, { roundUp: true });
-
-  if (!fromDate || !toDate) {
-    return;
-  }
-
-  return {
-    from: fromDate.toDate(),
-    to: toDate.toDate(),
-  };
-}
+const emptyDatatable = { rows: [], columns: [], type: 'datatable' };
 
 export const requestEventAnnotations = (
   input: ExpressionValueSearchContext | null,
@@ -90,26 +75,13 @@ export const requestEventAnnotations = (
   return defer(async () => {
     const { aggs, dataViews, searchSource, getNow, uiSettings } = await getStartDependencies();
     if (!input?.timeRange) {
-      return null;
+      return emptyDatatable;
     }
-    const dates = toAbsoluteDates(input?.timeRange);
-    if (!dates) {
-      return null;
+
+    const interval = getCalculatedInterval(uiSettings, args.interval, input?.timeRange);
+    if (!interval) {
+      return emptyDatatable;
     }
-    const buckets = new TimeBuckets({
-      'histogram:maxBars': uiSettings.get(UI_SETTINGS.HISTOGRAM_MAX_BARS),
-      'histogram:barTarget': uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET),
-      dateFormat: uiSettings.get('dateFormat'),
-      'dateFormat:scaled': uiSettings.get('dateFormat:scaled'),
-    });
-
-    buckets.setInterval(args.interval);
-    buckets.setBounds({
-      min: moment(dates.from),
-      max: moment(dates.to),
-    });
-
-    const interval = buckets.getInterval().expression;
 
     const uniqueDataViewsToLoad = args.groups
       .map((g) => g.dataView.value)
@@ -133,7 +105,7 @@ export const requestEventAnnotations = (
     if (!queryGroups.length) {
       return manualAnnotationDatatableRows.length
         ? wrapRowsInDatatable(manualAnnotationDatatableRows)
-        : null;
+        : emptyDatatable;
     }
 
     const createEsaggsSingleRequest = async ({
