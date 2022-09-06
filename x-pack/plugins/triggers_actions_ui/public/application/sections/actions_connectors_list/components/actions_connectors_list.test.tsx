@@ -339,12 +339,12 @@ describe('actions_connectors_list', () => {
     `);
     });
 
-  test('if select item for edit should render EditConnectorFlyout', async () => {
-    await setup();
-    await wrapper.find('[data-test-subj="edit1"]').first().find('button').simulate('click');
-    expect(wrapper.find('[data-test-subj="edit-connector-flyout"]').exists()).toBeTruthy();
+    test('if select item for edit should render EditConnectorFlyout', async () => {
+      await setup();
+      await wrapper.find('[data-test-subj="edit1"]').first().find('button').simulate('click');
+      expect(wrapper.find('[data-test-subj="edit-connector-flyout"]').exists()).toBeTruthy();
+    });
   });
-});
 
   describe('component empty with show only capability', () => {
     let wrapper: ReactWrapper<any>;
