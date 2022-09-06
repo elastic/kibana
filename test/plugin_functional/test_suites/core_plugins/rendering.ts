@@ -148,6 +148,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'telemetry.labels.prId (number)',
         'telemetry.labels.testBuildId (string)',
         'telemetry.labels.testJobId (string)',
+        'telemetry.labels.ciBuildName (string)',
         'telemetry.hidePrivacyStatement (boolean)',
         'telemetry.optIn (boolean)',
         'telemetry.sendUsageFrom (alternatives)',

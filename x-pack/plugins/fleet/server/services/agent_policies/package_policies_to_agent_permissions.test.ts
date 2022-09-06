@@ -6,34 +6,146 @@
  */
 
 jest.mock('../epm/packages');
-import type { SavedObjectsClientContract } from '@kbn/core/server';
-
-import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 import type { PackagePolicy, RegistryDataStream } from '../../types';
-import { getPackageInfo } from '../epm/packages';
 
 import {
   getDataStreamPrivileges,
   storedPackagePoliciesToAgentPermissions,
 } from './package_policies_to_agent_permissions';
 
-const getPackageInfoMock = getPackageInfo as jest.MockedFunction<typeof getPackageInfo>;
+const packageInfoCache = new Map();
+packageInfoCache.set('test_package-0.0.0', {
+  name: 'test_package',
+  version: '0.0.0',
+  latestVersion: '0.0.0',
+  release: 'experimental',
+  format_version: '1.0.0',
+  title: 'Test Package',
+  description: '',
+  icons: [],
+  owner: { github: '' },
+  status: 'not_installed',
+  assets: {
+    kibana: {
+      csp_rule_template: [],
+      dashboard: [],
+      visualization: [],
+      search: [],
+      index_pattern: [],
+      map: [],
+      lens: [],
+      security_rule: [],
+      ml_module: [],
+      tag: [],
+      osquery_pack_asset: [],
+      osquery_saved_query: [],
+    },
+    elasticsearch: {
+      component_template: [],
+      ingest_pipeline: [],
+      ilm_policy: [],
+      transform: [],
+      index_template: [],
+      data_stream_ilm_policy: [],
+      ml_model: [],
+    },
+  },
+  data_streams: [
+    {
+      type: 'logs',
+      dataset: 'some-logs',
+      title: '',
+      release: '',
+      package: 'test_package',
+      path: '',
+      ingest_pipeline: '',
+      streams: [{ input: 'test-logs', title: 'Test Logs', template_path: '' }],
+    },
+    {
+      type: 'metrics',
+      dataset: 'some-metrics',
+      title: '',
+      release: '',
+      package: 'test_package',
+      path: '',
+      ingest_pipeline: '',
+      streams: [{ input: 'test-metrics', title: 'Test Logs', template_path: '' }],
+    },
+  ],
+});
+packageInfoCache.set('osquery_manager-0.3.0', {
+  format_version: '1.0.0',
+  name: 'osquery_manager',
+  title: 'Osquery Manager',
+  version: '0.3.0',
+  license: 'basic',
+  description:
+    'Centrally manage osquery deployments, run live queries, and schedule recurring queries',
+  type: 'integration',
+  release: 'beta',
+  categories: ['security', 'os_system', 'config_management'],
+  icons: [
+    {
+      src: '/img/logo_osquery.svg',
+      title: 'logo osquery',
+      size: '32x32',
+      type: 'image/svg+xml',
+    },
+  ],
+  owner: { github: 'elastic/integrations' },
+  readme: '/package/osquery_manager/0.3.0/docs/README.md',
+  data_streams: [
+    {
+      dataset: 'osquery_manager.result',
+      package: 'osquery_manager',
+      ingest_pipeline: 'default',
+      path: 'result',
+      streams: [],
+      title: 'Osquery Manager queries',
+      type: 'logs',
+      release: 'experimental',
+    },
+  ],
+  latestVersion: '0.3.0',
+  notice: undefined,
+  status: 'not_installed',
+  assets: {
+    kibana: {
+      csp_rule_template: [],
+      dashboard: [],
+      visualization: [],
+      search: [],
+      index_pattern: [],
+      map: [],
+      lens: [],
+      security_rule: [],
+      ml_module: [],
+      tag: [],
+      osquery_pack_asset: [],
+      osquery_saved_query: [],
+    },
+    elasticsearch: {
+      component_template: [],
+      ingest_pipeline: [],
+      ilm_policy: [],
+      transform: [],
+      index_template: [],
+      data_stream_ilm_policy: [],
+      ml_model: [],
+    },
+  },
+});
 
 describe('storedPackagePoliciesToAgentPermissions()', () => {
-  let soClient: jest.Mocked<SavedObjectsClientContract>;
-  beforeEach(() => {
-    soClient = savedObjectsClientMock.create();
-  });
-
   it('Returns `undefined` if there are no package policies', async () => {
-    const permissions = await storedPackagePoliciesToAgentPermissions(soClient, []);
+    const permissions = await storedPackagePoliciesToAgentPermissions(packageInfoCache, []);
     expect(permissions).toBeUndefined();
   });
 
   it('Throw an error if package policies is not an array', async () => {
     await expect(() =>
-      storedPackagePoliciesToAgentPermissions(soClient, undefined)
+      storedPackagePoliciesToAgentPermissions(packageInfoCache, undefined)
     ).rejects.toThrow(
       /storedPackagePoliciesToAgentPermissions should be called with a PackagePolicy/
     );
@@ -41,80 +153,20 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
 
   it('Returns the default permissions if a package policy does not have a package', async () => {
     await expect(() =>
-      storedPackagePoliciesToAgentPermissions(soClient, [
+      storedPackagePoliciesToAgentPermissions(packageInfoCache, [
         { name: 'foo', package: undefined } as PackagePolicy,
       ])
     ).rejects.toThrow(/No package for package policy foo/);
   });
 
   it('Returns the permissions for the enabled inputs', async () => {
-    getPackageInfoMock.mockResolvedValueOnce({
-      name: 'test-package',
-      version: '0.0.0',
-      latestVersion: '0.0.0',
-      release: 'experimental',
-      format_version: '1.0.0',
-      title: 'Test Package',
-      description: '',
-      icons: [],
-      owner: { github: '' },
-      status: 'not_installed',
-      assets: {
-        kibana: {
-          csp_rule_template: [],
-          dashboard: [],
-          visualization: [],
-          search: [],
-          index_pattern: [],
-          map: [],
-          lens: [],
-          security_rule: [],
-          ml_module: [],
-          tag: [],
-          osquery_pack_asset: [],
-          osquery_saved_query: [],
-        },
-        elasticsearch: {
-          component_template: [],
-          ingest_pipeline: [],
-          ilm_policy: [],
-          transform: [],
-          index_template: [],
-          data_stream_ilm_policy: [],
-          ml_model: [],
-        },
-      },
-      data_streams: [
-        {
-          type: 'logs',
-          dataset: 'some-logs',
-          title: '',
-          release: '',
-          package: 'test-package',
-          path: '',
-          ingest_pipeline: '',
-          streams: [{ input: 'test-logs', title: 'Test Logs', template_path: '' }],
-        },
-        {
-          type: 'metrics',
-          dataset: 'some-metrics',
-          title: '',
-          release: '',
-          package: 'test-package',
-          path: '',
-          ingest_pipeline: '',
-          streams: [{ input: 'test-metrics', title: 'Test Logs', template_path: '' }],
-        },
-      ],
-    });
-
     const packagePolicies: PackagePolicy[] = [
       {
         id: 'package-policy-uuid-test-123',
         name: 'test-policy',
         namespace: 'test',
         enabled: true,
-        package: { name: 'test-package', version: '0.0.0', title: 'Test Package' },
+        package: { name: 'test_package', version: '0.0.0', title: 'Test Package' },
         inputs: [
           {
             type: 'test-logs',
@@ -148,7 +200,10 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
       },
     ];
 
-    const permissions = await storedPackagePoliciesToAgentPermissions(soClient, packagePolicies);
+    const permissions = await storedPackagePoliciesToAgentPermissions(
+      packageInfoCache,
+      packagePolicies
+    );
     expect(permissions).toMatchObject({
       'package-policy-uuid-test-123': {
         indices: [
@@ -162,63 +217,13 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
   });
 
   it('Returns the dataset for the compiled data_streams', async () => {
-    getPackageInfoMock.mockResolvedValueOnce({
-      name: 'test-package',
-      version: '0.0.0',
-      latestVersion: '0.0.0',
-      release: 'experimental',
-      format_version: '1.0.0',
-      title: 'Test Package',
-      description: '',
-      icons: [],
-      owner: { github: '' },
-      status: 'not_installed',
-      assets: {
-        kibana: {
-          csp_rule_template: [],
-          dashboard: [],
-          visualization: [],
-          search: [],
-          index_pattern: [],
-          map: [],
-          lens: [],
-          security_rule: [],
-          ml_module: [],
-          tag: [],
-          osquery_pack_asset: [],
-          osquery_saved_query: [],
-        },
-        elasticsearch: {
-          component_template: [],
-          ingest_pipeline: [],
-          ilm_policy: [],
-          transform: [],
-          index_template: [],
-          data_stream_ilm_policy: [],
-          ml_model: [],
-        },
-      },
-      data_streams: [
-        {
-          type: 'logs',
-          dataset: 'some-logs',
-          title: '',
-          release: '',
-          package: 'test-package',
-          path: '',
-          ingest_pipeline: '',
-          streams: [{ input: 'test-logs', title: 'Test Logs', template_path: '' }],
-        },
-      ],
-    });
-
     const packagePolicies: PackagePolicy[] = [
       {
         id: 'package-policy-uuid-test-123',
         name: 'test-policy',
         namespace: 'test',
         enabled: true,
-        package: { name: 'test-package', version: '0.0.0', title: 'Test Package' },
+        package: { name: 'test_package', version: '0.0.0', title: 'Test Package' },
         inputs: [
           {
             type: 'test-logs',
@@ -242,7 +247,10 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
       },
     ];
 
-    const permissions = await storedPackagePoliciesToAgentPermissions(soClient, packagePolicies);
+    const permissions = await storedPackagePoliciesToAgentPermissions(
+      packageInfoCache,
+      packagePolicies
+    );
     expect(permissions).toMatchObject({
       'package-policy-uuid-test-123': {
         indices: [
@@ -256,63 +264,13 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
   });
 
   it('Returns the cluster privileges if there is one in the package policy', async () => {
-    getPackageInfoMock.mockResolvedValueOnce({
-      name: 'test-package',
-      version: '0.0.0',
-      latestVersion: '0.0.0',
-      release: 'experimental',
-      format_version: '1.0.0',
-      title: 'Test Package',
-      description: '',
-      icons: [],
-      owner: { github: '' },
-      status: 'not_installed',
-      assets: {
-        kibana: {
-          csp_rule_template: [],
-          dashboard: [],
-          visualization: [],
-          search: [],
-          index_pattern: [],
-          map: [],
-          lens: [],
-          security_rule: [],
-          ml_module: [],
-          tag: [],
-          osquery_pack_asset: [],
-          osquery_saved_query: [],
-        },
-        elasticsearch: {
-          component_template: [],
-          ingest_pipeline: [],
-          ilm_policy: [],
-          transform: [],
-          index_template: [],
-          data_stream_ilm_policy: [],
-          ml_model: [],
-        },
-      },
-      data_streams: [
-        {
-          type: 'logs',
-          dataset: 'some-logs',
-          title: '',
-          release: '',
-          package: 'test-package',
-          path: '',
-          ingest_pipeline: '',
-          streams: [{ input: 'test-logs', title: 'Test Logs', template_path: '' }],
-        },
-      ],
-    });
-
     const packagePolicies: PackagePolicy[] = [
       {
         id: 'package-policy-uuid-test-123',
         name: 'test-policy',
         namespace: 'test',
         enabled: true,
-        package: { name: 'test-package', version: '0.0.0', title: 'Test Package' },
+        package: { name: 'test_package', version: '0.0.0', title: 'Test Package' },
         elasticsearch: {
           privileges: {
             cluster: ['monitor'],
@@ -341,7 +299,10 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
       },
     ];
 
-    const permissions = await storedPackagePoliciesToAgentPermissions(soClient, packagePolicies);
+    const permissions = await storedPackagePoliciesToAgentPermissions(
+      packageInfoCache,
+      packagePolicies
+    );
     expect(permissions).toMatchObject({
       'package-policy-uuid-test-123': {
         indices: [
@@ -356,76 +317,13 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
   });
 
   it('Returns the dataset for osquery_manager package', async () => {
-    getPackageInfoMock.mockResolvedValueOnce({
-      format_version: '1.0.0',
-      name: 'osquery_manager',
-      title: 'Osquery Manager',
-      version: '0.3.0',
-      license: 'basic',
-      description:
-        'Centrally manage osquery deployments, run live queries, and schedule recurring queries',
-      type: 'integration',
-      release: 'beta',
-      categories: ['security', 'os_system', 'config_management'],
-      icons: [
-        {
-          src: '/img/logo_osquery.svg',
-          title: 'logo osquery',
-          size: '32x32',
-          type: 'image/svg+xml',
-        },
-      ],
-      owner: { github: 'elastic/integrations' },
-      readme: '/package/osquery_manager/0.3.0/docs/README.md',
-      data_streams: [
-        {
-          dataset: 'osquery_manager.result',
-          package: 'osquery_manager',
-          ingest_pipeline: 'default',
-          path: 'result',
-          streams: [],
-          title: 'Osquery Manager queries',
-          type: 'logs',
-          release: 'experimental',
-        },
-      ],
-      latestVersion: '0.3.0',
-      notice: undefined,
-      status: 'not_installed',
-      assets: {
-        kibana: {
-          csp_rule_template: [],
-          dashboard: [],
-          visualization: [],
-          search: [],
-          index_pattern: [],
-          map: [],
-          lens: [],
-          security_rule: [],
-          ml_module: [],
-          tag: [],
-          osquery_pack_asset: [],
-          osquery_saved_query: [],
-        },
-        elasticsearch: {
-          component_template: [],
-          ingest_pipeline: [],
-          ilm_policy: [],
-          transform: [],
-          index_template: [],
-          data_stream_ilm_policy: [],
-          ml_model: [],
-        },
-      },
-    });
-
     const packagePolicies: PackagePolicy[] = [
       {
         id: 'package-policy-uuid-test-123',
         name: 'test-policy',
         namespace: 'test',
         enabled: true,
-        package: { name: 'osquery_manager', version: '0.0.0', title: 'Test Package' },
+        package: { name: 'osquery_manager', version: '0.3.0', title: 'Test Package' },
         inputs: [
           {
             type: 'osquery_manager',
@@ -449,7 +347,10 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
       },
     ];
 
-    const permissions = await storedPackagePoliciesToAgentPermissions(soClient, packagePolicies);
+    const permissions = await storedPackagePoliciesToAgentPermissions(
+      packageInfoCache,
+      packagePolicies
+    );
     expect(permissions).toMatchObject({
       'package-policy-uuid-test-123': {
         indices: [
