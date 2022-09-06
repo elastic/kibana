@@ -17,6 +17,7 @@ export interface Request {
   http: {
     method: string;
     path: string;
+    query?: string;
     headers?: { [key: string]: string };
     params?: string;
     body?: JSON | string;

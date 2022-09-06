@@ -62,7 +62,7 @@ export interface SpanDocument extends Omit<Document, 'transaction'> {
 export interface TransactionDocument extends Omit<Document, 'service'> {
   service: { name: string; environment: string; version: string };
   processor: string;
-  url: { path: string };
+  url: { path: string; query?: string };
   http: {
     request: Request;
     response: Response;
