@@ -14,6 +14,7 @@ import styled from 'styled-components';
 
 import { isTab } from '@kbn/timelines-plugin/public';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
+import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import { InputsModelId } from '../../common/store/inputs/constants';
 import { SecurityPageName } from '../../app/types';
 import type { UpdateDateRange } from '../../common/components/charts/common';
@@ -178,19 +179,21 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
 
                 {canUseMaps && (
                   <>
-                    <EuiPanel
-                      hasBorder
-                      paddingSize="none"
-                      data-test-subj="conditional-embeddable-map"
-                    >
-                      <EmbeddedMap
-                        query={query}
-                        filters={filters}
-                        startDate={from}
-                        endDate={to}
-                        setQuery={setQuery}
-                      />
-                    </EuiPanel>
+                    <TrackApplicationView viewId="network-map">
+                      <EuiPanel
+                        hasBorder
+                        paddingSize="none"
+                        data-test-subj="conditional-embeddable-map"
+                      >
+                        <EmbeddedMap
+                          query={query}
+                          filters={filters}
+                          startDate={from}
+                          endDate={to}
+                          setQuery={setQuery}
+                        />
+                      </EuiPanel>
+                    </TrackApplicationView>
                     <EuiSpacer />
                   </>
                 )}
