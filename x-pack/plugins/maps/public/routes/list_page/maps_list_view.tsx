@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { SavedObjectReference } from '@kbn/core/types';
+import type { SavedObjectsFindOptionsReference } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { TableListView } from '@kbn/content-management-table-list';
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list';
@@ -19,7 +20,6 @@ import {
   getNavigateToApp,
   getUrlForApp,
   getSavedObjectsClient,
-  getSavedObjectsTagging,
   getUiSettings,
 } from '../../kibana_services';
 import { getAppTitle } from '../../../common/i18n_getters';
@@ -42,8 +42,6 @@ interface MapUserContent extends UserContentCommonSchema {
   };
 }
 
-const savedObjectsTagging = getSavedObjectsTagging();
-
 function navigateToNewMap() {
   const navigateToApp = getNavigateToApp();
   navigateToApp(APP_ID, {
@@ -64,18 +62,7 @@ const toTableListViewSavedObject = (
   };
 };
 
-async function findMaps(searchQuery: string) {
-  let searchTerm = searchQuery;
-  let tagReferences;
-
-  if (savedObjectsTagging) {
-    const parsed = savedObjectsTagging.ui.parseSearchQuery(searchQuery, {
-      useName: true,
-    });
-    searchTerm = parsed.searchTerm;
-    tagReferences = parsed.tagReferences;
-  }
-
+async function findMaps(searchTerm: string, tagReferences?: SavedObjectsFindOptionsReference[]) {
   const resp = await getSavedObjectsClient().find<MapSavedObjectAttributes>({
     type: MAP_SAVED_OBJECT_TYPE,
     search: searchTerm ? `${searchTerm}*` : undefined,
