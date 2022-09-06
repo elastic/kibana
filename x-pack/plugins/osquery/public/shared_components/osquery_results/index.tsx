@@ -63,7 +63,7 @@ const OsqueryActionResultsComponent: React.FC<OsqueryActionResultsProps> = ({
   return (
     <div data-test-subj={'osquery-results'}>
       {actionsData?.data.items.map((item) => {
-        const actionId = item.fields?.action_id[0];
+        const actionId = item.fields?.['queries.action_id']?.[0];
         const query = item.fields?.['queries.query']?.[0];
         const startDate = item.fields?.['@timestamp'][0];
 
