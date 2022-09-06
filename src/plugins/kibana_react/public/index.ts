@@ -41,9 +41,6 @@ export { useUiSetting, useUiSetting$ } from './ui_settings';
 
 export { useExecutionContext } from './use_execution_context';
 
-export type { TableListViewProps, TableListViewState } from './table_list_view';
-export { TableListView } from './table_list_view';
-
 export type { ToolbarButtonProps } from './toolbar_button';
 export { POSITIONS, WEIGHTS, TOOLBAR_BUTTON_SIZES, ToolbarButton } from './toolbar_button';
 

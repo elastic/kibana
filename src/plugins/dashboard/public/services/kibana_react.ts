@@ -16,7 +16,6 @@ export {
   useKibana,
   withKibana,
   toMountPoint,
-  TableListView,
   reactToUiComponent,
   ExitFullScreenButton,
   KibanaContextProvider,
