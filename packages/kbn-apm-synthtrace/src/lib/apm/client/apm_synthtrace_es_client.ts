@@ -62,7 +62,7 @@ export class ApmSynthtraceEsClient {
   async clean(dataStreams?: string[]) {
     return this.getWriteTargets().then(async (writeTargets) => {
       const indices = Object.values(writeTargets);
-      this.logger.info(`Attempting to clean: ${indices}`);
+      this.logger.info(`Attempting to clean: ${indices} + ${dataStreams ?? []}`);
       if (this.forceLegacyIndices) {
         return cleanWriteTargets({
           client: this.client,
@@ -132,10 +132,10 @@ export class ApmSynthtraceEsClient {
     this.logger.info(verifyRepository);
   }
 
-  async refresh() {
+  async refresh(dataStreams?: string[]) {
     const writeTargets = await this.getWriteTargets();
 
-    const indices = Object.values(writeTargets);
+    const indices = Object.values(writeTargets).concat(dataStreams ?? []);
     this.logger.info(`Indexed all data attempting to refresh: ${indices}`);
 
     return this.client.indices.refresh({

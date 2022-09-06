@@ -13832,7 +13832,7 @@ ejs@^3.1.6, ejs@^3.1.8:
   dependencies:
     jake "^10.8.5"
 
-elastic-apm-http-client@11.0.1:
+elastic-apm-http-client@11.0.1, elastic-apm-http-client@^11.0.1:
   version "11.0.1"
   resolved "https://registry.yarnpkg.com/elastic-apm-http-client/-/elastic-apm-http-client-11.0.1.tgz#15dbe99d56d62b3f732d1bd2b51bef6094b78801"
   integrity sha512-5AOWlhs2WlZpI+DfgGqY/8Rk7KF8WeevaO8R961eBylavU6GWhLRNiJncohn5jsvrqhmeT19azBvy/oYRN7bJw==
