@@ -2046,7 +2046,7 @@ describe('SavedObjectsRepository', () => {
     });
   });
 
-  describe.only('#bulkDelete', () => {
+  describe('#bulkDelete', () => {
     const obj1: SavedObjectsBulkDeleteObject = {
       type: 'config',
       id: '6.0.0-alpha1',
@@ -2202,13 +2202,45 @@ describe('SavedObjectsRepository', () => {
         expectClientCallBulkDeleteArgsAction(objects, { method: 'delete' });
       });
 
-      it.todo(`prepends namespace to the id when providing namespace for single-namespace type`);
-      it.todo(
-        `doesn't prepend namespace to the id when providing no namespace for single-namespace type`
-      );
-      it.todo(`normalizes options.namespace from 'default' to undefined`);
-      it.todo(`doesn't prepend namespace to the id when not using single-namespace type`);
-      it.todo(`defaults to not using the force option`);
+      it(`prepends namespace to the id when providing namespace for single-namespace type`, async () => {
+        const getId = (type: string, id: string) => `${namespace}:${type}:${id}`;
+        await repositoryBulkDeleteSuccess([obj1, obj2], { namespace });
+        expectClientCallBulkDeleteArgsAction([obj1, obj2], { method: 'delete', getId });
+      });
+
+      it(`doesn't prepend namespace to the id when providing no namespace for single-namespace type`, async () => {
+        const getId = (type: string, id: string) => `${type}:${id}`;
+        await repositoryBulkDeleteSuccess([obj1, obj2]);
+        expectClientCallBulkDeleteArgsAction([obj1, obj2], { method: 'delete', getId });
+      });
+
+      it(`normalizes options.namespace from 'default' to undefined`, async () => {
+        const getId = (type: string, id: string) => `${type}:${id}`;
+        await repositoryBulkDeleteSuccess([obj1, obj2], { namespace: 'default' });
+        expectClientCallBulkDeleteArgsAction([obj1, obj2], { method: 'delete', getId });
+      });
+
+      it(`doesn't prepend namespace to the id when not using single-namespace type`, async () => {
+        const getId = (type: string, id: string) => `${type}:${id}`; // not expecting namespace prefix;
+        const _obj1 = { ...obj1, type: NAMESPACE_AGNOSTIC_TYPE };
+        const _obj2 = { ...obj2, type: MULTI_NAMESPACE_ISOLATED_TYPE };
+
+        await repositoryBulkDeleteSuccess([_obj1], { namespace });
+        expectClientCallBulkDeleteArgsAction([_obj1], { method: 'delete', getId });
+        client.bulk.mockClear();
+        await repositoryBulkDeleteSuccess([_obj2], { namespace });
+        expectClientCallBulkDeleteArgsAction([_obj2], { method: 'delete', getId });
+        client.bulk.mockClear();
+      });
+
+      it(`does not pass on the force option`, async () => {
+        await repositoryBulkDeleteSuccess([obj1, obj2]);
+        expect(client.bulk).toHaveBeenCalledWith(
+          expect.not.objectContaining({ force: expect.anything() }),
+          expect.anything()
+        );
+      });
+
       it.todo(`accepts force option`);
     });
     describe('legacy URL aliases', () => {
