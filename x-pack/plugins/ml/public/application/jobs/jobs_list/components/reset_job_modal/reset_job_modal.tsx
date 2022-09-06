@@ -51,6 +51,7 @@ export const ResetJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, r
         unsetShowFunction();
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const showModal = useCallback((tempJobs: MlSummaryJob[]) => {
@@ -73,6 +74,7 @@ export const ResetJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, r
     setTimeout(() => {
       refreshJobs();
     }, RESETTING_JOBS_REFRESH_INTERVAL_MS);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobIds, refreshJobs]);
 
   if (modalVisible === false || jobIds.length === 0) {
