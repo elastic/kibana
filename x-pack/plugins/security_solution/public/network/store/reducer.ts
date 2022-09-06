@@ -6,7 +6,7 @@
  */
 
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
-import { get } from 'lodash/fp';
+import { get, set } from 'lodash/fp';
 import {
   Direction,
   FlowTarget,
@@ -202,64 +202,16 @@ export const networkReducer = reducerWithInitialState(initialNetworkState)
   }))
   .case(updateNetworkAnomaliesJobIdFilter, (state, { jobIds, networkType }) => {
     if (networkType === NetworkType.page) {
-      return {
-        ...state,
-        page: {
-          ...state.page,
-          queries: {
-            ...state.page.queries,
-            anomalies: {
-              ...state.page.queries.anomalies,
-              jobIdSelection: jobIds,
-            },
-          },
-        },
-      };
+      return set('page.queries.anomalies.jobIdSelection', jobIds, state);
     } else {
-      return {
-        ...state,
-        details: {
-          ...state.details,
-          queries: {
-            ...state.details.queries,
-            anomalies: {
-              ...state.details.queries.anomalies,
-              jobIdSelection: jobIds,
-            },
-          },
-        },
-      };
+      return set('details.queries.anomalies.jobIdSelection', jobIds, state);
     }
   })
   .case(updateNetworkAnomaliesInterval, (state, { interval, networkType }) => {
     if (networkType === NetworkType.page) {
-      return {
-        ...state,
-        page: {
-          ...state.page,
-          queries: {
-            ...state.page.queries,
-            anomalies: {
-              ...state.page.queries.anomalies,
-              intervalSelection: interval,
-            },
-          },
-        },
-      };
+      return set('page.queries.anomalies.intervalSelection', interval, state);
     } else {
-      return {
-        ...state,
-        details: {
-          ...state.details,
-          queries: {
-            ...state.details.queries,
-            anomalies: {
-              ...state.details.queries.anomalies,
-              intervalSelection: interval,
-            },
-          },
-        },
-      };
+      return set('details.queries.anomalies.intervalSelection', interval, state);
     }
   })
   .build();

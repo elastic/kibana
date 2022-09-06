@@ -6,6 +6,7 @@
  */
 
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
+import { set } from 'lodash/fp';
 import { DEFAULT_TABLE_ACTIVE_PAGE, DEFAULT_TABLE_LIMIT } from '../../common/store/constants';
 
 import {
@@ -136,64 +137,16 @@ export const usersReducer = reducerWithInitialState(initialUsersState)
   }))
   .case(updateUsersAnomaliesJobIdFilter, (state, { jobIds, usersType }) => {
     if (usersType === 'page') {
-      return {
-        ...state,
-        page: {
-          ...state.page,
-          queries: {
-            ...state.page.queries,
-            anomalies: {
-              ...state.page.queries.anomalies,
-              jobIdSelection: jobIds,
-            },
-          },
-        },
-      };
+      return set('page.queries.anomalies.jobIdSelection', jobIds, state);
     } else {
-      return {
-        ...state,
-        details: {
-          ...state.details,
-          queries: {
-            ...state.details.queries,
-            anomalies: {
-              ...state.details.queries.anomalies,
-              jobIdSelection: jobIds,
-            },
-          },
-        },
-      };
+      return set('details.queries.anomalies.jobIdSelection', jobIds, state);
     }
   })
   .case(updateUsersAnomaliesInterval, (state, { interval, usersType }) => {
     if (usersType === 'page') {
-      return {
-        ...state,
-        page: {
-          ...state.page,
-          queries: {
-            ...state.page.queries,
-            anomalies: {
-              ...state.page.queries.anomalies,
-              intervalSelection: interval,
-            },
-          },
-        },
-      };
+      return set('page.queries.anomalies.intervalSelection', interval, state);
     } else {
-      return {
-        ...state,
-        details: {
-          ...state.details,
-          queries: {
-            ...state.details.queries,
-            anomalies: {
-              ...state.details.queries.anomalies,
-              intervalSelection: interval,
-            },
-          },
-        },
-      };
+      return set('details.queries.anomalies.intervalSelection', interval, state);
     }
   })
   .build();

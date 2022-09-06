@@ -6,7 +6,7 @@
  */
 
 import { useState, useEffect, useMemo, useRef } from 'react';
-import { filter, head, noop, orderBy, pipe, get } from 'lodash/fp';
+import { filter, head, noop, orderBy, pipe, has } from 'lodash/fp';
 import type { MlSummaryJob } from '@kbn/ml-plugin/common';
 
 import { DEFAULT_ANOMALY_SCORE } from '../../../../../common/constants';
@@ -160,7 +160,7 @@ function formatResultData(
   return NOTABLE_ANOMALIES_IDS.map((notableJobId) => {
     const job = findJobWithId(notableJobId)(notableAnomaliesJobs);
     const bucket = buckets.find(({ key }) => key === job?.id);
-    const hasUserName = !!get("entity.hits.hits[0]._source['user.name']", bucket);
+    const hasUserName = has("entity.hits.hits[0]._source['user.name']", bucket);
 
     return {
       name: notableJobId,
