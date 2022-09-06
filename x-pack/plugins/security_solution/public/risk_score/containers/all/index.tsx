@@ -7,6 +7,7 @@
 
 import { useEffect, useMemo } from 'react';
 
+import { useRiskScoreDeprecated } from '../deprecated';
 import { createFilter } from '../../../common/containers/helpers';
 import type { RiskScoreSortField, StrategyResponseType } from '../../../../common/search_strategy';
 import {
@@ -32,6 +33,7 @@ export interface RiskScoreState<T extends RiskQueries.hostsRiskScore | RiskQueri
   refetch: inputsModel.Refetch;
   totalCount: number;
   isModuleEnabled: boolean | undefined;
+  isDeprecated: boolean;
 }
 
 export interface UseRiskScoreParams {
@@ -114,6 +116,8 @@ const useRiskScore = <T extends RiskQueries.hostsRiskScore | RiskQueries.usersRi
 
   const { addError } = useAppToasts();
 
+  const { isDeprecated } = useRiskScoreDeprecated(featureEnabled, defaultIndex);
+
   const {
     loading,
     result: response,
@@ -134,10 +138,11 @@ const useRiskScore = <T extends RiskQueries.hostsRiskScore | RiskQueries.usersRi
       inspect,
       refetch,
       totalCount: response.totalCount,
+      isDeprecated,
       isModuleEnabled: skip ? featureEnabled : featureEnabled && response.data != null,
       isInspected: false,
     }),
-    [featureEnabled, inspect, refetch, response.data, response.totalCount, skip]
+    [featureEnabled, inspect, isDeprecated, refetch, response.data, response.totalCount, skip]
   );
 
   const riskScoreRequest = useMemo(
@@ -172,10 +177,10 @@ const useRiskScore = <T extends RiskQueries.hostsRiskScore | RiskQueries.usersRi
   }, [addError, error]);
 
   useEffect(() => {
-    if (!skip && riskScoreRequest != null && featureEnabled) {
+    if (!skip && riskScoreRequest != null && featureEnabled && !isDeprecated) {
       search(riskScoreRequest);
     }
-  }, [featureEnabled, riskScoreRequest, search, skip]);
+  }, [featureEnabled, isDeprecated, riskScoreRequest, search, skip]);
 
   return [loading, riskScoreResponse];
 };

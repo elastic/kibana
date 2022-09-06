@@ -86,3 +86,18 @@ export const HOST_RISK_TABLE_TOOLTIP = i18n.translate(
       'The host risk table is not affected by the time range. This table shows the latest recorded risk score for each host.',
   }
 );
+
+export const UPGRADE_HOST_RISK_SCORE = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.hostsRiskDashboard.upgradeHostRiskScore',
+  {
+    defaultMessage: 'Upgrade Host Risk Score',
+  }
+);
+
+export const UPGRADE_HOST_RISK_SCORE_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.hostsRiskDashboard.upgradeHostRiskScoreDescription',
+  {
+    defaultMessage:
+      'Current data is no longer supported. Please migrate your data and upgrade the module',
+  }
+);

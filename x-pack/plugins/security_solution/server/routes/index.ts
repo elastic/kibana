@@ -8,6 +8,7 @@
 import type { StartServicesAccessor, Logger } from '@kbn/core/server';
 import type { IRuleDataClient, RuleDataPluginService } from '@kbn/rule-registry-plugin/server';
 
+import { getRiskScoreDeprecatedRoute } from '../lib/risk_score/routes';
 import type { SecuritySolutionPluginRouter } from '../types';
 
 import { createRulesRoute } from '../lib/detection_engine/routes/rules/create_rules_route';
@@ -177,9 +178,14 @@ export const initRoutes = (
   createSourcererDataViewRoute(router, getStartServices);
   getSourcererDataViewRoute(router, getStartServices);
 
-  const { previewTelemetryUrlEnabled } = config.experimentalFeatures;
+  const { previewTelemetryUrlEnabled, riskyHostsEnabled, riskyUsersEnabled } =
+    config.experimentalFeatures;
   if (previewTelemetryUrlEnabled) {
     // telemetry preview endpoint for e2e integration tests only at the moment.
     telemetryDetectionRulesPreviewRoute(router, logger, previewTelemetryReceiver, telemetrySender);
+  }
+
+  if (riskyHostsEnabled || riskyUsersEnabled) {
+    getRiskScoreDeprecatedRoute(router);
   }
 };

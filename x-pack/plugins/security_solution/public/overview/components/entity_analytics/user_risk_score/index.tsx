@@ -65,14 +65,15 @@ export const EntityAnalyticsUserRiskScores = () => {
     skip: !toggleStatus,
   });
 
-  const [isTableLoading, { data, inspect, refetch, isModuleEnabled }] = useUserRiskScore({
-    filterQuery: severityFilter,
-    skip: !toggleStatus,
-    pagination: {
-      cursorStart: 0,
-      querySize: 5,
-    },
-  });
+  const [isTableLoading, { data, inspect, refetch, isModuleEnabled, isDeprecated }] =
+    useUserRiskScore({
+      filterQuery: severityFilter,
+      skip: !toggleStatus,
+      pagination: {
+        cursorStart: 0,
+        querySize: 5,
+      },
+    });
 
   useQueryInspector({
     queryId: TABLE_QUERY_ID,
@@ -125,6 +126,10 @@ export const EntityAnalyticsUserRiskScores = () => {
 
   if (!isModuleEnabled) {
     return <EntityAnalyticsUserRiskScoresDisable />;
+  }
+
+  if (isDeprecated) {
+    return <EntityAnalyticsUserRiskScoresDeprecated />;
   }
 
   return (
@@ -201,6 +206,26 @@ const EntityAnalyticsUserRiskScoresDisable = () => (
           data-test-subj="enable_user_risk_score"
         >
           {i18n.ENABLE_USER_RISK_SCORE}
+        </EuiButton>
+      }
+    />
+  </EuiPanel>
+);
+
+const EntityAnalyticsUserRiskScoresDeprecated = () => (
+  <EuiPanel hasBorder>
+    <HeaderSection title={<h2>{i18n.USER_RISK_TITLE}</h2>} titleSize="s" />
+    <EuiEmptyPrompt
+      title={<h2>{i18n.UPGRADE_USER_RISK_SCORE}</h2>}
+      body={i18n.UPGRADE_USER_RISK_SCORE_DESCRIPTION}
+      actions={
+        <EuiButton
+          color="primary"
+          fill
+          onClick={() => alert('Angela do the upgrade')}
+          data-test-subj="upgrade_user_risk_score"
+        >
+          {i18n.UPGRADE_USER_RISK_SCORE}
         </EuiButton>
       }
     />

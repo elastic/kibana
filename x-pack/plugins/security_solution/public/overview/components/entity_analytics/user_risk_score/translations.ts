@@ -79,3 +79,18 @@ export const USER_RISK_TABLE_TOOLTIP = i18n.translate(
       'The user risk table is not affected by the time range. This table shows the latest recorded risk score for each user.',
   }
 );
+
+export const UPGRADE_USER_RISK_SCORE = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.usersRiskDashboard.upgradeUserRiskScore',
+  {
+    defaultMessage: 'Upgrade User Risk Score',
+  }
+);
+
+export const UPGRADE_USER_RISK_SCORE_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.usersRiskDashboard.upgradeUserRiskScoreDescription',
+  {
+    defaultMessage:
+      'Current data is no longer supported. Please migrate your data and upgrade the module',
+  }
+);

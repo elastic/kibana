@@ -68,14 +68,15 @@ export const EntityAnalyticsHostRiskScores = () => {
     skip: !toggleStatus,
   });
 
-  const [isTableLoading, { data, inspect, refetch, isModuleEnabled }] = useHostRiskScore({
-    filterQuery: severityFilter,
-    skip: !toggleStatus,
-    pagination: {
-      cursorStart: 0,
-      querySize: 5,
-    },
-  });
+  const [isTableLoading, { data, inspect, refetch, isModuleEnabled, isDeprecated }] =
+    useHostRiskScore({
+      filterQuery: severityFilter,
+      skip: !toggleStatus,
+      pagination: {
+        cursorStart: 0,
+        querySize: 5,
+      },
+    });
 
   useQueryInspector({
     queryId: TABLE_QUERY_ID,
@@ -129,6 +130,10 @@ export const EntityAnalyticsHostRiskScores = () => {
 
   if (!isModuleEnabled) {
     return <EntityAnalyticsHostRiskScoresDisable />;
+  }
+
+  if (isDeprecated) {
+    return <EntityAnalyticsHostRiskScoresDeprecated />;
   }
 
   return (
@@ -211,6 +216,33 @@ const EntityAnalyticsHostRiskScoresDisable = () => {
               data-test-subj="enable_host_risk_score"
             >
               {i18n.ENABLE_HOST_RISK_SCORE}
+            </EuiButton>
+          </EuiToolTip>
+        }
+      />
+    </EuiPanel>
+  );
+};
+
+const EntityAnalyticsHostRiskScoresDeprecated = () => {
+  const { signalIndexExists } = useCheckSignalIndex();
+
+  return (
+    <EuiPanel hasBorder>
+      <HeaderSection title={<h2>{i18n.HOST_RISK_TITLE}</h2>} titleSize="s" />
+      <EuiEmptyPrompt
+        title={<h2>{i18n.UPGRADE_HOST_RISK_SCORE}</h2>}
+        body={i18n.UPGRADE_HOST_RISK_SCORE_DESCRIPTION}
+        actions={
+          <EuiToolTip content={!signalIndexExists ? i18n.ENABLE_RISK_SCORE_POPOVER : null}>
+            <EuiButton
+              color="primary"
+              fill
+              onClick={() => alert('Angela do the upgrade')}
+              isDisabled={!signalIndexExists}
+              data-test-subj="upgrade_host_risk_score"
+            >
+              {i18n.UPGRADE_HOST_RISK_SCORE}
             </EuiButton>
           </EuiToolTip>
         }
