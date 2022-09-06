@@ -7,11 +7,12 @@
 import { schema as rt, TypeOf } from '@kbn/config-schema';
 import yaml from 'js-yaml';
 import { type PackagePolicy, PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
-import type {
-  ElasticsearchClient,
-  SavedObject,
-  Logger,
-  SavedObjectsClientContract,
+import {
+  type ElasticsearchClient,
+  type SavedObject,
+  type Logger,
+  type SavedObjectsClientContract,
+  SavedObjectsErrorHelpers,
 } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { PackagePolicyServiceInterface } from '@kbn/fleet-plugin/server';
@@ -25,12 +26,11 @@ import {
   UPDATE_RULES_CONFIG_ROUTE_PATH,
 } from '../../../common/constants';
 import type { CspApiRequestHandlerContext, CspRouter, CspRequestHandler } from '../../types';
-import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 export type UpdateRulesConfigBodySchema = TypeOf<typeof updateRulesConfigurationBodySchema>;
 
 /** Minimal set of fields required for updating a CSP SO rule */
-type SavedObjectRuleUpdatePayload = Pick<CspRule, 'enabled'>;
+export type SavedObjectRuleUpdatePayload = Pick<CspRule, 'enabled'>;
 
 /**
  * Minimal set of fields required for generating
@@ -54,7 +54,7 @@ const updateRulesConfigurationBodySchema = rt.object({
   rules: rt.arrayOf(
     rt.object({
       /**
-       * the rule saved object id
+       * the rule saved-object id
        */
       id: rt.string(),
       enabled: rt.boolean(),
@@ -98,11 +98,11 @@ export const getUpdatedPackagePolicy = (
 /**
  * gets all rules of a package policy with fields required for runtime config
  */
-export const getAllPackagePolicyCspRulesSO = (
+export const getCspRulesSO = (
   soClient: SavedObjectsClientContract,
   packagePolicyId: PackagePolicy['id'],
   policyId: PackagePolicy['policy_id']
-) =>
+): Promise<SavedObject<PackagePolicyRuleUpdatePayload>[]> =>
   soClient
     .find<PackagePolicyRuleUpdatePayload>({
       type: CSP_RULE_SAVED_OBJECT_TYPE,
@@ -111,24 +111,23 @@ export const getAllPackagePolicyCspRulesSO = (
         policyId,
       }),
       fields: RUNTIME_CFG_FIELDS,
-      searchFields: ['name'],
       perPage: 10000,
     })
     .then((response) => response.saved_objects);
 
 /**
- * gets rules by id of a package policy with fields required for updating SO object
+ * gets rules of a package policy by id with fields required for updating SO object
  */
 const getByIdCurrentRulesSO = (
   soClient: CspApiRequestHandlerContext['soClient'],
   ruleIds: string[]
-) =>
+): Promise<SavedObject<SavedObjectRuleUpdatePayload>[]> =>
   soClient
     .bulkGet<SavedObjectRuleUpdatePayload>(
       ruleIds.map((ruleId) => ({
         id: ruleId,
         type: CSP_RULE_SAVED_OBJECT_TYPE,
-        fields: ['enabled'],
+        fields: ['enabled'], // In case of a rollback, this is the only field we need to restore
       }))
     )
     .then((response) => response.saved_objects);
@@ -174,21 +173,19 @@ const getRuleUpdateFields = ({
 }: SavedObject<SavedObjectRuleUpdatePayload>) => ({ id, type, attributes, references });
 
 /**
- * Gets current rules with next values for 'enabled' property
+ * Merges the current rules SO with their new 'enabled' value
  */
 const getNextCspRulesSO = (
   current: Array<SavedObject<SavedObjectRuleUpdatePayload>>,
   rulesToChange: UpdateRulesConfigBodySchema['rules']
-) => {
+): Array<SavedObject<SavedObjectRuleUpdatePayload>> => {
   const currentRulesMap = Object.fromEntries(
     current.map((rule) => [rule.id, getRuleUpdateFields(rule)])
   );
+
   return rulesToChange.map((rule) => ({
     ...currentRulesMap[rule.id],
-    attributes: {
-      ...currentRulesMap[rule.id].attributes,
-      enabled: rule.enabled,
-    },
+    attributes: { enabled: rule.enabled },
   }));
 };
 
@@ -207,13 +204,14 @@ const runUpdate = async ({
   updateSO: () => Promise<unknown>;
   updatePackagePolicy: () => Promise<PackagePolicy>;
   logger: Logger;
-}) => {
-  logger.info(`Start updating rules`);
+}): Promise<PackagePolicy> => {
+  logger.info('Start updating rules');
 
   try {
     await updateSO();
   } catch (e) {
-    logger.error(`Failed updating saved objects: ${e?.message || ''}`);
+    logger.warn('Failed updating saved objects');
+    logger.error(e);
     throw e;
   }
 
@@ -222,7 +220,8 @@ const runUpdate = async ({
     logger.info('Finish updating rules');
     return updatedPolicy;
   } catch (e) {
-    logger.error(`Failed updating package policy vars: ${e?.message || ''}`);
+    logger.warn('Failed updating package policy vars');
+    logger.error(e);
 
     logger.info('Rollback to previous saved-objects rules');
     await rollbackSO();
@@ -240,20 +239,17 @@ export const updatePackagePolicyCspRules = async (
   packagePolicy: PackagePolicy,
   rulesToChange: UpdateRulesConfigBodySchema['rules']
 ): Promise<PackagePolicy> => {
+  // Get initial rules, before updating
   const currentRulesSO = await getByIdCurrentRulesSO(
     soClient,
     rulesToChange.map((rule) => rule.id)
   );
 
-  const rollbackSO = () => updateRulesSO(soClient, currentRulesSO);
+  // Define actions to be executed for updating rules
   const updateSO = () => updateRulesSO(soClient, getNextCspRulesSO(currentRulesSO, rulesToChange));
   const updatePackagePolicy = async () =>
     updatePackagePolicyRuntimeCfgVar({
-      rules: await getAllPackagePolicyCspRulesSO(
-        soClient,
-        packagePolicy.id,
-        packagePolicy.policy_id
-      ),
+      rules: await getCspRulesSO(soClient, packagePolicy.id, packagePolicy.policy_id),
       soClient,
       packagePolicyService,
       user,
@@ -261,11 +257,15 @@ export const updatePackagePolicyCspRules = async (
       esClient: esClient.asCurrentUser,
     });
 
+  // Define actions to be executed for rollback
+  const rollbackSO = () => updateRulesSO(soClient, currentRulesSO);
+
+  // Start the update process
   return runUpdate({
     logger,
-    rollbackSO,
     updateSO,
     updatePackagePolicy,
+    rollbackSO,
   });
 };
 
@@ -288,13 +288,14 @@ export const updateRulesConfigurationHandler: CspRequestHandler<
     );
     if (!packagePolicy) {
       // packagePolicyService.get() throws a 404 if the package policy is not found
-      // we consider returning null as the same, and utilize the same error
-      // so testing for the policy-not-found case is the same.
+      // we consider returning null as the same, and use the same error
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(
         PACKAGE_POLICY_SAVED_OBJECT_TYPE,
         request.body.package_policy_id
       );
     }
+
+    cspContext.logger.info(`Start updating package policy - ${packagePolicy.id}`);
 
     const updatedPackagePolicy = await updatePackagePolicyCspRules(
       cspContext,
@@ -305,7 +306,7 @@ export const updateRulesConfigurationHandler: CspRequestHandler<
   } catch (e) {
     const error = transformError(e);
     cspContext.logger.error(
-      `Failed to update rules configuration on package policy - ${error.message}`
+      `Failed updating package policy (${request.body.package_policy_id}) - ${error.message}`
     );
 
     return response.customError({

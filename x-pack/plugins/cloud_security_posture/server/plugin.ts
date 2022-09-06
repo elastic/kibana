@@ -39,7 +39,7 @@ import {
 import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME } from '../common/constants';
 import {
   updatePackagePolicyRuntimeCfgVar,
-  getAllPackagePolicyCspRulesSO,
+  getCspRulesSO,
 } from './routes/configuration/update_rules_configuration';
 
 import {
@@ -109,11 +109,7 @@ export class CspPlugin
             await onPackagePolicyPostCreateCallback(this.logger, packagePolicy, soClient);
 
             const updatedPackagePolicy = await updatePackagePolicyRuntimeCfgVar({
-              rules: await getAllPackagePolicyCspRulesSO(
-                soClient,
-                packagePolicy.id,
-                packagePolicy.policy_id
-              ),
+              rules: await getCspRulesSO(soClient, packagePolicy.id, packagePolicy.policy_id),
               packagePolicy,
               packagePolicyService: plugins.fleet.packagePolicyService,
               esClient,
