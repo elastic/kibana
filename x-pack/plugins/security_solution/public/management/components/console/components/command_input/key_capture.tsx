@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { FormEventHandler, KeyboardEventHandler, MutableRefObject } from 'react';
+import type {
+  ClipboardEventHandler,
+  FormEventHandler,
+  KeyboardEventHandler,
+  MutableRefObject,
+} from 'react';
 import React, { memo, useCallback, useMemo, useRef, useState } from 'react';
 import { pick } from 'lodash';
 import styled from 'styled-components';
@@ -95,24 +100,25 @@ export const KeyCapture = memo<KeyCaptureProps>(({ onCapture, focusRef, onStateC
     [onStateChange]
   );
 
-  const handleInputOnPaste = useCallback<FormEventHandler>(
+  const handleInputOnPaste = useCallback<ClipboardEventHandler>(
     (ev) => {
       const value = ev.clipboardData.getData('text');
       ev.stopPropagation();
 
-      const eventDetails = pick(ev, [
-        'key',
-        'altKey',
-        'ctrlKey',
-        'keyCode',
-        'metaKey',
-        'repeat',
-        'shiftKey',
-      ]);
+      // hard-coded for use in onCapture and future keyboard functions
+      const metaKey = {
+        altKey: false,
+        ctrlKey: false,
+        key: 'Meta',
+        keyCode: 91,
+        metaKey: true,
+        repeat: false,
+        shiftKey: false,
+      };
 
       onCapture({
         value,
-        eventDetails,
+        eventDetails: metaKey,
       });
     },
     [onCapture]
