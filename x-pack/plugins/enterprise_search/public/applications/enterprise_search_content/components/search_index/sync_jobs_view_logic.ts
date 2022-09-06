@@ -19,7 +19,7 @@ import {
   FetchSyncJobsApiLogic,
   FetchSyncJobsArgs,
   FetchSyncJobsResponse,
-} from '../../api/connector_package/fetch_sync_jobs_api_logic';
+} from '../../api/connector/fetch_sync_jobs_api_logic';
 
 import { IndexViewLogic } from './index_view_logic';
 
