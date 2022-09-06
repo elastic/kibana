@@ -505,7 +505,8 @@ describe('Authenticator', () => {
         state: { authorization },
       });
       expectAuditEvents({ action: 'user_login', outcome: 'success' });
-      expect(mockOptions.userProfileService.activate).toHaveBeenCalled();
+      expect(mockOptions.userProfileService.activate).toHaveBeenCalledTimes(1);
+      expect(mockOptions.userProfileService.activate).toHaveBeenCalledWith(userProfileGrant);
     });
 
     it('returns `notHandled` if login attempt is targeted to not configured provider.', async () => {
