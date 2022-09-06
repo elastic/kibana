@@ -12,6 +12,7 @@ import {
   SavedObjectsErrorHelpers,
 } from '@kbn/core/server';
 import { nodeBuilder, escapeKuery } from '@kbn/es-query';
+import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type {
   Pagination,
   FileShareJSON,
@@ -22,6 +23,7 @@ import type {
 import { FILE_SO_TYPE } from '../../common/constants';
 import type { File } from '../../common/types';
 import { fileShareObjectType } from '../saved_objects';
+import { getCounters, Counters } from '../usage';
 import { generateShareToken } from './generate_share_token';
 import { FileShareServiceStart } from './types';
 import {
@@ -126,11 +128,23 @@ function validateCreateArgs({ validUntil }: CreateShareArgs): void {
  * @internal
  */
 export class InternalFileShareService implements FileShareServiceStart {
+  private static usageCounter: undefined | UsageCounter;
+
+  public static configureUsageCounter(uc: UsageCounter) {
+    InternalFileShareService.usageCounter = uc;
+  }
+
   private readonly savedObjectsType = fileShareObjectType.name;
 
   constructor(
     private readonly savedObjects: SavedObjectsClientContract | ISavedObjectsRepository
   ) {}
+
+  private incremenetUsageCounter(counter: Counters) {
+    InternalFileShareService.usageCounter?.incrementCounter({
+      counterName: getCounters('share_service')[counter],
+    });
+  }
 
   public async share(args: CreateShareArgs): Promise<FileShareJSONWithToken> {
     validateCreateArgs(args);
@@ -152,9 +166,11 @@ export class InternalFileShareService implements FileShareServiceStart {
   }
 
   public async delete({ id }: DeleteArgs): Promise<void> {
+    this.incremenetUsageCounter('UNSHARE');
     try {
       await this.savedObjects.delete(this.savedObjectsType, id);
     } catch (e) {
+      this.incremenetUsageCounter('UNSHARE_ERROR');
       if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
         throw new FileShareNotFoundError(`File share with id "${id}" not found.`);
       }

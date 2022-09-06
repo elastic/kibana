@@ -31,6 +31,7 @@ export class FilesPlugin implements Plugin<FilesSetup, FilesStart, FilesPluginSe
   private readonly logger: Logger;
   private fileServiceFactory: undefined | FileServiceFactory;
   private securitySetup: FilesPluginSetupDependencies['security'];
+  private usageCollectionSetup: FilesPluginSetupDependencies['usageCollection'];
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
@@ -40,8 +41,9 @@ export class FilesPlugin implements Plugin<FilesSetup, FilesStart, FilesPluginSe
     core: CoreSetup,
     { security, usageCollection }: FilesPluginSetupDependencies
   ): FilesSetup {
-    FileServiceFactory.setup(core.savedObjects);
+    FileServiceFactory.setup(core.savedObjects, usageCollection);
     this.securitySetup = security;
+    this.usageCollectionSetup = usageCollection;
 
     core.http.registerRouteHandlerContext<FilesRequestHandlerContext, typeof PLUGIN_ID>(
       PLUGIN_ID,

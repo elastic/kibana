@@ -11,11 +11,13 @@ import {
   Logger,
   KibanaRequest,
 } from '@kbn/core/server';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { SecurityPluginSetup } from '@kbn/security-plugin/server';
 
-import type { File, FileJSON, FileMetadata } from '../../common';
+import { File, FileJSON, FileMetadata, PLUGIN_ID } from '../../common';
 import { fileObjectType, fileShareObjectType, hiddenTypes } from '../saved_objects';
 import { BlobStorageService } from '../blob_storage_service';
+import { FileClientImpl } from '../file_client/file_client';
 import { InternalFileShareService } from '../file_share_service';
 import {
   CreateFileArgs,
@@ -132,8 +134,16 @@ export class FileServiceFactoryImpl implements FileServiceFactory {
   /**
    * This function can only called during Kibana's setup phase
    */
-  public static setup(savedObjectsSetup: SavedObjectsServiceSetup): void {
+  public static setup(
+    savedObjectsSetup: SavedObjectsServiceSetup,
+    usageCollection?: UsageCollectionSetup
+  ): void {
     savedObjectsSetup.registerType<FileMetadata<{}>>(fileObjectType);
     savedObjectsSetup.registerType(fileShareObjectType);
+    if (usageCollection) {
+      const usageCounter = usageCollection.createUsageCounter(PLUGIN_ID);
+      FileClientImpl.configureUsageCounter(usageCounter);
+      InternalFileShareService.configureUsageCounter(usageCounter);
+    }
   }
 }
