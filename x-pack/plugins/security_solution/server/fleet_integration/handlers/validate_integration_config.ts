@@ -57,6 +57,18 @@ const validateCloudIntegrationConfig = (config: CloudConfig, logger: Logger): vo
     );
     throwError('invalid value for cloudConfig preventions malware');
   }
+  if (!config?.eventFilters) {
+    logger.warn(
+      `eventFilters is required for cloud integration: {eventFilters : nonInteractiveSession: true / false}`
+    );
+    throwError('eventFilters is required for cloud integration');
+  }
+  if (typeof config.eventFilters?.nonInteractiveSession !== 'boolean') {
+    logger.warn(
+      `invalid value for eventFilters nonInteractiveSession: ${config.eventFilters?.nonInteractiveSession}`
+    );
+    throwError('invalid value for eventFilters nonInteractiveSession');
+  }
 };
 
 export const validateIntegrationConfig = (config: Config, logger: Logger): void => {
