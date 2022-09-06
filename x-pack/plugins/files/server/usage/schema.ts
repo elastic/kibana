@@ -31,7 +31,7 @@ export interface FileKindUsageSchema extends CountAndSize {
   };
 }
 
-export const schema: MakeSchemaFrom<FileKindUsageSchema> = {
+export const filesSchema: MakeSchemaFrom<FileKindUsageSchema> = {
   ...countAndAvgSize,
   share_count: {
     type: 'long',

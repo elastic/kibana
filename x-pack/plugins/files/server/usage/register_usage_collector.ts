@@ -7,7 +7,7 @@
 import type { CoreStart } from '@kbn/core/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { hiddenTypes } from '../saved_objects';
-import { schema } from './schema';
+import { filesSchema, FileKindUsageSchema } from './schema';
 import { fetch } from './fetch';
 
 interface Args {
@@ -21,14 +21,14 @@ export function registerUsageCollector({ usageCollection, coreStartPromise }: Ar
   }
 
   usageCollection.registerCollector(
-    usageCollection.makeUsageCollector({
+    usageCollection.makeUsageCollector<FileKindUsageSchema>({
       type: 'files',
       fetch: async () => {
         return fetch({
           soClient: (await coreStartPromise).savedObjects.createInternalRepository(hiddenTypes),
         });
       },
-      schema,
+      schema: filesSchema,
       isReady: () => coreStartPromise.then(() => true),
     })
   );
