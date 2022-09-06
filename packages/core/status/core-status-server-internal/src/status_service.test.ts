@@ -8,24 +8,20 @@
 
 import { of, BehaviorSubject, firstValueFrom } from 'rxjs';
 
-import {
-  ServiceStatus,
-  ServiceStatusLevels,
-  CoreStatus,
-  InternalStatusServiceSetup,
-} from './types';
+import { ServiceStatus, ServiceStatusLevels, CoreStatus } from '@kbn/core-status-common';
+import { InternalStatusServiceSetup } from './types';
 import { StatusService } from './status_service';
 import { first, take, toArray } from 'rxjs/operators';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import { environmentServiceMock } from '@kbn/core-environment-server-mocks';
 import { mockRouter, RouterMock } from '@kbn/core-http-router-server-mocks';
 import { httpServiceMock } from '@kbn/core-http-server-mocks';
-import { ServiceStatusLevelSnapshotSerializer } from './test_utils';
+import { ServiceStatusLevelSnapshotSerializer } from './test_helpers';
 import { metricsServiceMock } from '@kbn/core-metrics-server-mocks';
 import { configServiceMock } from '@kbn/config-mocks';
 import { coreUsageDataServiceMock } from '@kbn/core-usage-data-server-mocks';
 import { analyticsServiceMock } from '@kbn/core-analytics-server-mocks';
-import { AnalyticsServiceSetup } from '..';
+import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
 
 expect.addSnapshotSerializer(ServiceStatusLevelSnapshotSerializer);
 
