@@ -15,7 +15,7 @@ const statusConfigSchema = schema.object({
 
 export type StatusConfigType = TypeOf<typeof statusConfigSchema>;
 
-export const config: ServiceConfigDescriptor<StatusConfigType> = {
+export const statusConfig: ServiceConfigDescriptor<StatusConfigType> = {
   path: 'status',
   schema: statusConfigSchema,
 };

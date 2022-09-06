@@ -6,16 +6,11 @@
  * Side Public License, v 1.
  */
 
-import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { StatusService } from './status_service';
-import {
-  InternalStatusServiceSetup,
-  StatusServiceSetup,
-  ServiceStatusLevels,
-  ServiceStatus,
-  CoreStatus,
-} from './types';
 import { BehaviorSubject } from 'rxjs';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import { ServiceStatusLevels, ServiceStatus } from '@kbn/core-base-common';
+import type { StatusService, InternalStatusServiceSetup } from '@kbn/core-status-server-internal';
+import type { StatusServiceSetup, CoreStatus } from '@kbn/core-status-server';
 
 const available: ServiceStatus = {
   level: ServiceStatusLevels.available,

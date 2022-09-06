@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
-export function foo() {
-  return 'hello world';
-}
+export { StatusService } from './status_service';
+export { statusConfig } from './status_config';
+export type { StatusConfigType } from './status_config';
+export type { InternalStatusServiceSetup } from './types';

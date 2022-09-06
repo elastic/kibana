@@ -6,6 +6,6 @@
  * Side Public License, v 1.
  */
 
-export function foo() {
-  return 'hello world';
-}
+export type { ServiceStatusLevel, ServiceStatus } from '@kbn/core-base-common';
+export { ServiceStatusLevels } from '@kbn/core-base-common';
+export type { StatusServiceSetup, CoreStatus } from './src';

@@ -8,13 +8,12 @@
 
 import { Observable, combineLatest, ReplaySubject, firstValueFrom } from 'rxjs';
 import { schema } from '@kbn/config-schema';
-import { PackageInfo } from '@kbn/config';
-
+import type { PackageInfo } from '@kbn/config';
 import type { PluginName } from '@kbn/core-base-common';
 import type { IRouter } from '@kbn/core-http-server';
 import type { MetricsServiceSetup } from '@kbn/core-metrics-server';
 import type { CoreIncrementUsageCounter } from '@kbn/core-usage-data-server';
-import { ServiceStatus, CoreStatus, ServiceStatusLevels } from '../types';
+import { ServiceStatus, CoreStatus, ServiceStatusLevels } from '@kbn/core-status-server';
 import { calculateLegacyStatus, LegacyStatusInfo } from '../legacy_status';
 import { StatusResponse } from '../../../types/status';
 

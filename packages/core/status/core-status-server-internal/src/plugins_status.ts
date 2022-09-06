@@ -5,6 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { BehaviorSubject, Observable, ReplaySubject, Subscription } from 'rxjs';
 import {
   map,
@@ -16,9 +17,8 @@ import {
 } from 'rxjs/operators';
 import { sortBy } from 'lodash';
 import { isDeepStrictEqual } from 'util';
-
-import type { PluginName } from '@kbn/core-base-common';
-import { type ServiceStatus, type CoreStatus, ServiceStatusLevels } from './types';
+import { ServiceStatusLevels, type PluginName, type ServiceStatus } from '@kbn/core-base-common';
+import type { CoreStatus } from '@kbn/core-status-server';
 import { getSummaryStatus } from './get_summary_status';
 
 const STATUS_TIMEOUT_MS = 30 * 1000; // 30 seconds
@@ -43,6 +43,7 @@ interface PluginData {
     derivedStatus: ServiceStatus;
   };
 }
+
 interface PluginStatus {
   [name: PluginName]: ServiceStatus;
 }

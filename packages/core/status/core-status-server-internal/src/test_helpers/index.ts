@@ -6,6 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { StatusService } from './status_service';
-export { config } from './status_config';
-export * from './types';
+export { ServiceStatusLevelSnapshotSerializer } from './test_utils';

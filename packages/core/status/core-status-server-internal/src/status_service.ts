@@ -19,7 +19,7 @@ import { map, distinctUntilChanged, shareReplay, debounceTime, takeUntil } from 
 import { isDeepStrictEqual } from 'util';
 
 import type { RootSchema } from '@kbn/analytics-client';
-import { Logger, LogMeta } from '@kbn/logging';
+import type { Logger, LogMeta } from '@kbn/logging';
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
 import type { PluginName } from '@kbn/core-base-common';
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
@@ -29,10 +29,11 @@ import type { InternalElasticsearchServiceSetup } from '@kbn/core-elasticsearch-
 import type { InternalMetricsServiceSetup } from '@kbn/core-metrics-server-internal';
 import type { InternalSavedObjectsServiceSetup } from '@kbn/core-saved-objects-server-internal';
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
+import type { ServiceStatus, CoreStatus } from '@kbn/core-status-server';
 import { registerStatusRoute } from './routes';
 
-import { config, StatusConfigType } from './status_config';
-import { ServiceStatus, CoreStatus, InternalStatusServiceSetup } from './types';
+import { statusConfig as config, StatusConfigType } from './status_config';
+import type { InternalStatusServiceSetup } from './types';
 import { getSummaryStatus } from './get_summary_status';
 import { PluginsStatusService } from './cached_plugins_status';
 import { getOverallStatusChanges } from './log_overall_status';

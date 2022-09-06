@@ -8,7 +8,7 @@
 
 import { Observable } from 'rxjs';
 import { distinctUntilChanged, pairwise, startWith, takeUntil, map } from 'rxjs/operators';
-import { ServiceStatus } from './types';
+import type { ServiceStatus } from '@kbn/core-base-common';
 
 export const getOverallStatusChanges = (
   overall$: Observable<ServiceStatus>,
