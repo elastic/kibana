@@ -453,7 +453,11 @@ function DiscoverFieldComponent({
 
   const renderPopover = () => {
     const dateRange = data?.query?.timefilter.timefilter.getAbsoluteTime();
-    const fieldForStats = multiFields ? multiFields[0].field : field; // TODO: how to handle multifields?
+    // prioritize an aggregatable multi field if available or take the parent field
+    const fieldForStats =
+      (multiFields?.length &&
+        multiFields.find((multiField) => multiField.field.aggregatable)?.field) ||
+      field;
     const showLegacyFieldStats = services.uiSettings.get(SHOW_LEGACY_FIELD_TOP_VALUES);
 
     return (
