@@ -92,7 +92,7 @@ async function enhanceEdges(
   const hostsRiskByHostName: Record<string, string> | undefined = hostRiskData?.hits.hits.reduce(
     (acc, hit) => ({
       ...acc,
-      [hit._source?.host.name ?? '']: hit._source?.risk,
+      [hit._source?.host.name ?? '']: hit._source?.host.risk.calculated_level,
     }),
     {}
   );

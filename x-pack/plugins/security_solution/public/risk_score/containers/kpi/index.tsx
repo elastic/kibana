@@ -80,11 +80,11 @@ interface RiskScoreKpi {
 
 type UseHostRiskScoreKpiProps = Omit<
   UseRiskScoreKpiProps,
-  'defaultIndex' | 'aggBy' | 'featureEnabled'
+  'defaultIndex' | 'aggBy' | 'featureEnabled' | 'entity'
 >;
 type UseUserRiskScoreKpiProps = Omit<
   UseRiskScoreKpiProps,
-  'defaultIndex' | 'aggBy' | 'featureEnabled'
+  'defaultIndex' | 'aggBy' | 'featureEnabled' | 'entity'
 >;
 
 export const useUserRiskScoreKpi = ({

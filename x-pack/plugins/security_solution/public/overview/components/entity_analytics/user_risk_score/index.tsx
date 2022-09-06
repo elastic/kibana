@@ -20,7 +20,6 @@ import { LinkButton, useGetSecuritySolutionLinkProps } from '../../../../common/
 import { LastUpdatedAt } from '../../detection_response/utils';
 import { HeaderSection } from '../../../../common/components/header_section';
 import type { RiskSeverity } from '../../../../../common/search_strategy';
-import { RiskScoreEntity } from '../../../../../common/search_strategy';
 import { SecurityPageName } from '../../../../app/types';
 import * as i18n from './translations';
 import { generateSeverityFilter } from '../../../../hosts/store/helpers';
@@ -64,7 +63,6 @@ export const EntityAnalyticsUserRiskScores = () => {
   const { severityCount, loading: isKpiLoading } = useUserRiskScoreKpi({
     filterQuery: severityFilter,
     skip: !toggleStatus,
-    entity: RiskScoreEntity.user,
   });
 
   const [isTableLoading, { data, inspect, refetch, isModuleEnabled }] = useUserRiskScore({
