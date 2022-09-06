@@ -154,6 +154,7 @@ export interface XYState {
   curveType?: XYCurveType;
   fillOpacity?: number;
   hideEndzones?: boolean;
+  showCurrentTimeMarker?: boolean;
   valuesInLegend?: boolean;
 }
 
