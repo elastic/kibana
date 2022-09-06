@@ -94,6 +94,18 @@ export function TooltipSection({
     [localValues, indexPattern, handleInputChange]
   );
 
+  const newBucketButton = (
+    <NewBucketButton
+      data-test-subj={`lnsXY-annotation-tooltip-add_field`}
+      onClick={() => {
+        handleInputChange([...localValues, { id: generateId(), value: undefined, isNew: true }]);
+      }}
+      label={i18n.translate('xpack.lens.xyChart.annotation.tooltip.addField', {
+        defaultMessage: 'Add field',
+      })}
+    />
+  );
+
   if (localValues.length === 0) {
     return (
       <>
@@ -104,18 +116,7 @@ export function TooltipSection({
             })}
           </EuiButton>
         </EuiFlexItem>
-        <NewBucketButton
-          data-test-subj={`lnsXY-annotation-tooltip-add_field`}
-          onClick={() => {
-            handleInputChange([
-              ...localValues,
-              { id: generateId(), value: undefined, isNew: true },
-            ]);
-          }}
-          label={i18n.translate('xpack.lens.xyChart.annotation.tooltip.addField', {
-            defaultMessage: 'Add field',
-          })}
-        />
+        {newBucketButton}
       </>
     );
   }
@@ -225,15 +226,7 @@ export function TooltipSection({
           );
         })}
       </DragDropBuckets>
-      <NewBucketButton
-        onClick={() => {
-          handleInputChange([...localValues, { id: generateId(), value: undefined, isNew: true }]);
-        }}
-        data-test-subj={`lnsXY-annotation-tooltip-addField`}
-        label={i18n.translate('xpack.lens.xyChart.annotation.tooltip.addField', {
-          defaultMessage: 'Add field',
-        })}
-      />
+      {newBucketButton}
     </>
   );
 }

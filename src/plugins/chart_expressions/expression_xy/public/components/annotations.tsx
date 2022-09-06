@@ -21,22 +21,23 @@ import {
 import moment from 'moment';
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import type {
+  EventAnnotationOutput,
   ManualPointEventAnnotationArgs,
   ManualRangeEventAnnotationRow,
 } from '@kbn/event-annotation-plugin/common';
-import type { FieldFormat } from '@kbn/field-formats-plugin/common';
+import type { FieldFormat, FormatFactory } from '@kbn/field-formats-plugin/common';
 import {
   defaultAnnotationColor,
   defaultAnnotationRangeColor,
 } from '@kbn/event-annotation-plugin/public';
-import { Datatable, DatatableRow } from '@kbn/expressions-plugin/common';
+import { Datatable, DatatableColumn, DatatableRow } from '@kbn/expressions-plugin/common';
 import { ManualPointEventAnnotationRow } from '@kbn/event-annotation-plugin/common/manual_event_annotation/types';
-import type { CollectiveConfig } from '../../common';
+import type { MergedAnnotation } from '../../common';
 import { AnnotationIcon, hasIcon, Marker, MarkerBody } from '../helpers';
 import { mapVerticalToHorizontalPlacement, LINES_MARKER_SIZE } from '../helpers';
 
 export interface AnnotationsProps {
-  groupedLineAnnotations: CollectiveConfig[];
+  groupedLineAnnotations: MergedAnnotation[];
   rangeAnnotations: ManualRangeEventAnnotationRow[];
   formatter?: FieldFormat;
   isHorizontal: boolean;
@@ -50,7 +51,7 @@ export interface AnnotationsProps {
 const createCustomTooltipDetails =
   (
     config: ManualPointEventAnnotationArgs[],
-    formatter?: FieldFormat
+    timeFormatter?: FieldFormat
   ): AnnotationTooltipFormatter | undefined =>
   () => {
     return (
@@ -65,7 +66,9 @@ const createCustomTooltipDetails =
               )}
               <EuiFlexItem> {label}</EuiFlexItem>
             </EuiFlexGroup>
-            <span className="echTooltip__value"> {formatter?.convert(time) || String(time)}</span>
+            <span className="echTooltip__value">
+              {timeFormatter?.convert(time) || String(time)}
+            </span>
           </div>
         ))}
       </div>
@@ -110,8 +113,12 @@ export const OUTSIDE_RECT_ANNOTATION_WIDTH_SUGGESTION = 2;
 
 export const getAnnotationsGroupedByInterval = (
   annotations: ManualPointEventAnnotationRow[],
-  formatter?: FieldFormat
+  configs: EventAnnotationOutput[] | undefined,
+  columns: DatatableColumn[] | undefined,
+  formatFactory: FormatFactory,
+  timeFormatter?: FieldFormat
 ) => {
+  console.log(columns);
   const visibleGroupedConfigs = annotations.reduce<Record<string, ManualPointEventAnnotationRow[]>>(
     (acc, current) => {
       const timebucket = moment(current.timebucket).valueOf();
@@ -122,24 +129,38 @@ export const getAnnotationsGroupedByInterval = (
     },
     {}
   );
-  let collectiveConfig: CollectiveConfig;
-  return Object.entries(visibleGroupedConfigs).map(([timebucket, configArr]) => {
-    collectiveConfig = {
-      ...configArr[0],
-      icon: configArr[0].icon || 'triangle',
+  let mergedAnnotation: MergedAnnotation;
+  return Object.entries(visibleGroupedConfigs).map(([timebucket, rowsPerBucket]) => {
+    // get config from the annotation
+    // if textField is defined, get the value from the row
+    const firstRow = rowsPerBucket[0];
+
+    const config = configs?.find((c) => c.id === firstRow.id);
+    const textField = config && 'textField' in config && config?.textField;
+    const columnFormatter = columns?.find((c) => c.id === `field:${textField}`)?.meta?.params;
+    const formatter = columnFormatter && formatFactory(columnFormatter);
+    const label =
+      textField && formatter && `field:${textField}` in firstRow
+        ? formatter.convert(firstRow[`field:${textField}`])
+        : firstRow.label;
+    mergedAnnotation = {
+      ...firstRow,
+      label,
+      icon: firstRow.icon || 'triangle',
       timebucket: Number(timebucket),
       position: 'bottom',
     };
-    if (configArr.length > 1) {
-      const commonStyles = getCommonStyles(configArr);
-      collectiveConfig = {
-        ...collectiveConfig,
+    if (rowsPerBucket.length > 1) {
+      const commonStyles = getCommonStyles(rowsPerBucket);
+      mergedAnnotation = {
+        ...mergedAnnotation,
         ...commonStyles,
-        icon: String(configArr.length),
-        customTooltipDetails: createCustomTooltipDetails(configArr, formatter),
+        label: '',
+        icon: String(rowsPerBucket.length),
+        customTooltipDetails: createCustomTooltipDetails(rowsPerBucket, timeFormatter),
       };
     }
-    return collectiveConfig;
+    return mergedAnnotation;
   });
 };
 

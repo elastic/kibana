@@ -397,14 +397,18 @@ export function XYChart({
   };
 
   const referenceLineLayers = getReferenceLayers(layers);
-
   const [rangeAnnotations, lineAnnotations] = partition(
     annotations?.datatable.rows,
     isRangeAnnotation
   );
 
+  const annotationsConfigs = annotations?.layers.flatMap((l) => l.annotations);
+
   const groupedLineAnnotations = getAnnotationsGroupedByInterval(
     lineAnnotations as ManualPointEventAnnotationRow[],
+    annotationsConfigs,
+    annotations?.datatable.columns,
+    formatFactory,
     xAxisFormatter
   );
 

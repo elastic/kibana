@@ -8,7 +8,11 @@
 import { Ast, AstFunction } from '@kbn/interpreter';
 import { Position, ScaleType } from '@elastic/charts';
 import type { PaletteRegistry } from '@kbn/coloring';
-import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
+import {
+  EventAnnotationServiceType,
+  isManualPointAnnotationConfig,
+  isRangeAnnotationConfig,
+} from '@kbn/event-annotation-plugin/public';
 import { LegendSize } from '@kbn/visualizations-plugin/public';
 import { XYCurveType } from '@kbn/expression-xy-plugin/common';
 import {
@@ -363,7 +367,12 @@ export const buildExpression = (
                             'auto',
                           groups: validAnnotationsLayers.map((layer) => ({
                             indexPatternId: layer.indexPatternId,
-                            annotations: layer.annotations,
+                            annotations: layer.annotations.filter(
+                              (a) =>
+                                isManualPointAnnotationConfig(a) ||
+                                isRangeAnnotationConfig(a) ||
+                                (a.filter && a.filter?.query !== '')
+                            ),
                           })),
                         }),
                       },
