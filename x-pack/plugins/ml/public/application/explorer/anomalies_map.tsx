@@ -25,6 +25,7 @@ import {
   VectorLayerDescriptor,
 } from '@kbn/maps-plugin/common';
 import { EMSTermJoinConfig } from '@kbn/maps-plugin/public';
+import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import { useMlKibana } from '../contexts/kibana';
 import { isDefined } from '../../../common/types/guards';
 import { MlEmbeddedMapComponent } from '../components/ml_embedded_map';
@@ -252,7 +253,9 @@ export const AnomaliesMap: FC<Props> = ({ anomalies, jobIds }) => {
             data-test-subj="mlAnomalyExplorerAnomaliesMap"
             style={{ width: '100%', height: 300 }}
           >
-            <MlEmbeddedMapComponent layerList={layerList} />
+            <TrackApplicationView viewId="anomalies-map">
+              <MlEmbeddedMapComponent layerList={layerList} />
+            </TrackApplicationView>
           </div>
         </EuiAccordion>
       </EuiPanel>
