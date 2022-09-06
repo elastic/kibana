@@ -905,11 +905,6 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
                 },
               };
             }
-          } else {
-            // checking if the object is single namespace type should be redundant, since it wouldn't have an `esRequestIndex` but we do the check to be safe
-            if (this._registry.isSingleNamespace(type)) {
-              namespaces = [SavedObjectsUtils.namespaceIdToString(namespace)];
-            }
           }
 
           const expectedResult = {
@@ -973,6 +968,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
         }
         const deleted = rawResponse.result === 'deleted';
         if (deleted) {
+          // `namespaces` should only exist in the expectedResult.value if the type is multinamespace.
           if (namespaces) {
             await deleteLegacyUrlAliases({
               mappings: this._mappings,
