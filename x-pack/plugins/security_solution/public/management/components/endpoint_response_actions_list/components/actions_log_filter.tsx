@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useMemo, useCallback } from 'react';
+import React, { memo, useMemo, useState, useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSelectable, EuiPopoverTitle } from '@elastic/eui';
 import { ActionsLogFilterPopover } from './actions_log_filter_popover';
 import { type FilterItems, type FilterName, useActionsLogFilter } from './hooks';
@@ -22,8 +22,9 @@ export const ActionsLogFilter = memo(
     onChangeFilterOptions: (selectedOptions: string[]) => void;
   }) => {
     const getTestId = useTestIdGenerator('response-actions-list');
-    const { items, setItems, hasActiveFilters, numActiveFilters, numFilters } =
-      useActionsLogFilter(filterName);
+    const [searchString, setSearchString] = useState('');
+    const { isError, isLoading, items, setItems, hasActiveFilters, numActiveFilters, numFilters } =
+      useActionsLogFilter(filterName, searchString);
 
     const isSearchable = useMemo(() => filterName !== 'statuses', [filterName]);
 
@@ -65,16 +66,25 @@ export const ActionsLogFilter = memo(
       >
         <EuiSelectable
           aria-label={`${filterName}`}
+          isLoading={isLoading}
           onChange={onChange}
           options={items}
           searchable={isSearchable ? true : undefined}
           searchProps={{
             placeholder: UX_MESSAGES.filterSearchPlaceholder(filterName),
             compressed: true,
+            onChange: (searchValue) => setSearchString(searchValue.trim()),
           }}
         >
           {(list, search) => {
-            return (
+            return isError ? (
+              <div
+                style={{ width: 300 }}
+                data-test-subj={getTestId(`${filterName}-filter-popoverList`)}
+              >
+                {'Error fetching hosts'}
+              </div>
+            ) : (
               <div
                 style={{ width: 300 }}
                 data-test-subj={getTestId(`${filterName}-filter-popoverList`)}

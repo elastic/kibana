@@ -23,26 +23,32 @@ export const ActionsLogFilters = memo(
     dateRangePickerState,
     isDataLoading,
     onClick,
+    onChangeHostsFilter,
     onChangeCommandsFilter,
     onChangeStatusesFilter,
     onRefresh,
     onRefreshChange,
     onTimeChange,
+    showHostsFilter,
   }: {
     dateRangePickerState: DateRangePickerValues;
     isDataLoading: boolean;
+    onChangeHostsFilter: (selectedCommands: string[]) => void;
     onChangeCommandsFilter: (selectedCommands: string[]) => void;
     onChangeStatusesFilter: (selectedStatuses: string[]) => void;
     onRefresh: () => void;
     onRefreshChange: (evt: OnRefreshChangeProps) => void;
     onTimeChange: ({ start, end }: DurationRange) => void;
     onClick: ReturnType<typeof useGetEndpointActionList>['refetch'];
+    showHostsFilter: boolean;
   }) => {
     const getTestId = useTestIdGenerator('response-actions-list');
     const filters = useMemo(() => {
-      // TODO: add more filter names here (users, hosts, statuses)
       return (
         <>
+          {showHostsFilter && (
+            <ActionsLogFilter filterName={'hosts'} onChangeFilterOptions={onChangeHostsFilter} />
+          )}
           <ActionsLogFilter filterName={'actions'} onChangeFilterOptions={onChangeCommandsFilter} />
           <ActionsLogFilter
             filterName={'statuses'}
@@ -50,7 +56,7 @@ export const ActionsLogFilters = memo(
           />
         </>
       );
-    }, [onChangeCommandsFilter, onChangeStatusesFilter]);
+    }, [onChangeHostsFilter, onChangeCommandsFilter, onChangeStatusesFilter, showHostsFilter]);
 
     const onClickRefreshButton = useCallback(() => onClick(), [onClick]);
 

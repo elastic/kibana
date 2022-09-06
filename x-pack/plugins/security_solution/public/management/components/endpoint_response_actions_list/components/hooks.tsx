@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import type {
   DurationRange,
   OnRefreshChangeProps,
@@ -19,6 +19,7 @@ import type { DateRangePickerValues } from './actions_log_date_range_picker';
 import type { FILTER_NAMES } from '../translations';
 import { UX_MESSAGES } from '../translations';
 import { StatusBadge } from './status_badge';
+import { useGetEndpointsList } from '../../../hooks/endpoint/use_get_endpoints_list';
 
 const defaultDateRangeOptions = Object.freeze({
   autoRefreshOptions: {
@@ -114,8 +115,11 @@ export const getActionStatus = (status: ResponseActionStatus): string => {
 // TODO: add more filter names here
 export type FilterName = keyof typeof FILTER_NAMES;
 export const useActionsLogFilter = (
-  filterName: FilterName
+  filterName: FilterName,
+  searchString: string
 ): {
+  isError: boolean;
+  isLoading: boolean;
   items: FilterItems;
   setItems: React.Dispatch<React.SetStateAction<FilterItems>>;
   hasActiveFilters: boolean;
@@ -123,6 +127,9 @@ export const useActionsLogFilter = (
   numFilters: number;
 } => {
   const isStatusesFilter = filterName === 'statuses';
+  const isHostsFilter = filterName === 'hosts';
+  const { isError, data: endpointsList, isFetching } = useGetEndpointsList(searchString);
+
   const [items, setItems] = useState<FilterItems>(
     isStatusesFilter
       ? RESPONSE_ACTION_STATUS.map((filter) => ({
@@ -137,12 +144,26 @@ export const useActionsLogFilter = (
           ) as unknown as string,
           checked: undefined,
         }))
+      : isHostsFilter
+      ? []
       : RESPONSE_ACTION_COMMANDS.map((filter) => ({
           key: filter,
           label: filter === 'unisolate' ? 'release' : filter,
           checked: undefined,
         }))
   );
+
+  useEffect(() => {
+    if (isHostsFilter && endpointsList) {
+      setItems(
+        endpointsList?.map((list) => ({
+          key: list.id,
+          label: list.name,
+          checked: undefined,
+        }))
+      );
+    }
+  }, [endpointsList, isHostsFilter, setItems]);
 
   const hasActiveFilters = useMemo(() => !!items.find((item) => item.checked === 'on'), [items]);
   const numActiveFilters = useMemo(
@@ -151,5 +172,13 @@ export const useActionsLogFilter = (
   );
   const numFilters = useMemo(() => items.filter((item) => item.checked !== 'on').length, [items]);
 
-  return { items, setItems, hasActiveFilters, numActiveFilters, numFilters };
+  return {
+    isError: isHostsFilter && isError,
+    isLoading: isHostsFilter && isFetching,
+    items,
+    setItems,
+    hasActiveFilters,
+    numActiveFilters,
+    numFilters,
+  };
 };

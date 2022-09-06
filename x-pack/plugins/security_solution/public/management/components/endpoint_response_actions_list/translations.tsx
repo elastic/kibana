@@ -160,6 +160,9 @@ export const FILTER_NAMES = Object.freeze({
   actions: i18n.translate('xpack.securitySolution.responseActionsList.list.filter.actions', {
     defaultMessage: 'Actions',
   }),
+  hosts: i18n.translate('xpack.securitySolution.responseActionsList.list.filter.Hosts', {
+    defaultMessage: 'Hosts',
+  }),
   statuses: i18n.translate('xpack.securitySolution.responseActionsList.list.filter.statuses', {
     defaultMessage: 'Statuses',
   }),

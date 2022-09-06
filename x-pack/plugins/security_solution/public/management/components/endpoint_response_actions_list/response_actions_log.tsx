@@ -179,6 +179,13 @@ export const ResponseActionsLog = memo<
     [setQueryParams]
   );
 
+  // handle on change hosts filter
+  const onChangeHostsFilter = useCallback(
+    (selectedAgentIds: string[]) => {
+      setQueryParams((prevState) => ({ ...prevState, agentIds: selectedAgentIds }));
+    },
+    [setQueryParams]
+  );
   // total actions
   const totalItemCount = useMemo(() => actionList?.total ?? 0, [actionList]);
 
@@ -531,11 +538,13 @@ export const ResponseActionsLog = memo<
         dateRangePickerState={dateRangePickerState}
         isDataLoading={isFetching}
         onClick={reFetchEndpointActionList}
+        onChangeHostsFilter={onChangeHostsFilter}
         onChangeCommandsFilter={onChangeCommandsFilter}
         onChangeStatusesFilter={onChangeStatusesFilter}
         onRefresh={onRefresh}
         onRefreshChange={onRefreshChange}
         onTimeChange={onTimeChange}
+        showHostsFilter={showHostNames}
       />
       {isFetched && !totalItemCount ? (
         <ManagementEmptyStateWrapper>
