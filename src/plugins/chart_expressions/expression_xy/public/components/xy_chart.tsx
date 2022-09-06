@@ -35,7 +35,7 @@ import { Datatable, RenderMode } from '@kbn/expressions-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { EmptyPlaceholder, LegendToggle } from '@kbn/charts-plugin/public';
 import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
-import { ManualPointEventAnnotationRow } from '@kbn/event-annotation-plugin/common';
+import { PointEventAnnotationRow } from '@kbn/event-annotation-plugin/common';
 import { ChartsPluginSetup, ChartsPluginStart, useActiveCursor } from '@kbn/charts-plugin/public';
 import { MULTILAYER_TIME_AXIS_STYLE } from '@kbn/charts-plugin/common';
 import {
@@ -405,7 +405,7 @@ export function XYChart({
   const annotationsConfigs = annotations?.layers.flatMap((l) => l.annotations);
 
   const groupedLineAnnotations = getAnnotationsGroupedByInterval(
-    lineAnnotations as ManualPointEventAnnotationRow[],
+    lineAnnotations as PointEventAnnotationRow[],
     annotationsConfigs,
     annotations?.datatable.columns,
     formatFactory,

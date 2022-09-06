@@ -18,5 +18,16 @@
 }
 
 .xyAnnotationTooltipDetail {
-  padding: $euiSizeXS ($euiSizeXS * 2);
+  padding: $euiSizeXS (
+    $euiSizeXS * 2
+  );
+}
+
+.xyAnnotationTooltip__skippedCount {
+  text-align: right;
+  margin-right: 0;
+}
+
+.xyAnnotationTooltip__group__singleItem+.xyAnnotationTooltip__group__singleItem {
+  border-top: $euiBorderThin;
 }

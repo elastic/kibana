@@ -28,5 +28,6 @@ export interface MergedAnnotation extends Omit<ManualPointEventAnnotationArgs, '
   timebucket: number;
   position: 'bottom';
   icon?: AvailableAnnotationIcon | string;
-  customTooltipDetails?: AnnotationTooltipFormatter | undefined;
+  customTooltipDetails: AnnotationTooltipFormatter;
+  isGrouped: boolean;
 }

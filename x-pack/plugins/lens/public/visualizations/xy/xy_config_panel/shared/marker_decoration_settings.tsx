@@ -161,10 +161,24 @@ export function TextDecorationSetting<Icon extends string = string>({
               : `${idPrefix}${selectedVisibleOption}`
           }
           onChange={(id) => {
-            setConfig({
-              textVisibility: id !== `${idPrefix}none`,
-            });
-            setVisibleOption(id.replace(idPrefix, '') as 'none' | 'name' | 'field');
+            const chosenOption = id.replace(idPrefix, '') as 'none' | 'name' | 'field';
+            if (chosenOption === 'none') {
+              setConfig({
+                textVisibility: false,
+                textField: undefined,
+              });
+            } else if (chosenOption === 'field') {
+              setConfig({
+                textVisibility: true,
+              });
+            } else if (chosenOption === 'name') {
+              setConfig({
+                textVisibility: true,
+                textField: undefined,
+              });
+            }
+
+            setVisibleOption(chosenOption);
           }}
           isFullWidth
         />

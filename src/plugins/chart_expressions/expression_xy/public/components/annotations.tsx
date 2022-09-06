@@ -10,7 +10,7 @@ import './annotations.scss';
 import './reference_lines/reference_lines.scss';
 
 import React from 'react';
-import { snakeCase } from 'lodash';
+import { groupBy, snakeCase } from 'lodash';
 import {
   AnnotationDomainType,
   AnnotationTooltipFormatter,
@@ -19,7 +19,7 @@ import {
   RectAnnotation,
 } from '@elastic/charts';
 import moment from 'moment';
-import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
 import type {
   EventAnnotationOutput,
   ManualPointEventAnnotationArgs,
@@ -31,7 +31,7 @@ import {
   defaultAnnotationRangeColor,
 } from '@kbn/event-annotation-plugin/public';
 import { Datatable, DatatableColumn, DatatableRow } from '@kbn/expressions-plugin/common';
-import { ManualPointEventAnnotationRow } from '@kbn/event-annotation-plugin/common/manual_event_annotation/types';
+import { PointEventAnnotationRow } from '@kbn/event-annotation-plugin/common/manual_event_annotation/types';
 import type { MergedAnnotation } from '../../common';
 import { AnnotationIcon, hasIcon, Marker, MarkerBody } from '../helpers';
 import { mapVerticalToHorizontalPlacement, LINES_MARKER_SIZE } from '../helpers';
@@ -50,27 +50,93 @@ export interface AnnotationsProps {
 
 const createCustomTooltipDetails =
   (
-    config: ManualPointEventAnnotationArgs[],
-    timeFormatter?: FieldFormat
-  ): AnnotationTooltipFormatter | undefined =>
+    rows: PointEventAnnotationRow[],
+    formatFactory: FormatFactory,
+    columns: DatatableColumn[] | undefined
+  ): AnnotationTooltipFormatter =>
   () => {
+    if (rows.length === 1) {
+      return (
+        <div key={rows[0].time} className="xyAnnotationTooltip">
+          {rows.map(({ icon, label, time, color }) => (
+            <div className="echTooltip__item--container" key={snakeCase(label)}>
+              <EuiFlexGroup className="echTooltip__label" gutterSize="xs">
+                {hasIcon(icon) && (
+                  <EuiFlexItem grow={false}>
+                    <AnnotationIcon type={icon} color={color} />
+                  </EuiFlexItem>
+                )}
+                <EuiFlexItem> {label}</EuiFlexItem>
+              </EuiFlexGroup>
+            </div>
+          ))}
+        </div>
+      );
+    }
+    const groupedConfigs = groupBy(rows, 'id');
+    const lastElement = rows[rows.length - 1];
     return (
-      <div key={config[0].time}>
-        {config.map(({ icon, label, time, color }) => (
-          <div className="echTooltip__item--container" key={snakeCase(label)}>
-            <EuiFlexGroup className="echTooltip__label" gutterSize="xs">
-              {hasIcon(icon) && (
-                <EuiFlexItem grow={false}>
-                  <AnnotationIcon type={icon} color={color} />
-                </EuiFlexItem>
-              )}
-              <EuiFlexItem> {label}</EuiFlexItem>
-            </EuiFlexGroup>
-            <span className="echTooltip__value">
-              {timeFormatter?.convert(time) || String(time)}
-            </span>
+      <div key={rows[0].time} className="xyAnnotationTooltip">
+        {Object.values(groupedConfigs).map((group) => {
+          const firstElement = group[0];
+          const extraFields = Object.keys(firstElement)
+            .filter((key) => key.startsWith('field:'))
+            .map((key) => {
+              const columnFormatter = columns?.find((c) => c.id === key)?.meta?.params;
+              const formatter = columnFormatter && formatFactory(columnFormatter);
+              return {
+                key,
+                name: key.replace('field:', ''),
+                formatter,
+              };
+            });
+
+          return (
+            <div className="xyAnnotationTooltip__group">
+              <EuiFlexGroup className="echTooltip__label" gutterSize="xs">
+                {hasIcon(firstElement.icon) && (
+                  <EuiFlexItem grow={false}>
+                    <AnnotationIcon type={firstElement.icon} color={firstElement.color} />
+                  </EuiFlexItem>
+                )}
+                <EuiFlexItem> {firstElement.label}</EuiFlexItem>
+              </EuiFlexGroup>
+              <EuiPanel
+                color="subdued"
+                hasShadow={false}
+                paddingSize="xs"
+                borderRadius="none"
+                hasBorder={true}
+              >
+                {group.map((el) => (
+                  <div
+                    className="echTooltip__item--container xyAnnotationTooltip__group__singleItem"
+                    key={snakeCase(el.time)}
+                  >
+                    <span className="echTooltip__value">
+                      {moment(el.time).format('YYYY-MM-DD, hh:mm:ss')}
+                      <div className="xyAnnotationTooltip__extraFields">
+                        {extraFields.map((field) => (
+                          <div>
+                            {field.name} :
+                            {field.formatter
+                              ? field.formatter.convert(el[field.key])
+                              : el[field.key]}
+                          </div>
+                        ))}
+                      </div>
+                    </span>
+                  </div>
+                ))}
+              </EuiPanel>
+            </div>
+          );
+        })}
+        {lastElement.skippedCount && (
+          <div className="echTooltip__item--container  xyAnnotationTooltip__skippedCount">
+            <span className="echTooltip__value">... +{lastElement.skippedCount} more</span>
           </div>
-        ))}
+        )}
       </div>
     );
   };
@@ -112,13 +178,13 @@ export const OUTSIDE_RECT_ANNOTATION_WIDTH = 8;
 export const OUTSIDE_RECT_ANNOTATION_WIDTH_SUGGESTION = 2;
 
 export const getAnnotationsGroupedByInterval = (
-  annotations: ManualPointEventAnnotationRow[],
+  annotations: PointEventAnnotationRow[],
   configs: EventAnnotationOutput[] | undefined,
   columns: DatatableColumn[] | undefined,
   formatFactory: FormatFactory,
   timeFormatter?: FieldFormat
 ) => {
-  const visibleGroupedConfigs = annotations.reduce<Record<string, ManualPointEventAnnotationRow[]>>(
+  const visibleGroupedConfigs = annotations.reduce<Record<string, PointEventAnnotationRow[]>>(
     (acc, current) => {
       const timebucket = moment(current.timebucket).valueOf();
       return {
@@ -148,15 +214,18 @@ export const getAnnotationsGroupedByInterval = (
       icon: firstRow.icon || 'triangle',
       timebucket: Number(timebucket),
       position: 'bottom',
+      customTooltipDetails: createCustomTooltipDetails(rowsPerBucket, formatFactory, columns),
+      isGrouped: false,
     };
     if (rowsPerBucket.length > 1) {
       const commonStyles = getCommonStyles(rowsPerBucket);
       mergedAnnotation = {
         ...mergedAnnotation,
         ...commonStyles,
+        isGrouped: true,
         label: '',
         icon: String(rowsPerBucket.length),
-        customTooltipDetails: createCustomTooltipDetails(rowsPerBucket, timeFormatter),
+        customTooltipDetails: createCustomTooltipDetails(rowsPerBucket, formatFactory, columns),
       };
     }
     return mergedAnnotation;
@@ -181,20 +250,10 @@ export const Annotations = ({
     <>
       {groupedLineAnnotations.map((annotation) => {
         const markerPositionVertical = Position.Top;
-        const markerPosition = isHorizontal
-          ? mapVerticalToHorizontalPlacement(markerPositionVertical)
-          : markerPositionVertical;
         const hasReducedPadding = paddingMap[markerPositionVertical] === LINES_MARKER_SIZE;
-        const id = snakeCase(`${annotation.id}-${annotation.time}`);
-        const { timebucket, time } = annotation;
-        const isGrouped = Boolean(annotation.customTooltipDetails);
-        const header =
-          formatter?.convert(isGrouped ? timebucket : time) ||
-          moment(isGrouped ? timebucket : time).toISOString();
+        const { timebucket, time, isGrouped, id: configId } = annotation;
         const strokeWidth = simpleView ? 1 : annotation.lineWidth || 1;
-        const dataValue = isGrouped
-          ? moment(isBarChart && minInterval ? timebucket + minInterval / 2 : timebucket).valueOf()
-          : moment(time).valueOf();
+        const id = snakeCase(`${configId}-${time}`);
         return (
           <LineAnnotation
             id={id}
@@ -223,15 +282,26 @@ export const Annotations = ({
                 />
               ) : undefined
             }
-            markerPosition={markerPosition}
+            markerPosition={
+              isHorizontal
+                ? mapVerticalToHorizontalPlacement(markerPositionVertical)
+                : markerPositionVertical
+            }
             dataValues={[
               {
-                dataValue,
-                header,
+                dataValue: isGrouped
+                  ? moment(
+                      isBarChart && minInterval ? timebucket + minInterval / 2 : timebucket
+                    ).valueOf()
+                  : moment(time).valueOf(),
+                header:
+                  formatter?.convert(isGrouped ? timebucket : time) ||
+                  moment(isGrouped ? timebucket : time).toISOString(),
                 details: annotation.label,
               },
             ]}
             customTooltipDetails={annotation.customTooltipDetails}
+            placement={'bottom'}
             style={{
               line: {
                 strokeWidth,
