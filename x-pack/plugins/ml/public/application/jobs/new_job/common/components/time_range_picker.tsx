@@ -46,6 +46,7 @@ export const TimeRangePicker: FC<Props> = ({ setTimeRange, timeRange }) => {
         end: endMoment.valueOf(),
       });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [startMoment, endMoment]);
 
   // update our local start and end moment objects if
@@ -54,6 +55,7 @@ export const TimeRangePicker: FC<Props> = ({ setTimeRange, timeRange }) => {
   useEffect(() => {
     setStartMoment(moment(timeRange.start));
     setEndMoment(moment(timeRange.end));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(timeRange)]);
 
   return (

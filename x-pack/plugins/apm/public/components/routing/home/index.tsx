@@ -27,6 +27,7 @@ import { ApmMainTemplate } from '../templates/apm_main_template';
 import { ServiceGroupTemplate } from '../templates/service_group_template';
 import { dependencies } from './dependencies';
 import { legacyBackends } from './legacy_backends';
+import { storageExplorer } from './storage_explorer';
 
 export function page<
   TPath extends string,
@@ -232,6 +233,7 @@ export const home = {
       }),
       ...dependencies,
       ...legacyBackends,
+      ...storageExplorer,
       '/': {
         element: (
           <ServiceGroupsRedirect>
