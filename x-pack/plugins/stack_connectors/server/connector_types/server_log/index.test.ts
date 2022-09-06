@@ -8,11 +8,7 @@
 import { validateParams } from '@kbn/actions-plugin/server/lib';
 import { Logger } from '@kbn/core/server';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
-import {
-  getConnectorType,
-  ServerLogConnectorType,
-  ServerLogConnectorTypeExecutorOptions,
-} from './server_log';
+import { getConnectorType, ServerLogConnectorType, ServerLogConnectorTypeExecutorOptions } from '.';
 import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { loggerMock } from '@kbn/logging-mocks';

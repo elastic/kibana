@@ -8,18 +8,18 @@
 import axios, { AxiosResponse } from 'axios';
 
 import { createExternalService } from './service';
-import * as utils from '../../lib/axios_utils';
+import * as utils from '@kbn/actions-plugin/server/lib/axios_utils';
 import { ExternalService, ServiceNowITSMIncident } from './types';
 import { Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { actionsConfigMock } from '../../actions_config.mock';
+import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { serviceNowCommonFields, serviceNowChoices } from './mocks';
 import { snExternalServiceConfig } from './config';
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
 jest.mock('axios');
-jest.mock('../../lib/axios_utils', () => {
-  const originalUtils = jest.requireActual('../../lib/axios_utils');
+jest.mock('@kbn/actions-plugin/server/lib/axios_utils', () => {
+  const originalUtils = jest.requireActual('@kbn/actions-plugin/server/lib/axios_utils');
   return {
     ...originalUtils,
     request: jest.fn(),

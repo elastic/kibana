@@ -6,7 +6,7 @@
  */
 
 import { validateCommonConfig, validateCommonSecrets, validateCommonConnector } from './validators';
-import { actionsConfigMock } from '../../actions_config.mock';
+import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 
 const configurationUtilities = actionsConfigMock.create();
 

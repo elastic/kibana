@@ -16,7 +16,7 @@ import {
   SlackConnectorType,
   SlackConnectorTypeExecutorOptions,
   ConnectorTypeId,
-} from './slack';
+} from '.';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';

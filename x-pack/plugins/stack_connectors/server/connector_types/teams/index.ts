@@ -24,9 +24,9 @@ import {
   AlertingConnectorFeatureId,
   UptimeConnectorFeatureId,
   SecurityConnectorFeatureId,
-} from '@kbn/actions-plugin/common/connector_feature_config';
-import { getRetryAfterIntervalFromHeaders } from './lib/http_rersponse_retry_header';
-import { isOk, promiseResult, Result } from './lib/result_type';
+} from '@kbn/actions-plugin/common/types';
+import { getRetryAfterIntervalFromHeaders } from '../lib/http_response_retry_header';
+import { isOk, promiseResult, Result } from '../lib/result_type';
 
 export type TeamsConnectorType = ConnectorType<
   {},

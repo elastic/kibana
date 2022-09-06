@@ -7,12 +7,12 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const NAME = i18n.translate('xpack.actions.builtin.cases.jiraTitle', {
+export const NAME = i18n.translate('xpack.stackConnectors.jira.title', {
   defaultMessage: 'Jira',
 });
 
 export const ALLOWED_HOSTS_ERROR = (message: string) =>
-  i18n.translate('xpack.actions.builtin.jira.configuration.apiAllowedHostsError', {
+  i18n.translate('xpack.stackConnectors.jira.configuration.apiAllowedHostsError', {
     defaultMessage: 'error configuring connector action: {message}',
     values: {
       message,

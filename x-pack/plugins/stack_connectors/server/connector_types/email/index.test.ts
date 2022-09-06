@@ -28,7 +28,7 @@ import {
   EmailConnectorTypeExecutorOptions,
   ConnectorTypeConfigType,
   ConnectorTypeSecretsType,
-} from './email';
+} from '.';
 import { ValidateEmailAddressesOptions } from '@kbn/actions-plugin/common';
 
 const sendEmailMock = sendEmail as jest.Mock;

@@ -10,6 +10,8 @@
 import { AxiosError, AxiosInstance, AxiosResponse } from 'axios';
 import { TypeOf } from '@kbn/config-schema';
 import { Logger } from '@kbn/core/server';
+import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
+import { ValidatorServices } from '@kbn/actions-plugin/server/types';
 import {
   ExecutorParamsSchemaITSM,
   ExecutorSubActionCommonFieldsParamsSchema,
@@ -25,11 +27,9 @@ import {
   ExecutorSubActionAddEventParamsSchema,
   ExternalIncidentServiceConfigurationBaseSchema,
 } from './schema';
-import { ActionsConfigurationUtilities } from '../../actions_config';
-import { SNProductsConfigValue } from '../../../common';
-import { ValidatorServices } from '../../types';
+import { SNProductsConfigValue } from '../../../common/servicenow_config';
 
-export type { SNProductsConfigValue, SNProductsConfig } from '../../../common';
+export type { SNProductsConfigValue, SNProductsConfig } from '../../../common/servicenow_config';
 
 export type ServiceNowPublicConfigurationBaseType = TypeOf<
   typeof ExternalIncidentServiceConfigurationBaseSchema

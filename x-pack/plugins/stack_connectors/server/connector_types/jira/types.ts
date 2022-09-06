@@ -9,6 +9,7 @@
 
 import { TypeOf } from '@kbn/config-schema';
 import { Logger } from '@kbn/core/server';
+import { ValidatorServices } from '@kbn/actions-plugin/server/types';
 import {
   ExternalIncidentServiceConfigurationSchema,
   ExternalIncidentServiceSecretConfigurationSchema,
@@ -22,7 +23,6 @@ import {
   ExecutorSubActionGetIssueParamsSchema,
   ExecutorSubActionCommonFieldsParamsSchema,
 } from './schema';
-import { ValidatorServices } from '../../types';
 
 export type JiraPublicConfigurationType = TypeOf<typeof ExternalIncidentServiceConfigurationSchema>;
 export type JiraSecretConfigurationType = TypeOf<

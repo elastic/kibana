@@ -7,7 +7,7 @@
 
 import { TypeOf } from '@kbn/config-schema';
 import { Logger } from '@kbn/core/server';
-import { ValidatorServices } from '../../types';
+import { ValidatorServices } from '@kbn/actions-plugin/server/types';
 import {
   ExecutorParamsSchema,
   ExecutorSubActionPushParamsSchema,

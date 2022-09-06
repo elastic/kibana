@@ -17,7 +17,7 @@ import {
   AlertingConnectorFeatureId,
   CasesConnectorFeatureId,
   SecurityConnectorFeatureId,
-} from '@kbn/actions-plugin/common/connector_feature_config';
+} from '@kbn/actions-plugin/common/types';
 import {
   SwimlaneExecutorResultData,
   SwimlanePublicConfigurationType,
@@ -54,7 +54,7 @@ export function getConnectorType(
   return {
     id: '.swimlane',
     minimumLicenseRequired: 'gold',
-    name: i18n.translate('xpack.actions.builtin.swimlaneTitle', {
+    name: i18n.translate('xpack.stackConnectors.swimlane.title', {
       defaultMessage: 'Swimlane',
     }),
     supportedFeatureIds: [

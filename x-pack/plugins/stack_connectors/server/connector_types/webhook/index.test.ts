@@ -18,7 +18,7 @@ import {
   getConnectorType,
   WebhookConnectorType,
   WebhookMethods,
-} from './webhook';
+} from '.';
 
 import * as utils from '@kbn/actions-plugin/server/lib/axios_utils';
 import { loggerMock } from '@kbn/logging-mocks';

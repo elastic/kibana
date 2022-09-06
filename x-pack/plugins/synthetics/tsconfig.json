@@ -33,6 +33,9 @@
     },
     {
       "path": "../../../src/plugins/unified_search/tsconfig.json"
+    },
+    {
+      "path": "../stack_connectors/tsconfig.json"
     }
   ]
 }

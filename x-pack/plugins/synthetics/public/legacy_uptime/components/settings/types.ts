@@ -15,7 +15,7 @@ import type {
   TeamsActionTypeId,
   WebhookActionTypeId,
   EmailActionTypeId,
-} from '@kbn/actions-plugin/server/builtin_action_types';
+} from '@kbn/stack-connectors-plugin/server/connector_types';
 
 export type ActionTypeId =
   | typeof SlackActionTypeId

@@ -23,11 +23,11 @@ import {
   AlertingConnectorFeatureId,
   UptimeConnectorFeatureId,
   SecurityConnectorFeatureId,
-} from '@kbn/actions-plugin/common/connector_feature_config';
+} from '@kbn/actions-plugin/common/types';
 import { renderMustacheString } from '@kbn/actions-plugin/server/lib/mustache_renderer';
-import { getRetryAfterIntervalFromHeaders } from './lib/http_rersponse_retry_header';
-import { nullableType } from './lib/nullable';
-import { isOk, promiseResult, Result } from './lib/result_type';
+import { getRetryAfterIntervalFromHeaders } from '../lib/http_response_retry_header';
+import { nullableType } from '../lib/nullable';
+import { isOk, promiseResult, Result } from '../lib/result_type';
 
 // config definition
 export enum WebhookMethods {

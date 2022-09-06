@@ -5,14 +5,14 @@
  * 2.0.
  */
 
+import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
+import { ValidatorServices } from '@kbn/actions-plugin/server/types';
 import * as i18n from './translations';
-import { ActionsConfigurationUtilities } from '../../actions_config';
 import {
   CasesWebhookPublicConfigurationType,
   CasesWebhookSecretConfigurationType,
   ExternalServiceValidation,
 } from './types';
-import { ValidatorServices } from '../../types';
 
 const validateConfig = (
   configObject: CasesWebhookPublicConfigurationType,

@@ -7,6 +7,12 @@
 
 import { LicenseType } from '@kbn/licensing-plugin/common/types';
 
+export {
+  AlertingConnectorFeatureId,
+  CasesConnectorFeatureId,
+  UptimeConnectorFeatureId,
+  SecurityConnectorFeatureId,
+} from './connector_feature_config';
 export interface ActionType {
   id: string;
   name: string;

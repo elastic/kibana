@@ -7,12 +7,12 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const NAME = i18n.translate('xpack.actions.builtin.cases.resilientTitle', {
+export const NAME = i18n.translate('xpack.stackConnectors.resilient.title', {
   defaultMessage: 'IBM Resilient',
 });
 
 export const ALLOWED_HOSTS_ERROR = (message: string) =>
-  i18n.translate('xpack.actions.builtin.configuration.apiAllowedHostsError', {
+  i18n.translate('xpack.stackConnectors.resilient.configuration.apiAllowedHostsError', {
     defaultMessage: 'error configuring connector action: {message}',
     values: {
       message,

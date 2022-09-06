@@ -26,10 +26,10 @@ import {
   AlertingConnectorFeatureId,
   UptimeConnectorFeatureId,
   SecurityConnectorFeatureId,
-} from '@kbn/actions-plugin/common/connector_feature_config';
+} from '@kbn/actions-plugin/common/types';
 import { renderMustacheString } from '@kbn/actions-plugin/server/lib/mustache_renderer';
 import { getCustomAgents } from '@kbn/actions-plugin/server/lib/get_custom_agents';
-import { getRetryAfterIntervalFromHeaders } from './lib/http_rersponse_retry_header';
+import { getRetryAfterIntervalFromHeaders } from '../lib/http_response_retry_header';
 
 export type SlackConnectorType = ConnectorType<
   {},

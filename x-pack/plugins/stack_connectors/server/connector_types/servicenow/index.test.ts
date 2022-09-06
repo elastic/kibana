@@ -5,19 +5,15 @@
  * 2.0.
  */
 
-import { actionsMock } from '../../mocks';
-import { createActionTypeRegistry } from '../index.test';
+import { Logger } from '@kbn/core/server';
+import { loggerMock } from '@kbn/logging-mocks';
+import { actionsMock } from '@kbn/actions-plugin/server/mocks';
+import { ExecutorParams, ServiceNowPublicConfigurationType } from './types';
 import {
-  ServiceNowPublicConfigurationBaseType,
-  ServiceNowSecretConfigurationType,
-  ExecutorParams,
-  PushToServiceResponse,
-} from './types';
-import {
-  ServiceNowActionType,
-  ServiceNowITSMActionTypeId,
-  ServiceNowSIRActionTypeId,
-  ServiceNowActionTypeExecutorOptions,
+  ServiceNowConnectorType,
+  ServiceNowConnectorTypeExecutorOptions,
+  getServiceNowITSMConnectorType,
+  getServiceNowSIRConnectorType,
 } from '.';
 import { api } from './api';
 
@@ -32,6 +28,7 @@ jest.mock('./api', () => ({
 }));
 
 const services = actionsMock.createServices();
+const mockedLogger: jest.Mocked<Logger> = loggerMock.create();
 
 describe('ServiceNow', () => {
   const config = { apiUrl: 'https://instance.com' };
@@ -51,16 +48,11 @@ describe('ServiceNow', () => {
   });
 
   describe('ServiceNow ITSM', () => {
-    let actionType: ServiceNowActionType;
-
+    let connectorType: ServiceNowConnectorType<ServiceNowPublicConfigurationType, ExecutorParams>;
     beforeAll(() => {
-      const { actionTypeRegistry } = createActionTypeRegistry();
-      actionType = actionTypeRegistry.get<
-        ServiceNowPublicConfigurationBaseType,
-        ServiceNowSecretConfigurationType,
-        ExecutorParams,
-        PushToServiceResponse | {}
-      >(ServiceNowITSMActionTypeId);
+      connectorType = getServiceNowITSMConnectorType({
+        logger: mockedLogger,
+      });
     });
 
     describe('execute()', () => {
@@ -76,8 +68,11 @@ describe('ServiceNow', () => {
           secrets,
           params,
           services,
-        } as unknown as ServiceNowActionTypeExecutorOptions;
-        await actionType.executor(executorOptions);
+        } as unknown as ServiceNowConnectorTypeExecutorOptions<
+          ServiceNowPublicConfigurationType,
+          ExecutorParams
+        >;
+        await connectorType.executor(executorOptions);
         expect((api.pushToService as jest.Mock).mock.calls[0][0].commentFieldKey).toBe(
           'work_notes'
         );
@@ -86,16 +81,12 @@ describe('ServiceNow', () => {
   });
 
   describe('ServiceNow SIR', () => {
-    let actionType: ServiceNowActionType;
+    let connectorType: ServiceNowConnectorType<ServiceNowPublicConfigurationType, ExecutorParams>;
 
     beforeAll(() => {
-      const { actionTypeRegistry } = createActionTypeRegistry();
-      actionType = actionTypeRegistry.get<
-        ServiceNowPublicConfigurationBaseType,
-        ServiceNowSecretConfigurationType,
-        ExecutorParams,
-        PushToServiceResponse | {}
-      >(ServiceNowSIRActionTypeId);
+      connectorType = getServiceNowSIRConnectorType({
+        logger: mockedLogger,
+      });
     });
 
     describe('execute()', () => {
@@ -111,8 +102,11 @@ describe('ServiceNow', () => {
           secrets,
           params,
           services,
-        } as unknown as ServiceNowActionTypeExecutorOptions;
-        await actionType.executor(executorOptions);
+        } as unknown as ServiceNowConnectorTypeExecutorOptions<
+          ServiceNowPublicConfigurationType,
+          ExecutorParams
+        >;
+        await connectorType.executor(executorOptions);
         expect((api.pushToService as jest.Mock).mock.calls[0][0].commentFieldKey).toBe(
           'work_notes'
         );

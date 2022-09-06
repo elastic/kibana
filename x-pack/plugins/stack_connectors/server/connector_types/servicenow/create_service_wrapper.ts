@@ -6,12 +6,12 @@
  */
 
 import { Logger } from '@kbn/core/server';
+import type { ConnectorTokenClientContract } from '@kbn/actions-plugin/server/types';
+import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import { ExternalService, ExternalServiceCredentials, SNProductsConfigValue } from './types';
 
 import { ServiceNowPublicConfigurationType, ServiceFactory } from './types';
-import { ActionsConfigurationUtilities } from '../../actions_config';
 import { getAxiosInstance } from './utils';
-import { ConnectorTokenClientContract } from '../../types';
 
 interface CreateServiceWrapperOpts<T = ExternalService> {
   connectorId: string;

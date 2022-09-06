@@ -18,7 +18,7 @@ import {
   AlertingConnectorFeatureId,
   CasesConnectorFeatureId,
   SecurityConnectorFeatureId,
-} from '@kbn/actions-plugin/common/connector_feature_config';
+} from '@kbn/actions-plugin/common/types';
 import { validate } from './validators';
 import {
   ExternalIncidentServiceConfigurationSchema,

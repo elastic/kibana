@@ -9,7 +9,7 @@ import { Logger } from '@kbn/core/server';
 import { Services } from '@kbn/actions-plugin/server/types';
 import { validateParams, validateSecrets } from '@kbn/actions-plugin/server/lib';
 import axios from 'axios';
-import { getConnectorType, TeamsConnectorType, ConnectorTypeId } from './teams';
+import { getConnectorType, TeamsConnectorType, ConnectorTypeId } from '.';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import * as utils from '@kbn/actions-plugin/server/lib/axios_utils';

@@ -20,8 +20,8 @@ import {
   AlertingConnectorFeatureId,
   UptimeConnectorFeatureId,
   SecurityConnectorFeatureId,
-} from '@kbn/actions-plugin/common/connector_feature_config';
-import { postPagerduty } from './lib/post_pagerduty';
+} from '@kbn/actions-plugin/common/types';
+import { postPagerduty } from './post_pagerduty';
 
 // uses the PagerDuty Events API v2
 // https://v2.developer.pagerduty.com/docs/events-api-v2

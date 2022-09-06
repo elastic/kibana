@@ -34,7 +34,7 @@ import {
   SendEmailOptions,
   Transport,
 } from '@kbn/actions-plugin/server/lib/send_email';
-import { portSchema } from './lib/schemas';
+import { portSchema } from '../lib/schemas';
 
 export type EmailConnectorType = ConnectorType<
   ConnectorTypeConfigType,

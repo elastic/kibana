@@ -14,7 +14,7 @@ import {
   ESIndexConnectorType,
   ESIndexConnectorTypeExecutorOptions,
   getConnectorType,
-} from './es_index';
+} from '.';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import { loggerMock } from '@kbn/logging-mocks';

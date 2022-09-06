@@ -8,6 +8,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { TypeOf } from '@kbn/config-schema';
 import { Logger } from '@kbn/logging';
+import { ValidatorServices } from '@kbn/actions-plugin/server/types';
 import {
   ConfigMappingSchema,
   ExecutorParamsSchema,
@@ -15,7 +16,6 @@ import {
   SwimlaneSecretsConfigurationSchema,
   SwimlaneServiceConfigurationSchema,
 } from './schema';
-import { ValidatorServices } from '../../types';
 
 export type SwimlanePublicConfigurationType = TypeOf<typeof SwimlaneServiceConfigurationSchema>;
 export type SwimlaneSecretConfigurationType = TypeOf<typeof SwimlaneSecretsConfigurationSchema>;

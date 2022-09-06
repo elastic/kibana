@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-jest.mock('./lib/post_xmatters', () => ({
+jest.mock('./post_xmatters', () => ({
   postXmatters: jest.fn(),
 }));
+import { postXmatters } from './post_xmatters';
 
-import { postXmatters } from './lib/post_xmatters';
 import { Logger } from '@kbn/core/server';
 import {
   ConnectorTypeConfigType,
   ConnectorTypeSecretsType,
   getConnectorType,
   XmattersConnectorType,
-} from './xmatters';
+} from '.';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { Services } from '@kbn/actions-plugin/server/types';
 import {

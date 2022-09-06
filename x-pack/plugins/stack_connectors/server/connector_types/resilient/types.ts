@@ -9,6 +9,7 @@
 
 import { TypeOf } from '@kbn/config-schema';
 import { Logger } from '@kbn/core/server';
+import { ValidatorServices } from '@kbn/actions-plugin/server/types';
 import {
   ExecutorParamsSchema,
   ExecutorSubActionCommonFieldsParamsSchema,
@@ -20,8 +21,6 @@ import {
   ExternalIncidentServiceConfigurationSchema,
   ExternalIncidentServiceSecretConfigurationSchema,
 } from './schema';
-
-import { ValidatorServices } from '../../types';
 
 export type ResilientPublicConfigurationType = TypeOf<
   typeof ExternalIncidentServiceConfigurationSchema

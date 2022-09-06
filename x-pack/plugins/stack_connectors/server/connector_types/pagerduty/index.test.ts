@@ -7,13 +7,12 @@
 
 import moment from 'moment';
 
-jest.mock('./lib/post_pagerduty', () => ({
+jest.mock('./post_pagerduty', () => ({
   postPagerduty: jest.fn(),
 }));
-
 import { Services } from '@kbn/actions-plugin/server/types';
 import { validateConfig, validateSecrets, validateParams } from '@kbn/actions-plugin/server/lib';
-import { postPagerduty } from './lib/post_pagerduty';
+import { postPagerduty } from './post_pagerduty';
 import { Logger } from '@kbn/core/server';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
@@ -22,7 +21,7 @@ import {
   getConnectorType,
   PagerDutyConnectorType,
   PagerDutyConnectorTypeExecutorOptions,
-} from './pagerduty';
+} from '.';
 import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import { loggerMock } from '@kbn/logging-mocks';
 

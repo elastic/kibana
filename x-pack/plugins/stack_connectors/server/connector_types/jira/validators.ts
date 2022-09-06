@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ValidatorServices } from '@kbn/actions-plugin/server/types';
 import {
   JiraPublicConfigurationType,
   JiraSecretConfigurationType,
@@ -12,7 +13,6 @@ import {
 } from './types';
 
 import * as i18n from './translations';
-import { ValidatorServices } from '../../types';
 
 export const validateCommonConfig = (
   configObject: JiraPublicConfigurationType,
