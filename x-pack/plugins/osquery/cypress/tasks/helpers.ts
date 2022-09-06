@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-export async function getLatestVersion(): Promise<string> {
-  return '8.5.0-SNAPSHOT';
-}
+export const getRandomInt = () => Math.floor(Math.random() * 100);
