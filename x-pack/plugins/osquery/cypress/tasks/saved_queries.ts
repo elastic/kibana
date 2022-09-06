@@ -39,16 +39,21 @@ export const getSavedQueriesComplexTest = (savedQueryId: string, savedQueryDescr
       cy.contains('Exit fullscreen').should('exist');
 
       // hidden columns
+      cy.contains('columns hidden').should('not.exist');
       cy.react('EuiDataGridHeaderCellWrapper', { props: { id: 'osquery.cmdline' } }).click();
+      cy.contains(/Hide column$/).click();
+      cy.react('EuiDataGridHeaderCellWrapper', {
+        props: { id: 'osquery.cwd' },
+      }).click();
       cy.contains(/Hide column$/).click();
       cy.react('EuiDataGridHeaderCellWrapper', {
         props: { id: 'osquery.disk_bytes_written.number' },
       }).click();
       cy.contains(/Hide column$/).click();
-      cy.contains('2 columns hidden').should('exist');
+      cy.contains('columns hidden').should('exist');
       // change pagination
       cy.getBySel('pagination-button-next').click().wait(500).click();
-      cy.contains('2 columns hidden').should('exist');
+      cy.contains('columns hidden').should('exist');
 
       cy.getBySel(RESULTS_TABLE_BUTTON).trigger('mouseover');
       cy.contains(/Enter fullscreen$/).should('not.exist');
@@ -60,7 +65,7 @@ export const getSavedQueriesComplexTest = (savedQueryId: string, savedQueryDescr
         props: { id: 'osquery.egid' },
       }).click();
       cy.contains(/Sort A-Z$/).click();
-      cy.contains('2 columns hidden').should('exist');
+      cy.contains('columns hidden').should('exist');
       cy.getBySel(RESULTS_TABLE_BUTTON).trigger('mouseover');
       cy.contains(/Enter fullscreen$/).should('exist');
 
