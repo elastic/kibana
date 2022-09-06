@@ -272,7 +272,6 @@ export const updatePackagePolicyHandler: RequestHandler<
 
   let newData: NewPackagePolicy;
 
-  // TODO improve typing here
   if (
     body.inputs &&
     isSimplifiedCreatePackagePolicyRequest(body as unknown as SimplifiedPackagePolicy)
