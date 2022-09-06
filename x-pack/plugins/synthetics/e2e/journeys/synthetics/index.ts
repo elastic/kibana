@@ -5,6 +5,5 @@
  * 2.0.
  */
 
-export * from './detail_flyout.journey';
 export * from './getting_started.journey';
 export * from './add_monitor.journey';
