@@ -154,7 +154,7 @@ const RuleActionsFormComponent = ({ rulesCount, onClose, onConfirm }: RuleAction
           <li>
             <FormattedMessage
               id="xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.addRuleActions.actionFrequencyDetail"
-              defaultMessage="Action frequency is shared to all new and existing actions."
+              defaultMessage="The actions frequency you select below is applied to all actions (both new and existing) for all selected rules."
             />
           </li>
           <li>
