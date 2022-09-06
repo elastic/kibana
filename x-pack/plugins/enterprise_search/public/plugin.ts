@@ -22,6 +22,7 @@ import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
 
 import {
+  ANALYTICS_PLUGIN,
   APP_SEARCH_PLUGIN,
   ELASTICSEARCH_PLUGIN,
   ENTERPRISE_SEARCH_CONTENT_PLUGIN,
@@ -114,6 +115,27 @@ export class EnterpriseSearchPlugin implements Plugin {
     });
 
     core.application.register({
+      id: ANALYTICS_PLUGIN.ID,
+      title: ANALYTICS_PLUGIN.NAME,
+      euiIconType: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.LOGO,
+      appRoute: ANALYTICS_PLUGIN.URL,
+      category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
+      mount: async (params: AppMountParameters) => {
+        const kibanaDeps = await this.getKibanaDeps(core, params, cloud);
+        const { chrome, http } = kibanaDeps.core;
+        chrome.docTitle.change(ANALYTICS_PLUGIN.NAME);
+
+        await this.getInitialData(http);
+        const pluginData = this.getPluginData();
+
+        const { renderApp } = await import('./applications');
+        const { Analytics } = await import('./applications/analytics');
+
+        return renderApp(Analytics, kibanaDeps, pluginData);
+      },
+    });
+
+    core.application.register({
       id: ELASTICSEARCH_PLUGIN.ID,
       title: ELASTICSEARCH_PLUGIN.NAME,
       euiIconType: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.LOGO,
@@ -187,6 +209,16 @@ export class EnterpriseSearchPlugin implements Plugin {
         description: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.DESCRIPTION,
         path: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.URL,
         order: 100,
+      });
+
+      plugins.home.featureCatalogue.register({
+        id: ANALYTICS_PLUGIN.ID,
+        title: ANALYTICS_PLUGIN.NAME,
+        icon: 'appAnalytics',
+        description: ANALYTICS_PLUGIN.DESCRIPTION,
+        path: ANALYTICS_PLUGIN.URL,
+        category: 'data',
+        showOnHomePage: false,
       });
 
       plugins.home.featureCatalogue.register({
