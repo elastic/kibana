@@ -171,7 +171,7 @@ export default ({ getService }: FtrProviderContext) => {
         'x-pack/test/functional/fixtures/kbn_archiver/visualize/default'
       );
       await kibanaServer.uiSettings.update({
-        'unifiedFieldList:useFieldExistenceSampling': true,
+        'lens:useFieldExistenceSampling': true,
       });
     });
     after(async () => {
@@ -179,7 +179,7 @@ export default ({ getService }: FtrProviderContext) => {
       await esArchiver.unload('x-pack/test/functional/es_archives/visualize/default');
       await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.uiSettings.update({
-        'unifiedFieldList:useFieldExistenceSampling': false,
+        'lens:useFieldExistenceSampling': false,
       });
     });
 

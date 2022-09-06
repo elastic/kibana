@@ -357,7 +357,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
       }),
     };
 
-    const isUsingSampling = core.uiSettings.get('unifiedFieldList:useFieldExistenceSampling');
+    const isUsingSampling = core.uiSettings.get('lens:useFieldExistenceSampling');
 
     const fieldGroupDefinitions: FieldGroups = {
       SpecialFields: {

@@ -7,4 +7,4 @@
  */
 
 export const PLUGIN_ID = 'unifiedFieldList';
-export const FIELD_EXISTENCE_SETTING = 'unifiedFieldList:useFieldExistenceSampling';
+export const FIELD_EXISTENCE_SETTING = 'lens:useFieldExistenceSampling';
