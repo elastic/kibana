@@ -7,51 +7,66 @@
  */
 
 import { random } from 'lodash';
-
 import { apm, timerange } from '../..';
+import { ApmFields } from '../lib/apm/apm_fields';
 import { Instance } from '../lib/apm/instance';
 import { Scenario } from '../cli/scenario';
 import { getLogger } from '../cli/utils/get_common_services';
 import { RunOptions } from '../cli/utils/parse_run_cli_flags';
-import { ApmFields } from '../lib/apm/apm_fields';
-import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
-
-const ENVIRONMENT = getSynthtraceEnvironment(__filename);
 
 const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
   const logger = getLogger(runOptions);
 
-  const numServices = 500;
   const languages = ['go', 'dotnet', 'java', 'python'];
-  const services = ['web', 'order-processing', 'api-backend', 'proxy'];
+  const services = ['web', 'order-processing', 'api-backend'];
 
   return {
     generate: ({ from, to }) => {
       const range = timerange(from, to);
 
-      const successfulTimestamps = range.ratePerMinute(180);
+      const successfulTimestamps = range.interval('1s').randomize(100, 180);
 
-      const instances = [...Array(numServices).keys()].map((index) =>
+      const instances = services.map((service, index) =>
         apm
           .service(
-            `${services[index % services.length]}-${languages[index % languages.length]}-${index}`,
-            ENVIRONMENT,
+            `${service}-${languages[index % languages.length]}`,
+            'production',
             languages[index % languages.length]
           )
           .instance(`instance-${index}`)
       );
+      const entities = [
+        'order',
+        'book',
+        'product',
+        'baskets',
+        'user',
+        'exporter',
+        'set',
+        'profile',
+      ];
+      const routes = (e: string) => {
+        return [
+          `HEAD /${e}/{id}`,
+          `GET /${e}/{id}`,
+          `PUT /${e}s`,
+          `POST /${e}s`,
+          `DELETE /${e}/{id}`,
+          `GET /${e}s`,
+        ];
+      };
+      const urls = entities.flatMap(routes);
 
-      const urls = ['GET /order/{id}', 'POST /basket/{id}', 'DELETE /basket', 'GET /products'];
-
-      const instanceSpans = (instance: Instance, url: string) => {
+      const instanceSpans = (instance: Instance, url: string, index: number) => {
         const successfulTraceEvents = successfulTimestamps.generator((timestamp) => {
-          const randomHigh = random(1000, 4000);
-          const randomLow = random(100, randomHigh / 5);
-          const duration = random(randomLow, randomHigh);
-          const childDuration = random(randomLow, duration);
+          const mod = (index % 4) + 1;
+          const randomHigh = random(100, mod * 1000, false);
+          const randomLow = random(10, randomHigh / 10 + mod * 3, false);
+          const duration = random(randomLow, randomHigh, false);
+          const childDuration = random(1, duration);
           const remainderDuration = duration - childDuration;
-          const generateError = random(1, 4) % 3 === 0;
-          const generateChildError = random(0, 5) % 2 === 0;
+          const generateError = index % random(mod, 9) === 0;
+          const generateChildError = index % random(mod, 9) === 0;
           const span = instance
             .transaction(url)
             .timestamp(timestamp)
@@ -81,8 +96,8 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
 
       return instances
         .flatMap((instance) => urls.map((url) => ({ instance, url })))
-        .map(({ instance, url }) =>
-          logger.perf('generating_apm_events', () => instanceSpans(instance, url))
+        .map(({ instance, url }, index) =>
+          logger.perf('generating_apm_events', () => instanceSpans(instance, url, index))
         )
         .reduce((p, c) => p.merge(c));
     },
