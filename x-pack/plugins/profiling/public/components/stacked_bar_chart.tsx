@@ -44,6 +44,7 @@ function SubchartTooltip({
         height={128}
         width={width}
         showAxes={false}
+        onShowMoreClick={null}
       />
     </EuiPanel>
   );

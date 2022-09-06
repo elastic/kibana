@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { IRouter, KibanaResponseFactory, Logger } from '@kbn/core/server';
+import type { IRouter, Logger } from '@kbn/core/server';
 import { RouteRegisterParameters } from '.';
 import { fromMapToRecord, getRoutePaths, INDEX_EVENTS } from '../../common';
 import { ProfilingESField } from '../../common/elasticsearch';
@@ -28,7 +28,6 @@ export async function topNElasticSearchQuery({
   timeTo,
   searchField,
   highCardinality,
-  response,
   kuery,
 }: {
   client: ProfilingESClient;
@@ -37,7 +36,6 @@ export async function topNElasticSearchQuery({
   timeTo: number;
   searchField: string;
   highCardinality: boolean;
-  response: KibanaResponseFactory;
   kuery: string;
 }): Promise<TopNResponse> {
   const filter = createCommonFilter({ timeFrom, timeTo, kuery });
@@ -166,7 +164,6 @@ export function queryTopNCommon(
             timeTo,
             searchField,
             highCardinality,
-            response,
             kuery,
           }),
         });

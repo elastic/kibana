@@ -52,15 +52,16 @@ describe('TopN data from Elasticsearch', () => {
 
   describe('when fetching Stack Traces', () => {
     it('should search first then skip mget', async () => {
-      const response = await topNElasticSearchQuery({
-        client,
-        logger,
-        timeFrom: 456,
-        timeTo: 789,
-        searchField: ProfilingESField.StacktraceID,
-        highCardinality: false,
-        kuery: '',
-        response: kibanaResponseFactory,
+      const response = kibanaResponseFactory.ok({
+        body: await topNElasticSearchQuery({
+          client,
+          logger,
+          timeFrom: 456,
+          timeTo: 789,
+          searchField: ProfilingESField.StacktraceID,
+          highCardinality: false,
+          kuery: '',
+        }),
       });
 
       // Calls to mget are skipped since data doesn't exist
