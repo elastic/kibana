@@ -13,12 +13,8 @@ import {
   EuiFlexItem,
   EuiSpacer,
   EuiText,
-  EuiFieldText,
-  EuiComboBox,
-  EuiFormRow,
   EuiButtonEmpty,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ScriptField } from './form_fields';
 import { useFieldEditorContext } from '../field_editor_context';
