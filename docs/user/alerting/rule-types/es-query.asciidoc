@@ -38,7 +38,7 @@ Time window:: Defines how far back to search for documents, using the
 value higher than the *check every* value in the 
 <<defining-rules-general-details, general rule details>>, to avoid gaps in 
 detection.
-Exclude the hits from previous run:: Turn on to avoid alert duplication by
+Exclude matches from previous run:: Turn on to avoid alert duplication by
 excluding documents that have already been detected by the previous rule run.
 
 [float]
