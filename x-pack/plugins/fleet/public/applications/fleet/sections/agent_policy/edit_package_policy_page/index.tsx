@@ -110,7 +110,6 @@ export const EditPackagePolicyForm = memo<{
     namespace: '',
     policy_id: '',
     enabled: true,
-    output_id: '',
     inputs: [],
     version: '',
   });

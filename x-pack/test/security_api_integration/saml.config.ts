@@ -20,6 +20,8 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     '../security_functional/fixtures/common/test_endpoints'
   );
 
+  const auditLogPath = resolve(__dirname, './fixtures/audit/saml.log');
+
   return {
     testFiles: [require.resolve('./tests/saml')],
     servers: xPackAPITestsConfig.get('servers'),
@@ -53,6 +55,14 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--xpack.security.authc.providers=${JSON.stringify(['saml', 'basic'])}`,
         '--xpack.security.authc.saml.realm=saml1',
         '--xpack.security.authc.saml.maxRedirectURLSize=100b',
+        '--xpack.security.audit.enabled=true',
+        '--xpack.security.audit.appender.type=file',
+        `--xpack.security.audit.appender.fileName=${auditLogPath}`,
+        '--xpack.security.audit.appender.layout.type=json',
+        `--xpack.security.audit.ignore_filters=${JSON.stringify([
+          { actions: ['http_request'] },
+          { categories: ['database'] },
+        ])}`,
       ],
     },
   };
