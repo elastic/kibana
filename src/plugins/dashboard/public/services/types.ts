@@ -13,6 +13,7 @@ import { DashboardStartDependencies } from '../plugin';
 import { DashboardApplicationService } from './application/types';
 import { DashboardChromeService } from './chrome/types';
 import { DashboardCapabilitiesService } from './dashboard_capabilities/types';
+import { DashboardSessionStorageServiceType } from './dashboard_session_storage/types';
 import { DashboardDataService } from './data/types';
 import { DashboardDataViewEditorService } from './data_view_editor/types';
 import { DashboardEmbeddableService } from './embeddable/types';
@@ -39,6 +40,7 @@ export interface DashboardServices {
   chrome: DashboardChromeService;
   data: DashboardDataService;
   dashboardCapabilities: DashboardCapabilitiesService;
+  dashboardSessionStorage: DashboardSessionStorageServiceType;
   dataViewEditor: DashboardDataViewEditorService; // used only for no data state
   embeddable: DashboardEmbeddableService;
   http: DashboardHTTPService;

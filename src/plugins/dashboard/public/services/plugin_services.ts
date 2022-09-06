@@ -18,6 +18,7 @@ import { DashboardPluginServiceParams, DashboardServices } from './types';
 import { applicationServiceFactory } from './application/application_service';
 import { chromeServiceFactory } from './chrome/chrome_service';
 import { dashboardCapabilitiesServiceFactory } from './dashboard_capabilities/dashboard_capabilities_service';
+import { dashboardSessionStorageServiceFactory } from './dashboard_session_storage/dashboard_session_storage_service';
 import { dataServiceFactory } from './data/data_service';
 import { dataViewEditorServiceFactory } from './data_view_editor/data_view_editor_service';
 import { embeddableServiceFactory } from './embeddable/embeddable_service';
@@ -41,6 +42,10 @@ const providers: PluginServiceProviders<DashboardServices, DashboardPluginServic
   chrome: new PluginServiceProvider(chromeServiceFactory),
   data: new PluginServiceProvider(dataServiceFactory),
   dashboardCapabilities: new PluginServiceProvider(dashboardCapabilitiesServiceFactory),
+  dashboardSessionStorage: new PluginServiceProvider(dashboardSessionStorageServiceFactory, [
+    'notifications',
+    'spaces',
+  ]),
   dataViewEditor: new PluginServiceProvider(dataViewEditorServiceFactory),
   embeddable: new PluginServiceProvider(embeddableServiceFactory),
   http: new PluginServiceProvider(httpServiceFactory),

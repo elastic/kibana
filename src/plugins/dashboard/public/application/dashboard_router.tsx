@@ -10,7 +10,6 @@ import './index.scss';
 import React from 'react';
 import { History } from 'history';
 import { Provider } from 'react-redux';
-import { first } from 'rxjs/operators';
 import { parse, ParsedQuery } from 'query-string';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Switch, Route, RouteComponentProps, HashRouter, Redirect } from 'react-router-dom';
@@ -24,7 +23,7 @@ import { DashboardListing } from './listing';
 import { dashboardStateStore } from './state';
 import { DashboardApp } from './dashboard_app';
 import { DashboardNoMatch } from './listing/dashboard_no_match';
-import { addHelpMenuToAppChrome, DashboardSessionStorage } from './lib';
+import { addHelpMenuToAppChrome } from './lib';
 import { createDashboardListingFilterUrl } from '../dashboard_constants';
 import { createDashboardEditUrl, DashboardConstants } from '../dashboard_constants';
 import { dashboardReadonlyBadge, getDashboardPageTitle } from '../dashboard_strings';
@@ -61,10 +60,8 @@ export async function mountApp({
 }: DashboardMountProps) {
   const [coreStart, pluginsStart, dashboardStart] = await core.getStartServices();
 
-  const { data: dataStart, spaces: spacesApi, embeddable } = pluginsStart;
+  const { data: dataStart, embeddable } = pluginsStart;
 
-  const activeSpaceId =
-    spacesApi && (await spacesApi.getActiveSpace$().pipe(first()).toPromise())?.id;
   let globalEmbedSettings: DashboardEmbedSettings | undefined;
   let routerHistory: History;
 
@@ -75,10 +72,6 @@ export async function mountApp({
     setHeaderActionMenu,
     scopedHistory: () => scopedHistory,
     savedDashboards: dashboardStart.getSavedDashboardLoader(),
-    dashboardSessionStorage: new DashboardSessionStorage(
-      core.notifications.toasts,
-      activeSpaceId || 'default'
-    ),
   };
 
   const getUrlStateStorage = (history: RouteComponentProps['history']) =>

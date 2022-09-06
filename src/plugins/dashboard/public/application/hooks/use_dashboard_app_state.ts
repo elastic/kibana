@@ -82,11 +82,12 @@ export const useDashboardAppState = ({
    * Unpack services
    */
   const services = useKibana<DashboardAppServices>().services;
-  const { savedDashboards, dashboardSessionStorage, scopedHistory } = services;
+  const { savedDashboards, scopedHistory } = services;
 
   const {
     chrome: { docTitle },
     dashboardCapabilities,
+    dashboardSessionStorage,
     data: { query, search, dataViews },
     embeddable,
     initializerContext: { kibanaVersion },
@@ -301,7 +302,7 @@ export const useDashboardAppState = ({
                 setDashboardAppState((s) => ({ ...s, hasUnsavedChanges }));
 
                 unsavedChanges.viewMode = current.viewMode; // always push view mode into session store.
-                dashboardSessionStorage.setState(savedDashboardId, unsavedChanges);
+                dashboardSessionStorage.setState(unsavedChanges, savedDashboardId);
               });
             });
           })

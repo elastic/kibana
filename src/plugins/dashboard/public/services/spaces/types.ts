@@ -9,6 +9,7 @@
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 
 export interface DashboardSpacesService {
+  getActiveSpace$?: SpacesPluginStart['getActiveSpace$'];
   getLegacyUrlConflict?: SpacesPluginStart['ui']['components']['getLegacyUrlConflict'];
   redirectLegacyUrl?: SpacesPluginStart['ui']['redirectLegacyUrl'];
 }

@@ -11,7 +11,7 @@ import { Capabilities } from '@kbn/core/public';
 import { DashboardState } from '../../types';
 import { DashboardAppLocatorParams } from '../..';
 import { stateToRawDashboardState } from '../lib/convert_dashboard_state';
-import { getSavedDashboardMock, makeDefaultServices } from '../test_helpers';
+import { getSavedDashboardMock } from '../test_helpers';
 import { showPublicUrlSwitch, ShowShareModal, ShowShareModalProps } from './show_share_modal';
 import { pluginServices } from '../../services/plugin_services';
 
@@ -70,14 +70,14 @@ describe('ShowShareModal', () => {
   });
 
   const getPropsAndShare = (unsavedState?: Partial<DashboardState>): ShowShareModalProps => {
-    const services = makeDefaultServices();
-    services.dashboardSessionStorage.getState = jest.fn().mockReturnValue(unsavedState);
+    pluginServices.getServices().dashboardSessionStorage.getState = jest
+      .fn()
+      .mockReturnValue(unsavedState);
     return {
       isDirty: true,
       savedDashboard: getSavedDashboardMock(),
       anchorElement: document.createElement('div'),
       currentDashboardState: { panels: {} } as unknown as DashboardState,
-      dashboardSessionStorage: services.dashboardSessionStorage,
     };
   };
 

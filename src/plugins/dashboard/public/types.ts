@@ -27,7 +27,6 @@ import type { Query, TimeRange } from '@kbn/es-query';
 
 import type { DashboardContainer, DashboardSavedObject } from '.';
 import type { DashboardAppLocatorParams } from './locator';
-import { DashboardSessionStorage } from './application/lib';
 import { DashboardPanelState, SavedDashboardPanel } from '../common/types';
 import { SavedObjectLoader } from './services/saved_object_loader';
 
@@ -162,6 +161,5 @@ export interface DashboardAppServices {
   savedDashboards: SavedObjectLoader; // TODO: Remove as part of https://github.com/elastic/kibana/pull/138774
   scopedHistory: () => ScopedHistory; // app mount context
   onAppLeave: AppMountParameters['onAppLeave']; // app mount context
-  dashboardSessionStorage: DashboardSessionStorage; // make a service
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu']; // app mount context
 }

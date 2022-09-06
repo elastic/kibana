@@ -17,8 +17,9 @@ import { DashboardSavedObject } from '../..';
 import { DashboardAppServices } from '../../types';
 import { makeDefaultServices } from '../test_helpers';
 import { SavedObjectLoader } from '../../services/saved_object_loader';
-import { DASHBOARD_PANELS_UNSAVED_ID } from '../lib/dashboard_session_storage';
 import { DashboardUnsavedListing, DashboardUnsavedListingProps } from './dashboard_unsaved_listing';
+import { DASHBOARD_PANELS_UNSAVED_ID } from '../../services/dashboard_session_storage/dashboard_session_storage_service';
+import { pluginServices } from '../../services/plugin_services';
 
 const mockedDashboards: { [key: string]: DashboardSavedObject } = {
   dashboardUnsavedOne: {
@@ -125,7 +126,7 @@ describe('Unsaved listing', () => {
   });
 
   it('Shows a warning then clears changes when delete unsaved changes is pressed', async () => {
-    const { services, component } = mountWith({});
+    const { component } = mountWith({});
     const getDiscardButton = () =>
       findTestSubject(component, 'discard-unsaved-Dashboard-Unsaved-One');
     await waitFor(() => {
@@ -135,8 +136,8 @@ describe('Unsaved listing', () => {
     getDiscardButton().simulate('click');
     waitFor(() => {
       component.update();
-      expect(services.core.overlays.openConfirm).toHaveBeenCalled();
-      expect(services.dashboardSessionStorage.clearState).toHaveBeenCalledWith(
+      expect(pluginServices.getServices().overlays.openConfirm).toHaveBeenCalled();
+      expect(pluginServices.getServices().dashboardSessionStorage.clearState).toHaveBeenCalledWith(
         'dashboardUnsavedOne'
       );
     });
@@ -162,12 +163,16 @@ describe('Unsaved listing', () => {
     const { component } = mountWith({ services, props });
     waitFor(() => {
       component.update();
-      expect(services.dashboardSessionStorage.clearState).toHaveBeenCalledWith('failCase1');
-      expect(services.dashboardSessionStorage.clearState).toHaveBeenCalledWith('failCase2');
+      expect(pluginServices.getServices().dashboardSessionStorage.clearState).toHaveBeenCalledWith(
+        'failCase1'
+      );
+      expect(pluginServices.getServices().dashboardSessionStorage.clearState).toHaveBeenCalledWith(
+        'failCase2'
+      );
 
       // clearing panels from dashboard with errors should cause getDashboardIdsWithUnsavedChanges to be called again.
       expect(
-        services.dashboardSessionStorage.getDashboardIdsWithUnsavedChanges
+        pluginServices.getServices().dashboardSessionStorage.getDashboardIdsWithUnsavedChanges
       ).toHaveBeenCalledTimes(2);
     });
   });

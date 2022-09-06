@@ -99,8 +99,7 @@ export function DashboardTopNav({
   redirectTo,
   printMode,
 }: DashboardTopNavProps) {
-  const { core, setHeaderActionMenu, dashboardSessionStorage } =
-    useKibana<DashboardAppServices>().services;
+  const { core, setHeaderActionMenu } = useKibana<DashboardAppServices>().services;
   const {
     chrome: {
       getIsVisible$: getChromeIsVisible$,
@@ -277,7 +276,6 @@ export function DashboardTopNav({
       const saveResult = await saveDashboard({
         redirectTo,
         saveOptions,
-        dashboardSessionStorage,
         savedDashboard: dashboardAppState.savedDashboard,
         currentState: { ...currentState, ...stateFromSaveModal },
       });
@@ -310,7 +308,6 @@ export function DashboardTopNav({
     showSaveModal(dashboardSaveModal, core.i18n.Context);
   }, [
     dispatchDashboardStateChange,
-    dashboardSessionStorage,
     hasApi,
     hasTagDecoration,
     dashboardAppState,
@@ -327,7 +324,6 @@ export function DashboardTopNav({
       redirectTo,
       currentState,
       saveOptions: {},
-      dashboardSessionStorage,
       savedDashboard: dashboardAppState.savedDashboard,
     });
     if (saveResult.id && !saveResult.redirected) {
@@ -338,7 +334,7 @@ export function DashboardTopNav({
       if (!mounted) return;
       setState((s) => ({ ...s, isSaveInProgress: false }));
     }, DashboardConstants.CHANGE_CHECK_DEBOUNCE);
-  }, [dashboardSessionStorage, dashboardAppState, redirectTo, mounted]);
+  }, [dashboardAppState, redirectTo, mounted]);
 
   const runClone = useCallback(() => {
     const currentState = dashboardAppState.getLatestDashboardState();
@@ -356,14 +352,13 @@ export function DashboardTopNav({
       const saveResult = await saveDashboard({
         redirectTo,
         saveOptions,
-        dashboardSessionStorage,
         savedDashboard: dashboardAppState.savedDashboard,
         currentState: { ...currentState, title: newTitle },
       });
       return saveResult.id ? { id: saveResult.id } : { error: saveResult.error };
     };
     showCloneModal({ onClone, title: currentState.title });
-  }, [dashboardSessionStorage, dashboardAppState, redirectTo]);
+  }, [dashboardAppState, redirectTo]);
 
   const showOptions = useCallback(
     (anchorElement: HTMLElement) => {
@@ -396,13 +391,12 @@ export function DashboardTopNav({
       const currentState = dashboardAppState.getLatestDashboardState();
       ShowShareModal({
         anchorElement,
-        dashboardSessionStorage,
         currentDashboardState: currentState,
         savedDashboard: dashboardAppState.savedDashboard,
         isDirty: Boolean(dashboardAppState.hasUnsavedChanges),
       });
     },
-    [dashboardAppState, dashboardSessionStorage]
+    [dashboardAppState]
   );
 
   const dashboardTopNavActions = useMemo(() => {

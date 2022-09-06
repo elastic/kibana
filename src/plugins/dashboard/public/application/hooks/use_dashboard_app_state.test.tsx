@@ -13,7 +13,6 @@ import { renderHook, act, RenderHookResult } from '@testing-library/react-hooks'
 import { createKbnUrlStateStorage, defer } from '@kbn/kibana-utils-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
 
-import { DashboardSessionStorage } from '../lib';
 import { DashboardConstants } from '../../dashboard_constants';
 import { SavedObjectLoader } from '../../services/saved_object_loader';
 import { DashboardAppServices, DashboardAppState } from '../../types';
@@ -264,16 +263,14 @@ describe.skip('Dashboard initial state', () => {
   });
 
   it('Combines session state and URL state into initial state', async () => {
-    const dashboardSessionStorage = {
-      getState: jest
-        .fn()
-        .mockReturnValue({ viewMode: ViewMode.EDIT, description: 'this should be overwritten' }),
-    } as unknown as DashboardSessionStorage;
+    pluginServices.getServices().dashboardSessionStorage.getState = jest
+      .fn()
+      .mockReturnValue({ viewMode: ViewMode.EDIT, description: 'this should be overwritten' });
+
     const kbnUrlStateStorage = createKbnUrlStateStorage();
     kbnUrlStateStorage.set('_a', { description: 'with this' });
     const { renderHookResult, embeddableFactoryResult } = renderDashboardAppStateHook({
       partialProps: { kbnUrlStateStorage },
-      partialServices: { dashboardSessionStorage },
     });
     const getResult = () => renderHookResult.result.current;
 
@@ -324,7 +321,6 @@ describe.skip('Dashboard state sync', () => {
   });
 
   it('pushes unsaved changes to the session storage', async () => {
-    const { services } = defaultDashboardAppStateHookResult;
     expect(getResult().getLatestDashboardState?.().fullScreenMode).toBe(false);
     act(() => {
       dashboardStateStore.dispatch(setViewMode(ViewMode.EDIT)); // session storage is only populated in edit mode
@@ -333,7 +329,7 @@ describe.skip('Dashboard state sync', () => {
     await act(async () => {
       await new Promise((resolve) => setTimeout(resolve, 3));
     });
-    expect(services.dashboardSessionStorage.setState).toHaveBeenCalledWith(
+    expect(pluginServices.getServices().dashboardSessionStorage.setState).toHaveBeenCalledWith(
       'testDashboardId',
       expect.objectContaining({
         description: 'Wow an even cooler description.',

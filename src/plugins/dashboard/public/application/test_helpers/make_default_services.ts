@@ -15,7 +15,6 @@ import {
 } from '../../services/saved_object_loader';
 import { DashboardAppServices } from '../../types';
 import { getSavedDashboardMock } from './get_saved_dashboard_mock';
-import { DashboardSessionStorage } from '../lib';
 
 export function makeDefaultServices(): DashboardAppServices {
   const core = coreMock.createStart();
@@ -40,21 +39,11 @@ export function makeDefaultServices(): DashboardAppServices {
     .fn()
     .mockImplementation((id?: string) => Promise.resolve(getSavedDashboardMock({ id })));
 
-  const dashboardSessionStorage = {
-    getDashboardIdsWithUnsavedChanges: jest
-      .fn()
-      .mockResolvedValue(['dashboardUnsavedOne', 'dashboardUnsavedTwo']),
-    getState: jest.fn().mockReturnValue(undefined),
-    setState: jest.fn(),
-  } as unknown as DashboardSessionStorage;
-  dashboardSessionStorage.clearState = jest.fn();
-
   return {
     scopedHistory: () => ({} as ScopedHistory),
     setHeaderActionMenu: (mountPoint) => {},
     restorePreviousUrl: () => {},
     onAppLeave: (handler) => {},
-    dashboardSessionStorage,
     savedDashboards,
     core,
   };

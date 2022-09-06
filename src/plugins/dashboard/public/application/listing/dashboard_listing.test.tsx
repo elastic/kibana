@@ -17,8 +17,8 @@ import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { DashboardAppServices } from '../../types';
 import { DashboardListing, DashboardListingProps } from './dashboard_listing';
 import { makeDefaultServices } from '../test_helpers';
-import { DASHBOARD_PANELS_UNSAVED_ID } from '../lib/dashboard_session_storage';
 import { pluginServices } from '../../services/plugin_services';
+import { DASHBOARD_PANELS_UNSAVED_ID } from '../../services/dashboard_session_storage/dashboard_session_storage_service';
 
 function makeDefaultProps(): DashboardListingProps {
   return {
@@ -86,9 +86,10 @@ describe('after fetch', () => {
         hits: [],
       });
     };
-    services.dashboardSessionStorage.getDashboardIdsWithUnsavedChanges = () => [
-      DASHBOARD_PANELS_UNSAVED_ID,
-    ];
+    pluginServices.getServices().dashboardSessionStorage.getDashboardIdsWithUnsavedChanges = jest
+      .fn()
+      .mockReturnValueOnce([DASHBOARD_PANELS_UNSAVED_ID])
+      .mockReturnValue(['dashboardUnsavedOne', 'dashboardUnsavedTwo']);
     const { component } = mountWith({ services });
     // Ensure all promises resolve
     await new Promise((resolve) => process.nextTick(resolve));

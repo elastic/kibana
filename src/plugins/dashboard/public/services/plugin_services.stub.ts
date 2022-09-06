@@ -17,6 +17,7 @@ import { DashboardServices } from './types';
 import { applicationServiceFactory } from './application/application.stub';
 import { chromeServiceFactory } from './chrome/chrome.stub';
 import { dashboardCapabilitiesServiceFactory } from './dashboard_capabilities/dashboard_capabilities.stub';
+import { dashboardSessionStorageServiceFactory } from './dashboard_session_storage/dashboard_session_storage.stub';
 import { dataServiceFactory } from './data/data.stub';
 import { dataViewEditorServiceFactory } from './data_view_editor/data_view_editor.stub';
 import { embeddableServiceFactory } from './embeddable/embeddable.stub';
@@ -40,6 +41,7 @@ export const providers: PluginServiceProviders<DashboardServices> = {
   chrome: new PluginServiceProvider(chromeServiceFactory),
   data: new PluginServiceProvider(dataServiceFactory),
   dashboardCapabilities: new PluginServiceProvider(dashboardCapabilitiesServiceFactory),
+  dashboardSessionStorage: new PluginServiceProvider(dashboardSessionStorageServiceFactory),
   dataViewEditor: new PluginServiceProvider(dataViewEditorServiceFactory),
   embeddable: new PluginServiceProvider(embeddableServiceFactory),
   http: new PluginServiceProvider(httpServiceFactory),

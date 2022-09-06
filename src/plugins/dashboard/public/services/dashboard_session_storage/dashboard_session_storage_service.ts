@@ -6,22 +6,50 @@
  * Side Public License, v 1.
  */
 
+import { firstValueFrom } from 'rxjs';
+
 import { set } from '@kbn/safer-lodash-set';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { NotificationsStart } from '@kbn/core/public';
+import type { KibanaPluginServiceFactory } from '@kbn/presentation-util-plugin/public';
 
+import type { DashboardStartDependencies } from '../../plugin';
+import type { DashboardSessionStorageServiceType } from './types';
 import { panelStorageErrorStrings } from '../../dashboard_strings';
 import type { DashboardState } from '../../types';
+import { DashboardNotificationsService } from '../notifications/types';
+import { DashboardSpacesService } from '../spaces/types';
 
 export const DASHBOARD_PANELS_UNSAVED_ID = 'unsavedDashboard';
 const DASHBOARD_PANELS_SESSION_KEY = 'dashboardStateManagerPanels';
 
-export class DashboardSessionStorage {
-  private sessionStorage: Storage;
+interface DashboardSessionStorageRequiredServices {
+  notifications: DashboardNotificationsService;
+  spaces: DashboardSpacesService;
+}
 
-  constructor(private toasts: NotificationsStart['toasts'], private activeSpaceId: string) {
+export type DashboardSessionStorageServiceFactory = KibanaPluginServiceFactory<
+  DashboardSessionStorageServiceType,
+  DashboardStartDependencies,
+  DashboardSessionStorageRequiredServices
+>;
+
+class DashboardSessionStorageService implements DashboardSessionStorageServiceType {
+  private activeSpaceId: string;
+  private sessionStorage: Storage;
+  private notifications: DashboardNotificationsService;
+  private spaces: DashboardSpacesService;
+
+  constructor(requiredServices: DashboardSessionStorageRequiredServices) {
+    ({ notifications: this.notifications, spaces: this.spaces } = requiredServices);
     this.sessionStorage = new Storage(sessionStorage);
+
+    this.activeSpaceId = 'default';
+    if (this.spaces.getActiveSpace$) {
+      firstValueFrom(this.spaces.getActiveSpace$()).then((space) => {
+        this.activeSpaceId = space.id;
+      });
+    }
   }
 
   public clearState(id = DASHBOARD_PANELS_UNSAVED_ID) {
@@ -33,7 +61,7 @@ export class DashboardSessionStorage {
         this.sessionStorage.set(DASHBOARD_PANELS_SESSION_KEY, sessionStorage);
       }
     } catch (e) {
-      this.toasts.addDanger({
+      this.notifications.toasts.addDanger({
         title: panelStorageErrorStrings.getPanelsClearError(e.message),
         'data-test-subj': 'dashboardPanelsClearFailure',
       });
@@ -44,20 +72,20 @@ export class DashboardSessionStorage {
     try {
       return this.sessionStorage.get(DASHBOARD_PANELS_SESSION_KEY)?.[this.activeSpaceId]?.[id];
     } catch (e) {
-      this.toasts.addDanger({
+      this.notifications.toasts.addDanger({
         title: panelStorageErrorStrings.getPanelsGetError(e.message),
         'data-test-subj': 'dashboardPanelsGetFailure',
       });
     }
   }
 
-  public setState(id = DASHBOARD_PANELS_UNSAVED_ID, newState: Partial<DashboardState>) {
+  public setState(newState: Partial<DashboardState>, id = DASHBOARD_PANELS_UNSAVED_ID) {
     try {
       const sessionStateStorage = this.sessionStorage.get(DASHBOARD_PANELS_SESSION_KEY) || {};
       set(sessionStateStorage, [this.activeSpaceId, id], newState);
       this.sessionStorage.set(DASHBOARD_PANELS_SESSION_KEY, sessionStateStorage);
     } catch (e) {
-      this.toasts.addDanger({
+      this.notifications.toasts.addDanger({
         title: panelStorageErrorStrings.getPanelsSetError(e.message),
         'data-test-subj': 'dashboardPanelsSetFailure',
       });
@@ -69,6 +97,7 @@ export class DashboardSessionStorage {
       const dashboardStatesInSpace =
         this.sessionStorage.get(DASHBOARD_PANELS_SESSION_KEY)?.[this.activeSpaceId] || {};
       const dashboardsWithUnsavedChanges: string[] = [];
+
       Object.keys(dashboardStatesInSpace).map((dashboardId) => {
         if (
           dashboardStatesInSpace[dashboardId].viewMode === ViewMode.EDIT &&
@@ -80,7 +109,7 @@ export class DashboardSessionStorage {
       });
       return dashboardsWithUnsavedChanges;
     } catch (e) {
-      this.toasts.addDanger({
+      this.notifications.toasts.addDanger({
         title: panelStorageErrorStrings.getPanelsGetError(e.message),
         'data-test-subj': 'dashboardPanelsGetFailure',
       });
@@ -92,3 +121,10 @@ export class DashboardSessionStorage {
     return this.getDashboardIdsWithUnsavedChanges().indexOf(id) !== -1;
   }
 }
+
+export const dashboardSessionStorageServiceFactory: DashboardSessionStorageServiceFactory = (
+  core,
+  requiredServices
+) => {
+  return new DashboardSessionStorageService(requiredServices);
+};

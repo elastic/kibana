@@ -36,9 +36,9 @@ import {
 import { DashboardUnsavedListing } from './dashboard_unsaved_listing';
 import { confirmCreateWithUnsaved, confirmDiscardUnsavedChanges } from './confirm_overlays';
 import { getDashboardListItemLink } from './get_dashboard_list_item_link';
-import { DASHBOARD_PANELS_UNSAVED_ID } from '../lib/dashboard_session_storage';
 import { DashboardAppNoDataPage, isDashboardAppInNoDataState } from '../dashboard_app_no_data';
 import { pluginServices } from '../../services/plugin_services';
+import { DASHBOARD_PANELS_UNSAVED_ID } from '../../services/dashboard_session_storage/dashboard_session_storage_service';
 
 const SAVED_OBJECTS_LIMIT_SETTING = 'savedObjects:listingLimit';
 const SAVED_OBJECTS_PER_PAGE_SETTING = 'savedObjects:perPage';
@@ -57,18 +57,21 @@ export const DashboardListing = ({
   kbnUrlStateStorage,
 }: DashboardListingProps) => {
   const {
-    services: { core, savedDashboards, dashboardSessionStorage },
+    services: { core, savedDashboards },
   } = useKibana<DashboardAppServices>();
   const {
     application,
     chrome: { setBreadcrumbs },
     dashboardCapabilities: { showWriteControls },
+    dashboardSessionStorage,
     data: { query },
     notifications: { toasts },
     savedObjects: { client },
     savedObjectsTagging: { getSearchBarFilter, parseSearchQuery },
     settings: { uiSettings, theme },
   } = pluginServices.getServices();
+
+  // debugger;
 
   const [showNoDataPage, setShowNoDataPage] = useState<boolean>(false);
   useMount(() => {

@@ -23,7 +23,6 @@ import type { DashboardState } from '../../types';
 import { dashboardUrlParams } from '../dashboard_router';
 import { stateToRawDashboardState } from '../lib/convert_dashboard_state';
 import { convertPanelMapToSavedPanels } from '../lib/convert_dashboard_panels';
-import type { DashboardSessionStorage } from '../lib';
 import { pluginServices } from '../../services/plugin_services';
 
 const showFilterBarId = 'showFilterBar';
@@ -33,7 +32,6 @@ export interface ShowShareModalProps {
   anchorElement: HTMLElement;
   savedDashboard: DashboardSavedObject;
   currentDashboardState: DashboardState;
-  dashboardSessionStorage: DashboardSessionStorage;
 }
 
 export const showPublicUrlSwitch = (anonymousUserCapabilities: Capabilities) => {
@@ -49,10 +47,10 @@ export function ShowShareModal({
   anchorElement,
   savedDashboard,
   currentDashboardState,
-  dashboardSessionStorage,
 }: ShowShareModalProps) {
   const {
     dashboardCapabilities: { createShortUrl: allowShortUrl },
+    dashboardSessionStorage,
     data: {
       query: {
         timefilter: {

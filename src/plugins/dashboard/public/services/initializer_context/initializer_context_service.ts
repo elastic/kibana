@@ -26,6 +26,8 @@ class InitializerContextService implements DashboardInitializerContextServiceTyp
   }
 }
 
-export const initializerContextServiceFactory: InitializerContextServiceFactory = (params) => {
-  return new InitializerContextService(params.initContext);
+export const initializerContextServiceFactory: InitializerContextServiceFactory = ({
+  initContext,
+}) => {
+  return new InitializerContextService(initContext);
 };

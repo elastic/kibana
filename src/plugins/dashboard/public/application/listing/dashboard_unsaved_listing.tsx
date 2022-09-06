@@ -21,9 +21,10 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 import type { DashboardSavedObject } from '../..';
 import { dashboardUnsavedListingStrings, getNewDashboardTitle } from '../../dashboard_strings';
-import { DASHBOARD_PANELS_UNSAVED_ID } from '../lib/dashboard_session_storage';
 import type { DashboardAppServices, DashboardRedirect } from '../../types';
 import { confirmDiscardUnsavedChanges } from './confirm_overlays';
+import { pluginServices } from '../../services/plugin_services';
+import { DASHBOARD_PANELS_UNSAVED_ID } from '../../services/dashboard_session_storage/dashboard_session_storage_service';
 
 const DashboardUnsavedItem = ({
   id,
@@ -116,8 +117,9 @@ export const DashboardUnsavedListing = ({
   refreshUnsavedDashboards,
 }: DashboardUnsavedListingProps) => {
   const {
-    services: { dashboardSessionStorage, savedDashboards },
+    services: { savedDashboards },
   } = useKibana<DashboardAppServices>();
+  const { dashboardSessionStorage } = pluginServices.getServices();
 
   const [items, setItems] = useState<UnsavedItemMap>({});
 

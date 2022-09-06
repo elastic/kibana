@@ -16,6 +16,7 @@ export const spacesServiceFactory: SpacesServiceFactory = () => {
   const pluginMock = spacesPluginMock.createStartContract();
 
   return {
+    getActiveSpace$: pluginMock.getActiveSpace$,
     getLegacyUrlConflict: pluginMock.ui.components.getLegacyUrlConflict,
     redirectLegacyUrl: pluginMock.ui.redirectLegacyUrl,
   };

@@ -17,7 +17,6 @@ import type { DashboardSavedObject } from '../../saved_dashboards';
 import { dashboardSaveToastStrings } from '../../dashboard_strings';
 import { getHasTaggingCapabilitiesGuard } from './dashboard_tagging';
 import type { DashboardRedirect, DashboardState } from '../../types';
-import type { DashboardSessionStorage } from './dashboard_session_storage';
 import { serializeControlGroupToDashboardSavedObject } from './dashboard_control_group';
 import { convertPanelStateToSavedDashboardPanel } from '../../../common/embeddable/embeddable_saved_object_converters';
 import { pluginServices } from '../../services/plugin_services';
@@ -29,7 +28,6 @@ interface SaveDashboardProps {
   currentState: DashboardState;
   saveOptions: SavedDashboardSaveOpts;
   savedDashboard: DashboardSavedObject;
-  dashboardSessionStorage: DashboardSessionStorage;
 }
 
 export const saveDashboard = async ({
@@ -37,10 +35,16 @@ export const saveDashboard = async ({
   saveOptions,
   currentState,
   savedDashboard,
-  dashboardSessionStorage,
 }: SaveDashboardProps): Promise<{ id?: string; redirected?: boolean; error?: any }> => {
   const {
+    data: {
+      query: {
+        timefilter: { timefilter },
+      },
+    },
+    dashboardSessionStorage,
     initializerContext: { kibanaVersion },
+    notifications,
   } = pluginServices.getServices();
 
   const lastDashboardId = savedDashboard.id;
@@ -64,15 +68,6 @@ export const saveDashboard = async ({
   if (hasTaggingCapabilities(savedDashboard)) {
     savedDashboard.setTags(tags);
   }
-
-  const {
-    data: {
-      query: {
-        timefilter: { timefilter },
-      },
-    },
-    notifications,
-  } = pluginServices.getServices();
 
   const { from, to } = timefilter.getTime();
   savedDashboard.timeFrom = savedDashboard.timeRestore ? convertTimeToUTCString(from) : undefined;
