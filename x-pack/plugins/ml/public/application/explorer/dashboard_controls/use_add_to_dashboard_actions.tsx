@@ -47,6 +47,7 @@ export function useAddToDashboardActions<
         },
       });
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [getEmbeddableInput]
   );
 

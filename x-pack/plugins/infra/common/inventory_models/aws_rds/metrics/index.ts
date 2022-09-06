@@ -19,6 +19,18 @@ import { awsRDSCpuTotal } from './tsvb/aws_rds_cpu_total';
 import { awsRDSQueriesExecuted } from './tsvb/aws_rds_queries_executed';
 import { awsRDSActiveTransactions } from './tsvb/aws_rds_active_transactions';
 
+const awsRDSSnapshotMetrics = {
+  cpu,
+  rdsLatency,
+  rdsConnections,
+  rdsQueriesExecuted,
+  rdsActiveTransactions,
+};
+
+export const awsRDSSnapshotMetricTypes = Object.keys(awsRDSSnapshotMetrics) as Array<
+  keyof typeof awsRDSSnapshotMetrics
+>;
+
 export const metrics: InventoryMetrics = {
   tsvb: {
     awsRDSLatency,
@@ -27,13 +39,7 @@ export const metrics: InventoryMetrics = {
     awsRDSQueriesExecuted,
     awsRDSActiveTransactions,
   },
-  snapshot: {
-    cpu,
-    rdsLatency,
-    rdsConnections,
-    rdsQueriesExecuted,
-    rdsActiveTransactions,
-  },
+  snapshot: awsRDSSnapshotMetrics,
   defaultSnapshot: 'cpu',
   defaultTimeRangeInSeconds: 14400, // 4 hours
 };

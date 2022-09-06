@@ -135,6 +135,7 @@ export const useConfusionMatrix = (
     }
 
     loadConfusionMatrixData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify([jobConfig, searchQuery])]);
 
   return {
