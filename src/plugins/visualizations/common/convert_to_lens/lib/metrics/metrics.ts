@@ -17,8 +17,8 @@ import {
   convertToParentPipelineAggColumns,
   ParentPipelineMetric,
 } from '../convert/parent_pipeline';
-import { convertToPercentileColumns } from '../convert/percentile';
-import { convertToPercentileRankColumns } from '../convert/percentile_rank';
+import { convertToPercentileColumn } from '../convert/percentile';
+import { convertToPercentileRankColumn } from '../convert/percentile_rank';
 import { SUPPORTED_METRICS } from '../convert/supported_metrics';
 import { Column } from '../../types';
 import { getValidColumns } from '../utils';
@@ -51,14 +51,14 @@ export const convertMetricToColumns = <T extends METRIC_TYPES | BUCKET_TYPES>(
       return getValidColumns(columns);
     }
     case METRIC_TYPES.PERCENTILES: {
-      const columns = convertToPercentileColumns({
+      const columns = convertToPercentileColumn({
         agg: agg as SchemaConfig<METRIC_TYPES.PERCENTILES>,
         dataView,
       });
       return getValidColumns(columns);
     }
     case METRIC_TYPES.PERCENTILE_RANKS: {
-      const columns = convertToPercentileRankColumns({
+      const columns = convertToPercentileRankColumn({
         agg: agg as SchemaConfig<METRIC_TYPES.PERCENTILE_RANKS>,
         dataView,
       });

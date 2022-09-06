@@ -8,6 +8,7 @@
 
 import { METRIC_TYPES } from '@kbn/data-plugin/common';
 import { Operations, PercentileParams } from '../..';
+import { getFieldNameFromField } from '../utils';
 import { createColumn } from './column';
 import {
   PercentileColumnWithExtendedMeta,
@@ -27,13 +28,28 @@ export const convertToPercentileParams = (percentile: number): PercentileParams 
 });
 
 export const convertToPercentileColumn = (
-  percentile: number,
   { agg, dataView }: CommonColumnConverterArgs<METRIC_TYPES.PERCENTILES>,
   { index, reducedTimeRange }: { index?: number; reducedTimeRange?: string } = {}
 ): PercentileColumn | null => {
-  const params = convertToPercentileParams(percentile);
+  const { aggParams, accessor } = agg;
+  if (!aggParams) {
+    return null;
+  }
+  const { percents } = aggParams;
 
-  const field = dataView.getFieldByName(agg?.aggParams?.field ?? '');
+  if (!percents || !percents.length || percents[accessor] === undefined) {
+    return null;
+  }
+
+  const params = convertToPercentileParams(percents[accessor]);
+
+  const fieldName = getFieldNameFromField(agg?.aggParams?.field);
+
+  if (!fieldName) {
+    return null;
+  }
+
+  const field = dataView.getFieldByName(fieldName);
   if (!field) {
     return null;
   }
@@ -51,24 +67,4 @@ export const convertToPercentileColumn = (
           }
         : commonColumnParams.meta,
   };
-};
-
-export const convertToPercentileColumns = (
-  columnConverterArgs: CommonColumnConverterArgs<METRIC_TYPES.PERCENTILES>,
-  reducedTimeRange?: string
-): Array<PercentileColumn | null> | null => {
-  const { aggParams } = columnConverterArgs.agg;
-  if (!aggParams) {
-    return null;
-  }
-
-  const { percents } = aggParams;
-
-  if (!percents || !percents.length) {
-    return null;
-  }
-
-  return percents.map((p, index) =>
-    convertToPercentileColumn(p, columnConverterArgs, { index, reducedTimeRange })
-  );
 };

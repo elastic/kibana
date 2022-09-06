@@ -8,24 +8,35 @@
 
 import { METRIC_TYPES } from '@kbn/data-plugin/common';
 import { PercentileRanksParams } from '../..';
+import { getFieldNameFromField } from '../utils';
 import { createColumn } from './column';
 import { PercentileRanksColumn, CommonColumnConverterArgs } from './types';
 
-export const convertToPercentileRankParams = (value: number): PercentileRanksParams | null => ({
+export const convertToPercentileRankParams = (value: number): PercentileRanksParams => ({
   value: Number(value),
 });
 
 export const convertToPercentileRankColumn = (
-  value: number,
   { agg, dataView }: CommonColumnConverterArgs<METRIC_TYPES.PERCENTILE_RANKS>,
   { index, reducedTimeRange }: { index?: number; reducedTimeRange?: string } = {}
 ): PercentileRanksColumn | null => {
-  const params = convertToPercentileRankParams(value);
-  if (!params) {
+  const { aggParams, accessor } = agg;
+  if (!aggParams) {
+    return null;
+  }
+  const { values } = aggParams;
+
+  if (!values || !values.length || values[accessor] === undefined) {
     return null;
   }
 
-  const field = dataView.getFieldByName(agg.aggParams!.field ?? '');
+  const params = convertToPercentileRankParams(values[accessor]);
+  const fieldName = getFieldNameFromField(agg.aggParams!.field);
+  if (!fieldName) {
+    return null;
+  }
+
+  const field = dataView.getFieldByName(fieldName);
   if (!field) {
     return null;
   }
@@ -44,23 +55,4 @@ export const convertToPercentileRankColumn = (
           }
         : commonColumnParams.meta,
   };
-};
-
-export const convertToPercentileRankColumns = (
-  columnConverterArgs: CommonColumnConverterArgs<METRIC_TYPES.PERCENTILE_RANKS>,
-  reducedTimeRange?: string
-): Array<PercentileRanksColumn | null> | null => {
-  if (!columnConverterArgs.agg.aggParams) {
-    return null;
-  }
-
-  const { values } = columnConverterArgs.agg.aggParams;
-
-  if (!values || !values.length) {
-    return null;
-  }
-
-  return values.map((p, index) =>
-    convertToPercentileRankColumn(p, columnConverterArgs, { index, reducedTimeRange })
-  );
 };

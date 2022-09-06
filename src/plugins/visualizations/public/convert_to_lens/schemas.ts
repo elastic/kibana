@@ -12,7 +12,8 @@ import { Column } from '../../common';
 import { convertMetricToColumns } from '../../common/convert_to_lens/lib/metrics';
 import { convertBucketToColumns } from '../../common/convert_to_lens/lib/buckets';
 import { Vis } from '../types';
-import { getVisSchemas, Schemas } from '../vis_schemas';
+import { Schemas } from '../vis_types';
+import { getVisSchemas } from '../vis_schemas';
 
 export const getColumnsFromVis = <T>(
   vis: Vis<T>,
