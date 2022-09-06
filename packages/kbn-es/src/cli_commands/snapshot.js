@@ -87,6 +87,7 @@ exports.run = async (defaults = {}) => {
       const pairs = options.secureFiles.split(',').map((kv) => kv.split('=').map((v) => v.trim()));
       await cluster.configureKeystoreWithSecureSettingsFiles(installPath, pairs);
     }
+    await cluster.configureApm(installPath);
 
     reportTime(installStartTime, 'installed', {
       success: true,

@@ -6,6 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { getConfiguration, loadConfiguration } from '@kbn/apm-config-loader';
+import { AgentConfigOptions } from 'elastic-apm-node';
+
 /**
  * List of the patterns for the settings names that are supposed to be secure and stored in the keystore.
  */
@@ -49,4 +52,13 @@ export function parseSettings(
   }
 
   return settings;
+}
+
+let initialized = false;
+export function getApmConfiguration(): AgentConfigOptions {
+  if (!initialized) {
+    loadConfiguration(process.argv, '../../../../../', true);
+  }
+  initialized = true;
+  return getConfiguration('elasticsearch') || { active: false };
 }

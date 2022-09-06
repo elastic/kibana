@@ -23,7 +23,7 @@ const {
 const { createCliError } = require('./errors');
 const { promisify } = require('util');
 const treeKillAsync = promisify(require('tree-kill'));
-const { parseSettings, SettingsFilter } = require('./settings');
+const { parseSettings, SettingsFilter, getApmConfiguration } = require('./settings');
 const { CA_CERT_PATH, ES_NOPASSWORD_P12_PATH, extract } = require('@kbn/dev-utils');
 
 const DEFAULT_READY_TIMEOUT = parseTimeoutToMs('1m');
@@ -148,6 +148,27 @@ exports.Cluster = class Cluster {
         stripComponents: 1,
       });
     });
+  }
+
+  async configureApm(installPath) {
+    const apmConfiguration = getApmConfiguration();
+    if (!apmConfiguration.active) return;
+    const env = { JAVA_HOME: '' };
+    if (apmConfiguration.secretToken) {
+      this._log.info(`embedding APM 'tracing.apm.secret_token' into Elasticsearch's keystore`);
+      await execa(ES_KEYSTORE_BIN, ['add', 'tracing.apm.secret_token', '-x'], {
+        cwd: installPath,
+        input: apmConfiguration.secretToken,
+        env,
+      });
+    } else if (apmConfiguration.apiKey) {
+      this._log.info(`embedding APM 'tracing.apm.api_key' into Elasticsearch's keystore`);
+      await execa(ES_KEYSTORE_BIN, ['add', 'tracing.apm.api_key', '-x'], {
+        cwd: installPath,
+        input: apmConfiguration.apiKey,
+        env,
+      });
+    }
   }
 
   /**
@@ -349,6 +370,7 @@ exports.Cluster = class Cluster {
         esArgs.set(`xpack.security.http.ssl.keystore.type`, `PKCS12`);
       }
     }
+    this.applyApmConfiguration(esArgs);
 
     const args = parseSettings(
       extractConfigFiles(
@@ -464,6 +486,30 @@ exports.Cluster = class Cluster {
         });
       }
     });
+  }
+
+  applyApmConfiguration(esArgs) {
+    const apmConfiguration = getApmConfiguration();
+    if (apmConfiguration.active) {
+      esArgs.set('tracing.apm.enabled', 'true');
+      esArgs.set('tracing.apm.agent.server_url', apmConfiguration.serverUrl);
+      esArgs.set('tracing.apm.agent.log_level', apmConfiguration.logLevel ?? 'info');
+      esArgs.set(
+        'tracing.apm.agent.transaction_sample_rate',
+        apmConfiguration.transactionSampleRate ?? 1
+      );
+      if (apmConfiguration.metricsInterval) {
+        esArgs.set('tracing.apm.agent.metrics_interval', apmConfiguration.metricsInterval);
+      }
+      // TODO Specifying secret_token and api_key in the keystore appears to be broken.
+      // https://github.com/elastic/elasticsearch/issues/89205
+      // These two settings can be removed from here once that ticket is resolved
+      if (apmConfiguration.secretToken) {
+        esArgs.set('tracing.apm.agent.secret_token', apmConfiguration.secretToken);
+      } else if (apmConfiguration.apiKey) {
+        esArgs.set('tracing.apm.agent.api_key', apmConfiguration.apiKey);
+      }
+    }
   }
 
   async _waitForClusterReady(client, readyTimeout = DEFAULT_READY_TIMEOUT) {
