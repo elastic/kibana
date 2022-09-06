@@ -87,6 +87,7 @@ export const bulkEditActionToRulesClientOperation = (
         getNotifyWhenOperation(action.value.throttle),
       ];
 
+    // schedule actions
     case BulkActionEditType.set_schedule:
       return [
         {
