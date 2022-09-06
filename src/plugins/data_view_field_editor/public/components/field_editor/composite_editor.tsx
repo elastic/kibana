@@ -18,10 +18,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ScriptField } from './form_fields';
 import { useFieldEditorContext } from '../field_editor_context';
-import { RUNTIME_FIELD_OPTIONS_PRIMITIVE } from './constants';
-import { valueToComboBoxOption } from './lib';
-import { RuntimePrimitiveTypes, UseField, UseArray, TextField } from '../../shared_imports';
-import { FieldFormInternal } from './field_editor';
+import { UseField, UseArray, TextField } from '../../shared_imports';
 
 export interface CompositeEditorProps {
   onReset: () => void;
