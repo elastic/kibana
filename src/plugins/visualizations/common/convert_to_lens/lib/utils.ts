@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { DataViewField } from '@kbn/data-views-plugin/common';
 import { SchemaConfig } from '../../types';
 import { Column } from '../types';
 
@@ -31,4 +32,16 @@ export const getValidColumns = (columns: Array<Column | null> | Column | null | 
   }
 
   return columns ? [columns] : null;
+};
+
+export const getFieldNameFromField = (field: DataViewField | string | undefined) => {
+  if (!field) {
+    return null;
+  }
+
+  if (typeof field === 'string') {
+    return field;
+  }
+
+  return field.displayName;
 };

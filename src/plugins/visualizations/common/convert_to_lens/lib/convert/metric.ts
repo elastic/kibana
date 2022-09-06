@@ -21,6 +21,7 @@ import {
   MinColumn,
   SumColumn,
 } from '../../types';
+import { getFieldNameFromField } from '../utils';
 
 type MetricAggregationWithoutParams =
   | typeof Operations.AVERAGE
@@ -84,7 +85,7 @@ export const convertMetricAggregationColumnWithoutSpecialParams = (
   let sourceField;
 
   if (isMetricWithField(agg)) {
-    sourceField = agg.aggParams?.field ?? 'document';
+    sourceField = getFieldNameFromField(agg.aggParams?.field) ?? 'document';
   } else {
     sourceField = 'document';
   }
