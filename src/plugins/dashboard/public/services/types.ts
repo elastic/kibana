@@ -12,6 +12,7 @@ import { KibanaPluginServiceParams } from '@kbn/presentation-util-plugin/public'
 import { DashboardStartDependencies } from '../plugin';
 import { DashboardApplicationService } from './application/types';
 import { DashboardChromeService } from './chrome/types';
+import { DashboardCoreContextService } from './core_context/types';
 import { DashboardCapabilitiesService } from './dashboard_capabilities/types';
 import { DashboardSessionStorageServiceType } from './dashboard_session_storage/types';
 import { DashboardDataService } from './data/types';
@@ -38,6 +39,7 @@ export type DashboardPluginServiceParams = KibanaPluginServiceParams<DashboardSt
 export interface DashboardServices {
   application: DashboardApplicationService;
   chrome: DashboardChromeService;
+  coreContext: DashboardCoreContextService;
   data: DashboardDataService;
   dashboardCapabilities: DashboardCapabilitiesService;
   dashboardSessionStorage: DashboardSessionStorageServiceType;

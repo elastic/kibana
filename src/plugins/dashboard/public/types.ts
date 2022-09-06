@@ -10,12 +10,7 @@ import { History } from 'history';
 import { AnyAction, Dispatch } from 'redux';
 import { BehaviorSubject, Subject } from 'rxjs';
 
-import type {
-  AppMountParameters,
-  CoreStart,
-  ScopedHistory,
-  KibanaExecutionContext,
-} from '@kbn/core/public';
+import type { AppMountParameters, ScopedHistory, KibanaExecutionContext } from '@kbn/core/public';
 import type { Filter } from '@kbn/es-query';
 import type { PersistableControlGroupInput } from '@kbn/controls-plugin/common';
 import { type EmbeddableInput, ViewMode } from '@kbn/embeddable-plugin/common';
@@ -156,7 +151,6 @@ export interface DashboardSaveOptions {
 }
 
 export interface DashboardAppServices {
-  core: CoreStart;
   restorePreviousUrl: () => void; // app mount context
   savedDashboards: SavedObjectLoader; // TODO: Remove as part of https://github.com/elastic/kibana/pull/138774
   scopedHistory: () => ScopedHistory; // app mount context

@@ -17,6 +17,7 @@ import { DashboardPluginServiceParams, DashboardServices } from './types';
 
 import { applicationServiceFactory } from './application/application_service';
 import { chromeServiceFactory } from './chrome/chrome_service';
+import { coreContextServiceFactory } from './core_context/core_context_service';
 import { dashboardCapabilitiesServiceFactory } from './dashboard_capabilities/dashboard_capabilities_service';
 import { dashboardSessionStorageServiceFactory } from './dashboard_session_storage/dashboard_session_storage_service';
 import { dataServiceFactory } from './data/data_service';
@@ -40,6 +41,7 @@ import { usageCollectionServiceFactory } from './usage_collection/usage_collecti
 const providers: PluginServiceProviders<DashboardServices, DashboardPluginServiceParams> = {
   application: new PluginServiceProvider(applicationServiceFactory),
   chrome: new PluginServiceProvider(chromeServiceFactory),
+  coreContext: new PluginServiceProvider(coreContextServiceFactory),
   data: new PluginServiceProvider(dataServiceFactory),
   dashboardCapabilities: new PluginServiceProvider(dashboardCapabilitiesServiceFactory),
   dashboardSessionStorage: new PluginServiceProvider(dashboardSessionStorageServiceFactory, [

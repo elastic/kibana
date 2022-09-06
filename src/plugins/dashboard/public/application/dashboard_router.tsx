@@ -59,7 +59,6 @@ export async function mountApp({
   setHeaderActionMenu,
 }: DashboardMountProps) {
   const [coreStart, pluginsStart, dashboardStart] = await core.getStartServices();
-
   const { data: dataStart, embeddable } = pluginsStart;
 
   let globalEmbedSettings: DashboardEmbedSettings | undefined;
@@ -67,7 +66,6 @@ export async function mountApp({
 
   const dashboardServices: DashboardAppServices = {
     onAppLeave,
-    core: coreStart,
     restorePreviousUrl,
     setHeaderActionMenu,
     scopedHistory: () => scopedHistory,

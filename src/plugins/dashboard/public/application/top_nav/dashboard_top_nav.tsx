@@ -99,13 +99,14 @@ export function DashboardTopNav({
   redirectTo,
   printMode,
 }: DashboardTopNavProps) {
-  const { core, setHeaderActionMenu } = useKibana<DashboardAppServices>().services;
+  const { setHeaderActionMenu } = useKibana<DashboardAppServices>().services;
   const {
     chrome: {
       getIsVisible$: getChromeIsVisible$,
       recentlyAccessed: chromeRecentlyAccessed,
       docTitle,
     },
+    coreContext: { i18nContext },
     dashboardCapabilities,
     data: { query, search },
     embeddable: { getEmbeddableFactory, getEmbeddableFactories, getStateTransfer },
@@ -305,13 +306,13 @@ export function DashboardTopNav({
       />
     );
     closeAllFlyouts();
-    showSaveModal(dashboardSaveModal, core.i18n.Context);
+    showSaveModal(dashboardSaveModal, i18nContext);
   }, [
     dispatchDashboardStateChange,
     hasApi,
     hasTagDecoration,
     dashboardAppState,
-    core.i18n.Context,
+    i18nContext,
     docTitle,
     closeAllFlyouts,
     redirectTo,

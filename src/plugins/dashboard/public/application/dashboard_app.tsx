@@ -39,9 +39,10 @@ export function DashboardApp({
   redirectTo,
   history,
 }: DashboardAppProps) {
-  const { core, onAppLeave } = useKibana<DashboardAppServices>().services;
+  const { onAppLeave } = useKibana<DashboardAppServices>().services;
   const {
     chrome: { setBreadcrumbs, setIsVisible },
+    coreContext: { executionContext },
     data: { search },
     embeddable: { getStateTransfer },
     settings: { uiSettings },
@@ -63,7 +64,7 @@ export function DashboardApp({
     [toasts, history, uiSettings]
   );
 
-  useExecutionContext(core.executionContext, {
+  useExecutionContext(executionContext, {
     type: 'application',
     page: 'app',
     id: savedDashboardId || 'new',

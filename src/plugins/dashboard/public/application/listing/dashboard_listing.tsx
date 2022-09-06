@@ -57,11 +57,12 @@ export const DashboardListing = ({
   kbnUrlStateStorage,
 }: DashboardListingProps) => {
   const {
-    services: { core, savedDashboards },
+    services: { savedDashboards },
   } = useKibana<DashboardAppServices>();
   const {
     application,
     chrome: { setBreadcrumbs },
+    coreContext: { executionContext },
     dashboardCapabilities: { showWriteControls },
     dashboardSessionStorage,
     data: { query },
@@ -82,7 +83,7 @@ export const DashboardListing = ({
     dashboardSessionStorage.getDashboardIdsWithUnsavedChanges()
   );
 
-  useExecutionContext(core.executionContext, {
+  useExecutionContext(executionContext, {
     type: 'application',
     page: 'list',
   });
