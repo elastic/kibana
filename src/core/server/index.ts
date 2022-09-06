@@ -433,12 +433,8 @@ export type { DeprecationsDetails } from '@kbn/core-deprecations-common';
 export type { AppCategory } from '@kbn/core-application-common';
 export { DEFAULT_APP_CATEGORIES, APP_WRAPPER_CLASS } from '@kbn/core-application-common';
 
-export {
-  ServiceStatusLevels,
-  CoreStatus,
-  ServiceStatus,
-  ServiceStatusLevel,
-} from '@kbn/core-status-common';
+export { ServiceStatusLevels } from '@kbn/core-status-common';
+export type { CoreStatus, ServiceStatus, ServiceStatusLevel } from '@kbn/core-status-common';
 export type { StatusServiceSetup } from '@kbn/core-status-server';
 
 export type { DocLinksServiceStart, DocLinksServiceSetup } from '@kbn/core-doc-links-server';
