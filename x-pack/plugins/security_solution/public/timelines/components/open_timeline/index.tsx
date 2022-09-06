@@ -201,7 +201,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
     const deleteTimelines: DeleteTimelines = useCallback(
       async (timelineIds: string[]) => {
         startTransaction({
-          name: timelineIds.length > 1 ? TIMELINE_ACTIONS.DELETE : TIMELINE_ACTIONS.BULK_DELETE,
+          name: timelineIds.length > 1 ? TIMELINE_ACTIONS.BULK_DELETE : TIMELINE_ACTIONS.DELETE,
         });
 
         if (timelineIds.includes(timelineSavedObjectId)) {
