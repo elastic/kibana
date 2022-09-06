@@ -120,6 +120,8 @@ describe('CopyToSpaceFlyout', () => {
     expect(wrapper.find(EuiEmptyPrompt)).toHaveLength(0);
     expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(1);
 
+    // Wait for loading spinner to clear
+    await act(async () => {});
     wrapper.update();
 
     expect(wrapper.find(CopyToSpaceForm)).toHaveLength(1);

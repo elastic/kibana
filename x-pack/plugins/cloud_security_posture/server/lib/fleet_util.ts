@@ -58,7 +58,10 @@ export const getCspAgentPolicies = async (
   packagePolicies: PackagePolicy[],
   agentPolicyService: AgentPolicyServiceInterface
 ): Promise<AgentPolicy[]> =>
-  agentPolicyService.getByIds(soClient, uniq(map(packagePolicies, 'policy_id')));
+  agentPolicyService.getByIds(soClient, uniq(map(packagePolicies, 'policy_id')), {
+    withPackagePolicies: true,
+    ignoreMissing: true,
+  });
 
 export const getCspPackagePolicies = (
   soClient: SavedObjectsClientContract,

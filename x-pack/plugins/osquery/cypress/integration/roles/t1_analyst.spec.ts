@@ -55,7 +55,8 @@ describe('T1 Analyst - READ + runSavedQueries ', () => {
     submitQuery();
     checkResults();
   });
-  it('should be able to use saved query in a new query', () => {
+  // TODO UNSKIP AFTER FF
+  it.skip('should be able to use saved query in a new query', () => {
     navigateTo('/app/osquery/live_queries');
     cy.waitForReact(1000);
     cy.contains('New live query').should('not.be.disabled').click();
@@ -94,6 +95,7 @@ describe('T1 Analyst - READ + runSavedQueries ', () => {
     cy.contains('New live query').click();
     selectAllAgents();
     cy.get(LIVE_QUERY_EDITOR).should('not.exist');
-    cy.contains('Submit').should('be.disabled');
+    submitQuery();
+    cy.contains('Query is a required field');
   });
 });

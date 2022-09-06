@@ -28,10 +28,15 @@ describe('when calling the Action Details route handler', () => {
   let actionDetailsRouteHandler: ReturnType<typeof getActionDetailsRequestHandler>;
 
   beforeEach(() => {
+    const mockContext = createMockEndpointAppContext();
+    (mockContext.service.getEndpointMetadataService as jest.Mock) = jest.fn().mockReturnValue({
+      findHostMetadataForFleetAgents: jest.fn().mockResolvedValue([]),
+    });
     mockScopedEsClient = elasticsearchServiceMock.createScopedClusterClient();
     mockSavedObjectClient = savedObjectsClientMock.create();
     mockResponse = httpServerMock.createResponseFactory();
-    actionDetailsRouteHandler = getActionDetailsRequestHandler(createMockEndpointAppContext());
+
+    actionDetailsRouteHandler = getActionDetailsRequestHandler(mockContext);
   });
 
   it('should call service using action id from request', async () => {
@@ -40,6 +45,7 @@ describe('when calling the Action Details route handler', () => {
     const mockContext = requestContextMock.convertContext(
       createRouteHandlerContext(mockScopedEsClient, mockSavedObjectClient)
     );
+
     const mockRequest = httpServerMock.createKibanaRequest<
       TypeOf<typeof ActionDetailsRequestSchema.params>,
       never,

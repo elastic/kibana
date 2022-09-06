@@ -17,12 +17,13 @@ import {
   typeInOsqueryFieldInput,
 } from '../../tasks/live_query';
 import { ArchiverMethod, runKbnArchiverScript } from '../../tasks/archiver';
-import { getSavedQueriesComplexTest } from '../../tasks/saved_queries';
 
 describe('T2 Analyst - READ + Write Live/Saved + runSavedQueries ', () => {
   const SAVED_QUERY_ID = 'Saved-Query-Id';
-  const NEW_SAVED_QUERY_ID = 'Saved-Query-Id-T2';
-  const NEW_SAVED_QUERY_DESCRIPTION = 'Test saved query description T2';
+  // const randomNumber = getRandomInt();
+  //
+  // const NEW_SAVED_QUERY_ID = `Saved-Query-Id-${randomNumber}`;
+  // const NEW_SAVED_QUERY_DESCRIPTION = `Test saved query description ${randomNumber}`;
   beforeEach(() => {
     login(ROLES.t2_analyst);
     navigateTo('/app/osquery');
@@ -35,7 +36,8 @@ describe('T2 Analyst - READ + Write Live/Saved + runSavedQueries ', () => {
     runKbnArchiverScript(ArchiverMethod.UNLOAD, 'saved_query');
   });
 
-  getSavedQueriesComplexTest(NEW_SAVED_QUERY_ID, NEW_SAVED_QUERY_DESCRIPTION);
+  // TODO unskip after FF
+  // getSavedQueriesComplexTest(NEW_SAVED_QUERY_ID, NEW_SAVED_QUERY_DESCRIPTION);
 
   it('should not be able to add nor edit packs', () => {
     const PACK_NAME = 'removing-pack';
@@ -101,15 +103,15 @@ describe('T2 Analyst - READ + Write Live/Saved + runSavedQueries ', () => {
   it('to click the edit button and edit pack', () => {
     navigateTo('/app/osquery/saved_queries');
     cy.getBySel('pagination-button-next').click();
+
     cy.react('CustomItemAction', {
       props: { index: 1, item: { attributes: { id: SAVED_QUERY_ID } } },
     }).click();
     cy.contains('Custom key/value pairs.').should('exist');
     cy.contains('Hours of uptime').should('exist');
-    cy.react('ECSComboboxFieldComponent', { props: { field: { value: 'labels' } } })
-      .parents('[data-test-subj="ECSMappingEditorForm"]')
-      .react('EuiButtonIcon', { props: { iconType: 'trash' } })
-      .click();
+    cy.react('ECSMappingEditorForm').within(() => {
+      cy.react('EuiButtonIcon', { props: { iconType: 'trash' } }).click();
+    });
     cy.react('EuiButton').contains('Update query').click();
     cy.wait(5000);
 

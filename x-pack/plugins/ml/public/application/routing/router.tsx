@@ -88,6 +88,7 @@ const LegacyHashUrlRedirect: FC = ({ children }) => {
     if (location.hash.startsWith('#/')) {
       history.push(location.hash.replace('#', ''));
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.hash]);
 
   return <>{children}</>;
