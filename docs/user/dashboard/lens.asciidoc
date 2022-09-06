@@ -78,34 +78,6 @@ image:images/lens_dataViewDropDown_8.4.0.png[Dropdown menu located next to {data
 For more information about adding fields to {data-sources} and examples, refer to <<runtime-fields>>.
 
 [float]
-[[create-custom-tables]]
-==== Create custom tables
-
-Tables are highly customizable, and provide you with text alignment, value formatting, coloring options, and more.
-
-. From the *Visualization type* dropdown, select *Table*. 
-
-. Drag the fields you want to visualize to the workspace. 
-
-. To sort or hide the columns, click the arrow next to the column heading, then select an option.
-+
-All columns that belong to the same layer pane group are sorted in the table.
-
-. To change the display options, click a *Metrics* field in the layer pane, then configure the following options:
-
-* *Name* &mdash; Specifies the field display name. 
-
-* *Value format* &mdash; Specifies how the field value displays in the table. 
-
-* *Text alignment* &mdash; Aligns the values in the cell to the *Left*, *Center*, or *Right*.
-
-* *Hide column* &mdash; Hides the column for the field.
-
-* *Summary row* &mdash; Adds a row that displays the summary value. When specified, allows you to enter a *Summary label*.
-
-* *Color by value* &mdash; Applies color to the cell or text values. To change the color, click *Edit*. 
-
-[float]
 [[drag-and-drop-keyboard-navigation]]
 ==== Create visualizations with keyboard navigation
 

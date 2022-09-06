@@ -1,0 +1,212 @@
+[[supported-visualizations]]
+== Supported visualizations
+:keywords: administrator, data view, data views, management, runtime fields, runtime fields in Kibana, scripted fields, field formatters, data fields, index pattern, index patterns
+:description: Conceptual and step-by-step procedures for using runtime fields, scripted fields, and field formatters.
+
+Short description.
+
+[discrete]
+[[supported-visualizations-table]]
+=== Table
+
+[discrete]
+[[supported-visualizations-bar-horizontal]]
+=== Bar horizontal
+
+[discrete]
+[[supported-visualizations-bar-horizontal-percentage]]
+=== Bar horizontal percentage
+
+[discrete]
+[[supported-visualizations-bar-stacked]]
+=== Bar horizontal stacked
+
+[discrete]
+[[supported-visualizations-bar-vertical]]
+=== Bar vertical
+
+[discrete]
+[[supported-visualizations-bar-vertical-percentage]]
+=== Bar vertical percentage
+
+[discrete]
+[[supported-visualizations-bar-stacked]]
+=== Bar vertical stacked
+
+[discrete]
+[[supported-visualizations-bar-stacked]]
+=== Bar vertical stacked
+
+[discrete]
+[[supported-visualizations-gauge-horizontal]]
+=== Gauge hortizontal
+
+[WARNING]
+==================================================
+This functionality is in technical preview and may be changed or removed 
+completely in a future release.
+==================================================
+
+[discrete]
+[[supported-visualizations-gauge-vertical]]
+=== Gauge vertical
+
+[WARNING]
+==================================================
+This functionality is in technical preview and may be changed or removed 
+completely in a future release.
+==================================================
+
+[discrete]
+[[supported-visualizations-legacy-metric]]
+=== Legacy metric
+
+[discrete]
+[[supported-visualizations-metric]]
+=== Metric
+
+[WARNING]
+==================================================
+This functionality is in technical preview and may be changed or removed 
+completely in a future release.
+==================================================
+
+Metrics convey a clear understanding of how a specific indicator behaves. The primary goal is to display a number of the 
+the most accurate, precise, and immediate value. 
+
+Use metrics for the following quantitative data:
+
+* Plain numbers
+* Counts of elements, such as visitors and flights
+* Percentages
+* Formulas, such as sum and average
+
+Add metrics to your dashboard to answer the following questions:
+
+* How many visitors did we have?
+* What's the current usage of CPU and Memory?
+* How many flights have been delayed?
+
+[image]
+
+[cols=2*]
+|===
+
+| *1*
+| *Title* [Description]
+
+| *2*
+| *Subtitle* [Description]
+
+| *3*
+| *Measure unit* [Description]
+
+| *4*
+| *Value* [Description]
+
+| *5*
+| *Minimum value* [Description]
+
+| *5*
+| *Maximum value* [Description]
+
+| *5*
+| *Bar and color values* [Description]
+|===
+
+[discrete]
+[[supported-visualizations-metric-best-practices]]
+==== Metric best practices
+
+To make metrics as clear as possible, use all the required components. 
+
+Text and values should be self-explanatory and shouldn't require any prior contextual knowledge in order to be understood. Be specific without being verbose.
+
+[image]
+
+When the displayed value is the result of applied filters and does not reflect the current timeframe selected on your dashboard, 
+remember to make this explicit. You can use subtitles or <other smaller text name> to clarify this and to inform the user of the choices 
+and calculations that have been made prior. 
+
+*Don'ts*
+Don’t rely solely on <micro visualization functionality> or <background visualization functionality> to provide a precise and understandable analysis of data trends. 
+These options give a contextual and wider layer of information that could help understanding the overall trends and evolution of data but they are not detailed enough 
+to get specific insights. 
+
+If your goal is to precisely see evolution of values over time please use a line chart instead, where you’ll have all the information required to perform a proper analysis 
+(grid, values, axis, legend…)
+
+[image] 
+
+[discrete]
+[[supported-visualizations-metric-alternatives]]
+==== Alternative metric visualizations
+
+* *Bar chart* When many indicators/metrics share the same scale (e.g. percentage) it’s better to put them on the same chart in order to simplify the comparison among them
+
+* *Table* Tables offer the possibility to sort and handle data in a more detailed manner. Use tables with conditional formatting to obtain a similar result but with more controls.
+
+* *Text* Use plain text with a dedicated box when a long explanation is needed. Metric chart has limitations in terms of component size and length of text, instead of 
+abounding with text, switch to a simpler component such a plain text.
+
+[discrete]
+[[supported-visualizations-area]]
+=== Area
+
+[discrete]
+[[supported-visualizations-area-percentage]]
+=== Area percentage
+
+[discrete]
+[[supported-visualizations-area-stacked]]
+=== Area stacked
+
+[discrete]
+[[supported-visualizations-line]]
+=== Line
+
+[discrete]
+[[supported-visualizations-heat-map]]
+=== Heat map
+
+[discrete]
+[[supported-visualizations-region-map]]
+=== Region map
+
+[WARNING]
+==================================================
+This functionality is in technical preview and may be changed or removed 
+completely in a future release.
+==================================================
+
+[discrete]
+[[supported-visualizations-donut]]
+=== Donut
+
+[discrete]
+[[supported-visualizations-mosaic]]
+=== Mosaic
+
+[WARNING]
+==================================================
+This functionality is in technical preview and may be changed or removed 
+completely in a future release.
+==================================================
+
+[discrete]
+[[supported-visualizations-pie]]
+=== Pie
+
+[discrete]
+[[supported-visualizations-treemap]]
+=== Treemap
+
+[discrete]
+[[supported-visualizations-waffle]]
+=== Waffle
+
+[WARNING]
+==================================================
+This functionality is in technical preview and may be changed or removed 
+completely in a future release.
+==================================================

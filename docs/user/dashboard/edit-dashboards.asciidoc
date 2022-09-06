@@ -1,0 +1,3 @@
+* To open an existing dashboard, click the dashboard *Title* you want to open.
++
+When you open an existing dashboard, you are in view mode. To make changes to the dashboard, click *Edit* in the toolbar. 

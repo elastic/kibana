@@ -1,0 +1,256 @@
+[[create-dashboards-and-visualizations]]
+== Create dashboards and visualizations
+:keywords: administrator, data view, data views, management, runtime fields, runtime fields in Kibana, scripted fields, field formatters, data fields, index pattern, index patterns
+:description: Conceptual and step-by-step procedures for using runtime fields, scripted fields, and field formatters.
+
+Dashboards provide you with the space where you add panels of your data.
+
+[float]
+[[dashboard-minimum-requirements]]
+=== Minimum requirements
+
+To create dashboards, you must meet the minimum requirements. 
+
+* If you need to set up {kib}, use https://www.elastic.co/cloud/elasticsearch-service/signup?baymax=docs-body&elektra=docs[our free trial].
+
+* Make sure you have {ref}/getting-started-index.html[data indexed into {es}] and a <<data-views, data view>>.
+
+* When the read-only indicator appears, you have insufficient privileges
+to create or save dashboards, and the options to create and save dashboards are not visible. For more information,
+refer to <<xpack-security-authorization,Granting access to {kib}>>.
+
+[discrete]
+[[create-the-dashboard]]
+=== Create the dashboard
+
+Begin with an empty dashboard, or open an existing dashboard.
+
+. Open the main menu, then click *Dashboard*.
+
+. On the *Dashboards* page, click *Create dashboard*.
+
+[discrete]
+[[create-visualizations]]
+=== Create visualizations
+
+. On the dashboard toolbar, click *Create visualization*.
+
+. From the {data-source} dropdown, select the {data-source} you want to visualize.
+
+[discrete]
+[[create-tabular-visualizations]]
+=== Create tabular visualizations
+
+Tables are highly customizable, and provide you with text alignment, value formatting, coloring options, and more.
+
+. From the *Visualization type* dropdown, select *Table*. 
+
+. Drag the fields you want to visualize to the workspace. 
+
+. To sort or hide the columns, click the arrow next to the column heading, then select an option.
++
+All columns that belong to the same layer pane group are sorted in the table.
+
+. To change the display options, click a *Metrics* field in the layer pane, then configure the following options:
+
+* *Name* &mdash; Specifies the field display name. 
+
+* *Value format* &mdash; Specifies how the field value displays in the table. 
+
+* *Text alignment* &mdash; Aligns the values in the cell to the *Left*, *Center*, or *Right*.
+
+* *Hide column* &mdash; Hides the column for the field.
+
+* *Summary row* &mdash; Adds a row that displays the summary value. When specified, allows you to enter a *Summary label*.
+
+* *Color by value* &mdash; Applies color to the cell or text values. To change the color, click *Edit*. 
+
+[discrete]
+[[create-bar-visualizations]]
+=== Create bar visualizations
+
+[discrete]
+[[create-goal-and-single-value-visualizations]]
+=== Create goal and single value visualizations
+
+[discrete]
+[[create-line-and-area-visualizations]]
+=== Create line and area visualizations
+
+[discrete]
+[[create-magnitude-visualizations]]
+=== Create magnitude visualizations
+
+[discrete]
+[[create-map-visualizations]]
+=== Create map visualizations
+
+[discrete]
+[[create-proportion-visualizations]]
+=== Create proportion visualizations
+
+[float]
+[[save-to-the-dashboard]]
+==== Save the visualization
+
+Add the visualization to the dashboard. 
+
+. Click *Save and return*.
+
+. Add an optional title to the panel.
+
+.. In the panel header, click *No Title*.
+
+.. On the *Customize panel* window, select *Show panel title*.
+
+.. Enter the *Panel title*, then click *Save*.
+
+[float]
+[[create-panels-with-lens]]
+=== Add panels from the Visualize Library
+
+Add panels that are saved in the *Visualize Library* or search results from <<save-your-search,*Discover*>>.
+
+. Open the main menu, then click *Visualize Library*.
+
+. Click *Create visualization*, then select an editor. 
+
+To add existing panels from the *Visualize Library*:
+
+. In the dashboard toolbar, click *Add from library*.
+
+. Click the panel you want to add to the dashboard, then click *X*.
++
+When a panel contains a saved query, both queries are applied.
++
+When you add search results from *Discover* to dashboards, the results are not aggregated.
+
+If you created the panel from the *Visualize Library*:
+
+. Click *Save*.
+
+. On the *Save* window, enter the *Title*.
+
+. Choose one of the following options:
+
+* If you want to add the panel to an existing dashboard, select *Existing*, select the dashboard from the dropdown, then click *Save and go to Dashboard*.
+
+* If you want to add the panel to a new dashboard, select *New*, then click *Save and go to Dashboard*.
+
+To add unsaved dashboard panels to the *Visualize Library*:
+
+. Open the panel menu, then select *More > Save to library*.
+
+. Enter the panel title, then click *Save*.
+
+[float]
+[[save-to-visualize-library]]
+==== Save to the Visualize Library
+
+To use the panel on other dashboards and *Canvas* workpads, save the panel to the *Visualize Library*. When panels are saved in the *Visualize Library*, image:dashboard/images/visualize-library-icon.png[Visualize Library icon] appears in the panel header.
+
+If you created the panel from the dashboard:
+
+. In the editor, click *Save to library*.
+
+. Enter the *Title* and add any applicable <<managing-tags,*Tags*>>.
+
+. Make sure that *Add to Dashboard after saving* is selected.
+
+. Click *Save and return*.
+
+If you created the panel from the *Visualize Library*:
+
+. In the editor, click *Save*.
+
+. On the *Save* window, enter the *Title*.
+
+. Choose one of the following options:
+
+* To save the panel to a dashboard and the *Visualize Library*, select *Add to library*, add any applicable <<managing-tags,*Tags*>>, then click *Save and go to Dashboard*.
+
+* To save the panel only to the *Visualize Library*, select *None*, add any applicable <<managing-tags,*Tags*>>, then click *Save and add to library*.
+
+[[tsvb]]
+
+[float]
+[[add-text]]
+== Add context to panels
+
+To provide context to your dashboard panels, add *Text* panels that display important information, instructions, images, and more. You create *Text* panels using GitHub-flavored Markdown text.
+
+. On the dashboard, click image:images/dashboard_createNewTextButton_7.15.0.png[Create New Text button in dashboard toolbar].
+
+. In the *Markdown* field, enter the text, then click *Update*.
+
+For example, when you enter:
+
+[role="screenshot"]
+image::images/markdown_example_1.png[Markdown text with links]
+
+The following instructions are displayed:
+
+[role="screenshot"]
+image::images/markdown_example_2.png[Panel with markdown link text]
+
+Or when you enter:
+
+[role="screenshot"]
+image::images/markdown_example_3.png[Markdown text with image file]
+
+The following image is displayed:
+
+[role="screenshot"]
+image::images/markdown_example_4.png[Panel with markdown image]
+
+For detailed information about writing on GitHub, click *Help*.
+
+[float]
+[[arrange-panels]]
+[[moving-containers]]
+[[resizing-containers]]
+== Organize panels
+
+Compare the data in your panels side-by-side, organize panels by priority, resize the panels so they all appear immediately on the dashboard, and more.
+
+In the toolbar, click *Edit*, then use the following options:
+
+* To move, click and hold the panel header, then drag to the new location.
+
+* To resize, click the resize control, then drag to the new dimensions.
+
+* To maximize to fullscreen, open the panel menu, then click *More > Maximize panel*.
+
+[float]
+[[save-dashboards]]
+== Save dashboards
+
+When you've finished making changes to the dashboard, save it.
+
+If you are saving a new dashboard:
+
+. In the toolbar, click *Save*.
+
+. On the *Save dashboard* window, enter the *Title* and an optional *Description*.
+
+. Add any applicable <<managing-tags,*Tags*>>. 
+
+. To save the time filter to the dashboard, select *Store time with dashboard*.
+
+. Click *Save*.
+
+If you are saving an existing dashboard, click *Save*.
+
+To exit *Edit* mode, click *Switch to view mode*. 
+
+[float]
+[[share-the-dashboard]]
+== Share dashboards
+
+To share the dashboard with a larger audience, click *Share* in the toolbar. For detailed information about the sharing options, refer to <<reporting-getting-started,Reporting>>.
+
+[float]
+[[import-dashboards]]
+== Export dashboards
+
+To automate {kib}, you can export dashboards as NDJSON using the <<saved-objects-api-export, Export objects API>>. It is important to export dashboards with all necessary references.
