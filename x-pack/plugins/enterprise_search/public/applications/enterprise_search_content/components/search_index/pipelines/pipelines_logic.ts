@@ -84,6 +84,7 @@ type PipelinesActions = Pick<
 
 interface PipelinesValues {
   canSetPipeline: boolean;
+  canUseMlInferencePipeline: boolean;
   defaultPipelineValues: IngestPipelineParams;
   defaultPipelineValuesData: IngestPipelineParams | null;
   index: FetchIndexApiResponse;
@@ -228,6 +229,11 @@ export const PipelinesLogic = kea<MakeLogicType<PipelinesValues, PipelinesAction
     canSetPipeline: [
       () => [selectors.index],
       (index: ElasticsearchIndexWithIngestion) => !isApiIndex(index),
+    ],
+    canUseMlInferencePipeline: [
+      () => [selectors.canSetPipeline, selectors.pipelineState],
+      (canSetPipeline: boolean, pipelineState: IngestPipelineParams) =>
+        canSetPipeline && pipelineState.run_ml_inference,
     ],
     defaultPipelineValues: [
       () => [selectors.defaultPipelineValuesData],

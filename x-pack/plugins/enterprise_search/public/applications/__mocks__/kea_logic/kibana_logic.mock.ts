@@ -6,12 +6,14 @@
  */
 
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
+import { Capabilities } from '@kbn/core/public';
 
 import { securityMock } from '@kbn/security-plugin/public/mocks';
 
 import { mockHistory } from '../react_router/state.mock';
 
 export const mockKibanaValues = {
+  capabilities: {} as Capabilities,
   config: { host: 'http://localhost:3002' },
   charts: chartPluginMock.createStartContract(),
   cloud: {
