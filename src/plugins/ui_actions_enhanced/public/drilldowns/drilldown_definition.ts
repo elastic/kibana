@@ -119,7 +119,7 @@ export interface DrilldownDefinition<
    * drilldown execution. Should be internationalized.
    */
   readonly actionMenuItem?: UiComponent<{
-    config: Omit<SerializedAction<Config>, "factoryId">;
+    config: Omit<SerializedAction<Config>, 'factoryId'>;
     context: ExecutionContext | ActionExecutionContext<ExecutionContext>;
   }>;
 

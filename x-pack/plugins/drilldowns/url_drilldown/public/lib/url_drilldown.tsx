@@ -17,7 +17,10 @@ import {
 } from '@kbn/embeddable-plugin/public';
 import { ActionExecutionContext, ROW_CLICK_TRIGGER } from '@kbn/ui-actions-plugin/public';
 import type { Query, Filter, TimeRange } from '@kbn/es-query';
-import type { CollectConfigProps as CollectConfigPropsBase, UiComponent } from '@kbn/kibana-utils-plugin/public';
+import type {
+  CollectConfigProps as CollectConfigPropsBase,
+  UiComponent,
+} from '@kbn/kibana-utils-plugin/public';
 import {
   reactToUiComponent,
   UrlTemplateEditorVariable,
@@ -32,11 +35,11 @@ import {
   urlDrilldownCompileUrl,
   UiActionsEnhancedBaseActionFactoryContext as BaseActionFactoryContext,
 } from '@kbn/ui-actions-enhanced-plugin/public';
+import type { SerializedAction } from '@kbn/ui-actions-enhanced-plugin/common/types';
 import { txtUrlDrilldownDisplayName } from './i18n';
 import { getEventVariableList, getEventScopeValues } from './variables/event_variables';
 import { getContextVariableList, getContextScopeValues } from './variables/context_variables';
 import { getGlobalVariableList } from './variables/global_variables';
-import type {SerializedAction} from '@kbn/ui-actions-enhanced-plugin/common/types';
 
 interface EmbeddableQueryInput extends EmbeddableInput {
   query?: Query;
@@ -83,7 +86,10 @@ export class UrlDrilldown implements Drilldown<Config, ActionContext, ActionFact
 
   public readonly getDisplayName = () => txtUrlDrilldownDisplayName;
 
-  public readonly actionMenuItem: UiComponent<{config: Omit<SerializedAction<UrlDrilldownConfig>, 'factoryId'>; context: ActionContext | ActionExecutionContext<ActionContext>;}> = reactToUiComponent(({config, context}) => {
+  public readonly actionMenuItem: UiComponent<{
+    config: Omit<SerializedAction<UrlDrilldownConfig>, 'factoryId'>;
+    context: ActionContext | ActionExecutionContext<ActionContext>;
+  }> = reactToUiComponent(({ config, context }) => {
     const [title, setTitle] = React.useState(config.name);
     React.useEffect(() => {
       let unmounted = false;
