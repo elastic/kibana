@@ -106,7 +106,9 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
     watch: ['throttle'],
   });
   const throttle = formThrottle || initialState.throttle;
-  const formRef = useRef<{ validation: () => Promise<{ isValid: boolean }> }>(null);
+  const responseActionsValidationRef = useRef<{ validation: () => Promise<{ isValid: boolean }> }>(
+    null
+  );
 
   const handleSubmit = useCallback(
     (enabled: boolean) => {
@@ -119,8 +121,8 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
   );
 
   const getData = useCallback(async () => {
-    if (formRef.current?.validation) {
-      const { isValid } = await formRef.current?.validation();
+    if (responseActionsValidationRef.current?.validation) {
+      const { isValid } = await responseActionsValidationRef.current?.validation();
       if (!isValid) {
         return {
           isValid: false,
@@ -189,7 +191,9 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
         return (
           <>
             <UseArray path="responseActions">
-              {(params) => <ResponseActionsForm {...params} formRef={formRef} />}
+              {(params) => (
+                <ResponseActionsForm {...params} formRef={responseActionsValidationRef} />
+              )}
             </UseArray>
           </>
         );
