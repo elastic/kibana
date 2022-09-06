@@ -80,9 +80,13 @@ export async function topNElasticSearchQuery({
 
   const topN = createTopNSamples(aggregations);
 
-  const totalSampledStackTraces = aggregations.total_count.value ?? 0;
+  for (let i = 0; i < topN.length; i++) {
+    topN[i].Count = (topN[i].Count ?? 0) / eventsIndex.sampleRate;
+  }
 
+  let totalSampledStackTraces = aggregations.total_count.value ?? 0;
   logger.info('total sampled stacktraces: ' + totalSampledStackTraces);
+  totalSampledStackTraces = Math.floor(totalSampledStackTraces / eventsIndex.sampleRate);
 
   if (searchField !== ProfilingESField.StacktraceID) {
     return response.ok({
@@ -96,7 +100,7 @@ export async function topNElasticSearchQuery({
 
   for (let i = 0; i < groupByBuckets.length; i++) {
     const stackTraceID = String(groupByBuckets[i].key);
-    const count = groupByBuckets[i].count.value ?? 0;
+    const count = Math.floor((groupByBuckets[i].count.value ?? 0) / eventsIndex.sampleRate);
     totalAggregatedStackTraces += count;
     stackTraceEvents.set(stackTraceID, count);
   }
