@@ -9,7 +9,7 @@ import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('banners - functional tests', function () {
-    loadTestFile(require.resolve('./global'));
+    // loadTestFile(require.resolve('./global'));
     loadTestFile(require.resolve('./spaces'));
   });
 }
