@@ -124,7 +124,7 @@ export const FilterGroup = ({
       hasShadow={false}
       paddingSize="none"
       className={cx({
-        [boderPadding]: path !== '',
+        [boderPadding]: !firstLevel,
       })}
     >
       {filters.map((filter, index, acc) => (
