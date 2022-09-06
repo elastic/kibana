@@ -70,7 +70,7 @@ export interface QueryStringInputProps {
   isInvalid?: boolean;
   isClearable?: boolean;
   iconType?: EuiIconProps['type'];
-
+  isDisabled?: boolean;
   /**
    * @param nonKqlMode by default if language switch is enabled, user can switch between kql and lucene syntax mode
    * this params add another option text, which is just a  simple keyword search mode, the way a simple search box works
@@ -750,6 +750,7 @@ export default class QueryStringInputUI extends PureComponent<Props, State> {
           >
             <div role="search" className={inputWrapClassName} ref={this.assignQueryInputDivRef}>
               <EuiTextArea
+                disabled={this.props.isDisabled ?? false}
                 placeholder={this.props.placeholder || this.getSearchInputPlaceholder()}
                 value={this.forwardNewValueIfNeeded(this.getQueryString())}
                 onKeyDown={this.onKeyDown}

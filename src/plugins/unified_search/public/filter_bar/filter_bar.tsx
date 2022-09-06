@@ -27,6 +27,7 @@ export interface Props {
    * Applies extra styles necessary when coupled with the query bar
    */
   afterQueryBar?: boolean;
+  readOnly?: boolean;
 }
 
 const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
@@ -45,6 +46,7 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
       tabIndex={-1}
     >
       <FilterItems
+        readOnly={props.readOnly || false}
         filters={props.filters!}
         onFiltersUpdated={props.onFiltersUpdated}
         indexPatterns={props.indexPatterns!}

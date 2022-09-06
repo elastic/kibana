@@ -96,6 +96,7 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
   // defines size of suggestions query popover
   suggestionsSize?: SuggestionsListSize;
   isScreenshotMode?: boolean;
+  isDisabled?: boolean;
 }
 
 export type SearchBarProps<QT extends Query | AggregateQuery = Query> = SearchBarOwnProps<QT> &
@@ -504,6 +505,7 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
           timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
           hiddenPanelOptions={this.props.hiddenFilterPanelOptions}
           data-test-subj="unifiedFilterBar"
+          readOnly={this.props.isDisabled ?? false}
         />
       );
     }
@@ -553,6 +555,7 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
           isScreenshotMode={this.props.isScreenshotMode}
           onTextLangQuerySubmit={this.onTextLangQuerySubmit}
           onTextLangQueryChange={this.onTextLangQueryChange}
+          isDisabled={this.props.isDisabled}
         />
       </div>
     );

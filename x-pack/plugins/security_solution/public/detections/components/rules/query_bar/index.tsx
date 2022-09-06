@@ -33,7 +33,7 @@ export interface FieldValueQueryBar {
   query: Query;
   saved_id: string | null;
 }
-interface QueryBarDefineRuleProps {
+export interface QueryBarDefineRuleProps {
   browserFields: BrowserFields;
   dataTestSubj: string;
   field: FieldHook;
@@ -44,6 +44,11 @@ interface QueryBarDefineRuleProps {
   openTimelineSearch: boolean;
   resizeParentContainer?: (height: number) => void;
   onValidityChange?: (arg: boolean) => void;
+  isDisabled?: boolean;
+  /**
+   * if saved query selected, reset to it's value
+   */
+  resetSavedQuery?: boolean;
 }
 
 const actionTimelineToHide: ActionTimelineToShow[] = ['duplicate', 'createFrom'];
@@ -63,6 +68,8 @@ export const QueryBarDefineRule = ({
   openTimelineSearch = false,
   resizeParentContainer,
   onValidityChange,
+  isDisabled,
+  resetSavedQuery,
 }: QueryBarDefineRuleProps) => {
   const { value: fieldValue, setValue: setFieldValue } = field as FieldHook<FieldValueQueryBar>;
   const [originalHeight, setOriginalHeight] = useState(-1);
@@ -138,6 +145,16 @@ export const QueryBarDefineRule = ({
       isSubscribed = false;
     };
   }, [fieldValue, filterManager, savedQuery, savedQueryServices]);
+
+  useEffect(() => {
+    if (resetSavedQuery && savedQuery) {
+      setFieldValue({
+        filters: savedQuery.attributes.filters ?? [],
+        query: savedQuery.attributes.query,
+        saved_id: savedQuery.id,
+      });
+    }
+  }, [resetSavedQuery, savedQuery, setFieldValue]);
 
   const onSubmitQuery = useCallback(
     (newQuery: Query) => {
@@ -263,13 +280,16 @@ export const QueryBarDefineRule = ({
                 isRefreshPaused={false}
                 filterQuery={fieldValue.query}
                 filterManager={filterManager}
-                filters={filterManager.getFilters() || []}
+                filters={
+                  filterManager.getFilters().map((f) => ({ ...f, readOnly: isDisabled })) || []
+                }
                 onChangedQuery={onChangedQuery}
                 onSubmitQuery={onSubmitQuery}
                 savedQuery={savedQuery}
                 onSavedQuery={onSavedQuery}
                 hideSavedQuery={false}
                 displayStyle="inPage"
+                isDisabled={isDisabled}
               />
             </div>
           )}

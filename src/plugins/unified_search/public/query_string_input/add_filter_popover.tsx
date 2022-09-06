@@ -50,6 +50,7 @@ export const AddFilterPopover = React.memo(function AddFilterPopover({
         onClick={() => setIsAddFilterPopoverOpen((isOpen) => !isOpen)}
         size="m"
         {...buttonProps}
+        disabled
       />
     </EuiToolTip>
   );

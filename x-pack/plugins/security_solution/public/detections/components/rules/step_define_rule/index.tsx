@@ -45,6 +45,7 @@ import {
 import type { DefineStepRule, RuleStepProps } from '../../../pages/detection_engine/rules/types';
 import { RuleStep, DataSourceType } from '../../../pages/detection_engine/rules/types';
 import { StepRuleDescription } from '../description_step';
+import type { QueryBarDefineRuleProps } from '../query_bar';
 import { QueryBarDefineRule } from '../query_bar';
 import { SelectRuleType } from '../select_rule_type';
 import { AnomalyThresholdSlider } from '../anomaly_threshold_slider';
@@ -69,6 +70,7 @@ import {
   isNewTermsRule,
   isThreatMatchRule,
   isThresholdRule,
+  isQueryRule,
 } from '../../../../../common/detection_engine/utils';
 import { EqlQueryBar } from '../eql_query_bar';
 import { DataViewSelector } from '../data_view_selector';
@@ -126,6 +128,7 @@ export const stepDefineDefaultValue: DefineStepRule = {
   dataSourceType: DataSourceType.IndexPatterns,
   newTermsFields: [],
   historyWindowSize: '7d',
+  shouldLoadQueryDynamically: false,
 };
 
 /**
@@ -211,6 +214,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       dataSourceType: formDataSourceType,
       newTermsFields: formNewTermsFields,
       historyWindowSize: formHistoryWindowSize,
+      shouldLoadQueryDynamically: formShouldLoadQueryDynamically,
     },
   ] = useFormData<DefineStepRule>({
     form,
@@ -231,6 +235,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       'dataSourceType',
       'newTermsFields',
       'historyWindowSize',
+      'shouldLoadQueryDynamically',
     ],
   });
 
@@ -613,18 +618,20 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
           ),
         }}
         component={QueryBarDefineRule}
-        componentProps={{
-          browserFields,
-          // runtimeMappings,
-          idAria: 'detectionEngineStepDefineRuleQueryBar',
-          indexPattern,
-          isDisabled: isLoading,
-          isLoading: isIndexPatternLoading,
-          dataTestSubj: 'detectionEngineStepDefineRuleQueryBar',
-          openTimelineSearch,
-          onValidityChange: setIsQueryBarValid,
-          onCloseTimelineSearch: handleCloseTimelineSearch,
-        }}
+        componentProps={
+          {
+            browserFields,
+            idAria: 'detectionEngineStepDefineRuleQueryBar',
+            indexPattern,
+            isDisabled: isLoading || formShouldLoadQueryDynamically,
+            resetSavedQuery: formShouldLoadQueryDynamically,
+            isLoading: isIndexPatternLoading,
+            dataTestSubj: 'detectionEngineStepDefineRuleQueryBar',
+            openTimelineSearch,
+            onValidityChange: setIsQueryBarValid,
+            onCloseTimelineSearch: handleCloseTimelineSearch,
+          } as QueryBarDefineRuleProps
+        }
       />
     ),
     [
@@ -635,6 +642,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       isIndexPatternLoading,
       isLoading,
       openTimelineSearch,
+      formShouldLoadQueryDynamically,
     ]
   );
   const onOptionsChange = useCallback((field: FieldsEqlOptions, value: string | undefined) => {
@@ -741,6 +749,29 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               )}
             </>
           </RuleTypeEuiFormRow>
+
+          {isQueryRule(ruleType) && (
+            <>
+              <EuiSpacer size="s" />
+              <RuleTypeEuiFormRow
+                label={'Load the saved query dynamically on each execution'}
+                $isVisible={Boolean(formQuery?.saved_id)}
+                fullWidth
+              >
+                <CommonUseField
+                  path="shouldLoadQueryDynamically"
+                  componentProps={{
+                    idAria: 'detectionEngineStepDefineRuleShouldLoadQueryDynamically',
+                    'data-test-subj': 'detectionEngineStepDefineRuleShouldLoadQueryDynamically',
+                    euiFieldProps: {
+                      disabled: isLoading,
+                    },
+                  }}
+                />
+              </RuleTypeEuiFormRow>
+            </>
+          )}
+
           <RuleTypeEuiFormRow $isVisible={isMlRule(ruleType)} fullWidth>
             <>
               <UseField

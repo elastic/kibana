@@ -22,6 +22,7 @@ import type {
   CompleteRule,
   SavedQueryRuleParams,
   QueryRuleParams,
+  UnifiedQueryRuleParams,
 } from '../../schemas/rule_schemas';
 import type { ExperimentalFeatures } from '../../../../../common/experimental_features';
 import { buildReasonMessageForQueryAlert } from '../reason_formatters';
@@ -48,7 +49,7 @@ export const queryExecutor = async ({
 }: {
   inputIndex: string[];
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
-  completeRule: CompleteRule<QueryRuleParams> | CompleteRule<SavedQueryRuleParams>;
+  completeRule: CompleteRule<UnifiedQueryRuleParams>;
   tuple: RuleRangeTuple;
   exceptionItems: ExceptionListItemSchema[];
   listClient: ListClient;

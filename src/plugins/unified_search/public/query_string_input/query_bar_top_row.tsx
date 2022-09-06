@@ -95,6 +95,7 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
   isScreenshotMode?: boolean;
   onTextLangQuerySubmit: (query?: Query | AggregateQuery) => void;
   onTextLangQueryChange: (query: AggregateQuery) => void;
+  isDisabled?: boolean;
 }
 
 const SharingMetaFields = React.memo(function SharingMetaFields({
@@ -511,6 +512,7 @@ export const QueryBarTopRow = React.memo(
                 disableLanguageSwitcher={true}
                 prepend={renderFilterMenuOnly() && renderFilterButtonGroup()}
                 size={props.suggestionsSize}
+                isDisabled={props.isDisabled}
               />
             </EuiFlexItem>
           )}
