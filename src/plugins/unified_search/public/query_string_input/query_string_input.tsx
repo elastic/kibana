@@ -70,6 +70,7 @@ export interface QueryStringInputProps {
   isInvalid?: boolean;
   isClearable?: boolean;
   iconType?: EuiIconProps['type'];
+  isDisabled?: boolean;
 
   /**
    * @param nonKqlMode by default if language switch is enabled, user can switch between kql and lucene syntax mode
@@ -758,6 +759,7 @@ export default class QueryStringInputUI extends PureComponent<Props, State> {
                 onClick={this.onClickInput}
                 onBlur={this.onInputBlur}
                 onFocus={this.handleOnFocus}
+                disabled={this.props.isDisabled}
                 className={inputClassName}
                 fullWidth
                 rows={1}
@@ -802,6 +804,7 @@ export default class QueryStringInputUI extends PureComponent<Props, State> {
                     title={i18n.translate('unifiedSearch.query.queryBar.clearInputLabel', {
                       defaultMessage: 'Clear input',
                     })}
+                    disabled={this.props.isDisabled}
                     onClick={() => {
                       this.onQueryStringChange('');
                       if (this.props.autoSubmit) {
