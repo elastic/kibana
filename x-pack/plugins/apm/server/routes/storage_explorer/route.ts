@@ -7,6 +7,8 @@
 
 import * as t from 'io-ts';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import Boom from '@hapi/boom';
+import { i18n } from '@kbn/i18n';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { getSearchAggregatedTransactions } from '../../lib/helpers/transactions';
 import { setupRequest } from '../../lib/helpers/setup_request';
@@ -22,6 +24,7 @@ import { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
 import { getStorageDetailsPerProcessorEvent } from './get_storage_details_per_processor_event';
 import { getRandomSampler } from '../../lib/helpers/get_random_sampler';
 import { getSizeTimeseries } from './get_size_timeseries';
+import { hasStorageExplorerPrivileges } from './has_storage_explorer_privileges';
 
 const storageExplorerRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/storage_explorer',
@@ -226,8 +229,38 @@ const storageChartRoute = createApmServerRoute({
   },
 });
 
+const storageExplorerPrivilegesRoute = createApmServerRoute({
+  endpoint: 'GET /internal/apm/storage_explorer/privileges',
+  options: { tags: ['access:apm'] },
+
+  handler: async (resources): Promise<{ hasPrivileges: boolean }> => {
+    const {
+      plugins: { security },
+      context,
+    } = resources;
+
+    if (!security) {
+      throw Boom.internal(SECURITY_REQUIRED_MESSAGE);
+    }
+
+    const setup = await setupRequest(resources);
+    const hasPrivileges = await hasStorageExplorerPrivileges({
+      context,
+      setup,
+    });
+
+    return { hasPrivileges };
+  },
+});
+
 export const storageExplorerRouteRepository = {
   ...storageExplorerRoute,
   ...storageExplorerServiceDetailsRoute,
   ...storageChartRoute,
+  ...storageExplorerPrivilegesRoute,
 };
+
+const SECURITY_REQUIRED_MESSAGE = i18n.translate(
+  'xpack.apm.api.storageExplorer.securityRequired',
+  { defaultMessage: 'Security plugin is required' }
+);
