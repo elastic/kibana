@@ -72,7 +72,6 @@ import type { ExternalCallback } from '..';
 import { storedPackagePolicyToAgentInputs } from './agent_policies';
 import { agentPolicyService } from './agent_policy';
 import { getDataOutputForAgentPolicy } from './agent_policies';
-import { outputService } from './output';
 import { getPackageInfo, getInstallation, ensureInstalledPackage } from './epm/packages';
 import { getAssetsData } from './epm/packages/assets';
 import { compileTemplate } from './epm/agent/agent';
@@ -111,6 +110,7 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
       skipEnsureInstalled?: boolean;
       skipUniqueNameVerification?: boolean;
       overwrite?: boolean;
+      packageInfo?: PackageInfo;
     }
   ): Promise<PackagePolicy> {
     const agentPolicy = await agentPolicyService.get(soClient, packagePolicy.policy_id, true);
@@ -159,11 +159,13 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
         });
       }
 
-      const pkgInfo = await getPackageInfo({
-        savedObjectsClient: soClient,
-        pkgName: packagePolicy.package.name,
-        pkgVersion: packagePolicy.package.version,
-      });
+      const pkgInfo =
+        options?.packageInfo ??
+        (await getPackageInfo({
+          savedObjectsClient: soClient,
+          pkgName: packagePolicy.package.name,
+          pkgVersion: packagePolicy.package.version,
+        }));
 
       // Check if it is a limited package, and if so, check that the corresponding agent policy does not
       // already contain a package policy for this package
@@ -657,19 +659,22 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
 
     for (const id of ids) {
       try {
-        let packageInfo: PackageInfo;
-        ({ packagePolicy, packageInfo } = await this.getUpgradePackagePolicyInfo(
-          soClient,
-          id,
-          packagePolicy,
-          pkgVersion
-        ));
+        const { packagePolicy: currentPackagePolicy, packageInfo } =
+          await this.getUpgradePackagePolicyInfo(soClient, id, packagePolicy, pkgVersion);
 
-        if (packagePolicy.is_managed && !options?.force) {
+        if (currentPackagePolicy.is_managed && !options?.force) {
           throw new PackagePolicyRestrictionRelatedError(`Cannot upgrade package policy ${id}`);
         }
 
-        await this.doUpgrade(soClient, esClient, id, packagePolicy!, result, packageInfo, options);
+        await this.doUpgrade(
+          soClient,
+          esClient,
+          id,
+          currentPackagePolicy,
+          result,
+          packageInfo,
+          options
+        );
       } catch (error) {
         result.push({
           id,
@@ -869,7 +874,6 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
           description: newPolicy.description ?? '',
           enabled: newPolicy.enabled ?? true,
           policy_id: newPolicy.policy_id ?? agentPolicyId,
-          output_id: newPolicy.output_id ?? '',
           inputs: newPolicy.inputs[0]?.streams ? newPolicy.inputs : inputs,
           vars: newPolicy.vars || newPP.vars,
         };
@@ -890,7 +894,7 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
       skipArchive: true,
     });
     if (packageInfo) {
-      return packageToPackagePolicy(packageInfo, '', '');
+      return packageToPackagePolicy(packageInfo, '');
     }
   }
 
@@ -901,19 +905,14 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
   ): Promise<NewPackagePolicy | undefined> {
     const pkgInstall = await getInstallation({ savedObjectsClient: soClient, pkgName, logger });
     if (pkgInstall) {
-      const [packageInfo, defaultOutputId] = await Promise.all([
-        getPackageInfo({
-          savedObjectsClient: soClient,
-          pkgName: pkgInstall.name,
-          pkgVersion: pkgInstall.version,
-        }),
-        outputService.getDefaultDataOutputId(soClient),
-      ]);
+      const packageInfo = await getPackageInfo({
+        savedObjectsClient: soClient,
+        pkgName: pkgInstall.name,
+        pkgVersion: pkgInstall.version,
+      });
+
       if (packageInfo) {
-        if (!defaultOutputId) {
-          throw new Error('Default output is not set');
-        }
-        return packageToPackagePolicy(packageInfo, '', defaultOutputId);
+        return packageToPackagePolicy(packageInfo, '');
       }
     }
   }
@@ -1280,6 +1279,7 @@ export interface PackagePolicyServiceInterface {
       skipEnsureInstalled?: boolean;
       skipUniqueNameVerification?: boolean;
       overwrite?: boolean;
+      packageInfo?: PackageInfo;
     }
   ): Promise<PackagePolicy>;
 

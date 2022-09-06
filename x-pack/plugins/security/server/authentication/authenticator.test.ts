@@ -348,16 +348,23 @@ describe('Authenticator', () => {
 
     it('returns user that authentication provider returns.', async () => {
       const request = httpServerMock.createKibanaRequest();
+      mockOptions.session.create.mockResolvedValue(mockSessVal);
 
       const user = mockAuthenticatedUser();
       mockBasicAuthenticationProvider.login.mockResolvedValue(
-        AuthenticationResult.succeeded(user, { authHeaders: { authorization: 'Basic .....' } })
+        AuthenticationResult.succeeded(user, {
+          authHeaders: { authorization: 'Basic .....' },
+          state: {}, // to ensure a new session is created
+        })
       );
 
       await expect(
         authenticator.login(request, { provider: { type: 'basic' }, value: {} })
       ).resolves.toEqual(
-        AuthenticationResult.succeeded(user, { authHeaders: { authorization: 'Basic .....' } })
+        AuthenticationResult.succeeded(user, {
+          authHeaders: { authorization: 'Basic .....' },
+          state: {},
+        })
       );
       expectAuditEvents({ action: 'user_login', outcome: 'success' });
     });
@@ -470,7 +477,7 @@ describe('Authenticator', () => {
       expect(mockOptions.userProfileService.activate).toHaveBeenCalledWith(userProfileGrant);
     });
 
-    it('does not activate profiles for the Elastic Cloud users even if profile grant is provided', async () => {
+    it('activates profiles for the Elastic Cloud users if profile grant is provided', async () => {
       const user = mockAuthenticatedUser({ elastic_cloud_user: true });
       const request = httpServerMock.createKibanaRequest();
       const authorization = `Basic ${Buffer.from('foo:bar').toString('base64')}`;
@@ -492,12 +499,14 @@ describe('Authenticator', () => {
 
       expect(mockOptions.session.create).toHaveBeenCalledTimes(1);
       expect(mockOptions.session.create).toHaveBeenCalledWith(request, {
+        userProfileId: 'some-profile-uid',
         username: user.username,
         provider: mockSessVal.provider,
         state: { authorization },
       });
       expectAuditEvents({ action: 'user_login', outcome: 'success' });
-      expect(mockOptions.userProfileService.activate).not.toHaveBeenCalled();
+      expect(mockOptions.userProfileService.activate).toHaveBeenCalledTimes(1);
+      expect(mockOptions.userProfileService.activate).toHaveBeenCalledWith(userProfileGrant);
     });
 
     it('returns `notHandled` if login attempt is targeted to not configured provider.', async () => {
@@ -704,10 +713,7 @@ describe('Authenticator', () => {
       expect(mockOptions.session.extend).not.toHaveBeenCalled();
       expect(mockOptions.session.invalidate).toHaveBeenCalledTimes(1);
       expect(mockOptions.session.invalidate).toHaveBeenCalledWith(request, { match: 'current' });
-      expectAuditEvents(
-        { action: 'user_logout', outcome: 'unknown' },
-        { action: 'user_login', outcome: 'success' }
-      );
+      expectAuditEvents({ action: 'user_logout', outcome: 'unknown' });
     });
 
     it('clears session if provider asked to do so in `succeeded` result.', async () => {
@@ -728,10 +734,7 @@ describe('Authenticator', () => {
       expect(mockOptions.session.extend).not.toHaveBeenCalled();
       expect(mockOptions.session.invalidate).toHaveBeenCalledTimes(1);
       expect(mockOptions.session.invalidate).toHaveBeenCalledWith(request, { match: 'current' });
-      expectAuditEvents(
-        { action: 'user_logout', outcome: 'unknown' },
-        { action: 'user_login', outcome: 'success' }
-      );
+      expectAuditEvents({ action: 'user_logout', outcome: 'unknown' });
     });
 
     it('clears session if provider asked to do so in `redirected` result.', async () => {
@@ -788,7 +791,7 @@ describe('Authenticator', () => {
         await expect(
           authenticator.login(request, { provider: { type: 'basic' }, value: {} })
         ).resolves.toEqual(AuthenticationResult.succeeded(mockUser));
-        expectAuditEvents({ action: 'user_login', outcome: 'success' });
+        expect(auditLogger.log).not.toHaveBeenCalled();
       });
 
       it('does not redirect to Access Agreement if request cannot be handled', async () => {
@@ -805,7 +808,7 @@ describe('Authenticator', () => {
 
       it('does not redirect to Access Agreement if authentication fails', async () => {
         const request = httpServerMock.createKibanaRequest();
-        mockOptions.session.get.mockResolvedValue(mockSessVal);
+        mockOptions.session.get.mockResolvedValue(null);
 
         const failureReason = new Error('something went wrong');
         mockBasicAuthenticationProvider.login.mockResolvedValue(
@@ -846,7 +849,7 @@ describe('Authenticator', () => {
         await expect(
           authenticator.login(request, { provider: { type: 'basic' }, value: {} })
         ).resolves.toEqual(AuthenticationResult.succeeded(mockUser, { state: 'some-state' }));
-        expectAuditEvents({ action: 'user_login', outcome: 'success' });
+        expect(auditLogger.log).not.toHaveBeenCalled();
       });
 
       it('does not redirect to Access Agreement its own requests', async () => {
@@ -860,7 +863,7 @@ describe('Authenticator', () => {
         await expect(
           authenticator.login(request, { provider: { type: 'basic' }, value: {} })
         ).resolves.toEqual(AuthenticationResult.succeeded(mockUser, { state: 'some-state' }));
-        expectAuditEvents({ action: 'user_login', outcome: 'success' });
+        expect(auditLogger.log).not.toHaveBeenCalled();
       });
 
       it('does not redirect to Access Agreement if it is not configured', async () => {
@@ -876,7 +879,7 @@ describe('Authenticator', () => {
         await expect(
           authenticator.login(request, { provider: { type: 'basic' }, value: {} })
         ).resolves.toEqual(AuthenticationResult.succeeded(mockUser, { state: 'some-state' }));
-        expectAuditEvents({ action: 'user_login', outcome: 'success' });
+        expect(auditLogger.log).not.toHaveBeenCalled();
       });
 
       it('does not redirect to Access Agreement if license doesnt allow it.', async () => {
@@ -893,7 +896,7 @@ describe('Authenticator', () => {
         await expect(
           authenticator.login(request, { provider: { type: 'basic' }, value: {} })
         ).resolves.toEqual(AuthenticationResult.succeeded(mockUser, { state: 'some-state' }));
-        expectAuditEvents({ action: 'user_login', outcome: 'success' });
+        expect(auditLogger.log).not.toHaveBeenCalled();
       });
 
       it('redirects to Access Agreement when needed.', async () => {
@@ -919,7 +922,7 @@ describe('Authenticator', () => {
             }
           )
         );
-        expectAuditEvents({ action: 'user_login', outcome: 'success' });
+        expect(auditLogger.log).not.toHaveBeenCalled();
       });
 
       it('redirects to Access Agreement preserving redirect URL specified in login attempt.', async () => {
@@ -949,7 +952,7 @@ describe('Authenticator', () => {
             }
           )
         );
-        expectAuditEvents({ action: 'user_login', outcome: 'success' });
+        expect(auditLogger.log).not.toHaveBeenCalled();
       });
 
       it('redirects to Access Agreement preserving redirect URL specified in the authentication result.', async () => {
@@ -976,7 +979,7 @@ describe('Authenticator', () => {
             }
           )
         );
-        expectAuditEvents({ action: 'user_login', outcome: 'success' });
+        expect(auditLogger.log).not.toHaveBeenCalled();
       });
 
       it('redirects AJAX requests to Access Agreement when needed.', async () => {
@@ -1002,7 +1005,7 @@ describe('Authenticator', () => {
             }
           )
         );
-        expectAuditEvents({ action: 'user_login', outcome: 'success' });
+        expect(auditLogger.log).not.toHaveBeenCalled();
       });
     });
 
@@ -1064,7 +1067,7 @@ describe('Authenticator', () => {
             authResponseHeaders: { 'WWW-Authenticate': 'Negotiate' },
           })
         );
-        expectAuditEvents({ action: 'user_login', outcome: 'success' });
+        expect(auditLogger.log).not.toHaveBeenCalled();
       });
 
       it('does not redirect to Overwritten Session if session was unauthenticated before login', async () => {
@@ -1279,7 +1282,7 @@ describe('Authenticator', () => {
       const authenticationResult = await authenticator.authenticate(request);
       expect(authenticationResult.failed()).toBe(true);
       expect(authenticationResult.error).toBe(failureReason);
-      expect(auditLogger.log).not.toHaveBeenCalled();
+      expectAuditEvents({ action: 'user_login', outcome: 'failure' });
     });
 
     it('returns user that authentication provider returns.', async () => {
@@ -1319,7 +1322,7 @@ describe('Authenticator', () => {
         provider: mockSessVal.provider,
         state: { authorization },
       });
-      expect(auditLogger.log).not.toHaveBeenCalled();
+      expectAuditEvents({ action: 'user_login', outcome: 'success' });
       expect(mockOptions.userProfileService.activate).not.toHaveBeenCalled();
     });
 
@@ -1344,7 +1347,7 @@ describe('Authenticator', () => {
         provider: mockSessVal.provider,
         state: { authorization },
       });
-      expect(auditLogger.log).not.toHaveBeenCalled();
+      expectAuditEvents({ action: 'user_login', outcome: 'success' });
       expect(mockOptions.userProfileService.activate).not.toHaveBeenCalled();
     });
 
@@ -1375,7 +1378,7 @@ describe('Authenticator', () => {
         provider: mockSessVal.provider,
         state: { authorization },
       });
-      expect(auditLogger.log).not.toHaveBeenCalled();
+      expectAuditEvents({ action: 'user_login', outcome: 'success' });
       expect(mockOptions.userProfileService.activate).toHaveBeenCalledTimes(1);
       expect(mockOptions.userProfileService.activate).toHaveBeenCalledWith(userProfileGrant);
     });
@@ -1952,7 +1955,10 @@ describe('Authenticator', () => {
         await expect(authenticator.authenticate(request)).resolves.toEqual(
           AuthenticationResult.succeeded(mockUser)
         );
-        expectAuditEvents({ action: 'user_logout', outcome: 'unknown' });
+        expectAuditEvents(
+          { action: 'user_logout', outcome: 'unknown' },
+          { action: 'user_login', outcome: 'success' }
+        );
       });
 
       it('does not redirect AJAX requests to Overwritten Session', async () => {
@@ -1972,7 +1978,10 @@ describe('Authenticator', () => {
             authResponseHeaders: { 'WWW-Authenticate': 'Negotiate' },
           })
         );
-        expectAuditEvents({ action: 'user_logout', outcome: 'unknown' });
+        expectAuditEvents(
+          { action: 'user_logout', outcome: 'unknown' },
+          { action: 'user_login', outcome: 'success' }
+        );
       });
 
       it('does not redirect to Overwritten Session if username and provider did not change', async () => {
@@ -2016,7 +2025,10 @@ describe('Authenticator', () => {
             }
           )
         );
-        expectAuditEvents({ action: 'user_logout', outcome: 'unknown' });
+        expectAuditEvents(
+          { action: 'user_logout', outcome: 'unknown' },
+          { action: 'user_login', outcome: 'success' }
+        );
       });
 
       it('redirects to Overwritten Session when provider changes', async () => {
@@ -2043,7 +2055,10 @@ describe('Authenticator', () => {
             }
           )
         );
-        expectAuditEvents({ action: 'user_logout', outcome: 'unknown' });
+        expectAuditEvents(
+          { action: 'user_logout', outcome: 'unknown' },
+          { action: 'user_login', outcome: 'success' }
+        );
       });
 
       it('redirects to Overwritten Session preserving redirect URL specified in the authentication result.', async () => {
@@ -2068,7 +2083,10 @@ describe('Authenticator', () => {
             }
           )
         );
-        expectAuditEvents({ action: 'user_logout', outcome: 'unknown' });
+        expectAuditEvents(
+          { action: 'user_logout', outcome: 'unknown' },
+          { action: 'user_login', outcome: 'success' }
+        );
       });
     });
   });

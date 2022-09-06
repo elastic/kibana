@@ -987,6 +987,19 @@
           },
           {
             "parentPluginId": "discover",
+            "id": "def-public.SavedSearch.tags",
+            "type": "Array",
+            "tags": [],
+            "label": "tags",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "src/plugins/saved_search/public/services/saved_searches/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "discover",
             "id": "def-public.SavedSearch.grid",
             "type": "Object",
             "tags": [],

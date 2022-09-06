@@ -17,6 +17,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'timePicker', 'discover']);
+  const from = 'Sep 22, 2015 @ 00:00:00.000';
+  const to = 'Sep 23, 2015 @ 00:00:00.000';
 
   describe('dashboard saved search embeddable', () => {
     before(async () => {
@@ -29,14 +31,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });
+      await PageObjects.common.setTime({ from, to });
       await PageObjects.common.navigateToApp('dashboard');
       await filterBar.ensureFieldEditorModalIsClosed();
       await PageObjects.dashboard.gotoDashboardLandingPage();
       await PageObjects.dashboard.clickNewDashboard();
-      await PageObjects.timePicker.setAbsoluteRange(
-        'Sep 22, 2015 @ 00:00:00.000',
-        'Sep 23, 2015 @ 00:00:00.000'
-      );
     });
 
     after(async () => {
@@ -94,6 +93,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await PageObjects.discover.getSavedSearchTitle()).to.equal(
         'Rendering Test: saved search'
       );
+    });
+
+    after(async () => {
+      await PageObjects.common.unsetTime();
     });
   });
 }
