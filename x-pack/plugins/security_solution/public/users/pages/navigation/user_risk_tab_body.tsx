@@ -52,9 +52,12 @@ const UserRiskTabBodyComponent: React.FC<
     useQueryToggle(`${QUERY_ID} overTime`);
   const { toggleStatus: contributorsToggleStatus, setToggleStatus: setContributorsToggleStatus } =
     useQueryToggle(`${QUERY_ID} contributors`);
-
+  const filterQuery = useMemo(
+    () => (userName ? buildUserNamesFilter([userName]) : undefined),
+    [userName]
+  );
   const [loading, { data, refetch, inspect }] = useUserRiskScore({
-    filterQuery: userName ? buildUserNamesFilter([userName]) : undefined,
+    filterQuery,
     onlyLatest: false,
     skip: !overTimeToggleStatus && !contributorsToggleStatus,
     timerange,
