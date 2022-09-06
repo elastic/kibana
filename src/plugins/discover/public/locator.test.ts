@@ -11,6 +11,9 @@ import { mockStorage } from '@kbn/kibana-utils-plugin/public/storage/hashed_item
 import { FilterStateStore } from '@kbn/es-query';
 import { DiscoverAppLocatorDefinition } from './locator';
 import { SerializableRecord } from '@kbn/utility-types';
+import { DiscoverStart, DiscoverStartPlugins } from './plugin';
+import { CoreSetup } from '@kbn/core/public';
+import { DataViewSpec } from '@kbn/data-views-plugin/public';
 
 const dataViewId: string = 'c367b774-a4c2-11ea-bb37-0242ac130002';
 const savedSearchId: string = '571aaf70-4c88-11e8-b3d7-01146121b73d';
@@ -19,9 +22,18 @@ interface SetupParams {
   useHash?: boolean;
 }
 
+const dataViewSpecMock = { id: 'mock-id' } as DataViewSpec;
+
+const dataViewsMock = { create: jest.fn(() => dataViewSpecMock) };
+
+const corePluginMock = {
+  getStartServices: jest.fn(() => [{}, { data: { dataViews: dataViewsMock } }]),
+} as unknown as CoreSetup<DiscoverStartPlugins, DiscoverStart>;
+
 const setup = async ({ useHash = false }: SetupParams = {}) => {
   const locator = new DiscoverAppLocatorDefinition({
     useHash,
+    core: corePluginMock,
   });
 
   return {
@@ -62,6 +74,17 @@ describe('Discover url generator', () => {
 
     expect(_a).toEqual({
       index: dataViewId,
+    });
+    expect(_g).toEqual({});
+  });
+
+  test('can specify dataViewSpec', async () => {
+    const { locator } = await setup();
+    const { path } = await locator.getLocation({ dataViewSpec: dataViewSpecMock });
+    const { _a, _g } = getStatesFromKbnUrl(path, ['_a', '_g']);
+
+    expect(_a).toEqual({
+      index: dataViewSpecMock.id,
     });
     expect(_g).toEqual({});
   });
