@@ -56,80 +56,81 @@ async function getMainServiceStatistics({
 }) {
   const { apmEventClient } = setup;
 
-  const allIndicesStats = await getTotalIndicesStats({ context, setup });
-
-  const response = await apmEventClient.search('get_main_service_statistics', {
-    apm: {
-      events: [
-        ProcessorEvent.span,
-        ProcessorEvent.transaction,
-        ProcessorEvent.error,
-        ProcessorEvent.metric,
-      ],
-    },
-    body: {
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            ...environmentQuery(environment),
-            ...kqlQuery(kuery),
-            ...rangeQuery(start, end),
-            ...(indexLifecyclePhase !== IndexLifecyclePhaseSelectOption.All
-              ? termQuery(
-                  TIER,
-                  indexLifeCyclePhaseToDataTier[indexLifecyclePhase]
-                )
-              : []),
-          ] as QueryDslQueryContainer[],
-        },
+  const [allIndicesStats, response] = await Promise.all([
+    getTotalIndicesStats({ context, setup }),
+    apmEventClient.search('get_main_service_statistics', {
+      apm: {
+        events: [
+          ProcessorEvent.span,
+          ProcessorEvent.transaction,
+          ProcessorEvent.error,
+          ProcessorEvent.metric,
+        ],
       },
-      aggs: {
-        sample: {
-          random_sampler: randomSampler,
-          aggs: {
-            services: {
-              terms: {
-                field: SERVICE_NAME,
-                size: 500,
-              },
-              aggs: {
-                sample: {
-                  top_hits: {
-                    size: 1,
-                    _source: [AGENT_NAME],
-                    sort: {
-                      '@timestamp': 'desc',
-                    },
-                  },
+      body: {
+        size: 0,
+        query: {
+          bool: {
+            filter: [
+              ...environmentQuery(environment),
+              ...kqlQuery(kuery),
+              ...rangeQuery(start, end),
+              ...(indexLifecyclePhase !== IndexLifecyclePhaseSelectOption.All
+                ? termQuery(
+                    TIER,
+                    indexLifeCyclePhaseToDataTier[indexLifecyclePhase]
+                  )
+                : []),
+            ] as QueryDslQueryContainer[],
+          },
+        },
+        aggs: {
+          sample: {
+            random_sampler: randomSampler,
+            aggs: {
+              services: {
+                terms: {
+                  field: SERVICE_NAME,
+                  size: 500,
                 },
-                indices: {
-                  terms: {
-                    field: INDEX,
-                    size: 500,
-                  },
-                  aggs: {
-                    number_of_metric_docs: {
-                      value_count: {
-                        field: INDEX,
+                aggs: {
+                  sample: {
+                    top_hits: {
+                      size: 1,
+                      _source: [AGENT_NAME],
+                      sort: {
+                        '@timestamp': 'desc',
                       },
                     },
                   },
-                },
-                environments: {
-                  terms: {
-                    field: SERVICE_ENVIRONMENT,
+                  indices: {
+                    terms: {
+                      field: INDEX,
+                      size: 500,
+                    },
+                    aggs: {
+                      number_of_metric_docs: {
+                        value_count: {
+                          field: INDEX,
+                        },
+                      },
+                    },
                   },
-                },
-                transactions: {
-                  filter: {
-                    term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction },
+                  environments: {
+                    terms: {
+                      field: SERVICE_ENVIRONMENT,
+                    },
                   },
-                  aggs: {
-                    sampled_transactions: {
-                      terms: {
-                        field: TRANSACTION_SAMPLED,
-                        size: 10,
+                  transactions: {
+                    filter: {
+                      term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction },
+                    },
+                    aggs: {
+                      sampled_transactions: {
+                        terms: {
+                          field: TRANSACTION_SAMPLED,
+                          size: 10,
+                        },
                       },
                     },
                   },
@@ -139,8 +140,8 @@ async function getMainServiceStatistics({
           },
         },
       },
-    },
-  });
+    }),
+  ]);
 
   const serviceStats = response.aggregations?.sample.services.buckets.map(
     (bucket) => {
