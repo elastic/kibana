@@ -176,7 +176,6 @@ export async function _installPackage({
      * This split of prepare/install could be extended to all asset types. Besides performance, it also allows us to
      * more easily write unit tests against the asset generation code without needing to mock ES responses.
      */
-
     const preparedIngestPipelines = prepareToInstallPipelines(packageInfo, paths);
     const preparedIndexTemplates = prepareToInstallTemplates(packageInfo, paths, esReferences);
 
