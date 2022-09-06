@@ -41,6 +41,7 @@ RUNTIME_DEPS = [
   "//packages/kbn-config-schema",
   "//packages/kbn-std",
   "//packages/kbn-i18n",
+  "//packages/core/status/core-status-common",
 ]
 
 TYPES_DEPS = [
