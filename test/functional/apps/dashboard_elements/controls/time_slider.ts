@@ -12,10 +12,8 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const retry = getService('retry');
   const esArchiver = getService('esArchiver');
   const security = getService('security');
-  const filterBar = getService('filterBar');
   const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
   const { dashboardControls, timePicker, common, dashboard } = getPageObjects([
@@ -23,10 +21,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'timePicker',
     'dashboard',
     'common',
-    'header',
   ]);
 
-  describe.only('Time Slider Control', async () => {
+  describe('Time Slider Control', async () => {
     before(async () => {
       await security.testUser.setRoles([
         'kibana_admin',
@@ -51,7 +48,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'Oct 22, 2018 @ 00:00:00.000',
         'Dec 3, 2018 @ 00:00:00.000'
       );
-      await dashboard.saveDashboard('Test Time Slider Control', { exitFromEditMode: false });
     });
 
     after(async () => {
