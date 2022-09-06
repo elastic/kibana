@@ -109,7 +109,7 @@ export const DocViewerTable = ({
   onAddColumn,
   onRemoveColumn,
 }: DocViewRenderProps) => {
-  const showAllActions = useIsWithinBreakpoints(['xl'], true);
+  const showActionsInsideTableCell = useIsWithinBreakpoints(['xl'], true);
 
   const { storage, uiSettings, fieldFormats } = useDiscoverServices();
   const showMultiFields = uiSettings.get(SHOW_MULTIFIELDS);
@@ -269,7 +269,11 @@ export const DocViewerTable = ({
 
   const headers = [
     !isSingleDocView && (
-      <EuiTableHeaderCell align="left" width={showAllActions ? 150 : 62} isSorted={false}>
+      <EuiTableHeaderCell
+        align="left"
+        width={showActionsInsideTableCell ? 150 : 62}
+        isSorted={false}
+      >
         <EuiText size="xs">
           <strong>
             <FormattedMessage
@@ -309,14 +313,14 @@ export const DocViewerTable = ({
               {!isSingleDocView && (
                 <EuiTableRowCell
                   key={field + '-actions'}
-                  align={showAllActions ? 'left' : 'center'}
-                  width={showAllActions ? undefined : 62}
+                  align={showActionsInsideTableCell ? 'left' : 'center'}
+                  width={showActionsInsideTableCell ? undefined : 62}
                   className="kbnDocViewer__tableActionsCell"
                   textOnly={false}
                   mobileOptions={MOBILE_OPTIONS}
                 >
                   <TableActions
-                    mode={showAllActions ? 'inline' : 'as_popover'}
+                    mode={showActionsInsideTableCell ? 'inline' : 'as_popover'}
                     field={field}
                     pinned={pinned}
                     fieldMapping={fieldMapping}
@@ -362,7 +366,7 @@ export const DocViewerTable = ({
         }
       );
     },
-    [onToggleColumn, onTogglePinned, isSingleDocView, showAllActions]
+    [onToggleColumn, onTogglePinned, isSingleDocView, showActionsInsideTableCell]
   );
 
   const rowElements = [
