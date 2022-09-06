@@ -11,7 +11,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { CoreStart } from '@kbn/core/public';
 // import { i18n } from '@kbn/i18n';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-// import { isOfAggregateQueryType, getIndexPatternFromSQLQuery } from '@kbn/es-query';
+import { isOfAggregateQueryType, AggregateQuery } from '@kbn/es-query';
 import { EuiSelect, EuiButtonEmpty } from '@elastic/eui';
 import { DatatableColumn, ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
@@ -25,10 +25,12 @@ import {
   DataType,
   TableChangeType,
 } from '../types';
+import { generateId } from '../id_generator';
 import { toExpression } from './to_expression';
 import { EsSQLDataPanel } from './datapanel';
-// import { fetchSql } from './fetch_sql';
-import { EsSQLPrivateState, EsSQLPersistedState } from './types';
+import { fetchSql } from './fetch_sql';
+import { loadIndexPatternRefs } from './utils';
+import { EsSQLPrivateState, EsSQLPersistedState, IndexPatternRef } from './types';
 import { Datasource } from '../types';
 
 export function getSQLDatasource({
@@ -60,7 +62,7 @@ export function getSQLDatasource({
             [id]: {
               ...state.layers[id],
               columns: state.fieldList.map((f) => ({
-                columnId: f.name,
+                columnId: f.id,
                 fieldName: f.name,
               })),
             },
@@ -72,12 +74,11 @@ export function getSQLDatasource({
           layerId: id,
           columns: state.fieldList.map((f) => {
             return {
-              columnId: f.name,
+              columnId: f.id,
               operation: {
                 dataType: f.meta.type,
                 label: f.name,
                 isBucketed: false,
-                noBucketInfo: true,
               },
             };
           }),
@@ -95,11 +96,47 @@ export function getSQLDatasource({
     getErrorMessages: () => {
       return [];
     },
-    initialize(state?: EsSQLPersistedState) {
+    async initialize(state?: EsSQLPersistedState) {
       const initState = state || { layers: {} };
-      // const indexPatternRefs: IndexPatternRef[] = await loadIndexPatternRefs(dataViews);
-      // const cachedFieldList: Record<string, { fields: DatatableColumn[]; singleRow: boolean }> = {};
-      const fieldList: DatatableColumn[] = [];
+      const indexPatternRefs: IndexPatternRef[] = await loadIndexPatternRefs(dataViews);
+      let fieldList: DatatableColumn[] = [];
+      if (state) {
+        const layer = Object.values(state?.layers)?.[0];
+        if (layer.query && isOfAggregateQueryType(layer.query) && 'sql' in layer.query) {
+          const table = await fetchSql(layer.query, dataViews, data, expressions);
+          const columnsFromQuery = table?.columns ?? [];
+          const layerIds = Object.keys(state.layers);
+          const newLayerId = layerIds.length > 0 ? layerIds[0] : generateId();
+          const existingColumns = state.layers[newLayerId].columns;
+          const columns = [
+            ...existingColumns,
+            ...columnsFromQuery.map((c) => ({ columnId: c.id, fieldName: c.id })),
+          ];
+          const uniqueIds: string[] = [];
+
+          const unique = columns.filter((col) => {
+            const isDuplicate = uniqueIds.includes(col.columnId);
+
+            if (!isDuplicate) {
+              uniqueIds.push(col.columnId);
+
+              return true;
+            }
+
+            return false;
+          });
+
+          fieldList = unique.map((u) => {
+            const field = columnsFromQuery.find((c) => c.name === u.fieldName);
+            return {
+              name: u.fieldName,
+              id: u.columnId,
+              meta: field?.meta,
+            };
+          }) as DatatableColumn[];
+        }
+      }
+      // const temp = fetchFieldList(query, data, expressions, timeFieldName);
       // if (context && 'sql' in context) {
       //   const table = await fetchSql(context, dataViews, data, expressions);
       //   const index = getIndexPatternFromSQLQuery(context.sql);
@@ -118,10 +155,9 @@ export function getSQLDatasource({
       // }
       return {
         ...initState,
-        // cachedFieldList,
         fieldList,
         removedLayers: [],
-        indexPatternRefs: [],
+        indexPatternRefs,
       };
     },
 
@@ -132,58 +168,29 @@ export function getSQLDatasource({
       return true;
     },
     insertLayer(state: EsSQLPrivateState, newLayerId: string) {
+      const layer = Object.values(state?.layers)?.[0];
+      const query = layer?.query;
+      const columns = layer?.columns ?? [];
       const removedLayer = state.removedLayers[0];
       const newRemovedList = removedLayer ? state.removedLayers.slice(1) : state.removedLayers;
+      const index =
+        layer?.index ??
+        (JSON.parse(localStorage.getItem('lens-settings') || '{}').indexPatternId ||
+          state.indexPatternRefs[0].id);
       return {
         ...state,
-        // cachedFieldList: {
-        //   ...state.cachedFieldList,
-        //   [newLayerId]: removedLayer
-        //     ? removedLayer.fieldList
-        //     : {
-        //         fields: [],
-        //         singleRow: false,
-        //       },
-        // },
-        fieldList: [],
         layers: {
           ...state.layers,
-          [newLayerId]: removedLayer
-            ? removedLayer.layer
-            : blankLayer(
-                JSON.parse(localStorage.getItem('lens-settings') || '{}').indexPatternId ||
-                  state.indexPatternRefs[0].id
-              ),
+          [newLayerId]: removedLayer ? removedLayer.layer : blankLayer(index, query, columns),
         },
         removedLayers: newRemovedList,
       };
     },
-    // updateLayerId(state: EsSQLPrivateState, oldLayerId: string, newLayerId: string) {
-    //   let layers = {};
-    //   Object.entries(state.layers).map(([key, value]) => {
-    //     if (key === oldLayerId) {
-    //       layers = {
-    //         ...layers,
-    //         [newLayerId]: value,
-    //       };
-    //     } else {
-    //       layers = {
-    //         ...layers,
-    //         [key]: value,
-    //       };
-    //     }
-    //   });
-    //   return {
-    //     ...state,
-    //     layers,
-    //   };
-    // },
-    createEmptyLayer(indexPatternId: string) {
+    createEmptyLayer() {
       return {
         indexPatternRefs: [],
         layers: {},
         removedLayers: [],
-        // cachedFieldList: {},
         fieldList: [],
       };
     },
@@ -213,7 +220,7 @@ export function getSQLDatasource({
         ...state,
         layers: {
           ...state.layers,
-          [layerId]: { ...state.layers[layerId], columns: [] },
+          [layerId]: { ...state.layers[layerId] },
         },
       };
     },
@@ -246,6 +253,9 @@ export function getSQLDatasource({
       //   })
       // );
       return true;
+    },
+    getUsedDataView: (state: EsSQLPrivateState, layerId: string) => {
+      return state.layers[layerId].index;
     },
 
     removeColumn({ prevState, layerId, columnId }) {
@@ -313,10 +323,14 @@ export function getSQLDatasource({
             ...fields.map((field) => ({ value: field.name, text: field.name })),
           ]}
           onChange={(e) => {
+            const meta = fields.find((f) => f.name === e.target.value)?.meta;
             props.setState(
               !selectedField
                 ? {
                     ...props.state,
+                    fieldList: meta
+                      ? [...fields, { id: props.columnId, name: e.target.value, meta }]
+                      : fields,
                     layers: {
                       ...props.state.layers,
                       [props.layerId]: {
@@ -330,6 +344,9 @@ export function getSQLDatasource({
                   }
                 : {
                     ...props.state,
+                    fieldList: meta
+                      ? [...fields, { id: props.columnId, name: e.target.value, meta }]
+                      : fields,
                     layers: {
                       ...props.state.layers,
                       [props.layerId]: {
@@ -365,33 +382,6 @@ export function getSQLDatasource({
       );
     },
 
-    onDrop: (props) => {
-      const { droppedItem, dropType } = props;
-
-      if (dropType === 'field_add') {
-        const currentLayer = props.state.layers[props.layerId];
-        const columnExists = currentLayer.columns.some((c) => c.columnId === props.columnId);
-        props.setState({
-          ...props.state,
-          layers: {
-            ...props.state.layers,
-            [props.layerId]: {
-              ...props.state.layers[props.layerId],
-              columns: columnExists
-                ? currentLayer.columns.map((c) =>
-                    c.columnId !== props.columnId ? c : { ...c, fieldName: droppedItem.field }
-                  )
-                : [
-                    ...props.state.layers[props.layerId].columns,
-                    { columnId: props.columnId, fieldName: droppedItem.field },
-                  ],
-            },
-          },
-        });
-        return true;
-      }
-      return false;
-    },
     uniqueLabels(state: EsSQLPrivateState) {
       const layers = state.layers;
       const columnLabelMap = {} as Record<string, string>;
@@ -409,9 +399,42 @@ export function getSQLDatasource({
     },
 
     getDropProps: (props) => {
-      if (!props.dragging?.isSqlField) return undefined;
+      const { source } = props;
+      if (!source) {
+        return;
+      }
+      const label = source.field as string;
+      return { dropTypes: ['field_add'], nextLabel: label };
+    },
 
-      return { dropTypes: ['field_add'], nextLabel: props.dragging?.field };
+    onDrop: (props) => {
+      const { dropType, state, source, target } = props;
+      const { layers, fieldList } = state;
+      const layerId = Object.keys(layers)?.[0];
+
+      const field = fieldList.find((f) => f.id === source.id);
+
+      if (dropType === 'field_add') {
+        const currentLayer = props.state.layers[layerId];
+        props.setState({
+          ...props.state,
+          fieldList: field
+            ? [...fieldList, { id: target.columnId, name: field.name, meta: field.meta }]
+            : fieldList,
+          layers: {
+            ...props.state.layers,
+            [layerId]: {
+              ...props.state.layers[layerId],
+              columns: [
+                ...currentLayer.columns,
+                { columnId: target.columnId, fieldName: field?.name ?? '' },
+              ],
+            },
+          },
+        });
+        return true;
+      }
+      return false;
     },
 
     getPublicAPI({ state, layerId }: PublicAPIProps<EsSQLPrivateState>) {
@@ -429,12 +452,10 @@ export function getSQLDatasource({
 
           if (column) {
             const field = state.fieldList?.find((f) => f.name === column.fieldName)!;
-            const overwrite = layer.overwrittenFieldTypes?.[column.fieldName];
             return {
-              dataType: overwrite || (field?.meta?.type as DataType),
+              dataType: field?.meta?.type as DataType,
               label: field?.name,
               isBucketed: false,
-              noBucketInfo: true,
             };
           }
           return null;
@@ -454,10 +475,14 @@ export function getSQLDatasource({
   return sqlDatasource;
 }
 
-function blankLayer(index: string) {
+function blankLayer(
+  index: string,
+  query?: AggregateQuery,
+  columns?: Array<{ columnId: string; fieldName: string }>
+) {
   return {
     index,
-    query: '',
-    columns: [],
+    query,
+    columns: columns ?? [],
   };
 }

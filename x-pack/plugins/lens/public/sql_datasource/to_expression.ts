@@ -30,18 +30,21 @@ function getExpressionForLayer(
       ],
     };
   });
+
   const kibana = buildExpressionFunction('kibana', {});
   const kibanaContext = buildExpressionFunction('kibana_context', {
     timeRange: timeRange && timerangeToAst(timeRange),
   });
   const ast = buildExpression([kibana, kibanaContext]).toAst();
   const timeFieldName = refs.find((r) => r.id === layer.index)?.timeField;
-  // do this dynamic
-  const essql = aggregateQueryToAst({ sql: layer.query }, timeFieldName);
+  if (layer.query) {
+    const essql = aggregateQueryToAst(layer.query, timeFieldName);
 
-  if (essql) {
-    ast.chain.push(essql);
+    if (essql) {
+      ast.chain.push(essql);
+    }
   }
+
   ast.chain.push({
     type: 'function',
     function: 'lens_map_to_columns',

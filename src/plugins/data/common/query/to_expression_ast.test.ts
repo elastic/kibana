@@ -11,7 +11,7 @@ import { queryStateToExpressionAst } from './to_expression_ast';
 describe('queryStateToExpressionAst', () => {
   it('returns an object with the correct structure', async () => {
     const dataViewsService = {} as unknown as DataViewsContract;
-    const actual = await queryStateToExpressionAst({
+    const actual = await ({
       filters: [],
       query: { language: 'lucene', query: '' },
       time: {

@@ -5,13 +5,13 @@
  * 2.0.
  */
 import type { DatatableColumn } from '@kbn/expressions-plugin/public';
+import type { AggregateQuery } from '@kbn/es-query';
 
 export interface EsSQLLayer {
   index: string;
-  query: string;
+  query: AggregateQuery | undefined;
   columns: Array<{ columnId: string; fieldName: string }>;
   timeField?: string;
-  overwrittenFieldTypes?: Record<string, string>;
 }
 
 export interface EsSQLPersistedState {

@@ -178,26 +178,6 @@ export function getIndexPatternDatasource({
         },
       };
     },
-    // updateLayerId(state: IndexPatternPrivateState, oldLayerId: string, newLayerId: string) {
-    //   let layers = {};
-    //   Object.entries(state.layers).map(([key, value]) => {
-    //     if (key === oldLayerId) {
-    //       layers = {
-    //         ...layers,
-    //         [newLayerId]: value,
-    //       };
-    //     } else {
-    //       layers = {
-    //         ...layers,
-    //         [key]: value,
-    //       };
-    //     }
-    //   });
-    //   return {
-    //     ...state,
-    //     layers,
-    //   };
-    // },
 
     createEmptyLayer(indexPatternId: string) {
       return {

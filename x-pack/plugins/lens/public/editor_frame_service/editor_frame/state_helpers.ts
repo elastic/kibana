@@ -195,7 +195,7 @@ export async function initializeSources(
   return {
     indexPatterns,
     indexPatternRefs,
-    states: initializeDatasources({
+    states: await initializeDatasources({
       datasourceMap,
       datasourceStates,
       initialContext,
@@ -207,7 +207,7 @@ export async function initializeSources(
   };
 }
 
-export function initializeDatasources({
+export async function initializeDatasources({
   datasourceMap,
   datasourceStates,
   indexPatternRefs,
@@ -228,7 +228,7 @@ export function initializeDatasources({
   const states: DatasourceStates = {};
   for (const [datasourceId, datasource] of Object.entries(datasourceMap)) {
     if (datasourceStates[datasourceId]) {
-      const state = datasource.initialize(
+      const state = await datasource.initialize(
         datasourceStates[datasourceId].state || undefined,
         references,
         initialContext,
@@ -318,7 +318,7 @@ export async function persistedStateToExpression(
     },
     { isFullEditor: false }
   );
-  const datasourceStates = initializeDatasources({
+  const datasourceStates = await initializeDatasources({
     datasourceMap,
     datasourceStates: datasourceStatesFromSO,
     references: [...references, ...(internalReferences || [])],

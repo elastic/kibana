@@ -665,7 +665,6 @@ export const LensTopNavMenu = ({
       visualization?.activeId,
     ]
   );
-  // console.dir(datasourceStates);
 
   const onSavedWrapped = useCallback(
     (newSavedQuery) => {
@@ -766,6 +765,15 @@ export const LensTopNavMenu = ({
             closeDataViewEditor.current = dataViewEditor.openEditor({
               onSave: async (dataView) => {
                 if (dataView.id) {
+                  // console.dir(dataView);
+                  // console.log(query);
+                  dispatch(
+                    switchAndCleanDatasource({
+                      newDatasourceId: 'indexpattern',
+                      visualizationId: visualization?.activeId,
+                      currentIndexPatternId: dataView?.id,
+                    })
+                  );
                   dispatchChangeIndexPattern(dataView);
                   setCurrentIndexPattern(dataView);
                 }
@@ -774,7 +782,7 @@ export const LensTopNavMenu = ({
             });
           }
         : undefined,
-    [canEditDataView, dataViewEditor, dispatchChangeIndexPattern]
+    [canEditDataView, dataViewEditor, dispatch, dispatchChangeIndexPattern, visualization?.activeId]
   );
 
   // setting that enables/disables SQL

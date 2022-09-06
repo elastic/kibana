@@ -11,3 +11,4 @@ export * from './types';
 export * from './is_query';
 export * from './query_state';
 export { queryStateToExpressionAst } from './to_expression_ast';
+export { textBasedQueryStateToExpressionAst } from './text_based_query_state_to_ast';

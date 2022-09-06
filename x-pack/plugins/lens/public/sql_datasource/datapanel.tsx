@@ -12,6 +12,7 @@ import usePrevious from 'react-use/lib/usePrevious';
 import { isEqual } from 'lodash';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { DatatableColumn } from '@kbn/expressions-plugin/public';
 
 import { isOfAggregateQueryType, getIndexPatternFromSQLQuery } from '@kbn/es-query';
 import { ExpressionsStart } from '@kbn/expressions-plugin/public';
@@ -51,32 +52,58 @@ export function EsSQLDataPanel({
   const clearLocalState = () => setLocalState((s) => ({ ...s, nameFilter: '' }));
   useEffect(() => {
     async function fetchData() {
-      // const cachedFieldList: Record<string, { fields: DatatableColumn[]; singleRow: boolean }> = {};
       if (query && isOfAggregateQueryType(query) && 'sql' in query && !isEqual(query, prevQuery)) {
         const indexPatternRefs: IndexPatternRef[] = await loadIndexPatternRefs(dataViews);
         const table = await fetchSql(query, dataViews, data, expressions);
         const indexPattern = getIndexPatternFromSQLQuery(query.sql);
         const index = indexPatternRefs.find((r) => r.title === indexPattern)?.id ?? '';
-        const columns = table?.columns ?? [];
+        const dataView = await dataViews.get(index);
+        const timeFieldName = dataView.timeFieldName;
+        const columnsFromQuery = table?.columns ?? [];
         const layerIds = Object.keys(state.layers);
         const newLayerId = layerIds.length > 0 ? layerIds[0] : generateId();
-        // cachedFieldList[newLayerId] = {
-        //   fields: columns ?? [],
-        //   singleRow: table?.rows.length === 1,
-        // };
+        const existingColumns = state.layers[newLayerId].columns;
+        const columns = [
+          ...existingColumns,
+          ...columnsFromQuery.map((c) => ({ columnId: c.id, fieldName: c.id })),
+        ];
+        const uniqueIds: string[] = [];
+
+        const unique = columns.filter((col) => {
+          const isDuplicate = uniqueIds.includes(col.columnId);
+
+          if (!isDuplicate) {
+            uniqueIds.push(col.columnId);
+
+            return true;
+          }
+
+          return false;
+        });
+
         const tempState = {
           layers: {
             [newLayerId]: {
               index,
-              query: query.sql,
-              columns: columns.map((c) => ({ columnId: c.id, fieldName: c.id })),
+              query,
+              columns: unique,
+              timeField: timeFieldName,
             },
           },
         };
 
+        const fieldList = unique.map((u) => {
+          const field = columnsFromQuery.find((c) => c.name === u.fieldName);
+          return {
+            name: u.fieldName,
+            id: u.columnId,
+            meta: field?.meta,
+          };
+        }) as DatatableColumn[];
+
         setState({
           ...tempState,
-          fieldList: columns ?? [],
+          fieldList: fieldList ?? [],
           removedLayers: [],
           indexPatternRefs,
         });
@@ -159,7 +186,6 @@ export function EsSQLDataPanel({
                           draggable
                           order={[index]}
                           value={{
-                            isSqlField: true,
                             field: field?.name,
                             id: field.id,
                             humanData: { label: field?.name },

@@ -233,6 +233,15 @@ export function ChangeDataView({
                 onClick={() => {
                   setPopoverIsOpen(false);
                   onDataViewCreated();
+                  if (isTextBasedLangSelected) {
+                    setIsTextBasedLangSelected(false);
+                    // clean up the Text based language query
+                    onTextLangQuerySubmit?.({
+                      language: 'kuery',
+                      query: '',
+                    });
+                    setTriggerLabel(trigger.label);
+                  }
                 }}
                 size="xs"
                 iconType="plusInCircleFilled"

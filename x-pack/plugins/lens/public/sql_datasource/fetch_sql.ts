@@ -12,6 +12,7 @@ import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { Datatable } from '@kbn/expressions-plugin/public';
 import type { DataViewsContract } from '@kbn/data-views-plugin/common';
 import { queryStateToExpressionAst } from '@kbn/data-plugin/common';
+// import { textBasedQueryStateToExpressionAst } from '@kbn/data-plugin/common';
 
 interface SQLErrorResponse {
   error: {
