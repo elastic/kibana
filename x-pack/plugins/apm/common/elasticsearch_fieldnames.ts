@@ -147,3 +147,7 @@ export const PROFILE_INUSE_SPACE = 'profile.inuse_space.bytes';
 export const FAAS_ID = 'faas.id';
 export const FAAS_COLDSTART = 'faas.coldstart';
 export const FAAS_TRIGGER_TYPE = 'faas.trigger.type';
+
+// Metadata
+export const TIER = '_tier';
+export const INDEX = '_index';
