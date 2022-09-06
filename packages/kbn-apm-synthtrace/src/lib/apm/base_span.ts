@@ -76,4 +76,12 @@ export class BaseSpan extends Serializable<ApmFields> {
   isTransaction(): this is Transaction {
     return this.fields['processor.event'] === 'transaction';
   }
+
+  labels(labels: Record<string, string>) {
+    Object.entries(labels).forEach(([key, value]) => {
+      // @ts-expect-error
+      this.fields[`labels.${key}`] = value;
+    });
+    return this;
+  }
 }

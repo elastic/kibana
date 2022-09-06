@@ -21,7 +21,7 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
   return {
     generate: ({ from, to }) => {
       const range = timerange(from, to);
-      const timestamps = range.interval('1s').rate(3);
+      const timestamps = range.ratePerMinute(180);
 
       const instance = apm.service('lambda-python', ENVIRONMENT, 'python').instance('instance');
 

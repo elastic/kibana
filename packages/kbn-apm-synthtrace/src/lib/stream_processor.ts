@@ -45,9 +45,11 @@ export class StreamProcessor<TFields extends Fields = ApmFields> {
   private readonly streamAggregators: Array<StreamAggregator<TFields>>;
 
   constructor(private readonly options: StreamProcessorOptions<TFields>) {
-    [this.intervalAmount, this.intervalUnit] = this.options.flushInterval
+    const { intervalAmount, intervalUnit } = this.options.flushInterval
       ? parseInterval(this.options.flushInterval)
       : parseInterval('1m');
+    this.intervalAmount = intervalAmount;
+    this.intervalUnit = intervalUnit;
     this.name = this.options?.name ?? 'StreamProcessor';
     this.version = this.options.version ?? '8.0.0';
     this.versionMajor = Number.parseInt(this.version.split('.')[0], 10);

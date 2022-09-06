@@ -28,7 +28,7 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
     generate: ({ from, to }) => {
       const range = timerange(from, to);
 
-      const successfulTimestamps = range.interval('1s').rate(1);
+      const successfulTimestamps = range.ratePerMinute(60);
       // `.randomize(3, 180);
 
       const instances = [...Array(numServices).keys()].map((index) =>
