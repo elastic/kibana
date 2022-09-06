@@ -20,6 +20,7 @@ export interface TimeSliderSubjectState {
   isOpen: boolean;
   ticks: EuiRangeTick[];
   timeRangeBounds: [number, number];
+  value?: [number, number];
 }
 
 // public only - redux embeddable state type

@@ -38,7 +38,7 @@ export const TimeSlider: FC<Props> = (props: Props) => {
   const timeRangeMin = timeRangeBounds[FROM_INDEX];
   const timeRangeMax = timeRangeBounds[TO_INDEX];
   const value = select((state) => {
-    return state.explicitInput.value;
+    return state.componentState.value;
   });
   const isOpen = select((state) => {
     return state.componentState.isOpen;

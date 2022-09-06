@@ -25,11 +25,25 @@ export const timeSliderReducers = {
     state.componentState.ticks = action.payload.ticks;
     state.componentState.timeRangeBounds = action.payload.timeRangeBounds;
   },
+  setValueAsPercentageOfTimeRange: (
+    state: WritableDraft<TimeSliderReduxState>,
+    action: PayloadAction<{
+      timesliceStartAsPercentageOfTimeRange?: number;
+      timesliceEndAsPercentageOfTimeRange?: number;
+    }>
+  ) => {
+    state.explicitInput.timesliceStartAsPercentageOfTimeRange =
+      action.payload.timesliceStartAsPercentageOfTimeRange;
+    state.explicitInput.timesliceEndAsPercentageOfTimeRange =
+      action.payload.timesliceEndAsPercentageOfTimeRange;
+  },
   setValue: (
     state: WritableDraft<TimeSliderReduxState>,
-    action: PayloadAction<{ value?: [number, number] }>
+    action: PayloadAction<{
+      value?: [number, number];
+    }>
   ) => {
-    state.explicitInput.value = action.payload.value;
+    state.componentState.value = action.payload.value;
   },
   setRange: (
     state: WritableDraft<TimeSliderReduxState>,
