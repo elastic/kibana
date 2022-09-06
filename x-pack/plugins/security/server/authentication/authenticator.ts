@@ -721,10 +721,8 @@ export class Authenticator {
 
     // If authentication result includes user profile grant, we should try to activate user profile for this user and
     // store user profile identifier in the session value.
-    // IMPORTANT: We don't activate profiles for the Elastic Cloud managed users until Cloud supports stable user
-    // profile identifiers.
-    const shouldActivateProfile =
-      authenticationResult.userProfileGrant && !authenticationResult.user?.elastic_cloud_user;
+    const shouldActivateProfile = authenticationResult.userProfileGrant;
+
     if (shouldActivateProfile) {
       this.logger.debug(`Activating profile for "${authenticationResult.user?.username}".`);
       userProfileId = (
