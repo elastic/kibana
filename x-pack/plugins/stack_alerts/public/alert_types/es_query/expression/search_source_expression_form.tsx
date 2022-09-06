@@ -38,13 +38,21 @@ interface LocalState {
   timeWindowSize: CommonAlertParams['timeWindowSize'];
   timeWindowUnit: CommonAlertParams['timeWindowUnit'];
   size: CommonAlertParams['size'];
+  excludeHitsFromPreviousRun: CommonAlertParams['excludeHitsFromPreviousRun'];
 }
 
 interface LocalStateAction {
   type:
     | SearchSourceParamsAction['type']
-    | ('threshold' | 'thresholdComparator' | 'timeWindowSize' | 'timeWindowUnit' | 'size');
-  payload: SearchSourceParamsAction['payload'] | (number[] | number | string);
+    | (
+        | 'threshold'
+        | 'thresholdComparator'
+        | 'timeWindowSize'
+        | 'timeWindowUnit'
+        | 'size'
+        | 'excludeHitsFromPreviousRun'
+      );
+  payload: SearchSourceParamsAction['payload'] | (number[] | number | string | boolean);
 }
 
 type LocalStateReducer = (prevState: LocalState, action: LocalStateAction) => LocalState;
@@ -94,6 +102,8 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
       timeWindowSize: ruleParams.timeWindowSize ?? DEFAULT_VALUES.TIME_WINDOW_SIZE,
       timeWindowUnit: ruleParams.timeWindowUnit ?? DEFAULT_VALUES.TIME_WINDOW_UNIT,
       size: ruleParams.size ?? DEFAULT_VALUES.SIZE,
+      excludeHitsFromPreviousRun:
+        ruleParams.excludeHitsFromPreviousRun ?? DEFAULT_VALUES.EXCLUDE_PREVIOUS_HITS,
     }
   );
   const { index: dataView, query, filter: filters } = ruleConfiguration;
@@ -170,6 +180,11 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
 
   const onChangeSizeValue = useCallback(
     (updatedValue: number) => dispatch({ type: 'size', payload: updatedValue }),
+    []
+  );
+
+  const onChangeExcludeHitsFromPreviousRun = useCallback(
+    (exclude: boolean) => dispatch({ type: 'excludeHitsFromPreviousRun', payload: exclude }),
     []
   );
 
@@ -275,6 +290,8 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
         hasValidationErrors={hasExpressionValidationErrors(ruleParams) || !dataView}
         onTestFetch={onTestFetch}
         onCopyQuery={onCopyQuery}
+        excludeHitsFromPreviousRun={ruleConfiguration.excludeHitsFromPreviousRun}
+        onChangeExcludeHitsFromPreviousRun={onChangeExcludeHitsFromPreviousRun}
       />
 
       <EuiSpacer />
