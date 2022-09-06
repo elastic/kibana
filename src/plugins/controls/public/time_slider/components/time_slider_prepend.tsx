@@ -81,6 +81,7 @@ export const TimeSliderPrepend: FC<Props> = (props: Props) => {
         aria-label={i18n.translate('controls.timeSlider.previousLabel', {
           defaultMessage: 'Previous time window',
         })}
+        data-test-subj="timeSlider-previousTimeWindow"
       />
       {props.waitForControlOutputConsumersToLoad$ === undefined ? null : (
         <EuiButtonIcon
@@ -109,6 +110,7 @@ export const TimeSliderPrepend: FC<Props> = (props: Props) => {
         aria-label={i18n.translate('controls.timeSlider.nextLabel', {
           defaultMessage: 'Next time window',
         })}
+        data-test-subj="timeSlider-nextTimeWindow"
       />
     </div>
   );
