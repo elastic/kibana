@@ -5,21 +5,15 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
 import { EuiFlexItem } from '@elastic/eui';
-import { toMetricOpt } from '../../../snapshot_metric_i18n';
-// eslint-disable-next-line @kbn/imports/no_boundary_crossing
-import { WaffleSortControls } from '../../../../public/pages/metrics/inventory_view/components/waffle/waffle_sort_controls';
-import type { ToolbarProps } from '../../../../public/pages/metrics/inventory_view/components/toolbars/toolbar';
-// eslint-disable-next-line @kbn/imports/no_boundary_crossing
-import { WaffleMetricControls } from '../../../../public/pages/metrics/inventory_view/components/waffle/metric_control';
-// eslint-disable-next-line @kbn/imports/no_boundary_crossing
-import { WaffleGroupByControls } from '../../../../public/pages/metrics/inventory_view/components/waffle/waffle_group_by_controls';
-import {
-  toGroupByOpt,
-  // eslint-disable-next-line @kbn/imports/no_boundary_crossing
-} from '../../../../public/pages/metrics/inventory_view/components/toolbars/toolbar_wrapper';
-import { SnapshotMetricType } from '../../types';
+import React, { useMemo } from 'react';
+import { SnapshotMetricType } from '../../../../../../common/inventory_models/types';
+import { toMetricOpt } from '../../../../../../common/snapshot_metric_i18n';
+import { WaffleMetricControls } from '../waffle/metric_control';
+import { WaffleGroupByControls } from '../waffle/waffle_group_by_controls';
+import { WaffleSortControls } from '../waffle/waffle_sort_controls';
+import { toGroupByOpt } from './toolbar_wrapper';
+import type { ToolbarProps } from './types';
 
 interface Props extends ToolbarProps {
   metricTypes: SnapshotMetricType[];
