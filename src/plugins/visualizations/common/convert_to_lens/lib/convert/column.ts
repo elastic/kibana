@@ -14,7 +14,7 @@ import { SchemaConfig, SupportedAggregation } from '../../../types';
 import { AggId, ExtraColumnFields, GeneralColumnWithMeta } from './types';
 import { getLabel } from '../utils';
 
-export const createAggregationId = (agg: SchemaConfig): AggId => `${agg.aggType}.${agg.accessor}`;
+export const createAggregationId = (agg: SchemaConfig): AggId => `${agg.aggType}.${agg.aggId}`;
 
 export const createColumn = <T extends SupportedAggregation>(
   agg: SchemaConfig<T>,

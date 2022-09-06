@@ -52,7 +52,7 @@ export interface CommonColumnConverterArgs<
   dataView: DataView;
 }
 
-export type AggId = `${string}.${number}`;
+export type AggId = `${string}.${string}`;
 
 export interface Meta {
   aggId: AggId;
