@@ -299,22 +299,8 @@ describe('#start(installPath)', () => {
     const cluster = new Cluster({ log, ssl: false });
     await cluster.start();
 
-    expect(extractConfigFiles.mock.calls).toMatchInlineSnapshot(`
-      Array [
-        Array [
-          Array [
-            "action.destructive_requires_name=true",
-            "cluster.routing.allocation.disk.threshold_enabled=false",
-            "ingest.geoip.downloader.enabled=false",
-            "search.check_ccs_compatibility=true",
-          ],
-          undefined,
-          Object {
-            "log": <ToolingLog>,
-          },
-        ],
-      ]
-    `);
+    const config = extractConfigFiles.mock.calls[0][0];
+    expect(config).not.toContain('xpack.security.http.ssl.enabled=true');
   });
 
   it(`allows overriding search.check_ccs_compatibility`, async () => {
@@ -331,22 +317,9 @@ describe('#start(installPath)', () => {
       esArgs: ['search.check_ccs_compatibility=false'],
     });
 
-    expect(extractConfigFiles.mock.calls).toMatchInlineSnapshot(`
-      Array [
-        Array [
-          Array [
-            "action.destructive_requires_name=true",
-            "cluster.routing.allocation.disk.threshold_enabled=false",
-            "ingest.geoip.downloader.enabled=false",
-            "search.check_ccs_compatibility=false",
-          ],
-          undefined,
-          Object {
-            "log": <ToolingLog>,
-          },
-        ],
-      ]
-    `);
+    const config = extractConfigFiles.mock.calls[0][0];
+    expect(config).toContain('search.check_ccs_compatibility=false');
+    expect(config).not.toContain('search.check_ccs_compatibility=true');
   });
 });
 
@@ -411,22 +384,8 @@ describe('#run()', () => {
     const cluster = new Cluster({ log, ssl: false });
     await cluster.run();
 
-    expect(extractConfigFiles.mock.calls).toMatchInlineSnapshot(`
-      Array [
-        Array [
-          Array [
-            "action.destructive_requires_name=true",
-            "cluster.routing.allocation.disk.threshold_enabled=false",
-            "ingest.geoip.downloader.enabled=false",
-            "search.check_ccs_compatibility=true",
-          ],
-          undefined,
-          Object {
-            "log": <ToolingLog>,
-          },
-        ],
-      ]
-    `);
+    const config = extractConfigFiles.mock.calls[0][0];
+    expect(config).not.toContain(`xpack.security.http.ssl.enabled=true`);
   });
 
   it('sets default Java heap', async () => {
