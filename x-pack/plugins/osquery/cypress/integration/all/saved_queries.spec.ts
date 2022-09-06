@@ -9,7 +9,6 @@ import { getRandomInt } from '../../tasks/helpers';
 import { navigateTo } from '../../tasks/navigation';
 
 import { login } from '../../tasks/login';
-import { getSavedQueriesComplexTest } from '../../tasks/saved_queries';
 import { ROLES } from '../../test';
 
 describe('ALL - Saved queries', () => {
@@ -22,5 +21,6 @@ describe('ALL - Saved queries', () => {
     navigateTo('/app/osquery');
   });
 
-  getSavedQueriesComplexTest(SAVED_QUERY_ID, SAVED_QUERY_DESCRIPTION);
+  // TODO usnkip after FF
+  // getSavedQueriesComplexTest(SAVED_QUERY_ID, SAVED_QUERY_DESCRIPTION);
 });

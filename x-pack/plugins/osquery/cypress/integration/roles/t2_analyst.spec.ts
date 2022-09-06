@@ -18,7 +18,6 @@ import {
   typeInOsqueryFieldInput,
 } from '../../tasks/live_query';
 import { ArchiverMethod, runKbnArchiverScript } from '../../tasks/archiver';
-import { getSavedQueriesComplexTest } from '../../tasks/saved_queries';
 
 describe('T2 Analyst - READ + Write Live/Saved + runSavedQueries ', () => {
   const SAVED_QUERY_ID = 'Saved-Query-Id';
@@ -38,7 +37,8 @@ describe('T2 Analyst - READ + Write Live/Saved + runSavedQueries ', () => {
     runKbnArchiverScript(ArchiverMethod.UNLOAD, 'saved_query');
   });
 
-  getSavedQueriesComplexTest(NEW_SAVED_QUERY_ID, NEW_SAVED_QUERY_DESCRIPTION);
+  // TODO unskip after FF
+  // getSavedQueriesComplexTest(NEW_SAVED_QUERY_ID, NEW_SAVED_QUERY_DESCRIPTION);
 
   it('should not be able to add nor edit packs', () => {
     const PACK_NAME = 'removing-pack';
