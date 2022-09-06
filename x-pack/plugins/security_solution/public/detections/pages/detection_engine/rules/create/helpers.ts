@@ -444,7 +444,9 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
         language: ruleFields.queryBar?.query?.language,
         query: ruleFields.queryBar?.query?.query as string,
         saved_id: undefined,
-        ...(ruleType === 'query' &&
+        type: 'query',
+        // rule only be updated as saved_query type if it has saved_id and shouldLoadQueryDynamically checkbox checked
+        ...(['query', 'saved_query'].includes(ruleType) &&
           ruleFields.queryBar?.saved_id &&
           ruleFields.shouldLoadQueryDynamically && {
             type: 'saved_query' as Type,
