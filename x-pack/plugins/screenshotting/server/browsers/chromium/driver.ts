@@ -345,7 +345,7 @@ export class HeadlessChromiumDriver {
       return;
     }
 
-    const client = (this.page as unknown as {_client(): CDPSession})._client();
+    const client = (this.page as unknown as { _client(): CDPSession })._client();
 
     // We have to reach into the Chrome Devtools Protocol to apply headers as using
     // puppeteer's API will cause map tile requests to hang indefinitely:
@@ -436,9 +436,9 @@ export class HeadlessChromiumDriver {
     // In order to get the inspector running, we have to know the page's internal ID (again, private)
     // in order to construct the final debugging URL.
 
-    const client = (this.page as unknown as {_client(): CDPSession})._client();
+    const client = (this.page as unknown as { _client(): CDPSession })._client();
     const target = this.page.target();
-    const targetId = (target as unknown as {_targetId: string})._targetId;
+    const targetId = (target as unknown as { _targetId: string })._targetId;
 
     await client.send('Debugger.enable');
     await client.send('Debugger.pause');
