@@ -43,7 +43,7 @@ const UPDATE_FAILED_TEXT = i18n.translate('xpack.csp.rules.rulesErrorToast.updat
 });
 
 export const useBulkUpdateCspRules = () => {
-  const { savedObjects, notifications, http } = useKibana().services;
+  const { notifications, http } = useKibana().services;
   const queryClient = useQueryClient();
 
   return useMutation(
@@ -53,20 +53,16 @@ export const useBulkUpdateCspRules = () => {
     }: {
       savedObjectRules: RuleSavedObject[];
       packagePolicyId: CspRule['package_policy_id'];
-    }) => {
-      await savedObjects.client.bulkUpdate<RuleSavedObject>(
-        savedObjectRules.map((savedObjectRule) => ({
-          type: CSP_RULE_SAVED_OBJECT_TYPE,
-          id: savedObjectRule.id,
-          attributes: savedObjectRule.attributes,
-        }))
-      );
-      await http.post(UPDATE_RULES_CONFIG_ROUTE_PATH, {
+    }) =>
+      http.post(UPDATE_RULES_CONFIG_ROUTE_PATH, {
         body: JSON.stringify({
           package_policy_id: packagePolicyId,
+          rules: savedObjectRules.map((savedObjectRule) => ({
+            id: savedObjectRule.id,
+            enabled: savedObjectRule.attributes.enabled,
+          })),
         }),
-      });
-    },
+      }),
     {
       onError: (err) => {
         if (err instanceof Error) notifications.toasts.addError(err, { title: UPDATE_FAILED_TEXT });
