@@ -82,7 +82,7 @@ export async function fetch({ soClient }: Args): Promise<FileKindUsageSchema> {
         avg_size: size.value,
       })
     ),
-    status: (aggregations?.status.buckets as SizeBucket[])?.reduce(
+    status_breakdown: (aggregations?.status.buckets as SizeBucket[])?.reduce(
       (acc, { key, size, doc_count: count }) => ({
         ...acc,
         [key as FileStatus]: {
@@ -90,7 +90,7 @@ export async function fetch({ soClient }: Args): Promise<FileKindUsageSchema> {
           avg_size: size.value,
         },
       }),
-      {} as FileKindUsageSchema['status']
+      {} as FileKindUsageSchema['status_breakdown']
     ),
     share_count: sharesTotal,
   };

@@ -26,7 +26,7 @@ export interface FileKindUsageSchema extends CountAndSize {
   bytes_used: null | number;
   share_count: number;
   file_kind_breakdown: FileKind[];
-  status: {
+  status_breakdown: {
     [status in FileStatus]: CountAndSize;
   };
 }
@@ -57,7 +57,7 @@ export const schema: MakeSchemaFrom<FileKindUsageSchema> = {
       ...countAndAvgSize,
     },
   },
-  status: {
+  status_breakdown: {
     AWAITING_UPLOAD: countAndAvgSize,
     DELETED: countAndAvgSize,
     READY: countAndAvgSize,
