@@ -14,6 +14,7 @@ import type {
   InternalHttpServicePreboot,
   InternalHttpServiceSetup,
 } from '@kbn/core-http-server-internal';
+import type { I18nServiceSetup } from '@kbn/core-i18n-server';
 import { config as i18nConfigDef, I18nConfigType } from './i18n_config';
 import { getKibanaTranslationFiles } from './get_kibana_translation_files';
 import { initTranslations } from './init_translations';
@@ -27,21 +28,6 @@ export interface PrebootDeps {
 export interface SetupDeps {
   http: InternalHttpServiceSetup;
   pluginPaths: string[];
-}
-
-/**
- * @public
- */
-export interface I18nServiceSetup {
-  /**
-   * Return the locale currently in use.
-   */
-  getLocale(): string;
-
-  /**
-   * Return the absolute paths to translation files currently in use.
-   */
-  getTranslationFiles(): string[];
 }
 
 export class I18nService {
