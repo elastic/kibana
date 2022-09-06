@@ -46,7 +46,7 @@ export const OpenIndicatorFlyoutButton: VFC<OpenIndicatorFlyoutButtonProps> = ({
     <EuiToolTip content={buttonLabel} delay="long">
       <EuiButtonIcon
         data-test-subj={BUTTON_TEST_ID}
-        color={isOpen ? 'primary' : 'text'}
+        color={isOpen ? 'text' : 'primary'}
         iconType={isOpen ? 'minimize' : 'expand'}
         isSelected={isOpen}
         iconSize="s"

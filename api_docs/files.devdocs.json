@@ -5063,7 +5063,9 @@
             "signature": [
               "(content: ",
               "Readable",
-              ") => Promise<",
+              ", abort$?: ",
+              "Observable",
+              "<unknown> | undefined) => Promise<",
               {
                 "pluginId": "files",
                 "scope": "common",
@@ -5091,6 +5093,23 @@
                 "path": "x-pack/plugins/files/common/types.ts",
                 "deprecated": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "files",
+                "id": "def-common.File.uploadContent.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "abort$",
+                "description": [
+                  "- An observable that can be used to abort the upload at any time."
+                ],
+                "signature": [
+                  "Observable",
+                  "<unknown> | undefined"
+                ],
+                "path": "x-pack/plugins/files/common/types.ts",
+                "deprecated": false,
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -5560,10 +5579,12 @@
             "parentPluginId": "files",
             "id": "def-common.FileKind.http",
             "type": "Object",
-            "tags": [],
+            "tags": [
+              "note"
+            ],
             "label": "http",
             "description": [
-              "\nOptionally specify which HTTP routes to create for the file kind"
+              "\nSpecify which HTTP routes to create for the file kind.\n\nYou can always create your own HTTP routes for working with files but\nthis interface allows you to expose basic CRUD operations, upload, download\nand sharing of files over a RESTful-like interface.\n"
             ],
             "signature": [
               "{ create?: HttpEndpointDefinition | undefined; update?: HttpEndpointDefinition | undefined; delete?: HttpEndpointDefinition | undefined; getById?: HttpEndpointDefinition | undefined; list?: HttpEndpointDefinition | undefined; download?: HttpEndpointDefinition | undefined; share?: HttpEndpointDefinition | undefined; }"

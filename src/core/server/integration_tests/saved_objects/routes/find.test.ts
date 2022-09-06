@@ -9,13 +9,17 @@
 import supertest from 'supertest';
 import querystring from 'querystring';
 
-import { registerFindRoute } from '../../../saved_objects/routes/find';
-import { savedObjectsClientMock } from '../../../mocks';
-import { CoreUsageStatsClient } from '../../../core_usage_data';
-import { coreUsageStatsClientMock } from '../../../core_usage_data/core_usage_stats_client.mock';
-import { coreUsageDataServiceMock } from '../../../core_usage_data/core_usage_data_service.mock';
-import { setupServer } from '../../../saved_objects/routes/test_utils';
-import type { InternalSavedObjectsRequestHandlerContext } from '../../../saved_objects/internal_types';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import type { ICoreUsageStatsClient } from '@kbn/core-usage-data-base-server-internal';
+import {
+  coreUsageStatsClientMock,
+  coreUsageDataServiceMock,
+} from '@kbn/core-usage-data-server-mocks';
+import { setupServer } from './test_utils';
+import {
+  registerFindRoute,
+  type InternalSavedObjectsRequestHandlerContext,
+} from '@kbn/core-saved-objects-server-internal';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 
@@ -24,7 +28,7 @@ describe('GET /api/saved_objects/_find', () => {
   let httpSetup: SetupServerReturn['httpSetup'];
   let handlerContext: SetupServerReturn['handlerContext'];
   let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
-  let coreUsageStatsClient: jest.Mocked<CoreUsageStatsClient>;
+  let coreUsageStatsClient: jest.Mocked<ICoreUsageStatsClient>;
 
   const clientResponse = {
     total: 0,

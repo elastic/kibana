@@ -13,7 +13,7 @@ import { nextTick } from '@kbn/test-jest-helpers';
 import { HttpError } from '../../../../../common/types/api';
 
 import { SyncStatus } from '../../../../../common/types/connectors';
-import { StartSyncApiLogic } from '../../api/connector_package/start_sync_api_logic';
+import { StartSyncApiLogic } from '../../api/connector/start_sync_api_logic';
 import { FetchIndexApiLogic } from '../../api/index/fetch_index_api_logic';
 
 import { IngestionMethod, IngestionStatus } from '../../types';
@@ -26,6 +26,7 @@ import { IndexViewLogic } from './index_view_logic';
 // We can't test fetchTimeOutId because this will get set whenever the logic is created
 // And the timeoutId is non-deterministic. We use expect.object.containing throughout this test file
 const DEFAULT_VALUES = {
+  connectorId: null,
   data: undefined,
   index: undefined,
   indexName: '',
@@ -41,6 +42,7 @@ const DEFAULT_VALUES = {
 
 const CONNECTOR_VALUES = {
   ...DEFAULT_VALUES,
+  connectorId: connectorIndex.connector.id,
   data: connectorIndex,
   index: indexToViewIndex(connectorIndex),
   ingestionMethod: IngestionMethod.CONNECTOR,
