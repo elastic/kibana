@@ -110,18 +110,21 @@ export const JobMap: FC<Props> = ({ analyticsId, modelId, forceRefresh }) => {
 
   useEffect(() => {
     fetchAndSetElementsWrapper({ analyticsId, modelId });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [analyticsId, modelId]);
 
   useEffect(() => {
     if (forceRefresh === true) {
       fetchAndSetElementsWrapper({ analyticsId, modelId });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [forceRefresh]);
 
   useEffect(() => {
     if (message !== undefined) {
       notifications.toasts.add(message);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [message]);
 
   useEffect(
@@ -129,6 +132,7 @@ export const JobMap: FC<Props> = ({ analyticsId, modelId, forceRefresh }) => {
       if (!refresh) return;
       fetchAndSetElementsWrapper({ analyticsId, modelId });
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [refresh]
   );
 
