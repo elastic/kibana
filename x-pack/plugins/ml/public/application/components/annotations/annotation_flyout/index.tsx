@@ -439,6 +439,7 @@ export const AnnotationFlyout: FC<any> = (props) => {
 
   const cancelEditingHandler = useCallback(() => {
     annotationUpdatesService.setValue(null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   if (annotationProp === undefined || annotationProp === null) {
