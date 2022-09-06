@@ -5,14 +5,7 @@
  * 2.0.
  */
 
-import React, {
-  forwardRef,
-  useCallback,
-  useEffect,
-  useImperativeHandle,
-  useMemo,
-  useState,
-} from 'react';
+import React, { forwardRef, useCallback, useEffect, useMemo, useState } from 'react';
 
 import type { EuiAccordionProps } from '@elastic/eui';
 import { EuiSpacer } from '@elastic/eui';
@@ -22,6 +15,7 @@ import { useForm as useHookForm, FormProvider } from 'react-hook-form';
 import { get, isEmpty, map } from 'lodash';
 import { QueryClientProvider } from '@tanstack/react-query';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
+import type { ResponseActionValidatorRef } from '@kbn/security-solution-plugin/public/detections/components/response_actions/response_actions_form';
 import { QueryPackSelectable } from '../../live_queries/form/QueryPackSelectable';
 import type { EcsMappingFormField } from '../../packs/queries/ecs_mapping_editor_field';
 import { defaultEcsFormData } from '../../packs/queries/ecs_mapping_editor_field';
@@ -38,7 +32,7 @@ import { PackFieldWrapper } from './pack_field_wrapper';
 
 interface OsqueryResponseActionsParamsFormProps {
   item: ArrayItem;
-  ref: React.RefObject<{ validation: () => Promise<{ isValid: boolean }> }>;
+  ref: React.RefObject<ResponseActionValidatorRef>;
 }
 
 interface OsqueryResponseActionsParamsFormFields {
@@ -51,6 +45,7 @@ interface OsqueryResponseActionsParamsFormFields {
 
 const OsqueryResponseActionParamsFormComponent: React.FunctionComponent<OsqueryResponseActionsParamsFormProps> =
   forwardRef(({ item }, ref) => {
+    console.log({ item });
     const uniqueId = useMemo(() => uuid.v4(), []);
     const hooksForm = useHookForm<OsqueryResponseActionsParamsFormFields>({
       defaultValues: {
@@ -113,19 +108,20 @@ const OsqueryResponseActionParamsFormComponent: React.FunctionComponent<OsqueryR
       watchedValues.savedQueryId,
     ]);
 
-    useImperativeHandle(
-      ref,
-      () => ({
-        validation: async () => {
-          await handleSubmit(onSubmit)();
+    useEffect(() => {
+      // @ts-expect-error update types
+      ref.current.validation = async (actions: Record<number, { isValid: boolean }>) => {
+        await handleSubmit(onSubmit)();
 
-          return {
+        return {
+          ...actions,
+          [item.id]: {
             isValid,
-          };
-        },
-      }),
-      [handleSubmit, isValid, onSubmit]
-    );
+          },
+        };
+      };
+    }, [errors, handleSubmit, isValid, item.id, onSubmit, ref]);
+
     useEffect(() => {
       register('savedQueryId');
       register('id');

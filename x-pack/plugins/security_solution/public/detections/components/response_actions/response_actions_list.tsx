@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback, useEffect, useRef, useMemo } from 'react';
+import type { ResponseActionValidatorRef } from './response_actions_form';
 import type { ResponseActionType } from './get_supported_response_actions';
 import { ResponseActionAddButton } from './response_action_add_button';
 import { ResponseActionTypeForm } from './response_action_type_form';
@@ -17,7 +18,7 @@ interface IResponseActionsListProps {
   removeItem: (id: number) => void;
   addItem: () => void;
   supportedResponseActionTypes: ResponseActionType[];
-  formRef: React.RefObject<{ validation: () => Promise<{ isValid: boolean }> }>;
+  formRef: React.RefObject<ResponseActionValidatorRef>;
 }
 
 const GhostFormField = () => <></>;

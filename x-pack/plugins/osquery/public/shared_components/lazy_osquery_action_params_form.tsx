@@ -8,10 +8,11 @@
 import React, { lazy, Suspense } from 'react';
 import type { ArrayItem } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import type { ResponseActionValidatorRef } from '@kbn/security-solution-plugin/public/detections/components/response_actions/response_actions_form';
 
 interface LazyOsqueryActionParamsFormProps {
   item: ArrayItem;
-  formRef: React.RefObject<{ validation: () => Promise<{ isValid: boolean }> }>;
+  formRef: React.RefObject<ResponseActionValidatorRef>;
 }
 
 const GhostFormField = () => <></>;

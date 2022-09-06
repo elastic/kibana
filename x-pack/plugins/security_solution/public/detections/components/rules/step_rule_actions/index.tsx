@@ -15,11 +15,13 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { findIndex } from 'lodash/fp';
+import { some } from 'lodash';
 import type { FC } from 'react';
 import React, { memo, useCallback, useEffect, useMemo, useRef } from 'react';
 
 import type { ActionVariables } from '@kbn/triggers-actions-ui-plugin/public';
 import { UseArray } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import type { ResponseActionValidatorRef } from '../../response_actions/response_actions_form';
 import { ResponseActionsForm } from '../../response_actions/response_actions_form';
 import type { RuleStepProps, ActionsStepRule } from '../../../pages/detection_engine/rules/types';
 import { RuleStep } from '../../../pages/detection_engine/rules/types';
@@ -106,9 +108,7 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
     watch: ['throttle'],
   });
   const throttle = formThrottle || initialState.throttle;
-  const responseActionsValidationRef = useRef<{ validation: () => Promise<{ isValid: boolean }> }>(
-    null
-  );
+  const responseActionsValidationRef = useRef<ResponseActionValidatorRef>({});
 
   const handleSubmit = useCallback(
     (enabled: boolean) => {
@@ -120,16 +120,27 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
     [getFields, onSubmit]
   );
 
-  const getData = useCallback(async () => {
+  const validateResponseActions = async () => {
     if (responseActionsValidationRef.current?.validation) {
-      const { isValid } = await responseActionsValidationRef.current?.validation();
-      if (!isValid) {
-        return {
-          isValid: false,
-          data: getFormData(),
-        };
-      }
+      const actionsMap = await responseActionsValidationRef?.current?.validation(
+        responseActionsValidationRef.current?.actions
+      );
+      // eslint-disable-next-line require-atomic-updates
+      responseActionsValidationRef.current.actions = actionsMap;
+
+      return some(actionsMap, (item) => !item.isValid);
     }
+  };
+
+  const getData = useCallback(async () => {
+    const isResponseActionsInvalid = await validateResponseActions();
+    if (isResponseActionsInvalid) {
+      return {
+        isValid: false,
+        data: getFormData(),
+      };
+    }
+
     const result = await submit();
     return result?.isValid
       ? result

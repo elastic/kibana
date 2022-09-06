@@ -14,12 +14,15 @@ import { useSupportedResponseActionTypes } from './use_supported_response_action
 import { UseField } from '../../../shared_imports';
 
 const GhostFormField = () => <></>;
-
+export interface ResponseActionValidatorRef {
+  validation?: (actions: unknown) => Promise<{ [key: number]: { isValid: boolean } }>;
+  actions?: unknown;
+}
 interface IProps {
   items: ArrayItem[];
   addItem: () => void;
   removeItem: (id: number) => void;
-  formRef: React.RefObject<{ validation: () => Promise<{ isValid: boolean }> }>;
+  formRef: React.RefObject<ResponseActionValidatorRef>;
 }
 
 export const ResponseActionsForm = ({ items, addItem, removeItem, formRef }: IProps) => {

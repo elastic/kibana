@@ -16,6 +16,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
+import type { ResponseActionValidatorRef } from './response_actions_form';
 import { OsqueryResponseAction } from './osquery/osquery_response_action';
 import { getLogo, RESPONSE_ACTION_TYPES } from './constants';
 import { useFormData } from '../../../shared_imports';
@@ -24,7 +25,7 @@ import type { ArrayItem } from '../../../shared_imports';
 interface IProps {
   item: ArrayItem;
   onDeleteAction: (id: number) => void;
-  formRef: React.RefObject<{ validation: () => Promise<{ isValid: boolean }> }>;
+  formRef: React.RefObject<ResponseActionValidatorRef>;
 }
 
 export const ResponseActionTypeForm = React.memo((props: IProps) => {
