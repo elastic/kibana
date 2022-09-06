@@ -537,7 +537,7 @@ export class DashboardPageControls extends FtrService {
     expect(await this.rangeSliderGetUpperBoundAttribute(controlId, compare)).to.be(
       expectedUpperBound
     );
-  };
+  }
 
   // Time slider functions
   public async gotoNextTimeSlice() {
