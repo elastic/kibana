@@ -78,7 +78,8 @@ export interface PartitionVisParams extends VisCommonParams {
   nestedLegend?: boolean;
 }
 
-export interface PieVisConfig extends VisCommonConfig {
+export interface PieVisConfig extends Omit<VisCommonConfig, 'metric'> {
+  metrics: Array<ExpressionValueVisDimension | string>;
   buckets?: Array<ExpressionValueVisDimension | string>;
   partitionByColumn?: boolean;
   isDonut: boolean;

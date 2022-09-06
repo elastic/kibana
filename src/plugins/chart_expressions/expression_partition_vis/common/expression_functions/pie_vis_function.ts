@@ -7,9 +7,14 @@
  */
 
 import { Position } from '@elastic/charts';
-import { prepareLogTable, validateAccessor } from '@kbn/visualizations-plugin/common/utils';
+import {
+  getColumnByAccessor,
+  prepareLogTable,
+  validateAccessor,
+} from '@kbn/visualizations-plugin/common/utils';
 import { DEFAULT_LEGEND_SIZE, LegendSize } from '@kbn/visualizations-plugin/common/constants';
 import { Datatable, DatatableColumn, DatatableRow } from '@kbn/expressions-plugin/common';
+import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
 import { EmptySizeRatios, LegendDisplay, PartitionVisParams } from '../types/expression_renderers';
 import { ChartTypes, PieVisExpressionFunctionDefinition } from '../types';
 import {
@@ -20,24 +25,58 @@ import {
 } from '../constants';
 import { errors, strings } from './i18n';
 
-const transposeTable = (
-  table: Datatable
+export const collapseMetrics = (
+  table: Datatable,
+  bucketAccessors: Array<string | ExpressionValueVisDimension>,
+  metricAccessors: Array<string | ExpressionValueVisDimension>
 ): {
   table: Datatable;
-  metricAccessor: string;
-  bucketAccessor: string;
+  metricAccessor: string | ExpressionValueVisDimension;
+  bucketAccessors: Array<string | ExpressionValueVisDimension>;
 } => {
-  const oldRow = table.rows[0]; // only supports single row tables for now
+  if (metricAccessors.length < 2) {
+    return {
+      table,
+      metricAccessor: metricAccessors[0],
+      bucketAccessors,
+    };
+  }
 
-  const nameColumnId = 'name';
+  const bucketColumns = bucketAccessors
+    ?.map((accessor) => getColumnByAccessor(accessor, table.columns))
+    .filter(Boolean) as DatatableColumn[];
+
+  const metricColumns = metricAccessors
+    ?.map((accessor) => getColumnByAccessor(accessor, table.columns))
+    .filter(Boolean) as DatatableColumn[];
+
+  const transposedRows: DatatableRow[] = [];
+
+  const [priorBucketColumns, finalBucketColumn] = [
+    bucketColumns.slice(0, bucketColumns.length - 1),
+    bucketColumns[bucketColumns.length - 1],
+  ];
+
+  const nameColumnId = 'category-name';
   const valueColumnId = 'value';
 
-  const transposedRows: DatatableRow[] = table.columns.map((column) => ({
-    [nameColumnId]: column.name,
-    [valueColumnId]: oldRow[column.id],
-  }));
+  table.rows.forEach((row) => {
+    metricColumns.forEach((metricCol) => {
+      const newRow: DatatableRow = {};
+
+      priorBucketColumns.forEach(({ id }) => {
+        newRow[id] = row[id];
+      });
+
+      newRow[nameColumnId] = `${row[finalBucketColumn.id]} - ${metricCol.name}`;
+      newRow[valueColumnId] = row[metricCol.id];
+
+      transposedRows.push(newRow);
+    });
+  });
 
   const transposedColumns: DatatableColumn[] = [
+    ...priorBucketColumns,
     {
       id: nameColumnId,
       name: nameColumnId,
@@ -56,7 +95,7 @@ const transposeTable = (
 
   return {
     metricAccessor: valueColumnId,
-    bucketAccessor: nameColumnId,
+    bucketAccessors: [...priorBucketColumns.map(({ id }) => id), nameColumnId],
     table: {
       type: 'datatable',
       columns: transposedColumns,
@@ -71,19 +110,15 @@ export const pieVisFunction = (): PieVisExpressionFunctionDefinition => ({
   inputTypes: ['datatable'],
   help: strings.getPieVisFunctionName(),
   args: {
-    metric: {
+    metrics: {
       types: ['vis_dimension', 'string'],
       help: strings.getMetricArgHelp(),
+      multi: true,
     },
     buckets: {
       types: ['vis_dimension', 'string'],
       help: strings.getBucketsArgHelp(),
       multi: true,
-    },
-    // TODO - revisit arg name (columnsAsSlices?)
-    partitionByColumn: {
-      types: ['boolean'],
-      help: 'whether or not to transpose the datatable before rendering the slices',
     },
     splitColumn: {
       types: ['vis_dimension', 'string'],
@@ -187,11 +222,10 @@ export const pieVisFunction = (): PieVisExpressionFunctionDefinition => ({
       throw new Error(errors.splitRowAndSplitColumnAreSpecifiedError());
     }
 
-    if (args.metric) {
-      validateAccessor(args.metric, context.columns);
-    }
+    args.metrics.forEach((accessor) => validateAccessor(accessor, context.columns));
+
     if (args.buckets) {
-      args.buckets.forEach((bucket) => validateAccessor(bucket, context.columns));
+      args.buckets.forEach((accessor) => validateAccessor(accessor, context.columns));
     }
     if (args.splitColumn) {
       args.splitColumn.forEach((splitColumn) => validateAccessor(splitColumn, context.columns));
@@ -200,15 +234,11 @@ export const pieVisFunction = (): PieVisExpressionFunctionDefinition => ({
       args.splitRow.forEach((splitRow) => validateAccessor(splitRow, context.columns));
     }
 
-    let transposedTable;
-    let transposedMetricAccessor;
-    let transposedBucketAccessor;
-    if (args.partitionByColumn) {
-      const result = transposeTable(context);
-      transposedTable = result.table;
-      transposedMetricAccessor = result.metricAccessor;
-      transposedBucketAccessor = result.bucketAccessor;
-    }
+    const { table, metricAccessor, bucketAccessors } = collapseMetrics(
+      context,
+      args.buckets ?? [],
+      args.metrics
+    );
 
     const visConfig: PartitionVisParams = {
       ...args,
@@ -218,39 +248,39 @@ export const pieVisFunction = (): PieVisExpressionFunctionDefinition => ({
         handlers.getExecutionContext?.()?.description,
       palette: args.palette,
       dimensions: {
-        metric: transposedMetricAccessor ?? args.metric,
-        buckets: transposedBucketAccessor ? [transposedBucketAccessor] : args.buckets,
+        metric: metricAccessor,
+        buckets: bucketAccessors,
         splitColumn: args.splitColumn,
         splitRow: args.splitRow,
       },
     };
 
-    // TODO fix inspector
-    if (handlers?.inspectorAdapters?.tables) {
-      handlers.inspectorAdapters.tables.reset();
-      handlers.inspectorAdapters.tables.allowCsvExport = true;
+    // // TODO fix inspector
+    // if (handlers?.inspectorAdapters?.tables) {
+    //   handlers.inspectorAdapters.tables.reset();
+    //   handlers.inspectorAdapters.tables.allowCsvExport = true;
 
-      const logTable = prepareLogTable(
-        context,
-        [
-          [[transposedMetricAccessor ?? args.metric], strings.getSliceSizeHelp()],
-          [
-            transposedBucketAccessor ? [transposedBucketAccessor] : args.buckets,
-            strings.getSliceHelp(),
-          ],
-          [args.splitColumn, strings.getColumnSplitHelp()],
-          [args.splitRow, strings.getRowSplitHelp()],
-        ],
-        true
-      );
-      handlers.inspectorAdapters.tables.logDatatable('default', logTable);
-    }
+    //   const logTable = prepareLogTable(
+    //     context,
+    //     [
+    //       [[transposedMetricAccessor ?? args.metric], strings.getSliceSizeHelp()],
+    //       [
+    //         transposedBucketAccessor ? [transposedBucketAccessor] : args.buckets,
+    //         strings.getSliceHelp(),
+    //       ],
+    //       [args.splitColumn, strings.getColumnSplitHelp()],
+    //       [args.splitRow, strings.getRowSplitHelp()],
+    //     ],
+    //     true
+    //   );
+    //   handlers.inspectorAdapters.tables.logDatatable('default', logTable);
+    // }
 
     return {
       type: 'render',
       as: PARTITION_VIS_RENDERER_NAME,
       value: {
-        visData: transposedTable ?? context,
+        visData: table,
         visConfig,
         syncColors: handlers?.isSyncColorsEnabled?.() ?? false,
         visType: args.isDonut ? ChartTypes.DONUT : ChartTypes.PIE,
