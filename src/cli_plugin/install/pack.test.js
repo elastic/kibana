@@ -10,7 +10,7 @@ import Fs from 'fs';
 import { join } from 'path';
 
 import sinon from 'sinon';
-import glob from 'glob-all';
+import globby from 'globby';
 import del from 'del';
 
 import { Logger } from '../lib/logger';
@@ -71,7 +71,8 @@ describe('kibana cli', function () {
         await getPackData(settings, logger);
         await extract(settings, logger);
 
-        expect(glob.sync('**/*', { cwd: testWorkingPath })).toMatchInlineSnapshot(`
+        expect(globby.sync('**/*', { cwd: testWorkingPath, onlyFiles: false }).sort())
+          .toMatchInlineSnapshot(`
           Array [
             "archive.part",
             "bin",

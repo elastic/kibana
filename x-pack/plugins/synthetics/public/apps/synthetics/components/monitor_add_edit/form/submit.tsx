@@ -75,6 +75,7 @@ export const ActionBar = () => {
           <EuiFlexItem grow={false}>
             <EuiButton
               fill
+              isLoading={loading}
               iconType="plusInCircleFilled"
               onClick={handleSubmit(formSubmitter)}
               data-test-subj="syntheticsMonitorConfigSubmitButton"
