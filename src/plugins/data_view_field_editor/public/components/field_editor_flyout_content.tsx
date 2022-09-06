@@ -70,7 +70,7 @@ const FieldEditorFlyoutContentComponent = ({
 }: Props) => {
   const isMounted = useRef(false);
   const isEditingExistingField = !!fieldToEdit;
-  const { dataView } = useFieldEditorContext();
+  const { dataView, subfields$ } = useFieldEditorContext();
 
   const {
     panel: { isVisible: isPanelVisible },
@@ -119,10 +119,14 @@ const FieldEditorFlyoutContentComponent = ({
           confirmChangeNameOrType: true,
         });
       } else {
-        onSave(updatedField);
+        if (updatedField.type === 'composite') {
+          onSave({ ...updatedField, fields: subfields$.getValue() });
+        } else {
+          onSave(updatedField);
+        }
       }
     }
-  }, [onSave, submit, fieldToEdit, isEditingExistingField]);
+  }, [onSave, submit, fieldToEdit, isEditingExistingField, subfields$]);
 
   const onClickCancel = useCallback(() => {
     const canClose = canCloseValidator();

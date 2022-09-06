@@ -254,6 +254,7 @@ export const FieldEditorFlyoutContentContainer = ({
       namesNotAllowed={namesNotAllowed}
       existingConcreteFields={existingConcreteFields}
       fieldName$={new BehaviorSubject(fieldToEdit?.name || '')}
+      subfields$={new BehaviorSubject(fieldToEdit?.fields)}
     >
       <FieldPreviewProvider>
         <FieldEditorFlyoutContent

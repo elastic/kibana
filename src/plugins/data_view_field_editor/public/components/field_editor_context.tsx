@@ -9,7 +9,12 @@
 import React, { createContext, useContext, FunctionComponent, useMemo } from 'react';
 import { NotificationsStart, CoreStart } from '@kbn/core/public';
 import type { BehaviorSubject } from 'rxjs';
-import type { DataView, DataPublicPluginStart, FieldFormatsStart } from '../shared_imports';
+import type {
+  DataView,
+  DataPublicPluginStart,
+  FieldFormatsStart,
+  RuntimeFieldSubFields,
+} from '../shared_imports';
 import { ApiService } from '../lib/api';
 import type { InternalFieldType, PluginStart } from '../types';
 
@@ -44,6 +49,7 @@ export interface Context {
    */
   existingConcreteFields: Array<{ name: string; type: string }>;
   fieldName$: BehaviorSubject<string>;
+  subfields$: BehaviorSubject<RuntimeFieldSubFields | undefined>;
 }
 
 const fieldEditorContext = createContext<Context | undefined>(undefined);
@@ -60,6 +66,7 @@ export const FieldEditorProvider: FunctionComponent<Context> = ({
   existingConcreteFields,
   children,
   fieldName$,
+  subfields$,
 }) => {
   const ctx = useMemo<Context>(
     () => ({
@@ -73,6 +80,7 @@ export const FieldEditorProvider: FunctionComponent<Context> = ({
       namesNotAllowed,
       existingConcreteFields,
       fieldName$,
+      subfields$,
     }),
     [
       dataView,
@@ -85,6 +93,7 @@ export const FieldEditorProvider: FunctionComponent<Context> = ({
       namesNotAllowed,
       existingConcreteFields,
       fieldName$,
+      subfields$,
     ]
   );
 

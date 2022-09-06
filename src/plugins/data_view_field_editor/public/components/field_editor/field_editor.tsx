@@ -106,7 +106,7 @@ const formSerializer = (field: FieldFormInternal): Field => {
 };
 
 const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) => {
-  const { namesNotAllowed, fieldTypeToProcess, fieldName$ } = useFieldEditorContext();
+  const { namesNotAllowed, fieldTypeToProcess, fieldName$, subfields$ } = useFieldEditorContext();
   const {
     params: { update: updatePreviewParams },
     fieldPreview$,
@@ -175,7 +175,7 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) 
   const lastPreview = useRef<FieldPreview[]>();
 
   useEffect(() => {
-    const existingCompositeField = !!Object.keys(form.getFormData().fields || {}).length;
+    const existingCompositeField = !!Object.keys(subfields$.getValue() || {}).length;
 
     const subLastPreview = fieldPreview$.subscribe((val) => {
       lastPreview.current = val;
@@ -183,7 +183,7 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) 
     const changes$ = getFieldPreviewChanges(fieldPreview$);
 
     const subChanges = changes$.subscribe((previewFields) => {
-      const { fields } = form.getFormData();
+      const fields = subfields$.getValue();
 
       const modifiedFields = { ...fields };
 
@@ -195,7 +195,10 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) 
           modifiedFields[name] = { type: change.type! };
         }
       });
-      form.updateFieldValues({ ...form.getFormData(), fields: modifiedFields });
+
+      subfields$.next(modifiedFields);
+      // necessary to maintain script code when changing types
+      form.updateFieldValues({ ...form.getFormData() });
     });
 
     // first preview value is skipped for saved fields, need to populate for new fields and rerenders
@@ -209,7 +212,7 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) 
       subChanges.unsubscribe();
       subLastPreview.unsubscribe();
     };
-  }, [form, fieldPreview$]);
+  }, [form, fieldPreview$, subfields$]);
 
   useEffect(() => {
     if (onChange) {
