@@ -18,12 +18,7 @@ import { getFilter } from '../get_filter';
 import { searchAfterAndBulkCreate } from '../search_after_bulk_create';
 import type { RuleRangeTuple, BulkCreate, WrapHits } from '../types';
 import type { ITelemetryEventsSender } from '../../../telemetry/sender';
-import type {
-  CompleteRule,
-  SavedQueryRuleParams,
-  QueryRuleParams,
-  UnifiedQueryRuleParams,
-} from '../../schemas/rule_schemas';
+import type { CompleteRule, UnifiedQueryRuleParams } from '../../schemas/rule_schemas';
 import type { ExperimentalFeatures } from '../../../../../common/experimental_features';
 import { buildReasonMessageForQueryAlert } from '../reason_formatters';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
