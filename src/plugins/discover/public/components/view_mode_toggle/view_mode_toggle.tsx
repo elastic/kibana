@@ -87,6 +87,27 @@ export const DocumentViewModeToggle = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiTab>
+      <EuiTab
+        isSelected={viewMode === VIEW_MODE.LOG_EXPLORER}
+        onClick={() => setDiscoverViewMode(VIEW_MODE.LOG_EXPLORER)}
+        className="dscViewModeToggle__tab"
+        data-test-subj="dscViewModeFieldStatsButton"
+      >
+        <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
+          <EuiFlexItem>
+            <FormattedMessage id="discover.viewModes.fieldStatistics.label" defaultMessage="Logs" />
+          </EuiFlexItem>
+          <EuiFlexItem css={badgeCellCss}>
+            <EuiBetaBadge
+              label={i18n.translate('discover.viewModes.fieldStatistics.betaTitle', {
+                defaultMessage: 'Beta',
+              })}
+              size="s"
+              className="fieldStatsBetaBadge"
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiTab>
     </EuiTabs>
   );
 };

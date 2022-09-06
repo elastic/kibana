@@ -77,6 +77,9 @@ export const DiscoverMainContent = ({
   const setDiscoverViewMode = useCallback(
     (mode: VIEW_MODE) => {
       stateContainer.setAppState({ viewMode: mode });
+      if (mode === VIEW_MODE.LOG_EXPLORER) {
+        navigateTo('/log-explorer');
+      }
 
       if (trackUiMetric) {
         if (mode === VIEW_MODE.AGGREGATED_LEVEL) {

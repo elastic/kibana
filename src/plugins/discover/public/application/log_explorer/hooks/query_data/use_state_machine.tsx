@@ -141,7 +141,7 @@ export const useStateMachineService = ({
       });
     },
     {
-      devTools: true,
+      devTools: false,
     }
   );
 

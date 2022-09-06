@@ -23,7 +23,7 @@ import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import classNames from 'classnames';
 import React, { useCallback, useEffect, useRef } from 'react';
 import { SavedSearchURLConflictCallout } from '../../../../components/saved_search_url_conflict_callout/saved_search_url_conflict_callout';
-import { VIEW_MODE } from '../../../../components/view_mode_toggle';
+import { DocumentViewModeToggle, VIEW_MODE } from '../../../../components/view_mode_toggle';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import '../../../main/components/layout/discover_layout.scss';
 import { LoadingSpinner } from '../../../main/components/loading_spinner/loading_spinner';
@@ -207,28 +207,38 @@ export function LogExplorerLayout({ dataViewList, savedSearch }: LogExplorerLayo
                 'dscPageContent--emptyPrompt': entriesState.matches('failedNoData'),
               })}
             >
-              {entriesState.matches('failedNoData') ? (
-                <DiscoverNoResults
-                  isTimeBased={true}
-                  data={data}
-                  // error={dataState.error}
-                  hasQuery={isOfQueryType(state.query) && !!state.query?.query}
-                  hasFilters={hasActiveFilter(state.filters)}
-                  onDisableFilters={onDisableFilters}
+              <>
+                <DocumentViewModeToggle
+                  viewMode={VIEW_MODE.LOG_EXPLORER}
+                  setDiscoverViewMode={(mode) => {
+                    if (mode !== VIEW_MODE.LOG_EXPLORER) {
+                      history().push('/');
+                    }
+                  }}
                 />
-              ) : entriesState.matches('loadingAround') ? (
-                <LoadingSpinner />
-              ) : (
-                <EuiFlexGroup
-                  className="dscPageContent__inner"
-                  direction="column"
-                  alignItems="stretch"
-                  gutterSize="none"
-                  responsive={false}
-                >
-                  <LogExplorer savedSearch={savedSearch} stateMachine={entriesActor} />
-                </EuiFlexGroup>
-              )}
+                {entriesState.matches('failedNoData') ? (
+                  <DiscoverNoResults
+                    isTimeBased={true}
+                    data={data}
+                    // error={dataState.error}
+                    hasQuery={isOfQueryType(state.query) && !!state.query?.query}
+                    hasFilters={hasActiveFilter(state.filters)}
+                    onDisableFilters={onDisableFilters}
+                  />
+                ) : entriesState.matches('loadingAround') ? (
+                  <LoadingSpinner />
+                ) : (
+                  <EuiFlexGroup
+                    className="dscPageContent__inner"
+                    direction="column"
+                    alignItems="stretch"
+                    gutterSize="none"
+                    responsive={false}
+                  >
+                    <LogExplorer savedSearch={savedSearch} stateMachine={entriesActor} />
+                  </EuiFlexGroup>
+                )}
+              </>
             </EuiPageContent>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
