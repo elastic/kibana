@@ -15,6 +15,8 @@ export default ({ getService }: FtrProviderContext) => {
   const retry = getService('retry');
 
   describe('Observability Alert Details page - Feature flag', function () {
+    this.tags('includeFirefox');
+
     before(async () => {
       await observability.alerts.common.setKibanaTimeZoneToUTC();
       await esArchiver.load('x-pack/test/functional/es_archives/observability/alerts');
@@ -26,14 +28,15 @@ export default ({ getService }: FtrProviderContext) => {
       await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs');
     });
 
-    it('should redirect the user to the alerts page when the feature flag is disabled', async () => {
+    it('should show 404 page when the feature flag is disabled', async () => {
       await observability.alerts.common.navigateToAlertDetails(uuid.v4());
       await retry.waitFor(
         'Alerts page to be visible',
-        async () => await testSubjects.exists('alertsPageWithData')
+        async () => await testSubjects.exists('pageNotFound')
       );
     });
-    describe('Alert Detail / Alert Flyout', () => {
+    // flaky
+    describe.skip('Alert Detail / Alert Flyout', () => {
       before(async () => {
         await observability.alerts.common.navigateToTimeWithData();
       });
