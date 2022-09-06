@@ -13,7 +13,7 @@ import { LOGS_INDEX_PATTERN } from '..';
 export default function ({ getService }: FtrProviderContext) {
   const elasticChart = getService('elasticChart');
   const ml = getService('ml');
-  const mlScreenshots = getService('mlScreenshots');
+  const commonScreenshots = getService('commonScreenshots');
   const testSubjects = getService('testSubjects');
 
   const screenshotDirectories = ['ml_docs', 'anomaly_detection'];
@@ -71,8 +71,8 @@ export default function ({ getService }: FtrProviderContext) {
 
       await ml.testExecution.logTestStep('continue to the pick fields step and take screenshot');
       await ml.jobWizardCommon.advanceToPickFieldsSection();
-      await mlScreenshots.removeFocusFromElement();
-      await mlScreenshots.takeScreenshot('ml-population-job', screenshotDirectories);
+      await commonScreenshots.removeFocusFromElement();
+      await commonScreenshots.takeScreenshot('ml-population-job', screenshotDirectories);
     });
 
     it('anomaly explorer screenshots', async () => {
@@ -96,7 +96,7 @@ export default function ({ getService }: FtrProviderContext) {
         yOffset: Math.floor(cellSize / 2.0),
       });
 
-      await mlScreenshots.takeScreenshot('ml-population-results', screenshotDirectories);
+      await commonScreenshots.takeScreenshot('ml-population-results', screenshotDirectories);
 
       await ml.testExecution.logTestStep(
         'select swim lane tile, expand anomaly row and take screenshot'
@@ -111,7 +111,7 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.anomaliesTable.ensureDetailsOpen(0);
       await ml.anomaliesTable.scrollRowIntoView(0);
       await ml.testExecution.logTestStep('take screenshot');
-      await mlScreenshots.takeScreenshot(
+      await commonScreenshots.takeScreenshot(
         'ml-population-anomaly',
         screenshotDirectories,
         1500,

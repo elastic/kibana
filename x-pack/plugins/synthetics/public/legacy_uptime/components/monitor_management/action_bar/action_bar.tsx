@@ -65,6 +65,8 @@ export const ActionBar = ({
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean | undefined>(undefined);
   const isReadOnly = monitor[ConfigKey.MONITOR_SOURCE_TYPE] === SourceType.PROJECT;
 
+  const hasServiceManagedLocation = monitor.locations?.some((loc) => loc.isServiceManaged);
+
   const { data, status } = useFetcher(() => {
     if (!isSaving || !isValid) {
       return;
@@ -142,7 +144,6 @@ export const ActionBar = ({
                 {/* Popover is used instead of EuiTooltip until the resolution of https://github.com/elastic/eui/issues/5604 */}
                 <EuiPopover
                   repositionOnScroll={true}
-                  initialFocus={false}
                   button={
                     <EuiButton
                       css={{ width: '100%' }}
@@ -150,7 +151,7 @@ export const ActionBar = ({
                       size="s"
                       color="success"
                       iconType="play"
-                      disabled={!isValid || isTestRunInProgress}
+                      disabled={!isValid || isTestRunInProgress || !hasServiceManagedLocation}
                       data-test-subj={'monitorTestNowRunBtn'}
                       onClick={() => onTestNow()}
                       onMouseEnter={() => {

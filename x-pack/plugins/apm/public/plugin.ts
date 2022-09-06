@@ -123,6 +123,13 @@ const dependenciesTitle = i18n.translate(
   }
 );
 
+const apmSettingsTitle = i18n.translate(
+  'xpack.apm.navigation.apmSettingsTitle',
+  {
+    defaultMessage: 'Settings',
+  }
+);
+
 export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
   constructor(
     private readonly initializerContext: PluginInitializerContext<ConfigSchema>
@@ -303,6 +310,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
           title: dependenciesTitle,
           path: '/dependencies/inventory',
         },
+        { id: 'settings', title: apmSettingsTitle, path: '/settings' },
       ],
 
       async mount(appMountParameters: AppMountParameters<unknown>) {

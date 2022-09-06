@@ -6,24 +6,23 @@
  */
 
 import dateMath from '@kbn/datemath';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { RuleExecutorServicesMock } from '@kbn/alerting-plugin/server/mocks';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
-import { eqlExecutor } from './eql';
 import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
 import { getEntryListMock } from '@kbn/lists-plugin/common/schemas/types/entry_list.mock';
-import { getCompleteRuleMock, getEqlRuleParams } from '../../schemas/rule_schemas.mock';
+import { DEFAULT_INDEX_PATTERN } from '../../../../../common/constants';
 import { getIndexVersion } from '../../routes/index/get_index_version';
 import { SIGNALS_TEMPLATE_VERSION } from '../../routes/index/get_signals_template';
-import { allowedExperimentalValues } from '../../../../../common/experimental_features';
 import type { EqlRuleParams } from '../../schemas/rule_schemas';
-import { DEFAULT_INDEX_PATTERN } from '../../../../../common/constants';
+import { getCompleteRuleMock, getEqlRuleParams } from '../../schemas/rule_schemas.mock';
+import { ruleExecutionLogMock } from '../../rule_monitoring/mocks';
+import { eqlExecutor } from './eql';
 
 jest.mock('../../routes/index/get_index_version');
 
 describe('eql_executor', () => {
   const version = '8.0.0';
-  let logger: ReturnType<typeof loggingSystemMock.createLogger>;
+  const ruleExecutionLogger = ruleExecutionLogMock.forExecutors.create();
   let alertServices: RuleExecutorServicesMock;
   (getIndexVersion as jest.Mock).mockReturnValue(SIGNALS_TEMPLATE_VERSION);
   const params = getEqlRuleParams();
@@ -35,8 +34,8 @@ describe('eql_executor', () => {
   };
 
   beforeEach(() => {
+    jest.clearAllMocks();
     alertServices = alertsMock.createRuleExecutorServices();
-    logger = loggingSystemMock.createLogger();
     alertServices.scopedClusterClient.asCurrentUser.eql.search.mockResolvedValue({
       hits: {
         total: { relation: 'eq', value: 10 },
@@ -54,10 +53,9 @@ describe('eql_executor', () => {
         completeRule: eqlCompleteRule,
         tuple,
         exceptionItems,
-        experimentalFeatures: allowedExperimentalValues,
+        ruleExecutionLogger,
         services: alertServices,
         version,
-        logger,
         bulkCreate: jest.fn(),
         wrapHits: jest.fn(),
         wrapSequences: jest.fn(),

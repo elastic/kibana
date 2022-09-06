@@ -29,15 +29,15 @@ import {
 } from './plugins_service';
 
 import type { InjectedMetadataPlugin } from '@kbn/core-injected-metadata-common-internal';
-import { notificationServiceMock } from '../notifications/notifications_service.mock';
-import { applicationServiceMock } from '../application/application_service.mock';
-import { overlayServiceMock } from '../overlays/overlay_service.mock';
-import { chromeServiceMock } from '../chrome/chrome_service.mock';
+import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
+import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
+import { overlayServiceMock } from '@kbn/core-overlays-browser-mocks';
+import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
 import { fatalErrorsServiceMock } from '@kbn/core-fatal-errors-browser-mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import type { CoreSetup, CoreStart, PluginInitializerContext } from '..';
-import { savedObjectsServiceMock } from '../saved_objects/saved_objects_service.mock';
+import { savedObjectsServiceMock } from '@kbn/core-saved-objects-browser-mocks';
 import { deprecationsServiceMock } from '@kbn/core-deprecations-browser-mocks';
 
 export let mockPluginInitializers: Map<PluginName, MockedPluginInitializer>;

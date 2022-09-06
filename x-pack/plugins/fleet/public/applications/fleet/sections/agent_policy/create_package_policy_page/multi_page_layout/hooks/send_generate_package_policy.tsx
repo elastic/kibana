@@ -8,7 +8,8 @@
 import type { NewPackagePolicy, PackageInfo } from '../../../../../types';
 
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../../../../constants';
-import { SO_SEARCH_LIMIT, getMaxPackageName } from '../../../../../../../../common';
+import { getMaxPackageName } from '../../../../../../../../common/services';
+import { SO_SEARCH_LIMIT } from '../../../../../../../../common/constants';
 import { packageToPackagePolicy } from '../../../../../services';
 import { sendGetPackagePolicies } from '../../../../../hooks';
 
@@ -31,14 +32,12 @@ export const sendGeneratePackagePolicy = async (
     namespace: 'default',
     policy_id: agentPolicyId,
     enabled: true,
-    output_id: '',
     inputs: [],
   };
 
   const packagePolicy = packageToPackagePolicy(
     packageInfo,
     agentPolicyId,
-    defaultPolicy.output_id,
     defaultPolicy.namespace,
     defaultPolicy.name,
     defaultPolicy.description,

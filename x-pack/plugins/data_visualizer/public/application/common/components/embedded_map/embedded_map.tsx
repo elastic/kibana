@@ -13,7 +13,6 @@ import {
   MapEmbeddable,
   MapEmbeddableInput,
   MapEmbeddableOutput,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '@kbn/maps-plugin/public/embeddable';
 import { MAP_SAVED_OBJECT_TYPE, RenderTooltipContentParams } from '@kbn/maps-plugin/public';
 import {

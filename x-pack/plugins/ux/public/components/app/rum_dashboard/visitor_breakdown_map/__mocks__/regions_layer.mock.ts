@@ -16,7 +16,6 @@ export const mockLayerList = [
           applyGlobalTime: true,
           type: 'ES_TERM_SOURCE',
           id: '3657625d-17b0-41ef-99ba-3a2b2938655c',
-          indexPatternTitle: 'apm-*',
           term: 'client.geo.country_iso_code',
           whereQuery: {
             language: 'kuery',
@@ -68,6 +67,9 @@ export const mockLayerList = [
         labelColor: { type: 'STATIC', options: { color: '#000000' } },
         labelSize: { type: 'STATIC', options: { size: 14 } },
         labelBorderColor: { type: 'STATIC', options: { color: '#FFFFFF' } },
+        labelZoomRange: {
+          options: { maxZoom: 24, minZoom: 0, useLayerZoomRange: true },
+        },
         symbolizeAs: { options: { value: 'circle' } },
         labelBorderSize: { options: { size: 'SMALL' } },
       },
@@ -91,7 +93,6 @@ export const mockLayerList = [
           applyGlobalTime: true,
           type: 'ES_TERM_SOURCE',
           id: 'e62a1b9c-d7ff-4fd4-a0f6-0fdc44bb9e41',
-          indexPatternTitle: 'apm-*',
           term: 'client.geo.region_iso_code',
           whereQuery: {
             language: 'kuery',
@@ -137,6 +138,9 @@ export const mockLayerList = [
         labelColor: { type: 'STATIC', options: { color: '#000000' } },
         labelSize: { type: 'STATIC', options: { size: 14 } },
         labelBorderColor: { type: 'STATIC', options: { color: '#FFFFFF' } },
+        labelZoomRange: {
+          options: { maxZoom: 24, minZoom: 0, useLayerZoomRange: true },
+        },
         symbolizeAs: { options: { value: 'circle' } },
         labelBorderSize: { options: { size: 'SMALL' } },
       },

@@ -125,8 +125,14 @@ export type {
   GetDownloadSourceResponse,
   PostDownloadSourceRequest,
   PutDownloadSourceRequest,
-} from '../../common';
-export { entries, ElasticsearchAssetType, KibanaAssetType, InstallStatus } from '../../common';
+  GetAvailableVersionsResponse,
+} from '../../common/types';
+export {
+  entries,
+  ElasticsearchAssetType,
+  KibanaAssetType,
+  InstallStatus,
+} from '../../common/types';
 
 export * from './intra_app_route_state';
 export * from './ui_extensions';

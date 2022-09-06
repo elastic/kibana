@@ -9,27 +9,28 @@ import axios from 'axios';
 import { pick } from 'lodash';
 import {
   ManifestLocation,
-  ServiceLocation,
-  Locations,
+  PublicLocation,
+  PublicLocations,
   ThrottlingOptions,
   BandwidthLimitKey,
   LocationStatus,
 } from '../../common/runtime_types';
 import { UptimeServerSetup } from '../legacy_uptime/lib/adapters/framework';
 
-export const getDevLocation = (devUrl: string): ServiceLocation => ({
+export const getDevLocation = (devUrl: string): PublicLocation => ({
   id: 'localhost',
   label: 'Local Synthetics Service',
   geo: { lat: 0, lon: 0 },
   url: devUrl,
   isServiceManaged: true,
   status: LocationStatus.EXPERIMENTAL,
+  isInvalid: false,
 });
 
 export async function getServiceLocations(server: UptimeServerSetup) {
-  let locations: Locations = [];
+  let locations: PublicLocations = [];
 
-  if (process.env.NODE_ENV !== 'production' && server.config.service?.devUrl) {
+  if (server.config.service?.devUrl) {
     locations = [getDevLocation(server.config.service.devUrl)];
   }
 
@@ -58,6 +59,7 @@ export async function getServiceLocations(server: UptimeServerSetup) {
         url: location.url,
         isServiceManaged: true,
         status: location.status,
+        isInvalid: false,
       });
     });
 

@@ -34,7 +34,7 @@ import { useCasesFeatures } from '../cases_context/use_cases_features';
 import { CreateCaseOwnerSelector } from './owner_selector';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { useAvailableCasesOwners } from '../app/use_available_owners';
-import { CaseAttachments } from '../../types';
+import { CaseAttachmentsWithoutOwner } from '../../types';
 import { Severity } from './severity';
 
 interface ContainerProps {
@@ -67,7 +67,7 @@ export interface CreateCaseFormProps extends Pick<Partial<CreateCaseFormFieldsPr
     createAttachments: UseCreateAttachments['createAttachments']
   ) => Promise<void>;
   timelineIntegration?: CasesTimelineIntegration;
-  attachments?: CaseAttachments;
+  attachments?: CaseAttachmentsWithoutOwner;
 }
 
 const empty: ActionConnector[] = [];

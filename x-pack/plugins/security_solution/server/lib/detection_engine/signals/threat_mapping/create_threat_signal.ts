@@ -15,7 +15,6 @@ import type { SearchAfterAndBulkCreateReturnType } from '../types';
 
 export const createThreatSignal = async ({
   alertId,
-  buildRuleMessage,
   bulkCreate,
   completeRule,
   currentResult,
@@ -26,9 +25,9 @@ export const createThreatSignal = async ({
   inputIndex,
   language,
   listClient,
-  logger,
   outputIndex,
   query,
+  ruleExecutionLogger,
   savedId,
   searchAfterSize,
   services,
@@ -50,10 +49,8 @@ export const createThreatSignal = async ({
   if (!threatFilter.query || threatFilter.query?.bool.should.length === 0) {
     // empty threat list and we do not want to return everything as being
     // a hit so opt to return the existing result.
-    logger.debug(
-      buildRuleMessage(
-        'Indicator items are empty after filtering for missing data, returning without attempting a match'
-      )
+    ruleExecutionLogger.debug(
+      'Indicator items are empty after filtering for missing data, returning without attempting a match'
     );
     return currentResult;
   } else {
@@ -68,26 +65,22 @@ export const createThreatSignal = async ({
       lists: exceptionItems,
     });
 
-    logger.debug(
-      buildRuleMessage(
-        `${threatFilter.query?.bool.should.length} indicator items are being checked for existence of matches`
-      )
+    ruleExecutionLogger.debug(
+      `${threatFilter.query?.bool.should.length} indicator items are being checked for existence of matches`
     );
 
     const result = await searchAfterAndBulkCreate({
       buildReasonMessage: buildReasonMessageForThreatMatchAlert,
-      buildRuleMessage,
       bulkCreate,
       completeRule,
       enrichment: threatEnrichment,
       eventsTelemetry,
       exceptionsList: exceptionItems,
       filter: esFilter,
-      id: alertId,
       inputIndexPattern: inputIndex,
       listClient,
-      logger,
       pageSize: searchAfterSize,
+      ruleExecutionLogger,
       services,
       sortOrder: 'desc',
       trackTotalHits: false,
@@ -98,14 +91,12 @@ export const createThreatSignal = async ({
       secondaryTimestamp,
     });
 
-    logger.debug(
-      buildRuleMessage(
-        `${
-          threatFilter.query?.bool.should.length
-        } items have completed match checks and the total times to search were ${
-          result.searchAfterTimes.length !== 0 ? result.searchAfterTimes : '(unknown) '
-        }ms`
-      )
+    ruleExecutionLogger.debug(
+      `${
+        threatFilter.query?.bool.should.length
+      } items have completed match checks and the total times to search were ${
+        result.searchAfterTimes.length !== 0 ? result.searchAfterTimes : '(unknown) '
+      }ms`
     );
     return result;
   }

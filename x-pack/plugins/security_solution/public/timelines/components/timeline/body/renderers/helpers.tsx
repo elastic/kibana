@@ -73,13 +73,3 @@ export const showVia = (eventAction: string | null | undefined): boolean =>
     'overwrite',
     'rename',
   ].includes(`${eventAction}`.toLowerCase());
-
-export const excludeFileNameAndPath = ({
-  eventAction,
-  eventCategory,
-  eventType,
-}: {
-  eventAction: string | null | undefined;
-  eventCategory: string | null | undefined;
-  eventType: string | null | undefined;
-}) => false;

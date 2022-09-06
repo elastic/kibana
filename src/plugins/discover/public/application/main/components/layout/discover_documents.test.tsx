@@ -12,12 +12,12 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { setHeaderActionMenuMounter } from '../../../../kibana_services';
 import { esHits } from '../../../../__mocks__/es_hits';
 import { savedSearchMock } from '../../../../__mocks__/saved_search';
-import { GetStateReturn } from '../../services/discover_state';
+import { AppState, GetStateReturn } from '../../services/discover_state';
 import { DataDocuments$ } from '../../hooks/use_saved_search';
 import { discoverServiceMock } from '../../../../__mocks__/services';
 import { FetchStatus } from '../../../types';
-import { DiscoverDocuments } from './discover_documents';
-import { indexPatternMock } from '../../../../__mocks__/index_pattern';
+import { DiscoverDocuments, onResize } from './discover_documents';
+import { dataViewMock } from '../../../../__mocks__/data_view';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { buildDataTableRecord } from '../../../../utils/build_data_record';
 import { EsHitRecord } from '../../../../types';
@@ -32,12 +32,12 @@ function mountComponent(fetchStatus: FetchStatus, hits: EsHitRecord[]) {
 
   const documents$ = new BehaviorSubject({
     fetchStatus,
-    result: hits.map((hit) => buildDataTableRecord(hit, indexPatternMock)),
+    result: hits.map((hit) => buildDataTableRecord(hit, dataViewMock)),
   }) as DataDocuments$;
 
   const props = {
     expandedDoc: undefined,
-    indexPattern: indexPatternMock,
+    dataView: dataViewMock,
     onAddFilter: jest.fn(),
     savedSearch: savedSearchMock,
     documents$,
@@ -73,5 +73,27 @@ describe('Discover documents layout', () => {
     const component = mountComponent(FetchStatus.COMPLETE, esHits);
     expect(component.find('.dscDocuments__loading').exists()).toBeFalsy();
     expect(component.find('.dscTable').exists()).toBeTruthy();
+  });
+
+  test('should set rounded width to state on resize column', () => {
+    let state = {
+      grid: { columns: { timestamp: { width: 173 }, someField: { width: 197 } } },
+    } as AppState;
+    const stateContainer = {
+      setAppState: (newState: Partial<AppState>) => {
+        state = { ...state, ...newState };
+      },
+    } as unknown as GetStateReturn;
+
+    onResize(
+      {
+        columnId: 'someField',
+        width: 205.5435345534,
+      },
+      stateContainer,
+      state
+    );
+
+    expect(state.grid?.columns?.someField.width).toEqual(206);
   });
 });

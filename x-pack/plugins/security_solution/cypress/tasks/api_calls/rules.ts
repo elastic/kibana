@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import type { CustomRule, ThreatIndicatorRule, MachineLearningRule } from '../../objects/rule';
+import type {
+  CustomRule,
+  ThreatIndicatorRule,
+  MachineLearningRule,
+  ThresholdRule,
+  NewTermsRule,
+} from '../../objects/rule';
 
 export const createMachineLearningRule = (rule: MachineLearningRule, ruleId = 'ml_rule_testing') =>
   cy.request({
@@ -23,12 +29,17 @@ export const createMachineLearningRule = (rule: MachineLearningRule, ruleId = 'm
       enabled: false,
       machine_learning_job_id: rule.machineLearningJobs,
       anomaly_threshold: rule.anomalyScoreThreshold,
+      tags: rule.tags,
     },
     headers: { 'kbn-xsrf': 'cypress-creds' },
     failOnStatusCode: false,
   });
 
-export const createCustomRule = (rule: CustomRule, ruleId = 'rule_testing', interval = '100m') =>
+export const createCustomRule = (
+  rule: CustomRule,
+  ruleId = 'rule_testing',
+  interval = '100m'
+): Cypress.Chainable<Cypress.Response<unknown>> =>
   cy.request({
     method: 'POST',
     url: 'api/detection_engine/rules',
@@ -41,108 +52,206 @@ export const createCustomRule = (rule: CustomRule, ruleId = 'rule_testing', inte
       severity: rule.severity.toLocaleLowerCase(),
       type: 'query',
       from: 'now-50000h',
-      index: rule.index,
+      index: rule.dataSource.type === 'indexPatterns' ? rule.dataSource.index : '',
       query: rule.customQuery,
       language: 'kuery',
       enabled: false,
       exceptions_list: rule.exceptionLists ?? [],
+      tags: rule.tags,
+      ...(rule.timeline.id ?? rule.timeline.templateTimelineId
+        ? {
+            timeline_id: rule.timeline.id ?? rule.timeline.templateTimelineId,
+            timeline_title: rule.timeline.title,
+          }
+        : {}),
     },
     headers: { 'kbn-xsrf': 'cypress-creds' },
     failOnStatusCode: false,
   });
 
-export const createEventCorrelationRule = (rule: CustomRule, ruleId = 'rule_testing') =>
-  cy.request({
-    method: 'POST',
-    url: 'api/detection_engine/rules',
-    body: {
-      rule_id: ruleId,
-      risk_score: parseInt(rule.riskScore, 10),
-      description: rule.description,
-      interval: `${rule.runsEvery.interval}${rule.runsEvery.type}`,
-      from: `now-${rule.lookBack.interval}${rule.lookBack.type}`,
-      name: rule.name,
-      severity: rule.severity.toLocaleLowerCase(),
-      type: 'eql',
-      index: rule.index,
-      query: rule.customQuery,
-      language: 'eql',
-      enabled: true,
-    },
-    headers: { 'kbn-xsrf': 'cypress-creds' },
-  });
+export const createEventCorrelationRule = (rule: CustomRule, ruleId = 'rule_testing') => {
+  if (rule.dataSource.type === 'indexPatterns') {
+    cy.request({
+      method: 'POST',
+      url: 'api/detection_engine/rules',
+      body: {
+        rule_id: ruleId,
+        risk_score: parseInt(rule.riskScore, 10),
+        description: rule.description,
+        interval: `${rule.runsEvery.interval}${rule.runsEvery.type}`,
+        from: `now-${rule.lookBack.interval}${rule.lookBack.type}`,
+        name: rule.name,
+        severity: rule.severity.toLocaleLowerCase(),
+        type: 'eql',
+        index: rule.dataSource.index,
+        query: rule.customQuery,
+        language: 'eql',
+        enabled: true,
+        tags: rule.tags,
+      },
+      headers: { 'kbn-xsrf': 'cypress-creds' },
+    });
+  }
+};
 
-export const createCustomIndicatorRule = (rule: ThreatIndicatorRule, ruleId = 'rule_testing') =>
-  cy.request({
-    method: 'POST',
-    url: 'api/detection_engine/rules',
-    body: {
-      rule_id: ruleId,
-      risk_score: parseInt(rule.riskScore, 10),
-      description: rule.description,
-      // Default interval is 1m, our tests config overwrite this to 1s
-      // See https://github.com/elastic/kibana/pull/125396 for details
-      interval: '10s',
-      name: rule.name,
-      severity: rule.severity.toLocaleLowerCase(),
-      type: 'threat_match',
-      timeline_id: rule.timeline.templateTimelineId,
-      timeline_title: rule.timeline.title,
-      threat_mapping: [
-        {
-          entries: [
-            {
-              field: rule.indicatorMappingField,
-              type: 'mapping',
-              value: rule.indicatorIndexField,
-            },
-          ],
+export const createThresholdRule = (rule: ThresholdRule, ruleId = 'rule_testing') => {
+  if (rule.dataSource.type === 'indexPatterns') {
+    cy.request({
+      method: 'POST',
+      url: 'api/detection_engine/rules',
+      body: {
+        rule_id: ruleId,
+        risk_score: parseInt(rule.riskScore, 10),
+        description: rule.description,
+        interval: `${rule.runsEvery.interval}${rule.runsEvery.type}`,
+        from: `now-${rule.lookBack.interval}${rule.lookBack.type}`,
+        name: rule.name,
+        severity: rule.severity.toLocaleLowerCase(),
+        type: 'threshold',
+        index: rule.dataSource.index,
+        query: rule.customQuery,
+        threshold: {
+          field: [rule.thresholdField],
+          value: parseInt(rule.threshold, 10),
+          cardinality: [],
         },
-      ],
-      threat_query: '*:*',
-      threat_language: 'kuery',
-      threat_filters: [],
-      threat_index: rule.indicatorIndexPattern,
-      threat_indicator_path: rule.threatIndicatorPath,
-      from: 'now-50000h',
-      index: rule.index,
-      query: rule.customQuery || '*:*',
-      language: 'kuery',
-      enabled: true,
-    },
-    headers: { 'kbn-xsrf': 'cypress-creds' },
-    failOnStatusCode: false,
-  });
+        enabled: true,
+        tags: rule.tags,
+      },
+      headers: { 'kbn-xsrf': 'cypress-creds' },
+    });
+  }
+};
+
+export const createNewTermsRule = (rule: NewTermsRule, ruleId = 'rule_testing') => {
+  if (rule.dataSource.type === 'indexPatterns') {
+    cy.request({
+      method: 'POST',
+      url: 'api/detection_engine/rules',
+      body: {
+        rule_id: ruleId,
+        risk_score: parseInt(rule.riskScore, 10),
+        description: rule.description,
+        interval: `${rule.runsEvery.interval}${rule.runsEvery.type}`,
+        from: `now-${rule.lookBack.interval}${rule.lookBack.type}`,
+        name: rule.name,
+        severity: rule.severity.toLocaleLowerCase(),
+        type: 'new_terms',
+        index: rule.dataSource.index,
+        query: rule.customQuery,
+        new_terms_fields: rule.newTermsFields,
+        history_window_start: `now-${rule.historyWindowSize.interval}${rule.historyWindowSize.type}`,
+        enabled: true,
+        tags: rule.tags,
+      },
+      headers: { 'kbn-xsrf': 'cypress-creds' },
+    });
+  }
+};
+
+export const createCustomIndicatorRule = (rule: ThreatIndicatorRule, ruleId = 'rule_testing') => {
+  if (rule.dataSource.type === 'indexPatterns') {
+    cy.request({
+      method: 'POST',
+      url: 'api/detection_engine/rules',
+      body: {
+        rule_id: ruleId,
+        risk_score: parseInt(rule.riskScore, 10),
+        description: rule.description,
+        // Default interval is 1m, our tests config overwrite this to 1s
+        // See https://github.com/elastic/kibana/pull/125396 for details
+        interval: '10s',
+        name: rule.name,
+        severity: rule.severity.toLocaleLowerCase(),
+        type: 'threat_match',
+        timeline_id: rule.timeline.templateTimelineId,
+        timeline_title: rule.timeline.title,
+        threat_mapping: [
+          {
+            entries: [
+              {
+                field: rule.indicatorMappingField,
+                type: 'mapping',
+                value: rule.indicatorIndexField,
+              },
+            ],
+          },
+        ],
+        threat_query: '*:*',
+        threat_language: 'kuery',
+        threat_filters: [],
+        threat_index: rule.indicatorIndexPattern,
+        threat_indicator_path: rule.threatIndicatorPath,
+        from: 'now-50000h',
+        index: rule.dataSource.index,
+        query: rule.customQuery || '*:*',
+        language: 'kuery',
+        enabled: true,
+        tags: rule.tags,
+      },
+      headers: { 'kbn-xsrf': 'cypress-creds' },
+      failOnStatusCode: false,
+    });
+  }
+};
 
 export const createCustomRuleEnabled = (
   rule: CustomRule,
   ruleId = '1',
   interval = '100m',
   maxSignals = 500
-) =>
-  cy.request({
-    method: 'POST',
-    url: 'api/detection_engine/rules',
-    body: {
-      rule_id: ruleId,
-      risk_score: parseInt(rule.riskScore, 10),
-      description: rule.description,
-      interval,
-      name: rule.name,
-      severity: rule.severity.toLocaleLowerCase(),
-      type: 'query',
-      from: 'now-50000h',
-      index: rule.index,
-      query: rule.customQuery,
-      language: 'kuery',
-      enabled: true,
-      tags: ['rule1'],
-      max_signals: maxSignals,
-      building_block_type: rule.buildingBlockType,
-    },
-    headers: { 'kbn-xsrf': 'cypress-creds' },
-    failOnStatusCode: false,
-  });
+) => {
+  if (rule.dataSource.type === 'indexPatterns') {
+    cy.request({
+      method: 'POST',
+      url: 'api/detection_engine/rules',
+      body: {
+        rule_id: ruleId,
+        risk_score: parseInt(rule.riskScore, 10),
+        description: rule.description,
+        interval,
+        name: rule.name,
+        severity: rule.severity.toLocaleLowerCase(),
+        type: 'query',
+        from: 'now-50000h',
+        index: rule.dataSource.index,
+        query: rule.customQuery,
+        language: 'kuery',
+        enabled: true,
+        tags: ['rule1'],
+        max_signals: maxSignals,
+        building_block_type: rule.buildingBlockType,
+      },
+      headers: { 'kbn-xsrf': 'cypress-creds' },
+      failOnStatusCode: false,
+    });
+  } else if (rule.dataSource.type === 'dataView') {
+    cy.request({
+      method: 'POST',
+      url: 'api/detection_engine/rules',
+      body: {
+        rule_id: ruleId,
+        risk_score: parseInt(rule.riskScore, 10),
+        description: rule.description,
+        interval,
+        name: rule.name,
+        severity: rule.severity.toLocaleLowerCase(),
+        type: 'query',
+        from: 'now-50000h',
+        index: [],
+        data_view_id: rule.dataSource.dataView,
+        query: rule.customQuery,
+        language: 'kuery',
+        enabled: true,
+        tags: ['rule1'],
+        max_signals: maxSignals,
+        building_block_type: rule.buildingBlockType,
+      },
+      headers: { 'kbn-xsrf': 'cypress-creds' },
+      failOnStatusCode: false,
+    });
+  }
+};
 
 export const deleteCustomRule = (ruleId = '1') => {
   cy.request({

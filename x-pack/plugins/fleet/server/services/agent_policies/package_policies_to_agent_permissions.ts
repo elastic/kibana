@@ -4,33 +4,32 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { SavedObjectsClientContract } from '@kbn/core/server';
 
 import type {
   FullAgentPolicyOutputPermissions,
+  PackageInfo,
   RegistryDataStreamPrivileges,
-} from '../../../common';
+} from '../../../common/types';
 import { PACKAGE_POLICY_DEFAULT_INDEX_PRIVILEGES } from '../../constants';
 
 import type { PackagePolicy } from '../../types';
-
-import { getPackageInfo } from '../epm/packages';
+import { pkgToPkgKey } from '../epm/registry';
 
 export const DEFAULT_CLUSTER_PERMISSIONS = ['monitor'];
 
 export async function storedPackagePoliciesToAgentPermissions(
-  soClient: SavedObjectsClientContract,
-  packagePolicies: string[] | PackagePolicy[]
+  packageInfoCache: Map<string, PackageInfo>,
+  packagePolicies?: PackagePolicy[]
 ): Promise<FullAgentPolicyOutputPermissions | undefined> {
-  if (packagePolicies.length === 0) {
-    return;
-  }
-
   // I'm not sure what permissions to return for this case, so let's return the defaults
-  if (typeof packagePolicies[0] === 'string') {
+  if (!packagePolicies) {
     throw new Error(
       'storedPackagePoliciesToAgentPermissions should be called with a PackagePolicy'
     );
+  }
+
+  if (packagePolicies.length === 0) {
+    return;
   }
 
   const permissionEntries = (packagePolicies as PackagePolicy[]).map<Promise<[string, any]>>(
@@ -39,11 +38,7 @@ export async function storedPackagePoliciesToAgentPermissions(
         throw new Error(`No package for package policy ${packagePolicy.name}`);
       }
 
-      const pkg = await getPackageInfo({
-        savedObjectsClient: soClient,
-        pkgName: packagePolicy.package.name,
-        pkgVersion: packagePolicy.package.version,
-      });
+      const pkg = packageInfoCache.get(pkgToPkgKey(packagePolicy.package))!;
 
       if (!pkg.data_streams || pkg.data_streams.length === 0) {
         return [packagePolicy.name, undefined];

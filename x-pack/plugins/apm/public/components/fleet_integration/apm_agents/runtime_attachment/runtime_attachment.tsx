@@ -27,6 +27,8 @@ import { EditDiscoveryRule } from './edit_discovery_rule';
 import { IDiscoveryRuleList, Operation, RuntimeAttachmentSettings } from '.';
 import { JavaAgentVersionInput } from './java_agent_version_input';
 
+const DEFAULT_AGENT_VERSION = 'latest';
+
 interface Props {
   isEnabled: boolean;
   onToggleEnable: () => void;
@@ -116,7 +118,7 @@ export function RuntimeAttachment({
         </EuiFlexItem>
         {isEnabled && (
           <JavaAgentVersionInput
-            version={version}
+            version={version || DEFAULT_AGENT_VERSION}
             onChange={onChangeVersion}
             isValid={isValidVersion}
           />

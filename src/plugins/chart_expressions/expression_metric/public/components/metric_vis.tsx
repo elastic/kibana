@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
@@ -14,21 +14,27 @@ import {
   Chart,
   Metric,
   MetricSpec,
+  MetricWProgress,
+  isMetricElementEvent,
   RenderChangeListener,
   Settings,
-  MetricWProgress,
 } from '@elastic/charts';
 import { getColumnByAccessor, getFormatByAccessor } from '@kbn/visualizations-plugin/common/utils';
 import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
-import {
+import type {
   Datatable,
   DatatableColumn,
   DatatableRow,
   IInterpreterRenderHandlers,
-} from '@kbn/expressions-plugin';
+  RenderMode,
+} from '@kbn/expressions-plugin/common';
 import { CustomPaletteState } from '@kbn/charts-plugin/public';
-import { euiLightVars } from '@kbn/ui-theme';
 import { FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
+import type { FieldFormatConvertFunction } from '@kbn/field-formats-plugin/common';
+import { CUSTOM_PALETTE } from '@kbn/coloring';
+import { css } from '@emotion/react';
+import { euiThemeVars } from '@kbn/ui-theme';
+import { useResizeObserver } from '@elastic/eui';
 import { VisParams } from '../../common';
 import {
   getPaletteService,
@@ -37,9 +43,9 @@ import {
   getUiSettingsService,
 } from '../services';
 import { getCurrencyCode } from './currency_codes';
+import { getDataBoundsForPalette } from '../utils';
 
-const defaultColor = euiLightVars.euiColorDarkestShade;
-
+export const defaultColor = euiThemeVars.euiColorLightestShade;
 const getBytesUnit = (value: number) => {
   const units = ['byte', 'kilobyte', 'megabyte', 'gigabyte', 'terabyte', 'petabyte'];
   const abs = Math.abs(value);
@@ -69,22 +75,32 @@ const getBytesUnit = (value: number) => {
   return { value, unit };
 };
 
-const getFormatter = (
+const getMetricFormatter = (
   accessor: ExpressionValueVisDimension | string,
   columns: Datatable['columns']
 ) => {
   const serializedFieldFormat = getFormatByAccessor(accessor, columns);
-  const formatId = serializedFieldFormat?.id ?? 'number';
+  const formatId =
+    (serializedFieldFormat?.id === 'suffix'
+      ? serializedFieldFormat.params?.id
+      : serializedFieldFormat?.id) ?? 'number';
 
-  if (!['number', 'currency', 'percent', 'bytes', 'duration'].includes(formatId)) {
+  if (
+    !['number', 'currency', 'percent', 'bytes', 'duration', 'string', 'null'].includes(formatId)
+  ) {
     throw new Error(
       i18n.translate('expressionMetricVis.errors.unsupportedColumnFormat', {
-        defaultMessage: 'Metric Visualization - Unsupported column format: "{id}"',
+        defaultMessage: 'Metric visualization expression - Unsupported column format: "{id}"',
         values: {
           id: formatId,
         },
       })
     );
+  }
+
+  // this formats are coming when formula is empty
+  if (formatId === 'string') {
+    return getFormatService().deserialize(serializedFieldFormat).getConverterFor('text');
   }
 
   if (formatId === 'duration') {
@@ -140,55 +156,93 @@ const getFormatter = (
     : new Intl.NumberFormat(locale, intlOptions).format;
 };
 
-const getColor = (value: number, paletteParams: CustomPaletteState | undefined) =>
-  paletteParams
-    ? getPaletteService().get('custom')?.getColorForValue?.(value, paletteParams, {
-        min: paletteParams.rangeMin,
-        max: paletteParams.rangeMax,
-      }) || defaultColor
-    : defaultColor;
+const getColor = (
+  value: number,
+  paletteParams: CustomPaletteState,
+  accessors: { metric: string; max?: string; breakdownBy?: string },
+  data: Datatable,
+  rowNumber: number
+) => {
+  const { min, max } = getDataBoundsForPalette(accessors, data, rowNumber);
+
+  return getPaletteService().get(CUSTOM_PALETTE)?.getColorForValue?.(value, paletteParams, {
+    min,
+    max,
+  });
+};
+
+const buildFilterEvent = (rowIdx: number, columnIdx: number, table: Datatable) => {
+  return {
+    name: 'filter',
+    data: {
+      data: [
+        {
+          table,
+          column: columnIdx,
+          row: rowIdx,
+        },
+      ],
+    },
+  };
+};
 
 export interface MetricVisComponentProps {
   data: Datatable;
   config: Pick<VisParams, 'metric' | 'dimensions'>;
   renderComplete: IInterpreterRenderHandlers['done'];
+  fireEvent: IInterpreterRenderHandlers['event'];
+  renderMode: RenderMode;
+  filterable: boolean;
 }
 
-const MetricVisComponent = ({ data, config, renderComplete }: MetricVisComponentProps) => {
+export const MetricVis = ({
+  data,
+  config,
+  renderComplete,
+  fireEvent,
+  renderMode,
+  filterable,
+}: MetricVisComponentProps) => {
   const primaryMetricColumn = getColumnByAccessor(config.dimensions.metric, data.columns)!;
-  const formatPrimaryMetric = getFormatter(config.dimensions.metric, data.columns);
+  const formatPrimaryMetric = getMetricFormatter(config.dimensions.metric, data.columns);
 
   let secondaryMetricColumn: DatatableColumn | undefined;
-  let formatSecondaryMetric: ReturnType<typeof getFormatter>;
+  let formatSecondaryMetric: ReturnType<typeof getMetricFormatter>;
   if (config.dimensions.secondaryMetric) {
     secondaryMetricColumn = getColumnByAccessor(config.dimensions.secondaryMetric, data.columns);
-    formatSecondaryMetric = getFormatter(config.dimensions.secondaryMetric, data.columns);
+    formatSecondaryMetric = getMetricFormatter(config.dimensions.secondaryMetric, data.columns);
   }
 
-  const breakdownByColumn = config.dimensions.breakdownBy
-    ? getColumnByAccessor(config.dimensions.breakdownBy, data.columns)
-    : undefined;
+  let breakdownByColumn: DatatableColumn | undefined;
+  let formatBreakdownValue: FieldFormatConvertFunction;
+  if (config.dimensions.breakdownBy) {
+    breakdownByColumn = getColumnByAccessor(config.dimensions.breakdownBy, data.columns);
+    formatBreakdownValue = getFormatService()
+      .deserialize(getFormatByAccessor(config.dimensions.breakdownBy, data.columns))
+      .getConverterFor('text');
+  }
 
   let getProgressBarConfig = (_row: DatatableRow): Partial<MetricWProgress> => ({});
 
-  if (config.dimensions.progressMax) {
-    const maxColId = getColumnByAccessor(config.dimensions.progressMax, data.columns)?.id;
-    if (maxColId) {
-      getProgressBarConfig = (_row: DatatableRow): Partial<MetricWProgress> => ({
-        domainMax: _row[maxColId],
-        progressBarDirection: config.metric.progressDirection,
-      });
-    }
+  const maxColId = config.dimensions.max
+    ? getColumnByAccessor(config.dimensions.max, data.columns)?.id
+    : undefined;
+  if (maxColId) {
+    getProgressBarConfig = (_row: DatatableRow): Partial<MetricWProgress> => ({
+      domainMax: _row[maxColId],
+      progressBarDirection: config.metric.progressDirection,
+    });
   }
 
   const metricConfigs: MetricSpec['data'][number] = (
     breakdownByColumn ? data.rows : data.rows.slice(0, 1)
-  ).map((row) => {
+  ).map((row, rowIdx) => {
     const value = row[primaryMetricColumn.id];
-    const title = breakdownByColumn ? row[breakdownByColumn.id] : primaryMetricColumn.name;
-    const subtitle = breakdownByColumn
-      ? primaryMetricColumn.name
-      : secondaryMetricColumn?.name ?? config.metric.subtitle;
+    const title = breakdownByColumn
+      ? formatBreakdownValue(row[breakdownByColumn.id])
+      : primaryMetricColumn.name;
+    const subtitle = breakdownByColumn ? primaryMetricColumn.name : config.metric.subtitle;
+    const secondaryPrefix = config.metric.secondaryPrefix ?? secondaryMetricColumn?.name;
     return {
       value,
       valueFormatter: formatPrimaryMetric,
@@ -196,12 +250,28 @@ const MetricVisComponent = ({ data, config, renderComplete }: MetricVisComponent
       subtitle,
       extra: (
         <span>
+          {secondaryPrefix}
           {secondaryMetricColumn
-            ? formatSecondaryMetric!(row[secondaryMetricColumn.id])
-            : config.metric.extraText}
+            ? `${secondaryPrefix ? ' ' : ''}${formatSecondaryMetric!(
+                row[secondaryMetricColumn.id]
+              )}`
+            : undefined}
         </span>
       ),
-      color: getColor(value, config.metric.palette),
+      color:
+        config.metric.palette && value != null
+          ? getColor(
+              value,
+              config.metric.palette,
+              {
+                metric: primaryMetricColumn.id,
+                max: maxColId,
+                breakdownBy: breakdownByColumn?.id,
+              },
+              data,
+              rowIdx
+            ) ?? defaultColor
+          : config.metric.color ?? defaultColor,
       ...getProgressBarConfig(row),
     };
   });
@@ -228,17 +298,84 @@ const MetricVisComponent = ({ data, config, renderComplete }: MetricVisComponent
     [renderComplete]
   );
 
+  let pixelHeight;
+  let pixelWidth;
+  if (renderMode === 'edit') {
+    // In the editor, we constrain the maximum size of the tiles for aesthetic reasons
+    const maxTileSideLength = metricConfigs.flat().length > 1 ? 200 : 300;
+    pixelHeight = grid.length * maxTileSideLength;
+    pixelWidth = grid[0]?.length * maxTileSideLength;
+  }
+
+  const [scrollChildHeight, setScrollChildHeight] = useState<string>('100%');
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const scrollDimensions = useResizeObserver(scrollContainerRef.current);
+
+  useEffect(() => {
+    const minTileHeight = 64; // TODO - magic number from the @elastic/charts side. would be nice to deduplicate
+    const minimumRequiredVerticalSpace = minTileHeight * grid.length;
+    setScrollChildHeight(
+      (scrollDimensions.height ?? -Infinity) > minimumRequiredVerticalSpace
+        ? '100%'
+        : `${minimumRequiredVerticalSpace}px`
+    );
+  }, [grid.length, scrollDimensions.height]);
+
+  // force chart to re-render to circumvent a charts bug
+  const magicKey = useRef(0);
+  useEffect(() => {
+    magicKey.current++;
+  }, [data]);
+
   return (
-    <Chart>
-      <Settings
-        theme={[{ background: { color: 'transparent' } }, chartTheme]}
-        onRenderChange={onRenderChange}
-      />
-      <Metric id="metric" data={grid} />
-    </Chart>
+    <div
+      ref={scrollContainerRef}
+      css={css`
+        height: ${pixelHeight ? `${pixelHeight}px` : '100%'};
+        width: ${pixelWidth ? `${pixelWidth}px` : '100%'};
+        max-height: 100%;
+        max-width: 100%;
+        overflow-y: auto;
+      `}
+    >
+      <div
+        css={css`
+          height: ${scrollChildHeight};
+        `}
+      >
+        <Chart key={magicKey.current}>
+          <Settings
+            theme={[
+              {
+                background: { color: 'transparent' },
+                metric: {
+                  background: defaultColor,
+                  barBackground: euiThemeVars.euiColorLightShade,
+                },
+              },
+              chartTheme,
+            ]}
+            onRenderChange={onRenderChange}
+            onElementClick={(events) => {
+              if (!filterable) {
+                return;
+              }
+              events.forEach((event) => {
+                if (isMetricElementEvent(event)) {
+                  const colIdx = breakdownByColumn
+                    ? data.columns.findIndex((col) => col === breakdownByColumn)
+                    : data.columns.findIndex((col) => col === primaryMetricColumn);
+                  const rowLength = grid[0].length;
+                  fireEvent(
+                    buildFilterEvent(event.rowIndex * rowLength + event.columnIndex, colIdx, data)
+                  );
+                }
+              });
+            }}
+          />
+          <Metric id="metric" data={grid} />
+        </Chart>
+      </div>
+    </div>
   );
 };
-
-// default export required for React.Lazy
-// eslint-disable-next-line import/no-default-export
-export { MetricVisComponent as default };

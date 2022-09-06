@@ -293,23 +293,7 @@
             "section": "def-common.DataViewBase",
             "text": "DataViewBase"
           },
-          " | undefined, queries: ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.Query",
-            "text": "Query"
-          },
-          " | ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.Query",
-            "text": "Query"
-          },
-          "[], filters: ",
+          " | undefined, queries: AnyQuery | AnyQuery[], filters: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -377,22 +361,7 @@
               "- a query object or array of query objects. Each query has a language property and a query property."
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Query",
-                "text": "Query"
-              },
-              " | ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Query",
-                "text": "Query"
-              },
-              "[]"
+              "AnyQuery | AnyQuery[]"
             ],
             "path": "packages/kbn-es-query/src/es_query/build_es_query.ts",
             "deprecated": false,
@@ -1966,6 +1935,51 @@
       },
       {
         "parentPluginId": "@kbn/es-query",
+        "id": "def-common.getAggregateQueryMode",
+        "type": "Function",
+        "tags": [],
+        "label": "getAggregateQueryMode",
+        "description": [],
+        "signature": [
+          "(query: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.AggregateQuery",
+            "text": "AggregateQuery"
+          },
+          ") => never"
+        ],
+        "path": "packages/kbn-es-query/src/es_query/es_query_sql.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/es-query",
+            "id": "def-common.getAggregateQueryMode.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "query",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.AggregateQuery",
+                "text": "AggregateQuery"
+              }
+            ],
+            "path": "packages/kbn-es-query/src/es_query/es_query_sql.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/es-query",
         "id": "def-common.getDataViewFieldSubtypeMulti",
         "type": "Function",
         "tags": [],
@@ -2037,6 +2051,37 @@
             "path": "packages/kbn-es-query/src/utils.ts",
             "deprecated": false,
             "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/es-query",
+        "id": "def-common.getIndexPatternFromSQLQuery",
+        "type": "Function",
+        "tags": [],
+        "label": "getIndexPatternFromSQLQuery",
+        "description": [],
+        "signature": [
+          "(sqlQuery: string | undefined) => string"
+        ],
+        "path": "packages/kbn-es-query/src/es_query/es_query_sql.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/es-query",
+            "id": "def-common.getIndexPatternFromSQLQuery.$1",
+            "type": "string",
+            "tags": [],
+            "label": "sqlQuery",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-es-query/src/es_query/es_query_sql.ts",
+            "deprecated": false,
+            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -2387,6 +2432,130 @@
         "returnComment": [
           "`true` if a filter is an `MatchAllFilter`"
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/es-query",
+        "id": "def-common.isOfAggregateQueryType",
+        "type": "Function",
+        "tags": [],
+        "label": "isOfAggregateQueryType",
+        "description": [],
+        "signature": [
+          "(query: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Query",
+            "text": "Query"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.AggregateQuery",
+            "text": "AggregateQuery"
+          },
+          " | { [key: string]: any; }) => boolean"
+        ],
+        "path": "packages/kbn-es-query/src/es_query/es_query_sql.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/es-query",
+            "id": "def-common.isOfAggregateQueryType.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "query",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Query",
+                "text": "Query"
+              },
+              " | ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.AggregateQuery",
+                "text": "AggregateQuery"
+              },
+              " | { [key: string]: any; }"
+            ],
+            "path": "packages/kbn-es-query/src/es_query/es_query_sql.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/es-query",
+        "id": "def-common.isOfQueryType",
+        "type": "Function",
+        "tags": [],
+        "label": "isOfQueryType",
+        "description": [],
+        "signature": [
+          "(arg: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Query",
+            "text": "Query"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.AggregateQuery",
+            "text": "AggregateQuery"
+          },
+          " | undefined) => boolean"
+        ],
+        "path": "packages/kbn-es-query/src/es_query/es_query_sql.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/es-query",
+            "id": "def-common.isOfQueryType.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "arg",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Query",
+                "text": "Query"
+              },
+              " | ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.AggregateQuery",
+                "text": "AggregateQuery"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-es-query/src/es_query/es_query_sql.ts",
+            "deprecated": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
         "initialIsOpen": false
       },
       {
@@ -3521,7 +3690,7 @@
             "label": "function",
             "description": [],
             "signature": [
-              "\"nested\" | \"exists\" | \"range\" | \"is\" | \"and\" | \"or\" | \"not\""
+              "\"range\" | \"nested\" | \"exists\" | \"is\" | \"and\" | \"or\" | \"not\""
             ],
             "path": "packages/kbn-es-query/src/kuery/node_types/types.ts",
             "deprecated": false
@@ -3858,6 +4027,20 @@
       }
     ],
     "misc": [
+      {
+        "parentPluginId": "@kbn/es-query",
+        "id": "def-common.AggregateQuery",
+        "type": "Type",
+        "tags": [],
+        "label": "AggregateQuery",
+        "description": [],
+        "signature": [
+          "{ sql: string; } | { esql: string; }"
+        ],
+        "path": "packages/kbn-es-query/src/filters/build_filters/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/es-query",
         "id": "def-common.CustomFilter",

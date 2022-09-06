@@ -9,7 +9,6 @@ export * from './network_routes';
 export * from './network_routes_loading';
 export * from './nav_tabs';
 export * from './utils';
-export * from './alerts_query_tab_body';
 export * from './countries_query_tab_body';
 export * from './dns_query_tab_body';
 export * from './http_query_tab_body';

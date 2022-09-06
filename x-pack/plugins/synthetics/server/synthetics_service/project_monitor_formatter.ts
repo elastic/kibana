@@ -4,13 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { Subject } from 'rxjs';
 import { isEqual } from 'lodash';
+import { KibanaRequest } from '@kbn/core/server';
 import {
   SavedObjectsUpdateResponse,
   SavedObjectsClientContract,
   SavedObjectsFindResult,
 } from '@kbn/core/server';
 import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
+import { SyntheticsMonitorClient } from './synthetics_monitor/synthetics_monitor_client';
 import {
   BrowserFields,
   ConfigKey,
@@ -46,6 +49,7 @@ export class ProjectMonitorFormatter {
   private spaceId: string;
   private keepStale: boolean;
   private locations: Locations;
+  private privateLocations: Locations;
   private savedObjectsClient: SavedObjectsClientContract;
   private encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
   private staleMonitorsMap: StaleMonitorMap = {};
@@ -58,9 +62,13 @@ export class ProjectMonitorFormatter {
   public failedStaleMonitors: FailedMonitors = [];
   private server: UptimeServerSetup;
   private projectFilter: string;
+  private syntheticsMonitorClient: SyntheticsMonitorClient;
+  private request: KibanaRequest;
+  private subject?: Subject<unknown>;
 
   constructor({
     locations,
+    privateLocations,
     keepStale,
     savedObjectsClient,
     encryptedSavedObjectsClient,
@@ -68,8 +76,12 @@ export class ProjectMonitorFormatter {
     spaceId,
     monitors,
     server,
+    syntheticsMonitorClient,
+    request,
+    subject,
   }: {
     locations: Locations;
+    privateLocations: Locations;
     keepStale: boolean;
     savedObjectsClient: SavedObjectsClientContract;
     encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
@@ -77,36 +89,51 @@ export class ProjectMonitorFormatter {
     spaceId: string;
     monitors: ProjectBrowserMonitor[];
     server: UptimeServerSetup;
+    syntheticsMonitorClient: SyntheticsMonitorClient;
+    request: KibanaRequest;
+    subject?: Subject<unknown>;
   }) {
     this.projectId = projectId;
     this.spaceId = spaceId;
     this.locations = locations;
+    this.privateLocations = privateLocations;
     this.keepStale = keepStale;
     this.savedObjectsClient = savedObjectsClient;
     this.encryptedSavedObjectsClient = encryptedSavedObjectsClient;
+    this.syntheticsMonitorClient = syntheticsMonitorClient;
     this.monitors = monitors;
     this.server = server;
     this.projectFilter = `${syntheticsMonitorType}.attributes.${ConfigKey.PROJECT_ID}: "${this.projectId}"`;
+    this.request = request;
+    this.subject = subject;
   }
 
   public configureAllProjectMonitors = async () => {
     this.staleMonitorsMap = await this.getAllProjectMonitorsForProject();
-    await Promise.all(
-      this.monitors.map((monitor) =>
-        this.configureProjectMonitor({
-          monitor,
-        })
-      )
-    );
+    for (const monitor of this.monitors) {
+      await this.configureProjectMonitor({ monitor });
+      await new Promise((resolve) => setTimeout(resolve, 100));
+    }
 
     await this.handleStaleMonitors();
   };
 
   private configureProjectMonitor = async ({ monitor }: { monitor: ProjectBrowserMonitor }) => {
     try {
+      const {
+        integrations: { writeIntegrationPolicies },
+      } = await this.server.fleet.authz.fromRequest(this.request);
+
+      if (monitor.privateLocations?.length && !writeIntegrationPolicies) {
+        throw new Error(
+          'Insufficient permissions. In order to configure private locations, you must have Fleet and Integrations write permissions. To resolve, please generate a new API key with a user who has Fleet and Integrations write permissions.'
+        );
+      }
+
       // check to see if monitor already exists
       const normalizedMonitor = normalizeProjectMonitor({
         locations: this.locations,
+        privateLocations: this.privateLocations,
         monitor,
         projectId: this.projectId,
         namespace: this.spaceId,
@@ -136,20 +163,11 @@ export class ProjectMonitorFormatter {
         if (this.staleMonitorsMap[monitor.id]) {
           this.staleMonitorsMap[monitor.id].stale = false;
         }
+        this.handleStreamingMessage({ message: `${monitor.id}: monitor updated successfully` });
       } else {
-        const newMonitor = await this.savedObjectsClient.create<EncryptedSyntheticsMonitor>(
-          syntheticsMonitorType,
-          formatSecrets({
-            ...normalizedMonitor,
-            revision: 1,
-          })
-        );
-        await syncNewMonitor({
-          server: this.server,
-          monitor: normalizedMonitor,
-          monitorSavedObject: newMonitor,
-        });
+        await this.createMonitor(normalizedMonitor);
         this.createdMonitors.push(monitor.id);
+        this.handleStreamingMessage({ message: `${monitor.id}: monitor created successfully` });
       }
     } catch (e) {
       this.server.logger.error(e);
@@ -159,6 +177,10 @@ export class ProjectMonitorFormatter {
         details: e.message,
         payload: monitor,
       });
+      this.handleStreamingMessage({ message: `${monitor.id}: failed to create or update monitor` });
+      if (this.staleMonitorsMap[monitor.id]) {
+        this.staleMonitorsMap[monitor.id].stale = false;
+      }
     }
   };
 
@@ -207,6 +229,24 @@ export class ProjectMonitorFormatter {
     return savedObjects?.[0];
   };
 
+  private createMonitor = async (normalizedMonitor: BrowserFields) => {
+    const newMonitor = await this.savedObjectsClient.create<EncryptedSyntheticsMonitor>(
+      syntheticsMonitorType,
+      formatSecrets({
+        ...normalizedMonitor,
+        revision: 1,
+      })
+    );
+    await syncNewMonitor({
+      server: this.server,
+      monitor: normalizedMonitor,
+      monitorSavedObject: newMonitor,
+      syntheticsMonitorClient: this.syntheticsMonitorClient,
+      savedObjectsClient: this.savedObjectsClient,
+      request: this.request,
+    });
+  };
+
   private updateMonitor = async (
     previousMonitor: SavedObjectsFindResult<EncryptedSyntheticsMonitor>,
     normalizedMonitor: BrowserFields
@@ -244,11 +284,15 @@ export class ProjectMonitorFormatter {
       );
 
     if (hasMonitorBeenEdited) {
-      syncEditedMonitor({
+      await syncEditedMonitor({
         editedMonitor: normalizedMonitor,
         editedMonitorSavedObject: editedMonitor,
         previousMonitor,
+        decryptedPreviousMonitor,
         server: this.server,
+        syntheticsMonitorClient: this.syntheticsMonitorClient,
+        savedObjectsClient: this.savedObjectsClient,
+        request: this.request,
       });
     }
 
@@ -260,19 +304,18 @@ export class ProjectMonitorFormatter {
       const staleMonitorsData = Object.values(this.staleMonitorsMap).filter(
         (monitor) => monitor.stale === true
       );
-      await Promise.all(
-        staleMonitorsData.map((monitor) => {
-          if (!this.keepStale) {
-            return this.deleteStaleMonitor({
-              monitorId: monitor.savedObjectId,
-              journeyId: monitor.journeyId,
-            });
-          } else {
-            this.staleMonitors.push(monitor.journeyId);
-            return null;
-          }
-        })
-      );
+
+      for (const staleMonitor of staleMonitorsData) {
+        if (!this.keepStale) {
+          await this.deleteStaleMonitor({
+            monitorId: staleMonitor.savedObjectId,
+            journeyId: staleMonitor.journeyId,
+          });
+        } else {
+          this.staleMonitors.push(staleMonitor.journeyId);
+          return null;
+        }
+      }
     } catch (e) {
       this.server.logger.error(e);
     }
@@ -290,14 +333,24 @@ export class ProjectMonitorFormatter {
         savedObjectsClient: this.savedObjectsClient,
         server: this.server,
         monitorId,
+        syntheticsMonitorClient: this.syntheticsMonitorClient,
+        request: this.request,
       });
       this.deletedMonitors.push(journeyId);
+      this.handleStreamingMessage({ message: `Monitor ${journeyId} deleted successfully` });
     } catch (e) {
+      this.handleStreamingMessage({ message: `Monitor ${journeyId} could not be deleted` });
       this.failedStaleMonitors.push({
-        id: monitorId,
+        id: journeyId,
         reason: 'Failed to delete stale monitor',
         details: e.message,
       });
+    }
+  };
+
+  private handleStreamingMessage = async ({ message }: { message: string }) => {
+    if (this.subject) {
+      this.subject?.next(message);
     }
   };
 }

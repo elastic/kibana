@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import type { KibanaRequest } from '@kbn/core/server';
 import { buildEsQuery } from '@kbn/es-query';
 import { castEsToKbnFieldTypeName, ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
@@ -21,7 +20,6 @@ import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { zipObject } from 'lodash';
 import { Observable, defer, throwError } from 'rxjs';
 import { catchError, map, switchMap, tap } from 'rxjs/operators';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import type { NowProviderPublicContract } from '../../../public';
 import { getEsQueryConfig } from '../../es_query';
 import { getTime } from '../../query';
@@ -40,9 +38,9 @@ type Output = Observable<Datatable>;
 
 interface Arguments {
   query: string;
-  parameter: Array<string | number | boolean>;
-  count: number;
-  timezone: string;
+  parameter?: Array<string | number | boolean>;
+  count?: number;
+  timezone?: string;
   timeField?: string;
 }
 

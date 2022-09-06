@@ -31,7 +31,9 @@ export function createMockClientArgs() {
   const clientArgs = {
     authorization,
     unsecuredSavedObjectsClient: soClient,
-    caseService,
+    services: {
+      caseService,
+    },
     logger,
   };
 

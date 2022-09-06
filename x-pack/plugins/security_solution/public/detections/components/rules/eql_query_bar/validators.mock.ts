@@ -8,11 +8,6 @@
 import type { ValidationError } from '../../../../shared_imports';
 import { ERROR_CODES } from './validators';
 
-export const getEqlResponseError = (): ValidationError => ({
-  code: ERROR_CODES.FAILED_REQUEST,
-  message: 'something went wrong',
-});
-
 export const getEqlValidationError = (): ValidationError => ({
   code: ERROR_CODES.INVALID_EQL,
   messages: ['line 1: WRONG\nline 2: ALSO WRONG'],

@@ -7,10 +7,10 @@
 
 import { IScopedClusterClient } from '@kbn/core/server';
 
-import { Crawler } from '../../../common/types/crawler';
+import { ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE } from '../../../common/constants';
 import { ElasticsearchIndexWithIngestion } from '../../../common/types/indices';
-
 import { fetchConnectorByIndexName } from '../connectors/fetch_connectors';
+import { fetchCrawlerByIndexName } from '../crawler/fetch_crawlers';
 
 import { mapIndexStats } from './fetch_indices';
 
@@ -21,28 +21,29 @@ export const fetchIndex = async (
   const indexDataResult = await client.asCurrentUser.indices.get({ index });
   const indexData = indexDataResult[index];
   const { indices } = await client.asCurrentUser.indices.stats({ index });
+
+  const { count } = await client.asCurrentUser.count({ index });
+
   if (!indices || !indices[index] || !indexData) {
     throw new Error('404');
   }
   const indexStats = indices[index];
-  const indexResult = mapIndexStats(indexData, indexStats, index);
+  const indexResult = {
+    count,
+    ...mapIndexStats(indexData, indexStats, index),
+  };
 
   const connector = await fetchConnectorByIndexName(client, index);
-  if (connector) {
+  if (connector && connector.service_type !== ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE) {
     return {
       ...indexResult,
       connector,
     };
   }
 
-  const crawlerResult = await client.asCurrentUser.search<Crawler>({
-    index: '.ent-search-actastic-crawler2_configurations',
-    query: { term: { index_name: index } },
-  });
-  const crawler = crawlerResult.hits.hits[0]?._source;
-
+  const crawler = await fetchCrawlerByIndexName(client, index);
   if (crawler) {
-    return { ...indexResult, crawler };
+    return { ...indexResult, connector, crawler };
   }
 
   return indexResult;

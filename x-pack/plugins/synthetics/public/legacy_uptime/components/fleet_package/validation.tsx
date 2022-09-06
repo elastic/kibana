@@ -121,6 +121,17 @@ const validateThrottleValue = (speed: string | undefined, allowZero?: boolean) =
   return isNaN(throttleValue) || (allowZero ? throttleValue < 0 : throttleValue <= 0);
 };
 
+export const validateParamsValue = (params?: string) => {
+  try {
+    if (params) {
+      JSON.parse(params ?? '');
+    }
+  } catch (e) {
+    return true;
+  }
+  return false;
+};
+
 const validateBrowser: ValidationLibrary = {
   ...validateCommon,
   [ConfigKey.SOURCE_ZIP_URL]: ({
@@ -136,6 +147,7 @@ const validateBrowser: ValidationLibrary = {
   [ConfigKey.UPLOAD_SPEED]: ({ [ConfigKey.UPLOAD_SPEED]: uploadSpeed }) =>
     validateThrottleValue(uploadSpeed),
   [ConfigKey.LATENCY]: ({ [ConfigKey.LATENCY]: latency }) => validateThrottleValue(latency, true),
+  [ConfigKey.PARAMS]: ({ [ConfigKey.PARAMS]: params }) => validateParamsValue(params),
 };
 
 export type ValidateDictionary = Record<DataStream, Validation>;

@@ -31,5 +31,8 @@ export function useCurrentUser() {
 export function useUserProfile<T extends UserProfileData>(dataPath?: string) {
   const { userProfiles } = useSecurityApiClients();
   const dataUpdateState = useObservable(userProfiles.dataUpdates$);
-  return useAsync(() => userProfiles.get<T>(dataPath), [userProfiles, dataUpdateState]);
+  return useAsync(
+    () => userProfiles.getCurrent<T>(dataPath ? { dataPath } : undefined),
+    [userProfiles, dataUpdateState]
+  );
 }

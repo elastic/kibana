@@ -191,6 +191,7 @@ export const buildEventsSearchQuery = ({
         ...docFields,
       ],
       ...(aggregations ? { aggregations } : {}),
+      runtime_mappings: runtimeMappings,
       sort,
     },
   };

@@ -33,7 +33,7 @@ const INGEST_API_PACKAGE_POLICIES = `${INGEST_API_ROOT}/package_policies`;
 const INGEST_API_PACKAGE_POLICIES_DELETE = `${INGEST_API_PACKAGE_POLICIES}/delete`;
 const INGEST_API_EPM_PACKAGES = `${INGEST_API_ROOT}/epm/packages`;
 
-const SECURITY_PACKAGES_ROUTE = `${INGEST_API_EPM_PACKAGES}?category=security`;
+const SECURITY_PACKAGES_ROUTE = `${INGEST_API_EPM_PACKAGES}?category=security&experimental=true`;
 
 /**
  * Holds information about the test resources created to support an Endpoint Policy
@@ -190,7 +190,6 @@ export function EndpointPolicyTestResourcesProvider({ getService }: FtrProviderC
           description: 'Protect the worlds data - but in the East Coast',
           policy_id: agentPolicy!.id,
           enabled: true,
-          output_id: '',
           inputs: [
             {
               type: 'endpoint',

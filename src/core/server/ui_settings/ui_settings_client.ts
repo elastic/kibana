@@ -7,8 +7,8 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import { SavedObjectsErrorHelpers } from '../saved_objects';
-import { SavedObjectsClientContract } from '../saved_objects/types';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-utils-server';
 import { createOrUpgradeSavedConfig } from './create_or_upgrade_saved_config';
 import { UiSettingsParams } from './types';
 import { CannotOverrideError } from './ui_settings_errors';
@@ -192,8 +192,7 @@ export class UiSettingsClient extends BaseUiSettingsClient {
   }
 
   private isIgnorableError(error: Error) {
-    const { isForbiddenError, isEsUnavailableError } = this.savedObjectsClient.errors;
-
+    const { isForbiddenError, isEsUnavailableError } = SavedObjectsErrorHelpers;
     return isForbiddenError(error) || isEsUnavailableError(error);
   }
 }

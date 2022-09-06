@@ -16,12 +16,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { IndexPatternLoadExpressionFunctionDefinition } from '@kbn/data-views-plugin/common';
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/common';
 
-import type {
-  IEsSearchResponse,
-  ISearchOptions,
-  ISearchSource,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../public';
+import type { IEsSearchResponse, ISearchOptions, ISearchSource } from '../../../public';
 import type { EsaggsExpressionFunctionDefinition } from '../expressions';
 import { AggConfig, AggConfigSerialized, IAggConfig } from './agg_config';
 import type { IAggType } from './agg_type';

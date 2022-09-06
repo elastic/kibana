@@ -9,7 +9,7 @@
 import { mockPersistedLogFactory } from './query_string_input.test.mocks';
 
 import React from 'react';
-import { mount } from 'enzyme';
+import { mount, shallow } from 'enzyme';
 import { render } from '@testing-library/react';
 import { EMPTY } from 'rxjs';
 
@@ -65,6 +65,10 @@ const kqlQuery = {
   language: 'kuery',
 };
 
+const sqlQuery = {
+  sql: 'SELECT * FROM test',
+};
+
 const createMockWebStorage = () => ({
   clear: jest.fn(),
   getItem: jest.fn(),
@@ -109,6 +113,7 @@ function wrapQueryBarTopRowInContext(testProps: any) {
 describe('QueryBarTopRowTopRow', () => {
   const QUERY_INPUT_SELECTOR = 'QueryStringInputUI';
   const TIMEPICKER_SELECTOR = 'Memo(EuiSuperDatePicker)';
+  const REFRESH_BUTTON_SELECTOR = 'EuiSuperUpdateButton';
   const TIMEPICKER_DURATION = '[data-shared-timefilter-duration]';
 
   beforeEach(() => {
@@ -191,6 +196,23 @@ describe('QueryBarTopRowTopRow', () => {
     expect(component.find(TIMEPICKER_SELECTOR).length).toBe(1);
   });
 
+  it('Should render timepicker without the submit button if showSubmitButton is false', () => {
+    const component = mount(
+      wrapQueryBarTopRowInContext({
+        isDirty: false,
+        screenTitle: 'Another Screen',
+        showDatePicker: true,
+        showSubmitButton: false,
+        dateRangeFrom: 'now-7d',
+        dateRangeTo: 'now',
+        timeHistory: mockTimeHistory,
+      })
+    );
+
+    expect(component.find(REFRESH_BUTTON_SELECTOR).length).toBe(0);
+    expect(component.find(TIMEPICKER_SELECTOR).length).toBe(1);
+  });
+
   it('Should render the timefilter duration container for sharing', () => {
     const component = mount(
       wrapQueryBarTopRowInContext({
@@ -256,5 +278,22 @@ describe('QueryBarTopRowTopRow', () => {
 
     expect(component.find(QUERY_INPUT_SELECTOR).length).toBe(0);
     expect(component.find(TIMEPICKER_SELECTOR).length).toBe(0);
+  });
+
+  it('Should NOT render query input bar if on text based languages mode', () => {
+    const component = shallow(
+      wrapQueryBarTopRowInContext({
+        query: sqlQuery,
+        isDirty: false,
+        screenTitle: 'SQL Screen',
+        timeHistory: mockTimeHistory,
+        indexPatterns: [stubIndexPattern],
+        showDatePicker: false,
+        dateRangeFrom: 'now-7d',
+        dateRangeTo: 'now',
+      })
+    );
+
+    expect(component.find(QUERY_INPUT_SELECTOR).length).toBe(0);
   });
 });

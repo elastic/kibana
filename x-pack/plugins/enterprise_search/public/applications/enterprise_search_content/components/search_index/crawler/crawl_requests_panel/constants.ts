@@ -60,3 +60,16 @@ export const readableCrawlerStatuses: { [key in CrawlerStatus]: string } = {
     { defaultMessage: 'Skipped' }
   ),
 };
+
+export const crawlStatusColors: { [key in CrawlerStatus]: 'default' | 'danger' | 'success' } = {
+  [CrawlerStatus.Pending]: 'default',
+  [CrawlerStatus.Suspended]: 'default',
+  [CrawlerStatus.Starting]: 'default',
+  [CrawlerStatus.Running]: 'default',
+  [CrawlerStatus.Suspending]: 'default',
+  [CrawlerStatus.Canceling]: 'default',
+  [CrawlerStatus.Success]: 'success',
+  [CrawlerStatus.Failed]: 'danger',
+  [CrawlerStatus.Canceled]: 'default',
+  [CrawlerStatus.Skipped]: 'default',
+};

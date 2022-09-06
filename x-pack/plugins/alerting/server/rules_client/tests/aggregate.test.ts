@@ -103,15 +103,10 @@ describe('aggregate()', () => {
           ],
         },
         snoozed: {
-          buckets: [
-            {
-              key: '2022-03-21T20:22:01.501Z-*',
-              format: 'strict_date_time',
-              from: 1.647894121501e12,
-              from_as_string: '2022-03-21T20:22:01.501Z',
-              doc_count: 2,
-            },
-          ],
+          doc_count: 0,
+          count: {
+            doc_count: 0,
+          },
         },
         tags: {
           buckets: [
@@ -175,7 +170,7 @@ describe('aggregate()', () => {
           "unmuted": 27,
         },
         "ruleSnoozedStatus": Object {
-          "snoozed": 2,
+          "snoozed": 0,
         },
         "ruleTags": Array [
           "a",
@@ -203,7 +198,18 @@ describe('aggregate()', () => {
             terms: { field: 'alert.attributes.muteAll' },
           },
           snoozed: {
-            terms: { field: 'alert.attributes.isSnoozedUntil' },
+            aggs: {
+              count: {
+                filter: {
+                  exists: {
+                    field: 'alert.attributes.snoozeSchedule.duration',
+                  },
+                },
+              },
+            },
+            nested: {
+              path: 'alert.attributes.snoozeSchedule',
+            },
           },
           tags: {
             terms: { field: 'alert.attributes.tags', order: { _key: 'asc' } },
@@ -247,7 +253,18 @@ describe('aggregate()', () => {
             terms: { field: 'alert.attributes.muteAll' },
           },
           snoozed: {
-            terms: { field: 'alert.attributes.isSnoozedUntil' },
+            aggs: {
+              count: {
+                filter: {
+                  exists: {
+                    field: 'alert.attributes.snoozeSchedule.duration',
+                  },
+                },
+              },
+            },
+            nested: {
+              path: 'alert.attributes.snoozeSchedule',
+            },
           },
           tags: {
             terms: { field: 'alert.attributes.tags', order: { _key: 'asc' } },

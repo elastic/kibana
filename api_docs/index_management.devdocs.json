@@ -2437,7 +2437,7 @@
         "label": "MAJOR_VERSION",
         "description": [],
         "signature": [
-          "\"8.4.0\""
+          "\"8.5.0\""
         ],
         "path": "x-pack/plugins/index_management/common/constants/plugin.ts",
         "deprecated": false,

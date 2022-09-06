@@ -16,6 +16,7 @@ import {
 import {
   DataStream,
   DataStreamCodec,
+  FormMonitorTypeCodec,
   ModeCodec,
   ResponseBodyIndexPolicyCodec,
   ScheduleUnitCodec,
@@ -79,9 +80,11 @@ export const CommonFieldsCodec = t.intersection([
     [ConfigKey.LOCATIONS]: MonitorServiceLocationsCodec,
   }),
   t.partial({
+    [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorTypeCodec,
     [ConfigKey.TIMEOUT]: t.union([t.string, t.null]),
     [ConfigKey.REVISION]: t.number,
     [ConfigKey.MONITOR_SOURCE_TYPE]: SourceTypeCodec,
+    [ConfigKey.CONFIG_ID]: t.string,
   }),
 ]);
 
@@ -219,6 +222,7 @@ export const EncryptedBrowserSimpleFieldsCodec = t.intersection([
       [ConfigKey.PROJECT_ID]: t.string,
       [ConfigKey.ORIGINAL_SPACE]: t.string,
       [ConfigKey.CUSTOM_HEARTBEAT_ID]: t.string,
+      [ConfigKey.TEXT_ASSERTION]: t.string,
     }),
   ]),
   ZipUrlTLSFieldsCodec,
@@ -314,6 +318,24 @@ export const SyntheticsMonitorWithIdCodec = t.intersection([
   t.interface({ id: t.string }),
 ]);
 
+export const HeartbeatConfigCodec = t.intersection([
+  SyntheticsMonitorWithIdCodec,
+  t.partial({
+    fields_under_root: t.boolean,
+    fields: t.intersection([
+      t.interface({
+        config_id: t.string,
+      }),
+      t.partial({
+        run_once: t.boolean,
+        test_run_id: t.string,
+        'monitor.project.name': t.string,
+        'monitor.project.id': t.string,
+      }),
+    ]),
+  }),
+]);
+
 export const EncryptedSyntheticsMonitorWithIdCodec = t.intersection([
   EncryptedSyntheticsMonitorCodec,
   t.interface({ id: t.string }),
@@ -332,6 +354,8 @@ export type EncryptedSyntheticsMonitorWithId = t.TypeOf<
 >;
 
 export type EncryptedSyntheticsSavedMonitor = t.TypeOf<typeof EncryptedSyntheticsSavedMonitorCodec>;
+
+export type HeartbeatConfig = t.TypeOf<typeof HeartbeatConfigCodec>;
 
 export const MonitorDefaultsCodec = t.interface({
   [DataStream.HTTP]: HTTPFieldsCodec,

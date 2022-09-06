@@ -86,6 +86,31 @@ describe('buildObjectRecursive', () => {
               atomic: ['matched_atomic_2'],
             },
           },
+          {
+            matched: {
+              atomic: ['MacBook-Pro-de-Gloria.local'],
+            },
+          },
+          {
+            matched: {
+              atomic: ['MacBook-Pro-de-Gloria.local'],
+            },
+          },
+          {
+            matched: {
+              atomic: ['x86_64'],
+            },
+          },
+          {
+            matched: {
+              atomic: ['MacBook-Pro-de-Gloria.local'],
+            },
+          },
+          {
+            matched: {
+              atomic: ['MacBook-Pro-de-Gloria.local'],
+            },
+          },
         ],
       },
     });
@@ -103,6 +128,31 @@ describe('buildObjectRecursive', () => {
           {
             matched: {
               field: ['matched_field_2'],
+            },
+          },
+          {
+            matched: {
+              field: ['host.name'],
+            },
+          },
+          {
+            matched: {
+              field: ['host.hostname'],
+            },
+          },
+          {
+            matched: {
+              field: ['host.architecture'],
+            },
+          },
+          {
+            matched: {
+              field: ['host.name'],
+            },
+          },
+          {
+            matched: {
+              field: ['host.hostname'],
             },
           },
         ],

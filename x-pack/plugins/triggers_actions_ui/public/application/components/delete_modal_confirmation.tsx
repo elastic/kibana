@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiConfirmModal } from '@elastic/eui';
+import { EuiCallOut, EuiConfirmModal } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
 import { HttpSetup } from '@kbn/core/public';
@@ -19,6 +19,8 @@ export const DeleteModalConfirmation = ({
   onErrors,
   singleTitle,
   multipleTitle,
+  showWarningText,
+  warningText,
   setIsLoadingState,
 }: {
   idsToDelete: string[];
@@ -35,6 +37,8 @@ export const DeleteModalConfirmation = ({
   singleTitle: string;
   multipleTitle: string;
   setIsLoadingState: (isLoading: boolean) => void;
+  showWarningText?: boolean;
+  warningText?: string;
 }) => {
   const [deleteModalFlyoutVisible, setDeleteModalVisibility] = useState<boolean>(false);
 
@@ -120,7 +124,10 @@ export const DeleteModalConfirmation = ({
       cancelButtonText={cancelButtonText}
       confirmButtonText={confirmButtonText}
     >
-      {confirmModalText}
+      <p>{confirmModalText}</p>
+      {showWarningText && (
+        <EuiCallOut title={<>{warningText}</>} color="warning" iconType="alert" />
+      )}
     </EuiConfirmModal>
   );
 };

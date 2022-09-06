@@ -147,9 +147,7 @@ export class ESDocField extends AbstractField implements IField {
       return null;
     }
 
-    const topTerms: AggregationsTermsAggregation = {
-      size: size - 1, // need additional color for the "other"-value
-    };
+    const topTerms: AggregationsTermsAggregation = { size };
     if (indexPatternField.scripted && indexPatternField.script) {
       topTerms.script = {
         source: indexPatternField.script,

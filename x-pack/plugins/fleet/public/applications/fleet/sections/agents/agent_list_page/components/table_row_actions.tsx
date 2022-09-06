@@ -21,7 +21,6 @@ export const TableRowActions: React.FunctionComponent<{
   onUnenrollClick: () => void;
   onUpgradeClick: () => void;
   onAddRemoveTagsClick: (button: HTMLElement) => void;
-  allTags: string[];
 }> = ({
   agent,
   agentPolicy,
@@ -29,7 +28,6 @@ export const TableRowActions: React.FunctionComponent<{
   onUnenrollClick,
   onUpgradeClick,
   onAddRemoveTagsClick,
-  allTags,
 }) => {
   const { getHref } = useLink();
   const hasFleetAllPrivileges = useAuthz().fleet.all;

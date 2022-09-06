@@ -13,6 +13,11 @@ import { MonitorOverviewResult } from '../../../../../common/runtime_types';
 export const fetchMonitorOverviewAction = createAsyncAction<
   MonitorOverviewPageState,
   MonitorOverviewResult
->('fetchMonitorOverivewAction');
+>('fetchMonitorOverviewAction');
 
 export const setOverviewPerPageAction = createAction<number>('setOverviewPerPageAction');
+
+export const quietFetchOverviewAction = createAsyncAction<
+  MonitorOverviewPageState,
+  MonitorOverviewResult
+>('quietFetchOverviewAction');

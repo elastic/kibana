@@ -107,6 +107,31 @@ tr:hover .c5:focus::before {
   background-image: linear-gradient( 135deg, #1d1e24 25%, transparent 25% ), linear-gradient( -135deg, #1d1e24 25%, transparent 25% ), linear-gradient( 135deg, transparent 75%, #1d1e24 75% ), linear-gradient( -135deg, transparent 75%, #1d1e24 75% );
 }
 
+.c4 {
+  display: inline-block;
+  max-width: 100%;
+}
+
+.c4 [data-rbd-placeholder-context-id] {
+  display: none !important;
+}
+
+.c6 > span.euiToolTipAnchor {
+  display: block;
+}
+
+.c6 > span.euiToolTipAnchor.eui-textTruncate {
+  display: inline-block;
+}
+
+.c7 {
+  vertical-align: top;
+}
+
+.c24 {
+  margin-right: 5px;
+}
+
 .c23 {
   margin-right: 5px;
 }
@@ -179,31 +204,6 @@ tr:hover .c5:focus::before {
   margin-right: 10px;
 }
 
-.c4 {
-  display: inline-block;
-  max-width: 100%;
-}
-
-.c4 [data-rbd-placeholder-context-id] {
-  display: none !important;
-}
-
-.c6 > span.euiToolTipAnchor {
-  display: block;
-}
-
-.c6 > span.euiToolTipAnchor.eui-textTruncate {
-  display: inline-block;
-}
-
-.c7 {
-  vertical-align: top;
-}
-
-.c24 {
-  margin-right: 5px;
-}
-
 .c1 {
   margin: 5px 0;
 }
@@ -239,10 +239,10 @@ tr:hover .c5:focus::before {
                     class=""
                   >
                     <div
-                      class="euiPopover euiPopover--anchorDownCenter c3"
+                      class="euiPopover c3 emotion-euiPopover"
                     >
                       <div
-                        class="euiPopover__anchor"
+                        class="euiPopover__anchor css-16vtueo-render"
                       >
                         <div
                           data-test-subj="withHoverActionsButton"
@@ -327,10 +327,10 @@ tr:hover .c5:focus::before {
                     class=""
                   >
                     <div
-                      class="euiPopover euiPopover--anchorDownCenter c3"
+                      class="euiPopover c3 emotion-euiPopover"
                     >
                       <div
-                        class="euiPopover__anchor"
+                        class="euiPopover__anchor css-16vtueo-render"
                       >
                         <div
                           data-test-subj="withHoverActionsButton"
@@ -424,10 +424,10 @@ tr:hover .c5:focus::before {
                     class=""
                   >
                     <div
-                      class="euiPopover euiPopover--anchorDownCenter c3"
+                      class="euiPopover c3 emotion-euiPopover"
                     >
                       <div
-                        class="euiPopover__anchor"
+                        class="euiPopover__anchor css-16vtueo-render"
                       >
                         <div
                           data-test-subj="withHoverActionsButton"
@@ -506,10 +506,10 @@ tr:hover .c5:focus::before {
                     class=""
                   >
                     <div
-                      class="euiPopover euiPopover--anchorDownCenter c3"
+                      class="euiPopover c3 emotion-euiPopover"
                     >
                       <div
-                        class="euiPopover__anchor"
+                        class="euiPopover__anchor css-16vtueo-render"
                       >
                         <div
                           data-test-subj="withHoverActionsButton"
@@ -584,10 +584,10 @@ tr:hover .c5:focus::before {
                     class=""
                   >
                     <div
-                      class="euiPopover euiPopover--anchorDownCenter c3"
+                      class="euiPopover c3 emotion-euiPopover"
                     >
                       <div
-                        class="euiPopover__anchor"
+                        class="euiPopover__anchor css-16vtueo-render"
                       >
                         <div
                           data-test-subj="withHoverActionsButton"
@@ -676,10 +676,10 @@ tr:hover .c5:focus::before {
                         class=""
                       >
                         <div
-                          class="euiPopover euiPopover--anchorDownCenter c3"
+                          class="euiPopover c3 emotion-euiPopover"
                         >
                           <div
-                            class="euiPopover__anchor"
+                            class="euiPopover__anchor css-16vtueo-render"
                           >
                             <div
                               data-test-subj="withHoverActionsButton"
@@ -764,10 +764,10 @@ tr:hover .c5:focus::before {
                         class=""
                       >
                         <div
-                          class="euiPopover euiPopover--anchorDownCenter c3"
+                          class="euiPopover c3 emotion-euiPopover"
                         >
                           <div
-                            class="euiPopover__anchor"
+                            class="euiPopover__anchor css-16vtueo-render"
                           >
                             <div
                               data-test-subj="withHoverActionsButton"
@@ -847,10 +847,10 @@ tr:hover .c5:focus::before {
                         class=""
                       >
                         <div
-                          class="euiPopover euiPopover--anchorDownCenter c3"
+                          class="euiPopover c3 emotion-euiPopover"
                         >
                           <div
-                            class="euiPopover__anchor"
+                            class="euiPopover__anchor css-16vtueo-render"
                           >
                             <div
                               data-test-subj="withHoverActionsButton"
@@ -923,10 +923,10 @@ tr:hover .c5:focus::before {
                         class=""
                       >
                         <div
-                          class="euiPopover euiPopover--anchorDownCenter c3"
+                          class="euiPopover c3 emotion-euiPopover"
                         >
                           <div
-                            class="euiPopover__anchor"
+                            class="euiPopover__anchor css-16vtueo-render"
                           >
                             <div
                               data-test-subj="withHoverActionsButton"
@@ -999,10 +999,10 @@ tr:hover .c5:focus::before {
                         class=""
                       >
                         <div
-                          class="euiPopover euiPopover--anchorDownCenter c3"
+                          class="euiPopover c3 emotion-euiPopover"
                         >
                           <div
-                            class="euiPopover__anchor"
+                            class="euiPopover__anchor css-16vtueo-render"
                           >
                             <div
                               data-test-subj="withHoverActionsButton"
@@ -1082,10 +1082,10 @@ tr:hover .c5:focus::before {
                         class=""
                       >
                         <div
-                          class="euiPopover euiPopover--anchorDownCenter c3"
+                          class="euiPopover c3 emotion-euiPopover"
                         >
                           <div
-                            class="euiPopover__anchor"
+                            class="euiPopover__anchor css-16vtueo-render"
                           >
                             <div
                               data-test-subj="withHoverActionsButton"
@@ -1212,10 +1212,10 @@ tr:hover .c5:focus::before {
                                           class=""
                                         >
                                           <div
-                                            class="euiPopover euiPopover--anchorDownCenter c3"
+                                            class="euiPopover c3 emotion-euiPopover"
                                           >
                                             <div
-                                              class="euiPopover__anchor"
+                                              class="euiPopover__anchor css-16vtueo-render"
                                             >
                                               <div
                                                 data-test-subj="withHoverActionsButton"
@@ -1261,7 +1261,7 @@ tr:hover .c5:focus::before {
                                                             <a
                                                               class="euiLink emotion-euiLink-primary"
                                                               data-test-subj="network-details"
-                                                              href="/ip/192.168.1.2/source"
+                                                              href="/ip/192.168.1.2/source/flows"
                                                               rel="noreferrer"
                                                             >
                                                               192.168.1.2
@@ -1305,10 +1305,10 @@ tr:hover .c5:focus::before {
                                               class=""
                                             >
                                               <div
-                                                class="euiPopover euiPopover--anchorDownCenter c3"
+                                                class="euiPopover c3 emotion-euiPopover"
                                               >
                                                 <div
-                                                  class="euiPopover__anchor"
+                                                  class="euiPopover__anchor css-16vtueo-render"
                                                 >
                                                   <div
                                                     data-test-subj="withHoverActionsButton"
@@ -1416,10 +1416,10 @@ tr:hover .c5:focus::before {
                                           class=""
                                         >
                                           <div
-                                            class="euiPopover euiPopover--anchorDownCenter c3"
+                                            class="euiPopover c3 emotion-euiPopover"
                                           >
                                             <div
-                                              class="euiPopover__anchor"
+                                              class="euiPopover__anchor css-16vtueo-render"
                                             >
                                               <div
                                                 data-test-subj="withHoverActionsButton"
@@ -1494,10 +1494,10 @@ tr:hover .c5:focus::before {
                                           class=""
                                         >
                                           <div
-                                            class="euiPopover euiPopover--anchorDownCenter c3"
+                                            class="euiPopover c3 emotion-euiPopover"
                                           >
                                             <div
-                                              class="euiPopover__anchor"
+                                              class="euiPopover__anchor css-16vtueo-render"
                                             >
                                               <div
                                                 data-test-subj="withHoverActionsButton"
@@ -1582,10 +1582,10 @@ tr:hover .c5:focus::before {
                                           class=""
                                         >
                                           <div
-                                            class="euiPopover euiPopover--anchorDownCenter c3"
+                                            class="euiPopover c3 emotion-euiPopover"
                                           >
                                             <div
-                                              class="euiPopover__anchor"
+                                              class="euiPopover__anchor css-16vtueo-render"
                                             >
                                               <div
                                                 data-test-subj="withHoverActionsButton"
@@ -1660,10 +1660,10 @@ tr:hover .c5:focus::before {
                                           class=""
                                         >
                                           <div
-                                            class="euiPopover euiPopover--anchorDownCenter c3"
+                                            class="euiPopover c3 emotion-euiPopover"
                                           >
                                             <div
-                                              class="euiPopover__anchor"
+                                              class="euiPopover__anchor css-16vtueo-render"
                                             >
                                               <div
                                                 data-test-subj="withHoverActionsButton"
@@ -1738,10 +1738,10 @@ tr:hover .c5:focus::before {
                                           class=""
                                         >
                                           <div
-                                            class="euiPopover euiPopover--anchorDownCenter c3"
+                                            class="euiPopover c3 emotion-euiPopover"
                                           >
                                             <div
-                                              class="euiPopover__anchor"
+                                              class="euiPopover__anchor css-16vtueo-render"
                                             >
                                               <div
                                                 data-test-subj="withHoverActionsButton"
@@ -1834,10 +1834,10 @@ tr:hover .c5:focus::before {
                               class=""
                             >
                               <div
-                                class="euiPopover euiPopover--anchorDownCenter c3"
+                                class="euiPopover c3 emotion-euiPopover"
                               >
                                 <div
-                                  class="euiPopover__anchor"
+                                  class="euiPopover__anchor css-16vtueo-render"
                                 >
                                   <div
                                     data-test-subj="withHoverActionsButton"
@@ -1923,10 +1923,10 @@ tr:hover .c5:focus::before {
                               class=""
                             >
                               <div
-                                class="euiPopover euiPopover--anchorDownCenter c3"
+                                class="euiPopover c3 emotion-euiPopover"
                               >
                                 <div
-                                  class="euiPopover__anchor"
+                                  class="euiPopover__anchor css-16vtueo-render"
                                 >
                                   <div
                                     data-test-subj="withHoverActionsButton"
@@ -2041,10 +2041,10 @@ tr:hover .c5:focus::before {
                               class=""
                             >
                               <div
-                                class="euiPopover euiPopover--anchorDownCenter c3"
+                                class="euiPopover c3 emotion-euiPopover"
                               >
                                 <div
-                                  class="euiPopover__anchor"
+                                  class="euiPopover__anchor css-16vtueo-render"
                                 >
                                   <div
                                     data-test-subj="withHoverActionsButton"
@@ -2130,10 +2130,10 @@ tr:hover .c5:focus::before {
                               class=""
                             >
                               <div
-                                class="euiPopover euiPopover--anchorDownCenter c3"
+                                class="euiPopover c3 emotion-euiPopover"
                               >
                                 <div
-                                  class="euiPopover__anchor"
+                                  class="euiPopover__anchor css-16vtueo-render"
                                 >
                                   <div
                                     data-test-subj="withHoverActionsButton"
@@ -2256,10 +2256,10 @@ tr:hover .c5:focus::before {
                                           class=""
                                         >
                                           <div
-                                            class="euiPopover euiPopover--anchorDownCenter c3"
+                                            class="euiPopover c3 emotion-euiPopover"
                                           >
                                             <div
-                                              class="euiPopover__anchor"
+                                              class="euiPopover__anchor css-16vtueo-render"
                                             >
                                               <div
                                                 data-test-subj="withHoverActionsButton"
@@ -2305,7 +2305,7 @@ tr:hover .c5:focus::before {
                                                             <a
                                                               class="euiLink emotion-euiLink-primary"
                                                               data-test-subj="network-details"
-                                                              href="/ip/10.1.2.3/source"
+                                                              href="/ip/10.1.2.3/source/flows"
                                                               rel="noreferrer"
                                                             >
                                                               10.1.2.3
@@ -2349,10 +2349,10 @@ tr:hover .c5:focus::before {
                                               class=""
                                             >
                                               <div
-                                                class="euiPopover euiPopover--anchorDownCenter c3"
+                                                class="euiPopover c3 emotion-euiPopover"
                                               >
                                                 <div
-                                                  class="euiPopover__anchor"
+                                                  class="euiPopover__anchor css-16vtueo-render"
                                                 >
                                                   <div
                                                     data-test-subj="withHoverActionsButton"
@@ -2460,10 +2460,10 @@ tr:hover .c5:focus::before {
                                           class=""
                                         >
                                           <div
-                                            class="euiPopover euiPopover--anchorDownCenter c3"
+                                            class="euiPopover c3 emotion-euiPopover"
                                           >
                                             <div
-                                              class="euiPopover__anchor"
+                                              class="euiPopover__anchor css-16vtueo-render"
                                             >
                                               <div
                                                 data-test-subj="withHoverActionsButton"
@@ -2538,10 +2538,10 @@ tr:hover .c5:focus::before {
                                           class=""
                                         >
                                           <div
-                                            class="euiPopover euiPopover--anchorDownCenter c3"
+                                            class="euiPopover c3 emotion-euiPopover"
                                           >
                                             <div
-                                              class="euiPopover__anchor"
+                                              class="euiPopover__anchor css-16vtueo-render"
                                             >
                                               <div
                                                 data-test-subj="withHoverActionsButton"
@@ -2626,10 +2626,10 @@ tr:hover .c5:focus::before {
                                           class=""
                                         >
                                           <div
-                                            class="euiPopover euiPopover--anchorDownCenter c3"
+                                            class="euiPopover c3 emotion-euiPopover"
                                           >
                                             <div
-                                              class="euiPopover__anchor"
+                                              class="euiPopover__anchor css-16vtueo-render"
                                             >
                                               <div
                                                 data-test-subj="withHoverActionsButton"
@@ -2704,10 +2704,10 @@ tr:hover .c5:focus::before {
                                           class=""
                                         >
                                           <div
-                                            class="euiPopover euiPopover--anchorDownCenter c3"
+                                            class="euiPopover c3 emotion-euiPopover"
                                           >
                                             <div
-                                              class="euiPopover__anchor"
+                                              class="euiPopover__anchor css-16vtueo-render"
                                             >
                                               <div
                                                 data-test-subj="withHoverActionsButton"
@@ -2782,10 +2782,10 @@ tr:hover .c5:focus::before {
                                           class=""
                                         >
                                           <div
-                                            class="euiPopover euiPopover--anchorDownCenter c3"
+                                            class="euiPopover c3 emotion-euiPopover"
                                           >
                                             <div
-                                              class="euiPopover__anchor"
+                                              class="euiPopover__anchor css-16vtueo-render"
                                             >
                                               <div
                                                 data-test-subj="withHoverActionsButton"
@@ -2874,10 +2874,10 @@ tr:hover .c5:focus::before {
                 class=""
               >
                 <div
-                  class="euiPopover euiPopover--anchorDownCenter c3"
+                  class="euiPopover c3 emotion-euiPopover"
                 >
                   <div
-                    class="euiPopover__anchor"
+                    class="euiPopover__anchor css-16vtueo-render"
                   >
                     <div
                       data-test-subj="withHoverActionsButton"
@@ -2986,10 +2986,10 @@ tr:hover .c5:focus::before {
                 class=""
               >
                 <div
-                  class="euiPopover euiPopover--anchorDownCenter c3"
+                  class="euiPopover c3 emotion-euiPopover"
                 >
                   <div
-                    class="euiPopover__anchor"
+                    class="euiPopover__anchor css-16vtueo-render"
                   >
                     <div
                       data-test-subj="withHoverActionsButton"
@@ -3098,10 +3098,10 @@ tr:hover .c5:focus::before {
                 class=""
               >
                 <div
-                  class="euiPopover euiPopover--anchorDownCenter c3"
+                  class="euiPopover c3 emotion-euiPopover"
                 >
                   <div
-                    class="euiPopover__anchor"
+                    class="euiPopover__anchor css-16vtueo-render"
                   >
                     <div
                       data-test-subj="withHoverActionsButton"

@@ -8,6 +8,7 @@
 import React, { memo, ReactNode, useCallback, useEffect, useRef, useState } from 'react';
 import { EuiFlyout, EuiFlyoutBody } from '@elastic/eui';
 
+import { getConnectorCompatibility } from '@kbn/actions-plugin/common';
 import {
   ActionConnector,
   ActionType,
@@ -21,20 +22,20 @@ import { useCreateConnector } from '../../../hooks/use_create_connector';
 import { ConnectorForm, ConnectorFormState } from '../connector_form';
 import { ConnectorFormSchema } from '../types';
 import { FlyoutHeader } from './header';
-import { FlyoutFooter } from './foooter';
+import { FlyoutFooter } from './footer';
 import { UpgradeLicenseCallOut } from './upgrade_license_callout';
 
 export interface CreateConnectorFlyoutProps {
   actionTypeRegistry: ActionTypeRegistryContract;
   onClose: () => void;
-  supportedActionTypes?: ActionType[];
+  featureId?: string;
   onConnectorCreated?: (connector: ActionConnector) => void;
   onTestConnector?: (connector: ActionConnector) => void;
 }
 
 const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
   actionTypeRegistry,
-  supportedActionTypes,
+  featureId,
   onClose,
   onConnectorCreated,
   onTestConnector,
@@ -72,7 +73,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
 
   const hasErrors = isFormValid === false;
   const isSaving = isSavingConnector || isSubmitting;
-  const footerButtonType = actionType != null ? 'back' : 'cancel';
+  const hasConnectorTypeSelected = actionType != null;
   const actionTypeModel: ActionTypeModel | null =
     actionType != null ? actionTypeRegistry.get(actionType.id) : null;
 
@@ -156,13 +157,15 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
         icon={actionTypeModel?.iconClass}
         actionTypeName={actionType?.name}
         actionTypeMessage={actionTypeModel?.selectMessage}
+        compatibility={getConnectorCompatibility(actionType?.supportedFeatureIds)}
+        isExperimental={actionTypeModel?.isExperimental}
       />
       <EuiFlyoutBody
         banner={!actionType && hasActionsUpgradeableByTrial ? <UpgradeLicenseCallOut /> : null}
       >
         {actionType == null ? (
           <ActionTypeMenu
-            actionTypes={supportedActionTypes}
+            featureId={featureId}
             onActionTypeChange={setActionType}
             setHasActionsUpgradeableByTrial={setHasActionsUpgradeableByTrial}
             actionTypeRegistry={actionTypeRegistry}
@@ -181,7 +184,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
         ) : null}
       </EuiFlyoutBody>
       <FlyoutFooter
-        buttonType={footerButtonType}
+        hasConnectorTypeSelected={hasConnectorTypeSelected}
         onBack={resetActionType}
         onCancel={onClose}
         disabled={hasErrors || !canSave}

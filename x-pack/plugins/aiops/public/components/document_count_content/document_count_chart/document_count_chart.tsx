@@ -24,11 +24,23 @@ import {
 import { i18n } from '@kbn/i18n';
 import { IUiSettingsClient } from '@kbn/core/public';
 import { DualBrush, DualBrushAnnotation } from '@kbn/aiops-components';
-import { getWindowParameters } from '@kbn/aiops-utils';
+import { getSnappedWindowParameters, getWindowParameters } from '@kbn/aiops-utils';
 import type { WindowParameters } from '@kbn/aiops-utils';
 import { MULTILAYER_TIME_AXIS_STYLE } from '@kbn/charts-plugin/common';
+import type { ChangePoint } from '@kbn/ml-agg-utils';
 
 import { useAiOpsKibana } from '../../../kibana_context';
+
+import { BrushBadge } from './brush_badge';
+
+declare global {
+  interface Window {
+    /**
+     * Flag used to enable debugState on elastic charts
+     */
+    _echDebugStateFlag?: boolean;
+  }
+}
 
 export interface DocumentCountChartPoint {
   time: number | string;
@@ -36,15 +48,21 @@ export interface DocumentCountChartPoint {
 }
 
 interface DocumentCountChartProps {
-  brushSelectionUpdateHandler: (d: WindowParameters) => void;
+  brushSelectionUpdateHandler: (d: WindowParameters, force: boolean) => void;
   width?: number;
   chartPoints: DocumentCountChartPoint[];
+  chartPointsSplit?: DocumentCountChartPoint[];
   timeRangeEarliest: number;
   timeRangeLatest: number;
   interval: number;
+  changePoint?: ChangePoint;
+  isBrushCleared: boolean;
 }
 
 const SPEC_ID = 'document_count';
+
+const BADGE_HEIGHT = 20;
+const BADGE_WIDTH = 75;
 
 enum VIEW_MODE {
   ZOOM = 'zoom',
@@ -61,13 +79,29 @@ function getTimezone(uiSettings: IUiSettingsClient) {
   }
 }
 
+function getBaselineBadgeOverflow(
+  windowParametersAsPixels: WindowParameters,
+  baselineBadgeWidth: number
+) {
+  const { baselineMin, baselineMax, deviationMin } = windowParametersAsPixels;
+
+  const baselineBrushWidth = baselineMax - baselineMin;
+  const baselineBadgeActualMax = baselineMin + baselineBadgeWidth;
+  return deviationMin < baselineBadgeActualMax
+    ? Math.max(0, baselineBadgeWidth - baselineBrushWidth)
+    : 0;
+}
+
 export const DocumentCountChart: FC<DocumentCountChartProps> = ({
   brushSelectionUpdateHandler,
   width,
   chartPoints,
+  chartPointsSplit,
   timeRangeEarliest,
   timeRangeLatest,
   interval,
+  changePoint,
+  isBrushCleared,
 }) => {
   const {
     services: { data, uiSettings, fieldFormats, charts },
@@ -79,9 +113,21 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
   const xAxisFormatter = fieldFormats.deserialize({ id: 'date' });
   const useLegacyTimeAxis = uiSettings.get('visualization:useLegacyTimeAxis', false);
 
-  const seriesName = i18n.translate('xpack.aiops.dataGrid.field.documentCountChart.seriesLabel', {
-    defaultMessage: 'document count',
-  });
+  const overallSeriesName = i18n.translate(
+    'xpack.aiops.dataGrid.field.documentCountChart.seriesLabel',
+    {
+      defaultMessage: 'document count',
+    }
+  );
+
+  const overallSeriesNameWithSplit = i18n.translate(
+    'xpack.aiops.dataGrid.field.documentCountChartSplit.seriesLabel',
+    {
+      defaultMessage: 'other document count',
+    }
+  );
+
+  const splitSeriesName = `${changePoint?.fieldName}:${changePoint?.fieldValue}`;
 
   // TODO Let user choose between ZOOM and BRUSH mode.
   const [viewMode] = useState<VIEW_MODE>(VIEW_MODE.BRUSH);
@@ -106,6 +152,34 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
     return chartPoints;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chartPoints, timeRangeEarliest, timeRangeLatest, interval]);
+
+  const adjustedChartPointsSplit = useMemo(() => {
+    // Display empty chart when no data in range
+    if (!Array.isArray(chartPointsSplit) || chartPointsSplit.length < 1)
+      return [{ time: timeRangeEarliest, value: 0 }];
+
+    // If chart has only one bucket
+    // it won't show up correctly unless we add an extra data point
+    if (chartPointsSplit.length === 1) {
+      return [
+        ...chartPointsSplit,
+        {
+          time: interval ? Number(chartPointsSplit[0].time) + interval : timeRangeEarliest,
+          value: 0,
+        },
+      ];
+    }
+    return chartPointsSplit;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [chartPointsSplit, timeRangeEarliest, timeRangeLatest, interval]);
+
+  const snapTimestamps = useMemo(() => {
+    return adjustedChartPoints
+      .map((d) => d.time)
+      .filter(function (arg: unknown): arg is number {
+        return typeof arg === 'number';
+      });
+  }, [adjustedChartPoints]);
 
   const timefilterUpdateHandler = useCallback(
     (ranges: { from: number; to: number }) => {
@@ -148,9 +222,10 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
           xDomain.min,
           xDomain.max + interval
         );
-        setOriginalWindowParameters(wp);
-        setWindowParameters(wp);
-        brushSelectionUpdateHandler(wp);
+        const wpSnap = getSnappedWindowParameters(wp, snapTimestamps);
+        setOriginalWindowParameters(wpSnap);
+        setWindowParameters(wpSnap);
+        brushSelectionUpdateHandler(wpSnap, true);
       }
     }
   };
@@ -161,10 +236,21 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
     WindowParameters | undefined
   >();
   const [windowParameters, setWindowParameters] = useState<WindowParameters | undefined>();
+  const [windowParametersAsPixels, setWindowParametersAsPixels] = useState<
+    WindowParameters | undefined
+  >();
 
-  function onWindowParametersChange(wp: WindowParameters) {
+  useEffect(() => {
+    if (isBrushCleared && originalWindowParameters !== undefined) {
+      setOriginalWindowParameters(undefined);
+      setWindowParameters(undefined);
+    }
+  }, [isBrushCleared, originalWindowParameters]);
+
+  function onWindowParametersChange(wp: WindowParameters, wpPx: WindowParameters) {
     setWindowParameters(wp);
-    brushSelectionUpdateHandler(wp);
+    setWindowParametersAsPixels(wpPx);
+    brushSelectionUpdateHandler(wp, false);
   }
 
   const [mlBrushWidth, setMlBrushWidth] = useState<number>();
@@ -178,23 +264,61 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
   }, [viewMode]);
 
   const isBrushVisible =
-    originalWindowParameters && mlBrushMarginLeft && mlBrushWidth && mlBrushWidth > 0;
+    originalWindowParameters &&
+    windowParameters &&
+    mlBrushMarginLeft &&
+    mlBrushWidth &&
+    mlBrushWidth > 0;
+
+  // Avoid overlap of brush badges when the brushes are quite narrow.
+  const baselineBadgeOverflow = windowParametersAsPixels
+    ? getBaselineBadgeOverflow(windowParametersAsPixels, BADGE_WIDTH)
+    : 0;
+  const baselineBadgeMarginLeft =
+    (mlBrushMarginLeft ?? 0) + (windowParametersAsPixels?.baselineMin ?? 0);
 
   return (
     <>
       {isBrushVisible && (
-        <div className="aiopsHistogramBrushes">
-          <DualBrush
-            windowParameters={originalWindowParameters}
-            min={timeRangeEarliest}
-            max={timeRangeLatest + interval}
-            onChange={onWindowParametersChange}
-            marginLeft={mlBrushMarginLeft}
-            width={mlBrushWidth}
-          />
+        <div className="aiopsHistogramBrushes" data-test-subj="aiopsHistogramBrushes">
+          <div css={{ height: BADGE_HEIGHT }}>
+            <BrushBadge
+              label={i18n.translate('xpack.aiops.documentCountChart.baselineBadgeLabel', {
+                defaultMessage: 'Baseline',
+              })}
+              marginLeft={baselineBadgeMarginLeft - baselineBadgeOverflow}
+              timestampFrom={windowParameters.baselineMin}
+              timestampTo={windowParameters.baselineMax}
+              width={BADGE_WIDTH}
+            />
+            <BrushBadge
+              label={i18n.translate('xpack.aiops.documentCountChart.deviationBadgeLabel', {
+                defaultMessage: 'Deviation',
+              })}
+              marginLeft={mlBrushMarginLeft + (windowParametersAsPixels?.deviationMin ?? 0)}
+              timestampFrom={windowParameters.deviationMin}
+              timestampTo={windowParameters.deviationMax}
+              width={BADGE_WIDTH}
+            />
+          </div>
+          <div
+            css={{
+              'margin-bottom': '-4px',
+            }}
+          >
+            <DualBrush
+              windowParameters={originalWindowParameters}
+              min={timeRangeEarliest}
+              max={timeRangeLatest + interval}
+              onChange={onWindowParametersChange}
+              marginLeft={mlBrushMarginLeft}
+              snapTimestamps={snapTimestamps}
+              width={mlBrushWidth}
+            />
+          </div>
         </div>
       )}
-      <div style={{ width: width ?? '100%' }} data-test-subj="aiopsDocumentCountChart">
+      <div css={{ width: width ?? '100%' }} data-test-subj="aiopsDocumentCountChart">
         <Chart
           size={{
             width: '100%',
@@ -211,6 +335,7 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
             }}
             theme={chartTheme}
             baseTheme={chartBaseTheme}
+            debugState={window._echDebugStateFlag ?? false}
           />
           <Axis
             id="bottom"
@@ -223,14 +348,29 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
           <Axis id="left" position={Position.Left} />
           <BarSeries
             id={SPEC_ID}
-            name={seriesName}
+            name={chartPointsSplit ? overallSeriesNameWithSplit : overallSeriesName}
             xScaleType={ScaleType.Time}
             yScaleType={ScaleType.Linear}
             xAccessor="time"
             yAccessors={['value']}
             data={adjustedChartPoints}
+            stackAccessors={[0]}
             timeZone={timeZone}
           />
+          {chartPointsSplit && (
+            <BarSeries
+              id={`${SPEC_ID}_split`}
+              name={splitSeriesName}
+              xScaleType={ScaleType.Time}
+              yScaleType={ScaleType.Linear}
+              xAccessor="time"
+              yAccessors={['value']}
+              data={adjustedChartPointsSplit}
+              stackAccessors={[0]}
+              timeZone={timeZone}
+              color={['orange']}
+            />
+          )}
           {windowParameters && (
             <>
               <DualBrushAnnotation

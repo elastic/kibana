@@ -8,7 +8,14 @@
 import React, { useCallback } from 'react';
 import { Route, Switch } from 'react-router-dom';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiText, EuiTitle } from '@elastic/eui';
+import {
+  EuiBetaBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIconTip,
+  EuiText,
+  EuiTitle,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { euiThemeVars } from '@kbn/ui-theme';
@@ -38,6 +45,7 @@ import { useStyles } from './styles';
 import { TreeViewContainer } from '../tree_view_container';
 import { ChartsToggle } from '../charts_toggle';
 import {
+  BETA,
   COUNT_WIDGET_CLUSTERS,
   COUNT_WIDGET_NAMESPACE,
   COUNT_WIDGET_NODES,
@@ -63,7 +71,7 @@ const KubernetesSecurityRoutesComponent = ({
     (result: AggregateResult): Record<string, number> =>
       result.buckets.reduce((groupedByKeyValue, aggregate) => {
         groupedByKeyValue[aggregate.key_as_string || (aggregate.key.toString() as string)] =
-          aggregate.count_by_aggs.value;
+          aggregate.count_by_aggs?.value ?? 0;
         return groupedByKeyValue;
       }, {} as Record<string, number>),
     []
@@ -73,10 +81,10 @@ const KubernetesSecurityRoutesComponent = ({
     (result: AggregateResult): Record<string, number> =>
       result.buckets.reduce((groupedByKeyValue, aggregate) => {
         if (aggregate.key.toString() === '0') {
-          groupedByKeyValue[aggregate.key] = aggregate.count_by_aggs.value;
+          groupedByKeyValue[aggregate.key] = aggregate.count_by_aggs?.value ?? 0;
         } else {
           groupedByKeyValue.nonRoot =
-            (groupedByKeyValue.nonRoot || 0) + aggregate.count_by_aggs.value;
+            (groupedByKeyValue.nonRoot || 0) + (aggregate.count_by_aggs?.value ?? 0);
         }
         return groupedByKeyValue;
       }, {} as Record<string, number>),
@@ -94,7 +102,10 @@ const KubernetesSecurityRoutesComponent = ({
         <EuiFlexGroup gutterSize="none" css={styles.titleSection}>
           <EuiFlexItem>
             <EuiTitle size="l">
-              <h1>{KUBERNETES_TITLE}</h1>
+              <h1 css={styles.titleText}>
+                {KUBERNETES_TITLE}
+                <EuiBetaBadge label={BETA} size="s" css={styles.betaBadge} />
+              </h1>
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem grow={false} css={styles.titleActions}>
@@ -107,7 +118,7 @@ const KubernetesSecurityRoutesComponent = ({
         </EuiFlexGroup>
         {!shouldHideCharts && (
           <>
-            <EuiFlexGroup>
+            <EuiFlexGroup css={styles.widgetsGroup}>
               <EuiFlexItem css={styles.leftWidgetsGroup}>
                 <EuiFlexGroup css={styles.countWidgetsGroup}>
                   <EuiFlexItem>
@@ -157,7 +168,7 @@ const KubernetesSecurityRoutesComponent = ({
                   </EuiFlexItem>
                 </EuiFlexGroup>
                 <EuiFlexGroup css={styles.widgetsBottomSpacing}>
-                  <EuiFlexItem css={styles.noBottomSpacing}>
+                  <EuiFlexItem>
                     <PercentWidget
                       title={
                         <>
@@ -209,7 +220,7 @@ const KubernetesSecurityRoutesComponent = ({
                       onReduce={onReduceInteractiveAggs}
                     />
                   </EuiFlexItem>
-                  <EuiFlexItem css={styles.noBottomSpacing}>
+                  <EuiFlexItem>
                     <PercentWidget
                       title={
                         <>

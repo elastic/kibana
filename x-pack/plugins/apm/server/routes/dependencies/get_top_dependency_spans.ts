@@ -12,6 +12,7 @@ import {
   termsQuery,
 } from '@kbn/observability-plugin/server';
 import { compact, keyBy } from 'lodash';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import {
   AGENT_NAME,
   EVENT_OUTCOME,
@@ -27,7 +28,6 @@ import {
 } from '../../../common/elasticsearch_fieldnames';
 import { Environment } from '../../../common/environment_rt';
 import { EventOutcome } from '../../../common/event_outcome';
-import { ProcessorEvent } from '../../../common/processor_event';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
 import { Setup } from '../../lib/helpers/setup_request';

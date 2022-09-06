@@ -30,7 +30,6 @@ journey('StepsDuration', async ({ page, params }) => {
   });
 
   step('Go to monitor details', async () => {
-    await page.click('text=Dismiss');
     await page.click('button:has-text("test-monitor - inline")');
     expect(page.url()).toBe(`${baseUrl}/monitor/dGVzdC1tb25pdG9yLWlubGluZQ==/?${queryParams}`);
   });

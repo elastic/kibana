@@ -26,16 +26,14 @@ describe('utils', () => {
         Object {
           "arguments": Array [
             Object {
+              "isQuoted": false,
               "type": "literal",
               "value": "a",
             },
             Object {
+              "isQuoted": false,
               "type": "literal",
               "value": "hello",
-            },
-            Object {
-              "type": "literal",
-              "value": false,
             },
           ],
           "function": "is",
@@ -50,16 +48,14 @@ describe('utils', () => {
         Object {
           "arguments": Array [
             Object {
+              "isQuoted": false,
               "type": "literal",
               "value": "a",
             },
             Object {
+              "isQuoted": false,
               "type": "literal",
               "value": "hello",
-            },
-            Object {
-              "type": "literal",
-              "value": false,
             },
           ],
           "function": "is",
@@ -78,16 +74,14 @@ describe('utils', () => {
             Object {
               "arguments": Array [
                 Object {
+                  "isQuoted": false,
                   "type": "literal",
                   "value": "a",
                 },
                 Object {
+                  "isQuoted": false,
                   "type": "literal",
                   "value": "hello",
-                },
-                Object {
-                  "type": "literal",
-                  "value": false,
                 },
               ],
               "function": "is",
@@ -96,16 +90,14 @@ describe('utils', () => {
             Object {
               "arguments": Array [
                 Object {
+                  "isQuoted": false,
                   "type": "literal",
                   "value": "b",
                 },
                 Object {
+                  "isQuoted": false,
                   "type": "literal",
                   "value": "hi",
-                },
-                Object {
-                  "type": "literal",
-                  "value": false,
                 },
               ],
               "function": "is",
@@ -128,16 +120,14 @@ describe('utils', () => {
             Object {
               "arguments": Array [
                 Object {
+                  "isQuoted": false,
                   "type": "literal",
                   "value": "b",
                 },
                 Object {
+                  "isQuoted": false,
                   "type": "literal",
                   "value": "hi",
-                },
-                Object {
-                  "type": "literal",
-                  "value": false,
                 },
               ],
               "function": "is",
@@ -146,16 +136,14 @@ describe('utils', () => {
             Object {
               "arguments": Array [
                 Object {
+                  "isQuoted": false,
                   "type": "literal",
                   "value": "a",
                 },
                 Object {
+                  "isQuoted": false,
                   "type": "literal",
                   "value": "hello",
-                },
-                Object {
-                  "type": "literal",
-                  "value": false,
                 },
               ],
               "function": "is",
@@ -229,16 +217,14 @@ describe('utils', () => {
         Object {
           "arguments": Array [
             Object {
+              "isQuoted": false,
               "type": "literal",
               "value": "a.attributes.owner",
             },
             Object {
+              "isQuoted": false,
               "type": "literal",
               "value": "hello",
-            },
-            Object {
-              "type": "literal",
-              "value": false,
             },
           ],
           "function": "is",
@@ -254,16 +240,14 @@ describe('utils', () => {
             Object {
               "arguments": Array [
                 Object {
+                  "isQuoted": false,
                   "type": "literal",
                   "value": "a.attributes.owner",
                 },
                 Object {
+                  "isQuoted": false,
                   "type": "literal",
                   "value": "hello",
-                },
-                Object {
-                  "type": "literal",
-                  "value": false,
                 },
               ],
               "function": "is",
@@ -272,16 +256,14 @@ describe('utils', () => {
             Object {
               "arguments": Array [
                 Object {
+                  "isQuoted": false,
                   "type": "literal",
                   "value": "a.attributes.owner",
                 },
                 Object {
+                  "isQuoted": false,
                   "type": "literal",
                   "value": "hi",
-                },
-                Object {
-                  "type": "literal",
-                  "value": false,
                 },
               ],
               "function": "is",

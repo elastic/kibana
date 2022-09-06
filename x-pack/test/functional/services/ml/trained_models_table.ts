@@ -180,6 +180,17 @@ export function TrainedModelsTableProvider(
       );
     }
 
+    public async deleteModel(modelId: string) {
+      await mlCommonUI.invokeTableRowAction(
+        this.rowSelector(modelId),
+        'mlModelsTableRowDeleteAction'
+      );
+      await this.assertDeleteModalExists();
+      await this.confirmDeleteModel();
+      await mlCommonUI.waitForRefreshButtonEnabled();
+      await this.assertModelDisplayedInTable(modelId, false);
+    }
+
     public async assertModelDeleteActionButtonEnabled(modelId: string, expectedValue: boolean) {
       await this.assertModelDeleteActionButtonExists(modelId, true);
       const isEnabled = await testSubjects.isEnabled(
@@ -197,6 +208,14 @@ export function TrainedModelsTableProvider(
       await testSubjects.existOrFail('mlModelsDeleteModal', { timeout: 60 * 1000 });
     }
 
+    public async assertStartDeploymentModalExists(expectExist = true) {
+      if (expectExist) {
+        await testSubjects.existOrFail('mlModelsStartDeploymentModal', { timeout: 60 * 1000 });
+      } else {
+        await testSubjects.missingOrFail('mlModelsStartDeploymentModal', { timeout: 60 * 1000 });
+      }
+    }
+
     public async assertDeleteModalNotExists() {
       await testSubjects.missingOrFail('mlModelsDeleteModal', { timeout: 60 * 1000 });
     }
@@ -212,6 +231,71 @@ export function TrainedModelsTableProvider(
     public async clickDeleteAction(modelId: string) {
       await testSubjects.click(this.rowSelector(modelId, 'mlModelsTableRowDeleteAction'));
       await this.assertDeleteModalExists();
+    }
+
+    async assertNumOfAllocations(expectedValue: number) {
+      const actualValue = await testSubjects.getAttribute(
+        'mlModelsStartDeploymentModalNumOfAllocations',
+        'value'
+      );
+      expect(actualValue).to.eql(
+        expectedValue,
+        `Expected number of allocations to equal ${expectedValue}, got ${actualValue}`
+      );
+    }
+
+    public async setNumOfAllocations(value: number) {
+      await testSubjects.setValue('mlModelsStartDeploymentModalNumOfAllocations', value.toString());
+      await this.assertNumOfAllocations(value);
+    }
+
+    public async setThreadsPerAllocation(value: number) {
+      await mlCommonUI.selectButtonGroupValue(
+        'mlModelsStartDeploymentModalThreadsPerAllocation',
+        value.toString()
+      );
+    }
+
+    public async startDeploymentWithParams(
+      modelId: string,
+      params: { numOfAllocations: number; threadsPerAllocation: number }
+    ) {
+      await this.openStartDeploymentModal(modelId);
+
+      await this.setNumOfAllocations(params.numOfAllocations);
+      await this.setThreadsPerAllocation(params.threadsPerAllocation);
+
+      await testSubjects.click('mlModelsStartDeploymentModalStartButton');
+      await this.assertStartDeploymentModalExists(false);
+
+      await mlCommonUI.waitForRefreshButtonEnabled();
+
+      await mlCommonUI.assertLastToastHeader(
+        `Deployment for "${modelId}" has been started successfully.`
+      );
+    }
+
+    public async stopDeployment(modelId: string) {
+      await this.clickStopDeploymentAction(modelId);
+      await mlCommonUI.waitForRefreshButtonEnabled();
+      await mlCommonUI.assertLastToastHeader(
+        `Deployment for "${modelId}" has been stopped successfully.`
+      );
+    }
+
+    public async openStartDeploymentModal(modelId: string) {
+      await testSubjects.clickWhenNotDisabled(
+        this.rowSelector(modelId, 'mlModelsTableRowStartDeploymentAction'),
+        { timeout: 5000 }
+      );
+      await this.assertStartDeploymentModalExists(true);
+    }
+
+    public async clickStopDeploymentAction(modelId: string) {
+      await testSubjects.clickWhenNotDisabled(
+        this.rowSelector(modelId, 'mlModelsTableRowStopDeploymentAction'),
+        { timeout: 5000 }
+      );
     }
 
     public async ensureRowIsExpanded(modelId: string) {

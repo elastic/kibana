@@ -5,27 +5,41 @@
  * 2.0.
  */
 
-import { useEffect, useMemo, useState } from 'react'; //  useCallback, useRef
-import type { DataView } from '@kbn/data-views-plugin/public';
+import { useEffect, useMemo, useState } from 'react';
 import { merge } from 'rxjs';
+
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
-import { useAiOpsKibana } from '../kibana_context';
-import { useTimefilter } from './use_time_filter';
-import { aiopsRefresh$ } from '../application/services/timefilter_refresh_service';
+import type { ChangePoint } from '@kbn/ml-agg-utils';
+
+import type { SavedSearch } from '@kbn/discover-plugin/public';
+
 import { TimeBuckets } from '../../common/time_buckets';
+
+import { useAiOpsKibana } from '../kibana_context';
+import { aiopsRefresh$ } from '../application/services/timefilter_refresh_service';
+import type { DocumentStatsSearchStrategyParams } from '../get_document_stats';
+import type { AiOpsIndexBasedAppState } from '../components/explain_log_rate_spikes/explain_log_rate_spikes_app_state';
+import {
+  getEsQueryFromSavedSearch,
+  SavedSearchSavedObject,
+} from '../application/utils/search_utils';
+
+import { useTimefilter } from './use_time_filter';
 import { useDocumentCountStats } from './use_document_count_stats';
-import { Dictionary } from './url_state';
-import { DocumentStatsSearchStrategyParams } from '../get_document_stats';
-import { getEsQueryFromSavedSearch } from '../application/utils/search_utils';
-import { AiOpsIndexBasedAppState } from '../components/explain_log_rate_spikes/explain_log_rate_spikes_wrapper';
+import type { Dictionary } from './url_state';
 
 export const useData = (
-  currentDataView: DataView,
+  {
+    currentDataView,
+    currentSavedSearch,
+  }: { currentDataView: DataView; currentSavedSearch: SavedSearch | SavedSearchSavedObject | null },
   aiopsListState: AiOpsIndexBasedAppState,
-  onUpdate: (params: Dictionary<unknown>) => void
+  onUpdate: (params: Dictionary<unknown>) => void,
+  selectedChangePoint?: ChangePoint
 ) => {
   const { services } = useAiOpsKibana();
-  const { uiSettings } = services;
+  const { uiSettings, data } = services;
   const [lastRefresh, setLastRefresh] = useState(0);
   const [fieldStatsRequest, setFieldStatsRequest] = useState<
     DocumentStatsSearchStrategyParams | undefined
@@ -33,15 +47,20 @@ export const useData = (
 
   /** Prepare required params to pass to search strategy **/
   const { searchQueryLanguage, searchString, searchQuery } = useMemo(() => {
+    const filterManager = data.query.filterManager;
     const searchData = getEsQueryFromSavedSearch({
       dataView: currentDataView,
       uiSettings,
-      savedSearch: undefined,
+      savedSearch: currentSavedSearch,
+      filterManager: data.query.filterManager,
     });
 
     if (searchData === undefined || aiopsListState.searchString !== '') {
       if (aiopsListState.filters) {
-        services.data.query.filterManager.setFilters(aiopsListState.filters);
+        const globalFilters = filterManager?.getGlobalFilters();
+
+        if (filterManager) filterManager.setFilters(aiopsListState.filters);
+        if (globalFilters) filterManager?.addFilters(globalFilters);
       }
       return {
         searchQuery: aiopsListState.searchQuery,
@@ -57,6 +76,7 @@ export const useData = (
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
+    currentSavedSearch?.id,
     currentDataView.id,
     aiopsListState.searchString,
     aiopsListState.searchQueryLanguage,
@@ -81,7 +101,23 @@ export const useData = (
     autoRefreshSelector: true,
   });
 
-  const { docStats } = useDocumentCountStats(fieldStatsRequest, lastRefresh);
+  const overallStatsRequest = useMemo(() => {
+    return fieldStatsRequest
+      ? { ...fieldStatsRequest, selectedChangePoint, includeSelectedChangePoint: false }
+      : undefined;
+  }, [fieldStatsRequest, selectedChangePoint]);
+
+  const selectedChangePointStatsRequest = useMemo(() => {
+    return fieldStatsRequest && selectedChangePoint
+      ? { ...fieldStatsRequest, selectedChangePoint, includeSelectedChangePoint: true }
+      : undefined;
+  }, [fieldStatsRequest, selectedChangePoint]);
+
+  const documentStats = useDocumentCountStats(
+    overallStatsRequest,
+    selectedChangePointStatsRequest,
+    lastRefresh
+  );
 
   function updateFieldStatsRequest() {
     const timefilterActiveBounds = timefilter.getActiveBounds();
@@ -141,7 +177,7 @@ export const useData = (
   }, [searchString, JSON.stringify(searchQuery)]);
 
   return {
-    docStats,
+    documentStats,
     timefilter,
     /** Start timestamp filter */
     earliest: fieldStatsRequest?.earliest,

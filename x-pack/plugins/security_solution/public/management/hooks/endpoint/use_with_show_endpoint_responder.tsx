@@ -10,7 +10,6 @@ import { i18n } from '@kbn/i18n';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 import {
   ActionLogButton,
-  EndpointExitModalMessage,
   getEndpointResponseActionsConsoleCommands,
 } from '../../components/endpoint_responder';
 import { useConsoleManager } from '../../components/console';
@@ -21,7 +20,7 @@ import { OfflineCallout } from '../../components/endpoint_responder/offline_call
 type ShowEndpointResponseActionsConsole = (endpointMetadata: HostMetadata) => void;
 
 const RESPONDER_PAGE_TITLE = i18n.translate('xpack.securitySolution.responder_overlay.pageTitle', {
-  defaultMessage: 'Responder',
+  defaultMessage: 'Response console',
 });
 
 export const useWithShowEndpointResponder = (): ShowEndpointResponseActionsConsole => {
@@ -49,14 +48,16 @@ export const useWithShowEndpointResponder = (): ShowEndpointResponseActionsConso
               endpoint: endpointMetadata,
             },
             consoleProps: {
-              commands: getEndpointResponseActionsConsoleCommands(endpointAgentId),
+              commands: getEndpointResponseActionsConsoleCommands({
+                endpointAgentId,
+                endpointCapabilities: endpointMetadata.Endpoint.capabilities ?? [],
+              }),
               'data-test-subj': 'endpointResponseActionsConsole',
               TitleComponent: () => <HeaderEndpointInfo endpointId={endpointAgentId} />,
             },
             PageTitleComponent: () => <>{RESPONDER_PAGE_TITLE}</>,
             PageBodyComponent: () => <OfflineCallout endpointId={endpointAgentId} />,
             ActionComponents: [ActionLogButton],
-            ExitPendingActionComponent: EndpointExitModalMessage,
           })
           .show();
       }

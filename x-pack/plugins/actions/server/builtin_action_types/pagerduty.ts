@@ -11,8 +11,18 @@ import { schema, TypeOf } from '@kbn/config-schema';
 import moment from 'moment';
 import { Logger } from '@kbn/core/server';
 import { postPagerduty } from './lib/post_pagerduty';
-import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../types';
+import {
+  ActionType,
+  ActionTypeExecutorOptions,
+  ActionTypeExecutorResult,
+  ValidatorServices,
+} from '../types';
 import { ActionsConfigurationUtilities } from '../actions_config';
+import {
+  AlertingConnectorFeatureId,
+  UptimeConnectorFeatureId,
+  SecurityConnectorFeatureId,
+} from '../../common';
 
 // uses the PagerDuty Events API v2
 // https://v2.developer.pagerduty.com/docs/events-api-v2
@@ -142,30 +152,43 @@ export function getActionType({
     name: i18n.translate('xpack.actions.builtin.pagerdutyTitle', {
       defaultMessage: 'PagerDuty',
     }),
+    supportedFeatureIds: [
+      AlertingConnectorFeatureId,
+      UptimeConnectorFeatureId,
+      SecurityConnectorFeatureId,
+    ],
     validate: {
-      config: schema.object(configSchemaProps, {
-        validate: curry(validateActionTypeConfig)(configurationUtilities),
-      }),
-      secrets: SecretsSchema,
-      params: ParamsSchema,
+      config: {
+        schema: ConfigSchema,
+        customValidator: validateActionTypeConfig,
+      },
+      secrets: {
+        schema: SecretsSchema,
+      },
+      params: {
+        schema: ParamsSchema,
+      },
     },
     executor: curry(executor)({ logger, configurationUtilities }),
   };
 }
 
 function validateActionTypeConfig(
-  configurationUtilities: ActionsConfigurationUtilities,
-  configObject: ActionTypeConfigType
+  configObject: ActionTypeConfigType,
+  validatorServices: ValidatorServices
 ) {
+  const { configurationUtilities } = validatorServices;
   try {
     configurationUtilities.ensureUriAllowed(getPagerDutyApiUrl(configObject));
   } catch (allowListError) {
-    return i18n.translate('xpack.actions.builtin.pagerduty.pagerdutyConfigurationError', {
-      defaultMessage: 'error configuring pagerduty action: {message}',
-      values: {
-        message: allowListError.message,
-      },
-    });
+    throw new Error(
+      i18n.translate('xpack.actions.builtin.pagerduty.pagerdutyConfigurationError', {
+        defaultMessage: 'error configuring pagerduty action: {message}',
+        values: {
+          message: allowListError.message,
+        },
+      })
+    );
   }
 }
 

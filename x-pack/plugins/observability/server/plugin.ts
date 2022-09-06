@@ -55,6 +55,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
       cases: [observabilityFeatureId],
       privileges: {
         all: {
+          api: ['casesSuggestUserProfiles', 'bulkGetUserProfiles'],
           app: [casesFeatureId, 'kibana'],
           catalogue: [observabilityFeatureId],
           cases: {
@@ -63,7 +64,6 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
             update: [observabilityFeatureId],
             push: [observabilityFeatureId],
           },
-          api: [],
           savedObject: {
             all: [],
             read: [],
@@ -71,12 +71,12 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
           ui: casesCapabilities.all,
         },
         read: {
+          api: ['bulkGetUserProfiles'],
           app: [casesFeatureId, 'kibana'],
           catalogue: [observabilityFeatureId],
           cases: {
             read: [observabilityFeatureId],
           },
-          api: [],
           savedObject: {
             all: [],
             read: [],
@@ -145,7 +145,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
         start,
       },
       logger: this.initContext.logger.get(),
-      repository: getGlobalObservabilityServerRouteRepository(),
+      repository: getGlobalObservabilityServerRouteRepository(config),
       ruleDataService,
     });
 

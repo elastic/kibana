@@ -7,6 +7,7 @@
 
 import pMap from 'p-map';
 import type { ElasticsearchClient, SavedObjectsClientContract, Logger } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 import { appContextService } from '../app_context';
 import { setupFleet } from '../setup';
@@ -105,7 +106,7 @@ async function _deletePreconfigurationDeleteRecord(
         soClient
           .delete(PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE, savedObject.id)
           .catch((err) => {
-            if (soClient.errors.isNotFoundError(err)) {
+            if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
               return undefined;
             }
             throw err;

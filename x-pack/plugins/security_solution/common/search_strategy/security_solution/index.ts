@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { IEsSearchRequest } from '@kbn/data-plugin/common';
 import type { ESQuery } from '../../typed_json';
 import type {
@@ -58,12 +57,7 @@ import type {
   MatrixHistogramRequestOptions,
   MatrixHistogramStrategyResponse,
 } from './matrix_histogram';
-import type {
-  TimerangeInput,
-  SortField,
-  PaginationInput,
-  PaginationInputPaginated,
-} from '../common';
+import type { TimerangeInput, SortField, PaginationInputPaginated } from '../common';
 import type {
   CtiEventEnrichmentRequestOptions,
   CtiEventEnrichmentStrategyResponse,
@@ -125,16 +119,10 @@ export interface RequestBasicOptions extends IEsSearchRequest {
   timerange: TimerangeInput;
   filterQuery: ESQuery | string | undefined;
   defaultIndex: string[];
-  docValueFields?: estypes.QueryDslFieldAndFormat[];
   factoryQueryType?: FactoryQueryTypes;
 }
 
 /** A mapping of semantic fields to their document counterparts */
-
-export interface RequestOptions<Field = string> extends RequestBasicOptions {
-  pagination: PaginationInput;
-  sort: SortField<Field>;
-}
 
 export interface RequestOptionsPaginated<Field = string> extends RequestBasicOptions {
   pagination: PaginationInputPaginated;
@@ -265,11 +253,6 @@ export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQu
   ? KpiRiskScoreRequestOptions
   : never;
 
-export interface DocValueFieldsInput {
-  field: string;
-
-  format: string;
-}
 export interface CommonFields {
   '@timestamp'?: string[];
 }

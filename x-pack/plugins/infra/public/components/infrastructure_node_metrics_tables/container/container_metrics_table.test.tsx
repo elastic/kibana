@@ -94,7 +94,7 @@ describe('ContainerMetricsTable', () => {
           isLoading={true}
           setCurrentPageIndex={jest.fn()}
           setSortState={jest.fn()}
-          sortState={{ field: 'name', direction: 'asc' }}
+          sortState={{ field: 'id', direction: 'asc' }}
           timerange={{ from: new Date().toISOString(), to: new Date().toISOString() }}
         />
       </CoreProviders>
@@ -113,7 +113,7 @@ describe('ContainerMetricsTable', () => {
           isLoading={false}
           setCurrentPageIndex={jest.fn()}
           setSortState={jest.fn()}
-          sortState={{ field: 'name', direction: 'asc' }}
+          sortState={{ field: 'id', direction: 'asc' }}
           timerange={{ from: new Date().toISOString(), to: new Date().toISOString() }}
         />
       </CoreProviders>

@@ -213,32 +213,24 @@ const NetworkDetailsLinkComponent: React.FC<{
   onClick?: (e: SyntheticEvent) => void | undefined;
   title?: string;
 }> = ({ Component, children, ip, flowTarget = FlowTarget.source, isButton, onClick, title }) => {
-  const { formatUrl, search } = useFormatUrl(SecurityPageName.network);
-  const { navigateToApp } = useKibana().services.application;
-  const goToNetworkDetails = useCallback(
-    (ev, cIp: string) => {
-      ev.preventDefault();
-      navigateToApp(APP_UI_ID, {
-        deepLinkId: SecurityPageName.network,
-        path: getNetworkDetailsUrl(encodeURIComponent(encodeIpv6(cIp)), flowTarget, search),
-      });
-    },
-    [flowTarget, navigateToApp, search]
-  );
-  const getHref = useCallback(
-    (cIp: string) => formatUrl(getNetworkDetailsUrl(encodeURIComponent(encodeIpv6(cIp)))),
-    [formatUrl]
-  );
+  const getSecuritySolutionLinkProps = useGetSecuritySolutionLinkProps();
 
   const getLink = useCallback(
-    (cIp: string, i: number) =>
-      isButton ? (
+    (cIp: string, i: number) => {
+      const { onClick: onClickNavigation, href } = getSecuritySolutionLinkProps({
+        deepLinkId: SecurityPageName.network,
+        path: getNetworkDetailsUrl(encodeURIComponent(encodeIpv6(cIp)), flowTarget),
+      });
+
+      const onLinkClick = onClick ?? ((e: SyntheticEvent) => onClickNavigation(e as MouseEvent));
+
+      return isButton ? (
         <GenericLinkButton
           Component={Component}
           key={`${cIp}-${i}`}
           dataTestSubj="data-grid-network-details"
-          onClick={onClick ?? ((e: SyntheticEvent) => goToNetworkDetails(e, cIp))}
-          href={getHref(cIp)}
+          onClick={onLinkClick}
+          href={href}
           title={title ?? cIp}
         >
           {children}
@@ -246,14 +238,15 @@ const NetworkDetailsLinkComponent: React.FC<{
       ) : (
         <LinkAnchor
           key={`${cIp}-${i}`}
-          onClick={onClick ?? ((e: SyntheticEvent) => goToNetworkDetails(e, cIp))}
-          href={getHref(cIp)}
+          onClick={onLinkClick}
+          href={href}
           data-test-subj="network-details"
         >
           {children ? children : cIp}
         </LinkAnchor>
-      ),
-    [Component, children, getHref, goToNetworkDetails, isButton, onClick, title]
+      );
+    },
+    [children, Component, flowTarget, getSecuritySolutionLinkProps, onClick, isButton, title]
   );
   return isArray(ip) ? <>{ip.map(getLink)}</> : getLink(ip, 0);
 };

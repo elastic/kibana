@@ -6,7 +6,7 @@
  */
 
 import { getJourneyScreenshotBlocks } from './get_journey_screenshot_blocks';
-import { mockSearchResult } from './helper';
+import { mockSearchResult } from './test_helpers';
 
 describe('getJourneyScreenshotBlocks', () => {
   it('returns formatted blocks', async () => {

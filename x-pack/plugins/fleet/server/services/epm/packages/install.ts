@@ -35,7 +35,7 @@ import type {
   KibanaAssetType,
   PackageVerificationResult,
 } from '../../../types';
-import { AUTO_UPGRADE_POLICIES_PACKAGES } from '../../../../common';
+import { AUTO_UPGRADE_POLICIES_PACKAGES } from '../../../../common/constants';
 import { IngestManagerError, PackageOutdatedError } from '../../../errors';
 import { PACKAGES_SAVED_OBJECT_TYPE, MAX_TIME_COMPLETE_INSTALL } from '../../../constants';
 import { licenseService } from '../..';
@@ -241,6 +241,7 @@ interface InstallUploadedArchiveParams {
   archiveBuffer: Buffer;
   contentType: string;
   spaceId: string;
+  version?: string;
 }
 
 function getTelemetryEvent(pkgName: string, pkgVersion: string): PackageUpdateEvent {
@@ -362,11 +363,21 @@ async function installPackageFromRegistry({
       .getSavedObjects()
       .createImporter(savedObjectsClient);
 
+    const savedObjectTagAssignmentService = appContextService
+      .getSavedObjectsTagging()
+      .createInternalAssignmentService({ client: savedObjectsClient });
+
+    const savedObjectTagClient = appContextService
+      .getSavedObjectsTagging()
+      .createTagClient({ client: savedObjectsClient });
+
     // try installing the package, if there was an error, call error handler and rethrow
     // @ts-expect-error status is string instead of InstallResult.status 'installed' | 'already_installed'
     return await _installPackage({
       savedObjectsClient,
       savedObjectsImporter,
+      savedObjectTagAssignmentService,
+      savedObjectTagClient,
       esClient,
       logger,
       installedPkg,
@@ -427,6 +438,7 @@ async function installPackageByUpload({
   archiveBuffer,
   contentType,
   spaceId,
+  version,
 }: InstallUploadedArchiveParams): Promise<InstallResult> {
   // Workaround apm issue with async spans: https://github.com/elastic/apm-agent-nodejs/issues/2611
   await Promise.resolve();
@@ -439,21 +451,26 @@ async function installPackageByUpload({
   try {
     const { packageInfo } = await generatePackageInfoFromArchiveBuffer(archiveBuffer, contentType);
 
+    // Allow for overriding the version in the manifest for cases where we install
+    // stack-aligned bundled packages to support special cases around the
+    // `forceAlignStackVersion` flag in `fleet_packages.json`.
+    const pkgVersion = version || packageInfo.version;
+
     const installedPkg = await getInstallationObject({
       savedObjectsClient,
       pkgName: packageInfo.name,
     });
 
-    installType = getInstallType({ pkgVersion: packageInfo.version, installedPkg });
+    installType = getInstallType({ pkgVersion, installedPkg });
 
     span?.addLabels({
       packageName: packageInfo.name,
-      packageVersion: packageInfo.version,
+      packageVersion: pkgVersion,
       installType,
     });
 
     telemetryEvent.packageName = packageInfo.name;
-    telemetryEvent.newVersion = packageInfo.version;
+    telemetryEvent.newVersion = pkgVersion;
     telemetryEvent.installType = installType;
     telemetryEvent.currentVersion = installedPkg?.attributes.version || 'not_installed';
 
@@ -462,14 +479,14 @@ async function installPackageByUpload({
     deleteVerificationResult(packageInfo);
     const paths = await unpackBufferToCache({
       name: packageInfo.name,
-      version: packageInfo.version,
+      version: pkgVersion,
       archiveBuffer,
       contentType,
     });
 
     setPackageInfo({
       name: packageInfo.name,
-      version: packageInfo.version,
+      version: pkgVersion,
       packageInfo,
     });
 
@@ -477,15 +494,25 @@ async function installPackageByUpload({
       .getSavedObjects()
       .createImporter(savedObjectsClient);
 
+    const savedObjectTagAssignmentService = appContextService
+      .getSavedObjectsTagging()
+      .createInternalAssignmentService({ client: savedObjectsClient });
+
+    const savedObjectTagClient = appContextService
+      .getSavedObjectsTagging()
+      .createTagClient({ client: savedObjectsClient });
+
     // @ts-expect-error status is string instead of InstallResult.status 'installed' | 'already_installed'
     return await _installPackage({
       savedObjectsClient,
       savedObjectsImporter,
+      savedObjectTagAssignmentService,
+      savedObjectTagClient,
       esClient,
       logger,
       installedPkg,
       paths,
-      packageInfo,
+      packageInfo: { ...packageInfo, version: pkgVersion },
       installType,
       installSource,
       spaceId,
@@ -552,6 +579,7 @@ export async function installPackage(args: InstallPackageParams): Promise<Instal
         archiveBuffer: matchingBundledPackage.buffer,
         contentType: 'application/zip',
         spaceId,
+        version: matchingBundledPackage.version,
       });
 
       return { ...response, installSource: 'bundled' };

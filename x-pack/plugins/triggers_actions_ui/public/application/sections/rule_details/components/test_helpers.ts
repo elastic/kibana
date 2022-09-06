@@ -6,7 +6,7 @@
  */
 
 import uuid from 'uuid';
-import { Rule } from '../../../../types';
+import { Rule, RuleSummary, RuleType } from '../../../../types';
 
 export function mockRule(overloads: Partial<Rule> = {}): Rule {
   return {
@@ -34,4 +34,53 @@ export function mockRule(overloads: Partial<Rule> = {}): Rule {
     },
     ...overloads,
   };
+}
+
+export function mockRuleType(overloads: Partial<RuleType> = {}): RuleType {
+  return {
+    id: 'test.testRuleType',
+    name: 'My Test Rule Type',
+    actionGroups: [{ id: 'default', name: 'Default Action Group' }],
+    actionVariables: {
+      context: [],
+      state: [],
+      params: [],
+    },
+    defaultActionGroupId: 'default',
+    recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
+    authorizedConsumers: {},
+    producer: 'rules',
+    minimumLicenseRequired: 'basic',
+    enabledInLicense: true,
+    ...overloads,
+  };
+}
+
+export function mockRuleSummary(overloads: Partial<RuleSummary> = {}): RuleSummary {
+  const summary: RuleSummary = {
+    id: 'rule-id',
+    name: 'rule-name',
+    tags: ['tag-1', 'tag-2'],
+    ruleTypeId: '123',
+    consumer: 'rule-consumer',
+    status: 'OK',
+    muteAll: false,
+    throttle: '',
+    enabled: true,
+    errorMessages: [],
+    statusStartDate: '2022-03-21T07:40:46-07:00',
+    statusEndDate: '2022-03-25T07:40:46-07:00',
+    alerts: {
+      foo: {
+        status: 'OK',
+        muted: false,
+        actionGroupId: 'testActionGroup',
+      },
+    },
+    executionDuration: {
+      average: 100,
+      valuesWithTimestamp: {},
+    },
+  };
+  return { ...summary, ...overloads };
 }

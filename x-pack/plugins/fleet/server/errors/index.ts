@@ -8,7 +8,7 @@
 /* eslint-disable max-classes-per-file */
 import type { ElasticsearchErrorDetails } from '@kbn/es-errors';
 
-import type { FleetErrorType } from '../../common';
+import type { FleetErrorType } from '../../common/types';
 
 import { isESClientError } from './utils';
 
@@ -54,6 +54,7 @@ export class ConcurrentInstallOperationError extends IngestManagerError {}
 export class AgentReassignmentError extends IngestManagerError {}
 export class PackagePolicyIneligibleForUpgradeError extends IngestManagerError {}
 export class PackagePolicyValidationError extends IngestManagerError {}
+export class PackagePolicyNotFoundError extends IngestManagerError {}
 export class BundledPackageNotFoundError extends IngestManagerError {}
 export class HostedAgentPolicyRestrictionRelatedError extends IngestManagerError {
   constructor(message = 'Cannot perform that action') {

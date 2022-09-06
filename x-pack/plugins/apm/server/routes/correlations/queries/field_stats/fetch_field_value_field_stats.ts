@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import {
   CommonCorrelationsQueryParams,
   FieldValuePair,
@@ -14,7 +15,6 @@ import {
   TopValueBucket,
 } from '../../../../../common/correlations/field_stats_types';
 import { Setup } from '../../../../lib/helpers/setup_request';
-import { ProcessorEvent } from '../../../../../common/processor_event';
 import { getCommonCorrelationsQuery } from '../get_common_correlations_query';
 
 export const fetchFieldValueFieldStats = async ({

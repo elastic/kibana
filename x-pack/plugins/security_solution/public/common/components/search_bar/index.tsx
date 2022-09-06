@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { set } from '@elastic/safer-lodash-set/fp';
+import { set } from '@kbn/safer-lodash-set/fp';
 import { getOr } from 'lodash/fp';
 import React, { memo, useEffect, useCallback, useMemo } from 'react';
 import type { ConnectedProps } from 'react-redux';
@@ -43,7 +43,7 @@ import { useSyncSearchBarUrlParams } from '../../hooks/search_bar/use_sync_searc
 import { useSyncTimerangeUrlParam } from '../../hooks/search_bar/use_sync_timerange_url_param';
 
 interface SiemSearchBarProps {
-  id: InputsModelId;
+  id: InputsModelId.global | InputsModelId.timeline;
   indexPattern: DataViewBase;
   pollForSignalIndex?: () => void;
   timelineId?: string;
@@ -363,7 +363,7 @@ const makeMapStateToProps = () => {
 SearchBarComponent.displayName = 'SiemSearchBar';
 
 interface UpdateReduxSearchBar extends OnTimeChangeProps {
-  id: InputsModelId;
+  id: InputsModelId.global | InputsModelId.timeline;
   filters?: Filter[];
   filterManager: FilterManager;
   query?: Query;

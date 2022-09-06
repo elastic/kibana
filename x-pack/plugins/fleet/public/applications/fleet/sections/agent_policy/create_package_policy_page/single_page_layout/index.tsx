@@ -24,9 +24,10 @@ import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 import { safeLoad } from 'js-yaml';
 
 import { useCancelAddPackagePolicy, useOnSaveNavigate } from '../hooks';
-import type { CreatePackagePolicyRequest } from '../../../../../../../common';
+import type { CreatePackagePolicyRequest } from '../../../../../../../common/types';
 
-import { dataTypes, FLEET_SYSTEM_PACKAGE, splitPkgKey } from '../../../../../../../common';
+import { splitPkgKey } from '../../../../../../../common/services';
+import { dataTypes, FLEET_SYSTEM_PACKAGE } from '../../../../../../../common/constants';
 import { useConfirmForceInstall } from '../../../../../integrations/hooks';
 import type {
   AgentPolicy,
@@ -142,7 +143,6 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     namespace: 'default',
     policy_id: '',
     enabled: true,
-    output_id: '',
     inputs: [],
   });
 
@@ -227,16 +227,15 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     [setNewAgentPolicy, newAgentPolicy, selectedPolicyTab]
   );
 
-  const updateSelectedPolicy = useCallback(
-    (policy) => {
-      setSelectedPolicyTab(policy);
-      setPolicyValidation(policy, newAgentPolicy);
+  const updateSelectedPolicyTab = useCallback(
+    (selectedTab) => {
+      setSelectedPolicyTab(selectedTab);
+      setPolicyValidation(selectedTab, newAgentPolicy);
     },
     [setSelectedPolicyTab, newAgentPolicy]
   );
 
   const hasErrors = validationResults ? validationHasErrors(validationResults) : false;
-
   // Update package policy validation
   const updatePackagePolicyValidation = useCallback(
     (newPackagePolicy?: NewPackagePolicy) => {
@@ -312,32 +311,31 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     [agentCount]
   );
 
-  const createAgentPolicy = useCallback(
-    async ({ force }: { force?: boolean } = {}): Promise<string | undefined> => {
-      let policyId;
-      setFormState('LOADING');
-      // do not create agent policy with system integration if package policy already is for system package
-      const packagePolicyIsSystem = packagePolicy?.package?.name === FLEET_SYSTEM_PACKAGE;
-      const resp = await sendCreateAgentPolicy(newAgentPolicy, {
-        withSysMonitoring: withSysMonitoring && !packagePolicyIsSystem,
-      });
-      if (resp.error) {
-        setFormState('VALID');
-        throw resp.error;
-      }
-      if (resp.data) {
-        policyId = resp.data.item.id;
-        setAgentPolicy(resp.data.item);
-        setSelectedPolicyTab(SelectedPolicyTab.EXISTING);
-        updatePackagePolicy({ policy_id: policyId });
-      }
-      return policyId;
-    },
-    [newAgentPolicy, updatePackagePolicy, withSysMonitoring, packagePolicy]
-  );
+  const createAgentPolicy = useCallback(async (): Promise<AgentPolicy | undefined> => {
+    let createdAgentPolicy;
+    setFormState('LOADING');
+    // do not create agent policy with system integration if package policy already is for system package
+    const packagePolicyIsSystem = packagePolicy?.package?.name === FLEET_SYSTEM_PACKAGE;
+    const resp = await sendCreateAgentPolicy(newAgentPolicy, {
+      withSysMonitoring: withSysMonitoring && !packagePolicyIsSystem,
+    });
+    if (resp.error) {
+      setFormState('VALID');
+      throw resp.error;
+    }
+    if (resp.data) {
+      createdAgentPolicy = resp.data.item;
+      setAgentPolicy(createdAgentPolicy);
+      updatePackagePolicy({ policy_id: createdAgentPolicy.id });
+    }
+    return createdAgentPolicy;
+  }, [packagePolicy?.package?.name, newAgentPolicy, withSysMonitoring, updatePackagePolicy]);
 
   const onSubmit = useCallback(
-    async ({ force }: { force?: boolean } = {}) => {
+    async ({
+      force,
+      overrideCreatedAgentPolicy,
+    }: { overrideCreatedAgentPolicy?: AgentPolicy; force?: boolean } = {}) => {
       if (formState === 'VALID' && hasErrors) {
         setFormState('INVALID');
         return;
@@ -346,10 +344,10 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
         setFormState('CONFIRM');
         return;
       }
-      let policyId;
-      if (selectedPolicyTab === SelectedPolicyTab.NEW) {
+      let createdPolicy = overrideCreatedAgentPolicy;
+      if (selectedPolicyTab === SelectedPolicyTab.NEW && !overrideCreatedAgentPolicy) {
         try {
-          policyId = await createAgentPolicy({ force });
+          createdPolicy = await createAgentPolicy();
         } catch (e) {
           notifications.toasts.addError(e, {
             title: i18n.translate('xpack.fleet.createAgentPolicy.errorNotificationTitle', {
@@ -364,7 +362,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       // passing pkgPolicy with policy_id here as setPackagePolicy doesn't propagate immediately
       const { error, data } = await savePackagePolicy({
         ...packagePolicy,
-        policy_id: policyId ?? packagePolicy.policy_id,
+        policy_id: createdPolicy?.id ?? packagePolicy.policy_id,
         force,
       });
       if (!error) {
@@ -396,12 +394,12 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
         });
       } else {
         if (isVerificationError(error)) {
+          setFormState('VALID'); // don't show the add agent modal
           const forceInstall = await confirmForceInstall(packagePolicy.package!);
 
           if (forceInstall) {
-            onSubmit({ force: true });
-          } else {
-            setFormState('VALID');
+            // skip creating the agent policy because it will have already been successfully created
+            onSubmit({ overrideCreatedAgentPolicy: createdPolicy, force: true });
           }
           return;
         }
@@ -460,7 +458,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
         validation={validation}
         packageInfo={packageInfo}
         setHasAgentPolicyError={setHasAgentPolicyError}
-        updateSelectedTab={updateSelectedPolicy}
+        updateSelectedTab={updateSelectedPolicyTab}
         selectedAgentPolicyId={queryParamsPolicyId}
       />
     ),
@@ -472,7 +470,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       updateNewAgentPolicy,
       validation,
       withSysMonitoring,
-      updateSelectedPolicy,
+      updateSelectedPolicyTab,
       queryParamsPolicyId,
     ]
   );

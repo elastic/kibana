@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { JobFieldType } from '.';
+import type { SupportedFieldType } from '.';
 
 export interface Percentile {
   percent: number;
@@ -15,7 +15,7 @@ export interface Percentile {
 
 export interface FieldRequestConfig {
   fieldName: string;
-  type: JobFieldType;
+  type: SupportedFieldType;
   cardinality: number;
   existsInDocs: boolean;
 }

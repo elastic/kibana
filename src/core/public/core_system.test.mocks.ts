@@ -10,13 +10,13 @@ import { injectedMetadataServiceMock } from '@kbn/core-injected-metadata-browser
 import { docLinksServiceMock } from '@kbn/core-doc-links-browser-mocks';
 import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
-import { applicationServiceMock } from './application/application_service.mock';
-import { chromeServiceMock } from './chrome/chrome_service.mock';
+import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
+import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
 import { fatalErrorsServiceMock } from '@kbn/core-fatal-errors-browser-mocks';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';
-import { notificationServiceMock } from './notifications/notifications_service.mock';
-import { overlayServiceMock } from './overlays/overlay_service.mock';
+import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
+import { overlayServiceMock } from '@kbn/core-overlays-browser-mocks';
 import { pluginsServiceMock } from './plugins/plugins_service.mock';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import { renderingServiceMock } from './rendering/rendering_service.mock';
@@ -62,7 +62,7 @@ export const MockNotificationsService = notificationServiceMock.create();
 export const NotificationServiceConstructor = jest
   .fn()
   .mockImplementation(() => MockNotificationsService);
-jest.doMock('./notifications', () => ({
+jest.doMock('@kbn/core-notifications-browser-internal', () => ({
   NotificationsService: NotificationServiceConstructor,
 }));
 
@@ -82,13 +82,13 @@ jest.doMock('@kbn/core-ui-settings-browser-internal', () => ({
 
 export const MockChromeService = chromeServiceMock.create();
 export const ChromeServiceConstructor = jest.fn().mockImplementation(() => MockChromeService);
-jest.doMock('./chrome', () => ({
+jest.doMock('@kbn/core-chrome-browser-internal', () => ({
   ChromeService: ChromeServiceConstructor,
 }));
 
 export const MockOverlayService = overlayServiceMock.create();
 export const OverlayServiceConstructor = jest.fn().mockImplementation(() => MockOverlayService);
-jest.doMock('./overlays', () => ({
+jest.doMock('@kbn/core-overlays-browser-internal', () => ({
   OverlayService: OverlayServiceConstructor,
 }));
 
@@ -102,7 +102,7 @@ export const MockApplicationService = applicationServiceMock.create();
 export const ApplicationServiceConstructor = jest
   .fn()
   .mockImplementation(() => MockApplicationService);
-jest.doMock('./application', () => ({
+jest.doMock('@kbn/core-application-browser-internal', () => ({
   ApplicationService: ApplicationServiceConstructor,
 }));
 

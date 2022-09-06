@@ -14,13 +14,6 @@ export const RULE_AND_TIMELINE_FETCH_FAILURE = i18n.translate(
   }
 );
 
-export const RULE_EXECUTION_FETCH_FAILURE = i18n.translate(
-  'xpack.securitySolution.containers.detectionEngine.ruleExecutionLogFailureDescription',
-  {
-    defaultMessage: 'Failed to fetch Rule Execution Events',
-  }
-);
-
 export const RULE_ADD_FAILURE = i18n.translate(
   'xpack.securitySolution.containers.detectionEngine.addRuleFailDescription',
   {
@@ -116,10 +109,3 @@ export const RELOAD_MISSING_PREPACKAGED_RULES_AND_TIMELINES = (
         'Install {missingRules} Elastic prebuilt {missingRules, plural, =1 {rule} other {rules}} and {missingTimelines} Elastic prebuilt {missingTimelines, plural, =1 {timeline} other {timelines}} ',
     }
   );
-
-export const RULE_EXECUTION_EVENTS_FETCH_FAILURE = i18n.translate(
-  'xpack.securitySolution.containers.detectionEngine.ruleExecutionEventsFetchFailDescription',
-  {
-    defaultMessage: 'Failed to fetch rule execution events',
-  }
-);

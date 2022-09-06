@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable @kbn/eslint/no-restricted-paths */
 import {
   PushToServiceApiParams as JiraPushToServiceApiParams,
   Incident as JiraIncident,

@@ -32,7 +32,7 @@ function getArtifact(platform: PLATFORM_TYPE, kibanaVersion: string) {
     windows: {
       downloadCommand: [
         `$ProgressPreference = 'SilentlyContinue'`,
-        `wget ${ARTIFACT_BASE_URL}/elastic-agent-${kibanaVersion}-windows-x86_64.zip -OutFile elastic-agent-${kibanaVersion}-windows-x86_64.zip`,
+        `Invoke-WebRequest -Uri https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent-${kibanaVersion}-windows-x86_64.zip -OutFile elastic-agent-${kibanaVersion}-windows-x86_64.zip`,
         `Expand-Archive .\\elastic-agent-${kibanaVersion}-windows-x86_64.zip`,
         `cd elastic-agent-${kibanaVersion}-windows-x86_64`,
       ].join(`\n`),
@@ -48,6 +48,9 @@ function getArtifact(platform: PLATFORM_TYPE, kibanaVersion: string) {
         `curl -L -O ${ARTIFACT_BASE_URL}/elastic-agent-${kibanaVersion}-x86_64.rpm`,
         `sudo rpm -vi elastic-agent-${kibanaVersion}-x86_64.rpm`,
       ].join(`\n`),
+    },
+    kubernetes: {
+      downloadCommand: '',
     },
   };
 
@@ -109,6 +112,7 @@ export function getInstallCommandForPlatform(
     windows: `${artifact.downloadCommand}\n.\\elastic-agent.exe install ${commandArgumentsStr}`,
     deb: `${artifact.downloadCommand}\nsudo elastic-agent enroll ${commandArgumentsStr}\nsudo systemctl enable elastic-agent\nsudo systemctl start elastic-agent`,
     rpm: `${artifact.downloadCommand}\nsudo elastic-agent enroll ${commandArgumentsStr}\nsudo systemctl enable elastic-agent\nsudo systemctl start elastic-agent`,
+    kubernetes: '',
   };
 
   return commands[platform];

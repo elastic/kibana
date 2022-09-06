@@ -82,7 +82,7 @@ The following example shows how to {kib-repo}blob/{branch}/docs/development/core
 [source,typescript]
 ----
 import { schema } from '@kbn/config-schema';
-import type { CoreSetup,Plugin } from 'kibana/server';
+import type { CoreSetup,Plugin } from '@kbn/core/server';
 
 export class MyPlugin implements Plugin {
   public setup(core: CoreSetup) {

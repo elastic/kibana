@@ -159,11 +159,11 @@ export function KibanaPanel(props) {
                   </EuiDescriptionListDescription>
                   <EuiDescriptionListTitle className="eui-textBreakWord">
                     <FormattedMessage
-                      id="xpack.monitoring.cluster.overview.kibanaPanel.overdueTaskCountLabel"
-                      defaultMessage="Overdue Rules"
+                      id="xpack.monitoring.cluster.overview.kibanaPanel.queuedRulesCountLabel"
+                      defaultMessage="Queued Rules"
                     />
                   </EuiDescriptionListTitle>
-                  <EuiDescriptionListDescription data-test-subj="kbnOverdueRules">
+                  <EuiDescriptionListDescription data-test-subj="kbnQueuedRules">
                     {props.rules.cluster.overdue.count}
                   </EuiDescriptionListDescription>
                 </>

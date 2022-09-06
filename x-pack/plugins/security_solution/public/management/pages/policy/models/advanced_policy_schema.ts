@@ -146,6 +146,39 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
+    key: 'linux.advanced.tty_io.max_kilobytes_per_process',
+    first_supported_version: '8.5',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.tty_io.max_kilobytes_per_process',
+      {
+        defaultMessage:
+          'The maximum kilobytes of terminal output to record for a single process. Default: 512',
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.tty_io.max_kilobytes_per_event',
+    first_supported_version: '8.5',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.tty_io.max_kilobytes_per_event',
+      {
+        defaultMessage:
+          'The maximum kilobytes of terminal output to record in a single event. Default: 512',
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.tty_io.max_event_interval_seconds',
+    first_supported_version: '8.5',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.tty_io.max_event_interval_seconds',
+      {
+        defaultMessage:
+          'The maximum amount of time (seconds) to batch terminal output in a single event. Default: 30',
+      }
+    ),
+  },
+  {
     key: 'mac.advanced.agent.connection_delay',
     first_supported_version: '7.9',
     documentation: i18n.translate(
@@ -938,12 +971,13 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
-    key: 'windows.advanced.rollback',
+    key: 'windows.advanced.alerts.rollback.self_healing.enabled',
     first_supported_version: '8.4',
     documentation: i18n.translate(
-      'xpack.securitySolution.endpoint.policy.advanced.windows.rollback',
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.alerts.rollback.self_healing.enabled',
       {
-        defaultMessage: 'Experimental',
+        defaultMessage:
+          'Self-healing erases attack artifacts when prevention alerts are triggered. Warning: data loss can occur. Default: false',
       }
     ),
     license: 'platinum',
@@ -978,6 +1012,28 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       {
         defaultMessage:
           'Additional filesystems for fanotify to ignore. The format is a comma separated list of filesystem names as they appear in "/proc/filesystems", e.g. "ext4,tmpfs". When "ignore_unknown_filesystems" is false, parsed entries of this option supplement internally known bad filesystems to be ignored. When "ignore_unknown_filesystems" is true, parsed entries of this option override entries in "monitored_filesystems" and internally CI tested filesystems.',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.memory_protection.context_manipulation_detection',
+    first_supported_version: '8.4',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.memory_protection.context_manipulation_detection',
+      {
+        defaultMessage:
+          'Detect injection based on thread context manipulation (e.g. `SetThreadContext`) as a part of memory protection. Default: true',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.kernel.image_and_process_file_timestamp',
+    first_supported_version: '8.4',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.kernel.image_and_process_file_timestamp',
+      {
+        defaultMessage:
+          'Collect executable/dll timestamps for process and async image load events. Default: true',
       }
     ),
   },

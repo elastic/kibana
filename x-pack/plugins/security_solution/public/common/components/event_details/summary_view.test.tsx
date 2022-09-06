@@ -52,10 +52,11 @@ const enrichedHostIpData: AlertSummaryRow['description'] = {
   values: [...hostIpValues],
 };
 
+const mockCount = 90019001;
 jest.mock('../../containers/alerts/use_alert_prevalence', () => ({
   useAlertPrevalence: () => ({
     loading: false,
-    count: 1,
+    count: mockCount,
     error: false,
   }),
 }));
@@ -94,7 +95,7 @@ describe('Summary View', () => {
       });
 
       // Shows alert prevalence information
-      expect(screen.getByTestId('alert-prevalence')).toBeInTheDocument();
+      expect(screen.getByText(mockCount)).toBeInTheDocument();
       // Shows the Investigate in timeline button
       expect(screen.getByLabelText('Investigate in timeline')).toBeInTheDocument();
     });
@@ -121,7 +122,7 @@ describe('Summary View', () => {
       );
 
       // Does not render the prevalence and timeline items
-      expect(screen.queryByTestId('alert-prevalence')).not.toBeInTheDocument();
+      expect(screen.queryByText(mockCount)).not.toBeInTheDocument();
       expect(screen.queryByLabelText('Investigate in timeline')).not.toBeInTheDocument();
     });
   });

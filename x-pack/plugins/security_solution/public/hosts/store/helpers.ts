@@ -29,10 +29,6 @@ export const setHostPageQueriesActivePageToZero = (state: HostsModel): Queries =
     ...state.page.queries[HostsTableType.uncommonProcesses],
     activePage: DEFAULT_TABLE_ACTIVE_PAGE,
   },
-  [HostsTableType.alerts]: {
-    ...state.page.queries[HostsTableType.alerts],
-    activePage: DEFAULT_TABLE_ACTIVE_PAGE,
-  },
 });
 
 export const setHostDetailsQueriesActivePageToZero = (state: HostsModel): Queries => ({
@@ -51,10 +47,6 @@ export const setHostDetailsQueriesActivePageToZero = (state: HostsModel): Querie
   },
   [HostsTableType.uncommonProcesses]: {
     ...state.details.queries[HostsTableType.uncommonProcesses],
-    activePage: DEFAULT_TABLE_ACTIVE_PAGE,
-  },
-  [HostsTableType.alerts]: {
-    ...state.page.queries[HostsTableType.alerts],
     activePage: DEFAULT_TABLE_ACTIVE_PAGE,
   },
 });

@@ -29,11 +29,13 @@ The identifier for the case. To retrieve case IDs, use
 (Optional, string) An identifier for the space. If it is not specified, the
 default space is used.
 
+[role="child_attributes"]
 === {api-request-body-title}
 
 `alertId`::
-(Required*, string) The identifier for the alert. It is required only when
-`type` is `alert`. preview:[]
+(Required*, string or array of strings) The identifier for the alert. It is
+required only when `type` is `alert`. If it is an array, `index` must also be an
+array.preview:[]
 
 `comment`::
 (Required*, string) The updated comment. It is required only when `type` is
@@ -44,7 +46,8 @@ default space is used.
 <<cases-api-get-comments>>.
 
 `index`::
-(Required*, string) The alert index. It is required only when `type` is `alert`.
+(Required*, string or array of strings) The alert index. It is required only
+when `type` is `alert`. If it is an array, `alertId` must also be an array.
 preview:[]
 
 `owner`::

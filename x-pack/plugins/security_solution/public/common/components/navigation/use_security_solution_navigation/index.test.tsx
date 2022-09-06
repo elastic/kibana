@@ -6,20 +6,17 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
-import type { KibanaPageTemplateProps } from '@kbn/shared-ux-components';
+import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
 import { useKibana } from '../../../lib/kibana/kibana_react';
 import { useGetUserCasesPermissions } from '../../../lib/kibana';
 import { SecurityPageName } from '../../../../app/types';
 import { useSecuritySolutionNavigation } from '.';
-import { CONSTANTS } from '../../url_state/constants';
-import { TimelineTabs } from '../../../../../common/types/timeline';
-import { useDeepEqualSelector } from '../../../hooks/use_selector';
-import type { UrlInputsModel } from '../../../store/inputs/model';
 import { useRouteSpy } from '../../../utils/route/use_route_spy';
 import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental_features';
 import { TestProviders } from '../../../mock';
 import { CASES_FEATURE_ID } from '../../../../../common/constants';
 import { useCanSeeHostIsolationExceptionsMenu } from '../../../../management/pages/host_isolation_exceptions/view/hooks';
+import { useTourContext } from '../../guided_onboarding';
 import {
   noCasesPermissions,
   readCasesCapabilities,
@@ -40,39 +37,9 @@ jest.mock('../../../hooks/use_selector');
 jest.mock('../../../hooks/use_experimental_features');
 jest.mock('../../../utils/route/use_route_spy');
 jest.mock('../../../../management/pages/host_isolation_exceptions/view/hooks');
+jest.mock('../../guided_onboarding');
 
 describe('useSecuritySolutionNavigation', () => {
-  const mockUrlState = {
-    [CONSTANTS.timeline]: {
-      activeTab: TimelineTabs.query,
-      id: '',
-      isOpen: false,
-      graphEventId: '',
-    },
-    [CONSTANTS.timerange]: {
-      global: {
-        [CONSTANTS.timerange]: {
-          from: '2020-07-07T08:20:18.966Z',
-          fromStr: 'now-24h',
-          kind: 'relative',
-          to: '2020-07-08T08:20:18.966Z',
-          toStr: 'now',
-        },
-        linkTo: ['timeline'],
-      },
-      timeline: {
-        [CONSTANTS.timerange]: {
-          from: '2020-07-07T08:20:18.966Z',
-          fromStr: 'now-24h',
-          kind: 'relative',
-          to: '2020-07-08T08:20:18.966Z',
-          toStr: 'now',
-        },
-        linkTo: ['global'],
-      },
-    } as UrlInputsModel,
-  };
-
   const mockRouteSpy = [
     {
       detailName: '',
@@ -87,9 +54,9 @@ describe('useSecuritySolutionNavigation', () => {
 
   beforeEach(() => {
     (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
-    (useDeepEqualSelector as jest.Mock).mockReturnValue({ urlState: mockUrlState });
     (useRouteSpy as jest.Mock).mockReturnValue(mockRouteSpy);
     (useCanSeeHostIsolationExceptionsMenu as jest.Mock).mockReturnValue(true);
+    (useTourContext as jest.Mock).mockReturnValue({ isTourShown: false });
 
     const cases = mockCasesContract();
     cases.helpers.getUICapabilities.mockReturnValue(readCasesPermissions());
@@ -133,7 +100,7 @@ describe('useSecuritySolutionNavigation', () => {
       { wrapper: TestProviders }
     );
 
-    expect(result?.current?.items?.[3].items?.[2].id).toEqual(SecurityPageName.users);
+    expect(result?.current?.items?.[4].items?.[2].id).toEqual(SecurityPageName.users);
   });
 
   // TODO: [kubernetes] remove when no longer experimental
@@ -143,7 +110,7 @@ describe('useSecuritySolutionNavigation', () => {
       () => useSecuritySolutionNavigation(),
       { wrapper: TestProviders }
     );
-    expect(result?.current?.items?.[1].items?.[2].id).toEqual(SecurityPageName.kubernetes);
+    expect(result?.current?.items?.[1].items?.[3].id).toEqual(SecurityPageName.kubernetes);
   });
 
   it('should omit host isolation exceptions if hook reports false', () => {
@@ -171,7 +138,7 @@ describe('useSecuritySolutionNavigation', () => {
           { wrapper: TestProviders }
         );
 
-        const caseNavItem = (result.current?.items || [])[4].items?.find(
+        const caseNavItem = (result.current?.items || [])[6].items?.find(
           (item) => item['data-test-subj'] === 'navigation-cases'
         );
         expect(caseNavItem).toMatchInlineSnapshot(`
@@ -201,6 +168,27 @@ describe('useSecuritySolutionNavigation', () => {
         );
         expect(caseNavItem).toBeFalsy();
       });
+    });
+  });
+
+  describe('Guided onboarding tour', () => {
+    it('nav can be collapsed if tour is not shown', () => {
+      const { result } = renderHook<{}, KibanaPageTemplateProps['solutionNav']>(
+        () => useSecuritySolutionNavigation(),
+        { wrapper: TestProviders }
+      );
+
+      expect(result.current?.canBeCollapsed).toBe(true);
+    });
+    it(`nav can't be collapsed if tour is shown`, () => {
+      (useTourContext as jest.Mock).mockReturnValue({ isTourShown: true });
+
+      const { result } = renderHook<{}, KibanaPageTemplateProps['solutionNav']>(
+        () => useSecuritySolutionNavigation(),
+        { wrapper: TestProviders }
+      );
+
+      expect(result.current?.canBeCollapsed).toBe(false);
     });
   });
 });

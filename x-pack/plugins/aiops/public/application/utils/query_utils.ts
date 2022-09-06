@@ -8,11 +8,14 @@
 // TODO Consolidate with duplicate query utils in
 // `x-pack/plugins/data_visualizer/common/utils/query_utils.ts`
 
+import { cloneDeep } from 'lodash';
+
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+
 import { Query } from '@kbn/es-query';
-import { cloneDeep } from 'lodash';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import type { ChangePoint } from '@kbn/ml-agg-utils';
 
 /*
  * Contains utility functions for building and processing queries.
@@ -24,7 +27,9 @@ export function buildBaseFilterCriteria(
   timeFieldName?: string,
   earliestMs?: number,
   latestMs?: number,
-  query?: Query['query']
+  query?: Query['query'],
+  selectedChangePoint?: ChangePoint,
+  includeSelectedChangePoint = true
 ): estypes.QueryDslQueryContainer[] {
   const filterCriteria = [];
   if (timeFieldName && earliestMs && latestMs) {
@@ -41,6 +46,22 @@ export function buildBaseFilterCriteria(
 
   if (query && typeof query === 'object') {
     filterCriteria.push(query);
+  }
+
+  if (selectedChangePoint && includeSelectedChangePoint) {
+    filterCriteria.push({
+      term: { [selectedChangePoint.fieldName]: selectedChangePoint.fieldValue },
+    });
+  } else if (selectedChangePoint && !includeSelectedChangePoint) {
+    filterCriteria.push({
+      bool: {
+        must_not: [
+          {
+            term: { [selectedChangePoint.fieldName]: selectedChangePoint.fieldValue },
+          },
+        ],
+      },
+    });
   }
 
   return filterCriteria;

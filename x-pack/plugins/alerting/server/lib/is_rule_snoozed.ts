@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { first } from 'lodash';
+import { first, isEmpty } from 'lodash';
 import { SanitizedRule, RuleTypeParams } from '../../common/rule';
 import { isSnoozeActive } from './snooze/is_snooze_active';
 
 type RuleSnoozeProps = Pick<SanitizedRule<RuleTypeParams>, 'muteAll' | 'snoozeSchedule'>;
 type ActiveSnoozes = Array<{ snoozeEndTime: Date; id: string; lastOccurrence?: Date }>;
 
-function getActiveSnoozes(rule: Pick<RuleSnoozeProps, 'snoozeSchedule'>): ActiveSnoozes | null {
-  if (rule.snoozeSchedule == null) {
+export function getActiveSnoozes(rule: RuleSnoozeProps): ActiveSnoozes | null {
+  if (rule.snoozeSchedule == null || isEmpty(rule.snoozeSchedule)) {
     return null;
   }
 
@@ -26,9 +26,7 @@ function getActiveSnoozes(rule: Pick<RuleSnoozeProps, 'snoozeSchedule'>): Active
   );
 }
 
-export function getActiveScheduledSnoozes(
-  rule: Pick<RuleSnoozeProps, 'snoozeSchedule'>
-): ActiveSnoozes | null {
+export function getActiveScheduledSnoozes(rule: RuleSnoozeProps): ActiveSnoozes | null {
   return getActiveSnoozes(rule)?.filter((r) => Boolean(r.id)) ?? null;
 }
 

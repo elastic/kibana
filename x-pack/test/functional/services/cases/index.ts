@@ -12,14 +12,18 @@ import { CasesCreateViewServiceProvider } from './create';
 import { CasesTableServiceProvider } from './list';
 import { CasesNavigationProvider } from './navigation';
 import { CasesSingleViewServiceProvider } from './single_case_view';
+import { CasesTestResourcesServiceProvider } from './test_resources';
 
 export function CasesServiceProvider(context: FtrProviderContext) {
+  const casesCommon = CasesCommonServiceProvider(context);
+
   return {
     api: CasesAPIServiceProvider(context),
-    common: CasesCommonServiceProvider(context),
+    common: casesCommon,
     casesTable: CasesTableServiceProvider(context),
-    create: CasesCreateViewServiceProvider(context),
+    create: CasesCreateViewServiceProvider(context, casesCommon),
     navigation: CasesNavigationProvider(context),
     singleCase: CasesSingleViewServiceProvider(context),
+    testResources: CasesTestResourcesServiceProvider(context),
   };
 }

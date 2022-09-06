@@ -45,6 +45,7 @@ export function SourcePicker({
           }),
           showSavedObject: (indexPattern) => !indexPattern.attributes.type,
           includeFields: ['type'],
+          defaultSearchField: 'name',
         },
       ]}
       fixedPageSize={fixedPageSize}

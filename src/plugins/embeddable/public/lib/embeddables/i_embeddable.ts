@@ -7,7 +7,7 @@
  */
 
 import { Observable } from 'rxjs';
-import { ErrorLike } from '@kbn/expressions-plugin';
+import { ErrorLike } from '@kbn/expressions-plugin/common';
 import { Adapters } from '../types';
 import { IContainer } from '../containers/i_container';
 import { EmbeddableInput } from '../../../common/types';
@@ -141,6 +141,12 @@ export interface IEmbeddable<
    * @param changes
    */
   updateInput(changes: Partial<I>): void;
+
+  /**
+   * Updates output state with the given changes.
+   * @param changes
+   */
+  updateOutput(changes: Partial<O>): void;
 
   /**
    * Returns an observable which will be notified when input state changes.

@@ -244,6 +244,7 @@ export class CiStatsReporter {
       body: {
         buildId,
         defaultMeta: options?.defaultMeta,
+        buildkiteJobId: process.env.BUILDKITE_JOB_ID,
         metrics,
       },
       bodyDesc: `metrics: ${metrics

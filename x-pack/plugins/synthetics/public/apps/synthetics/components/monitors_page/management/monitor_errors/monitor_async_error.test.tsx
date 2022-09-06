@@ -52,6 +52,7 @@ describe('<MonitorAsyncError />', () => {
       error: null,
       loading: true,
       loaded: false,
+      monitorUpsertStatuses: {},
       data: {
         absoluteTotal: 6,
         perPage: 5,

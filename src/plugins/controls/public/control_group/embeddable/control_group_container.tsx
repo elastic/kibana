@@ -6,37 +6,34 @@
  * Side Public License, v 1.
  */
 
+import {
+  map,
+  skip,
+  switchMap,
+  catchError,
+  debounceTime,
+  distinctUntilChanged,
+} from 'rxjs/operators';
 import React from 'react';
-import { uniqBy } from 'lodash';
 import ReactDOM from 'react-dom';
 import deepEqual from 'fast-deep-equal';
 import { Filter, uniqFilters } from '@kbn/es-query';
 import { EMPTY, merge, pipe, Subject, Subscription } from 'rxjs';
 import { EuiContextMenuPanel } from '@elastic/eui';
-import {
-  distinctUntilChanged,
-  debounceTime,
-  catchError,
-  switchMap,
-  map,
-  skip,
-  mapTo,
-} from 'rxjs/operators';
 
 import {
-  withSuspense,
-  LazyReduxEmbeddableWrapper,
-  ReduxEmbeddableWrapperPropsWithChildren,
+  ReduxEmbeddablePackage,
+  ReduxEmbeddableTools,
   SolutionToolbarPopover,
 } from '@kbn/presentation-util-plugin/public';
 import { OverlayRef } from '@kbn/core/public';
-import { DataView } from '@kbn/data-views-plugin/public';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { Container, EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import {
   ControlGroupInput,
   ControlGroupOutput,
+  ControlGroupReduxState,
   ControlPanelState,
   ControlsPanels,
   CONTROL_GROUP_TYPE,
@@ -53,10 +50,6 @@ import { ControlGroup } from '../component/control_group_component';
 import { controlGroupReducers } from '../state/control_group_reducers';
 import { ControlEmbeddable, ControlInput, ControlOutput } from '../../types';
 import { CreateControlButton, CreateControlButtonTypes } from '../editor/create_control';
-
-const ControlGroupReduxWrapper = withSuspense<
-  ReduxEmbeddableWrapperPropsWithChildren<ControlGroupInput>
->(LazyReduxEmbeddableWrapper);
 
 let flyoutRef: OverlayRef | undefined;
 export const setFlyoutRef = (newRef: OverlayRef | undefined) => {
@@ -76,6 +69,11 @@ export class ControlGroupContainer extends Container<
 
   private relevantDataViewId?: string;
   private lastUsedDataViewId?: string;
+
+  private reduxEmbeddableTools: ReduxEmbeddableTools<
+    ControlGroupReduxState,
+    typeof controlGroupReducers
+  >;
 
   public setLastUsedDataViewId = (lastUsedDataViewId: string) => {
     this.lastUsedDataViewId = lastUsedDataViewId;
@@ -162,16 +160,29 @@ export class ControlGroupContainer extends Container<
     );
   };
 
-  constructor(initialInput: ControlGroupInput, parent?: Container) {
+  constructor(
+    reduxEmbeddablePackage: ReduxEmbeddablePackage,
+    initialInput: ControlGroupInput,
+    parent?: Container
+  ) {
     super(
       initialInput,
-      { embeddableLoaded: {} },
+      { dataViewIds: [], embeddableLoaded: {}, filters: [] },
       pluginServices.getServices().controls.getControlFactory,
       parent,
       ControlGroupChainingSystems[initialInput.chainingSystem]?.getContainerSettings(initialInput)
     );
 
     this.recalculateFilters$ = new Subject();
+
+    // build redux embeddable tools
+    this.reduxEmbeddableTools = reduxEmbeddablePackage.createTools<
+      ControlGroupReduxState,
+      typeof controlGroupReducers
+    >({
+      embeddable: this,
+      reducers: controlGroupReducers,
+    });
 
     // when all children are ready setup subscriptions
     this.untilReady().then(() => {
@@ -215,7 +226,7 @@ export class ControlGroupContainer extends Container<
               .pipe(
                 // Embeddables often throw errors into their output streams.
                 catchError(() => EMPTY),
-                mapTo(childId)
+                map(() => childId)
               )
           )
         )
@@ -261,12 +272,12 @@ export class ControlGroupContainer extends Container<
   };
 
   private recalculateDataViews = () => {
-    const allDataViews: DataView[] = [];
+    const allDataViewIds: Set<string> = new Set();
     Object.values(this.children).map((child) => {
-      const childOutput = child.getOutput() as ControlOutput;
-      allDataViews.push(...(childOutput.dataViews ?? []));
+      const dataViewId = (child.getOutput() as ControlOutput).dataViewId;
+      if (dataViewId) allDataViewIds.add(dataViewId);
     });
-    this.updateOutput({ dataViews: uniqBy(allDataViews, 'id') });
+    this.updateOutput({ dataViewIds: Array.from(allDataViewIds) });
   };
 
   protected createNewPanelState<TEmbeddableInput extends ControlInput = ControlInput>(
@@ -354,10 +365,11 @@ export class ControlGroupContainer extends Container<
     }
     this.domNode = dom;
     const ControlsServicesProvider = pluginServices.getContextProvider();
+    const { Wrapper: ControlGroupReduxWrapper } = this.reduxEmbeddableTools;
     ReactDOM.render(
       <KibanaThemeProvider theme$={pluginServices.getServices().theme.theme$}>
         <ControlsServicesProvider>
-          <ControlGroupReduxWrapper embeddable={this} reducers={controlGroupReducers}>
+          <ControlGroupReduxWrapper>
             <ControlGroup />
           </ControlGroupReduxWrapper>
         </ControlsServicesProvider>
@@ -370,6 +382,7 @@ export class ControlGroupContainer extends Container<
     super.destroy();
     this.closeAllFlyouts();
     this.subscriptions.unsubscribe();
+    this.reduxEmbeddableTools.cleanup();
     if (this.domNode) ReactDOM.unmountComponentAtNode(this.domNode);
   }
 }

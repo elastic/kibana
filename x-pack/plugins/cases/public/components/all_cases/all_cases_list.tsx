@@ -70,7 +70,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
     const firstAvailableStatus = head(difference(caseStatuses, hiddenStatuses));
     const initialFilterOptions = {
       ...(!isEmpty(hiddenStatuses) && firstAvailableStatus && { status: firstAvailableStatus }),
-      owner: hasOwner ? owner : availableSolutions,
+      owner: hasOwner ? owner : [],
     };
     const [filterOptions, setFilterOptions] = useState<FilterOptions>({
       ...DEFAULT_FILTER_OPTIONS,
@@ -244,6 +244,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
           availableSolutions={hasOwner ? [] : availableSolutions}
           initial={{
             search: filterOptions.search,
+            searchFields: filterOptions.searchFields,
             reporters: filterOptions.reporters,
             tags: filterOptions.tags,
             status: filterOptions.status,

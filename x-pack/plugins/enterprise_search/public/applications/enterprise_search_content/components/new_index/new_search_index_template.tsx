@@ -5,12 +5,6 @@
  * 2.0.
  */
 
-/**
- * TODO:
- * - Need to add documentation URLs (search for `#`s)
- * - Bind create index button
- */
-
 import React, { ChangeEvent } from 'react';
 
 import { useValues, useActions } from 'kea';
@@ -27,6 +21,7 @@ import {
   EuiPanel,
   EuiSelect,
   EuiSpacer,
+  EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -37,7 +32,8 @@ import { LanguageForOptimization } from './types';
 
 export interface Props {
   buttonLoading?: boolean;
-  formDisabled?: boolean;
+  docsUrl?: string;
+  error?: string | React.ReactNode;
   onNameChange?(name: string): void;
   onSubmit(name: string, language: LanguageForOptimization): void;
   title: React.ReactNode;
@@ -46,19 +42,27 @@ export interface Props {
 
 export const NewSearchIndexTemplate: React.FC<Props> = ({
   children,
+  docsUrl,
+  error,
   title,
   onNameChange,
   onSubmit,
-  formDisabled,
   buttonLoading,
 }) => {
-  const { name, language, rawName, languageSelectValue } = useValues(NewSearchIndexLogic);
+  const {
+    fullIndexName,
+    fullIndexNameExists,
+    fullIndexNameIsValid,
+    language,
+    rawName,
+    languageSelectValue,
+  } = useValues(NewSearchIndexLogic);
   const { setRawName, setLanguageSelectValue } = useActions(NewSearchIndexLogic);
 
   const handleNameChange = (e: ChangeEvent<HTMLInputElement>) => {
     setRawName(e.target.value);
     if (onNameChange) {
-      onNameChange(e.target.value);
+      onNameChange(fullIndexName);
     }
   };
 
@@ -66,12 +70,40 @@ export const NewSearchIndexTemplate: React.FC<Props> = ({
     setLanguageSelectValue(e.target.value);
   };
 
+  const formInvalid = !!error || fullIndexNameExists || !fullIndexNameIsValid;
+
+  const formError = () => {
+    if (fullIndexNameExists) {
+      return i18n.translate(
+        'xpack.enterpriseSearch.content.newIndex.newSearchIndexTemplate.alreadyExists.error',
+        {
+          defaultMessage: 'An index with the name {indexName} already exists',
+          values: {
+            indexName: fullIndexName,
+          },
+        }
+      );
+    }
+    if (!fullIndexNameIsValid) {
+      return i18n.translate(
+        'xpack.enterpriseSearch.content.newIndex.newSearchIndexTemplate.isInvalid.error',
+        {
+          defaultMessage: '{indexName} is an invalid index name',
+          values: {
+            indexName: fullIndexName,
+          },
+        }
+      );
+    }
+    return error;
+  };
+
   return (
     <EuiPanel hasBorder>
       <EuiForm
         onSubmit={(event) => {
           event.preventDefault();
-          onSubmit(name, language);
+          onSubmit(fullIndexName, language);
         }}
         component="form"
         id="enterprise-search-add-connector"
@@ -92,13 +124,14 @@ export const NewSearchIndexTemplate: React.FC<Props> = ({
                       defaultMessage: 'Index name',
                     }
                   )}
+                  isInvalid={formInvalid}
+                  error={formError()}
                   helpText={i18n.translate(
-                    'xpack.enterpriseSearch.content.newIndex.newSearchIndexTemplate.nameInputHelpText',
+                    'xpack.enterpriseSearch.content.newIndex.newSearchIndexTemplate.nameInputHelpText.lineOne',
                     {
-                      defaultMessage:
-                        'Names cannot contain spaces or special characters. {indexName}',
+                      defaultMessage: 'Your index will be named: {indexName}',
                       values: {
-                        indexName: name.length > 0 ? `Your index will be named: ${name}` : '',
+                        indexName: fullIndexName,
                       },
                     }
                   )}
@@ -116,8 +149,18 @@ export const NewSearchIndexTemplate: React.FC<Props> = ({
                     value={rawName}
                     onChange={handleNameChange}
                     autoFocus
+                    prepend="search-"
                   />
                 </EuiFormRow>
+                <EuiText size="xs" color="subdued">
+                  {i18n.translate(
+                    'xpack.enterpriseSearch.content.newIndex.newSearchIndexTemplate.nameInputHelpText.lineTwo',
+                    {
+                      defaultMessage:
+                        'Names should be lowercase and cannot contain spaces or special characters.',
+                    }
+                  )}
+                </EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiFormRow
@@ -149,7 +192,7 @@ export const NewSearchIndexTemplate: React.FC<Props> = ({
           <EuiFlexItem grow={false}>
             <EuiButton
               fill
-              isDisabled={!name || formDisabled}
+              isDisabled={!rawName || buttonLoading || formInvalid}
               isLoading={buttonLoading}
               type="submit"
             >
@@ -161,16 +204,18 @@ export const NewSearchIndexTemplate: React.FC<Props> = ({
               )}
             </EuiButton>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiLink target="_blank" href="#">
-              {i18n.translate(
-                'xpack.enterpriseSearch.content.newIndex.newSearchIndexTemplate.viewDocumentation.linkText',
-                {
-                  defaultMessage: 'View the documentation',
-                }
-              )}
-            </EuiLink>
-          </EuiFlexItem>
+          {!!docsUrl && (
+            <EuiFlexItem grow={false}>
+              <EuiLink target="_blank" href={docsUrl}>
+                {i18n.translate(
+                  'xpack.enterpriseSearch.content.newIndex.newSearchIndexTemplate.viewDocumentation.linkText',
+                  {
+                    defaultMessage: 'View the documentation',
+                  }
+                )}
+              </EuiLink>
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
       </EuiForm>
       <EuiHorizontalRule />

@@ -582,13 +582,7 @@
             "description": [],
             "signature": [
               "(objects: SavedObjectTarget[]) => Promise<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsCollectMultiNamespaceReferencesResponse",
-                "text": "SavedObjectsCollectMultiNamespaceReferencesResponse"
-              },
+              "SavedObjectsCollectMultiNamespaceReferencesResponse",
               ">"
             ],
             "path": "x-pack/plugins/spaces/public/spaces_manager/spaces_manager.ts",
@@ -863,13 +857,7 @@
             "description": [],
             "signature": [
               "[spaceId: string]:  ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsImportResponse",
-                "text": "SavedObjectsImportResponse"
-              }
+              "SavedObjectsImportResponse"
             ],
             "path": "x-pack/plugins/spaces/public/copy_saved_objects_to_space/types.ts",
             "deprecated": false
@@ -1718,7 +1706,7 @@
               "The size of the avatar."
             ],
             "signature": [
-              "\"s\" | \"m\" | \"l\" | \"xl\" | undefined"
+              "\"m\" | \"s\" | \"l\" | \"xl\" | undefined"
             ],
             "path": "x-pack/plugins/spaces/public/space_avatar/types.ts",
             "deprecated": false
@@ -3205,13 +3193,7 @@
             ],
             "signature": [
               "(id: string) => ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.ISavedObjectsPointInTimeFinder",
-                "text": "ISavedObjectsPointInTimeFinder"
-              },
+              "ISavedObjectsPointInTimeFinder",
               "<unknown, unknown>"
             ],
             "path": "x-pack/plugins/spaces/server/spaces_client/spaces_client.ts",
@@ -3904,21 +3886,9 @@
           "(request: ",
           "KibanaRequest",
           "<unknown, unknown, unknown, any>, savedObjectsStart: ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCoreSavedObjectsPluginApi",
-            "section": "def-server.SavedObjectsServiceStart",
-            "text": "SavedObjectsServiceStart"
-          },
+          "SavedObjectsServiceStart",
           ") => ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCoreSavedObjectsPluginApi",
-            "section": "def-server.ISavedObjectsRepository",
-            "text": "ISavedObjectsRepository"
-          }
+          "ISavedObjectsRepository"
         ],
         "path": "x-pack/plugins/spaces/server/spaces_client/spaces_client_service.ts",
         "deprecated": false,
@@ -3946,13 +3916,7 @@
             "label": "savedObjectsStart",
             "description": [],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsServiceStart",
-                "text": "SavedObjectsServiceStart"
-              }
+              "SavedObjectsServiceStart"
             ],
             "path": "x-pack/plugins/spaces/server/spaces_client/spaces_client_service.ts",
             "deprecated": false

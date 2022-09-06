@@ -111,10 +111,33 @@ export function telemetryTaskRunner(
               dailyExecutionTimeoutCounts,
               dailyFailedAndUnrecognizedTasks,
             ]) => {
+              const hasErrors =
+                totalCountAggregations.hasErrors ||
+                totalInUse.hasErrors ||
+                dailyExecutionCounts.hasErrors ||
+                dailyExecutionTimeoutCounts.hasErrors ||
+                dailyFailedAndUnrecognizedTasks.hasErrors;
+
+              const errorMessages = [
+                totalCountAggregations.errorMessage,
+                totalInUse.errorMessage,
+                dailyExecutionCounts.errorMessage,
+                dailyExecutionTimeoutCounts.errorMessage,
+                dailyFailedAndUnrecognizedTasks.errorMessage,
+              ].filter((message) => message !== undefined);
+
               return {
                 state: {
+                  has_errors: hasErrors,
+                  ...(errorMessages.length > 0 && { error_messages: errorMessages }),
                   runs: (state.runs || 0) + 1,
-                  ...totalCountAggregations,
+                  count_total: totalCountAggregations.count_total,
+                  count_by_type: totalCountAggregations.count_by_type,
+                  throttle_time: totalCountAggregations.throttle_time,
+                  schedule_time: totalCountAggregations.schedule_time,
+                  throttle_time_number_s: totalCountAggregations.throttle_time_number_s,
+                  schedule_time_number_s: totalCountAggregations.schedule_time_number_s,
+                  connectors_per_alert: totalCountAggregations.connectors_per_alert,
                   count_active_by_type: totalInUse.countByType,
                   count_active_total: totalInUse.countTotal,
                   count_disabled_total: totalCountAggregations.count_total - totalInUse.countTotal,

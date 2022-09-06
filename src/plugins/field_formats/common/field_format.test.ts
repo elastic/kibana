@@ -147,6 +147,35 @@ describe('FieldFormat class', () => {
 
         expect(f.convert(['one', 'two', 'three'])).toBe('["one","two","three"]');
       });
+
+      test('formats a list of values as html', () => {
+        const f = getTestFormat();
+
+        expect(f.convert([123, 456, 789], 'html')).toMatchInlineSnapshot(
+          `"<span class=\\"ffArray__highlight\\">[</span>123<span class=\\"ffArray__highlight\\">,</span> 456<span class=\\"ffArray__highlight\\">,</span> 789<span class=\\"ffArray__highlight\\">]</span>"`
+        );
+      });
+
+      test('formats a list of values containing newlines as html', () => {
+        const f = getTestFormat();
+        const newlineList = [
+          '{\n  "foo": "bar",\n  "fizz": "buzz"\n}',
+          '{\n  "bar": "foo",\n  "buzz": "fizz"\n}',
+        ];
+
+        expect(f.convert(newlineList, 'html')).toMatchInlineSnapshot(`
+          "<span class=\\"ffArray__highlight\\">[</span>
+            {
+              &quot;foo&quot;: &quot;bar&quot;,
+              &quot;fizz&quot;: &quot;buzz&quot;
+            }<span class=\\"ffArray__highlight\\">,</span>
+            {
+              &quot;bar&quot;: &quot;foo&quot;,
+              &quot;buzz&quot;: &quot;fizz&quot;
+            }
+          <span class=\\"ffArray__highlight\\">]</span>"
+        `);
+      });
     });
   });
 });

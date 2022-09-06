@@ -16,7 +16,8 @@ import { run } from '@kbn/dev-cli-runner';
 import { createFlagError } from '@kbn/dev-cli-errors';
 import { EsVersion, readConfigFile } from '@kbn/test';
 import path from 'path';
-import { extractor, ScalabilitySetup } from './extractor';
+import { extractor } from './extractor';
+import { ScalabilitySetup, TestData } from './types';
 
 interface Vars {
   [key: string]: string;
@@ -58,9 +59,12 @@ export async function runExtractor() {
       const scalabilitySetup: ScalabilitySetup = config.get('scalabilitySetup');
 
       if (!scalabilitySetup) {
-        log.error(`'scalabilitySetup' must be defined in config file!`);
-        return;
+        log.warning(
+          `'scalabilitySetup' is not defined in config file, output file for Kibana scalability run won't be generated`
+        );
       }
+
+      const testData: TestData = config.get('testData');
 
       const env = config.get(`kbnTestServer.env`);
       if (
@@ -101,7 +105,7 @@ export async function runExtractor() {
       const withoutStaticResources = !!flags['without-static-resources'] || false;
 
       return extractor({
-        param: { journeyName, scalabilitySetup, buildId, withoutStaticResources },
+        param: { journeyName, scalabilitySetup, testData, buildId, withoutStaticResources },
         client: { baseURL, username, password },
         log,
       });

@@ -5,6 +5,35 @@
  * 2.0.
  */
 
+import { ConnectorIndex, CrawlerIndex, ElasticsearchIndex } from '../../../common/types/indices';
+
 export interface Crawler {
   domains: [];
 }
+
+export const enum IngestionMethod {
+  CONNECTOR,
+  CRAWLER,
+  API,
+}
+
+export const enum IngestionStatus {
+  CONNECTED,
+  ERROR,
+  SYNC_ERROR,
+  INCOMPLETE,
+}
+
+interface ElasticsearchViewIndexExtension {
+  ingestionMethod: IngestionMethod;
+  ingestionStatus: IngestionStatus;
+  lastUpdated: string | 'never' | null; // date string
+}
+
+export type ConnectorViewIndex = ConnectorIndex & ElasticsearchViewIndexExtension;
+
+export type CrawlerViewIndex = CrawlerIndex & ElasticsearchViewIndexExtension;
+
+export type ApiViewIndex = ElasticsearchIndex & ElasticsearchViewIndexExtension;
+
+export type ElasticsearchViewIndex = CrawlerViewIndex | ConnectorViewIndex | ApiViewIndex;

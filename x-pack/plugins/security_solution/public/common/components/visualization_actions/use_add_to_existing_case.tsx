@@ -7,13 +7,10 @@
 import { useCallback, useMemo } from 'react';
 import { CommentType } from '@kbn/cases-plugin/common';
 
-import { APP_ID } from '../../../../common/constants';
 import { useKibana, useGetUserCasesPermissions } from '../../lib/kibana';
 import { ADD_TO_CASE_SUCCESS } from './translations';
 
 import type { LensAttributes } from './types';
-
-const owner = APP_ID;
 
 export const useAddToExistingCase = ({
   onAddToCaseClicked,
@@ -33,7 +30,6 @@ export const useAddToExistingCase = ({
           timeRange,
           attributes: lensAttributes,
         })}}`,
-        owner,
         type: CommentType.user as const,
       },
     ];

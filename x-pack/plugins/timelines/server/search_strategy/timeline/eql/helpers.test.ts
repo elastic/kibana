@@ -10,7 +10,6 @@ import { buildEqlDsl, parseEqlResponse } from './helpers';
 import { eventsResponse, sequenceResponse } from './__mocks__';
 const defaultArgs = {
   defaultIndex: ['logs-endpoint.events*'],
-  docValueFields: [],
   runtimeMappings: {},
   fieldRequested: [
     '@timestamp',
@@ -282,6 +281,9 @@ describe('Search Strategy EQL helper', () => {
                     "family": Array [
                       "windows",
                     ],
+                    "name": Array [
+                      "Windows",
+                    ],
                   },
                 },
                 "message": Array [
@@ -411,6 +413,9 @@ describe('Search Strategy EQL helper', () => {
                   "os": Object {
                     "family": Array [
                       "windows",
+                    ],
+                    "name": Array [
+                      "Windows",
                     ],
                   },
                 },
@@ -549,6 +554,9 @@ describe('Search Strategy EQL helper', () => {
                     "family": Array [
                       "windows",
                     ],
+                    "name": Array [
+                      "Windows",
+                    ],
                   },
                 },
                 "message": Array [
@@ -674,6 +682,9 @@ describe('Search Strategy EQL helper', () => {
                   "os": Object {
                     "family": Array [
                       "windows",
+                    ],
+                    "name": Array [
+                      "Windows",
                     ],
                   },
                 },

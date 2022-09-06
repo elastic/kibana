@@ -16,7 +16,7 @@ import { REPO_ROOT } from './paths.mjs';
 import { cleanPaths } from './clean.mjs';
 import { indent } from './indent.mjs';
 
-const BAZEL_RUNNER_SRC = '../../../packages/kbn-bazel-runner/src/index.js';
+const BAZEL_RUNNER_SRC = '../../../packages/kbn-bazel-runner/index.js';
 
 async function getBazelRunner() {
   /* eslint-disable no-unsanitized/method */
@@ -56,7 +56,7 @@ function throwBazelError(log, name, code, output) {
 async function runBazel(log, inputArgs, opts = undefined) {
   const bazel = (await getBazelRunner()).runBazel;
 
-  const args = [...(opts?.offline ? ['--config=offline'] : []), ...inputArgs];
+  const args = [...inputArgs, ...(opts?.offline ? ['--config=offline'] : [])];
   log.debug(`> bazel ${args.join(' ')}`);
   await bazel(args, {
     env: opts?.env,

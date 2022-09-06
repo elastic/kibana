@@ -40,7 +40,7 @@ import { InspectPanelAction } from './panel_header/panel_actions/inspect_panel_a
 import { EditPanelAction } from '../actions';
 import { CustomizePanelModal } from './panel_header/panel_actions/customize_title/customize_panel_modal';
 import { EmbeddableStart } from '../../plugin';
-import { EmbeddableStateTransfer, ErrorEmbeddable } from '..';
+import { EmbeddableStateTransfer, ErrorEmbeddable, isSelfStyledEmbeddable } from '..';
 
 const sortByOrderField = (
   { order: orderA }: { order?: number },
@@ -296,6 +296,10 @@ export class EmbeddablePanel extends React.Component<Props, State> {
     const title = this.props.embeddable.getTitle();
     const headerId = this.generateId();
 
+    const selfStyledOptions = isSelfStyledEmbeddable(this.props.embeddable)
+      ? this.props.embeddable.getSelfStyledOptions()
+      : undefined;
+
     return (
       <EuiPanel
         className={classes}
@@ -309,7 +313,7 @@ export class EmbeddablePanel extends React.Component<Props, State> {
         {!this.props.hideHeader && (
           <PanelHeader
             getActionContextMenuPanel={this.getActionContextMenuPanel}
-            hidePanelTitle={this.state.hidePanelTitle}
+            hidePanelTitle={this.state.hidePanelTitle || !!selfStyledOptions?.hideTitle}
             isViewMode={viewOnlyMode}
             customizeTitle={
               'customizePanelTitle' in this.state.universalActions

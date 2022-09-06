@@ -7,11 +7,13 @@
 
 import expect from '@kbn/expect';
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
+import { WebElementWrapper } from '../../../../test/functional/services/lib/web_element_wrapper';
 import { FtrProviderContext } from '../ftr_provider_context';
 import { logWrapper } from './log_wrapper';
 
 export function LensPageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
+  const findService = getService('find');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const elasticChart = getService('elasticChart');
@@ -45,7 +47,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async isLensPageOrFail() {
-      return await testSubjects.existOrFail('lnsApp', { timeout: 1000 });
+      return await testSubjects.existOrFail('lnsApp', { timeout: 10000 });
     },
 
     /**
@@ -70,7 +72,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     async assertExpectedText(selector: string, test: (value?: string) => boolean) {
       let actualText: string | undefined;
 
-      await retry.waitForWithTimeout('assertExpectedText', 1000, async () => {
+      await retry.waitForWithTimeout('assertExpectedText', 5000, async () => {
         actualText = await find.byCssSelector(selector).then((el) => el.getVisibleText());
         return test(actualText);
       });
@@ -99,7 +101,6 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       return retry.try(async () => {
         await testSubjects.click(`visListingTitleLink-${title}`);
         await this.isLensPageOrFail();
-        await PageObjects.unifiedSearch.closeTourPopoverByLocalStorage();
       });
     },
 
@@ -1080,20 +1081,20 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      * @param title - expected title
      * @param count - expected count of metric
      */
-    async assertMetric(title: string, count: string) {
+    async assertLegacyMetric(title: string, count: string) {
       await this.assertExactText('[data-test-subj="metric_label"]', title);
       await this.assertExactText('[data-test-subj="metric_value"]', count);
     },
 
-    async clickMetric() {
+    async clickLegacyMetric() {
       await testSubjects.click('metric_label');
     },
 
-    async setMetricDynamicColoring(coloringType: 'none' | 'labels' | 'background') {
-      await testSubjects.click('lnsMetric_dynamicColoring_groups_' + coloringType);
+    async setLegacyMetricDynamicColoring(coloringType: 'none' | 'labels' | 'background') {
+      await testSubjects.click('lnsLegacyMetric_dynamicColoring_groups_' + coloringType);
     },
 
-    async getMetricStyle() {
+    async getLegacyMetricStyle() {
       const el = await testSubjects.find('metric_value');
       const styleString = await el.getAttribute('style');
       return styleString.split(';').reduce<Record<string, string>>((memo, cssLine) => {
@@ -1111,6 +1112,47 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     async assertColor(color: string) {
       // TODO: target dimensionTrigger color element after merging https://github.com/elastic/kibana/pull/76871
       await testSubjects.getAttribute('~indexPattern-dimension-colorPicker', color);
+    },
+    async getMetricTiles() {
+      return findService.allByCssSelector('[data-test-subj="mtrVis"] .echChart li');
+    },
+
+    async getMetricElementIfExists(selector: string, container: WebElementWrapper) {
+      return (await findService.descendantExistsByCssSelector(selector, container))
+        ? await container.findByCssSelector(selector)
+        : undefined;
+    },
+
+    async getMetricDatum(tile: WebElementWrapper) {
+      return {
+        title: await (await this.getMetricElementIfExists('h2', tile))?.getVisibleText(),
+        subtitle: await (
+          await this.getMetricElementIfExists('.echMetricText__subtitle', tile)
+        )?.getVisibleText(),
+        extraText: await (
+          await this.getMetricElementIfExists('.echMetricText__extra', tile)
+        )?.getVisibleText(),
+        value: await (
+          await this.getMetricElementIfExists('.echMetricText__value', tile)
+        )?.getVisibleText(),
+        color: await (
+          await this.getMetricElementIfExists('.echMetric', tile)
+        )?.getComputedStyle('background-color'),
+      };
+    },
+
+    async getMetricVisualizationData() {
+      const tiles = await this.getMetricTiles();
+      const showingBar = Boolean(await findService.existsByCssSelector('.echSingleMetricProgress'));
+
+      const metricData = [];
+      for (const tile of tiles) {
+        metricData.push({
+          ...(await this.getMetricDatum(tile)),
+          showingBar,
+        });
+      }
+      return metricData;
     },
 
     /**
@@ -1132,7 +1174,6 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         await PageObjects.dashboard.switchToEditMode();
       }
       await dashboardAddPanel.clickCreateNewLink();
-      await PageObjects.unifiedSearch.closeTourPopoverByLocalStorage();
       await this.goToTimeRange();
       await this.configureDimension({
         dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
@@ -1208,6 +1249,11 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await testSubjects.click('lns-dataView-switch-link');
       await testSubjects.existOrFail('indexPattern-add-field');
       await testSubjects.click('indexPattern-add-field');
+    },
+
+    async createAdHocDataView(name: string) {
+      await testSubjects.click('lns-dataView-switch-link');
+      await PageObjects.unifiedSearch.createNewDataView(name, true);
     },
 
     /** resets visualization/layer or removes a layer */
@@ -1288,7 +1334,8 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     async dragFieldToExtraDropType(
       field: string,
       to: string,
-      type: 'duplicate' | 'swap' | 'combine'
+      type: 'duplicate' | 'swap' | 'combine',
+      visDataTestSubj?: string | undefined
     ) {
       const from = `lnsFieldListPanelField-${field}`;
       await this.dragEnterDrop(
@@ -1296,7 +1343,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         testSubjects.getCssSelector(`${to} > lnsDragDrop`),
         testSubjects.getCssSelector(`${to} > lnsDragDrop-${type}`)
       );
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await this.waitForVisualization(visDataTestSubj);
     },
 
     /**
@@ -1309,14 +1356,15 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     async dragDimensionToExtraDropType(
       from: string,
       to: string,
-      type: 'duplicate' | 'swap' | 'combine'
+      type: 'duplicate' | 'swap' | 'combine',
+      visDataTestSubj?: string | undefined
     ) {
       await this.dragEnterDrop(
         testSubjects.getCssSelector(from),
         testSubjects.getCssSelector(`${to} > lnsDragDrop`),
         testSubjects.getCssSelector(`${to} > lnsDragDrop-${type}`)
       );
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await this.waitForVisualization(visDataTestSubj);
     },
 
     async switchToQuickFunctions() {

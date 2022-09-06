@@ -9,16 +9,12 @@
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ElasticsearchRequestHandlerContext } from '@kbn/core-elasticsearch-server';
 import { CoreElasticsearchRouteHandlerContext } from '@kbn/core-elasticsearch-server-internal';
-import type { InternalCoreStart } from './internal_types';
-import {
-  CoreSavedObjectsRouteHandlerContext,
-  SavedObjectsRequestHandlerContext,
-} from './saved_objects';
+import type { SavedObjectsRequestHandlerContext } from '@kbn/core-saved-objects-server';
+import { CoreSavedObjectsRouteHandlerContext } from '@kbn/core-saved-objects-server-internal';
+import type { DeprecationsRequestHandlerContext } from '@kbn/core-deprecations-server';
+import { CoreDeprecationsRouteHandlerContext } from '@kbn/core-deprecations-server-internal';
 import { CoreUiSettingsRouteHandlerContext, UiSettingsRequestHandlerContext } from './ui_settings';
-import {
-  CoreDeprecationsRouteHandlerContext,
-  DeprecationsRequestHandlerContext,
-} from './deprecations';
+import type { InternalCoreStart } from './internal_types';
 
 /**
  * The `core` context provided to route handler.

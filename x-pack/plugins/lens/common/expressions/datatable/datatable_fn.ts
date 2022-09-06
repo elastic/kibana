@@ -8,7 +8,11 @@
 import { cloneDeep } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { prepareLogTable } from '@kbn/visualizations-plugin/common/utils';
-import type { Datatable, DatatableColumnMeta, ExecutionContext } from '@kbn/expressions-plugin';
+import type {
+  Datatable,
+  DatatableColumnMeta,
+  ExecutionContext,
+} from '@kbn/expressions-plugin/common';
 import { FormatFactory } from '../../types';
 import { transposeTable } from './transpose_helpers';
 import { computeSummaryRowForColumn } from './summary';
@@ -111,7 +115,10 @@ export const datatableFn =
       value: {
         data: table,
         untransposedData,
-        args,
+        args: {
+          ...args,
+          title: (context.variables.embeddableTitle as string) ?? args.title,
+        },
       },
     };
   };

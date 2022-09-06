@@ -44,16 +44,18 @@ const DraggableLegendContainer = styled.div<{ height: number; $minWidth: number 
 `;
 
 const DraggableLegendComponent: React.FC<{
+  className?: string;
   height: number;
   legendItems: LegendItem[];
   minWidth?: number;
-}> = ({ height, legendItems, minWidth = DEFAULT_WIDTH }) => {
+}> = ({ className, height, legendItems, minWidth = DEFAULT_WIDTH }) => {
   if (legendItems.length === 0) {
     return null;
   }
 
   return (
     <DraggableLegendContainer
+      className={className}
       data-test-subj="draggable-legend"
       height={height === 0 ? MIN_LEGEND_HEIGHT : height}
       $minWidth={minWidth}

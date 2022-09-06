@@ -12,14 +12,14 @@ import { getPhraseScript } from '../../filters';
 import { getFields } from './utils/get_fields';
 import { getTimeZoneFromSettings, getDataViewFieldSubtypeNested } from '../../utils';
 import { getFullFieldNameNode } from './utils/get_full_field_name_node';
-import type { DataViewBase, KueryNode, DataViewFieldBase, KueryQueryOptions } from '../..';
+import type { DataViewBase, KueryNode, DataViewFieldBase, KueryQueryOptions } from '../../..';
 import type { KqlContext } from '../types';
 
 import * as ast from '../ast';
 import * as literal from '../node_types/literal';
 import * as wildcard from '../node_types/wildcard';
 
-export function buildNodeParams(fieldName: string, value: any, isPhrase: boolean = false) {
+export function buildNodeParams(fieldName: string, value: any) {
   if (isUndefined(fieldName)) {
     throw new Error('fieldName is a required argument');
   }
@@ -32,9 +32,8 @@ export function buildNodeParams(fieldName: string, value: any, isPhrase: boolean
       : literal.buildNode(fieldName);
   const valueNode =
     typeof value === 'string' ? ast.fromLiteralExpression(value) : literal.buildNode(value);
-  const isPhraseNode = literal.buildNode(isPhrase);
   return {
-    arguments: [fieldNode, valueNode, isPhraseNode],
+    arguments: [fieldNode, valueNode],
   };
 }
 
@@ -45,7 +44,7 @@ export function toElasticsearchQuery(
   context: KqlContext = {}
 ): estypes.QueryDslQueryContainer {
   const {
-    arguments: [fieldNameArg, valueArg, isPhraseArg],
+    arguments: [fieldNameArg, valueArg],
   } = node;
 
   const isExistsQuery = wildcard.isNode(valueArg) && wildcard.isLoneWildcard(valueArg);
@@ -62,7 +61,7 @@ export function toElasticsearchQuery(
     context?.nested ? context.nested.path : undefined
   );
   const value = !isUndefined(valueArg) ? ast.toElasticsearchQuery(valueArg) : valueArg;
-  const type = isPhraseArg.value ? 'phrase' : 'best_fields';
+  const type = valueArg.isQuoted ? 'phrase' : 'best_fields';
   if (fullFieldNameArg.value === null) {
     if (wildcard.isNode(valueArg)) {
       return {

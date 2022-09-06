@@ -157,7 +157,7 @@
         "signature": [
           "React.ExoticComponent<",
           "CustomizablePaletteProps",
-          "> & { readonly _result: ({ palettes, activePalette, setPalette, dataBounds, showExtraActions, showRangeTypeSelector, disableSwitchingContinuity, }: ",
+          "> & { readonly _result: ({ palettes, activePalette, setPalette, dataBounds, showExtraActions, showRangeTypeSelector, disableSwitchingContinuity, displayInfinity, }: ",
           "CustomizablePaletteProps",
           ") => JSX.Element; }"
         ],

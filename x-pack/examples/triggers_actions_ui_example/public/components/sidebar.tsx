@@ -59,6 +59,11 @@ export const Sidebar = () => {
                 name: 'Rule Status Filter',
                 onClick: () => history.push(`/rule_status_filter`),
               },
+              {
+                id: 'alerts table',
+                name: 'Alert Table',
+                onClick: () => history.push('/alerts_table'),
+              },
             ],
           },
         ]}

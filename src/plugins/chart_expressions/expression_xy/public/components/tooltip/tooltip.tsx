@@ -8,7 +8,9 @@
 
 import { TooltipInfo, XYChartSeriesIdentifier } from '@elastic/charts';
 import { FormatFactory } from '@kbn/field-formats-plugin/common';
+import { getAccessorByDimension } from '@kbn/visualizations-plugin/common/utils';
 import React, { FC } from 'react';
+import { CommonXYDataLayerConfig } from '../../../common';
 import {
   DatatablesWithFormatInfo,
   getMetaFromSeriesId,
@@ -32,6 +34,7 @@ type Props = TooltipInfo & {
     splitRowAccessor?: string;
     splitColumnAccessor?: string;
   };
+  layers: CommonXYDataLayerConfig[];
 };
 
 export const Tooltip: FC<Props> = ({
@@ -43,6 +46,7 @@ export const Tooltip: FC<Props> = ({
   formattedDatatables,
   splitAccessors,
   xDomain,
+  layers,
 }) => {
   const pickedValue = values.find(({ isHighlighted }) => isHighlighted);
 
@@ -52,10 +56,14 @@ export const Tooltip: FC<Props> = ({
 
   const data: TooltipData[] = [];
   const seriesIdentifier = pickedValue.seriesIdentifier as XYChartSeriesIdentifier;
-  const { layerId, xAccessor, yAccessor } = getMetaFromSeriesId(seriesIdentifier.specId);
-  const { formattedColumns } = formattedDatatables[layerId];
+  const { layerId, xAccessor, yAccessors } = getMetaFromSeriesId(seriesIdentifier.specId);
+  const { formattedColumns, table } = formattedDatatables[layerId];
   const layerTitles = titles[layerId];
   const layerFormats = fieldFormats[layerId];
+  const markSizeAccessor = layers.find((layer) => layer.layerId === layerId)?.markSizeAccessor;
+  const markSizeColumnId = markSizeAccessor
+    ? getAccessorByDimension(markSizeAccessor, table.columns)
+    : undefined;
   let headerFormatter;
   if (header && xAccessor) {
     headerFormatter = formattedColumns[xAccessor]
@@ -67,12 +75,20 @@ export const Tooltip: FC<Props> = ({
     });
   }
 
-  const tooltipYAccessor = yAccessor === seriesIdentifier.yAccessor ? yAccessor : null;
+  const tooltipYAccessor = yAccessors.includes(seriesIdentifier.yAccessor as string)
+    ? (seriesIdentifier.yAccessor as string)
+    : null;
   if (tooltipYAccessor) {
     const yFormatter = formatFactory(layerFormats.yAccessors[tooltipYAccessor]);
     data.push({
       label: layerTitles?.yTitles?.[tooltipYAccessor],
       value: yFormatter ? yFormatter.convert(pickedValue.value) : `${pickedValue.value}`,
+    });
+  }
+  if (markSizeColumnId && pickedValue.formattedMarkValue) {
+    data.push({
+      label: layerTitles?.markSizeTitles?.[markSizeColumnId],
+      value: pickedValue.formattedMarkValue,
     });
   }
   seriesIdentifier.splitAccessors.forEach((splitValue, key) => {
@@ -87,21 +103,18 @@ export const Tooltip: FC<Props> = ({
 
   if (
     splitAccessors?.splitColumnAccessor &&
-    seriesIdentifier.smVerticalAccessorValue !== undefined
-  ) {
-    data.push({
-      label: layerTitles?.splitColumnTitles?.[splitAccessors?.splitColumnAccessor],
-      value: `${seriesIdentifier.smVerticalAccessorValue}`,
-    });
-  }
-
-  if (
-    splitAccessors?.splitRowAccessor &&
     seriesIdentifier.smHorizontalAccessorValue !== undefined
   ) {
     data.push({
-      label: layerTitles?.splitRowTitles?.[splitAccessors?.splitRowAccessor],
+      label: layerTitles?.splitColumnTitles?.[splitAccessors?.splitColumnAccessor],
       value: `${seriesIdentifier.smHorizontalAccessorValue}`,
+    });
+  }
+
+  if (splitAccessors?.splitRowAccessor && seriesIdentifier.smVerticalAccessorValue !== undefined) {
+    data.push({
+      label: layerTitles?.splitRowTitles?.[splitAccessors?.splitRowAccessor],
+      value: `${seriesIdentifier.smVerticalAccessorValue}`,
     });
   }
 

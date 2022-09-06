@@ -37,5 +37,3 @@ export const HistoryItem = memo<HistoryItemProps>(({ children }) => {
 });
 
 HistoryItem.displayName = 'HistoryItem';
-
-export type HistoryItemComponent = typeof HistoryItem;

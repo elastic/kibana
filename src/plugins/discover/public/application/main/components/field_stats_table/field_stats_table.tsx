@@ -7,7 +7,7 @@
  */
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import type { Filter, Query } from '@kbn/es-query';
+import type { Filter, Query, AggregateQuery } from '@kbn/es-query';
 import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
 import type { DataViewField, DataView } from '@kbn/data-views-plugin/public';
 import {
@@ -17,16 +17,16 @@ import {
   IEmbeddable,
   isErrorEmbeddable,
 } from '@kbn/embeddable-plugin/public';
+import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { FIELD_STATISTICS_LOADED } from './constants';
-import type { SavedSearch } from '../../../../services/saved_searches';
 import type { GetStateReturn } from '../../services/discover_state';
 import { AvailableFields$, DataRefetch$ } from '../../hooks/use_saved_search';
 
 export interface DataVisualizerGridEmbeddableInput extends EmbeddableInput {
   dataView: DataView;
   savedSearch?: SavedSearch;
-  query?: Query;
+  query?: Query | AggregateQuery;
   visibleFieldNames?: string[];
   filters?: Filter[];
   showPreviewByDefault?: boolean;
@@ -47,9 +47,9 @@ export interface FieldStatisticsTableProps {
    */
   columns: string[];
   /**
-   * The used index pattern
+   * The used data view
    */
-  indexPattern: DataView;
+  dataView: DataView;
   /**
    * Saved search description
    */
@@ -65,7 +65,7 @@ export interface FieldStatisticsTableProps {
   /**
    * Optional query to update the table content
    */
-  query?: Query;
+  query?: Query | AggregateQuery;
   /**
    * Filters query to update the table content
    */
@@ -92,7 +92,7 @@ export interface FieldStatisticsTableProps {
 export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
   const {
     availableFields$,
-    indexPattern,
+    dataView,
     savedSearch,
     query,
     columns,
@@ -147,7 +147,7 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
     if (embeddable && !isErrorEmbeddable(embeddable)) {
       // Update embeddable whenever one of the important input changes
       embeddable.updateInput({
-        dataView: indexPattern,
+        dataView,
         savedSearch,
         query,
         filters,
@@ -160,7 +160,7 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
     }
   }, [
     embeddable,
-    indexPattern,
+    dataView,
     savedSearch,
     query,
     columns,
@@ -193,7 +193,7 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
           // Initialize embeddable with information available at mount
           const initializedEmbeddable = await factory.create({
             id: 'discover_data_visualizer_grid',
-            dataView: indexPattern,
+            dataView,
             savedSearch,
             query,
             showPreviewByDefault,

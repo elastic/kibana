@@ -11,9 +11,23 @@ import { mount } from 'enzyme';
 
 import { AlertsCountPanel } from '.';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
+import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { DEFAULT_STACK_BY_FIELD, DEFAULT_STACK_BY_FIELD1 } from '../common/config';
 import { TestProviders } from '../../../../common/mock';
 import { ChartContextMenu } from '../../../pages/detection_engine/chart_panels/chart_context_menu';
+import { TABLE } from '../../../pages/detection_engine/chart_panels/chart_select/translations';
+
+const from = '2022-07-28T08:20:18.966Z';
+const to = '2022-07-28T08:20:18.966Z';
+jest.mock('../../../../common/containers/use_global_time', () => {
+  const actual = jest.requireActual('../../../../common/containers/use_global_time');
+  return {
+    ...actual,
+    useGlobalTime: jest
+      .fn()
+      .mockReturnValue({ from, to, setQuery: jest.fn(), deleteQuery: jest.fn() }),
+  };
+});
 
 jest.mock('../../../../common/containers/query_toggle');
 jest.mock('react-router-dom', () => {
@@ -38,6 +52,7 @@ jest.mock('../../../containers/detection_engine/alerts/use_query', () => {
 
 describe('AlertsCountPanel', () => {
   const defaultProps = {
+    inspectTitle: TABLE,
     signalIndexName: 'signalIndexName',
     stackByField0: DEFAULT_STACK_BY_FIELD,
     stackByField1: DEFAULT_STACK_BY_FIELD1,
@@ -61,6 +76,18 @@ describe('AlertsCountPanel', () => {
       );
 
       expect(wrapper.find('[data-test-subj="alertsCountPanel"]').exists()).toBeTruthy();
+    });
+  });
+
+  it('invokes useGlobalTime() with false to prevent global queries from being deleted when the component unmounts', async () => {
+    await act(async () => {
+      mount(
+        <TestProviders>
+          <AlertsCountPanel {...defaultProps} />
+        </TestProviders>
+      );
+
+      expect(useGlobalTime).toBeCalledWith(false);
     });
   });
 

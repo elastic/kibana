@@ -6060,6 +6060,545 @@
       },
       {
         "parentPluginId": "@kbn/mapbox-gl",
+        "id": "def-common.RasterTileSource",
+        "type": "Class",
+        "tags": [],
+        "label": "RasterTileSource",
+        "description": [],
+        "signature": [
+          "maplibregl.RasterTileSource extends maplibregl.Evented implements maplibregl.Source"
+        ],
+        "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/mapbox-gl",
+            "id": "def-common.RasterTileSource.type",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"raster\" | \"raster-dem\""
+            ],
+            "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/mapbox-gl",
+            "id": "def-common.RasterTileSource.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/mapbox-gl",
+            "id": "def-common.RasterTileSource.minzoom",
+            "type": "number",
+            "tags": [],
+            "label": "minzoom",
+            "description": [],
+            "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/mapbox-gl",
+            "id": "def-common.RasterTileSource.maxzoom",
+            "type": "number",
+            "tags": [],
+            "label": "maxzoom",
+            "description": [],
+            "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/mapbox-gl",
+            "id": "def-common.RasterTileSource.url",
+            "type": "string",
+            "tags": [],
+            "label": "url",
+            "description": [],
+            "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/mapbox-gl",
+            "id": "def-common.RasterTileSource.scheme",
+            "type": "string",
+            "tags": [],
+            "label": "scheme",
+            "description": [],
+            "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/mapbox-gl",
+            "id": "def-common.RasterTileSource.tileSize",
+            "type": "number",
+            "tags": [],
+            "label": "tileSize",
+            "description": [],
+            "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/mapbox-gl",
+            "id": "def-common.RasterTileSource.bounds",
+            "type": "Object",
+            "tags": [],
+            "label": "bounds",
+            "description": [],
+            "signature": [
+              "[number, number, number, number]"
+            ],
+            "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/mapbox-gl",
+            "id": "def-common.RasterTileSource.tileBounds",
+            "type": "Object",
+            "tags": [],
+            "label": "tileBounds",
+            "description": [],
+            "signature": [
+              "maplibregl.TileBounds"
+            ],
+            "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/mapbox-gl",
+            "id": "def-common.RasterTileSource.roundZoom",
+            "type": "boolean",
+            "tags": [],
+            "label": "roundZoom",
+            "description": [],
+            "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/mapbox-gl",
+            "id": "def-common.RasterTileSource.dispatcher",
+            "type": "Object",
+            "tags": [],
+            "label": "dispatcher",
+            "description": [],
+            "signature": [
+              "maplibregl.Dispatcher"
+            ],
+            "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/mapbox-gl",
+            "id": "def-common.RasterTileSource.map",
+            "type": "Object",
+            "tags": [],
+            "label": "map",
+            "description": [],
+            "signature": [
+              "maplibregl.Map"
+            ],
+            "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/mapbox-gl",
+            "id": "def-common.RasterTileSource.tiles",
+            "type": "Array",
+            "tags": [],
+            "label": "tiles",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/mapbox-gl",
+            "id": "def-common.RasterTileSource._loaded",
+            "type": "boolean",
+            "tags": [],
+            "label": "_loaded",
+            "description": [],
+            "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/mapbox-gl",
+            "id": "def-common.RasterTileSource._options",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "_options",
+            "description": [],
+            "signature": [
+              "maplibregl.RasterSourceSpecification | maplibregl.RasterDEMSourceSpecification"
+            ],
+            "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/mapbox-gl",
+            "id": "def-common.RasterTileSource._tileJSONRequest",
+            "type": "Object",
+            "tags": [],
+            "label": "_tileJSONRequest",
+            "description": [],
+            "signature": [
+              "{ cancel: () => void; }"
+            ],
+            "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/mapbox-gl",
+            "id": "def-common.RasterTileSource.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/mapbox-gl",
+                "id": "def-common.RasterTileSource.Unnamed.$1",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/mapbox-gl",
+                "id": "def-common.RasterTileSource.Unnamed.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "maplibregl.RasterSourceSpecification | maplibregl.RasterDEMSourceSpecification"
+                ],
+                "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/mapbox-gl",
+                "id": "def-common.RasterTileSource.Unnamed.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "dispatcher",
+                "description": [],
+                "signature": [
+                  "maplibregl.Dispatcher"
+                ],
+                "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/mapbox-gl",
+                "id": "def-common.RasterTileSource.Unnamed.$4",
+                "type": "Object",
+                "tags": [],
+                "label": "eventedParent",
+                "description": [],
+                "signature": [
+                  "maplibregl.Evented"
+                ],
+                "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/mapbox-gl",
+            "id": "def-common.RasterTileSource.load",
+            "type": "Function",
+            "tags": [],
+            "label": "load",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/mapbox-gl",
+            "id": "def-common.RasterTileSource.loaded",
+            "type": "Function",
+            "tags": [],
+            "label": "loaded",
+            "description": [],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/mapbox-gl",
+            "id": "def-common.RasterTileSource.onAdd",
+            "type": "Function",
+            "tags": [],
+            "label": "onAdd",
+            "description": [],
+            "signature": [
+              "(map: maplibregl.Map) => void"
+            ],
+            "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/mapbox-gl",
+                "id": "def-common.RasterTileSource.onAdd.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "map",
+                "description": [],
+                "signature": [
+                  "maplibregl.Map"
+                ],
+                "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/mapbox-gl",
+            "id": "def-common.RasterTileSource.onRemove",
+            "type": "Function",
+            "tags": [],
+            "label": "onRemove",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/mapbox-gl",
+            "id": "def-common.RasterTileSource.serialize",
+            "type": "Function",
+            "tags": [],
+            "label": "serialize",
+            "description": [],
+            "signature": [
+              "() => any"
+            ],
+            "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/mapbox-gl",
+            "id": "def-common.RasterTileSource.hasTile",
+            "type": "Function",
+            "tags": [],
+            "label": "hasTile",
+            "description": [],
+            "signature": [
+              "(tileID: maplibregl.OverscaledTileID) => boolean"
+            ],
+            "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/mapbox-gl",
+                "id": "def-common.RasterTileSource.hasTile.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "tileID",
+                "description": [],
+                "signature": [
+                  "maplibregl.OverscaledTileID"
+                ],
+                "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/mapbox-gl",
+            "id": "def-common.RasterTileSource.loadTile",
+            "type": "Function",
+            "tags": [],
+            "label": "loadTile",
+            "description": [],
+            "signature": [
+              "(tile: maplibregl.Tile, callback: maplibregl.Callback<void>) => void"
+            ],
+            "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/mapbox-gl",
+                "id": "def-common.RasterTileSource.loadTile.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "tile",
+                "description": [],
+                "signature": [
+                  "maplibregl.Tile"
+                ],
+                "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/mapbox-gl",
+                "id": "def-common.RasterTileSource.loadTile.$2",
+                "type": "Function",
+                "tags": [],
+                "label": "callback",
+                "description": [],
+                "signature": [
+                  "maplibregl.Callback<void>"
+                ],
+                "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/mapbox-gl",
+            "id": "def-common.RasterTileSource.abortTile",
+            "type": "Function",
+            "tags": [],
+            "label": "abortTile",
+            "description": [],
+            "signature": [
+              "(tile: maplibregl.Tile, callback: maplibregl.Callback<void>) => void"
+            ],
+            "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/mapbox-gl",
+                "id": "def-common.RasterTileSource.abortTile.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "tile",
+                "description": [],
+                "signature": [
+                  "maplibregl.Tile"
+                ],
+                "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/mapbox-gl",
+                "id": "def-common.RasterTileSource.abortTile.$2",
+                "type": "Function",
+                "tags": [],
+                "label": "callback",
+                "description": [],
+                "signature": [
+                  "maplibregl.Callback<void>"
+                ],
+                "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/mapbox-gl",
+            "id": "def-common.RasterTileSource.unloadTile",
+            "type": "Function",
+            "tags": [],
+            "label": "unloadTile",
+            "description": [],
+            "signature": [
+              "(tile: maplibregl.Tile, callback: maplibregl.Callback<void>) => void"
+            ],
+            "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/mapbox-gl",
+                "id": "def-common.RasterTileSource.unloadTile.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "tile",
+                "description": [],
+                "signature": [
+                  "maplibregl.Tile"
+                ],
+                "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/mapbox-gl",
+                "id": "def-common.RasterTileSource.unloadTile.$2",
+                "type": "Function",
+                "tags": [],
+                "label": "callback",
+                "description": [],
+                "signature": [
+                  "maplibregl.Callback<void>"
+                ],
+                "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/mapbox-gl",
+            "id": "def-common.RasterTileSource.hasTransition",
+            "type": "Function",
+            "tags": [],
+            "label": "hasTransition",
+            "description": [],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/mapbox-gl",
         "id": "def-common.VectorTileSource",
         "type": "Class",
         "tags": [],
@@ -7566,7 +8105,7 @@
         "label": "MapEvent",
         "description": [],
         "signature": [
-          "\"error\" | \"rotate\" | \"move\" | \"render\" | \"data\" | \"remove\" | \"idle\" | \"resize\" | \"zoom\" | \"mousedown\" | \"mouseup\" | \"mouseover\" | \"mousemove\" | \"click\" | \"dblclick\" | \"mouseenter\" | \"mouseleave\" | \"mouseout\" | \"contextmenu\" | \"wheel\" | \"touchstart\" | \"touchend\" | \"touchmove\" | \"touchcancel\" | \"movestart\" | \"moveend\" | \"dragstart\" | \"drag\" | \"dragend\" | \"zoomstart\" | \"zoomend\" | \"rotatestart\" | \"rotateend\" | \"pitchstart\" | \"pitch\" | \"pitchend\" | \"boxzoomstart\" | \"boxzoomend\" | \"boxzoomcancel\" | \"webglcontextlost\" | \"webglcontextrestored\" | \"load\" | \"styledata\" | \"sourcedata\" | \"dataloading\" | \"styledataloading\" | \"sourcedataloading\" | \"styleimagemissing\" | \"style.load\" | \"dataabort\" | \"sourcedataabort\""
+          "\"error\" | \"render\" | \"data\" | \"remove\" | \"rotate\" | \"move\" | \"idle\" | \"resize\" | \"zoom\" | \"mousedown\" | \"mouseup\" | \"mouseover\" | \"mousemove\" | \"click\" | \"dblclick\" | \"mouseenter\" | \"mouseleave\" | \"mouseout\" | \"contextmenu\" | \"wheel\" | \"touchstart\" | \"touchend\" | \"touchmove\" | \"touchcancel\" | \"movestart\" | \"moveend\" | \"dragstart\" | \"drag\" | \"dragend\" | \"zoomstart\" | \"zoomend\" | \"rotatestart\" | \"rotateend\" | \"pitchstart\" | \"pitch\" | \"pitchend\" | \"boxzoomstart\" | \"boxzoomend\" | \"boxzoomcancel\" | \"webglcontextlost\" | \"webglcontextrestored\" | \"load\" | \"styledata\" | \"sourcedata\" | \"dataloading\" | \"styledataloading\" | \"sourcedataloading\" | \"styleimagemissing\" | \"style.load\" | \"dataabort\" | \"sourcedataabort\""
         ],
         "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
         "deprecated": false,
@@ -7596,7 +8135,7 @@
         "signature": [
           "any"
         ],
-        "path": "packages/kbn-mapbox-gl/src/index.ts",
+        "path": "packages/kbn-mapbox-gl/index.ts",
         "deprecated": false,
         "initialIsOpen": false
       },

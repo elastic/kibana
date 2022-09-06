@@ -143,8 +143,9 @@ export class CspPlugin
 
   async initialize(core: CoreStart, taskManager: TaskManagerStartContract): Promise<void> {
     this.logger.debug('initialize');
-    await initializeCspIndices(core.elasticsearch.client.asInternalUser, this.logger);
-    await initializeCspTransforms(core.elasticsearch.client.asInternalUser, this.logger);
+    const esClient = core.elasticsearch.client.asInternalUser;
+    await initializeCspIndices(esClient, this.logger);
+    await initializeCspTransforms(esClient, this.logger);
     await scheduleFindingsStatsTask(taskManager, this.logger);
   }
 

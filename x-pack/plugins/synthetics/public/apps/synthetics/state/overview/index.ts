@@ -12,7 +12,11 @@ import { MonitorOverviewResult } from '../../../../../common/runtime_types';
 import { IHttpSerializedFetchError, serializeHttpFetchError } from '../utils/http_error';
 
 import { MonitorOverviewPageState } from './models';
-import { fetchMonitorOverviewAction, setOverviewPerPageAction } from './actions';
+import {
+  fetchMonitorOverviewAction,
+  quietFetchOverviewAction,
+  setOverviewPerPageAction,
+} from './actions';
 
 export interface MonitorOverviewState {
   data: MonitorOverviewResult;
@@ -50,6 +54,12 @@ export const monitorOverviewReducer = createReducer(initialState, (builder) => {
     })
     .addCase(fetchMonitorOverviewAction.fail, (state, action) => {
       state.loading = false;
+      state.error = serializeHttpFetchError(action.payload);
+    })
+    .addCase(quietFetchOverviewAction.success, (state, action) => {
+      state.data = action.payload;
+    })
+    .addCase(quietFetchOverviewAction.fail, (state, action) => {
       state.error = serializeHttpFetchError(action.payload);
     })
     .addCase(setOverviewPerPageAction, (state, action) => {

@@ -16,7 +16,7 @@ import {
   EuiButtonIcon,
   EuiDataGridStyle,
 } from '@elastic/eui';
-import { useSorting, usePagination } from './hooks';
+import { useSorting, usePagination, useBulkActions } from './hooks';
 import { AlertsTableProps } from '../../../types';
 import {
   ALERTS_TABLE_CONTROL_COLUMNS_ACTIONS_LABEL,
@@ -24,6 +24,7 @@ import {
 } from './translations';
 
 import './alerts_table.scss';
+import { getToolbarVisibility } from './toolbar';
 
 export const ACTIVE_ROW_CLASS = 'alertsTableActiveRow';
 const DEFAULT_ACTIONS_COLUMNS_WIDTH = 75;
@@ -36,6 +37,7 @@ const GridStyles: EuiDataGridStyle = {
 
 const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTableProps) => {
   const [rowClasses, setRowClasses] = useState<EuiDataGridStyle['rowClasses']>({});
+  const alertsData = props.useFetchAlertsData();
   const {
     activePage,
     alerts,
@@ -45,8 +47,36 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     onPageChange,
     onSortChange,
     sort: sortingFields,
-  } = props.useFetchAlertsData();
+  } = alertsData;
   const { sortingColumns, onSort } = useSorting(onSortChange, sortingFields);
+
+  const { useActionsColumn = () => ({ renderCustomActionsRow: undefined, width: undefined }) } =
+    props.alertsTableConfiguration;
+  const { renderCustomActionsRow, width: actionsColumnWidth = DEFAULT_ACTIONS_COLUMNS_WIDTH } =
+    useActionsColumn();
+
+  const {
+    isBulkActionsColumnActive,
+    getBulkActionsLeadingControlColumn,
+    bulkActionsState,
+    bulkActions,
+  } = useBulkActions({
+    alerts,
+    useBulkActionsConfig: props.alertsTableConfiguration.useBulkActions,
+  });
+
+  const toolbarVisibility = useCallback(() => {
+    const { rowSelection } = bulkActionsState;
+    return getToolbarVisibility({
+      bulkActions,
+      alertsCount,
+      rowSelection,
+      alerts: alertsData.alerts,
+      updatedAt: props.updatedAt,
+      isLoading,
+    });
+  }, [bulkActionsState, bulkActions, alertsCount, alertsData.alerts, props.updatedAt, isLoading])();
+
   const {
     pagination,
     onChangePageSize,
@@ -59,87 +89,8 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     pageIndex: activePage,
     pageSize: props.pageSize,
   });
-  const { useActionsColumn = () => ({ renderCustomActionsRow: undefined, width: undefined }) } =
-    props.alertsTableConfiguration;
 
   const [visibleColumns, setVisibleColumns] = useState(props.visibleColumns);
-
-  const onChangeVisibleColumns = useCallback(
-    (newColumns: string[]) => {
-      setVisibleColumns(newColumns);
-      onColumnsChange(
-        props.columns.sort((a, b) => newColumns.indexOf(a.id) - newColumns.indexOf(b.id)),
-        newColumns
-      );
-    },
-    [onColumnsChange, props.columns]
-  );
-
-  const { renderCustomActionsRow, width: actionsColumnWidth = DEFAULT_ACTIONS_COLUMNS_WIDTH } =
-    useActionsColumn();
-
-  const leadingControlColumns = useMemo(() => {
-    if (!props.showExpandToDetails && !renderCustomActionsRow) return props.leadingControlColumns;
-
-    return [
-      {
-        id: 'expandColumn',
-        width: actionsColumnWidth,
-        headerCellRender: () => {
-          return (
-            <span data-test-subj="expandColumnHeaderLabel">
-              {ALERTS_TABLE_CONTROL_COLUMNS_ACTIONS_LABEL}
-            </span>
-          );
-        },
-        rowCellRender: (cveProps: EuiDataGridCellValueElementProps) => {
-          const { visibleRowIndex } = cveProps as EuiDataGridCellValueElementProps & {
-            visibleRowIndex: number;
-          };
-
-          return (
-            <EuiFlexGroup gutterSize="none" responsive={false}>
-              {props.showExpandToDetails && (
-                <EuiFlexItem grow={false}>
-                  <EuiToolTip content={ALERTS_TABLE_CONTROL_COLUMNS_VIEW_DETAILS_LABEL}>
-                    <EuiButtonIcon
-                      size="s"
-                      iconType="expand"
-                      color="primary"
-                      onClick={() => {
-                        setFlyoutAlertIndex(visibleRowIndex);
-                      }}
-                      data-test-subj={`expandColumnCellOpenFlyoutButton-${visibleRowIndex}`}
-                      aria-label={ALERTS_TABLE_CONTROL_COLUMNS_VIEW_DETAILS_LABEL}
-                    />
-                  </EuiToolTip>
-                </EuiFlexItem>
-              )}
-              {renderCustomActionsRow && renderCustomActionsRow(alerts[visibleRowIndex])}
-            </EuiFlexGroup>
-          );
-        },
-      },
-      ...props.leadingControlColumns,
-    ];
-  }, [
-    actionsColumnWidth,
-    alerts,
-    props.leadingControlColumns,
-    props.showExpandToDetails,
-    renderCustomActionsRow,
-    setFlyoutAlertIndex,
-  ]);
-
-  useEffect(() => {
-    // Row classes do not deal with visible row indices so we need to handle page offset
-    const rowIndex = flyoutAlertIndex + pagination.pageIndex * pagination.pageSize;
-    setRowClasses({
-      [rowIndex]: ACTIVE_ROW_CLASS,
-    });
-  }, [flyoutAlertIndex, pagination.pageIndex, pagination.pageSize]);
-
-  const handleFlyoutClose = useCallback(() => setFlyoutAlertIndex(-1), [setFlyoutAlertIndex]);
 
   // TODO when every solution is using this table, we will be able to simplify it by just passing the alert index
   const handleFlyoutAlert = useCallback(
@@ -152,6 +103,97 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     [alerts, setFlyoutAlertIndex]
   );
 
+  const onChangeVisibleColumns = useCallback(
+    (newColumns: string[]) => {
+      setVisibleColumns(newColumns);
+      onColumnsChange(
+        props.columns.sort((a, b) => newColumns.indexOf(a.id) - newColumns.indexOf(b.id)),
+        newColumns
+      );
+    },
+    [onColumnsChange, props.columns]
+  );
+
+  const leadingControlColumns = useMemo(() => {
+    const isActionButtonsColumnActive =
+      props.showExpandToDetails || Boolean(renderCustomActionsRow);
+
+    let controlColumns = [...props.leadingControlColumns];
+
+    if (isActionButtonsColumnActive) {
+      controlColumns = [
+        {
+          id: 'expandColumn',
+          width: actionsColumnWidth,
+          headerCellRender: () => {
+            return (
+              <span data-test-subj="expandColumnHeaderLabel">
+                {ALERTS_TABLE_CONTROL_COLUMNS_ACTIONS_LABEL}
+              </span>
+            );
+          },
+          rowCellRender: (cveProps: EuiDataGridCellValueElementProps) => {
+            const { visibleRowIndex } = cveProps as EuiDataGridCellValueElementProps & {
+              visibleRowIndex: number;
+            };
+
+            return (
+              <EuiFlexGroup gutterSize="none" responsive={false}>
+                {props.showExpandToDetails && (
+                  <EuiFlexItem grow={false}>
+                    <EuiToolTip content={ALERTS_TABLE_CONTROL_COLUMNS_VIEW_DETAILS_LABEL}>
+                      <EuiButtonIcon
+                        size="s"
+                        iconType="expand"
+                        color="primary"
+                        onClick={() => {
+                          setFlyoutAlertIndex(visibleRowIndex);
+                        }}
+                        data-test-subj={`expandColumnCellOpenFlyoutButton-${visibleRowIndex}`}
+                        aria-label={ALERTS_TABLE_CONTROL_COLUMNS_VIEW_DETAILS_LABEL}
+                      />
+                    </EuiToolTip>
+                  </EuiFlexItem>
+                )}
+                {renderCustomActionsRow &&
+                  alerts[visibleRowIndex] &&
+                  renderCustomActionsRow(alerts[visibleRowIndex], handleFlyoutAlert, props.id)}
+              </EuiFlexGroup>
+            );
+          },
+        },
+        ...controlColumns,
+      ];
+    }
+
+    if (isBulkActionsColumnActive) {
+      controlColumns = [getBulkActionsLeadingControlColumn(), ...controlColumns];
+    }
+
+    return controlColumns;
+  }, [
+    actionsColumnWidth,
+    alerts,
+    getBulkActionsLeadingControlColumn,
+    handleFlyoutAlert,
+    isBulkActionsColumnActive,
+    props.id,
+    props.leadingControlColumns,
+    props.showExpandToDetails,
+    renderCustomActionsRow,
+    setFlyoutAlertIndex,
+  ]);
+
+  useEffect(() => {
+    // Row classes do not deal with visible row indices, so we need to handle page offset
+    const rowIndex = flyoutAlertIndex + pagination.pageIndex * pagination.pageSize;
+    setRowClasses({
+      [rowIndex]: ACTIVE_ROW_CLASS,
+    });
+  }, [flyoutAlertIndex, pagination.pageIndex, pagination.pageSize]);
+
+  const handleFlyoutClose = useCallback(() => setFlyoutAlertIndex(-1), [setFlyoutAlertIndex]);
+
   const basicRenderCellValue = ({
     data,
     columnId,
@@ -160,7 +202,6 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     columnId: string;
   }) => {
     const value = data.find((d) => d.field === columnId)?.value ?? [];
-    // console.log({ data, columnId })
     return <>{value.length ? value.join() : '--'}</>;
   };
 
@@ -180,7 +221,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
       const alert = alerts[_props.rowIndex - pagination.pageSize * pagination.pageIndex];
       const data: Array<{ field: string; value: string[] }> = [];
       Object.entries(alert ?? {}).forEach(([key, value]) => {
-        data.push({ field: key, value });
+        data.push({ field: key, value: value as string[] });
       });
       return renderCellValue({
         ..._props,
@@ -202,6 +243,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
             flyoutIndex={flyoutAlertIndex + pagination.pageIndex * pagination.pageSize}
             onPaginate={onPaginateFlyout}
             isLoading={isLoading}
+            id={props.id}
           />
         )}
       </Suspense>
@@ -217,6 +259,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
           renderCellValue={handleRenderCellValue}
           gridStyle={{ ...GridStyles, rowClasses }}
           sorting={{ columns: sortingColumns, onSort }}
+          toolbarVisibility={toolbarVisibility}
           pagination={{
             ...pagination,
             pageSizeOptions: props.pageSizeOptions,

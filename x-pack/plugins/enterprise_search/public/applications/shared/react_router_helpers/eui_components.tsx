@@ -21,6 +21,8 @@ import {
   EuiPanel,
   EuiCard,
   EuiCardProps,
+  EuiBadge,
+  EuiBadgeProps,
 } from '@elastic/eui';
 import { EuiPanelProps } from '@elastic/eui/src/components/panel/panel';
 
@@ -91,3 +93,30 @@ export const EuiListGroupItemTo: React.FC<ReactRouterEuiListGroupItemProps> = ({
 }) => (
   <EuiListGroupItem {...rest} {...generateReactRouterProps({ to, onClick, shouldNotCreateHref })} />
 );
+
+// TODO Right now this only supports the `color` prop of EuiBadgeProps
+// Trying to use EuiBadgeProps in its entirety causes a succession of Typescript errors
+type ReactRouterEuiBadgeProps = ReactRouterProps & Pick<EuiBadgeProps, 'color'> & { label: string };
+export const EuiBadgeTo: React.FC<ReactRouterEuiBadgeProps> = ({
+  label,
+  onClick,
+  shouldNotCreateHref,
+  to,
+  ...rest
+}) => {
+  const routerProps = generateReactRouterProps({ onClick, shouldNotCreateHref, to });
+
+  const badgeProps: EuiBadgeProps = {
+    ...rest,
+    iconOnClick: routerProps.onClick,
+    iconOnClickAriaLabel: label,
+    onClick: routerProps.onClick,
+    onClickAriaLabel: label,
+  };
+
+  return (
+    <EuiBadge {...badgeProps} className="enterpriseSearchEuiBadgeTo">
+      {label}
+    </EuiBadge>
+  );
+};

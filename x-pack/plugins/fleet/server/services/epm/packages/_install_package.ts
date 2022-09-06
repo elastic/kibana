@@ -10,15 +10,18 @@ import type {
   Logger,
   SavedObject,
   SavedObjectsClientContract,
-  SavedObjectsImporter,
+  ISavedObjectsImporter,
 } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+
+import type { IAssignmentService, ITagsClient } from '@kbn/saved-objects-tagging-plugin/server';
 
 import {
   MAX_TIME_COMPLETE_INSTALL,
   ASSETS_SAVED_OBJECT_TYPE,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   SO_SEARCH_LIMIT,
-} from '../../../../common';
+} from '../../../../common/constants';
 import { PACKAGES_SAVED_OBJECT_TYPE, FLEET_INSTALL_FORMAT_VERSION } from '../../../constants';
 import type {
   AssetReference,
@@ -55,6 +58,8 @@ import { withPackageSpan } from './utils';
 export async function _installPackage({
   savedObjectsClient,
   savedObjectsImporter,
+  savedObjectTagAssignmentService,
+  savedObjectTagClient,
   esClient,
   logger,
   installedPkg,
@@ -66,7 +71,9 @@ export async function _installPackage({
   verificationResult,
 }: {
   savedObjectsClient: SavedObjectsClientContract;
-  savedObjectsImporter: Pick<SavedObjectsImporter, 'import' | 'resolveImportErrors'>;
+  savedObjectsImporter: Pick<ISavedObjectsImporter, 'import' | 'resolveImportErrors'>;
+  savedObjectTagAssignmentService: IAssignmentService;
+  savedObjectTagClient: ITagsClient;
   esClient: ElasticsearchClient;
   logger: Logger;
   installedPkg?: SavedObject<Installation>;
@@ -77,7 +84,7 @@ export async function _installPackage({
   spaceId: string;
   verificationResult?: PackageVerificationResult;
 }): Promise<AssetReference[]> {
-  const { name: pkgName, version: pkgVersion } = packageInfo;
+  const { name: pkgName, version: pkgVersion, title: pkgTitle } = packageInfo;
 
   try {
     // if some installation already exists
@@ -119,7 +126,10 @@ export async function _installPackage({
       installKibanaAssetsAndReferences({
         savedObjectsClient,
         savedObjectsImporter,
+        savedObjectTagAssignmentService,
+        savedObjectTagClient,
         pkgName,
+        pkgTitle,
         paths,
         installedPkg,
         logger,
@@ -285,7 +295,7 @@ export async function _installPackage({
 
     return [...installedKibanaAssetsRefs, ...esReferences];
   } catch (err) {
-    if (savedObjectsClient.errors.isConflictError(err)) {
+    if (SavedObjectsErrorHelpers.isConflictError(err)) {
       throw new ConcurrentInstallOperationError(
         `Concurrent installation or upgrade of ${pkgName || 'unknown'}-${
           pkgVersion || 'unknown'

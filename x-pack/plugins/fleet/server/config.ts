@@ -11,7 +11,10 @@ import { schema } from '@kbn/config-schema';
 import type { TypeOf } from '@kbn/config-schema';
 import type { PluginConfigDescriptor } from '@kbn/core/server';
 
-import { getExperimentalAllowedValues, isValidExperimentalValue } from '../common';
+import {
+  getExperimentalAllowedValues,
+  isValidExperimentalValue,
+} from '../common/experimental_features';
 const allowedExperimentalValues = getExperimentalAllowedValues();
 
 import {

@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectsClientContract } from '../../saved_objects/types';
-
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import {
   createTestServers,
   TestElasticsearchUtils,
@@ -69,7 +68,7 @@ describe('createOrUpgradeSavedConfig()', () => {
   afterAll(async () => {
     await esServer.stop();
     await kbn.stop();
-  }, 30000);
+  });
 
   it('upgrades the previous version on each increment', async function () {
     // ------------------------------------
@@ -210,5 +209,5 @@ describe('createOrUpgradeSavedConfig()', () => {
       // Should have the transform(s) applied
       isDefaultIndexMigrated: true,
     });
-  }, 30000);
+  });
 });

@@ -8,8 +8,8 @@ import { keyBy, keys, merge } from 'lodash';
 import type { RequestHandler } from '@kbn/core/server';
 
 import type { DataStream } from '../../types';
-import { KibanaSavedObjectType } from '../../../common';
-import type { GetDataStreamsResponse } from '../../../common';
+import { KibanaSavedObjectType } from '../../../common/types';
+import type { GetDataStreamsResponse } from '../../../common/types';
 import { getPackageSavedObjects } from '../../services/epm/packages/get';
 import { defaultIngestErrorHandler } from '../../errors';
 

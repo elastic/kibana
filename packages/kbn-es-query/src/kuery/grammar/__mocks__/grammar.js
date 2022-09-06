@@ -367,8 +367,7 @@ function peg$parse(input, options) {
     };
   var peg$f15 = function(value) {
       if (value.type === 'cursor') return value;
-      const isPhrase = buildLiteralNode(true);
-      return (field) => buildFunctionNode('is', [field, value, isPhrase]);
+      return (field) => buildFunctionNode('is', [field, value]);
     };
   var peg$f16 = function(value) {
       if (value.type === 'cursor') return value;
@@ -377,8 +376,7 @@ function peg$parse(input, options) {
         error('Leading wildcards are disabled. See query:allowLeadingWildcards in Advanced Settings.');
       }
 
-      const isPhrase = buildLiteralNode(false);
-      return (field) => buildFunctionNode('is', [field, value, isPhrase]);
+      return (field) => buildFunctionNode('is', [field, value]);
     };
   var peg$f17 = function() { return parseCursor; };
   var peg$f18 = function(prefix, cursor, suffix) {
@@ -393,7 +391,7 @@ function peg$parse(input, options) {
       };
     };
   var peg$f19 = function(chars) {
-      return buildLiteralNode(chars.join(''));
+      return buildLiteralNode(chars.join(''), true);
     };
   var peg$f20 = function(char) { return char; };
   var peg$f21 = function(chars) {

@@ -10,13 +10,13 @@ import { useMemo, useEffect } from 'react';
 import type { Filter, Query } from '@kbn/es-query';
 import { isEmpty } from 'lodash/fp';
 import { inputsSelectors } from '../../store';
-import { CONSTANTS } from '../../components/url_state/constants';
 import { useUpdateUrlParam } from '../../utils/global_query_string';
+import { URL_PARAM_KEY } from '../use_url_state';
 
 export const useSyncSearchBarUrlParams = () => {
-  const updateSavedQueryUrlParam = useUpdateUrlParam<string>(CONSTANTS.savedQuery);
-  const updateAppQueryUrlParam = useUpdateUrlParam<Query>(CONSTANTS.appQuery);
-  const updateFilterUrlParam = useUpdateUrlParam<Filter[]>(CONSTANTS.filters);
+  const updateSavedQueryUrlParam = useUpdateUrlParam<string>(URL_PARAM_KEY.savedQuery);
+  const updateAppQueryUrlParam = useUpdateUrlParam<Query>(URL_PARAM_KEY.appQuery);
+  const updateFilterUrlParam = useUpdateUrlParam<Filter[]>(URL_PARAM_KEY.filters);
 
   const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuerySelector(), []);
   const getGlobalFiltersQuerySelector = useMemo(

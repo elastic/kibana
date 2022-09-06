@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useMemo, useState } from 'react';
+import React, { memo, useCallback, useMemo, useState, useEffect } from 'react';
 
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { EuiButton, EuiSpacer, EuiText } from '@elastic/eui';
 import type { EuiFlyoutSize } from '@elastic/eui/src/components/flyout/flyout';
 import { useLocation } from 'react-router-dom';
+import type { ServerApiError } from '../../../common/types';
 import { AdministrationListPage } from '../administration_list_page';
 
 import type { PaginatedContentProps } from '../paginated_content';
@@ -107,6 +108,12 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
       error,
       refetch: refetchListData,
     } = useWithArtifactListData(apiClient, searchableFields);
+
+    useEffect(() => {
+      if (!isLoading && error) {
+        toasts.addDanger((error?.body as ServerApiError)?.message || error.message);
+      }
+    }, [error, toasts, isLoading]);
 
     const items = useMemo(() => {
       return listDataResponse?.data ?? [];

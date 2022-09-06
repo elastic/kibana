@@ -18,7 +18,8 @@ import {
 } from './definitions';
 import { getFieldByNameFactory } from '../pure_helpers';
 import { documentField } from '../document_field';
-import { IndexPattern, IndexPatternLayer, IndexPatternField } from '../types';
+import { IndexPatternLayer } from '../types';
+import { IndexPattern, IndexPatternField } from '../../types';
 import { GenericIndexPatternColumn } from '.';
 import { DateHistogramIndexPatternColumn } from './definitions/date_histogram';
 
@@ -211,7 +212,7 @@ describe('time scale transition', () => {
     ).toEqual(
       expect.objectContaining({
         timeScale: undefined,
-        label: 'Count of records',
+        label: 'Count of bytesLabel',
       })
     );
   });

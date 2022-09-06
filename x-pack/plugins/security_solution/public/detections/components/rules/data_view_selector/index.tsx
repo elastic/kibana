@@ -11,29 +11,21 @@ import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiCallOut, EuiComboBox, EuiFormRow, EuiSpacer } from '@elastic/eui';
 
 import type { DataViewListItem } from '@kbn/data-views-plugin/common';
-import type { DataViewBase } from '@kbn/es-query';
 import type { FieldHook } from '../../../../shared_imports';
 import { getFieldValidityAndErrorMessage } from '../../../../shared_imports';
 import * as i18n from './translations';
-import { useKibana } from '../../../../common/lib/kibana';
 import type { DefineStepRule } from '../../../pages/detection_engine/rules/types';
 
-interface DataViewSelectorProps {
-  kibanaDataViews: { [x: string]: DataViewListItem };
+export interface DataViewSelectorProps {
+  kibanaDataViews: Record<string, DataViewListItem>;
   field: FieldHook<DefineStepRule['dataViewId']>;
-  setIndexPattern: (indexPattern: DataViewBase) => void;
 }
 
-export const DataViewSelector = ({
-  kibanaDataViews,
-  field,
-  setIndexPattern,
-}: DataViewSelectorProps) => {
-  const { data } = useKibana().services;
-
+export const DataViewSelector = ({ kibanaDataViews, field }: DataViewSelectorProps) => {
   let isInvalid;
   let errorMessage;
   let dataViewId: string | null | undefined;
+
   if (field != null) {
     const fieldAndError = getFieldValidityAndErrorMessage(field);
     isInvalid = fieldAndError.isInvalid;
@@ -62,7 +54,26 @@ export const DataViewSelector = ({
       : []
   );
 
-  const [selectedDataView, setSelectedDataView] = useState<DataViewListItem>();
+  const [showDataViewAlertsOnAlertsWarning, setShowDataViewAlertsOnAlertsWarning] = useState(false);
+
+  useEffect(() => {
+    if (!selectedDataViewNotFound && dataViewId) {
+      const dataViewsTitle = kibanaDataViews[dataViewId].title;
+      const dataViewsId = kibanaDataViews[dataViewId].id;
+
+      setShowDataViewAlertsOnAlertsWarning(dataViewsId === 'security-solution-default');
+
+      setSelectedOption([{ id: dataViewsId, label: dataViewsTitle }]);
+    } else {
+      setSelectedOption([]);
+    }
+  }, [
+    dataViewId,
+    field,
+    kibanaDataViews,
+    selectedDataViewNotFound,
+    setShowDataViewAlertsOnAlertsWarning,
+  ]);
 
   // TODO: optimize this, pass down array of data view ids
   // at the same time we grab the data views in the top level form component
@@ -75,20 +86,8 @@ export const DataViewSelector = ({
       : [];
   }, [kibanaDataViewsDefined, kibanaDataViews]);
 
-  useEffect(() => {
-    const fetchSingleDataView = async () => {
-      if (selectedDataView != null) {
-        const dv = await data.dataViews.get(selectedDataView.id);
-        setIndexPattern(dv);
-      }
-    };
-
-    fetchSingleDataView();
-  }, [data.dataViews, selectedDataView, setIndexPattern]);
-
   const onChangeDataViews = (options: Array<EuiComboBoxOptionOption<string>>) => {
     const selectedDataViewOption = options;
-
     setSelectedOption(selectedDataViewOption ?? []);
 
     if (
@@ -96,10 +95,9 @@ export const DataViewSelector = ({
       selectedDataViewOption.length > 0 &&
       selectedDataViewOption[0].id != null
     ) {
-      setSelectedDataView(kibanaDataViews[selectedDataViewOption[0].id]);
-      field?.setValue(selectedDataViewOption[0].id);
+      const selectedDataViewId = selectedDataViewOption[0].id;
+      field?.setValue(selectedDataViewId);
     } else {
-      setSelectedDataView(undefined);
       field?.setValue(undefined);
     }
   };
@@ -114,6 +112,19 @@ export const DataViewSelector = ({
             iconType="help"
           >
             <p>{i18n.DATA_VIEW_NOT_FOUND_WARNING_DESCRIPTION(dataViewId)}</p>
+          </EuiCallOut>
+          <EuiSpacer size="s" />
+        </>
+      )}
+      {showDataViewAlertsOnAlertsWarning && (
+        <>
+          <EuiCallOut
+            title={i18n.DDATA_VIEW_ALERTS_ON_ALERTS_WARNING_LABEL}
+            color="warning"
+            iconType="help"
+            data-test-subj="defaultSecurityDataViewWarning"
+          >
+            <p>{i18n.DATA_VIEW_ALERTS_ON_ALERTS_WARNING_DESCRIPTION}</p>
           </EuiCallOut>
           <EuiSpacer size="s" />
         </>

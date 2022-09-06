@@ -14,6 +14,7 @@ import type { SolutionNavPanelProps } from './solution_grouped_nav_panel';
 import { SolutionNavPanel } from './solution_grouped_nav_panel';
 import type { DefaultSideNavItem } from './types';
 import { bottomNavOffset } from '../../../lib/helpers';
+import { BETA } from '@kbn/kubernetes-security-plugin/common/translations';
 
 const mockUseIsWithinBreakpoints = jest.fn(() => true);
 jest.mock('@elastic/eui', () => {
@@ -37,7 +38,16 @@ const mockItems: DefaultSideNavItem[] = [
     href: '/network',
     description: 'Network description',
   },
+  {
+    id: SecurityPageName.kubernetes,
+    label: 'Kubernetes',
+    href: '/kubernetes',
+    description: 'Kubernetes description',
+    isBeta: true,
+  },
 ];
+
+const betaMockItemsCount = mockItems.filter((item) => item.isBeta).length;
 
 const mockCategories: LinkCategories = [
   {
@@ -86,6 +96,7 @@ describe('SolutionGroupedNav', () => {
         expect(result.getByText(item.description)).toBeInTheDocument();
       }
     });
+    expect(result.queryAllByText(BETA).length).toBe(betaMockItemsCount);
   });
 
   it('should only render categories with items', () => {

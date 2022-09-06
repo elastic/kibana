@@ -11,9 +11,8 @@ describe('convertRuleIdsToKueryNode', () => {
   test('should convert ids correctly', () => {
     expect(convertRuleIdsToKueryNode(['1'])).toEqual({
       arguments: [
-        { type: 'literal', value: 'alert.id' },
-        { type: 'literal', value: 'alert:1' },
-        { type: 'literal', value: false },
+        { type: 'literal', value: 'alert.id', isQuoted: false },
+        { type: 'literal', value: 'alert:1', isQuoted: false },
       ],
       function: 'is',
       type: 'function',
@@ -28,14 +27,12 @@ describe('convertRuleIdsToKueryNode', () => {
             {
               type: 'literal',
               value: 'alert.id',
+              isQuoted: false,
             },
             {
               type: 'literal',
               value: 'alert:1',
-            },
-            {
-              type: 'literal',
-              value: false,
+              isQuoted: false,
             },
           ],
           function: 'is',
@@ -46,14 +43,12 @@ describe('convertRuleIdsToKueryNode', () => {
             {
               type: 'literal',
               value: 'alert.id',
+              isQuoted: false,
             },
             {
               type: 'literal',
               value: 'alert:22',
-            },
-            {
-              type: 'literal',
-              value: false,
+              isQuoted: false,
             },
           ],
           function: 'is',

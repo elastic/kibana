@@ -6,7 +6,7 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { SavedObject, SavedObjectAttributes } from '@kbn/core/public';
+import { SavedObject, SavedObjectAttributes } from '@kbn/core/types';
 
 export type DeprecationSource = 'Kibana' | 'Elasticsearch';
 

@@ -6,7 +6,7 @@
  */
 
 import { CoreSetup, CoreStart } from '@kbn/core/server';
-import { ExecutionContext } from '@kbn/expressions-plugin';
+import { ExecutionContext } from '@kbn/expressions-plugin/common';
 import { PluginStartContract } from '../plugin';
 
 const getUiSettings = (coreStart: CoreStart, context: ExecutionContext) => {

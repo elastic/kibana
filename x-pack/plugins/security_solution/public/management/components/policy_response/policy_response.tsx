@@ -25,6 +25,8 @@ import { PolicyResponseActionItem } from './policy_response_action_item';
 const StyledEuiTreeView = styled(EuiTreeView)`
   .policy-response-action-item-expanded {
     height: auto;
+    padding-top: ${({ theme }) => theme.eui.euiSizeS};
+    padding-bottom: ${({ theme }) => theme.eui.euiSizeS};
     .euiTreeView__nodeLabel {
       width: 100%;
     }
@@ -38,8 +40,17 @@ const StyledEuiTreeView = styled(EuiTreeView)`
       .euiTreeView__node {
         // When response action item displays a callout, this needs to be overwritten to remove the default max height of EuiTreeView
         max-height: none !important;
-        padding-top: ${({ theme }) => theme.eui.euiSizeS};
-        padding-bottom: ${({ theme }) => theme.eui.euiSizeS};
+      }
+    }
+  }
+  .euiTreeView__node {
+    max-height: none !important;
+    .euiNotificationBadge {
+      margin-right: 5px;
+    }
+    .euiTreeView__nodeLabel {
+      .euiText {
+        font-size: ${({ theme }) => theme.eui.euiFontSize};
       }
     }
   }
@@ -130,11 +141,7 @@ export const PolicyResponse = memo(
                 ),
                 id: `action_message_${actionKey}`,
                 isExpanded: true,
-                className:
-                  action.status !== HostPolicyResponseActionStatus.success &&
-                  action.status !== HostPolicyResponseActionStatus.unsupported
-                    ? 'policy-response-action-item-expanded'
-                    : '',
+                className: 'policy-response-action-item-expanded',
               },
             ],
           };

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { REMOVED_TYPES } from '../../../saved_objects/migrations/core';
+import { REMOVED_TYPES } from '@kbn/core-saved-objects-migration-server-internal';
 import * as kbnTestServer from '../../../../test_helpers/kbn_server';
 
 // Types should NEVER be removed from this array
@@ -49,6 +49,8 @@ const previouslyRegisteredTypes = [
   'event_loop_delays_daily',
   'exception-list',
   'exception-list-agnostic',
+  'file',
+  'fileShare',
   'file-upload-telemetry',
   'file-upload-usage-collection-telemetry',
   'fleet-agent-actions',
@@ -99,6 +101,8 @@ const previouslyRegisteredTypes = [
   'siem-ui-timeline-pinned-event',
   'space',
   'spaces-usage-stats',
+  'synthetics-monitor',
+  'synthetics-privates-locations',
   'tag',
   'task',
   'telemetry',
@@ -110,6 +114,7 @@ const previouslyRegisteredTypes = [
   'upgrade-assistant-reindex-operation',
   'upgrade-assistant-telemetry',
   'uptime-dynamic-settings',
+  'uptime-synthetics-api-key',
   'url',
   'usage-counters',
   'visualization',

@@ -10,6 +10,7 @@ import {
   Sort,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { rangeQuery } from '@kbn/observability-plugin/server';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import {
   ERROR_LOG_LEVEL,
   PARENT_ID,
@@ -17,7 +18,6 @@ import {
   TRACE_ID,
   TRANSACTION_DURATION,
 } from '../../../common/elasticsearch_fieldnames';
-import { ProcessorEvent } from '../../../common/processor_event';
 import { Setup } from '../../lib/helpers/setup_request';
 import { getLinkedChildrenCountBySpanId } from '../span_links/get_linked_children';
 

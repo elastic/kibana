@@ -33,7 +33,8 @@ import { packageToPackagePolicy, pkgKeyFromPackageInfo } from '../../../../../se
 import { Loading } from '../../../../../components';
 import { useStartServices, useGetPackagePolicies } from '../../../../../hooks';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../../../../constants';
-import { SO_SEARCH_LIMIT, getMaxPackageName } from '../../../../../../../../common';
+import { getMaxPackageName } from '../../../../../../../../common/services';
+import { SO_SEARCH_LIMIT } from '../../../../../../../../common/constants';
 
 import { isAdvancedVar } from '../../services';
 import type { PackagePolicyValidationResults } from '../../services';
@@ -111,7 +112,6 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
             packageToPackagePolicy(
               packageInfo,
               agentPolicy?.id || '',
-              packagePolicy.output_id,
               packagePolicy.namespace,
               packagePolicy.name,
               packagePolicy.description,
@@ -133,7 +133,6 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
           packageToPackagePolicy(
             packageInfo,
             agentPolicy?.id || '',
-            packagePolicy.output_id,
             packagePolicy.namespace,
             packagePolicy.name || incrementedName,
             packagePolicy.description,

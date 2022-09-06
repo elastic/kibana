@@ -13,10 +13,10 @@ import type { DataTableRecord, ValueToStringConverter } from '../../types';
 
 export interface GridContext {
   expanded?: DataTableRecord | undefined;
-  setExpanded: (hit?: DataTableRecord) => void;
+  setExpanded?: (hit?: DataTableRecord) => void;
   rows: DataTableRecord[];
-  onFilter: DocViewFilterFn;
-  indexPattern: DataView;
+  onFilter?: DocViewFilterFn;
+  dataView: DataView;
   isDarkMode: boolean;
   selectedDocs: string[];
   setSelectedDocs: (selected: string[]) => void;

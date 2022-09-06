@@ -37,6 +37,7 @@ import {
 } from '../../../../../shared/constants';
 import { DataPanel } from '../../../../../shared/data_panel/data_panel';
 
+import { docLinks } from '../../../../../shared/doc_links/doc_links';
 import { CrawlUnits } from '../../../../api/crawler/types';
 
 import { AutomaticCrawlSchedulerLogic } from './automatic_crawl_scheduler_logic';
@@ -71,7 +72,7 @@ export const AutomaticCrawlScheduler: React.FC = () => {
             defaultMessage="Setup automated crawling. {readMoreMessage}."
             values={{
               readMoreMessage: (
-                <EuiLink href={'' /* TODO Add docs url */} target="_blank">
+                <EuiLink href={docLinks.crawlerManaging} target="_blank" external>
                   {i18n.translate(
                     'xpack.enterpriseSearch.crawler.automaticCrawlSchedule.readMoreLink',
                     {

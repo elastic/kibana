@@ -11,10 +11,34 @@
   "language": "kuery",
   "license": "Elastic License v2",
   "name": "User Added as Owner for Azure Application",
-  "note": "## Config\n\nThe Azure Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+  "note": "",
   "query": "event.dataset:azure.auditlogs and azure.auditlogs.operation_name:\"Add owner to application\" and event.outcome:(Success or success)\n",
+  "related_integrations": [
+    {
+      "package": "azure",
+      "version": "0.12.0"
+    }
+  ],
+  "required_fields": [
+    {
+      "ecs": false,
+      "name": "azure.auditlogs.operation_name",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "event.dataset",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "event.outcome",
+      "type": "keyword"
+    }
+  ],
   "risk_score": 21,
   "rule_id": "774f5e28-7b75-4a58-b94e-41bf060fdd86",
+  "setup": "The Azure Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
   "severity": "low",
   "tags": [
     "Elastic",
@@ -43,5 +67,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 5
+  "version": 7
 }

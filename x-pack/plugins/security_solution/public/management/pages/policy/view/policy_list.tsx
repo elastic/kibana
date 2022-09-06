@@ -19,7 +19,6 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { useLocation } from 'react-router-dom';
-import type { AgentPolicy } from '@kbn/fleet-plugin/common';
 import type { CreatePackagePolicyRouteState } from '@kbn/fleet-plugin/public';
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
 import { AdministrationListPage } from '../../../components/administration_list_page';
@@ -58,10 +57,14 @@ export const PolicyList = memo(() => {
 
   // endpoint count per policy
   const policyIds = useMemo(() => data?.items.map((policies) => policies.id) ?? [], [data]);
+  const agentPolicyIds = useMemo(
+    () => data?.items.map((policies) => policies.policy_id) ?? [],
+    [data]
+  );
   const { data: endpointCount = { items: [] } } = useGetAgentCountForPolicy({
-    policyIds,
+    agentPolicyIds,
     customQueryOptions: {
-      enabled: policyIds.length > 0,
+      enabled: agentPolicyIds.length > 0,
       onError: (err) => {
         toasts.addDanger(
           i18n.translate('xpack.securitySolution.policyList.endpointCountError', {
@@ -76,7 +79,7 @@ export const PolicyList = memo(() => {
   const { data: endpointPackageInfo, isFetching: packageIsFetching } =
     useGetEndpointSecurityPackage({
       customQueryOptions: {
-        enabled: policyIds.length === 0,
+        enabled: agentPolicyIds.length === 0,
         onError: (err) => {
           toasts.addDanger(
             i18n.translate('xpack.securitySolution.policyList.packageVersionError', {
@@ -88,11 +91,14 @@ export const PolicyList = memo(() => {
     });
 
   const policyIdToEndpointCount = useMemo(() => {
-    const map = new Map<AgentPolicy['package_policies'][number], number>();
-    for (const policy of endpointCount?.items) {
-      for (const packagePolicyId of policy.package_policies) {
-        if (policyIds.includes(packagePolicyId as string)) {
-          map.set(packagePolicyId, policy.agents ?? 0);
+    const map = new Map<string, number>();
+
+    for (const agentPolicy of endpointCount?.items) {
+      if (agentPolicy.package_policies) {
+        for (const packagePolicy of agentPolicy.package_policies) {
+          if (policyIds.includes(packagePolicy.id)) {
+            map.set(packagePolicy.id, agentPolicy.agents ?? 0);
+          }
         }
       }
     }

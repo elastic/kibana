@@ -1,0 +1,4 @@
+type: object
+properties:
+  severity:
+    $ref: 'severity_property.yaml'

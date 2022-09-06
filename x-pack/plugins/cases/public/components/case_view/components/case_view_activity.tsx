@@ -155,14 +155,14 @@ export const CaseViewActivity = ({
           onSeverityChange={onUpdateSeverity}
         />
         <UserList
-          data-test-subj="case-view-user-list-reporter"
+          dataTestSubj="case-view-user-list-reporter"
           email={emailContent}
           headline={i18n.REPORTER}
           users={[caseData.createdBy]}
         />
         {userActionsData?.participants ? (
           <UserList
-            data-test-subj="case-view-user-list-participants"
+            dataTestSubj="case-view-user-list-participants"
             email={emailContent}
             headline={i18n.PARTICIPANTS}
             loading={isLoadingUserActions}

@@ -23,7 +23,7 @@ describe('generateConnectorApiKeyApiLogic', () => {
       const result = fetchIndex({ indexName: 'indexName' });
       await nextTick();
       expect(http.get).toHaveBeenCalledWith('/internal/enterprise_search/indices/indexName');
-      expect(result).resolves.toEqual('result');
+      await expect(result).resolves.toEqual('result');
     });
   });
 });

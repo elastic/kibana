@@ -13,7 +13,6 @@ import {
   enableComparisonByDefault,
   enableInspectEsQueries,
   maxSuggestions,
-  enableInfrastructureView,
   defaultApmServiceEnvironment,
   apmProgressiveLoading,
   enableServiceGroups,
@@ -84,19 +83,9 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
     }),
     schema: schema.boolean(),
   },
-  [enableInfrastructureView]: {
-    category: [observabilityFeatureId],
-    name: i18n.translate('xpack.observability.enableInfrastructureView', {
-      defaultMessage: 'Infrastructure feature',
-    }),
-    value: false,
-    description: i18n.translate('xpack.observability.enableInfrastructureViewDescription', {
-      defaultMessage: 'Enable the Infrastructure view feature in APM app',
-    }),
-    schema: schema.boolean(),
-  },
   [defaultApmServiceEnvironment]: {
     category: [observabilityFeatureId],
+    sensitive: true,
     name: i18n.translate('xpack.observability.defaultApmServiceEnvironment', {
       defaultMessage: 'Default service environment',
     }),

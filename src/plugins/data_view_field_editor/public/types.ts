@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SerializableRecord } from '@kbn/utility-types';
+import { FieldSpec } from '@kbn/data-views-plugin/public';
 import { FunctionComponent } from 'react';
 import { DeleteFieldProviderProps } from './components';
 import { OpenFieldDeleteModalOptions } from './open_delete_modal';
@@ -21,11 +21,22 @@ import {
   UsageCollectionStart,
 } from './shared_imports';
 
+/**
+ * Public setup contract of data view field editor
+ * @public
+ */
 export interface PluginSetup {
   fieldFormatEditors: FormatEditorServiceSetup['fieldFormatEditors'];
 }
 
+/**
+ * Public start contract of data view field editor
+ * @public
+ */
 export interface PluginStart {
+  /**
+   * method to open the data view field editor fly-out
+   */
   openEditor(options: OpenFieldEditorOptions): () => void;
   openDeleteModal(options: OpenFieldDeleteModalOptions): () => void;
   fieldFormatEditors: FormatEditorServiceStart['fieldFormatEditors'];
@@ -47,18 +58,35 @@ export interface StartPlugins {
 
 export type InternalFieldType = 'concrete' | 'runtime';
 
+/**
+ * The data model for the field editor
+ * @public
+ */
 export interface Field {
-  name: string;
-  type: RuntimeField['type'] | string;
+  /**
+   * name / path used for the field
+   */
+  name: FieldSpec['name'];
+  /**
+   * ES type
+   */
+  type: RuntimeType;
+  /**
+   * source of the runtime field script
+   */
   script?: RuntimeField['script'];
-  customLabel?: string;
+  /**
+   * custom label for display
+   */
+  customLabel?: FieldSpec['customLabel'];
+  /**
+   * custom popularity
+   */
   popularity?: number;
-  format?: FieldFormatConfig;
-}
-
-export interface FieldFormatConfig {
-  id: string;
-  params?: SerializableRecord;
+  /**
+   * configuration of the field format
+   */
+  format?: FieldSpec['format'];
 }
 
 export interface EsRuntimeField {

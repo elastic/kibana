@@ -410,7 +410,12 @@ const IndexPatternEditorFlyoutContentComponent = ({
         </Form>
         <Footer
           onCancel={onCancel}
-          onSubmit={(adhoc?: boolean) => {
+          onSubmit={async (adhoc?: boolean) => {
+            const formData = form.getFormData();
+            if (!formData.name) {
+              form.updateFieldValues({ name: formData.title });
+              await form.getFields().name.validate();
+            }
             form.setFieldValue('isAdHoc', adhoc || false);
             form.submit();
           }}

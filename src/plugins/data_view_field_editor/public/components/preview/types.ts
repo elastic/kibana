@@ -5,10 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React from 'react';
 
-import type { RuntimeType, RuntimeField } from '../../shared_imports';
-import type { FieldFormatConfig, RuntimeFieldPainlessError } from '../../types';
+import { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
+import React from 'react';
+import type { RuntimeField, RuntimeType } from '../../shared_imports';
+import type { RuntimeFieldPainlessError } from '../../types';
 
 export type From = 'cluster' | 'custom';
 
@@ -54,7 +55,7 @@ export interface Params {
   index: string | null;
   type: RuntimeType | null;
   script: Required<RuntimeField>['script'] | null;
-  format: FieldFormatConfig | null;
+  format: SerializedFieldFormat | null;
   document: { [key: string]: unknown } | null;
 }
 

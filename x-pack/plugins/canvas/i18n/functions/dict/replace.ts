@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { replace } from '../../../canvas_plugin_src/functions/common/replace';
+import type { replace } from '../../../canvas_plugin_src/functions/common/replace';
 import { FunctionHelp } from '../function_help';
 import { FunctionFactory } from '../../../types';
 import { JS } from '../../constants';

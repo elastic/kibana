@@ -7,20 +7,28 @@
 
 import type {
   SecurityActivateUserProfileRequest,
-  SecuritySuggestUserProfilesResponse,
+  SecurityUserProfileWithMetadata,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { SecurityUserProfile } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import type { IClusterClient, Logger } from '@kbn/core/server';
+import type { IClusterClient, KibanaRequest, Logger } from '@kbn/core/server';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 
-import type { UserProfile, UserProfileData, UserProfileWithSecurity } from '../../common';
+import type {
+  UserProfile,
+  UserProfileData,
+  UserProfileLabels,
+  UserProfileWithSecurity,
+} from '../../common';
 import type { AuthorizationServiceSetupInternal } from '../authorization';
 import type { CheckUserProfilesPrivilegesResponse } from '../authorization/types';
 import { getDetailedErrorMessage, getErrorStatusCode } from '../errors';
+import type { Session } from '../session_management';
+import { getPrintableSessionId } from '../session_management';
 import type { UserProfileGrant } from './user_profile_grant';
 
 const KIBANA_DATA_ROOT = 'kibana';
-const ACTIVATION_MAX_RETRIES = 3;
+const ACTIVATION_MAX_RETRIES = 10;
 const ACTIVATION_RETRY_SCALE_DURATION_MS = 150;
 const MAX_SUGGESTIONS_COUNT = 100;
 const DEFAULT_SUGGESTIONS_COUNT = 10;
@@ -30,6 +38,18 @@ const MIN_SUGGESTIONS_FOR_PRIVILEGES_CHECK = 10;
  * A set of methods to work with Kibana user profiles.
  */
 export interface UserProfileServiceStart {
+  /**
+   * Retrieves a user profile for the current user extracted from the specified request. If the profile isn't available,
+   * e.g. for the anonymous users or users authenticated via authenticating proxies, the `null` value is returned.
+   * @param params Get current user profile operation parameters.
+   * @param params.request User request instance to get user profile for.
+   * @param params.dataPath By default Elasticsearch returns user information, but does not return any user data. The
+   * optional "dataPath" parameter can be used to return personal data for the requested user profiles.
+   */
+  getCurrent<D extends UserProfileData, L extends UserProfileLabels>(
+    params: UserProfileGetCurrentParams
+  ): Promise<UserProfileWithSecurity<D, L> | null>;
+
   /**
    * Retrieves multiple user profiles by their identifiers.
    * @param params Bulk get operation parameters.
@@ -42,12 +62,12 @@ export interface UserProfileServiceStart {
   ): Promise<Array<UserProfile<D>>>;
 
   /**
-   * Retrieves a single user profile by identifier.
+   * Suggests multiple user profiles by search criteria.
    * @param params Suggest operation parameters.
-   * @param params.name Query string used to match name-related fields in user profiles. The following fields are
-   * treated as name-related: username, full_name and email.
-   * @param params.dataPath By default API returns user information, but does not return any user data. The optional
-   * "dataPath" parameter can be used to return personal data for this user (within `kibana` namespace).
+   * @param params.name Query string used to match name-related fields in user profiles. The following fields are treated as name-related: username, full_name and email.
+   * @param params.size Desired number of suggestion to return. The default value is 10.
+   * @param params.dataPath By default, suggest API returns user information, but does not return any user data. The optional "dataPath" parameter can be used to return personal data for this user (within `kibana` namespace only).
+   * @param params.requiredPrivileges The set of the privileges that users associated with the suggested user profile should have in the specified space. If not specified, privileges check isn't performed and all matched profiles are returned irrespective to the privileges of the associated users.
    */
   suggest<D extends UserProfileData>(
     params: UserProfileSuggestParams
@@ -60,17 +80,6 @@ export interface UserProfileServiceStartInternal extends UserProfileServiceStart
    * @param grant User profile grant (username/password or access token).
    */
   activate(grant: UserProfileGrant): Promise<UserProfileWithSecurity>;
-
-  /**
-   * Retrieves a single user profile by its identifier.
-   * @param uid User profile identifier.
-   * @param dataPath By default Elasticsearch returns user information, but does not return any user data. The optional
-   * "dataPath" parameter can be used to return personal data for the requested user profile.
-   */
-  get<D extends UserProfileData>(
-    uid: string,
-    dataPath?: string
-  ): Promise<UserProfileWithSecurity<D>>;
 
   /**
    * Updates user preferences by identifier.
@@ -86,6 +95,7 @@ export interface UserProfileServiceSetupParams {
 
 export interface UserProfileServiceStartParams {
   clusterClient: IClusterClient;
+  session: PublicMethodsOf<Session>;
 }
 
 /**
@@ -101,6 +111,22 @@ export interface UserProfileRequiredPrivileges {
    * The set of the Kibana specific application privileges.
    */
   privileges: { kibana: string[] };
+}
+
+/**
+ * Parameters for the get user profile for the current user API.
+ */
+export interface UserProfileGetCurrentParams {
+  /**
+   * User request instance to get user profile for.
+   */
+  request: KibanaRequest;
+
+  /**
+   * By default, get API returns user information, but does not return any user data. The optional "dataPath"
+   * parameter can be used to return personal data for this user (within `kibana` namespace only).
+   */
+  dataPath?: string;
 }
 
 /**
@@ -153,8 +179,10 @@ function parseUserProfile<D extends UserProfileData>(
 ): UserProfile<D> {
   return {
     uid: rawUserProfile.uid,
-    // @ts-expect-error @elastic/elasticsearch SecurityActivateUserProfileResponse.enabled: boolean
-    enabled: rawUserProfile.enabled,
+    // Get User Profile API returns `enabled` property, but Suggest User Profile API doesn't since it's assumed that the
+    // API returns only enabled profiles. To simplify the API in Kibana we use the same interfaces for user profiles
+    // irrespective to the source they are coming from, so we need to "normalize" `enabled` property here.
+    enabled: rawUserProfile.enabled ?? true,
     data: rawUserProfile.data?.[KIBANA_DATA_ROOT] ?? {},
     user: {
       username: rawUserProfile.user.username,
@@ -162,8 +190,6 @@ function parseUserProfile<D extends UserProfileData>(
       email: rawUserProfile.user.email ?? undefined,
       // @elastic/elasticsearch types support `null` values for the `full_name`, but we don't.
       full_name: rawUserProfile.user.full_name ?? undefined,
-      // @ts-expect-error @elastic/elasticsearch SecurityUserProfileUser.display_name?: string
-      display_name: rawUserProfile.user.display_name ?? undefined,
     },
   };
 }
@@ -194,10 +220,10 @@ export class UserProfileService {
     this.authz = authz;
   }
 
-  start({ clusterClient }: UserProfileServiceStartParams) {
+  start({ clusterClient, session }: UserProfileServiceStartParams) {
     return {
       activate: this.activate.bind(this, clusterClient),
-      get: this.get.bind(this, clusterClient),
+      getCurrent: this.getCurrent.bind(this, clusterClient, session),
       bulkGet: this.bulkGet.bind(this, clusterClient),
       update: this.update.bind(this, clusterClient),
       suggest: this.suggest.bind(this, clusterClient),
@@ -261,29 +287,64 @@ export class UserProfileService {
   }
 
   /**
-   * See {@link UserProfileServiceStartInternal} for documentation.
+   * See {@link UserProfileServiceStart} for documentation.
    */
-  private async get<D extends UserProfileData>(
+  private async getCurrent<D extends UserProfileData>(
     clusterClient: IClusterClient,
-    uid: string,
-    dataPath?: string
+    session: PublicMethodsOf<Session>,
+    { request, dataPath }: UserProfileGetCurrentParams
   ) {
+    let userSession;
     try {
-      const body = await clusterClient.asInternalUser.security.getUserProfile({
-        uid,
+      userSession = await session.get(request);
+    } catch (error) {
+      this.logger.error(`Failed to retrieve user session: ${getDetailedErrorMessage(error)}`);
+      throw error;
+    }
+
+    if (!userSession) {
+      return null;
+    }
+
+    if (!userSession.userProfileId) {
+      this.logger.debug(
+        `User profile missing from the current session [sid=${getPrintableSessionId(
+          userSession.sid
+        )}].`
+      );
+      return null;
+    }
+
+    let body;
+    try {
+      // @ts-expect-error Invalid response format.
+      body = (await clusterClient.asInternalUser.security.getUserProfile({
+        uid: userSession.userProfileId,
         data: dataPath ? `${KIBANA_DATA_ROOT}.${dataPath}` : undefined,
-      });
-      return parseUserProfileWithSecurity<D>(body[uid]!);
+      })) as { profiles: SecurityUserProfileWithMetadata[] };
     } catch (error) {
       this.logger.error(
-        `Failed to retrieve user profile [uid=${uid}]: ${getDetailedErrorMessage(error)}`
+        `Failed to retrieve user profile for the current user [sid=${getPrintableSessionId(
+          userSession.sid
+        )}]: ${getDetailedErrorMessage(error)}`
       );
       throw error;
     }
+
+    if (body.profiles.length === 0) {
+      this.logger.error(
+        `The user profile for the current user [sid=${getPrintableSessionId(
+          userSession.sid
+        )}] is not found.`
+      );
+      throw new Error(`User profile is not found.`);
+    }
+
+    return parseUserProfileWithSecurity<D>(body.profiles[0]);
   }
 
   /**
-   * See {@link UserProfileServiceStartInternal} for documentation.
+   * See {@link UserProfileServiceStart} for documentation.
    */
   private async bulkGet<D extends UserProfileData>(
     clusterClient: IClusterClient,
@@ -294,28 +355,13 @@ export class UserProfileService {
     }
 
     try {
-      // Use `transport.request` since `.security.suggestUserProfiles` implementation doesn't accept `hint` as a body
-      // parameter yet.
-      const body =
-        await clusterClient.asInternalUser.transport.request<SecuritySuggestUserProfilesResponse>({
-          method: 'POST',
-          path: '_security/profile/_suggest',
-          body: {
-            hint: { uids: [...uids] },
-            // We need at most as many results as requested uids.
-            size: uids.size,
-            data: dataPath ? `${KIBANA_DATA_ROOT}.${dataPath}` : undefined,
-          },
-        });
+      // @ts-expect-error Invalid response format.
+      const body = (await clusterClient.asInternalUser.security.getUserProfile({
+        uid: [...uids].join(','),
+        data: dataPath ? `${KIBANA_DATA_ROOT}.${dataPath}` : undefined,
+      })) as { profiles: SecurityUserProfileWithMetadata[] };
 
-      return (
-        body.profiles
-          // "uids" is just a hint that allows to put user profiles with the requested uids on the top of the
-          // returned list, but if Elasticsearch cannot find user profiles for all requested uids it might include
-          // other "matched" user profiles as well.
-          .filter((rawProfile) => uids.has(rawProfile.uid))
-          .map((rawProfile) => parseUserProfile<D>(rawProfile))
-      );
+      return body.profiles.map((rawUserProfile) => parseUserProfile<D>(rawUserProfile));
     } catch (error) {
       this.logger.error(`Failed to bulk get user profiles: ${getDetailedErrorMessage(error)}`);
       throw error;
@@ -344,7 +390,7 @@ export class UserProfileService {
   }
 
   /**
-   * See {@link UserProfileServiceStartInternal} for documentation.
+   * See {@link UserProfileServiceStart} for documentation.
    */
   private async suggest<D extends UserProfileData>(
     clusterClient: IClusterClient,
@@ -427,9 +473,11 @@ export class UserProfileService {
       const unknownUids = [];
       for (const profileUid of response.hasPrivilegeUids) {
         const filteredProfile = profilesBatch.get(profileUid);
-        if (filteredProfile) {
+        // We check privileges in batches and the batch can have more users than requested. We ignore "excessive" users,
+        // but still iterate through entire batch to collect and report all unknown uids.
+        if (filteredProfile && filteredProfiles.length < requiredSize) {
           filteredProfiles.push(filteredProfile);
-        } else {
+        } else if (!filteredProfile) {
           unknownUids.push(profileUid);
         }
       }

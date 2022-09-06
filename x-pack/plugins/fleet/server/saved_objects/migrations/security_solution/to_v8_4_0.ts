@@ -25,11 +25,14 @@ export const migratePackagePolicyToV840: SavedObjectMigrationFn<PackagePolicy, P
   if (input && input.config) {
     const policy = input.config.policy.value;
 
-    const migratedPolicy = { fanotify: { ignore_unknown_filesystems: false } };
+    const migratedAdvancedPolicy = { fanotify: { ignore_unknown_filesystems: false } };
+    const migratedAttackSurfaceReductionPolicy = { credential_hardening: { enabled: false } };
 
     policy.linux.advanced = policy.linux.advanced
-      ? { ...policy.linux.advanced, ...migratedPolicy }
-      : { ...migratedPolicy };
+      ? { ...policy.linux.advanced, ...migratedAdvancedPolicy }
+      : { ...migratedAdvancedPolicy };
+
+    policy.windows.attack_surface_reduction = migratedAttackSurfaceReductionPolicy;
   }
 
   return updatedPackagePolicyDoc;

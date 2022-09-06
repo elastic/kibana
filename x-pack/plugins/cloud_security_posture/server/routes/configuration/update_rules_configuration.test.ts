@@ -134,7 +134,7 @@ describe('Update rules configuration API', () => {
     };
     const cspConfig = await createRulesConfig(cspRules as SavedObjectsFindResponse<CspRule>);
     expect(cspConfig).toMatchObject({
-      data_yaml: { activated_rules: { cis_k8s: ['cis_1_1_1', 'cis_1_1_3'] } },
+      runtime_cfg: { activated_rules: { cis_k8s: ['cis_1_1_1', 'cis_1_1_3'] } },
     });
   });
 
@@ -177,24 +177,24 @@ describe('Update rules configuration API', () => {
       ],
     };
     const cspConfig = await createRulesConfig(cspRules as SavedObjectsFindResponse<CspRule>);
-    expect(cspConfig).toMatchObject({ data_yaml: { activated_rules: { cis_k8s: [] } } });
+    expect(cspConfig).toMatchObject({ runtime_cfg: { activated_rules: {} } });
   });
 
-  it('validate adding new dataYaml to package policy instance', async () => {
+  it('validate adding new runtimeCfg to package policy instance', async () => {
     const packagePolicy = createPackagePolicyMock();
-    packagePolicy.vars = { dataYaml: { type: 'yaml' } };
+    packagePolicy.vars = { runtimeCfg: { type: 'yaml' } };
 
-    const dataYaml = 'data_yaml:\n  activated_rules:\n  cis_k8s:\n    - 1.1.1\n    - 1.1.2\n';
-    const updatedPackagePolicy = setVarToPackagePolicy(packagePolicy, dataYaml);
-    expect(updatedPackagePolicy.vars).toEqual({ dataYaml: { type: 'yaml', value: dataYaml } });
+    const runtimeCfg = 'runtime_cfg:\n  activated_rules:\n  cis_k8s:\n    - 1.1.1\n    - 1.1.2\n';
+    const updatedPackagePolicy = setVarToPackagePolicy(packagePolicy, runtimeCfg);
+    expect(updatedPackagePolicy.vars).toEqual({ runtimeCfg: { type: 'yaml', value: runtimeCfg } });
   });
 
-  it('validate adding new dataYaml to package policy instance when it not exists on source', async () => {
+  it('validate adding new runtimeCfg to package policy instance when it not exists on source', async () => {
     const packagePolicy = createPackagePolicyMock();
 
-    const dataYaml = 'data_yaml:\n  activated_rules:\n  cis_k8s:\n    - 1.1.1\n    - 1.1.2\n';
-    const updatedPackagePolicy = setVarToPackagePolicy(packagePolicy, dataYaml);
-    expect(updatedPackagePolicy.vars).toEqual({ dataYaml: { type: 'yaml', value: dataYaml } });
+    const runtimeCfg = 'runtime_cfg:\n  activated_rules:\n  cis_k8s:\n    - 1.1.1\n    - 1.1.2\n';
+    const updatedPackagePolicy = setVarToPackagePolicy(packagePolicy, runtimeCfg);
+    expect(updatedPackagePolicy.vars).toEqual({ runtimeCfg: { type: 'yaml', value: runtimeCfg } });
   });
 
   it('verify that the API for updating package policy was invoked', async () => {
@@ -254,7 +254,7 @@ describe('Update rules configuration API', () => {
     mockSoClient.find.mockResolvedValueOnce(cspRules as SavedObjectsFindResponse<CspRule>);
 
     const mockPackagePolicy = createPackagePolicyMock();
-    mockPackagePolicy.vars = { dataYaml: { type: 'foo' } };
+    mockPackagePolicy.vars = { runtimeCfg: { type: 'foo' } };
     const packagePolicyId1 = chance.guid();
     mockPackagePolicy.id = packagePolicyId1;
 
@@ -268,8 +268,8 @@ describe('Update rules configuration API', () => {
       user
     );
 
-    expect(updatePackagePolicy.vars!.dataYaml).toHaveProperty('value');
-    expect(updatePackagePolicy.vars!.dataYaml).toMatchObject({ type: 'yaml' });
+    expect(updatePackagePolicy.vars!.runtimeCfg).toHaveProperty('value');
+    expect(updatePackagePolicy.vars!.runtimeCfg).toMatchObject({ type: 'yaml' });
     expect(mockPackagePolicyService.update).toBeCalledTimes(1);
     expect(mockPackagePolicyService.update.mock.calls[0][2]).toEqual(packagePolicyId1);
   });
@@ -322,7 +322,7 @@ describe('Update rules configuration API', () => {
     const packagePolicyId1 = chance.guid();
     const user = null;
     mockPackagePolicy.id = packagePolicyId1;
-    mockPackagePolicy.vars = { foo: {}, dataYaml: { type: 'yaml' } };
+    mockPackagePolicy.vars = { foo: {}, runtimeCfg: { type: 'yaml' } };
 
     mockPackagePolicyService.update.mockImplementation(
       (
@@ -375,7 +375,7 @@ describe('Update rules configuration API', () => {
     };
     mockSoClient.find.mockResolvedValueOnce(cspRules as SavedObjectsFindResponse<CspRule>);
 
-    mockPackagePolicy.vars = { dataYaml: { type: 'yaml' } };
+    mockPackagePolicy.vars = { runtimeCfg: { type: 'yaml' } };
 
     await updateAgentConfiguration(
       mockPackagePolicyService,

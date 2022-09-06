@@ -26,6 +26,15 @@ export class HomePageObject extends FtrService {
     return await this.testSubjects.exists(`sampleDataSetCard${id}`);
   }
 
+  async openSampleDataAccordion() {
+    const accordion = await this.testSubjects.find('showSampleDataAccordion');
+    const className = await accordion.getAttribute('class');
+
+    if (!className.includes('euiAccordion-isOpen')) {
+      await this.testSubjects.click('showSampleDataButton');
+    }
+  }
+
   async isSampleDataSetInstalled(id: string) {
     const sampleDataCard = await this.testSubjects.find(`sampleDataSetCard${id}`);
     const deleteButton = await sampleDataCard.findAllByTestSubject(`removeSampleDataSet${id}`);
@@ -50,6 +59,7 @@ export class HomePageObject extends FtrService {
   }
 
   async addSampleDataSet(id: string) {
+    await this.openSampleDataAccordion();
     const isInstalled = await this.isSampleDataSetInstalled(id);
     if (!isInstalled) {
       await this.retry.waitFor('wait until sample data is installed', async () => {
@@ -61,6 +71,7 @@ export class HomePageObject extends FtrService {
   }
 
   async removeSampleDataSet(id: string) {
+    await this.openSampleDataAccordion();
     // looks like overkill but we're hitting flaky cases where we click but it doesn't remove
     await this.testSubjects.waitForEnabled(`removeSampleDataSet${id}`);
     // https://github.com/elastic/kibana/issues/65949

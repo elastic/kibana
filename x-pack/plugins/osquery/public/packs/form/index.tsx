@@ -19,7 +19,6 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import type { OsqueryManagerPackagePolicy } from '../../../common/types';
 import {
   Form,
   useForm,
@@ -38,6 +37,7 @@ import { useCreatePack } from '../use_create_pack';
 import { useUpdatePack } from '../use_update_pack';
 import { convertPackQueriesToSO, convertSOQueriesToPack } from './utils';
 import { idSchemaValidation } from '../queries/validations';
+import type { PackItem } from '../types';
 
 const GhostFormField = () => <></>;
 
@@ -46,7 +46,7 @@ const FORM_ID = 'scheduledQueryForm';
 const CommonUseField = getUseField({ component: Field });
 
 interface PackFormProps {
-  defaultValue?: OsqueryManagerPackagePolicy;
+  defaultValue?: PackItem;
   editMode?: boolean;
   isReadOnly?: boolean;
 }
@@ -70,16 +70,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
     withRedirect: true,
   });
 
-  const { form } = useForm<
-    Omit<OsqueryManagerPackagePolicy, 'policy_id' | 'id'> & {
-      queries: {};
-      policy_ids: string[];
-    },
-    Omit<OsqueryManagerPackagePolicy, 'policy_id' | 'id'> & {
-      queries: {};
-      policy_ids: string[];
-    }
-  >({
+  const { form } = useForm<PackItem>({
     id: FORM_ID,
     schema: {
       name: {
@@ -142,6 +133,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
       policy_ids: payload.policy_ids ?? [],
       queries: convertPackQueriesToSO(payload.queries),
     }),
+    // @ts-expect-error update types
     serializer: (payload) => ({
       ...payload,
       queries: convertSOQueriesToPack(payload.queries),
