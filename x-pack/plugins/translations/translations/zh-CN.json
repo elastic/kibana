@@ -32887,7 +32887,6 @@
     "xpack.triggersActionsUI.sections.rulesList.refreshRulesButtonLabel": "刷新",
     "xpack.triggersActionsUI.sections.rulesList.remainingSnoozeIndefinite": "无限期",
     "xpack.triggersActionsUI.sections.rulesList.removeAllButton": "全部删除",
-    "xpack.triggersActionsUI.sections.rulesList.removeAllSnoozeSchedules": "移除所有计划",
     "xpack.triggersActionsUI.sections.rulesList.removeCancelButton": "取消",
     "xpack.triggersActionsUI.sections.rulesList.removeConfirmButton": "全部删除",
     "xpack.triggersActionsUI.sections.rulesList.resetDefaultIndexLabel": "重置默认索引",

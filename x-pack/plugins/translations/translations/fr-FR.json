@@ -32877,7 +32877,6 @@
     "xpack.triggersActionsUI.sections.rulesList.refreshRulesButtonLabel": "Actualiser",
     "xpack.triggersActionsUI.sections.rulesList.remainingSnoozeIndefinite": "Indéfiniment",
     "xpack.triggersActionsUI.sections.rulesList.removeAllButton": "Tout supprimer",
-    "xpack.triggersActionsUI.sections.rulesList.removeAllSnoozeSchedules": "Supprimer tous les calendriers",
     "xpack.triggersActionsUI.sections.rulesList.removeCancelButton": "Annuler",
     "xpack.triggersActionsUI.sections.rulesList.removeConfirmButton": "Tout supprimer",
     "xpack.triggersActionsUI.sections.rulesList.resetDefaultIndexLabel": "Réinitialiser l'index par défaut",

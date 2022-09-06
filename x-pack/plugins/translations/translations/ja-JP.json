@@ -32853,7 +32853,6 @@
     "xpack.triggersActionsUI.sections.rulesList.refreshRulesButtonLabel": "更新",
     "xpack.triggersActionsUI.sections.rulesList.remainingSnoozeIndefinite": "永久",
     "xpack.triggersActionsUI.sections.rulesList.removeAllButton": "すべて削除",
-    "xpack.triggersActionsUI.sections.rulesList.removeAllSnoozeSchedules": "すべてのスケジュールを削除",
     "xpack.triggersActionsUI.sections.rulesList.removeCancelButton": "キャンセル",
     "xpack.triggersActionsUI.sections.rulesList.removeConfirmButton": "すべて削除",
     "xpack.triggersActionsUI.sections.rulesList.resetDefaultIndexLabel": "デフォルトのインデックスをリセット",
