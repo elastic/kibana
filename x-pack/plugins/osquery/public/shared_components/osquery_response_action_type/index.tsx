@@ -167,36 +167,6 @@ const OsqueryResponseActionParamsFormComponent: React.FunctionComponent<OsqueryR
       clearErrors();
     }, [clearErrors, setValue]);
 
-    // useEffect(() => {
-    // if (queryType === 'query') {
-    //   context.updateFieldValues({
-    //     [item.path]: {
-    //       actionTypeId: '.osquery',
-    //       params: {
-    //         id: watchedValues.id,
-    //         savedQueryId: watchedValues.savedQueryId,
-    //         query: watchedValues.query,
-    //         ecs_mapping: watchedValues.ecs_mapping,
-    //         packId: '',
-    //       },
-    //     },
-    //   });
-    // } else {
-    //   context.updateFieldValues({
-    //     [item.path]: {
-    //       actionTypeId: '.osquery',
-    //       params: {
-    //         id: watchedValues.id,
-    //         packId: watchedValues?.packId?.length ? watchedValues?.packId[0] : undefined,
-    //         savedQueryId: '',
-    //         query: '',
-    //         ecs_mapping: '',
-    //       },
-    //     },
-    //   });
-    // }
-    // }, [context, item.path, queryType, watchedValues]);
-
     const handleSavedQueryChange = useCallback(
       (savedQuery) => {
         if (savedQuery) {
