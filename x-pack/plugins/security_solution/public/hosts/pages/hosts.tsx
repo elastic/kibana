@@ -103,7 +103,7 @@ const HostsComponent = () => {
     }
 
     if (tabName === HostsTableType.risk) {
-      const severityFilter = generateSeverityFilter(severitySelection);
+      const severityFilter = generateSeverityFilter(severitySelection, 'host');
 
       return [...severityFilter, ...hostNameExistsFilter, ...filters];
     }

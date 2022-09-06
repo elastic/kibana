@@ -108,7 +108,9 @@ export const HostOverview = React.memo<HostSummaryProps>(
             title: i18n.HOST_RISK_SCORE,
             description: (
               <>
-                {hostRiskData ? Math.round(hostRiskData.risk_stats.risk_score) : getEmptyTagValue()}
+                {hostRiskData
+                  ? Math.round(hostRiskData.host.risk.calculated_score_norm)
+                  : getEmptyTagValue()}
               </>
             ),
           },
@@ -118,7 +120,10 @@ export const HostOverview = React.memo<HostSummaryProps>(
             description: (
               <>
                 {hostRiskData ? (
-                  <RiskScore severity={hostRiskData.risk as RiskSeverity} hideBackgroundColor />
+                  <RiskScore
+                    severity={hostRiskData.host.risk.calculated_level as RiskSeverity}
+                    hideBackgroundColor
+                  />
                 ) : (
                   getEmptyTagValue()
                 )}

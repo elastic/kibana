@@ -23,11 +23,12 @@ describe('HostRiskSummary', () => {
           '@timestamp': '1641902481',
           host: {
             name: 'test-host-name',
-          },
-          risk: riskKeyword,
-          risk_stats: {
-            risk_score: 9999,
-            rule_risks: [],
+            risk: {
+              multipliers: [],
+              calculated_score_norm: 9999,
+              calculated_level: riskKeyword,
+              rule_risks: [],
+            },
           },
         },
       ],
@@ -67,11 +68,12 @@ describe('HostRiskSummary', () => {
           '@timestamp': '1641902530',
           host: {
             name: 'test-host-name',
-          },
-          risk: 'test-risk',
-          risk_stats: {
-            risk_score: 9999,
-            rule_risks: [],
+            risk: {
+              multipliers: [],
+              calculated_score_norm: 9999,
+              calculated_level: 'test-risk',
+              rule_risks: [],
+            },
           },
         },
       ],

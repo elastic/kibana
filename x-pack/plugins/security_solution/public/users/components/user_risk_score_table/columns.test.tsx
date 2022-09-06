@@ -19,8 +19,8 @@ describe('getUserRiskScoreColumns', () => {
     const columns = getUserRiskScoreColumns(defaultProps);
 
     expect(columns[0].field).toBe('user.name');
-    expect(columns[1].field).toBe('risk_stats.risk_score');
-    expect(columns[2].field).toBe('risk');
+    expect(columns[1].field).toBe('user.risk.calculated_score_norm');
+    expect(columns[2].field).toBe('user.risk.calculated_level');
 
     columns.forEach((column) => {
       expect(column).toHaveProperty('name');

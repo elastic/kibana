@@ -13,6 +13,7 @@ import type { HostsComponentsQueryProps } from './types';
 import * as i18n from '../translations';
 import { HostRiskInformationButtonEmpty } from '../../components/host_risk_information';
 import { HostRiskScoreQueryId, useHostRiskScore } from '../../../risk_score/containers';
+import type { HostRiskScore } from '../../../../common/search_strategy';
 import { buildHostNamesFilter } from '../../../../common/search_strategy';
 import { useQueryInspector } from '../../../common/components/page/manage_query';
 import { RiskScoreOverTime } from '../../../common/components/risk_score_over_time';
@@ -86,7 +87,9 @@ const HostRiskTabBodyComponent: React.FC<
     [setOverTimeToggleStatus]
   );
 
-  const rules = data && data.length > 0 ? data[data.length - 1].risk_stats.rule_risks : [];
+  const lastHosttRiskItem: HostRiskScore | null =
+    data && data.length > 0 ? data[data.length - 1] : null;
+  const rules = lastHosttRiskItem ? lastHosttRiskItem.host.risk.rule_risks : [];
 
   return (
     <>

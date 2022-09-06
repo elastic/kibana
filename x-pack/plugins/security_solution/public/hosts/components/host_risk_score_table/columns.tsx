@@ -67,7 +67,7 @@ export const getHostRiskScoreColumns = ({
     },
   },
   {
-    field: 'risk_stats.risk_score',
+    field: 'host.risk.calculated_score_norm',
     name: i18n.HOST_RISK_SCORE,
     truncateText: true,
     mobileOptions: { show: true },
@@ -84,7 +84,7 @@ export const getHostRiskScoreColumns = ({
     },
   },
   {
-    field: 'risk',
+    field: 'host.risk.calculated_level',
     name: (
       <EuiToolTip content={i18n.HOST_RISK_TOOLTIP}>
         <>

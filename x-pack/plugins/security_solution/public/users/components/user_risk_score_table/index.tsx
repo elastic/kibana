@@ -31,7 +31,7 @@ import type { State } from '../../../common/store';
 import type {
   RiskScoreSortField,
   RiskSeverity,
-  UsersRiskScore,
+  UserRiskScore,
 } from '../../../../common/search_strategy';
 
 const IconWrapper = styled.span`
@@ -52,7 +52,7 @@ export const rowItems: ItemsPerRow[] = [
 const tableType = usersModel.UsersTableType.risk;
 
 interface UserRiskScoreTableProps {
-  data: UsersRiskScore[];
+  data: UserRiskScore[];
   id: string;
   isInspect: boolean;
   loading: boolean;
@@ -170,7 +170,7 @@ const UserRiskScoreTableComponent: React.FC<UserRiskScoreTableProps> = ({
   );
 
   const getUserRiskScoreFilterQuerySelector = useMemo(
-    () => usersSelectors.usersRiskScoreSeverityFilterSelector(),
+    () => usersSelectors.UserRiskScoreSeverityFilterSelector(),
     []
   );
   const severitySelectionRedux = useDeepEqualSelector((state: State) =>

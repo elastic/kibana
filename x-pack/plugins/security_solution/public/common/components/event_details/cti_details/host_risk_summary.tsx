@@ -25,12 +25,12 @@ const HostRiskSummaryComponent: React.FC<{
         toolTipContent={
           <FormattedMessage
             id="xpack.securitySolution.alertDetails.overview.hostDataTooltipContent"
-            defaultMessage="Risk classification is displayed only when available for a host. Ensure {hostsRiskScoreDocumentationLink} is enabled within your environment."
+            defaultMessage="Risk classification is displayed only when available for a host. Ensure {HostRiskScoreDocumentationLink} is enabled within your environment."
             values={{
-              hostsRiskScoreDocumentationLink: (
+              HostRiskScoreDocumentationLink: (
                 <EuiLink href={RISKY_HOSTS_DOC_LINK} target="_blank">
                   <FormattedMessage
-                    id="xpack.securitySolution.alertDetails.overview.hostsRiskScoreLink"
+                    id="xpack.securitySolution.alertDetails.overview.HostRiskScoreLink"
                     defaultMessage="Host Risk Score"
                   />
                 </EuiLink>
@@ -56,7 +56,10 @@ const HostRiskSummaryComponent: React.FC<{
           <EnrichedDataRow
             field={i18n.HOST_RISK_CLASSIFICATION}
             value={
-              <RiskScore severity={hostRisk.result[0].risk as RiskSeverity} hideBackgroundColor />
+              <RiskScore
+                severity={hostRisk.result[0].host.risk.calculated_level as RiskSeverity}
+                hideBackgroundColor
+              />
             }
           />
         </>

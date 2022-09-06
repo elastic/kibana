@@ -12,8 +12,8 @@ import type { UserEcs } from '../../../../ecs/user';
 export const enum UserRiskScoreFields {
   timestamp = '@timestamp',
   userName = 'user.name',
-  riskScore = 'risk_stats.risk_score',
-  risk = 'risk',
+  riskScore = 'user.risk.calculated_score_norm',
+  risk = 'user.risk.calculated_level',
 }
 
 export interface UserRiskScoreItem {

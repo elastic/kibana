@@ -77,12 +77,12 @@ const UsersComponent = () => {
   const query = useDeepEqualSelector(getGlobalQuerySelector);
   const filters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
 
-  const getUsersRiskScoreFilterQuerySelector = useMemo(
-    () => usersSelectors.usersRiskScoreSeverityFilterSelector(),
+  const getUserRiskScoreFilterQuerySelector = useMemo(
+    () => usersSelectors.UserRiskScoreSeverityFilterSelector(),
     []
   );
   const severitySelection = useDeepEqualSelector((state: State) =>
-    getUsersRiskScoreFilterQuerySelector(state)
+    getUserRiskScoreFilterQuerySelector(state)
   );
 
   const { to, from, deleteQuery, setQuery, isInitializing } = useGlobalTime();
@@ -96,7 +96,7 @@ const UsersComponent = () => {
     }
 
     if (tabName === UsersTableType.risk) {
-      const severityFilter = generateSeverityFilter(severitySelection);
+      const severityFilter = generateSeverityFilter(severitySelection, 'user');
 
       return [...severityFilter, ...filters];
     }

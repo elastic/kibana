@@ -60,7 +60,10 @@ export const setHostsQueriesActivePageToZero = (state: HostsModel, type: HostsTy
   throw new Error(`HostsType ${type} is unknown`);
 };
 
-export const generateSeverityFilter = (severitySelection: RiskSeverity[]) =>
+export const generateSeverityFilter = (
+  severitySelection: RiskSeverity[],
+  entity: 'user' | 'host'
+) =>
   severitySelection.length > 0
     ? [
         {
@@ -68,7 +71,9 @@ export const generateSeverityFilter = (severitySelection: RiskSeverity[]) =>
             bool: {
               should: severitySelection.map((query) => ({
                 match_phrase: {
-                  'risk.keyword': {
+                  [entity === 'user'
+                    ? 'user.risk.calculated_level.keyword'
+                    : 'host.risk.calculated_level.keyword']: {
                     query,
                   },
                 },

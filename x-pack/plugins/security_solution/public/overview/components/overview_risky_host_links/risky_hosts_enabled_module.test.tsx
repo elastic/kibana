@@ -59,12 +59,13 @@ describe('RiskyHostsEnabledModule', () => {
                   '@timestamp': '1641902481',
                   host: {
                     name: 'a',
+                    risk: {
+                      calculated_score_norm: 1,
+                      rule_risks: [],
+                      calculated_level: '',
+                      multipliers: [],
+                    },
                   },
-                  risk_stats: {
-                    risk_score: 1,
-                    rule_risks: [],
-                  },
-                  risk: '',
                 },
               ]}
               to={'now'}

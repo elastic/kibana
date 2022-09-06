@@ -68,7 +68,7 @@ export const getUserRiskScoreColumns = ({
     },
   },
   {
-    field: 'risk_stats.risk_score',
+    field: 'user.risk.calculated_score_norm',
     name: i18n.USER_RISK_SCORE,
     truncateText: true,
     mobileOptions: { show: true },
@@ -85,7 +85,7 @@ export const getUserRiskScoreColumns = ({
     },
   },
   {
-    field: 'risk',
+    field: 'user.risk.calculated_level',
     name: (
       <EuiToolTip content={i18n.USER_RISK_TOOLTIP}>
         <>

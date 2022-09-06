@@ -11,7 +11,11 @@ import { useDispatch } from 'react-redux';
 import { sum } from 'lodash/fp';
 import { useHostRiskScoreKpi, useUserRiskScoreKpi } from '../../../../risk_score/containers';
 import { LinkAnchor, useGetSecuritySolutionLinkProps } from '../../../../common/components/links';
-import { Direction, RiskScoreFields, RiskSeverity } from '../../../../../common/search_strategy';
+import {
+  Direction,
+  RiskSeverity,
+  UserRiskScoreFields,
+} from '../../../../../common/search_strategy';
 import * as i18n from './translations';
 import { getTabsOnHostsUrl } from '../../../../common/components/link_to/redirect_to_hosts';
 import { SecurityPageName } from '../../../../app/types';
@@ -52,7 +56,7 @@ export const EntityAnalyticsHeader = () => {
 
         dispatch(
           hostsActions.updateHostRiskScoreSort({
-            sort: { field: RiskScoreFields.riskScore, direction: Direction.desc },
+            sort: { field: HostRiskScoreFields.riskScore, direction: Direction.desc },
             hostsType: HostsType.page,
           })
         );
@@ -74,7 +78,7 @@ export const EntityAnalyticsHeader = () => {
 
         dispatch(
           usersActions.updateTableSorting({
-            sort: { field: RiskScoreFields.riskScore, direction: Direction.desc },
+            sort: { field: UserRiskScoreFields.riskScore, direction: Direction.desc },
             tableType: UsersTableType.risk,
           })
         );

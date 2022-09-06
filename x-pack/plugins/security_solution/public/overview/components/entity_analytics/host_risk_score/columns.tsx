@@ -12,10 +12,10 @@ import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { HostDetailsLink } from '../../../../common/components/links';
 import { HostsTableType } from '../../../../hosts/store/model';
 import { RiskScore } from '../../../../common/components/severity/common';
-import type { HostsRiskScore, RiskSeverity } from '../../../../../common/search_strategy';
+import type { HostRiskScore, RiskSeverity } from '../../../../../common/search_strategy';
 import * as i18n from './translations';
 
-type HostRiskScoreColumns = Array<EuiBasicTableColumn<HostsRiskScore>>;
+type HostRiskScoreColumns = Array<EuiBasicTableColumn<HostRiskScore>>;
 
 export const getHostRiskScoreColumns = (): HostRiskScoreColumns => [
   {
@@ -31,7 +31,7 @@ export const getHostRiskScoreColumns = (): HostRiskScoreColumns => [
     },
   },
   {
-    field: 'risk_stats.risk_score',
+    field: 'host.risk.calculated_score_norm',
     name: i18n.HOST_RISK_SCORE,
     truncateText: true,
     mobileOptions: { show: true },
@@ -47,7 +47,7 @@ export const getHostRiskScoreColumns = (): HostRiskScoreColumns => [
     },
   },
   {
-    field: 'risk',
+    field: 'host.risk.calculated_level',
     name: (
       <EuiToolTip content={i18n.HOST_RISK_TOOLTIP}>
         <>
