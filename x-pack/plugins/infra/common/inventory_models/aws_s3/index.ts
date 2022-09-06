@@ -9,6 +9,8 @@ import { i18n } from '@kbn/i18n';
 import { metrics } from './metrics';
 import { InventoryModel } from '../types';
 
+export { awsS3SnapshotMetricTypes } from './metrics';
+
 export const awsS3: InventoryModel = {
   id: 'awsS3',
   displayName: i18n.translate('xpack.infra.inventoryModels.awsS3.displayName', {

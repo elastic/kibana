@@ -88,6 +88,7 @@ export const CategoryStoppedPartitions: FC = () => {
         .subscribe();
       return () => resultsSubscription.unsubscribe();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
