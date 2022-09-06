@@ -6,7 +6,26 @@
  */
 import React from 'react';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
+import { ProcessEvent } from '../../../common/types/process_tree';
 import { TTYPlayerControls, TTYPlayerControlsDeps } from '.';
+
+const MOCK_PROCESS_EVENT_START: ProcessEvent = {
+  process: {
+    entity_id: '1',
+  },
+};
+
+const MOCK_PROCESS_EVENT_MIDDLE: ProcessEvent = {
+  process: {
+    entity_id: '2',
+  },
+};
+
+const MOCK_PROCESS_EVENT_END: ProcessEvent = {
+  process: {
+    entity_id: '3',
+  },
+};
 
 describe('TTYPlayerControls component', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
@@ -18,7 +37,7 @@ describe('TTYPlayerControls component', () => {
     mockedContext = createAppRootMockRenderer();
 
     props = {
-      currentProcessEntityId: '1',
+      currentProcessEvent: MOCK_PROCESS_EVENT_START,
       processIdLineMap: {
         '1': {
           value: 0,
@@ -40,6 +59,8 @@ describe('TTYPlayerControls component', () => {
       linesLength: 10,
       onSeekLine: jest.fn(),
       onTogglePlayback: jest.fn(),
+      onClose: jest.fn(),
+      onJumpToEvent: jest.fn(),
       textSizer: <div>tty text sizer placeholder</div>,
     };
   });
@@ -70,7 +91,7 @@ describe('TTYPlayerControls component', () => {
 
   it('clicking on previous button triggers onSeekLine', async () => {
     renderResult = mockedContext.render(
-      <TTYPlayerControls {...props} currentProcessEntityId="2" />
+      <TTYPlayerControls {...props} currentProcessEvent={MOCK_PROCESS_EVENT_MIDDLE} />
     );
     renderResult.queryByTestId('sessionView:TTYPlayerControlsPrevious')?.click();
     expect(props.onSeekLine).toHaveBeenCalledWith(0);
@@ -78,7 +99,7 @@ describe('TTYPlayerControls component', () => {
 
   it('clicking on start button triggers onSeekLine', async () => {
     renderResult = mockedContext.render(
-      <TTYPlayerControls {...props} currentProcessEntityId="3" />
+      <TTYPlayerControls {...props} currentProcessEvent={MOCK_PROCESS_EVENT_END} />
     );
     renderResult.queryByTestId('sessionView:TTYPlayerControlsStart')?.click();
     expect(props.onSeekLine).toHaveBeenCalledWith(0);
@@ -100,7 +121,7 @@ describe('TTYPlayerControls component', () => {
 
   it('end and next buttons are disabled if currentProcessEntityId is end', async () => {
     renderResult = mockedContext.render(
-      <TTYPlayerControls {...props} currentProcessEntityId="3" />
+      <TTYPlayerControls {...props} currentProcessEvent={MOCK_PROCESS_EVENT_END} />
     );
     renderResult.queryByTestId('sessionView:TTYPlayerControlsNext')?.click();
     expect(props.onSeekLine).not.toHaveBeenCalled();

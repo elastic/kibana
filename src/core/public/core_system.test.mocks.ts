@@ -11,7 +11,7 @@ import { docLinksServiceMock } from '@kbn/core-doc-links-browser-mocks';
 import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
-import { chromeServiceMock } from './chrome/chrome_service.mock';
+import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
 import { fatalErrorsServiceMock } from '@kbn/core-fatal-errors-browser-mocks';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';
@@ -19,7 +19,7 @@ import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { overlayServiceMock } from '@kbn/core-overlays-browser-mocks';
 import { pluginsServiceMock } from './plugins/plugins_service.mock';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
-import { renderingServiceMock } from './rendering/rendering_service.mock';
+import { renderingServiceMock } from '@kbn/core-rendering-browser-mocks';
 import { integrationsServiceMock } from '@kbn/core-integrations-browser-mocks';
 import { coreAppMock } from './core_app/core_app.mock';
 
@@ -82,7 +82,7 @@ jest.doMock('@kbn/core-ui-settings-browser-internal', () => ({
 
 export const MockChromeService = chromeServiceMock.create();
 export const ChromeServiceConstructor = jest.fn().mockImplementation(() => MockChromeService);
-jest.doMock('./chrome', () => ({
+jest.doMock('@kbn/core-chrome-browser-internal', () => ({
   ChromeService: ChromeServiceConstructor,
 }));
 
@@ -114,7 +114,7 @@ jest.doMock('@kbn/core-doc-links-browser-internal', () => ({
 
 export const MockRenderingService = renderingServiceMock.create();
 export const RenderingServiceConstructor = jest.fn().mockImplementation(() => MockRenderingService);
-jest.doMock('./rendering', () => ({
+jest.doMock('@kbn/core-rendering-browser-internal', () => ({
   RenderingService: RenderingServiceConstructor,
 }));
 
