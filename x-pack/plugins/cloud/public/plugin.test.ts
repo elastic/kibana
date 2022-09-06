@@ -12,6 +12,21 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { homePluginMock } from '@kbn/home-plugin/public/mocks';
 import { securityMock } from '@kbn/security-plugin/public/mocks';
 import { CloudPlugin, type CloudConfigType } from './plugin';
+import { CloudExperimentsPluginSetup } from '@kbn/cloud-experiments-plugin/common';
+import { cloudExperimentsMock } from '@kbn/cloud-experiments-plugin/common/mocks';
+
+const baseConfig = {
+  base_url: 'https://cloud.elastic.co',
+  deployment_url: '/abc123',
+  profile_url: '/user/settings/',
+  organization_url: '/account/',
+  full_story: {
+    enabled: false,
+  },
+  chat: {
+    enabled: false,
+  },
+};
 
 describe('Cloud Plugin', () => {
   describe('#setup', () => {
@@ -22,17 +37,8 @@ describe('Cloud Plugin', () => {
 
       const setupPlugin = async ({ config = {} }: { config?: Partial<CloudConfigType> }) => {
         const initContext = coreMock.createPluginInitializerContext({
+          ...baseConfig,
           id: 'cloudId',
-          base_url: 'https://cloud.elastic.co',
-          deployment_url: '/abc123',
-          profile_url: '/profile/alice',
-          organization_url: '/org/myOrg',
-          full_story: {
-            enabled: false,
-          },
-          chat: {
-            enabled: false,
-          },
           ...config,
         });
 
@@ -92,16 +98,7 @@ describe('Cloud Plugin', () => {
         currentUserProps?: Record<string, any> | Error;
       }) => {
         const initContext = coreMock.createPluginInitializerContext({
-          base_url: 'https://cloud.elastic.co',
-          deployment_url: '/abc123',
-          profile_url: '/profile/alice',
-          organization_url: '/org/myOrg',
-          full_story: {
-            enabled: false,
-          },
-          chat: {
-            enabled: false,
-          },
+          ...baseConfig,
           ...config,
         });
 
@@ -249,17 +246,8 @@ describe('Cloud Plugin', () => {
         failHttp?: boolean;
       }) => {
         const initContext = coreMock.createPluginInitializerContext({
+          ...baseConfig,
           id: isCloudEnabled ? 'cloud-id' : null,
-          base_url: 'https://cloud.elastic.co',
-          deployment_url: '/abc123',
-          profile_url: '/profile/alice',
-          organization_url: '/org/myOrg',
-          full_story: {
-            enabled: false,
-          },
-          chat: {
-            enabled: false,
-          },
           ...config,
         });
 
@@ -322,18 +310,9 @@ describe('Cloud Plugin', () => {
     describe('interface', () => {
       const setupPlugin = () => {
         const initContext = coreMock.createPluginInitializerContext({
+          ...baseConfig,
           id: 'cloudId',
           cname: 'cloud.elastic.co',
-          base_url: 'https://cloud.elastic.co',
-          deployment_url: '/abc123',
-          profile_url: '/user/settings/',
-          organization_url: '/account/',
-          chat: {
-            enabled: false,
-          },
-          full_story: {
-            enabled: false,
-          },
         });
         const plugin = new CloudPlugin(initContext);
 
@@ -381,6 +360,50 @@ describe('Cloud Plugin', () => {
       it('exposes cname', () => {
         const { setup } = setupPlugin();
         expect(setup.cname).toBe('cloud.elastic.co');
+      });
+    });
+
+    describe('Set up cloudExperiments', () => {
+      describe('when cloud ID is not provided in the config', () => {
+        let cloudExperiments: jest.Mocked<CloudExperimentsPluginSetup>;
+        beforeEach(() => {
+          const plugin = new CloudPlugin(coreMock.createPluginInitializerContext(baseConfig));
+          cloudExperiments = cloudExperimentsMock.createSetupMock();
+          plugin.setup(coreMock.createSetup(), { cloudExperiments });
+        });
+
+        test('does not call cloudExperiments.identifyUser', async () => {
+          expect(cloudExperiments.identifyUser).not.toHaveBeenCalled();
+        });
+      });
+
+      describe('when cloud ID is provided in the config', () => {
+        let cloudExperiments: jest.Mocked<CloudExperimentsPluginSetup>;
+        beforeEach(() => {
+          const plugin = new CloudPlugin(
+            coreMock.createPluginInitializerContext({ ...baseConfig, id: 'cloud test' })
+          );
+          cloudExperiments = cloudExperimentsMock.createSetupMock();
+          plugin.setup(coreMock.createSetup(), { cloudExperiments });
+        });
+
+        test('calls cloudExperiments.identifyUser', async () => {
+          expect(cloudExperiments.identifyUser).toHaveBeenCalledTimes(1);
+        });
+
+        test('the cloud ID is hashed when calling cloudExperiments.identifyUser', async () => {
+          expect(cloudExperiments.identifyUser.mock.calls[0][0]).toEqual(
+            '1acb4a1cc1c3d672a8d826055d897c2623ceb1d4fb07e46d97986751a36b06cf'
+          );
+        });
+
+        test('specifies the Kibana version when calling cloudExperiments.identifyUser', async () => {
+          expect(cloudExperiments.identifyUser.mock.calls[0][1]).toEqual(
+            expect.objectContaining({
+              kibanaVersion: 'version',
+            })
+          );
+        });
       });
     });
   });
