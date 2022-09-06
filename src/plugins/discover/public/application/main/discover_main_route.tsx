@@ -96,8 +96,8 @@ export function DiscoverMainRoute(props: Props) {
         }
 
         const { appStateContainer } = getState({ history, uiSettings: config });
-        const { index } = appStateContainer.getState();
-        const ip = await loadDataView(data.dataViews, config, index);
+        const { index, ignoreFetchState } = appStateContainer.getState();
+        const ip = await loadDataView(data.dataViews, config, ignoreFetchState, index);
 
         const ipList = ip.list as Array<SavedObject<DataViewAttributes>>;
         const dataViewData = resolveDataView(ip, searchSource, toastNotifications);

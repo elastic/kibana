@@ -71,6 +71,7 @@ export function getStateDefaults({
     rowHeight: undefined,
     rowsPerPage: undefined,
     grid: undefined,
+    ignoreFetchState: undefined,
   };
   if (savedSearch.grid) {
     defaultState.grid = savedSearch.grid;

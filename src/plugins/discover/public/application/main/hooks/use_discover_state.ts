@@ -158,7 +158,7 @@ export function useDiscoverState({
          *  That's because appState is updated before savedSearchData$
          *  The following line of code catches this, but should be improved
          */
-        const nextDataView = await loadDataView(dataViews, config, nextState.index);
+        const nextDataView = await loadDataView(dataViews, config, undefined, nextState.index);
         savedSearch.searchSource.setField('index', nextDataView.loaded);
 
         reset();
