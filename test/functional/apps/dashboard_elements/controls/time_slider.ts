@@ -70,7 +70,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('can not add a second time slider control', async () => {
         await dashboardControls.openControlsMenu();
         const createTimeSliderButton = await testSubjects.find('controls-create-timeslider-button');
-        const isDisabled = await createTimeSliderButton.getAttribute('disabled');
         expect(await createTimeSliderButton.getAttribute('disabled')).to.be('true');
       });
 

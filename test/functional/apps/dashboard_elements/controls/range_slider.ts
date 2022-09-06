@@ -116,7 +116,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardControls.controlsEditorSetfield('dayOfWeek', RANGE_SLIDER_CONTROL);
         await dashboardControls.controlEditorSave();
         await dashboardControls.rangeSliderWaitForLoading();
-        await dashbaordControls.validateRange('placeholder', firstId, '0', '6');
+        await dashboardControls.validateRange('placeholder', firstId, '0', '6');
 
         // when creating a new filter, the ability to select a data view should be removed, because the dashboard now only has one data view
         await retry.try(async () => {
