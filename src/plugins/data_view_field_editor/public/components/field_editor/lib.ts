@@ -100,6 +100,7 @@ export const getFieldPreviewChanges = (subject: Subject<FieldPreview[]>) =>
     bufferCount(2, 1),
     // convert values into diff descriptions
     map(([prev, next]) => {
+      console.log('*** diffing', prev, next);
       const changes = differenceWith(next, prev, isEqual).reduce<ChangeSet>((col, item) => {
         col[item.name] = {
           changeType: ChangeType.UPSERT,

@@ -24,7 +24,7 @@ import { ScriptField } from './form_fields';
 import { useFieldEditorContext } from '../field_editor_context';
 import { RUNTIME_FIELD_OPTIONS_PRIMITIVE } from './constants';
 import { valueToComboBoxOption } from './lib';
-import { RuntimePrimitiveTypes, UseField } from '../../shared_imports';
+import { RuntimePrimitiveTypes, UseField, UseArray } from '../../shared_imports';
 import { FieldFormInternal } from './field_editor';
 
 export interface CompositeEditorProps {
@@ -33,44 +33,58 @@ export interface CompositeEditorProps {
 
 export const CompositeEditor = ({ onReset }: CompositeEditorProps) => {
   const { links, existingConcreteFields } = useFieldEditorContext();
+  // console.log('*** CompositeEditor', value);
   return (
-    <UseField<FieldFormInternal['fields']> path="fields">
-      {({ value = {}, setValue }) => {
-        return (
-          <div data-test-subj="compositeEditor">
-            <ScriptField
-              existingConcreteFields={existingConcreteFields}
-              links={links}
-              placeholder={"emit('field_name', 'hello world');"}
-            />
-            <EuiSpacer size="xl" />
-            <>
-              <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="spaceBetween">
-                <EuiFlexGroup gutterSize="s" alignItems="center">
-                  <EuiFlexItem grow={false}>
-                    <EuiText size="s">
-                      <FormattedMessage
-                        id="indexPatternFieldEditor.editor.compositeFieldsCount"
-                        defaultMessage="Generated fields"
-                      />
-                    </EuiText>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiNotificationBadge color="subdued">
-                      {Object.entries(value).length}
-                    </EuiNotificationBadge>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-                <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty flush="right" iconType="refresh" onClick={onReset}>
-                    <FormattedMessage
-                      id="indexPatternFieldEditor.editor.compositeRefreshTypes"
-                      defaultMessage="Reset"
-                    />
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-              {Object.entries(value).map(([key, itemValue], idx) => {
+    <div data-test-subj="compositeEditor">
+      <ScriptField
+        existingConcreteFields={existingConcreteFields}
+        links={links}
+        placeholder={"emit('field_name', 'hello world');"}
+      />
+      <EuiSpacer size="xl" />
+      <>
+        <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="spaceBetween">
+          <EuiFlexGroup gutterSize="s" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiText size="s">
+                <FormattedMessage
+                  id="indexPatternFieldEditor.editor.compositeFieldsCount"
+                  defaultMessage="Generated fields"
+                />
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiNotificationBadge color="subdued">{0}</EuiNotificationBadge>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty flush="right" iconType="refresh" onClick={onReset}>
+              <FormattedMessage
+                id="indexPatternFieldEditor.editor.compositeRefreshTypes"
+                defaultMessage="Reset"
+              />
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <UseArray path="fields" initialNumberOfItems={0}>
+          {({ items, addItem, removeItem }) => {
+            return (
+              <>
+                {items.map((field, index) => {
+                  return <div key={field.id}>{field.path}</div>;
+                })}
+              </>
+            );
+          }}
+        </UseArray>
+      </>
+    </div>
+  );
+};
+
+/**
+
+ {Object.entries(value).map(([key, itemValue], idx) => {
                 return (
                   <div>
                     <EuiFlexGroup gutterSize="s">
@@ -96,6 +110,7 @@ export const CompositeEditor = ({ onReset }: CompositeEditorProps) => {
                               }
                               // update the type for the given field
                               value[key] = { type: newValue[0].value! as RuntimePrimitiveTypes };
+                              console.log('*** onChange', value);
                               // retun new object as to trigger react hooks
                               setValue({ ...value });
                             }}
@@ -115,10 +130,4 @@ export const CompositeEditor = ({ onReset }: CompositeEditorProps) => {
                   </div>
                 );
               })}
-            </>
-          </div>
-        );
-      }}
-    </UseField>
-  );
-};
+ */

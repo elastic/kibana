@@ -457,6 +457,7 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
       ) {
         return;
       }
+      console.log('*** updateFieldValues', updatedFormData);
 
       const updatedFormDataInitialized = initDefaultValue(updatedFormData, runDeserializer);
 

@@ -140,7 +140,7 @@ export const schema = {
     ],
   },
   fields: {
-    defaultValue: {},
+    defaultValue: [],
   },
   __meta__: {
     isCustomLabelVisible: {

@@ -44,7 +44,8 @@ export interface FieldEditorFormState {
 }
 
 export interface FieldFormInternal extends Omit<Field, 'type' | 'internalType' | 'fields'> {
-  fields?: Record<string, { type: RuntimePrimitiveTypes }>;
+  // fields?: Record<string, { type: RuntimePrimitiveTypes }>;
+  fields?: Array<{ name: string; type: RuntimePrimitiveTypes }>;
   type: TypeSelection;
   __meta__: {
     isCustomLabelVisible: boolean;
@@ -77,12 +78,20 @@ const fieldTypeToComboBoxOption = (type: Field['type']): TypeSelection => {
 };
 
 const formDeserializer = (field: Field): FieldFormInternal => {
+  const { fields, ...rest } = field;
   const fieldType = fieldTypeToComboBoxOption(field.type);
 
   const format = field.format === null ? undefined : field.format;
 
   return {
-    ...field,
+    /*
+    fields: [
+      { name: 'test', type: 'keyword' },
+      { name: 'test2', type: 'keyword' },
+    ],
+    */
+    fields: fields ? Object.entries(fields).map(([name, { type }]) => ({ name, type })) : undefined,
+    ...rest,
     type: fieldType,
     format,
     __meta__: {
@@ -95,9 +104,14 @@ const formDeserializer = (field: Field): FieldFormInternal => {
 };
 
 const formSerializer = (field: FieldFormInternal): Field => {
-  const { __meta__, type, format, ...rest } = field;
+  const { __meta__, type, format, fields, ...rest } = field;
+  console.log('*** serializer', field);
   return {
     type: type && type[0].value!,
+    fields: fields?.reduce((acc, { name, type: type2 }) => {
+      acc[name] = { type: type2 };
+      return acc;
+    }, {} as Record<string, { type: RuntimePrimitiveTypes }>), // ({ ...acc, [name]: { type2 } }), {}),
     // By passing "null" we are explicitly telling DataView to remove the
     // format if there is one defined for the field.
     format: format === undefined ? null : format,
@@ -117,6 +131,15 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) 
     deserializer: formDeserializer,
     serializer: formSerializer,
   });
+
+  useEffect(() => {
+    console.log('*** default field', field);
+    const a = form.subscribe((thing) => {
+      console.log('*** field changes', thing.data.internal.fields);
+    });
+
+    return () => a.unsubscribe();
+  }, [form, field]);
 
   const { submit, isValid: isFormValid, isSubmitted, getFields, isSubmitting } = form;
 
@@ -138,6 +161,14 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) 
     const sub = form.subscribe(({ data }) => {
       if (data.internal.name !== fieldName$.getValue()) {
         fieldName$.next(data.internal.name);
+      }
+
+      if (
+        data.internal.type[0].value !== 'composite' &&
+        Object.keys(data.internal.fields || {}).length > 0
+      ) {
+        console.log('*** reset fields');
+        form.updateFieldValues({ ...form.getFormData(), fields: {} });
       }
     });
 
@@ -184,6 +215,7 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) 
 
     const subChanges = changes$.subscribe((previewFields) => {
       const { fields } = form.getFormData();
+      console.log('*** starting update', fields);
 
       const modifiedFields = { ...fields };
 
@@ -195,10 +227,14 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) 
           modifiedFields[name] = { type: change.type! };
         }
       });
-      form.updateFieldValues({ ...form.getFormData(), fields: modifiedFields });
+      console.log('**** UPDATING', { ...form.getFormData(), fields: modifiedFields });
+      // const asArray = Object.entries(modifiedFields).map(([name, { type }]) => ({ name, type }));
+      form.updateFieldValues({ fields: modifiedFields });
     });
 
     // first preview value is skipped for saved fields, need to populate for new fields and rerenders
+    // TODO want to make 'existingCompositeField' when switching back
+    console.log('fieldPreview prepop', existingCompositeField, lastPreview.current);
     if (!existingCompositeField) {
       fieldPreview$.next([]);
     } else if (lastPreview.current) {
@@ -243,6 +279,8 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) 
       onFormModifiedChange(isFormModified);
     }
   }, [isFormModified, onFormModifiedChange, form]);
+
+  console.log('*** render', form.getFormData().fields);
 
   return (
     <Form
