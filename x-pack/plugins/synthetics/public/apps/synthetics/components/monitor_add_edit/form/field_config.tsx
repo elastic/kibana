@@ -411,6 +411,23 @@ export const FIELD: Record<string, FieldMeta> = {
       };
     },
   },
+  [ConfigKey.ENABLED]: {
+    fieldKey: ConfigKey.ENABLED,
+    component: EuiSwitch,
+    label: i18n.translate('xpack.synthetics.monitorConfig.enabled.label', {
+      defaultMessage: 'Enabled',
+    }),
+    controlled: true,
+    props: ({ setValue }) => ({
+      id: 'syntheticsMontiorConfigIsEnabled',
+      label: i18n.translate('xpack.synthetics.monitorConfig.enabled.label', {
+        defaultMessage: 'Sets whether or not this monitor will run',
+      }),
+      onChange: (event: React.ChangeEvent<HTMLInputElement>) => {
+        setValue(ConfigKey.ENABLED, !!event.target.checked);
+      },
+    }),
+  },
   [ConfigKey.TAGS]: {
     fieldKey: ConfigKey.TAGS,
     component: ComboBox,
