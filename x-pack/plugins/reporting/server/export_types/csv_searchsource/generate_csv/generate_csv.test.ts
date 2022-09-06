@@ -7,9 +7,7 @@
 
 import { errors as esErrors } from '@elastic/elasticsearch';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
-import type { Logger, IScopedClusterClient, IUiSettingsClient } from '@kbn/core/server';
-import { identity, range } from 'lodash';
-import * as Rx from 'rxjs';
+import type { IScopedClusterClient, IUiSettingsClient, Logger } from '@kbn/core/server';
 import {
   elasticsearchServiceMock,
   loggingSystemMock,
@@ -21,14 +19,16 @@ import { searchSourceInstanceMock } from '@kbn/data-plugin/common/search/search_
 import { IScopedSearchClient } from '@kbn/data-plugin/server';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 import { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
+import { identity, range } from 'lodash';
+import * as Rx from 'rxjs';
 import { Writable } from 'stream';
-import { ReportingConfig } from '../../..';
 import { CancellationToken } from '../../../../common/cancellation_token';
 import {
   UI_SETTINGS_CSV_QUOTE_VALUES,
   UI_SETTINGS_CSV_SEPARATOR,
   UI_SETTINGS_DATEFORMAT_TZ,
 } from '../../../../common/constants';
+import { ReportingConfigType } from '../../../config';
 import { createMockConfig, createMockConfigSchema } from '../../../test_helpers';
 import { JobParamsCSV } from '../types';
 import { CsvGenerator } from './generate_csv';
@@ -39,7 +39,7 @@ const createMockJob = (baseObj: any = {}): JobParamsCSV => ({
 
 let mockEsClient: IScopedClusterClient;
 let mockDataClient: IScopedSearchClient;
-let mockConfig: ReportingConfig;
+let mockConfig: ReportingConfigType['csv'];
 let mockLogger: jest.Mocked<Logger>;
 let uiSettingsClient: IUiSettingsClient;
 let stream: jest.Mocked<Writable>;
@@ -109,7 +109,7 @@ beforeEach(async () => {
         scroll: { size: 500, duration: '30s' },
       },
     })
-  );
+  ).get('csv');
 
   searchSourceMock.getField = jest.fn((key: string) => {
     switch (key) {
@@ -241,7 +241,7 @@ it('warns if max size was reached', async () => {
         scroll: { size: 500, duration: '30s' },
       },
     })
-  );
+  ).get('csv');
 
   mockDataClient.search = jest.fn().mockImplementation(() =>
     Rx.of({
@@ -335,7 +335,7 @@ it('uses the scrollId to page all the data', async () => {
   expect(mockDataClient.search).toHaveBeenCalledTimes(1);
   expect(mockDataClient.search).toBeCalledWith(
     { params: { body: {}, ignore_throttled: undefined, scroll: '30s', size: 500 } },
-    { strategy: 'es' }
+    { strategy: 'es', transport: { maxRetries: 0, requestTimeout: '30s' } }
   );
 
   // `scroll` and `clearScroll` must be called with scroll ID in the post body!
@@ -738,7 +738,7 @@ describe('formulas', () => {
           scroll: { size: 500, duration: '30s' },
         },
       })
-    );
+    ).get('csv');
     mockDataClient.search = jest.fn().mockImplementation(() =>
       Rx.of({
         rawResponse: {
@@ -804,8 +804,15 @@ it('can override ignoring frozen indices', async () => {
   await generateCsv.generateData();
 
   expect(mockDataClient.search).toBeCalledWith(
-    { params: { body: {}, ignore_throttled: false, scroll: '30s', size: 500 } },
-    { strategy: 'es' }
+    {
+      params: {
+        body: {},
+        ignore_throttled: false,
+        scroll: '30s',
+        size: 500,
+      },
+    },
+    { strategy: 'es', transport: { maxRetries: 0, requestTimeout: '30s' } }
   );
 });
 

@@ -61,7 +61,7 @@ export const runTaskFnFactory: RunTaskFnFactory<ImmediateExecuteFn> = function e
 
     const csv = new CsvGenerator(
       job,
-      config,
+      config.get('csv'),
       clients,
       dependencies,
       cancellationToken,

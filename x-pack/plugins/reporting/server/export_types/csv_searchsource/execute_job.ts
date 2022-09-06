@@ -44,7 +44,7 @@ export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadCSV>> = (
 
     const csv = new CsvGenerator(
       job,
-      config,
+      config.get('csv'),
       clients,
       dependencies,
       cancellationToken,
