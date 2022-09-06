@@ -25,6 +25,7 @@ import { uiSettings } from './ui_settings';
 import { registerRoutes } from './routes/register_routes';
 import { getGlobalObservabilityServerRouteRepository } from './routes/get_global_observability_server_route_repository';
 import { casesFeatureId, observabilityFeatureId } from '../common';
+import { slo } from './saved_objects';
 
 export type ObservabilityPluginSetup = ReturnType<ObservabilityPlugin['setup']>;
 
@@ -133,6 +134,10 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
         logger.warn(err);
         throw err;
       });
+    }
+
+    if (config.unsafe.slo.enabled) {
+      core.savedObjects.registerType(slo);
     }
 
     const start = () => core.getStartServices().then(([coreStart]) => coreStart);
