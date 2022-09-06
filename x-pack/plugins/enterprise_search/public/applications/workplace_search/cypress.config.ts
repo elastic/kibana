@@ -11,26 +11,24 @@ import { defineConfig } from 'cypress';
 // eslint-disable-next-line import/no-default-export
 export default defineConfig({
   defaultCommandTimeout: 120000,
+  e2e: {
+    baseUrl: 'http://localhost:5601',
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    setupNodeEvents(on, config) {},
+    supportFile: './cypress/support/commands.ts',
+  },
+  env: {
+    password: 'changeme',
+    username: 'elastic',
+  },
   execTimeout: 120000,
-  pageLoadTimeout: 120000,
+  pageLoadTimeout: 180000,
   retries: {
     runMode: 2,
   },
-  screenshotsFolder: '../../../target/kibana-threat-intelligence/cypress/screenshots',
-  trashAssetsBeforeRuns: false,
+  screenshotsFolder: '../../../target/cypress/screenshots',
   video: false,
-  videosFolder: '../../../target/kibana-threat-intelligence/cypress/videos',
-  viewportHeight: 946,
-  viewportWidth: 1680,
-  env: {
-    protocol: 'http',
-    hostname: 'localhost',
-    configport: '5601',
-  },
-
-  e2e: {
-    setupNodeEvents(on, config) {
-      // implement node event listeners here
-    },
-  },
+  videosFolder: '../../../target/cypress/videos',
+  viewportHeight: 1200,
+  viewportWidth: 1600,
 });

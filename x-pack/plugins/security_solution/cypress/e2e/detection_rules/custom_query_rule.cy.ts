@@ -278,6 +278,7 @@ describe('Custom query rules', () => {
 
             deleteRuleFromDetailsPage();
 
+            // @ts-expect-error update types
             cy.waitFor('@deleteRule').then(() => {
               cy.get(RULES_TABLE).should('exist');
               cy.get(RULES_TABLE)
