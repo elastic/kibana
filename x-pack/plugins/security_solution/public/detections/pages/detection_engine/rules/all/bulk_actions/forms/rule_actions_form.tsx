@@ -160,7 +160,7 @@ const RuleActionsFormComponent = ({ rulesCount, onClose, onConfirm }: RuleAction
           <li>
             <FormattedMessage
               id="xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.addRuleActions.deleteActionsDetail"
-              defaultMessage='If you’d like to delete actions for all selected rules, select "Perform no actions" in the dropdown and check Overwrite all selected rule actions.'
+              defaultMessage='To delete actions for all selected rules, select "Perform no actions" in the menu and check "Overwrite all selected rule actions".'
             />
           </li>
           <li>{i18n.RULE_VARIABLES_DETAIL}</li>
