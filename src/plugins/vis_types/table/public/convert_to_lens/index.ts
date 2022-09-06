@@ -25,7 +25,10 @@ export const convertToLens: ConvertTableToLensVisualization = async (vis, timefi
     return null;
   }
 
-  const columns = getColumnsFromVis(vis, timefilter, dataView);
+  const columns = getColumnsFromVis(vis, timefilter, dataView, {
+    buckets: ['bucket'],
+    splits: ['split'],
+  });
 
   if (columns === null) {
     return null;
