@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+export interface EventFilters {
+  nonInteractiveSession?: boolean;
+}
+
 export interface EndpointConfig {
   type: 'endpoint';
   endpointConfig: {
@@ -20,6 +24,7 @@ export interface CloudConfig {
       behavior_protection: boolean;
     };
   };
+  eventFilters?: EventFilters;
 }
 
 export type Config = EndpointConfig | CloudConfig;
