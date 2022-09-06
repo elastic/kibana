@@ -26,6 +26,7 @@ import { IndexViewLogic } from './index_view_logic';
 // We can't test fetchTimeOutId because this will get set whenever the logic is created
 // And the timeoutId is non-deterministic. We use expect.object.containing throughout this test file
 const DEFAULT_VALUES = {
+  connectorId: null,
   data: undefined,
   index: undefined,
   indexName: '',
@@ -41,6 +42,7 @@ const DEFAULT_VALUES = {
 
 const CONNECTOR_VALUES = {
   ...DEFAULT_VALUES,
+  connectorId: connectorIndex.connector.id,
   data: connectorIndex,
   index: indexToViewIndex(connectorIndex),
   ingestionMethod: IngestionMethod.CONNECTOR,
