@@ -48,7 +48,7 @@ export const dateHistogram: AnnotationsRequestProcessorsFunction = ({
       barTargetUiSettings
     );
     const { from, to } = getTimerange(req);
-    const { timezone } = capabilities;
+    const { timezone, forceFixedInterval } = capabilities;
 
     overwrite(doc, `aggs.${annotation.id}.date_histogram`, {
       field: timeField,
@@ -58,7 +58,10 @@ export const dateHistogram: AnnotationsRequestProcessorsFunction = ({
         min: from.valueOf(),
         max: to.valueOf(),
       },
-      ...dateHistogramInterval(autoBucketSize < bucketSize ? autoIntervalString : intervalString),
+      ...dateHistogramInterval(
+        autoBucketSize < bucketSize ? autoIntervalString : intervalString,
+        forceFixedInterval
+      ),
     });
     return next(doc);
   };

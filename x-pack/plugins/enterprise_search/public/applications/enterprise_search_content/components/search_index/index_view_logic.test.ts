@@ -13,7 +13,7 @@ import { nextTick } from '@kbn/test-jest-helpers';
 import { HttpError } from '../../../../../common/types/api';
 
 import { SyncStatus } from '../../../../../common/types/connectors';
-import { StartSyncApiLogic } from '../../api/connector_package/start_sync_api_logic';
+import { StartSyncApiLogic } from '../../api/connector/start_sync_api_logic';
 import { FetchIndexApiLogic } from '../../api/index/fetch_index_api_logic';
 
 import { IngestionMethod, IngestionStatus } from '../../types';
