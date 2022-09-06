@@ -153,6 +153,25 @@ describe('useSearchStrategy', () => {
     expect(mockAddToastError).toBeCalledWith(error, { title: errorMessage });
   });
 
+  it('does not show toast error if showErrorToast = false', () => {
+    const error = 'test error';
+    const errorMessage = 'error message title';
+    (useObservable as jest.Mock).mockReturnValue({
+      ...useObservableHookResult,
+      error,
+    });
+
+    renderHook(() =>
+      useSearchStrategy<FactoryQueryTypes>({
+        ...userSearchStrategyProps,
+        showErrorToast: false,
+        errorMessage,
+      })
+    );
+
+    expect(mockAddToastError).not.toBeCalled();
+  });
+
   it('start should be called when search is called ', () => {
     const start = jest.fn();
 

@@ -20,7 +20,7 @@ jest.mock('../../../risk_score/containers/all', () => ({
   useHostRiskScore: jest.fn().mockReturnValue([
     true,
     {
-      data: [],
+      data: undefined,
       isModuleEnabled: false,
     },
   ]),
@@ -72,7 +72,7 @@ describe('Host Summary Component', () => {
         ...mockProps,
         isInDetailsSidePanel: true,
       };
-      const risk = 'very high hos risk';
+      const risk = 'very high host risk';
       const riskScore = 9999999;
 
       (useHostRiskScore as jest.Mock).mockReturnValue([

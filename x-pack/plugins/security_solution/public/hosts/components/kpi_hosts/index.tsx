@@ -18,7 +18,7 @@ import { useHostRiskScore } from '../../../risk_score/containers';
 
 export const HostsKpiComponent = React.memo<HostsKpiProps>(
   ({ filterQuery, from, indexNames, to, setQuery, skip, updateDateRange }) => {
-    const [_, { isModuleEnabled }] = useHostRiskScore({});
+    const [_, { isModuleEnabled }] = useHostRiskScore();
 
     return (
       <>

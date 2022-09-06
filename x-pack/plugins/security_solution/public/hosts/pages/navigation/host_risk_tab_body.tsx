@@ -46,13 +46,18 @@ const HostRiskTabBodyComponent: React.FC<
     [startDate, endDate]
   );
 
+  const filterQuery = useMemo(
+    () => (hostName ? buildHostNamesFilter([hostName]) : undefined),
+    [hostName]
+  );
+
   const { toggleStatus: overTimeToggleStatus, setToggleStatus: setOverTimeToggleStatus } =
     useQueryToggle(`${QUERY_ID} overTime`);
   const { toggleStatus: contributorsToggleStatus, setToggleStatus: setContributorsToggleStatus } =
     useQueryToggle(`${QUERY_ID} contributors`);
 
   const [loading, { data, refetch, inspect }] = useHostRiskScore({
-    filterQuery: hostName ? buildHostNamesFilter([hostName]) : undefined,
+    filterQuery,
     onlyLatest: false,
     skip: !overTimeToggleStatus && !contributorsToggleStatus,
     timerange,
