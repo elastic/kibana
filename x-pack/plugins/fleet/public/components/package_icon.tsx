@@ -19,7 +19,7 @@ import { usePackageIconType } from '../hooks';
 // override those styles until the bug is fixed or we find a better approach
 const Icon = styled(EuiIcon)`
   width: '16px';
-  margin: unset !important;
+  margin-block-end: unset !important;
 `;
 
 export const PackageIcon: React.FunctionComponent<
