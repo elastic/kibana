@@ -13,6 +13,7 @@ import type { DataViewField } from '@kbn/data-views-plugin/public';
 import { DocViewFilterFn } from '../../doc_views_types';
 
 interface TableActionsProps {
+  mode?: 'inline' | 'as_popover';
   field: string;
   pinned: boolean;
   flattenedField: unknown;
@@ -24,6 +25,7 @@ interface TableActionsProps {
 }
 
 export const TableActions = ({
+  mode = 'as_popover',
   pinned,
   field,
   fieldMapping,
@@ -168,23 +170,25 @@ export const TableActions = ({
     },
   ];
 
-  // TODO: add tooltips and show only for larger screens
-  return (
-    <EuiFlexGroup responsive={false} gutterSize="none" className="kbnDocViewer__buttons">
-      {panels[0].items.map((item) => (
-        <EuiFlexItem key={item.icon} grow={false}>
-          <EuiButtonIcon
-            className="kbnDocViewer__actionButton"
-            data-test-subj={item['data-test-subj']}
-            aria-label={item['aria-label']}
-            onClick={item.onClick}
-            iconType={item.icon}
-            disabled={item.disabled}
-          />
-        </EuiFlexItem>
-      ))}
-    </EuiFlexGroup>
-  );
+  // TODO: add tooltips
+  if (mode === 'inline') {
+    return (
+      <EuiFlexGroup responsive={false} gutterSize="xs" className="kbnDocViewer__buttons">
+        {panels[0].items.map((item) => (
+          <EuiFlexItem key={item.icon} grow={false}>
+            <EuiButtonIcon
+              className="kbnDocViewer__actionButton"
+              data-test-subj={item['data-test-subj']}
+              aria-label={item['aria-label']}
+              onClick={item.onClick}
+              iconType={item.icon}
+              disabled={item.disabled}
+            />
+          </EuiFlexItem>
+        ))}
+      </EuiFlexGroup>
+    );
+  }
 
   return (
     <EuiPopover
