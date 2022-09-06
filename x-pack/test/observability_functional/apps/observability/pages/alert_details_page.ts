@@ -34,6 +34,9 @@ export default ({ getService }: FtrProviderContext) => {
       );
     });
     describe('Alert Detail / Alert Flyout', () => {
+      before(async () => {
+        await observability.alerts.common.navigateToTimeWithData();
+      });
       it('should open the flyout instead of the alerts details page when clicking on "View alert details" from the... (3 dots) button when the feature flag is disabled', async () => {
         await observability.alerts.common.openActionsMenuForRow(0);
         await retry.waitFor(
