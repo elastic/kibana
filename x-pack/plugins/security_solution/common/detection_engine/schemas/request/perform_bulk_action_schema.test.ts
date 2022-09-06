@@ -377,6 +377,102 @@ describe('perform_bulk_action_schema', () => {
       });
     });
 
+    describe('schedules', () => {
+      test('invalid request: wrong schedules payload type', () => {
+        const payload = {
+          query: 'name: test',
+          action: BulkAction.edit,
+          [BulkAction.edit]: [{ type: BulkActionEditType.set_schedule, value: [] }],
+        };
+
+        const message = retrieveValidationMessage(payload);
+
+        expect(getPaths(left(message.errors))).toEqual([
+          'Invalid value "edit" supplied to "action"',
+          'Invalid value "set_schedule" supplied to "edit,type"',
+          'Invalid value "[]" supplied to "edit,value"',
+        ]);
+        expect(message.schema).toEqual({});
+      });
+
+      test('invalid request: missing interval', () => {
+        const payload = {
+          query: 'name: test',
+          action: BulkAction.edit,
+          [BulkAction.edit]: [
+            {
+              type: BulkActionEditType.set_schedule,
+              value: {
+                meta: {
+                  from: '1m',
+                },
+              },
+            },
+          ],
+        };
+
+        const message = retrieveValidationMessage(payload);
+
+        expect(getPaths(left(message.errors))).toEqual(
+          expect.arrayContaining([
+            'Invalid value "edit" supplied to "action"',
+            'Invalid value "{"meta":{"from":"1m"}}" supplied to "edit,value"',
+            'Invalid value "undefined" supplied to "edit,value,interval"',
+          ])
+        );
+        expect(message.schema).toEqual({});
+      });
+
+      test('invalid request: missing lookback', () => {
+        const payload = {
+          query: 'name: test',
+          action: BulkAction.edit,
+          [BulkAction.edit]: [
+            {
+              type: BulkActionEditType.set_schedule,
+              value: {
+                interval: '1m',
+              },
+            },
+          ],
+        };
+
+        const message = retrieveValidationMessage(payload);
+
+        expect(getPaths(left(message.errors))).toEqual(
+          expect.arrayContaining([
+            'Invalid value "edit" supplied to "action"',
+            'Invalid value "{"interval":"1m"}" supplied to "edit,value"',
+            'Invalid value "undefined" supplied to "edit,value,meta"',
+          ])
+        );
+        expect(message.schema).toEqual({});
+      });
+
+      test('valid request: set_schedule edit action', () => {
+        const payload: PerformBulkActionSchema = {
+          query: 'name: test',
+          action: BulkAction.edit,
+          [BulkAction.edit]: [
+            {
+              type: BulkActionEditType.set_schedule,
+              value: {
+                interval: '1m',
+                meta: {
+                  from: '1m',
+                },
+              },
+            },
+          ],
+        };
+
+        const message = retrieveValidationMessage(payload);
+
+        expect(getPaths(left(message.errors))).toEqual([]);
+        expect(message.schema).toEqual(payload);
+      });
+    });
+
     describe('rule actions', () => {
       test('invalid request: invalid rule actions payload', () => {
         const payload = {
