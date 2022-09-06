@@ -4111,13 +4111,7 @@
             "label": "history",
             "description": [],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCoreApplicationPluginApi",
-                "section": "def-public.ScopedHistory",
-                "text": "ScopedHistory"
-              },
+              "ScopedHistory",
               "<unknown>"
             ],
             "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx",

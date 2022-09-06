@@ -19,12 +19,14 @@ export const RareFieldSelector: FC = () => {
   const { jobCreator: jc, jobCreatorUpdate, jobCreatorUpdated } = useContext(JobCreatorContext);
   const jobCreator = jc as RareJobCreator;
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const runtimeCategoryFields = useMemo(() => filterCategoryFields(jobCreator.runtimeFields), []);
   const allCategoryFields = useMemo(
     () =>
       [...newJobCapsService.categoryFields, ...runtimeCategoryFields].sort((a, b) =>
         a.name.localeCompare(b.name)
       ),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
   const categoryFields = useFilteredCategoryFields(
@@ -42,10 +44,12 @@ export const RareFieldSelector: FC = () => {
       jobCreator.addInfluencer(rareField.name);
     }
     jobCreatorUpdate();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [rareField]);
 
   useEffect(() => {
     setRareField(jobCreator.rareField);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobCreatorUpdated]);
 
   return (
@@ -76,6 +80,7 @@ function useFilteredCategoryFields(
     } else {
       setFields(allCategoryFields);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobCreatorUpdated]);
 
   return fields;
