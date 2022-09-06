@@ -10,8 +10,8 @@ import React from 'react';
 import styled from 'styled-components';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { Case, CommentType } from '../../common';
-import { useToasts } from './lib/kibana';
-import { useCaseViewNavigation } from './navigation';
+import { useKibana, useToasts } from './lib/kibana';
+import { generateCaseViewPath } from './navigation';
 import { CaseAttachmentsWithoutOwner } from '../types';
 import {
   CASE_ALERT_SUCCESS_SYNC_TEXT,
@@ -19,6 +19,7 @@ import {
   CASE_SUCCESS_TOAST,
   VIEW_CASE,
 } from './translations';
+import { OWNER_INFO } from '../../common/constants';
 
 const LINE_CLAMP = 3;
 const Title = styled.span`
@@ -94,7 +95,7 @@ function getToastContent({
 }
 
 export const useCasesToast = () => {
-  const { navigateToCaseView } = useCaseViewNavigation();
+  const { getUrlForApp, navigateToUrl } = useKibana().services.application;
 
   const toasts = useToasts();
 
@@ -110,11 +111,17 @@ export const useCasesToast = () => {
       title?: string;
       content?: string;
     }) => {
+      const caseOwner = theCase.owner as keyof typeof OWNER_INFO;
+      const appIdToNavigateTo = OWNER_INFO[caseOwner].appId;
+      const url = getUrlForApp(appIdToNavigateTo, {
+        deepLinkId: 'cases',
+        path: generateCaseViewPath({ detailName: theCase.id }),
+      });
+
       const onViewCaseClick = () => {
-        navigateToCaseView({
-          detailName: theCase.id,
-        });
+        navigateToUrl(url);
       };
+
       const renderTitle = getToastTitle({ theCase, title, attachments });
       const renderContent = getToastContent({ theCase, content, attachments });
 
