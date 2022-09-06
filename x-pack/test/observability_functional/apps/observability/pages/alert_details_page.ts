@@ -44,6 +44,7 @@ export default ({ getService }: FtrProviderContext) => {
           async () => await testSubjects.exists('viewAlertDetailsFlyout')
         );
 
+        await testSubjects.isDisplayed('viewAlertDetailsFlyout');
         await testSubjects.click('viewAlertDetailsFlyout');
         await retry.waitFor(
           'Alert flyout to be visible',
