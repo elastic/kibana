@@ -145,7 +145,7 @@ const RuleActionsFormComponent = ({ rulesCount, onClose, onConfirm }: RuleAction
         title={
           <FormattedMessage
             id="xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.addRuleActions.infoCalloutTitle"
-            defaultMessage="Add actions for {rulesCount, plural, one {# rule} other {# rules}} you’ve selected. Here some tips and suggestions:"
+            defaultMessage="Configure actions for {rulesCount, plural, one {# rule} other {# rules}} you’ve selected"
             values={{ rulesCount }}
           />
         }
