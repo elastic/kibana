@@ -35,7 +35,7 @@ export default ({ getService }: FtrProviderContext) => {
         async () => await testSubjects.exists('pageNotFound')
       );
     });
-    // flaky
+    // FLAKY for the same reason: https://github.com/elastic/kibana/issues/133799
     describe.skip('Alert Detail / Alert Flyout', () => {
       before(async () => {
         await observability.alerts.common.navigateToTimeWithData();
