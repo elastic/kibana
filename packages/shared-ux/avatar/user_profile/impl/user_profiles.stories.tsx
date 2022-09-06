@@ -22,37 +22,39 @@ export default {
 };
 
 type UserAvatarParams = Pick<UserAvatarProps, 'user'>;
-const sampleUsers = [{
-  username: 'Peggy',
-  email: 'test@email.com',
-  full_name: 'Peggy Simms',
-  display_name: 'Peggy'
-},
-{
-  username: 'Martin',
-  email: 'test@email.com',
-  full_name: 'Martin Gatsby',
-  display_name: 'Martin'
-},
-{
-  username: 'Leonardo DiCaprio',
-  email: 'test@email.com',
-  full_name: 'Leonardo DiCaprio',
-  display_name: 'Leonardo DiCaprio'
-}];
+const sampleUsers = [
+  {
+    username: 'Peggy',
+    email: 'test@email.com',
+    full_name: 'Peggy Simms',
+    display_name: 'Peggy',
+  },
+  {
+    username: 'Martin',
+    email: 'test@email.com',
+    full_name: 'Martin Gatsby',
+    display_name: 'Martin',
+  },
+  {
+    username: 'Leonardo DiCaprio',
+    email: 'test@email.com',
+    full_name: 'Leonardo DiCaprio',
+    display_name: 'Leonardo DiCaprio',
+  },
+];
 
 export const userAvatar = (
   params: Pick<UserProfileUserInfo, 'username'>,
   rest: UserAvatarParams
 ) => {
-  let username = params;
-  return <UserAvatar {...{user: username}}  {...rest}/>;
+  const username = params;
+  return <UserAvatar {...{ user: username }} {...rest} />;
 };
 
 userAvatar.argTypes = {
   username: {
     control: { type: 'radio' },
-    options: sampleUsers.map(({username}) => username),
-    defaultValue: sampleUsers.map(({username}) => username)[0],
+    options: sampleUsers.map(({ username }) => username),
+    defaultValue: sampleUsers.map(({ username }) => username)[0],
   },
 };
