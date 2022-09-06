@@ -467,8 +467,8 @@ export const commonMigratePartitionChartGroups = (
               if (attributes.state.visualization.shape === 'mosaic') {
                 return {
                   ...l,
-                  primaryGroups: [groups![0]],
-                  secondaryGroups: groups.length === 2 ? [groups![1]] : undefined,
+                  primaryGroups: [groups[0]],
+                  secondaryGroups: groups.length === 2 ? [groups[1]] : undefined,
                 };
               }
               return {
