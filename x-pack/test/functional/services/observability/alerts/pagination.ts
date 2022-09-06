@@ -11,7 +11,7 @@ const ROWS_PER_PAGE_SELECTOR = 'tablePaginationPopoverButton';
 const PREV_BUTTON_SELECTOR = 'pagination-button-previous';
 const NEXT_BUTTON_SELECTOR = 'pagination-button-next';
 const TEN_ROWS_SELECTOR = 'tablePagination-10-rows';
-const TWENTY_FIVE_ROWS_SELECTOR = 'tablePagination-25-rows';
+const TWENTY_ROWS_SELECTOR = 'tablePagination-20-rows';
 const FIFTY_ROWS_SELECTOR = 'tablePagination-50-rows';
 const BUTTON_ONE_SELECTOR = 'pagination-button-0';
 const BUTTON_TWO_SELECTOR = 'pagination-button-1';
@@ -35,8 +35,8 @@ export function ObservabilityAlertsPaginationProvider({ getService }: FtrProvide
     return await testSubjects.find(TEN_ROWS_SELECTOR);
   };
 
-  const getTwentyFiveRowsPageSelector = async () => {
-    return await testSubjects.find(TWENTY_FIVE_ROWS_SELECTOR);
+  const getTwentyRowsPageSelector = async () => {
+    return await testSubjects.find(TWENTY_ROWS_SELECTOR);
   };
 
   const getFiftyRowsPageSelector = async () => {
@@ -97,7 +97,7 @@ export function ObservabilityAlertsPaginationProvider({ getService }: FtrProvide
     getPageSizeSelectorOrFail,
     missingPageSizeSelectorOrFail,
     getTenRowsPageSelector,
-    getTwentyFiveRowsPageSelector,
+    getTwentyRowsPageSelector,
     getFiftyRowsPageSelector,
     getPrevPageButton,
     getPrevPageButtonOrFail,

@@ -45,9 +45,11 @@ export class StreamProcessor<TFields extends Fields = ApmFields> {
   private readonly streamAggregators: Array<StreamAggregator<TFields>>;
 
   constructor(private readonly options: StreamProcessorOptions<TFields>) {
-    [this.intervalAmount, this.intervalUnit] = this.options.flushInterval
+    const { intervalAmount, intervalUnit } = this.options.flushInterval
       ? parseInterval(this.options.flushInterval)
       : parseInterval('1m');
+    this.intervalAmount = intervalAmount;
+    this.intervalUnit = intervalUnit;
     this.name = this.options?.name ?? 'StreamProcessor';
     this.version = this.options.version ?? '8.0.0';
     this.versionMajor = Number.parseInt(this.version.split('.')[0], 10);
@@ -56,8 +58,8 @@ export class StreamProcessor<TFields extends Fields = ApmFields> {
   }
   private readonly intervalAmount: number;
   private readonly intervalUnit: any;
-  private readonly name: string;
-  private readonly version: string;
+  public readonly name: string;
+  public readonly version: string;
   private readonly versionMajor: number;
 
   // TODO move away from chunking and feed this data one by one to processors

@@ -139,6 +139,8 @@
       "@kbn/newsfeed-plugin/*": ["src/plugins/newsfeed/*"],
       "@kbn/presentation-util-plugin": ["src/plugins/presentation_util"],
       "@kbn/presentation-util-plugin/*": ["src/plugins/presentation_util/*"],
+      "@kbn/saved-objects-finder-plugin": ["src/plugins/saved_objects_finder"],
+      "@kbn/saved-objects-finder-plugin/*": ["src/plugins/saved_objects_finder/*"],
       "@kbn/saved-objects-management-plugin": ["src/plugins/saved_objects_management"],
       "@kbn/saved-objects-management-plugin/*": ["src/plugins/saved_objects_management/*"],
       "@kbn/saved-objects-tagging-oss-plugin": ["src/plugins/saved_objects_tagging_oss"],
