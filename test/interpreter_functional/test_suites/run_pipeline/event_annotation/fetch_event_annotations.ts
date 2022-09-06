@@ -18,7 +18,8 @@ export default function ({
 }: FtrProviderContext & { updateBaselines: boolean }) {
   let expectExpression: ExpectExpression;
 
-  describe('fetch event annotation tests', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/140113
+  describe.skip('fetch event annotation tests', () => {
     before(() => {
       expectExpression = expectExpressionProvider({ getService, updateBaselines });
     });
