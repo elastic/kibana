@@ -7,7 +7,6 @@
  */
 
 import { ScopedHistory } from '@kbn/core/public';
-import { coreMock } from '@kbn/core/public/mocks';
 
 import {
   SavedObjectLoader,
@@ -17,8 +16,6 @@ import { DashboardAppServices } from '../../types';
 import { getSavedDashboardMock } from './get_saved_dashboard_mock';
 
 export function makeDefaultServices(): DashboardAppServices {
-  const core = coreMock.createStart();
-
   const savedDashboards = {} as SavedObjectLoader;
   savedDashboards.find = (search: string, sizeOrOptions: number | SavedObjectLoaderFindOptions) => {
     const size = typeof sizeOrOptions === 'number' ? sizeOrOptions : sizeOrOptions.size ?? 10;
@@ -45,6 +42,5 @@ export function makeDefaultServices(): DashboardAppServices {
     restorePreviousUrl: () => {},
     onAppLeave: (handler) => {},
     savedDashboards,
-    core,
   };
 }

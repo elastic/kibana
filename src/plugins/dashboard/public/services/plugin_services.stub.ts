@@ -20,11 +20,11 @@ import { coreContextServiceFactory } from './core_context/core_context.stub';
 import { dashboardCapabilitiesServiceFactory } from './dashboard_capabilities/dashboard_capabilities.stub';
 import { dashboardSessionStorageServiceFactory } from './dashboard_session_storage/dashboard_session_storage.stub';
 import { dataServiceFactory } from './data/data.stub';
-import { dataViewEditorServiceFactory } from './data_view_editor/data_view_editor.stub';
 import { embeddableServiceFactory } from './embeddable/embeddable.stub';
 import { httpServiceFactory } from './http/http.stub';
 import { initializerContextServiceFactory } from './initializer_context/initializer_context.stub';
 import { navigationServiceFactory } from './navigation/navigation.stub';
+import { noDataPageContextServiceFactory } from './no_data_page_context/no_data_page_context.stub';
 import { notificationsServiceFactory } from './notifications/notifications.stub';
 import { overlaysServiceFactory } from './overlays/overlays.stub';
 import { savedObjectsServiceFactory } from './saved_objects/saved_objects.stub';
@@ -44,11 +44,11 @@ export const providers: PluginServiceProviders<DashboardServices> = {
   data: new PluginServiceProvider(dataServiceFactory),
   dashboardCapabilities: new PluginServiceProvider(dashboardCapabilitiesServiceFactory),
   dashboardSessionStorage: new PluginServiceProvider(dashboardSessionStorageServiceFactory),
-  dataViewEditor: new PluginServiceProvider(dataViewEditorServiceFactory),
   embeddable: new PluginServiceProvider(embeddableServiceFactory),
   http: new PluginServiceProvider(httpServiceFactory),
   initializerContext: new PluginServiceProvider(initializerContextServiceFactory),
   navigation: new PluginServiceProvider(navigationServiceFactory),
+  noDataPageContext: new PluginServiceProvider(noDataPageContextServiceFactory),
   notifications: new PluginServiceProvider(notificationsServiceFactory),
   overlays: new PluginServiceProvider(overlaysServiceFactory),
   savedObjects: new PluginServiceProvider(savedObjectsServiceFactory),

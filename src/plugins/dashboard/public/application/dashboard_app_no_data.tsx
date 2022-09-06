@@ -11,9 +11,7 @@ import {
   AnalyticsNoDataPageKibanaProvider,
   AnalyticsNoDataPage,
 } from '@kbn/shared-ux-page-analytics-no-data';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 
-import type { DashboardAppServices } from '../types';
 import { pluginServices } from '../services/plugin_services';
 
 export const DashboardAppNoDataPage = ({
@@ -22,18 +20,20 @@ export const DashboardAppNoDataPage = ({
   onDataViewCreated: () => void;
 }) => {
   const {
-    services: { core },
-  } = useKibana<DashboardAppServices>();
-
-  const {
     data: { dataViews },
-    dataViewEditor,
+    noDataPageContext: {
+      coreStart: { docLinks, application },
+      dataViewEditor,
+    },
+    http: { basePath },
   } = pluginServices.getServices();
 
   const analyticsServices = {
-    coreStart: core as unknown as React.ComponentProps<
-      typeof AnalyticsNoDataPageKibanaProvider
-    >['coreStart'],
+    coreStart: {
+      docLinks,
+      application,
+      http: { basePath },
+    } as unknown as React.ComponentProps<typeof AnalyticsNoDataPageKibanaProvider>['coreStart'],
     dataViews,
     dataViewEditor,
   };
