@@ -449,6 +449,10 @@ export const getDatatableVisualization = ({
                       arguments: {
                         columnId: [column.columnId],
                         hidden: typeof column.hidden === 'undefined' ? [] : [column.hidden],
+                        oneClickFilter:
+                          typeof column.oneClickFilter === 'undefined'
+                            ? []
+                            : [column.oneClickFilter],
                         width: typeof column.width === 'undefined' ? [] : [column.width],
                         isTransposed:
                           typeof column.isTransposed === 'undefined' ? [] : [column.isTransposed],
