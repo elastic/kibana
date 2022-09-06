@@ -37,23 +37,36 @@ const apmTransactionErrorRateIndicatorSchema = t.type({
   ]),
 });
 
-const rollingTimeWindowSchema = t.type({
+export const rollingTimeWindowSchema = t.type({
   duration: t.string,
   is_rolling: t.literal(true),
 });
 
-export const createSloParamsSchema = t.type({
-  body: t.type({
+export const indicatorSchema = t.union([
+  apmTransactionDurationIndicatorSchema,
+  apmTransactionErrorRateIndicatorSchema,
+]);
+
+const sloOptionalSettingsSchema = t.partial({
+  settings: t.partial({
+    destination_index: t.string,
+  }),
+});
+
+const createSLOBodySchema = t.intersection([
+  t.type({
     name: t.string,
     description: t.string,
-    indicator: t.union([
-      apmTransactionDurationIndicatorSchema,
-      apmTransactionErrorRateIndicatorSchema,
-    ]),
+    indicator: indicatorSchema,
     time_window: rollingTimeWindowSchema,
     budgeting_method: t.literal('occurrences'),
     objective: t.type({
       target: t.number,
     }),
   }),
+  sloOptionalSettingsSchema,
+]);
+
+export const createSLOParamsSchema = t.type({
+  body: createSLOBodySchema,
 });
