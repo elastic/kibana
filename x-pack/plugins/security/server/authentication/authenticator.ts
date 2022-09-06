@@ -82,7 +82,7 @@ export interface AuthenticatorOptions {
   featureUsageService: SecurityFeatureUsageServiceStart;
   userProfileService: UserProfileServiceStartInternal;
   getCurrentUser: (request: KibanaRequest) => AuthenticatedUser | null;
-  config: Pick<ConfigType, 'authc'>;
+  config: Pick<ConfigType, 'authc' | 'accessAgreement'>;
   basePath: IBasePath;
   license: SecurityLicense;
   loggers: LoggerFactory;
@@ -831,21 +831,27 @@ export class Authenticator {
    * @param sessionValue Current session value if any.
    */
   private shouldRedirectToAccessAgreement(sessionValue: SessionValue | null) {
-    // Request should be redirected to Access Agreement UI only if all following conditions are met:
-    //  1. Request can be redirected (not API call)
-    //  2. Request is authenticated, but user hasn't acknowledged access agreement in the current
-    //     session yet (based on the flag we store in the session)
-    //  3. Request is authenticated by the provider that has `accessAgreement` configured
-    //  4. Current license allows access agreement
-    //  5. And it's not a request to the Access Agreement UI itself
-    return (
-      sessionValue != null &&
-      !sessionValue.accessAgreementAcknowledged &&
-      (this.options.config.authc.providers as Record<string, any>)[sessionValue.provider.type]?.[
-        sessionValue.provider.name
-      ]?.accessAgreement &&
-      this.options.license.getFeatures().allowAccessAgreement
-    );
+    // If user doesn't have an active session or if they already acknowledged
+    // access agreement (based on the flag we store in the session) - bail out.
+    if (sessionValue == null || sessionValue.accessAgreementAcknowledged) {
+      return false;
+    }
+
+    // If access agreement is neither enabled globally (for all providers)
+    // nor for the provider that authenticated user request - bail out.
+    const providerConfig = (this.options.config.authc.providers as Record<string, any>)[
+      sessionValue.provider.type
+    ]?.[sessionValue.provider.name];
+
+    if (
+      !this.options.config.accessAgreement?.message &&
+      !providerConfig?.accessAgreement?.message
+    ) {
+      return false;
+    }
+
+    // Check if the current license allows access agreement.
+    return this.options.license.getFeatures().allowAccessAgreement;
   }
 
   /**
@@ -874,6 +880,7 @@ export class Authenticator {
     const isUpdatedSessionAuthenticated = isSessionAuthenticated(sessionUpdateResult?.value);
 
     let preAccessRedirectURL;
+
     if (isUpdatedSessionAuthenticated && sessionUpdateResult?.overwritten) {
       this.logger.debug('Redirecting user to the overwritten session UI.');
       preAccessRedirectURL = `${this.options.basePath.serverBasePath}${OVERWRITTEN_SESSION_ROUTE}`;

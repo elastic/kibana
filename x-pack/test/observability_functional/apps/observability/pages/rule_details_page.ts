@@ -145,6 +145,9 @@ export default ({ getService }: FtrProviderContext) => {
       before(async () => {
         await observability.alerts.common.navigateToRuleDetailsByRuleId(logThresholdRuleId);
       });
+      after(async () => {
+        await observability.users.restoreDefaultTestUserRole();
+      });
       it('should show the actions button if user has permissions', async () => {
         await retry.waitFor(
           'Actions button to be visible',
