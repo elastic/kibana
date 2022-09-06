@@ -63,15 +63,3 @@ export function deleteAgentDocs(ignoreUnavailable: boolean = false) {
     ignoreUnavailable,
   });
 }
-
-export function cleanupEnrollmentTokens() {
-  cy.request('/api/fleet/enrollment_api_keys').then((response: any) => {
-    response.body.items.forEach((item: any) => {
-      cy.request({
-        method: 'DELETE',
-        url: `/api/fleet/enrollment_api_keys/${item.id}`,
-        headers: { 'kbn-xsrf': 'kibana' },
-      });
-    });
-  });
-}

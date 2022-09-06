@@ -6,7 +6,7 @@
  */
 
 import { FLEET, navigateTo } from '../tasks/navigation';
-import { cleanupAgentPolicies, cleanupEnrollmentTokens } from '../tasks/cleanup';
+import { cleanupAgentPolicies } from '../tasks/cleanup';
 import { ENROLLMENT_TOKENS_TAB, ENROLLMENT_TOKENS } from '../screens/fleet';
 
 describe('Enrollment token page', () => {
@@ -29,7 +29,6 @@ describe('Enrollment token page', () => {
 
   after(() => {
     cleanupAgentPolicies();
-    cleanupEnrollmentTokens();
   });
 
   it('Create new Token', () => {
@@ -41,13 +40,13 @@ describe('Enrollment token page', () => {
     cy.getBySel(ENROLLMENT_TOKENS.LIST_TABLE, { timeout: 15000 }).contains('Agent policy 1');
   });
 
-  it('Delete Token', () => {
+  it('Delete Token - inactivates the token', () => {
     cy.visit('app/fleet/enrollment-tokens');
     cy.getBySel(ENROLLMENT_TOKENS.LIST_TABLE).find('tr').should('have.length', 2);
     cy.getBySel(ENROLLMENT_TOKENS.TABLE_REVOKE_BTN).first().click();
     cy.get('.euiPanel').contains('Are you sure you want to revoke');
     cy.get('.euiButton').contains('Revoke enrollment token').click({ force: true });
 
-    cy.getBySel(ENROLLMENT_TOKENS.LIST_TABLE).find('tr').should('have.length', 2);
+    cy.getBySel(ENROLLMENT_TOKENS.TABLE_REVOKE_BTN).first().should('not.exist');
   });
 });
