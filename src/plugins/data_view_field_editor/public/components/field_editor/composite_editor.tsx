@@ -24,7 +24,7 @@ import { ScriptField } from './form_fields';
 import { useFieldEditorContext } from '../field_editor_context';
 import { RUNTIME_FIELD_OPTIONS_PRIMITIVE } from './constants';
 import { valueToComboBoxOption } from './lib';
-import { RuntimePrimitiveTypes, UseField, UseArray } from '../../shared_imports';
+import { RuntimePrimitiveTypes, UseField, UseArray, TextField } from '../../shared_imports';
 import { FieldFormInternal } from './field_editor';
 
 export interface CompositeEditorProps {
@@ -71,7 +71,16 @@ export const CompositeEditor = ({ onReset }: CompositeEditorProps) => {
             return (
               <>
                 {items.map((field, index) => {
-                  return <div key={field.id}>{field.path}</div>;
+                  return (
+                    <div>
+                      <UseField
+                        key={field.id}
+                        path={`${field.path}.name`}
+                        config={{ label: field.path }}
+                        component={TextField}
+                      />
+                    </div>
+                  );
                 })}
               </>
             );

@@ -83,6 +83,8 @@ const formDeserializer = (field: Field): FieldFormInternal => {
 
   const format = field.format === null ? undefined : field.format;
 
+  console.log('>>>>>>> Deserializing...', field);
+
   return {
     /*
     fields: [
@@ -105,7 +107,7 @@ const formDeserializer = (field: Field): FieldFormInternal => {
 
 const formSerializer = (field: FieldFormInternal): Field => {
   const { __meta__, type, format, fields, ...rest } = field;
-  console.log('*** serializer', field);
+  // console.log('*** serializer', field);
   return {
     type: type && type[0].value!,
     fields: fields?.reduce((acc, { name, type: type2 }) => {
@@ -156,25 +158,29 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) 
     ],
   });
 
+  useEffect(() => {
+    console.log('Form data changed:', formData);
+  }, [formData]);
+
   // use observable to sidestep react state
   useEffect(() => {
-    const sub = form.subscribe(({ data }) => {
-      if (data.internal.name !== fieldName$.getValue()) {
-        fieldName$.next(data.internal.name);
-      }
+    // const sub = form.subscribe(({ data }) => {
+    //   if (data.internal.name !== fieldName$.getValue()) {
+    //     fieldName$.next(data.internal.name);
+    //   }
 
-      if (
-        data.internal.type[0].value !== 'composite' &&
-        Object.keys(data.internal.fields || {}).length > 0
-      ) {
-        console.log('*** reset fields');
-        form.updateFieldValues({ ...form.getFormData(), fields: {} });
-      }
-    });
+    //   if (
+    //     data.internal.type[0].value !== 'composite' &&
+    //     Object.keys(data.internal.fields || {}).length > 0
+    //   ) {
+    //     console.log('*** reset fields');
+    //     form.updateFieldValues({ ...form.getFormData(), fields: {} });
+    //   }
+    // });
 
-    return () => {
-      sub.unsubscribe();
-    };
+    // return () => {
+    //   sub.unsubscribe();
+    // };
   }, [form, fieldName$]);
 
   const {
@@ -215,7 +221,7 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) 
 
     const subChanges = changes$.subscribe((previewFields) => {
       const { fields } = form.getFormData();
-      console.log('*** starting update', fields);
+      // console.log('*** starting update', fields);
 
       const modifiedFields = { ...fields };
 
@@ -228,8 +234,9 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) 
         }
       });
       console.log('**** UPDATING', { ...form.getFormData(), fields: modifiedFields });
-      // const asArray = Object.entries(modifiedFields).map(([name, { type }]) => ({ name, type }));
-      form.updateFieldValues({ fields: modifiedFields });
+      const asArray = Object.entries(modifiedFields).map(([name, { type }]) => ({ name, type }));
+      form.updateFieldValues({ fields: asArray }, { runDeserializer: false });
+      // form.updateFieldValues({ ...form.getFormData(), fields: modifiedFields });
     });
 
     // first preview value is skipped for saved fields, need to populate for new fields and rerenders
