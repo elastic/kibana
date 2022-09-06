@@ -68,10 +68,9 @@ export class TimelineTestService extends FtrService {
       this.log.info(JSON.stringify(createdTimeline));
     });
 
-    const { savedObjectId: timelineId, version, ...timelineDoc } = createdTimeline;
+    const { savedObjectId: timelineId, version } = createdTimeline;
 
     const timelineUpdate: TimelineInput = {
-      ...(timelineDoc as TimelineInput),
       title,
       // Set date range to the last 1 year
       dateRange: {
@@ -110,9 +109,6 @@ export class TimelineTestService extends FtrService {
     version: string
   ): Promise<TimelineResponse> {
     return await this.supertest
-      // DEV NOTE/FYI:
-      // Although this API is a `patch`, it does not seem that it actually does a patch,
-      // so `updates` should always be the full timeline record
       .patch(TIMELINE_URL)
       .set('kbn-xsrf', 'true')
       .send({

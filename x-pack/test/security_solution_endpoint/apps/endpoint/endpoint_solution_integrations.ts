@@ -7,6 +7,7 @@
 
 import { IndexedHostsAndAlertsResponse } from '@kbn/security-solution-plugin/common/endpoint/index_data';
 import { TimelineResponse } from '@kbn/security-solution-plugin/common/types';
+import { kibanaPackageJson } from '@kbn/utils';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 /**
@@ -32,6 +33,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       endpointAgentId = indexedData.hosts[0].agent.id;
+
+      await endpointService.waitForUnitedEndpoints([endpointAgentId]);
+
+      // Ensure our Endpoint is for v8.0 (or whatever is running in kibana now)
+      await endpointService.sendEndpointMetadataUpdate(endpointAgentId, {
+        agent: { version: kibanaPackageJson.version },
+      });
 
       // start/stop the endpoint rule. This should cause the rule to run immediately
       // and avoid us having to wait for the interval (of 5 minutes)
