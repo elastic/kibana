@@ -115,7 +115,7 @@ export const ConfigPanelQueryAnnotation = ({
           }}
           disableAutoFocus
           indexPatternTitle={frame.dataViews.indexPatterns[layer.indexPatternId].title}
-          isInvalid={!isQueryInputValid}
+          isInvalid={!isQueryInputValid || inputQuery.query === ''}
           onSubmit={() => {}}
           data-test-subj="annotation-query-based-query-input"
           placeholder={

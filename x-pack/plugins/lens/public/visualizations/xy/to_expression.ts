@@ -15,6 +15,7 @@ import {
 } from '@kbn/event-annotation-plugin/public';
 import { LegendSize } from '@kbn/visualizations-plugin/public';
 import { XYCurveType } from '@kbn/expression-xy-plugin/common';
+import { EventAnnotationConfig } from '@kbn/event-annotation-plugin/common';
 import {
   State,
   YConfig,
@@ -245,6 +246,11 @@ export const buildExpression = (
     });
   }
 
+  const isValidAnnotation = (a: EventAnnotationConfig) =>
+    isManualPointAnnotationConfig(a) ||
+    isRangeAnnotationConfig(a) ||
+    (a.filter && a.filter?.query !== '');
+
   return {
     type: 'expression',
     chain: [
@@ -347,40 +353,38 @@ export const buildExpression = (
               )
             ),
           ],
-          annotations: validAnnotationsLayers.length
-            ? [
-                {
-                  type: 'expression',
-                  chain: [
-                    {
-                      type: 'function',
-                      function: 'event_annotations_result',
-                      arguments: {
-                        layers: validAnnotationsLayers.map((layer) =>
-                          annotationLayerToExpression(layer, eventAnnotationService)
-                        ),
-                        datatable: eventAnnotationService.toFetchExpression({
-                          interval:
-                            (validDataLayers[0]?.xAccessor &&
-                              metadata[validDataLayers[0]?.layerId]?.[validDataLayers[0]?.xAccessor]
-                                ?.interval) ||
-                            'auto',
-                          groups: validAnnotationsLayers.map((layer) => ({
-                            indexPatternId: layer.indexPatternId,
-                            annotations: layer.annotations.filter(
-                              (a) =>
-                                isManualPointAnnotationConfig(a) ||
-                                isRangeAnnotationConfig(a) ||
-                                (a.filter && a.filter?.query !== '')
-                            ),
-                          })),
-                        }),
+          annotations:
+            validAnnotationsLayers.length &&
+            validAnnotationsLayers.flatMap((l) => l.annotations.filter(isValidAnnotation)).length
+              ? [
+                  {
+                    type: 'expression',
+                    chain: [
+                      {
+                        type: 'function',
+                        function: 'event_annotations_result',
+                        arguments: {
+                          layers: validAnnotationsLayers.map((layer) =>
+                            annotationLayerToExpression(layer, eventAnnotationService)
+                          ),
+                          datatable: eventAnnotationService.toFetchExpression({
+                            interval:
+                              (validDataLayers[0]?.xAccessor &&
+                                metadata[validDataLayers[0]?.layerId]?.[
+                                  validDataLayers[0]?.xAccessor
+                                ]?.interval) ||
+                              'auto',
+                            groups: validAnnotationsLayers.map((layer) => ({
+                              indexPatternId: layer.indexPatternId,
+                              annotations: layer.annotations.filter(isValidAnnotation),
+                            })),
+                          }),
+                        },
                       },
-                    },
-                  ],
-                },
-              ]
-            : [],
+                    ],
+                  },
+                ]
+              : [],
         },
       },
     ],

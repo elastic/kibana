@@ -118,7 +118,6 @@ export const getAnnotationsGroupedByInterval = (
   formatFactory: FormatFactory,
   timeFormatter?: FieldFormat
 ) => {
-  console.log(columns);
   const visibleGroupedConfigs = annotations.reduce<Record<string, ManualPointEventAnnotationRow[]>>(
     (acc, current) => {
       const timebucket = moment(current.timebucket).valueOf();
