@@ -10,7 +10,7 @@ import {
   ServiceStatusLevels,
   type ServiceStatus,
   type ServiceStatusLevel,
-} from '@kbn/core-base-common';
+} from '@kbn/core-status-common';
 
 /**
  * Returns a single {@link ServiceStatus} that summarizes the most severe status level from a group of statuses.

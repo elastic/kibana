@@ -6,4 +6,5 @@
  * Side Public License, v 1.
  */
 
-export type { StatusServiceSetup } from './contracts';
+export { ServiceStatusLevels } from './src';
+export type { ServiceStatus, ServiceStatusLevel, ServiceStatusLevelId, CoreStatus } from './src';

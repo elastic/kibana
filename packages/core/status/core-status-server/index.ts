@@ -6,6 +6,11 @@
  * Side Public License, v 1.
  */
 
-export type { ServiceStatusLevel, ServiceStatus } from '@kbn/core-base-common';
-export { ServiceStatusLevels } from '@kbn/core-base-common';
-export type { StatusServiceSetup, CoreStatus } from './src';
+export type {
+  ServiceStatusLevel,
+  ServiceStatus,
+  CoreStatus,
+  ServiceStatusLevelId,
+} from '@kbn/core-status-common';
+export { ServiceStatusLevels } from '@kbn/core-status-common';
+export type { StatusServiceSetup } from './src';

@@ -17,8 +17,8 @@ import {
 } from 'rxjs/operators';
 import { sortBy } from 'lodash';
 import { isDeepStrictEqual } from 'util';
-import { ServiceStatusLevels, type PluginName, type ServiceStatus } from '@kbn/core-base-common';
-import type { CoreStatus } from '@kbn/core-status-server';
+import type { PluginName } from '@kbn/core-base-common';
+import { ServiceStatusLevels, type CoreStatus, type ServiceStatus } from '@kbn/core-status-common';
 import { getSummaryStatus } from './get_summary_status';
 
 const STATUS_TIMEOUT_MS = 30 * 1000; // 30 seconds

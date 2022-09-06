@@ -40,6 +40,13 @@ export interface ServiceStatus<Meta extends Record<string, any> | unknown = unkn
 }
 
 /**
+ * Possible values for the ID of a {@link ServiceStatusLevel}
+ *
+ * @public
+ */
+export type ServiceStatusLevelId = 'available' | 'degraded' | 'unavailable' | 'critical';
+
+/**
  * The current "level" of availability of a service.
  *
  * @remarks

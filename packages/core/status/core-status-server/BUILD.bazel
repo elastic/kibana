@@ -36,14 +36,14 @@ NPM_MODULE_EXTRA_FILES = [
 ]
 
 RUNTIME_DEPS = [
-  "//packages/core/base/core-base-common",
+  "//packages/core/status/core-status-common",
 ]
 
 TYPES_DEPS = [
   "@npm//@types/node",
   "@npm//@types/jest",
   "@npm//rxjs",
-  "//packages/core/base/core-base-common:npm_module_types",
+  "//packages/core/status/core-status-common:npm_module_types",
 ]
 
 jsts_transpiler(

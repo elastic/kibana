@@ -2,19 +2,22 @@ load("@npm//@bazel/typescript:index.bzl", "ts_config")
 load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
 load("//src/dev/bazel:index.bzl", "jsts_transpiler", "pkg_npm", "pkg_npm_types", "ts_project")
 
-PKG_DIRNAME = "core-elasticsearch-server-mocks"
-PKG_REQUIRE_NAME = "@kbn/core-elasticsearch-server-mocks"
+PKG_DIRNAME = "core-status-common"
+PKG_REQUIRE_NAME = "@kbn/core-status-common"
 
 SOURCE_FILES = glob(
   [
     "**/*.ts",
+    "**/*.tsx",
   ],
   exclude = [
     "**/*.config.js",
+    "**/*.mock.*",
     "**/*.test.*",
     "**/*.stories.*",
     "**/__snapshots__/**",
     "**/integration_tests/**",
+    "**/mocks/**",
     "**/scripts/**",
     "**/storybook/**",
     "**/test_fixtures/**",
@@ -34,25 +37,27 @@ NPM_MODULE_EXTRA_FILES = [
 ]
 
 RUNTIME_DEPS = [
-  "@npm//rxjs",
-  "//packages/core/elasticsearch/core-elasticsearch-client-server-mocks",
+  "@npm//react",
+  "//packages/kbn-std",
 ]
 
 TYPES_DEPS = [
   "@npm//@types/node",
   "@npm//@types/jest",
-  "@npm//rxjs",
-  "//packages/kbn-utility-types:npm_module_types",
-  "//packages/core/status/core-status-common:npm_module_types",
-  "//packages/core/elasticsearch/core-elasticsearch-server:npm_module_types",
-  "//packages/core/elasticsearch/core-elasticsearch-client-server-mocks:npm_module_types",
-  "//packages/core/elasticsearch/core-elasticsearch-server-internal:npm_module_types",
+  "//packages/kbn-std:npm_module_types",
 ]
 
 jsts_transpiler(
   name = "target_node",
   srcs = SRCS,
   build_pkg_name = package_name(),
+)
+
+jsts_transpiler(
+  name = "target_web",
+  srcs = SRCS,
+  build_pkg_name = package_name(),
+  web = True,
 )
 
 ts_config(
@@ -79,7 +84,7 @@ ts_project(
 js_library(
   name = PKG_DIRNAME,
   srcs = NPM_MODULE_EXTRA_FILES,
-  deps = RUNTIME_DEPS + [":target_node"],
+  deps = RUNTIME_DEPS + [":target_node", ":target_web"],
   package_name = PKG_REQUIRE_NAME,
   visibility = ["//visibility:public"],
 )

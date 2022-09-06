@@ -7,7 +7,8 @@
  */
 
 import type { Observable } from 'rxjs';
-import type { PluginName, ServiceStatus } from '@kbn/core-base-common';
+import type { PluginName } from '@kbn/core-base-common';
+import type { ServiceStatus } from '@kbn/core-status-common';
 
 import { type Deps, PluginsStatusService as BasePluginsStatusService } from './plugins_status';
 

@@ -7,21 +7,7 @@
  */
 
 import type { Observable } from 'rxjs';
-import type { ServiceStatus } from '@kbn/core-base-common';
-
-/**
- * Status of core services.
- *
- * @internalRemarks
- * Only contains entries for backend services that could have a non-available `status`.
- * For example, `context` cannot possibly be broken, so it is not included.
- *
- * @public
- */
-export interface CoreStatus {
-  elasticsearch: ServiceStatus;
-  savedObjects: ServiceStatus;
-}
+import type { ServiceStatus, CoreStatus } from '@kbn/core-status-common';
 
 /**
  * API for accessing status of Core and this plugin's dependencies as well as for customizing this plugin's status.

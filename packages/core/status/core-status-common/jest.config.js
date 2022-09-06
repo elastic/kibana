@@ -6,4 +6,8 @@
  * Side Public License, v 1.
  */
 
-export type { StatusServiceSetup } from './contracts';
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../..',
+  roots: ['<rootDir>/packages/core/status/core-status-common-internal'],
+};
