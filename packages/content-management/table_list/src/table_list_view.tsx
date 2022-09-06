@@ -6,7 +6,15 @@
  * Side Public License, v 1.
  */
 
-import React, { useReducer, useCallback, useEffect, useRef, useMemo, ReactNode } from 'react';
+import React, {
+  useReducer,
+  useCallback,
+  useEffect,
+  useRef,
+  useMemo,
+  ReactNode,
+  MouseEvent,
+} from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import {
   EuiBasicTableColumn,
@@ -53,7 +61,10 @@ export interface Props<T extends UserContentCommonSchema = UserContentCommonSche
     searchQuery: string,
     references?: SavedObjectsFindOptionsReference[]
   ): Promise<{ total: number; hits: T[] }>;
-  getDetailViewLink(entity: T): string;
+  /** Handler to set the item title "href" value */
+  getDetailViewLink?: (entity: T) => string;
+  /** Handler to execute when clicking the item title */
+  onClickTitle?: (item: T) => void;
   createItem?(): void;
   deleteItems?(items: T[]): Promise<void>;
   editItem?(item: T): void;
@@ -103,9 +114,22 @@ function TableListViewComp<T extends UserContentCommonSchema>({
   editItem,
   deleteItems,
   getDetailViewLink,
+  onClickTitle,
   id = 'userContent',
   children,
 }: Props<T>) {
+  if (!getDetailViewLink && !onClickTitle) {
+    throw new Error(
+      `[TableListView] One o["getDetailViewLink" or "onClickTitle"] prop must be provided.`
+    );
+  }
+
+  if (getDetailViewLink && onClickTitle) {
+    throw new Error(
+      `[TableListView] Either "getDetailViewLink" or "onClickTitle" can be provided. Not both.`
+    );
+  }
+
   const isMounted = useRef(false);
   const fetchIdx = useRef(0);
 
@@ -138,8 +162,18 @@ function TableListViewComp<T extends UserContentCommonSchema>({
         }),
         sortable: true,
         render: (field: keyof T, record: T) => (
+          // The validation is handled at the top of the component
+          // eslint-disable-next-line  @elastic/eui/href-or-on-click
           <EuiLink
-            href={getDetailViewLink(record)}
+            href={getDetailViewLink ? getDetailViewLink(record) : undefined}
+            onClick={
+              onClickTitle
+                ? (e: MouseEvent) => {
+                    e.preventDefault();
+                    onClickTitle(record);
+                  }
+                : undefined
+            }
             data-test-subj={`${id}ListingTitleLink-${record.attributes.title.split(' ').join('-')}`}
           >
             {record.attributes.title}

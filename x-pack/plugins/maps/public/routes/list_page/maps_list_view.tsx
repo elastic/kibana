@@ -12,13 +12,13 @@ import { i18n } from '@kbn/i18n';
 import { TableListView } from '@kbn/content-management-table-list';
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list';
 import { SimpleSavedObject } from '@kbn/core-saved-objects-api-browser';
+import { goToSpecifiedPath } from '../../render_app';
 import { APP_ID, getEditPath, MAP_PATH, MAP_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import {
   getMapsCapabilities,
   getCoreChrome,
   getExecutionContext,
   getNavigateToApp,
-  getUrlForApp,
   getSavedObjectsClient,
   getUiSettings,
 } from '../../kibana_services';
@@ -118,11 +118,7 @@ export function MapsListView() {
         defaultMessage: 'maps',
       })}
       tableListTitle={getAppTitle()}
-      getDetailViewLink={({ id }) =>
-        getUrlForApp()('maps', {
-          path: getEditPath(id),
-        })
-      }
+      onClickTitle={({ id }) => goToSpecifiedPath(getEditPath(id))}
     />
   );
 }
