@@ -40,10 +40,12 @@ export const SwimLanePagination: FC<SwimLanePaginationProps> = ({
 
   const goToPage = useCallback((pageNumber: number) => {
     onPaginationChange({ fromPage: pageNumber + 1 });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const setPerPage = useCallback((perPageUpdate: number) => {
     onPaginationChange({ perPage: perPageUpdate });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const pageCount = Math.ceil(cardinality / perPage);

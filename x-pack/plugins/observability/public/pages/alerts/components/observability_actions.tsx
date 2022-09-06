@@ -29,7 +29,7 @@ import {
 } from '../containers/alerts_table_t_grid/translations';
 import { ObservabilityAppServices } from '../../../application/types';
 import { RULE_DETAILS_PAGE_ID } from '../../rule_details/types';
-import type { TopAlert } from '../containers/alerts_page/alerts_page';
+import type { TopAlert } from '../containers/alerts_page/types';
 import { ObservabilityRuleTypeRegistry } from '../../..';
 import { ALERT_DETAILS_PAGE_ID } from '../../alert_details/types';
 

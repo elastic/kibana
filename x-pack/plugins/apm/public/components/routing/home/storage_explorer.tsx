@@ -8,10 +8,15 @@
 import React from 'react';
 import { EuiTitle, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import * as t from 'io-ts';
 import { StorageExplorer } from '../../app/storage_explorer';
 import { BetaBadge } from '../../shared/beta_badge';
 import { ApmMainTemplate } from '../templates/apm_main_template';
 import { Breadcrumb } from '../../app/breadcrumb';
+import {
+  indexLifecyclePhaseRt,
+  IndexLifecyclePhaseSelectOption,
+} from '../../../../common/storage_explorer_types';
 
 export const storageExplorer = {
   '/storage-explorer': {
@@ -48,5 +53,13 @@ export const storageExplorer = {
         </ApmMainTemplate>
       </Breadcrumb>
     ),
+    params: t.type({
+      query: indexLifecyclePhaseRt,
+    }),
+    defaults: {
+      query: {
+        indexLifecyclePhase: IndexLifecyclePhaseSelectOption.All,
+      },
+    },
   },
 };

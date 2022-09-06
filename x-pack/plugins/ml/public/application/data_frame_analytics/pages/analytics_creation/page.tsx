@@ -81,6 +81,7 @@ export const Page: FC<Props> = ({ jobId }) => {
         }
       })();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -88,6 +89,7 @@ export const Page: FC<Props> = ({ jobId }) => {
       activatedSteps.splice(currentStep, 1, true);
       setActivatedSteps(activatedSteps);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentStep]);
 
   const analyticsWizardSteps = [

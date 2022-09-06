@@ -26,7 +26,6 @@ import { getComparisonEnabled } from '../../../shared/time_comparison/get_compar
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { asDynamicBytes } from '../../../../../common/utils/formatters';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
-import { IndexLifecyclePhaseSelectOption } from '../../../../../common/storage_explorer_types';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { useProgressiveFetcher } from '../../../../hooks/use_progressive_fetcher';
@@ -37,11 +36,7 @@ import type { APIReturnType } from '../../../../services/rest/create_call_apm_ap
 type StorageExplorerItems =
   APIReturnType<'GET /internal/apm/storage_explorer'>['serviceStatistics'];
 
-interface Props {
-  indexLifecyclePhase: IndexLifecyclePhaseSelectOption;
-}
-
-export function ServicesTable({ indexLifecyclePhase }: Props) {
+export function ServicesTable() {
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<
     Record<string, ReactNode>
   >({});
@@ -54,6 +49,7 @@ export function ServicesTable({ indexLifecyclePhase }: Props) {
       rangeTo,
       environment,
       kuery,
+      indexLifecyclePhase,
       comparisonEnabled: urlComparisonEnabled,
     },
   } = useApmParams('/storage-explorer');

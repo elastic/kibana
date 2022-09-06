@@ -17,7 +17,6 @@ import {
 } from '@elastic/charts';
 import { useChartTheme } from '@kbn/observability-plugin/public';
 import { useProgressiveFetcher } from '../../../hooks/use_progressive_fetcher';
-import { IndexLifecyclePhaseSelectOption } from '../../../../common/storage_explorer_types';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { ChartContainer } from '../../shared/charts/chart_container';
@@ -27,11 +26,7 @@ import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_
 import { Coordinate, TimeSeries } from '../../../../typings/timeseries';
 import { asDynamicBytes } from '../../../../common/utils/formatters';
 
-interface Props {
-  indexLifecyclePhase: IndexLifecyclePhaseSelectOption;
-}
-
-export function StorageChart({ indexLifecyclePhase }: Props) {
+export function StorageChart() {
   const { core } = useApmPluginContext();
   const chartTheme = useChartTheme();
 
@@ -41,7 +36,7 @@ export function StorageChart({ indexLifecyclePhase }: Props) {
   });
 
   const {
-    query: { rangeFrom, rangeTo, environment, kuery },
+    query: { rangeFrom, rangeTo, environment, kuery, indexLifecyclePhase },
   } = useApmParams('/storage-explorer');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
