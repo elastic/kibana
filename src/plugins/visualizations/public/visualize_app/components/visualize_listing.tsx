@@ -201,6 +201,7 @@ export const VisualizeListing = () => {
 
   return (
     <TableListView<VisualizeUserContent>
+      id="vis"
       headingId="visualizeListingHeading"
       // we allow users to create visualizations even if they can't save them
       // for data exploration purposes

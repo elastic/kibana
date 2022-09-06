@@ -116,6 +116,7 @@ export function MapsListView() {
 
   return (
     <TableListView<MapUserContent>
+      id="map"
       headingId="mapsListingPage"
       createItem={isReadOnly ? undefined : navigateToNewMap}
       findItems={findMaps}
