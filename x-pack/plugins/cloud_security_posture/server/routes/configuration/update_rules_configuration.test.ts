@@ -331,7 +331,8 @@ describe('Update rules configuration API', () => {
     setupSoClientFindMock(mocks);
     setupPackagePolicyServiceGetMock(mocks);
 
-    const { requestMock, responseMock, soClientMock, contextMock } = mocks;
+    const { requestMock, responseMock, soClientMock, contextMock, packagePolicyServiceMock } =
+      mocks;
 
     const message = 'some error';
     soClientMock.bulkUpdate.mockReturnValue(Promise.reject(message));
@@ -343,6 +344,7 @@ describe('Update rules configuration API', () => {
         responseMock
       );
     } catch (e) {
+      expect(packagePolicyServiceMock.update).not.toHaveBeenCalled();
       expect(responseMock.customError).toHaveBeenCalledWith(
         expect.objectContaining({
           message,
@@ -359,8 +361,7 @@ describe('Update rules configuration API', () => {
     setupSoClientFindMock(mocks);
     setupPackagePolicyServiceGetMock(mocks);
 
-    const { requestMock, responseMock, packagePolicyServiceMock, contextMock, packagePolicyMock } =
-      mocks;
+    const { requestMock, responseMock, packagePolicyServiceMock, contextMock } = mocks;
 
     const message = 'some error';
     packagePolicyServiceMock.update.mockReturnValue(Promise.reject(message));
@@ -372,8 +373,6 @@ describe('Update rules configuration API', () => {
         responseMock
       );
     } catch (e) {
-      const unchangedPackagePolicyMock = getMocks().packagePolicyMock;
-      expect(packagePolicyMock).toEqual(unchangedPackagePolicyMock);
       expect(responseMock.customError).toHaveBeenCalledWith(
         expect.objectContaining({
           message,
