@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import {coreMock, loggingSystemMock} from '@kbn/core/server/mocks';
+import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 
 import { ConfigSchema } from './config';
 import { EncryptedSavedObjectsPlugin } from './plugin';
 
 describe('EncryptedSavedObjects Plugin', () => {
-
   describe('setup()', () => {
     it('exposes proper contract', () => {
       const plugin = new EncryptedSavedObjectsPlugin(
@@ -30,8 +29,8 @@ describe('EncryptedSavedObjects Plugin', () => {
 
     it('exposes proper contract when encryption key is set', () => {
       const mockInitializerContext = coreMock.createPluginInitializerContext(
-        ConfigSchema.validate({encryptionKey: 'z'.repeat(32)}, {dist: true})
-      )
+        ConfigSchema.validate({ encryptionKey: 'z'.repeat(32) }, { dist: true })
+      );
 
       const plugin = new EncryptedSavedObjectsPlugin(mockInitializerContext);
 
@@ -44,12 +43,12 @@ describe('EncryptedSavedObjects Plugin', () => {
         }
       `);
 
-      const infoLogs = loggingSystemMock.collect(mockInitializerContext.logger).info
+      const infoLogs = loggingSystemMock.collect(mockInitializerContext.logger).info;
 
       expect(infoLogs.length).toBe(1);
-      expect(infoLogs[0]).toEqual(
-        [`Hashed 'encryptionKey' for this instance: WLbjNGKEm7aA4NfJHYyW88jHUkHtyF7ENHcF0obYGBU=`]
-      );
+      expect(infoLogs[0]).toEqual([
+        `Hashed 'encryptionKey' for this instance: WLbjNGKEm7aA4NfJHYyW88jHUkHtyF7ENHcF0obYGBU=`,
+      ]);
     });
   });
 
