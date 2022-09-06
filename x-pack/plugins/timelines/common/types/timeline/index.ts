@@ -322,6 +322,7 @@ export enum TimelineId {
   alternateTest = 'alternateTest',
   rulePreview = 'rule-preview',
   kubernetesPageSessions = 'kubernetes-page-sessions',
+  threatFeed = 'threat-feed',
 }
 
 export const TimelineIdLiteralRt = runtimeTypes.union([
@@ -335,6 +336,7 @@ export const TimelineIdLiteralRt = runtimeTypes.union([
   runtimeTypes.literal(TimelineId.test),
   runtimeTypes.literal(TimelineId.rulePreview),
   runtimeTypes.literal(TimelineId.kubernetesPageSessions),
+  runtimeTypes.literal(TimelineId.threatFeed),
 ]);
 
 export type TimelineIdLiteral = runtimeTypes.TypeOf<typeof TimelineIdLiteralRt>;

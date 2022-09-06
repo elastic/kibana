@@ -53,6 +53,7 @@ export enum TimelineId {
   test = 'test', // Reserved for testing purposes
   alternateTest = 'alternateTest',
   kubernetesPageSessions = 'kubernetes-page-sessions',
+  threatFeed = 'threat-feed',
 }
 
 export interface InitialyzeTGridSettings extends Partial<TGridModelSettings> {

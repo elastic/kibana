@@ -20,6 +20,7 @@ import { SecurityPageName } from '../app/types';
 import type { SecuritySubPluginRoutes } from '../app/types';
 import { useSourcererDataView } from '../common/containers/sourcerer';
 import { SecuritySolutionPageWrapper } from '../common/components/page_wrapper';
+import { TGridDemo } from './tgrid_demo';
 
 const ThreatIntelligence = memo(() => {
   const { threatIntelligence } = useKibana().services;
@@ -41,6 +42,7 @@ const ThreatIntelligence = memo(() => {
 
   return (
     <TrackApplicationView viewId="threat_intelligence">
+      <TGridDemo />
       <ThreatIntelligencePlugin securitySolutionContext={securitySolutionContext} />
       <SpyRoute pageName={SecurityPageName.threatIntelligenceIndicators} />
     </TrackApplicationView>

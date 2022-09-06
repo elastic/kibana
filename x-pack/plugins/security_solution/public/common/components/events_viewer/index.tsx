@@ -154,7 +154,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
+  console.log({pageFilters});
   const globalFilters = useMemo(() => [...filters, ...(pageFilters ?? [])], [filters, pageFilters]);
   const trailingControlColumns: ControlColumnProps[] = EMPTY_CONTROL_COLUMNS;
 

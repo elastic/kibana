@@ -18,7 +18,7 @@ export const EnterpriseGuard: FC = ({ children }) => {
     services: { http },
   } = useKibana();
 
-  if (licenseService.isEnterprise()) {
+  if (true) {
     return <>{children}</>;
   }
 

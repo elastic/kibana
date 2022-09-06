@@ -21,5 +21,6 @@ export const EntityType = {
   ALERTS: 'alerts',
   EVENTS: 'events',
   SESSIONS: 'sessions',
+  THREATS: 'threats',
 } as const;
 export type EntityType = typeof EntityType[keyof typeof EntityType];

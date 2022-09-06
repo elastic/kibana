@@ -223,6 +223,7 @@ export const useTimelineEvents = ({
 
   const timelineSearch = useCallback(
     (request: TimelineRequest<typeof language> | null) => {
+      console.log(request);
       if (request == null || skip) {
         return;
       }
@@ -231,6 +232,7 @@ export const useTimelineEvents = ({
         prevTimelineRequest.current = request;
         abortCtrl.current = new AbortController();
         setLoading(true);
+        console.log({data, request});
         if (data && data.search) {
           const { endTracking } = startTracking();
           const abortSignal = abortCtrl.current.signal;
@@ -373,7 +375,9 @@ export const useTimelineEvents = ({
   ]);
 
   useEffect(() => {
+    console.log('fire');
     if (!deepEqual(prevTimelineRequest.current, timelineRequest)) {
+      console.log('fire for real');
       timelineSearch(timelineRequest);
     }
     return () => {

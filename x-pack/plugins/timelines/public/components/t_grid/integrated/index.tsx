@@ -206,6 +206,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
       }),
     [esQueryConfig, dataProviders, indexPattern, browserFields, filters, start, end, query, kqlMode]
   );
+  console.log({filters, filterQuery});
 
   const canQueryTimeline = useMemo(
     () =>
@@ -251,7 +252,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
       sort: sortField,
       startDate: start,
     });
-
+    console.log({loading, events});
   useEffect(() => {
     dispatch(tGridActions.updateIsLoading({ id, isLoading: loading }));
   }, [dispatch, id, loading]);
