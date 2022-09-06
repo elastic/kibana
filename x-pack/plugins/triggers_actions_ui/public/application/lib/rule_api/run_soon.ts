@@ -7,6 +7,6 @@
 import { HttpSetup } from '@kbn/core/public';
 import { INTERNAL_BASE_ALERTING_API_PATH } from '../../constants';
 
-export async function runSoon({ id, http }: { id: string; http: HttpSetup }): Promise<void> {
+export async function runSoon({ id, http }: { id: string; http: HttpSetup }): Promise<string> {
   return http.post(`${INTERNAL_BASE_ALERTING_API_PATH}/rule/${encodeURIComponent(id)}/_run_soon`);
 }

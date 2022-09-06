@@ -29,8 +29,8 @@ export const runSoonRoute = (
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         const rulesClient = (await context.alerting).getRulesClient();
-        await rulesClient.runSoon(req.params);
-        return res.noContent();
+        const message = await rulesClient.runSoon(req.params);
+        return message ? res.ok({ body: message }) : res.noContent();
       })
     )
   );

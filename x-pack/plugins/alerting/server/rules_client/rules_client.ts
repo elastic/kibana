@@ -40,7 +40,7 @@ import {
   InvalidateAPIKeyResult as SecurityPluginInvalidateAPIKeyResult,
 } from '@kbn/security-plugin/server';
 import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
-import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import { TaskManagerStartContract, TaskStatus } from '@kbn/task-manager-plugin/server';
 import {
   IEvent,
   IEventLogClient,
@@ -2654,7 +2654,15 @@ export class RulesClient {
 
   public async runSoon({ id }: { id: string }) {
     const { attributes } = await this.unsecuredSavedObjectsClient.get<Rule>('alert', id);
-
+    const taskDoc = await this.taskManager.get(id);
+    if (
+      taskDoc &&
+      (taskDoc.status === TaskStatus.Claiming || taskDoc.status === TaskStatus.Running)
+    ) {
+      return i18n.translate('xpack.alerting.rulesClient.runSoon.ruleIsRunning', {
+        defaultMessage: 'Rule is already running',
+      });
+    }
     try {
       await this.authorization.ensureAuthorized({
         ruleTypeId: attributes.alertTypeId,

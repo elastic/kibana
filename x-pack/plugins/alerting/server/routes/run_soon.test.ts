@@ -31,7 +31,7 @@ describe('runSoonRuleRoute', () => {
 
     expect(config.path).toMatchInlineSnapshot(`"/internal/alerting/rule/{id}/_run_soon"`);
 
-    rulesClient.runSoon.mockResolvedValueOnce();
+    rulesClient.runSoon.mockResolvedValueOnce(undefined);
 
     const [context, req, res] = mockHandlerArguments(
       { rulesClient },
@@ -55,6 +55,42 @@ describe('runSoonRuleRoute', () => {
     `);
 
     expect(res.noContent).toHaveBeenCalled();
+  });
+
+  it('returns a message if a rule is already running', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+
+    runSoonRoute(router, licenseState);
+
+    const [config, handler] = router.post.mock.calls[0];
+
+    expect(config.path).toMatchInlineSnapshot(`"/internal/alerting/rule/{id}/_run_soon"`);
+
+    rulesClient.runSoon.mockResolvedValueOnce('Rule already running');
+
+    const [context, req, res] = mockHandlerArguments(
+      { rulesClient },
+      {
+        params: {
+          id: '1',
+        },
+      },
+      ['noContent']
+    );
+
+    expect(await handler(context, req, res)).toEqual(undefined);
+
+    expect(rulesClient.runSoon).toHaveBeenCalledTimes(1);
+    expect(rulesClient.runSoon.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "id": "1",
+        },
+      ]
+    `);
+
+    expect(res.ok).toHaveBeenCalledWith({ body: 'Rule already running' });
   });
 
   it('ensures the rule type gets validated for the license', async () => {

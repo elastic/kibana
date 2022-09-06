@@ -264,12 +264,16 @@ export const RulesList = ({
 
   const onRunRule = async (rule: RuleTableItem) => {
     try {
-      await runSoon({ http, id: rule.id });
-      toasts.addSuccess({
-        title: i18n.translate('xpack.triggersActionsUI.sections.rulesList.ableToRunRuleSoon', {
-          defaultMessage: 'Your rule is scheduled to run soon',
-        }),
-      });
+      const message = await runSoon({ http, id: rule.id });
+      if (message) {
+        toasts.addWarning({ title: message });
+      } else {
+        toasts.addSuccess({
+          title: i18n.translate('xpack.triggersActionsUI.sections.rulesList.ableToRunRuleSoon', {
+            defaultMessage: 'Your rule is scheduled to run soon',
+          }),
+        });
+      }
     } catch (e) {
       toasts.addError(e, {
         title: i18n.translate('xpack.triggersActionsUI.sections.rulesList.unableToRunRuleSoon', {
