@@ -27,7 +27,7 @@
   "server": false,
   "ui": true,
   "configPath": ["xpack", "ux"],
-  "requiredBundles": ["kibanaReact", "observability", "maps"],
+  "requiredBundles": ["kibanaReact", "observability", "maps", "usageCollection"],
   "owner": {
     "name": "Uptime",
     "githubTeam": "uptime"

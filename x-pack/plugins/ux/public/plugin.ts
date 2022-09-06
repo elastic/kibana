@@ -34,6 +34,7 @@ import { MapsStartApi } from '@kbn/maps-plugin/public';
 import { Start as InspectorPluginStart } from '@kbn/inspector-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { LensPublicStart } from '@kbn/lens-plugin/public';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 
 export type UxPluginSetup = void;
 export type UxPluginStart = void;
@@ -44,6 +45,7 @@ export interface ApmPluginSetupDeps {
   home?: HomePublicPluginSetup;
   licensing: LicensingPluginSetup;
   observability: ObservabilityPublicSetup;
+  usageCollection?: UsageCollectionSetup;
 }
 
 export interface ApmPluginStartDeps {

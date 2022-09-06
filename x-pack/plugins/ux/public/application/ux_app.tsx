@@ -127,42 +127,47 @@ export function UXAppRoot({
   const plugins = { ...deps, maps };
 
   createCallApmApi(core);
+  const ApplicationUsageTrackingProvider =
+    plugins.usageCollection?.components.ApplicationUsageTrackingProvider ??
+    React.Fragment;
 
   return (
-    <RedirectAppLinks
-      className={APP_WRAPPER_CLASS}
-      application={core.application}
-    >
-      <KibanaContextProvider
-        services={{
-          ...core,
-          ...plugins,
-          inspector,
-          observability,
-          embeddable,
-          data,
-          dataViews,
-          lens,
-        }}
+    <ApplicationUsageTrackingProvider>
+      <RedirectAppLinks
+        className={APP_WRAPPER_CLASS}
+        application={core.application}
       >
-        <i18nCore.Context>
-          <RouterProvider history={history} router={uxRouter}>
-            <DatePickerContextProvider>
-              <InspectorContextProvider>
-                <UrlParamsProvider>
-                  <EuiErrorBoundary>
-                    <CsmSharedContextProvider>
-                      <UxApp />
-                    </CsmSharedContextProvider>
-                  </EuiErrorBoundary>
-                  <UXActionMenu appMountParameters={appMountParameters} />
-                </UrlParamsProvider>
-              </InspectorContextProvider>
-            </DatePickerContextProvider>
-          </RouterProvider>
-        </i18nCore.Context>
-      </KibanaContextProvider>
-    </RedirectAppLinks>
+        <KibanaContextProvider
+          services={{
+            ...core,
+            ...plugins,
+            inspector,
+            observability,
+            embeddable,
+            data,
+            dataViews,
+            lens,
+          }}
+        >
+          <i18nCore.Context>
+            <RouterProvider history={history} router={uxRouter}>
+              <DatePickerContextProvider>
+                <InspectorContextProvider>
+                  <UrlParamsProvider>
+                    <EuiErrorBoundary>
+                      <CsmSharedContextProvider>
+                        <UxApp />
+                      </CsmSharedContextProvider>
+                    </EuiErrorBoundary>
+                    <UXActionMenu appMountParameters={appMountParameters} />
+                  </UrlParamsProvider>
+                </InspectorContextProvider>
+              </DatePickerContextProvider>
+            </RouterProvider>
+          </i18nCore.Context>
+        </KibanaContextProvider>
+      </RedirectAppLinks>
+    </ApplicationUsageTrackingProvider>
   );
 }
 
@@ -190,6 +195,9 @@ export const renderApp = ({
     // eslint-disable-next-line no-console
     console.log('Error creating static data view', e);
   });
+  const ApplicationUsageTrackingProvider =
+    deps.usageCollection?.components.ApplicationUsageTrackingProvider ??
+    React.Fragment;
 
   ReactDOM.render(
     <UXAppRoot
