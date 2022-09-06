@@ -117,7 +117,7 @@ const AssigneesFilterPopoverComponent: React.FC<AssigneesFilterPopoverProps> = (
         clearButtonLabel: i18n.CLEAR_FILTERS,
         emptyMessage: <EmptyMessage />,
         noMatchesMessage: !isUserTyping && !isLoadingData ? <NoMatches /> : <EmptyMessage />,
-        singleSelection: true,
+        singleSelection: false,
       }}
     />
   );
