@@ -49,14 +49,14 @@ const setupRules = () => {
       attributes: { ...rule.attributes, enabled: true },
     })
   );
-  return { updatedRulesSO: updatedRulesSO, initialRulesSO };
+  return { updatedRulesSO, initialRulesSO };
 };
 
 type CspUpdateRulesConfigMocks = Awaited<ReturnType<typeof getMocks>>;
 
 const getBulkUpdateMock = (
-  rules: SavedObject<PackagePolicyRuleUpdatePayload>[]
-): SavedObject<SavedObjectRuleUpdatePayload>[] =>
+  rules: Array<SavedObject<PackagePolicyRuleUpdatePayload>>
+): Array<SavedObject<SavedObjectRuleUpdatePayload>> =>
   rules.map((rule) => ({
     ...rule,
     // Updates to rules SO only include the 'enabled' field

@@ -102,7 +102,7 @@ export const getCspRulesSO = (
   soClient: SavedObjectsClientContract,
   packagePolicyId: PackagePolicy['id'],
   policyId: PackagePolicy['policy_id']
-): Promise<SavedObject<PackagePolicyRuleUpdatePayload>[]> =>
+): Promise<Array<SavedObject<PackagePolicyRuleUpdatePayload>>> =>
   soClient
     .find<PackagePolicyRuleUpdatePayload>({
       type: CSP_RULE_SAVED_OBJECT_TYPE,
@@ -121,7 +121,7 @@ export const getCspRulesSO = (
 const getByIdCurrentRulesSO = (
   soClient: CspApiRequestHandlerContext['soClient'],
   ruleIds: string[]
-): Promise<SavedObject<SavedObjectRuleUpdatePayload>[]> =>
+): Promise<Array<SavedObject<SavedObjectRuleUpdatePayload>>> =>
   soClient
     .bulkGet<SavedObjectRuleUpdatePayload>(
       ruleIds.map((ruleId) => ({
