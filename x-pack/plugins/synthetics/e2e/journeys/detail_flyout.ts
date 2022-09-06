@@ -40,7 +40,7 @@ journey('Test Monitor Detail Flyout', async ({ page, params }) => {
     await syntheticsApp.navigateToOverview();
     await page.click(`[data-test-subj="${monitorName}-metric-item"]`);
     const flyoutHeader = await page.waitForSelector('.euiFlyoutHeader');
-    expect(await flyoutHeader.innerText()).toContain('test-flyout-http-monitor');
+    expect(await flyoutHeader.innerText()).toContain(monitorName);
   });
 
   step('delete monitors', async () => {
