@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { APMQueryParams } from '../url_helpers';
-import { APMLink, APMLinkExtendProps, useAPMHref } from './apm_link';
+import { LegacyAPMLink, APMLinkExtendProps, useAPMHref } from './apm_link';
 
 const persistedFilters: Array<keyof APMQueryParams> = [
   'host',
@@ -28,5 +28,5 @@ interface Props extends APMLinkExtendProps {
 }
 
 export function MetricOverviewLink({ serviceName, ...rest }: Props) {
-  return <APMLink path={`/services/${serviceName}/metrics`} {...rest} />;
+  return <LegacyAPMLink path={`/services/${serviceName}/metrics`} {...rest} />;
 }

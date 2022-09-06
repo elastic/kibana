@@ -23,7 +23,7 @@ import { httpServiceMock } from '@kbn/core-http-server-mocks';
 import { ServiceStatusLevelSnapshotSerializer } from './test_utils';
 import { metricsServiceMock } from '@kbn/core-metrics-server-mocks';
 import { configServiceMock } from '@kbn/config-mocks';
-import { coreUsageDataServiceMock } from '../core_usage_data/core_usage_data_service.mock';
+import { coreUsageDataServiceMock } from '@kbn/core-usage-data-server-mocks';
 import { analyticsServiceMock } from '@kbn/core-analytics-server-mocks';
 import { AnalyticsServiceSetup } from '..';
 

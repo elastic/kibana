@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { HttpSetup } from '@kbn/core/public';
 import { ISection } from '../../typings/section';
+import { paths } from '../../config/paths';
 
 export const getEmptySections = ({ http }: { http: HttpSetup }): ISection[] => {
   return [
@@ -97,7 +98,7 @@ export const getEmptySections = ({ http }: { http: HttpSetup }): ISection[] => {
       linkTitle: i18n.translate('xpack.observability.emptySection.apps.alert.link', {
         defaultMessage: 'Create rule',
       }),
-      href: http.basePath.prepend('/app/management/insightsAndAlerting/triggersActions/alerts'),
+      href: http.basePath.prepend(paths.observability.rules),
     },
   ];
 };
