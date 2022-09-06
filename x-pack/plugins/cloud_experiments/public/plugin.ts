@@ -36,11 +36,20 @@ export class CloudExperimentsPlugin
   public setup(core: CoreSetup): CloudExperimentsPluginSetup {
     return {
       identifyUser: (userId, userMetadata) => {
-        this.launchDarklyClient = LaunchDarkly.initialize(
-          this.clientId,
-          { key: userId, custom: userMetadata },
-          { application: { id: 'kibana-browser', version: this.kibanaVersion } }
-        );
+        if (!this.launchDarklyClient) {
+          // If the client has not been initialized, create it with the user data..
+          this.launchDarklyClient = LaunchDarkly.initialize(
+            this.clientId,
+            { key: userId, custom: userMetadata },
+            { application: { id: 'kibana-browser', version: this.kibanaVersion } }
+          );
+        } else {
+          // Otherwise, call the `identify` method.
+          this.launchDarklyClient
+            .identify({ key: userId, custom: userMetadata })
+            // eslint-disable-next-line no-console
+            .catch((err) => console.warn(err));
+        }
       },
       getVariation: this.getVariation,
       reportMetric: this.reportMetric,
