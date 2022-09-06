@@ -50,7 +50,7 @@ const apisToIntercept = [
   },
 ];
 
-describe.skip('Service overview: Time Comparison', () => {
+describe('Service overview: Time Comparison', () => {
   before(() => {
     synthtrace.index(
       opbeans({
@@ -65,6 +65,29 @@ describe.skip('Service overview: Time Comparison', () => {
   });
 
   beforeEach(() => {
+    cy.intercept(
+      'GET',
+      '/internal/apm/services/opbeans-java/transactions/charts/latency?*'
+    ).as('latencyChartRequest');
+    cy.intercept('GET', '/internal/apm/services/opbeans-java/throughput?*').as(
+      'throughputChartRequest'
+    );
+    cy.intercept(
+      'GET',
+      '/internal/apm/services/opbeans-java/transactions/charts/error_rate?*'
+    ).as('errorRateChartRequest');
+    cy.intercept(
+      'GET',
+      '/internal/apm/services/opbeans-java/transactions/groups/detailed_statistics?*'
+    ).as('transactionGroupsDetailedRequest');
+    cy.intercept(
+      'POST',
+      '/internal/apm/services/opbeans-java/errors/groups/detailed_statistics?*'
+    ).as('errorGroupsDetailedRequest');
+    cy.intercept(
+      'GET',
+      '/internal/apm/services/opbeans-java/service_overview_instances/detailed_statistics?*'
+    ).as('instancesDetailedRequest');
     cy.loginAsViewerUser();
   });
 
@@ -74,57 +97,7 @@ describe.skip('Service overview: Time Comparison', () => {
     cy.url().should('include', 'offset=1d');
   });
 
-  describe('when comparison is toggled off', () => {
-    it('disables select box', () => {
-      cy.visitKibana(serviceOverviewHref);
-      cy.contains('opbeans-java');
-
-      // Comparison is enabled by default
-      cy.get('[data-test-subj="comparisonSelect"]').should('be.enabled');
-
-      // toggles off comparison
-      cy.contains('Comparison').click();
-      cy.get('[data-test-subj="comparisonSelect"]').should('be.disabled');
-    });
-
-    it('calls APIs without comparison time range', () => {
-      apisToIntercept.map(({ endpoint, name }) => {
-        cy.intercept('GET', endpoint).as(name);
-      });
-      cy.visitKibana(serviceOverviewHref);
-
-      cy.get('[data-test-subj="comparisonSelect"]').should('be.enabled');
-      const offset = `offset=1d`;
-
-      // When the page loads it fetches all APIs with comparison time range
-      cy.wait(apisToIntercept.map(({ name }) => `@${name}`)).then(
-        (interceptions) => {
-          interceptions.map((interception) => {
-            expect(interception.request.url).include(offset);
-          });
-        }
-      );
-
-      cy.contains('opbeans-java');
-
-      // toggles off comparison
-      cy.contains('Comparison').click();
-      cy.get('[data-test-subj="comparisonSelect"]').should('be.disabled');
-      // When comparison is disabled APIs are called withou comparison time range
-      cy.wait(apisToIntercept.map(({ name }) => `@${name}`)).then(
-        (interceptions) => {
-          interceptions.map((interception) => {
-            expect(interception.request.url).not.include(offset);
-          });
-        }
-      );
-    });
-  });
-
   it('changes comparison type', () => {
-    apisToIntercept.map(({ endpoint, name }) => {
-      cy.intercept('GET', endpoint).as(name);
-    });
     cy.visitKibana(serviceOverviewPath);
     cy.contains('opbeans-java');
     // opens the page with "Day before" selected
@@ -186,9 +159,6 @@ describe.skip('Service overview: Time Comparison', () => {
   });
 
   it('hovers over throughput chart shows previous and current period', () => {
-    apisToIntercept.map(({ endpoint, name }) => {
-      cy.intercept('GET', endpoint).as(name);
-    });
     cy.visitKibana(
       url.format({
         pathname: serviceOverviewPath,
@@ -208,5 +178,49 @@ describe.skip('Service overview: Time Comparison', () => {
 
     cy.contains('Throughput');
     cy.contains('0 tpm');
+  });
+
+  describe('when comparison is toggled off', () => {
+    it('disables select box', () => {
+      cy.visitKibana(serviceOverviewHref);
+      cy.contains('opbeans-java');
+
+      // Comparison is enabled by default
+      cy.get('[data-test-subj="comparisonSelect"]').should('be.enabled');
+
+      // toggles off comparison
+      cy.contains('Comparison').click();
+      cy.get('[data-test-subj="comparisonSelect"]').should('be.disabled');
+    });
+
+    it('calls APIs without comparison time range', () => {
+      cy.visitKibana(serviceOverviewHref);
+
+      cy.get('[data-test-subj="comparisonSelect"]').should('be.enabled');
+      const offset = `offset=1d`;
+
+      // When the page loads it fetches all APIs with comparison time range
+      cy.wait(apisToIntercept.map(({ name }) => `@${name}`)).then(
+        (interceptions) => {
+          interceptions.map((interception) => {
+            expect(interception.request.url).include(offset);
+          });
+        }
+      );
+
+      cy.contains('opbeans-java');
+
+      // toggles off comparison
+      cy.contains('Comparison').click();
+      cy.get('[data-test-subj="comparisonSelect"]').should('be.disabled');
+      // When comparison is disabled APIs are called withou comparison time range
+      cy.wait(apisToIntercept.map(({ name }) => `@${name}`)).then(
+        (interceptions) => {
+          interceptions.map((interception) => {
+            expect(interception.request.url).not.include(offset);
+          });
+        }
+      );
+    });
   });
 });

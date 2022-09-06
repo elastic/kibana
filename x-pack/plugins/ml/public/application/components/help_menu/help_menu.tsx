@@ -29,6 +29,7 @@ export const HelpMenu: FC<HelpMenuProps> = React.memo(({ docLink }) => {
         },
       ],
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return null;

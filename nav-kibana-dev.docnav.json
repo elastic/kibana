@@ -138,7 +138,7 @@
           "label": "data.search"
         },
         {
-          "id": "kibDevTutorialFilesService",
+          "id": "kibDevTutorialFileService",
           "label": "File service"
         },
         {
