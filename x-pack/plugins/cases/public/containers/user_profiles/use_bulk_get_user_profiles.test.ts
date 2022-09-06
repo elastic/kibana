@@ -68,17 +68,47 @@ describe('useBulkGetUserProfiles', () => {
     });
   });
 
-  it('does not call bulkGetUserProfiles and returns an empty array when the uids is empty', async () => {
-    const spyOnBulkGetUserProfiles = jest.spyOn(api, 'bulkGetUserProfiles');
-
-    const { result, waitFor } = renderHook(() => useBulkGetUserProfiles({ uids: [] }), {
+  it('returns a mapping with user profiles', async () => {
+    const { result, waitFor } = renderHook(() => useBulkGetUserProfiles(props), {
       wrapper: appMockRender.AppWrapper,
     });
 
     await waitFor(() => result.current.isSuccess);
 
-    expect(spyOnBulkGetUserProfiles).not.toBeCalled();
-    expect(result.current.data?.size).toBe(0);
+    expect(result.current.data).toMatchInlineSnapshot(`
+      Map {
+        "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0" => Object {
+          "data": Object {},
+          "enabled": true,
+          "uid": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0",
+          "user": Object {
+            "email": "damaged_raccoon@elastic.co",
+            "full_name": "Damaged Raccoon",
+            "username": "damaged_raccoon",
+          },
+        },
+        "u_A_tM4n0wPkdiQ9smmd8o0Hr_h61XQfu8aRPh9GMoRoc_0" => Object {
+          "data": Object {},
+          "enabled": true,
+          "uid": "u_A_tM4n0wPkdiQ9smmd8o0Hr_h61XQfu8aRPh9GMoRoc_0",
+          "user": Object {
+            "email": "physical_dinosaur@elastic.co",
+            "full_name": "Physical Dinosaur",
+            "username": "physical_dinosaur",
+          },
+        },
+        "u_9xDEQqUqoYCnFnPPLq5mIRHKL8gBTo_NiKgOnd5gGk0_0" => Object {
+          "data": Object {},
+          "enabled": true,
+          "uid": "u_9xDEQqUqoYCnFnPPLq5mIRHKL8gBTo_NiKgOnd5gGk0_0",
+          "user": Object {
+            "email": "wet_dingo@elastic.co",
+            "full_name": "Wet Dingo",
+            "username": "wet_dingo",
+          },
+        },
+      }
+    `);
   });
 
   it('shows a toast error message when an error occurs in the response', async () => {

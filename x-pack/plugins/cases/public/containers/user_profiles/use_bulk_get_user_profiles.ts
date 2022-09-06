@@ -13,25 +13,24 @@ import { ServerError } from '../../types';
 import { USER_PROFILES_CACHE_KEY, USER_PROFILES_BULK_GET_CACHE_KEY } from '../constants';
 import { bulkGetUserProfiles } from './api';
 
+const profilesToMap = (profiles: UserProfileWithAvatar[]): Map<string, UserProfileWithAvatar> =>
+  profiles.reduce<Map<string, UserProfileWithAvatar>>((acc, profile) => {
+    acc.set(profile.uid, profile);
+    return acc;
+  }, new Map<string, UserProfileWithAvatar>());
+
 export const useBulkGetUserProfiles = ({ uids }: { uids: string[] }) => {
   const { security } = useKibana().services;
 
   const toasts = useToasts();
 
-  return useQuery<Map<string, UserProfileWithAvatar>, ServerError>(
+  return useQuery<UserProfileWithAvatar[], ServerError, Map<string, UserProfileWithAvatar>>(
     [USER_PROFILES_CACHE_KEY, USER_PROFILES_BULK_GET_CACHE_KEY, uids],
-    async () => {
-      if (uids.length <= 0 || !security) {
-        return new Map<string, UserProfileWithAvatar>();
-      }
-
-      const profiles = await bulkGetUserProfiles({ security, uids });
-      return profiles.reduce<Map<string, UserProfileWithAvatar>>((acc, profile) => {
-        acc.set(profile.uid, profile);
-        return acc;
-      }, new Map<string, UserProfileWithAvatar>());
+    () => {
+      return bulkGetUserProfiles({ security, uids });
     },
     {
+      select: profilesToMap,
       retry: false,
       keepPreviousData: true,
       onError: (error: ServerError) => {
