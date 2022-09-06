@@ -357,7 +357,7 @@ export const TimeSeries = ({
         tickFormat={xAxisFormatter}
         gridLine={gridLineStyle}
         style={shouldUseNewTimeAxis ? MULTILAYER_TIME_AXIS_STYLE : undefined}
-        timeAxisLayerCount={shouldUseNewTimeAxis ? 3 : 0}
+        timeAxisLayerCount={shouldUseNewTimeAxis ? 2 : 0}
       />
     </Chart>
   );

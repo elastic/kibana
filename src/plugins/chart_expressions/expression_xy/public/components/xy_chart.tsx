@@ -927,7 +927,7 @@ export function XYChart({
             style={xAxisStyle}
             showOverlappingLabels={xAxisConfig?.showOverlappingLabels}
             showDuplicatedTicks={xAxisConfig?.showDuplicates}
-            timeAxisLayerCount={shouldUseNewTimeAxis ? 3 : 0}
+            timeAxisLayerCount={shouldUseNewTimeAxis ? 2 : 0}
           />
           {isSplitChart && splitTable && (
             <SplitChart
