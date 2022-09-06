@@ -300,7 +300,7 @@ export async function persistedStateToExpression(
 ): Promise<{ ast: Ast | null; errors: ErrorMessage[] | undefined }> {
   const {
     state: {
-      visualization: visualizationState,
+      visualization: persistedVisualizationState,
       datasourceStates: persistedDatasourceStates,
       adHocDataViews,
       internalReferences,
@@ -323,6 +323,14 @@ export async function persistedStateToExpression(
     };
   }
   const visualization = visualizations[visualizationType!];
+  const visualizationState = initializeVisualization({
+    visualizationMap: visualizations,
+    visualizationState: {
+      state: persistedVisualizationState,
+      activeId: visualizationType,
+    },
+    references: [...references, ...(internalReferences || [])],
+  });
   const datasourceStatesFromSO = Object.fromEntries(
     Object.entries(persistedDatasourceStates).map(([id, state]) => [
       id,
