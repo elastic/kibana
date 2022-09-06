@@ -17,13 +17,19 @@ import { awsEC2DiskIOBytes } from './tsvb/aws_ec2_diskio_bytes';
 
 import { InventoryMetrics } from '../../types';
 
+const awsEC2SnapshotMetrics = { cpu, rx, tx, diskIOReadBytes, diskIOWriteBytes };
+
+export const awsEC2SnapshotMetricTypes = Object.keys(awsEC2SnapshotMetrics) as Array<
+  keyof typeof awsEC2SnapshotMetrics
+>;
+
 export const metrics: InventoryMetrics = {
   tsvb: {
     awsEC2CpuUtilization,
     awsEC2NetworkTraffic,
     awsEC2DiskIOBytes,
   },
-  snapshot: { cpu, rx, tx, diskIOReadBytes, diskIOWriteBytes },
+  snapshot: awsEC2SnapshotMetrics,
   defaultSnapshot: 'cpu',
   defaultTimeRangeInSeconds: 14400, // 4 hours
 };
