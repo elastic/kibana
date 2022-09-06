@@ -14282,7 +14282,7 @@ RedirectableRequest.prototype._performRequest = function () {
   // If specified, use the agent corresponding to the protocol
   // (HTTP and HTTPS use different types of agents)
   if (this._options.agents) {
-    var scheme = protocol.substr(0, protocol.length - 1);
+    var scheme = protocol.slice(0, -1);
     this._options.agent = this._options.agents[scheme];
   }
 
@@ -14374,10 +14374,21 @@ RedirectableRequest.prototype._processResponse = function (response) {
     return;
   }
 
+  // Store the request headers if applicable
+  var requestHeaders;
+  var beforeRedirect = this._options.beforeRedirect;
+  if (beforeRedirect) {
+    requestHeaders = Object.assign({
+      // The Host header was set by nativeProtocol.request
+      Host: response.req.getHeader("host"),
+    }, this._options.headers);
+  }
+
   // RFC7231§6.4: Automatic redirection needs to done with
   // care for methods not known to be safe, […]
   // RFC7231§6.4.2–3: For historical reasons, a user agent MAY change
   // the request method from POST to GET for the subsequent request.
+  var method = this._options.method;
   if ((statusCode === 301 || statusCode === 302) && this._options.method === "POST" ||
       // RFC7231§6.4.4: The 303 (See Other) status code indicates that
       // the server is redirecting the user agent to a different resource […]
@@ -14425,10 +14436,18 @@ RedirectableRequest.prototype._processResponse = function (response) {
   }
 
   // Evaluate the beforeRedirect callback
-  if (typeof this._options.beforeRedirect === "function") {
-    var responseDetails = { headers: response.headers };
+  if (typeof beforeRedirect === "function") {
+    var responseDetails = {
+      headers: response.headers,
+      statusCode: statusCode,
+    };
+    var requestDetails = {
+      url: currentUrl,
+      method: method,
+      headers: requestHeaders,
+    };
     try {
-      this._options.beforeRedirect.call(null, this._options, responseDetails);
+      beforeRedirect(this._options, responseDetails, requestDetails);
     }
     catch (err) {
       this.emit("error", err);
@@ -59199,17 +59218,6 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-async function isVaultAvailable() {
-  try {
-    await Object(_child_process__WEBPACK_IMPORTED_MODULE_3__["spawn"])('vault', ['--version'], {
-      stdio: 'pipe'
-    });
-    return true;
-  } catch {
-    return false;
-  }
-}
-
 async function isElasticCommitter() {
   try {
     const {
@@ -59223,21 +59231,13 @@ async function isElasticCommitter() {
   }
 }
 
-async function migrateToNewServersIfNeeded(settingsPath) {
+async function upToDate(settingsPath) {
   if (!(await Object(_fs__WEBPACK_IMPORTED_MODULE_5__["isFile"])(settingsPath))) {
     return false;
   }
 
   const readSettingsFile = await Object(_fs__WEBPACK_IMPORTED_MODULE_5__["readFile"])(settingsPath, 'utf8');
-  const newReadSettingsFile = readSettingsFile.replace(/cloud\.buildbuddy\.io/g, 'remote.buildbuddy.io');
-
-  if (newReadSettingsFile === readSettingsFile) {
-    return false;
-  }
-
-  Object(_fs__WEBPACK_IMPORTED_MODULE_5__["writeFile"])(settingsPath, newReadSettingsFile);
-  _log__WEBPACK_IMPORTED_MODULE_4__["log"].info(`[bazel_tools] upgrade remote cache settings to use new server address`);
-  return true;
+  return readSettingsFile.startsWith('# V2 ');
 }
 
 async function setupRemoteCache(repoRootPath) {
@@ -59247,51 +59247,19 @@ async function setupRemoteCache(repoRootPath) {
   }
 
   _log__WEBPACK_IMPORTED_MODULE_4__["log"].debug(`[bazel_tools] setting up remote cache settings if necessary`);
-  const settingsPath = Object(path__WEBPACK_IMPORTED_MODULE_2__["resolve"])(repoRootPath, '.bazelrc.cache'); // Checks if we should upgrade the servers used on .bazelrc.cache
-  //
-  // NOTE: this can be removed in the future once everyone is migrated into the new servers
+  const settingsPath = Object(path__WEBPACK_IMPORTED_MODULE_2__["resolve"])(repoRootPath, '.bazelrc.cache'); // Checks if we should upgrade or install the config file
 
-  if (await migrateToNewServersIfNeeded(settingsPath)) {
-    return;
-  }
-
-  if (Object(fs__WEBPACK_IMPORTED_MODULE_1__["existsSync"])(settingsPath)) {
-    _log__WEBPACK_IMPORTED_MODULE_4__["log"].debug(`[bazel_tools] remote cache settings already exist, skipping`);
-    return;
-  }
-
-  if (!(await isVaultAvailable())) {
-    _log__WEBPACK_IMPORTED_MODULE_4__["log"].info('[bazel_tools] vault is not available, unable to setup remote cache settings.');
-    _log__WEBPACK_IMPORTED_MODULE_4__["log"].info('[bazel_tools] building packages will work, but will be slower in many cases.');
-    _log__WEBPACK_IMPORTED_MODULE_4__["log"].info('[bazel_tools] reach out to Operations if you need assistance with this.');
-    return;
-  }
-
-  let apiKey = '';
-
-  try {
-    const {
-      stdout
-    } = await Object(_child_process__WEBPACK_IMPORTED_MODULE_3__["spawn"])('vault', ['read', '-field=readonly-key', 'secret/ui-team/kibana-bazel-remote-cache'], {
-      stdio: 'pipe'
-    });
-    apiKey = stdout.trim();
-  } catch (ex) {
-    _log__WEBPACK_IMPORTED_MODULE_4__["log"].info('[bazel_tools] unable to read bazel remote cache key from vault, are you authenticated?');
-    _log__WEBPACK_IMPORTED_MODULE_4__["log"].info('[bazel_tools] building packages will work, but will be slower in many cases.');
-    _log__WEBPACK_IMPORTED_MODULE_4__["log"].info('[bazel_tools] reach out to Operations if you need assistance with this.');
-    _log__WEBPACK_IMPORTED_MODULE_4__["log"].info(`[bazel_tools] ${ex}`);
+  if (await upToDate(settingsPath)) {
+    _log__WEBPACK_IMPORTED_MODULE_4__["log"].debug(`[bazel_tools] remote cache config already exists and is up-to-date, skipping`);
     return;
   }
 
   const contents = dedent__WEBPACK_IMPORTED_MODULE_0___default.a`
-    # V1 - This file is automatically generated by 'yarn kbn bootstrap'
+    # V2 - This file is automatically generated by 'yarn kbn bootstrap'
     # To regenerate this file, delete it and run 'yarn kbn bootstrap' again.
-    build --bes_results_url=https://app.buildbuddy.io/invocation/
-    build --bes_backend=grpcs://remote.buildbuddy.io
-    build --remote_cache=grpcs://remote.buildbuddy.io
-    build --remote_timeout=3600
-    build --remote_header=${apiKey}
+    build --remote_cache=https://storage.googleapis.com/kibana-local-bazel-remote-cache
+    build --noremote_upload_local_results
+    build --incompatible_remote_results_ignore_disk
   `;
   Object(fs__WEBPACK_IMPORTED_MODULE_1__["writeFileSync"])(settingsPath, contents);
   _log__WEBPACK_IMPORTED_MODULE_4__["log"].info(`[bazel_tools] remote cache settings written to ${settingsPath}`);

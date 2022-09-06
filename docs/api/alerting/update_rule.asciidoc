@@ -6,14 +6,24 @@
 
 Update the attributes for an existing rule.
 
-WARNING: This API supports <<token-api-authentication>> only.
-
 [[update-rule-api-request]]
 ==== Request
 
 `PUT <kibana host>:<port>/api/alerting/rule/<id>`
 
 `PUT <kibana host>:<port>/s/<space_id>/api/alerting/rule/<id>`
+
+==== {api-description-title}
+
+[WARNING]
+====
+* This API supports only
+<<token-api-authentication,token-based authentication>>.
+* When you update a rule, it identifies which roles you have at that point in time.
+Thereafter, when the rule performs queries, it uses those security privileges.
+If you have different privileges than the user that created or most recently
+updated the rule, you might change its behavior.
+====
 
 [[update-rule-api-path-params]]
 ==== Path parameters

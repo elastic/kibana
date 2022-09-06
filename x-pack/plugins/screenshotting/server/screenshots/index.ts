@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import type { KibanaRequest, Logger } from 'src/core/server';
 import apm from 'elastic-apm-node';
-import { from, of, Observable } from 'rxjs';
+import { from, Observable, of } from 'rxjs';
 import {
   catchError,
   concatMap,
@@ -18,18 +19,16 @@ import {
   tap,
   toArray,
 } from 'rxjs/operators';
-import type { KibanaRequest, Logger } from 'src/core/server';
 import { LayoutParams } from '../../common';
-import type { ConfigType } from '../config';
 import type { HeadlessChromiumDriverFactory, PerformanceMetrics } from '../browsers';
-import { createLayout } from '../layouts';
+import type { ConfigType } from '../config';
 import type { Layout } from '../layouts';
-import { ScreenshotObservableHandler } from './observable';
+import { createLayout } from '../layouts';
 import type { ScreenshotObservableOptions, ScreenshotObservableResult } from './observable';
+import { ScreenshotObservableHandler } from './observable';
 import { Semaphore } from './semaphore';
 
-export type { UrlOrUrlWithContext } from './observable';
-export type { ScreenshotObservableResult } from './observable';
+export type { ScreenshotObservableResult, UrlOrUrlWithContext } from './observable';
 
 export interface ScreenshotOptions<F extends 'pdf' | 'png' = 'png'>
   extends ScreenshotObservableOptions {
@@ -101,7 +100,7 @@ export class Screenshots {
         {
           browserTimezone,
           openUrlTimeout,
-          defaultViewport: { height: layout.height, width: layout.width },
+          defaultViewport: { width: layout.width },
         },
         this.logger
       )

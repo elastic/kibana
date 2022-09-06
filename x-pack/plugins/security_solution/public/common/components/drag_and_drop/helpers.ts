@@ -9,7 +9,6 @@ import { Dispatch } from 'redux';
 import { ActionCreator } from 'typescript-fsa';
 import { getProviderIdFromDraggable } from '@kbn/securitysolution-t-grid';
 
-import { BrowserField } from '../../containers/source';
 import { dragAndDropActions } from '../../store/actions';
 import { IdToDataProvider } from '../../store/drag_and_drop/model';
 import { addContentToTimeline } from '../../../timelines/components/timeline/data_providers/helpers';
@@ -90,16 +89,16 @@ export const addProviderToTimeline = ({
 };
 
 export const allowTopN = ({
-  browserField,
+  isAggregatable,
+  fieldType,
   fieldName,
   hideTopN,
 }: {
-  browserField: Partial<BrowserField> | undefined;
   fieldName: string;
+  isAggregatable: boolean;
+  fieldType: string;
   hideTopN: boolean;
 }): boolean => {
-  const isAggregatable = browserField?.aggregatable ?? false;
-  const fieldType = browserField?.type ?? '';
   const isAllowedType = [
     'boolean',
     'geo-point',

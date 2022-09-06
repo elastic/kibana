@@ -9,7 +9,7 @@
 import { coreMock } from '../../../../core/server/mocks';
 import { ElasticsearchClient, SavedObjectsClientContract } from 'kibana/server';
 import { ConfigSchema } from '../../config';
-import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
+import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 import { termsAggSuggestions } from './terms_agg';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { duration } from 'moment';

@@ -7,7 +7,6 @@
     "rootDir": "./src",
     "stripInternal": true,
     "types": [
-      "jest",
       "node"
     ]
   },

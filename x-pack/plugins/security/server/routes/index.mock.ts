@@ -7,7 +7,7 @@
 
 import { BehaviorSubject } from 'rxjs';
 
-import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
+import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 import {
   coreMock,
   httpResourcesMock,

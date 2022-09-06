@@ -245,7 +245,7 @@ describe('ColumnHeaders', () => {
           sort: [
             {
               columnId: '@timestamp',
-              columnType: 'number',
+              columnType: 'date',
               sortDirection: Direction.asc,
             },
             { columnId: 'host.name', columnType: 'text', sortDirection: Direction.asc },

@@ -183,7 +183,7 @@ describe('Policy Form Layout', () => {
         );
         expect(warningCallout).toHaveLength(1);
         expect(warningCallout.text()).toEqual(
-          'This action will update 5 hostsSaving these changes will apply updates to all endpoints assigned to this agent policy.'
+          'This action will update 5 endpointsSaving these changes will apply updates to all endpoints assigned to this agent policy.'
         );
       });
       it('should close dialog if cancel button is clicked', () => {

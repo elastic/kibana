@@ -35,9 +35,10 @@ describe('Search Strategy EQL helper', () => {
           pagination: { activePage: 0, querySize: 25 },
           sort: [
             {
-              field: '@timestamp',
               direction: Direction.desc,
-              type: 'number',
+              esTypes: ['date'],
+              field: '@timestamp',
+              type: 'date',
             },
           ],
           timerange: {
@@ -85,9 +86,10 @@ describe('Search Strategy EQL helper', () => {
           pagination: { activePage: 1, querySize: 2 },
           sort: [
             {
-              field: '@timestamp',
               direction: Direction.desc,
-              type: 'number',
+              esTypes: ['date'],
+              field: '@timestamp',
+              type: 'date',
             },
           ],
           timerange: {
@@ -141,9 +143,10 @@ describe('Search Strategy EQL helper', () => {
           pagination: { activePage: 0, querySize: 2 },
           sort: [
             {
-              field: '@timestamp',
               direction: Direction.desc,
-              type: 'number',
+              field: '@timestamp',
+              esTypes: ['date'],
+              type: 'date',
             },
           ],
           timerange: {
@@ -418,9 +421,10 @@ describe('Search Strategy EQL helper', () => {
           pagination: { activePage: 3, querySize: 2 },
           sort: [
             {
-              field: '@timestamp',
               direction: Direction.desc,
-              type: 'number',
+              esTypes: ['date'],
+              field: '@timestamp',
+              type: 'date',
             },
           ],
           timerange: {

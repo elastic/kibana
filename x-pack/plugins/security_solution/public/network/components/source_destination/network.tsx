@@ -85,6 +85,8 @@ export const Network = React.memo<{
                 field={NETWORK_PROTOCOL_FIELD_NAME}
                 isDraggable={isDraggable}
                 value={proto}
+                isAggregatable={true}
+                fieldType="keyword"
               />
             </EuiFlexItemMarginRight>
           ))
@@ -138,6 +140,8 @@ export const Network = React.memo<{
                 field={NETWORK_TRANSPORT_FIELD_NAME}
                 isDraggable={isDraggable}
                 value={trans}
+                isAggregatable={true}
+                fieldType="keyword"
               />
             </EuiFlexItemMarginRight>
           ))
@@ -153,6 +157,8 @@ export const Network = React.memo<{
                 field={NETWORK_COMMUNITY_ID_FIELD_NAME}
                 isDraggable={isDraggable}
                 value={trans}
+                isAggregatable={true}
+                fieldType="keyword"
               />
             </EuiFlexItem>
           ))

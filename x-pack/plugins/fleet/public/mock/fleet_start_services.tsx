@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
-import type { MockedKeys } from '@kbn/utility-types/jest';
+import type { MockedKeys } from '@kbn/utility-types-jest';
 
 import { coreMock } from '../../../../../src/core/public/mocks';
 import type { IStorage } from '../../../../../src/plugins/kibana_utils/public';

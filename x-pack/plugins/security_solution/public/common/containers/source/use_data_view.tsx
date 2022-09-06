@@ -28,7 +28,7 @@ import {
 } from '../../../../../../../src/plugins/data/common';
 import * as i18n from './translations';
 import { SourcererScopeName } from '../../store/sourcerer/model';
-import { getSourcererDataview } from '../sourcerer/api';
+import { getSourcererDataView } from '../sourcerer/api';
 
 export type IndexFieldSearch = (param: {
   dataViewId: string;
@@ -51,7 +51,7 @@ interface DataViewInfo {
  * HOT Code path where the fields can be 16087 in length or larger. This is
  * VERY mutatious on purpose to improve the performance of the transform.
  */
-const getDataViewStateFromIndexFields = memoizeOne(
+export const getDataViewStateFromIndexFields = memoizeOne(
   (_title: string, fields: IndexField[]): DataViewInfo => {
     // Adds two dangerous casts to allow for mutations within this function
     type DangerCastForMutation = Record<string, {}>;
@@ -125,7 +125,7 @@ export const useDataView = (): {
         };
         setLoading({ id: dataViewId, loading: true });
         if (needToBeInit) {
-          const dataViewToUpdate = await getSourcererDataview(
+          const dataViewToUpdate = await getSourcererDataView(
             dataViewId,
             abortCtrl.current[dataViewId].signal
           );

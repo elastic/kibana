@@ -35,7 +35,7 @@ import {
   sendGetOneAgentPolicy,
   useFleetStatus,
 } from '../../../hooks';
-import { FLEET_APM_PACKAGE, outputType } from '../../../../../../common';
+import { FLEET_APM_PACKAGE, SO_SEARCH_LIMIT, outputType } from '../../../../../../common';
 
 const AgentPolicyFormRow = styled(EuiFormRow)`
   .euiFormRow__label {
@@ -51,7 +51,7 @@ function useAgentPoliciesOptions(packageInfo?: PackageInfo) {
     isLoading: isAgentPoliciesLoading,
   } = useGetAgentPolicies({
     page: 1,
-    perPage: 1000,
+    perPage: SO_SEARCH_LIMIT,
     sortField: 'name',
     sortOrder: 'asc',
     full: true,

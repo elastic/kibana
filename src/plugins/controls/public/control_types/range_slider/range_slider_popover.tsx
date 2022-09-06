@@ -110,7 +110,7 @@ export const RangeSliderPopover: FC<Props> = ({
       className="rangeSliderAnchor__button"
       data-test-subj={`range-slider-control-${id}`}
     >
-      <EuiFlexGroup gutterSize="none">
+      <EuiFlexGroup gutterSize="none" responsive={false}>
         <EuiFlexItem>
           <EuiFieldNumber
             controlOnly
@@ -178,8 +178,7 @@ export const RangeSliderPopover: FC<Props> = ({
       panelClassName="rangeSlider__panelOverride"
       closePopover={() => setIsPopoverOpen(false)}
       anchorPosition="downCenter"
-      initialFocus={false}
-      repositionOnScroll
+      attachToAnchor={false}
       disableFocusTrap
       onPanelResize={() => {
         if (rangeRef?.current) {
@@ -192,6 +191,7 @@ export const RangeSliderPopover: FC<Props> = ({
         className="rangeSlider__actions"
         gutterSize="none"
         data-test-subj="rangeSlider-control-actions"
+        responsive={false}
       >
         <EuiFlexItem>
           <EuiDualRange

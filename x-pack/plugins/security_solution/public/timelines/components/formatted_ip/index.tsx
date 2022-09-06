@@ -83,10 +83,21 @@ const NonDecoratedIpComponent: React.FC<{
   contextId: string;
   eventId: string;
   fieldName: string;
+  fieldType: string;
+  isAggregatable: boolean;
   isDraggable: boolean;
   truncate?: boolean;
   value: string | object | null | undefined;
-}> = ({ contextId, eventId, fieldName, isDraggable, truncate, value }) => {
+}> = ({
+  contextId,
+  eventId,
+  fieldName,
+  fieldType,
+  isAggregatable,
+  isDraggable,
+  truncate,
+  value,
+}) => {
   const key = useMemo(
     () =>
       `non-decorated-ip-draggable-wrapper-${getUniqueId({
@@ -130,6 +141,8 @@ const NonDecoratedIpComponent: React.FC<{
   return (
     <DraggableWrapper
       dataProvider={dataProviderProp}
+      fieldType={fieldType}
+      isAggregatable={isAggregatable}
       isDraggable={isDraggable}
       key={key}
       render={render}
@@ -150,6 +163,8 @@ const AddressLinksItemComponent: React.FC<AddressLinksItemProps> = ({
   contextId,
   eventId,
   fieldName,
+  fieldType,
+  isAggregatable,
   isButton,
   isDraggable,
   onClick,
@@ -262,6 +277,8 @@ const AddressLinksItemComponent: React.FC<AddressLinksItemProps> = ({
     <DraggableWrapper
       dataProvider={dataProviderProp}
       isDraggable={isDraggable}
+      fieldType={fieldType}
+      isAggregatable={isAggregatable}
       key={key}
       render={render}
       truncate={truncate}
@@ -277,6 +294,8 @@ interface AddressLinksProps {
   contextId: string;
   eventId: string;
   fieldName: string;
+  fieldType: string;
+  isAggregatable: boolean;
   isButton?: boolean;
   isDraggable: boolean;
   onClick?: () => void;
@@ -290,6 +309,8 @@ const AddressLinksComponent: React.FC<AddressLinksProps> = ({
   contextId,
   eventId,
   fieldName,
+  fieldType,
+  isAggregatable,
   isButton,
   isDraggable,
   onClick,
@@ -308,6 +329,8 @@ const AddressLinksComponent: React.FC<AddressLinksProps> = ({
           contextId={contextId}
           eventId={eventId}
           fieldName={fieldName}
+          fieldType={fieldType}
+          isAggregatable={isAggregatable}
           isButton={isButton}
           isDraggable={isDraggable}
           onClick={onClick}
@@ -320,6 +343,8 @@ const AddressLinksComponent: React.FC<AddressLinksProps> = ({
       contextId,
       eventId,
       fieldName,
+      fieldType,
+      isAggregatable,
       isButton,
       isDraggable,
       onClick,
@@ -338,6 +363,8 @@ const AddressLinks = React.memo(
     prevProps.contextId === nextProps.contextId &&
     prevProps.eventId === nextProps.eventId &&
     prevProps.fieldName === nextProps.fieldName &&
+    prevProps.isAggregatable === nextProps.isAggregatable &&
+    prevProps.fieldType === nextProps.fieldType &&
     prevProps.isDraggable === nextProps.isDraggable &&
     prevProps.truncate === nextProps.truncate &&
     deepEqual(prevProps.addresses, nextProps.addresses)
@@ -348,6 +375,8 @@ const FormattedIpComponent: React.FC<{
   contextId: string;
   eventId: string;
   fieldName: string;
+  fieldType: string;
+  isAggregatable: boolean;
   isButton?: boolean;
   isDraggable: boolean;
   onClick?: () => void;
@@ -359,6 +388,8 @@ const FormattedIpComponent: React.FC<{
   contextId,
   eventId,
   fieldName,
+  fieldType,
+  isAggregatable,
   isDraggable,
   isButton,
   onClick,
@@ -377,6 +408,8 @@ const FormattedIpComponent: React.FC<{
             contextId={contextId}
             eventId={eventId}
             fieldName={fieldName}
+            fieldType={fieldType}
+            isAggregatable={isAggregatable}
             isButton={isButton}
             isDraggable={isDraggable}
             onClick={onClick}
@@ -400,6 +433,8 @@ const FormattedIpComponent: React.FC<{
         isDraggable={isDraggable}
         onClick={onClick}
         fieldName={fieldName}
+        fieldType={fieldType}
+        isAggregatable={isAggregatable}
         truncate={truncate}
         title={title}
       />
@@ -410,6 +445,8 @@ const FormattedIpComponent: React.FC<{
         contextId={contextId}
         eventId={eventId}
         fieldName={fieldName}
+        fieldType={fieldType}
+        isAggregatable={isAggregatable}
         isDraggable={isDraggable}
         truncate={truncate}
         value={value}
@@ -424,6 +461,8 @@ export const FormattedIp = React.memo(
     prevProps.contextId === nextProps.contextId &&
     prevProps.eventId === nextProps.eventId &&
     prevProps.fieldName === nextProps.fieldName &&
+    prevProps.isAggregatable === nextProps.isAggregatable &&
+    prevProps.fieldType === nextProps.fieldType &&
     prevProps.isDraggable === nextProps.isDraggable &&
     prevProps.truncate === nextProps.truncate &&
     deepEqual(prevProps.value, nextProps.value)

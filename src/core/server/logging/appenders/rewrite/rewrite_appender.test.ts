@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { MockedKeys } from '@kbn/utility-types/jest';
+import type { MockedKeys } from '@kbn/utility-types-jest';
 import { createRewritePolicyMock, resetAllMocks } from './rewrite_appender.test.mocks';
 import { rewriteAppenderMocks } from './mocks';
 import { LogLevel, LogRecord, LogMeta, DisposableAppender } from '@kbn/logging';

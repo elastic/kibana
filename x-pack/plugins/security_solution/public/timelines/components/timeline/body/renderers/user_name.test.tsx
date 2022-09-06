@@ -54,6 +54,8 @@ jest.mock('../../../../store/timeline', () => {
 describe('UserName', () => {
   const props = {
     fieldName: 'user.name',
+    fieldType: 'keyword',
+    isAggregatable: true,
     contextId: 'test-context-id',
     eventId: 'test-event-id',
     isDraggable: false,

@@ -215,19 +215,6 @@ const url = await shortUrls.create({
 });
 ```
 
-You can make the short URL slug human-readable by specifying the
-`humanReadableSlug` flag:
-
-```ts
-const url = await shortUrls.create({
-  locator,
-  params: {
-    dashboardId: '123',
-  },
-  humanReadableSlug: true,
-});
-```
-
 Or you can manually specify the slug for the short URL using the `slug` option:
 
 ```ts

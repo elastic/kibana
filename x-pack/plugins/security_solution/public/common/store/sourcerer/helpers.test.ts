@@ -7,7 +7,11 @@
 
 import { mockGlobalState } from '../../mock';
 import { SourcererScopeName } from './model';
-import { getScopePatternListSelection, validateSelectedPatterns } from './helpers';
+import {
+  getScopePatternListSelection,
+  sortWithExcludesAtEnd,
+  validateSelectedPatterns,
+} from './helpers';
 
 const signalIndexName = mockGlobalState.sourcerer.signalIndexName;
 
@@ -16,9 +20,9 @@ const dataView = {
   title: `auditbeat-*,packetbeat-*,${signalIndexName}`,
   patternList: ['packetbeat-*', 'auditbeat-*', `${signalIndexName}`],
 };
-const patternListNoSignals = mockGlobalState.sourcerer.defaultDataView.patternList
-  .filter((p) => p !== signalIndexName)
-  .sort();
+const patternListNoSignals = sortWithExcludesAtEnd(
+  mockGlobalState.sourcerer.defaultDataView.patternList.filter((p) => p !== signalIndexName)
+);
 
 describe('sourcerer store helpers', () => {
   describe('getScopePatternListSelection', () => {

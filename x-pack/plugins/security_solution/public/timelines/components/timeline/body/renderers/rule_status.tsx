@@ -26,6 +26,8 @@ interface BaseProps {
   contextId: string;
   eventId: string;
   fieldName: string;
+  fieldType: string;
+  isAggregatable: boolean;
   isDraggable: boolean;
   value: string | number | undefined | null;
 }
@@ -37,6 +39,8 @@ const RuleStatusComponent: React.FC<Props> = ({
   contextId,
   eventId,
   fieldName,
+  fieldType,
+  isAggregatable,
   isDraggable,
   value,
   onClick,
@@ -61,6 +65,8 @@ const RuleStatusComponent: React.FC<Props> = ({
     <DefaultDraggable
       field={fieldName}
       id={`alert-details-value-default-draggable-${contextId}-${eventId}-${fieldName}-${value}`}
+      fieldType={fieldType}
+      isAggregatable={isAggregatable}
       isDraggable={false}
       value={`${value}`}
       tooltipContent={fieldName}

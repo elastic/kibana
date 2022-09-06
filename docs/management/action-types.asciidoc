@@ -58,6 +58,10 @@ a| <<swimlane-action-type, Swimlane>>
 a| <<webhook-action-type, Webhook>>
 
 | Send a request to a web service.
+
+a| <<xmatters-action-type,xMatters>>
+
+| Send actionable alerts to on-call xMatters resources.
 |===
 
 [NOTE]

@@ -10,7 +10,7 @@ import { login } from '../../tasks/login';
 import { ArchiverMethod, runKbnArchiverScript } from '../../tasks/archiver';
 import { ROLES } from '../../test';
 
-describe('ALL - Delete ECS Mappings', () => {
+describe('ALL - Edit saved query', () => {
   const SAVED_QUERY_ID = 'Saved-Query-Id';
 
   before(() => {
@@ -25,14 +25,40 @@ describe('ALL - Delete ECS Mappings', () => {
     runKbnArchiverScript(ArchiverMethod.UNLOAD, 'saved_query');
   });
 
-  it('to click the edit button and edit pack', () => {
+  it('by changing ecs mappings and platforms', () => {
     cy.react('CustomItemAction', {
       props: { index: 1, item: { attributes: { id: SAVED_QUERY_ID } } },
     }).click();
     cy.contains('Custom key/value pairs.').should('exist');
     cy.contains('Hours of uptime').should('exist');
     cy.react('EuiButtonIcon', { props: { id: 'labels-trash' } }).click();
+
+    cy.react('PlatformCheckBoxGroupField').within(() => {
+      cy.react('EuiCheckbox', {
+        props: {
+          id: 'linux',
+          checked: true,
+        },
+      }).should('exist');
+      cy.react('EuiCheckbox', {
+        props: {
+          id: 'darwin',
+          checked: true,
+        },
+      }).should('exist');
+
+      cy.react('EuiCheckbox', {
+        props: {
+          id: 'windows',
+          checked: false,
+        },
+      }).should('exist');
+    });
+
+    cy.get('#windows').check({ force: true });
+
     cy.react('EuiButton').contains('Update query').click();
+
     cy.wait(5000);
 
     cy.react('CustomItemAction', {
@@ -40,5 +66,27 @@ describe('ALL - Delete ECS Mappings', () => {
     }).click();
     cy.contains('Custom key/value pairs').should('not.exist');
     cy.contains('Hours of uptime').should('not.exist');
+
+    cy.react('PlatformCheckBoxGroupField').within(() => {
+      cy.react('EuiCheckbox', {
+        props: {
+          id: 'linux',
+          checked: true,
+        },
+      }).should('exist');
+      cy.react('EuiCheckbox', {
+        props: {
+          id: 'darwin',
+          checked: true,
+        },
+      }).should('exist');
+
+      cy.react('EuiCheckbox', {
+        props: {
+          id: 'windows',
+          checked: true,
+        },
+      }).should('exist');
+    });
   });
 });

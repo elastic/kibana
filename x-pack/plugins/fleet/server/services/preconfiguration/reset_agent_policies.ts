@@ -56,6 +56,10 @@ async function _deleteGhostPackagePolicies(
     }, new Set<string>())
   );
 
+  if (!policyIds.length) {
+    return;
+  }
+
   const objects = policyIds.map((id) => ({ id, type: AGENT_POLICY_SAVED_OBJECT_TYPE }));
   const agentPolicyExistsMap = (await soClient.bulkGet(objects)).saved_objects.reduce((acc, so) => {
     if (so.error && so.error.statusCode === 404) {
@@ -144,6 +148,10 @@ async function _deleteExistingData(
     ).items;
   }
 
+  if (!existingPolicies.length) {
+    return;
+  }
+
   // unenroll all the agents enroled in this policies
   const { agents } = await getAgentsByKuery(esClient, {
     showInactive: false,
@@ -175,18 +183,16 @@ async function _deleteExistingData(
       }
     );
   }
-  if (existingPolicies.length > 0) {
-    logger.info(`Deleting ${existingPolicies.length} agent policies`);
-    await pMap(
-      existingPolicies,
-      (policy) =>
-        agentPolicyService.delete(soClient, esClient, policy.id, {
-          force: true,
-          removeFleetServerDocuments: true,
-        }),
-      {
-        concurrency: 20,
-      }
-    );
-  }
+  logger.info(`Deleting ${existingPolicies.length} agent policies`);
+  await pMap(
+    existingPolicies,
+    (policy) =>
+      agentPolicyService.delete(soClient, esClient, policy.id, {
+        force: true,
+        removeFleetServerDocuments: true,
+      }),
+    {
+      concurrency: 20,
+    }
+  );
 }

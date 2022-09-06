@@ -15,6 +15,7 @@ import type { AgentPolicy, NewAgentPolicy, PackageInfo } from '../../../types';
 import { AgentPolicyIntegrationForm } from '../components';
 import type { ValidationResults } from '../components/agent_policy_validation';
 
+import { SO_SEARCH_LIMIT } from '../../../constants';
 import { incrementPolicyName } from '../../../services';
 
 import { StepSelectAgentPolicy } from './step_select_agent_policy';
@@ -60,7 +61,7 @@ export const StepSelectHosts: React.FunctionComponent<Props> = ({
   let agentPolicies: AgentPolicy[] = [];
   const { data: agentPoliciesData, error: err } = useGetAgentPolicies({
     page: 1,
-    perPage: 1000,
+    perPage: SO_SEARCH_LIMIT,
     sortField: 'name',
     sortOrder: 'asc',
     full: true,

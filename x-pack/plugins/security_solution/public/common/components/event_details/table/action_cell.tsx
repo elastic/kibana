@@ -51,6 +51,8 @@ export const ActionCell: React.FC<Props> = React.memo(
       values,
     });
 
+    const { aggregatable, type } = fieldFromBrowserField || { aggregatable: false, type: '' };
+
     const [showTopN, setShowTopN] = useState<boolean>(false);
     const { timelineId: timelineIdFind } = useContext(TimelineContext);
     const [hoverActionsOwnFocus] = useState<boolean>(false);
@@ -74,6 +76,8 @@ export const ActionCell: React.FC<Props> = React.memo(
         dataProvider={actionCellConfig?.dataProvider}
         enableOverflowButton={true}
         field={data.field}
+        isAggregatable={aggregatable}
+        fieldType={type}
         hideAddToTimeline={hideAddToTimeline}
         isObjectArray={data.isObjectArray}
         onFilterAdded={onFilterAdded}

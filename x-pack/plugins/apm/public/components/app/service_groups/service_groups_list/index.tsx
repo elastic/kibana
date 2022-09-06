@@ -51,7 +51,7 @@ export function ServiceGroupsList() {
 
   const sortedItems = sortBy(filteredItems, (item) =>
     apmServiceGroupsSortType === 'alphabetical'
-      ? item.groupName
+      ? item.groupName.toLowerCase()
       : item.updatedAt
   );
 

@@ -574,6 +574,76 @@ export default function (providerContext: FtrProviderContext) {
           'Cannot update name in Fleet because the agent policy is managed by an external orchestration solution, such as Elastic Cloud, Kubernetes, etc. Please make changes using your orchestration solution.'
         );
       });
+
+      it('should return a 200 if updating monitoring_enabled on a policy', async () => {
+        const fetchPackageList = async () => {
+          const response = await supertest
+            .get('/api/fleet/epm/packages')
+            .set('kbn-xsrf', 'xxx')
+            .expect(200);
+          return response.body;
+        };
+
+        const {
+          body: { item: originalPolicy },
+        } = await supertest
+          .post(`/api/fleet/agent_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'Test_policy',
+            description: 'Initial description',
+            namespace: 'default',
+          })
+          .expect(200);
+
+        // uninstall the elastic_agent and verify that is installed after the policy update
+        await supertest
+          .delete(`/api/fleet/epm/packages/elastic_agent/1.3.3`)
+          .set('kbn-xsrf', 'xxxx');
+
+        const listResponse = await fetchPackageList();
+        const installedPackages = listResponse.items.filter(
+          (item: any) => item.status === 'installed'
+        );
+
+        expect(installedPackages.length).to.be(0);
+
+        agentPolicyId = originalPolicy.id;
+        const {
+          body: { item: updatedPolicy },
+        } = await supertest
+          .put(`/api/fleet/agent_policies/${agentPolicyId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'Test_policy_with_monitoring',
+            description: 'Updated description',
+            namespace: 'default',
+            monitoring_enabled: ['logs', 'metrics'],
+          })
+          .expect(200);
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        const { id, updated_at, ...newPolicy } = updatedPolicy;
+        createdPolicyIds.push(updatedPolicy.id);
+
+        expect(newPolicy).to.eql({
+          status: 'active',
+          name: 'Test_policy_with_monitoring',
+          description: 'Updated description',
+          namespace: 'default',
+          is_managed: false,
+          revision: 2,
+          updated_by: 'elastic',
+          package_policies: [],
+          monitoring_enabled: ['logs', 'metrics'],
+        });
+
+        const listResponseAfterUpdate = await fetchPackageList();
+
+        const installedPackagesAfterUpdate = listResponseAfterUpdate.items
+          .filter((item: any) => item.status === 'installed')
+          .map((item: any) => item.name);
+        expect(installedPackagesAfterUpdate).to.contain('elastic_agent');
+      });
     });
 
     describe('POST /api/fleet/agent_policies/delete', () => {

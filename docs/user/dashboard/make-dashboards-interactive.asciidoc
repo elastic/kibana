@@ -29,6 +29,8 @@ Third-party developers can create drilldowns. To learn how to code drilldowns, r
 [[add-controls]]
 === experimental[] Add Controls panels
 
+deprecated::[8.3.0, "Input controls are deprecated in 8.3.0, and will be removed in a future release. In 8.3.0 and later, use the link:https://www.elastic.co/guide/en/kibana/8.3/add-controls.html[new controls] to interactively filter your dashboard data."]
+
 *Controls* panels allow you to apply dashboard-level filters based on values from a list, or a range of values. 
 
 There are two types of *Controls* you can add to dashboards:

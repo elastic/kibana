@@ -310,7 +310,11 @@ export const getDateHistogramBucketAgg = ({
             return;
           }
 
-          if (agg.params.extendToTimeRange && agg.buckets.hasBounds()) {
+          if (
+            agg.params.extendToTimeRange &&
+            agg.buckets.hasBounds() &&
+            !agg.aggConfigs.hasTimeShifts()
+          ) {
             const bucketBounds = agg.buckets.getBounds()!;
             output.params.extended_bounds = omitBy(
               {

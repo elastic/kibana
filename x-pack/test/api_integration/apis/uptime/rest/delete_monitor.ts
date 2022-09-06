@@ -12,7 +12,9 @@ import { API_URLS } from '../../../../../plugins/uptime/common/constants';
 import { getFixtureJson } from './helper/get_fixture_json';
 
 export default function ({ getService }: FtrProviderContext) {
-  describe('[DELETE] /internal/uptime/service/monitors', () => {
+  describe('[DELETE] /internal/uptime/service/monitors', function () {
+    this.tags('skipCloud');
+
     const supertest = getService('supertest');
 
     let _httpMonitorJson: HTTPFields;

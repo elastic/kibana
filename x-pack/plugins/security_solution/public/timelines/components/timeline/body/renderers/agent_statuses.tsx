@@ -18,12 +18,16 @@ export const AgentStatuses = React.memo(
     fieldName,
     contextId,
     eventId,
+    fieldType,
+    isAggregatable,
     isDraggable,
     value,
   }: {
     fieldName: string;
+    fieldType: string;
     contextId: string;
     eventId: string;
+    isAggregatable: boolean;
     isDraggable: boolean;
     value: string;
   }) => {
@@ -38,6 +42,8 @@ export const AgentStatuses = React.memo(
               <DefaultDraggable
                 field={fieldName}
                 id={`event-details-value-default-draggable-${contextId}-${eventId}-${fieldName}-${value}`}
+                fieldType={fieldType}
+                isAggregatable={isAggregatable}
                 isDraggable={isDraggable}
                 tooltipContent={fieldName}
                 value={`${agentStatus}`}
@@ -57,6 +63,8 @@ export const AgentStatuses = React.memo(
           <DefaultDraggable
             field={isolationFieldName}
             id={`event-details-value-default-draggable-${contextId}-${eventId}-${isolationFieldName}-${value}`}
+            fieldType={fieldType}
+            isAggregatable={isAggregatable}
             isDraggable={isDraggable}
             tooltipContent={isolationFieldName}
             value={`${isIsolated}`}

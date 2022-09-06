@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { MockedKeys } from '@kbn/utility-types/jest';
+import type { MockedKeys } from '@kbn/utility-types-jest';
 
 import type { CoreSetup, Logger } from 'kibana/server';
 import { coreMock, httpServerMock } from '../../../../../src/core/server/mocks';

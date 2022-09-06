@@ -106,6 +106,8 @@ export const AuditdGenericLine = React.memo<Props>(
           isDraggable={isDraggable}
           queryValue={result}
           value={result}
+          isAggregatable={true}
+          fieldType="keyword"
         />
       </TokensFlexItem>
     </EuiFlexGroup>

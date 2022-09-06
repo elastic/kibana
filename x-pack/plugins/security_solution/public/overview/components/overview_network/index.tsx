@@ -6,7 +6,7 @@
  */
 
 import { isEmpty } from 'lodash/fp';
-import { EuiFlexItem, EuiPanel } from '@elastic/eui';
+import { EuiPanel } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo, useCallback, useState, useEffect } from 'react';
@@ -135,35 +135,32 @@ const OverviewNetworkComponent: React.FC<OverviewNetworkProps> = ({
   );
 
   return (
-    <EuiFlexItem>
-      <InspectButtonContainer show={toggleStatus}>
-        <EuiPanel hasBorder data-test-subj="overview-network-query">
-          <>
-            <HeaderSection
-              id={OverviewNetworkQueryId}
-              height={!toggleStatus ? 30 : undefined}
-              subtitle={subtitle}
-              title={title}
-              toggleStatus={toggleStatus}
-              toggleQuery={toggleQuery}
-              isInspectDisabled={filterQuery === undefined}
-            >
-              {networkPageButton}
-            </HeaderSection>
-            {toggleStatus && (
-              <OverviewNetworkStatsManage
-                loading={loading}
-                data={overviewNetwork}
-                id={id}
-                inspect={inspect}
-                setQuery={setQuery}
-                refetch={refetch}
-              />
-            )}
-          </>
-        </EuiPanel>
-      </InspectButtonContainer>
-    </EuiFlexItem>
+    <InspectButtonContainer show={toggleStatus}>
+      <EuiPanel hasBorder data-test-subj="overview-network-query">
+        <>
+          <HeaderSection
+            id={OverviewNetworkQueryId}
+            subtitle={subtitle}
+            title={title}
+            toggleStatus={toggleStatus}
+            toggleQuery={toggleQuery}
+            isInspectDisabled={filterQuery === undefined}
+          >
+            {networkPageButton}
+          </HeaderSection>
+          {toggleStatus && (
+            <OverviewNetworkStatsManage
+              loading={loading}
+              data={overviewNetwork}
+              id={id}
+              inspect={inspect}
+              setQuery={setQuery}
+              refetch={refetch}
+            />
+          )}
+        </>
+      </EuiPanel>
+    </InspectButtonContainer>
   );
 };
 

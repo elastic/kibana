@@ -6,6 +6,7 @@ Learn how to perform common APM app tasks.
 
 
 * <<agent-configuration>>
+* <<apm-spaces>>
 * <<apm-alerts>>
 * <<custom-links>>
 * <<filters>>
@@ -16,6 +17,8 @@ Learn how to perform common APM app tasks.
 
 
 include::agent-configuration.asciidoc[]
+
+include::apm-spaces.asciidoc[]
 
 include::apm-alerts.asciidoc[]
 

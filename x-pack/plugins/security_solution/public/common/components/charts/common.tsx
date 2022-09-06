@@ -18,6 +18,7 @@ import {
   Position,
   BrushEndListener,
 } from '@elastic/charts';
+import { EuiFlexGroup } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
@@ -140,4 +141,8 @@ export const checkIfAllValuesAreZero = (data: ChartSeriesData[] | null | undefin
 
 export const Wrapper = styled.div`
   position: relative;
+`;
+
+export const ChartWrapper = styled(EuiFlexGroup)`
+  z-index: 0;
 `;

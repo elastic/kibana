@@ -7,9 +7,8 @@
 
 import apm from 'elastic-apm-node';
 import type { Headers, Logger } from 'src/core/server';
-import type { HeadlessChromiumDriver } from '../browsers';
-import type { Context } from '../browsers';
-import { DEFAULT_PAGELOAD_SELECTOR } from './constants';
+import type { Context, HeadlessChromiumDriver } from '../browsers';
+import { CONTEXT_DEBUG, DEFAULT_PAGELOAD_SELECTOR } from './constants';
 
 export const openUrl = async (
   browser: HeadlessChromiumDriver,
@@ -28,6 +27,27 @@ export const openUrl = async (
 
   try {
     await browser.open(url, { context, headers, waitForSelector, timeout }, logger);
+
+    // Debug logging for viewport size and resizing
+    await browser.evaluate(
+      {
+        fn() {
+          // eslint-disable-next-line no-console
+          console.log(
+            `Navigating URL with viewport size: width=${window.innerWidth} height=${window.innerHeight} scaleFactor:${window.devicePixelRatio}`
+          );
+          window.addEventListener('resize', () => {
+            // eslint-disable-next-line no-console
+            console.log(
+              `Detected a viewport resize: width=${window.innerWidth} height=${window.innerHeight} scaleFactor:${window.devicePixelRatio}`
+            );
+          });
+        },
+        args: [],
+      },
+      { context: CONTEXT_DEBUG },
+      logger
+    );
   } catch (err) {
     logger.error(err);
     throw new Error(`An error occurred when trying to open the Kibana URL: ${err.message}`);

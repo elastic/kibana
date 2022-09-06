@@ -27,6 +27,8 @@ type RenderFunctionProp = (
 
 interface Props {
   dataProvider: DataProvider;
+  isAggregatable: boolean;
+  fieldType: string;
   disabled?: boolean;
   hideTopN: boolean;
   isDraggable?: boolean;
@@ -39,6 +41,8 @@ interface Props {
 
 export const useHoverActions = ({
   dataProvider,
+  isAggregatable,
+  fieldType,
   hideTopN,
   isDraggable,
   onFilterAdded,
@@ -102,6 +106,8 @@ export const useHoverActions = ({
         dataProvider={dataProvider}
         draggableId={isDraggable ? getDraggableId(dataProvider.id) : undefined}
         field={dataProvider.queryMatch.field}
+        isAggregatable={isAggregatable}
+        fieldType={fieldType}
         hideTopN={hideTopN}
         isObjectArray={false}
         onFilterAdded={onFilterAdded}
@@ -120,9 +126,11 @@ export const useHoverActions = ({
   }, [
     closeTopN,
     dataProvider,
+    fieldType,
     handleClosePopOverTrigger,
     hideTopN,
     hoverActionsOwnFocus,
+    isAggregatable,
     isDraggable,
     onFilterAdded,
     render,

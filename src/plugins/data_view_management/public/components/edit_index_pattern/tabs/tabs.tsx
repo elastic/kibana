@@ -448,7 +448,7 @@ export function Tabs({
                       getFieldInfo,
                     }}
                     openModal={overlays.openModal}
-                    theme={theme!}
+                    theme={theme}
                     userEditPermission={dataViews.getCanSaveSync()}
                   />
                 )}

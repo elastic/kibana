@@ -36,6 +36,8 @@ interface GetRowItemDraggableParams {
   attrName: string;
   idPrefix: string;
   render?: (item: string) => JSX.Element;
+  fieldType?: string;
+  isAggregatable?: boolean;
   displayCount?: number;
   dragDisplayValue?: string;
   maxOverflow?: number;
@@ -45,6 +47,8 @@ export const getRowItemDraggable = ({
   rowItem,
   attrName,
   idPrefix,
+  fieldType,
+  isAggregatable,
   render,
   dragDisplayValue,
 }: GetRowItemDraggableParams): JSX.Element => {
@@ -67,6 +71,8 @@ export const getRowItemDraggable = ({
             operator: IS_OPERATOR,
           },
         }}
+        fieldType={fieldType}
+        isAggregatable={isAggregatable}
         render={(dataProvider, _, snapshot) =>
           snapshot.isDragging ? (
             <DragEffects>
@@ -88,6 +94,8 @@ interface GetRowItemDraggablesParams {
   attrName: string;
   idPrefix: string;
   render?: (item: string) => JSX.Element;
+  fieldType?: string;
+  isAggregatable?: boolean;
   displayCount?: number;
   dragDisplayValue?: string;
   maxOverflow?: number;
@@ -98,6 +106,8 @@ export const getRowItemDraggables = ({
   idPrefix,
   render,
   dragDisplayValue,
+  fieldType = 'keyword',
+  isAggregatable = false,
   displayCount = 5,
   maxOverflow = 5,
 }: GetRowItemDraggablesParams): JSX.Element => {
@@ -122,6 +132,8 @@ export const getRowItemDraggables = ({
                 operator: IS_OPERATOR,
               },
             }}
+            fieldType={fieldType}
+            isAggregatable={isAggregatable}
             render={(dataProvider, _, snapshot) =>
               snapshot.isDragging ? (
                 <DragEffects>
@@ -146,6 +158,8 @@ export const getRowItemDraggables = ({
           maxOverflowItems={maxOverflow}
           overflowIndexStart={displayCount}
           rowItems={rowItems}
+          fieldType={fieldType}
+          isAggregatable={isAggregatable}
         />
       </>
     ) : (
@@ -161,12 +175,16 @@ interface OverflowItemProps {
   dragDisplayValue?: string;
   field: string;
   rowItem: string;
+  fieldType?: string;
+  isAggregatable?: boolean;
 }
 
 export const OverflowItemComponent: React.FC<OverflowItemProps> = ({
   dataProvider,
   dragDisplayValue,
   field,
+  fieldType = '',
+  isAggregatable = false,
   rowItem,
 }) => {
   const [showTopN, setShowTopN] = useState<boolean>(false);
@@ -196,6 +214,8 @@ export const OverflowItemComponent: React.FC<OverflowItemProps> = ({
           closeTopN={closeTopN}
           dataProvider={dataProvider}
           field={field}
+          fieldType={fieldType}
+          isAggregatable={isAggregatable}
           isObjectArray={false}
           ownFocus={hoverActionsOwnFocus}
           showOwnFocus={false}
@@ -219,6 +239,8 @@ interface RowItemOverflowProps {
   maxOverflowItems: number;
   overflowIndexStart: number;
   rowItems: string[];
+  fieldType?: string;
+  isAggregatable?: boolean;
 }
 
 export const RowItemOverflowComponent: React.FC<RowItemOverflowProps> = ({
@@ -228,6 +250,8 @@ export const RowItemOverflowComponent: React.FC<RowItemOverflowProps> = ({
   maxOverflowItems = 5,
   overflowIndexStart = 5,
   rowItems,
+  fieldType,
+  isAggregatable,
 }) => {
   const overflowItems = useMemo(
     () =>
@@ -257,11 +281,22 @@ export const RowItemOverflowComponent: React.FC<RowItemOverflowProps> = ({
                 dragDisplayValue={dragDisplayValue}
                 rowItem={rowItem}
                 field={attrName}
+                fieldType={fieldType}
+                isAggregatable={isAggregatable}
               />
             </EuiFlexItem>
           );
         }),
-    [attrName, dragDisplayValue, idPrefix, maxOverflowItems, overflowIndexStart, rowItems]
+    [
+      attrName,
+      dragDisplayValue,
+      idPrefix,
+      maxOverflowItems,
+      overflowIndexStart,
+      rowItems,
+      fieldType,
+      isAggregatable,
+    ]
   );
   return (
     <>

@@ -60,6 +60,8 @@ describe('FormattedIp', () => {
     value: '192.168.1.1',
     contextId: 'test-context-id',
     eventId: 'test-event-id',
+    isAggregatable: true,
+    fieldType: 'ip',
     isDraggable: false,
     fieldName: 'host.ip',
   };

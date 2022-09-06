@@ -37,6 +37,8 @@ export const PrimarySecondary = React.memo<Props>(
           isDraggable={isDraggable}
           value={primary}
           iconType="user"
+          isAggregatable={true}
+          fieldType="keyword"
         />
       );
     } else if (nilOrUnSet(primary) && !nilOrUnSet(secondary)) {
@@ -48,6 +50,8 @@ export const PrimarySecondary = React.memo<Props>(
           isDraggable={isDraggable}
           value={secondary}
           iconType="user"
+          isAggregatable={true}
+          fieldType="keyword"
         />
       );
     } else if (primary === secondary) {
@@ -59,6 +63,8 @@ export const PrimarySecondary = React.memo<Props>(
           isDraggable={isDraggable}
           value={secondary}
           iconType="user"
+          isAggregatable={true}
+          fieldType="keyword"
         />
       );
     } else {
@@ -72,6 +78,8 @@ export const PrimarySecondary = React.memo<Props>(
               isDraggable={isDraggable}
               value={primary}
               iconType="user"
+              isAggregatable={true}
+              fieldType="keyword"
             />
           </TokensFlexItem>
           <TokensFlexItem grow={false} component="span">
@@ -85,6 +93,8 @@ export const PrimarySecondary = React.memo<Props>(
               isDraggable={isDraggable}
               value={secondary}
               iconType="user"
+              isAggregatable={true}
+              fieldType="keyword"
             />
           </TokensFlexItem>
         </EuiFlexGroup>
@@ -123,6 +133,8 @@ export const PrimarySecondaryUserInfo = React.memo<PrimarySecondaryUserInfoProps
           isDraggable={isDraggable}
           value={userName}
           iconType="user"
+          isAggregatable={true}
+          fieldType="keyword"
         />
       );
     } else if (!nilOrUnSet(userName) && nilOrUnSet(primary) && nilOrUnSet(secondary)) {
@@ -134,6 +146,8 @@ export const PrimarySecondaryUserInfo = React.memo<PrimarySecondaryUserInfoProps
           isDraggable={isDraggable}
           value={userName}
           iconType="user"
+          isAggregatable={true}
+          fieldType="keyword"
         />
       );
     } else {

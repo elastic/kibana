@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { MockedKeys } from '@kbn/utility-types/jest';
+import type { MockedKeys } from '@kbn/utility-types-jest';
 import { CoreSetup, CoreStart } from 'kibana/public';
 import moment from 'moment';
 import { coreMock } from 'src/core/public/mocks';

@@ -88,7 +88,6 @@ describe('create()', () => {
       body: expect.any(String),
     });
     expect(JSON.parse(fetchSpy.mock.calls[0][1].body)).toStrictEqual({
-      humanReadableSlug: false,
       locatorId: LEGACY_SHORT_URL_LOCATOR_ID,
       params: {
         url: 'https://example.com/foo/bar',
@@ -173,7 +172,6 @@ describe('createFromLongUrl()', () => {
       body: expect.any(String),
     });
     expect(JSON.parse(fetchSpy.mock.calls[0][1].body)).toStrictEqual({
-      humanReadableSlug: true,
       locatorId: LEGACY_SHORT_URL_LOCATOR_ID,
       params: {
         url: '/a/b/c',

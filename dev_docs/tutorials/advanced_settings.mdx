@@ -286,3 +286,13 @@ export const migrations = {
 };
 ```
 [1] Since all `uiSettings` migrations are added to the same migration function, while not required, grouping settings by team is good practice.
+
+### Creating Transforms
+
+If you have need to make a change that isn't possible in a saved object migration function (for example, you need to find other saved
+objects), you can create a transform function instead. This will be applied when a `config` saved object is first created, and/or when it is
+first upgraded. Note that you might need to add an extra attribute to verify that this transform has already been applied so it doesn't get
+applied again in the future.
+
+For example, we needed to transform the `defaultIndex` attribute, and we added an extra `isDefaultIndexMigrated` attribute for this purpose.
+See `src/core/server/ui_settings/saved_objects/transforms.ts` and [#13339](https://github.com/elastic/kibana/pull/133339) for an example.

@@ -32,7 +32,7 @@ export const workpadTypeFactory = (
       '@created': { type: 'date' },
     },
   },
-  migrations: workpadMigrationsFactory(deps),
+  migrations: () => workpadMigrationsFactory(deps),
   management: {
     importableAndExportable: true,
     icon: 'canvasApp',

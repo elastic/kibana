@@ -39,11 +39,11 @@ const { BASE_BUCKET_DAILY, BASE_BUCKET_PERMANENT } = require('./bucket_config.js
       `
       set -euo pipefail
       cp manifest.json manifest-latest-verified.json
-      gsutil cp manifest-latest-verified.json gs://${BASE_BUCKET_DAILY}/${version}/
+      gsutil -h "Cache-Control:no-cache, max-age=0, no-transform" cp manifest-latest-verified.json gs://${BASE_BUCKET_DAILY}/${version}/
       rm manifest.json
       cp manifest-permanent.json manifest.json
       gsutil -m cp -r gs://${bucket}/* gs://${BASE_BUCKET_PERMANENT}/${version}/
-      gsutil cp manifest.json gs://${BASE_BUCKET_PERMANENT}/${version}/
+      gsutil -h "Cache-Control:no-cache, max-age=0, no-transform" cp manifest.json gs://${BASE_BUCKET_PERMANENT}/${version}/
     `,
       { shell: '/bin/bash' }
     );

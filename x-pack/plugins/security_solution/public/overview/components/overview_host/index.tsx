@@ -6,7 +6,7 @@
  */
 
 import { isEmpty } from 'lodash/fp';
-import { EuiFlexItem, EuiPanel } from '@elastic/eui';
+import { EuiPanel } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo, useCallback, useState, useEffect } from 'react';
@@ -130,33 +130,30 @@ const OverviewHostComponent: React.FC<OverviewHostProps> = ({
   );
 
   return (
-    <EuiFlexItem>
-      <InspectButtonContainer show={toggleStatus}>
-        <EuiPanel hasBorder>
-          <HeaderSection
-            id={OverviewHostQueryId}
-            height={!toggleStatus ? 30 : undefined}
-            subtitle={subtitle}
-            toggleStatus={toggleStatus}
-            toggleQuery={toggleQuery}
-            title={title}
-            isInspectDisabled={filterQuery === undefined}
-          >
-            <>{hostPageButton}</>
-          </HeaderSection>
-          {toggleStatus && (
-            <OverviewHostStatsManage
-              loading={loading}
-              data={overviewHost}
-              setQuery={setQuery}
-              id={id}
-              inspect={inspect}
-              refetch={refetch}
-            />
-          )}
-        </EuiPanel>
-      </InspectButtonContainer>
-    </EuiFlexItem>
+    <InspectButtonContainer show={toggleStatus}>
+      <EuiPanel hasBorder>
+        <HeaderSection
+          id={OverviewHostQueryId}
+          subtitle={subtitle}
+          toggleStatus={toggleStatus}
+          toggleQuery={toggleQuery}
+          title={title}
+          isInspectDisabled={filterQuery === undefined}
+        >
+          <>{hostPageButton}</>
+        </HeaderSection>
+        {toggleStatus && (
+          <OverviewHostStatsManage
+            loading={loading}
+            data={overviewHost}
+            setQuery={setQuery}
+            id={id}
+            inspect={inspect}
+            refetch={refetch}
+          />
+        )}
+      </EuiPanel>
+    </InspectButtonContainer>
   );
 };
 

@@ -12,7 +12,6 @@ import { TestProviders } from '../../mock';
 import { NO_ALERT_INDEX } from '../../../../common/constants';
 import { ModalInspectQuery, formatIndexPatternRequested } from './modal';
 import { InputsModelId } from '../../store/inputs/constants';
-import { EXCLUDE_ELASTIC_CLOUD_INDEX } from '../../containers/sourcerer';
 
 jest.mock('react-router-dom', () => {
   const original = jest.requireActual('react-router-dom');
@@ -218,7 +217,6 @@ describe('Modal Inspect', () => {
         </TestProviders>
       );
       expect(wrapper.find('i[data-test-subj="not-sourcerer-msg"]').first().exists()).toEqual(false);
-      expect(wrapper.find('i[data-test-subj="exclude-logs-msg"]').first().exists()).toEqual(false);
     });
     test('not-sourcerer-msg when not all patterns are in sourcerer selection', () => {
       const wrapper = mount(
@@ -227,19 +225,6 @@ describe('Modal Inspect', () => {
         </TestProviders>
       );
       expect(wrapper.find('i[data-test-subj="not-sourcerer-msg"]').first().exists()).toEqual(true);
-      expect(wrapper.find('i[data-test-subj="exclude-logs-msg"]').first().exists()).toEqual(false);
-    });
-    test('exclude-logs-msg when EXCLUDE_ELASTIC_CLOUD_INDEX is present in patterns', () => {
-      const wrapper = mount(
-        <TestProviders>
-          <ModalInspectQuery
-            {...defaultProps}
-            request={getRequest([EXCLUDE_ELASTIC_CLOUD_INDEX, 'logs-*'])}
-          />
-        </TestProviders>
-      );
-      expect(wrapper.find('i[data-test-subj="not-sourcerer-msg"]').first().exists()).toEqual(false);
-      expect(wrapper.find('i[data-test-subj="exclude-logs-msg"]').first().exists()).toEqual(true);
     });
   });
 });

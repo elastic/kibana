@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MockedKeys } from '@kbn/utility-types/jest';
+import { MockedKeys } from '@kbn/utility-types-jest';
 import { mount, ReactWrapper } from 'enzyme';
 import { CoreSetup, CoreStart, DocLinksStart } from 'kibana/public';
 import moment from 'moment';

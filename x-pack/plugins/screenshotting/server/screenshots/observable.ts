@@ -6,19 +6,19 @@
  */
 
 import type { Transaction } from 'elastic-apm-node';
-import { defer, forkJoin, throwError, Observable } from 'rxjs';
+import { defer, forkJoin, Observable, throwError } from 'rxjs';
 import { catchError, mergeMap, switchMapTo, timeoutWith } from 'rxjs/operators';
 import type { Headers, Logger } from 'src/core/server';
 import { errors } from '../../common';
 import type { Context, HeadlessChromiumDriver } from '../browsers';
-import { getChromiumDisconnectedError, DEFAULT_VIEWPORT } from '../browsers';
+import { DEFAULT_VIEWPORT, getChromiumDisconnectedError } from '../browsers';
 import type { Layout } from '../layouts';
 import type { ElementsPositionAndAttribute } from './get_element_position_data';
 import { getElementPositionAndAttributes } from './get_element_position_data';
 import { getNumberOfItems } from './get_number_of_items';
 import { getRenderErrors } from './get_render_errors';
-import { getScreenshots } from './get_screenshots';
 import type { Screenshot } from './get_screenshots';
+import { getScreenshots } from './get_screenshots';
 import { getTimeRange } from './get_time_range';
 import { injectCustomCss } from './inject_css';
 import { openUrl } from './open_url';
@@ -126,15 +126,6 @@ const getDefaultElementPosition = (dimensions: { height?: number; width?: number
   ];
 };
 
-/*
- * If Kibana is showing a non-HTML error message, the viewport might not be
- * provided by the browser.
- */
-const getDefaultViewPort = () => ({
-  ...DEFAULT_VIEWPORT,
-  zoom: 1,
-});
-
 export class ScreenshotObservableHandler {
   constructor(
     private readonly driver: HeadlessChromiumDriver,
@@ -189,15 +180,9 @@ export class ScreenshotObservableHandler {
     const waitTimeout = this.options.timeouts.waitForElements;
 
     return defer(() => getNumberOfItems(driver, this.logger, waitTimeout, this.layout)).pipe(
-      mergeMap(async (itemsCount) => {
-        // set the viewport to the dimensions from the job, to allow elements to flow into the expected layout
-        const viewport = this.layout.getViewport(itemsCount) || getDefaultViewPort();
-
-        // Set the viewport allowing time for the browser to handle reflow and redraw
-        // before checking for readiness of visualizations.
-        await driver.setViewport(viewport, this.logger);
-        await waitForVisualizations(driver, this.logger, waitTimeout, itemsCount, this.layout);
-      }),
+      mergeMap((itemsCount) =>
+        waitForVisualizations(driver, this.logger, waitTimeout, itemsCount, this.layout)
+      ),
       this.waitUntil(waitTimeout, 'wait for elements')
     );
   }
@@ -244,10 +229,10 @@ export class ScreenshotObservableHandler {
           this.checkPageIsOpen(); // fail the report job if the browser has closed
           const elements =
             data.elementsPositionAndAttributes ??
-            getDefaultElementPosition(this.layout.getViewport(1));
+            getDefaultElementPosition(this.layout.getViewport());
           let screenshots: Screenshot[] = [];
           try {
-            screenshots = await getScreenshots(this.driver, this.logger, elements);
+            screenshots = await getScreenshots(this.driver, this.logger, elements, this.layout);
           } catch (e) {
             throw new errors.FailedToCaptureScreenshot(e.message);
           }

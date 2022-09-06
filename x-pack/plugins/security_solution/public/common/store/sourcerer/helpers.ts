@@ -10,6 +10,17 @@ import { SourcererDataView, SourcererModel, SourcererScopeById, SourcererScopeNa
 import { SelectedDataViewPayload } from './actions';
 import { sourcererModel } from '../model';
 
+export const sortWithExcludesAtEnd = (indices: string[]) => {
+  const allSorted = indices.reduce(
+    (acc: { includes: string[]; excludes: string[] }, index) =>
+      index.trim().startsWith('-')
+        ? { includes: acc.includes, excludes: [...acc.excludes, index] }
+        : { includes: [...acc.includes, index], excludes: acc.excludes },
+    { includes: [], excludes: [] }
+  );
+  return [...allSorted.includes.sort(), ...allSorted.excludes.sort()];
+};
+
 export const getScopePatternListSelection = (
   theDataView: SourcererDataView | undefined,
   sourcererScope: SourcererScopeName,
@@ -20,26 +31,26 @@ export const getScopePatternListSelection = (
     theDataView != null && theDataView.id !== null ? theDataView.patternList : [];
 
   if (!isDefaultDataView) {
-    return patternList.sort();
+    return sortWithExcludesAtEnd(patternList);
   }
   // when our SIEM data view is set, here are the defaults
   switch (sourcererScope) {
     case SourcererScopeName.default:
-      return patternList.filter((index) => index !== signalIndexName).sort();
+      return sortWithExcludesAtEnd(patternList.filter((index) => index !== signalIndexName));
     case SourcererScopeName.detections:
       // set to signalIndexName whether or not it exists yet in the patternList
-      return (signalIndexName != null ? [signalIndexName] : []).sort();
+      return signalIndexName != null ? [signalIndexName] : [];
     case SourcererScopeName.timeline:
-      return patternList.sort();
+      return sortWithExcludesAtEnd(patternList);
   }
 };
 
 export const ensurePatternFormat = (patternList: string[]): string[] =>
-  [
+  sortWithExcludesAtEnd([
     ...new Set(
       patternList.reduce((acc: string[], pattern: string) => [...pattern.split(','), ...acc], [])
     ),
-  ].sort();
+  ]);
 
 export const validateSelectedPatterns = (
   state: SourcererModel,

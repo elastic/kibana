@@ -32,6 +32,15 @@ cat <<EOF >> $KIBANA_DIR/.bazelrc
 EOF
 fi
 
+if [[ "$BAZEL_CACHE_MODE" == "populate-local-gcs" ]]; then
+  echo "[bazel] enabling caching with GCS buckets for local dev"
+
+cat <<EOF >> $KIBANA_DIR/.bazelrc
+  build --remote_cache=https://storage.googleapis.com/kibana-local-bazel-remote-cache
+  build --google_credentials=$BAZEL_LOCAL_DEV_CACHE_CREDENTIALS_FILE
+EOF
+fi
+
 if [[ "$BAZEL_CACHE_MODE" == "buildbuddy" ]]; then
   echo "[bazel] enabling caching with Buildbuddy"
 cat <<EOF >> $KIBANA_DIR/.bazelrc
@@ -43,7 +52,7 @@ cat <<EOF >> $KIBANA_DIR/.bazelrc
 EOF
 fi
 
-if [[ "$BAZEL_CACHE_MODE" != @(gcs|buildbuddy|none|) ]]; then
-  echo "invalid value for BAZEL_CACHE_MODE received ($BAZEL_CACHE_MODE), expected one of [gcs,buildbuddy,none]"
+if [[ "$BAZEL_CACHE_MODE" != @(gcs|populate-local-gcs|buildbuddy|none|) ]]; then
+  echo "invalid value for BAZEL_CACHE_MODE received ($BAZEL_CACHE_MODE), expected one of [gcs,populate-local-gcs|buildbuddy,none]"
   exit 1
 fi
