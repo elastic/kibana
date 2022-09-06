@@ -35,8 +35,8 @@ export function MachineLearningDataVisualizerIndexBasedProvider({
 
     async clickUseFullDataButton(expectedFormattedTotalDocCount: string) {
       await retry.tryForTime(30 * 1000, async () => {
-        await testSubjects.clickWhenNotDisabled('dataVisualizerButtonUseFullData');
-        await testSubjects.clickWhenNotDisabled('superDatePickerApplyTimeButton');
+        await testSubjects.clickWhenNotDisabledWithoutRetry('dataVisualizerButtonUseFullData');
+        await testSubjects.clickWhenNotDisabledWithoutRetry('superDatePickerApplyTimeButton');
         await this.assertTotalDocumentCount(expectedFormattedTotalDocCount);
       });
     },
@@ -154,7 +154,7 @@ export function MachineLearningDataVisualizerIndexBasedProvider({
     },
 
     async clickCreateAdvancedJobButton() {
-      await testSubjects.clickWhenNotDisabled('dataVisualizerCreateAdvancedJobCard');
+      await testSubjects.clickWhenNotDisabledWithoutRetry('dataVisualizerCreateAdvancedJobCard');
     },
 
     async assertCreateDataFrameAnalyticsCardExists() {
@@ -183,7 +183,7 @@ export function MachineLearningDataVisualizerIndexBasedProvider({
 
     async clickViewInDiscoverButton() {
       await retry.tryForTime(5000, async () => {
-        await testSubjects.clickWhenNotDisabled('dataVisualizerViewInDiscoverCard');
+        await testSubjects.clickWhenNotDisabledWithoutRetry('dataVisualizerViewInDiscoverCard');
         await PageObjects.discover.waitForDiscoverAppOnScreen();
       });
     },
