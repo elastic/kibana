@@ -164,7 +164,7 @@ export function MachineLearningCommonUIProvider({
     },
 
     async setMultiSelectFilter(testDataSubj: string, fieldTypes: string[]) {
-      await testSubjects.clickWhenNotDisabled(`${testDataSubj}-button`);
+      await testSubjects.clickWhenNotDisabledWithoutRetry(`${testDataSubj}-button`);
       await testSubjects.existOrFail(`${testDataSubj}-popover`);
       await testSubjects.existOrFail(`${testDataSubj}-searchInput`);
       const searchBarInput = await testSubjects.find(`${testDataSubj}-searchInput`);
@@ -186,7 +186,7 @@ export function MachineLearningCommonUIProvider({
     },
 
     async removeMultiSelectFilter(testDataSubj: string, fieldTypes: string[]) {
-      await testSubjects.clickWhenNotDisabled(`${testDataSubj}-button`);
+      await testSubjects.clickWhenNotDisabledWithoutRetry(`${testDataSubj}-button`);
       await testSubjects.existOrFail(`${testDataSubj}-popover`);
       await testSubjects.existOrFail(`${testDataSubj}-searchInput`);
       const searchBarInput = await testSubjects.find(`${testDataSubj}-searchInput`);

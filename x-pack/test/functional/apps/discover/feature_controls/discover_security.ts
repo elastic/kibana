@@ -552,7 +552,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         );
 
         // check the JSON tab
-        await find.clickByCssSelectorWhenNotDisabled('#kbn_doc_viewer_tab_1');
+        await find.clickByCssSelectorWhenNotDisabledWithoutRetry('#kbn_doc_viewer_tab_1');
         await retry.waitForWithTimeout(
           'index in flyout JSON tab is matching the logstash index',
           5000,

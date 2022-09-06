@@ -20,7 +20,9 @@ export function MachineLearningLensVisualizationsProvider(
       await testSubjects.click('embeddablePanelAction-create-ml-ad-job-action');
     },
     async clickCreateJob(layerIndex: number) {
-      await testSubjects.clickWhenNotDisabled(`mlLensLayerCreateJobButton_${layerIndex}`);
+      await testSubjects.clickWhenNotDisabledWithoutRetry(
+        `mlLensLayerCreateJobButton_${layerIndex}`
+      );
     },
     async clickCreateJobFromLayerWithWizard(layerIndex: number) {
       await testSubjects.click(`mlLensLayerCreateWithWizardButton_${layerIndex}`);

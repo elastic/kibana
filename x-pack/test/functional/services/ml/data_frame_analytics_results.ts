@@ -379,7 +379,7 @@ export function MachineLearningDataFrameAnalyticsResultsProvider(
 
       if (expandableContentExists !== shouldExpand) {
         await retry.tryForTime(5 * 1000, async () => {
-          await testSubjects.clickWhenNotDisabled(
+          await testSubjects.clickWhenNotDisabledWithoutRetry(
             `mlDFExpandableSection-${sectionId}-toggle-button`
           );
           if (shouldExpand) {
