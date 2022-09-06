@@ -32,7 +32,12 @@ import {
   validatePackagePolicy,
   validationHasErrors,
 } from '../../common/services';
-import { SO_SEARCH_LIMIT, FLEET_APM_PACKAGE, outputType } from '../../common/constants';
+import {
+  SO_SEARCH_LIMIT,
+  FLEET_APM_PACKAGE,
+  outputType,
+  PACKAGES_SAVED_OBJECT_TYPE,
+} from '../../common/constants';
 import type {
   DeletePackagePoliciesResponse,
   UpgradePackagePolicyResponse,
@@ -46,6 +51,8 @@ import type {
   UpgradePackagePolicyDryRunResponseItem,
   RegistryDataStream,
   PackagePolicyPackage,
+  Installation,
+  ExperimentalDataStreamFeaturesMap,
 } from '../../common/types';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../constants';
 import {
@@ -80,6 +87,7 @@ import { appContextService } from '.';
 import { removeOldAssets } from './epm/packages/cleanup';
 import type { PackageUpdateEvent, UpdateEventType } from './upgrade_sender';
 import { sendTelemetryEvents } from './upgrade_sender';
+import { handleExperimentalFeatureOptIn } from './package_policies';
 
 export type InputsOverride = Partial<NewPackagePolicyInput> & {
   vars?: Array<NewPackagePolicyInput['vars'] & { name: string }>;
@@ -158,6 +166,9 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
           force: options?.force,
         });
       }
+
+      // Handle component template/mappings updates for experimental features, e.g. synthetic source
+      await handleExperimentalFeatureOptIn({ soClient, esClient, packagePolicy });
 
       const pkgInfo =
         options?.packageInfo ??
@@ -279,11 +290,30 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
       throw new Error(packagePolicySO.error.message);
     }
 
-    return {
+    // If possible, return the experimental features map for the package policy's `package` field
+    let experimentalFeatures: ExperimentalDataStreamFeaturesMap | undefined;
+    if (packagePolicySO.attributes.package?.name) {
+      const installation = await soClient.get<Installation>(
+        PACKAGES_SAVED_OBJECT_TYPE,
+        packagePolicySO.attributes.package?.name
+      );
+
+      if (installation && !installation.error) {
+        experimentalFeatures = installation.attributes?.experimental_data_stream_features_map;
+      }
+    }
+
+    const response = {
       id: packagePolicySO.id,
       version: packagePolicySO.version,
       ...packagePolicySO.attributes,
     };
+
+    if (experimentalFeatures && response.package) {
+      response.package.experimental_data_stream_features_map = experimentalFeatures;
+    }
+
+    return response;
   }
 
   public async findAllForAgentPolicy(
@@ -444,6 +474,9 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
       inputs = await _compilePackagePolicyInputs(pkgInfo, packagePolicy.vars || {}, inputs);
       elasticsearch = pkgInfo.elasticsearch;
     }
+
+    // Handle component template/mappings updates for experimental features, e.g. synthetic source
+    await handleExperimentalFeatureOptIn({ soClient, esClient, packagePolicy });
 
     await soClient.update<PackagePolicySOAttributes>(
       SAVED_OBJECT_TYPE,
@@ -873,6 +906,11 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
           namespace: newPolicy.namespace ?? 'default',
           description: newPolicy.description ?? '',
           enabled: newPolicy.enabled ?? true,
+          package: {
+            ...newPP.package!,
+            experimental_data_stream_features_map:
+              newPolicy.package?.experimental_data_stream_features_map,
+          },
           policy_id: newPolicy.policy_id ?? agentPolicyId,
           inputs: newPolicy.inputs[0]?.streams ? newPolicy.inputs : inputs,
           vars: newPolicy.vars || newPP.vars,

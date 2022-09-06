@@ -417,6 +417,14 @@ export type PackageInfo =
   | Installable<Merge<RegistryPackage, EpmPackageAdditions>>
   | Installable<Merge<ArchivePackage, EpmPackageAdditions>>;
 
+// TODO - Expand this with other experimental indexing types
+export type ExperimentalIndexingFeature = 'synthetic_source';
+
+export type ExperimentalDataStreamFeaturesMap = Array<{
+  data_stream: string;
+  features: Record<ExperimentalIndexingFeature, boolean>;
+}>;
+
 export interface Installation extends SavedObjectAttributes {
   installed_kibana: KibanaAssetReference[];
   installed_es: EsAssetReference[];
@@ -433,6 +441,7 @@ export interface Installation extends SavedObjectAttributes {
   install_format_schema_version?: string;
   verification_status: PackageVerificationStatus;
   verification_key_id?: string | null;
+  experimental_data_stream_features_map?: ExperimentalDataStreamFeaturesMap;
 }
 
 export interface PackageUsageStats {
