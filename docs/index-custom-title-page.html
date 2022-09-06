@@ -2,7 +2,7 @@
   * {
     box-sizing: border-box;
   }
-  
+
   body {
     font-family: Arial, Helvetica, sans-serif;
   }
@@ -12,13 +12,13 @@
     padding: 16px;
     text-align: left;
   }
-  
+
   .card:hover {
     box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
     padding: 16px;
     text-align: left;
   }
-  
+
   .card-description {
     color: #000;
   }
@@ -54,9 +54,9 @@
       -moz-columns: 2;
     }
   }
-  
+
   @media screen and (max-width: 600px) {
-    
+
   }
 </style>
 
@@ -64,85 +64,94 @@
 
 <div class="row my-4">
   <div class="col-md-6 col-12">
+    <h2>Bring your data to life</h2>
     <p>
-      From creating beautiful visualizations to managing the Elastic Stack,
-      learn how Kibana helps you get the most of your data.
+      Take this tutorial for the basics of exploring and visualizing your data.
     </p>
     <p>
       <a href="get-started.html">
-        <button class="btn btn-primary">Get started</button>
+        <button class="btn btn-primary">Create a visualization</button>
       </a>
     </p>
     <p>
-      <a class="inline-block mr-3" href="setup.html">Set up</a>
+      <a class="inline-block mr-3" href="https://www.elastic.co/webinars/getting-started-kibana">Demo</a>
       <a class="inline-block mr-3" href="https://www.elastic.co/videos/training-how-to-series-stack">How-to videos</a>
-      <a class="inline-block mr-3" href="https://www.elastic.co/guide/en/kibana/8.3/release-notes-8.3.0.html">Release docs</a>
-    </p>
+      <a class="inline-block mr-3" href="https://www.elastic.co/guide/en/kibana/8.4/whats-new.html">What's new</a>
+  </p>
   </div>
   <div class="col-md-6 col-12">
-    <img class="w-100" src="https://i.imgur.com/Xg4tPtJ.png" />
+    <img class="w-100" src="https://i.imgur.com/ew7ierC.png" />
   </div>
 </div>
+
+<h3>Explore by use case</h3>
 
 <div class="row my-4">
   <div class="col-md-4 col-12 mb-2">
     <a class="no-text-decoration" href="dashboard.html">
       <div class="card">
-        <p class="font-weight-bold">Add search experience</p>
-        <p class="card-description">Create search for your app or website, or workplace content.</p>
+        <div class="icon" style="background-image: url('https://i.imgur.com/JUxHITA.png');"></div>
+        <h4>Search</h4>
+        <p class="card-description">Learn how to create a search experience for your data.</p>
       </div>
     </a>
   </div>
   <div class="col-md-4 col-12 mb-2">
-    <a class="no-text-decoration" href="dashboard.html">
+    <a class="no-text-decoration" href="https://www.elastic.co/guide/en/welcome-to-elastic/current/getting-started-observability.html">
       <div class="card">
-        <p class="font-weight-bold">Monitor logs & metrics</p>
-        <p class="card-description">Get end-to-end observability into your environment.</p>
+        <div class="icon" style="background-image: url('https://i.imgur.com/XCIZjs1.png');"></div>
+        <h4>Observe</h4>
+        <p class="card-description">Follow our guides for monitoring logs, metrics, and traces.</p>
       </div>
     </a>
   </div>
   <div class="col-md-4 col-12 mb-2">
-    <a class="no-text-decoration" href="dashboard.html">
-      <div class="card">    
-        <p class="font-weight-bold">Protect against threats</p>
-        <p class="card-description">Protect against threats by unifying security in one place.</p>
+    <a class="no-text-decoration" href="https://www.elastic.co/guide/en/security/current/es-overview.html">
+      <div class="card">
+        <div class="icon" align-items-center style="background-image: url('https://i.imgur.com/MNgoZfx.png');"></div>
+        <h4>Protect</h4>
+        <p class="card-description">Everything you need to know about protecting your data.</p>
       </div>
     </a>
   </div>
 </div>
 
+<h3>Explore Kibana</h3>
+
 <div class="my-5">
   <div class="d-flex align-items-center mb-3">
     <div class="icon" style="background-image: url('https://i.imgur.com/e8Zu260.png');"></div>
-    <div class="section-title">Explore, visualize, and share</div>
+    <h4 class="section-title">Discover, visualize, and share</h4>
   </div>
   <ul class="ul-col-md-2 ul-col-1">
     <li>
-      <a href="discover.html">Search and gain insight</a>
-    </li>
-    <li>
-      <a href="xpack-graph.html">Graph patterns and relationships</a>
+      <a href="discover.html">Discover what's in your data</a>
     </li>
     <li>
       <a href="dashboard.html">Build charts and dashboards</a>
     </li>
     <li>
-      <a href="reporting-getting-started.html">Generate and share reports</a>
+      <a href="maps.html">Map geographic data</a>
     </li>
     <li>
       <a href="canvas.html">Design presentations</a>
     </li>
     <li>
-      <a href="alerting-getting-started.html">Alert and take action</a>
-    </li>
-    <li>
-      <a href="maps.html">Map geographic data</a>
-    </li>
-    <li>
-      <a href="kuery-query.html">Use Kibana Query Language</a>
+      <a href="xpack-graph.html">Graph patterns and relationships</a>
     </li>
     <li>
       <a href="xpack-ml.html">Model, predict, & detect behavior</a>
+    </li>
+    <li>
+      <a href="reporting-getting-started.html">Generate and share reports</a>
+    </li>
+
+    <li>
+      <a href="alerting-getting-started.html">Alert and take action</a>
+    </li>
+
+    <li>
+      <a href="kuery-query.html">Use Kibana Query Language</a>
     </li>
     <li>
       <a href="data-views.html">Learn about data views</a>
@@ -153,12 +162,9 @@
 <div class="my-5">
   <div class="d-flex align-items-center mb-3">
     <div class="icon" style="background-image: url('https://i.imgur.com/cI3JRfU.png');"></div>
-    <div class="section-title">Get organized</div>
+    <h4 class="section-title">Get organized</h4>
   </div>
   <ul class="ul-col-md-2 ul-col-1">
-    <li>
-      <a href="xpack-spaces.html">Collect related data in spaces</a>
-    </li>
     <li>
       <a href="xpack-spaces.html">Collect related data in spaces</a>
     </li>
@@ -166,7 +172,7 @@
       <a href="managing-tags.html">Quickly find apps and objects</a>
     </li>
     <li>
-      <a href="managing-saved-objects.html">Tag the objects you saved</a>
+      <a href="managing-saved-objects.html">Manage the objects you saved</a>
     </li>
   </ul>
 </div>
@@ -174,44 +180,64 @@
 <div class="my-5">
   <div class="d-flex align-items-center mb-3">
     <div class="icon" style="background-image: url('https://i.imgur.com/knrZn5B.png');"></div>
-    <div class="section-title">Manage and secure</div>
+    <h4 class="section-title">Manage and secure</h4>
   </div>
   <ul class="ul-col-md-2 ul-col-1">
     <li>
-      <a href="management.html">Manage indices, licenses, & more</a>
-    </li>
-    <li>
-      <a href="advanced-options.html">Customize Kibana</a>
+      <a href="management.html">Manage data and indices</a>
     </li>
     <li>
       <a href="tutorial-secure-access-to-kibana.html">Configure access & security</a>
     </li>
     <li>
-      <a href="kibana-troubleshooting.html">Troubleshoot</a>
-    </li>
-    <li>
       <a href="xpack-monitoring.html">Monitor the Elastic Stack</a>
     </li>
     <li>
-      <a href="upgrade.html">Prepare for an upgrade</a>
+      <a href="advanced-options.html">Customize Kibana</a>
+    </li>
+    <li>
+      <a href="kibana-troubleshooting.html">Troubleshoot</a>
     </li>
   </ul>
 </div>
 
 <div class="my-5">
   <div class="d-flex align-items-center mb-3">
+    <div class="icon" style="background-image: url('https://i.imgur.com/Hi0ZQ5W.png');"></div>
+    <h4 class="section-title">Install and upgrade</h4>
+  </div>
+  <ul class="ul-col-md-2 ul-col-1">
+    <li>
+      <a href="/install.html">Install</a>
+    </li>
+    <li>
+      <a href="settings.html">Configure settings</a>
+    </li>
+    <li>
+      <a href="upgrade.html">Prepare for an upgrade</a>
+    </li>
+    <li>
+      <a href="upgrade.html">Prepare for an upgrade</a>
+    </li>
+    <li>
+      <a href="managing-licenses.html">Update your license</a>
+  </ul>
+</div>
+
+<div class="my-5">
+  <div class="d-flex align-items-center mb-3">
     <div class="icon" style="background-image: url('https://i.imgur.com/3OEaSup.png');"></div>
-    <div class="section-title">Tools, APIs, and Dev docs</div>
+    <h4 class="section-title">Tools, APIs, and Dev docs</h4>
   </div>
   <ul class="ul-col-md-2 ul-col-1">
     <li>
       <a href="console-kibana.html">Console</a>
     </li>
     <li>
-      <a href="api.html">REST APIs</a>
+      <a href="console-kibana.html">Search profiler</a>
     </li>
     <li>
-      <a href="console-kibana.html">Search profiler</a>
+      <a href="api.html">REST APIs</a>
     </li>
     <li>
       <a href="development.html">Developer docs</a>
@@ -219,4 +245,5 @@
   </ul>
 </div>
 
-<p class="my-4">For more, view <a href="https://www.elastic.co/guide/index.html">all Elastic docs</a>.</p>
+
+<p class="my-4"><a href="https://www.elastic.co/guide/index.html">View all Elastic docs</a></p>
