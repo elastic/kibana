@@ -584,8 +584,6 @@ export function getIndexPatternDatasource({
       };
     },
     getDatasourceSuggestionsForField(state, draggedField, filterLayers, indexPatterns) {
-      // eslint-disable-next-line no-console
-      console.log('getDatasourceSuggestionsForField', draggedField);
       return isDraggedField(draggedField)
         ? getDatasourceSuggestionsForField(
             state,
