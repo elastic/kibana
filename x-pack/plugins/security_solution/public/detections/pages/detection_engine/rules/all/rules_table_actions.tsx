@@ -9,7 +9,7 @@ import type { DefaultItemAction } from '@elastic/eui';
 import { EuiToolTip } from '@elastic/eui';
 import React from 'react';
 import type { NavigateToAppOptions } from '@kbn/core/public';
-import { BulkAction } from '../../../../../../common/detection_engine/schemas/common/schemas';
+import { BulkAction } from '../../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema';
 import type { UseAppToasts } from '../../../../../common/hooks/use_app_toasts';
 import { canEditRuleWithActions } from '../../../../../common/utils/privileges';
 import type { Rule } from '../../../../containers/detection_engine/rules';

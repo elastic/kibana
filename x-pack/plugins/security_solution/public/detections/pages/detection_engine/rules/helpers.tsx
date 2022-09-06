@@ -361,14 +361,44 @@ export const redirectToDetections = (
   hasEncryptionKey === false ||
   needsListsConfiguration;
 
-const getRuleSpecificRuleParamKeys = (ruleType: Type) => {
-  const queryRuleParams = ['index', 'filters', 'language', 'query', 'saved_id'];
+const commonRuleParamsKeys = [
+  'id',
+  'name',
+  'description',
+  'false_positives',
+  'rule_id',
+  'max_signals',
+  'risk_score',
+  'output_index',
+  'references',
+  'severity',
+  'timeline_id',
+  'timeline_title',
+  'threat',
+  'type',
+  'version',
+];
+const queryRuleParams = ['index', 'filters', 'language', 'query', 'saved_id'];
+const machineLearningRuleParams = ['anomaly_threshold', 'machine_learning_job_id'];
+const thresholdRuleParams = ['threshold', ...queryRuleParams];
 
+const getAllRuleParamsKeys = (): string[] => {
+  const allRuleParamsKeys = [
+    ...commonRuleParamsKeys,
+    ...queryRuleParams,
+    ...machineLearningRuleParams,
+    ...thresholdRuleParams,
+  ].sort();
+
+  return Array.from(new Set<string>(allRuleParamsKeys));
+};
+
+const getRuleSpecificRuleParamKeys = (ruleType: Type) => {
   switch (ruleType) {
     case 'machine_learning':
-      return ['anomaly_threshold', 'machine_learning_job_id'];
+      return machineLearningRuleParams;
     case 'threshold':
-      return ['threshold', ...queryRuleParams];
+      return thresholdRuleParams;
     case 'new_terms':
     case 'threat_match':
     case 'query':
@@ -380,24 +410,6 @@ const getRuleSpecificRuleParamKeys = (ruleType: Type) => {
 };
 
 export const getActionMessageRuleParams = (ruleType: Type): string[] => {
-  const commonRuleParamsKeys = [
-    'id',
-    'name',
-    'description',
-    'false_positives',
-    'rule_id',
-    'max_signals',
-    'risk_score',
-    'output_index',
-    'references',
-    'severity',
-    'timeline_id',
-    'timeline_title',
-    'threat',
-    'type',
-    'version',
-  ];
-
   const ruleParamsKeys = [
     ...commonRuleParamsKeys,
     ...getRuleSpecificRuleParamKeys(ruleType),
@@ -406,12 +418,7 @@ export const getActionMessageRuleParams = (ruleType: Type): string[] => {
   return ruleParamsKeys;
 };
 
-export const getActionMessageParams = memoizeOne((ruleType: Type | undefined): ActionVariables => {
-  if (!ruleType) {
-    return { state: [], params: [] };
-  }
-  const actionMessageRuleParams = getActionMessageRuleParams(ruleType);
-  // Prefixes are being added automatically by the ActionTypeForm
+const transformRuleKeysToActionVariables = (actionMessageRuleParams: string[]): ActionVariables => {
   return {
     state: [{ name: 'signals_count', description: 'state.signals_count' }],
     params: [],
@@ -428,7 +435,22 @@ export const getActionMessageParams = memoizeOne((ruleType: Type | undefined): A
       }),
     ],
   };
+};
+
+export const getActionMessageParams = memoizeOne((ruleType: Type | undefined): ActionVariables => {
+  if (!ruleType) {
+    return { state: [], params: [] };
+  }
+  const actionMessageRuleParams = getActionMessageRuleParams(ruleType);
+
+  return transformRuleKeysToActionVariables(actionMessageRuleParams);
 });
+
+/**
+ * returns action variables available for all rule types
+ */
+export const getAllActionMessageParams = () =>
+  transformRuleKeysToActionVariables(getAllRuleParamsKeys());
 
 // typed as null not undefined as the initial state for this value is null.
 export const userHasPermissions = (canUserCRUD: boolean | null): boolean =>

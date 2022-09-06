@@ -27,7 +27,7 @@ import {
   buildNewTermsAgg,
 } from './build_new_terms_aggregation';
 import type { SignalSource } from '../../signals/types';
-import { validateImmutable, validateIndexPatterns } from '../utils';
+import { validateIndexPatterns } from '../utils';
 import { parseDateString, validateHistoryWindowStart } from './utils';
 import { addToSearchAfterReturn, createSearchAfterReturnType } from '../../signals/utils';
 
@@ -61,7 +61,6 @@ export const createNewTermsAlertType = (
          * @returns mutatedRuleParams
          */
         validateMutatedParams: (mutatedRuleParams) => {
-          validateImmutable(mutatedRuleParams.immutable);
           validateIndexPatterns(mutatedRuleParams.index);
 
           return mutatedRuleParams;
