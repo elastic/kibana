@@ -8,10 +8,13 @@
 
 import { run } from '@kbn/dev-cli-runner';
 // import { createFlagError, createFailError } from '@kbn/dev-cli-errors';
-import { getPrChanges } from '../../../.buildkite/pipeline-utils';
+// import { getPrChanges } from '../../../.buildkite/pipeline-utils';
 import { filter, from, switchMap } from 'rxjs';
+import { tap } from 'rxjs';
+import { map } from 'rxjs';
+import { pipe } from 'rxjs';
 import { pluck } from 'rxjs/operators';
-import { testDirectoryRegexes, isTest } from './helpers';
+import { regexify, isTest } from './helpers';
 import { findConfigFile } from './find_config_file';
 
 const flags = {
@@ -34,24 +37,26 @@ blah blah blah
 }
 
 async function process({ flags, log }) {
-  log.info('\n### Running runCheckOwnTestsRanCli()');
+  log.verbose('\n### Running runCheckOwnTestsRanCli()');
 
-  const isTestFromRoots = isTest(
-    testDirectoryRegexes('src/dev/own_tests_ran/test_roots.yml')
-  );
-
-  from(flags.mock ? mockData() : await getPrChanges())
+  // from(flags.mock ? mockData() : await getPrChanges())
+  from(mockData())
     .pipe(
       pluck('filename'),
-      filter(isTestFromRoots),
+      filter(isTest(regexify('src/dev/own_tests_ran/test_roots.yml'))),
+      // tap(x => console.log(`\n### x: \n  ${x}`)),
       switchMap(async (x) => await findConfigFile(x))
     )
     .subscribe({
-      next: (x) => console.log(`\n### Config: \n\t${x}`),
+      next: (x) => console.log(`\n### Config: \n${x}`),
+      // next: (x) => log.info(`\n### File: \n  ${pretty(x)}`),
       // next: noop,
-      error: (x) => console.error(`\n### x: \n\t${x}`),
-      complete: () => console.log('\n### Complete'),
+      error: (x) => console.error(`\n### x: \n${x}`),
+      complete: () => log.verbose('\n### Complete'),
     });
+}
+function pretty(x) {
+  return JSON.stringify(x, null, 2);
 }
 
 function mockData() {
@@ -60,8 +65,14 @@ function mockData() {
       filename: 'x-pack/test/functional/apps/discover/feature_controls/discover_spaces.ts',
     },
     {
+      filename: 'not/a/test/file/index.js',
+    },
+    {
       filename:
         'x-pack/test/functional/apps/advanced_settings/feature_controls/advanced_settings_security.ts',
+    },
+    {
+      filename: 'also_not_a_test.js',
     },
   ];
 }

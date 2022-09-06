@@ -16,7 +16,7 @@ async function* readDir(directory) {
 const isConfig = (x) => /.*config\.(ts|js)/.test(x);
 const directoryOf = (x) => dirname(x);
 
-// TODO-TRE: Use a back stop the test directory.
+// TODO-TRE: Use a back stop for the test directories or something!
 // TODO-TRE: Once it reaches the backstop, stop iterating.
 let count = 0;
 export const findConfigFile = async (filePath) => {

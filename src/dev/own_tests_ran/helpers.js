@@ -15,7 +15,7 @@ const resolveRoot = resolve.bind(null, REPO_ROOT);
 const testDirectories = (testRootsPath) =>
   yaml.load(readFileSync(resolveRoot(testRootsPath), 'utf8')).general;
 
-export const testDirectoryRegexes = (testRootsPath) =>
+export const regexify = (testRootsPath) =>
   testDirectories(testRootsPath).map((x) => new RegExp(x));
 
 export const isTest = (regexes) => (filePath) => regexes.some((re) => re.test(filePath));
