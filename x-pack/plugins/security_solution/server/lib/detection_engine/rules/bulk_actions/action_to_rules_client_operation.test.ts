@@ -41,4 +41,24 @@ describe('bulkEditActionToRulesClientOperation', () => {
       value: ['test'],
     },
   ]);
+
+  test('should transform schedule bulk edit correctly', () => {
+    expect(
+      bulkEditActionToRulesClientOperation({
+        type: BulkActionEditType.set_schedule,
+        value: {
+          interval: '100m',
+          meta: {
+            from: '10m',
+          },
+        },
+      })
+    ).toEqual([
+      {
+        field: 'schedule',
+        operation: 'set',
+        value: { interval: '100m' },
+      },
+    ]);
+  });
 });
