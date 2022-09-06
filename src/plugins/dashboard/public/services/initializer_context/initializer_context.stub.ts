@@ -7,15 +7,14 @@
  */
 
 import { PluginServiceFactory } from '@kbn/presentation-util-plugin/public';
-import { DashboardInitializerContextServiceType } from './types';
+import { DashboardInitializerContextService } from './types';
 
-const defaultDashboardInitializerContext: DashboardInitializerContextServiceType = {
+const defaultDashboardInitializerContext: DashboardInitializerContextService = {
   kibanaVersion: 'test.kibana.version',
   allowByValueEmbeddables: true,
 };
 
-type InitializerContextServiceFactory =
-  PluginServiceFactory<DashboardInitializerContextServiceType>;
+type InitializerContextServiceFactory = PluginServiceFactory<DashboardInitializerContextService>;
 
 export const initializerContextServiceFactory: InitializerContextServiceFactory = () => {
   return {

@@ -6,28 +6,26 @@
  * Side Public License, v 1.
  */
 
-import { PluginInitializerContext } from '@kbn/core/public';
 import { DashboardFeatureFlagConfig } from '../..';
 import { DashboardPluginServiceParams } from '../types';
-import { DashboardInitializerContextServiceType } from './types';
+import { DashboardInitializerContextService } from './types';
 
 export type InitializerContextServiceFactory = (
   params: DashboardPluginServiceParams
-) => DashboardInitializerContextServiceType;
-
-class InitializerContextService implements DashboardInitializerContextServiceType {
-  public kibanaVersion: string;
-  public allowByValueEmbeddables: boolean;
-
-  constructor(initializerContext: PluginInitializerContext) {
-    this.kibanaVersion = initializerContext.env.packageInfo.version;
-    this.allowByValueEmbeddables =
-      initializerContext.config.get<DashboardFeatureFlagConfig>().allowByValueEmbeddables;
-  }
-}
+) => DashboardInitializerContextService;
 
 export const initializerContextServiceFactory: InitializerContextServiceFactory = ({
   initContext,
 }) => {
-  return new InitializerContextService(initContext);
+  const {
+    env: {
+      packageInfo: { version },
+    },
+    config: { get },
+  } = initContext;
+
+  return {
+    kibanaVersion: version,
+    allowByValueEmbeddables: get<DashboardFeatureFlagConfig>().allowByValueEmbeddables,
+  };
 };
