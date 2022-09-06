@@ -306,9 +306,10 @@ export const DocViewerTable = ({
               {!isSingleDocView && (
                 <EuiTableRowCell
                   key={field + '-actions'}
-                  align="center"
-                  width={62}
-                  className="kbnDocViewer__tableActionsCell"
+                  align="left"
+                  // align="center"
+                  width={200}
+                  // className="kbnDocViewer__tableActionsCell"
                   textOnly={false}
                   mobileOptions={MOBILE_OPTIONS}
                 >
