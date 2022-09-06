@@ -18,6 +18,7 @@ import {
   CardinalityColumn,
   CountColumn,
   MaxColumn,
+  MedianColumn,
   MinColumn,
   SumColumn,
 } from '../../types';
@@ -29,6 +30,7 @@ type MetricAggregationWithoutParams =
   | typeof Operations.UNIQUE_COUNT
   | typeof Operations.COUNTER_RATE
   | typeof Operations.MAX
+  | typeof Operations.MEDIAN
   | typeof Operations.MIN
   | typeof Operations.SUM
   | typeof Operations.STANDARD_DEVIATION;
@@ -39,6 +41,7 @@ const SUPPORTED_METRICS_AGGS_WITHOUT_PARAMS: MetricAggregationWithoutParams[] = 
   Operations.UNIQUE_COUNT,
   Operations.MAX,
   Operations.MIN,
+  Operations.MEDIAN,
   Operations.SUM,
   Operations.STANDARD_DEVIATION,
 ];
@@ -48,6 +51,7 @@ export type MetricAggregationColumnWithoutSpecialParams =
   | CountColumn
   | CardinalityColumn
   | MaxColumn
+  | MedianColumn
   | MinColumn
   | SumColumn;
 
@@ -57,6 +61,7 @@ export type MetricsWithoutSpecialParams =
   | METRIC_TYPES.MAX
   | METRIC_TYPES.MIN
   | METRIC_TYPES.SUM
+  | METRIC_TYPES.MEDIAN
   | METRIC_TYPES.CARDINALITY
   | METRIC_TYPES.STD_DEV
   | METRIC_TYPES.VALUE_COUNT;

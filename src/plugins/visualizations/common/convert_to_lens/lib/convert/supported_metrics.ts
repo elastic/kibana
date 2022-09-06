@@ -31,6 +31,7 @@ export type Metric<T extends Operation | string> = { name: T } & AggOptions<T>;
 interface LocalSupportedMetrics {
   [METRIC_TYPES.AVG]: Metric<typeof Operations.AVERAGE>;
   [METRIC_TYPES.CARDINALITY]: Metric<typeof Operations.UNIQUE_COUNT>;
+  [METRIC_TYPES.MEDIAN]: Metric<typeof Operations.MEDIAN>;
   [METRIC_TYPES.COUNT]: Metric<typeof Operations.COUNT>;
   [METRIC_TYPES.DERIVATIVE]: Metric<typeof Operations.DIFFERENCES>;
   [METRIC_TYPES.CUMULATIVE_SUM]: Metric<typeof Operations.CUMULATIVE_SUM>;
@@ -153,6 +154,11 @@ export const SUPPORTED_METRICS: SupportedMetrics = {
   },
   std_dev: {
     name: 'standard_deviation',
+    isFullReference: false,
+    isFieldRequired: true,
+  },
+  median: {
+    name: 'median',
     isFullReference: false,
     isFieldRequired: true,
   },

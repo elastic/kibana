@@ -42,6 +42,7 @@ export const convertMetricToColumns = <T extends METRIC_TYPES | BUCKET_TYPES>(
     case METRIC_TYPES.COUNT:
     case METRIC_TYPES.CARDINALITY:
     case METRIC_TYPES.VALUE_COUNT:
+    case METRIC_TYPES.MEDIAN:
     case METRIC_TYPES.STD_DEV: {
       const columns = convertMetricAggregationColumnWithoutSpecialParams(supportedAgg, {
         agg: agg as SchemaConfig<MetricsWithoutSpecialParams>,
