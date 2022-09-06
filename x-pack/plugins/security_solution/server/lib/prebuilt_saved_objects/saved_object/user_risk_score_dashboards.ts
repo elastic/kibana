@@ -46,7 +46,7 @@ export const userRiskScoreDashboards: SavedObject[] = [
                     operationType: 'sum',
                     params: { emptyAsNull: true },
                     scale: 'ratio',
-                    sourceField: 'risk_stats.risk_score',
+                    sourceField: 'user.risk.calculated_score_norm',
                   },
                   'ba672ee7-0990-4277-9bc7-6361077efe18': {
                     customLabel: true,
@@ -74,7 +74,7 @@ export const userRiskScoreDashboards: SavedObject[] = [
                     operationType: 'last_value',
                     params: { sortField: '@timestamp' },
                     scale: 'ordinal',
-                    sourceField: 'risk.keyword',
+                    sourceField: 'user.risk.calculated_level',
                   },
                 },
                 incompleteColumns: {},
@@ -167,7 +167,7 @@ export const userRiskScoreDashboards: SavedObject[] = [
                     operationType: 'max',
                     params: { emptyAsNull: true },
                     scale: 'ratio',
-                    sourceField: 'risk_stats.risk_score',
+                    sourceField: 'user.risk.calculated_score_norm',
                   },
                   'e82aed80-ee04-4ad1-9b9d-fde4a25be58a': {
                     dataType: 'date',
@@ -230,11 +230,11 @@ export const userRiskScoreDashboards: SavedObject[] = [
       fields: '[]',
       runtimeFieldMap: '{}',
       timeFieldName: '@timestamp',
-      title: '.siem-signals-<REPLACE-WITH-SPACE>',
+      title: '.alerts-security.alerts-<REPLACE-WITH-SPACE>',
       typeMeta: '{}',
     },
     coreMigrationVersion: '8.3.0',
-    id: 'siem-signals-<REPLACE-WITH-SPACE>-index-pattern',
+    id: 'alerts-<REPLACE-WITH-SPACE>-index-pattern',
     migrationVersion: { 'index-pattern': '8.0.0' },
     references: [],
     type: 'index-pattern',
@@ -259,7 +259,7 @@ export const userRiskScoreDashboards: SavedObject[] = [
     migrationVersion: { visualization: '8.3.0' },
     references: [
       {
-        id: 'siem-signals-<REPLACE-WITH-SPACE>-index-pattern',
+        id: 'alerts-<REPLACE-WITH-SPACE>-index-pattern',
         name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
         type: 'index-pattern',
       },
@@ -286,7 +286,7 @@ export const userRiskScoreDashboards: SavedObject[] = [
     migrationVersion: { visualization: '8.3.0' },
     references: [
       {
-        id: 'siem-signals-<REPLACE-WITH-SPACE>-index-pattern',
+        id: 'alerts-<REPLACE-WITH-SPACE>-index-pattern',
         name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
         type: 'index-pattern',
       },
@@ -313,7 +313,7 @@ export const userRiskScoreDashboards: SavedObject[] = [
     migrationVersion: { visualization: '8.3.0' },
     references: [
       {
-        id: 'siem-signals-<REPLACE-WITH-SPACE>-index-pattern',
+        id: 'alerts-<REPLACE-WITH-SPACE>-index-pattern',
         name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
         type: 'index-pattern',
       },
