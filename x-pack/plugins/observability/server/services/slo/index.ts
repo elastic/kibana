@@ -6,3 +6,4 @@
  */
 
 export * from './resource_installer';
+export * from './slo_repository';
