@@ -232,7 +232,7 @@ export const useTimelineEvents = ({
         prevTimelineRequest.current = request;
         abortCtrl.current = new AbortController();
         setLoading(true);
-        console.log({data, request});
+        console.log({ data, request });
         if (data && data.search) {
           const { endTracking } = startTracking();
           const abortSignal = abortCtrl.current.signal;
