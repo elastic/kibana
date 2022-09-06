@@ -69,5 +69,6 @@ export interface SchemaConfig<Agg extends SupportedAggregation = SupportedAggreg
   format: SerializedFieldFormat;
   params: SchemaConfigParams;
   aggType: Agg;
+  aggId?: string;
   aggParams?: AggParamsMapping[Agg];
 }

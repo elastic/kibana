@@ -29,7 +29,7 @@ export interface FilterQuery {
 
 export interface Filter {
   input: FilterQuery;
-  label: string;
+  label?: string;
 }
 
 export interface Range {

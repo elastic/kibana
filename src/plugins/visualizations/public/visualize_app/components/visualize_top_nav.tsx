@@ -107,7 +107,7 @@ const TopNav = ({
       }
     };
     asyncGetTriggerContext();
-  }, [services.data.query.timefilter.timefilter, vis, vis.type, vis.params]);
+  }, [services.data.query.timefilter.timefilter, vis, vis.type, vis.params, vis.data.indexPattern]);
 
   const displayEditInLensItem = Boolean(vis.type.navigateToLens && editInLensConfig);
   const config = useMemo(() => {

@@ -10,6 +10,7 @@ import { IAggConfig, METRIC_TYPES } from '@kbn/data-plugin/common';
 import { SchemaConfig } from '../../..';
 import { Operations } from '../../constants';
 import { getFormulaFromMetric, SUPPORTED_METRICS } from '../convert/supported_metrics';
+import { isSchemaConfig } from '../utils';
 
 export const addTimeRangeToFormula = (reducedTimeRange?: string) => {
   return reducedTimeRange ? `, reducedTimeRange='${reducedTimeRange}'` : '';
@@ -79,13 +80,6 @@ const getFormulaForSubMetric = (agg: IAggConfig, reducedTimeRange?: string): str
   }
 
   return null;
-};
-
-const isSchemaConfig = (agg: SchemaConfig | IAggConfig): agg is SchemaConfig => {
-  if ((agg as SchemaConfig).aggType) {
-    return true;
-  }
-  return false;
 };
 
 export const getFormulaForPipelineAgg = (
