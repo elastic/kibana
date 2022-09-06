@@ -471,7 +471,10 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
         showQueryInput={this.props.showQueryInput}
         showFilterBar={this.props.showFilterBar}
         showSaveQuery={this.props.showSaveQuery}
-        buttonProps={{ size: this.shouldShowDatePickerAsBadge() ? 's' : 'm' }}
+        buttonProps={{
+          size: this.shouldShowDatePickerAsBadge() ? 's' : 'm',
+          disabled: this.props.isDisabled,
+        }}
         indexPatterns={this.props.indexPatterns}
         timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
         manageFilterSetComponent={
@@ -505,7 +508,7 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
           timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
           hiddenPanelOptions={this.props.hiddenFilterPanelOptions}
           data-test-subj="unifiedFilterBar"
-          readOnly={this.props.isDisabled ?? false}
+          readOnly={this.props.isDisabled}
         />
       );
     }

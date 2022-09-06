@@ -46,7 +46,7 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
       tabIndex={-1}
     >
       <FilterItems
-        readOnly={props.readOnly || false}
+        readOnly={props.readOnly}
         filters={props.filters!}
         onFiltersUpdated={props.onFiltersUpdated}
         indexPatterns={props.indexPatterns!}

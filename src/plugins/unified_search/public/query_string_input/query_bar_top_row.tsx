@@ -467,7 +467,11 @@ export const QueryBarTopRow = React.memo(
               filters={props.filters}
               timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
               onFiltersUpdated={props.onFiltersUpdated}
-              buttonProps={{ size: shouldShowDatePickerAsBadge() ? 's' : 'm', display: 'empty' }}
+              buttonProps={{
+                size: shouldShowDatePickerAsBadge() ? 's' : 'm',
+                display: 'empty',
+                disabled: props.isDisabled,
+              }}
             />
           </EuiFlexItem>
         )
