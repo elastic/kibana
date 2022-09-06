@@ -6,10 +6,42 @@
  */
 
 const basePath = '/app/apm/settings/custom-links';
+const deleteAllCustomLinks = () => {
+  // delete customLink if exists
+  const kibanaUrl = Cypress.env('KIBANA_URL');
+  cy.request({
+    log: false,
+    method: 'GET',
+    url: `${kibanaUrl}/internal/apm/settings/custom_links`,
+    body: {},
+    headers: {
+      'kbn-xsrf': 'e2e_test',
+    },
+    auth: { user: 'editor', pass: 'changeme' },
+  }).then((response) => {
+    const promises = response.body.customLinks.map((item: any) => {
+      if (item.id) {
+        return cy.request({
+          log: false,
+          method: 'DELETE',
+          url: `${kibanaUrl}/internal/apm/settings/custom_links/${item.id}`,
+          body: {},
+          headers: {
+            'kbn-xsrf': 'e2e_test',
+          },
+          auth: { user: 'editor', pass: 'changeme' },
+          failOnStatusCode: false,
+        });
+      }
+    });
+    return Promise.all(promises);
+  });
+};
 
 describe('Custom links', () => {
   beforeEach(() => {
     cy.loginAsEditorUser();
+    deleteAllCustomLinks();
   });
 
   it('shows empty message and create button', () => {
