@@ -95,9 +95,9 @@ async function getMainServiceStatistics({
                 },
                 aggs: {
                   sample: {
-                    top_hits: {
+                    top_metrics: {
                       size: 1,
-                      _source: [AGENT_NAME],
+                      metrics: { field: AGENT_NAME },
                       sort: {
                         '@timestamp': 'desc',
                       },
@@ -166,7 +166,7 @@ async function getMainServiceStatistics({
         sampledTransactionDocs:
           bucket.transactions.sampled_transactions.buckets[0]?.doc_count,
         size: estimatedSize,
-        agentName: bucket.sample.hits.hits[0]?._source.agent.name as AgentName,
+        agentName: bucket.sample.top[0]?.metrics[AGENT_NAME] as AgentName,
       };
     }
   );
