@@ -35,6 +35,27 @@ export interface StartTransforms {
   transformIds: string[];
 }
 
+export interface StopTransforms {
+  http: HttpSetup;
+  signal?: AbortSignal;
+  spaceId?: string;
+  transformIds: string[];
+}
+
+export interface GetTransformState {
+  http: HttpSetup;
+  signal?: AbortSignal;
+  spaceId?: string;
+  transformId: string;
+}
+
+export interface RestartTransforms {
+  http: HttpSetup;
+  signal?: AbortSignal;
+  spaceId?: string;
+  transformIds: string[];
+}
+
 export async function createIngestPipeline({
   http,
   signal,
@@ -86,6 +107,70 @@ export async function startTransforms({
       }))
     ),
     signal,
+  });
+
+  return res;
+}
+
+export async function getTransformState({
+  http,
+  signal,
+  spaceId = 'default',
+  transformId,
+}: GetTransformState) {
+  const res = await http.get(`/api/transform/transforms/${transformId}/_stats`, {
+    signal,
+  });
+
+  return res;
+}
+
+export async function stopTransforms({
+  http,
+  signal,
+  spaceId = 'default',
+  transformIds,
+}: StopTransforms) {
+  transformIds.map(async (transformId) => {
+    const { id, state } = await getTransformState({
+      http,
+      signal,
+      spaceId,
+      transformId,
+    });
+    return { id, state };
+  });
+  const res = await http.post(`/api/transform/start_transforms`, {
+    body: JSON.stringify(
+      transformIds.map((id) => ({
+        id,
+        state,
+      }))
+    ),
+    signal,
+  });
+
+  return res;
+}
+
+export async function restartTransforms({
+  http,
+  signal,
+  spaceId = 'default',
+  transformIds,
+}: RestartTransforms) {
+  await stopTransforms({
+    http,
+    signal,
+    spaceId,
+    transformIds,
+  });
+
+  const res = await startTransforms({
+    http,
+    signal,
+    spaceId,
+    transformIds,
   });
 
   return res;
