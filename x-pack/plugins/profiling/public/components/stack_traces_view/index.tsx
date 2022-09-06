@@ -52,7 +52,7 @@ export function StackTracesView() {
 
   const state = useTimeRangeAsync(() => {
     if (!topNType) {
-      return Promise.resolve({ charts: [] });
+      return Promise.resolve({ charts: [], metadata: {} });
     }
     return fetchTopN({
       type: topNType,
@@ -62,8 +62,10 @@ export function StackTracesView() {
     }).then((response: TopNResponse) => {
       const totalCount = response.TotalCount;
       const samples = response.TopN;
-      const charts = groupSamplesByCategory(samples, totalCount);
-      return { charts };
+      const charts = groupSamplesByCategory({ samples, totalCount, metadata: response.Metadata });
+      return {
+        charts,
+      };
     });
   }, [topNType, timeRange.start, timeRange.end, fetchTopN, kuery]);
 

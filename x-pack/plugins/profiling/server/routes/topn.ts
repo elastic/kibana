@@ -12,7 +12,7 @@ import { fromMapToRecord, getRoutePaths, INDEX_EVENTS } from '../../common';
 import { ProfilingESField } from '../../common/elasticsearch';
 import { groupStackFrameMetadataByStackTrace, StackTraceID } from '../../common/profiling';
 import { getFieldNameForTopNType, TopNType } from '../../common/stack_traces';
-import { createTopNSamples, getTopNAggregationRequest } from '../../common/topn';
+import { createTopNSamples, getTopNAggregationRequest, TopNResponse } from '../../common/topn';
 import { ProfilingRequestHandlerContext } from '../types';
 import { createProfilingEsClient, ProfilingESClient } from '../utils/create_profiling_es_client';
 import { withProfilingSpan } from '../utils/with_profiling_span';
@@ -39,7 +39,7 @@ export async function topNElasticSearchQuery({
   highCardinality: boolean;
   response: KibanaResponseFactory;
   kuery: string;
-}) {
+}): Promise<TopNResponse> {
   const filter = createCommonFilter({ timeFrom, timeTo, kuery });
   const targetSampleSize = 20000; // minimum number of samples to get statistically sound results
   const fixedInterval = findFixedIntervalForBucketsPerTimeRange(timeFrom, timeTo, 50);
@@ -69,13 +69,11 @@ export async function topNElasticSearchQuery({
   const { aggregations } = resEvents;
 
   if (!aggregations) {
-    return response.ok({
-      body: {
-        TotalCount: 0,
-        TopN: [],
-        Metadata: {},
-      },
-    });
+    return {
+      TotalCount: 0,
+      TopN: [],
+      Metadata: {},
+    };
   }
 
   const topN = createTopNSamples(aggregations);
@@ -85,9 +83,11 @@ export async function topNElasticSearchQuery({
   logger.info('total sampled stacktraces: ' + totalSampledStackTraces);
 
   if (searchField !== ProfilingESField.StacktraceID) {
-    return response.ok({
-      body: { TotalCount: totalSampledStackTraces, TopN: topN, Metadata: {} },
-    });
+    return {
+      TotalCount: totalSampledStackTraces,
+      TopN: topN,
+      Metadata: {},
+    };
   }
 
   const stackTraceEvents = new Map<StackTraceID, number>();
@@ -128,13 +128,11 @@ export async function topNElasticSearchQuery({
 
   logger.info('returning payload response to client');
 
-  return response.ok({
-    body: {
-      TotalCount: totalSampledStackTraces,
-      TopN: topN,
-      Metadata: metadata,
-    },
-  });
+  return {
+    TotalCount: totalSampledStackTraces,
+    TopN: topN,
+    Metadata: metadata,
+  };
 }
 
 export function queryTopNCommon(
@@ -160,15 +158,17 @@ export function queryTopNCommon(
       const client = await getClient(context);
 
       try {
-        return await topNElasticSearchQuery({
-          client: createProfilingEsClient({ request, esClient: client }),
-          logger,
-          timeFrom,
-          timeTo,
-          searchField,
-          highCardinality,
-          response,
-          kuery,
+        return response.ok({
+          body: await topNElasticSearchQuery({
+            client: createProfilingEsClient({ request, esClient: client }),
+            logger,
+            timeFrom,
+            timeTo,
+            searchField,
+            highCardinality,
+            response,
+            kuery,
+          }),
         });
       } catch (e) {
         logger.error(e);

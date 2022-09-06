@@ -39,6 +39,8 @@ function SubchartTooltip({
         category={highlightedSubchart.Category}
         percentage={highlightedSubchart.Percentage}
         data={highlightedSubchart.Series}
+        /* we don't show metadata in tooltips */
+        metadata={[]}
         height={128}
         width={width}
         showAxes={false}

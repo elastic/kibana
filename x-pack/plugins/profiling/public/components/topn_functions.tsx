@@ -20,7 +20,8 @@ import { i18n } from '@kbn/i18n';
 import { keyBy, orderBy } from 'lodash';
 import React, { useMemo } from 'react';
 import { TopNFunctions, TopNFunctionSortField } from '../../common/functions';
-import { getCalleeFunction, getCalleeSource, StackFrameMetadata } from '../../common/profiling';
+import { getCalleeFunction, StackFrameMetadata } from '../../common/profiling';
+import { StackFrameSummary } from './stack_frame_summary';
 
 interface Row {
   rank: number;
@@ -135,20 +136,7 @@ export const TopNFunctionsTable = ({
         defaultMessage: 'Function',
       }),
       width: '100%',
-      render: (_, { frame }) => (
-        <EuiFlexGroup direction="column" gutterSize="xs">
-          <EuiFlexItem>
-            <div>
-              <EuiText size="s" style={{ fontWeight: 'bold' }}>
-                {getCalleeFunction(frame)}
-              </EuiText>
-            </div>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiText size="s">{getCalleeSource(frame) || '‎'}</EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      ),
+      render: (_, { frame }) => <StackFrameSummary frame={frame} />,
     },
     {
       field: TopNFunctionSortField.Samples,
