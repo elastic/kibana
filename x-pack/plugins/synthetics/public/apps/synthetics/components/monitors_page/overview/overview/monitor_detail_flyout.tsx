@@ -199,6 +199,12 @@ export function MonitorDetailFlyout(props: Props) {
                     'monitor.id': [id],
                     'observer.geo.name': [location],
                   },
+                  filters: [
+                    {
+                      field: 'observer.geo.name',
+                      values: [location],
+                    },
+                  ],
                   dataType: 'synthetics',
                   selectedMetricField: 'monitor.duration.us',
                   name: 'All monitors response duration',
@@ -214,6 +220,12 @@ export function MonitorDetailFlyout(props: Props) {
                     'monitor.id': [id],
                     'observer.geo.name': [location],
                   },
+                  filters: [
+                    {
+                      field: 'observer.geo.name',
+                      values: [location],
+                    },
+                  ],
                   dataType: 'synthetics',
                   selectedMetricField: 'monitor.duration.us',
                   name: 'Previous period',

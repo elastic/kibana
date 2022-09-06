@@ -23,7 +23,7 @@ export const useMonitorDetail = (
           filter: [
             {
               term: {
-                'monitor.id': monitorId,
+                config_id: monitorId,
               },
             },
             {
