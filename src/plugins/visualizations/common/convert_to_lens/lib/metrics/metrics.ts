@@ -24,6 +24,7 @@ import { Column } from '../../types';
 import { getValidColumns } from '../utils';
 import { convertToSiblingPipelineColumns } from '../convert/sibling_pipeline';
 import { SiblingPipelineMetric } from '../convert/types';
+import { convertToStdDeviationFormulaColumns } from '../convert/std_deviation';
 
 export const convertMetricToColumns = <T extends METRIC_TYPES | BUCKET_TYPES>(
   agg: SchemaConfig<T>,
@@ -42,10 +43,16 @@ export const convertMetricToColumns = <T extends METRIC_TYPES | BUCKET_TYPES>(
     case METRIC_TYPES.COUNT:
     case METRIC_TYPES.CARDINALITY:
     case METRIC_TYPES.VALUE_COUNT:
-    case METRIC_TYPES.MEDIAN:
-    case METRIC_TYPES.STD_DEV: {
+    case METRIC_TYPES.MEDIAN: {
       const columns = convertMetricAggregationColumnWithoutSpecialParams(supportedAgg, {
         agg: agg as SchemaConfig<MetricsWithoutSpecialParams>,
+        dataView,
+      });
+      return getValidColumns(columns);
+    }
+    case METRIC_TYPES.STD_DEV: {
+      const columns = convertToStdDeviationFormulaColumns({
+        agg: agg as SchemaConfig<METRIC_TYPES.STD_DEV>,
         dataView,
       });
       return getValidColumns(columns);
