@@ -2,18 +2,17 @@ load("@npm//@bazel/typescript:index.bzl", "ts_config")
 load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
 load("//src/dev/bazel:index.bzl", "jsts_transpiler", "pkg_npm", "pkg_npm_types", "ts_project")
 
-PKG_DIRNAME = "impl"
+PKG_DIRNAME = "shared-ux-router"
 PKG_REQUIRE_NAME = "@kbn/shared-ux-router"
 
 SOURCE_FILES = glob(
   [
-    "src/**/*.ts",
-    "src/**/*.tsx",
-    "src/**/*.mdx"
+    "**/*.ts",
+    "**/*.tsx",
+    "**/*.mdx"
   ],
   exclude = [
     "**/*.test.*",
-    "**/*.stories.*",
   ],
 )
 
@@ -72,14 +71,12 @@ jsts_transpiler(
   name = "target_node",
   srcs = SRCS,
   build_pkg_name = package_name(),
-  root_input_dir = "src",
 )
 
 jsts_transpiler(
   name = "target_web",
   srcs = SRCS,
   build_pkg_name = package_name(),
-  root_input_dir = "src",
   web = True,
   additional_args = [
     "--copy-files",
@@ -105,7 +102,6 @@ ts_project(
   declaration_map = True,
   emit_declaration_only = True,
   out_dir = "target_types",
-  root_dir = "src",
   tsconfig = ":tsconfig",
 )
 
