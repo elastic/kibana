@@ -115,6 +115,7 @@ const defaultEsQueryExpressionParams: EsQueryAlertParams<SearchType.esQuery> = {
   index: ['test-index'],
   timeField: '@timestamp',
   esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
+  excludeHitsFromPreviousRun: true,
 };
 
 describe('EsQueryAlertTypeExpression', () => {
@@ -180,6 +181,12 @@ describe('EsQueryAlertTypeExpression', () => {
     expect(wrapper.find('[data-test-subj="testQueryError"]').exists()).toBeFalsy();
     expect(wrapper.find('[data-test-subj="thresholdExpression"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="forLastExpression"]').exists()).toBeTruthy();
+
+    const excludeHitsButton = wrapper.find(
+      '[data-test-subj="excludeHitsFromPreviousRunExpression"]'
+    );
+    expect(excludeHitsButton.exists()).toBeTruthy();
+    expect(excludeHitsButton.first().prop('checked')).toBeTruthy();
 
     const testQueryButton = wrapper.find('EuiButton[data-test-subj="testQuery"]');
     expect(testQueryButton.exists()).toBeTruthy();
