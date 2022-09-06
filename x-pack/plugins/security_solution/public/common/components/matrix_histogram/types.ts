@@ -15,7 +15,6 @@ import type { InputsModelId } from '../../store/inputs/constants';
 import type { MatrixHistogramType } from '../../../../common/search_strategy/security_solution';
 import type { UpdateDateRange } from '../charts/common';
 import type { GlobalTimeArgs } from '../../containers/use_global_time';
-import type { DocValueFields } from '../../../../common/search_strategy';
 import type { FieldValueThreshold } from '../../../detections/components/rules/threshold_input';
 import type { GetLensAttributes, LensAttributes } from '../visualization_actions/types';
 
@@ -66,7 +65,6 @@ interface MatrixHistogramBasicProps {
 }
 
 export interface MatrixHistogramQueryProps {
-  docValueFields?: DocValueFields[];
   endDate: string;
   errorMessage: string;
   indexNames: string[];

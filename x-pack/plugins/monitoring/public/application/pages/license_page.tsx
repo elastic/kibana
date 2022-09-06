@@ -13,7 +13,7 @@ import { PageTemplate } from './page_template';
 import { License } from '../../components';
 import { GlobalStateContext } from '../contexts/global_state_context';
 import { CODE_PATH_LICENSE, STANDALONE_CLUSTER_CLUSTER_UUID } from '../../../common/constants';
-import { MonitoringTimeContainer } from '../hooks/use_monitoring_time';
+import { useMonitoringTimeContainerContext } from '../hooks/use_monitoring_time';
 
 const CODE_PATHS = [CODE_PATH_LICENSE];
 
@@ -22,7 +22,7 @@ export const LicensePage: React.FC<{}> = () => {
     defaultMessage: 'License',
   });
 
-  const { setIsDisabled } = useContext(MonitoringTimeContainer.Context);
+  const { setIsDisabled } = useMonitoringTimeContainerContext();
   useEffect(() => {
     setIsDisabled(true);
     return () => {

@@ -47,23 +47,24 @@ export async function generateAgent(
 
   switch (status) {
     case 'error':
-      data = { last_checkin_status: 'error' };
+      data = { policy_revision_idx: 1, last_checkin_status: 'error' };
       break;
     case 'degraded':
-      data = { last_checkin_status: 'degraded' };
+      data = { policy_revision_idx: 1, last_checkin_status: 'degraded' };
       break;
     case 'offline':
-      data = { last_checkin: '2017-06-07T18:59:04.498Z' };
+      data = { policy_revision_idx: 1, last_checkin: '2017-06-07T18:59:04.498Z' };
       break;
     // Agent with last checkin status as error and currently unenrolling => should displayd updating status
     case 'error-unenrolling':
       data = {
+        policy_revision_idx: 1,
         last_checkin_status: 'error',
         unenrollment_started_at: '2017-06-07T18:59:04.498Z',
       };
       break;
     default:
-      data = { last_checkin: new Date().toISOString() };
+      data = { policy_revision_idx: 1, last_checkin: new Date().toISOString() };
   }
 
   await es.index({

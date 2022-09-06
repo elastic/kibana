@@ -9,10 +9,18 @@
     "objects": []
   },
   "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
     "classes": [
       {
         "parentPluginId": "@kbn/shared-ux-storybook-mock",
-        "id": "def-server.AbstractStorybookMock",
+        "id": "def-common.AbstractStorybookMock",
         "type": "Class",
         "tags": [],
         "label": "AbstractStorybookMock",
@@ -22,9 +30,9 @@
         "signature": [
           {
             "pluginId": "@kbn/shared-ux-storybook-mock",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnSharedUxStorybookMockPluginApi",
-            "section": "def-server.AbstractStorybookMock",
+            "section": "def-common.AbstractStorybookMock",
             "text": "AbstractStorybookMock"
           },
           "<Props, Services, PropArguments, ServiceArguments>"
@@ -34,7 +42,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/shared-ux-storybook-mock",
-            "id": "def-server.AbstractStorybookMock.propArguments",
+            "id": "def-common.AbstractStorybookMock.propArguments",
             "type": "Object",
             "tags": [],
             "label": "propArguments",
@@ -51,7 +59,7 @@
           },
           {
             "parentPluginId": "@kbn/shared-ux-storybook-mock",
-            "id": "def-server.AbstractStorybookMock.serviceArguments",
+            "id": "def-common.AbstractStorybookMock.serviceArguments",
             "type": "Object",
             "tags": [],
             "label": "serviceArguments",
@@ -68,7 +76,7 @@
           },
           {
             "parentPluginId": "@kbn/shared-ux-storybook-mock",
-            "id": "def-server.AbstractStorybookMock.dependencies",
+            "id": "def-common.AbstractStorybookMock.dependencies",
             "type": "Array",
             "tags": [],
             "label": "dependencies",
@@ -78,9 +86,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/shared-ux-storybook-mock",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnSharedUxStorybookMockPluginApi",
-                "section": "def-server.AbstractStorybookMock",
+                "section": "def-common.AbstractStorybookMock",
                 "text": "AbstractStorybookMock"
               },
               "<",
@@ -92,7 +100,7 @@
           },
           {
             "parentPluginId": "@kbn/shared-ux-storybook-mock",
-            "id": "def-server.AbstractStorybookMock.getPropArgumentTypes",
+            "id": "def-common.AbstractStorybookMock.getPropArgumentTypes",
             "type": "Function",
             "tags": [],
             "label": "getPropArgumentTypes",
@@ -111,7 +119,7 @@
           },
           {
             "parentPluginId": "@kbn/shared-ux-storybook-mock",
-            "id": "def-server.AbstractStorybookMock.getServiceArgumentTypes",
+            "id": "def-common.AbstractStorybookMock.getServiceArgumentTypes",
             "type": "Function",
             "tags": [],
             "label": "getServiceArgumentTypes",
@@ -134,7 +142,7 @@
           },
           {
             "parentPluginId": "@kbn/shared-ux-storybook-mock",
-            "id": "def-server.AbstractStorybookMock.getArgumentTypes",
+            "id": "def-common.AbstractStorybookMock.getArgumentTypes",
             "type": "Function",
             "tags": [],
             "label": "getArgumentTypes",
@@ -159,7 +167,7 @@
           },
           {
             "parentPluginId": "@kbn/shared-ux-storybook-mock",
-            "id": "def-server.AbstractStorybookMock.getArgumentValue",
+            "id": "def-common.AbstractStorybookMock.getArgumentValue",
             "type": "Function",
             "tags": [],
             "label": "getArgumentValue",
@@ -176,7 +184,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/shared-ux-storybook-mock",
-                "id": "def-server.AbstractStorybookMock.getArgumentValue.$1",
+                "id": "def-common.AbstractStorybookMock.getArgumentValue.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "arg",
@@ -190,7 +198,7 @@
               },
               {
                 "parentPluginId": "@kbn/shared-ux-storybook-mock",
-                "id": "def-server.AbstractStorybookMock.getArgumentValue.$2",
+                "id": "def-common.AbstractStorybookMock.getArgumentValue.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "params",
@@ -208,7 +216,7 @@
           },
           {
             "parentPluginId": "@kbn/shared-ux-storybook-mock",
-            "id": "def-server.AbstractStorybookMock.getProps",
+            "id": "def-common.AbstractStorybookMock.getProps",
             "type": "Function",
             "tags": [],
             "label": "getProps",
@@ -225,7 +233,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/shared-ux-storybook-mock",
-                "id": "def-server.AbstractStorybookMock.getProps.$1",
+                "id": "def-common.AbstractStorybookMock.getProps.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "params",
@@ -243,7 +251,7 @@
           },
           {
             "parentPluginId": "@kbn/shared-ux-storybook-mock",
-            "id": "def-server.AbstractStorybookMock.getServices",
+            "id": "def-common.AbstractStorybookMock.getServices",
             "type": "Function",
             "tags": [],
             "label": "getServices",
@@ -260,7 +268,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/shared-ux-storybook-mock",
-                "id": "def-server.AbstractStorybookMock.getServices.$1",
+                "id": "def-common.AbstractStorybookMock.getServices.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "params",
@@ -280,14 +288,6 @@
         "initialIsOpen": false
       }
     ],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
     "functions": [],
     "interfaces": [],
     "enums": [],

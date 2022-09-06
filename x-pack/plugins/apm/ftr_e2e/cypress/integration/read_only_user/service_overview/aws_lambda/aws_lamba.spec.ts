@@ -23,8 +23,8 @@ const apiToIntercept = {
 };
 
 describe('Service overview - aws lambda', () => {
-  before(async () => {
-    await synthtrace.index(
+  before(() => {
+    synthtrace.index(
       generateData({
         start: new Date(start).getTime(),
         end: new Date(end).getTime(),
@@ -32,19 +32,16 @@ describe('Service overview - aws lambda', () => {
     );
   });
 
-  after(async () => {
-    await synthtrace.clean();
-  });
-
-  beforeEach(() => {
-    cy.loginAsViewerUser();
+  after(() => {
+    synthtrace.clean();
   });
 
   it('displays a cold start rate chart and not a transaction breakdown chart', () => {
     const { endpoint, name } = apiToIntercept;
-
     cy.intercept('GET', endpoint).as(name);
-    cy.visit(serviceOverviewHref);
+
+    cy.loginAsViewerUser();
+    cy.visitKibana(serviceOverviewHref);
     cy.wait(`@${name}`);
 
     cy.contains('Cold start rate');

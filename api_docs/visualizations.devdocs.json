@@ -99,6 +99,14 @@
                 "section": "def-common.VisParams",
                 "text": "VisParams"
               },
+              " | undefined, timeRange?: ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataQueryPluginApi",
+                "section": "def-common.TimeRange",
+                "text": "TimeRange"
+              },
               " | undefined) => Promise<",
               {
                 "pluginId": "visualizations",
@@ -1157,6 +1165,694 @@
           }
         ],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
+        "id": "def-public.VisualizeEmbeddable",
+        "type": "Class",
+        "tags": [],
+        "label": "VisualizeEmbeddable",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "visualizations",
+            "scope": "public",
+            "docId": "kibVisualizationsPluginApi",
+            "section": "def-public.VisualizeEmbeddable",
+            "text": "VisualizeEmbeddable"
+          },
+          " extends ",
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.Embeddable",
+            "text": "Embeddable"
+          },
+          "<",
+          {
+            "pluginId": "visualizations",
+            "scope": "public",
+            "docId": "kibVisualizationsPluginApi",
+            "section": "def-public.VisualizeInput",
+            "text": "VisualizeInput"
+          },
+          ", ",
+          "VisualizeOutput",
+          "> implements ",
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.ReferenceOrValueEmbeddable",
+            "text": "ReferenceOrValueEmbeddable"
+          },
+          "<",
+          "VisualizeByValueInput",
+          ", ",
+          "VisualizeByReferenceInput",
+          ">,",
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.FilterableEmbeddable",
+            "text": "FilterableEmbeddable"
+          }
+        ],
+        "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-public.VisualizeEmbeddable.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"visualization\""
+            ],
+            "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-public.VisualizeEmbeddable.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "visualizations",
+                "id": "def-public.VisualizeEmbeddable.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "timefilter",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "data",
+                    "scope": "public",
+                    "docId": "kibDataQueryPluginApi",
+                    "section": "def-public.TimefilterContract",
+                    "text": "TimefilterContract"
+                  }
+                ],
+                "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "visualizations",
+                "id": "def-public.VisualizeEmbeddable.Unnamed.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "{ vis, editPath, editUrl, indexPatterns, deps, capabilities }",
+                "description": [],
+                "signature": [
+                  "VisualizeEmbeddableConfiguration"
+                ],
+                "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "visualizations",
+                "id": "def-public.VisualizeEmbeddable.Unnamed.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "initialInput",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "visualizations",
+                    "scope": "public",
+                    "docId": "kibVisualizationsPluginApi",
+                    "section": "def-public.VisualizeInput",
+                    "text": "VisualizeInput"
+                  }
+                ],
+                "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "visualizations",
+                "id": "def-public.VisualizeEmbeddable.Unnamed.$4",
+                "type": "Object",
+                "tags": [],
+                "label": "attributeService",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "embeddable",
+                    "scope": "public",
+                    "docId": "kibEmbeddablePluginApi",
+                    "section": "def-public.AttributeService",
+                    "text": "AttributeService"
+                  },
+                  "<",
+                  "VisualizeSavedObjectAttributes",
+                  ", ",
+                  "VisualizeByValueInput",
+                  ", ",
+                  "VisualizeByReferenceInput",
+                  ", unknown> | undefined"
+                ],
+                "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx",
+                "deprecated": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "visualizations",
+                "id": "def-public.VisualizeEmbeddable.Unnamed.$5",
+                "type": "Object",
+                "tags": [],
+                "label": "parent",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "embeddable",
+                    "scope": "public",
+                    "docId": "kibEmbeddablePluginApi",
+                    "section": "def-public.IContainer",
+                    "text": "IContainer"
+                  },
+                  "<{}, ",
+                  {
+                    "pluginId": "embeddable",
+                    "scope": "public",
+                    "docId": "kibEmbeddablePluginApi",
+                    "section": "def-public.ContainerInput",
+                    "text": "ContainerInput"
+                  },
+                  "<{}>, ",
+                  {
+                    "pluginId": "embeddable",
+                    "scope": "public",
+                    "docId": "kibEmbeddablePluginApi",
+                    "section": "def-public.ContainerOutput",
+                    "text": "ContainerOutput"
+                  },
+                  "> | undefined"
+                ],
+                "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx",
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-public.VisualizeEmbeddable.reportsEmbeddableLoad",
+            "type": "Function",
+            "tags": [],
+            "label": "reportsEmbeddableLoad",
+            "description": [],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-public.VisualizeEmbeddable.getDescription",
+            "type": "Function",
+            "tags": [],
+            "label": "getDescription",
+            "description": [],
+            "signature": [
+              "() => string"
+            ],
+            "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-public.VisualizeEmbeddable.getVis",
+            "type": "Function",
+            "tags": [],
+            "label": "getVis",
+            "description": [],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "visualizations",
+                "scope": "public",
+                "docId": "kibVisualizationsPluginApi",
+                "section": "def-public.Vis",
+                "text": "Vis"
+              },
+              "<",
+              {
+                "pluginId": "visualizations",
+                "scope": "common",
+                "docId": "kibVisualizationsPluginApi",
+                "section": "def-common.VisParams",
+                "text": "VisParams"
+              },
+              ">"
+            ],
+            "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-public.VisualizeEmbeddable.getFilters",
+            "type": "Function",
+            "tags": [],
+            "label": "getFilters",
+            "description": [
+              "\nGets the Visualize embeddable's local filters"
+            ],
+            "signature": [
+              "() => Promise<",
+              "Filter",
+              "[]>"
+            ],
+            "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx",
+            "deprecated": false,
+            "children": [],
+            "returnComment": [
+              "Local/panel-level array of filters for Visualize embeddable"
+            ]
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-public.VisualizeEmbeddable.getQuery",
+            "type": "Function",
+            "tags": [],
+            "label": "getQuery",
+            "description": [
+              "\nGets the Visualize embeddable's local query"
+            ],
+            "signature": [
+              "() => Promise<",
+              "Query",
+              " | ",
+              "AggregateQuery",
+              " | undefined>"
+            ],
+            "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx",
+            "deprecated": false,
+            "children": [],
+            "returnComment": [
+              "Local/panel-level query for Visualize embeddable"
+            ]
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-public.VisualizeEmbeddable.getInspectorAdapters",
+            "type": "Function",
+            "tags": [],
+            "label": "getInspectorAdapters",
+            "description": [],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "inspector",
+                "scope": "common",
+                "docId": "kibInspectorPluginApi",
+                "section": "def-common.Adapters",
+                "text": "Adapters"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-public.VisualizeEmbeddable.openInspector",
+            "type": "Function",
+            "tags": [],
+            "label": "openInspector",
+            "description": [],
+            "signature": [
+              "() => ",
+              "OverlayRef",
+              " | undefined"
+            ],
+            "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-public.VisualizeEmbeddable.transferCustomizationsToUiState",
+            "type": "Function",
+            "tags": [],
+            "label": "transferCustomizationsToUiState",
+            "description": [
+              "\nTransfers all changes in the containerState.customization into\nthe uiState of this visualization."
+            ],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-public.VisualizeEmbeddable.hasInspector",
+            "type": "Function",
+            "tags": [],
+            "label": "hasInspector",
+            "description": [],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-public.VisualizeEmbeddable.onContainerLoading",
+            "type": "Function",
+            "tags": [],
+            "label": "onContainerLoading",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-public.VisualizeEmbeddable.onContainerData",
+            "type": "Function",
+            "tags": [],
+            "label": "onContainerData",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-public.VisualizeEmbeddable.onContainerRender",
+            "type": "Function",
+            "tags": [],
+            "label": "onContainerRender",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-public.VisualizeEmbeddable.onContainerError",
+            "type": "Function",
+            "tags": [],
+            "label": "onContainerError",
+            "description": [],
+            "signature": [
+              "(error: ",
+              {
+                "pluginId": "expressions",
+                "scope": "public",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-public.ExpressionRenderError",
+                "text": "ExpressionRenderError"
+              },
+              ") => void"
+            ],
+            "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "visualizations",
+                "id": "def-public.VisualizeEmbeddable.onContainerError.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "error",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "expressions",
+                    "scope": "public",
+                    "docId": "kibExpressionsPluginApi",
+                    "section": "def-public.ExpressionRenderError",
+                    "text": "ExpressionRenderError"
+                  }
+                ],
+                "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-public.VisualizeEmbeddable.render",
+            "type": "Function",
+            "tags": [],
+            "label": "render",
+            "description": [
+              "\n"
+            ],
+            "signature": [
+              "(domNode: HTMLElement) => Promise<void>"
+            ],
+            "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "visualizations",
+                "id": "def-public.VisualizeEmbeddable.render.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "domNode",
+                "description": [],
+                "signature": [
+                  "HTMLElement"
+                ],
+                "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-public.VisualizeEmbeddable.renderError",
+            "type": "Function",
+            "tags": [],
+            "label": "renderError",
+            "description": [],
+            "signature": [
+              "(domNode: HTMLElement, error: string | ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ErrorLike",
+                "text": "ErrorLike"
+              },
+              ") => () => boolean"
+            ],
+            "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "visualizations",
+                "id": "def-public.VisualizeEmbeddable.renderError.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "domNode",
+                "description": [],
+                "signature": [
+                  "HTMLElement"
+                ],
+                "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "visualizations",
+                "id": "def-public.VisualizeEmbeddable.renderError.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "error",
+                "description": [],
+                "signature": [
+                  "string | ",
+                  {
+                    "pluginId": "expressions",
+                    "scope": "common",
+                    "docId": "kibExpressionsPluginApi",
+                    "section": "def-common.ErrorLike",
+                    "text": "ErrorLike"
+                  }
+                ],
+                "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-public.VisualizeEmbeddable.destroy",
+            "type": "Function",
+            "tags": [],
+            "label": "destroy",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-public.VisualizeEmbeddable.reload",
+            "type": "Function",
+            "tags": [],
+            "label": "reload",
+            "description": [],
+            "signature": [
+              "() => Promise<void>"
+            ],
+            "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-public.VisualizeEmbeddable.supportedTriggers",
+            "type": "Function",
+            "tags": [],
+            "label": "supportedTriggers",
+            "description": [],
+            "signature": [
+              "() => string[]"
+            ],
+            "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-public.VisualizeEmbeddable.inputIsRefType",
+            "type": "Function",
+            "tags": [],
+            "label": "inputIsRefType",
+            "description": [],
+            "signature": [
+              "(input: ",
+              {
+                "pluginId": "visualizations",
+                "scope": "public",
+                "docId": "kibVisualizationsPluginApi",
+                "section": "def-public.VisualizeInput",
+                "text": "VisualizeInput"
+              },
+              ") => input is ",
+              "VisualizeByReferenceInput"
+            ],
+            "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "visualizations",
+                "id": "def-public.VisualizeEmbeddable.inputIsRefType.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "input",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "visualizations",
+                    "scope": "public",
+                    "docId": "kibVisualizationsPluginApi",
+                    "section": "def-public.VisualizeInput",
+                    "text": "VisualizeInput"
+                  }
+                ],
+                "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-public.VisualizeEmbeddable.getInputAsValueType",
+            "type": "Function",
+            "tags": [],
+            "label": "getInputAsValueType",
+            "description": [],
+            "signature": [
+              "() => Promise<",
+              "VisualizeByValueInput",
+              ">"
+            ],
+            "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-public.VisualizeEmbeddable.getInputAsRefType",
+            "type": "Function",
+            "tags": [],
+            "label": "getInputAsRefType",
+            "description": [],
+            "signature": [
+              "() => Promise<",
+              "VisualizeByReferenceInput",
+              ">"
+            ],
+            "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
       }
     ],
     "functions": [
@@ -2182,7 +2878,7 @@
             "label": "configuration",
             "description": [],
             "signature": [
-              "{ fill: string | number; legend: { isVisible: boolean; position: string; shouldTruncate: boolean; maxLines: number; showSingleSeries: boolean; }; gridLinesVisibility: { x: boolean; yLeft: boolean; yRight: boolean; }; extents: { yLeftExtent: AxisExtents; yRightExtent: AxisExtents; }; }"
+              "{ fill: string | number; legend: { isVisible: boolean; position: string; shouldTruncate: boolean; maxLines: number; showSingleSeries: boolean; }; gridLinesVisibility: { x: boolean; yLeft: boolean; yRight: boolean; }; tickLabelsVisibility?: { x: boolean; yLeft: boolean; yRight: boolean; } | undefined; axisTitlesVisibility?: { x: boolean; yLeft: boolean; yRight: boolean; } | undefined; valueLabels?: boolean | undefined; extents?: { yLeftExtent: AxisExtents; yRightExtent: AxisExtents; } | undefined; }"
             ],
             "path": "src/plugins/visualizations/public/vis_types/types.ts",
             "deprecated": false
@@ -3084,7 +3780,7 @@
             "label": "getDisplayName",
             "description": [],
             "signature": [
-              "(() => string) | undefined"
+              "() => string"
             ],
             "path": "src/plugins/visualizations/public/types.ts",
             "deprecated": false,
@@ -3620,6 +4316,14 @@
                 "section": "def-common.VisParams",
                 "text": "VisParams"
               },
+              " | undefined, timeRange?: ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataQueryPluginApi",
+                "section": "def-common.TimeRange",
+                "text": "TimeRange"
+              },
               " | undefined) => Promise<",
               {
                 "pluginId": "visualizations",
@@ -3647,6 +4351,27 @@
                     "docId": "kibVisualizationsPluginApi",
                     "section": "def-common.VisParams",
                     "text": "VisParams"
+                  },
+                  " | undefined"
+                ],
+                "path": "src/plugins/visualizations/public/vis_types/types.ts",
+                "deprecated": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "visualizations",
+                "id": "def-public.VisTypeDefinition.navigateToLens.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "timeRange",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "data",
+                    "scope": "common",
+                    "docId": "kibDataQueryPluginApi",
+                    "section": "def-common.TimeRange",
+                    "text": "TimeRange"
                   },
                   " | undefined"
                 ],
@@ -4451,10 +5176,23 @@
           },
           {
             "parentPluginId": "visualizations",
-            "id": "def-public.VisualizeEditorLayersContext.timeFieldName",
+            "id": "def-public.VisualizeEditorLayersContext.xFieldName",
             "type": "string",
             "tags": [],
-            "label": "timeFieldName",
+            "label": "xFieldName",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/visualizations/public/vis_types/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-public.VisualizeEditorLayersContext.xMode",
+            "type": "string",
+            "tags": [],
+            "label": "xMode",
             "description": [],
             "signature": [
               "string | undefined"
@@ -5125,7 +5863,7 @@
         "label": "VisualizeEmbeddableContract",
         "description": [],
         "signature": [
-          "{ readonly type: \"visualization\"; readonly id: string; render: (domNode: HTMLElement) => Promise<void>; getExplicitInput: () => ",
+          "{ readonly type: \"visualization\"; render: (domNode: HTMLElement) => Promise<void>; readonly id: string; getExplicitInput: () => ",
           {
             "pluginId": "visualizations",
             "scope": "public",
@@ -5169,7 +5907,23 @@
             "section": "def-public.VisualizeInput",
             "text": "VisualizeInput"
           },
-          ">) => void; reportsEmbeddableLoad: () => boolean; getFilters: () => Promise<",
+          ">) => void; reportsEmbeddableLoad: () => boolean; getVis: () => ",
+          {
+            "pluginId": "visualizations",
+            "scope": "public",
+            "docId": "kibVisualizationsPluginApi",
+            "section": "def-public.Vis",
+            "text": "Vis"
+          },
+          "<",
+          {
+            "pluginId": "visualizations",
+            "scope": "common",
+            "docId": "kibVisualizationsPluginApi",
+            "section": "def-common.VisParams",
+            "text": "VisParams"
+          },
+          ">; getFilters: () => Promise<",
           "Filter",
           "[]>; getInspectorAdapters: () => ",
           {
@@ -5335,7 +6089,9 @@
             "section": "def-public.ContainerOutput",
             "text": "ContainerOutput"
           },
-          ">; }"
+          ">; updateOutput: (outputChanges: Partial<",
+          "VisualizeOutput",
+          ">) => void; }"
         ],
         "path": "src/plugins/visualizations/public/index.ts",
         "deprecated": false,
@@ -5442,7 +6198,13 @@
             "text": "ErrorEmbeddable"
           },
           " | ",
-          "VisualizeEmbeddable",
+          {
+            "pluginId": "visualizations",
+            "scope": "public",
+            "docId": "kibVisualizationsPluginApi",
+            "section": "def-public.VisualizeEmbeddable",
+            "text": "VisualizeEmbeddable"
+          },
           " | ",
           "DisabledLabEmbeddable",
           " | undefined>; isEditable: () => Promise<boolean>; getDisplayName: () => string; createFromSavedObject: (savedObjectId: string, input: Partial<",
@@ -5486,7 +6248,13 @@
             "text": "ErrorEmbeddable"
           },
           " | ",
-          "VisualizeEmbeddable",
+          {
+            "pluginId": "visualizations",
+            "scope": "public",
+            "docId": "kibVisualizationsPluginApi",
+            "section": "def-public.VisualizeEmbeddable",
+            "text": "VisualizeEmbeddable"
+          },
           " | ",
           "DisabledLabEmbeddable",
           ">; readonly savedObjectMetaData: ",
@@ -5505,7 +6273,7 @@
             "section": "def-public.OnSaveProps",
             "text": "OnSaveProps"
           },
-          ") => Promise<true>; }"
+          ") => Promise<boolean>; }"
         ],
         "path": "src/plugins/visualizations/public/index.ts",
         "deprecated": false,

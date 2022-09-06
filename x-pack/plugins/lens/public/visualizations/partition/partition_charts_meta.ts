@@ -9,11 +9,13 @@ import { i18n } from '@kbn/i18n';
 import type { EuiIconProps } from '@elastic/eui';
 
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
-import { LensIconChartDonut } from '../../assets/chart_donut';
-import { LensIconChartPie } from '../../assets/chart_pie';
-import { LensIconChartTreemap } from '../../assets/chart_treemap';
-import { LensIconChartMosaic } from '../../assets/chart_mosaic';
-import { LensIconChartWaffle } from '../../assets/chart_waffle';
+import {
+  IconChartDonut,
+  IconChartPie,
+  IconChartTreemap,
+  IconChartMosaic,
+  IconChartWaffle,
+} from '@kbn/chart-icons';
 import {
   CategoryDisplay,
   NumberDisplay,
@@ -140,7 +142,7 @@ const emptySizeRatioOptions: PartitionChartMeta['toolbarPopover']['emptySizeRati
 
 export const PartitionChartsMeta: Record<PieChartType, PartitionChartMeta> = {
   donut: {
-    icon: LensIconChartDonut,
+    icon: IconChartDonut,
     label: i18n.translate('xpack.lens.pie.donutLabel', {
       defaultMessage: 'Donut',
     }),
@@ -156,7 +158,7 @@ export const PartitionChartsMeta: Record<PieChartType, PartitionChartMeta> = {
     },
   },
   pie: {
-    icon: LensIconChartPie,
+    icon: IconChartPie,
     label: i18n.translate('xpack.lens.pie.pielabel', {
       defaultMessage: 'Pie',
     }),
@@ -171,7 +173,7 @@ export const PartitionChartsMeta: Record<PieChartType, PartitionChartMeta> = {
     },
   },
   treemap: {
-    icon: LensIconChartTreemap,
+    icon: IconChartTreemap,
     label: i18n.translate('xpack.lens.pie.treemaplabel', {
       defaultMessage: 'Treemap',
     }),
@@ -186,7 +188,7 @@ export const PartitionChartsMeta: Record<PieChartType, PartitionChartMeta> = {
     },
   },
   mosaic: {
-    icon: LensIconChartMosaic,
+    icon: IconChartMosaic,
     label: i18n.translate('xpack.lens.pie.mosaiclabel', {
       defaultMessage: 'Mosaic',
     }),
@@ -203,7 +205,7 @@ export const PartitionChartsMeta: Record<PieChartType, PartitionChartMeta> = {
     requiredMinDimensionCount: 2,
   },
   waffle: {
-    icon: LensIconChartWaffle,
+    icon: IconChartWaffle,
     label: i18n.translate('xpack.lens.pie.wafflelabel', {
       defaultMessage: 'Waffle',
     }),

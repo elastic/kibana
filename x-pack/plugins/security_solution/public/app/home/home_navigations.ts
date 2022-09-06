@@ -31,6 +31,7 @@ import {
   APP_KUBERNETES_PATH,
   APP_LANDING_PATH,
   APP_RESPONSE_ACTIONS_PATH,
+  APP_ENTITY_ANALYTICS_PATH,
   APP_PATH,
 } from '../../../common/constants';
 
@@ -187,6 +188,13 @@ export const navTabs: SecurityNav = {
   [SecurityPageName.cloudSecurityPostureRules]: {
     ...getSecuritySolutionCSPNavTab<SecurityPageName>('rules', APP_PATH),
     urlKey: 'administration',
+  },
+  [SecurityPageName.entityAnalytics]: {
+    id: SecurityPageName.entityAnalytics,
+    name: i18n.ENTITY_ANALYTICS,
+    href: APP_ENTITY_ANALYTICS_PATH,
+    disabled: false,
+    urlKey: 'entity_analytics',
   },
 };
 

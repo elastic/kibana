@@ -6,7 +6,7 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
-import type { KibanaPageTemplateProps } from '@kbn/shared-ux-components';
+import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
 import { useKibana } from '../../../lib/kibana/kibana_react';
 import { useGetUserCasesPermissions } from '../../../lib/kibana';
 import { SecurityPageName } from '../../../../app/types';

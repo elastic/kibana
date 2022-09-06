@@ -15,21 +15,42 @@ import {
   isErrorResponse,
   TimeRangeBounds,
 } from '@kbn/data-plugin/common';
+import { useFilters } from '../../query_bar/hooks/use_filters';
 import { convertAggregationToChartSeries } from '../../../common/utils/barchart';
 import { RawIndicatorFieldId } from '../../../../common/types/indicator';
-import { DEFAULT_THREAT_INDEX_KEY, THREAT_QUERY_BASE } from '../../../../common/constants';
+import { THREAT_QUERY_BASE } from '../../../../common/constants';
 import { calculateBarchartColumnTimeInterval } from '../../../common/utils/dates';
 import { useKibana } from '../../../hooks/use_kibana';
-import { DEFAULT_TIME_RANGE } from './use_filters/utils';
+import { DEFAULT_TIME_RANGE } from '../../query_bar/hooks/use_filters/utils';
+import { useSourcererDataView } from './use_sourcerer_data_view';
 
 export interface UseAggregatedIndicatorsParam {
+  /**
+   * From and To values passed to the {@link }useAggregatedIndicators} hook
+   * to query indicators for the Indicators barchart.
+   */
   timeRange?: TimeRange;
 }
 
 export interface UseAggregatedIndicatorsValue {
+  /**
+   * Array of {@link ChartSeries}, ready to be used in the Indicators barchart.
+   */
   indicators: ChartSeries[];
+  /**
+   * Callback used by the IndicatorsFieldSelector component to query a new set of
+   * aggregated indicators.
+   * @param field the selected Indicator field
+   */
   onFieldChange: (field: string) => void;
+  /**
+   * The min and max times returned by the aggregated Indicators query.
+   */
   dateRange: TimeRangeBounds;
+  /**
+   * Indicator field used to query the aggregated Indicators.
+   */
+  selectedField: string;
 }
 
 export interface Aggregation {
@@ -70,10 +91,10 @@ export const useAggregatedIndicators = ({
   const {
     services: {
       data: { search: searchService, query: queryService },
-      uiSettings,
     },
   } = useKibana();
-  const defaultThreatIndices = uiSettings.get<string[]>(DEFAULT_THREAT_INDEX_KEY);
+
+  const { selectedPatterns } = useSourcererDataView();
 
   const searchSubscription$ = useRef(new Subscription());
   const abortController = useRef(new AbortController());
@@ -85,6 +106,8 @@ export const useAggregatedIndicators = ({
     () => queryService.timefilter.timefilter.calculateBounds(timeRange),
     [queryService, timeRange]
   );
+
+  const { filters, filterQuery } = useFilters();
 
   const loadData = useCallback(async () => {
     const dateFrom: number = (dateRange.min as moment.Moment).toDate().getTime();
@@ -100,8 +123,13 @@ export const useAggregatedIndicators = ({
           query: THREAT_QUERY_BASE,
           language: 'kuery',
         },
+        {
+          query: filterQuery.query as string,
+          language: 'kuery',
+        },
       ],
       [
+        ...filters,
         {
           query: {
             range: {
@@ -120,7 +148,7 @@ export const useAggregatedIndicators = ({
       .search<IEsSearchRequest, IKibanaSearchResponse<RawAggregatedIndicatorsResponse>>(
         {
           params: {
-            index: defaultThreatIndices,
+            index: selectedPatterns,
             body: {
               aggregations: {
                 [AGGREGATION_NAME]: {
@@ -170,7 +198,17 @@ export const useAggregatedIndicators = ({
           searchSubscription$.current.unsubscribe();
         },
       });
-  }, [dateRange, defaultThreatIndices, field, searchService, timeRange]);
+  }, [
+    dateRange.max,
+    dateRange.min,
+    field,
+    filterQuery,
+    filters,
+    searchService,
+    selectedPatterns,
+    timeRange.from,
+    timeRange.to,
+  ]);
 
   const onFieldChange = useCallback(
     async (f: string) => {
@@ -190,5 +228,6 @@ export const useAggregatedIndicators = ({
     dateRange,
     indicators,
     onFieldChange,
+    selectedField: field,
   };
 };

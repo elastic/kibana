@@ -6,7 +6,7 @@ NOTE:
 
     node scripts/build_plugin_list_docs
 
-  You can update the template within node_modules/@kbn/dev-utils/target_node/plugin_list/generate_plugin_list.js
+  You can update the template within node_modules/@kbn/dev-utils/target_node/src/plugin_list/generate_plugin_list.js
 
 ////
 
@@ -237,6 +237,10 @@ Content is fetched from the remote (https://feeds.elastic.co) once a day, with p
 |NOTE: This plugin is deprecated and will be removed in 8.0. See https://github.com/elastic/kibana/issues/46435 for more information.
 
 
+|{kib-repo}blob/{branch}/src/plugins/saved_objects_finder/README.md[savedObjectsFinder]
+|The savedObjectsFinder plugin exposes a UI for finding saved objects on the client side.
+
+
 |{kib-repo}blob/{branch}/src/plugins/saved_objects_management/README.md[savedObjectsManagement]
 |The savedObjectsManagement plugin manages the Saved Objects management section.
 
@@ -257,10 +261,6 @@ oss plugins.
 |{kib-repo}blob/{branch}/src/plugins/share/README.mdx[share]
 |The share plugin contains various utilities for displaying sharing context menu,
 generating deep links to other apps using locators, and creating short URLs.
-
-
-|{kib-repo}blob/{branch}/src/plugins/shared_ux/README.md[sharedUX]
-|Our mission is to make consistency in our user experience a product.
 
 
 |{kib-repo}blob/{branch}/src/plugins/telemetry/README.md[telemetry]
@@ -301,6 +301,10 @@ In general this plugin provides:
 
 |{kib-repo}blob/{branch}/src/plugins/ui_actions_enhanced/README.md[uiActionsEnhanced]
 |Registers commercially licensed generic actions like per panel time range and contains some code that supports drilldown work.
+
+
+|{kib-repo}blob/{branch}/src/plugins/unified_field_list/README.md[unifiedFieldList]
+|This Kibana plugin contains components and services for field list UI (as in fields sidebar on Discover and Lens pages).
 
 
 |{kib-repo}blob/{branch}/src/plugins/unified_search/README.md[unifiedSearch]
@@ -512,7 +516,7 @@ the infrastructure monitoring use-case within Kibana.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/kubernetes_security/README.md[kubernetesSecurity]
-|(under construction)
+|This plugin provides interactive visualizations of your Kubernetes workload and session data.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/lens/readme.md[lens]

@@ -9,21 +9,25 @@
 jest.mock('uuid');
 
 import supertest from 'supertest';
-import { registerResolveImportErrorsRoute } from '../../../saved_objects/routes/resolve_import_errors';
-import { savedObjectsClientMock } from '../../../mocks';
-import { CoreUsageStatsClient } from '../../../core_usage_data';
-import { coreUsageStatsClientMock } from '../../../core_usage_data/core_usage_stats_client.mock';
-import { coreUsageDataServiceMock } from '../../../core_usage_data/core_usage_data_service.mock';
-import { setupServer, createExportableType } from '../../../saved_objects/routes/test_utils';
-import { SavedObjectConfig } from '../../../saved_objects/saved_objects_config';
-import { SavedObjectsImporter } from '../../../saved_objects/import';
-import type { InternalSavedObjectsRequestHandlerContext } from '../../../saved_objects/internal_types';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import type { ICoreUsageStatsClient } from '@kbn/core-usage-data-base-server-internal';
+import {
+  coreUsageStatsClientMock,
+  coreUsageDataServiceMock,
+} from '@kbn/core-usage-data-server-mocks';
+import { setupServer, createExportableType } from './test_utils';
+import { SavedObjectConfig } from '@kbn/core-saved-objects-base-server-internal';
+import { SavedObjectsImporter } from '@kbn/core-saved-objects-import-export-server-internal';
+import {
+  registerResolveImportErrorsRoute,
+  type InternalSavedObjectsRequestHandlerContext,
+} from '@kbn/core-saved-objects-server-internal';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 
 const allowedTypes = ['index-pattern', 'visualization', 'dashboard'];
 const config = { maxImportPayloadBytes: 26214400, maxImportExportSize: 10000 } as SavedObjectConfig;
-let coreUsageStatsClient: jest.Mocked<CoreUsageStatsClient>;
+let coreUsageStatsClient: jest.Mocked<ICoreUsageStatsClient>;
 const URL = '/api/saved_objects/_resolve_import_errors';
 
 describe(`POST ${URL}`, () => {

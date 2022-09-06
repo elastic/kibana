@@ -162,6 +162,55 @@
       },
       {
         "parentPluginId": "@kbn/shared-ux-button-toolbar",
+        "id": "def-common.Toolbar",
+        "type": "Function",
+        "tags": [],
+        "label": "Toolbar",
+        "description": [
+          "\n"
+        ],
+        "signature": [
+          "({ children }: ",
+          {
+            "pluginId": "@kbn/shared-ux-button-toolbar",
+            "scope": "common",
+            "docId": "kibKbnSharedUxButtonToolbarPluginApi",
+            "section": "def-common.Props",
+            "text": "Props"
+          },
+          ") => JSX.Element"
+        ],
+        "path": "packages/shared-ux/button_toolbar/src/toolbar/toolbar.tsx",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-button-toolbar",
+            "id": "def-common.Toolbar.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ children }",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/shared-ux-button-toolbar",
+                "scope": "common",
+                "docId": "kibKbnSharedUxButtonToolbarPluginApi",
+                "section": "def-common.Props",
+                "text": "Props"
+              }
+            ],
+            "path": "packages/shared-ux/button_toolbar/src/toolbar/toolbar.tsx",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "Toolbar component"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-button-toolbar",
         "id": "def-common.ToolbarPopover",
         "type": "Function",
         "tags": [],
@@ -368,6 +417,34 @@
           }
         ],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-button-toolbar",
+        "id": "def-common.Props",
+        "type": "Interface",
+        "tags": [],
+        "label": "Props",
+        "description": [
+          "\nProps for a generic toolbar component"
+        ],
+        "path": "packages/shared-ux/button_toolbar/src/toolbar/toolbar.tsx",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-button-toolbar",
+            "id": "def-common.Props.children",
+            "type": "Object",
+            "tags": [],
+            "label": "children",
+            "description": [],
+            "signature": [
+              "NamedSlots"
+            ],
+            "path": "packages/shared-ux/button_toolbar/src/toolbar/toolbar.tsx",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
       }
     ],
     "enums": [],
@@ -402,6 +479,40 @@
         ],
         "path": "packages/shared-ux/button_toolbar/src/popover/popover.tsx",
         "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-button-toolbar",
+        "id": "def-common.ToolbarButton",
+        "type": "Type",
+        "tags": [],
+        "label": "ToolbarButton",
+        "description": [
+          "type for cases with both button or a popover could be used"
+        ],
+        "signature": [
+          "(({ label, iconSide, ...rest }: ",
+          {
+            "pluginId": "@kbn/shared-ux-button-toolbar",
+            "scope": "common",
+            "docId": "kibKbnSharedUxButtonToolbarPluginApi",
+            "section": "def-common.Props",
+            "text": "Props"
+          },
+          ") => JSX.Element) | (({ label, iconType, children, iconSide, ...popover }: ",
+          {
+            "pluginId": "@kbn/shared-ux-button-toolbar",
+            "scope": "common",
+            "docId": "kibKbnSharedUxButtonToolbarPluginApi",
+            "section": "def-common.Props",
+            "text": "Props"
+          },
+          ") => JSX.Element)"
+        ],
+        "path": "packages/shared-ux/button_toolbar/src/toolbar/toolbar.tsx",
+        "deprecated": false,
+        "returnComment": [],
+        "children": [],
         "initialIsOpen": false
       }
     ],

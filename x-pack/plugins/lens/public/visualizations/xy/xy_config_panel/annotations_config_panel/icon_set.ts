@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { AvailableAnnotationIcon } from '@kbn/event-annotation-plugin/common';
-import { IconTriangle, IconCircle } from '../../../../assets/annotation_icons';
+import { IconTriangle, IconCircle } from '@kbn/chart-icons';
 import { IconSet } from '../shared/icon_select';
 
 export const annotationsIconSet: IconSet<AvailableAnnotationIcon> = [
