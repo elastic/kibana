@@ -32,7 +32,7 @@ import type { InjectedMetadataPlugin } from '@kbn/core-injected-metadata-common-
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
 import { overlayServiceMock } from '@kbn/core-overlays-browser-mocks';
-import { chromeServiceMock } from '../chrome/chrome_service.mock';
+import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
 import { fatalErrorsServiceMock } from '@kbn/core-fatal-errors-browser-mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';

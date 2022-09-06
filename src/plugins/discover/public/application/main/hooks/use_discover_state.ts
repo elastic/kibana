@@ -184,6 +184,7 @@ export function useDiscoverState({
         search: services.data.search,
         savedObjectsClient: services.core.savedObjects.client,
         spaces: services.spaces,
+        savedObjectsTagging: services.savedObjectsTagging,
       });
 
       const newDataView = newSavedSearch.searchSource.getField('index') || dataView;
