@@ -224,8 +224,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.dashboard.loadSavedDashboard('dashboard with bad filters');
       });
 
-      it('filter with non-existent index pattern renders in error mode', async function () {
-        const hasBadFieldFilter = await filterBar.hasFilter('name', 'error', false);
+      it('filter with non-existent index pattern renders in warning mode', async function () {
+        const hasBadFieldFilter = await filterBar.hasFilter('name', 'warn', false);
         expect(hasBadFieldFilter).to.be(true);
       });
 
