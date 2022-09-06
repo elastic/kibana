@@ -22,6 +22,7 @@ const QuestionInput: FC<{
 
   useEffect(() => {
     inferrer.questionText$.next(questionText);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [questionText]);
 
   const runningState = useObservable(inferrer.runningState$);
