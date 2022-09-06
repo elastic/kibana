@@ -7,15 +7,21 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const SHORT_EMPTY_TITLE = i18n.translate('xpack.osquery.action.shortEmptyTitle', {
-  defaultMessage: 'Osquery is not available',
-});
+export const SHORT_EMPTY_TITLE = i18n.translate(
+  'xpack.securitySolution.osquery.action.shortEmptyTitle',
+  {
+    defaultMessage: 'Osquery is not available',
+  }
+);
 
-export const PERMISSION_DENIED = i18n.translate('xpack.osquery.action.permissionDenied', {
-  defaultMessage: 'Permission denied',
-});
+export const PERMISSION_DENIED = i18n.translate(
+  'xpack.securitySolution.osquery.action.permissionDenied',
+  {
+    defaultMessage: 'Permission denied',
+  }
+);
 
-export const NOT_AVAILABLE = i18n.translate('xpack.osquery.action.unavailable', {
+export const NOT_AVAILABLE = i18n.translate('xpack.securitySolution.osquery.action.unavailable', {
   defaultMessage:
     'The Osquery Manager integration is not added to the agent policy. To run queries on the host, add the Osquery Manager integration to the agent policy in Fleet.',
 });

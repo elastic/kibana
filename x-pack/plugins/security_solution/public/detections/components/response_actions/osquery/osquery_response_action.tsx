@@ -38,7 +38,7 @@ export const OsqueryResponseAction = React.memo((props: IProps) => {
             body={
               <p>
                 <FormattedMessage
-                  id="xpack.osquery.action.missingPrivilleges"
+                  id="xpack.securitySolution.osquery.action.missingPrivilleges"
                   defaultMessage="To access this page, ask your administrator for {osquery} Kibana privileges."
                   values={{
                     // TODO fix error

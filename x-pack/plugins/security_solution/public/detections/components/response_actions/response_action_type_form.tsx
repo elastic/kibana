@@ -71,7 +71,7 @@ export const ResponseActionTypeForm = React.memo((props: IProps) => {
         color="danger"
         className="actAccordionActionForm__extraAction"
         aria-label={i18n.translate(
-          'xpack.triggersActionsUI.sections.actionTypeForm.accordion.deleteIconAriaLabel',
+          'xpack.securitySolution.actionTypeForm.accordion.deleteIconAriaLabel',
           {
             defaultMessage: 'Delete',
           }

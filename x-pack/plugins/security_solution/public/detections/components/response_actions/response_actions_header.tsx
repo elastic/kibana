@@ -20,7 +20,7 @@ export const ResponseActionsHeader = () => {
             <h4>
               <FormattedMessage
                 defaultMessage="Response Actions"
-                id="xpack.securitySolution.rules.actionForm.responseActionSectionsDescription"
+                id="xpack.securitySolution.actionForm.responseActionSectionsDescription"
               />
             </h4>
           </EuiTitle>
@@ -28,7 +28,7 @@ export const ResponseActionsHeader = () => {
         <EuiFlexItem grow={false}>
           <EuiBetaBadge
             tooltipContent={i18n.translate(
-              'xpack.securitySolution.rules.actionForm.experimentalTooltip',
+              'xpack.securitySolution.actionForm.experimentalTooltip',
               {
                 defaultMessage:
                   'This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will take a best effort approach to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
@@ -45,7 +45,7 @@ export const ResponseActionsHeader = () => {
       <EuiFlexItem>
         <FormattedMessage
           defaultMessage="Response actions are run on each rule execution"
-          id="'xpack.securitySolution.rules.actionForm.responseActionSectionsTitle"
+          id="'xpack.securitySolution.actionForm.responseActionSectionsTitle"
         />
       </EuiFlexItem>
       <EuiSpacer size="m" />
