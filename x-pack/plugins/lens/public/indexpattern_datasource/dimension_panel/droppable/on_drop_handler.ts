@@ -124,9 +124,26 @@ function onFieldDrop(props: DropHandlerProps<DraggedField>, shouldAddField?: boo
   const layer = state.layers[target.layerId];
   const indexPattern = indexPatterns[layer.indexPatternId];
   const targetColumn = layer.columns[target.columnId];
+  // discourage already used operations for a field
+  const alreadyUsedOperations = new Set(
+    Object.values(layer.columns)
+      .map((column) =>
+        'sourceField' in column && column.sourceField === source.field.name
+          ? column.operationType
+          : undefined
+      )
+      .filter(Boolean) as string[]
+  );
+
   const newOperation = shouldAddField
     ? targetColumn.operationType
-    : getNewOperation(source.field, target.filterOperations, targetColumn, prioritizedOperation);
+    : getNewOperation(
+        source.field,
+        target.filterOperations,
+        targetColumn,
+        prioritizedOperation,
+        alreadyUsedOperations
+      );
 
   if (
     !isDraggedField(source) ||
