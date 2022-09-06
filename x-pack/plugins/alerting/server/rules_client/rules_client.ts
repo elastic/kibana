@@ -2652,7 +2652,7 @@ export class RulesClient {
     }
   }
 
-  private async runSoon({ id }: { id: string }) {
+  public async runSoon({ id }: { id: string }) {
     const { attributes } = await this.unsecuredSavedObjectsClient.get<Rule>('alert', id);
 
     try {
