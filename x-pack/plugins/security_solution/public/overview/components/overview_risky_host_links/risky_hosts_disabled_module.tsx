@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
+import { EuiButton, EuiFlexItem } from '@elastic/eui';
 
 import * as i18n from './translations';
 import { DisabledLinkPanel } from '../link_panel/disabled_link_panel';
@@ -17,15 +18,61 @@ import { OpenInDevConsoleButton } from '../../../common/components/open_in_dev_c
 import { useCheckSignalIndex } from '../../../detections/containers/detection_engine/alerts/use_check_signal_index';
 import type { LinkPanelListItem } from '../link_panel';
 import { useEnableHostRiskFromUrl } from '../../../common/hooks/use_enable_host_risk_from_url';
+import { createIndices, createIngestPipeline, createTransform, startTransforms } from './api';
+import { useKibana } from '../../../common/lib/kibana';
+import { useSpaceId } from '../../../common/hooks/use_space_id';
+import {
+  getCreateIngestPipelineOptions,
+  getCreateLatestTransformOptions,
+  getCreateMLHostRiskScoreIndicesOptions,
+  getCreateMLHostRiskScoreLatestIndicesOptions,
+  getCreatePivaTransformOptions,
+} from './utils';
 
 export const RISKY_HOSTS_DOC_LINK =
   'https://www.github.com/elastic/detection-rules/blob/main/docs/experimental-machine-learning/host-risk-score.md';
 
 const emptyList: LinkPanelListItem[] = [];
 
-export const RiskyHostsDisabledModuleComponent = () => {
+const RiskyHostsDisabledModuleComponent = () => {
   const loadFromUrl = useEnableHostRiskFromUrl();
   const { signalIndexExists } = useCheckSignalIndex();
+  const { http } = useKibana().services;
+  const spaceId = useSpaceId();
+
+  const onBoardingHostRiskScore = useCallback(async () => {
+    await createIngestPipeline({ http, spaceId, options: getCreateIngestPipelineOptions() }); // step 5
+    await createIndices({
+      http,
+      spaceId,
+      options: getCreateMLHostRiskScoreIndicesOptions({ spaceId }),
+    }); // step 6 create ml_host_risk_score_default index
+    await createIndices({
+      http,
+      spaceId,
+      options: getCreateMLHostRiskScoreLatestIndicesOptions({ spaceId }),
+    }); // step 9 create ml_host_risk_score_latest_default index
+    await createTransform({
+      http,
+      spaceId,
+      transformId: `ml_hostriskscore_pivot_transform_${spaceId}`,
+      options: getCreatePivaTransformOptions({ spaceId }),
+    }); // step 7 create ml_hostriskscore_pivot_transform_default
+    await createTransform({
+      http,
+      spaceId,
+      transformId: `ml_hostriskscore_latest_transform_${spaceId}`,
+      options: getCreateLatestTransformOptions({ spaceId }),
+    }); // step10 create ml_hostriskscore_latest_transform_default
+    await startTransforms({
+      http,
+      spaceId,
+      transformIds: [
+        `ml_hostriskscore_latest_transform_${spaceId}`,
+        `ml_hostriskscore_pivot_transform_${spaceId}`,
+      ],
+    }); // step 8.11
+  }, [http, spaceId]);
 
   return (
     <DisabledLinkPanel
@@ -36,12 +83,18 @@ export const RiskyHostsDisabledModuleComponent = () => {
       titleCopy={i18n.DANGER_TITLE}
       LinkPanelViewComponent={RiskyHostsPanelView}
       moreButtons={
-        <OpenInDevConsoleButton
-          href={loadFromUrl}
-          enableButton={!!signalIndexExists}
-          title={ENABLE_VIA_DEV_TOOLS}
-          tooltipContent={i18n.ENABLE_RISK_SCORE_POPOVER}
-        />
+        onBoardingHostRiskScore ? (
+          <EuiFlexItem>
+            <EuiButton onClick={onBoardingHostRiskScore}>{'Enable'}</EuiButton>
+          </EuiFlexItem>
+        ) : (
+          <OpenInDevConsoleButton
+            href={loadFromUrl}
+            enableButton={!!signalIndexExists}
+            title={ENABLE_VIA_DEV_TOOLS}
+            tooltipContent={i18n.ENABLE_RISK_SCORE_POPOVER}
+          />
+        )
       }
     />
   );
