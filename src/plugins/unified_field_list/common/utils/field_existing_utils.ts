@@ -188,12 +188,6 @@ async function fetchDataViewStats({
       timeout: '4500ms',
     },
   });
-  //   {
-  //     // Global request timeout. Will cancel the request if exceeded. Overrides the elasticsearch.requestTimeout
-  //     // requestTimeout: '5000ms',
-  //     // Fails fast instead of retrying- default is to retry
-  //     // maxRetries: 0,
-  //   }
 
   return response?.hits.hits;
 }
