@@ -266,7 +266,12 @@ export const DocViewerTable = ({
 
   const headers = [
     !isSingleDocView && (
-      <EuiTableHeaderCell align="left" width={62} isSorted={false}>
+      <EuiTableHeaderCell
+        align="left"
+        // width={62}
+        width={150}
+        isSorted={false}
+      >
         <EuiText size="xs">
           <strong>
             <FormattedMessage
@@ -308,7 +313,7 @@ export const DocViewerTable = ({
                   key={field + '-actions'}
                   align="left"
                   // align="center"
-                  width={200}
+                  // width={62}
                   // className="kbnDocViewer__tableActionsCell"
                   textOnly={false}
                   mobileOptions={MOBILE_OPTIONS}

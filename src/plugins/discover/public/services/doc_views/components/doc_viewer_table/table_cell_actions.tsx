@@ -168,10 +168,11 @@ export const TableActions = ({
     },
   ];
 
+  // TODO: add tooltips and show only for larger screens
   return (
     <EuiFlexGroup responsive={false} gutterSize="none">
       {panels[0].items.map((item) => (
-        <EuiFlexItem key={item.icon}>
+        <EuiFlexItem key={item.icon} grow={false}>
           <EuiButtonIcon
             data-test-subj={item['data-test-subj']}
             aria-label={item['aria-label']}
