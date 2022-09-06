@@ -81,6 +81,12 @@ export const getDefaultRuleMonitoring = (): RuleMonitoring => ({
   },
 });
 
+interface StackTraceLog {
+  message: string;
+  tags: string[];
+  stackTrace?: string;
+}
+
 export class TaskRunner<
   Params extends RuleTypeParams,
   ExtractedParams extends RuleTypeParams,
@@ -113,7 +119,7 @@ export class TaskRunner<
   private usageCounter?: UsageCounter;
   private searchAbortController: AbortController;
   private cancelled: boolean;
-  private stackTraceLog: string | null;
+  private stackTraceLog: StackTraceLog | null;
 
   constructor(
     ruleType: NormalizedRuleType<
@@ -388,7 +394,11 @@ export class TaskRunner<
               `rule execution failure: ${ruleLabel}`,
               err.message
             );
-            this.stackTraceLog = err.stack;
+            this.stackTraceLog = {
+              message: err,
+              tags: [this.ruleType.id, ruleId, 'rule-run-failed'],
+              stackTrace: err.stack,
+            };
             throw new ErrorWithReason(RuleExecutionStatusErrorReasons.Execute, err);
           }
         }
@@ -722,11 +732,18 @@ export class TaskRunner<
           if (isAlertSavedObjectNotFoundError(err, ruleId)) {
             this.logger.debug(message);
           } else {
-            this.logger.error(message, {
-              tags: [this.ruleType.id, ruleId, 'rule-run-failed'],
-              error: { stack_trace: this.stackTraceLog ? this.stackTraceLog : err.stack },
-            });
-            this.stackTraceLog = null;
+            if (this.stackTraceLog) {
+              this.logger.error(this.stackTraceLog.message, {
+                tags: this.stackTraceLog.tags,
+                error: { stack_trace: this.stackTraceLog.stackTrace },
+              });
+              this.stackTraceLog = null;
+            } else {
+              this.logger.error(message, {
+                tags: [this.ruleType.id, ruleId, 'rule-run-failed'],
+                error: { stack_trace: err.stack },
+              });
+            }
           }
           return originalState;
         }
