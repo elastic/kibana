@@ -34,7 +34,7 @@ export const convertToLens: ConvertTableToLensVisualization = async (vis, timefi
   const layerId = uuid();
 
   return {
-    type: 'lnsXY',
+    type: 'lnsDatatable',
     layers: [
       {
         indexPatternId: dataView.id!,

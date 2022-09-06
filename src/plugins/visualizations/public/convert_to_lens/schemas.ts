@@ -18,7 +18,10 @@ export const getColumnsFromVis = <T>(
   vis: Vis<T>,
   timefilter: TimefilterContract,
   dataView: DataView,
-  { splits, buckets }: { splits: Array<keyof Schemas>; buckets: Array<keyof Schemas> }
+  { splits, buckets }: { splits: Array<keyof Schemas>; buckets: Array<keyof Schemas> } = {
+    splits: [],
+    buckets: [],
+  }
 ) => {
   const visSchemas = getVisSchemas(vis, {
     timefilter,
