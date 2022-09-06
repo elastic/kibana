@@ -593,7 +593,7 @@ def generate_test_data():
 
     ts_start = int(time.time())
     upload_data_txt = ""
-
+    logging.info('Hello')
     if tornado.options.options.data_file:
         json_array = ""
         if tornado.options.options.data_file.endswith(".csv"):
@@ -648,7 +648,6 @@ def generate_test_data():
     took_secs = int(time.time() - ts_start)
 
     logging.info("Done - total docs uploaded: %d, took %d seconds" % (tornado.options.options.count, took_secs))
-
 
 if __name__ == '__main__':
     tornado.options.define("es_url", type=str, default='http://localhost:9200/', help="URL of your Elasticsearch node")

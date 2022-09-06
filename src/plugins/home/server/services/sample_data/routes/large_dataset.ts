@@ -10,7 +10,10 @@ import uuid from 'uuid';
 import { schema } from '@kbn/config-schema';
 import { IRouter, Logger, SavedObject } from '@kbn/core/server';
 import { CoreSetup } from '@kbn/core/server';
+import { Readable } from 'stream';
+import { getSavedObjectsClient } from './utils';
 import { SampleDatasetSchema } from '../lib/sample_dataset_registry_types';
+import { SampleDataInstallError } from '../errors';
 
 const dataView = (indexName: string) => {
   return {
@@ -70,14 +73,10 @@ export function createInstallLargeDatasetRoute(
       let errorOccured = false;
       const pythonProcess = spawn(
         'python3',
-        [
-          'es_test_data.py',
-          '--username=elastic',
-          '--password=changeme',
-          '--index_name=${indexName}',
-          '--count=${nrOfDocuments}',
-        ],
-        { shell: true }
+        ['es_test_data.py', 'username=elastic', 'password="changeme"'],
+        {
+          shell: true,
+        }
       );
 
       pythonProcess.stdout.setEncoding('utf8');
@@ -89,7 +88,7 @@ export function createInstallLargeDatasetRoute(
 
       const core = await context.core;
       const { getImporter } = core.savedObjects;
-      /* const objectTypes = ['index-pattern'];
+      const objectTypes = ['index-pattern'];
       const savedObjectsClient = await getSavedObjectsClient(context, objectTypes);
       const soImporter = getImporter(savedObjectsClient);
 
@@ -124,9 +123,9 @@ export function createInstallLargeDatasetRoute(
             message: 'Error occurred while generating data set',
           },
         });
-      }*/
+      }
       pythonProcess.on('close', function (code) {
-        logger.info('Closed');
+        logger.info('Closed with code ' + code);
       });
       return res.ok({
         body: {
