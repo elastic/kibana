@@ -26,7 +26,8 @@ import { ElasticsearchAssetType } from '../../../../../common/types/models';
 import type {
   EsAssetReference,
   InstallablePackage,
-  IndexTemplateEntry,
+  ESAssetMetadata,
+  IndexTemplate,
 } from '../../../../../common/types/models';
 import { getInstallation } from '../../packages';
 
@@ -35,7 +36,15 @@ import { retryTransientEsErrors } from '../retry';
 import { deleteTransforms } from './remove';
 import { getAsset } from './common';
 
-interface TransformInstallation {
+interface TransformModuleBase {
+  transformModuleId: string;
+}
+interface DestinationIndexTemplateInstallation extends TransformModuleBase {
+  installationName: string;
+  _meta: ESAssetMetadata;
+  template: IndexTemplate['template'];
+}
+interface TransformInstallation extends TransformModuleBase {
   installationName: string;
   content: any;
 }
@@ -79,57 +88,43 @@ export const installTransform = async (
   const transformPaths = paths.filter((path) => isTransform(path));
   let installedTransforms: EsAssetReference[] = [];
   if (transformPaths.length > 0) {
-    const transformRefs = transformPaths.reduce<EsAssetReference[]>((acc, path) => {
-      acc.push({
-        id: getTransformNameForInstallation(installablePackage, path, installNameSuffix),
-        type: ElasticsearchAssetType.transform,
-      });
-
-      return acc;
-    }, []);
-
-    // get and save transform refs before installing transforms
-    esReferences = await updateEsAssetReferences(
-      savedObjectsClient,
-      installablePackage.name,
-      esReferences,
-      {
-        assetsToAdd: transformRefs,
-      }
-    );
-
-    const transformAssets = new Map();
-    const destinationIndexTemplates = [];
+    const transformsSpecifications = new Map();
+    const destinationIndexTemplates: DestinationIndexTemplateInstallation[] = [];
     const indices = [];
     const transforms: TransformInstallation[] = [];
 
     transformPaths.forEach((path: string) => {
-      const { folderName, fileName } = getTransformFolderAndFileNames(installablePackage, path);
+      const { transformModuleId, fileName } = getTransformFolderAndFileNames(
+        installablePackage,
+        path
+      );
 
       // Since there can be multiple assets per transform job definition
-      // We want to create a unique list of assets for each main folder
-      if (transformAssets.get(folderName) === undefined) {
-        transformAssets.set(folderName, new Map());
+      // We want to create a unique list of assets/specifications for each transform job
+      if (transformsSpecifications.get(transformModuleId) === undefined) {
+        transformsSpecifications.set(transformModuleId, new Map());
       }
-      const packageAssets = transformAssets.get(folderName);
+      const packageAssets = transformsSpecifications.get(transformModuleId);
 
       const content = safeLoad(getAsset(path).toString('utf-8'));
 
       if (fileName === 'fields') {
         const validFields = processFields(content);
         const mappings = generateMappings(validFields);
-        transformAssets.get(folderName)?.set('mappings', mappings);
+        packageAssets?.set('mappings', mappings);
       }
 
       if (fileName === 'transform') {
-        transformAssets.get(folderName)?.set('destinationIndex', content.dest);
-        transformAssets.get(folderName)?.set('transform', content);
+        transformsSpecifications.get(transformModuleId)?.set('destinationIndex', content.dest);
+        indices.push(content.dest);
+        transformsSpecifications.get(transformModuleId)?.set('transform', content);
         content._meta = getESAssetMetadata({ packageName: installablePackage.name });
         transforms.push({
-          folderName,
+          transformModuleId,
           installationName: getTransformNameForInstallation(
             installablePackage,
-            path,
+            transformModuleId,
+            ElasticsearchAssetType.transform,
             installNameSuffix
           ),
           content,
@@ -138,9 +133,8 @@ export const installTransform = async (
       }
 
       if (fileName === 'manifest') {
-        console.log('content', JSON.stringify(content));
         if (isPopulatedObject(content, ['start']) && content.start === false) {
-          transformAssets.get(folderName)?.set('start', false);
+          transformsSpecifications.get(transformModuleId)?.set('start', false);
         }
         // If manifest.yml contains destination_index_template
         // Combine the mappings and other index template settings from manifest.yml into a single index template
@@ -151,122 +145,133 @@ export const installTransform = async (
             unknown
           >;
           if (isPopulatedObject(packageAssets.get('mappings'))) {
-            const mergedDestinationIndexTemplateWithMappings = {
+            const mergedDestinationIndexTemplateInstallationWithMappings = {
               ...(destinationIndexTemplate ?? {}),
               mappings: {
-                ...destinationIndexTemplate.mappings,
+                ...(destinationIndexTemplate.mappings !== null &&
+                typeof destinationIndexTemplate.mappings === 'object'
+                  ? destinationIndexTemplate.mappings
+                  : {}),
                 ...packageAssets.get('mappings'),
               },
-            };
-            // @todo: check name
+            } as IndexTemplate['template'];
+
             destinationIndexTemplates.push({
-              folderName,
+              transformModuleId,
               _meta: getESAssetMetadata({ packageName: installablePackage.name }),
-              name: getTransformNameForInstallation(installablePackage, path, installNameSuffix),
-              template: mergedDestinationIndexTemplateWithMappings,
-            } as IndexTemplateEntry);
+              installationName: getTransformNameForInstallation(
+                installablePackage,
+                transformModuleId,
+                ElasticsearchAssetType.indexTemplate,
+                installNameSuffix
+              ),
+              template: mergedDestinationIndexTemplateInstallationWithMappings,
+            } as DestinationIndexTemplateInstallation);
             packageAssets.set(
               'destinationIndexTemplate',
-              mergedDestinationIndexTemplateWithMappings
+              mergedDestinationIndexTemplateInstallationWithMappings
             );
           } else {
-            transformAssets
-              .get(folderName)
-              ?.set('destinationIndexTemplate', destinationIndexTemplate);
+            packageAssets.set('destinationIndexTemplate', destinationIndexTemplate);
+
             destinationIndexTemplates.push({
-              folderName,
-              name: getTransformNameForInstallation(installablePackage, path, installNameSuffix),
+              transformModuleId,
+              installationName: getTransformNameForInstallation(
+                installablePackage,
+                transformModuleId,
+                ElasticsearchAssetType.indexTemplate,
+                installNameSuffix
+              ),
               template: destinationIndexTemplate,
               _meta: getESAssetMetadata({ packageName: installablePackage.name }),
-            } as IndexTemplateEntry);
+            } as DestinationIndexTemplateInstallation);
           }
         }
       }
-
-      // transformAssets
-      //   .get(folderName)
-      //   ?.set('_meta', getESAssetMetadata({ packageName: installablePackage.name }));
-
-      return {
-        folderName,
-        installationName: getTransformNameForInstallation(
-          installablePackage,
-          path,
-          installNameSuffix
-        ),
-        content,
-      };
     });
 
-    console.log(
-      'destinationIndexTemplates',
-      destinationIndexTemplates.map((destinationIndexTemplate) =>
-        JSON.stringify({
-          // esClient,
-          // logger,
-          // componentTemplates: {},
-          indexTemplate: {
-            templateName: destinationIndexTemplate.name,
-            indexTemplate: {
-              ...destinationIndexTemplate.template,
-              priority: 200,
-              index_patterns: [
-                transformAssets.get(destinationIndexTemplate.folderName)?.get('destinationIndex'),
-              ],
-              _meta: destinationIndexTemplate._meta,
-            },
-          },
-        })
-      )
+    const indexTemplatesRefs = destinationIndexTemplates.map((template) => ({
+      id: template.installationName,
+      type: ElasticsearchAssetType.indexTemplate,
+    }));
+
+    const transformRefs = transforms.map((t) => ({
+      id: t.installationName,
+      type: ElasticsearchAssetType.transform,
+    }));
+
+    // get and save refs associated with the transforms before installing
+    esReferences = await updateEsAssetReferences(
+      savedObjectsClient,
+      installablePackage.name,
+      esReferences,
+      {
+        assetsToAdd: [...indexTemplatesRefs, ...transformRefs],
+        assetsToRemove: previousInstalledTransformEsAssets,
+      }
     );
 
-    const indexTemplates = await Promise.all(
+    await Promise.all(
       destinationIndexTemplates.map((destinationIndexTemplate) => {
         return installComponentAndIndexTemplateForDataStream({
           esClient,
           logger,
           componentTemplates: {},
           indexTemplate: {
-            templateName: destinationIndexTemplate.name,
+            templateName: destinationIndexTemplate.installationName,
+            // @ts-expect-error Index template here should not contain data_stream property
+            // as this template is applied to only an index and not a data stream
             indexTemplate: {
               template: destinationIndexTemplate.template,
               priority: 200,
               // @todo: verify if this is correct
               index_patterns: [
-                transformAssets.get(destinationIndexTemplate.folderName)?.get('destinationIndex')
-                  .index,
+                transformsSpecifications
+                  .get(destinationIndexTemplate.transformModuleId)
+                  ?.get('destinationIndex').index,
               ],
               _meta: destinationIndexTemplate._meta,
-              // data_stream: { hidden: false },
               composed_of: [],
             },
           },
         });
       })
     );
+    // @TODO: Should we create indices for jobs that we are not starting automatically?
+    // And should these indices be tracked as ES references?
+    await Promise.all(
+      transforms.map(async (transform) => {
+        const index = transform.content.dest.index;
+        // const pipelineId = transform.content.dest.pipeline;
+        const startTransform =
+          transformsSpecifications.get(transform.transformModuleId)?.get('start') !== false;
 
-    const installationPromises = transforms.map(async (transform) => {
-      console.log('transform.folderName', transformAssets.get(transform.folderName)?.get('start'));
+        // @todo: replace true with !startTransform
+        if (!startTransform) {
+          const indexExist = await esClient.indices.exists({
+            index,
+          });
+          if (indexExist !== true) {
+            // @TODO: action [indices:admin/create] is unauthorized for user [kibana_system] with effective roles [kibana_system]
+            // return esClient.indices.create({
+            //   index,
+            //   ...(pipelineId ? { settings: { default_pipeline: pipelineId } } : {}),
+            // });
+          }
+        }
+      })
+    );
+
+    const transformsPromises = transforms.map(async (transform) => {
       return handleTransformInstall({
         esClient,
         logger,
         transform,
-        startTransform: transformAssets.get(transform.folderName)?.get('start'),
+        startTransform: transformsSpecifications.get(transform.transformModuleId)?.get('start'),
       });
     });
 
-    installedTransforms = await Promise.all(installationPromises).then((results) => results.flat());
-  }
-
-  if (previousInstalledTransformEsAssets.length > 0) {
-    esReferences = await updateEsAssetReferences(
-      savedObjectsClient,
-      installablePackage.name,
-      esReferences,
-      {
-        assetsToRemove: previousInstalledTransformEsAssets,
-      }
-    );
+    installedTransforms = await Promise.all(transformsPromises).then((results) => results.flat());
   }
 
   return { installedTransforms, esReferences };
@@ -288,7 +293,6 @@ async function handleTransformInstall({
   transform: TransformInstallation;
   startTransform?: boolean;
 }): Promise<EsAssetReference> {
-  console.log(transform.installationName, startTransform);
   try {
     await retryTransientEsErrors(
       () =>
@@ -311,7 +315,6 @@ async function handleTransformInstall({
   }
 
   if (startTransform === undefined || startTransform === true) {
-    console.log('starting transform', transform.installationName);
     await esClient.transform.startTransform(
       { transform_id: transform.installationName },
       { ignore: [409] }
@@ -323,24 +326,23 @@ async function handleTransformInstall({
 
 const getTransformNameForInstallation = (
   installablePackage: InstallablePackage,
-  path: string,
+  transformModuleId: string,
+  assetType: string,
   suffix: string
 ) => {
-  const pathPaths = path.split('/');
-  const filename = pathPaths?.pop()?.split('.')[0];
-  const folderName = pathPaths?.pop();
-  return `${installablePackage.name}.${folderName}-${filename}-${suffix}`;
+  // @TODO: Should this be prefixed with `logs`?
+  return `logs-${installablePackage.name}.${transformModuleId}-${assetType}-default-${suffix}`;
 };
 
 const getTransformFolderAndFileNames = (installablePackage: InstallablePackage, path: string) => {
   const pathPaths = path.split('/');
   const fileName = pathPaths?.pop()?.split('.')[0];
-  let folderName = pathPaths?.pop();
+  let transformModuleId = pathPaths?.pop();
 
   // If fields.yml is located inside a directory called 'fields' (e.g. {exampleFolder}/fields/fields.yml)
   // We need to go one level up to get the real folder name
-  if (folderName === 'fields') {
-    folderName = pathPaths?.pop();
+  if (transformModuleId === 'fields') {
+    transformModuleId = pathPaths?.pop();
   }
-  return { fileName, folderName };
+  return { fileName: fileName ?? '', transformModuleId: transformModuleId ?? '' };
 };

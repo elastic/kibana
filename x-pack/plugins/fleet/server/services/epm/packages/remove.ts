@@ -150,6 +150,7 @@ async function deleteAssets(
   // must delete ingestPipelines first, or ml models referenced in them cannot be deleted.
   // separate the assets into Index Templates and other assets.
   type Tuple = [EsAssetReference[], EsAssetReference[]];
+
   const [indexTemplatesAndPipelines, otherAssets] = installedEs.reduce<Tuple>(
     ([indexAssetTypes, otherAssetTypes], asset) => {
       if (

@@ -89,7 +89,6 @@ export async function _installPackage({
   try {
     // if some installation already exists
     if (installedPkg) {
-      console.log('installedPkg', installedPkg);
       // if the installation is currently running, don't try to install
       // instead, only return already installed assets
       if (
@@ -114,8 +113,6 @@ export async function _installPackage({
         });
       }
     } else {
-      console.log('no previously installed package calling createInstallation');
-
       await createInstallation({
         savedObjectsClient,
         packageInfo,

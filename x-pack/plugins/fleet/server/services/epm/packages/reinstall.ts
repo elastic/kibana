@@ -22,7 +22,6 @@ export async function reinstallPackageForInstallation({
   esClient: ElasticsearchClient;
   installation: Installation;
 }) {
-  console.log('reinstallPackageForInstallation');
   if (installation.install_source === 'upload') {
     throw new Error('Cannot reinstall an uploaded package');
   }
