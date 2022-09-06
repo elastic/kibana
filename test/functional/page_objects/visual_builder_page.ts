@@ -265,7 +265,7 @@ export class VisualBuilderPageObject extends FtrService {
   }
 
   public async applyChanges() {
-    await this.testSubjects.clickWhenNotDisabled('applyBtn');
+    await this.testSubjects.clickWhenNotDisabledWithoutRetry('applyBtn');
   }
 
   /**
