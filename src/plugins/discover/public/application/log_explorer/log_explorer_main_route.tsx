@@ -19,7 +19,6 @@ import {
   AnalyticsNoDataPageKibanaProvider,
   AnalyticsNoDataPage,
 } from '@kbn/shared-ux-page-analytics-no-data';
-import { inspect } from '@xstate/inspect';
 import {
   SavedSearch,
   getSavedSearch,
