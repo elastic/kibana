@@ -16,6 +16,7 @@ import {
   EuiLink,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useRecentlyViewedMonitors } from './use_recently_viewed_monitors';
 import { useSyntheticsSettingsContext } from '../../../contexts';
 import { useMonitorName } from './use_monitor_name';
 
@@ -28,9 +29,11 @@ export const MonitorSelector = () => {
 
   const { values, loading } = useMonitorName({ search: searchValue });
 
+  const recentlyViewed = useRecentlyViewedMonitors();
+
   useEffect(() => {
-    setOptions(values);
-  }, [values]);
+    setOptions([...recentlyViewed, ...values]);
+  }, [recentlyViewed, values]);
 
   const onButtonClick = () => {
     setIsPopoverOpen(!isPopoverOpen);
@@ -40,7 +43,9 @@ export const MonitorSelector = () => {
     setIsPopoverOpen(false);
   };
 
-  const button = <EuiButtonIcon iconType="arrowDown" onClick={onButtonClick} />;
+  const button = (
+    <EuiButtonIcon iconType="arrowDown" onClick={onButtonClick} aria-label={SELECT_MONITOR} />
+  );
 
   return (
     <Fragment>
@@ -88,10 +93,14 @@ export const MonitorSelector = () => {
   );
 };
 
-const NO_RESULT_FOUND = i18n.translate('xpack.synthetics.monitorSummary.up', {
+const NO_RESULT_FOUND = i18n.translate('xpack.synthetics.monitorSummary.noResultsFound', {
   defaultMessage: 'No monitors found. Try modifying your query.',
 });
 
-const PLACEHOLDER = i18n.translate('xpack.synthetics.monitorSummary.up', {
+const PLACEHOLDER = i18n.translate('xpack.synthetics.monitorSummary.placeholderSearch', {
   defaultMessage: 'Monitor name or tag',
+});
+
+const SELECT_MONITOR = i18n.translate('xpack.synthetics.monitorSummary.selectMonitor', {
+  defaultMessage: 'Select a different monitor to view its details',
 });
