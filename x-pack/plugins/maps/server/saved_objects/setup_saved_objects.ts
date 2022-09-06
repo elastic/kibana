@@ -19,7 +19,7 @@ export function setupSavedObjects(
   core: CoreSetup,
   getFilterMigrations: () => MigrateFunctionsObject
 ) {
-  core.savedObjects.registerType({
+  core.savedObjects.registerType<MapSavedObjectAttributes>({
     name: 'map',
     hidden: false,
     namespaceType: 'multiple-isolated',
