@@ -52,7 +52,6 @@ export async function getSizeTimeseries({
   context: ApmPluginRequestHandlerContext;
 }) {
   const { apmEventClient } = setup;
-  const allIndicesStats = await getTotalIndicesStats({ setup, context });
 
   const { intervalString } = getBucketSizeForAggregatedTransactions({
     start,
@@ -60,62 +59,65 @@ export async function getSizeTimeseries({
     searchAggregatedTransactions,
   });
 
-  const res = await apmEventClient.search('get_storage_timeseries', {
-    apm: {
-      events: [
-        ProcessorEvent.span,
-        ProcessorEvent.transaction,
-        ProcessorEvent.error,
-        ProcessorEvent.metric,
-      ],
-    },
-    body: {
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            ...environmentQuery(environment),
-            ...kqlQuery(kuery),
-            ...rangeQuery(start, end),
-            ...(indexLifecyclePhase !== IndexLifecyclePhaseSelectOption.All
-              ? termQuery(
-                  TIER,
-                  indexLifeCyclePhaseToDataTier[indexLifecyclePhase]
-                )
-              : []),
-          ],
-        },
+  const [allIndicesStats, res] = await Promise.all([
+    getTotalIndicesStats({ setup, context }),
+    apmEventClient.search('get_storage_timeseries', {
+      apm: {
+        events: [
+          ProcessorEvent.span,
+          ProcessorEvent.transaction,
+          ProcessorEvent.error,
+          ProcessorEvent.metric,
+        ],
       },
-      aggs: {
-        sample: {
-          random_sampler: randomSampler,
-          aggs: {
-            services: {
-              terms: {
-                field: SERVICE_NAME,
-                size: 500,
-              },
-              aggs: {
-                storageTimeSeries: {
-                  date_histogram: {
-                    field: '@timestamp',
-                    fixed_interval: intervalString,
-                    min_doc_count: 0,
-                    extended_bounds: {
-                      min: start,
-                      max: end,
-                    },
-                  },
-                  aggs: {
-                    indices: {
-                      terms: {
-                        field: INDEX,
-                        size: 500,
+      body: {
+        size: 0,
+        query: {
+          bool: {
+            filter: [
+              ...environmentQuery(environment),
+              ...kqlQuery(kuery),
+              ...rangeQuery(start, end),
+              ...(indexLifecyclePhase !== IndexLifecyclePhaseSelectOption.All
+                ? termQuery(
+                    TIER,
+                    indexLifeCyclePhaseToDataTier[indexLifecyclePhase]
+                  )
+                : []),
+            ],
+          },
+        },
+        aggs: {
+          sample: {
+            random_sampler: randomSampler,
+            aggs: {
+              services: {
+                terms: {
+                  field: SERVICE_NAME,
+                  size: 500,
+                },
+                aggs: {
+                  storageTimeSeries: {
+                    date_histogram: {
+                      field: '@timestamp',
+                      fixed_interval: intervalString,
+                      min_doc_count: 0,
+                      extended_bounds: {
+                        min: start,
+                        max: end,
                       },
-                      aggs: {
-                        number_of_metric_docs_for_index: {
-                          value_count: {
-                            field: INDEX,
+                    },
+                    aggs: {
+                      indices: {
+                        terms: {
+                          field: INDEX,
+                          size: 500,
+                        },
+                        aggs: {
+                          number_of_metric_docs_for_index: {
+                            value_count: {
+                              field: INDEX,
+                            },
                           },
                         },
                       },
@@ -127,8 +129,8 @@ export async function getSizeTimeseries({
           },
         },
       },
-    },
-  });
+    }),
+  ]);
 
   return (
     res.aggregations?.sample.services.buckets.map((serviceBucket) => {
