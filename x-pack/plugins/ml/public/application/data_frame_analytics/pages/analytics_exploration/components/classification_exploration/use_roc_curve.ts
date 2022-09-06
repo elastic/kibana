@@ -121,6 +121,7 @@ export const useRocCurve = (
     }
 
     loadRocCurveData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify([jobConfig, searchQuery, columns])]);
 
   return {

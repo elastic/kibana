@@ -20,6 +20,7 @@ export const TextInput: FC<{
 
   useEffect(() => {
     inferrer.inputText$.next(inputText);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [inputText]);
 
   const runningState = useObservable(inferrer.runningState$);

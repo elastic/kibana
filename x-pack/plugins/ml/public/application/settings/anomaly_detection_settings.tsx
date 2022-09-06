@@ -44,6 +44,7 @@ export const AnomalyDetectionSettings: FC = () => {
 
   useEffect(() => {
     loadSummaryStats();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function loadSummaryStats() {
