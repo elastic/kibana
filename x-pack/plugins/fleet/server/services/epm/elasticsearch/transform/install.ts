@@ -7,19 +7,13 @@
 
 import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { errors } from '@elastic/elasticsearch';
-
 import { safeLoad } from 'js-yaml';
-
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
 import { installComponentAndIndexTemplateForDataStream } from '../template/install';
-
 import { processFields } from '../../fields/field';
-
 import { generateMappings } from '../template/template';
-
 import { getESAssetMetadata } from '../meta';
-
 import { updateEsAssetReferences } from '../../packages/install';
 import { getPathParts } from '../../archive';
 import { ElasticsearchAssetType } from '../../../../../common/types/models';
@@ -124,7 +118,6 @@ export const installTransform = async (
           installationName: getTransformNameForInstallation(
             installablePackage,
             transformModuleId,
-            ElasticsearchAssetType.transform,
             installNameSuffix
           ),
           content,
@@ -162,8 +155,8 @@ export const installTransform = async (
               installationName: getTransformNameForInstallation(
                 installablePackage,
                 transformModuleId,
-                ElasticsearchAssetType.indexTemplate,
-                installNameSuffix
+                installNameSuffix,
+                'template'
               ),
               template: mergedDestinationIndexTemplateInstallationWithMappings,
             } as DestinationIndexTemplateInstallation);
@@ -179,8 +172,8 @@ export const installTransform = async (
               installationName: getTransformNameForInstallation(
                 installablePackage,
                 transformModuleId,
-                ElasticsearchAssetType.indexTemplate,
-                installNameSuffix
+                installNameSuffix,
+                'template'
               ),
               template: destinationIndexTemplate,
               _meta: getESAssetMetadata({ packageName: installablePackage.name }),
@@ -224,7 +217,6 @@ export const installTransform = async (
             indexTemplate: {
               template: destinationIndexTemplate.template,
               priority: 200,
-              // @todo: verify if this is correct
               index_patterns: [
                 transformsSpecifications
                   .get(destinationIndexTemplate.transformModuleId)
@@ -242,21 +234,19 @@ export const installTransform = async (
     await Promise.all(
       transforms.map(async (transform) => {
         const index = transform.content.dest.index;
-        // const pipelineId = transform.content.dest.pipeline;
+        const pipelineId = transform.content.dest.pipeline;
         const startTransform =
           transformsSpecifications.get(transform.transformModuleId)?.get('start') !== false;
 
-        // @todo: replace true with !startTransform
         if (!startTransform) {
           const indexExist = await esClient.indices.exists({
             index,
           });
           if (indexExist !== true) {
-            // @TODO: action [indices:admin/create] is unauthorized for user [kibana_system] with effective roles [kibana_system]
-            // return esClient.indices.create({
-            //   index,
-            //   ...(pipelineId ? { settings: { default_pipeline: pipelineId } } : {}),
-            // });
+            return esClient.indices.create({
+              index,
+              ...(pipelineId ? { settings: { default_pipeline: pipelineId } } : {}),
+            });
           }
         }
       })
@@ -329,11 +319,13 @@ async function handleTransformInstall({
 const getTransformNameForInstallation = (
   installablePackage: InstallablePackage,
   transformModuleId: string,
-  assetType: string,
-  suffix: string
+  suffix: string,
+  assetType?: string
 ) => {
   // @TODO: Should this be prefixed with `logs`?
-  return `logs-${installablePackage.name}.${transformModuleId}-${assetType}-default-${suffix}`;
+  return `logs-${installablePackage.name}.${transformModuleId}-${
+    assetType === undefined ? 'default' : assetType
+  }-${suffix}`;
 };
 
 const getTransformFolderAndFileNames = (installablePackage: InstallablePackage, path: string) => {
