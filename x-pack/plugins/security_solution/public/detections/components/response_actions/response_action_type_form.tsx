@@ -24,10 +24,11 @@ import type { ArrayItem } from '../../../shared_imports';
 interface IProps {
   item: ArrayItem;
   onDeleteAction: (id: number) => void;
+  formRef: React.RefObject<{ validation: () => Promise<{ isValid: boolean }> }>;
 }
 
 export const ResponseActionTypeForm = React.memo((props: IProps) => {
-  const { item, onDeleteAction } = props;
+  const { item, onDeleteAction, formRef } = props;
   const [_isOpen, setIsOpen] = useState(true);
 
   const [data] = useFormData();
@@ -35,11 +36,11 @@ export const ResponseActionTypeForm = React.memo((props: IProps) => {
 
   const getResponseActionTypeForm = useCallback(() => {
     if (action?.actionTypeId === RESPONSE_ACTION_TYPES.OSQUERY) {
-      return <OsqueryResponseAction item={item} />;
+      return <OsqueryResponseAction item={item} formRef={formRef} />;
     }
     // Place for other ResponseActionTypes
     return null;
-  }, [action?.actionTypeId, item]);
+  }, [action?.actionTypeId, formRef, item]);
 
   const handleDelete = useCallback(() => {
     onDeleteAction(item.id);

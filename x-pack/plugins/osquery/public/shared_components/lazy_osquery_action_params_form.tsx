@@ -11,6 +11,7 @@ import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 
 interface LazyOsqueryActionParamsFormProps {
   item: ArrayItem;
+  formRef: React.RefObject<{ validation: () => Promise<{ isValid: boolean }> }>;
 }
 
 const GhostFormField = () => <></>;
@@ -18,7 +19,7 @@ const GhostFormField = () => <></>;
 export const getLazyOsqueryResponseActionTypeForm =
   // eslint-disable-next-line react/display-name
   () => (props: LazyOsqueryActionParamsFormProps) => {
-    const { item } = props;
+    const { item, formRef } = props;
     const OsqueryResponseActionParamsForm = lazy(() => import('./osquery_response_action_type'));
 
     return (
@@ -49,7 +50,7 @@ export const getLazyOsqueryResponseActionTypeForm =
           readDefaultValueOnForm={!item.isNew}
         />
         <Suspense fallback={null}>
-          <OsqueryResponseActionParamsForm item={item} />
+          <OsqueryResponseActionParamsForm item={item} ref={formRef} />
         </Suspense>
       </>
     );

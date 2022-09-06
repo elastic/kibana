@@ -17,13 +17,20 @@ interface IResponseActionsListProps {
   removeItem: (id: number) => void;
   addItem: () => void;
   supportedResponseActionTypes: ResponseActionType[];
+  formRef: React.RefObject<{ validation: () => Promise<{ isValid: boolean }> }>;
 }
 
 const GhostFormField = () => <></>;
 
 // eslint-disable-next-line react/display-name
 export const ResponseActionsList = React.memo(
-  ({ items, removeItem, supportedResponseActionTypes, addItem }: IResponseActionsListProps) => {
+  ({
+    items,
+    removeItem,
+    supportedResponseActionTypes,
+    addItem,
+    formRef,
+  }: IResponseActionsListProps) => {
     const actionTypeIdRef = useRef<string | null>(null);
     const updateActionTypeId = useCallback((id) => {
       actionTypeIdRef.current = id;
@@ -53,7 +60,11 @@ export const ResponseActionsList = React.memo(
         {items.map((actionItem, index) => {
           return (
             <div key={actionItem.id}>
-              <ResponseActionTypeForm item={actionItem} onDeleteAction={removeItem} />
+              <ResponseActionTypeForm
+                item={actionItem}
+                onDeleteAction={removeItem}
+                formRef={formRef}
+              />
 
               <UseField path={`${actionItem.path}.actionTypeId`} component={GhostFormField} />
             </div>

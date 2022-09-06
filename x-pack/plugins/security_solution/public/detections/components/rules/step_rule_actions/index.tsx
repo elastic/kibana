@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import { findIndex } from 'lodash/fp';
 import type { FC } from 'react';
-import React, { memo, useCallback, useEffect, useMemo } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useRef } from 'react';
 
 import type { ActionVariables } from '@kbn/triggers-actions-ui-plugin/public';
 import { UseArray } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
@@ -106,6 +106,7 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
     watch: ['throttle'],
   });
   const throttle = formThrottle || initialState.throttle;
+  const formRef = useRef<{ validation: () => Promise<{ isValid: boolean }> }>(null);
 
   const handleSubmit = useCallback(
     (enabled: boolean) => {
@@ -118,6 +119,15 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
   );
 
   const getData = useCallback(async () => {
+    if (formRef.current?.validation) {
+      const { isValid } = await formRef.current?.validation();
+      if (!isValid) {
+        return {
+          isValid: false,
+          data: getFormData(),
+        };
+      }
+    }
     const result = await submit();
     return result?.isValid
       ? result
@@ -178,7 +188,9 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
       if (throttle !== stepActionsDefaultValue.throttle) {
         return (
           <>
-            <UseArray path="responseActions">{ResponseActionsForm}</UseArray>
+            <UseArray path="responseActions">
+              {(params) => <ResponseActionsForm {...params} formRef={formRef} />}
+            </UseArray>
           </>
         );
       } else {

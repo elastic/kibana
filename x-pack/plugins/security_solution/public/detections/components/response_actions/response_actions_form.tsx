@@ -19,9 +19,10 @@ interface IProps {
   items: ArrayItem[];
   addItem: () => void;
   removeItem: (id: number) => void;
+  formRef: React.RefObject<{ validation: () => Promise<{ isValid: boolean }> }>;
 }
 
-export const ResponseActionsForm = ({ items, addItem, removeItem }: IProps) => {
+export const ResponseActionsForm = ({ items, addItem, removeItem, formRef }: IProps) => {
   const supportedResponseActionTypes = useSupportedResponseActionTypes();
 
   const form = useMemo(() => {
@@ -34,9 +35,10 @@ export const ResponseActionsForm = ({ items, addItem, removeItem }: IProps) => {
         removeItem={removeItem}
         supportedResponseActionTypes={supportedResponseActionTypes}
         addItem={addItem}
+        formRef={formRef}
       />
     );
-  }, [addItem, items, removeItem, supportedResponseActionTypes]);
+  }, [addItem, formRef, items, removeItem, supportedResponseActionTypes]);
 
   return (
     <>

@@ -14,11 +14,11 @@ import { NOT_AVAILABLE, PERMISSION_DENIED, SHORT_EMPTY_TITLE } from './translati
 
 interface IProps {
   item: ArrayItem;
+  formRef: React.RefObject<{ validation: () => Promise<{ isValid: boolean }> }>;
 }
 
 // eslint-disable-next-line react/display-name
 export const OsqueryResponseAction = React.memo((props: IProps) => {
-  // IT SHOULD BE MOVED INTO OSQUERY PLUGIN
   const { osquery } = useKibana().services;
   const OsqueryForm = useMemo(
     () => osquery?.OsqueryResponseActionTypeForm,
