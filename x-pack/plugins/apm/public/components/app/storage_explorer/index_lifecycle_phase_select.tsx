@@ -8,16 +8,18 @@
 import React from 'react';
 import { EuiSuperSelect, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useHistory } from 'react-router-dom';
 import { IndexLifecyclePhaseSelectOption } from '../../../../common/storage_explorer_types';
+import * as urlHelpers from '../../shared/links/url_helpers';
+import { useApmParams } from '../../../hooks/use_apm_params';
 
-interface Props {
-  indexLifecyclePhase: IndexLifecyclePhaseSelectOption;
-  onChange: (indexLifecyclePhase: IndexLifecyclePhaseSelectOption) => void;
-}
-export function IndexLifecyclePhaseSelect({
-  indexLifecyclePhase,
-  onChange,
-}: Props) {
+export function IndexLifecyclePhaseSelect() {
+  const history = useHistory();
+
+  const {
+    query: { indexLifecyclePhase },
+  } = useApmParams('/storage-explorer');
+
   const options = [
     {
       value: IndexLifecyclePhaseSelectOption.All,
@@ -121,7 +123,11 @@ export function IndexLifecyclePhaseSelect({
       )}
       options={options}
       valueOfSelected={indexLifecyclePhase}
-      onChange={(value) => onChange(value as IndexLifecyclePhaseSelectOption)}
+      onChange={(value) => {
+        urlHelpers.push(history, {
+          query: { indexLifecyclePhase: value },
+        });
+      }}
       hasDividers
       style={{ minWidth: 200 }}
     />

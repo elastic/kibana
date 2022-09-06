@@ -5,31 +5,23 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { IndexLifecyclePhaseSelectOption } from '../../../../common/storage_explorer_types';
 import { IndexLifecyclePhaseSelect } from './index_lifecycle_phase_select';
 import { ServicesTable } from './services_table';
 import { SearchBar } from '../../shared/search_bar';
 
 export function StorageExplorer() {
-  const [indexLifecyclePhase, setIndexLifecyclePhase] = useState(
-    IndexLifecyclePhaseSelectOption.Hot
-  );
-
   return (
     <>
       <SearchBar />
       <EuiFlexGroup justifyContent="flexEnd">
         <EuiFlexItem grow={false}>
-          <IndexLifecyclePhaseSelect
-            indexLifecyclePhase={indexLifecyclePhase}
-            onChange={setIndexLifecyclePhase}
-          />
+          <IndexLifecyclePhaseSelect />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer />
-      <ServicesTable indexLifecyclePhase={indexLifecyclePhase} />
+      <ServicesTable />
     </>
   );
 }
