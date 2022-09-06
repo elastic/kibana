@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ProcessorEvent } from '../../../common/processor_event';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { Setup } from '../../lib/helpers/setup_request';
 
 export async function getHasData({ setup }: { setup: Setup }) {

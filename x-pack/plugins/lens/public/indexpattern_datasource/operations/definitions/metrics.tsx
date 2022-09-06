@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { EuiSwitch } from '@elastic/eui';
+import { EuiSwitch, EuiText } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import { OperationDefinition, ParamEditorProps } from '.';
@@ -30,6 +30,7 @@ import {
 } from '../time_scale_utils';
 import { getDisallowedPreviousShiftMessage } from '../../time_shift_utils';
 import { updateColumnParam } from '../layer_helpers';
+import { getColumnReducedTimeRangeError } from '../../reduced_time_range_utils';
 
 type MetricColumn<T> = FieldBasedIndexPatternColumn & {
   operationType: T;
@@ -80,7 +81,9 @@ function buildMetricOperation<T extends MetricColumn<string>>({
       undefined,
       optionalTimeScaling ? column?.timeScale : undefined,
       undefined,
-      column?.timeShift
+      column?.timeShift,
+      undefined,
+      column?.reducedTimeRange
     );
   };
 
@@ -131,6 +134,7 @@ function buildMetricOperation<T extends MetricColumn<string>>({
         timeScale: optionalTimeScaling ? previousColumn?.timeScale : undefined,
         filter: getFilter(previousColumn, columnParams),
         timeShift: columnParams?.shift || previousColumn?.timeShift,
+        reducedTimeRange: columnParams?.reducedTimeRange || previousColumn?.reducedTimeRange,
         params: {
           ...getFormatFromPreviousColumn(previousColumn),
           emptyAsNull:
@@ -158,36 +162,34 @@ function buildMetricOperation<T extends MetricColumn<string>>({
       return [
         {
           dataTestSubj: 'hide-zero-values',
-          optionElement: (
-            <>
-              <EuiSwitch
-                label={i18n.translate('xpack.lens.indexPattern.hideZero', {
-                  defaultMessage: 'Hide zero values',
-                })}
-                labelProps={{
-                  style: {
-                    fontWeight: euiThemeVars.euiFontWeightMedium,
-                  },
-                }}
-                checked={Boolean(currentColumn.params?.emptyAsNull)}
-                onChange={() => {
-                  paramEditorUpdater(
-                    updateColumnParam({
-                      layer,
-                      columnId,
-                      paramName: 'emptyAsNull',
-                      value: !currentColumn.params?.emptyAsNull,
-                    })
-                  );
-                }}
-                compressed
-              />
-            </>
+          inlineElement: (
+            <EuiSwitch
+              label={
+                <EuiText size="xs">
+                  {i18n.translate('xpack.lens.indexPattern.hideZero', {
+                    defaultMessage: 'Hide zero values',
+                  })}
+                </EuiText>
+              }
+              labelProps={{
+                style: {
+                  fontWeight: euiThemeVars.euiFontWeightMedium,
+                },
+              }}
+              checked={Boolean(currentColumn.params?.emptyAsNull)}
+              onChange={() => {
+                paramEditorUpdater(
+                  updateColumnParam({
+                    layer,
+                    columnId,
+                    paramName: 'emptyAsNull',
+                    value: !currentColumn.params?.emptyAsNull,
+                  })
+                );
+              }}
+              compressed
+            />
           ),
-          title: '',
-          showInPopover: true,
-          inlineElement: null,
-          onClick: () => {},
         },
       ];
     },
@@ -210,8 +212,10 @@ function buildMetricOperation<T extends MetricColumn<string>>({
           indexPattern
         ),
         getDisallowedPreviousShiftMessage(layer, columnId),
+        getColumnReducedTimeRangeError(layer, columnId, indexPattern),
       ]),
     filterable: true,
+    canReduceTimeRange: true,
     documentation: {
       section: 'elasticsearch',
       signature: i18n.translate('xpack.lens.indexPattern.metric.signature', {

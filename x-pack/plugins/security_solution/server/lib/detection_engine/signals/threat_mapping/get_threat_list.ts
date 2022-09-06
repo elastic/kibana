@@ -22,18 +22,17 @@ export const INDICATOR_PER_PAGE = 1000;
 
 export const getThreatList = async ({
   esClient,
-  query,
-  language,
-  index,
-  searchAfter,
   exceptionItems,
+  index,
+  language,
+  perPage,
+  query,
+  ruleExecutionLogger,
+  searchAfter,
   threatFilters,
-  buildRuleMessage,
-  logger,
   threatListConfig,
   pitId,
   reassignPitId,
-  perPage,
   runtimeMappings,
   listClient,
 }: GetThreatListOptions): Promise<estypes.SearchResponse<ThreatListDoc>> => {
@@ -49,10 +48,8 @@ export const getThreatList = async ({
     exceptionItems
   );
 
-  logger.debug(
-    buildRuleMessage(
-      `Querying the indicator items from the index: "${index}" with searchAfter: "${searchAfter}" for up to ${calculatedPerPage} indicator items`
-    )
+  ruleExecutionLogger.debug(
+    `Querying the indicator items from the index: "${index}" with searchAfter: "${searchAfter}" for up to ${calculatedPerPage} indicator items`
   );
 
   const response = await esClient.search<
@@ -74,7 +71,7 @@ export const getThreatList = async ({
     pit: { id: pitId },
   });
 
-  logger.debug(buildRuleMessage(`Retrieved indicator items of size: ${response.hits.hits.length}`));
+  ruleExecutionLogger.debug(`Retrieved indicator items of size: ${response.hits.hits.length}`);
 
   reassignPitId(response.pit_id);
 

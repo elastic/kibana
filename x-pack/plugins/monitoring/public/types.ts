@@ -10,9 +10,7 @@ import { NavigationPublicPluginStart as NavigationStart } from '@kbn/navigation-
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 export type { MonitoringConfig } from '../server';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 export type { MLJobs } from '../server/lib/elasticsearch/get_ml_jobs';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 

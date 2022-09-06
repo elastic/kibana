@@ -118,6 +118,10 @@ export const agentPolicyRouteService = {
     return AGENT_POLICY_API_ROUTES.LIST_PATTERN;
   },
 
+  getBulkGetPath: () => {
+    return AGENT_POLICY_API_ROUTES.BULK_GET_PATTERN;
+  },
+
   getInfoPath: (agentPolicyId: string) => {
     return AGENT_POLICY_API_ROUTES.INFO_PATTERN.replace('{agentPolicyId}', agentPolicyId);
   },
@@ -198,6 +202,8 @@ export const agentRouteService = {
   getIncomingDataPath: () => AGENT_API_ROUTES.DATA_PATTERN,
   getCreateActionPath: (agentId: string) =>
     AGENT_API_ROUTES.ACTIONS_PATTERN.replace('{agentId}', agentId),
+  getListTagsPath: () => AGENT_API_ROUTES.LIST_TAGS_PATTERN,
+  getAvailableVersionsPath: () => AGENT_API_ROUTES.AVAILABLE_VERSIONS_PATTERN,
 };
 
 export const outputRoutesService = {

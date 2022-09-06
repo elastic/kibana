@@ -13,7 +13,6 @@ export {
   MetricsTableNoIndicesContent,
   NumberCell,
   StepwisePagination,
-  UptimeCell,
 } from './components';
 export {
   averageOfValues,

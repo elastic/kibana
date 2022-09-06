@@ -78,10 +78,10 @@ export default class IndexPatternSelect extends Component<IndexPatternSelectInte
       return;
     }
 
-    let indexPatternTitle;
+    let label;
     try {
       const indexPattern = await this.props.indexPatternService.get(indexPatternId);
-      indexPatternTitle = indexPattern.title;
+      label = indexPattern.getName();
     } catch (err) {
       // index pattern no longer exists
       return;
@@ -94,23 +94,24 @@ export default class IndexPatternSelect extends Component<IndexPatternSelectInte
     this.setState({
       selectedIndexPattern: {
         value: indexPatternId,
-        label: indexPatternTitle,
+        label,
       },
     });
   };
 
   debouncedFetch = _.debounce(async (searchValue: string) => {
-    const idsAndTitles = await this.props.indexPatternService.getIdsWithTitle();
+    const dataViews = await this.props.indexPatternService.getIdsWithTitle();
     if (!this.isMounted || searchValue !== this.state.searchValue) {
       return;
     }
 
     const options = [];
-    for (let i = 0; i < idsAndTitles.length; i++) {
-      if (idsAndTitles[i].title.toLowerCase().includes(searchValue.toLowerCase())) {
+    for (let i = 0; i < dataViews.length; i++) {
+      const label = dataViews[i].name ? dataViews[i].name : dataViews[i].title;
+      if (label && label.toLowerCase().includes(searchValue.toLowerCase())) {
         options.push({
-          label: idsAndTitles[i].title,
-          value: idsAndTitles[i].id,
+          label,
+          value: dataViews[i].id,
         });
       }
     }

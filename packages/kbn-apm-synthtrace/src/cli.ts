@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { runSynthtrace } from './scripts/run_synthtrace';
+export { runSynthtrace } from './cli/run_synthtrace';

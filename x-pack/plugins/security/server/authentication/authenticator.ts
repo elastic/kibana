@@ -25,7 +25,7 @@ import type { ConfigType } from '../config';
 import { getErrorStatusCode } from '../errors';
 import type { SecurityFeatureUsageServiceStart } from '../feature_usage';
 import type { Session, SessionValue } from '../session_management';
-import type { UserProfileServiceStart } from '../user_profile';
+import type { UserProfileServiceStartInternal } from '../user_profile';
 import { AuthenticationResult } from './authentication_result';
 import { canRedirectRequest } from './can_redirect_request';
 import { DeauthenticationResult } from './deauthentication_result';
@@ -80,7 +80,7 @@ export interface ProviderLoginAttempt {
 export interface AuthenticatorOptions {
   audit: AuditServiceSetup;
   featureUsageService: SecurityFeatureUsageServiceStart;
-  userProfileService: UserProfileServiceStart;
+  userProfileService: UserProfileServiceStartInternal;
   getCurrentUser: (request: KibanaRequest) => AuthenticatedUser | null;
   config: Pick<ConfigType, 'authc'>;
   basePath: IBasePath;
@@ -164,7 +164,11 @@ function isLoginAttemptWithProviderType(
   );
 }
 
-function isSessionAuthenticated(sessionValue?: Readonly<SessionValue> | null) {
+type WithRequiredProperty<T, K extends keyof T> = T & Required<Pick<T, K>>;
+
+function isSessionAuthenticated(
+  sessionValue?: Readonly<SessionValue> | null
+): sessionValue is WithRequiredProperty<SessionValue, 'username'> {
   return !!sessionValue?.username;
 }
 
@@ -330,23 +334,6 @@ export class Authenticator {
           authenticationResult,
           existingSessionValue,
         });
-
-        // Checking for presence of `user` object to determine success state rather than
-        // `success()` method since that indicates a successful authentication and `redirect()`
-        // could also (but does not always) authenticate a user successfully (e.g. SAML flow)
-        if (authenticationResult.user || authenticationResult.failed()) {
-          const auditLogger = this.options.audit.asScoped(request);
-          auditLogger.log(
-            userLoginEvent({
-              // We must explicitly specify the sessionId for login events because we just created the session, so
-              // it won't automatically get included in the audit event from the request context.
-              sessionId: sessionUpdateResult?.value?.sid,
-              authenticationResult,
-              authenticationProvider: providerName,
-              authenticationType: provider.type,
-            })
-          );
-        }
 
         return this.handlePreAccessRedirects(
           request,
@@ -637,6 +624,21 @@ export class Authenticator {
       existingSessionValue: Readonly<SessionValue> | null;
     }
   ) {
+    // Log failed `user_login` attempt only if creating a brand new session or if the existing session is
+    // not authenticated (e.g. during SAML handshake). If the existing session is authenticated we will
+    // invalidate it and log a `user_logout` event instead.
+    if (authenticationResult.failed() && !isSessionAuthenticated(existingSessionValue)) {
+      const auditLogger = this.options.audit.asScoped(request);
+      auditLogger.log(
+        userLoginEvent({
+          sessionId: existingSessionValue?.sid,
+          authenticationResult,
+          authenticationProvider: provider.name,
+          authenticationType: provider.type,
+        })
+      );
+    }
+
     if (!existingSessionValue && !authenticationResult.shouldUpdateState()) {
       return null;
     }
@@ -715,10 +717,15 @@ export class Authenticator {
       existingSessionValue = null;
     }
 
+    let userProfileId = existingSessionValue?.userProfileId;
+
     // If authentication result includes user profile grant, we should try to activate user profile for this user and
     // store user profile identifier in the session value.
-    let userProfileId = existingSessionValue?.userProfileId;
-    if (authenticationResult.userProfileGrant) {
+    // IMPORTANT: We don't activate profiles for the Elastic Cloud managed users until Cloud supports stable user
+    // profile identifiers.
+    const shouldActivateProfile =
+      authenticationResult.userProfileGrant && !authenticationResult.user?.elastic_cloud_user;
+    if (shouldActivateProfile) {
       this.logger.debug(`Activating profile for "${authenticationResult.user?.username}".`);
       userProfileId = (
         await this.options.userProfileService.activate(authenticationResult.userProfileGrant)
@@ -740,6 +747,24 @@ export class Authenticator {
         provider,
         state: authenticationResult.shouldUpdateState() ? authenticationResult.state : null,
       });
+
+      // Log successful `user_login` event if a new authenticated session was created or an existing session was overwritten and
+      // the username or authentication provider changed. When username or authentication provider changes the session
+      // gets invalidated (logging `user_logout` event) before a new session is created.
+      if (
+        isNewSessionAuthenticated &&
+        (!isExistingSessionAuthenticated || usernameHasChanged || providerHasChanged)
+      ) {
+        const auditLogger = this.options.audit.asScoped(request);
+        auditLogger.log(
+          userLoginEvent({
+            sessionId: newSessionValue?.sid, // We must explicitly specify the `sessionId` here since we just created the session and it can't be inferred from the request context.
+            authenticationResult,
+            authenticationProvider: provider.name,
+            authenticationType: provider.type,
+          })
+        );
+      }
     } else if (authenticationResult.shouldUpdateState()) {
       newSessionValue = await this.session.update(request, {
         ...existingSessionValue,
@@ -771,7 +796,7 @@ export class Authenticator {
     sessionValue,
     skipAuditEvent,
   }: InvalidateSessionValueParams) {
-    if (sessionValue && !skipAuditEvent) {
+    if (isSessionAuthenticated(sessionValue) && !skipAuditEvent) {
       const auditLogger = this.options.audit.asScoped(request);
       auditLogger.log(
         userLogoutEvent({

@@ -11,6 +11,7 @@ import { scaleLog } from 'd3-scale';
  * Polyfill is from: https://developers.google.com/web/updates/2015/08/using-requestidlecallback
  * This is for Safari 12.1.2 and IE-11
  */
+// do not delete
 export const polyFillRequestIdleCallback = (callback: IdleRequestCallback) => {
   const start = Date.now();
   return setTimeout(() => {
@@ -34,6 +35,7 @@ export const polyFillRequestIdleCallback = (callback: IdleRequestCallback) => {
  * scheduler with fibers (Concurrent React) and we would then remove
  * this and all usages. Otherwise, just remove this note
  */
+// do not delete
 export const requestIdleCallbackViaScheduler = (
   callback: IdleRequestCallback,
   opts?: IdleRequestOptions
@@ -66,4 +68,5 @@ export const requestIdleCallbackViaScheduler = (
  * delayMax setting value meaning at most beyond 25 elements to display, they will take at most
  * 2 seconds to delay before show up.
  */
+// do not delete
 export const maxDelay = scaleLog().domain([1, 25]).range([100, 2000]).clamp(true);

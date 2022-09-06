@@ -50,7 +50,7 @@ export const AgentBinarySection: React.FunctionComponent<AgentBinarySectionProps
       <EuiButtonEmpty
         iconType="plusInCircle"
         href={getHref('settings_create_download_sources')}
-        data-test-subj="adddownloadSourcesBtn"
+        data-test-subj="addDownloadSourcesBtn"
       >
         <FormattedMessage
           id="xpack.fleet.settings.downloadSourcesSection.CreateButtonLabel"

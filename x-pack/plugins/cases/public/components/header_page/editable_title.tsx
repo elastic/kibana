@@ -118,7 +118,7 @@ const EditableTitleComponent: React.FC<EditableTitleProps> = ({ onSubmit, isLoad
   ) : (
     <Title title={title} releasePhase={releasePhase}>
       {isLoading && <MySpinner data-test-subj="editable-title-loading" />}
-      {!isLoading && permissions.all && (
+      {!isLoading && permissions.update && (
         <MyEuiButtonIcon
           aria-label={i18n.EDIT_TITLE_ARIA(title as string)}
           iconType="pencil"

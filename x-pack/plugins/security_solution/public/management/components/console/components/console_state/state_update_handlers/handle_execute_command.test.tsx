@@ -32,11 +32,7 @@ describe('When a Console command is entered by the user', () => {
     expect(renderResult.getByTestId('test-helpOutput')).toBeTruthy();
 
     await waitFor(() => {
-      expect(renderResult.getAllByTestId('test-commandList-command')).toHaveLength(
-        // `+2` to account for builtin commands
-        // `+2` to account for builtin generic args
-        commands.length + 4
-      );
+      expect(renderResult.getAllByTestId('test-commandList-command')).toHaveLength(commands.length);
     });
   });
 
@@ -52,14 +48,14 @@ describe('When a Console command is entered by the user', () => {
     });
   });
 
-  it('should clear the command output history when `cls` is entered', async () => {
+  it('should clear the command output history when `clear` is entered', async () => {
     render();
     enterCommand('help');
     enterCommand('help');
 
     expect(renderResult.getByTestId('test-historyOutput').childElementCount).toBe(2);
 
-    enterCommand('cls');
+    enterCommand('clear');
 
     expect(renderResult.getByTestId('test-historyOutput').childElementCount).toBe(0);
   });
@@ -111,7 +107,7 @@ describe('When a Console command is entered by the user', () => {
 
     await waitFor(() => {
       expect(renderResult.getByTestId('test-unknownCommandError').textContent).toEqual(
-        'Unsupported text/commandThe text you entered foo-foo is unsupported! Click  or type help for assistance.'
+        'Unsupported text/commandThe text you entered foo-foo is unsupported! Click  Help or type help for assistance.'
       );
     });
   });
@@ -145,6 +141,28 @@ describe('When a Console command is entered by the user', () => {
     await waitFor(() => {
       expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
         'The following cmd2 arguments are not supported by this command: --foo, --bar'
+      );
+    });
+  });
+
+  it('should show error if unknown arguments are used along with the `--help` argument', async () => {
+    render();
+    enterCommand('cmd2 one two three --help');
+
+    await waitFor(() => {
+      expect(renderResult.getByTestId('test-badArgument').textContent).toMatch(
+        /Unsupported argument/
+      );
+    });
+  });
+
+  it('should show error if values are given to the `--help` argument', async () => {
+    render();
+    enterCommand('cmd2 --help one --help');
+
+    await waitFor(() => {
+      expect(renderResult.getByTestId('test-badArgument').textContent).toMatch(
+        /Unsupported argument/
       );
     });
   });
@@ -208,7 +226,7 @@ describe('When a Console command is entered by the user', () => {
     const cmd1Definition = commands.find((command) => command.name === 'cmd1');
 
     if (!cmd1Definition) {
-      throw new Error('cmd1 defintion not fount');
+      throw new Error('cmd1 defintion not found');
     }
 
     cmd1Definition.validate = () => 'command is invalid';
@@ -217,7 +235,7 @@ describe('When a Console command is entered by the user', () => {
     enterCommand('cmd1');
 
     await waitFor(() => {
-      expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
+      expect(renderResult.getByTestId('test-validationError-message').textContent).toEqual(
         'command is invalid'
       );
     });

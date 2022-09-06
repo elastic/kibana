@@ -12,14 +12,18 @@ import {
   Uuid,
 } from '@elastic/elasticsearch/lib/api/types';
 
-export interface ElasticsearchIndex {
-  health?: HealthStatus;
+import { Connector } from './connectors';
+import { Crawler } from './crawler';
 
+export interface ElasticsearchIndex {
+  count: number; // Elasticsearch _count
+  health?: HealthStatus;
+  hidden: boolean;
   name: IndexName;
   status?: IndicesStatsIndexMetadataState;
   total: {
     docs: {
-      count: number;
+      count: number; // Lucene count (includes nested documents)
       deleted: number;
     };
     store: {
@@ -28,3 +32,21 @@ export interface ElasticsearchIndex {
   };
   uuid?: Uuid;
 }
+
+export interface ConnectorIndex extends ElasticsearchIndex {
+  connector: Connector;
+}
+export interface CrawlerIndex extends ElasticsearchIndex {
+  crawler: Crawler;
+  connector?: Connector;
+}
+
+export interface ElasticsearchIndexWithPrivileges extends ElasticsearchIndex {
+  alias: boolean;
+  privileges: {
+    manage: boolean;
+    read: boolean;
+  };
+}
+
+export type ElasticsearchIndexWithIngestion = ElasticsearchIndex | ConnectorIndex | CrawlerIndex;

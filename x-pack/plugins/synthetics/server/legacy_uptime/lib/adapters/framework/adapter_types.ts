@@ -29,11 +29,11 @@ import { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { CloudSetup } from '@kbn/cloud-plugin/server';
 import { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 import { FleetStartContract } from '@kbn/fleet-plugin/server';
+import { BfetchServerSetup } from '@kbn/bfetch-plugin/server';
 import { UptimeESClient } from '../../lib';
 import type { TelemetryEventsSender } from '../../telemetry/sender';
 import type { UptimeRouter } from '../../../../types';
 import { UptimeConfig } from '../../../../../common/config';
-import { SyntheticsService } from '../../../../synthetics_service/synthetics_service';
 
 export type UMElasticsearchQueryFn<P, R = any> = (
   params: {
@@ -57,7 +57,6 @@ export interface UptimeServerSetup {
   savedObjectsClient?: SavedObjectsClientContract;
   authSavedObjectsClient?: SavedObjectsClientContract;
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
-  syntheticsService: SyntheticsService;
   kibanaVersion: string;
   logger: Logger;
   telemetry: TelemetryEventsSender;
@@ -78,6 +77,7 @@ export interface UptimeCorePluginsSetup {
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
   taskManager: TaskManagerSetupContract;
   telemetry: TelemetryPluginSetup;
+  bfetch: BfetchServerSetup;
 }
 
 export interface UptimeCorePluginsStart {

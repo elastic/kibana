@@ -15,7 +15,7 @@ import {
   LICENCE_FOR_PER_POLICY_OUTPUT,
   FLEET_APM_PACKAGE,
   outputType,
-} from '../../../../../../../common';
+} from '../../../../../../../common/constants';
 import type { NewAgentPolicy, AgentPolicy } from '../../../../types';
 
 // The super select component do not support null or '' as a value

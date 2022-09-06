@@ -8,7 +8,7 @@
 import React, { lazy, Suspense, useCallback } from 'react';
 import { Redirect, Switch } from 'react-router-dom';
 import { Route } from '@kbn/kibana-react-plugin/public';
-import { QueryClientProvider } from 'react-query';
+import { QueryClientProvider } from '@tanstack/react-query';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { AllCases } from '../all_cases';
 import { CreateCase } from '../create';
@@ -58,7 +58,7 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({
         </Route>
 
         <Route path={getCreateCasePath(basePath)}>
-          {permissions.all ? (
+          {permissions.create ? (
             <CreateCase
               onSuccess={onCreateCaseSuccess}
               onCancel={navigateToAllCases}
@@ -70,7 +70,7 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({
         </Route>
 
         <Route path={getCasesConfigurePath(basePath)}>
-          {permissions.all ? (
+          {permissions.update ? (
             <ConfigureCases />
           ) : (
             <NoPrivilegesPage pageName={i18n.CONFIGURE_CASES_PAGE_NAME} />

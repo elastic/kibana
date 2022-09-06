@@ -20,7 +20,7 @@ import type {
   UpdatePackageRequest,
   UpdatePackageResponse,
 } from '../../types';
-import type { GetStatsResponse } from '../../../common';
+import type { FleetErrorResponse, GetStatsResponse } from '../../../common/types';
 
 import { getCustomIntegrations } from '../../services/custom_integrations';
 
@@ -103,12 +103,11 @@ export const sendGetFileByPath = (filePath: string) => {
 };
 
 export const sendInstallPackage = (pkgName: string, pkgVersion: string, force: boolean = false) => {
-  return sendRequest<InstallPackageResponse>({
+  const body = force ? { force } : undefined;
+  return sendRequest<InstallPackageResponse, FleetErrorResponse>({
     path: epmRouteService.getInstallPath(pkgName, pkgVersion),
     method: 'post',
-    body: {
-      force,
-    },
+    body,
   });
 };
 

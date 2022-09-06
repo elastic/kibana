@@ -31,6 +31,7 @@ export default ({ getService }: FtrProviderContext) => {
     hostname: string;
   }
 
+  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/138923
   describe('Tests involving runtime fields of source indexes and the signals index', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/security_solution/runtime');

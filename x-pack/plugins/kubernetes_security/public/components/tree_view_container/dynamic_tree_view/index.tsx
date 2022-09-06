@@ -14,6 +14,7 @@ import {
   EuiBadge,
   keys,
   EuiLoadingSpinner,
+  EuiToolTip,
 } from '@elastic/eui';
 import {
   TREE_NAVIGATION_LOADING,
@@ -22,6 +23,8 @@ import {
 import { useFetchDynamicTreeView } from './hooks';
 import { useStyles } from './styles';
 import { disableEventDefaults, focusNextElement } from './helpers';
+import { useTreeViewContext } from '../contexts';
+import { TreeViewIcon } from '../tree_view_icon';
 import type { DynamicTreeViewProps, DynamicTreeViewItemProps } from './types';
 
 const BUTTON_TEST_ID = 'kubernetesSecurity:dynamicTreeViewButton';
@@ -55,14 +58,14 @@ export const DynamicTreeView = ({
   depth = 0,
   selectionDepth = {},
   query,
-  indexPattern = '',
   onSelect,
-  hasSelection,
   selected = '',
   expanded = true,
   ...props
 }: DynamicTreeViewProps) => {
   const styles = useStyles(depth);
+
+  const { indexPattern, setNoResults } = useTreeViewContext();
 
   const { data, fetchNextPage, isFetchingNextPage, hasNextPage, isLoading } =
     useFetchDynamicTreeView(query, tree[depth].key, indexPattern, expanded);
@@ -87,16 +90,27 @@ export const DynamicTreeView = ({
   };
 
   useEffect(() => {
+    if (depth === 0 && data && data.pages?.[0].buckets.length === 0) {
+      setNoResults(true);
+    }
+  }, [data, depth, setNoResults]);
+
+  useEffect(() => {
     if (expanded) {
       fetchNextPage();
     }
   }, [fetchNextPage, expanded]);
 
   useEffect(() => {
-    if (!hasSelection && !depth && data && data.pages?.[0].buckets?.[0]?.key) {
-      onSelect({}, data.pages[0].buckets[0].key, tree[depth].type);
+    if (!selected && !depth && data && data.pages?.[0].buckets?.[0]?.key) {
+      onSelect(
+        {},
+        tree[depth].type,
+        data.pages[0].buckets[0].key,
+        data.pages[0].buckets[0].key_as_string
+      );
     }
-  }, [data, depth, hasSelection, onSelect, tree]);
+  }, [data, depth, selected, onSelect, tree]);
 
   const onClickNextPageHandler = () => {
     fetchNextPage();
@@ -158,7 +172,6 @@ export const DynamicTreeView = ({
                   aria-label={ariaLabel}
                   depth={depth}
                   expanded={expanded}
-                  indexPattern={indexPattern}
                   isExpanded={isExpanded}
                   onSelect={onSelect}
                   onToggleExpand={onToggleExpand}
@@ -209,25 +222,32 @@ const DynamicTreeViewItem = ({
   selected,
   expanded,
   query,
-  indexPattern,
   ...props
 }: DynamicTreeViewItemProps) => {
   const isLastNode = depth === tree.length - 1;
   const styles = useStyles(depth);
   const buttonRef = useRef<Record<string, any>>({});
 
+  const handleSelect = () => {
+    if (tree[depth].type === 'clusterId') {
+      onSelect(selectionDepth, tree[depth].type, aggData.key, aggData.key_as_string);
+    } else {
+      onSelect(selectionDepth, tree[depth].type, aggData.key);
+    }
+  };
+
   const onKeyboardToggle = () => {
     if (!isLastNode) {
       onToggleExpand();
     }
-    onSelect(selectionDepth, aggData.key, tree[depth].type);
+    handleSelect();
   };
 
   const onButtonToggle = () => {
     if (!isLastNode && !isExpanded) {
       onToggleExpand();
     }
-    onSelect(selectionDepth, aggData.key, tree[depth].type);
+    handleSelect();
   };
 
   const onArrowToggle = (event: MouseEvent<SVGElement>) => {
@@ -276,11 +296,18 @@ const DynamicTreeViewItem = ({
   const isSelected = useMemo(() => {
     return (
       selected ===
-      Object.entries({ ...selectionDepth, [tree[depth].type]: aggData.key })
+      Object.entries({
+        ...selectionDepth,
+        [tree[depth].type]: aggData.key,
+        ...(tree[depth].type === 'clusterId' &&
+          aggData.key_as_string && {
+            clusterName: aggData.key_as_string,
+          }),
+      })
         .map(([k, v]) => `${k}.${v}`)
         .join()
     );
-  }, [aggData.key, depth, selected, selectionDepth, tree]);
+  }, [aggData.key, aggData.key_as_string, depth, selected, selectionDepth, tree]);
 
   return (
     <li
@@ -295,6 +322,7 @@ const DynamicTreeViewItem = ({
         onClick={onButtonToggle}
         onKeyDown={onKeyDown}
         ref={(el) => (buttonRef.current[aggData.key] = el)}
+        css={isLastNode ? styles.leafNodeButton : undefined}
       >
         {!isLastNode && (
           <EuiIcon
@@ -303,8 +331,10 @@ const DynamicTreeViewItem = ({
             onClick={onArrowToggle}
           />
         )}
-        <EuiIcon {...tree[depth].iconProps} css={styles.labelIcon} />
-        <span className="euiTreeView__nodeLabel">{aggData.key}</span>
+        <TreeViewIcon {...tree[depth].iconProps} css={styles.labelIcon} />
+        <EuiToolTip content={aggData.key}>
+          <span className="euiTreeView__nodeLabel">{aggData.key_as_string || aggData.key}</span>
+        </EuiToolTip>
       </button>
       <div
         onKeyDown={(event: React.KeyboardEvent) => onChildrenKeydown(event, aggData.key.toString())}
@@ -317,9 +347,11 @@ const DynamicTreeViewItem = ({
             selectionDepth={{
               ...selectionDepth,
               [tree[depth].type]: aggData.key,
+              ...(tree[depth].type === 'clusterId' && {
+                clusterName: aggData.key_as_string,
+              }),
             }}
             tree={tree}
-            indexPattern={indexPattern}
             onSelect={onSelect}
             selected={selected}
             aria-label={`${aggData.key} child of ${props['aria-label']}`}

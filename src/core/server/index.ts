@@ -52,33 +52,26 @@ import type {
   HttpServiceStart,
 } from '@kbn/core-http-server';
 import type { PrebootServicePreboot } from '@kbn/core-preboot-server';
+import type { MetricsServiceSetup, MetricsServiceStart } from '@kbn/core-metrics-server';
 import {
   ElasticsearchServiceSetup,
-  configSchema as elasticsearchConfigSchema,
   ElasticsearchServiceStart,
   ElasticsearchServicePreboot,
-} from './elasticsearch';
-import { HttpResources } from './http_resources';
+} from '@kbn/core-elasticsearch-server';
+import { configSchema as elasticsearchConfigSchema } from '@kbn/core-elasticsearch-server-internal';
+import type { CapabilitiesSetup, CapabilitiesStart } from '@kbn/core-capabilities-server';
+import type {
+  SavedObjectsServiceSetup,
+  SavedObjectsServiceStart,
+} from '@kbn/core-saved-objects-server';
+import type { DeprecationsServiceSetup } from '@kbn/core-deprecations-server';
+import type { CoreUsageDataStart, CoreUsageDataSetup } from '@kbn/core-usage-data-server';
 
+import { I18nServiceSetup } from '@kbn/core-i18n-server';
+import { HttpResources } from './http_resources';
 import { PluginsServiceSetup, PluginsServiceStart, PluginOpaqueId } from './plugins';
 import { UiSettingsServiceSetup, UiSettingsServiceStart } from './ui_settings';
-import { SavedObjectsServiceSetup, SavedObjectsServiceStart } from './saved_objects';
-import { CapabilitiesSetup, CapabilitiesStart } from './capabilities';
-import { MetricsServiceSetup, MetricsServiceStart } from './metrics';
 import { StatusServiceSetup } from './status';
-import { CoreUsageDataStart, CoreUsageDataSetup } from './core_usage_data';
-import { I18nServiceSetup } from './i18n';
-import { DeprecationsServiceSetup } from './deprecations';
-// Because of #79265 we need to explicitly import, then export these types for
-// scripts/telemetry_check.js to work as expected
-import {
-  CoreUsageStats,
-  CoreUsageData,
-  CoreConfigUsageData,
-  ConfigUsageData,
-  CoreEnvironmentUsageData,
-  CoreServicesUsageData,
-} from './core_usage_data';
 import type { CoreRequestHandlerContext } from './core_route_handler_context';
 import type { PrebootCoreRequestHandlerContext } from './preboot_core_route_handler_context';
 
@@ -89,18 +82,23 @@ export type {
   CoreEnvironmentUsageData,
   CoreServicesUsageData,
   ConfigUsageData,
-};
+  CoreUsageDataSetup,
+  CoreUsageDataStart,
+  CoreUsageCounter,
+  CoreIncrementUsageCounter,
+  CoreIncrementCounterParams,
+} from '@kbn/core-usage-data-server';
 
 export type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 export type { IExecutionContextContainer } from '@kbn/core-execution-context-server';
 
 export { bootstrap } from './bootstrap';
+export type { Capabilities } from '@kbn/core-capabilities-common';
 export type {
-  Capabilities,
   CapabilitiesProvider,
   CapabilitiesSwitcher,
   ResolveCapabilitiesOptions,
-} from './capabilities';
+} from '@kbn/core-capabilities-server';
 export type {
   ConfigPath,
   ConfigService,
@@ -115,22 +113,25 @@ export type {
 
 export type { CoreId } from '@kbn/core-base-common-internal';
 
-export { ElasticsearchConfig, pollEsNodesVersion } from './elasticsearch';
+export { ElasticsearchConfig, pollEsNodesVersion } from '@kbn/core-elasticsearch-server-internal';
+export type {
+  NodesVersionCompatibility,
+  PollEsNodesVersionOptions,
+} from '@kbn/core-elasticsearch-server-internal';
 export type {
   ElasticsearchServicePreboot,
   ElasticsearchServiceSetup,
   ElasticsearchServiceStart,
-  ElasticsearchStatusMeta,
-  NodesVersionCompatibility,
+  ElasticsearchConfigPreboot,
+  ElasticsearchRequestHandlerContext,
   FakeRequest,
   ScopeableRequest,
   ElasticsearchClient,
   IClusterClient,
   ICustomClusterClient,
   ElasticsearchClientConfig,
+  ElasticsearchClientSslConfig,
   IScopedClusterClient,
-  ElasticsearchConfigPreboot,
-  PollEsNodesVersionOptions,
   UnauthorizedErrorHandlerOptions,
   UnauthorizedErrorHandlerResultRetryParams,
   UnauthorizedErrorHandlerRetryResult,
@@ -138,8 +139,7 @@ export type {
   UnauthorizedErrorHandlerResult,
   UnauthorizedErrorHandlerToolkit,
   UnauthorizedErrorHandler,
-  ElasticsearchRequestHandlerContext,
-} from './elasticsearch';
+} from '@kbn/core-elasticsearch-server';
 
 export { CspConfig } from '@kbn/core-http-server-internal';
 export { CoreKibanaRequest, kibanaResponseFactory } from '@kbn/core-http-router-server-internal';
@@ -272,15 +272,27 @@ export type {
   ExposedToBrowserDescriptor,
 } from './plugins';
 
-export {
-  SavedObjectsClient,
-  SavedObjectsErrorHelpers,
-  SavedObjectsSerializer,
-  SavedObjectTypeRegistry,
-  SavedObjectsUtils,
-  mergeSavedObjectMigrationMaps,
-} from './saved_objects';
-
+export type {
+  SavedObject,
+  SavedObjectAttribute,
+  SavedObjectAttributes,
+  SavedObjectAttributeSingle,
+  SavedObjectReference,
+  SavedObjectsMigrationVersion,
+  SavedObjectsImportConflictError,
+  SavedObjectsImportAmbiguousConflictError,
+  SavedObjectsImportFailure,
+  SavedObjectsImportMissingReferencesError,
+  SavedObjectsImportResponse,
+  SavedObjectsImportRetry,
+  SavedObjectsImportSuccess,
+  SavedObjectsImportUnknownError,
+  SavedObjectsImportUnsupportedTypeError,
+  SavedObjectsNamespaceType,
+  SavedObjectsImportSimpleWarning,
+  SavedObjectsImportActionRequiredWarning,
+  SavedObjectsImportWarning,
+} from '@kbn/core-saved-objects-common';
 export type {
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkGetObject,
@@ -290,42 +302,16 @@ export type {
   SavedObjectsBulkUpdateResponse,
   SavedObjectsCheckConflictsObject,
   SavedObjectsCheckConflictsResponse,
-  SavedObjectsClientProviderOptions,
-  SavedObjectsClientWrapperFactory,
-  SavedObjectsClientWrapperOptions,
-  SavedObjectsClientFactory,
-  SavedObjectsClientFactoryProvider,
   SavedObjectsClosePointInTimeOptions,
   SavedObjectsClosePointInTimeResponse,
   ISavedObjectsPointInTimeFinder,
   SavedObjectsCreatePointInTimeFinderDependencies,
   SavedObjectsCreatePointInTimeFinderOptions,
   SavedObjectsCreateOptions,
-  SavedObjectTypeExcludeFromUpgradeFilterHook,
-  SavedObjectsExportResultDetails,
-  SavedObjectsExportExcludedObject,
   SavedObjectsFindResult,
   SavedObjectsFindResponse,
-  SavedObjectsImportConflictError,
-  SavedObjectsImportAmbiguousConflictError,
-  SavedObjectsImportFailure,
-  SavedObjectsImportMissingReferencesError,
-  SavedObjectsImportOptions,
-  SavedObjectsImportResponse,
-  SavedObjectsImportRetry,
-  SavedObjectsImportSuccess,
-  SavedObjectsImportUnknownError,
-  SavedObjectsImportUnsupportedTypeError,
-  SavedObjectMigrationContext,
-  SavedObjectsMigrationLogger,
   SavedObjectsOpenPointInTimeOptions,
   SavedObjectsOpenPointInTimeResponse,
-  SavedObjectsRawDoc,
-  SavedObjectsRawDocParseOptions,
-  SavedObjectSanitizedDoc,
-  SavedObjectUnsanitizedDoc,
-  SavedObjectsRepositoryFactory,
-  SavedObjectsResolveImportErrorsOptions,
   SavedObjectsBulkResolveObject,
   SavedObjectsBulkResolveResponse,
   SavedObjectsResolveResponse,
@@ -341,44 +327,74 @@ export type {
   SavedObjectsUpdateObjectsSpacesOptions,
   SavedObjectsUpdateObjectsSpacesResponse,
   SavedObjectsUpdateObjectsSpacesResponseObject,
-  SavedObjectsServiceStart,
-  SavedObjectsServiceSetup,
-  SavedObjectStatusMeta,
   SavedObjectsDeleteOptions,
   ISavedObjectsRepository,
-  SavedObjectsRepository,
   SavedObjectsDeleteByNamespaceOptions,
   SavedObjectsIncrementCounterOptions,
   SavedObjectsIncrementCounterField,
+  SavedObjectsBaseOptions,
+  MutatingOperationRefreshSetting,
+  SavedObjectsClientContract,
+  SavedObjectsFindOptions,
+  SavedObjectsFindOptionsReference,
+  SavedObjectsPitParams,
+} from '@kbn/core-saved-objects-api-server';
+export type {
+  SavedObjectsServiceSetup,
+  SavedObjectsServiceStart,
+  SavedObjectsClientProviderOptions,
+  SavedObjectsClientWrapperFactory,
+  SavedObjectsClientWrapperOptions,
+  SavedObjectsClientFactory,
+  SavedObjectsClientFactoryProvider,
+  SavedObjectTypeExcludeFromUpgradeFilterHook,
+  SavedObjectsExportResultDetails,
+  SavedObjectsExportExcludedObject,
+  SavedObjectsImportOptions,
+  SavedObjectMigrationContext,
+  SavedObjectsMigrationLogger,
+  SavedObjectsRawDoc,
+  SavedObjectsRawDocSource,
+  SavedObjectsRawDocParseOptions,
+  SavedObjectSanitizedDoc,
+  SavedObjectUnsanitizedDoc,
+  SavedObjectsRepositoryFactory,
+  SavedObjectsResolveImportErrorsOptions,
+  SavedObjectStatusMeta,
   SavedObjectsFieldMapping,
   SavedObjectsTypeMappingDefinition,
   SavedObjectsMappingProperties,
   ISavedObjectTypeRegistry,
-  SavedObjectsNamespaceType,
   SavedObjectsType,
   SavedObjectsTypeManagementDefinition,
   SavedObjectMigrationMap,
   SavedObjectMigrationFn,
-  SavedObjectsExporter,
   ISavedObjectsExporter,
   SavedObjectExportBaseOptions,
   SavedObjectsExportByObjectOptions,
   SavedObjectsExportByTypeOptions,
-  SavedObjectsExportError,
   SavedObjectsExportTransform,
   SavedObjectsExportTransformContext,
-  SavedObjectsImporter,
   ISavedObjectsImporter,
-  SavedObjectsImportError,
   SavedObjectsImportHook,
   SavedObjectsImportHookResult,
-  SavedObjectsImportSimpleWarning,
-  SavedObjectsImportActionRequiredWarning,
-  SavedObjectsImportWarning,
   SavedObjectsValidationMap,
   SavedObjectsValidationSpec,
+  ISavedObjectsSerializer,
   SavedObjectsRequestHandlerContext,
-} from './saved_objects';
+} from '@kbn/core-saved-objects-server';
+export {
+  SavedObjectsErrorHelpers,
+  SavedObjectsUtils,
+  mergeSavedObjectMigrationMaps,
+} from '@kbn/core-saved-objects-utils-server';
+export { SavedObjectTypeRegistry } from '@kbn/core-saved-objects-base-server-internal';
+export type { SavedObjectsRepository } from '@kbn/core-saved-objects-api-server-internal';
+export { SavedObjectsClient } from '@kbn/core-saved-objects-api-server-internal';
+export type {
+  SavedObjectsExportError,
+  SavedObjectsImportError,
+} from '@kbn/core-saved-objects-import-export-server-internal';
 
 export type {
   IUiSettingsClient,
@@ -400,46 +416,25 @@ export type {
   MetricsServiceSetup,
   MetricsServiceStart,
   IntervalHistogram,
-} from './metrics';
-export { EventLoopDelaysMonitor } from './metrics';
+  IEventLoopDelaysMonitor,
+} from '@kbn/core-metrics-server';
+export { EventLoopDelaysMonitor } from '@kbn/core-metrics-collectors-server-internal';
 
-export type { I18nServiceSetup } from './i18n';
+export type { I18nServiceSetup } from '@kbn/core-i18n-server';
 export type {
   RegisterDeprecationsConfig,
   GetDeprecationsContext,
   DeprecationsServiceSetup,
   DeprecationsClient,
   DeprecationsRequestHandlerContext,
-} from './deprecations';
+} from '@kbn/core-deprecations-server';
 export type { DeprecationsDetails } from '@kbn/core-deprecations-common';
-export type { AppCategory } from '../types';
-export { DEFAULT_APP_CATEGORIES, APP_WRAPPER_CLASS } from '../utils';
 
-export type {
-  SavedObject,
-  SavedObjectAttribute,
-  SavedObjectAttributes,
-  SavedObjectAttributeSingle,
-  SavedObjectReference,
-  SavedObjectsBaseOptions,
-  MutatingOperationRefreshSetting,
-  SavedObjectsClientContract,
-  SavedObjectsFindOptions,
-  SavedObjectsFindOptionsReference,
-  SavedObjectsPitParams,
-  SavedObjectsMigrationVersion,
-} from './types';
+export type { AppCategory } from '@kbn/core-application-common';
+export { DEFAULT_APP_CATEGORIES, APP_WRAPPER_CLASS } from '@kbn/core-application-common';
 
 export { ServiceStatusLevels } from './status';
 export type { CoreStatus, ServiceStatus, ServiceStatusLevel, StatusServiceSetup } from './status';
-
-export type {
-  CoreUsageDataSetup,
-  CoreUsageDataStart,
-  CoreUsageCounter,
-  CoreIncrementUsageCounter,
-  CoreIncrementCounterParams,
-} from './core_usage_data';
 
 export type { DocLinksServiceStart, DocLinksServiceSetup } from '@kbn/core-doc-links-server';
 

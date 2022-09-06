@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
+import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { FieldTableHeader, FieldTableHeaderProps } from './field_table_header';
 
 const mockOnFilterSelectedChange = jest.fn();
@@ -61,24 +62,27 @@ describe('FieldTableHeader', () => {
       expect(result.queryByTestId('viewSelectorOption-selected')).not.toBeInTheDocument();
 
       result.getByTestId('viewSelectorButton').click();
+      await waitForEuiPopoverOpen();
 
       expect(result.getByTestId('viewSelectorMenu')).toBeInTheDocument();
       expect(result.getByTestId('viewSelectorOption-all')).toBeInTheDocument();
       expect(result.getByTestId('viewSelectorOption-selected')).toBeInTheDocument();
     });
 
-    it('should callback when "view all" option is clicked', () => {
+    it('should callback when "view all" option is clicked', async () => {
       const result = render(<FieldTableHeader {...defaultProps} filterSelectedEnabled={false} />);
 
       result.getByTestId('viewSelectorButton').click();
+      await waitForEuiPopoverOpen();
       result.getByTestId('viewSelectorOption-all').click();
       expect(mockOnFilterSelectedChange).toHaveBeenCalledWith(false);
     });
 
-    it('should callback when "view selected" option is clicked', () => {
+    it('should callback when "view selected" option is clicked', async () => {
       const result = render(<FieldTableHeader {...defaultProps} filterSelectedEnabled={false} />);
 
       result.getByTestId('viewSelectorButton').click();
+      await waitForEuiPopoverOpen();
       result.getByTestId('viewSelectorOption-selected').click();
       expect(mockOnFilterSelectedChange).toHaveBeenCalledWith(true);
     });

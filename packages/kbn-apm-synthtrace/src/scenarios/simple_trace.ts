@@ -6,12 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { apm, timerange } from '..';
+import { apm, timerange } from '../..';
 import { ApmFields } from '../lib/apm/apm_fields';
 import { Instance } from '../lib/apm/instance';
-import { Scenario } from '../scripts/scenario';
-import { getLogger } from '../scripts/utils/get_common_services';
-import { RunOptions } from '../scripts/utils/parse_run_cli_flags';
+import { Scenario } from '../cli/scenario';
+import { getLogger } from '../cli/utils/get_common_services';
+import { RunOptions } from '../cli/utils/parse_run_cli_flags';
+import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
+
+const ENVIRONMENT = getSynthtraceEnvironment(__filename);
 
 const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
   const logger = getLogger(runOptions);
@@ -24,12 +27,11 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
 
       const transactionName = '240rpm/75% 1000ms';
 
-      const successfulTimestamps = range.interval('1s').rate(3);
-
-      const failedTimestamps = range.interval('1s').rate(1);
+      const successfulTimestamps = range.ratePerMinute(180);
+      const failedTimestamps = range.ratePerMinute(180);
 
       const instances = [...Array(numServices).keys()].map((index) =>
-        apm.service(`opbeans-go-${index}`, 'production', 'go').instance('instance')
+        apm.service(`opbeans-go-${index}`, ENVIRONMENT, 'go').instance('instance')
       );
       const instanceSpans = (instance: Instance) => {
         const successfulTraceEvents = successfulTimestamps.generator((timestamp) =>

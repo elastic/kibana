@@ -7,13 +7,13 @@
 
 import React from 'react';
 
-import { EuiSpacer, EuiPanel, EuiTitle, EuiLink } from '@elastic/eui';
+import { EuiSpacer, EuiTitle, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { docLinks } from '../doc_links';
 
 export const ElasticsearchResources: React.FC = () => (
-  <EuiPanel hasShadow grow={false} color="subdued">
+  <>
     <EuiTitle size="xs">
       <h4>
         {i18n.translate('xpack.enterpriseSearch.overview.elasticsearchResources.title', {
@@ -53,5 +53,5 @@ export const ElasticsearchResources: React.FC = () => (
         defaultMessage: 'Search UI for Elasticsearch',
       })}
     </EuiLink>
-  </EuiPanel>
+  </>
 );

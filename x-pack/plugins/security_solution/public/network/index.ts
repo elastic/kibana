@@ -20,7 +20,7 @@ export class Network {
     return {
       routes,
       storageTimelines: {
-        timelineById: getTimelinesInStorageByIds(storage, [TimelineId.networkPageExternalAlerts]),
+        timelineById: getTimelinesInStorageByIds(storage, [TimelineId.networkPageEvents]),
       },
       store: {
         initialState: { network: initialNetworkState },

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import type {
   AlertInstanceContext,
@@ -19,7 +18,6 @@ import { getFilter } from '../get_filter';
 import { searchAfterAndBulkCreate } from '../search_after_bulk_create';
 import type { RuleRangeTuple, BulkCreate, WrapHits } from '../types';
 import type { ITelemetryEventsSender } from '../../../telemetry/sender';
-import type { BuildRuleMessage } from '../rule_messages';
 import type {
   CompleteRule,
   SavedQueryRuleParams,
@@ -28,21 +26,21 @@ import type {
 import type { ExperimentalFeatures } from '../../../../../common/experimental_features';
 import { buildReasonMessageForQueryAlert } from '../reason_formatters';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
+import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 
 export const queryExecutor = async ({
   inputIndex,
   runtimeMappings,
   completeRule,
   tuple,
-  listClient,
   exceptionItems,
+  listClient,
   experimentalFeatures,
+  ruleExecutionLogger,
+  eventsTelemetry,
   services,
   version,
   searchAfterSize,
-  logger,
-  eventsTelemetry,
-  buildRuleMessage,
   bulkCreate,
   wrapHits,
   primaryTimestamp,
@@ -52,15 +50,14 @@ export const queryExecutor = async ({
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
   completeRule: CompleteRule<QueryRuleParams> | CompleteRule<SavedQueryRuleParams>;
   tuple: RuleRangeTuple;
-  listClient: ListClient;
   exceptionItems: ExceptionListItemSchema[];
+  listClient: ListClient;
   experimentalFeatures: ExperimentalFeatures;
+  ruleExecutionLogger: IRuleExecutionLogForExecutors;
+  eventsTelemetry: ITelemetryEventsSender | undefined;
   services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   version: string;
   searchAfterSize: number;
-  logger: Logger;
-  eventsTelemetry: ITelemetryEventsSender | undefined;
-  buildRuleMessage: BuildRuleMessage;
   bulkCreate: BulkCreate;
   wrapHits: WrapHits;
   primaryTimestamp: string;
@@ -82,18 +79,16 @@ export const queryExecutor = async ({
 
     return searchAfterAndBulkCreate({
       tuple,
-      listClient,
-      exceptionsList: exceptionItems,
       completeRule,
       services,
-      logger,
+      listClient,
+      exceptionsList: exceptionItems,
+      ruleExecutionLogger,
       eventsTelemetry,
-      id: completeRule.alertId,
       inputIndexPattern: inputIndex,
-      filter: esFilter,
       pageSize: searchAfterSize,
+      filter: esFilter,
       buildReasonMessage: buildReasonMessageForQueryAlert,
-      buildRuleMessage,
       bulkCreate,
       wrapHits,
       runtimeMappings,

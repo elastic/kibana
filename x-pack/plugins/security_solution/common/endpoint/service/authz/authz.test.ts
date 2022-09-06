@@ -47,7 +47,7 @@ describe('Endpoint Authz service', () => {
       });
 
       it('should set `canKillProcess` to false if not proper license', () => {
-        licenseService.isPlatinumPlus.mockReturnValue(false);
+        licenseService.isEnterprise.mockReturnValue(false);
 
         expect(calculateEndpointAuthz(licenseService, fleetAuthz, userRoles).canKillProcess).toBe(
           false
@@ -55,7 +55,7 @@ describe('Endpoint Authz service', () => {
       });
 
       it('should set `canSuspendProcess` to false if not proper license', () => {
-        licenseService.isPlatinumPlus.mockReturnValue(false);
+        licenseService.isEnterprise.mockReturnValue(false);
 
         expect(
           calculateEndpointAuthz(licenseService, fleetAuthz, userRoles).canSuspendProcess
@@ -63,7 +63,7 @@ describe('Endpoint Authz service', () => {
       });
 
       it('should set `canGetRunningProcesses` to false if not proper license', () => {
-        licenseService.isPlatinumPlus.mockReturnValue(false);
+        licenseService.isEnterprise.mockReturnValue(false);
 
         expect(
           calculateEndpointAuthz(licenseService, fleetAuthz, userRoles).canGetRunningProcesses

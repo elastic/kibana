@@ -25,6 +25,7 @@ export const useStyles = () => {
     const breadcrumbButton: CSSObject = {
       height: 'fit-content',
       maxWidth: '248px',
+      fontSize: size.m,
       fontWeight: font.weight.regular,
       '.euiButtonEmpty__content': {
         paddingLeft: size.xs,

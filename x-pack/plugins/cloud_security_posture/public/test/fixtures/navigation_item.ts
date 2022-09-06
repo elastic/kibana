@@ -5,16 +5,18 @@
  * 2.0.
  */
 import Chance from 'chance';
-import type { CspNavigationItem } from '../../common/navigation/types';
+import type { CspPageNavigationItem } from '../../common/navigation/types';
 
-type CreateNavigationItemFixtureInput = { chance?: Chance.Chance } & Partial<CspNavigationItem>;
-export const createNavigationItemFixture = ({
+type CreateNavigationItemFixtureInput = { chance?: Chance.Chance } & Partial<CspPageNavigationItem>;
+export const createPageNavigationItemFixture = ({
   chance = new Chance(),
   name = chance.word(),
   path = `/${chance.word()}`,
   disabled = undefined,
-}: CreateNavigationItemFixtureInput = {}): CspNavigationItem => ({
+  id = 'cloud_security_posture-dashboard',
+}: CreateNavigationItemFixtureInput = {}): CspPageNavigationItem => ({
   name,
   path,
   disabled,
+  id,
 });

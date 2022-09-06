@@ -8,14 +8,14 @@
 
 import React from 'react';
 import { act } from 'react-dom/test-utils';
+import { BehaviorSubject } from 'rxjs';
 
 import { RenderingService } from './rendering_service';
-import { applicationServiceMock } from '../application/application_service.mock';
-import { chromeServiceMock } from '../chrome/chrome_service.mock';
-import { overlayServiceMock } from '../overlays/overlay_service.mock';
+import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
+import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
+import { overlayServiceMock } from '@kbn/core-overlays-browser-mocks';
 import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 import { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';
-import { BehaviorSubject } from 'rxjs';
 
 describe('RenderingService#start', () => {
   let application: ReturnType<typeof applicationServiceMock.createInternalStartContract>;

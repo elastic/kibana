@@ -13,6 +13,7 @@ import { Sidebar } from './sidebar';
 import { useGetUserCasesPermissions, useKibana } from '../../../common/lib/kibana';
 import type { CaseUiClientMock } from '@kbn/cases-plugin/public/mocks';
 import { casesPluginMock } from '@kbn/cases-plugin/public/mocks';
+import { noCasesPermissions, readCasesPermissions } from '../../../cases_test_utils';
 
 jest.mock('../../../common/lib/kibana');
 
@@ -37,10 +38,7 @@ describe('Sidebar', () => {
   });
 
   it('does not render the recently created cases section when the user does not have read permissions', async () => {
-    (useGetUserCasesPermissions as jest.Mock).mockReturnValue({
-      crud: false,
-      read: false,
-    });
+    (useGetUserCasesPermissions as jest.Mock).mockReturnValue(noCasesPermissions());
 
     await waitFor(() =>
       mount(
@@ -54,10 +52,7 @@ describe('Sidebar', () => {
   });
 
   it('does render the recently created cases section when the user has read permissions', async () => {
-    (useGetUserCasesPermissions as jest.Mock).mockReturnValue({
-      crud: false,
-      read: true,
-    });
+    (useGetUserCasesPermissions as jest.Mock).mockReturnValue(readCasesPermissions());
 
     await waitFor(() =>
       mount(

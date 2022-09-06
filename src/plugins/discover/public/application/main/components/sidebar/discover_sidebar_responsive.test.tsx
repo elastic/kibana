@@ -21,8 +21,8 @@ import {
 } from './discover_sidebar_responsive';
 import { DiscoverServices } from '../../../../build_services';
 import { FetchStatus } from '../../../types';
-import { AvailableFields$, DataDocuments$ } from '../../hooks/use_saved_search';
-import { stubLogstashIndexPattern } from '@kbn/data-plugin/common/stubs';
+import { AvailableFields$, DataDocuments$, RecordRawType } from '../../hooks/use_saved_search';
+import { stubLogstashDataView } from '@kbn/data-plugin/common/stubs';
 import { VIEW_MODE } from '../../../../components/view_mode_toggle';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
@@ -73,11 +73,11 @@ jest.mock('../../utils/calc_field_counts', () => ({
 }));
 
 function getCompProps(): DiscoverSidebarResponsiveProps {
-  const indexPattern = stubLogstashIndexPattern;
+  const dataView = stubLogstashDataView;
 
-  const hits = getDataTableRecords(indexPattern);
+  const hits = getDataTableRecords(dataView);
 
-  const indexPatternList = [
+  const dataViewList = [
     { id: '0', attributes: { title: 'b' } } as SavedObject<DataViewAttributes>,
     { id: '1', attributes: { title: 'a' } } as SavedObject<DataViewAttributes>,
     { id: '2', attributes: { title: 'c' } } as SavedObject<DataViewAttributes>,
@@ -99,12 +99,12 @@ function getCompProps(): DiscoverSidebarResponsiveProps {
       fetchStatus: FetchStatus.COMPLETE,
       fields: [] as string[],
     }) as AvailableFields$,
-    indexPatternList,
-    onChangeIndexPattern: jest.fn(),
+    dataViewList,
+    onChangeDataView: jest.fn(),
     onAddFilter: jest.fn(),
     onAddField: jest.fn(),
     onRemoveField: jest.fn(),
-    selectedIndexPattern: indexPattern,
+    selectedDataView: dataView,
     state: {},
     trackUiMetric: jest.fn(),
     onFieldEdited: jest.fn(),
@@ -163,7 +163,30 @@ describe('discover responsive sidebar', function () {
 
   it('should show "Add a field" button to create a runtime field', () => {
     expect(mockServices.dataViewEditor.userPermissions.editDataView).toHaveBeenCalled();
-    expect(findTestSubject(comp, 'indexPattern-add-field_btn').length).toBe(1);
+    expect(findTestSubject(comp, 'dataView-add-field_btn').length).toBe(1);
+  });
+
+  it('should not show "Add a field" button on the sql mode', () => {
+    const initialProps = getCompProps();
+    const propsWithTextBasedMode = {
+      ...initialProps,
+      onAddFilter: undefined,
+      documents$: new BehaviorSubject({
+        fetchStatus: FetchStatus.COMPLETE,
+        recordRawType: RecordRawType.PLAIN,
+        result: getDataTableRecords(stubLogstashDataView),
+      }) as DataDocuments$,
+      state: {
+        ...initialProps.state,
+        query: { sql: 'SELECT * FROM `index`' },
+      },
+    };
+    const compInViewerMode = mountWithIntl(
+      <KibanaContextProvider services={mockServices}>
+        <DiscoverSidebarResponsive {...propsWithTextBasedMode} />
+      </KibanaContextProvider>
+    );
+    expect(findTestSubject(compInViewerMode, 'indexPattern-add-field_btn').length).toBe(0);
   });
 
   it('should not show "Add a field" button in viewer mode', () => {
@@ -185,6 +208,6 @@ describe('discover responsive sidebar', function () {
     expect(
       mockedServicesInViewerMode.dataViewEditor.userPermissions.editDataView
     ).toHaveBeenCalled();
-    expect(findTestSubject(compInViewerMode, 'indexPattern-add-field_btn').length).toBe(0);
+    expect(findTestSubject(compInViewerMode, 'dataView-add-field_btn').length).toBe(0);
   });
 });

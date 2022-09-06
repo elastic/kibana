@@ -7,7 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 import { RuleTypeParams } from '@kbn/alerting-plugin/common';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ValidationResult } from '@kbn/triggers-actions-ui-plugin/public/types';
 
 export type MonitoringAlertTypeParams = ValidateOptions & RuleTypeParams;

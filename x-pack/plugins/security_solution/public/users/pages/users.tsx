@@ -14,6 +14,7 @@ import { useParams } from 'react-router-dom';
 import type { Filter } from '@kbn/es-query';
 import { isTab } from '@kbn/timelines-plugin/public';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
+import { InputsModelId } from '../../common/store/inputs/constants';
 import { SecurityPageName } from '../../app/types';
 import { FiltersGlobal } from '../../common/components/filters_global';
 import { HeaderPage } from '../../common/components/header_page';
@@ -90,7 +91,7 @@ const UsersComponent = () => {
 
   const { tabName } = useParams<{ tabName: string }>();
   const tabsFilters: Filter[] = React.useMemo(() => {
-    if (tabName === UsersTableType.alerts || tabName === UsersTableType.events) {
+    if (tabName === UsersTableType.events) {
       return filters.length > 0 ? [...filters, ...userNameExistsFilter] : userNameExistsFilter;
     }
 
@@ -102,7 +103,7 @@ const UsersComponent = () => {
     return filters;
   }, [severitySelection, tabName, filters]);
 
-  const { docValueFields, indicesExist, indexPattern, selectedPatterns } = useSourcererDataView();
+  const { indicesExist, indexPattern, selectedPatterns } = useSourcererDataView();
   const [filterQuery, kqlError] = useMemo(
     () =>
       convertToBuildEsQuery({
@@ -150,7 +151,7 @@ const UsersComponent = () => {
     [containerElement, onSkipFocusBeforeEventsTable, onSkipFocusAfterEventsTable]
   );
 
-  const narrowDateRange = useCallback<UpdateDateRange>(
+  const updateDateRange = useCallback<UpdateDateRange>(
     ({ x }) => {
       if (!x) {
         return;
@@ -158,7 +159,7 @@ const UsersComponent = () => {
       const [min, max] = x;
       dispatch(
         setAbsoluteRangeDatePicker({
-          id: 'global',
+          id: InputsModelId.global,
           from: new Date(min).toISOString(),
           to: new Date(max).toISOString(),
         })
@@ -180,7 +181,7 @@ const UsersComponent = () => {
         <StyledFullHeightContainer onKeyDown={onKeyDown} ref={containerElement}>
           <EuiWindowEvent event="resize" handler={noop} />
           <FiltersGlobal>
-            <SiemSearchBar indexPattern={indexPattern} id="global" />
+            <SiemSearchBar indexPattern={indexPattern} id={InputsModelId.global} />
           </FiltersGlobal>
 
           <SecuritySolutionPageWrapper noPadding={globalFullScreen}>
@@ -199,7 +200,7 @@ const UsersComponent = () => {
               setQuery={setQuery}
               to={to}
               skip={isInitializing || !filterQuery}
-              narrowDateRange={narrowDateRange}
+              updateDateRange={updateDateRange}
             />
 
             <EuiSpacer />
@@ -210,12 +211,10 @@ const UsersComponent = () => {
 
             <UsersTabs
               deleteQuery={deleteQuery}
-              docValueFields={docValueFields}
               filterQuery={tabsFilterQuery || ''}
               from={from}
               indexNames={selectedPatterns}
               isInitializing={isInitializing}
-              setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
               setQuery={setQuery}
               to={to}
               type={usersModel.UsersType.page}

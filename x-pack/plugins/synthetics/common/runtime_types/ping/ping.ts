@@ -105,6 +105,7 @@ export const MonitorType = t.intersection([
       gte: t.string,
       lt: t.string,
     }),
+    fleet_managed: t.boolean,
   }),
 ]);
 

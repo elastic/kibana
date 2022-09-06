@@ -24,7 +24,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { dataTypes } from '../../../../../../../common';
+import { dataTypes } from '../../../../../../../common/constants';
 import type { NewAgentPolicy, AgentPolicy } from '../../../../types';
 import { useAuthz, useStartServices, sendCreateAgentPolicy } from '../../../../hooks';
 import { AgentPolicyForm, agentPolicyFormValidation } from '../../components';
@@ -68,7 +68,7 @@ export const CreateAgentPolicyFlyout: React.FunctionComponent<Props> = ({
   const header = (
     <EuiFlyoutHeader hasBorder aria-labelledby="CreateAgentPolicyFlyoutTitle">
       <EuiTitle size="m">
-        <h2 id="CreateAgentPolicyFlyoutTitle">
+        <h2 id="CreateAgentPolicyFlyoutTitle" data-test-subj="createAgentPolicyFlyoutTitle">
           <FormattedMessage
             id="xpack.fleet.createAgentPolicy.flyoutTitle"
             defaultMessage="Create agent policy"

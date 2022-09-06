@@ -55,4 +55,29 @@ describe('cleanupUrlState', () => {
     } as AppStateUrl;
     expect(cleanupUrlState(state)).toMatchInlineSnapshot(`Object {}`);
   });
+
+  test('should keep a valid rowsPerPage', async () => {
+    const state = {
+      rowsPerPage: 50,
+    } as AppStateUrl;
+    expect(cleanupUrlState(state)).toMatchInlineSnapshot(`
+      Object {
+        "rowsPerPage": 50,
+      }
+    `);
+  });
+
+  test('should remove a negative rowsPerPage', async () => {
+    const state = {
+      rowsPerPage: -50,
+    } as AppStateUrl;
+    expect(cleanupUrlState(state)).toMatchInlineSnapshot(`Object {}`);
+  });
+
+  test('should remove an invalid rowsPerPage', async () => {
+    const state = {
+      rowsPerPage: 'test',
+    } as unknown as AppStateUrl;
+    expect(cleanupUrlState(state)).toMatchInlineSnapshot(`Object {}`);
+  });
 });

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+// TODO Consolidate with near duplicate component `FullTimeRangeSelector` in
+// `x-pack/plugins/data_visualizer/public/application/index_data_visualizer/components/full_time_range_selector/full_time_range_selector.tsx`
+
 import React, { FC, useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';

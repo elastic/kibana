@@ -7,11 +7,17 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
-import { render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 import { basicCase, caseUserActions, getAlertUserAction } from '../../containers/mock';
 import { CaseActionBar, CaseActionBarProps } from '.';
-import { TestProviders } from '../../common/mock';
+import {
+  allCasesPermissions,
+  noDeleteCasesPermissions,
+  noUpdateCasesPermissions,
+  TestProviders,
+} from '../../common/mock';
 import { useGetCaseUserActions } from '../../containers/use_get_case_user_actions';
 import { useRefreshCaseViewPage } from '../case_view/use_on_refresh_case_view_page';
 
@@ -187,5 +193,57 @@ describe('CaseActionBar', () => {
     );
 
     expect(getByText('Case opened')).toBeInTheDocument();
+  });
+
+  it('should show the change status text when the user has update privileges', () => {
+    render(
+      <TestProviders>
+        <CaseActionBar {...defaultProps} />
+      </TestProviders>
+    );
+
+    expect(screen.getByTitle('Change status')).toBeInTheDocument();
+  });
+
+  it('should not show the change status text when the user does not have update privileges', () => {
+    render(
+      <TestProviders permissions={noUpdateCasesPermissions()}>
+        <CaseActionBar {...defaultProps} />
+      </TestProviders>
+    );
+
+    expect(screen.queryByTitle('Change status')).not.toBeInTheDocument();
+  });
+
+  it('should not show the sync alerts toggle when the user does not have update privileges', () => {
+    const { queryByText } = render(
+      <TestProviders permissions={noUpdateCasesPermissions()}>
+        <CaseActionBar {...defaultProps} />
+      </TestProviders>
+    );
+
+    expect(queryByText('Sync alerts')).not.toBeInTheDocument();
+  });
+
+  it('should not show the delete item in the menu when the user does not have delete privileges', () => {
+    const { queryByText, queryByTestId } = render(
+      <TestProviders permissions={noDeleteCasesPermissions()}>
+        <CaseActionBar {...defaultProps} />
+      </TestProviders>
+    );
+
+    expect(queryByTestId('property-actions-ellipses')).not.toBeInTheDocument();
+    expect(queryByText('Delete case')).not.toBeInTheDocument();
+  });
+
+  it('should show the the delete item in the menu when the user does have delete privileges', () => {
+    const { queryByText } = render(
+      <TestProviders permissions={allCasesPermissions()}>
+        <CaseActionBar {...defaultProps} />
+      </TestProviders>
+    );
+
+    userEvent.click(screen.getByTestId('property-actions-ellipses'));
+    expect(queryByText('Delete case')).toBeInTheDocument();
   });
 });

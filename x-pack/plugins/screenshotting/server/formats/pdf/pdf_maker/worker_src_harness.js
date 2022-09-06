@@ -10,6 +10,7 @@
  * The TS file needs to be compiled on the fly, unlike when Kibana is running as a dist.
  */
 
+// eslint-disable-next-line @kbn/imports/no_boundary_crossing
 require('../../../../../../../src/setup_node_env');
 // eslint-disable-next-line @kbn/imports/uniform_imports
 require('./worker.ts');

@@ -279,7 +279,7 @@ export const schema = Joi.object()
 
     /**
      * Optional settings to enable scalability testing for single user performance journey.
-     * If defined, 'scalabilitySetup' must include 'warmup' and 'test' stages,
+     * If defined, 'scalabilitySetup' must include 'warmup' and 'test' stage array,
      * 'maxDuration', e.g. '10m' to limit execution time to 10 minutes.
      * Each stage must include 'action', 'duration' and 'maxUsersCount'.
      * In addition, 'rampConcurrentUsers' requires 'minUsersCount' to ramp users from
@@ -287,41 +287,37 @@ export const schema = Joi.object()
      */
     scalabilitySetup: Joi.object()
       .keys({
-        warmup: Joi.object()
-          .keys({
-            stages: Joi.array().items(
-              Joi.object().keys({
-                action: Joi.string()
-                  .valid('constantConcurrentUsers', 'rampConcurrentUsers')
-                  .required(),
-                duration: Joi.string().pattern(SCALABILITY_DURATION_PATTERN).required(),
-                minUsersCount: Joi.number().when('action', {
-                  is: 'rampConcurrentUsers',
-                  then: Joi.number().required().less(Joi.ref('maxUsersCount')),
-                  otherwise: Joi.forbidden(),
-                }),
-                maxUsersCount: Joi.number().required().greater(0),
-              })
-            ),
-          })
+        warmup: Joi.array()
+          .items(
+            Joi.object().keys({
+              action: Joi.string()
+                .valid('constantConcurrentUsers', 'rampConcurrentUsers')
+                .required(),
+              duration: Joi.string().pattern(SCALABILITY_DURATION_PATTERN).required(),
+              minUsersCount: Joi.number().when('action', {
+                is: 'rampConcurrentUsers',
+                then: Joi.number().required().less(Joi.ref('maxUsersCount')),
+                otherwise: Joi.forbidden(),
+              }),
+              maxUsersCount: Joi.number().required().greater(0),
+            })
+          )
           .required(),
-        test: Joi.object()
-          .keys({
-            stages: Joi.array().items(
-              Joi.object().keys({
-                action: Joi.string()
-                  .valid('constantConcurrentUsers', 'rampConcurrentUsers')
-                  .required(),
-                duration: Joi.string().pattern(SCALABILITY_DURATION_PATTERN).required(),
-                minUsersCount: Joi.number().when('action', {
-                  is: 'rampConcurrentUsers',
-                  then: Joi.number().required().less(Joi.ref('maxUsersCount')),
-                  otherwise: Joi.forbidden(),
-                }),
-                maxUsersCount: Joi.number().required().greater(0),
-              })
-            ),
-          })
+        test: Joi.array()
+          .items(
+            Joi.object().keys({
+              action: Joi.string()
+                .valid('constantConcurrentUsers', 'rampConcurrentUsers')
+                .required(),
+              duration: Joi.string().pattern(SCALABILITY_DURATION_PATTERN).required(),
+              minUsersCount: Joi.number().when('action', {
+                is: 'rampConcurrentUsers',
+                then: Joi.number().required().less(Joi.ref('maxUsersCount')),
+                otherwise: Joi.forbidden(),
+              }),
+              maxUsersCount: Joi.number().required().greater(0),
+            })
+          )
           .required(),
         maxDuration: Joi.string().pattern(SCALABILITY_DURATION_PATTERN).required(),
       })

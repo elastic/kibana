@@ -22,12 +22,17 @@ import { isEndpointHostIsolated } from '../../../../../common/utils/validators';
 import { useLicense } from '../../../../../common/hooks/use_license';
 import { isIsolationSupported } from '../../../../../../common/endpoint/service/host_isolation/utils';
 
+interface Options {
+  isEndpointList: boolean;
+}
+
 /**
  * Returns a list (array) of actions for an individual endpoint
  * @param endpointMetadata
  */
 export const useEndpointActionItems = (
-  endpointMetadata: MaybeImmutable<HostMetadata> | undefined
+  endpointMetadata: MaybeImmutable<HostMetadata> | undefined,
+  options?: Options
 ): ContextMenuItemNavByRouterProps[] => {
   const isPlatinumPlus = useLicense().isPlatinumPlus();
   const { getAppUrl } = useAppUrl();
@@ -56,6 +61,11 @@ export const useEndpointActionItems = (
         selected_endpoint: _selectedEndpoint,
         ...currentUrlParams
       } = allCurrentUrlParams;
+      const endpointActionsPath = getEndpointDetailsPath({
+        name: 'endpointActivityLog',
+        ...currentUrlParams,
+        selected_endpoint: endpointId,
+      });
       const endpointIsolatePath = getEndpointDetailsPath({
         name: 'endpointIsolate',
         ...currentUrlParams,
@@ -122,7 +132,25 @@ export const useEndpointActionItems = (
                 children: (
                   <FormattedMessage
                     id="xpack.securitySolution.endpoint.actions.console"
-                    defaultMessage="Launch responder"
+                    defaultMessage="Respond"
+                  />
+                ),
+              },
+            ]
+          : []),
+        ...(options?.isEndpointList
+          ? [
+              {
+                'data-test-subj': 'actionsLink',
+                icon: 'logoSecurity',
+                key: 'actionsLogLink',
+                navigateAppId: APP_UI_ID,
+                navigateOptions: { path: endpointActionsPath },
+                href: getAppUrl({ path: endpointActionsPath }),
+                children: (
+                  <FormattedMessage
+                    id="xpack.securitySolution.endpoint.actions.actionsLog"
+                    defaultMessage="View actions log"
                   />
                 ),
               },
@@ -228,5 +256,6 @@ export const useEndpointActionItems = (
     isPlatinumPlus,
     isResponseActionsConsoleEnabled,
     showEndpointResponseActionsConsole,
+    options?.isEndpointList,
   ]);
 };

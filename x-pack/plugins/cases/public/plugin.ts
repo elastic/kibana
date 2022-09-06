@@ -24,6 +24,7 @@ import { getCasesContextLazy } from './client/ui/get_cases_context';
 import { getCreateCaseFlyoutLazy } from './client/ui/get_create_case_flyout';
 import { getRecentCasesLazy } from './client/ui/get_recent_cases';
 import { groupAlertsByRule } from './client/helpers/group_alerts_by_rule';
+import { getUICapabilities } from './client/helpers/capabilities';
 import { ExternalReferenceAttachmentTypeRegistry } from './client/attachment_framework/external_reference_registry';
 import { PersistableStateAttachmentTypeRegistry } from './client/attachment_framework/persistable_state_registry';
 
@@ -150,6 +151,7 @@ export class CasesUiPlugin
       },
       helpers: {
         canUseCases: canUseCases(core.application.capabilities),
+        getUICapabilities,
         getRuleIdFromEvent,
         groupAlertsByRule,
       },

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectsClientContract } from '../../saved_objects/types';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { ConfigAttributes } from '../saved_objects';
 import { isConfigVersionUpgradeable } from './is_config_version_upgradeable';
 

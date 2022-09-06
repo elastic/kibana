@@ -59,6 +59,7 @@ export {
 
 export type {
   Query,
+  AggregateQuery,
   Filter,
   LatLon,
   FieldFilter,

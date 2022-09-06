@@ -8,6 +8,10 @@
 
 import type { Event, EventType } from '@kbn/analytics-client';
 
+export type FiltersOptions = {
+  [key in 'eq' | 'gte' | 'gt' | 'lte' | 'lt']?: unknown;
+};
+
 export interface GetEventsOptions {
   /**
    * eventTypes (optional) array of event types to return
@@ -24,6 +28,18 @@ export interface GetEventsOptions {
    * @remarks Useful when we need to retrieve the events after a specific action, and we don't care about anything prior to that.
    */
   fromTimestamp?: string;
+  /**
+   * List of internal keys to validate in the event with the validation comparison.
+   * @example
+   * {
+   *   filters: {
+   *     'properties.my_key': {
+   *       eq: 'my expected value',
+   *     },
+   *   },
+   * }
+   */
+  filters?: Record<string, FiltersOptions>;
 }
 
 export interface EBTHelpersContract {
@@ -37,7 +53,10 @@ export interface EBTHelpersContract {
    * @param takeNumberOfEvents - number of events to return
    * @param options (optional) list of options to filter events or for advanced usage of the API {@link GetEventsOptions}.
    */
-  getEvents: (takeNumberOfEvents: number, options?: GetEventsOptions) => Promise<Event[]>;
+  getEvents: (
+    takeNumberOfEvents: number,
+    options?: GetEventsOptions
+  ) => Promise<Array<Event<Record<string, unknown>>>>;
   /**
    * Count the number of events that match the filters.
    * @param options list of options to filter the events {@link GetEventsOptions}. `withTimeoutMs` is required in this API.

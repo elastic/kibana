@@ -11,7 +11,26 @@ import {
   savedQuerySavedObjectType,
   packSavedObjectType,
   packAssetSavedObjectType,
+  usageMetricSavedObjectType,
 } from '../../../common/types';
+
+export const usageMetricSavedObjectMappings: SavedObjectsType['mappings'] = {
+  properties: {
+    count: {
+      type: 'long',
+    },
+    errors: {
+      type: 'long',
+    },
+  },
+};
+
+export const usageMetricType: SavedObjectsType = {
+  name: usageMetricSavedObjectType,
+  hidden: false,
+  namespaceType: 'agnostic',
+  mappings: usageMetricSavedObjectMappings,
+};
 
 export const savedQuerySavedObjectMappings: SavedObjectsType['mappings'] = {
   properties: {

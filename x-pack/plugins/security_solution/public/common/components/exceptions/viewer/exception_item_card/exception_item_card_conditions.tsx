@@ -9,12 +9,19 @@ import React, { memo, useMemo, useCallback } from 'react';
 import { EuiExpression, EuiToken, EuiFlexGroup, EuiFlexItem, EuiBadge } from '@elastic/eui';
 import styled from 'styled-components';
 import type {
+  EntryExists,
+  EntryList,
+  EntryMatch,
+  EntryMatchAny,
+  EntryMatchWildcard,
+  EntryNested,
   ExceptionListItemSchema,
   NonEmptyNestedEntriesArray,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { ListOperatorTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 
 import * as i18n from './translations';
+import { ValueWithSpaceWarning } from '../value_with_space_warning/value_with_space_warning';
 
 const OS_LABELS = Object.freeze({
   linux: i18n.OS_LINUX,
@@ -35,6 +42,9 @@ const OPERATOR_TYPE_LABELS_INCLUDED = Object.freeze({
 const OPERATOR_TYPE_LABELS_EXCLUDED = Object.freeze({
   [ListOperatorTypeEnum.MATCH_ANY]: i18n.CONDITION_OPERATOR_TYPE_NOT_MATCH_ANY,
   [ListOperatorTypeEnum.MATCH]: i18n.CONDITION_OPERATOR_TYPE_NOT_MATCH,
+  [ListOperatorTypeEnum.WILDCARD]: i18n.CONDITION_OPERATOR_TYPE_WILDCARD_DOES_NOT_MATCH,
+  [ListOperatorTypeEnum.EXISTS]: i18n.CONDITION_OPERATOR_TYPE_DOES_NOT_EXIST,
+  [ListOperatorTypeEnum.LIST]: i18n.CONDITION_OPERATOR_TYPE_NOT_IN_LIST,
 });
 
 const EuiFlexGroupNested = styled(EuiFlexGroup)`
@@ -88,7 +98,6 @@ export const ExceptionItemCardConditions = memo<CriteriaConditionsProps>(
           return nestedEntries.map((entry) => {
             const { field: nestedField, type: nestedType, operator: nestedOperator } = entry;
             const nestedValue = 'value' in entry ? entry.value : '';
-
             return (
               <EuiFlexGroupNested
                 data-test-subj={`${dataTestSubj}-nestedCondition`}
@@ -110,12 +119,32 @@ export const ExceptionItemCardConditions = memo<CriteriaConditionsProps>(
                     value={getEntryValue(nestedType, nestedValue)}
                   />
                 </EuiFlexItemNested>
+                <ValueWithSpaceWarning value={nestedValue} />
               </EuiFlexGroupNested>
             );
           });
         }
       },
       [dataTestSubj]
+    );
+
+    const getValue = useCallback(
+      (
+        entry:
+          | EntryExists
+          | EntryList
+          | EntryMatch
+          | EntryMatchAny
+          | EntryMatchWildcard
+          | EntryNested
+      ) => {
+        if (entry.type === 'list') {
+          return entry.list.id;
+        } else {
+          return 'value' in entry ? entry.value : '';
+        }
+      },
+      []
     );
 
     return (
@@ -130,10 +159,10 @@ export const ExceptionItemCardConditions = memo<CriteriaConditionsProps>(
         )}
         {entries.map((entry, index) => {
           const { field, type } = entry;
-          const value = 'value' in entry ? entry.value : '';
+          const value = getValue(entry);
+
           const nestedEntries = 'entries' in entry ? entry.entries : [];
           const operator = 'operator' in entry ? entry.operator : '';
-
           return (
             <div data-test-subj={`${dataTestSubj}-condition`} key={field + type + value + index}>
               <div className="eui-xScroll">
@@ -148,6 +177,7 @@ export const ExceptionItemCardConditions = memo<CriteriaConditionsProps>(
                   description={getEntryOperator(type, operator)}
                   value={getEntryValue(type, value)}
                 />
+                <ValueWithSpaceWarning value={value} />
               </div>
               {nestedEntries != null && getNestedEntriesContent(type, nestedEntries)}
             </div>

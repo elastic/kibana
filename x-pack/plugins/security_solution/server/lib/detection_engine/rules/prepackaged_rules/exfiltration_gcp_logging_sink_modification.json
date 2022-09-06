@@ -13,13 +13,37 @@
   "language": "kuery",
   "license": "Elastic License v2",
   "name": "GCP Logging Sink Modification",
-  "note": "## Config\n\nThe GCP Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
-  "query": "event.dataset:(googlecloud.audit or gcp.audit) and event.action:google.logging.v*.ConfigServiceV*.UpdateSink and event.outcome:success\n",
+  "note": "",
+  "query": "event.dataset:gcp.audit and event.action:google.logging.v*.ConfigServiceV*.UpdateSink and event.outcome:success\n",
   "references": [
     "https://cloud.google.com/logging/docs/export#how_sinks_work"
   ],
+  "related_integrations": [
+    {
+      "package": "gcp",
+      "version": "1.10.0"
+    }
+  ],
+  "required_fields": [
+    {
+      "ecs": true,
+      "name": "event.action",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "event.dataset",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "event.outcome",
+      "type": "keyword"
+    }
+  ],
   "risk_score": 21,
   "rule_id": "184dfe52-2999-42d9-b9d1-d1ca54495a61",
+  "setup": "The GCP Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
   "severity": "low",
   "tags": [
     "Elastic",
@@ -48,5 +72,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 5
+  "version": 7
 }

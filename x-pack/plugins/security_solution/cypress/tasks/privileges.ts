@@ -110,6 +110,68 @@ export const secReadCasesAllUser: User = {
   roles: [secReadCasesAll.name],
 };
 
+export const secAllCasesOnlyReadDelete: Role = {
+  name: 'sec_all_cases_only_read_delete',
+  privileges: {
+    elasticsearch: {
+      indices: [
+        {
+          names: ['*'],
+          privileges: ['all'],
+        },
+      ],
+    },
+    kibana: [
+      {
+        feature: {
+          siem: ['all'],
+          securitySolutionCases: ['cases_read', 'cases_delete'],
+          actions: ['all'],
+          actionsSimulators: ['all'],
+        },
+        spaces: ['*'],
+      },
+    ],
+  },
+};
+
+export const secAllCasesOnlyReadDeleteUser: User = {
+  username: 'sec_all_cases_only_read_delete_user',
+  password: 'password',
+  roles: [secAllCasesOnlyReadDelete.name],
+};
+
+export const secAllCasesNoDelete: Role = {
+  name: 'sec_all_cases_no_delete',
+  privileges: {
+    elasticsearch: {
+      indices: [
+        {
+          names: ['*'],
+          privileges: ['all'],
+        },
+      ],
+    },
+    kibana: [
+      {
+        feature: {
+          siem: ['all'],
+          securitySolutionCases: ['minimal_all'],
+          actions: ['all'],
+          actionsSimulators: ['all'],
+        },
+        spaces: ['*'],
+      },
+    ],
+  },
+};
+
+export const secAllCasesNoDeleteUser: User = {
+  username: 'sec_all_cases_no_delete_user',
+  password: 'password',
+  roles: [secAllCasesNoDelete.name],
+};
+
 const getUserInfo = (user: User): UserInfo => ({
   username: user.username,
   full_name: user.username.replace('_', ' '),

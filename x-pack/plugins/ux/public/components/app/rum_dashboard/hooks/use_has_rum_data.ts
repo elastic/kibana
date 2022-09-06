@@ -6,6 +6,8 @@
  */
 
 import { useEsSearch } from '@kbn/observability-plugin/public';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
+import { useEffect } from 'react';
 import {
   formatHasRumResult,
   hasRumDataQuery,
@@ -13,7 +15,10 @@ import {
 import { useDataView } from '../local_uifilters/use_data_view';
 
 export function useHasRumData() {
+  const [hasData, setHasData] = useLocalStorage('uxAppHasDataBoolean', false);
+
   const { dataViewTitle } = useDataView();
+
   const { data: response, loading } = useEsSearch(
     {
       index: dataViewTitle,
@@ -25,8 +30,17 @@ export function useHasRumData() {
     }
   );
 
+  useEffect(() => {
+    if (response) {
+      const { hasData: hasDataN } = formatHasRumResult(response, dataViewTitle);
+      setHasData(hasDataN);
+    }
+  }, [dataViewTitle, response, setHasData]);
+
+  if (!response) return { loading, hasData };
+
   return {
-    data: formatHasRumResult(response, dataViewTitle),
+    hasData: formatHasRumResult(response, dataViewTitle).hasData,
     loading,
   };
 }

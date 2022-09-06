@@ -56,7 +56,7 @@ describe('getOperationTypesForField', () => {
           aggregatable: true,
           searchable: true,
         })
-      ).toEqual(['terms', 'unique_count', 'last_value']);
+      ).toEqual(['terms', 'unique_count', 'last_value', 'count']);
     });
 
     it('should return only bucketed operations on strings when passed proper filterOperations function', () => {
@@ -96,6 +96,7 @@ describe('getOperationTypesForField', () => {
         'percentile',
         'percentile_rank',
         'last_value',
+        'count',
       ]);
     });
 
@@ -122,6 +123,7 @@ describe('getOperationTypesForField', () => {
         'percentile',
         'percentile_rank',
         'last_value',
+        'count',
       ]);
     });
 
@@ -148,6 +150,38 @@ describe('getOperationTypesForField', () => {
         })
       ).toEqual([]);
     });
+  });
+
+  describe('with partially applicable functions', () => {
+    expect(
+      getOperationTypesForField({
+        type: 'number',
+        name: 'a',
+        displayName: 'aLabel',
+        aggregatable: true,
+        searchable: true,
+        partiallyApplicableFunctions: {
+          median: true,
+          last_value: true,
+          max: true,
+        },
+      })
+    ).toEqual([
+      'range',
+      'terms',
+      'average',
+      'sum',
+      'min',
+      'unique_count',
+      'standard_deviation',
+      'percentile',
+      'percentile_rank',
+      'count',
+      // partially applicable functions are put in the back of the list so they are not auto-picked
+      'median',
+      'max',
+      'last_value',
+    ]);
   });
 
   describe('with restrictions', () => {
@@ -386,6 +420,21 @@ describe('getOperationTypesForField', () => {
               Object {
                 "field": "bytes",
                 "operationType": "last_value",
+                "type": "field",
+              },
+              Object {
+                "field": "timestamp",
+                "operationType": "count",
+                "type": "field",
+              },
+              Object {
+                "field": "bytes",
+                "operationType": "count",
+                "type": "field",
+              },
+              Object {
+                "field": "source",
+                "operationType": "count",
                 "type": "field",
               },
               Object {

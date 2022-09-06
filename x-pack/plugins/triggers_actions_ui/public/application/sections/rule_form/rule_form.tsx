@@ -49,6 +49,7 @@ import {
   RecoveredActionGroup,
   isActionGroupDisabledForActionTypeId,
 } from '@kbn/alerting-plugin/common';
+import { AlertingConnectorFeatureId } from '@kbn/actions-plugin/common';
 import { RuleReducerAction, InitialRule } from './rule_reducer';
 import {
   RuleTypeModel,
@@ -79,6 +80,8 @@ import { getInitialInterval } from './get_initial_interval';
 
 const ENTER_KEY = 13;
 
+const INTEGER_REGEX = /^[1-9][0-9]*$/;
+
 function getProducerFeatureName(producer: string, kibanaFeatures: KibanaFeature[]) {
   return kibanaFeatures.find((featureItem) => featureItem.id === producer)?.name;
 }
@@ -96,6 +99,7 @@ interface RuleFormProps<MetaData = Record<string, any>> {
   setHasActionsWithBrokenConnector?: (value: boolean) => void;
   metadata?: MetaData;
   filteredRuleTypes?: string[];
+  connectorFeatureId?: string;
 }
 
 export const RuleForm = ({
@@ -111,6 +115,7 @@ export const RuleForm = ({
   actionTypeRegistry,
   metadata,
   filteredRuleTypes: ruleTypeToFilter,
+  connectorFeatureId = AlertingConnectorFeatureId,
 }: RuleFormProps) => {
   const {
     notifications: { toasts },
@@ -550,6 +555,7 @@ export const RuleForm = ({
             setHasActionsWithBrokenConnector={setHasActionsWithBrokenConnector}
             messageVariables={selectedRuleType.actionVariables}
             defaultActionGroupId={defaultActionGroupId}
+            featureId={connectorFeatureId}
             isActionGroupDisabledForActionType={(actionGroupId: string, actionTypeId: string) =>
               isActionGroupDisabledForActionType(selectedRuleType, actionGroupId, actionTypeId)
             }
@@ -725,9 +731,11 @@ export const RuleForm = ({
                   data-test-subj="intervalInput"
                   onChange={(e) => {
                     const value = e.target.value;
-                    const interval = value !== '' ? parseInt(value, 10) : undefined;
-                    setRuleInterval(interval);
-                    setScheduleProperty('interval', `${value}${ruleIntervalUnit}`);
+                    if (value === '' || INTEGER_REGEX.test(value)) {
+                      const parsedValue = value === '' ? '' : parseInt(value, 10);
+                      setRuleInterval(parsedValue || undefined);
+                      setScheduleProperty('interval', `${parsedValue}${ruleIntervalUnit}`);
+                    }
                   }}
                 />
               </EuiFlexItem>

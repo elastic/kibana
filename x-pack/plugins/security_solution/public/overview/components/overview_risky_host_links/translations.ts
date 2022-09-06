@@ -24,22 +24,28 @@ export const WARNING_BODY = i18n.translate(
 export const DANGER_TITLE = i18n.translate(
   'xpack.securitySolution.overview.riskyHostsDashboardDangerPanelTitle',
   {
-    defaultMessage: 'No host risk score data to display',
+    defaultMessage: 'No host risk score data',
   }
 );
 
 export const DANGER_BODY = i18n.translate(
   'xpack.securitySolution.overview.riskyHostsDashboardEnableThreatIntel',
   {
-    defaultMessage:
-      'Please enable the host risk score module in order to view the list of risky hosts.',
+    defaultMessage: 'You must enable the host risk module to view risky hosts.',
   }
 );
 
-export const DANGER_BUTTON = i18n.translate(
+export const ENABLE_VIA_DEV_TOOLS = i18n.translate(
   'xpack.securitySolution.overview.riskyHostsDashboardDangerPanelButton',
   {
-    defaultMessage: 'Enable Risk Score',
+    defaultMessage: 'Enable via Dev Tools',
+  }
+);
+
+export const LEARN_MORE = i18n.translate(
+  'xpack.securitySolution.overview.riskyHostsDashboardLearnMoreButton',
+  {
+    defaultMessage: 'Learn More',
   }
 );
 
@@ -51,5 +57,16 @@ export const PANEL_TITLE = i18n.translate(
   'xpack.securitySolution.overview.riskyHostsDashboardTitle',
   {
     defaultMessage: 'Current host risk scores',
+  }
+);
+
+export const IMPORT_DASHBOARD = i18n.translate('xpack.securitySolution.overview.importDasboard', {
+  defaultMessage: 'Import dashboard',
+});
+
+export const ENABLE_RISK_SCORE_POPOVER = i18n.translate(
+  'xpack.securitySolution.overview.enableRiskScorePopoverTitle',
+  {
+    defaultMessage: 'Alerts need to be available before enabling module',
   }
 );

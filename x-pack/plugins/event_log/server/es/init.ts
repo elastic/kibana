@@ -8,8 +8,11 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { asyncForEach } from '@kbn/std';
 import { groupBy } from 'lodash';
+import pRetry, { FailedAttemptError } from 'p-retry';
 import { getIlmPolicy, getIndexTemplate } from './documents';
 import { EsContext } from './context';
+
+const MAX_RETRY_DELAY = 30000;
 
 export async function initializeEs(esContext: EsContext): Promise<boolean> {
   esContext.logger.debug('initializing elasticsearch resources starting');
@@ -28,10 +31,33 @@ export async function initializeEs(esContext: EsContext): Promise<boolean> {
 async function initializeEsResources(esContext: EsContext) {
   const steps = new EsInitializationSteps(esContext);
 
-  await steps.setExistingAssetsToHidden();
-  await steps.createIlmPolicyIfNotExists();
-  await steps.createIndexTemplateIfNotExists();
-  await steps.createInitialIndexIfNotExists();
+  // today, setExistingAssetsToHidden() never throws, but just in case ...
+  await retry(steps.setExistingAssetsToHidden);
+  await retry(steps.createIlmPolicyIfNotExists);
+  await retry(steps.createIndexTemplateIfNotExists);
+  await retry(steps.createInitialIndexIfNotExists);
+
+  async function retry(stepMethod: () => Promise<void>): Promise<void> {
+    // call the step method with retry options via p-retry
+    await pRetry(() => stepMethod.call(steps), getRetryOptions(esContext, stepMethod.name));
+  }
+}
+
+function getRetryOptions(esContext: EsContext, operation: string) {
+  const logger = esContext.logger;
+  // should retry on the order of 2s, 4s, 8s, 16s
+  // see: https://github.com/tim-kos/node-retry#retryoperationoptions
+  return {
+    minTimeout: esContext.retryDelay,
+    maxTimeout: MAX_RETRY_DELAY,
+    retries: 4,
+    factor: 2,
+    randomize: true,
+    onFailedAttempt: (err: FailedAttemptError) => {
+      const message = `eventLog initialization operation failed and will be retried: ${operation}; ${err.retriesLeft} more times; error: ${err.message}`;
+      logger.warn(message);
+    },
+  };
 }
 
 export interface ParsedIndexAlias extends estypes.IndicesAliasDefinition {

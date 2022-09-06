@@ -303,7 +303,7 @@ export function getCurrentMethodAndTokenPaths(
   return ret;
 }
 
-// eslint-disable-next-line
+// eslint-disable-next-line import/no-default-export
 export default function ({
   coreEditor: editor,
   parser,

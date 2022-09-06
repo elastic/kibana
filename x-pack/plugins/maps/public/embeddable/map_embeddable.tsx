@@ -23,6 +23,7 @@ import {
   genericEmbeddableInputIsEqual,
   VALUE_CLICK_TRIGGER,
   omitGenericEmbeddableInput,
+  FilterableEmbeddable,
 } from '@kbn/embeddable-plugin/public';
 import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
@@ -35,6 +36,7 @@ import {
   setReadOnly,
   updateLayerById,
   setGotoWithCenter,
+  setEmbeddableSearchContext,
 } from '../actions';
 import { getIsLayerTOCOpen, getOpenTOCDetails } from '../selectors/ui_selectors';
 import {
@@ -47,6 +49,7 @@ import {
 import {
   areLayersLoaded,
   getGeoFieldNames,
+  getEmbeddableSearchContext,
   getLayerList,
   getGoto,
   getMapCenter,
@@ -103,7 +106,7 @@ function getIsRestore(searchSessionId?: string) {
 
 export class MapEmbeddable
   extends Embeddable<MapEmbeddableInput, MapEmbeddableOutput>
-  implements ReferenceOrValueEmbeddable<MapByValueInput, MapByReferenceInput>
+  implements ReferenceOrValueEmbeddable<MapByValueInput, MapByReferenceInput>, FilterableEmbeddable
 {
   type = MAP_SAVED_OBJECT_TYPE;
   deferEmbeddableLoad = true;
@@ -193,6 +196,21 @@ export class MapEmbeddable
       forceRefresh: false,
     });
 
+    const mapStateJSON = this._savedMap.getAttributes().mapStateJSON;
+    if (mapStateJSON) {
+      try {
+        const mapState = JSON.parse(mapStateJSON);
+        store.dispatch(
+          setEmbeddableSearchContext({
+            filters: mapState.filters ? mapState.filters : [],
+            query: mapState.query,
+          })
+        );
+      } catch (e) {
+        // ignore malformed mapStateJSON, not a critical error for viewing map - map will just use defaults
+      }
+    }
+
     this._unsubscribeFromStore = store.subscribe(() => {
       this._handleStoreChanges();
     });
@@ -246,6 +264,20 @@ export class MapEmbeddable
 
   public getDescription() {
     return this._isInitialized ? this._savedMap.getAttributes().description : '';
+  }
+
+  public async getFilters() {
+    const embeddableSearchContext = getEmbeddableSearchContext(
+      this._savedMap.getStore().getState()
+    );
+    return embeddableSearchContext ? embeddableSearchContext.filters : [];
+  }
+
+  public async getQuery() {
+    const embeddableSearchContext = getEmbeddableSearchContext(
+      this._savedMap.getStore().getState()
+    );
+    return embeddableSearchContext?.query;
   }
 
   public supportedTriggers(): string[] {
@@ -735,7 +767,7 @@ export class MapEmbeddable
       ) {
         /**
          * Maps emit rendered when the data is loaded, as we don't have feedback from the maps rendering library atm.
-         * This means that the dashboard-loaded event might be fired while a map is still rendering in some cases.
+         * This means that the DASHBOARD_LOADED_EVENT event might be fired while a map is still rendering in some cases.
          * For more details please contact the maps team.
          */
         this.updateOutput({

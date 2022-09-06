@@ -14,7 +14,7 @@ import {
 } from '../../common/constants';
 import { DASHBOARDS, EXPLORE } from '../app/translations';
 import type { LinkItem } from '../common/links/types';
-import { overviewLinks, detectionResponseLinks } from '../overview/links';
+import { overviewLinks, detectionResponseLinks, entityAnalyticsLinks } from '../overview/links';
 import { links as hostsLinks } from '../hosts/links';
 import { links as networkLinks } from '../network/links';
 import { links as usersLinks } from '../users/links';
@@ -25,15 +25,20 @@ export const dashboardsLandingLinks: LinkItem = {
   id: SecurityPageName.dashboardsLanding,
   title: DASHBOARDS,
   path: DASHBOARDS_PATH,
-  globalNavEnabled: true,
-  globalNavOrder: 1,
+  globalNavPosition: 1,
   capabilities: [`${SERVER_APP_ID}.show`],
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.appLinks.dashboards', {
       defaultMessage: 'Dashboards',
     }),
   ],
-  links: [overviewLinks, detectionResponseLinks, kubernetesLinks, cloudSecurityPostureLinks],
+  links: [
+    overviewLinks,
+    detectionResponseLinks,
+    kubernetesLinks,
+    cloudSecurityPostureLinks,
+    entityAnalyticsLinks,
+  ],
   skipUrlState: true,
   hideTimeline: true,
 };
@@ -42,8 +47,7 @@ export const threatHuntingLandingLinks: LinkItem = {
   id: SecurityPageName.exploreLanding,
   title: EXPLORE,
   path: EXPLORE_PATH,
-  globalNavEnabled: true,
-  globalNavOrder: 6,
+  globalNavPosition: 6,
   capabilities: [`${SERVER_APP_ID}.show`],
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.appLinks.explore', {

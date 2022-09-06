@@ -9,7 +9,7 @@
 import fn from './lines';
 
 import expect from '@kbn/expect';
-import invoke from './helpers/invoke_series_fn';
+import invoke from './test_helpers/invoke_series_fn';
 
 describe('lines.js', () => {
   let seriesList;

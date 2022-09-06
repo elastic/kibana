@@ -13,6 +13,7 @@ test('should sort enabled action types first', async () => {
     {
       id: '1',
       minimumLicenseRequired: 'basic',
+      supportedFeatureIds: ['alerting'],
       name: 'first',
       enabled: true,
       enabledInConfig: true,
@@ -21,6 +22,7 @@ test('should sort enabled action types first', async () => {
     {
       id: '2',
       minimumLicenseRequired: 'gold',
+      supportedFeatureIds: ['alerting'],
       name: 'second',
       enabled: false,
       enabledInConfig: true,
@@ -29,6 +31,7 @@ test('should sort enabled action types first', async () => {
     {
       id: '3',
       minimumLicenseRequired: 'basic',
+      supportedFeatureIds: ['alerting'],
       name: 'third',
       enabled: true,
       enabledInConfig: true,
@@ -37,6 +40,7 @@ test('should sort enabled action types first', async () => {
     {
       id: '4',
       minimumLicenseRequired: 'basic',
+      supportedFeatureIds: ['alerting'],
       name: 'x-fourth',
       enabled: true,
       enabledInConfig: false,
@@ -55,6 +59,7 @@ test('should sort by name when all enabled', async () => {
     {
       id: '1',
       minimumLicenseRequired: 'basic',
+      supportedFeatureIds: ['alerting'],
       name: 'third',
       enabled: true,
       enabledInConfig: true,
@@ -63,6 +68,7 @@ test('should sort by name when all enabled', async () => {
     {
       id: '2',
       minimumLicenseRequired: 'basic',
+      supportedFeatureIds: ['alerting'],
       name: 'first',
       enabled: true,
       enabledInConfig: true,
@@ -71,6 +77,7 @@ test('should sort by name when all enabled', async () => {
     {
       id: '3',
       minimumLicenseRequired: 'basic',
+      supportedFeatureIds: ['alerting'],
       name: 'second',
       enabled: true,
       enabledInConfig: true,
@@ -79,6 +86,7 @@ test('should sort by name when all enabled', async () => {
     {
       id: '4',
       minimumLicenseRequired: 'basic',
+      supportedFeatureIds: ['alerting'],
       name: 'x-fourth',
       enabled: true,
       enabledInConfig: false,

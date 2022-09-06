@@ -12,7 +12,7 @@ describe('getRequestBase', () => {
     const requestBase = getRequestBase({
       index: 'the-index',
       timeFieldName: 'the-time-field-name',
-      kuery: '',
+      searchQuery: '{"bool":{"filter":[],"must":[{"match_all":{}}],"must_not":[]}}',
       start: 1577836800000,
       end: 1609459200000,
       baselineMin: 10,
@@ -28,7 +28,7 @@ describe('getRequestBase', () => {
       index: 'the-index',
       timeFieldName: 'the-time-field-name',
       includeFrozen: true,
-      kuery: '',
+      searchQuery: '{"bool":{"filter":[],"must":[{"match_all":{}}],"must_not":[]}}',
       start: 1577836800000,
       end: 1609459200000,
       baselineMin: 10,

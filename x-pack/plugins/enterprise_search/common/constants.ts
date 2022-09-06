@@ -39,6 +39,23 @@ export const ENTERPRISE_SEARCH_CONTENT_PLUGIN = {
   SUPPORT_URL: 'https://discuss.elastic.co/c/enterprise-search/',
 };
 
+export const ANALYTICS_PLUGIN = {
+  ID: 'enterpriseSearchAnalytics',
+  NAME: i18n.translate('xpack.enterpriseSearch.analytics.productName', {
+    defaultMessage: 'Analytics',
+  }),
+  DESCRIPTION: i18n.translate('xpack.enterpriseSearch.analytics.productDescription', {
+    defaultMessage:
+      'Dashboards and tools for visualizing end-user behavior and measuring the performance of your search applications.',
+  }),
+  CARD_DESCRIPTION: i18n.translate('xpack.enterpriseSearch.analytics.productCardDescription', {
+    defaultMessage:
+      'Dashboards and tools for visualizing end-user behavior and measuring the performance of your search applications.',
+  }),
+  URL: '/app/enterprise_search/analytics',
+  SUPPORT_URL: 'https://discuss.elastic.co/c/enterprise-search/',
+};
+
 export const ELASTICSEARCH_PLUGIN = {
   ID: 'elasticsearch',
   NAME: i18n.translate('xpack.enterpriseSearch.elasticsearch.productName', {
@@ -46,10 +63,6 @@ export const ELASTICSEARCH_PLUGIN = {
   }),
   DESCRIPTION: i18n.translate('xpack.enterpriseSearch.elasticsearch.productDescription', {
     defaultMessage: 'Low-level tools for creating performant and relevant search experiences.',
-  }),
-  CARD_DESCRIPTION: i18n.translate('xpack.enterpriseSearch.elasticsearch.productCardDescription', {
-    defaultMessage:
-      'Design and build performant, relevant search-powered applications or large-scale search implementations directly in Elasticsearch.',
   }),
   URL: '/app/enterprise_search/elasticsearch',
   SUPPORT_URL: 'https://discuss.elastic.co/c/elastic-stack/elasticsearch/',
@@ -64,10 +77,6 @@ export const APP_SEARCH_PLUGIN = {
     defaultMessage:
       'Leverage dashboards, analytics, and APIs for advanced application search made simple.',
   }),
-  CARD_DESCRIPTION: i18n.translate('xpack.enterpriseSearch.appSearch.productCardDescription', {
-    defaultMessage:
-      'Design, deploy, and manage powerful search experiences for your websites and web/mobile apps.',
-  }),
   URL: '/app/enterprise_search/app_search',
   SUPPORT_URL: 'https://discuss.elastic.co/c/enterprise-search/app-search/',
 };
@@ -81,13 +90,6 @@ export const WORKPLACE_SEARCH_PLUGIN = {
     defaultMessage:
       'Search all documents, files, and sources available across your virtual workplace.',
   }),
-  CARD_DESCRIPTION: i18n.translate(
-    'xpack.enterpriseSearch.workplaceSearch.productCardDescription',
-    {
-      defaultMessage:
-        'Unify your content in one place, with instant connectivity to popular productivity and collaboration tools.',
-    }
-  ),
   URL: '/app/enterprise_search/workplace_search',
   NON_ADMIN_URL: '/app/enterprise_search/workplace_search/p',
   SUPPORT_URL: 'https://discuss.elastic.co/c/enterprise-search/workplace-search/',
@@ -107,3 +109,11 @@ export const ENTERPRISE_SEARCH_KIBANA_COOKIE = '_enterprise_search';
 
 export const ENTERPRISE_SEARCH_RELEVANCE_LOGS_SOURCE_ID = 'ent-search-logs';
 export const ENTERPRISE_SEARCH_AUDIT_LOGS_SOURCE_ID = 'ent-search-audit-logs';
+
+export const APP_SEARCH_URL = '/app/enterprise_search/app_search';
+export const ENTERPRISE_SEARCH_ELASTICSEARCH_URL = '/app/enterprise_search/elasticsearch';
+export const WORKPLACE_SEARCH_URL = '/app/enterprise_search/workplace_search';
+
+export const ENTERPRISE_SEARCH_DOCUMENTS_DEFAULT_DOC_COUNT = 25;
+
+export const ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE = 'elastic-crawler';

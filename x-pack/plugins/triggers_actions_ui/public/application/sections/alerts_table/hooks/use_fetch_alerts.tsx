@@ -48,7 +48,7 @@ interface InspectQuery {
 }
 type GetInspectQuery = () => InspectQuery;
 
-interface FetchAlertResp {
+export interface FetchAlertResp {
   alerts: EcsFieldsResponse[];
   isInitializing: boolean;
   getInspectQuery: GetInspectQuery;

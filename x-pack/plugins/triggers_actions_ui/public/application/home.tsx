@@ -11,13 +11,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSpacer, EuiButtonEmpty, EuiPageHeader } from '@elastic/eui';
 
 import { getIsExperimentalFeatureEnabled } from '../common/get_experimental_features';
-import {
-  Section,
-  routeToConnectors,
-  routeToRules,
-  routeToInternalAlerts,
-  routeToInternalShareableComponentsSandbox,
-} from './constants';
+import { Section, routeToConnectors, routeToRules, routeToInternalAlerts } from './constants';
 import { getAlertingSectionBreadcrumb } from './lib/breadcrumb';
 import { getCurrentDocTitle } from './lib/doc_title';
 import { hasShowActionsCapability } from './lib/capabilities';
@@ -32,9 +26,6 @@ const ActionsConnectorsList = lazy(
 );
 const RulesList = lazy(() => import('./sections/rules_list/components/rules_list'));
 const AlertsPage = lazy(() => import('./sections/alerts_table/alerts_page'));
-const InternalShareableComponentsSandbox = lazy(
-  () => import('./internal/shareable_components_sandbox/shareable_components_sandbox')
-);
 
 export interface MatchParams {
   section: Section;
@@ -54,9 +45,6 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
     docLinks,
   } = useKibana().services;
   const isInternalAlertsTableEnabled = getIsExperimentalFeatureEnabled('internalAlertsTable');
-  const isInternalShareableComponentsSandboxEnabled = getIsExperimentalFeatureEnabled(
-    'internalShareableComponentsSandbox'
-  );
 
   const canShowActions = hasShowActionsCapability(capabilities);
   const tabs: Array<{
@@ -162,13 +150,6 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
               path={routeToRules}
               component={suspendedComponentWithProps(RulesList, 'xl')}
             />
-            {isInternalShareableComponentsSandboxEnabled && (
-              <Route
-                exact
-                path={routeToInternalShareableComponentsSandbox}
-                component={suspendedComponentWithProps(InternalShareableComponentsSandbox, 'xl')}
-              />
-            )}
             {isInternalAlertsTableEnabled ? (
               <Route
                 exact

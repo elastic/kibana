@@ -10,7 +10,7 @@ import _, { isArray, last, get } from 'lodash';
 import React, { Component } from 'react';
 import { parse as parseUrl } from 'url';
 import PropTypes from 'prop-types';
-import { RedirectAppLinks } from '@kbn/kibana-react-plugin/public';
+import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { getMetricsField } from '../../lib/get_metrics_field';
 import { createTickFormatter } from '../../lib/tick_formatter';
 import { createFieldFormatter } from '../../lib/create_field_formatter';
@@ -271,15 +271,13 @@ class TableVis extends Component {
 
     return (
       <RenderCounter initialRender={initialRender}>
-        <RedirectAppLinks
-          application={getCoreStart().application}
-          className="tvbVis"
-          data-test-subj="tableView"
-        >
-          <table className="table">
-            <thead>{header}</thead>
-            <tbody>{rows}</tbody>
-          </table>
+        <RedirectAppLinks coreStart={getCoreStart()} className="tvbVis" data-test-subj="tableView">
+          <div className="tvbVis" data-test-subj="tableView">
+            <table className="table">
+              <thead>{header}</thead>
+              <tbody>{rows}</tbody>
+            </table>
+          </div>
         </RedirectAppLinks>
         {accessDeniedDrilldownUrl && (
           <ExternalUrlErrorModal

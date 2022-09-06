@@ -142,4 +142,18 @@ describe('DraggableLegend', () => {
       `${MIN_LEGEND_HEIGHT}px`
     );
   });
+
+  it('renders a legend with specified class names', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <DraggableLegend className="foo bar baz" height={0} legendItems={legendItems} />
+      </TestProviders>
+    );
+
+    expect(wrapper.find('[data-test-subj="draggable-legend"]').first().getDOMNode()).toHaveClass(
+      'foo',
+      'bar',
+      'baz'
+    );
+  });
 });

@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ThemeService } from '@kbn/charts-plugin/public/services';
 import { uiSettings } from './ui_settings';
 

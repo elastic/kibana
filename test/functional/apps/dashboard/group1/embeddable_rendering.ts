@@ -60,9 +60,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     // TODO add test for 'animal sound pie' viz
 
     // This tests line charts that do not use timeseries data
-    const dogData = await elasticChart.getChartDebugData('visTypeXyChart', 2);
-    const pointCount = dogData?.areas?.reduce((acc, a) => {
-      return acc + a.lines.y1.points.length;
+    const dogData = await elasticChart.getChartDebugData('xyVisChart', 2);
+    const pointCount = dogData?.lines?.reduce((acc, a) => {
+      return acc + a.points.length;
     }, 0);
     expect(pointCount).to.equal(6);
 
@@ -83,9 +83,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     // Three instead of 0 because there is a visualization based off a non time based index that
     // should still show data.
-    const dogData = await elasticChart.getChartDebugData('visTypeXyChart');
-    const pointCount = dogData?.areas?.reduce((acc, a) => {
-      return acc + a.lines.y1.points.length;
+    const dogData = await elasticChart.getChartDebugData('xyVisChart', 2);
+    const pointCount = dogData?.lines?.reduce((acc, a) => {
+      return acc + a.points.length;
     }, 0);
     expect(pointCount).to.equal(6);
 
@@ -99,8 +99,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await dashboardExpect.vegaTextsDoNotExist(['5,000']);
   };
 
-  // FLAKY: https://github.com/elastic/kibana/issues/132865
-  describe.skip('dashboard embeddable rendering', function describeIndexTests() {
+  describe('dashboard embeddable rendering', function describeIndexTests() {
     before(async () => {
       await security.testUser.setRoles(['kibana_admin', 'animals', 'test_logstash_reader']);
       await kibanaServer.savedObjects.cleanStandardList();

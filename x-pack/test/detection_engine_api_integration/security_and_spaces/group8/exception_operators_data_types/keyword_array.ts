@@ -633,5 +633,134 @@ export default ({ getService }: FtrProviderContext) => {
         ]);
       });
     });
+
+    describe('"matches wildcard" operator', () => {
+      it('should filter 1 single keyword if it is set as an exception', async () => {
+        const rule = getRuleForSignalTesting(['keyword_as_array']);
+        const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
+          [
+            {
+              field: 'keyword',
+              operator: 'included',
+              type: 'wildcard',
+              value: 'word o*',
+            },
+          ],
+        ]);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForSignalsToBePresent(supertest, log, 3, [id]);
+        const signalsOpen = await getSignalsById(supertest, log, id);
+        const hits = signalsOpen.hits.hits.map((hit) => hit._source?.keyword).sort();
+        expect(hits).to.eql([
+          [],
+          ['word eight', 'word nine', 'word ten'],
+          ['word five', null, 'word six', 'word seven'],
+        ]);
+      });
+
+      it('should filter 2 keyword if both are set as exceptions', async () => {
+        const rule = getRuleForSignalTesting(['keyword_as_array']);
+        const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
+          [
+            {
+              field: 'keyword',
+              operator: 'included',
+              type: 'wildcard',
+              value: 'word t*',
+            },
+          ],
+        ]);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForSignalsToBePresent(supertest, log, 2, [id]);
+        const signalsOpen = await getSignalsById(supertest, log, id);
+        const hits = signalsOpen.hits.hits.map((hit) => hit._source?.keyword).sort();
+        expect(hits).to.eql([[], ['word five', null, 'word six', 'word seven']]);
+      });
+
+      it('should filter 3 keyword if all 3 are set as exceptions', async () => {
+        const rule = getRuleForSignalTesting(['keyword_as_array']);
+        const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
+          [
+            {
+              field: 'keyword',
+              operator: 'included',
+              type: 'wildcard',
+              value: 'word *',
+            },
+          ],
+        ]);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForSignalsToBePresent(supertest, log, 1, [id]);
+        const signalsOpen = await getSignalsById(supertest, log, id);
+        const hits = signalsOpen.hits.hits.map((hit) => hit._source?.keyword).sort();
+        expect(hits.flat(Number.MAX_SAFE_INTEGER)).to.eql([]);
+      });
+    });
+
+    describe('"does not match wildcard" operator', () => {
+      it('should filter 1 single keyword if it is set as an exception', async () => {
+        const rule = getRuleForSignalTesting(['keyword_as_array']);
+        const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
+          [
+            {
+              field: 'keyword',
+              operator: 'excluded',
+              type: 'wildcard',
+              value: 'word o*',
+            },
+          ],
+        ]);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForSignalsToBePresent(supertest, log, 1, [id]);
+        const signalsOpen = await getSignalsById(supertest, log, id);
+        const hits = signalsOpen.hits.hits.map((hit) => hit._source?.keyword).sort();
+        expect(hits).to.eql([['word one', 'word two', 'word three', 'word four']]);
+      });
+
+      it('should filter 2 keyword if both are set as exceptions', async () => {
+        const rule = getRuleForSignalTesting(['keyword_as_array']);
+        const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
+          [
+            {
+              field: 'keyword',
+              operator: 'excluded',
+              type: 'wildcard',
+              value: 'word t*',
+            },
+          ],
+        ]);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForSignalsToBePresent(supertest, log, 2, [id]);
+        const signalsOpen = await getSignalsById(supertest, log, id);
+        const hits = signalsOpen.hits.hits.map((hit) => hit._source?.keyword).sort();
+        expect(hits).to.eql([
+          ['word eight', 'word nine', 'word ten'],
+          ['word one', 'word two', 'word three', 'word four'],
+        ]);
+      });
+
+      it('should filter 3 keyword if all 3 are set as exceptions', async () => {
+        const rule = getRuleForSignalTesting(['keyword_as_array']);
+        const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
+          [
+            {
+              field: 'keyword',
+              operator: 'excluded',
+              type: 'wildcard',
+              value: 'word *',
+            },
+          ],
+        ]);
+        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForSignalsToBePresent(supertest, log, 3, [id]);
+        const signalsOpen = await getSignalsById(supertest, log, id);
+        const hits = signalsOpen.hits.hits.map((hit) => hit._source?.keyword).sort();
+        expect(hits).to.eql([
+          ['word eight', 'word nine', 'word ten'],
+          ['word five', null, 'word six', 'word seven'],
+          ['word one', 'word two', 'word three', 'word four'],
+        ]);
+      });
+    });
   });
 };

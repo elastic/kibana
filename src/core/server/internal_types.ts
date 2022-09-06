@@ -31,28 +31,35 @@ import type {
   InternalHttpServiceSetup,
   InternalHttpServiceStart,
 } from '@kbn/core-http-server-internal';
-import { CapabilitiesSetup, CapabilitiesStart } from './capabilities';
+import type {
+  InternalMetricsServiceSetup,
+  InternalMetricsServiceStart,
+} from '@kbn/core-metrics-server-internal';
 import {
   InternalElasticsearchServicePreboot,
   InternalElasticsearchServiceSetup,
   InternalElasticsearchServiceStart,
-} from './elasticsearch';
+} from '@kbn/core-elasticsearch-server-internal';
+import type { CapabilitiesSetup, CapabilitiesStart } from '@kbn/core-capabilities-server';
 import {
   InternalSavedObjectsServiceSetup,
   InternalSavedObjectsServiceStart,
-} from './saved_objects';
+} from '@kbn/core-saved-objects-server-internal';
+import {
+  InternalDeprecationsServiceSetup,
+  InternalDeprecationsServiceStart,
+} from '@kbn/core-deprecations-server-internal';
+import type { CoreUsageDataStart } from '@kbn/core-usage-data-server';
+import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
+import type { I18nServiceSetup } from '@kbn/core-i18n-server';
 import {
   InternalUiSettingsServicePreboot,
   InternalUiSettingsServiceSetup,
   InternalUiSettingsServiceStart,
 } from './ui_settings';
-import { InternalMetricsServiceSetup, InternalMetricsServiceStart } from './metrics';
 import { InternalRenderingServiceSetup } from './rendering';
 import { InternalHttpResourcesPreboot, InternalHttpResourcesSetup } from './http_resources';
 import { InternalStatusServiceSetup } from './status';
-import { CoreUsageDataStart, InternalCoreUsageDataSetup } from './core_usage_data';
-import { I18nServiceSetup } from './i18n';
-import { InternalDeprecationsServiceSetup, InternalDeprecationsServiceStart } from './deprecations';
 
 /** @internal */
 export interface InternalCorePreboot {

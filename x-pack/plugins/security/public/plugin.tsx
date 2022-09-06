@@ -28,6 +28,7 @@ import { AnalyticsService } from './analytics';
 import { AnonymousAccessService } from './anonymous_access';
 import type { AuthenticationServiceSetup, AuthenticationServiceStart } from './authentication';
 import { AuthenticationService } from './authentication';
+import type { SecurityApiClients } from './components';
 import type { ConfigType } from './config';
 import { ManagementService, UserAPIClient } from './management';
 import type { SecurityNavControlServiceStart } from './nav_control';
@@ -71,6 +72,7 @@ export class SecurityPlugin
   private readonly anonymousAccessService = new AnonymousAccessService();
   private readonly analyticsService = new AnalyticsService();
   private authc!: AuthenticationServiceSetup;
+  private securityApiClients!: SecurityApiClients;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = this.initializerContext.config.get<ConfigType>();
@@ -93,7 +95,7 @@ export class SecurityPlugin
       http: core.http,
     });
 
-    const securityApiClients = {
+    this.securityApiClients = {
       userProfiles: new UserProfileAPIClient(core.http),
       users: new UserAPIClient(core.http),
     };
@@ -101,7 +103,7 @@ export class SecurityPlugin
     this.navControlService.setup({
       securityLicense: license,
       logoutUrl: getLogoutUrl(core.http),
-      securityApiClients,
+      securityApiClients: this.securityApiClients,
     });
 
     this.analyticsService.setup({ securityLicense: license });
@@ -110,7 +112,7 @@ export class SecurityPlugin
       authc: this.authc,
       application: core.application,
       getStartServices: core.getStartServices,
-      securityApiClients,
+      securityApiClients: this.securityApiClients,
     });
 
     if (management) {
@@ -181,6 +183,17 @@ export class SecurityPlugin
       uiApi: getUiApi({ core }),
       navControlService: this.navControlService.start({ core, authc: this.authc }),
       authc: this.authc as AuthenticationServiceStart,
+      userProfiles: {
+        getCurrent: this.securityApiClients.userProfiles.getCurrent.bind(
+          this.securityApiClients.userProfiles
+        ),
+        bulkGet: this.securityApiClients.userProfiles.bulkGet.bind(
+          this.securityApiClients.userProfiles
+        ),
+        suggest: this.securityApiClients.userProfiles.suggest.bind(
+          this.securityApiClients.userProfiles
+        ),
+      },
     };
   }
 
@@ -217,6 +230,11 @@ export interface SecurityPluginStart {
    * Exposes authentication information about the currently logged in user.
    */
   authc: AuthenticationServiceStart;
+  /**
+   * A set of methods to work with Kibana user profiles.
+   */
+  userProfiles: Pick<UserProfileAPIClient, 'getCurrent' | 'bulkGet' | 'suggest'>;
+
   /**
    * Exposes UI components that will be loaded asynchronously.
    * @deprecated

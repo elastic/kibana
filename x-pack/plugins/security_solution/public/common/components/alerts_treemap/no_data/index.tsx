@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
 
@@ -15,12 +15,25 @@ const NoDataLabel = styled(EuiText)`
   text-align: center;
 `;
 
-const NoDataComponent: React.FC = () => (
+interface Props {
+  reason?: string;
+}
+
+const NoDataComponent: React.FC<Props> = ({ reason }) => (
   <EuiFlexGroup alignItems="center" gutterSize="none">
     <EuiFlexItem grow={true}>
       <NoDataLabel color="subdued" data-test-subj="noDataLabel" size="xs">
         {i18n.NO_DATA_LABEL}
       </NoDataLabel>
+
+      {reason != null && (
+        <>
+          <EuiSpacer size="s" />
+          <NoDataLabel color="subdued" data-test-subj="reasonLabel" size="xs">
+            {reason}
+          </NoDataLabel>
+        </>
+      )}
     </EuiFlexItem>
   </EuiFlexGroup>
 );

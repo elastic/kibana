@@ -110,5 +110,7 @@ export default function kubernetesSecurityApiIntegrationTests({
     });
 
     loadTestFile(require.resolve('./process_events_route'));
+    loadTestFile(require.resolve('./io_events_route'));
+    loadTestFile(require.resolve('./get_total_io_bytes_route'));
   });
 }

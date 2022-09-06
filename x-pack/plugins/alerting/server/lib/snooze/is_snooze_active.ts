@@ -19,11 +19,13 @@ export function isSnoozeActive(snooze: RuleSnoozeSchedule) {
     };
   const startTimeMS = Date.parse(rRule.dtstart);
   const initialEndTime = startTimeMS + duration;
+  const isInitialStartSkipped = snooze.skipRecurrences?.includes(rRule.dtstart);
   // If now is during the first occurrence of the snooze
   const now = Date.now();
-  if (now >= startTimeMS && now < initialEndTime)
+  if (now >= startTimeMS && now < initialEndTime && !isInitialStartSkipped)
     return {
       snoozeEndTime: new Date(initialEndTime),
+      lastOccurrence: new Date(rRule.dtstart),
       id,
     };
 
@@ -40,8 +42,11 @@ export function isSnoozeActive(snooze: RuleSnoozeSchedule) {
     const recurrenceRule = new RRule(rRuleOptions);
     const lastOccurrence = recurrenceRule.before(new Date(now), true);
     if (!lastOccurrence) return null;
+    // Check if the current recurrence has been skipped manually
+    if (snooze.skipRecurrences?.includes(lastOccurrence.toISOString())) return null;
     const lastOccurrenceEndTime = lastOccurrence.getTime() + duration;
-    if (now < lastOccurrenceEndTime) return { snoozeEndTime: new Date(lastOccurrenceEndTime), id };
+    if (now < lastOccurrenceEndTime)
+      return { lastOccurrence, snoozeEndTime: new Date(lastOccurrenceEndTime), id };
   } catch (e) {
     throw new Error(`Failed to process RRule ${rRule}: ${e}`);
   }

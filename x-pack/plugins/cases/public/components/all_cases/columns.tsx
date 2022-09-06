@@ -250,7 +250,12 @@ export const useCasesColumns = ({
             render: (caseOwner: CasesOwners) => {
               const ownerInfo = OWNER_INFO[caseOwner];
               return ownerInfo ? (
-                <EuiIcon size="s" type={ownerInfo.iconType} title={ownerInfo.label} />
+                <EuiIcon
+                  size="m"
+                  type={ownerInfo.iconType}
+                  title={ownerInfo.label}
+                  data-test-subj={`case-table-column-owner-icon-${caseOwner}`}
+                />
               ) : (
                 getEmptyTagValue()
               );
@@ -319,7 +324,7 @@ export const useCasesColumns = ({
               return (
                 <StatusContextMenu
                   currentStatus={theCase.status}
-                  disabled={!permissions.all || isLoadingUpdateCase}
+                  disabled={!permissions.update || isLoadingUpdateCase}
                   onStatusChanged={(status) =>
                     handleDispatchUpdate({
                       updateKey: 'status',
@@ -372,7 +377,7 @@ export const useCasesColumns = ({
           },
         ]
       : []),
-    ...(permissions.all && !isSelectorView
+    ...(permissions.delete && !isSelectorView
       ? [
           {
             name: (

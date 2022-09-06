@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { elasticsearchClientMock } from '@kbn/core/server/elasticsearch/client/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { getExecutionsPerDayCount, getInUseTotalCount, getTotalCount } from './actions_telemetry';
 
@@ -113,6 +112,7 @@ Object {
     "some.type": 1,
   },
   "countTotal": 4,
+  "hasErrors": false,
 }
 `);
   });
@@ -131,6 +131,8 @@ Object {
 Object {
   "countByType": Object {},
   "countTotal": 0,
+  "errorMessage": "oh no",
+  "hasErrors": true,
 }
 `);
   });
@@ -195,6 +197,7 @@ Object {
   "countEmailByService": Object {},
   "countNamespaces": 1,
   "countTotal": 2,
+  "hasErrors": false,
 }
 `);
   });
@@ -296,6 +299,7 @@ Object {
   "countEmailByService": Object {},
   "countNamespaces": 1,
   "countTotal": 4,
+  "hasErrors": false,
 }
 `);
   });
@@ -317,6 +321,8 @@ Object {
   "countEmailByService": Object {},
   "countNamespaces": 0,
   "countTotal": 0,
+  "errorMessage": "oh no",
+  "hasErrors": true,
 }
 `);
   });
@@ -439,6 +445,7 @@ Object {
     "some.type": 1,
   },
   "countTotal": 6,
+  "hasErrors": false,
 }
 `);
   });
@@ -547,6 +554,7 @@ Object {
   },
   "countNamespaces": 1,
   "countTotal": 6,
+  "hasErrors": false,
 }
 `);
   });
@@ -646,6 +654,7 @@ Object {
   },
   "countNamespaces": 3,
   "countTotal": 6,
+  "hasErrors": false,
 }
 `);
   });
@@ -745,6 +754,7 @@ Object {
         __slack: 7,
       },
       countTotal: 120,
+      hasErrors: false,
     });
   });
 
@@ -766,6 +776,8 @@ Object {
   "countFailed": 0,
   "countFailedByType": Object {},
   "countTotal": 0,
+  "errorMessage": "oh no",
+  "hasErrors": true,
 }
 `);
   });

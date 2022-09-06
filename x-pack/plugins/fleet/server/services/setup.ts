@@ -10,13 +10,13 @@ import pMap from 'p-map';
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 
-import { AUTO_UPDATE_PACKAGES } from '../../common';
+import { AUTO_UPDATE_PACKAGES } from '../../common/constants';
+import type { PreconfigurationError } from '../../common/constants';
 import type {
   DefaultPackagesInstallationError,
-  PreconfigurationError,
   BundledPackage,
   Installation,
-} from '../../common';
+} from '../../common/types';
 
 import { SO_SEARCH_LIMIT } from '../constants';
 
@@ -41,6 +41,7 @@ import type { UpgradeManagedPackagePoliciesResult } from './managed_package_poli
 import { upgradeManagedPackagePolicies } from './managed_package_policies';
 import { getBundledPackages } from './epm/packages';
 import { upgradePackageInstallVersion } from './setup/upgrade_package_install_version';
+import { upgradeAgentPolicySchemaVersion } from './setup/upgrade_agent_policy_schema_version';
 
 export interface SetupStatus {
   isInitialized: boolean;
@@ -129,6 +130,9 @@ async function createSetupSideEffects(
 
   logger.debug('Upgrade Fleet package install versions');
   await upgradePackageInstallVersion({ soClient, esClient, logger });
+
+  logger.debug('Upgrade Agent policy schema version');
+  await upgradeAgentPolicySchemaVersion(soClient);
 
   logger.debug('Setting up Fleet enrollment keys');
   await ensureDefaultEnrollmentAPIKeysExists(soClient, esClient);

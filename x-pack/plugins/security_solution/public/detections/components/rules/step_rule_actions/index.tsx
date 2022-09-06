@@ -69,7 +69,7 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
   setForm,
   actionMessageParams,
 }) => {
-  const [isLoadingCaseAction, hasErrorOnCreationCaseAction] = useManageCaseAction();
+  const [isLoadingCaseAction] = useManageCaseAction();
   const {
     services: {
       application,
@@ -159,14 +159,13 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
             component={RuleActionsField}
             componentProps={{
               messageVariables: actionMessageParams,
-              hasErrorOnCreationCaseAction,
             }}
           />
         </>
       ) : (
         <UseField path="actions" component={GhostFormField} />
       ),
-    [throttle, actionMessageParams, hasErrorOnCreationCaseAction]
+    [throttle, actionMessageParams]
   );
   // only display the actions dropdown if the user has "read" privileges for actions
   const displayActionsDropDown = useMemo(() => {

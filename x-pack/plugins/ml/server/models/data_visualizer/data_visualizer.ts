@@ -8,18 +8,17 @@
 import { get, each, last, find } from 'lodash';
 
 import { IScopedClusterClient } from '@kbn/core/server';
-import { KBN_FIELD_TYPES } from '@kbn/data-plugin/server';
 import {
   buildSamplerAggregation,
-  getAggIntervals,
+  fetchHistogramsForFields,
   getSamplerAggregationsResponsePath,
 } from '@kbn/ml-agg-utils';
-import { stringHash } from '@kbn/ml-string-hash';
+import type { AggCardinality, FieldsForHistograms } from '@kbn/ml-agg-utils';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { ML_JOB_FIELD_TYPES } from '../../../common/constants/field_types';
 import { getSafeAggregationName } from '../../../common/util/job_utils';
 import { buildBaseFilterCriteria } from '../../lib/query_utils';
-import { AggCardinality, RuntimeMappings } from '../../../common/types/fields';
+import { RuntimeMappings } from '../../../common/types/fields';
 import { getDatafeedAggregations } from '../../../common/util/datafeed_utils';
 import { Datafeed } from '../../../common/types/anomaly_detection_jobs';
 
@@ -27,8 +26,6 @@ const SAMPLER_TOP_TERMS_THRESHOLD = 100000;
 const SAMPLER_TOP_TERMS_SHARD_SIZE = 5000;
 const AGGREGATABLE_EXISTS_REQUEST_BATCH_SIZE = 200;
 const FIELDS_REQUEST_BATCH_SIZE = 10;
-
-const MAX_CHART_COLUMNS = 20;
 
 interface FieldData {
   fieldName: string;
@@ -44,11 +41,6 @@ export interface Field {
   fieldName: string;
   type: string;
   cardinality: number;
-}
-
-export interface HistogramField {
-  fieldName: string;
-  type: string;
 }
 
 interface Distribution {
@@ -114,57 +106,6 @@ interface FieldExamples {
   examples: any[];
 }
 
-interface AggHistogram {
-  histogram: {
-    field: string;
-    interval: number;
-  };
-}
-
-interface AggTerms {
-  terms: {
-    field: string;
-    size: number;
-  };
-}
-
-interface NumericDataItem {
-  key: number;
-  key_as_string?: string;
-  doc_count: number;
-}
-
-interface NumericChartData {
-  data: NumericDataItem[];
-  id: string;
-  interval: number;
-  stats: [number, number];
-  type: 'numeric';
-}
-
-interface OrdinalDataItem {
-  key: string;
-  key_as_string?: string;
-  doc_count: number;
-}
-
-interface OrdinalChartData {
-  type: 'ordinal' | 'boolean';
-  cardinality: number;
-  data: OrdinalDataItem[];
-  id: string;
-}
-
-interface UnsupportedChartData {
-  id: string;
-  type: 'unsupported';
-}
-
-type ChartRequestAgg = AggHistogram | AggCardinality | AggTerms;
-
-// type ChartDataItem = NumericDataItem | OrdinalDataItem;
-type ChartData = NumericChartData | OrdinalChartData | UnsupportedChartData;
-
 type BatchStats =
   | NumericFieldStats
   | StringFieldStats
@@ -173,126 +114,11 @@ type BatchStats =
   | DocumentCountStats
   | FieldExamples;
 
-// export for re-use by transforms plugin
-export const getHistogramsForFields = async (
-  client: IScopedClusterClient,
-  indexPattern: string,
-  query: any,
-  fields: HistogramField[],
-  samplerShardSize: number,
-  runtimeMappings?: RuntimeMappings
-) => {
-  const { asCurrentUser } = client;
-  const aggIntervals = await getAggIntervals(
-    client.asCurrentUser,
-    indexPattern,
-    query,
-    fields,
-    samplerShardSize,
-    runtimeMappings
-  );
-
-  const chartDataAggs = fields.reduce((aggs, field) => {
-    const fieldName = field.fieldName;
-    const fieldType = field.type;
-    const id = stringHash(fieldName);
-    if (fieldType === KBN_FIELD_TYPES.NUMBER || fieldType === KBN_FIELD_TYPES.DATE) {
-      if (aggIntervals[id] !== undefined) {
-        aggs[`${id}_histogram`] = {
-          histogram: {
-            field: fieldName,
-            interval: aggIntervals[id].interval !== 0 ? aggIntervals[id].interval : 1,
-          },
-        };
-      }
-    } else if (fieldType === KBN_FIELD_TYPES.STRING || fieldType === KBN_FIELD_TYPES.BOOLEAN) {
-      if (fieldType === KBN_FIELD_TYPES.STRING) {
-        aggs[`${id}_cardinality`] = {
-          cardinality: {
-            field: fieldName,
-          },
-        };
-      }
-      aggs[`${id}_terms`] = {
-        terms: {
-          field: fieldName,
-          size: MAX_CHART_COLUMNS,
-        },
-      };
-    }
-    return aggs;
-  }, {} as Record<string, ChartRequestAgg>);
-
-  if (Object.keys(chartDataAggs).length === 0) {
-    return [];
-  }
-
-  const body = await asCurrentUser.search(
-    {
-      index: indexPattern,
-      size: 0,
-      body: {
-        query,
-        aggs: buildSamplerAggregation(chartDataAggs, samplerShardSize),
-        size: 0,
-        ...(isPopulatedObject(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
-      },
-    },
-    { maxRetries: 0 }
-  );
-
-  const aggsPath = getSamplerAggregationsResponsePath(samplerShardSize);
-  const aggregations = aggsPath.length > 0 ? get(body.aggregations, aggsPath) : body.aggregations;
-
-  const chartsData: ChartData[] = fields.map((field): ChartData => {
-    const fieldName = field.fieldName;
-    const fieldType = field.type;
-    const id = stringHash(field.fieldName);
-
-    if (fieldType === KBN_FIELD_TYPES.NUMBER || fieldType === KBN_FIELD_TYPES.DATE) {
-      if (aggIntervals[id] === undefined) {
-        return {
-          type: 'numeric',
-          data: [],
-          interval: 0,
-          stats: [0, 0],
-          id: fieldName,
-        };
-      }
-
-      return {
-        data: aggregations[`${id}_histogram`].buckets,
-        interval: aggIntervals[id].interval,
-        stats: [aggIntervals[id].min, aggIntervals[id].max],
-        type: 'numeric',
-        id: fieldName,
-      };
-    } else if (fieldType === KBN_FIELD_TYPES.STRING || fieldType === KBN_FIELD_TYPES.BOOLEAN) {
-      return {
-        type: fieldType === KBN_FIELD_TYPES.STRING ? 'ordinal' : 'boolean',
-        cardinality:
-          fieldType === KBN_FIELD_TYPES.STRING ? aggregations[`${id}_cardinality`].value : 2,
-        data: aggregations[`${id}_terms`].buckets,
-        id: fieldName,
-      };
-    }
-
-    return {
-      type: 'unsupported',
-      id: fieldName,
-    };
-  });
-
-  return chartsData;
-};
-
 export class DataVisualizer {
-  private _client: IScopedClusterClient;
   private _asCurrentUser: IScopedClusterClient['asCurrentUser'];
 
   constructor(client: IScopedClusterClient) {
     this._asCurrentUser = client.asCurrentUser;
-    this._client = client;
   }
 
   // Obtains overall stats on the fields in the supplied index pattern, returning an object
@@ -388,12 +214,12 @@ export class DataVisualizer {
   async getHistogramsForFields(
     indexPattern: string,
     query: any,
-    fields: HistogramField[],
+    fields: FieldsForHistograms,
     samplerShardSize: number,
     runtimeMappings?: RuntimeMappings
   ): Promise<any> {
-    return await getHistogramsForFields(
-      this._client,
+    return await fetchHistogramsForFields(
+      this._asCurrentUser,
       indexPattern,
       query,
       fields,

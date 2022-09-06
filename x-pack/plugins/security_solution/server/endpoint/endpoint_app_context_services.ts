@@ -16,7 +16,6 @@ import type {
   AgentService,
   FleetStartContract,
   AgentPolicyServiceInterface,
-  PackagePolicyServiceInterface,
 } from '@kbn/fleet-plugin/server';
 import type { PluginStartContract as AlertsPluginStartContract } from '@kbn/alerting-plugin/server';
 import {
@@ -28,7 +27,6 @@ import type { ManifestManager } from './services/artifacts';
 import type { ConfigType } from '../config';
 import type { IRequestContextFactory } from '../request_context_factory';
 import type { LicenseService } from '../../common/license';
-import type { ExperimentalFeatures } from '../../common/experimental_features';
 import type { EndpointMetadataService } from './services/metadata';
 import {
   EndpointAppContentServicesNotSetUpError,
@@ -146,10 +144,6 @@ export class EndpointAppContextService {
 
   public stop() {}
 
-  public getExperimentalFeatures(): Readonly<ExperimentalFeatures> | undefined {
-    return this.startDependencies?.config.experimentalFeatures;
-  }
-
   private getFleetAuthzService(): FleetStartContract['authz'] {
     if (!this.startDependencies?.fleetAuthzService) {
       throw new EndpointAppContentServicesNotStartedError();
@@ -194,14 +188,6 @@ export class EndpointAppContextService {
   }
 
   /** @deprecated use `getScopedFleetServices()` instead */
-  public getPackagePolicyService(): PackagePolicyServiceInterface {
-    if (!this.startDependencies?.packagePolicyService) {
-      throw new EndpointAppContentServicesNotStartedError();
-    }
-    return this.startDependencies?.packagePolicyService;
-  }
-
-  /** @deprecated use `getScopedFleetServices()` instead */
   public getAgentPolicyService(): AgentPolicyServiceInterface | undefined {
     return this.startDependencies?.agentPolicyService;
   }
@@ -222,13 +208,6 @@ export class EndpointAppContextService {
       throw new EndpointAppContentServicesNotStartedError();
     }
     return this.startDependencies.cases.getCasesClientWithRequest(req);
-  }
-
-  public getExceptionListsClient(): ExceptionListClient {
-    if (!this.startDependencies?.exceptionListsClient) {
-      throw new EndpointAppContentServicesNotStartedError();
-    }
-    return this.startDependencies.exceptionListsClient;
   }
 
   public getFeatureUsageService(): FeatureUsageService {

@@ -25,6 +25,7 @@ import type { ParsedCommandInterface } from '../../../service/parsed_command_inp
 import { parseCommandInput } from '../../../service/parsed_command_input';
 import { UnknownCommand } from '../../unknown_comand';
 import { BadArgument } from '../../bad_argument';
+import { ValidationError } from '../../validation_error';
 import type { Command, CommandDefinition, CommandExecutionComponentProps } from '../../../types';
 
 const toCliArgumentOption = (argName: string) => `--${argName}`;
@@ -46,7 +47,7 @@ const getUnknownArguments = (
   const response: string[] = [];
 
   Object.keys(inputArgs).forEach((argName) => {
-    if (!argDefinitions || !argDefinitions[argName]) {
+    if (argName !== 'help' && (!argDefinitions || !argDefinitions[argName])) {
       response.push(argName);
     }
   });
@@ -115,10 +116,12 @@ const cloneCommandDefinitionWithNewRenderComponent = (
 
 const createCommandHistoryEntry = (
   command: CommandHistoryItem['command'],
-  state: CommandHistoryItem['state'] = createCommandExecutionState()
+  state: CommandHistoryItem['state'] = createCommandExecutionState(),
+  isValid: CommandHistoryItem['isValid'] = true
 ): CommandHistoryItem => {
   return {
     id: uuidV4(),
+    isValid,
     enteredAt: new Date().toISOString(),
     command,
     state,
@@ -143,14 +146,18 @@ export const handleExecuteCommand: ConsoleStoreReducer<
   if (!commandDefinition) {
     return updateStateWithNewCommandHistoryItem(
       state,
-      createCommandHistoryEntry({
-        input: parsedInput.input,
-        args: parsedInput,
-        commandDefinition: {
-          ...UnknownCommandDefinition,
-          RenderComponent: UnknownCommand,
+      createCommandHistoryEntry(
+        {
+          input: parsedInput.input,
+          args: parsedInput,
+          commandDefinition: {
+            ...UnknownCommandDefinition,
+            RenderComponent: UnknownCommand,
+          },
         },
-      })
+        undefined,
+        false
+      )
     );
   }
 
@@ -182,10 +189,27 @@ export const handleExecuteCommand: ConsoleStoreReducer<
   if (parsedInput.hasArgs) {
     // Show command help
     if (parsedInput.hasArg('help')) {
+      if (
+        Object.keys(parsedInput.args).length > 1 ||
+        parsedInput.args.help.length > 1 ||
+        parsedInput.args.help[0] !== true
+      ) {
+        return updateStateWithNewCommandHistoryItem(
+          state,
+          createCommandHistoryEntry(
+            cloneCommandDefinitionWithNewRenderComponent(command, BadArgument),
+            undefined,
+            false
+          )
+        );
+      }
+
       return updateStateWithNewCommandHistoryItem(
         state,
         createCommandHistoryEntry(
-          cloneCommandDefinitionWithNewRenderComponent(command, HelpCommandArgument)
+          cloneCommandDefinitionWithNewRenderComponent(command, HelpCommandArgument),
+          undefined,
+          false
         )
       );
     }
@@ -203,12 +227,13 @@ export const handleExecuteCommand: ConsoleStoreReducer<
                 defaultMessage: 'Command does not support any arguments',
               }
             ),
-          })
+          }),
+          false
         )
       );
     }
 
-    // no unknown arguments allowed?
+    // no unknown arguments allowed
     const unknownInputArgs = getUnknownArguments(parsedInput.args, commandDefinition.args);
 
     if (unknownInputArgs.length) {
@@ -238,7 +263,8 @@ export const handleExecuteCommand: ConsoleStoreReducer<
                 />
               </ConsoleCodeBlock>
             ),
-          })
+          }),
+          false
         )
       );
     }
@@ -265,7 +291,8 @@ export const handleExecuteCommand: ConsoleStoreReducer<
                   )}
                 </ConsoleCodeBlock>
               ),
-            })
+            }),
+            false
           )
         );
       }
@@ -280,14 +307,15 @@ export const handleExecuteCommand: ConsoleStoreReducer<
           cloneCommandDefinitionWithNewRenderComponent(command, BadArgument),
           createCommandExecutionState({
             errorMessage: exclusiveOrErrorMessage,
-          })
+          }),
+          false
         )
       );
     }
 
     // Validate each argument given to the command
     for (const argName of Object.keys(parsedInput.args)) {
-      const argDefinition = commandDefinition.args[argName];
+      const argDefinition = commandDefinition.args?.[argName];
       const argInput = parsedInput.args[argName];
 
       // Unknown argument
@@ -309,7 +337,8 @@ export const handleExecuteCommand: ConsoleStoreReducer<
                   )}
                 </ConsoleCodeBlock>
               ),
-            })
+            }),
+            false
           )
         );
       }
@@ -332,7 +361,8 @@ export const handleExecuteCommand: ConsoleStoreReducer<
                   )}
                 </ConsoleCodeBlock>
               ),
-            })
+            }),
+            false
           )
         );
       }
@@ -357,7 +387,8 @@ export const handleExecuteCommand: ConsoleStoreReducer<
                     )}
                   </ConsoleCodeBlock>
                 ),
-              })
+              }),
+              false
             )
           );
         }
@@ -381,7 +412,8 @@ export const handleExecuteCommand: ConsoleStoreReducer<
               })}
             </ConsoleCodeBlock>
           ),
-        })
+        }),
+        false
       )
     );
   } else if (exclusiveOrArgs.length > 0) {
@@ -391,7 +423,8 @@ export const handleExecuteCommand: ConsoleStoreReducer<
         cloneCommandDefinitionWithNewRenderComponent(command, BadArgument),
         createCommandExecutionState({
           errorMessage: exclusiveOrErrorMessage,
-        })
+        }),
+        false
       )
     );
   } else if (commandDefinition.mustHaveArgs) {
@@ -407,7 +440,8 @@ export const handleExecuteCommand: ConsoleStoreReducer<
               })}
             </ConsoleCodeBlock>
           ),
-        })
+        }),
+        false
       )
     );
   }
@@ -420,10 +454,11 @@ export const handleExecuteCommand: ConsoleStoreReducer<
       return updateStateWithNewCommandHistoryItem(
         state,
         createCommandHistoryEntry(
-          cloneCommandDefinitionWithNewRenderComponent(command, BadArgument),
+          cloneCommandDefinitionWithNewRenderComponent(command, ValidationError),
           createCommandExecutionState({
             errorMessage: validationResult,
-          })
+          }),
+          false
         )
       );
     }

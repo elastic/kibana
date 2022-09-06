@@ -32,12 +32,7 @@ post:
             owner:
               $ref: '../components/schemas/owners.yaml'
             settings:
-              description: An object that contains the case settings.
-              type: object
-              properties:
-                syncAlerts:
-                  description: Turns alert syncing on or off.
-                  type: boolean
+              $ref: '../components/schemas/settings.yaml'
             severity:
               $ref: '../components/schemas/severity_property.yaml' 
             tags:
@@ -77,9 +72,10 @@ delete:
   summary: Deletes one or more cases from the default space.
   operationId: deleteCaseDefaultSpace
   description: >
-    You must have `all` privileges for the **Cases** feature in the
-    **Management**, **Observability**, or **Security** section of the Kibana
-    feature privileges, depending on the owner of the cases you're deleting.
+    You must have `read` or `all` privileges and the `delete` sub-feature
+    privilege for the **Cases** feature in the **Management**, **Observability**,
+    or **Security** section of the Kibana feature privileges, depending on the
+    owner of the cases you're deleting.
   tags:
     - cases
     - kibana
@@ -138,12 +134,7 @@ patch:
                     description: The identifier for the case.
                     type: string
                   settings:
-                    description: An object that contains the case settings.
-                    type: object
-                    properties:
-                      syncAlerts:
-                        description: Turns alert syncing on or off.
-                        type: boolean
+                    $ref: '../components/schemas/settings.yaml'
                   severity:
                     $ref: '../components/schemas/severity_property.yaml'
                   status:

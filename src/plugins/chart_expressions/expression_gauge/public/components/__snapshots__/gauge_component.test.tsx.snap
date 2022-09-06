@@ -46,14 +46,6 @@ exports[`GaugeComponent renders the chart 1`] = `
     labelMinor=""
     subtype="verticalBullet"
     tickValueFormatter={[Function]}
-    ticks={
-      Array [
-        0,
-        1.33,
-        2.67,
-        4,
-      ]
-    }
     tooltipValueFormatter={[Function]}
   />
 </Chart>

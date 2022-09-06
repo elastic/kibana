@@ -11,23 +11,23 @@ import { IScopedClusterClient } from '@kbn/core/server';
 import { textAnalysisSettings } from './text_analysis';
 
 const prefixMapping: MappingTextProperty = {
-  search_analyzer: 'q_prefix',
   analyzer: 'i_prefix',
-  type: 'text',
   index_options: 'docs',
+  search_analyzer: 'q_prefix',
+  type: 'text',
 };
 
 const delimiterMapping: MappingTextProperty = {
   analyzer: 'iq_text_delimiter',
-  type: 'text',
   index_options: 'freqs',
+  type: 'text',
 };
 
 const joinedMapping: MappingTextProperty = {
-  search_analyzer: 'q_text_bigram',
   analyzer: 'i_text_bigram',
-  type: 'text',
   index_options: 'freqs',
+  search_analyzer: 'q_text_bigram',
+  type: 'text',
 };
 
 const enumMapping: MappingKeywordProperty = {
@@ -45,17 +45,17 @@ const defaultMappings = {
   dynamic_templates: [
     {
       all_text_fields: {
-        match_mapping_type: 'string',
         mapping: {
           analyzer: 'iq_text_base',
           fields: {
-            prefix: prefixMapping,
             delimiter: delimiterMapping,
-            joined: joinedMapping,
             enum: enumMapping,
+            joined: joinedMapping,
+            prefix: prefixMapping,
             stem: stemMapping,
           },
         },
+        match_mapping_type: 'string',
       },
     },
   ],
@@ -64,13 +64,13 @@ const defaultMappings = {
 export const createApiIndex = async (
   client: IScopedClusterClient,
   indexName: string,
-  language: string | undefined
+  language: string | undefined | null
 ) => {
   return await client.asCurrentUser.indices.create({
-    index: indexName,
     body: {
       mappings: defaultMappings,
-      settings: textAnalysisSettings(language),
+      settings: textAnalysisSettings(language ?? undefined),
     },
+    index: indexName,
   });
 };

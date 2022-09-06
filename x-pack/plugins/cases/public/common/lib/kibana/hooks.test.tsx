@@ -9,7 +9,7 @@ import React from 'react';
 import { renderHook } from '@testing-library/react-hooks';
 
 import { useApplicationCapabilities } from './hooks';
-import { TestProviders } from '../../mock';
+import { allCasesPermissions, TestProviders } from '../../mock';
 
 describe('hooks', () => {
   describe('useApplicationCapabilities', () => {
@@ -23,7 +23,7 @@ describe('hooks', () => {
 
       expect(result.current).toEqual({
         actions: { crud: true, read: true },
-        generalCases: { all: true, read: true },
+        generalCases: allCasesPermissions(),
         visualize: { crud: true, read: true },
         dashboard: { crud: true, read: true },
       });

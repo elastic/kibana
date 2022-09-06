@@ -12,10 +12,14 @@ import {
   UpdatePackagePolicyRequestBodySchema,
 } from '../models';
 
-import { ListWithKuerySchema } from '.';
+import { ListWithKuerySchema, BulkRequestBodySchema } from './common';
 
 export const GetPackagePoliciesRequestSchema = {
   query: ListWithKuerySchema,
+};
+
+export const BulkGetPackagePoliciesRequestSchema = {
+  body: BulkRequestBodySchema,
 };
 
 export const GetOnePackagePolicyRequestSchema = {
@@ -36,6 +40,15 @@ export const UpdatePackagePolicyRequestSchema = {
 export const DeletePackagePoliciesRequestSchema = {
   body: schema.object({
     packagePolicyIds: schema.arrayOf(schema.string()),
+    force: schema.maybe(schema.boolean()),
+  }),
+};
+
+export const DeleteOnePackagePolicyRequestSchema = {
+  params: schema.object({
+    packagePolicyId: schema.string(),
+  }),
+  query: schema.object({
     force: schema.maybe(schema.boolean()),
   }),
 };

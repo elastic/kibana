@@ -10,9 +10,9 @@ import {
   EuiHeaderSection,
   EuiHeaderSectionItem,
 } from '@elastic/eui';
-import React, { useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
-import { createPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
+import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
 import { i18n } from '@kbn/i18n';
 
 import type { AppMountParameters } from '@kbn/core/public';
@@ -27,6 +27,7 @@ import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 import { timelineSelectors } from '../../../timelines/store/timeline';
 import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { getScopeFromPath, showSourcererByPath } from '../../../common/containers/sourcerer';
+import { useTourContext } from '../../../common/components/guided_onboarding';
 
 const BUTTON_ADD_DATA = i18n.translate('xpack.securitySolution.globalHeader.buttonAddData', {
   defaultMessage: 'Add integrations',
@@ -38,7 +39,7 @@ const BUTTON_ADD_DATA = i18n.translate('xpack.securitySolution.globalHeader.butt
  */
 export const GlobalHeader = React.memo(
   ({ setHeaderActionMenu }: { setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'] }) => {
-    const portalNode = useMemo(() => createPortalNode(), []);
+    const portalNode = useMemo(() => createHtmlPortalNode(), []);
     const {
       theme,
       http: {
@@ -69,6 +70,12 @@ export const GlobalHeader = React.memo(
       };
     }, [portalNode, setHeaderActionMenu, theme.theme$]);
 
+    const { isTourShown, endTour } = useTourContext();
+    const closeOnboardingTourIfShown = useCallback(() => {
+      if (isTourShown) {
+        endTour();
+      }
+    }, [isTourShown, endTour]);
     return (
       <InPortal node={portalNode}>
         <EuiHeaderSection side="right">
@@ -85,6 +92,7 @@ export const GlobalHeader = React.memo(
                 data-test-subj="add-data"
                 href={href}
                 iconType="indexOpen"
+                onClick={closeOnboardingTourIfShown}
               >
                 {BUTTON_ADD_DATA}
               </EuiHeaderLink>

@@ -5,33 +5,39 @@
  * 2.0.
  */
 
-import { useQuery } from 'react-query';
+import { useQuery } from '@tanstack/react-query';
 
+import type { SavedObjectsFindResponse } from '@kbn/core/public';
 import { useKibana } from '../common/lib/kibana';
 import { useErrorToast } from '../common/hooks/use_error_toast';
 import { SAVED_QUERIES_ID } from './constants';
+import type { SavedQuerySO } from '../routes/saved_queries/list';
 
 export const useSavedQueries = ({
   isLive = false,
   pageIndex = 0,
   pageSize = 10000,
   sortField = 'updated_at',
-  sortDirection = 'desc',
+  sortOrder = 'desc',
 }) => {
   const { http } = useKibana().services;
   const setErrorToast = useErrorToast();
 
-  return useQuery(
-    [SAVED_QUERIES_ID, { pageIndex, pageSize, sortField, sortDirection }],
+  return useQuery<
+    Omit<SavedObjectsFindResponse, 'savedObjects'> & {
+      data: SavedQuerySO[];
+    },
+    { body: { error: string; message: string } }
+  >(
+    [SAVED_QUERIES_ID, { pageIndex, pageSize, sortField, sortOrder }],
     () =>
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      http.get<any>('/internal/osquery/saved_query', {
-        query: { pageIndex, pageSize, sortField, sortDirection },
+      http.get('/api/osquery/saved_queries', {
+        query: { page: pageIndex + 1, pageSize, sort: sortField, sortOrder },
       }),
     {
       keepPreviousData: true,
       refetchInterval: isLive ? 10000 : false,
-      onError: (error: { body: { error: string; message: string } }) => {
+      onError: (error) => {
         setErrorToast(error, {
           title: error.body.error,
           toastMessage: error.body.message,

@@ -8,7 +8,7 @@
 import { schema, TypeOf } from '@kbn/config-schema';
 import { UMServerLibs } from '../../legacy_uptime/uptime_server';
 import { syntheticsMonitorType } from '../../../common/types/saved_objects';
-import { UMRestApiRouteFactory } from '../../legacy_uptime/routes';
+import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { ConfigKey, MonitorFields } from '../../../common/runtime_types';
 
@@ -20,7 +20,7 @@ const queryParams = schema.object({
 
 type QueryParams = TypeOf<typeof queryParams>;
 
-export const createGetMonitorStatusRoute: UMRestApiRouteFactory = (libs: UMServerLibs) => ({
+export const createGetMonitorStatusRoute: SyntheticsRestApiRouteFactory = (libs: UMServerLibs) => ({
   method: 'GET',
   path: SYNTHETICS_API_URLS.MONITOR_STATUS,
   validate: {

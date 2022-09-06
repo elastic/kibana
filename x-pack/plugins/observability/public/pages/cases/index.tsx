@@ -19,7 +19,7 @@ import { getNoDataConfig } from '../../utils/no_data_config';
 import { ObservabilityAppServices } from '../../application/types';
 
 export const CasesPage = React.memo(() => {
-  const userPermissions = useGetUserCasesPermissions();
+  const userCasesPermissions = useGetUserCasesPermissions();
   const { docLinks, http } = useKibana<ObservabilityAppServices>().services;
   const { ObservabilityPageTemplate } = usePluginContext();
 
@@ -38,13 +38,13 @@ export const CasesPage = React.memo(() => {
     docsLink: docLinks.links.observability.guide,
   });
 
-  return userPermissions.read ? (
+  return userCasesPermissions.read ? (
     <ObservabilityPageTemplate
-      isPageDataLoaded={Boolean(hasAnyData || isAllRequestsComplete)}
+      isPageDataLoaded={isAllRequestsComplete}
       data-test-subj={noDataConfig ? 'noDataPage' : undefined}
       noDataConfig={noDataConfig}
     >
-      <Cases permissions={userPermissions} />
+      <Cases permissions={userCasesPermissions} />
     </ObservabilityPageTemplate>
   ) : (
     <CaseFeatureNoPermissions />

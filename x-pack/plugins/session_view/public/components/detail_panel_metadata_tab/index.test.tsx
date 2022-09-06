@@ -41,9 +41,9 @@ const TEST_ORCHESTRATOR_RESOURCE_NAME = 'pdcsi-node-6hvsp';
 const TEST_ORCHESTRATOR_RESOURCE_TYPE = 'pod';
 const TEST_ORCHESTRATOR_RESOURCE_IP = 'PLACEHOLDER_FOR_RESOURCE.IP';
 const TEST_ORCHESTRATOR_NAMESPACE = 'kube-system';
-const TEST_ORCHESTRATOR_PARENT_TYPE = 'elastic-k8s-cluster';
+const TEST_ORCHESTRATOR_RESOURCE_PARENT_TYPE = 'elastic-k8s-cluster';
 const TEST_ORCHESTRATOR_CLUSTER_ID = 'PLACEHOLDER_FOR_CLUSTER.ID';
-const TEST_ORCHESTRATOR_CLUSTER_NAME = 'PLACEHOLDER_FOR_PARENT.TYPE';
+const TEST_ORCHESTRATOR_CLUSTER_NAME = 'PLACEHOLDER_FOR_CLUSTER.NAME';
 
 // Cloud data
 const TEST_CLOUD_INSTANCE_NAME = 'gke-cluster-1-paulo-default-pool-f0fea4ab-lhx2';
@@ -86,14 +86,14 @@ const TEST_ORCHESTRATOR: ProcessEventOrchestrator = {
     name: TEST_ORCHESTRATOR_RESOURCE_NAME,
     type: TEST_ORCHESTRATOR_RESOURCE_TYPE,
     ip: TEST_ORCHESTRATOR_RESOURCE_IP,
+    parent: {
+      type: TEST_ORCHESTRATOR_RESOURCE_PARENT_TYPE,
+    },
   },
   namespace: TEST_ORCHESTRATOR_NAMESPACE,
   cluster: {
     name: TEST_ORCHESTRATOR_CLUSTER_NAME,
     id: TEST_ORCHESTRATOR_CLUSTER_ID,
-  },
-  parent: {
-    type: TEST_ORCHESTRATOR_PARENT_TYPE,
   },
 };
 
@@ -215,23 +215,25 @@ describe('DetailPanelMetadataTab component', () => {
       expect(renderResult.queryByText('resource.type')).toBeVisible();
       expect(renderResult.queryByText('resource.ip')).toBeVisible();
       expect(renderResult.queryByText('namespace')).toBeVisible();
-      expect(renderResult.queryByText('parent.type')).toBeVisible();
+      expect(renderResult.queryByText('resource.parent.type')).toBeVisible();
       expect(renderResult.queryByText('cluster.id')).toBeVisible();
       expect(renderResult.queryByText('cluster.name')).toBeVisible();
       expect(renderResult.queryByText(TEST_ORCHESTRATOR_RESOURCE_NAME)).toBeVisible();
       expect(renderResult.queryByText(TEST_ORCHESTRATOR_RESOURCE_TYPE)).toBeVisible();
       expect(renderResult.queryByText(TEST_ORCHESTRATOR_RESOURCE_IP)).toBeVisible();
       expect(renderResult.queryByText(TEST_ORCHESTRATOR_NAMESPACE)).toBeVisible();
-      expect(renderResult.queryByText(TEST_ORCHESTRATOR_PARENT_TYPE)).toBeVisible();
+      expect(renderResult.queryByText(TEST_ORCHESTRATOR_RESOURCE_PARENT_TYPE)).toBeVisible();
       expect(renderResult.queryByText(TEST_ORCHESTRATOR_CLUSTER_ID)).toBeVisible();
       expect(renderResult.queryByText(TEST_ORCHESTRATOR_CLUSTER_NAME)).toBeVisible();
 
       // expand Cloud Accordion
       renderResult.queryByText('Cloud')?.click();
+      expect(renderResult.queryByText('instance.name')).toBeVisible();
       expect(renderResult.queryByText('provider')).toBeVisible();
       expect(renderResult.queryByText('region')).toBeVisible();
       expect(renderResult.queryByText('account.id')).toBeVisible();
       expect(renderResult.queryByText('project.id')).toBeVisible();
+      expect(renderResult.queryByText(TEST_CLOUD_INSTANCE_NAME)).toBeVisible();
       expect(renderResult.queryByText(TEST_CLOUD_PROVIDER)).toBeVisible();
       expect(renderResult.queryByText(TEST_CLOUD_REGION)).toBeVisible();
       expect(renderResult.queryByText(TEST_CLOUD_ACCOUNT_ID)).toBeVisible();

@@ -1,6 +1,6 @@
-# @elastic/apm-synthtrace
+# @kbn/apm-synthtrace
 
-`@elastic/apm-synthtrace` is a tool in technical preview to generate synthetic APM data. It is intended to be used for development and testing of the Elastic APM app in Kibana.
+`@kbn/apm-synthtrace` is a tool in technical preview to generate synthetic APM data. It is intended to be used for development and testing of the Elastic APM app in Kibana.
 
 At a high-level, the module works by modeling APM events/metricsets with [a fluent API](https://en.wikipedia.org/wiki/Fluent_interface). The models can then be serialized and converted to Elasticsearch documents. In the future we might support APM Server as an output as well.
 
@@ -25,7 +25,7 @@ This library can currently be used in two ways:
 #### Example
 
 ```ts
-import { service, timerange, toElasticsearchOutput } from '@elastic/apm-synthtrace';
+import { service, timerange, toElasticsearchOutput } from '@kbn/apm-synthtrace';
 
 const instance = service('synth-go', 'production', 'go').instance('instance-a');
 
@@ -72,14 +72,14 @@ const esEvents = toElasticsearchOutput(traceEvents.concat(metricsets));
 
 #### Generating metricsets
 
-`@elastic/apm-synthtrace` can also automatically generate transaction metrics, span destination metrics and transaction breakdown metrics based on the generated trace events. If we expand on the previous example:
+`@kbn/apm-synthtrace` can also automatically generate transaction metrics, span destination metrics and transaction breakdown metrics based on the generated trace events. If we expand on the previous example:
 
 ```ts
 import {
   getTransactionMetrics,
   getSpanDestinationMetrics,
   getBreakdownMetrics,
-} from '@elastic/apm-synthtrace';
+} from '@kbn/apm-synthtrace';
 
 const esEvents = toElasticsearchOutput([
   ...traceEvents,
@@ -91,7 +91,7 @@ const esEvents = toElasticsearchOutput([
 
 ### CLI
 
-Via the CLI, you can run scenarios, either using a fixed time range or continuously generating data. Scenarios are available in [`packages/elastic-apm-synthtrace/src/scenarios/`](https://github.com/elastic/kibana/blob/main/packages/elastic-apm-synthtrace/src/scenarios/).
+Via the CLI, you can run scenarios, either using a fixed time range or continuously generating data. Scenarios are available in [`packages/kbn-apm-synthtrace/src/scenarios/`](https://github.com/elastic/kibana/blob/main/packages/kbn-apm-synthtrace/src/scenarios/).
 
 For live data ingestion:
 
@@ -155,3 +155,19 @@ Note:
 | `--logLevel`      | [enum]    | `info`  | Log level                                                                                               |
 | `--gcpRepository` | [string]  |         | Allows you to register a GCP repository in <client_name>:<bucket>[:base_path] format                    |
 | `-p`              | [string]  |         | Specify multiple sets of streamaggregators to be included in the StreamProcessor                        |
+
+## Testing
+
+Run the Jest tests:
+
+```
+node scripts/jest --config ./packages/kbn-apm-synthtrace/jest.config.js
+```
+
+## Typescript
+
+Run the type checker:
+
+```
+node scripts/type_check.js --project packages/kbn-apm-synthtrace/tsconfig.json
+```

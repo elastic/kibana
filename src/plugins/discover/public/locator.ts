@@ -7,7 +7,7 @@
  */
 
 import type { SerializableRecord } from '@kbn/utility-types';
-import type { Filter, TimeRange, Query } from '@kbn/es-query';
+import type { Filter, TimeRange, Query, AggregateQuery } from '@kbn/es-query';
 import type { GlobalQueryStateFromUrl, RefreshInterval } from '@kbn/data-plugin/public';
 import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
@@ -22,7 +22,12 @@ export interface DiscoverAppLocatorParams extends SerializableRecord {
   savedSearchId?: string;
 
   /**
-   * Optionally set index pattern ID.
+   * Optionally set index pattern / data view ID.
+   */
+  dataViewId?: string;
+  /**
+   * Duplication of dataViewId
+   * @deprecated
    */
   indexPatternId?: string;
 
@@ -44,7 +49,7 @@ export interface DiscoverAppLocatorParams extends SerializableRecord {
   /**
    * Optionally set a query.
    */
-  query?: Query;
+  query?: Query | AggregateQuery;
 
   /**
    * If not given, will use the uiSettings configuration for `storeInSessionStorage`. useHash determines
@@ -101,6 +106,7 @@ export class DiscoverAppLocatorDefinition implements LocatorDefinition<DiscoverA
     const {
       useHash = this.deps.useHash,
       filters,
+      dataViewId,
       indexPatternId,
       query,
       refreshInterval,
@@ -116,7 +122,7 @@ export class DiscoverAppLocatorDefinition implements LocatorDefinition<DiscoverA
     } = params;
     const savedSearchPath = savedSearchId ? `view/${encodeURIComponent(savedSearchId)}` : '';
     const appState: {
-      query?: Query;
+      query?: Query | AggregateQuery;
       filters?: Filter[];
       index?: string;
       columns?: string[];
@@ -132,6 +138,7 @@ export class DiscoverAppLocatorDefinition implements LocatorDefinition<DiscoverA
     if (query) appState.query = query;
     if (filters && filters.length) appState.filters = filters?.filter((f) => !isFilterPinned(f));
     if (indexPatternId) appState.index = indexPatternId;
+    if (dataViewId) appState.index = dataViewId;
     if (columns) appState.columns = columns;
     if (savedQuery) appState.savedQuery = savedQuery;
     if (sort) appState.sort = sort;

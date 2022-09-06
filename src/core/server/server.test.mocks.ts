@@ -20,10 +20,10 @@ jest.doMock('./plugins/plugins_service', () => ({
   PluginsService: jest.fn(() => mockPluginsService),
 }));
 
-import { elasticsearchServiceMock } from './elasticsearch/elasticsearch_service.mock';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 
 export const mockElasticsearchService = elasticsearchServiceMock.create();
-jest.doMock('./elasticsearch/elasticsearch_service', () => ({
+jest.doMock('@kbn/core-elasticsearch-server-internal', () => ({
   ElasticsearchService: jest.fn(() => mockElasticsearchService),
 }));
 
@@ -37,10 +37,10 @@ jest.doMock('@kbn/config', () => ({
   ConfigService: jest.fn(() => mockConfigService),
 }));
 
-import { savedObjectsServiceMock } from './saved_objects/saved_objects_service.mock';
+import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
 
 export const mockSavedObjectsService = savedObjectsServiceMock.create();
-jest.doMock('./saved_objects/saved_objects_service', () => ({
+jest.doMock('@kbn/core-saved-objects-server-internal', () => ({
   SavedObjectsService: jest.fn(() => mockSavedObjectsService),
 }));
 
@@ -82,10 +82,10 @@ jest.doMock('@kbn/core-node-server-internal', () => ({
   NodeService: jest.fn(() => mockNodeService),
 }));
 
-import { metricsServiceMock } from './metrics/metrics_service.mock';
+import { metricsServiceMock } from '@kbn/core-metrics-server-mocks';
 
 export const mockMetricsService = metricsServiceMock.create();
-jest.doMock('./metrics/metrics_service', () => ({
+jest.doMock('@kbn/core-metrics-server-internal', () => ({
   MetricsService: jest.fn(() => mockMetricsService),
 }));
 
@@ -103,10 +103,10 @@ jest.doMock('@kbn/core-logging-server-internal', () => ({
   LoggingService: jest.fn(() => mockLoggingService),
 }));
 
-import { i18nServiceMock } from './i18n/i18n_service.mock';
+import { i18nServiceMock } from '@kbn/core-i18n-server-mocks';
 
 export const mockI18nService = i18nServiceMock.create();
-jest.doMock('./i18n/i18n_service', () => ({
+jest.doMock('@kbn/core-i18n-server-internal', () => ({
   I18nService: jest.fn(() => mockI18nService),
 }));
 
@@ -117,10 +117,10 @@ jest.doMock('@kbn/core-preboot-server-internal', () => ({
   PrebootService: jest.fn(() => mockPrebootService),
 }));
 
-import { deprecationsServiceMock } from './deprecations/deprecations_service.mock';
+import { deprecationsServiceMock } from '@kbn/core-deprecations-server-mocks';
 
 export const mockDeprecationService = deprecationsServiceMock.create();
-jest.doMock('./deprecations/deprecations_service', () => ({
+jest.doMock('@kbn/core-deprecations-server-internal', () => ({
   DeprecationsService: jest.fn(() => mockDeprecationService),
 }));
 

@@ -120,14 +120,66 @@ describe('Events Details Helpers', () => {
         },
         {
           category: 'kibana',
-          field: 'kibana.alert.rule.parameters.criteria',
-          isObjectArray: true,
-          originalValue: [
-            '{"metric":"cpu","comparator":">","threshold":[3],"timeSize":1,"timeUnit":"m","customMetric":{"type":"custom","id":"alert-custom-metric","field":"","aggregation":"avg"}}',
-          ],
-          values: [
-            '{"metric":"cpu","comparator":">","threshold":[3],"timeSize":1,"timeUnit":"m","customMetric":{"type":"custom","id":"alert-custom-metric","field":"","aggregation":"avg"}}',
-          ],
+          field: 'kibana.alert.rule.parameters.criteria.metric',
+          isObjectArray: false,
+          originalValue: ['cpu'],
+          values: ['cpu'],
+        },
+        {
+          category: 'kibana',
+          field: 'kibana.alert.rule.parameters.criteria.comparator',
+          isObjectArray: false,
+          originalValue: ['>'],
+          values: ['>'],
+        },
+        {
+          category: 'kibana',
+          field: 'kibana.alert.rule.parameters.criteria.threshold',
+          isObjectArray: false,
+          originalValue: ['3'],
+          values: ['3'],
+        },
+        {
+          category: 'kibana',
+          field: 'kibana.alert.rule.parameters.criteria.timeSize',
+          isObjectArray: false,
+          originalValue: ['1'],
+          values: ['1'],
+        },
+        {
+          category: 'kibana',
+          field: 'kibana.alert.rule.parameters.criteria.timeUnit',
+          isObjectArray: false,
+          originalValue: ['m'],
+          values: ['m'],
+        },
+        {
+          category: 'kibana',
+          field: 'kibana.alert.rule.parameters.criteria.customMetric.type',
+          isObjectArray: false,
+          originalValue: ['custom'],
+          values: ['custom'],
+        },
+        {
+          category: 'kibana',
+          field: 'kibana.alert.rule.parameters.criteria.customMetric.id',
+          isObjectArray: false,
+          originalValue: ['alert-custom-metric'],
+          values: ['alert-custom-metric'],
+        },
+        {
+          category: 'kibana',
+          field: 'kibana.alert.rule.parameters.criteria.customMetric.field',
+          isObjectArray: false,
+          originalValue: [''],
+          values: [''],
+        },
+        {
+          category: 'kibana',
+          field: 'kibana.alert.rule.parameters.criteria.customMetric.aggregation',
+          isObjectArray: false,
+          originalValue: ['avg'],
+          values: ['avg'],
         },
         {
           category: 'kibana',
@@ -528,6 +580,17 @@ describe('Events Details Helpers', () => {
           isObjectArray: false,
           originalValue: ['a04ac6d98ad989312783d4fe3456c53730b212c79a426fb215708b6c6daa3de3'],
           values: ['a04ac6d98ad989312783d4fe3456c53730b212c79a426fb215708b6c6daa3de3'],
+        },
+        {
+          category: 'threat',
+          field: 'threat.enrichments',
+          isObjectArray: true,
+          originalValue: [
+            '{"matched.field":["myhash.mysha256"],"matched.index":["logs-ti_abusech.malware"],"matched.type":["indicator_match_rule"],"feed.name":["AbuseCH malware"],"matched.atomic":["a04ac6d98ad989312783d4fe3456c53730b212c79a426fb215708b6c6daa3de3"]}',
+          ],
+          values: [
+            '{"matched.field":["myhash.mysha256"],"matched.index":["logs-ti_abusech.malware"],"matched.type":["indicator_match_rule"],"feed.name":["AbuseCH malware"],"matched.atomic":["a04ac6d98ad989312783d4fe3456c53730b212c79a426fb215708b6c6daa3de3"]}',
+          ],
         },
       ];
       const result = getDataFromFieldsHits(data);

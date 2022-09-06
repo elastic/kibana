@@ -29,6 +29,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { DataPanel } from '../../../../shared/data_panel/data_panel';
+import { docLinks } from '../../../../shared/doc_links';
 import { CrawlerDomainDetailLogic } from '../crawler_domain_detail_logic';
 
 import { getCheckedOptionLabels, getSelectableOptions } from './utils';
@@ -84,7 +85,7 @@ export const DeduplicationPanel: React.FC = () => {
           documents on this domain. {documentationLink}."
           values={{
             documentationLink: (
-              <EuiLink href={'' /* TODO add docs url */} target="_blank" external>
+              <EuiLink href={docLinks.crawlerManaging} target="_blank" external>
                 {i18n.translate(
                   'xpack.enterpriseSearch.crawler.deduplicationPanel.learnMoreMessage',
                   {

@@ -8,12 +8,12 @@
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 import type { Inspect, Maybe, TimerangeInput } from '../../common';
-import type { AuthenticationHit, RequestBasicOptions } from '..';
+import type { RequestBasicOptions } from '..';
 import type { AlertsGroupData } from './alerts';
-import type { AnomaliesActionGroupData, AnomalyHit } from './anomalies';
+import type { AnomaliesActionGroupData } from './anomalies';
 import type { DnsHistogramGroupData } from './dns';
 import type { AuthenticationsActionGroupData } from './authentications';
-import type { EventsActionGroupData, EventHit } from './events';
+import type { EventsActionGroupData } from './events';
 import type { PreviewHistogramGroupData } from './preview';
 
 export * from './alerts';
@@ -100,18 +100,6 @@ export type MatrixHistogramParseData<T> = T extends MatrixHistogramType.alerts
   ? EventsActionGroupData[]
   : T extends MatrixHistogramType.preview
   ? PreviewHistogramGroupData[]
-  : never;
-
-export type MatrixHistogramHit<T> = T extends
-  | MatrixHistogramType.alerts
-  | MatrixHistogramType.dns
-  | MatrixHistogramType.events
-  | MatrixHistogramType.preview
-  ? EventHit
-  : T extends MatrixHistogramType.anomalies
-  ? AnomalyHit
-  : T extends MatrixHistogramType.authentications
-  ? AuthenticationHit
   : never;
 
 export type MatrixHistogramDataConfig = Record<

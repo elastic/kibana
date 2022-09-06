@@ -23,9 +23,10 @@ import {
   useIsWithinBreakpoints,
 } from '@elastic/eui';
 import classNames from 'classnames';
-import { EuiPanelStyled } from './solution_grouped_nav_panel.styles';
+import { EuiPanelStyled, FlexLink } from './solution_grouped_nav_panel.styles';
 import type { DefaultSideNavItem } from './types';
 import type { LinkCategories } from '../../../links/types';
+import { NavItemBetaBadge } from '../nav_item_beta_badge';
 
 export interface SolutionNavPanelProps {
   onClose: () => void;
@@ -42,10 +43,6 @@ export interface SolutionNavPanelCategoriesProps {
 }
 export interface SolutionNavPanelItemsProps {
   items: DefaultSideNavItem[];
-  onClose: () => void;
-}
-export interface SolutionNavPanelItemProps {
-  item: DefaultSideNavItem;
   onClose: () => void;
 }
 
@@ -159,10 +156,10 @@ const SolutionNavPanelCategories: React.FC<SolutionNavPanelCategoriesProps> = ({
 
 const SolutionNavPanelItems: React.FC<SolutionNavPanelItemsProps> = ({ items, onClose }) => (
   <>
-    {items.map(({ id, href, onClick, label, description }) => (
+    {items.map(({ id, href, onClick, label, description, isBeta }) => (
       <Fragment key={id}>
         <EuiDescriptionListTitle>
-          <a
+          <FlexLink
             data-test-subj={`groupedNavPanelLink-${id}`}
             href={href}
             onClick={(ev) => {
@@ -173,7 +170,8 @@ const SolutionNavPanelItems: React.FC<SolutionNavPanelItemsProps> = ({ items, on
             }}
           >
             {label}
-          </a>
+            {isBeta && <NavItemBetaBadge />}
+          </FlexLink>
         </EuiDescriptionListTitle>
         <EuiDescriptionListDescription>{description}</EuiDescriptionListDescription>
       </Fragment>

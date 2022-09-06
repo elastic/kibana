@@ -13,11 +13,11 @@ import {
 } from '@kbn/alerting-plugin/common';
 import { RuleStatus } from '../../types';
 
-jest.mock('../lib/rule_api', () => ({
-  loadRules: jest.fn(),
+jest.mock('../lib/rule_api/rules_kuery_filter', () => ({
+  loadRulesWithKueryFilter: jest.fn(),
 }));
 
-const { loadRules } = jest.requireMock('../lib/rule_api');
+const { loadRulesWithKueryFilter } = jest.requireMock('../lib/rule_api/rules_kuery_filter');
 
 const onError = jest.fn();
 const onPage = jest.fn();
@@ -233,7 +233,7 @@ const MOCK_RULE_DATA = {
 
 describe('useLoadRules', () => {
   beforeEach(() => {
-    loadRules.mockResolvedValue(MOCK_RULE_DATA);
+    loadRulesWithKueryFilter.mockResolvedValue(MOCK_RULE_DATA);
     jest.clearAllMocks();
   });
 
@@ -273,7 +273,7 @@ describe('useLoadRules', () => {
     expect(result.current.rulesState.isLoading).toBeFalsy();
 
     expect(onPage).toBeCalledTimes(0);
-    expect(loadRules).toBeCalledWith(expect.objectContaining(params));
+    expect(loadRulesWithKueryFilter).toBeCalledWith(expect.objectContaining(params));
     expect(result.current.rulesState.data).toEqual(expect.arrayContaining(MOCK_RULE_DATA.data));
     expect(result.current.rulesState.totalItemCount).toEqual(MOCK_RULE_DATA.total);
   });
@@ -305,11 +305,11 @@ describe('useLoadRules', () => {
       await waitForNextUpdate();
     });
 
-    expect(loadRules).toBeCalledWith(expect.objectContaining(params));
+    expect(loadRulesWithKueryFilter).toBeCalledWith(expect.objectContaining(params));
   });
 
   it('should reset the page if the data is fetched while paged', async () => {
-    loadRules.mockResolvedValue({
+    loadRulesWithKueryFilter.mockResolvedValue({
       ...MOCK_RULE_DATA,
       data: [],
     });
@@ -347,7 +347,7 @@ describe('useLoadRules', () => {
   });
 
   it('should call onError if API fails', async () => {
-    loadRules.mockRejectedValue('');
+    loadRulesWithKueryFilter.mockRejectedValue('');
     const params = {
       page: {
         index: 0,
@@ -378,7 +378,7 @@ describe('useLoadRules', () => {
 
   describe('No data', () => {
     it('noData should be true, if there is no Filter and no rules', async () => {
-      loadRules.mockResolvedValue({ ...MOCK_RULE_DATA, data: [] });
+      loadRulesWithKueryFilter.mockResolvedValue({ ...MOCK_RULE_DATA, data: [] });
       const params = {
         page: {
           index: 0,
@@ -411,7 +411,7 @@ describe('useLoadRules', () => {
     });
 
     it('noData should be false, if there is rule types filter and no rules', async () => {
-      loadRules.mockResolvedValue({ ...MOCK_RULE_DATA, data: [] });
+      loadRulesWithKueryFilter.mockResolvedValue({ ...MOCK_RULE_DATA, data: [] });
       const params = {
         page: {
           index: 0,
@@ -444,7 +444,7 @@ describe('useLoadRules', () => {
     });
 
     it('noData should be true, if there is rule types filter and no rules with hasDefaultRuleTypesFiltersOn = true', async () => {
-      loadRules.mockResolvedValue({ ...MOCK_RULE_DATA, data: [] });
+      loadRulesWithKueryFilter.mockResolvedValue({ ...MOCK_RULE_DATA, data: [] });
       const params = {
         page: {
           index: 0,

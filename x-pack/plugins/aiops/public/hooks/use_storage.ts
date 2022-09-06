@@ -8,7 +8,7 @@
 import { useCallback, useState } from 'react';
 import { useAiOpsKibana } from '../kibana_context';
 
-export const AIOPS_FROZEN_TIER_PREFERENCE = 'aiop.frozenDataTierPreference';
+export const AIOPS_FROZEN_TIER_PREFERENCE = 'aiops.frozenDataTierPreference';
 
 export type AiOps = Partial<{
   [AIOPS_FROZEN_TIER_PREFERENCE]: 'exclude_frozen' | 'include_frozen';

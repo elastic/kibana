@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { EuiButtonIcon } from '@elastic/eui';
 import { EuiFormRow, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { EuiComboBox } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import type { Query } from '@kbn/es-query';
 import { DatatableUtilitiesService, parseTimeShift } from '@kbn/data-plugin/common';
@@ -18,13 +17,14 @@ import {
   GenericIndexPatternColumn,
   operationDefinitionMap,
 } from '../operations';
-import { IndexPattern, IndexPatternLayer } from '../types';
-import { IndexPatternDimensionEditorProps } from './dimension_panel';
+import type { IndexPatternLayer } from '../types';
+import type { IndexPatternDimensionEditorProps } from './dimension_panel';
 import {
   getDateHistogramInterval,
   getLayerTimeShiftChecks,
   timeShiftOptions,
 } from '../time_shift_utils';
+import type { IndexPattern } from '../../types';
 
 // to do: get the language from uiSettings
 export const defaultFilter: Query = {
@@ -46,7 +46,9 @@ export function setTimeShift(
         currentColumn.timeScale,
         currentColumn.timeScale,
         currentColumn.timeShift,
-        trimmedTimeShift
+        trimmedTimeShift,
+        currentColumn.reducedTimeRange,
+        currentColumn.reducedTimeRange
       );
   return {
     ...layer,
@@ -68,7 +70,6 @@ export function TimeShift({
   layer,
   updateLayer,
   indexPattern,
-  isFocused,
   activeData,
   layerId,
 }: {
@@ -78,17 +79,15 @@ export function TimeShift({
   columnId: string;
   layer: IndexPatternLayer;
   updateLayer: (newLayer: IndexPatternLayer) => void;
-  isFocused: boolean;
   activeData: IndexPatternDimensionEditorProps['activeData'];
   layerId: string;
 }) {
-  const focusSetRef = useRef(false);
   const [localValue, setLocalValue] = useState(selectedColumn.timeShift);
   useEffect(() => {
     setLocalValue(selectedColumn.timeShift);
   }, [selectedColumn.timeShift]);
   const selectedOperation = operationDefinitionMap[selectedColumn.operationType];
-  if (!selectedOperation.shiftable || selectedColumn.timeShift === undefined) {
+  if (!selectedOperation.shiftable) {
     return null;
   }
 
@@ -112,29 +111,22 @@ export function TimeShift({
   const localValueNotMultiple = parsedLocalValue && isValueNotMultiple(parsedLocalValue);
 
   function getSelectedOption() {
-    if (!localValue) return [];
     const goodPick = timeShiftOptions.filter(({ value }) => value === localValue);
     if (goodPick.length > 0) return goodPick;
     return [
       {
-        value: localValue,
-        label: localValue,
+        value: localValue ?? '',
+        label:
+          localValue ??
+          i18n.translate('xpack.lens.timeShift.none', {
+            defaultMessage: 'None',
+          }),
       },
     ];
   }
 
   return (
-    <div
-      ref={(r) => {
-        if (r && isFocused) {
-          const timeShiftInput = r.querySelector('[data-test-subj="comboBoxSearchInput"]');
-          if (!focusSetRef.current && timeShiftInput instanceof HTMLInputElement) {
-            focusSetRef.current = true;
-            timeShiftInput.focus();
-          }
-        }
-      }}
-    >
+    <div>
       <EuiFormRow
         display="rowCompressed"
         fullWidth
@@ -168,7 +160,7 @@ export function TimeShift({
             <EuiComboBox
               fullWidth
               compressed
-              isClearable={false}
+              isClearable={true}
               data-test-subj="indexPattern-dimension-time-shift"
               placeholder={i18n.translate('xpack.lens.indexPattern.timeShiftPlaceholder', {
                 defaultMessage: 'Type custom values (e.g. 8w)',
@@ -194,7 +186,7 @@ export function TimeShift({
                 }
               }}
               onChange={(choices) => {
-                if (choices.length === 0) {
+                if (choices.length === 0 || (choices.length && choices[0].value === '')) {
                   updateLayer(setTimeShift(columnId, layer, ''));
                   setLocalValue('');
                   return;
@@ -208,19 +200,6 @@ export function TimeShift({
                   setLocalValue(choice);
                 }
               }}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              data-test-subj="indexPattern-time-shift-remove"
-              color="danger"
-              aria-label={i18n.translate('xpack.lens.timeShift.removeLabel', {
-                defaultMessage: 'Remove time shift',
-              })}
-              onClick={() => {
-                updateLayer(setTimeShift(columnId, layer, undefined));
-              }}
-              iconType="cross"
             />
           </EuiFlexItem>
         </EuiFlexGroup>

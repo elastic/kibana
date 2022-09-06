@@ -238,6 +238,7 @@ export const schema: FormSchema<AboutStepRule> = {
   },
   timestampOverrideFallbackDisabled: {
     type: FIELD_TYPES.CHECKBOX,
+    defaultValue: false,
     label: i18n.translate(
       'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldTimestampOverrideFallbackDisabledLabel',
       {

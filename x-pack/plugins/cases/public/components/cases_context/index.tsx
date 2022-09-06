@@ -16,7 +16,7 @@ import {
   casesContextReducer,
   getInitialCasesContextState,
 } from './cases_context_reducer';
-import { CasesFeaturesAllRequired, CasesFeatures } from '../../containers/types';
+import { CasesFeaturesAllRequired, CasesFeatures, CasesPermissions } from '../../containers/types';
 import { CasesGlobalComponents } from './cases_global_components';
 import { ReleasePhase } from '../types';
 import { ExternalReferenceAttachmentTypeRegistry } from '../../client/attachment_framework/external_reference_registry';
@@ -30,10 +30,7 @@ export interface CasesContextValue {
   owner: string[];
   appId: string;
   appTitle: string;
-  permissions: {
-    all: boolean;
-    read: boolean;
-  };
+  permissions: CasesPermissions;
   basePath: string;
   features: CasesFeaturesAllRequired;
   releasePhase: ReleasePhase;

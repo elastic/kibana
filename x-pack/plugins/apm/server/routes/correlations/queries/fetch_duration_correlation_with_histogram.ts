@@ -18,14 +18,15 @@ import {
   KS_TEST_THRESHOLD,
 } from '../../../../common/correlations/constants';
 
-import { ProcessorEvent } from '../../../../common/processor_event';
+import { LatencyDistributionChartType } from '../../../../common/latency_distribution_chart_types';
 import { Setup } from '../../../lib/helpers/setup_request';
 import { fetchDurationCorrelation } from './fetch_duration_correlation';
 import { fetchDurationRanges } from './fetch_duration_ranges';
+import { getEventType } from '../utils';
 
 export async function fetchDurationCorrelationWithHistogram({
   setup,
-  eventType,
+  chartType,
   start,
   end,
   environment,
@@ -39,7 +40,7 @@ export async function fetchDurationCorrelationWithHistogram({
   fieldValuePair,
 }: CommonCorrelationsQueryParams & {
   setup: Setup;
-  eventType: ProcessorEvent;
+  chartType: LatencyDistributionChartType;
   expectations: number[];
   ranges: estypes.AggregationsAggregationRange[];
   fractions: number[];
@@ -47,6 +48,8 @@ export async function fetchDurationCorrelationWithHistogram({
   totalDocCount: number;
   fieldValuePair: FieldValuePair;
 }) {
+  const searchMetrics = false; // latency correlations does not search metrics documents
+  const eventType = getEventType(chartType, searchMetrics);
   const queryWithFieldValuePair = {
     bool: {
       filter: [
@@ -72,21 +75,22 @@ export async function fetchDurationCorrelationWithHistogram({
 
   if (correlation !== null && ksTest !== null && !isNaN(ksTest)) {
     if (correlation > CORRELATION_THRESHOLD && ksTest < KS_TEST_THRESHOLD) {
-      const logHistogram = await fetchDurationRanges({
+      const { durationRanges: histogram } = await fetchDurationRanges({
         setup,
-        eventType,
+        chartType,
         start,
         end,
         environment,
         kuery,
         query: queryWithFieldValuePair,
         rangeSteps: histogramRangeSteps,
+        searchMetrics,
       });
       return {
         ...fieldValuePair,
         correlation,
         ksTest,
-        histogram: logHistogram,
+        histogram,
       };
     } else {
       return {

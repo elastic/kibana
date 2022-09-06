@@ -9,7 +9,7 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 import { BaseSnoozePanel } from './base_snooze_panel';
 
-describe('CustomRecurrenceScheduler', () => {
+describe('BaseSnoozePanel', () => {
   test('should render', () => {
     const wrapper = mountWithIntl(
       <BaseSnoozePanel
@@ -18,6 +18,7 @@ describe('CustomRecurrenceScheduler', () => {
         isLoading={false}
         showCancel={false}
         scheduledSnoozes={[]}
+        activeSnoozes={[]}
         snoozeRule={jest.fn()}
         unsnoozeRule={jest.fn()}
         navigateToScheduler={jest.fn()}
@@ -42,6 +43,7 @@ describe('CustomRecurrenceScheduler', () => {
         isLoading={false}
         showCancel={false}
         scheduledSnoozes={[]}
+        activeSnoozes={[]}
         snoozeRule={jest.fn()}
         unsnoozeRule={jest.fn()}
         navigateToScheduler={jest.fn()}
@@ -58,6 +60,7 @@ describe('CustomRecurrenceScheduler', () => {
         isLoading={false}
         showCancel={true}
         scheduledSnoozes={[]}
+        activeSnoozes={[]}
         snoozeRule={jest.fn()}
         unsnoozeRule={jest.fn()}
         navigateToScheduler={jest.fn()}
@@ -91,6 +94,7 @@ describe('CustomRecurrenceScheduler', () => {
             },
           },
         ]}
+        activeSnoozes={[]}
         snoozeRule={jest.fn()}
         unsnoozeRule={jest.fn()}
         navigateToScheduler={jest.fn()}

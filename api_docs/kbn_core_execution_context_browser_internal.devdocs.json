@@ -47,7 +47,7 @@
             "label": "#context",
             "description": [],
             "signature": [
-              "{ readonly type?: string | undefined; readonly name?: string | undefined; readonly page?: string | undefined; readonly id?: string | undefined; readonly description?: string | undefined; readonly url?: string | undefined; readonly child?: ",
+              "{ readonly type?: string | undefined; readonly name?: string | undefined; readonly page?: string | undefined; readonly id?: string | undefined; readonly description?: string | undefined; readonly url?: string | undefined; readonly meta?: { [key: string]: string | number | boolean | undefined; } | undefined; readonly child?: ",
               "KibanaExecutionContext",
               " | undefined; }"
             ],

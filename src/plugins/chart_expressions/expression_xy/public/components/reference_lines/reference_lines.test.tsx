@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { LineAnnotation, RectAnnotation } from '@elastic/charts';
-import { shallow } from 'enzyme';
+import { Chart, LineAnnotation, RectAnnotation } from '@elastic/charts';
+import { mount, shallow } from 'enzyme';
 import React from 'react';
 import { Datatable } from '@kbn/expressions-plugin/common';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
@@ -129,6 +129,38 @@ describe('ReferenceLines', () => {
           },
         },
       };
+    });
+
+    it('should not throw on null data', () => {
+      const position = getAxisFromId('yAccessorLeft');
+      const [layer] = createLayers([
+        {
+          forAccessor: `yAccessorLeftFirstId`,
+          position,
+          lineStyle: 'solid',
+          fill: 'above',
+          type: 'referenceLineDecorationConfig',
+        },
+      ]);
+      expect(() =>
+        mount(
+          <Chart>
+            <ReferenceLines
+              {...defaultProps}
+              layers={[
+                {
+                  ...layer,
+                  table: {
+                    ...layer.table,
+                    rows: [{}],
+                    columns: [{ ...layer.table.columns[0], meta: { type: 'number' } }],
+                  },
+                },
+              ]}
+            />
+          </Chart>
+        )
+      ).not.toThrow();
     });
 
     it.each([

@@ -46,7 +46,7 @@ export interface ThreadingParams {
   threadsPerAllocations: number;
 }
 
-const THREADS_MAX_EXPONENT = 6;
+const THREADS_MAX_EXPONENT = 4;
 
 /**
  * Form for setting threading params.
@@ -111,6 +111,7 @@ export const StartDeploymentSetup: FC<StartDeploymentSetup> = ({ config, onConfi
             onChange={(event) => {
               onConfigChange({ ...config, numOfAllocations: Number(event.target.value) });
             }}
+            data-test-subj={'mlModelsStartDeploymentModalNumOfAllocations'}
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
@@ -156,6 +157,7 @@ export const StartDeploymentSetup: FC<StartDeploymentSetup> = ({ config, onConfi
               onConfigChange({ ...config, threadsPerAllocations: value });
             }}
             options={threadsPerAllocationsOptions}
+            data-test-subj={'mlModelsStartDeploymentModalThreadsPerAllocation'}
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
@@ -195,7 +197,12 @@ export const StartDeploymentModal: FC<StartDeploymentModalProps> = ({
   const errors = numOfAllocationsValidator(config.numOfAllocations);
 
   return (
-    <EuiModal onClose={onClose} initialFocus="[name=numOfAllocations]" maxWidth={false}>
+    <EuiModal
+      onClose={onClose}
+      initialFocus="[name=numOfAllocations]"
+      maxWidth={false}
+      data-test-subj="mlModelsStartDeploymentModal"
+    >
       <EuiModalHeader>
         <EuiModalHeaderTitle>
           <EuiFlexGroup justifyContent={'spaceBetween'}>
@@ -288,6 +295,7 @@ export const StartDeploymentModal: FC<StartDeploymentModalProps> = ({
           onClick={onConfigChange.bind(null, config)}
           fill
           disabled={!!errors}
+          data-test-subj={'mlModelsStartDeploymentModalStartButton'}
         >
           <FormattedMessage
             id="xpack.ml.trainedModels.modelsList.startDeployment.startButton"

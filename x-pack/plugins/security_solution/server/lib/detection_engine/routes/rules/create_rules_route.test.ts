@@ -10,7 +10,6 @@ import {
   getEmptyFindResult,
   getRuleMock,
   getCreateRequest,
-  getRuleExecutionSummarySucceeded,
   getFindResultWithSingleHit,
   createMlRuleRequest,
   getBasicEmptySearchResponse,
@@ -20,8 +19,7 @@ import { buildMlAuthz } from '../../../machine_learning/authz';
 import { requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { createRulesRoute } from './create_rules_route';
 import { getCreateRulesSchemaMock } from '../../../../../common/detection_engine/schemas/request/rule_schemas.mock';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { elasticsearchClientMock } from '@kbn/core/server/elasticsearch/client/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
 
 jest.mock('../../../machine_learning/authz', () => mockMlAuthzFactory.create());
@@ -38,9 +36,6 @@ describe('create_rules', () => {
 
     clients.rulesClient.find.mockResolvedValue(getEmptyFindResult()); // no current rules
     clients.rulesClient.create.mockResolvedValue(getRuleMock(getQueryRuleParams())); // creation succeeds
-    clients.ruleExecutionLog.getExecutionSummary.mockResolvedValue(
-      getRuleExecutionSummarySucceeded()
-    );
 
     context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValue(
       elasticsearchClientMock.createSuccessTransportRequestPromise(getBasicEmptySearchResponse())

@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { isValidNamespace } from '@kbn/fleet-plugin/common';
+import { validateParamsValue } from '../fleet_package/validation';
 import {
   ConfigKey,
   DataStream,
@@ -154,6 +155,7 @@ const validateBrowser: Validation = {
   [ConfigKey.UPLOAD_SPEED]: ({ [ConfigKey.UPLOAD_SPEED]: uploadSpeed }) =>
     validateThrottleValue(uploadSpeed),
   [ConfigKey.LATENCY]: ({ [ConfigKey.LATENCY]: latency }) => validateThrottleValue(latency, true),
+  [ConfigKey.PARAMS]: ({ [ConfigKey.PARAMS]: params }) => validateParamsValue(params),
 };
 
 export type ValidateDictionary = Record<DataStream, Validation>;

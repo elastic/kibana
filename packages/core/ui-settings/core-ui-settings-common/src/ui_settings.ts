@@ -50,7 +50,7 @@ export interface UiSettingsParams<T = unknown> {
   /** used to group the configured setting in the UI */
   category?: string[];
   /** array of permitted values for this setting */
-  options?: string[];
+  options?: string[] | number[];
   /** text labels for 'select' type UI element */
   optionLabels?: Record<string, string>;
   /** a flag indicating whether new value applying requires page reloading */

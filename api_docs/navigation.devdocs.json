@@ -238,7 +238,7 @@
             "section": "def-public.TopNavMenuProps",
             "text": "TopNavMenuProps"
           },
-          ") => React.ReactElement<any, string | React.JSXElementConstructor<any>> | null"
+          "<QT>) => React.ReactElement<any, string | React.JSXElementConstructor<any>> | null"
         ],
         "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu.tsx",
         "deprecated": false,
@@ -257,7 +257,8 @@
                 "docId": "kibNavigationPluginApi",
                 "section": "def-public.TopNavMenuProps",
                 "text": "TopNavMenuProps"
-              }
+              },
+              "<QT>"
             ],
             "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu.tsx",
             "deprecated": false,
@@ -653,7 +654,7 @@
         "description": [],
         "signature": [
           "SearchBarOwnProps",
-          " & { appName: string; useDefaultBehaviors?: boolean | undefined; savedQueryId?: string | undefined; onSavedQueryIdChange?: ((savedQueryId?: string | undefined) => void) | undefined; } & Omit<",
+          "<QT> & { appName: string; useDefaultBehaviors?: boolean | undefined; savedQueryId?: string | undefined; onSavedQueryIdChange?: ((savedQueryId?: string | undefined) => void) | undefined; } & Omit<",
           {
             "pluginId": "unifiedSearch",
             "scope": "public",
@@ -661,7 +662,7 @@
             "section": "def-public.SearchBarProps",
             "text": "SearchBarProps"
           },
-          ", \"kibana\" | \"intl\" | \"timeHistory\"> & { config?: ",
+          "<QT>, \"kibana\" | \"intl\" | \"timeHistory\"> & { config?: ",
           {
             "pluginId": "navigation",
             "scope": "public",
@@ -680,13 +681,7 @@
             "text": "UnifiedSearchPublicPluginStart"
           },
           " | undefined; className?: string | undefined; visible?: boolean | undefined; setMenuMountPoint?: ((menuMount: ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.MountPoint",
-            "text": "MountPoint"
-          },
+          "MountPoint",
           "<HTMLElement> | undefined) => void) | undefined; }"
         ],
         "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu.tsx",
@@ -758,7 +753,7 @@
           "label": "ui",
           "description": [],
           "signature": [
-            "{ TopNavMenu: React.ComponentType<",
+            "{ TopNavMenu: (props: ",
             {
               "pluginId": "navigation",
               "scope": "public",
@@ -766,7 +761,19 @@
               "section": "def-public.TopNavMenuProps",
               "text": "TopNavMenuProps"
             },
-            ">; }"
+            "<",
+            "Query",
+            ">) => React.ReactElement<any, string | React.JSXElementConstructor<any>>; AggregateQueryTopNavMenu: (props: ",
+            {
+              "pluginId": "navigation",
+              "scope": "public",
+              "docId": "kibNavigationPluginApi",
+              "section": "def-public.TopNavMenuProps",
+              "text": "TopNavMenuProps"
+            },
+            "<",
+            "AggregateQuery",
+            ">) => React.ReactElement<any, string | React.JSXElementConstructor<any>>; }"
           ],
           "path": "src/plugins/navigation/public/types.ts",
           "deprecated": false

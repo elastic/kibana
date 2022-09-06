@@ -11,7 +11,7 @@ import userEvent from '@testing-library/user-event';
 import React from 'react';
 import AllCasesSelectorModal from '.';
 import { Case, CaseStatuses, StatusAll } from '../../../../common';
-import { AppMockRenderer, createAppMockRenderer } from '../../../common/mock';
+import { allCasesPermissions, AppMockRenderer, createAppMockRenderer } from '../../../common/mock';
 import { useCasesToast } from '../../../common/use_cases_toast';
 import { alertComment } from '../../../containers/mock';
 import { useCreateAttachments } from '../../../containers/use_create_attachments';
@@ -64,15 +64,12 @@ describe('use cases add to existing case modal hook', () => {
           externalReferenceAttachmentTypeRegistry,
           persistableStateAttachmentTypeRegistry,
           owner: ['test'],
-          permissions: {
-            all: true,
-            read: true,
-          },
+          permissions: allCasesPermissions(),
           appId: 'test',
           appTitle: 'jest',
           basePath: '/jest',
           dispatch,
-          features: { alerts: { sync: true, enabled: true }, metrics: [] },
+          features: { alerts: { sync: true, enabled: true, isExperimental: false }, metrics: [] },
           releasePhase: 'ga',
         }}
       >

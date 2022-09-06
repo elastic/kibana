@@ -13,6 +13,7 @@ import { getChromeUserAgentDefaults } from './defaults/get_chrome_user_agent_def
 import { getBreakdownMetrics } from './processors/get_breakdown_metrics';
 import { getApmWriteTargets } from './utils/get_apm_write_targets';
 import { ApmSynthtraceEsClient } from './client/apm_synthtrace_es_client';
+import { ApmSynthtraceKibanaClient } from './client/apm_synthtrace_kibana_client';
 
 import type { ApmException } from './apm_fields';
 
@@ -25,6 +26,7 @@ export const apm = {
   getBreakdownMetrics,
   getApmWriteTargets,
   ApmSynthtraceEsClient,
+  ApmSynthtraceKibanaClient,
 };
 
 export type { ApmSynthtraceEsClient, ApmException };

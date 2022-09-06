@@ -6,12 +6,22 @@ PKG_REQUIRE_NAME = "@kbn/es"
 
 SOURCE_FILES = glob(
   [
-    "src/**/*",
+    "**/*.ts",
+    "**/*.js",
   ],
   exclude = [
+    "**/*.config.js",
+    "**/*.mock.*",
     "**/*.test.*",
-    "**/integration_tests/**",
+    "**/*.stories.*",
     "**/__fixtures__/**",
+    "**/__snapshots__/**",
+    "**/integration_tests/**",
+    "**/mocks/**",
+    "**/scripts/**",
+    "**/storybook/**",
+    "**/test_fixtures/**",
+    "**/test_helpers/**",
   ],
 )
 
@@ -34,7 +44,7 @@ RUNTIME_DEPS = [
   "@npm//del",
   "@npm//execa",
   "@npm//getopts",
-  "@npm//glob",
+  "@npm//globby",
   "@npm//node-fetch",
   "@npm//simple-git",
   "@npm//tree-kill",

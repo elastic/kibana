@@ -16,7 +16,7 @@ import {
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { KibanaPageTemplateProps } from '@kbn/shared-ux-components';
+import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
 import { enableServiceGroups } from '@kbn/observability-plugin/public';
 import { useFetcher, FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { ApmPluginStartDeps } from '../../../plugin';
@@ -116,30 +116,33 @@ export function ServiceGroupTemplate({
 
   const tabs = useTabs(serviceGroupContextTab);
   const selectedTab = tabs?.find(({ isSelected }) => isSelected);
-  useBreadcrumb([
-    {
-      title: i18n.translate('xpack.apm.serviceGroups.breadcrumb.title', {
-        defaultMessage: 'Services',
-      }),
-      href: serviceGroupsLink,
-    },
-    ...(selectedTab
-      ? [
-          ...(serviceGroupName
-            ? [
-                {
-                  title: serviceGroupName,
-                  href: router.link('/services', { query }),
-                },
-              ]
-            : []),
-          {
-            title: selectedTab.label,
-            href: selectedTab.href,
-          } as { title: string; href: string },
-        ]
-      : []),
-  ]);
+  useBreadcrumb(
+    () => [
+      {
+        title: i18n.translate('xpack.apm.serviceGroups.breadcrumb.title', {
+          defaultMessage: 'Services',
+        }),
+        href: serviceGroupsLink,
+      },
+      ...(selectedTab
+        ? [
+            ...(serviceGroupName
+              ? [
+                  {
+                    title: serviceGroupName,
+                    href: router.link('/services', { query }),
+                  },
+                ]
+              : []),
+            {
+              title: selectedTab.label,
+              href: selectedTab.href,
+            } as { title: string; href: string },
+          ]
+        : []),
+    ],
+    [query, router, selectedTab, serviceGroupName, serviceGroupsLink]
+  );
   return (
     <ApmMainTemplate
       pageTitle={isServiceGroupsEnabled ? serviceGroupsPageTitle : pageTitle}

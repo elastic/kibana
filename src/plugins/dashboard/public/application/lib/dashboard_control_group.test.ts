@@ -9,6 +9,7 @@
 import { mockControlGroupInput } from '@kbn/controls-plugin/common/mocks';
 import { ControlGroupContainer } from '@kbn/controls-plugin/public/control_group/embeddable/control_group_container';
 import { Filter } from '@kbn/es-query';
+import { ReduxEmbeddablePackage } from '@kbn/presentation-util-plugin/public';
 import { combineDashboardFiltersWithControlGroupFilters } from './dashboard_control_group';
 
 jest.mock('@kbn/controls-plugin/public/control_group/embeddable/control_group_container');
@@ -50,7 +51,10 @@ const testFilter3: Filter = {
   },
 };
 
-const mockControlGroupContainer = new ControlGroupContainer(mockControlGroupInput());
+const mockControlGroupContainer = new ControlGroupContainer(
+  { getTools: () => {} } as unknown as ReduxEmbeddablePackage,
+  mockControlGroupInput()
+);
 
 describe('Test dashboard control group', () => {
   describe('Combine dashboard filters with control group filters test', () => {

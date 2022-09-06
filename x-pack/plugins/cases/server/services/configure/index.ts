@@ -25,6 +25,7 @@ import {
 } from '../transform';
 import { ConnectorReferenceHandler } from '../connector_reference_handler';
 import { ESCasesConfigureAttributes } from './types';
+import { IndexRefresh } from '../types';
 
 interface ClientArgs {
   unsecuredSavedObjectsClient: SavedObjectsClientContract;
@@ -33,16 +34,19 @@ interface ClientArgs {
 interface GetCaseConfigureArgs extends ClientArgs {
   configurationId: string;
 }
+
+interface DeleteCaseConfigureArgs extends GetCaseConfigureArgs, IndexRefresh {}
+
 interface FindCaseConfigureArgs extends ClientArgs {
   options?: SavedObjectFindOptionsKueryNode;
 }
 
-interface PostCaseConfigureArgs extends ClientArgs {
+interface PostCaseConfigureArgs extends ClientArgs, IndexRefresh {
   attributes: CasesConfigureAttributes;
   id: string;
 }
 
-interface PatchCaseConfigureArgs extends ClientArgs {
+interface PatchCaseConfigureArgs extends ClientArgs, IndexRefresh {
   configurationId: string;
   updatedAttributes: Partial<CasesConfigureAttributes>;
   originalConfiguration: SavedObject<CasesConfigureAttributes>;
@@ -51,10 +55,18 @@ interface PatchCaseConfigureArgs extends ClientArgs {
 export class CaseConfigureService {
   constructor(private readonly log: Logger) {}
 
-  public async delete({ unsecuredSavedObjectsClient, configurationId }: GetCaseConfigureArgs) {
+  public async delete({
+    unsecuredSavedObjectsClient,
+    configurationId,
+    refresh,
+  }: DeleteCaseConfigureArgs) {
     try {
       this.log.debug(`Attempting to DELETE case configure ${configurationId}`);
-      return await unsecuredSavedObjectsClient.delete(CASE_CONFIGURE_SAVED_OBJECT, configurationId);
+      return await unsecuredSavedObjectsClient.delete(
+        CASE_CONFIGURE_SAVED_OBJECT,
+        configurationId,
+        { refresh }
+      );
     } catch (error) {
       this.log.debug(`Error on DELETE case configure ${configurationId}: ${error}`);
       throw error;
@@ -105,6 +117,7 @@ export class CaseConfigureService {
     unsecuredSavedObjectsClient,
     attributes,
     id,
+    refresh,
   }: PostCaseConfigureArgs): Promise<SavedObject<CasesConfigureAttributes>> {
     try {
       this.log.debug(`Attempting to POST a new case configuration`);
@@ -112,7 +125,7 @@ export class CaseConfigureService {
       const createdConfig = await unsecuredSavedObjectsClient.create<ESCasesConfigureAttributes>(
         CASE_CONFIGURE_SAVED_OBJECT,
         esConfigInfo.attributes,
-        { id, references: esConfigInfo.referenceHandler.build() }
+        { id, references: esConfigInfo.referenceHandler.build(), refresh }
       );
 
       return transformToExternalModel(createdConfig);
@@ -127,6 +140,7 @@ export class CaseConfigureService {
     configurationId,
     updatedAttributes,
     originalConfiguration,
+    refresh,
   }: PatchCaseConfigureArgs): Promise<SavedObjectsUpdateResponse<CasesConfigurePatch>> {
     try {
       this.log.debug(`Attempting to UPDATE case configuration ${configurationId}`);
@@ -141,6 +155,7 @@ export class CaseConfigureService {
           },
           {
             references: esUpdateInfo.referenceHandler.build(originalConfiguration.references),
+            refresh,
           }
         );
 

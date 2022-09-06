@@ -14,7 +14,7 @@ import {
 } from './use_saved_search_messages';
 import { FetchStatus } from '../../types';
 import { BehaviorSubject } from 'rxjs';
-import { DataMainMsg } from './use_saved_search';
+import { DataMainMsg, RecordRawType } from './use_saved_search';
 import { filter } from 'rxjs/operators';
 
 describe('test useSavedSearch message generators', () => {
@@ -52,14 +52,17 @@ describe('test useSavedSearch message generators', () => {
     sendPartialMsg(main$);
   });
   test('sendLoadingMsg', (done) => {
-    const main$ = new BehaviorSubject<DataMainMsg>({ fetchStatus: FetchStatus.COMPLETE });
+    const main$ = new BehaviorSubject<DataMainMsg>({
+      fetchStatus: FetchStatus.COMPLETE,
+    });
     main$.subscribe((value) => {
       if (value.fetchStatus !== FetchStatus.COMPLETE) {
         expect(value.fetchStatus).toBe(FetchStatus.LOADING);
+        expect(value.recordRawType).toBe(RecordRawType.DOCUMENT);
         done();
       }
     });
-    sendLoadingMsg(main$);
+    sendLoadingMsg(main$, RecordRawType.DOCUMENT);
   });
   test('sendErrorMsg', (done) => {
     const main$ = new BehaviorSubject<DataMainMsg>({ fetchStatus: FetchStatus.PARTIAL });

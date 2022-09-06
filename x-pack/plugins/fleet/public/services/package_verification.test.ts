@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { PackageVerificationStatus } from '../../common';
+import type { PackageVerificationStatus } from '../../common/types';
 import type { PackageInfo } from '../types';
 
 import { ExperimentalFeaturesService, isPackageUnverified } from '.';

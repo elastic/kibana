@@ -25,7 +25,7 @@ import { CrawlEvent } from '../../../../api/crawler/types';
 import { CrawlDetailLogic } from '../crawl_details_flyout/crawl_detail_logic';
 import { CrawlerLogic } from '../crawler_logic';
 
-import { readableCrawlerStatuses } from './constants';
+import { crawlStatusColors, readableCrawlerStatuses } from './constants';
 import { CrawlEventTypeBadge } from './crawl_event_type_badge';
 
 export const CrawlRequestsTable: React.FC = () => {
@@ -84,7 +84,9 @@ export const CrawlRequestsTable: React.FC = () => {
       name: i18n.translate('xpack.enterpriseSearch.crawler.crawlRequestsTable.column.status', {
         defaultMessage: 'Status',
       }),
-      render: (status: CrawlEvent['status']) => readableCrawlerStatuses[status],
+      render: (status: CrawlEvent['status']) => (
+        <EuiBadge color={crawlStatusColors[status]}>{readableCrawlerStatuses[status]}</EuiBadge>
+      ),
     },
   ];
 

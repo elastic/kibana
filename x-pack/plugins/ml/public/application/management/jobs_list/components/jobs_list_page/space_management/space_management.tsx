@@ -16,6 +16,7 @@ import {
   EuiInMemoryTable,
   SearchFilterConfig,
   EuiBasicTableColumn,
+  EuiProgress,
 } from '@elastic/eui';
 
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
@@ -87,6 +88,7 @@ export const SpaceManagement: FC<Props> = ({ spacesApi, setCurrentTab }) => {
       refresh(currentTabId);
       setPageIndex(0);
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [currentTabId]
   );
 
@@ -102,6 +104,8 @@ export const SpaceManagement: FC<Props> = ({ spacesApi, setCurrentTab }) => {
               'data-test-subj': 'mlSpaceManagementTableColumnSpaces',
               sortable: true,
               truncateText: true,
+              align: 'right',
+              width: '10%',
               render: (item: ManagementItems) => {
                 return (
                   <MLSavedObjectsSpacesList
@@ -122,11 +126,12 @@ export const SpaceManagement: FC<Props> = ({ spacesApi, setCurrentTab }) => {
   const getTable = useCallback(() => {
     return (
       <>
+        {isLoading ? <EuiProgress size="xs" color="accent" /> : null}
+
         <EuiSpacer size="m" />
         {items === undefined ? null : (
           <>
-            <EuiFlexGroup>
-              <EuiFlexItem />
+            <EuiFlexGroup justifyContent={'flexEnd'} gutterSize={'none'}>
               <EuiFlexItem grow={false}>
                 <RefreshButton
                   onRefreshClick={refresh.bind(null, currentTabId)}
@@ -157,6 +162,7 @@ export const SpaceManagement: FC<Props> = ({ spacesApi, setCurrentTab }) => {
         )}
       </>
     );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [items, columns, isLoading, filters, currentTabId, refresh, onTableChange]);
 
   const tabs = useMemo(
@@ -210,6 +216,9 @@ export const RefreshButton: FC<{ onRefreshClick: () => void; isRefreshing: boole
     data-test-subj={`mlRefreshJobListButton${isRefreshing ? ' loading' : ' loaded'}`}
     onClick={onRefreshClick}
     isLoading={isRefreshing}
+    iconType={'refresh'}
+    iconSide={'left'}
+    iconSize={'m'}
   >
     <FormattedMessage id="xpack.ml.management.list.refreshButtonLabel" defaultMessage="Refresh" />
   </EuiButtonEmpty>

@@ -8,7 +8,7 @@
 import { CursorPagination } from './types';
 import { CursorDirection, SortOrder } from '../../../../../common/runtime_types';
 import { QueryContext } from './query_context';
-import { getUptimeESMockClient } from '../helper';
+import { getUptimeESMockClient } from '../test_helpers';
 
 export const nextPagination = (key: any): CursorPagination => {
   return {

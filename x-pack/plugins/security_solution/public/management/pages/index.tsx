@@ -36,37 +36,42 @@ import { ResponseActionsContainer } from './response_actions';
 const EndpointTelemetry = () => (
   <TrackApplicationView viewId={SecurityPageName.endpoints}>
     <EndpointsContainer />
+    <SpyRoute pageName={SecurityPageName.endpoints} />
   </TrackApplicationView>
 );
 
 const PolicyTelemetry = () => (
   <TrackApplicationView viewId={SecurityPageName.policies}>
     <PolicyContainer />
+    <SpyRoute pageName={SecurityPageName.policies} />
   </TrackApplicationView>
 );
 
 const TrustedAppTelemetry = () => (
   <TrackApplicationView viewId={SecurityPageName.trustedApps}>
     <TrustedAppsContainer />
+    <SpyRoute pageName={SecurityPageName.trustedApps} />
   </TrackApplicationView>
 );
 
 const EventFilterTelemetry = () => (
   <TrackApplicationView viewId={SecurityPageName.eventFilters}>
     <EventFiltersContainer />
+    <SpyRoute pageName={SecurityPageName.eventFilters} />
   </TrackApplicationView>
 );
 
 const HostIsolationExceptionsTelemetry = () => (
   <TrackApplicationView viewId={SecurityPageName.hostIsolationExceptions}>
-    <SpyRoute pageName={SecurityPageName.administration} />
     <HostIsolationExceptionsContainer />
+    <SpyRoute pageName={SecurityPageName.hostIsolationExceptions} />
   </TrackApplicationView>
 );
 
 const ResponseActionsTelemetry = () => (
   <TrackApplicationView viewId={SecurityPageName.responseActions}>
     <ResponseActionsContainer />
+    <SpyRoute pageName={SecurityPageName.responseActions} />
   </TrackApplicationView>
 );
 

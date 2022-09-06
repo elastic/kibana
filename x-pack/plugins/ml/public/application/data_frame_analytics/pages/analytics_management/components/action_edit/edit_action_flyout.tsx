@@ -112,7 +112,7 @@ export const EditActionFlyout: FC<Required<EditAction>> = ({ closeFlyout, item }
       refresh();
       closeFlyout();
     } catch (e) {
-      // eslint-disable-next-line
+      // eslint-disable-next-line no-console
       console.error(e);
 
       toastNotificationService.displayErrorToast(

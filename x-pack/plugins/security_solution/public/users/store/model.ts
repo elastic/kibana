@@ -19,10 +19,14 @@ export enum UsersTableType {
   anomalies = 'anomalies',
   risk = 'userRisk',
   events = 'events',
-  alerts = 'externalAlerts',
 }
 
-export type AllUsersTables = UsersTableType;
+export enum UsersDetailsTableType {
+  authentications = 'authentications',
+  anomalies = 'anomalies',
+  risk = 'userRisk',
+  events = 'events',
+}
 
 export interface BasicQueryPaginated {
   activePage: number;
@@ -44,13 +48,11 @@ export interface UsersQueries {
   [UsersTableType.anomalies]: null | undefined;
   [UsersTableType.risk]: UsersRiskScoreQuery;
   [UsersTableType.events]: BasicQueryPaginated;
-  [UsersTableType.alerts]: BasicQueryPaginated;
 }
 
 export interface UserDetailsQueries {
   [UsersTableType.anomalies]: null | undefined;
   [UsersTableType.events]: BasicQueryPaginated;
-  [UsersTableType.alerts]: BasicQueryPaginated;
 }
 
 export interface UsersPageModel {
@@ -59,14 +61,6 @@ export interface UsersPageModel {
 
 export interface UserDetailsPageModel {
   queries: UserDetailsQueries;
-}
-
-export interface UsersDetailsQueries {
-  [UsersTableType.allUsers]: AllUsersQuery;
-}
-
-export interface UsersDetailsModel {
-  queries: UsersDetailsQueries;
 }
 
 export interface UsersModel {

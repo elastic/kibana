@@ -15,7 +15,7 @@ import type {
   AppLocation,
   PolicyData,
   HostStatus,
-  HostIsolationResponse,
+  ResponseActionApiResponse,
   EndpointPendingActions,
 } from '../../../../common/endpoint/types';
 import type { ServerApiError } from '../../../common/types';
@@ -88,7 +88,7 @@ export interface EndpointState {
   /** The status of the host, which is mapped to the Elastic Agent status in Fleet */
   hostStatus?: HostStatus;
   /** Host isolation request state for a single endpoint */
-  isolationRequestState: AsyncResourceState<HostIsolationResponse>;
+  isolationRequestState: AsyncResourceState<ResponseActionApiResponse>;
   /**
    * Holds a map of `agentId` to `EndpointPendingActions` that is used by both the list and details view
    * Getting pending endpoint actions is "supplemental" data, so there is no need to show other Async

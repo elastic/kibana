@@ -21,7 +21,7 @@ export const DEFAULT_METRIC = { type: AGG_TYPE.COUNT };
 
 export interface IESAggSource extends IESSource {
   getAggKey(aggType: AGG_TYPE, fieldName: string): string;
-  getAggLabel(aggType: AGG_TYPE, fieldLabel: string): string;
+  getAggLabel(aggType: AGG_TYPE, fieldLabel: string): Promise<string>;
   getMetricFields(): IESAggField[];
   getMetricFieldForName(fieldName: string): IESAggField | null;
   getValueAggsDsl(indexPattern: DataView): { [key: string]: unknown };
@@ -88,7 +88,7 @@ export abstract class AbstractESAggSource extends AbstractESSource implements IE
     });
   }
 
-  getAggLabel(aggType: AGG_TYPE, fieldLabel: string): string {
+  async getAggLabel(aggType: AGG_TYPE, fieldLabel: string): Promise<string> {
     switch (aggType) {
       case AGG_TYPE.COUNT:
         return COUNT_PROP_LABEL;

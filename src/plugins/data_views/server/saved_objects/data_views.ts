@@ -38,8 +38,15 @@ export const dataViewSavedObjectType: SavedObjectsType = {
     properties: {
       title: { type: 'text' },
       type: { type: 'keyword' },
-      name: { type: 'text' },
+      name: {
+        type: 'text',
+        fields: {
+          keyword: {
+            type: 'keyword',
+          },
+        },
+      },
     },
   },
-  migrations: indexPatternSavedObjectTypeMigrations as any,
+  migrations: indexPatternSavedObjectTypeMigrations,
 };

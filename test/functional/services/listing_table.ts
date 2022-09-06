@@ -180,21 +180,9 @@ export class ListingTableService extends FtrService {
 
   /**
    * Clicks NewItem button on Landing page
-   * @param promptBtnTestSubj testSubj locator for Prompt button
    */
-  public async clickNewButton(promptBtnTestSubj: string): Promise<void> {
-    await this.retry.tryForTime(20000, async () => {
-      // newItemButton button is only visible when there are items in the listing table is displayed.
-      const isnNewItemButtonPresent = await this.testSubjects.exists('newItemButton', {
-        timeout: 10000,
-      });
-      if (isnNewItemButtonPresent) {
-        await this.testSubjects.click('newItemButton');
-      } else {
-        // no items exist, click createPromptButton to create new dashboard/visualization
-        await this.testSubjects.click(promptBtnTestSubj);
-      }
-    });
+  public async clickNewButton(): Promise<void> {
+    await this.testSubjects.click('newItemButton');
   }
 
   public async onListingPage(appName: AppName) {

@@ -33,27 +33,27 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const end = new Date('2021-01-01T00:15:00.000Z').getTime() - 1;
 
   async function callApi<TMetricName extends 'latency' | 'throughput' | 'error_rate'>({
-    backendName,
+    dependencyName,
     searchServiceDestinationMetrics,
     spanName = '',
     metric,
     kuery = '',
     environment = ENVIRONMENT_ALL.value,
   }: {
-    backendName: string;
+    dependencyName: string;
     searchServiceDestinationMetrics: boolean;
     spanName?: string;
     metric: TMetricName;
     kuery?: string;
     environment?: string;
-  }): Promise<SupertestReturnType<`GET /internal/apm/backends/charts/${TMetricName}`>> {
+  }): Promise<SupertestReturnType<`GET /internal/apm/dependencies/charts/${TMetricName}`>> {
     return await apmApiClient.readUser({
-      endpoint: `GET /internal/apm/backends/charts/${
+      endpoint: `GET /internal/apm/dependencies/charts/${
         metric as 'latency' | 'throughput' | 'error_rate'
       }`,
       params: {
         query: {
-          backendName,
+          dependencyName,
           start: new Date(start).toISOString(),
           end: new Date(end).toISOString(),
           environment,
@@ -80,7 +80,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     () => {
       it('handles empty state', async () => {
         const { body, status } = await callApi({
-          backendName: 'elasticsearch',
+          dependencyName: 'elasticsearch',
           metric: 'latency',
           searchServiceDestinationMetrics: true,
         });
@@ -94,180 +94,125 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     }
   );
 
-  registry.when(
-    'Dependency metrics when data is loaded',
-    { config: 'basic', archives: ['apm_mappings_only_8.0.0'] },
-    () => {
-      before(async () => {
-        await generateOperationData({
-          synthtraceEsClient,
-          start,
-          end,
-        });
+  registry.when('Dependency metrics when data is loaded', { config: 'basic', archives: [] }, () => {
+    before(async () => {
+      await generateOperationData({
+        synthtraceEsClient,
+        start,
+        end,
       });
+    });
 
-      describe('without spanName', () => {
-        describe('without a kuery or environment', () => {
-          it('returns the correct latency', async () => {
-            const response = await callApi({
-              backendName: 'elasticsearch',
-              searchServiceDestinationMetrics: true,
-              spanName: '',
-              metric: 'latency',
-            });
-
-            const searchRate =
-              ES_SEARCH_FAILURE_RATE + ES_SEARCH_SUCCESS_RATE + ES_SEARCH_UNKNOWN_RATE;
-            const bulkRate = ES_BULK_RATE;
-
-            expect(avg(response.body.currentTimeseries)).to.eql(
-              roundNumber(
-                ((ES_SEARCH_DURATION * searchRate + ES_BULK_DURATION * bulkRate) /
-                  (searchRate + bulkRate)) *
-                  1000
-              )
-            );
-          });
-
-          it('returns the correct throughput', async () => {
-            const response = await callApi({
-              backendName: 'redis',
-              searchServiceDestinationMetrics: true,
-              spanName: '',
-              metric: 'throughput',
-            });
-
-            expect(avg(response.body.currentTimeseries)).to.eql(REDIS_SET_RATE);
-          });
-
-          it('returns the correct failure rate', async () => {
-            const response = await callApi({
-              backendName: 'elasticsearch',
-              searchServiceDestinationMetrics: true,
-              spanName: '',
-              metric: 'error_rate',
-            });
-
-            const expectedErrorRate =
-              ES_SEARCH_FAILURE_RATE / (ES_SEARCH_FAILURE_RATE + ES_SEARCH_SUCCESS_RATE);
-
-            expect(avg(response.body.currentTimeseries)).to.eql(expectedErrorRate);
-          });
-        });
-
-        describe('with a kuery', () => {
-          it('returns the correct latency', async () => {
-            const response = await callApi({
-              backendName: 'elasticsearch',
-              searchServiceDestinationMetrics: true,
-              spanName: '',
-              metric: 'latency',
-              kuery: `event.outcome:unknown`,
-            });
-
-            const searchRate = ES_SEARCH_UNKNOWN_RATE;
-            const bulkRate = ES_BULK_RATE;
-
-            expect(avg(response.body.currentTimeseries)).to.eql(
-              roundNumber(
-                ((ES_SEARCH_DURATION * searchRate + ES_BULK_DURATION * bulkRate) /
-                  (searchRate + bulkRate)) *
-                  1000
-              )
-            );
-          });
-
-          it('returns the correct throughput', async () => {
-            const response = await callApi({
-              backendName: 'elasticsearch',
-              searchServiceDestinationMetrics: true,
-              spanName: '',
-              metric: 'throughput',
-              kuery: `event.outcome:unknown`,
-            });
-
-            const searchRate = ES_SEARCH_UNKNOWN_RATE;
-            const bulkRate = ES_BULK_RATE;
-
-            expect(avg(response.body.currentTimeseries)).to.eql(roundNumber(searchRate + bulkRate));
-          });
-
-          it('returns the correct failure rate', async () => {
-            const response = await callApi({
-              backendName: 'elasticsearch',
-              searchServiceDestinationMetrics: true,
-              spanName: '',
-              metric: 'error_rate',
-              kuery: 'event.outcome:success',
-            });
-
-            expect(avg(response.body.currentTimeseries)).to.eql(0);
-          });
-        });
-
-        describe('with an environment', () => {
-          it('returns the correct latency', async () => {
-            const response = await callApi({
-              backendName: 'elasticsearch',
-              searchServiceDestinationMetrics: true,
-              spanName: '',
-              metric: 'latency',
-              environment: 'production',
-            });
-
-            const searchRate = ES_SEARCH_UNKNOWN_RATE;
-            const bulkRate = 0;
-
-            expect(avg(response.body.currentTimeseries)).to.eql(
-              roundNumber(
-                ((ES_SEARCH_DURATION * searchRate + ES_BULK_DURATION * bulkRate) /
-                  (searchRate + bulkRate)) *
-                  1000
-              )
-            );
-          });
-
-          it('returns the correct throughput', async () => {
-            const response = await callApi({
-              backendName: 'elasticsearch',
-              searchServiceDestinationMetrics: true,
-              spanName: '',
-              metric: 'throughput',
-              environment: 'production',
-            });
-
-            const searchRate =
-              ES_SEARCH_FAILURE_RATE + ES_SEARCH_SUCCESS_RATE + ES_SEARCH_UNKNOWN_RATE;
-            const bulkRate = 0;
-
-            expect(avg(response.body.currentTimeseries)).to.eql(roundNumber(searchRate + bulkRate));
-          });
-
-          it('returns the correct failure rate', async () => {
-            const response = await callApi({
-              backendName: 'elasticsearch',
-              searchServiceDestinationMetrics: true,
-              spanName: '',
-              metric: 'error_rate',
-              environment: 'development',
-            });
-
-            expect(avg(response.body.currentTimeseries)).to.eql(null);
-          });
-        });
-      });
-
-      describe('with spanName', () => {
+    describe('without spanName', () => {
+      describe('without a kuery or environment', () => {
         it('returns the correct latency', async () => {
           const response = await callApi({
-            backendName: 'elasticsearch',
-            searchServiceDestinationMetrics: false,
-            spanName: '/_search',
+            dependencyName: 'elasticsearch',
+            searchServiceDestinationMetrics: true,
+            spanName: '',
             metric: 'latency',
           });
 
           const searchRate =
             ES_SEARCH_FAILURE_RATE + ES_SEARCH_SUCCESS_RATE + ES_SEARCH_UNKNOWN_RATE;
+          const bulkRate = ES_BULK_RATE;
+
+          expect(avg(response.body.currentTimeseries)).to.eql(
+            roundNumber(
+              ((ES_SEARCH_DURATION * searchRate + ES_BULK_DURATION * bulkRate) /
+                (searchRate + bulkRate)) *
+                1000
+            )
+          );
+        });
+
+        it('returns the correct throughput', async () => {
+          const response = await callApi({
+            dependencyName: 'redis',
+            searchServiceDestinationMetrics: true,
+            spanName: '',
+            metric: 'throughput',
+          });
+
+          expect(avg(response.body.currentTimeseries)).to.eql(REDIS_SET_RATE);
+        });
+
+        it('returns the correct failure rate', async () => {
+          const response = await callApi({
+            dependencyName: 'elasticsearch',
+            searchServiceDestinationMetrics: true,
+            spanName: '',
+            metric: 'error_rate',
+          });
+
+          const expectedErrorRate =
+            ES_SEARCH_FAILURE_RATE / (ES_SEARCH_FAILURE_RATE + ES_SEARCH_SUCCESS_RATE);
+
+          expect(avg(response.body.currentTimeseries)).to.eql(expectedErrorRate);
+        });
+      });
+
+      describe('with a kuery', () => {
+        it('returns the correct latency', async () => {
+          const response = await callApi({
+            dependencyName: 'elasticsearch',
+            searchServiceDestinationMetrics: true,
+            spanName: '',
+            metric: 'latency',
+            kuery: `event.outcome:unknown`,
+          });
+
+          const searchRate = ES_SEARCH_UNKNOWN_RATE;
+          const bulkRate = ES_BULK_RATE;
+
+          expect(avg(response.body.currentTimeseries)).to.eql(
+            roundNumber(
+              ((ES_SEARCH_DURATION * searchRate + ES_BULK_DURATION * bulkRate) /
+                (searchRate + bulkRate)) *
+                1000
+            )
+          );
+        });
+
+        it('returns the correct throughput', async () => {
+          const response = await callApi({
+            dependencyName: 'elasticsearch',
+            searchServiceDestinationMetrics: true,
+            spanName: '',
+            metric: 'throughput',
+            kuery: `event.outcome:unknown`,
+          });
+
+          const searchRate = ES_SEARCH_UNKNOWN_RATE;
+          const bulkRate = ES_BULK_RATE;
+
+          expect(avg(response.body.currentTimeseries)).to.eql(roundNumber(searchRate + bulkRate));
+        });
+
+        it('returns the correct failure rate', async () => {
+          const response = await callApi({
+            dependencyName: 'elasticsearch',
+            searchServiceDestinationMetrics: true,
+            spanName: '',
+            metric: 'error_rate',
+            kuery: 'event.outcome:success',
+          });
+
+          expect(avg(response.body.currentTimeseries)).to.eql(0);
+        });
+      });
+
+      describe('with an environment', () => {
+        it('returns the correct latency', async () => {
+          const response = await callApi({
+            dependencyName: 'elasticsearch',
+            searchServiceDestinationMetrics: true,
+            spanName: '',
+            metric: 'latency',
+            environment: 'production',
+          });
+
+          const searchRate = ES_SEARCH_UNKNOWN_RATE;
           const bulkRate = 0;
 
           expect(avg(response.body.currentTimeseries)).to.eql(
@@ -281,28 +226,78 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         it('returns the correct throughput', async () => {
           const response = await callApi({
-            backendName: 'redis',
-            searchServiceDestinationMetrics: false,
-            spanName: 'SET',
+            dependencyName: 'elasticsearch',
+            searchServiceDestinationMetrics: true,
+            spanName: '',
             metric: 'throughput',
+            environment: 'production',
           });
 
-          expect(avg(response.body.currentTimeseries)).to.eql(REDIS_SET_RATE);
+          const searchRate =
+            ES_SEARCH_FAILURE_RATE + ES_SEARCH_SUCCESS_RATE + ES_SEARCH_UNKNOWN_RATE;
+          const bulkRate = 0;
+
+          expect(avg(response.body.currentTimeseries)).to.eql(roundNumber(searchRate + bulkRate));
         });
 
         it('returns the correct failure rate', async () => {
           const response = await callApi({
-            backendName: 'elasticsearch',
-            searchServiceDestinationMetrics: false,
-            spanName: '/_bulk',
+            dependencyName: 'elasticsearch',
+            searchServiceDestinationMetrics: true,
+            spanName: '',
             metric: 'error_rate',
+            environment: 'development',
           });
 
           expect(avg(response.body.currentTimeseries)).to.eql(null);
         });
       });
+    });
 
-      after(() => synthtraceEsClient.clean());
-    }
-  );
+    describe('with spanName', () => {
+      it('returns the correct latency', async () => {
+        const response = await callApi({
+          dependencyName: 'elasticsearch',
+          searchServiceDestinationMetrics: false,
+          spanName: '/_search',
+          metric: 'latency',
+        });
+
+        const searchRate = ES_SEARCH_FAILURE_RATE + ES_SEARCH_SUCCESS_RATE + ES_SEARCH_UNKNOWN_RATE;
+        const bulkRate = 0;
+
+        expect(avg(response.body.currentTimeseries)).to.eql(
+          roundNumber(
+            ((ES_SEARCH_DURATION * searchRate + ES_BULK_DURATION * bulkRate) /
+              (searchRate + bulkRate)) *
+              1000
+          )
+        );
+      });
+
+      it('returns the correct throughput', async () => {
+        const response = await callApi({
+          dependencyName: 'redis',
+          searchServiceDestinationMetrics: false,
+          spanName: 'SET',
+          metric: 'throughput',
+        });
+
+        expect(avg(response.body.currentTimeseries)).to.eql(REDIS_SET_RATE);
+      });
+
+      it('returns the correct failure rate', async () => {
+        const response = await callApi({
+          dependencyName: 'elasticsearch',
+          searchServiceDestinationMetrics: false,
+          spanName: '/_bulk',
+          metric: 'error_rate',
+        });
+
+        expect(avg(response.body.currentTimeseries)).to.eql(null);
+      });
+    });
+
+    after(() => synthtraceEsClient.clean());
+  });
 }

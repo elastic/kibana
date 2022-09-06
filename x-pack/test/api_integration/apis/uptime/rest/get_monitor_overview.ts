@@ -82,7 +82,7 @@ export default function ({ getService }: FtrProviderContext) {
           expect(apiResponse.body.allMonitorIds.sort()).eql(
             savedMonitors.map((monitor) => monitor.id).sort()
           );
-          expect(apiResponse.body.pages).to.have.keys(['1', '2']);
+          expect(apiResponse.body.pages).to.have.keys(['0', '1']);
           expect(apiResponse.body.pages[1].length).eql(20);
         } finally {
           await Promise.all(
@@ -107,7 +107,7 @@ export default function ({ getService }: FtrProviderContext) {
           expect(apiResponse.body.allMonitorIds.sort()).eql(
             savedMonitors.map((monitor) => monitor.id).sort()
           );
-          expect(apiResponse.body.pages).to.have.keys(['1', '2', '3', '4', '5']);
+          expect(apiResponse.body.pages).to.have.keys(['0', '1', '2', '3', '4']);
           expect(apiResponse.body.pages[1].length).eql(5);
         } finally {
           await Promise.all(

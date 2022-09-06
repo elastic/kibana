@@ -19,8 +19,7 @@ import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import type { CoreSetup } from '@kbn/core/server';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import type { ElasticsearchClientMock } from '@kbn/core/server/elasticsearch/client/mocks';
+import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { TRANSFORM_STATES } from '../../../../common/constants';
 import { METADATA_TRANSFORMS_PATTERN } from '../../../../common/endpoint/constants';
 import type { RunResult } from '@kbn/task-manager-plugin/server/task';

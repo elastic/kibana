@@ -15,6 +15,7 @@ import { links, getManagementFilteredLinks } from './links';
 jest.mock('../common/hooks/use_license', () => {
   const licenseServiceInstance = {
     isPlatinumPlus: jest.fn(),
+    isEnterprise: jest.fn(() => true),
   };
   return {
     licenseService: licenseServiceInstance,

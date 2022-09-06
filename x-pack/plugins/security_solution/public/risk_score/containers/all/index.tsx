@@ -34,7 +34,7 @@ import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import { isIndexNotFoundError } from '../../../common/utils/exceptions';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import type { inputsModel } from '../../../common/store';
-import { useSpaceId } from '../common';
+import { useSpaceId } from '../../../common/hooks/use_space_id';
 
 export interface RiskScoreState<RiskScoreType extends HostsRiskScore[] | UsersRiskScore[]> {
   data?: RiskScoreType;

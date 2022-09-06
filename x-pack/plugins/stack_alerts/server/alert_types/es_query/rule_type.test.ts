@@ -18,8 +18,7 @@ import { getRuleType } from './rule_type';
 import { EsQueryRuleParams, EsQueryRuleState } from './rule_type_params';
 import { ActionContext } from './action_context';
 import { ESSearchResponse, ESSearchRequest } from '@kbn/core/types/elasticsearch';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { elasticsearchClientMock } from '@kbn/core/server/elasticsearch/client/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { coreMock } from '@kbn/core/server/mocks';
 import { ActionGroupId, ConditionMetAlertInstanceId } from './constants';
 import { OnlyEsQueryRuleParams, OnlySearchSourceRuleParams } from './types';
@@ -148,6 +147,7 @@ describe('ruleType', () => {
         thresholdComparator: Comparator.BETWEEN,
         threshold: [0],
         searchType: 'esQuery',
+        excludeHitsFromPreviousRun: true,
       };
       const ruleServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
 
@@ -178,6 +178,7 @@ describe('ruleType', () => {
         thresholdComparator: Comparator.GT,
         threshold: [0],
         searchType: 'esQuery',
+        excludeHitsFromPreviousRun: true,
       };
       const ruleServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
 
@@ -224,6 +225,7 @@ describe('ruleType', () => {
         thresholdComparator: Comparator.GT,
         threshold: [0],
         searchType: 'esQuery',
+        excludeHitsFromPreviousRun: true,
       };
       const ruleServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
 
@@ -273,6 +275,7 @@ describe('ruleType', () => {
         thresholdComparator: Comparator.GT,
         threshold: [0],
         searchType: 'esQuery',
+        excludeHitsFromPreviousRun: true,
       };
       const ruleServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
 
@@ -316,6 +319,7 @@ describe('ruleType', () => {
         thresholdComparator: Comparator.GT,
         threshold: [0],
         searchType: 'esQuery',
+        excludeHitsFromPreviousRun: true,
       };
       const ruleServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
 
@@ -388,6 +392,7 @@ describe('ruleType', () => {
         thresholdComparator: Comparator.GT,
         threshold: [0],
         searchType: 'esQuery',
+        excludeHitsFromPreviousRun: true,
       };
       const ruleServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
 
@@ -434,6 +439,7 @@ describe('ruleType', () => {
         thresholdComparator: Comparator.GT,
         threshold: [0],
         searchType: 'esQuery',
+        excludeHitsFromPreviousRun: true,
       };
       const ruleServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
 
@@ -503,6 +509,7 @@ describe('ruleType', () => {
       threshold: [0],
       searchConfiguration: {},
       searchType: 'searchSource',
+      excludeHitsFromPreviousRun: true,
     };
 
     afterAll(() => {

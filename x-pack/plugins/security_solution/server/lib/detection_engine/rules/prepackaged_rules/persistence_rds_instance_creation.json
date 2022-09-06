@@ -16,13 +16,43 @@
   "language": "kuery",
   "license": "Elastic License v2",
   "name": "AWS RDS Instance Creation",
-  "note": "## Config\n\nThe AWS Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+  "note": "",
   "query": "event.dataset:aws.cloudtrail and event.provider:rds.amazonaws.com and event.action:CreateDBInstance and event.outcome:success\n",
   "references": [
     "https://docs.aws.amazon.com/AmazonRDS/latest/APIReference/API_CreateDBInstance.html"
   ],
+  "related_integrations": [
+    {
+      "integration": "cloudtrail",
+      "package": "aws",
+      "version": "1.10.2"
+    }
+  ],
+  "required_fields": [
+    {
+      "ecs": true,
+      "name": "event.action",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "event.dataset",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "event.outcome",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "event.provider",
+      "type": "keyword"
+    }
+  ],
   "risk_score": 21,
   "rule_id": "f30f3443-4fbb-4c27-ab89-c3ad49d62315",
+  "setup": "The AWS Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
   "severity": "low",
   "tags": [
     "Elastic",
@@ -30,7 +60,8 @@
     "AWS",
     "Continuous Monitoring",
     "SecOps",
-    "Asset Visibility"
+    "Asset Visibility",
+    "Persistence"
   ],
   "threat": [
     {
@@ -45,5 +76,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 3
+  "version": 5
 }

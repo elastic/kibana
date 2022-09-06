@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CoreStart } from '@kbn/core/public';
+import type { AppLeaveHandler, CoreStart } from '@kbn/core/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
@@ -23,7 +23,7 @@ import type {
   TriggersAndActionsUIPublicPluginStart as TriggersActionsStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import type { CasesUiStart } from '@kbn/cases-plugin/public';
-import type { SecurityPluginSetup } from '@kbn/security-plugin/public';
+import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { TimelinesUIStart } from '@kbn/timelines-plugin/public';
 import type { SessionViewStart } from '@kbn/session-view-plugin/public';
 import type { KubernetesSecurityStart } from '@kbn/kubernetes-security-plugin/public';
@@ -33,11 +33,13 @@ import type { LicensingPluginStart, LicensingPluginSetup } from '@kbn/licensing-
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { CspClientPluginStart } from '@kbn/cloud-security-posture-plugin/public';
 import type { ApmBase } from '@elastic/apm-rum';
 import type {
   SavedObjectsTaggingApi,
   SavedObjectTaggingOssPluginStart,
 } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import type { ThreatIntelligencePluginStart } from '@kbn/threat-intelligence-plugin/public';
 import type { ResolverPluginSetup } from './resolver/types';
 import type { Inspect } from '../common/search_strategy';
 import type { Detections } from './detections';
@@ -53,6 +55,8 @@ import type { Timelines } from './timelines';
 import type { Management } from './management';
 import type { LandingPages } from './landing_pages';
 import type { CloudSecurityPosture } from './cloud_security_posture';
+import type { ThreatIntelligence } from './threat_intelligence';
+import type { SecuritySolutionTemplateWrapper } from './app/home/template_wrapper';
 
 export interface SetupPlugins {
   home?: HomePublicPluginSetup;
@@ -84,7 +88,9 @@ export interface StartPlugins {
   spaces?: SpacesPluginStart;
   dataViewFieldEditor: IndexPatternFieldEditorStart;
   osquery?: OsqueryPluginStart;
-  security: SecurityPluginSetup;
+  security: SecurityPluginStart;
+  cloudSecurityPosture: CspClientPluginStart;
+  threatIntelligence: ThreatIntelligencePluginStart;
 }
 
 export interface StartPluginsDependencies extends StartPlugins {
@@ -96,6 +102,15 @@ export type StartServices = CoreStart &
     storage: Storage;
     apm: ApmBase;
     savedObjectsTagging?: SavedObjectsTaggingApi;
+    onAppLeave: (handler: AppLeaveHandler) => void;
+
+    /**
+     * This component will be exposed to all lazy loaded plugins, via useKibana hook. It should wrap every plugin route.
+     * The goal is to allow page property customization (such as `template`).
+     */
+    securityLayout: {
+      getPluginWrapper: () => typeof SecuritySolutionTemplateWrapper;
+    };
   };
 
 export interface PluginSetup {
@@ -125,6 +140,7 @@ export interface SubPlugins {
   management: Management;
   landingPages: LandingPages;
   cloudSecurityPosture: CloudSecurityPosture;
+  threatIntelligence: ThreatIntelligence;
 }
 
 // TODO: find a better way to defined these types
@@ -142,4 +158,5 @@ export interface StartedSubPlugins {
   management: ReturnType<Management['start']>;
   landingPages: ReturnType<LandingPages['start']>;
   cloudSecurityPosture: ReturnType<CloudSecurityPosture['start']>;
+  threatIntelligence: ReturnType<ThreatIntelligence['start']>;
 }

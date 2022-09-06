@@ -6,7 +6,7 @@
  */
 
 import { appContextService } from '../../services';
-import type { GetFleetStatusResponse, PostFleetSetupResponse } from '../../../common';
+import type { GetFleetStatusResponse, PostFleetSetupResponse } from '../../../common/types';
 import { formatNonFatalErrors, setupFleet } from '../../services/setup';
 import { hasFleetServers } from '../../services/fleet_server';
 import { defaultIngestErrorHandler } from '../../errors';

@@ -7,12 +7,15 @@
  */
 
 import { random } from 'lodash';
-import { apm, timerange } from '..';
+import { apm, timerange } from '../..';
 import { ApmFields } from '../lib/apm/apm_fields';
 import { Instance } from '../lib/apm/instance';
-import { Scenario } from '../scripts/scenario';
-import { getLogger } from '../scripts/utils/get_common_services';
-import { RunOptions } from '../scripts/utils/parse_run_cli_flags';
+import { Scenario } from '../cli/scenario';
+import { getLogger } from '../cli/utils/get_common_services';
+import { RunOptions } from '../cli/utils/parse_run_cli_flags';
+import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
+
+const ENVIRONMENT = getSynthtraceEnvironment(__filename);
 
 const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
   const logger = getLogger(runOptions);
@@ -24,14 +27,14 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
     generate: ({ from, to }) => {
       const range = timerange(from, to);
 
-      const successfulTimestamps = range.interval('1s').rate(1);
+      const successfulTimestamps = range.ratePerMinute(60);
       // `.randomize(3, 180);
 
       const instances = services.map((service, index) =>
         apm
           .service(
-            `${service}-${languages[index % languages.length]}`,
-            'production',
+            `${services[index % services.length]}-${languages[index % languages.length]}-${index}`,
+            ENVIRONMENT,
             languages[index % languages.length]
           )
           .instance(`instance-${index}`)

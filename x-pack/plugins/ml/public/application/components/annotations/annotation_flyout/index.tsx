@@ -78,6 +78,8 @@ interface State {
 }
 
 export class AnnotationFlyoutUI extends Component<CommonProps & Props> {
+  private deletionInProgress = false;
+
   public state: State = {
     isDeleteModalVisible: false,
     applyAnnotationToSeries: true,
@@ -121,12 +123,16 @@ export class AnnotationFlyoutUI extends Component<CommonProps & Props> {
   };
 
   public deleteHandler = async () => {
+    if (this.deletionInProgress) return;
+
     const { annotationState } = this.state;
     const toastNotifications = getToastNotifications();
 
     if (annotationState === null || annotationState._id === undefined) {
       return;
     }
+
+    this.deletionInProgress = true;
 
     try {
       await ml.annotations.deleteAnnotation(annotationState._id);
@@ -153,6 +159,8 @@ export class AnnotationFlyoutUI extends Component<CommonProps & Props> {
     }
 
     this.closeDeleteModal();
+
+    this.deletionInProgress = false;
 
     const { annotationUpdatesService } = this.props;
 
@@ -431,6 +439,7 @@ export const AnnotationFlyout: FC<any> = (props) => {
 
   const cancelEditingHandler = useCallback(() => {
     annotationUpdatesService.setValue(null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   if (annotationProp === undefined || annotationProp === null) {

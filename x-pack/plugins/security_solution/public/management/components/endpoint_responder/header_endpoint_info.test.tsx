@@ -50,7 +50,7 @@ describe('Responder header endpoint info', () => {
   });
   it('should show endpoint name', async () => {
     const name = await renderResult.findByTestId('responderHeaderEndpointName');
-    expect(name.textContent).toBe(`ENDPOINT ${endpointDetails.metadata.host.name}`);
+    expect(name.textContent).toBe(`${endpointDetails.metadata.host.name}`);
   });
   it('should show agent and isolation status', async () => {
     const agentStatus = await renderResult.findByTestId(

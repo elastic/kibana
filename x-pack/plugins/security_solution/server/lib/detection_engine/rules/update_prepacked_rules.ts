@@ -16,7 +16,7 @@ import type { RuleParams } from '../schemas/rule_schemas';
 import { legacyMigrate } from './utils';
 import { deleteRules } from './delete_rules';
 import { PrepackagedRulesError } from '../routes/rules/add_prepackaged_rules_route';
-import type { IRuleExecutionLogForRoutes } from '../rule_execution_log';
+import type { IRuleExecutionLogForRoutes } from '../rule_monitoring';
 import { createRules } from './create_rules';
 import { transformAlertToRuleAction } from '../../../../common/detection_engine/transform_actions';
 
@@ -99,8 +99,8 @@ export const createPromises = (
     } else {
       return patchRules({
         rulesClient,
-        rule: migratedRule,
-        params: {
+        existingRule: migratedRule,
+        nextParams: {
           ...rule,
           // Force enabled to use the enabled state from the existing rule by passing in undefined to patchRules
           enabled: undefined,

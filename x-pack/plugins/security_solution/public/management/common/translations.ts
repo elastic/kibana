@@ -25,10 +25,6 @@ export const EVENT_FILTERS_TAB = i18n.translate('xpack.securitySolution.eventFil
   defaultMessage: 'Event filters',
 });
 
-export const BETA_BADGE_LABEL = i18n.translate('xpack.securitySolution.administration.list.beta', {
-  defaultMessage: 'Beta',
-});
-
 export const OS_TITLES: Readonly<{ [K in OperatingSystem]: string }> = {
   [OperatingSystem.WINDOWS]: i18n.translate('xpack.securitySolution.administration.os.windows', {
     defaultMessage: 'Windows',

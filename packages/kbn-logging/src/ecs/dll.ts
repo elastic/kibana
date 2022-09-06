@@ -8,12 +8,10 @@
 
 import { EcsCodeSignature } from './code_signature';
 import { EcsHash } from './hash';
-import { EcsPe } from './pe';
 
 interface NestedFields {
   code_signature?: EcsCodeSignature;
   hash?: EcsHash;
-  pe?: EcsPe;
 }
 
 /**

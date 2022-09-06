@@ -17,6 +17,7 @@ import {
   typeInOsqueryFieldInput,
 } from '../../tasks/live_query';
 import {
+  LIVE_QUERY_EDITOR,
   RESULTS_TABLE,
   RESULTS_TABLE_BUTTON,
   RESULTS_TABLE_CELL_WRRAPER,
@@ -27,6 +28,7 @@ import { ROLES } from '../../test';
 describe('ALL - Live Query', () => {
   before(() => {
     runKbnArchiverScript(ArchiverMethod.LOAD, 'ecs_mapping_1');
+    runKbnArchiverScript(ArchiverMethod.LOAD, 'example_pack');
   });
 
   beforeEach(() => {
@@ -36,6 +38,29 @@ describe('ALL - Live Query', () => {
 
   after(() => {
     runKbnArchiverScript(ArchiverMethod.UNLOAD, 'ecs_mapping_1');
+    runKbnArchiverScript(ArchiverMethod.UNLOAD, 'example_pack');
+  });
+
+  it('should validate the form', () => {
+    cy.contains('New live query').click();
+    submitQuery();
+    cy.contains('Agents is a required field');
+    cy.contains('Query is a required field');
+    selectAllAgents();
+    inputQuery('select * from uptime; ');
+    submitQuery();
+    cy.contains('Agents is a required field').should('not.exist');
+    cy.contains('Query is a required field').should('not.exist');
+    checkResults();
+    getAdvancedButton().click();
+    typeInOsqueryFieldInput('days{downArrow}{enter}');
+    submitQuery();
+    cy.contains('ECS field is required.');
+    typeInECSFieldInput('message{downArrow}{enter}');
+    submitQuery();
+    cy.contains('ECS field is required.').should('not.exist');
+
+    checkResults();
   });
 
   it('should run query and enable ecs mapping', () => {
@@ -79,7 +104,7 @@ describe('ALL - Live Query', () => {
     cy.contains('New live query').click();
     selectAllAgents();
     cy.react('SavedQueriesDropdown').type('NOMAPPING{downArrow}{enter}');
-    cy.getReact('SavedQueriesDropdown').getCurrentState().should('have.length', 1);
+    // cy.getReact('SavedQueriesDropdown').getCurrentState().should('have.length', 1); // TODO do we need it?
     inputQuery('{selectall}{backspace}{selectall}{backspace}select * from users');
     cy.wait(1000);
     submitQuery();
@@ -91,5 +116,29 @@ describe('ALL - Live Query', () => {
       .click();
 
     cy.react('ReactAce', { props: { value: 'select * from users' } }).should('exist');
+  });
+
+  it('should run live pack', () => {
+    cy.contains('New live query').click();
+    cy.contains('Run a set of queries in a pack.').click();
+    cy.get(LIVE_QUERY_EDITOR).should('not.exist');
+    cy.getBySel('select-live-pack').click();
+    cy.contains('Example').click();
+    cy.contains('This table contains 3 rows.');
+    cy.contains('system_memory_linux_elastic');
+    cy.contains('system_info_elastic');
+    cy.contains('failingQuery');
+    selectAllAgents();
+    submitQuery();
+    cy.getBySel('live-query-loading').should('exist');
+    cy.getBySel('live-query-loading', { timeout: 10000 }).should('not.exist');
+    cy.getBySel('toggleIcon-system_memory_linux_elastic').click();
+    checkResults();
+    cy.getBySel('toggleIcon-system_memory_linux_elastic').click();
+    cy.getBySel('toggleIcon-failingQuery').click();
+    cy.contains('Status').click();
+    cy.contains('query failed, code: 1, message: no such table: opera_extensions');
+    navigateTo('/app/osquery');
+    cy.contains('Example');
   });
 });

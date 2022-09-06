@@ -11,3 +11,7 @@ export * from '../../../hooks/use_breakpoints';
 export * from './use_service_allowed';
 export * from './use_enablement';
 export * from './use_locations';
+export * from './use_last_x_checks';
+export * from './use_last_50_duration_chart';
+export * from './use_location_name';
+export * from './use_status_by_location';

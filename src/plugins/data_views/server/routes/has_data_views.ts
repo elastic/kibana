@@ -7,7 +7,7 @@
  */
 
 import { IRouter } from '@kbn/core/server';
-import { getIndexPattern, hasUserIndexPattern } from '../has_user_index_pattern';
+import { getDataViews, hasUserDataView } from '../has_user_data_view';
 
 export const registerHasDataViewsRoute = (router: IRouter): void => {
   router.get(
@@ -19,11 +19,11 @@ export const registerHasDataViewsRoute = (router: IRouter): void => {
       const core = await ctx.core;
       const savedObjectsClient = core.savedObjects.client;
       const elasticsearchClient = core.elasticsearch.client.asCurrentUser;
-      const dataViews = await getIndexPattern({
+      const dataViews = await getDataViews({
         esClient: elasticsearchClient,
         soClient: savedObjectsClient,
       });
-      const checkDataPattern = await hasUserIndexPattern(
+      const hasUserDataViewResult = await hasUserDataView(
         {
           esClient: elasticsearchClient,
           soClient: savedObjectsClient,
@@ -31,8 +31,8 @@ export const registerHasDataViewsRoute = (router: IRouter): void => {
         dataViews
       );
       const response = {
-        hasDataView: !!dataViews.total,
-        hasUserDataView: !!checkDataPattern,
+        hasDataView: dataViews.total > 0,
+        hasUserDataView: hasUserDataViewResult,
       };
       return res.ok({ body: response });
     }

@@ -5,69 +5,50 @@
  * 2.0.
  */
 
-import { CONSTANTS } from '../url_state/constants';
-import type { SearchNavTab } from './types';
-import { TimelineTabs } from '../../../../common/types/timeline';
 import { getSearch } from './helpers';
+import { SecurityPageName } from '../../../app/types';
+import type { AppLinkItems } from '../../links';
+import { updateAppLinks } from '../../links';
+import { mockGlobalState } from '../../mock';
+import type { Capabilities } from '@kbn/core-capabilities-common';
+
+const defaultAppLinks: AppLinkItems = [
+  {
+    id: SecurityPageName.alerts,
+    title: 'Alerts',
+    path: '/alerts',
+    skipUrlState: false,
+  },
+  {
+    id: SecurityPageName.administration,
+    title: 'Admin',
+    path: '/admin',
+    skipUrlState: true,
+  },
+];
 
 describe('helpers', () => {
+  beforeAll(() => {
+    updateAppLinks(defaultAppLinks, {
+      capabilities: {} as unknown as Capabilities,
+      experimentalFeatures: mockGlobalState.app.enableExperimental,
+    });
+  });
   it('returns the search string', () => {
-    const serachNavTab: SearchNavTab = { urlKey: 'host', isDetailPage: false };
     const globalQueryString = 'test=123';
-    const urlState = {
-      [CONSTANTS.timeline]: {
-        activeTab: TimelineTabs.query,
-        id: '123',
-        isOpen: false,
-      },
-    };
 
-    expect(getSearch(serachNavTab, urlState, globalQueryString)).toEqual(
-      "?timeline=(activeTab:query,id:'123',isOpen:!f)&test=123"
-    );
+    expect(getSearch(SecurityPageName.alerts, globalQueryString)).toEqual('?test=123');
   });
 
-  it('returns an empty string when global globalQueryString and urlState are empty', () => {
-    const serachNavTab: SearchNavTab = { urlKey: 'host', isDetailPage: false };
+  it('returns an empty string when globalQueryString is empty', () => {
     const globalQueryString = '';
-    const urlState = {
-      [CONSTANTS.timeline]: {
-        activeTab: TimelineTabs.query,
-        id: '',
-        isOpen: false,
-      },
-    };
 
-    expect(getSearch(serachNavTab, urlState, globalQueryString)).toEqual('');
+    expect(getSearch(SecurityPageName.alerts, globalQueryString)).toEqual('');
   });
 
-  it('returns the search string when global globalQueryString is empty', () => {
-    const serachNavTab: SearchNavTab = { urlKey: 'host', isDetailPage: false };
-    const globalQueryString = '';
-    const urlState = {
-      [CONSTANTS.timeline]: {
-        activeTab: TimelineTabs.query,
-        id: '123',
-        isOpen: false,
-      },
-    };
-
-    expect(getSearch(serachNavTab, urlState, globalQueryString)).toEqual(
-      "?timeline=(activeTab:query,id:'123',isOpen:!f)"
-    );
-  });
-
-  it('returns the search string when global urlState is empty', () => {
-    const serachNavTab: SearchNavTab = { urlKey: 'host', isDetailPage: false };
+  it('returns an empty string when the page does not require url state', () => {
     const globalQueryString = 'test=123';
-    const urlState = {
-      [CONSTANTS.timeline]: {
-        activeTab: TimelineTabs.query,
-        id: '',
-        isOpen: false,
-      },
-    };
 
-    expect(getSearch(serachNavTab, urlState, globalQueryString)).toEqual('?test=123');
+    expect(getSearch(SecurityPageName.administration, globalQueryString)).toEqual('');
   });
 });

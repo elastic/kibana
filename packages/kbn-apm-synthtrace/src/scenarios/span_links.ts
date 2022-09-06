@@ -7,9 +7,12 @@
  */
 
 import { compact, shuffle } from 'lodash';
-import { apm, ApmFields, EntityArrayIterable, timerange } from '..';
+import { apm, ApmFields, EntityArrayIterable, timerange } from '../..';
 import { generateLongId, generateShortId } from '../lib/utils/generate_id';
-import { Scenario } from '../scripts/scenario';
+import { Scenario } from '../cli/scenario';
+import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
+
+const ENVIRONMENT = getSynthtraceEnvironment(__filename);
 
 function generateExternalSpanLinks() {
   // randomly creates external span links 0 - 10
@@ -31,7 +34,8 @@ const scenario: Scenario<ApmFields> = async () => {
   return {
     generate: ({ from, to }) => {
       const producerInternalOnlyInstance = apm
-        .service('producer-internal-only', 'production', 'go')
+
+        .service('producer-internal-only', ENVIRONMENT, 'go')
         .instance('instance-a');
       const producerInternalOnlyEvents = timerange(
         new Date('2022-04-25T19:00:00.000Z'),
@@ -58,7 +62,7 @@ const scenario: Scenario<ApmFields> = async () => {
       const spanASpanLink = getSpanLinksFromEvents(producerInternalOnlyApmFields);
 
       const producerConsumerInstance = apm
-        .service('producer-consumer', 'production', 'java')
+        .service('producer-consumer', ENVIRONMENT, 'java')
         .instance('instance-b');
       const producerConsumerEvents = timerange(from, to)
         .interval('1m')
@@ -84,7 +88,7 @@ const scenario: Scenario<ApmFields> = async () => {
       const producerConsumerApmFields = producerConsumerEvents.toArray();
       const spanBSpanLink = getSpanLinksFromEvents(producerConsumerApmFields);
 
-      const consumerInstance = apm.service('consumer', 'production', 'ruby').instance('instance-c');
+      const consumerInstance = apm.service('consumer', ENVIRONMENT, 'ruby').instance('instance-c');
       const consumerEvents = timerange(from, to)
         .interval('1m')
         .rate(1)

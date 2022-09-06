@@ -67,8 +67,7 @@ const AddToCaseButtonComponent: React.FC<Props> = ({ timelineId }) => {
     [dispatch, graphEventId, navigateToApp, savedObjectId, timelineId, timelineTitle]
   );
 
-  const userPermissions = useGetUserCasesPermissions();
-  const casesPermissions = { all: userPermissions.crud, read: userPermissions.read };
+  const userCasesPermissions = useGetUserCasesPermissions();
 
   const handleButtonClick = useCallback(() => {
     setPopover((currentIsOpen) => !currentIsOpen);
@@ -107,6 +106,10 @@ const AddToCaseButtonComponent: React.FC<Props> = ({ timelineId }) => {
     handlePopoverClose();
     openCaseModal(true);
   }, [openCaseModal, handlePopoverClose]);
+
+  const onCaseModalClose = useCallback(() => {
+    openCaseModal(false);
+  }, [openCaseModal]);
 
   const closePopover = useCallback(() => {
     setPopover(false);
@@ -164,8 +167,9 @@ const AddToCaseButtonComponent: React.FC<Props> = ({ timelineId }) => {
       {isCaseModalOpen &&
         cases.ui.getAllCasesSelectorModal({
           onRowClick,
+          onClose: onCaseModalClose,
           owner: [APP_ID],
-          permissions: casesPermissions,
+          permissions: userCasesPermissions,
         })}
     </>
   );

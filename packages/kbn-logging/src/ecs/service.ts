@@ -17,8 +17,13 @@ export interface EcsService {
   ephemeral_id?: string;
   id?: string;
   name?: string;
-  node?: { name: string };
+  node?: Node;
   state?: string;
   type?: string;
   version?: string;
+}
+
+interface Node {
+  name?: string;
+  roles?: string[];
 }

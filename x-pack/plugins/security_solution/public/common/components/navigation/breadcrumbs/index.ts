@@ -15,7 +15,6 @@ import { getTrailingBreadcrumbs as getIPDetailsBreadcrumbs } from '../../../../n
 import { getTrailingBreadcrumbs as getDetectionRulesBreadcrumbs } from '../../../../detections/pages/detection_engine/rules/utils';
 import { getTrailingBreadcrumbs as getUsersBreadcrumbs } from '../../../../users/pages/details/utils';
 import { getTrailingBreadcrumbs as getKubernetesBreadcrumbs } from '../../../../kubernetes/pages/utils/breadcrumbs';
-import { getTrailingBreadcrumbs as getAdminBreadcrumbs } from '../../../../management/common/breadcrumbs';
 import { SecurityPageName } from '../../../../app/types';
 import type {
   RouteSpyState,
@@ -80,7 +79,13 @@ export const getBreadcrumbsForRoute = (
 ): ChromeBreadcrumb[] | null => {
   const spyState: RouteSpyState = omit('navTabs', object);
 
-  if (!spyState || !object.navTabs || !spyState.pageName || isCaseRoutes(spyState)) {
+  if (
+    !spyState ||
+    !object.navTabs ||
+    !spyState.pageName ||
+    isCaseRoutes(spyState) ||
+    isCloudSecurityPostureManagedRoutes(spyState)
+  ) {
     return null;
   }
 
@@ -98,18 +103,6 @@ export const getBreadcrumbsForRoute = (
   const leadingBreadcrumbs = isGroupedNavigationEnabled
     ? newMenuLeadingBreadcrumbs
     : [siemRootBreadcrumb, pageBreadcrumb];
-
-  // Admin URL works differently. All admin pages are under '/administration'
-  if (isAdminRoutes(spyState)) {
-    if (isGroupedNavigationEnabled) {
-      return emptyLastBreadcrumbUrl([...leadingBreadcrumbs, ...getAdminBreadcrumbs(spyState)]);
-    } else {
-      return [
-        ...(siemRootBreadcrumb ? [siemRootBreadcrumb] : []),
-        ...getAdminBreadcrumbs(spyState),
-      ];
-    }
-  }
 
   return emptyLastBreadcrumbUrl([
     ...leadingBreadcrumbs,
@@ -157,12 +150,12 @@ const isCaseRoutes = (spyState: RouteSpyState) => spyState.pageName === Security
 const isKubernetesRoutes = (spyState: RouteSpyState) =>
   spyState.pageName === SecurityPageName.kubernetes;
 
-const isAdminRoutes = (spyState: RouteSpyState): spyState is AdministrationRouteSpyState =>
-  spyState.pageName === SecurityPageName.administration;
-
 const isRulesRoutes = (spyState: RouteSpyState): spyState is AdministrationRouteSpyState =>
   spyState.pageName === SecurityPageName.rules ||
   spyState.pageName === SecurityPageName.rulesCreate;
+
+const isCloudSecurityPostureManagedRoutes = (spyState: RouteSpyState) =>
+  spyState.pageName === SecurityPageName.cloudSecurityPostureRules;
 
 const emptyLastBreadcrumbUrl = (breadcrumbs: ChromeBreadcrumb[]) => {
   const leadingBreadCrumbs = breadcrumbs.slice(0, -1);

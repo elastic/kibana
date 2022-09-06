@@ -101,6 +101,11 @@ export type DashboardAppLocatorParams = {
    */
   savedQuery?: string;
 
+  /**
+   * List of tags to set to the state
+   */
+  tags?: string[];
+
   options?: RawDashboardState['options'];
 
   /**

@@ -152,20 +152,22 @@ export const disableAlertById = async ({ alertId }: { alertId: string }) => {
 };
 
 export const fetchActionTypes = async (): Promise<ActionType[]> => {
-  const response = (await apiService.get(API_URLS.CONNECTOR_TYPES)) as Array<
-    AsApiContract<ActionType>
-  >;
+  const response = (await apiService.get(API_URLS.CONNECTOR_TYPES, {
+    feature_id: 'uptime',
+  })) as Array<AsApiContract<ActionType>>;
   return response.map<ActionType>(
     ({
       enabled_in_config: enabledInConfig,
       enabled_in_license: enabledInLicense,
       minimum_license_required: minimumLicenseRequired,
+      supported_feature_ids: supportedFeatureIds,
       ...res
     }: AsApiContract<ActionType>) => ({
       ...res,
       enabledInConfig,
       enabledInLicense,
       minimumLicenseRequired,
+      supportedFeatureIds,
     })
   );
 };

@@ -26,7 +26,6 @@ import type {
   ISearchStrategy,
 } from '.';
 import { NoSearchIdInSessionError } from '.';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
 import { createSearchSessionsClientMock } from './mocks';
 import { ENHANCED_ES_SEARCH_STRATEGY } from '../../common';

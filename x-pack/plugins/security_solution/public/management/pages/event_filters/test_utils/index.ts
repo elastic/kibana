@@ -60,30 +60,6 @@ export const ecsEventMock = (): Ecs => ({
   },
 });
 
-export const createdEventFilterEntryMock = (): ExceptionListItemSchema => ({
-  _version: 'WzM4MDgsMV0=',
-  meta: undefined,
-  comments: [],
-  created_at: '2021-04-19T10:30:36.425Z',
-  created_by: 'elastic',
-  description: '',
-  entries: [
-    { field: 'event.category', operator: 'included', type: 'match', value: 'process' },
-    { field: 'process.executable', operator: 'included', type: 'match', value: 'C:\\iexlorer.exe' },
-  ],
-  id: '47598790-a0fa-11eb-8458-69ac85f1fa18',
-  item_id: '93f65a04-6f5c-4f9e-9be5-e674b3c2392f',
-  list_id: '.endpointEventFilterList',
-  name: 'Test',
-  namespace_type: 'agnostic',
-  os_types: ['windows'],
-  tags: ['policy:all'],
-  tie_breaker_id: 'c42f3dbd-292f-49e8-83ab-158d024a4d8b',
-  type: 'simple',
-  updated_at: '2021-04-19T10:30:36.428Z',
-  updated_by: 'elastic',
-});
-
 export type EventFiltersListQueryHttpMockProviders = ResponseProvidersInterface<{
   eventFiltersList: () => FoundExceptionListItemSchema;
   eventFiltersCreateList: () => ExceptionListItemSchema;

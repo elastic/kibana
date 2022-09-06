@@ -76,7 +76,7 @@ export const usePushToService = ({
 
     // these message require that the user do some sort of write action as a result of the message, readonly users won't
     // be able to perform such an action so let's not display the error to the user in that situation
-    if (!permissions.all) {
+    if (!permissions.update) {
       return errors;
     }
 
@@ -114,7 +114,7 @@ export const usePushToService = ({
 
     return errors;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [actionLicense, caseStatus, connectors.length, connector, loadingLicense, permissions.all]);
+  }, [actionLicense, caseStatus, connectors.length, connector, loadingLicense, permissions.update]);
 
   const pushToServiceButton = useMemo(
     () => (
@@ -126,7 +126,7 @@ export const usePushToService = ({
           isLoading ||
           loadingLicense ||
           errorsMsg.length > 0 ||
-          !permissions.all ||
+          !permissions.push ||
           !isValidConnector ||
           !hasDataToPush
         }
@@ -146,13 +146,13 @@ export const usePushToService = ({
       hasDataToPush,
       isLoading,
       loadingLicense,
-      permissions.all,
+      permissions.push,
       isValidConnector,
     ]
   );
 
   const objToReturn = useMemo(() => {
-    const hidePushButton = errorsMsg.length > 0 || !hasDataToPush || !permissions.all;
+    const hidePushButton = errorsMsg.length > 0 || !hasDataToPush || !permissions.push;
 
     return {
       pushButton: hidePushButton ? (
@@ -184,7 +184,7 @@ export const usePushToService = ({
     hasLicenseError,
     onEditClick,
     pushToServiceButton,
-    permissions.all,
+    permissions.push,
   ]);
 
   return objToReturn;

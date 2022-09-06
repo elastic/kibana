@@ -39,7 +39,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         before(async () => {
           const panelCount = await dashboard.getPanelCount();
           if (panelCount > 0) {
-            const panels = await dashboard.getAllPanels();
+            const panels = await dashboard.getDashboardPanels();
             for (const panel of panels) {
               await dashboardPanelActions.removePanel(panel);
             }

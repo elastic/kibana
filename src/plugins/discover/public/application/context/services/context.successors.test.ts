@@ -39,8 +39,8 @@ describe('context successors', function () {
   let dataPluginMock: DataPublicPluginStart;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let mockSearchSource: any;
-  const indexPattern = {
-    id: 'INDEX_PATTERN_ID',
+  const dataView = {
+    id: 'DATA_VIEW_ID',
     timeFieldName: '@timestamp',
     isTimeNanosBased: () => false,
     popularizeField: () => {},
@@ -67,17 +67,17 @@ describe('context successors', function () {
             _index: 't',
             _id: '1',
             _source: {
-              [indexPattern.timeFieldName!]: timeValIso,
+              [dataView.timeFieldName!]: timeValIso,
             },
             sort: [timeValNr, tieBreakerValue],
           },
-          indexPattern,
+          dataView,
           true
         );
 
         return fetchSurroundingDocs(
           SurrDocType.SUCCESSORS,
-          indexPattern,
+          dataView,
           anchor,
           tieBreakerField,
           SortDirection.desc,
@@ -101,7 +101,7 @@ describe('context successors', function () {
         (hits) => {
           expect(mockSearchSource.fetch$.calledOnce).toBe(true);
           expect(hits).toEqual(
-            buildDataTableRecordList(mockSearchSource._stubHits.slice(-3), indexPattern)
+            buildDataTableRecordList(mockSearchSource._stubHits.slice(-3), dataView)
           );
         }
       );
@@ -133,7 +133,7 @@ describe('context successors', function () {
           expect(Object.keys(last(intervals) ?? {})).toEqual(['format', 'lte']);
           expect(intervals.length).toBeGreaterThan(1);
           expect(hits).toEqual(
-            buildDataTableRecordList(mockSearchSource._stubHits.slice(-3), indexPattern)
+            buildDataTableRecordList(mockSearchSource._stubHits.slice(-3), dataView)
           );
         }
       );
@@ -163,7 +163,7 @@ describe('context successors', function () {
           expect(moment(last(intervals)?.gte).valueOf()).toBeGreaterThan(MS_PER_DAY * 2200);
           expect(intervals.length).toBeGreaterThan(1);
           expect(hits).toEqual(
-            buildDataTableRecordList(mockSearchSource._stubHits.slice(0, 4), indexPattern)
+            buildDataTableRecordList(mockSearchSource._stubHits.slice(0, 4), dataView)
           );
         }
       );
@@ -213,17 +213,17 @@ describe('context successors', function () {
             _id: '1',
             _index: 'test',
             _source: {
-              [indexPattern.timeFieldName!]: timeValIso,
+              [dataView.timeFieldName!]: timeValIso,
             },
             sort: [timeValNr, tieBreakerValue],
           },
-          indexPattern,
+          dataView,
           true
         );
 
         return fetchSurroundingDocs(
           SurrDocType.SUCCESSORS,
-          indexPattern,
+          dataView,
           anchor,
           tieBreakerField,
           SortDirection.desc,
@@ -248,7 +248,7 @@ describe('context successors', function () {
         (hits) => {
           expect(mockSearchSource.fetch$.calledOnce).toBe(true);
           expect(hits).toEqual(
-            buildDataTableRecordList(mockSearchSource._stubHits.slice(-3), indexPattern)
+            buildDataTableRecordList(mockSearchSource._stubHits.slice(-3), dataView)
           );
           const setFieldsSpy = mockSearchSource.setField.withArgs('fields');
           const removeFieldsSpy = mockSearchSource.removeField.withArgs('fieldsFromSource');

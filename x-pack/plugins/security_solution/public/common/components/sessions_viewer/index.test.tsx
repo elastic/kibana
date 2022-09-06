@@ -24,7 +24,7 @@ const originalKibanaLib = jest.requireActual('../../lib/kibana');
 const mockUseGetUserCasesPermissions = useGetUserCasesPermissions as jest.Mock;
 mockUseGetUserCasesPermissions.mockImplementation(originalKibanaLib.useGetUserCasesPermissions);
 
-jest.mock('../url_state/normalize_time_range');
+jest.mock('../../utils/normalize_time_range');
 
 const startDate = '2022-03-22T22:10:56.794Z';
 const endDate = '2022-03-21T22:10:56.791Z';

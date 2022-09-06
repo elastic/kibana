@@ -63,12 +63,13 @@ export const Page: FC = () => {
       setJobsExist(count > 0);
     } catch (e) {
       // Swallow the error and just show the empty table in the analytics id selector
-      console.error('Error checking analytics jobs exist', e); // eslint-disable-line
+      console.error('Error checking analytics jobs exist', e); // eslint-disable-line no-console
     }
   };
 
   useEffect(function checkJobs() {
     checkJobsExist();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const getEmptyState = () => {

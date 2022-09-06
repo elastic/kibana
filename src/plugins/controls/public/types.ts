@@ -16,14 +16,14 @@ import {
   IEmbeddable,
 } from '@kbn/embeddable-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { DataView, DataViewField, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { DataViewField, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { ControlInput } from '../common/types';
-import { ControlsService } from './services/controls';
+import { ControlsServiceType } from './services/controls/types';
 
 export interface CommonControlOutput {
   filters?: Filter[];
-  dataViews?: DataView[];
+  dataViewId?: string;
 }
 
 export type ControlOutput = EmbeddableOutput & CommonControlOutput;
@@ -71,12 +71,12 @@ export interface DataControlFieldRegistry {
  * Plugin types
  */
 export interface ControlsPluginSetup {
-  registerControlType: ControlsService['registerControlType'];
+  registerControlType: ControlsServiceType['registerControlType'];
 }
 
 export interface ControlsPluginStart {
-  getControlFactory: ControlsService['getControlFactory'];
-  getControlTypes: ControlsService['getControlTypes'];
+  getControlFactory: ControlsServiceType['getControlFactory'];
+  getControlTypes: ControlsServiceType['getControlTypes'];
 }
 
 export interface ControlsPluginSetupDeps {

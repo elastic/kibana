@@ -22,16 +22,16 @@ import { httpHandlerMockFactory } from '../../common/mock/endpoint/http_handler_
 import type {
   ActionDetailsApiResponse,
   ActionListApiResponse,
-  HostIsolationResponse,
+  ResponseActionApiResponse,
   PendingActionsResponse,
-  ProcessesEntry,
   ActionDetails,
+  GetProcessesActionOutputContent,
 } from '../../../common/endpoint/types';
 
 export type ResponseActionsHttpMocksInterface = ResponseProvidersInterface<{
-  isolateHost: () => HostIsolationResponse;
+  isolateHost: () => ResponseActionApiResponse;
 
-  releaseHost: () => HostIsolationResponse;
+  releaseHost: () => ResponseActionApiResponse;
 
   killProcess: () => ActionDetailsApiResponse;
 
@@ -43,7 +43,7 @@ export type ResponseActionsHttpMocksInterface = ResponseProvidersInterface<{
 
   agentPendingActionsSummary: (options: HttpFetchOptionsWithPath) => PendingActionsResponse;
 
-  processes: () => ActionDetailsApiResponse<ProcessesEntry>;
+  processes: () => ActionDetailsApiResponse<GetProcessesActionOutputContent>;
 }>;
 
 export const responseActionsHttpMocks = httpHandlerMockFactory<ResponseActionsHttpMocksInterface>([
@@ -51,16 +51,16 @@ export const responseActionsHttpMocks = httpHandlerMockFactory<ResponseActionsHt
     id: 'isolateHost',
     path: ISOLATE_HOST_ROUTE,
     method: 'post',
-    handler: (): HostIsolationResponse => {
-      return { action: '1-2-3' };
+    handler: (): ResponseActionApiResponse => {
+      return { action: '1-2-3', data: { id: '1-2-3' } as ResponseActionApiResponse['data'] };
     },
   },
   {
     id: 'releaseHost',
     path: UNISOLATE_HOST_ROUTE,
     method: 'post',
-    handler: (): HostIsolationResponse => {
-      return { action: '3-2-1' };
+    handler: (): ResponseActionApiResponse => {
+      return { action: '3-2-1', data: { id: '3-2-1' } as ResponseActionApiResponse['data'] };
     },
   },
   {
@@ -134,7 +134,7 @@ export const responseActionsHttpMocks = httpHandlerMockFactory<ResponseActionsHt
     id: 'processes',
     path: GET_PROCESSES_ROUTE,
     method: 'post',
-    handler: (): ActionDetailsApiResponse<ProcessesEntry> => {
+    handler: (): ActionDetailsApiResponse<GetProcessesActionOutputContent> => {
       const generator = new EndpointActionGenerator('seed');
       const response = generator.generateActionDetails({
         outputs: {
@@ -145,7 +145,7 @@ export const responseActionsHttpMocks = httpHandlerMockFactory<ResponseActionsHt
             },
           },
         },
-      }) as ActionDetails<ProcessesEntry>;
+      }) as ActionDetails<GetProcessesActionOutputContent>;
 
       return { data: response };
     },

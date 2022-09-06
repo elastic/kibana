@@ -8,7 +8,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { LogRecord } from '@kbn/logging';
-import { set } from '@elastic/safer-lodash-set';
+import { set } from '@kbn/safer-lodash-set';
 import { has, unset } from 'lodash';
 import { assertNever } from '@kbn/std';
 import type { MetaRewritePolicyConfig } from '@kbn/core-logging-server';

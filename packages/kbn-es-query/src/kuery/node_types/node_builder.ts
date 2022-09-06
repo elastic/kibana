@@ -13,7 +13,6 @@ export const nodeBuilder = {
     return nodeTypes.function.buildNodeWithArgumentNodes('is', [
       nodeTypes.literal.buildNode(fieldName),
       typeof value === 'string' ? nodeTypes.literal.buildNode(value) : value,
-      nodeTypes.literal.buildNode(false),
     ]);
   },
   or: (nodes: KueryNode[]): KueryNode => {

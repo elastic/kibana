@@ -2183,13 +2183,7 @@
           ],
           "signature": [
             "(clusterClient: ",
-            {
-              "pluginId": "core",
-              "scope": "server",
-              "docId": "kibCorePluginApi",
-              "section": "def-server.IClusterClient",
-              "text": "IClusterClient"
-            },
+            "IClusterClient",
             ", pollingFrequency: number) => { license$: ",
             "Observable",
             "<",
@@ -2209,13 +2203,7 @@
               "label": "clusterClient",
               "description": [],
               "signature": [
-                {
-                  "pluginId": "core",
-                  "scope": "server",
-                  "docId": "kibCorePluginApi",
-                  "section": "def-server.IClusterClient",
-                  "text": "IClusterClient"
-                }
+                "IClusterClient"
               ],
               "path": "x-pack/plugins/licensing/server/types.ts",
               "deprecated": false,
