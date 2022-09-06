@@ -6,21 +6,37 @@
  */
 
 import { useMemo } from 'react';
+import { SecuritySolutionDataViewBase } from '../../../types';
 import { useSecurityContext } from '../../../hooks/use_security_context';
 
 export const useSourcererDataView = () => {
   const { sourcererDataView } = useSecurityContext();
 
-  const indexPatterns = useMemo(
-    () => [sourcererDataView.indexPattern],
-    [sourcererDataView.indexPattern]
-  );
+  const updatedPattern = useMemo(() => {
+    const displayNameField = {
+      aggregatable: true,
+      esTypes: ['keyword'],
+      name: 'threat.indicator.name',
+      searchable: true,
+      type: 'string',
+    };
+
+    const fields = [...sourcererDataView.indexPattern.fields, displayNameField];
+
+    return {
+      ...sourcererDataView.indexPattern,
+      fields,
+    } as SecuritySolutionDataViewBase;
+  }, [sourcererDataView.indexPattern]);
+
+  const indexPatterns = useMemo(() => [updatedPattern], [updatedPattern]);
 
   return useMemo(
     () => ({
       ...sourcererDataView,
       indexPatterns,
+      indexPattern: updatedPattern,
     }),
-    [indexPatterns, sourcererDataView]
+    [indexPatterns, sourcererDataView, updatedPattern]
   );
 };

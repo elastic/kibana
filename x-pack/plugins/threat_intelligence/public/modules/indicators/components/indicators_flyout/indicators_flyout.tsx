@@ -24,7 +24,6 @@ import { Indicator, RawIndicatorFieldId } from '../../../../../common/types/indi
 import { IndicatorsFlyoutJson } from '../indicators_flyout_json/indicators_flyout_json';
 import { IndicatorsFlyoutTable } from '../indicators_flyout_table/indicators_flyout_table';
 import { unwrapValue } from '../../lib/unwrap_value';
-import { getDisplayName } from '../../lib/display_name';
 
 export const TITLE_TEST_ID = 'tiIndicatorFlyoutTitle';
 export const SUBTITLE_TEST_ID = 'tiIndicatorFlyoutSubtitle';
@@ -103,8 +102,7 @@ export const IndicatorsFlyout: VFC<IndicatorsFlyoutProps> = ({
   );
 
   const firstSeen: string = unwrapValue(indicator, RawIndicatorFieldId.FirstSeen) as string;
-  const displayName = getDisplayName(indicator);
-  const displayNameValue = displayName.value || EMPTY_VALUE;
+  const displayNameValue = unwrapValue(indicator, RawIndicatorFieldId.Name) || EMPTY_VALUE;
   const flyoutTitleId = useGeneratedHtmlId({
     prefix: 'simpleFlyoutTitle',
   });
