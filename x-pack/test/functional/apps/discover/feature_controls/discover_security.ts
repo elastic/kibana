@@ -38,6 +38,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   async function setDiscoverTimeRange() {
     await PageObjects.header.waitUntilLoadingHasFinished();
+    await PageObjects.common.waitForTopNavToBeVisible();
     await PageObjects.timePicker.setDefaultAbsoluteRange();
   }
 
@@ -49,13 +50,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   describe('discover feature controls security', () => {
     before(async () => {
+      // ensure we're logged out so we can login as the appropriate users
+      await PageObjects.security.forceLogout();
+
       await kibanaServer.importExport.load(
         'x-pack/test/functional/fixtures/kbn_archiver/discover/feature_controls/security'
       );
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
-
-      // ensure we're logged out so we can login as the appropriate users
-      await PageObjects.security.forceLogout();
     });
 
     after(async () => {
