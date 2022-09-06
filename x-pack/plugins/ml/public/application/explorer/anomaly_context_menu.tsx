@@ -15,6 +15,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { SEARCH_QUERY_LANGUAGE } from '../../../common/constants/search';
 import { useCasesModal } from '../contexts/kibana/use_cases_modal';
 import { DEFAULT_MAX_SERIES_TO_PLOT } from '../services/anomaly_explorer_charts_service';
 import { ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE } from '../../embeddables';
@@ -30,6 +31,7 @@ interface AnomalyContextMenuProps {
   bounds?: TimeRangeBounds;
   interval?: number;
   chartsCount: number;
+  queryString: string;
 }
 export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
   selectedJobs,
@@ -37,6 +39,7 @@ export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
   bounds,
   interval,
   chartsCount,
+  queryString,
 }) => {
   const {
     services: {
@@ -88,6 +91,7 @@ export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
               jobIds: selectedJobs?.map((v) => v.id),
               timeRange: globalTimeRange,
               maxSeriesToPlot: DEFAULT_MAX_SERIES_TO_PLOT,
+              query: { query: queryString, language: SEARCH_QUERY_LANGUAGE.KUERY },
             })
           )}
           data-test-subj="mlAnomalyAttachChartsToCasesButton"
@@ -100,7 +104,7 @@ export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
       );
     }
     return items;
-  }, [canEditDashboards, globalTimeRange, closePopoverOnAction, selectedJobs]);
+  }, [canEditDashboards, globalTimeRange, closePopoverOnAction, selectedJobs, queryString]);
 
   const jobIds = selectedJobs.map(({ id }) => id);
 
@@ -140,6 +144,7 @@ export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
           bounds={bounds}
           interval={interval}
           jobIds={jobIds}
+          queryString={queryString}
         />
       ) : null}
     </>
