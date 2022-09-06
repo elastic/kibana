@@ -28,7 +28,7 @@ Intuitively an async task should be `await`'ed.
 ```ts
 // feature.spec.ts
 beforeEach(async () => {
-  await cy.task('waitForMe');
+  await cy.task('waitForMe', 150);
 });
 ```
 
@@ -39,7 +39,7 @@ However, the correct approach is to simply call it and let Cypress queue the tas
 ```ts
 // feature.spec.ts
 beforeEach(() => {
-  cy.task('waitForMe');
+  cy.task('waitForMe', 150);
 });
 ```
 
@@ -80,27 +80,31 @@ Some times test can stop in the middle of the execution and start running again,
 
 **WRONG**
 
-```ts
-// we check that there are not links created
-it('shows empty message and create button', () => {
-  cy.visitKibana(basePath);
-  cy.contains('No links found');
-  cy.contains('Create custom link');
-});
+The following will create a custom link during the test, and delete it after the test. This can lead to an invalid state if the test is stopped halfway through.
 
-it('creates custom link', () => {
-  cy.contains('Create custom link').click();
-  cy.get('input[name="label"]').type('foo');
-  cy.contains('Save').click();
-  cy.contains('foo');
-  // if the test stops before the delete and starts again, the previous test will fail
-  cy.contains('Delete').click();
+```ts
+describe('Custom links', () => {
+  // we check that there are not links created
+  it('shows empty message and create button', () => {
+    cy.visitKibana(basePath);
+    cy.contains('No links found');
+    cy.contains('Create custom link');
+  });
+
+  it('creates custom link', () => {
+    cy.contains('Create custom link').click();
+    cy.get('input[name="label"]').type('foo');
+    cy.contains('Save').click();
+    cy.contains('foo');
+    // if the test stops before the delete and starts again, the previous test will fail
+    cy.contains('Delete').click();
+  });
 });
 ```
 
 **CORRECT**
 
-Delete any possible data created during the test before running them, preferably calling the api
+The correct approach is to clean up data before running the tests, preferably via api calls (as opposed to clicking the ui).
 
 ```ts
 describe('Custom links', () => {
@@ -115,6 +119,20 @@ describe('Custom links', () => {
       },
       auth: { user: 'editor', pass: '****' },
     });
+  });
+
+  it('shows empty message and create button', () => {
+    cy.visitKibana(basePath);
+    cy.contains('No links found');
+    cy.contains('Create custom link');
+  });
+
+  it('creates custom link', () => {
+    cy.contains('Create custom link').click();
+    cy.get('input[name="label"]').type('foo');
+    cy.contains('Save').click();
+    cy.contains('foo');
+    cy.contains('Delete').click();
   });
 });
 ```
