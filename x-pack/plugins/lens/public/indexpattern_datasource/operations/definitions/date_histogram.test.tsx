@@ -60,6 +60,8 @@ const indexPattern1: IndexPattern = {
       searchable: true,
     },
   ]),
+  isPersisted: true,
+  spec: {},
 };
 
 const indexPattern2: IndexPattern = {
@@ -86,6 +88,8 @@ const indexPattern2: IndexPattern = {
       searchable: true,
     },
   ]),
+  isPersisted: true,
+  spec: {},
 };
 
 const uiSettingsMock = {} as IUiSettingsClient;
