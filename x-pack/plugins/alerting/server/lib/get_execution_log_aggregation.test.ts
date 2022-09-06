@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { fromKueryExpression } from '@kbn/es-query';
 import {
   getNumExecutions,
   getExecutionLogAggregation,
@@ -216,6 +217,414 @@ describe('getExecutionLogAggregation', () => {
               ruleExecution: {
                 filter: {
                   bool: {
+                    must: [
+                      {
+                        bool: {
+                          must: [
+                            { match: { 'event.action': 'execute' } },
+                            { match: { 'event.provider': 'alerting' } },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+                aggs: {
+                  executeStartTime: { min: { field: 'event.start' } },
+                  scheduleDelay: {
+                    max: {
+                      field: 'kibana.task.schedule_delay',
+                    },
+                  },
+                  totalSearchDuration: {
+                    max: { field: 'kibana.alert.rule.execution.metrics.total_search_duration_ms' },
+                  },
+                  esSearchDuration: {
+                    max: { field: 'kibana.alert.rule.execution.metrics.es_search_duration_ms' },
+                  },
+                  numTriggeredActions: {
+                    max: {
+                      field: 'kibana.alert.rule.execution.metrics.number_of_triggered_actions',
+                    },
+                  },
+                  numGeneratedActions: {
+                    max: {
+                      field: 'kibana.alert.rule.execution.metrics.number_of_generated_actions',
+                    },
+                  },
+                  numActiveAlerts: {
+                    max: {
+                      field: 'kibana.alert.rule.execution.metrics.alert_counts.active',
+                    },
+                  },
+                  numRecoveredAlerts: {
+                    max: {
+                      field: 'kibana.alert.rule.execution.metrics.alert_counts.recovered',
+                    },
+                  },
+                  numNewAlerts: {
+                    max: {
+                      field: 'kibana.alert.rule.execution.metrics.alert_counts.new',
+                    },
+                  },
+                  executionDuration: { max: { field: 'event.duration' } },
+                  outcomeAndMessage: {
+                    top_hits: {
+                      size: 1,
+                      _source: {
+                        includes: [
+                          'event.outcome',
+                          'message',
+                          'error.message',
+                          'kibana.version',
+                          'rule.id',
+                        ],
+                      },
+                    },
+                  },
+                },
+              },
+              timeoutMessage: {
+                filter: {
+                  bool: {
+                    must: [
+                      { match: { 'event.action': 'execute-timeout' } },
+                      { match: { 'event.provider': 'alerting' } },
+                    ],
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+  });
+
+  test('should correctly generate aggregation with a defined filter in the form of a string', () => {
+    expect(
+      getExecutionLogAggregation({
+        page: 2,
+        perPage: 10,
+        sort: [{ timestamp: { order: 'asc' } }, { execution_duration: { order: 'desc' } }],
+        filter: 'test:test',
+      })
+    ).toEqual({
+      excludeExecuteStart: {
+        filter: {
+          bool: {
+            must_not: [
+              {
+                term: {
+                  'event.action': 'execute-start',
+                },
+              },
+            ],
+          },
+        },
+        aggs: {
+          executionUuidCardinality: {
+            aggs: {
+              executionUuidCardinality: {
+                cardinality: { field: 'kibana.alert.rule.execution.uuid' },
+              },
+            },
+            filter: {
+              bool: {
+                filter: {
+                  bool: {
+                    minimum_should_match: 1,
+                    should: [
+                      {
+                        match: {
+                          test: 'test',
+                        },
+                      },
+                    ],
+                  },
+                },
+                must: [
+                  {
+                    bool: {
+                      must: [
+                        {
+                          match: {
+                            'event.action': 'execute',
+                          },
+                        },
+                        {
+                          match: {
+                            'event.provider': 'alerting',
+                          },
+                        },
+                      ],
+                    },
+                  },
+                ],
+              },
+            },
+          },
+          executionUuid: {
+            terms: {
+              field: 'kibana.alert.rule.execution.uuid',
+              size: 1000,
+              order: [
+                { 'ruleExecution>executeStartTime': 'asc' },
+                { 'ruleExecution>executionDuration': 'desc' },
+              ],
+            },
+            aggs: {
+              executionUuidSorted: {
+                bucket_sort: {
+                  sort: [
+                    { 'ruleExecution>executeStartTime': { order: 'asc' } },
+                    { 'ruleExecution>executionDuration': { order: 'desc' } },
+                  ],
+                  from: 10,
+                  size: 10,
+                  gap_policy: 'insert_zeros',
+                },
+              },
+              actionExecution: {
+                filter: {
+                  bool: {
+                    must: [
+                      { match: { 'event.action': 'execute' } },
+                      { match: { 'event.provider': 'actions' } },
+                    ],
+                  },
+                },
+                aggs: { actionOutcomes: { terms: { field: 'event.outcome', size: 2 } } },
+              },
+              minExecutionUuidBucket: {
+                bucket_selector: {
+                  buckets_path: {
+                    count: 'ruleExecution._count',
+                  },
+                  script: {
+                    source: 'params.count > 0',
+                  },
+                },
+              },
+              ruleExecution: {
+                filter: {
+                  bool: {
+                    filter: {
+                      bool: {
+                        minimum_should_match: 1,
+                        should: [
+                          {
+                            match: {
+                              test: 'test',
+                            },
+                          },
+                        ],
+                      },
+                    },
+                    must: [
+                      {
+                        bool: {
+                          must: [
+                            { match: { 'event.action': 'execute' } },
+                            { match: { 'event.provider': 'alerting' } },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+                aggs: {
+                  executeStartTime: { min: { field: 'event.start' } },
+                  scheduleDelay: {
+                    max: {
+                      field: 'kibana.task.schedule_delay',
+                    },
+                  },
+                  totalSearchDuration: {
+                    max: { field: 'kibana.alert.rule.execution.metrics.total_search_duration_ms' },
+                  },
+                  esSearchDuration: {
+                    max: { field: 'kibana.alert.rule.execution.metrics.es_search_duration_ms' },
+                  },
+                  numTriggeredActions: {
+                    max: {
+                      field: 'kibana.alert.rule.execution.metrics.number_of_triggered_actions',
+                    },
+                  },
+                  numGeneratedActions: {
+                    max: {
+                      field: 'kibana.alert.rule.execution.metrics.number_of_generated_actions',
+                    },
+                  },
+                  numActiveAlerts: {
+                    max: {
+                      field: 'kibana.alert.rule.execution.metrics.alert_counts.active',
+                    },
+                  },
+                  numRecoveredAlerts: {
+                    max: {
+                      field: 'kibana.alert.rule.execution.metrics.alert_counts.recovered',
+                    },
+                  },
+                  numNewAlerts: {
+                    max: {
+                      field: 'kibana.alert.rule.execution.metrics.alert_counts.new',
+                    },
+                  },
+                  executionDuration: { max: { field: 'event.duration' } },
+                  outcomeAndMessage: {
+                    top_hits: {
+                      size: 1,
+                      _source: {
+                        includes: [
+                          'event.outcome',
+                          'message',
+                          'error.message',
+                          'kibana.version',
+                          'rule.id',
+                        ],
+                      },
+                    },
+                  },
+                },
+              },
+              timeoutMessage: {
+                filter: {
+                  bool: {
+                    must: [
+                      { match: { 'event.action': 'execute-timeout' } },
+                      { match: { 'event.provider': 'alerting' } },
+                    ],
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+  });
+
+  test('should correctly generate aggregation with a defined filter in the form of a KueryNode', () => {
+    expect(
+      getExecutionLogAggregation({
+        page: 2,
+        perPage: 10,
+        sort: [{ timestamp: { order: 'asc' } }, { execution_duration: { order: 'desc' } }],
+        filter: fromKueryExpression('test:test'),
+      })
+    ).toEqual({
+      excludeExecuteStart: {
+        filter: {
+          bool: {
+            must_not: [
+              {
+                term: {
+                  'event.action': 'execute-start',
+                },
+              },
+            ],
+          },
+        },
+        aggs: {
+          executionUuidCardinality: {
+            aggs: {
+              executionUuidCardinality: {
+                cardinality: { field: 'kibana.alert.rule.execution.uuid' },
+              },
+            },
+            filter: {
+              bool: {
+                filter: {
+                  bool: {
+                    minimum_should_match: 1,
+                    should: [
+                      {
+                        match: {
+                          test: 'test',
+                        },
+                      },
+                    ],
+                  },
+                },
+                must: [
+                  {
+                    bool: {
+                      must: [
+                        {
+                          match: {
+                            'event.action': 'execute',
+                          },
+                        },
+                        {
+                          match: {
+                            'event.provider': 'alerting',
+                          },
+                        },
+                      ],
+                    },
+                  },
+                ],
+              },
+            },
+          },
+          executionUuid: {
+            terms: {
+              field: 'kibana.alert.rule.execution.uuid',
+              size: 1000,
+              order: [
+                { 'ruleExecution>executeStartTime': 'asc' },
+                { 'ruleExecution>executionDuration': 'desc' },
+              ],
+            },
+            aggs: {
+              executionUuidSorted: {
+                bucket_sort: {
+                  sort: [
+                    { 'ruleExecution>executeStartTime': { order: 'asc' } },
+                    { 'ruleExecution>executionDuration': { order: 'desc' } },
+                  ],
+                  from: 10,
+                  size: 10,
+                  gap_policy: 'insert_zeros',
+                },
+              },
+              actionExecution: {
+                filter: {
+                  bool: {
+                    must: [
+                      { match: { 'event.action': 'execute' } },
+                      { match: { 'event.provider': 'actions' } },
+                    ],
+                  },
+                },
+                aggs: { actionOutcomes: { terms: { field: 'event.outcome', size: 2 } } },
+              },
+              minExecutionUuidBucket: {
+                bucket_selector: {
+                  buckets_path: {
+                    count: 'ruleExecution._count',
+                  },
+                  script: {
+                    source: 'params.count > 0',
+                  },
+                },
+              },
+              ruleExecution: {
+                filter: {
+                  bool: {
+                    filter: {
+                      bool: {
+                        minimum_should_match: 1,
+                        should: [
+                          {
+                            match: {
+                              test: 'test',
+                            },
+                          },
+                        ],
+                      },
+                    },
                     must: [
                       {
                         bool: {
