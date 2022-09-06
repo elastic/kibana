@@ -119,15 +119,11 @@ export async function loadIndexPatternRefs(
 
   // add data view from context
   if (contextDataViewSpec) {
-    const existedDataView = indexPatterns.find(
+    const existingDataView = indexPatterns.find(
       (indexPattern) => indexPattern.id === contextDataViewSpec.id
     );
-    if (!existedDataView) {
-      missedIndexPatterns.push({
-        id: contextDataViewSpec.id!,
-        name: contextDataViewSpec.name,
-        title: contextDataViewSpec.title!,
-      });
+    if (!existingDataView) {
+      missedIndexPatterns.push(contextDataViewSpec);
     }
   }
 
@@ -276,7 +272,7 @@ async function refreshExistingFields({
           body.timeFieldName = pattern.timeFieldName;
         }
 
-        if (pattern.spec) {
+        if (!pattern.isPersisted) {
           body.spec = pattern.spec;
         }
 
