@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { coreMock } from '@kbn/core/server/mocks';
+import {coreMock, loggingSystemMock} from '@kbn/core/server/mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 
 import { ConfigSchema } from './config';
 import { EncryptedSavedObjectsPlugin } from './plugin';
 
 describe('EncryptedSavedObjects Plugin', () => {
+
   describe('setup()', () => {
     it('exposes proper contract', () => {
       const plugin = new EncryptedSavedObjectsPlugin(
@@ -28,11 +29,12 @@ describe('EncryptedSavedObjects Plugin', () => {
     });
 
     it('exposes proper contract when encryption key is set', () => {
-      const plugin = new EncryptedSavedObjectsPlugin(
-        coreMock.createPluginInitializerContext(
-          ConfigSchema.validate({ encryptionKey: 'z'.repeat(32) }, { dist: true })
-        )
-      );
+      const mockInitializerContext = coreMock.createPluginInitializerContext(
+        ConfigSchema.validate({encryptionKey: 'z'.repeat(32)}, {dist: true})
+      )
+
+      const plugin = new EncryptedSavedObjectsPlugin(mockInitializerContext);
+
       expect(plugin.setup(coreMock.createSetup(), { security: securityMock.createSetup() }))
         .toMatchInlineSnapshot(`
         Object {
@@ -42,9 +44,11 @@ describe('EncryptedSavedObjects Plugin', () => {
         }
       `);
 
-      expect(plugin.logger.info).toHaveBeenCalledTimes(1);
-      expect(plugin.logger.info).toHaveBeenCalledWith(
-        `Hashed 'encryptionKey' for this instance: WLbjNGKEm7aA4NfJHYyW88jHUkHtyF7ENHcF0obYGBU=`
+      const infoLogs = loggingSystemMock.collect(mockInitializerContext.logger).info
+
+      expect(infoLogs.length).toBe(1);
+      expect(infoLogs[0]).toEqual(
+        [`Hashed 'encryptionKey' for this instance: WLbjNGKEm7aA4NfJHYyW88jHUkHtyF7ENHcF0obYGBU=`]
       );
     });
   });
