@@ -19,6 +19,7 @@ import { addIntegration, closeModalIfVisible } from '../../tasks/integrations';
 import { DEFAULT_POLICY } from '../../screens/fleet';
 import { getSavedQueriesDropdown } from '../../screens/live_query';
 import { ROLES } from '../../test';
+import { getRandomInt } from '../../tasks/helpers';
 
 describe('ALL - Packs', () => {
   const integration = 'Osquery Manager';
@@ -251,7 +252,8 @@ describe('ALL - Packs', () => {
     beforeEach(() => {
       login();
     });
-    const AGENT_NAME = 'PackTest2';
+    const randomNumber = getRandomInt();
+    const AGENT_NAME = `PackTest${randomNumber}`;
     const REMOVING_PACK = 'removing-pack';
     it('add integration', () => {
       cy.visit(FLEET_AGENT_POLICIES);
@@ -272,7 +274,7 @@ describe('ALL - Packs', () => {
       findAndClickButton('Save pack');
 
       cy.getBySel('toastCloseButton').click();
-      cy.contains(REMOVING_PACK).click();
+      cy.react('ScheduledQueryNameComponent', { props: { name: REMOVING_PACK } }).click();
       cy.contains(`${REMOVING_PACK} details`).should('exist');
       findAndClickButton('Edit');
       cy.react('EuiComboBoxInput', { props: { value: AGENT_NAME } }).should('exist');

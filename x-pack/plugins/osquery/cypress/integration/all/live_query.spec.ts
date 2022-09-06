@@ -105,7 +105,7 @@ describe('ALL - Live Query', () => {
     selectAllAgents();
     cy.react('SavedQueriesDropdown').type('NOMAPPING{downArrow}{enter}');
     // cy.getReact('SavedQueriesDropdown').getCurrentState().should('have.length', 1); // TODO do we need it?
-    inputQuery('{selectall}{backspace}{selectall}{backspace}select * from users');
+    inputQuery('{selectall}{backspace}select * from users;');
     cy.wait(1000);
     submitQuery();
     checkResults();
@@ -115,15 +115,14 @@ describe('ALL - Live Query', () => {
       .should('be.visible')
       .click();
 
-    cy.react('ReactAce', { props: { value: 'select * from users' } }).should('exist');
+    cy.react('ReactAce', { props: { value: 'select * from users;' } }).should('exist');
   });
 
   it('should run live pack', () => {
     cy.contains('New live query').click();
     cy.contains('Run a set of queries in a pack.').click();
     cy.get(LIVE_QUERY_EDITOR).should('not.exist');
-    cy.getBySel('select-live-pack').click();
-    cy.contains('Example').click();
+    cy.getBySel('select-live-pack').click().type('Example{downArrow}{enter}');
     cy.contains('This table contains 3 rows.');
     cy.contains('system_memory_linux_elastic');
     cy.contains('system_info_elastic');
