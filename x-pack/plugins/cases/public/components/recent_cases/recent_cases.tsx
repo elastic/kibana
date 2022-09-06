@@ -26,7 +26,8 @@ const MarkdownContainer = styled.div`
 `;
 
 export interface RecentCasesProps {
-  filterOptions: Partial<FilterOptions>;
+  // TODO: bring reportedBy back
+  filterOptions: Partial<FilterOptions & { reportedBy: string[] }>;
   maxCasesToShow: number;
 }
 

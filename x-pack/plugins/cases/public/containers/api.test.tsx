@@ -13,7 +13,6 @@ import { ConnectorTypes, CommentType, CaseStatuses, CaseSeverity } from '../../c
 import {
   CASES_URL,
   INTERNAL_BULK_CREATE_ATTACHMENTS_URL,
-  INTERNAL_FIND_ASSIGNEES_URL,
   SECURITY_SOLUTION_OWNER,
 } from '../../common/constants';
 
@@ -34,7 +33,6 @@ import {
   resolveCase,
   getFeatureIds,
   postComment,
-  findAssignees,
 } from './api';
 
 import {
@@ -61,7 +59,6 @@ import {
 
 import { DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS } from './use_get_cases';
 import { getCasesStatus } from '../api';
-import { userProfiles } from './user_profiles/api.mock';
 
 const abortCtrl = new AbortController();
 const mockKibanaServices = KibanaServices.get as jest.Mock;
@@ -375,40 +372,6 @@ describe('Cases API', () => {
       fetchMock.mockResolvedValue(caseUserActionsWithRegisteredAttachmentsSnake);
       const resp = await getCaseUserActions(basicCase.id, abortCtrl.signal);
       expect(resp).toEqual(caseUserActionsWithRegisteredAttachments);
-    });
-  });
-
-  describe('findAssignees', () => {
-    beforeEach(() => {
-      fetchMock.mockClear();
-      fetchMock.mockResolvedValue(userProfiles);
-    });
-
-    test('should be called with correct check url, method, signal', async () => {
-      await findAssignees({
-        signal: abortCtrl.signal,
-        owners: [SECURITY_SOLUTION_OWNER],
-        searchTerm: 'user',
-        size: 1,
-      });
-      expect(fetchMock).toHaveBeenCalledWith(INTERNAL_FIND_ASSIGNEES_URL, {
-        method: 'GET',
-        signal: abortCtrl.signal,
-        query: {
-          searchTerm: 'user',
-          size: 1,
-          owners: JSON.stringify([SECURITY_SOLUTION_OWNER]),
-        },
-      });
-    });
-
-    test('should return correct response', async () => {
-      const resp = await findAssignees({
-        signal: abortCtrl.signal,
-        owners: [SECURITY_SOLUTION_OWNER],
-        searchTerm: 'user',
-      });
-      expect(resp).toEqual(userProfiles);
     });
   });
 

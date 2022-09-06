@@ -15,7 +15,7 @@ export const getSortField = (profile: UserProfileWithAvatar) =>
   profile.user.username.toLowerCase();
 
 export const moveCurrentUserToBeginning = <T extends { uid: string }>(
-  currentUserProfile?: T | null,
+  currentUserProfile?: T,
   profiles?: T[]
 ) => {
   if (!profiles) {
@@ -41,10 +41,10 @@ export const moveCurrentUserToBeginning = <T extends { uid: string }>(
 
 export const bringCurrentUserToFrontAndSort = (
   currentUserProfile: CurrentUserProfile,
-  profiles?: UserProfileWithAvatar[] | null
+  profiles?: UserProfileWithAvatar[]
 ) => moveCurrentUserToBeginning(currentUserProfile, sortProfiles(profiles));
 
-export const sortProfiles = (profiles?: UserProfileWithAvatar[] | null) => {
+export const sortProfiles = (profiles?: UserProfileWithAvatar[]) => {
   if (!profiles) {
     return;
   }

@@ -55,7 +55,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
       cases: [observabilityFeatureId],
       privileges: {
         all: {
-          api: ['casesSuggestUserProfiles', 'casesFindAssignedUsers', 'bulkGetUserProfiles'],
+          api: ['casesSuggestUserProfiles', 'bulkGetUserProfiles'],
           app: [casesFeatureId, 'kibana'],
           catalogue: [observabilityFeatureId],
           cases: {
@@ -71,7 +71,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
           ui: casesCapabilities.all,
         },
         read: {
-          api: ['bulkGetUserProfiles', 'casesFindAssignedUsers'],
+          api: ['bulkGetUserProfiles'],
           app: [casesFeatureId, 'kibana'],
           catalogue: [observabilityFeatureId],
           cases: {

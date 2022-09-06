@@ -9,13 +9,13 @@ import React from 'react';
 
 const SelectedStatusMessageComponent: React.FC<{
   selectedCount: number;
-  createMessage: (total: number) => string;
-}> = ({ selectedCount, createMessage }) => {
+  message: string;
+}> = ({ selectedCount, message }) => {
   if (selectedCount <= 0) {
     return null;
   }
 
-  return <>{createMessage(selectedCount)}</>;
+  return <>{message}</>;
 };
 SelectedStatusMessageComponent.displayName = 'SelectedStatusMessage';
 

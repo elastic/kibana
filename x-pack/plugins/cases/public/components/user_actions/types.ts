@@ -43,7 +43,7 @@ export type SupportedUserActionTypes = keyof Omit<typeof ActionTypes, Unsupporte
 export interface UserActionBuilderArgs {
   caseData: Case;
   userProfiles: Map<string, UserProfileWithAvatar>;
-  currentUserProfile?: CurrentUserProfile;
+  currentUserProfile: CurrentUserProfile;
   externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
   persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
   userAction: CaseUserActions;

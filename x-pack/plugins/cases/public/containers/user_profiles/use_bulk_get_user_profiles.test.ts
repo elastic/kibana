@@ -36,23 +36,6 @@ describe('useBulkGetUserProfiles', () => {
     });
   });
 
-  it('does not call bulkGetUserProfiles when security is undefined', async () => {
-    useKibanaMock.mockReturnValue({
-      services: { ...createStartServicesMock(), security: undefined },
-    });
-
-    const spyOnBulkGetUserProfiles = jest.spyOn(api, 'bulkGetUserProfiles');
-
-    const { result, waitFor } = renderHook(() => useBulkGetUserProfiles(props), {
-      wrapper: appMockRender.AppWrapper,
-    });
-
-    await waitFor(() => result.current.isSuccess);
-
-    expect(spyOnBulkGetUserProfiles).not.toBeCalled();
-    expect(result.current.data?.size).toBe(0);
-  });
-
   it('calls bulkGetUserProfiles with correct arguments', async () => {
     const spyOnBulkGetUserProfiles = jest.spyOn(api, 'bulkGetUserProfiles');
 

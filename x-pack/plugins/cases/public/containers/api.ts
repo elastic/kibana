@@ -7,7 +7,6 @@
 
 import type { ValidFeatureId } from '@kbn/rule-data-utils';
 import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common/constants';
-import { UserProfile } from '@kbn/user-profile-components';
 import {
   Cases,
   FetchCasesProps,
@@ -41,7 +40,6 @@ import {
   CASE_TAGS_URL,
   CASES_URL,
   INTERNAL_BULK_CREATE_ATTACHMENTS_URL,
-  INTERNAL_FIND_ASSIGNEES_URL,
 } from '../../common/constants';
 import { getAllConnectorTypesUrl } from '../../common/utils/connectors_api';
 
@@ -123,23 +121,6 @@ export interface FindAssigneesProps {
   size?: number;
   signal: AbortSignal;
 }
-
-export const findAssignees = async ({
-  searchTerm,
-  owners,
-  size,
-  signal,
-}: FindAssigneesProps): Promise<UserProfile[]> => {
-  const response = await KibanaServices.get().http.fetch<UserProfile[]>(
-    INTERNAL_FIND_ASSIGNEES_URL,
-    {
-      method: 'GET',
-      signal,
-      query: { owners: JSON.stringify(owners), searchTerm, size },
-    }
-  );
-  return response ?? [];
-};
 
 export const getReporters = async (signal: AbortSignal, owner: string[]): Promise<User[]> => {
   const response = await KibanaServices.get().http.fetch<User[]>(CASE_REPORTERS_URL, {

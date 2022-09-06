@@ -18,13 +18,9 @@ export const useGetCurrentUserProfile = () => {
 
   const toasts = useToasts();
 
-  return useQuery<UserProfile | null, ServerError>(
+  return useQuery<UserProfile, ServerError>(
     [USER_PROFILES_CACHE_KEY, USER_PROFILES_GET_CURRENT_CACHE_KEY],
     () => {
-      if (!security) {
-        return null;
-      }
-
       return getCurrentUserProfile({ security });
     },
     {
@@ -45,4 +41,4 @@ export const useGetCurrentUserProfile = () => {
   );
 };
 
-export type UseGetCurrentUserProfile = UseQueryResult<UserProfile | null, ServerError>;
+export type UseGetCurrentUserProfile = UseQueryResult<UserProfile, ServerError>;

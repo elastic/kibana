@@ -15,16 +15,9 @@ import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/s
 import type { UserProfile } from '@kbn/security-plugin/common';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 
-import { isEmpty } from 'lodash';
-import {
-  excess,
-  FindAssigneesRequestRt,
-  SuggestUserProfilesRequestRt,
-  throwErrors,
-} from '../../../common/api';
+import { excess, SuggestUserProfilesRequestRt, throwErrors } from '../../../common/api';
 import { Operations } from '../../authorization';
 import { createCaseError } from '../../common/error';
-import { CasesClient } from '../../client';
 
 const MAX_PROFILES_SIZE = 100;
 const MIN_PROFILES_SIZE = 0;
@@ -46,75 +39,6 @@ export class UserProfileService {
     }
 
     this.options = options;
-  }
-
-  public async findAssignees(
-    request: KibanaRequest,
-    casesClient: CasesClient
-  ): Promise<UserProfile[]> {
-    const params = pipe(
-      excess(FindAssigneesRequestRt).decode(request.query),
-      fold(throwErrors(Boom.badRequest), identity)
-    );
-
-    const { searchTerm, size, owners } = params;
-
-    try {
-      if (this.options === undefined) {
-        throw new Error('UserProfileService must be initialized before calling suggest');
-      }
-
-      const { spaces } = this.options;
-
-      const securityPluginFields = {
-        securityPluginSetup: this.options.securityPluginSetup,
-        securityPluginStart: this.options.securityPluginStart,
-      };
-
-      UserProfileService.validateSizeParam(size);
-
-      if (!UserProfileService.isSecurityEnabled(securityPluginFields) || owners.length <= 0) {
-        return [];
-      }
-
-      const assigneesWithinAllCases = new Set(
-        await casesClient.cases.getAssignees({ owner: owners })
-      );
-
-      const { securityPluginStart } = securityPluginFields;
-
-      // if we didn't receive a search term just return all the assignees within cases
-      if (isEmpty(searchTerm)) {
-        const assignedUserProfiles = await securityPluginStart.userProfiles.bulkGet({
-          uids: assigneesWithinAllCases,
-          dataPath: 'avatar',
-        });
-
-        return assignedUserProfiles.slice(0, size ?? MAX_PROFILES_SIZE);
-      }
-
-      const suggestedUsers = await UserProfileService.suggestUsers({
-        securityPluginStart,
-        spaceId: spaces.spacesService.getSpaceId(request),
-        owners,
-        searchTerm,
-        size,
-      });
-
-      return suggestedUsers.reduce<UserProfile[]>((acc, suggestedUser) => {
-        if (assigneesWithinAllCases.has(suggestedUser.uid)) {
-          acc.push(suggestedUser);
-        }
-
-        return acc;
-      }, []);
-    } catch (error) {
-      throw createCaseError({
-        logger: this.logger,
-        message: `Failed to retrieve assignee user profiles in service for name: ${searchTerm} owners: [${owners}]: ${error}`,
-        error,
-      });
-    }
   }
 
   private static suggestUsers({

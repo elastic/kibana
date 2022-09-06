@@ -57,16 +57,6 @@ describe('User profiles API', () => {
       security.userProfiles.bulkGet = jest.fn().mockResolvedValue(userProfiles);
     });
 
-    it('returns an empty array when userProfiles is undefined', async () => {
-      security.userProfiles = undefined as unknown as SecurityPluginStart['userProfiles'];
-      const res = await bulkGetUserProfiles({
-        security,
-        uids: userProfilesIds,
-      });
-
-      expect(res).toEqual([]);
-    });
-
     it('returns the user profiles correctly', async () => {
       const res = await bulkGetUserProfiles({
         security,
@@ -102,16 +92,6 @@ describe('User profiles API', () => {
       jest.clearAllMocks();
       security = securityMock.createStart();
       security.userProfiles.getCurrent = jest.fn().mockResolvedValue(currentProfile);
-    });
-
-    it('returns null when userProfiles is undefined', async () => {
-      security.userProfiles = undefined as unknown as SecurityPluginStart['userProfiles'];
-
-      const res = await getCurrentUserProfile({
-        security,
-      });
-
-      expect(res).toBeNull();
     });
 
     it('returns the current user profile correctly', async () => {

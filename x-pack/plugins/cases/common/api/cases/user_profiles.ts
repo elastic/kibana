@@ -7,18 +7,6 @@
 
 import * as rt from 'io-ts';
 
-export const FindAssigneesRequestRt = rt.intersection([
-  rt.type({
-    searchTerm: rt.string,
-    owners: rt.array(rt.string),
-  }),
-  rt.partial({
-    size: rt.number,
-  }),
-]);
-
-export type FindAssigneesRequest = rt.TypeOf<typeof FindAssigneesRequestRt>;
-
 export const SuggestUserProfilesRequestRt = rt.intersection([
   rt.type({
     name: rt.string,

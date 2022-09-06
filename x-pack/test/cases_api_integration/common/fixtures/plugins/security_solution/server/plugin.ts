@@ -39,7 +39,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
       cases: ['securitySolutionFixture'],
       privileges: {
         all: {
-          api: ['casesSuggestUserProfiles', 'casesFindAssignedUsers', 'bulkGetUserProfiles'],
+          api: ['casesSuggestUserProfiles', 'bulkGetUserProfiles'],
           app: ['kibana'],
           cases: {
             create: ['securitySolutionFixture'],
@@ -54,7 +54,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
           ui: [],
         },
         read: {
-          api: ['bulkGetUserProfiles', 'casesFindAssignedUsers'],
+          api: ['bulkGetUserProfiles'],
           app: ['kibana'],
           cases: {
             read: ['securitySolutionFixture'],

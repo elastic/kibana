@@ -46,7 +46,7 @@ export const bulkGetUserProfiles = async ({
     return [];
   }
 
-  return security.userProfiles?.bulkGet?.({ uids: new Set(uids), dataPath: 'avatar' }) ?? [];
+  return security.userProfiles.bulkGet({ uids: new Set(uids), dataPath: 'avatar' });
 };
 
 export interface GetCurrentUserProfileArgs {
@@ -55,6 +55,6 @@ export interface GetCurrentUserProfileArgs {
 
 export const getCurrentUserProfile = async ({
   security,
-}: GetCurrentUserProfileArgs): Promise<UserProfile | null> => {
-  return security.userProfiles?.getCurrent?.({ dataPath: 'avatar' }) ?? null;
+}: GetCurrentUserProfileArgs): Promise<UserProfile> => {
+  return security.userProfiles.getCurrent({ dataPath: 'avatar' });
 };

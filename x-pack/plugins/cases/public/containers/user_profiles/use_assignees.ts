@@ -6,12 +6,16 @@
  */
 
 import { UserProfileWithAvatar } from '@kbn/user-profile-components';
-import { sortBy } from 'lodash';
 import { useMemo } from 'react';
 import { CaseAssignees } from '../../../common/api';
 import { CurrentUserProfile } from '../../components/types';
-import { getSortField, moveCurrentUserToBeginning } from '../../components/user_profiles/sort';
+import { bringCurrentUserToFrontAndSort } from '../../components/user_profiles/sort';
 import { Assignee, AssigneeWithProfile } from '../../components/user_profiles/types';
+
+interface PartitionedAssignees {
+  usersWithProfiles: UserProfileWithAvatar[];
+  usersWithoutProfiles: Assignee[];
+}
 
 export const useAssignees = ({
   caseAssignees,
@@ -21,43 +25,35 @@ export const useAssignees = ({
   caseAssignees: CaseAssignees;
   userProfiles: Map<string, UserProfileWithAvatar>;
   currentUserProfile: CurrentUserProfile;
-}) => {
-  const currentUserAsAssignee = getCurrentUserProfileAsAssignee(currentUserProfile);
-
-  const assigneesWithProfiles = useMemo(() => {
-    const sortedUserProfiles = sortProfiles(
-      caseAssignees.reduce<AssigneeWithProfile[]>((acc, assignee) => {
+}): {
+  assigneesWithProfiles: AssigneeWithProfile[];
+  assigneesWithoutProfiles: Assignee[];
+  allAssignees: Assignee[];
+} => {
+  const { assigneesWithProfiles, assigneesWithoutProfiles } = useMemo(() => {
+    const { usersWithProfiles, usersWithoutProfiles } = caseAssignees.reduce<PartitionedAssignees>(
+      (acc, assignee) => {
         const profile = userProfiles.get(assignee.uid);
 
         if (profile) {
-          acc.push({ uid: assignee.uid, profile });
+          acc.usersWithProfiles.push(profile);
+        } else {
+          acc.usersWithoutProfiles.push({ uid: assignee.uid });
         }
 
         return acc;
-      }, [])
+      },
+      { usersWithProfiles: [], usersWithoutProfiles: [] }
     );
 
-    const result = moveCurrentUserToBeginning<AssigneeWithProfile>(
-      currentUserAsAssignee,
-      sortedUserProfiles
-    );
+    const orderedProf = bringCurrentUserToFrontAndSort(currentUserProfile, usersWithProfiles);
 
-    return result ?? [];
-  }, [caseAssignees, currentUserAsAssignee, userProfiles]);
-
-  const assigneesWithoutProfiles = useMemo(
-    () =>
-      caseAssignees.reduce<Assignee[]>((acc, assignee) => {
-        const profile = userProfiles.get(assignee.uid);
-
-        if (!profile) {
-          acc.push({ uid: assignee.uid });
-        }
-
-        return acc;
-      }, []),
-    [caseAssignees, userProfiles]
-  );
+    const assigneesWithProfile2 = orderedProf?.map((profile) => ({ uid: profile.uid, profile }));
+    return {
+      assigneesWithProfiles: assigneesWithProfile2 ?? [],
+      assigneesWithoutProfiles: usersWithoutProfiles,
+    };
+  }, [caseAssignees, currentUserProfile, userProfiles]);
 
   const allAssignees = useMemo(
     () => [...assigneesWithProfiles, ...assigneesWithoutProfiles],
@@ -69,13 +65,4 @@ export const useAssignees = ({
     assigneesWithoutProfiles,
     allAssignees,
   };
-};
-
-const getCurrentUserProfileAsAssignee = (currentUserProfile: CurrentUserProfile) =>
-  currentUserProfile != null
-    ? { uid: currentUserProfile.uid, profile: currentUserProfile }
-    : undefined;
-
-const sortProfiles = (assignees: AssigneeWithProfile[]) => {
-  return sortBy(assignees, (assignee) => getSortField(assignee.profile));
 };

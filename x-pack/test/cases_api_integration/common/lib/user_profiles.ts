@@ -8,11 +8,8 @@
 import type SuperTest from 'supertest';
 
 import { UserProfileBulkGetParams, UserProfileServiceStart } from '@kbn/security-plugin/server';
-import {
-  INTERNAL_FIND_ASSIGNEES_URL,
-  INTERNAL_SUGGEST_USER_PROFILES_URL,
-} from '@kbn/cases-plugin/common/constants';
-import { FindAssigneesRequest, SuggestUserProfilesRequest } from '@kbn/cases-plugin/common/api';
+import { INTERNAL_SUGGEST_USER_PROFILES_URL } from '@kbn/cases-plugin/common/constants';
+import { SuggestUserProfilesRequest } from '@kbn/cases-plugin/common/api';
 import { UserProfileService } from '@kbn/cases-plugin/server/services';
 import { superUser } from './authentication/users';
 import { User } from './authentication/types';
@@ -84,25 +81,4 @@ export const loginUsers = async ({
       })
       .expect(200);
   }
-};
-
-export const findAssignees = async ({
-  supertest,
-  req,
-  expectedHttpCode = 200,
-  auth = { user: superUser, space: null },
-}: {
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
-  req: FindAssigneesRequest;
-  expectedHttpCode?: number;
-  auth?: { user: User; space: string | null };
-}): ReturnType<UserProfileService['findAssignees']> => {
-  const { body: profiles } = await supertest
-    .get(`${getSpaceUrlPrefix(auth.space)}${INTERNAL_FIND_ASSIGNEES_URL}`)
-    .auth(auth.user.username, auth.user.password)
-    .set('kbn-xsrf', 'true')
-    .query({ ...req, owners: JSON.stringify(req.owners) })
-    .expect(expectedHttpCode);
-
-  return profiles;
 };

@@ -31,22 +31,6 @@ describe('useGetCurrentUserProfile', () => {
     });
   });
 
-  it('does not call getCurrentUserProfile when security is undefined', async () => {
-    useKibanaMock.mockReturnValue({
-      services: { ...createStartServicesMock(), security: undefined },
-    });
-
-    const spyOnGetCurrentUserProfile = jest.spyOn(api, 'getCurrentUserProfile');
-
-    const { result, waitFor } = renderHook(() => useGetCurrentUserProfile(), {
-      wrapper: appMockRender.AppWrapper,
-    });
-
-    await waitFor(() => result.current.isSuccess);
-
-    expect(spyOnGetCurrentUserProfile).not.toHaveBeenCalled();
-  });
-
   it('calls getCurrentUserProfile with correct arguments', async () => {
     const spyOnGetCurrentUserProfile = jest.spyOn(api, 'getCurrentUserProfile');
 

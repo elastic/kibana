@@ -7,9 +7,9 @@
 
 import { EuiFilterButton } from '@elastic/eui';
 import { UserProfilesPopover, UserProfileWithAvatar } from '@kbn/user-profile-components';
-import React, { useCallback, useEffect, useState } from 'react';
-import { CASE_LIST_CACHE_KEY } from '../../containers/constants';
-import { useFindAssignees } from '../../containers/use_find_assignees';
+import { isEmpty } from 'lodash';
+import React, { useCallback, useMemo, useState } from 'react';
+import { useSuggestUserProfiles } from '../../containers/user_profiles/use_suggest_user_profiles';
 import { useAvailableCasesOwners } from '../app/use_available_owners';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { CurrentUserProfile } from '../types';
@@ -24,7 +24,6 @@ export interface AssigneesFilterPopoverProps {
   currentUserProfile: CurrentUserProfile;
   isLoading: boolean;
   onSelectionChange: (users: UserProfileWithAvatar[]) => void;
-  setFetchAssignees: (fetcher: () => void) => void;
 }
 
 const AssigneesFilterPopoverComponent: React.FC<AssigneesFilterPopoverProps> = ({
@@ -32,16 +31,12 @@ const AssigneesFilterPopoverComponent: React.FC<AssigneesFilterPopoverProps> = (
   currentUserProfile,
   isLoading,
   onSelectionChange,
-  setFetchAssignees,
 }) => {
   const { owner: owners } = useCasesContext();
   const hasOwners = owners.length > 0;
   const availableOwners = useAvailableCasesOwners(['read']);
   const [searchTerm, setSearchTerm] = useState('');
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const [searchResultProfiles, setSearchResultProfiles] = useState<
-    UserProfileWithAvatar[] | undefined
-  >();
 
   const togglePopover = useCallback(() => setIsPopoverOpen((value) => !value), []);
 
@@ -57,35 +52,36 @@ const AssigneesFilterPopoverComponent: React.FC<AssigneesFilterPopoverProps> = (
     (selectedCount: number) => (
       <SelectedStatusMessage
         selectedCount={selectedCount}
-        createMessage={i18n.TOTAL_ASSIGNEES_FILTERED}
+        message={i18n.TOTAL_ASSIGNEES_FILTERED(selectedCount)}
       />
     ),
     []
   );
 
-  const {
-    data: assignees,
-    refetch: fetchAssignees,
-    isLoading: isLoadingAssignees,
-  } = useFindAssignees({
+  const onSearchChange = useCallback((term: string) => {
+    setSearchTerm(term);
+
+    if (!isEmpty(term)) {
+      setIsUserTyping(true);
+    }
+  }, []);
+
+  const [isUserTyping, setIsUserTyping] = useState(false);
+
+  const onDebounce = useCallback(() => setIsUserTyping(false), []);
+
+  const { data: userProfiles, isLoading: isLoadingSuggest } = useSuggestUserProfiles({
+    name: searchTerm,
     owners: hasOwners ? owners : availableOwners,
-    searchTerm,
-    // TODO: maybe use a different cache key?
-    cacheKey: CASE_LIST_CACHE_KEY,
+    onDebounce,
   });
 
-  useEffect(() => {
-    const sortedUserProfiles = bringCurrentUserToFrontAndSort(currentUserProfile, assignees);
-    setSearchResultProfiles(sortedUserProfiles);
-  }, [assignees, currentUserProfile]);
+  const searchResultProfiles = useMemo(
+    () => bringCurrentUserToFrontAndSort(currentUserProfile, userProfiles),
+    [userProfiles, currentUserProfile]
+  );
 
-  useEffect(() => {
-    if (fetchAssignees != null) {
-      setFetchAssignees(fetchAssignees);
-    }
-  }, [fetchAssignees, setFetchAssignees]);
-
-  const isLoadingData = isLoading || isLoadingAssignees;
+  const isLoadingData = isLoading || isLoadingSuggest;
 
   return (
     <UserProfilesPopover
@@ -101,7 +97,7 @@ const AssigneesFilterPopoverComponent: React.FC<AssigneesFilterPopoverProps> = (
           onClick={togglePopover}
           isLoading={isLoadingData}
           isSelected={isPopoverOpen}
-          numFilters={assignees?.length ?? 0}
+          numFilters={userProfiles?.length ?? 0}
           hasActiveFilters={selectedAssignees.length > 0}
           numActiveFilters={selectedAssignees.length}
           aria-label={i18n.FILTER_ASSIGNEES_ARIA_LABEL}
@@ -111,16 +107,16 @@ const AssigneesFilterPopoverComponent: React.FC<AssigneesFilterPopoverProps> = (
       }
       selectableProps={{
         onChange,
-        onSearchChange: setSearchTerm,
+        onSearchChange,
         selectedStatusMessage,
         options: searchResultProfiles,
         selectedOptions: selectedAssignees,
-        isLoading: isLoadingData,
+        isLoading: isLoadingData || isUserTyping,
         height: 'full',
         searchPlaceholder: i18n.SEARCH_USERS,
         clearButtonLabel: i18n.CLEAR_FILTERS,
         emptyMessage: <EmptyMessage />,
-        noMatchesMessage: <NoMatches />,
+        noMatchesMessage: !isUserTyping && !isLoadingData ? <NoMatches /> : <EmptyMessage />,
         singleSelection: true,
       }}
     />

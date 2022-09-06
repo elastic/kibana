@@ -231,7 +231,6 @@ describe('AllCasesListGeneric', () => {
       </TestProviders>
     );
 
-    screen.debug();
     userEvent.hover(result.queryAllByTestId('case-user-profile-avatar-damaged_raccoon')[0]);
 
     await waitFor(() => {

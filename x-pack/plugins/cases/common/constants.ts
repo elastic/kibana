@@ -80,7 +80,6 @@ export const INTERNAL_BULK_CREATE_ATTACHMENTS_URL =
   `${CASES_INTERNAL_URL}/{case_id}/attachments/_bulk_create` as const;
 export const INTERNAL_SUGGEST_USER_PROFILES_URL =
   `${CASES_INTERNAL_URL}/_suggest_user_profiles` as const;
-export const INTERNAL_FIND_ASSIGNEES_URL = `${CASES_INTERNAL_URL}/_find_assignees` as const;
 
 /**
  * Action routes

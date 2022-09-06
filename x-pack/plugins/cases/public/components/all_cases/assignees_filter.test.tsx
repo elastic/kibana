@@ -7,30 +7,20 @@
 
 import React from 'react';
 import userEvent from '@testing-library/user-event';
-import { screen, fireEvent } from '@testing-library/react';
+import { screen, fireEvent, waitFor } from '@testing-library/react';
 import { AppMockRenderer, createAppMockRenderer } from '../../common/mock';
 import { AssigneesFilterPopover, AssigneesFilterPopoverProps } from './assignees_filter';
-import { useFindAssignees } from '../../containers/use_find_assignees';
 import { userProfiles } from '../../containers/user_profiles/api.mock';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 
-jest.mock('../../containers/use_find_assignees');
-
-const useFindAssigneesMock = useFindAssignees as jest.Mock;
+jest.mock('../../containers/user_profiles/api');
 
 describe('AssigneesFilterPopover', () => {
   let appMockRender: AppMockRenderer;
   let defaultProps: AssigneesFilterPopoverProps;
-  const refetch = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
-
-    useFindAssigneesMock.mockReturnValue({
-      data: userProfiles,
-      isLoading: false,
-      refetch,
-    });
 
     appMockRender = createAppMockRenderer();
 
@@ -39,7 +29,6 @@ describe('AssigneesFilterPopover', () => {
       selectedAssignees: [],
       isLoading: false,
       onSelectionChange: jest.fn(),
-      setFetchAssignees: jest.fn(),
     };
   });
 
@@ -48,7 +37,10 @@ describe('AssigneesFilterPopover', () => {
     const props = { ...defaultProps, onSelectionChange };
     appMockRender.render(<AssigneesFilterPopover {...props} />);
 
-    userEvent.click(screen.getByTestId('options-filter-popover-button-assignees'));
+    await waitFor(() => {
+      userEvent.click(screen.getByTestId('options-filter-popover-button-assignees'));
+      expect(screen.getByPlaceholderText('Search users')).toBeInTheDocument();
+    });
     await waitForEuiPopoverOpen();
 
     fireEvent.change(screen.getByPlaceholderText('Search users'), { target: { value: 'dingo' } });
@@ -75,7 +67,11 @@ describe('AssigneesFilterPopover', () => {
     const props = { ...defaultProps, onSelectionChange };
     appMockRender.render(<AssigneesFilterPopover {...props} />);
 
-    userEvent.click(screen.getByTestId('options-filter-popover-button-assignees'));
+    await waitFor(() => {
+      userEvent.click(screen.getByTestId('options-filter-popover-button-assignees'));
+      expect(screen.getByText('wet_dingo@elastic.co'));
+    });
+
     await waitForEuiPopoverOpen();
 
     fireEvent.change(screen.getByPlaceholderText('Search users'), { target: { value: 'dingo' } });
@@ -115,12 +111,14 @@ describe('AssigneesFilterPopover', () => {
   it('does not show the assigned users total if there are no assigned users', async () => {
     appMockRender.render(<AssigneesFilterPopover {...defaultProps} />);
 
-    userEvent.click(screen.getByTestId('options-filter-popover-button-assignees'));
+    await waitFor(() => {
+      userEvent.click(screen.getByTestId('options-filter-popover-button-assignees'));
+      expect(screen.getByText('Damaged Raccoon')).toBeInTheDocument();
+    });
+
     await waitForEuiPopoverOpen();
 
     expect(screen.queryByText('assignee')).not.toBeInTheDocument();
-    fireEvent.change(screen.getByPlaceholderText('Search users'), { target: { value: 'dingo' } });
-    userEvent.click(screen.getByText('wet_dingo@elastic.co'));
   });
 
   it('shows the 1 assigned total when the users are passed in', async () => {
@@ -130,47 +128,26 @@ describe('AssigneesFilterPopover', () => {
     };
     appMockRender.render(<AssigneesFilterPopover {...props} />);
 
-    userEvent.click(screen.getByTestId('options-filter-popover-button-assignees'));
+    await waitFor(async () => {
+      userEvent.click(screen.getByTestId('options-filter-popover-button-assignees'));
+      expect(screen.getByText('1 assignee filtered')).toBeInTheDocument();
+    });
+
     await waitForEuiPopoverOpen();
 
-    expect(screen.getByText('1 assignee filtered')).toBeInTheDocument();
     expect(screen.getByText('Damaged Raccoon')).toBeInTheDocument();
   });
 
   it('shows three users when initially rendered', async () => {
     appMockRender.render(<AssigneesFilterPopover {...defaultProps} />);
 
-    userEvent.click(screen.getByTestId('options-filter-popover-button-assignees'));
+    await waitFor(() => {
+      userEvent.click(screen.getByTestId('options-filter-popover-button-assignees'));
+      expect(screen.getByText('Wet Dingo')).toBeInTheDocument();
+    });
     await waitForEuiPopoverOpen();
 
     expect(screen.getByText('Damaged Raccoon')).toBeInTheDocument();
     expect(screen.getByText('Physical Dinosaur')).toBeInTheDocument();
-    expect(screen.getByText('Wet Dingo')).toBeInTheDocument();
-  });
-
-  it('shows the empty message when no users are returned by the hook initially', async () => {
-    useFindAssigneesMock.mockReturnValue({ data: [], isLoading: false });
-    appMockRender.render(<AssigneesFilterPopover {...defaultProps} />);
-
-    userEvent.click(screen.getByTestId('options-filter-popover-button-assignees'));
-    await waitForEuiPopoverOpen();
-
-    expect(
-      screen.queryByTestId('case-user-profiles-assignees-popover-no-matches')
-    ).not.toBeInTheDocument();
-  });
-
-  it('shows the no matches component', async () => {
-    useFindAssigneesMock.mockReturnValue({ data: [], isLoading: false });
-    appMockRender.render(<AssigneesFilterPopover {...defaultProps} />);
-
-    userEvent.click(screen.getByTestId('options-filter-popover-button-assignees'));
-    await waitForEuiPopoverOpen();
-
-    fireEvent.change(screen.getByPlaceholderText('Search users'), { target: { value: 'bananas' } });
-
-    expect(
-      screen.getAllByTestId('case-user-profiles-assignees-popover-no-matches')[0]
-    ).toBeInTheDocument();
   });
 });

@@ -81,7 +81,7 @@ const SuggestUsersPopoverComponent: React.FC<SuggestUsersPopoverProps> = ({
     (selectedCount: number) => (
       <SelectedStatusMessage
         selectedCount={selectedCount}
-        createMessage={i18n.TOTAL_USERS_ASSIGNED}
+        message={i18n.TOTAL_USERS_ASSIGNED(selectedCount)}
       />
     ),
     []
@@ -98,11 +98,8 @@ const SuggestUsersPopoverComponent: React.FC<SuggestUsersPopoverProps> = ({
   const isLoadingData = isLoadingSuggest || isLoading;
 
   const searchResultProfiles = useMemo(
-    () =>
-      !isEmpty(searchTerm)
-        ? bringCurrentUserToFrontAndSort(currentUserProfile, userProfiles)
-        : undefined,
-    [userProfiles, currentUserProfile, searchTerm]
+    () => bringCurrentUserToFrontAndSort(currentUserProfile, userProfiles),
+    [currentUserProfile, userProfiles]
   );
 
   return (

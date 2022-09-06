@@ -91,21 +91,23 @@ export const AllCasesList = React.memo<AllCasesListProps>(
     });
 
     const assigneesFromCases = useMemo(() => {
-      return data.cases.reduce<string[]>((acc, caseInfo) => {
+      return data.cases.reduce<Set<string>>((acc, caseInfo) => {
         if (!caseInfo) {
           return acc;
         }
 
-        acc.push(...caseInfo.assignees.map((assignee) => assignee.uid));
+        for (const assignee of caseInfo.assignees) {
+          acc.add(assignee.uid);
+        }
         return acc;
-      }, []);
+      }, new Set());
     }, [data.cases]);
 
     const { data: userProfiles } = useBulkGetUserProfiles({
-      uids: assigneesFromCases,
+      uids: Array.from(assigneesFromCases),
     });
 
-    const { data: currentUserProfile, isLoading: isLoadingUserProfileData } =
+    const { data: currentUserProfile, isLoading: isLoadingCurrentUserProfile } =
       useGetCurrentUserProfile();
 
     const { data: connectors = [] } = useGetConnectors();
@@ -277,7 +279,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
           hiddenStatuses={hiddenStatuses}
           displayCreateCaseButton={isSelectorView}
           onCreateCasePressed={onRowClick}
-          isLoading={isLoadingUserProfileData}
+          isLoading={isLoadingCurrentUserProfile}
           currentUserProfile={currentUserProfile}
         />
         <CasesTable

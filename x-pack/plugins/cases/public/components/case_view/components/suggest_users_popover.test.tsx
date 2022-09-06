@@ -16,6 +16,8 @@ import { AssigneeWithProfile } from '../../user_profiles/types';
 
 jest.mock('../../../containers/user_profiles/api');
 
+jest.useFakeTimers();
+
 describe('SuggestUsersPopover', () => {
   let appMockRender: AppMockRenderer;
   let defaultProps: SuggestUsersPopoverProps;
@@ -223,28 +225,12 @@ describe('SuggestUsersPopover', () => {
     expect(togglePopover).toBeCalled();
   });
 
-  it('shows the empty message initially', async () => {
+  it('shows results initially', async () => {
     appMockRender.render(<SuggestUsersPopover {...defaultProps} />);
 
     await waitForEuiPopoverOpen();
 
-    expect(
-      screen.queryByTestId('case-user-profiles-assignees-popover-no-matches')
-    ).not.toBeInTheDocument();
-  });
-
-  it('shows the no matches component', async () => {
-    appMockRender.render(<SuggestUsersPopover {...defaultProps} />);
-
-    await waitForEuiPopoverOpen();
-
-    fireEvent.change(screen.getByPlaceholderText('Search users'), { target: { value: 'bananas' } });
-
-    await waitFor(() =>
-      expect(
-        screen.getAllByTestId('case-user-profiles-assignees-popover-no-matches')[0]
-      ).toBeInTheDocument()
-    );
+    await waitFor(() => expect(screen.getByText('Damaged Raccoon')).toBeInTheDocument());
   });
 });
 

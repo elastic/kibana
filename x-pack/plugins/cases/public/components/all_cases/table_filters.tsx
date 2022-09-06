@@ -11,6 +11,7 @@ import styled from 'styled-components';
 import { EuiFlexGroup, EuiFlexItem, EuiFieldSearch, EuiFilterGroup, EuiButton } from '@elastic/eui';
 
 import { UserProfileWithAvatar } from '@kbn/user-profile-components';
+import { useQueryClient } from '@tanstack/react-query';
 import { StatusAll, CaseStatusWithAllStatus, CaseSeverityWithAll } from '../../../common/ui/types';
 import { CaseStatuses } from '../../../common/api';
 import { FilterOptions } from '../../containers/types';
@@ -19,7 +20,11 @@ import { StatusFilter } from './status_filter';
 import * as i18n from './translations';
 import { SeverityFilter } from './severity_filter';
 import { useGetTags } from '../../containers/use_get_tags';
-import { CASE_LIST_CACHE_KEY } from '../../containers/constants';
+import {
+  CASE_LIST_CACHE_KEY,
+  USER_PROFILES_CACHE_KEY,
+  USER_PROFILES_SUGGEST_CACHE_KEY,
+} from '../../containers/constants';
 import { DEFAULT_FILTER_OPTIONS } from '../../containers/use_get_cases';
 import { AssigneesFilterPopover } from './assignees_filter';
 import { CurrentUserProfile } from '../types';
@@ -73,16 +78,15 @@ const CasesTableFiltersComponent = ({
   const fetchAssignees = useRef<() => void>();
   const { data: tags = [], refetch: fetchTags } = useGetTags(CASE_LIST_CACHE_KEY);
 
-  const setFetchAssignees = useCallback((refetchAssignees: () => void) => {
-    fetchAssignees.current = refetchAssignees;
-  }, []);
+  const queryClient = useQueryClient();
 
   const refetch = useCallback(() => {
     fetchTags();
+    queryClient.refetchQueries([USER_PROFILES_CACHE_KEY, USER_PROFILES_SUGGEST_CACHE_KEY]);
     if (fetchAssignees.current != null) {
       fetchAssignees.current();
     }
-  }, [fetchAssignees, fetchTags]);
+  }, [fetchTags, queryClient]);
 
   useEffect(() => {
     if (setFilterRefetch != null) {
@@ -207,7 +211,6 @@ const CasesTableFiltersComponent = ({
             currentUserProfile={currentUserProfile}
             isLoading={isLoading}
             onSelectionChange={handleSelectedAssignees}
-            setFetchAssignees={setFetchAssignees}
           />
           <FilterPopover
             buttonLabel={i18n.TAGS}
