@@ -14,7 +14,7 @@ import { nextTick } from '@kbn/test-jest-helpers';
 import { HttpError, Status } from '../../../../../common/types/api';
 
 import { SyncStatus } from '../../../../../common/types/connectors';
-import { FetchSyncJobsApiLogic } from '../../api/connector_package/fetch_sync_jobs_api_logic';
+import { FetchSyncJobsApiLogic } from '../../api/connector/fetch_sync_jobs_api_logic';
 
 import { IndexViewLogic } from './index_view_logic';
 import { SyncJobView, SyncJobsViewLogic } from './sync_jobs_view_logic';
