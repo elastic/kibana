@@ -6,8 +6,19 @@
  * Side Public License, v 1.
  */
 
-module.exports = {
-  preset: '@kbn/test/jest_node',
-  rootDir: '../..',
-  roots: ['<rootDir>/packages/kbn-jsonc'],
-};
+const { stripJsonComments } = require('./strip_json_comments');
+
+/**
+ * @param {string} jsonWithComments
+ * @returns {unknown}
+ */
+function parse(jsonWithComments) {
+  return JSON.parse(
+    stripJsonComments(jsonWithComments, {
+      whitespace: false,
+      trailingCommas: true,
+    })
+  );
+}
+
+module.exports = { parse };

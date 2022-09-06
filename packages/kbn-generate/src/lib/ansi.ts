@@ -6,18 +6,5 @@
  * Side Public License, v 1.
  */
 
-const { stripJsonComments } = require('./src/strip_json_comments');
-
-/**
- * @param {string} jsonWithComments
- */
-function parse(jsonWithComments) {
-  return JSON.parse(
-    stripJsonComments(jsonWithComments, {
-      whitespace: false,
-      trailingCommas: true,
-    })
-  );
-}
-
-module.exports = { parse };
+// https://gist.github.com/fnky/458719343aabd01cfb17a3a4f7296797
+export const CLEAR_LINE_AND_MOVE_LEFT = `\x1B[2K\x1B[0G`;

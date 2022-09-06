@@ -19,8 +19,10 @@ import { discoverBazelPackages, BAZEL_PACKAGE_DIRS } from '@kbn/bazel-packages';
 import { createFailError, createFlagError, isFailError } from '@kbn/dev-cli-errors';
 import { sortPackageJson } from '@kbn/sort-package-json';
 
+import { validateTeam } from '../lib/validate_team';
 import { TEMPLATE_DIR, ROOT_PKG_DIR, PKG_TEMPLATE_DIR } from '../paths';
 import type { GenerateCommand } from '../generate_command';
+import { ask } from '../lib/ask';
 
 export const PackageCommand: GenerateCommand = {
   name: 'package',
@@ -28,7 +30,7 @@ export const PackageCommand: GenerateCommand = {
   usage: 'node scripts/generate package [name]',
   flags: {
     boolean: ['web', 'force', 'dev'],
-    string: ['dir'],
+    string: ['dir', 'owner'],
     help: `
       --dev          Generate a package which is intended for dev-only use and can access things like devDependencies
       --web          Build webpack-compatible version of sources for this package. If your package is intended to be
@@ -39,6 +41,8 @@ export const PackageCommand: GenerateCommand = {
 ${BAZEL_PACKAGE_DIRS.map((dir) => `                          ./${dir}/*\n`).join('')}
                       defaults to [./packages/{kebab-case-version-of-name}]
       --force        If the --dir already exists, delete it before generation
+      --owner        Github username of the owner for this package, if this is not specified then you will be asked for
+                      this value interactively.
     `,
   },
   async run({ log, flags, render }) {
@@ -82,6 +86,18 @@ ${BAZEL_PACKAGE_DIRS.map((dir) => `                          ./${dir}/*\n`).join
       }
     }
 
+    let owner = flags.owner;
+    if ((typeof owner !== 'string' || !owner) && process.stderr.isTTY) {
+      owner = await ask({
+        question: 'What team should own this package? (should start with "@elastic/")',
+        validate: validateTeam,
+      });
+    }
+
+    if (typeof owner !== 'string' || !owner.startsWith('@')) {
+      throw createFlagError(`expected --owner to be a string starting with an @ symbol`);
+    }
+
     const templateFiles = await globby('**/*', {
       cwd: PKG_TEMPLATE_DIR,
       absolute: false,
@@ -122,6 +138,7 @@ ${BAZEL_PACKAGE_DIRS.map((dir) => `                          ./${dir}/*\n`).join
           name,
           web,
           dev,
+          owner,
           directoryName: Path.basename(normalizedRepoRelativeDir),
           normalizedRepoRelativeDir,
         },

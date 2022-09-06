@@ -3411,14 +3411,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/jsonc@link:bazel-bin/packages/kbn-jsonc":
-  version "0.0.0"
-  uid ""
-
-"@kbn/kibana-manifest-parser@link:bazel-bin/packages/kbn-kibana-manifest-parser":
-  version "0.0.0"
-  uid ""
-
 "@kbn/kibana-manifest-schema@link:bazel-bin/packages/kbn-kibana-manifest-schema":
   version "0.0.0"
   uid ""
@@ -7493,15 +7485,7 @@
   version "0.0.0"
   uid ""
 
-"@types/kbn__jsonc@link:bazel-bin/packages/kbn-jsonc/npm_module_types":
-  version "0.0.0"
-  uid ""
-
 "@types/kbn__kbn-ci-stats-performance-metrics@link:bazel-bin/packages/kbn-kbn-ci-stats-performance-metrics/npm_module_types":
-  version "0.0.0"
-  uid ""
-
-"@types/kbn__kibana-manifest-parser@link:bazel-bin/packages/kbn-kibana-manifest-parser/npm_module_types":
   version "0.0.0"
   uid ""
 
