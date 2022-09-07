@@ -7,6 +7,7 @@
 
 import { Transaction } from '@elastic/apm-rum';
 import { useCallback } from 'react';
+import { CommentType } from '../../../../common/api/cases/comment';
 import { CaseAttachmentsWithoutOwner } from '../../../types';
 import { useStartTransaction } from './use_start_transaction';
 
@@ -31,12 +32,13 @@ export const useCreateCaseWithAttachmentsTransaction = () => {
         if (!attachments) {
           return startTransaction(`Cases [${appId}] ${CREATE_CASE}`);
         }
-        if (attachments.length === 1) {
+        const alertCount = getAlertCount(attachments);
+        if (alertCount <= 1) {
           return startTransaction(`Cases [${appId}] ${ADD_ATTACHMENT_TO_NEW_CASE}`);
         }
 
         const transaction = startTransaction(`Cases [${appId}] ${BULK_ADD_ATTACHMENT_TO_NEW_CASE}`);
-        transaction?.addLabels({ attachment_count: attachments.length });
+        transaction?.addLabels({ alert_count: alertCount });
         return transaction;
       },
       [startTransaction]
@@ -57,17 +59,30 @@ export const useAddAttachmentToExistingCaseTransaction = () => {
   const startAddAttachmentToExistingCaseTransaction =
     useCallback<StartAddAttachmentToExistingCaseTransaction>(
       ({ appId, attachments }) => {
-        if (attachments.length === 1) {
+        const alertCount = getAlertCount(attachments);
+        if (alertCount <= 1) {
           return startTransaction(`Cases [${appId}] ${ADD_ATTACHMENT_TO_EXISTING_CASE}`);
         }
         const transaction = startTransaction(
           `Cases [${appId}] ${BULK_ADD_ATTACHMENT_TO_EXISTING_CASE}`
         );
-        transaction?.addLabels({ attachment_count: attachments.length });
+        transaction?.addLabels({ alert_count: alertCount });
         return transaction;
       },
       [startTransaction]
     );
 
   return { startTransaction: startAddAttachmentToExistingCaseTransaction };
+};
+
+const getAlertCount = (attachments: CaseAttachmentsWithoutOwner) => {
+  return attachments.reduce((total, attachment) => {
+    if (attachment.type !== CommentType.alert) {
+      return total;
+    }
+    if (!Array.isArray(attachment.alertId)) {
+      return total + 1;
+    }
+    return total + attachment.alertId.length;
+  }, 0);
 };
