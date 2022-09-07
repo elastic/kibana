@@ -13,7 +13,7 @@ import {
   RuleTypeState,
 } from '@kbn/alerting-plugin/common';
 import { RuleExecutorOptions, RuleExecutorServices, RuleType } from '@kbn/alerting-plugin/server';
-import { FieldSpec } from '@kbn/data-views-plugin/common';
+import { FieldSpec } from '@kbn/data-plugin/common';
 import { AlertsClient } from './alert_data_client/alerts_client';
 
 type SimpleAlertType<

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FieldSpec } from '@kbn/data-views-plugin/server';
+import { FieldSpec } from '@kbn/data-plugin/common';
 import { BrowserField, BrowserFields } from '../../types';
 
 const getFieldCategory = (fieldCapability: FieldSpec) => {
