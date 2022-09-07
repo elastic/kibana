@@ -21,6 +21,7 @@ export const useCloneAction = (canCreateDataFrameAnalytics: boolean) => {
 
   const clickHandler = useCallback((item: DataFrameAnalyticsListRow) => {
     navigateToWizardWithClonedJob(item);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const action: DataFrameAnalyticsListAction = useMemo(
@@ -33,6 +34,7 @@ export const useCloneAction = (canCreateDataFrameAnalytics: boolean) => {
       onClick: clickHandler,
       'data-test-subj': 'mlAnalyticsJobCloneButton',
     }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
 
