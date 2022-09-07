@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { EuiButtonEmpty, EuiIcon, EuiNotificationBadge, EuiPopover } from '@elastic/eui';
+import { EuiButtonEmpty, EuiPopover } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 
 export function Warnings({ warnings }: { warnings: React.ReactNode[] }) {
@@ -18,10 +19,14 @@ export function Warnings({ warnings }: { warnings: React.ReactNode[] }) {
         isOpen={open}
         closePopover={() => setOpen(false)}
         button={
-          <EuiButtonEmpty onClick={() => setOpen(!open)}>
-            <EuiNotificationBadge>{warnings.length}</EuiNotificationBadge>{' '}
-            <EuiIcon color="warning" type="alert" />
-          </EuiButtonEmpty>
+          <EuiButtonEmpty color="warning" iconType="alert" onClick={() => setOpen(!open)} size="xs">{
+            i18n.translate('charts.warning.warningLabel', {
+              defaultMessage: '{numberWarnings, number} {numberWarnings, plural, one {warning} other {warnings}}',
+              values: {
+                numberWarnings: warnings.length
+              }
+            })
+          }</EuiButtonEmpty>
         }
       >
         <div style={{ maxWidth: 512 }}>
