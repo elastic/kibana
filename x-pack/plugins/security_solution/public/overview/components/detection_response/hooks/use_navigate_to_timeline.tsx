@@ -15,6 +15,10 @@ import { TimelineId, TimelineType } from '../../../../../common/types/timeline';
 import { useCreateTimeline } from '../../../../timelines/components/timeline/properties/use_create_timeline';
 import { updateProviders } from '../../../../timelines/store/timeline/actions';
 
+export interface AdditionalFilter {
+  field: string;
+  value: string;
+}
 export const useNavigateToTimeline = () => {
   const dispatch = useDispatch();
 
@@ -63,8 +67,12 @@ export const useNavigateToTimeline = () => {
     navigateToTimeline(dataProvider);
   };
 
-  const openRuleInTimeline = (ruleName: string) => {
+  const openRuleInTimeline = (ruleName: string, additionalFilter?: AdditionalFilter) => {
     const dataProvider = getDataProvider('kibana.alert.rule.name', '', ruleName);
+
+    if (additionalFilter) {
+      dataProvider.and.push(getDataProvider(additionalFilter.field, '', additionalFilter.value));
+    }
 
     navigateToTimeline(dataProvider);
   };

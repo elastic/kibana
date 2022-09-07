@@ -31,7 +31,7 @@ import { useNavigation } from '../../../../common/lib/kibana';
 import { SecurityPageName } from '../../../../../common/constants';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { HoverVisibilityContainer } from '../../../../common/components/hover_visibility_container';
-import { BUTTON_CLASS as INPECT_BUTTON_CLASS } from '../../../../common/components/inspect';
+import { BUTTON_CLASS as INSPECT_BUTTON_CLASS } from '../../../../common/components/inspect';
 import { FormattedCount } from '../../../../common/components/formatted_number';
 import { useNavigateToTimeline } from '../hooks/use_navigate_to_timeline';
 
@@ -125,7 +125,7 @@ export const RuleAlertsTable = React.memo<RuleAlertsTableProps>(({ signalIndexNa
   );
 
   return (
-    <HoverVisibilityContainer show={true} targetClassNames={[INPECT_BUTTON_CLASS]}>
+    <HoverVisibilityContainer show={true} targetClassNames={[INSPECT_BUTTON_CLASS]}>
       <EuiPanel hasBorder data-test-subj="severityRuleAlertsPanel">
         <HeaderSection
           id={DETECTION_RESPONSE_RULE_ALERTS_QUERY_ID}

@@ -110,7 +110,7 @@ export const useAlertsByStatus: UseAlertsByStatus = ({
     }),
     indexName: signalIndexName,
     skip,
-    queryName: ALERTS_QUERY_NAMES.BY_STATUS,
+    queryName: ALERTS_QUERY_NAMES.BY_STATUS_BY_SEVERITY,
   });
 
   useEffect(() => {

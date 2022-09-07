@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import { EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { useParams } from 'react-router-dom';
 
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { euiThemeVars } from '@kbn/ui-theme';
 
 import { InputsModelId } from '../../../common/store/inputs/constants';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
@@ -44,7 +46,9 @@ import { LandingPageComponent } from '../../../common/components/landing_page';
 import { SecuritySolutionTabNavigation } from '../../../common/components/navigation';
 import { getNetworkDetailsPageFilter } from '../../../common/components/visualization_actions/utils';
 import { hasMlUserPermissions } from '../../../../common/machine_learning/has_ml_user_permissions';
+import { AlertCountByStatus } from '../../../common/components/alert_count_by_status';
 import { useMlCapabilities } from '../../../common/components/ml/hooks/use_ml_capabilities';
+import { useAlertsPrivileges } from '../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { navTabsNetworkDetails } from './nav_tabs';
 import { NetworkDetailsTabs } from './details_tabs';
 import { useInstalledSecurityJobsIds } from '../../../common/components/ml/hooks/use_installed_security_jobs';
@@ -52,6 +56,13 @@ import { useInstalledSecurityJobsIds } from '../../../common/components/ml/hooks
 export { getTrailingBreadcrumbs } from './utils';
 
 const NetworkDetailsManage = manageQuery(IpOverview);
+
+const StyledEuiFlexItem = euiStyled(EuiFlexItem)`
+  border: 1px solid ${euiThemeVars.euiColorLightShade};
+  border-radius: 5px;
+  padding: 12px;
+  width: 100%;
+`;
 
 const NetworkDetailsComponent: React.FC = () => {
   const dispatch = useDispatch();
@@ -66,6 +77,9 @@ const NetworkDetailsComponent: React.FC = () => {
     () => inputsSelectors.globalFiltersQuerySelector(),
     []
   );
+
+  const { hasKibanaREAD, hasIndexRead } = useAlertsPrivileges();
+  const canReadAlerts = hasKibanaREAD && hasIndexRead;
 
   const query = useDeepEqualSelector(getGlobalQuerySelector);
   const filters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
@@ -147,7 +161,6 @@ const NetworkDetailsComponent: React.FC = () => {
 
           <SecuritySolutionPageWrapper>
             <HeaderPage
-              border
               data-test-subj="network-details-headline"
               draggableArguments={headerDraggableArguments}
               subtitle={
@@ -161,25 +174,34 @@ const NetworkDetailsComponent: React.FC = () => {
             >
               <FlowTargetSelectConnected flowTarget={flowTarget} />
             </HeaderPage>
-            <NetworkDetailsManage
-              id={id}
-              inspect={inspect}
-              ip={ip}
-              isInDetailsSidePanel={false}
-              data={networkDetails}
-              anomaliesData={anomaliesData}
-              loading={loading}
-              isLoadingAnomaliesData={isLoadingAnomaliesData}
-              type={type}
-              flowTarget={flowTarget}
-              refetch={refetch}
-              setQuery={setQuery}
-              startDate={from}
-              endDate={to}
-              narrowDateRange={narrowDateRange}
-              indexPatterns={selectedPatterns}
-            />
-            <EuiHorizontalRule />
+            <EuiFlexGroup>
+              <StyledEuiFlexItem grow={3}>
+                <NetworkDetailsManage
+                  id={id}
+                  inspect={inspect}
+                  ip={ip}
+                  isInDetailsSidePanel={false}
+                  data={networkDetails}
+                  anomaliesData={anomaliesData}
+                  loading={loading}
+                  isLoadingAnomaliesData={isLoadingAnomaliesData}
+                  type={type}
+                  flowTarget={flowTarget}
+                  refetch={refetch}
+                  setQuery={setQuery}
+                  startDate={from}
+                  endDate={to}
+                  narrowDateRange={narrowDateRange}
+                  indexPatterns={selectedPatterns}
+                />
+              </StyledEuiFlexItem>
+              {canReadAlerts && (
+                <EuiFlexItem>
+                  <AlertCountByStatus field={`${flowTarget}.ip`} value={detailName} />
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
+
             <EuiSpacer />
             <SecuritySolutionTabNavigation
               navTabs={navTabsNetworkDetails(ip, hasMlUserPermissions(capabilities), flowTarget)}

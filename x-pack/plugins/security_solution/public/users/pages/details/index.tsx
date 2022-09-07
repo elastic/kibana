@@ -5,13 +5,17 @@
  * 2.0.
  */
 
-import { EuiSpacer, EuiWindowEvent } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiWindowEvent } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 
-import type { Filter } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
+import type { Filter } from '@kbn/es-query';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { euiThemeVars } from '@kbn/ui-theme';
+
+import { AlertCountByStatus } from '../../../common/components/alert_count_by_status';
 import { InputsModelId } from '../../../common/store/inputs/constants';
 import { SecurityPageName } from '../../../app/types';
 import { FiltersGlobal } from '../../../common/components/filters_global';
@@ -23,6 +27,7 @@ import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useKibana } from '../../../common/lib/kibana';
 import { convertToBuildEsQuery } from '../../../common/lib/keury';
 import { inputsSelectors } from '../../../common/store';
+import { useAlertsPrivileges } from '../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { setUsersDetailsTablesActivePageToZero } from '../../store/actions';
 import { setAbsoluteRangeDatePicker } from '../../../common/store/inputs/actions';
 import { SpyRoute } from '../../../common/utils/route/spy_routes';
@@ -53,7 +58,16 @@ import { UsersType } from '../../store/model';
 import { hasMlUserPermissions } from '../../../../common/machine_learning/has_ml_user_permissions';
 import { useMlCapabilities } from '../../../common/components/ml/hooks/use_ml_capabilities';
 import { LandingPageComponent } from '../../../common/components/landing_page';
+
 const QUERY_ID = 'UsersDetailsQueryId';
+const ES_USER_FIELD = 'user.username';
+
+const StyledEuiFlexItem = euiStyled(EuiFlexItem)`
+  border: 1px solid ${euiThemeVars.euiColorLightShade};
+  border-radius: 5px;
+  padding: 12px;
+  width: 100%;
+`;
 
 const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
   detailName,
@@ -72,6 +86,9 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
   const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuerySelector(), []);
   const query = useDeepEqualSelector(getGlobalQuerySelector);
   const filters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
+
+  const { hasKibanaREAD, hasIndexRead } = useAlertsPrivileges();
+  const canReadAlerts = hasKibanaREAD && hasIndexRead;
 
   const { to, from, deleteQuery, setQuery, isInitializing } = useGlobalTime();
   const { globalFullScreen } = useGlobalFullScreen();
@@ -143,7 +160,6 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
 
           <SecuritySolutionPageWrapper noPadding={globalFullScreen}>
             <HeaderPage
-              border
               subtitle={
                 <LastEventTime
                   indexKey={LastEventIndexKey.userDetails}
@@ -153,31 +169,38 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
               }
               title={detailName}
             />
-            <AnomalyTableProvider
-              criteriaFields={getCriteriaFromUsersType(UsersType.details, detailName)}
-              startDate={from}
-              endDate={to}
-              skip={isInitializing}
-            >
-              {({ isLoadingAnomaliesData, anomaliesData }) => (
-                <UserOverview
-                  userName={detailName}
-                  id={QUERY_ID}
-                  isInDetailsSidePanel={false}
-                  data={userDetails}
-                  anomaliesData={anomaliesData}
-                  isLoadingAnomaliesData={isLoadingAnomaliesData}
-                  loading={loading}
+            <EuiFlexGroup>
+              <StyledEuiFlexItem grow={3}>
+                <AnomalyTableProvider
+                  criteriaFields={getCriteriaFromUsersType(UsersType.details, detailName)}
                   startDate={from}
                   endDate={to}
-                  narrowDateRange={narrowDateRange}
-                  indexPatterns={selectedPatterns}
-                />
+                  skip={isInitializing}
+                >
+                  {({ isLoadingAnomaliesData, anomaliesData }) => (
+                    <UserOverview
+                      userName={detailName}
+                      id={QUERY_ID}
+                      isInDetailsSidePanel={false}
+                      data={userDetails}
+                      anomaliesData={anomaliesData}
+                      isLoadingAnomaliesData={isLoadingAnomaliesData}
+                      loading={loading}
+                      startDate={from}
+                      endDate={to}
+                      narrowDateRange={narrowDateRange}
+                      indexPatterns={selectedPatterns}
+                    />
+                  )}
+                </AnomalyTableProvider>
+              </StyledEuiFlexItem>
+              {canReadAlerts && (
+                <EuiFlexItem>
+                  <AlertCountByStatus field={ES_USER_FIELD} value={detailName} />
+                </EuiFlexItem>
               )}
-            </AnomalyTableProvider>
-
+            </EuiFlexGroup>
             <EuiSpacer />
-
             <SecuritySolutionTabNavigation
               navTabs={navTabsUsersDetails(
                 detailName,
@@ -185,9 +208,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
                 isPlatinumOrTrialLicense
               )}
             />
-
             <EuiSpacer />
-
             <UsersDetailsTabs
               deleteQuery={deleteQuery}
               detailName={detailName}

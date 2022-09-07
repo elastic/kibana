@@ -6,14 +6,15 @@
  */
 
 import React from 'react';
+
 import { EuiFlexItem, EuiFlexGroup, EuiSpacer, EuiLink } from '@elastic/eui';
 
-import { HostsKpiHosts } from './hosts';
-import { HostsKpiUniqueIps } from './unique_ips';
-import type { HostsKpiProps } from './types';
 import { CallOutSwitcher } from '../../../common/components/callouts';
-import * as i18n from './translations';
 import { useHostRiskScore } from '../../../risk_score/containers';
+import { HostsKpiHosts } from './hosts';
+import * as i18n from './translations';
+import type { HostsKpiProps } from './types';
+import { HostsKpiUniqueIps } from './unique_ips';
 import { RISKY_HOSTS_DOC_LINK } from '../../../../common/constants';
 
 export const HostsKpiComponent = React.memo<HostsKpiProps>(
@@ -81,7 +82,7 @@ export const HostsDetailsKpiComponent = React.memo<HostsKpiProps>(
   ({ filterQuery, from, indexNames, to, setQuery, skip, updateDateRange }) => {
     return (
       <EuiFlexGroup wrap>
-        <EuiFlexItem grow={1}>
+        <EuiFlexItem grow={3}>
           <HostsKpiUniqueIps
             filterQuery={filterQuery}
             from={from}

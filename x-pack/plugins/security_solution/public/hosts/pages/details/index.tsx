@@ -5,13 +5,20 @@
  * 2.0.
  */
 
-import { EuiHorizontalRule, EuiSpacer, EuiWindowEvent } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
+  EuiSpacer,
+  EuiWindowEvent,
+} from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import React, { useEffect, useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 
 import type { Filter } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
+import { useAlertsPrivileges } from '../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { InputsModelId } from '../../../common/store/inputs/constants';
 import type { HostItem } from '../../../../common/search_strategy';
 import { LastEventIndexKey } from '../../../../common/search_strategy';
@@ -55,8 +62,19 @@ import { manageQuery } from '../../../common/components/page/manage_query';
 import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { LandingPageComponent } from '../../../common/components/landing_page';
+import { AlertCountByStatus } from '../../../common/components/alert_count_by_status';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { euiThemeVars } from '@kbn/ui-theme';
 
+const ES_HOST_FIELD = 'host.hostname';
 const HostOverviewManage = manageQuery(HostOverview);
+
+const StyledEuiFlexItem = euiStyled(EuiFlexItem)`
+  border: 1px solid ${euiThemeVars.euiColorLightShade};
+  border-radius: 5px;
+  padding: 12px;
+  width: 100%;
+`;
 
 const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDetailsPagePath }) => {
   const dispatch = useDispatch();
@@ -136,6 +154,9 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
 
   const isPlatinumOrTrialLicense = useMlCapabilities().isPlatinumOrTrialLicense;
 
+  const { hasKibanaREAD, hasIndexRead } = useAlertsPrivileges();
+  const canReadAlerts = hasKibanaREAD && hasIndexRead;
+
   return (
     <>
       {indicesExist ? (
@@ -151,7 +172,6 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
           >
             <Display show={!globalFullScreen}>
               <HeaderPage
-                border
                 subtitle={
                   <LastEventTime
                     indexKey={LastEventIndexKey.hostDetails}
@@ -161,34 +181,42 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
                 }
                 title={detailName}
               />
-
-              <AnomalyTableProvider
-                criteriaFields={hostToCriteria(hostOverview)}
-                startDate={from}
-                endDate={to}
-                skip={isInitializing}
-              >
-                {({ isLoadingAnomaliesData, anomaliesData }) => (
-                  <HostOverviewManage
-                    id={id}
-                    isInDetailsSidePanel={false}
-                    data={hostOverview as HostItem}
-                    anomaliesData={anomaliesData}
-                    isLoadingAnomaliesData={isLoadingAnomaliesData}
-                    loading={loading}
+              <EuiFlexGroup>
+                <StyledEuiFlexItem grow={3}>
+                  <AnomalyTableProvider
+                    criteriaFields={hostToCriteria(hostOverview)}
                     startDate={from}
                     endDate={to}
-                    narrowDateRange={narrowDateRange}
-                    setQuery={setQuery}
-                    refetch={refetch}
-                    inspect={inspect}
-                    hostName={detailName}
-                    indexNames={selectedPatterns}
-                  />
-                )}
-              </AnomalyTableProvider>
-
-              <EuiHorizontalRule />
+                    skip={isInitializing}
+                  >
+                    {({ isLoadingAnomaliesData, anomaliesData }) => (
+                      <HostOverviewManage
+                        id={id}
+                        isInDetailsSidePanel={false}
+                        data={hostOverview as HostItem}
+                        anomaliesData={anomaliesData}
+                        isLoadingAnomaliesData={isLoadingAnomaliesData}
+                        loading={loading}
+                        startDate={from}
+                        endDate={to}
+                        narrowDateRange={narrowDateRange}
+                        setQuery={setQuery}
+                        refetch={refetch}
+                        inspect={inspect}
+                        hostName={detailName}
+                        indexNames={selectedPatterns}
+                      />
+                    )}
+                  </AnomalyTableProvider>
+                </StyledEuiFlexItem>
+                <EuiFlexItem>
+                  {canReadAlerts && (
+                    <EuiFlexItem>
+                      <AlertCountByStatus field={ES_HOST_FIELD} value={detailName} />
+                    </EuiFlexItem>
+                  )}
+                </EuiFlexItem>
+              </EuiFlexGroup>
 
               <HostsDetailsKpiComponent
                 filterQuery={filterQuery}
