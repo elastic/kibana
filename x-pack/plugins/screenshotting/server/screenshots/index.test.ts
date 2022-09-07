@@ -77,7 +77,7 @@ describe('Screenshot Observable Pipeline', () => {
       },
       networkPolicy: { enabled: false, rules: [] },
       browser: {} as ConfigType['browser'],
-    } as ConfigType;
+    };
 
     screenshots = new Screenshots(driverFactory, logger, packageInfo, http, config, cloud);
 
