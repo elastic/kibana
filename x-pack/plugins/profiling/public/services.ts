@@ -91,7 +91,7 @@ export function getServices(core: CoreStart): Services {
           timeTo,
           kuery,
         };
-        return await core.http.get(paths.FlamechartElastic, { query });
+        return await core.http.get(paths.Flamechart, { query });
       } catch (e) {
         return e;
       }

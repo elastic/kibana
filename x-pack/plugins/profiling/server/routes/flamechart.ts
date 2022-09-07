@@ -19,7 +19,7 @@ export function registerFlameChartElasticSearchRoute({ router, logger }: RouteRe
   const paths = getRoutePaths();
   router.get(
     {
-      path: paths.FlamechartElastic,
+      path: paths.Flamechart,
       validate: {
         query: schema.object({
           timeFrom: schema.number(),
