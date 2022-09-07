@@ -26,7 +26,7 @@ import {
 interface Args extends QueryState {
   dataViewsService: DataViewsContract;
   inputQuery?: Query;
-  adHocDataView?: DataView;
+  adHocDataViews: DataView[];
 }
 
 /**
@@ -41,7 +41,7 @@ export async function queryStateToExpressionAst({
   inputQuery,
   time,
   dataViewsService,
-  adHocDataView,
+  adHocDataViews,
 }: Args) {
   const kibana = buildExpressionFunction<ExpressionFunctionKibana>('kibana', {});
   let q;
@@ -62,9 +62,15 @@ export async function queryStateToExpressionAst({
       const idsTitles = await dataViewsService.getIdsWithTitle();
 
       let dataViewId = idsTitles.find(({ title }) => title === idxPattern)?.id;
+
       // use ad-hoc data view if exists
-      if (!dataViewId && adHocDataView?.title === idxPattern) {
-        dataViewId = adHocDataView.id;
+      if (!dataViewId) {
+        // eslint-disable-next-line no-console
+        console.log('adHocDataViews', adHocDataViews);
+        const adHocDataView = adHocDataViews.find(({ title }) => title === idxPattern);
+        if (adHocDataView) {
+          dataViewId = adHocDataView.id;
+        }
       }
 
       if (dataViewId) {

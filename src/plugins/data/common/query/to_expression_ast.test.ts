@@ -19,6 +19,7 @@ describe('queryStateToExpressionAst', () => {
         to: 'now+7d',
       },
       dataViewsService,
+      adHocDataViews: [],
     });
 
     expect(actual).toHaveProperty(
@@ -58,6 +59,7 @@ describe('queryStateToExpressionAst', () => {
         to: 'now+7d',
       },
       dataViewsService,
+      adHocDataViews: [],
     });
 
     expect(actual).toHaveProperty(

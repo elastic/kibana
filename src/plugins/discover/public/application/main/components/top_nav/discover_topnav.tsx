@@ -17,7 +17,11 @@ import { getTopNavLinks } from './get_top_nav_links';
 import { getHeaderActionMenuMounter } from '../../../../kibana_services';
 import { GetStateReturn } from '../../services/discover_state';
 import { onSaveSearch } from './on_save_search';
-import { setAdHocDataView } from '../../utils/adhoc_data_view';
+import {
+  clearAdHocDataViews,
+  getAdHocDataViews,
+  setAdHocDataView,
+} from '../../utils/adhoc_data_views';
 
 export type DiscoverTopNavProps = Pick<
   DiscoverLayoutProps,
@@ -72,17 +76,18 @@ export const DiscoverTopNav = ({
   const closeFieldEditor = useRef<() => void | undefined>();
   const closeDataViewEditor = useRef<() => void | undefined>();
 
-  const updateAdHocDataView = useCallback((newDataView: DataView) => {
-    const newAdHocDataView = !newDataView.isPersisted() ? newDataView : undefined;
-    setAdHocDataView(newAdHocDataView);
-    return newAdHocDataView;
-  }, []);
+  const [adHocDataViews, setAdHocDataViews] = useState<DataView[]>(getAdHocDataViews());
 
-  const [adHocDataView, _setAdHocDataView] = useState(updateAdHocDataView(dataView));
   useEffect(() => {
-    _setAdHocDataView(updateAdHocDataView(dataView));
-    return () => setAdHocDataView(undefined);
-  }, [dataView, updateAdHocDataView]);
+    if (!dataView.isPersisted()) {
+      setAdHocDataView(dataView);
+    }
+
+    setAdHocDataViews(getAdHocDataViews());
+  }, [dataView]);
+
+  // clear adHocDataViews before on unmount only
+  useEffect(() => () => clearAdHocDataViews(), []);
 
   const { AggregateQueryTopNavMenu } = navigation.ui;
 
@@ -214,7 +219,7 @@ export const DiscoverTopNav = ({
     onDataViewCreated: createNewDataView,
     onChangeDataView,
     textBasedLanguages: supportedTextBasedLanguages as DataViewPickerProps['textBasedLanguages'],
-    adHocDataViews: adHocDataView ? [adHocDataView] : [],
+    adHocDataViews,
   };
 
   const onTextBasedSavedAndExit = useCallback(

@@ -27,7 +27,7 @@ export function fetchSql(
   dataViewsService: DataViewsContract,
   data: DataPublicPluginStart,
   expressions: ExpressionsStart,
-  adHocDataView?: DataView,
+  adHocDataViews: DataView[],
   filters?: Filter[],
   inputQuery?: Query
 ) {
@@ -38,7 +38,7 @@ export function fetchSql(
     time: timeRange,
     dataViewsService,
     inputQuery,
-    adHocDataView,
+    adHocDataViews,
   })
     .then((ast) => {
       if (ast) {
