@@ -94,7 +94,7 @@ export async function getSizeTimeseries({
               services: {
                 terms: {
                   field: SERVICE_NAME,
-                  size: 500,
+                  size: 50,
                 },
                 aggs: {
                   storageTimeSeries: {
