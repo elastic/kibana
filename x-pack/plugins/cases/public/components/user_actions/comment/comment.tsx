@@ -109,6 +109,8 @@ const getCreateCommentUserAction = ({
         comment,
         externalReferenceAttachmentTypeRegistry,
         caseData,
+        isLoading: loadingCommentIds.includes(comment.id),
+        handleDeleteComment,
       });
 
       return externalReferenceBuilder.build();
@@ -119,6 +121,8 @@ const getCreateCommentUserAction = ({
         comment,
         persistableStateAttachmentTypeRegistry,
         caseData,
+        isLoading: loadingCommentIds.includes(comment.id),
+        handleDeleteComment,
       });
 
       return persistableBuilder.build();

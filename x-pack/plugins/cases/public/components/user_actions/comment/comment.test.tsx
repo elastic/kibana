@@ -8,6 +8,8 @@
 import React from 'react';
 import { EuiCommentList } from '@elastic/eui';
 import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 
 import { Actions } from '../../../../common/api';
 import {
@@ -263,6 +265,33 @@ describe('createCommentUserActionBuilder', () => {
       expect(result.getByTestId('comment-externalReference-.test')).toBeInTheDocument();
       expect(screen.getByText('Attachment actions')).toBeInTheDocument();
     });
+
+    it('renders the delete attachment action correctly', async () => {
+      const externalReferenceAttachmentTypeRegistry = new ExternalReferenceAttachmentTypeRegistry();
+      externalReferenceAttachmentTypeRegistry.register(getExternalReferenceAttachment());
+
+      const userAction = getExternalReferenceUserAction();
+      const builder = createCommentUserActionBuilder({
+        ...builderArgs,
+        externalReferenceAttachmentTypeRegistry,
+        caseData: {
+          ...builderArgs.caseData,
+          comments: [externalReferenceAttachment],
+        },
+        userAction,
+      });
+
+      const createdUserAction = builder.build();
+      const result = appMockRender.render(<EuiCommentList comments={createdUserAction} />);
+
+      expect(result.getByTestId('comment-externalReference-.test')).toBeInTheDocument();
+      expect(result.getByTestId('property-actions')).toBeInTheDocument();
+
+      userEvent.click(result.getByTestId('property-actions-ellipses'));
+      await waitForEuiPopoverOpen();
+
+      expect(result.queryByTestId('property-actions-trash')).toBeInTheDocument();
+    });
   });
 
   describe('Persistable state', () => {
@@ -397,6 +426,34 @@ describe('createCommentUserActionBuilder', () => {
 
       expect(result.getByTestId('comment-persistableState-.test')).toBeInTheDocument();
       expect(screen.getByText('Attachment actions')).toBeInTheDocument();
+    });
+
+    it('renders the delete attachment action correctly', async () => {
+      const attachment = getPersistableStateAttachment();
+      const persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTypeRegistry();
+      persistableStateAttachmentTypeRegistry.register(attachment);
+
+      const userAction = getPersistableStateUserAction();
+      const builder = createCommentUserActionBuilder({
+        ...builderArgs,
+        persistableStateAttachmentTypeRegistry,
+        caseData: {
+          ...builderArgs.caseData,
+          comments: [persistableStateAttachment],
+        },
+        userAction,
+      });
+
+      const createdUserAction = builder.build();
+      const result = appMockRender.render(<EuiCommentList comments={createdUserAction} />);
+
+      expect(result.getByTestId('comment-persistableState-.test')).toBeInTheDocument();
+      expect(result.getByTestId('property-actions')).toBeInTheDocument();
+
+      userEvent.click(result.getByTestId('property-actions-ellipses'));
+      await waitForEuiPopoverOpen();
+
+      expect(result.queryByTestId('property-actions-trash')).toBeInTheDocument();
     });
   });
 });
