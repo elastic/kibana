@@ -27,7 +27,7 @@ import { errors, strings } from './i18n';
 
 export const collapseMetrics = (
   table: Datatable,
-  bucketAccessors: Array<string | ExpressionValueVisDimension>,
+  bucketAccessors: Array<string | ExpressionValueVisDimension> = [],
   metricAccessors: Array<string | ExpressionValueVisDimension>
 ): {
   table: Datatable;
@@ -236,7 +236,7 @@ export const pieVisFunction = (): PieVisExpressionFunctionDefinition => ({
 
     const { table, metricAccessor, bucketAccessors } = collapseMetrics(
       context,
-      args.buckets ?? [],
+      args.buckets,
       args.metrics
     );
 
