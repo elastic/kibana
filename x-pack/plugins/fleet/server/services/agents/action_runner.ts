@@ -14,7 +14,7 @@ import { isResponseError } from '@kbn/es-errors';
 
 import type { Agent, BulkActionResult } from '../../types';
 import { appContextService } from '..';
-import { AGENT_ACTIONS_STATUS_INDEX, SO_SEARCH_LIMIT } from '../../../common/constants';
+import { SO_SEARCH_LIMIT } from '../../../common/constants';
 
 import { getAgentActions } from './actions';
 import { closePointInTime, getAgentsByKuery } from './crud';
@@ -70,20 +70,11 @@ export abstract class ActionRunner {
 
     withSpan({ name: this.getActionType(), type: 'action' }, () =>
       this.processAgentsInBatches().catch(async (error) => {
-        const createActionStatus = (errorMessage: string) =>
-          this.createActionStatus(this.esClient, {
-            '@timestamp': new Date().toISOString(),
-            error_message: errorMessage,
-            status: 'failed',
-            action_id: this.actionParams.actionId,
-          });
-
         // 404 error comes when PIT query is closed
         if (isResponseError(error) && error.statusCode === 404) {
           const errorMessage =
             '404 error from elasticsearch, not retrying. Error: ' + error.message;
           appContextService.getLogger().warn(errorMessage);
-          await createActionStatus(errorMessage);
           return;
         }
         if (this.retryParams.retryCount) {
@@ -96,7 +87,6 @@ export abstract class ActionRunner {
           if (this.retryParams.retryCount === 3) {
             const errorMessage = 'Stopping after 3rd retry. Error: ' + error.message;
             appContextService.getLogger().warn(errorMessage);
-            await createActionStatus(errorMessage);
             return;
           }
         } else {
@@ -116,15 +106,6 @@ export abstract class ActionRunner {
     );
 
     return { items: [], actionId: this.actionParams.actionId! };
-  }
-
-  async createActionStatus(esClient: ElasticsearchClient, data: any): Promise<void> {
-    await esClient.create({
-      index: AGENT_ACTIONS_STATUS_INDEX,
-      id: uuid(),
-      body: { data },
-      refresh: 'wait_for',
-    });
   }
 
   private async processBatch(agents: Agent[]): Promise<{ items: BulkActionResult[] }> {
@@ -186,7 +167,6 @@ export abstract class ActionRunner {
           .debug('currentAgents returned 0 hits, returning from bulk action query');
         break; // stop executing if there are no more results
       }
-      // if (allAgentsProcessed > 4) throw new Error('simulating error before batch processed ' + this.retryParams.searchAfter);
       const currentResults = await this.processBatch(currentAgents);
       results = { items: results.items.concat(currentResults.items) };
       allAgentsProcessed += currentAgents.length;

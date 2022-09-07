@@ -405,8 +405,6 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   // Current upgrades
   const { abortUpgrade, currentUpgrades, refreshUpgrades } = useCurrentUpgrades(fetchData);
 
-  const [refreshActionStatus, setRefreshActionStatus] = useState(false);
-
   const columns = [
     {
       field: HOSTNAME_FIELD,
@@ -650,7 +648,6 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         currentQuery={kuery}
         selectedAgents={selectedAgents}
         refreshAgents={({ refreshTags = false }: { refreshTags?: boolean } = {}) => {
-          setRefreshActionStatus(!refreshActionStatus);
           Promise.all([fetchData({ refreshTags }), refreshUpgrades()]);
         }}
         onClickAddAgent={() => setEnrollmentFlyoutState({ isOpen: true })}

@@ -10,8 +10,6 @@ import pMap from 'p-map';
 
 import { SO_SEARCH_LIMIT } from '../../constants';
 
-import { AGENT_ACTIONS_STATUS_INDEX } from '../../../common/constants';
-
 import type { FleetServerAgentAction, ActionStatus } from '../../types';
 import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '../../../common';
 
@@ -21,7 +19,6 @@ import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '../../../commo
 export async function getActionStatuses(esClient: ElasticsearchClient): Promise<ActionStatus[]> {
   let actions = await _getActions(esClient);
   const cancelledActionIds = await _getCancelledActionId(esClient);
-  const actionStatuses = await _getActionStatuses(esClient);
 
   // Fetch acknowledged result for every action
   actions = await pMap(
@@ -47,19 +44,10 @@ export async function getActionStatuses(esClient: ElasticsearchClient): Promise<
       const complete = count === nbAgentsActioned;
       const isCancelled = cancelledActionIds.indexOf(action.actionId) > -1;
 
-      const actionStatus = actionStatuses.find((as) => as.actionId === action.actionId);
-
       return {
         ...action,
         nbAgentsAck: count,
-        status: complete
-          ? 'complete'
-          : isCancelled
-          ? 'cancelled'
-          : actionStatus?.status === 'failed'
-          ? 'failed'
-          : action.status,
-        errorMessage: actionStatus?.errorMessage,
+        status: complete ? 'complete' : isCancelled ? 'cancelled' : action.status,
         nbAgentsActioned,
       };
     },
@@ -93,19 +81,6 @@ async function _getCancelledActionId(esClient: ElasticsearchClient) {
   });
 
   return res.hits.hits.map((hit) => hit._source?.data?.target_id as string);
-}
-
-async function _getActionStatuses(esClient: ElasticsearchClient) {
-  const res = await esClient.search<any>({
-    index: AGENT_ACTIONS_STATUS_INDEX,
-    ignore_unavailable: true,
-  });
-
-  return res.hits.hits.map((hit) => ({
-    actionId: hit._source?.data.action_id,
-    status: hit._source?.data.status,
-    errorMessage: hit._source?.data.error_message,
-  }));
 }
 
 async function _getActions(esClient: ElasticsearchClient) {
