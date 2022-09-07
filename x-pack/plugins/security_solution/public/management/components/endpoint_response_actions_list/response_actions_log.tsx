@@ -31,8 +31,8 @@ import { getEmptyValue } from '../../../common/components/empty_value';
 import { FormattedDate } from '../../../common/components/formatted_date';
 import type {
   ResponseActions,
-  ResponseActionStatus,
   ActionListApiResponse,
+  ResponseActionStatus,
 } from '../../../../common/endpoint/types';
 import type { EndpointActionListRequestQuery } from '../../../../common/endpoint/schema/actions';
 import { ManagementEmptyStateWrapper } from '../management_empty_state_wrapper';
@@ -52,8 +52,8 @@ const getCommand = (command: ResponseActions): Exclude<ResponseActions, 'unisola
 const getActionStatus = (status: ResponseActionStatus): string => {
   if (status === 'failed') {
     return UX_MESSAGES.badge.failed;
-  } else if (status === 'completed') {
-    return UX_MESSAGES.badge.completed;
+  } else if (status === 'successful') {
+    return UX_MESSAGES.badge.successful;
   } else if (status === 'pending') {
     return UX_MESSAGES.badge.pending;
   }
@@ -168,7 +168,10 @@ export const ResponseActionsLog = memo<
   // handle on change actions filter
   const onChangeStatusesFilter = useCallback(
     (selectedStatuses: string[]) => {
-      setQueryParams((prevState) => ({ ...prevState, statuses: selectedStatuses }));
+      setQueryParams((prevState) => ({
+        ...prevState,
+        statuses: selectedStatuses as ResponseActionStatus[],
+      }));
     },
     [setQueryParams]
   );
@@ -405,9 +408,9 @@ export const ResponseActionsLog = memo<
             <EuiToolTip content={status} anchorClassName="eui-textTruncate">
               <StatusBadge
                 color={
-                  _status === 'failed' ? 'danger' : _status === 'completed' ? 'success' : 'warning'
+                  _status === 'failed' ? 'danger' : _status === 'successful' ? 'success' : 'warning'
                 }
-                status={status as ResponseActionStatus}
+                status={status}
               />
             </EuiToolTip>
           );

@@ -17,9 +17,14 @@ import { getActionList, getActionListByStatus } from '../../services';
 import type { SecuritySolutionRequestHandlerContext } from '../../../types';
 import type { EndpointAppContext } from '../../types';
 import { errorHandler } from '../error_handler';
+import type { ResponseActionStatus } from '../../../../common/endpoint/types';
 
 const formatStringIds = (value: string | string[] | undefined): undefined | string[] =>
   typeof value === 'string' ? [value] : value;
+
+const formatStatusValues = (
+  value: ResponseActionStatus | ResponseActionStatus[]
+): ResponseActionStatus[] => (typeof value === 'string' ? [value] : value);
 
 export const actionListHandler = (
   endpointContext: EndpointAppContext
@@ -47,7 +52,7 @@ export const actionListHandler = (
     const esClient = (await context.core).elasticsearch.client.asInternalUser;
 
     try {
-      const getParams = {
+      const requestParams = {
         commands: formatStringIds(commands),
         esClient,
         elasticAgentIds: formatStringIds(elasticAgentIds),
@@ -66,11 +71,11 @@ export const actionListHandler = (
       const getActionsLog = () => {
         if (statuses?.length) {
           return getActionListByStatus({
-            ...getParams,
-            statuses: formatStringIds(statuses) as string[],
+            ...requestParams,
+            statuses: formatStatusValues(statuses),
           });
         }
-        return getActionList(getParams);
+        return getActionList(requestParams);
       };
 
       const body = await getActionsLog();

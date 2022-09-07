@@ -46,7 +46,7 @@ describe('useGetEndpointActionList hook', () => {
         agentIds: ['123', '456'],
         userIds: ['elastic', 'citsale'],
         commands: ['isolate', 'unisolate'],
-        statuses: ['complete', 'pending'],
+        statuses: ['pending', 'successful'],
         page: 2,
         pageSize: 20,
         startDate: 'now-5d',
@@ -59,7 +59,7 @@ describe('useGetEndpointActionList hook', () => {
       query: {
         agentIds: ['123', '456'],
         commands: ['isolate', 'unisolate'],
-        statuses: ['complete', 'pending'],
+        statuses: ['pending', 'successful'],
         endDate: 'now',
         page: 2,
         pageSize: 20,

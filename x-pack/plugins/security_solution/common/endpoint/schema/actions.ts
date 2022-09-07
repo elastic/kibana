@@ -69,6 +69,12 @@ export const ActionDetailsRequestSchema = {
   }),
 };
 
+const statusesSchema = schema.oneOf([
+  schema.literal('failed'),
+  schema.literal('pending'),
+  schema.literal('successful'),
+]);
+
 export const EndpointActionListRequestSchema = {
   query: schema.object({
     agentIds: schema.maybe(
@@ -90,11 +96,7 @@ export const EndpointActionListRequestSchema = {
     startDate: schema.maybe(schema.string()), // date ISO strings or moment date
     endDate: schema.maybe(schema.string()), // date ISO strings or moment date
     statuses: schema.maybe(
-      // ['completed', 'failed', 'pending']
-      schema.oneOf([
-        schema.arrayOf(schema.string({ minLength: 6 }), { minSize: 1, maxSize: 3 }),
-        schema.string({ minLength: 6 }),
-      ])
+      schema.oneOf([schema.arrayOf(statusesSchema, { minSize: 1, maxSize: 3 }), statusesSchema])
     ),
     userIds: schema.maybe(
       schema.oneOf([

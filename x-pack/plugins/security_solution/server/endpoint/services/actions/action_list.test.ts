@@ -99,7 +99,7 @@ describe('When using `getActionList()', () => {
           isCompleted: true,
           isExpired: false,
           startedAt: '2022-04-27T16:08:47.449Z',
-          status: 'completed',
+          status: 'successful',
           comment: doc?.EndpointActions.data.comment,
           createdBy: doc?.user.id,
           parameters: doc?.EndpointActions.data.parameters,
@@ -318,7 +318,7 @@ describe('When using `getActionList()', () => {
         isExpired: false,
         isCompleted: true,
         wasSuccessful: true,
-        status: 'completed',
+        status: 'successful',
       })
     );
   });

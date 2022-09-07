@@ -199,7 +199,7 @@ export const getActionStatus = ({
     ? 'failed'
     : isCompleted
     ? wasSuccessful
-      ? 'completed'
+      ? 'successful'
       : 'failed'
     : 'pending';
 

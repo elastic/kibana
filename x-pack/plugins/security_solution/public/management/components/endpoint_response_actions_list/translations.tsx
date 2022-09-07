@@ -113,10 +113,10 @@ export const UX_MESSAGES = Object.freeze({
       values: { filterName },
     }),
   badge: {
-    completed: i18n.translate(
-      'xpack.securitySolution.responseActionsList.list.item.badge.completed',
+    successful: i18n.translate(
+      'xpack.securitySolution.responseActionsList.list.item.badge.successful',
       {
-        defaultMessage: 'Completed',
+        defaultMessage: 'Successful',
       }
     ),
     failed: i18n.translate('xpack.securitySolution.responseActionsList.list.item.badge.failed', {

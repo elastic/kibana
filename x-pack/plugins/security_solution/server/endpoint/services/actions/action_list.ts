@@ -9,7 +9,11 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
 import { ENDPOINT_DEFAULT_PAGE_SIZE } from '../../../../common/endpoint/constants';
 import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
-import type { ActionDetails, ActionListApiResponse } from '../../../../common/endpoint/types';
+import type {
+  ActionDetails,
+  ActionListApiResponse,
+  ResponseActionStatus,
+} from '../../../../common/endpoint/types';
 
 import { getActions, getActionResponses } from '../../utils/action_list_helpers';
 
@@ -55,7 +59,7 @@ export const getActionListByStatus = async ({
   userIds,
   unExpiredOnly = false,
 }: OptionalFilterParams & {
-  statuses: string[];
+  statuses: ResponseActionStatus[];
   esClient: ElasticsearchClient;
   logger: Logger;
   metadataService: EndpointMetadataService;
@@ -81,9 +85,6 @@ export const getActionListByStatus = async ({
   const actionDetailsByStatus = allActionDetails.filter((detail) =>
     statuses.includes(detail.status)
   );
-
-  // 0, 20;
-  // 21, 40;
 
   return {
     page,

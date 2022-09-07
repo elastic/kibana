@@ -345,7 +345,7 @@ describe('Response Actions Log', () => {
       ]);
       expect(
         renderResult.getAllByTestId(`${testPrefix}-column-status`).map((n) => n.textContent)
-      ).toEqual(['Completed', 'Completed']);
+      ).toEqual(['Successful', 'Successful']);
     });
 
     it('shows Failed status badge for failed actions', async () => {
@@ -450,7 +450,7 @@ const getActionListMock = async ({
   isCompleted = true,
   isExpired = false,
   wasSuccessful = true,
-  status = 'completed',
+  status = 'successful',
 }: {
   agentIds?: string[];
   commands?: string[];

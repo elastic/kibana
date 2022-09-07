@@ -158,12 +158,22 @@ describe('actions schemas', () => {
       }).not.toThrow();
     });
 
-    it('should work with at least one `status` filter', () => {
+    it('should work with at least one `status` filter in a list', () => {
       expect(() => {
         EndpointActionListRequestSchema.query.validate({
           startDate: 'now-1d', // yesterday
           endDate: 'now', // today
           statuses: ['failed'],
+        });
+      }).not.toThrow();
+    });
+
+    it.each(['failed', 'pending', 'successful'])('should work alone with %s filter', (status) => {
+      expect(() => {
+        EndpointActionListRequestSchema.query.validate({
+          startDate: 'now-1d', // yesterday
+          endDate: 'now', // today
+          statuses: status,
         });
       }).not.toThrow();
     });
@@ -183,7 +193,17 @@ describe('actions schemas', () => {
         EndpointActionListRequestSchema.query.validate({
           startDate: 'now-1d', // yesterday
           endDate: 'now', // today
-          statuses: ['failed', 'completed', 'pending', 'xyz'],
+          statuses: ['failed', 'pending', 'successful', 'xyz'],
+        });
+      }).toThrow();
+    });
+
+    it('should not work with any string for `status` filter', () => {
+      expect(() => {
+        EndpointActionListRequestSchema.query.validate({
+          startDate: 'now-1d', // yesterday
+          endDate: 'now', // today
+          statuses: ['xyz', 'pqr', 'abc'],
         });
       }).toThrow();
     });
@@ -193,7 +213,7 @@ describe('actions schemas', () => {
         EndpointActionListRequestSchema.query.validate({
           startDate: 'now-1d', // yesterday
           endDate: 'now', // today
-          statuses: ['completed', 'failed', 'pending'],
+          statuses: ['failed', 'pending', 'successful'],
         });
       }).not.toThrow();
     });

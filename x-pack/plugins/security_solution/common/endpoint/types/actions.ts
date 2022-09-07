@@ -12,6 +12,7 @@ import type {
   ResponseActionBodySchema,
   KillOrSuspendProcessRequestSchema,
 } from '../schema/actions';
+import type { RESPONSE_ACTION_STATUS } from '../service/response_actions/constants';
 
 export type ISOLATION_ACTIONS = 'isolate' | 'unisolate';
 
@@ -263,7 +264,6 @@ export interface PendingActionsResponse {
 
 export type PendingActionsRequestQuery = TypeOf<typeof ActionStatusRequestSchema.query>;
 
-export const RESPONSE_ACTION_STATUS = ['completed', 'failed', 'pending'] as const;
 export type ResponseActionStatus = typeof RESPONSE_ACTION_STATUS[number];
 export interface ActionDetails<TOutputContent extends object = object> {
   /** The action id */
@@ -340,6 +340,6 @@ export interface ActionListApiResponse {
    * multiple agents
    */
   data: Array<Omit<ActionDetails, 'outputs'>>;
-  statuses: string[] | undefined;
+  statuses: ResponseActionStatus[] | undefined;
   total: number;
 }
