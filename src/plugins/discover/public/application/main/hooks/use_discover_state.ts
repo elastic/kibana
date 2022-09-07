@@ -41,7 +41,7 @@ import { FetchStatus } from '../../types';
 import { getDataViewAppState } from '../utils/get_switch_data_view_app_state';
 import { DataTableRecord } from '../../../types';
 import { restoreStateFromSavedSearch } from '../../../services/saved_searches/restore_from_saved_search';
-import { getUiActions } from '../../../kibana_services';
+import { getUiActions, getUrlTracker } from '../../../kibana_services';
 
 const MAX_NUM_OF_COLUMNS = 50;
 
@@ -158,7 +158,7 @@ export function useDiscoverState({
          *  That's because appState is updated before savedSearchData$
          *  The following line of code catches this, but should be improved
          */
-        const nextDataView = await loadDataView(dataViews, config, undefined, nextState.index);
+        const nextDataView = await loadDataView(dataViews, config, nextState.index);
         savedSearch.searchSource.setField('index', nextDataView.loaded);
 
         reset();
@@ -180,6 +180,7 @@ export function useDiscoverState({
     data$,
     reset,
     savedSearch.searchSource,
+    savedSearch.id,
   ]);
 
   /**
@@ -360,6 +361,12 @@ export function useDiscoverState({
     }
     return currentDataView;
   }, [stateContainer, onChangeDataView, openConfirmSavePrompt, savedSearch, updateSavedSearch]);
+
+  useEffect(() => {
+    if (!dataView.isPersisted() && !savedSearch.id) {
+      getUrlTracker().setTrackedUrl('/');
+    }
+  }, [dataView, savedSearch.id, stateContainer]);
 
   return {
     data$,

@@ -96,10 +96,6 @@ export interface AppState {
    * Number of rows in the grid per page
    */
   rowsPerPage?: number;
-  /**
-   * Determines whether the fetch data view error should be ignored
-   */
-  ignoreFetchState?: boolean;
 }
 
 export interface AppStateUrl extends Omit<AppState, 'sort'> {
@@ -454,6 +450,5 @@ function createUrlGeneratorState({
     useHash: false,
     viewMode: appState.viewMode,
     hideAggregatedPreview: appState.hideAggregatedPreview,
-    ignoreFetchState: appState.ignoreFetchState,
   };
 }

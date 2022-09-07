@@ -72,20 +72,11 @@ export const DiscoverTopNav = ({
   const closeFieldEditor = useRef<() => void | undefined>();
   const closeDataViewEditor = useRef<() => void | undefined>();
 
-  const updateAdHocDataView = useCallback(
-    (newDataView: DataView) => {
-      const newAdHocDataView = !newDataView.isPersisted() ? newDataView : undefined;
-      if (!newDataView.isPersisted()) {
-        stateContainer.setAppState({ ignoreFetchState: true });
-        setAdHocDataView(newAdHocDataView);
-      } else {
-        stateContainer.setAppState({ ignoreFetchState: undefined });
-        setAdHocDataView(newAdHocDataView);
-      }
-      return newAdHocDataView;
-    },
-    [stateContainer]
-  );
+  const updateAdHocDataView = useCallback((newDataView: DataView) => {
+    const newAdHocDataView = !newDataView.isPersisted() ? newDataView : undefined;
+    setAdHocDataView(newAdHocDataView);
+    return newAdHocDataView;
+  }, []);
 
   const [adHocDataView, _setAdHocDataView] = useState(updateAdHocDataView(dataView));
   useEffect(() => {

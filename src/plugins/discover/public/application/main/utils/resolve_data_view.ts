@@ -77,7 +77,6 @@ export function getDataViewId(
 export async function loadDataView(
   dataViews: DataViewsContract,
   config: IUiSettingsClient,
-  ignoreFetchState?: boolean,
   id?: string
 ): Promise<DataViewData> {
   const dataViewList = (await dataViews.getCache()) as unknown as DataViewSavedObject[];
@@ -103,7 +102,7 @@ export async function loadDataView(
     list: dataViewList || [],
     loaded: await dataViews.get(actualId),
     stateVal: id,
-    stateValFound: ignoreFetchState ? true : !!id && actualId === id,
+    stateValFound: !!id && actualId === id,
   };
 }
 
