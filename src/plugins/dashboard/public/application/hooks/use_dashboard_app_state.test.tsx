@@ -19,7 +19,6 @@ import { DashboardAppServices, DashboardAppState } from '../../types';
 import { DashboardContainer } from '../embeddable/dashboard_container';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { dashboardStateStore, setDescription, setViewMode } from '../state';
-import { DashboardContainerServices } from '../embeddable/dashboard_container';
 import { useDashboardAppState, UseDashboardStateProps } from './use_dashboard_app_state';
 import {
   getSampleDashboardInput,
@@ -78,19 +77,7 @@ const setupEmbeddableFactory = (
   services: DashboardAppServices,
   id: string
 ): SetupEmbeddableFactoryReturn => {
-  const containerOptions = {
-    savedObjectMetaData: {} as unknown,
-    ExitFullScreenButton: () => null,
-    SavedObjectFinder: () => null,
-    application: {} as unknown,
-    inspector: {} as unknown,
-    uiActions: {} as unknown,
-  } as unknown as DashboardContainerServices;
-
-  const dashboardContainer = new DashboardContainer(
-    { ...getSampleDashboardInput(), id },
-    containerOptions
-  );
+  const dashboardContainer = new DashboardContainer({ ...getSampleDashboardInput(), id });
   const deferEmbeddableCreate = defer();
   pluginServices.getServices().embeddable.getEmbeddableFactory = jest.fn().mockImplementation(
     () =>

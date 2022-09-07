@@ -38,8 +38,10 @@ import { spacesServiceFactory } from './spaces/spaces_service';
 import { urlForwardingServiceFactory } from './url_forwarding/url_forwarding_service';
 import { visualizationsServiceFactory } from './visualizations/visualizations_service';
 import { usageCollectionServiceFactory } from './usage_collection/usage_collection_service';
+import { analyticsServiceFactory } from './analytics/analytics_service';
 
 const providers: PluginServiceProviders<DashboardServices, DashboardPluginServiceParams> = {
+  analytics: new PluginServiceProvider(analyticsServiceFactory),
   application: new PluginServiceProvider(applicationServiceFactory),
   chrome: new PluginServiceProvider(chromeServiceFactory),
   coreContext: new PluginServiceProvider(coreContextServiceFactory),

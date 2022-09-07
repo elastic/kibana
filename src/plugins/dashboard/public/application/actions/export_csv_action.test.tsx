@@ -23,7 +23,6 @@ import { ExportCSVAction } from './export_csv_action';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public/types';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { LINE_FEED_CHARACTER } from '@kbn/data-plugin/common/exports/export_csv';
-import { screenshotModePluginMock } from '@kbn/screenshot-mode-plugin/public/mocks';
 import { pluginServices } from '../../services/plugin_services';
 
 describe('Export CSV action', () => {
@@ -49,17 +48,6 @@ describe('Export CSV action', () => {
       create: jest.fn().mockImplementation(() => ({ id: 'brandNewSavedObject' })),
     };
 
-    const options = {
-      ExitFullScreenButton: () => null,
-      SavedObjectFinder: () => null,
-      application: {} as any,
-      inspector: {} as any,
-      notifications: {} as any,
-      savedObjectMetaData: {} as any,
-      uiActions: {} as any,
-      theme: coreStart.theme,
-      screenshotMode: screenshotModePluginMock.createSetupContract(),
-    };
     const input = getSampleDashboardInput({
       panels: {
         '123': getSampleDashboardPanel<ContactCardEmbeddableInput>({
@@ -68,7 +56,7 @@ describe('Export CSV action', () => {
         }),
       },
     });
-    container = new DashboardContainer(input, options);
+    container = new DashboardContainer(input);
     dataMock = dataPluginMock.createStartContract();
 
     const contactCardEmbeddable = await container.addNewEmbeddable<

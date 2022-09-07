@@ -27,7 +27,6 @@ import {
   ContactCardEmbeddableOutput,
   CONTACT_CARD_EMBEDDABLE,
 } from '@kbn/embeddable-plugin/public/lib/test_samples/embeddables';
-import { screenshotModePluginMock } from '@kbn/screenshot-mode-plugin/public/mocks';
 import { pluginServices } from '../../services/plugin_services';
 
 const mockEmbeddableFactory = new ContactCardEmbeddableFactory((() => null) as any, {} as any);
@@ -48,19 +47,7 @@ beforeEach(async () => {
     execute: jest.fn(),
   } as unknown as UnlinkFromLibraryAction;
 
-  const containerOptions = {
-    ExitFullScreenButton: () => null,
-    SavedObjectFinder: () => null,
-    application: {} as any,
-    inspector: {} as any,
-    notifications: {} as any,
-    savedObjectMetaData: {} as any,
-    uiActions: {} as any,
-    theme: coreStart.theme,
-    screenshotMode: screenshotModePluginMock.createSetupContract(),
-  };
-
-  container = new DashboardContainer(getSampleDashboardInput(), containerOptions);
+  container = new DashboardContainer(getSampleDashboardInput());
 
   const contactCardEmbeddable = await container.addNewEmbeddable<
     ContactCardEmbeddableInput,

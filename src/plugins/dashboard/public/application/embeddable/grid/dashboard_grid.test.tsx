@@ -15,7 +15,7 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
 import { DashboardGrid, DashboardGridProps } from './dashboard_grid';
-import { DashboardContainer, DashboardContainerServices } from '../dashboard_container';
+import { DashboardContainer } from '../dashboard_container';
 import { getSampleDashboardInput } from '../../test_helpers';
 import {
   ContactCardEmbeddableFactory,
@@ -46,14 +46,7 @@ function prepare(props?: Partial<DashboardGridProps>) {
       },
     },
   });
-  const options: DashboardContainerServices = {
-    inspector: {
-      isAvailable: jest.fn(),
-    } as any,
-    SavedObjectFinder: () => null,
-    ExitFullScreenButton: () => null,
-  };
-  dashboardContainer = new DashboardContainer(initialInput, options);
+  dashboardContainer = new DashboardContainer(initialInput);
   const defaultTestProps: DashboardGridProps = {
     container: dashboardContainer,
     kibana: null as any,

@@ -106,7 +106,7 @@ export interface DashboardAppState {
 /**
  * The shared services and tools used to build a dashboard from a saved object ID.
  */
-// TODO: Delete this maybe?
+// TODO: Remove reference to DashboardAppServices as part of https://github.com/elastic/kibana/pull/138774
 export type DashboardBuildContext = Pick<DashboardAppServices, 'savedDashboards'> & {
   locatorState?: DashboardAppLocatorParams;
   history: History;

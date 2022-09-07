@@ -21,7 +21,6 @@ import {
   ContactCardEmbeddableOutput,
   CONTACT_CARD_EMBEDDABLE,
 } from '@kbn/embeddable-plugin/public/lib/test_samples/embeddables';
-import { screenshotModePluginMock } from '@kbn/screenshot-mode-plugin/public/mocks';
 import { pluginServices } from '../../services/plugin_services';
 
 const { doStart } = embeddablePluginMock.createInstance();
@@ -37,17 +36,6 @@ let embeddable: ContactCardEmbeddable;
 let coreStart: CoreStart;
 beforeEach(async () => {
   coreStart = coreMock.createStart();
-  const options = {
-    ExitFullScreenButton: () => null,
-    SavedObjectFinder: () => null,
-    application: {} as any,
-    inspector: {} as any,
-    notifications: {} as any,
-    savedObjectMetaData: {} as any,
-    uiActions: {} as any,
-    theme: coreStart.theme,
-    screenshotMode: screenshotModePluginMock.createSetupContract(),
-  };
   const input = getSampleDashboardInput({
     panels: {
       '123': getSampleDashboardPanel<ContactCardEmbeddableInput>({
@@ -56,7 +44,7 @@ beforeEach(async () => {
       }),
     },
   });
-  container = new DashboardContainer(input, options);
+  container = new DashboardContainer(input);
 
   const contactCardEmbeddable = await container.addNewEmbeddable<
     ContactCardEmbeddableInput,

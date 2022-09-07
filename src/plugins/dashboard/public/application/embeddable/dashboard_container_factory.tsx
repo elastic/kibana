@@ -27,7 +27,7 @@ import {
 
 import { DashboardContainerInput } from '../..';
 import { DASHBOARD_CONTAINER_TYPE } from './dashboard_constants';
-import type { DashboardContainer, DashboardContainerServices } from './dashboard_container';
+import type { DashboardContainer } from './dashboard_container';
 import {
   createExtract,
   createInject,
@@ -49,10 +49,7 @@ export class DashboardContainerFactoryDefinition
   public inject: EmbeddablePersistableStateService['inject'];
   public extract: EmbeddablePersistableStateService['extract'];
 
-  constructor(
-    private readonly getStartServices: () => Promise<DashboardContainerServices>,
-    private readonly persistableStateService: EmbeddablePersistableStateService
-  ) {
+  constructor(private readonly persistableStateService: EmbeddablePersistableStateService) {
     this.inject = createInject(this.persistableStateService);
     this.extract = createExtract(this.persistableStateService);
   }
@@ -83,8 +80,6 @@ export class DashboardContainerFactoryDefinition
     initialInput: DashboardContainerInput,
     parent?: Container
   ): Promise<DashboardContainer | ErrorEmbeddable> => {
-    const services = await this.getStartServices();
-
     const {
       embeddable: { getEmbeddableFactory },
     } = pluginServices.getServices();
@@ -109,8 +104,6 @@ export class DashboardContainerFactoryDefinition
       './dashboard_container'
     );
 
-    return Promise.resolve(
-      new DashboardContainerEmbeddable(initialInput, services, parent, controlGroup)
-    );
+    return Promise.resolve(new DashboardContainerEmbeddable(initialInput, parent, controlGroup));
   };
 }

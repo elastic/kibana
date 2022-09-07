@@ -11,7 +11,6 @@ import { mount } from 'enzyme';
 
 import { findTestSubject, nextTick } from '@kbn/test-jest-helpers';
 import { I18nProvider } from '@kbn/i18n-react';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import {
   CONTEXT_MENU_TRIGGER,
   EmbeddablePanel,
@@ -27,11 +26,10 @@ import {
   EMPTY_EMBEDDABLE,
 } from '@kbn/embeddable-plugin/public/lib/test_samples/embeddables';
 import { applicationServiceMock, coreMock } from '@kbn/core/public/mocks';
-import { inspectorPluginMock } from '@kbn/inspector-plugin/public/mocks';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { createEditModeAction } from '@kbn/embeddable-plugin/public/lib/test_samples';
 
-import { DashboardContainer, DashboardContainerServices } from './dashboard_container';
+import { DashboardContainer } from './dashboard_container';
 import { getSampleDashboardInput, getSampleDashboardPanel } from '../test_helpers';
 import { pluginServices } from '../../services/plugin_services';
 import { ApplicationStart } from '@kbn/core-application-browser';
@@ -43,13 +41,6 @@ const embeddableFactory = new ContactCardEmbeddableFactory((() => null) as any, 
 pluginServices.getServices().embeddable.getEmbeddableFactory = jest
   .fn()
   .mockReturnValue(embeddableFactory);
-
-const options: DashboardContainerServices = {
-  // TODO: clean up use of any
-  inspector: {} as any,
-  SavedObjectFinder: () => null,
-  ExitFullScreenButton: () => null,
-};
 
 beforeEach(() => {
   application = applicationServiceMock.createStartContract();
@@ -64,7 +55,7 @@ test('DashboardContainer initializes embeddables', async (done) => {
       }),
     },
   });
-  const container = new DashboardContainer(initialInput, options);
+  const container = new DashboardContainer(initialInput);
 
   const subscription = container.getOutput$().subscribe((output) => {
     if (container.getOutput().embeddableLoaded['123']) {
@@ -85,7 +76,7 @@ test('DashboardContainer initializes embeddables', async (done) => {
 });
 
 test('DashboardContainer.addNewEmbeddable', async () => {
-  const container = new DashboardContainer(getSampleDashboardInput(), options);
+  const container = new DashboardContainer(getSampleDashboardInput());
   const embeddable = await container.addNewEmbeddable<ContactCardEmbeddableInput>(
     CONTACT_CARD_EMBEDDABLE,
     {
@@ -116,7 +107,7 @@ test('DashboardContainer.replacePanel', async (done) => {
     },
   });
 
-  const container = new DashboardContainer(initialInput, options);
+  const container = new DashboardContainer(initialInput);
   let counter = 0;
 
   const subscription = container.getInput$().subscribe(
@@ -157,7 +148,7 @@ test('Container view mode change propagates to existing children', async (done) 
       }),
     },
   });
-  const container = new DashboardContainer(initialInput, options);
+  const container = new DashboardContainer(initialInput);
 
   const embeddable = await container.untilEmbeddableLoaded('123');
   expect(embeddable.getInput().viewMode).toBe(ViewMode.VIEW);
@@ -167,7 +158,7 @@ test('Container view mode change propagates to existing children', async (done) 
 });
 
 test('Container view mode change propagates to new children', async () => {
-  const container = new DashboardContainer(getSampleDashboardInput(), options);
+  const container = new DashboardContainer(getSampleDashboardInput());
   const embeddable = await container.addNewEmbeddable<
     ContactCardEmbeddableInput,
     ContactCardEmbeddableOutput,
@@ -186,8 +177,7 @@ test('Container view mode change propagates to new children', async () => {
 test('searchSessionId propagates to children', async () => {
   const searchSessionId1 = 'searchSessionId1';
   const container = new DashboardContainer(
-    getSampleDashboardInput({ searchSessionId: searchSessionId1 }),
-    options
+    getSampleDashboardInput({ searchSessionId: searchSessionId1 })
   );
   const embeddable = await container.addNewEmbeddable<
     ContactCardEmbeddableInput,
@@ -206,7 +196,6 @@ test('searchSessionId propagates to children', async () => {
 });
 
 test('DashboardContainer in edit mode shows edit mode actions', async () => {
-  const inspector = inspectorPluginMock.createStartContract();
   const uiActionsSetup = uiActionsPluginMock.createSetupContract();
 
   const editModeAction = createEditModeAction();
@@ -214,7 +203,7 @@ test('DashboardContainer in edit mode shows edit mode actions', async () => {
   uiActionsSetup.addTriggerAction(CONTEXT_MENU_TRIGGER, editModeAction);
 
   const initialInput = getSampleDashboardInput({ viewMode: ViewMode.VIEW });
-  const container = new DashboardContainer(initialInput, options);
+  const container = new DashboardContainer(initialInput);
 
   const embeddable = await container.addNewEmbeddable<
     ContactCardEmbeddableInput,
@@ -228,21 +217,18 @@ test('DashboardContainer in edit mode shows edit mode actions', async () => {
 
   const component = mount(
     <I18nProvider>
-      <KibanaContextProvider services={options}>
-        <DashboardServicesProvider>
-          <EmbeddablePanel
-            embeddable={embeddable}
-            getActions={() => Promise.resolve([])}
-            getAllEmbeddableFactories={(() => []) as any}
-            getEmbeddableFactory={(() => null) as any}
-            notifications={{} as any}
-            application={application}
-            inspector={inspector}
-            SavedObjectFinder={() => null}
-            theme={theme}
-          />
-        </DashboardServicesProvider>
-      </KibanaContextProvider>
+      <DashboardServicesProvider>
+        <EmbeddablePanel
+          embeddable={embeddable}
+          getActions={() => Promise.resolve([])}
+          getAllEmbeddableFactories={(() => []) as any}
+          getEmbeddableFactory={(() => null) as any}
+          notifications={{} as any}
+          application={application}
+          SavedObjectFinder={() => null}
+          theme={theme}
+        />
+      </DashboardServicesProvider>
     </I18nProvider>
   );
 

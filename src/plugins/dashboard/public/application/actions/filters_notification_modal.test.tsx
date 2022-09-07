@@ -13,10 +13,7 @@ import { FilterableEmbeddable, isErrorEmbeddable, ViewMode } from '@kbn/embeddab
 import { DashboardContainer } from '../embeddable/dashboard_container';
 import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 import { getSampleDashboardInput } from '../test_helpers';
-import { CoreStart } from '@kbn/core/public';
-import { coreMock } from '@kbn/core/public/mocks';
 import { EuiModalFooter } from '@elastic/eui';
-import { screenshotModePluginMock } from '@kbn/screenshot-mode-plugin/public/mocks';
 import { FiltersNotificationModal, FiltersNotificationProps } from './filters_notification_modal';
 import {
   ContactCardEmbeddable,
@@ -37,24 +34,9 @@ describe('LibraryNotificationPopover', () => {
   let container: DashboardContainer;
   let embeddable: ContactCardEmbeddable & FilterableEmbeddable;
   let defaultProps: FiltersNotificationProps;
-  let coreStart: CoreStart;
 
   beforeEach(async () => {
-    coreStart = coreMock.createStart();
-
-    const containerOptions = {
-      ExitFullScreenButton: () => null,
-      SavedObjectFinder: () => null,
-      application: {} as any,
-      inspector: {} as any,
-      notifications: {} as any,
-      savedObjectMetaData: {} as any,
-      uiActions: {} as any,
-      theme: coreStart.theme,
-      screenshotMode: screenshotModePluginMock.createSetupContract(),
-    };
-
-    container = new DashboardContainer(getSampleDashboardInput(), containerOptions);
+    container = new DashboardContainer(getSampleDashboardInput());
     const contactCardEmbeddable = await container.addNewEmbeddable<
       ContactCardEmbeddableInput,
       ContactCardEmbeddableOutput,

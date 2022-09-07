@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import * as React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
@@ -32,10 +31,6 @@ import {
   PANEL_BADGE_TRIGGER,
   PANEL_NOTIFICATION_TRIGGER,
 } from '@kbn/embeddable-plugin/public';
-import {
-  ExitFullScreenButton as ExitFullScreenButtonUi,
-  type ExitFullScreenButtonProps,
-} from '@kbn/kibana-react-plugin/public';
 import type {
   ScreenshotModePluginSetup,
   ScreenshotModePluginStart,
@@ -164,21 +159,6 @@ export class DashboardPlugin
       return { theme: coreStart.theme };
     };
 
-    const getStartServices = async () => {
-      const [coreStart, deps] = await core.getStartServices();
-
-      const ExitFullScreenButton: React.FC<ExitFullScreenButtonProps> = (props) => {
-        return <ExitFullScreenButtonUi {...props} chrome={coreStart.chrome} />;
-      };
-      return {
-        SavedObjectFinder: getSavedObjectFinder(coreStart.savedObjects, coreStart.uiSettings),
-        application: coreStart.application,
-        analytics: coreStart.analytics,
-        inspector: deps.inspector,
-        ExitFullScreenButton,
-      };
-    };
-
     if (share) {
       this.locator = share.url.locators.create(
         new DashboardAppLocatorDefinition({
@@ -237,10 +217,7 @@ export class DashboardPlugin
     });
 
     core.getStartServices().then(([, deps]) => {
-      const dashboardContainerFactory = new DashboardContainerFactoryDefinition(
-        getStartServices,
-        deps.embeddable
-      );
+      const dashboardContainerFactory = new DashboardContainerFactoryDefinition(deps.embeddable);
       embeddable.registerEmbeddableFactory(
         dashboardContainerFactory.type,
         dashboardContainerFactory

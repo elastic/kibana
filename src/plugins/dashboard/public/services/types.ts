@@ -10,6 +10,7 @@ import { PluginInitializerContext } from '@kbn/core/public';
 import { KibanaPluginServiceParams } from '@kbn/presentation-util-plugin/public';
 
 import { DashboardStartDependencies } from '../plugin';
+import { DashboardAnalyticsService } from './analytics/types';
 import { DashboardApplicationService } from './application/types';
 import { DashboardChromeService } from './chrome/types';
 import { DashboardCoreContextService } from './core_context/types';
@@ -38,6 +39,7 @@ export type DashboardPluginServiceParams = KibanaPluginServiceParams<DashboardSt
   initContext: PluginInitializerContext; // need a custom type so that initContext is a required parameter for initializerContext
 };
 export interface DashboardServices {
+  analytics: DashboardAnalyticsService;
   application: DashboardApplicationService;
   chrome: DashboardChromeService;
   coreContext: DashboardCoreContextService;

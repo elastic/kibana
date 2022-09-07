@@ -17,12 +17,12 @@ import {
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { withSuspense } from '@kbn/presentation-util-plugin/public';
 import { context } from '@kbn/kibana-react-plugin/public';
-
 import {
-  DashboardContainer,
-  DashboardReactContextValue,
-  DashboardLoadedInfo,
-} from '../dashboard_container';
+  ExitFullScreenButton,
+  ExitFullScreenButtonKibanaProvider,
+} from '@kbn/shared-ux-button-exit-full-screen';
+
+import { DashboardContainer, DashboardLoadedInfo } from '../dashboard_container';
 import { DashboardGrid } from '../grid';
 import { DashboardEmptyScreen } from '../empty_screen/dashboard_empty_screen';
 import { pluginServices } from '../../../services/plugin_services';
@@ -47,8 +47,6 @@ const ControlsCallout = withSuspense<CalloutProps>(LazyControlsCallout);
 
 export class DashboardViewport extends React.Component<DashboardViewportProps, State> {
   static contextType = context;
-  public declare readonly context: DashboardReactContextValue;
-
   private controlsRoot: React.RefObject<HTMLDivElement>;
 
   private subscription?: Subscription;
@@ -155,8 +153,8 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
           className={useMargins ? 'dshDashboardViewport-withMargins' : 'dshDashboardViewport'}
         >
           {isFullScreenMode && (
-            <this.context.services.ExitFullScreenButton
-              onExitFullScreenMode={this.onExitFullScreenMode}
+            <ExitFullScreenButton
+              onExit={this.onExitFullScreenMode}
               toggleChrome={!isEmbeddedExternally}
             />
           )}

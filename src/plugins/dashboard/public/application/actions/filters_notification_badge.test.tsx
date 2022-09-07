@@ -9,7 +9,7 @@
 import { getSampleDashboardInput } from '../test_helpers';
 import { DashboardContainer } from '../embeddable/dashboard_container';
 
-import { coreMock, uiSettingsServiceMock } from '@kbn/core/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 import { CoreStart } from '@kbn/core/public';
 import { FiltersNotificationBadge } from '.';
 import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
@@ -28,7 +28,6 @@ import {
   ContactCardEmbeddableOutput,
   CONTACT_CARD_EMBEDDABLE,
 } from '@kbn/embeddable-plugin/public/lib/test_samples/embeddables';
-import { screenshotModePluginMock } from '@kbn/screenshot-mode-plugin/public/mocks';
 import { pluginServices } from '../../services/plugin_services';
 
 const mockEmbeddableFactory = new ContactCardEmbeddableFactory((() => null) as any, {} as any);
@@ -66,20 +65,7 @@ const getMockPhraseFilter = (key: string, value: string) => {
 beforeEach(async () => {
   coreStart = coreMock.createStart();
 
-  const containerOptions = {
-    ExitFullScreenButton: () => null,
-    SavedObjectFinder: () => null,
-    application: {} as any,
-    inspector: {} as any,
-    notifications: {} as any,
-    savedObjectMetaData: {} as any,
-    uiActions: {} as any,
-    uiSettings: uiSettingsServiceMock.createStartContract(),
-    theme: coreStart.theme,
-    screenshotMode: screenshotModePluginMock.createSetupContract(),
-  };
-
-  container = new DashboardContainer(getSampleDashboardInput(), containerOptions);
+  container = new DashboardContainer(getSampleDashboardInput());
 
   const contactCardEmbeddable = await container.addNewEmbeddable<
     ContactCardEmbeddableInput,

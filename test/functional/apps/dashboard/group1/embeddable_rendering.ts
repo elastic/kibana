@@ -175,6 +175,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await expectAllDataRenders();
     });
 
+    // seems to be flaky - caused by this PR?
     it('data rendered correctly when dashboard is hard refreshed', async () => {
       await browser.refresh();
       const alert = await browser.getAlert();

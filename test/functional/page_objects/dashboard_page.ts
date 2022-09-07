@@ -98,15 +98,15 @@ export class DashboardPageObject extends FtrService {
   }
 
   public async exitFullScreenLogoButtonExists() {
-    return await this.testSubjects.exists('exitFullScreenModeLogo');
+    return await this.testSubjects.exists('exitFullScreenModeButton');
   }
 
   public async getExitFullScreenLogoButton() {
-    return await this.testSubjects.find('exitFullScreenModeLogo');
+    return await this.testSubjects.find('exitFullScreenModeButton');
   }
 
   public async clickExitFullScreenLogoButton() {
-    await this.testSubjects.click('exitFullScreenModeLogo');
+    await this.testSubjects.click('exitFullScreenModeButton');
     await this.waitForRenderComplete();
   }
 

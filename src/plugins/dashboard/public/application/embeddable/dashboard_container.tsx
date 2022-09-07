@@ -12,8 +12,7 @@ import ReactDOM from 'react-dom';
 
 import { I18nProvider } from '@kbn/i18n-react';
 import { Subscription } from 'rxjs';
-import type { CoreStart, KibanaExecutionContext } from '@kbn/core/public';
-import { Start as InspectorStartContract } from '@kbn/inspector-plugin/public';
+import type { KibanaExecutionContext } from '@kbn/core/public';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import type { ControlGroupContainer } from '@kbn/controls-plugin/public';
 import type { Filter, TimeRange } from '@kbn/es-query';
@@ -29,14 +28,10 @@ import {
   ErrorEmbeddable,
   isErrorEmbeddable,
 } from '@kbn/embeddable-plugin/public';
-import {
-  KibanaContextProvider,
-  KibanaReactContext,
-  KibanaReactContextValue,
-  KibanaThemeProvider,
-} from '@kbn/kibana-react-plugin/public';
-import type { RefreshInterval } from '@kbn/data-plugin/public';
 import type { Query } from '@kbn/es-query';
+import type { RefreshInterval } from '@kbn/data-plugin/public';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { ExitFullScreenButtonKibanaProvider } from '@kbn/shared-ux-button-exit-full-screen';
 
 import { DASHBOARD_CONTAINER_TYPE } from './dashboard_constants';
 import { createPanelState } from './panel';
@@ -51,13 +46,6 @@ import {
   syncDashboardControlGroup,
 } from '../lib/dashboard_control_group';
 import { pluginServices } from '../../services/plugin_services';
-
-export interface DashboardContainerServices {
-  ExitFullScreenButton: React.ComponentType<any>;
-  SavedObjectFinder: React.ComponentType<any>;
-  inspector: InspectorStartContract;
-  analytics?: CoreStart['analytics'];
-}
 
 export interface DashboardLoadedInfo {
   timeToData: number;
@@ -84,9 +72,6 @@ export interface InheritedChildInput extends IndexSignature {
   syncTooltips?: boolean;
   executionContext?: KibanaExecutionContext;
 }
-
-export type DashboardReactContextValue = KibanaReactContextValue<DashboardContainerServices>;
-export type DashboardReactContext = KibanaReactContext<DashboardContainerServices>;
 
 export class DashboardContainer extends Container<InheritedChildInput, DashboardContainerInput> {
   public readonly type = DASHBOARD_CONTAINER_TYPE;
@@ -135,7 +120,6 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
 
   constructor(
     initialInput: DashboardContainerInput,
-    private readonly services: DashboardContainerServices,
     parent?: Container,
     controlGroup?: ControlGroupContainer | ErrorEmbeddable
   ) {
@@ -187,8 +171,10 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   }
 
   private onDataLoaded(data: DashboardLoadedInfo) {
-    if (this.services.analytics) {
-      reportPerformanceMetricEvent(this.services.analytics, {
+    const { analytics } = pluginServices.getServices();
+
+    if (analytics) {
+      reportPerformanceMetricEvent(analytics, {
         eventName: DASHBOARD_LOADED_EVENT,
         duration: data.timeToDone,
         key1: 'time_to_data',
@@ -326,19 +312,20 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
 
     const {
       settings: { theme },
+      chrome: { setIsVisible },
     } = pluginServices.getServices();
 
     ReactDOM.render(
       <I18nProvider>
-        <KibanaContextProvider services={this.services}>
-          <KibanaThemeProvider theme$={theme.theme$}>
+        <KibanaThemeProvider theme$={theme.theme$}>
+          <ExitFullScreenButtonKibanaProvider coreStart={{ chrome: { setIsVisible } }}>
             <DashboardViewport
               container={this}
               controlGroup={this.controlGroup}
               onDataLoaded={this.onDataLoaded.bind(this)}
             />
-          </KibanaThemeProvider>
-        </KibanaContextProvider>
+          </ExitFullScreenButtonKibanaProvider>
+        </KibanaThemeProvider>
       </I18nProvider>,
       dom
     );
