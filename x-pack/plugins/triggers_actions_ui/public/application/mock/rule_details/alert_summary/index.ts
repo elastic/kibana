@@ -63,7 +63,7 @@ export const mockRule = (): Rule => {
   };
 };
 
-export const mockChartData = (): AlertChartData[] => {
+export function mockChartData(): AlertChartData[] {
   return [
     {
       date: 1660608000000,
@@ -231,7 +231,7 @@ export const mockChartData = (): AlertChartData[] => {
       status: 'total',
     },
   ];
-};
+}
 
 export const mockAggsResponse = () => {
   return {
