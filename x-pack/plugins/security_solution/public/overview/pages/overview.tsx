@@ -8,6 +8,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiShowFor } from '@elastic/eui';
 import React, { useCallback, useState, useMemo } from 'react';
 
+import { InputsModelId } from '../../common/store/inputs/constants';
 import { FiltersGlobal } from '../../common/components/filters_global';
 import { SiemSearchBar } from '../../common/components/search_bar';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
@@ -69,12 +70,19 @@ const OverviewComponent = () => {
 
   const riskyHostsEnabled = useIsExperimentalFeatureEnabled('riskyHostsEnabled');
 
+  const timerange = useMemo(
+    () => ({
+      from,
+      to,
+    }),
+    [from, to]
+  );
   return (
     <>
       {indicesExist ? (
         <>
           <FiltersGlobal>
-            <SiemSearchBar id="global" indexPattern={indexPattern} />
+            <SiemSearchBar id={InputsModelId.global} indexPattern={indexPattern} />
           </FiltersGlobal>
 
           <SecuritySolutionPageWrapper>
@@ -143,10 +151,7 @@ const OverviewComponent = () => {
                           <RiskyHostLinks
                             deleteQuery={deleteQuery}
                             setQuery={setQuery}
-                            timerange={{
-                              from,
-                              to,
-                            }}
+                            timerange={timerange}
                           />
                         )}
                       </EuiFlexItem>

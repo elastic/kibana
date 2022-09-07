@@ -155,3 +155,19 @@ Note:
 | `--logLevel`      | [enum]    | `info`  | Log level                                                                                               |
 | `--gcpRepository` | [string]  |         | Allows you to register a GCP repository in <client_name>:<bucket>[:base_path] format                    |
 | `-p`              | [string]  |         | Specify multiple sets of streamaggregators to be included in the StreamProcessor                        |
+
+## Testing
+
+Run the Jest tests:
+
+```
+node scripts/jest --config ./packages/kbn-apm-synthtrace/jest.config.js
+```
+
+## Typescript
+
+Run the type checker:
+
+```
+node scripts/type_check.js --project packages/kbn-apm-synthtrace/tsconfig.json
+```
