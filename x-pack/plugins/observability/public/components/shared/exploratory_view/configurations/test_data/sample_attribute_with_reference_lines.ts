@@ -96,6 +96,7 @@ export const sampleAttributeWithReferenceLines = {
                 params: {
                   emptyAsNull: false,
                 },
+                timeScalingMode: 'optional',
                 scale: 'ratio',
                 sourceField: RECORDS_FIELD,
                 timeScale: undefined,
@@ -117,6 +118,7 @@ export const sampleAttributeWithReferenceLines = {
                 },
                 scale: 'ratio',
                 sourceField: RECORDS_FIELD,
+                timeScalingMode: 'optional',
                 timeScale: undefined,
                 timeShift: undefined,
               },

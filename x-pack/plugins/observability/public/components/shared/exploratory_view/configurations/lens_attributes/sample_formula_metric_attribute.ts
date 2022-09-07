@@ -62,6 +62,7 @@ export const sampleMetricFormulaAttribute = {
                 params: {
                   emptyAsNull: false,
                 },
+                timeScalingMode: 'optional',
                 scale: 'ratio',
                 sourceField: '___records___',
               },
@@ -74,6 +75,7 @@ export const sampleMetricFormulaAttribute = {
                 params: {
                   emptyAsNull: false,
                 },
+                timeScalingMode: 'optional',
                 scale: 'ratio',
                 sourceField: '___records___',
               },
