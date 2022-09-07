@@ -3144,7 +3144,7 @@ describe('XYChart component', () => {
       // checking tooltip
       const renderLinks = mount(<div>{groupedAnnotation.prop('customTooltipDetails')!()}</div>);
       expect(renderLinks.text()).toEqual(
-        ' Event 1 2022-03-18T08:25:00.000Z Event 2 2022-03-18T08:25:00.020Z Event 3 2022-03-18T08:25:00.001Z'
+        ' Event 12022-03-18, 04:25:002022-03-18, 04:25:002022-03-18, 04:25:00'
       );
     });
 

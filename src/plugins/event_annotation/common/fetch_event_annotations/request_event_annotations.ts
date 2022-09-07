@@ -304,8 +304,12 @@ function regroupForRequestOptimization(
           return acc;
         } else {
           const dataView = loadedDataViews.find((dv) => dv.id === g.dataView.value.id)!;
-          const timeField = current.timeField ?? dataView.timeFieldName;
-          // get default timefield if not defined
+
+          const timeField =
+            current.timeField ??
+            (dataView.timeFieldName ||
+              dataView.fields.find((field) => field.type === 'date' && field.displayName)?.name);
+
           const key = `${g.dataView.value.id}-${timeField}`;
           const subGroup = acc[key] as QueryGroup;
           if (subGroup) {
