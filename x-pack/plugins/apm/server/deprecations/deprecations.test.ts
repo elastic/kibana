@@ -54,7 +54,7 @@ describe('getDeprecations', () => {
               get: () =>
                 ({
                   id: 'foo',
-                  package_policies: [''],
+                  package_policies: [{ package: { name: 'system' } }],
                 } as AgentPolicy),
             },
           }),

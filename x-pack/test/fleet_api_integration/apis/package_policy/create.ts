@@ -24,7 +24,8 @@ export default function (providerContext: FtrProviderContext) {
   // because `this` has to point to the Mocha context
   // see https://mochajs.org/#arrow-functions
 
-  describe('Package Policy - create', async function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/139336
+  describe.skip('Package Policy - create', async function () {
     skipIfNoDockerRegistry(providerContext);
     let agentPolicyId: string;
     before(async () => {
@@ -81,7 +82,6 @@ export default function (providerContext: FtrProviderContext) {
           namespace: 'default',
           policy_id: hostedPolicy.id,
           enabled: true,
-          output_id: '',
           inputs: [],
           package: {
             name: 'filetest',
@@ -107,7 +107,6 @@ export default function (providerContext: FtrProviderContext) {
           namespace: 'default',
           policy_id: hostedPolicy.id,
           enabled: true,
-          output_id: '',
           inputs: [],
           package: {
             name: 'filetest',
@@ -135,7 +134,6 @@ export default function (providerContext: FtrProviderContext) {
           namespace: 'default',
           policy_id: agentPolicyId,
           enabled: true,
-          output_id: '',
           inputs: [],
           package: {
             name: 'filetest',
@@ -147,8 +145,8 @@ export default function (providerContext: FtrProviderContext) {
       const { body } = await supertest
         .get(`/internal/saved_objects_tagging/tags/_find?page=1&perPage=10000`)
         .expect(200);
-      expect(body.tags.find((tag: any) => tag.name === 'Managed').relationCount).to.be(6);
-      expect(body.tags.find((tag: any) => tag.name === 'For File Tests').relationCount).to.be(6);
+      expect(body.tags.find((tag: any) => tag.name === 'Managed').relationCount).to.be(9);
+      expect(body.tags.find((tag: any) => tag.name === 'For File Tests').relationCount).to.be(9);
     });
 
     it('should return a 400 with an empty namespace', async function () {
@@ -161,7 +159,6 @@ export default function (providerContext: FtrProviderContext) {
           namespace: '',
           policy_id: agentPolicyId,
           enabled: true,
-          output_id: '',
           inputs: [],
           package: {
             name: 'filetest',
@@ -182,7 +179,6 @@ export default function (providerContext: FtrProviderContext) {
           namespace: 'InvalidNamespace',
           policy_id: agentPolicyId,
           enabled: true,
-          output_id: '',
           inputs: [],
           package: {
             name: 'filetest',
@@ -201,7 +197,6 @@ export default function (providerContext: FtrProviderContext) {
             'testlength😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀',
           policy_id: agentPolicyId,
           enabled: true,
-          output_id: '',
           inputs: [],
           package: {
             name: 'filetest',
@@ -222,7 +217,6 @@ export default function (providerContext: FtrProviderContext) {
           namespace: 'default',
           policy_id: agentPolicyId,
           enabled: true,
-          output_id: '',
           inputs: [],
           package: {
             name: 'endpoint',
@@ -241,7 +235,6 @@ export default function (providerContext: FtrProviderContext) {
           namespace: 'default',
           policy_id: agentPolicyId,
           enabled: true,
-          output_id: '',
           inputs: [],
           package: {
             name: 'endpoint',
@@ -262,7 +255,6 @@ export default function (providerContext: FtrProviderContext) {
           namespace: 'default',
           policy_id: agentPolicyId,
           enabled: true,
-          output_id: '',
           inputs: [],
           package: {
             name: 'filetest',
@@ -280,7 +272,6 @@ export default function (providerContext: FtrProviderContext) {
           namespace: 'default',
           policy_id: agentPolicyId,
           enabled: true,
-          output_id: '',
           inputs: [],
           package: {
             name: 'filetest',
@@ -310,7 +301,6 @@ export default function (providerContext: FtrProviderContext) {
           namespace: 'default',
           policy_id: otherAgentPolicyId,
           enabled: true,
-          output_id: '',
           inputs: [],
           package: {
             name: 'filetest',
@@ -328,7 +318,6 @@ export default function (providerContext: FtrProviderContext) {
           namespace: 'default',
           policy_id: agentPolicyId,
           enabled: true,
-          output_id: '',
           inputs: [],
           package: {
             name: 'filetest',
@@ -349,7 +338,6 @@ export default function (providerContext: FtrProviderContext) {
           namespace: 'default',
           policy_id: agentPolicyId,
           enabled: true,
-          output_id: '',
           inputs: [
             {
               enabled: true,
@@ -385,7 +373,6 @@ export default function (providerContext: FtrProviderContext) {
           namespace: 'default',
           policy_id: agentPolicyId,
           enabled: true,
-          output_id: '',
           inputs: [
             {
               enabled: true,
@@ -425,7 +412,6 @@ export default function (providerContext: FtrProviderContext) {
           namespace: 'default',
           policy_id: agentPolicyId,
           enabled: true,
-          output_id: '',
           inputs: [
             {
               enabled: true,
@@ -489,7 +475,6 @@ export default function (providerContext: FtrProviderContext) {
             namespace: 'default',
             policy_id: agentPolicyId,
             enabled: true,
-            output_id: '',
             inputs: [
               {
                 type: 'logfile',
@@ -526,7 +511,6 @@ export default function (providerContext: FtrProviderContext) {
             namespace: 'default',
             policy_id: agentPolicyId,
             enabled: true,
-            output_id: '',
             inputs: [
               {
                 type: 'logfile',
@@ -563,7 +547,6 @@ export default function (providerContext: FtrProviderContext) {
             namespace: 'default',
             policy_id: agentPolicyId,
             enabled: true,
-            output_id: '',
             inputs: [
               {
                 type: 'logfile',

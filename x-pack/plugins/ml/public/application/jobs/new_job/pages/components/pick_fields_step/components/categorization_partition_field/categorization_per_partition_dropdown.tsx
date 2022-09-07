@@ -28,11 +28,13 @@ export const CategorizationPerPartitionFieldDropdown = ({
 
   const filteredCategories = useMemo(
     () => categoryFields.filter((c) => c.id !== jobCreator.categorizationFieldName),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [categoryFields, jobCreatorUpdated]
   );
   useEffect(() => {
     jobCreator.categorizationPerPartitionField = categorizationPartitionFieldName;
     jobCreatorUpdate();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [categorizationPartitionFieldName]);
 
   useEffect(() => {
@@ -48,6 +50,7 @@ export const CategorizationPerPartitionFieldDropdown = ({
     }
     setCategorizationPartitionFieldName(jobCreator.categorizationPerPartitionField);
     setEnablePerPartitionCategorization(jobCreator.perPartitionCategorization);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobCreatorUpdated]);
   return (
     <EuiFormRow

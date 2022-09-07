@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { DataViewFieldBase } from '../..';
+import { DataViewFieldBase } from '../../..';
 
 /**
  * Base index pattern fields for testing

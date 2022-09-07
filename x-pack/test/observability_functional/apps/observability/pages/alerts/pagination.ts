@@ -15,7 +15,6 @@ const DEFAULT_ROWS_PER_PAGE = 50;
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
 
-  // FAILING: https://github.com/elastic/kibana/issues/113486
   describe('Observability alerts pagination', function () {
     this.tags('includeFirefox');
 
@@ -82,7 +81,7 @@ export default ({ getService }: FtrProviderContext) => {
         it('Shows up to 25 rows per page', async () => {
           await retry.try(async () => {
             await (await observability.alerts.pagination.getPageSizeSelector()).click();
-            await (await observability.alerts.pagination.getTwentyFiveRowsPageSelector()).click();
+            await (await observability.alerts.pagination.getTwentyRowsPageSelector()).click();
             const tableRows = await observability.alerts.common.getTableCellsInRows();
             expect(tableRows.length).to.not.be.greaterThan(25);
           });
