@@ -55,7 +55,7 @@ import {
 } from './authorization/get_authorization_mode_by_source';
 import { connectorAuditEvent, ConnectorAuditAction } from './lib/audit_events';
 import { trackLegacyRBACExemption } from './lib/track_legacy_rbac_exemption';
-import { isConnectorDeprecated } from './lib/is_conector_deprecated';
+import { isConnectorDeprecated } from './lib/is_connector_deprecated';
 import { ActionsConfigurationUtilities } from './actions_config';
 import {
   OAuthClientCredentialsParams,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isConnectorDeprecated } from './is_conector_deprecated';
+import { isConnectorDeprecated } from './is_connector_deprecated';
 
 describe('isConnectorDeprecated', () => {
   const connector = {

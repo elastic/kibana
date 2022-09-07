@@ -8,7 +8,7 @@
 import React, { useCallback, useEffect, useState, useMemo } from 'react';
 
 import { EuiSpacer } from '@elastic/eui';
-import { snExternalServiceConfig } from '@kbn/actions-plugin/common';
+import { snExternalServiceConfig } from '@kbn/stack-connectors-plugin/common/servicenow_config';
 import { useFormContext, useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 
 import { ActionConnectorFieldsProps } from '../../../../types';

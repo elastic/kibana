@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { registerBuiltInConnectorTypes } from '.';
+import { registerConnectorTypes } from '.';
 import { Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
@@ -31,7 +31,7 @@ beforeEach(() => {
 
 describe('registers connectors', () => {
   test('calls registerType with expected connector types', () => {
-    registerBuiltInConnectorTypes({
+    registerConnectorTypes({
       logger,
       actions: mockedActions,
     });

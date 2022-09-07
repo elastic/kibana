@@ -7,13 +7,12 @@
 
 import { SavedObject } from '@kbn/core/server';
 import { ActionsConfigurationUtilities } from '../actions_config';
-import { ActionTypeRegistry } from '../action_type_registry';
 import { validateSecrets } from '../lib';
-import { RawAction, ActionType } from '../types';
+import { RawAction, ActionType, ActionTypeRegistryContract } from '../types';
 
 export function transformConnectorsForExport(
   connectors: SavedObject[],
-  actionTypeRegistry: ActionTypeRegistry
+  actionTypeRegistry: ActionTypeRegistryContract
 ): Array<SavedObject<RawAction>> {
   return connectors.map((c) => {
     const connector = c as SavedObject<RawAction>;

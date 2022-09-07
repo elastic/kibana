@@ -7,7 +7,6 @@
 
 import { Logger } from '@kbn/core/server';
 import { PluginSetupContract as ActionsPluginSetupContract } from '@kbn/actions-plugin/server';
-
 import { getConnectorType as getEmailConnectorType } from './email';
 import { getConnectorType as getIndexConnectorType } from './es_index';
 import { getConnectorType as getPagerDutyConnectorType } from './pagerduty';
@@ -54,7 +53,7 @@ export { ConnectorTypeId as ResilientConnectorTypeId } from './resilient';
 export type { ActionParamsType as TeamsActionParams } from './teams';
 export { ConnectorTypeId as TeamsConnectorTypeId } from './teams';
 
-export function registerBuiltInConnectorTypes({
+export function registerConnectorTypes({
   actions,
   logger,
   publicBaseUrl,
