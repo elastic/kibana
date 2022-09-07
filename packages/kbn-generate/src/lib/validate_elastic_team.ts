@@ -14,7 +14,7 @@ interface Body {
   suggestions: string[];
 }
 
-export async function validateTeam(owner: string): Promise<ValidationResult> {
+export async function validateElasticTeam(owner: string): Promise<ValidationResult> {
   const slug = owner.startsWith('@') ? owner.slice(1) : owner;
 
   const res = await Axios.get<Body>('https://ci-stats.kibana.dev/v1/_validate_kibana_team', {

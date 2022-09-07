@@ -22,7 +22,7 @@ interface Options {
 
 export async function ask(options: Options) {
   if (!process.stderr.isTTY) {
-    throw new Error(`don't call ask() without checking process.stderr.isTTY`);
+    return undefined;
   }
   const int = Readline.createInterface({
     input: process.stdin,

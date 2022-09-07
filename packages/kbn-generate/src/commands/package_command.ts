@@ -19,15 +19,18 @@ import { discoverBazelPackages, BAZEL_PACKAGE_DIRS } from '@kbn/bazel-packages';
 import { createFailError, createFlagError, isFailError } from '@kbn/dev-cli-errors';
 import { sortPackageJson } from '@kbn/sort-package-json';
 
-import { validateTeam } from '../lib/validate_team';
+import { validateElasticTeam } from '../lib/validate_elastic_team';
 import { TEMPLATE_DIR, ROOT_PKG_DIR, PKG_TEMPLATE_DIR } from '../paths';
 import type { GenerateCommand } from '../generate_command';
 import { ask } from '../lib/ask';
 
+const validPkgId = (id: unknown): id is string =>
+  typeof id === 'string' && id.startsWith('@kbn/') && !id.includes(' ');
+
 export const PackageCommand: GenerateCommand = {
   name: 'package',
   description: 'Generate a basic package',
-  usage: 'node scripts/generate package [name]',
+  usage: 'node scripts/generate package [pkgId]',
   flags: {
     boolean: ['web', 'force', 'dev'],
     string: ['dir', 'owner'],
@@ -46,21 +49,32 @@ ${BAZEL_PACKAGE_DIRS.map((dir) => `                          ./${dir}/*\n`).join
     `,
   },
   async run({ log, flags, render }) {
-    const [name] = flags._;
-    if (!name) {
-      throw createFlagError(`missing package name`);
-    }
-    if (!name.startsWith('@kbn/')) {
-      throw createFlagError(`package name must start with @kbn/`);
+    const pkgId =
+      flags._[0] ||
+      (await ask({
+        question: `What should the package id be? (Must start with @kbn/ and have no spaces)`,
+        async validate(input) {
+          if (validPkgId(input)) {
+            return input;
+          }
+
+          return {
+            err: `"${input}" must start with @kbn/ and have no spaces`,
+          };
+        },
+      }));
+
+    if (!validPkgId(pkgId)) {
+      throw createFlagError(`package id must start with @kbn/ and have no spaces`);
     }
 
-    const typePkgName = `@types/${name.slice(1).replace('/', '__')}`;
+    const typePkgName = `@types/${pkgId.slice(1).replace('/', '__')}`;
     const web = !!flags.web;
     const dev = !!flags.dev;
 
     const packageDir = flags.dir
       ? Path.resolve(`${flags.dir}`)
-      : Path.resolve(ROOT_PKG_DIR, name.slice(1).replace('/', '-'));
+      : Path.resolve(ROOT_PKG_DIR, pkgId.slice(1).replace('/', '-'));
     const relContainingDir = Path.relative(REPO_ROOT, Path.dirname(packageDir));
     if (!micromatch.isMatch(relContainingDir, BAZEL_PACKAGE_DIRS)) {
       throw createFlagError(
@@ -86,14 +100,12 @@ ${BAZEL_PACKAGE_DIRS.map((dir) => `                          ./${dir}/*\n`).join
       }
     }
 
-    let owner = flags.owner;
-    if ((typeof owner !== 'string' || !owner) && process.stderr.isTTY) {
-      owner = await ask({
-        question: 'What team should own this package? (should start with "@elastic/")',
-        validate: validateTeam,
-      });
-    }
-
+    const owner =
+      flags.owner ||
+      (await ask({
+        question: 'Which Elastic team should own this package? (Must start with "@elastic/")',
+        validate: validateElasticTeam,
+      }));
     if (typeof owner !== 'string' || !owner.startsWith('@')) {
       throw createFlagError(`expected --owner to be a string starting with an @ symbol`);
     }
@@ -104,7 +116,6 @@ ${BAZEL_PACKAGE_DIRS.map((dir) => `                          ./${dir}/*\n`).join
       dot: true,
       onlyFiles: true,
     });
-
     if (!templateFiles.length) {
       throw new Error('unable to find package template files');
     }
@@ -135,7 +146,7 @@ ${BAZEL_PACKAGE_DIRS.map((dir) => `                          ./${dir}/*\n`).join
 
       await render.toFile(src, dest, {
         pkg: {
-          name,
+          id: pkgId,
           web,
           dev,
           owner,
@@ -163,8 +174,8 @@ ${BAZEL_PACKAGE_DIRS.map((dir) => `                          ./${dir}/*\n`).join
       ? [packageJson.devDependencies, packageJson.dependencies]
       : [packageJson.dependencies, packageJson.devDependencies];
 
-    addDeps[name] = `link:bazel-bin/${normalizedRepoRelativeDir}`;
-    delete removeDeps[name];
+    addDeps[pkgId] = `link:bazel-bin/${normalizedRepoRelativeDir}`;
+    delete removeDeps[pkgId];
 
     // for @types packages always remove from deps and add to devDeps
     packageJson.devDependencies[
@@ -184,6 +195,6 @@ ${BAZEL_PACKAGE_DIRS.map((dir) => `                          ./${dir}/*\n`).join
     );
     log.info('Updated packages/BUILD.bazel');
 
-    log.success(`Generated ${name}! Please bootstrap to make sure it works.`);
+    log.success(`Generated ${pkgId}! Please bootstrap to make sure it works.`);
   },
 };
