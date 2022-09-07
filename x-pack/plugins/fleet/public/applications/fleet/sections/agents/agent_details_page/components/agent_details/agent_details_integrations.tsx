@@ -25,6 +25,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import styled from 'styled-components';
 
 import type { Agent, AgentPolicy, PackagePolicy } from '../../../../../types';
+import type { FleetServerAgentComponentUnit } from '../../../../../../../../common/types/models/agent';
 import { useLink, useUIExtension } from '../../../../../hooks';
 import { ExtensionWrapper, PackageIcon } from '../../../../../components';
 
@@ -99,6 +100,10 @@ export const AgentDetailsIntegration: React.FunctionComponent<{
     packagePolicy.package?.name ?? '',
     'package-policy-response'
   );
+  const genericErrorsListExtensionView = useUIExtension(
+    packagePolicy.package?.name ?? '',
+    'package-generic-errors-list'
+  );
 
   const policyResponseExtensionView = useMemo(() => {
     return (
@@ -112,6 +117,35 @@ export const AgentDetailsIntegration: React.FunctionComponent<{
       )
     );
   }, [agent, extensionView]);
+
+  const packageErrors = useMemo(() => {
+    const packageErrorUnits: FleetServerAgentComponentUnit[] = [];
+    if (!agent.components) {
+      return packageErrorUnits;
+    }
+
+    for (let i = 0; i < agent.components?.length; i++) {
+      if (agent.components[i].type === packagePolicy.package?.name) {
+        for (let j = 0; j < agent.components[i].units.length; j++) {
+          const unit = agent.components[i].units[j];
+          if (unit.status === 'failed') {
+            packageErrorUnits.push(unit);
+          }
+        }
+      }
+    }
+    return packageErrorUnits;
+  }, [agent.components, packagePolicy]);
+
+  const genericErrorsListExtensionViewWrapper = useMemo(() => {
+    return (
+      genericErrorsListExtensionView && (
+        <ExtensionWrapper>
+          <genericErrorsListExtensionView.Component packageErrors={packageErrors} />
+        </ExtensionWrapper>
+      )
+    );
+  }, [packageErrors, genericErrorsListExtensionView]);
 
   const inputItems = [
     {
@@ -195,7 +229,7 @@ export const AgentDetailsIntegration: React.FunctionComponent<{
                   {packagePolicy.name}
                 </EuiLink>
               </EuiFlexItem>
-              {showNeedsAttentionBadge && (
+              {(showNeedsAttentionBadge || packageErrors.length) && (
                 <EuiFlexItem grow={false}>
                   <EuiBadge color={theme.euiTheme.colors.danger} iconType="alert" iconSide="left">
                     <FormattedMessage
@@ -217,6 +251,7 @@ export const AgentDetailsIntegration: React.FunctionComponent<{
         aria-labelledby="inputsTreeView"
       />
       {policyResponseExtensionView}
+      {genericErrorsListExtensionViewWrapper}
       <EuiSpacer />
     </CollapsablePanel>
   );
