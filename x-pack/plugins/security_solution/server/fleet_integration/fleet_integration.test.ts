@@ -82,6 +82,7 @@ describe('ingest_integration tests ', () => {
       enabled: true,
       streams: [],
       config: {
+        integration_config: {},
         policy: { value: policyFactory() },
         artifact_manifest: { value: manifest },
       },

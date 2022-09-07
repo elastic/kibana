@@ -118,10 +118,9 @@ export const getPackagePolicyCreateCallback = (
           enabled: true,
           streams: [],
           config: {
-            integration_config: {
-              value: endpointIntegrationConfig,
-              type: ENDPOINT_INTEGRATION_CONFIG_KEY,
-            },
+            integration_config: endpointIntegrationConfig
+              ? { value: endpointIntegrationConfig }
+              : {},
             artifact_manifest: {
               value: manifestValue,
             },
