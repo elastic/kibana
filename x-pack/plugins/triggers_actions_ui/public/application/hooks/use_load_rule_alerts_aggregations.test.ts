@@ -43,6 +43,26 @@ describe('useLoadRuleAlertsAggs', () => {
     expect(errorRuleAlertsAggs).toBeFalsy();
     expect(alertsChartData.length).toEqual(33);
   });
+
+  it('should have the correct query body sent to Elasticsearch', async () => {
+    const ruleId = 'c95bc120-1d56-11ed-9cc7-e7214ada1128';
+    const { waitForNextUpdate } = renderHook(() =>
+      useLoadRuleAlertsAggs({
+        features: ALERTS_FEATURE_ID,
+        ruleId,
+      })
+    );
+
+    await waitForNextUpdate();
+    const body = `{"index":"mock_index","size":0,"query":{"bool":{"must":[{"term":{"kibana.alert.rule.uuid":"${ruleId}"}},{"range":{"@timestamp":{"gte":"now-30d","lt":"now"}}},{"bool":{"should":[{"term":{"kibana.alert.status":"active"}},{"term":{"kibana.alert.status":"recovered"}}]}}]}},"aggs":{"total":{"filters":{"filters":{"totalActiveAlerts":{"term":{"kibana.alert.status":"active"}},"totalRecoveredAlerts":{"term":{"kibana.alert.status":"recovered"}}}}},"statusPerDay":{"date_histogram":{"field":"@timestamp","fixed_interval":"1d","extended_bounds":{"min":"now-30d","max":"now"}},"aggs":{"alertStatus":{"terms":{"field":"kibana.alert.status"}}}}}}`;
+
+    expect(useKibanaMock().services.http.post).toHaveBeenCalledWith(
+      '/internal/rac/alerts/find',
+      expect.objectContaining({
+        body,
+      })
+    );
+  });
 });
 
 function mockAggsResponse() {
