@@ -12,10 +12,7 @@ import type {
   ResponseActionBodySchema,
   KillOrSuspendProcessRequestSchema,
 } from '../schema/actions';
-import type {
-  RESPONSE_ACTION_STATUS,
-  RESPONSE_ACTION_COMMANDS,
-} from '../service/response_actions/constants';
+import type { ResponseActionStatus, ResponseActions } from '../service/response_actions/constants';
 
 export type ISOLATION_ACTIONS = 'isolate' | 'unisolate';
 
