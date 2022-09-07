@@ -36,7 +36,6 @@ export const getRiskScoreDeprecatedRoute = (router: SecuritySolutionPluginRouter
           ignore_unavailable: true,
           allow_no_indices: false,
         });
-        console.log('RES', res);
         const isDeprecated = !Object.keys(res.fields).includes(newFieldName);
 
         return response.ok({
@@ -44,7 +43,6 @@ export const getRiskScoreDeprecatedRoute = (router: SecuritySolutionPluginRouter
         });
       } catch (err) {
         const error = transformError(err);
-        console.log('err', error);
         if (error.statusCode === 404) {
           // index does not exist, therefore cannot be deprecated
           return response.ok({
