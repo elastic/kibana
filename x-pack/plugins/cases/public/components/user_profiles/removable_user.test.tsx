@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { fireEvent, screen } from '@testing-library/react';
-import { UserRepresentation, UserRepresentationProps } from './user_representation';
+import { RemovableUser, UserRepresentationProps } from './removable_user';
 import { userProfiles } from '../../containers/user_profiles/api.mock';
 import { AppMockRenderer, createAppMockRenderer } from '../../common/mock';
 
@@ -30,13 +30,13 @@ describe('UserRepresentation', () => {
   });
 
   it('does not show the cross button when the user is not hovering over the row', () => {
-    appMockRender.render(<UserRepresentation {...defaultProps} />);
+    appMockRender.render(<RemovableUser {...defaultProps} />);
 
     expect(screen.queryByTestId(dataTestSubjCross)).toHaveStyle('opacity: 0');
   });
 
   it('show the cross button when the user is hovering over the row', () => {
-    appMockRender.render(<UserRepresentation {...defaultProps} />);
+    appMockRender.render(<RemovableUser {...defaultProps} />);
 
     fireEvent.mouseEnter(screen.getByTestId(dataTestSubjGroup));
 
@@ -45,7 +45,7 @@ describe('UserRepresentation', () => {
 
   it('show the cross button when hovering over the row of an unknown user', () => {
     appMockRender.render(
-      <UserRepresentation {...{ ...defaultProps, assignee: { uid: 'unknownId' } }} />
+      <RemovableUser {...{ ...defaultProps, assignee: { uid: 'unknownId' } }} />
     );
 
     fireEvent.mouseEnter(screen.getByTestId(dataTestSubjGroupUnknown));
@@ -54,7 +54,7 @@ describe('UserRepresentation', () => {
   });
 
   it('shows and then removes the cross button when the user hovers and removes the mouse from over the row', () => {
-    appMockRender.render(<UserRepresentation {...defaultProps} />);
+    appMockRender.render(<RemovableUser {...defaultProps} />);
 
     fireEvent.mouseEnter(screen.getByTestId(dataTestSubjGroup));
     expect(screen.getByTestId(dataTestSubjCross)).toHaveStyle('opacity: 1');
@@ -65,7 +65,7 @@ describe('UserRepresentation', () => {
 
   it("renders unknown for the user's information", () => {
     appMockRender.render(
-      <UserRepresentation {...{ ...defaultProps, assignee: { uid: 'unknownId' } }} />
+      <RemovableUser {...{ ...defaultProps, assignee: { uid: 'unknownId' } }} />
     );
 
     expect(screen.getByText('Unknown')).toBeInTheDocument();

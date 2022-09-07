@@ -15,3 +15,5 @@ export interface Assignee {
 export interface AssigneeWithProfile extends Assignee {
   profile: UserProfileWithAvatar;
 }
+
+export type UserInfoWithAvatar = Partial<Pick<UserProfileWithAvatar, 'user' | 'data'>>;
