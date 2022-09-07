@@ -35,7 +35,7 @@ async function getCompatibleActions(
   trigger: typeof VISUALIZE_FIELD_TRIGGER | typeof VISUALIZE_GEO_FIELD_TRIGGER
 ) {
   const compatibleActions = await getUiActions().getTriggerCompatibleActions(trigger, {
-    dataViewSpec: dataView.toSpec(),
+    dataViewSpec: dataView.toSpec(false),
     fieldName,
     contextualFields,
   });
@@ -50,7 +50,7 @@ export function triggerVisualizeActions(
   if (!dataView) return;
   const trigger = getTriggerConstant(field.type);
   const triggerOptions = {
-    dataViewSpec: dataView.toSpec(),
+    dataViewSpec: dataView.toSpec(false),
     fieldName: field.name,
     contextualFields,
   };
