@@ -12,8 +12,8 @@ import {
   EuiPanel,
   EuiSpacer,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { EuiTableSortingType } from '@elastic/eui/src/components/basic_table/table_types';
+import { i18n } from '@kbn/i18n';
 import React, { useCallback, useContext, useMemo } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
