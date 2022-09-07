@@ -116,6 +116,7 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
             {...inputs.nameInput.formRowProps}
           >
             <EuiFieldText
+              data-test-subj="settingsOutputsFlyout.nameInput"
               fullWidth
               {...inputs.nameInput.props}
               placeholder={i18n.translate(
@@ -137,6 +138,7 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
           >
             <EuiSelect
               fullWidth
+              data-test-subj="settingsOutputsFlyout.typeInput"
               {...inputs.typeInput.props}
               options={OUTPUT_TYPE_OPTIONS}
               placeholder={i18n.translate(
@@ -162,6 +164,7 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
           )}
           {isESOutput && (
             <MultiRowInput
+              data-test-subj="settingsOutputsFlyout.hostUrlInput"
               label={i18n.translate('xpack.fleet.settings.editOutputFlyout.esHostsInputLabel', {
                 defaultMessage: 'Hosts',
               })}
