@@ -5,14 +5,9 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useTrackHttpRequest } from '../../lib/apm/use_track_http_request';
 import type { QueryName } from './query_names';
-
-type QueryFn<Request, Response> = (
-  request: Request,
-  signal: AbortController['signal']
-) => Promise<Response>;
 
 interface ResultState<Response> {
   data?: Response;
@@ -24,10 +19,19 @@ interface Result<Request, Response> extends ResultState<Response> {
   query: (request: Request) => void;
 }
 
+type QueryFnParam<Request, Response> = (
+  request: Request,
+  signal: AbortController['signal']
+) => Promise<Response>;
+
+interface OptionsParam {
+  disabled?: boolean;
+}
+
 export const useQuery = <Request, Response>(
   queryName: QueryName,
-  queryFn: QueryFn<Request, Response>,
-  options: { disabled?: boolean } = {}
+  queryFn: QueryFnParam<Request, Response>,
+  { disabled = false }: OptionsParam = {}
 ): Result<Request, Response> => {
   const [request, setRequest] = useState<Request | null>(null);
   const [result, setResult] = useState<ResultState<Response>>({
@@ -35,7 +39,6 @@ export const useQuery = <Request, Response>(
     isLoading: false,
     error: undefined,
   });
-  const { disabled = false } = useMemo(() => options, [options]);
   const { startTracking } = useTrackHttpRequest();
 
   const query = useCallback((req: Request) => {
