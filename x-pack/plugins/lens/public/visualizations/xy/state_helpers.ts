@@ -217,7 +217,7 @@ export function validateColumn(
     }
     if (missingTooltipFields.length) {
       invalidMessages.push(
-        i18n.translate('xpack.lens.xyChart.annotationError.textFieldNotFound', {
+        i18n.translate('xpack.lens.xyChart.annotationError.tooltipFieldNotFound', {
           defaultMessage:
             'Tooltip {missingFields, plural, one {field} other {fields}} {missingTooltipFields} not found in data view {dataView}',
           values: {
