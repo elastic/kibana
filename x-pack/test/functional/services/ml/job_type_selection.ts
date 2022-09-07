@@ -12,7 +12,7 @@ export function MachineLearningJobTypeSelectionProvider({ getService }: FtrProvi
 
   return {
     async selectSingleMetricJob() {
-      await testSubjects.clickWhenNotDisabled('mlJobTypeLinkSingleMetricJob');
+      await testSubjects.clickWhenNotDisabledWithoutRetry('mlJobTypeLinkSingleMetricJob');
       await this.assertSingleMetricJobWizardOpen();
     },
 
@@ -21,7 +21,7 @@ export function MachineLearningJobTypeSelectionProvider({ getService }: FtrProvi
     },
 
     async selectMultiMetricJob() {
-      await testSubjects.clickWhenNotDisabled('mlJobTypeLinkMultiMetricJob');
+      await testSubjects.clickWhenNotDisabledWithoutRetry('mlJobTypeLinkMultiMetricJob');
       await this.assertMultiMetricJobWizardOpen();
     },
 
@@ -30,7 +30,7 @@ export function MachineLearningJobTypeSelectionProvider({ getService }: FtrProvi
     },
 
     async selectPopulationJob() {
-      await testSubjects.clickWhenNotDisabled('mlJobTypeLinkPopulationJob');
+      await testSubjects.clickWhenNotDisabledWithoutRetry('mlJobTypeLinkPopulationJob');
       await this.assertPopulationJobWizardOpen();
     },
 
@@ -39,7 +39,7 @@ export function MachineLearningJobTypeSelectionProvider({ getService }: FtrProvi
     },
 
     async selectAdvancedJob() {
-      await testSubjects.clickWhenNotDisabled('mlJobTypeLinkAdvancedJob');
+      await testSubjects.clickWhenNotDisabledWithoutRetry('mlJobTypeLinkAdvancedJob');
       await this.assertAdvancedJobWizardOpen();
     },
 
@@ -48,7 +48,7 @@ export function MachineLearningJobTypeSelectionProvider({ getService }: FtrProvi
     },
 
     async selectCategorizationJob() {
-      await testSubjects.clickWhenNotDisabled('mlJobTypeLinkCategorizationJob');
+      await testSubjects.clickWhenNotDisabledWithoutRetry('mlJobTypeLinkCategorizationJob');
       await this.assertCategorizationJobWizardOpen();
     },
 
