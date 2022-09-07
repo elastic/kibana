@@ -21,5 +21,6 @@ export const createFormulaColumn = (formula: string, agg: SchemaConfig): Formula
     references: [],
     ...createColumn(agg),
     params: { ...params },
+    timeShift: agg.aggParams?.timeShift,
   };
 };

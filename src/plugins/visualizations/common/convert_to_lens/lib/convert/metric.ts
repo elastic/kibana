@@ -113,6 +113,7 @@ export const convertMetricAggregationColumnWithoutSpecialParams = (
         },
       }),
     },
+    timeShift: agg.aggParams?.timeShift,
   } as MetricAggregationColumnWithoutSpecialParams;
 };
 

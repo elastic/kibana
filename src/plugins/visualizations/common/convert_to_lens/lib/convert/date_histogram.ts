@@ -53,5 +53,6 @@ export const convertToDateHistogramColumn = (
     isSplit,
     sourceField: dateField.name,
     params,
+    timeShift: aggParams.timeShift,
   };
 };

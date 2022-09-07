@@ -69,5 +69,6 @@ export const convertToPercentileColumn = (
             ...commonColumnParams.meta,
           }
         : commonColumnParams.meta,
+    timeShift: agg.aggParams?.timeShift,
   };
 };

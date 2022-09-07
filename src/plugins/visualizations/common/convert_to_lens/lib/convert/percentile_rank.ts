@@ -57,5 +57,6 @@ export const convertToPercentileRankColumn = (
             ...commonColumnParams.meta,
           }
         : commonColumnParams.meta,
+    timeShift: agg.aggParams?.timeShift,
   };
 };

@@ -27,5 +27,6 @@ export const convertToFiltersColumn = (
     params: {
       filters: aggParams.filters ?? [],
     },
+    timeShift: aggParams.timeShift,
   };
 };

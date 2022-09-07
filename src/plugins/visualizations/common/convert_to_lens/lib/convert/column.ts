@@ -20,19 +20,16 @@ export const createColumn = <T extends SupportedAggregation>(
   agg: SchemaConfig<T>,
   field?: DataViewField,
   { isBucketed = false, isSplit = false, reducedTimeRange }: ExtraColumnFields = {}
-): GeneralColumnWithMeta => {
-  const aggId = createAggregationId(agg);
-  return {
-    columnId: uuid(),
-    dataType: (field?.type as DataType) ?? undefined,
-    label: getLabel(agg),
-    isBucketed,
-    isSplit,
-    reducedTimeRange,
-    // timeShift, //TODO: do it later
-    meta: { aggId },
-  };
-};
+): GeneralColumnWithMeta => ({
+  columnId: uuid(),
+  dataType: (field?.type as DataType) ?? undefined,
+  label: getLabel(agg),
+  isBucketed,
+  isSplit,
+  reducedTimeRange,
+  timeShift: agg.aggParams?.timeShift,
+  meta: { aggId: createAggregationId(agg) },
+});
 
 export const createAggregationIdFromCustomAgg = (agg: IAggConfig): AggId =>
   `${agg.type.dslName}.${0}`;
@@ -41,16 +38,12 @@ export const createColumnFromCustomAgg = (
   agg: IAggConfig,
   field?: DataViewField,
   { isBucketed = false, isSplit = false, reducedTimeRange }: ExtraColumnFields = {}
-): GeneralColumnWithMeta => {
-  const aggId = createAggregationIdFromCustomAgg(agg);
-  return {
-    columnId: uuid(),
-    dataType: (field?.type as DataType) ?? undefined,
-    label: agg.getFieldDisplayName(),
-    isBucketed,
-    isSplit,
-    reducedTimeRange,
-    // timeShift, //TODO: do it later
-    meta: { aggId },
-  };
-};
+): GeneralColumnWithMeta => ({
+  columnId: uuid(),
+  dataType: (field?.type as DataType) ?? undefined,
+  label: agg.getFieldDisplayName(),
+  isBucketed,
+  isSplit,
+  reducedTimeRange,
+  meta: { aggId: createAggregationIdFromCustomAgg(agg) },
+});

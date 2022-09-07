@@ -87,7 +87,9 @@ export const convertToParentPipelineAggColumns = (
           op.name === Operations.MOVING_AVERAGE
             ? convertToMovingAverageParams(agg as SchemaConfig<METRIC_TYPES.MOVING_FN>)
             : {},
+        timeShift: agg.aggParams?.timeShift,
       } as ParentPipelineAggColumn,
+
       subMetric,
     ];
   } else {

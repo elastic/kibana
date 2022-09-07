@@ -129,5 +129,6 @@ export const convertToTermsColumn = (
     isBucketed: true,
     isSplit,
     params: { ...params },
+    timeShift: aggParams?.timeShift,
   };
 };
