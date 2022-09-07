@@ -8,6 +8,8 @@ import React, { FC, useCallback, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFieldNumber, EuiFormRow, formatDate, htmlIdGenerator } from '@elastic/eui';
 import { TimeRange } from '@kbn/data-plugin/common/query';
+import { Query } from '@kbn/es-query';
+import { SEARCH_QUERY_LANGUAGE } from '../../../../common/constants/search';
 import { useDashboardTable } from './use_dashboards_table';
 import { AddToDashboardControl } from './add_to_dashboard_controls';
 import { useAddToDashboardActions } from './use_add_to_dashboard_actions';
@@ -33,6 +35,7 @@ export interface AddToDashboardControlProps {
   bounds?: TimeRangeBounds;
   interval?: number;
   onClose: (callback?: () => Promise<void>) => void;
+  queryString?: string;
 }
 
 /**
@@ -44,6 +47,7 @@ export const AddAnomalyChartsToDashboardControl: FC<AddToDashboardControlProps> 
   selectedCells,
   bounds,
   interval,
+  queryString,
 }) => {
   const [severity] = useTableSeverity();
   const [maxSeriesToPlot, setMaxSeriesToPlot] = useState(DEFAULT_MAX_SERIES_TO_PLOT);
@@ -66,9 +70,12 @@ export const AddAnomalyChartsToDashboardControl: FC<AddToDashboardControlProps> 
       jobIds,
       maxSeriesToPlot: maxSeriesToPlot ?? DEFAULT_MAX_SERIES_TO_PLOT,
       severityThreshold: severity.val,
-      ...(timeRange ?? {}),
+      ...(timeRange ? { timeRange } : {}),
+      ...(queryString !== undefined
+        ? { query: { query: queryString, language: SEARCH_QUERY_LANGUAGE.KUERY } as Query }
+        : {}),
     };
-  }, [selectedCells, interval, bounds, jobIds, maxSeriesToPlot, severity]);
+  }, [selectedCells, interval, bounds, jobIds, maxSeriesToPlot, severity, queryString]);
 
   const { dashboardItems, isLoading, search } = useDashboardTable();
   const { addToDashboardAndEditCallback } = useAddToDashboardActions(
