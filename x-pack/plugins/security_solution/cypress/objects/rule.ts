@@ -511,7 +511,9 @@ export const expectedExportedRule = (
   }
 
   // NOTE: Order of the properties in this object matters for the tests to work.
-  const rule = {
+  // TODO: Follow up https://github.com/elastic/kibana/pull/137628 and add an explicit type to this object
+  // without using Partial
+  const rule: Partial<FullResponseSchema> = {
     id,
     updated_at: updatedAt,
     updated_by: updatedBy,

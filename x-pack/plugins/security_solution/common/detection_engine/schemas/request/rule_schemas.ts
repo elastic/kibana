@@ -508,7 +508,7 @@ const sharedResponseSchema = t.intersection([
   t.exact(t.type(responseRequiredFields)),
   t.exact(t.partial(responseOptionalFields)),
 ]);
-type SharedResponseSchema = t.TypeOf<typeof sharedResponseSchema>;
+export type SharedResponseSchema = t.TypeOf<typeof sharedResponseSchema>;
 export const fullResponseSchema = t.intersection([sharedResponseSchema, responseTypeSpecific]);
 export type FullResponseSchema = t.TypeOf<typeof fullResponseSchema>;
 

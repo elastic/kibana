@@ -6,12 +6,12 @@
  */
 
 import type { MachineLearningResponseSchema } from '@kbn/security-solution-plugin/common/detection_engine/schemas/request';
-import { getBaseSimpleRuleOutput } from './get_simple_rule_output';
+import { getMockSharedResponseSchema } from './get_simple_rule_output';
 import { removeServerGeneratedProperties } from './remove_server_generated_properties';
 
 const getBaseMlRuleOutput = (ruleId = 'rule-1'): MachineLearningResponseSchema => {
   return {
-    ...getBaseSimpleRuleOutput(ruleId),
+    ...getMockSharedResponseSchema(ruleId),
     name: 'Simple ML Rule',
     description: 'Simple Machine Learning Rule',
     anomaly_threshold: 44,

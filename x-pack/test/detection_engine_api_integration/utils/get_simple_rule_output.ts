@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-import type { FullResponseSchema } from '@kbn/security-solution-plugin/common/detection_engine/schemas/request';
+import type {
+  FullResponseSchema,
+  SharedResponseSchema,
+} from '@kbn/security-solution-plugin/common/detection_engine/schemas/request';
 import { removeServerGeneratedProperties } from './remove_server_generated_properties';
 
-/**
- * This is the typical output of a simple rule that Kibana will output with all the defaults
- * except for the server generated properties.  Useful for testing end to end tests.
- */
-export const getBaseSimpleRuleOutput = (ruleId = 'rule-1', enabled = false) => ({
+export const getMockSharedResponseSchema = (
+  ruleId = 'rule-1',
+  enabled = false
+): SharedResponseSchema => ({
   actions: [],
   author: [],
   created_by: 'elastic',
@@ -60,7 +62,7 @@ export const getBaseSimpleRuleOutput = (ruleId = 'rule-1', enabled = false) => (
 });
 
 const getQueryRuleOutput = (ruleId = 'rule-1', enabled = false): FullResponseSchema => ({
-  ...getBaseSimpleRuleOutput(ruleId, enabled),
+  ...getMockSharedResponseSchema(ruleId, enabled),
   index: ['auditbeat-*'],
   language: 'kuery',
   query: 'user.name: root or user.name: admin',
@@ -70,6 +72,10 @@ const getQueryRuleOutput = (ruleId = 'rule-1', enabled = false): FullResponseSch
   saved_id: undefined,
 });
 
+/**
+ * This is the typical output of a simple rule that Kibana will output with all the defaults
+ * except for the server generated properties.  Useful for testing end to end tests.
+ */
 export const getSimpleRuleOutput = (ruleId = 'rule-1', enabled = false) => {
   return removeServerGeneratedProperties(getQueryRuleOutput(ruleId, enabled));
 };

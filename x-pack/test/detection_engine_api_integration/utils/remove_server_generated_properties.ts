@@ -6,7 +6,15 @@
  */
 
 import type { FullResponseSchema } from '@kbn/security-solution-plugin/common/detection_engine/schemas/request';
-import { pickBy } from 'lodash';
+import { omit, pickBy } from 'lodash';
+
+const serverGeneratedProperties = ['id', 'created_at', 'updated_at', 'execution_summary'] as const;
+
+type ServerGeneratedProperties = typeof serverGeneratedProperties[number];
+export type RuleWithoutServerGeneratedProperties = Omit<
+  FullResponseSchema,
+  ServerGeneratedProperties
+>;
 
 /**
  * This will remove server generated properties such as date times, etc...
@@ -14,18 +22,12 @@ import { pickBy } from 'lodash';
  */
 export const removeServerGeneratedProperties = (
   rule: FullResponseSchema
-): Omit<FullResponseSchema, 'id' | 'created_at' | 'updated_at'> => {
-  const {
-    /* eslint-disable @typescript-eslint/naming-convention */
-    id,
-    created_at,
-    updated_at,
-    execution_summary,
-    ...removedProperties
-  } = rule;
+): RuleWithoutServerGeneratedProperties => {
+  const removedProperties = omit(rule, serverGeneratedProperties);
+
   // We're only removing undefined values, so this cast correctly narrows the type
-  return pickBy(removedProperties, (value) => value !== undefined) as Omit<
-    FullResponseSchema,
-    'id' | 'created_at' | 'updated_at'
-  >;
+  return pickBy(
+    removedProperties,
+    (value) => value !== undefined
+  ) as RuleWithoutServerGeneratedProperties;
 };

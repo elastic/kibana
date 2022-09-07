@@ -11,13 +11,14 @@ import type {
   MachineLearningResponseSchema,
   QueryResponseSchema,
   SavedQueryResponseSchema,
+  SharedResponseSchema,
   ThreatMatchResponseSchema,
 } from '../request';
 import { getListArrayMock } from '../types/lists.mock';
 
 export const ANCHOR_DATE = '2020-02-20T03:57:54.037Z';
 
-const getResponseBaseParams = (anchorDate: string = ANCHOR_DATE) => ({
+const getResponseBaseParams = (anchorDate: string = ANCHOR_DATE): SharedResponseSchema => ({
   author: [],
   id: '7a7065d7-6e8b-4aae-8d20-c93613dec9f9',
   created_at: new Date(anchorDate).toISOString(),

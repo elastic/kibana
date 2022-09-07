@@ -6,8 +6,11 @@
  */
 
 import { getSimpleRuleOutput } from './get_simple_rule_output';
+import { RuleWithoutServerGeneratedProperties } from './remove_server_generated_properties';
 
-export const getSimpleRuleOutputWithWebHookAction = (actionId: string) => ({
+export const getSimpleRuleOutputWithWebHookAction = (
+  actionId: string
+): RuleWithoutServerGeneratedProperties => ({
   ...getSimpleRuleOutput(),
   throttle: 'rule',
   actions: [
