@@ -125,11 +125,7 @@ export const convertСustomMetricAggregationColumnWithoutSpecialParams = (
     return null;
   }
 
-  let sourceField;
-
-  if (agg) {
-    sourceField = agg.params?.field ?? 'document';
-  }
+  const sourceField: string = getFieldNameFromField(agg?.params?.field) ?? 'document';
 
   const field = dataView.getFieldByName(sourceField);
   if (!field && aggregation.isFieldRequired) {
