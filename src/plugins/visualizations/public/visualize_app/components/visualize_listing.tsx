@@ -53,6 +53,7 @@ const toTableListViewSavedObject = (savedObject: Record<string, unknown>): Visua
     references: savedObject.references as Array<{ id: string; type: string; name: string }>,
     type: savedObject.savedObjectType as string,
     editUrl: savedObject.editUrl as string,
+    editApp: savedObject.editApp as string,
     icon: savedObject.icon as string,
     stage: savedObject.stage as VisualizationStage,
     savedObjectType: savedObject.savedObjectType as string,
@@ -130,7 +131,7 @@ export const VisualizeListing = () => {
   }, []);
 
   const editItem = useCallback(
-    ({ editUrl, editApp }) => {
+    ({ attributes: { editUrl, editApp } }: VisualizeUserContent) => {
       if (editApp) {
         application.navigateToApp(editApp, { path: editUrl });
         return;
