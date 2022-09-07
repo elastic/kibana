@@ -52,8 +52,8 @@ const getCommand = (command: ResponseActions): Exclude<ResponseActions, 'unisola
 const getActionStatus = (status: ResponseActionStatus): string => {
   if (status === 'failed') {
     return UX_MESSAGES.badge.failed;
-  } else if (status === 'completed') {
-    return UX_MESSAGES.badge.completed;
+  } else if (status === 'successful') {
+    return UX_MESSAGES.badge.successful;
   } else if (status === 'pending') {
     return UX_MESSAGES.badge.pending;
   }
@@ -182,7 +182,10 @@ export const ResponseActionsLog = memo<
   // handle on change actions filter
   const onChangeStatusesFilter = useCallback(
     (selectedStatuses: string[]) => {
-      setQueryParams((prevState) => ({ ...prevState, statuses: selectedStatuses }));
+      setQueryParams((prevState) => ({
+        ...prevState,
+        statuses: selectedStatuses as ResponseActionStatus[],
+      }));
     },
     [setQueryParams]
   );
