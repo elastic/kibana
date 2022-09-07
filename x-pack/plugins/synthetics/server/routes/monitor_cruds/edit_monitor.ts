@@ -92,9 +92,6 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
         revision: (previousMonitor.attributes[ConfigKey.REVISION] || 0) + 1,
       };
       const formattedMonitor = formatSecrets(monitorWithRevision);
-      const isMultiStepMonitor =
-        monitor.type === 'browser' &&
-        monitor[ConfigKey.FORM_MONITOR_TYPE] !== FormMonitorType.SINGLE;
 
       const { errors, editedMonitor: editedMonitorSavedObject } = await syncEditedMonitor({
         server,
