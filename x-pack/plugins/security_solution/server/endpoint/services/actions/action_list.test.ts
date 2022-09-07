@@ -162,6 +162,7 @@ describe('When using `getActionList()', () => {
       startDate: undefined,
       elasticAgentIds: undefined,
       endDate: undefined,
+      statuses: undefined,
       data: [
         {
           agents: ['agent-a', 'agent-b', 'agent-x'],
@@ -178,6 +179,7 @@ describe('When using `getActionList()', () => {
           isCompleted: false,
           isExpired: true,
           startedAt: '2022-04-27T16:08:47.449Z',
+          status: 'failed',
           comment: doc?.EndpointActions.data.comment,
           createdBy: doc?.user.id,
           parameters: doc?.EndpointActions.data.parameters,
