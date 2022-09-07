@@ -238,11 +238,8 @@ export const formatMlPipelineBody = async (
   destinationField: string,
   esClient: ElasticsearchClient
 ): Promise<PipelineDefinition> => {
-  // TODO: we need an actual client. ML has one, can they export it?
-  // TODO: see x-pack/plugins/ml/public/application/services/ml_api_service/trained_models.ts
   const models = await esClient.ml.getTrainedModels({model_id: modelId});
   const model = models.trained_model_configs[0];
-  // TODO: model can contain more than one input field, map all of those?
   const modelInputField = model.input.field_names[0];
   const modelType = model.model_type;
   const modelVersion = model.version;
