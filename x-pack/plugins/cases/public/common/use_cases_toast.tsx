@@ -20,6 +20,7 @@ import {
   VIEW_CASE,
 } from './translations';
 import { OWNER_INFO } from '../../common/constants';
+import { useCasesContext } from '../components/cases_context/use_cases_context';
 
 const LINE_CLAMP = 3;
 const Title = styled.span`
@@ -94,7 +95,11 @@ function getToastContent({
   return undefined;
 }
 
+const isValidOwner = (owner: string): owner is keyof typeof OWNER_INFO =>
+  Object.keys(OWNER_INFO).includes(owner);
+
 export const useCasesToast = () => {
+  const { appId } = useCasesContext();
   const { getUrlForApp, navigateToUrl } = useKibana().services.application;
 
   const toasts = useToasts();
@@ -111,8 +116,10 @@ export const useCasesToast = () => {
       title?: string;
       content?: string;
     }) => {
-      const caseOwner = theCase.owner as keyof typeof OWNER_INFO;
-      const appIdToNavigateTo = OWNER_INFO[caseOwner].appId;
+      const appIdToNavigateTo = isValidOwner(theCase.owner)
+        ? OWNER_INFO[theCase.owner].appId
+        : appId;
+
       const url = getUrlForApp(appIdToNavigateTo, {
         deepLinkId: 'cases',
         path: generateCaseViewPath({ detailName: theCase.id }),
