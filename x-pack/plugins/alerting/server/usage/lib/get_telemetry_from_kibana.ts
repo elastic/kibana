@@ -164,7 +164,7 @@ export async function getTotalCountAggregations({
             script: {
               source: `
                def rule = params._source['alert'];
-                if (rule != null) {
+                if (rule != null && rule.tags != null) {
                   if (rule.tags.size() > 0) {
                     emit(1);
                   } else {
@@ -178,7 +178,7 @@ export async function getTotalCountAggregations({
             script: {
               source: `
                 def rule = params._source['alert'];
-                if (rule != null) {
+                if (rule != null && rule.snoozeSchedule != null) {
                   if (rule.snoozeSchedule.size() > 0) {
                     emit(1);
                   } else {
@@ -203,7 +203,7 @@ export async function getTotalCountAggregations({
             script: {
               source: `
                 def rule = params._source['alert'];
-                if (rule != null) {
+                if (rule != null && rule.mutedInstanceIds != null) {
                   if (rule.mutedInstanceIds.size() > 0) {
                     emit(1);
                   } else {
