@@ -7,13 +7,13 @@
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
-import { APMSection } from '../../components/app/section/apm';
-import { LogsSection } from '../../components/app/section/logs';
-import { MetricsSection } from '../../components/app/section/metrics';
-import { UptimeSection } from '../../components/app/section/uptime';
-import { UXSection } from '../../components/app/section/ux';
-import { HasDataMap } from '../../context/has_data_context';
-import { BucketSize } from '.';
+import { APMSection } from '../../../components/app/section/apm';
+import { LogsSection } from '../../../components/app/section/logs';
+import { MetricsSection } from '../../../components/app/section/metrics';
+import { UptimeSection } from '../../../components/app/section/uptime';
+import { UXSection } from '../../../components/app/section/ux';
+import { HasDataMap } from '../../../context/has_data_context';
+import { BucketSize } from '../containers';
 
 interface Props {
   bucketSize: BucketSize;
