@@ -80,6 +80,7 @@ import { PlaceholderEmbeddableFactory } from './application/embeddable/placehold
 import { ExportCSVAction } from './application/actions/export_csv_action';
 import { dashboardFeatureCatalog } from './dashboard_strings';
 import { FiltersNotificationBadge } from './application/actions/filters_notification_badge';
+import { DashboardMountContextProps } from './types';
 
 export interface DashboardFeatureFlagConfig {
   allowByValueEmbeddables: boolean;
@@ -268,15 +269,20 @@ export class DashboardPlugin
         params.element.classList.add(APP_WRAPPER_CLASS);
         const { mountApp } = await import('./application/dashboard_router');
         appMounted();
+
+        const mountContext: DashboardMountContextProps = {
+          restorePreviousUrl,
+          scopedHistory: () => this.currentHistory!,
+          onAppLeave: params.onAppLeave,
+          setHeaderActionMenu: params.setHeaderActionMenu,
+        };
+
         return mountApp({
           // pass in context object
           core,
           appUnMounted,
-          restorePreviousUrl,
           element: params.element,
-          onAppLeave: params.onAppLeave,
-          scopedHistory: this.currentHistory!,
-          setHeaderActionMenu: params.setHeaderActionMenu,
+          mountContext,
         });
       },
     };

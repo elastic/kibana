@@ -41,6 +41,7 @@ import {
 } from '../lib';
 import { isDashboardAppInNoDataState } from '../dashboard_app_no_data';
 import { pluginServices } from '../../services/plugin_services';
+import { useDashboardMountContext } from './dashboard_mount_context';
 
 export interface UseDashboardStateProps {
   history: History;
@@ -78,12 +79,15 @@ export const useDashboardAppState = ({
   const [lastSavedState, setLastSavedState] = useState<DashboardState>();
   const $onLastSavedStateChange = useMemo(() => new Subject<DashboardState>(), []);
 
-  /**
-   * Unpack services
-   */
-  const services = useKibana<DashboardAppServices>().services;
-  const { savedDashboards, scopedHistory } = services;
+  // TODO: Remove as part of https://github.com/elastic/kibana/pull/138774
+  const {
+    services: { savedDashboards },
+  } = useKibana<DashboardAppServices>();
 
+  /**
+   * Unpack services and context
+   */
+  const { scopedHistory } = useDashboardMountContext();
   const {
     chrome: { docTitle },
     dashboardCapabilities,

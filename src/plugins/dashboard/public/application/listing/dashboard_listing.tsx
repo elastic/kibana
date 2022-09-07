@@ -56,9 +56,11 @@ export const DashboardListing = ({
   initialFilter,
   kbnUrlStateStorage,
 }: DashboardListingProps) => {
+  // TODO: Remove as part of https://github.com/elastic/kibana/pull/138774
   const {
     services: { savedDashboards },
   } = useKibana<DashboardAppServices>();
+
   const {
     application,
     chrome: { setBreadcrumbs },
@@ -71,8 +73,6 @@ export const DashboardListing = ({
     savedObjectsTagging: { getSearchBarFilter, parseSearchQuery },
     settings: { uiSettings, theme },
   } = pluginServices.getServices();
-
-  // debugger;
 
   const [showNoDataPage, setShowNoDataPage] = useState<boolean>(false);
   useMount(() => {

@@ -17,17 +17,22 @@ import { Switch, Route, RouteComponentProps, HashRouter, Redirect } from 'react-
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
-import { AppMountParameters, CoreSetup, ScopedHistory } from '@kbn/core/public';
+import { AppMountParameters, CoreSetup } from '@kbn/core/public';
 
 import { DashboardListing } from './listing';
 import { dashboardStateStore } from './state';
 import { DashboardApp } from './dashboard_app';
-import { DashboardNoMatch } from './listing/dashboard_no_match';
 import { addHelpMenuToAppChrome } from './lib';
+import { DashboardNoMatch } from './listing/dashboard_no_match';
 import { createDashboardListingFilterUrl } from '../dashboard_constants';
 import { createDashboardEditUrl, DashboardConstants } from '../dashboard_constants';
 import { dashboardReadonlyBadge, getDashboardPageTitle } from '../dashboard_strings';
-import { DashboardAppServices, DashboardEmbedSettings, RedirectToProps } from '../types';
+import {
+  DashboardAppServices,
+  DashboardEmbedSettings,
+  RedirectToProps,
+  DashboardMountContextProps,
+} from '../types';
 import { DashboardStart, DashboardStartDependencies } from '../plugin';
 import { pluginServices } from '../services/plugin_services';
 
@@ -40,35 +45,21 @@ export const dashboardUrlParams = {
 
 export interface DashboardMountProps {
   appUnMounted: () => void;
-  restorePreviousUrl: () => void;
-
-  scopedHistory: ScopedHistory<unknown>;
   element: AppMountParameters['element'];
-  onAppLeave: AppMountParameters['onAppLeave'];
   core: CoreSetup<DashboardStartDependencies, DashboardStart>;
-  setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
+  mountContext: DashboardMountContextProps;
 }
 
-export async function mountApp({
-  core,
-  element,
-  onAppLeave,
-  appUnMounted,
-  scopedHistory,
-  restorePreviousUrl,
-  setHeaderActionMenu,
-}: DashboardMountProps) {
+export async function mountApp({ core, element, appUnMounted, mountContext }: DashboardMountProps) {
   const [coreStart, pluginsStart, dashboardStart] = await core.getStartServices();
+  const { DashboardMountContext } = await import('./hooks/dashboard_mount_context');
+
   const { data: dataStart, embeddable } = pluginsStart;
 
   let globalEmbedSettings: DashboardEmbedSettings | undefined;
   let routerHistory: History;
 
   const dashboardServices: DashboardAppServices = {
-    onAppLeave,
-    restorePreviousUrl,
-    setHeaderActionMenu,
-    scopedHistory: () => scopedHistory,
     savedDashboards: dashboardStart.getSavedDashboardLoader(),
   };
 
@@ -159,37 +150,39 @@ export async function mountApp({
 
   // dispatch synthetic hash change event to update hash history objects
   // this is necessary because hash updates triggered by using popState won't trigger this event naturally.
-  const unlistenParentHistory = scopedHistory.listen(() => {
+  const unlistenParentHistory = mountContext.scopedHistory().listen(() => {
     window.dispatchEvent(new HashChangeEvent('hashchange'));
   });
 
   const app = (
-    // wrap new context provider
+    // TODO: Remove KibanaContextProvider as part of https://github.com/elastic/kibana/pull/138774
     <I18nProvider>
       <Provider store={dashboardStateStore}>
         <KibanaContextProvider services={dashboardServices}>
-          <KibanaThemeProvider theme$={core.theme.theme$}>
-            <HashRouter>
-              <Switch>
-                <Route
-                  path={[
-                    DashboardConstants.CREATE_NEW_DASHBOARD_URL,
-                    `${DashboardConstants.VIEW_DASHBOARD_URL}/:id`,
-                  ]}
-                  render={renderDashboard}
-                />
-                <Route
-                  exact
-                  path={DashboardConstants.LANDING_PAGE_PATH}
-                  render={renderListingPage}
-                />
-                <Route exact path="/">
-                  <Redirect to={DashboardConstants.LANDING_PAGE_PATH} />
-                </Route>
-                <Route render={renderNoMatch} />
-              </Switch>
-            </HashRouter>
-          </KibanaThemeProvider>
+          <DashboardMountContext.Provider value={mountContext}>
+            <KibanaThemeProvider theme$={core.theme.theme$}>
+              <HashRouter>
+                <Switch>
+                  <Route
+                    path={[
+                      DashboardConstants.CREATE_NEW_DASHBOARD_URL,
+                      `${DashboardConstants.VIEW_DASHBOARD_URL}/:id`,
+                    ]}
+                    render={renderDashboard}
+                  />
+                  <Route
+                    exact
+                    path={DashboardConstants.LANDING_PAGE_PATH}
+                    render={renderListingPage}
+                  />
+                  <Route exact path="/">
+                    <Redirect to={DashboardConstants.LANDING_PAGE_PATH} />
+                  </Route>
+                  <Route render={renderNoMatch} />
+                </Switch>
+              </HashRouter>
+            </KibanaThemeProvider>
+          </DashboardMountContext.Provider>
         </KibanaContextProvider>
       </Provider>
     </I18nProvider>

@@ -150,10 +150,14 @@ export interface DashboardSaveOptions {
   isTitleDuplicateConfirmed: boolean;
 }
 
+export interface DashboardMountContextProps {
+  restorePreviousUrl: () => void;
+  scopedHistory: () => ScopedHistory;
+  onAppLeave: AppMountParameters['onAppLeave'];
+  setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
+}
+
+// TODO: Remove DashboardAppServices as part of https://github.com/elastic/kibana/pull/138774
 export interface DashboardAppServices {
-  restorePreviousUrl: () => void; // app mount context
-  savedDashboards: SavedObjectLoader; // TODO: Remove as part of https://github.com/elastic/kibana/pull/138774
-  scopedHistory: () => ScopedHistory; // app mount context
-  onAppLeave: AppMountParameters['onAppLeave']; // app mount context
-  setHeaderActionMenu: AppMountParameters['setHeaderActionMenu']; // app mount context
+  savedDashboards: SavedObjectLoader;
 }

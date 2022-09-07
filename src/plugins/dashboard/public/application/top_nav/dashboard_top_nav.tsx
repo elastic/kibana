@@ -26,7 +26,6 @@ import {
 } from '@kbn/presentation-util-plugin/public';
 import type { SavedQuery } from '@kbn/data-plugin/common';
 import { isErrorEmbeddable, openAddPanelFlyout, ViewMode } from '@kbn/embeddable-plugin/public';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   getSavedObjectFinder,
   type SaveResult,
@@ -45,7 +44,7 @@ import { showOptionsPopover } from './show_options_popover';
 import { DashboardConstants } from '../../dashboard_constants';
 import { confirmDiscardUnsavedChanges } from '../listing/confirm_overlays';
 import type { DashboardAppState, DashboardSaveOptions, NavAction } from '../../types';
-import type { DashboardAppServices, DashboardEmbedSettings, DashboardRedirect } from '../../types';
+import type { DashboardEmbedSettings, DashboardRedirect } from '../../types';
 import { getCreateVisualizationButtonTitle, unsavedChangesBadge } from '../../dashboard_strings';
 import {
   setFullScreenMode,
@@ -60,6 +59,7 @@ import {
   useDashboardSelector,
 } from '../state';
 import { pluginServices } from '../../services/plugin_services';
+import { useDashboardMountContext } from '../hooks/dashboard_mount_context';
 
 export interface DashboardTopNavState {
   chromeIsVisible: boolean;
@@ -99,7 +99,7 @@ export function DashboardTopNav({
   redirectTo,
   printMode,
 }: DashboardTopNavProps) {
-  const { setHeaderActionMenu } = useKibana<DashboardAppServices>().services;
+  const { setHeaderActionMenu } = useDashboardMountContext();
   const {
     chrome: {
       getIsVisible$: getChromeIsVisible$,

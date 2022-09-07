@@ -116,9 +116,11 @@ export const DashboardUnsavedListing = ({
   unsavedDashboardIds,
   refreshUnsavedDashboards,
 }: DashboardUnsavedListingProps) => {
+  // TODO: Remove as part of https://github.com/elastic/kibana/pull/138774
   const {
     services: { savedDashboards },
   } = useKibana<DashboardAppServices>();
+
   const { dashboardSessionStorage } = pluginServices.getServices();
 
   const [items, setItems] = useState<UnsavedItemMap>({});

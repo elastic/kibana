@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { ScopedHistory } from '@kbn/core/public';
-
 import {
   SavedObjectLoader,
   type SavedObjectLoaderFindOptions,
@@ -15,6 +13,7 @@ import {
 import { DashboardAppServices } from '../../types';
 import { getSavedDashboardMock } from './get_saved_dashboard_mock';
 
+// TODO: Remove as part of https://github.com/elastic/kibana/pull/138774
 export function makeDefaultServices(): DashboardAppServices {
   const savedDashboards = {} as SavedObjectLoader;
   savedDashboards.find = (search: string, sizeOrOptions: number | SavedObjectLoaderFindOptions) => {
@@ -37,10 +36,6 @@ export function makeDefaultServices(): DashboardAppServices {
     .mockImplementation((id?: string) => Promise.resolve(getSavedDashboardMock({ id })));
 
   return {
-    scopedHistory: () => ({} as ScopedHistory),
-    setHeaderActionMenu: (mountPoint) => {},
-    restorePreviousUrl: () => {},
-    onAppLeave: (handler) => {},
     savedDashboards,
   };
 }
