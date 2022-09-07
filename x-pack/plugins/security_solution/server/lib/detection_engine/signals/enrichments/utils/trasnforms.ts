@@ -14,7 +14,7 @@ function customizer<T>(objValue: T, srcValue: T) {
   }
 }
 
-const mergeEnrichments: MergeEnrichments = (enrichmentsList) => {
+export const mergeEnrichments: MergeEnrichments = (enrichmentsList = []) => {
   return enrichmentsList.reduce((acc, val) => mergeWith(acc, val, customizer), {});
 };
 

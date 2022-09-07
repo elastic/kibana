@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import type { MakeSinleFieldMathRequest } from '../types';
-import { getEventValue } from './events';
+import type { MakeSingleFieldMathQuery } from '../types';
 
-export const makeSinleFieldMathRequest: MakeSinleFieldMathRequest = ({ events, mappingField }) => {
-  const shouldClauses = events.map((event) => ({
+export const makeSingleFieldMathQuery: MakeSingleFieldMathQuery = (values, field) => {
+  const shouldClauses = values.map((value) => ({
     match: {
-      [mappingField.enrichmentField]: {
-        query: getEventValue(event, mappingField.eventField),
+      [field]: {
+        query: value,
         minimum_should_match: 1,
       },
     },
