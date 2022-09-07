@@ -169,7 +169,7 @@ export const getOrphanedPackagePolicies: RequestHandler<undefined, undefined> = 
 function isSimplifiedCreatePackagePolicyRequest(
   body: Omit<TypeOf<typeof CreatePackagePolicyRequestSchema.body>, 'force' | 'package'>
 ): body is SimplifiedPackagePolicy {
-  // If inputs it's no defined or if it's a record string:{} we consider it as a simplified package policy
+  // If `inputs` is not defined or if it's a non-array, the request body is using the new simplified API
   if (body.inputs && Array.isArray(body.inputs)) {
     return false;
   }
