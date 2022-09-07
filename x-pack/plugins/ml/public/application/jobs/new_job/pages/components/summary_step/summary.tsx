@@ -64,6 +64,7 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
 
   useEffect(() => {
     jobCreator.subscribeToProgress(setProgress);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -141,6 +142,7 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
 
   useEffect(() => {
     setIsValid(jobValidator.validationSummary.basic);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobValidatorUpdated]);
 
   return (
