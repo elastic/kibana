@@ -34,6 +34,9 @@ export class FilesPlugin implements Plugin<FilesSetup, FilesStart> {
         asScoped(fileKind: string) {
           return createFilesClient({ fileKind, http: core.http });
         },
+        asUnscoped() {
+          return createFilesClient({ http: core.http });
+        },
       },
     };
     return this.api;

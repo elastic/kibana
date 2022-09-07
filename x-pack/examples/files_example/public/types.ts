@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FilesSetup, FilesStart, FilesClient } from '@kbn/files-plugin/public';
+import type { FilesSetup, FilesStart, ScopedFilesClient } from '@kbn/files-plugin/public';
 
 export interface FilesExamplePluginsSetup {
   files: FilesSetup;
@@ -17,7 +17,7 @@ export interface FilesExamplePluginsStart {
 
 export interface FileClients {
   // Example file kind
-  example: FilesClient;
+  example: ScopedFilesClient;
 }
 
 export interface AppPluginStartDependencies {

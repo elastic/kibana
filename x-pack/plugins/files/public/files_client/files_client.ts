@@ -8,7 +8,7 @@
 import { pipe } from 'fp-ts/lib/function';
 import * as qs from 'query-string';
 import type { HttpStart } from '@kbn/core/public';
-import type { FilesClient } from '../types';
+import type { ScopedFilesClient, FilesClient } from '../types';
 import {
   API_BASE_PATH,
   FILES_API_BASE_PATH,
@@ -65,9 +65,24 @@ export const apiRoutes = {
   getMetricsRoute: () => `${API_BASE_PATH}/metrics`,
 };
 
-interface Args {
-  fileKind: string;
+/**
+ * Arguments to create a new {@link FileClient}.
+ */
+export interface Args {
+  /**
+   * The http start service from core.
+   */
   http: HttpStart;
+}
+
+/**
+ * Arguments to create a new {@link ScopedFilesClient}.
+ */
+export interface ScopedArgs extends Args {
+  /**
+   * The file kind to scope all requests to where file kinds are needed.
+   */
+  fileKind: string;
 }
 
 const commonBodyHeaders = {
@@ -76,36 +91,44 @@ const commonBodyHeaders = {
   },
 };
 
-export const createFilesClient = ({ http, fileKind }: Args): FilesClient => {
+export function createFilesClient(args: Args): FilesClient;
+export function createFilesClient(scopedArgs: ScopedArgs): ScopedFilesClient;
+export function createFilesClient({
+  http,
+  fileKind: scopedFileKind,
+}: {
+  http: HttpStart;
+  fileKind?: string;
+}): FilesClient | ScopedFilesClient {
   const api: FilesClient = {
-    create: (args) => {
-      return http.post(apiRoutes.getCreateFileRoute(fileKind), {
+    create: ({ kind, ...args }) => {
+      return http.post(apiRoutes.getCreateFileRoute(scopedFileKind ?? kind), {
         headers: commonBodyHeaders,
         body: JSON.stringify(args),
       });
     },
-    delete: (args) => {
-      return http.delete(apiRoutes.getDeleteRoute(fileKind, args.id));
+    delete: ({ kind, ...args }) => {
+      return http.delete(apiRoutes.getDeleteRoute(scopedFileKind ?? kind, args.id));
     },
-    download: (args) => {
-      return http.get(apiRoutes.getDownloadRoute(fileKind, args.id, args.fileName), {
+    download: ({ kind, ...args }) => {
+      return http.get(apiRoutes.getDownloadRoute(scopedFileKind ?? kind, args.id, args.fileName), {
         headers: { Accept: '*/*' },
       });
     },
-    getById: (args) => {
-      return http.get(apiRoutes.getByIdRoute(fileKind, args.id));
+    getById: ({ kind, ...args }) => {
+      return http.get(apiRoutes.getByIdRoute(scopedFileKind ?? kind, args.id));
     },
-    list(args = {}) {
-      return http.get(apiRoutes.getListRoute(fileKind, args.page, args.perPage));
+    list({ kind, ...args } = { kind: '' }) {
+      return http.get(apiRoutes.getListRoute(scopedFileKind ?? kind, args.page, args.perPage));
     },
-    update: ({ id, ...body }) => {
-      return http.patch(apiRoutes.getUpdateRoute(fileKind, id), {
+    update: ({ kind, id, ...body }) => {
+      return http.patch(apiRoutes.getUpdateRoute(scopedFileKind ?? kind, id), {
         headers: commonBodyHeaders,
         body: JSON.stringify(body),
       });
     },
-    upload: (args) => {
-      return http.put(apiRoutes.getUploadRoute(fileKind, args.id), {
+    upload: ({ kind, ...args }) => {
+      return http.put(apiRoutes.getUploadRoute(scopedFileKind ?? kind, args.id), {
         headers: {
           'Content-Type': 'application/octet-stream',
         },
@@ -113,20 +136,25 @@ export const createFilesClient = ({ http, fileKind }: Args): FilesClient => {
         body: args.body as BodyInit,
       });
     },
-    share: ({ fileId, name, validUntil }) => {
-      return http.post(apiRoutes.getShareRoute(fileKind, fileId), {
+    getDownloadHref: ({ fileKind: kind, id }) => {
+      return `${http.basePath.prepend(apiRoutes.getDownloadRoute(scopedFileKind ?? kind, id))}`;
+    },
+    share: ({ kind, fileId, name, validUntil }) => {
+      return http.post(apiRoutes.getShareRoute(scopedFileKind ?? kind, fileId), {
         headers: commonBodyHeaders,
         body: JSON.stringify({ name, validUntil }),
       });
     },
-    unshare: ({ id }) => {
-      return http.delete(apiRoutes.getShareRoute(fileKind, id));
+    unshare: ({ kind, id }) => {
+      return http.delete(apiRoutes.getShareRoute(scopedFileKind ?? kind, id));
     },
-    getShare: ({ id }) => {
-      return http.get(apiRoutes.getShareRoute(fileKind, id));
+    getShare: ({ kind, id }) => {
+      return http.get(apiRoutes.getShareRoute(scopedFileKind ?? kind, id));
     },
-    listShares: ({ forFileId, page, perPage }) => {
-      return http.get(apiRoutes.getListSharesRoute(fileKind, page, perPage, forFileId));
+    listShares: ({ kind, forFileId, page, perPage }) => {
+      return http.get(
+        apiRoutes.getListSharesRoute(scopedFileKind ?? kind, page, perPage, forFileId)
+      );
     },
     find: ({ page, perPage, ...filterArgs }) => {
       return http.post(apiRoutes.getFindRoute(page, perPage), {
@@ -140,9 +168,6 @@ export const createFilesClient = ({ http, fileKind }: Args): FilesClient => {
     publicDownload: ({ token, fileName }) => {
       return http.get(apiRoutes.getPublicDownloadRoute(token, fileName));
     },
-    getDownloadHref: ({ id }) => {
-      return `${http.basePath.prepend(apiRoutes.getDownloadRoute(fileKind, id))}`;
-    },
   };
   return api;
-};
+}
