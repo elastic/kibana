@@ -243,7 +243,7 @@ export const getAnnotationsGroupedByInterval = (
       textField && formatter && `field:${textField}` in firstRow
         ? formatter.convert(firstRow[`field:${textField}`])
         : firstRow.label;
-    const mergedAnnotation = {
+    const mergedAnnotation: MergedAnnotation = {
       ...firstRow,
       label,
       icon: firstRow.icon || 'triangle',
