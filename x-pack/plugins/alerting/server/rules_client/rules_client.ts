@@ -950,8 +950,12 @@ export class RulesClient {
       ) as string[];
       const ruleNameIdEntries = await Promise.all(
         ruleIds.map(async (id) => {
-          const result = await this.get({ id });
-          return [id, result.name];
+          try {
+            const result = await this.get({ id });
+            return [id, result.name];
+          } catch (e) {
+            return [id, id];
+          }
         })
       );
       const ruleNameIdMap: Record<string, string> = ruleNameIdEntries.reduce(
