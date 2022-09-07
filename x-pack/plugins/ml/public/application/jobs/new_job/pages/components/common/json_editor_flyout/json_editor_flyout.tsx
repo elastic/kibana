@@ -56,6 +56,7 @@ export const JsonEditorFlyout: FC<Props> = ({ isDisabled, jobEditorMode, datafee
   useEffect(() => {
     setJobConfigString(jobCreator.formattedJobJson);
     setDatafeedConfigString(jobCreator.formattedDatafeedJson);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobCreatorUpdated]);
 
   useEffect(() => {
@@ -72,6 +73,7 @@ export const JsonEditorFlyout: FC<Props> = ({ isDisabled, jobEditorMode, datafee
     } else {
       setTempCombinedJob(null);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [showJsonFlyout]);
 
   const editJsonMode =
