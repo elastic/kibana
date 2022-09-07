@@ -18,8 +18,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const security = getService('security');
   const kibanaServer = getService('kibanaServer');
 
-  const { timePicker, visChart, visualBuilder, visualize, settings, common } = getPageObjects([
-    'timePicker',
+  const { visChart, visualBuilder, visualize, settings, common } = getPageObjects([
     'visChart',
     'visualBuilder',
     'visualize',
