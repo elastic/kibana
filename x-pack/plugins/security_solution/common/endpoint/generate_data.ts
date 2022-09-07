@@ -355,6 +355,14 @@ const alertsDefaultDataStream = {
   namespace: 'default',
 };
 
+/**
+ * Generator to create various ElasticSearch documents that are normally streamed by the Endpoint.
+ *
+ * NOTE:  this generator currently reuses certain data (ex. `this.commonInfo`) across several
+ *        documents, thus use caution if manipulating/mutating value in the generated data
+ *        (ex. in tests). Individual standalone generators exist, whose generated data does not
+ *        contain shared data structures.
+ */
 export class EndpointDocGenerator extends BaseDataGenerator {
   commonInfo: HostInfo;
   sequence: number = 0;
