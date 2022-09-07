@@ -23,10 +23,43 @@ import {
 import { Kubernetes } from '../../../typings/es_schemas/raw/fields/kubernetes';
 import { Container } from '../../../typings/es_schemas/raw/fields/container';
 import { maybe } from '../../../common/utils/maybe';
+import { estypes } from '@elastic/elasticsearch';
 
 export interface ContainerMetadata {
   kubernetes?: Kubernetes;
   container?: Container;
+}
+
+export interface ResponseHitSource {
+  [key: string]: {
+    pod: {
+      name: string;
+      uid: string;
+    };
+    labels: {
+      [key: string]: string;
+    };
+    image: {
+      name: string;
+    };
+    id: string;
+  };
+}
+
+export interface ResponseHit {
+  _source: ResponseHitSource;
+}
+
+interface Aggs extends estypes.AggregationsMultiBucketAggregateBase {
+  buckets: Array<{
+    key: string;
+    key_as_string?: string;
+    all_labels: {
+      hits: {
+        hits: ResponseHit[];
+      };
+    };
+  }>;
 }
 
 export const getServiceContainerMetadata = async ({
@@ -58,7 +91,10 @@ export const getServiceContainerMetadata = async ({
     { exists: { field: KUBERNETES_LABELS } },
   ];
 
-  const response = await esClient.search({
+  const response = await esClient.search<
+    unknown,
+    { deployment: Aggs; namespace: Aggs; replicaset: Aggs; labels: Aggs }
+  >({
     index: [indexName],
     _source: [KUBERNETES, CONTAINER],
     query: {
@@ -107,11 +143,12 @@ export const getServiceContainerMetadata = async ({
     },
   });
 
-  const sources = maybe(response.hits.hits[0])?._source;
+  const sources = maybe(response.hits.hits[0])?._source as ResponseHitSource;
 
-  const allLabels = response.aggregations?.labels?.buckets.map(
-    (bucket) => bucket.all_labels.hits.hits[0]._source.kubernetes.labels
-  );
+  const allLabels =
+    response.aggregations?.labels?.buckets.map(
+      (bucket) => bucket.all_labels.hits.hits[0]._source.kubernetes.labels
+    ) ?? [];
 
   return {
     kubernetes: {
@@ -120,13 +157,13 @@ export const getServiceContainerMetadata = async ({
         uid: sources?.kubernetes?.pod.uid,
       },
       deployment: response.aggregations?.deployment?.buckets.map(
-        (bucket) => bucket.key as string
+        (bucket) => bucket.key
       ),
       replicaset: response.aggregations?.replicaset?.buckets.map(
-        (bucket) => bucket.key as string
+        (bucket) => bucket.key
       ),
       namespace: response.aggregations?.namespace?.buckets.map(
-        (bucket) => bucket.key as string
+        (bucket) => bucket.key
       ),
       labels: allLabels
         .map((label) => Object.keys(label).map((key) => `${key}:${label[key]}`))

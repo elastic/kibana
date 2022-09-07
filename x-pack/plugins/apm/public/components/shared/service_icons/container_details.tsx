@@ -104,7 +104,7 @@ export function ContainerDetails({ container, kubernetes }: Props) {
     });
   }
 
-  if (kubernetes?.labels) {
+  if (kubernetes?.labels && kubernetes?.labels.length > 0) {
     listItems.push({
       title: i18n.translate(
         'xpack.apm.serviceIcons.serviceDetails.kubernetes.labels',
