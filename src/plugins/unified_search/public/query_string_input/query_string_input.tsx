@@ -796,7 +796,7 @@ export default class QueryStringInputUI extends PureComponent<Props, State> {
                   />
                 </div>
               ) : null}
-              {this.props.isClearable && this.props.query.query ? (
+              {this.props.isClearable && !this.props.isDisabled && this.props.query.query ? (
                 <div className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right">
                   <button
                     type="button"
@@ -804,7 +804,6 @@ export default class QueryStringInputUI extends PureComponent<Props, State> {
                     title={i18n.translate('unifiedSearch.query.queryBar.clearInputLabel', {
                       defaultMessage: 'Clear input',
                     })}
-                    disabled={this.props.isDisabled}
                     onClick={() => {
                       this.onQueryStringChange('');
                       if (this.props.autoSubmit) {

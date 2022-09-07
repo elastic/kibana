@@ -267,7 +267,7 @@ describe('SearchBar', () => {
     );
     const queryInput = component.find(QUERY_INPUT).at(0).getDOMNode();
     expect(queryInput.querySelector('textarea')).toBeDisabled();
-    expect(queryInput.querySelector('[title="Clear input"]')).toBeDisabled();
+    expect(queryInput.querySelector('[title="Clear input"]')).toBeNull();
 
     expect(component.find(EuiSuperDatePicker).prop('isDisabled')).toBe(true);
     expect(component.find(EuiSuperUpdateButton).prop('isDisabled')).toBe(true);
