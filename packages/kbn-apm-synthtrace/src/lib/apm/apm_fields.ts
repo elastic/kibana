@@ -41,6 +41,7 @@ export interface ApmException {
   message: string;
 }
 export interface Observer {
+  type: string;
   version: string;
   version_major: number;
 }
@@ -51,6 +52,8 @@ export type ApmFields = Fields &
     'agent.name': string;
     'agent.version': string;
     'container.id': string;
+    'destination.address': string;
+    'destination.port': number;
     'ecs.version': string;
     'event.outcome': string;
     'event.ingested': number;
@@ -84,6 +87,8 @@ export type ApmFields = Fields &
     'service.runtime.name': string;
     'service.runtime.version': string;
     'service.framework.name': string;
+    'service.target.name': string;
+    'service.target.type': string;
     'span.id': string;
     'span.name': string;
     'span.type': string;

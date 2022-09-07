@@ -150,3 +150,7 @@ export const FAAS_TRIGGER_TYPE = 'faas.trigger.type';
 export const FAAS_DURATION = 'faas.duration';
 export const FAAS_COLDSTART_DURATION = 'faas.coldstart_duration';
 export const FAAS_BILLED_DURATION = 'faas.billed_duration';
+
+// Metadata
+export const TIER = '_tier';
+export const INDEX = '_index';
