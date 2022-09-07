@@ -117,18 +117,20 @@ export const PackagePolicyInputStreamConfig: React.FunctionComponent<{
           <EuiFlexGroup gutterSize="none" alignItems="flexStart">
             <EuiFlexItem grow={1} />
             <EuiFlexItem grow={5}>
-              <EuiSwitch
-                label={packageInputStream.title}
-                disabled={packagePolicyInputStream.keep_enabled}
-                checked={packagePolicyInputStream.enabled}
-                onChange={(e) => {
-                  const enabled = e.target.checked;
-                  updatePackagePolicyInputStream({
-                    enabled,
-                  });
-                }}
-              />
-              {packageInputStream.description ? (
+              {packageInfo.type === 'integration' && (
+                <EuiSwitch
+                  label={packageInputStream.title}
+                  disabled={packagePolicyInputStream.keep_enabled}
+                  checked={packagePolicyInputStream.enabled}
+                  onChange={(e) => {
+                    const enabled = e.target.checked;
+                    updatePackagePolicyInputStream({
+                      enabled,
+                    });
+                  }}
+                />
+              )}
+              {packageInfo.type === 'integration' && packageInputStream.description ? (
                 <Fragment>
                   <EuiSpacer size="s" />
                   <EuiText size="s" color="subdued">
