@@ -68,4 +68,4 @@ export type { IEditorController, EditorRenderProps } from './visualize_app/types
 
 export { VISUALIZE_EDITOR_TRIGGER, ACTION_CONVERT_TO_LENS } from './triggers';
 
-export { getColumnsFromVis } from './convert_to_lens';
+export { getColumnsFromVis, getPercentageColumnFormulaColumn } from './convert_to_lens';

@@ -9,8 +9,17 @@
 import { IAggConfig, METRIC_TYPES } from '@kbn/data-plugin/common';
 import { SchemaConfig } from '../../..';
 import { Operations } from '../../constants';
+import { isMetricWithField } from '../convert/metric';
+import { getStdDeviationFormula } from '../convert/std_deviation';
 import { getFormulaFromMetric, SUPPORTED_METRICS } from '../convert/supported_metrics';
-import { isSchemaConfig } from '../utils';
+import {
+  getFieldNameFromField,
+  isPercentileAgg,
+  isPercentileRankAgg,
+  isPipeline,
+  isSchemaConfig,
+  isStdDevAgg,
+} from '../utils';
 
 export const addTimeRangeToFormula = (reducedTimeRange?: string) => {
   return reducedTimeRange ? `, reducedTimeRange='${reducedTimeRange}'` : '';
@@ -32,11 +41,12 @@ const METRIC_AGGS_WITHOUT_PARAMS: string[] = [
 ];
 
 const getFormulaForAggsWithoutParams = (
-  agg: IAggConfig,
+  agg: IAggConfig | SchemaConfig<METRIC_TYPES>,
   selector: string,
   reducedTimeRange?: string
 ) => {
-  const op = SUPPORTED_METRICS[agg.type.dslName as METRIC_TYPES];
+  const type = isSchemaConfig(agg) ? agg.aggType : (agg.type.dslName as METRIC_TYPES);
+  const op = SUPPORTED_METRICS[type];
   if (!op) {
     return null;
   }
@@ -46,17 +56,35 @@ const getFormulaForAggsWithoutParams = (
 };
 
 const getFormulaForPercentileRanks = (
-  agg: IAggConfig,
+  agg: IAggConfig | SchemaConfig<METRIC_TYPES.PERCENTILE_RANKS>,
   selector: string,
   reducedTimeRange?: string
 ) => {
-  const op = SUPPORTED_METRICS[agg.type.dslName as METRIC_TYPES];
+  const type = isSchemaConfig(agg) ? agg.aggType : (agg.type.dslName as METRIC_TYPES);
+  const value = isSchemaConfig(agg) ? Number(agg.aggId?.split('.')[1]) : agg.params.value;
+  const op = SUPPORTED_METRICS[type];
   if (!op) {
     return null;
   }
 
   const formula = getFormulaFromMetric(op);
-  return `${formula}(${selector}, value=${agg.params.value}${addTimeRangeToFormula(
+  return `${formula}(${selector}, value=${value}${addTimeRangeToFormula(reducedTimeRange)})`;
+};
+
+const getFormulaForPercentile = (
+  agg: IAggConfig | SchemaConfig<METRIC_TYPES.PERCENTILES>,
+  selector: string,
+  reducedTimeRange?: string
+) => {
+  const type = isSchemaConfig(agg) ? agg.aggType : (agg.type.dslName as METRIC_TYPES);
+  const percentile = isSchemaConfig(agg) ? Number(agg.aggId?.split('.')[1]) : agg.params.percentile;
+  const op = SUPPORTED_METRICS[type];
+  if (!op) {
+    return null;
+  }
+
+  const formula = getFormulaFromMetric(op);
+  return `${formula}(${selector}, percentile=${percentile}${addTimeRangeToFormula(
     reducedTimeRange
   )})`;
 };
@@ -132,4 +160,27 @@ export const getFormulaForPipelineAgg = (
   }
 
   return `${formula}(${subFormula})`;
+};
+
+export const getFormulaForAgg = (agg: SchemaConfig<METRIC_TYPES>) => {
+  if (isPipeline(agg)) {
+    return getFormulaForPipelineAgg(agg);
+  }
+
+  if (isPercentileAgg(agg)) {
+    return getFormulaForPercentile(agg, getFieldNameFromField(agg.aggParams?.field) ?? '');
+  }
+
+  if (isPercentileRankAgg(agg)) {
+    return getFormulaForPercentileRanks(agg, getFieldNameFromField(agg.aggParams?.field) ?? '');
+  }
+
+  if (isStdDevAgg(agg) && agg.aggId) {
+    return getStdDeviationFormula(agg.aggId, getFieldNameFromField(agg.aggParams?.field) ?? '');
+  }
+
+  return getFormulaForAggsWithoutParams(
+    agg,
+    isMetricWithField(agg) ? getFieldNameFromField(agg.aggParams?.field) ?? '' : ''
+  );
 };

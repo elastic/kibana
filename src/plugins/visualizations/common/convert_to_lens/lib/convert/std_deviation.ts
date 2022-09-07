@@ -33,6 +33,21 @@ const getFormulaForStdDevUpperBound = (field: string, reducedTimeRange?: string)
   )}) + ${2} * ${aggFormula}(${field}${addTimeRangeToFormula(reducedTimeRange)})`;
 };
 
+export const getStdDeviationFormula = (
+  aggId: string,
+  fieldName: string,
+  reducedTimeRange?: string
+) => {
+  const [, mode] = aggId.split('.');
+  if (!STD_MODES.includes(mode)) {
+    return null;
+  }
+
+  return mode === STD_LOWER
+    ? getFormulaForStdDevLowerBound(fieldName, reducedTimeRange)
+    : getFormulaForStdDevUpperBound(fieldName, reducedTimeRange);
+};
+
 export const convertToStdDeviationFormulaColumns = (
   { agg, dataView }: CommonColumnConverterArgs<METRIC_TYPES.STD_DEV>,
   reducedTimeRange?: string
@@ -52,15 +67,11 @@ export const convertToStdDeviationFormulaColumns = (
     return null;
   }
 
-  const [, mode] = aggId.split('.');
-  if (!STD_MODES.includes(mode)) {
+  const formula = getStdDeviationFormula(aggId, field.displayName, reducedTimeRange);
+
+  if (!formula) {
     return null;
   }
-
-  const formula =
-    mode === STD_LOWER
-      ? getFormulaForStdDevLowerBound(field.displayName, reducedTimeRange)
-      : getFormulaForStdDevUpperBound(field.displayName, reducedTimeRange);
 
   return createFormulaColumn(formula, agg);
 };

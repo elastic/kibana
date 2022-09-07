@@ -38,6 +38,11 @@ export type MetricsWithField = Exclude<
   | METRIC_TYPES.COUNT
 >;
 
+export type ParentPipelineMetric =
+  | METRIC_TYPES.CUMULATIVE_SUM
+  | METRIC_TYPES.DERIVATIVE
+  | METRIC_TYPES.MOVING_FN;
+
 export type SiblingPipelineMetric =
   | METRIC_TYPES.AVG_BUCKET
   | METRIC_TYPES.SUM_BUCKET

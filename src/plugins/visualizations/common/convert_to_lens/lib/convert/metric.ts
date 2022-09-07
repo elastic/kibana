@@ -32,8 +32,7 @@ type MetricAggregationWithoutParams =
   | typeof Operations.MAX
   | typeof Operations.MEDIAN
   | typeof Operations.MIN
-  | typeof Operations.SUM
-  | typeof Operations.STANDARD_DEVIATION;
+  | typeof Operations.SUM;
 
 const SUPPORTED_METRICS_AGGS_WITHOUT_PARAMS: MetricAggregationWithoutParams[] = [
   Operations.AVERAGE,
@@ -43,7 +42,6 @@ const SUPPORTED_METRICS_AGGS_WITHOUT_PARAMS: MetricAggregationWithoutParams[] = 
   Operations.MIN,
   Operations.MEDIAN,
   Operations.SUM,
-  Operations.STANDARD_DEVIATION,
 ];
 
 export type MetricAggregationColumnWithoutSpecialParams =
@@ -63,7 +61,6 @@ export type MetricsWithoutSpecialParams =
   | METRIC_TYPES.SUM
   | METRIC_TYPES.MEDIAN
   | METRIC_TYPES.CARDINALITY
-  | METRIC_TYPES.STD_DEV
   | METRIC_TYPES.VALUE_COUNT;
 
 const isSupportedAggregationWithoutParams = (
@@ -72,8 +69,8 @@ const isSupportedAggregationWithoutParams = (
   return (SUPPORTED_METRICS_AGGS_WITHOUT_PARAMS as string[]).includes(agg);
 };
 
-const isMetricWithField = (
-  agg: CommonColumnConverterArgs<MetricsWithField | METRIC_TYPES.COUNT>['agg']
+export const isMetricWithField = (
+  agg: CommonColumnConverterArgs<METRIC_TYPES>['agg']
 ): agg is SchemaConfig<MetricsWithField> => {
   return agg.aggType !== METRIC_TYPES.COUNT;
 };

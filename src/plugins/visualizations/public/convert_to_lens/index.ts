@@ -7,3 +7,4 @@
  */
 
 export { getColumnsFromVis } from './schemas';
+export { getPercentageColumnFormulaColumn } from '../../common/convert_to_lens/lib/metrics';

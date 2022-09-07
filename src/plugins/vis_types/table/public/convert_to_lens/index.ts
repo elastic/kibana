@@ -6,7 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { getColumnsFromVis } from '@kbn/visualizations-plugin/public';
+import {
+  getColumnsFromVis,
+  getVisSchemas,
+  getPercentageColumnFormulaColumn,
+} from '@kbn/visualizations-plugin/public';
 import uuid from 'uuid';
 import { getDataViewsStart } from '../services';
 import { ConvertTableToLensVisualization } from './types';
@@ -32,6 +36,22 @@ export const convertToLens: ConvertTableToLensVisualization = async (vis, timefi
 
   if (columns === null) {
     return null;
+  }
+
+  if (vis.params.percentageCol) {
+    const visSchemas = getVisSchemas(vis, {
+      timefilter,
+      timeRange: timefilter.getAbsoluteTime(),
+    });
+    const metricAgg = visSchemas.metric.find((m) => m.label === vis.params.percentageCol);
+    if (!metricAgg) {
+      return null;
+    }
+    const percentageColumn = getPercentageColumnFormulaColumn(metricAgg);
+    if (!percentageColumn) {
+      return null;
+    }
+    columns.push(percentageColumn);
   }
 
   const layerId = uuid();
