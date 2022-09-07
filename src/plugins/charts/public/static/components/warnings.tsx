@@ -19,14 +19,15 @@ export function Warnings({ warnings }: { warnings: React.ReactNode[] }) {
         isOpen={open}
         closePopover={() => setOpen(false)}
         button={
-          <EuiButtonEmpty color="warning" iconType="alert" onClick={() => setOpen(!open)} size="xs">{
-            i18n.translate('charts.warning.warningLabel', {
-              defaultMessage: '{numberWarnings, number} {numberWarnings, plural, one {warning} other {warnings}}',
+          <EuiButtonEmpty color="warning" iconType="alert" onClick={() => setOpen(!open)} size="xs">
+            {i18n.translate('charts.warning.warningLabel', {
+              defaultMessage:
+                '{numberWarnings, number} {numberWarnings, plural, one {warning} other {warnings}}',
               values: {
-                numberWarnings: warnings.length
-              }
-            })
-          }</EuiButtonEmpty>
+                numberWarnings: warnings.length,
+              },
+            })}
+          </EuiButtonEmpty>
         }
       >
         <div style={{ maxWidth: 512 }}>
