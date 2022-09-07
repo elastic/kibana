@@ -311,7 +311,7 @@ function getLensAttributesPartition(
   const pieConfig: PieVisualizationState = {
     layers: [
       {
-        groups: ['col1'],
+        primaryGroups: ['col1'],
         metric: 'col2',
         layerId: 'layer1',
         layerType: 'data',
