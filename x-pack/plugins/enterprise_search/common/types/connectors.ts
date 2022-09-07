@@ -32,10 +32,10 @@ export enum SyncStatus {
 }
 
 export interface IngestPipelineParams {
-  extract_binary_content: boolean | null;
-  name: string | null;
-  reduce_whitespace: boolean | null;
-  run_ml_inference: boolean | null;
+  extract_binary_content: boolean;
+  name: string;
+  reduce_whitespace: boolean;
+  run_ml_inference: boolean;
 }
 
 export interface Connector {

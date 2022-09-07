@@ -102,12 +102,14 @@ export const addConnector = async (
     last_sync_status: null,
     last_synced: null,
     name: input.index_name.startsWith('search-') ? input.index_name.substring(7) : input.index_name,
-    pipeline: {
-      extract_binary_content: connectorsPipelineMeta?.default_extract_binary_content,
-      name: connectorsPipelineMeta?.default_name,
-      reduce_whitespace: connectorsPipelineMeta?.default_reduce_whitespace,
-      run_ml_inference: connectorsPipelineMeta?.default_run_ml_inference,
-    },
+    pipeline: connectorsPipelineMeta
+      ? {
+          extract_binary_content: connectorsPipelineMeta.default_extract_binary_content,
+          name: connectorsPipelineMeta.default_name,
+          reduce_whitespace: connectorsPipelineMeta.default_reduce_whitespace,
+          run_ml_inference: connectorsPipelineMeta.default_run_ml_inference,
+        }
+      : null,
     scheduling: { enabled: false, interval: '0 0 0 * * ?' },
     service_type: serviceType,
     status: ConnectorStatus.CREATED,
