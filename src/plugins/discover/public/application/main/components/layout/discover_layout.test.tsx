@@ -176,12 +176,16 @@ function mountComponent(
 describe('Discover component', () => {
   test('selected data view without time field displays no chart toggle', () => {
     const component = mountComponent(dataViewMock);
-    expect(component.find('[data-test-subj="discoverChartOptionsToggle"]').exists()).toBeFalsy();
+    expect(
+      component.getDOMNode().querySelectorAll('[data-test-subj="discoverChartOptionsToggle"]')
+    ).toHaveLength(0);
   });
 
   test('selected data view with time field displays chart toggle', () => {
     const component = mountComponent(dataViewWithTimefieldMock);
-    expect(component.find('[data-test-subj="discoverChartOptionsToggle"]').exists()).toBeTruthy();
+    expect(
+      component.getDOMNode().querySelectorAll('[data-test-subj="discoverChartOptionsToggle"]')
+    ).toHaveLength(1);
   });
 
   test('sql query displays no chart toggle', () => {
@@ -192,7 +196,9 @@ describe('Discover component', () => {
       { sql: 'SELECT * FROM test' },
       true
     );
-    expect(component.find('[data-test-subj="discoverChartOptionsToggle"]').exists()).toBeFalsy();
+    expect(
+      component.getDOMNode().querySelectorAll('[data-test-subj="discoverChartOptionsToggle"]')
+    ).toHaveLength(0);
   });
 
   test('the saved search title h1 gains focus on navigate', () => {
