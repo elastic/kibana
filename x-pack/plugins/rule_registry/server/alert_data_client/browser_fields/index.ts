@@ -17,7 +17,7 @@ const getFieldCategory = (fieldCapability: FieldSpec) => {
   return name[0];
 };
 
-const populateInfoFactory = (fieldCapability: FieldSpec) => {
+const browserFieldFactory = (fieldCapability: FieldSpec) => {
   const category = getFieldCategory(fieldCapability);
   return {
     category,
@@ -36,7 +36,7 @@ export const fieldDescriptorToBrowserFieldMapper = (
   const browserFields = new Map();
 
   fieldDescriptor.forEach((fieldCapability) => {
-    const { category, field } = populateInfoFactory(fieldCapability);
+    const { category, field } = browserFieldFactory(fieldCapability);
 
     if (browserFields.has(category)) {
       const { fields: currentFields } = browserFields.get(category);
