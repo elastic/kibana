@@ -114,14 +114,16 @@ Object {
       "legendPosition": "right",
       "legendSize": "small",
       "maxLegendLines": 2,
-      "metric": Object {
-        "accessor": 0,
-        "format": Object {
-          "id": "number",
-          "params": Object {},
+      "metrics": Array [
+        Object {
+          "accessor": 0,
+          "format": Object {
+            "id": "number",
+            "params": Object {},
+          },
+          "type": "vis_dimension",
         },
-        "type": "vis_dimension",
-      },
+      ],
       "nestedLegend": true,
       "palette": Object {
         "name": "kibana_palette",
@@ -248,14 +250,16 @@ Object {
       "legendPosition": "right",
       "legendSize": "small",
       "maxLegendLines": 2,
-      "metric": Object {
-        "accessor": 0,
-        "format": Object {
-          "id": "number",
-          "params": Object {},
+      "metrics": Array [
+        Object {
+          "accessor": 0,
+          "format": Object {
+            "id": "number",
+            "params": Object {},
+          },
+          "type": "vis_dimension",
         },
-        "type": "vis_dimension",
-      },
+      ],
       "nestedLegend": true,
       "palette": Object {
         "name": "kibana_palette",

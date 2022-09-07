@@ -57,7 +57,7 @@ export const collapseMetrics = (
     bucketColumns[bucketColumns.length - 1],
   ];
 
-  const nameColumnId = 'category-name';
+  const nameColumnId = 'category-metric';
   const valueColumnId = 'value';
 
   table.rows.forEach((row) => {
