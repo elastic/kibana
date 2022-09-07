@@ -47,7 +47,7 @@ interface StatusAnalyticsPayload {
   overall_status_summary: string;
 }
 
-export interface SetupDeps {
+export interface StatusServiceSetupDeps {
   analytics: AnalyticsServiceSetup;
   elasticsearch: Pick<InternalElasticsearchServiceSetup, 'status$'>;
   environment: InternalEnvironmentServiceSetup;
@@ -81,7 +81,7 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
     savedObjects,
     environment,
     coreUsageData,
-  }: SetupDeps) {
+  }: StatusServiceSetupDeps) {
     const statusConfig = await firstValueFrom(this.config$);
     const core$ = this.setupCoreStatus({ elasticsearch, savedObjects });
     this.pluginsStatus = new PluginsStatusService({ core$, pluginDependencies });
@@ -201,7 +201,7 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
   private setupCoreStatus({
     elasticsearch,
     savedObjects,
-  }: Pick<SetupDeps, 'elasticsearch' | 'savedObjects'>): Observable<CoreStatus> {
+  }: Pick<StatusServiceSetupDeps, 'elasticsearch' | 'savedObjects'>): Observable<CoreStatus> {
     return combineLatest([elasticsearch.status$, savedObjects.status$]).pipe(
       map(([elasticsearchStatus, savedObjectsStatus]) => ({
         elasticsearch: elasticsearchStatus,

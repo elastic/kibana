@@ -10,7 +10,7 @@ import { of, BehaviorSubject, firstValueFrom } from 'rxjs';
 
 import { ServiceStatus, ServiceStatusLevels, CoreStatus } from '@kbn/core-status-common';
 import { InternalStatusServiceSetup } from './types';
-import { StatusService } from './status_service';
+import { StatusService, StatusServiceSetupDeps } from './status_service';
 import { first, take, toArray } from 'rxjs/operators';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import { environmentServiceMock } from '@kbn/core-environment-server-mocks';
@@ -47,8 +47,7 @@ describe('StatusService', () => {
     summary: 'This is critical!',
   };
 
-  type SetupDeps = Parameters<StatusService['setup']>[0];
-  const setupDeps = (overrides: Partial<SetupDeps>): SetupDeps => {
+  const setupDeps = (overrides: Partial<StatusServiceSetupDeps>): StatusServiceSetupDeps => {
     return {
       analytics: analyticsServiceMock.createAnalyticsServiceSetup(),
       elasticsearch: {
