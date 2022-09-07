@@ -7,10 +7,13 @@
 
 import React, { useContext, useMemo } from 'react';
 import { generatePath, Link, type RouteComponentProps } from 'react-router-dom';
-import { EuiTextColor, EuiButtonEmpty, EuiFlexGroup, EuiPageHeader, EuiSpacer } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiPageHeader, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
 import { i18n } from '@kbn/i18n';
+import { PackagePolicy } from '@kbn/fleet-plugin/common';
+import { CspInlineDescriptionList } from '../../components/csp_inline_description_list';
+import { kubeDeployOptions } from '../../components/fleet_extensions/deployment_type_select';
 import { CloudPosturePageTitle } from '../../components/cloud_posture_page_title';
 import type { BreadcrumbEntry } from '../../common/navigation/types';
 import { RulesContainer, type PageUrlParams } from './rules_container';
@@ -41,6 +44,15 @@ const getRulesBreadcrumbs = (
   return breadCrumbs;
 };
 
+const getPackageTypeDisplayName = (packageInfo: PackagePolicy) => {
+  const enabledPackage = packageInfo.inputs.find((input) => input.enabled);
+  const matchingKubeDeployOption = kubeDeployOptions.find(
+    (option) => option.value === enabledPackage.type
+  );
+
+  return matchingKubeDeployOption.label;
+};
+
 export const Rules = ({ match: { params } }: RouteComponentProps<PageUrlParams>) => {
   const { http } = useKibana().services;
   const integrationInfo = useCspIntegrationInfo(params);
@@ -55,6 +67,9 @@ export const Rules = ({ match: { params } }: RouteComponentProps<PageUrlParams>)
   );
 
   useCspBreadcrumbs(breadcrumbs);
+
+  console.log(packageInfo);
+  console.log(agentInfo);
 
   return (
     <CloudPosturePage query={integrationInfo}>
@@ -96,16 +111,27 @@ export const Rules = ({ match: { params } }: RouteComponentProps<PageUrlParams>)
         description={
           packageInfo?.package &&
           agentInfo?.name && (
-            <EuiTextColor color="subdued">
-              <FormattedMessage
-                id="xpack.csp.rules.rulePageHeader.pageDescriptionTitle"
-                defaultMessage="{integrationType}, {agentPolicyName}"
-                values={{
-                  integrationType: packageInfo.package.title,
-                  agentPolicyName: agentInfo.name,
-                }}
-              />
-            </EuiTextColor>
+            <CspInlineDescriptionList
+              listItems={[
+                { title: 'Integration', description: 'KSPM' },
+                {
+                  title: 'Type',
+                  description:
+                    packageInfo?.inputs?.length && getPackageTypeDisplayName(packageInfo),
+                },
+                { title: 'Benchmark', description: 'CIS Kubernetes' },
+              ]}
+            />
+            // <EuiTextColor color="subdued">
+            //   <FormattedMessage
+            //     id="xpack.csp.rules.rulePageHeader.pageDescriptionTitle"
+            //     defaultMessage="{integrationType}, {agentPolicyName}"
+            //     values={{
+            //       integrationType: packageInfo.package.title,
+            //       agentPolicyName: agentInfo.name,
+            //     }}
+            //   />
+            // </EuiTextColor>
           )
         }
         bottomBorder

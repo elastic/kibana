@@ -27,7 +27,8 @@ interface Props {
   isDisabled?: boolean;
 }
 
-const kubeDeployOptions: Array<EuiComboBoxOptionOption<InputType>> = [
+// exporting those pairings in order to find the matching display name to value
+export const kubeDeployOptions: Array<EuiComboBoxOptionOption<InputType>> = [
   {
     value: CLOUDBEAT_VANILLA,
     label: i18n.translate(
