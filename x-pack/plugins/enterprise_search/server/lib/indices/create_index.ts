@@ -61,16 +61,19 @@ const defaultMappings = {
   ],
 };
 
-export const createApiIndex = async (
+export const createIndex = async (
   client: IScopedClusterClient,
   indexName: string,
-  language: string | undefined | null
+  language: string | undefined | null,
+  applyMappings: boolean
 ) => {
   return await client.asCurrentUser.indices.create({
-    body: {
-      mappings: defaultMappings,
-      settings: textAnalysisSettings(language ?? undefined),
-    },
     index: indexName,
+    mappings: applyMappings ? defaultMappings : {},
+    settings: {
+      ...textAnalysisSettings(language ?? undefined),
+      auto_expand_replicas: '0-3',
+      number_of_shards: 2,
+    },
   });
 };
