@@ -10,6 +10,7 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 
 import { AiopsPluginSetup, AiopsPluginStart } from './types';
 import { setStartServices } from './kibana_services';
@@ -19,6 +20,7 @@ export interface AiOpsStartDependencies {
   charts: ChartsPluginStart;
   fieldFormats: FieldFormatsStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  share: SharePluginStart;
 }
 
 export class AiopsPlugin implements Plugin<AiopsPluginSetup, AiopsPluginStart> {
