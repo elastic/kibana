@@ -5,6 +5,9 @@ Object {
   "chain": Array [
     Object {
       "arguments": Object {
+        "addTimeMarker": Array [
+          false,
+        ],
         "emphasizeFitting": Array [
           true,
         ],

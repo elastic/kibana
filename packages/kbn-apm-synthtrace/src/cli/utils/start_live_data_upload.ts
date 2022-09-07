@@ -14,9 +14,11 @@ import { ApmSynthtraceEsClient } from '../../lib/apm';
 import { Logger } from '../../lib/utils/create_logger';
 import { EntityArrayIterable } from '../../lib/entity_iterable';
 import { StreamProcessor } from '../../lib/stream_processor';
+import { ApmSynthtraceApmClient } from '../../lib/apm/client/apm_synthtrace_apm_client';
 
 export async function startLiveDataUpload(
   esClient: ApmSynthtraceEsClient,
+  apmIntakeClient: ApmSynthtraceApmClient | null,
   logger: Logger,
   runOptions: RunOptions,
   start: Date,
@@ -41,7 +43,7 @@ export async function startLiveDataUpload(
         generate({ from: bucketFrom, to: bucketTo }).toArray()
       );
 
-      logger.debug(
+      logger.info(
         `Requesting ${new Date(bucketFrom).toISOString()} to ${new Date(
           bucketTo
         ).toISOString()}, events: ${nextEvents.length}`
@@ -65,18 +67,20 @@ export async function startLiveDataUpload(
       maxSourceEvents: runOptions.maxDocs,
       name: `Live index`,
     });
-    await logger.perf('index_live_scenario', () =>
-      esClient.index(
-        new EntityArrayIterable(eventsToUpload),
-        {
-          concurrency: runOptions.workers,
-          maxDocs: runOptions.maxDocs,
-          mapToIndex,
-          dryRun: false,
-        },
-        streamProcessor
-      )
-    );
+    await logger.perf('index_live_scenario', async () => {
+      const events = new EntityArrayIterable(eventsToUpload);
+      const streamToBulkOptions = {
+        concurrency: runOptions.workers,
+        maxDocs: runOptions.maxDocs,
+        mapToIndex,
+        dryRun: false,
+      };
+      if (apmIntakeClient) {
+        await apmIntakeClient.index(events, streamToBulkOptions, streamProcessor);
+      } else {
+        await esClient.index(events, streamToBulkOptions, streamProcessor);
+      }
+    });
   }
 
   do {
