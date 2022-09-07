@@ -63,7 +63,6 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
   const [pageSize, setPageSize] = useState(10);
   const [sortField, setSortField] = useState<keyof ChangePoint>(DEFAULT_SORT_FIELD);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>(DEFAULT_SORT_DIRECTION);
-  // const [discoverUrlError, setDiscoverUrlError] = useState<string | undefined>();
 
   const aiOpsKibana = useAiOpsKibana();
   const {
