@@ -7,10 +7,9 @@
  */
 
 import { findConfigFile } from '../find_config_file';
-import { ToolingLog } from '@kbn/tooling-log';
 
 describe(`find config file fn`, () => {
   it(`should be a fn`, () => {
-    expect(typeof findConfigFile).to.be('function');
+    expect(typeof findConfigFile).toBe('function');
   });
 });
