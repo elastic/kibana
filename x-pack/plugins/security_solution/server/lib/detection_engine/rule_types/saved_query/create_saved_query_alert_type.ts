@@ -13,7 +13,7 @@ import type { CompleteRule, SavedQueryRuleParams } from '../../schemas/rule_sche
 import { savedQueryRuleParams } from '../../schemas/rule_schemas';
 import { queryExecutor } from '../../signals/executors/query';
 import type { CreateRuleOptions, SecurityAlertType } from '../types';
-import { validateImmutable, validateIndexPatterns } from '../utils';
+import { validateIndexPatterns } from '../utils';
 export const createSavedQueryAlertType = (
   createOptions: CreateRuleOptions
 ): SecurityAlertType<SavedQueryRuleParams, {}, {}, 'default'> => {
@@ -40,7 +40,6 @@ export const createSavedQueryAlertType = (
          * @returns mutatedRuleParams
          */
         validateMutatedParams: (mutatedRuleParams) => {
-          validateImmutable(mutatedRuleParams.immutable);
           validateIndexPatterns(mutatedRuleParams.index);
 
           return mutatedRuleParams;
