@@ -28,6 +28,7 @@ import {
   EuiLink,
   EuiTextArea,
 } from '@elastic/eui';
+import { getDocLinks } from '../../../../../kibana_services';
 import { useMonitorName } from '../hooks/use_monitor_name';
 import { MonitorTypeRadioGroup } from '../fields/monitor_type_radio_group';
 import {
@@ -989,7 +990,10 @@ export const FIELD: Record<string, FieldMeta> = {
         {i18n.translate('xpack.synthetics.monitorConfig.playwrightOptions.helpText', {
           defaultMessage: 'Configure Playwright agent with custom options. ',
         })}
-        <EuiLink href="#" target="_blank">
+        <EuiLink
+          href={getDocLinks()?.links?.observability?.syntheticsCommandReference}
+          target="_blank"
+        >
           {i18n.translate('xpack.synthetics.monitorConfig.playwrightOptions.learnMore', {
             defaultMessage: 'Learn more',
           })}
