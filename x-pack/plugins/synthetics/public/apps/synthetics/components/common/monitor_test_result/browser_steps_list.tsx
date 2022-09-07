@@ -67,7 +67,7 @@ export const BrowserStepsList = ({ steps, error, loading, showStepNumber = false
             </strong>
           </EuiText>
         ),
-        header: 'Step',
+        header: STEP_LABEL,
         enlarge: true,
       },
     },

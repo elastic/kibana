@@ -44,6 +44,7 @@ export const StepImageCaption: React.FC<StepImageCaptionProps> = ({
     return () => {
       onVisible(false);
     };
+    // Empty deps to only trigger effect once on init
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

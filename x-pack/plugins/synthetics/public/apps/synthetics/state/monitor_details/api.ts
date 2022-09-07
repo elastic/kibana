@@ -9,23 +9,17 @@ import { SavedObject } from '@kbn/core/types';
 import { apiService } from '../../../../utils/api_service';
 import {
   EncryptedSyntheticsSavedMonitor,
-  Ping,
   PingsResponse,
   PingsResponseType,
   SyntheticsMonitor,
 } from '../../../../../common/runtime_types';
-import { API_URLS, SYNTHETICS_API_URLS } from '../../../../../common/constants';
+import { API_URLS } from '../../../../../common/constants';
 
 export interface QueryParams {
   monitorId: string;
   dateStart: string;
   dateEnd: string;
 }
-
-// TODO: Remove the following along with the rest route if not needed
-export const fetchMonitorStatus = async (params: QueryParams): Promise<Ping> => {
-  return await apiService.get(SYNTHETICS_API_URLS.MONITOR_STATUS, { ...params });
-};
 
 export const fetchMonitorRecentPings = async ({
   monitorId,

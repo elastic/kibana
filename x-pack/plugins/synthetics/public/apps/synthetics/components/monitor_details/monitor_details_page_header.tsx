@@ -9,9 +9,5 @@ import React from 'react';
 import { MonitorDetailsTabs } from './monitor_detials_tabs';
 
 export const MonitorDetailsPageHeader = () => {
-  return (
-    <>
-      <MonitorDetailsTabs />
-    </>
-  );
+  return <MonitorDetailsTabs />;
 };

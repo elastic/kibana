@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { createGetMonitorStatusRoute } from './monitor_summary/monitor_status';
 import { getAPIKeySyntheticsRoute } from './monitor_cruds/get_api_key';
 import { getServiceLocationsRoute } from './synthetics_service/get_service_locations';
 import { deleteSyntheticsMonitorRoute } from './monitor_cruds/delete_monitor';
@@ -47,7 +46,6 @@ export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   testNowMonitorRoute,
   getServiceAllowedRoute,
   getAPIKeySyntheticsRoute,
-  createGetMonitorStatusRoute,
 ];
 
 export const syntheticsAppStreamingApiRoutes: SyntheticsStreamingRouteFactory[] = [
