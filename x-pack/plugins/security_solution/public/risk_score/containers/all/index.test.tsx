@@ -34,149 +34,64 @@ const mockRefetch = jest.fn();
 
 let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;
 
-describe('useHostRiskScore', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-    appToastsMock = useAppToastsMock.create();
-    (useAppToasts as jest.Mock).mockReturnValue(appToastsMock);
-  });
-
-  test('does not search if feature is not enabled', () => {
-    mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
-    mockUseSearchStrategy.mockReturnValue({
-      loading: false,
-      result: {
-        data: undefined,
-        totalCount: 0,
-      },
-      search: mockSearch,
-      refetch: mockRefetch,
-      inspect: {},
-      error: undefined,
+[useHostRiskScore, useUserRiskScore].forEach((fn) => {
+  const riskEntity = fn.name === 'useHostRiskScore' ? 'host' : 'user';
+  describe(`${fn.name}`, () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+      appToastsMock = useAppToastsMock.create();
+      (useAppToasts as jest.Mock).mockReturnValue(appToastsMock);
     });
-    const { result } = renderHook(() => useHostRiskScore(), {
-      wrapper: TestProviders,
-    });
-    expect(mockSearch).not.toHaveBeenCalled();
-    expect(result.current).toEqual([
-      false,
-      {
-        data: undefined,
-        inspect: {},
-        isInspected: false,
-        isModuleEnabled: false,
-        refetch: mockRefetch,
-        totalCount: 0,
-      },
-    ]);
-  });
-
-  test('handle index not found error', () => {
-    mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
-
-    mockUseSearchStrategy.mockReturnValue({
-      loading: false,
-      result: {
-        data: undefined,
-        totalCount: 0,
-      },
-      search: mockSearch,
-      refetch: mockRefetch,
-      inspect: {},
-      error: {
-        attributes: {
-          caused_by: {
-            type: 'index_not_found_exception',
-          },
+    test('does not search if feature is not enabled', () => {
+      mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
+      mockUseSearchStrategy.mockReturnValue({
+        loading: false,
+        result: {
+          data: undefined,
+          totalCount: 0,
         },
-      },
-    });
-    const { result } = renderHook(() => useHostRiskScore(), {
-      wrapper: TestProviders,
-    });
-    expect(result.current).toEqual([
-      false,
-      {
-        data: undefined,
-        inspect: {},
-        isInspected: false,
-        isModuleEnabled: false,
+        search: mockSearch,
         refetch: mockRefetch,
-        totalCount: 0,
-      },
-    ]);
-  });
-
-  test('show error toast', () => {
-    mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
-
-    const error = new Error();
-    mockUseSearchStrategy.mockReturnValue({
-      loading: false,
-      result: {
-        data: undefined,
-        totalCount: 0,
-      },
-      search: mockSearch,
-      refetch: mockRefetch,
-      inspect: {},
-      error,
-    });
-    renderHook(() => useHostRiskScore(), {
-      wrapper: TestProviders,
-    });
-    expect(appToastsMock.addError).toHaveBeenCalledWith(error, {
-      title: 'Failed to run search on risk score',
-    });
-  });
-
-  test('runs search if feature is enabled', () => {
-    mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
-    mockUseSearchStrategy.mockReturnValue({
-      loading: false,
-      result: {
-        data: [],
-        totalCount: 0,
-      },
-      search: mockSearch,
-      refetch: mockRefetch,
-      inspect: {},
-      error: undefined,
-    });
-    renderHook(() => useHostRiskScore(), {
-      wrapper: TestProviders,
-    });
-    expect(mockSearch).toHaveBeenCalledWith({
-      defaultIndex: ['ml_host_risk_score_latest_default'],
-      factoryQueryType: 'hostsRiskScore',
-      filterQuery: undefined,
-      pagination: undefined,
-      timerange: undefined,
-      sort: undefined,
-    });
-  });
-
-  test('return result', async () => {
-    mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
-    mockUseSearchStrategy.mockReturnValue({
-      loading: false,
-      result: {
-        data: [],
-        totalCount: 0,
-      },
-      search: mockSearch,
-      refetch: mockRefetch,
-      inspect: {},
-      error: undefined,
-    });
-    const { result, waitFor } = renderHook(() => useHostRiskScore(), {
-      wrapper: TestProviders,
-    });
-    await waitFor(() => {
+        inspect: {},
+        error: undefined,
+      });
+      const { result } = renderHook(() => fn(), {
+        wrapper: TestProviders,
+      });
+      expect(mockSearch).not.toHaveBeenCalled();
       expect(result.current).toEqual([
         false,
         {
-          data: [],
+          data: undefined,
+          inspect: {},
+          isInspected: false,
+          isModuleEnabled: false,
+          refetch: mockRefetch,
+          totalCount: 0,
+        },
+      ]);
+    });
+
+    test('if query skipped and feature is enabled, isModuleEnabled should be true', () => {
+      mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
+      mockUseSearchStrategy.mockReturnValue({
+        loading: false,
+        result: {
+          data: undefined,
+          totalCount: 0,
+        },
+        search: mockSearch,
+        refetch: mockRefetch,
+        inspect: {},
+        error: undefined,
+      });
+      const { result } = renderHook(() => fn({ skip: true }), {
+        wrapper: TestProviders,
+      });
+      expect(result.current).toEqual([
+        false,
+        {
+          data: undefined,
           inspect: {},
           isInspected: false,
           isModuleEnabled: true,
@@ -185,159 +100,121 @@ describe('useHostRiskScore', () => {
         },
       ]);
     });
-  });
-});
 
-describe('useUserRiskScore', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-    appToastsMock = useAppToastsMock.create();
-    (useAppToasts as jest.Mock).mockReturnValue(appToastsMock);
-  });
+    test('handle index not found error', () => {
+      mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
 
-  test('does not search if feature is not enabled', () => {
-    mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
-    mockUseSearchStrategy.mockReturnValue({
-      loading: false,
-      result: {
-        data: undefined,
-        totalCount: 0,
-      },
-      search: mockSearch,
-      refetch: mockRefetch,
-      inspect: {},
-      error: undefined,
-    });
-    const { result } = renderHook(() => useUserRiskScore(), {
-      wrapper: TestProviders,
-    });
-    expect(mockSearch).not.toHaveBeenCalled();
-    expect(result.current).toEqual([
-      false,
-      {
-        data: undefined,
-        inspect: {},
-        isInspected: false,
-        isModuleEnabled: false,
+      mockUseSearchStrategy.mockReturnValue({
+        loading: false,
+        result: {
+          data: undefined,
+          totalCount: 0,
+        },
+        search: mockSearch,
         refetch: mockRefetch,
-        totalCount: 0,
-      },
-    ]);
-  });
-
-  test('handle index not found error', () => {
-    mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
-
-    mockUseSearchStrategy.mockReturnValue({
-      loading: false,
-      result: {
-        data: undefined,
-        totalCount: 0,
-      },
-      search: mockSearch,
-      refetch: mockRefetch,
-      inspect: {},
-      error: {
-        attributes: {
-          caused_by: {
-            type: 'index_not_found_exception',
+        inspect: {},
+        error: {
+          attributes: {
+            caused_by: {
+              type: 'index_not_found_exception',
+            },
           },
         },
-      },
-    });
-    const { result } = renderHook(() => useUserRiskScore(), {
-      wrapper: TestProviders,
-    });
-    expect(result.current).toEqual([
-      false,
-      {
-        data: undefined,
-        inspect: {},
-        isInspected: false,
-        isModuleEnabled: false,
-        refetch: mockRefetch,
-        totalCount: 0,
-      },
-    ]);
-  });
-
-  test('show error toast', () => {
-    mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
-
-    const error = new Error();
-    mockUseSearchStrategy.mockReturnValue({
-      loading: false,
-      result: {
-        data: undefined,
-        totalCount: 0,
-      },
-      search: mockSearch,
-      refetch: mockRefetch,
-      inspect: {},
-      error,
-    });
-    renderHook(() => useUserRiskScore(), {
-      wrapper: TestProviders,
-    });
-    expect(appToastsMock.addError).toHaveBeenCalledWith(error, {
-      title: 'Failed to run search on risk score',
-    });
-  });
-
-  test('runs search if feature is enabled', () => {
-    mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
-    mockUseSearchStrategy.mockReturnValue({
-      loading: false,
-      result: {
-        data: [],
-        totalCount: 0,
-      },
-      search: mockSearch,
-      refetch: mockRefetch,
-      inspect: {},
-      error: undefined,
-    });
-    renderHook(() => useUserRiskScore(), {
-      wrapper: TestProviders,
-    });
-    expect(mockSearch).toHaveBeenCalledWith({
-      defaultIndex: ['ml_user_risk_score_latest_default'],
-      factoryQueryType: 'usersRiskScore',
-      filterQuery: undefined,
-      pagination: undefined,
-      timerange: undefined,
-      sort: undefined,
-    });
-  });
-
-  test('return result', async () => {
-    mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
-    mockUseSearchStrategy.mockReturnValue({
-      loading: false,
-      result: {
-        data: [],
-        totalCount: 0,
-      },
-      search: mockSearch,
-      refetch: mockRefetch,
-      inspect: {},
-      error: undefined,
-    });
-    const { result, waitFor } = renderHook(() => useUserRiskScore(), {
-      wrapper: TestProviders,
-    });
-    await waitFor(() => {
+      });
+      const { result } = renderHook(() => fn(), {
+        wrapper: TestProviders,
+      });
       expect(result.current).toEqual([
         false,
         {
-          data: [],
+          data: undefined,
           inspect: {},
           isInspected: false,
-          isModuleEnabled: true,
+          isModuleEnabled: false,
           refetch: mockRefetch,
           totalCount: 0,
         },
       ]);
+    });
+
+    test('show error toast', () => {
+      mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
+
+      const error = new Error();
+      mockUseSearchStrategy.mockReturnValue({
+        loading: false,
+        result: {
+          data: undefined,
+          totalCount: 0,
+        },
+        search: mockSearch,
+        refetch: mockRefetch,
+        inspect: {},
+        error,
+      });
+      renderHook(() => fn(), {
+        wrapper: TestProviders,
+      });
+      expect(appToastsMock.addError).toHaveBeenCalledWith(error, {
+        title: 'Failed to run search on risk score',
+      });
+    });
+
+    test('runs search if feature is enabled', () => {
+      mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
+      mockUseSearchStrategy.mockReturnValue({
+        loading: false,
+        result: {
+          data: [],
+          totalCount: 0,
+        },
+        search: mockSearch,
+        refetch: mockRefetch,
+        inspect: {},
+        error: undefined,
+      });
+      renderHook(() => fn(), {
+        wrapper: TestProviders,
+      });
+      expect(mockSearch).toHaveBeenCalledWith({
+        defaultIndex: [`ml_${riskEntity}_risk_score_latest_default`],
+        factoryQueryType: `${riskEntity}sRiskScore`,
+        filterQuery: undefined,
+        pagination: undefined,
+        timerange: undefined,
+        sort: undefined,
+      });
+    });
+
+    test('return result', async () => {
+      mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
+      mockUseSearchStrategy.mockReturnValue({
+        loading: false,
+        result: {
+          data: [],
+          totalCount: 0,
+        },
+        search: mockSearch,
+        refetch: mockRefetch,
+        inspect: {},
+        error: undefined,
+      });
+      const { result, waitFor } = renderHook(() => fn(), {
+        wrapper: TestProviders,
+      });
+      await waitFor(() => {
+        expect(result.current).toEqual([
+          false,
+          {
+            data: [],
+            inspect: {},
+            isInspected: false,
+            isModuleEnabled: true,
+            refetch: mockRefetch,
+            totalCount: 0,
+          },
+        ]);
+      });
     });
   });
 });
