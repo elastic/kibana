@@ -10,6 +10,8 @@ import { metrics } from './metrics';
 import { InventoryModel } from '../types';
 import { nginx as nginxRequiredMetrics } from '../shared/metrics/required_metrics';
 
+export { podSnapshotMetricTypes } from './metrics';
+
 export const pod: InventoryModel = {
   id: 'pod',
   displayName: i18n.translate('xpack.infra.inventoryModel.pod.displayName', {
