@@ -1475,7 +1475,8 @@ describe('Task Runner', () => {
     expect(runnerResult).toEqual(generateRunnerResult({ successRatio: 0 }));
     const loggerCall = logger.error.mock.calls[0][0];
     const loggerMeta = logger.error.mock.calls[0][1];
-    expect(loggerCall as string).toMatchInlineSnapshot(
+    const loggerCallPrefix = (loggerCall as string).split('-');
+    expect(loggerCallPrefix[0].trim()).toMatchInlineSnapshot(
       `"Executing Rule foo:test:1 has resulted in Error: params invalid: [param1]: expected value of type [string] but got [undefined]"`
     );
     expect(loggerMeta?.tags).toEqual(['test', '1', 'rule-run-failed']);
@@ -1608,9 +1609,13 @@ describe('Task Runner', () => {
 
     const loggerCall = logger.error.mock.calls[0][0];
     const loggerMeta = logger.error.mock.calls[0][1];
-    expect(loggerCall as string).toMatchInlineSnapshot(`[Error: GENERIC ERROR MESSAGE]`);
+    const loggerCallPrefix = (loggerCall as string).split('-');
+    expect(loggerCallPrefix[0].trim()).toMatchInlineSnapshot(
+      `"Executing Rule default:test:1 has resulted in Error: GENERIC ERROR MESSAGE"`
+    );
     expect(loggerMeta?.tags).toEqual(['test', '1', 'rule-run-failed']);
     expect(loggerMeta?.error?.stack_trace).toBeDefined();
+    expect(logger.error).toBeCalledTimes(1);
   });
 
   test('recovers gracefully when the Alert Task Runner throws an exception when fetching the encrypted attributes', async () => {
@@ -2896,6 +2901,15 @@ describe('Task Runner', () => {
             reason: errorReason,
           },
         },
+        timings: {
+          claim_to_start_duration_ms: 0,
+          prepare_rule_duration_ms: 0,
+          process_alerts_duration_ms: 0,
+          process_rule_duration_ms: 0,
+          rule_type_run_duration_ms: 0,
+          total_run_duration_ms: 0,
+          trigger_actions_duration_ms: 0,
+        },
       });
     } else if (status === 'warning') {
       expect(alertingEventLogger.done).toHaveBeenCalledWith({
@@ -2919,6 +2933,15 @@ describe('Task Runner', () => {
             reason: errorReason,
           },
         },
+        timings: {
+          claim_to_start_duration_ms: 0,
+          prepare_rule_duration_ms: 0,
+          process_alerts_duration_ms: 0,
+          process_rule_duration_ms: 0,
+          rule_type_run_duration_ms: 0,
+          total_run_duration_ms: 0,
+          trigger_actions_duration_ms: 0,
+        },
       });
     } else {
       expect(alertingEventLogger.done).toHaveBeenCalledWith({
@@ -2937,6 +2960,15 @@ describe('Task Runner', () => {
         status: {
           lastExecutionDate: new Date('1970-01-01T00:00:00.000Z'),
           status,
+        },
+        timings: {
+          claim_to_start_duration_ms: 0,
+          prepare_rule_duration_ms: 0,
+          process_alerts_duration_ms: 0,
+          process_rule_duration_ms: 0,
+          rule_type_run_duration_ms: 0,
+          total_run_duration_ms: 0,
+          trigger_actions_duration_ms: 0,
         },
       });
     }

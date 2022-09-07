@@ -21,7 +21,9 @@ import { DataPublicPluginStart, ES_FIELD_TYPES } from '@kbn/data-plugin/public';
 import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import { EuiCallOut, EuiLink } from '@elastic/eui';
 import type {
   DatasourceDimensionEditorProps,
   DatasourceDimensionTriggerProps,
@@ -41,6 +43,7 @@ import {
   injectReferences,
   loadInitialState,
   onRefreshIndexPattern,
+  renameIndexPattern,
   triggerActionOnIndexPatternChange,
 } from './loader';
 import { toExpression } from './to_expression';
@@ -464,6 +467,9 @@ export function getIndexPatternDatasource({
       }
       return changeIndexPattern({ indexPatternId, state, storage, indexPatterns });
     },
+    onIndexPatternRename: (state, oldIndexPatternId, newIndexPatternId) => {
+      return renameIndexPattern({ state, oldIndexPatternId, newIndexPatternId });
+    },
     getRenderEventCounters(state: IndexPatternPrivateState): string[] {
       const additionalEvents = {
         time_shift: false,
@@ -550,15 +556,18 @@ export function getIndexPatternDatasource({
           }
           return null;
         },
-        getSourceId: () => layer.indexPatternId,
-        getFilters: (activeData: FramePublicAPI['activeData'], timeRange?: TimeRange) =>
-          getFiltersInLayer(
+        getSourceId: () => {
+          return layer.indexPatternId;
+        },
+        getFilters: (activeData: FramePublicAPI['activeData'], timeRange?: TimeRange) => {
+          return getFiltersInLayer(
             layer,
             visibleColumnIds,
             activeData?.[layerId],
             indexPatterns[layer.indexPatternId],
             timeRange
-          ),
+          );
+        },
         getVisualDefaults: () => getVisualDefaultsForLayer(layer),
         getMaxPossibleNumValues: (columnId) => {
           if (layer && layer.columns[columnId]) {
@@ -655,6 +664,46 @@ export function getIndexPatternDatasource({
           setState
         ),
       ];
+    },
+    getDeprecationMessages: () => {
+      const deprecatedMessages: React.ReactNode[] = [];
+      const useFieldExistenceSamplingKey = 'lens:useFieldExistenceSampling';
+      const isUsingSampling = core.uiSettings.get(useFieldExistenceSamplingKey);
+
+      if (isUsingSampling) {
+        deprecatedMessages.push(
+          <EuiCallOut
+            color="warning"
+            iconType="alert"
+            size="s"
+            title={
+              <FormattedMessage
+                id="xpack.lens.indexPattern.useFieldExistenceSamplingBody"
+                defaultMessage="Field existence sampling has been deprecated and will be removed in Kibana {version}. You may disable this feature in {link}."
+                values={{
+                  version: '8.6.0',
+                  link: (
+                    <EuiLink
+                      onClick={() => {
+                        core.application.navigateToApp('management', {
+                          path: `/kibana/settings?query=${useFieldExistenceSamplingKey}`,
+                        });
+                      }}
+                    >
+                      <FormattedMessage
+                        id="xpack.lens.indexPattern.useFieldExistenceSampling.advancedSettings"
+                        defaultMessage="Advanced Settings"
+                      />
+                    </EuiLink>
+                  ),
+                }}
+              />
+            }
+          />
+        );
+      }
+
+      return deprecatedMessages;
     },
     checkIntegrity: (state, indexPatterns) => {
       const ids = Object.values(state.layers || {}).map(({ indexPatternId }) => indexPatternId);

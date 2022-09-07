@@ -13,7 +13,7 @@ import pLimit from 'p-limit';
 import { cpus } from 'os';
 import { RunOptions } from './parse_run_cli_flags';
 import { getScenario } from './get_scenario';
-import { ApmSynthtraceEsClient, LogLevel } from '../..';
+import { ApmSynthtraceEsClient, LogLevel } from '../../..';
 import { Logger } from '../../lib/utils/create_logger';
 
 export async function startHistoricalDataUpload(
@@ -54,7 +54,7 @@ export async function startHistoricalDataUpload(
   }
 
   const events = logger.perf('generate_scenario', () => generate({ from, to }));
-  const ratePerMinute = events.ratePerMinute();
+  const ratePerMinute = events.estimatedRatePerMinute();
   logger.info(
     `Scenario is generating ${ratePerMinute.toLocaleString()} events per minute interval`
   );
@@ -62,7 +62,7 @@ export async function startHistoricalDataUpload(
   if (runOptions.maxDocs) {
     // estimate a more accurate range end for when --maxDocs is specified
     rangeEnd = moment(from)
-      // ratePerMinute() is not exact if the generator is yielding variable documents
+      // estimatedRatePerMinute() is not exact if the generator is yielding variable documents
       // the rate is calculated by peeking the first yielded event and its children.
       // for real complex cases manually specifying --to is encouraged.
       .subtract((runOptions.maxDocs / ratePerMinute) * runOptions.maxDocsConfidence, 'm')
@@ -211,7 +211,7 @@ export async function startHistoricalDataUpload(
   return Promise.all(workers.map((worker) => limiter(() => worker())))
     .then(async () => {
       if (!runOptions.dryRun) {
-        await esClient.refresh();
+        await esClient.refresh(runOptions.apm ? ['metrics-apm.service-*'] : []);
       }
     })
     .then(() => {

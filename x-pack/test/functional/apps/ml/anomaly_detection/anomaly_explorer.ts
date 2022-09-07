@@ -6,9 +6,10 @@
  */
 
 import { stringHash } from '@kbn/ml-string-hash';
-import { Job, Datafeed } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
-import { AnomalySwimlaneEmbeddableInput } from '@kbn/ml-plugin/public';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { Job, Datafeed } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
+import type { AnomalySwimlaneEmbeddableInput } from '@kbn/ml-plugin/public';
+import type { AnomalyChartsEmbeddableInput } from '@kbn/ml-plugin/public/embeddables';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../services/ml/security_common';
 
 // @ts-expect-error not full interface
@@ -61,11 +62,12 @@ const cellSize = 15;
 const overallSwimLaneTestSubj = 'mlAnomalyExplorerSwimlaneOverall';
 const viewBySwimLaneTestSubj = 'mlAnomalyExplorerSwimlaneViewBy';
 
-export default function ({ getService }: FtrProviderContext) {
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
   const elasticChart = getService('elasticChart');
   const browser = getService('browser');
+  const PageObjects = getPageObjects(['common', 'timePicker']);
 
   describe('anomaly explorer', function () {
     this.tags(['ml']);
@@ -208,7 +210,6 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.swimLane.assertAxisLabels(viewBySwimLaneTestSubj, 'y', ['EGF', 'DAL']);
 
           await ml.testExecution.logTestStep('renders anomaly explorer charts');
-          // TODO check why count changed from 4 to 5
           await ml.anomalyExplorer.assertAnomalyExplorerChartsCount(5);
 
           await ml.testExecution.logTestStep('updates top influencers list');
@@ -372,6 +373,29 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.anomaliesTable.assertTableRowsCount(10);
         });
 
+        it('renders swim lanes correctly on the time bounds change', async () => {
+          const fromTime = 'Jul 7, 2012 @ 00:00:00.000';
+          const toTime = 'Feb 12, 2016 @ 23:59:54.000';
+
+          await PageObjects.timePicker.pauseAutoRefresh();
+          await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+
+          await ml.commonUI.waitForDatePickerIndicatorLoaded();
+
+          await ml.swimLane.waitForSwimLanesToLoad();
+          await ml.swimLane.assertAxisLabels(viewBySwimLaneTestSubj, 'x', [
+            '2012-06-19',
+            '2012-11-16',
+            '2013-04-15',
+            '2013-09-12',
+            '2014-02-09',
+            '2014-07-09',
+            '2014-12-06',
+            '2015-05-05',
+            '2015-10-02',
+          ]);
+        });
+
         describe('Anomaly Swim Lane as embeddable', function () {
           beforeEach(async () => {
             await ml.navigation.navigateToAnomalyExplorer(testData.jobConfig.job_id, {
@@ -386,7 +410,7 @@ export default function ({ getService }: FtrProviderContext) {
             await ml.anomalyExplorer.attachSwimLaneToCase('viewBy', {
               title: 'ML Test case',
               description: 'Case with an anomaly swim lane',
-              tag: 'ml_case',
+              tag: 'ml_swim_lane_case',
             });
 
             const expectedAttachment = {
@@ -405,7 +429,7 @@ export default function ({ getService }: FtrProviderContext) {
               {
                 title: 'ML Test case',
                 description: 'Case with an anomaly swim lane',
-                tag: 'ml_case',
+                tag: 'ml_swim_lane_case',
                 reporter: USER.ML_POWERUSER,
               },
               expectedAttachment,
@@ -421,6 +445,60 @@ export default function ({ getService }: FtrProviderContext) {
             );
             await ml.anomalyExplorer.openAddToDashboardControl();
             await ml.anomalyExplorer.addAndEditSwimlaneInDashboard('ML Test');
+          });
+        });
+
+        describe('Anomaly Charts as embeddable', function () {
+          beforeEach(async () => {
+            await ml.navigation.navigateToAnomalyExplorer(
+              testData.jobConfig.job_id,
+              {
+                from: '2016-02-07T00%3A00%3A00.000Z',
+                to: '2016-02-11T23%3A59%3A54.000Z',
+              },
+              () => elasticChart.setNewChartUiDebugFlag(true)
+            );
+
+            await ml.commonUI.waitForMlLoadingIndicatorToDisappear();
+            await ml.commonUI.waitForDatePickerIndicatorLoaded();
+
+            await ml.testExecution.logTestStep('clicks on the Overall swim lane cell');
+            const sampleCell = (await ml.swimLane.getCells(overallSwimLaneTestSubj))[0];
+            await ml.swimLane.selectSingleCell(overallSwimLaneTestSubj, {
+              x: sampleCell.x + cellSize,
+              y: sampleCell.y + cellSize,
+            });
+            await ml.swimLane.waitForSwimLanesToLoad();
+          });
+
+          it('attaches an embeddable to a case', async () => {
+            await ml.anomalyExplorer.attachAnomalyChartsToCase({
+              title: 'ML Charts Test case',
+              description: 'Case with an anomaly charts attachment',
+              tag: 'ml_anomaly_charts',
+            });
+
+            const expectedAttachment = {
+              jobIds: [testData.jobConfig.job_id],
+              timeRange: {
+                from: '2016-02-07T00:00:00.000Z',
+                to: '2016-02-11T23:59:54.000Z',
+              },
+              maxSeriesToPlot: 6,
+            } as AnomalyChartsEmbeddableInput;
+
+            expectedAttachment.id = stringHash(JSON.stringify(expectedAttachment)).toString();
+
+            await ml.cases.assertCaseWithAnomalyChartsAttachment(
+              {
+                title: 'ML Charts Test case',
+                description: 'Case with an anomaly charts attachment',
+                tag: 'ml_anomaly_charts',
+                reporter: USER.ML_POWERUSER,
+              },
+              expectedAttachment,
+              6
+            );
           });
         });
       });

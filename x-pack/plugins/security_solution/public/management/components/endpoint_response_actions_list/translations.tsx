@@ -78,8 +78,8 @@ export const TABLE_COLUMN_NAMES = Object.freeze({
   user: i18n.translate('xpack.securitySolution.responseActionsList.list.user', {
     defaultMessage: 'User',
   }),
-  host: i18n.translate('xpack.securitySolution.responseActionsList.list.host', {
-    defaultMessage: 'Host',
+  hosts: i18n.translate('xpack.securitySolution.responseActionsList.list.hosts', {
+    defaultMessage: 'Hosts',
   }),
   comments: i18n.translate('xpack.securitySolution.responseActionsList.list.comments', {
     defaultMessage: 'Comments',
@@ -125,6 +125,20 @@ export const UX_MESSAGES = Object.freeze({
     pending: i18n.translate('xpack.securitySolution.responseActionsList.list.item.badge.pending', {
       defaultMessage: 'Pending',
     }),
+  },
+  unenrolled: {
+    hosts: i18n.translate(
+      'xpack.securitySolution.responseActionsList.list.item.hosts.unenrolled.hosts',
+      {
+        defaultMessage: 'Hosts unenrolled',
+      }
+    ),
+    host: i18n.translate(
+      'xpack.securitySolution.responseActionsList.list.item.hosts.unenrolled.host',
+      {
+        defaultMessage: 'Host unenrolled',
+      }
+    ),
   },
   screenReaderExpand: i18n.translate(
     'xpack.securitySolution.responseActionsList.list.screenReader.expand',

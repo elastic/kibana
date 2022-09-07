@@ -65,7 +65,7 @@ describe('suggestions', () => {
               {
                 layerId: 'first',
                 layerType: layerTypes.DATA,
-                groups: [],
+                primaryGroups: [],
                 metrics: ['a'],
                 numberDisplay: NumberDisplay.HIDDEN,
                 categoryDisplay: CategoryDisplay.DEFAULT,
@@ -555,9 +555,8 @@ describe('suggestions', () => {
               {
                 layerId: 'first',
                 layerType: layerTypes.DATA,
-                groups: ['a'],
+                primaryGroups: ['a'],
                 metrics: ['b'],
-
                 numberDisplay: NumberDisplay.HIDDEN,
                 categoryDisplay: CategoryDisplay.INSIDE,
                 legendDisplay: LegendDisplay.SHOW,
@@ -579,9 +578,8 @@ describe('suggestions', () => {
               {
                 layerId: 'first',
                 layerType: layerTypes.DATA,
-                groups: ['a'],
+                primaryGroups: ['a'],
                 metrics: ['b'],
-
                 numberDisplay: NumberDisplay.HIDDEN,
                 categoryDisplay: CategoryDisplay.INSIDE,
                 legendDisplay: 'show',
@@ -613,7 +611,7 @@ describe('suggestions', () => {
               {
                 layerId: 'first',
                 layerType: layerTypes.DATA,
-                groups: [],
+                primaryGroups: [],
                 metrics: ['a'],
 
                 numberDisplay: NumberDisplay.HIDDEN,
@@ -663,7 +661,7 @@ describe('suggestions', () => {
               {
                 layerId: 'first',
                 layerType: layerTypes.DATA,
-                groups: ['a', 'b'],
+                primaryGroups: ['a', 'b'],
                 metrics: ['e'],
                 numberDisplay: NumberDisplay.VALUE,
                 categoryDisplay: CategoryDisplay.DEFAULT,
@@ -712,7 +710,7 @@ describe('suggestions', () => {
               {
                 layerId: 'first',
                 layerType: layerTypes.DATA,
-                groups: ['a', 'b'],
+                primaryGroups: ['a', 'b'],
                 metrics: ['e'],
                 numberDisplay: NumberDisplay.PERCENT,
                 categoryDisplay: CategoryDisplay.DEFAULT,
@@ -749,7 +747,7 @@ describe('suggestions', () => {
               {
                 layerId: 'first',
                 layerType: layerTypes.DATA,
-                groups: ['a'],
+                primaryGroups: ['a'],
                 metrics: ['b'],
 
                 numberDisplay: NumberDisplay.HIDDEN,
@@ -772,7 +770,7 @@ describe('suggestions', () => {
               {
                 layerId: 'first',
                 layerType: layerTypes.DATA,
-                groups: ['a'],
+                primaryGroups: ['a'],
                 metrics: ['b'],
 
                 numberDisplay: NumberDisplay.HIDDEN,
@@ -806,7 +804,7 @@ describe('suggestions', () => {
               {
                 layerId: 'first',
                 layerType: layerTypes.DATA,
-                groups: [],
+                primaryGroups: [],
                 metrics: ['a'],
 
                 numberDisplay: NumberDisplay.HIDDEN,
@@ -848,7 +846,7 @@ describe('suggestions', () => {
               {
                 layerId: 'first',
                 layerType: layerTypes.DATA,
-                groups: ['a', 'b'],
+                primaryGroups: ['a', 'b'],
                 metrics: ['c'],
 
                 numberDisplay: NumberDisplay.HIDDEN,
@@ -883,7 +881,7 @@ describe('suggestions', () => {
               {
                 layerId: 'first',
                 layerType: layerTypes.DATA,
-                groups: [],
+                primaryGroups: [],
                 metrics: ['a'],
 
                 numberDisplay: NumberDisplay.HIDDEN,
@@ -921,7 +919,7 @@ describe('suggestions', () => {
               {
                 layerId: 'first',
                 layerType: layerTypes.DATA,
-                groups: ['a', 'b'],
+                primaryGroups: ['a', 'b'],
                 metrics: ['c'],
                 numberDisplay: NumberDisplay.HIDDEN,
                 categoryDisplay: CategoryDisplay.INSIDE,

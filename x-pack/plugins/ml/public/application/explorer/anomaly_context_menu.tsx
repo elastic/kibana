@@ -5,16 +5,21 @@
  * 2.0.
  */
 
-import React, { useMemo, useState, FC } from 'react';
+import React, { FC, useCallback, useMemo, useState } from 'react';
 import {
   EuiButtonIcon,
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiFlexItem,
   EuiPopover,
+  EuiPopoverTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { useCasesModal } from '../contexts/kibana/use_cases_modal';
+import { DEFAULT_MAX_SERIES_TO_PLOT } from '../services/anomaly_explorer_charts_service';
+import { ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE } from '../../embeddables';
+import { useTimeRangeUpdates } from '../contexts/kibana/use_timefilter';
 import { useMlKibana } from '../contexts/kibana';
 import type { AppStateSelectedCells, ExplorerJob } from './explorer_utils';
 import { TimeRangeBounds } from '../util/time_buckets';
@@ -37,13 +42,25 @@ export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
   const {
     services: {
       application: { capabilities },
+      cases,
     },
   } = useMlKibana();
-
+  const globalTimeRange = useTimeRangeUpdates(true);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isAddDashboardsActive, setIsAddDashboardActive] = useState(false);
 
+  const closePopoverOnAction = useCallback(
+    (actionCallback: Function) => {
+      setIsMenuOpen(false);
+      actionCallback();
+    },
+    [setIsMenuOpen]
+  );
+
+  const openCasesModal = useCasesModal(ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE);
+
   const canEditDashboards = capabilities.dashboard?.createNew ?? false;
+  const casesPrivileges = cases?.helpers.canUseCases();
 
   const menuItems = useMemo(() => {
     const items = [];
@@ -51,25 +68,45 @@ export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
       items.push(
         <EuiContextMenuItem
           key="addToDashboard"
-          onClick={setIsAddDashboardActive.bind(null, true)}
+          onClick={closePopoverOnAction.bind(null, setIsAddDashboardActive.bind(null, true))}
           data-test-subj="mlAnomalyAddChartsToDashboardButton"
         >
           <FormattedMessage
             id="xpack.ml.explorer.anomalies.addToDashboardLabel"
-            defaultMessage="Add anomaly charts to dashboard"
+            defaultMessage="Add to dashboard"
           />
         </EuiContextMenuItem>
       );
     }
+
+    if (!!casesPrivileges?.create || !!casesPrivileges?.update) {
+      items.push(
+        <EuiContextMenuItem
+          key="attachToCase"
+          onClick={closePopoverOnAction.bind(
+            null,
+            openCasesModal.bind(null, {
+              jobIds: selectedJobs?.map((v) => v.id),
+              timeRange: globalTimeRange,
+              maxSeriesToPlot: DEFAULT_MAX_SERIES_TO_PLOT,
+            })
+          )}
+          data-test-subj="mlAnomalyAttachChartsToCasesButton"
+        >
+          <FormattedMessage id="xpack.ml.explorer.attachToCaseLabel" defaultMessage="Add to case" />
+        </EuiContextMenuItem>
+      );
+    }
     return items;
-  }, [canEditDashboards]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [canEditDashboards, globalTimeRange, closePopoverOnAction, selectedJobs]);
 
   const jobIds = selectedJobs.map(({ id }) => id);
 
   return (
     <>
-      {menuItems.length > 0 && chartsCount > 0 && (
-        <EuiFlexItem grow={false} style={{ marginLeft: 'auto', alignSelf: 'baseline' }}>
+      {menuItems.length > 0 && chartsCount > 0 ? (
+        <EuiFlexItem grow={false} css={{ marginLeft: 'auto', alignSelf: 'baseline' }}>
           <EuiPopover
             button={
               <EuiButtonIcon
@@ -89,10 +126,15 @@ export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
             panelPaddingSize="none"
             anchorPosition="downLeft"
           >
+            <EuiPopoverTitle paddingSize="s">
+              {i18n.translate('xpack.ml.explorer.anomalies.actionsPopoverLabel', {
+                defaultMessage: 'Anomaly charts',
+              })}
+            </EuiPopoverTitle>
             <EuiContextMenuPanel items={menuItems} />
           </EuiPopover>
         </EuiFlexItem>
-      )}
+      ) : null}
       {isAddDashboardsActive && selectedJobs ? (
         <AddAnomalyChartsToDashboardControl
           onClose={async () => {
