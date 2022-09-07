@@ -82,8 +82,7 @@ export const getDefaultRuleMonitoring = (): RuleMonitoring => ({
 });
 
 interface StackTraceLog {
-  message: string;
-  tags: string[];
+  message: ElasticsearchError;
   stackTrace?: string;
 }
 
@@ -396,7 +395,6 @@ export class TaskRunner<
             );
             this.stackTraceLog = {
               message: err,
-              tags: [this.ruleType.id, ruleId, 'rule-run-failed'],
               stackTrace: err.stack,
             };
             throw new ErrorWithReason(RuleExecutionStatusErrorReasons.Execute, err);
@@ -726,24 +724,21 @@ export class TaskRunner<
         (ruleRunStateWithMetrics: RuleTaskStateAndMetrics) =>
           transformRunStateToTaskState(ruleRunStateWithMetrics),
         (err: ElasticsearchError) => {
-          const message = `Executing Rule ${spaceId}:${
-            this.ruleType.id
-          }:${ruleId} has resulted in Error: ${getEsErrorMessage(err)}`;
           if (isAlertSavedObjectNotFoundError(err, ruleId)) {
+            const message = `Executing Rule ${spaceId}:${
+              this.ruleType.id
+            }:${ruleId} has resulted in Error: ${getEsErrorMessage(err)}`;
             this.logger.debug(message);
           } else {
-            if (this.stackTraceLog) {
-              this.logger.error(this.stackTraceLog.message, {
-                tags: this.stackTraceLog.tags,
-                error: { stack_trace: this.stackTraceLog.stackTrace },
-              });
-              this.stackTraceLog = null;
-            } else {
-              this.logger.error(message, {
-                tags: [this.ruleType.id, ruleId, 'rule-run-failed'],
-                error: { stack_trace: err.stack },
-              });
-            }
+            const error = this.stackTraceLog ? this.stackTraceLog.message : err;
+            const stack = this.stackTraceLog ? this.stackTraceLog.stackTrace : err.stack;
+            const message = `Executing Rule ${spaceId}:${
+              this.ruleType.id
+            }:${ruleId} has resulted in Error: ${getEsErrorMessage(error)} - ${stack ?? ''}`;
+            this.logger.error(message, {
+              tags: [this.ruleType.id, ruleId, 'rule-run-failed'],
+              error: { stack_trace: stack },
+            });
           }
           return originalState;
         }
