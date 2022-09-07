@@ -5,7 +5,11 @@
  * 2.0.
  */
 
+import { FLEET_AGENT_LIST_PAGE } from '../screens/fleet';
+
 import { createAgentDoc } from '../tasks/agents';
+import { setupFleetServer } from '../tasks/fleet_server';
+import { deleteFleetServerDocs, deleteAgentDocs } from '../tasks/cleanup';
 
 const createAgentDocs = (kibanaVersion: string) => [
   createAgentDoc('agent-1', 'policy-1'), // this agent will have upgrade available
@@ -14,29 +18,39 @@ const createAgentDocs = (kibanaVersion: string) => [
 ];
 
 let docs: any[] = [];
-// TODO: create fleet server, fix version of agent to upgrade to an allowed version (>= fleet server's, < kibana)
-// https://github.com/elastic/kibana/issues/138121
-describe.skip('View agents', () => {
+
+describe('View agents list', () => {
   before(() => {
-    cy.task('deleteDocsByQuery', {
-      index: '.fleet-agents',
-      query: { match_all: {} },
-      ignoreUnavailable: true,
-    });
+    deleteFleetServerDocs(true);
+    deleteAgentDocs(true);
+    setupFleetServer();
+
     cy.getKibanaVersion().then((version) => {
       docs = createAgentDocs(version);
       cy.task('insertDocs', { index: '.fleet-agents', docs });
     });
   });
   after(() => {
-    cy.task('deleteDocsByQuery', {
-      index: '.fleet-agents',
-      query: { match_all: {} },
-    });
+    deleteFleetServerDocs();
+    deleteAgentDocs();
   });
   beforeEach(() => {
-    cy.intercept('/api/fleet/agents/setup', { isReady: true });
+    cy.intercept('/api/fleet/agents/setup', {
+      isReady: true,
+      missing_optional_features: [],
+      missing_requirements: [],
+    });
     cy.intercept('/api/fleet/setup', { isInitialized: true, nonFatalErrors: [] });
+    cy.intercept('/api/fleet/agents_status', {
+      total: 18,
+      inactive: 0,
+      online: 18,
+      error: 0,
+      offline: 0,
+      updating: 0,
+      other: 0,
+      events: 0,
+    });
     cy.intercept(/\/api\/fleet\/agent_policies(\?.*)?$/, {
       items: [
         {
@@ -78,10 +92,10 @@ describe.skip('View agents', () => {
   describe('Agent filter suggestions', () => {
     it('should filter based on agent id', () => {
       cy.visit('/app/fleet/agents');
-      cy.getBySel('agentList.queryInput').type('agent.id: "agent-1"{enter}');
-      cy.getBySel('fleetAgentListTable');
-      cy.getBySel('fleetAgentListTable').find('tr').should('have.length', 2);
-      cy.getBySel('fleetAgentListTable').contains('agent-1');
+      cy.getBySel(FLEET_AGENT_LIST_PAGE.QUERY_INPUT).type('agent.id: "agent-1"{enter}');
+      cy.getBySel(FLEET_AGENT_LIST_PAGE.TABLE);
+      cy.getBySel(FLEET_AGENT_LIST_PAGE.TABLE).find('tr').should('have.length', 2);
+      cy.getBySel(FLEET_AGENT_LIST_PAGE.TABLE).contains('agent-1');
     });
   });
 
@@ -89,19 +103,19 @@ describe.skip('View agents', () => {
     it('should only show agents with upgrade available after click', () => {
       cy.visit('/app/fleet/agents');
 
-      cy.getBySel('agentList.showUpgradeable').click();
-      cy.getBySel('fleetAgentListTable').find('tr').should('have.length', 17);
-      cy.getBySel('fleetAgentListTable').contains('agent-1');
+      cy.getBySel(FLEET_AGENT_LIST_PAGE.SHOW_UPGRADEABLE).click();
+      cy.getBySel(FLEET_AGENT_LIST_PAGE.TABLE).find('tr').should('have.length', 17);
+      cy.getBySel(FLEET_AGENT_LIST_PAGE.TABLE).contains('agent-1');
     });
 
     it('should clear filter on second click', () => {
       cy.visit('/app/fleet/agents');
 
-      cy.getBySel('agentList.showUpgradeable').click();
-      cy.getBySel('agentList.showUpgradeable').click();
-      cy.getBySel('fleetAgentListTable').find('tr').should('have.length', 18);
-      cy.getBySel('fleetAgentListTable').contains('agent-1');
-      cy.getBySel('fleetAgentListTable').contains('agent-2');
+      cy.getBySel(FLEET_AGENT_LIST_PAGE.SHOW_UPGRADEABLE).click();
+      cy.getBySel(FLEET_AGENT_LIST_PAGE.SHOW_UPGRADEABLE).click();
+      cy.getBySel(FLEET_AGENT_LIST_PAGE.TABLE).find('tr').should('have.length', 19);
+      cy.getBySel(FLEET_AGENT_LIST_PAGE.TABLE).contains('agent-1');
+      cy.getBySel(FLEET_AGENT_LIST_PAGE.TABLE).contains('agent-2');
     });
   });
 
@@ -109,85 +123,92 @@ describe.skip('View agents', () => {
     it('should should show all policies as options', () => {
       cy.visit('/app/fleet/agents');
 
-      cy.getBySel('agentList.policyFilter').click();
+      cy.getBySel(FLEET_AGENT_LIST_PAGE.POLICY_FILTER).click();
 
       cy.get('button').contains('Agent policy 1');
       cy.get('button').contains('Agent policy 2');
       cy.get('button').contains('Agent policy 3');
     });
+
     it('should filter on single policy (no results)', () => {
       cy.visit('/app/fleet/agents');
 
-      cy.getBySel('agentList.policyFilter').click();
+      cy.getBySel(FLEET_AGENT_LIST_PAGE.POLICY_FILTER).click();
 
       cy.get('button').contains('Agent policy 4').click();
 
-      cy.getBySel('fleetAgentListTable').contains('No agents found');
+      cy.getBySel(FLEET_AGENT_LIST_PAGE.TABLE).contains('No agents found');
     });
+
     it('should filter on single policy', () => {
       cy.visit('/app/fleet/agents');
 
-      cy.getBySel('agentList.policyFilter').click();
+      cy.getBySel(FLEET_AGENT_LIST_PAGE.POLICY_FILTER).click();
 
       cy.get('button').contains('Agent policy 1').click();
 
-      cy.getBySel('fleetAgentListTable').find('tr').should('have.length', 2);
-      cy.getBySel('fleetAgentListTable').contains('agent-1');
+      cy.getBySel(FLEET_AGENT_LIST_PAGE.TABLE).find('tr').should('have.length', 2);
+      cy.getBySel(FLEET_AGENT_LIST_PAGE.TABLE).contains('agent-1');
     });
+
     it('should filter on multiple policies', () => {
       cy.visit('/app/fleet/agents');
 
-      cy.getBySel('agentList.policyFilter').click();
+      cy.getBySel(FLEET_AGENT_LIST_PAGE.POLICY_FILTER).click();
 
       cy.get('button').contains('Agent policy 1').click();
       cy.get('button').contains('Agent policy 2').click();
 
-      cy.getBySel('fleetAgentListTable').find('tr').should('have.length', 3);
-      cy.getBySel('fleetAgentListTable').contains('agent-1');
-      cy.getBySel('fleetAgentListTable').contains('agent-2');
+      cy.getBySel(FLEET_AGENT_LIST_PAGE.TABLE).find('tr').should('have.length', 3);
+      cy.getBySel(FLEET_AGENT_LIST_PAGE.TABLE).contains('agent-1');
+      cy.getBySel(FLEET_AGENT_LIST_PAGE.TABLE).contains('agent-2');
     });
   });
+
   describe('Agent status filter', () => {
     it('should filter on healthy (16 result)', () => {
       cy.visit('/app/fleet/agents');
 
-      cy.getBySel('agentList.statusFilter').click();
+      cy.getBySel(FLEET_AGENT_LIST_PAGE.STATUS_FILTER).click();
 
       cy.get('button').contains('Healthy').click();
 
-      cy.getBySel('fleetAgentListTable').find('tr').should('have.length', 17);
-      cy.getBySel('fleetAgentListTable').contains('agent-1');
+      cy.getBySel(FLEET_AGENT_LIST_PAGE.TABLE).find('tr').should('have.length', 18);
+      cy.getBySel(FLEET_AGENT_LIST_PAGE.TABLE).contains('agent-1');
     });
+
     it('should filter on unhealthy (1 result)', () => {
       cy.visit('/app/fleet/agents');
 
-      cy.getBySel('agentList.statusFilter').click();
+      cy.getBySel(FLEET_AGENT_LIST_PAGE.STATUS_FILTER).click();
 
       cy.get('button').contains('Unhealthy').click();
 
-      cy.getBySel('fleetAgentListTable').find('tr').should('have.length', 2);
-      cy.getBySel('fleetAgentListTable').contains('agent-2');
+      cy.getBySel(FLEET_AGENT_LIST_PAGE.TABLE).find('tr').should('have.length', 2);
+      cy.getBySel(FLEET_AGENT_LIST_PAGE.TABLE).contains('agent-2');
     });
+
     it('should filter on inactive (0 result)', () => {
       cy.visit('/app/fleet/agents');
 
-      cy.getBySel('agentList.statusFilter').click();
+      cy.getBySel(FLEET_AGENT_LIST_PAGE.STATUS_FILTER).click();
 
       cy.get('button').contains('Inactive').click();
 
-      cy.getBySel('fleetAgentListTable').contains('No agents found');
+      cy.getBySel(FLEET_AGENT_LIST_PAGE.TABLE).contains('No agents found');
     });
+
     it('should filter on healthy and unhealthy', () => {
       cy.visit('/app/fleet/agents');
 
-      cy.getBySel('agentList.statusFilter').click();
+      cy.getBySel(FLEET_AGENT_LIST_PAGE.STATUS_FILTER).click();
 
       cy.get('button').contains('healthy').click();
       cy.get('button').contains('Unhealthy').click();
 
-      cy.getBySel('fleetAgentListTable').find('tr').should('have.length', 18);
-      cy.getBySel('fleetAgentListTable').contains('agent-1');
-      cy.getBySel('fleetAgentListTable').contains('agent-2');
+      cy.getBySel(FLEET_AGENT_LIST_PAGE.TABLE).find('tr').should('have.length', 19);
+      cy.getBySel(FLEET_AGENT_LIST_PAGE.TABLE).contains('agent-1');
+      cy.getBySel(FLEET_AGENT_LIST_PAGE.TABLE).contains('agent-2');
     });
   });
 
@@ -195,19 +216,19 @@ describe.skip('View agents', () => {
     it('should allow to bulk upgrade agents', () => {
       cy.visit('/app/fleet/agents');
 
-      cy.getBySel('agentList.policyFilter').click();
+      cy.getBySel(FLEET_AGENT_LIST_PAGE.POLICY_FILTER).click();
 
       cy.get('button').contains('Agent policy 3').click();
-      cy.getBySel('fleetAgentListTable').find('tr').should('have.length', 16);
+      cy.getBySel(FLEET_AGENT_LIST_PAGE.TABLE).find('tr').should('have.length', 16);
 
-      cy.getBySel('checkboxSelectAll').click();
+      cy.getBySel(FLEET_AGENT_LIST_PAGE.CHECKBOX_SELECT_ALL).click();
       // Trigger a bulk upgrade
-      cy.getBySel('agentBulkActionsButton').click();
+      cy.getBySel(FLEET_AGENT_LIST_PAGE.BULK_ACTIONS_BUTTON).click();
       cy.get('button').contains('Upgrade 15 agents').click();
       cy.get('.euiModalFooter button').contains('Upgrade 15 agents').click();
-      // Cancel upgrade
-      cy.getBySel('abortUpgradeBtn').click();
-      cy.get('button').contains('Confirm').click();
+      // Cancel upgrade - this assertion is currently flaky
+      // cy.getBySel(CURRENT_BULK_UPGRADES_CALLOUT.ABORT_BTN).click();
+      // cy.get('button').contains('Confirm').click();
     });
   });
 });

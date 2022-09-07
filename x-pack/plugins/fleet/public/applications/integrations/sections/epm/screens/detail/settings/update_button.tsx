@@ -326,6 +326,7 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
                 },
               }}
               id="upgradePoliciesCheckbox"
+              data-test-subj="epmDetails.upgradePoliciesCheckbox"
               disabled={!canUpgradePackages}
               checked={upgradePackagePolicies}
               onChange={handleUpgradePackagePoliciesChange}
