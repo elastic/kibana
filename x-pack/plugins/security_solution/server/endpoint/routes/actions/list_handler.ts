@@ -17,7 +17,10 @@ import { getActionList, getActionListByStatus } from '../../services';
 import type { SecuritySolutionRequestHandlerContext } from '../../../types';
 import type { EndpointAppContext } from '../../types';
 import { errorHandler } from '../error_handler';
-import type { ResponseActions, ResponseActionStatus } from '../../../../common/endpoint/types';
+import type {
+  ResponseActions,
+  ResponseActionStatus,
+} from '../../../../common/endpoint/service/response_actions/constants';
 
 const formatStringIds = (value: string | string[] | undefined): undefined | string[] =>
   typeof value === 'string' ? [value] : value;

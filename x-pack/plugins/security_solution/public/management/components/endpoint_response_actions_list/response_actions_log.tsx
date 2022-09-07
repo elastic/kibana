@@ -27,13 +27,13 @@ import { euiStyled, css } from '@kbn/kibana-react-plugin/common';
 import type { HorizontalAlignment, CriteriaWithPagination } from '@elastic/eui';
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { getEmptyValue } from '../../../common/components/empty_value';
-import { FormattedDate } from '../../../common/components/formatted_date';
 import type {
   ResponseActions,
-  ActionListApiResponse,
   ResponseActionStatus,
-} from '../../../../common/endpoint/types';
+} from '../../../../common/endpoint/service/response_actions/constants';
+import { getEmptyValue } from '../../../common/components/empty_value';
+import { FormattedDate } from '../../../common/components/formatted_date';
+import type { ActionListApiResponse } from '../../../../common/endpoint/types';
 import type { EndpointActionListRequestQuery } from '../../../../common/endpoint/schema/actions';
 import { ManagementEmptyStateWrapper } from '../management_empty_state_wrapper';
 import { useGetEndpointActionList } from '../../hooks';
@@ -41,24 +41,13 @@ import { OUTPUT_MESSAGES, TABLE_COLUMN_NAMES, UX_MESSAGES } from './translations
 import { MANAGEMENT_PAGE_SIZE_OPTIONS } from '../../common/constants';
 import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 import { ActionsLogFilters } from './components/actions_log_filters';
-import { useDateRangePicker } from './components/hooks';
+import { getActionStatus, useDateRangePicker } from './components/hooks';
 import { StatusBadge } from './components/status_badge';
 
 const emptyValue = getEmptyValue();
 
 const getCommand = (command: ResponseActions): Exclude<ResponseActions, 'unisolate'> | 'release' =>
   command === 'unisolate' ? 'release' : command;
-
-const getActionStatus = (status: ResponseActionStatus): string => {
-  if (status === 'failed') {
-    return UX_MESSAGES.badge.failed;
-  } else if (status === 'successful') {
-    return UX_MESSAGES.badge.successful;
-  } else if (status === 'pending') {
-    return UX_MESSAGES.badge.pending;
-  }
-  return '';
-};
 
 // Truncated usernames
 const StyledFacetButton = euiStyled(EuiFacetButton)`

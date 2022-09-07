@@ -13,10 +13,8 @@ import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import type { AppContextTestRender } from '../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
 import { ResponseActionsLog } from './response_actions_log';
-import type {
-  ActionListApiResponse,
-  ResponseActionStatus,
-} from '../../../../common/endpoint/types';
+import type { ActionListApiResponse } from '../../../../common/endpoint/types';
+import type { ResponseActionStatus } from '../../../../common/endpoint/service/response_actions/constants';
 import { MANAGEMENT_PATH } from '../../../../common/constants';
 import { EndpointActionGenerator } from '../../../../common/endpoint/data_generators/endpoint_action_generator';
 

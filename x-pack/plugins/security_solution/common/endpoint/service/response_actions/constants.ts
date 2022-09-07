@@ -5,6 +5,8 @@
  * 2.0.
  */
 export const RESPONSE_ACTION_STATUS = ['failed', 'pending', 'successful'] as const;
+export type ResponseActionStatus = typeof RESPONSE_ACTION_STATUS[number];
+
 export const RESPONSE_ACTION_COMMANDS = [
   'isolate',
   'unisolate',
@@ -12,3 +14,4 @@ export const RESPONSE_ACTION_COMMANDS = [
   'suspend-process',
   'running-processes',
 ] as const;
+export type ResponseActions = typeof RESPONSE_ACTION_COMMANDS[number];

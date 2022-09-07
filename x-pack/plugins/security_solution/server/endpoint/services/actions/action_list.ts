@@ -9,11 +9,8 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
 import { ENDPOINT_DEFAULT_PAGE_SIZE } from '../../../../common/endpoint/constants';
 import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
-import type {
-  ActionDetails,
-  ActionListApiResponse,
-  ResponseActionStatus,
-} from '../../../../common/endpoint/types';
+import type { ActionDetails, ActionListApiResponse } from '../../../../common/endpoint/types';
+import type { ResponseActionStatus } from '../../../../common/endpoint/service/response_actions/constants';
 
 import { getActions, getActionResponses } from '../../utils/action_list_helpers';
 

@@ -10,12 +10,14 @@ import type {
   DurationRange,
   OnRefreshChangeProps,
 } from '@elastic/eui/src/components/date_picker/types';
+import type { ResponseActionStatus } from '../../../../../common/endpoint/service/response_actions/constants';
 import {
   RESPONSE_ACTION_COMMANDS,
   RESPONSE_ACTION_STATUS,
 } from '../../../../../common/endpoint/service/response_actions/constants';
 import type { DateRangePickerValues } from './actions_log_date_range_picker';
 import type { FILTER_NAMES } from '../translations';
+import { UX_MESSAGES } from '../translations';
 import { StatusBadge } from './status_badge';
 
 const defaultDateRangeOptions = Object.freeze({
@@ -98,6 +100,17 @@ export type FilterItems = Array<{
   checked: 'on' | undefined;
 }>;
 
+export const getActionStatus = (status: ResponseActionStatus): string => {
+  if (status === 'failed') {
+    return UX_MESSAGES.badge.failed;
+  } else if (status === 'successful') {
+    return UX_MESSAGES.badge.successful;
+  } else if (status === 'pending') {
+    return UX_MESSAGES.badge.pending;
+  }
+  return '';
+};
+
 // TODO: add more filter names here
 export type FilterName = keyof typeof FILTER_NAMES;
 export const useActionsLogFilter = (
@@ -119,7 +132,7 @@ export const useActionsLogFilter = (
               color={
                 filter === 'successful' ? 'success' : filter === 'failed' ? 'danger' : 'warning'
               }
-              status={filter.slice(0, 1).toUpperCase().concat(filter.slice(1))}
+              status={getActionStatus(filter)}
             />
           ) as unknown as string,
           checked: undefined,

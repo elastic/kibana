@@ -12,10 +12,7 @@ import type {
   ResponseActionBodySchema,
   KillOrSuspendProcessRequestSchema,
 } from '../schema/actions';
-import type {
-  RESPONSE_ACTION_STATUS,
-  RESPONSE_ACTION_COMMANDS,
-} from '../service/response_actions/constants';
+import type { ResponseActionStatus, ResponseActions } from '../service/response_actions/constants';
 
 export type ISOLATION_ACTIONS = 'isolate' | 'unisolate';
 
@@ -49,8 +46,6 @@ export interface KillProcessActionOutputContent {
   pid?: number;
   entity_id?: string;
 }
-
-export type ResponseActions = typeof RESPONSE_ACTION_COMMANDS[number];
 
 export const ActivityLogItemTypes = {
   ACTION: 'action' as const,
@@ -258,8 +253,6 @@ export interface PendingActionsResponse {
 }
 
 export type PendingActionsRequestQuery = TypeOf<typeof ActionStatusRequestSchema.query>;
-
-export type ResponseActionStatus = typeof RESPONSE_ACTION_STATUS[number];
 export interface ActionDetails<TOutputContent extends object = object> {
   /** The action id */
   id: string;
