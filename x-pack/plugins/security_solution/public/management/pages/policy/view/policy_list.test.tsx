@@ -63,7 +63,7 @@ describe('When on the policy list page', () => {
     it('should show instruction text and a button to add the Endpoint Security integration', async () => {
       expect(
         renderResult.findByText(
-          'From this page, you’ll be able to view and manage the Endpoint and Cloud Security Integration policies in your environment running Endpoint and Cloud Security.'
+          'From this page, you’ll be able to view and manage the Elastic Defend Integration policies in your environment running Elastic Defend.'
         )
       ).toBeTruthy();
       await waitFor(() => {
