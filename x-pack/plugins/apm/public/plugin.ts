@@ -130,6 +130,13 @@ const apmSettingsTitle = i18n.translate(
   }
 );
 
+const apmStorageExplorerTitle = i18n.translate(
+  'xpack.apm.navigation.apmStorageExplorerTitle',
+  {
+    defaultMessage: 'Storage Explorer',
+  }
+);
+
 export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
   constructor(
     private readonly initializerContext: PluginInitializerContext<ConfigSchema>
@@ -311,6 +318,11 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
           path: '/dependencies/inventory',
         },
         { id: 'settings', title: apmSettingsTitle, path: '/settings' },
+        {
+          id: 'storage-explorer',
+          title: apmStorageExplorerTitle,
+          path: '/storage-explorer',
+        },
       ],
 
       async mount(appMountParameters: AppMountParameters<unknown>) {

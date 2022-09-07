@@ -87,6 +87,7 @@ export const EmbeddableAnomalyChartsContainer: FC<EmbeddableAnomalyChartsContain
       dateFormat: uiSettings.get('dateFormat'),
       'dateFormat:scaled': uiSettings.get('dateFormat:scaled'),
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -97,6 +98,7 @@ export const EmbeddableAnomalyChartsContainer: FC<EmbeddableAnomalyChartsContain
       severity: severity.val,
       entityFields: selectedEntities,
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [severity, selectedEntities]);
 
   const {
@@ -112,6 +114,7 @@ export const EmbeddableAnomalyChartsContainer: FC<EmbeddableAnomalyChartsContain
     severity.val,
     { onRenderComplete, onError, onLoading }
   );
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const resizeHandler = useCallback(
     throttle((e: { width: number; height: number }) => {
       if (Math.abs(chartWidth - e.width) > 20) {
