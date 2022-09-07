@@ -144,6 +144,18 @@ describe('Details Panel Component', () => {
       mockState.timeline.timelineById[TimelineId.active].expandedDetail = eventExpandedDetail;
       mockState.timeline.timelineById.test.expandedDetail = eventExpandedDetail;
       store = createStore(mockState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+
+      mockUseSearchStrategy.mockReturnValue({
+        loading: true,
+        result: {
+          data: undefined,
+          totalCount: 0,
+        },
+        error: undefined,
+        search: jest.fn(),
+        refetch: jest.fn(),
+        inspect: {},
+      });
     });
 
     test('it should render the Event Details Panel when the panelView is set and the associated params are set', () => {

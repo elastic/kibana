@@ -138,7 +138,7 @@
           "label": "data.search"
         },
         {
-          "id": "kibDevTutorialFilesService",
+          "id": "kibDevTutorialFileService",
           "label": "File service"
         },
         {
@@ -171,6 +171,9 @@
     {
       "label": "Contributors Newsletters",
       "items": [
+        {
+          "id": "kibAugust2022ContributorNewsletter"
+        },
         {
           "id": "kibJuly2022ContributorNewsletter"
         },
