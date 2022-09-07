@@ -488,8 +488,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
   }
 
-  // Failing: See https://github.com/elastic/kibana/issues/139700
-  describe.skip('encrypted saved objects API', () => {
+  describe('encrypted saved objects API', () => {
     function generateRawId(id: string, type: string, spaceId?: string) {
       return `${
         spaceId && type !== SAVED_OBJECT_WITH_SECRET_AND_MULTIPLE_SPACES_TYPE
