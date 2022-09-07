@@ -5,68 +5,44 @@
  * 2.0.
  */
 
-import { FieldSpec } from '@kbn/data-views-plugin/server';
-import { BrowserField, FieldInfo } from '../../types';
+import { FieldSpec } from '@kbn/data-plugin/common';
+import { BrowserField, BrowserFields } from '../../types';
 
-import { fieldsBeat } from './fields';
-const beatsMap = new Map(Object.entries(fieldsBeat));
+const getFieldCategory = (fieldCapability: FieldSpec) => {
+  const name = fieldCapability.name.split('.');
 
-const populatedFieldInfoFactory = (fieldCapability: FieldSpec, beat: FieldInfo) => {
-  const { category, description, example, name } = beat;
-  const { aggregatable, readFromDocValues, searchable, type } = fieldCapability;
+  if (name.length === 1) {
+    return 'base';
+  }
 
+  return name[0];
+};
+
+const browserFieldFactory = (
+  fieldCapability: FieldSpec,
+  category: string
+): { [fieldName in string]: BrowserField } => {
   return {
-    category,
-    field: {
-      [name]: {
-        aggregatable,
-        category,
-        description,
-        example,
-        name,
-        readFromDocValues,
-        searchable,
-        type,
-      },
+    [fieldCapability.name]: {
+      ...fieldCapability,
+      category,
     },
   };
 };
 
-const emptyFieldInfoFactory = (fieldCapability: FieldSpec) => {
-  const category = fieldCapability.name.split('.')[0];
-  return {
-    category,
-    field: {
-      [fieldCapability.name]: {
-        ...fieldCapability,
-        category,
-      },
-    },
-  };
-};
-
-export const fieldDescriptorToBrowserFieldMapper = async (
+export const fieldDescriptorToBrowserFieldMapper = (
   fieldDescriptor: FieldSpec[]
-): Promise<BrowserField[]> => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      const browserFields = new Map();
+): BrowserFields => {
+  return fieldDescriptor.reduce((browserFields: BrowserFields, fieldCapability: FieldSpec) => {
+    const category = getFieldCategory(fieldCapability);
+    const field = browserFieldFactory(fieldCapability, category);
 
-      fieldDescriptor.forEach((fieldCapability) => {
-        const beat = beatsMap.get(fieldCapability.name);
-        const { category, field } = beat
-          ? populatedFieldInfoFactory(fieldCapability, beat)
-          : emptyFieldInfoFactory(fieldCapability);
+    if (browserFields[category]) {
+      browserFields[category] = { fields: { ...browserFields[category].fields, ...field } };
+    } else {
+      browserFields[category] = { fields: field };
+    }
 
-        if (browserFields.has(category)) {
-          const { fields: currentFields } = browserFields.get(category);
-          browserFields.set(category, { fields: { ...currentFields, ...field } });
-        } else {
-          browserFields.set(category, { fields: field });
-        }
-      });
-
-      resolve(Object.fromEntries(browserFields));
-    });
-  });
+    return browserFields;
+  }, {});
 };
