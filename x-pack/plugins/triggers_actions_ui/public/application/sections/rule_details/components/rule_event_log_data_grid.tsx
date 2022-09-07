@@ -193,6 +193,10 @@ export const RuleEventLogDataGrid = (props: RuleEventLogDataGrid) => {
                 }
               ),
               isSortable: getIsColumnSortable('rule_id'),
+              actions: {
+                showSortAsc: false,
+                showSortDesc: false,
+              },
             },
             {
               id: 'rule_name',
@@ -203,6 +207,11 @@ export const RuleEventLogDataGrid = (props: RuleEventLogDataGrid) => {
                 }
               ),
               isSortable: getIsColumnSortable('rule_name'),
+              actions: {
+                showSortAsc: false,
+                showSortDesc: false,
+                showHide: false,
+              },
             },
           ]
         : []),
