@@ -12,8 +12,8 @@ import {
   calculateBounds,
   DatatableUtilitiesService,
   parseInterval,
-  TimeRange,
   TimeRangeBounds,
+  TimeRange,
 } from '@kbn/data-plugin/common';
 import type { TimeScaleExpressionFunction, TimeScaleUnit, TimeScaleArgs } from './types';
 
@@ -37,7 +37,7 @@ export const timeScaleFn =
     context
   ) => {
     let timeBounds: TimeRangeBounds | undefined;
-    const timeZone = await getTimezone(context);
+    const contextTimeZone = await getTimezone(context);
 
     let getStartEndOfBucketMeta: (row: DatatableRow) => {
       startOfBucket: Moment;
@@ -59,13 +59,13 @@ export const timeScaleFn =
       }
       const datatableUtilities = await getDatatableUtilities(context);
       const timeInfo = datatableUtilities.getDateHistogramMeta(dateColumnDefinition, {
-        timeZone,
+        timeZone: contextTimeZone,
       });
       const intervalDuration = timeInfo?.interval && parseInterval(timeInfo.interval);
       timeBounds = timeInfo?.timeRange && calculateBounds(timeInfo.timeRange);
 
       getStartEndOfBucketMeta = (row) => {
-        const startOfBucket = moment.tz(row[dateColumnId], timeZone);
+        const startOfBucket = moment.tz(row[dateColumnId], timeInfo?.timeZone ?? contextTimeZone);
 
         return {
           startOfBucket,
@@ -86,8 +86,8 @@ export const timeScaleFn =
       timeBounds = calculateBounds(timeRange);
 
       getStartEndOfBucketMeta = () => ({
-        startOfBucket: moment.tz(timeRange.from, timeZone),
-        endOfBucket: moment.tz(timeRange.to, timeZone),
+        startOfBucket: moment.tz(timeRange.from, contextTimeZone),
+        endOfBucket: moment.tz(timeRange.to, contextTimeZone),
       });
     }
 
@@ -122,8 +122,8 @@ export const timeScaleFn =
 
         const bucketSize = endOfBucket.diff(startOfBucket);
         const factor = bucketSize / unitInMs[targetUnit];
-
         const currentValue = newRow[inputColumnId];
+
         if (currentValue != null) {
           newRow[outputColumnId] = Number(currentValue) / factor;
         }
