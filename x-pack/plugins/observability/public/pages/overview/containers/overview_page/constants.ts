@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-export interface AnalyticsCollection {
-  event_retention_day_length: number;
-  id: string;
-  name: string;
-}
+export const CAPABILITIES_KEYS = ['logs', 'infrastructure', 'apm', 'uptime'];
 
-export type AnalyticsCollectionDocument = Omit<AnalyticsCollection, 'id'>;
+export const ALERT_TABLE_STATE_STORAGE_KEY = 'xpack.observability.overview.alert.tableState';
+export const ALERTS_PER_PAGE = 10;

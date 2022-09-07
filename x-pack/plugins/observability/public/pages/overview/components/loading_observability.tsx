@@ -8,8 +8,8 @@
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { ObservabilityHeaderMenu } from '../../components/app/header';
-import { usePluginContext } from '../../hooks/use_plugin_context';
+import { ObservabilityHeaderMenu } from '../../../components/app/header';
+import { usePluginContext } from '../../../hooks/use_plugin_context';
 
 export function LoadingObservability() {
   const { ObservabilityPageTemplate } = usePluginContext();

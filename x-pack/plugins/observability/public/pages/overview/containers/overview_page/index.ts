@@ -5,10 +5,5 @@
  * 2.0.
  */
 
-export interface AnalyticsCollection {
-  event_retention_day_length: number;
-  id: string;
-  name: string;
-}
-
-export type AnalyticsCollectionDocument = Omit<AnalyticsCollection, 'id'>;
+export { OverviewPage } from './overview_page';
+export type { BucketSize } from './types';
