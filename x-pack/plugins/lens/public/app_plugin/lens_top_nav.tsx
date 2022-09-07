@@ -542,9 +542,8 @@ export const LensTopNavMenu = ({
             getEsQueryConfig(uiSettings)
           );
 
-          const dataViewSpec = indexPatterns.find((current) => current.id === meta.id)?.toSpec();
           return discover.locator!.getRedirectUrl({
-            dataViewSpec,
+            dataViewSpec: dataViews.indexPatterns[meta.id].spec,
             timeRange: data.query.timefilter.timefilter.getTime(),
             filters: newFilters,
             query: newQuery,
@@ -588,6 +587,7 @@ export const LensTopNavMenu = ({
     query,
     filters,
     indexPatterns,
+    dataViews.indexPatterns,
     data.query.timefilter.timefilter,
     lensStore,
     theme$,
