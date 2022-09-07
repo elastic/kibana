@@ -658,7 +658,7 @@ export const getXyVisualization = ({
     if (dataViews) {
       annotationLayers.forEach((layer) => {
         layer.annotations.forEach((annotation) => {
-          const validatedColumn = validateColumn?.(
+          const validatedColumn = validateColumn(
             state,
             { dataViews },
             layer.layerId,
