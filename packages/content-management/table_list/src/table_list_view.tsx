@@ -61,8 +61,8 @@ export interface Props<T extends UserContentCommonSchema = UserContentCommonSche
     searchQuery: string,
     references?: SavedObjectsFindOptionsReference[]
   ): Promise<{ total: number; hits: T[] }>;
-  /** Handler to set the item title "href" value */
-  getDetailViewLink?: (entity: T) => string;
+  /** Handler to set the item title "href" value. If it returns undefined there won't be a link for this item. */
+  getDetailViewLink?: (entity: T) => string | undefined;
   /** Handler to execute when clicking the item title */
   onClickTitle?: (item: T) => void;
   createItem?(): void;
@@ -161,24 +161,35 @@ function TableListViewComp<T extends UserContentCommonSchema>({
           defaultMessage: 'Title',
         }),
         sortable: true,
-        render: (field: keyof T, record: T) => (
+        render: (field: keyof T, record: T) => {
           // The validation is handled at the top of the component
-          // eslint-disable-next-line  @elastic/eui/href-or-on-click
-          <EuiLink
-            href={getDetailViewLink ? getDetailViewLink(record) : undefined}
-            onClick={
-              onClickTitle
-                ? (e: MouseEvent) => {
-                    e.preventDefault();
-                    onClickTitle(record);
-                  }
-                : undefined
-            }
-            data-test-subj={`${id}ListingTitleLink-${record.attributes.title.split(' ').join('-')}`}
-          >
-            {record.attributes.title}
-          </EuiLink>
-        ),
+          const href = getDetailViewLink ? getDetailViewLink(record) : undefined;
+
+          if (!href && !onClickTitle) {
+            // This item is not clickable
+            return <span>{record.attributes.title}</span>;
+          }
+
+          return (
+            // eslint-disable-next-line  @elastic/eui/href-or-on-click
+            <EuiLink
+              href={getDetailViewLink ? getDetailViewLink(record) : undefined}
+              onClick={
+                onClickTitle
+                  ? (e: MouseEvent) => {
+                      e.preventDefault();
+                      onClickTitle(record);
+                    }
+                  : undefined
+              }
+              data-test-subj={`${id}ListingTitleLink-${record.attributes.title
+                .split(' ')
+                .join('-')}`}
+            >
+              {record.attributes.title}
+            </EuiLink>
+          );
+        },
       },
       {
         field: 'attributes.description',

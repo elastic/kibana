@@ -43,6 +43,7 @@ interface VisualizeUserContent extends VisualizationListItem, UserContentCommonS
     description?: string;
     editApp: string;
     editUrl: string;
+    error?: string;
   };
 }
 
@@ -59,11 +60,13 @@ const toTableListViewSavedObject = (savedObject: Record<string, unknown>): Visua
     savedObjectType: savedObject.savedObjectType as string,
     typeTitle: savedObject.typeTitle as string,
     title: (savedObject.title as string) ?? '',
+    error: (savedObject.error as string) ?? '',
     attributes: {
       title: (savedObject.title as string) ?? '',
       description: savedObject.description as string,
       editApp: savedObject.editApp as string,
       editUrl: savedObject.editUrl as string,
+      error: savedObject.error as string,
     },
   };
 };
@@ -226,8 +229,8 @@ export const VisualizeListing = () => {
       tableListTitle={i18n.translate('visualizations.listing.table.listTitle', {
         defaultMessage: 'Visualize Library',
       })}
-      getDetailViewLink={({ attributes: { editApp, editUrl } }) =>
-        getVisualizeListItemLink(core.application, kbnUrlStateStorage, editApp, editUrl)
+      getDetailViewLink={({ attributes: { editApp, editUrl, error } }) =>
+        getVisualizeListItemLink(core.application, kbnUrlStateStorage, editApp, editUrl, error)
       }
     >
       {dashboardCapabilities.createNew && (
