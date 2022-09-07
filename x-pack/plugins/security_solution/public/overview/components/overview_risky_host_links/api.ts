@@ -4,165 +4,234 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { HttpSetup } from '@kbn/core/public';
+import type { HttpSetup, NotificationsStart } from '@kbn/core/public';
 
 interface CreateIngestPipeline {
   http: HttpSetup;
+  errorMessage?: string;
+  notifications?: NotificationsStart;
   signal?: AbortSignal;
-  spaceId?: string;
   options: { name: string; processors: Array<Record<string, unknown>> };
 }
 
 interface DeleteIngestPipeline {
   http: HttpSetup;
+  notifications?: NotificationsStart;
+  errorMessage?: string;
   signal?: AbortSignal;
-  spaceId?: string;
   names: string;
 }
 
 interface CreateIndices {
   http: HttpSetup;
+  notifications?: NotificationsStart;
   signal?: AbortSignal;
-  spaceId?: string;
+  errorMessage?: string;
   options: { index: string; mappings: Record<string, unknown> };
 }
 
 interface DeleteIndices {
   http: HttpSetup;
+  notifications?: NotificationsStart;
   signal?: AbortSignal;
-  spaceId?: string;
+  errorMessage?: string;
   options: { indices: string[] };
 }
 
 interface CreateTransforms {
   http: HttpSetup;
+  notifications?: NotificationsStart;
   signal?: AbortSignal;
-  spaceId?: string;
+  errorMessage?: string;
   transformId: string;
   options: Record<string, unknown>;
 }
 
 interface StartTransforms {
   http: HttpSetup;
+  notifications?: NotificationsStart;
   signal?: AbortSignal;
-  spaceId?: string;
+  errorMessage?: string;
   transformIds: string[];
 }
 
 interface StopTransforms {
   http: HttpSetup;
   signal?: AbortSignal;
-  spaceId?: string;
+  errorMessage?: string;
   transformIds: string[];
 }
 
 interface GetTransformState {
   http: HttpSetup;
   signal?: AbortSignal;
-  spaceId?: string;
+  errorMessage?: string;
   transformId: string;
 }
 
 interface GetTransformsState {
   http: HttpSetup;
+  errorMessage?: string;
   signal?: AbortSignal;
-  spaceId?: string;
   transformIds: string[];
 }
 
 interface RestartTransforms {
   http: HttpSetup;
+  errorMessage?: string;
   signal?: AbortSignal;
-  spaceId?: string;
   transformIds: string[];
 }
 
 interface DeleteTransforms {
   http: HttpSetup;
+  notifications?: NotificationsStart;
+  errorMessage?: string;
   signal?: AbortSignal;
-  spaceId?: string;
   transformIds: string[];
-  options: {
+  options?: {
     deleteDestIndex?: boolean;
     deleteDestDataView?: boolean;
     forceDelete?: boolean;
   };
 }
 
+const INDEX_MANAGEMENT_API_BASE_PATH = `/api/index_management`;
+const INGEST_PIPELINES_API_BASE_PATH = `/api/ingest_pipelines`;
+const TRANSFORM_API_BASE_PATH = `/api/transform`;
+
 export async function createIngestPipeline({
   http,
+  notifications,
   signal,
-  spaceId = 'default',
+  errorMessage,
   options,
 }: CreateIngestPipeline) {
-  const res = await http.post(`/api/ingest_pipelines`, {
-    body: JSON.stringify(options),
-    signal,
-  });
+  const res = await http
+    .post(INGEST_PIPELINES_API_BASE_PATH, {
+      body: JSON.stringify(options),
+      signal,
+    })
+    .catch((e) => {
+      notifications?.toasts?.addDanger({
+        title: errorMessage ?? 'Ingest pipeline creation failed',
+        text: e?.body?.message,
+      });
+    });
 
   return res;
 }
 
 export async function deleteIngestPipelines({
   http,
+  notifications,
   signal,
-  spaceId = 'default',
+  errorMessage,
   names, // separate with ','
 }: DeleteIngestPipeline) {
-  const res = await http.delete(`/api/ingest_pipelines/${names}`, {
-    signal,
-  });
+  const res = await http
+    .delete(`${INGEST_PIPELINES_API_BASE_PATH}/${names}`, {
+      signal,
+    })
+    .catch((e) => {
+      notifications?.toasts?.addDanger({
+        title: errorMessage ?? 'Failed to delete index',
+        text: e?.body?.message,
+      });
+    });
 
   return res;
 }
 
-export async function createIndices({ http, signal, spaceId = 'default', options }: CreateIndices) {
-  const res = await http.put('/api/index_management/indices/create', {
-    body: JSON.stringify(options),
-    signal,
-  });
+export async function createIndices({
+  http,
+  notifications,
+  signal,
+  errorMessage,
+  options,
+}: CreateIndices) {
+  const res = await http
+    .put(`${INDEX_MANAGEMENT_API_BASE_PATH}/indices/create`, {
+      body: JSON.stringify(options),
+      signal,
+    })
+    .catch((e) => {
+      notifications?.toasts?.addDanger({
+        title: errorMessage ?? 'Failed to create index',
+        text: e?.body?.message,
+      });
+    });
 
   return res;
 }
 
-export async function deleteIndices({ http, signal, spaceId = 'default', options }: DeleteIndices) {
-  const res = await http.post('/api/index_management/indices/delete', {
-    body: JSON.stringify(options),
-    signal,
-  });
+export async function deleteIndices({
+  http,
+  notifications,
+  signal,
+  errorMessage,
+  options,
+}: DeleteIndices) {
+  const res = await http
+    .post(`${INDEX_MANAGEMENT_API_BASE_PATH}/indices/delete`, {
+      body: JSON.stringify(options),
+      signal,
+    })
+    .catch((e) => {
+      notifications?.toasts?.addDanger({
+        title: errorMessage ?? 'Failed to delete indices',
+        text: e?.body?.message,
+      });
+    });
 
   return res;
 }
 
 export async function createTransform({
   http,
+  notifications,
   signal,
-  spaceId = 'default',
+  errorMessage,
   transformId,
   options,
 }: CreateTransforms) {
-  const res = await http.put(`/api/transform/transforms/${transformId}`, {
-    body: JSON.stringify(options),
-    signal,
-  });
+  const res = await http
+    .put(`${TRANSFORM_API_BASE_PATH}/transforms/${transformId}`, {
+      body: JSON.stringify(options),
+      signal,
+    })
+    .catch((e) => {
+      notifications?.toasts?.addDanger({
+        title: errorMessage ?? 'Failed to create Transform',
+        text: e?.body?.message,
+      });
+    });
 
   return res;
 }
 
 export async function startTransforms({
   http,
+  notifications,
   signal,
-  spaceId = 'default',
+  errorMessage,
   transformIds,
 }: StartTransforms) {
-  const res = await http.post(`/api/transform/start_transforms`, {
-    body: JSON.stringify(
-      transformIds.map((id) => ({
-        id,
-      }))
-    ),
-    signal,
-  });
+  const res = await http
+    .post(`${TRANSFORM_API_BASE_PATH}/start_transforms`, {
+      body: JSON.stringify(
+        transformIds.map((id) => ({
+          id,
+        }))
+      ),
+      signal,
+    })
+    .catch((e) => {
+      notifications?.toasts?.addDanger({
+        title: errorMessage ?? 'Failed to start Transforms',
+        text: e?.body?.message,
+      });
+    });
 
   return res;
 }
@@ -170,11 +239,11 @@ export async function startTransforms({
 export async function getTransformState({
   http,
   signal,
-  spaceId = 'default',
+  errorMessage,
   transformId,
 }: GetTransformState) {
   const res = await http.get<{ transforms: Array<{ id: string; state: string }> }>(
-    `/api/transform/transforms/${transformId}/_stats`,
+    `${TRANSFORM_API_BASE_PATH}/transforms/${transformId}/_stats`,
     {
       signal,
     }
@@ -186,37 +255,50 @@ export async function getTransformState({
 export async function getTransformsState({
   http,
   signal,
-  spaceId = 'default',
+  errorMessage,
   transformIds,
 }: GetTransformsState) {
-  const unresolvedPromises: Array<Promise<{ transforms: Array<{ id: string; state: string }> }>> =
-    transformIds.map(async (transformId) => {
-      const transformState = await getTransformState({
+  // const unresolvedPromises: Array<Promise<{ transforms: Array<{ id: string; state: string }> }>> =
+  //   transformIds.map(async (transformId) => {
+  //     const transformState = await getTransformState({
+  //       http,
+  //       signal,
+  //       spaceId,
+  //       transformId,
+  //     });
+  //     return transformState;
+  //   });
+
+  const states = await Promise.all(
+    transformIds.map((transformId) => {
+      const transformState = getTransformState({
         http,
         signal,
-        spaceId,
         transformId,
       });
       return transformState;
-    });
-
-  const states = await Promise.all(unresolvedPromises);
+    })
+  );
   return states;
 }
 
-export async function stopTransforms({
-  http,
-  signal,
-  spaceId = 'default',
-  transformIds,
-}: StopTransforms) {
-  const states = await getTransformsState({ http, signal, spaceId, transformIds });
-  const res = await http.post(`/api/transform/stop_transforms`, {
+export async function stopTransforms({ http, signal, errorMessage, transformIds }: StopTransforms) {
+  const states = await getTransformsState({ http, signal, transformIds });
+  const res = await http.post(`${TRANSFORM_API_BASE_PATH}/stop_transforms`, {
     body: JSON.stringify(
-      states.map((state) => ({
-        id: state.transforms[0].id,
-        state: state.transforms[0].state,
-      }))
+      states.reduce(
+        (acc, state) =>
+          state.transforms.length > 0
+            ? [
+                ...acc,
+                {
+                  id: state.transforms[0].id,
+                  state: state.transforms[0].state,
+                },
+              ]
+            : acc,
+        []
+      )
     ),
     signal,
   });
@@ -226,23 +308,31 @@ export async function stopTransforms({
 
 export async function deleteTransforms({
   http,
+  notifications,
   signal,
-  spaceId = 'default',
+  errorMessage,
   transformIds,
   options,
 }: DeleteTransforms) {
-  await stopTransforms({ http, signal, spaceId, transformIds });
+  await stopTransforms({ http, signal, transformIds });
 
-  const res = await http.post(`/api/transform/delete_transforms`, {
-    body: JSON.stringify({
-      ...options,
-      transformsInfo: transformIds.map((id) => ({
-        id,
-        state: 'stopped',
-      })),
-    }),
-    signal,
-  });
+  const res = await http
+    .post(`${TRANSFORM_API_BASE_PATH}/delete_transforms`, {
+      body: JSON.stringify({
+        transformsInfo: transformIds.map((id) => ({
+          id,
+          state: 'stopped',
+        })),
+        ...(options ? options : {}),
+      }),
+      signal,
+    })
+    .catch((e) => {
+      notifications?.toasts?.addDanger({
+        title: errorMessage ?? 'Failed to delete Transforms',
+        text: e?.body?.message,
+      });
+    });
 
   return res;
 }
@@ -250,20 +340,18 @@ export async function deleteTransforms({
 export async function restartTransforms({
   http,
   signal,
-  spaceId = 'default',
+  errorMessage,
   transformIds,
 }: RestartTransforms) {
   await stopTransforms({
     http,
     signal,
-    spaceId,
     transformIds,
   });
 
   const res = await startTransforms({
     http,
     signal,
-    spaceId,
     transformIds,
   });
 

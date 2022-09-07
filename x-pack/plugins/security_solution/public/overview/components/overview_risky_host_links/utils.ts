@@ -5,8 +5,28 @@
  * 2.0.
  */
 
+import type { HttpSetup, NotificationsStart } from '@kbn/core/public';
+import {
+  createIngestPipeline,
+  createIndices,
+  createTransform,
+  startTransforms,
+  deleteTransforms,
+  deleteIngestPipelines,
+} from './api';
+export enum InstallationState {
+  Started = 'STARTED',
+  Done = 'DONE',
+}
+const INSTALLATION_ERROR = 'Installation error';
+const UNINSTALLATION_ERROR = 'Uninstallation error';
+const getHostRiskScorePivotTransformId = (spaceId = 'default') =>
+  `ml_hostriskscore_pivot_transform_${spaceId}`;
+const getHostRiskScoreLatestTransformId = (spaceId = 'default') =>
+  `ml_hostriskscore_latest_transform_${spaceId}`;
+const ML_HOSTRISKSCORE_INGEST_PIPELINE = 'ml_hostriskscore_ingest_pipeline';
 export const getCreateIngestPipelineOptions = () => ({
-  name: 'ml_hostriskscore_ingest_pipeline',
+  name: ML_HOSTRISKSCORE_INGEST_PIPELINE,
   processors: [
     {
       set: {
@@ -23,7 +43,8 @@ export const getCreateIngestPipelineOptions = () => ({
     },
     {
       script: {
-        id: 'ml_hostriskscore_levels_script',
+        source:
+          "double risk_score = (def)ctx.getByPath(params.risk_score);\nif (risk_score < 20) {\n    ctx['risk'] = 'Unknown'\n}\nelse if (risk_score >= 20 && risk_score < 40) {\n    ctx['risk'] = 'Low'\n}\nelse if (risk_score >= 40 && risk_score < 70) {\n    ctx['risk'] = 'Moderate'\n}\nelse if (risk_score >= 70 && risk_score < 90) {\n    ctx['risk'] = 'High'\n}\nelse if (risk_score >= 90) {\n    ctx['risk'] = 'Critical'\n}",
         params: {
           risk_score: 'risk_stats.risk_score',
         },
@@ -211,3 +232,104 @@ export const getCreateLatestTransformOptions = ({ spaceId = 'default' }: { space
     },
   },
 });
+
+export const installHostRiskScoreModule = async ({
+  http,
+  notifications,
+  spaceId = 'default',
+}: {
+  http: HttpSetup;
+  notifications?: NotificationsStart;
+  spaceId?: string;
+}) => {
+  await createIngestPipeline({
+    http,
+    notifications,
+    errorMessage: `${INSTALLATION_ERROR} - Ingest pipeline creation failed`,
+    options: getCreateIngestPipelineOptions(),
+  }); // step 5
+  await createIndices({
+    http,
+    notifications,
+    errorMessage: `${INSTALLATION_ERROR} - Index creation failed`,
+    options: getCreateMLHostRiskScoreIndicesOptions({ spaceId }),
+  }); // step 6 create ml_host_risk_score_default index
+  await createIndices({
+    http,
+    errorMessage: `${INSTALLATION_ERROR} - Index creation failed`,
+    options: getCreateMLHostRiskScoreLatestIndicesOptions({ spaceId }),
+  }); // step 9 create ml_host_risk_score_latest_default index
+  await createTransform({
+    http,
+    errorMessage: `${INSTALLATION_ERROR} - Transform creation failed`,
+    transformId: getHostRiskScorePivotTransformId(spaceId),
+    options: getCreatePivaTransformOptions({ spaceId }),
+  }); // step 7 create ml_hostriskscore_pivot_transform_default
+  await createTransform({
+    http,
+    errorMessage: `${INSTALLATION_ERROR} - Transform creation failed`,
+    transformId: getHostRiskScoreLatestTransformId(spaceId),
+    options: getCreateLatestTransformOptions({ spaceId }),
+  }); // step10 create ml_hostriskscore_latest_transform_default
+  await startTransforms({
+    http,
+    errorMessage: `${INSTALLATION_ERROR} - Failed to start Transforms`,
+    transformIds: [
+      getHostRiskScorePivotTransformId(spaceId),
+      getHostRiskScoreLatestTransformId(spaceId),
+    ],
+  }); // step 8.11
+};
+
+export const uninstallHostRiskScoreModule = async ({
+  http,
+  notifications,
+  spaceId = 'default',
+}: {
+  http: HttpSetup;
+  notifications?: NotificationsStart;
+  spaceId?: string;
+}) => {
+  await deleteTransforms({
+    http,
+    notifications,
+    errorMessage: `${UNINSTALLATION_ERROR} - Failed to delete Transforms`,
+    transformIds: [
+      getHostRiskScorePivotTransformId(spaceId),
+      getHostRiskScoreLatestTransformId(spaceId),
+    ],
+    options: {
+      deleteDestIndex: true,
+      deleteDestDataView: true,
+      forceDelete: false,
+    },
+  });
+
+  await deleteIngestPipelines({
+    http,
+    notifications,
+    errorMessage: `${UNINSTALLATION_ERROR} - Failed to delete ingest pipelines`,
+    names: ML_HOSTRISKSCORE_INGEST_PIPELINE,
+  });
+};
+
+export const upgradeHostRiskScoreModule = async ({
+  http,
+  notifications,
+  spaceId = 'default',
+}: {
+  http: HttpSetup;
+  notifications?: NotificationsStart;
+  spaceId?: string;
+}) => {
+  await uninstallHostRiskScoreModule({
+    http,
+    notifications,
+    spaceId,
+  });
+  await installHostRiskScoreModule({
+    http,
+    notifications,
+    spaceId,
+  });
+};
