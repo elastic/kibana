@@ -116,7 +116,11 @@ const useRiskScore = <T extends RiskQueries.hostsRiskScore | RiskQueries.usersRi
 
   const { addError } = useAppToasts();
 
-  const { isDeprecated } = useRiskScoreDeprecated(featureEnabled, defaultIndex);
+  const {
+    isDeprecated,
+    isEnabled,
+    loading: isDeprecatedLoading,
+  } = useRiskScoreDeprecated(featureEnabled, defaultIndex);
 
   const {
     loading,
@@ -139,10 +143,10 @@ const useRiskScore = <T extends RiskQueries.hostsRiskScore | RiskQueries.usersRi
       refetch,
       totalCount: response.totalCount,
       isDeprecated,
-      isModuleEnabled: skip ? featureEnabled : featureEnabled && response.data != null,
+      isModuleEnabled: skip ? featureEnabled : isEnabled,
       isInspected: false,
     }),
-    [featureEnabled, inspect, isDeprecated, refetch, response.data, response.totalCount, skip]
+    [featureEnabled, inspect, isDeprecated, isEnabled, refetch, response, skip]
   );
 
   const riskScoreRequest = useMemo(
@@ -182,5 +186,5 @@ const useRiskScore = <T extends RiskQueries.hostsRiskScore | RiskQueries.usersRi
     }
   }, [featureEnabled, isDeprecated, riskScoreRequest, search, skip]);
 
-  return [loading, riskScoreResponse];
+  return [loading || isDeprecatedLoading, riskScoreResponse];
 };

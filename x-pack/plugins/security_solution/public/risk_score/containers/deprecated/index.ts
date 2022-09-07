@@ -10,16 +10,23 @@ import { getRiskScoreDeprecated } from './api';
 
 export const useRiskScoreDeprecated = (isFeatureEnabled: boolean, defaultIndex?: string) => {
   const [isDeprecated, setIsDeprecated] = useState(false);
+  const [isEnabled, setIsEnabled] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const abortCtrl = useRef(new AbortController());
   const searchDeprecated = useCallback((indexName: string) => {
     const asyncSearch = async () => {
-      abortCtrl.current = new AbortController();
-      setLoading(true);
-      const res = await getRiskScoreDeprecated(indexName, abortCtrl.current.signal);
-      setLoading(false);
-      setIsDeprecated(res.isDeprecated);
+      try {
+        abortCtrl.current = new AbortController();
+        setLoading(true);
+        const res = await getRiskScoreDeprecated(indexName, abortCtrl.current.signal);
+        setLoading(false);
+        setIsDeprecated(res.isDeprecated);
+        setIsEnabled(res.isEnabled);
+      } catch (e) {
+        setLoading(false);
+        setIsDeprecated(false);
+      }
     };
     abortCtrl.current.abort();
     asyncSearch();
@@ -37,5 +44,5 @@ export const useRiskScoreDeprecated = (isFeatureEnabled: boolean, defaultIndex?:
     };
   }, []);
 
-  return { loading, isDeprecated };
+  return { loading, isDeprecated, isEnabled };
 };

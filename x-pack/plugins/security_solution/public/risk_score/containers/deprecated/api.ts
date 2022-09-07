@@ -11,8 +11,8 @@ import { RISK_SCORE_DEPRECATION_API_URL } from '../../../../common/constants';
 export const getRiskScoreDeprecated = async (
   indexName: string,
   signal?: AbortSignal
-): Promise<{ isDeprecated: boolean }> => {
-  return KibanaServices.get().http.fetch<{ isDeprecated: boolean }>(
+): Promise<{ isDeprecated: boolean; isEnabled: boolean }> => {
+  return KibanaServices.get().http.fetch<{ isDeprecated: boolean; isEnabled: boolean }>(
     RISK_SCORE_DEPRECATION_API_URL,
     {
       method: 'GET',
