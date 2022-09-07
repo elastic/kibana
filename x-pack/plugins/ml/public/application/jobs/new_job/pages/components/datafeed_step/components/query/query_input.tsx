@@ -26,6 +26,7 @@ export const QueryInput: FC<{ setIsValidQuery(v: boolean): void }> = ({ setIsVal
       jobCreator.query = JSON.parse(queryString);
       jobCreatorUpdate();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [queryString]);
 
   useEffect(() => {
@@ -39,11 +40,13 @@ export const QueryInput: FC<{ setIsValidQuery(v: boolean): void }> = ({ setIsVal
         setQueryString(actualQuery);
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobCreatorUpdated]);
 
   useEffect(() => {
     const validJson = isValidJson(queryString);
     setIsValidQuery(validJson);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   function onChange(qs: string) {

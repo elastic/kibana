@@ -5,6 +5,7 @@
  * 2.0.
  */
 import type { SavedObject } from '@kbn/core/server';
+import type { Observable } from 'rxjs';
 import type { Readable } from 'stream';
 import type { ES_FIXED_SIZE_INDEX_BLOB_STORE } from './constants';
 
@@ -353,8 +354,9 @@ export interface File<Meta = unknown> {
    * Stream file content to storage.
    *
    * @param content - The content to stream to storage.
+   * @param abort$ - An observable that can be used to abort the upload at any time.
    */
-  uploadContent(content: Readable): Promise<File<Meta>>;
+  uploadContent(content: Readable, abort$?: Observable<unknown>): Promise<File<Meta>>;
 
   /**
    * Stream file content from storage.
