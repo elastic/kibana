@@ -21,6 +21,7 @@ import { FieldEditorProvider, Context } from '../../../public/components/field_e
 import { FieldPreviewProvider } from '../../../public/components/preview';
 import { initApi, ApiService } from '../../../public/lib';
 import { init as initHttpRequests } from './http_requests';
+import { RuntimeFieldSubFields } from '../../../public/shared_imports';
 
 const dataStart = dataPluginMock.createStartContract();
 const { search } = dataStart;
@@ -139,6 +140,7 @@ export const WithFieldEditorDependencies =
       },
       fieldFormats,
       fieldName$: new BehaviorSubject(''),
+      subfields$: new BehaviorSubject<RuntimeFieldSubFields | undefined>([]),
     };
 
     const mergedDependencies = merge({}, dependencies, overridingDependencies);
