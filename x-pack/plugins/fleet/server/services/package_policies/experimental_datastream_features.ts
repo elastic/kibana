@@ -10,6 +10,7 @@ import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-ser
 
 import type { NewPackagePolicy, PackagePolicy } from '../../types';
 import { updateDatastreamExperimentalFeatures } from '../epm/packages/update';
+import { packagePolicyService } from '../package_policy';
 
 export async function handleExperimentalDatastreamFeatureOptIn({
   soClient,
@@ -24,7 +25,27 @@ export async function handleExperimentalDatastreamFeatureOptIn({
     return;
   }
 
+  // If we're performing an update, we want to check if we actually need to perform
+  // an update to the component templates for the package. So we fetch the saved object
+  // for the package policy here to compare later.
+  let packagePolicySo;
+  if (packagePolicy.id) {
+    packagePolicySo = await packagePolicyService.get(soClient, packagePolicy.id.toString());
+  }
+
   for (const featureMapEntry of packagePolicy.package.experimental_data_stream_features) {
+    const existingOptIn = packagePolicySo?.package?.experimental_data_stream_features?.find(
+      (optIn) => optIn.data_stream === featureMapEntry.data_stream
+    );
+
+    const isOptInChanged =
+      existingOptIn?.features.synthetic_source === featureMapEntry.features.synthetic_source;
+
+    // If the feature opt-in status in unchanged, we don't need to update any component templates
+    if (!isOptInChanged) {
+      continue;
+    }
+
     const componentTemplateName = `${featureMapEntry.data_stream}@package`;
     const componentTemplateRes = await esClient.cluster.getComponentTemplate({
       name: componentTemplateName,
