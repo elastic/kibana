@@ -22,9 +22,9 @@ import {
   VisState810,
   VisState820,
   VisState830,
-  LensDocShape840,
-  XYVisStatePre840,
-  VisState840,
+  LensDocShape850,
+  XYVisStatePre850,
+  VisState850,
 } from './types';
 import { layerTypes, LegacyMetricState } from '../../common';
 import { Filter } from '@kbn/es-query';
@@ -2316,13 +2316,13 @@ describe('Lens migrations', () => {
           },
         },
       },
-    } as unknown as SavedObjectUnsanitizedDoc<LensDocShape840<XYVisStatePre840>>;
+    } as unknown as SavedObjectUnsanitizedDoc<LensDocShape850<XYVisStatePre850>>;
 
     it('migrates existing annotation events as manual type', () => {
       const result = migrations['8.5.0'](example, context) as ReturnType<
         SavedObjectMigrationFn<LensDocShape, LensDocShape>
       >;
-      const visState = result.attributes.state.visualization as VisState840;
+      const visState = result.attributes.state.visualization as VisState850;
       const [dataLayer, annotationLayer] = visState.layers;
       expect(dataLayer).toEqual({ layerType: 'data' });
       expect(annotationLayer).toEqual({

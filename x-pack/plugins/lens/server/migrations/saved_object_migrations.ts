@@ -34,9 +34,9 @@ import {
   XYVisualizationState830,
   VisState810,
   VisState820,
-  XYVisStatePre840,
-  LensDocShape840,
-  VisState840,
+  XYVisStatePre850,
+  LensDocShape850,
+  VisState850,
 } from './types';
 import {
   commonRenameOperationsForFormula,
@@ -520,22 +520,22 @@ const preserveOldLegendSizeDefault: SavedObjectMigrationFn<LensDocShape810, Lens
 ) => ({ ...doc, attributes: commonPreserveOldLegendSizeDefault(doc.attributes) });
 
 const addEventAnnotationType: SavedObjectMigrationFn<
-  LensDocShape840<XYVisStatePre840>,
-  LensDocShape840<VisState840>
+  LensDocShape850<XYVisStatePre850>,
+  LensDocShape850<VisState850>
 > = (doc) => {
   const newDoc = cloneDeep(doc);
   return { ...newDoc, attributes: commonExplicitAnnotationType(newDoc.attributes) };
 };
 
 const addEventAnnotationDataViewReferences: SavedObjectMigrationFn<
-  LensDocShape840<VisState840>,
-  LensDocShape840<VisState840>
+  LensDocShape850<VisState850>,
+  LensDocShape850<VisState850>
 > = (doc) => ({
   ...doc,
   references: commonAnnotationAddDataViewIdReferences(doc.attributes, doc.references),
 });
 
-const migrateMetricIds: SavedObjectMigrationFn<LensDocShape840, LensDocShape840> = (doc) => ({
+const migrateMetricIds: SavedObjectMigrationFn<LensDocShape850, LensDocShape850> = (doc) => ({
   ...doc,
   attributes: commonMigrateMetricIds(doc.attributes),
 });
