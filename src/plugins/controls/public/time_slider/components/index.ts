@@ -6,10 +6,5 @@
  * Side Public License, v 1.
  */
 
-import type { TimeRange } from '@kbn/es-query';
-
-export interface ControlsSettingsService {
-  getTimezone: () => string;
-  getDateFormat: () => string;
-  getDefaultTimeRange: () => TimeRange;
-}
+export { TimeSlider } from './time_slider';
+export { TimeSliderPrepend } from './time_slider_prepend';

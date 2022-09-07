@@ -6,10 +6,12 @@
  * Side Public License, v 1.
  */
 
-import type { TimeRange } from '@kbn/es-query';
+import type { ControlInput } from '../types';
 
-export interface ControlsSettingsService {
-  getTimezone: () => string;
-  getDateFormat: () => string;
-  getDefaultTimeRange: () => TimeRange;
+export const TIME_SLIDER_CONTROL = 'timeSlider';
+
+export interface TimeSliderControlEmbeddableInput extends ControlInput {
+  // Encode value as percentage of time range to support relative time ranges.
+  timesliceStartAsPercentageOfTimeRange?: number;
+  timesliceEndAsPercentageOfTimeRange?: number;
 }
