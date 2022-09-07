@@ -40,24 +40,18 @@ export function registerFlameChartElasticSearchRoute({ router, logger }: RouteRe
           kuery,
         });
 
-        const {
-          stackTraces,
-          executables,
-          stackFrames,
-          eventsIndex,
-          downsampledTotalCount,
-          stackTraceEvents,
-        } = await getExecutablesAndStackTraces({
-          logger,
-          client: createProfilingEsClient({ request, esClient }),
-          filter,
-          sampleSize: targetSampleSize,
-        });
+        const { stackTraces, executables, stackFrames, eventsIndex, totalCount, stackTraceEvents } =
+          await getExecutablesAndStackTraces({
+            logger,
+            client: createProfilingEsClient({ request, esClient }),
+            filter,
+            sampleSize: targetSampleSize,
+          });
 
         const flamegraph = await withProfilingSpan('collect_flamegraph', async () => {
           return new FlameGraph(
             eventsIndex.sampleRate,
-            downsampledTotalCount,
+            totalCount,
             stackTraceEvents,
             stackTraces,
             stackFrames,
