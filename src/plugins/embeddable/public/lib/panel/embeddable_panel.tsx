@@ -32,6 +32,7 @@ import {
 } from '../embeddables/i_embeddable';
 import { ViewMode } from '../types';
 
+import { EmbeddablePanelError } from './embeddable_panel_error';
 import { RemovePanelAction } from './panel_header/panel_actions';
 import { AddPanelAction } from './panel_header/panel_actions/add_panel/add_panel_action';
 import { CustomizePanelTitleAction } from './panel_header/panel_actions/customize_title/customize_panel_action';
@@ -40,7 +41,7 @@ import { InspectPanelAction } from './panel_header/panel_actions/inspect_panel_a
 import { EditPanelAction } from '../actions';
 import { CustomizePanelModal } from './panel_header/panel_actions/customize_title/customize_panel_modal';
 import { EmbeddableStart } from '../../plugin';
-import { EmbeddableStateTransfer, ErrorEmbeddable, isSelfStyledEmbeddable } from '..';
+import { EmbeddableStateTransfer, isSelfStyledEmbeddable } from '..';
 
 const sortByOrderField = (
   { order: orderA }: { order?: number },
@@ -118,18 +119,10 @@ interface BasePanelActions {
   editPanel: EditPanelAction;
 }
 
-const emptyObject = {};
-type EmptyObject = typeof emptyObject;
-
-type PanelUniversalActions =
-  | BasePanelActions
-  | InspectorPanelAction
-  | (BasePanelActions & InspectorPanelAction)
-  | EmptyObject;
+interface PanelUniversalActions extends Partial<InspectorPanelAction>, Partial<BasePanelActions> {}
 
 export class EmbeddablePanel extends React.Component<Props, State> {
   private embeddableRoot = React.createRef<HTMLDivElement>();
-  private errorRoot = React.createRef<HTMLDivElement>();
   private parentSubscription?: Subscription;
   private subscription: Subscription = new Subscription();
   private mounted: boolean = false;
@@ -152,13 +145,6 @@ export class EmbeddablePanel extends React.Component<Props, State> {
       badges: [],
       notifications: [],
     };
-  }
-
-  componentDidUpdate(prevProps: Props, prevState: State) {
-    if (this.state.error !== prevState.error) {
-      prevState.destroyError?.();
-      this.setState({ destroyError: this.renderError() });
-    }
   }
 
   private async refreshBadges() {
@@ -264,24 +250,6 @@ export class EmbeddablePanel extends React.Component<Props, State> {
     }
   };
 
-  private renderError() {
-    if (!this.state.error || !this.errorRoot.current) {
-      return;
-    }
-
-    if (this.props.embeddable.renderError) {
-      return this.props.embeddable.renderError(this.errorRoot.current, this.state.error);
-    }
-
-    const errorEmbeddable = new ErrorEmbeddable(this.state.error, {
-      id: this.props.embeddable.id,
-    });
-
-    errorEmbeddable.render(this.errorRoot.current);
-
-    return () => errorEmbeddable.destroy();
-  }
-
   public render() {
     const viewOnlyMode = [ViewMode.VIEW, ViewMode.PRINT].includes(this.state.viewMode);
     const classes = classNames('embPanel', {
@@ -330,10 +298,10 @@ export class EmbeddablePanel extends React.Component<Props, State> {
           />
         )}
         {this.state.error && (
-          <div
-            className="embPanel__content"
-            data-test-subj="embeddableError"
-            ref={this.errorRoot}
+          <EmbeddablePanelError
+            editPanelAction={this.state.universalActions.editPanel}
+            embeddable={this.props.embeddable}
+            error={this.state.error}
           />
         )}
         <div className="embPanel__content" ref={this.embeddableRoot} {...contentAttrs} />
