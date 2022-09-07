@@ -35,7 +35,7 @@ export function getEventAnnotationService(): EventAnnotationServiceType {
 
     for (const annotation of manualBasedAnnotations) {
       if (isRangeAnnotationConfig(annotation)) {
-        const { label, isHidden, color, key, outside, id } = annotation;
+        const { label, color, key, outside, id } = annotation;
         const { timestamp: time, endTimestamp: endTime } = key;
         expressions.push({
           type: 'expression' as const,
@@ -50,14 +50,12 @@ export function getEventAnnotationService(): EventAnnotationServiceType {
                 label: [label || defaultAnnotationLabel],
                 color: [color || defaultAnnotationRangeColor],
                 outside: [Boolean(outside)],
-                isHidden: [Boolean(isHidden)],
               },
             },
           ],
         });
       } else {
-        const { label, isHidden, color, lineStyle, lineWidth, icon, key, textVisibility, id } =
-          annotation;
+        const { label, color, lineStyle, lineWidth, icon, key, textVisibility, id } = annotation;
         expressions.push({
           type: 'expression' as const,
           chain: [
@@ -73,7 +71,6 @@ export function getEventAnnotationService(): EventAnnotationServiceType {
                 lineStyle: [lineStyle || 'solid'],
                 icon: hasIcon(icon) ? [icon] : ['triangle'],
                 textVisibility: [textVisibility || false],
-                isHidden: [Boolean(isHidden)],
               },
             },
           ],
@@ -85,7 +82,6 @@ export function getEventAnnotationService(): EventAnnotationServiceType {
       const {
         id,
         label,
-        isHidden,
         color,
         lineStyle,
         lineWidth,
@@ -112,7 +108,6 @@ export function getEventAnnotationService(): EventAnnotationServiceType {
               icon: hasIcon(icon) ? [icon] : ['triangle'],
               textVisibility: [textVisibility || false],
               textField: textVisibility && textField ? [textField] : [],
-              isHidden: [Boolean(isHidden)],
               filter: filter ? [queryToAst(filter)] : [],
               extraFields: extraFields || [],
             },
@@ -129,8 +124,9 @@ export function getEventAnnotationService(): EventAnnotationServiceType {
         return [];
       }
 
-      const groupsExpressions = groups.map(
-        ({ annotations, indexPatternId }): ExpressionAstExpression => {
+      const groupsExpressions = groups
+        .filter((g) => g.annotations.some((a) => !a.isHidden))
+        .map(({ annotations, indexPatternId }): ExpressionAstExpression => {
           const indexPatternExpression: ExpressionAstExpression = {
             type: 'expression',
             chain: [
@@ -143,6 +139,7 @@ export function getEventAnnotationService(): EventAnnotationServiceType {
               },
             ],
           };
+          const annotationExpressions = annotationsToExpression(annotations);
           return {
             type: 'expression',
             chain: [
@@ -151,13 +148,12 @@ export function getEventAnnotationService(): EventAnnotationServiceType {
                 function: 'event_annotation_group',
                 arguments: {
                   dataView: [indexPatternExpression],
-                  annotations: [...annotationsToExpression(annotations)],
+                  annotations: [...annotationExpressions],
                 },
               },
             ],
           };
-        }
-      );
+        });
 
       const fetchExpression: ExpressionAstExpression = {
         type: 'expression',

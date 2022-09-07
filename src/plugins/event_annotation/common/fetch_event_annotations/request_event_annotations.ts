@@ -73,10 +73,10 @@ export const requestEventAnnotations = (
   getStartDependencies: () => Promise<FetchEventAnnotationsStartDependencies>
 ) => {
   return defer(async () => {
-    const { aggs, dataViews, searchSource, getNow, uiSettings } = await getStartDependencies();
-    if (!input?.timeRange) {
+    if (!input?.timeRange || !args.groups) {
       return emptyDatatable;
     }
+    const { aggs, dataViews, searchSource, getNow, uiSettings } = await getStartDependencies();
 
     const interval = getCalculatedInterval(uiSettings, args.interval, input?.timeRange);
     if (!interval) {
@@ -289,10 +289,6 @@ function regroupForRequestOptimization(
   const outputGroups = groups
     .map((g) => {
       return g.annotations.reduce<Record<string, ManualGroup | QueryGroup>>((acc, current) => {
-        if (current.isHidden) {
-          return acc;
-        }
-
         if (isManualAnnotation(current)) {
           if (!isInRange(current, input?.timeRange)) {
             return acc;
