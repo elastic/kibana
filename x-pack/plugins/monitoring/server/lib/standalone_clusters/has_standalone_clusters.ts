@@ -51,13 +51,6 @@ export async function hasStandaloneClusters(req: LegacyRequest, ccs: string) {
             },
           },
         ],
-        must_not: [
-          {
-            exists: {
-              field: 'error.message',
-            },
-          },
-        ],
       },
     },
   ];
