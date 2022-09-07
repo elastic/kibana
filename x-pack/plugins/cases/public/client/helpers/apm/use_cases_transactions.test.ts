@@ -23,8 +23,16 @@ jest.mock('./use_start_transaction', () => ({
 }));
 
 const appId = 'testAppId';
-const singleAttachments = [{}] as unknown as CaseAttachmentsWithoutOwner;
-const bulkAttachments = [{}, {}] as unknown as CaseAttachmentsWithoutOwner;
+
+const singleAttachments = [
+  { type: 'alert', alertId: 'someAlertId' },
+] as CaseAttachmentsWithoutOwner;
+
+const bulkAttachments = [
+  { type: 'alert', alertId: ['someAlertId', 'someAlertId2'] },
+  { type: 'alert', alertId: ['someAlertId3'] },
+  { type: 'user', comment: 'someComment' },
+] as CaseAttachmentsWithoutOwner;
 
 const renderUseCreateCaseWithAttachmentsTransaction = () =>
   renderHook<void, { startTransaction: StartCreateCaseWithAttachmentsTransaction }>(
@@ -68,7 +76,7 @@ describe('cases transactions', () => {
       expect(mockStartTransaction).toHaveBeenCalledWith(
         `Cases [${appId}] bulkAddAttachmentsToNewCase`
       );
-      expect(mockAddLabels).toHaveBeenCalledWith({ attachment_count: bulkAttachments.length });
+      expect(mockAddLabels).toHaveBeenCalledWith({ alert_count: 3 });
     });
   });
 
@@ -92,7 +100,7 @@ describe('cases transactions', () => {
       expect(mockStartTransaction).toHaveBeenCalledWith(
         `Cases [${appId}] bulkAddAttachmentsToExistingCase`
       );
-      expect(mockAddLabels).toHaveBeenCalledWith({ attachment_count: bulkAttachments.length });
+      expect(mockAddLabels).toHaveBeenCalledWith({ alert_count: 3 });
     });
   });
 });
