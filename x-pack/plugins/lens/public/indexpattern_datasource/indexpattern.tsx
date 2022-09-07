@@ -671,22 +671,6 @@ export function getIndexPatternDatasource({
       const isUsingSampling = core.uiSettings.get(useFieldExistenceSamplingKey);
 
       if (isUsingSampling) {
-        const link = (
-          <EuiLink
-            color="accent"
-            onClick={() => {
-              core.application.navigateToApp('management', {
-                path: `/kibana/settings?query=${useFieldExistenceSamplingKey}`,
-              });
-            }}
-          >
-            <FormattedMessage
-              id="xpack.lens.indexPattern.useFieldExistenceSamplingLink"
-              defaultMessage="Use field existence sampling"
-            />
-          </EuiLink>
-        );
-
         deprecatedMessages.push(
           <EuiCallOut
             color="warning"
@@ -695,17 +679,23 @@ export function getIndexPatternDatasource({
             title={
               <FormattedMessage
                 id="xpack.lens.indexPattern.useFieldExistenceSamplingBody"
-                defaultMessage="Use field existence sampling is deprecated and will be removed in 8.6.0. To disable, go to {advancedSettings} > {link}"
+                defaultMessage="Field existence sampling has been deprecated and will be removed in Kibana {version}. You may disable this feature in {link}."
                 values={{
-                  advancedSettings: (
-                    <strong>
+                  version: '8.6.0',
+                  link: (
+                    <EuiLink
+                      onClick={() => {
+                        core.application.navigateToApp('management', {
+                          path: `/kibana/settings?query=${useFieldExistenceSamplingKey}`,
+                        });
+                      }}
+                    >
                       <FormattedMessage
                         id="xpack.lens.indexPattern.useFieldExistenceSampling.advancedSettings"
                         defaultMessage="Advanced Settings"
                       />
-                    </strong>
+                    </EuiLink>
                   ),
-                  link,
                 }}
               />
             }

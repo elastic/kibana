@@ -28,16 +28,16 @@ export function FrameLayout(props: FrameLayoutProps) {
     <EuiFlexGroup direction="column" responsive={false} gutterSize="none" alignItems="stretch">
       {props.bannerMessages ? (
         <EuiFlexItem grow={false}>
-          <section aria-labelledby="bannerMessagesId">
+          <aside aria-labelledby="bannerMessagesId">
             <EuiScreenReaderOnly>
               <h2 id="bannerMessagesId">
-                {i18n.translate('xpack.lens.section.bannerMessages', {
-                  defaultMessage: 'Banner messages',
+                {i18n.translate('xpack.lens.section.bannerMessagesLabel', {
+                  defaultMessage: 'Deprecation messages',
                 })}
               </h2>
             </EuiScreenReaderOnly>
             {props.bannerMessages}
-          </section>
+          </aside>
         </EuiFlexItem>
       ) : null}
       <EuiFlexItem grow={true} className="lnsFrameLayout__wrapper">
