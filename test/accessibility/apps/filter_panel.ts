@@ -68,13 +68,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('filter-sets-applyToAllFilters');
       await PageObjects.common.sleep(1000);
       await testSubjects.click('filter-sets-pinAllFilters');
-
       await a11y.testAppSnapshot();
     });
 
     it('a11y test on unpin all filters view', async () => {
       await testSubjects.click('queryBarMenuPopover');
-
       await testSubjects.click('filter-sets-applyToAllFilters');
       await testSubjects.click('filter-sets-unpinAllFilters');
       await a11y.testAppSnapshot();
