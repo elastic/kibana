@@ -55,6 +55,15 @@ export function ObservabilityAlertsCommonProvider({
     );
   };
 
+  const navigateToAlertDetails = async (alertId: string) => {
+    return await pageObjects.common.navigateToUrlWithBrowserHistory(
+      'observability',
+      `/alerts/${alertId}`,
+      '',
+      { ensureCurrentUrl: false }
+    );
+  };
+
   const navigateToRuleDetailsByRuleId = async (ruleId: string) => {
     return await pageObjects.common.navigateToUrlWithBrowserHistory(
       'observability',
@@ -146,7 +155,7 @@ export function ObservabilityAlertsCommonProvider({
   const getViewAlertDetailsFlyoutButton = async () => {
     await openActionsMenuForRow(0);
 
-    return await testSubjects.find('viewAlertDetails');
+    return await testSubjects.find('viewAlertDetailsFlyout');
   };
 
   const openAlertsFlyout = async () => {
@@ -335,5 +344,6 @@ export function ObservabilityAlertsCommonProvider({
     getRuleStatValue,
     navigateToRulesPage,
     navigateToRuleDetailsByRuleId,
+    navigateToAlertDetails,
   };
 }
