@@ -9,7 +9,83 @@
     "objects": []
   },
   "server": {
-    "classes": [],
+    "classes": [
+      {
+        "parentPluginId": "@kbn/std",
+        "id": "def-server.Semaphore",
+        "type": "Class",
+        "tags": [],
+        "label": "Semaphore",
+        "description": [],
+        "path": "packages/kbn-std/src/semaphore.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/std",
+            "id": "def-server.Semaphore.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/kbn-std/src/semaphore.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/std",
+                "id": "def-server.Semaphore.Unnamed.$1",
+                "type": "number",
+                "tags": [],
+                "label": "capacity",
+                "description": [],
+                "signature": [
+                  "number"
+                ],
+                "path": "packages/kbn-std/src/semaphore.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/std",
+            "id": "def-server.Semaphore.acquire",
+            "type": "Function",
+            "tags": [],
+            "label": "acquire",
+            "description": [],
+            "signature": [
+              "<T>() => ",
+              "OperatorFunction",
+              "<T, T>"
+            ],
+            "path": "packages/kbn-std/src/semaphore.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/std",
+            "id": "def-server.Semaphore.release",
+            "type": "Function",
+            "tags": [],
+            "label": "release",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "packages/kbn-std/src/semaphore.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "functions": [
       {
         "parentPluginId": "@kbn/std",
