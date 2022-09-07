@@ -6,9 +6,20 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core/server';
+import { MlTrainedModelConfig } from "@elastic/elasticsearch/lib/api/typesWithBodyKey";
 
 export interface CreatedPipelines {
   created: string[];
+}
+
+export interface PipelineDefinition {
+  processors?: Array<Record<string, any>>;
+  description?: string;
+  version?: number;
+}
+
+export interface MlTrainedModelClient {
+  getTrainedModels(modelId?: string): Promise<MlTrainedModelConfig[]>;
 }
 
 /**
@@ -224,4 +235,52 @@ export const createIndexPipelineDefinitions = (
     version: 1,
   });
   return { created: [indexName, `${indexName}@custom`, `${indexName}@ml-inference`] };
+};
+
+export const formatMlPipelineBody = async (
+  modelId: string,
+  sourceField: string,
+  destinationField: string,
+  trainedModelClient: MlTrainedModelClient
+): Promise<PipelineDefinition> => {
+  // TODO: we need an actual client. ML has one, can they export it?
+  // TODO: see x-pack/plugins/ml/public/application/services/ml_api_service/trained_models.ts
+  const models = await trainedModelClient.getTrainedModels(modelId);
+  const model = models[0];
+  // TODO: model can contain more than one input field, map all of those?
+  const modelInputField = model.input.field_names[0];
+  const modelType = model.model_type;
+  const modelVersion = model.version;
+  return {
+    "description": "",
+    "version": 1,
+    "processors": [
+      {
+        "remove": {
+          "field": `ml.inference.${destinationField}`,
+          "ignore_missing": true
+        }
+      },
+      {
+        "inference": {
+          "model_id": `${modelId}`,
+          "target_field": `ml.inference.${destinationField}`,
+          "field_map": {
+            sourceField: modelInputField
+          }
+        }
+      },
+      {
+        "append": {
+          "field": "_source._ingest.processors",
+          "value": {
+            "type": modelType,
+            "model_id": modelId,
+            "model_version": modelVersion,
+            "processed_timestamp": "{{{_ingest.timestamp}}}"
+          }
+        }
+      }
+    ]
+  };
 };
