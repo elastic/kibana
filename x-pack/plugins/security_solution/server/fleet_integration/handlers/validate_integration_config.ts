@@ -65,7 +65,7 @@ const validateCloudIntegrationConfig = (config: CloudConfig, logger: Logger): vo
   }
   if (typeof config.eventFilters?.nonInteractiveSession !== 'boolean') {
     logger.warn(
-      `invalid value for eventFilters nonInteractiveSession: ${config.eventFilters?.nonInteractiveSession}`
+      `missing or invalid value for eventFilters nonInteractiveSession: ${config.eventFilters?.nonInteractiveSession}`
     );
     throwError('invalid value for eventFilters nonInteractiveSession');
   }
