@@ -81,19 +81,17 @@ export const buildQueryFromFilters = (
     return filters
       .filter((f) => !!f)
       .filter(filterNegate(negate))
-      .filter(
-        (filter) => {
-          const indexPattern = findIndexPattern(filter.meta.index);
-          return !ignoreFilterIfFieldNotInIndex || filterMatchesIndex(filter, indexPattern)
-        }
-      )
+      .filter((filter) => {
+        const indexPattern = findIndexPattern(filter.meta.index);
+        return !ignoreFilterIfFieldNotInIndex || filterMatchesIndex(filter, indexPattern);
+      })
       .map((filter) => {
         const indexPattern = findIndexPattern(filter.meta.index);
         return migrateFilter(filter, indexPattern);
       })
       .map((filter) => {
         const indexPattern = findIndexPattern(filter.meta.index);
-        return handleNestedFilter(filter, indexPattern, {ignoreUnmapped: nestedIgnoreUnmapped})
+        return handleNestedFilter(filter, indexPattern, { ignoreUnmapped: nestedIgnoreUnmapped });
       })
       .map(cleanFilter)
       .map(translateToQuery);
