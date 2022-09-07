@@ -59,17 +59,18 @@ export const getNormalizedDataStreams = (packageInfo: PackageInfo): RegistryData
     return packageInfo.data_streams || [];
   }
 
-  if (!packageInfo.policy_templates || packageInfo.policy_templates.length === 0) {
+  const policyTemplates = packageInfo.policy_templates as RegistryPolicyInputOnlyTemplate[];
+
+  if (!policyTemplates || policyTemplates.length === 0) {
     return [];
   }
 
-  return packageInfo.policy_templates.map((policyTemplate) => {
-    if (!isInputOnlyPolicyTemplate(policyTemplate)) throw new Error('boom'); // TODO make this nice
+  return policyTemplates.map((policyTemplate) => {
     const dataStream: RegistryDataStream = {
       type: policyTemplate.type,
       dataset: createDefaultDatasetName(packageInfo, policyTemplate),
-      title: policyTemplate.title + ' Dataset', // TODO is this nice
-      release: packageInfo.release || 'ga', // TODO is this right
+      title: policyTemplate.title + ' Dataset',
+      release: packageInfo.release || 'ga',
       streams: [
         {
           input: policyTemplate.input,
@@ -81,7 +82,7 @@ export const getNormalizedDataStreams = (packageInfo: PackageInfo): RegistryData
         },
       ],
       package: packageInfo.name,
-      path: packageInfo.name, // TODO what does this do
+      path: packageInfo.name,
     };
 
     return dataStream;
