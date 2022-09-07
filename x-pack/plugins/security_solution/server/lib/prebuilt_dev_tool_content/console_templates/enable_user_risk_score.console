@@ -5,7 +5,7 @@ PUT _scripts/ml_userriskscore_levels_script
 {
   "script": {
     "lang": "painless",
-    "source": "double risk_score = (def)ctx.getByPath(params.risk_score);\nif (risk_score < 20) {\n  ctx['risk'] = 'Unknown'\n}\nelse if (risk_score >= 20 && risk_score < 40) {\n  ctx['risk'] = 'Low'\n}\nelse if (risk_score >= 40 && risk_score < 70) {\n  ctx['risk'] = 'Moderate'\n}\nelse if (risk_score >= 70 && risk_score < 90) {\n  ctx['risk'] = 'High'\n}\nelse if (risk_score >= 90) {\n  ctx['risk'] = 'Critical'\n}"
+    "source": "double risk_score = (def)ctx.getByPath(params.risk_score);\nif (risk_score < 20) {\n  ctx['user']['risk']['calculated_level'] = 'Unknown'\n}\nelse if (risk_score >= 20 && risk_score < 40) {\n  ctx['user']['risk']['calculated_level'] = 'Low'\n}\nelse if (risk_score >= 40 && risk_score < 70) {\n  ctx['user']['risk']['calculated_level'] = 'Moderate'\n}\nelse if (risk_score >= 70 && risk_score < 90) {\n  ctx['user']['risk']['calculated_level'] = 'High'\n}\nelse if (risk_score >= 90) {\n  ctx['user']['risk']['calculated_level'] = 'Critical'\n}"
   }
 }
 
@@ -22,7 +22,7 @@ PUT _scripts/ml_userriskscore_reduce_script
 {
   "script": {
     "lang": "painless",
-    "source": "// Consolidating time decayed risks from across all shards\nMap total_risk_stats = new HashMap();\nfor (state in states) {\n    for (key in state.rule_risk_stats.keySet()) {\n    def rule_stats = state.rule_risk_stats.get(key);\n    def stats = total_risk_stats.getOrDefault(key, 0.0);\n    stats = rule_stats;\n    total_risk_stats.put(key, stats);\n    }\n}\n// Consolidating individual rule risks and arranging them in decreasing order\nList risks = new ArrayList();\nfor (key in total_risk_stats.keySet()) {\n    risks.add(total_risk_stats[key])\n}\nCollections.sort(risks, Collections.reverseOrder());\n// Calculating total risk and normalizing it to a range\ndouble total_risk = 0.0;\ndouble risk_cap = params.max_risk * params.zeta_constant;\nfor (int i=0;i<risks.length;i++) {\n    total_risk += risks[i] / Math.pow((1+i), params.p);\n}\ndouble total_norm_risk = 100 * total_risk / risk_cap;\nif (total_norm_risk < 40) {\n    total_norm_risk =  2.125 * total_norm_risk;\n}\nelse if (total_norm_risk >= 40 && total_norm_risk < 50) {\n    total_norm_risk = 85 + (total_norm_risk - 40);\n}\nelse {\n    total_norm_risk = 95 + (total_norm_risk - 50) / 10;\n}\n\nList rule_stats = new ArrayList();\nfor (key in total_risk_stats.keySet()) {\n    Map temp = new HashMap();\n    temp[\"rule_name\"] = key;\n    temp[\"rule_risk\"] = total_risk_stats[key];\n    rule_stats.add(temp);\n}\n\nreturn [\"risk_score\": total_norm_risk, \"rule_risks\": rule_stats];"
+    "source": "// Consolidating time decayed risks from across all shards\nMap total_risk_stats = new HashMap();\nfor (state in states) {\n    for (key in state.rule_risk_stats.keySet()) {\n    def rule_stats = state.rule_risk_stats.get(key);\n    def stats = total_risk_stats.getOrDefault(key, 0.0);\n    stats = rule_stats;\n    total_risk_stats.put(key, stats);\n    }\n}\n// Consolidating individual rule risks and arranging them in decreasing order\nList risks = new ArrayList();\nfor (key in total_risk_stats.keySet()) {\n    risks.add(total_risk_stats[key])\n}\nCollections.sort(risks, Collections.reverseOrder());\n// Calculating total risk and normalizing it to a range\ndouble total_risk = 0.0;\ndouble risk_cap = params.max_risk * params.zeta_constant;\nfor (int i=0;i<risks.length;i++) {\n    total_risk += risks[i] / Math.pow((1+i), params.p);\n}\ndouble total_norm_risk = 100 * total_risk / risk_cap;\nif (total_norm_risk < 40) {\n    total_norm_risk =  2.125 * total_norm_risk;\n}\nelse if (total_norm_risk >= 40 && total_norm_risk < 50) {\n    total_norm_risk = 85 + (total_norm_risk - 40);\n}\nelse {\n    total_norm_risk = 95 + (total_norm_risk - 50) / 10;\n}\n\nList rule_stats = new ArrayList();\nfor (key in total_risk_stats.keySet()) {\n    Map temp = new HashMap();\n    temp[\"rule_name\"] = key;\n    temp[\"rule_risk\"] = total_risk_stats[key];\n    rule_stats.add(temp);\n}\n\nreturn [\"calculated_score_norm\": total_norm_risk, \"rule_risks\": rule_stats];"
   }
 }
 
@@ -51,7 +51,7 @@ PUT _ingest/pipeline/ml_userriskscore_ingest_pipeline
       "script": {
         "id": "ml_userriskscore_levels_script",
         "params": {
-          "risk_score": "risk_stats.risk_score"
+          "risk_score": "user.risk.calculated_score_norm"
         }
       }
     }
@@ -61,31 +61,48 @@ PUT _ingest/pipeline/ml_userriskscore_ingest_pipeline
 # 5. Create mappings for the destination index of the User Risk Score pivot transform
 PUT ml_user_risk_score_{{space_name}}
 {
-  "mappings":{
-    "properties":{
-      "user.name":{
-        "type":"keyword"
-      },
-      "@timestamp": {
-        "type": "date"
+  "mappings": {
+    "properties": {
+      "user": {
+        "properties": {
+          "name": {
+            "type": "keyword"
+          },
+          "risk": {
+            "properties": {
+              "calculated_score_norm": {
+                "type": "float"
+              },
+              "calculated_level": {
+                "type": "keyword"
+              },
+              "rule_risks": {
+                "properties": {
+                  "rule_name": {
+                    "type": "text",
+                    "fields": {
+                      "keyword": {
+                        "type": "keyword"
+                      }
+                    }
+                  },
+                  "rule_risk": {
+                    "type": "float"
+                  },
+                  "rule_id": {
+                    "type": "keyword"
+                  }
+                }
+              }
+            }
+          }
+        }
       },
       "ingest_timestamp": {
         "type": "date"
       },
-      "risk": {
-        "type": "text",
-        "fields": {
-          "keyword": {
-            "type":  "keyword"
-          }
-        }
-      },
-      "risk_stats": {
-        "properties": {
-          "risk_score": {
-            "type": "float"
-          }
-        }
+      "@timestamp": {
+        "type": "date"
       }
     }
   }
@@ -107,7 +124,7 @@ PUT _transform/ml_userriskscore_pivot_transform_{{space_name}}
           "field": "@timestamp"
         }
       },
-      "risk_stats": {
+      "user.risk": {
         "scripted_metric": {
           "combine_script": "return state",
           "init_script": "state.rule_risk_stats = new HashMap();",
@@ -170,31 +187,48 @@ POST _transform/ml_userriskscore_pivot_transform_{{space_name}}/_start
 # 8. Create mappings for the destination index of the User Risk Score latest transform
 PUT ml_user_risk_score_latest_{{space_name}}
 {
-  "mappings":{
-    "properties":{
-      "user.name":{
-        "type":"keyword"
-      },
-      "@timestamp": {
-        "type": "date"
+  "mappings": {
+    "properties": {
+      "user": {
+        "properties": {
+          "name": {
+            "type": "keyword"
+          },
+          "risk": {
+            "properties": {
+              "calculated_score_norm": {
+                "type": "float"
+              },
+              "calculated_level": {
+                "type": "keyword"
+              },
+              "rule_risks": {
+                "properties": {
+                  "rule_name": {
+                    "type": "text",
+                    "fields": {
+                      "keyword": {
+                        "type": "keyword"
+                      }
+                    }
+                  },
+                  "rule_risk": {
+                    "type": "float"
+                  },
+                  "rule_id": {
+                    "type": "keyword"
+                  }
+                }
+              }
+            }
+          }
+        }
       },
       "ingest_timestamp": {
         "type": "date"
       },
-      "risk": {
-        "type": "text",
-        "fields": {
-          "keyword": {
-            "type":  "keyword"
-          }
-        }
-      },
-      "risk_stats": {
-        "properties": {
-          "risk_score": {
-            "type": "float"
-          }
-        }
+      "@timestamp": {
+        "type": "date"
       }
     }
   }
