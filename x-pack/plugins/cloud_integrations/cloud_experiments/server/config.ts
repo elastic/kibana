@@ -8,21 +8,10 @@
 import { schema, TypeOf } from '@kbn/config-schema';
 import { PluginConfigDescriptor } from '@kbn/core/server';
 
-const configSchema = schema.object({
-  enabled: schema.boolean({ defaultValue: false }),
-  sdkKey: schema.conditional(
-    schema.siblingRef('enabled'),
-    true,
-    schema.string({ minLength: 1 }),
-    schema.maybe(schema.string())
-  ),
-  clientId: schema.conditional(
-    schema.siblingRef('enabled'),
-    true,
-    schema.string({ minLength: 1 }),
-    schema.maybe(schema.string())
-  ),
-  clientLogLevel: schema.oneOf(
+const launchDarklySchema = schema.object({
+  sdk_key: schema.string({ minLength: 1 }),
+  client_id: schema.string({ minLength: 1 }),
+  client_log_level: schema.oneOf(
     [
       schema.literal('none'),
       schema.literal('error'),
@@ -34,11 +23,23 @@ const configSchema = schema.object({
   ),
 });
 
+const configSchema = schema.object({
+  enabled: schema.boolean({ defaultValue: false }),
+  launch_darkly: schema.conditional(
+    schema.siblingRef('enabled'),
+    true,
+    launchDarklySchema,
+    schema.maybe(launchDarklySchema)
+  ),
+});
+
 export type CloudExperimentsConfigType = TypeOf<typeof configSchema>;
 
 export const config: PluginConfigDescriptor<CloudExperimentsConfigType> = {
   exposeToBrowser: {
-    clientId: true,
+    launch_darkly: {
+      client_id: true,
+    },
   },
   schema: configSchema,
 };

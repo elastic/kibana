@@ -43,9 +43,10 @@ export class CloudExperimentsPlugin
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
     const config = initializerContext.config.get<CloudExperimentsConfigType>();
-    this.launchDarklyClient = LaunchDarkly.init(config.sdkKey!, {
+    const ldConfig = config.launch_darkly!; // If the plugin is enabled, launch_darkly must exist according to the config-schema
+    this.launchDarklyClient = LaunchDarkly.init(ldConfig.sdk_key, {
       application: { id: `kibana-server`, version: initializerContext.env.packageInfo.version },
-      logger: LaunchDarkly.basicLogger({ level: config.clientLogLevel }),
+      logger: LaunchDarkly.basicLogger({ level: ldConfig.client_log_level }),
       // For some reason, the stream API does not work in Kibana. `.waitForInitialization()` hangs forever (doesn't throw, neither logs any errors).
       // Using polling for now until we resolve that issue.
       // Relevant issue: https://github.com/launchdarkly/node-server-sdk/issues/132

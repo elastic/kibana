@@ -26,7 +26,8 @@ export class CloudExperimentsPlugin
   /** Constructor of the plugin **/
   constructor(core: PluginInitializerContext) {
     this.kibanaVersion = core.env.packageInfo.version;
-    this.clientId = core.config.get<{ clientId: string }>().clientId;
+    const ldConfig = core.config.get<{ launch_darkly: { client_id: string } }>().launch_darkly;
+    this.clientId = ldConfig.client_id;
   }
 
   /**
