@@ -19,7 +19,7 @@ import { RISKY_USERS_DOC_LINK } from '../constants';
 
 export const UsersKpiComponent = React.memo<UsersKpiProps>(
   ({ filterQuery, from, indexNames, to, setQuery, skip, updateDateRange }) => {
-    const [_, { isModuleEnabled }] = useUserRiskScore({});
+    const [_, { isModuleEnabled }] = useUserRiskScore();
 
     return (
       <>
