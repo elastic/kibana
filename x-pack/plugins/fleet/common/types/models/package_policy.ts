@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { ExperimentalDataStreamFeaturesMap } from './epm';
+import type { ExperimentalDataStreamFeature } from './epm';
 
 export interface PackagePolicyPackage {
   name: string;
   title: string;
   version: string;
-  experimental_data_stream_features_map?: ExperimentalDataStreamFeaturesMap;
+  experimental_data_stream_features?: ExperimentalDataStreamFeature[];
 }
 
 export interface PackagePolicyConfigRecordEntry {

@@ -9,10 +9,9 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 
 import type { NewPackagePolicy, PackagePolicy } from '../../types';
-import { appContextService } from '../app_context';
 import { updateDatastreamExperimentalFeatures } from '../epm/packages/update';
 
-export async function handleExperimentalFeatureOptIn({
+export async function handleExperimentalDatastreamFeatureOptIn({
   soClient,
   esClient,
   packagePolicy,
@@ -21,13 +20,11 @@ export async function handleExperimentalFeatureOptIn({
   esClient: ElasticsearchClient;
   packagePolicy: PackagePolicy | NewPackagePolicy;
 }) {
-  const logger = appContextService.getLogger();
-  logger.debug(JSON.stringify(packagePolicy.package, null, 2));
-  if (!packagePolicy.package?.experimental_data_stream_features_map) {
+  if (!packagePolicy.package?.experimental_data_stream_features) {
     return;
   }
 
-  for (const featureMapEntry of packagePolicy.package.experimental_data_stream_features_map) {
+  for (const featureMapEntry of packagePolicy.package.experimental_data_stream_features) {
     const componentTemplateName = `${featureMapEntry.data_stream}@package`;
     const componentTemplateRes = await esClient.cluster.getComponentTemplate({
       name: componentTemplateName,
@@ -58,9 +55,9 @@ export async function handleExperimentalFeatureOptIn({
   await updateDatastreamExperimentalFeatures(
     soClient,
     packagePolicy.package.name,
-    packagePolicy.package.experimental_data_stream_features_map
+    packagePolicy.package.experimental_data_stream_features
   );
 
   // Delete the experimental features map from the package policy so it doesn't get persisted
-  delete packagePolicy.package.experimental_data_stream_features_map;
+  delete packagePolicy.package.experimental_data_stream_features;
 }

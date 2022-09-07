@@ -52,7 +52,7 @@ import type {
   RegistryDataStream,
   PackagePolicyPackage,
   Installation,
-  ExperimentalDataStreamFeaturesMap,
+  ExperimentalDataStreamFeature,
 } from '../../common/types';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../constants';
 import {
@@ -87,7 +87,7 @@ import { appContextService } from '.';
 import { removeOldAssets } from './epm/packages/cleanup';
 import type { PackageUpdateEvent, UpdateEventType } from './upgrade_sender';
 import { sendTelemetryEvents } from './upgrade_sender';
-import { handleExperimentalFeatureOptIn } from './package_policies';
+import { handleExperimentalDatastreamFeatureOptIn } from './package_policies';
 
 export type InputsOverride = Partial<NewPackagePolicyInput> & {
   vars?: Array<NewPackagePolicyInput['vars'] & { name: string }>;
@@ -168,7 +168,7 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
       }
 
       // Handle component template/mappings updates for experimental features, e.g. synthetic source
-      await handleExperimentalFeatureOptIn({ soClient, esClient, packagePolicy });
+      await handleExperimentalDatastreamFeatureOptIn({ soClient, esClient, packagePolicy });
 
       const pkgInfo =
         options?.packageInfo ??
@@ -290,8 +290,8 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
       throw new Error(packagePolicySO.error.message);
     }
 
-    // If possible, return the experimental features map for the package policy's `package` field
-    let experimentalFeatures: ExperimentalDataStreamFeaturesMap | undefined;
+    let experimentalFeatures: ExperimentalDataStreamFeature[] | undefined;
+
     if (packagePolicySO.attributes.package?.name) {
       const installation = await soClient.get<Installation>(
         PACKAGES_SAVED_OBJECT_TYPE,
@@ -299,7 +299,7 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
       );
 
       if (installation && !installation.error) {
-        experimentalFeatures = installation.attributes?.experimental_data_stream_features_map;
+        experimentalFeatures = installation.attributes?.experimental_data_stream_features;
       }
     }
 
@@ -309,8 +309,9 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
       ...packagePolicySO.attributes,
     };
 
+    // If possible, return the experimental features map for the package policy's `package` field
     if (experimentalFeatures && response.package) {
-      response.package.experimental_data_stream_features_map = experimentalFeatures;
+      response.package.experimental_data_stream_features = experimentalFeatures;
     }
 
     return response;
@@ -476,7 +477,7 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
     }
 
     // Handle component template/mappings updates for experimental features, e.g. synthetic source
-    await handleExperimentalFeatureOptIn({ soClient, esClient, packagePolicy });
+    await handleExperimentalDatastreamFeatureOptIn({ soClient, esClient, packagePolicy });
 
     await soClient.update<PackagePolicySOAttributes>(
       SAVED_OBJECT_TYPE,
@@ -908,8 +909,7 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
           enabled: newPolicy.enabled ?? true,
           package: {
             ...newPP.package!,
-            experimental_data_stream_features_map:
-              newPolicy.package?.experimental_data_stream_features_map,
+            experimental_data_stream_features: newPolicy.package?.experimental_data_stream_features,
           },
           policy_id: newPolicy.policy_id ?? agentPolicyId,
           inputs: newPolicy.inputs[0]?.streams ? newPolicy.inputs : inputs,

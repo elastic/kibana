@@ -52,6 +52,6 @@ export async function updateDatastreamExperimentalFeatures(
   }>
 ) {
   await savedObjectsClient.update<Installation>(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {
-    experimental_data_stream_features_map: dataStreamFeatureMapping,
+    experimental_data_stream_features: dataStreamFeatureMapping,
   });
 }

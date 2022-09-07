@@ -87,7 +87,7 @@ const PackagePolicyBaseSchema = {
       name: schema.string(),
       title: schema.string(),
       version: schema.string(),
-      experimental_data_stream_features_map: schema.maybe(
+      experimental_data_stream_features: schema.maybe(
         schema.arrayOf(
           schema.object({
             data_stream: schema.string(),
@@ -121,7 +121,7 @@ const CreatePackagePolicyProps = {
       name: schema.string(),
       title: schema.maybe(schema.string()),
       version: schema.string(),
-      experimental_data_stream_features_map: schema.maybe(
+      experimental_data_stream_features: schema.maybe(
         schema.arrayOf(
           schema.object({
             data_stream: schema.string(),

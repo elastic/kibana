@@ -298,7 +298,7 @@ export const PackagePolicyInputStreamConfig: React.FunctionComponent<{
                           <EuiFlexItem>
                             <EuiSwitch
                               checked={
-                                packagePolicy.package?.experimental_data_stream_features_map?.some(
+                                packagePolicy.package?.experimental_data_stream_features?.some(
                                   ({ data_stream: dataStream, features }) =>
                                     dataStream ===
                                       getRegistryDataStreamAssetBaseName(
@@ -320,7 +320,7 @@ export const PackagePolicyInputStreamConfig: React.FunctionComponent<{
                                 updatePackagePolicy({
                                   package: {
                                     ...packagePolicy.package,
-                                    experimental_data_stream_features_map: [
+                                    experimental_data_stream_features: [
                                       {
                                         data_stream: getRegistryDataStreamAssetBaseName(
                                           packagePolicyInputStream.data_stream
