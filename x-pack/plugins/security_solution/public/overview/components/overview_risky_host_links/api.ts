@@ -57,6 +57,7 @@ interface StartTransforms {
 
 interface StopTransforms {
   http: HttpSetup;
+  notifications?: NotificationsStart;
   signal?: AbortSignal;
   errorMessage?: string;
   transformIds: string[];
@@ -78,6 +79,7 @@ interface GetTransformsState {
 
 interface RestartTransforms {
   http: HttpSetup;
+  notifications?: NotificationsStart;
   errorMessage?: string;
   signal?: AbortSignal;
   transformIds: string[];
@@ -258,17 +260,6 @@ export async function getTransformsState({
   errorMessage,
   transformIds,
 }: GetTransformsState) {
-  // const unresolvedPromises: Array<Promise<{ transforms: Array<{ id: string; state: string }> }>> =
-  //   transformIds.map(async (transformId) => {
-  //     const transformState = await getTransformState({
-  //       http,
-  //       signal,
-  //       spaceId,
-  //       transformId,
-  //     });
-  //     return transformState;
-  //   });
-
   const states = await Promise.all(
     transformIds.map((transformId) => {
       const transformState = getTransformState({
@@ -282,26 +273,39 @@ export async function getTransformsState({
   return states;
 }
 
-export async function stopTransforms({ http, signal, errorMessage, transformIds }: StopTransforms) {
+export async function stopTransforms({
+  http,
+  notifications,
+  signal,
+  errorMessage,
+  transformIds,
+}: StopTransforms) {
   const states = await getTransformsState({ http, signal, transformIds });
-  const res = await http.post(`${TRANSFORM_API_BASE_PATH}/stop_transforms`, {
-    body: JSON.stringify(
-      states.reduce(
-        (acc, state) =>
-          state.transforms.length > 0
-            ? [
-                ...acc,
-                {
-                  id: state.transforms[0].id,
-                  state: state.transforms[0].state,
-                },
-              ]
-            : acc,
-        []
-      )
-    ),
-    signal,
-  });
+  const res = await http
+    .post(`${TRANSFORM_API_BASE_PATH}/stop_transforms`, {
+      body: JSON.stringify(
+        states.reduce(
+          (acc, state) =>
+            state.transforms.length > 0
+              ? [
+                  ...acc,
+                  {
+                    id: state.transforms[0].id,
+                    state: state.transforms[0].state,
+                  },
+                ]
+              : acc,
+          [] as Array<{ id: string; state: string }>
+        )
+      ),
+      signal,
+    })
+    .catch((e) => {
+      notifications?.toasts?.addDanger({
+        title: errorMessage ?? 'Failed to stop Transforms',
+        text: e?.body?.message,
+      });
+    });
 
   return res;
 }
@@ -339,19 +343,24 @@ export async function deleteTransforms({
 
 export async function restartTransforms({
   http,
+  notifications,
   signal,
   errorMessage,
   transformIds,
 }: RestartTransforms) {
   await stopTransforms({
     http,
+    notifications,
     signal,
+    errorMessage,
     transformIds,
   });
 
   const res = await startTransforms({
     http,
+    notifications,
     signal,
+    errorMessage,
     transformIds,
   });
 
