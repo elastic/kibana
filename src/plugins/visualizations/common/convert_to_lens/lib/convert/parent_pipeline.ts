@@ -62,7 +62,7 @@ export const convertToParentPipelineAggColumns = (
     return null;
   }
 
-  if (subAgg.name === 'count' || subAgg.name === 'sum') {
+  if ((!customMetric.getField() && subAgg.name === 'count') || subAgg.name === 'sum') {
     // create column for sum or count
     const subMetric = convertСustomMetricAggregationColumnWithoutSpecialParams(
       subAgg,
