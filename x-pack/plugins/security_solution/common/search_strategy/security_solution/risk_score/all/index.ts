@@ -25,13 +25,13 @@ export interface RiskScoreRequestOptions extends IEsSearchRequest {
 export interface HostsRiskScoreStrategyResponse extends IEsSearchResponse {
   inspect?: Maybe<Inspect>;
   totalCount: number;
-  data: HostsRiskScore[] | undefined;
+  data: HostRiskScore[] | undefined;
 }
 
 export interface UsersRiskScoreStrategyResponse extends IEsSearchResponse {
   inspect?: Maybe<Inspect>;
   totalCount: number;
-  data: UsersRiskScore[] | undefined;
+  data: UserRiskScore[] | undefined;
 }
 
 export interface RiskStats {
