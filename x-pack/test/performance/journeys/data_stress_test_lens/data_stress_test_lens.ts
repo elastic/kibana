@@ -25,6 +25,8 @@ export default function ({ getService }: FtrProviderContext) {
               );
 
               await waitForVisualizations(page, 1);
+              // wait for a short amount of time to make sure all events are captured
+              await page.waitForTimeout(1000);
             },
           },
         ],
