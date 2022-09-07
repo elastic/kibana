@@ -285,7 +285,7 @@ export class ControlGroupContainer extends Container<
       order: nextOrder,
       width:
         panelState.type === TIME_SLIDER_CONTROL ? 'large' : this.getInput().defaultControlWidth,
-      grow: this.getInput().defaultControlGrow,
+      grow: panelState.type === TIME_SLIDER_CONTROL ? true : this.getInput().defaultControlGrow,
       ...panelState,
     } as ControlPanelState<TEmbeddableInput>;
   }
