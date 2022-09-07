@@ -196,6 +196,7 @@ export const AvailablePackages: React.FC<{
     useLocation().search
   );
   const [category, setCategory] = useState(selectedCategory);
+  const [searchTerm, setSearchTerm] = useState(searchParam || '');
 
   const history = useHistory();
   const { getHref, getAbsolutePath } = useLink();
@@ -309,6 +310,9 @@ export const AvailablePackages: React.FC<{
           categories={categories}
           selectedCategory={category}
           onCategoryChange={({ id }) => {
+            const categoryTitle = categories.find((c) => c.id === id)?.title;
+            const categoryParam = `(category:${categoryTitle}) `;
+            setSearchTerm(categoryParam);
             setUrlCategory(id);
           }}
         />
@@ -316,14 +320,6 @@ export const AvailablePackages: React.FC<{
       ...controls,
     ];
   }
-
-  const filteredCards = cards.filter((c) => {
-    if (category === '') {
-      return true;
-    }
-
-    return c.categories.includes(category);
-  });
 
   // TODO: Remove this hard coded list of integrations with a suggestion service
   const featuredList = (
@@ -395,12 +391,13 @@ export const AvailablePackages: React.FC<{
       featuredList={featuredList}
       isLoading={isLoadingAllPackages}
       controls={controls}
-      initialSearch={searchParam}
-      list={filteredCards}
+      searchTerm={searchTerm}
+      setSearchTerm={setSearchTerm}
+      list={cards}
       selectedCategory={category}
       setSelectedCategory={setUrlCategory}
       categories={categories}
-      onSearchChange={setUrlSearchTerm}
+      setUrlSearchTerm={setUrlSearchTerm}
       showMissingIntegrationMessage
       callout={noEprCallout}
       showCardLabels={false}

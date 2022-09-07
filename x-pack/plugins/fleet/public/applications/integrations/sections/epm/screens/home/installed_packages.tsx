@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useLocation, useHistory, useParams } from 'react-router-dom';
 import semverLt from 'semver/functions/lt';
 import { i18n } from '@kbn/i18n';
@@ -109,6 +109,8 @@ export const InstalledPackages: React.FC<{
     useLocation().search
   );
 
+  const [searchTerm, setSearchTerm] = useState(searchParam || '');
+
   const history = useHistory();
 
   function setUrlCategory(categoryId: string) {
@@ -165,7 +167,12 @@ export const InstalledPackages: React.FC<{
     <CategoryFacets
       categories={categories}
       selectedCategory={selectedCategory}
-      onCategoryChange={({ id }: CategoryFacet) => setUrlCategory(id)}
+      onCategoryChange={({ id }: CategoryFacet) => {
+        const categoryTitle = categories.find((c) => c.id === id)?.title;
+        const categoryParam = `(category:${categoryTitle}) `;
+        setSearchTerm(categoryParam);
+        setUrlCategory(id);
+      }}
     />
   );
 
@@ -191,8 +198,9 @@ export const InstalledPackages: React.FC<{
       {...{ isLoading, controls, callout, categories }}
       selectedCategory={selectedCategory}
       setSelectedCategory={setUrlCategory}
-      onSearchChange={setUrlSearchTerm}
-      initialSearch={searchParam}
+      setUrlSearchTerm={setUrlSearchTerm}
+      searchTerm={searchTerm}
+      setSearchTerm={setSearchTerm}
       list={cards}
     />
   );

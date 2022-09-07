@@ -15,9 +15,8 @@ import {
   EuiLink,
   EuiSpacer,
   EuiTitle,
-  EuiSearchBar,
+  EuiFieldSearch,
   EuiText,
-  EuiBadge,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -39,11 +38,12 @@ export interface Props {
   title?: string;
   list: IntegrationCardItem[];
   featuredList?: JSX.Element | null;
-  initialSearch?: string;
+  searchTerm: string;
+  setSearchTerm: (category: string) => void;
   selectedCategory: ExtendedIntegrationCategory;
   setSelectedCategory: (category: string) => void;
   categories: CategoryFacet[];
-  onSearchChange: (search: string) => void;
+  setUrlSearchTerm: (search: string) => void;
   showMissingIntegrationMessage?: boolean;
   callout?: JSX.Element | null;
   showCardLabels?: boolean;
@@ -54,8 +54,9 @@ export const PackageListGrid: FunctionComponent<Props> = ({
   controls,
   title,
   list,
-  initialSearch,
-  onSearchChange,
+  searchTerm,
+  setSearchTerm,
+  setUrlSearchTerm,
   selectedCategory,
   setSelectedCategory,
   categories,
@@ -64,11 +65,16 @@ export const PackageListGrid: FunctionComponent<Props> = ({
   callout,
   showCardLabels = true,
 }) => {
-  const [searchTerm, setSearchTerm] = useState(initialSearch || '');
   const localSearchRef = useLocalSearch(list);
   const menuRef = useRef<HTMLDivElement>(null);
   const [isSticky, setIsSticky] = useState(false);
   const [windowScrollY] = useState(window.scrollY);
+
+  const splitTextInput = (text: string) => {
+    const regex = /\(([^\)]+)\)\s/;
+    const splitInput = text.split(regex).reverse();
+    return splitInput[0];
+  };
 
   useEffect(() => {
     const menuRefCurrent = menuRef.current;
@@ -81,26 +87,28 @@ export const PackageListGrid: FunctionComponent<Props> = ({
     return () => window.removeEventListener('scroll', onScroll);
   }, [windowScrollY, isSticky]);
 
-  const onQueryChange = ({
-    queryText,
-    error,
-  }: {
-    queryText: string;
-    error: { message: string } | null;
-  }) => {
-    if (!error) {
-      onSearchChange(queryText);
-      setSearchTerm(queryText);
-    }
-  };
-
-  const resetQuery = () => {
-    setSearchTerm('');
-  };
-
   const selectedCategoryTitle = selectedCategory
     ? categories.find((category) => category.id === selectedCategory)?.title
     : undefined;
+
+  const onQueryChange = (e: any) => {
+    const queryText = e.target.value;
+    const categoryParam = `(category:${selectedCategoryTitle})`;
+
+    const newQuery =
+      selectedCategoryTitle && !searchTerm.includes(selectedCategoryTitle)
+        ? `${categoryParam} ${queryText}`
+        : queryText;
+
+    setSearchTerm(newQuery);
+
+    const queryInput = splitTextInput(newQuery);
+    setUrlSearchTerm(queryInput);
+  };
+
+  const resetQuery = () => {
+    setUrlSearchTerm('');
+  };
 
   const controlsContent = <ControlsColumn title={title} controls={controls} sticky={isSticky} />;
   let gridContent: JSX.Element;
@@ -108,13 +116,22 @@ export const PackageListGrid: FunctionComponent<Props> = ({
   if (isLoading || !localSearchRef.current) {
     gridContent = <Loading />;
   } else {
-    const filteredList = searchTerm
-      ? list.filter((item) =>
-          (localSearchRef.current!.search(searchTerm) as IntegrationCardItem[])
+    const filteredByCategory = list.filter((c) => {
+      if (selectedCategory === '') {
+        return true;
+      }
+      return c.categories.includes(selectedCategory);
+    });
+
+    const queryInput = splitTextInput(searchTerm);
+
+    const filteredList = queryInput
+      ? filteredByCategory.filter((item) =>
+          (localSearchRef.current!.search(queryInput) as IntegrationCardItem[])
             .map((match) => match[searchIdField])
             .includes(item[searchIdField])
         )
-      : list;
+      : filteredByCategory;
     gridContent = (
       <GridColumn
         list={filteredList}
@@ -133,34 +150,15 @@ export const PackageListGrid: FunctionComponent<Props> = ({
             {controlsContent}
           </EuiFlexItem>
           <EuiFlexItem grow={5}>
-            <EuiSearchBar
-              query={searchTerm || undefined}
-              box={{
-                'data-test-subj': 'epmList.searchBar',
-                placeholder: i18n.translate('xpack.fleet.epmList.searchPackagesPlaceholder', {
-                  defaultMessage: 'Search for integrations',
-                }),
-                incremental: true,
-              }}
-              onChange={onQueryChange}
-              toolsRight={
-                selectedCategoryTitle ? (
-                  <div>
-                    <EuiBadge
-                      color="accent"
-                      iconType="cross"
-                      iconSide="right"
-                      iconOnClick={() => {
-                        setSelectedCategory('');
-                      }}
-                      iconOnClickAriaLabel="Remove category"
-                      data-test-sub="epmList.categoryBadge"
-                    >
-                      {selectedCategoryTitle}
-                    </EuiBadge>
-                  </div>
-                ) : undefined
-              }
+            <EuiFieldSearch
+              placeholder={i18n.translate('xpack.fleet.epmList.searchPackagesPlaceholder', {
+                defaultMessage: 'Search for integrations',
+              })}
+              value={searchTerm}
+              onChange={(e) => onQueryChange(e)}
+              isClearable={true}
+              incremental={true}
+              fullWidth={true}
             />
             {callout ? (
               <>
