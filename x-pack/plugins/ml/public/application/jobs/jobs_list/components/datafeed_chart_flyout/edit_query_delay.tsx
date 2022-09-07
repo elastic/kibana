@@ -71,6 +71,7 @@ export const EditQueryDelay: FC<{
       );
     }
     setIsEditing(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [datafeedId, newQueryDelay]);
 
   const editButton = (
