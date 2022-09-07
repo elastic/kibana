@@ -21,6 +21,7 @@ import { CrawlRequestsPanel } from './crawler/crawl_requests_panel/crawl_request
 import { CrawlerTotalStats } from './crawler_total_stats';
 import { GenerateApiKeyPanel } from './generate_api_key_panel';
 import { OverviewLogic } from './overview.logic';
+import { SyncJobs } from './sync_jobs';
 import { TotalStats } from './total_stats';
 
 export const SearchIndexOverview: React.FC = () => {
@@ -67,6 +68,8 @@ export const SearchIndexOverview: React.FC = () => {
         <>
           <EuiSpacer />
           <ConnectorOverviewPanels />
+          <EuiSpacer />
+          <SyncJobs />
         </>
       )}
     </>
