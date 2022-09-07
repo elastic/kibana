@@ -69,6 +69,7 @@ export * from './get_simple_rule_output_without_rule_id';
 export * from './get_simple_rule_preview_output';
 export * from './get_simple_rule_update';
 export * from './get_simple_rule_without_rule_id';
+export * from './get_simple_saved_query_rule';
 export * from './get_simple_threat_match';
 export * from './get_stats';
 export * from './get_stats_url';
