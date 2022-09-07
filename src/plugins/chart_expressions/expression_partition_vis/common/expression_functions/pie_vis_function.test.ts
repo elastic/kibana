@@ -187,7 +187,7 @@ describe('collapseMetrics', () => {
     };
 
     const result = collapseMetrics(table, ['1', '2'], ['3', '4']);
-    expect(result.bucketAccessors).toEqual(['1', 'category-metric']);
+    expect(result.bucketAccessors).toEqual(['1', 'metric-name']);
     expect(result.metricAccessor).toEqual('value');
     expect(result.table).toMatchInlineSnapshot(`
       Object {
@@ -200,11 +200,11 @@ describe('collapseMetrics', () => {
             "name": "bucket1",
           },
           Object {
-            "id": "category-metric",
+            "id": "metric-name",
             "meta": Object {
               "type": "string",
             },
-            "name": "category-metric",
+            "name": "metric-name",
           },
           Object {
             "id": "value",
@@ -217,42 +217,42 @@ describe('collapseMetrics', () => {
         "rows": Array [
           Object {
             "1": "square",
-            "category-metric": "red - metric1",
+            "metric-name": "red - metric1",
             "value": 1,
           },
           Object {
             "1": "square",
-            "category-metric": "red - metric2",
+            "metric-name": "red - metric2",
             "value": 2,
           },
           Object {
             "1": "square",
-            "category-metric": "blue - metric1",
+            "metric-name": "blue - metric1",
             "value": 3,
           },
           Object {
             "1": "square",
-            "category-metric": "blue - metric2",
+            "metric-name": "blue - metric2",
             "value": 4,
           },
           Object {
             "1": "circle",
-            "category-metric": "red - metric1",
+            "metric-name": "red - metric1",
             "value": 5,
           },
           Object {
             "1": "circle",
-            "category-metric": "red - metric2",
+            "metric-name": "red - metric2",
             "value": 6,
           },
           Object {
             "1": "circle",
-            "category-metric": "blue - metric1",
+            "metric-name": "blue - metric1",
             "value": 7,
           },
           Object {
             "1": "circle",
-            "category-metric": "blue - metric2",
+            "metric-name": "blue - metric2",
             "value": 8,
           },
         ],
@@ -302,5 +302,92 @@ describe('collapseMetrics', () => {
     expect(result.table).toEqual(table);
     expect(result.bucketAccessors).toEqual(bucketAccessors);
     expect(result.metricAccessor).toEqual(metricAccessors[0]);
+  });
+
+  it('does not blow up when there are no bucket accessors', () => {
+    const table: Datatable = {
+      type: 'datatable',
+      columns: [
+        {
+          id: '3',
+          name: 'metric1',
+          meta: {
+            type: 'number',
+          },
+        },
+        {
+          id: '4',
+          name: 'metric2',
+          meta: {
+            type: 'number',
+          },
+        },
+      ],
+      rows: [
+        { '3': 1, '4': 2 },
+        { '3': 3, '4': 4 },
+        { '3': 5, '4': 6 },
+        { '3': 7, '4': 8 },
+      ],
+    };
+
+    const result = collapseMetrics(table, undefined, ['3', '4']);
+    expect(result.bucketAccessors).toEqual(['metric-name']);
+    expect(result.metricAccessor).toEqual('value');
+    expect(result.table).toMatchInlineSnapshot(`
+      Object {
+        "columns": Array [
+          Object {
+            "id": "metric-name",
+            "meta": Object {
+              "type": "string",
+            },
+            "name": "metric-name",
+          },
+          Object {
+            "id": "value",
+            "meta": Object {
+              "type": "number",
+            },
+            "name": "value",
+          },
+        ],
+        "rows": Array [
+          Object {
+            "metric-name": "metric1",
+            "value": 1,
+          },
+          Object {
+            "metric-name": "metric2",
+            "value": 2,
+          },
+          Object {
+            "metric-name": "metric1",
+            "value": 3,
+          },
+          Object {
+            "metric-name": "metric2",
+            "value": 4,
+          },
+          Object {
+            "metric-name": "metric1",
+            "value": 5,
+          },
+          Object {
+            "metric-name": "metric2",
+            "value": 6,
+          },
+          Object {
+            "metric-name": "metric1",
+            "value": 7,
+          },
+          Object {
+            "metric-name": "metric2",
+            "value": 8,
+          },
+        ],
+        "type": "datatable",
+      }
+    `);
   });
 });

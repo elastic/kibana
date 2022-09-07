@@ -57,7 +57,7 @@ export const collapseMetrics = (
     bucketColumns[bucketColumns.length - 1],
   ];
 
-  const nameColumnId = 'category-metric';
+  const nameColumnId = 'metric-name';
   const valueColumnId = 'value';
 
   table.rows.forEach((row) => {
@@ -68,7 +68,9 @@ export const collapseMetrics = (
         newRow[id] = row[id];
       });
 
-      newRow[nameColumnId] = `${row[finalBucketColumn.id]} - ${metricCol.name}`;
+      newRow[nameColumnId] = finalBucketColumn
+        ? `${row[finalBucketColumn.id]} - ${metricCol.name}`
+        : metricCol.name;
       newRow[valueColumnId] = row[metricCol.id];
 
       transposedRows.push(newRow);
