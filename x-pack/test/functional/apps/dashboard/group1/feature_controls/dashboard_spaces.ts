@@ -19,32 +19,30 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'dashboard', 'security', 'spaceSelector', 'error']);
   const appsMenu = getService('appsMenu');
   const testSubjects = getService('testSubjects');
+  const kibanaServer = getService('kibanaServer');
 
   describe('spaces', () => {
+    const customSpace = 'custom_space';
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
     });
 
     describe('space with no features disabled', () => {
       before(async () => {
-        // we need to load the following in every situation as deleting
-        // a space deletes all of the associated saved objects
-        await esArchiver.load(
-          'x-pack/test/functional/es_archives/dashboard/feature_controls/spaces'
-        );
         await spacesService.create({
-          id: 'custom_space',
-          name: 'custom_space',
+          id: customSpace,
+          name: customSpace,
           disabledFeatures: [],
         });
-      });
-
-      after(async () => {
-        await spacesService.delete('custom_space');
-        await esArchiver.unload(
-          'x-pack/test/functional/es_archives/dashboard/feature_controls/spaces'
+        // we need to load the following in every situation as deleting
+        // a space deletes all of the associated saved objects
+        await kibanaServer.importExport.load(
+          'x-pack/test/functional/fixtures/kbn_archiver/dashboard/feature_controls/custom_space',
+          { space: customSpace }
         );
       });
+
+      after(async () => await spacesService.delete(customSpace));
 
       it('shows dashboard navlink', async () => {
         await PageObjects.common.navigateToApp('home', {
@@ -88,7 +86,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it(`can view existing Dashboard`, async () => {
         await PageObjects.common.navigateToActualUrl(
           'dashboard',
-          createDashboardEditUrl('i-exist'),
+          createDashboardEditUrl('8fba09d8-df3f-5aa1-83cc-65f7fbcbc0d9'),
           {
             basePath: '/s/custom_space',
             ensureCurrentUrl: false,
@@ -103,24 +101,20 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     describe('space with Dashboard disabled', () => {
       before(async () => {
-        // we need to load the following in every situation as deleting
-        // a space deletes all of the associated saved objects
-        await esArchiver.load(
-          'x-pack/test/functional/es_archives/dashboard/feature_controls/spaces'
-        );
         await spacesService.create({
-          id: 'custom_space',
-          name: 'custom_space',
+          id: customSpace,
+          name: customSpace,
           disabledFeatures: ['dashboard'],
         });
-      });
-
-      after(async () => {
-        await spacesService.delete('custom_space');
-        await esArchiver.unload(
-          'x-pack/test/functional/es_archives/dashboard/feature_controls/spaces'
+        // we need to load the following in every situation as deleting
+        // a space deletes all of the associated saved objects
+        await kibanaServer.importExport.load(
+          'x-pack/test/functional/fixtures/kbn_archiver/dashboard/feature_controls/custom_space',
+          { space: customSpace }
         );
       });
+
+      after(async () => await spacesService.delete('custom_space'));
 
       it(`doesn't show dashboard navlink`, async () => {
         await PageObjects.common.navigateToApp('home', {

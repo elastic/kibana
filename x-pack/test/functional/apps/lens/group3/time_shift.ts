@@ -60,8 +60,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await PageObjects.lens.hasFixAction()).to.be(true);
       await PageObjects.lens.useFixAction();
 
-      expect(await PageObjects.lens.getDatatableCellText(1, 2)).to.eql('5,541.5');
-      expect(await PageObjects.lens.getDatatableCellText(1, 3)).to.eql('3,628');
+      expect(await PageObjects.lens.getDatatableCellText(2, 2)).to.eql('6,976');
+      expect(await PageObjects.lens.getDatatableCellText(2, 3)).to.eql('4,182.5');
 
       expect(await PageObjects.lens.getDatatableHeaderText(0)).to.eql('Filters of ip');
     });
