@@ -15,7 +15,7 @@ import type {
   RegistryDataStream,
 } from '../types';
 
-const DATASET_VAR: RegistryVarsEntry = {
+const DATA_STREAM_DATASET_VAR: RegistryVarsEntry = {
   name: 'data_stream.dataset',
   type: 'text',
   title: 'Dataset name',
@@ -24,7 +24,6 @@ const DATASET_VAR: RegistryVarsEntry = {
   multi: false,
   required: true,
   show_user: true,
-  // default: 'generic', // TODO
 };
 
 export function isInputOnlyPolicyTemplate(
@@ -89,15 +88,19 @@ export const getNormalizedDataStreams = (packageInfo: PackageInfo): RegistryData
   });
 };
 
+// Input only packages must provide a dataset name in order to differentiate their data streams
+// here we add the dataset var if it is not defined in the package already.
 const addDatasetVarIfNotPresent = (vars?: RegistryVarsEntry[]): RegistryVarsEntry[] => {
   const newVars = vars ?? [];
 
-  const isDatasetAlreadyAdded = newVars.find((varEntry) => varEntry.name === DATASET_VAR.name);
+  const isDatasetAlreadyAdded = newVars.find(
+    (varEntry) => varEntry.name === DATA_STREAM_DATASET_VAR.name
+  );
 
   if (isDatasetAlreadyAdded) {
     return newVars;
   } else {
-    return [...newVars, DATASET_VAR];
+    return [...newVars, DATA_STREAM_DATASET_VAR];
   }
 };
 
