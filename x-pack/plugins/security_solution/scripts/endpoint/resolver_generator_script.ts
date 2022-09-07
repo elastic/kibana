@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-/* eslint-disable no-console */
+/* eslint-disable no-console,max-classes-per-file */
 import yargs from 'yargs';
 import fs from 'fs';
 import { Client, errors } from '@elastic/elasticsearch';
@@ -14,10 +14,27 @@ import { CA_CERT_PATH } from '@kbn/dev-utils';
 import { ToolingLog } from '@kbn/tooling-log';
 import type { KbnClientOptions } from '@kbn/test';
 import { KbnClient } from '@kbn/test';
+import { kibanaPackageJson } from '@kbn/utils';
+import { EndpointMetadataGenerator } from '../../common/endpoint/data_generators/endpoint_metadata_generator';
 import { indexHostsAndAlerts } from '../../common/endpoint/index_data';
 import { ANCESTRY_LIMIT, EndpointDocGenerator } from '../../common/endpoint/generate_data';
 
 main();
+
+// Document Generator override
+// A document generator that uses a custom Endpoint Metadata generator that sets the `agent.version`
+// to the current version of kibana
+const DocGenerator = class extends EndpointDocGenerator {
+  constructor(seed) {
+    const MetadataGenerator = class extends EndpointMetadataGenerator {
+      protected randomVersion(): string {
+        return kibanaPackageJson.version;
+      }
+    };
+
+    super(seed, MetadataGenerator);
+  }
+};
 
 function handleErr(err: unknown) {
   if (err instanceof errors.ResponseError && err.statusCode !== 404) {
@@ -323,11 +340,14 @@ async function main() {
   }
 
   let seed = argv.seed;
+
   if (!seed) {
     seed = Math.random().toString();
     console.log(`No seed supplied, using random seed: ${seed}`);
   }
+
   const startTime = new Date().getTime();
+
   if (argv.fleet && !argv.withNewUser) {
     // warn and exit when using fleet flag
     console.log(
@@ -336,6 +356,7 @@ async function main() {
     // eslint-disable-next-line no-process-exit
     process.exit(0);
   }
+
   await indexHostsAndAlerts(
     client,
     kbnClient,
@@ -360,7 +381,8 @@ async function main() {
       ancestryArraySize: argv.ancestryArraySize,
       eventsDataStream: EndpointDocGenerator.createDataStreamFromIndex(argv.eventIndex),
       alertsDataStream: EndpointDocGenerator.createDataStreamFromIndex(argv.alertIndex),
-    }
+    },
+    DocGenerator
   );
   // delete endpoint_user after
 
