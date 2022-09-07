@@ -6,15 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, {
-  useReducer,
-  useCallback,
-  useEffect,
-  useRef,
-  useMemo,
-  ReactNode,
-  MouseEvent,
-} from 'react';
+import React, { useReducer, useCallback, useEffect, useRef, useMemo, ReactNode } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import {
   EuiBasicTableColumn,
@@ -25,16 +17,14 @@ import {
   Direction,
   EuiSpacer,
   EuiTableActionsColumnType,
-  EuiLink,
 } from '@elastic/eui';
 import { keyBy, uniq, get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 
-import { Table, ConfirmDeleteModal, ListingLimitWarning } from './components';
+import { Table, ConfirmDeleteModal, ListingLimitWarning, ItemDetails } from './components';
 import { useServices } from './services';
 import type { SavedObjectsReference, SavedObjectsFindOptionsReference } from './services';
 import type { Action } from './actions';
@@ -141,23 +131,11 @@ function TableListViewComp<T extends UserContentCommonSchema>({
     searchQueryParser,
     notifyError,
     DateFormatterComp,
-    navigateToUrl,
-    currentAppId$,
   } = useServices();
 
   const reducer = useMemo(() => {
     return getReducer<T>({ DateFormatterComp });
   }, [DateFormatterComp]);
-
-  const redirectAppLinksCoreStart = useMemo(
-    () => ({
-      application: {
-        navigateToUrl,
-        currentAppId$,
-      },
-    }),
-    [navigateToUrl, currentAppId$]
-  );
 
   const [state, dispatch] = useReducer<(state: State<T>, action: Action<T>) => State<T>>(reducer, {
     items: [],
@@ -175,42 +153,15 @@ function TableListViewComp<T extends UserContentCommonSchema>({
         }),
         sortable: true,
         render: (field: keyof T, record: T) => {
-          // The validation is handled at the top of the component
-          const href = getDetailViewLink ? getDetailViewLink(record) : undefined;
-
-          if (!href && !onClickTitle) {
-            // This item is not clickable
-            return <span>{record.attributes.title}</span>;
-          }
-
           return (
-            <RedirectAppLinks coreStart={redirectAppLinksCoreStart}>
-              {/* eslint-disable-next-line  @elastic/eui/href-or-on-click */}
-              <EuiLink
-                href={getDetailViewLink ? getDetailViewLink(record) : undefined}
-                onClick={
-                  onClickTitle
-                    ? (e: MouseEvent) => {
-                        e.preventDefault();
-                        onClickTitle(record);
-                      }
-                    : undefined
-                }
-                data-test-subj={`${id}ListingTitleLink-${record.attributes.title
-                  .split(' ')
-                  .join('-')}`}
-              >
-                {record.attributes.title}
-              </EuiLink>
-            </RedirectAppLinks>
+            <ItemDetails<T>
+              id={id}
+              item={record}
+              getDetailViewLink={getDetailViewLink}
+              onClickTitle={onClickTitle}
+            />
           );
         },
-      },
-      {
-        field: 'attributes.description',
-        name: i18n.translate('contentManagement.tableList.descriptionColumnName', {
-          defaultMessage: 'Description',
-        }),
       },
     ],
     searchQuery: initialQuery,
