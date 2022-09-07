@@ -60,11 +60,6 @@ function assignVariables(
 type StreamsMap = Map<string, NewPackagePolicyInputStream>;
 type InputMap = Map<string, { input: NewPackagePolicyInput; streams: StreamsMap }>;
 
-/**
- *
- * @param data
- * @param packageInfo
- */
 export function simplifiedPackagePolicytoNewPackagePolicy(
   data: SimplifiedPackagePolicy,
   packageInfo: PackageInfo

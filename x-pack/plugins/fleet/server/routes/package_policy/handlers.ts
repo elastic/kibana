@@ -264,59 +264,58 @@ export const updatePackagePolicyHandler: RequestHandler<
     throw Boom.notFound('Package policy not found');
   }
 
-  const { force, package: pkg, ...body } = request.body;
-  // TODO Remove deprecated APIs https://github.com/elastic/kibana/issues/121485
-  if ('output_id' in body) {
-    delete body.output_id;
-  }
-
-  let newData: NewPackagePolicy;
-
-  if (
-    body.inputs &&
-    isSimplifiedCreatePackagePolicyRequest(body as unknown as SimplifiedPackagePolicy)
-  ) {
-    if (!pkg) {
-      throw new Error('package is required');
-    }
-    const pkgInfo = await getPackageInfo({
-      savedObjectsClient: soClient,
-      pkgName: pkg.name,
-      pkgVersion: pkg.version,
-    });
-    newData = simplifiedPackagePolicytoNewPackagePolicy(
-      body as unknown as SimplifiedPackagePolicy,
-      pkgInfo
-    );
-  } else {
-    // removed fields not recognized by schema
-    const packagePolicyInputs = packagePolicy.inputs.map((input) => {
-      const newInput = {
-        ...input,
-        streams: input.streams.map((stream) => {
-          const newStream = { ...stream };
-          delete newStream.compiled_stream;
-          return newStream;
-        }),
-      };
-      delete newInput.compiled_input;
-      return newInput;
-    });
-    // listing down accepted properties, because loaded packagePolicy contains some that are not accepted in update
-    newData = {
-      ...body,
-      name: body.name ?? packagePolicy.name,
-      description: body.description ?? packagePolicy.description,
-      namespace: body.namespace ?? packagePolicy.namespace,
-      policy_id: body.policy_id ?? packagePolicy.policy_id,
-      enabled: 'enabled' in body ? body.enabled ?? packagePolicy.enabled : packagePolicy.enabled,
-      package: pkg ?? packagePolicy.package,
-      inputs: body.inputs ?? packagePolicyInputs,
-      vars: body.vars ?? packagePolicy.vars,
-    } as NewPackagePolicy;
-  }
-
   try {
+    const { force, package: pkg, ...body } = request.body;
+    // TODO Remove deprecated APIs https://github.com/elastic/kibana/issues/121485
+    if ('output_id' in body) {
+      delete body.output_id;
+    }
+
+    let newData: NewPackagePolicy;
+
+    if (
+      body.inputs &&
+      isSimplifiedCreatePackagePolicyRequest(body as unknown as SimplifiedPackagePolicy)
+    ) {
+      if (!pkg) {
+        throw new Error('package is required');
+      }
+      const pkgInfo = await getPackageInfo({
+        savedObjectsClient: soClient,
+        pkgName: pkg.name,
+        pkgVersion: pkg.version,
+      });
+      newData = simplifiedPackagePolicytoNewPackagePolicy(
+        body as unknown as SimplifiedPackagePolicy,
+        pkgInfo
+      );
+    } else {
+      // removed fields not recognized by schema
+      const packagePolicyInputs = packagePolicy.inputs.map((input) => {
+        const newInput = {
+          ...input,
+          streams: input.streams.map((stream) => {
+            const newStream = { ...stream };
+            delete newStream.compiled_stream;
+            return newStream;
+          }),
+        };
+        delete newInput.compiled_input;
+        return newInput;
+      });
+      // listing down accepted properties, because loaded packagePolicy contains some that are not accepted in update
+      newData = {
+        ...body,
+        name: body.name ?? packagePolicy.name,
+        description: body.description ?? packagePolicy.description,
+        namespace: body.namespace ?? packagePolicy.namespace,
+        policy_id: body.policy_id ?? packagePolicy.policy_id,
+        enabled: 'enabled' in body ? body.enabled ?? packagePolicy.enabled : packagePolicy.enabled,
+        package: pkg ?? packagePolicy.package,
+        inputs: body.inputs ?? packagePolicyInputs,
+        vars: body.vars ?? packagePolicy.vars,
+      } as NewPackagePolicy;
+    }
     newData = await packagePolicyService.runExternalCallbacks(
       'packagePolicyUpdate',
       newData,
