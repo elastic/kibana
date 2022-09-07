@@ -12,7 +12,7 @@ import { ElasticsearchIndexWithIngestion } from '../../../common/types/indices';
 import { fetchConnectorByIndexName } from '../connectors/fetch_connectors';
 import { fetchCrawlerByIndexName } from '../crawler/fetch_crawlers';
 
-import { mapIndexStats } from './fetch_indices';
+import { mapIndexStats } from './utils/map_index_stats';
 
 export const fetchIndex = async (
   client: IScopedClusterClient,
