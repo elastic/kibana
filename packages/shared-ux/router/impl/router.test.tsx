@@ -23,6 +23,8 @@ describe('Route', () => {
     const historyLocation = createMemoryHistory();
     // add the path to the history 
     historyLocation.push('/app/wow');
+    // prevent the location key from remaking itself each jest test
+    historyLocation.location.key = 's5brde';
     // the Route component takes the history location
     const example = shallow(<Route location={historyLocation.location} />);
     expect(example).toMatchSnapshot();
