@@ -7,8 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 import { HttpSetup } from '@kbn/core/public';
-import { ISection } from '../../typings/section';
-import { paths } from '../../config/paths';
+import { ISection } from '../../../typings/section';
+import { paths } from '../../../config/paths';
 
 export const getEmptySections = ({ http }: { http: HttpSetup }): ISection[] => {
   return [

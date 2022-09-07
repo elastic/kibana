@@ -23,7 +23,7 @@ import { useAlertIndexNames } from '../../../../hooks/use_alert_index_names';
 import { useHasData } from '../../../../hooks/use_has_data';
 import { usePluginContext } from '../../../../hooks/use_plugin_context';
 import { getNoDataConfig } from '../../../../utils/no_data_config';
-import { LoadingObservability } from '../../../overview/loading_observability';
+import { LoadingObservability } from '../../../overview';
 import {
   Provider,
   alertsPageStateContainer,
