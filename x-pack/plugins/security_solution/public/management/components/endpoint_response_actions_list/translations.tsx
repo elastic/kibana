@@ -126,6 +126,20 @@ export const UX_MESSAGES = Object.freeze({
       defaultMessage: 'Pending',
     }),
   },
+  unenrolled: {
+    hosts: i18n.translate(
+      'xpack.securitySolution.responseActionsList.list.item.hosts.unenrolled.hosts',
+      {
+        defaultMessage: 'Hosts unenrolled',
+      }
+    ),
+    host: i18n.translate(
+      'xpack.securitySolution.responseActionsList.list.item.hosts.unenrolled.host',
+      {
+        defaultMessage: 'Host unenrolled',
+      }
+    ),
+  },
   screenReaderExpand: i18n.translate(
     'xpack.securitySolution.responseActionsList.list.screenReader.expand',
     {

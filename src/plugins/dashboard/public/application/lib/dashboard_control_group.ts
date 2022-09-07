@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import _ from 'lodash';
 import { Subscription } from 'rxjs';
 import deepEqual from 'fast-deep-equal';
 import { compareFilters, COMPARE_ALL_OPTIONS, type Filter } from '@kbn/es-query';
@@ -144,6 +145,19 @@ export const syncDashboardControlGroup = async ({
       )
       .subscribe(() => {
         dashboardContainer.updateInput({ lastReloadRequestTime: Date.now() });
+      })
+  );
+
+  subscriptions.add(
+    controlGroup
+      .getOutput$()
+      .pipe(
+        distinctUntilChanged(({ timeslice: timesliceA }, { timeslice: timesliceB }) =>
+          _.isEqual(timesliceA, timesliceB)
+        )
+      )
+      .subscribe(({ timeslice }) => {
+        dashboardContainer.updateInput({ timeslice });
       })
   );
 
