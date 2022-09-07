@@ -36,7 +36,6 @@ const termsTitle = i18n.translate('data.search.aggs.buckets.termsTitle', {
 export interface CommonAggParamsTerms extends BaseAggParams {
   field: string;
   orderBy: string;
-  order?: 'asc' | 'desc';
   size?: number;
   shardSize?: number;
   missingBucket?: boolean;
@@ -52,10 +51,15 @@ export interface CommonAggParamsTerms extends BaseAggParams {
 
 export interface AggParamsTermsSerialized extends CommonAggParamsTerms {
   orderAgg?: AggConfigSerialized;
+  order?: 'asc' | 'desc';
 }
 
 export interface AggParamsTerms extends CommonAggParamsTerms {
   orderAgg?: IAggConfig;
+  order?: {
+    value: 'asc' | 'desc';
+    text: string;
+  };
 }
 
 export const getTermsBucketAgg = () =>

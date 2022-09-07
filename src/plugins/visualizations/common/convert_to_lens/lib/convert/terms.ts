@@ -92,7 +92,7 @@ export const convertToTermsParams = (
     exclude: aggParams.exclude ?? [],
     excludeIsRegex: aggParams.excludeIsRegex,
     otherBucket: aggParams.otherBucket,
-    orderDirection: aggParams.order ?? 'desc',
+    orderDirection: aggParams.order?.value ?? 'desc',
     parentFormat: { id: 'terms' },
     ...orderByWithAgg,
   };
