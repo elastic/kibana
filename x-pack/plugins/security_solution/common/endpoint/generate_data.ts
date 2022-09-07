@@ -18,12 +18,11 @@ import { EndpointMetadataGenerator } from './data_generators/endpoint_metadata_g
 import type {
   AlertEvent,
   DataStream,
-  Host,
   HostMetadata,
+  HostMetadataInterface,
   HostPolicyResponse,
   PolicyData,
   SafeEndpointEvent,
-  EndpointStatus,
 } from './types';
 import { HostPolicyResponseActionStatus } from './types';
 import { policyFactory } from './models/policy_config';
@@ -57,13 +56,7 @@ const POLICY_RESPONSE_STATUSES: HostPolicyResponseActionStatus[] = [
   HostPolicyResponseActionStatus.unsupported,
 ];
 
-const APPLIED_POLICIES: Array<{
-  name: string;
-  id: string;
-  status: HostPolicyResponseActionStatus;
-  endpoint_policy_version: number;
-  version: number;
-}> = [
+const APPLIED_POLICIES: Array<HostMetadataInterface['Endpoint']['policy']['applied']> = [
   {
     name: 'Default',
     id: '00000000-0000-0000-0000-000000000000',
@@ -183,38 +176,7 @@ const OTHER_EVENT_CATEGORIES: Record<
   },
 };
 
-interface HostInfo {
-  elastic: {
-    agent: {
-      id: string;
-    };
-  };
-  agent: {
-    version: string;
-    id: string;
-    type: string;
-  };
-  host: Host;
-  Endpoint: {
-    status: EndpointStatus;
-    policy: {
-      applied: {
-        id: string;
-        status: HostPolicyResponseActionStatus;
-        name: string;
-        endpoint_policy_version: number;
-        version: number;
-      };
-    };
-    configuration?: {
-      isolation: boolean;
-    };
-    state?: {
-      isolation: boolean;
-    };
-    capabilities?: string[];
-  };
-}
+type CommonHostInfo = Pick<HostMetadataInterface, 'elastic' | 'agent' | 'host' | 'Endpoint'>;
 
 interface NodeState {
   event: Event;
@@ -364,7 +326,7 @@ const alertsDefaultDataStream = {
  *        contain shared data structures.
  */
 export class EndpointDocGenerator extends BaseDataGenerator {
-  commonInfo: HostInfo;
+  commonInfo: CommonHostInfo;
   sequence: number = 0;
 
   private readonly metadataGenerator: EndpointMetadataGenerator;
@@ -423,7 +385,7 @@ export class EndpointDocGenerator extends BaseDataGenerator {
     };
   }
 
-  private createHostData(): HostInfo {
+  private createHostData(): CommonHostInfo {
     const { agent, elastic, host, Endpoint } = this.metadataGenerator.generate({
       Endpoint: { policy: { applied: this.randomChoice(APPLIED_POLICIES) } },
     });
