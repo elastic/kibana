@@ -59,7 +59,7 @@ export async function getSizeTimeseries({
     searchAggregatedTransactions,
   });
 
-  const [allIndicesStats, res] = await Promise.all([
+  const [{ indices: allIndicesStats }, res] = await Promise.all([
     getTotalIndicesStats({ setup, context }),
     apmEventClient.search('get_storage_timeseries', {
       apm: {

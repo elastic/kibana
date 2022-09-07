@@ -20,6 +20,7 @@ import { SearchBar } from '../../shared/search_bar';
 import { StorageChart } from './storage_chart';
 import { PermissionDenied } from './prompts/permission_denied';
 import { useFetcher, FETCH_STATUS } from '../../../hooks/use_fetcher';
+import { SummaryStats } from './summary_stats';
 
 const INITIAL_DATA = { hasPrivileges: false };
 
@@ -61,6 +62,8 @@ export function StorageExplorer() {
           <IndexLifecyclePhaseSelect />
         </EuiFlexItem>
       </EuiFlexGroup>
+      <EuiSpacer />
+      <SummaryStats />
       <EuiSpacer />
       <StorageChart />
       <EuiSpacer />

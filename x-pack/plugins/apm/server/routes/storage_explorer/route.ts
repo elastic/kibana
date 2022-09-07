@@ -25,6 +25,10 @@ import { getStorageDetailsPerProcessorEvent } from './get_storage_details_per_pr
 import { getRandomSampler } from '../../lib/helpers/get_random_sampler';
 import { getSizeTimeseries } from './get_size_timeseries';
 import { hasStorageExplorerPrivileges } from './has_storage_explorer_privileges';
+import {
+  getMainSummaryStats,
+  getTracesPerMinute,
+} from './get_summary_statistics';
 
 const storageExplorerRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/storage_explorer',
@@ -253,11 +257,90 @@ const storageExplorerPrivilegesRoute = createApmServerRoute({
   },
 });
 
+const storageExplorerSummaryStatsRoute = createApmServerRoute({
+  endpoint: 'GET /internal/apm/storage_explorer_summary_stats',
+  options: { tags: ['access:apm'] },
+  params: t.type({
+    query: t.intersection([
+      indexLifecyclePhaseRt,
+      probabilityRt,
+      environmentRt,
+      kueryRt,
+      rangeRt,
+    ]),
+  }),
+  handler: async (
+    resources
+  ): Promise<{
+    tracesPerMinute: number;
+    numberOfServices: number;
+    estimatedSize: number;
+    dailyDataGeneration: number;
+  }> => {
+    const {
+      params,
+      context,
+      request,
+      plugins: { security },
+    } = resources;
+
+    const {
+      query: {
+        indexLifecyclePhase,
+        probability,
+        environment,
+        kuery,
+        start,
+        end,
+      },
+    } = params;
+
+    const [setup, randomSampler] = await Promise.all([
+      setupRequest(resources),
+      getRandomSampler({ security, request, probability }),
+    ]);
+
+    const searchAggregatedTransactions = await getSearchAggregatedTransactions({
+      apmEventClient: setup.apmEventClient,
+      config: setup.config,
+      kuery,
+    });
+
+    const [mainSummaryStats, tracesPerMinute] = await Promise.all([
+      getMainSummaryStats({
+        setup,
+        context,
+        indexLifecyclePhase,
+        randomSampler,
+        start,
+        end,
+        environment,
+        kuery,
+      }),
+      getTracesPerMinute({
+        setup,
+        indexLifecyclePhase,
+        start,
+        end,
+        environment,
+        kuery,
+        searchAggregatedTransactions,
+      }),
+    ]);
+
+    return {
+      ...mainSummaryStats,
+      tracesPerMinute,
+    };
+  },
+});
+
 export const storageExplorerRouteRepository = {
   ...storageExplorerRoute,
   ...storageExplorerServiceDetailsRoute,
   ...storageChartRoute,
   ...storageExplorerPrivilegesRoute,
+  ...storageExplorerSummaryStatsRoute,
 };
 
 const SECURITY_REQUIRED_MESSAGE = i18n.translate(

@@ -56,7 +56,7 @@ async function getMainServiceStatistics({
 }) {
   const { apmEventClient } = setup;
 
-  const [allIndicesStats, response] = await Promise.all([
+  const [{ indices: allIndicesStats }, response] = await Promise.all([
     getTotalIndicesStats({ context, setup }),
     apmEventClient.search('get_main_service_statistics', {
       apm: {
