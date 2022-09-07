@@ -64,27 +64,37 @@ export interface EsQueryFiltersConfig {
  * @public
  */
 export const buildQueryFromFilters = (
-  filters: Filter[] = [],
-  indexPattern: DataViewBase | undefined,
+  inputFilters: Filter[] = [],
+  inputDataViews: DataViewBase | DataViewBase[] | undefined,
   { ignoreFilterIfFieldNotInIndex = false, nestedIgnoreUnmapped }: EsQueryFiltersConfig = {
     ignoreFilterIfFieldNotInIndex: false,
   }
 ): BoolQuery => {
-  filters = filters.filter((filter) => filter && !isFilterDisabled(filter));
+  const filters = inputFilters.filter((filter) => filter && !isFilterDisabled(filter));
+  const indexPatterns = Array.isArray(inputDataViews) ? inputDataViews : [inputDataViews];
+
+  const findIndexPattern = (id: string | undefined) => {
+    return indexPatterns.find((index) => index?.id === id) || indexPatterns[0];
+  };
 
   const filtersToESQueries = (negate: boolean) => {
     return filters
       .filter((f) => !!f)
       .filter(filterNegate(negate))
       .filter(
-        (filter) => !ignoreFilterIfFieldNotInIndex || filterMatchesIndex(filter, indexPattern)
+        (filter) => {
+          const indexPattern = findIndexPattern(filter.meta.index);
+          return !ignoreFilterIfFieldNotInIndex || filterMatchesIndex(filter, indexPattern)
+        }
       )
       .map((filter) => {
+        const indexPattern = findIndexPattern(filter.meta.index);
         return migrateFilter(filter, indexPattern);
       })
-      .map((filter) =>
-        handleNestedFilter(filter, indexPattern, { ignoreUnmapped: nestedIgnoreUnmapped })
-      )
+      .map((filter) => {
+        const indexPattern = findIndexPattern(filter.meta.index);
+        return handleNestedFilter(filter, indexPattern, {ignoreUnmapped: nestedIgnoreUnmapped})
+      })
       .map(cleanFilter)
       .map(translateToQuery);
   };
