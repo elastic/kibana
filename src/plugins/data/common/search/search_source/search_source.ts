@@ -84,7 +84,7 @@ import {
 import _ from 'lodash';
 import { normalizeSortRequest } from './normalize_sort_request';
 
-import { AggConfigSerialized, DataViewField, SerializedSearchSourceFields } from '../..';
+import {AggConfigSerialized, DataViewField, SerializedSearchSourceFields} from '../..';
 
 import { AggConfigs, EsQuerySortValue, IEsSearchResponse, ISearchGeneric } from '../..';
 import type {
@@ -103,6 +103,7 @@ import {
   IKibanaSearchResponse,
   isErrorResponse,
   isPartialResponse,
+  isCompleteResponse,
   UI_SETTINGS,
 } from '../..';
 import { AggsStart } from '../aggs';
@@ -572,7 +573,7 @@ export class SearchSource {
         });
       }),
       map((response) => {
-        if (response.isPartial) {
+        if (!isCompleteResponse(response)) {
           return response;
         }
         return onResponse(searchRequest, response, options);
