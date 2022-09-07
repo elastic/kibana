@@ -58,7 +58,7 @@ export function getColdStartCount({
     chartBase,
     aggs: { coldStart: { sum: { field: FAAS_COLDSTART } } },
     additionalFilters: [
-      { term: { [FAAS_COLDSTART]: true } },
+      ...termQuery(FAAS_COLDSTART, true),
       ...termQuery(FAAS_ID, faasId),
     ],
     operationName: 'get_cold_start_count',

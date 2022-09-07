@@ -7,12 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 import { termQuery } from '@kbn/observability-plugin/server';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import { euiLightVars as theme } from '@kbn/ui-theme';
 import {
   FAAS_ID,
-  METRICSET_NAME,
   SERVICE_NAME,
   SERVICE_NODE_NAME,
 } from '../../../../../common/elasticsearch_fieldnames';
@@ -21,6 +19,10 @@ import { getVizColorForIndex } from '../../../../../common/viz_colors';
 import { getMetricsDateHistogramParams } from '../../../../lib/helpers/metrics';
 import { Setup } from '../../../../lib/helpers/setup_request';
 import { GenericMetricsChart } from '../../fetch_and_transform_metrics';
+import {
+  getDocumentTypeFilterForTransactions,
+  getProcessorEventForTransactions,
+} from '../../../../lib/helpers/transactions';
 
 export async function getActiveInstances({
   environment,
@@ -30,6 +32,7 @@ export async function getActiveInstances({
   start,
   end,
   faasId,
+  searchAggregatedTransactions,
 }: {
   environment: string;
   kuery: string;
@@ -38,6 +41,7 @@ export async function getActiveInstances({
   start: number;
   end: number;
   faasId?: string;
+  searchAggregatedTransactions: boolean;
 }): Promise<GenericMetricsChart> {
   const { apmEventClient, config } = setup;
 
@@ -51,7 +55,7 @@ export async function getActiveInstances({
 
   const params = {
     apm: {
-      events: [ProcessorEvent.metric],
+      events: [getProcessorEventForTransactions(searchAggregatedTransactions)],
     },
     body: {
       size: 0,
@@ -62,7 +66,9 @@ export async function getActiveInstances({
             ...rangeQuery(start, end),
             ...environmentQuery(environment),
             ...kqlQuery(kuery),
-            { term: { [METRICSET_NAME]: 'transaction' } },
+            ...getDocumentTypeFilterForTransactions(
+              searchAggregatedTransactions
+            ),
             ...termQuery(FAAS_ID, faasId),
           ],
         },
@@ -94,7 +100,10 @@ export async function getActiveInstances({
     yUnit: 'number',
     series: [
       {
-        title: 'Active instances',
+        title: i18n.translate(
+          'xpack.apm.agentMetrics.serverless.series.activeInstances',
+          { defaultMessage: 'Active instances' }
+        ),
         key: 'active_instances',
         type: 'linemark',
         color: getVizColorForIndex(0, theme),

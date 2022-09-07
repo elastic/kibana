@@ -7,25 +7,25 @@
 
 import { i18n } from '@kbn/i18n';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { euiLightVars as theme } from '@kbn/ui-theme';
 import {
   kqlQuery,
   rangeQuery,
   termQuery,
 } from '@kbn/observability-plugin/server';
+import { euiLightVars as theme } from '@kbn/ui-theme';
 import {
   FAAS_BILLED_DURATION,
-  FAAS_COLDSTART_DURATION,
   FAAS_ID,
   METRIC_SYSTEM_TOTAL_MEMORY,
   SERVICE_NAME,
 } from '../../../../../common/elasticsearch_fieldnames';
 import { environmentQuery } from '../../../../../common/utils/environment_query';
+import { isFiniteNumber } from '../../../../../common/utils/is_finite_number';
+import { getVizColorForIndex } from '../../../../../common/viz_colors';
 import { getMetricsDateHistogramParams } from '../../../../lib/helpers/metrics';
 import { Setup } from '../../../../lib/helpers/setup_request';
-import { ChartBase } from '../../types';
-import { getVizColorForIndex } from '../../../../../common/viz_colors';
 import { GenericMetricsChart } from '../../fetch_and_transform_metrics';
+import { ChartBase } from '../../types';
 
 const chartBase: ChartBase = {
   title: i18n.translate('xpack.apm.agentMetrics.serverless.computeUsage', {
@@ -55,12 +55,7 @@ function calculateComputeUsageGBSeconds({
   faasBilledDuration?: number | null;
   totalMemory?: number | null;
 }) {
-  if (
-    faasBilledDuration === undefined ||
-    faasBilledDuration === null ||
-    totalMemory === undefined ||
-    totalMemory === null
-  ) {
+  if (!isFiniteNumber(faasBilledDuration) || !isFiniteNumber(totalMemory)) {
     return 0;
   }
   const bytesMsResult = totalMemory * faasBilledDuration;
@@ -106,7 +101,7 @@ export async function getComputeUsage({
             ...environmentQuery(environment),
             ...kqlQuery(kuery),
             ...termQuery(FAAS_ID, faasId),
-            { exists: { field: FAAS_COLDSTART_DURATION } },
+            { exists: { field: FAAS_BILLED_DURATION } },
           ],
         },
       },
@@ -124,7 +119,7 @@ export async function getComputeUsage({
     },
   };
 
-  const { hits, aggregations } = await apmEventClient.search(
+  const { aggregations } = await apmEventClient.search(
     'get_compute_usage',
     params
   );
@@ -135,7 +130,7 @@ export async function getComputeUsage({
     key: chartBase.key,
     yUnit: chartBase.yUnit,
     series:
-      hits.total.value === 0
+      !timeseriesData || timeseriesData.buckets.length === 0
         ? []
         : [
             {
@@ -150,17 +145,16 @@ export async function getComputeUsage({
                 totalMemory: aggregations?.avgTotalMemory.value,
               }),
               color: getVizColorForIndex(0, theme),
-              data:
-                timeseriesData?.buckets.map((bucket) => {
-                  const computeUsage = calculateComputeUsageGBSeconds({
-                    faasBilledDuration: bucket.avgFaasBilledDuration.value,
-                    totalMemory: bucket.avgTotalMemory.value,
-                  });
-                  return {
-                    x: bucket.key,
-                    y: computeUsage,
-                  };
-                }) || [],
+              data: timeseriesData.buckets.map((bucket) => {
+                const computeUsage = calculateComputeUsageGBSeconds({
+                  faasBilledDuration: bucket.avgFaasBilledDuration.value,
+                  totalMemory: bucket.avgTotalMemory.value,
+                });
+                return {
+                  x: bucket.key,
+                  y: computeUsage,
+                };
+              }),
             },
           ],
   };

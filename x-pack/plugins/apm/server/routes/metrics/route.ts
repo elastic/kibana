@@ -10,6 +10,7 @@ import { setupRequest } from '../../lib/helpers/setup_request';
 import { getMetricsChartDataByAgent } from './get_metrics_chart_data_by_agent';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { environmentRt, kueryRt, rangeRt } from '../default_api_types';
+import { getSearchAggregatedTransactions } from '../../lib/helpers/transactions';
 
 const metricsChartsRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/services/{serviceName}/metrics/charts',
@@ -63,6 +64,13 @@ const metricsChartsRoute = createApmServerRoute({
       faasId,
     } = params.query;
 
+    const searchAggregatedTransactions = await getSearchAggregatedTransactions({
+      ...setup,
+      kuery,
+      start,
+      end,
+    });
+
     const charts = await getMetricsChartDataByAgent({
       environment,
       kuery,
@@ -74,6 +82,7 @@ const metricsChartsRoute = createApmServerRoute({
       end,
       serviceRuntimeName,
       faasId,
+      searchAggregatedTransactions,
     });
 
     return { charts };

@@ -22,6 +22,7 @@ export function getServerlessAgentMetricCharts({
   faasId,
   start,
   end,
+  searchAggregatedTransactions,
 }: {
   environment: string;
   kuery: string;
@@ -30,6 +31,7 @@ export function getServerlessAgentMetricCharts({
   faasId?: string;
   start: number;
   end: number;
+  searchAggregatedTransactions: boolean;
 }) {
   return withApmSpan('get_serverless_agent_metric_charts', async () => {
     const options = {
@@ -42,12 +44,12 @@ export function getServerlessAgentMetricCharts({
       faasId,
     };
     return await Promise.all([
-      getDuration(options),
+      getDuration({ ...options, searchAggregatedTransactions }),
       getColdStartDuration(options),
       getColdStartCount(options),
       getMemoryChartData(options),
       getComputeUsage(options),
-      getActiveInstances(options),
+      getActiveInstances({ ...options, searchAggregatedTransactions }),
     ]);
   });
 }
