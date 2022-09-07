@@ -163,6 +163,23 @@
           },
           {
             "parentPluginId": "threatIntelligence",
+            "id": "def-public.SecuritySolutionPluginContext.getPageWrapper",
+            "type": "Function",
+            "tags": [],
+            "label": "getPageWrapper",
+            "description": [
+              "\nGets the `PageWrapper` component for embedding a filter bar in the security solution application."
+            ],
+            "signature": [
+              "() => React.ComponentType<{ children: React.ReactNode; }>"
+            ],
+            "path": "x-pack/plugins/threat_intelligence/public/types.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "threatIntelligence",
             "id": "def-public.SecuritySolutionPluginContext.licenseService",
             "type": "Object",
             "tags": [],

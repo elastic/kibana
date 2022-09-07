@@ -12,6 +12,7 @@ import { savedObjectsServiceMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 
 import { getSavedSearch } from './get_saved_searches';
+import { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 
 describe('getSavedSearch', () => {
   let search: DataPublicPluginStart['search'];
@@ -23,7 +24,10 @@ describe('getSavedSearch', () => {
   });
 
   test('should return empty saved search in case of no id', async () => {
-    const savedSearch = await getSavedSearch(undefined, { savedObjectsClient, search });
+    const savedSearch = await getSavedSearch(undefined, {
+      savedObjectsClient,
+      search,
+    });
 
     expect(search.searchSource.createEmpty).toHaveBeenCalled();
     expect(savedSearch).toHaveProperty('searchSource');
@@ -146,6 +150,7 @@ describe('getSavedSearch', () => {
             "desc",
           ],
         ],
+        "tags": undefined,
         "timeRange": undefined,
         "timeRestore": undefined,
         "title": "test1",
@@ -242,11 +247,70 @@ describe('getSavedSearch', () => {
             "desc",
           ],
         ],
+        "tags": undefined,
         "timeRange": undefined,
         "timeRestore": undefined,
         "title": "test2",
         "viewMode": undefined,
       }
     `);
+  });
+
+  it('should call savedObjectsTagging.ui.getTagIdsFromReferences', async () => {
+    savedObjectsClient.resolve = jest.fn().mockReturnValue({
+      saved_object: {
+        attributes: {
+          kibanaSavedObjectMeta: {
+            searchSourceJSON:
+              '{"query":{"sql":"SELECT * FROM foo"},"filter":[],"indexRefName":"kibanaSavedObjectMeta.searchSourceJSON.index"}',
+          },
+          title: 'test2',
+          sort: [['order_date', 'desc']],
+          columns: ['_source'],
+          description: 'description',
+          grid: {},
+          hideChart: true,
+          isTextBasedQuery: true,
+        },
+        id: 'ccf1af80-2297-11ec-86e0-1155ffb9c7a7',
+        type: 'search',
+        references: [
+          {
+            name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+            id: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
+            type: 'index-pattern',
+          },
+          {
+            name: 'tag-1',
+            id: 'tag-1',
+            type: 'tag',
+          },
+        ],
+        namespaces: ['default'],
+      },
+      outcome: 'exactMatch',
+    });
+    const savedObjectsTagging = {
+      ui: {
+        getTagIdsFromReferences: jest.fn((_, tags) => tags),
+      },
+    } as unknown as SavedObjectsTaggingApi;
+    await getSavedSearch('ccf1af80-2297-11ec-86e0-1155ffb9c7a7', {
+      savedObjectsClient,
+      search,
+      savedObjectsTagging,
+    });
+    expect(savedObjectsTagging.ui.getTagIdsFromReferences).toHaveBeenCalledWith([
+      {
+        name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+        id: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
+        type: 'index-pattern',
+      },
+      {
+        name: 'tag-1',
+        id: 'tag-1',
+        type: 'tag',
+      },
+    ]);
   });
 });
