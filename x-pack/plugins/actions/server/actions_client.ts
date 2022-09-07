@@ -78,7 +78,7 @@ import {
 // We'll set this max setting assuming it's never reached.
 export const MAX_ACTIONS_RETURNED = 10000;
 
-interface ActionUpdate extends SavedObjectAttributes {
+interface ActionUpdate {
   name: string;
   config: SavedObjectAttributes;
   secrets: SavedObjectAttributes;
