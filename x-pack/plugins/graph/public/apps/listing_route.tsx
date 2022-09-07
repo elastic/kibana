@@ -97,6 +97,7 @@ export function ListingRoute({
   return (
     <I18nProvider>
       <TableListView<GraphUserContent>
+        id="graph"
         headingId="graphListingHeading"
         createItem={capabilities.graph.save ? createItem : undefined}
         findItems={findItems}
