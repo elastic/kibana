@@ -30330,7 +30330,6 @@
     "xpack.stackAlerts.esQuery.ui.testQuery": "测试查询",
     "xpack.stackAlerts.esQuery.ui.testQueryIsExecuted": "已执行查询。",
     "xpack.stackAlerts.esQuery.ui.thresholdHelp.ariaLabel": "帮助",
-    "xpack.stackAlerts.esQuery.ui.thresholdHelp.duplicateMatches": "如果时间窗口大于检查时间间隔且文档在多次运行时与查询匹配，则仅将其用在第一次阈值计算期间。",
     "xpack.stackAlerts.esQuery.ui.thresholdHelp.threshold": "每次运行规则时，都会检查与查询匹配的文档数目是否与此阈值相符。",
     "xpack.stackAlerts.esQuery.ui.thresholdHelp.title": "设置阈值和时间窗口",
     "xpack.stackAlerts.esQuery.ui.validation.error.greaterThenThreshold0Text": "阈值 1 必须 > 阈值 0。",

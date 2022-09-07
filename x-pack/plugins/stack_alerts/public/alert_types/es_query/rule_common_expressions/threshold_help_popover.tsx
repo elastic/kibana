@@ -6,14 +6,7 @@
  */
 
 import React, { Component } from 'react';
-import {
-  EuiButtonIcon,
-  EuiPopover,
-  EuiPopoverTitle,
-  EuiText,
-  EuiCallOut,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiButtonIcon, EuiPopover, EuiPopoverTitle, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
@@ -66,16 +59,16 @@ export class QueryThresholdHelpPopover extends Component<{}, State> {
               }}
             />
           </p>
+          <p>
+            <FormattedMessage
+              id="xpack.stackAlerts.esQuery.ui.thresholdHelp.duplicateMatches"
+              defaultMessage="If {excludePrevious} is turned on, a document that matches the query in multiple runs will be used in only the first threshold calculation."
+              values={{
+                excludePrevious: <b>Exclude matches from previous runs</b>,
+              }}
+            />
+          </p>
         </EuiText>
-        <EuiSpacer size="m" />
-        <EuiCallOut
-          iconType="pin"
-          size="s"
-          title={i18n.translate('xpack.stackAlerts.esQuery.ui.thresholdHelp.duplicateMatches', {
-            defaultMessage:
-              "If the 'Exclude the hits from previous rule runs' option is checked and the time window is greater than the check interval, a document that matches the query in multiple runs will be used in only the first threshold calculation.",
-          })}
-        />
       </div>
     );
   }

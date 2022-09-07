@@ -145,7 +145,7 @@ export const RuleCommonExpressions: React.FC<RuleCommonExpressionsProps> = ({
             onChangeExcludeHitsFromPreviousRun(event.target.checked);
           }}
           label={i18n.translate('xpack.stackAlerts.esQuery.ui.excludePreviousHitsExpression', {
-            defaultMessage: 'Exclude the hits from previous rule runs',
+            defaultMessage: 'Exclude matches from previous runs',
           })}
         />
       </EuiFormRow>
