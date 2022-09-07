@@ -140,7 +140,7 @@ export const WithFieldEditorDependencies =
       },
       fieldFormats,
       fieldName$: new BehaviorSubject(''),
-      subfields$: new BehaviorSubject<RuntimeFieldSubFields | undefined>([]),
+      subfields$: new BehaviorSubject<RuntimeFieldSubFields | undefined>(undefined),
     };
 
     const mergedDependencies = merge({}, dependencies, overridingDependencies);
