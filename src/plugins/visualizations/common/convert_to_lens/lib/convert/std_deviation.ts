@@ -13,6 +13,10 @@ import { createFormulaColumn } from './formula';
 import { getFormulaFromMetric, SUPPORTED_METRICS } from './supported_metrics';
 import { CommonColumnConverterArgs } from './types';
 
+const STD_LOWER = 'std_lower';
+const STD_UPPER = 'std_upper';
+const STD_MODES = [STD_LOWER, STD_UPPER];
+
 const getFormulaForStdDevLowerBound = (field: string, reducedTimeRange?: string) => {
   const aggFormula = getFormulaFromMetric(SUPPORTED_METRICS.std_dev);
 
@@ -33,6 +37,11 @@ export const convertToStdDeviationFormulaColumns = (
   { agg, dataView }: CommonColumnConverterArgs<METRIC_TYPES.STD_DEV>,
   reducedTimeRange?: string
 ) => {
+  const { aggId } = agg;
+  if (!aggId) {
+    return null;
+  }
+
   const fieldName = getFieldNameFromField(agg.aggParams?.field);
 
   if (!fieldName) {
@@ -43,9 +52,13 @@ export const convertToStdDeviationFormulaColumns = (
     return null;
   }
 
-  const { accessor } = agg;
+  const [, mode] = aggId.split('.');
+  if (!STD_MODES.includes(mode)) {
+    return null;
+  }
+
   const formula =
-    accessor % 2 === 0 // every even accessor is lower bound, odd is upper bound
+    mode === STD_LOWER
       ? getFormulaForStdDevLowerBound(field.displayName, reducedTimeRange)
       : getFormulaForStdDevUpperBound(field.displayName, reducedTimeRange);
 

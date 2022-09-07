@@ -31,17 +31,20 @@ export const convertToPercentileColumn = (
   { agg, dataView }: CommonColumnConverterArgs<METRIC_TYPES.PERCENTILES>,
   { index, reducedTimeRange }: { index?: number; reducedTimeRange?: string } = {}
 ): PercentileColumn | null => {
-  const { aggParams, accessor } = agg;
-  if (!aggParams) {
+  const { aggParams, aggId } = agg;
+  if (!aggParams || !aggId) {
     return null;
   }
   const { percents } = aggParams;
 
-  if (!percents || !percents.length || percents[accessor] === undefined) {
+  const [, percentStr] = aggId.split('.');
+
+  const percent = Number(percentStr);
+  if (!percents || !percents.length || percentStr === '' || isNaN(percent)) {
     return null;
   }
 
-  const params = convertToPercentileParams(percents[accessor]);
+  const params = convertToPercentileParams(percent);
 
   const fieldName = getFieldNameFromField(agg?.aggParams?.field);
 

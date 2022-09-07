@@ -20,17 +20,20 @@ export const convertToPercentileRankColumn = (
   { agg, dataView }: CommonColumnConverterArgs<METRIC_TYPES.PERCENTILE_RANKS>,
   { index, reducedTimeRange }: { index?: number; reducedTimeRange?: string } = {}
 ): PercentileRanksColumn | null => {
-  const { aggParams, accessor } = agg;
-  if (!aggParams) {
+  const { aggParams, aggId } = agg;
+  if (!aggParams || !aggId) {
     return null;
   }
   const { values } = aggParams;
+  const [, percentStr] = aggId.split('.');
 
-  if (!values || !values.length || values[accessor] === undefined) {
+  const percent = Number(percentStr);
+
+  if (!values || !values.length || percentStr === '' || isNaN(percent)) {
     return null;
   }
 
-  const params = convertToPercentileRankParams(values[accessor]);
+  const params = convertToPercentileRankParams(percent);
   const fieldName = getFieldNameFromField(agg.aggParams!.field);
   if (!fieldName) {
     return null;
