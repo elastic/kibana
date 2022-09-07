@@ -64,7 +64,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('can create a new time slider control from a blank state', async () => {
         await dashboardControls.createTimeSliderControl();
         expect(await dashboardControls.getControlsCount()).to.be(1);
-        await dashboard.clearUnsavedChanges();
       });
 
       it('can not add a second time slider control', async () => {
@@ -96,7 +95,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const firstId = (await dashboardControls.getAllControlIds())[0];
         await dashboardControls.removeExistingControl(firstId);
         expect(await dashboardControls.getControlsCount()).to.be(1);
-        await dashboard.clearUnsavedChanges();
       });
     });
   });
