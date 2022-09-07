@@ -8,3 +8,4 @@
 export const SCREENSHOTTING_APP_ID = 'screenshotting';
 export const SCREENSHOTTING_EXPRESSION = 'expression';
 export const SCREENSHOTTING_EXPRESSION_INPUT = 'input';
+export const SCREENSHOTTING_EXPRESSION_PARAMS = 'params';

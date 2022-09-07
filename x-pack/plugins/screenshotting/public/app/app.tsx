@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import type { ExpressionRendererParams } from '@kbn/expressions-plugin/public';
 import { useExpressionRenderer } from '@kbn/expressions-plugin/public';
-import { SCREENSHOTTING_EXPRESSION, SCREENSHOTTING_EXPRESSION_INPUT } from '../../common';
+import { SCREENSHOTTING_EXPRESSION, SCREENSHOTTING_EXPRESSION_INPUT, SCREENSHOTTING_EXPRESSION_PARAMS } from '../../common';
 import { ScreenshotModeContext } from './screenshot_mode_context';
 
 export function App() {
@@ -30,13 +30,18 @@ export function App() {
       ) ?? '',
     [screenshotMode]
   );
-  const context = useMemo(
+  const input = useMemo(
     () => screenshotMode?.getScreenshotContext(SCREENSHOTTING_EXPRESSION_INPUT),
     [screenshotMode]
   );
+  const params = useMemo(
+    () => screenshotMode?.getScreenshotContext(SCREENSHOTTING_EXPRESSION_PARAMS, {}),
+    [screenshotMode]
+  );
   const { error, isEmpty } = useExpressionRenderer(elementRef, {
+    ...params,
     expression,
-    context,
+    context: input,
   });
 
   return (

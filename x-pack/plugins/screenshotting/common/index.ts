@@ -9,6 +9,7 @@ export {
   SCREENSHOTTING_APP_ID,
   SCREENSHOTTING_EXPRESSION,
   SCREENSHOTTING_EXPRESSION_INPUT,
+  SCREENSHOTTING_EXPRESSION_PARAMS,
 } from './expression';
 export type { LayoutParams, LayoutType } from './layout';
 export { errors };

@@ -29,6 +29,7 @@ import {
   SCREENSHOTTING_APP_ID,
   SCREENSHOTTING_EXPRESSION,
   SCREENSHOTTING_EXPRESSION_INPUT,
+  SCREENSHOTTING_EXPRESSION_PARAMS,
 } from '../../common';
 import { HeadlessChromiumDriverFactory, PerformanceMetrics } from '../browsers';
 import { systemHasInsufficientMemory } from '../cloud';
@@ -60,6 +61,11 @@ export interface CaptureOptions extends Optional<ScreenshotObservableOptions, 'u
    * Expression input.
    */
   input?: unknown;
+
+  /**
+   * Expression context params.
+   */
+  params?: Record<string, unknown>;
 
   /**
    * Layout parameters.
@@ -176,6 +182,7 @@ export class Screenshots {
   private getCaptureOptions({
     expression,
     input,
+    params = {},
     request,
     ...options
   }: ScreenshotOptions): ScreenshotObservableOptions {
@@ -187,6 +194,7 @@ export class Screenshots {
             {
               [SCREENSHOTTING_EXPRESSION]: expression,
               [SCREENSHOTTING_EXPRESSION_INPUT]: input,
+              [SCREENSHOTTING_EXPRESSION_PARAMS]: params,
             },
           ] as UrlOrUrlWithContext,
         ]
