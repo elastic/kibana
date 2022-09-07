@@ -14,14 +14,14 @@ import {
   SLO_INDEX_TEMPLATE_NAME,
   SLO_INGEST_PIPELINE_NAME,
   SLO_RESOURCES_VERSION,
-} from '@kbn/observability-plugin/server/assets/constants';
-import { getSLOTransformTemplate } from '@kbn/observability-plugin/server/assets/transform_templates/slo_transform_template';
+} from '../../../assets/constants';
+import { getSLOTransformTemplate } from '../../../assets/transform_templates/slo_transform_template';
 import {
   SLO,
   apmTransactionDurationSLOSchema,
   APMTransactionDurationSLO,
-} from '@kbn/observability-plugin/server/types/models';
-import { ALL_VALUE } from '@kbn/observability-plugin/server/types/schema';
+} from '../../../types/models';
+import { ALL_VALUE } from '../../../types/schema';
 import { TransformGenerator } from '.';
 
 const APM_SOURCE_INDEX = 'metrics-apm*';

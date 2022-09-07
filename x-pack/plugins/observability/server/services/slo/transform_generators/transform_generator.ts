@@ -6,7 +6,7 @@
  */
 
 import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { SLO } from '@kbn/observability-plugin/server/types/models';
+import { SLO } from '../../../types/models';
 
 export interface TransformGenerator {
   getTransformParams(slo: SLO, spaceId: string): TransformPutTransformRequest;

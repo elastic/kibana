@@ -20,7 +20,7 @@ export const getSLOTransformTemplate = (
   aggregations: TransformPivot['aggregations'] = {}
 ): TransformPutTransformRequest => ({
   transform_id: transformId,
-  source: source,
+  source,
   frequency: '1m',
   dest: destination,
   settings: {
@@ -34,7 +34,7 @@ export const getSLOTransformTemplate = (
   },
   pivot: {
     group_by: groupBy,
-    aggregations: aggregations,
+    aggregations,
   },
   _meta: {
     version: 1,
