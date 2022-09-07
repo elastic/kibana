@@ -63,7 +63,7 @@ describe('Stack frame metadata operations', () => {
       SourceLine: 1456,
     });
     expect(getCalleeSource(metadata)).toEqual(
-      '/build/python3.9-RNBry6/python3.9-3.9.2/Objects/dictobject.c#2567'
+      '/build/python3.9-RNBry6/python3.9-3.9.2/Objects/dictobject.c#1456'
     );
   });
 
