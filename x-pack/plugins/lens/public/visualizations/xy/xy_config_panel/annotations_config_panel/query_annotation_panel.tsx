@@ -73,35 +73,6 @@ export const ConfigPanelQueryAnnotation = ({
         display="rowCompressed"
         className="lnsRowCompressedMargin"
         fullWidth
-        label={i18n.translate('xpack.lens.xyChart.annotation.queryField', {
-          defaultMessage: 'Target date field',
-        })}
-      >
-        <FieldPicker
-          options={options}
-          selectedOptions={
-            selectedField
-              ? [
-                  {
-                    label: selectedField,
-                    value: { type: 'field', field: selectedField },
-                  },
-                ]
-              : []
-          }
-          onChoose={function (choice: FieldOptionValue | undefined): void {
-            if (choice) {
-              onChange({ timeField: choice.field });
-            }
-          }}
-          fieldIsInvalid={!fieldIsValid}
-          data-test-subj="annotation-query-based-field-picker"
-        />
-      </EuiFormRow>
-      <EuiFormRow
-        display="rowCompressed"
-        className="lnsRowCompressedMargin"
-        fullWidth
         label={i18n.translate('xpack.lens.xyChart.annotation.queryInput', {
           defaultMessage: 'Annotation query',
         })}
@@ -129,6 +100,35 @@ export const ConfigPanelQueryAnnotation = ({
                   values: { example: 'method:GET' },
                 })
           }
+        />
+      </EuiFormRow>
+      <EuiFormRow
+        display="rowCompressed"
+        className="lnsRowCompressedMargin"
+        fullWidth
+        label={i18n.translate('xpack.lens.xyChart.annotation.queryField', {
+          defaultMessage: 'Target date field',
+        })}
+      >
+        <FieldPicker
+          options={options}
+          selectedOptions={
+            selectedField
+              ? [
+                  {
+                    label: selectedField,
+                    value: { type: 'field', field: selectedField },
+                  },
+                ]
+              : []
+          }
+          onChoose={function (choice: FieldOptionValue | undefined): void {
+            if (choice) {
+              onChange({ timeField: choice.field });
+            }
+          }}
+          fieldIsInvalid={!fieldIsValid}
+          data-test-subj="annotation-query-based-field-picker"
         />
       </EuiFormRow>
     </>
