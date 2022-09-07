@@ -1542,7 +1542,7 @@ export class EndpointDocGenerator extends BaseDataGenerator {
   }
 
   /**
-   * Generates an Ingest `package policy` that includes the Endpoint Policy data
+   * Generates a Fleet `package policy` that includes the Endpoint Policy data
    */
   public generatePolicyPackagePolicy(): PolicyData {
     const created = new Date(Date.now() - 8.64e7).toISOString(); // 24h ago
@@ -1587,7 +1587,7 @@ export class EndpointDocGenerator extends BaseDataGenerator {
   }
 
   /**
-   * Generate an Agent Policy (ingest)
+   * Generate an Agent Policy (Fleet)
    */
   public generateAgentPolicy(): GetAgentPoliciesResponseItem {
     // FIXME: remove and use new FleetPackagePolicyGenerator (#2262)
@@ -1607,7 +1607,7 @@ export class EndpointDocGenerator extends BaseDataGenerator {
   }
 
   /**
-   * Generate an EPM Package for Endpoint
+   * Generate a Fleet EPM Package for Endpoint
    */
   public generateEpmPackage(): GetPackagesResponse['items'][0] {
     return {
