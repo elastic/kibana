@@ -6,9 +6,11 @@
  */
 
 import type { MakeSchemaFrom } from '@kbn/usage-collection-plugin/server';
-import type { FilesMetricsHttpEndpoint } from '../routes/api_routes';
+import type { FilesMetrics } from '../../common';
 
-export type FileKindUsageSchema = Omit<FilesMetricsHttpEndpoint['output'], 'countByExtension'> & {
+type MetricsWithoutExtension = Omit<FilesMetrics, 'countByExtension'>;
+
+export type FileKindUsageSchema = MetricsWithoutExtension & {
   countByExtension: Array<{ extension: string; count: number }>;
 };
 
