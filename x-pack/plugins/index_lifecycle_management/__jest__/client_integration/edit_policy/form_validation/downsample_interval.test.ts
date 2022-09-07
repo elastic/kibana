@@ -150,5 +150,5 @@ describe('<EditPolicy /> downsample interval validation', () => {
     await actions.frozen.downsample.setDownsampleInterval('2', 'h');
     actions.errors.waitForValidation();
     actions.errors.expectMessages([], 'frozen');
-  });
+  }, /* increase a timeout of this test as it could fail on ci*/ 12000);
 });
