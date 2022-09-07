@@ -5,22 +5,24 @@
  * 2.0.
  */
 
+import type { SetEventsDeleted, SetEventsLoading } from '@kbn/timelines-plugin/common';
+import type {
+  AlertStatus,
+  CustomBulkActionProp,
+  OnUpdateAlertStatusSuccess,
+  OnUpdateAlertStatusError,
+} from '@kbn/timelines-plugin/common/types';
+import type { TGridModel, TimelineState } from '@kbn/timelines-plugin/public';
+import { useBulkActionItems } from '@kbn/timelines-plugin/public';
+import { tGridSelectors } from '@kbn/timelines-plugin/public/store/t_grid';
+
 import React, { useCallback, useEffect, useState } from 'react';
 import type { ConnectedProps } from 'react-redux';
 import { connect, useDispatch } from 'react-redux';
-import type {
-  AlertStatus,
-  SetEventsLoading,
-  SetEventsDeleted,
-  OnUpdateAlertStatusSuccess,
-  OnUpdateAlertStatusError,
-  CustomBulkActionProp,
-} from '../../../../../common/types';
-import type { Refetch } from '../../../../store/t_grid/inputs';
-import type { TGridModel, TimelineState } from '../../../../store/t_grid';
-import { tGridActions, tGridSelectors } from '../../../../store/t_grid';
+import { timelineActions } from '../../../../timelines/store/timeline';
+
 import { BulkActions } from '.';
-import { useBulkActionItems } from '../../../../hooks/use_bulk_action_items';
+import type { Refetch } from '../../../store/inputs/model';
 
 interface OwnProps {
   id: string;
@@ -63,7 +65,7 @@ export const AlertBulkActionsComponent = React.memo<StatefulAlertBulkActionsProp
     // Catches state change isSelectAllChecked->false (page checkbox) upon user selection change to reset toolbar select all
     useEffect(() => {
       if (isSelectAllChecked) {
-        dispatch(tGridActions.setTGridSelectAll({ id, selectAll: false }));
+        dispatch(timelineActions.setTGridSelectAll({ id, selectAll: false }));
       } else {
         setShowClearSelection(false);
       }
@@ -73,14 +75,14 @@ export const AlertBulkActionsComponent = React.memo<StatefulAlertBulkActionsProp
     // Dispatches to stateful_body's selectAll via TimelineTypeContext props
     // as scope of response data required to actually set selectedEvents
     const onSelectAll = useCallback(() => {
-      dispatch(tGridActions.setTGridSelectAll({ id, selectAll: true }));
+      dispatch(timelineActions.setTGridSelectAll({ id, selectAll: true }));
       setShowClearSelection(true);
     }, [dispatch, id]);
 
     // Callback for clearing entire selection from toolbar
     const onClearSelection = useCallback(() => {
       clearSelected({ id });
-      dispatch(tGridActions.setTGridSelectAll({ id, selectAll: false }));
+      dispatch(timelineActions.setTGridSelectAll({ id, selectAll: false }));
       setShowClearSelection(false);
     }, [clearSelected, dispatch, id]);
 
@@ -106,14 +108,14 @@ export const AlertBulkActionsComponent = React.memo<StatefulAlertBulkActionsProp
 
     const setEventsLoading = useCallback<SetEventsLoading>(
       ({ eventIds, isLoading }) => {
-        dispatch(tGridActions.setEventsLoading({ id, eventIds, isLoading }));
+        dispatch(timelineActions.setEventsLoading({ id, eventIds, isLoading }));
       },
       [dispatch, id]
     );
 
     const setEventsDeleted = useCallback<SetEventsDeleted>(
       ({ eventIds, isDeleted }) => {
-        dispatch(tGridActions.setEventsDeleted({ id, eventIds, isDeleted }));
+        dispatch(timelineActions.setEventsDeleted({ id, eventIds, isDeleted }));
       },
       [dispatch, id]
     );
@@ -163,7 +165,7 @@ const makeMapStateToProps = () => {
 };
 
 const mapDispatchToProps = {
-  clearSelected: tGridActions.clearSelected,
+  clearSelected: timelineActions.clearSelected,
 };
 
 const connector = connect(makeMapStateToProps, mapDispatchToProps);
