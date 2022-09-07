@@ -61,6 +61,7 @@ export const scheduleNotificationResponseActions = (
         pack_id: packId,
         queries: map(queries, (query, queryId) => {
           return {
+            ...query,
             id: queryId,
             query: query.query,
             ecs_mapping: query.ecs_mapping,

@@ -90,11 +90,11 @@ export const createActionHandler = async (
           )
         )
       : params.queries?.length
-      ? map(convertSOQueriesToPack(params.queries), (query, packQueryId) =>
+      ? map(params.queries, (query) =>
           pickBy(
             {
+              // @ts-expect-error where does type 'number' comes from?
               ...query,
-              id: packQueryId,
               action_id: uuid.v4(),
               agents: selectedAgents,
             },
