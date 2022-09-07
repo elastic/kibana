@@ -123,7 +123,7 @@ export const getActionDetailsById = async (
     id: actionId,
     agents: normalizedActionRequest.agents,
     hosts: normalizedActionRequest.agents.reduce<ActionDetails['hosts']>((acc, id) => {
-      acc[id] = { name: agentsHostInfo[id] };
+      acc[id] = { name: agentsHostInfo[id] ?? '' };
       return acc;
     }, {}),
     command: normalizedActionRequest.command,

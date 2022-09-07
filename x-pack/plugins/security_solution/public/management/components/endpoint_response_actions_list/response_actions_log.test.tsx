@@ -189,7 +189,7 @@ describe('Response Actions Log', () => {
       ).toEqual(['Time', 'Command', 'User', 'Comments', 'Status', 'Expand rows']);
     });
 
-    it('should show `Host` column when `showHostNames` is TRUE', async () => {
+    it('should show `Hosts` column when `showHostNames` is TRUE', async () => {
       render({ showHostNames: true });
 
       expect(
@@ -199,6 +199,73 @@ describe('Response Actions Log', () => {
           .slice(0, 7)
           .map((col) => col.textContent)
       ).toEqual(['Time', 'Command', 'User', 'Hosts', 'Comments', 'Status', 'Expand rows']);
+    });
+
+    it('should show multiple hostnames correctly', async () => {
+      const data = await getActionListMock({ actionCount: 1 });
+      data.data[0] = {
+        ...data.data[0],
+        hosts: {
+          ...data.data[0].hosts,
+          'agent-b': { name: 'Host-agent-b' },
+          'agent-c': { name: '' },
+          'agent-d': { name: 'Host-agent-d' },
+        },
+      };
+
+      mockUseGetEndpointActionList = {
+        ...baseMockedActionList,
+        data,
+      };
+      render({ showHostNames: true });
+
+      expect(renderResult.getByTestId(`${testPrefix}-column-hostname`)).toHaveTextContent(
+        'Host-agent-a, Host-agent-b, Host-agent-d'
+      );
+    });
+
+    it('should show display host is unenrolled for a single agent action when metadata host name is empty', async () => {
+      const data = await getActionListMock({ actionCount: 1 });
+      data.data[0] = {
+        ...data.data[0],
+        hosts: {
+          ...data.data[0].hosts,
+          'agent-a': { name: '' },
+        },
+      };
+
+      mockUseGetEndpointActionList = {
+        ...baseMockedActionList,
+        data,
+      };
+      render({ showHostNames: true });
+
+      expect(renderResult.getByTestId(`${testPrefix}-column-hostname`)).toHaveTextContent(
+        'Host unenrolled'
+      );
+    });
+
+    it('should show display host is unenrolled for a single agent action when metadata host names are empty', async () => {
+      const data = await getActionListMock({ actionCount: 1 });
+      data.data[0] = {
+        ...data.data[0],
+        hosts: {
+          ...data.data[0].hosts,
+          'agent-a': { name: '' },
+          'agent-b': { name: '' },
+          'agent-c': { name: '' },
+        },
+      };
+
+      mockUseGetEndpointActionList = {
+        ...baseMockedActionList,
+        data,
+      };
+      render({ showHostNames: true });
+
+      expect(renderResult.getByTestId(`${testPrefix}-column-hostname`)).toHaveTextContent(
+        'Hosts unenrolled'
+      );
     });
 
     it('should paginate table when there is data', async () => {
