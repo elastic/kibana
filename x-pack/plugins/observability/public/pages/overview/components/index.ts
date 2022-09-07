@@ -5,10 +5,6 @@
  * 2.0.
  */
 
-export interface AnalyticsCollection {
-  event_retention_day_length: number;
-  id: string;
-  name: string;
-}
-
-export type AnalyticsCollectionDocument = Omit<AnalyticsCollection, 'id'>;
+export * from './data_sections';
+export * from './loading_observability';
+export * from './empty_section';
