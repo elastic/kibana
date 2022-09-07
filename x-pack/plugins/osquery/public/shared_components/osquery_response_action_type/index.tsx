@@ -13,7 +13,6 @@ import { EuiSpacer } from '@elastic/eui';
 import uuid from 'uuid';
 import { useForm as useHookForm, FormProvider } from 'react-hook-form';
 import { get, isEmpty, map } from 'lodash';
-import { QueryClientProvider } from '@tanstack/react-query';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
 import type { ResponseActionValidatorRef } from '@kbn/security-solution-plugin/public/detections/components/response_actions/response_actions_form';
 import { QueryPackSelectable } from '../../live_queries/form/QueryPackSelectable';
@@ -26,13 +25,19 @@ import type { ArrayItem } from '../../shared_imports';
 import { useKibana } from '../../common/lib/kibana';
 import { SavedQueriesDropdown } from '../../saved_queries/saved_queries_dropdown';
 import { LiveQueryQueryField } from '../../live_queries/form/live_query_query_field';
-import { queryClient } from '../../query_client';
 import { StyledEuiAccordion } from '../../components/accordion';
 import { PackFieldWrapper } from './pack_field_wrapper';
+import { usePack } from '../../packs/use_pack';
 
 interface OsqueryResponseActionsParamsFormProps {
   item: ArrayItem;
   ref: React.RefObject<ResponseActionValidatorRef>;
+}
+interface ResponseActionValidatorRef {
+  validation?: (
+    actions: unknown
+  ) => Promise<{ [key: number]: { errors: Record<string, unknown> } }>;
+  actions?: unknown;
 }
 
 interface OsqueryResponseActionsParamsFormFields {
@@ -48,7 +53,7 @@ const OsqueryResponseActionParamsFormComponent: React.FunctionComponent<OsqueryR
     const uniqueId = useMemo(() => uuid.v4(), []);
     const hooksForm = useHookForm<OsqueryResponseActionsParamsFormFields>({
       defaultValues: {
-        ecs_mapping: [defaultEcsFormData],
+        // ecs_mapping: [defaultEcsFormData],
         id: uniqueId,
       },
     });
@@ -59,53 +64,14 @@ const OsqueryResponseActionParamsFormComponent: React.FunctionComponent<OsqueryR
     const { params: defaultParams } = get(data, item.path);
 
     const watchedValues = watch();
+    const { data: packData } = usePack({
+      packId: watchedValues?.packId?.[0],
+      skip: !watchedValues?.packId,
+    });
     const [queryType, setQueryType] = useState<string>(
-      defaultParams?.packId?.length ? 'pack' : 'query'
+      !isEmpty(defaultParams?.queries) ? 'pack' : 'query'
     );
-    const onSubmit = useCallback(async () => {
-      if (isEmpty(errors)) {
-        try {
-          if (queryType === 'query') {
-            context.updateFieldValues({
-              [item.path]: {
-                actionTypeId: '.osquery',
-                params: {
-                  id: watchedValues.id,
-                  savedQueryId: watchedValues.savedQueryId,
-                  query: watchedValues.query,
-                  ecs_mapping: watchedValues.ecs_mapping,
-                  packId: '',
-                },
-              },
-            });
-          } else {
-            context.updateFieldValues({
-              [item.path]: {
-                actionTypeId: '.osquery',
-                params: {
-                  id: watchedValues.id,
-                  packId: watchedValues?.packId?.length ? watchedValues?.packId[0] : undefined,
-                  savedQueryId: '',
-                  query: '',
-                  ecs_mapping: '',
-                },
-              },
-            });
-          }
-          // eslint-disable-next-line no-empty
-        } catch (e) {}
-      }
-    }, [
-      context,
-      errors,
-      item.path,
-      queryType,
-      watchedValues.ecs_mapping,
-      watchedValues.id,
-      watchedValues?.packId,
-      watchedValues.query,
-      watchedValues.savedQueryId,
-    ]);
+    const onSubmit = useCallback(async () => null, []);
 
     useEffect(() => {
       // @ts-expect-error update types
@@ -143,7 +109,36 @@ const OsqueryResponseActionParamsFormComponent: React.FunctionComponent<OsqueryR
       [permissions.readSavedQueries, permissions.runSavedQueries]
     );
 
+    useEffect(() => {
+      if (queryType === 'pack' && packData) {
+        console.log({ watchedValues });
+        context.updateFieldValues({
+          [item.path]: {
+            actionTypeId: '.osquery',
+            params: {
+              id: watchedValues.id,
+              packId: watchedValues?.packId?.length ? watchedValues?.packId[0] : undefined,
+              queries: packData?.queries,
+            },
+          },
+        });
+      } else {
+        context.updateFieldValues({
+          [item.path]: {
+            actionTypeId: '.osquery',
+            params: {
+              id: watchedValues.id,
+              savedQueryId: watchedValues.savedQueryId,
+              query: watchedValues.query,
+              ecs_mapping: watchedValues.ecs_mapping,
+            },
+          },
+        });
+      }
+    }, [context, item.path, packData, queryType, watchedValues]);
+
     useEffectOnce(() => {
+      console.log({ defaultParams, path: item.path });
       if (defaultParams && defaultParams.id) {
         const { packId, ...restParams } = defaultParams;
         map(restParams, (value, key: keyof OsqueryResponseActionsParamsFormFields) => {
@@ -151,12 +146,11 @@ const OsqueryResponseActionParamsFormComponent: React.FunctionComponent<OsqueryR
             setValue(key, value);
           }
         });
-        if (packId) {
+        if (!isEmpty(packId)) {
           setValue('packId', [packId]);
         }
       }
     });
-
     const resetFormFields = useCallback(() => {
       setValue('packId', []);
       setValue('savedQueryId', '');
@@ -199,39 +193,37 @@ const OsqueryResponseActionParamsFormComponent: React.FunctionComponent<OsqueryR
     return (
       <>
         <FormProvider {...hooksForm}>
-          <QueryClientProvider client={queryClient}>
-            <QueryPackSelectable
-              queryType={queryType}
-              setQueryType={setQueryType}
-              canRunPacks={canRunPacks}
-              canRunSingleQuery={canRunSingleQuery}
-              resetFormFields={resetFormFields}
-            />
-            {queryType === 'query' && (
-              <>
-                {!isSavedQueryDisabled && (
-                  <>
-                    <SavedQueriesDropdown
-                      disabled={isSavedQueryDisabled}
-                      onChange={handleSavedQueryChange}
-                    />
-                  </>
-                )}
-                <LiveQueryQueryField queryType={'query'} />
-                <EuiSpacer size="m" />
-                <StyledEuiAccordion
-                  id="advanced"
-                  forceState={advancedContentState}
-                  onToggle={handleToggle}
-                  buttonContent="Advanced"
-                >
-                  <EuiSpacer size="xs" />
-                  <ECSMappingEditorField />
-                </StyledEuiAccordion>
-              </>
-            )}
-            {queryType === 'pack' && <PackFieldWrapper />}
-          </QueryClientProvider>
+          <QueryPackSelectable
+            queryType={queryType}
+            setQueryType={setQueryType}
+            canRunPacks={canRunPacks}
+            canRunSingleQuery={canRunSingleQuery}
+            resetFormFields={resetFormFields}
+          />
+          {queryType === 'query' && (
+            <>
+              {!isSavedQueryDisabled && (
+                <>
+                  <SavedQueriesDropdown
+                    disabled={isSavedQueryDisabled}
+                    onChange={handleSavedQueryChange}
+                  />
+                </>
+              )}
+              <LiveQueryQueryField queryType={'query'} />
+              <EuiSpacer size="m" />
+              <StyledEuiAccordion
+                id="advanced"
+                forceState={advancedContentState}
+                onToggle={handleToggle}
+                buttonContent="Advanced"
+              >
+                <EuiSpacer size="xs" />
+                <ECSMappingEditorField />
+              </StyledEuiAccordion>
+            </>
+          )}
+          {queryType === 'pack' && <PackFieldWrapper />}
         </FormProvider>
       </>
     );

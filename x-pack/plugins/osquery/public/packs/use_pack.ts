@@ -10,7 +10,7 @@ import { useKibana } from '../common/lib/kibana';
 import type { PackItem } from './types';
 
 interface UsePack {
-  packId: string;
+  packId?: string;
   skip?: boolean;
 }
 

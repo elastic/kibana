@@ -8,11 +8,18 @@
 import React, { lazy, Suspense } from 'react';
 import type { ArrayItem } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import type { ResponseActionValidatorRef } from '@kbn/security-solution-plugin/public/detections/components/response_actions/response_actions_form';
+import { QueryClientProvider } from '@tanstack/react-query';
+import { queryClient } from '../query_client';
 
 interface LazyOsqueryActionParamsFormProps {
   item: ArrayItem;
   formRef: React.RefObject<ResponseActionValidatorRef>;
+}
+interface ResponseActionValidatorRef {
+  validation?: (
+    actions: unknown
+  ) => Promise<{ [key: number]: { errors: Record<string, unknown> } }>;
+  actions?: unknown;
 }
 
 const GhostFormField = () => <></>;
@@ -50,8 +57,15 @@ export const getLazyOsqueryResponseActionTypeForm =
           component={GhostFormField}
           readDefaultValueOnForm={!item.isNew}
         />
+        <UseField
+          path={`${item.path}.params.queries`}
+          component={GhostFormField}
+          readDefaultValueOnForm={!item.isNew}
+        />
         <Suspense fallback={null}>
-          <OsqueryResponseActionParamsForm item={item} ref={formRef} />
+          <QueryClientProvider client={queryClient}>
+            <OsqueryResponseActionParamsForm item={item} ref={formRef} />
+          </QueryClientProvider>
         </Suspense>
       </>
     );

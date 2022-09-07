@@ -89,6 +89,18 @@ export const createActionHandler = async (
             (value) => !isEmpty(value)
           )
         )
+      : params.queries?.length
+      ? map(convertSOQueriesToPack(params.queries), (query, packQueryId) =>
+          pickBy(
+            {
+              ...query,
+              id: packQueryId,
+              action_id: uuid.v4(),
+              agents: selectedAgents,
+            },
+            (value) => !isEmpty(value)
+          )
+        )
       : [
           pickBy(
             {
