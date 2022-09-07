@@ -19,7 +19,7 @@ import {
   DETECTION_ENGINE_RULES_URL_FIND,
   DETECTION_ENGINE_RULES_EXCEPTIONS_REFERENCE_URL,
 } from '../../../../../common/constants';
-import type { BulkAction } from '../../../../../common/detection_engine/schemas/common';
+import type { BulkAction } from '../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema';
 import type {
   FullResponseSchema,
   PreviewResponse,
