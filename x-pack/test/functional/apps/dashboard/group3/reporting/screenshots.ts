@@ -313,7 +313,7 @@ export default function ({
           updateBaselines
         );
 
-        expect(percentDiff).to.be.lessThan(0.09);
+        expect(percentDiff).to.be.lessThan(0.12);
       });
     });
   });
