@@ -1827,7 +1827,7 @@
             "section": "def-server.RuleExecutorServices",
             "text": "RuleExecutorServices"
           },
-          "<InstanceState, InstanceContext, ActionGroupIds>"
+          "<State, Context, ActionGroupIds>"
         ],
         "path": "x-pack/plugins/alerting/server/types.ts",
         "deprecated": false,
@@ -1899,22 +1899,14 @@
           {
             "parentPluginId": "alerting",
             "id": "def-server.RuleExecutorServices.alertFactory",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "alertFactory",
             "description": [],
             "signature": [
-              "{ create: (id: string) => ",
-              {
-                "pluginId": "alerting",
-                "scope": "server",
-                "docId": "kibAlertingPluginApi",
-                "section": "def-server.PublicAlert",
-                "text": "PublicAlert"
-              },
-              "<InstanceState, InstanceContext, ActionGroupIds>; hasReachedAlertLimit: () => boolean; done: () => ",
-              "AlertFactoryDoneUtils",
-              "<InstanceState, InstanceContext, ActionGroupIds>; }"
+              "Pick<",
+              "AlertFactory",
+              "<State, Context, ActionGroupIds>, \"done\" | \"create\"> & { alertLimit: Pick<{ getValue: () => number; setLimitReached: (reached: boolean) => void; checkLimitUsage: () => void; }, \"getValue\" | \"setLimitReached\">; }"
             ],
             "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false
