@@ -592,10 +592,11 @@ export const SAVED_OBJECT_TELEMETRY = 'monitoring-telemetry';
 export const TELEMETRY_METRIC_BUTTON_CLICK = 'btnclick__';
 
 export type INDEX_PATTERN_TYPES =
-  | 'elasticsearch'
-  | 'kibana'
-  | 'logstash'
-  | 'beats'
-  | 'enterprisesearch';
+  | typeof ELASTICSEARCH_SYSTEM_ID
+  | typeof KIBANA_SYSTEM_ID
+  | typeof LOGSTASH_SYSTEM_ID
+  | typeof BEATS_SYSTEM_ID
+  | typeof ENTERPRISE_SEARCH_SYSTEM_ID
+  | typeof APM_SYSTEM_ID;
 
 export type DS_INDEX_PATTERN_TYPES = typeof DS_INDEX_PATTERN_METRICS | typeof DS_INDEX_PATTERN_LOGS;

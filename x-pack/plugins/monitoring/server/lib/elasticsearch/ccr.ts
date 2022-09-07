@@ -12,13 +12,13 @@ import { ElasticsearchMetric } from '../metrics';
 import { createQuery } from '../create_query';
 import { ElasticsearchResponse } from '../../../common/types/es';
 import { LegacyRequest } from '../../types';
-import { getNewIndexPatterns, getElasticsearchDataset } from '../cluster/get_index_patterns';
+import { getIndexPatterns, getElasticsearchDataset } from '../cluster/get_index_patterns';
 import { Globals } from '../../static_globals';
 
 export async function checkCcrEnabled(req: LegacyRequest, ccs: string) {
   const dataset = 'cluster_stats';
   const moduleType = 'elasticsearch';
-  const indexPatterns = getNewIndexPatterns({
+  const indexPatterns = getIndexPatterns({
     config: Globals.app.config,
     moduleType,
     dataset,

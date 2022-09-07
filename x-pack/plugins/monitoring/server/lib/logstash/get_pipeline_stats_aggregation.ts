@@ -6,7 +6,7 @@
  */
 
 import { LegacyRequest, PipelineVersion } from '../../types';
-import { getNewIndexPatterns, getLogstashDataset } from '../cluster/get_index_patterns';
+import { getIndexPatterns, getLogstashDataset } from '../cluster/get_index_patterns';
 import { createQuery } from '../create_query';
 import { LogstashMetric } from '../metrics';
 import { Globals } from '../../static_globals';
@@ -121,7 +121,7 @@ function fetchPipelineLatestStats(
 ) {
   const dataset = 'node_stats';
   const moduleType = 'logstash';
-  const indexPatterns = getNewIndexPatterns({
+  const indexPatterns = getIndexPatterns({
     config: Globals.app.config,
     ccs: req.payload.ccs,
     moduleType,

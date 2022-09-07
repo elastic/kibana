@@ -11,7 +11,6 @@ import {
   postClusterSetupStatusRequestQueryRT,
   postClusterSetupStatusResponsePayloadRT,
 } from '../../../../../common/http_api/setup';
-import { getIndexPatterns } from '../../../../lib/cluster/get_index_patterns';
 import { createValidationFunction } from '../../../../lib/create_route_validation_function';
 import { verifyMonitoringAuth } from '../../../../lib/elasticsearch/verify_monitoring_auth';
 import { handleError } from '../../../../lib/errors';
@@ -45,14 +44,7 @@ export function clusterSetupStatusRoute(server: MonitoringCore) {
       // the monitoring data. `try/catch` makes it a little more explicit.
       try {
         await verifyMonitoringAuth(req);
-        const indexPatterns = getIndexPatterns(server.config, {}, req.payload.ccs);
-        const status = await getCollectionStatus(
-          req,
-          indexPatterns,
-          clusterUuid,
-          undefined,
-          skipLiveData
-        );
+        const status = await getCollectionStatus(req, clusterUuid, undefined, skipLiveData);
         return postClusterSetupStatusResponsePayloadRT.encode(status);
       } catch (err) {
         throw handleError(err, req);

@@ -13,7 +13,7 @@ import { createQuery } from '../../create_query';
 import { ElasticsearchMetric } from '../../metrics';
 import { ElasticsearchResponse } from '../../../../common/types/es';
 import { LegacyRequest } from '../../../types';
-import { getNewIndexPatterns, getElasticsearchDataset } from '../../cluster/get_index_patterns';
+import { getIndexPatterns, getElasticsearchDataset } from '../../cluster/get_index_patterns';
 import { Globals } from '../../../static_globals';
 
 export function handleResponse(shardStats: any, indexUuid: string) {
@@ -75,7 +75,7 @@ export function getIndexSummary(
   const dataset = 'index'; // data_stream.dataset
   const type = 'index_stats'; // legacy
   const moduleType = 'elasticsearch';
-  const indexPatterns = getNewIndexPatterns({
+  const indexPatterns = getIndexPatterns({
     config: Globals.app.config,
     dataset,
     moduleType,

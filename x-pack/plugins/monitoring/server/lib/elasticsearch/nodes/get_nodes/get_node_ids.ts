@@ -10,7 +10,7 @@ import { get } from 'lodash';
 import { ElasticsearchMetric } from '../../../metrics';
 import { createQuery } from '../../../create_query';
 import { LegacyRequest, Bucket } from '../../../../types';
-import { getNewIndexPatterns, getElasticsearchDataset } from '../../../cluster/get_index_patterns';
+import { getIndexPatterns, getElasticsearchDataset } from '../../../cluster/get_index_patterns';
 import { Globals } from '../../../../static_globals';
 
 export async function getNodeIds(
@@ -23,7 +23,7 @@ export async function getNodeIds(
 
   const dataset = 'node_stats';
   const moduleType = 'elasticsearch';
-  const indexPattern = getNewIndexPatterns({
+  const indexPattern = getIndexPatterns({
     config: Globals.app.config,
     ccs: req.payload.ccs,
     moduleType,

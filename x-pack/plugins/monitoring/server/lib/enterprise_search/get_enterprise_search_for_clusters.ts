@@ -38,7 +38,7 @@ export function getEnterpriseSearchForClusters(
   const maxBucketSize = config.ui.max_bucket_size;
 
   const indexPatterns = getLegacyIndexPattern({
-    moduleType: 'enterprisesearch',
+    moduleType: 'enterprise_search',
     ccs,
     config: Globals.app.config,
   });

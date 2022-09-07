@@ -13,7 +13,7 @@ import {
   postElasticsearchIndexDetailResponsePayloadRT,
 } from '../../../../../common/http_api/elasticsearch';
 import { getClusterStats } from '../../../../lib/cluster/get_cluster_stats';
-import { getNewIndexPatterns } from '../../../../lib/cluster/get_index_patterns';
+import { getIndexPatterns } from '../../../../lib/cluster/get_index_patterns';
 import { createValidationFunction } from '../../../../lib/create_route_validation_function';
 import { getMetrics } from '../../../../lib/details/get_metrics';
 import { getIndexSummary } from '../../../../lib/elasticsearch/indices';
@@ -44,7 +44,7 @@ export function esIndexRoute(server: MonitoringCore) {
         const start = req.payload.timeRange.min;
         const end = req.payload.timeRange.max;
 
-        const logsIndexPattern = getNewIndexPatterns({
+        const logsIndexPattern = getIndexPatterns({
           config,
           type: 'logs',
           moduleType: 'elasticsearch',

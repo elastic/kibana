@@ -9,7 +9,7 @@ import { AlertCluster, AlertClusterHealth } from '../../../common/types/alerts';
 import { ElasticsearchSource } from '../../../common/types/es';
 import { createDatasetFilter } from './create_dataset_query_filter';
 import { Globals } from '../../static_globals';
-import { getNewIndexPatterns, getElasticsearchDataset } from '../cluster/get_index_patterns';
+import { getIndexPatterns, getElasticsearchDataset } from '../cluster/get_index_patterns';
 import { CCS_REMOTE_PATTERN } from '../../../common/constants';
 
 export async function fetchClusterHealth(
@@ -17,7 +17,7 @@ export async function fetchClusterHealth(
   clusters: AlertCluster[],
   filterQuery?: string
 ): Promise<AlertClusterHealth[]> {
-  const indexPatterns = getNewIndexPatterns({
+  const indexPatterns = getIndexPatterns({
     config: Globals.app.config,
     moduleType: 'elasticsearch',
     dataset: 'cluster_stats',
