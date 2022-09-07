@@ -11,7 +11,7 @@ import { ActionTypeConfig, ActionTypeSecrets, ActionTypeParams } from '../types'
 
 const CASE_ACTION_TYPE_ID = '.case';
 const ServerLogActionTypeId = '.server-log';
-const IndexActionTypeId = '.es-index';
+const IndexActionTypeId = '.index';
 const ACTIONS_SCOPED_WITHIN_STACK = new Set([
   ServerLogActionTypeId,
   IndexActionTypeId,
