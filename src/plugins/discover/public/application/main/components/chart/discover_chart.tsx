@@ -33,6 +33,7 @@ const DiscoverHistogramMemoized = memo(DiscoverHistogram);
 export const CHART_HIDDEN_KEY = 'discover:chartHidden';
 
 export function DiscoverChart({
+  className,
   resetSavedSearch,
   savedSearch,
   savedSearchDataChart$,
@@ -44,6 +45,7 @@ export function DiscoverChart({
   isTimeBased,
   appendHistogram,
 }: {
+  className?: string;
   resetSavedSearch: () => void;
   savedSearch: SavedSearch;
   savedSearchDataChart$: DataCharts$;
@@ -121,7 +123,7 @@ export function DiscoverChart({
 
   return (
     <EuiFlexGroup
-      className="eui-fullHeight"
+      className={className}
       direction="column"
       alignItems="stretch"
       gutterSize="none"

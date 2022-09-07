@@ -12,25 +12,15 @@ import React, { ReactElement } from 'react';
 
 export const DiscoverPanelsFixed = ({
   className,
-  histogramHeight,
-  isPlainRecord,
-  hideChart,
-  histogramPanel,
+  hideTopPanel,
+  topPanel,
   mainPanel,
 }: {
   className?: string;
-  histogramHeight: number;
-  isPlainRecord: boolean;
-  hideChart: boolean | undefined;
-  histogramPanel: ReactElement;
+  hideTopPanel?: boolean;
+  topPanel: ReactElement;
   mainPanel: ReactElement;
 }) => {
-  const histogramPanelCss = hideChart
-    ? undefined
-    : css`
-        height: ${histogramHeight}px;
-      `;
-
   const mainPanelCss = css`
     min-height: 0;
   `;
@@ -43,11 +33,7 @@ export const DiscoverPanelsFixed = ({
       gutterSize="none"
       responsive={false}
     >
-      {!isPlainRecord && (
-        <EuiFlexItem grow={false} css={histogramPanelCss}>
-          {histogramPanel}
-        </EuiFlexItem>
-      )}
+      {!hideTopPanel && <EuiFlexItem grow={false}>{topPanel}</EuiFlexItem>}
       <EuiFlexItem css={mainPanelCss}>{mainPanel}</EuiFlexItem>
     </EuiFlexGroup>
   );

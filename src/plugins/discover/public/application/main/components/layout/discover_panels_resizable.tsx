@@ -6,7 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { EuiResizableContainer, useEuiTheme, useResizeObserver } from '@elastic/eui';
+import {
+  EuiResizableContainer,
+  useEuiTheme,
+  useGeneratedHtmlId,
+  useResizeObserver,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { ReactElement, RefObject, useCallback, useEffect, useState } from 'react';
 
@@ -18,24 +23,24 @@ const pixelsToPercent = (containerHeight: number, pixels: number) =>
 
 export const DiscoverPanelsResizable = ({
   className,
-  histogramHeight: preferredHistogramHeight,
   resizeRef,
-  histogramPanel,
+  initialTopPanelHeight,
+  topPanel,
   mainPanel,
 }: {
   className?: string;
-  histogramHeight: number;
   resizeRef: RefObject<HTMLDivElement>;
-  histogramPanel: ReactElement;
+  initialTopPanelHeight: number;
+  topPanel: ReactElement;
   mainPanel: ReactElement;
 }) => {
   const { euiTheme } = useEuiTheme();
-  const minHistogramHeight = euiTheme.base * 8;
+  const minTopPanelHeight = euiTheme.base * 8;
   const minMainHeight = euiTheme.base * 10;
-  const histogramPanelId = 'dscHistogramPanel';
+  const topPanelId = useGeneratedHtmlId({ prefix: 'topPanel' });
   const { height: containerHeight } = useResizeObserver(resizeRef.current);
-  const [histogramHeight, setHistogramHeight] = useState<number>(preferredHistogramHeight);
-  const [panelSizes, setPanelSizes] = useState({ histogramSize: 0, mainSize: 0 });
+  const [topPanelHeight, setTopPanelHeight] = useState(initialTopPanelHeight);
+  const [panelSizes, setPanelSizes] = useState({ topPanelSize: 0, mainSize: 0 });
 
   // EuiResizableContainer doesn't work properly when used with react-reverse-portal and
   // will cancel the resize. To work around this we keep track of when resizes start and
@@ -63,44 +68,44 @@ export const DiscoverPanelsResizable = ({
     z-index: 2;
   `;
 
-  // Instead of setting the panel sizes directly, we convert the histogram height
+  // Instead of setting the panel sizes directly, we convert the top panel height
   // from a percentage of the container height to a pixel value. This will trigger
   // the effect below to update the panel sizes.
   const onPanelSizeChange = useCallback(
-    ({ [histogramPanelId]: histogramSize }: { [key: string]: number }) => {
-      setHistogramHeight(percentToPixels(containerHeight, histogramSize));
+    ({ [topPanelId]: topPanelSize }: { [key: string]: number }) => {
+      setTopPanelHeight(percentToPixels(containerHeight, topPanelSize));
     },
-    [containerHeight]
+    [containerHeight, topPanelId]
   );
 
-  // This effect will update the panel sizes based on the histogram height whenever
+  // This effect will update the panel sizes based on the top panel height whenever
   // it or the container height changes. This allows us to keep the height of the
-  // histogram panel fixed when the window is resized.
+  // top panel panel fixed when the window is resized.
   useEffect(() => {
     if (!containerHeight) {
       return;
     }
 
-    let histogramSize: number;
+    let topPanelSize: number;
 
     // If the container height is less than the minimum main content height
-    // plus the current histogram height, then we need to make some adjustments.
-    if (containerHeight < minMainHeight + histogramHeight) {
-      const newHistogramHeight = containerHeight - minMainHeight;
+    // plus the current top panel height, then we need to make some adjustments.
+    if (containerHeight < minMainHeight + topPanelHeight) {
+      const newTopPanelHeight = containerHeight - minMainHeight;
 
-      // Try to make the histogram height fit within the container, but if it
+      // Try to make the top panel height fit within the container, but if it
       // doesn't then just use the minimum height.
-      if (newHistogramHeight < minHistogramHeight) {
-        histogramSize = pixelsToPercent(containerHeight, minHistogramHeight);
+      if (newTopPanelHeight < minTopPanelHeight) {
+        topPanelSize = pixelsToPercent(containerHeight, minTopPanelHeight);
       } else {
-        histogramSize = pixelsToPercent(containerHeight, newHistogramHeight);
+        topPanelSize = pixelsToPercent(containerHeight, newTopPanelHeight);
       }
     } else {
-      histogramSize = pixelsToPercent(containerHeight, histogramHeight);
+      topPanelSize = pixelsToPercent(containerHeight, topPanelHeight);
     }
 
-    setPanelSizes({ histogramSize, mainSize: 100 - histogramSize });
-  }, [containerHeight, histogramHeight, minHistogramHeight, minMainHeight]);
+    setPanelSizes({ topPanelSize, mainSize: 100 - topPanelSize });
+  }, [containerHeight, topPanelHeight, minTopPanelHeight, minMainHeight]);
 
   return (
     <div
@@ -117,12 +122,12 @@ export const DiscoverPanelsResizable = ({
         {(EuiResizablePanel, EuiResizableButton) => (
           <>
             <EuiResizablePanel
-              id={histogramPanelId}
-              minSize={`${minHistogramHeight}px`}
-              size={panelSizes.histogramSize}
+              id={topPanelId}
+              minSize={`${minTopPanelHeight}px`}
+              size={panelSizes.topPanelSize}
               paddingSize="none"
             >
-              {histogramPanel}
+              {topPanel}
             </EuiResizablePanel>
             <EuiResizableButton css={resizeWithPortalsHackButtonCss}>
               <span

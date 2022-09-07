@@ -19,6 +19,7 @@ import React, { RefObject, useCallback, useMemo } from 'react';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
+import { css } from '@emotion/css';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DataTableRecord } from '../../../../types';
 import { DocumentViewModeToggle, VIEW_MODE } from '../../../../components/view_mode_toggle';
@@ -29,11 +30,30 @@ import { DiscoverChart } from '../chart';
 import { FieldStatisticsTable } from '../field_stats_table';
 import { DiscoverDocuments } from './discover_documents';
 import { DOCUMENTS_VIEW_CLICK, FIELD_STATISTICS_VIEW_CLICK } from '../field_stats_table/constants';
-import { DiscoverPanelsResizable } from './discover_panels_resizable';
-import { DiscoverPanelsFixed } from './discover_panels_fixed';
+import { DiscoverPanels, DISCOVER_PANELS_MODE } from './discover_panels';
 
 const DiscoverChartMemoized = React.memo(DiscoverChart);
 const FieldStatisticsTableMemoized = React.memo(FieldStatisticsTable);
+
+export interface DiscoverMainContentProps {
+  isPlainRecord: boolean;
+  dataView: DataView;
+  navigateTo: (url: string) => void;
+  resetSavedSearch: () => void;
+  expandedDoc?: DataTableRecord;
+  setExpandedDoc: (doc?: DataTableRecord) => void;
+  savedSearch: SavedSearch;
+  savedSearchData$: SavedSearchData;
+  savedSearchRefetch$: DataRefetch$;
+  state: AppState;
+  stateContainer: GetStateReturn;
+  isTimeBased: boolean;
+  viewMode: VIEW_MODE;
+  onAddFilter: DocViewFilterFn | undefined;
+  onFieldEdited: () => void;
+  columns: string[];
+  resizeRef: RefObject<HTMLDivElement>;
+}
 
 export const DiscoverMainContent = ({
   isPlainRecord,
@@ -53,25 +73,7 @@ export const DiscoverMainContent = ({
   onFieldEdited,
   columns,
   resizeRef,
-}: {
-  isPlainRecord: boolean;
-  dataView: DataView;
-  navigateTo: (url: string) => void;
-  resetSavedSearch: () => void;
-  expandedDoc?: DataTableRecord;
-  setExpandedDoc: (doc?: DataTableRecord) => void;
-  savedSearch: SavedSearch;
-  savedSearchData$: SavedSearchData;
-  savedSearchRefetch$: DataRefetch$;
-  state: AppState;
-  stateContainer: GetStateReturn;
-  isTimeBased: boolean;
-  viewMode: VIEW_MODE;
-  onAddFilter: DocViewFilterFn | undefined;
-  onFieldEdited: () => void;
-  columns: string[];
-  resizeRef: RefObject<HTMLDivElement>;
-}) => {
+}: DiscoverMainContentProps) => {
   const { trackUiMetric } = useDiscoverServices();
 
   const setDiscoverViewMode = useCallback(
@@ -89,7 +91,7 @@ export const DiscoverMainContent = ({
     [trackUiMetric, stateContainer]
   );
 
-  const histogramPanelNode = useMemo(
+  const topPanelNode = useMemo(
     () => createHtmlPortalNode({ attributes: { class: 'eui-fullHeight' } }),
     []
   );
@@ -101,17 +103,24 @@ export const DiscoverMainContent = ({
 
   const showFixedPanels = useIsWithinBreakpoints(['xs', 's']) || isPlainRecord || state.hideChart;
   const { euiTheme } = useEuiTheme();
-  const panelsProps = {
-    className: 'dscPageContent__inner',
-    histogramHeight: euiTheme.base * 12,
-    histogramPanel: <OutPortal node={histogramPanelNode} />,
-    mainPanel: <OutPortal node={mainPanelNode} />,
-  };
+  const topPanelHeight = euiTheme.base * 12;
+  const chartClassName =
+    showFixedPanels && !state.hideChart
+      ? css`
+          height: ${topPanelHeight}px;
+        `
+      : 'eui-fullHeight';
+  const panelsMode = isPlainRecord
+    ? DISCOVER_PANELS_MODE.SINGLE
+    : showFixedPanels
+    ? DISCOVER_PANELS_MODE.FIXED
+    : DISCOVER_PANELS_MODE.RESIZABLE;
 
   return (
     <>
-      <InPortal node={histogramPanelNode}>
+      <InPortal node={topPanelNode}>
         <DiscoverChartMemoized
+          className={chartClassName}
           resetSavedSearch={resetSavedSearch}
           savedSearch={savedSearch}
           savedSearchDataChart$={savedSearchData$.charts$}
@@ -170,15 +179,14 @@ export const DiscoverMainContent = ({
           )}
         </EuiFlexGroup>
       </InPortal>
-      {showFixedPanels ? (
-        <DiscoverPanelsFixed
-          isPlainRecord={isPlainRecord}
-          hideChart={state.hideChart}
-          {...panelsProps}
-        />
-      ) : (
-        <DiscoverPanelsResizable resizeRef={resizeRef} {...panelsProps} />
-      )}
+      <DiscoverPanels
+        className="dscPageContent__inner"
+        mode={panelsMode}
+        resizeRef={resizeRef}
+        initialTopPanelHeight={topPanelHeight}
+        topPanel={<OutPortal node={topPanelNode} />}
+        mainPanel={<OutPortal node={mainPanelNode} />}
+      />
     </>
   );
 };
