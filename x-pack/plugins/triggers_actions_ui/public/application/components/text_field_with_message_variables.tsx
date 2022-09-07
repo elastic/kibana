@@ -124,6 +124,7 @@ export const TextFieldWithMessageVariables: React.FunctionComponent<Props> = ({
           }
         }}
         append={wrapField ? undefined : VariableButton}
+        autoComplete="off"
       />
     </Wrapper>
   );

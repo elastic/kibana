@@ -74,6 +74,7 @@ const PasswordFieldComponent: React.FC<PasswordFieldProps> = ({
               onChange={field.onChange}
               isLoading={field.isValidating || isLoading === true}
               fullWidth
+              autoComplete="new-password"
               {...rest}
             />
           </EuiFormRow>
