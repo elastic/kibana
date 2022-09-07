@@ -232,16 +232,21 @@ export interface XYArgs extends DataLayerArgs {
   showTooltip: boolean;
 }
 
+export interface ExpressionAnnotationsLayers {
+  layers: AnnotationLayerConfigResult[];
+  datatable: Datatable;
+}
+export type ExpressionAnnotationResult = ExpressionAnnotationsLayers & {
+  type: 'event_annotations_result';
+};
+
 export interface LayeredXYArgs {
   legend: LegendConfigResult;
   endValue?: EndValue;
   emphasizeFitting?: boolean;
   valueLabels: ValueLabelMode;
   layers?: XYExtendedLayerConfigResult[];
-  annotations?: {
-    layers: AnnotationLayerConfigResult[];
-    datatable: Datatable;
-  };
+  annotations?: ExpressionAnnotationResult;
   fittingFunction?: FittingFunction;
   fillOpacity?: number;
   hideEndzones?: boolean;
@@ -282,10 +287,7 @@ export interface XYProps {
   orderBucketsBySum?: boolean;
   showTooltip: boolean;
   singleTable?: boolean;
-  annotations?: {
-    layers: AnnotationLayerConfigResult[];
-    datatable: Datatable;
-  };
+  annotations?: ExpressionAnnotationResult;
 }
 
 export interface AnnotationLayerArgs {

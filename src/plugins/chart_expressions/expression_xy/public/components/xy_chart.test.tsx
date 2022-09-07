@@ -3084,6 +3084,7 @@ describe('XYChart component', () => {
           ...args,
           layers: [dateHistogramLayer],
           annotations: {
+            type: 'event_annotations_result' as const,
             layers: annotationLayers,
             datatable: {
               type: 'datatable' as const,
