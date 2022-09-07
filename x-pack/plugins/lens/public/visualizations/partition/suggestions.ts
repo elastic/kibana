@@ -132,13 +132,13 @@ export function suggestions({
                 ...state.layers[0],
                 layerId: table.layerId,
                 groups: groups.map((col) => col.columnId),
-                metric: metricColumnId,
+                metrics: metricColumnId ? [metricColumnId] : [],
                 layerType: layerTypes.DATA,
               }
             : {
                 layerId: table.layerId,
                 groups: groups.map((col) => col.columnId),
-                metric: metricColumnId,
+                metrics: metricColumnId ? [metricColumnId] : [],
                 numberDisplay: NumberDisplay.PERCENT,
                 categoryDisplay: CategoryDisplay.DEFAULT,
                 legendDisplay: LegendDisplay.DEFAULT,
@@ -197,7 +197,7 @@ export function suggestions({
                 ...state.layers[0],
                 layerId: table.layerId,
                 groups: groups.map((col) => col.columnId),
-                metric: metricColumnId,
+                metrics: metricColumnId ? [metricColumnId] : [],
                 categoryDisplay:
                   state.layers[0].categoryDisplay === CategoryDisplay.INSIDE
                     ? CategoryDisplay.DEFAULT
@@ -207,7 +207,7 @@ export function suggestions({
             : {
                 layerId: table.layerId,
                 groups: groups.map((col) => col.columnId),
-                metric: metricColumnId,
+                metrics: metricColumnId ? [metricColumnId] : [],
                 numberDisplay: NumberDisplay.PERCENT,
                 categoryDisplay: CategoryDisplay.DEFAULT,
                 legendDisplay: LegendDisplay.DEFAULT,
@@ -244,14 +244,14 @@ export function suggestions({
                 ...state.layers[0],
                 layerId: table.layerId,
                 groups: groups.map((col) => col.columnId),
-                metric: metricColumnId,
+                metrics: metricColumnId ? [metricColumnId] : [],
                 categoryDisplay: CategoryDisplay.DEFAULT,
                 layerType: layerTypes.DATA,
               }
             : {
                 layerId: table.layerId,
                 groups: groups.map((col) => col.columnId),
-                metric: metricColumnId,
+                metrics: metricColumnId ? [metricColumnId] : [],
                 numberDisplay: NumberDisplay.PERCENT,
                 categoryDisplay: CategoryDisplay.DEFAULT,
                 legendDisplay: LegendDisplay.DEFAULT,
@@ -283,14 +283,14 @@ export function suggestions({
                 ...state.layers[0],
                 layerId: table.layerId,
                 groups: groups.map((col) => col.columnId),
-                metric: metricColumnId,
+                metrics: metricColumnId ? [metricColumnId] : [],
                 categoryDisplay: CategoryDisplay.DEFAULT,
                 layerType: layerTypes.DATA,
               }
             : {
                 layerId: table.layerId,
                 groups: groups.map((col) => col.columnId),
-                metric: metricColumnId,
+                metrics: metricColumnId ? [metricColumnId] : [],
                 numberDisplay: NumberDisplay.PERCENT,
                 categoryDisplay: CategoryDisplay.DEFAULT,
                 legendDisplay: LegendDisplay.DEFAULT,

@@ -66,7 +66,7 @@ describe('suggestions', () => {
                 layerId: 'first',
                 layerType: layerTypes.DATA,
                 groups: [],
-                metric: 'a',
+                metrics: ['a'],
                 numberDisplay: NumberDisplay.HIDDEN,
                 categoryDisplay: CategoryDisplay.DEFAULT,
                 legendDisplay: LegendDisplay.DEFAULT,
@@ -556,7 +556,7 @@ describe('suggestions', () => {
                 layerId: 'first',
                 layerType: layerTypes.DATA,
                 groups: ['a'],
-                metric: 'b',
+                metrics: ['b'],
 
                 numberDisplay: NumberDisplay.HIDDEN,
                 categoryDisplay: CategoryDisplay.INSIDE,
@@ -580,7 +580,7 @@ describe('suggestions', () => {
                 layerId: 'first',
                 layerType: layerTypes.DATA,
                 groups: ['a'],
-                metric: 'b',
+                metrics: ['b'],
 
                 numberDisplay: NumberDisplay.HIDDEN,
                 categoryDisplay: CategoryDisplay.INSIDE,
@@ -614,7 +614,7 @@ describe('suggestions', () => {
                 layerId: 'first',
                 layerType: layerTypes.DATA,
                 groups: [],
-                metric: 'a',
+                metrics: ['a'],
 
                 numberDisplay: NumberDisplay.HIDDEN,
                 categoryDisplay: CategoryDisplay.DEFAULT,
@@ -664,7 +664,7 @@ describe('suggestions', () => {
                 layerId: 'first',
                 layerType: layerTypes.DATA,
                 groups: ['a', 'b'],
-                metric: 'e',
+                metrics: ['e'],
                 numberDisplay: NumberDisplay.VALUE,
                 categoryDisplay: CategoryDisplay.DEFAULT,
                 legendDisplay: LegendDisplay.DEFAULT,
@@ -713,7 +713,7 @@ describe('suggestions', () => {
                 layerId: 'first',
                 layerType: layerTypes.DATA,
                 groups: ['a', 'b'],
-                metric: 'e',
+                metrics: ['e'],
                 numberDisplay: NumberDisplay.PERCENT,
                 categoryDisplay: CategoryDisplay.DEFAULT,
                 legendDisplay: LegendDisplay.DEFAULT,
@@ -750,7 +750,7 @@ describe('suggestions', () => {
                 layerId: 'first',
                 layerType: layerTypes.DATA,
                 groups: ['a'],
-                metric: 'b',
+                metrics: ['b'],
 
                 numberDisplay: NumberDisplay.HIDDEN,
                 categoryDisplay: CategoryDisplay.INSIDE,
@@ -773,7 +773,7 @@ describe('suggestions', () => {
                 layerId: 'first',
                 layerType: layerTypes.DATA,
                 groups: ['a'],
-                metric: 'b',
+                metrics: ['b'],
 
                 numberDisplay: NumberDisplay.HIDDEN,
                 categoryDisplay: CategoryDisplay.DEFAULT, // This is changed
@@ -807,7 +807,7 @@ describe('suggestions', () => {
                 layerId: 'first',
                 layerType: layerTypes.DATA,
                 groups: [],
-                metric: 'a',
+                metrics: ['a'],
 
                 numberDisplay: NumberDisplay.HIDDEN,
                 categoryDisplay: CategoryDisplay.DEFAULT,
@@ -849,7 +849,7 @@ describe('suggestions', () => {
                 layerId: 'first',
                 layerType: layerTypes.DATA,
                 groups: ['a', 'b'],
-                metric: 'c',
+                metrics: ['c'],
 
                 numberDisplay: NumberDisplay.HIDDEN,
                 categoryDisplay: CategoryDisplay.INSIDE,
@@ -884,7 +884,7 @@ describe('suggestions', () => {
                 layerId: 'first',
                 layerType: layerTypes.DATA,
                 groups: [],
-                metric: 'a',
+                metrics: ['a'],
 
                 numberDisplay: NumberDisplay.HIDDEN,
                 categoryDisplay: CategoryDisplay.DEFAULT,
@@ -922,7 +922,7 @@ describe('suggestions', () => {
                 layerId: 'first',
                 layerType: layerTypes.DATA,
                 groups: ['a', 'b'],
-                metric: 'c',
+                metrics: ['c'],
                 numberDisplay: NumberDisplay.HIDDEN,
                 categoryDisplay: CategoryDisplay.INSIDE,
                 legendDisplay: LegendDisplay.SHOW,

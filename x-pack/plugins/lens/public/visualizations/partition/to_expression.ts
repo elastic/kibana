@@ -141,7 +141,7 @@ const generateCommonArguments: GenerateExpressionAstArguments = (
   return {
     labels: generateCommonLabelsAstArgs(state, attributes, layer),
     buckets: operations.map((o) => o.columnId).map(prepareDimension),
-    metric: layer.metric ? [prepareDimension(layer.metric)] : [],
+    metrics: layer.metrics.map(prepareDimension),
     legendDisplay: [attributes.isPreview ? LegendDisplay.HIDE : layer.legendDisplay],
     legendPosition: [layer.legendPosition || Position.Right],
     maxLegendLines: [layer.legendMaxLines ?? 1],
@@ -271,7 +271,7 @@ function expressionHelper(
     }))
     .filter((o): o is { columnId: string; operation: Operation } => !!o.operation);
 
-  if (!layer.metric || !operations.length) {
+  if (!layer.metrics.length) {
     return null;
   }
   const visualizationAst = generateExprAst(

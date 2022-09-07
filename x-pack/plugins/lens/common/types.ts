@@ -64,7 +64,7 @@ export enum EmptySizeRatios {
 
 export interface SharedPieLayerState {
   groups: string[];
-  metric?: string;
+  metrics: string[];
   numberDisplay: NumberDisplayType;
   categoryDisplay: CategoryDisplayType;
   legendDisplay: LegendDisplayType;

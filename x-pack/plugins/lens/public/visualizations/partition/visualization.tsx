@@ -31,7 +31,7 @@ function newLayerState(layerId: string): PieLayerState {
   return {
     layerId,
     groups: [],
-    metric: undefined,
+    metrics: [],
     numberDisplay: NumberDisplay.PERCENT,
     categoryDisplay: CategoryDisplay.DEFAULT,
     legendDisplay: LegendDisplay.DEFAULT,
@@ -134,7 +134,7 @@ export const getPieVisualization = ({
 
     const getSliceByGroup = (): VisualizationDimensionGroupConfig => {
       const baseProps = {
-        required: true,
+        required: false,
         groupId: 'groups',
         accessors: sortedColumns,
         enableDimensionEditor: true,
@@ -184,8 +184,8 @@ export const getPieVisualization = ({
           defaultMessage: 'Value',
         }),
       },
-      accessors: layer.metric ? [{ columnId: layer.metric }] : [],
-      supportsMoreColumns: !layer.metric,
+      accessors: layer.metrics.map((columnId) => ({ columnId })),
+      supportsMoreColumns: true,
       filterOperations: numberMetricOperations,
       required: true,
       dataTestSubj: 'lnsPie_sizeByDimensionPanel',
@@ -206,7 +206,7 @@ export const getPieVisualization = ({
         if (groupId === 'groups') {
           return { ...l, groups: [...l.groups.filter((group) => group !== columnId), columnId] };
         }
-        return { ...l, metric: columnId };
+        return { ...l, metrics: [...l.metrics.filter((metric) => metric !== columnId), columnId] };
       }),
     };
   },
@@ -218,10 +218,11 @@ export const getPieVisualization = ({
           return l;
         }
 
-        if (l.metric === columnId) {
-          return { ...l, metric: undefined };
-        }
-        return { ...l, groups: l.groups.filter((c) => c !== columnId) };
+        return {
+          ...l,
+          groups: l.groups.filter((c) => c !== columnId),
+          metrics: l.metrics.filter((c) => c !== columnId),
+        };
       }),
     };
   },
@@ -275,13 +276,13 @@ export const getPieVisualization = ({
     const warningMessages = [];
 
     for (const layer of state.layers) {
-      const { layerId, metric } = layer;
+      const { layerId, metrics } = layer;
       const rows = frame.activeData[layerId]?.rows;
       const numericColumn = frame.activeData[layerId]?.columns.find(
         ({ meta }) => meta?.type === 'number'
       );
 
-      if (!rows || !metric) {
+      if (!rows || !metrics.length) {
         break;
       }
 
@@ -299,17 +300,26 @@ export const getPieVisualization = ({
         );
       }
 
-      const columnToLabel = frame.datasourceLayers[layerId]?.getOperationForColumnId(metric)?.label;
-      const hasArrayValues = rows.some((row) => Array.isArray(row[metric]));
-      if (hasArrayValues) {
+      const metricsWithArrayValues = metrics
+        .map((metricColId) => {
+          if (rows.some((row) => Array.isArray(row[metricColId]))) {
+            return metricColId;
+          }
+        })
+        .filter(Boolean) as string[];
+
+      if (metricsWithArrayValues.length) {
+        const labels = metricsWithArrayValues.map(
+          (colId) => frame.datasourceLayers[layerId]?.getOperationForColumnId(colId)?.label || colId
+        );
         warningMessages.push(
           <FormattedMessage
-            key={columnToLabel || metric}
+            key={labels.join(',')}
             id="xpack.lens.pie.arrayValues"
-            defaultMessage="{label} contains array values. Your visualization may not render as
+            defaultMessage="The following dimensions contain array values: {label}. Your visualization may not render as
         expected."
             values={{
-              label: <strong>{columnToLabel || metric}</strong>,
+              label: <strong>{labels.join(', ')}</strong>,
             }}
           />
         );
