@@ -77,7 +77,7 @@ const getActionButton = (mode: ColorRangeItemMode) => {
 const getAppend = (rangeType: CustomPaletteParams['rangeType'], mode: ColorRangeItemMode) => {
   const items: EuiFieldNumberProps['append'] = [];
 
-  if (rangeType === 'percent' && mode !== 'auto') {
+  if (rangeType === 'percent') {
     items.push('%');
   }
 
