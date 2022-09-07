@@ -6,6 +6,7 @@
  */
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { StepCtx } from '../../services/performance';
+import { waitForVisualizations } from '../../utils';
 
 export default function ({ getService }: FtrProviderContext) {
   describe('flight_dashboard', () => {
@@ -26,6 +27,8 @@ export default function ({ getService }: FtrProviderContext) {
           {
             name: 'Add Flights Sample Data',
             handler: async ({ page }) => {
+              const showSampleDataButton = page.locator('[data-test-subj=showSampleDataButton]');
+              await showSampleDataButton.click();
               const removeButton = page.locator('[data-test-subj=removeSampleDataSetflights]');
               try {
                 await removeButton.click({ timeout: 1_000 });
@@ -45,16 +48,7 @@ export default function ({ getService }: FtrProviderContext) {
               await page.click('[data-test-subj=launchSampleDataSetflights]');
               await page.click('[data-test-subj=viewSampleDataSetflights-dashboard]');
 
-              await page.waitForFunction(function renderCompleted() {
-                const visualizations = Array.from(
-                  document.querySelectorAll('[data-rendering-count]')
-                );
-                const visualizationElementsLoaded = visualizations.length > 0;
-                const visualizationAnimationsFinished = visualizations.every(
-                  (e) => e.getAttribute('data-render-complete') === 'true'
-                );
-                return visualizationElementsLoaded && visualizationAnimationsFinished;
-              });
+              await waitForVisualizations(page, 15);
             },
           },
           {
@@ -69,12 +63,7 @@ export default function ({ getService }: FtrProviderContext) {
 
               await page.click('[data-test-subj="embeddablePanelAction-editPanel"]');
 
-              await page.waitForFunction(function renderCompleted() {
-                const visualization = document.querySelector('[data-rendering-count]');
-                return (
-                  visualization && visualization?.getAttribute('data-render-complete') === 'true'
-                );
-              });
+              await waitForVisualizations(page, 1);
             },
           },
         ],

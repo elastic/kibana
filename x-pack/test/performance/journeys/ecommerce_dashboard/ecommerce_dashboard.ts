@@ -7,6 +7,7 @@
 import { Page } from 'playwright';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { StepCtx } from '../../services/performance';
+import { waitForVisualizations } from '../../utils';
 
 export default function ({ getService }: FtrProviderContext) {
   describe('ecommerce_dashboard', () => {
@@ -27,6 +28,8 @@ export default function ({ getService }: FtrProviderContext) {
           {
             name: 'Add Ecommerce Sample Data',
             handler: async ({ page }: { page: Page }) => {
+              const showSampleDataButton = page.locator('[data-test-subj=showSampleDataButton]');
+              await showSampleDataButton.click();
               const removeButton = page.locator('[data-test-subj=removeSampleDataSetecommerce]');
               try {
                 await removeButton.click({ timeout: 1_000 });
@@ -45,16 +48,7 @@ export default function ({ getService }: FtrProviderContext) {
               await page.click('[data-test-subj=launchSampleDataSetecommerce]');
               await page.click('[data-test-subj=viewSampleDataSetecommerce-dashboard]');
 
-              await page.waitForFunction(function renderCompleted() {
-                const visualizations = Array.from(
-                  document.querySelectorAll('[data-rendering-count]')
-                );
-                const visualizationElementsLoaded = visualizations.length > 0;
-                const visualizationAnimationsFinished = visualizations.every(
-                  (e) => e.getAttribute('data-render-complete') === 'true'
-                );
-                return visualizationElementsLoaded && visualizationAnimationsFinished;
-              });
+              await waitForVisualizations(page, 13);
             },
           },
         ],
