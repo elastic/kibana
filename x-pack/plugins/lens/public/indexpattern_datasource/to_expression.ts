@@ -301,7 +301,7 @@ function getExpressionForLayer(
           type: 'function',
           function: 'lens_time_scale',
           arguments: {
-            dateColumnId: [firstDateHistogramColumn ? firstDateHistogramColumn[0] : ''],
+            dateColumnId: firstDateHistogramColumn?.length ? [firstDateHistogramColumn[0]] : [],
             inputColumnId: [id],
             outputColumnId: [id],
             outputColumnName: [col.label],

@@ -7,12 +7,7 @@
 
 import moment, { Moment } from 'moment-timezone';
 import { i18n } from '@kbn/i18n';
-import {
-  buildResultColumns,
-  Datatable,
-  DatatableRow,
-  ExecutionContext,
-} from '@kbn/expressions-plugin/common';
+import { buildResultColumns, DatatableRow, ExecutionContext } from '@kbn/expressions-plugin/common';
 import {
   calculateBounds,
   DatatableUtilitiesService,
@@ -44,7 +39,7 @@ export const timeScaleFn =
     let timeBounds: TimeRangeBounds | undefined;
     const timeZone = await getTimezone(context);
 
-    let getStartEndOfBucket: (row: DatatableRow) => {
+    let getStartEndOfBucketMeta: (row: DatatableRow) => {
       startOfBucket: Moment;
       endOfBucket: Moment;
     };
@@ -69,8 +64,9 @@ export const timeScaleFn =
       const intervalDuration = timeInfo?.interval && parseInterval(timeInfo.interval);
       timeBounds = timeInfo?.timeRange && calculateBounds(timeInfo.timeRange);
 
-      getStartEndOfBucket = (row) => {
-        const startOfBucket = moment(row[dateColumnId]);
+      getStartEndOfBucketMeta = (row) => {
+        const startOfBucket = moment.tz(row[dateColumnId], timeZone);
+
         return {
           startOfBucket,
           endOfBucket: startOfBucket.clone().add(intervalDuration),
@@ -89,9 +85,9 @@ export const timeScaleFn =
 
       timeBounds = calculateBounds(timeRange);
 
-      getStartEndOfBucket = () => ({
-        startOfBucket: moment(timeRange.from),
-        endOfBucket: moment(timeRange.to),
+      getStartEndOfBucketMeta = () => ({
+        startOfBucket: moment.tz(timeRange.from, timeZone),
+        endOfBucket: moment.tz(timeRange.to, timeZone),
       });
     }
 
@@ -109,47 +105,30 @@ export const timeScaleFn =
       return input;
     }
 
-    const targetUnitInMs = unitInMs[targetUnit];
+    return {
+      ...input,
+      columns: resultColumns,
+      rows: input.rows.map((row) => {
+        const newRow = { ...row };
 
-    // the datemath plugin always parses dates by using the current default moment time zone.
-    // to use the configured time zone, we are switching just for the bounds calculation.
+        let { startOfBucket, endOfBucket } = getStartEndOfBucketMeta(row);
 
-    // The code between this call and the reset in the finally block is not allowed to get async,
-    // otherwise the timezone setting can leak out of this function.
-    const defaultTimezone = moment().zoneName();
-    let result: Datatable;
-    try {
-      moment.tz.setDefault(timeZone);
+        if (timeBounds && timeBounds.min) {
+          startOfBucket = moment.max(startOfBucket, timeBounds.min);
+        }
+        if (timeBounds && timeBounds.max) {
+          endOfBucket = moment.min(endOfBucket, timeBounds.max);
+        }
 
-      result = {
-        ...input,
-        columns: resultColumns,
-        rows: input.rows.map((row) => {
-          const newRow = { ...row };
+        const bucketSize = endOfBucket.diff(startOfBucket);
+        const factor = bucketSize / unitInMs[targetUnit];
 
-          let { startOfBucket, endOfBucket } = getStartEndOfBucket(row);
+        const currentValue = newRow[inputColumnId];
+        if (currentValue != null) {
+          newRow[outputColumnId] = Number(currentValue) / factor;
+        }
 
-          if (timeBounds && timeBounds.min) {
-            startOfBucket = moment.max(startOfBucket, timeBounds.min);
-          }
-          if (timeBounds && timeBounds.max) {
-            endOfBucket = moment.min(endOfBucket, timeBounds.max);
-          }
-          const bucketSize = endOfBucket.diff(startOfBucket);
-          const factor = bucketSize / targetUnitInMs;
-
-          const currentValue = newRow[inputColumnId];
-          if (currentValue != null) {
-            newRow[outputColumnId] = Number(currentValue) / factor;
-          }
-
-          return newRow;
-        }),
-      };
-    } finally {
-      // reset default moment timezone
-      moment.tz.setDefault(defaultTimezone);
-    }
-
-    return result;
+        return newRow;
+      }),
+    };
   };
