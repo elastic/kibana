@@ -93,7 +93,7 @@ export const createNewTermsAlertType = (
           primaryTimestamp,
           secondaryTimestamp,
           aggregatableTimestampField,
-          filter,
+          exceptionFilter,
           unprocessedExceptions,
         },
         services,
@@ -125,7 +125,7 @@ export const createNewTermsAlertType = (
         services,
         type: params.type,
         query: params.query,
-        exceptionFilter: filter,
+        exceptionFilter,
       });
 
       const parsedHistoryWindowSize = parseDateString({

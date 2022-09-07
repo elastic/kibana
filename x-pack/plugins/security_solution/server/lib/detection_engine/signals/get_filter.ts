@@ -58,7 +58,7 @@ export const getFilter = async ({
   query,
   exceptionFilter,
 }: GetFilterArgs): Promise<ESBoolQuery> => {
-  const queryFilter = async () => {
+  const queryFilter = () => {
     if (query != null && language != null && index != null) {
       return getQueryFilter({
         query,

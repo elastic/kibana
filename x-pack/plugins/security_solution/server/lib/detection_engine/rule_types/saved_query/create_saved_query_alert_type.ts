@@ -73,7 +73,7 @@ export const createSavedQueryAlertType = (
           wrapHits,
           primaryTimestamp,
           secondaryTimestamp,
-          filter,
+          exceptionFilter,
           unprocessedExceptions,
         },
         services,
@@ -96,7 +96,7 @@ export const createSavedQueryAlertType = (
         wrapHits,
         primaryTimestamp,
         secondaryTimestamp,
-        filter,
+        exceptionFilter,
         unprocessedExceptions,
       });
       return { ...result, state };

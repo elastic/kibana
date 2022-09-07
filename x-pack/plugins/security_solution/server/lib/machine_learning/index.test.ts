@@ -26,7 +26,7 @@ describe('getAnomalies', () => {
       threshold: 5,
       earliestMs: 1588517231429,
       latestMs: 1588617231429,
-      filter: undefined,
+      exceptionFilter: undefined,
     };
   });
 

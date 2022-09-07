@@ -47,7 +47,7 @@ export const eqlExecutor = async ({
   wrapSequences,
   primaryTimestamp,
   secondaryTimestamp,
-  filter,
+  exceptionFilter,
   unprocessedExceptions,
 }: {
   inputIndex: string[];
@@ -62,7 +62,7 @@ export const eqlExecutor = async ({
   wrapSequences: WrapSequences;
   primaryTimestamp: string;
   secondaryTimestamp?: string;
-  filter: Filter | undefined;
+  exceptionFilter: Filter | undefined;
   unprocessedExceptions: ExceptionListItemSchema[];
 }): Promise<SearchAfterAndBulkCreateReturnType> => {
   const ruleParams = completeRule.ruleParams;
@@ -83,7 +83,7 @@ export const eqlExecutor = async ({
       eventCategoryOverride: ruleParams.eventCategoryOverride,
       timestampField: ruleParams.timestampField,
       tiebreakerField: ruleParams.tiebreakerField,
-      filter,
+      exceptionFilter,
     });
 
     ruleExecutionLogger.debug(`EQL query request: ${JSON.stringify(request)}`);

@@ -568,7 +568,7 @@ describe('create_signals', () => {
         secondaryTimestamp: undefined,
         runtimeMappings: undefined,
         eventCategoryOverride: undefined,
-        filter: undefined,
+        exceptionFilter: undefined,
       });
       expect(request).toEqual({
         allow_no_indices: true,
@@ -620,7 +620,7 @@ describe('create_signals', () => {
         runtimeMappings: undefined,
         eventCategoryOverride: 'event.other_category',
         timestampField: undefined,
-        filter: undefined,
+        exceptionFilter: undefined,
       });
       expect(request).toEqual({
         allow_no_indices: true,
@@ -708,7 +708,7 @@ describe('create_signals', () => {
         runtimeMappings: undefined,
         eventCategoryOverride: 'event.other_category',
         timestampField: undefined,
-        filter: undefined,
+        exceptionFilter: undefined,
       });
       expect(request).toEqual({
         allow_no_indices: true,
@@ -767,7 +767,7 @@ describe('create_signals', () => {
         secondaryTimestamp: undefined,
         runtimeMappings: undefined,
         eventCategoryOverride: undefined,
-        filter,
+        exceptionFilter: filter,
       });
       expect(request).toMatchInlineSnapshot(`
         Object {
@@ -909,7 +909,7 @@ describe('create_signals', () => {
         primaryTimestamp: '@timestamp',
         secondaryTimestamp: undefined,
         runtimeMappings: undefined,
-        filter: undefined,
+        exceptionFilter: undefined,
       });
       expect(request).toEqual({
         allow_no_indices: true,

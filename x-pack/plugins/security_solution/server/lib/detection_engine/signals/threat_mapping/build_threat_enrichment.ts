@@ -21,7 +21,7 @@ export const buildThreatEnrichment = ({
   pitId,
   reassignPitId,
   listClient,
-  filter,
+  exceptionFilter,
 }: BuildThreatEnrichmentOptions): SignalsEnrichment => {
   const getMatchedThreats: GetMatchedThreats = async (ids) => {
     const matchedThreatsFilter = {
@@ -50,7 +50,7 @@ export const buildThreatEnrichment = ({
       reassignPitId,
       runtimeMappings: undefined,
       listClient,
-      filter,
+      exceptionFilter,
     });
 
     return threatResponse.hits.hits;

@@ -74,7 +74,7 @@ export const createQueryAlertType = (
           primaryTimestamp,
           secondaryTimestamp,
           unprocessedExceptions,
-          filter,
+          exceptionFilter,
         },
         services,
         state,
@@ -96,7 +96,7 @@ export const createQueryAlertType = (
         primaryTimestamp,
         secondaryTimestamp,
         unprocessedExceptions,
-        filter,
+        exceptionFilter,
       });
       return { ...result, state };
     },

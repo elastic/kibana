@@ -75,7 +75,7 @@ export const createIndicatorMatchAlertType = (
           wrapHits,
           primaryTimestamp,
           secondaryTimestamp,
-          filter,
+          exceptionFilter,
           unprocessedExceptions,
         },
         services,
@@ -97,7 +97,7 @@ export const createIndicatorMatchAlertType = (
         wrapHits,
         primaryTimestamp,
         secondaryTimestamp,
-        filter,
+        exceptionFilter,
         unprocessedExceptions,
       });
       return { ...result, state };

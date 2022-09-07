@@ -57,7 +57,7 @@ export const createMlAlertType = (
           ruleExecutionLogger,
           tuple,
           wrapHits,
-          filter,
+          exceptionFilter,
           unprocessedExceptions,
         },
         services,
@@ -73,7 +73,7 @@ export const createMlAlertType = (
         ruleExecutionLogger,
         bulkCreate,
         wrapHits,
-        filter,
+        exceptionFilter,
         unprocessedExceptions,
       });
       return { ...result, state };

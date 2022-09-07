@@ -75,7 +75,7 @@ export const createThresholdAlertType = (
           secondaryTimestamp,
           ruleExecutionLogger,
           aggregatableTimestampField,
-          filter,
+          exceptionFilter,
           unprocessedExceptions,
         },
         services,
@@ -98,7 +98,7 @@ export const createThresholdAlertType = (
         primaryTimestamp,
         secondaryTimestamp,
         aggregatableTimestampField,
-        filter,
+        exceptionFilter,
         unprocessedExceptions,
       });
       return result;

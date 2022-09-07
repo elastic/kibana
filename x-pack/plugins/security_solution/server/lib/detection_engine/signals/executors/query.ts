@@ -46,7 +46,7 @@ export const queryExecutor = async ({
   primaryTimestamp,
   secondaryTimestamp,
   unprocessedExceptions,
-  filter,
+  exceptionFilter,
 }: {
   inputIndex: string[];
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
@@ -64,7 +64,7 @@ export const queryExecutor = async ({
   primaryTimestamp: string;
   secondaryTimestamp?: string;
   unprocessedExceptions: ExceptionListItemSchema[];
-  filter: Filter | undefined;
+  exceptionFilter: Filter | undefined;
 }) => {
   const ruleParams = completeRule.ruleParams;
 
@@ -77,7 +77,7 @@ export const queryExecutor = async ({
       savedId: ruleParams.savedId,
       services,
       index: inputIndex,
-      exceptionFilter: filter,
+      exceptionFilter,
     });
 
     return searchAfterAndBulkCreate({

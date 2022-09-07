@@ -48,7 +48,7 @@ export const createEventSignal = async ({
   runtimeMappings,
   primaryTimestamp,
   secondaryTimestamp,
-  filter,
+  exceptionFilter,
   unprocessedExceptions,
 }: CreateEventSignalOptions): Promise<SearchAfterAndBulkCreateReturnType> => {
   const threatFilter = buildThreatMappingFilter({
@@ -80,7 +80,7 @@ export const createEventSignal = async ({
       reassignPitId: reassignThreatPitId,
       runtimeMappings,
       listClient,
-      filter,
+      exceptionFilter,
     });
 
     const signalMatches = getSignalMatchesFromThreatList(threatListHits);
@@ -105,7 +105,7 @@ export const createEventSignal = async ({
       savedId,
       services,
       index: inputIndex,
-      exceptionFilter: filter,
+      exceptionFilter,
     });
 
     ruleExecutionLogger.debug(

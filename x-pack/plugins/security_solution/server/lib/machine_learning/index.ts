@@ -23,7 +23,7 @@ export interface AnomaliesSearchParams {
   earliestMs: number;
   latestMs: number;
   maxRecords?: number;
-  filter: Filter | undefined;
+  exceptionFilter: Filter | undefined;
 }
 
 export const getAnomalies = async (
@@ -51,7 +51,7 @@ export const getAnomalies = async (
                 },
               },
             ],
-            must_not: params.filter?.query,
+            must_not: params.exceptionFilter?.query,
           },
         },
         fields: [

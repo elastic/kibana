@@ -42,7 +42,7 @@ interface BuildEqlSearchRequestParams {
   eventCategoryOverride?: string;
   timestampField?: string;
   tiebreakerField?: string;
-  filter: Filter | undefined;
+  exceptionFilter: Filter | undefined;
 }
 
 const buildTimeRangeFilter = ({
@@ -221,7 +221,7 @@ export const buildEqlSearchRequest = ({
   eventCategoryOverride,
   timestampField,
   tiebreakerField,
-  filter,
+  exceptionFilter,
 }: BuildEqlSearchRequestParams): estypes.EqlSearchRequest => {
   const timestamps = secondaryTimestamp
     ? [primaryTimestamp, secondaryTimestamp]
@@ -236,7 +236,7 @@ export const buildEqlSearchRequest = ({
     language: 'eql',
     filters: filters || [],
     index,
-    exceptionFilter: filter,
+    exceptionFilter,
   });
 
   const rangeFilter = buildTimeRangeFilter({

@@ -301,7 +301,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               indicesToQuery: inputIndex,
             });
 
-            const { filter, unprocessedExceptions } = await buildExceptionFilter({
+            const { filter: exceptionFilter, unprocessedExceptions } = await buildExceptionFilter({
               alias: null,
               excludeExceptions: true,
               chunkSize: 1024,
@@ -318,7 +318,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                   runOpts: {
                     completeRule,
                     inputIndex,
-                    filter,
+                    exceptionFilter,
                     unprocessedExceptions,
                     runtimeMappings: {
                       ...runtimeMappings,

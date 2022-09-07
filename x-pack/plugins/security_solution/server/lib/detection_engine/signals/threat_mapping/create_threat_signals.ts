@@ -52,7 +52,7 @@ export const createThreatSignals = async ({
   runtimeMappings,
   primaryTimestamp,
   secondaryTimestamp,
-  filter,
+  exceptionFilter,
   unprocessedExceptions,
 }: CreateThreatSignalsOptions): Promise<SearchAfterAndBulkCreateReturnType> => {
   const params = completeRule.ruleParams;
@@ -87,7 +87,7 @@ export const createThreatSignals = async ({
     filters: allEventFilters,
     primaryTimestamp,
     secondaryTimestamp,
-    filter,
+    exceptionFilter,
   });
 
   ruleExecutionLogger.debug(`Total event count: ${eventCount}`);
@@ -113,7 +113,7 @@ export const createThreatSignals = async ({
     query: threatQuery,
     language: threatLanguage,
     index: threatIndex,
-    filter,
+    exceptionFilter,
   });
 
   ruleExecutionLogger.debug(`Total indicator items: ${threatListCount}`);
@@ -134,7 +134,7 @@ export const createThreatSignals = async ({
     pitId: threatPitId,
     reassignPitId: reassignThreatPitId,
     listClient,
-    filter,
+    exceptionFilter,
   });
 
   const createSignals = async ({
@@ -195,7 +195,7 @@ export const createThreatSignals = async ({
           runtimeMappings,
           primaryTimestamp,
           secondaryTimestamp,
-          filter,
+          exceptionFilter,
         }),
 
       createSignal: (slicedChunk) =>
@@ -231,7 +231,7 @@ export const createThreatSignals = async ({
           runtimeMappings,
           primaryTimestamp,
           secondaryTimestamp,
-          filter,
+          exceptionFilter,
           unprocessedExceptions,
         }),
     });
@@ -253,7 +253,7 @@ export const createThreatSignals = async ({
           reassignPitId: reassignThreatPitId,
           runtimeMappings,
           listClient,
-          filter,
+          exceptionFilter,
         }),
 
       createSignal: (slicedChunk) =>
@@ -282,7 +282,7 @@ export const createThreatSignals = async ({
           runtimeMappings,
           primaryTimestamp,
           secondaryTimestamp,
-          filter,
+          exceptionFilter,
           unprocessedExceptions,
         }),
     });

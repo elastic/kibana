@@ -20,7 +20,7 @@ export const findMlSignals = async ({
   anomalyThreshold,
   from,
   to,
-  filter,
+  exceptionFilter,
 }: {
   ml: MlPluginSetup;
   request: KibanaRequest;
@@ -29,7 +29,7 @@ export const findMlSignals = async ({
   anomalyThreshold: number;
   from: string;
   to: string;
-  filter: Filter | undefined;
+  exceptionFilter: Filter | undefined;
 }): Promise<AnomalyResults> => {
   const { mlAnomalySearch } = ml.mlSystemProvider(request, savedObjectsClient);
   const params = {
@@ -37,7 +37,7 @@ export const findMlSignals = async ({
     threshold: anomalyThreshold,
     earliestMs: dateMath.parse(from)?.valueOf() ?? 0,
     latestMs: dateMath.parse(to)?.valueOf() ?? 0,
-    filter,
+    exceptionFilter,
   };
   return getAnomalies(params, mlAnomalySearch);
 };

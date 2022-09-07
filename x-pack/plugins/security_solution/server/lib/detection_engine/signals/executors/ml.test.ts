@@ -73,7 +73,7 @@ describe('ml_executor', () => {
         listClient,
         bulkCreate: jest.fn(),
         wrapHits: jest.fn(),
-        filter: undefined,
+        exceptionFilter: undefined,
         unprocessedExceptions: [],
       })
     ).rejects.toThrow('ML plugin unavailable during rule execution');
@@ -90,7 +90,7 @@ describe('ml_executor', () => {
       listClient,
       bulkCreate: jest.fn(),
       wrapHits: jest.fn(),
-      filter: undefined,
+      exceptionFilter: undefined,
       unprocessedExceptions: [],
     });
     expect(ruleExecutionLogger.warn).toHaveBeenCalled();
@@ -118,7 +118,7 @@ describe('ml_executor', () => {
       listClient,
       bulkCreate: jest.fn(),
       wrapHits: jest.fn(),
-      filter: undefined,
+      exceptionFilter: undefined,
       unprocessedExceptions: [],
     });
     expect(ruleExecutionLogger.warn).toHaveBeenCalled();

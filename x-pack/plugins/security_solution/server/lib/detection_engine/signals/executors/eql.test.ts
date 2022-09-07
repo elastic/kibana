@@ -57,7 +57,7 @@ describe('eql_executor', () => {
         wrapHits: jest.fn(),
         wrapSequences: jest.fn(),
         primaryTimestamp: '@timestamp',
-        filter: undefined,
+        exceptionFilter: undefined,
         unprocessedExceptions: [getExceptionListItemSchemaMock()],
       });
       expect(ruleExecutionLogger.warn).toHaveBeenCalled();

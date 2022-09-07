@@ -38,7 +38,7 @@ export const createThreatSignal = async ({
   runtimeMappings,
   primaryTimestamp,
   secondaryTimestamp,
-  filter,
+  exceptionFilter,
   unprocessedExceptions,
 }: CreateThreatSignalOptions): Promise<SearchAfterAndBulkCreateReturnType> => {
   const threatFilter = buildThreatMappingFilter({
@@ -63,7 +63,7 @@ export const createThreatSignal = async ({
       savedId,
       services,
       index: inputIndex,
-      exceptionFilter: filter,
+      exceptionFilter,
     });
 
     ruleExecutionLogger.debug(

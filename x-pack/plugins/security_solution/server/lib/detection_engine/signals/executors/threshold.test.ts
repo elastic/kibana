@@ -101,7 +101,7 @@ describe('threshold_executor', () => {
         inputIndex: ['auditbeat-*'],
         primaryTimestamp: TIMESTAMP,
         aggregatableTimestampField: TIMESTAMP,
-        filter: undefined,
+        exceptionFilter: undefined,
         unprocessedExceptions: [],
       });
       expect(response.state).toEqual({
@@ -162,7 +162,7 @@ describe('threshold_executor', () => {
         inputIndex: ['auditbeat-*'],
         primaryTimestamp: TIMESTAMP,
         aggregatableTimestampField: TIMESTAMP,
-        filter: undefined,
+        exceptionFilter: undefined,
         unprocessedExceptions: [getExceptionListItemSchemaMock()],
       });
       expect(ruleExecutionLogger.warn).toHaveBeenCalled();

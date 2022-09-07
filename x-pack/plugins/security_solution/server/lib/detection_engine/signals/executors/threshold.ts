@@ -52,7 +52,7 @@ export const thresholdExecutor = async ({
   primaryTimestamp,
   secondaryTimestamp,
   aggregatableTimestampField,
-  filter,
+  exceptionFilter,
   unprocessedExceptions,
 }: {
   inputIndex: string[];
@@ -70,7 +70,7 @@ export const thresholdExecutor = async ({
   primaryTimestamp: string;
   secondaryTimestamp?: string;
   aggregatableTimestampField: string;
-  filter: Filter | undefined;
+  exceptionFilter: Filter | undefined;
   unprocessedExceptions: ExceptionListItemSchema[];
 }): Promise<SearchAfterAndBulkCreateReturnType & { state: ThresholdAlertState }> => {
   const result = createSearchAfterReturnType();
@@ -124,7 +124,7 @@ export const thresholdExecutor = async ({
       savedId: ruleParams.savedId,
       services,
       index: inputIndex,
-      exceptionFilter: filter,
+      exceptionFilter,
     });
 
     // Look for new events over threshold

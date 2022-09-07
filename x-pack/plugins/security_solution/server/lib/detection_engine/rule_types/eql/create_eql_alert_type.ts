@@ -73,7 +73,7 @@ export const createEqlAlertType = (
           wrapSequences,
           primaryTimestamp,
           secondaryTimestamp,
-          filter,
+          exceptionFilter,
           unprocessedExceptions,
         },
         services,
@@ -92,7 +92,7 @@ export const createEqlAlertType = (
         wrapSequences,
         primaryTimestamp,
         secondaryTimestamp,
-        filter,
+        exceptionFilter,
         unprocessedExceptions,
       });
       return { ...result, state };

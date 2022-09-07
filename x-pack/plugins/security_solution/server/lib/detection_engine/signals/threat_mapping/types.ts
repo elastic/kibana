@@ -69,7 +69,7 @@ export interface CreateThreatSignalsOptions {
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
   primaryTimestamp: string;
   secondaryTimestamp?: string;
-  filter: Filter | undefined;
+  exceptionFilter: Filter | undefined;
   unprocessedExceptions: ExceptionListItemSchema[];
 }
 
@@ -98,7 +98,7 @@ export interface CreateThreatSignalOptions {
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
   primaryTimestamp: string;
   secondaryTimestamp?: string;
-  filter: Filter | undefined;
+  exceptionFilter: Filter | undefined;
   unprocessedExceptions: ExceptionListItemSchema[];
 }
 
@@ -135,7 +135,7 @@ export interface CreateEventSignalOptions {
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
   primaryTimestamp: string;
   secondaryTimestamp?: string;
-  filter: Filter | undefined;
+  exceptionFilter: Filter | undefined;
   unprocessedExceptions: ExceptionListItemSchema[];
 }
 
@@ -200,7 +200,7 @@ export interface GetThreatListOptions {
   reassignPitId: (newPitId: OpenPointInTimeResponse['id'] | undefined) => void;
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
   listClient: ListClient;
-  filter: Filter | undefined;
+  exceptionFilter: Filter | undefined;
 }
 
 export interface ThreatListCountOptions {
@@ -209,7 +209,7 @@ export interface ThreatListCountOptions {
   language: ThreatLanguageOrUndefined;
   query: string;
   threatFilters: unknown[];
-  filter: Filter | undefined;
+  exceptionFilter: Filter | undefined;
 }
 
 export interface ThreatListDoc {
@@ -248,7 +248,7 @@ export interface BuildThreatEnrichmentOptions {
   pitId: string;
   reassignPitId: (newPitId: OpenPointInTimeResponse['id'] | undefined) => void;
   listClient: ListClient;
-  filter: Filter | undefined;
+  exceptionFilter: Filter | undefined;
 }
 
 export interface EventsOptions {
@@ -264,7 +264,7 @@ export interface EventsOptions {
   secondaryTimestamp?: string;
   tuple: RuleRangeTuple;
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
-  filter: Filter | undefined;
+  exceptionFilter: Filter | undefined;
 }
 
 export interface EventDoc {
@@ -281,7 +281,7 @@ export interface EventCountOptions {
   tuple: RuleRangeTuple;
   primaryTimestamp: string;
   secondaryTimestamp?: string;
-  filter: Filter | undefined;
+  exceptionFilter: Filter | undefined;
 }
 
 export interface SignalMatch {

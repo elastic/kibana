@@ -34,7 +34,7 @@ export const getThreatList = async ({
   reassignPitId,
   runtimeMappings,
   listClient,
-  filter,
+  exceptionFilter,
 }: GetThreatListOptions): Promise<estypes.SearchResponse<ThreatListDoc>> => {
   const calculatedPerPage = perPage ?? INDICATOR_PER_PAGE;
   if (calculatedPerPage > 10000) {
@@ -45,7 +45,7 @@ export const getThreatList = async ({
     language: language ?? 'kuery',
     filters: threatFilters,
     index,
-    exceptionFilter: filter,
+    exceptionFilter,
   });
 
   ruleExecutionLogger.debug(
@@ -96,14 +96,14 @@ export const getThreatListCount = async ({
   language,
   threatFilters,
   index,
-  filter,
+  exceptionFilter,
 }: ThreatListCountOptions): Promise<number> => {
   const queryFilter = getQueryFilter({
     query,
     language: language ?? 'kuery',
     filters: threatFilters,
     index,
-    exceptionFilter: filter,
+    exceptionFilter,
   });
   const response = await esClient.count({
     body: {

@@ -38,7 +38,7 @@ export const threatMatchExecutor = async ({
   wrapHits,
   primaryTimestamp,
   secondaryTimestamp,
-  filter,
+  exceptionFilter,
   unprocessedExceptions,
 }: {
   inputIndex: string[];
@@ -55,7 +55,7 @@ export const threatMatchExecutor = async ({
   wrapHits: WrapHits;
   primaryTimestamp: string;
   secondaryTimestamp?: string;
-  filter: Filter | undefined;
+  exceptionFilter: Filter | undefined;
   unprocessedExceptions: ExceptionListItemSchema[];
 }) => {
   const ruleParams = completeRule.ruleParams;
@@ -90,7 +90,7 @@ export const threatMatchExecutor = async ({
       runtimeMappings,
       primaryTimestamp,
       secondaryTimestamp,
-      filter,
+      exceptionFilter,
       unprocessedExceptions,
     });
   });

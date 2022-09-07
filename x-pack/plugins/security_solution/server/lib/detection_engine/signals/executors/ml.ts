@@ -39,7 +39,7 @@ export const mlExecutor = async ({
   ruleExecutionLogger,
   bulkCreate,
   wrapHits,
-  filter,
+  exceptionFilter,
   unprocessedExceptions,
 }: {
   completeRule: CompleteRule<MachineLearningRuleParams>;
@@ -50,7 +50,7 @@ export const mlExecutor = async ({
   ruleExecutionLogger: IRuleExecutionLogForExecutors;
   bulkCreate: BulkCreate;
   wrapHits: WrapHits;
-  filter: Filter | undefined;
+  exceptionFilter: Filter | undefined;
   unprocessedExceptions: ExceptionListItemSchema[];
 }) => {
   const result = createSearchAfterReturnType();
@@ -101,7 +101,7 @@ export const mlExecutor = async ({
       anomalyThreshold: ruleParams.anomalyThreshold,
       from: tuple.from.toISOString(),
       to: tuple.to.toISOString(),
-      filter,
+      exceptionFilter,
     });
 
     const [filteredAnomalyHits, _] = await filterEventsAgainstList({
