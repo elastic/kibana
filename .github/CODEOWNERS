@@ -132,7 +132,6 @@ x-pack/examples/files_example @elastic/kibana-app-services
 /x-pack/plugins/apm/  @elastic/apm-ui
 /x-pack/test/functional/apps/apm/  @elastic/apm-ui
 /x-pack/test/apm_api_integration/ @elastic/apm-ui
-/src/plugins/apm_oss/  @elastic/apm-ui
 /src/apm.js @elastic/kibana-core @vigneshshanmugam
 /packages/kbn-apm-config-loader/ @vigneshshanmugam
 /src/core/types/elasticsearch @elastic/apm-ui
