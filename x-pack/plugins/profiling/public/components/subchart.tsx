@@ -16,8 +16,10 @@ import {
 } from '@elastic/charts';
 import {
   EuiBadge,
+  EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHorizontalRule,
   EuiLink,
   EuiSpacer,
   EuiText,
@@ -25,13 +27,15 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { StackFrameMetadata } from '../../common/profiling';
 import { getFieldNameForTopNType, TopNType } from '../../common/stack_traces';
-import { CountPerTime } from '../../common/topn';
+import { CountPerTime, OTHER_BUCKET_LABEL } from '../../common/topn';
 import { useKibanaTimeZoneSetting } from '../hooks/use_kibana_timezone_setting';
 import { useProfilingChartsTheme } from '../hooks/use_profiling_charts_theme';
 import { useProfilingParams } from '../hooks/use_profiling_params';
 import { useProfilingRouter } from '../hooks/use_profiling_router';
 import { asPercentage } from '../utils/formatters/as_percentage';
+import { StackFrameSummary } from './stack_frame_summary';
 
 export interface SubChartProps {
   index: number;
@@ -42,7 +46,13 @@ export interface SubChartProps {
   percentage: number;
   data: CountPerTime[];
   showAxes: boolean;
+  metadata: StackFrameMetadata[];
+  onShowMoreClick: (() => void) | null;
+  style?: React.ComponentProps<typeof EuiFlexGroup>['style'];
+  showFrames: boolean;
 }
+
+const NUM_DISPLAYED_FRAMES = 5;
 
 export const SubChart: React.FC<SubChartProps> = ({
   index,
@@ -53,6 +63,10 @@ export const SubChart: React.FC<SubChartProps> = ({
   data,
   width,
   showAxes,
+  metadata,
+  onShowMoreClick,
+  style,
+  showFrames,
 }) => {
   const theme = useEuiTheme();
 
@@ -74,9 +88,75 @@ export const SubChart: React.FC<SubChartProps> = ({
 
   const { chartsTheme, chartsBaseTheme } = useProfilingChartsTheme();
 
+  const compact = !!onShowMoreClick;
+
+  const displayedFrames = compact ? metadata.slice(0, NUM_DISPLAYED_FRAMES) : metadata;
+
+  const hasMoreFrames = displayedFrames.length < metadata.length;
+
+  let bottomElement: React.ReactElement;
+
+  if (metadata.length > 0) {
+    bottomElement = (
+      <>
+        <EuiFlexItem
+          style={{
+            backgroundColor: theme.euiTheme.colors.lightestShade,
+            padding: theme.euiTheme.size.m,
+          }}
+        >
+          <EuiFlexGroup direction="column" gutterSize="none">
+            {displayedFrames.map((frame, frameIndex) => (
+              <>
+                <EuiFlexItem grow={false} key={frame.FrameID}>
+                  <EuiFlexGroup direction="row" alignItems="center">
+                    <EuiFlexItem grow={false}>{frameIndex + 1}</EuiFlexItem>
+                    <EuiFlexItem grow>
+                      <StackFrameSummary frame={frame} />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiFlexItem>
+                {frameIndex < displayedFrames.length - 1 || hasMoreFrames ? (
+                  <EuiFlexItem grow={false}>
+                    <EuiHorizontalRule size="full" margin="s" />
+                  </EuiFlexItem>
+                ) : null}
+              </>
+            ))}
+          </EuiFlexGroup>
+
+          {hasMoreFrames && !!onShowMoreClick && (
+            <EuiButton onClick={onShowMoreClick}>
+              {i18n.translate('xpack.profiling.stackTracesView.showMoreTracesButton', {
+                defaultMessage: 'Show more',
+              })}
+            </EuiButton>
+          )}
+        </EuiFlexItem>
+      </>
+    );
+  } else if (category === OTHER_BUCKET_LABEL && showFrames) {
+    bottomElement = (
+      <EuiFlexItem grow style={{ padding: theme.euiTheme.size.m }}>
+        <EuiFlexGroup direction="row" alignItems="center" justifyContent="center">
+          <EuiFlexItem grow={false}>
+            {i18n.translate('xpack.profiling.stackTracesView.otherTraces', {
+              defaultMessage: '[This summarizes all traces that are too small to display]',
+            })}
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+    );
+  } else {
+    bottomElement = <EuiSpacer size="s" />;
+  }
+
   return (
-    <EuiFlexGroup direction="column" gutterSize="none">
-      <EuiFlexItem>
+    <EuiFlexGroup direction="column" gutterSize="s" style={{ ...style, height: '100%' }}>
+      <EuiFlexItem
+        grow={false}
+        style={{ padding: theme.euiTheme.size.l, paddingBottom: theme.euiTheme.size.s }}
+      >
         <EuiFlexGroup
           direction="row"
           gutterSize="m"
@@ -100,8 +180,7 @@ export const SubChart: React.FC<SubChartProps> = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
-      <EuiSpacer />
-      <EuiFlexItem style={{ position: 'relative' }}>
+      <EuiFlexItem grow={false} style={{ position: 'relative' }}>
         <Chart size={{ height, width }}>
           <Settings
             showLegend={false}
@@ -160,6 +239,7 @@ export const SubChart: React.FC<SubChartProps> = ({
           </div>
         ) : null}
       </EuiFlexItem>
+      {bottomElement}
     </EuiFlexGroup>
   );
 };

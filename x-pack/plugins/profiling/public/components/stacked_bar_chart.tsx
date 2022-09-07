@@ -28,7 +28,8 @@ import { SubChart } from './subchart';
 
 function SubchartTooltip({
   highlightedSubchart,
-}: TooltipInfo & { highlightedSubchart: TopNSubchart }) {
+  showFrames,
+}: TooltipInfo & { highlightedSubchart: TopNSubchart; showFrames: boolean }) {
   // max tooltip width - 2 * padding (16px)
   const width = 224;
   return (
@@ -39,9 +40,13 @@ function SubchartTooltip({
         category={highlightedSubchart.Category}
         percentage={highlightedSubchart.Percentage}
         data={highlightedSubchart.Series}
+        showFrames={showFrames}
+        /* we don't show metadata in tooltips */
+        metadata={[]}
         height={128}
         width={width}
         showAxes={false}
+        onShowMoreClick={null}
       />
     </EuiPanel>
   );
@@ -55,6 +60,7 @@ export interface StackedBarChartProps {
   onSampleOut: () => void;
   highlightedSubchart?: TopNSubchart;
   charts: TopNSubchart[];
+  showFrames: boolean;
 }
 
 export const StackedBarChart: React.FC<StackedBarChartProps> = ({
@@ -65,6 +71,7 @@ export const StackedBarChart: React.FC<StackedBarChartProps> = ({
   onSampleOut,
   highlightedSubchart,
   charts,
+  showFrames,
 }) => {
   const timeZone = useKibanaTimeZoneSetting();
 
@@ -97,7 +104,13 @@ export const StackedBarChart: React.FC<StackedBarChartProps> = ({
       <Tooltip
         customTooltip={
           highlightedSubchart
-            ? (props) => <SubchartTooltip {...props} highlightedSubchart={highlightedSubchart} />
+            ? (props) => (
+                <SubchartTooltip
+                  {...props}
+                  showFrames={showFrames}
+                  highlightedSubchart={highlightedSubchart}
+                />
+              )
             : () => <></>
         }
       />

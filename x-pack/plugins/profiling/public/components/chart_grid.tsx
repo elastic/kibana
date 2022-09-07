@@ -5,39 +5,25 @@
  * 2.0.
  */
 
-import { EuiFlexGrid, EuiFlexItem, EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiFlexGrid, EuiFlexItem, EuiFlyout, EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { take } from 'lodash';
-import React from 'react';
+import React, { useState } from 'react';
 import { TopNSubchart } from '../../common/topn';
 import { SubChart } from './subchart';
 
 export interface ChartGridProps {
   limit: number;
   charts: TopNSubchart[];
+  showFrames: boolean;
 }
 
-function printSubCharts(subcharts: TopNSubchart[], maximum: number) {
-  const ncharts = Math.min(maximum, subcharts.length);
-
-  return take(subcharts, ncharts).map((subchart, i) => (
-    <EuiFlexItem key={i}>
-      <EuiPanel>
-        <SubChart
-          index={subchart.Index}
-          color={subchart.Color}
-          category={subchart.Category}
-          percentage={subchart.Percentage}
-          height={200}
-          data={subchart.Series}
-          showAxes
-        />
-      </EuiPanel>
-    </EuiFlexItem>
-  ));
-}
-
-export const ChartGrid: React.FC<ChartGridProps> = ({ limit, charts }) => {
+export const ChartGrid: React.FC<ChartGridProps> = ({ limit, charts, showFrames }) => {
   const maximum = Math.min(limit, charts.length ?? 0);
+
+  const ncharts = Math.min(maximum, charts.length);
+
+  const [selectedSubchart, setSelectedSubchart] = useState<TopNSubchart | undefined>(undefined);
+
   return (
     <>
       <EuiSpacer />
@@ -46,8 +32,48 @@ export const ChartGrid: React.FC<ChartGridProps> = ({ limit, charts }) => {
       </EuiTitle>
       <EuiSpacer />
       <EuiFlexGrid columns={2} gutterSize="m">
-        {printSubCharts(charts, maximum)}
+        {take(charts, ncharts).map((subchart, i) => (
+          <EuiFlexItem key={i}>
+            <EuiPanel paddingSize="none">
+              <SubChart
+                index={subchart.Index}
+                color={subchart.Color}
+                category={subchart.Category}
+                percentage={subchart.Percentage}
+                metadata={subchart.Metadata}
+                height={200}
+                data={subchart.Series}
+                showAxes
+                onShowMoreClick={() => {
+                  setSelectedSubchart(subchart);
+                }}
+                showFrames={showFrames}
+              />
+            </EuiPanel>
+          </EuiFlexItem>
+        ))}
       </EuiFlexGrid>
+      {selectedSubchart && (
+        <EuiFlyout
+          onClose={() => {
+            setSelectedSubchart(undefined);
+          }}
+        >
+          <SubChart
+            style={{ overflow: 'auto' }}
+            index={selectedSubchart.Index}
+            color={selectedSubchart.Color}
+            category={selectedSubchart.Category}
+            percentage={selectedSubchart.Percentage}
+            metadata={selectedSubchart.Metadata}
+            height={200}
+            data={selectedSubchart.Series}
+            showAxes
+            onShowMoreClick={null}
+            showFrames={showFrames}
+          />
+        </EuiFlyout>
+      )}
     </>
   );
 };
