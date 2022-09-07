@@ -81,15 +81,11 @@ export class CloudExperimentsPlugin
     return this.launchDarklyClient.variation(configKey, defaultValue);
   };
 
-  private reportMetric = <Data>({
-    metricName,
-    metricData,
-    metricValue,
-  }: CloudExperimentsMetric<Data>): void => {
-    this.launchDarklyClient?.track(metricName, metricData, metricValue);
+  private reportMetric = <Data>({ name, meta, value }: CloudExperimentsMetric<Data>): void => {
+    this.launchDarklyClient?.track(name, meta, value);
     // eslint-disable-next-line no-console
-    console.debug(`Reported experimentation metric ${metricName}`, {
-      experimentationMetric: { metricName, metricData, metricValue },
+    console.debug(`Reported experimentation metric ${name}`, {
+      experimentationMetric: { name, meta, value },
     });
   };
 }

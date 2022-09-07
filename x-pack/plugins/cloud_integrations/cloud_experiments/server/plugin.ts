@@ -99,17 +99,13 @@ export class CloudExperimentsPlugin
     return await this.launchDarklyClient.variation(configKey, this.launchDarklyUser, defaultValue);
   };
 
-  private reportMetric = <Data>({
-    metricName,
-    metricData,
-    metricValue,
-  }: CloudExperimentsMetric<Data>): void => {
+  private reportMetric = <Data>({ name, meta, value }: CloudExperimentsMetric<Data>): void => {
     if (!this.launchDarklyUser) return; // Skip any action if no LD User is defined
-    this.launchDarklyClient.track(metricName, this.launchDarklyUser, metricData, metricValue);
+    this.launchDarklyClient.track(name, this.launchDarklyUser, meta, value);
     this.logger.debug<{ experimentationMetric: CloudExperimentsMetric<Data> } & LogMeta>(
-      `Reported experimentation metric ${metricName}`,
+      `Reported experimentation metric ${name}`,
       {
-        experimentationMetric: { metricName, metricData, metricValue },
+        experimentationMetric: { name, meta, value },
       }
     );
   };

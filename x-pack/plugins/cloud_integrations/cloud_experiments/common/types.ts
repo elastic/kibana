@@ -45,13 +45,14 @@ export interface CloudExperimentsMetric<Data> {
   /**
    * The name of the metric.
    */
-  metricName: string;
+  name: string;
   /**
    * Any optional data to enrich the context of the metric. Or if the conversion is based on a non-numeric value.
    */
-  metricData?: Data;
+  meta?: Data;
   /**
-   * The numeric value of the metric. Mostly used to track the conversion rates.
+   * The numeric value of the metric. Bear in mind that they are averaged by the underlying solution.
+   * Typical values to report here are time-to-action, number of panels in a loaded dashboard, and page load time.
    */
-  metricValue?: number;
+  value?: number;
 }
