@@ -28,8 +28,8 @@ import type { InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
 import type { InternalElasticsearchServiceSetup } from '@kbn/core-elasticsearch-server-internal';
 import type { InternalMetricsServiceSetup } from '@kbn/core-metrics-server-internal';
 import type { InternalSavedObjectsServiceSetup } from '@kbn/core-saved-objects-server-internal';
+import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
 import { registerStatusRoute } from './routes';
-import type { InternalCoreUsageDataSetup } from '../core_usage_data';
 
 import { config, StatusConfigType } from './status_config';
 import { ServiceStatus, CoreStatus, InternalStatusServiceSetup } from './types';
