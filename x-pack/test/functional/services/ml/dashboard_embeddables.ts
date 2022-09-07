@@ -59,7 +59,7 @@ export function MachineLearningDashboardEmbeddablesProvider(
       const subj = 'mlAnomalyChartsInitializerConfirmButton';
       await retry.tryForTime(60 * 1000, async () => {
         await this.assertInitializerConfirmButtonEnabled();
-        await testSubjects.clickWhenNotDisabled(subj);
+        await testSubjects.clickWhenNotDisabledWithoutRetry(subj);
         await this.assertAnomalyChartsEmbeddableInitializerNotExists();
       });
     },
