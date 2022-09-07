@@ -8,7 +8,7 @@
 import { PluginInitializerContext, Plugin, CoreSetup, Logger } from '@kbn/core/server';
 import { PluginSetupContract as ActionsPluginSetupContract } from '@kbn/actions-plugin/server';
 import { registerBuiltInConnectorTypes } from './connector_types';
-
+import { getWellKnownEmailServiceRoute } from './routes';
 export interface ConnectorsPluginsSetup {
   actions: ActionsPluginSetupContract;
 }
@@ -25,7 +25,10 @@ export class StackConnectorsPlugin implements Plugin<void, void> {
   }
 
   public setup(core: CoreSetup<ConnectorsPluginsStart>, plugins: ConnectorsPluginsSetup) {
+    const router = core.http.createRouter();
     const { actions } = plugins;
+
+    getWellKnownEmailServiceRoute(router);
 
     registerBuiltInConnectorTypes({
       logger: this.logger,

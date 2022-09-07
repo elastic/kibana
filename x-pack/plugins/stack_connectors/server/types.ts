@@ -9,3 +9,29 @@ export type { GetFieldsByIssueTypeResponse as JiraGetFieldsResponse } from './co
 export type { GetCommonFieldsResponse as ServiceNowGetFieldsResponse } from './connector_types/servicenow/types';
 export type { GetCommonFieldsResponse as ResilientGetFieldsResponse } from './connector_types/resilient/types';
 export type { SwimlanePublicConfigurationType } from './connector_types/swimlane/types';
+
+export type {
+  CasesWebhookConnectorTypeId,
+  CasesWebhookActionParams,
+  EmailConnectorTypeId,
+  EmailActionParams,
+  IndexConnectorTypeId,
+  IndexActionParams,
+  PagerDutyConnectorTypeId,
+  PagerDutyActionParams,
+  ServerLogConnectorTypeId,
+  ServerLogActionParams,
+  SlackConnectorTypeId,
+  SlackActionParams,
+  WebhookConnectorTypeId,
+  WebhookActionParams,
+  ServiceNowITSMConnectorTypeId,
+  ServiceNowSIRConnectorTypeId,
+  ServiceNowActionParams,
+  JiraConnectorTypeId,
+  JiraActionParams,
+  ResilientConnectorTypeId,
+  ResilientActionParams,
+  TeamsConnectorTypeId,
+  TeamsActionParams,
+} from './connector_types';

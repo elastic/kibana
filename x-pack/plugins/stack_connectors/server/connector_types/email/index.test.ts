@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-jest.mock('@kbn/actions-plugin/server/lib/send_email', () => ({
+jest.mock('./send_email', () => ({
   sendEmail: jest.fn(),
 }));
 
@@ -20,7 +20,7 @@ import {
   validateParams,
   validateSecrets,
 } from '@kbn/actions-plugin/server/lib';
-import { sendEmail } from '@kbn/actions-plugin/server/lib/send_email';
+import { sendEmail } from './send_email';
 import {
   ActionParamsType,
   getConnectorType,

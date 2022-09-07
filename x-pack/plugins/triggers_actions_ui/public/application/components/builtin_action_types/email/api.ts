@@ -6,7 +6,7 @@
  */
 
 import { HttpSetup } from '@kbn/core/public';
-import { INTERNAL_BASE_ACTION_API_PATH } from '../../../constants';
+import { INTERNAL_BASE_STACK_CONNECTORS_API_PATH } from '../../../constants';
 import { EmailConfig } from '../types';
 
 export async function getServiceConfig({
@@ -16,5 +16,5 @@ export async function getServiceConfig({
   http: HttpSetup;
   service: string;
 }): Promise<Partial<Pick<EmailConfig, 'host' | 'port' | 'secure'>>> {
-  return await http.get(`${INTERNAL_BASE_ACTION_API_PATH}/connector/_email_config/${service}`);
+  return await http.get(`${INTERNAL_BASE_STACK_CONNECTORS_API_PATH}/_email_config/${service}`);
 }

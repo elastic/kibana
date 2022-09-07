@@ -8,10 +8,6 @@
 export const serviceNowITSMTable = 'incident';
 export const serviceNowSIRTable = 'sn_si_incident';
 
-export const ServiceNowITSMActionTypeId = '.servicenow';
-export const ServiceNowSIRActionTypeId = '.servicenow-sir';
-export const ServiceNowITOMActionTypeId = '.servicenow-itom';
-
 const SN_ITSM_APP_ID = '7148dbc91bf1f450ced060a7234bcb88';
 const SN_SIR_APP_ID = '2f0746801baeb01019ae54e4604bcb0f';
 

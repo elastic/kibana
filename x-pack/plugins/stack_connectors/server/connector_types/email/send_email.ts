@@ -11,13 +11,16 @@ import nodemailer from 'nodemailer';
 import { default as MarkdownIt } from 'markdown-it';
 
 import { Logger } from '@kbn/core/server';
-import { ActionsConfigurationUtilities } from '../actions_config';
-import { CustomHostSettings } from '../config';
-import { getNodeSSLOptions, getSSLSettingsFromConfig } from './get_node_ssl_options';
+import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
+import { CustomHostSettings } from '@kbn/actions-plugin/server/config';
+import {
+  getNodeSSLOptions,
+  getSSLSettingsFromConfig,
+} from '@kbn/actions-plugin/server/lib/get_node_ssl_options';
+import { ConnectorTokenClientContract, ProxySettings } from '@kbn/actions-plugin/server/types';
+import { getOAuthClientCredentialsAccessToken } from '@kbn/actions-plugin/server/lib/get_oauth_client_credentials_access_token';
+import { AdditionalEmailServices } from '../../../common';
 import { sendEmailGraphApi } from './send_email_graph_api';
-import { ConnectorTokenClientContract, ProxySettings } from '../types';
-import { AdditionalEmailServices } from '../../common';
-import { getOAuthClientCredentialsAccessToken } from './get_oauth_client_credentials_access_token';
 
 // an email "service" which doesn't actually send, just returns what it would send
 export const JSON_TRANSPORT_SERVICE = '__json';

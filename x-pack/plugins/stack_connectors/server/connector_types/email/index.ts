@@ -22,18 +22,13 @@ import {
   UptimeConnectorFeatureId,
   SecurityConnectorFeatureId,
 } from '@kbn/actions-plugin/common/connector_feature_config';
-
-import { AdditionalEmailServices, withoutMustacheTemplate } from '@kbn/actions-plugin/common';
+import { withoutMustacheTemplate } from '@kbn/actions-plugin/common';
 import {
   renderMustacheObject,
   renderMustacheString,
 } from '@kbn/actions-plugin/server/lib/mustache_renderer';
-import {
-  sendEmail,
-  JSON_TRANSPORT_SERVICE,
-  SendEmailOptions,
-  Transport,
-} from '@kbn/actions-plugin/server/lib/send_email';
+import { AdditionalEmailServices } from '../../../common';
+import { sendEmail, JSON_TRANSPORT_SERVICE, SendEmailOptions, Transport } from './send_email';
 import { portSchema } from '../lib/schemas';
 
 export type EmailConnectorType = ConnectorType<

@@ -10,12 +10,12 @@ import { Logger } from '@kbn/core/server';
 import { sendEmail } from './send_email';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import nodemailer from 'nodemailer';
-import { ProxySettings } from '../types';
-import { actionsConfigMock } from '../actions_config.mock';
-import { CustomHostSettings } from '../config';
+import { ProxySettings } from '@kbn/actions-plugin/server/types';
+import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
+import { CustomHostSettings } from '@kbn/actions-plugin/server/config';
 import { sendEmailGraphApi } from './send_email_graph_api';
-import { getOAuthClientCredentialsAccessToken } from './get_oauth_client_credentials_access_token';
-import { connectorTokenClientMock } from './connector_token_client.mock';
+import { getOAuthClientCredentialsAccessToken } from '@kbn/actions-plugin/server/lib/get_oauth_client_credentials_access_token';
+import { connectorTokenClientMock } from '@kbn/actions-plugin/server/lib/connector_token_client.mock';
 
 jest.mock('nodemailer', () => ({
   createTransport: jest.fn(),
@@ -23,7 +23,7 @@ jest.mock('nodemailer', () => ({
 jest.mock('./send_email_graph_api', () => ({
   sendEmailGraphApi: jest.fn(),
 }));
-jest.mock('./get_oauth_client_credentials_access_token', () => ({
+jest.mock('@kbn/actions-plugin/server/lib/get_oauth_client_credentials_access_token', () => ({
   getOAuthClientCredentialsAccessToken: jest.fn(),
 }));
 

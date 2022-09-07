@@ -16,7 +16,6 @@ import { getActionRoute } from './get';
 import { getAllActionRoute } from './get_all';
 import { connectorTypesRoute } from './connector_types';
 import { updateActionRoute } from './update';
-import { getWellKnownEmailServiceRoute } from './get_well_known_email_service';
 import { getOAuthAccessToken } from './get_oauth_access_token';
 import { defineLegacyRoutes } from './legacy';
 import { ActionsConfigurationUtilities } from '../actions_config';
@@ -42,5 +41,4 @@ export function defineRoutes(opts: RouteOptions) {
   executeActionRoute(router, licenseState);
 
   getOAuthAccessToken(router, licenseState, actionsConfigUtils);
-  getWellKnownEmailServiceRoute(router, licenseState);
 }

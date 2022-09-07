@@ -28,7 +28,7 @@ describe('useEmailConfig', () => {
     const { result } = renderUseEmailConfigHook();
     await act(async () => {
       const res = await result.current.getEmailServiceConfig('gmail');
-      expect(http.get).toHaveBeenCalledWith('/internal/actions/connector/_email_config/gmail');
+      expect(http.get).toHaveBeenCalledWith('/internal/stack_connectors/_email_config/gmail');
       expect(res).toEqual({
         host: 'smtp.gmail.com',
         port: 465,
@@ -46,7 +46,7 @@ describe('useEmailConfig', () => {
     const { result } = renderUseEmailConfigHook();
     await act(async () => {
       const res = await result.current.getEmailServiceConfig('gmail');
-      expect(http.get).toHaveBeenCalledWith('/internal/actions/connector/_email_config/gmail');
+      expect(http.get).toHaveBeenCalledWith('/internal/stack_connectors/_email_config/gmail');
       expect(res).toEqual({
         host: 'smtp.gmail.com',
         port: 465,
@@ -61,7 +61,7 @@ describe('useEmailConfig', () => {
 
     await act(async () => {
       const res = await result.current.getEmailServiceConfig('foo');
-      expect(http.get).toHaveBeenCalledWith('/internal/actions/connector/_email_config/foo');
+      expect(http.get).toHaveBeenCalledWith('/internal/stack_connectors/_email_config/foo');
       expect(res).toEqual({
         host: '',
         port: 0,
