@@ -9,7 +9,7 @@ import type { DeepPartial } from 'utility-types';
 import { merge } from 'lodash';
 import { gte } from 'semver';
 import { BaseDataGenerator } from './base_data_generator';
-import type { HostMetadataInterface } from '../types';
+import type { HostMetadataInterface, OSFields } from '../types';
 import { EndpointStatus, HostPolicyResponseActionStatus } from '../types';
 
 /**
@@ -64,7 +64,7 @@ export class EndpointMetadataGenerator extends BaseDataGenerator {
         architecture: this.randomString(10),
         ip: this.randomArray(3, () => this.randomIP()),
         mac: this.randomArray(3, () => this.randomMac()),
-        os: this.randomChoice(OS),
+        os: this.randomOsFields(),
       },
       Endpoint: {
         status: EndpointStatus.enrolled,
@@ -88,5 +88,62 @@ export class EndpointMetadataGenerator extends BaseDataGenerator {
     };
 
     return merge(hostMetadataDoc, overrides);
+  }
+
+  protected randomOsFields(): OSFields {
+    return this.randomChoice([
+      {
+        name: 'Windows',
+        full: 'Windows 10',
+        version: '10.0',
+        platform: 'Windows',
+        family: 'windows',
+        Ext: {
+          variant: 'Windows Pro',
+        },
+      },
+      {
+        name: 'Windows',
+        full: 'Windows Server 2016',
+        version: '10.0',
+        platform: 'Windows',
+        family: 'windows',
+        Ext: {
+          variant: 'Windows Server',
+        },
+      },
+      {
+        name: 'Windows',
+        full: 'Windows Server 2012',
+        version: '6.2',
+        platform: 'Windows',
+        family: 'windows',
+        Ext: {
+          variant: 'Windows Server',
+        },
+      },
+      {
+        name: 'Windows',
+        full: 'Windows Server 2012R2',
+        version: '6.3',
+        platform: 'Windows',
+        family: 'windows',
+        Ext: {
+          variant: 'Windows Server Release 2',
+        },
+      },
+      {
+        Ext: {
+          variant: 'Debian',
+        },
+        kernel: '4.19.0-21-cloud-amd64 #1 SMP Debian 4.19.249-2 (2022-06-30)',
+        name: 'Linux',
+        family: 'debian',
+        type: 'linux',
+        version: '10.12',
+        platform: 'debian',
+        full: 'Debian 10.12',
+      },
+    ]);
   }
 }

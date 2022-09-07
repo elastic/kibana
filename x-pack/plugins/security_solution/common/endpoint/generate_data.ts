@@ -14,17 +14,18 @@ import type {
   KibanaAssetReference,
 } from '@kbn/fleet-plugin/common';
 import { agentPolicyStatuses } from '@kbn/fleet-plugin/common';
+import { EndpointMetadataGenerator } from './data_generators/endpoint_metadata_generator';
 import type {
   AlertEvent,
   DataStream,
   Host,
   HostMetadata,
   HostPolicyResponse,
-  OSFields,
   PolicyData,
   SafeEndpointEvent,
+  EndpointStatus,
 } from './types';
-import { EndpointStatus, HostPolicyResponseActionStatus } from './types';
+import { HostPolicyResponseActionStatus } from './types';
 import { policyFactory } from './models/policy_config';
 import {
   ancestryArray,
@@ -48,55 +49,6 @@ export type Event = AlertEvent | SafeEndpointEvent;
  * ancestry_array[0] == process.parent.entity_id and ancestry_array[1] == process.parent.parent.entity_id
  */
 export const ANCESTRY_LIMIT: number = 2;
-
-const Windows: OSFields[] = [
-  {
-    name: 'Windows',
-    full: 'Windows 10',
-    version: '10.0',
-    platform: 'Windows',
-    family: 'windows',
-    Ext: {
-      variant: 'Windows Pro',
-    },
-  },
-  {
-    name: 'Windows',
-    full: 'Windows Server 2016',
-    version: '10.0',
-    platform: 'Windows',
-    family: 'windows',
-    Ext: {
-      variant: 'Windows Server',
-    },
-  },
-  {
-    name: 'Windows',
-    full: 'Windows Server 2012',
-    version: '6.2',
-    platform: 'Windows',
-    family: 'windows',
-    Ext: {
-      variant: 'Windows Server',
-    },
-  },
-  {
-    name: 'Windows',
-    full: 'Windows Server 2012R2',
-    version: '6.3',
-    platform: 'Windows',
-    family: 'windows',
-    Ext: {
-      variant: 'Windows Server Release 2',
-    },
-  },
-];
-
-const Linux: OSFields[] = [];
-
-const Mac: OSFields[] = [];
-
-const OS: OSFields[] = [...Windows, ...Mac, ...Linux];
 
 const POLICY_RESPONSE_STATUSES: HostPolicyResponseActionStatus[] = [
   HostPolicyResponseActionStatus.success,
@@ -407,13 +359,20 @@ export class EndpointDocGenerator extends BaseDataGenerator {
   commonInfo: HostInfo;
   sequence: number = 0;
 
+  private readonly metadataGenerator: EndpointMetadataGenerator;
+
   /**
    * The EndpointDocGenerator parameters
    *
    * @param seed either a string to seed the random number generator or a random number generator function
+   * @param MetadataGenerator
    */
-  constructor(seed: string | seedrandom.prng = Math.random().toString()) {
+  constructor(
+    seed: string | seedrandom.prng = Math.random().toString(),
+    MetadataGenerator: typeof EndpointMetadataGenerator = EndpointMetadataGenerator
+  ) {
     super(seed);
+    this.metadataGenerator = new MetadataGenerator(seed);
     this.commonInfo = this.createHostData();
   }
 
@@ -457,46 +416,11 @@ export class EndpointDocGenerator extends BaseDataGenerator {
   }
 
   private createHostData(): HostInfo {
-    const hostName = this.randomHostname();
-    const isIsolated = this.randomBoolean(0.3);
-    const agentVersion = this.randomVersion();
-    const capabilities = ['isolation', 'kill_process', 'suspend_process', 'running_processes'];
-    const agentId = this.seededUUIDv4();
+    const { agent, elastic, host, Endpoint } = this.metadataGenerator.generate({
+      Endpoint: { policy: { applied: this.randomChoice(APPLIED_POLICIES) } },
+    });
 
-    return {
-      agent: {
-        version: agentVersion,
-        id: agentId,
-        type: 'endpoint',
-      },
-      elastic: {
-        agent: {
-          id: agentId,
-        },
-      },
-      host: {
-        id: this.seededUUIDv4(),
-        hostname: hostName,
-        name: hostName,
-        architecture: this.randomString(10),
-        ip: this.randomArray(3, () => this.randomIP()),
-        mac: this.randomArray(3, () => this.randomMac()),
-        os: this.randomChoice(OS),
-      },
-      Endpoint: {
-        status: EndpointStatus.enrolled,
-        policy: {
-          applied: this.randomChoice(APPLIED_POLICIES),
-        },
-        configuration: {
-          isolation: isIsolated,
-        },
-        state: {
-          isolation: isIsolated,
-        },
-        capabilities,
-      },
-    };
+    return { agent, elastic, host, Endpoint };
   }
 
   /**
@@ -508,21 +432,11 @@ export class EndpointDocGenerator extends BaseDataGenerator {
     ts = new Date().getTime(),
     metadataDataStream = metadataDefaultDataStream
   ): HostMetadata {
-    return {
+    return this.metadataGenerator.generate({
       '@timestamp': ts,
-      event: {
-        created: ts,
-        id: this.seededUUIDv4(),
-        kind: 'metric',
-        category: ['host'],
-        type: ['info'],
-        module: 'endpoint',
-        action: 'endpoint_metadata',
-        dataset: 'endpoint.metadata',
-      },
-      ...this.commonInfo,
       data_stream: metadataDataStream,
-    };
+      ...this.commonInfo,
+    });
   }
 
   /**
