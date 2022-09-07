@@ -71,11 +71,10 @@ export const generateSeverityFilter = (
             bool: {
               should: severitySelection.map((query) => ({
                 match_phrase: {
-                  [entity === 'user'
-                    ? 'user.risk.calculated_level.keyword'
-                    : 'host.risk.calculated_level.keyword']: {
-                    query,
-                  },
+                  [entity === 'user' ? 'user.risk.calculated_level' : 'host.risk.calculated_level']:
+                    {
+                      query,
+                    },
                 },
               })),
             },

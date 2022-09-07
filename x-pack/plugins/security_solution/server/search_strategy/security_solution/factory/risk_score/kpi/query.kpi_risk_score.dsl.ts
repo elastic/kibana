@@ -27,8 +27,8 @@ export const buildKpiRiskScoreQuery = ({
           terms: {
             field:
               entity === RiskScoreEntity.user
-                ? 'user.risk.calculated_level.keyword'
-                : 'host.risk.calculated_level.keyword',
+                ? 'user.risk.calculated_level'
+                : 'host.risk.calculated_level',
           },
           aggs: {
             unique_entries: {
