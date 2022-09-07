@@ -16,7 +16,7 @@ import {
   clearFlashMessages,
   flashSuccessToast,
 } from '../../../shared/flash_messages';
-import { StartSyncApiLogic, StartSyncArgs } from '../../api/connector_package/start_sync_api_logic';
+import { StartSyncApiLogic, StartSyncArgs } from '../../api/connector/start_sync_api_logic';
 import {
   FetchIndexApiLogic,
   FetchIndexApiParams,
@@ -29,6 +29,7 @@ import {
   getLastUpdated,
   indexToViewIndex,
   isConnectorIndex,
+  isConnectorViewIndex,
   isCrawlerIndex,
 } from '../../utils/indices';
 
@@ -61,6 +62,7 @@ export interface IndexViewActions {
 }
 
 export interface IndexViewValues {
+  connectorId: string | null;
   data: typeof FetchIndexApiLogic.values.data;
   fetchIndexTimeoutId: NodeJS.Timeout | null;
   index: ElasticsearchViewIndex | undefined;
@@ -170,7 +172,7 @@ export const IndexViewLogic = kea<MakeLogicType<IndexViewValues, IndexViewAction
     },
     startSync: () => {
       if (isConnectorIndex(values.data)) {
-        actions.makeStartSyncRequest({ connectorId: values.data?.connector?.id });
+        actions.makeStartSyncRequest({ connectorId: values.data.connector.id });
       }
     },
     startSyncApiError: (e) => flashAPIErrors(e),
@@ -215,6 +217,10 @@ export const IndexViewLogic = kea<MakeLogicType<IndexViewValues, IndexViewAction
     ],
   },
   selectors: ({ selectors }) => ({
+    connectorId: [
+      () => [selectors.index],
+      (index) => (isConnectorViewIndex(index) ? index.connector.id : null),
+    ],
     index: [() => [selectors.data], (data) => (data ? indexToViewIndex(data) : undefined)],
     ingestionMethod: [() => [selectors.data], (data) => getIngestionMethod(data)],
     ingestionStatus: [() => [selectors.data], (data) => getIngestionStatus(data)],

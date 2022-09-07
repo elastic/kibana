@@ -417,6 +417,28 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
 
                 // Total search duration should be greater since it includes any network latency
                 expect(totalSearchDuration! - esSearchDuration! > 0).to.be(true);
+
+                expect(
+                  event?.kibana?.alert?.rule?.execution?.metrics?.claim_to_start_duration_ms
+                ).to.be.greaterThan(0);
+                expect(
+                  event?.kibana?.alert?.rule?.execution?.metrics?.total_run_duration_ms
+                ).to.be.greaterThan(0);
+                expect(
+                  event?.kibana?.alert?.rule?.execution?.metrics?.prepare_rule_duration_ms
+                ).to.be.greaterThan(0);
+                expect(
+                  event?.kibana?.alert?.rule?.execution?.metrics?.rule_type_run_duration_ms
+                ).to.be.greaterThan(0);
+                expect(
+                  event?.kibana?.alert?.rule?.execution?.metrics?.process_alerts_duration_ms! >= 0
+                ).to.be(true);
+                expect(
+                  event?.kibana?.alert?.rule?.execution?.metrics?.trigger_actions_duration_ms! >= 0
+                ).to.be(true);
+                expect(
+                  event?.kibana?.alert?.rule?.execution?.metrics?.process_rule_duration_ms
+                ).to.be.greaterThan(0);
                 break;
               // this will get triggered as we add new event actions
               default:

@@ -10,11 +10,14 @@ import expect from '@kbn/expect';
 import {
   DETECTION_ENGINE_RULES_BULK_ACTION,
   DETECTION_ENGINE_RULES_URL,
+  NOTIFICATION_THROTTLE_NO_ACTIONS,
+  NOTIFICATION_THROTTLE_RULE,
 } from '@kbn/security-solution-plugin/common/constants';
+
 import {
   BulkAction,
   BulkActionEditType,
-} from '@kbn/security-solution-plugin/common/detection_engine/schemas/common/schemas';
+} from '@kbn/security-solution-plugin/common/detection_engine/schemas/request/perform_bulk_action_schema';
 import { RulesSchema } from '@kbn/security-solution-plugin/common/detection_engine/schemas/response';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
@@ -30,6 +33,7 @@ import {
   getLegacyActionSO,
   installPrePackagedRules,
   getSimpleMlRule,
+  getWebHookAction,
 } from '../../utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -42,6 +46,31 @@ export default ({ getService }: FtrProviderContext): void => {
     supertest.post(DETECTION_ENGINE_RULES_BULK_ACTION).set('kbn-xsrf', 'true');
   const fetchRule = (ruleId: string) =>
     supertest.get(`${DETECTION_ENGINE_RULES_URL}?rule_id=${ruleId}`).set('kbn-xsrf', 'true');
+
+  const fetchPrebuiltRule = async () => {
+    const { body: findBody } = await supertest
+      .get(
+        `${DETECTION_ENGINE_RULES_URL}/_find?per_page=1&filter=alert.attributes.params.immutable: true`
+      )
+      .set('kbn-xsrf', 'true');
+
+    return findBody.data[0];
+  };
+
+  /**
+   * allows to get access to internal property: notifyWhen
+   */
+  const fetchRuleByAlertApi = (ruleId: string) =>
+    supertest.get(`/api/alerting/rule/${ruleId}`).set('kbn-xsrf', 'true');
+
+  const createWebHookAction = async () =>
+    (
+      await supertest
+        .post('/api/actions/action')
+        .set('kbn-xsrf', 'true')
+        .send(getWebHookAction())
+        .expect(200)
+    ).body;
 
   describe('perform_bulk_action', () => {
     beforeEach(async () => {
@@ -362,73 +391,410 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     describe('edit action', () => {
-      it('should set, add and delete tags in rules', async () => {
-        const ruleId = 'ruleId';
-        const tags = ['tag1', 'tag2'];
-        await createRule(supertest, log, getSimpleRule(ruleId));
+      describe('tags actions', () => {
+        const overwriteTagsCases = [
+          {
+            caseName: '3 existing tags overwritten with 2 of them = 2 existing tags',
+            existingTags: ['tag1', 'tag2', 'tag3'],
+            tagsToOverwrite: ['tag1', 'tag2'],
+            resultingTags: ['tag1', 'tag2'],
+          },
+          {
+            caseName: '3 existing tags overwritten with 2 other tags = 2 other tags',
+            existingTags: ['tag1', 'tag2', 'tag3'],
+            tagsToOverwrite: ['new-tag1', 'new-tag2'],
+            resultingTags: ['new-tag1', 'new-tag2'],
+          },
+          {
+            caseName:
+              '3 existing tags overwritten with 1 of them + 2 other tags = 1 existing tag + 2 other tags',
+            existingTags: ['tag1', 'tag2', 'tag3'],
+            tagsToOverwrite: ['tag1', 'new-tag1', 'new-tag2'],
+            resultingTags: ['tag1', 'new-tag1', 'new-tag2'],
+          },
+          {
+            caseName: '0 existing tags overwritten with 2 tags = 2 tags',
+            existingTags: [],
+            tagsToOverwrite: ['new-tag1', 'new-tag2'],
+            resultingTags: ['new-tag1', 'new-tag2'],
+          },
+          {
+            caseName: '3 existing tags overwritten with 0 tags = 0 tags',
+            existingTags: ['tag1', 'tag2', 'tag3'],
+            tagsToOverwrite: [],
+            resultingTags: [],
+          },
+        ];
 
-        const { body: setTagsBody } = await postBulkAction()
-          .send({
-            query: '',
-            action: BulkAction.edit,
-            [BulkAction.edit]: [
+        overwriteTagsCases.forEach(({ caseName, existingTags, tagsToOverwrite, resultingTags }) => {
+          it(`should set tags in rules, case: "${caseName}"`, async () => {
+            const ruleId = 'ruleId';
+
+            await createRule(supertest, log, { ...getSimpleRule(ruleId), tags: existingTags });
+
+            const { body: bulkEditResponse } = await postBulkAction()
+              .send({
+                query: '',
+                action: BulkAction.edit,
+                [BulkAction.edit]: [
+                  {
+                    type: BulkActionEditType.set_tags,
+                    value: tagsToOverwrite,
+                  },
+                ],
+              })
+              .expect(200);
+
+            expect(bulkEditResponse.attributes.summary).to.eql({
+              failed: 0,
+              succeeded: 1,
+              total: 1,
+            });
+
+            // Check that the updated rule is returned with the response
+            expect(bulkEditResponse.attributes.results.updated[0].tags).to.eql(resultingTags);
+
+            // Check that the updates have been persisted
+            const { body: updatedRule } = await fetchRule(ruleId).expect(200);
+
+            expect(updatedRule.tags).to.eql(resultingTags);
+          });
+        });
+
+        const deleteTagsCases = [
+          {
+            caseName: '3 existing tags - 2 of them = 1 tag',
+            existingTags: ['tag1', 'tag2', 'tag3'],
+            tagsToDelete: ['tag1', 'tag2'],
+            resultingTags: ['tag3'],
+          },
+          {
+            caseName: '3 existing tags - 2 other tags(none of them) = 3 tags',
+            existingTags: ['tag1', 'tag2', 'tag3'],
+            tagsToDelete: ['tag4', 'tag5'],
+            resultingTags: ['tag1', 'tag2', 'tag3'],
+          },
+          {
+            caseName: '3 existing tags - 1 of them - 2 other tags(none of them) = 2 tags',
+            existingTags: ['tag1', 'tag2', 'tag3'],
+            tagsToDelete: ['tag3', 'tag4', 'tag5'],
+            resultingTags: ['tag1', 'tag2'],
+          },
+          {
+            caseName: '3 existing tags - 0 tags = 3 tags',
+            existingTags: ['tag1', 'tag2', 'tag3'],
+            tagsToDelete: [],
+            resultingTags: ['tag1', 'tag2', 'tag3'],
+          },
+          {
+            caseName: '0 existing tags - 2 tags = 0 tags',
+            existingTags: [],
+            tagsToDelete: ['tag4', 'tag5'],
+            resultingTags: [],
+          },
+          {
+            caseName: '3 existing tags - 3 of them = 0 tags',
+            existingTags: ['tag1', 'tag2', 'tag3'],
+            tagsToDelete: ['tag1', 'tag2', 'tag3'],
+            resultingTags: [],
+          },
+        ];
+
+        deleteTagsCases.forEach(({ caseName, existingTags, tagsToDelete, resultingTags }) => {
+          it(`should delete tags in rules, case: "${caseName}"`, async () => {
+            const ruleId = 'ruleId';
+
+            await createRule(supertest, log, { ...getSimpleRule(ruleId), tags: existingTags });
+
+            const { body: bulkEditResponse } = await postBulkAction()
+              .send({
+                query: '',
+                action: BulkAction.edit,
+                [BulkAction.edit]: [
+                  {
+                    type: BulkActionEditType.delete_tags,
+                    value: tagsToDelete,
+                  },
+                ],
+              })
+              .expect(200);
+
+            expect(bulkEditResponse.attributes.summary).to.eql({
+              failed: 0,
+              succeeded: 1,
+              total: 1,
+            });
+
+            // Check that the updated rule is returned with the response
+            expect(bulkEditResponse.attributes.results.updated[0].tags).to.eql(resultingTags);
+
+            // Check that the updates have been persisted
+            const { body: updatedRule } = await fetchRule(ruleId).expect(200);
+
+            expect(updatedRule.tags).to.eql(resultingTags);
+          });
+        });
+
+        const addTagsCases = [
+          {
+            caseName: '3 existing tags + 2 of them = 3 tags',
+            existingTags: ['tag1', 'tag2', 'tag3'],
+            addedTags: ['tag1', 'tag2'],
+            resultingTags: ['tag1', 'tag2', 'tag3'],
+          },
+          {
+            caseName: '3 existing tags + 2 other tags(none of them) = 5 tags',
+            existingTags: ['tag1', 'tag2', 'tag3'],
+            addedTags: ['tag4', 'tag5'],
+            resultingTags: ['tag1', 'tag2', 'tag3', 'tag4', 'tag5'],
+          },
+          {
+            caseName: '3 existing tags + 1 of them + 2 other tags(none of them) = 5 tags',
+            existingTags: ['tag1', 'tag2', 'tag3'],
+            addedTags: ['tag4', 'tag5', 'tag1'],
+            resultingTags: ['tag1', 'tag2', 'tag3', 'tag4', 'tag5'],
+          },
+          {
+            caseName: '0 existing tags + 2 tags = 2 tags',
+            existingTags: [],
+            addedTags: ['tag4', 'tag5'],
+            resultingTags: ['tag4', 'tag5'],
+          },
+          {
+            caseName: '3 existing tags + 0 tags = 3 tags',
+            existingTags: ['tag1', 'tag2', 'tag3'],
+            addedTags: [],
+            resultingTags: ['tag1', 'tag2', 'tag3'],
+          },
+        ];
+
+        addTagsCases.forEach(({ caseName, existingTags, addedTags, resultingTags }) => {
+          it(`should add tags to rules, case: "${caseName}"`, async () => {
+            const ruleId = 'ruleId';
+            await createRule(supertest, log, { ...getSimpleRule(ruleId), tags: existingTags });
+
+            const { body: bulkEditResponse } = await postBulkAction()
+              .send({
+                query: '',
+                action: BulkAction.edit,
+                [BulkAction.edit]: [
+                  {
+                    type: BulkActionEditType.add_tags,
+                    value: addedTags,
+                  },
+                ],
+              })
+              .expect(200);
+
+            expect(bulkEditResponse.attributes.summary).to.eql({
+              failed: 0,
+              succeeded: 1,
+              total: 1,
+            });
+
+            // Check that the updated rule is returned with the response
+            expect(bulkEditResponse.attributes.results.updated[0].tags).to.eql(resultingTags);
+
+            // Check that the updates have been persisted
+            const { body: updatedRule } = await fetchRule(ruleId).expect(200);
+
+            expect(updatedRule.tags).to.eql(resultingTags);
+          });
+        });
+      });
+
+      describe('index patterns actions', () => {
+        it('should set index patterns in rules', async () => {
+          const ruleId = 'ruleId';
+          await createRule(supertest, log, getSimpleRule(ruleId));
+
+          const { body: bulkEditResponse } = await postBulkAction()
+            .send({
+              query: '',
+              action: BulkAction.edit,
+              [BulkAction.edit]: [
+                {
+                  type: BulkActionEditType.set_index_patterns,
+                  value: ['initial-index-*'],
+                },
+              ],
+            })
+            .expect(200);
+
+          expect(bulkEditResponse.attributes.summary).to.eql({ failed: 0, succeeded: 1, total: 1 });
+
+          // Check that the updated rule is returned with the response
+          expect(bulkEditResponse.attributes.results.updated[0].index).to.eql(['initial-index-*']);
+
+          // Check that the updates have been persisted
+          const { body: updatedRule } = await fetchRule(ruleId).expect(200);
+
+          expect(updatedRule.index).to.eql(['initial-index-*']);
+        });
+
+        it('should add index patterns to rules', async () => {
+          const ruleId = 'ruleId';
+          const indexPatterns = ['index1-*', 'index2-*'];
+          const resultingIndexPatterns = ['index1-*', 'index2-*', 'index3-*'];
+          await createRule(supertest, log, { ...getSimpleRule(ruleId), index: indexPatterns });
+
+          const { body: bulkEditResponse } = await postBulkAction()
+            .send({
+              query: '',
+              action: BulkAction.edit,
+              [BulkAction.edit]: [
+                {
+                  type: BulkActionEditType.add_index_patterns,
+                  value: ['index3-*'],
+                },
+              ],
+            })
+            .expect(200);
+
+          expect(bulkEditResponse.attributes.summary).to.eql({ failed: 0, succeeded: 1, total: 1 });
+
+          // Check that the updated rule is returned with the response
+          expect(bulkEditResponse.attributes.results.updated[0].index).to.eql(
+            resultingIndexPatterns
+          );
+
+          // Check that the updates have been persisted
+          const { body: updatedRule } = await fetchRule(ruleId).expect(200);
+
+          expect(updatedRule.index).to.eql(resultingIndexPatterns);
+        });
+
+        it('should delete index patterns from rules', async () => {
+          const ruleId = 'ruleId';
+          const indexPatterns = ['index1-*', 'index2-*'];
+          const resultingIndexPatterns = ['index1-*'];
+          await createRule(supertest, log, { ...getSimpleRule(ruleId), index: indexPatterns });
+
+          const { body: bulkEditResponse } = await postBulkAction()
+            .send({
+              query: '',
+              action: BulkAction.edit,
+              [BulkAction.edit]: [
+                {
+                  type: BulkActionEditType.delete_index_patterns,
+                  value: ['index2-*'],
+                },
+              ],
+            })
+            .expect(200);
+
+          expect(bulkEditResponse.attributes.summary).to.eql({ failed: 0, succeeded: 1, total: 1 });
+
+          // Check that the updated rule is returned with the response
+          expect(bulkEditResponse.attributes.results.updated[0].index).to.eql(
+            resultingIndexPatterns
+          );
+
+          // Check that the updates have been persisted
+          const { body: updatedRule } = await fetchRule(ruleId).expect(200);
+
+          expect(updatedRule.index).to.eql(resultingIndexPatterns);
+        });
+
+        it('should return error if index patterns action is applied to machine learning rule', async () => {
+          const mlRule = await createRule(supertest, log, getSimpleMlRule());
+
+          const { body } = await postBulkAction()
+            .send({
+              ids: [mlRule.id],
+              action: BulkAction.edit,
+              [BulkAction.edit]: [
+                {
+                  type: BulkActionEditType.add_index_patterns,
+                  value: ['index-*'],
+                },
+              ],
+            })
+            .expect(500);
+
+          expect(body.attributes.summary).to.eql({ failed: 1, succeeded: 0, total: 1 });
+          expect(body.attributes.errors[0]).to.eql({
+            message:
+              "Index patterns can't be added. Machine learning rule doesn't have index patterns property",
+            status_code: 500,
+            rules: [
               {
-                type: BulkActionEditType.set_tags,
-                value: ['reset-tag'],
+                id: mlRule.id,
+                name: mlRule.name,
               },
             ],
-          })
-          .expect(200);
+          });
+        });
 
-        expect(setTagsBody.attributes.summary).to.eql({ failed: 0, succeeded: 1, total: 1 });
+        it('should return error if all index patterns removed from a rule', async () => {
+          const rule = await createRule(supertest, log, {
+            ...getSimpleRule(),
+            index: ['simple-index-*'],
+          });
 
-        // Check that the updated rule is returned with the response
-        expect(setTagsBody.attributes.results.updated[0].tags).to.eql(['reset-tag']);
+          const { body } = await postBulkAction()
+            .send({
+              ids: [rule.id],
+              action: BulkAction.edit,
+              [BulkAction.edit]: [
+                {
+                  type: BulkActionEditType.delete_index_patterns,
+                  value: ['simple-index-*'],
+                },
+              ],
+            })
+            .expect(500);
 
-        // Check that the updates have been persisted
-        const { body: setTagsRule } = await fetchRule(ruleId).expect(200);
-
-        expect(setTagsRule.tags).to.eql(['reset-tag']);
-
-        const { body: addTagsBody } = await postBulkAction()
-          .send({
-            query: '',
-            action: BulkAction.edit,
-            [BulkAction.edit]: [
+          expect(body.attributes.summary).to.eql({ failed: 1, succeeded: 0, total: 1 });
+          expect(body.attributes.errors[0]).to.eql({
+            message: "Mutated params invalid: Index patterns can't be empty",
+            status_code: 500,
+            rules: [
               {
-                type: BulkActionEditType.add_tags,
-                value: tags,
+                id: rule.id,
+                name: rule.name,
               },
             ],
-          })
-          .expect(200);
+          });
+        });
 
-        expect(addTagsBody.attributes.summary).to.eql({ failed: 0, succeeded: 1, total: 1 });
+        it('should return error if index patterns set to empty list', async () => {
+          const ruleId = 'ruleId';
+          const rule = await createRule(supertest, log, {
+            ...getSimpleRule(ruleId),
+            index: ['simple-index-*'],
+          });
 
-        // Check that the updated rule is returned with the response
-        expect(addTagsBody.attributes.results.updated[0].tags).to.eql(['reset-tag', ...tags]);
+          const { body } = await postBulkAction()
+            .send({
+              ids: [rule.id],
+              action: BulkAction.edit,
+              [BulkAction.edit]: [
+                {
+                  type: BulkActionEditType.set_index_patterns,
+                  value: [],
+                },
+              ],
+            })
+            .expect(500);
 
-        // Check that the updates have been persisted
-        const { body: addedTagsRule } = await fetchRule(ruleId).expect(200);
-
-        expect(addedTagsRule.tags).to.eql(['reset-tag', ...tags]);
-
-        await postBulkAction()
-          .send({
-            query: '',
-            action: BulkAction.edit,
-            [BulkAction.edit]: [
+          expect(body.attributes.summary).to.eql({ failed: 1, succeeded: 0, total: 1 });
+          expect(body.attributes.errors[0]).to.eql({
+            message: "Mutated params invalid: Index patterns can't be empty",
+            status_code: 500,
+            rules: [
               {
-                type: BulkActionEditType.delete_tags,
-                value: ['reset-tag', 'tag1'],
+                id: rule.id,
+                name: rule.name,
               },
             ],
-          })
-          .expect(200);
+          });
 
-        const { body: deletedTagsRule } = await fetchRule(ruleId).expect(200);
+          // Check that the rule hasn't been updated
+          const { body: reFetchedRule } = await fetchRule(ruleId).expect(200);
 
-        expect(deletedTagsRule.tags).to.eql(['tag2']);
+          expect(reFetchedRule.index).to.eql(['simple-index-*']);
+        });
       });
 
       it('should migrate legacy actions on edit', async () => {
@@ -490,79 +856,7 @@ export default ({ getService }: FtrProviderContext): void => {
         ]);
       });
 
-      it('should set, add and delete index patterns in rules', async () => {
-        const ruleId = 'ruleId';
-        const indices = ['index1-*', 'index2-*'];
-        await createRule(supertest, log, getSimpleRule(ruleId));
-
-        const { body: setIndexBody } = await postBulkAction()
-          .send({
-            query: '',
-            action: BulkAction.edit,
-            [BulkAction.edit]: [
-              {
-                type: BulkActionEditType.set_index_patterns,
-                value: ['initial-index-*'],
-              },
-            ],
-          })
-          .expect(200);
-
-        expect(setIndexBody.attributes.summary).to.eql({ failed: 0, succeeded: 1, total: 1 });
-
-        // Check that the updated rule is returned with the response
-        expect(setIndexBody.attributes.results.updated[0].index).to.eql(['initial-index-*']);
-
-        // Check that the updates have been persisted
-        const { body: setIndexRule } = await fetchRule(ruleId).expect(200);
-
-        expect(setIndexRule.index).to.eql(['initial-index-*']);
-
-        const { body: addIndexBody } = await postBulkAction()
-          .send({
-            query: '',
-            action: BulkAction.edit,
-            [BulkAction.edit]: [
-              {
-                type: BulkActionEditType.add_index_patterns,
-                value: indices,
-              },
-            ],
-          })
-          .expect(200);
-
-        expect(addIndexBody.attributes.summary).to.eql({ failed: 0, succeeded: 1, total: 1 });
-
-        // Check that the updated rule is returned with the response
-        expect(addIndexBody.attributes.results.updated[0].index).to.eql([
-          'initial-index-*',
-          ...indices,
-        ]);
-
-        // Check that the updates have been persisted
-        const { body: addIndexRule } = await fetchRule(ruleId).expect(200);
-
-        expect(addIndexRule.index).to.eql(['initial-index-*', ...indices]);
-
-        await postBulkAction()
-          .send({
-            query: '',
-            action: BulkAction.edit,
-            [BulkAction.edit]: [
-              {
-                type: BulkActionEditType.delete_index_patterns,
-                value: ['index1-*'],
-              },
-            ],
-          })
-          .expect(200);
-
-        const { body: deleteIndexRule } = await fetchRule(ruleId).expect(200);
-
-        expect(deleteIndexRule.index).to.eql(['initial-index-*', 'index2-*']);
-      });
-
-      it('should set timeline values in rule', async () => {
+      it('should set timeline template values in rule', async () => {
         const ruleId = 'ruleId';
         const timelineId = '91832785-286d-4ebe-b884-1a208d111a70';
         const timelineTitle = 'Test timeline';
@@ -597,7 +891,7 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(rule.timeline_title).to.eql(timelineTitle);
       });
 
-      it('should correctly remove timeline', async () => {
+      it('should correctly remove timeline template', async () => {
         const timelineId = 'test-id';
         const timelineTitle = 'Test timeline template';
         const ruleId = 'ruleId';
@@ -638,42 +932,6 @@ export default ({ getService }: FtrProviderContext): void => {
 
         expect(rule.timeline_id).to.be(undefined);
         expect(rule.timeline_title).to.be(undefined);
-      });
-
-      it('should return error when trying to bulk edit immutable rule', async () => {
-        await installPrePackagedRules(supertest, log);
-        const { body: findBody } = await supertest
-          .get(
-            `${DETECTION_ENGINE_RULES_URL}/_find?per_page=1&filter=alert.attributes.params.immutable: true`
-          )
-          .set('kbn-xsrf', 'true')
-          .send();
-        const immutableRule = findBody.data[0];
-
-        const { body } = await postBulkAction()
-          .send({
-            ids: [immutableRule.id],
-            action: BulkAction.edit,
-            [BulkAction.edit]: [
-              {
-                type: BulkActionEditType.add_tags,
-                value: ['new-tag'],
-              },
-            ],
-          })
-          .expect(500);
-
-        expect(body.attributes.summary).to.eql({ failed: 1, succeeded: 0, total: 1 });
-        expect(body.attributes.errors[0]).to.eql({
-          message: "Mutated params invalid: Elastic rule can't be edited",
-          status_code: 500,
-          rules: [
-            {
-              id: immutableRule.id,
-              name: immutableRule.name,
-            },
-          ],
-        });
       });
 
       it('should return error if index patterns action is applied to machine learning rule', async () => {
@@ -760,6 +1018,642 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body: updatedRule } = await fetchRule(ruleId).expect(200);
 
         expect(updatedRule.version).to.be(rule.version + 1);
+      });
+
+      describe('prebuilt rules', () => {
+        const cases = [
+          {
+            type: BulkActionEditType.add_tags,
+            value: ['new-tag'],
+          },
+          {
+            type: BulkActionEditType.set_tags,
+            value: ['new-tag'],
+          },
+          {
+            type: BulkActionEditType.delete_tags,
+            value: ['new-tag'],
+          },
+          {
+            type: BulkActionEditType.add_index_patterns,
+            value: ['test-*'],
+          },
+          {
+            type: BulkActionEditType.set_index_patterns,
+            value: ['test-*'],
+          },
+          {
+            type: BulkActionEditType.delete_index_patterns,
+            value: ['test-*'],
+          },
+          {
+            type: BulkActionEditType.set_timeline,
+            value: { timeline_id: 'mock-id', timeline_title: 'mock-title' },
+          },
+        ];
+        cases.forEach(({ type, value }) => {
+          it(`should return error when trying to apply "${type}" edit action to prebuilt rule`, async () => {
+            await installPrePackagedRules(supertest, log);
+            const prebuiltRule = await fetchPrebuiltRule();
+
+            const { body } = await postBulkAction()
+              .send({
+                ids: [prebuiltRule.id],
+                action: BulkAction.edit,
+                [BulkAction.edit]: [
+                  {
+                    type,
+                    value,
+                  },
+                ],
+              })
+              .expect(500);
+
+            expect(body.attributes.summary).to.eql({ failed: 1, succeeded: 0, total: 1 });
+            expect(body.attributes.errors[0]).to.eql({
+              message: "Elastic rule can't be edited",
+              status_code: 500,
+              rules: [
+                {
+                  id: prebuiltRule.id,
+                  name: prebuiltRule.name,
+                },
+              ],
+            });
+          });
+        });
+      });
+
+      describe('rule actions', () => {
+        const webHookActionMock = {
+          group: 'default',
+          params: {
+            body: '{}',
+          },
+        };
+
+        describe('set_rule_actions', () => {
+          it('should set action correctly', async () => {
+            const ruleId = 'ruleId';
+            const createdRule = await createRule(supertest, log, getSimpleRule(ruleId));
+
+            // create a new action
+            const hookAction = await createWebHookAction();
+
+            const { body } = await postBulkAction()
+              .send({
+                ids: [createdRule.id],
+                action: BulkAction.edit,
+                [BulkAction.edit]: [
+                  {
+                    type: BulkActionEditType.set_rule_actions,
+                    value: {
+                      throttle: '1h',
+                      actions: [
+                        {
+                          ...webHookActionMock,
+                          id: hookAction.id,
+                        },
+                      ],
+                    },
+                  },
+                ],
+              })
+              .expect(200);
+
+            // Check that the updated rule is returned with the response
+            expect(body.attributes.results.updated[0].actions).to.eql([
+              {
+                ...webHookActionMock,
+                id: hookAction.id,
+                action_type_id: '.webhook',
+              },
+            ]);
+
+            // Check that the updates have been persisted
+            const { body: readRule } = await fetchRule(ruleId).expect(200);
+
+            expect(readRule.actions).to.eql([
+              {
+                ...webHookActionMock,
+                id: hookAction.id,
+                action_type_id: '.webhook',
+              },
+            ]);
+          });
+
+          it('should set actions to empty list, actions payload is empty list', async () => {
+            // create a new action
+            const hookAction = await createWebHookAction();
+
+            const defaultRuleAction = {
+              id: hookAction.id,
+              action_type_id: '.webhook',
+              group: 'default',
+              params: {
+                body: '{"test":"a default action"}',
+              },
+            };
+
+            const ruleId = 'ruleId';
+            const createdRule = await createRule(supertest, log, {
+              ...getSimpleRule(ruleId),
+              actions: [defaultRuleAction],
+              throttle: '1d',
+            });
+
+            const { body } = await postBulkAction()
+              .send({
+                ids: [createdRule.id],
+                action: BulkAction.edit,
+                [BulkAction.edit]: [
+                  {
+                    type: BulkActionEditType.set_rule_actions,
+                    value: {
+                      throttle: '1h',
+                      actions: [],
+                    },
+                  },
+                ],
+              })
+              .expect(200);
+
+            // Check that the updated rule is returned with the response
+            expect(body.attributes.results.updated[0].actions).to.eql([]);
+
+            // Check that the updates have been persisted
+            const { body: readRule } = await fetchRule(ruleId).expect(200);
+
+            expect(readRule.actions).to.eql([]);
+          });
+        });
+
+        describe('add_rule_actions', () => {
+          it('should add action correctly to empty actions list', async () => {
+            const ruleId = 'ruleId';
+            const createdRule = await createRule(supertest, log, getSimpleRule(ruleId));
+
+            // create a new action
+            const hookAction = await createWebHookAction();
+
+            const { body } = await postBulkAction()
+              .send({
+                ids: [createdRule.id],
+                action: BulkAction.edit,
+                [BulkAction.edit]: [
+                  {
+                    type: BulkActionEditType.add_rule_actions,
+                    value: {
+                      throttle: '1h',
+                      actions: [
+                        {
+                          ...webHookActionMock,
+                          id: hookAction.id,
+                        },
+                      ],
+                    },
+                  },
+                ],
+              })
+              .expect(200);
+
+            // Check that the updated rule is returned with the response
+            expect(body.attributes.results.updated[0].actions).to.eql([
+              {
+                ...webHookActionMock,
+                id: hookAction.id,
+                action_type_id: '.webhook',
+              },
+            ]);
+
+            // Check that the updates have been persisted
+            const { body: readRule } = await fetchRule(ruleId).expect(200);
+
+            expect(readRule.actions).to.eql([
+              {
+                ...webHookActionMock,
+                id: hookAction.id,
+                action_type_id: '.webhook',
+              },
+            ]);
+          });
+
+          it('should add action correctly to non empty actions list', async () => {
+            // create a new action
+            const hookAction = await createWebHookAction();
+
+            const defaultRuleAction = {
+              id: hookAction.id,
+              action_type_id: '.webhook',
+              group: 'default',
+              params: {
+                body: '{"test":"a default action"}',
+              },
+            };
+
+            const ruleId = 'ruleId';
+            const createdRule = await createRule(supertest, log, {
+              ...getSimpleRule(ruleId),
+              actions: [defaultRuleAction],
+              throttle: '1d',
+            });
+
+            const { body } = await postBulkAction()
+              .send({
+                ids: [createdRule.id],
+                action: BulkAction.edit,
+                [BulkAction.edit]: [
+                  {
+                    type: BulkActionEditType.add_rule_actions,
+                    value: {
+                      throttle: '1h',
+                      actions: [
+                        {
+                          ...webHookActionMock,
+                          id: hookAction.id,
+                        },
+                      ],
+                    },
+                  },
+                ],
+              })
+              .expect(200);
+
+            // Check that the updated rule is returned with the response
+            expect(body.attributes.results.updated[0].actions).to.eql([
+              defaultRuleAction,
+              {
+                ...webHookActionMock,
+                id: hookAction.id,
+                action_type_id: '.webhook',
+              },
+            ]);
+
+            // Check that the updates have been persisted
+            const { body: readRule } = await fetchRule(ruleId).expect(200);
+
+            expect(readRule.actions).to.eql([
+              defaultRuleAction,
+              {
+                ...webHookActionMock,
+                id: hookAction.id,
+                action_type_id: '.webhook',
+              },
+            ]);
+          });
+
+          it('should not change actions of rule if empty list of actions added', async () => {
+            // create a new action
+            const hookAction = await createWebHookAction();
+
+            const defaultRuleAction = {
+              id: hookAction.id,
+              action_type_id: '.webhook',
+              group: 'default',
+              params: {
+                body: '{"test":"a default action"}',
+              },
+            };
+
+            const ruleId = 'ruleId';
+            const createdRule = await createRule(supertest, log, {
+              ...getSimpleRule(ruleId),
+              actions: [defaultRuleAction],
+              throttle: '1d',
+            });
+
+            const { body } = await postBulkAction()
+              .send({
+                ids: [createdRule.id],
+                action: BulkAction.edit,
+                [BulkAction.edit]: [
+                  {
+                    type: BulkActionEditType.add_rule_actions,
+                    value: {
+                      throttle: '1h',
+                      actions: [],
+                    },
+                  },
+                ],
+              })
+              .expect(200);
+
+            // Check that the updated rule is returned with the response
+            expect(body.attributes.results.updated[0].actions).to.eql([defaultRuleAction]);
+
+            // Check that the updates have been persisted
+            const { body: readRule } = await fetchRule(ruleId).expect(200);
+
+            expect(readRule.actions).to.eql([defaultRuleAction]);
+          });
+
+          it('should change throttle if actions list in payload is empty', async () => {
+            // create a new action
+            const hookAction = await createWebHookAction();
+
+            const defaultRuleAction = {
+              id: hookAction.id,
+              action_type_id: '.webhook',
+              group: 'default',
+              params: {
+                body: '{"test":"a default action"}',
+              },
+            };
+
+            const ruleId = 'ruleId';
+            const createdRule = await createRule(supertest, log, {
+              ...getSimpleRule(ruleId),
+              actions: [defaultRuleAction],
+              throttle: '8h',
+            });
+
+            const { body } = await postBulkAction()
+              .send({
+                ids: [createdRule.id],
+                action: BulkAction.edit,
+                [BulkAction.edit]: [
+                  {
+                    type: BulkActionEditType.add_rule_actions,
+                    value: {
+                      throttle: '1h',
+                      actions: [],
+                    },
+                  },
+                ],
+              })
+              .expect(200);
+
+            // Check that the updated rule is returned with the response
+            expect(body.attributes.results.updated[0].throttle).to.be('1h');
+
+            // Check that the updates have been persisted
+            const { body: readRule } = await fetchRule(ruleId).expect(200);
+
+            expect(readRule.throttle).to.eql('1h');
+          });
+        });
+
+        describe('prebuilt rules', () => {
+          const cases = [
+            {
+              type: BulkActionEditType.set_rule_actions,
+            },
+            {
+              type: BulkActionEditType.add_rule_actions,
+            },
+          ];
+          cases.forEach(({ type }) => {
+            it(`should apply "${type}" rule action to prebuilt rule`, async () => {
+              await installPrePackagedRules(supertest, log);
+              const prebuiltRule = await fetchPrebuiltRule();
+              const hookAction = await createWebHookAction();
+
+              const { body } = await postBulkAction()
+                .send({
+                  ids: [prebuiltRule.id],
+                  action: BulkAction.edit,
+                  [BulkAction.edit]: [
+                    {
+                      type,
+                      value: {
+                        throttle: '1h',
+                        actions: [
+                          {
+                            ...webHookActionMock,
+                            id: hookAction.id,
+                          },
+                        ],
+                      },
+                    },
+                  ],
+                })
+                .expect(200);
+
+              const editedRule = body.attributes.results.updated[0];
+              // Check that the updated rule is returned with the response
+              expect(editedRule.actions).to.eql([
+                {
+                  ...webHookActionMock,
+                  id: hookAction.id,
+                  action_type_id: '.webhook',
+                },
+              ]);
+              // version of prebuilt rule should not change
+              expect(editedRule.version).to.be(prebuiltRule.version);
+
+              // Check that the updates have been persisted
+              const { body: readRule } = await fetchRule(prebuiltRule.rule_id).expect(200);
+
+              expect(readRule.actions).to.eql([
+                {
+                  ...webHookActionMock,
+                  id: hookAction.id,
+                  action_type_id: '.webhook',
+                },
+              ]);
+              expect(prebuiltRule.version).to.be(readRule.version);
+            });
+          });
+
+          // if rule action is applied together with another edit action, that can't be applied to prebuilt rule (for example: tags action)
+          // bulk edit request should return error
+          it(`should return error if one of edit action is not eligible for prebuilt rule`, async () => {
+            await installPrePackagedRules(supertest, log);
+            const prebuiltRule = await fetchPrebuiltRule();
+            const hookAction = await createWebHookAction();
+
+            const { body } = await postBulkAction()
+              .send({
+                ids: [prebuiltRule.id],
+                action: BulkAction.edit,
+                [BulkAction.edit]: [
+                  {
+                    type: BulkActionEditType.set_rule_actions,
+                    value: {
+                      throttle: '1h',
+                      actions: [
+                        {
+                          ...webHookActionMock,
+                          id: hookAction.id,
+                        },
+                      ],
+                    },
+                  },
+                  {
+                    type: BulkActionEditType.set_tags,
+                    value: ['tag-1'],
+                  },
+                ],
+              })
+              .expect(500);
+
+            expect(body.attributes.summary).to.eql({ failed: 1, succeeded: 0, total: 1 });
+            expect(body.attributes.errors[0]).to.eql({
+              message: "Elastic rule can't be edited",
+              status_code: 500,
+              rules: [
+                {
+                  id: prebuiltRule.id,
+                  name: prebuiltRule.name,
+                },
+              ],
+            });
+
+            // Check that the updates were not made
+            const { body: readRule } = await fetchRule(prebuiltRule.rule_id).expect(200);
+
+            expect(readRule.actions).to.eql(prebuiltRule.actions);
+            expect(readRule.tags).to.eql(prebuiltRule.tags);
+            expect(readRule.version).to.be(prebuiltRule.version);
+          });
+        });
+
+        describe('throttle', () => {
+          const casesForEmptyActions = [
+            {
+              payloadThrottle: NOTIFICATION_THROTTLE_NO_ACTIONS,
+            },
+            {
+              payloadThrottle: NOTIFICATION_THROTTLE_RULE,
+            },
+            {
+              payloadThrottle: '1d',
+            },
+          ];
+          casesForEmptyActions.forEach(({ payloadThrottle }) => {
+            it(`throttle is set to NOTIFICATION_THROTTLE_NO_ACTIONS, if payload throttle="${payloadThrottle}" and actions list is empty`, async () => {
+              const ruleId = 'ruleId';
+              const createdRule = await createRule(supertest, log, {
+                ...getSimpleRule(ruleId),
+                throttle: '8h',
+              });
+
+              const { body } = await postBulkAction()
+                .send({
+                  ids: [createdRule.id],
+                  action: BulkAction.edit,
+                  [BulkAction.edit]: [
+                    {
+                      type: BulkActionEditType.set_rule_actions,
+                      value: {
+                        throttle: payloadThrottle,
+                        actions: [],
+                      },
+                    },
+                  ],
+                })
+                .expect(200);
+
+              // Check that the updated rule is returned with the response
+              expect(body.attributes.results.updated[0].throttle).to.eql(
+                NOTIFICATION_THROTTLE_NO_ACTIONS
+              );
+
+              // Check that the updates have been persisted
+              const { body: rule } = await fetchRule(ruleId).expect(200);
+
+              expect(rule.throttle).to.eql(NOTIFICATION_THROTTLE_NO_ACTIONS);
+            });
+          });
+
+          const casesForNonEmptyActions = [
+            {
+              payloadThrottle: NOTIFICATION_THROTTLE_NO_ACTIONS,
+              expectedThrottle: NOTIFICATION_THROTTLE_NO_ACTIONS,
+            },
+            {
+              payloadThrottle: NOTIFICATION_THROTTLE_RULE,
+              expectedThrottle: NOTIFICATION_THROTTLE_RULE,
+            },
+            {
+              payloadThrottle: '1h',
+              expectedThrottle: '1h',
+            },
+          ];
+          casesForNonEmptyActions.forEach(({ payloadThrottle, expectedThrottle }) => {
+            it(`throttle is set correctly, if payload throttle="${payloadThrottle}" and actions non empty`, async () => {
+              // create a new action
+              const hookAction = await createWebHookAction();
+
+              const ruleId = 'ruleId';
+              const createdRule = await createRule(supertest, log, getSimpleRule(ruleId));
+
+              const { body } = await postBulkAction()
+                .send({
+                  ids: [createdRule.id],
+                  action: BulkAction.edit,
+                  [BulkAction.edit]: [
+                    {
+                      type: BulkActionEditType.set_rule_actions,
+                      value: {
+                        throttle: payloadThrottle,
+                        actions: [
+                          {
+                            id: hookAction.id,
+                            group: 'default',
+                            params: { body: '{}' },
+                          },
+                        ],
+                      },
+                    },
+                  ],
+                })
+                .expect(200);
+
+              // Check that the updated rule is returned with the response
+              expect(body.attributes.results.updated[0].throttle).to.eql(expectedThrottle);
+
+              // Check that the updates have been persisted
+              const { body: rule } = await fetchRule(ruleId).expect(200);
+
+              expect(rule.throttle).to.eql(expectedThrottle);
+            });
+          });
+        });
+
+        describe('notifyWhen', () => {
+          const cases = [
+            {
+              payload: { throttle: NOTIFICATION_THROTTLE_NO_ACTIONS },
+              // keeps existing default value which is onActiveAlert
+              expected: { notifyWhen: 'onActiveAlert' },
+            },
+            {
+              payload: { throttle: '1d' },
+              expected: { notifyWhen: 'onThrottleInterval' },
+            },
+            {
+              payload: { throttle: NOTIFICATION_THROTTLE_RULE },
+              expected: { notifyWhen: 'onActiveAlert' },
+            },
+          ];
+          cases.forEach(({ payload, expected }) => {
+            it(`should set notifyWhen correctly, if payload throttle="${payload.throttle}"`, async () => {
+              const createdRule = await createRule(supertest, log, getSimpleRule('ruleId'));
+
+              await postBulkAction()
+                .send({
+                  ids: [createdRule.id],
+                  action: BulkAction.edit,
+                  [BulkAction.edit]: [
+                    {
+                      type: BulkActionEditType.set_rule_actions,
+                      value: {
+                        throttle: payload.throttle,
+                        actions: [],
+                      },
+                    },
+                  ],
+                })
+                .expect(200);
+
+              // Check whether notifyWhen set correctly
+              const { body: rule } = await fetchRuleByAlertApi(createdRule.id).expect(200);
+
+              expect(rule.notify_when).to.eql(expected.notifyWhen);
+            });
+          });
+        });
       });
     });
 

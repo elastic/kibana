@@ -24,7 +24,6 @@ import { Indicator, RawIndicatorFieldId } from '../../../../../common/types/indi
 import { IndicatorsFlyoutJson } from '../indicators_flyout_json/indicators_flyout_json';
 import { IndicatorsFlyoutTable } from '../indicators_flyout_table/indicators_flyout_table';
 import { unwrapValue } from '../../lib/unwrap_value';
-import { displayValue } from '../../lib/display_value';
 
 export const TITLE_TEST_ID = 'tiIndicatorFlyoutTitle';
 export const SUBTITLE_TEST_ID = 'tiIndicatorFlyoutSubtitle';
@@ -103,7 +102,7 @@ export const IndicatorsFlyout: VFC<IndicatorsFlyoutProps> = ({
   );
 
   const firstSeen: string = unwrapValue(indicator, RawIndicatorFieldId.FirstSeen) as string;
-  const value = displayValue(indicator) || EMPTY_VALUE;
+  const displayNameValue = unwrapValue(indicator, RawIndicatorFieldId.Name) || EMPTY_VALUE;
   const flyoutTitleId = useGeneratedHtmlId({
     prefix: 'simpleFlyoutTitle',
   });
@@ -116,7 +115,7 @@ export const IndicatorsFlyout: VFC<IndicatorsFlyoutProps> = ({
             <FormattedMessage
               id="xpack.threatIntelligence.indicator.flyout.panelTitle"
               defaultMessage="Indicator: {title}"
-              values={{ title: value }}
+              values={{ title: displayNameValue }}
             />
           </h2>
         </EuiTitle>

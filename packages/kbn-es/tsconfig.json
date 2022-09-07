@@ -4,6 +4,7 @@
     "outDir": "target/types"
   },
   "include": [
-    "src/**/*"
+    "**/*.ts",
+    "**/*.js"
   ]
 }

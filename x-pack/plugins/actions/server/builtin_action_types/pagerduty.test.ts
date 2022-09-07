@@ -26,6 +26,7 @@ import {
   PagerDutyActionType,
   PagerDutyActionTypeExecutorOptions,
 } from './pagerduty';
+import { ActionsConfigurationUtilities } from '../actions_config';
 
 const postPagerdutyMock = postPagerduty as jest.Mock;
 
@@ -35,6 +36,7 @@ const services: Services = actionsMock.createServices();
 
 let actionType: PagerDutyActionType;
 let mockedLogger: jest.Mocked<Logger>;
+let configurationUtilities: ActionsConfigurationUtilities;
 
 beforeAll(() => {
   const { logger, actionTypeRegistry } = createActionTypeRegistry();
@@ -44,6 +46,7 @@ beforeAll(() => {
     ActionParamsType
   >(ACTION_TYPE_ID);
   mockedLogger = logger;
+  configurationUtilities = actionTypeRegistry.getUtils();
 });
 
 describe('get()', () => {
@@ -55,47 +58,65 @@ describe('get()', () => {
 
 describe('validateConfig()', () => {
   test('should validate and pass when config is valid', () => {
-    expect(validateConfig(actionType, {})).toEqual({ apiUrl: null });
-    expect(validateConfig(actionType, { apiUrl: 'bar' })).toEqual({ apiUrl: 'bar' });
+    expect(validateConfig(actionType, {}, { configurationUtilities })).toEqual({ apiUrl: null });
+    expect(
+      validateConfig(
+        actionType,
+        {
+          apiUrl: 'bar',
+        },
+        { configurationUtilities }
+      )
+    ).toEqual({ apiUrl: 'bar' });
   });
 
   test('should validate and throw error when config is invalid', () => {
     expect(() => {
-      validateConfig(actionType, { shouldNotBeHere: true });
+      validateConfig(actionType, { shouldNotBeHere: true }, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
       `"error validating action type config: [shouldNotBeHere]: definition for this key is missing"`
     );
   });
 
   test('should validate and pass when the pagerduty url is added to allowedHosts', () => {
+    const configUtils = {
+      ...actionsConfigMock.create(),
+      ensureUriAllowed: (url: string) => {
+        expect(url).toEqual('https://events.pagerduty.com/v2/enqueue');
+      },
+    };
     actionType = getActionType({
       logger: mockedLogger,
-      configurationUtilities: {
-        ...actionsConfigMock.create(),
-        ensureUriAllowed: (url) => {
-          expect(url).toEqual('https://events.pagerduty.com/v2/enqueue');
-        },
-      },
+      configurationUtilities: configUtils,
     });
 
     expect(
-      validateConfig(actionType, { apiUrl: 'https://events.pagerduty.com/v2/enqueue' })
+      validateConfig(
+        actionType,
+        { apiUrl: 'https://events.pagerduty.com/v2/enqueue' },
+        { configurationUtilities: configUtils }
+      )
     ).toEqual({ apiUrl: 'https://events.pagerduty.com/v2/enqueue' });
   });
 
   test('config validation returns an error if the specified URL isnt added to allowedHosts', () => {
+    const configUtils = {
+      ...actionsConfigMock.create(),
+      ensureUriAllowed: (_: string) => {
+        throw new Error(`target url is not added to allowedHosts`);
+      },
+    };
     actionType = getActionType({
       logger: mockedLogger,
-      configurationUtilities: {
-        ...actionsConfigMock.create(),
-        ensureUriAllowed: (_) => {
-          throw new Error(`target url is not added to allowedHosts`);
-        },
-      },
+      configurationUtilities: configUtils,
     });
 
     expect(() => {
-      validateConfig(actionType, { apiUrl: 'https://events.pagerduty.com/v2/enqueue' });
+      validateConfig(
+        actionType,
+        { apiUrl: 'https://events.pagerduty.com/v2/enqueue' },
+        { configurationUtilities: configUtils }
+      );
     }).toThrowErrorMatchingInlineSnapshot(
       `"error validating action type config: error configuring pagerduty action: target url is not added to allowedHosts"`
     );
@@ -105,20 +126,20 @@ describe('validateConfig()', () => {
 describe('validateSecrets()', () => {
   test('should validate and pass when secrets is valid', () => {
     const routingKey = 'super-secret';
-    expect(validateSecrets(actionType, { routingKey })).toEqual({
+    expect(validateSecrets(actionType, { routingKey }, { configurationUtilities })).toEqual({
       routingKey,
     });
   });
 
   test('should validate and throw error when secrets is invalid', () => {
     expect(() => {
-      validateSecrets(actionType, { routingKey: false });
+      validateSecrets(actionType, { routingKey: false }, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
       `"error validating action type secrets: [routingKey]: expected value of type [string] but got [boolean]"`
     );
 
     expect(() => {
-      validateSecrets(actionType, {});
+      validateSecrets(actionType, {}, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
       `"error validating action type secrets: [routingKey]: expected value of type [string] but got [undefined]"`
     );
@@ -127,7 +148,7 @@ describe('validateSecrets()', () => {
 
 describe('validateParams()', () => {
   test('should validate and pass when params is valid', () => {
-    expect(validateParams(actionType, {})).toEqual({});
+    expect(validateParams(actionType, {}, { configurationUtilities })).toEqual({});
 
     const params = {
       eventAction: 'trigger',
@@ -140,12 +161,12 @@ describe('validateParams()', () => {
       group: 'a group',
       class: 'a class',
     };
-    expect(validateParams(actionType, params)).toEqual(params);
+    expect(validateParams(actionType, params, { configurationUtilities })).toEqual(params);
   });
 
   test('should validate and throw error when params is invalid', () => {
     expect(() => {
-      validateParams(actionType, { eventAction: 'ackynollage' });
+      validateParams(actionType, { eventAction: 'ackynollage' }, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(`
 "error validating action params: [eventAction]: types that failed validation:
 - [eventAction.0]: expected value to equal [trigger]
@@ -157,12 +178,28 @@ describe('validateParams()', () => {
   test('should validate and pass when valid timestamp has spaces', () => {
     const randoDate = new Date('1963-09-23T01:23:45Z').toISOString();
     const timestamp = `  ${randoDate}`;
-    expect(validateParams(actionType, { timestamp })).toEqual({ timestamp });
+    expect(
+      validateParams(
+        actionType,
+        {
+          timestamp,
+        },
+        { configurationUtilities }
+      )
+    ).toEqual({ timestamp });
   });
 
   test('should validate and pass when timestamp is empty string', () => {
     const timestamp = '';
-    expect(validateParams(actionType, { timestamp })).toEqual({ timestamp });
+    expect(
+      validateParams(
+        actionType,
+        {
+          timestamp,
+        },
+        { configurationUtilities }
+      )
+    ).toEqual({ timestamp });
   });
 
   test('should validate and pass all the valid ISO-8601 formatted dates', () => {
@@ -170,25 +207,57 @@ describe('validateParams()', () => {
     const date2 = '2011-05-06T03:30-07';
     const date3 = '2011-05-06';
 
-    expect(validateParams(actionType, { timestamp: date1 })).toEqual({ timestamp: date1 });
-    expect(validateParams(actionType, { timestamp: date2 })).toEqual({ timestamp: date2 });
-    expect(validateParams(actionType, { timestamp: date3 })).toEqual({ timestamp: date3 });
+    expect(
+      validateParams(
+        actionType,
+        {
+          timestamp: date1,
+        },
+        { configurationUtilities }
+      )
+    ).toEqual({ timestamp: date1 });
+    expect(
+      validateParams(
+        actionType,
+        {
+          timestamp: date2,
+        },
+        { configurationUtilities }
+      )
+    ).toEqual({ timestamp: date2 });
+    expect(
+      validateParams(
+        actionType,
+        {
+          timestamp: date3,
+        },
+        { configurationUtilities }
+      )
+    ).toEqual({ timestamp: date3 });
   });
 
   test('should validate and throw error when timestamp is invalid', () => {
     const timestamp = `1963-09-55 90:23:45`;
     expect(() => {
-      validateParams(actionType, {
-        timestamp,
-      });
+      validateParams(
+        actionType,
+        {
+          timestamp,
+        },
+        { configurationUtilities }
+      );
     }).toThrowError(`error validating action params: error parsing timestamp "${timestamp}"`);
   });
 
   test('should validate and throw error when dedupKey is missing on resolve', () => {
     expect(() => {
-      validateParams(actionType, {
-        eventAction: 'resolve',
-      });
+      validateParams(
+        actionType,
+        {
+          eventAction: 'resolve',
+        },
+        { configurationUtilities }
+      );
     }).toThrowError(
       `error validating action params: DedupKey is required when eventAction is "resolve"`
     );

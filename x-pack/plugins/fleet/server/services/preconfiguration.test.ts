@@ -928,7 +928,6 @@ describe('comparePreconfiguredPolicyToCurrent', () => {
         created_by: 'system',
         inputs: [],
         policy_id: 'abc123',
-        output_id: 'default',
       },
     ],
   };

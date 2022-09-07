@@ -15,7 +15,6 @@ import { mockUiSetting } from '../../../../common/mocks/mock_kibana_ui_settings_
 import { TestProvidersComponent } from '../../../../common/mocks/test_providers';
 import { generateFieldTypeMap } from '../../../../common/mocks/mock_field_type_map';
 import { unwrapValue } from '../../lib/unwrap_value';
-import { displayValue } from '../../lib/display_value';
 
 const mockIndicator = generateMockIndicator();
 const mockFieldTypesMap = generateFieldTypeMap();
@@ -33,7 +32,7 @@ describe('<IndicatorsFlyout />', () => {
     );
 
     expect(getByTestId(TITLE_TEST_ID).innerHTML).toContain(
-      `Indicator: ${displayValue(mockIndicator)}`
+      `Indicator: ${unwrapValue(mockIndicator, RawIndicatorFieldId.Name)}`
     );
     expect(getByTestId(SUBTITLE_TEST_ID).innerHTML).toContain(
       `First seen: ${dateFormatter(
