@@ -30298,7 +30298,6 @@
     "xpack.stackAlerts.esQuery.ui.testQuery": "クエリのテスト",
     "xpack.stackAlerts.esQuery.ui.testQueryIsExecuted": "クエリが実行されます。",
     "xpack.stackAlerts.esQuery.ui.thresholdHelp.ariaLabel": "ヘルプ",
-    "xpack.stackAlerts.esQuery.ui.thresholdHelp.duplicateMatches": "時間枠がチェック間隔より長く、ドキュメントが複数の実行でクエリと一致する場合、最初のしきい値計算でのみ使用されます。",
     "xpack.stackAlerts.esQuery.ui.thresholdHelp.threshold": "ルールが実行されるたびに、クエリと一致するドキュメントの数がこのしきい値を満たすかどうかが確認されます。",
     "xpack.stackAlerts.esQuery.ui.thresholdHelp.title": "しきい値と時間枠を設定",
     "xpack.stackAlerts.esQuery.ui.validation.error.greaterThenThreshold0Text": "しきい値1はしきい値0より大きくなければなりません。",

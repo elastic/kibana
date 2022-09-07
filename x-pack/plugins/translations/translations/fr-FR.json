@@ -30322,7 +30322,6 @@
     "xpack.stackAlerts.esQuery.ui.testQuery": "Tester la recherche",
     "xpack.stackAlerts.esQuery.ui.testQueryIsExecuted": "La requête a été exécutée.",
     "xpack.stackAlerts.esQuery.ui.thresholdHelp.ariaLabel": "Aide",
-    "xpack.stackAlerts.esQuery.ui.thresholdHelp.duplicateMatches": "Si la fenêtre de temps est supérieure à l'intervalle de vérification et qu'un document correspond à la requête dans plusieurs exécutions, il n'est utilisé que dans le premier calcul du seuil.",
     "xpack.stackAlerts.esQuery.ui.thresholdHelp.threshold": "Chaque fois que la règle s'exécute, elle vérifie si le nombre de documents qui correspondent à votre requête atteint ce seuil.",
     "xpack.stackAlerts.esQuery.ui.thresholdHelp.title": "Définir le seuil et la fenêtre de temps",
     "xpack.stackAlerts.esQuery.ui.validation.error.greaterThenThreshold0Text": "Seuil 1 doit être supérieur à Seuil 0.",

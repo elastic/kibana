@@ -326,27 +326,38 @@ export const ResponseActionsLog = memo<
         name: TABLE_COLUMN_NAMES.hosts,
         width: '20%',
         truncateText: true,
-        render: (hosts: ActionDetails['hosts']) => {
+        render: (_hosts: ActionDetails['hosts']) => {
+          const hosts = _hosts && Object.values(_hosts);
           // join hostnames if the action is for multiple agents
           // and skip empty strings for names if any
-          const hostname =
-            hosts &&
-            Object.values(hosts)
-              .reduce<string[]>((acc, host) => {
-                if (host.name.trim()) {
-                  acc.push(host.name);
-                }
-                return acc;
-              }, [])
-              .join(', ');
+          const _hostnames = hosts
+            .reduce<string[]>((acc, host) => {
+              if (host.name.trim()) {
+                acc.push(host.name);
+              }
+              return acc;
+            }, [])
+            .join(', ');
+
+          let hostnames = _hostnames;
+          if (!_hostnames) {
+            if (hosts.length > 1) {
+              // when action was for a single agent and no host name
+              hostnames = UX_MESSAGES.unenrolled.hosts;
+            } else if (hosts.length === 1) {
+              // when action was for a multiple agents
+              // and none of them have a host name
+              hostnames = UX_MESSAGES.unenrolled.host;
+            }
+          }
           return (
-            <EuiToolTip content={hostname} anchorClassName="eui-textTruncate">
+            <EuiToolTip content={hostnames} anchorClassName="eui-textTruncate">
               <EuiText
                 size="s"
                 className="eui-textTruncate eui-fullWidth"
                 data-test-subj={getTestId('column-hostname')}
               >
-                {hostname}
+                {hostnames}
               </EuiText>
             </EuiToolTip>
           );
