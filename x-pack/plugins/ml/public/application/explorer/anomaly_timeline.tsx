@@ -213,7 +213,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
           name: (
             <FormattedMessage
               id="xpack.ml.explorer.attachToCaseLabel"
-              defaultMessage="Attach to case"
+              defaultMessage="Add to case"
             />
           ),
           'data-test-subj': 'mlAnomalyTimelinePanelAttachToCaseButton',
@@ -225,7 +225,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
           title: (
             <FormattedMessage
               id="xpack.ml.explorer.attachToCaseLabel"
-              defaultMessage="Attach to case"
+              defaultMessage="Add to case"
             />
           ),
           items: [
@@ -255,6 +255,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
       }
 
       return panels;
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [canEditDashboards, openCasesModal, viewBySwimlaneFieldName]);
 
     // If selecting a cell in the 'view by' swimlane, indicate the corresponding time in the Overall swimlane.
@@ -284,6 +285,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
 
     const onResize = useCallback((value: number) => {
       anomalyTimelineStateService.setContainerWidth(value);
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     return (
