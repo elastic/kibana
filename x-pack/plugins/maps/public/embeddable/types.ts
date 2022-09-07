@@ -32,6 +32,7 @@ interface MapEmbeddableState {
   filters?: Filter[];
   query?: Query;
   timeRange?: TimeRange;
+  timeslice?: [number, number];
   filterByMapExtent?: boolean;
   isMovementSynchronized?: boolean;
 }

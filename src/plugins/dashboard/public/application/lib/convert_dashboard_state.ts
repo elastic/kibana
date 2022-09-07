@@ -117,6 +117,7 @@ export const stateToDashboardContainerInput = ({
     query,
     title,
     timeRestore,
+    timeslice,
     filters: dashboardFilters,
   } = dashboardState;
 
@@ -147,6 +148,7 @@ export const stateToDashboardContainerInput = ({
     timeRange: {
       ..._.cloneDeep(timefilter.getTime()),
     },
+    timeslice,
     timeRestore,
     executionContext,
   };

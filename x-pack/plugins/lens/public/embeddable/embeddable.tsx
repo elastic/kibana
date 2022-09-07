@@ -96,6 +96,7 @@ interface LensBaseEmbeddableInput extends EmbeddableInput {
   filters?: Filter[];
   query?: Query;
   timeRange?: TimeRange;
+  timeslice?: [number, number];
   palette?: PaletteOutput;
   renderMode?: RenderMode;
   style?: React.CSSProperties;
@@ -468,15 +469,23 @@ export class Embeddable
     const cleanedFilters = containerState.filters
       ? containerState.filters.filter((filter) => !filter.meta.disabled)
       : undefined;
+    const nextTimeRange =
+      containerState.timeslice !== undefined
+        ? {
+            from: new Date(containerState.timeslice[0]).toISOString(),
+            to: new Date(containerState.timeslice[1]).toISOString(),
+            mode: 'absolute' as 'absolute',
+          }
+        : containerState.timeRange;
     if (
-      !isEqual(containerState.timeRange, this.externalSearchContext.timeRange) ||
+      !isEqual(nextTimeRange, this.externalSearchContext.timeRange) ||
       !isEqual(containerState.query, this.externalSearchContext.query) ||
       !isEqual(cleanedFilters, this.externalSearchContext.filters) ||
       this.externalSearchContext.searchSessionId !== containerState.searchSessionId ||
       this.embeddableTitle !== this.getTitle()
     ) {
       this.externalSearchContext = {
-        timeRange: containerState.timeRange,
+        timeRange: nextTimeRange,
         query: containerState.query,
         filters: cleanedFilters,
         searchSessionId: containerState.searchSessionId,

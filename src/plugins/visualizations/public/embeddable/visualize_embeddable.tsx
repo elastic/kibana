@@ -76,6 +76,7 @@ export interface VisualizeInput extends EmbeddableInput {
   query?: Query;
   filters?: Filter[];
   timeRange?: TimeRange;
+  timeslice?: [number, number];
 }
 
 export interface VisualizeOutput extends EmbeddableOutput {
@@ -279,8 +280,16 @@ export class VisualizeEmbeddable
     let dirty = false;
 
     // Check if timerange has changed
-    if (!_.isEqual(this.input.timeRange, this.timeRange)) {
-      this.timeRange = _.cloneDeep(this.input.timeRange);
+    const nextTimeRange =
+      this.input.timeslice !== undefined
+        ? {
+            from: new Date(this.input.timeslice[0]).toISOString(),
+            to: new Date(this.input.timeslice[1]).toISOString(),
+            mode: 'absolute' as 'absolute',
+          }
+        : this.input.timeRange;
+    if (!_.isEqual(nextTimeRange, this.timeRange)) {
+      this.timeRange = _.cloneDeep(nextTimeRange);
       dirty = true;
     }
 
