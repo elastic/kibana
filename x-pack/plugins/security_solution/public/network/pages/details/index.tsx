@@ -47,6 +47,7 @@ import { hasMlUserPermissions } from '../../../../common/machine_learning/has_ml
 import { useMlCapabilities } from '../../../common/components/ml/hooks/use_ml_capabilities';
 import { navTabsNetworkDetails } from './nav_tabs';
 import { NetworkDetailsTabs } from './details_tabs';
+import { useInstalledSecurityJobsIds } from '../../../common/components/ml/hooks/use_installed_security_jobs';
 
 export { getTrailingBreadcrumbs } from './utils';
 
@@ -115,11 +116,14 @@ const NetworkDetailsComponent: React.FC = () => {
     ip,
   });
 
+  const { jobIds } = useInstalledSecurityJobsIds();
   const [isLoadingAnomaliesData, anomaliesData] = useAnomaliesTableData({
     criteriaFields: networkToCriteria(detailName, flowTarget),
     startDate: from,
     endDate: to,
     skip: isInitializing,
+    jobIds,
+    aggregationInterval: 'auto',
   });
 
   const headerDraggableArguments = useMemo(

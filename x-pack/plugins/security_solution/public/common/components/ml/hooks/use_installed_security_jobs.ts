@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import type { MlSummaryJob } from '@kbn/ml-plugin/public';
 import { hasMlUserPermissions } from '../../../../../common/machine_learning/has_ml_user_permissions';
@@ -64,4 +64,11 @@ export const useInstalledSecurityJobs = (): UseInstalledSecurityJobsReturn => {
   }, [addError, error]);
 
   return { isLicensed, isMlUser, jobs, loading };
+};
+
+export const useInstalledSecurityJobsIds = () => {
+  const { jobs, loading } = useInstalledSecurityJobs();
+  const jobIds = useMemo(() => jobs.map((job) => job.id), [jobs]);
+
+  return { jobIds, loading };
 };

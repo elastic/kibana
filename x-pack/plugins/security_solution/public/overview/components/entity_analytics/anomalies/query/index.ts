@@ -53,6 +53,16 @@ export const getAggregatedAnomaliesQuery = ({
       terms: {
         field: 'job_id',
       },
+      aggs: {
+        entity: {
+          top_hits: {
+            _source: {
+              includes: ['host.name', 'user.name'],
+            },
+            size: 1,
+          },
+        },
+      },
     },
   },
 });

@@ -14,7 +14,8 @@ import type { InfluencerInput, Anomalies, CriteriaFields } from '../types';
 import * as i18n from './translations';
 import { useTimeZone, useUiSetting$ } from '../../../lib/kibana';
 import { useAppToasts } from '../../../hooks/use_app_toasts';
-import { useInstalledSecurityJobs } from '../hooks/use_installed_security_jobs';
+import { useMlCapabilities } from '../hooks/use_ml_capabilities';
+import { hasMlUserPermissions } from '../../../../../common/machine_learning/has_ml_user_permissions';
 
 interface Args {
   influencers?: InfluencerInput[];
@@ -24,6 +25,8 @@ interface Args {
   skip?: boolean;
   criteriaFields?: CriteriaFields[];
   filterQuery?: estypes.QueryDslQueryContainer;
+  jobIds: string[];
+  aggregationInterval: string;
 }
 
 type Return = [boolean, Anomalies | null];
@@ -57,15 +60,18 @@ export const useAnomaliesTableData = ({
   threshold = -1,
   skip = false,
   filterQuery,
+  jobIds,
+  aggregationInterval,
 }: Args): Return => {
   const [tableData, setTableData] = useState<Anomalies | null>(null);
-  const { isMlUser, jobs } = useInstalledSecurityJobs();
+  const mlCapabilities = useMlCapabilities();
+  const isMlUser = hasMlUserPermissions(mlCapabilities);
+
   const [loading, setLoading] = useState(true);
   const { addError } = useAppToasts();
   const timeZone = useTimeZone();
   const [anomalyScore] = useUiSetting$<number>(DEFAULT_ANOMALY_SCORE);
 
-  const jobIds = jobs.map((job) => job.id);
   const startDateMs = useMemo(() => new Date(startDate).getTime(), [startDate]);
   const endDateMs = useMemo(() => new Date(endDate).getTime(), [endDate]);
 
@@ -89,7 +95,7 @@ export const useAnomaliesTableData = ({
               jobIds,
               criteriaFields: criteriaFieldsInput,
               influencersFilterQuery: filterQuery,
-              aggregationInterval: 'auto',
+              aggregationInterval,
               threshold: getThreshold(anomalyScore, threshold),
               earliestMs,
               latestMs,
@@ -135,6 +141,7 @@ export const useAnomaliesTableData = ({
     endDateMs,
     skip,
     isMlUser,
+    aggregationInterval,
     // eslint-disable-next-line react-hooks/exhaustive-deps
     jobIds.sort().join(),
   ]);

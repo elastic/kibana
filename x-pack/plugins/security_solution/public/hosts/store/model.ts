@@ -42,12 +42,17 @@ export interface HostRiskScoreQuery extends BasicQueryPaginated {
   severitySelection: RiskSeverity[];
 }
 
+export interface HostsAnomaliesQuery {
+  jobIdSelection: string[];
+  intervalSelection: string;
+}
+
 export interface Queries {
   [HostsTableType.authentications]: BasicQueryPaginated;
   [HostsTableType.hosts]: HostsQuery;
   [HostsTableType.events]: BasicQueryPaginated;
   [HostsTableType.uncommonProcesses]: BasicQueryPaginated;
-  [HostsTableType.anomalies]: null | undefined;
+  [HostsTableType.anomalies]: HostsAnomaliesQuery;
   [HostsTableType.risk]: HostRiskScoreQuery;
   [HostsTableType.sessions]: BasicQueryPaginated;
 }
