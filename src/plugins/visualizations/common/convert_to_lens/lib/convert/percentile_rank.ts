@@ -9,7 +9,7 @@
 import { METRIC_TYPES } from '@kbn/data-plugin/common';
 import { PercentileRanksParams } from '../..';
 import { getFieldNameFromField } from '../utils';
-import { createColumn } from './column';
+import { createColumn, getFormat } from './column';
 import { PercentileRanksColumn, CommonColumnConverterArgs } from './types';
 
 export const convertToPercentileRankParams = (value: number): PercentileRanksParams => ({
@@ -49,7 +49,7 @@ export const convertToPercentileRankColumn = (
     operationType: 'percentile_rank',
     sourceField: field.name,
     ...commonColumnParams,
-    params: { ...params },
+    params: { ...params, ...getFormat(agg.format) },
     meta:
       index !== undefined
         ? {

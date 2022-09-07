@@ -9,12 +9,24 @@
 import uuid from 'uuid';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { IAggConfig } from '@kbn/data-plugin/common';
-import { DataType } from '../../types';
+import { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
+import { DataType, FormatParams } from '../../types';
 import { SchemaConfig, SupportedAggregation } from '../../../types';
 import { AggId, ExtraColumnFields, GeneralColumnWithMeta } from './types';
 import { getLabel } from '../utils';
 
 export const createAggregationId = (agg: SchemaConfig): AggId => `${agg.aggType}.${agg.aggId}`;
+
+const isSupportedFormat = (format: string) => ['bytes', 'number', 'percent'].includes(format);
+
+export const getFormat = (format?: SerializedFieldFormat): FormatParams => {
+  // not supported formatters should be converted to number
+  if (!format?.id || !isSupportedFormat(format.id)) {
+    return {};
+  }
+
+  return { format: { id: format.id } };
+};
 
 export const createColumn = <T extends SupportedAggregation>(
   agg: SchemaConfig<T>,

@@ -34,10 +34,9 @@ const isSupprtedBucketAgg = (agg: SchemaConfig): agg is SchemaConfig<BucketAggs>
 export const getBucketColumns = (
   aggType: BUCKET_TYPES,
   aggParams: AggParamsMapping[BucketAggs],
-  label: string,
   dataView: DataView,
-  isSplit: boolean = false,
-  metricColumns: Column[]
+  metricColumns: Column[],
+  { label, isSplit = false }: { label: string; isSplit: boolean }
 ) => {
   switch (aggType) {
     case BUCKET_TYPES.DATE_HISTOGRAM:
@@ -86,14 +85,10 @@ export const convertBucketToColumns = <T extends METRIC_TYPES | BUCKET_TYPES>(
     if (!agg.aggParams || !isSupprtedBucketAgg(agg)) {
       return null;
     }
-    return getBucketColumns(
-      agg.aggType,
-      agg.aggParams,
-      getLabel(agg),
-      dataView,
+    return getBucketColumns(agg.aggType, agg.aggParams, dataView, metricColumns, {
+      label: getLabel(agg),
       isSplit,
-      metricColumns
-    );
+    });
   } else {
     const isTermsAgg = agg.type.dslName === 'terms';
     const orderAgg = agg.getParam('orderAgg');
@@ -105,10 +100,9 @@ export const convertBucketToColumns = <T extends METRIC_TYPES | BUCKET_TYPES>(
     return getBucketColumns(
       aggType,
       isTermsAgg ? ({ ...aggParams, orderAgg } as AggParamsTerms) : aggParams,
-      agg.makeLabel(),
       dataView,
-      isSplit,
-      metricColumns
+      metricColumns,
+      { label: agg.makeLabel(), isSplit }
     );
   }
 };

@@ -9,7 +9,7 @@
 import { IAggConfig, METRIC_TYPES } from '@kbn/data-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { Operations } from '../../constants';
-import { createColumn, createColumnFromCustomAgg } from './column';
+import { createColumn, createColumnFromCustomAgg, getFormat } from './column';
 import { SupportedMetric } from './supported_metrics';
 import { CommonColumnConverterArgs, MetricsWithField } from './types';
 import { SchemaConfig } from '../../../types';
@@ -106,13 +106,7 @@ export const convertMetricAggregationColumnWithoutSpecialParams = (
     ...createColumn(agg, field, {
       reducedTimeRange,
     }),
-    params: {
-      ...(agg.format.id && {
-        format: {
-          id: agg.format.id,
-        },
-      }),
-    },
+    params: { ...getFormat(agg.format) },
     timeShift: agg.aggParams?.timeShift,
   } as MetricAggregationColumnWithoutSpecialParams;
 };

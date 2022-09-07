@@ -9,7 +9,7 @@
 import { METRIC_TYPES } from '@kbn/data-plugin/common';
 import { Operations, PercentileParams } from '../..';
 import { getFieldNameFromField } from '../utils';
-import { createColumn } from './column';
+import { createColumn, getFormat } from './column';
 import {
   PercentileColumnWithExtendedMeta,
   PercentileColumn,
@@ -61,7 +61,7 @@ export const convertToPercentileColumn = (
     operationType: 'percentile',
     sourceField: field.name,
     ...commonColumnParams,
-    params: { ...params },
+    params: { ...params, ...getFormat(agg.format) },
     meta:
       index !== undefined
         ? {
