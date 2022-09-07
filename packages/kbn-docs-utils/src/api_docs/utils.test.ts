@@ -11,7 +11,7 @@ import Path from 'path';
 import { Project } from 'ts-morph';
 import { findPlugins } from './find_plugins';
 import { getPluginApi } from './get_plugin_api';
-import { getKibanaPlatformPlugin } from './tests/kibana_platform_plugin_mock';
+import { getKibanaPlatformPlugin } from './integration_tests/kibana_platform_plugin_mock';
 import { PluginApi, PluginOrPackage } from './types';
 import { getPluginForPath, getServiceForPath, removeBrokenLinks, getFileName } from './utils';
 
@@ -53,14 +53,17 @@ it('test getServiceForPath', () => {
 
   expect(
     getServiceForPath(
-      '/var/lib/jenkins/workspace/elastic+kibana+pipeline-pull-request/kibana/packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/foo/index',
-      '/var/lib/jenkins/workspace/elastic+kibana+pipeline-pull-request/kibana/packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a'
+      '/var/lib/jenkins/workspace/elastic+kibana+pipeline-pull-request/kibana/packages/kbn-docs-utils/src/api_docs/integration_tests/__fixtures__/src/plugin_a/public/foo/index',
+      '/var/lib/jenkins/workspace/elastic+kibana+pipeline-pull-request/kibana/packages/kbn-docs-utils/src/api_docs/integration_tests/__fixtures__/src/plugin_a'
     )
   ).toBe('foo');
 });
 
 it('test removeBrokenLinks', () => {
-  const tsConfigFilePath = Path.resolve(__dirname, 'tests/__fixtures__/src/tsconfig.json');
+  const tsConfigFilePath = Path.resolve(
+    __dirname,
+    'integration_tests/__fixtures__/src/tsconfig.json'
+  );
   const project = new Project({
     tsConfigFilePath,
   });

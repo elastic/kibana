@@ -9,7 +9,8 @@
 import { ToolingLog } from '@kbn/tooling-log';
 import { Project } from 'ts-morph';
 import { getPluginApi } from './get_plugin_api';
-import {
+import type {
+  AdoptionTrackedAPIsByPlugin,
   ApiDeclaration,
   MissingApiItemMap,
   PluginApi,
@@ -18,6 +19,7 @@ import {
   UnreferencedDeprecationsByPlugin,
 } from './types';
 import { removeBrokenLinks } from './utils';
+import { AdoptionTrackedAPIStats } from './types';
 
 export function getPluginApiMap(
   project: Project,
@@ -29,10 +31,11 @@ export function getPluginApiMap(
   missingApiItems: MissingApiItemMap;
   referencedDeprecations: ReferencedDeprecationsByPlugin;
   unreferencedDeprecations: UnreferencedDeprecationsByPlugin;
+  adoptionTrackedAPIs: AdoptionTrackedAPIsByPlugin;
 } {
   log.debug('Building plugin API map, getting missing comments, and collecting deprecations...');
   const pluginApiMap: { [key: string]: PluginApi } = {};
-  plugins.map((plugin) => {
+  plugins.forEach((plugin) => {
     const captureReferences =
       collectReferences && (!pluginFilter || pluginFilter.indexOf(plugin.manifest.id) >= 0);
     pluginApiMap[plugin.manifest.id] = getPluginApi(
@@ -47,16 +50,52 @@ export function getPluginApiMap(
   // Mapping of plugin id to the missing source API id to all the plugin API items that referenced this item.
   const missingApiItems: { [key: string]: { [key: string]: string[] } } = {};
   const referencedDeprecations: ReferencedDeprecationsByPlugin = {};
-
   const unreferencedDeprecations: UnreferencedDeprecationsByPlugin = {};
+  const adoptionTrackedAPIs: AdoptionTrackedAPIsByPlugin = {};
 
   plugins.forEach((plugin) => {
     const id = plugin.manifest.id;
     const pluginApi = pluginApiMap[id];
     removeBrokenLinks(pluginApi, missingApiItems, pluginApiMap, log);
     collectDeprecations(pluginApi, referencedDeprecations, unreferencedDeprecations);
+    collectAdoptionTrackedAPIs(pluginApi, adoptionTrackedAPIs);
   });
-  return { pluginApiMap, missingApiItems, referencedDeprecations, unreferencedDeprecations };
+  return {
+    pluginApiMap,
+    missingApiItems,
+    referencedDeprecations,
+    unreferencedDeprecations,
+    adoptionTrackedAPIs,
+  };
+}
+
+function collectAdoptionTrackedAPIs(
+  pluginApi: PluginApi,
+  adoptionTrackedAPIsByPlugin: AdoptionTrackedAPIsByPlugin
+) {
+  adoptionTrackedAPIsByPlugin[pluginApi.id] = [];
+  (['client', 'common', 'server'] as Array<'client' | 'server' | 'common'>).forEach((scope) => {
+    pluginApi[scope].forEach((api) => {
+      collectAdoptionForApi(api, adoptionTrackedAPIsByPlugin[pluginApi.id]);
+    });
+  });
+}
+
+function collectAdoptionForApi(
+  api: ApiDeclaration,
+  adoptionTrackedAPIs: AdoptionTrackedAPIStats[]
+) {
+  const { id, label, tags = [], children, references = [] } = api;
+  if (tags.find((tag) => tag === 'track-adoption')) {
+    const uniqueReferences = new Set<string>(references.map(({ plugin }) => plugin));
+    adoptionTrackedAPIs.push({
+      trackedApi: { id, label },
+      references: [...uniqueReferences.values()],
+    });
+  }
+  if (children) {
+    children.forEach((child) => collectAdoptionForApi(child, adoptionTrackedAPIs));
+  }
 }
 
 function collectDeprecations(

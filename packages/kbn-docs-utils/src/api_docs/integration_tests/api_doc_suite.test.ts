@@ -93,7 +93,7 @@ function fnIsCorrect(fn: ApiDeclaration | undefined) {
   expect(p5?.description?.length).toBe(1);
 }
 
-beforeAll(() => {
+beforeAll(async () => {
   const tsConfigFilePath = Path.resolve(__dirname, '__fixtures__/src/tsconfig.json');
   const project = new Project({
     tsConfigFilePath,
@@ -109,30 +109,34 @@ beforeAll(() => {
   pluginA.manifest.serviceFolders = ['foo'];
   const plugins: PluginOrPackage[] = [pluginA, pluginB];
 
-  const { pluginApiMap, missingApiItems, referencedDeprecations } = getPluginApiMap(
-    project,
-    plugins,
-    log,
-    { collectReferences: false }
-  );
+  const { pluginApiMap, missingApiItems, referencedDeprecations, adoptionTrackedAPIs } =
+    getPluginApiMap(project, plugins, log, { collectReferences: false });
 
   doc = pluginApiMap.pluginA;
 
-  pluginAStats = collectApiStatsForPlugin(doc, missingApiItems, referencedDeprecations);
+  pluginAStats = collectApiStatsForPlugin(
+    doc,
+    missingApiItems,
+    referencedDeprecations,
+    adoptionTrackedAPIs
+  );
   pluginBStats = collectApiStatsForPlugin(
     pluginApiMap.pluginB,
     missingApiItems,
-    referencedDeprecations
+    referencedDeprecations,
+    adoptionTrackedAPIs
   );
 
   mdxOutputFolder = Path.resolve(__dirname, 'snapshots');
-  writePluginDocs(mdxOutputFolder, { doc, plugin: pluginA, pluginStats: pluginAStats, log });
-  writePluginDocs(mdxOutputFolder, {
-    doc: pluginApiMap.pluginB,
-    plugin: pluginB,
-    pluginStats: pluginBStats,
-    log,
-  });
+  await Promise.all([
+    writePluginDocs(mdxOutputFolder, { doc, plugin: pluginA, pluginStats: pluginAStats, log }),
+    writePluginDocs(mdxOutputFolder, {
+      doc: pluginApiMap.pluginB,
+      plugin: pluginB,
+      pluginStats: pluginBStats,
+      log,
+    }),
+  ]);
 });
 
 it('Stats', () => {
