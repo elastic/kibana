@@ -40,7 +40,7 @@ export const getThreatList = async ({
   if (calculatedPerPage > 10000) {
     throw new TypeError('perPage cannot exceed the size of 10000');
   }
-  const queryFilter = await getQueryFilter({
+  const queryFilter = getQueryFilter({
     query,
     language: language ?? 'kuery',
     filters: threatFilters,
@@ -98,7 +98,7 @@ export const getThreatListCount = async ({
   index,
   filter,
 }: ThreatListCountOptions): Promise<number> => {
-  const queryFilter = await getQueryFilter({
+  const queryFilter = getQueryFilter({
     query,
     language: language ?? 'kuery',
     filters: threatFilters,

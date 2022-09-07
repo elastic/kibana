@@ -36,11 +36,11 @@ describe('findThresholdSignals', () => {
   let mockService: RuleExecutorServicesMock;
   const ruleExecutionLogger = ruleExecutionLogMock.forExecutors.create();
 
-  beforeEach(async () => {
+  beforeEach(() => {
     jest.clearAllMocks();
     jest.spyOn(single_search_after, 'singleSearchAfter').mockImplementation(mockSingleSearchAfter);
     mockService = alertsMock.createRuleExecutorServices();
-    const queryFilter = await getQueryFilter({
+    const queryFilter = getQueryFilter({
       query: '',
       language: 'kuery',
       filters: [],

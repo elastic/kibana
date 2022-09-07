@@ -9,13 +9,13 @@ import { getQueryFilter, getAllFilters } from './get_query_filter';
 import type { Filter } from '@kbn/es-query';
 import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
 import { getListClientMock } from '@kbn/lists-plugin/server/services/lists/list_client.mock';
-import { buildExceptionFilter } from '../exceptions/build_exception_filter';
+import { buildExceptionFilter } from '@kbn/lists-plugin/server/services/exception_lists';
 
 describe('get_filter', () => {
   describe('getQueryFilter', () => {
     describe('kuery', () => {
-      test('it should work with an empty filter as kuery', async () => {
-        const queryFilter = await getQueryFilter({
+      test('it should work with an empty filter as kuery', () => {
+        const queryFilter = getQueryFilter({
           query: 'host.name: linux',
           language: 'kuery',
           filters: [],
@@ -45,8 +45,8 @@ describe('get_filter', () => {
         });
       });
 
-      test('it should work with a simple filter as a kuery', async () => {
-        const queryFilter = await getQueryFilter({
+      test('it should work with a simple filter as a kuery', () => {
+        const queryFilter = getQueryFilter({
           query: 'host.name: windows',
           language: 'kuery',
           filters: [
@@ -99,8 +99,8 @@ describe('get_filter', () => {
         });
       });
 
-      test('it should ignore disabled filters as a kuery', async () => {
-        const queryFilter = await getQueryFilter({
+      test('it should ignore disabled filters as a kuery', () => {
+        const queryFilter = getQueryFilter({
           query: 'host.name: windows',
           language: 'kuery',
           filters: [
@@ -170,8 +170,8 @@ describe('get_filter', () => {
         });
       });
 
-      test('it should work with a simple filter as a kuery without meta information', async () => {
-        const queryFilter = await getQueryFilter({
+      test('it should work with a simple filter as a kuery without meta information', () => {
+        const queryFilter = getQueryFilter({
           query: 'host.name: windows',
           language: 'kuery',
           filters: [
@@ -214,7 +214,7 @@ describe('get_filter', () => {
         });
       });
 
-      test('it should work with a simple filter as a kuery without meta information with an exists', async () => {
+      test('it should work with a simple filter as a kuery without meta information with an exists', () => {
         const query: Partial<Filter> = {
           query: {
             match_phrase: {
@@ -231,7 +231,7 @@ describe('get_filter', () => {
           },
         } as Partial<Filter>;
 
-        const queryFilter = await getQueryFilter({
+        const queryFilter = getQueryFilter({
           query: 'host.name: windows',
           language: 'kuery',
           filters: [query, exists],
@@ -271,8 +271,8 @@ describe('get_filter', () => {
         });
       });
 
-      test('it should work with a simple filter that is disabled as a kuery', async () => {
-        const queryFilter = await getQueryFilter({
+      test('it should work with a simple filter that is disabled as a kuery', () => {
+        const queryFilter = getQueryFilter({
           query: 'host.name: windows',
           language: 'kuery',
           filters: [
@@ -322,8 +322,8 @@ describe('get_filter', () => {
     });
 
     describe('lucene', () => {
-      test('it should work with an empty filter as lucene', async () => {
-        const queryFilter = await getQueryFilter({
+      test('it should work with an empty filter as lucene', () => {
+        const queryFilter = getQueryFilter({
           query: 'host.name: linux',
           language: 'lucene',
           filters: [],
@@ -348,8 +348,8 @@ describe('get_filter', () => {
         });
       });
 
-      test('it should work with a simple filter as a lucene', async () => {
-        const queryFilter = await getQueryFilter({
+      test('it should work with a simple filter as a lucene', () => {
+        const queryFilter = getQueryFilter({
           query: 'host.name: windows',
           language: 'lucene',
           filters: [
@@ -398,8 +398,8 @@ describe('get_filter', () => {
         });
       });
 
-      test('it should ignore disabled lucene filters', async () => {
-        const queryFilter = await getQueryFilter({
+      test('it should ignore disabled lucene filters', () => {
+        const queryFilter = getQueryFilter({
           query: 'host.name: windows',
           language: 'lucene',
           filters: [
@@ -465,8 +465,8 @@ describe('get_filter', () => {
         });
       });
 
-      test('it should work with a simple filter that is disabled as a lucene', async () => {
-        const queryFilter = await getQueryFilter({
+      test('it should work with a simple filter that is disabled as a lucene', () => {
+        const queryFilter = getQueryFilter({
           query: 'host.name: windows',
           language: 'lucene',
           filters: [
@@ -517,7 +517,7 @@ describe('get_filter', () => {
           chunkSize: 1024,
           excludeExceptions: true,
         });
-        const queryFilter = await getQueryFilter({
+        const queryFilter = getQueryFilter({
           query: 'host.name: linux',
           language: 'kuery',
           filters: [],
@@ -601,7 +601,7 @@ describe('get_filter', () => {
         chunkSize: 1024,
         excludeExceptions: true,
       });
-      const queryFilter = await getQueryFilter({
+      const queryFilter = getQueryFilter({
         query: 'host.name: linux',
         language: 'kuery',
         filters: [],
@@ -720,7 +720,7 @@ describe('get_filter', () => {
         chunkSize: 1024,
         excludeExceptions: true,
       });
-      const queryFilter = await getQueryFilter({
+      const queryFilter = getQueryFilter({
         query: 'host.name: linux',
         language: 'kuery',
         filters: [],
@@ -796,8 +796,8 @@ describe('get_filter', () => {
       `);
     });
 
-    test('it should work when exceptionFilter has value undefined', async () => {
-      const queryFilter = await getQueryFilter({
+    test('it should work when exceptionFilter has value undefined', () => {
+      const queryFilter = getQueryFilter({
         query: 'host.name: linux',
         language: 'kuery',
         filters: [],
@@ -825,7 +825,7 @@ describe('get_filter', () => {
           chunkSize: 1024,
           excludeExceptions: false,
         });
-        const queryFilter = await getQueryFilter({
+        const queryFilter = getQueryFilter({
           query: 'host.name: linux',
           language: 'kuery',
           filters: [],
@@ -907,7 +907,7 @@ describe('get_filter', () => {
           chunkSize: 1024,
           excludeExceptions: false,
         });
-        const queryFilter = await getQueryFilter({
+        const queryFilter = getQueryFilter({
           query: 'host.name: linux',
           language: 'kuery',
           filters: [],
@@ -1018,8 +1018,8 @@ describe('get_filter', () => {
       });
     });
 
-    test('it should work with a nested object queries', async () => {
-      const queryFilter = await getQueryFilter({
+    test('it should work with a nested object queries', () => {
+      const queryFilter = getQueryFilter({
         query: 'category:{ name:Frank and trusted:true }',
         language: 'kuery',
         filters: [],
@@ -1075,8 +1075,8 @@ describe('get_filter', () => {
       `);
     });
 
-    test('it works with references and does not add indexes', async () => {
-      const queryFilter = await getQueryFilter({
+    test('it works with references and does not add indexes', () => {
+      const queryFilter = getQueryFilter({
         query:
           '(event.module:suricata and event.kind:alert) and suricata.eve.alert.signature_id: (2610182 or 2610183 or 2610184 or 2610185 or 2610186 or 2610187)',
         language: 'kuery',

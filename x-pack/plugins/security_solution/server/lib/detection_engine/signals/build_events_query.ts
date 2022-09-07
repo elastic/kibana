@@ -208,7 +208,7 @@ export const buildEventsSearchQuery = ({
   return searchQuery;
 };
 
-export const buildEqlSearchRequest = async ({
+export const buildEqlSearchRequest = ({
   query,
   index,
   from,
@@ -222,7 +222,7 @@ export const buildEqlSearchRequest = async ({
   timestampField,
   tiebreakerField,
   filter,
-}: BuildEqlSearchRequestParams): Promise<estypes.EqlSearchRequest> => {
+}: BuildEqlSearchRequestParams): estypes.EqlSearchRequest => {
   const timestamps = secondaryTimestamp
     ? [primaryTimestamp, secondaryTimestamp]
     : [primaryTimestamp];
@@ -231,7 +231,7 @@ export const buildEqlSearchRequest = async ({
     format: 'strict_date_optional_time',
   }));
 
-  const esFilter = await getQueryFilter({
+  const esFilter = getQueryFilter({
     query: '',
     language: 'eql',
     filters: filters || [],

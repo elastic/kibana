@@ -37,7 +37,7 @@ export const findAllListItems = async ({
   esClient,
   filter,
   listId,
-  sortField: sortFieldWithPossibleValue,
+  sortField,
   listIndex,
   listItemIndex,
   sortOrder,
@@ -46,12 +46,10 @@ export const findAllListItems = async ({
   if (list == null) {
     return null;
   } else {
-    let allListItems: ListItemArraySchema = [];
+    const allListItems: ListItemArraySchema = [];
     const query = getQueryFilterWithListId({ filter, listId });
-    const sortField =
-      sortFieldWithPossibleValue === 'value' ? list.tie_breaker_id : sortFieldWithPossibleValue;
-
-    const respose = await esClient.count({
+    const sort = getSortWithTieBreaker({ sortField, sortOrder });
+    const { count } = await esClient.count({
       body: {
         query,
       },
@@ -62,7 +60,7 @@ export const findAllListItems = async ({
     let response = await esClient.search<SearchEsListItemSchema>({
       body: {
         query,
-        sort: getSortWithTieBreaker({ sortField, sortOrder }),
+        sort,
       },
       ignore_unavailable: true,
       index: listItemIndex,
@@ -70,7 +68,7 @@ export const findAllListItems = async ({
     });
 
     while (response.hits.hits.length !== 0) {
-      allListItems = allListItems.concat(transformElasticToListItem({ response, type: list.type }));
+      allListItems.push(...transformElasticToListItem({ response, type: list.type }));
 
       if (allListItems.length > 100000) {
         throw new TypeError('API route only supports up to 100,000 items');
@@ -80,7 +78,7 @@ export const findAllListItems = async ({
         body: {
           query,
           search_after: response.hits.hits[response.hits.hits.length - 1].sort,
-          sort: getSortWithTieBreaker({ sortField, sortOrder }),
+          sort,
         },
         ignore_unavailable: true,
         index: listItemIndex,
@@ -89,7 +87,7 @@ export const findAllListItems = async ({
     }
     return {
       data: allListItems,
-      total: respose.count,
+      total: count,
     };
   }
 };

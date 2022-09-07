@@ -60,6 +60,7 @@ describe('eql_executor', () => {
         filter: undefined,
         unprocessedExceptions: [getExceptionListItemSchemaMock()],
       });
+      expect(ruleExecutionLogger.warn).toHaveBeenCalled();
       expect(ruleExecutionLogger.warn.mock.calls[0][0]).toContain(
         "The following exceptions won't be applied to rule execution"
       );

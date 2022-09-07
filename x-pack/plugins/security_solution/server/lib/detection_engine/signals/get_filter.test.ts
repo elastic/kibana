@@ -10,7 +10,7 @@ import type { RuleExecutorServicesMock } from '@kbn/alerting-plugin/server/mocks
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
 import { getListClientMock } from '@kbn/lists-plugin/server/services/lists/list_client.mock';
-import { buildExceptionFilter } from '../exceptions/build_exception_filter';
+import { buildExceptionFilter } from '@kbn/lists-plugin/server/services/exception_lists';
 
 describe('get_filter', () => {
   let servicesMock: RuleExecutorServicesMock;

@@ -70,7 +70,7 @@ export const eqlExecutor = async ({
   return withSecuritySpan('eqlExecutor', async () => {
     const result = createSearchAfterReturnType();
 
-    const request = await buildEqlSearchRequest({
+    const request = buildEqlSearchRequest({
       query: ruleParams.query,
       index: inputIndex,
       from: tuple.from.toISOString(),

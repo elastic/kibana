@@ -11,7 +11,7 @@ import type {
   ExceptionListItemSchema,
   CreateExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
-import { useApi } from '@kbn/securitysolution-list-hooks';
+import { useApi, removeIdFromExceptionItemsEntries } from '@kbn/securitysolution-list-hooks';
 import type { HttpStart } from '@kbn/core/public';
 
 import { updateAlertStatus } from '../../../detections/containers/detection_engine/alerts/api';
@@ -22,11 +22,7 @@ import {
 } from '../../../detections/components/alerts_table/default_config';
 import { getQueryFilter } from '../../../detections/containers/detection_engine/exceptions/get_query_filter';
 import type { Index } from '../../../../common/detection_engine/schemas/common/schemas';
-import {
-  formatExceptionItemForUpdate,
-  prepareExceptionItemsForBulkClose,
-  removeIdFromExceptionItemsEntries,
-} from './helpers';
+import { formatExceptionItemForUpdate, prepareExceptionItemsForBulkClose } from './helpers';
 import { useKibana } from '../../lib/kibana';
 
 /**

@@ -23,7 +23,6 @@ import type {
   ExceptionListItemSchema,
   CreateExceptionListItemSchema,
   UpdateExceptionListItemSchema,
-  EntriesArray,
 } from '@kbn/securitysolution-io-ts-list-types';
 import {
   comment,
@@ -38,7 +37,6 @@ import {
   addIdToEntries,
 } from '@kbn/securitysolution-list-utils';
 import type { DataViewBase } from '@kbn/es-query';
-import { removeIdFromItem } from '@kbn/securitysolution-utils';
 import * as i18n from './translations';
 import type { AlertData, Flattened } from './types';
 
@@ -371,23 +369,6 @@ function filterEmptyExceptionEntries<T extends ExceptionEntry>(entries: T[]): T[
   }
   return finalEntries;
 }
-
-export const removeIdFromExceptionItemsEntries = <T extends { entries: EntriesArray }>(
-  exceptionItem: T
-): T => {
-  const { entries } = exceptionItem;
-  const entriesNoId = entries.map((entry) => {
-    if (entry.type === 'nested') {
-      return removeIdFromItem({
-        ...entry,
-        entries: entry.entries.map((nestedEntry) => removeIdFromItem(nestedEntry)),
-      });
-    } else {
-      return removeIdFromItem<Entry>(entry);
-    }
-  });
-  return { ...exceptionItem, entries: entriesNoId };
-};
 
 /**
  * Returns the default values from the alert data to autofill new endpoint exceptions

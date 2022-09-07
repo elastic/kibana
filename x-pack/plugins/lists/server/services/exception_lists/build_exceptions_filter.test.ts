@@ -10,6 +10,35 @@ import type {
   EntryMatchAny,
   ExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
+
+import {
+  getEntryMatchAnyExcludeMock,
+  getEntryMatchAnyMock,
+} from '../../../common/schemas/types/entry_match_any.mock';
+import {
+  getEntryExistsExcludedMock,
+  getEntryExistsMock,
+} from '../../../common/schemas/types/entry_exists.mock';
+import {
+  getEntryNestedExcludeMock,
+  getEntryNestedMixedEntries,
+  getEntryNestedMock,
+} from '../../../common/schemas/types/entry_nested.mock';
+import { getExceptionListItemSchemaMock } from '../../../common/schemas/response/exception_list_item_schema.mock';
+import {
+  getEntryMatchWildcardExcludeMock,
+  getEntryMatchWildcardMock,
+} from '../../../common/schemas/types/entry_match_wildcard.mock';
+import {
+  getEntryMatchExcludeMock,
+  getEntryMatchMock,
+} from '../../../common/schemas/types/entry_match.mock';
+import { getListClientMock } from '../lists/list_client.mock';
+import {
+  getEntryListExcludedMock,
+  getEntryListMock,
+} from '../../../common/schemas/types/entry_list.mock';
+
 import {
   buildExceptionFilter,
   buildExceptionItemFilter,
@@ -23,34 +52,6 @@ import {
   createOrClauses,
   filterOutUnprocessableValueLists,
 } from './build_exception_filter';
-
-import {
-  getEntryMatchAnyExcludeMock,
-  getEntryMatchAnyMock,
-} from '@kbn/lists-plugin/common/schemas/types/entry_match_any.mock';
-import {
-  getEntryExistsExcludedMock,
-  getEntryExistsMock,
-} from '@kbn/lists-plugin/common/schemas/types/entry_exists.mock';
-import {
-  getEntryNestedExcludeMock,
-  getEntryNestedMixedEntries,
-  getEntryNestedMock,
-} from '@kbn/lists-plugin/common/schemas/types/entry_nested.mock';
-import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
-import {
-  getEntryMatchWildcardExcludeMock,
-  getEntryMatchWildcardMock,
-} from '@kbn/lists-plugin/common/schemas/types/entry_match_wildcard.mock';
-import {
-  getEntryMatchExcludeMock,
-  getEntryMatchMock,
-} from '@kbn/lists-plugin/common/schemas/types/entry_match.mock';
-import { getListClientMock } from '@kbn/lists-plugin/server/services/lists/list_client.mock';
-import {
-  getEntryListExcludedMock,
-  getEntryListMock,
-} from '@kbn/lists-plugin/common/schemas/types/entry_list.mock';
 
 const modifiedGetEntryMatchAnyMock = (): EntryMatchAny => ({
   ...getEntryMatchAnyMock(),
@@ -67,8 +68,8 @@ describe('build_exceptions_filter', () => {
         alias: null,
         chunkSize: 1,
         excludeExceptions: false,
-        lists: [],
         listClient,
+        lists: [],
       });
       expect(filter).toBeUndefined();
     });
@@ -78,8 +79,8 @@ describe('build_exceptions_filter', () => {
         alias: null,
         chunkSize: 1,
         excludeExceptions: false,
-        lists: [getExceptionListItemSchemaMock()],
         listClient,
+        lists: [getExceptionListItemSchemaMock()],
       });
 
       expect(filter).toMatchInlineSnapshot(`
@@ -151,8 +152,8 @@ describe('build_exceptions_filter', () => {
         alias: null,
         chunkSize: 2,
         excludeExceptions: true,
-        lists: [exceptionItem1, exceptionItem2],
         listClient,
+        lists: [exceptionItem1, exceptionItem2],
       });
       expect(filter).toMatchInlineSnapshot(`
         Object {
@@ -233,8 +234,8 @@ describe('build_exceptions_filter', () => {
         alias: null,
         chunkSize: 2,
         excludeExceptions: true,
-        lists: [exceptionItem1, exceptionItem2, exceptionItem3],
         listClient,
+        lists: [exceptionItem1, exceptionItem2, exceptionItem3],
       });
 
       expect(filter).toMatchInlineSnapshot(`
@@ -334,8 +335,8 @@ describe('build_exceptions_filter', () => {
         alias: null,
         chunkSize: 1,
         excludeExceptions: true,
-        lists: exceptions,
         listClient,
+        lists: exceptions,
       });
 
       expect(filter).toMatchInlineSnapshot(`
@@ -1282,6 +1283,7 @@ describe('build_exceptions_filter', () => {
 
       expect(booleanFilter).toEqual({
         bool: {
+          minimum_should_match: 1,
           should: [
             {
               terms: {
@@ -1289,7 +1291,6 @@ describe('build_exceptions_filter', () => {
               },
             },
           ],
-          minimum_should_match: 1,
         },
       });
     });

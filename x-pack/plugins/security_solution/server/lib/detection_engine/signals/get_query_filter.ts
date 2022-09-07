@@ -11,7 +11,7 @@ import { buildEsQuery } from '@kbn/es-query';
 import type { ESBoolQuery } from '../../../../common/typed_json';
 import type { Index, Query } from '../../../../common/detection_engine/schemas/common';
 
-export const getQueryFilter = async ({
+export const getQueryFilter = ({
   query,
   language,
   filters,
@@ -23,7 +23,7 @@ export const getQueryFilter = async ({
   filters: unknown;
   index: Index;
   exceptionFilter: Filter | undefined;
-}): Promise<ESBoolQuery> => {
+}): ESBoolQuery => {
   const indexPattern: DataViewBase = {
     fields: [],
     title: index.join(),

@@ -8,7 +8,7 @@
 import { buildEqlSearchRequest, buildEventsSearchQuery } from './build_events_query';
 import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
 import { getListClientMock } from '@kbn/lists-plugin/server/services/lists/list_client.mock';
-import { buildExceptionFilter } from '../exceptions/build_exception_filter';
+import { buildExceptionFilter } from '@kbn/lists-plugin/server/services/exception_lists';
 
 const emptyFilter = {
   bool: {
@@ -556,8 +556,8 @@ describe('create_signals', () => {
   });
 
   describe('buildEqlSearchRequest', () => {
-    test('should build a basic request with time range', async () => {
-      const request = await buildEqlSearchRequest({
+    test('should build a basic request with time range', () => {
+      const request = buildEqlSearchRequest({
         query: 'process where true',
         index: ['testindex1', 'testindex2'],
         from: 'now-5m',
@@ -607,8 +607,8 @@ describe('create_signals', () => {
       });
     });
 
-    test('should build a request with timestamp and event category overrides', async () => {
-      const request = await buildEqlSearchRequest({
+    test('should build a request with timestamp and event category overrides', () => {
+      const request = buildEqlSearchRequest({
         query: 'process where true',
         index: ['testindex1', 'testindex2'],
         from: 'now-5m',
@@ -695,8 +695,8 @@ describe('create_signals', () => {
       });
     });
 
-    test('should build a request without @timestamp fallback if secondaryTimestamp is not specified', async () => {
-      const request = await buildEqlSearchRequest({
+    test('should build a request without @timestamp fallback if secondaryTimestamp is not specified', () => {
+      const request = buildEqlSearchRequest({
         query: 'process where true',
         index: ['testindex1', 'testindex2'],
         from: 'now-5m',
@@ -756,7 +756,7 @@ describe('create_signals', () => {
         chunkSize: 1024,
         excludeExceptions: true,
       });
-      const request = await buildEqlSearchRequest({
+      const request = buildEqlSearchRequest({
         query: 'process where true',
         index: ['testindex1', 'testindex2'],
         from: 'now-5m',
@@ -864,7 +864,7 @@ describe('create_signals', () => {
       `);
     });
 
-    test('should build a request with filters', async () => {
+    test('should build a request with filters', () => {
       const filters = [
         {
           meta: {
@@ -899,7 +899,7 @@ describe('create_signals', () => {
           },
         },
       ];
-      const request = await buildEqlSearchRequest({
+      const request = buildEqlSearchRequest({
         query: 'process where true',
         index: ['testindex1', 'testindex2'],
         from: 'now-5m',

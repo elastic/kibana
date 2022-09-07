@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-
 import type { ISearchStart } from '@kbn/data-plugin/public';
+import type { Filter } from '@kbn/es-query';
 import type { Status } from '../../../../common/detection_engine/schemas/common/schemas';
 import type { Ecs } from '../../../../common/ecs';
 import type { NoteResult } from '../../../../common/types/timeline/note';
@@ -57,7 +56,7 @@ export interface SendAlertToTimelineActionProps {
   ecsData: Ecs | Ecs[];
   updateTimelineIsLoading: UpdateTimelineLoading;
   searchStrategyClient: ISearchStart;
-  getExceptions: GetExceptions;
+  getExceptionFilter: GetExceptionFilter;
 }
 
 export type UpdateTimelineLoading = ({ id, isLoading }: { id: string; isLoading: boolean }) => void;
@@ -71,7 +70,7 @@ export interface CreateTimelineProps {
 }
 
 export type CreateTimeline = ({ from, timeline, to }: CreateTimelineProps) => void;
-export type GetExceptions = (ecsData: Ecs) => Promise<ExceptionListItemSchema[]>;
+export type GetExceptionFilter = (ecsData: Ecs) => Promise<Filter | undefined>;
 
 export interface ThresholdAggregationData {
   thresholdFrom: string;

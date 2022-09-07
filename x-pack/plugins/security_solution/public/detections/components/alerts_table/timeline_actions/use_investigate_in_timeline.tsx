@@ -11,13 +11,10 @@ import { EuiContextMenuItem } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { ALERT_RULE_EXCEPTIONS_LIST } from '@kbn/rule-data-utils';
-import type {
-  ExceptionListIdentifiers,
-  ExceptionListItemSchema,
-} from '@kbn/securitysolution-io-ts-list-types';
-import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
+import type { ExceptionListId } from '@kbn/securitysolution-io-ts-list-types';
 import { useApi } from '@kbn/securitysolution-list-hooks';
 
+import type { Filter } from '@kbn/es-query';
 import { useKibana } from '../../../../common/lib/kibana';
 import { TimelineId, TimelineType } from '../../../../../common/types/timeline';
 import type { Ecs } from '../../../../../common/ecs';
@@ -47,18 +44,16 @@ export const useInvestigateInTimeline = ({
   const dispatch = useDispatch();
 
   const { services } = useKibana();
-  const { getExceptionListsItems } = useApi(services.http);
+  const { getExceptionFilterFromIds } = useApi(services.http);
 
-  const getExceptions = useCallback(
-    async (ecsData: Ecs): Promise<ExceptionListItemSchema[]> => {
+  const getExceptionFilter = useCallback(
+    async (ecsData: Ecs): Promise<Filter | undefined> => {
       const exceptionsLists = (getField(ecsData, ALERT_RULE_EXCEPTIONS_LIST) ?? []).reduce(
-        (acc: ExceptionListIdentifiers[], next: string) => {
+        (acc: ExceptionListId[], next: string) => {
           const parsedList = JSON.parse(next);
           if (parsedList.type === 'detection') {
             const formattedList = {
-              id: parsedList.id,
-              listId: parsedList.list_id,
-              type: ExceptionListTypeEnum.DETECTION,
+              exceptionListId: parsedList.list_id,
               namespaceType: parsedList.namespace_type,
             };
             acc.push(formattedList);
@@ -68,35 +63,28 @@ export const useInvestigateInTimeline = ({
         []
       );
 
-      const allExceptions: ExceptionListItemSchema[] = [];
-
       if (exceptionsLists.length > 0) {
-        await getExceptionListsItems({
-          lists: exceptionsLists,
-          filterOptions: [],
-          pagination: {
-            page: 0,
-            perPage: 10000,
-            total: 10000,
-          },
-          showDetectionsListsOnly: true,
-          showEndpointListsOnly: false,
-          onSuccess: ({ exceptions }) => {
-            allExceptions.push(...exceptions);
+        await getExceptionFilterFromIds({
+          exceptionListIds: exceptionsLists,
+          excludeExceptions: true,
+          chunkSize: 10000,
+          alias: 'Exceptions',
+          onSuccess: (filter) => {
+            return filter;
           },
           onError: (err: string[]) => {
             addError(err, {
               title: i18n.translate(
-                'xpack.securitySolution.detectionEngine.alerts.fetchExceptionsFailure',
-                { defaultMessage: 'Error fetching exceptions.' }
+                'xpack.securitySolution.detectionEngine.alerts.fetchExceptionFilterFailure',
+                { defaultMessage: 'Error fetching exception filter.' }
               ),
             });
           },
         });
       }
-      return allExceptions;
+      return undefined;
     },
-    [addError, getExceptionListsItems]
+    [addError, getExceptionFilterFromIds]
   );
 
   const filterManagerBackup = useMemo(() => query.filterManager, [query.filterManager]);
@@ -151,7 +139,7 @@ export const useInvestigateInTimeline = ({
         ecsData: ecsRowData,
         searchStrategyClient,
         updateTimelineIsLoading,
-        getExceptions,
+        getExceptionFilter,
       });
     }
   }, [
@@ -160,7 +148,7 @@ export const useInvestigateInTimeline = ({
     onInvestigateInTimelineAlertClick,
     searchStrategyClient,
     updateTimelineIsLoading,
-    getExceptions,
+    getExceptionFilter,
   ]);
 
   const investigateInTimelineActionItems = useMemo(

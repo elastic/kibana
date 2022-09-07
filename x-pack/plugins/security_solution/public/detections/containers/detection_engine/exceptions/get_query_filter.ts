@@ -11,11 +11,12 @@ import type {
   CreateExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import type { Filter, EsQueryConfig, DataViewBase } from '@kbn/es-query';
+import { getExceptionFilterFromExceptions } from '@kbn/securitysolution-list-api';
 import { buildEsQuery } from '@kbn/es-query';
+import { KibanaServices } from '../../../../common/lib/kibana';
 
 import type { Query, Index } from '../../../../../common/detection_engine/schemas/common';
 import type { ESBoolQuery } from '../../../../../common/typed_json';
-import { getExceptionFilterFromExceptions } from './api';
 
 export const getQueryFilter = async (
   query: Query,
@@ -41,6 +42,7 @@ export const getQueryFilter = async (
   // Discussion at https://issues.apache.org/jira/browse/LUCENE-4835 indicates that 1024 is a
   // very conservative value.
   const { filter } = await getExceptionFilterFromExceptions({
+    http: KibanaServices.get().http,
     exceptions: lists,
     excludeExceptions,
     chunkSize: 1024,

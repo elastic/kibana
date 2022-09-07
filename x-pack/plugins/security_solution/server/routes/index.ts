@@ -74,7 +74,6 @@ import { createPrebuiltSavedObjectsRoute } from '../lib/prebuilt_saved_objects/r
 import { readAlertsIndexExistsRoute } from '../lib/detection_engine/routes/index/read_alerts_index_exists_route';
 import { getInstalledIntegrationsRoute } from '../lib/detection_engine/routes/fleet/get_installed_integrations/get_installed_integrations_route';
 import { registerResolverRoutes } from '../endpoint/routes/resolver';
-import { getExceptionFilterRoute } from '../lib/detection_engine/routes/exceptions/get_exception_filter_route';
 import { createRuleExceptionsRoute } from '../lib/detection_engine/routes/rules/create_rule_exceptions_route';
 
 export const initRoutes = (
@@ -148,8 +147,6 @@ export const initRoutes = (
 
   persistNoteRoute(router, config, security);
   persistPinnedEventRoute(router, config, security);
-
-  getExceptionFilterRoute(router, config, security);
 
   // Detection Engine Signals routes that have the REST endpoints of /api/detection_engine/signals
   // POST /api/detection_engine/signals/status

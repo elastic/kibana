@@ -13,6 +13,7 @@ import { TIMESTAMP } from '@kbn/rule-data-utils';
 import { createPersistenceRuleTypeWrapper } from '@kbn/rule-registry-plugin/server';
 import { parseScheduleDates } from '@kbn/securitysolution-io-ts-utils';
 
+import { buildExceptionFilter } from '@kbn/lists-plugin/server/services/exception_lists';
 import {
   checkPrivilegesFromEsClient,
   getExceptions,
@@ -38,7 +39,6 @@ import { withSecuritySpan } from '../../../utils/with_security_span';
 import { getInputIndex, DataViewError } from '../signals/get_input_output_index';
 import { TIMESTAMP_RUNTIME_FIELD } from './constants';
 import { buildTimestampRuntimeMapping } from './utils/build_timestamp_runtime_mapping';
-import { buildExceptionFilter } from '../exceptions/build_exception_filter';
 
 /* eslint-disable complexity */
 export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =

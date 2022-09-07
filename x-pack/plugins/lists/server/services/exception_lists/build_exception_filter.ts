@@ -6,36 +6,32 @@
  */
 
 import { chunk } from 'lodash/fp';
-
-import type {
+import {
+  CreateExceptionListItemSchema,
+  Entry,
   EntryExists,
+  EntryList,
   EntryMatch,
   EntryMatchAny,
+  EntryMatchWildcard,
   EntryNested,
   ExceptionListItemSchema,
   OsTypeArray,
-  EntryList,
-  EntryMatchWildcard,
-  Entry,
   Type,
-  CreateExceptionListItemSchema,
-} from '@kbn/securitysolution-io-ts-list-types';
-import {
   entriesExists,
+  entriesList,
   entriesMatch,
   entriesMatchAny,
-  entriesNested,
-  entriesList,
   entriesMatchWildcard,
+  entriesNested,
 } from '@kbn/securitysolution-io-ts-list-types';
-
 import type { Filter } from '@kbn/es-query';
-import type { ListClient } from '@kbn/lists-plugin/server';
-
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { partition } from 'lodash';
 import { hasLargeValueList } from '@kbn/securitysolution-list-utils';
-import { MAXIMUM_SMALL_VALUE_LIST_SIZE } from '../../../../common/detection_engine/constants';
+import { MAXIMUM_SMALL_VALUE_LIST_SIZE } from '@kbn/securitysolution-list-constants';
+
+import type { ListClient } from '../..';
 
 type ExceptionEntry = Entry | EntryNested;
 export interface BooleanFilter {
@@ -146,7 +142,7 @@ export const buildExceptionItemFilter = async <
         listClient,
       });
       if (!filter) {
-        return;
+        return undefined;
       }
       return [filter];
     } else {
@@ -165,7 +161,7 @@ export const buildExceptionItemFilter = async <
         })
       );
       if (isUnprocessable) {
-        return;
+        return undefined;
       }
       return [
         {
@@ -231,11 +227,14 @@ export const filterOutUnprocessableValueLists = async <
 
         // Don't want any items, just the total list size
         const valueList = await listClient.findListItem({
-          listId: id,
-          perPage: 0,
-          page: 0,
-          filter: '',
           currentIndexPosition: 0,
+          filter: '',
+          listId: id,
+          page: 0,
+          perPage: 0,
+          searchAfter: [],
+          sortField: undefined,
+          sortOrder: undefined,
         });
 
         if (!valueList || (valueList && valueList.total > MAXIMUM_SMALL_VALUE_LIST_SIZE)) {
@@ -511,8 +510,8 @@ export const buildListClause = async (
   } = entry;
 
   const list = await listClient.findAllListItems({
-    listId: entry.list.id,
     filter: '',
+    listId: entry.list.id,
   });
   if (list == null) {
     throw new TypeError(`Cannot find list: "${entry.list.id}"`);
@@ -524,7 +523,7 @@ export const buildListClause = async (
       return value.includes('-');
     });
     if (dashNotationRange.length > 200) {
-      return;
+      return undefined;
     }
     const rangeClauses = buildIpRangeClauses(dashNotationRange, field);
     if (slashNotationRange.length > 0) {
@@ -562,8 +561,8 @@ export const getBaseNestedClause = async (
     const [singleNestedEntry] = entries;
     const innerClause = await createInnerAndClauses({
       entry: singleNestedEntry,
-      parent: parentField,
       listClient,
+      parent: parentField,
     });
     return isBooleanFilter(innerClause) ? innerClause : { bool: {} };
   }
@@ -574,8 +573,8 @@ export const getBaseNestedClause = async (
     entries.map(async (nestedEntry) => {
       const clauses = await createInnerAndClauses({
         entry: nestedEntry,
-        parent: parentField,
         listClient,
+        parent: parentField,
       });
       if (!clauses) {
         isUnprocessable = true;
@@ -586,7 +585,7 @@ export const getBaseNestedClause = async (
   );
 
   if (isUnprocessable) {
-    return;
+    return undefined;
   }
   return {
     bool: {
@@ -604,7 +603,7 @@ export const buildNestedClause = async (
   const baseNestedClause = await getBaseNestedClause(entries, field, listClient);
 
   if (!baseNestedClause) {
-    return;
+    return undefined;
   }
 
   return {

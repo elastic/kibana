@@ -80,6 +80,9 @@ export const findSmallListRoute = (router: ListsPluginRouter): void => {
                 listId: valueList.id,
                 page: 0,
                 perPage: 0,
+                searchAfter: [],
+                sortField: undefined,
+                sortOrder: undefined,
               });
 
               if (
