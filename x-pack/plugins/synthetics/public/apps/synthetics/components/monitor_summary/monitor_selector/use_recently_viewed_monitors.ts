@@ -29,32 +29,42 @@ export const useRecentlyViewedMonitors = () => {
     }
   }, [monitorId, recentlyViewed, setRecentlyViewed]);
 
-  const { data, loading } = useFetcher(async () => {
-    const { resolved_objects: monitorObjects } = await savedObjects!.client.bulkResolve([
-      {
+  const { data } = useFetcher(async () => {
+    const monitorsList = JSON.parse(recentlyViewed ?? '[]') as string[];
+
+    const { resolved_objects: monitorObjects } = await savedObjects!.client.bulkResolve(
+      monitorsList.map((monId) => ({
         type: syntheticsMonitorType,
-        id: monitorId,
-      },
-      {
-        type: syntheticsMonitorType,
-        id: 'wwwwww',
-      },
-    ]);
+        id: monId,
+      }))
+    );
+
+    const missingMonitors = monitorObjects
+      .filter((mon) => mon.saved_object.error?.statusCode === 404)
+      .map((mon) => mon.saved_object.id);
+
+    if (missingMonitors.length > 0) {
+      setRecentlyViewed(
+        JSON.stringify(monitorsList.filter((monId) => !missingMonitors.includes(monId)))
+      );
+    }
 
     return monitorObjects
-      .filter(({ saved_object: monitor }) => Boolean(monitor.attributes))
+      .filter(
+        ({ saved_object: monitor }) => Boolean(monitor.attributes) && monitor.id !== monitorId
+      )
       .map(({ saved_object: monitor }) => ({
         id: monitor.id,
         label: (monitor.attributes as MonitorFields).name,
       }));
-  }, [monitorId]);
+  }, [monitorId, recentlyViewed]);
 
   return useMemo(() => {
-    return [
-      { id: 'recently_viewed', label: RECENTLY_VIEWED, isGroupLabel: true },
-      ...JSON.parse(recentlyViewed ?? '[]'),
-    ];
-  }, []);
+    if ((data ?? []).length === 0) {
+      return [];
+    }
+    return [{ id: 'recently_viewed', label: RECENTLY_VIEWED, isGroupLabel: true }, ...(data ?? [])];
+  }, [data]);
 };
 
 const RECENTLY_VIEWED = i18n.translate('xpack.synthetics.monitorSummary.recentlyViewed', {

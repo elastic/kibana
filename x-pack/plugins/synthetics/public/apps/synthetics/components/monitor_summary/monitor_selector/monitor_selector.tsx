@@ -14,6 +14,8 @@ import {
   EuiSelectableOption,
   EuiHighlight,
   EuiLink,
+  EuiButtonEmpty,
+  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useRecentlyViewedMonitors } from './use_recently_viewed_monitors';
@@ -32,8 +34,20 @@ export const MonitorSelector = () => {
   const recentlyViewed = useRecentlyViewedMonitors();
 
   useEffect(() => {
-    setOptions([...recentlyViewed, ...values]);
-  }, [recentlyViewed, values]);
+    if (recentlyViewed.length > 0 && !searchValue) {
+      const otherMonitors = values.filter((value) =>
+        recentlyViewed.every((recent) => recent.id !== value.id)
+      );
+
+      setOptions([
+        ...recentlyViewed,
+        { id: 'monitors', label: MONITORS, isGroupLabel: true },
+        ...otherMonitors,
+      ]);
+    } else {
+      setOptions(values);
+    }
+  }, [recentlyViewed, searchValue, values]);
 
   const onButtonClick = () => {
     setIsPopoverOpen(!isPopoverOpen);
@@ -56,7 +70,7 @@ export const MonitorSelector = () => {
         isOpen={isPopoverOpen}
         closePopover={closePopover}
       >
-        <EuiPopoverTitle paddingSize="s">Go to monitor</EuiPopoverTitle>
+        <EuiPopoverTitle paddingSize="s">{GO_TO_MONITOR}</EuiPopoverTitle>
         <EuiSelectable
           searchable
           isLoading={loading}
@@ -80,10 +94,19 @@ export const MonitorSelector = () => {
             </EuiLink>
           )}
           noMatchesMessage={NO_RESULT_FOUND}
+          emptyMessage={
+            <EuiButtonEmpty href={`${basePath}/app/synthetics/add-monitor`}>
+              Create new monitor
+            </EuiButtonEmpty>
+          }
         >
           {(list, search) => (
             <div style={{ width: 240 }}>
-              <EuiPopoverTitle paddingSize="s">{search}</EuiPopoverTitle>
+              <EuiPopoverTitle paddingSize="s">
+                <EuiText color="subdued" size="s" className="eui-textCenter">
+                  {NO_OTHER_MONITORS_EXISTS}
+                </EuiText>
+              </EuiPopoverTitle>
               {list}
             </div>
           )}
@@ -92,6 +115,10 @@ export const MonitorSelector = () => {
     </Fragment>
   );
 };
+
+const GO_TO_MONITOR = i18n.translate('xpack.synthetics.monitorSummary.goToMonitor', {
+  defaultMessage: 'Go to monitor',
+});
 
 const NO_RESULT_FOUND = i18n.translate('xpack.synthetics.monitorSummary.noResultsFound', {
   defaultMessage: 'No monitors found. Try modifying your query.',
@@ -103,4 +130,12 @@ const PLACEHOLDER = i18n.translate('xpack.synthetics.monitorSummary.placeholderS
 
 const SELECT_MONITOR = i18n.translate('xpack.synthetics.monitorSummary.selectMonitor', {
   defaultMessage: 'Select a different monitor to view its details',
+});
+
+const MONITORS = i18n.translate('xpack.synthetics.monitorSummary.monitors', {
+  defaultMessage: 'Other monitors',
+});
+
+const NO_OTHER_MONITORS_EXISTS = i18n.translate('xpack.synthetics.monitorSummary.noOtherMonitors', {
+  defaultMessage: 'No other monitors exist',
 });

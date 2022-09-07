@@ -7,6 +7,7 @@
 
 import { useMemo } from 'react';
 import { useFetcher } from '@kbn/observability-plugin/public';
+import { useParams } from 'react-router-dom';
 import { fetchMonitorManagementList } from '../../../state';
 
 export const useMonitorName = ({ search = '' }: { search?: string }) => {
@@ -20,6 +21,8 @@ export const useMonitorName = ({ search = '' }: { search?: string }) => {
     });
   }, [search]);
 
+  const { monitorId } = useParams<{ monitorId: string }>();
+
   return useMemo(() => {
     const { monitors = [] } = data ?? {};
     const values = monitors.map((monitor) => ({
@@ -27,6 +30,6 @@ export const useMonitorName = ({ search = '' }: { search?: string }) => {
       id: monitor.id,
     }));
 
-    return { values, loading };
-  }, [data, loading]);
+    return { values: values.filter((val) => val.id !== monitorId), loading };
+  }, [data, loading, monitorId]);
 };
