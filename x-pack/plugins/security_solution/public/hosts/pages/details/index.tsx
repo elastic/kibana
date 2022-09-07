@@ -5,19 +5,15 @@
  * 2.0.
  */
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
-  EuiSpacer,
-  EuiWindowEvent,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiWindowEvent } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import React, { useEffect, useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 
 import type { Filter } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { useAlertsPrivileges } from '../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { InputsModelId } from '../../../common/store/inputs/constants';
 import type { HostItem } from '../../../../common/search_strategy';
@@ -63,8 +59,6 @@ import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { LandingPageComponent } from '../../../common/components/landing_page';
 import { AlertCountByStatus } from '../../../common/components/alert_count_by_status';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { euiThemeVars } from '@kbn/ui-theme';
 
 const ES_HOST_FIELD = 'host.hostname';
 const HostOverviewManage = manageQuery(HostOverview);

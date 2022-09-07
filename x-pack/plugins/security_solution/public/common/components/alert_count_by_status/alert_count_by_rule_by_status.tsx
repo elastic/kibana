@@ -11,8 +11,6 @@ import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiBasicTable,
   EuiEmptyPrompt,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiLink,
   EuiPanel,
   EuiText,
