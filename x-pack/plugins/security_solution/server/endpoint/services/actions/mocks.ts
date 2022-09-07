@@ -51,7 +51,7 @@ export const createActionResponsesEsSearchResultsMock = (
       '@timestamp': '2022-04-30T16:08:47.449Z',
     }),
     endpointActionGenerator.generateResponseEsHit({
-      agent: { id: agentIds ? agentIds : 'agent-a' },
+      agent: { id: 'agent-a' },
       EndpointActions: { action_id: '123' },
       '@timestamp': '2022-04-30T16:08:47.449Z',
     }),
