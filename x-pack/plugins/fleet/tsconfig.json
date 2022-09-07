@@ -6,6 +6,7 @@
     "declaration": true,
     "declarationMap": true,
   },
+  "exclude": ["cypress.config.ts"],
   "include": [
     // add all the folders containing files to be compiled
     ".storybook/**/*",
