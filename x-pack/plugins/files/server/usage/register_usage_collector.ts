@@ -4,18 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { CoreStart } from '@kbn/core/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import { hiddenTypes } from '../saved_objects';
+import type { FileServiceStart } from '../file_service';
 import { filesSchema, FileKindUsageSchema } from './schema';
-import { fetch } from './fetch';
-
 interface Args {
   usageCollection?: UsageCollectionSetup;
-  coreStartPromise: Promise<CoreStart>;
+  getFileService: () => undefined | FileServiceStart;
 }
 
-export function registerUsageCollector({ usageCollection, coreStartPromise }: Args): void {
+export function registerUsageCollector({ usageCollection, getFileService }: Args): void {
   if (!usageCollection) {
     return;
   }
@@ -23,13 +20,18 @@ export function registerUsageCollector({ usageCollection, coreStartPromise }: Ar
   usageCollection.registerCollector(
     usageCollection.makeUsageCollector<FileKindUsageSchema>({
       type: 'files',
+      isReady: () => Boolean(getFileService()),
       fetch: async () => {
-        return fetch({
-          soClient: (await coreStartPromise).savedObjects.createInternalRepository(hiddenTypes),
-        });
+        const { countByExtension, ...rest } = await getFileService()!.getUsageMetrics();
+        return {
+          ...rest,
+          countByExtension: Object.entries(countByExtension).map(([extension, count]) => ({
+            extension,
+            count,
+          })),
+        };
       },
       schema: filesSchema,
-      isReady: () => coreStartPromise.then(() => true),
     })
   );
 }

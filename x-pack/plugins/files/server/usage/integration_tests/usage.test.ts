@@ -47,25 +47,21 @@ describe('Files usage telemetry', () => {
 
     expect(body.usage.files).toMatchInlineSnapshot(`
       Object {
-        "avg_size": 13,
-        "bytes_used": 13,
-        "count": 3,
-        "file_kind_breakdown": Array [
+        "countByExtension": Array [
           Object {
-            "avg_size": 13,
             "count": 3,
-            "kind": "test-file-kind",
+            "extension": "png",
           },
         ],
-        "share_count": 2,
-        "status_breakdown": Object {
-          "AWAITING_UPLOAD": Object {
-            "avg_size": null,
-            "count": 2,
-          },
-          "READY": Object {
-            "avg_size": 13,
-            "count": 1,
+        "countByStatus": Object {
+          "AWAITING_UPLOAD": 2,
+          "READY": 1,
+        },
+        "storage": Object {
+          "esFixedSizeIndex": Object {
+            "available": 53687091187,
+            "capacity": 53687091200,
+            "used": 13,
           },
         },
       }

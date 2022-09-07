@@ -6,62 +6,38 @@
  */
 
 import type { MakeSchemaFrom } from '@kbn/usage-collection-plugin/server';
-import { FileStatus } from '../../common/types';
+import type { FilesMetricsHttpEndpoint } from '../routes/api_routes';
 
-interface CountAndSize {
-  count: number;
-  avg_size: null | number;
-}
-
-const countAndAvgSize: MakeSchemaFrom<CountAndSize> = {
-  count: { type: 'long' },
-  avg_size: { type: 'long' },
+export type FileKindUsageSchema = Omit<FilesMetricsHttpEndpoint['output'], 'countByExtension'> & {
+  countByExtension: Array<{ extension: string; count: number }>;
 };
 
-interface FileKind extends CountAndSize {
-  kind: string;
-}
-
-export interface FileKindUsageSchema extends CountAndSize {
-  bytes_used: null | number;
-  share_count: number;
-  file_kind_breakdown: FileKind[];
-  status_breakdown: {
-    [status in FileStatus]: CountAndSize;
-  };
-}
-
 export const filesSchema: MakeSchemaFrom<FileKindUsageSchema> = {
-  ...countAndAvgSize,
-  share_count: {
-    type: 'long',
-    _meta: {
-      description: 'Count of file share saved objects',
-    },
-  },
-  bytes_used: {
-    type: 'long',
-    _meta: {
-      description: 'Total bytes used by files with saved objects',
-    },
-  },
-  file_kind_breakdown: {
+  countByExtension: {
     type: 'array',
     items: {
-      kind: {
-        type: 'keyword',
-        _meta: {
-          description: 'Name of the file kind',
-        },
-      },
-      ...countAndAvgSize,
+      extension: { type: 'keyword' },
+      count: { type: 'long' },
     },
   },
-  status_breakdown: {
-    AWAITING_UPLOAD: countAndAvgSize,
-    DELETED: countAndAvgSize,
-    READY: countAndAvgSize,
-    UPLOADING: countAndAvgSize,
-    UPLOAD_ERROR: countAndAvgSize,
+  countByStatus: {
+    AWAITING_UPLOAD: { type: 'long', _meta: { description: 'Number of files awaiting upload' } },
+    DELETED: { type: 'long', _meta: { description: 'Number of files that are marked as deleted' } },
+    READY: { type: 'long', _meta: { description: 'Number of files that are ready for download' } },
+    UPLOADING: {
+      type: 'long',
+      _meta: { description: 'Number of files that are currently uploading' },
+    },
+    UPLOAD_ERROR: {
+      type: 'long',
+      _meta: { description: 'Number of files that failed to upload' },
+    },
+  },
+  storage: {
+    esFixedSizeIndex: {
+      capacity: { type: 'long', _meta: { description: 'Capacity of the fixed size index' } },
+      available: { type: 'long', _meta: { description: 'Available storage in bytes' } },
+      used: { type: 'long', _meta: { description: 'Used storage in bytes' } },
+    },
   },
 };
