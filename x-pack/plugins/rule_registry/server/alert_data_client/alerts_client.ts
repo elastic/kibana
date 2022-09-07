@@ -730,12 +730,12 @@ export class AlertsClient {
     allowNoIndex: boolean;
   }): Promise<BrowserField[]> {
     const indexPatternsFetcherAsInternalUser = new IndexPatternsFetcher(this.esClient);
-    const fieldDescriptor = await indexPatternsFetcherAsInternalUser.getFieldsForWildcard({
+    const { fields } = await indexPatternsFetcherAsInternalUser.getFieldsForWildcard({
       pattern: indices,
       metaFields,
       fieldCapsOptions: { allow_no_indices: allowNoIndex },
     });
 
-    return await fieldDescriptorToBrowserFieldMapper(fieldDescriptor);
+    return fieldDescriptorToBrowserFieldMapper(fields);
   }
 }

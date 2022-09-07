@@ -6,34 +6,19 @@
  */
 
 import { FieldSpec } from '@kbn/data-views-plugin/server';
-import { BrowserField, FieldInfo } from '../../types';
+import { BrowserField } from '../../types';
 
-import { fieldsBeat } from './fields';
-const beatsMap = new Map(Object.entries(fieldsBeat));
+const getFieldCategory = (fieldCapability: FieldSpec) => {
+  const name = fieldCapability.name.split('.');
+  if (name.length === 1) {
+    return 'base';
+  }
 
-const populatedFieldInfoFactory = (fieldCapability: FieldSpec, beat: FieldInfo) => {
-  const { category, description, example, name } = beat;
-  const { aggregatable, readFromDocValues, searchable, type } = fieldCapability;
-
-  return {
-    category,
-    field: {
-      [name]: {
-        aggregatable,
-        category,
-        description,
-        example,
-        name,
-        readFromDocValues,
-        searchable,
-        type,
-      },
-    },
-  };
+  return name[0];
 };
 
-const emptyFieldInfoFactory = (fieldCapability: FieldSpec) => {
-  const category = fieldCapability.name.split('.')[0];
+const populateInfoFactory = (fieldCapability: FieldSpec) => {
+  const category = getFieldCategory(fieldCapability);
   return {
     category,
     field: {
@@ -45,28 +30,21 @@ const emptyFieldInfoFactory = (fieldCapability: FieldSpec) => {
   };
 };
 
-export const fieldDescriptorToBrowserFieldMapper = async (
+export const fieldDescriptorToBrowserFieldMapper = (
   fieldDescriptor: FieldSpec[]
-): Promise<BrowserField[]> => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      const browserFields = new Map();
+): BrowserField[] => {
+  const browserFields = new Map();
 
-      fieldDescriptor.forEach((fieldCapability) => {
-        const beat = beatsMap.get(fieldCapability.name);
-        const { category, field } = beat
-          ? populatedFieldInfoFactory(fieldCapability, beat)
-          : emptyFieldInfoFactory(fieldCapability);
+  fieldDescriptor.forEach((fieldCapability) => {
+    const { category, field } = populateInfoFactory(fieldCapability);
 
-        if (browserFields.has(category)) {
-          const { fields: currentFields } = browserFields.get(category);
-          browserFields.set(category, { fields: { ...currentFields, ...field } });
-        } else {
-          browserFields.set(category, { fields: field });
-        }
-      });
-
-      resolve(Object.fromEntries(browserFields));
-    });
+    if (browserFields.has(category)) {
+      const { fields: currentFields } = browserFields.get(category);
+      browserFields.set(category, { fields: { ...currentFields, ...field } });
+    } else {
+      browserFields.set(category, { fields: field });
+    }
   });
+
+  return Object.fromEntries(browserFields);
 };
