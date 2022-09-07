@@ -35,8 +35,10 @@ export default defineConfig({
   },
 
   e2e: {
+    baseUrl: 'http://localhost:5601',
     setupNodeEvents(on, config) {
-      // implement node event listeners here
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      return require('./plugins')(on, config);
     },
   },
 });

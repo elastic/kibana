@@ -19,11 +19,12 @@ export default defineConfig({
   viewportHeight: 946,
   viewportWidth: 1680,
   e2e: {
+    baseUrl: 'http://localhost:5601',
     // We've imported your old cypress plugins here.
     // You may want to clean this up later by importing these.
     setupNodeEvents(on, config) {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires, @kbn/imports/no_unresolvable_imports
-      return require('./cypress/plugins/index.js')(on, config);
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      return require('./plugins')(on, config);
     },
   },
 });
