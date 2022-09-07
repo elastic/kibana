@@ -171,26 +171,22 @@ export const pieVisFunction = (): PieVisExpressionFunctionDefinition => ({
       },
     };
 
-    // // TODO fix inspector
-    // if (handlers?.inspectorAdapters?.tables) {
-    //   handlers.inspectorAdapters.tables.reset();
-    //   handlers.inspectorAdapters.tables.allowCsvExport = true;
+    if (handlers?.inspectorAdapters?.tables) {
+      handlers.inspectorAdapters.tables.reset();
+      handlers.inspectorAdapters.tables.allowCsvExport = true;
 
-    //   const logTable = prepareLogTable(
-    //     context,
-    //     [
-    //       [[transposedMetricAccessor ?? args.metric], strings.getSliceSizeHelp()],
-    //       [
-    //         transposedBucketAccessor ? [transposedBucketAccessor] : args.buckets,
-    //         strings.getSliceHelp(),
-    //       ],
-    //       [args.splitColumn, strings.getColumnSplitHelp()],
-    //       [args.splitRow, strings.getRowSplitHelp()],
-    //     ],
-    //     true
-    //   );
-    //   handlers.inspectorAdapters.tables.logDatatable('default', logTable);
-    // }
+      const logTable = prepareLogTable(
+        table,
+        [
+          [[metricAccessor], strings.getSliceSizeHelp()],
+          [bucketAccessors, strings.getSliceHelp()],
+          [args.splitColumn, strings.getColumnSplitHelp()],
+          [args.splitRow, strings.getRowSplitHelp()],
+        ],
+        true
+      );
+      handlers.inspectorAdapters.tables.logDatatable('default', logTable);
+    }
 
     return {
       type: 'render',

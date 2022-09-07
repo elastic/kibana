@@ -7,10 +7,8 @@
  */
 
 import { Datatable, DatatableColumn, DatatableRow } from '@kbn/expressions-plugin/common';
-import {
-  ExpressionValueVisDimension,
-  getColumnByAccessor,
-} from '@kbn/visualizations-plugin/common';
+import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
+import type { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
 
 export const collapseMetricColumns = (
   table: Datatable,
