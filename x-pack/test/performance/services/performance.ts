@@ -183,7 +183,7 @@ export class PerformanceTestingService extends FtrService {
   ) {
     return this.withTransaction(`Journey ${journeyName}`, async () => {
       const browser = await this.getBrowserInstance();
-      const context = await browser.newContext();
+      const context = await browser.newContext({ bypassCSP: true });
 
       if (!requireAuth) {
         const cookie = await this.auth.login({ username: 'elastic', password: 'changeme' });
