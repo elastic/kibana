@@ -23,11 +23,8 @@
   );
 }
 
-.xyAnnotationTooltip__skippedCount {
-  text-align: right;
-  margin-right: 0;
-}
-
 .xyAnnotationTooltip__group__singleItem+.xyAnnotationTooltip__group__singleItem {
   border-top: $euiBorderThin;
+  padding-top: $euiSizeXS;
+  margin-top: $euiSizeXS;
 }

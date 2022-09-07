@@ -408,8 +408,7 @@ export function XYChart({
     lineAnnotations as PointEventAnnotationRow[],
     annotationsConfigs,
     annotations?.datatable.columns,
-    formatFactory,
-    xAxisFormatter
+    formatFactory
   );
 
   const visualConfigs = [
