@@ -20,6 +20,7 @@ import { coreContextServiceFactory } from './core_context/core_context.stub';
 import { dashboardCapabilitiesServiceFactory } from './dashboard_capabilities/dashboard_capabilities.stub';
 import { dashboardSessionStorageServiceFactory } from './dashboard_session_storage/dashboard_session_storage.stub';
 import { dataServiceFactory } from './data/data.stub';
+import { documentationLinksServiceFactory } from './documentation_links/documentation_links.stub';
 import { embeddableServiceFactory } from './embeddable/embeddable.stub';
 import { httpServiceFactory } from './http/http.stub';
 import { initializerContextServiceFactory } from './initializer_context/initializer_context.stub';
@@ -41,9 +42,10 @@ export const providers: PluginServiceProviders<DashboardServices> = {
   application: new PluginServiceProvider(applicationServiceFactory),
   chrome: new PluginServiceProvider(chromeServiceFactory),
   coreContext: new PluginServiceProvider(coreContextServiceFactory),
-  data: new PluginServiceProvider(dataServiceFactory),
   dashboardCapabilities: new PluginServiceProvider(dashboardCapabilitiesServiceFactory),
   dashboardSessionStorage: new PluginServiceProvider(dashboardSessionStorageServiceFactory),
+  data: new PluginServiceProvider(dataServiceFactory),
+  documentationLinks: new PluginServiceProvider(documentationLinksServiceFactory),
   embeddable: new PluginServiceProvider(embeddableServiceFactory),
   http: new PluginServiceProvider(httpServiceFactory),
   initializerContext: new PluginServiceProvider(initializerContextServiceFactory),

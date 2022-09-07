@@ -19,11 +19,6 @@ export const noDataPageContextServiceFactory: NoDataPageContextServiceFactory = 
 
   return {
     coreStart: {
-      docLinks: {
-        links: {
-          kibana: { guide: corePluginMock.docLinks.links.kibana.guide },
-        },
-      },
       application: {
         currentAppId$: corePluginMock.application.currentAppId$,
         navigateToUrl: corePluginMock.application.navigateToUrl,

@@ -11,11 +11,6 @@ import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 
 export interface DashboardNoDataPageContextService {
   coreStart: {
-    docLinks: {
-      links: {
-        kibana: { guide: CoreStart['docLinks']['links']['kibana']['guide'] };
-      };
-    };
     application: {
       currentAppId$: CoreStart['application']['currentAppId$'];
       navigateToUrl: CoreStart['application']['navigateToUrl'];

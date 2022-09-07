@@ -51,14 +51,19 @@ export interface DashboardMountProps {
 }
 
 export async function mountApp({ core, element, appUnMounted, mountContext }: DashboardMountProps) {
-  const [coreStart, pluginsStart, dashboardStart] = await core.getStartServices();
+  const [, , dashboardStart] = await core.getStartServices(); // TODO: Remove as part of https://github.com/elastic/kibana/pull/138774
   const { DashboardMountContext } = await import('./hooks/dashboard_mount_context');
 
-  const { data: dataStart, embeddable } = pluginsStart;
+  const {
+    data: dataStart,
+    embeddable,
+    settings: { uiSettings },
+  } = pluginServices.getServices();
 
   let globalEmbedSettings: DashboardEmbedSettings | undefined;
   let routerHistory: History;
 
+  // TODO: Remove as part of https://github.com/elastic/kibana/pull/138774
   const dashboardServices: DashboardAppServices = {
     savedDashboards: dashboardStart.getSavedDashboardLoader(),
   };
@@ -66,7 +71,7 @@ export async function mountApp({ core, element, appUnMounted, mountContext }: Da
   const getUrlStateStorage = (history: RouteComponentProps['history']) =>
     createKbnUrlStateStorage({
       history,
-      useHash: coreStart.uiSettings.get('state:storeInSessionStorage'),
+      useHash: uiSettings.get('state:storeInSessionStorage'),
       ...withNotifyOnErrors(core.notifications.toasts),
     });
 
@@ -188,10 +193,14 @@ export async function mountApp({ core, element, appUnMounted, mountContext }: Da
     </I18nProvider>
   );
 
-  addHelpMenuToAppChrome(coreStart.chrome, coreStart.docLinks);
-  // TODO: Is it safe to put this here, outside of the provider?
+  addHelpMenuToAppChrome();
+
   if (!pluginServices.getServices().dashboardCapabilities.showWriteControls) {
-    coreStart.chrome.setBadge({
+    const {
+      chrome: { setBadge },
+    } = pluginServices.getServices();
+
+    setBadge({
       text: dashboardReadonlyBadge.getText(),
       tooltip: dashboardReadonlyBadge.getTooltip(),
       iconType: 'glasses',

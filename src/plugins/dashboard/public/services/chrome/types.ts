@@ -10,6 +10,7 @@ import type { CoreStart } from '@kbn/core/public';
 
 export interface DashboardChromeService {
   docTitle: CoreStart['chrome']['docTitle'];
+  setBadge: CoreStart['chrome']['setBadge'];
   getIsVisible$: CoreStart['chrome']['getIsVisible$'];
   recentlyAccessed: CoreStart['chrome']['recentlyAccessed'];
   setBreadcrumbs: CoreStart['chrome']['setBreadcrumbs'];

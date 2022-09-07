@@ -17,6 +17,7 @@ export const chromeServiceFactory: ChromeServiceFactory = () => {
 
   return {
     docTitle: pluginMock.docTitle,
+    setBadge: pluginMock.setBadge,
     getIsVisible$: pluginMock.getIsVisible$,
     recentlyAccessed: pluginMock.recentlyAccessed,
     setBreadcrumbs: pluginMock.setBreadcrumbs,

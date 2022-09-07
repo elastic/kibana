@@ -21,6 +21,7 @@ import { coreContextServiceFactory } from './core_context/core_context_service';
 import { dashboardCapabilitiesServiceFactory } from './dashboard_capabilities/dashboard_capabilities_service';
 import { dashboardSessionStorageServiceFactory } from './dashboard_session_storage/dashboard_session_storage_service';
 import { dataServiceFactory } from './data/data_service';
+import { documentationLinksServiceFactory } from './documentation_links/documentation_links_service';
 import { embeddableServiceFactory } from './embeddable/embeddable_service';
 import { httpServiceFactory } from './http/http_service';
 import { initializerContextServiceFactory } from './initializer_context/initializer_context_service';
@@ -42,12 +43,13 @@ const providers: PluginServiceProviders<DashboardServices, DashboardPluginServic
   application: new PluginServiceProvider(applicationServiceFactory),
   chrome: new PluginServiceProvider(chromeServiceFactory),
   coreContext: new PluginServiceProvider(coreContextServiceFactory),
-  data: new PluginServiceProvider(dataServiceFactory),
   dashboardCapabilities: new PluginServiceProvider(dashboardCapabilitiesServiceFactory),
   dashboardSessionStorage: new PluginServiceProvider(dashboardSessionStorageServiceFactory, [
     'notifications',
     'spaces',
   ]),
+  data: new PluginServiceProvider(dataServiceFactory),
+  documentationLinks: new PluginServiceProvider(documentationLinksServiceFactory),
   embeddable: new PluginServiceProvider(embeddableServiceFactory),
   http: new PluginServiceProvider(httpServiceFactory),
   initializerContext: new PluginServiceProvider(initializerContextServiceFactory),

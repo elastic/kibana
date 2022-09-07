@@ -20,11 +20,6 @@ export const noDataPageContextServiceFactory: NoDataPageContextServiceFactory = 
   startPlugins,
 }) => {
   const {
-    docLinks: {
-      links: {
-        kibana: { guide },
-      },
-    },
     application: {
       currentAppId$,
       navigateToUrl,
@@ -37,11 +32,6 @@ export const noDataPageContextServiceFactory: NoDataPageContextServiceFactory = 
 
   return {
     coreStart: {
-      docLinks: {
-        links: {
-          kibana: { guide },
-        },
-      },
       application: {
         currentAppId$,
         navigateToUrl,

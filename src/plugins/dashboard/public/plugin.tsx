@@ -57,7 +57,7 @@ import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import { getSavedObjectFinder, type SavedObjectsStart } from '@kbn/saved-objects-plugin/public';
-// import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 
 import {
   ClonePanelAction,
@@ -80,7 +80,7 @@ import { PlaceholderEmbeddableFactory } from './application/embeddable/placehold
 import { ExportCSVAction } from './application/actions/export_csv_action';
 import { dashboardFeatureCatalog } from './dashboard_strings';
 import { FiltersNotificationBadge } from './application/actions/filters_notification_badge';
-import { DashboardMountContextProps } from './types';
+import type { DashboardMountContextProps } from './types';
 
 export interface DashboardFeatureFlagConfig {
   allowByValueEmbeddables: boolean;
@@ -95,7 +95,7 @@ export interface DashboardSetupDependencies {
   usageCollection?: UsageCollectionSetup;
   uiActions: UiActionsSetup;
   urlForwarding: UrlForwardingSetup;
-  // unifiedSearch: UnifiedSearchPublicPluginStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
 }
 
 export interface DashboardStartDependencies {
@@ -115,7 +115,7 @@ export interface DashboardStartDependencies {
   urlForwarding: UrlForwardingStart;
   usageCollection?: UsageCollectionStart;
   visualizations: VisualizationsStart;
-  // unifiedSearch: UnifiedSearchPublicPluginStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
 }
 
 export interface DashboardSetup {

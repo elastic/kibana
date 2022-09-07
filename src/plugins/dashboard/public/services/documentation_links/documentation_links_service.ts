@@ -8,33 +8,25 @@
 
 import type { KibanaPluginServiceFactory } from '@kbn/presentation-util-plugin/public';
 import type { DashboardStartDependencies } from '../../plugin';
-import type { DashboardChromeService } from './types';
+import type { DashboardDocumentationLinksService } from './types';
 
-export type ChromeServiceFactory = KibanaPluginServiceFactory<
-  DashboardChromeService,
+export type DocumentationLinksServiceFactory = KibanaPluginServiceFactory<
+  DashboardDocumentationLinksService,
   DashboardStartDependencies
 >;
 
-export const chromeServiceFactory: ChromeServiceFactory = ({ coreStart }) => {
+export const documentationLinksServiceFactory: DocumentationLinksServiceFactory = ({
+  coreStart,
+}) => {
   const {
-    chrome: {
-      docTitle,
-      setBadge,
-      getIsVisible$,
-      recentlyAccessed,
-      setBreadcrumbs,
-      setHelpExtension,
-      setIsVisible,
+    docLinks: {
+      links: {
+        kibana: { guide },
+      },
     },
   } = coreStart;
 
   return {
-    docTitle,
-    setBadge,
-    getIsVisible$,
-    recentlyAccessed,
-    setBreadcrumbs,
-    setHelpExtension,
-    setIsVisible,
+    kibanaGuideDocLink: guide,
   };
 };
