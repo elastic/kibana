@@ -20,48 +20,38 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useMemo, useRef, useCallback, useState, useEffect } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { observabilityFeatureId } from '../../../common';
-import { useTrackPageview, useUiTracker } from '../..';
-import { EmptySections } from '../../components/app/empty_sections';
-import { ObservabilityHeaderMenu } from '../../components/app/header';
-import { NewsFeed } from '../../components/app/news_feed';
-import { Resources } from '../../components/app/resources';
-import { DatePicker } from '../../components/shared/date_picker';
-import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
-import { useFetcher } from '../../hooks/use_fetcher';
-import { useHasData } from '../../hooks/use_has_data';
-import { usePluginContext } from '../../hooks/use_plugin_context';
-import { useAlertIndexNames } from '../../hooks/use_alert_index_names';
-import { getNewsFeed } from '../../services/get_news_feed';
-import { getBucketSize } from '../../utils/get_bucket_size';
-import { DataSections } from './data_sections';
-import { LoadingObservability } from './loading_observability';
-import { AlertsTableTGrid } from '../alerts/containers/alerts_table_t_grid/alerts_table_t_grid';
-import { SectionContainer } from '../../components/app/section';
-import { ObservabilityAppServices } from '../../application/types';
-import { useGetUserCasesPermissions } from '../../hooks/use_get_user_cases_permissions';
-import { paths } from '../../config';
-import { useDatePickerContext } from '../../hooks/use_date_picker_context';
-import { ObservabilityStatusProgress } from '../../components/app/observability_status/observability_status_progress';
-import { ObservabilityStatus } from '../../components/app/observability_status';
-import { useGuidedSetupProgress } from '../../hooks/use_guided_setup_progress';
-import { useObservabilityTourContext } from '../../components/shared/tour';
+import React, { useMemo, useRef, useCallback, useState, useEffect } from 'react';
 
-export type BucketSize = ReturnType<typeof calculateBucketSize>;
+import { calculateBucketSize } from './helpers';
+import { PageHeaderProps } from './types';
 
-const CAPABILITIES_KEYS = ['logs', 'infrastructure', 'apm', 'uptime'];
-
-function calculateBucketSize({ start, end }: { start?: number; end?: number }) {
-  if (start && end) {
-    return getBucketSize({ start, end, minInterval: '60s' });
-  }
-}
-
-const ALERT_TABLE_STATE_STORAGE_KEY = 'xpack.observability.overview.alert.tableState';
-const ALERTS_PER_PAGE = 10;
+import { EmptySections } from '../../../../components/app/empty_sections';
+import { observabilityFeatureId } from '../../../../../common';
+import { useTrackPageview, useUiTracker } from '../../../..';
+import { ObservabilityHeaderMenu } from '../../../../components/app/header';
+import { NewsFeed } from '../../../../components/app/news_feed';
+import { Resources } from '../../../../components/app/resources';
+import { DatePicker } from '../../../../components/shared/date_picker';
+import { useBreadcrumbs } from '../../../../hooks/use_breadcrumbs';
+import { useFetcher } from '../../../../hooks/use_fetcher';
+import { useHasData } from '../../../../hooks/use_has_data';
+import { usePluginContext } from '../../../../hooks/use_plugin_context';
+import { useAlertIndexNames } from '../../../../hooks/use_alert_index_names';
+import { getNewsFeed } from '../../../../services/get_news_feed';
+import { DataSections, LoadingObservability } from '../../components';
+import { AlertsTableTGrid } from '../../../alerts/containers/alerts_table_t_grid/alerts_table_t_grid';
+import { SectionContainer } from '../../../../components/app/section';
+import { ObservabilityAppServices } from '../../../../application/types';
+import { useGetUserCasesPermissions } from '../../../../hooks/use_get_user_cases_permissions';
+import { paths } from '../../../../config';
+import { useDatePickerContext } from '../../../../hooks/use_date_picker_context';
+import { ObservabilityStatusProgress } from '../../../../components/app/observability_status/observability_status_progress';
+import { ObservabilityStatus } from '../../../../components/app/observability_status';
+import { useGuidedSetupProgress } from '../../../../hooks/use_guided_setup_progress';
+import { useObservabilityTourContext } from '../../../../components/shared/tour';
+import { CAPABILITIES_KEYS, ALERT_TABLE_STATE_STORAGE_KEY, ALERTS_PER_PAGE } from './constants';
 
 export function OverviewPage() {
   const trackMetric = useUiTracker({ app: 'observability-overview' });
@@ -251,13 +241,6 @@ export function OverviewPage() {
       )}
     </ObservabilityPageTemplate>
   );
-}
-
-interface PageHeaderProps {
-  showTour?: boolean;
-  onTourDismiss: () => void;
-  handleGuidedSetupClick: () => void;
-  onTimeRangeRefresh: () => void;
 }
 
 function PageHeader({
