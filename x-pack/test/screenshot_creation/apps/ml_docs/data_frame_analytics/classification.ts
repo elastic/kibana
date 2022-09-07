@@ -126,6 +126,7 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.dataFrameAnalyticsResults.expandClassificationEvaluationSection(false);
       await ml.dataFrameAnalyticsResults.expandFeatureImportanceSection(false);
       await ml.dataFrameAnalyticsResults.expandScatterplotMatrixSection(false);
+      await ml.dataFrameAnalyticsResults.enableResultsTablePreviewHistogramCharts(true);
       await ml.dataFrameAnalyticsResults.scrollAnalysisIntoView();
       await commonScreenshots.removeFocusFromElement();
       await commonScreenshots.takeScreenshot(
@@ -156,7 +157,7 @@ export default function ({ getService }: FtrProviderContext) {
         'confusion-matrix-binary-accuracy',
         screenshotDirectories
       );
-      await ml.dataFrameAnalyticsResults.scrollRocCurveChartIntoView();
+      await ml.dataFrameAnalyticsResults.scrollClassificationEvaluationIntoView();
       await commonScreenshots.takeScreenshot(
         'flights-classification-roc-curve',
         screenshotDirectories
