@@ -103,6 +103,7 @@ export interface FilterOptions {
   severity: CaseSeverityWithAll;
   status: CaseStatusWithAllStatus;
   tags: string[];
+  assignees: string[];
   reporters: User[];
   owner: string[];
 }

@@ -24,10 +24,11 @@ import { UserRepresentation } from '../../user_profiles/user_representation';
 import { useCasesContext } from '../../cases_context/use_cases_context';
 import { Assignee } from '../../user_profiles/types';
 import { SuggestUsersPopover } from './suggest_users_popover';
+import { CurrentUserProfile } from '../../types';
 
 interface AssigneesListProps {
   assignees: Assignee[];
-  currentUserProfile?: UserProfileWithAvatar;
+  currentUserProfile: CurrentUserProfile;
   assignSelf: () => void;
   togglePopOver: () => void;
   onAssigneeRemoved: (removedAssigneeUID: string) => void;
@@ -80,7 +81,7 @@ AssigneesList.displayName = 'AssigneesList';
 
 export interface AssignUsersProps {
   caseAssignees: CaseAssignees;
-  currentUserProfile?: UserProfileWithAvatar;
+  currentUserProfile: CurrentUserProfile;
   userProfiles: Map<string, UserProfileWithAvatar>;
   onAssigneesChanged: (assignees: Assignee[]) => void;
   isLoading: boolean;
@@ -177,6 +178,7 @@ const AssignUsersComponent: React.FC<AssignUsersProps> = ({
           <EuiFlexItem data-test-subj="case-view-assignees-edit" grow={false}>
             <SuggestUsersPopover
               assignedUsersWithProfiles={assigneesWithProfiles}
+              currentUserProfile={currentUserProfile}
               isLoading={isLoading}
               isPopoverOpen={isPopoverOpen}
               onUsersChange={onUsersChange}

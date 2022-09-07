@@ -39,14 +39,14 @@ export const REMOVE_ASSIGNEES = i18n.translate(
   }
 );
 
-export const TOTAL_USERS = (total: number) =>
-  i18n.translate('xpack.cases.userProfile.totalUsers', {
-    defaultMessage: '{total, plural, one {# user} other {# users}}',
-    values: { total },
-  });
+export const ASSIGNEES = i18n.translate('xpack.cases.assigneesTitle', {
+  defaultMessage: 'Assignees',
+});
 
-export const TOTAL_USERS_ASSIGNED = (total: number) =>
-  i18n.translate('xpack.cases.userProfile.totalUsersAssigned', {
-    defaultMessage: '{total} assigned',
-    values: { total },
-  });
+export const NO_MATCHING_USERS = i18n.translate('xpack.cases.userProfiles.noMatchingUsers', {
+  defaultMessage: 'No matching users with required access.',
+});
+
+export const TRY_MODIFYING_SEARCH = i18n.translate('xpack.cases.userProfiles.tryModifyingSearch', {
+  defaultMessage: 'Try modifying your search.',
+});

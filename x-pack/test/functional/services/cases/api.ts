@@ -12,8 +12,11 @@ import {
   deleteAllCaseItems,
   createComment,
   updateCase,
-  loginUsers,
 } from '../../../cases_api_integration/common/lib/utils';
+import {
+  loginUsers,
+  suggestUserProfiles,
+} from '../../../cases_api_integration/common/lib/user_profiles';
 import { User } from '../../../cases_api_integration/common/lib/authentication/types';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -86,6 +89,10 @@ export function CasesAPIServiceProvider({ getService }: FtrProviderContext) {
         supertest: supertestWithoutAuth,
         users,
       });
+    },
+
+    async suggestUserProfiles(options: Parameters<typeof suggestUserProfiles>[0]['req']) {
+      return suggestUserProfiles({ supertest: kbnSupertest, req: options });
     },
   };
 }

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { securityMock } from '@kbn/security-plugin/public/mocks';
+import { SecurityPluginStart } from '@kbn/security-plugin/public';
 import { GENERAL_CASES_OWNER } from '../../../common/constants';
 import { createStartServicesMock } from '../../common/lib/kibana/kibana_react.mock';
 import { bulkGetUserProfiles, getCurrentUserProfile, suggestUserProfiles } from './api';
@@ -47,10 +49,11 @@ describe('User profiles API', () => {
   });
 
   describe('bulkGetUserProfiles', () => {
-    const { security } = createStartServicesMock();
+    let security: SecurityPluginStart;
 
     beforeEach(() => {
       jest.clearAllMocks();
+      security = securityMock.createStart();
       security.userProfiles.bulkGet = jest.fn().mockResolvedValue(userProfiles);
     });
 
@@ -81,11 +84,13 @@ describe('User profiles API', () => {
   });
 
   describe('getCurrentUserProfile', () => {
-    const { security } = createStartServicesMock();
+    let security: SecurityPluginStart;
+
     const currentProfile = userProfiles[0];
 
     beforeEach(() => {
       jest.clearAllMocks();
+      security = securityMock.createStart();
       security.userProfiles.getCurrent = jest.fn().mockResolvedValue(currentProfile);
     });
 

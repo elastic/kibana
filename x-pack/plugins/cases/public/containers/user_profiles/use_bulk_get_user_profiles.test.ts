@@ -6,14 +6,17 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
-import { useToasts } from '../../common/lib/kibana';
+import { useToasts, useKibana } from '../../common/lib/kibana';
 import { AppMockRenderer, createAppMockRenderer } from '../../common/mock';
 import * as api from './api';
 import { useBulkGetUserProfiles } from './use_bulk_get_user_profiles';
 import { userProfilesIds } from './api.mock';
+import { createStartServicesMock } from '../../common/lib/kibana/kibana_react.mock';
 
 jest.mock('../../common/lib/kibana');
 jest.mock('./api');
+
+const useKibanaMock = useKibana as jest.Mock;
 
 describe('useBulkGetUserProfiles', () => {
   const props = {
@@ -28,6 +31,9 @@ describe('useBulkGetUserProfiles', () => {
   beforeEach(() => {
     appMockRender = createAppMockRenderer();
     jest.clearAllMocks();
+    useKibanaMock.mockReturnValue({
+      services: { ...createStartServicesMock() },
+    });
   });
 
   it('calls bulkGetUserProfiles with correct arguments', async () => {

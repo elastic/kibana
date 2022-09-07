@@ -30,6 +30,7 @@ describe('SuggestUsersPopover', () => {
       onUsersChange: jest.fn(),
       togglePopover: jest.fn(),
       onClosePopover: jest.fn(),
+      currentUserProfile: undefined,
     };
   });
 
@@ -168,7 +169,7 @@ describe('SuggestUsersPopover', () => {
 
     await waitForEuiPopoverOpen();
 
-    expect(screen.queryByTestId('case-view-assignees-popover-totals')).not.toBeInTheDocument();
+    expect(screen.queryByText('assigned')).not.toBeInTheDocument();
     fireEvent.change(screen.getByPlaceholderText('Search users'), { target: { value: 'dingo' } });
 
     await waitFor(() => {
@@ -176,9 +177,21 @@ describe('SuggestUsersPopover', () => {
     });
 
     fireEvent.click(screen.getByText('wet_dingo@elastic.co'));
+    expect(screen.getByText('1 assigned')).toBeInTheDocument();
   });
 
-  it('shows the 1 assigned total', async () => {
+  it('shows the 1 assigned total after clicking on a user', async () => {
+    appMockRender.render(<SuggestUsersPopover {...defaultProps} />);
+
+    await waitForEuiPopoverOpen();
+
+    expect(screen.queryByText('assigned')).not.toBeInTheDocument();
+    fireEvent.change(screen.getByPlaceholderText('Search users'), { target: { value: 'dingo' } });
+    fireEvent.click(screen.getByText('wet_dingo@elastic.co'));
+    expect(screen.getByText('1 assigned')).toBeInTheDocument();
+  });
+
+  it('shows the 1 assigned total when the users are passed in', async () => {
     const props = {
       ...defaultProps,
       assignedUsersWithProfiles: [{ uid: userProfiles[0].uid, profile: userProfiles[0] }],
@@ -187,7 +200,6 @@ describe('SuggestUsersPopover', () => {
 
     await waitForEuiPopoverOpen();
 
-    expect(screen.getByTestId('case-view-assignees-popover-totals')).toBeInTheDocument();
     expect(screen.getByText('1 assigned')).toBeInTheDocument();
     expect(screen.getByText('Damaged Raccoon')).toBeInTheDocument();
   });
@@ -211,27 +223,12 @@ describe('SuggestUsersPopover', () => {
     expect(togglePopover).toBeCalled();
   });
 
-  it('shows the empty message initially', async () => {
+  it('shows results initially', async () => {
     appMockRender.render(<SuggestUsersPopover {...defaultProps} />);
 
     await waitForEuiPopoverOpen();
 
-    fireEvent.click(screen.getByTestId('case-view-assignees-edit-button'));
-
-    expect(screen.queryByTestId('case-view-assignees-popover-no-matches')).not.toBeInTheDocument();
-  });
-
-  it('shows the no matches component', async () => {
-    appMockRender.render(<SuggestUsersPopover {...defaultProps} />);
-
-    await waitForEuiPopoverOpen();
-
-    fireEvent.click(screen.getByTestId('case-view-assignees-edit-button'));
-    fireEvent.change(screen.getByPlaceholderText('Search users'), { target: { value: 'bananas' } });
-
-    await waitFor(() =>
-      expect(screen.getAllByTestId('case-view-assignees-popover-no-matches')[0]).toBeInTheDocument()
-    );
+    await waitFor(() => expect(screen.getByText('Damaged Raccoon')).toBeInTheDocument());
   });
 });
 

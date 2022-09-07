@@ -16,11 +16,13 @@ interface CaseUserAvatarProps {
 }
 
 const CaseUserAvatarComponent: React.FC<CaseUserAvatarProps> = ({ size, profile }) => {
+  const dataTestSubjName = profile?.user.username;
+
   return profile !== undefined ? (
     <UserAvatar
       user={profile.user}
       avatar={profile.data.avatar}
-      data-test-subj="case-user-profile-avatar"
+      data-test-subj={`case-user-profile-avatar-${dataTestSubjName}`}
       size={size}
     />
   ) : (

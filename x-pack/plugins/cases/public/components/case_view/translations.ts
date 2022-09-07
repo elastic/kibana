@@ -201,10 +201,8 @@ export const ASSIGN_YOURSELF = i18n.translate('xpack.cases.caseView.assignYourse
   defaultMessage: 'assign yourself',
 });
 
-export const NO_MATCHING_USERS = i18n.translate('xpack.cases.caseView.noMatchingUsers', {
-  defaultMessage: 'No matching users with required access.',
-});
-
-export const TRY_MODIFYING_SEARCH = i18n.translate('xpack.cases.caseView.tryModifyingSearch', {
-  defaultMessage: 'Try modifying your search.',
-});
+export const TOTAL_USERS_ASSIGNED = (total: number) =>
+  i18n.translate('xpack.cases.caseView.totalUsersAssigned', {
+    defaultMessage: '{total} assigned',
+    values: { total },
+  });

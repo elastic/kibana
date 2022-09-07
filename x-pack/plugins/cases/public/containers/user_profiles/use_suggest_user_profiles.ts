@@ -9,15 +9,13 @@ import { useState } from 'react';
 import { useQuery, UseQueryResult } from '@tanstack/react-query';
 import useDebounce from 'react-use/lib/useDebounce';
 import { UserProfile } from '@kbn/security-plugin/common';
-import { isEmpty, noop } from 'lodash';
-import { DEFAULT_USER_SIZE } from '../../../common/constants';
+import { noop } from 'lodash';
+import { DEFAULT_USER_SIZE, SEARCH_DEBOUNCE_MS } from '../../../common/constants';
 import * as i18n from '../translations';
 import { useKibana, useToasts } from '../../common/lib/kibana';
 import { ServerError } from '../../types';
 import { USER_PROFILES_CACHE_KEY, USER_PROFILES_SUGGEST_CACHE_KEY } from '../constants';
 import { suggestUserProfiles, SuggestUserProfilesArgs } from './api';
-
-const DEBOUNCE_MS = 500;
 
 type Props = Omit<SuggestUserProfilesArgs, 'signal' | 'http'> & { onDebounce?: () => void };
 
@@ -35,7 +33,7 @@ export const useSuggestUserProfiles = ({
       setDebouncedName(name);
       onDebounce();
     },
-    DEBOUNCE_MS,
+    SEARCH_DEBOUNCE_MS,
     [name]
   );
 
@@ -48,10 +46,6 @@ export const useSuggestUserProfiles = ({
       { name: debouncedName, owners, size },
     ],
     () => {
-      if (isEmpty(name)) {
-        return [];
-      }
-
       const abortCtrlRef = new AbortController();
       return suggestUserProfiles({
         http,

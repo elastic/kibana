@@ -228,7 +228,8 @@ export const basicCase: Case = {
   settings: {
     syncAlerts: true,
   },
-  assignees: [],
+  // damaged_raccoon uid
+  assignees: [{ uid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0' }],
 };
 
 export const caseWithAlerts = {
@@ -553,13 +554,6 @@ export const pushedCaseSnake = {
   external_service: { ...basicPushSnake, connector_id: pushConnectorId },
 };
 
-export const reporters: string[] = ['alexis', 'kim', 'maria', 'steph'];
-export const respReporters = [
-  { username: 'alexis', full_name: null, email: null },
-  { username: 'kim', full_name: null, email: null },
-  { username: 'maria', full_name: null, email: null },
-  { username: 'steph', full_name: null, email: null },
-];
 export const casesSnake: CasesResponse = [
   basicCaseSnake,
   { ...pushedCaseSnake, id: '1', totalComment: 0, comments: [] },
