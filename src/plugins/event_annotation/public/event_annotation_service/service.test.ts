@@ -86,7 +86,6 @@ describe('Event Annotation Service', () => {
                 lineStyle: ['solid'],
                 icon: ['triangle'],
                 textVisibility: [false],
-                isHidden: [false],
               },
             },
           ],
@@ -121,7 +120,6 @@ describe('Event Annotation Service', () => {
                 label: ['Hello'],
                 color: ['#F04E981A'],
                 outside: [false],
-                isHidden: [false],
               },
             },
           ],
@@ -159,7 +157,6 @@ describe('Event Annotation Service', () => {
                 icon: ['triangle'],
                 textVisibility: [false],
                 textField: [],
-                isHidden: [false],
                 filter: [
                   {
                     chain: [
@@ -230,7 +227,6 @@ describe('Event Annotation Service', () => {
                 lineStyle: ['solid'],
                 icon: ['triangle'],
                 textVisibility: [false],
-                isHidden: [false],
               },
             },
           ],
@@ -248,7 +244,6 @@ describe('Event Annotation Service', () => {
                 label: ['Hello Range'],
                 color: ['#F04E981A'],
                 outside: [false],
-                isHidden: [false],
               },
             },
           ],
@@ -269,7 +264,6 @@ describe('Event Annotation Service', () => {
                 icon: ['triangle'],
                 textVisibility: [false],
                 textField: [],
-                isHidden: [false],
                 filter: [
                   {
                     chain: [
@@ -332,7 +326,6 @@ describe('Event Annotation Service', () => {
                   icon: ['triangle'],
                   textVisibility: [textVisibility],
                   textField: expected ? [expected] : [],
-                  isHidden: [false],
                   filter: [
                     {
                       chain: [
