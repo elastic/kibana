@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 
 import { useRiskScoreDeprecated } from '../deprecated';
 import { createFilter } from '../../../common/containers/helpers';
@@ -120,7 +120,8 @@ const useRiskScore = <T extends RiskQueries.hostsRiskScore | RiskQueries.usersRi
     isDeprecated,
     isEnabled,
     loading: isDeprecatedLoading,
-  } = useRiskScoreDeprecated(featureEnabled, defaultIndex);
+    refetch: refetchDeprecated,
+  } = useRiskScoreDeprecated(featureEnabled, factoryQueryType, defaultIndex);
 
   const {
     loading,
@@ -136,17 +137,22 @@ const useRiskScore = <T extends RiskQueries.hostsRiskScore | RiskQueries.usersRi
     showErrorToast: false,
   });
 
+  const refetchAll = useCallback(() => {
+    if (defaultIndex) refetchDeprecated(defaultIndex);
+    refetch();
+  }, [defaultIndex, refetch, refetchDeprecated]);
+
   const riskScoreResponse = useMemo(
     () => ({
       data: response.data,
       inspect,
-      refetch,
+      refetch: refetchAll,
       totalCount: response.totalCount,
       isDeprecated,
       isModuleEnabled: skip ? featureEnabled : isEnabled,
       isInspected: false,
     }),
-    [featureEnabled, inspect, isDeprecated, isEnabled, refetch, response, skip]
+    [featureEnabled, inspect, isDeprecated, isEnabled, refetchAll, response, skip]
   );
 
   const riskScoreRequest = useMemo(

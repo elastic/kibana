@@ -27,9 +27,9 @@ export const getRiskScoreDeprecatedRoute = (router: SecuritySolutionPluginRouter
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
       const coreContext = await context.core;
-      const { indexName } = request.query;
+      const { indexName, entity } = request.query;
       try {
-        const newFieldName = 'host.risk.calculated_level';
+        const newFieldName = `${entity}.risk.calculated_level`;
         const res = await coreContext.elasticsearch.client.asCurrentUser.fieldCaps({
           index: indexName,
           fields: newFieldName,

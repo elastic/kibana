@@ -9,4 +9,5 @@ import * as t from 'io-ts';
 
 export const indexDeprecatedSchema = t.type({
   indexName: t.string,
+  entity: t.string,
 });

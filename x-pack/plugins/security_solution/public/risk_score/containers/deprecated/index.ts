@@ -5,10 +5,20 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { RiskQueries } from '../../../../common/search_strategy';
 import { getRiskScoreDeprecated } from './api';
 
-export const useRiskScoreDeprecated = (isFeatureEnabled: boolean, defaultIndex?: string) => {
+export const useRiskScoreDeprecated = (
+  isFeatureEnabled: boolean,
+  factoryQueryType: RiskQueries.hostsRiskScore | RiskQueries.usersRiskScore,
+  defaultIndex?: string
+) => {
+  const riskEntity = useMemo(
+    () => (factoryQueryType === RiskQueries.hostsRiskScore ? 'host' : 'user'),
+    [factoryQueryType]
+  );
+
   const [isDeprecated, setIsDeprecated] = useState(false);
   const [isEnabled, setIsEnabled] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -19,7 +29,7 @@ export const useRiskScoreDeprecated = (isFeatureEnabled: boolean, defaultIndex?:
       try {
         abortCtrl.current = new AbortController();
         setLoading(true);
-        const res = await getRiskScoreDeprecated(indexName, abortCtrl.current.signal);
+        const res = await getRiskScoreDeprecated(indexName, riskEntity, abortCtrl.current.signal);
         setLoading(false);
         setIsDeprecated(res.isDeprecated);
         setIsEnabled(res.isEnabled);
@@ -44,5 +54,5 @@ export const useRiskScoreDeprecated = (isFeatureEnabled: boolean, defaultIndex?:
     };
   }, []);
 
-  return { loading, isDeprecated, isEnabled };
+  return { loading, isDeprecated, isEnabled, refetch: searchDeprecated };
 };
