@@ -305,7 +305,7 @@ export async function syncExistingFields({
   const { indexPatternList } = requestOptions;
   const newExistingFields = { ...existingFields };
 
-  const { result, status } = await refreshExistingFields({ ...requestOptions });
+  const { result, status } = await refreshExistingFields(requestOptions);
 
   if (result) {
     if (isFirstExistenceFetch) {
