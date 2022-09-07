@@ -50,7 +50,7 @@ export interface Connector {
   last_sync_status: SyncStatus | null;
   last_synced: string | null;
   name: string;
-  pipeline: IngestPipelineParams | null;
+  pipeline?: IngestPipelineParams | null;
   scheduling: {
     enabled: boolean;
     interval: string; // crontab syntax
