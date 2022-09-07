@@ -8,7 +8,7 @@
 
 import React, { useRef, memo, useEffect, useState, useCallback } from 'react';
 import classNames from 'classnames';
-import { EsqlLang, monaco } from '@kbn/monaco';
+import { EsqlLang, ES_QLLang, monaco } from '@kbn/monaco';
 import { IDataPluginServices } from '@kbn/data-plugin/public';
 import type { AggregateQuery } from '@kbn/es-query';
 import { getAggregateQueryMode } from '@kbn/es-query';
@@ -67,6 +67,9 @@ const KEYCODE_ARROW_DOWN = 40;
 
 const languageId = (language: string) => {
   switch (language) {
+    case 'esql': {
+      return ES_QLLang.ID;
+    }
     case 'sql':
     default: {
       return EsqlLang.ID;

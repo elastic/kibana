@@ -72,6 +72,24 @@ export async function queryStateToExpressionAst({
         throw new Error(`No data view found for index pattern ${idxPattern}`);
       }
     }
+
+    // esql query
+    if (mode === 'esql' && 'esql' in query) {
+      const idxPattern = getIndexPatternFromSQLQuery(query.esql);
+      const idsTitles = await dataViewsService.getIdsWithTitle();
+      const dataViewIdTitle = idsTitles.find(({ title }) => title === idxPattern);
+      if (dataViewIdTitle) {
+        const dataView = await dataViewsService.get(dataViewIdTitle.id);
+        const timeFieldName = dataView.timeFieldName;
+        const essql = aggregateQueryToAst(query, timeFieldName);
+
+        if (essql) {
+          ast.chain.push(essql);
+        }
+      } else {
+        throw new Error(`No data view found for index pattern ${idxPattern}`);
+      }
+    }
   }
   return ast;
 }

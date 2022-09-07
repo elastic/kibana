@@ -25,6 +25,7 @@ import { getEsQueryConfig } from '../../es_query';
 import { getTime } from '../../query';
 import { UiSettingsCommon } from '../..';
 import {
+  ESQL_SEARCH_STRATEGY,
   ISearchGeneric,
   KibanaContext,
   SqlRequestParams,
@@ -41,6 +42,7 @@ interface Arguments {
   parameter?: Array<string | number | boolean>;
   count?: number;
   timezone?: string;
+  lang?: string;
   timeField?: string;
 }
 
@@ -112,6 +114,10 @@ export const getEssqlFn = ({ getStartDependencies }: EssqlFnArguments) => {
         }),
         default: 1000,
       },
+      lang: {
+        types: ['string'],
+        help: 'This is a hack, if you want to run es_ql, set to es_ql, otherwise leave empty',
+      },
       timezone: {
         aliases: ['tz'],
         types: ['string'],
@@ -131,9 +137,70 @@ export const getEssqlFn = ({ getStartDependencies }: EssqlFnArguments) => {
     },
     fn(
       input,
-      { count, parameter, query, timeField, timezone },
+      { count, parameter, query, timeField, timezone, lang },
       { abortSignal, inspectorAdapters, getKibanaRequest }
     ) {
+      if (lang === 'es_ql') {
+        return defer(() =>
+          getStartDependencies(() => {
+            const request = getKibanaRequest?.();
+            if (!request) {
+              throw new Error(
+                'A KibanaRequest is required to run queries on the server. ' +
+                  'Please provide a request object to the expression execution params.'
+              );
+            }
+
+            return request;
+          })
+        ).pipe(
+          switchMap(({ nowProvider, search, uiSettings }) => {
+            const params: any = {
+              query,
+              time_zone: timezone,
+            };
+
+            return search<any, any>(
+              { params },
+              { abortSignal, strategy: ESQL_SEARCH_STRATEGY }
+            ).pipe(
+              catchError((error) => {
+                if (!error.err) {
+                  error.message = `Unexpected error from Elasticsearch: ${error.message}`;
+                } else {
+                  const { type, reason } = error.err.attributes;
+                  if (type === 'parsing_exception') {
+                    error.message = `Couldn't parse Elasticsearch ESQL query. You may need to add double quotes to names containing special characters. Check your query and try again. Error: ${reason}`;
+                  } else {
+                    error.message = `Unexpected error from Elasticsearch: ${type} - ${reason}`;
+                  }
+                }
+
+                return throwError(() => error);
+              })
+            );
+          }),
+          map(({ rawResponse: body }) => {
+            const columns =
+              body.columns?.map(({ name, type }) => ({
+                id: sanitize(name),
+                name: sanitize(name),
+                meta: { type: normalizeType(type) },
+              })) ?? [];
+            const columnNames = columns.map(({ name }) => name);
+            const rows = body.values.map((row) => zipObject(columnNames, row));
+
+            return {
+              type: 'datatable',
+              meta: {
+                type: 'es_ql',
+              },
+              columns,
+              rows,
+            } as Datatable;
+          })
+        );
+      }
       return defer(() =>
         getStartDependencies(() => {
           const request = getKibanaRequest?.();

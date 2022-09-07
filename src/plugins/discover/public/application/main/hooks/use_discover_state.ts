@@ -290,8 +290,14 @@ export function useDiscoverState({
 
   useEffect(() => {
     async function fetchDataview() {
-      if (state.query && isOfAggregateQueryType(state.query) && 'sql' in state.query) {
-        const indexPatternFromQuery = getIndexPatternFromSQLQuery(state.query.sql);
+      if (
+        state.query &&
+        isOfAggregateQueryType(state.query) &&
+        ('sql' in state.query || 'esql' in state.query)
+      ) {
+        const indexPatternFromQuery = getIndexPatternFromSQLQuery(
+          'sql' in state.query ? state.query.sql : state.query.esql
+        );
         const idsTitles = await dataViews.getIdsWithTitle();
         const dataViewObj = idsTitles.find(({ title }) => title === indexPatternFromQuery);
         if (dataViewObj) {

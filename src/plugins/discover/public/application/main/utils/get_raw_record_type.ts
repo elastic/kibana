@@ -15,7 +15,11 @@ import {
 import { RecordRawType } from '../hooks/use_saved_search';
 
 export function getRawRecordType(query?: Query | AggregateQuery) {
-  if (query && isOfAggregateQueryType(query) && getAggregateQueryMode(query) === 'sql') {
+  if (
+    query &&
+    isOfAggregateQueryType(query) &&
+    (getAggregateQueryMode(query) === 'sql' || getAggregateQueryMode(query) === 'esql')
+  ) {
     return RecordRawType.PLAIN;
   }
 

@@ -18,3 +18,4 @@ export * from './strategies/es_search';
 export * from './strategies/eql_search';
 export * from './strategies/ese_search';
 export * from './strategies/sql_search';
+export * from './strategies/esql_search';
