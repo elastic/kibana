@@ -108,7 +108,7 @@ export interface VisTypeDefinition<TVisParams> {
    * in order to be displayed in the Lens editor.
    */
   readonly navigateToLens?: (
-    vis?: Vis<VisParams>,
+    vis?: Vis<TVisParams>,
     timeFilter?: TimefilterContract
   ) => Promise<NavigateToLensContext | null> | undefined;
 
