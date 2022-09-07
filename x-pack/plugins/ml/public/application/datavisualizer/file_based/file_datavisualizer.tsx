@@ -94,6 +94,7 @@ export const FileDataVisualizerPage: FC = () => {
         },
       ],
     ],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [mlLocator]
   );
 
@@ -103,6 +104,7 @@ export const FileDataVisualizerPage: FC = () => {
       const { getFileDataVisualizerComponent } = dataVisualizer;
       getFileDataVisualizerComponent().then(setFileDataVisualizer);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

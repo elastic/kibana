@@ -6,20 +6,14 @@
  */
 
 import { resolve } from 'path';
-import glob from 'glob';
+import globby from 'globby';
 import { bold } from 'chalk';
 import { argv } from 'yargs';
 import { requestFromApi } from './request_from_api';
 
 async function listFiles() {
-  const scan = (pattern) => {
-    return new Promise((resolve, reject) => {
-      glob(pattern, {}, (err, files) => (err ? reject(err) : resolve(files)));
-    });
-  };
-
   const pattern = resolve(__dirname, './apis/*/index.js');
-  const files = await scan(pattern);
+  const files = await globby(pattern);
   files.forEach((file) => {
     const { name, description } = require(file); // eslint-disable-line import/no-dynamic-require
     console.log('    ' + bold(`node ${argv.$0} ${name}`));
