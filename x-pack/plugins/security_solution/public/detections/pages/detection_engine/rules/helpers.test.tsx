@@ -54,6 +54,7 @@ describe('rule helpers', () => {
         dataViewId: undefined,
         index: ['auditbeat-*'],
         machineLearningJobId: [],
+        shouldLoadQueryDynamically: true,
         queryBar: {
           query: {
             query: 'user.name: root or user.name: admin',

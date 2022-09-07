@@ -16,6 +16,7 @@ import {
   getDependents,
   addSavedId,
   addQueryFields,
+  addSavedQueryFields,
   addTimelineTitle,
   addMlFields,
   addThreatMatchFields,
@@ -267,6 +268,25 @@ describe('rules_schema', () => {
 
       expected.type = 'saved_query';
       expected.saved_id = 'save id 123';
+
+      expect(getPaths(left(message.errors))).toEqual([]);
+      expect(message.schema).toEqual(expected);
+    });
+
+    test('it should validate a type of "saved_query" with undefined "query" dependent', () => {
+      const payload = getRulesSchemaMock();
+      payload.type = 'saved_query';
+      payload.saved_id = 'save id 123';
+      payload.query = undefined;
+
+      const decoded = checkTypeDependents(payload);
+      const checked = exactCheck(payload, decoded);
+      const message = pipe(checked, foldLeftRight);
+      const expected = getRulesSchemaMock();
+
+      expected.type = 'saved_query';
+      expected.saved_id = 'save id 123';
+      expected.query = undefined;
 
       expect(getPaths(left(message.errors))).toEqual([]);
       expect(message.schema).toEqual(expected);
@@ -689,23 +709,25 @@ describe('rules_schema', () => {
       expect(fields).toEqual(expected);
     });
 
-    test('should return two fields for a rule of type "query"', () => {
+    test('should return three fields for a rule of type "query"', () => {
       const fields = addQueryFields({ type: 'query' });
       expect(fields.length).toEqual(3);
     });
 
-    test('should return two fields for a rule of type "threshold"', () => {
+    test('should return three fields for a rule of type "threshold"', () => {
       const fields = addQueryFields({ type: 'threshold' });
       expect(fields.length).toEqual(3);
     });
 
-    test('should return two fields for a rule of type "saved_query"', () => {
-      const fields = addQueryFields({ type: 'saved_query' });
+    test('should return three fields for a rule of type "threat_match"', () => {
+      const fields = addQueryFields({ type: 'threat_match' });
       expect(fields.length).toEqual(3);
     });
+  });
 
-    test('should return two fields for a rule of type "threat_match"', () => {
-      const fields = addQueryFields({ type: 'threat_match' });
+  describe('addSavedQueryFields', () => {
+    test('should return three fields for a rule of type "saved_query"', () => {
+      const fields = addSavedQueryFields({ type: 'saved_query' });
       expect(fields.length).toEqual(3);
     });
   });

@@ -522,10 +522,25 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      describe('saved_query and query rule type', () => {
+      describe.only('saved_query and query rule type', () => {
         it('should allow to save a query rule type as a saved_query rule type', async () => {
           const ruleId = 'rule-1';
           const savedQueryRule = getSimpleSavedQueryRule(ruleId);
+          await createRule(supertest, log, getSimpleRule(ruleId));
+
+          const { body: outputRule } = await supertest
+            .put(DETECTION_ENGINE_RULES_URL)
+            .set('kbn-xsrf', 'true')
+            .send(savedQueryRule)
+            .expect(200);
+
+          expect(outputRule.type).to.be('saved_query');
+          expect(outputRule.saved_id).to.be(savedQueryRule.saved_id);
+        });
+
+        it('should allow to save a query rule type as a saved_query rule type with undefined query', async () => {
+          const ruleId = 'rule-1';
+          const savedQueryRule = { ...getSimpleSavedQueryRule(ruleId), query: undefined };
           await createRule(supertest, log, getSimpleRule(ruleId));
 
           const { body: outputRule } = await supertest

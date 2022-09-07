@@ -259,6 +259,18 @@ export const addQueryFields = (typeAndTimelineOnly: TypeAndTimelineOnly): t.Mixe
   }
 };
 
+export const addSavedQueryFields = (typeAndTimelineOnly: TypeAndTimelineOnly): t.Mixed[] => {
+  if (['saved_query'].includes(typeAndTimelineOnly.type)) {
+    return [
+      t.exact(t.partial({ query: dependentRulesSchema.props.query })),
+      t.exact(t.type({ language: dependentRulesSchema.props.language })),
+      t.exact(t.partial({ data_view_id: dependentRulesSchema.props.data_view_id })),
+    ];
+  } else {
+    return [];
+  }
+};
+
 export const addMlFields = (typeAndTimelineOnly: TypeAndTimelineOnly): t.Mixed[] => {
   if (isMlRule(typeAndTimelineOnly.type)) {
     return [
@@ -333,6 +345,7 @@ export const getDependents = (typeAndTimelineOnly: TypeAndTimelineOnly): t.Mixed
     ...addSavedId(typeAndTimelineOnly),
     ...addTimelineTitle(typeAndTimelineOnly),
     ...addQueryFields(typeAndTimelineOnly),
+    ...addSavedQueryFields(typeAndTimelineOnly),
     ...addMlFields(typeAndTimelineOnly),
     ...addThresholdFields(typeAndTimelineOnly),
     ...addEqlFields(typeAndTimelineOnly),
