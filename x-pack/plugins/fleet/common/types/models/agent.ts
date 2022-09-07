@@ -104,7 +104,7 @@ export interface CurrentUpgrade {
   startTime?: string;
 }
 
-export interface CurrentAction {
+export interface ActionStatus {
   actionId: string;
   nbAgentsActionCreated: number;
   nbAgentsAck: number;

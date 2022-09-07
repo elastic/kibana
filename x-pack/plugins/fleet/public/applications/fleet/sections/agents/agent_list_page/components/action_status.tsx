@@ -17,7 +17,7 @@ import {
   EuiAccordion,
 } from '@elastic/eui';
 
-import type { CurrentAction } from '../../../../types';
+import type { ActionStatus } from '../../../../types';
 import { useActionStatus } from '../hooks';
 
 export const ActionStatusCallout: React.FunctionComponent<{ refreshActionStatus: boolean }> = ({
@@ -37,7 +37,7 @@ export const ActionStatusCallout: React.FunctionComponent<{ refreshActionStatus:
     ACTION: 'actioned',
   };
 
-  const calloutTitle = (currentAction: CurrentAction) => (
+  const calloutTitle = (currentAction: ActionStatus) => (
     <FormattedMessage
       id="xpack.fleet.currentAction.calloutTitle"
       defaultMessage="{nbAgentsAck} of {nbAgentsActioned} {type}, status: {status}, actionId: {actionId}"

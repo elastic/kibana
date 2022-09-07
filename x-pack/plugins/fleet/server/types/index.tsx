@@ -12,7 +12,7 @@ export type {
   AgentStatus,
   AgentType,
   AgentAction,
-  CurrentAction,
+  ActionStatus,
   CurrentUpgrade,
   PackagePolicy,
   PackagePolicyInput,

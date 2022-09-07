@@ -10,12 +10,12 @@ import { i18n } from '@kbn/i18n';
 
 import { sendGetActionStatus, useStartServices } from '../../../../hooks';
 
-import type { CurrentAction } from '../../../../types';
+import type { ActionStatus } from '../../../../types';
 
 const POLL_INTERVAL = 30 * 1000;
 
 export function useActionStatus() {
-  const [currentActions, setCurrentActions] = useState<CurrentAction[]>([]);
+  const [currentActions, setCurrentActions] = useState<ActionStatus[]>([]);
   const currentTimeoutRef = useRef<NodeJS.Timeout>();
   const isCancelledRef = useRef<boolean>(false);
   const { notifications } = useStartServices();

@@ -12,13 +12,13 @@ import { SO_SEARCH_LIMIT } from '../../constants';
 
 import { AGENT_ACTIONS_STATUS_INDEX } from '../../../common/constants';
 
-import type { FleetServerAgentAction, CurrentAction } from '../../types';
+import type { FleetServerAgentAction, ActionStatus } from '../../types';
 import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '../../../common';
 
 /**
  * Return current bulk actions
  */
-export async function getActionStatuses(esClient: ElasticsearchClient): Promise<CurrentAction[]> {
+export async function getActionStatuses(esClient: ElasticsearchClient): Promise<ActionStatus[]> {
   let actions = await _getActions(esClient);
   const cancelledActionIds = await _getCancelledActionId(esClient);
   const actionStatuses = await _getActionStatuses(esClient);
@@ -162,6 +162,6 @@ async function _getActions(esClient: ElasticsearchClient) {
       acc[hit._source.action_id].nbAgentsActionCreated += hit._source.agents?.length ?? 0;
 
       return acc;
-    }, {} as { [k: string]: CurrentAction })
+    }, {} as { [k: string]: ActionStatus })
   );
 }

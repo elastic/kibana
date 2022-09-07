@@ -7,7 +7,7 @@
 
 import type { SearchHit } from '@kbn/core/types/elasticsearch';
 
-import type { Agent, AgentAction, CurrentAction, CurrentUpgrade, NewAgentAction } from '../models';
+import type { Agent, AgentAction, ActionStatus, CurrentUpgrade, NewAgentAction } from '../models';
 
 import type { ListResult, ListWithKuery } from './common';
 
@@ -207,7 +207,7 @@ export interface GetCurrentUpgradesResponse {
   items: CurrentUpgrade[];
 }
 export interface GetActionStatusResponse {
-  items: CurrentAction[];
+  items: ActionStatus[];
 }
 export interface GetAvailableVersionsResponse {
   items: string[];
