@@ -46,7 +46,7 @@ export const createColumnFromCustomAgg = (
   return {
     columnId: uuid(),
     dataType: (field?.type as DataType) ?? undefined,
-    label: field?.displayName,
+    label: agg.getFieldDisplayName(),
     isBucketed,
     isSplit,
     reducedTimeRange,

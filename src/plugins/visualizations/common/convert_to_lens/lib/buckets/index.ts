@@ -41,7 +41,7 @@ export const getBucketColumns = (
 ) => {
   switch (aggType) {
     case BUCKET_TYPES.DATE_HISTOGRAM:
-      return convertToDateHistogramColumn(aggParams, label, dataView, isSplit);
+      return convertToDateHistogramColumn(aggParams, dataView, isSplit);
     case BUCKET_TYPES.FILTERS:
       return convertToFiltersColumn(aggParams, isSplit);
     case BUCKET_TYPES.TERMS:
@@ -67,7 +67,6 @@ export const getBucketColumns = (
           {
             field: fieldName,
           },
-          label,
           dataView,
           isSplit
         );

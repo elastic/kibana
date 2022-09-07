@@ -9,6 +9,7 @@
 import _ from 'lodash';
 import { IAggConfig, METRIC_TYPES } from '@kbn/data-plugin/common';
 import { DataViewField } from '@kbn/data-views-plugin/common';
+import { DataViewFieldBase } from '@kbn/es-query';
 import { SchemaConfig } from '../../types';
 import { Column } from '../types';
 import { Column as ColumnWithMeta, SiblingPipelineMetric } from './convert/types';
@@ -37,7 +38,9 @@ export const getValidColumns = (columns: Array<Column | null> | Column | null | 
   return columns ? [columns] : null;
 };
 
-export const getFieldNameFromField = (field: DataViewField | string | undefined) => {
+export const getFieldNameFromField = (
+  field: DataViewField | DataViewFieldBase | string | undefined
+) => {
   if (!field) {
     return null;
   }
@@ -46,7 +49,7 @@ export const getFieldNameFromField = (field: DataViewField | string | undefined)
     return field;
   }
 
-  return field.displayName;
+  return field.name;
 };
 
 export const isSchemaConfig = (agg: SchemaConfig | IAggConfig): agg is SchemaConfig => {
