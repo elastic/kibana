@@ -152,7 +152,7 @@ export class ApmTransactionDurationTransformGenerator implements TransformGenera
   }
 
   private buildAggregations(slo: APMTransactionDurationSLO) {
-    const truncatedThreshold = parseInt(slo.indicator.params['threshold.us'].toFixed(0));
+    const truncatedThreshold = Math.trunc(slo.indicator.params['threshold.us']);
 
     return {
       _numerator: {

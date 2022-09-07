@@ -25,6 +25,8 @@ import { ALL_VALUE } from '../../../types/schema';
 import { TransformGenerator } from '.';
 
 const APM_SOURCE_INDEX = 'metrics-apm*';
+const ALLOWED_STATUS_CODES = ['2xx', '3xx', '4xx', '5xx'];
+const DEFAULT_GOOD_STATUS_CODES = ['2xx', '3xx', '4xx'];
 
 export class ApmTransactionErrorRateTransformGenerator implements TransformGenerator {
   public getTransformParams(slo: SLO, spaceId: string): TransformPutTransformRequest {
@@ -173,11 +175,9 @@ export class ApmTransactionErrorRateTransformGenerator implements TransformGener
   }
 
   private getGoodStatusCodesFilter(goodStatusCodes: string[] | undefined) {
-    let statusCodes = goodStatusCodes?.filter((code) =>
-      ['2xx', '3xx', '4xx', '5xx'].includes(code)
-    );
+    let statusCodes = goodStatusCodes?.filter((code) => ALLOWED_STATUS_CODES.includes(code));
     if (statusCodes === undefined || statusCodes.length === 0) {
-      statusCodes = ['2xx', '3xx', '4xx'];
+      statusCodes = DEFAULT_GOOD_STATUS_CODES;
     }
 
     return statusCodes.map((code) => ({

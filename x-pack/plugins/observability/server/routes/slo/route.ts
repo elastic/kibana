@@ -6,8 +6,11 @@
  */
 
 import uuid from 'uuid';
-import { KibanaSavedObjectsSLORepository, ResourceInstaller } from '../../services/slo';
-import { TransformInstaller } from '../../services/slo/transform_installer';
+import {
+  KibanaSavedObjectsSLORepository,
+  ResourceInstaller,
+  TransformInstaller,
+} from '../../services/slo';
 import {
   ApmTransactionDurationTransformGenerator,
   ApmTransactionErrorRateTransformGenerator,
