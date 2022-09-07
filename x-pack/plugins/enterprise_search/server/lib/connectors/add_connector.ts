@@ -13,7 +13,7 @@ import { ErrorCode } from '../../../common/types/error_codes';
 import { setupConnectorsIndices } from '../../index_management/setup_indices';
 
 import { fetchCrawlerByIndexName } from '../crawler/fetch_crawlers';
-import { textAnalysisSettings } from '../indices/text_analysis';
+import { createIndex } from '../indices/create_index';
 
 import { deleteConnectorById } from './delete_connector';
 
@@ -51,10 +51,7 @@ const createConnector = async (
     document,
     index: CONNECTORS_INDEX,
   });
-  await client.asCurrentUser.indices.create({
-    index,
-    settings: textAnalysisSettings(language ?? undefined),
-  });
+  await createIndex(client, document.index_name, language, false);
   await client.asCurrentUser.indices.refresh({ index: CONNECTORS_INDEX });
 
   return { id: result._id, index_name: document.index_name };
