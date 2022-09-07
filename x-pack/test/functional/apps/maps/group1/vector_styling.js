@@ -8,11 +8,8 @@
 import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
-<<<<<<< HEAD
   const PageObjects = getPageObjects(['maps', 'timePicker', 'common']);
-=======
-  const PageObjects = getPageObjects(['common', 'maps', 'timePicker']);
->>>>>>> main
+
   const security = getService('security');
   const from = 'Mar 1, 2015 @ 00:00:00.000';
   const to = 'Mar 1, 2016 @ 00:00:00.000';
