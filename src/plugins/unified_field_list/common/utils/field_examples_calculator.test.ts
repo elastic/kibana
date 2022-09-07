@@ -9,12 +9,7 @@
 import { keys, clone, uniq, filter, map, flatten } from 'lodash';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { stubLogstashDataView as dataView } from '@kbn/data-views-plugin/common/data_view.stub';
-import {
-  getFieldExampleBuckets,
-  countMissing,
-  groupValues,
-  getFieldValues,
-} from './field_examples_calculator';
+import { getFieldExampleBuckets, groupValues, getFieldValues } from './field_examples_calculator';
 
 const hitsAsValues: Array<Record<string, string | number | string[]>> = [
   {
@@ -121,27 +116,8 @@ const hits = hitsAsValues.map((value) => ({
 }));
 
 describe('fieldExamplesCalculator', function () {
-  it('should have a _countMissing that counts nulls & undefineds in an array', function () {
-    const values = [
-      ['foo', 'bar'],
-      'foo',
-      'foo',
-      undefined,
-      ['foo', 'bar'],
-      'bar',
-      'baz',
-      null,
-      null,
-      null,
-      'foo',
-      undefined,
-    ];
-    expect(countMissing(values)).toBe(5);
-  });
-
   describe('groupValues', function () {
-    let grouped: { groups: Record<string, any>; valuesCount: number };
-    let params: any;
+    let grouped: { groups: Record<string, any>; sampledValues: number };
     let values: any;
     beforeEach(function () {
       values = [
@@ -149,7 +125,7 @@ describe('fieldExamplesCalculator', function () {
         'foo',
         'foo',
         undefined,
-        ['foo', 'bar'],
+        ['foo', 'bar', 'bar'],
         'bar',
         'baz',
         null,
@@ -158,29 +134,27 @@ describe('fieldExamplesCalculator', function () {
         'foo',
         undefined,
       ];
-      params = {};
-      grouped = groupValues(values, params);
+      grouped = groupValues(values);
     });
 
     it('should have a groupValues that counts values', function () {
       expect(grouped.groups).toBeInstanceOf(Object);
-      expect(grouped.valuesCount).toBe(9);
+      expect(grouped.sampledValues).toBe(9);
     });
 
     it('should throw an error if any value is a plain object', function () {
       expect(function () {
-        groupValues([{}, true, false], params);
+        groupValues([{}, true, false]);
       }).toThrowError();
     });
 
     it('should handle values with dots in them', function () {
       values = ['0', '0.........', '0.......,.....'];
-      params = {};
-      grouped = groupValues(values, params);
+      grouped = groupValues(values);
       expect(grouped.groups[values[0]].count).toBe(1);
       expect(grouped.groups[values[1]].count).toBe(1);
       expect(grouped.groups[values[2]].count).toBe(1);
-      expect(grouped.valuesCount).toBe(3);
+      expect(grouped.sampledValues).toBe(3);
     });
 
     it('should have a a key for value in the array when not grouping array terms', function () {
@@ -195,29 +169,7 @@ describe('fieldExamplesCalculator', function () {
       expect(grouped.groups.foo.count).toBe(5);
       expect(grouped.groups.bar.count).toBe(3);
       expect(grouped.groups.baz.count).toBe(1);
-      expect(grouped.valuesCount).toBe(9);
-    });
-
-    describe('grouped array terms', function () {
-      beforeEach(function () {
-        params.grouped = true;
-        grouped = groupValues(values, params);
-      });
-
-      it('should group array terms when passed params.grouped', function () {
-        expect(keys(grouped.groups).length).toBe(4);
-        expect(grouped.groups['foo,bar']).toBeInstanceOf(Object);
-      });
-
-      it('should contain the original array as the value', function () {
-        expect(grouped.groups['foo,bar'].value).toEqual(['foo', 'bar']);
-      });
-
-      it('should count the pairs separately from the values they contain', function () {
-        expect(grouped.groups['foo,bar'].count).toBe(2);
-        expect(grouped.groups.foo.count).toBe(3);
-        expect(grouped.groups.bar.count).toBe(1);
-      });
+      expect(grouped.sampledValues).toBe(9);
     });
   });
 
@@ -284,21 +236,16 @@ describe('fieldExamplesCalculator', function () {
     });
 
     it('counts the total hits', function () {
-      expect(getFieldExampleBuckets(params).total).toBe(params.hits.length);
-    });
-
-    it('counts the hits the field exists in', function () {
-      params.field = dataView.fields.getByName('phpmemory');
-      expect(getFieldExampleBuckets(params).exists).toBe(5);
+      expect(getFieldExampleBuckets(params).sampledDocuments).toBe(params.hits.length);
     });
 
     it('counts total number of values', function () {
       params.field = dataView.fields.getByName('@tags');
-      expect(getFieldExampleBuckets(params).valuesCount).toBe(3);
+      expect(getFieldExampleBuckets(params).sampledValues).toBe(3);
       params.field = dataView.fields.getByName('extension');
-      expect(getFieldExampleBuckets(params).valuesCount).toBe(params.hits.length);
+      expect(getFieldExampleBuckets(params).sampledValues).toBe(params.hits.length);
       params.field = dataView.fields.getByName('phpmemory');
-      expect(getFieldExampleBuckets(params).valuesCount).toBe(5);
+      expect(getFieldExampleBuckets(params).sampledValues).toBe(5);
     });
   });
 });

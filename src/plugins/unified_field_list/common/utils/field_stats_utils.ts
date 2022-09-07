@@ -361,8 +361,8 @@ export async function getSimpleExamples(
 
     return {
       totalDocuments: getHitsTotal(simpleExamplesResult),
-      sampledDocuments: fieldExampleBuckets.total,
-      sampledValues: fieldExampleBuckets.valuesCount,
+      sampledDocuments: fieldExampleBuckets.sampledDocuments,
+      sampledValues: fieldExampleBuckets.sampledValues,
       topValues: {
         buckets: fieldExampleBuckets.buckets,
       },
