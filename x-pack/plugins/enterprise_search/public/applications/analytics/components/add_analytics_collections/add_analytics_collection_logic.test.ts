@@ -1,3 +1,10 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
 import {
   LogicMounter,
   mockFlashMessageHelpers,
@@ -7,10 +14,10 @@ import {
 
 import { nextTick } from '@kbn/test-jest-helpers';
 
+import { AnalyticsCollection } from '../../../../../common/types/analytics';
 import { HttpError, Status } from '../../../../../common/types/api';
 
 import { AddAnalyticsCollectionLogic } from './add_analytics_collection_logic';
-import { AnalyticsCollection } from '../../../../../common/types/analytics';
 
 describe('addAnalyticsCollectionLogic', () => {
   const { mount } = new LogicMounter(AddAnalyticsCollectionLogic);

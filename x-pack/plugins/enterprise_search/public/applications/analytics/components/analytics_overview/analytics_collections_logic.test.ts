@@ -7,8 +7,6 @@
 
 import { LogicMounter, mockFlashMessageHelpers } from '../../../__mocks__/kea_logic';
 
-import { nextTick } from '@kbn/test-jest-helpers';
-
 import { HttpError, Status } from '../../../../../common/types/api';
 
 import { AnalyticsCollectionsLogic } from './analytics_collections_logic';

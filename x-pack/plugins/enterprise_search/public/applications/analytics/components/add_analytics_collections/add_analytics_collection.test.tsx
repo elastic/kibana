@@ -23,5 +23,4 @@ describe('AddAnalyticsCollection', () => {
     const wrapper = shallow(<AddAnalyticsCollection />);
     expect(wrapper.find(AddAnalyticsCollectionForm)).toHaveLength(1);
   });
-
 });
