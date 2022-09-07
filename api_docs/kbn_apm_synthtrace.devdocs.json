@@ -192,13 +192,28 @@
             "label": "refresh",
             "description": [],
             "signature": [
-              "() => Promise<",
+              "(dataStreams?: string[] | undefined) => Promise<",
               "ShardsOperationResponseBase",
               ">"
             ],
             "path": "packages/kbn-apm-synthtrace/src/lib/apm/client/apm_synthtrace_es_client.ts",
             "deprecated": false,
-            "children": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/apm-synthtrace",
+                "id": "def-server.ApmSynthtraceEsClient.refresh.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "dataStreams",
+                "description": [],
+                "signature": [
+                  "string[] | undefined"
+                ],
+                "path": "packages/kbn-apm-synthtrace/src/lib/apm/client/apm_synthtrace_es_client.ts",
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
             "returnComment": []
           },
           {
@@ -455,10 +470,10 @@
           },
           {
             "parentPluginId": "@kbn/apm-synthtrace",
-            "id": "def-server.EntityArrayIterable.ratePerMinute",
+            "id": "def-server.EntityArrayIterable.estimatedRatePerMinute",
             "type": "Function",
             "tags": [],
-            "label": "ratePerMinute",
+            "label": "estimatedRatePerMinute",
             "description": [],
             "signature": [
               "() => number"
@@ -805,10 +820,10 @@
           },
           {
             "parentPluginId": "@kbn/apm-synthtrace",
-            "id": "def-server.EntityIterable.ratePerMinute",
+            "id": "def-server.EntityIterable.estimatedRatePerMinute",
             "type": "Function",
             "tags": [],
-            "label": "ratePerMinute",
+            "label": "estimatedRatePerMinute",
             "description": [],
             "signature": [
               "() => number"

@@ -6994,6 +6994,19 @@
           },
           {
             "parentPluginId": "lens",
+            "id": "def-public.XYState.showCurrentTimeMarker",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "showCurrentTimeMarker",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/lens/public/visualizations/xy/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "lens",
             "id": "def-public.XYState.valuesInLegend",
             "type": "CompoundType",
             "tags": [],

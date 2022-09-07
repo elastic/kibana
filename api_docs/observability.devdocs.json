@@ -7124,6 +7124,25 @@
           },
           {
             "parentPluginId": "observability",
+            "id": "def-server.ObservabilityRouteHandlerResources.spacesService",
+            "type": "Object",
+            "tags": [],
+            "label": "spacesService",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "spaces",
+                "scope": "server",
+                "docId": "kibSpacesPluginApi",
+                "section": "def-server.SpacesServiceStart",
+                "text": "SpacesServiceStart"
+              }
+            ],
+            "path": "x-pack/plugins/observability/server/routes/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "observability",
             "id": "def-server.ObservabilityRouteHandlerResources.request",
             "type": "Object",
             "tags": [],
@@ -7263,6 +7282,8 @@
           "<\"POST /api/observability/slos\", ",
           "TypeC",
           "<{ body: ",
+          "IntersectionC",
+          "<[",
           "TypeC",
           "<{ name: ",
           "StringC",
@@ -7360,7 +7381,13 @@
           "TypeC",
           "<{ target: ",
           "NumberC",
-          "; }>; }>; }>, ",
+          "; }>; }>, ",
+          "PartialC",
+          "<{ settings: ",
+          "PartialC",
+          "<{ destination_index: ",
+          "StringC",
+          "; }>; }>]>; }>, ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -7422,7 +7449,7 @@
         "label": "ObservabilityConfig",
         "description": [],
         "signature": [
-          "{ readonly unsafe: Readonly<{} & { slo: Readonly<{} & { enabled: boolean; }>; }>; readonly annotations: Readonly<{} & { index: string; enabled: boolean; }>; }"
+          "{ readonly unsafe: Readonly<{} & { slo: Readonly<{} & { enabled: boolean; }>; alertDetails: Readonly<{} & { enabled: boolean; }>; }>; readonly annotations: Readonly<{} & { index: string; enabled: boolean; }>; }"
         ],
         "path": "x-pack/plugins/observability/server/index.ts",
         "deprecated": false,
@@ -7441,6 +7468,8 @@
           "<\"POST /api/observability/slos\", ",
           "TypeC",
           "<{ body: ",
+          "IntersectionC",
+          "<[",
           "TypeC",
           "<{ name: ",
           "StringC",
@@ -7538,7 +7567,13 @@
           "TypeC",
           "<{ target: ",
           "NumberC",
-          "; }>; }>; }>, ",
+          "; }>; }>, ",
+          "PartialC",
+          "<{ settings: ",
+          "PartialC",
+          "<{ destination_index: ",
+          "StringC",
+          "; }>; }>]>; }>, ",
           {
             "pluginId": "observability",
             "scope": "server",
