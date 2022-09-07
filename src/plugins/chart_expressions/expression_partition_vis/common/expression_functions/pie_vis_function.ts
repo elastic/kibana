@@ -7,14 +7,8 @@
  */
 
 import { Position } from '@elastic/charts';
-import {
-  getColumnByAccessor,
-  prepareLogTable,
-  validateAccessor,
-} from '@kbn/visualizations-plugin/common/utils';
+import { prepareLogTable, validateAccessor } from '@kbn/visualizations-plugin/common/utils';
 import { DEFAULT_LEGEND_SIZE, LegendSize } from '@kbn/visualizations-plugin/common/constants';
-import { Datatable, DatatableColumn, DatatableRow } from '@kbn/expressions-plugin/common';
-import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
 import { EmptySizeRatios, LegendDisplay, PartitionVisParams } from '../types/expression_renderers';
 import { ChartTypes, PieVisExpressionFunctionDefinition } from '../types';
 import {
@@ -24,87 +18,7 @@ import {
   PARTITION_VIS_RENDERER_NAME,
 } from '../constants';
 import { errors, strings } from './i18n';
-
-export const collapseMetrics = (
-  table: Datatable,
-  bucketAccessors: Array<string | ExpressionValueVisDimension> = [],
-  metricAccessors: Array<string | ExpressionValueVisDimension>
-): {
-  table: Datatable;
-  metricAccessor: string | ExpressionValueVisDimension;
-  bucketAccessors: Array<string | ExpressionValueVisDimension>;
-} => {
-  if (metricAccessors.length < 2) {
-    return {
-      table,
-      metricAccessor: metricAccessors[0],
-      bucketAccessors,
-    };
-  }
-
-  const bucketColumns = bucketAccessors
-    ?.map((accessor) => getColumnByAccessor(accessor, table.columns))
-    .filter(Boolean) as DatatableColumn[];
-
-  const metricColumns = metricAccessors
-    ?.map((accessor) => getColumnByAccessor(accessor, table.columns))
-    .filter(Boolean) as DatatableColumn[];
-
-  const transposedRows: DatatableRow[] = [];
-
-  const [priorBucketColumns, finalBucketColumn] = [
-    bucketColumns.slice(0, bucketColumns.length - 1),
-    bucketColumns[bucketColumns.length - 1],
-  ];
-
-  const nameColumnId = 'metric-name';
-  const valueColumnId = 'value';
-
-  table.rows.forEach((row) => {
-    metricColumns.forEach((metricCol) => {
-      const newRow: DatatableRow = {};
-
-      priorBucketColumns.forEach(({ id }) => {
-        newRow[id] = row[id];
-      });
-
-      newRow[nameColumnId] = finalBucketColumn
-        ? `${row[finalBucketColumn.id]} - ${metricCol.name}`
-        : metricCol.name;
-      newRow[valueColumnId] = row[metricCol.id];
-
-      transposedRows.push(newRow);
-    });
-  });
-
-  const transposedColumns: DatatableColumn[] = [
-    ...priorBucketColumns,
-    {
-      id: nameColumnId,
-      name: nameColumnId,
-      meta: {
-        type: 'string',
-      },
-    },
-    {
-      id: valueColumnId,
-      name: valueColumnId,
-      meta: {
-        type: 'number',
-      },
-    },
-  ];
-
-  return {
-    metricAccessor: valueColumnId,
-    bucketAccessors: [...priorBucketColumns.map(({ id }) => id), nameColumnId],
-    table: {
-      type: 'datatable',
-      columns: transposedColumns,
-      rows: transposedRows,
-    },
-  };
-};
+import { collapseMetricColumns } from '../utils';
 
 export const pieVisFunction = (): PieVisExpressionFunctionDefinition => ({
   name: PIE_VIS_EXPRESSION_NAME,
@@ -236,7 +150,7 @@ export const pieVisFunction = (): PieVisExpressionFunctionDefinition => ({
       args.splitRow.forEach((splitRow) => validateAccessor(splitRow, context.columns));
     }
 
-    const { table, metricAccessor, bucketAccessors } = collapseMetrics(
+    const { table, metricAccessor, bucketAccessors } = collapseMetricColumns(
       context,
       args.buckets,
       args.metrics
