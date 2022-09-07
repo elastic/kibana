@@ -9,5 +9,9 @@ node scripts/generate packages_build_manifest
 check_for_changed_files 'node scripts/generate packages_build_manifest' true
 
 echo --- Check Codeowners Manifest
-node scripts/generate codeowners
-check_for_changed_files 'node scripts/generate codeowners' true
+if [ -f ".github/CODEOWNERS" ]; then
+  node scripts/generate codeowners
+  check_for_changed_files 'node scripts/generate codeowners' true
+else
+  echo "skipping, no existing .github/CODEOWNERS file found"
+fi
