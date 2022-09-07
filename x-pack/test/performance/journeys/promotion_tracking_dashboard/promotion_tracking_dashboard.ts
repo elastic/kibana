@@ -48,7 +48,9 @@ export default function ({ getService }: FtrProviderContext) {
           },
           {
             name: 'Wait for visualization animations to finish',
-            handler: async ({ page }) => await waitForVisualizations(page, 1),
+            handler: async ({ page }) => {
+              await waitForVisualizations(page, 1);
+            },
           },
         ],
         {
