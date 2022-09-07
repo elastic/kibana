@@ -24,7 +24,7 @@ import {
   MetricAggregationColumnWithoutSpecialParams,
 } from './metric';
 import { SUPPORTED_METRICS } from './supported_metrics';
-import { CommonColumnConverterArgs } from './types';
+import { CommonColumnConverterArgs, ParentPipelineMetric } from './types';
 
 export type ParentPipelineAggColumn = MovingAverageColumn | DerivativeColumn | CumulativeSumColumn;
 
@@ -33,11 +33,6 @@ export const convertToMovingAverageParams = (
 ): MovingAverageParams => ({
   window: agg.aggParams!.window ?? 0,
 });
-
-export type ParentPipelineMetric =
-  | METRIC_TYPES.CUMULATIVE_SUM
-  | METRIC_TYPES.DERIVATIVE
-  | METRIC_TYPES.MOVING_FN;
 
 export const convertToParentPipelineAggColumns = (
   { agg, dataView }: CommonColumnConverterArgs<ParentPipelineMetric>,

@@ -13,6 +13,7 @@ import { DataViewFieldBase } from '@kbn/es-query';
 import { SchemaConfig } from '../../types';
 import { Column } from '../types';
 import { Column as ColumnWithMeta, SiblingPipelineMetric } from './convert/types';
+import { MetricsWithoutSpecialParams } from './convert/metric';
 
 type UnwrapArray<T> = T extends Array<infer P> ? P : T;
 
@@ -73,10 +74,64 @@ const SIBBLING_PIPELINE_AGGS: string[] = [
   METRIC_TYPES.MIN_BUCKET,
 ];
 
+const PARENT_PIPELINE_AGGS: string[] = [
+  METRIC_TYPES.CUMULATIVE_SUM,
+  METRIC_TYPES.DERIVATIVE,
+  METRIC_TYPES.MOVING_FN,
+];
+
+const AGGS_WITHOUT_SPECIAL_RARAMS: string[] = [
+  METRIC_TYPES.AVG,
+  METRIC_TYPES.COUNT,
+  METRIC_TYPES.MAX,
+  METRIC_TYPES.MIN,
+  METRIC_TYPES.SUM,
+  METRIC_TYPES.MEDIAN,
+  METRIC_TYPES.CARDINALITY,
+  METRIC_TYPES.VALUE_COUNT,
+];
+
+const PIPELINE_AGGS: string[] = [...SIBBLING_PIPELINE_AGGS, ...PARENT_PIPELINE_AGGS];
+
 export const isSiblingPipeline = (
   metric: SchemaConfig
 ): metric is SchemaConfig<SiblingPipelineMetric> => {
   return SIBBLING_PIPELINE_AGGS.includes(metric.aggType);
+};
+
+export const isPipeline = (
+  metric: SchemaConfig
+): metric is
+  | SchemaConfig<METRIC_TYPES.CUMULATIVE_SUM>
+  | SchemaConfig<METRIC_TYPES.DERIVATIVE>
+  | SchemaConfig<METRIC_TYPES.MOVING_FN>
+  | SchemaConfig<METRIC_TYPES.AVG_BUCKET>
+  | SchemaConfig<METRIC_TYPES.MAX_BUCKET>
+  | SchemaConfig<METRIC_TYPES.MIN_BUCKET>
+  | SchemaConfig<METRIC_TYPES.SUM_BUCKET> => {
+  return PIPELINE_AGGS.includes(metric.aggType);
+};
+
+export const isMetricAggWithoutParams = (
+  metric: SchemaConfig
+): metric is SchemaConfig<MetricsWithoutSpecialParams> => {
+  return AGGS_WITHOUT_SPECIAL_RARAMS.includes(metric.aggType);
+};
+
+export const isPercentileAgg = (
+  metric: SchemaConfig
+): metric is SchemaConfig<METRIC_TYPES.PERCENTILES> => {
+  return metric.aggType === METRIC_TYPES.PERCENTILES;
+};
+
+export const isPercentileRankAgg = (
+  metric: SchemaConfig
+): metric is SchemaConfig<METRIC_TYPES.PERCENTILE_RANKS> => {
+  return metric.aggType === METRIC_TYPES.PERCENTILE_RANKS;
+};
+
+export const isStdDevAgg = (metric: SchemaConfig): metric is SchemaConfig<METRIC_TYPES.STD_DEV> => {
+  return metric.aggType === METRIC_TYPES.STD_DEV;
 };
 
 export const getCutomBucketsFromSiblingAggs = (metrics: SchemaConfig[]) => {
