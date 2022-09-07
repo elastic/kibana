@@ -197,7 +197,7 @@ export const createPackagePolicyHandler: FleetRequestHandler<
     let newPackagePolicy: NewPackagePolicy;
     if (isSimplifiedCreatePackagePolicyRequest(newPolicy)) {
       if (!pkg) {
-        throw new Error('Package is mandatory');
+        throw new Error('Package is required');
       }
       const pkgInfo = await getPackageInfo({
         savedObjectsClient: soClient,
@@ -277,7 +277,7 @@ export const updatePackagePolicyHandler: RequestHandler<
     isSimplifiedCreatePackagePolicyRequest(body as unknown as SimplifiedPackagePolicy)
   ) {
     if (!pkg) {
-      throw new Error('package is mandatory');
+      throw new Error('package is required');
     }
     const pkgInfo = await getPackageInfo({
       savedObjectsClient: soClient,

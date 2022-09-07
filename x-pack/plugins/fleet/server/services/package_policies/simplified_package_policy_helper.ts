@@ -11,6 +11,7 @@ import type {
   NewPackagePolicyInputStream,
   PackagePolicyConfigRecord,
 } from '../../../common/types';
+import { PackagePolicyValidationError } from '../../errors';
 import type { NewPackagePolicy, PackageInfo } from '../../types';
 
 type SimplifiedVars = Record<string, string | string[] | boolean | number | number[] | null>;
@@ -49,7 +50,7 @@ function assignVariables(
 ) {
   Object.entries(userProvidedVars).forEach(([varKey, varValue]) => {
     if (!varsRecord || !varsRecord[varKey]) {
-      throw new Error(`Variable ${ctxMessage}:${varKey} not found`);
+      throw new PackagePolicyValidationError(`Variable ${ctxMessage}:${varKey} not found`);
     }
 
     varsRecord[varKey].value = varValue;
@@ -80,7 +81,6 @@ export function simplifiedPackagePolicytoNewPackagePolicy(
 
   // Build a input and streams Map to easily find package policy stream
   const inputMap: InputMap = new Map();
-  // disable everything or use default?
   packagePolicy.inputs.forEach((input) => {
     const streamMap: StreamsMap = new Map();
     input.streams.forEach((stream) => {
@@ -98,7 +98,7 @@ export function simplifiedPackagePolicytoNewPackagePolicy(
 
     const { input: packagePolicyInput, streams: streamsMap } = inputMap.get(inputId) ?? {};
     if (!packagePolicyInput || !streamsMap) {
-      throw new Error(`Input not found: ${inputId}`);
+      throw new PackagePolicyValidationError(`Input not found: ${inputId}`);
     }
 
     if (enabled === false) {
@@ -115,7 +115,7 @@ export function simplifiedPackagePolicytoNewPackagePolicy(
       const { enabled: streamEnabled, vars: streamsLevelVars } = streamVal;
       const packagePolicyStream = streamsMap.get(streamId);
       if (!packagePolicyStream) {
-        throw new Error(`Stream not found ${inputId}: ${streamId}`);
+        throw new PackagePolicyValidationError(`Stream not found ${inputId}: ${streamId}`);
       }
 
       if (streamEnabled === false) {
