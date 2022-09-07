@@ -7,6 +7,7 @@
  */
 import { service } from './service';
 import { browser } from './browser';
+import { serverless } from './serverless';
 import { getTransactionMetrics } from './processors/get_transaction_metrics';
 import { getSpanDestinationMetrics } from './processors/get_span_destination_metrics';
 import { getChromeUserAgentDefaults } from './defaults/get_chrome_user_agent_defaults';
@@ -27,6 +28,7 @@ export const apm = {
   getApmWriteTargets,
   ApmSynthtraceEsClient,
   ApmSynthtraceKibanaClient,
+  serverless,
 };
 
 export type { ApmSynthtraceEsClient, ApmException };
