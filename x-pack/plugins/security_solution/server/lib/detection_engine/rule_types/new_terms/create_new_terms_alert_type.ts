@@ -29,7 +29,11 @@ import {
 import type { SignalSource } from '../../signals/types';
 import { validateIndexPatterns } from '../utils';
 import { parseDateString, validateHistoryWindowStart } from './utils';
-import { addToSearchAfterReturn, createSearchAfterReturnType } from '../../signals/utils';
+import {
+  addToSearchAfterReturn,
+  createSearchAfterReturnType,
+  logUnprocessedExceptionsWarnings,
+} from '../../signals/utils';
 
 export const createNewTermsAlertType = (
   createOptions: CreateRuleOptions
@@ -109,13 +113,7 @@ export const createNewTermsAlertType = (
         from: params.from,
       });
 
-      if (unprocessedExceptions.length !== 0) {
-        ruleExecutionLogger.warn(
-          `The following exceptions won't be applied to rule execution: ${JSON.stringify(
-            unprocessedExceptions
-          )}`
-        );
-      }
+      logUnprocessedExceptionsWarnings(unprocessedExceptions, ruleExecutionLogger);
 
       const esFilter = await getFilter({
         filters: params.filters,

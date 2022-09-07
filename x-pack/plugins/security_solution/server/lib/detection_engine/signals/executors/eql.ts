@@ -24,7 +24,12 @@ import type {
   SearchAfterAndBulkCreateReturnType,
   SignalSource,
 } from '../types';
-import { addToSearchAfterReturn, createSearchAfterReturnType, makeFloatString } from '../utils';
+import {
+  addToSearchAfterReturn,
+  createSearchAfterReturnType,
+  makeFloatString,
+  logUnprocessedExceptionsWarnings,
+} from '../utils';
 import { buildReasonMessageForEqlAlert } from '../reason_formatters';
 import type { CompleteRule, EqlRuleParams } from '../../schemas/rule_schemas';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
@@ -87,13 +92,7 @@ export const eqlExecutor = async ({
     });
 
     ruleExecutionLogger.debug(`EQL query request: ${JSON.stringify(request)}`);
-    if (unprocessedExceptions.length !== 0) {
-      ruleExecutionLogger.warn(
-        `The following exceptions won't be applied to rule execution: ${JSON.stringify(
-          unprocessedExceptions
-        )}`
-      );
-    }
+    logUnprocessedExceptionsWarnings(unprocessedExceptions, ruleExecutionLogger);
 
     const eqlSignalSearchStart = performance.now();
 

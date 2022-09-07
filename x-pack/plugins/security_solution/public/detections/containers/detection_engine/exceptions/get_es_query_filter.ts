@@ -18,7 +18,7 @@ import { KibanaServices } from '../../../../common/lib/kibana';
 import type { Query, Index } from '../../../../../common/detection_engine/schemas/common';
 import type { ESBoolQuery } from '../../../../../common/typed_json';
 
-export const getQueryFilter = async (
+export const getEsQueryFilter = async (
   query: Query,
   language: Language,
   filters: unknown,

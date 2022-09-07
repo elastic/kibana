@@ -31,7 +31,11 @@ import type {
   ThresholdAlertState,
   WrapHits,
 } from '../types';
-import { addToSearchAfterReturn, createSearchAfterReturnType } from '../utils';
+import {
+  addToSearchAfterReturn,
+  createSearchAfterReturnType,
+  logUnprocessedExceptionsWarnings,
+} from '../utils';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
 import { buildThresholdSignalHistory } from '../threshold/build_signal_history';
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
@@ -77,13 +81,7 @@ export const thresholdExecutor = async ({
   const ruleParams = completeRule.ruleParams;
 
   return withSecuritySpan('thresholdExecutor', async () => {
-    if (unprocessedExceptions.length !== 0) {
-      ruleExecutionLogger.warn(
-        `The following exceptions won't be applied to rule execution: ${JSON.stringify(
-          unprocessedExceptions
-        )}`
-      );
-    }
+    logUnprocessedExceptionsWarnings(unprocessedExceptions, ruleExecutionLogger);
 
     // Get state or build initial state (on upgrade)
     const { signalHistory, searchErrors: previousSearchErrors } = state.initialized
