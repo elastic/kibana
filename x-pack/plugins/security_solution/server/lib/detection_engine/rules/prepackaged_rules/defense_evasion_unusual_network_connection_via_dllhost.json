@@ -18,6 +18,38 @@
     "https://www.volexity.com/blog/2021/05/27/suspected-apt29-operation-launches-election-fraud-themed-phishing-campaigns/",
     "https://www.iana.org/assignments/iana-ipv4-special-registry/iana-ipv4-special-registry.xhtml"
   ],
+  "required_fields": [
+    {
+      "ecs": true,
+      "name": "destination.ip",
+      "type": "ip"
+    },
+    {
+      "ecs": true,
+      "name": "event.type",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "host.id",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.args_count",
+      "type": "long"
+    },
+    {
+      "ecs": true,
+      "name": "process.entity_id",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.name",
+      "type": "keyword"
+    }
+  ],
   "risk_score": 47,
   "rule_id": "c7894234-7814-44c2-92a9-f7d851ea246a",
   "severity": "medium",
@@ -39,12 +71,12 @@
       "technique": [
         {
           "id": "T1218",
-          "name": "Signed Binary Proxy Execution",
+          "name": "System Binary Proxy Execution",
           "reference": "https://attack.mitre.org/techniques/T1218/"
         }
       ]
     }
   ],
   "type": "eql",
-  "version": 2
+  "version": 4
 }

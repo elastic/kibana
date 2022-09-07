@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-/* eslint-disable @kbn/eslint/no-restricted-paths */
-
-import {
+import type {
   ExecutorSubActionPushParams,
   MappingConfigType,
 } from '@kbn/actions-plugin/server/builtin_action_types/swimlane/types';

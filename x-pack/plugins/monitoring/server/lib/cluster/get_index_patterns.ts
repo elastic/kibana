@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { LegacyServer } from '../../types';
 import { prefixIndexPatternWithCcs } from '../../../common/ccs_utils';
 import {
   INDEX_PATTERN_ELASTICSEARCH,
@@ -14,20 +13,41 @@ import {
   INDEX_PATTERN_LOGSTASH,
   INDEX_PATTERN_BEATS,
   INDEX_ALERTS,
-  DS_INDEX_PATTERN_TYPES,
+  DS_INDEX_PATTERN_LOGS,
   DS_INDEX_PATTERN_METRICS,
   INDEX_PATTERN_TYPES,
   INDEX_PATTERN_ENTERPRISE_SEARCH,
   CCS_REMOTE_PATTERN,
 } from '../../../common/constants';
-import { MonitoringConfig } from '../..';
+import { MonitoringConfig } from '../../config';
+
+interface CommonIndexPatternArgs {
+  config: MonitoringConfig;
+  moduleType?: INDEX_PATTERN_TYPES;
+  dataset?: string;
+  namespace?: string;
+  ccs?: string;
+  ecsLegacyOnly?: boolean;
+}
+
+// moduleType is mandatory when type is not informed or when type=metrics
+interface MetricIndexPatternArgs extends CommonIndexPatternArgs {
+  type?: typeof DS_INDEX_PATTERN_METRICS;
+  moduleType: INDEX_PATTERN_TYPES;
+}
+
+// moduleType is optional when type=logs
+interface LogsIndexPatternArgs extends CommonIndexPatternArgs {
+  type: typeof DS_INDEX_PATTERN_LOGS;
+}
+
+type IndexPatternArgs = MetricIndexPatternArgs | LogsIndexPatternArgs;
 
 export function getIndexPatterns(
-  server: LegacyServer,
+  config: MonitoringConfig,
   additionalPatterns: Record<string, string> = {},
   ccs: string = CCS_REMOTE_PATTERN
 ) {
-  const config = server.config;
   const esIndexPattern = prefixIndexPatternWithCcs(config, INDEX_PATTERN_ELASTICSEARCH, ccs);
   const kbnIndexPattern = prefixIndexPatternWithCcs(config, INDEX_PATTERN_KIBANA, ccs);
   const lsIndexPattern = prefixIndexPatternWithCcs(config, INDEX_PATTERN_LOGSTASH, ccs);
@@ -63,7 +83,7 @@ export function getLegacyIndexPattern({
   config,
   ccs,
 }: {
-  moduleType: INDEX_PATTERN_TYPES;
+  moduleType: INDEX_PATTERN_TYPES | 'filebeat';
   ecsLegacyOnly?: boolean;
   config: MonitoringConfig;
   ccs?: string;
@@ -86,6 +106,9 @@ export function getLegacyIndexPattern({
     case 'enterprisesearch':
       indexPattern = INDEX_PATTERN_ENTERPRISE_SEARCH;
       break;
+    case 'filebeat':
+      indexPattern = config.ui.logs.index;
+      break;
     default:
       throw new Error(`invalid module type to create index pattern: ${moduleType}`);
   }
@@ -96,44 +119,37 @@ export function getDsIndexPattern({
   type = DS_INDEX_PATTERN_METRICS,
   moduleType,
   dataset,
-  namespace = '*',
+  namespace,
   config,
   ccs,
-}: {
-  type?: string;
-  dataset?: string;
-  moduleType: INDEX_PATTERN_TYPES;
-  namespace?: string;
-  config: MonitoringConfig;
-  ccs?: string;
-}): string {
-  let datasetsPattern = '';
-  if (dataset) {
-    datasetsPattern = `${moduleType}.${dataset}`;
-  } else {
-    datasetsPattern = `${moduleType}.*`;
-  }
-  return prefixIndexPatternWithCcs(config, `${type}-${datasetsPattern}-${namespace}`, ccs);
+}: CommonIndexPatternArgs & { type?: string }): string {
+  const datasetsPattern = `${moduleType ?? '*'}.${dataset ?? '*'}`;
+  return prefixIndexPatternWithCcs(config, `${type}-${datasetsPattern}-${namespace ?? '*'}`, ccs);
 }
 
-export function getNewIndexPatterns({
-  config,
-  moduleType,
-  type = DS_INDEX_PATTERN_METRICS,
-  dataset,
-  namespace = '*',
-  ccs,
-  ecsLegacyOnly,
-}: {
-  config: MonitoringConfig;
-  moduleType: INDEX_PATTERN_TYPES;
-  type?: DS_INDEX_PATTERN_TYPES;
-  dataset?: string;
-  namespace?: string;
-  ccs?: string;
-  ecsLegacyOnly?: boolean;
-}): string {
-  const legacyIndexPattern = getLegacyIndexPattern({ moduleType, ecsLegacyOnly, config, ccs });
-  const dsIndexPattern = getDsIndexPattern({ type, moduleType, dataset, namespace, config, ccs });
+export function getNewIndexPatterns(indexPattern: IndexPatternArgs): string {
+  const legacyModuleType = isLogIndexPattern(indexPattern) ? 'filebeat' : indexPattern.moduleType;
+  const { config, ccs, dataset, ecsLegacyOnly, moduleType, namespace, type } = indexPattern;
+
+  const legacyIndexPattern = getLegacyIndexPattern({
+    moduleType: legacyModuleType,
+    ecsLegacyOnly,
+    config,
+    ccs,
+  });
+
+  const dsIndexPattern = getDsIndexPattern({
+    type,
+    moduleType,
+    dataset,
+    namespace,
+    config,
+    ccs,
+  });
+
   return `${legacyIndexPattern},${dsIndexPattern}`;
 }
+
+const isLogIndexPattern = (args: IndexPatternArgs): args is LogsIndexPatternArgs => {
+  return (args as LogsIndexPatternArgs).type === 'logs';
+};

@@ -149,7 +149,9 @@ function expectApisToCallServicesSuccessfully(
     await expect(agentClient.listAgents({ showInactive: true })).resolves.toEqual(
       'getAgentsByKuery success'
     );
-    expect(mockGetAgentsByKuery).toHaveBeenCalledWith(mockEsClient, { showInactive: true });
+    expect(mockGetAgentsByKuery).toHaveBeenCalledWith(mockEsClient, {
+      showInactive: true,
+    });
   });
 
   test('client.getAgent calls getAgentById and returns results', async () => {

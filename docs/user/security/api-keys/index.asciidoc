@@ -45,6 +45,11 @@ curl --location --request GET 'http://localhost:5601/api/security/role' \
 --header 'kbn-xsrf: true' \
 --header 'Authorization: ApiKey aVZlLUMzSUJuYndxdDJvN0k1bU46aGxlYUpNS2lTa2FKeVZua1FnY1VEdw==' \
 
+[IMPORTANT]
+============================================================================
+API keys are intended for programmatic access to {kib} and {es}. Do not use API keys to authenticate access via a web browser.
+============================================================================
+
 [float]
 [[view-api-keys]]
 === View and delete API keys

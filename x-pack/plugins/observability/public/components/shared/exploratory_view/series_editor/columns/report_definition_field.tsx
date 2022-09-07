@@ -10,11 +10,11 @@ import { isEmpty } from 'lodash';
 import { ExistsFilter, PhraseFilter } from '@kbn/es-query';
 import { ESFilter } from '@kbn/core/types/elasticsearch';
 import { PersistableFilter } from '@kbn/lens-plugin/common';
+import { ALL_VALUES_SELECTED } from '../../configurations/constants/url_constants';
 import FieldValueSuggestions from '../../../field_value_suggestions';
 import { useAppDataViewContext } from '../../hooks/use_app_data_view';
 import { buildPhrasesFilter } from '../../configurations/utils';
 import { SeriesConfig, SeriesUrl } from '../../types';
-import { ALL_VALUES_SELECTED } from '../../../field_value_suggestions/field_value_combobox';
 
 interface Props {
   seriesId: number;

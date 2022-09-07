@@ -6,13 +6,13 @@
  */
 
 import { isEmpty } from 'lodash/fp';
-import { EuiFlexItem, EuiPanel } from '@elastic/eui';
+import { EuiPanel } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo, useCallback, useState, useEffect } from 'react';
 
 import { DEFAULT_NUMBER_FORMAT, APP_UI_ID } from '../../../../common/constants';
-import { ESQuery } from '../../../../common/typed_json';
+import type { ESQuery } from '../../../../common/typed_json';
 import { HeaderSection } from '../../../common/components/header_section';
 import { useUiSetting$, useKibana } from '../../../common/lib/kibana';
 import { manageQuery } from '../../../common/components/page/manage_query';
@@ -23,7 +23,7 @@ import {
 import { getOverviewNetworkStats, OverviewNetworkStats } from '../overview_network_stats';
 import { getNetworkUrl, useFormatUrl } from '../../../common/components/link_to';
 import { InspectButtonContainer } from '../../../common/components/inspect';
-import { GlobalTimeArgs } from '../../../common/containers/use_global_time';
+import type { GlobalTimeArgs } from '../../../common/containers/use_global_time';
 import { SecurityPageName } from '../../../app/types';
 import { LinkButton } from '../../../common/components/links';
 import { useQueryToggle } from '../../../common/containers/query_toggle';
@@ -135,35 +135,32 @@ const OverviewNetworkComponent: React.FC<OverviewNetworkProps> = ({
   );
 
   return (
-    <EuiFlexItem>
-      <InspectButtonContainer show={toggleStatus}>
-        <EuiPanel hasBorder data-test-subj="overview-network-query">
-          <>
-            <HeaderSection
-              id={OverviewNetworkQueryId}
-              height={!toggleStatus ? 30 : undefined}
-              subtitle={subtitle}
-              title={title}
-              toggleStatus={toggleStatus}
-              toggleQuery={toggleQuery}
-              isInspectDisabled={filterQuery === undefined}
-            >
-              {networkPageButton}
-            </HeaderSection>
-            {toggleStatus && (
-              <OverviewNetworkStatsManage
-                loading={loading}
-                data={overviewNetwork}
-                id={id}
-                inspect={inspect}
-                setQuery={setQuery}
-                refetch={refetch}
-              />
-            )}
-          </>
-        </EuiPanel>
-      </InspectButtonContainer>
-    </EuiFlexItem>
+    <InspectButtonContainer show={toggleStatus}>
+      <EuiPanel hasBorder data-test-subj="overview-network-query">
+        <>
+          <HeaderSection
+            id={OverviewNetworkQueryId}
+            subtitle={subtitle}
+            title={title}
+            toggleStatus={toggleStatus}
+            toggleQuery={toggleQuery}
+            isInspectDisabled={filterQuery === undefined}
+          >
+            {networkPageButton}
+          </HeaderSection>
+          {toggleStatus && (
+            <OverviewNetworkStatsManage
+              loading={loading}
+              data={overviewNetwork}
+              id={id}
+              inspect={inspect}
+              setQuery={setQuery}
+              refetch={refetch}
+            />
+          )}
+        </>
+      </EuiPanel>
+    </InspectButtonContainer>
   );
 };
 

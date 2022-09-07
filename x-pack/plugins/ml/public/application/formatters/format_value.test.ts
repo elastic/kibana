@@ -19,6 +19,7 @@ describe('ML - formatValue formatter', () => {
     bucket_span: 900,
     detector_index: 0,
     is_interim: false,
+    // '2018-06-28 03:00' in UTC
     timestamp: 1530155700000,
     by_field_name: 'clientip',
     by_field_value: '65.55.215.39',
@@ -51,12 +52,15 @@ describe('ML - formatValue formatter', () => {
     moment.tz.setDefault('Browser');
   });
 
-  // For time_of_day and time_of_week test values which are offsets in seconds
-  // from UTC start of week / day are formatted correctly using the test timezone.
+  // For time_of_week test that values which are offsets seconds after a whole number of weeks after 1/1/1970 in UTC
+  // are formatted correctly using the test timezone.
   test('correctly formats time_of_week value from numeric input', () => {
-    expect(formatValue(359739, 'time_of_week', undefined, timeOfWeekRecord)).toBe('Wed 23:55');
+    // ~100h offset
+    expect(formatValue(359739, 'time_of_week', undefined, timeOfWeekRecord)).toBe('Sun 23:55');
   });
 
+  // For time_of_day test values which are offsets in seconds
+  // from UTC start of day are formatted correctly using the test timezone.
   test('correctly formats time_of_day value from numeric input', () => {
     expect(formatValue(73781, 'time_of_day', undefined, timeOfDayRecord)).toBe('15:29');
   });
@@ -72,7 +76,7 @@ describe('ML - formatValue formatter', () => {
   });
 
   test('correctly formats time_of_week value from array input', () => {
-    expect(formatValue([359739], 'time_of_week', undefined, timeOfWeekRecord)).toBe('Wed 23:55');
+    expect(formatValue([359739], 'time_of_week', undefined, timeOfWeekRecord)).toBe('Sun 23:55');
   });
 
   test('correctly formats time_of_day value from array input', () => {

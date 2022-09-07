@@ -5,23 +5,33 @@
  * 2.0.
  */
 
-import React, { FC, useContext, useEffect, useMemo } from 'react';
-import { createPortalNode, InPortal } from 'react-reverse-portal';
+import React, { FC, useContext, useEffect } from 'react';
+import { InPortal, OutPortal } from 'react-reverse-portal';
+import { EuiLoadingContent } from '@elastic/eui';
 import { MlPageControlsContext } from '../ml_page/ml_page';
 
+/**
+ * Component for setting the page header content.
+ */
 export const MlPageHeader: FC = ({ children }) => {
-  const { setPageTitle } = useContext(MlPageControlsContext);
-
-  const portalNode = useMemo(() => createPortalNode(), []);
+  const { headerPortal, setIsHeaderMounted } = useContext(MlPageControlsContext);
 
   useEffect(() => {
-    setPageTitle(children);
-
+    setIsHeaderMounted(true);
     return () => {
-      portalNode.unmount();
-      setPageTitle(undefined);
+      setIsHeaderMounted(false);
     };
-  }, [portalNode, setPageTitle]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  return <InPortal node={portalNode}>{children}</InPortal>;
+  return <InPortal node={headerPortal}>{children}</InPortal>;
+};
+
+/**
+ * Renders content of the {@link MlPageHeader}
+ */
+export const MlPageHeaderRenderer: FC = () => {
+  const { headerPortal, isHeaderMounted } = useContext(MlPageControlsContext);
+
+  return isHeaderMounted ? <OutPortal node={headerPortal} /> : <EuiLoadingContent lines={1} />;
 };

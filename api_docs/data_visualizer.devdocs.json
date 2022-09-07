@@ -6,6 +6,55 @@
     "interfaces": [
       {
         "parentPluginId": "dataVisualizer",
+        "id": "def-public.GetAdditionalLinksParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "GetAdditionalLinksParams",
+        "description": [],
+        "path": "x-pack/plugins/data_visualizer/public/application/common/components/results_links/results_links.tsx",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "dataVisualizer",
+            "id": "def-public.GetAdditionalLinksParams.dataViewId",
+            "type": "string",
+            "tags": [],
+            "label": "dataViewId",
+            "description": [],
+            "path": "x-pack/plugins/data_visualizer/public/application/common/components/results_links/results_links.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dataVisualizer",
+            "id": "def-public.GetAdditionalLinksParams.dataViewTitle",
+            "type": "string",
+            "tags": [],
+            "label": "dataViewTitle",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/data_visualizer/public/application/common/components/results_links/results_links.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dataVisualizer",
+            "id": "def-public.GetAdditionalLinksParams.globalState",
+            "type": "Any",
+            "tags": [],
+            "label": "globalState",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/plugins/data_visualizer/public/application/common/components/results_links/results_links.tsx",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dataVisualizer",
         "id": "def-public.IndexDataVisualizerViewProps",
         "type": "Interface",
         "tags": [],
@@ -62,20 +111,20 @@
           },
           {
             "parentPluginId": "dataVisualizer",
-            "id": "def-public.IndexDataVisualizerViewProps.additionalLinks",
+            "id": "def-public.IndexDataVisualizerViewProps.getAdditionalLinks",
             "type": "Array",
             "tags": [],
-            "label": "additionalLinks",
+            "label": "getAdditionalLinks",
             "description": [],
             "signature": [
               {
                 "pluginId": "dataVisualizer",
                 "scope": "public",
                 "docId": "kibDataVisualizerPluginApi",
-                "section": "def-public.ResultLink",
-                "text": "ResultLink"
+                "section": "def-public.GetAdditionalLinks",
+                "text": "GetAdditionalLinks"
               },
-              "[] | undefined"
+              " | undefined"
             ],
             "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/components/index_data_visualizer_view/index_data_visualizer_view.tsx",
             "deprecated": false
@@ -208,10 +257,10 @@
           },
           {
             "parentPluginId": "dataVisualizer",
-            "id": "def-public.ResultLink.dataTestSubj",
+            "id": "def-public.ResultLink.datatestsubj",
             "type": "string",
             "tags": [],
-            "label": "dataTestSubj",
+            "label": "'data-test-subj'",
             "description": [],
             "signature": [
               "string | undefined"
@@ -270,13 +319,21 @@
       },
       {
         "parentPluginId": "dataVisualizer",
-        "id": "def-public.IndexDataVisualizerSpec",
+        "id": "def-public.GetAdditionalLinks",
         "type": "Type",
         "tags": [],
-        "label": "IndexDataVisualizerSpec",
+        "label": "GetAdditionalLinks",
         "description": [],
         "signature": [
-          "React.FunctionComponent<{ additionalLinks: ",
+          "((params: ",
+          {
+            "pluginId": "dataVisualizer",
+            "scope": "public",
+            "docId": "kibDataVisualizerPluginApi",
+            "section": "def-public.GetAdditionalLinksParams",
+            "text": "GetAdditionalLinksParams"
+          },
+          ") => Promise<",
           {
             "pluginId": "dataVisualizer",
             "scope": "public",
@@ -284,7 +341,29 @@
             "section": "def-public.ResultLink",
             "text": "ResultLink"
           },
-          "[]; }>"
+          "[] | undefined>)[]"
+        ],
+        "path": "x-pack/plugins/data_visualizer/public/application/common/components/results_links/results_links.tsx",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dataVisualizer",
+        "id": "def-public.IndexDataVisualizerSpec",
+        "type": "Type",
+        "tags": [],
+        "label": "IndexDataVisualizerSpec",
+        "description": [],
+        "signature": [
+          "React.FunctionComponent<{ getAdditionalLinks?: ",
+          {
+            "pluginId": "dataVisualizer",
+            "scope": "public",
+            "docId": "kibDataVisualizerPluginApi",
+            "section": "def-public.GetAdditionalLinks",
+            "text": "GetAdditionalLinks"
+          },
+          " | undefined; }>"
         ],
         "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/index_data_visualizer.tsx",
         "deprecated": false,
@@ -329,15 +408,15 @@
       "label": "DataVisualizerPluginStart",
       "description": [],
       "signature": [
-        "{ getFileDataVisualizerComponent: () => Promise<() => React.FC<Props>>; getIndexDataVisualizerComponent: () => Promise<() => React.FC<{ additionalLinks: ",
+        "{ getFileDataVisualizerComponent: () => Promise<() => React.FC<Props>>; getIndexDataVisualizerComponent: () => Promise<() => React.FC<{ getAdditionalLinks?: ",
         {
           "pluginId": "dataVisualizer",
           "scope": "public",
           "docId": "kibDataVisualizerPluginApi",
-          "section": "def-public.ResultLink",
-          "text": "ResultLink"
+          "section": "def-public.GetAdditionalLinks",
+          "text": "GetAdditionalLinks"
         },
-        "[]; }>>; getMaxBytesFormatted: () => string; }"
+        " | undefined; }>>; getMaxBytesFormatted: () => string; }"
       ],
       "path": "x-pack/plugins/data_visualizer/public/plugin.ts",
       "deprecated": false,

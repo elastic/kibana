@@ -4,60 +4,108 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useQuery } from 'react-query';
+import { useQuery } from '@tanstack/react-query';
 import { lastValueFrom } from 'rxjs';
-import { IEsSearchResponse } from '@kbn/data-plugin/common';
+import { IKibanaSearchRequest, IKibanaSearchResponse } from '@kbn/data-plugin/common';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { Pagination } from '@elastic/eui';
+import { useContext } from 'react';
+import { number } from 'io-ts';
+import { getAggregationCount, getFindingsCountAggQuery } from '../../utils/utils';
+import { FindingsEsPitContext } from '../../es_pit/findings_es_pit_context';
+import { FINDINGS_REFETCH_INTERVAL_MS } from '../../constants';
 import { useKibana } from '../../../../common/hooks/use_kibana';
 import { showErrorToast } from '../../latest_findings/use_latest_findings';
-import type { CspFinding, FindingsBaseEsQuery, FindingsQueryResult } from '../../types';
+import type { CspFinding, FindingsBaseEsQuery, Sort } from '../../types';
 
 interface UseResourceFindingsOptions extends FindingsBaseEsQuery {
   resourceId: string;
+  from: NonNullable<estypes.SearchRequest['from']>;
+  size: NonNullable<estypes.SearchRequest['size']>;
+  sort: Sort<CspFinding>;
+  enabled: boolean;
 }
 
-export type ResourceFindingsResult = FindingsQueryResult<
-  ReturnType<typeof useResourceFindings>['data'] | undefined,
-  unknown
->;
+export interface ResourceFindingsQuery {
+  pageIndex: Pagination['pageIndex'];
+  pageSize: Pagination['pageSize'];
+  sort: Sort<CspFinding>;
+}
 
-export const getResourceFindingsQuery = ({
-  index,
+type ResourceFindingsRequest = IKibanaSearchRequest<estypes.SearchRequest>;
+type ResourceFindingsResponse = IKibanaSearchResponse<estypes.SearchResponse<CspFinding, Aggs>>;
+
+interface Aggs {
+  count: estypes.AggregationsMultiBucketAggregateBase<estypes.AggregationsStringRareTermsBucketKeys>;
+}
+
+const getResourceFindingsQuery = ({
   query,
   resourceId,
-}: UseResourceFindingsOptions): estypes.SearchRequest => ({
-  index,
+  from,
+  size,
+  pitId,
+  sort,
+}: UseResourceFindingsOptions & { pitId: string }): estypes.SearchRequest => ({
+  from,
+  size,
   body: {
     query: {
       ...query,
       bool: {
         ...query?.bool,
-        filter: [...(query?.bool?.filter || []), { term: { 'resource_id.keyword': resourceId } }],
+        filter: [...(query?.bool?.filter || []), { term: { 'resource.id': resourceId } }],
       },
     },
+    sort: [{ [sort.field]: sort.direction }],
+    pit: { id: pitId },
+    aggs: getFindingsCountAggQuery(),
   },
+  ignore_unavailable: false,
 });
 
-export const useResourceFindings = ({ index, query, resourceId }: UseResourceFindingsOptions) => {
+export const useResourceFindings = (options: UseResourceFindingsOptions) => {
   const {
     data,
     notifications: { toasts },
   } = useKibana().services;
 
+  const { pitIdRef, setPitId } = useContext(FindingsEsPitContext);
+  const params = { ...options, pitId: pitIdRef.current };
+
   return useQuery(
-    ['csp_resource_findings', { index, query, resourceId }],
+    ['csp_resource_findings', { params }],
     () =>
-      lastValueFrom<IEsSearchResponse<CspFinding>>(
-        data.search.search({
-          params: getResourceFindingsQuery({ index, query, resourceId }),
+      lastValueFrom(
+        data.search.search<ResourceFindingsRequest, ResourceFindingsResponse>({
+          params: getResourceFindingsQuery(params),
         })
       ),
     {
-      select: ({ rawResponse: { hits } }) => ({
-        page: hits.hits.map((hit) => hit._source!),
-        total: hits.total as number,
-      }),
-      onError: (err) => showErrorToast(toasts, err),
+      enabled: options.enabled,
+      keepPreviousData: true,
+      select: ({
+        rawResponse: { hits, pit_id: newPitId, aggregations },
+      }: ResourceFindingsResponse) => {
+        if (!aggregations) throw new Error('expected aggregations to exists');
+
+        if (!Array.isArray(aggregations?.count.buckets))
+          throw new Error('expected buckets to be an array');
+
+        return {
+          page: hits.hits.map((hit) => hit._source!),
+          total: number.is(hits.total) ? hits.total : 0,
+          count: getAggregationCount(aggregations.count.buckets),
+          newPitId: newPitId!,
+        };
+      },
+      onError: (err: Error) => showErrorToast(toasts, err),
+      onSuccess: ({ newPitId }) => {
+        setPitId(newPitId);
+      },
+      // Refetching on an interval to ensure the PIT window stays open
+      refetchInterval: FINDINGS_REFETCH_INTERVAL_MS,
+      refetchIntervalInBackground: true,
     }
   );
 };

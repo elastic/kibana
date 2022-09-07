@@ -19,7 +19,7 @@ import {
   EuiPopover,
   EuiToolTip,
 } from '@elastic/eui';
-import { Datatable } from '@kbn/expressions-plugin';
+import { Datatable } from '@kbn/expressions-plugin/common';
 import { downloadMultipleAs } from '@kbn/share-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { IUiSettingsClient } from '@kbn/core/public';

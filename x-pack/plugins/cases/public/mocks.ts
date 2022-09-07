@@ -28,7 +28,16 @@ const hooksMock: jest.Mocked<CasesUiStart['hooks']> = {
 
 const helpersMock: jest.Mocked<CasesUiStart['helpers']> = {
   canUseCases: jest.fn(),
+  getUICapabilities: jest.fn().mockReturnValue({
+    all: false,
+    create: false,
+    read: false,
+    update: false,
+    delete: false,
+    push: false,
+  }),
   getRuleIdFromEvent: jest.fn(),
+  groupAlertsByRule: jest.fn(),
 };
 
 export interface CaseUiClientMock {

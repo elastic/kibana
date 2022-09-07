@@ -23,7 +23,7 @@ import {
 } from '../../../common/api';
 import { CASE_COMMENT_SAVED_OBJECT } from '../../../common/constants';
 
-import { createIncident, getCommentContextFromAttributes } from './utils';
+import { createIncident, getCommentContextFromAttributes, getDurationInSeconds } from './utils';
 import { createCaseError } from '../../common/error';
 import {
   createAlertUpdateRequest,
@@ -50,8 +50,8 @@ function shouldCloseByPush(
 
 const changeAlertsStatusToClose = async (
   caseId: string,
-  caseService: CasesClientArgs['caseService'],
-  alertsService: CasesClientArgs['alertsService']
+  caseService: CasesClientArgs['services']['caseService'],
+  alertsService: CasesClientArgs['services']['alertsService']
 ) => {
   const alertAttachments = (await caseService.getAllCaseComments({
     id: [caseId],
@@ -99,11 +99,13 @@ export const push = async (
 ): Promise<CaseResponse> => {
   const {
     unsecuredSavedObjectsClient,
-    attachmentService,
-    caseService,
-    caseConfigureService,
-    userActionService,
-    alertsService,
+    services: {
+      attachmentService,
+      caseService,
+      caseConfigureService,
+      userActionService,
+      alertsService,
+    },
     actionsClient,
     user,
     logger,
@@ -226,11 +228,18 @@ export const push = async (
                 closed_by: { email, full_name, username },
               }
             : {}),
+          ...(shouldMarkAsClosed
+            ? getDurationInSeconds({
+                closedAt: pushedDate,
+                createdAt: theCase.created_at,
+              })
+            : {}),
           external_service: externalService,
           updated_at: pushedDate,
           updated_by: { username, full_name, email },
         },
         version: myCase.version,
+        refresh: false,
       }),
 
       attachmentService.bulkUpdate({
@@ -245,6 +254,7 @@ export const push = async (
             },
             version: comment.version,
           })),
+        refresh: false,
       }),
     ]);
 
@@ -256,6 +266,7 @@ export const push = async (
         user,
         caseId,
         owner: myCase.attributes.owner,
+        refresh: false,
       });
 
       if (myCase.attributes.settings.syncAlerts) {

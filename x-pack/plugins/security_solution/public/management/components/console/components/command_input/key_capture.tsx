@@ -5,27 +5,22 @@
  * 2.0.
  */
 
-import React, {
-  FormEventHandler,
-  KeyboardEventHandler,
-  memo,
-  MutableRefObject,
-  useCallback,
-  useRef,
-  useState,
-} from 'react';
+import type { FormEventHandler, KeyboardEventHandler, MutableRefObject } from 'react';
+import React, { memo, useCallback, useMemo, useRef, useState } from 'react';
 import { pick } from 'lodash';
 import styled from 'styled-components';
-import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
+import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
 import { useDataTestSubj } from '../../hooks/state_selectors/use_data_test_subj';
 
 const NOOP = () => undefined;
 
 const KeyCaptureContainer = styled.span`
   display: inline-block;
-  position: relative;
+  position: absolute;
   width: 1px;
   height: 1em;
+  left: -110vw;
+  top: -110vh;
   overflow: hidden;
 
   .invisible-input {
@@ -40,11 +35,14 @@ const KeyCaptureContainer = styled.span`
       animation: none !important;
       width: 1ch !important;
       position: absolute;
-      left: -100px;
-      top: -100px;
     }
   }
 `;
+
+interface KeyCaptureFocusInterface {
+  focus: (force?: boolean) => void;
+  blur: () => void;
+}
 
 export interface KeyCaptureProps {
   onCapture: (params: {
@@ -55,7 +53,7 @@ export interface KeyCaptureProps {
     >;
   }) => void;
   onStateChange?: (isCapturing: boolean) => void;
-  focusRef?: MutableRefObject<((force?: boolean) => void) | null>;
+  focusRef?: MutableRefObject<KeyCaptureFocusInterface | null>;
 }
 
 /**
@@ -74,20 +72,51 @@ export const KeyCapture = memo<KeyCaptureProps>(({ onCapture, focusRef, onStateC
   //       call `onCapture()` with it and then set the lastInput state back to an empty string
   const [, setLastInput] = useState('');
   const getTestId = useTestIdGenerator(useDataTestSubj());
+  const inputRef = useRef<HTMLInputElement | null>(null);
+  const blurInputRef = useRef<HTMLInputElement | null>(null);
 
-  const handleBlurAndFocus = useCallback<FormEventHandler>(
+  const [isCapturing, setIsCapturing] = useState(false);
+
+  const handleInputOnBlur = useCallback(() => {
+    setIsCapturing(false);
+
+    if (onStateChange) {
+      onStateChange(false);
+    }
+  }, [onStateChange]);
+
+  const handleInputOnFocus = useCallback<FormEventHandler>(
     (ev) => {
-      if (!onStateChange) {
-        return;
-      }
+      setIsCapturing(true);
 
-      onStateChange(ev.type === 'focus');
+      if (onStateChange) {
+        onStateChange(true);
+      }
     },
     [onStateChange]
   );
 
   const handleOnKeyUp = useCallback<KeyboardEventHandler<HTMLInputElement>>(
     (ev) => {
+      // There is a condition (still not clear how it is actually happening) where the `Enter` key
+      // event from the EuiSelectable component gets captured here by the Input. Its likely due to
+      // the sequence of events between keyup, focus and the Focus trap component having the
+      // `returnFocus` on by default.
+      // To avoid having that key Event from actually being processed, we check for this custom
+      // property on the event and skip processing it if we find it. This property is currently
+      // set by the CommandInputHistory (using EuiSelectable).
+
+      // @ts-expect-error
+      if (!isCapturing || ev._CONSOLE_IGNORE_KEY) {
+        // @ts-expect-error
+        if (ev._CONSOLE_IGNORE_KEY) {
+          // @ts-expect-error
+          ev._CONSOLE_IGNORE_KEY = false;
+        }
+
+        return;
+      }
+
       ev.stopPropagation();
 
       const eventDetails = pick(ev, [
@@ -109,7 +138,7 @@ export const KeyCapture = memo<KeyCaptureProps>(({ onCapture, focusRef, onStateC
         return '';
       });
     },
-    [onCapture]
+    [isCapturing, onCapture]
   );
 
   const handleOnInput = useCallback<FormEventHandler<HTMLInputElement>>((ev) => {
@@ -120,33 +149,44 @@ export const KeyCapture = memo<KeyCaptureProps>(({ onCapture, focusRef, onStateC
     });
   }, []);
 
-  const inputRef = useRef<HTMLInputElement | null>(null);
+  const keyCaptureFocusMethods = useMemo<KeyCaptureFocusInterface>(() => {
+    return {
+      focus: (force: boolean = false) => {
+        // If user selected text and `force` is not true, then don't focus (else they lose selection)
+        if (!force && (window.getSelection()?.toString() ?? '').length > 0) {
+          return;
+        }
 
-  const setFocus = useCallback((force: boolean = false) => {
-    // If user selected text and `force` is not true, then don't focus (else they lose selection)
-    if (!force && (window.getSelection()?.toString() ?? '').length > 0) {
-      return;
-    }
+        inputRef.current?.focus();
+      },
 
-    inputRef.current?.focus();
+      blur: () => {
+        // only blur if the input has focus
+        if (inputRef.current && document.activeElement === inputRef.current) {
+          blurInputRef.current?.focus();
+        }
+      },
+    };
   }, []);
 
   if (focusRef) {
-    focusRef.current = setFocus;
+    focusRef.current = keyCaptureFocusMethods;
   }
 
-  // FIXME:PT probably need to add `aria-` type properties to the input?
   return (
-    <KeyCaptureContainer data-test-subj={getTestId('keyCapture')}>
+    <KeyCaptureContainer data-test-subj={getTestId('keyCapture')} aria-hidden="true" tabIndex={-1}>
+      <input value="" ref={blurInputRef} tabIndex={-1} onChange={NOOP} />
+
       <input
         className="invisible-input"
         data-test-subj={getTestId('keyCapture-input')}
         spellCheck="false"
         value=""
+        tabIndex={-1}
         onInput={handleOnInput}
         onKeyUp={handleOnKeyUp}
-        onBlur={handleBlurAndFocus}
-        onFocus={handleBlurAndFocus}
+        onBlur={handleInputOnBlur}
+        onFocus={handleInputOnFocus}
         onChange={NOOP} // this just silences Jest output warnings
         ref={inputRef}
       />

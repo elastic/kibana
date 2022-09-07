@@ -9,14 +9,15 @@ import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
 import { QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 import { SERVER_APP_ID } from '../../../../../common/constants';
 
-import { queryRuleParams, QueryRuleParams } from '../../schemas/rule_schemas';
+import type { QueryRuleParams } from '../../schemas/rule_schemas';
+import { queryRuleParams } from '../../schemas/rule_schemas';
 import { queryExecutor } from '../../signals/executors/query';
-import { CreateRuleOptions, SecurityAlertType } from '../types';
-
+import type { CreateRuleOptions, SecurityAlertType } from '../types';
+import { validateIndexPatterns } from '../utils';
 export const createQueryAlertType = (
   createOptions: CreateRuleOptions
 ): SecurityAlertType<QueryRuleParams, {}, {}, 'default'> => {
-  const { eventsTelemetry, experimentalFeatures, logger, version } = createOptions;
+  const { eventsTelemetry, experimentalFeatures, version } = createOptions;
   return {
     id: QUERY_RULE_TYPE_ID,
     name: 'Custom Query Rule',
@@ -31,6 +32,17 @@ export const createQueryAlertType = (
             throw new Error('Validation of rule params failed');
           }
           return validated;
+        },
+        /**
+         * validate rule params when rule is bulk edited (update and created in future as well)
+         * returned params can be modified (useful in case of version increment)
+         * @param mutatedRuleParams
+         * @returns mutatedRuleParams
+         */
+        validateMutatedParams: (mutatedRuleParams) => {
+          validateIndexPatterns(mutatedRuleParams.index);
+
+          return mutatedRuleParams;
         },
       },
     },
@@ -50,33 +62,40 @@ export const createQueryAlertType = (
     async executor(execOptions) {
       const {
         runOpts: {
-          buildRuleMessage,
-          bulkCreate,
+          inputIndex,
+          runtimeMappings,
+          completeRule,
+          tuple,
           exceptionItems,
           listClient,
-          completeRule,
+          ruleExecutionLogger,
           searchAfterSize,
-          tuple,
+          bulkCreate,
           wrapHits,
+          primaryTimestamp,
+          secondaryTimestamp,
         },
         services,
         state,
       } = execOptions;
 
       const result = await queryExecutor({
-        buildRuleMessage,
-        bulkCreate,
-        exceptionItems,
-        experimentalFeatures,
-        eventsTelemetry,
-        listClient,
-        logger,
         completeRule,
-        searchAfterSize,
-        services,
         tuple,
+        exceptionItems,
+        listClient,
+        experimentalFeatures,
+        ruleExecutionLogger,
+        eventsTelemetry,
+        services,
         version,
+        searchAfterSize,
+        bulkCreate,
         wrapHits,
+        inputIndex,
+        runtimeMappings,
+        primaryTimestamp,
+        secondaryTimestamp,
       });
       return { ...result, state };
     },

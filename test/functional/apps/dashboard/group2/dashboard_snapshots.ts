@@ -7,6 +7,7 @@
  */
 
 import expect from '@kbn/expect';
+import { OPTIONS_LIST_CONTROL, RANGE_SLIDER_CONTROL } from '@kbn/controls-plugin/common';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
@@ -15,7 +16,14 @@ export default function ({
   getPageObjects,
   updateBaselines,
 }: FtrProviderContext & { updateBaselines: boolean }) {
-  const PageObjects = getPageObjects(['dashboard', 'header', 'visualize', 'common', 'timePicker']);
+  const PageObjects = getPageObjects([
+    'dashboard',
+    'dashboardControls',
+    'header',
+    'visualize',
+    'common',
+    'timePicker',
+  ]);
   const screenshot = getService('screenshots');
   const browser = getService('browser');
   const kibanaServer = getService('kibanaServer');
@@ -85,6 +93,55 @@ export default function ({
 
       await PageObjects.dashboard.clickExitFullScreenLogoButton();
       expect(percentDifference).to.be.lessThan(0.029);
+    });
+
+    describe('compare controls snapshot', async () => {
+      before(async () => {
+        await PageObjects.dashboard.gotoDashboardLandingPage();
+        await PageObjects.dashboard.clickNewDashboard();
+        await PageObjects.dashboardControls.createControl({
+          controlType: OPTIONS_LIST_CONTROL,
+          dataViewTitle: 'logstash-*',
+          fieldName: 'machine.os.raw',
+          title: 'Machine OS',
+        });
+        await PageObjects.dashboardControls.createControl({
+          controlType: RANGE_SLIDER_CONTROL,
+          dataViewTitle: 'logstash-*',
+          fieldName: 'bytes',
+          title: 'Bytes',
+        });
+        await PageObjects.dashboard.saveDashboard('Dashboard Controls');
+      });
+
+      it('in light mode', async () => {
+        const percentDifference = await screenshot.compareAgainstBaseline(
+          'dashboard_controls_light',
+          updateBaselines
+        );
+        expect(percentDifference).to.be.lessThan(0.022);
+      });
+
+      it('in dark mode', async () => {
+        await kibanaServer.uiSettings.update({
+          'theme:darkMode': true,
+        });
+        await browser.refresh();
+        await PageObjects.dashboard.waitForRenderComplete();
+
+        const percentDifference = await screenshot.compareAgainstBaseline(
+          'dashboard_controls_dark',
+          updateBaselines
+        );
+        expect(percentDifference).to.be.lessThan(0.022);
+      });
+
+      after(async () => {
+        await kibanaServer.uiSettings.update({
+          'theme:darkMode': false,
+        });
+        await browser.refresh();
+      });
     });
   });
 }

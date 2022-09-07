@@ -32,6 +32,10 @@ import {
 import type { MockedFleetStartServices, TestRenderer } from '../../../../../../mock';
 import { createIntegrationsTestRendererMock } from '../../../../../../mock';
 
+import { ExperimentalFeaturesService } from '../../../../services';
+
+// @ts-ignore this saves us having to define all experimental features
+ExperimentalFeaturesService.init({});
 import { Detail } from '.';
 
 describe('when on integration detail', () => {
@@ -40,12 +44,15 @@ describe('when on integration detail', () => {
   let testRenderer: TestRenderer;
   let renderResult: ReturnType<typeof testRenderer.render>;
   let mockedApi: MockedApi<EpmPackageDetailsResponseProvidersMock>;
-  const render = () =>
-    (renderResult = testRenderer.render(
-      <Route path={INTEGRATIONS_ROUTING_PATHS.integration_details}>
-        <Detail />
-      </Route>
-    ));
+  const render = async () => {
+    await act(async () => {
+      renderResult = testRenderer.render(
+        <Route path={INTEGRATIONS_ROUTING_PATHS.integration_details}>
+          <Detail />
+        </Route>
+      );
+    });
+  };
 
   beforeEach(async () => {
     testRenderer = createIntegrationsTestRendererMock();
@@ -58,7 +65,7 @@ describe('when on integration detail', () => {
   });
 
   describe('and the package is installed', () => {
-    beforeEach(() => render());
+    beforeEach(async () => render());
 
     it('should display agent policy usage count', async () => {
       await act(() => mockedApi.waitForApi());
@@ -73,11 +80,11 @@ describe('when on integration detail', () => {
   });
 
   describe('and the package is not installed', () => {
-    beforeEach(() => {
+    beforeEach(async () => {
       const unInstalledPackage = mockedApi.responseProvider.epmGetInfo();
       unInstalledPackage.item.status = 'not_installed';
       mockedApi.responseProvider.epmGetInfo.mockReturnValue(unInstalledPackage);
-      render();
+      await render();
     });
 
     it('should NOT display agent policy usage count', async () => {
@@ -92,7 +99,9 @@ describe('when on integration detail', () => {
   });
 
   describe('and a custom UI extension is NOT registered', () => {
-    beforeEach(() => render());
+    beforeEach(async () => {
+      await render();
+    });
 
     it('should show overview and settings tabs', () => {
       const tabs: DetailViewPanelName[] = ['overview', 'settings'];
@@ -120,7 +129,7 @@ describe('when on integration detail', () => {
     // that is `resolved` once the lazy components actually renders.
     let lazyComponentWasRendered: Promise<void>;
 
-    beforeEach(() => {
+    beforeEach(async () => {
       let setWasRendered: () => void;
       lazyComponentWasRendered = new Promise((resolve) => {
         setWasRendered = resolve;
@@ -141,7 +150,7 @@ describe('when on integration detail', () => {
         Component: CustomComponent,
       });
 
-      render();
+      await render();
     });
 
     afterEach(() => {
@@ -167,7 +176,7 @@ describe('when on integration detail', () => {
   describe('and a custom assets UI extension is registered', () => {
     let lazyComponentWasRendered: Promise<void>;
 
-    beforeEach(() => {
+    beforeEach(async () => {
       let setWasRendered: () => void;
       lazyComponentWasRendered = new Promise((resolve) => {
         setWasRendered = resolve;
@@ -188,7 +197,7 @@ describe('when on integration detail', () => {
         Component: CustomComponent,
       });
 
-      render();
+      await render();
     });
 
     afterEach(() => {
@@ -212,7 +221,9 @@ describe('when on integration detail', () => {
   });
 
   describe('and the Add integration button is clicked', () => {
-    beforeEach(() => render());
+    beforeEach(async () => {
+      await render();
+    });
 
     it('should link to the create page', () => {
       const addButton = renderResult.getByTestId('addIntegrationPolicyButton') as HTMLAnchorElement;
@@ -224,9 +235,9 @@ describe('when on integration detail', () => {
 
   describe('and on the Policies Tab', () => {
     const policiesTabURLPath = pagePathGetters.integration_details_policies({ pkgkey })[1];
-    beforeEach(() => {
+    beforeEach(async () => {
       testRenderer.mountHistory.push(policiesTabURLPath);
-      render();
+      await render();
     });
 
     it('should display policies list', () => {
@@ -509,7 +520,6 @@ const mockApiCalls = (
       ],
       owner: { github: 'elastic/integrations-services' },
       latestVersion: '0.3.7',
-      removable: true,
       status: 'installed',
     },
   } as GetInfoResponse;
@@ -543,7 +553,6 @@ On Windows, the module was tested with Nginx installed from the Chocolatey repos
         namespace: 'default',
         policy_id: '521c1b70-3976-11eb-ad1c-3baa423084d9',
         enabled: true,
-        output_id: '',
         inputs: [
           {
             type: 'logfile',
@@ -622,7 +631,6 @@ On Windows, the module was tested with Nginx installed from the Chocolatey repos
         namespace: 'default',
         policy_id: '125c1b70-3976-11eb-ad1c-3baa423085y6',
         enabled: true,
-        output_id: '',
         inputs: [
           {
             type: 'logfile',
@@ -707,11 +715,7 @@ On Windows, the module was tested with Nginx installed from the Chocolatey repos
         namespace: 'default',
         description: 'Default agent policy created by Kibana',
         status: 'active',
-        package_policies: [
-          '4d09bd78-b0ad-4238-9fa3-d87d3c887c73',
-          '2babac18-eb8e-4ce4-b53b-4b7c5f507019',
-          'e8a37031-2907-44f6-89d2-98bd493f60dc',
-        ],
+        package_policies: [],
         is_managed: false,
         monitoring_enabled: ['logs', 'metrics'],
         revision: 6,
@@ -725,7 +729,7 @@ On Windows, the module was tested with Nginx installed from the Chocolatey repos
         namespace: 'default',
         description: 'Protect EU from COVID',
         status: 'active',
-        package_policies: ['e8a37031-2907-44f6-89d2-98bd493f60cd'],
+        package_policies: [],
         is_managed: false,
         monitoring_enabled: ['logs', 'metrics'],
         revision: 2,
@@ -805,6 +809,16 @@ On Windows, the module was tested with Nginx installed from the Chocolatey repos
       if (path === appRoutesService.getCheckPermissionsPath()) {
         markApiCallAsHandled();
         return mockedApiInterface.responseProvider.appCheckPermissions();
+      }
+
+      if (path === '/api/fleet/epm/categories') {
+        return Promise.resolve();
+      }
+      if (path === '/api/fleet/epm/packages') {
+        return Promise.resolve();
+      }
+      if (path === '/api/fleet/agents') {
+        return Promise.resolve();
       }
 
       const err = new Error(`API [GET ${path}] is not MOCKED!`);

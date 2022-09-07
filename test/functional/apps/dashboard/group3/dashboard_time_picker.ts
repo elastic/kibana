@@ -14,6 +14,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardExpect = getService('dashboardExpect');
   const pieChart = getService('pieChart');
+  const elasticChart = getService('elasticChart');
   const dashboardVisualizations = getService('dashboardVisualizations');
   const PageObjects = getPageObjects([
     'dashboard',
@@ -31,6 +32,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     before(async function () {
       await PageObjects.dashboard.initTests();
       await PageObjects.dashboard.preserveCrossAppState();
+      await elasticChart.setNewChartUiDebugFlag(true);
     });
 
     after(async () => {
@@ -43,7 +45,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('Visualization updated when time picker changes', async () => {
       await PageObjects.dashboard.clickNewDashboard();
       await PageObjects.dashboard.addVisualizations([PIE_CHART_VIS_NAME]);
-      await pieChart.expectPieSliceCount(0);
+      await pieChart.expectEmptyPieChart();
 
       await PageObjects.timePicker.setHistoricalDataRange();
       await pieChart.expectPieSliceCount(10);
@@ -124,6 +126,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         '2015-09-19 06:31:44.000',
         '2015-09-23 18:31:44.000'
       );
+      await elasticChart.setNewChartUiDebugFlag(true);
       await pieChart.expectPieSliceCount(10);
     });
   });

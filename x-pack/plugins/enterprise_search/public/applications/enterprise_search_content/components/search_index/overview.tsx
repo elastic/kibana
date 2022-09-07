@@ -7,16 +7,71 @@
 
 import React from 'react';
 
-import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
+import { useValues } from 'kea';
+
+import { EuiSpacer } from '@elastic/eui';
+
+import { i18n } from '@kbn/i18n';
+
+import { isApiIndex, isConnectorIndex, isCrawlerIndex } from '../../utils/indices';
+
+import { ConnectorOverviewPanels } from './connector/connector_overview_panels';
+import { CrawlDetailsFlyout } from './crawler/crawl_details_flyout/crawl_details_flyout';
+import { CrawlRequestsPanel } from './crawler/crawl_requests_panel/crawl_requests_panel';
+import { CrawlerTotalStats } from './crawler_total_stats';
+import { GenerateApiKeyPanel } from './generate_api_key_panel';
+import { OverviewLogic } from './overview.logic';
+import { SyncJobs } from './sync_jobs';
+import { TotalStats } from './total_stats';
 
 export const SearchIndexOverview: React.FC = () => {
+  const { indexData } = useValues(OverviewLogic);
+
   return (
-    <EnterpriseSearchContentPageTemplate
-      pageChrome={[]}
-      pageViewTelemetry="Overview"
-      isLoading={false}
-    >
-      <>Overview</>
-    </EnterpriseSearchContentPageTemplate>
+    <>
+      <EuiSpacer />
+      {isCrawlerIndex(indexData) ? (
+        <CrawlerTotalStats />
+      ) : (
+        <TotalStats
+          ingestionType={
+            isConnectorIndex(indexData)
+              ? i18n.translate(
+                  'xpack.enterpriseSearch.content.searchIndex.totalStats.connectorIngestionMethodLabel',
+                  {
+                    defaultMessage: 'Connector',
+                  }
+                )
+              : i18n.translate(
+                  'xpack.enterpriseSearch.content.searchIndex.totalStats.apiIngestionMethodLabel',
+                  {
+                    defaultMessage: 'API',
+                  }
+                )
+          }
+        />
+      )}
+      {isApiIndex(indexData) && (
+        <>
+          <EuiSpacer />
+          <GenerateApiKeyPanel />
+        </>
+      )}
+      {isCrawlerIndex(indexData) && (
+        <>
+          <EuiSpacer />
+          <CrawlRequestsPanel />
+          <CrawlDetailsFlyout />
+        </>
+      )}
+      {isConnectorIndex(indexData) && (
+        <>
+          <EuiSpacer />
+          <ConnectorOverviewPanels />
+          <EuiSpacer />
+          <SyncJobs />
+        </>
+      )}
+    </>
   );
 };

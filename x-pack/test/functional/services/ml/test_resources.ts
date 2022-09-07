@@ -230,15 +230,15 @@ export function MachineLearningTestResourcesProvider(
       await this.createSavedSearchIfNeeded(savedSearches.farequoteFilter, indexPatternTitle);
     },
 
-    async createMLTestDashboardIfNeeded() {
-      await this.createDashboardIfNeeded(dashboards.mlTestDashboard);
+    async createMLTestDashboardIfNeeded(): Promise<string> {
+      return await this.createDashboardIfNeeded(dashboards.mlTestDashboard);
     },
 
     async deleteMLTestDashboard() {
       await this.deleteDashboardByTitle(dashboards.mlTestDashboard.requestBody.attributes.title);
     },
 
-    async createDashboardIfNeeded(dashboard: any) {
+    async createDashboardIfNeeded(dashboard: { requestBody: any }): Promise<string> {
       const title = dashboard.requestBody.attributes.title;
       const dashboardId = await this.getDashboardId(title);
       if (dashboardId !== undefined) {
@@ -271,6 +271,24 @@ export function MachineLearningTestResourcesProvider(
     ) {
       await this.createSavedSearchIfNeeded(
         savedSearches.farequoteFilterAndKuery,
+        indexPatternTitle
+      );
+    },
+
+    async createSavedSearchFarequoteFilterTwoAndLuceneIfNeeded(
+      indexPatternTitle: string = 'ft_farequote'
+    ) {
+      await this.createSavedSearchIfNeeded(
+        savedSearches.farequoteFilterTwoAndLucene,
+        indexPatternTitle
+      );
+    },
+
+    async createSavedSearchFarequoteFilterTwoAndKueryIfNeeded(
+      indexPatternTitle: string = 'ft_farequote'
+    ) {
+      await this.createSavedSearchIfNeeded(
+        savedSearches.farequoteFilterTwoAndKuery,
         indexPatternTitle
       );
     },
@@ -483,6 +501,10 @@ export function MachineLearningTestResourcesProvider(
         SavedObjectType.ML_TRAINED_MODEL_SAVED_OBJECT_TYPE
       );
       for (const id of savedObjectIds) {
+        if (mlApi.isInternalModelId(id)) {
+          log.debug(`> Skipping internal ${id}`);
+          continue;
+        }
         await this.deleteSavedObjectById(
           id,
           SavedObjectType.ML_TRAINED_MODEL_SAVED_OBJECT_TYPE,

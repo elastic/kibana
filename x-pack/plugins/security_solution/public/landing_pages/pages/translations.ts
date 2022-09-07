@@ -7,10 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const THREAT_HUNTING_PAGE_TITLE = i18n.translate(
+export const EXPLORE_PAGE_TITLE = i18n.translate(
   'xpack.securitySolution.landing.threatHunting.pageTitle',
   {
-    defaultMessage: 'Threat hunting',
+    defaultMessage: 'Explore',
   }
 );
 
@@ -18,6 +18,27 @@ export const DASHBOARDS_PAGE_TITLE = i18n.translate(
   'xpack.securitySolution.landing.dashboards.pageTitle',
   {
     defaultMessage: 'Dashboards',
+  }
+);
+
+export const DASHBOARDS_PAGE_CREATE_BUTTON = i18n.translate(
+  'xpack.securitySolution.landing.dashboards.createButton',
+  {
+    defaultMessage: 'Create Dashboard',
+  }
+);
+
+export const DASHBOARDS_PAGE_SECTION_DEFAULT = i18n.translate(
+  'xpack.securitySolution.landing.dashboards.section.default',
+  {
+    defaultMessage: 'DEFAULT',
+  }
+);
+
+export const DASHBOARDS_PAGE_SECTION_CUSTOM = i18n.translate(
+  'xpack.securitySolution.landing.dashboards.section.custom',
+  {
+    defaultMessage: 'CUSTOM',
   }
 );
 

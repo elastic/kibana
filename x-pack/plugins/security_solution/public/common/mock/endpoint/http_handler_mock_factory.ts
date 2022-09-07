@@ -92,6 +92,7 @@ interface RouteMock<R extends ResponseProvidersInterface = ResponseProvidersInte
    */
   id: keyof R;
   method: HttpMethods;
+  /** The API path to match on. This value could can have tokens in the format of `{token_name}` */
   path: string;
   /**
    * The handler for providing a response to for this API call.

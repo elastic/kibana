@@ -15,10 +15,17 @@ export default function ({ getService }: FtrProviderContext) {
   const ebtServerHelper = getService('kibana_ebt_server');
 
   describe('Core Context Providers', () => {
-    let event: Event;
+    let event: Event<Record<string, unknown>>;
     before(async () => {
-      // Wait for the 2nd "status_changed" event. At that point all the context providers should be set up.
-      [, event] = await ebtServerHelper.getLastEvents(2, ['core-overall_status_changed']);
+      let i = 2;
+      do {
+        // Wait until we get a GREEN "status_changed" event. At that point all the context providers should be set up.
+        const events = await ebtServerHelper.getEvents(i, {
+          eventTypes: ['core-overall_status_changed'],
+        });
+        event = events[i - 1];
+        i++;
+      } while (event.properties.overall_status_level !== 'available');
     });
 
     it('should have the properties provided by the "kibana info" context provider', () => {

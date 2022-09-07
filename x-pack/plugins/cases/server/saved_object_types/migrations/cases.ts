@@ -122,6 +122,13 @@ export const addSeverity = (
   return { ...doc, attributes: { ...doc.attributes, severity }, references: doc.references ?? [] };
 };
 
+export const addAssignees = (
+  doc: SavedObjectUnsanitizedDoc<CaseAttributes>
+): SavedObjectSanitizedDoc<CaseAttributes> => {
+  const assignees = doc.attributes.assignees ?? [];
+  return { ...doc, attributes: { ...doc.attributes, assignees }, references: doc.references ?? [] };
+};
+
 export const caseMigrations = {
   '7.10.0': (
     doc: SavedObjectUnsanitizedDoc<UnsanitizedCaseConnector>
@@ -184,4 +191,5 @@ export const caseMigrations = {
   '7.15.0': caseConnectorIdMigration,
   '8.1.0': removeCaseType,
   '8.3.0': pipeMigrations(addDuration, addSeverity),
+  '8.5.0': addAssignees,
 };

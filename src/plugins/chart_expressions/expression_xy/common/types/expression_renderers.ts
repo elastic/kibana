@@ -25,8 +25,8 @@ export interface XYRender {
 }
 
 export interface CollectiveConfig extends Omit<ManualPointEventAnnotationArgs, 'icon'> {
-  roundedTimestamp: number;
-  axisMode: 'bottom';
+  timebucket: number;
+  position: 'bottom';
   icon?: AvailableAnnotationIcon | string;
   customTooltipDetails?: AnnotationTooltipFormatter | undefined;
 }

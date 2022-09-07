@@ -18,7 +18,7 @@ import { RuleDurationFormat } from '../../rules_list/components/rule_duration_fo
 
 describe('rule_event_log_list_cell_renderer', () => {
   it('renders primitive values correctly', () => {
-    const wrapper = shallow(<RuleEventLogListCellRenderer columnId="message" value="test" />);
+    const wrapper = mount(<RuleEventLogListCellRenderer columnId="message" value="test" />);
 
     expect(wrapper.text()).toEqual('test');
   });
@@ -36,6 +36,14 @@ describe('rule_event_log_list_cell_renderer', () => {
 
     expect(wrapper.find(RuleDurationFormat).exists()).toBeTruthy();
     expect(wrapper.find(RuleDurationFormat).props().duration).toEqual(100000);
+  });
+
+  it('renders alert count correctly', () => {
+    const wrapper = shallow(
+      <RuleEventLogListCellRenderer columnId="num_new_alerts" value="3" version="8.3.0" />
+    );
+
+    expect(wrapper.text()).toEqual('3');
   });
 
   it('renders timestamps correctly', () => {

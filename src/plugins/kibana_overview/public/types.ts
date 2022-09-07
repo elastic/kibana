@@ -12,6 +12,7 @@ import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { NewsfeedPublicPluginStart } from '@kbn/newsfeed-plugin/public';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { SharePluginStart } from '@kbn/share-plugin/public';
+import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface KibanaOverviewPluginSetup {}
@@ -30,4 +31,5 @@ export interface AppPluginStartDependencies {
   navigation: NavigationPublicPluginStart;
   newsfeed?: NewsfeedPublicPluginStart;
   share: SharePluginStart;
+  dataViewEditor: DataViewEditorStart;
 }

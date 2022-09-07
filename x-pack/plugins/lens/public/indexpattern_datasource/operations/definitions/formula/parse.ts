@@ -8,13 +8,14 @@
 import { i18n } from '@kbn/i18n';
 import { isObject } from 'lodash';
 import type { TinymathAST, TinymathVariable, TinymathLocation } from '@kbn/tinymath';
+import type { IndexPattern } from '../../../../types';
 import {
   OperationDefinition,
   GenericOperationDefinition,
   GenericIndexPatternColumn,
   operationDefinitionMap,
 } from '..';
-import type { IndexPattern, IndexPatternLayer } from '../../../types';
+import type { IndexPatternLayer } from '../../../types';
 import { mathOperation } from './math';
 import { documentField } from '../../../document_field';
 import { runASTValidation, shouldHaveFieldArgument, tryToParse } from './validation';
@@ -103,9 +104,10 @@ function extractColumns(
     if (nodeOperation.input === 'field') {
       const [fieldName] = variables.filter((v): v is TinymathVariable => isObject(v));
       // a validation task passed before executing this and checked already there's a field
-      const field = shouldHaveFieldArgument(node)
-        ? indexPattern.getFieldByName(fieldName.value)!
-        : documentField;
+      let field = fieldName ? indexPattern.getFieldByName(fieldName.value) : undefined;
+      if (!shouldHaveFieldArgument(node) && !field) {
+        field = documentField;
+      }
 
       const mappedParams = {
         ...mergeWithGlobalFilter(
@@ -122,7 +124,8 @@ function extractColumns(
         {
           layer,
           indexPattern,
-          field,
+          // checked in the validation phase
+          field: field!,
         },
         mappedParams
       );

@@ -5,9 +5,11 @@
  * 2.0.
  */
 
+// eslint-disable-next-line @kbn/imports/no_boundary_crossing
 export { EuiCodeEditor } from '@kbn/es-ui-shared-plugin/public';
 export type { EuiCodeEditorProps } from '@kbn/es-ui-shared-plugin/public';
 
+// eslint-disable-next-line @kbn/imports/no_boundary_crossing
 import { XJson } from '@kbn/es-ui-shared-plugin/public';
 const { collapseLiteralStrings, expandLiteralStrings } = XJson;
 

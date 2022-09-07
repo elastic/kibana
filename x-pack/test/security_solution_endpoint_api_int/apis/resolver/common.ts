@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import _ from 'lodash';
 import expect from '@kbn/expect';
 import { firstNonNullValue } from '@kbn/security-solution-plugin/common/endpoint/models/ecs_safety_helpers';
 import { NodeID } from '@kbn/security-solution-plugin/server/endpoint/routes/resolver/tree/utils';

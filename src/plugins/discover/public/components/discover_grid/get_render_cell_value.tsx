@@ -8,6 +8,7 @@
 
 import React, { Fragment, useContext, useEffect, useMemo } from 'react';
 import classnames from 'classnames';
+import { i18n } from '@kbn/i18n';
 import { euiLightVars as themeLight, euiDarkVars as themeDark } from '@kbn/ui-theme';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import {
@@ -15,16 +16,18 @@ import {
   EuiDescriptionList,
   EuiDescriptionListTitle,
   EuiDescriptionListDescription,
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { DiscoverGridContext } from './discover_grid_context';
 import { JsonCodeEditor } from '../json_code_editor/json_code_editor';
 import { defaultMonacoEditorWidth } from './constants';
-import { EsHitRecord } from '../../application/types';
 import { formatFieldValue } from '../../utils/format_value';
 import { formatHit } from '../../utils/format_hit';
-import { ElasticSearchHit } from '../../types';
-import { useDiscoverServices } from '../../utils/use_discover_services';
+import { DataTableRecord, EsHitRecord } from '../../types';
+import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { MAX_DOC_FIELDS_DISPLAYED } from '../../../common';
 
 const CELL_CLASS = 'dscDiscoverGrid__cellValue';
@@ -32,11 +35,11 @@ const CELL_CLASS = 'dscDiscoverGrid__cellValue';
 export const getRenderCellValueFn =
   (
     dataView: DataView,
-    rows: ElasticSearchHit[] | undefined,
-    rowsFlattened: Array<Record<string, unknown>>,
+    rows: DataTableRecord[] | undefined,
     useNewFieldsApi: boolean,
     fieldsToShow: string[],
-    maxDocFieldsDisplayed: number
+    maxDocFieldsDisplayed: number,
+    closePopover: () => void
   ) =>
   ({ rowIndex, columnId, isDetails, setCellProps }: EuiDataGridCellValueElementProps) => {
     const { uiSettings, fieldFormats } = useDiscoverServices();
@@ -44,19 +47,16 @@ export const getRenderCellValueFn =
     const maxEntries = useMemo(() => uiSettings.get(MAX_DOC_FIELDS_DISPLAYED), [uiSettings]);
 
     const row = rows ? rows[rowIndex] : undefined;
-    const rowFlattened = rowsFlattened
-      ? (rowsFlattened[rowIndex] as Record<string, unknown>)
-      : undefined;
 
     const field = dataView.fields.getByName(columnId);
     const ctx = useContext(DiscoverGridContext);
 
     useEffect(() => {
-      if ((row as EsHitRecord).isAnchor) {
+      if (row?.isAnchor) {
         setCellProps({
           className: 'dscDocsGrid__cell--highlight',
         });
-      } else if (ctx.expanded && row && ctx.expanded._id === row._id) {
+      } else if (ctx.expanded && row && ctx.expanded.id === row.id) {
         setCellProps({
           style: {
             backgroundColor: ctx.isDarkMode
@@ -69,7 +69,7 @@ export const getRenderCellValueFn =
       }
     }, [ctx, row, setCellProps]);
 
-    if (typeof row === 'undefined' || typeof rowFlattened === 'undefined') {
+    if (typeof row === 'undefined') {
       return <span className={CELL_CLASS}>-</span>;
     }
 
@@ -80,25 +80,25 @@ export const getRenderCellValueFn =
     const useTopLevelObjectColumns = Boolean(
       useNewFieldsApi &&
         !field &&
-        row?.fields &&
-        !(row.fields as Record<string, unknown[]>)[columnId]
+        row?.raw.fields &&
+        !(row.raw.fields as Record<string, unknown[]>)[columnId]
     );
 
     if (isDetails) {
       return renderPopoverContent({
-        rowRaw: row,
-        rowFlattened,
+        row,
         field,
         columnId,
         dataView,
         useTopLevelObjectColumns,
         fieldFormats,
+        closePopover,
       });
     }
 
     if (field?.type === '_source' || useTopLevelObjectColumns) {
       const pairs = useTopLevelObjectColumns
-        ? getTopLevelObjectPairs(row, columnId, dataView, fieldsToShow).slice(
+        ? getTopLevelObjectPairs(row.raw, columnId, dataView, fieldsToShow).slice(
             0,
             maxDocFieldsDisplayed
           )
@@ -129,7 +129,7 @@ export const getRenderCellValueFn =
         // formatFieldValue guarantees sanitized values
         // eslint-disable-next-line react/no-danger
         dangerouslySetInnerHTML={{
-          __html: formatFieldValue(rowFlattened[columnId], row, fieldFormats, dataView, field),
+          __html: formatFieldValue(row.flattened[columnId], row.raw, fieldFormats, dataView, field),
         }}
       />
     );
@@ -147,44 +147,84 @@ function getInnerColumns(fields: Record<string, unknown[]>, columnId: string) {
   );
 }
 
+function getJSON(columnId: string, row: DataTableRecord, useTopLevelObjectColumns: boolean) {
+  const json = useTopLevelObjectColumns
+    ? getInnerColumns(row.raw.fields as Record<string, unknown[]>, columnId)
+    : row.raw;
+  return json as Record<string, unknown>;
+}
+
 /**
  * Helper function for the cell popover
  */
 function renderPopoverContent({
-  rowRaw,
-  rowFlattened,
+  row,
   field,
   columnId,
   dataView,
   useTopLevelObjectColumns,
   fieldFormats,
+  closePopover,
 }: {
-  rowRaw: ElasticSearchHit;
-  rowFlattened: Record<string, unknown>;
+  row: DataTableRecord;
   field: DataViewField | undefined;
   columnId: string;
   dataView: DataView;
   useTopLevelObjectColumns: boolean;
   fieldFormats: FieldFormatsStart;
+  closePopover: () => void;
 }) {
+  const closeButton = (
+    <EuiButtonIcon
+      aria-label={i18n.translate('discover.grid.closePopover', {
+        defaultMessage: `Close popover`,
+      })}
+      data-test-subj="docTableClosePopover"
+      iconSize="s"
+      iconType="cross"
+      size="xs"
+      onClick={closePopover}
+    />
+  );
   if (useTopLevelObjectColumns || field?.type === '_source') {
-    const json = useTopLevelObjectColumns
-      ? getInnerColumns(rowRaw.fields as Record<string, unknown[]>, columnId)
-      : rowRaw;
     return (
-      <JsonCodeEditor json={json as Record<string, unknown>} width={defaultMonacoEditorWidth} />
+      <EuiFlexGroup gutterSize="none" direction="column" justifyContent="flexEnd">
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup justifyContent="flexEnd" gutterSize="none">
+            <EuiFlexItem grow={false}>{closeButton}</EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <JsonCodeEditor
+            json={getJSON(columnId, row, useTopLevelObjectColumns)}
+            width={defaultMonacoEditorWidth}
+            height={200}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   }
 
   return (
-    <span
-      className="dscDiscoverGrid__cellPopoverValue"
-      // formatFieldValue guarantees sanitized values
-      // eslint-disable-next-line react/no-danger
-      dangerouslySetInnerHTML={{
-        __html: formatFieldValue(rowFlattened[columnId], rowRaw, fieldFormats, dataView, field),
-      }}
-    />
+    <EuiFlexGroup gutterSize="none" direction="row" responsive={false}>
+      <EuiFlexItem>
+        <span
+          className="dscDiscoverGrid__cellPopoverValue eui-textBreakWord"
+          // formatFieldValue guarantees sanitized values
+          // eslint-disable-next-line react/no-danger
+          dangerouslySetInnerHTML={{
+            __html: formatFieldValue(
+              row.flattened[columnId],
+              row.raw,
+              fieldFormats,
+              dataView,
+              field
+            ),
+          }}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>{closeButton}</EuiFlexItem>
+    </EuiFlexGroup>
   );
 }
 /**
@@ -192,7 +232,7 @@ function renderPopoverContent({
  * this is used for legacy stuff like displaying products of our ecommerce dataset
  */
 function getTopLevelObjectPairs(
-  row: ElasticSearchHit,
+  row: EsHitRecord,
   columnId: string,
   dataView: DataView,
   fieldsToShow: string[]
@@ -215,7 +255,6 @@ function getTopLevelObjectPairs(
         formatter.convert(val, 'html', {
           field: subField,
           hit: row,
-          indexPattern: dataView,
         })
       )
       .join(', ');

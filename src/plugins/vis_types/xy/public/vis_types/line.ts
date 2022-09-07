@@ -35,6 +35,7 @@ export const lineVisTypeDefinition = {
   description: i18n.translate('visTypeXy.line.lineDescription', {
     defaultMessage: 'Display data as a series of points.',
   }),
+  fetchDatatable: true,
   toExpressionAst,
   getSupportedTriggers: () => [VIS_EVENT_TO_TRIGGER.filter, VIS_EVENT_TO_TRIGGER.brush],
   updateVisTypeOnParamsChange: getVisTypeFromParams,
@@ -127,6 +128,7 @@ export const lineVisTypeDefinition = {
     },
   },
   editorConfig: {
+    enableDataViewChange: true,
     optionTabs,
     schemas: [
       {
@@ -134,7 +136,13 @@ export const lineVisTypeDefinition = {
         name: 'metric',
         title: i18n.translate('visTypeXy.line.metricTitle', { defaultMessage: 'Y-axis' }),
         min: 1,
-        aggFilter: ['!geo_centroid', '!geo_bounds', '!filtered_metric', '!single_percentile'],
+        aggFilter: [
+          '!geo_centroid',
+          '!geo_bounds',
+          '!filtered_metric',
+          '!single_percentile',
+          '!single_percentile_rank',
+        ],
         defaults: [{ schema: 'metric', type: 'count' }],
       },
       {

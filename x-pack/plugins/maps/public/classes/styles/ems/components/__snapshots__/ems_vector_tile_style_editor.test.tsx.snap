@@ -1,0 +1,25 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`EMSVectorTileStyleEditor is rendered 1`] = `
+<EuiFormRow
+  describedByIds={Array []}
+  display="columnCompressed"
+  fullWidth={false}
+  hasChildLabel={true}
+  hasEmptyLabelSpace={false}
+  label="Color blend"
+  labelType="label"
+>
+  <EuiColorPicker
+    aria-label="Color blend"
+    aria-placeholder="No color"
+    color="#4A412A"
+    compressed={true}
+    format="hex"
+    isClearable={true}
+    onChange={[Function]}
+    placeholder="No color"
+    secondaryInputDisplay="top"
+  />
+</EuiFormRow>
+`;

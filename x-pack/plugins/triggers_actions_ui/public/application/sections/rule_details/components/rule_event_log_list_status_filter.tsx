@@ -8,8 +8,7 @@
 import React, { useState, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFilterButton, EuiPopover, EuiFilterGroup, EuiFilterSelectItem } from '@elastic/eui';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { EcsEventOutcome } from '@kbn/core/server';
+import type { EcsEventOutcome } from '@kbn/core/server';
 import { RuleEventLogListStatus } from './rule_event_log_list_status';
 
 const statusFilters: EcsEventOutcome[] = ['success', 'failure', 'unknown'];
@@ -55,7 +54,7 @@ export const RuleEventLogListStatusFilter = (props: RuleEventLogListStatusFilter
           >
             <FormattedMessage
               id="xpack.triggersActionsUI.sections.ruleDetails.eventLogStatusFilterLabel"
-              defaultMessage="Status"
+              defaultMessage="Response"
             />
           </EuiFilterButton>
         }

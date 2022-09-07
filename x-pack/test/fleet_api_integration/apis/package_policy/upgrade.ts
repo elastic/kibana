@@ -8,7 +8,7 @@ import expect from '@kbn/expect';
 import {
   UpgradePackagePolicyDryRunResponse,
   UpgradePackagePolicyResponse,
-} from '@kbn/fleet-plugin/common';
+} from '@kbn/fleet-plugin/common/types';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { setupFleetAndAgents } from '../agents/services';
@@ -17,6 +17,7 @@ export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
 
   function withTestPackageVersion(version: string) {
     before(async function () {
@@ -42,12 +43,12 @@ export default function (providerContext: FtrProviderContext) {
     let packagePolicyId: string;
 
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
+      await kibanaServer.savedObjects.cleanStandardList();
       await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
     });
 
     after(async () => {
-      await getService('esArchiver').unload('x-pack/test/functional/es_archives/empty_kibana');
+      await kibanaServer.savedObjects.cleanStandardList();
       await getService('esArchiver').unload(
         'x-pack/test/functional/es_archives/fleet/empty_fleet_server'
       );
@@ -77,7 +78,6 @@ export default function (providerContext: FtrProviderContext) {
             namespace: 'default',
             policy_id: agentPolicyId,
             enabled: true,
-            output_id: '',
             inputs: [
               {
                 policy_template: 'package_policy_upgrade',
@@ -199,7 +199,6 @@ export default function (providerContext: FtrProviderContext) {
             namespace: 'default',
             policy_id: agentPolicyId,
             enabled: true,
-            output_id: '',
             inputs: [
               {
                 policy_template: 'package_policy_upgrade',
@@ -314,7 +313,6 @@ export default function (providerContext: FtrProviderContext) {
             namespace: 'default',
             policy_id: agentPolicyId,
             enabled: true,
-            output_id: '',
             inputs: [
               {
                 policy_template: 'package_policy_upgrade',
@@ -419,7 +417,6 @@ export default function (providerContext: FtrProviderContext) {
             namespace: 'default',
             policy_id: agentPolicyId,
             enabled: true,
-            output_id: '',
             inputs: [
               {
                 policy_template: 'package_policy_upgrade',
@@ -523,7 +520,6 @@ export default function (providerContext: FtrProviderContext) {
             namespace: 'default',
             policy_id: agentPolicyId,
             enabled: true,
-            output_id: '',
             inputs: [
               {
                 policy_template: 'package_policy_upgrade',
@@ -617,7 +613,6 @@ export default function (providerContext: FtrProviderContext) {
             namespace: 'default',
             policy_id: agentPolicyId,
             enabled: true,
-            output_id: '',
             inputs: [
               {
                 policy_template: 'package_policy_upgrade',
@@ -715,7 +710,6 @@ export default function (providerContext: FtrProviderContext) {
             namespace: 'default',
             policy_id: agentPolicyId,
             enabled: true,
-            output_id: '',
             inputs: [
               {
                 policy_template: 'package_policy_upgrade',
@@ -815,7 +809,6 @@ export default function (providerContext: FtrProviderContext) {
             namespace: 'default',
             policy_id: agentPolicyId,
             enabled: true,
-            output_id: '',
             inputs: [
               {
                 policy_template: 'package_policy_upgrade',
@@ -947,7 +940,6 @@ export default function (providerContext: FtrProviderContext) {
             namespace: 'default',
             policy_id: agentPolicyId,
             enabled: true,
-            output_id: '',
             inputs: [
               {
                 policy_template: 'package_policy_upgrade',
@@ -1087,7 +1079,6 @@ export default function (providerContext: FtrProviderContext) {
             namespace: 'default',
             policy_id: agentPolicyId,
             enabled: true,
-            output_id: '',
             inputs: [
               {
                 policy_template: 'package_policy_upgrade',

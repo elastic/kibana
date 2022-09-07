@@ -6,6 +6,8 @@
 
 experimental[] List all centrally-managed Logstash pipelines.
 
+IMPORTANT: Limit the number of pipelines to 10k or fewer. As the number of pipelines nears and surpasses 10k, you may see performance issues on {kib}.
+
 [[logstash-configuration-management-api-list-request]]
 ==== Request
 

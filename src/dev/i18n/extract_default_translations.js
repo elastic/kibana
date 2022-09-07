@@ -7,11 +7,12 @@
  */
 
 import path from 'path';
+import globby from 'globby';
 
 import { extractCodeMessages } from './extractors';
-import { globAsync, readFileAsync, normalizePath } from './utils';
+import { readFileAsync, normalizePath } from './utils';
 
-import { createFailError, isFailError } from '@kbn/dev-utils';
+import { createFailError, isFailError } from '@kbn/dev-cli-errors';
 
 function addMessageToMap(targetMap, key, value, reporter) {
   const existingValue = targetMap.get(key);
@@ -58,13 +59,14 @@ export async function matchEntriesWithExctractors(inputPath, options = {}) {
     '**/build/**',
     '**/*.test.{js,jsx,ts,tsx}',
     '**/*.d.ts',
-  ].concat(additionalIgnore);
+  ]
+    .concat(additionalIgnore)
+    .map((i) => `!${i}`);
 
-  const entries = await globAsync('*.{js,jsx,ts,tsx}', {
+  const entries = await globby(['*.{js,jsx,ts,tsx}', ...ignore], {
     cwd: inputPath,
-    matchBase: true,
-    ignore,
-    mark,
+    baseNameMatch: true,
+    markDirectories: mark,
     absolute,
   });
 

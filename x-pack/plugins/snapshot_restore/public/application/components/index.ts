@@ -16,9 +16,14 @@ export { SnapshotDeleteProvider } from './snapshot_delete_provider';
 export { RestoreSnapshotForm } from './restore_snapshot_form';
 export { PolicyExecuteProvider } from './policy_execute_provider';
 export { PolicyDeleteProvider } from './policy_delete_provider';
-export { CollapsibleIndicesList, CollapsibleDataStreamsList } from './collapsible_lists';
+export {
+  CollapsibleIndicesList,
+  CollapsibleDataStreamsList,
+  CollapsibleFeatureStatesList,
+} from './collapsible_lists';
 export type { UpdateRetentionSettings } from './retention_update_modal_provider';
 export { RetentionSettingsUpdateModalProvider } from './retention_update_modal_provider';
 export type { ExecuteRetention } from './retention_execute_modal_provider';
 export { RetentionExecuteModalProvider } from './retention_execute_modal_provider';
 export { PolicyForm } from './policy_form';
+export { FeatureStatesFormField } from './feature_states_form_field';

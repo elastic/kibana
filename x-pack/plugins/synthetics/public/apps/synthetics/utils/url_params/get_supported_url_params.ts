@@ -25,6 +25,11 @@ export interface SyntheticsUrlParams {
   statusFilter: string;
   focusConnectorField?: boolean;
   query?: string;
+  tags?: string[];
+  locations?: string[];
+  monitorType?: string[];
+  status?: string[];
+  locationId?: string;
 }
 
 const {
@@ -80,6 +85,10 @@ export const getSupportedUrlParams = (params: {
     pagination,
     focusConnectorField,
     query,
+    tags,
+    monitorType,
+    locations,
+    locationId,
   } = filteredParams;
 
   return {
@@ -103,5 +112,9 @@ export const getSupportedUrlParams = (params: {
     statusFilter: statusFilter || STATUS_FILTER,
     focusConnectorField: !!focusConnectorField,
     query: query || '',
+    tags: tags ? JSON.parse(tags) : [],
+    monitorType: monitorType ? JSON.parse(monitorType) : [],
+    locations: locations ? JSON.parse(locations) : [],
+    locationId: locationId || undefined,
   };
 };

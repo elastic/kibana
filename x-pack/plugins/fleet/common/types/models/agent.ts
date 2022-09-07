@@ -9,6 +9,7 @@ import type {
   AGENT_TYPE_EPHEMERAL,
   AGENT_TYPE_PERMANENT,
   AGENT_TYPE_TEMPORARY,
+  FleetServerAgentComponentStatuses,
 } from '../../constants';
 
 export type AgentType =
@@ -29,12 +30,10 @@ export type AgentStatus =
 
 export type SimplifiedAgentStatus = 'healthy' | 'unhealthy' | 'updating' | 'offline' | 'inactive';
 
-export type AgentActionType =
-  | 'POLICY_CHANGE'
-  | 'UNENROLL'
-  | 'UPGRADE'
-  | 'SETTINGS'
-  | 'POLICY_REASSIGN';
+export type AgentActionType = 'UNENROLL' | 'UPGRADE' | 'SETTINGS' | 'POLICY_REASSIGN' | 'CANCEL';
+
+type FleetServerAgentComponentStatusTuple = typeof FleetServerAgentComponentStatuses;
+export type FleetServerAgentComponentStatus = FleetServerAgentComponentStatusTuple[number];
 
 export interface NewAgentAction {
   type: AgentActionType;
@@ -44,6 +43,10 @@ export interface NewAgentAction {
   agents: string[];
   created_at?: string;
   id?: string;
+  expiration?: string;
+  start_time?: string;
+  minimum_execution_duration?: number;
+  source_uri?: string;
 }
 
 export interface AgentAction extends NewAgentAction {
@@ -81,15 +84,44 @@ interface AgentBase {
 export interface Agent extends AgentBase {
   id: string;
   access_api_key?: string;
+  default_api_key_history?: FleetServerAgent['default_api_key_history'];
   status?: AgentStatus;
   packages: string[];
+  sort?: Array<number | string | null>;
 }
 
 export interface AgentSOAttributes extends AgentBase {
   packages?: string[];
 }
 
-// Generated from FleetServer schema.json
+export interface CurrentUpgrade {
+  actionId: string;
+  complete: boolean;
+  nbAgents: number;
+  nbAgentsAck: number;
+  version: string;
+  startTime?: string;
+}
+
+interface FleetServerAgentComponentUnit {
+  id: string;
+  type: 'input' | 'output';
+  status: FleetServerAgentComponentStatus;
+  message: string;
+  payload?: {
+    [key: string]: any;
+  };
+}
+
+interface FleetServerAgentComponent {
+  id: string;
+  type: string;
+  status: FleetServerAgentComponentStatus;
+  message: string;
+  units: FleetServerAgentComponentUnit[];
+}
+
+// Initially generated from FleetServer schema.json
 
 /**
  * An Elastic Agent that has enrolled into Fleet
@@ -192,6 +224,17 @@ export interface FleetServerAgent {
    * A list of tags used for organizing/filtering agents
    */
   tags?: string[];
+  /**
+   * Default API Key History
+   */
+  default_api_key_history?: Array<{
+    id: string;
+    retired_at: string;
+  }>;
+  /**
+   * Components array
+   */
+  components?: FleetServerAgentComponent[];
 }
 /**
  * An Elastic Agent metadata

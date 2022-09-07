@@ -9,8 +9,8 @@ import React, { useMemo, useState, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiSelectable,
-  EuiFilterGroup,
   EuiFilterButton,
+  EuiFilterGroup,
   EuiPopover,
   EuiSelectableProps,
   EuiSelectableOption,
@@ -20,6 +20,7 @@ import {
 export interface RuleTagFilterProps {
   tags: string[];
   selectedTags: string[];
+  isGrouped?: boolean; // Whether or not this should appear as the child of a EuiFilterGroup
   isLoading?: boolean;
   loadingMessage?: EuiSelectableProps['loadingMessage'];
   noMatchesMessage?: EuiSelectableProps['noMatchesMessage'];
@@ -38,6 +39,7 @@ export const RuleTagFilter = (props: RuleTagFilterProps) => {
   const {
     tags = [],
     selectedTags = [],
+    isGrouped = false,
     isLoading = false,
     loadingMessage,
     noMatchesMessage,
@@ -56,11 +58,11 @@ export const RuleTagFilter = (props: RuleTagFilterProps) => {
     return [...new Set([...tags, ...selectedTags])].sort();
   }, [tags, selectedTags]);
 
-  const options: EuiSelectableOption[] = useMemo(
+  const options = useMemo(
     () =>
       allTags.map((tag) => ({
         label: tag,
-        checked: selectedTags.includes(tag) ? 'on' : undefined,
+        checked: selectedTags.includes(tag) ? ('on' as const) : undefined,
         'data-test-subj': optionDataTestSubj(tag),
       })),
     [allTags, selectedTags, optionDataTestSubj]
@@ -102,9 +104,21 @@ export const RuleTagFilter = (props: RuleTagFilterProps) => {
     );
   };
 
+  const Container = useMemo(() => {
+    if (isGrouped) {
+      return React.Fragment;
+    }
+    return EuiFilterGroup;
+  }, [isGrouped]);
+
   return (
-    <EuiFilterGroup data-test-subj={dataTestSubj}>
-      <EuiPopover isOpen={isPopoverOpen} closePopover={onClosePopover} button={renderButton()}>
+    <Container>
+      <EuiPopover
+        data-test-subj={dataTestSubj}
+        isOpen={isPopoverOpen}
+        closePopover={onClosePopover}
+        button={renderButton()}
+      >
         <EuiSelectable
           searchable
           data-test-subj={selectableDataTestSubj}
@@ -125,7 +139,7 @@ export const RuleTagFilter = (props: RuleTagFilterProps) => {
           )}
         </EuiSelectable>
       </EuiPopover>
-    </EuiFilterGroup>
+    </Container>
   );
 };
 

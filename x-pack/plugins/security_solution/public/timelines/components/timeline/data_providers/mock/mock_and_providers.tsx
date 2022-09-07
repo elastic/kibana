@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { DataProvider, DataProvidersAnd, IS_OPERATOR } from '../data_provider';
+import type { DataProvider, DataProvidersAnd } from '../data_provider';
+import { IS_OPERATOR } from '../data_provider';
 
 export const providerA: DataProvidersAnd = {
   enabled: true,

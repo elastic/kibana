@@ -8,6 +8,7 @@
 import React from 'react';
 import { mount, ReactWrapper } from 'enzyme';
 import { act, RenderResult, waitFor, within } from '@testing-library/react';
+import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 
 import { CaseSeverity, CommentType, ConnectorTypes } from '../../../common/api';
@@ -15,8 +16,6 @@ import { useKibana } from '../../common/lib/kibana';
 import { AppMockRenderer, createAppMockRenderer, TestProviders } from '../../common/mock';
 import { usePostCase } from '../../containers/use_post_case';
 import { useCreateAttachments } from '../../containers/use_create_attachments';
-import { useGetTags } from '../../containers/use_get_tags';
-import { useConnectors } from '../../containers/configure/use_connectors';
 import { useCaseConfigure } from '../../containers/configure/use_configure';
 import { useGetIncidentTypes } from '../connectors/resilient/use_get_incident_types';
 import { useGetSeverity } from '../connectors/resilient/use_get_severity';
@@ -42,6 +41,8 @@ import { Choice } from '../connectors/servicenow/types';
 import userEvent from '@testing-library/user-event';
 import { connectorsMock } from '../../common/mock/connectors';
 import { CaseAttachments } from '../../types';
+import { useGetConnectors } from '../../containers/configure/use_connectors';
+import { useGetTags } from '../../containers/use_get_tags';
 
 const sampleId = 'case-id';
 
@@ -60,7 +61,7 @@ jest.mock('../connectors/jira/use_get_issues');
 jest.mock('../connectors/servicenow/use_get_choices');
 jest.mock('../../common/lib/kibana');
 
-const useConnectorsMock = useConnectors as jest.Mock;
+const useGetConnectorsMock = useGetConnectors as jest.Mock;
 const useCaseConfigureMock = useCaseConfigure as jest.Mock;
 const usePostCaseMock = usePostCase as jest.Mock;
 const useCreateAttachmentsMock = useCreateAttachments as jest.Mock;
@@ -130,7 +131,7 @@ const fillFormReactTestingLib = async (renderResult: RenderResult) => {
 };
 
 describe('Create case', () => {
-  const fetchTags = jest.fn();
+  const refetch = jest.fn();
   const onFormSubmitSuccess = jest.fn();
   const afterCaseCreated = jest.fn();
   const createAttachments = jest.fn();
@@ -145,7 +146,7 @@ describe('Create case', () => {
     usePostCaseMock.mockImplementation(() => defaultPostCase);
     useCreateAttachmentsMock.mockImplementation(() => ({ createAttachments }));
     usePostPushToServiceMock.mockImplementation(() => defaultPostPushToService);
-    useConnectorsMock.mockReturnValue(sampleConnectorData);
+    useGetConnectorsMock.mockReturnValue(sampleConnectorData);
     useCaseConfigureMock.mockImplementation(() => useCaseConfigureResponse);
     useGetIncidentTypesMock.mockReturnValue(useGetIncidentTypesResponse);
     useGetSeverityMock.mockReturnValue(useGetSeverityResponse);
@@ -159,8 +160,8 @@ describe('Create case', () => {
     );
 
     (useGetTags as jest.Mock).mockImplementation(() => ({
-      tags: sampleTags,
-      fetchTags,
+      data: sampleTags,
+      refetch,
     }));
     useKibanaMock().services.triggersActionsUi.actionTypeRegistry.get = jest.fn().mockReturnValue({
       actionTypeTitle: '.servicenow',
@@ -190,9 +191,9 @@ describe('Create case', () => {
     });
 
     it('should post case on submit click', async () => {
-      useConnectorsMock.mockReturnValue({
+      useGetConnectorsMock.mockReturnValue({
         ...sampleConnectorData,
-        connectors: connectorsMock,
+        data: connectorsMock,
       });
 
       const renderResult = mockedContext.render(
@@ -210,9 +211,9 @@ describe('Create case', () => {
     });
 
     it('should post a case on submit click with the selected severity', async () => {
-      useConnectorsMock.mockReturnValue({
+      useGetConnectorsMock.mockReturnValue({
         ...sampleConnectorData,
-        connectors: connectorsMock,
+        data: connectorsMock,
       });
 
       const renderResult = mockedContext.render(
@@ -225,7 +226,8 @@ describe('Create case', () => {
       await fillFormReactTestingLib(renderResult);
 
       userEvent.click(renderResult.getByTestId('case-severity-selection'));
-      expect(renderResult.getByTestId('case-severity-selection-high')).toBeTruthy();
+      await waitForEuiPopoverOpen();
+      expect(renderResult.getByTestId('case-severity-selection-high')).toBeVisible();
       userEvent.click(renderResult.getByTestId('case-severity-selection-high'));
 
       userEvent.click(renderResult.getByTestId('create-case-submit'));
@@ -268,9 +270,9 @@ describe('Create case', () => {
     });
 
     it('should toggle sync settings', async () => {
-      useConnectorsMock.mockReturnValue({
+      useGetConnectorsMock.mockReturnValue({
         ...sampleConnectorData,
-        connectors: connectorsMock,
+        data: connectorsMock,
       });
 
       const wrapper = mount(
@@ -292,9 +294,9 @@ describe('Create case', () => {
     });
 
     it('should set sync alerts to false when the sync feature setting is false', async () => {
-      useConnectorsMock.mockReturnValue({
+      useGetConnectorsMock.mockReturnValue({
         ...sampleConnectorData,
-        connectors: connectorsMock,
+        data: connectorsMock,
       });
 
       const wrapper = mount(
@@ -338,9 +340,9 @@ describe('Create case', () => {
         persistLoading: false,
       }));
 
-      useConnectorsMock.mockReturnValue({
+      useGetConnectorsMock.mockReturnValue({
         ...sampleConnectorData,
-        connectors: connectorsMock,
+        data: connectorsMock,
       });
 
       const wrapper = mount(
@@ -388,9 +390,9 @@ describe('Create case', () => {
         persistLoading: false,
       }));
 
-      useConnectorsMock.mockReturnValue({
+      useGetConnectorsMock.mockReturnValue({
         ...sampleConnectorData,
-        connectors: connectorsMock,
+        data: connectorsMock,
       });
 
       const wrapper = mount(
@@ -413,9 +415,9 @@ describe('Create case', () => {
 
   describe('Step 2 - Connector Fields', () => {
     it(`should submit and push to Jira connector`, async () => {
-      useConnectorsMock.mockReturnValue({
+      useGetConnectorsMock.mockReturnValue({
         ...sampleConnectorData,
-        connectors: connectorsMock,
+        data: connectorsMock,
       });
 
       const wrapper = mount(
@@ -480,9 +482,9 @@ describe('Create case', () => {
     });
 
     it(`should submit and push to resilient connector`, async () => {
-      useConnectorsMock.mockReturnValue({
+      useGetConnectorsMock.mockReturnValue({
         ...sampleConnectorData,
-        connectors: connectorsMock,
+        data: connectorsMock,
       });
 
       const wrapper = mount(
@@ -550,9 +552,9 @@ describe('Create case', () => {
     });
 
     it(`should submit and push to servicenow itsm connector`, async () => {
-      useConnectorsMock.mockReturnValue({
+      useGetConnectorsMock.mockReturnValue({
         ...sampleConnectorData,
-        connectors: connectorsMock,
+        data: connectorsMock,
       });
 
       const wrapper = mount(
@@ -645,9 +647,9 @@ describe('Create case', () => {
     });
 
     it(`should submit and push to servicenow sir connector`, async () => {
-      useConnectorsMock.mockReturnValue({
+      useGetConnectorsMock.mockReturnValue({
         ...sampleConnectorData,
-        connectors: connectorsMock,
+        data: connectorsMock,
       });
 
       const wrapper = mount(
@@ -748,9 +750,9 @@ describe('Create case', () => {
   });
 
   it(`should call afterCaseCreated`, async () => {
-    useConnectorsMock.mockReturnValue({
+    useGetConnectorsMock.mockReturnValue({
       ...sampleConnectorData,
-      connectors: connectorsMock,
+      data: connectorsMock,
     });
 
     const wrapper = mockedContext.render(
@@ -763,6 +765,7 @@ describe('Create case', () => {
     await fillFormReactTestingLib(wrapper);
     expect(wrapper.queryByTestId('connector-fields-jira')).toBeFalsy();
     userEvent.click(wrapper.getByTestId('dropdown-connectors'));
+    await waitForEuiPopoverOpen();
     await act(async () => {
       userEvent.click(wrapper.getByTestId('dropdown-connector-jira-1'));
     });
@@ -781,9 +784,9 @@ describe('Create case', () => {
   });
 
   it('should call createAttachments with the attachments after the case is created', async () => {
-    useConnectorsMock.mockReturnValue({
+    useGetConnectorsMock.mockReturnValue({
       ...sampleConnectorData,
-      connectors: connectorsMock,
+      data: connectorsMock,
     });
     const attachments = [
       {
@@ -822,13 +825,17 @@ describe('Create case', () => {
     });
 
     expect(createAttachments).toHaveBeenCalledTimes(1);
-    expect(createAttachments).toHaveBeenCalledWith({ caseId: 'case-id', data: attachments });
+    expect(createAttachments).toHaveBeenCalledWith({
+      caseId: 'case-id',
+      data: attachments,
+      caseOwner: 'securitySolution',
+    });
   });
 
   it('should NOT call createAttachments if the attachments are an empty array', async () => {
-    useConnectorsMock.mockReturnValue({
+    useGetConnectorsMock.mockReturnValue({
       ...sampleConnectorData,
-      connectors: connectorsMock,
+      data: connectorsMock,
     });
     const attachments: CaseAttachments = [];
 
@@ -849,9 +856,9 @@ describe('Create case', () => {
   });
 
   it(`should call callbacks in correct order`, async () => {
-    useConnectorsMock.mockReturnValue({
+    useGetConnectorsMock.mockReturnValue({
       ...sampleConnectorData,
-      connectors: connectorsMock,
+      data: connectorsMock,
     });
     const attachments = [
       {

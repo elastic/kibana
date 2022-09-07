@@ -1,0 +1,18 @@
+title: Apache error logs
+release: experimental
+type: logs
+streams:
+- input: logfile
+  vars:
+  - name: paths
+    type: text
+    title: Paths
+    multi: true
+    required: true
+    show_user: true
+    default:
+    - /var/log/apache2/error.log*
+    - /var/log/httpd/error_log*
+  template_path: log.yml.hbs
+  title: Apache error logs
+  description: Collect Apache error logs

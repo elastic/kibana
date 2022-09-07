@@ -14,20 +14,6 @@ export const API_URL_LABEL = i18n.translate(
   }
 );
 
-export const API_URL_HELPTEXT = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.apiUrlHelpText',
-  {
-    defaultMessage: 'Include the full URL.',
-  }
-);
-
-export const API_URL_REQUIRED = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.requiredApiUrlTextField',
-  {
-    defaultMessage: 'URL is required.',
-  }
-);
-
 export const API_URL_INVALID = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.invalidApiUrlTextField',
   {
@@ -35,32 +21,10 @@ export const API_URL_INVALID = i18n.translate(
   }
 );
 
-export const API_URL_REQUIRE_HTTPS = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.requireHttpsApiUrlTextField',
-  {
-    defaultMessage: 'URL must start with https://.',
-  }
-);
-
 export const AUTHENTICATION_LABEL = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.authenticationLabel',
   {
     defaultMessage: 'Authentication',
-  }
-);
-
-export const REMEMBER_VALUES_LABEL = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.rememberValuesLabel',
-  {
-    defaultMessage:
-      'Remember these values. You must reenter them each time you edit the connector.',
-  }
-);
-
-export const REENTER_VALUES_LABEL = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.reenterValuesLabel',
-  {
-    defaultMessage: 'You must authenticate each time you edit the connector.',
   }
 );
 
@@ -82,13 +46,6 @@ export const PASSWORD_LABEL = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.passwordTextFieldLabel',
   {
     defaultMessage: 'Password',
-  }
-);
-
-export const PASSWORD_REQUIRED = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.requiredPasswordTextField',
-  {
-    defaultMessage: 'Password is required.',
   }
 );
 
@@ -189,10 +146,11 @@ export const API_INFO_ERROR = (status: number) =>
     defaultMessage: 'Received status: {status} when attempting to get application information',
   });
 
-export const INSTALL = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.install',
+export const FETCH_ERROR = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.fetchErrorMsg',
   {
-    defaultMessage: 'install',
+    defaultMessage:
+      'Failed to fetch. Check the URL or the CORS configuration of your ServiceNow instance.',
   }
 );
 
@@ -334,5 +292,89 @@ export const SEVERITY_REQUIRED_LABEL = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.severityRequiredSelectFieldLabel',
   {
     defaultMessage: 'Severity (required)',
+  }
+);
+
+export const CLIENTID_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.clientIdTextFieldLabel',
+  {
+    defaultMessage: 'Client ID',
+  }
+);
+
+export const CLIENTSECRET_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.clientSecretTextFieldLabel',
+  {
+    defaultMessage: 'Client Secret',
+  }
+);
+
+export const KEY_ID_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.keyIdTextFieldLabel',
+  {
+    defaultMessage: 'JWT Verifier Key ID',
+  }
+);
+
+export const USER_IDENTIFIER_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.userEmailTextFieldLabel',
+  {
+    defaultMessage: 'User Identifier',
+  }
+);
+
+export const PRIVATE_KEY_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.privateKeyTextFieldLabel',
+  {
+    defaultMessage: 'Private Key',
+  }
+);
+
+export const PRIVATE_KEY_PASSWORD_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.privateKeyPassTextFieldLabel',
+  {
+    defaultMessage: 'Private Key Password',
+  }
+);
+
+export const PRIVATE_KEY_PASSWORD_HELPER_TEXT = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.privateKeyPassLabelHelpText',
+  {
+    defaultMessage: 'This is only required if you have set a password on your private key',
+  }
+);
+
+export const CLIENTID_REQUIRED = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.requiredClientIdTextField',
+  {
+    defaultMessage: 'Client ID is required.',
+  }
+);
+
+export const PRIVATE_KEY_REQUIRED = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.requiredPrivateKeyTextField',
+  {
+    defaultMessage: 'Private Key is required.',
+  }
+);
+
+export const KEYID_REQUIRED = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.requiredKeyIdTextField',
+  {
+    defaultMessage: 'JWT Verifier Key ID is required.',
+  }
+);
+
+export const USER_IDENTIFIER_REQUIRED = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.requiredUserIdentifierTextField',
+  {
+    defaultMessage: 'User Identifier is required.',
+  }
+);
+
+export const IS_OAUTH = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.useOAuth',
+  {
+    defaultMessage: 'Use OAuth authentication',
   }
 );

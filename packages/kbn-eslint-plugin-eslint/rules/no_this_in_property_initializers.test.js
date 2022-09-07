@@ -71,7 +71,7 @@ ruleTester.run('@kbn/eslint/no_this_in_property_initializers', rule, {
       errors: [
         {
           line: 2,
-          message: `"this" is not fully initialized in class property intializers, define the value for this property in the constructor instead`,
+          message: `"this" is not fully initialized in class property initializers, define the value for this property in the constructor instead`,
         },
       ],
     },

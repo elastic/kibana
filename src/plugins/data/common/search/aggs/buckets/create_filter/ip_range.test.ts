@@ -32,7 +32,7 @@ describe('AggConfig Filters', () => {
         },
       } as any;
 
-      return new AggConfigs(indexPattern, aggs, { typesRegistry });
+      return new AggConfigs(indexPattern, aggs, { typesRegistry }, jest.fn());
     };
 
     test('should return a range filter for ip_range agg', () => {

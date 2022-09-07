@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { pieFunctionFactory } from '../../../public/functions/pie';
+import type { pieFunctionFactory } from '../../../public/functions/pie';
 import { FunctionFactoryHelp } from '../function_help';
 import { Legend } from '../../../types';
 import { CSS, FONT_FAMILY, FONT_WEIGHT, BOOLEAN_FALSE } from '../../constants';

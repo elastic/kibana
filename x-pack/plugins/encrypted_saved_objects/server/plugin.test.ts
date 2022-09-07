@@ -60,10 +60,11 @@ describe('EncryptedSavedObjects Plugin', () => {
             `);
 
       expect(startContract.getClient()).toMatchInlineSnapshot(`
-              Object {
-                "getDecryptedAsInternalUser": [Function],
-              }
-            `);
+        Object {
+          "createPointInTimeFinderDecryptedAsInternalUser": [Function],
+          "getDecryptedAsInternalUser": [Function],
+        }
+      `);
     });
   });
 });

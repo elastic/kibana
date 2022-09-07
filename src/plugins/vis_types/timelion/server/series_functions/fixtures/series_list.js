@@ -7,8 +7,8 @@
  */
 
 import buckets from './bucket_list';
-import getSeries from '../helpers/get_series';
-import getSeriesList from '../helpers/get_series_list';
+import getSeries from '../test_helpers/get_series';
+import getSeriesList from '../test_helpers/get_series_list';
 
 export default function () {
   return getSeriesList([

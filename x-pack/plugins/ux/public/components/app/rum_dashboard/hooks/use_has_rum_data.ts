@@ -5,10 +5,42 @@
  * 2.0.
  */
 
-import { useFetcher } from '../../../../hooks/use_fetcher';
+import { useEsSearch } from '@kbn/observability-plugin/public';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
+import { useEffect } from 'react';
+import {
+  formatHasRumResult,
+  hasRumDataQuery,
+} from '../../../../services/data/has_rum_data_query';
+import { useDataView } from '../local_uifilters/use_data_view';
 
 export function useHasRumData() {
-  return useFetcher((callApmApi) => {
-    return callApmApi('GET /api/apm/observability_overview/has_rum_data', {});
-  }, []);
+  const [hasData, setHasData] = useLocalStorage('uxAppHasDataBoolean', false);
+
+  const { dataViewTitle } = useDataView();
+
+  const { data: response, loading } = useEsSearch(
+    {
+      index: dataViewTitle,
+      ...hasRumDataQuery({}),
+    },
+    [dataViewTitle],
+    {
+      name: 'UXHasRumData',
+    }
+  );
+
+  useEffect(() => {
+    if (response) {
+      const { hasData: hasDataN } = formatHasRumResult(response, dataViewTitle);
+      setHasData(hasDataN);
+    }
+  }, [dataViewTitle, response, setHasData]);
+
+  if (!response) return { loading, hasData };
+
+  return {
+    hasData: formatHasRumResult(response, dataViewTitle).hasData,
+    loading,
+  };
 }

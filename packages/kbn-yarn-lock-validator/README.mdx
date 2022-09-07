@@ -1,0 +1,17 @@
+---
+id: kibDevDocsOpsKbnYarnLockValidator
+slug: /kibana-dev-docs/ops/kbn-yarn-lock-validator
+title: "@kbn/yarn-lock-validator"
+description: 'A tool for validating specific conditions for our dependency chain'
+date: 2022-07-14
+tags: ['kibana', 'dev', 'contributor', 'operations', 'packages', 'scripts', 'yarn']
+---
+
+`@kbn/yarn-lock-validator` provides yarn.lock validation logic for the Kibana project. It is loaded up by <DocLink id="kibDevDocsOpsKbnPm" /> after bootstrap and validates that we haven't accidentally re-introduced specific dependencies or version-combination scenarios detailed below:
+
+## validation scenarios
+
+ - Only a single version of lodash@4 is installed
+ - No lodash@3 versions installed
+ - None of the bazel packages in `"dependencies"`, and none of the transient dependencies of those packages, are marked as `"devOnly": true`
+

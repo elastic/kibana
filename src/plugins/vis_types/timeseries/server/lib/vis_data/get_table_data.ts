@@ -33,54 +33,56 @@ export async function getTableData(
   panel: Panel,
   services: VisTypeTimeseriesRequestServices
 ) {
-  const panelIndex = await services.cachedIndexPatternFetcher(
-    panel.index_pattern,
-    !panel.use_kibana_indexes
-  );
-
-  const strategy = await services.searchStrategyRegistry.getViableStrategy(
-    requestContext,
-    req,
-    panelIndex
-  );
-
-  if (!strategy) {
-    throw new Error(
-      i18n.translate('visTypeTimeseries.searchStrategyUndefinedErrorMessage', {
-        defaultMessage: 'Search strategy was not defined',
-      })
-    );
-  }
-
-  const { searchStrategy, capabilities } = strategy;
-
-  const extractFields = createFieldsFetcher(req, {
-    indexPatternsService: services.indexPatternsService,
-    cachedIndexPatternFetcher: services.cachedIndexPatternFetcher,
-    searchStrategy,
-    capabilities,
-  });
-
-  const calculatePivotLabel = async () => {
-    const pivotIds = getFieldsForTerms(panel.pivot_id);
-
-    if (pivotIds.length) {
-      const fields = panelIndex.indexPattern?.id
-        ? await extractFields({ id: panelIndex.indexPattern.id })
-        : [];
-
-      return getMultiFieldLabel(pivotIds, fields);
-    }
-  };
-
-  const meta: DataResponseMeta = {
-    type: panel.type,
-    uiRestrictions: capabilities.uiRestrictions,
-    trackedEsSearches: {},
-  };
+  let meta: DataResponseMeta | undefined;
   const handleError = handleErrorResponse(panel);
 
   try {
+    const panelIndex = await services.cachedIndexPatternFetcher(
+      panel.index_pattern,
+      !panel.use_kibana_indexes
+    );
+
+    const strategy = await services.searchStrategyRegistry.getViableStrategy(
+      requestContext,
+      req,
+      panelIndex
+    );
+
+    if (!strategy) {
+      throw new Error(
+        i18n.translate('visTypeTimeseries.searchStrategyUndefinedErrorMessage', {
+          defaultMessage: 'Search strategy was not defined',
+        })
+      );
+    }
+
+    const { searchStrategy, capabilities } = strategy;
+
+    const extractFields = createFieldsFetcher(req, {
+      indexPatternsService: services.indexPatternsService,
+      cachedIndexPatternFetcher: services.cachedIndexPatternFetcher,
+      searchStrategy,
+      capabilities,
+    });
+
+    const calculatePivotLabel = async () => {
+      const pivotIds = getFieldsForTerms(panel.pivot_id);
+
+      if (pivotIds.length) {
+        const fields = panelIndex.indexPattern?.id
+          ? await extractFields({ id: panelIndex.indexPattern.id })
+          : [];
+
+        return getMultiFieldLabel(pivotIds, fields);
+      }
+    };
+
+    meta = {
+      type: panel.type,
+      uiRestrictions: capabilities.uiRestrictions,
+      trackedEsSearches: {},
+    };
+
     panel.series.forEach((series) => {
       isAggSupported(series.metrics, capabilities);
       if (series.filter?.query && !isConfigurationFeatureEnabled('filter', capabilities)) {
@@ -131,7 +133,7 @@ export async function getTableData(
     const series = await Promise.all(buckets.map(processBucket({ panel, extractFields })));
 
     return {
-      ...meta,
+      ...(meta || {}),
       pivot_label: panel.pivot_label || (await calculatePivotLabel()),
       series,
     };

@@ -1,0 +1,13 @@
+{
+  "description": "Tiny/Dummy PyTorch model (pass_through)",
+  "model_type": "pytorch",
+  "inference_config": {
+    "pass_through": {
+      "tokenization": {
+        "bert": {
+          "with_special_tokens": false
+        }
+      }
+    }
+  }
+}

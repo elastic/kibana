@@ -10,6 +10,5 @@ export default function ({ loadTestFile }: FtrProviderContext) {
   describe('pipeline', () => {
     loadTestFile(require.resolve('./load'));
     loadTestFile(require.resolve('./save'));
-    loadTestFile(require.resolve('./delete'));
   });
 }

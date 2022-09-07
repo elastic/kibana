@@ -18,7 +18,7 @@ export default function actionsTests({ loadTestFile, getService }: FtrProviderCo
     after(async () => {
       await tearDown(getService);
     });
-
+    loadTestFile(require.resolve('./builtin_action_types/cases_webhook'));
     loadTestFile(require.resolve('./builtin_action_types/email'));
     loadTestFile(require.resolve('./builtin_action_types/es_index'));
     loadTestFile(require.resolve('./builtin_action_types/es_index_preconfigured'));
@@ -41,5 +41,10 @@ export default function actionsTests({ loadTestFile, getService }: FtrProviderCo
     loadTestFile(require.resolve('./get'));
     loadTestFile(require.resolve('./connector_types'));
     loadTestFile(require.resolve('./update'));
+
+    /**
+     * Sub action framework
+     */
+    loadTestFile(require.resolve('./sub_action_framework'));
   });
 }

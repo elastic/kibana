@@ -1,0 +1,183 @@
+{
+  "attributes": {
+    "closed_at": null,
+    "closed_by": null,
+    "connector": {
+      "fields": [],
+      "name": "none",
+      "type": ".none"
+    },
+    "created_at": "2022-07-02T14:03:52.812Z",
+    "created_by": {
+      "email": null,
+      "full_name": null,
+      "username": "elastic"
+    },
+    "description": "Persistable state",
+    "duration": null,
+    "external_service": null,
+    "owner": "cases",
+    "settings": {
+      "syncAlerts": false
+    },
+    "severity": "low",
+    "status": "open",
+    "tags": [],
+    "title": "Persistable state",
+    "updated_at": "2022-07-02T14:16:22.809Z",
+    "updated_by": {
+      "email": null,
+      "full_name": null,
+      "username": "elastic"
+    }
+  },
+  "coreMigrationVersion": "8.4.0",
+  "id": "cdeede80-fa0f-11ec-bcb4-59410ea3e0fe",
+  "migrationVersion": {
+    "cases": "8.3.0"
+  },
+  "references": [],
+  "type": "cases",
+  "updated_at": "2022-07-02T14:16:22.812Z",
+  "version": "WzE5NCwxXQ=="
+}
+
+{
+  "attributes": {
+    "created_at": "2022-07-02T14:16:22.809Z",
+    "created_by": {
+      "email": null,
+      "full_name": null,
+      "username": "elastic"
+    },
+    "owner": "cases",
+    "persistableStateAttachmentState": {
+      "foo": "foo"
+    },
+    "persistableStateAttachmentTypeId": ".test",
+    "pushed_at": null,
+    "pushed_by": null,
+    "type": "persistableState",
+    "updated_at": null,
+    "updated_by": null
+  },
+  "coreMigrationVersion": "8.4.0",
+  "id": "8cf7a270-fa11-11ec-bcb4-59410ea3e0fe",
+  "migrationVersion": {
+    "cases-comments": "8.3.0"
+  },
+  "references": [
+    {
+      "id": "cdeede80-fa0f-11ec-bcb4-59410ea3e0fe",
+      "name": "associated-cases",
+      "type": "cases"
+    }
+  ],
+  "score": null,
+  "sort": [
+    1656771382809,
+    337
+  ],
+  "type": "cases-comments",
+  "updated_at": "2022-07-02T14:16:22.811Z",
+  "version": "WzE5NSwxXQ=="
+}
+
+{
+  "attributes": {
+    "action": "create",
+    "created_at": "2022-07-02T14:16:23.376Z",
+    "created_by": {
+      "email": null,
+      "full_name": null,
+      "username": "elastic"
+    },
+    "owner": "cases",
+    "payload": {
+      "comment": {
+        "owner": "cases",
+        "persistableStateAttachmentState": {
+          "foo": "foo"
+        },
+        "persistableStateAttachmentTypeId": ".test",
+        "type": "persistableState"
+      }
+    },
+    "type": "comment"
+  },
+  "coreMigrationVersion": "8.4.0",
+  "id": "8d4e7500-fa11-11ec-bcb4-59410ea3e0fe",
+  "migrationVersion": {
+    "cases-user-actions": "8.3.0"
+  },
+  "references": [
+    {
+      "id": "cdeede80-fa0f-11ec-bcb4-59410ea3e0fe",
+      "name": "associated-cases",
+      "type": "cases"
+    },
+    {
+      "id": "8cf7a270-fa11-11ec-bcb4-59410ea3e0fe",
+      "name": "associated-cases-comments",
+      "type": "cases-comments"
+    }
+  ],
+  "score": null,
+  "sort": [
+    1656771383376,
+    356
+  ],
+  "type": "cases-user-actions",
+  "updated_at": "2022-07-02T14:16:23.376Z",
+  "version": "WzE5NiwxXQ=="
+}
+
+{
+  "attributes": {
+    "action": "create",
+    "created_at": "2022-07-02T14:03:53.183Z",
+    "created_by": {
+      "email": null,
+      "full_name": null,
+      "username": "elastic"
+    },
+    "owner": "cases",
+    "payload": {
+      "connector": {
+        "fields": null,
+        "name": "none",
+        "type": ".none"
+      },
+      "description": "Persistable state",
+      "owner": "cases",
+      "settings": {
+        "syncAlerts": false
+      },
+      "severity": "low",
+      "status": "open",
+      "tags": [],
+      "title": "Persistable state"
+    },
+    "type": "create_case"
+  },
+  "coreMigrationVersion": "8.4.0",
+  "id": "ce283e00-fa0f-11ec-bcb4-59410ea3e0fe",
+  "migrationVersion": {
+    "cases-user-actions": "8.3.0"
+  },
+  "references": [
+    {
+      "id": "cdeede80-fa0f-11ec-bcb4-59410ea3e0fe",
+      "name": "associated-cases",
+      "type": "cases"
+    }
+  ],
+  "score": null,
+  "sort": [
+    1656770633183,
+    308
+  ],
+  "type": "cases-user-actions",
+  "updated_at": "2022-07-02T14:03:53.184Z",
+  "version": "WzE0NSwxXQ=="
+}

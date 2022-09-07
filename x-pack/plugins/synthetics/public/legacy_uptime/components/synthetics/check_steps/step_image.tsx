@@ -12,10 +12,11 @@ import { PingTimestamp } from '../../monitor/ping_list/columns/ping_timestamp';
 
 interface Props {
   step: JourneyStep;
+  allStepsLoaded?: boolean;
   compactView?: boolean;
 }
 
-export const StepImage = ({ step, compactView }: Props) => {
+export const StepImage = ({ step, compactView, allStepsLoaded }: Props) => {
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s" wrap>
       <EuiFlexItem grow={false}>
@@ -23,6 +24,7 @@ export const StepImage = ({ step, compactView }: Props) => {
           checkGroup={step.monitor.check_group}
           initialStepNo={step.synthetics?.step?.index}
           stepStatus={step.synthetics.payload?.status}
+          allStepsLoaded={allStepsLoaded}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false} style={{ minWidth: 80 }}>

@@ -7,7 +7,8 @@
 
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 
-import { SO_SEARCH_LIMIT, getMaxPackageName } from '../../../common';
+import { SO_SEARCH_LIMIT } from '../../../common/constants';
+import { getMaxPackageName } from '../../../common/services';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../constants';
 
 import { packagePolicyService } from '../package_policy';

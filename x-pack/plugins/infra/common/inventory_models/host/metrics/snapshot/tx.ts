@@ -5,9 +5,38 @@
  * 2.0.
  */
 
-import { networkTrafficWithInterfaces } from '../../../shared/metrics/snapshot/network_traffic_with_interfaces';
-export const tx = networkTrafficWithInterfaces(
-  'tx',
-  'system.network.out.bytes',
-  'system.network.name'
-);
+import { MetricsUIAggregation } from '../../../types';
+export const tx: MetricsUIAggregation = {
+  tx_avg: {
+    avg: {
+      field: 'host.network.egress.bytes',
+    },
+  },
+  tx_period: {
+    filter: {
+      exists: {
+        field: 'host.network.egress.bytes',
+      },
+    },
+    aggs: {
+      period: {
+        max: {
+          field: 'metricset.period',
+        },
+      },
+    },
+  },
+  tx: {
+    bucket_script: {
+      buckets_path: {
+        value: 'tx_avg',
+        period: 'tx_period>period',
+      },
+      script: {
+        source: 'params.value / (params.period / 1000)',
+        lang: 'painless',
+      },
+      gap_policy: 'skip',
+    },
+  },
+};

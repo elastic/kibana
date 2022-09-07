@@ -13,8 +13,8 @@ import {
 
 import type { Filter } from '@kbn/es-query';
 import { RowRendererId } from '../../../../common/types/timeline';
-import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
-import { SubsetTimelineModel } from '../../../timelines/store/timeline/model';
+import type { Status } from '../../../../common/detection_engine/schemas/common/schemas';
+import type { SubsetTimelineModel } from '../../../timelines/store/timeline/model';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 import {
   columns,
@@ -166,7 +166,8 @@ export const alertsPreviewDefaultModel: SubsetTimelineModel = {
   sort: [
     {
       columnId: 'kibana.alert.original_time',
-      columnType: 'number',
+      columnType: 'date',
+      esTypes: ['date'],
       sortDirection: 'desc',
     },
   ],

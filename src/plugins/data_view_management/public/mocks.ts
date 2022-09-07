@@ -16,6 +16,7 @@ import { indexPatternFieldEditorPluginMock } from '@kbn/data-view-field-editor-p
 import { indexPatternEditorPluginMock } from '@kbn/data-view-editor-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
+import { savedObjectsManagementPluginMock } from '@kbn/saved-objects-management-plugin/public/mocks';
 import {
   IndexPatternManagementSetup,
   IndexPatternManagementStart,
@@ -56,12 +57,14 @@ const docLinks = {
 const createIndexPatternManagmentContext = (): {
   [key in keyof IndexPatternManagmentContext]: any;
 } => {
-  const { application, chrome, uiSettings, notifications, overlays } = coreMock.createStart();
+  const { application, chrome, uiSettings, notifications, overlays, theme } =
+    coreMock.createStart();
   const { http } = coreMock.createSetup();
   const data = dataPluginMock.createStartContract();
   const dataViewFieldEditor = indexPatternFieldEditorPluginMock.createStartContract();
   const dataViews = dataViewPluginMocks.createStartContract();
   const unifiedSearch = unifiedSearchPluginMock.createStartContract();
+  const savedObjectsManagement = savedObjectsManagementPluginMock.createStartContract();
 
   return {
     application,
@@ -81,6 +84,8 @@ const createIndexPatternManagmentContext = (): {
     IndexPatternEditor:
       indexPatternEditorPluginMock.createStartContract().IndexPatternEditorComponent,
     fieldFormats: fieldFormatsServiceMock.createStartContract(),
+    theme,
+    savedObjectsManagement,
   };
 };
 

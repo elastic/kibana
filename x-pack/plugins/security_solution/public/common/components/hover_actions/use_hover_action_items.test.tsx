@@ -6,15 +6,25 @@
  */
 import { useRef } from 'react';
 import { renderHook, act } from '@testing-library/react-hooks';
-import { useHoverActionItems, UseHoverActionItemsProps } from './use_hover_action_items';
+import type { UseHoverActionItemsProps } from './use_hover_action_items';
+import { useHoverActionItems } from './use_hover_action_items';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
-import { DataProvider } from '../../../../common/types/timeline';
+import type { DataProvider } from '../../../../common/types/timeline';
 
 jest.mock('../../lib/kibana');
 jest.mock('../../hooks/use_selector');
 jest.mock('../../containers/sourcerer', () => ({
   useSourcererDataView: jest.fn().mockReturnValue({ browserFields: {} }),
 }));
+const mockDispatch = jest.fn();
+jest.mock('react-redux', () => {
+  const original = jest.requireActual('react-redux');
+
+  return {
+    ...original,
+    useDispatch: () => mockDispatch,
+  };
+});
 
 describe('useHoverActionItems', () => {
   const defaultProps: UseHoverActionItemsProps = {

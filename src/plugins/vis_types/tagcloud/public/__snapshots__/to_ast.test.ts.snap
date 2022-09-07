@@ -5,35 +5,6 @@ Object {
   "chain": Array [
     Object {
       "arguments": Object {
-        "aggs": Array [],
-        "index": Array [
-          Object {
-            "chain": Array [
-              Object {
-                "arguments": Object {
-                  "id": Array [
-                    "123",
-                  ],
-                },
-                "function": "indexPatternLoad",
-                "type": "function",
-              },
-            ],
-            "type": "expression",
-          },
-        ],
-        "metricsAtAllLevels": Array [
-          false,
-        ],
-        "partialRows": Array [
-          false,
-        ],
-      },
-      "function": "esaggs",
-      "type": "function",
-    },
-    Object {
-      "arguments": Object {
         "bucket": Array [
           Object {
             "chain": Array [
@@ -120,35 +91,6 @@ Object {
   "chain": Array [
     Object {
       "arguments": Object {
-        "aggs": Array [],
-        "index": Array [
-          Object {
-            "chain": Array [
-              Object {
-                "arguments": Object {
-                  "id": Array [
-                    "123",
-                  ],
-                },
-                "function": "indexPatternLoad",
-                "type": "function",
-              },
-            ],
-            "type": "expression",
-          },
-        ],
-        "metricsAtAllLevels": Array [
-          false,
-        ],
-        "partialRows": Array [
-          false,
-        ],
-      },
-      "function": "esaggs",
-      "type": "function",
-    },
-    Object {
-      "arguments": Object {
         "bucket": Array [
           Object {
             "chain": Array [
@@ -233,35 +175,6 @@ Object {
 exports[`tagcloud vis toExpressionAst function should match snapshot without params 1`] = `
 Object {
   "chain": Array [
-    Object {
-      "arguments": Object {
-        "aggs": Array [],
-        "index": Array [
-          Object {
-            "chain": Array [
-              Object {
-                "arguments": Object {
-                  "id": Array [
-                    "123",
-                  ],
-                },
-                "function": "indexPatternLoad",
-                "type": "function",
-              },
-            ],
-            "type": "expression",
-          },
-        ],
-        "metricsAtAllLevels": Array [
-          false,
-        ],
-        "partialRows": Array [
-          false,
-        ],
-      },
-      "function": "esaggs",
-      "type": "function",
-    },
     Object {
       "arguments": Object {
         "bucket": Array [

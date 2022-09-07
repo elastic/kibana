@@ -3,11 +3,11 @@
 The Kibana actions plugin provides a framework to create executable actions. You can:
 
 - Register an action type and associate a JavaScript function to run when actions
-  are executed.
+  are generated.
 - Get a list of registered action types
 - Create an action from an action type and encrypted configuration object.
 - Get a list of actions that have been created.
-- Execute an action, passing it a parameter object.
+- Trigger an action, passing it a parameter object.
 - Perform CRUD operations on actions.
 
 ---
@@ -81,13 +81,13 @@ Table of Contents
 **Action Type**: A programatically defined integration with another service, with an expected set of configuration and parameters properties, typically defined with a schema. Plugins can add new
 action types.
 
-**Action**: A configuration object associated with an action type, that is ready to be executed. The configuration is persisted via Saved Objects, and some/none/all of the configuration properties can be stored encrypted.
+**Action**: A configuration object associated with an action type, that is ready to run. The configuration is persisted via Saved Objects, and some/none/all of the configuration properties can be stored encrypted.
 
 ## Usage
 
 1. Develop and register an action type (see [Action types -> Example](#example)).
 2. Create an action by using the [RESTful API](#restful-api).
-3. Use alerts to execute actions or execute manually (see [Firing actions](#firing-actions)).
+3. Use alerting rules to generate actions or trigger them manually (see [Firing actions](#firing-actions)).
 
 ## Kibana Actions Configuration
 
@@ -99,7 +99,8 @@ Built-In-Actions are configured using the _xpack.actions_ namespace under _kiban
 
 #### **allowedHosts** configuration
 
-- You can use the string "*" in the **allowedHosts** configuration in place of a specific hostname to enable Kibana to target any URL, but keep in mind the potential to use such a feature to execute [SSRF](https://www.owasp.org/index.php/Server_Side_Request_Forgery) attacks from your server.
+- You can use the string "*" in the **allowedHosts** configuration in place of a specific hostname to enable Kibana to target any URL, but keep in mind the potential to use such a feature to launch [SSRF](https://owasp.org/www-community/attacks/Server_Side_Request_Forgery) attacks from your server.
+
 
 - The **allowedHosts** configuration applies to built-in action types (such as Slack and PagerDuty). While the _PagerDuty Action Type_ has been configured to support the service's Events API (at _https://events.pagerduty.com/v2/enqueue_, which you can read about in [Pagerduty's documentation](https://v2.developer.pagerduty.com/docs/events-api-v2)), the PagerDuty domain must still be included in the allowedHosts configuration before the action can be used.
 
@@ -130,28 +131,29 @@ The following table describes the properties of the `options` object.
 | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------- |
 | id                       | Unique identifier for the action type. For convention, ids starting with `.` are reserved for built in action types. We recommend using a convention like `<plugin_id>.mySpecialAction` for your action types.                                                                                                                                                                                                                                                                                                                                                                                       | string                       |
 | name                     | A user-friendly name for the action type. These will be displayed in dropdowns when chosing action types.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | string                       |
-| maxAttempts              | The maximum number of times this action will attempt to execute when scheduled.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | number                       |
+| maxAttempts              | The maximum number of times this action will attempt to run when scheduled.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | number                       |
 | minimumLicenseRequired   | The license required to use the action type.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         | string                       |
+| supportedFeatureIds   | List of IDs of the features that this action type is available in. Allowed values are `alerting`, `siem`, `uptime`, `cases`. See  `x-pack/plugins/actions/common/connector_feature_config.ts` for the most up to date list.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         | string[]                       |
 | validate.params          | When developing an action type, it needs to accept parameters to know what to do with the action. (Example `to`, `from`, `subject`, `body` of an email). See the current built-in email action type for an example of the state-of-the-art validation. <p>Technically, the value of this property should have a property named `validate()` which is a function that takes a params object to validate and returns a sanitized version of that object to pass to the execution function. Validation errors should be thrown from the `validate()` function and will be available as an error message | schema / validation function |
 | validate.config          | Similar to params, a config may be required when creating an action (for example `host` and `port` for an email server).                                                                                                                                                                                                                                                                                                                                                                                                                                                                             | schema / validation function |
 | validate.secrets         | Similar to params, a secrets object may be required when creating an action (for example `user` and `password` for an email server).                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | schema / validation function |
-| executor                 | This is where the code of an action type lives. This is a function gets called for executing an action from either alerting or manually by using the exposed function (see firing actions). For full details, see executor section below.                                                                                                                                                                                                                                                                                                                                                            | Function                     |
+| executor                 | This is where the code of an action type lives. This is a function gets called for generating an action from either alerting or manually by using the exposed function (see firing actions). For full details, see executor section below.                                                                                                                                                                                                                                                                                                                                                            | Function                     |
 | renderParameterTemplates | Optionally define a function to provide custom rendering for this action type.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | Function                     |
 
 **Important** - The config object is persisted in ElasticSearch and updated via the ElasticSearch update document API. This API allows "partial updates" - and this can cause issues with the encryption used on specified properties. So, a `validate()` function should return values for all configuration properties, so that partial updates do not occur. Setting property values to `null` rather than `undefined`, or not including a property in the config object, is all you need to do to ensure partial updates won't occur.
 
 ### Executor
 
-This is the primary function for an action type. Whenever the action needs to execute, this function will perform the action. It receives a variety of parameters. The following table describes the properties that the executor receives.
+This is the primary function for an action type. Whenever the action needs to run, this function will perform the action. It receives a variety of parameters. The following table describes the properties that the executor receives.
 
 **executor(options)**
 
 | Property                                | Description                                                                                                                                                                                                                                                                                                                                                                                 |
 | --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| actionId                                | The action saved object id that the action type is executing for.                                                                                                                                                                                                                                                                                                                           |
+| actionId                                | The action saved object id that the connector is generating.                                                                                                                                                                                                                                                                                                                           |
 | config                                  | The action configuration. If you would like to validate the config before being passed to the executor, define `validate.config` within the action type.                                                                                                                                                                                                                                    |
 | secrets                                 | The decrypted secrets object given to an action. This comes from the action saved object that is partially or fully encrypted within the data store. If you would like to validate the secrets object before being passed to the executor, define `validate.secrets` within the action type.                                                                                                |
-| params                                  | Parameters for the execution. These will be given at execution time by either an alert or manually provided when calling the plugin provided execute function.                                                                                                                                                                                                                              |
+| params                                  | Parameters for the action. These will be given at run time by either an alert or manually provided when calling the plugin provided execute function.                                                                                                                                                                                                                              |
 | services.scopedClusterClient            | Use this to do Elasticsearch queries on the cluster Kibana connects to. Serves the same purpose as the normal IClusterClient, but exposes an additional `asCurrentUser` method that doesn't use credentials of the Kibana internal user (as `asInternalUser` does) to request Elasticsearch API, but rather passes HTTP headers extracted from the current user request to the API instead. |
 | services.savedObjectsClient             | This is an instance of the saved objects client. This provides the ability to do CRUD on any saved objects within the same space the alert lives in.<br><br>The scope of the saved objects client is tied to the user in context calling the execute API or the API key provided to the execute plugin function (only when security isenabled).                                             |
 | services.log(tags, [data], [timestamp]) | Use this to create server logs. (This is the same function as server.log)                                                                                                                                                                                                                                                                                                                   |
@@ -176,7 +178,7 @@ By providing the user's Request you'll receive an instance of the ActionsClient 
 const actionsClient = server.plugins.actions.getActionsClientWithRequest(request);
 ```
 
-Once you have a scoped ActionsClient you can execute an action by caling either the `enqueueExecution` which will schedule the action to run later or the `execute` apis which will run it immediately and return the result respectively.
+Once you have a scoped ActionsClient you can generate an action by calling either the `enqueueExecution` which will schedule the action to run later or the `execute` apis which will run it immediately and return the result respectively.
 
 ### actionsClient.enqueueExecution(options)
 
@@ -191,7 +193,7 @@ The following table describes the properties of the `options` object.
 
 | Property | Description                                                                                            | Type             |
 | -------- | ------------------------------------------------------------------------------------------------------ | ---------------- |
-| id       | The id of the action you want to execute.                                                              | string           |
+| id       | The id of the action you want to run.                                                              | string           |
 | params   | The `params` value to give the action type executor.                                                   | object           |
 | spaceId  | The space id the action is within.                                                                     | string           |
 | apiKey   | The Elasticsearch API key to use for context. (Note: only required and used when security is enabled). | string           |
@@ -225,7 +227,7 @@ The following table describes the properties of the `options` object.
 
 | Property | Description                                                                           | Type             |
 | -------- | ------------------------------------------------------------------------------------- | ---------------- |
-| id       | The id of the action you want to execute.                                             | string           |
+| id       | The id of the action you want to generate.                                             | string           |
 | params   | The `params` value to give the action type executor.                                  | object           |
 | source   | The source of the execution, either an HTTP request or a reference to a Saved Object. | object, optional |
 

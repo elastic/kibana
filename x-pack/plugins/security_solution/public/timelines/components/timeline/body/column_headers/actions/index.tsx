@@ -8,10 +8,10 @@
 import { EuiButtonIcon } from '@elastic/eui';
 import React, { useCallback } from 'react';
 
-import { ColumnHeaderOptions } from '../../../../../../../common/types';
-import { OnColumnRemoved } from '../../../events';
+import type { ColumnHeaderOptions } from '../../../../../../../common/types';
+import type { OnColumnRemoved } from '../../../events';
 import { EventsHeadingExtra, EventsLoading } from '../../../styles';
-import { Sort } from '../../sort';
+import type { Sort } from '../../sort';
 
 import * as i18n from '../translations';
 

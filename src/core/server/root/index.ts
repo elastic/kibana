@@ -8,9 +8,9 @@
 
 import { ConnectableObservable, Subscription } from 'rxjs';
 import { first, publishReplay, switchMap, concatMap, tap } from 'rxjs/operators';
-
-import { Env, RawConfigurationProvider } from '../config';
-import { Logger, LoggerFactory, LoggingConfigType, LoggingSystem } from '../logging';
+import type { Logger, LoggerFactory } from '@kbn/logging';
+import { Env, RawConfigurationProvider } from '@kbn/config';
+import { LoggingConfigType, LoggingSystem } from '@kbn/core-logging-server-internal';
 import { Server } from '../server';
 
 /**

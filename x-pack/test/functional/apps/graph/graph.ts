@@ -10,6 +10,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['settings', 'common', 'graph', 'header']);
+  const kibanaServer = getService('kibanaServer');
   const log = getService('log');
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
@@ -19,13 +20,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await browser.setWindowSize(1600, 1000);
       log.debug('load graph/secrepo data');
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/graph/secrepo');
-      await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
+      await kibanaServer.savedObjects.cleanStandardList();
       await PageObjects.common.navigateToApp('settings');
       log.debug('create secrepo index pattern');
       await PageObjects.settings.createIndexPattern('secrepo', '@timestamp');
       log.debug('navigateTo graph');
       await PageObjects.common.navigateToApp('graph');
       await PageObjects.graph.createWorkspace();
+    });
+
+    after(async () => {
+      await kibanaServer.savedObjects.clean({ types: ['index-pattern'] });
+
+      await esArchiver.unload('x-pack/test/functional/es_archives/graph/secrepo');
     });
 
     const graphName = 'my Graph workspace name ' + new Date().getTime();

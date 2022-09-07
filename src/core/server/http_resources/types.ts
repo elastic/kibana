@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import type { RequestHandlerContext } from '..';
 import type {
   IRouter,
   RouteConfig,
@@ -15,7 +14,8 @@ import type {
   HttpResponseOptions,
   KibanaResponseFactory,
   RequestHandler,
-} from '../http';
+} from '@kbn/core-http-server';
+import type { RequestHandlerContext } from '..';
 
 /**
  * Allows to configure HTTP response parameters

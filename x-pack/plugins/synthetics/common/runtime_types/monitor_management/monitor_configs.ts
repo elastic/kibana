@@ -119,3 +119,20 @@ export enum ThrottlingSuffix {
 
 export const ThrottlingSuffixCodec = tEnum<ThrottlingSuffix>('ThrottlingSuffix', ThrottlingSuffix);
 export type ThrottlingSuffixType = t.TypeOf<typeof ThrottlingSuffixCodec>;
+
+export enum SourceType {
+  UI = 'ui',
+  PROJECT = 'project',
+}
+
+export const SourceTypeCodec = tEnum<SourceType>('SourceType', SourceType);
+
+export enum FormMonitorType {
+  SINGLE = 'single',
+  MULTISTEP = 'multistep',
+  HTTP = 'http',
+  TCP = 'tcp',
+  ICMP = 'icmp',
+}
+
+export const FormMonitorTypeCodec = tEnum<FormMonitorType>('FormMonitorType', FormMonitorType);

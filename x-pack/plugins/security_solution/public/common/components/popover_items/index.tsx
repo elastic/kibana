@@ -76,9 +76,11 @@ const PopoverItemsComponent = <T extends unknown>({
 
   return (
     <PopoverItemsWrapper alignItems="center" gutterSize="s" data-test-subj={dataTestPrefix}>
-      <EuiFlexItem grow={1} className="eui-textTruncate">
-        <OverflowList items={items.slice(0, numberOfItemsToDisplay)} />
-      </EuiFlexItem>
+      {numberOfItemsToDisplay !== 0 && (
+        <EuiFlexItem grow={1} className="eui-textTruncate">
+          <OverflowList items={items.slice(0, numberOfItemsToDisplay)} />
+        </EuiFlexItem>
+      )}
       <EuiPopover
         ownFocus
         data-test-subj={`${dataTestPrefix}DisplayPopover`}

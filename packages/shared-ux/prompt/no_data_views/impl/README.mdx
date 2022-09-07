@@ -1,0 +1,28 @@
+---
+id: sharedUX/Prompt/NoDataViews
+slug: /shared-ux/prompt/no-data-views
+title: No Data Views Prompt
+description: A prompt to be displayed when there is data in Elasticsearch, but no data views
+tags: ['shared-ux', 'component', 'prompt', 'no-data']
+date: 2022-02-09
+---
+
+When there is data in Elasticsearch, but there haven't been any data views created yet, we want to display an appropriate message to the user and facilitate creation of data views, (if appropriate permissions are in place).
+
+The `NoDataViewsPrompt` connected component uses:
+
+- `userPermissions.editDataView` from `data_view_editor` to determine if the user has permission to create data views
+- `openEditor` from `data_view_editor` to facilitate creating a data view.
+- `docLinks` from `coreStart` to populate documentation links.
+
+## API
+| Export | Description |
+|---|---|
+| `NoDataViewsPromptProvider` | Provides contextual services to `NoDataViewsPrompt`. |
+| `NoDataViewsPromptKibanaProvider` | Maps Kibana dependencies to provide contextual services to `NoDataViewsPrompt`. |
+| `NoDataViewsPrompt` | Uses a `Provider` to access contextual services to populate props on the `NoDataViewsPromptComponent`. |
+| `NoDataViewsPromptComponent` | The pure component, a pre-configured **EuiEmptyPrompt**. |
+
+## EUI Promotion Status
+
+This component is not currently considered for promotion to EUI.

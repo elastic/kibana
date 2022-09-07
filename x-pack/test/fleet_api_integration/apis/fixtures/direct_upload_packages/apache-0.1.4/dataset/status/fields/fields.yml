@@ -1,0 +1,154 @@
+- name: apache.status
+  type: group
+  fields:
+  - name: hostname
+    type: keyword
+    description: |
+      Apache hostname.
+  - name: total_accesses
+    type: long
+    description: |
+      Total number of access requests.
+  - name: total_kbytes
+    type: long
+    description: |
+      Total number of kilobytes served.
+  - name: requests_per_sec
+    type: scaled_float
+    description: |
+      Requests per second.
+  - name: bytes_per_sec
+    type: scaled_float
+    description: |
+      Bytes per second.
+  - name: bytes_per_request
+    type: scaled_float
+    description: |
+      Bytes per request.
+  - name: workers.busy
+    type: long
+    description: |
+      Number of busy workers.
+  - name: workers.idle
+    type: long
+    description: |
+      Number of idle workers.
+  - name: uptime
+    type: group
+    fields:
+    - name: server_uptime
+      type: long
+      description: |
+        Server uptime in seconds.
+    - name: uptime
+      type: long
+      description: |
+        Server uptime.
+  - name: cpu
+    type: group
+    fields:
+    - name: load
+      type: scaled_float
+      description: |
+        CPU Load.
+    - name: user
+      type: scaled_float
+      description: |
+        CPU user load.
+    - name: system
+      type: scaled_float
+      description: |
+        System cpu.
+    - name: children_user
+      type: scaled_float
+      description: |
+        CPU of children user.
+    - name: children_system
+      type: scaled_float
+      description: |
+        CPU of children system.
+  - name: connections
+    type: group
+    fields:
+    - name: total
+      type: long
+      description: |
+        Total connections.
+    - name: async.writing
+      type: long
+      description: |
+        Async connection writing.
+    - name: async.keep_alive
+      type: long
+      description: |
+        Async keeped alive connections.
+    - name: async.closing
+      type: long
+      description: |
+        Async closed connections.
+  - name: load
+    type: group
+    fields:
+    - name: "1"
+      type: scaled_float
+      description: |
+        Load average for the last minute.
+    - name: "5"
+      type: scaled_float
+      description: |
+        Load average for the last 5 minutes.
+    - name: "15"
+      type: scaled_float
+      description: |
+        Load average for the last 15 minutes.
+  - name: scoreboard
+    type: group
+    fields:
+    - name: starting_up
+      type: long
+      description: |
+        Starting up.
+    - name: reading_request
+      type: long
+      description: |
+        Reading requests.
+    - name: sending_reply
+      type: long
+      description: |
+        Sending Reply.
+    - name: keepalive
+      type: long
+      description: |
+        Keep alive.
+    - name: dns_lookup
+      type: long
+      description: |
+        Dns Lookups.
+    - name: closing_connection
+      type: long
+      description: |
+        Closing connections.
+    - name: logging
+      type: long
+      description: |
+        Logging
+    - name: gracefully_finishing
+      type: long
+      description: |
+        Gracefully finishing.
+    - name: idle_cleanup
+      type: long
+      description: |
+        Idle cleanups.
+    - name: open_slot
+      type: long
+      description: |
+        Open slots.
+    - name: waiting_for_connection
+      type: long
+      description: |
+        Waiting for connections.
+    - name: total
+      type: long
+      description: |
+        Total.

@@ -6,20 +6,52 @@
  */
 
 const basePath = '/app/apm/settings/custom-links';
+const deleteAllCustomLinks = () => {
+  // delete customLink if exists
+  const kibanaUrl = Cypress.env('KIBANA_URL');
+  cy.request({
+    log: false,
+    method: 'GET',
+    url: `${kibanaUrl}/internal/apm/settings/custom_links`,
+    body: {},
+    headers: {
+      'kbn-xsrf': 'e2e_test',
+    },
+    auth: { user: 'editor', pass: 'changeme' },
+  }).then((response) => {
+    const promises = response.body.customLinks.map((item: any) => {
+      if (item.id) {
+        return cy.request({
+          log: false,
+          method: 'DELETE',
+          url: `${kibanaUrl}/internal/apm/settings/custom_links/${item.id}`,
+          body: {},
+          headers: {
+            'kbn-xsrf': 'e2e_test',
+          },
+          auth: { user: 'editor', pass: 'changeme' },
+          failOnStatusCode: false,
+        });
+      }
+    });
+    return Promise.all(promises);
+  });
+};
 
 describe('Custom links', () => {
   beforeEach(() => {
-    cy.loginAsPowerUser();
+    cy.loginAsEditorUser();
+    deleteAllCustomLinks();
   });
 
   it('shows empty message and create button', () => {
-    cy.visit(basePath);
+    cy.visitKibana(basePath);
     cy.contains('No links found');
     cy.contains('Create custom link');
   });
 
   it('creates custom link', () => {
-    cy.visit(basePath);
+    cy.visitKibana(basePath);
     const emptyPrompt = cy.get('[data-test-subj="customLinksEmptyPrompt"]');
     cy.contains('Create custom link').click();
     cy.contains('Create link');
@@ -33,5 +65,22 @@ describe('Custom links', () => {
     cy.contains('https://foo.com');
     cy.get('[data-test-subj="editCustomLink"]').click();
     cy.contains('Delete').click();
+  });
+
+  it('clears filter values when field is selected', () => {
+    cy.visitKibana(basePath);
+
+    // wait for empty prompt
+    cy.get('[data-test-subj="customLinksEmptyPrompt"]').should('be.visible');
+
+    cy.contains('Create custom link').click();
+    cy.get('[data-test-subj="filter-0"]').select('service.name');
+    cy.get(
+      '[data-test-subj="service.name.value"] [data-test-subj="comboBoxSearchInput"]'
+    ).type('foo');
+    cy.get('[data-test-subj="filter-0"]').select('service.environment');
+    cy.get(
+      '[data-test-subj="service.environment.value"] [data-test-subj="comboBoxInput"]'
+    ).should('not.contain', 'foo');
   });
 });

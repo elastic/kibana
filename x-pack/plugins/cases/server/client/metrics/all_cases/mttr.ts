@@ -22,7 +22,11 @@ export class MTTR extends AllCasesAggregationHandler {
   }
 
   public async compute(): Promise<CasesMetricsResponse> {
-    const { authorization, caseService, logger } = this.options.clientArgs;
+    const {
+      authorization,
+      services: { caseService },
+      logger,
+    } = this.options.clientArgs;
 
     try {
       const { filter: authorizationFilter } = await authorization.getAuthorizationFilter(

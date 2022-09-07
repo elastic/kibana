@@ -7,8 +7,7 @@
  */
 
 import type { Subject } from 'rxjs';
-import type { Event, TelemetryCounter } from '@kbn/analytics-client';
-import { TelemetryCounterType } from '@kbn/analytics-client';
+import type { Event, TelemetryCounter, TelemetryCounterType } from '@kbn/analytics-client';
 
 /**
  * Creates a telemetry counter helper to make it easier to generate them
@@ -28,13 +27,21 @@ export function createTelemetryCounterHelper(
    */
   return (
     events: Event[],
-    { type, code, error }: { type?: TelemetryCounterType; code?: string; error?: Error } = {}
+    {
+      type,
+      code,
+      error,
+    }: {
+      type?: TelemetryCounterType;
+      code?: string;
+      error?: Error;
+    } = {}
   ) => {
     const eventTypeCounts = countEventTypes(events);
     Object.entries(eventTypeCounts).forEach(([eventType, count]) => {
       telemetryCounter$.next({
         source,
-        type: type ?? (error ? TelemetryCounterType.failed : TelemetryCounterType.succeeded),
+        type: type ?? (error ? 'failed' : 'succeeded'),
         code: code ?? error?.message ?? 'OK',
         count,
         event_type: eventType,

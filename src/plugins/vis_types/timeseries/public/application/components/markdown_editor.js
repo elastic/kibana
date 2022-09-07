@@ -23,6 +23,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { getDataViewsStart } from '../../services';
 import { fetchIndexPattern } from '../../../common/index_patterns_utils';
 
+import './_markdown_editor.scss';
+
 export class MarkdownEditor extends Component {
   constructor(props) {
     super(props);
@@ -48,7 +50,7 @@ export class MarkdownEditor extends Component {
   async componentDidMount() {
     const dataViews = getDataViewsStart();
     const { indexPattern } = await fetchIndexPattern(this.props.model.index_pattern, dataViews);
-    this.setState({ fieldFormatMap: indexPattern?.fieldFormatMap });
+    this.setState({ fieldFormatMap: indexPattern?.fieldFormatMap, indexPattern });
   }
 
   render() {
@@ -58,7 +60,13 @@ export class MarkdownEditor extends Component {
       return null;
     }
     const series = _.get(visData, `${model.id}.series`, []);
-    const variables = convertSeriesToVars(series, model, getConfig, this.state.fieldFormatMap);
+    const variables = convertSeriesToVars(
+      series,
+      model,
+      getConfig,
+      this.state.fieldFormatMap,
+      this.state.indexPattern
+    );
     const rows = [];
     const rawFormatter = createTickFormatter('0.[0000]', null, getConfig);
 

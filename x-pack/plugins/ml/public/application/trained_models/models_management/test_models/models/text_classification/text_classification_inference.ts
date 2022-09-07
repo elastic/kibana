@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import { InferenceBase } from '../inference_base';
 import { processResponse } from './common';
 import type { TextClassificationResponse, RawTextClassificationResponse } from './common';
@@ -14,6 +15,15 @@ import { SUPPORTED_PYTORCH_TASKS } from '../../../../../../../common/constants/t
 
 export class TextClassificationInference extends InferenceBase<TextClassificationResponse> {
   protected inferenceType = SUPPORTED_PYTORCH_TASKS.TEXT_CLASSIFICATION;
+  protected inferenceTypeLabel = i18n.translate(
+    'xpack.ml.trainedModels.testModelsFlyout.textClassification.label',
+    { defaultMessage: 'Text classification' }
+  );
+  protected info = [
+    i18n.translate('xpack.ml.trainedModels.testModelsFlyout.textClassification.info1', {
+      defaultMessage: 'Test how well the model classifies your input text.',
+    }),
+  ];
 
   public async infer() {
     try {
@@ -45,7 +55,13 @@ export class TextClassificationInference extends InferenceBase<TextClassificatio
   }
 
   public getInputComponent(): JSX.Element {
-    return getGeneralInputComponent(this);
+    const placeholder = i18n.translate(
+      'xpack.ml.trainedModels.testModelsFlyout.textClassification.inputText',
+      {
+        defaultMessage: 'Enter a phrase to test',
+      }
+    );
+    return getGeneralInputComponent(this, placeholder);
   }
 
   public getOutputComponent(): JSX.Element {

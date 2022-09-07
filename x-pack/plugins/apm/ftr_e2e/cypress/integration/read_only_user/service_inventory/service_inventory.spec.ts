@@ -9,6 +9,7 @@ import url from 'url';
 import { synthtrace } from '../../../../synthtrace';
 import { opbeans } from '../../../fixtures/synthtrace/opbeans';
 import { checkA11y } from '../../../support/commands';
+import { generateMultipleServicesData } from './generate_data';
 
 const timeRange = {
   rangeFrom: '2021-10-10T00:00:00.000Z',
@@ -31,77 +32,68 @@ const mainApiRequestsToIntercept = [
   },
 ];
 
-const secondaryApiRequestsToIntercept = [
-  {
-    endpoint: 'internal/apm/suggestions?*',
-    aliasName: 'suggestionsRequest',
-  },
-];
-
 const mainAliasNames = mainApiRequestsToIntercept.map(
   ({ aliasName }) => `@${aliasName}`
 );
 
-describe('When navigating to the service inventory', () => {
-  before(async () => {
-    cy.loginAsReadOnlyUser();
-    cy.visit(serviceInventoryHref);
-
+describe('Service inventory', () => {
+  before(() => {
     const { rangeFrom, rangeTo } = timeRange;
-    await synthtrace.index(
+    synthtrace.index(
       opbeans({
         from: new Date(rangeFrom).getTime(),
         to: new Date(rangeTo).getTime(),
       })
     );
   });
-
-  after(async () => {
-    await synthtrace.clean();
+  after(() => {
+    synthtrace.clean();
   });
 
-  it('has no detectable a11y violations on load', () => {
-    cy.contains('h1', 'Services');
-    // set skipFailures to true to not fail the test when there are accessibility failures
-    checkA11y({ skipFailures: true });
-  });
-
-  it('has a list of services', () => {
-    cy.contains('opbeans-node');
-    cy.contains('opbeans-java');
-    cy.contains('opbeans-rum');
-  });
-
-  it('has a list of environments', () => {
-    cy.get('td:contains(production)').should('have.length', 3);
-  });
-
-  it('when clicking on a service it loads the service overview for that service', () => {
-    cy.contains('opbeans-node').click({ force: true });
-    cy.url().should('include', '/apm/services/opbeans-node/overview');
-    cy.contains('h1', 'opbeans-node');
-  });
-
-  describe.skip('Calls APIs', () => {
+  describe('When navigating to the service inventory', () => {
     beforeEach(() => {
-      [...mainApiRequestsToIntercept, ...secondaryApiRequestsToIntercept].map(
-        ({ endpoint, aliasName }) => {
-          cy.intercept('GET', endpoint).as(aliasName);
-        }
+      cy.loginAsViewerUser();
+      cy.visitKibana(serviceInventoryHref);
+    });
+
+    it('has no detectable a11y violations on load', () => {
+      cy.contains('h1', 'Services');
+      // set skipFailures to true to not fail the test when there are accessibility failures
+      checkA11y({ skipFailures: true });
+    });
+
+    it('has a list of services', () => {
+      cy.contains('opbeans-node');
+      cy.contains('opbeans-java');
+      cy.contains('opbeans-rum');
+    });
+
+    it('has a list of environments', () => {
+      cy.get('td:contains(production)').should('have.length', 3);
+    });
+
+    it('when clicking on a service it loads the service overview for that service', () => {
+      cy.contains('opbeans-node').click({ force: true });
+      cy.url().should('include', '/apm/services/opbeans-node/overview');
+      cy.contains('h1', 'opbeans-node');
+    });
+  });
+
+  describe('Calls APIs', () => {
+    beforeEach(() => {
+      cy.intercept('GET', '/internal/apm/services?*').as('servicesRequest');
+      cy.intercept('POST', '/internal/apm/services/detailed_statistics?*').as(
+        'detailedStatisticsRequest'
       );
 
-      cy.loginAsReadOnlyUser();
-      cy.visit(serviceInventoryHref);
+      cy.loginAsViewerUser();
+      cy.visitKibana(serviceInventoryHref);
     });
 
     it('with the correct environment when changing the environment', () => {
       cy.wait(mainAliasNames);
-      cy.get('[data-test-subj="environmentFilter"]').type('pro');
 
-      cy.expectAPIsToHaveBeenCalledWith({
-        apisIntercepted: ['@suggestionsRequest'],
-        value: 'fieldValue=pro',
-      });
+      cy.get('[data-test-subj="environmentFilter"]').type('production');
 
       cy.contains('button', 'production').click();
 
@@ -129,6 +121,77 @@ describe('When navigating to the service inventory', () => {
 
       cy.contains('Refresh').click();
       cy.wait(mainAliasNames);
+    });
+  });
+
+  describe('Check detailed statistics API with multiple services', () => {
+    before(() => {
+      // clean previous data created
+      synthtrace.clean();
+      const { rangeFrom, rangeTo } = timeRange;
+      synthtrace.index(
+        generateMultipleServicesData({
+          from: new Date(rangeFrom).getTime(),
+          to: new Date(rangeTo).getTime(),
+        })
+      );
+    });
+
+    beforeEach(() => {
+      cy.loginAsViewerUser();
+    });
+
+    after(() => {
+      synthtrace.clean();
+    });
+
+    it('calls detailed API with visible items only', () => {
+      cy.intercept('POST', '/internal/apm/services/detailed_statistics?*').as(
+        'detailedStatisticsRequest'
+      );
+      cy.intercept('GET', '/internal/apm/services?*').as(
+        'mainStatisticsRequest'
+      );
+
+      cy.visitKibana(
+        `${serviceInventoryHref}&pageSize=10&sortField=serviceName&sortDirection=asc`
+      );
+      cy.wait('@mainStatisticsRequest');
+      cy.contains('Services');
+      cy.get('.euiPagination__list').children().should('have.length', 5);
+      cy.wait('@detailedStatisticsRequest').then((payload) => {
+        expect(payload.request.body.serviceNames).eql(
+          JSON.stringify([
+            '0',
+            '1',
+            '10',
+            '11',
+            '12',
+            '13',
+            '14',
+            '15',
+            '16',
+            '17',
+          ])
+        );
+      });
+      cy.get('[data-test-subj="pagination-button-1"]').click();
+      cy.wait('@detailedStatisticsRequest').then((payload) => {
+        expect(payload.request.body.serviceNames).eql(
+          JSON.stringify([
+            '18',
+            '19',
+            '2',
+            '20',
+            '21',
+            '22',
+            '23',
+            '24',
+            '25',
+            '26',
+          ])
+        );
+      });
     });
   });
 });

@@ -494,7 +494,7 @@ export function getMlClient(
       await modelIdsCheck(p);
       return mlClient.stopTrainedModelDeployment(...p);
     },
-    async inferTrainedModelDeployment(...p: Parameters<MlClient['inferTrainedModelDeployment']>) {
+    async inferTrainedModel(...p: Parameters<MlClient['inferTrainedModel']>) {
       await modelIdsCheck(p);
       // Temporary workaround for the incorrect inferTrainedModelDeployment function in the esclient
       if (

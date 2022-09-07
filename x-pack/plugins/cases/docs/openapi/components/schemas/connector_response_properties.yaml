@@ -1,0 +1,23 @@
+actionTypeId:
+  $ref: 'connector_types.yaml'
+config:
+  type: object
+  properties:
+    apiUrl:
+      type: string
+    projectKey:
+      type: string
+  additionalProperties: true  
+id:
+  type: string
+isDeprecated:
+  type: boolean
+isMissingSecrets:
+  type: boolean
+isPreconfigured:
+  type: boolean
+name:
+  type: string
+referencedByCount:
+  type: integer
+

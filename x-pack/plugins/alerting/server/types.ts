@@ -10,14 +10,15 @@ import type {
   CustomRequestHandlerContext,
   SavedObjectReference,
   IUiSettingsClient,
+} from '@kbn/core/server';
+import { ISearchStartSearchSource } from '@kbn/data-plugin/common';
+import { LicenseType } from '@kbn/licensing-plugin/server';
+import {
   IScopedClusterClient,
   SavedObjectAttributes,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { ISearchStartSearchSource } from '@kbn/data-plugin/common';
-import { LicenseType } from '@kbn/licensing-plugin/server';
-import { AlertFactoryDoneUtils, PublicAlert } from './alert';
 import { RuleTypeRegistry as OrigruleTypeRegistry } from './rule_type_registry';
 import { PluginSetupContract, PluginStartContract } from './plugin';
 import { RulesClient } from './rules_client';
@@ -40,10 +41,12 @@ import {
   SanitizedRuleConfig,
   RuleMonitoring,
   MappedParams,
+  RuleSnooze,
 } from '../common';
+import { PublicAlertFactory } from './alert/create_alert_factory';
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 export type SpaceIdToNamespaceFunction = (spaceId?: string) => string | undefined;
-
+export type { RuleTypeParams };
 /**
  * @public
  */
@@ -65,20 +68,16 @@ export type AlertingRequestHandlerContext = CustomRequestHandlerContext<{
  * @internal
  */
 export type AlertingRouter = IRouter<AlertingRequestHandlerContext>;
-
 export interface RuleExecutorServices<
-  InstanceState extends AlertInstanceState = AlertInstanceState,
-  InstanceContext extends AlertInstanceContext = AlertInstanceContext,
+  State extends AlertInstanceState = AlertInstanceState,
+  Context extends AlertInstanceContext = AlertInstanceContext,
   ActionGroupIds extends string = never
 > {
-  searchSourceClient: Promise<ISearchStartSearchSource>;
+  searchSourceClient: ISearchStartSearchSource;
   savedObjectsClient: SavedObjectsClientContract;
   uiSettingsClient: IUiSettingsClient;
   scopedClusterClient: IScopedClusterClient;
-  alertFactory: {
-    create: (id: string) => PublicAlert<InstanceState, InstanceContext, ActionGroupIds>;
-    done: () => AlertFactoryDoneUtils<InstanceState, InstanceContext, ActionGroupIds>;
-  };
+  alertFactory: PublicAlertFactory<State, Context, ActionGroupIds>;
   shouldWriteAlerts: () => boolean;
   shouldStopExecution: () => boolean;
 }
@@ -123,6 +122,7 @@ export type ExecutorType<
 
 export interface RuleTypeParamsValidator<Params extends RuleTypeParams> {
   validate: (object: unknown) => Params;
+  validateMutatedParams?: (mutatedOject: Params, origObject?: Params) => Params;
 }
 
 export interface RuleType<
@@ -248,7 +248,8 @@ export interface RawRule extends SavedObjectAttributes {
   meta?: RuleMeta;
   executionStatus: RawRuleExecutionStatus;
   monitoring?: RuleMonitoring;
-  snoozeEndTime?: string | null; // Remove ? when this parameter is made available in the public API
+  snoozeSchedule?: RuleSnooze; // Remove ? when this parameter is made available in the public API
+  isSnoozedUntil?: string | null;
 }
 
 export interface AlertingPlugin {
@@ -275,3 +276,5 @@ export interface InvalidatePendingApiKey {
 }
 
 export type RuleTypeRegistry = PublicMethodsOf<OrigruleTypeRegistry>;
+
+export type RulesClientApi = PublicMethodsOf<RulesClient>;

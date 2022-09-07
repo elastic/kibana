@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { apm, timerange } from '@elastic/apm-synthtrace';
+import { apm, timerange } from '@kbn/apm-synthtrace';
 
 export function generateData({ from, to }: { from: number; to: number }) {
   const range = timerange(from, to);
@@ -37,5 +37,42 @@ export function generateData({ from, to }: { from: number; to: number }) {
         .timestamp(timestamp)
         .duration(500)
         .success(),
+    ]);
+}
+
+export function generateErrors({
+  from,
+  to,
+  errorCount,
+}: {
+  from: number;
+  to: number;
+  errorCount: number;
+}) {
+  const range = timerange(from, to);
+
+  const opbeansJava = apm
+    .service('opbeans-java', 'production', 'java')
+    .instance('opbeans-java-prod-1')
+    .podId('opbeans-java-prod-1-pod');
+
+  return range
+    .interval('2m')
+    .rate(1)
+    .generator((timestamp, index) => [
+      opbeansJava
+        .transaction('GET /apple 🍎 ')
+        .timestamp(timestamp)
+        .duration(1000)
+        .success()
+        .errors(
+          ...Array(errorCount)
+            .fill(0)
+            .map((_, idx) => {
+              return opbeansJava
+                .error(`Error ${idx}`, `exception ${idx}`)
+                .timestamp(timestamp);
+            })
+        ),
     ]);
 }

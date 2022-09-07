@@ -9,7 +9,7 @@ import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
-import { HostsComponentsQueryProps } from './types';
+import type { HostsComponentsQueryProps } from './types';
 import * as i18n from '../translations';
 import { HostRiskInformationButtonEmpty } from '../../components/host_risk_information';
 import { HostRiskScoreQueryId, useHostRiskScore } from '../../../risk_score/containers';
@@ -22,7 +22,7 @@ import { useDashboardButtonHref } from '../../../common/hooks/use_dashboard_butt
 import { RISKY_HOSTS_DASHBOARD_TITLE } from './constants';
 
 const StyledEuiFlexGroup = styled(EuiFlexGroup)`
-  margin-top: ${({ theme }) => theme.eui.paddingSizes.l};
+  margin-top: ${({ theme }) => theme.eui.euiSizeL};
 `;
 
 const QUERY_ID = HostRiskScoreQueryId.HOST_DETAILS_RISK_SCORE;
@@ -46,13 +46,18 @@ const HostRiskTabBodyComponent: React.FC<
     [startDate, endDate]
   );
 
+  const filterQuery = useMemo(
+    () => (hostName ? buildHostNamesFilter([hostName]) : undefined),
+    [hostName]
+  );
+
   const { toggleStatus: overTimeToggleStatus, setToggleStatus: setOverTimeToggleStatus } =
     useQueryToggle(`${QUERY_ID} overTime`);
   const { toggleStatus: contributorsToggleStatus, setToggleStatus: setContributorsToggleStatus } =
     useQueryToggle(`${QUERY_ID} contributors`);
 
   const [loading, { data, refetch, inspect }] = useHostRiskScore({
-    filterQuery: hostName ? buildHostNamesFilter([hostName]) : undefined,
+    filterQuery,
     onlyLatest: false,
     skip: !overTimeToggleStatus && !contributorsToggleStatus,
     timerange,

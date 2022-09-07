@@ -66,15 +66,11 @@ export const MemoryPreviewChart: FC<MemoryPreviewChartProps> = ({ memoryOverview
         colour: euiPaletteGray(5)[0],
       },
     }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
 
   const chartData = [
-    {
-      x: 0,
-      y: memoryOverview.machine_memory.jvm,
-      g: groups.jvm.name,
-    },
     {
       x: 0,
       y: memoryOverview.trained_models.total,
@@ -99,6 +95,11 @@ export const MemoryPreviewChart: FC<MemoryPreviewChartProps> = ({ memoryOverview
         memoryOverview.dfa_training.total -
         memoryOverview.anomaly_detection.total,
       g: groups.available.name,
+    },
+    {
+      x: 0,
+      y: memoryOverview.machine_memory.jvm,
+      g: groups.jvm.name,
     },
   ];
 

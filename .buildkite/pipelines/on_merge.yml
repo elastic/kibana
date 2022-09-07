@@ -11,13 +11,27 @@ steps:
       automatic:
         - exit_status: '*'
           limit: 1
-
   - wait
+
+  - label: 'Triggering changes-based pipelines'
+    branches: main
+    agents:
+      queue: kibana-default
+    plugins:
+      - chronotc/monorepo-diff#v2.0.4:
+          watch:
+            - path:
+                - 'versions.json'
+              config:
+                command: 'ts-node .buildkite/scripts/steps/trigger_pipeline.ts kibana-buildkite-pipelines-deploy main'
+                label: 'Trigger pipeline deploy'
+                agents:
+                  queue: 'kibana-default'
 
   - command: .buildkite/scripts/steps/on_merge_build_and_metrics.sh
     label: Build Kibana Distribution and Plugins
     agents:
-      queue: c2-16
+      queue: n2-16-spot
     key: build
     timeout_in_minutes: 60
     retry:
@@ -29,10 +43,12 @@ steps:
     label: Build TS Refs and Check Public API Docs
     key: public-api-docs
     agents:
-      queue: c2-4
+      queue: n2-4-spot
     timeout_in_minutes: 80
     retry:
       automatic:
+        - exit_status: '-1'
+          limit: 3
         - exit_status: '*'
           limit: 1
 
@@ -65,9 +81,9 @@ steps:
   - command: .buildkite/scripts/steps/lint.sh
     label: 'Linting'
     agents:
-      queue: n2-2-spot
+      queue: n2-8-spot
     key: linting
-    timeout_in_minutes: 90
+    timeout_in_minutes: 60
     retry:
       automatic:
         - exit_status: '-1'
@@ -76,9 +92,13 @@ steps:
   - command: .buildkite/scripts/steps/lint_with_types.sh
     label: 'Linting (with types)'
     agents:
-      queue: c2-16
+      queue: n2-16-spot
     key: linting_with_types
     timeout_in_minutes: 90
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
 
   - command: .buildkite/scripts/steps/checks.sh
     label: 'Checks'
@@ -93,8 +113,12 @@ steps:
   - command: .buildkite/scripts/steps/check_types.sh
     label: 'Check Types'
     agents:
-      queue: c2-8
+      queue: n2-16-spot
     timeout_in_minutes: 60
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
 
   - command: .buildkite/scripts/steps/storybooks/build_and_upload.sh
     label: 'Build Storybooks'
@@ -102,6 +126,16 @@ steps:
       queue: n2-4-spot
     key: storybooks
     timeout_in_minutes: 60
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
+
+  - command: .buildkite/scripts/steps/bazel_cache/bootstrap_linux.sh
+    label: 'Populate local dev bazel cache (Linux)'
+    agents:
+      queue: n2-4-spot
+    timeout_in_minutes: 30
     retry:
       automatic:
         - exit_status: '-1'

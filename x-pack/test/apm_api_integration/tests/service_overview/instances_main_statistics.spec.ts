@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { pick, sortBy } from 'lodash';
 import moment from 'moment';
-import { apm, timerange } from '@elastic/apm-synthtrace';
+import { apm, timerange } from '@kbn/apm-synthtrace';
 import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import { isFiniteNumber } from '@kbn/apm-plugin/common/utils/is_finite_number';
 
@@ -283,7 +283,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   registry.when(
     'Service overview instances main statistics when data is generated',
-    { config: 'basic', archives: ['apm_mappings_only_8.0.0'] },
+    { config: 'basic', archives: [] },
     () => {
       describe('for two go instances and one java instance', () => {
         const GO_A_INSTANCE_RATE_SUCCESS = 10;

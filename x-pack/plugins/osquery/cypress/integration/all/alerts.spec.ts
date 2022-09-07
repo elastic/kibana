@@ -8,7 +8,6 @@
 import { ArchiverMethod, runKbnArchiverScript } from '../../tasks/archiver';
 import { login } from '../../tasks/login';
 import {
-  checkResults,
   findAndClickButton,
   findFormFieldByRowsLabelAndType,
   inputQuery,
@@ -34,10 +33,9 @@ describe('Alert Event Details', () => {
     runKbnArchiverScript(ArchiverMethod.UNLOAD, 'rule');
   });
 
-  it('should be able to run live query', () => {
+  it('should prepare packs and alert rules', () => {
     const PACK_NAME = 'testpack';
     const RULE_NAME = 'Test-rule';
-    const TIMELINE_NAME = 'Untitled timeline';
     navigateTo('/app/osquery/packs');
     preparePack(PACK_NAME);
     findAndClickButton('Edit');
@@ -50,22 +48,39 @@ describe('Alert Event Details', () => {
     closeModalIfVisible();
     cy.contains(PACK_NAME);
     cy.visit('/app/security/rules');
-    cy.contains(RULE_NAME).click();
+    cy.contains(RULE_NAME);
     cy.wait(2000);
     cy.getBySel('ruleSwitch').should('have.attr', 'aria-checked', 'true');
     cy.getBySel('ruleSwitch').click();
     cy.getBySel('ruleSwitch').should('have.attr', 'aria-checked', 'false');
     cy.getBySel('ruleSwitch').click();
     cy.getBySel('ruleSwitch').should('have.attr', 'aria-checked', 'true');
+  });
+
+  it('should be able to run live query and add to timeline (-depending on the previous test)', () => {
+    const TIMELINE_NAME = 'Untitled timeline';
     cy.visit('/app/security/alerts');
-    cy.wait(500);
-    cy.getBySel('expand-event').first().click();
+    cy.getBySel('header-page-title').contains('Alerts').should('exist');
+    cy.getBySel('expand-event')
+      .first()
+      .within(() => {
+        cy.get(`[data-is-loading="true"]`).should('exist');
+      });
+    cy.getBySel('expand-event')
+      .first()
+      .within(() => {
+        cy.get(`[data-is-loading="true"]`).should('not.exist');
+      });
+    cy.getBySel('timeline-context-menu-button').first().click({ force: true });
+    cy.contains('Run Osquery');
+    cy.getBySel('expand-event').first().click({ force: true });
     cy.getBySel('take-action-dropdown-btn').click();
     cy.getBySel('osquery-action-item').click();
     cy.contains('1 agent selected.');
     inputQuery('select * from uptime;');
     submitQuery();
-    checkResults();
+    cy.contains('Results');
+    cy.contains('Add to timeline investigation');
     cy.contains('Save for later').click();
     cy.contains('Save query');
     cy.get('.euiButtonEmpty--flushLeft').contains('Cancel').click();

@@ -8,11 +8,8 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 
-import {
-  CustomAssetsAccordionProps,
-  CustomAssetsAccordion,
-  PackageAssetsComponent,
-} from '@kbn/fleet-plugin/public';
+import type { CustomAssetsAccordionProps, PackageAssetsComponent } from '@kbn/fleet-plugin/public';
+import { CustomAssetsAccordion } from '@kbn/fleet-plugin/public';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { APP_PATH } from '../../../../../../common/constants';
 

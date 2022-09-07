@@ -15,14 +15,12 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { findIndex } from 'lodash/fp';
-import React, { FC, memo, useCallback, useEffect, useMemo } from 'react';
+import type { FC } from 'react';
+import React, { memo, useCallback, useEffect, useMemo } from 'react';
 
-import { ActionVariables } from '@kbn/triggers-actions-ui-plugin/public';
-import {
-  RuleStep,
-  RuleStepProps,
-  ActionsStepRule,
-} from '../../../pages/detection_engine/rules/types';
+import type { ActionVariables } from '@kbn/triggers-actions-ui-plugin/public';
+import type { RuleStepProps, ActionsStepRule } from '../../../pages/detection_engine/rules/types';
+import { RuleStep } from '../../../pages/detection_engine/rules/types';
 import { StepRuleDescription } from '../description_step';
 import { Form, UseField, useForm, useFormData } from '../../../../shared_imports';
 import { StepContentWrapper } from '../step_content_wrapper';
@@ -33,7 +31,7 @@ import {
 } from '../throttle_select_field';
 import { RuleActionsField } from '../rule_actions_field';
 import { useKibana } from '../../../../common/lib/kibana';
-import { getSchema } from './schema';
+import { getSchema } from './get_schema';
 import * as I18n from './translations';
 import { APP_UI_ID } from '../../../../../common/constants';
 import { useManageCaseAction } from './use_manage_case_action';
@@ -71,7 +69,7 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
   setForm,
   actionMessageParams,
 }) => {
-  const [isLoadingCaseAction, hasErrorOnCreationCaseAction] = useManageCaseAction();
+  const [isLoadingCaseAction] = useManageCaseAction();
   const {
     services: {
       application,
@@ -161,14 +159,13 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
             component={RuleActionsField}
             componentProps={{
               messageVariables: actionMessageParams,
-              hasErrorOnCreationCaseAction,
             }}
           />
         </>
       ) : (
         <UseField path="actions" component={GhostFormField} />
       ),
-    [throttle, actionMessageParams, hasErrorOnCreationCaseAction]
+    [throttle, actionMessageParams]
   );
   // only display the actions dropdown if the user has "read" privileges for actions
   const displayActionsDropDown = useMemo(() => {

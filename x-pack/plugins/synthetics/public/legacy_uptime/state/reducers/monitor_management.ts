@@ -42,6 +42,7 @@ export interface MonitorManagementList {
   enablement: MonitorManagementEnablementResult | null;
   syntheticsService: { isAllowed?: boolean; signupUrl: string | null; loading: boolean };
   throttling: ThrottlingOptions;
+  locationsLoaded?: boolean;
 }
 
 export const initialState: MonitorManagementList = {
@@ -51,6 +52,7 @@ export const initialState: MonitorManagementList = {
     total: null,
     monitors: [],
     syncErrors: [],
+    absoluteTotal: 0,
   },
   locations: [],
   enablement: null,
@@ -69,6 +71,7 @@ export const initialState: MonitorManagementList = {
     loading: false,
   },
   throttling: DEFAULT_THROTTLING,
+  locationsLoaded: false,
 };
 
 export const monitorManagementListReducer = createReducer(initialState, (builder) => {
@@ -118,6 +121,7 @@ export const monitorManagementListReducer = createReducer(initialState, (builder
         ...state.loading,
         serviceLocations: true,
       },
+      locationsLoaded: true,
     }))
     .addCase(
       getServiceLocationsSuccess,
@@ -209,6 +213,7 @@ export const monitorManagementListReducer = createReducer(initialState, (builder
         enablement: null,
       },
       enablement: {
+        canManageApiKeys: state.enablement?.canManageApiKeys || false,
         canEnable: state.enablement?.canEnable || false,
         areApiKeysEnabled: state.enablement?.areApiKeysEnabled || false,
         isEnabled: false,
@@ -246,6 +251,7 @@ export const monitorManagementListReducer = createReducer(initialState, (builder
         enablement: null,
       },
       enablement: {
+        canManageApiKeys: state.enablement?.canManageApiKeys || false,
         canEnable: state.enablement?.canEnable || false,
         areApiKeysEnabled: state.enablement?.areApiKeysEnabled || false,
         isEnabled: true,

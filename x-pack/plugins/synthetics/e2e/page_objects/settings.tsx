@@ -6,9 +6,9 @@
  */
 
 import { expect, Page } from '@elastic/synthetics';
+import { byTestId } from '@kbn/observability-plugin/e2e/utils';
 import { loginPageProvider } from './login';
 import { utilsPageProvider } from './utils';
-import { byTestId } from '../journeys/utils';
 
 export function settingsPageProvider({ page }: { page: Page; kibanaUrl: string }) {
   return {

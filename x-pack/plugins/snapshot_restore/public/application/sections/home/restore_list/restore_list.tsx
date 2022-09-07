@@ -115,7 +115,7 @@ export const RestoreList: React.FunctionComponent = () => {
           <EuiEmptyPrompt
             iconType="managementApp"
             title={
-              <h1>
+              <h1 data-test-subj="noRestoredSnapshotsHeader">
                 <FormattedMessage
                   id="xpack.snapshotRestore.restoreList.emptyPromptTitle"
                   defaultMessage="No restored snapshots"

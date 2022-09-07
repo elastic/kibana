@@ -70,7 +70,6 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
           <AgentUpgradeAgentModal
             agents={[agent]}
             agentCount={1}
-            version={kibanaVersion}
             onClose={() => {
               setIsUpgradeModalOpen(false);
               refreshAgent();
@@ -103,7 +102,7 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
             />
           </EuiContextMenuItem>,
           <EuiContextMenuItem
-            icon="cross"
+            icon="trash"
             disabled={!hasFleetAllPrivileges || !agent.active}
             onClick={() => {
               setIsUnenrollModalOpen(true);

@@ -7,7 +7,7 @@
 
 import { isEqual } from 'lodash';
 
-import { Schema } from '../../../shared/schema/types';
+import { AdvancedSchema, SchemaType } from '../../../shared/schema/types';
 
 import { DEFAULT_FIELD_SETTINGS, DISABLED_FIELD_SETTINGS } from './constants';
 import {
@@ -64,7 +64,7 @@ export const resetAllFields = (fields: FieldResultSettingObject) =>
 
 export const convertServerResultFieldsToResultFields = (
   serverResultFields: ServerFieldResultSettingObject,
-  schema: Schema
+  schema: AdvancedSchema
 ) => {
   const resultFields: FieldResultSettingObject = Object.keys(schema).reduce(
     (acc: FieldResultSettingObject, fieldName: string) => ({
@@ -100,17 +100,16 @@ export const convertToServerFieldResultSetting = (fieldResultSetting: FieldResul
   return serverFieldResultSetting;
 };
 
-export const splitResultFields = (resultFields: FieldResultSettingObject, schema: Schema) => {
-  const textResultFields: FieldResultSettingObject = {};
-  const nonTextResultFields: FieldResultSettingObject = {};
-  const keys = Object.keys(schema);
-  keys.forEach((fieldName) => {
-    (schema[fieldName] === 'text' ? textResultFields : nonTextResultFields)[fieldName] =
-      resultFields[fieldName];
-  });
-
-  return { textResultFields, nonTextResultFields };
-};
+export const splitResultFields = (resultFields: FieldResultSettingObject, schema: AdvancedSchema) =>
+  Object.entries(resultFields).reduce(
+    (acc, [fieldName, resultFieldSettings]) => {
+      const fieldType = schema[fieldName].type;
+      const targetField =
+        fieldType === SchemaType.Text ? 'textResultFields' : 'nonTextResultFields';
+      return { ...acc, [targetField]: { ...acc[targetField], [fieldName]: resultFieldSettings } };
+    },
+    { textResultFields: {}, nonTextResultFields: {} }
+  );
 
 export const areFieldsEmpty = (fields: FieldResultSettingObject) => {
   const anyNonEmptyField = Object.values(fields).find((field) => {

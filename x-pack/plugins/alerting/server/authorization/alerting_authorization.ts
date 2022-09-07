@@ -31,6 +31,7 @@ export enum ReadOperations {
   GetRuleState = 'getRuleState',
   GetAlertSummary = 'getAlertSummary',
   GetExecutionLog = 'getExecutionLog',
+  GetActionErrorLog = 'getActionErrorLog',
   Find = 'find',
   GetAuthorizedAlertsIndices = 'getAuthorizedAlertsIndices',
 }
@@ -47,6 +48,7 @@ export enum WriteOperations {
   MuteAlert = 'muteAlert',
   UnmuteAlert = 'unmuteAlert',
   Snooze = 'snooze',
+  BulkEdit = 'bulkEdit',
   Unsnooze = 'unsnooze',
 }
 

@@ -55,6 +55,13 @@ export const DATA_VISUALIZER_BREADCRUMB: ChromeBreadcrumb = Object.freeze({
   href: '/datavisualizer',
 });
 
+export const AIOPS_BREADCRUMB: ChromeBreadcrumb = Object.freeze({
+  text: i18n.translate('xpack.ml.aiopsBreadcrumbLabel', {
+    defaultMessage: 'AIOps',
+  }),
+  href: '/aiops/explain_log_rate_spikes_index_select',
+});
+
 export const CREATE_JOB_BREADCRUMB: ChromeBreadcrumb = Object.freeze({
   text: i18n.translate('xpack.ml.createJobsBreadcrumbLabel', {
     defaultMessage: 'Create job',
@@ -83,6 +90,7 @@ const breadcrumbs = {
   DATA_FRAME_ANALYTICS_BREADCRUMB,
   TRAINED_MODELS,
   DATA_VISUALIZER_BREADCRUMB,
+  AIOPS_BREADCRUMB,
   CREATE_JOB_BREADCRUMB,
   CALENDAR_MANAGEMENT_BREADCRUMB,
   FILTER_LISTS_BREADCRUMB,

@@ -8,3 +8,24 @@ bwMtOW0BH63Xcmy432HJ,ecommerce,\\"-\\",\\"Men's Clothing, Men's Shoes\\",\\"Men'
 5AMtOW0BH63Xcmy432HJ,ecommerce,\\"-\\",\\"Men's Clothing\\",\\"Men's Clothing\\",EUR,Kamal,Kamal,\\"Kamal Salazar\\",\\"Kamal Salazar\\",MALE,39,Salazar,Salazar,\\"(empty)\\",Tuesday,1,\\"kamal@salazar-family.zzz\\",Istanbul,Asia,TR,\\"POINT (29 41)\\",Istanbul,\\"Spherecords, Spritechnologies\\",\\"Spherecords, Spritechnologies\\",\\"Jun 24, 2019 @ 00:00:00.000\\",567736,\\"sold_product_567736_24718, sold_product_567736_24306\\",\\"sold_product_567736_24718, sold_product_567736_24306\\",\\"11.992, 75\\",\\"11.992, 75\\",\\"Men's Clothing, Men's Clothing\\",\\"Men's Clothing, Men's Clothing\\",\\"Dec 13, 2016 @ 00:00:00.000, Dec 13, 2016 @ 00:00:00.000\\",\\"0, 0\\",\\"0, 0\\",\\"Spherecords, Spritechnologies\\",\\"Spherecords, Spritechnologies\\",\\"6.109, 36.75\\",\\"11.992, 75\\",\\"24,718, 24,306\\",\\"Pyjama bottoms - light grey multicolor, Waterproof trousers - scarlet\\",\\"Pyjama bottoms - light grey multicolor, Waterproof trousers - scarlet\\",\\"1, 1\\",\\"ZO0663706637, ZO0620906209\\",\\"0, 0\\",\\"11.992, 75\\",\\"11.992, 75\\",\\"0, 0\\",\\"ZO0663706637, ZO0620906209\\",87,87,2,2,order,kamal
 "
 `;
+
+exports[`Reporting APIs Generate CSV from SearchSource with unmapped fields includes all unmapped fields to the report 1`] = `
+"\\"_id\\",\\"_index\\",\\"_score\\",\\"nested.unmapped\\",text,unmapped
+1,recipes,\\"-\\",\\"-\\",text1,unmapped1
+2,recipes,\\"-\\",unmapped2,text2,\\"-\\"
+"
+`;
+
+exports[`Reporting APIs Generate CSV from SearchSource with unmapped fields includes an unmapped field to the report 1`] = `
+"\\"_id\\",\\"_index\\",\\"_score\\",text,unmapped
+1,recipes,\\"-\\",text1,unmapped1
+2,recipes,\\"-\\",text2,\\"-\\"
+"
+`;
+
+exports[`Reporting APIs Generate CSV from SearchSource with unmapped fields includes an unmapped nested field to the report 1`] = `
+"\\"_id\\",\\"_index\\",\\"_score\\",\\"nested.unmapped\\",text
+1,recipes,\\"-\\",\\"-\\",text1
+2,recipes,\\"-\\",unmapped2,text2
+"
+`;

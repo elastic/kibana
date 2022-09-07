@@ -8,10 +8,11 @@
 
 import { nodeTypes } from '../node_types';
 import { fields } from '../../filters/stubs';
-import { DataViewBase } from '../..';
+import { DataViewBase } from '../../..';
 
 import * as range from './range';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { KQL_NODE_TYPE_LITERAL } from '../node_types/literal';
 
 jest.mock('../grammar');
 
@@ -33,7 +34,7 @@ describe('kuery functions', () => {
           arguments: [fieldName],
         } = result;
 
-        expect(fieldName).toHaveProperty('type', 'literal');
+        expect(fieldName).toHaveProperty('type', KQL_NODE_TYPE_LITERAL);
         expect(fieldName).toHaveProperty('value', 'bytes');
       });
 
@@ -43,7 +44,7 @@ describe('kuery functions', () => {
           arguments: [, , valueArg],
         } = result;
 
-        expect(valueArg).toHaveProperty('type', 'literal');
+        expect(valueArg).toHaveProperty('type', KQL_NODE_TYPE_LITERAL);
         expect(valueArg).toHaveProperty('value', 1000);
       });
     });
@@ -226,6 +227,36 @@ describe('kuery functions', () => {
         };
         const node = nodeTypes.function.buildNode('range', '*doublyNested*', 'lt', 8000);
         const result = range.toElasticsearchQuery(node, indexPattern);
+
+        expect(result).toEqual(expected);
+      });
+
+      test('should allow to configure ignore_unmapped for a nested query', () => {
+        const expected = {
+          bool: {
+            should: [
+              {
+                nested: {
+                  path: 'nestedField.nestedChild',
+                  query: {
+                    range: {
+                      'nestedField.nestedChild.doublyNestedChild': {
+                        lt: 8000,
+                      },
+                    },
+                  },
+                  score_mode: 'none',
+                  ignore_unmapped: true,
+                },
+              },
+            ],
+            minimum_should_match: 1,
+          },
+        };
+        const node = nodeTypes.function.buildNode('range', '*doublyNested*', 'lt', 8000);
+        const result = range.toElasticsearchQuery(node, indexPattern, {
+          nestedIgnoreUnmapped: true,
+        });
 
         expect(result).toEqual(expected);
       });

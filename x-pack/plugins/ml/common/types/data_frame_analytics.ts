@@ -7,11 +7,9 @@
 
 import Boom from '@hapi/boom';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { RuntimeMappings } from './fields';
 
 import { EsErrorBody } from '../util/errors';
 import { ANALYSIS_CONFIG_TYPE } from '../constants/data_frame_analytics';
-import { DATA_FRAME_TASK_STATE } from '../constants/data_frame_analytics';
 
 export interface DeleteDataFrameAnalyticsWithIndexStatus {
   success: boolean;
@@ -57,69 +55,90 @@ export interface ClassificationAnalysis {
   classification: Classification;
 }
 
-interface GenericAnalysis {
-  [key: string]: Record<string, any>;
+export type AnalysisConfig = estypes.MlDataframeAnalysisContainer;
+export interface DataFrameAnalyticsConfig
+  extends Omit<estypes.MlDataframeAnalyticsSummary, 'analyzed_fields'> {
+  analyzed_fields?: estypes.MlDataframeAnalysisAnalyzedFields;
 }
 
-export type AnalysisConfig =
-  | OutlierAnalysis
-  | RegressionAnalysis
-  | ClassificationAnalysis
-  | GenericAnalysis;
-
-export interface DataFrameAnalyticsConfig {
-  id: DataFrameAnalyticsId;
+export interface UpdateDataFrameAnalyticsConfig {
+  allow_lazy_start?: string;
   description?: string;
-  dest: {
-    index: IndexName;
-    results_field: string;
-  };
-  source: {
-    index: IndexName | IndexName[];
-    query?: estypes.QueryDslQueryContainer;
-    runtime_mappings?: RuntimeMappings;
-  };
-  analysis: AnalysisConfig;
-  analyzed_fields?: {
-    includes?: string[];
-    excludes?: string[];
-  };
-  model_memory_limit: string;
+  model_memory_limit?: string;
   max_num_threads?: number;
-  create_time: number;
-  version: string;
-  allow_lazy_start?: boolean;
 }
 
 export type DataFrameAnalysisConfigType =
   typeof ANALYSIS_CONFIG_TYPE[keyof typeof ANALYSIS_CONFIG_TYPE];
 
-export type DataFrameTaskStateType =
-  typeof DATA_FRAME_TASK_STATE[keyof typeof DATA_FRAME_TASK_STATE];
+export type DataFrameTaskStateType = estypes.MlDataframeState | 'analyzing' | 'reindexing';
 
-interface ProgressSection {
-  phase: string;
-  progress_percent: number;
-}
-
-export interface DataFrameAnalyticsStats {
-  assignment_explanation?: string;
-  id: DataFrameAnalyticsId;
-  memory_usage?: {
-    timestamp?: string;
-    peak_usage_bytes: number;
-    status: string;
-  };
-  node?: {
-    attributes: Record<string, any>;
-    ephemeral_id: string;
-    id: string;
-    name: string;
-    transport_address: string;
-  };
-  progress: ProgressSection[];
+export interface DataFrameAnalyticsStats extends Omit<estypes.MlDataframeAnalytics, 'state'> {
   failure_reason?: string;
   state: DataFrameTaskStateType;
+}
+
+export type DfAnalyticsExplainResponse = estypes.MlExplainDataFrameAnalyticsResponse;
+
+export interface PredictedClass {
+  predicted_class: string;
+  count: number;
+}
+export interface ConfusionMatrix {
+  actual_class: string;
+  actual_class_doc_count: number;
+  predicted_classes: PredictedClass[];
+  other_predicted_class_doc_count: number;
+}
+
+export interface RocCurveItem {
+  fpr: number;
+  threshold: number;
+  tpr: number;
+}
+
+interface EvalClass {
+  class_name: string;
+  value: number;
+}
+export interface ClassificationEvaluateResponse {
+  classification: {
+    multiclass_confusion_matrix?: {
+      confusion_matrix: ConfusionMatrix[];
+    };
+    recall?: {
+      classes: EvalClass[];
+      avg_recall: number;
+    };
+    accuracy?: {
+      classes: EvalClass[];
+      overall_accuracy: number;
+    };
+    auc_roc?: {
+      curve?: RocCurveItem[];
+      value: number;
+    };
+  };
+}
+
+export interface EvaluateMetrics {
+  classification: {
+    accuracy?: object;
+    recall?: object;
+    multiclass_confusion_matrix?: object;
+    auc_roc?: { include_curve: boolean; class_name: string };
+  };
+  regression: {
+    r_squared: object;
+    mse: object;
+    msle: object;
+    huber: object;
+  };
+}
+
+export interface FieldSelectionItem
+  extends Omit<estypes.MlDataframeAnalyticsFieldSelection, 'mapping_types'> {
+  mapping_types?: string[];
 }
 
 export interface AnalyticsMapNodeElement {
@@ -146,30 +165,14 @@ export interface AnalyticsMapReturnType {
   error: null | any;
 }
 
-export interface FeatureProcessor {
-  frequency_encoding: {
-    feature_name: string;
-    field: string;
-    frequency_map: Record<string, any>;
-  };
-  multi_encoding: {
-    processors: any[];
-  };
-  n_gram_encoding: {
-    feature_prefix?: string;
-    field: string;
-    length?: number;
-    n_grams: number[];
-    start?: number;
-  };
-  one_hot_encoding: {
-    field: string;
-    hot_map: string;
-  };
-  target_mean_encoding: {
-    default_value: number;
-    feature_name: string;
-    field: string;
-    target_map: Record<string, any>;
+export type FeatureProcessor = estypes.MlDataframeAnalysisFeatureProcessor;
+
+export interface TrackTotalHitsSearchResponse {
+  hits: {
+    total: {
+      value: number;
+      relation: string;
+    };
+    hits: any[];
   };
 }

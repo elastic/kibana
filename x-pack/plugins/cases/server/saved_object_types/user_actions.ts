@@ -7,9 +7,11 @@
 
 import { SavedObjectsType } from '@kbn/core/server';
 import { CASE_USER_ACTION_SAVED_OBJECT } from '../../common/constants';
-import { userActionsMigrations } from './migrations';
+import { createUserActionsMigrations, UserActionsMigrationsDeps } from './migrations/user_actions';
 
-export const caseUserActionSavedObjectType: SavedObjectsType = {
+export const createCaseUserActionSavedObjectType = (
+  migrationDeps: UserActionsMigrationsDeps
+): SavedObjectsType => ({
   name: CASE_USER_ACTION_SAVED_OBJECT,
   hidden: true,
   namespaceType: 'multiple-isolated',
@@ -55,9 +57,9 @@ export const caseUserActionSavedObjectType: SavedObjectsType = {
       },
     },
   },
-  migrations: userActionsMigrations,
+  migrations: () => createUserActionsMigrations(migrationDeps),
   management: {
     importableAndExportable: true,
     visibleInManagement: false,
   },
-};
+});

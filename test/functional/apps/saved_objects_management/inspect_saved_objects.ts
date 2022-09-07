@@ -12,7 +12,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common', 'settings', 'savedObjects']);
   const find = getService('find');
@@ -33,18 +33,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     return bools.every((currBool) => currBool === true);
   };
 
-  // FLAKY: https://github.com/elastic/kibana/issues/118288
-  describe.skip('saved objects inspect page', () => {
+  describe('saved objects inspect page', () => {
     beforeEach(async () => {
-      await esArchiver.load(
-        'test/functional/fixtures/es_archiver/saved_objects_management/edit_saved_object'
+      await kibanaServer.importExport.load(
+        'test/functional/fixtures/kbn_archiver/saved_objects_management/edit_saved_object'
       );
     });
 
     afterEach(async () => {
-      await esArchiver.unload(
-        'test/functional/fixtures/es_archiver/saved_objects_management/edit_saved_object'
-      );
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     it('allows to view the saved object', async () => {

@@ -18,6 +18,7 @@ import { UserActionUsernameWithAvatar } from '../avatar_username';
 import { MultipleAlertsCommentEvent, SingleAlertCommentEvent } from './alert_event';
 import { UserActionCopyLink } from '../copy_link';
 import { UserActionShowAlert } from './show_alert';
+import { ShowAlertTableLink } from './show_alert_table_link';
 
 type BuilderArgs = Pick<
   UserActionBuilderArgs,
@@ -58,7 +59,6 @@ const getSingleAlertUserAction = ({
         />
       ),
       className: 'comment-alert',
-      type: 'update',
       event: (
         <SingleAlertCommentEvent
           actionId={userAction.actionId}
@@ -71,7 +71,7 @@ const getSingleAlertUserAction = ({
       ),
       'data-test-subj': `user-action-alert-${userAction.type}-${userAction.action}-action-${userAction.actionId}`,
       timestamp: <UserActionTimestamp createdAt={userAction.createdAt} />,
-      timelineIcon: 'bell',
+      timelineAvatar: 'bell',
       actions: (
         <EuiFlexGroup responsive={false}>
           <EuiFlexItem grow={false}>
@@ -115,7 +115,6 @@ const getMultipleAlertsUserAction = ({
         />
       ),
       className: 'comment-alert',
-      type: 'update',
       event: (
         <MultipleAlertsCommentEvent
           actionId={userAction.actionId}
@@ -129,11 +128,14 @@ const getMultipleAlertsUserAction = ({
       ),
       'data-test-subj': `user-action-alert-${userAction.type}-${userAction.action}-action-${userAction.actionId}`,
       timestamp: <UserActionTimestamp createdAt={userAction.createdAt} />,
-      timelineIcon: 'bell',
+      timelineAvatar: 'bell',
       actions: (
         <EuiFlexGroup responsive={false}>
           <EuiFlexItem grow={false}>
             <UserActionCopyLink id={userAction.actionId} />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <ShowAlertTableLink />
           </EuiFlexItem>
         </EuiFlexGroup>
       ),

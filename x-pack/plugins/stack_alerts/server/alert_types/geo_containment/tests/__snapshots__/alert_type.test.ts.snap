@@ -24,11 +24,11 @@ Object {
       "name": "entityLocation",
     },
     Object {
-      "description": "The id of the boundary containing the entity",
+      "description": "The id of the boundary containing the entity. Value not set for recovered alerts",
       "name": "containingBoundaryId",
     },
     Object {
-      "description": "The boundary the entity is currently located within",
+      "description": "The name of the boundary containing the entity. Value not set for recovered alerts",
       "name": "containingBoundaryName",
     },
   ],

@@ -1,6 +1,7 @@
 pageLoadAssetSize:
   advancedSettings: 27596
   actions: 20000
+  aiops: 10000
   alerting: 106936
   apm: 64385
   canvas: 1066647
@@ -26,12 +27,12 @@ pageLoadAssetSize:
   indexLifecycleManagement: 107090
   indexManagement: 140608
   infra: 184320
-  fleet: 250000
+  fleet: 126917
   ingestPipelines: 58003
   inputControlVis: 172675
   inspector: 148711
   kibanaOverview: 56279
-  lens: 35000
+  lens: 36000
   licenseManagement: 41817
   licensing: 29004
   lists: 22900
@@ -51,13 +52,13 @@ pageLoadAssetSize:
   savedObjectsTagging: 59482
   savedObjectsTaggingOss: 20590
   searchprofiler: 67080
-  security: 95864
+  security: 65433
   snapshotRestore: 79032
   spaces: 57868
   telemetry: 51957
   telemetryManagementSection: 38586
   transform: 41007
-  triggersActionsUi: 104400
+  triggersActionsUi: 119000
   upgradeAssistant: 81241
   urlForwarding: 32579
   usageCollection: 39762
@@ -69,7 +70,7 @@ pageLoadAssetSize:
   visTypeTimeseries: 55203
   visTypeVega: 153573
   visTypeVislib: 242838
-  visTypeXy: 113478
+  visTypeXy: 30000
   visualizations: 90000
   watcher: 43598
   runtimeFields: 41752
@@ -95,11 +96,12 @@ pageLoadAssetSize:
   securitySolution: 273763
   customIntegrations: 28810
   expressionMetricVis: 23121
+  expressionLegacyMetricVis: 23121
   expressionHeatmap: 27505
   visTypeMetric: 23332
   bfetch: 22837
   kibanaUtils: 79713
-  dataViews: 43532
+  dataViews: 44532
   expressions: 140958
   fieldFormats: 65209
   kibanaReact: 74422
@@ -117,15 +119,20 @@ pageLoadAssetSize:
   expressionGauge: 25000
   controls: 40000
   expressionPartitionVis: 26338
-  sharedUX: 16225
+  savedSearch: 16225
   ux: 20784
   sessionView: 77750
   cloudSecurityPosture: 19109
   visTypeGauge: 24113
   unifiedSearch: 71059
+  unifiedFieldList: 65500
   data: 454087
   eventAnnotation: 19334
   screenshotting: 22870
   synthetics: 40958
-  expressionXY: 30000
+  expressionXY: 36000
   kibanaUsageCollection: 16463
+  kubernetesSecurity: 77234
+  threatIntelligence: 29195
+  files: 22673
+  savedObjectsFinder: 21691

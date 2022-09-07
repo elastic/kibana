@@ -266,13 +266,7 @@
           ],
           "signature": [
             "(request: ",
-            {
-              "pluginId": "core",
-              "scope": "server",
-              "docId": "kibCoreHttpPluginApi",
-              "section": "def-server.KibanaRequest",
-              "text": "KibanaRequest"
-            },
+            "KibanaRequest",
             "<unknown, unknown, unknown, any>) => boolean"
           ],
           "path": "src/plugins/screenshot_mode/server/types.ts",
@@ -286,13 +280,7 @@
               "label": "request",
               "description": [],
               "signature": [
-                {
-                  "pluginId": "core",
-                  "scope": "server",
-                  "docId": "kibCoreHttpPluginApi",
-                  "section": "def-server.KibanaRequest",
-                  "text": "KibanaRequest"
-                },
+                "KibanaRequest",
                 "<unknown, unknown, unknown, any>"
               ],
               "path": "src/plugins/screenshot_mode/server/types.ts",

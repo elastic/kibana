@@ -105,12 +105,15 @@ export class TelemetryEventsSender {
     this.isSending = false;
   }
 
-  private async fetchClusterInfo(): Promise<InfoResponse> {
-    if (this.esClient === undefined || this.esClient === null) {
-      throw Error('elasticsearch client is unavailable: cannot retrieve cluster infomation');
+  private async fetchClusterInfo(): Promise<InfoResponse | undefined> {
+    try {
+      if (this.esClient === undefined || this.esClient === null) {
+        throw Error('elasticsearch client is unavailable: cannot retrieve cluster infomation');
+      }
+      return await this.esClient.info();
+    } catch (e) {
+      this.logger.debug(`Error fetching cluster information: ${e}`);
     }
-
-    return await this.esClient.info();
   }
 
   public async sendEvents(
@@ -168,9 +171,10 @@ export class TelemetryEventsSender {
       const resp = await axios.post(telemetryUrl, ndjson, {
         headers: {
           'Content-Type': 'application/x-ndjson',
-          'X-Elastic-Cluster-ID': clusterUuid,
+          ...(clusterUuid ? { 'X-Elastic-Cluster-ID': clusterUuid } : undefined),
           'X-Elastic-Stack-Version': clusterVersionNumber ? clusterVersionNumber : '7.16.0',
         },
+        timeout: 5000,
       });
       this.logger.debug(`Events sent!. Response: ${resp.status} ${JSON.stringify(resp.data)}`);
     } catch (err) {

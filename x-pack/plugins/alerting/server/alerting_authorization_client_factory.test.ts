@@ -7,7 +7,7 @@
 
 import { Request } from '@hapi/hapi';
 import { ruleTypeRegistryMock } from './rule_type_registry.mock';
-import { KibanaRequest } from '@kbn/core/server';
+import { CoreKibanaRequest } from '@kbn/core/server';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import {
@@ -60,7 +60,7 @@ test('creates an alerting authorization client with proper constructor arguments
     securityPluginStart,
     ...alertingAuthorizationClientFactoryParams,
   });
-  const request = KibanaRequest.from(fakeRequest);
+  const request = CoreKibanaRequest.from(fakeRequest);
 
   factory.create(request);
 
@@ -78,7 +78,7 @@ test('creates an alerting authorization client with proper constructor arguments
 test('creates an alerting authorization client with proper constructor arguments', async () => {
   const factory = new AlertingAuthorizationClientFactory();
   factory.initialize(alertingAuthorizationClientFactoryParams);
-  const request = KibanaRequest.from(fakeRequest);
+  const request = CoreKibanaRequest.from(fakeRequest);
 
   factory.create(request);
 

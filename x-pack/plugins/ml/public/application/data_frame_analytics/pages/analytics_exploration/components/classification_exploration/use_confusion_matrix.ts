@@ -9,13 +9,15 @@ import { useState, useEffect } from 'react';
 
 import {
   isClassificationEvaluateResponse,
-  ClassificationEvaluateResponse,
-  ConfusionMatrix,
   ResultsSearchQuery,
   ANALYSIS_CONFIG_TYPE,
   ClassificationMetricItem,
 } from '../../../../common/analytics';
 import { isKeywordAndTextType } from '../../../../common/fields';
+import {
+  ClassificationEvaluateResponse,
+  ConfusionMatrix,
+} from '../../../../../../../common/types/data_frame_analytics';
 
 import {
   getDependentVar,
@@ -78,7 +80,7 @@ export const useConfusionMatrix = (
 
       let requiresKeyword = false;
       const dependentVariable = getDependentVar(jobConfig.analysis);
-      const resultsField = jobConfig.dest.results_field;
+      const resultsField = jobConfig.dest.results_field!;
       const isTraining = isTrainingFilter(searchQuery, resultsField);
 
       try {
@@ -133,6 +135,7 @@ export const useConfusionMatrix = (
     }
 
     loadConfusionMatrixData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify([jobConfig, searchQuery])]);
 
   return {

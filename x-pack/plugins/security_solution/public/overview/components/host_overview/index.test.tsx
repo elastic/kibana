@@ -20,7 +20,7 @@ jest.mock('../../../risk_score/containers/all', () => ({
   useHostRiskScore: jest.fn().mockReturnValue([
     true,
     {
-      data: [],
+      data: undefined,
       isModuleEnabled: false,
     },
   ]),
@@ -31,7 +31,6 @@ describe('Host Summary Component', () => {
     const mockProps = {
       anomaliesData: mockAnomalies,
       data: mockData.Hosts.edges[0].node,
-      docValueFields: [],
       endDate: '2019-06-18T06:00:00.000Z',
       id: 'hostOverview',
       indexNames: [],
@@ -73,7 +72,7 @@ describe('Host Summary Component', () => {
         ...mockProps,
         isInDetailsSidePanel: true,
       };
-      const risk = 'very high hos risk';
+      const risk = 'very high host risk';
       const riskScore = 9999999;
 
       (useHostRiskScore as jest.Mock).mockReturnValue([

@@ -19,11 +19,9 @@ const DATE_WITH_DATA = {
 
 const ALERTS_FLYOUT_SELECTOR = 'alertsFlyout';
 const FILTER_FOR_VALUE_BUTTON_SELECTOR = 'filterForValue';
-const ALERTS_TABLE_CONTAINER_SELECTOR = 'events-viewer-panel';
+const ALERTS_TABLE_CONTAINER_SELECTOR = 'alertsTable';
 const VIEW_RULE_DETAILS_SELECTOR = 'viewRuleDetails';
 const VIEW_RULE_DETAILS_FLYOUT_SELECTOR = 'viewRuleDetailsFlyout';
-
-const ACTION_COLUMN_INDEX = 0;
 
 type WorkflowStatus = 'open' | 'acknowledged' | 'closed';
 
@@ -44,6 +42,33 @@ export function ObservabilityAlertsCommonProvider({
       'observability',
       '/alerts',
       `?_a=(rangeFrom:'${DATE_WITH_DATA.rangeFrom}',rangeTo:'${DATE_WITH_DATA.rangeTo}')`,
+      { ensureCurrentUrl: false }
+    );
+  };
+
+  const navigateToRulesPage = async () => {
+    return await pageObjects.common.navigateToUrlWithBrowserHistory(
+      'observability',
+      '/alerts/rules',
+      '',
+      { ensureCurrentUrl: false }
+    );
+  };
+
+  const navigateToAlertDetails = async (alertId: string) => {
+    return await pageObjects.common.navigateToUrlWithBrowserHistory(
+      'observability',
+      `/alerts/${alertId}`,
+      '',
+      { ensureCurrentUrl: false }
+    );
+  };
+
+  const navigateToRuleDetailsByRuleId = async (ruleId: string) => {
+    return await pageObjects.common.navigateToUrlWithBrowserHistory(
+      'observability',
+      `/alerts/rules/${ruleId}`,
+      '?',
       { ensureCurrentUrl: false }
     );
   };
@@ -83,10 +108,6 @@ export function ObservabilityAlertsCommonProvider({
     return await find.allByCssSelector('.euiDataGridRowCell input[type="checkbox"]:enabled');
   };
 
-  const getExperimentalDisclaimer = async () => {
-    return testSubjects.existOrFail('o11yExperimentalDisclaimer');
-  };
-
   const getTableCellsInRows = async () => {
     const columnHeaders = await getTableColumnHeaders();
     if (columnHeaders.length <= 0) {
@@ -105,7 +126,7 @@ export function ObservabilityAlertsCommonProvider({
   };
 
   const getNoDataStateOrFail = async () => {
-    return await testSubjects.existOrFail('tGridEmptyState');
+    return await testSubjects.existOrFail('alertsStateTableEmptyState');
   };
 
   // Query Bar
@@ -134,7 +155,7 @@ export function ObservabilityAlertsCommonProvider({
   const getViewAlertDetailsFlyoutButton = async () => {
     await openActionsMenuForRow(0);
 
-    return await testSubjects.find('viewAlertDetails');
+    return await testSubjects.find('viewAlertDetailsFlyout');
   };
 
   const openAlertsFlyout = async () => {
@@ -190,11 +211,7 @@ export function ObservabilityAlertsCommonProvider({
   };
 
   const openActionsMenuForRow = async (rowIndex: number) => {
-    const rows = await getTableCellsInRows();
-    const actionsOverflowButton = await testSubjects.findDescendant(
-      'alertsTableRowActionMore',
-      rows[rowIndex][ACTION_COLUMN_INDEX]
-    );
+    const actionsOverflowButton = await getActionsButtonByIndex(rowIndex);
     await actionsOverflowButton.click();
   };
 
@@ -320,11 +337,13 @@ export function ObservabilityAlertsCommonProvider({
     openActionsMenuForRow,
     getTimeRange,
     navigateWithoutFilter,
-    getExperimentalDisclaimer,
     getActionsButtonByIndex,
     viewRuleDetailsButtonClick,
     viewRuleDetailsLinkClick,
     getAlertsFlyoutViewRuleDetailsLinkOrFail,
     getRuleStatValue,
+    navigateToRulesPage,
+    navigateToRuleDetailsByRuleId,
+    navigateToAlertDetails,
   };
 }

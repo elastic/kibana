@@ -1,0 +1,32 @@
+{
+  "type": "index",
+  "value": {
+    "index": "kubernetes-test-index",
+    "mappings": {
+      "properties": {
+        "message": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 256
+            }
+          }
+        },
+        "orchestrator.namespace": {
+          "type": "keyword",
+          "ignore_above": 256
+        },
+        "container.image.name": {
+          "type": "keyword",
+          "ignore_above": 256
+        },
+        "process.entry_leader.entity_id": {
+          "type": "keyword",
+          "ignore_above": 256
+        }
+      }
+    }
+  }
+}
+

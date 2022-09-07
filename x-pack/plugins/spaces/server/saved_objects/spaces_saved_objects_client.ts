@@ -78,7 +78,7 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
   private readonly spaceId: string;
   private readonly types: string[];
   private readonly spacesClient: ISpacesClient;
-  public readonly errors: SavedObjectsClientContract['errors'];
+  public readonly errors: typeof SavedObjectsErrorHelpers;
 
   constructor(options: SpacesSavedObjectsClientOptions) {
     const { baseClient, request, getSpacesService, typeRegistry } = options;
@@ -90,7 +90,7 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
     this.spacesClient = spacesService.createSpacesClient(request);
     this.spaceId = spacesService.getSpaceId(request);
     this.types = typeRegistry.getAllTypes().map((t) => t.name);
-    this.errors = baseClient.errors;
+    this.errors = SavedObjectsErrorHelpers;
   }
 
   async checkConflicts(

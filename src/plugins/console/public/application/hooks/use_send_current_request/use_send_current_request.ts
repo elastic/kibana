@@ -11,17 +11,18 @@ import { useCallback } from 'react';
 
 import { toMountPoint } from '../../../shared_imports';
 import { isQuotaExceededError } from '../../../services/history';
-// @ts-ignore
-import { retrieveAutoCompleteInfo } from '../../../lib/mappings/mappings';
 import { instance as registry } from '../../contexts/editor_context/editor_registry';
 import { useRequestActionContext, useServicesContext } from '../../contexts';
 import { StorageQuotaError } from '../../components/storage_quota_error';
 import { sendRequest } from './send_request';
 import { track } from './track';
+import { replaceVariables } from '../../../lib/utils';
+import { StorageKeys } from '../../../services';
+import { DEFAULT_VARIABLES } from '../../../../common/constants';
 
 export const useSendCurrentRequest = () => {
   const {
-    services: { history, settings, notifications, trackUiMetric, http },
+    services: { history, settings, notifications, trackUiMetric, http, autocompleteInfo, storage },
     theme$,
   } = useServicesContext();
 
@@ -30,7 +31,9 @@ export const useSendCurrentRequest = () => {
   return useCallback(async () => {
     try {
       const editor = registry.getInputEditor();
-      const requests = await editor.getRequestsInRange();
+      const variables = storage.get(StorageKeys.VARIABLES, DEFAULT_VARIABLES);
+      let requests = await editor.getRequestsInRange();
+      requests = replaceVariables(requests, variables);
       if (!requests.length) {
         notifications.toasts.add(
           i18n.translate('console.notification.error.noRequestSelectedTitle', {
@@ -102,7 +105,7 @@ export const useSendCurrentRequest = () => {
         // or templates may have changed, so we'll need to update this data. Assume that if
         // the user disables polling they're trying to optimize performance or otherwise
         // preserve resources, so they won't want this request sent either.
-        retrieveAutoCompleteInfo(http, settings, settings.getAutocomplete());
+        autocompleteInfo.retrieve(settings, settings.getAutocomplete());
       }
 
       dispatch({
@@ -129,5 +132,15 @@ export const useSendCurrentRequest = () => {
         });
       }
     }
-  }, [dispatch, http, settings, notifications.toasts, trackUiMetric, history, theme$]);
+  }, [
+    storage,
+    dispatch,
+    http,
+    settings,
+    notifications.toasts,
+    trackUiMetric,
+    history,
+    theme$,
+    autocompleteInfo,
+  ]);
 };

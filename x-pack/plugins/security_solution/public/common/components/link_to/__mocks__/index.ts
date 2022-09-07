@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SecurityPageName } from '../../../../app/types';
+import type { SecurityPageName } from '../../../../app/types';
 
 export { getDetectionEngineUrl } from '../redirect_to_detection_engine';
 export { getAppLandingUrl } from '../redirect_to_landing';
@@ -23,3 +23,9 @@ export const useFormatUrl = (page: SecurityPageName) => ({
   formatUrl: (path: string) => path,
   search: '',
 });
+
+// do not delete
+export const useGetSecuritySolutionUrl =
+  () =>
+  ({ path }: { path: string }) =>
+    path;

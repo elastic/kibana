@@ -29,10 +29,13 @@ import {
   Position,
   ScaleType,
   PartialTheme,
+  HeatmapStyle,
 } from '@elastic/charts';
 import moment from 'moment';
 
 import { i18n } from '@kbn/i18n';
+import { ChartsPluginStart, useActiveCursor } from '@kbn/charts-plugin/public';
+import { css } from '@emotion/react';
 import { SwimLanePagination } from './swimlane_pagination';
 import { AppStateSelectedCells, OverallSwimlaneData, ViewBySwimLaneData } from './explorer_utils';
 import { ANOMALY_THRESHOLD, SEVERITY_COLORS } from '../../../common';
@@ -155,6 +158,8 @@ export interface SwimlaneProps {
    */
   showTimeline?: boolean;
   showYAxis?: boolean;
+  yAxisWidth?: HeatmapStyle['yAxisLabel']['width'];
+  chartsService: ChartsPluginStart;
 }
 
 /**
@@ -176,10 +181,12 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
   selection,
   onCellsSelection,
   timeBuckets,
+  chartsService,
   showTimeline = true,
   showYAxis = true,
   showLegend = true,
   'data-test-subj': dataTestSubj,
+  yAxisWidth,
 }) => {
   const [chartWidth, setChartWidth] = useState<number>(0);
 
@@ -189,6 +196,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
   // Holds the container height for previously fetched data
   const containerHeightRef = useRef<number>();
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const resizeHandler = useCallback(
     throttle((e: { width: number; height: number }) => {
       const resultNewWidth = e.width - SWIM_LANE_LABEL_WIDTH;
@@ -209,7 +217,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
 
     return swimlaneData.points
       .map((v) => {
-        const formatted = { ...v, time: v.time * 1000 };
+        const formatted = { ...v, time: v.time * 1000, value: v.value === 0 ? null : v.value };
         if (showFilterContext) {
           formatted.laneLabel = i18n.translate('xpack.ml.explorer.overallSwimlaneUnfilteredLabel', {
             defaultMessage: '{label} (unfiltered)',
@@ -224,8 +232,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
         aIndex = aIndex > -1 ? aIndex : sortedLaneValues.length;
         bIndex = bIndex > -1 ? bIndex : sortedLaneValues.length;
         return aIndex - bIndex;
-      })
-      .filter((v) => v.value > 0);
+      });
   }, [swimlaneData?.points, filterActive, swimlaneType, swimlaneData?.laneLabels]);
 
   const showSwimlane = swimlaneData?.laneLabels?.length > 0 && swimLanePoints.length > 0;
@@ -247,6 +254,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
         rowsCount * (CELL_HEIGHT + BORDER_WIDTH * 2) +
           (showLegend ? LEGEND_HEIGHT : 0) +
           (showTimeline ? X_AXIS_HEIGHT : 0);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoading, rowsCount]);
 
   useEffect(() => {
@@ -269,6 +277,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
     }
 
     return { x: selection.times.map((v) => v * 1000), y: selection.lanes };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selection, swimlaneData, swimlaneType]);
 
   const showBrush = !!onCellsSelection;
@@ -301,7 +310,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
         },
         yAxisLabel: {
           visible: showYAxis,
-          width: Y_AXIS_LABEL_WIDTH,
+          width: yAxisWidth,
           textColor: euiTheme.euiTextSubduedColor,
           padding: Y_AXIS_LABEL_PADDING,
           fontSize: parseInt(euiTheme.euiFontSizeXS, 10),
@@ -324,6 +333,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
     };
 
     return theme;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     showSwimlane,
     swimlaneType,
@@ -332,6 +342,12 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
     timeBuckets,
     onCellsSelection,
   ]);
+
+  const chartRef = useRef(null);
+
+  const handleCursorUpdate = useActiveCursor(chartsService.activeCursor, chartRef, {
+    isDateHistogram: true,
+  });
 
   const onElementClick = useCallback(
     (e: HeatmapElementEvent[]) => {
@@ -394,30 +410,38 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
         <EuiFlexGroup
           gutterSize={'none'}
           direction={'column'}
-          style={{ width: '100%', height: '100%', overflow: 'hidden' }}
           ref={resizeRef}
           data-test-subj={dataTestSubj}
+          css={{
+            width: '100%',
+            height: '100%',
+            overflow: 'hidden',
+          }}
         >
           <EuiFlexItem
-            style={{
+            css={{
               width: '100%',
-              overflowY: 'auto',
-              overflowX: 'hidden',
+              'overflow-y': 'auto',
+              'overflow-x': 'hidden',
             }}
             grow={false}
           >
             <>
               <div>
                 <div
-                  style={{ height: `${containerHeight}px`, position: 'relative' }}
+                  style={{ height: `${containerHeight}px` }}
+                  css={css`
+                    position: relative;
+                  `}
                   hidden={noSwimLaneData}
                 >
                   {showSwimlane && !isLoading && (
-                    <Chart className={'mlSwimLaneContainer'}>
+                    <Chart className={'mlSwimLaneContainer'} ref={chartRef}>
                       <Settings
                         // TODO use the EUI charts theme see src/plugins/charts/public/services/theme/README.md
                         theme={themeOverrides}
                         onElementClick={onElementClick}
+                        onPointerUpdate={handleCursorUpdate}
                         showLegend={showLegend}
                         legendPosition={Position.Top}
                         xDomain={xDomain}

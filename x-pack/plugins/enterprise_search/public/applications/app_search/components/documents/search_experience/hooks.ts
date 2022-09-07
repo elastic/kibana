@@ -7,19 +7,20 @@
 
 import { useContext, useEffect, useState } from 'react';
 
-// @ts-expect-error types are not available for this package yet
 import { SearchContext } from '@elastic/react-search-ui';
+import type { SearchState } from '@elastic/search-ui';
 
 export const useSearchContextState = () => {
   const { driver } = useContext(SearchContext);
   const [state, setState] = useState(driver.state);
 
   useEffect(() => {
-    driver.subscribeToStateChanges((newState: object) => {
+    const subscription = (newState: SearchState) => {
       setState(newState);
-    });
+    };
+    driver.subscribeToStateChanges(subscription);
     return () => {
-      driver.unsubscribeToStateChanges();
+      driver.unsubscribeToStateChanges(subscription);
     };
   }, [state]);
 

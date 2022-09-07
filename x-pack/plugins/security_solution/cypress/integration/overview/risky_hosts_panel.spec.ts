@@ -11,7 +11,8 @@ import {
   OVERVIEW_RISKY_HOSTS_LINKS_ERROR_INNER_PANEL,
   OVERVIEW_RISKY_HOSTS_LINKS_WARNING_INNER_PANEL,
   OVERVIEW_RISKY_HOSTS_TOTAL_EVENT_COUNT,
-  OVERVIEW_RISKY_HOSTS_VIEW_DASHBOARD_BUTTON,
+  OVERVIEW_RISKY_HOSTS_DOC_LINK,
+  OVERVIEW_RISKY_HOSTS_IMPORT_DASHBOARD_BUTTON,
 } from '../../screens/overview';
 
 import { login, visit } from '../../tasks/login';
@@ -34,10 +35,9 @@ describe('Risky Hosts Link Panel', () => {
     cy.get(`${OVERVIEW_RISKY_HOSTS_LINKS} ${OVERVIEW_RISKY_HOSTS_LINKS_ERROR_INNER_PANEL}`).should(
       'exist'
     );
-    cy.get(`${OVERVIEW_RISKY_HOSTS_VIEW_DASHBOARD_BUTTON}`).should('be.disabled');
     cy.get(`${OVERVIEW_RISKY_HOSTS_TOTAL_EVENT_COUNT}`).should('have.text', 'Showing: 0 hosts');
     cy.get(`${OVERVIEW_RISKY_HOSTS_ENABLE_MODULE_BUTTON}`).should('exist');
-    cy.get(`${OVERVIEW_RISKY_HOSTS_ENABLE_MODULE_BUTTON}`)
+    cy.get(`${OVERVIEW_RISKY_HOSTS_DOC_LINK}`)
       .should('have.attr', 'href')
       .and('match', /host-risk-score.md/);
   });
@@ -60,7 +60,6 @@ describe('Risky Hosts Link Panel', () => {
       cy.get(
         `${OVERVIEW_RISKY_HOSTS_LINKS} ${OVERVIEW_RISKY_HOSTS_LINKS_WARNING_INNER_PANEL}`
       ).should('exist');
-      cy.get(`${OVERVIEW_RISKY_HOSTS_VIEW_DASHBOARD_BUTTON}`).should('be.disabled');
       cy.get(`${OVERVIEW_RISKY_HOSTS_TOTAL_EVENT_COUNT}`).should('have.text', 'Showing: 0 hosts');
     });
 
@@ -69,12 +68,11 @@ describe('Risky Hosts Link Panel', () => {
       cy.get(
         `${OVERVIEW_RISKY_HOSTS_LINKS} ${OVERVIEW_RISKY_HOSTS_LINKS_WARNING_INNER_PANEL}`
       ).should('not.exist');
-      cy.get(`${OVERVIEW_RISKY_HOSTS_VIEW_DASHBOARD_BUTTON}`).should('be.disabled');
+      cy.get(`${OVERVIEW_RISKY_HOSTS_IMPORT_DASHBOARD_BUTTON}`).should('exist');
       cy.get(`${OVERVIEW_RISKY_HOSTS_TOTAL_EVENT_COUNT}`).should('have.text', 'Showing: 6 hosts');
 
       changeSpace(testSpaceName);
       cy.visit(`/s/${testSpaceName}${OVERVIEW_URL}`);
-      cy.get(`${OVERVIEW_RISKY_HOSTS_VIEW_DASHBOARD_BUTTON}`).should('be.disabled');
       cy.get(`${OVERVIEW_RISKY_HOSTS_TOTAL_EVENT_COUNT}`).should('have.text', 'Showing: 0 hosts');
       cy.get(`${OVERVIEW_RISKY_HOSTS_ENABLE_MODULE_BUTTON}`).should('exist');
     });

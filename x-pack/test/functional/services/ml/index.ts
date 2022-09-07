@@ -36,6 +36,7 @@ import { MachineLearningJobWizardCommonProvider } from './job_wizard_common';
 import { MachineLearningJobWizardCategorizationProvider } from './job_wizard_categorization';
 import { MachineLearningJobWizardMultiMetricProvider } from './job_wizard_multi_metric';
 import { MachineLearningJobWizardPopulationProvider } from './job_wizard_population';
+import { MachineLearningLensVisualizationsProvider } from './lens_visualizations';
 import { MachineLearningNavigationProvider } from './navigation';
 import { MachineLearningOverviewPageProvider } from './overview_page';
 import { MachineLearningSecurityCommonProvider } from './security_common';
@@ -56,6 +57,8 @@ import { TrainedModelsProvider } from './trained_models';
 import { TrainedModelsTableProvider } from './trained_models_table';
 import { MachineLearningJobAnnotationsProvider } from './job_annotations_table';
 import { MlNodesPanelProvider } from './ml_nodes_list';
+import { MachineLearningCasesProvider } from './cases';
+import { AnomalyChartsProvider } from './anomaly_charts';
 
 export function MachineLearningProvider(context: FtrProviderContext) {
   const commonAPI = MachineLearningCommonAPIProvider(context);
@@ -63,7 +66,8 @@ export function MachineLearningProvider(context: FtrProviderContext) {
   const commonDataGrid = MachineLearningCommonDataGridProvider(context);
 
   const anomaliesTable = MachineLearningAnomaliesTableProvider(context);
-  const anomalyExplorer = MachineLearningAnomalyExplorerProvider(context);
+  const anomalyCharts = AnomalyChartsProvider(context);
+  const anomalyExplorer = MachineLearningAnomalyExplorerProvider(context, anomalyCharts);
   const api = MachineLearningAPIProvider(context);
   const commonConfig = MachineLearningCommonConfigsProvider(context);
   const customUrls = MachineLearningCustomUrlsProvider(context);
@@ -109,6 +113,7 @@ export function MachineLearningProvider(context: FtrProviderContext) {
   const jobWizardCommon = MachineLearningJobWizardCommonProvider(context, commonUI, customUrls);
   const jobWizardMultiMetric = MachineLearningJobWizardMultiMetricProvider(context);
   const jobWizardPopulation = MachineLearningJobWizardPopulationProvider(context);
+  const lensVisualizations = MachineLearningLensVisualizationsProvider(context, commonUI);
   const navigation = MachineLearningNavigationProvider(context);
   const overviewPage = MachineLearningOverviewPageProvider(context);
   const securityCommon = MachineLearningSecurityCommonProvider(context);
@@ -117,24 +122,24 @@ export function MachineLearningProvider(context: FtrProviderContext) {
   const settingsCalendar = MachineLearningSettingsCalendarProvider(context, commonUI);
   const settingsFilterList = MachineLearningSettingsFilterListProvider(context, commonUI);
   const singleMetricViewer = MachineLearningSingleMetricViewerProvider(context, commonUI);
-  const stackManagementJobs = MachineLearningStackManagementJobsProvider(
-    context,
-    jobTable,
-    dataFrameAnalyticsTable
-  );
+  const stackManagementJobs = MachineLearningStackManagementJobsProvider(context);
   const testExecution = MachineLearningTestExecutionProvider(context);
   const testResources = MachineLearningTestResourcesProvider(context, api);
   const alerting = MachineLearningAlertingProvider(context, api, commonUI);
   const swimLane = SwimLaneProvider(context);
-  const trainedModels = TrainedModelsProvider(context, api, commonUI);
+  const trainedModels = TrainedModelsProvider(context, commonUI);
   const trainedModelsTable = TrainedModelsTableProvider(context, commonUI);
   const mlNodesPanel = MlNodesPanelProvider(context);
 
+  const cases = MachineLearningCasesProvider(context, swimLane, anomalyCharts);
+
   return {
     anomaliesTable,
+    anomalyCharts,
     anomalyExplorer,
     alerting,
     api,
+    cases,
     commonAPI,
     commonConfig,
     commonDataGrid,
@@ -165,6 +170,7 @@ export function MachineLearningProvider(context: FtrProviderContext) {
     jobWizardCommon,
     jobWizardMultiMetric,
     jobWizardPopulation,
+    lensVisualizations,
     navigation,
     overviewPage,
     securityCommon,

@@ -32,7 +32,7 @@ function renderMenu({
       agentPolicy={agentPolicy}
       packagePolicy={packagePolicy}
       showAddAgent={showAddAgent}
-      upgradePackagePolicyHref=""
+      upgradePackagePolicyHref="/test/upgrade-link"
       defaultIsOpen={defaultIsOpen}
       key="test1"
     />
@@ -72,7 +72,6 @@ function createMockPackagePolicy(
     updated_by: '',
     policy_id: '',
     enabled: true,
-    output_id: '',
     namespace: 'default',
     inputs: [],
     revision: 1,
@@ -95,8 +94,9 @@ test('Should enable upgrade button if package has upgrade', async () => {
   const agentPolicy = createMockAgentPolicy();
   const packagePolicy = createMockPackagePolicy({ hasUpgrade: true });
   const { utils } = renderMenu({ agentPolicy, packagePolicy });
+
   await act(async () => {
-    const upgradeButton = utils.getByText('Upgrade integration policy').closest('button');
+    const upgradeButton = utils.getByTestId('PackagePolicyActionsUpgradeItem');
     expect(upgradeButton).not.toBeDisabled();
   });
 });

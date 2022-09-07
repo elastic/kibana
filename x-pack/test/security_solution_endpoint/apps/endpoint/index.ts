@@ -41,5 +41,7 @@ export default function (providerContext: FtrProviderContext) {
     loadTestFile(require.resolve('./trusted_apps_list'));
     loadTestFile(require.resolve('./fleet_integrations'));
     loadTestFile(require.resolve('./endpoint_permissions'));
+    loadTestFile(require.resolve('./artifact_entries_list'));
+    loadTestFile(require.resolve('./responder'));
   });
 }

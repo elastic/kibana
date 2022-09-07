@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectAttributes } from '@kbn/core/types';
+import type { SavedObjectAttributes } from '@kbn/core/types';
 
 export const BOOK_SAVED_OBJECT = 'book';
 

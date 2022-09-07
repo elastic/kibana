@@ -21,6 +21,29 @@ export const noKibanaPrivileges: Role = {
   },
 };
 
+export const noCasesPrivilegesSpace1: Role = {
+  name: 'no_kibana_privileges',
+  privileges: {
+    elasticsearch: {
+      indices: [
+        {
+          names: ['*'],
+          privileges: ['all'],
+        },
+      ],
+    },
+    kibana: [
+      {
+        feature: {
+          actions: ['read'],
+          actionsSimulators: ['read'],
+        },
+        spaces: ['space1'],
+      },
+    ],
+  },
+};
+
 export const globalRead: Role = {
   name: 'global_read',
   privileges: {
@@ -86,6 +109,54 @@ export const securitySolutionOnlyAll: Role = {
       {
         feature: {
           securitySolutionFixture: ['all'],
+          actions: ['all'],
+          actionsSimulators: ['all'],
+        },
+        spaces: ['space1'],
+      },
+    ],
+  },
+};
+
+export const securitySolutionOnlyDelete: Role = {
+  name: 'sec_only_delete',
+  privileges: {
+    elasticsearch: {
+      indices: [
+        {
+          names: ['*'],
+          privileges: ['all'],
+        },
+      ],
+    },
+    kibana: [
+      {
+        feature: {
+          securitySolutionFixture: ['cases_delete'],
+          actions: ['all'],
+          actionsSimulators: ['all'],
+        },
+        spaces: ['space1'],
+      },
+    ],
+  },
+};
+
+export const securitySolutionOnlyNoDelete: Role = {
+  name: 'sec_only_no_delete',
+  privileges: {
+    elasticsearch: {
+      indices: [
+        {
+          names: ['*'],
+          privileges: ['all'],
+        },
+      ],
+    },
+    kibana: [
+      {
+        feature: {
+          securitySolutionFixture: ['minimal_all'],
           actions: ['all'],
           actionsSimulators: ['all'],
         },
@@ -169,9 +240,12 @@ export const observabilityOnlyRead: Role = {
 
 export const roles = [
   noKibanaPrivileges,
+  noCasesPrivilegesSpace1,
   globalRead,
   securitySolutionOnlyAll,
   securitySolutionOnlyRead,
+  securitySolutionOnlyDelete,
+  securitySolutionOnlyNoDelete,
   observabilityOnlyAll,
   observabilityOnlyRead,
   testDisabledPluginAll,

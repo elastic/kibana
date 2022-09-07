@@ -17,7 +17,7 @@ import { DefaultFormatEditor, defaultState } from '../default/default';
 import { FormatEditorSamples } from '../../samples';
 import { formatId } from './constants';
 
-interface GeoPointFormatEditorFormatParams {
+export interface GeoPointFormatEditorFormatParams {
   transform: string;
 }
 

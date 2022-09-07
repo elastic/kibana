@@ -14,6 +14,9 @@ export class FilterBarService extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly common = this.ctx.getPageObject('common');
   private readonly header = this.ctx.getPageObject('header');
+  private readonly retry = this.ctx.getService('retry');
+  private readonly config = this.ctx.getService('config');
+  private readonly defaultTryTimeout = this.config.get('timeouts.try');
 
   /**
    * Checks if specified filter exists
@@ -55,8 +58,10 @@ export class FilterBarService extends FtrService {
    * @param key field name
    */
   public async removeFilter(key: string): Promise<void> {
-    await this.testSubjects.click(`~filter & ~filter-key-${key}`);
-    await this.testSubjects.click(`deleteFilter`);
+    await this.retry.try(async () => {
+      await this.testSubjects.click(`~filter & ~filter-key-${key}`);
+      await this.testSubjects.click(`deleteFilter`);
+    });
     await this.header.awaitGlobalLoadingIndicatorHidden();
   }
 
@@ -127,32 +132,37 @@ export class FilterBarService extends FtrService {
    * filterBar.addFilter('extension', 'is one of', ['jpg', 'png']);
    */
   public async addFilter(field: string, operator: string, ...values: any): Promise<void> {
-    await this.testSubjects.click('addFilter');
-    await this.comboBox.set('filterFieldSuggestionList', field);
-    await this.comboBox.set('filterOperatorList', operator);
-    const params = await this.testSubjects.find('filterParams');
-    const paramsComboBoxes = await params.findAllByCssSelector(
-      '[data-test-subj~="filterParamsComboBox"]',
-      1000
-    );
-    const paramFields = await params.findAllByTagName('input', 1000);
-    for (let i = 0; i < values.length; i++) {
-      let fieldValues = values[i];
-      if (!Array.isArray(fieldValues)) {
-        fieldValues = [fieldValues];
+    await this.retry.tryForTime(this.defaultTryTimeout * 2, async () => {
+      await this.testSubjects.click('addFilter');
+      await this.testSubjects.existOrFail('addFilterPopover');
+
+      await this.comboBox.set('filterFieldSuggestionList', field);
+      await this.comboBox.set('filterOperatorList', operator);
+      const params = await this.testSubjects.find('filterParams');
+      const paramsComboBoxes = await params.findAllByCssSelector(
+        '[data-test-subj~="filterParamsComboBox"]',
+        1000
+      );
+      const paramFields = await params.findAllByTagName('input', 1000);
+      for (let i = 0; i < values.length; i++) {
+        let fieldValues = values[i];
+        if (!Array.isArray(fieldValues)) {
+          fieldValues = [fieldValues];
+        }
+
+        if (paramsComboBoxes && paramsComboBoxes.length > 0) {
+          for (let j = 0; j < fieldValues.length; j++) {
+            await this.comboBox.setElement(paramsComboBoxes[i], fieldValues[j]);
+          }
+        } else if (paramFields && paramFields.length > 0) {
+          for (let j = 0; j < fieldValues.length; j++) {
+            await paramFields[i].type(fieldValues[j]);
+          }
+        }
       }
 
-      if (paramsComboBoxes && paramsComboBoxes.length > 0) {
-        for (let j = 0; j < fieldValues.length; j++) {
-          await this.comboBox.setElement(paramsComboBoxes[i], fieldValues[j]);
-        }
-      } else if (paramFields && paramFields.length > 0) {
-        for (let j = 0; j < fieldValues.length; j++) {
-          await paramFields[i].type(fieldValues[j]);
-        }
-      }
-    }
-    await this.testSubjects.click('saveFilter');
+      await this.testSubjects.clickWhenNotDisabledWithoutRetry('saveFilter');
+    });
     await this.header.awaitGlobalLoadingIndicatorHidden();
   }
 

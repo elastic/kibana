@@ -7,9 +7,9 @@
  */
 
 import { REPO_ROOT } from '@kbn/utils';
-import { getEnvOptions } from '../config/mocks';
+import { Env } from '@kbn/config';
+import { getEnvOptions } from '@kbn/config-mocks';
 import { PluginsConfig, PluginsConfigType } from './plugins_config';
-import { Env } from '../config';
 
 describe('PluginsConfig', () => {
   it('retrieves additionalPluginPaths from config.paths when in production mode', () => {

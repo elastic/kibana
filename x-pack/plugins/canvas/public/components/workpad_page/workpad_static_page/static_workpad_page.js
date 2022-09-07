@@ -8,7 +8,7 @@
 import React, { PureComponent } from 'react';
 import { ElementWrapper } from '../../element_wrapper';
 import { staticWorkpadPagePropTypes } from '../prop_types';
-import { isGroupId } from '../positioning_utils';
+import { isGroupId } from '../../../lib/workpad';
 
 export class StaticWorkpadPage extends PureComponent {
   static propTypes = staticWorkpadPagePropTypes;

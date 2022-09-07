@@ -66,8 +66,8 @@ export const registerUpdateScriptedFieldRoute = (
         const core = await ctx.core;
         const savedObjectsClient = core.savedObjects.client;
         const elasticsearchClient = core.elasticsearch.client.asCurrentUser;
-        const [, , { indexPatternsServiceFactory }] = await getStartServices();
-        const indexPatternsService = await indexPatternsServiceFactory(
+        const [, , { dataViewsServiceFactory }] = await getStartServices();
+        const indexPatternsService = await dataViewsServiceFactory(
           savedObjectsClient,
           elasticsearchClient,
           req

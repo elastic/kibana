@@ -243,7 +243,7 @@ describe('loadRuleAggregations', () => {
         Object {
           "query": Object {
             "default_search_operator": "AND",
-            "filter": "alert.attributes.enabled:(true) and not (alert.attributes.muteAll:true OR alert.attributes.snoozeEndTime > now)",
+            "filter": "alert.attributes.enabled: true",
             "search": undefined,
             "search_fields": undefined,
           },
@@ -262,7 +262,7 @@ describe('loadRuleAggregations', () => {
         Object {
           "query": Object {
             "default_search_operator": "AND",
-            "filter": "alert.attributes.enabled:(true) or (alert.attributes.muteAll:true OR alert.attributes.snoozeEndTime > now)",
+            "filter": "alert.attributes.enabled: true and (alert.attributes.muteAll:true OR alert.attributes.snoozeSchedule: { duration > 0 })",
             "search": undefined,
             "search_fields": undefined,
           },
@@ -281,7 +281,7 @@ describe('loadRuleAggregations', () => {
         Object {
           "query": Object {
             "default_search_operator": "AND",
-            "filter": "alert.attributes.enabled:(true) or (alert.attributes.muteAll:true OR alert.attributes.snoozeEndTime > now)",
+            "filter": "alert.attributes.enabled: true and (alert.attributes.muteAll:true OR alert.attributes.snoozeSchedule: { duration > 0 })",
             "search": undefined,
             "search_fields": undefined,
           },

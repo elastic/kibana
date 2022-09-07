@@ -10,8 +10,8 @@
 import { i18n } from '@kbn/i18n';
 
 import { OptionalFieldLabel } from '../optional_field_label';
-import { ScheduleStepRule } from '../../../pages/detection_engine/rules/types';
-import { FormSchema } from '../../../../shared_imports';
+import type { ScheduleStepRule } from '../../../pages/detection_engine/rules/types';
+import type { FormSchema } from '../../../../shared_imports';
 
 export const schema: FormSchema<ScheduleStepRule> = {
   interval: {

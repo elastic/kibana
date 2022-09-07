@@ -8,12 +8,13 @@
 import uuid from 'uuid';
 import { i18n } from '@kbn/i18n';
 import { addIdToItem } from '@kbn/securitysolution-utils';
-import { ThreatMap, threatMap, ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { ThreatMap, ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
+import { threatMap } from '@kbn/securitysolution-io-ts-alerting-types';
 
 import type { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
-import { ValidationFunc } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { ERROR_CODE } from '@kbn/es-ui-shared-plugin/static/forms/helpers/field_validators/types';
-import { Entry, FormattedEntry, ThreatMapEntries, EmptyEntry } from './types';
+import type { ValidationFunc } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import type { ERROR_CODE } from '@kbn/es-ui-shared-plugin/static/forms/helpers/field_validators/types';
+import type { Entry, FormattedEntry, ThreatMapEntries, EmptyEntry } from './types';
 
 /**
  * Formats the entry into one that is easily usable for the UI.

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import {
+import type {
   ImportExceptionsListSchema,
   ImportExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 
-import { ExceptionListClient } from '@kbn/lists-plugin/server';
+import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 
 /**
  * Util to call into exceptions list client import logic

@@ -7,13 +7,14 @@
 
 import { Observable, of } from 'rxjs';
 import { map as mapObservable } from 'rxjs/operators';
-import type { TimefilterContract, TimeRange } from '@kbn/data-plugin/public';
+import type { TimeRange } from '@kbn/es-query';
+import type { TimefilterContract } from '@kbn/data-plugin/public';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { RecordForInfluencer } from './results_service/results_service';
 import type { EntityField } from '../../../common/util/anomaly_utils';
 import type { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
 import type { MlApiServices } from './ml_api_service';
 import type { MlResultsService } from './results_service';
-import { isPopulatedObject } from '../../../common/util/object_utils';
 import { ExplorerChartsData } from '../explorer/explorer_charts/explorer_charts_container_service';
 import type { TimeRangeBounds } from '../util/time_buckets';
 import { isDefined } from '../../../common/types/guards';
@@ -109,7 +110,7 @@ export class AnomalyExplorerChartsService {
     severity = 0,
     maxSeries?: number
   ): Observable<ExplorerChartsData> {
-    const bounds = this.timeFilter.getActiveBounds();
+    const bounds = this.getTimeBounds();
     const boundsMin = bounds?.min ? bounds.min.valueOf() : undefined;
     const boundsMax = bounds?.max ? bounds.max.valueOf() : undefined;
 

@@ -43,7 +43,7 @@ CommentListActions.displayName = 'CommentListActions';
 
 type BuilderArgs = Pick<UserActionBuilderArgs, 'userAction' | 'handleOutlineComment'> & {
   label: EuiCommentProps['event'];
-  icon: EuiCommentProps['timelineIcon'];
+  icon: EuiCommentProps['timelineAvatar'];
 };
 
 export const createCommonUpdateUserActionBuilder = ({
@@ -62,11 +62,10 @@ export const createCommonUpdateUserActionBuilder = ({
             fullName={userAction.createdBy.fullName}
           />
         ),
-        type: 'update' as const,
         event: label,
         'data-test-subj': `${userAction.type}-${userAction.action}-action-${userAction.actionId}`,
         timestamp: <UserActionTimestamp createdAt={userAction.createdAt} />,
-        timelineIcon: icon,
+        timelineAvatar: icon,
         actions: (
           <EuiFlexGroup responsive={false}>
             <EuiFlexItem grow={false}>

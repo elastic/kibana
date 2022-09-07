@@ -32,6 +32,13 @@ export const bulkApplyTimelineTemplate = {
     }
   ),
 
+  TEMPLATE_SELECTOR_PLACEHOLDER: i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.applyTimelineTemplate.templateSelectorPlaceholder',
+    {
+      defaultMessage: 'Search Timeline template',
+    }
+  ),
+
   TEMPLATE_SELECTOR_DEFAULT_VALUE: i18n.translate(
     'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.applyTimelineTemplate.templateSelectorDefaultValue',
     {
@@ -46,5 +53,44 @@ export const bulkApplyTimelineTemplate = {
       If you previously applied Timeline templates to these rules, they will be overwritten or (if you select 'None') reset to none."
       values={{ rulesCount }}
     />
+  ),
+};
+
+export const bulkAddRuleActions = {
+  FORM_TITLE: i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.addRuleActions.formTitle',
+    {
+      defaultMessage: 'Add rule actions',
+    }
+  ),
+
+  OVERWRITE_LABEL: i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.addRuleActions.overwriteCheckboxLabel',
+    {
+      defaultMessage: 'Overwrite all selected rules actions',
+    }
+  ),
+
+  THROTTLE_LABEL: i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.addRuleActions.throttleLabel',
+    {
+      defaultMessage: 'Actions frequency',
+    }
+  ),
+
+  THROTTLE_HELP_TEXT: i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.addRuleActions.throttleHelpText',
+    {
+      defaultMessage:
+        'Select when automated actions should be performed if a rule evaluates as true.',
+    }
+  ),
+
+  RULE_VARIABLES_DETAIL: i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.edit.addRuleActions.ruleVariablesDetail',
+    {
+      defaultMessage:
+        'Rule variables may affect only some of the rules you select, based on the rule types (for example, \\u007b\\u007bcontext.rule.threshold\\u007d\\u007d will only display values for threshold rules).',
+    }
   ),
 };

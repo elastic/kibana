@@ -98,7 +98,7 @@ describe('ExplorerSwimlaneContainer', () => {
       <EmbeddableSwimLaneContainer
         id={'test-swimlane-embeddable'}
         embeddableContext={embeddableContext}
-        embeddableInput={
+        embeddableInput$={
           embeddableInput.asObservable() as Observable<AnomalySwimlaneEmbeddableInput>
         }
         services={services}
@@ -140,7 +140,7 @@ describe('ExplorerSwimlaneContainer', () => {
       <EmbeddableSwimLaneContainer
         embeddableContext={embeddableContext}
         id={'test-swimlane-embeddable'}
-        embeddableInput={
+        embeddableInput$={
           embeddableInput.asObservable() as Observable<AnomalySwimlaneEmbeddableInput>
         }
         services={services}

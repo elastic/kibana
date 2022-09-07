@@ -166,5 +166,171 @@ describe('#setupSavedObjects', () => {
         { namespace: 'some-ns' }
       );
     });
+
+    it('does not call decryptAttributes if Saved Object type is not registered', async () => {
+      const mockSavedObject: SavedObject = {
+        id: 'some-id',
+        type: 'not-known-type',
+        attributes: { attrOne: 'one', attrSecret: '*secret*' },
+        references: [],
+      };
+      mockSavedObjectsRepository.get.mockResolvedValue(mockSavedObject);
+
+      await expect(
+        setupContract().getDecryptedAsInternalUser(mockSavedObject.type, mockSavedObject.id, {
+          namespace: 'some-ns',
+        })
+      ).resolves.toEqual(mockSavedObject);
+
+      expect(mockEncryptedSavedObjectsService.decryptAttributes).toHaveBeenCalledTimes(0);
+    });
+  });
+
+  describe('#createPointInTimeFinderDecryptedAsInternalUser', () => {
+    it('includes `namespace` for single-namespace saved objects', async () => {
+      const mockSavedObject: SavedObject = {
+        id: 'some-id',
+        type: 'known-type',
+        attributes: { attrOne: 'one', attrSecret: '*secret*' },
+        references: [],
+      };
+      mockSavedObjectsRepository.createPointInTimeFinder = jest.fn().mockReturnValue({
+        close: jest.fn(),
+        find: function* asyncGenerator() {
+          yield { saved_objects: [mockSavedObject] };
+        },
+      });
+
+      mockSavedObjectTypeRegistry.isSingleNamespace.mockReturnValue(true);
+
+      const finder = await setupContract().createPointInTimeFinderDecryptedAsInternalUser({
+        type: 'known-type',
+        namespaces: ['some-ns'],
+      });
+
+      for await (const res of finder.find()) {
+        expect(res).toEqual({
+          saved_objects: [
+            {
+              ...mockSavedObject,
+              attributes: { attrOne: 'one', attrSecret: 'secret' },
+            },
+          ],
+        });
+      }
+
+      expect(mockEncryptedSavedObjectsService.decryptAttributes).toHaveBeenCalledTimes(1);
+      expect(mockEncryptedSavedObjectsService.decryptAttributes).toHaveBeenCalledWith(
+        { type: mockSavedObject.type, id: mockSavedObject.id, namespace: 'some-ns' },
+        mockSavedObject.attributes
+      );
+
+      expect(mockSavedObjectsRepository.createPointInTimeFinder).toHaveBeenCalledTimes(1);
+      expect(mockSavedObjectsRepository.createPointInTimeFinder).toHaveBeenCalledWith(
+        { type: 'known-type', namespaces: ['some-ns'] },
+        undefined
+      );
+    });
+
+    it('does not include `namespace` for multiple-namespace saved objects', async () => {
+      const mockSavedObject: SavedObject = {
+        id: 'some-id',
+        type: 'known-type',
+        attributes: { attrOne: 'one', attrSecret: '*secret*' },
+        references: [],
+      };
+      mockSavedObjectsRepository.createPointInTimeFinder = jest.fn().mockReturnValue({
+        close: jest.fn(),
+        find: function* asyncGenerator() {
+          yield { saved_objects: [mockSavedObject] };
+        },
+      });
+
+      mockSavedObjectTypeRegistry.isSingleNamespace.mockReturnValue(false);
+
+      const finder = await setupContract().createPointInTimeFinderDecryptedAsInternalUser({
+        type: 'known-type',
+        namespaces: ['some-ns'],
+      });
+
+      for await (const res of finder.find()) {
+        expect(res).toEqual({
+          saved_objects: [
+            {
+              ...mockSavedObject,
+              attributes: { attrOne: 'one', attrSecret: 'secret' },
+            },
+          ],
+        });
+      }
+
+      expect(mockEncryptedSavedObjectsService.decryptAttributes).toHaveBeenCalledTimes(1);
+      expect(mockEncryptedSavedObjectsService.decryptAttributes).toHaveBeenCalledWith(
+        { type: mockSavedObject.type, id: mockSavedObject.id, namespace: undefined },
+        mockSavedObject.attributes
+      );
+
+      expect(mockSavedObjectsRepository.createPointInTimeFinder).toHaveBeenCalledTimes(1);
+      expect(mockSavedObjectsRepository.createPointInTimeFinder).toHaveBeenCalledWith(
+        { type: 'known-type', namespaces: ['some-ns'] },
+        undefined
+      );
+    });
+
+    it('does not call decryptAttributes if Saved Object type is not registered', async () => {
+      const mockSavedObject: SavedObject = {
+        id: 'some-id',
+        type: 'not-known-type',
+        attributes: { attrOne: 'one', attrSecret: '*secret*' },
+        references: [],
+      };
+      mockSavedObjectsRepository.createPointInTimeFinder = jest.fn().mockReturnValue({
+        close: jest.fn(),
+        find: function* asyncGenerator() {
+          yield { saved_objects: [mockSavedObject] };
+        },
+      });
+
+      const finder = await setupContract().createPointInTimeFinderDecryptedAsInternalUser({
+        type: 'not-known-type',
+        namespaces: ['some-ns'],
+      });
+
+      for await (const res of finder.find()) {
+        expect(res).toEqual({
+          saved_objects: [mockSavedObject],
+        });
+      }
+
+      expect(mockEncryptedSavedObjectsService.decryptAttributes).toHaveBeenCalledTimes(0);
+    });
+
+    it('returns error within Saved Object if decryption failed', async () => {
+      const mockSavedObject: SavedObject = {
+        id: 'some-id',
+        type: 'known-type',
+        attributes: { attrOne: 'one', attrSecret: '*secret*' },
+        references: [],
+      };
+      mockSavedObjectsRepository.createPointInTimeFinder = jest.fn().mockReturnValue({
+        close: jest.fn(),
+        find: function* asyncGenerator() {
+          yield { saved_objects: [mockSavedObject] };
+        },
+      });
+
+      mockEncryptedSavedObjectsService.decryptAttributes.mockImplementation(() => {
+        throw new Error('Test failure');
+      });
+
+      const finder = await setupContract().createPointInTimeFinderDecryptedAsInternalUser({
+        type: 'known-type',
+        namespaces: ['some-ns'],
+      });
+
+      for await (const res of finder.find()) {
+        expect(res.saved_objects[0].error).toHaveProperty('message', 'Test failure');
+      }
+    });
   });
 });

@@ -171,7 +171,7 @@ export class GisPageObject extends FtrService {
       }
       await this.testSubjects.click('savedObjectTitle');
     }
-    await this.testSubjects.clickWhenNotDisabled('confirmSaveSavedObjectButton');
+    await this.testSubjects.clickWhenNotDisabledWithoutRetry('confirmSaveSavedObjectButton');
     await this.header.waitUntilLoadingHasFinished();
   }
 
@@ -193,6 +193,14 @@ export class GisPageObject extends FtrService {
 
   async expectMissingAddLayerButton() {
     await this.testSubjects.missingOrFail('addLayerButton');
+  }
+
+  async expectMissingToolsControl() {
+    await this.testSubjects.missingOrFail('mapToolsControlPopover');
+  }
+
+  async expectExistsToolsControl() {
+    await this.testSubjects.existOrFail('mapToolsControlPopover');
   }
 
   async expectExistAddLayerButton() {
@@ -288,10 +296,33 @@ export class GisPageObject extends FtrService {
     };
   }
 
+  // This method is also used by upgrade testing which is not part of PR testing
+  // Please keep in mind when udpating, removing or adding to this method
+  // upgrade needs to be tested too
+  async clearLegendTooltip() {
+    const isTooltipOpen = await this.testSubjects.exists(`layerTocTooltip`, { timeout: 5000 });
+    if (isTooltipOpen) {
+      await this.testSubjects.click(`layerTocTooltip`);
+      // Wait for tooltip to go away
+      await this.common.sleep(1000);
+    }
+  }
+
+  // This method is also used by upgrade testing which is not part of PR testing
+  // Please keep in mind when udpating, removing or adding to this method
+  // upgrade needs to be tested too
   async toggleLayerVisibility(layerName: string) {
-    this.log.debug(`Toggle layer visibility, layer: ${layerName}`);
+    this.log.debug('Inside toggleLayerVisibility');
+    await this.clearLegendTooltip();
     await this.openLayerTocActionsPanel(layerName);
     await this.testSubjects.click('layerVisibilityToggleButton');
+    await this.waitForLayersToLoad();
+    await this.clearLegendTooltip();
+  }
+
+  // In 8.4, EMS basemap layers no longer use EMS tile service name, instead using "Basemap"
+  async toggleEmsBasemapLayerVisibility() {
+    await this.toggleLayerVisibility('Basemap');
   }
 
   async openLegend() {
@@ -556,7 +587,7 @@ export class GisPageObject extends FtrService {
   }
 
   async openInspectorMapView() {
-    await this.inspector.openInspectorView('~inspectorViewChooserMap');
+    await this.inspector.openInspectorView('Map details');
   }
 
   // Method should only be used when multiple requests are expected
@@ -600,6 +631,7 @@ export class GisPageObject extends FtrService {
   }
 
   async _getResponse(requestName: string) {
+    await this.inspector.openInspectorRequestsView();
     if (requestName) {
       await this.testSubjects.click('inspectorRequestChooser');
       await this.testSubjects.click(`inspectorRequestChooser${requestName}`);
@@ -667,7 +699,7 @@ export class GisPageObject extends FtrService {
   }
 
   async getCategorySuggestions() {
-    return await this.comboBox.getOptionsList(`colorStopInput1`);
+    return await this.comboBox.getOptionsList(`colorStopInput0`);
   }
 
   async enableAutoFitToBounds() {

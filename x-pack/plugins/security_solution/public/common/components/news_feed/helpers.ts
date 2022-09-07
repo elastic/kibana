@@ -9,7 +9,7 @@ import { get } from 'lodash/fp';
 import moment from 'moment';
 import uuid from 'uuid';
 import semverCoerce from 'semver/functions/coerce';
-import { NewsItem, RawNewsApiItem, RawNewsApiResponse } from './types';
+import type { NewsItem, RawNewsApiItem, RawNewsApiResponse } from './types';
 import { KibanaServices } from '../../lib/kibana';
 
 /**

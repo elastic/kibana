@@ -4,22 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { DocValueFields } from '@kbn/timelines-plugin/common';
-import { UsersTableType, UsersType } from '../../store/model';
-import { GlobalTimeArgs } from '../../../common/containers/use_global_time';
-import { ESTermQuery } from '../../../../common/typed_json';
-import { NavTab } from '../../../common/components/navigation/types';
+import type { UsersTableType, UsersType } from '../../store/model';
+import type { GlobalTimeArgs } from '../../../common/containers/use_global_time';
+import type { ESTermQuery } from '../../../../common/typed_json';
+import type { NavTab } from '../../../common/components/navigation/types';
 
-type KeyUsersNavTabWithoutMlPermission = UsersTableType.allUsers &
-  UsersTableType.risk &
-  UsersTableType.events &
-  UsersTableType.alerts;
+type KeyUsersNavTab = `${UsersTableType}`;
 
-type KeyUsersNavTabWithMlPermission = KeyUsersNavTabWithoutMlPermission & UsersTableType.anomalies;
-
-type KeyUsersNavTab = KeyUsersNavTabWithoutMlPermission | KeyUsersNavTabWithMlPermission;
-
-export type UsersNavTab = Record<KeyUsersNavTab, NavTab>;
+export type UsersNavTab = Partial<Record<KeyUsersNavTab, NavTab>>;
 export interface QueryTabBodyProps {
   type: UsersType;
   startDate: GlobalTimeArgs['from'];
@@ -29,7 +21,6 @@ export interface QueryTabBodyProps {
 
 export type UsersComponentsQueryProps = QueryTabBodyProps & {
   deleteQuery?: GlobalTimeArgs['deleteQuery'];
-  docValueFields?: DocValueFields[];
   indexNames: string[];
   skip: boolean;
   setQuery: GlobalTimeArgs['setQuery'];

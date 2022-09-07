@@ -12,9 +12,8 @@ import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
 import { SavedObject, SavedObjectsFindResponse, SavedObjectsUtils } from '@kbn/core/server';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { FindActionResult } from '@kbn/actions-plugin/server/types';
-import { ActionType } from '@kbn/actions-plugin/common';
+import { ActionType, CasesConnectorFeatureId } from '@kbn/actions-plugin/common';
 import {
   CaseConfigurationsResponseRt,
   CaseConfigureResponseRt,
@@ -31,7 +30,7 @@ import {
   GetConfigureFindRequestRt,
   throwErrors,
 } from '../../../common/api';
-import { MAX_CONCURRENT_SEARCHES, SUPPORTED_CONNECTORS } from '../../../common/constants';
+import { MAX_CONCURRENT_SEARCHES } from '../../../common/constants';
 import { createCaseError } from '../../common/error';
 import { CasesClientInternal } from '../client_internal';
 import { CasesClientArgs } from '../types';
@@ -132,7 +131,12 @@ async function get(
   clientArgs: CasesClientArgs,
   casesClientInternal: CasesClientInternal
 ): Promise<CasesConfigurationsResponse> {
-  const { unsecuredSavedObjectsClient, caseConfigureService, logger, authorization } = clientArgs;
+  const {
+    unsecuredSavedObjectsClient,
+    services: { caseConfigureService },
+    logger,
+    authorization,
+  } = clientArgs;
   try {
     const queryParams = pipe(
       excess(GetConfigureFindRequestRt).decode(params),
@@ -222,8 +226,9 @@ function isConnectorSupported(
   actionTypes: Record<string, ActionType>
 ): boolean {
   return (
-    SUPPORTED_CONNECTORS.includes(action.actionTypeId) &&
-    actionTypes[action.actionTypeId]?.enabledInLicense
+    (actionTypes[action.actionTypeId]?.supportedFeatureIds ?? []).includes(
+      CasesConnectorFeatureId
+    ) && actionTypes[action.actionTypeId]?.enabledInLicense
   );
 }
 
@@ -233,8 +238,13 @@ async function update(
   clientArgs: CasesClientArgs,
   casesClientInternal: CasesClientInternal
 ): Promise<CasesConfigureResponse> {
-  const { caseConfigureService, logger, unsecuredSavedObjectsClient, user, authorization } =
-    clientArgs;
+  const {
+    services: { caseConfigureService },
+    logger,
+    unsecuredSavedObjectsClient,
+    user,
+    authorization,
+  } = clientArgs;
 
   try {
     const request = pipe(
@@ -289,11 +299,13 @@ async function update(
           mappings = await casesClientInternal.configuration.updateMappings({
             connector,
             mappingId: resMappings[0].id,
+            refresh: false,
           });
         } else {
           mappings = await casesClientInternal.configuration.createMappings({
             connector,
             owner: configuration.attributes.owner,
+            refresh: false,
           });
         }
       }
@@ -340,8 +352,13 @@ async function create(
   clientArgs: CasesClientArgs,
   casesClientInternal: CasesClientInternal
 ): Promise<CasesConfigureResponse> {
-  const { unsecuredSavedObjectsClient, caseConfigureService, logger, user, authorization } =
-    clientArgs;
+  const {
+    unsecuredSavedObjectsClient,
+    services: { caseConfigureService },
+    logger,
+    user,
+    authorization,
+  } = clientArgs;
   try {
     let error = null;
 
@@ -375,7 +392,11 @@ async function create(
 
     if (myCaseConfigure.saved_objects.length > 0) {
       const deleteConfigurationMapper = async (c: SavedObject<CasesConfigureAttributes>) =>
-        caseConfigureService.delete({ unsecuredSavedObjectsClient, configurationId: c.id });
+        caseConfigureService.delete({
+          unsecuredSavedObjectsClient,
+          configurationId: c.id,
+          refresh: false,
+        });
 
       // Ensuring we don't too many concurrent deletions running.
       await pMap(myCaseConfigure.saved_objects, deleteConfigurationMapper, {
@@ -397,6 +418,7 @@ async function create(
       mappings = await casesClientInternal.configuration.createMappings({
         connector: configuration.connector,
         owner: configuration.owner,
+        refresh: false,
       });
     } catch (e) {
       error = e.isBoom

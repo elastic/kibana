@@ -6,7 +6,7 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { isPopulatedObject } from '../util/object_utils';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
 export function isMultiBucketAggregate(
   arg: unknown

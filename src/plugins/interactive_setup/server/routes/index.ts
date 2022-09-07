@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { IBasePath, IRouter, Logger, PrebootServicePreboot } from '@kbn/core/server';
+import type { PrebootServicePreboot } from '@kbn/core-preboot-server';
+import type { IBasePath, IRouter, Logger } from '@kbn/core/server';
 import type { PublicContract, PublicMethodsOf } from '@kbn/utility-types';
 
 import type { ConfigType } from '../config';

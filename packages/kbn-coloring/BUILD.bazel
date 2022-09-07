@@ -7,13 +7,22 @@ PKG_REQUIRE_NAME = "@kbn/coloring"
 
 SOURCE_FILES = glob(
   [
-    "src/**/*.scss",
-    "src/**/*.ts",
-    "src/**/*.tsx",
+    "**/*.scss",
+    "**/*.ts",
+    "**/*.tsx",
   ],
   exclude = [
+    "**/*.config.js",
+    "**/*.mock.*",
     "**/*.test.*",
     "**/*.stories.*",
+    "**/__snapshots__/**",
+    "**/integration_tests/**",
+    "**/mocks/**",
+    "**/scripts/**",
+    "**/storybook/**",
+    "**/test_fixtures/**",
+    "**/test_helpers/**",
   ],
 )
 
@@ -41,7 +50,6 @@ NPM_MODULE_EXTRA_FILES = [
 RUNTIME_DEPS = [
   "//packages/kbn-i18n",
   "//packages/kbn-i18n-react",
-  "//packages/kbn-shared-ux-storybook",
   "//packages/kbn-interpreter",
   "//packages/kbn-utility-types",
   "//packages/kbn-shared-ux-utility",
@@ -65,7 +73,6 @@ RUNTIME_DEPS = [
 TYPES_DEPS = [
   "//packages/kbn-i18n:npm_module_types",
   "//packages/kbn-i18n-react:npm_module_types",
-  "//packages/kbn-shared-ux-storybook:npm_module_types",
   "//packages/kbn-interpreter:npm_module_types",
   "//packages/kbn-utility-types:npm_module_types",
   "//packages/kbn-shared-ux-utility:npm_module_types",
@@ -109,9 +116,9 @@ ts_project(
   srcs = SRCS,
   deps = TYPES_DEPS,
   declaration = True,
+  declaration_map = True,
   emit_declaration_only = True,
   out_dir = "target_types",
-  root_dir = "src",
   tsconfig = ":tsconfig",
 )
 

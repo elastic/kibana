@@ -5,54 +5,35 @@
  * 2.0.
  */
 
-import type { AssetParts } from '../../../types';
-import { getBufferExtractor, getPathParts, untarBuffer, unzipBuffer } from '../archive';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
-import { splitPkgKey } from '.';
+import { PackageNotFoundError } from '../../../errors';
 
-const testPaths = [
-  {
-    path: 'foo-1.1.0/service/type/file.yml',
-    assetParts: {
-      dataset: undefined,
-      file: 'file.yml',
-      path: 'foo-1.1.0/service/type/file.yml',
-      pkgkey: 'foo-1.1.0',
-      service: 'service',
-      type: 'type',
-    },
+import { splitPkgKey, fetchFindLatestPackageOrUndefined, fetchFindLatestPackageOrThrow } from '.';
+
+const mockLoggerFactory = loggingSystemMock.create();
+const mockLogger = mockLoggerFactory.get('mock logger');
+
+const mockGetBundledPackageByName = jest.fn();
+const mockFetchUrl = jest.fn();
+jest.mock('../..', () => ({
+  appContextService: {
+    getLogger: () => mockLogger,
+    getKibanaBranch: () => 'main',
+    getKibanaVersion: () => '99.0.0',
+    getConfig: () => ({}),
   },
-  {
-    path: 'iptables-1.0.4/kibana/visualization/683402b0-1f29-11e9-8ec4-cf5d91a864b3-ecs.json',
-    assetParts: {
-      dataset: undefined,
-      file: '683402b0-1f29-11e9-8ec4-cf5d91a864b3-ecs.json',
-      path: 'iptables-1.0.4/kibana/visualization/683402b0-1f29-11e9-8ec4-cf5d91a864b3-ecs.json',
-      pkgkey: 'iptables-1.0.4',
-      service: 'kibana',
-      type: 'visualization',
-    },
-  },
-  {
-    path: 'coredns-1.0.1/data_stream/stats/fields/coredns.stats.yml',
-    assetParts: {
-      dataset: 'stats',
-      file: 'coredns.stats.yml',
-      path: 'coredns-1.0.1/data_stream/stats/fields/coredns.stats.yml',
-      pkgkey: 'coredns-1.0.1',
-      service: '',
-      type: 'fields',
-    },
-  },
-];
+}));
 
-test('testPathParts', () => {
-  for (const value of testPaths) {
-    expect(getPathParts(value.path)).toStrictEqual(value.assetParts as AssetParts);
-  }
-});
+jest.mock('./requests', () => ({
+  fetchUrl: (url: string) => mockFetchUrl(url),
+}));
 
-describe('splitPkgKey tests', () => {
+jest.mock('../packages/bundled_packages', () => ({
+  getBundledPackageByName: (name: string) => mockGetBundledPackageByName(name),
+}));
+
+describe('splitPkgKey', () => {
   it('throws an error if there is nothing before the delimiter', () => {
     expect(() => {
       splitPkgKey('-0.0.1-dev1');
@@ -84,38 +65,81 @@ describe('splitPkgKey tests', () => {
   });
 });
 
-describe('getBufferExtractor called with { archivePath }', () => {
-  it('returns unzipBuffer if `archivePath` ends in .zip', () => {
-    const extractor = getBufferExtractor({ archivePath: '.zip' });
-    expect(extractor).toBe(unzipBuffer);
+describe('fetch package', () => {
+  afterEach(() => {
+    mockFetchUrl.mockReset();
+    mockGetBundledPackageByName.mockReset();
   });
 
-  it('returns untarBuffer if `archivePath` ends in .gz', () => {
-    const extractor = getBufferExtractor({ archivePath: '.gz' });
-    expect(extractor).toBe(untarBuffer);
-    const extractor2 = getBufferExtractor({ archivePath: '.tar.gz' });
-    expect(extractor2).toBe(untarBuffer);
+  type FetchFn = typeof fetchFindLatestPackageOrThrow | typeof fetchFindLatestPackageOrUndefined;
+  const performGenericFetchTests = (fetchMethodToTest: FetchFn) => {
+    it('Should return registry package if bundled package is older version', async () => {
+      const bundledPackage = { name: 'testpkg', version: '1.0.0' };
+      const registryPackage = { name: 'testpkg', version: '1.0.1' };
+
+      mockFetchUrl.mockResolvedValue(JSON.stringify([registryPackage]));
+
+      mockGetBundledPackageByName.mockResolvedValue(bundledPackage);
+      const result = await fetchMethodToTest('testpkg');
+      expect(result).toEqual(registryPackage);
+    });
+
+    it('Should return bundled package if bundled package is newer version', async () => {
+      const bundledPackage = { name: 'testpkg', version: '1.0.1' };
+      const registryPackage = { name: 'testpkg', version: '1.0.0' };
+
+      mockFetchUrl.mockResolvedValue(JSON.stringify([registryPackage]));
+
+      mockGetBundledPackageByName.mockResolvedValue(bundledPackage);
+      const result = await fetchMethodToTest('testpkg');
+      expect(result).toEqual(bundledPackage);
+    });
+    it('Should return bundled package if there is no registry package', async () => {
+      const bundledPackage = { name: 'testpkg', version: '1.0.1' };
+
+      mockFetchUrl.mockResolvedValue(JSON.stringify([]));
+
+      mockGetBundledPackageByName.mockResolvedValue(bundledPackage);
+      const result = await fetchMethodToTest('testpkg');
+      expect(result).toEqual(bundledPackage);
+    });
+
+    it('Should fall back to bundled package if there is an error getting from the registry', async () => {
+      const bundledPackage = { name: 'testpkg', version: '1.0.1' };
+
+      mockFetchUrl.mockRejectedValue(new Error('Registry error'));
+
+      mockGetBundledPackageByName.mockResolvedValue(bundledPackage);
+      const result = await fetchMethodToTest('testpkg');
+      expect(result).toEqual(bundledPackage);
+    });
+  };
+
+  describe('fetchFindLatestPackageOrUndefined', () => {
+    performGenericFetchTests(fetchFindLatestPackageOrUndefined);
+    it('Should return undefined if there is a registry error and no bundled package', async () => {
+      const bundledPackage = null;
+
+      mockFetchUrl.mockRejectedValue(new Error('Registry error'));
+
+      mockGetBundledPackageByName.mockResolvedValue(bundledPackage);
+      const result = await fetchFindLatestPackageOrUndefined('testpkg');
+      expect(result).toEqual(undefined);
+    });
   });
 
-  it('returns `undefined` if `archivePath` ends in anything else', () => {
-    const extractor = getBufferExtractor({ archivePath: '.xyz' });
-    expect(extractor).toEqual(undefined);
-  });
-});
+  describe('fetchFindLatestPackageOrThrow', () => {
+    performGenericFetchTests(fetchFindLatestPackageOrThrow);
+    it('Should return undefined if there is a registry error and no bundled package', async () => {
+      const bundledPackage = null;
 
-describe('getBufferExtractor called with { contentType }', () => {
-  it('returns unzipBuffer if `contentType` is `application/zip`', () => {
-    const extractor = getBufferExtractor({ contentType: 'application/zip' });
-    expect(extractor).toBe(unzipBuffer);
-  });
+      mockFetchUrl.mockRejectedValue(new Error('Registry error'));
 
-  it('returns untarBuffer if `contentType` is `application/gzip`', () => {
-    const extractor = getBufferExtractor({ contentType: 'application/gzip' });
-    expect(extractor).toBe(untarBuffer);
-  });
+      mockGetBundledPackageByName.mockResolvedValue(bundledPackage);
 
-  it('returns `undefined` if `contentType` ends in anything else', () => {
-    const extractor = getBufferExtractor({ contentType: '.xyz' });
-    expect(extractor).toEqual(undefined);
+      expect(() => fetchFindLatestPackageOrThrow('testpkg')).rejects.toBeInstanceOf(
+        PackageNotFoundError
+      );
+    });
   });
 });

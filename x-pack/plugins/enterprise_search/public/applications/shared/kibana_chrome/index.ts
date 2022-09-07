@@ -7,6 +7,9 @@
 
 export {
   SetEnterpriseSearchChrome,
+  SetAnalyticsChrome,
+  SetEnterpriseSearchContentChrome,
+  SetElasticsearchChrome,
   SetAppSearchChrome,
   SetWorkplaceSearchChrome,
 } from './set_chrome';

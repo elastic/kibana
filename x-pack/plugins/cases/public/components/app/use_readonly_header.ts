@@ -10,24 +10,25 @@ import { useCallback, useEffect } from 'react';
 import * as i18n from './translations';
 import { useKibana } from '../../common/lib/kibana';
 import { useCasesContext } from '../cases_context/use_cases_context';
+import { isReadOnlyPermissions } from '../../utils/permissions';
 
 /**
  * This component places a read-only icon badge in the header if user only has read permissions
  */
 export function useReadonlyHeader() {
-  const { userCanCrud } = useCasesContext();
+  const { permissions } = useCasesContext();
   const chrome = useKibana().services.chrome;
 
   // if the user is read only then display the glasses badge in the global navigation header
   const setBadge = useCallback(() => {
-    if (!userCanCrud) {
+    if (isReadOnlyPermissions(permissions)) {
       chrome.setBadge({
         text: i18n.READ_ONLY_BADGE_TEXT,
         tooltip: i18n.READ_ONLY_BADGE_TOOLTIP,
         iconType: 'glasses',
       });
     }
-  }, [chrome, userCanCrud]);
+  }, [chrome, permissions]);
 
   useEffect(() => {
     setBadge();

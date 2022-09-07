@@ -1,0 +1,50 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`serviceNameQuery fetches rum services 1`] = `
+Object {
+  "body": Object {
+    "aggs": Object {
+      "services": Object {
+        "terms": Object {
+          "field": "service.name",
+          "size": 1000,
+        },
+      },
+    },
+    "query": Object {
+      "bool": Object {
+        "filter": Array [
+          Object {
+            "range": Object {
+              "@timestamp": Object {
+                "format": "epoch_millis",
+                "gte": 0,
+                "lte": 50000,
+              },
+            },
+          },
+          Object {
+            "term": Object {
+              "transaction.type": "page-load",
+            },
+          },
+          Object {
+            "terms": Object {
+              "processor.event": Array [
+                "transaction",
+              ],
+            },
+          },
+          Object {
+            "exists": Object {
+              "field": "transaction.marks.navigationTiming.fetchStart",
+            },
+          },
+        ],
+        "must_not": Array [],
+      },
+    },
+    "size": 0,
+  },
+}
+`;

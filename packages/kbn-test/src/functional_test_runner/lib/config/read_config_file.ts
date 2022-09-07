@@ -9,7 +9,7 @@
 import Path from 'path';
 import { ToolingLog } from '@kbn/tooling-log';
 import { defaultsDeep } from 'lodash';
-import { createFlagError } from '@kbn/dev-utils';
+import { createFlagError } from '@kbn/dev-cli-errors';
 import { REPO_ROOT } from '@kbn/utils';
 
 import { Config } from './config';

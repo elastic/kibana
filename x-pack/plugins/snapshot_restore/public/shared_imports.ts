@@ -12,6 +12,9 @@ export type {
   SendRequestResponse,
   UseRequestResponse,
   UseRequestConfig,
+  Privileges,
+  MissingPrivileges,
+  Authorization,
 } from '@kbn/es-ui-shared-plugin/public';
 
 export {
@@ -26,6 +29,8 @@ export {
   useRequest,
   WithPrivileges,
   EuiCodeEditor,
+  AuthorizationContext,
+  GlobalFlyout,
 } from '@kbn/es-ui-shared-plugin/public';
 
 export { APP_WRAPPER_CLASS } from '@kbn/core/public';

@@ -75,6 +75,9 @@ export const AgentsApp: React.FunctionComponent = () => {
     fleetStatus?.missingRequirements?.length === 1 &&
     fleetStatus.missingRequirements[0] === 'fleet_server';
 
+  const displayInstructions =
+    fleetStatus.forceDisplayInstructions || hasOnlyFleetServerMissingRequirement;
+
   if (
     !hasOnlyFleetServerMissingRequirement &&
     fleetStatus.missingRequirements &&
@@ -86,7 +89,7 @@ export const AgentsApp: React.FunctionComponent = () => {
     return <NoAccessPage />;
   }
 
-  const rightColumn = hasOnlyFleetServerMissingRequirement ? (
+  const rightColumn = displayInstructions ? (
     <>
       <EuiFlexGroup justifyContent="flexEnd">
         <EuiFlexItem grow={false}>
@@ -114,7 +117,7 @@ export const AgentsApp: React.FunctionComponent = () => {
             {fleetServerModalVisible && (
               <FleetServerUpgradeModal onClose={onCloseFleetServerModal} />
             )}
-            {hasOnlyFleetServerMissingRequirement ? (
+            {displayInstructions ? (
               <FleetServerRequirementPage showEnrollmentRecommendation={false} />
             ) : (
               <AgentListPage />

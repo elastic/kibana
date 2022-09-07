@@ -7,13 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const NOTES_TOOLTIP = i18n.translate(
-  'xpack.timelines.timeline.body.notes.addOrViewNotesForThisEventTooltip',
-  {
-    defaultMessage: 'Add notes for this event',
-  }
-);
-
 export const TGRID_BODY_ARIA_LABEL = i18n.translate('xpack.timelines.tgrid.body.ariaLabel', {
   defaultMessage: 'Alerts',
 });
@@ -38,14 +31,6 @@ export const INVESTIGATE = i18n.translate(
     defaultMessage: 'Investigate',
   }
 );
-
-export const UNPINNED = i18n.translate('xpack.timelines.timeline.body.pinning.unpinnedTooltip', {
-  defaultMessage: 'Unpinned event',
-});
-
-export const PINNED = i18n.translate('xpack.timelines.timeline.body.pinning.pinnedTooltip', {
-  defaultMessage: 'Pinned event',
-});
 
 export const PINNED_WITH_NOTES = i18n.translate(
   'xpack.timelines.timeline.body.pinning.pinnnedWithNotesTooltip',
@@ -155,21 +140,6 @@ export const ADD_NOTES_FOR_ROW = ({
     values: { ariaRowindex, columnValues },
     defaultMessage:
       'Add notes for the event in row {ariaRowindex} to timeline, with columns {columnValues}',
-  });
-
-export const PIN_EVENT_FOR_ROW = ({
-  ariaRowindex,
-  columnValues,
-  isEventPinned,
-}: {
-  ariaRowindex: number;
-  columnValues: string;
-  isEventPinned: boolean;
-}) =>
-  i18n.translate('xpack.timelines.timeline.body.actions.pinEventForRowAriaLabel', {
-    values: { ariaRowindex, columnValues, isEventPinned },
-    defaultMessage:
-      '{isEventPinned, select, false {Pin} true {Unpin}} the event in row {ariaRowindex} to timeline, with columns {columnValues}',
   });
 
 export const TIMELINE_TOGGLE_BUTTON_ARIA_LABEL = ({

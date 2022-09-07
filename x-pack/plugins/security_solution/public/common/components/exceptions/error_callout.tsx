@@ -17,8 +17,8 @@ import {
 } from '@elastic/eui';
 
 import type { List } from '@kbn/securitysolution-io-ts-list-types';
-import { HttpSetup } from '@kbn/core/public';
-import { Rule } from '../../../detections/containers/detection_engine/rules/types';
+import type { HttpSetup } from '@kbn/core/public';
+import type { Rule } from '../../../detections/containers/detection_engine/rules/types';
 import * as i18n from './translations';
 import { useDissasociateExceptionList } from '../../../detections/containers/detection_engine/rules/use_dissasociate_exception_list';
 

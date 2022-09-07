@@ -16,6 +16,7 @@ import {
   buildExistsClause,
   buildMatchAnyClause,
   buildMatchClause,
+  buildMatchWildcardClause,
   buildNestedClause,
   createOrClauses,
 } from '@kbn/securitysolution-list-utils';
@@ -32,6 +33,10 @@ import {
   getEntryNestedMock,
 } from '../schemas/types/entry_nested.mock';
 import { getExceptionListItemSchemaMock } from '../schemas/response/exception_list_item_schema.mock';
+import {
+  getEntryMatchWildcardExcludeMock,
+  getEntryMatchWildcardMock,
+} from '../schemas/types/entry_match_wildcard.mock';
 
 // TODO: Port the test over to packages/kbn-securitysolution-list-utils/src/build_exception_filter/index.test.ts once the mocks are ported to kbn
 
@@ -1036,6 +1041,40 @@ describe('build_exceptions_filter', () => {
             },
           },
           score_mode: 'none',
+        },
+      });
+    });
+  });
+
+  describe('buildWildcardClause', () => {
+    test('it should build wildcard filter when operator is "included"', () => {
+      const booleanFilter = buildMatchWildcardClause(getEntryMatchWildcardMock());
+
+      expect(booleanFilter).toEqual({
+        bool: {
+          filter: {
+            wildcard: {
+              'host.name': 'some host name',
+            },
+          },
+        },
+      });
+    });
+
+    test('it should build boolean filter when operator is "excluded"', () => {
+      const booleanFilter = buildMatchWildcardClause(getEntryMatchWildcardExcludeMock());
+
+      expect(booleanFilter).toEqual({
+        bool: {
+          must_not: {
+            bool: {
+              filter: {
+                wildcard: {
+                  'host.name': 'some host name',
+                },
+              },
+            },
+          },
         },
       });
     });

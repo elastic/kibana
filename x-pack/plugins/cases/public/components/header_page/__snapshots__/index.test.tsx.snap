@@ -6,28 +6,97 @@ exports[`HeaderPage it renders 1`] = `
     <ThemeProvider
       theme={[Function]}
     >
-      <CasesProvider
-        value={
-          Object {
-            "features": undefined,
-            "owner": Array [
-              "securitySolution",
-            ],
-            "userCanCrud": true,
+      <QueryClientProvider
+        client={
+          QueryClient {
+            "defaultOptions": Object {
+              "queries": Object {
+                "retry": false,
+              },
+            },
+            "logger": BufferedConsole {
+              "Console": [Function],
+              "_buffer": Array [],
+              "_counters": Object {},
+              "_groupDepth": 0,
+              "_timers": Object {},
+              "assert": [Function],
+              "clear": [Function],
+              "count": [Function],
+              "countReset": [Function],
+              "debug": [Function],
+              "dir": [Function],
+              "dirxml": [Function],
+              "error": [Function],
+              "group": [Function],
+              "groupCollapsed": [Function],
+              "groupEnd": [Function],
+              "info": [Function],
+              "log": [Function],
+              "table": [Function],
+              "time": [Function],
+              "timeEnd": [Function],
+              "timeLog": [Function],
+              "trace": [Function],
+              "warn": [Function],
+            },
+            "mutationCache": MutationCache {
+              "config": Object {},
+              "listeners": Array [],
+              "mutationId": 0,
+              "mutations": Array [],
+              "subscribe": [Function],
+            },
+            "mutationDefaults": Array [],
+            "queryCache": QueryCache {
+              "config": Object {},
+              "listeners": Array [],
+              "queries": Array [],
+              "queriesMap": Object {},
+              "subscribe": [Function],
+            },
+            "queryDefaults": Array [],
           }
         }
       >
-        <Memo(HeaderPage)
-          border={true}
-          subtitle="Test subtitle"
-          subtitle2="Test subtitle 2"
-          title="Test title"
+        <CasesProvider
+          value={
+            Object {
+              "externalReferenceAttachmentTypeRegistry": ExternalReferenceAttachmentTypeRegistry {
+                "collection": Map {},
+                "name": "ExternalReferenceAttachmentTypeRegistry",
+              },
+              "features": undefined,
+              "owner": Array [
+                "securitySolution",
+              ],
+              "permissions": Object {
+                "all": true,
+                "create": true,
+                "delete": true,
+                "push": true,
+                "read": true,
+                "update": true,
+              },
+              "persistableStateAttachmentTypeRegistry": PersistableStateAttachmentTypeRegistry {
+                "collection": Map {},
+                "name": "PersistableStateAttachmentTypeRegistry",
+              },
+            }
+          }
         >
-          <p>
-            Test supplement
-          </p>
-        </Memo(HeaderPage)>
-      </CasesProvider>
+          <Memo(HeaderPage)
+            border={true}
+            subtitle="Test subtitle"
+            subtitle2="Test subtitle 2"
+            title="Test title"
+          >
+            <p>
+              Test supplement
+            </p>
+          </Memo(HeaderPage)>
+        </CasesProvider>
+      </QueryClientProvider>
     </ThemeProvider>
   </Component>
 </I18nProvider>

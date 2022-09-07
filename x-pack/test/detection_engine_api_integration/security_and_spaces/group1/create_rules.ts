@@ -8,10 +8,11 @@
 import expect from '@kbn/expect';
 
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
-import { RuleExecutionStatus } from '@kbn/security-solution-plugin/common/detection_engine/schemas/common';
+import { RuleExecutionStatus } from '@kbn/security-solution-plugin/common/detection_engine/rule_monitoring';
 import { CreateRulesSchema } from '@kbn/security-solution-plugin/common/detection_engine/schemas/request';
-
+import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
+
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,
@@ -30,6 +31,7 @@ import {
   getRuleForSignalTestingWithTimestampOverride,
   waitForAlertToComplete,
   waitForSignalsToBePresent,
+  getThresholdRuleForSignalTesting,
 } from '../../utils';
 import { createUserAndRole, deleteUserAndRole } from '../../../common/services/security_solution';
 
@@ -57,6 +59,24 @@ export default ({ getService }: FtrProviderContext) => {
       afterEach(async () => {
         await deleteSignalsIndex(supertest, log);
         await deleteAllAlerts(supertest, log);
+      });
+
+      describe('saved query', () => {
+        it('should create a saved query rule and query a data view', async () => {
+          const savedQueryRule = {
+            ...getSimpleRule(),
+            data_view_id: 'my-data-view',
+            type: 'saved_query',
+            saved_id: 'my-saved-query-id',
+          };
+          const { body } = await supertest
+            .post(DETECTION_ENGINE_RULES_URL)
+            .set('kbn-xsrf', 'true')
+            .send(savedQueryRule)
+            .expect(200);
+
+          expect(body.data_view_id).to.eql('my-data-view');
+        });
       });
 
       describe('elastic admin', () => {
@@ -163,13 +183,16 @@ export default ({ getService }: FtrProviderContext) => {
             interval: '5m',
             rule_id: 'rule-1',
             language: 'kuery',
-            output_index: '.siem-signals-default',
+            output_index: '',
             max_signals: 100,
             risk_score: 1,
             risk_score_mapping: [],
             name: 'Simple Rule Query',
             query: 'user.name: root or user.name: admin',
             references: [],
+            related_integrations: [],
+            required_fields: [],
+            setup: '',
             severity: 'high',
             severity_mapping: [],
             updated_by: 'elastic',
@@ -249,6 +272,44 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
+      it('should not create a rule if trying to add more than one default rule exception list', async () => {
+        const rule: CreateRulesSchema = {
+          name: 'Simple Rule Query',
+          description: 'Simple Rule Query',
+          enabled: true,
+          risk_score: 1,
+          rule_id: 'rule-1',
+          severity: 'high',
+          type: 'query',
+          query: 'user.name: root or user.name: admin',
+          exceptions_list: [
+            {
+              id: '2',
+              list_id: '123',
+              namespace_type: 'single',
+              type: ExceptionListTypeEnum.RULE_DEFAULT,
+            },
+            {
+              id: '1',
+              list_id: '456',
+              namespace_type: 'single',
+              type: ExceptionListTypeEnum.RULE_DEFAULT,
+            },
+          ],
+        };
+
+        const { body } = await supertest
+          .post(DETECTION_ENGINE_RULES_URL)
+          .set('kbn-xsrf', 'true')
+          .send(rule)
+          .expect(500);
+
+        expect(body).to.eql({
+          message: 'More than one default exception list found on rule',
+          status_code: 500,
+        });
+      });
+
       describe('t1_analyst', () => {
         const role = ROLES.t1_analyst;
 
@@ -267,6 +328,89 @@ export default ({ getService }: FtrProviderContext) => {
             .set('kbn-xsrf', 'true')
             .send(getSimpleRule())
             .expect(403);
+        });
+      });
+
+      describe('threshold validation', () => {
+        it('should result in 400 error if no threshold-specific fields are provided', async () => {
+          const { threshold, ...rule } = getThresholdRuleForSignalTesting(['*']);
+          const { body } = await supertest
+            .post(DETECTION_ENGINE_RULES_URL)
+            .set('kbn-xsrf', 'true')
+            .send(rule)
+            .expect(400);
+
+          expect(body).to.eql({
+            error: 'Bad Request',
+            message: '[request body]: Invalid value "undefined" supplied to "threshold"',
+            statusCode: 400,
+          });
+        });
+
+        it('should result in 400 error if more than 3 threshold fields', async () => {
+          const rule = getThresholdRuleForSignalTesting(['*']);
+          const { body } = await supertest
+            .post(DETECTION_ENGINE_RULES_URL)
+            .set('kbn-xsrf', 'true')
+            .send({
+              ...rule,
+              threshold: {
+                ...rule.threshold,
+                field: ['field-1', 'field-2', 'field-3', 'field-4'],
+              },
+            })
+            .expect(400);
+
+          expect(body).to.eql({
+            message: ['Number of fields must be 3 or less'],
+            status_code: 400,
+          });
+        });
+
+        it('should result in 400 error if threshold value is less than 1', async () => {
+          const rule = getThresholdRuleForSignalTesting(['*']);
+          const { body } = await supertest
+            .post(DETECTION_ENGINE_RULES_URL)
+            .set('kbn-xsrf', 'true')
+            .send({
+              ...rule,
+              threshold: {
+                ...rule.threshold,
+                value: 0,
+              },
+            })
+            .expect(400);
+
+          expect(body).to.eql({
+            error: 'Bad Request',
+            message: '[request body]: Invalid value "0" supplied to "threshold,value"',
+            statusCode: 400,
+          });
+        });
+
+        it('should result in 400 error if cardinality is also an agg field', async () => {
+          const rule = getThresholdRuleForSignalTesting(['*']);
+          const { body } = await supertest
+            .post(DETECTION_ENGINE_RULES_URL)
+            .set('kbn-xsrf', 'true')
+            .send({
+              ...rule,
+              threshold: {
+                ...rule.threshold,
+                cardinality: [
+                  {
+                    field: 'process.name',
+                    value: 5,
+                  },
+                ],
+              },
+            })
+            .expect(400);
+
+          expect(body).to.eql({
+            message: ['Cardinality of a field that is being aggregated on is always 1'],
+            status_code: 400,
+          });
         });
       });
     });

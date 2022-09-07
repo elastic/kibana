@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { EuiSpacer, EuiTabbedContent, EuiTabbedContentTab } from '@elastic/eui';
+import type { EuiTabbedContentTab } from '@elastic/eui';
+import { EuiSpacer, EuiTabbedContent } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useEffect, useMemo } from 'react';
@@ -42,14 +43,14 @@ import { POLICY_ARTIFACT_TRUSTED_APPS_LABELS } from './trusted_apps_translations
 import { POLICY_ARTIFACT_HOST_ISOLATION_EXCEPTIONS_LABELS } from './host_isolation_exceptions_translations';
 import { POLICY_ARTIFACT_BLOCKLISTS_LABELS } from './blocklists_translations';
 import { TrustedAppsApiClient } from '../../../trusted_apps/service/api_client';
-import { EventFiltersApiClient } from '../../../event_filters/service/event_filters_api_client';
+import { EventFiltersApiClient } from '../../../event_filters/service/api_client';
 import { BlocklistsApiClient } from '../../../blocklist/services/blocklists_api_client';
 import { HostIsolationExceptionsApiClient } from '../../../host_isolation_exceptions/host_isolation_exceptions_api_client';
 import { SEARCHABLE_FIELDS as TRUSTED_APPS_SEARCHABLE_FIELDS } from '../../../trusted_apps/constants';
 import { SEARCHABLE_FIELDS as EVENT_FILTERS_SEARCHABLE_FIELDS } from '../../../event_filters/constants';
 import { SEARCHABLE_FIELDS as HOST_ISOLATION_EXCEPTIONS_SEARCHABLE_FIELDS } from '../../../host_isolation_exceptions/constants';
 import { SEARCHABLE_FIELDS as BLOCKLISTS_SEARCHABLE_FIELDS } from '../../../blocklist/constants';
-import { PolicyDetailsRouteState } from '../../../../../../common/endpoint/types';
+import type { PolicyDetailsRouteState } from '../../../../../../common/endpoint/types';
 import { useListArtifact } from '../../../../hooks/artifacts';
 
 const enum PolicyTabKeys {

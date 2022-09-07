@@ -612,21 +612,9 @@
             "description": [],
             "signature": [
               "{ savedObjects: { client: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsClientContract",
-                "text": "SavedObjectsClientContract"
-              },
+              "SavedObjectsClientContract",
               "; typeRegistry: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.ISavedObjectTypeRegistry",
-                "text": "ISavedObjectTypeRegistry"
-              },
+              "ISavedObjectTypeRegistry",
               "; }; uiSettings: { client: ",
               {
                 "pluginId": "core",
@@ -1123,25 +1111,13 @@
           "text": "GlobalSearchFindOptions"
         },
         ", request: ",
-        {
-          "pluginId": "core",
-          "scope": "server",
-          "docId": "kibCoreHttpPluginApi",
-          "section": "def-server.KibanaRequest",
-          "text": "KibanaRequest"
-        },
+        "KibanaRequest",
         "<unknown, unknown, unknown, any>) => ",
         "Observable",
         "<",
         "GlobalSearchBatchedResults",
         ">; getSearchableTypes: (request: ",
-        {
-          "pluginId": "core",
-          "scope": "server",
-          "docId": "kibCoreHttpPluginApi",
-          "section": "def-server.KibanaRequest",
-          "text": "KibanaRequest"
-        },
+        "KibanaRequest",
         "<unknown, unknown, unknown, any>) => Promise<string[]>; }"
       ],
       "path": "x-pack/plugins/global_search/server/types.ts",

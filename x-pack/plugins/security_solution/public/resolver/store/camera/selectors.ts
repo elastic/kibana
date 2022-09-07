@@ -17,7 +17,7 @@ import {
   translationTransformation,
 } from '../../lib/transformation';
 import * as scalingConstants from './scaling_constants';
-import { Vector2, CameraState, AABB, Matrix3, CameraAnimationState } from '../../types';
+import type { Vector2, CameraState, AABB, Matrix3, CameraAnimationState } from '../../types';
 
 export interface ClippingPlanes {
   renderWidth: number;
@@ -64,8 +64,8 @@ function animationIsActive(animation: CameraAnimationState, time: number): boole
  *
  */
 export const scale: (state: CameraState) => (time: number) => Vector2 = createSelector(
-  (state) => state.scalingFactor,
-  (state) => state.animation,
+  (state: CameraState) => state.scalingFactor,
+  (state: CameraState) => state.animation,
   (scalingFactor, animation) => {
     const scaleNotCountingAnimation = scaleFromScalingFactor(scalingFactor);
     /**
@@ -277,7 +277,7 @@ export const scale: (state: CameraState) => (time: number) => Vector2 = createSe
  */
 export const clippingPlanes: (state: CameraState) => (time: number) => ClippingPlanes =
   createSelector(
-    (state) => state.rasterSize,
+    (state: CameraState) => state.rasterSize,
     scale,
     (rasterSize, scaleAtTime) =>
       /**
@@ -305,7 +305,7 @@ export const clippingPlanes: (state: CameraState) => (time: number) => ClippingP
  * Whether or not the camera is animating, at a given time.
  */
 export const isAnimating: (state: CameraState) => (time: number) => boolean = createSelector(
-  (state) => state.animation,
+  (state: CameraState) => state.animation,
   (animation) => (time) => {
     return animation !== undefined && animationIsActive(animation, time);
   }
@@ -324,10 +324,10 @@ export const isAnimating: (state: CameraState) => (time: number) => boolean = cr
  * We could update the translation as the user moved the mouse but floating point drift (round-off error) could occur.
  */
 export const translation: (state: CameraState) => (time: number) => Vector2 = createSelector(
-  (state) => state.panning,
-  (state) => state.translationNotCountingCurrentPanning,
+  (state: CameraState) => state.panning,
+  (state: CameraState) => state.translationNotCountingCurrentPanning,
   scale,
-  (state) => state.animation,
+  (state: CameraState) => state.animation,
   (panning, translationNotCountingCurrentPanning, scaleAtTime, animation) => {
     /**
      * Memoizing this for object reference equality.

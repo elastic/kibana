@@ -41,10 +41,7 @@ describe('JsonEditorWithMessageVariables', () => {
     const wrapper = mountWithIntl(<JsonEditorWithMessageVariables {...props} />);
 
     wrapper.find('[data-test-subj="fooAddVariableButton"]').first().simulate('click');
-    wrapper
-      .find('[data-test-subj="variableMenuButton-0-templated-name"]')
-      .first()
-      .simulate('click');
+    wrapper.find('[data-test-subj="variableMenuButton-0-templated-name"]').last().simulate('click');
 
     expect(wrapper.find('[data-test-subj="fooJsonEditor"]').first().prop('value')).toEqual(
       '{{myVar}}'
@@ -66,10 +63,7 @@ describe('JsonEditorWithMessageVariables', () => {
     );
 
     wrapper.find('[data-test-subj="fooAddVariableButton"]').first().simulate('click');
-    wrapper
-      .find('[data-test-subj="variableMenuButton-0-templated-name"]')
-      .first()
-      .simulate('click');
+    wrapper.find('[data-test-subj="variableMenuButton-0-templated-name"]').last().simulate('click');
 
     expect(wrapper.find('[data-test-subj="fooJsonEditor"]').first().prop('value')).toEqual(
       '{{{myVar}}}'

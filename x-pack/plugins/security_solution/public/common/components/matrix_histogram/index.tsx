@@ -6,7 +6,7 @@
  */
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { Position } from '@elastic/charts';
+import type { Position } from '@elastic/charts';
 import styled from 'styled-components';
 
 import { EuiFlexGroup, EuiFlexItem, EuiProgress, EuiSelect, EuiSpacer } from '@elastic/eui';
@@ -18,7 +18,7 @@ import { MatrixLoader } from './matrix_loader';
 import { Panel } from '../panel';
 import { getBarchartConfigs, getCustomChartData } from './utils';
 import { useMatrixHistogramCombined } from '../../containers/matrix_histogram';
-import {
+import type {
   MatrixHistogramProps,
   MatrixHistogramOption,
   MatrixHistogramQueryProps,
@@ -26,13 +26,13 @@ import {
   GetTitle,
   GetSubTitle,
 } from './types';
-import { MatrixHistogramType } from '../../../../common/search_strategy/security_solution';
-import { GlobalTimeArgs } from '../../containers/use_global_time';
+import type { MatrixHistogramType } from '../../../../common/search_strategy/security_solution';
+import type { GlobalTimeArgs } from '../../containers/use_global_time';
 import { setAbsoluteRangeDatePicker } from '../../store/inputs/actions';
 import { InputsModelId } from '../../store/inputs/constants';
 import { HoverVisibilityContainer } from '../hover_visibility_container';
 import { HISTOGRAM_ACTIONS_BUTTON_CLASS, VisualizationActions } from '../visualization_actions';
-import { GetLensAttributes, LensAttributes } from '../visualization_actions/types';
+import type { GetLensAttributes, LensAttributes } from '../visualization_actions/types';
 import { SecurityPageName } from '../../../../common/constants';
 import { useRouteSpy } from '../../utils/route/use_route_spy';
 import { useQueryToggle } from '../../containers/query_toggle';
@@ -72,7 +72,6 @@ const HistogramPanel = styled(Panel)<{ height?: number }>`
 export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> = ({
   chartHeight,
   defaultStackByOption,
-  docValueFields,
   endDate,
   errorMessage,
   filterQuery,
@@ -90,7 +89,7 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
   onError,
   paddingSize = 'm',
   panelHeight = DEFAULT_PANEL_HEIGHT,
-  setAbsoluteRangeDatePickerTarget = 'global',
+  setAbsoluteRangeDatePickerTarget = InputsModelId.global,
   setQuery,
   showInspectButton = false,
   showLegend,
@@ -138,6 +137,11 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
   const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [selectedStackByOption, setSelectedStackByOption] =
     useState<MatrixHistogramOption>(defaultStackByOption);
+
+  useEffect(() => {
+    setSelectedStackByOption(defaultStackByOption);
+  }, [defaultStackByOption]);
+
   const setSelectedChartOptionCallback = useCallback(
     (event: React.ChangeEvent<HTMLSelectElement>) => {
       setSelectedStackByOption(
@@ -171,7 +175,6 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
     stackByField: selectedStackByOption.value,
     runtimeMappings,
     isPtrIncluded,
-    docValueFields,
     skip: querySkip,
   };
   const [loading, { data, inspect, totalCount, refetch }] =

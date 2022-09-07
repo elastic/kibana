@@ -12,7 +12,7 @@ import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { Case, CommentType } from '../../common';
 import { useToasts } from './lib/kibana';
 import { useCaseViewNavigation } from './navigation';
-import { CaseAttachments } from '../types';
+import { CaseAttachmentsWithoutOwner } from '../types';
 import {
   CASE_ALERT_SUCCESS_SYNC_TEXT,
   CASE_ALERT_SUCCESS_TOAST,
@@ -34,6 +34,22 @@ const EuiTextStyled = styled(EuiText)`
   `}
 `;
 
+function getAlertsCount(attachments: CaseAttachmentsWithoutOwner): number {
+  let alertsCount = 0;
+  for (const attachment of attachments) {
+    if (attachment.type === CommentType.alert) {
+      // alertId might be an array
+      if (Array.isArray(attachment.alertId) && attachment.alertId.length > 1) {
+        alertsCount += attachment.alertId.length;
+      } else {
+        // or might be a single string
+        alertsCount++;
+      }
+    }
+  }
+  return alertsCount;
+}
+
 function getToastTitle({
   theCase,
   title,
@@ -41,16 +57,15 @@ function getToastTitle({
 }: {
   theCase: Case;
   title?: string;
-  attachments?: CaseAttachments;
+  attachments?: CaseAttachmentsWithoutOwner;
 }): string {
   if (title !== undefined) {
     return title;
   }
   if (attachments !== undefined) {
-    for (const attachment of attachments) {
-      if (attachment.type === CommentType.alert) {
-        return CASE_ALERT_SUCCESS_TOAST(theCase.title);
-      }
+    const alertsCount = getAlertsCount(attachments);
+    if (alertsCount > 0) {
+      return CASE_ALERT_SUCCESS_TOAST(theCase.title, alertsCount);
     }
   }
   return CASE_SUCCESS_TOAST(theCase.title);
@@ -63,7 +78,7 @@ function getToastContent({
 }: {
   theCase: Case;
   content?: string;
-  attachments?: CaseAttachments;
+  attachments?: CaseAttachmentsWithoutOwner;
 }): string | undefined {
   if (content !== undefined) {
     return content;
@@ -91,7 +106,7 @@ export const useCasesToast = () => {
       content,
     }: {
       theCase: Case;
-      attachments?: CaseAttachments;
+      attachments?: CaseAttachmentsWithoutOwner;
       title?: string;
       content?: string;
     }) => {

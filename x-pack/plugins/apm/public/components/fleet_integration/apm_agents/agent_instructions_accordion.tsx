@@ -29,7 +29,7 @@ import type {
   PackagePolicy,
   PackagePolicyEditExtensionComponentProps,
 } from '../apm_policy_form/typings';
-import { getCommands } from '../../../tutorial/config_agent/commands/get_commands';
+import { AgentConfigInstructions } from '../../../tutorial/config_agent/agent_config_instructions';
 import { renderMustache } from './render_mustache';
 import { TechnicalPreviewBadge } from '../../shared/technical_preview_badge';
 
@@ -80,26 +80,6 @@ function InstructionsContent({ markdown }: { markdown: string }) {
       openLinksInNewTab={true}
       whiteListedRules={['backticks', 'emphasis', 'link', 'list']}
     />
-  );
-}
-
-function TutorialConfigAgent({
-  variantId,
-  apmServerUrl,
-  secretToken,
-}: {
-  variantId: string;
-  apmServerUrl?: string;
-  secretToken?: string;
-}) {
-  const commandBlock = getCommands({
-    variantId,
-    policyDetails: { apmServerUrl, secretToken },
-  });
-  return (
-    <EuiCodeBlock isCopyable language="bash">
-      {commandBlock}
-    </EuiCodeBlock>
   );
 }
 
@@ -170,14 +150,14 @@ export function AgentInstructionsAccordion({
               </>
             )}
             {customComponentName === 'TutorialConfigAgent' && (
-              <TutorialConfigAgent
+              <AgentConfigInstructions
                 variantId={variantId}
                 apmServerUrl={apmServerUrl}
                 secretToken={secretToken}
               />
             )}
             {customComponentName === 'TutorialConfigAgentRumScript' && (
-              <TutorialConfigAgent
+              <AgentConfigInstructions
                 variantId="js_script"
                 apmServerUrl={apmServerUrl}
                 secretToken={secretToken}

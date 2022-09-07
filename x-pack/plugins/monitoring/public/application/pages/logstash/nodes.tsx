@@ -19,7 +19,7 @@ import { useTable } from '../../hooks/use_table';
 import { LOGSTASH_SYSTEM_ID, RULE_LOGSTASH_VERSION_MISMATCH } from '../../../../common/constants';
 import { AlertsByName } from '../../../alerts/types';
 import { fetchAlerts } from '../../../lib/fetch_alerts';
-import { BreadcrumbContainer } from '../../hooks/use_breadcrumbs';
+import { useBreadcrumbContainerContext } from '../../hooks/use_breadcrumbs';
 
 interface SetupModeProps {
   setupMode: any;
@@ -32,7 +32,7 @@ export const LogStashNodesPage: React.FC<ComponentProps> = ({ clusters }) => {
   const { services } = useKibana<{ data: any }>();
   const clusterUuid = globalState.cluster_uuid;
   const ccs = globalState.ccs;
-  const { generate: generateBreadcrumbs } = useContext(BreadcrumbContainer.Context);
+  const { generate: generateBreadcrumbs } = useBreadcrumbContainerContext();
   const cluster = find(clusters, {
     cluster_uuid: clusterUuid,
   }) as any;

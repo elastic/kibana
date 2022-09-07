@@ -60,6 +60,7 @@ export const sampleAreaVis = {
       },
     },
     editorConfig: {
+      enableDataViewChange: true,
       optionTabs: [
         {
           name: 'advanced',

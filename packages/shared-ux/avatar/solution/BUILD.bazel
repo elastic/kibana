@@ -7,14 +7,24 @@ PKG_REQUIRE_NAME = "@kbn/shared-ux-avatar-solution"
 
 SOURCE_FILES = glob(
   [
-    "src/**/*.ts",
-    "src/**/*.tsx",
-    "src/**/*.scss",
-    "src/**/*.mdx",
-    "src/**/*.svg",
+    "**/*.ts",
+    "**/*.tsx",
+    "**/*.scss",
+    "**/*.mdx",
+    "**/*.svg",
   ],
   exclude = [
+    "**/*.config.js",
+    "**/*.mock.*",
     "**/*.test.*",
+    "**/*.stories.*",
+    "**/__snapshots__/**",
+    "**/integration_tests/**",
+    "**/mocks/**",
+    "**/scripts/**",
+    "**/storybook/**",
+    "**/test_fixtures/**",
+    "**/test_helpers/**",
   ],
 )
 
@@ -61,7 +71,6 @@ RUNTIME_DEPS = [
 #  References to NPM packages work the same as RUNTIME_DEPS
 TYPES_DEPS = [
   "@npm//@elastic/eui",
-  "@npm//@storybook/addon-actions",
   "@npm//@types/classnames",
   "@npm//@types/enzyme",
   "@npm//@types/jest",
@@ -105,9 +114,9 @@ ts_project(
   srcs = SRCS,
   deps = TYPES_DEPS,
   declaration = True,
+  declaration_map = True,
   emit_declaration_only = True,
   out_dir = "target_types",
-  root_dir = "src",
   tsconfig = ":tsconfig",
 )
 

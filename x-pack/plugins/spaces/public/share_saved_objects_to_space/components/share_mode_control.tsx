@@ -110,7 +110,7 @@ export const ShareModeControl = (props: Props) => {
 
     const docLink = docLinks?.links.security.kibanaPrivileges;
     return (
-      <>
+      <EuiFlexItem grow={false}>
         <EuiCallOut
           size="s"
           iconType="help"
@@ -140,7 +140,7 @@ export const ShareModeControl = (props: Props) => {
         </EuiCallOut>
 
         <EuiSpacer size="m" />
-      </>
+      </EuiFlexItem>
     );
   };
 

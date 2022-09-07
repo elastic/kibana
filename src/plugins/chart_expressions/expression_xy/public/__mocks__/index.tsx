@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { Position } from '@elastic/charts';
 import { Datatable } from '@kbn/expressions-plugin/common';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { LayerTypes } from '../../common/constants';
@@ -162,13 +163,16 @@ export const dateHistogramLayer: DataLayerConfig = {
   layerId: 'dateHistogramLayer',
   type: 'dataLayer',
   layerType: LayerTypes.DATA,
-  hide: false,
+  showLines: true,
+  simpleView: false,
   xAccessor: 'xAccessorId',
-  yScaleType: 'linear',
   xScaleType: 'time',
   isHistogram: true,
-  splitAccessor: 'splitAccessorId',
-  seriesType: 'bar_stacked',
+  isStacked: true,
+  isPercentage: false,
+  isHorizontal: false,
+  splitAccessors: ['splitAccessorId'],
+  seriesType: 'bar',
   accessors: ['yAccessorId'],
   palette: mockPaletteOutput,
   table: dateHistogramData,
@@ -197,7 +201,13 @@ export function sampleArgsWithReferenceLine(value: number = 150) {
         type: 'referenceLineLayer',
         layerType: LayerTypes.REFERENCELINE,
         accessors: ['referenceLine-a'],
-        yConfig: [{ axisMode: 'left', forAccessor: 'referenceLine-a', type: 'extendedYConfig' }],
+        decorations: [
+          {
+            forAccessor: 'referenceLine-a',
+            type: 'referenceLineDecorationConfig',
+            position: Position.Left,
+          },
+        ],
         table: data,
       },
     ],

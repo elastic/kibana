@@ -7,7 +7,7 @@
  */
 
 import { get, isPlainObject, keys, findKey } from 'lodash';
-import moment from 'moment';
+import moment from 'moment-timezone';
 import { IAggConfig, parseInterval } from '../aggs';
 import { AggResponseBucket, TabbedRangeFilterParams, TimeRangeInformation } from './types';
 
@@ -112,10 +112,10 @@ export class TabifyBuckets {
       : moment.duration(this.buckets[1].key - this.buckets[0].key);
 
     this.buckets = this.buckets.filter((bucket: AggResponseBucket) => {
-      if (moment(bucket.key).isBefore(timeRange.from)) {
+      if (moment.tz(bucket.key, agg.aggConfigs.timeZone).isBefore(timeRange.from)) {
         return false;
       }
-      if (moment(bucket.key).add(interval).isAfter(timeRange.to)) {
+      if (moment.tz(bucket.key, agg.aggConfigs.timeZone).add(interval).isAfter(timeRange.to)) {
         return false;
       }
       return true;

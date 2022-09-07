@@ -5,37 +5,31 @@
  * 2.0.
  */
 
-import { noop } from 'lodash/fp';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import deepEqual from 'fast-deep-equal';
-import { Subscription } from 'rxjs';
 
-import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
-import {
+import type {
   AuthenticationsEdges,
   AuthStackByField,
   UserAuthenticationsRequestOptions,
-  UserAuthenticationsStrategyResponse,
-  UsersQueries,
 } from '../../../../common/search_strategy/security_solution';
-import { PageInfoPaginated, DocValueFields, SortField } from '../../../../common/search_strategy';
-import { ESTermQuery } from '../../../../common/typed_json';
+import { UsersQueries } from '../../../../common/search_strategy/security_solution';
+import type { PageInfoPaginated, SortField } from '../../../../common/search_strategy';
+import type { ESTermQuery } from '../../../../common/typed_json';
 
-import { inputsModel } from '../../store';
+import type { inputsModel } from '../../store';
 import { createFilter } from '../helpers';
 import { generateTablePaginationOptions } from '../../components/paginated_table/helpers';
-import { useKibana } from '../../lib/kibana';
-import { getInspectResponse } from '../../../helpers';
-import { InspectResponse } from '../../../types';
+
+import type { InspectResponse } from '../../../types';
 
 import * as i18n from './translations';
-import { useAppToasts } from '../../hooks/use_app_toasts';
+import { useSearchStrategy } from '../use_search_strategy';
 
 export interface AuthenticationArgs {
   authentications: AuthenticationsEdges[];
   inspect: InspectResponse;
   isInspected: boolean;
-  loading: boolean;
   loadPage: (newActivePage: number) => void;
   pageInfo: PageInfoPaginated;
   refetch: inputsModel.Refetch;
@@ -43,36 +37,28 @@ export interface AuthenticationArgs {
 }
 
 interface UseAuthentications {
-  docValueFields?: DocValueFields[];
-  filterQuery?: ESTermQuery | string;
+  activePage: number;
   endDate: string;
+  filterQuery?: ESTermQuery | string;
   indexNames: string[];
-  startDate: string;
+  limit: number;
   skip: boolean;
   stackByField: AuthStackByField;
-  activePage: number;
-  limit: number;
+  startDate: string;
 }
 
 export const useAuthentications = ({
-  docValueFields,
-  filterQuery,
-  endDate,
-  indexNames,
-  startDate,
   activePage,
+  endDate,
+  filterQuery,
+  indexNames,
   limit,
   skip,
   stackByField,
+  startDate,
 }: UseAuthentications): [boolean, AuthenticationArgs] => {
-  const { data } = useKibana().services;
-  const refetch = useRef<inputsModel.Refetch>(noop);
-  const abortCtrl = useRef(new AbortController());
-  const searchSubscription$ = useRef(new Subscription());
-  const [loading, setLoading] = useState(false);
   const [authenticationsRequest, setAuthenticationsRequest] =
     useState<UserAuthenticationsRequestOptions | null>(null);
-  const { addError, addWarning } = useAppToasts();
 
   const wrappedLoadMore = useCallback(
     (newActivePage: number) => {
@@ -90,72 +76,49 @@ export const useAuthentications = ({
     [limit]
   );
 
-  const [authenticationsResponse, setAuthenticationsResponse] = useState<AuthenticationArgs>({
-    authentications: [],
-    inspect: {
-      dsl: [],
-      response: [],
+  const {
+    loading,
+    result: response,
+    search,
+    refetch,
+    inspect,
+  } = useSearchStrategy<UsersQueries.authentications>({
+    factoryQueryType: UsersQueries.authentications,
+    initialResult: {
+      edges: [],
+      totalCount: -1,
+      pageInfo: {
+        activePage: 0,
+        fakeTotalCount: 0,
+        showMorePagesIndicator: false,
+      },
     },
-    isInspected: false,
-    loading: true,
-    loadPage: wrappedLoadMore,
-    pageInfo: {
-      activePage: 0,
-      fakeTotalCount: 0,
-      showMorePagesIndicator: false,
-    },
-    refetch: refetch.current,
-    totalCount: -1,
+    errorMessage: i18n.FAIL_AUTHENTICATIONS,
+    abort: skip,
   });
 
-  const authenticationsSearch = useCallback(
-    (request: UserAuthenticationsRequestOptions | null) => {
-      if (request == null || skip) {
-        return;
-      }
-      const asyncSearch = async () => {
-        abortCtrl.current = new AbortController();
-        setLoading(true);
-
-        searchSubscription$.current = data.search
-          .search<UserAuthenticationsRequestOptions, UserAuthenticationsStrategyResponse>(request, {
-            strategy: 'securitySolutionSearchStrategy',
-            abortSignal: abortCtrl.current.signal,
-          })
-          .subscribe({
-            next: (response) => {
-              if (isCompleteResponse(response)) {
-                setLoading(false);
-                setAuthenticationsResponse((prevResponse) => ({
-                  ...prevResponse,
-                  authentications: response.edges,
-                  inspect: getInspectResponse(response, prevResponse.inspect),
-                  pageInfo: response.pageInfo,
-                  refetch: refetch.current,
-                  totalCount: response.totalCount,
-                }));
-                searchSubscription$.current.unsubscribe();
-              } else if (isErrorResponse(response)) {
-                setLoading(false);
-                addWarning(i18n.ERROR_AUTHENTICATIONS);
-                searchSubscription$.current.unsubscribe();
-              }
-            },
-            error: (msg) => {
-              setLoading(false);
-              addError(msg, {
-                title: i18n.FAIL_AUTHENTICATIONS,
-              });
-              searchSubscription$.current.unsubscribe();
-            },
-          });
-      };
-      searchSubscription$.current.unsubscribe();
-      abortCtrl.current.abort();
-      asyncSearch();
-      refetch.current = asyncSearch;
-    },
-    [data.search, addError, addWarning, skip]
+  const authenticationsResponse = useMemo(
+    () => ({
+      endDate,
+      authentications: response.edges,
+      inspect,
+      isInspected: false,
+      loadPage: wrappedLoadMore,
+      pageInfo: response.pageInfo,
+      refetch,
+      startDate,
+      totalCount: response.totalCount,
+    }),
+    [
+      endDate,
+      inspect,
+      refetch,
+      response.edges,
+      response.pageInfo,
+      response.totalCount,
+      startDate,
+      wrappedLoadMore,
+    ]
   );
 
   useEffect(() => {
@@ -163,7 +126,6 @@ export const useAuthentications = ({
       const myRequest = {
         ...(prevRequest ?? {}),
         defaultIndex: indexNames,
-        docValueFields: docValueFields ?? [],
         factoryQueryType: UsersQueries.authentications,
         filterQuery: createFilter(filterQuery),
         stackByField,
@@ -180,32 +142,13 @@ export const useAuthentications = ({
       }
       return prevRequest;
     });
-  }, [
-    activePage,
-    docValueFields,
-    endDate,
-    filterQuery,
-    indexNames,
-    stackByField,
-    limit,
-    startDate,
-  ]);
+  }, [activePage, endDate, filterQuery, indexNames, stackByField, limit, startDate]);
 
   useEffect(() => {
-    authenticationsSearch(authenticationsRequest);
-    return () => {
-      searchSubscription$.current.unsubscribe();
-      abortCtrl.current.abort();
-    };
-  }, [authenticationsRequest, authenticationsSearch]);
-
-  useEffect(() => {
-    if (skip) {
-      setLoading(false);
-      searchSubscription$.current.unsubscribe();
-      abortCtrl.current.abort();
+    if (!skip && authenticationsRequest) {
+      search(authenticationsRequest);
     }
-  }, [skip]);
+  }, [authenticationsRequest, search, skip]);
 
   return [loading, authenticationsResponse];
 };

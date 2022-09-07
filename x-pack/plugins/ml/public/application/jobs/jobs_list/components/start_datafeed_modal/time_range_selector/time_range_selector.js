@@ -9,7 +9,7 @@ import './_time_range_selector.scss';
 import PropTypes from 'prop-types';
 import React, { Component, useState, useEffect } from 'react';
 
-import { EuiDatePicker, EuiFieldText, EuiSpacer } from '@elastic/eui';
+import { EuiDatePicker, EuiFieldText, EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
@@ -181,30 +181,34 @@ export class TimeRangeSelector extends Component {
             <EuiSpacer />
           </>
         ) : null}
-        <div className="time-range-section-container">
-          <TabStack
-            title={
-              <FormattedMessage
-                id="xpack.ml.jobsList.startDatafeedModal.searchStartTimeTitle"
-                defaultMessage="Search start time"
-              />
-            }
-            items={startItems}
-            switchState={this.state.startTab}
-            switchFunc={this.setStartTab}
-          />
-          <TabStack
-            title={
-              <FormattedMessage
-                id="xpack.ml.jobsList.startDatafeedModal.searchEndTimeTitle"
-                defaultMessage="Search end time"
-              />
-            }
-            items={endItems}
-            switchState={this.state.endTab}
-            switchFunc={this.setEndTab}
-          />
-        </div>
+        <EuiFlexGroup gutterSize="s">
+          <EuiFlexItem>
+            <TabStack
+              title={
+                <FormattedMessage
+                  id="xpack.ml.jobsList.startDatafeedModal.searchStartTimeTitle"
+                  defaultMessage="Search start time"
+                />
+              }
+              items={startItems}
+              switchState={this.state.startTab}
+              switchFunc={this.setStartTab}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <TabStack
+              title={
+                <FormattedMessage
+                  id="xpack.ml.jobsList.startDatafeedModal.searchEndTimeTitle"
+                  defaultMessage="Search end time"
+                />
+              }
+              items={endItems}
+              switchState={this.state.endTab}
+              switchFunc={this.setEndTab}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </div>
     );
   }
@@ -248,6 +252,7 @@ const DatePickerWithInput = ({ date, onChange, minDate, setIsValid, tab }) => {
       setDateString(date.format(TIME_FORMAT));
       setCurrentTab(tab);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tab]);
 
   function onTextChange(e) {

@@ -15,10 +15,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
 
-  describe('Filter panel', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/139659
+  describe.skip('Filter panel', () => {
     before(async () => {
       await PageObjects.common.navigateToApp('discover');
-      await PageObjects.discover.selectIndexPattern('kibana_sample_data_flights');
+      await PageObjects.discover.selectIndexPattern('Kibana Sample Data Flights');
     });
 
     it('a11y test on add filter panel', async () => {

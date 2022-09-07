@@ -6,7 +6,7 @@
  */
 
 import { getEmptyTagValue } from '../../../../../common/components/empty_value';
-import { ColumnRenderer } from './column_renderer';
+import type { ColumnRenderer } from './column_renderer';
 
 export const unknownColumnRenderer: ColumnRenderer = {
   isInstance: () => true,

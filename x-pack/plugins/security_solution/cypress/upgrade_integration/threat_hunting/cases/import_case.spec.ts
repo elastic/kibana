@@ -43,6 +43,7 @@ const CASE_NDJSON = '7_16_case.ndjson';
 const importedCase = {
   title: '7.16 case to export',
   user: 'glo',
+  initial: 'g',
   reporter: 'glo@test.co',
   tags: 'export case',
   numberOfAlerts: '1',
@@ -107,7 +108,7 @@ describe('Import case after upgrade', () => {
 
   it('Displays the correct case details on the cases page', () => {
     cy.get(ALL_CASES_NAME).should('have.text', importedCase.title);
-    cy.get(ALL_CASES_REPORTER).should('have.text', importedCase.user);
+    cy.get(ALL_CASES_REPORTER).should('have.text', importedCase.initial);
     cy.get(ALL_CASES_NUMBER_OF_ALERTS).should('have.text', importedCase.numberOfAlerts);
     cy.get(ALL_CASES_COMMENTS_COUNT).should('have.text', importedCase.numberOfComments);
     cy.get(ALL_CASES_NOT_PUSHED).should('be.visible');

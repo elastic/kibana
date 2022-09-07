@@ -6,6 +6,7 @@
  */
 
 import { httpServiceMock } from '@kbn/core/public/mocks';
+import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common';
 import { KibanaServices } from '../common/lib/kibana';
 
 import { ConnectorTypes, CommentType, CaseStatuses, CaseSeverity } from '../../common/api';
@@ -31,6 +32,8 @@ import {
   createAttachments,
   pushCase,
   resolveCase,
+  getFeatureIds,
+  postComment,
 } from './api';
 
 import {
@@ -51,6 +54,10 @@ import {
   caseUserActionsSnake,
   casesStatusSnake,
   basicCaseId,
+  caseWithRegisteredAttachmentsSnake,
+  caseWithRegisteredAttachments,
+  caseUserActionsWithRegisteredAttachments,
+  caseUserActionsWithRegisteredAttachmentsSnake,
 } from './mock';
 
 import { DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS } from './use_get_cases';
@@ -63,7 +70,7 @@ jest.mock('../common/lib/kibana');
 const fetchMock = jest.fn();
 mockKibanaServices.mockReturnValue({ http: { fetch: fetchMock } });
 
-describe('Case Configuration API', () => {
+describe('Cases API', () => {
   describe('deleteCases', () => {
     beforeEach(() => {
       fetchMock.mockClear();
@@ -126,6 +133,12 @@ describe('Case Configuration API', () => {
       const resp = await getCase(data, true, abortCtrl.signal);
       expect(resp).toEqual(basicCase);
     });
+
+    test('should not covert to camel case registered attachments', async () => {
+      fetchMock.mockResolvedValue(caseWithRegisteredAttachmentsSnake);
+      const resp = await getCase(data, true, abortCtrl.signal);
+      expect(resp).toEqual(caseWithRegisteredAttachments);
+    });
   });
 
   describe('resolveCase', () => {
@@ -154,6 +167,21 @@ describe('Case Configuration API', () => {
       const resp = await resolveCase(caseId, true, abortCtrl.signal);
       expect(resp).toEqual({ ...basicResolveCase, case: basicCase, targetAliasId });
     });
+
+    test('should not covert to camel case registered attachments', async () => {
+      fetchMock.mockResolvedValue({
+        ...basicResolveCase,
+        case: caseWithRegisteredAttachmentsSnake,
+        target_alias_id: targetAliasId,
+      });
+
+      const resp = await resolveCase(caseId, true, abortCtrl.signal);
+      expect(resp).toEqual({
+        ...basicResolveCase,
+        case: caseWithRegisteredAttachments,
+        targetAliasId,
+      });
+    });
   });
 
   describe('getCases', () => {
@@ -171,6 +199,7 @@ describe('Case Configuration API', () => {
         method: 'GET',
         query: {
           ...DEFAULT_QUERY_PARAMS,
+          searchFields: DEFAULT_FILTER_OPTIONS.searchFields,
           reporters: [],
           tags: [],
           owner: [SECURITY_SOLUTION_OWNER],
@@ -199,6 +228,7 @@ describe('Case Configuration API', () => {
           reporters,
           tags: ['coke', 'pepsi'],
           search: 'hello',
+          searchFields: DEFAULT_FILTER_OPTIONS.searchFields,
           status: CaseStatuses.open,
           owner: [SECURITY_SOLUTION_OWNER],
         },
@@ -219,6 +249,7 @@ describe('Case Configuration API', () => {
         method: 'GET',
         query: {
           ...DEFAULT_QUERY_PARAMS,
+          searchFields: DEFAULT_FILTER_OPTIONS.searchFields,
           reporters: [],
           tags: [],
           severity: CaseSeverity.HIGH,
@@ -240,6 +271,7 @@ describe('Case Configuration API', () => {
         method: 'GET',
         query: {
           ...DEFAULT_QUERY_PARAMS,
+          searchFields: DEFAULT_FILTER_OPTIONS.searchFields,
           reporters: [],
           tags: [],
         },
@@ -269,6 +301,7 @@ describe('Case Configuration API', () => {
           reporters,
           tags: ['(', '"double"'],
           search: 'hello',
+          searchFields: DEFAULT_FILTER_OPTIONS.searchFields,
           status: CaseStatuses.open,
           owner: [SECURITY_SOLUTION_OWNER],
         },
@@ -276,7 +309,7 @@ describe('Case Configuration API', () => {
       });
     });
 
-    test('should return correct response', async () => {
+    test('should return correct response and not covert to camel case registered attachments', async () => {
       fetchMock.mockResolvedValue(allCasesSnake);
       const resp = await getCases({
         filterOptions: { ...DEFAULT_FILTER_OPTIONS, owner: [SECURITY_SOLUTION_OWNER] },
@@ -337,6 +370,12 @@ describe('Case Configuration API', () => {
       const resp = await getCaseUserActions(basicCase.id, abortCtrl.signal);
       expect(resp).toEqual(caseUserActions);
     });
+
+    test('should not covert to camel case registered attachments', async () => {
+      fetchMock.mockResolvedValue(caseUserActionsWithRegisteredAttachmentsSnake);
+      const resp = await getCaseUserActions(basicCase.id, abortCtrl.signal);
+      expect(resp).toEqual(caseUserActionsWithRegisteredAttachments);
+    });
   });
 
   describe('getReporters', () => {
@@ -390,9 +429,12 @@ describe('Case Configuration API', () => {
       fetchMock.mockClear();
       fetchMock.mockResolvedValue([basicCaseSnake]);
     });
+
     const data = { description: 'updated description' };
+
     test('should be called with correct check url, method, signal', async () => {
       await patchCase(basicCase.id, data, basicCase.version, abortCtrl.signal);
+
       expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}`, {
         method: 'PATCH',
         body: JSON.stringify({
@@ -409,7 +451,20 @@ describe('Case Configuration API', () => {
         basicCase.version,
         abortCtrl.signal
       );
-      expect(resp).toEqual({ ...[basicCase] });
+
+      expect(resp).toEqual([basicCase]);
+    });
+
+    test('should not covert to camel case registered attachments', async () => {
+      fetchMock.mockResolvedValue([caseWithRegisteredAttachmentsSnake]);
+      const resp = await patchCase(
+        basicCase.id,
+        { description: 'updated description' },
+        basicCase.version,
+        abortCtrl.signal
+      );
+
+      expect(resp).toEqual([caseWithRegisteredAttachments]);
     });
   });
 
@@ -418,6 +473,7 @@ describe('Case Configuration API', () => {
       fetchMock.mockClear();
       fetchMock.mockResolvedValue(casesSnake);
     });
+
     const data = [
       {
         status: CaseStatuses.closed,
@@ -435,9 +491,9 @@ describe('Case Configuration API', () => {
       });
     });
 
-    test('should return correct response', async () => {
+    test('should return correct response should not covert to camel case registered attachments', async () => {
       const resp = await patchCasesStatus(data, abortCtrl.signal);
-      expect(resp).toEqual({ ...cases });
+      expect(resp).toEqual(cases);
     });
   });
 
@@ -456,6 +512,7 @@ describe('Case Configuration API', () => {
         signal: abortCtrl.signal,
         owner: SECURITY_SOLUTION_OWNER,
       });
+
       expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/${basicCase.id}/comments`, {
         method: 'PATCH',
         body: JSON.stringify({
@@ -479,6 +536,21 @@ describe('Case Configuration API', () => {
         owner: SECURITY_SOLUTION_OWNER,
       });
       expect(resp).toEqual(basicCase);
+    });
+
+    test('should not covert to camel case registered attachments', async () => {
+      fetchMock.mockResolvedValue(caseWithRegisteredAttachmentsSnake);
+
+      const resp = await patchComment({
+        caseId: basicCase.id,
+        commentId: basicCase.comments[0].id,
+        commentUpdate: 'updated comment',
+        version: basicCase.comments[0].version,
+        signal: abortCtrl.signal,
+        owner: SECURITY_SOLUTION_OWNER,
+      });
+
+      expect(resp).toEqual(caseWithRegisteredAttachments);
     });
   });
 
@@ -515,6 +587,12 @@ describe('Case Configuration API', () => {
     test('should return correct response', async () => {
       const resp = await postCase(data, abortCtrl.signal);
       expect(resp).toEqual(basicCase);
+    });
+
+    test('should not covert to camel case registered attachments', async () => {
+      fetchMock.mockResolvedValue(caseWithRegisteredAttachmentsSnake);
+      const resp = await postCase(data, abortCtrl.signal);
+      expect(resp).toEqual(caseWithRegisteredAttachments);
     });
   });
 
@@ -557,6 +635,12 @@ describe('Case Configuration API', () => {
       const resp = await createAttachments(data, basicCase.id, abortCtrl.signal);
       expect(resp).toEqual(basicCase);
     });
+
+    test('should not covert to camel case registered attachments', async () => {
+      fetchMock.mockResolvedValue(caseWithRegisteredAttachmentsSnake);
+      const resp = await createAttachments(data, basicCase.id, abortCtrl.signal);
+      expect(resp).toEqual(caseWithRegisteredAttachments);
+    });
   });
 
   describe('pushCase', () => {
@@ -583,6 +667,12 @@ describe('Case Configuration API', () => {
       const resp = await pushCase(basicCase.id, connectorId, abortCtrl.signal);
       expect(resp).toEqual(pushedCase);
     });
+
+    test('should not covert to camel case registered attachments', async () => {
+      fetchMock.mockResolvedValue(caseWithRegisteredAttachmentsSnake);
+      const resp = await pushCase(basicCase.id, connectorId, abortCtrl.signal);
+      expect(resp).toEqual(caseWithRegisteredAttachments);
+    });
   });
 
   describe('deleteComment', () => {
@@ -603,6 +693,61 @@ describe('Case Configuration API', () => {
         signal: abortCtrl.signal,
       });
       expect(resp).toBe(undefined);
+    });
+  });
+
+  describe('getFeatureIds', () => {
+    beforeEach(() => {
+      fetchMock.mockClear();
+      fetchMock.mockResolvedValue(['siem', 'observability']);
+    });
+
+    test('should be called with correct check url, method, signal', async () => {
+      const resp = await getFeatureIds(
+        { registrationContext: ['security', 'observability.logs'] },
+        abortCtrl.signal
+      );
+
+      expect(fetchMock).toHaveBeenCalledWith(`${BASE_RAC_ALERTS_API_PATH}/_feature_ids`, {
+        query: { registrationContext: ['security', 'observability.logs'] },
+        signal: abortCtrl.signal,
+      });
+
+      expect(resp).toEqual(['siem', 'observability']);
+    });
+  });
+
+  describe('postComment', () => {
+    beforeEach(() => {
+      fetchMock.mockClear();
+      fetchMock.mockResolvedValue(basicCaseSnake);
+    });
+
+    const data = {
+      comment: 'Solve this fast!',
+      type: CommentType.user as const,
+      owner: SECURITY_SOLUTION_OWNER,
+    };
+
+    test('should be called with correct check url, method, signal', async () => {
+      await postComment(data, basicCase.id, abortCtrl.signal);
+
+      expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/${basicCase.id}/comments`, {
+        method: 'POST',
+        body: JSON.stringify(data),
+        signal: abortCtrl.signal,
+      });
+    });
+
+    test('should return correct response', async () => {
+      const resp = await postComment(data, basicCase.id, abortCtrl.signal);
+      expect(resp).toEqual(basicCase);
+    });
+
+    test('should not covert to camel case registered attachments', async () => {
+      fetchMock.mockResolvedValue(caseWithRegisteredAttachmentsSnake);
+      const resp = await postComment(data, basicCase.id, abortCtrl.signal);
+      expect(resp).toEqual(caseWithRegisteredAttachments);
     });
   });
 });

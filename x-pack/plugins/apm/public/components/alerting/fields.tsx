@@ -142,14 +142,15 @@ export function IsAboveField({
 }) {
   return (
     <PopoverExpression
-      value={value ? `${value.toString()}${unit}` : ''}
+      value={`${value}${unit}`}
       title={i18n.translate(
         'xpack.apm.transactionErrorRateAlertTrigger.isAbove',
         { defaultMessage: 'is above' }
       )}
     >
       <EuiFieldNumber
-        value={value ?? ''}
+        min={0}
+        value={value ?? 0}
         onChange={(e) => onChange(parseInt(e.target.value, 10))}
         append={unit}
         compressed

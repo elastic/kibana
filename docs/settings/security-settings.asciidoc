@@ -8,6 +8,12 @@
 You do not need to configure any additional settings to use the
 {security-features} in {kib}. They are enabled by default.
 
+IMPORTANT: In high-availability deployments, make sure you use the same
+security settings for all instances of {kib}. Also consider storing
+sensitive security settings, such as encryption and decryption keys,
+securely in the Kibana Keystore, instead of keeping them in clear text in
+the kibana.yml file.
+
 [float]
 [[authentication-security-settings]]
 ==== Authentication security settings
@@ -27,11 +33,11 @@ xpack.security.authc:
       saml.saml1: <3>
           order: 1
           ...
-  
+
       saml.saml2: <4>
           order: 2
           ...
-  
+
       pki.realm3:
           order: 3
           ...
@@ -112,33 +118,19 @@ In addition to <<authentication-provider-settings,the settings that are valid fo
 NOTE: You can configure only one anonymous provider per {kib} instance.
 
 xpack.security.authc.providers.anonymous.<provider-name>.credentials {ess-icon}::
-Credentials that {kib} should use internally to authenticate anonymous requests to {es}. Possible values are: username and password, API key, or the constant `elasticsearch_anonymous_user` if you want to leverage {ref}/anonymous-access.html[{es} anonymous access].
+Credentials that {kib} should use internally to authenticate anonymous requests to {es}.
 +
 For example:
 +
 [source,yaml]
 ----------------------------------------
-# Username and password credentials
 xpack.security.authc.providers.anonymous.anonymous1:
   credentials:
     username: "anonymous_service_account"
     password: "anonymous_service_account_password"
-
-# API key (concatenated and base64-encoded)
-xpack.security.authc.providers.anonymous.anonymous1:
-  credentials:
-    apiKey: "VnVhQ2ZHY0JDZGJrUW0tZTVhT3g6dWkybHAyYXhUTm1zeWFrdzl0dk5udw=="
-
-# API key (as returned from Elasticsearch API)
-xpack.security.authc.providers.anonymous.anonymous1:
-  credentials:
-    apiKey.id: "VuaCfGcBCdbkQm-e5aOx"
-    apiKey.key: "ui2lp2axTNmsyakw9tvNnw"
-
-# Elasticsearch anonymous access
-xpack.security.authc.providers.anonymous.anonymous1:
-  credentials: "elasticsearch_anonymous_user"
 ----------------------------------------
+
+For more information, refer to <<anonymous-authentication>>.
 
 [float]
 [[http-authentication-settings]]
@@ -171,6 +163,17 @@ xpack.security.authc.selector.enabled {ess-icon}::
 Determines if the login selector UI should be enabled. By default, this setting is set to `true` if more than one authentication provider is configured.
 
 [float]
+[[authentication-access-agreement-settings]]
+==== Configure a default access agreement
+
+You can configure the following settings in the `kibana.yml` file.
+
+xpack.security.accessAgreement.message {ess-icon}::
+This setting specifies the access agreement text in Markdown format that will be used as the default access agreement for all providers that do not
+specify a value for `xpack.security.authc.providers.<provider-type>.<provider-name>.accessAgreement.message`.
+For more information, refer to <<xpack-security-access-agreement>>.
+
+[float]
 [[security-session-and-cookie-settings]]
 ==== Session and cookie security settings
 
@@ -187,7 +190,7 @@ Sets the `secure` flag of the session cookie. The default value is `false`. It
 is automatically set to `true` if <<server-ssl-enabled, `server.ssl.enabled`>> is set to `true`. Set this to `true` if SSL is configured outside of {kib} (for example, you are routing requests through a load balancer or proxy).
 
 [[xpack-security-sameSiteCookies]] xpack.security.sameSiteCookies {ess-icon}::
-Sets the `SameSite` attribute of the session cookie. This allows you to declare whether your cookie should be restricted to a first-party or same-site context. 
+Sets the `SameSite` attribute of the session cookie. This allows you to declare whether your cookie should be restricted to a first-party or same-site context.
 Valid values are `Strict`, `Lax`, `None`.
 This is *not set* by default, which modern browsers will treat as `Lax`. If you use Kibana embedded in an iframe in modern browsers, you might need to set it to `None`. Setting this value to `None` requires cookies to be sent over a secure connection by setting <<xpack-security-secureCookies, `xpack.security.secureCookies`>>: `true`.
 
@@ -212,7 +215,6 @@ TIP: Use a string of `<count>[ms\|s\|m\|h\|d\|w\|M\|Y]` (e.g. '20m', '24h', '7d'
 
 These settings control the encryption of saved objects with sensitive data. For more details, refer to <<xpack-security-secure-saved-objects>>.
 
-IMPORTANT: In high-availability deployments, make sure you use the same encryption and decryption keys for all instances of {kib}. Although the keys can be specified in clear text in `kibana.yml`, it's recommended to store them securely in the <<secure-settings,{kib} Keystore>>.
 
 [[xpack-encryptedSavedObjects-encryptionKey]] xpack.encryptedSavedObjects.encryptionKey::
 An arbitrary string of at least 32 characters that is used to encrypt sensitive properties of saved objects before they're stored in {es}. If not set, {kib} will generate a random key on startup, but certain features won't be available until you set the encryption key explicitly.
@@ -260,7 +262,7 @@ xpack.security.audit.appender::
 Optional. Specifies where audit logs should be written to and how they should be formatted. If no appender is specified, a default appender will be used (see above).
 
 xpack.security.audit.appender.type::
-Required. Specifies where audit logs should be written to. Allowed values are `console`, `file`, or `rolling-file`. 
+Required. Specifies where audit logs should be written to. Allowed values are `console`, `file`, or `rolling-file`.
 +
 Refer to <<audit-logging-file-appender>> and <<audit-logging-rolling-file-appender>> for appender specific settings.
 

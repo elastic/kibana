@@ -11,9 +11,6 @@ import {
 } from '@kbn/expressions-plugin/common';
 import { lastValueFrom } from 'rxjs';
 
-// @ts-expect-error untyped local
-import { buildESRequest } from '../../../common/lib/request/build_es_request';
-
 import { searchService } from '../../../public/services';
 import { ESSQL_SEARCH_STRATEGY } from '../../../common/lib/constants';
 import { EssqlSearchStrategyRequest, EssqlSearchStrategyResponse } from '../../../types';

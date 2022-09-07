@@ -9,9 +9,9 @@
 import fn from './abs';
 
 import _ from 'lodash';
-const expect = require('chai').expect;
+import expect from '@kbn/expect';
 const seriesList = require('./fixtures/series_list')();
-import invoke from './helpers/invoke_series_fn';
+import invoke from './test_helpers/invoke_series_fn';
 
 describe('abs.js', function () {
   it('should return the positive value of every value', function () {

@@ -1,0 +1,51 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`EndzoneTooltipHeader should render endzone tooltip with value, if it is specified 1`] = `
+<Fragment>
+  <EuiFlexGroup
+    alignItems="center"
+    className="detailedTooltip__header--partial"
+    gutterSize="xs"
+    responsive={false}
+  >
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiIcon
+        type="iInCircle"
+      />
+    </EuiFlexItem>
+    <EuiFlexItem>
+      The selected time range does not include this entire bucket. It might contain partial data.
+    </EuiFlexItem>
+  </EuiFlexGroup>
+  <EuiSpacer
+    size="xs"
+  />
+  <p>
+    some value
+  </p>
+</Fragment>
+`;
+
+exports[`EndzoneTooltipHeader should render endzone tooltip without value, if it is not specified 1`] = `
+<Fragment>
+  <EuiFlexGroup
+    alignItems="center"
+    className="detailedTooltip__header--partial"
+    gutterSize="xs"
+    responsive={false}
+  >
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiIcon
+        type="iInCircle"
+      />
+    </EuiFlexItem>
+    <EuiFlexItem>
+      The selected time range does not include this entire bucket. It might contain partial data.
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</Fragment>
+`;

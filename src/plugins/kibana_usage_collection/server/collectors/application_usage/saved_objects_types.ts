@@ -28,12 +28,6 @@ export interface ApplicationUsageTransactional extends ApplicationUsageTotal {
 }
 
 /**
- * @deprecated transactional type is no longer used, and only preserved for backward compatibility
- * @removeBy 8.0.0
- */
-export const SAVED_OBJECTS_TRANSACTIONAL_TYPE = 'application_usage_transactional';
-
-/**
  * Used to aggregate the transactional events into daily summaries so we can purge the granular events
  */
 export type ApplicationUsageDaily = ApplicationUsageTransactional;
@@ -64,18 +58,6 @@ export function registerMappings(registerType: SavedObjectsServiceSetup['registe
         // This type requires `timestamp` to be indexed so we can use it when rolling up totals (timestamp < now-90d)
         timestamp: { type: 'date' },
       },
-    },
-  });
-
-  // Type for storing ApplicationUsageTransactional (declaring empty mappings because we don't use the internal fields for query/aggregations)
-  // Remark: this type is deprecated and only here for BWC reasons.
-  registerType({
-    name: SAVED_OBJECTS_TRANSACTIONAL_TYPE,
-    hidden: false,
-    namespaceType: 'agnostic',
-    mappings: {
-      dynamic: false,
-      properties: {},
     },
   });
 }

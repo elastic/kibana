@@ -6,21 +6,21 @@
  */
 
 import { EuiContextMenuItem } from '@elastic/eui';
-import React, { useMemo } from 'react';
-import { DraggableId } from 'react-beautiful-dnd';
+import React, { useCallback, useMemo } from 'react';
+import type { DraggableId } from 'react-beautiful-dnd';
 
 import { isEmpty } from 'lodash';
 
 import { FilterManager } from '@kbn/data-plugin/public';
+import { useDispatch } from 'react-redux';
 import { useKibana } from '../../lib/kibana';
-import { getAllFieldsByName } from '../../containers/source';
 import { allowTopN } from '../drag_and_drop/helpers';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
-import { ColumnHeaderOptions, DataProvider, TimelineId } from '../../../../common/types/timeline';
-import { SourcererScopeName } from '../../store/sourcerer/model';
-import { useSourcererDataView } from '../../containers/sourcerer';
+import type { ColumnHeaderOptions, DataProvider } from '../../../../common/types/timeline';
+import { TimelineId } from '../../../../common/types/timeline';
 import { timelineSelectors } from '../../../timelines/store/timeline';
 import { ShowTopNButton } from './actions/show_top_n';
+import { addProvider } from '../../../timelines/store/timeline/actions';
 
 export interface UseHoverActionItemsProps {
   dataProvider?: DataProvider | DataProvider[];
@@ -29,6 +29,8 @@ export interface UseHoverActionItemsProps {
   draggableId?: DraggableId;
   enableOverflowButton?: boolean;
   field: string;
+  fieldType: string;
+  isAggregatable: boolean;
   handleHoverActionClicked: () => void;
   hideAddToTimeline: boolean;
   hideTopN: boolean;
@@ -59,6 +61,8 @@ export const useHoverActionItems = ({
   draggableId,
   enableOverflowButton,
   field,
+  fieldType,
+  isAggregatable,
   handleHoverActionClicked,
   hideTopN,
   hideAddToTimeline,
@@ -77,6 +81,7 @@ export const useHoverActionItems = ({
   values,
 }: UseHoverActionItemsProps): UseHoverActionItems => {
   const kibana = useKibana();
+  const dispatch = useDispatch();
   const { timelines, uiSettings } = kibana.services;
   // Common actions used by the alert table and alert flyout
   const {
@@ -103,22 +108,28 @@ export const useHoverActionItems = ({
     [uiSettings, timelineId, activeFilterManager, filterManagerBackup]
   );
 
-  //  Regarding data from useManageTimeline:
-  //  * `indexToAdd`, which enables the alerts index to be appended to
-  //    the `indexPattern` returned by `useWithSource`, may only be populated when
-  //    this component is rendered in the context of the active timeline. This
-  //    behavior enables the 'All events' view by appending the alerts index
-  //    to the index pattern.
-  const activeScope: SourcererScopeName =
-    timelineId === TimelineId.active
-      ? SourcererScopeName.timeline
-      : timelineId != null &&
-        [TimelineId.detectionsPage, TimelineId.detectionsRulesDetailsPage].includes(
-          timelineId as TimelineId
-        )
-      ? SourcererScopeName.detections
-      : SourcererScopeName.default;
-  const { browserFields } = useSourcererDataView(activeScope);
+  /*
+   *   Add to Timeline button, adds data to dataprovider but does not persists the Timeline
+   *   to the server because of following reasons.
+   *
+   *   1. Add to Timeline button performs actions in `timelines` plugin
+   *   2. `timelines` plugin does not have information on how to create/update the timelines in the server
+   *       as it is owned by Security Solution
+   * */
+  const OnAddToTimeline = useCallback(() => {
+    if (!dataProvider || isEmpty(dataProvider)) return;
+    dispatch(
+      addProvider({
+        id: TimelineId.active,
+        providers: dataProvider instanceof Array ? dataProvider : [dataProvider],
+      })
+    );
+  }, [dataProvider, dispatch]);
+
+  const onAddToTimelineClicked = useCallback(() => {
+    if (handleHoverActionClicked) handleHoverActionClicked();
+    OnAddToTimeline();
+  }, [handleHoverActionClicked, OnAddToTimeline]);
 
   /*
    * In the case of `DisableOverflowButton`, we show filters only when topN is NOT opened. As after topN button is clicked, the chart panel replace current hover actions in the hover actions' popover, so we have to hide all the actions.
@@ -215,14 +226,15 @@ export const useHoverActionItems = ({
               field,
               keyboardEvent: stKeyboardEvent,
               ownFocus,
-              onClick: handleHoverActionClicked,
+              onClick: onAddToTimelineClicked,
               showTooltip: enableOverflowButton ? false : true,
               value: values,
             })}
           </div>
         ) : null,
         allowTopN({
-          browserField: getAllFieldsByName(browserFields)[field],
+          fieldType,
+          isAggregatable,
           fieldName: field,
           hideTopN,
         })
@@ -246,13 +258,14 @@ export const useHoverActionItems = ({
         return item != null;
       }),
     [
-      browserFields,
       dataProvider,
       dataType,
       defaultFocusedButtonRef,
       draggableId,
       enableOverflowButton,
       field,
+      fieldType,
+      isAggregatable,
       filterManager,
       getAddToTimelineButton,
       getColumnToggleButton,
@@ -260,6 +273,7 @@ export const useHoverActionItems = ({
       getFilterForValueButton,
       getFilterOutValueButton,
       handleHoverActionClicked,
+      onAddToTimelineClicked,
       hideAddToTimeline,
       hideTopN,
       isObjectArray,

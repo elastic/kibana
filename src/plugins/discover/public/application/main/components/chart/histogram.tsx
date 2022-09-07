@@ -41,10 +41,10 @@ import {
   renderEndzoneTooltip,
 } from '@kbn/charts-plugin/public';
 import { LEGACY_TIME_AXIS, MULTILAYER_TIME_AXIS_STYLE } from '@kbn/charts-plugin/common';
-import { useDiscoverServices } from '../../../../utils/use_discover_services';
-import { DataCharts$, DataChartsMessage } from '../../utils/use_saved_search';
+import { useDiscoverServices } from '../../../../hooks/use_discover_services';
+import { DataCharts$, DataChartsMessage } from '../../hooks/use_saved_search';
 import { FetchStatus } from '../../../types';
-import { useDataState } from '../../utils/use_data_state';
+import { useDataState } from '../../hooks/use_data_state';
 import { GetStateReturn } from '../../services/discover_state';
 
 export interface DiscoverHistogramProps {

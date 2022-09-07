@@ -1127,6 +1127,21 @@
             ],
             "path": "src/plugins/share/public/types.ts",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "share",
+            "id": "def-public.ShowShareMenuOptions.onClose",
+            "type": "Function",
+            "tags": [],
+            "label": "onClose",
+            "description": [],
+            "signature": [
+              "(() => void) | undefined"
+            ],
+            "path": "src/plugins/share/public/types.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false

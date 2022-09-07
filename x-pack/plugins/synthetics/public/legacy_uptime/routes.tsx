@@ -12,6 +12,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { useInspectorContext } from '@kbn/observability-plugin/public';
+import { ManageLocations } from './pages/monitor_management/manage_locations';
 import {
   CERTIFICATES_ROUTE,
   MAPPING_ERROR_ROUTE,
@@ -34,6 +35,7 @@ import {
   NotFoundPage,
   SettingsPage,
   MonitorManagementBottomBar,
+  APIKeysButton,
 } from './pages';
 import { CertificatesPage } from './pages/certificates';
 import { UptimePage, useUptimeTelemetry } from './hooks';
@@ -47,7 +49,6 @@ import { MonitorPageTitle, MonitorPageTitleContent } from './components/monitor/
 import { UptimeDatePicker } from './components/common/uptime_date_picker';
 import { CertRefreshBtn } from './components/certificates/cert_refresh_btn';
 import { CertificateTitle } from './components/certificates/certificate_title';
-import { SyntheticsCallout } from './components/overview/synthetics_callout';
 import {
   StepDetailPageChildren,
   StepDetailPageHeader,
@@ -208,6 +209,7 @@ const getRoutes = (): RouteProps[] => {
             defaultMessage="Add Monitor"
           />
         ),
+        rightSideItems: [<APIKeysButton />, <ManageLocations />],
       },
       bottomBar: <MonitorManagementBottomBar />,
       bottomBarProps: { paddingSize: 'm' as const },
@@ -232,6 +234,7 @@ const getRoutes = (): RouteProps[] => {
             defaultMessage="Edit Monitor"
           />
         ),
+        rightSideItems: [<APIKeysButton />, <ManageLocations />],
       },
       bottomBar: <MonitorManagementBottomBar />,
       bottomBarProps: { paddingSize: 'm' as const },
@@ -272,7 +275,7 @@ const getRoutes = (): RouteProps[] => {
             </EuiFlexItem>
           </EuiFlexGroup>
         ),
-        rightSideItems: [<AddMonitorBtn />],
+        rightSideItems: [<AddMonitorBtn />, <APIKeysButton />, <ManageLocations />],
       },
     },
   ];
@@ -310,7 +313,6 @@ export const PageRouter: FC = () => {
         }) => (
           <Route path={path} key={telemetryId} exact={true}>
             <div className={APP_WRAPPER_CLASS} data-test-subj={dataTestSubj}>
-              <SyntheticsCallout />
               <RouteInit title={title} path={path} telemetryId={telemetryId} />
               <UptimePageTemplateComponent
                 path={path}

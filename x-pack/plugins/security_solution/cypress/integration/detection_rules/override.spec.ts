@@ -6,12 +6,8 @@
  */
 
 import { formatMitreAttackDescription } from '../../helpers/rules';
-import {
-  getIndexPatterns,
-  getNewOverrideRule,
-  getSeveritiesOverride,
-  OverrideRule,
-} from '../../objects/rule';
+import type { OverrideRule } from '../../objects/rule';
+import { getIndexPatterns, getNewOverrideRule, getSeveritiesOverride } from '../../objects/rule';
 
 import { NUMBER_OF_ALERTS, ALERT_GRID_CELL } from '../../screens/alerts';
 

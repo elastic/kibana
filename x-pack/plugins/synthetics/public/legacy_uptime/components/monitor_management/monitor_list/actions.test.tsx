@@ -8,6 +8,12 @@
 import React from 'react';
 import { screen } from '@testing-library/react';
 import { render } from '../../../lib/helper/rtl_helpers';
+import {
+  MonitorManagementListResult,
+  BrowserFields,
+  ConfigKey,
+  SourceType,
+} from '../../../../../common/runtime_types';
 
 import { Actions } from './actions';
 
@@ -15,11 +21,49 @@ describe('<Actions />', () => {
   const onUpdate = jest.fn();
 
   it('navigates to edit monitor flow on edit pencil', () => {
-    render(<Actions id="test-id" name="sample name" onUpdate={onUpdate} monitors={[]} />);
+    render(
+      <Actions
+        id="test-id"
+        name="sample name"
+        onUpdate={onUpdate}
+        monitors={
+          [
+            {
+              id: 'test-id',
+              attributes: {
+                [ConfigKey.MONITOR_SOURCE_TYPE]: SourceType.PROJECT,
+              } as BrowserFields,
+            },
+          ] as unknown as MonitorManagementListResult['monitors']
+        }
+      />
+    );
 
     expect(screen.getByLabelText('Edit monitor')).toHaveAttribute(
       'href',
       '/app/uptime/edit-monitor/test-id'
     );
+  });
+
+  it('disables deleting for project monitors', () => {
+    render(
+      <Actions
+        id="test-id"
+        name="sample name"
+        onUpdate={onUpdate}
+        monitors={
+          [
+            {
+              id: 'test-id',
+              attributes: {
+                [ConfigKey.MONITOR_SOURCE_TYPE]: SourceType.PROJECT,
+              } as BrowserFields,
+            },
+          ] as unknown as MonitorManagementListResult['monitors']
+        }
+      />
+    );
+
+    expect(screen.getByLabelText('Delete monitor')).toBeDisabled();
   });
 });

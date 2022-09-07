@@ -12,13 +12,13 @@ import {
   KibanaReactContextValue,
   KibanaServices,
 } from '@kbn/kibana-react-plugin/public';
-import { QuerySuggestion, UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import { QuerySuggestion } from '@kbn/unified-search-plugin/public';
 import { RendererFunction } from '../utils/typed_react';
+import { InfraClientStartDeps } from '../types';
 
 interface WithKueryAutocompletionLifecycleProps {
-  kibana: KibanaReactContextValue<
-    { unifiedSearch: UnifiedSearchPublicPluginStart } & KibanaServices
-  >;
+  kibana: KibanaReactContextValue<InfraClientStartDeps & KibanaServices>;
   children: RendererFunction<{
     isLoadingSuggestions: boolean;
     loadSuggestions: (expression: string, cursorPosition: number, maxSuggestions?: number) => void;
@@ -65,7 +65,7 @@ class WithKueryAutocompletionComponent extends React.Component<
     const { indexPattern } = this.props;
     const language = 'kuery';
     const hasQuerySuggestions =
-      this.props.kibana.services.unifiedSearch?.autocomplete.hasQuerySuggestions(language);
+      this.props.kibana.services.unifiedSearch.autocomplete.hasQuerySuggestions(language);
 
     if (!hasQuerySuggestions) {
       return;
@@ -85,7 +85,7 @@ class WithKueryAutocompletionComponent extends React.Component<
         query: expression,
         selectionStart: cursorPosition,
         selectionEnd: cursorPosition,
-        indexPatterns: [indexPattern],
+        indexPatterns: [indexPattern as DataView],
         boolFilter: [],
       })) || [];
 

@@ -17,17 +17,18 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import type { SearchResult } from '@elastic/search-ui';
+
 import { i18n } from '@kbn/i18n';
 
 import { EngineLogic } from '../../../engine';
 
 import { Result } from '../../../result';
-import { Result as ResultType } from '../../../result/types';
 import './curation_result_panel.scss';
 
 interface Props {
   variant: 'current' | 'promoted' | 'suggested' | 'hidden';
-  results: ResultType[];
+  results: SearchResult[];
 }
 
 export const CurationResultPanel: React.FC<Props> = ({ variant, results }) => {

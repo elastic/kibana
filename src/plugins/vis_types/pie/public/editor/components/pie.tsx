@@ -7,7 +7,6 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { METRIC_TYPE } from '@kbn/analytics';
 import {
   EuiPanel,
   EuiTitle,
@@ -223,9 +222,6 @@ const PieOptions = (props: PieOptionsProps) => {
               value={stateParams.nestedLegend}
               disabled={stateParams.legendDisplay === LegendDisplay.HIDE}
               setValue={(paramName, value) => {
-                if (props.trackUiMetric) {
-                  props.trackUiMetric(METRIC_TYPE.CLICK, 'nested_legend_switched');
-                }
                 setValue(paramName, value);
               }}
               data-test-subj="visTypePieNestedLegendSwitch"
@@ -253,9 +249,6 @@ const PieOptions = (props: PieOptionsProps) => {
             activePalette={stateParams.palette}
             paramName="palette"
             setPalette={(paramName, value) => {
-              if (props.trackUiMetric) {
-                props.trackUiMetric(METRIC_TYPE.CLICK, 'palette_selected');
-              }
               setValue(paramName, value);
             }}
           />
@@ -296,9 +289,6 @@ const PieOptions = (props: PieOptionsProps) => {
                 : stateParams.labels.position || LabelPositions.DEFAULT
             }
             setValue={(paramName, value) => {
-              if (props.trackUiMetric) {
-                props.trackUiMetric(METRIC_TYPE.CLICK, 'label_position_selected');
-              }
               setLabels(paramName, value);
             }}
             data-test-subj="visTypePieLabelPositionSelect"
@@ -338,9 +328,6 @@ const PieOptions = (props: PieOptionsProps) => {
               paramName="valuesFormat"
               value={stateParams.labels.valuesFormat || ValueFormats.PERCENT}
               setValue={(paramName, value) => {
-                if (props.trackUiMetric) {
-                  props.trackUiMetric(METRIC_TYPE.CLICK, 'values_format_selected');
-                }
                 setLabels(paramName, value);
               }}
               data-test-subj="visTypePieValueFormatsSelect"

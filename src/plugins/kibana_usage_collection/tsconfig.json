@@ -16,5 +16,6 @@
   "references": [
     { "path": "../../core/tsconfig.json" },
     { "path": "../../plugins/usage_collection/tsconfig.json" },
+    { "path": "../../plugins/telemetry/tsconfig.json" },
   ]
 }

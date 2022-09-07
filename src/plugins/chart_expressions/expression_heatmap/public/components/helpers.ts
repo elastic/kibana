@@ -19,7 +19,7 @@ import {
 } from '@kbn/coloring';
 
 import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/public';
-
+import { FormatFactory, IFieldFormat } from '@kbn/field-formats-plugin/common';
 import { defaultPaletteParams } from '../constants';
 
 export function getDataMinMax(
@@ -150,4 +150,65 @@ export const getSortPredicate = (column: DatatableColumn) => {
       return 'alphaAsc';
     }
   }
+};
+
+const isPrimitive = (value: unknown): boolean => value != null && typeof value !== 'object';
+
+export const getFormattedRow = (
+  row: Datatable['rows'][number],
+  columns: Datatable['columns'],
+  columnsFormatters: Record<string, IFieldFormat>
+): { row: Datatable['rows'][number]; formattedColumns: Record<string, true> } =>
+  columns.reduce(
+    (formattedInfo, { id }) => {
+      const record = formattedInfo.row[id];
+      if (
+        record != null &&
+        // pre-format non-primitive values
+        !isPrimitive(record)
+      ) {
+        return {
+          row: { ...formattedInfo.row, [id]: columnsFormatters[id]!.convert(record) },
+          formattedColumns: { ...formattedInfo.formattedColumns, [id]: true },
+        };
+      }
+      return formattedInfo;
+    },
+    { row, formattedColumns: {} }
+  );
+
+export const getFormattedTable = (
+  table: Datatable,
+  formatFactory: FormatFactory
+): { table: Datatable; formattedColumns: Record<string, true> } => {
+  const columnsFormatters = table.columns.reduce<Record<string, IFieldFormat>>(
+    (formatters, { id, meta }) => {
+      return {
+        ...formatters,
+        [id]: formatFactory(meta.params),
+      };
+    },
+    {}
+  );
+
+  const formattedTableInfo: {
+    rows: Datatable['rows'];
+    formattedColumns: Record<string, true>;
+  } = {
+    rows: [],
+    formattedColumns: {},
+  };
+  for (const row of table.rows) {
+    const formattedRowInfo = getFormattedRow(row, table.columns, columnsFormatters);
+    formattedTableInfo.rows.push(formattedRowInfo.row);
+    formattedTableInfo.formattedColumns = {
+      ...formattedTableInfo.formattedColumns,
+      ...formattedRowInfo.formattedColumns,
+    };
+  }
+
+  return {
+    table: { ...table, rows: formattedTableInfo.rows },
+    formattedColumns: formattedTableInfo.formattedColumns,
+  };
 };

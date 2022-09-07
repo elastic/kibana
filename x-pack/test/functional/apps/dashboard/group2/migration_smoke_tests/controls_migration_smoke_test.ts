@@ -17,9 +17,11 @@ import { FtrProviderContext } from '../../../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const pieChart = getService('pieChart');
+  const elasticChart = getService('elasticChart');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
+  const queryBar = getService('queryBar');
 
   const { common, settings, savedObjects, dashboard, dashboardControls } = getPageObjects([
     'common',
@@ -44,7 +46,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/getting_started/shakespeare');
-      await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     it('should be able to import dashboard with controls from 8.0.0', async () => {
@@ -95,7 +97,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('applies default selected options list options to dashboard', async () => {
       // because 4 selections are made on the control, the pie chart should only show 4 slices.
-      expect(await pieChart.getPieSliceCount()).to.be(4);
+      await elasticChart.setNewChartUiDebugFlag();
+      await queryBar.submitQuery();
+      await pieChart.expectPieSliceCountEsCharts(4);
     });
   });
 }

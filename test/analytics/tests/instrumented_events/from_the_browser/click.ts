@@ -15,19 +15,24 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('General "click"', () => {
     beforeEach(async () => {
-      await common.navigateToApp('home');
-      // Just click on the top div and expect it's still there... we're just testing the click event generation
-      await common.clickAndValidate('kibanaChrome', 'kibanaChrome');
+      // Navigating to `home` with the Welcome prompt because some runs were flaky
+      // as we handle the Welcome screen only if the login prompt pops up.
+      // Otherwise, it stays in the Welcome screen :/
+      await common.navigateToApp('home', { disableWelcomePrompt: false });
+      // Clicking the button skipWelcomeScreen.
+      await common.clickAndValidate('skipWelcomeScreen', 'headerGlobalNav');
     });
 
     it('should emit a "click" event', async () => {
-      const [event] = await ebtUIHelper.getLastEvents(1, ['click']);
+      const [event] = await ebtUIHelper.getEvents(1, { eventTypes: ['click'] });
       expect(event.event_type).to.eql('click');
       expect(event.properties.target).to.be.an('array');
       const targets = event.properties.target as string[];
       expect(targets.includes('DIV')).to.be(true);
-      expect(targets.includes('id=kibana-body')).to.be(true);
-      expect(targets.includes('data-test-subj=kibanaChrome')).to.be(true);
+      expect(targets.includes('class=homWelcome')).to.be(true);
+      expect(targets.includes('data-test-subj=homeWelcomeInterstitial')).to.be(true);
+      expect(targets.includes('BUTTON')).to.be(true);
+      expect(targets.includes('data-test-subj=skipWelcomeScreen')).to.be(true);
     });
   });
 }

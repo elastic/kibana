@@ -12,7 +12,7 @@ import useResizeObserver from 'use-resize-observer/polyfilled';
 import '../../../common/mock/match_media';
 import { mockIndexPattern, TestProviders } from '../../../common/mock';
 import { HostDetailsTabs } from './details_tabs';
-import { HostDetailsTabsProps, SetAbsoluteRangeDatePicker } from './types';
+import type { HostDetailsTabsProps } from './types';
 import { hostDetailsPagePath } from '../types';
 import { type } from './utils';
 import { useMountAppended } from '../../../common/utils/use_mount_appended';
@@ -36,7 +36,7 @@ jest.mock('../../../common/lib/kibana', () => {
   };
 });
 
-jest.mock('../../../common/components/url_state/normalize_time_range');
+jest.mock('../../../common/utils/normalize_time_range');
 
 jest.mock('../../../common/containers/source', () => ({
   useFetchIndex: () => [false, { indicesExist: true, indexPatterns: mockIndexPattern }],
@@ -70,11 +70,9 @@ jest.mock('../../../common/components/visualization_actions', () => ({
 describe('body', () => {
   const scenariosMap = {
     [HostsTableType.authentications]: 'AuthenticationsQueryTabBody',
-    [HostsTableType.hosts]: 'HostsQueryTabBody',
     [HostsTableType.uncommonProcesses]: 'UncommonProcessQueryTabBody',
     [HostsTableType.anomalies]: 'AnomaliesQueryTabBody',
     [HostsTableType.events]: 'EventsQueryTabBody',
-    [HostsTableType.alerts]: 'HostAlertsQueryTabBody',
   };
 
   const mockHostDetailsPageFilters = getHostDetailsPageFilters('host-1');
@@ -98,12 +96,11 @@ describe('body', () => {
     test(`it should pass expected object properties to ${componentName}`, () => {
       const wrapper = mount(
         <TestProviders>
-          <MemoryRouter initialEntries={[`/hosts/host-1/${path}`]}>
+          <MemoryRouter initialEntries={[`/hosts/name/host-1/${path}`]}>
             <HostDetailsTabs
               isInitializing={false}
               detailName={'host-1'}
               setQuery={jest.fn()}
-              setAbsoluteRangeDatePicker={jest.fn() as unknown as SetAbsoluteRangeDatePicker}
               hostDetailsPagePath={hostDetailsPagePath}
               indexNames={[]}
               indexPattern={mockIndexPattern}

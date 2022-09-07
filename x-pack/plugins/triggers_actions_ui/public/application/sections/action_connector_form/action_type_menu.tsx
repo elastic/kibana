@@ -15,19 +15,19 @@ import { loadActionTypes } from '../../lib/action_connector_api';
 import { actionTypeCompare } from '../../lib/action_type_compare';
 import { checkActionTypeEnabled } from '../../lib/check_action_type_enabled';
 import { useKibana } from '../../../common/lib/kibana';
-import { DEFAULT_HIDDEN_ACTION_TYPES } from '../../..';
 import { SectionLoading } from '../../components/section_loading';
+import { betaBadgeProps } from './beta_badge_props';
 
 interface Props {
   onActionTypeChange: (actionType: ActionType) => void;
-  actionTypes?: ActionType[];
+  featureId?: string;
   setHasActionsUpgradeableByTrial?: (value: boolean) => void;
   actionTypeRegistry: ActionTypeRegistryContract;
 }
 
 export const ActionTypeMenu = ({
   onActionTypeChange,
-  actionTypes,
+  featureId,
   setHasActionsUpgradeableByTrial,
   actionTypeRegistry,
 }: Props) => {
@@ -41,21 +41,10 @@ export const ActionTypeMenu = ({
   useEffect(() => {
     (async () => {
       try {
-        /**
-         * Hidden action types will be hidden only on Alerts & Actions.
-         * actionTypes prop is not filtered. Thus, any consumer that provides it's own actionTypes
-         * can use the hidden action types. For example, Cases or Detections of Security Solution.
-         *
-         * TODO: Remove when cases connector is available across Kibana. Issue: https://github.com/elastic/kibana/issues/82502.
-         *  */
-        let availableActionTypes = actionTypes;
-        if (!availableActionTypes) {
-          setLoadingActionTypes(true);
-          availableActionTypes = (await loadActionTypes({ http })).filter(
-            (actionType) => !DEFAULT_HIDDEN_ACTION_TYPES.includes(actionType.id)
-          );
-          setLoadingActionTypes(false);
-        }
+        setLoadingActionTypes(true);
+        const availableActionTypes = await loadActionTypes({ http, featureId });
+        setLoadingActionTypes(false);
+
         const index: ActionTypeIndex = {};
         for (const actionTypeItem of availableActionTypes) {
           index[actionTypeItem.id] = actionTypeItem;
@@ -94,6 +83,7 @@ export const ActionTypeMenu = ({
         selectMessage: actionTypeModel ? actionTypeModel.selectMessage : '',
         actionType,
         name: actionType.name,
+        isExperimental: actionTypeModel.isExperimental,
       };
     });
 
@@ -103,6 +93,7 @@ export const ActionTypeMenu = ({
       const checkEnabledResult = checkActionTypeEnabled(item.actionType);
       const card = (
         <EuiCard
+          betaBadgeProps={item.isExperimental ? betaBadgeProps : undefined}
           titleSize="xs"
           data-test-subj={`${item.actionType.id}-card`}
           icon={<EuiIcon size="xl" type={item.iconClass} />}

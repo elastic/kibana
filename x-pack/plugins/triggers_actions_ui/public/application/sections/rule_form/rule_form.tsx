@@ -49,6 +49,7 @@ import {
   RecoveredActionGroup,
   isActionGroupDisabledForActionTypeId,
 } from '@kbn/alerting-plugin/common';
+import { AlertingConnectorFeatureId } from '@kbn/actions-plugin/common';
 import { RuleReducerAction, InitialRule } from './rule_reducer';
 import {
   RuleTypeModel,
@@ -79,6 +80,8 @@ import { getInitialInterval } from './get_initial_interval';
 
 const ENTER_KEY = 13;
 
+const INTEGER_REGEX = /^[1-9][0-9]*$/;
+
 function getProducerFeatureName(producer: string, kibanaFeatures: KibanaFeature[]) {
   return kibanaFeatures.find((featureItem) => featureItem.id === producer)?.name;
 }
@@ -95,7 +98,8 @@ interface RuleFormProps<MetaData = Record<string, any>> {
   setHasActionsDisabled?: (value: boolean) => void;
   setHasActionsWithBrokenConnector?: (value: boolean) => void;
   metadata?: MetaData;
-  filteredSolutions?: string[] | undefined;
+  filteredRuleTypes?: string[];
+  connectorFeatureId?: string;
 }
 
 export const RuleForm = ({
@@ -110,7 +114,8 @@ export const RuleForm = ({
   ruleTypeRegistry,
   actionTypeRegistry,
   metadata,
-  filteredSolutions,
+  filteredRuleTypes: ruleTypeToFilter,
+  connectorFeatureId = AlertingConnectorFeatureId,
 }: RuleFormProps) => {
   const {
     notifications: { toasts },
@@ -163,7 +168,7 @@ export const RuleForm = ({
     ruleTypes,
     error: loadRuleTypesError,
     ruleTypeIndex,
-  } = useLoadRuleTypes({ filteredSolutions });
+  } = useLoadRuleTypes({ filteredRuleTypes: ruleTypeToFilter });
 
   // load rule types
   useEffect(() => {
@@ -550,6 +555,7 @@ export const RuleForm = ({
             setHasActionsWithBrokenConnector={setHasActionsWithBrokenConnector}
             messageVariables={selectedRuleType.actionVariables}
             defaultActionGroupId={defaultActionGroupId}
+            featureId={connectorFeatureId}
             isActionGroupDisabledForActionType={(actionGroupId: string, actionTypeId: string) =>
               isActionGroupDisabledForActionType(selectedRuleType, actionGroupId, actionTypeId)
             }
@@ -724,10 +730,12 @@ export const RuleForm = ({
                   name="interval"
                   data-test-subj="intervalInput"
                   onChange={(e) => {
-                    const interval =
-                      e.target.value !== '' ? parseInt(e.target.value, 10) : undefined;
-                    setRuleInterval(interval);
-                    setScheduleProperty('interval', `${e.target.value}${ruleIntervalUnit}`);
+                    const value = e.target.value;
+                    if (value === '' || INTEGER_REGEX.test(value)) {
+                      const parsedValue = value === '' ? '' : parseInt(value, 10);
+                      setRuleInterval(parsedValue || undefined);
+                      setScheduleProperty('interval', `${parsedValue}${ruleIntervalUnit}`);
+                    }
                   }}
                 />
               </EuiFlexItem>

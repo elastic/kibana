@@ -122,7 +122,7 @@ describe('TraceLink', () => {
       const component = shallow(<TraceLink />);
 
       expect(component.prop('to')).toEqual(
-        '/services/foo/transactions/view?traceId=123&transactionId=456&transactionName=bar&transactionType=GET&rangeFrom=now-24h&rangeTo=now'
+        '/services/foo/transactions/view?traceId=123&transactionId=456&transactionName=bar&transactionType=GET&rangeFrom=now-24h&rangeTo=now&waterfallItemId='
       );
     });
   });

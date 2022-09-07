@@ -1,0 +1,7 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`TooltipHeader should render plain value at the header 1`] = `
+<Fragment>
+  formatted-15
+</Fragment>
+`;

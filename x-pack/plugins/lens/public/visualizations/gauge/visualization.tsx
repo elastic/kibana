@@ -8,9 +8,11 @@
 import React from 'react';
 import { render } from 'react-dom';
 import { i18n } from '@kbn/i18n';
+import { ThemeServiceStart } from '@kbn/core/public';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 import { Ast } from '@kbn/interpreter';
-import { DatatableRow } from '@kbn/expressions-plugin';
+import { DatatableRow } from '@kbn/expressions-plugin/common';
 import { PaletteRegistry, CustomPaletteParams, CUSTOM_PALETTE } from '@kbn/coloring';
 import type { GaugeArguments } from '@kbn/expression-gauge-plugin/common';
 import { GaugeShapes, EXPRESSION_GAUGE_NAME } from '@kbn/expression-gauge-plugin/common';
@@ -19,9 +21,8 @@ import {
   getMaxValue,
   getMinValue,
   getValueFromAccessor,
-  VerticalBulletIcon,
-  HorizontalBulletIcon,
 } from '@kbn/expression-gauge-plugin/public';
+import { IconChartHorizontalBullet, IconChartVerticalBullet } from '@kbn/chart-icons';
 import type { DatasourceLayers, OperationMetadata, Visualization } from '../../types';
 import { getSuggestions } from './suggestions';
 import {
@@ -43,6 +44,7 @@ const groupLabelForGauge = i18n.translate('xpack.lens.metric.groupLabel', {
 
 interface GaugeVisualizationDeps {
   paletteService: PaletteRegistry;
+  theme: ThemeServiceStart;
 }
 
 export const isNumericMetric = (op: OperationMetadata) =>
@@ -53,14 +55,14 @@ export const isNumericDynamicMetric = (op: OperationMetadata) =>
 
 export const CHART_NAMES = {
   horizontalBullet: {
-    icon: HorizontalBulletIcon,
+    icon: IconChartHorizontalBullet,
     label: i18n.translate('xpack.lens.gaugeHorizontal.gaugeLabel', {
       defaultMessage: 'Gauge horizontal',
     }),
     groupLabel: groupLabelForGauge,
   },
   verticalBullet: {
-    icon: VerticalBulletIcon,
+    icon: IconChartVerticalBullet,
     label: i18n.translate('xpack.lens.gaugeVertical.gaugeLabel', {
       defaultMessage: 'Gauge vertical',
     }),
@@ -119,7 +121,7 @@ const toExpression = (
   const datasource = datasourceLayers[state.layerId];
   const datasourceExpression = datasourceExpressionsByLayers[state.layerId];
 
-  const originalOrder = datasource.getTableSpec().map(({ columnId }) => columnId);
+  const originalOrder = datasource?.getTableSpec().map(({ columnId }) => columnId);
   if (!originalOrder || !state.metricAccessor) {
     return null;
   }
@@ -159,6 +161,7 @@ const toExpression = (
 
 export const getGaugeVisualization = ({
   paletteService,
+  theme,
 }: GaugeVisualizationDeps): Visualization<GaugeVisualizationState> => ({
   id: LENS_GAUGE_ID,
 
@@ -245,12 +248,17 @@ export const getGaugeVisualization = ({
     return {
       groups: [
         {
-          supportFieldFormat: true,
+          enableFormatSelector: true,
           layerId: state.layerId,
           groupId: GROUP_ID.METRIC,
           groupLabel: i18n.translate('xpack.lens.gauge.metricLabel', {
             defaultMessage: 'Metric',
           }),
+          paramEditorCustomProps: {
+            headingLabel: i18n.translate('xpack.lens.gauge.headingLabel', {
+              defaultMessage: 'Value',
+            }),
+          },
           accessors: metricAccessor
             ? [
                 palette
@@ -273,12 +281,22 @@ export const getGaugeVisualization = ({
         },
         {
           supportStaticValue: true,
-          supportFieldFormat: false,
+          enableFormatSelector: false,
           layerId: state.layerId,
           groupId: GROUP_ID.MIN,
           groupLabel: i18n.translate('xpack.lens.gauge.minValueLabel', {
             defaultMessage: 'Minimum value',
           }),
+          paramEditorCustomProps: {
+            labels: [
+              i18n.translate('xpack.lens.gauge.minValueLabel', {
+                defaultMessage: 'Minimum value',
+              }),
+            ],
+            headingLabel: i18n.translate('xpack.lens.gauge.headingLabel', {
+              defaultMessage: 'Value',
+            }),
+          },
           accessors: state.minAccessor ? [{ columnId: state.minAccessor }] : [],
           filterOperations: isNumericMetric,
           supportsMoreColumns: !state.minAccessor,
@@ -289,12 +307,22 @@ export const getGaugeVisualization = ({
         },
         {
           supportStaticValue: true,
-          supportFieldFormat: false,
+          enableFormatSelector: false,
           layerId: state.layerId,
           groupId: GROUP_ID.MAX,
           groupLabel: i18n.translate('xpack.lens.gauge.maxValueLabel', {
             defaultMessage: 'Maximum value',
           }),
+          paramEditorCustomProps: {
+            labels: [
+              i18n.translate('xpack.lens.gauge.maxValueLabel', {
+                defaultMessage: 'Maximum value',
+              }),
+            ],
+            headingLabel: i18n.translate('xpack.lens.gauge.headingLabel', {
+              defaultMessage: 'Value',
+            }),
+          },
           accessors: state.maxAccessor ? [{ columnId: state.maxAccessor }] : [],
           filterOperations: isNumericMetric,
           supportsMoreColumns: !state.maxAccessor,
@@ -305,12 +333,22 @@ export const getGaugeVisualization = ({
         },
         {
           supportStaticValue: true,
-          supportFieldFormat: false,
+          enableFormatSelector: false,
           layerId: state.layerId,
           groupId: GROUP_ID.GOAL,
           groupLabel: i18n.translate('xpack.lens.gauge.goalValueLabel', {
             defaultMessage: 'Goal value',
           }),
+          paramEditorCustomProps: {
+            labels: [
+              i18n.translate('xpack.lens.gauge.goalValueLabel', {
+                defaultMessage: 'Goal value',
+              }),
+            ],
+            headingLabel: i18n.translate('xpack.lens.gauge.headingLabel', {
+              defaultMessage: 'Value',
+            }),
+          },
           accessors: state.goalAccessor ? [{ columnId: state.goalAccessor }] : [],
           filterOperations: isNumericMetric,
           supportsMoreColumns: !state.goalAccessor,
@@ -365,18 +403,22 @@ export const getGaugeVisualization = ({
 
   renderDimensionEditor(domElement, props) {
     render(
-      <I18nProvider>
-        <GaugeDimensionEditor {...props} paletteService={paletteService} />
-      </I18nProvider>,
+      <KibanaThemeProvider theme$={theme.theme$}>
+        <I18nProvider>
+          <GaugeDimensionEditor {...props} paletteService={paletteService} />
+        </I18nProvider>
+      </KibanaThemeProvider>,
       domElement
     );
   },
 
   renderToolbar(domElement, props) {
     render(
-      <I18nProvider>
-        <GaugeToolbar {...props} />
-      </I18nProvider>,
+      <KibanaThemeProvider theme$={theme.theme$}>
+        <I18nProvider>
+          <GaugeToolbar {...props} />
+        </I18nProvider>
+      </KibanaThemeProvider>,
       domElement
     );
   },

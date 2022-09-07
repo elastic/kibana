@@ -66,7 +66,19 @@ describe('TelemetryPlugin', () => {
 
         expect(coreSetupMock.analytics.registerShipper).toHaveBeenCalledWith(
           ElasticV3BrowserShipper,
-          { channelName: 'kibana-browser', version: 'version' }
+          { channelName: 'kibana-browser', version: 'version', sendTo: 'staging' }
+        );
+      });
+
+      it('registers the UI telemetry shipper (pointing to prod)', () => {
+        const initializerContext = coreMock.createPluginInitializerContext({ sendUsageTo: 'prod' });
+        const coreSetupMock = coreMock.createSetup();
+
+        new TelemetryPlugin(initializerContext).setup(coreSetupMock, { screenshotMode, home });
+
+        expect(coreSetupMock.analytics.registerShipper).toHaveBeenCalledWith(
+          ElasticV3BrowserShipper,
+          { channelName: 'kibana-browser', version: 'version', sendTo: 'production' }
         );
       });
     });

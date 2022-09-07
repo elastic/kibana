@@ -7,12 +7,12 @@
 
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { EuiFilterButton, EuiFilterSelectItem } from '@elastic/eui';
+import { EuiFilterButton, EuiSelectableListItem } from '@elastic/eui';
 import { RuleStatusFilter } from './rule_status_filter';
 
 const onChangeMock = jest.fn();
 
-describe('rule_state_filter', () => {
+describe('RuleStatusFilter', () => {
   beforeEach(() => {
     onChangeMock.mockReset();
   });
@@ -22,7 +22,7 @@ describe('rule_state_filter', () => {
       <RuleStatusFilter selectedStatuses={[]} onChange={onChangeMock} />
     );
 
-    expect(wrapper.find(EuiFilterSelectItem).exists()).toBeFalsy();
+    expect(wrapper.find(EuiSelectableListItem).exists()).toBeFalsy();
     expect(wrapper.find(EuiFilterButton).exists()).toBeTruthy();
 
     expect(wrapper.find('.euiNotificationBadge').text()).toEqual('0');
@@ -37,7 +37,7 @@ describe('rule_state_filter', () => {
 
     wrapper.find(EuiFilterButton).simulate('click');
 
-    const statusItems = wrapper.find(EuiFilterSelectItem);
+    const statusItems = wrapper.find(EuiSelectableListItem);
     expect(statusItems.length).toEqual(3);
   });
 
@@ -48,17 +48,17 @@ describe('rule_state_filter', () => {
 
     wrapper.find(EuiFilterButton).simulate('click');
 
-    wrapper.find(EuiFilterSelectItem).at(0).simulate('click');
+    wrapper.find(EuiSelectableListItem).at(0).simulate('click');
     expect(onChangeMock).toHaveBeenCalledWith(['enabled']);
 
     wrapper.setProps({
       selectedStatuses: ['enabled'],
     });
 
-    wrapper.find(EuiFilterSelectItem).at(0).simulate('click');
+    wrapper.find(EuiSelectableListItem).at(0).simulate('click');
     expect(onChangeMock).toHaveBeenCalledWith([]);
 
-    wrapper.find(EuiFilterSelectItem).at(1).simulate('click');
+    wrapper.find(EuiSelectableListItem).at(1).simulate('click');
     expect(onChangeMock).toHaveBeenCalledWith(['enabled', 'disabled']);
   });
 });

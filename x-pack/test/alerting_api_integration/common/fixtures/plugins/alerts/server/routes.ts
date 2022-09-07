@@ -13,6 +13,7 @@ import {
   KibanaResponseFactory,
   IKibanaResponse,
   Logger,
+  SavedObject,
 } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { InvalidatePendingApiKey } from '@kbn/alerting-plugin/server/types';
@@ -332,7 +333,7 @@ export function defineRoutes(
 
   router.post(
     {
-      path: `/api/alerting_actions_telemetry/run_now`,
+      path: `/api/alerting_actions_telemetry/run_soon`,
       validate: {
         body: schema.object({
           taskId: schema.string({
@@ -358,9 +359,51 @@ export function defineRoutes(
       const { taskId } = req.body;
       try {
         const taskManager = await taskManagerStart;
-        return res.ok({ body: await taskManager.runNow(taskId) });
+        return res.ok({ body: await taskManager.runSoon(taskId) });
       } catch (err) {
         return res.ok({ body: { id: taskId, error: `${err}` } });
+      }
+    }
+  );
+
+  router.get(
+    {
+      path: '/api/alerts_fixture/rule/{id}/_get_api_key',
+      validate: {
+        params: schema.object({
+          id: schema.string(),
+        }),
+      },
+    },
+    async function (
+      context: RequestHandlerContext,
+      req: KibanaRequest<any, any, any, any>,
+      res: KibanaResponseFactory
+    ): Promise<IKibanaResponse<any>> {
+      const { id } = req.params;
+      const [, { encryptedSavedObjects, spaces }] = await core.getStartServices();
+
+      const spaceId = spaces ? spaces.spacesService.getSpaceId(req) : 'default';
+
+      let namespace: string | undefined;
+      if (spaces && spaceId) {
+        namespace = spaces.spacesService.spaceIdToNamespace(spaceId);
+      }
+
+      try {
+        const {
+          attributes: { apiKey, apiKeyOwner },
+        }: SavedObject<RawRule> = await encryptedSavedObjects
+          .getClient({
+            includedHiddenTypes: ['alert'],
+          })
+          .getDecryptedAsInternalUser('alert', id, {
+            namespace,
+          });
+
+        return res.ok({ body: { apiKey, apiKeyOwner } });
+      } catch (err) {
+        return res.badRequest({ body: err });
       }
     }
   );

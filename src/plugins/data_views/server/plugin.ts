@@ -65,7 +65,6 @@ export class DataViewsServerPlugin
     });
 
     return {
-      indexPatternsServiceFactory: serviceFactory,
       dataViewsServiceFactory: serviceFactory,
     };
   }

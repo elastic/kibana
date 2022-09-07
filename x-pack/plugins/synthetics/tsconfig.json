@@ -12,7 +12,7 @@
     "public/**/*",
     "public/legacy_uptime/components/monitor/status_details/location_map/embeddables/low_poly_layer.json",
     "server/**/*",
-    "server/lib/requests/__fixtures__/monitor_charts_mock.json",
+    "server/legacy_uptime/lib/requests/__fixtures__/monitor_charts_mock.json",
     "../../../typings/**/*"
   ],
   "references": [

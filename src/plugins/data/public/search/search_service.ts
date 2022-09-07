@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { estypes } from '@elastic/elasticsearch';
+import { BfetchPublicSetup } from '@kbn/bfetch-plugin/public';
 import {
   CoreSetup,
   CoreStart,
@@ -13,22 +15,21 @@ import {
   PluginInitializerContext,
   StartServicesAccessor,
 } from '@kbn/core/public';
-import { BehaviorSubject } from 'rxjs';
-import React from 'react';
-import moment from 'moment';
-import { BfetchPublicSetup } from '@kbn/bfetch-plugin/public';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import { DataViewsContract } from '@kbn/data-views-plugin/common';
 import { ExpressionsSetup } from '@kbn/expressions-plugin/public';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { ScreenshotModePluginStart } from '@kbn/screenshot-mode-plugin/public';
 import { ManagementSetup } from '@kbn/management-plugin/public';
-import type { ISearchSetup, ISearchStart } from './types';
-
-import { handleResponse } from './fetch';
+import { ScreenshotModePluginStart } from '@kbn/screenshot-mode-plugin/public';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import moment from 'moment';
+import React from 'react';
+import { BehaviorSubject } from 'rxjs';
 import {
   cidrFunction,
   dateRangeFunction,
+  eqlRawResponse,
   esRawResponse,
   existsFilterFunction,
   extendedBoundsFunction,
@@ -49,43 +50,43 @@ import {
   rangeFilterFunction,
   rangeFunction,
   removeFilterFunction,
+  SearchRequest,
   SearchSourceDependencies,
   SearchSourceService,
   selectFilterFunction,
-  eqlRawResponse,
 } from '../../common/search';
-import { AggsService, AggsStartDependencies } from './aggs';
-import { IKibanaSearchResponse, IndexPatternsContract, SearchRequest } from '..';
-import { ISearchInterceptor, SearchInterceptor } from './search_interceptor';
-import { createUsageCollector, SearchUsageCollector } from './collectors';
-import { getEsaggs, getEsdsl, getEql } from './expressions';
-import { ISessionsClient, ISessionService, SessionsClient, SessionService } from './session';
-import { ConfigSchema } from '../../config';
 import {
   getShardDelayBucketAgg,
   SHARD_DELAY_AGG_NAME,
 } from '../../common/search/aggs/buckets/shard_delay';
 import { aggShardDelay } from '../../common/search/aggs/buckets/shard_delay_fn';
-import { DataPublicPluginStart, DataStartDependencies } from '../types';
+import { ConfigSchema } from '../../config';
 import { NowProviderInternalContract } from '../now_provider';
+import { DataPublicPluginStart, DataStartDependencies } from '../types';
+import { AggsService } from './aggs';
+import { createUsageCollector, SearchUsageCollector } from './collectors';
+import { getEql, getEsaggs, getEsdsl, getEssql } from './expressions';
 import { getKibanaContext } from './expressions/kibana_context';
-import { createConnectedSearchSessionIndicator } from './session/session_indicator';
-
+import { handleWarnings } from './fetch/handle_warnings';
+import { ISearchInterceptor, SearchInterceptor } from './search_interceptor';
+import { ISessionsClient, ISessionService, SessionsClient, SessionService } from './session';
 import { registerSearchSessionsMgmt } from './session/sessions_mgmt';
+import { createConnectedSearchSessionIndicator } from './session/session_indicator';
+import { ISearchSetup, ISearchStart } from './types';
 
 /** @internal */
 export interface SearchServiceSetupDependencies {
   bfetch: BfetchPublicSetup;
   expressions: ExpressionsSetup;
   usageCollection?: UsageCollectionSetup;
-  nowProvider: NowProviderInternalContract;
   management: ManagementSetup;
+  nowProvider: NowProviderInternalContract;
 }
 
 /** @internal */
 export interface SearchServiceStartDependencies {
-  fieldFormats: AggsStartDependencies['fieldFormats'];
-  indexPatterns: IndexPatternsContract;
+  fieldFormats: FieldFormatsStart;
+  indexPatterns: DataViewsContract;
   screenshotMode: ScreenshotModePluginStart;
 }
 
@@ -173,6 +174,11 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       })
     );
     expressions.registerFunction(
+      getEssql({ getStartServices } as {
+        getStartServices: StartServicesAccessor<DataStartDependencies, DataPublicPluginStart>;
+      })
+    );
+    expressions.registerFunction(
       getEql({ getStartServices } as {
         getStartServices: StartServicesAccessor<DataStartDependencies, DataPublicPluginStart>;
       })
@@ -181,8 +187,8 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     expressions.registerType(eqlRawResponse);
 
     const aggs = this.aggsService.setup({
-      registerFunction: expressions.registerFunction,
       uiSettings,
+      registerFunction: expressions.registerFunction,
       nowProvider,
     });
 
@@ -225,11 +231,19 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     const loadingCount$ = new BehaviorSubject(0);
     http.addLoadingCountSource(loadingCount$);
 
+    const aggs = this.aggsService.start({ fieldFormats, indexPatterns });
+
     const searchSourceDependencies: SearchSourceDependencies = {
+      aggs,
       getConfig: uiSettings.get.bind(uiSettings),
       search,
-      onResponse: (request: SearchRequest, response: IKibanaSearchResponse) =>
-        handleResponse(request, response, theme),
+      onResponse: (request, response, options) => {
+        if (!options.disableShardFailureWarning) {
+          const { rawResponse } = response;
+          handleWarnings(request.body, rawResponse, theme);
+        }
+        return response;
+      },
     };
 
     const config = this.initializerContext.config.get();
@@ -255,10 +269,23 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     }
 
     return {
-      aggs: this.aggsService.start({ fieldFormats, uiSettings, indexPatterns }),
+      aggs,
       search,
-      showError: (e: Error) => {
+      showError: (e) => {
         this.searchInterceptor.showError(e);
+      },
+      showWarnings: (adapter, cb) => {
+        adapter?.getRequests().forEach((request) => {
+          const rawResponse = (
+            request.response?.json as { rawResponse: estypes.SearchResponse | undefined }
+          )?.rawResponse;
+
+          if (!rawResponse) {
+            return;
+          }
+
+          handleWarnings(request.json as SearchRequest, rawResponse, theme, cb);
+        });
       },
       session: this.sessionService,
       sessionsClient: this.sessionsClient,

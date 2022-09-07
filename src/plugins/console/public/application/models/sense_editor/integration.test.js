@@ -12,10 +12,12 @@ import _ from 'lodash';
 import $ from 'jquery';
 
 import * as kb from '../../../lib/kb/kb';
-import * as mappings from '../../../lib/mappings/mappings';
+import { AutocompleteInfo, setAutocompleteInfo } from '../../../services';
 
 describe('Integration', () => {
   let senseEditor;
+  let autocompleteInfo;
+
   beforeEach(() => {
     // Set up our document body
     document.body.innerHTML =
@@ -24,10 +26,14 @@ describe('Integration', () => {
     senseEditor = create(document.querySelector('#ConAppEditor'));
     $(senseEditor.getCoreEditor().getContainer()).show();
     senseEditor.autocomplete._test.removeChangeListener();
+    autocompleteInfo = new AutocompleteInfo();
+    setAutocompleteInfo(autocompleteInfo);
   });
   afterEach(() => {
     $(senseEditor.getCoreEditor().getContainer()).hide();
     senseEditor.autocomplete._test.addChangeListener();
+    autocompleteInfo = null;
+    setAutocompleteInfo(null);
   });
 
   function processContextTest(data, mapping, kbSchemes, requestLine, testToRun) {
@@ -45,8 +51,8 @@ describe('Integration', () => {
 
       testToRun.cursor.lineNumber += lineOffset;
 
-      mappings.clear();
-      mappings.loadMappings(mapping);
+      autocompleteInfo.clear();
+      autocompleteInfo.mapping.loadMappings(mapping);
       const json = {};
       json[test.name] = kbSchemes || {};
       const testApi = kb._test.loadApisFromJson(json);

@@ -23,7 +23,7 @@ import { flattenWithPrefix } from '@kbn/securitysolution-rules';
 
 import { orderBy, get } from 'lodash';
 
-import { RuleExecutionStatus } from '@kbn/security-solution-plugin/common/detection_engine/schemas/common';
+import { RuleExecutionStatus } from '@kbn/security-solution-plugin/common/detection_engine/rule_monitoring';
 import {
   EqlCreateSchema,
   QueryCreateSchema,
@@ -247,6 +247,18 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       describe('EQL Rules', () => {
+        before(async () => {
+          await esArchiver.load(
+            'x-pack/test/functional/es_archives/security_solution/timestamp_override_6'
+          );
+        });
+
+        after(async () => {
+          await esArchiver.unload(
+            'x-pack/test/functional/es_archives/security_solution/timestamp_override_6'
+          );
+        });
+
         it('generates a correctly formatted signal from EQL non-sequence queries', async () => {
           const rule: EqlCreateSchema = {
             ...getEqlRuleForSignalTesting(['auditbeat-*']),
@@ -434,6 +446,38 @@ export default ({ getService }: FtrProviderContext) => {
               module: 'auditd',
             }),
           });
+        });
+
+        it('uses the provided timestamp_field', async () => {
+          const rule: EqlCreateSchema = {
+            ...getEqlRuleForSignalTesting(['fake.index.1']),
+            query: 'any where true',
+            timestamp_field: 'created_at',
+          };
+          const { id } = await createRule(supertest, log, rule);
+          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForSignalsToBePresent(supertest, log, 1, [id]);
+          const signals = await getSignalsByIds(supertest, log, [id]);
+          expect(signals.hits.hits.length).eql(3);
+
+          const createdAtHits = signals.hits.hits.map((hit) => hit._source?.created_at);
+          expect(createdAtHits).to.eql([1622676785, 1622676790, 1622676795]);
+        });
+
+        it('uses the provided tiebreaker_field', async () => {
+          const rule: EqlCreateSchema = {
+            ...getEqlRuleForSignalTesting(['fake.index.1']),
+            query: 'any where true',
+            tiebreaker_field: 'locale',
+          };
+          const { id } = await createRule(supertest, log, rule);
+          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForSignalsToBePresent(supertest, log, 1, [id]);
+          const signals = await getSignalsByIds(supertest, log, [id]);
+          expect(signals.hits.hits.length).eql(3);
+
+          const createdAtHits = signals.hits.hits.map((hit) => hit._source?.locale);
+          expect(createdAtHits).to.eql(['es', 'pt', 'ua']);
         });
 
         it('generates building block signals from EQL sequences in the expected form', async () => {
@@ -705,6 +749,54 @@ export default ({ getService }: FtrProviderContext) => {
           const signals = await getSignalsByIds(supertest, log, [id]);
           expect(signals.hits.hits.length).eql(1);
         });
+
+        it('uses the provided filters', async () => {
+          const rule: EqlCreateSchema = {
+            ...getEqlRuleForSignalTesting(['auditbeat-*']),
+            query: 'any where true',
+            filters: [
+              {
+                meta: {
+                  alias: null,
+                  negate: false,
+                  disabled: false,
+                  type: 'phrase',
+                  key: 'source.ip',
+                  params: {
+                    query: '46.148.18.163',
+                  },
+                },
+                query: {
+                  match_phrase: {
+                    'source.ip': '46.148.18.163',
+                  },
+                },
+              },
+              {
+                meta: {
+                  alias: null,
+                  negate: false,
+                  disabled: false,
+                  type: 'phrase',
+                  key: 'event.action',
+                  params: {
+                    query: 'error',
+                  },
+                },
+                query: {
+                  match_phrase: {
+                    'event.action': 'error',
+                  },
+                },
+              },
+            ],
+          };
+          const { id } = await createRule(supertest, log, rule);
+          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForSignalsToBePresent(supertest, log, 1, [id]);
+          const signals = await getSignalsByIds(supertest, log, [id]);
+          expect(signals.hits.hits.length).eql(2);
+        });
       });
 
       describe('Threshold Rules', () => {
@@ -927,7 +1019,7 @@ export default ({ getService }: FtrProviderContext) => {
               },
             ],
             [ALERT_WORKFLOW_STATUS]: 'open',
-            [ALERT_REASON]: `event created high alert Signal Testing Query.`,
+            [ALERT_REASON]: `event with process sshd, created high alert Signal Testing Query.`,
             [ALERT_RULE_UUID]: fullSignal[ALERT_RULE_UUID],
             [ALERT_ORIGINAL_TIME]: fullSignal[ALERT_ORIGINAL_TIME],
             [ALERT_DEPTH]: 1,
@@ -949,6 +1041,80 @@ export default ({ getService }: FtrProviderContext) => {
               count: 21,
               from: '2019-02-19T20:22:03.561Z',
             },
+          });
+        });
+
+        describe('Timestamp override and fallback', async () => {
+          before(async () => {
+            await esArchiver.load(
+              'x-pack/test/functional/es_archives/security_solution/timestamp_fallback'
+            );
+          });
+
+          after(async () => {
+            await esArchiver.unload(
+              'x-pack/test/functional/es_archives/security_solution/timestamp_fallback'
+            );
+          });
+
+          it('applies timestamp override when using single field', async () => {
+            const rule: ThresholdCreateSchema = {
+              ...getThresholdRuleForSignalTesting(['timestamp-fallback-test']),
+              threshold: {
+                field: 'host.name',
+                value: 1,
+              },
+              timestamp_override: 'event.ingested',
+            };
+            const { id } = await createRule(supertest, log, rule);
+            await waitForRuleSuccessOrStatus(supertest, log, id);
+            await waitForSignalsToBePresent(supertest, log, 2, [id]);
+            const signalsOpen = await getSignalsByIds(supertest, log, [id]);
+            expect(signalsOpen.hits.hits.length).eql(4);
+
+            for (const hit of signalsOpen.hits.hits) {
+              const originalTime = hit._source?.[ALERT_ORIGINAL_TIME];
+              const hostName = hit._source?.['host.name'];
+              if (hostName === 'host-1') {
+                expect(originalTime).eql('2020-12-16T15:15:18.570Z');
+              } else if (hostName === 'host-2') {
+                expect(originalTime).eql('2020-12-16T15:16:18.570Z');
+              } else if (hostName === 'host-3') {
+                expect(originalTime).eql('2020-12-16T16:15:18.570Z');
+              } else {
+                expect(originalTime).eql('2020-12-16T16:16:18.570Z');
+              }
+            }
+          });
+
+          it('applies timestamp override when using multiple fields', async () => {
+            const rule: ThresholdCreateSchema = {
+              ...getThresholdRuleForSignalTesting(['timestamp-fallback-test']),
+              threshold: {
+                field: ['host.name', 'source.ip'],
+                value: 1,
+              },
+              timestamp_override: 'event.ingested',
+            };
+            const { id } = await createRule(supertest, log, rule);
+            await waitForRuleSuccessOrStatus(supertest, log, id);
+            await waitForSignalsToBePresent(supertest, log, 2, [id]);
+            const signalsOpen = await getSignalsByIds(supertest, log, [id]);
+            expect(signalsOpen.hits.hits.length).eql(4);
+
+            for (const hit of signalsOpen.hits.hits) {
+              const originalTime = hit._source?.[ALERT_ORIGINAL_TIME];
+              const hostName = hit._source?.['host.name'];
+              if (hostName === 'host-1') {
+                expect(originalTime).eql('2020-12-16T15:15:18.570Z');
+              } else if (hostName === 'host-2') {
+                expect(originalTime).eql('2020-12-16T15:16:18.570Z');
+              } else if (hostName === 'host-3') {
+                expect(originalTime).eql('2020-12-16T16:15:18.570Z');
+              } else {
+                expect(originalTime).eql('2020-12-16T16:16:18.570Z');
+              }
+            }
           });
         });
       });

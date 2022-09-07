@@ -17,17 +17,17 @@ import { TopRiskScoreContributors } from '../../../common/components/top_risk_sc
 import { useQueryToggle } from '../../../common/containers/query_toggle';
 import { UserRiskScoreQueryId, useUserRiskScore } from '../../../risk_score/containers';
 import { buildUserNamesFilter } from '../../../../common/search_strategy';
-import { UsersComponentsQueryProps } from './types';
+import type { UsersComponentsQueryProps } from './types';
 import { UserRiskInformationButtonEmpty } from '../../components/user_risk_information';
 import { useDashboardButtonHref } from '../../../common/hooks/use_dashboard_button_href';
 
 const QUERY_ID = UserRiskScoreQueryId.USER_DETAILS_RISK_SCORE;
 
 const StyledEuiFlexGroup = styled(EuiFlexGroup)`
-  margin-top: ${({ theme }) => theme.eui.paddingSizes.l};
+  margin-top: ${({ theme }) => theme.eui.euiSizeL};
 `;
 
-const RISKY_USERS_DASHBOARD_TITLE = 'User Risk Score (Start Here)';
+const RISKY_USERS_DASHBOARD_TITLE = 'Current Risk Score For Users';
 
 const UserRiskTabBodyComponent: React.FC<
   Pick<UsersComponentsQueryProps, 'startDate' | 'endDate' | 'setQuery' | 'deleteQuery'> & {
@@ -52,9 +52,12 @@ const UserRiskTabBodyComponent: React.FC<
     useQueryToggle(`${QUERY_ID} overTime`);
   const { toggleStatus: contributorsToggleStatus, setToggleStatus: setContributorsToggleStatus } =
     useQueryToggle(`${QUERY_ID} contributors`);
-
+  const filterQuery = useMemo(
+    () => (userName ? buildUserNamesFilter([userName]) : undefined),
+    [userName]
+  );
   const [loading, { data, refetch, inspect }] = useUserRiskScore({
-    filterQuery: userName ? buildUserNamesFilter([userName]) : undefined,
+    filterQuery,
     onlyLatest: false,
     skip: !overTimeToggleStatus && !contributorsToggleStatus,
     timerange,

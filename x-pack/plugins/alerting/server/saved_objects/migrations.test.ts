@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import sinon from 'sinon';
 import uuid from 'uuid';
 import { getMigrations, isAnyActionSupportIncidents } from './migrations';
 import { RawRule } from '../types';
@@ -2318,6 +2319,27 @@ describe('successful migrations', () => {
     });
 
     describe('8.3.0', () => {
+      test('migrates snoozed rules to the new data model', () => {
+        const fakeTimer = sinon.useFakeTimers();
+        const migration830 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)[
+          '8.3.0'
+        ];
+        const mutedAlert = getMockData(
+          {
+            snoozeEndTime: '1970-01-02T00:00:00.000Z',
+          },
+          true
+        );
+        const migratedMutedAlert830 = migration830(mutedAlert, migrationContext);
+
+        expect(migratedMutedAlert830.attributes.snoozeSchedule.length).toEqual(1);
+        expect(migratedMutedAlert830.attributes.snoozeSchedule[0].rRule.dtstart).toEqual(
+          '1970-01-01T00:00:00.000Z'
+        );
+        expect(migratedMutedAlert830.attributes.snoozeSchedule[0].duration).toEqual(86400000);
+        fakeTimer.restore();
+      });
+
       test('migrates es_query alert params', () => {
         const migration830 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)[
           '8.3.0'
@@ -2372,6 +2394,33 @@ describe('successful migrations', () => {
         const migratedAlert830 = migration830(alert, migrationContext);
 
         expect(migratedAlert830.attributes.tags).toEqual(['__internal_immutable:false', 'tag-1']);
+      });
+    });
+
+    describe('8.4.1', () => {
+      test('removes isSnoozedUntil', () => {
+        const migration841 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)[
+          '8.4.1'
+        ];
+        const mutedAlert = getMockData(
+          {
+            isSnoozedUntil: '1970-01-02T00:00:00.000Z',
+          },
+          true
+        );
+        expect(mutedAlert.attributes.isSnoozedUntil).toBeTruthy();
+        const migratedAlert841 = migration841(mutedAlert, migrationContext);
+
+        expect(migratedAlert841.attributes.isSnoozedUntil).toBeFalsy();
+      });
+
+      test('works as expected if isSnoozedUntil is not populated', () => {
+        const migration841 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)[
+          '8.4.1'
+        ];
+        const mutedAlert = getMockData({}, true);
+        expect(mutedAlert.attributes.isSnoozedUntil).toBeFalsy();
+        expect(() => migration841(mutedAlert, migrationContext)).not.toThrowError();
       });
     });
 

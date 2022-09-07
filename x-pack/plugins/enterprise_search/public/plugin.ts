@@ -22,7 +22,9 @@ import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
 
 import {
+  ANALYTICS_PLUGIN,
   APP_SEARCH_PLUGIN,
+  ELASTICSEARCH_PLUGIN,
   ENTERPRISE_SEARCH_CONTENT_PLUGIN,
   ENTERPRISE_SEARCH_OVERVIEW_PLUGIN,
   WORKPLACE_SEARCH_PLUGIN,
@@ -113,6 +115,48 @@ export class EnterpriseSearchPlugin implements Plugin {
     });
 
     core.application.register({
+      id: ANALYTICS_PLUGIN.ID,
+      title: ANALYTICS_PLUGIN.NAME,
+      euiIconType: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.LOGO,
+      appRoute: ANALYTICS_PLUGIN.URL,
+      category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
+      mount: async (params: AppMountParameters) => {
+        const kibanaDeps = await this.getKibanaDeps(core, params, cloud);
+        const { chrome, http } = kibanaDeps.core;
+        chrome.docTitle.change(ANALYTICS_PLUGIN.NAME);
+
+        await this.getInitialData(http);
+        const pluginData = this.getPluginData();
+
+        const { renderApp } = await import('./applications');
+        const { Analytics } = await import('./applications/analytics');
+
+        return renderApp(Analytics, kibanaDeps, pluginData);
+      },
+    });
+
+    core.application.register({
+      id: ELASTICSEARCH_PLUGIN.ID,
+      title: ELASTICSEARCH_PLUGIN.NAME,
+      euiIconType: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.LOGO,
+      appRoute: ELASTICSEARCH_PLUGIN.URL,
+      category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
+      mount: async (params: AppMountParameters) => {
+        const kibanaDeps = await this.getKibanaDeps(core, params, cloud);
+        const { chrome, http } = kibanaDeps.core;
+        chrome.docTitle.change(ELASTICSEARCH_PLUGIN.NAME);
+
+        await this.getInitialData(http);
+        const pluginData = this.getPluginData();
+
+        const { renderApp } = await import('./applications');
+        const { Elasticsearch } = await import('./applications/elasticsearch');
+
+        return renderApp(Elasticsearch, kibanaDeps, pluginData);
+      },
+    });
+
+    core.application.register({
       id: APP_SEARCH_PLUGIN.ID,
       title: APP_SEARCH_PLUGIN.NAME,
       euiIconType: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.LOGO,
@@ -168,11 +212,31 @@ export class EnterpriseSearchPlugin implements Plugin {
       });
 
       plugins.home.featureCatalogue.register({
+        id: ANALYTICS_PLUGIN.ID,
+        title: ANALYTICS_PLUGIN.NAME,
+        icon: 'appAnalytics',
+        description: ANALYTICS_PLUGIN.DESCRIPTION,
+        path: ANALYTICS_PLUGIN.URL,
+        category: 'data',
+        showOnHomePage: false,
+      });
+
+      plugins.home.featureCatalogue.register({
         id: APP_SEARCH_PLUGIN.ID,
         title: APP_SEARCH_PLUGIN.NAME,
         icon: 'appSearchApp',
         description: APP_SEARCH_PLUGIN.DESCRIPTION,
         path: APP_SEARCH_PLUGIN.URL,
+        category: 'data',
+        showOnHomePage: false,
+      });
+
+      plugins.home.featureCatalogue.register({
+        id: ELASTICSEARCH_PLUGIN.ID,
+        title: ELASTICSEARCH_PLUGIN.NAME,
+        icon: 'appElasticsearch',
+        description: ELASTICSEARCH_PLUGIN.DESCRIPTION,
+        path: ELASTICSEARCH_PLUGIN.URL,
         category: 'data',
         showOnHomePage: false,
       });

@@ -26,9 +26,9 @@ describe('ConfiguredSourcesList', () => {
   it('renders', () => {
     const wrapper = shallow(<ConfiguredSourcesList {...props} />);
 
-    expect(wrapper.find('[data-test-subj="UnConnectedTooltip"]')).toHaveLength(21);
+    expect(wrapper.find('[data-test-subj="UnConnectedTooltip"]')).toHaveLength(19);
     expect(wrapper.find('[data-test-subj="AccountOnlyTooltip"]')).toHaveLength(2);
-    expect(wrapper.find('[data-test-subj="ConfiguredSourcesListItem"]')).toHaveLength(24);
+    expect(wrapper.find('[data-test-subj="ConfiguredSourcesListItem"]')).toHaveLength(22);
   });
 
   it('shows connect button for an source with multiple connector options that routes to choice page', () => {

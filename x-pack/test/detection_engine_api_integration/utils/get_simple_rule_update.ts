@@ -10,7 +10,7 @@ import type { UpdateRulesSchema } from '@kbn/security-solution-plugin/common/det
 /**
  * This is a typical simple rule for testing that is easy for most basic testing
  * @param ruleId The rule id
- * @param enabled Set to tru to enable it, by default it is off
+ * @param enabled Set to true to enable it, by default it is off
  */
 export const getSimpleRuleUpdate = (ruleId = 'rule-1', enabled = false): UpdateRulesSchema => ({
   name: 'Simple Rule Query',

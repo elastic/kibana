@@ -35,6 +35,7 @@ The identifier for the configuration. To retrieve the configuration IDs, use
 (Optional, string) An identifier for the space. If it is not specified, the
 default space is used.
 
+[role="child_attributes"]
 === Request body
 
 `closure_type`::
@@ -69,8 +70,8 @@ use <<cases-api-find-connectors>>.
 (Required, string) The name of the connector.
 
 `type`::
-(Required, string) The type of the connector. Valid values are: `.servicenow`,
-`.servicenow-sir`, `.jira`, `.resilient`, `.swimlane`, and `.none`.
+(Required, string) The type of the connector. Valid values are: `.cases-webhook`,
+`.jira`, `.none`, `.resilient`,`.servicenow`, `.servicenow-sir`, and `.swimlane`.
 ====
 
 `version`::
@@ -101,19 +102,19 @@ The API returns the following:
 [source,json]
 --------------------------------------------------
 {
-  "closure_type": "close-by-user",
+  "closure_type": "close-by-pushing",
   "owner": "cases",
-  "created_at": "2022-04-06T20:57:40.746Z",
+  "created_at": "2022-06-01T17:07:17.767Z",
   "created_by": {
-    "email": "admin@hms.gov.uk",
-    "full_name": "Ms Admin",
-    "username": "admin"
+    "email": "null",
+    "full_name": "null",
+    "username": "elastic"
   },
-  "updated_at": "2022-04-12T22:41:09.262Z",
+  "updated_at": "2022-06-01T19:58:48.169Z",
   "updated_by": {
-    "email": "admin@hms.gov.uk",
-    "full_name": "Ms Admin",
-    "username": "admin"
+    "email": "null",
+    "full_name": "null",
+    "username": "elastic"
   },
   "connector": {
     "id": "none",

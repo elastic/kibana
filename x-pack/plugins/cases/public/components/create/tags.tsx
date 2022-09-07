@@ -17,7 +17,7 @@ interface Props {
 }
 
 const TagsComponent: React.FC<Props> = ({ isLoading }) => {
-  const { tags: tagOptions, isLoading: isLoadingTags } = useGetTags();
+  const { data: tagOptions = [], isLoading: isLoadingTags } = useGetTags();
   const options = useMemo(
     () =>
       tagOptions.map((label) => ({

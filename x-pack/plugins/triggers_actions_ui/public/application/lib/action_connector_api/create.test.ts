@@ -26,15 +26,22 @@ describe('createActionConnector', () => {
     };
     http.post.mockResolvedValueOnce(apiResponse);
 
-    const connector: ActionConnectorWithoutId<{}, {}> = {
+    const connector: Pick<
+      ActionConnectorWithoutId,
+      'actionTypeId' | 'name' | 'config' | 'secrets'
+    > = {
       actionTypeId: 'test',
-      isPreconfigured: false,
-      isDeprecated: false,
       name: 'My test',
       config: {},
       secrets: {},
     };
-    const resolvedValue = { ...connector, id: '123' };
+    const resolvedValue = {
+      ...connector,
+      id: '123',
+      isDeprecated: false,
+      isPreconfigured: false,
+      isMissingSecrets: undefined,
+    };
 
     const result = await createActionConnector({ http, connector });
     expect(result).toEqual(resolvedValue);
@@ -42,7 +49,7 @@ describe('createActionConnector', () => {
       Array [
         "/api/actions/connector",
         Object {
-          "body": "{\\"name\\":\\"My test\\",\\"config\\":{},\\"secrets\\":{},\\"connector_type_id\\":\\"test\\",\\"is_preconfigured\\":false,\\"is_deprecated\\":false}",
+          "body": "{\\"name\\":\\"My test\\",\\"config\\":{},\\"secrets\\":{},\\"connector_type_id\\":\\"test\\"}",
         },
       ]
     `);

@@ -7,8 +7,6 @@
 
 import moment from 'moment';
 // @ts-ignore
-import { checkParam } from '../error_missing_required';
-// @ts-ignore
 import { ElasticsearchMetric } from '../metrics';
 // @ts-ignore
 import { createQuery } from '../create_query';

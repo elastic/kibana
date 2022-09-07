@@ -40,7 +40,14 @@ export const mockGlobalState: TimelineState = {
       itemsPerPageOptions: [5, 10, 20],
       loadingEventIds: [],
       showCheckboxes: false,
-      sort: [{ columnId: '@timestamp', columnType: 'number', sortDirection: Direction.desc }],
+      sort: [
+        {
+          columnId: '@timestamp',
+          columnType: 'date',
+          esTypes: ['date'],
+          sortDirection: Direction.desc,
+        },
+      ],
       selectedEventIds: {},
       savedObjectId: null,
       version: null,

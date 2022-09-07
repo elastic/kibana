@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { RequestHandler } from '@kbn/core/server';
-import { TypeOf } from '@kbn/config-schema';
+import type { RequestHandler } from '@kbn/core/server';
+import type { TypeOf } from '@kbn/config-schema';
 import { policyIndexPattern } from '../../../../common/endpoint/constants';
-import {
+import type {
   GetPolicyResponseSchema,
   GetAgentPolicySummaryRequestSchema,
 } from '../../../../common/endpoint/schema/policy';
-import { EndpointAppContext } from '../../types';
+import type { EndpointAppContext } from '../../types';
 import { getAgentPolicySummary, getPolicyResponseByAgentId } from './service';
-import { GetAgentSummaryResponse } from '../../../../common/endpoint/types';
+import type { GetAgentSummaryResponse } from '../../../../common/endpoint/types';
 
 export const getHostPolicyResponseHandler = function (): RequestHandler<
   undefined,

@@ -131,6 +131,7 @@ export const TableActions = ({
           toolTipContent: filtersPairToolTip,
           icon: 'plusInCircle',
           disabled: filtersPairDisabled,
+          'data-test-subj': `addFilterForValueButton-${field}`,
           onClick: onClickAction(onFilter.bind({}, fieldMapping, flattenedField, '+')),
         },
         {

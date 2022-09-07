@@ -2,7 +2,7 @@
 id: kibDevTutorialAdvancedSettings
 slug: /kibana-dev-docs/tutorials/advanced-settings
 title: How to register a new advanced setting
-summary: Learn how to add and use a new advanced setting
+description: Learn how to add and use a new advanced setting
 date: 2022-02-07
 tags: ['kibana','onboarding', 'dev', 'architecture', 'tutorials']
 ---
@@ -54,7 +54,7 @@ The following is a basic example for using the `uiSettings` service:
 
 **src/plugins/charts/public/plugin.ts**
 ```ts
-import { Plugin, CoreSetup } from 'kibana/public';
+import { Plugin, CoreSetup } from '@kbn/core/public';
 import { ExpressionsSetup } from '../../expressions/public';
 import { palette, systemPalette } from '../common';
 
@@ -132,7 +132,7 @@ The example also shows how plugins can leverage the optional deprecation paramet
 ```ts
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
-import { CoreSetup, Plugin } from 'kibana/server';
+import { CoreSetup, Plugin } from '@kbn/core/server';
 import { COLOR_MAPPING_SETTING, LEGACY_TIME_AXIS, palette, systemPalette } from '../common';
 import { ExpressionsServerSetup } from '../../expressions/server';
 
@@ -192,7 +192,7 @@ For example, changing the time filter refresh interval triggers a prompt in the 
 ```ts
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
-import type { DocLinksServiceSetup, UiSettingsParams } from 'kibana/server';
+import type { DocLinksServiceSetup, UiSettingsParams } from '@kbn/core/server';
 import { DEFAULT_QUERY_LANGUAGE, UI_SETTINGS } from '../common';
 
 export function getUiSettings(
@@ -231,7 +231,7 @@ For example, in 7.9.0, `siem` as renamed to `securitySolution`, and in 8.0.0, `t
 **src/core/server/ui_settings/saved_objects/migrations.ts**
 
 ```ts
-import { SavedObjectUnsanitizedDoc, SavedObjectSanitizedDoc } from 'kibana/server';
+import { SavedObjectUnsanitizedDoc, SavedObjectSanitizedDoc } from '@kbn/core/server';
 
 export const migrations = {
   '7.9.0': (doc: SavedObjectUnsanitizedDoc<any>): SavedObjectSanitizedDoc<any> => ({
@@ -286,3 +286,13 @@ export const migrations = {
 };
 ```
 [1] Since all `uiSettings` migrations are added to the same migration function, while not required, grouping settings by team is good practice.
+
+### Creating Transforms
+
+If you have need to make a change that isn't possible in a saved object migration function (for example, you need to find other saved
+objects), you can create a transform function instead. This will be applied when a `config` saved object is first created, and/or when it is
+first upgraded. Note that you might need to add an extra attribute to verify that this transform has already been applied so it doesn't get
+applied again in the future.
+
+For example, we needed to transform the `defaultIndex` attribute, and we added an extra `isDefaultIndexMigrated` attribute for this purpose.
+See `src/core/server/ui_settings/saved_objects/transforms.ts` and [#13339](https://github.com/elastic/kibana/pull/133339) for an example.

@@ -12,6 +12,7 @@ export type {
   AgentStatus,
   AgentType,
   AgentAction,
+  CurrentUpgrade,
   PackagePolicy,
   PackagePolicyInput,
   PackagePolicyInputStream,
@@ -73,13 +74,15 @@ export type {
   FleetServerAgentAction,
   FleetServerPolicy,
   FullAgentPolicyInputStream,
-} from '../../common';
-export {
-  ElasticsearchAssetType,
-  KibanaAssetType,
-  KibanaSavedObjectType,
-  dataTypes,
-} from '../../common';
+  DownloadSourceBase,
+  DownloadSource,
+  DownloadSourceAttributes,
+  PackageVerificationStatus,
+  BulkInstallPackageInfo,
+  PackageAssetReference,
+} from '../../common/types';
+export { ElasticsearchAssetType, KibanaAssetType, KibanaSavedObjectType } from '../../common/types';
+export { dataTypes } from '../../common/constants';
 
 export type AgentPolicyUpdateHandler = (
   action: 'created' | 'updated' | 'deleted',
@@ -90,6 +93,12 @@ export interface BulkActionResult {
   id: string;
   success: boolean;
   error?: Error;
+}
+
+import type { PackageVerificationStatus } from '../../common/types';
+export interface PackageVerificationResult {
+  verificationKeyId?: string;
+  verificationStatus: PackageVerificationStatus;
 }
 
 export * from './models';

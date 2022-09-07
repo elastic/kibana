@@ -13,5 +13,7 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./listing_mb'));
     loadTestFile(require.resolve('./instance'));
     loadTestFile(require.resolve('./instance_mb'));
+
+    loadTestFile(require.resolve('./rules_and_actions'));
   });
 }

@@ -1,0 +1,107 @@
+{
+  "id": "@kbn/core-analytics-server-mocks",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/core-analytics-server-mocks",
+        "id": "def-server.analyticsServiceMock",
+        "type": "Object",
+        "tags": [],
+        "label": "analyticsServiceMock",
+        "description": [],
+        "path": "packages/core/analytics/core-analytics-server-mocks/src/analytics_service.mock.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-analytics-server-mocks",
+            "id": "def-server.analyticsServiceMock.create",
+            "type": "Function",
+            "tags": [],
+            "label": "create",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<AnalyticsServiceContract>"
+            ],
+            "path": "packages/core/analytics/core-analytics-server-mocks/src/analytics_service.mock.ts",
+            "deprecated": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-analytics-server-mocks",
+            "id": "def-server.analyticsServiceMock.createAnalyticsServicePreboot",
+            "type": "Function",
+            "tags": [],
+            "label": "createAnalyticsServicePreboot",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<",
+              "AnalyticsServicePreboot",
+              ">"
+            ],
+            "path": "packages/core/analytics/core-analytics-server-mocks/src/analytics_service.mock.ts",
+            "deprecated": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-analytics-server-mocks",
+            "id": "def-server.analyticsServiceMock.createAnalyticsServiceSetup",
+            "type": "Function",
+            "tags": [],
+            "label": "createAnalyticsServiceSetup",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<",
+              "AnalyticsServiceSetup",
+              ">"
+            ],
+            "path": "packages/core/analytics/core-analytics-server-mocks/src/analytics_service.mock.ts",
+            "deprecated": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-analytics-server-mocks",
+            "id": "def-server.analyticsServiceMock.createAnalyticsServiceStart",
+            "type": "Function",
+            "tags": [],
+            "label": "createAnalyticsServiceStart",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<",
+              "AnalyticsServiceStart",
+              ">"
+            ],
+            "path": "packages/core/analytics/core-analytics-server-mocks/src/analytics_service.mock.ts",
+            "deprecated": false,
+            "returnComment": [],
+            "children": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

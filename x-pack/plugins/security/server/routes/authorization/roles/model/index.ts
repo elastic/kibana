@@ -5,10 +5,5 @@
  * 2.0.
  */
 
-export type { ElasticsearchRole } from '../../../../authorization';
-export { transformElasticsearchRoleToRole } from '../../../../authorization';
-export {
-  getPutPayloadSchema,
-  transformPutPayloadToElasticsearchRole,
-  validateKibanaPrivileges,
-} from './put_payload';
+export type { RolePayloadSchemaType } from './put_payload';
+export { transformPutPayloadToElasticsearchRole, getPutPayloadSchema } from './put_payload';

@@ -47,6 +47,20 @@ export const BULK_ACTION_FAILED_SINGLE_ALERT = i18n.translate(
   }
 );
 
+export const BULK_ACTION_ATTACH_NEW_CASE = i18n.translate(
+  'xpack.timelines.timeline.attachNewCase',
+  {
+    defaultMessage: 'Attach to new case',
+  }
+);
+
+export const BULK_ACTION_ATTACH_EXISTING_CASE = i18n.translate(
+  'xpack.timelines.timeline.attachExistingCase',
+  {
+    defaultMessage: 'Attach to existing case',
+  }
+);
+
 export const CLOSED_ALERT_SUCCESS_TOAST = (totalAlerts: number) =>
   i18n.translate('xpack.timelines.timeline.closedAlertSuccessToastMessage', {
     values: { totalAlerts },

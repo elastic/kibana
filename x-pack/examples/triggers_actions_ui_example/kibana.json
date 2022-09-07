@@ -1,0 +1,21 @@
+{
+  "id": "triggersActionsUiExample",
+  "version": "0.0.1",
+  "kibanaVersion": "kibana",
+  "owner": {
+    "name": "Response Ops",
+    "githubTeam": "response-ops"
+  },
+  "server": false,
+  "ui": true,
+  "requiredPlugins": [
+    "triggersActionsUi",
+    "data",
+    "alerting",
+    "developerExamples",
+    "kibanaReact",
+    "cases"
+  ],
+  "optionalPlugins": [],
+  "requiredBundles": []
+}

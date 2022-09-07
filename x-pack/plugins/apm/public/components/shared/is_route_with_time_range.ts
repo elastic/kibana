@@ -20,7 +20,33 @@ export function isRouteWithTimeRange({
       route.path === '/services' ||
       route.path === '/traces' ||
       route.path === '/service-map' ||
-      route.path === '/backends' ||
+      route.path === '/dependencies' ||
+      route.path === '/dependencies/inventory' ||
+      route.path === '/services/{serviceName}' ||
+      route.path === '/service-groups' ||
+      route.path === '/storage-explorer' ||
+      location.pathname === '/' ||
+      location.pathname === ''
+    );
+  });
+
+  return matchesRoute;
+}
+
+export function isRouteWithComparison({
+  apmRouter,
+  location,
+}: {
+  apmRouter: ApmRouter;
+  location: Location;
+}) {
+  const matchingRoutes = apmRouter.getRoutesToMatch(location.pathname);
+  const matchesRoute = matchingRoutes.some((route) => {
+    return (
+      route.path === '/services' ||
+      route.path === '/service-map' ||
+      route.path === '/dependencies' ||
+      route.path === '/dependencies/inventory' ||
       route.path === '/services/{serviceName}' ||
       route.path === '/service-groups' ||
       location.pathname === '/' ||

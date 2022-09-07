@@ -6,7 +6,7 @@
  */
 
 import type { FunctionComponent } from 'react';
-import React, { memo, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useLocation, useHistory, useParams } from 'react-router-dom';
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
@@ -38,7 +38,7 @@ import {
   useLink,
 } from '../../../../hooks';
 import { doesPackageHaveIntegrations } from '../../../../services';
-import type { PackageList } from '../../../../types';
+import type { GetPackagesResponse, PackageList } from '../../../../types';
 import { PackageListGrid } from '../../components/package_list_grid';
 
 import type { PackageListItem } from '../../../../types';
@@ -52,7 +52,7 @@ import { IntegrationPreference } from '../../components/integration_preference';
 
 import { mergeCategoriesAndCount } from './util';
 import { ALL_CATEGORY, CategoryFacets } from './category_facets';
-import type { CategoryFacet } from './category_facets';
+import type { CategoryFacet, ExtendedIntegrationCategory } from './category_facets';
 
 import type { CategoryParams } from '.';
 import { getParams, categoryExists, mapToCard } from '.';
@@ -180,8 +180,12 @@ const packageListToIntegrationsList = (packages: PackageList): PackageList => {
 
 // TODO: clintandrewhall - this component is hard to test due to the hooks, particularly those that use `http`
 // or `location` to load data.  Ideally, we'll split this into "connected" and "pure" components.
-export const AvailablePackages: React.FC = memo(() => {
+export const AvailablePackages: React.FC<{
+  allPackages?: GetPackagesResponse | null;
+  isLoading: boolean;
+}> = ({ allPackages, isLoading }) => {
   const [preference, setPreference] = useState<IntegrationPreferenceType>('recommended');
+
   useBreadcrumbs('integrations_all');
 
   const { http } = useStartServices();
@@ -191,11 +195,14 @@ export const AvailablePackages: React.FC = memo(() => {
     useParams<CategoryParams>(),
     useLocation().search
   );
+  const [category, setCategory] = useState(selectedCategory);
 
   const history = useHistory();
   const { getHref, getAbsolutePath } = useLink();
 
-  function setSelectedCategory(categoryId: string) {
+  function setUrlCategory(categoryId: string) {
+    setCategory(categoryId as ExtendedIntegrationCategory);
+
     const url = pagePathGetters.integrations_all({
       category: categoryId,
       searchTerm: searchParam,
@@ -203,9 +210,9 @@ export const AvailablePackages: React.FC = memo(() => {
     history.push(url);
   }
 
-  function setSearchTerm(search: string) {
+  function setUrlSearchTerm(search: string) {
     // Use .replace so the browser's back button is not tied to single keystroke
-    history.replace(pagePathGetters.integrations_all({ searchTerm: search })[1]);
+    history.replace(pagePathGetters.integrations_all({ searchTerm: search, category })[1]);
   }
 
   const {
@@ -216,11 +223,20 @@ export const AvailablePackages: React.FC = memo(() => {
     category: '',
     excludeInstallStatus: true,
   });
+
+  // Remove Kubernetes package granularity
+  if (eprPackages?.items) {
+    eprPackages.items.forEach(function (element) {
+      if (element.id === 'kubernetes') {
+        element.policy_templates = [];
+      }
+    });
+  }
+
   const eprIntegrationList = useMemo(
     () => packageListToIntegrationsList(eprPackages?.items || []),
     [eprPackages]
   );
-
   const { value: replacementCustomIntegrations } = useGetReplacementCustomIntegrations();
 
   const mergedEprPackages: Array<PackageListItem | CustomIntegration> =
@@ -238,7 +254,7 @@ export const AvailablePackages: React.FC = memo(() => {
   ];
 
   const cards: IntegrationCardItem[] = eprAndCustomPackages.map((item) => {
-    return mapToCard(getAbsolutePath, getHref, item);
+    return mapToCard({ getAbsolutePath, getHref, item });
   });
 
   cards.sort((a, b) => {
@@ -253,7 +269,7 @@ export const AvailablePackages: React.FC = memo(() => {
     include_policy_templates: true,
   });
 
-  const categories = useMemo(() => {
+  const categories: CategoryFacet[] = useMemo(() => {
     const eprAndCustomCategories: CategoryFacet[] = isLoadingCategories
       ? []
       : mergeCategoriesAndCount(
@@ -268,7 +284,7 @@ export const AvailablePackages: React.FC = memo(() => {
         count: cards.length,
       },
       ...(eprAndCustomCategories ? eprAndCustomCategories : []),
-    ] as CategoryFacet[];
+    ];
   }, [cards, eprCategories, isLoadingCategories]);
 
   if (!isLoadingCategories && !categoryExists(selectedCategory, categories)) {
@@ -291,9 +307,9 @@ export const AvailablePackages: React.FC = memo(() => {
             isLoadingCategories || isLoadingAllPackages || isLoadingAppendCustomIntegrations
           }
           categories={categories}
-          selectedCategory={selectedCategory}
+          selectedCategory={category}
           onCategoryChange={({ id }) => {
-            setSelectedCategory(id);
+            setUrlCategory(id);
           }}
         />
       </EuiFlexItem>,
@@ -302,11 +318,11 @@ export const AvailablePackages: React.FC = memo(() => {
   }
 
   const filteredCards = cards.filter((c) => {
-    if (selectedCategory === '') {
+    if (category === '') {
       return true;
     }
 
-    return c.categories.includes(selectedCategory);
+    return c.categories.includes(category);
   });
 
   // TODO: Remove this hard coded list of integrations with a suggestion service
@@ -314,16 +330,19 @@ export const AvailablePackages: React.FC = memo(() => {
     <>
       <EuiFlexGrid columns={3}>
         <EuiFlexItem>
-          <TrackApplicationView viewId="integration-card:epr:app_search_web_crawler:featured">
+          <TrackApplicationView viewId="integration-card:epr:web_crawler:featured">
             <EuiCard
-              data-test-subj="integration-card:epr:app_search_web_crawler:featured"
-              icon={<EuiIcon type="logoAppSearch" size="xxl" />}
-              href={addBasePath('/app/enterprise_search/app_search/engines/new?method=crawler')}
+              data-test-subj="integration-card:epr:web_crawler:featured"
+              icon={<EuiIcon type="logoEnterpriseSearch" size="xxl" />}
+              href={addBasePath(
+                '/app/enterprise_search/content/search_indices/new_index?method=crawler'
+              )}
               title={i18n.translate('xpack.fleet.featuredSearchTitle', {
-                defaultMessage: 'Web site crawler',
+                defaultMessage: 'Web crawler',
               })}
               description={i18n.translate('xpack.fleet.featuredSearchDesc', {
-                defaultMessage: 'Add search to your website with the App Search web crawler.',
+                defaultMessage:
+                  'Add search to your website with the Enterprise Search web crawler.',
               })}
             />
           </TrackApplicationView>
@@ -337,7 +356,7 @@ export const AvailablePackages: React.FC = memo(() => {
               })}
               description={i18n.translate('xpack.fleet.featuredObsDesc', {
                 defaultMessage:
-                  'Monitor, detect and diagnose complex performance issues from your application.',
+                  'Monitor, detect, and diagnose complex application performance issues.',
               })}
               href={addBasePath('/app/home#/tutorial/apm')}
               icon={<EuiIcon type="logoObservability" size="xxl" />}
@@ -351,11 +370,11 @@ export const AvailablePackages: React.FC = memo(() => {
               icon={<EuiIcon type="logoSecurity" size="xxl" />}
               href={addBasePath('/app/integrations/detail/endpoint/')}
               title={i18n.translate('xpack.fleet.featuredSecurityTitle', {
-                defaultMessage: 'Endpoint Security',
+                defaultMessage: 'Elastic Defend',
               })}
               description={i18n.translate('xpack.fleet.featuredSecurityDesc', {
                 defaultMessage:
-                  'Protect your hosts with threat prevention, detection, and deep security data visibility.',
+                  'Protect your hosts and cloud workloads with threat prevention, detection, and deep security data visibility.',
               })}
             />
           </TrackApplicationView>
@@ -378,10 +397,13 @@ export const AvailablePackages: React.FC = memo(() => {
       controls={controls}
       initialSearch={searchParam}
       list={filteredCards}
-      setSelectedCategory={setSelectedCategory}
-      onSearchChange={setSearchTerm}
+      selectedCategory={category}
+      setSelectedCategory={setUrlCategory}
+      categories={categories}
+      onSearchChange={setUrlSearchTerm}
       showMissingIntegrationMessage
       callout={noEprCallout}
+      showCardLabels={false}
     />
   );
-});
+};

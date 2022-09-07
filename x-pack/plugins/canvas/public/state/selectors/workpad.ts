@@ -7,7 +7,7 @@
 
 import { get, omit } from 'lodash';
 import { safeElementFromExpression, fromExpression } from '@kbn/interpreter';
-import { CanvasRenderedWorkpad } from '../../../shareable_runtime/types';
+import type { CanvasRenderedWorkpad } from '../../../shareable_runtime/types';
 import { append } from '../../lib/modify_path';
 import { getAssets } from './assets';
 import {

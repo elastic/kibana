@@ -23,7 +23,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { ml } from '../../services/ml_api_service';
+import { useMlApiContext } from '../../contexts/kibana';
 import { SyncSavedObjectResponse, SyncResult } from '../../../../common/types/saved_objects';
 import { SyncList } from './sync_list';
 import { useToastNotificationService } from '../../services/toast_notification_service';
@@ -36,11 +36,14 @@ export const JobSpacesSyncFlyout: FC<Props> = ({ onClose }) => {
   const [loading, setLoading] = useState(false);
   const [canSync, setCanSync] = useState(false);
   const [syncResp, setSyncResp] = useState<SyncSavedObjectResponse | null>(null);
+  const {
+    savedObjects: { syncSavedObjects },
+  } = useMlApiContext();
 
   async function loadSyncList(simulate: boolean = true) {
     setLoading(true);
     try {
-      const resp = await ml.savedObjects.syncSavedObjects(simulate);
+      const resp = await syncSavedObjects(simulate);
       setSyncResp(resp);
 
       const count = Object.values(resp).reduce((acc, cur) => acc + Object.keys(cur).length, 0);
@@ -58,6 +61,7 @@ export const JobSpacesSyncFlyout: FC<Props> = ({ onClose }) => {
 
   useEffect(() => {
     loadSyncList();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function sync() {

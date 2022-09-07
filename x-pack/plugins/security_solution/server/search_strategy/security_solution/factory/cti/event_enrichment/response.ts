@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { CtiQueries } from '../../../../../../common/search_strategy/security_solution/cti';
+import type { CtiQueries } from '../../../../../../common/search_strategy/security_solution/cti';
 import { inspectStringifyObject } from '../../../../../utils/build_query';
-import { SecuritySolutionFactory } from '../../types';
+import type { SecuritySolutionFactory } from '../../types';
 import { buildIndicatorEnrichments, getTotalCount } from './helpers';
 import { buildEventEnrichmentQuery } from './query';
 

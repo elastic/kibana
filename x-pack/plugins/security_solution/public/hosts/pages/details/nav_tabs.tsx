@@ -7,12 +7,12 @@
 
 import { omit } from 'lodash/fp';
 import * as i18n from '../translations';
-import { HostDetailsNavTab } from './types';
+import type { HostDetailsNavTab } from './types';
 import { HostsTableType } from '../../store/model';
 import { HOSTS_PATH } from '../../../../common/constants';
 
 const getTabsOnHostDetailsUrl = (hostName: string, tabName: HostsTableType) =>
-  `${HOSTS_PATH}/${hostName}/${tabName}`;
+  `${HOSTS_PATH}/name/${hostName}/${tabName}`;
 
 export const navTabsHostDetails = ({
   hasMlUserPermissions,
@@ -48,12 +48,6 @@ export const navTabsHostDetails = ({
       id: HostsTableType.events,
       name: i18n.NAVIGATION_EVENTS_TITLE,
       href: getTabsOnHostDetailsUrl(hostName, HostsTableType.events),
-      disabled: false,
-    },
-    [HostsTableType.alerts]: {
-      id: HostsTableType.alerts,
-      name: i18n.NAVIGATION_ALERTS_TITLE,
-      href: getTabsOnHostDetailsUrl(hostName, HostsTableType.alerts),
       disabled: false,
     },
     [HostsTableType.risk]: {

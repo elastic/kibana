@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { FC } from 'react';
 
-import { EuiStepsHorizontal, EuiProgress, EuiSpacer } from '@elastic/eui';
+import { EuiStepsHorizontal, EuiStepStatus, EuiProgress, EuiSpacer } from '@elastic/eui';
 
 export enum IMPORT_STATUS {
   INCOMPLETE = 'incomplete',
@@ -230,27 +230,29 @@ export const ImportProgress: FC<{ statuses: Statuses }> = ({ statuses }) => {
   const steps = [
     {
       title: processFileTitle,
-      isSelected: true,
-      isComplete:
-        readStatus === IMPORT_STATUS.COMPLETE && parseJSONStatus === IMPORT_STATUS.COMPLETE,
-      status: parseJSONStatus === IMPORT_STATUS.FAILED ? parseJSONStatus : readStatus, // if JSON parsing failed, fail the first step
+      status: (parseJSONStatus === IMPORT_STATUS.FAILED // if JSON parsing failed, fail the first step
+        ? parseJSONStatus
+        : readStatus === IMPORT_STATUS.COMPLETE && parseJSONStatus === IMPORT_STATUS.COMPLETE
+        ? 'complete'
+        : 'selected') as EuiStepStatus,
       onClick: () => {},
     },
     {
       title: createIndexTitle,
-      isSelected: readStatus === IMPORT_STATUS.COMPLETE,
-      isComplete: indexCreatedStatus === IMPORT_STATUS.COMPLETE,
-      status: indexCreatedStatus,
+      status: (indexCreatedStatus !== IMPORT_STATUS.INCOMPLETE // Show failure/completed states first
+        ? indexCreatedStatus
+        : completedStep === 1 // Then show selected/incomplete states
+        ? 'selected'
+        : 'incomplete') as EuiStepStatus,
       onClick: () => {},
     },
     {
       title: uploadingDataTitle,
-      isSelected:
-        indexCreatedStatus === IMPORT_STATUS.COMPLETE &&
-        (createPipeline === false ||
-          (createPipeline === true && ingestPipelineCreatedStatus === IMPORT_STATUS.COMPLETE)),
-      isComplete: uploadStatus === IMPORT_STATUS.COMPLETE,
-      status: uploadStatus,
+      status: (uploadStatus !== IMPORT_STATUS.INCOMPLETE // Show failure/completed states first
+        ? uploadStatus
+        : completedStep === 3 // Then show selected/incomplete states
+        ? 'selected'
+        : 'incomplete') as EuiStepStatus,
       onClick: () => {},
     },
   ];
@@ -258,9 +260,11 @@ export const ImportProgress: FC<{ statuses: Statuses }> = ({ statuses }) => {
   if (createPipeline === true) {
     steps.splice(2, 0, {
       title: createIngestPipelineTitle,
-      isSelected: indexCreatedStatus === IMPORT_STATUS.COMPLETE,
-      isComplete: ingestPipelineCreatedStatus === IMPORT_STATUS.COMPLETE,
-      status: ingestPipelineCreatedStatus,
+      status: (ingestPipelineCreatedStatus !== IMPORT_STATUS.INCOMPLETE // Show failure/completed states first
+        ? ingestPipelineCreatedStatus
+        : completedStep === 2 // Then show selected/incomplete states
+        ? 'selected'
+        : 'incomplete') as EuiStepStatus,
       onClick: () => {},
     });
   }
@@ -268,9 +272,11 @@ export const ImportProgress: FC<{ statuses: Statuses }> = ({ statuses }) => {
   if (createDataView === true) {
     steps.push({
       title: createDataViewTitle,
-      isSelected: uploadStatus === IMPORT_STATUS.COMPLETE,
-      isComplete: dataViewCreatedStatus === IMPORT_STATUS.COMPLETE,
-      status: dataViewCreatedStatus,
+      status: (dataViewCreatedStatus !== IMPORT_STATUS.INCOMPLETE // Show failure/completed states first
+        ? dataViewCreatedStatus
+        : completedStep === 4 // Then show selected/incomplete states
+        ? 'selected'
+        : 'incomplete') as EuiStepStatus,
       onClick: () => {},
     });
   }

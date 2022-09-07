@@ -218,6 +218,10 @@ const policy = {
           type: 'bool',
           value: false,
         },
+        pprof_enabled: {
+          type: 'bool',
+          value: false,
+        },
         java_attacher_discovery_rules: {
           type: 'yaml',
           value: '',

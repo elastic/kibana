@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import moment from 'moment';
-import fs from 'fs';
+import Fsp from 'fs/promises';
 import Path from 'path';
 import dedent from 'dedent';
 import { PluginApi, ScopeApi } from '../types';
@@ -19,6 +19,7 @@ import {
   getSlug,
 } from '../utils';
 import { writePluginDocSplitByFolder } from './write_plugin_split_by_folder';
+import { AUTO_GENERATED_WARNING } from '../auto_generated_warning';
 import { WritePluginDocsOpts } from './types';
 
 /**
@@ -29,15 +30,15 @@ import { WritePluginDocsOpts } from './types';
  * @param doc Contains the information of the plugin that will be written into mdx.
  * @param log Used for logging debug and error information.
  */
-export function writePluginDocs(
+export async function writePluginDocs(
   folder: string,
   { doc, plugin, pluginStats, log }: WritePluginDocsOpts
-): void {
+): Promise<void> {
   if (doc.serviceFolders) {
     log.debug(`Splitting plugin ${doc.id}`);
-    writePluginDocSplitByFolder(folder, { doc, log, plugin, pluginStats });
+    await writePluginDocSplitByFolder(folder, { doc, log, plugin, pluginStats });
   } else {
-    writePluginDoc(folder, { doc, plugin, pluginStats, log });
+    await writePluginDoc(folder, { doc, plugin, pluginStats, log });
   }
 }
 
@@ -54,10 +55,10 @@ function hasPublicApi(doc: PluginApi): boolean {
  * @param doc Contains the information of the plugin that will be written into mdx.
  * @param log Used for logging debug and error information.
  */
-export function writePluginDoc(
+export async function writePluginDoc(
   folder: string,
   { doc, log, plugin, pluginStats }: WritePluginDocsOpts
-): void {
+): Promise<void> {
   if (!hasPublicApi(doc)) {
     log.debug(`${doc.id} does not have a public api. Skipping.`);
     return;
@@ -75,14 +76,14 @@ export function writePluginDoc(
   let mdx =
     dedent(`
 ---
+${AUTO_GENERATED_WARNING}
 id: ${getPluginApiDocId(doc.id)}
 slug: /kibana-dev-docs/api/${slug}
 title: "${doc.id}"
 image: https://source.unsplash.com/400x175/?github
-summary: API docs for the ${doc.id} plugin
+description: API docs for the ${doc.id} plugin
 date: ${moment().format('YYYY-MM-DD')}
 tags: ['contributor', 'dev', 'apidocs', 'kibana', '${doc.id}']
-warning: This document is auto-generated and is meant to be viewed inside our experimental, new docs system. Reach out in #docs-engineering for more info.
 ---
 import ${json} from './${fileName}.devdocs.json';
 
@@ -112,7 +113,7 @@ ${
     common: groupPluginApi(doc.common),
     server: groupPluginApi(doc.server),
   };
-  fs.writeFileSync(
+  await Fsp.writeFile(
     Path.resolve(folder, fileName + '.devdocs.json'),
     JSON.stringify(scopedDoc, null, 2)
   );
@@ -121,7 +122,7 @@ ${
   mdx += scopApiToMdx(scopedDoc.server, 'Server', json, 'server');
   mdx += scopApiToMdx(scopedDoc.common, 'Common', json, 'common');
 
-  fs.writeFileSync(Path.resolve(folder, fileName + '.mdx'), mdx);
+  await Fsp.writeFile(Path.resolve(folder, fileName + '.mdx'), mdx);
 }
 
 function getJsonName(name: string): string {

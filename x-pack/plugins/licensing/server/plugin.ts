@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import { Observable, Subject, Subscription, timer } from 'rxjs';
+import type { Observable, Subject, Subscription } from 'rxjs';
+import { ReplaySubject, timer } from 'rxjs';
 import moment from 'moment';
 import { createHash } from 'crypto';
 import stringify from 'json-stable-stringify';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { MaybePromise } from '@kbn/utility-types';
+import type { MaybePromise } from '@kbn/utility-types';
 import { isPromise } from '@kbn/std';
-import {
+import type {
   CoreSetup,
   Logger,
   Plugin,
@@ -22,22 +23,22 @@ import {
 } from '@kbn/core/server';
 
 import { registerAnalyticsContextProvider } from '../common/register_analytics_context_provider';
-import {
+import type {
   ILicense,
   PublicLicense,
   PublicFeatures,
   LicenseType,
   LicenseStatus,
 } from '../common/types';
-import { LicensingPluginSetup, LicensingPluginStart } from './types';
+import type { LicensingPluginSetup, LicensingPluginStart } from './types';
 import { License } from '../common/license';
 import { createLicenseUpdate } from '../common/license_update';
 
-import { ElasticsearchError } from './types';
+import type { ElasticsearchError } from './types';
 import { registerRoutes } from './routes';
 import { FeatureUsageService } from './services';
 
-import { LicenseConfigType } from './licensing_config';
+import type { LicenseConfigType } from './licensing_config';
 import { createRouteHandlerContext } from './licensing_route_handler_context';
 import { createOnPreResponseHandler } from './on_pre_response_handler';
 import { getPluginStatus$ } from './plugin_status';
@@ -94,7 +95,7 @@ function sign({
  * current Kibana instance.
  */
 export class LicensingPlugin implements Plugin<LicensingPluginSetup, LicensingPluginStart, {}, {}> {
-  private stop$ = new Subject<void>();
+  private stop$: Subject<void> = new ReplaySubject<void>(1);
   private readonly logger: Logger;
   private readonly config: LicenseConfigType;
   private loggingSubscription?: Subscription;

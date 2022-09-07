@@ -7,7 +7,7 @@
  */
 
 import expect from '@kbn/expect';
-import { ExecutionContext } from '@kbn/expressions-plugin';
+import { ExecutionContext } from '@kbn/expressions-plugin/common';
 import {
   functionWrapper,
   getElasticLogo,

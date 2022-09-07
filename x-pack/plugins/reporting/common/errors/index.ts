@@ -6,8 +6,14 @@
  */
 
 /* eslint-disable max-classes-per-file */
-
 import { i18n } from '@kbn/i18n';
+
+export interface ReportingError {
+  /**
+   * Return a message describing the error that is human friendly
+   */
+  humanFriendlyMessage?(): string;
+}
 export abstract class ReportingError extends Error {
   /**
    * A string that uniquely brands an error type. This is used to power telemetry
@@ -30,6 +36,26 @@ export abstract class ReportingError extends Error {
 
   public toString() {
     return this.message;
+  }
+}
+
+/**
+ * While validating the page layout parameters for a screenshot type report job
+ */
+export class InvalidLayoutParametersError extends ReportingError {
+  static code = 'invalid_layout_parameters_error' as const;
+  public get code() {
+    return InvalidLayoutParametersError.code;
+  }
+}
+
+/**
+ * While loading requests in the Kibana app, a URL was encountered that the network policy did not allow.
+ */
+export class DisallowedOutgoingUrl extends ReportingError {
+  static code = 'disallowed_outgoing_url_error' as const;
+  public get code() {
+    return DisallowedOutgoingUrl.code;
   }
 }
 
@@ -67,17 +93,10 @@ export class PdfWorkerOutOfMemoryError extends ReportingError {
     return PdfWorkerOutOfMemoryError.code;
   }
 
-  details = i18n.translate('xpack.reporting.common.pdfWorkerOutOfMemoryErrorMessage', {
-    defaultMessage:
-      'Cannot generate PDF due to low memory. Consider making a smaller PDF before retrying this report.',
-  });
-
-  /**
-   * No need to provide extra details, we know exactly what happened and can provide
-   * a nicely formatted message
-   */
-  public override get message(): string {
-    return this.details;
+  public humanFriendlyMessage() {
+    return i18n.translate('xpack.reporting.common.pdfWorkerOutOfMemoryErrorMessage', {
+      defaultMessage: `Can't generate a PDF due to insufficient memory. Try making a smaller PDF and retrying this report.`,
+    });
   }
 }
 
@@ -87,16 +106,10 @@ export class BrowserCouldNotLaunchError extends ReportingError {
     return BrowserCouldNotLaunchError.code;
   }
 
-  details = i18n.translate('xpack.reporting.common.browserCouldNotLaunchErrorMessage', {
-    defaultMessage: 'Cannot generate screenshots because the browser did not launch.',
-  });
-
-  /**
-   * For this error message we expect that users will use the diagnostics
-   * functionality in reporting to debug further.
-   */
-  public override get message() {
-    return this.details;
+  public humanFriendlyMessage() {
+    return i18n.translate('xpack.reporting.common.browserCouldNotLaunchErrorMessage', {
+      defaultMessage: `Can't generate screenshots because the browser did not launch. See the server logs for more information.`,
+    });
   }
 }
 
@@ -131,12 +144,9 @@ export class VisualReportingSoftDisabledError extends ReportingError {
     return VisualReportingSoftDisabledError.code;
   }
 
-  details = i18n.translate('xpack.reporting.common.cloud.insufficientSystemMemoryError', {
-    defaultMessage:
-      'This report cannot be generated because Kibana does not have sufficient memory.',
-  });
-
-  public override get message() {
-    return this.details;
+  humanFriendlyMessage() {
+    return i18n.translate('xpack.reporting.common.cloud.insufficientSystemMemoryError', {
+      defaultMessage: `Can't generate this report due to insufficient memory.`,
+    });
   }
 }

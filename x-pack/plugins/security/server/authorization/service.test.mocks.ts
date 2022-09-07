@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-export const mockCheckPrivilegesWithRequestFactory = jest.fn();
+export const mockCheckPrivilegesFactory = jest.fn();
 jest.mock('./check_privileges', () => ({
-  checkPrivilegesWithRequestFactory: mockCheckPrivilegesWithRequestFactory,
+  checkPrivilegesFactory: mockCheckPrivilegesFactory,
 }));
 
 export const mockCheckPrivilegesDynamicallyWithRequestFactory = jest.fn();

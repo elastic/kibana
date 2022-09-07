@@ -251,13 +251,7 @@
               "\nThe docLinks start service from core"
             ],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.DocLinksStart",
-                "text": "DocLinksStart"
-              }
+              "DocLinksStart"
             ],
             "path": "x-pack/plugins/runtime_fields/public/components/runtime_field_editor_flyout_content/runtime_field_editor_flyout_content.tsx",
             "deprecated": false
@@ -330,7 +324,7 @@
             "label": "type",
             "description": [],
             "signature": [
-              "\"boolean\" | \"keyword\" | \"ip\" | \"date\" | \"long\" | \"double\""
+              "\"boolean\" | \"date\" | \"keyword\" | \"ip\" | \"long\" | \"double\""
             ],
             "path": "x-pack/plugins/runtime_fields/public/types.ts",
             "deprecated": false
@@ -363,7 +357,7 @@
         "description": [],
         "signature": [
           "ComboBoxOption",
-          "<\"boolean\" | \"keyword\" | \"ip\" | \"date\" | \"long\" | \"double\">[]"
+          "<\"boolean\" | \"date\" | \"keyword\" | \"ip\" | \"long\" | \"double\">[]"
         ],
         "path": "x-pack/plugins/runtime_fields/public/constants.ts",
         "deprecated": false,
@@ -377,7 +371,7 @@
         "label": "RuntimeType",
         "description": [],
         "signature": [
-          "\"boolean\" | \"keyword\" | \"ip\" | \"date\" | \"long\" | \"double\""
+          "\"boolean\" | \"date\" | \"keyword\" | \"ip\" | \"long\" | \"double\""
         ],
         "path": "x-pack/plugins/runtime_fields/public/types.ts",
         "deprecated": false,

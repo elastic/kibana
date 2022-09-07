@@ -16,8 +16,8 @@ export const registerTableVis = async (
   core: CoreSetup<TablePluginStartDependencies>,
   { expressions, visualizations }: TablePluginSetupDependencies
 ) => {
-  const [coreStart] = await core.getStartServices();
+  const [coreStart, { usageCollection }] = await core.getStartServices();
   expressions.registerFunction(createTableVisFn);
-  expressions.registerRenderer(getTableVisRenderer(coreStart));
+  expressions.registerRenderer(getTableVisRenderer(coreStart, usageCollection));
   visualizations.createBaseVisualization(tableVisTypeDefinition);
 };

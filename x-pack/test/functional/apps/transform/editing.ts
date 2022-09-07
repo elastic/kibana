@@ -61,6 +61,7 @@ export default function ({ getService }: FtrProviderContext) {
         resetRetentionPolicy: false,
         transformRetentionPolicyField: 'order_date',
         transformRetentionPolicyMaxAge: '1d',
+        numFailureRetries: '0',
         expected: {
           messageText: 'updated transform.',
           retentionPolicy: {
@@ -82,6 +83,7 @@ export default function ({ getService }: FtrProviderContext) {
         transformDocsPerSecond: '1000',
         transformFrequency: '10m',
         resetRetentionPolicy: true,
+        numFailureRetries: '7',
         expected: {
           messageText: 'updated transform.',
           retentionPolicy: {
@@ -143,6 +145,17 @@ export default function ({ getService }: FtrProviderContext) {
           await transform.editFlyout.setTransformEditFlyoutInputValue(
             'DocsPerSecond',
             testData.transformDocsPerSecond
+          );
+
+          await transform.testExecution.logTestStep(
+            'should update the transform number of failure retries'
+          );
+          await transform.editFlyout.openTransformEditAccordionAdvancedSettings();
+          await transform.editFlyout.assertTransformEditFlyoutInputExists('NumFailureRetries');
+          await transform.editFlyout.assertTransformEditFlyoutInputValue('NumFailureRetries', '');
+          await transform.editFlyout.setTransformEditFlyoutInputValue(
+            'NumFailureRetries',
+            testData.numFailureRetries
           );
 
           await transform.testExecution.logTestStep('should update the transform frequency');

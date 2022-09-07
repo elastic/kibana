@@ -35,8 +35,9 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { FieldIcon } from '@kbn/react-field';
-import { GetFieldTypeDescription } from './lib/get_field_type_description';
-import { useDiscoverServices } from '../../../../utils/use_discover_services';
+import { getFieldTypeDescription } from './lib/get_field_type_description';
+import { KNOWN_FIELD_TYPES } from '../../../../../common/field_types';
+import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 
 export interface State {
   searchable: string;
@@ -63,6 +64,10 @@ export interface Props {
    * the input value of the user
    */
   value?: string;
+  /**
+   * is text base lang mode
+   */
+  isPlainRecord: boolean;
 }
 
 interface FieldTypeTableItem {
@@ -75,7 +80,13 @@ interface FieldTypeTableItem {
  * Component is Discover's side bar to  search of available fields
  * Additionally there's a button displayed that allows the user to show/hide more filter fields
  */
-export function DiscoverFieldSearch({ onChange, value, types, presentFieldTypes }: Props) {
+export function DiscoverFieldSearch({
+  onChange,
+  value,
+  types,
+  presentFieldTypes,
+  isPlainRecord,
+}: Props) {
   const searchPlaceholder = i18n.translate('discover.fieldChooser.searchPlaceHolder', {
     defaultMessage: 'Search field names',
   });
@@ -107,14 +118,16 @@ export function DiscoverFieldSearch({ onChange, value, types, presentFieldTypes 
   const { docLinks } = useDiscoverServices();
 
   const items: FieldTypeTableItem[] = useMemo(() => {
+    const knownTypes = Object.values(KNOWN_FIELD_TYPES) as string[];
     return presentFieldTypes
+      .filter((element) => knownTypes.includes(element))
       .sort((one, another) => one.localeCompare(another))
       .map((element, index) => ({
         id: index,
         dataType: element,
-        description: GetFieldTypeDescription(element),
+        description: getFieldTypeDescription(element, docLinks),
       }));
-  }, [presentFieldTypes]);
+  }, [presentFieldTypes, docLinks]);
 
   const onHelpClick = () => setIsHelpOpen((prevIsHelpOpen) => !prevIsHelpOpen);
   const closeHelp = () => setIsHelpOpen(false);
@@ -122,7 +135,9 @@ export function DiscoverFieldSearch({ onChange, value, types, presentFieldTypes 
   const columnsSidebar: Array<EuiBasicTableColumn<FieldTypeTableItem>> = [
     {
       field: 'dataType',
-      name: 'Data type',
+      name: i18n.translate('discover.fieldTypesPopover.dataTypeColumnTitle', {
+        defaultMessage: 'Data type',
+      }),
       width: '110px',
       render: (name: string) => (
         <EuiFlexGroup alignItems="center" responsive={false} gutterSize="xs">
@@ -135,7 +150,9 @@ export function DiscoverFieldSearch({ onChange, value, types, presentFieldTypes 
     },
     {
       field: 'description',
-      name: 'Description',
+      name: i18n.translate('discover.fieldTypesPopover.descriptionColumnTitle', {
+        defaultMessage: 'Description',
+      }),
       // eslint-disable-next-line react/no-danger
       render: (description: string) => <div dangerouslySetInnerHTML={{ __html: description }} />,
     },
@@ -346,81 +363,83 @@ export function DiscoverFieldSearch({ onChange, value, types, presentFieldTypes 
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="xs" />
-      <EuiFlexItem>
-        <EuiFilterGroup fullWidth>
-          <EuiPopover
-            id="dataPanelTypeFilter"
-            panelClassName="euiFilterGroup__popoverPanel"
-            panelPaddingSize="none"
-            anchorPosition="rightUp"
-            display="block"
-            isOpen={isPopoverOpen}
-            closePopover={() => {
-              setPopoverOpen(false);
-            }}
-            button={buttonContent}
-          >
-            <EuiPopoverTitle paddingSize="s">
-              {i18n.translate('discover.fieldChooser.filter.filterByTypeLabel', {
-                defaultMessage: 'Filter by type',
-              })}
-            </EuiPopoverTitle>
-            {selectionPanel}
-            {footer()}
-          </EuiPopover>
-          <EuiPopover
-            anchorPosition="rightUp"
-            display="block"
-            button={helpButton}
-            isOpen={isHelpOpen}
-            panelPaddingSize="none"
-            className="dscFieldTypesHelp__popover"
-            panelClassName="dscFieldTypesHelp__panel"
-            closePopover={closeHelp}
-            initialFocus="#dscFieldTypesHelpBasicTableId"
-          >
-            <EuiPopoverTitle paddingSize="s">
-              {i18n.translate('discover.fieldChooser.popoverTitle', {
-                defaultMessage: 'Field types',
-              })}
-            </EuiPopoverTitle>
-            <EuiPanel
-              className="eui-yScroll"
-              style={{ maxHeight: '50vh' }}
-              color="transparent"
-              paddingSize="s"
+      {!isPlainRecord && (
+        <EuiFlexItem>
+          <EuiFilterGroup fullWidth>
+            <EuiPopover
+              id="dataPanelTypeFilter"
+              panelClassName="euiFilterGroup__popoverPanel"
+              panelPaddingSize="none"
+              anchorPosition="rightUp"
+              display="block"
+              isOpen={isPopoverOpen}
+              closePopover={() => {
+                setPopoverOpen(false);
+              }}
+              button={buttonContent}
             >
-              <EuiBasicTable
-                id="dscFieldTypesHelpBasicTableId"
-                tableCaption={i18n.translate('discover.fieldTypesPopover.tableTitle', {
-                  defaultMessage: 'Description of field types',
+              <EuiPopoverTitle paddingSize="s">
+                {i18n.translate('discover.fieldChooser.filter.filterByTypeLabel', {
+                  defaultMessage: 'Filter by type',
                 })}
-                items={items}
-                compressed={true}
-                rowHeader="firstName"
-                columns={columnsSidebar}
-                responsive={false}
-              />
-            </EuiPanel>
-            <EuiPanel color="transparent" paddingSize="s">
-              <EuiText color="subdued" size="xs">
-                <p>
-                  {i18n.translate('discover.fieldTypesPopover.learnMoreText', {
-                    defaultMessage: 'Learn more about',
+              </EuiPopoverTitle>
+              {selectionPanel}
+              {footer()}
+            </EuiPopover>
+            <EuiPopover
+              anchorPosition="rightUp"
+              display="block"
+              button={helpButton}
+              isOpen={isHelpOpen}
+              panelPaddingSize="none"
+              className="dscFieldTypesHelp__popover"
+              panelClassName="dscFieldTypesHelp__panel"
+              closePopover={closeHelp}
+              initialFocus="#dscFieldTypesHelpBasicTableId"
+            >
+              <EuiPopoverTitle paddingSize="s">
+                {i18n.translate('discover.fieldChooser.popoverTitle', {
+                  defaultMessage: 'Field types',
+                })}
+              </EuiPopoverTitle>
+              <EuiPanel
+                className="eui-yScroll"
+                style={{ maxHeight: '50vh' }}
+                color="transparent"
+                paddingSize="s"
+              >
+                <EuiBasicTable
+                  id="dscFieldTypesHelpBasicTableId"
+                  tableCaption={i18n.translate('discover.fieldTypesPopover.tableTitle', {
+                    defaultMessage: 'Description of field types',
                   })}
-                  &nbsp;
-                  <EuiLink href={docLinks.links.discover.fieldTypeHelp}>
-                    <FormattedMessage
-                      id="discover.fieldTypesPopover.learnMoreLink"
-                      defaultMessage="field types."
-                    />
-                  </EuiLink>
-                </p>
-              </EuiText>
-            </EuiPanel>
-          </EuiPopover>
-        </EuiFilterGroup>
-      </EuiFlexItem>
+                  items={items}
+                  compressed={true}
+                  rowHeader="firstName"
+                  columns={columnsSidebar}
+                  responsive={false}
+                />
+              </EuiPanel>
+              <EuiPanel color="transparent" paddingSize="s">
+                <EuiText color="subdued" size="xs">
+                  <p>
+                    {i18n.translate('discover.fieldTypesPopover.learnMoreText', {
+                      defaultMessage: 'Learn more about',
+                    })}
+                    &nbsp;
+                    <EuiLink href={docLinks.links.discover.fieldTypeHelp} target="_blank" external>
+                      <FormattedMessage
+                        id="discover.fieldTypesPopover.fieldTypesDocLinkLabel"
+                        defaultMessage="field types"
+                      />
+                    </EuiLink>
+                  </p>
+                </EuiText>
+              </EuiPanel>
+            </EuiPopover>
+          </EuiFilterGroup>
+        </EuiFlexItem>
+      )}
     </React.Fragment>
   );
 }

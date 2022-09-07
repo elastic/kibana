@@ -29,6 +29,7 @@ describe('T1 Analyst - READ + runSavedQueries ', () => {
   it('should be able to run saved queries but not add new ones', () => {
     navigateTo('/app/osquery/saved_queries');
     cy.waitForReact(1000);
+    cy.getBySel('pagination-button-next').click();
     cy.contains(SAVED_QUERY_ID);
     cy.contains('Add saved query').should('be.disabled');
     cy.react('PlayButtonComponent', {
@@ -50,12 +51,12 @@ describe('T1 Analyst - READ + runSavedQueries ', () => {
     cy.contains('select * from uptime');
     cy.wait(1000);
     cy.react('EuiTableBody').first().react('DefaultItemAction').first().click();
-    selectAllAgents();
     cy.contains(SAVED_QUERY_ID);
     submitQuery();
     checkResults();
   });
-  it('should be able to use saved query in a new query', () => {
+  // TODO UNSKIP AFTER FF
+  it.skip('should be able to use saved query in a new query', () => {
     navigateTo('/app/osquery/live_queries');
     cy.waitForReact(1000);
     cy.contains('New live query').should('not.be.disabled').click();
@@ -94,6 +95,7 @@ describe('T1 Analyst - READ + runSavedQueries ', () => {
     cy.contains('New live query').click();
     selectAllAgents();
     cy.get(LIVE_QUERY_EDITOR).should('not.exist');
-    cy.contains('Submit').should('be.disabled');
+    submitQuery();
+    cy.contains('Query is a required field');
   });
 });

@@ -1,0 +1,105 @@
+{
+  "attributes": {
+    "assignees": [
+      {
+        "uid": "abc"
+      }
+    ],
+    "closed_at": null,
+    "closed_by": null,
+    "connector": {
+      "fields": [],
+      "name": "none",
+      "type": ".none"
+    },
+    "created_at": "2022-08-02T16:56:16.806Z",
+    "created_by": {
+      "email": null,
+      "full_name": null,
+      "username": "elastic"
+    },
+    "description": "a case description",
+    "duration": null,
+    "external_service": null,
+    "owner": "cases",
+    "settings": {
+      "syncAlerts": false
+    },
+    "severity": "low",
+    "status": "open",
+    "tags": [
+      "super",
+      "awesome"
+    ],
+    "title": "Test case",
+    "updated_at": null,
+    "updated_by": null
+  },
+  "coreMigrationVersion": "8.5.0",
+  "id": "063d5820-1284-11ed-81af-63a2bdfb2bf9",
+  "migrationVersion": {
+    "cases": "8.5.0"
+  },
+  "references": [],
+  "type": "cases",
+  "updated_at": "2022-08-02T16:56:16.808Z",
+  "version": "WzE3MywxXQ=="
+}
+
+{
+  "attributes": {
+    "action": "create",
+    "created_at": "2022-08-02T16:56:17.195Z",
+    "created_by": {
+      "email": null,
+      "full_name": null,
+      "username": "elastic"
+    },
+    "owner": "cases",
+    "payload": {
+      "assignees": [
+        {
+          "uid": "abc"
+        }
+      ],
+      "connector": {
+        "fields": null,
+        "name": "none",
+        "type": ".none"
+      },
+      "description": "a case description",
+      "owner": "cases",
+      "settings": {
+        "syncAlerts": false
+      },
+      "severity": "low",
+      "status": "open",
+      "tags": [
+        "super",
+        "awesome"
+      ],
+      "title": "Test case"
+    },
+    "type": "create_case"
+  },
+  "coreMigrationVersion": "8.5.0",
+  "id": "06794fb0-1284-11ed-81af-63a2bdfb2bf9",
+  "migrationVersion": {
+    "cases-user-actions": "8.5.0"
+  },
+  "references": [
+    {
+      "id": "063d5820-1284-11ed-81af-63a2bdfb2bf9",
+      "name": "associated-cases",
+      "type": "cases"
+    }
+  ],
+  "score": null,
+  "sort": [
+    1659459377195,
+    334
+  ],
+  "type": "cases-user-actions",
+  "updated_at": "2022-08-02T16:56:17.195Z",
+  "version": "WzE3NCwxXQ=="
+}

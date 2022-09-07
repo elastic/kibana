@@ -27,5 +27,3 @@ export const createTimelineSchema = rt.intersection([
     version: unionWithNullType(rt.string),
   }),
 ]);
-
-export type CreateTimelineSchema = rt.TypeOf<typeof createTimelineSchema>;

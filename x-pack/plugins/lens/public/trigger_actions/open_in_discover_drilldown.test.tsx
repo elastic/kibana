@@ -8,7 +8,8 @@
 import React, { FormEvent } from 'react';
 import { IEmbeddable, EmbeddableInput } from '@kbn/embeddable-plugin/public';
 import { DiscoverSetup } from '@kbn/discover-plugin/public';
-import { execute, isCompatible } from './open_in_discover_helpers';
+import type { ApplicationStart } from '@kbn/core/public';
+import { getHref, isCompatible } from './open_in_discover_helpers';
 import { mount } from 'enzyme';
 import { Filter } from '@kbn/es-query';
 import {
@@ -16,10 +17,11 @@ import {
   CollectConfigProps,
   OpenInDiscoverDrilldown,
 } from './open_in_discover_drilldown';
+import { DataViewsService } from '@kbn/data-views-plugin/public';
 
 jest.mock('./open_in_discover_helpers', () => ({
   isCompatible: jest.fn(() => true),
-  execute: jest.fn(),
+  getHref: jest.fn(),
 }));
 
 describe('open in discover drilldown', () => {
@@ -27,7 +29,9 @@ describe('open in discover drilldown', () => {
   beforeEach(() => {
     drilldown = new OpenInDiscoverDrilldown({
       discover: {} as DiscoverSetup,
+      dataViews: () => ({} as DataViewsService),
       hasDiscoverAccess: () => true,
+      application: () => ({} as ApplicationStart),
     });
   });
   it('provides UI to edit config', () => {
@@ -52,14 +56,12 @@ describe('open in discover drilldown', () => {
     );
     expect(isCompatible).toHaveBeenCalledWith(expect.objectContaining({ filters }));
   });
-  it('calls through to execute helper', () => {
+  it('calls through to getHref helper', async () => {
     const filters: Filter[] = [{ meta: { disabled: false } }];
-    drilldown.execute(
+    await drilldown.execute(
       { openInNewTab: true },
       { embeddable: { type: 'lens' } as IEmbeddable<EmbeddableInput>, filters }
     );
-    expect(execute).toHaveBeenCalledWith(
-      expect.objectContaining({ filters, openInSameTab: false })
-    );
+    expect(getHref).toHaveBeenCalledWith(expect.objectContaining({ filters }));
   });
 });

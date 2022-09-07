@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IRouter, Logger } from '@kbn/core/server';
+import { IRouter } from '@kbn/core/server';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { ILicenseState } from '../lib';
 import { ActionsRequestHandlerContext } from '../types';
@@ -24,13 +24,12 @@ import { ActionsConfigurationUtilities } from '../actions_config';
 export interface RouteOptions {
   router: IRouter<ActionsRequestHandlerContext>;
   licenseState: ILicenseState;
-  logger: Logger;
   actionsConfigUtils: ActionsConfigurationUtilities;
   usageCounter?: UsageCounter;
 }
 
 export function defineRoutes(opts: RouteOptions) {
-  const { router, licenseState, logger, actionsConfigUtils, usageCounter } = opts;
+  const { router, licenseState, actionsConfigUtils, usageCounter } = opts;
 
   defineLegacyRoutes(router, licenseState, usageCounter);
 
@@ -42,6 +41,6 @@ export function defineRoutes(opts: RouteOptions) {
   connectorTypesRoute(router, licenseState);
   executeActionRoute(router, licenseState);
 
-  getOAuthAccessToken(router, licenseState, logger, actionsConfigUtils);
+  getOAuthAccessToken(router, licenseState, actionsConfigUtils);
   getWellKnownEmailServiceRoute(router, licenseState);
 }

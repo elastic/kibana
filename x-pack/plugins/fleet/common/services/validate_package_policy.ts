@@ -55,6 +55,7 @@ export const validatePackagePolicy = (
     description: null,
     namespace: null,
     inputs: {},
+    vars: {},
   };
   const namespaceValidation = isValidNamespace(packagePolicy.namespace);
 
@@ -249,6 +250,7 @@ export const validatePackagePolicyConfig = (
           defaultMessage: 'Invalid format',
         })
       );
+      return errors;
     }
     if (varDef.required && Array.isArray(parsedValue) && parsedValue.length === 0) {
       errors.push(
@@ -260,8 +262,8 @@ export const validatePackagePolicyConfig = (
         })
       );
     }
-    if (varDef.type === 'text' && parsedValue && Array.isArray(parsedValue)) {
-      const invalidStrings = parsedValue.filter((cand) => /^[*&]/.test(cand));
+    if (varDef.type === 'text' && parsedValue) {
+      const invalidStrings = parsedValue.filter((cand: any) => /^[*&]/.test(cand));
       // only show one error if multiple strings in array are invalid
       if (invalidStrings.length > 0) {
         errors.push(
@@ -272,6 +274,20 @@ export const validatePackagePolicyConfig = (
         );
       }
     }
+
+    if (varDef.type === 'integer' && parsedValue) {
+      const invalidIntegers = parsedValue.filter((val: any) => !Number.isInteger(Number(val)));
+      // only show one error if multiple strings in array are invalid
+      if (invalidIntegers.length > 0) {
+        errors.push(
+          i18n.translate('xpack.fleet.packagePolicyValidation.invalidIntegerMultiErrorMessage', {
+            defaultMessage: 'Invalid integer',
+          })
+        );
+      }
+    }
+
+    return errors.length ? errors : null;
   }
 
   if (varDef.type === 'text' && parsedValue && !Array.isArray(parsedValue)) {
@@ -295,6 +311,16 @@ export const validatePackagePolicyConfig = (
         defaultMessage: 'Boolean values must be either true or false',
       })
     );
+  }
+
+  if (varDef.type === 'integer' && parsedValue && !Array.isArray(parsedValue)) {
+    if (!Number.isInteger(Number(parsedValue))) {
+      errors.push(
+        i18n.translate('xpack.fleet.packagePolicyValidation.invalidIntegerErrorMessage', {
+          defaultMessage: 'Invalid integer',
+        })
+      );
+    }
   }
 
   return errors.length ? errors : null;

@@ -55,20 +55,20 @@ describe('helpers', () => {
       expect(isFieldInvalid('description', ['required'])).toBeTruthy();
     });
 
-    test('should return if false the field is not defined', async () => {
+    test('should return false if the field is not defined', async () => {
       expect(isFieldInvalid(undefined, ['required'])).toBeFalsy();
     });
 
-    test('should return if false the field is null', async () => {
-      expect(isFieldInvalid(null, ['required'])).toBeFalsy();
+    test('should return true if the field is null', async () => {
+      expect(isFieldInvalid(null, ['required'])).toBeTruthy();
     });
 
-    test('should return if false the error is not defined', async () => {
+    test('should return false if the error is not defined', async () => {
       // @ts-expect-error
       expect(isFieldInvalid('description', undefined)).toBeFalsy();
     });
 
-    test('should return if false the error is empty', async () => {
+    test('should return false if the error is empty', async () => {
       expect(isFieldInvalid('description', [])).toBeFalsy();
     });
   });

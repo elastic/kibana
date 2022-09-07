@@ -15,6 +15,7 @@ import { DataViewListItem } from '@kbn/data-views-plugin/public';
 export interface DataViewsListProps {
   dataViewsList: DataViewListItem[];
   onChangeDataView: (newId: string) => void;
+  isTextBasedLangSelected?: boolean;
   currentDataViewId?: string;
   selectableProps?: EuiSelectableProps;
   searchListInputId?: string;
@@ -23,6 +24,7 @@ export interface DataViewsListProps {
 export function DataViewsList({
   dataViewsList,
   onChangeDataView,
+  isTextBasedLangSelected,
   currentDataViewId,
   selectableProps,
   searchListInputId,
@@ -38,11 +40,11 @@ export function DataViewsList({
       data-test-subj="indexPattern-switcher"
       searchable
       singleSelection="always"
-      options={dataViewsList?.map(({ title, id }) => ({
+      options={dataViewsList?.map(({ title, id, name }) => ({
         key: id,
-        label: title,
+        label: name ? name : title,
         value: id,
-        checked: id === currentDataViewId ? 'on' : undefined,
+        checked: id === currentDataViewId && !Boolean(isTextBasedLangSelected) ? 'on' : undefined,
       }))}
       onChange={(choices) => {
         const choice = choices.find(({ checked }) => checked) as unknown as {
@@ -56,20 +58,23 @@ export function DataViewsList({
         placeholder: i18n.translate('unifiedSearch.query.queryBar.indexPattern.findDataView', {
           defaultMessage: 'Find a data view',
         }),
+        'data-test-subj': 'indexPattern-switcher--input',
         ...(selectableProps ? selectableProps.searchProps : undefined),
       }}
     >
       {(list, search) => (
-        <EuiPanel
-          css={css`
-            padding-bottom: 0;
-          `}
-          color="transparent"
-          paddingSize="s"
-        >
-          {search}
+        <>
+          <EuiPanel
+            css={css`
+              padding-bottom: 0;
+            `}
+            color="transparent"
+            paddingSize="s"
+          >
+            {search}
+          </EuiPanel>
           {list}
-        </EuiPanel>
+        </>
       )}
     </EuiSelectable>
   );

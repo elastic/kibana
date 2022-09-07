@@ -7,7 +7,7 @@
 
 import { useMemo } from 'react';
 import { SECURITY_FEATURE_ID } from '../../../../../common/constants';
-import { Privilege } from '../../../containers/detection_engine/alerts/types';
+import type { Privilege } from '../../../containers/detection_engine/alerts/types';
 import { useUserData } from '../../user_info';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 

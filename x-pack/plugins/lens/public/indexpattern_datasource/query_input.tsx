@@ -8,7 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { isEqual } from 'lodash';
-import { Query } from '@kbn/data-plugin/public';
+import type { Query } from '@kbn/es-query';
 import { QueryStringInput } from '@kbn/unified-search-plugin/public';
 import { useDebouncedValue } from '../shared_components';
 
@@ -20,6 +20,7 @@ export const QueryInput = ({
   onSubmit,
   disableAutoFocus,
   ['data-test-subj']: dataTestSubj,
+  placeholder,
 }: {
   value: Query;
   onChange: (input: Query) => void;
@@ -28,6 +29,7 @@ export const QueryInput = ({
   onSubmit: () => void;
   disableAutoFocus?: boolean;
   'data-test-subj'?: string;
+  placeholder?: string;
 }) => {
   const { inputValue, handleInputChange } = useDebouncedValue({ value, onChange });
 
@@ -51,7 +53,8 @@ export const QueryInput = ({
         }
       }}
       placeholder={
-        inputValue.language === 'kuery'
+        placeholder ??
+        (inputValue.language === 'kuery'
           ? i18n.translate('xpack.lens.indexPattern.filters.queryPlaceholderKql', {
               defaultMessage: '{example}',
               values: { example: 'method : "GET" or status : "404"' },
@@ -59,7 +62,7 @@ export const QueryInput = ({
           : i18n.translate('xpack.lens.indexPattern.filters.queryPlaceholderLucene', {
               defaultMessage: '{example}',
               values: { example: 'method:GET OR status:404' },
-            })
+            }))
       }
       languageSwitcherPopoverAnchorPosition="rightDown"
     />

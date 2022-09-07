@@ -10,8 +10,8 @@ import React from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiText } from '@elastic/eui';
+import type { IBasePath } from '@kbn/core-http-browser';
 
-import { IBasePath } from '../../http';
 import { IS_IE } from './url_overflow';
 
 export const UrlOverflowUi: React.FC<{ basePath: IBasePath }> = ({ basePath }) => {

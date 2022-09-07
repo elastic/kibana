@@ -12,7 +12,8 @@ import { DataProviderType } from './data_providers/data_provider';
 import { mockDataProviders } from './data_providers/mock/mock_data_providers';
 import { buildGlobalQuery, combineQueries, resolverIsShowing, showGlobalFilters } from './helpers';
 import { mockBrowserFields } from '../../../common/containers/source/mock';
-import { EsQueryConfig, FilterStateStore, Filter } from '@kbn/es-query';
+import type { EsQueryConfig, Filter } from '@kbn/es-query';
+import { FilterStateStore } from '@kbn/es-query';
 
 const cleanUpKqlQuery = (str: string) => str.replace(/\n/g, '').replace(/\s\s+/g, ' ');
 

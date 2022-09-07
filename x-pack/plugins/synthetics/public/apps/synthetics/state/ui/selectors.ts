@@ -6,9 +6,9 @@
  */
 
 import { createSelector } from 'reselect';
-import type { RooState } from '../root_reducer';
+import type { SyntheticsAppState } from '../root_reducer';
 
-const uiStateSelector = (appState: RooState) => appState.ui;
+const uiStateSelector = (appState: SyntheticsAppState) => appState.ui;
 export const selectBasePath = createSelector(uiStateSelector, ({ basePath }) => basePath);
 
 export const selectIsIntegrationsPopupOpen = createSelector(

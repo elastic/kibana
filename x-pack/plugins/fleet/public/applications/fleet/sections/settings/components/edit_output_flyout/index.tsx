@@ -46,7 +46,7 @@ export interface EditOutputFlyoutProps {
 
 const OUTPUT_TYPE_OPTIONS = [
   { value: 'elasticsearch', text: 'Elasticsearch' },
-  { value: 'logstash', text: 'Logstash (beta)' },
+  { value: 'logstash', text: 'Logstash' },
 ];
 
 export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = ({
@@ -116,6 +116,7 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
             {...inputs.nameInput.formRowProps}
           >
             <EuiFieldText
+              data-test-subj="settingsOutputsFlyout.nameInput"
               fullWidth
               {...inputs.nameInput.props}
               placeholder={i18n.translate(
@@ -134,27 +135,10 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
                 defaultMessage="Type"
               />
             }
-            helpText={
-              isLogstashOutput && (
-                <FormattedMessage
-                  id="xpack.fleet.editOutputFlyout.logstashTypeOutputBetaHelpText"
-                  defaultMessage="Logstash output is in beta. Click {sendFeedback} to report bugs and suggest improvements."
-                  values={{
-                    sendFeedback: (
-                      <strong>
-                        <FormattedMessage
-                          id="xpack.fleet.editOutputFlyout.sendFeedback"
-                          defaultMessage="Send feedback"
-                        />
-                      </strong>
-                    ),
-                  }}
-                />
-              )
-            }
           >
             <EuiSelect
               fullWidth
+              data-test-subj="settingsOutputsFlyout.typeInput"
               {...inputs.typeInput.props}
               options={OUTPUT_TYPE_OPTIONS}
               placeholder={i18n.translate(
@@ -180,6 +164,7 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
           )}
           {isESOutput && (
             <MultiRowInput
+              data-test-subj="settingsOutputsFlyout.hostUrlInput"
               label={i18n.translate('xpack.fleet.settings.editOutputFlyout.esHostsInputLabel', {
                 defaultMessage: 'Hosts',
               })}
