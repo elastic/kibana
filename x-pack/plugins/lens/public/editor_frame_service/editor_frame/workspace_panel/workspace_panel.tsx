@@ -18,7 +18,7 @@ import {
   EuiText,
   EuiButtonEmpty,
   EuiLink,
-  EuiPageContentBody,
+  EuiPageContentBody_Deprecated as EuiPageContentBody,
   EuiButton,
   EuiSpacer,
   EuiTextColor,
