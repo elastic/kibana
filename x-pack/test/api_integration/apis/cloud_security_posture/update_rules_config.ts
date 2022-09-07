@@ -6,7 +6,6 @@
  */
 import expect from '@kbn/expect';
 import type { SuperTest, Test } from 'supertest';
-import type { FtrProviderContext } from '../../ftr_provider_context';
 import type { PackageInfo, PackagePolicy } from '@kbn/fleet-plugin/common';
 import type { CspRule } from '@kbn/cloud-security-posture-plugin/common/schemas';
 import {
@@ -16,6 +15,7 @@ import {
 } from '@kbn/cloud-security-posture-plugin/common/constants';
 import type { SavedObjectsFindResponse } from '@kbn/core-saved-objects-api-server';
 import { packageToPackagePolicy } from '@kbn/fleet-plugin/common/services/package_to_package_policy';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 const getNewPackagePolicy = (packageInfo: PackageInfo) =>
   packageToPackagePolicy(
