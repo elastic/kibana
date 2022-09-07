@@ -80,12 +80,12 @@ const MyEuiSelect = styled(EuiSelect)`
   width: auto;
 `;
 
-const getNumberFromUserInput = (input: string, defaultValue = 0): number => {
+const getNumberFromUserInput = (input: string, minimumValue = 0): number => {
   const number = parseInt(input, 10);
   if (Number.isNaN(number)) {
-    return defaultValue;
+    return minimumValue;
   } else {
-    return Math.min(number, Number.MAX_SAFE_INTEGER);
+    return Math.max(minimumValue, Math.min(number, Number.MAX_SAFE_INTEGER));
   }
 };
 

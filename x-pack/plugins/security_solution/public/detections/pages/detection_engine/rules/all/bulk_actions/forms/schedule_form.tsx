@@ -33,8 +33,8 @@ export const formSchema: FormSchema<ScheduleFormData> = {
 };
 
 const defaultFormData: ScheduleFormData = {
-  interval: '5s',
-  lookback: '5m',
+  interval: '5m',
+  lookback: '1m',
 };
 
 interface ScheduleFormComponentProps {
@@ -87,6 +87,7 @@ export const ScheduleForm = ({ rulesCount, onClose, onConfirm }: ScheduleFormCom
           idAria: 'bulkEditRulesScheduleIntervalSelector',
           dataTestSubj: 'bulkEditRulesScheduleIntervalSelector',
           fullWidth: true,
+          minimumValue: 1,
         }}
       />
       <UseField
@@ -96,6 +97,7 @@ export const ScheduleForm = ({ rulesCount, onClose, onConfirm }: ScheduleFormCom
           idAria: 'bulkEditRulesScheduleLookbackSelector',
           dataTestSubj: 'bulkEditRulesScheduleLookbackSelector',
           fullWidth: true,
+          minimumValue: 1,
         }}
       />
     </BulkEditFormWrapper>
