@@ -15,9 +15,8 @@ describe('fetchIndexCounts lib function', () => {
       count: jest.fn().mockReturnValue({ count: 100 }),
     },
   };
-  it('returns count api response for each index name provided', async () => {
-    mockClient.asCurrentUser.count.mockImplementation(() => ({ count: 100 }));
 
+  it('returns count api response for each index name provided', async () => {
     const indexNames = ['index1', 'index2', 'index3'];
 
     await expect(
