@@ -14,9 +14,10 @@ import { SubChart } from './subchart';
 export interface ChartGridProps {
   limit: number;
   charts: TopNSubchart[];
+  showFrames: boolean;
 }
 
-export const ChartGrid: React.FC<ChartGridProps> = ({ limit, charts }) => {
+export const ChartGrid: React.FC<ChartGridProps> = ({ limit, charts, showFrames }) => {
   const maximum = Math.min(limit, charts.length ?? 0);
 
   const ncharts = Math.min(maximum, charts.length);
@@ -46,6 +47,7 @@ export const ChartGrid: React.FC<ChartGridProps> = ({ limit, charts }) => {
                 onShowMoreClick={() => {
                   setSelectedSubchart(subchart);
                 }}
+                showFrames={showFrames}
               />
             </EuiPanel>
           </EuiFlexItem>
@@ -68,6 +70,7 @@ export const ChartGrid: React.FC<ChartGridProps> = ({ limit, charts }) => {
             data={selectedSubchart.Series}
             showAxes
             onShowMoreClick={null}
+            showFrames={showFrames}
           />
         </EuiFlyout>
       )}

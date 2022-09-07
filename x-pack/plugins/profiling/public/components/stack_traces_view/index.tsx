@@ -7,7 +7,7 @@
 import { EuiButton, EuiButtonGroup, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
-import { StackTracesDisplayOption } from '../../../common/stack_traces';
+import { StackTracesDisplayOption, TopNType } from '../../../common/stack_traces';
 import { groupSamplesByCategory, TopNResponse, TopNSubchart } from '../../../common/topn';
 import { useProfilingParams } from '../../hooks/use_profiling_params';
 import { useProfilingRouter } from '../../hooks/use_profiling_router';
@@ -143,6 +143,7 @@ export function StackTracesView() {
                       setHighlightedSubchart(undefined);
                     }}
                     highlightedSubchart={highlightedSubchart}
+                    showFrames={topNType === TopNType.Traces}
                   />
                 </AsyncComponent>
               </EuiFlexItem>
@@ -151,7 +152,11 @@ export function StackTracesView() {
         </EuiFlexItem>
         <EuiFlexItem style={{ width: '100%' }}>
           <AsyncComponent size="m" mono {...state} style={{ minHeight: 200 }}>
-            <ChartGrid charts={data?.charts ?? []} limit={limit} />
+            <ChartGrid
+              charts={data?.charts ?? []}
+              limit={limit}
+              showFrames={topNType === TopNType.Traces}
+            />
           </AsyncComponent>
         </EuiFlexItem>
         {(data?.charts.length ?? 0) > limit ? (

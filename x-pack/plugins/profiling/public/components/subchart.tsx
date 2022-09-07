@@ -49,6 +49,7 @@ export interface SubChartProps {
   metadata: StackFrameMetadata[];
   onShowMoreClick: (() => void) | null;
   style?: React.ComponentProps<typeof EuiFlexGroup>['style'];
+  showFrames: boolean;
 }
 
 const NUM_DISPLAYED_FRAMES = 5;
@@ -65,6 +66,7 @@ export const SubChart: React.FC<SubChartProps> = ({
   metadata,
   onShowMoreClick,
   style,
+  showFrames,
 }) => {
   const theme = useEuiTheme();
 
@@ -92,9 +94,69 @@ export const SubChart: React.FC<SubChartProps> = ({
 
   const hasMoreFrames = displayedFrames.length < metadata.length;
 
+  let bottomElement: React.ReactElement;
+
+  if (metadata.length > 0) {
+    bottomElement = (
+      <>
+        <EuiFlexItem
+          style={{
+            backgroundColor: theme.euiTheme.colors.lightestShade,
+            padding: theme.euiTheme.size.m,
+          }}
+        >
+          <EuiFlexGroup direction="column" gutterSize="none">
+            {displayedFrames.map((frame, frameIndex) => (
+              <>
+                <EuiFlexItem grow={false} key={frame.FrameID}>
+                  <EuiFlexGroup direction="row" alignItems="center">
+                    <EuiFlexItem grow={false}>{frameIndex + 1}</EuiFlexItem>
+                    <EuiFlexItem grow>
+                      <StackFrameSummary frame={frame} />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiFlexItem>
+                {frameIndex < displayedFrames.length - 1 || hasMoreFrames ? (
+                  <EuiFlexItem grow={false}>
+                    <EuiHorizontalRule size="full" margin="s" />
+                  </EuiFlexItem>
+                ) : null}
+              </>
+            ))}
+          </EuiFlexGroup>
+
+          {hasMoreFrames && !!onShowMoreClick && (
+            <EuiButton onClick={onShowMoreClick}>
+              {i18n.translate('xpack.profiling.stackTracesView.showMoreTracesButton', {
+                defaultMessage: 'Show more',
+              })}
+            </EuiButton>
+          )}
+        </EuiFlexItem>
+      </>
+    );
+  } else if (category === OTHER_BUCKET_LABEL && showFrames) {
+    bottomElement = (
+      <EuiFlexItem grow style={{ padding: theme.euiTheme.size.m }}>
+        <EuiFlexGroup direction="row" alignItems="center" justifyContent="center">
+          <EuiFlexItem grow={false}>
+            {i18n.translate('xpack.profiling.stackTracesView.otherTraces', {
+              defaultMessage: '[This summarizes all traces that are too small to display]',
+            })}
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+    );
+  } else {
+    bottomElement = <EuiSpacer size="s" />;
+  }
+
   return (
-    <EuiFlexGroup direction="column" gutterSize="none" style={{ ...style, height: '100%' }}>
-      <EuiFlexItem grow={false} style={{ padding: theme.euiTheme.size.l }}>
+    <EuiFlexGroup direction="column" gutterSize="s" style={{ ...style, height: '100%' }}>
+      <EuiFlexItem
+        grow={false}
+        style={{ padding: theme.euiTheme.size.l, paddingBottom: theme.euiTheme.size.s }}
+      >
         <EuiFlexGroup
           direction="row"
           gutterSize="m"
@@ -118,7 +180,6 @@ export const SubChart: React.FC<SubChartProps> = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
-      <EuiSpacer />
       <EuiFlexItem grow={false} style={{ position: 'relative' }}>
         <Chart size={{ height, width }}>
           <Settings
@@ -178,56 +239,7 @@ export const SubChart: React.FC<SubChartProps> = ({
           </div>
         ) : null}
       </EuiFlexItem>
-      {metadata.length > 0 && (
-        <>
-          <EuiHorizontalRule margin="none" />
-          <EuiFlexItem
-            style={{
-              backgroundColor: theme.euiTheme.colors.lightestShade,
-              padding: theme.euiTheme.size.m,
-            }}
-          >
-            <EuiFlexGroup direction="column" gutterSize="none">
-              {displayedFrames.map((frame, frameIndex) => (
-                <>
-                  <EuiFlexItem grow={false} key={frame.FrameID}>
-                    <EuiFlexGroup direction="row" alignItems="center">
-                      <EuiFlexItem grow={false}>{frameIndex + 1}</EuiFlexItem>
-                      <EuiFlexItem grow>
-                        <StackFrameSummary frame={frame} />
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  </EuiFlexItem>
-                  {frameIndex < displayedFrames.length - 1 || hasMoreFrames ? (
-                    <EuiFlexItem grow={false}>
-                      <EuiHorizontalRule size="full" margin="s" />
-                    </EuiFlexItem>
-                  ) : null}
-                </>
-              ))}
-            </EuiFlexGroup>
-
-            {hasMoreFrames && !!onShowMoreClick && (
-              <EuiButton onClick={onShowMoreClick}>
-                {i18n.translate('xpack.profiling.stackTracesView.showMoreTracesButton', {
-                  defaultMessage: 'Show more',
-                })}
-              </EuiButton>
-            )}
-          </EuiFlexItem>
-        </>
-      )}
-      {category === OTHER_BUCKET_LABEL && (
-        <EuiFlexItem grow>
-          <EuiFlexGroup direction="row" alignItems="center" justifyContent="center">
-            <EuiFlexItem grow={false}>
-              {i18n.translate('xpack.profiling.stackTracesView.otherTraces', {
-                defaultMessage: '[This summarizes all traces that are too small to display]',
-              })}
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      )}
+      {bottomElement}
     </EuiFlexGroup>
   );
 };
