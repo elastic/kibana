@@ -19,13 +19,13 @@ export const collectionsCreateBreadcrumbs = [
   }),
 ];
 
-export const AnalyticsCollectionCreate: React.FC = () => {
+export const AddAnalyticsCollection: React.FC = () => {
 
   return (
     <EnterpriseSearchAnalyticsPageTemplate
       pageChrome={[...collectionsCreateBreadcrumbs]}
       restrictWidth
-      pageViewTelemetry="Analytics Collections Create"
+      pageViewTelemetry="Add Analytics Collection"
     >
       <AddAnalyticsCollectionForm />
     </EnterpriseSearchAnalyticsPageTemplate>

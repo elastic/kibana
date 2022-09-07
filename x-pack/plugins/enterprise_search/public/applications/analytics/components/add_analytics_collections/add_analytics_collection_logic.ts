@@ -14,7 +14,7 @@ import { HttpError, Status } from '../../../../../common/types/api';
 
 import { isAlphaNumericOrUnderscore } from '../../../../../common/utils/is_alphanumeric_underscore';
 import { generateEncodedPath } from '../../../shared/encode_path_params';
-import { flashAPIErrors } from '../../../shared/flash_messages';
+import { flashAPIErrors, flashSuccessToast } from '../../../shared/flash_messages';
 import { KibanaLogic } from '../../../shared/kibana';
 import { AddAnalyticsCollectionsAPILogic } from '../../api/add_analytics_collection/add_analytics_collection_api_logic';
 import { COLLECTION_VIEW_PATH } from '../../routes';
@@ -24,13 +24,14 @@ export interface AddAnalyticsCollectionsActions {
   apiSuccess(collection: AnalyticsCollection): AnalyticsCollection;
   createAnalyticsCollection(): void;
   makeRequest: typeof AddAnalyticsCollectionsAPILogic.actions.makeRequest;
-  setInputError(error: string | undefined): { inputError: string };
+  setInputError(error: string | boolean): { inputError: string | boolean };
   setNameValue(name: string): { name: string };
 }
 
 interface AddAnalyticsCollectionValues {
+  canSubmit: boolean;
   hasInputError: boolean;
-  inputError: string;
+  inputError: string | boolean;
   isLoading: boolean;
   name: string;
   status: typeof AddAnalyticsCollectionsAPILogic.values.status;
@@ -41,7 +42,7 @@ export const AddAnalyticsCollectionLogic = kea<
 >({
   actions: {
     createAnalyticsCollection: () => {},
-    setInputError: (inputError: string) => ({ inputError }),
+    setInputError: (inputError: string | boolean) => ({ inputError }),
     setNameValue: (name: string) => ({ name }),
   },
   connect: {
@@ -52,6 +53,14 @@ export const AddAnalyticsCollectionLogic = kea<
     apiError: (error) => flashAPIErrors(error),
     apiSuccess: async ({ name }, breakpoint) => {
       // Wait for propagation of the new collection
+      flashSuccessToast(
+        i18n.translate('xpack.enterpriseSearch.analytics.collectionsCreate.action.successMessage', {
+          defaultMessage: "Successfully added collection '{name}'",
+          values: {
+            name,
+          },
+        })
+      );
       await breakpoint(1000);
       KibanaLogic.values.navigateToUrl(
         generateEncodedPath(COLLECTION_VIEW_PATH, {
@@ -59,27 +68,27 @@ export const AddAnalyticsCollectionLogic = kea<
         })
       );
     },
-    createAnalyticsCollection: async () => {
+    createAnalyticsCollection: () => {
       const { name } = values;
-      await actions.makeRequest({ name });
+      actions.makeRequest({ name });
     },
     setNameValue: ({ name }) => {
       if (!isAlphaNumericOrUnderscore(name)) {
         const message = i18n.translate(
-          'xpack.enterpriseSearch.analytics.collectionsCreate.invalidCollectionName',
+          'xpack.enterpriseSearch.analytics.collectionsCreate.action.invalidCollectionName',
           {
             defaultMessage: 'Name must only contain alphanumeric characters and underscores',
           }
         );
         return actions.setInputError(message);
       }
-      return actions.setInputError('');
+      return actions.setInputError(false);
     },
   }),
   path: ['enterprise_search', 'add_analytics_collection'],
   reducers: {
     inputError: [
-      '',
+      false,
       {
         setInputError: (_, { inputError }) => inputError,
       },
@@ -92,7 +101,11 @@ export const AddAnalyticsCollectionLogic = kea<
     ],
   },
   selectors: ({ selectors }) => ({
-    hasInputError: [() => [selectors.inputError], (inputError) => inputError !== ''],
+    canSubmit: [
+      () => [selectors.hasInputError, selectors.isLoading, selectors.name],
+      (hasInputError, isLoading, name) => !hasInputError && !isLoading && name.length > 0,
+    ],
+    hasInputError: [() => [selectors.inputError], (inputError) => inputError !== false],
     isLoading: [
       () => [selectors.status],
       // includes success to include the redirect wait time

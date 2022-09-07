@@ -32,7 +32,9 @@ import { AddAnalyticsCollectionLogic } from './add_analytics_collection_logic';
 
 export const AddAnalyticsCollectionForm = () => {
   const { createAnalyticsCollection, setNameValue } = useActions(AddAnalyticsCollectionLogic);
-  const { name, inputError, hasInputError, isLoading } = useValues(AddAnalyticsCollectionLogic);
+  const { name, inputError, hasInputError, isLoading, canSubmit } = useValues(
+    AddAnalyticsCollectionLogic
+  );
   const { navigateToUrl } = useValues(KibanaLogic);
 
   return (
@@ -60,7 +62,9 @@ export const AddAnalyticsCollectionForm = () => {
             component="form"
             onSubmit={(e) => {
               e.preventDefault();
-              createAnalyticsCollection();
+              if (canSubmit) {
+                createAnalyticsCollection();
+              }
             }}
           >
             <EuiFormRow
@@ -106,8 +110,7 @@ export const AddAnalyticsCollectionForm = () => {
                 </EuiButtonEmpty>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButton fill type="submit" isLoading={isLoading}>
-                  Continue
+                <EuiButton fill type="submit" isLoading={isLoading} isDisabled={!canSubmit}>
                   {i18n.translate(
                     'xpack.enterpriseSearch.analytics.collectionsCreate.form.continueButton',
                     {
