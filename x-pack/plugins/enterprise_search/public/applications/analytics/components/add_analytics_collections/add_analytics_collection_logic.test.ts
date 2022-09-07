@@ -110,7 +110,7 @@ describe('addAnalyticsCollectionLogic', () => {
     });
 
     describe('onApiError', () => {
-      it('should flash an error toast', async () => {
+      it('should flash an error toast', () => {
         const httpError: HttpError = {
           body: {
             error: 'Bad Request',
