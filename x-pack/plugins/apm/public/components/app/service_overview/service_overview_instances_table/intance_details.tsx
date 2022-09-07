@@ -144,8 +144,6 @@ export function InstanceDetails({
     data,
   });
 
-  console.log('metricsKubernetesKeyValuePairs', metricsKubernetesKeyValuePairs);
-
   const containerType = data.kubernetes?.pod?.name ? 'Kubernetes' : 'Docker';
   return (
     <EuiFlexGroup direction="column" responsive={false}>

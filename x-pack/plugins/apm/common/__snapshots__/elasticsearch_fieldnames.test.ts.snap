@@ -37,7 +37,11 @@ exports[`Error CLOUD_REGION 1`] = `"europe-west1"`;
 
 exports[`Error CLOUD_SERVICE_NAME 1`] = `undefined`;
 
+exports[`Error CONTAINER 1`] = `undefined`;
+
 exports[`Error CONTAINER_ID 1`] = `undefined`;
+
+exports[`Error CONTAINER_IMAGE 1`] = `undefined`;
 
 exports[`Error DESTINATION_ADDRESS 1`] = `undefined`;
 
@@ -86,6 +90,26 @@ exports[`Error HTTP_RESPONSE_STATUS_CODE 1`] = `undefined`;
 exports[`Error INDEX 1`] = `undefined`;
 
 exports[`Error KUBERNETES 1`] = `undefined`;
+
+exports[`Error KUBERNETES_CONTAINER_NAME 1`] = `undefined`;
+
+exports[`Error KUBERNETES_DEPLOYMENT 1`] = `undefined`;
+
+exports[`Error KUBERNETES_DEPLOYMENT_NAME 1`] = `undefined`;
+
+exports[`Error KUBERNETES_LABELS 1`] = `undefined`;
+
+exports[`Error KUBERNETES_NAMESPACE 1`] = `undefined`;
+
+exports[`Error KUBERNETES_NAMESPACE_NAME 1`] = `undefined`;
+
+exports[`Error KUBERNETES_POD_NAME 1`] = `undefined`;
+
+exports[`Error KUBERNETES_POD_UID 1`] = `undefined`;
+
+exports[`Error KUBERNETES_REPLICASET 1`] = `undefined`;
+
+exports[`Error KUBERNETES_REPLICASET_NAME 1`] = `undefined`;
 
 exports[`Error LABEL_NAME 1`] = `undefined`;
 
@@ -280,7 +304,11 @@ exports[`Span CLOUD_REGION 1`] = `"europe-west1"`;
 
 exports[`Span CLOUD_SERVICE_NAME 1`] = `undefined`;
 
+exports[`Span CONTAINER 1`] = `undefined`;
+
 exports[`Span CONTAINER_ID 1`] = `undefined`;
+
+exports[`Span CONTAINER_IMAGE 1`] = `undefined`;
 
 exports[`Span DESTINATION_ADDRESS 1`] = `undefined`;
 
@@ -325,6 +353,26 @@ exports[`Span HTTP_RESPONSE_STATUS_CODE 1`] = `undefined`;
 exports[`Span INDEX 1`] = `undefined`;
 
 exports[`Span KUBERNETES 1`] = `undefined`;
+
+exports[`Span KUBERNETES_CONTAINER_NAME 1`] = `undefined`;
+
+exports[`Span KUBERNETES_DEPLOYMENT 1`] = `undefined`;
+
+exports[`Span KUBERNETES_DEPLOYMENT_NAME 1`] = `undefined`;
+
+exports[`Span KUBERNETES_LABELS 1`] = `undefined`;
+
+exports[`Span KUBERNETES_NAMESPACE 1`] = `undefined`;
+
+exports[`Span KUBERNETES_NAMESPACE_NAME 1`] = `undefined`;
+
+exports[`Span KUBERNETES_POD_NAME 1`] = `undefined`;
+
+exports[`Span KUBERNETES_POD_UID 1`] = `undefined`;
+
+exports[`Span KUBERNETES_REPLICASET 1`] = `undefined`;
+
+exports[`Span KUBERNETES_REPLICASET_NAME 1`] = `undefined`;
 
 exports[`Span LABEL_NAME 1`] = `undefined`;
 
@@ -515,7 +563,15 @@ exports[`Transaction CLOUD_REGION 1`] = `"europe-west1"`;
 
 exports[`Transaction CLOUD_SERVICE_NAME 1`] = `undefined`;
 
+exports[`Transaction CONTAINER 1`] = `
+Object {
+  "id": "container1234567890abcdef",
+}
+`;
+
 exports[`Transaction CONTAINER_ID 1`] = `"container1234567890abcdef"`;
+
+exports[`Transaction CONTAINER_IMAGE 1`] = `undefined`;
 
 exports[`Transaction DESTINATION_ADDRESS 1`] = `undefined`;
 
@@ -570,6 +626,26 @@ Object {
   },
 }
 `;
+
+exports[`Transaction KUBERNETES_CONTAINER_NAME 1`] = `undefined`;
+
+exports[`Transaction KUBERNETES_DEPLOYMENT 1`] = `undefined`;
+
+exports[`Transaction KUBERNETES_DEPLOYMENT_NAME 1`] = `undefined`;
+
+exports[`Transaction KUBERNETES_LABELS 1`] = `undefined`;
+
+exports[`Transaction KUBERNETES_NAMESPACE 1`] = `undefined`;
+
+exports[`Transaction KUBERNETES_NAMESPACE_NAME 1`] = `undefined`;
+
+exports[`Transaction KUBERNETES_POD_NAME 1`] = `undefined`;
+
+exports[`Transaction KUBERNETES_POD_UID 1`] = `"pod1234567890abcdef"`;
+
+exports[`Transaction KUBERNETES_REPLICASET 1`] = `undefined`;
+
+exports[`Transaction KUBERNETES_REPLICASET_NAME 1`] = `undefined`;
 
 exports[`Transaction LABEL_NAME 1`] = `undefined`;
 
