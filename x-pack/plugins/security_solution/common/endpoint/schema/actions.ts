@@ -8,6 +8,10 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { ENDPOINT_DEFAULT_PAGE_SIZE } from '../constants';
+import {
+  RESPONSE_ACTION_COMMANDS,
+  RESPONSE_ACTION_STATUS,
+} from '../service/response_actions/constants';
 
 const BaseActionRequestSchema = {
   /** A list of endpoint IDs whose hosts will be isolated (Fleet Agent IDs will be retrieved for these) */
@@ -69,19 +73,15 @@ export const ActionDetailsRequestSchema = {
   }),
 };
 
-const commandsSchema = schema.oneOf([
-  schema.literal('isolate'),
-  schema.literal('unisolate'),
-  schema.literal('kill-process'),
-  schema.literal('suspend-process'),
-  schema.literal('running-processes'),
-]);
+// TODO: fix the odd TS error
+const commandsSchema = schema.oneOf(
+  // @ts-expect-error TS2769: No overload matches this call
+  RESPONSE_ACTION_COMMANDS.map((command) => schema.literal(command))
+);
 
-const statusesSchema = schema.oneOf([
-  schema.literal('failed'),
-  schema.literal('pending'),
-  schema.literal('successful'),
-]);
+// TODO: fix the odd TS error
+// @ts-expect-error TS2769: No overload matches this call
+const statusesSchema = schema.oneOf(RESPONSE_ACTION_STATUS.map((status) => schema.literal(status)));
 
 export const EndpointActionListRequestSchema = {
   query: schema.object({
