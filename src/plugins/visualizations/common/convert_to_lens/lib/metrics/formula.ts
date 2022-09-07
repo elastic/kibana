@@ -42,7 +42,7 @@ const getFormulaForAggsWithoutParams = (
   }
 
   const formula = getFormulaFromMetric(op);
-  return `${formula}(${selector}${addTimeRangeToFormula(reducedTimeRange)})`;
+  return `${formula}(${selector ?? ''}${addTimeRangeToFormula(reducedTimeRange)})`;
 };
 
 const getFormulaForPercentileRanks = (
@@ -72,11 +72,11 @@ const getFormulaForSubMetric = (agg: IAggConfig, reducedTimeRange?: string): str
   }
 
   if (METRIC_AGGS_WITHOUT_PARAMS.includes(op.name)) {
-    return getFormulaForAggsWithoutParams(agg, agg.params.field.displayName, reducedTimeRange);
+    return getFormulaForAggsWithoutParams(agg, agg.params.field?.displayName, reducedTimeRange);
   }
 
   if (op.name === Operations.PERCENTILE_RANK) {
-    return getFormulaForPercentileRanks(agg, agg.params.field.displayName, reducedTimeRange);
+    return getFormulaForPercentileRanks(agg, agg.params.field?.displayName, reducedTimeRange);
   }
 
   return null;

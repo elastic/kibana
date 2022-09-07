@@ -11,7 +11,10 @@ import { TimefilterContract } from '@kbn/data-plugin/public';
 import { Column } from '../../common';
 import { convertMetricToColumns } from '../../common/convert_to_lens/lib/metrics';
 import { convertBucketToColumns } from '../../common/convert_to_lens/lib/buckets';
-import { getCutomBucketsFromSiblingAggs } from '../../common/convert_to_lens/lib/utils';
+import {
+  getCutomBucketsFromSiblingAggs,
+  isSiblingPipeline,
+} from '../../common/convert_to_lens/lib/utils';
 import { Vis } from '../types';
 import { getVisSchemas, Schemas } from '../vis_schemas';
 
@@ -37,6 +40,21 @@ const getBucketColumns = (
   return columns;
 };
 
+const isValidVis = (visSchemas: Schemas, splits: Array<keyof Schemas>) => {
+  const { metric } = visSchemas;
+  const sibblingPipelineAggs = metric.filter((m) => isSiblingPipeline(m));
+
+  if (!sibblingPipelineAggs.length) {
+    return true;
+  }
+
+  const splitAggs = splits.flatMap((split) => visSchemas[split]).filter(Boolean);
+  if (!splitAggs.length) {
+    return true;
+  }
+  return false;
+};
+
 export const getColumnsFromVis = <T>(
   vis: Vis<T>,
   timefilter: TimefilterContract,
@@ -51,6 +69,10 @@ export const getColumnsFromVis = <T>(
     timeRange: timefilter.getAbsoluteTime(),
   });
 
+  if (!isValidVis(visSchemas, [...buckets, ...splits])) {
+    return null;
+  }
+
   const customBuckets = getCutomBucketsFromSiblingAggs(visSchemas.metric);
 
   // doesn't support sibbling pipeline aggs with different bucket aggs
@@ -59,6 +81,7 @@ export const getColumnsFromVis = <T>(
   }
 
   const metricColumns = visSchemas.metric.flatMap((m) => convertMetricToColumns(m, dataView));
+
   if (metricColumns.includes(null)) {
     return null;
   }
