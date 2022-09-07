@@ -25,12 +25,12 @@ import {
   DataType,
   TableChangeType,
 } from '../types';
-import { generateId } from '../id_generator';
+// import { generateId } from '../id_generator';
 import { toExpression } from './to_expression';
 import { EsSQLDataPanel } from './datapanel';
 import { fetchSql } from './fetch_sql';
 import { loadIndexPatternRefs } from './utils';
-import { EsSQLPrivateState, EsSQLPersistedState, IndexPatternRef } from './types';
+import { EsSQLPrivateState, EsSQLPersistedState, IndexPatternRef, EsSQLLayerColumn } from './types';
 import { Datasource } from '../types';
 
 export function getSQLDatasource({
@@ -47,7 +47,7 @@ export function getSQLDatasource({
   dataViews: DataViewsPublicPluginStart;
 }) {
   const getSuggestionsForState = (state: EsSQLPrivateState) => {
-    return Object.entries(state.layers).map(([id, layer]) => {
+    return Object.entries(state.layers)?.map(([id, layer]) => {
       const reducedState: EsSQLPrivateState = {
         ...state,
         fieldList: state.fieldList,
@@ -58,30 +58,22 @@ export function getSQLDatasource({
       return {
         state: {
           ...reducedState,
-          layers: {
-            [id]: {
-              ...state.layers[id],
-              columns: state.fieldList.map((f) => ({
-                columnId: f.id,
-                fieldName: f.name,
-              })),
-            },
-          },
         },
         table: {
           changeType: 'unchanged' as TableChangeType,
           isMultiRow: false,
           layerId: id,
-          columns: state.fieldList.map((f) => {
-            return {
-              columnId: f.id,
-              operation: {
-                dataType: f.meta.type,
-                label: f.name,
-                isBucketed: false,
-              },
-            };
-          }),
+          columns:
+            layer.columns?.map((f) => {
+              return {
+                columnId: f.columnId,
+                operation: {
+                  dataType: f?.meta?.type,
+                  label: f.fieldName,
+                  isBucketed: false,
+                },
+              };
+            }) ?? [],
         },
         keptLayerIds: [id],
       };
@@ -105,35 +97,36 @@ export function getSQLDatasource({
         if (layer.query && isOfAggregateQueryType(layer.query) && 'sql' in layer.query) {
           const table = await fetchSql(layer.query, dataViews, data, expressions);
           const columnsFromQuery = table?.columns ?? [];
-          const layerIds = Object.keys(state.layers);
-          const newLayerId = layerIds.length > 0 ? layerIds[0] : generateId();
-          const existingColumns = state.layers[newLayerId].columns;
-          const columns = [
-            ...existingColumns,
-            ...columnsFromQuery.map((c) => ({ columnId: c.id, fieldName: c.id })),
-          ];
-          const uniqueIds: string[] = [];
+          // const layerIds = Object.keys(state.layers);
+          // const newLayerId = layerIds.length > 0 ? layerIds[0] : generateId();
+          // const existingColumns = state.layers[newLayerId].columns;
+          // const columns = [
+          //   ...existingColumns,
+          //   ...columnsFromQuery.map((c) => ({ columnId: c.id, fieldName: c.id, meta: c.meta })),
+          // ];
+          // const uniqueIds: string[] = [];
 
-          const unique = columns.filter((col) => {
-            const isDuplicate = uniqueIds.includes(col.columnId);
+          // const unique = columns.filter((col) => {
+          //   const isDuplicate = uniqueIds.includes(col.columnId);
 
-            if (!isDuplicate) {
-              uniqueIds.push(col.columnId);
+          //   if (!isDuplicate) {
+          //     uniqueIds.push(col.columnId);
 
-              return true;
-            }
+          //     return true;
+          //   }
 
-            return false;
-          });
+          //   return false;
+          // });
 
-          fieldList = unique.map((u) => {
-            const field = columnsFromQuery.find((c) => c.name === u.fieldName);
-            return {
-              name: u.fieldName,
-              id: u.columnId,
-              meta: field?.meta,
-            };
-          }) as DatatableColumn[];
+          // fieldList = unique.map((u) => {
+          //   const field = columnsFromQuery.find((c) => c.name === u.fieldName);
+          //   return {
+          //     name: u.fieldName,
+          //     id: u.columnId,
+          //     meta: field?.meta,
+          //   };
+          // }) as DatatableColumn[];
+          fieldList = columnsFromQuery;
         }
       }
       // const temp = fetchFieldList(query, data, expressions, timeFieldName);
@@ -157,6 +150,7 @@ export function getSQLDatasource({
         ...initState,
         fieldList,
         removedLayers: [],
+        selectedColumns: [],
         indexPatternRefs,
       };
     },
@@ -198,7 +192,7 @@ export function getSQLDatasource({
     removeLayer(state: EsSQLPrivateState, layerId: string) {
       const deletedLayer = state.layers[layerId];
       const newLayers = { ...state.layers };
-      delete newLayers[layerId];
+      // delete newLayers[layerId];
 
       const deletedFieldList = state.fieldList;
 
@@ -207,10 +201,7 @@ export function getSQLDatasource({
         layers: newLayers,
         fieldList: state.fieldList,
         removedLayers: deletedLayer.query
-          ? [
-              { layer: { ...deletedLayer, columns: [] }, fieldList: deletedFieldList },
-              ...state.removedLayers,
-            ]
+          ? [{ layer: { ...deletedLayer }, fieldList: deletedFieldList }, ...state.removedLayers]
           : state.removedLayers,
       };
     },
@@ -220,7 +211,6 @@ export function getSQLDatasource({
         ...state,
         layers: {
           ...state.layers,
-          [layerId]: { ...state.layers[layerId] },
         },
       };
     },
@@ -294,11 +284,12 @@ export function getSQLDatasource({
       domElement: Element,
       props: DatasourceDimensionTriggerProps<EsSQLPrivateState>
     ) => {
-      const selectedField = props.state.layers[props.layerId].columns.find(
-        (column) => column.columnId === props.columnId
-      )!;
+      const layer = props.state.layers[props.layerId];
+      const selectedField = layer?.columns?.find((column) => column.columnId === props.columnId)!;
       render(
-        <EuiButtonEmpty onClick={() => {}}>{selectedField?.fieldName}</EuiButtonEmpty>,
+        <EuiButtonEmpty onClick={() => {}}>
+          {selectedField?.customLabel ?? selectedField?.fieldName}
+        </EuiButtonEmpty>,
         domElement
       );
     },
@@ -312,7 +303,7 @@ export function getSQLDatasource({
       props: DatasourceDimensionEditorProps<EsSQLPrivateState>
     ) => {
       const fields = props.state.fieldList;
-      const selectedField = props.state.layers[props.layerId].columns.find(
+      const selectedField = props.state.layers[props.layerId]?.columns?.find(
         (column) => column.columnId === props.columnId
       );
       render(
@@ -328,25 +319,37 @@ export function getSQLDatasource({
               !selectedField
                 ? {
                     ...props.state,
-                    fieldList: meta
-                      ? [...fields, { id: props.columnId, name: e.target.value, meta }]
-                      : fields,
+                    // fieldList: meta
+                    //   ? [...fields, { id: props.columnId, name: e.target.value, meta }]
+                    //   : fields,
                     layers: {
                       ...props.state.layers,
                       [props.layerId]: {
                         ...props.state.layers[props.layerId],
                         columns: [
                           ...props.state.layers[props.layerId].columns,
-                          { columnId: props.columnId, fieldName: e.target.value },
+                          {
+                            columnId: props.columnId,
+                            fieldName: e.target.value,
+                            meta,
+                          },
+                        ],
+                        selectedColumns: [
+                          ...props.state.layers[props.layerId].selectedColumns,
+                          {
+                            columnId: props.columnId,
+                            fieldName: e.target.value,
+                            meta,
+                          },
                         ],
                       },
                     },
                   }
                 : {
                     ...props.state,
-                    fieldList: meta
-                      ? [...fields, { id: props.columnId, name: e.target.value, meta }]
-                      : fields,
+                    // fieldList: meta
+                    //   ? [...fields, { id: props.columnId, name: e.target.value, meta }]
+                    //   : fields,
                     layers: {
                       ...props.state.layers,
                       [props.layerId]: {
@@ -354,7 +357,13 @@ export function getSQLDatasource({
                         columns: props.state.layers[props.layerId].columns.map((col) =>
                           col.columnId !== props.columnId
                             ? col
-                            : { ...col, fieldName: e.target.value }
+                            : { ...col, fieldName: e.target.value, customLabel: undefined }
+                        ),
+                        selectedColumns: props.state.layers[props.layerId].selectedColumns.map(
+                          (col) =>
+                            col.columnId !== props.columnId
+                              ? col
+                              : { ...col, fieldName: e.target.value, customLabel: undefined }
                         ),
                       },
                     },
@@ -409,29 +418,88 @@ export function getSQLDatasource({
 
     onDrop: (props) => {
       const { dropType, state, source, target } = props;
-      const { layers, fieldList } = state;
-      const layerId = Object.keys(layers)?.[0];
-
-      const field = fieldList.find((f) => f.id === source.id);
+      const { layers } = state;
+      // console.dir(props);
+      // const layerId = Object.keys(layers)?.[0];
 
       if (dropType === 'field_add') {
-        const currentLayer = props.state.layers[layerId];
-        props.setState({
-          ...props.state,
-          fieldList: field
-            ? [...fieldList, { id: target.columnId, name: field.name, meta: field.meta }]
-            : fieldList,
-          layers: {
-            ...props.state.layers,
-            [layerId]: {
-              ...props.state.layers[layerId],
-              columns: [
-                ...currentLayer.columns,
-                { columnId: target.columnId, fieldName: field?.name ?? '' },
-              ],
+        Object.keys(layers).forEach((layerId) => {
+          const field = layers[layerId].columns.find((f) => f.columnId === source.id);
+          const currentLayer = props.state.layers[layerId];
+          const columnExists = currentLayer.columns.some((c) => c.columnId === source.columnId);
+          const numCols = currentLayer.columns.filter((c) => c.fieldName === field?.fieldName);
+          props.setState({
+            ...props.state,
+            // fieldList: field
+            //   ? [...fieldList, { id: target.columnId, name: field.name, meta: field.meta }]
+            //   : fieldList,
+            layers: {
+              ...props.state.layers,
+              [layerId]: {
+                ...props.state.layers[layerId],
+                columns: [
+                  ...currentLayer.columns,
+                  {
+                    columnId: target.columnId,
+                    customLabel: columnExists
+                      ? `${field?.fieldName}[${numCols.length - 1}]`
+                      : field?.fieldName ?? '',
+                    fieldName: field?.fieldName ?? '',
+                    meta: field?.meta,
+                  },
+                ],
+                selectedColumns: [
+                  ...currentLayer.selectedColumns,
+                  {
+                    columnId: target.columnId,
+                    customLabel: columnExists
+                      ? `${field?.fieldName}[${numCols.length - 1}]`
+                      : field?.fieldName ?? '',
+                    fieldName: field?.fieldName ?? '',
+                    meta: field?.meta,
+                  },
+                ],
+                // columns: currentLayer.columns.map((c) =>
+                //   c.columnId !== target.columnId
+                //     ? c
+                //     : { ...c, fieldName: field?.fieldName ?? '', meta: field?.meta }
+                // ),
+              },
             },
-          },
+          });
         });
+        // const field = layers[layerId].columns.find((f) => f.columnId === source.id);
+        // const currentLayer = props.state.layers[layerId];
+        // const columnExists = currentLayer.columns.some((c) => c.columnId === source.columnId);
+        // const numCols = currentLayer.columns.filter((c) => c.fieldName === field?.fieldName);
+        // props.setState({
+        //   ...props.state,
+        //   // fieldList: field
+        //   //   ? [...fieldList, { id: target.columnId, name: field.name, meta: field.meta }]
+        //   //   : fieldList,
+        //   layers: {
+        //     ...props.state.layers,
+        //     [layerId]: {
+        //       ...props.state.layers[layerId],
+        //       columns: [
+        //         ...currentLayer.columns,
+        //         {
+        //           columnId: target.columnId,
+        //           customLabel: columnExists
+        //             ? `${field?.fieldName}[${numCols.length - 1}]`
+        //             : field?.fieldName ?? '',
+        //           fieldName: field?.fieldName ?? '',
+        //           meta: field?.meta,
+        //         },
+        //       ],
+        //       // columns: currentLayer.columns.map((c) =>
+        //       //   c.columnId !== target.columnId
+        //       //     ? c
+        //       //     : { ...c, fieldName: field?.fieldName ?? '', meta: field?.meta }
+        //       // ),
+        //     },
+        //   },
+        // });
         return true;
       }
       return false;
@@ -443,18 +511,19 @@ export function getSQLDatasource({
 
         getTableSpec: () => {
           return (
-            state.layers[layerId]?.columns.map((column) => ({ columnId: column.columnId })) || []
+            state.layers[layerId]?.selectedColumns?.map((column) => ({
+              columnId: column.columnId,
+            })) || []
           );
         },
         getOperationForColumnId: (columnId: string) => {
           const layer = state.layers[layerId];
-          const column = layer?.columns.find((c) => c.columnId === columnId);
+          const column = layer?.columns?.find((c) => c.columnId === columnId);
 
           if (column) {
-            const field = state.fieldList?.find((f) => f.name === column.fieldName)!;
             return {
-              dataType: field?.meta?.type as DataType,
-              label: field?.name,
+              dataType: column?.meta?.type as DataType,
+              label: column?.fieldName,
               isBucketed: false,
             };
           }
@@ -475,14 +544,11 @@ export function getSQLDatasource({
   return sqlDatasource;
 }
 
-function blankLayer(
-  index: string,
-  query?: AggregateQuery,
-  columns?: Array<{ columnId: string; fieldName: string }>
-) {
+function blankLayer(index: string, query?: AggregateQuery, columns?: EsSQLLayerColumn[]) {
   return {
     index,
     query,
     columns: columns ?? [],
+    selectedColumns: [],
   };
 }

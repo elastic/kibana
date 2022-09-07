@@ -9,6 +9,7 @@ import { Ast } from '@kbn/interpreter';
 import type { TimeRange } from '@kbn/es-query';
 import { timerangeToAst, aggregateQueryToAst } from '@kbn/data-plugin/common';
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/common';
+import type { OriginalColumn } from '../../common/types';
 import { EsSQLPrivateState, EsSQLLayer, IndexPatternRef } from './types';
 
 function getExpressionForLayer(
@@ -16,20 +17,40 @@ function getExpressionForLayer(
   refs: IndexPatternRef[],
   timeRange?: TimeRange
 ): Ast | null {
-  if (layer.columns.length === 0) {
+  if (!layer.columns || layer.columns?.length === 0) {
     return null;
   }
 
-  const idMap = layer.columns.reduce((currentIdMap, column, index) => {
-    return {
-      ...currentIdMap,
-      [column.fieldName]: [
-        {
-          id: column.columnId,
-        },
-      ],
-    };
+  let idMapper: Record<string, OriginalColumn[]> = {};
+  layer.columns.forEach((col) => {
+    if (idMapper[col.fieldName]) {
+      idMapper[col.fieldName].push({
+        id: col.columnId,
+        label: col.customLabel ?? col.fieldName,
+      } as OriginalColumn);
+    } else {
+      idMapper = {
+        ...idMapper,
+        [col.fieldName]: [
+          {
+            id: col.columnId,
+            label: col.fieldName,
+          } as OriginalColumn,
+        ],
+      };
+    }
   });
+
+  // const idMap = layer.columns.reduce((currentIdMap, column, index) => {
+  //   return {
+  //     ...currentIdMap,
+  //     [column.fieldName]: [
+  //       {
+  //         id: column.columnId,
+  //       },
+  //     ],
+  //   };
+  // });
 
   const kibana = buildExpressionFunction('kibana', {});
   const kibanaContext = buildExpressionFunction('kibana_context', {
@@ -49,7 +70,7 @@ function getExpressionForLayer(
     type: 'function',
     function: 'lens_map_to_columns',
     arguments: {
-      idMap: [JSON.stringify(idMap)],
+      idMap: [JSON.stringify(idMapper)],
     },
   });
   return ast;

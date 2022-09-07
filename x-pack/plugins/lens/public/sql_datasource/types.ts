@@ -7,10 +7,18 @@
 import type { DatatableColumn } from '@kbn/expressions-plugin/public';
 import type { AggregateQuery } from '@kbn/es-query';
 
+export interface EsSQLLayerColumn {
+  columnId: string;
+  fieldName: string;
+  meta?: DatatableColumn['meta'];
+  customLabel?: string;
+}
+
 export interface EsSQLLayer {
   index: string;
   query: AggregateQuery | undefined;
-  columns: Array<{ columnId: string; fieldName: string }>;
+  columns: EsSQLLayerColumn[];
+  selectedColumns: EsSQLLayerColumn[];
   timeField?: string;
 }
 

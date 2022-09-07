@@ -12,7 +12,7 @@ import usePrevious from 'react-use/lib/usePrevious';
 import { isEqual } from 'lodash';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import type { DatatableColumn } from '@kbn/expressions-plugin/public';
+// import type { DatatableColumn } from '@kbn/expressions-plugin/public';
 
 import { isOfAggregateQueryType, getIndexPatternFromSQLQuery } from '@kbn/es-query';
 import { ExpressionsStart } from '@kbn/expressions-plugin/public';
@@ -65,7 +65,7 @@ export function EsSQLDataPanel({
         const existingColumns = state.layers[newLayerId].columns;
         const columns = [
           ...existingColumns,
-          ...columnsFromQuery.map((c) => ({ columnId: c.id, fieldName: c.id })),
+          ...columnsFromQuery.map((c) => ({ columnId: c.id, fieldName: c.id, meta: c.meta })),
         ];
         const uniqueIds: string[] = [];
 
@@ -87,23 +87,24 @@ export function EsSQLDataPanel({
               index,
               query,
               columns: unique,
+              selectedColumns: [],
               timeField: timeFieldName,
             },
           },
         };
 
-        const fieldList = unique.map((u) => {
-          const field = columnsFromQuery.find((c) => c.name === u.fieldName);
-          return {
-            name: u.fieldName,
-            id: u.columnId,
-            meta: field?.meta,
-          };
-        }) as DatatableColumn[];
+        // const fieldList = unique.map((u) => {
+        //   const field = columnsFromQuery.find((c) => c.name === u.fieldName);
+        //   return {
+        //     name: u.fieldName,
+        //     id: u.columnId,
+        //     meta: field?.meta,
+        //   };
+        // }) as DatatableColumn[];
 
         setState({
           ...tempState,
-          fieldList: fieldList ?? [],
+          fieldList: columnsFromQuery ?? [],
           removedLayers: [],
           indexPatternRefs,
         });
