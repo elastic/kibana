@@ -116,6 +116,28 @@ describe('Axes Settings', () => {
     expect(component.find('[data-test-subj="lnsshowEndzones"]').prop('checked')).toBe(true);
   });
 
+  it('hides the current time marker visibility flag if no setter is passed in', () => {
+    const component = shallow(<AxisSettingsPopover {...props} />);
+    expect(component.find('[data-test-subj="lnsshowCurrentTimeMarker"]')).toHaveLength(0);
+  });
+
+  it('shows the current time marker switch if setter is present', () => {
+    const mockToggle = jest.fn();
+    const component = shallow(
+      <AxisSettingsPopover
+        {...props}
+        currentTimeMarkerVisible={false}
+        setCurrentTimeMarkerVisibility={mockToggle}
+      />
+    );
+    const switchElement = component.find('[data-test-subj="lnsshowCurrentTimeMarker"]');
+    expect(switchElement.prop('checked')).toBe(false);
+
+    switchElement.simulate('change');
+
+    expect(mockToggle).toHaveBeenCalledWith(true);
+  });
+
   describe('axis extent', () => {
     it('hides the extent section if no extent is passed in', () => {
       const component = shallow(<AxisSettingsPopover {...props} />);
