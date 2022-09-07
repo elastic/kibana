@@ -85,7 +85,7 @@ export const AddAnalyticsCollectionLogic = kea<
       return actions.setInputError(false);
     },
   }),
-  path: ['enterprise_search', 'add_analytics_collection'],
+  path: ['enterprise_search', 'analytics', 'add_analytics_collection'],
   reducers: {
     inputError: [
       false,
