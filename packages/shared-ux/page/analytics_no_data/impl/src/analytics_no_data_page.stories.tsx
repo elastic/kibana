@@ -29,7 +29,9 @@ export default {
 export const Analytics = (params: AnalyticsNoDataPageStorybookParams) => {
   return (
     <AnalyticsNoDataPageProvider {...mock.getServices(params)}>
-      <Component {...mock.getProps()} />
+      <Component {...mock.getProps()}>
+        <p>Seeing this means the viewer has data.</p>
+      </Component>
     </AnalyticsNoDataPageProvider>
   );
 };
