@@ -35,15 +35,18 @@ export const MonitorSelector = () => {
 
   useEffect(() => {
     if (recentlyViewed.length > 0 && !searchValue) {
-      const otherMonitors = values.filter((value) =>
+      let otherMonitors = values.filter((value) =>
         recentlyViewed.every((recent) => recent.id !== value.id)
       );
 
-      setOptions([
-        ...recentlyViewed,
-        { id: 'monitors', label: MONITORS, isGroupLabel: true },
-        ...otherMonitors,
-      ]);
+      if (otherMonitors.length > 0) {
+        otherMonitors = [
+          { id: 'monitors', label: OTHER_MONITORS, isGroupLabel: true },
+          ...otherMonitors,
+        ];
+      }
+
+      setOptions([...recentlyViewed, ...otherMonitors]);
     } else {
       setOptions(values);
     }
@@ -96,16 +99,20 @@ export const MonitorSelector = () => {
           noMatchesMessage={NO_RESULT_FOUND}
           emptyMessage={
             <EuiButtonEmpty href={`${basePath}/app/synthetics/add-monitor`}>
-              Create new monitor
+              {CREATE_NEW_MONITOR}
             </EuiButtonEmpty>
           }
         >
           {(list, search) => (
             <div style={{ width: 240 }}>
               <EuiPopoverTitle paddingSize="s">
-                <EuiText color="subdued" size="s" className="eui-textCenter">
-                  {NO_OTHER_MONITORS_EXISTS}
-                </EuiText>
+                {options.length > 0 ? (
+                  search
+                ) : (
+                  <EuiText color="subdued" size="s" className="eui-textCenter">
+                    {NO_OTHER_MONITORS_EXISTS}
+                  </EuiText>
+                )}
               </EuiPopoverTitle>
               {list}
             </div>
@@ -120,6 +127,10 @@ const GO_TO_MONITOR = i18n.translate('xpack.synthetics.monitorSummary.goToMonito
   defaultMessage: 'Go to monitor',
 });
 
+const CREATE_NEW_MONITOR = i18n.translate('xpack.synthetics.monitorSummary.createNewMonitor', {
+  defaultMessage: 'Create new monitor',
+});
+
 const NO_RESULT_FOUND = i18n.translate('xpack.synthetics.monitorSummary.noResultsFound', {
   defaultMessage: 'No monitors found. Try modifying your query.',
 });
@@ -132,7 +143,7 @@ const SELECT_MONITOR = i18n.translate('xpack.synthetics.monitorSummary.selectMon
   defaultMessage: 'Select a different monitor to view its details',
 });
 
-const MONITORS = i18n.translate('xpack.synthetics.monitorSummary.monitors', {
+const OTHER_MONITORS = i18n.translate('xpack.synthetics.monitorSummary.otherMonitors', {
   defaultMessage: 'Other monitors',
 });
 
