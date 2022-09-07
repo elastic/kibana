@@ -33,7 +33,7 @@ describe('addAnalyticsCollectionLogic', () => {
     expect(AddAnalyticsCollectionLogic.values).toEqual({
       canSubmit: false,
       hasInputError: false,
-      inputError: false,
+      inputError: null,
       isLoading: false,
       name: '',
       status: Status.IDLE,
@@ -55,11 +55,11 @@ describe('addAnalyticsCollectionLogic', () => {
       });
 
       it('should reset error state', () => {
-        AddAnalyticsCollectionLogic.actions.setInputError(false);
+        AddAnalyticsCollectionLogic.actions.setInputError(null);
         expect(AddAnalyticsCollectionLogic.values).toEqual({
           canSubmit: false,
           hasInputError: false,
-          inputError: false,
+          inputError: null,
           isLoading: false,
           name: '',
           status: Status.IDLE,
@@ -85,7 +85,7 @@ describe('addAnalyticsCollectionLogic', () => {
         expect(AddAnalyticsCollectionLogic.values).toEqual({
           canSubmit: true,
           hasInputError: false,
-          inputError: false,
+          inputError: null,
           isLoading: false,
           name: 'valid',
           status: Status.IDLE,

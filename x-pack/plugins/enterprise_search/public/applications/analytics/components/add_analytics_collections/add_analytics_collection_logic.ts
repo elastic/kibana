@@ -9,32 +9,45 @@ import { kea, MakeLogicType } from 'kea';
 
 import { i18n } from '@kbn/i18n';
 
-import { AnalyticsCollection } from '../../../../../common/types/analytics';
-import { HttpError, Status } from '../../../../../common/types/api';
+import { Status } from '../../../../../common/types/api';
 
 import { isAlphaNumericOrUnderscore } from '../../../../../common/utils/is_alphanumeric_underscore';
+import { Actions } from '../../../shared/api_logic/create_api_logic';
 import { generateEncodedPath } from '../../../shared/encode_path_params';
 import { flashAPIErrors, flashSuccessToast } from '../../../shared/flash_messages';
 import { KibanaLogic } from '../../../shared/kibana';
-import { AddAnalyticsCollectionsAPILogic } from '../../api/add_analytics_collection/add_analytics_collection_api_logic';
+import {
+  AddAnalyticsCollectionsAPILogic,
+  AddAnalyticsCollectionApiLogicArgs,
+  AddAnalyticsCollectionApiLogicResponse,
+} from '../../api/add_analytics_collection/add_analytics_collection_api_logic';
 import { COLLECTION_VIEW_PATH } from '../../routes';
 
 export interface AddAnalyticsCollectionsActions {
-  apiError(error: HttpError): HttpError;
-  apiSuccess(collection: AnalyticsCollection): AnalyticsCollection;
+  apiError: Actions<
+    AddAnalyticsCollectionApiLogicArgs,
+    AddAnalyticsCollectionApiLogicResponse
+  >['apiError'];
+  apiSuccess: Actions<
+    AddAnalyticsCollectionApiLogicArgs,
+    AddAnalyticsCollectionApiLogicResponse
+  >['apiSuccess'];
   createAnalyticsCollection(): void;
-  makeRequest: typeof AddAnalyticsCollectionsAPILogic.actions.makeRequest;
-  setInputError(error: string | boolean): { inputError: string | boolean };
+  makeRequest: Actions<
+    AddAnalyticsCollectionApiLogicArgs,
+    AddAnalyticsCollectionApiLogicResponse
+  >['makeRequest'];
+  setInputError(error: string | null): { inputError: string | null };
   setNameValue(name: string): { name: string };
 }
 
 interface AddAnalyticsCollectionValues {
   canSubmit: boolean;
   hasInputError: boolean;
-  inputError: string | boolean;
+  inputError: string | null;
   isLoading: boolean;
   name: string;
-  status: typeof AddAnalyticsCollectionsAPILogic.values.status;
+  status: Status;
 }
 
 export const AddAnalyticsCollectionLogic = kea<
@@ -82,13 +95,13 @@ export const AddAnalyticsCollectionLogic = kea<
         );
         return actions.setInputError(message);
       }
-      return actions.setInputError(false);
+      return actions.setInputError(null);
     },
   }),
   path: ['enterprise_search', 'analytics', 'add_analytics_collection'],
   reducers: {
     inputError: [
-      false,
+      null,
       {
         setInputError: (_, { inputError }) => inputError,
       },
@@ -105,7 +118,7 @@ export const AddAnalyticsCollectionLogic = kea<
       () => [selectors.hasInputError, selectors.isLoading, selectors.name],
       (hasInputError, isLoading, name) => !hasInputError && !isLoading && name.length > 0,
     ],
-    hasInputError: [() => [selectors.inputError], (inputError) => inputError !== false],
+    hasInputError: [() => [selectors.inputError], (inputError) => inputError !== null],
     isLoading: [
       () => [selectors.status],
       // includes success to include the redirect wait time
