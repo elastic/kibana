@@ -226,21 +226,27 @@ export class FileClientImpl implements FileClient {
   };
 
   async share({ file, name, validUntil }: ShareArgs): Promise<FileShareJSONWithToken> {
-    if (!this.internalFileShareService) {
-      throw new Error('#share not implemented');
+    this.incrementUsageCounter('SHARE');
+    try {
+      if (!this.internalFileShareService) {
+        throw new Error('#share not implemented');
+      }
+      const shareObject = await this.internalFileShareService.share({
+        file,
+        name,
+        validUntil,
+      });
+      this.logAuditEvent(
+        createAuditEvent({
+          action: 'create',
+          message: `Shared file "${file.data.name}" with id "${file.data.id}"`,
+        })
+      );
+      return shareObject;
+    } catch (e) {
+      this.incrementUsageCounter('SHARE_ERROR');
+      throw e;
     }
-    const shareObject = await this.internalFileShareService.share({
-      file,
-      name,
-      validUntil,
-    });
-    this.logAuditEvent(
-      createAuditEvent({
-        action: 'create',
-        message: `Shared file "${file.data.name}" with id "${file.data.id}"`,
-      })
-    );
-    return shareObject;
   }
 
   unshare: FileShareServiceStart['delete'] = async (arg) => {

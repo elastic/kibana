@@ -10,6 +10,9 @@ export function getCounters(prefix: string) {
     DELETE: `${prefix}_delete`,
     DELETE_ERROR: `${prefix}_delete_error`,
 
+    SHARE: `${prefix}_unshare`,
+    SHARE_ERROR: `${prefix}_unshare_error`,
+
     UNSHARE: `${prefix}_unshare`,
     UNSHARE_ERROR: `${prefix}_unshare_error`,
 
