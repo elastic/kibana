@@ -71,6 +71,13 @@ export const EQL_QUERY_BAR_LABEL = i18n.translate(
   }
 );
 
+export const SAVED_QUERY_CHECKBOX_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.SavedQueryCheckboxLabel',
+  {
+    defaultMessage: 'Saved query',
+  }
+);
+
 export const THREAT_MATCH_INDEX_HELPER_TEXT = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.threatMatchingIcesHelperDescription',
   {

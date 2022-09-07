@@ -156,65 +156,54 @@ export const threatRuleParams = t.intersection([baseRuleParams, threatSpecificRu
 export type ThreatSpecificRuleParams = t.TypeOf<typeof threatSpecificRuleParams>;
 export type ThreatRuleParams = t.TypeOf<typeof threatRuleParams>;
 
-const querySpecificRuleParams = t.exact(
+const baseQueryOrSavedQueryRuleParams = t.exact(
   t.type({
-    type: t.literal('query'),
     language: nonEqlLanguages,
     index: indexOrUndefined,
-    query,
     filters: filtersOrUndefined,
-    savedId: savedIdOrUndefined,
     dataViewId: dataViewIdOrUndefined,
   })
 );
+
+const queryOnlyRuleParams = t.exact(
+  t.type({
+    type: t.literal('query'),
+    query,
+    savedId: savedIdOrUndefined,
+  })
+);
+const querySpecificRuleParams = t.intersection([
+  baseQueryOrSavedQueryRuleParams,
+  queryOnlyRuleParams,
+]);
 export const queryRuleParams = t.intersection([baseRuleParams, querySpecificRuleParams]);
+
 export type QuerySpecificRuleParams = t.TypeOf<typeof querySpecificRuleParams>;
 export type QueryRuleParams = t.TypeOf<typeof queryRuleParams>;
 
-const savedQuerySpecificRuleParams = t.type({
-  type: t.literal('saved_query'),
-  // Having language, query, and filters possibly defined adds more code confusion and probably user confusion
-  // if the saved object gets deleted for some reason
-  language: nonEqlLanguages,
-  index: indexOrUndefined,
-  dataViewId: dataViewIdOrUndefined,
-  query: queryOrUndefined,
-  filters: filtersOrUndefined,
-  savedId: saved_id,
-});
+const savedQueryOnlyRuleParams = t.exact(
+  t.type({
+    type: t.literal('saved_query'),
+    query: queryOrUndefined,
+    savedId: saved_id,
+  })
+);
+const savedQuerySpecificRuleParams = t.intersection([
+  baseQueryOrSavedQueryRuleParams,
+  savedQueryOnlyRuleParams,
+]);
 export const savedQueryRuleParams = t.intersection([baseRuleParams, savedQuerySpecificRuleParams]);
+
 export type SavedQuerySpecificRuleParams = t.TypeOf<typeof savedQuerySpecificRuleParams>;
 export type SavedQueryRuleParams = t.TypeOf<typeof savedQueryRuleParams>;
 
-const commonQuerySpecificRuleParams = t.exact(
-  t.type({
-    language: nonEqlLanguages,
-    index: indexOrUndefined,
-    filters: filtersOrUndefined,
-    dataViewId: dataViewIdOrUndefined,
-  })
-);
-
 export const unifiedQuerySpecificRuleParams = t.union([
-  t.exact(
-    t.type({
-      type: t.literal('query'),
-      query,
-      savedId: savedIdOrUndefined,
-    })
-  ),
-  t.exact(
-    t.type({
-      type: t.literal('saved_query'),
-      query: queryOrUndefined,
-      savedId: saved_id,
-    })
-  ),
+  queryOnlyRuleParams,
+  savedQueryOnlyRuleParams,
 ]);
-
 export const unifiedQueryRuleParams = t.intersection([
   baseRuleParams,
-  commonQuerySpecificRuleParams,
+  baseQueryOrSavedQueryRuleParams,
   unifiedQuerySpecificRuleParams,
 ]);
 export type UnifiedQuerySpecificRuleParams = t.TypeOf<typeof unifiedQuerySpecificRuleParams>;

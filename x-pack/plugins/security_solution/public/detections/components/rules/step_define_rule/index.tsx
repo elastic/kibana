@@ -755,7 +755,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
             <>
               <EuiSpacer size="s" />
               <RuleTypeEuiFormRow
-                label={'Load the saved query dynamically on each execution'}
+                label={i18n.SAVED_QUERY_CHECKBOX_LABEL}
                 $isVisible={Boolean(formQuery?.saved_id)}
                 fullWidth
               >
