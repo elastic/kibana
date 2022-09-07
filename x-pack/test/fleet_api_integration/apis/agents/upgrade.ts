@@ -557,17 +557,12 @@ export default function (providerContext: FtrProviderContext) {
           index: AGENTS_INDEX,
           body: {
             doc: {
-              local_metadata: {
-                elastic: {
-                  agent: { upgradeable: false, version: '0.0.0' },
-                },
-              },
-              upgrade_started_at: undefined,
+              local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
             },
           },
         });
 
-        const { body: unenrolledBody } = await supertest
+        const { body } = await supertest
           .post(`/api/fleet/agents/bulk_upgrade`)
           .set('kbn-xsrf', 'xxx')
           .send({
@@ -577,7 +572,39 @@ export default function (providerContext: FtrProviderContext) {
           })
           .expect(200);
 
-        expect(unenrolledBody).to.eql({});
+        const actionId = body.actionId;
+
+        const verifyActionResult = async () => {
+          const [agent1data, agent2data] = await Promise.all([
+            supertest.get(`/api/fleet/agents/agent1`).set('kbn-xsrf', 'xxx'),
+            supertest.get(`/api/fleet/agents/agent2`).set('kbn-xsrf', 'xxx'),
+          ]);
+          expect(typeof agent1data.body.item.upgrade_started_at).to.be('string');
+          expect(typeof agent2data.body.item.upgrade_started_at).to.be('string');
+        };
+
+        await new Promise((resolve, reject) => {
+          let attempts = 0;
+          const intervalId = setInterval(async () => {
+            if (attempts > 2) {
+              clearInterval(intervalId);
+              reject('action timed out');
+            }
+            ++attempts;
+            const {
+              body: { items: actionStatuses },
+            } = await supertest.get(`/api/fleet/agents/action_status`).set('kbn-xsrf', 'xxx');
+            const action = actionStatuses.find((a: any) => a.actionId === actionId);
+            // 2 upgradeable
+            if (action && action.nbAgentsActionCreated === 2) {
+              clearInterval(intervalId);
+              await verifyActionResult();
+              resolve({});
+            }
+          }, 1000);
+        }).catch((e) => {
+          throw e;
+        });
       });
 
       it('should not upgrade an unenrolling agent during bulk_upgrade', async () => {
