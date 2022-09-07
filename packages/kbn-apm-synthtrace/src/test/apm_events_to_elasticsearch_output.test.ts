@@ -46,6 +46,7 @@ describe('output apm events to elasticsearch', () => {
           "version": "1.4",
         },
         "observer": Object {
+          "type": "synthtrace",
           "version": "8.0.0",
           "version_major": 8,
         },
