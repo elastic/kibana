@@ -25,6 +25,12 @@ export const getUiSettings: () => Record<string, UiSettingsParams> = () => ({
           'If enabled, document sampling is used to determine field existence (available or empty) for the Lens field list instead of relying on index mappings.',
       }
     ),
+    deprecation: {
+      message: i18n.translate('xpack.lens.advancedSettings.useFieldExistenceSampling.deprecation', {
+        defaultMessage: 'This setting is deprecated and will not be supported as of 8.6.',
+      }),
+      docLinksKey: 'visualizationSettings',
+    },
     category: ['visualization'],
     schema: schema.boolean(),
   },
