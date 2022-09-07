@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 
 export * from '../../common/translations';
+export * from '../user_profiles/translations';
 
 export const STEP_ONE_TITLE = i18n.translate('xpack.cases.create.stepOneTitle', {
   defaultMessage: 'Case fields',

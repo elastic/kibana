@@ -39,7 +39,7 @@ export const REMOVE_ASSIGNEES = i18n.translate(
   }
 );
 
-export const ASSIGNEES = i18n.translate('xpack.cases.assigneesTitle', {
+export const ASSIGNEES = i18n.translate('xpack.cases.userProfile.assigneesTitle', {
   defaultMessage: 'Assignees',
 });
 

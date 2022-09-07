@@ -296,7 +296,3 @@ export const READ_ACTIONS_PERMISSIONS_ERROR_MSG = i18n.translate(
       'You do not have permission to view connectors. If you would like to view connectors, contact your Kibana administrator.',
   }
 );
-
-export const ASSIGNEES = i18n.translate('xpack.cases.common.assigneesTitle', {
-  defaultMessage: 'Assignees',
-});
