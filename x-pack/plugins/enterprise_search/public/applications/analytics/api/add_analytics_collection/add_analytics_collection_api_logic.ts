@@ -10,17 +10,25 @@ import { AnalyticsCollection } from '../../../../../common/types/analytics';
 import { createApiLogic } from '../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../shared/http';
 
-export type FetchAnalyticsCollectionsApiLogicResponse = AnalyticsCollection[];
+export interface AddAnalyticsCollectionApiLogicArgs {
+  name: string;
+}
 
-export const fetchAnalyticsCollections = async () => {
+export type AddAnalyticsCollectionApiLogicResponse = AnalyticsCollection;
+
+export const createAnalyticsCollection = async ({
+  name,
+}: AddAnalyticsCollectionApiLogicArgs): Promise<AddAnalyticsCollectionApiLogicResponse> => {
   const { http } = HttpLogic.values;
   const route = '/internal/enterprise_search/analytics/collections';
-  const response = await http.get<FetchAnalyticsCollectionsApiLogicResponse>(route);
+  const response = await http.post<AnalyticsCollection>(route, {
+    body: JSON.stringify({ name }),
+  });
 
   return response;
 };
 
-export const FetchAnalyticsCollectionsAPILogic = createApiLogic(
-  ['analytics', 'analytics_collections_api_logic'],
-  fetchAnalyticsCollections
+export const AddAnalyticsCollectionsAPILogic = createApiLogic(
+  ['analytics', 'add_analytics_collections_api_logic'],
+  createAnalyticsCollection
 );

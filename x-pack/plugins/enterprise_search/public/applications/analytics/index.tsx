@@ -12,9 +12,11 @@ import { isVersionMismatch } from '../../../common/is_version_mismatch';
 import { InitialAppData } from '../../../common/types';
 import { VersionMismatchPage } from '../shared/version_mismatch';
 
+import { AddAnalyticsCollection } from './components/add_analytics_collections/add_analytics_collection';
+
 import { AnalyticsOverview } from './components/analytics_overview/analytics_overview';
 
-import { ROOT_PATH } from './routes';
+import { ROOT_PATH, COLLECTION_CREATION_PATH } from './routes';
 
 export const Analytics: React.FC<InitialAppData> = (props) => {
   const { enterpriseSearchVersion, kibanaVersion } = props;
@@ -31,6 +33,9 @@ export const Analytics: React.FC<InitialAppData> = (props) => {
         ) : (
           <AnalyticsOverview />
         )}
+      </Route>
+      <Route path={COLLECTION_CREATION_PATH}>
+        <AddAnalyticsCollection />
       </Route>
     </Switch>
   );

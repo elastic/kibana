@@ -108,7 +108,20 @@ export function registerAnalyticsRoutes({ router, log }: RouteDependencies) {
             response,
             statusCode: 409,
           });
+        } else if ((error as Error).message === ErrorCode.ANALYTICS_COLLECTION_NAME_INVALID) {
+          return createError({
+            errorCode: (error as Error).message as ErrorCode,
+            message: i18n.translate(
+              'xpack.enterpriseSearch.server.routes.addAnalyticsCollection.analyticsCollectionNameInvalidError',
+              {
+                defaultMessage: 'Name must only contain alphanumeric characters and underscores',
+              }
+            ),
+            response,
+            statusCode: 400,
+          });
         }
+
         throw error;
       }
     })
