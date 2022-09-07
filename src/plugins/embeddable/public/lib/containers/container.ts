@@ -8,8 +8,18 @@
 
 import uuid from 'uuid';
 import { isEqual, xor } from 'lodash';
-import { merge, Subscription } from 'rxjs';
-import { combineLatestWith, mergeMap, pairwise, take } from 'rxjs/operators';
+import { EMPTY, merge, Subscription } from 'rxjs';
+import {
+  catchError,
+  combineLatestWith,
+  distinctUntilChanged,
+  map,
+  mergeMap,
+  pairwise,
+  switchMap,
+  take,
+} from 'rxjs/operators';
+import deepEqual from 'fast-deep-equal';
 
 import {
   Embeddable,
@@ -47,6 +57,7 @@ export abstract class Container<
   } = {};
 
   private subscription: Subscription | undefined;
+  private readonly anyChildOutputChange$;
 
   constructor(
     input: TContainerInput,
@@ -82,6 +93,26 @@ export abstract class Container<
       .subscribe(([_, [{ panels: prevPanels }, { panels: currentPanels }]]) => {
         this.maybeUpdateChildren(currentPanels, prevPanels);
       });
+
+    this.anyChildOutputChange$ = this.getOutput$().pipe(
+      map(() => this.getChildIds()),
+      distinctUntilChanged(deepEqual),
+
+      // children may change, so make sure we subscribe/unsubscribe with switchMap
+      switchMap((newChildIds: string[]) =>
+        merge(
+          ...newChildIds.map((childId) =>
+            this.getChild(childId)
+              .getOutput$()
+              .pipe(
+                // Embeddables often throw errors into their output streams.
+                catchError(() => EMPTY),
+                map(() => childId)
+              )
+          )
+        )
+      )
+    );
   }
 
   public setChildLoaded(embeddable: IEmbeddable) {
@@ -229,6 +260,10 @@ export abstract class Container<
       // tests I tried. Could probably be revisted with future releases of TS to see if
       // it can accurately infer the type.
     } as unknown as TEmbeddableInput;
+  }
+
+  public getAnyChildOutputChange$() {
+    return this.anyChildOutputChange$;
   }
 
   public destroy() {
