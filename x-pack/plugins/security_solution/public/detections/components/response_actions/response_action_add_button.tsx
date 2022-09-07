@@ -91,7 +91,7 @@ export const ResponseActionAddButton = ({
         );
       })
     );
-  }, [handleAddActionType, supportedResponseActionTypes]);
+  }, [handleAddActionType, isGoldLicense, supportedResponseActionTypes]);
 
   if (!supportedResponseActionTypes?.length) return <></>;
 

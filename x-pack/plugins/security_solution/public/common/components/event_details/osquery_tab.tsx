@@ -32,7 +32,6 @@ export const useOsqueryTab = ({
   } = useKibana();
   const handleAddToTimeline = useHandleAddToTimeline();
 
-  console.log({ rawEventData });
   if (!osquery || !rawEventData) {
     return;
   }
@@ -76,7 +75,6 @@ export const useOsqueryTab = ({
               <OsqueryResults
                 agentIds={agentIds}
                 ruleName={ruleName}
-                eventDetailId={id}
                 alertId={alertId}
                 addToTimeline={handleAddToTimeline}
               />

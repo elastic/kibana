@@ -35,7 +35,6 @@ const defaultProps = {
   agentIds: [TEST_AGENT],
   ruleName: ['Test-rule'],
   ruleActions: [{ action_type_id: 'action1' }, { action_type_id: 'action2' }],
-  eventDetailId: '123',
   alertId: 'test-alert-id',
 };
 

@@ -15,6 +15,7 @@ interface OsqueryResponseAction {
     id: string;
     savedQueryId: string;
     query: string;
+    packId: string;
     ecs_mapping?: Record<string, Record<'field', string>>;
   };
 }
@@ -42,7 +43,7 @@ export const scheduleNotificationResponseActions = (
 
   responseActions.forEach((responseActionParam) => {
     if (responseActionParam.actionTypeId === '.osquery' && osqueryCreateAction) {
-      const { savedQueryId, ...rest } = responseActionParam.params;
+      const { savedQueryId, packId, ...rest } = responseActionParam.params;
       return osqueryCreateAction({
         agent_all: undefined,
         agent_platforms: undefined,
@@ -50,7 +51,7 @@ export const scheduleNotificationResponseActions = (
         case_ids: undefined,
         event_ids: undefined,
         metadata: undefined,
-        pack_id: undefined,
+        pack_id: packId,
         queries: undefined,
         ...rest,
         // TODO WHY do we have to do it here? Find place where ecs_mapping is transformed for API, wrong type, should be Record<field> and is array...

@@ -11,6 +11,5 @@ export interface OsqueryActionResultsProps {
   agentIds?: string[];
   ruleName?: string[];
   alertId: string;
-  eventDetailId: string;
   addToTimeline?: (payload: { query: [string, string]; isIcon?: true }) => React.ReactElement;
 }

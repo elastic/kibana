@@ -5,24 +5,12 @@
  * 2.0.
  */
 
-import {
-  EuiErrorBoundary,
-  EuiCodeBlock,
-  EuiComment,
-  EuiText,
-  EuiSpacer,
-  EuiFlexItem,
-} from '@elastic/eui';
-import React, { useMemo } from 'react';
+import { EuiErrorBoundary, EuiSpacer } from '@elastic/eui';
+import React from 'react';
 import { QueryClientProvider } from '@tanstack/react-query';
 import type { CoreStart } from '@kbn/core/public';
 
-import { FormattedRelative } from '@kbn/i18n-react';
-
-import styled from 'styled-components';
 import { useAllLiveQueries } from '../../actions/use_all_live_queries';
-import { AGENT, AGENT_QUERY, ATTACHED_QUERY } from '../../agents/translations';
-import { ResultTabs } from '../../routes/saved_queries/edit/tabs';
 import { KibanaContextProvider } from '../../common/lib/kibana';
 import { Direction } from '../../../common/search_strategy';
 
@@ -30,11 +18,7 @@ import { queryClient } from '../../query_client';
 import { KibanaThemeProvider } from '../../shared_imports';
 import type { StartPlugins } from '../../types';
 import type { OsqueryActionResultsProps } from './types';
-
-const StyledScrolledEuiFlexItem = styled(EuiFlexItem)`
-  overflow-y: auto;
-  max-height: 60px;
-`;
+import { OsqueryResult } from './osquery_result';
 
 const OsqueryActionResultsComponent: React.FC<OsqueryActionResultsProps> = ({
   agentIds,
@@ -49,71 +33,28 @@ const OsqueryActionResultsComponent: React.FC<OsqueryActionResultsProps> = ({
     direction: Direction.desc,
     sortField: '@timestamp',
   });
-  const agentsList = useMemo(
-    () => (
-      <StyledScrolledEuiFlexItem>
-        {agentIds?.map((agent, id) => (
-          <EuiFlexItem key={id}>{agent}</EuiFlexItem>
-        ))}
-      </StyledScrolledEuiFlexItem>
-    ),
-    [agentIds]
-  );
 
   return (
     <div data-test-subj={'osquery-results'}>
-      {actionsData?.data.items.map((item) => {
-        const actionId = item.fields?.['queries.action_id']?.[0];
-        const query = item.fields?.['queries.query']?.[0];
+      {actionsData?.data.items.map((item, index) => {
+        const actionId = item.fields?.action_id?.[0];
+        const queryId = item.fields?.['queries.action_id']?.[0];
+        // const query = item.fields?.['queries.query']?.[0];
         const startDate = item.fields?.['@timestamp'][0];
 
         return (
-          <EuiComment
-            username={ruleName && ruleName[0]}
-            timestamp={<FormattedRelative value={startDate} />}
-            event={ATTACHED_QUERY}
-            data-test-subj={'osquery-results-comment'}
-            key={item._id}
-          >
-            <EuiSpacer size="m" />
-            <EuiText>
-              <h6>{AGENT}</h6>
-            </EuiText>
-            <EuiCodeBlock
-              language="sql"
-              fontSize="m"
-              paddingSize="m"
-              transparentBackground={agentIds && !agentIds[0].length}
-            >
-              {agentsList}
-            </EuiCodeBlock>
-            <EuiSpacer size="m" />
-            <EuiText>
-              <h6>{AGENT_QUERY}</h6>
-            </EuiText>
-            {query?.length ? (
-              <EuiCodeBlock
-                language="sql"
-                fontSize="m"
-                paddingSize="m"
-                transparentBackground={!query.length}
-              >
-                {query}
-              </EuiCodeBlock>
-            ) : (
-              <div>pack</div>
-            )}
-
-            <EuiSpacer size="xxl" />
-            <ResultTabs
-              actionId={actionId}
-              agentIds={agentIds}
-              startDate={startDate}
-              addToTimeline={addToTimeline}
-            />
-          </EuiComment>
+          <OsqueryResult
+            key={actionId + index}
+            actionId={actionId}
+            queryId={queryId}
+            startDate={startDate}
+            ruleName={ruleName}
+            addToTimeline={addToTimeline}
+            agentIds={agentIds}
+          />
         );
       })}
+      <EuiSpacer size="s" />
     </div>
   );
 };
