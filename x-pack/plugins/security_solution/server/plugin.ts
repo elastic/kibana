@@ -30,7 +30,6 @@ import { Dataset } from '@kbn/rule-registry-plugin/server';
 import type { ListPluginSetup } from '@kbn/lists-plugin/server';
 import type { ILicense } from '@kbn/licensing-plugin/server';
 
-import { catchError, exhaustMap, timer } from 'rxjs';
 import {
   createEqlAlertType,
   createIndicatorMatchAlertType,
@@ -356,40 +355,6 @@ export class Plugin implements ISecuritySolutionPlugin {
     plugins: SecuritySolutionPluginStartDependencies
   ): SecuritySolutionPluginStart {
     const { config, logger } = this;
-
-    /** FOR DEMO PURPOSES - Report metrics back to LaunchDarkly **/
-    if (plugins.cloudExperiments) {
-      timer(0, 10000)
-        .pipe(
-          exhaustMap(async () => {
-            const indexStats = await core.elasticsearch.client.asInternalUser.indices.stats({
-              index: 'security-index-test',
-              // @ts-expect-error @elasticsearch/client should add this to the types
-              ignore_unavailable: true,
-            });
-            plugins.cloudExperiments?.reportMetric({
-              metricName: 'Size of the Security indices',
-              metricValue: indexStats._all.total?.store?.size_in_bytes,
-              metricData: {
-                number_of_docs: indexStats._all.total?.docs?.count,
-              },
-            });
-
-            plugins.cloudExperiments?.reportMetric({
-              metricName: 'Number of documents in the Security indices',
-              metricValue: indexStats._all.total?.docs?.count,
-              metricData: {
-                size_of_the_indices: indexStats._all.total?.store?.size_in_bytes,
-              },
-            });
-          }),
-          catchError(async (error) => {
-            logger.warn(error);
-          })
-        )
-        .subscribe();
-    }
-    /** END OF FOR DEMO PURPOSES - Report metrics back to LaunchDarkly **/
 
     const savedObjectsClient = new SavedObjectsClient(core.savedObjects.createInternalRepository());
     const registerIngestCallback = plugins.fleet?.registerExternalCallback;
