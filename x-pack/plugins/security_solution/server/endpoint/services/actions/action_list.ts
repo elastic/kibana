@@ -279,7 +279,7 @@ const getActionDetailsList = async ({
       id: action.id,
       agents: action.agents,
       hosts: action.agents.reduce<ActionDetails['hosts']>((acc, id) => {
-        acc[id] = { name: agentsHostInfo[id] };
+        acc[id] = { name: agentsHostInfo[id] ?? '' };
         return acc;
       }, {}),
       command: action.command,
