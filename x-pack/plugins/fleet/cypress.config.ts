@@ -37,8 +37,8 @@ export default defineConfig({
   e2e: {
     baseUrl: 'http://localhost:5601',
     setupNodeEvents(on, config) {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      return require('./plugins')(on, config);
+      // eslint-disable-next-line @typescript-eslint/no-var-requires, @kbn/imports/no_boundary_crossing
+      return require('./cypress/plugins')(on, config);
     },
   },
 });
