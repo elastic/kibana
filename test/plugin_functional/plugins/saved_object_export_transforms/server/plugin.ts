@@ -31,7 +31,7 @@ export class SavedObjectExportTransformsPlugin implements Plugin {
       management: {
         defaultSearchField: 'title',
         importableAndExportable: true,
-        getTitle: (obj) => (obj.attributes as any).title,
+        getTitle: (obj) => obj.attributes.title,
         onExport: (ctx, objs) => {
           return objs.map((obj) => ({
             ...obj,
