@@ -58,8 +58,8 @@ export class StreamProcessor<TFields extends Fields = ApmFields> {
   }
   private readonly intervalAmount: number;
   private readonly intervalUnit: any;
-  private readonly name: string;
-  private readonly version: string;
+  public readonly name: string;
+  public readonly version: string;
   private readonly versionMajor: number;
 
   // TODO move away from chunking and feed this data one by one to processors
@@ -180,6 +180,7 @@ export class StreamProcessor<TFields extends Fields = ApmFields> {
   private static enrich(document: ApmFields, version: string, versionMajor: number): ApmFields {
     // see https://github.com/elastic/apm-server/issues/7088 can not be provided as flat key/values
     document.observer = {
+      type: 'synthtrace',
       version: version ?? '8.2.0',
       version_major: versionMajor,
     };
