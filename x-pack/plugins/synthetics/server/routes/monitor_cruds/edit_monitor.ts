@@ -92,26 +92,16 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
         revision: (previousMonitor.attributes[ConfigKey.REVISION] || 0) + 1,
       };
       const formattedMonitor = formatSecrets(monitorWithRevision);
-      const isMultiStepMonitor =
-        monitor.type === 'browser' &&
-        monitor[ConfigKey.FORM_MONITOR_TYPE] !== FormMonitorType.SINGLE;
 
-      const editedMonitorSavedObject: SavedObjectsUpdateResponse<EncryptedSyntheticsMonitor> =
-        await savedObjectsClient.update<MonitorFields>(
-          syntheticsMonitorType,
-          monitorId,
-          isMultiStepMonitor ? { ...formattedMonitor, urls: '' } : formattedMonitor
-        );
-
-      const errors = await syncEditedMonitor({
+      const { errors, editedMonitor: editedMonitorSavedObject } = await syncEditedMonitor({
         server,
-        editedMonitor,
-        editedMonitorSavedObject,
         previousMonitor,
         decryptedPreviousMonitor,
         syntheticsMonitorClient,
         savedObjectsClient,
         request,
+        normalizedMonitor: editedMonitor,
+        monitorWithRevision: formattedMonitor,
       });
 
       // Return service sync errors in OK response
@@ -134,8 +124,8 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
 });
 
 export const syncEditedMonitor = async ({
-  editedMonitor,
-  editedMonitorSavedObject,
+  normalizedMonitor,
+  monitorWithRevision,
   previousMonitor,
   decryptedPreviousMonitor,
   server,
@@ -143,8 +133,8 @@ export const syncEditedMonitor = async ({
   savedObjectsClient,
   request,
 }: {
-  editedMonitor: SyntheticsMonitor;
-  editedMonitorSavedObject: SavedObjectsUpdateResponse<EncryptedSyntheticsMonitor>;
+  normalizedMonitor: SyntheticsMonitor;
+  monitorWithRevision: SyntheticsMonitorWithSecrets;
   previousMonitor: SavedObject<EncryptedSyntheticsMonitor>;
   decryptedPreviousMonitor: SavedObject<SyntheticsMonitorWithSecrets>;
   server: UptimeServerSetup;
@@ -153,33 +143,47 @@ export const syncEditedMonitor = async ({
   request: KibanaRequest;
 }) => {
   try {
-    const errors = await syntheticsMonitorClient.editMonitor(
-      editedMonitor as MonitorFields,
-      editedMonitorSavedObject.id,
+    const editedSOPromise = savedObjectsClient.update<MonitorFields>(
+      syntheticsMonitorType,
+      previousMonitor.id,
+      monitorWithRevision.type === 'browser' &&
+        monitorWithRevision[ConfigKey.FORM_MONITOR_TYPE] !== FormMonitorType.SINGLE
+        ? { ...monitorWithRevision, urls: '' }
+        : monitorWithRevision
+    );
+
+    const editSyncPromise = syntheticsMonitorClient.editMonitor(
+      normalizedMonitor as MonitorFields,
+      previousMonitor.id,
       request,
       savedObjectsClient
     );
+
+    const [editedMonitorSavedObject, errors] = await Promise.all([
+      editedSOPromise,
+      editSyncPromise,
+    ]);
 
     sendTelemetryEvents(
       server.logger,
       server.telemetry,
       formatTelemetryUpdateEvent(
-        editedMonitorSavedObject,
+        editedMonitorSavedObject as SavedObjectsUpdateResponse<EncryptedSyntheticsMonitor>,
         previousMonitor,
         server.kibanaVersion,
-        Boolean((editedMonitor as MonitorFields)[ConfigKey.SOURCE_INLINE]),
+        Boolean((normalizedMonitor as MonitorFields)[ConfigKey.SOURCE_INLINE]),
         errors
       )
     );
 
-    return errors;
+    return { errors, editedMonitor: editedMonitorSavedObject };
   } catch (e) {
     server.logger.error(
       `Unable to update Synthetics monitor ${decryptedPreviousMonitor.attributes[ConfigKey.NAME]}`
     );
     await savedObjectsClient.update<MonitorFields>(
       syntheticsMonitorType,
-      editedMonitorSavedObject.id,
+      previousMonitor.id,
       decryptedPreviousMonitor.attributes
     );
 

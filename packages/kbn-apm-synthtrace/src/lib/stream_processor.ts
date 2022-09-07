@@ -180,6 +180,7 @@ export class StreamProcessor<TFields extends Fields = ApmFields> {
   private static enrich(document: ApmFields, version: string, versionMajor: number): ApmFields {
     // see https://github.com/elastic/apm-server/issues/7088 can not be provided as flat key/values
     document.observer = {
+      type: 'synthtrace',
       version: version ?? '8.2.0',
       version_major: versionMajor,
     };
