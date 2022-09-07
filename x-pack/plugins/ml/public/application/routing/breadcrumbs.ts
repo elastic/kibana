@@ -57,7 +57,7 @@ export const DATA_VISUALIZER_BREADCRUMB: ChromeBreadcrumb = Object.freeze({
 
 export const AIOPS_BREADCRUMB: ChromeBreadcrumb = Object.freeze({
   text: i18n.translate('xpack.ml.aiopsBreadcrumbLabel', {
-    defaultMessage: 'AIOps',
+    defaultMessage: 'AIOps Labs',
   }),
   href: '/aiops/explain_log_rate_spikes_index_select',
 });

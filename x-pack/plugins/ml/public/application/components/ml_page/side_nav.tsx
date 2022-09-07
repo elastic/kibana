@@ -226,7 +226,7 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
       mlTabs.push({
         id: 'aiops_section',
         name: i18n.translate('xpack.ml.navMenu.aiopsTabLinkText', {
-          defaultMessage: 'AIOps',
+          defaultMessage: 'AIOps Labs',
         }),
         disabled: disableLinks,
         items: [

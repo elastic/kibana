@@ -7,7 +7,7 @@
 
 import type { IRouter } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
+import type { DataRequestHandlerContext, PluginStart } from '@kbn/data-plugin/server';
 
 import { categorizeSchema } from '../../common/api/log_categorization';
 import { API_ENDPOINT } from '../../common/api';
@@ -18,7 +18,8 @@ import type { AiopsLicense } from '../types';
 export const defineLogCategorizationRoute = (
   router: IRouter<DataRequestHandlerContext>,
   license: AiopsLicense,
-  logger: Logger
+  logger: Logger,
+  dataStart: PluginStart
 ) => {
   router.post(
     {
@@ -62,7 +63,7 @@ export const defineLogCategorizationRoute = (
             },
           },
         });
-
+        // dataStart.search.getSearchStrategy().search({})
         const resp = await client.search<unknown, { categories: { buckets: any[] } }>({
           index: request.body.index,
           size: 0,
