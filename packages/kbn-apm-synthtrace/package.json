@@ -7,8 +7,5 @@
     "synthtrace": "./bin/synthtrace"
   },
   "main": "./target_node/index.js",
-  "private": true,
-  "kibana": {
-    "devOnly": true
-  }
+  "private": true
 }
