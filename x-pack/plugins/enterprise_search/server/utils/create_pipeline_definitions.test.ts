@@ -7,7 +7,7 @@
 
 import { ElasticsearchClient } from '@kbn/core/server';
 
-import {createIndexPipelineDefinitions, MlTrainedModelClient} from './create_pipeline_definitions';
+import {createIndexPipelineDefinitions } from './create_pipeline_definitions';
 import { formatMlPipelineBody } from './create_pipeline_definitions';
 
 describe('createIndexPipelineDefinitions util function', () => {
@@ -45,7 +45,9 @@ describe('formatMlPipelineBody util function', () => {
   const destField = 'my-dest-field';
 
   const mockClient = {
-    getTrainedModels: jest.fn()
+    ml: {
+      getTrainedModels: jest.fn()
+    }
   };
 
   const expectedResult = {
@@ -94,11 +96,11 @@ describe('formatMlPipelineBody util function', () => {
           input: { field_names: [modelInputField] }
         }
       ];
-    mockClient.getTrainedModels.mockImplementation((modelId: string) => Promise.resolve(mockResponse));
-    formatMlPipelineBody(modelId, sourceField, destField, mockClient as MlTrainedModelClient).then((actualResult) => {
+    mockClient.ml.getTrainedModels.mockImplementation((modelId: string) => Promise.resolve(mockResponse));
+    formatMlPipelineBody(modelId, sourceField, destField, mockClient as unknown as ElasticsearchClient).then((actualResult) => {
       expect(actualResult).toEqual(expectedResult);
     });
-    expect(mockClient.getTrainedModels).toHaveBeenCalledTimes(1);
+    expect(mockClient.ml.getTrainedModels).toHaveBeenCalledTimes(1);
   });
 
 });

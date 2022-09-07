@@ -6,7 +6,6 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core/server';
-import { MlTrainedModelConfig } from "@elastic/elasticsearch/lib/api/typesWithBodyKey";
 
 export interface CreatedPipelines {
   created: string[];
@@ -16,10 +15,6 @@ export interface PipelineDefinition {
   processors?: Array<Record<string, any>>;
   description?: string;
   version?: number;
-}
-
-export interface MlTrainedModelClient {
-  getTrainedModels(modelId?: string): Promise<MlTrainedModelConfig[]>;
 }
 
 /**
@@ -241,12 +236,12 @@ export const formatMlPipelineBody = async (
   modelId: string,
   sourceField: string,
   destinationField: string,
-  trainedModelClient: MlTrainedModelClient
+  esClient: ElasticsearchClient
 ): Promise<PipelineDefinition> => {
   // TODO: we need an actual client. ML has one, can they export it?
   // TODO: see x-pack/plugins/ml/public/application/services/ml_api_service/trained_models.ts
-  const models = await trainedModelClient.getTrainedModels(modelId);
-  const model = models[0];
+  const models = await esClient.ml.getTrainedModels({model_id: modelId});
+  const model = models.trained_model_configs[0];
   // TODO: model can contain more than one input field, map all of those?
   const modelInputField = model.input.field_names[0];
   const modelType = model.model_type;
