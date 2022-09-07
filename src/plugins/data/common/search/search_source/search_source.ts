@@ -84,7 +84,7 @@ import {
 import _ from 'lodash';
 import { normalizeSortRequest } from './normalize_sort_request';
 
-import {AggConfigSerialized, DataViewField, SerializedSearchSourceFields} from '../..';
+import { AggConfigSerialized, DataViewField, SerializedSearchSourceFields } from '../..';
 
 import { AggConfigs, EsQuerySortValue, IEsSearchResponse, ISearchGeneric } from '../..';
 import type {
