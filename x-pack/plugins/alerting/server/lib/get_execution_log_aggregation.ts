@@ -175,11 +175,13 @@ export function getExecutionLogAggregation({
             // Bucket sort to allow paging through executions
             executionUuidSorted: {
               bucket_sort: {
-                sort: [{
-                  'numErroredActions>_count': {
-                    order: 'desc',
+                sort: [
+                  {
+                    'numErroredActions>_count': {
+                      order: 'desc',
+                    },
                   },
-                }],
+                ],
                 from: (page - 1) * perPage,
                 size: perPage,
                 gap_policy: 'insert_zeros' as estypes.AggregationsGapPolicy,
@@ -196,7 +198,7 @@ export function getExecutionLogAggregation({
                   },
                 },
               },
-            },                
+            },
             numErroredActions: {
               filter: {
                 bool: {
@@ -214,8 +216,8 @@ export function getExecutionLogAggregation({
                     {
                       match: {
                         [OUTCOME_FIELD]: 'failure',
-                      }
-                    }
+                      },
+                    },
                   ],
                 },
               },
