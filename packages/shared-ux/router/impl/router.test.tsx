@@ -11,7 +11,6 @@ import { shallow } from 'enzyme';
 import { Route } from './router';
 import { createMemoryHistory } from 'history';
 
-
 describe('Route', () => {
   test('renders', () => {
     const example = shallow(<Route />);
@@ -19,32 +18,28 @@ describe('Route', () => {
   });
 
   test('location renders as expected', () => {
-    // create a history 
+    // create a history
     const historyLocation = createMemoryHistory();
-    // add the path to the history 
+    // add the path to the history
     historyLocation.push('/app/wow');
     // prevent the location key from remaking itself each jest test
     historyLocation.location.key = 's5brde';
     // the Route component takes the history location
     const example = shallow(<Route location={historyLocation.location} />);
     expect(example).toMatchSnapshot();
-  })
+  });
 
   test('component prop renders', () => {
     const sampleComponent: FC<{}> = () => {
-      return (
-        <Component>
-          Test
-        </Component>
-      )
-    }
-    const example = shallow(<Route component={sampleComponent}/>)
+      return <Component>Test</Component>;
+    };
+    const example = shallow(<Route component={sampleComponent} />);
     expect(example).toMatchSnapshot();
-  })
+  });
 
   test('render prop renders', () => {
-    const sampleReactNode = React.createElement('li', {id:'li1'}, 'one');
+    const sampleReactNode = React.createElement('li', { id: 'li1' }, 'one');
     const example = shallow(<Route render={() => sampleReactNode} />);
     expect(example).toMatchSnapshot();
-  })
+  });
 });
