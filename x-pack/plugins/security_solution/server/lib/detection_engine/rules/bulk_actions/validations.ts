@@ -9,7 +9,8 @@ import type { Type as RuleType } from '@kbn/securitysolution-io-ts-alerting-type
 import { invariant } from '../../../../../common/utils/invariant';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
 import { BulkActionsDryRunErrCode } from '../../../../../common/constants';
-import type { BulkActionEditPayload } from '../../../../../common/detection_engine/schemas/common/schemas';
+import type { BulkActionEditPayload } from '../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema';
+import { BulkActionEditType } from '../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema';
 import type { RuleAlertType } from '../types';
 import { isIndexPatternsBulkEditAction } from './utils';
 import { throwDryRunError } from './dry_run';
@@ -24,6 +25,8 @@ interface BulkActionsValidationArgs {
 interface BulkEditBulkActionsValidationArgs {
   ruleType: RuleType;
   mlAuthz: MlAuthz;
+  edit: BulkActionEditPayload[];
+  immutable: boolean;
 }
 
 interface DryRunBulkEditBulkActionsValidationArgs {
@@ -78,8 +81,26 @@ export const validateBulkDuplicateRule = async ({ rule, mlAuthz }: BulkActionsVa
 export const validateBulkEditRule = async ({
   ruleType,
   mlAuthz,
+  edit,
+  immutable,
 }: BulkEditBulkActionsValidationArgs) => {
   await throwMlAuthError(mlAuthz, ruleType);
+
+  // if rule can't be edited error will be thrown
+  const canRuleBeEdited = !immutable || istEditApplicableToImmutableRule(edit);
+  await throwDryRunError(
+    () => invariant(canRuleBeEdited, "Elastic rule can't be edited"),
+    BulkActionsDryRunErrCode.IMMUTABLE
+  );
+};
+
+/**
+ * add_rule_actions, set_rule_actions can be applied to prebuilt/immutable rules
+ */
+const istEditApplicableToImmutableRule = (edit: BulkActionEditPayload[]): boolean => {
+  return edit.every(({ type }) =>
+    [BulkActionEditType.set_rule_actions, BulkActionEditType.add_rule_actions].includes(type)
+  );
 };
 
 /**
@@ -91,13 +112,12 @@ export const dryRunValidateBulkEditRule = async ({
   edit,
   mlAuthz,
 }: DryRunBulkEditBulkActionsValidationArgs) => {
-  await validateBulkEditRule({ ruleType: rule.params.type, mlAuthz });
-
-  // if rule is immutable, it can't be edited
-  await throwDryRunError(
-    () => invariant(rule.params.immutable === false, "Elastic rule can't be edited"),
-    BulkActionsDryRunErrCode.IMMUTABLE
-  );
+  await validateBulkEditRule({
+    ruleType: rule.params.type,
+    mlAuthz,
+    edit,
+    immutable: rule.params.immutable,
+  });
 
   // if rule is machine_learning, index pattern action can't be applied to it
   await throwDryRunError(
