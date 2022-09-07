@@ -19,6 +19,9 @@ import type {
   Logger,
   SavedObjectsClientContract,
   IScopedClusterClient,
+  KibanaResponseFactory,
+  RequestHandler,
+  RouteMethod,
 } from '@kbn/core/server';
 import type {
   AgentService,
@@ -69,6 +72,18 @@ export type CspRequestHandlerContext = CustomRequestHandlerContext<{
   csp: CspApiRequestHandlerContext;
   fleet: FleetRequestHandlerContext['fleet'];
 }>;
+
+/**
+ * Convenience type for request handlers in CSP that includes the CspRequestHandlerContext type
+ * @internal
+ */
+export type CspRequestHandler<
+  P = unknown,
+  Q = unknown,
+  B = unknown,
+  Method extends RouteMethod = any,
+  ResponseFactory extends KibanaResponseFactory = KibanaResponseFactory
+> = RequestHandler<P, Q, B, CspRequestHandlerContext, Method, ResponseFactory>;
 
 /**
  * Convenience type for routers in Csp that includes the CspRequestHandlerContext type

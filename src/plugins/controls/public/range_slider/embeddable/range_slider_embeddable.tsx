@@ -29,13 +29,18 @@ import { i18n } from '@kbn/i18n';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { ReduxEmbeddableTools, ReduxEmbeddablePackage } from '@kbn/presentation-util-plugin/public';
 
-import { ControlInput, ControlOutput } from '../..';
+import {
+  ControlInput,
+  ControlOutput,
+  RangeSliderEmbeddableInput,
+  RANGE_SLIDER_CONTROL,
+} from '../..';
 import { pluginServices } from '../../services';
-import { ControlsDataService } from '../../services/data';
-import { ControlsDataViewsService } from '../../services/data_views';
 import { RangeSliderControl } from '../components/range_slider_control';
 import { getDefaultComponentState, rangeSliderReducers } from '../range_slider_reducers';
-import { RangeSliderEmbeddableInput, RangeSliderReduxState, RANGE_SLIDER_CONTROL } from '../types';
+import { RangeSliderReduxState } from '../types';
+import { ControlsDataService } from '../../services/data/types';
+import { ControlsDataViewsService } from '../../services/data_views/types';
 
 const diffDataFetchProps = (
   current?: RangeSliderDataFetchProps,
@@ -125,6 +130,7 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
         dataViewId: newInput.dataViewId,
         fieldName: newInput.fieldName,
         timeRange: newInput.timeRange,
+        timeslice: newInput.timeslice,
         filters: newInput.filters,
         query: newInput.query,
       })),
@@ -209,7 +215,13 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
     if (!dataView || !field) return;
 
     const embeddableInput = this.getInput();
-    const { ignoreParentSettings, fieldName, query, timeRange } = embeddableInput;
+    const {
+      ignoreParentSettings,
+      fieldName,
+      query,
+      timeRange: globalTimeRange,
+      timeslice,
+    } = embeddableInput;
     let { filters = [] } = embeddableInput;
 
     if (!field) {
@@ -224,6 +236,14 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
       filters = [];
     }
 
+    const timeRange =
+      timeslice !== undefined
+        ? {
+            from: new Date(timeslice[0]).toISOString(),
+            to: new Date(timeslice[1]).toISOString(),
+            mode: 'absolute' as 'absolute',
+          }
+        : globalTimeRange;
     if (!ignoreParentSettings?.ignoreTimerange && timeRange) {
       const timeFilter = this.dataService.timefilter.createFilter(dataView, timeRange);
       if (timeFilter) {
@@ -429,4 +449,8 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
       node
     );
   };
+
+  public isChained() {
+    return true;
+  }
 }

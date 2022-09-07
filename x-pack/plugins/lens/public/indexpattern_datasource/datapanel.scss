@@ -26,6 +26,7 @@
 .lnsInnerIndexPatternDataPanel__textField {
   @include euiFormControlLayoutPadding(1, 'right');
   @include euiFormControlLayoutPadding(1, 'left');
+  box-shadow: none;
 }
 
 .lnsInnerIndexPatternDataPanel__filterType {
@@ -55,4 +56,8 @@
   font-weight: 600;
   display: inline;
   padding-left: 8px;
+}
+
+.lnsFilterButton .euiFilterButton__textShift {
+  min-width: 0;
 }

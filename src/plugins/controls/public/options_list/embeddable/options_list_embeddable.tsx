@@ -27,18 +27,19 @@ import { DataView } from '@kbn/data-views-plugin/public';
 import { Embeddable, IContainer } from '@kbn/embeddable-plugin/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 
-import {
-  OptionsListField,
-  OPTIONS_LIST_CONTROL,
-  OptionsListReduxState,
-  OptionsListEmbeddableInput,
-} from '../types';
+import { OptionsListReduxState } from '../types';
 import { pluginServices } from '../../services';
-import { ControlInput, ControlOutput } from '../..';
+import {
+  ControlInput,
+  ControlOutput,
+  OptionsListEmbeddableInput,
+  OPTIONS_LIST_CONTROL,
+} from '../..';
 import { optionsListReducers } from '../options_list_reducers';
-import { ControlsDataViewsService } from '../../services/data_views';
 import { OptionsListControl } from '../components/options_list_control';
-import { ControlsOptionsListService } from '../../services/options_list';
+import { ControlsDataViewsService } from '../../services/data_views/types';
+import { ControlsOptionsListService } from '../../services/options_list/types';
+import { OptionsListField } from '../../../common/options_list/types';
 
 const diffDataFetchProps = (
   last?: OptionsListDataFetchProps,
@@ -129,6 +130,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
         dataViewId: newInput.dataViewId,
         fieldName: newInput.fieldName,
         timeRange: newInput.timeRange,
+        timeslice: newInput.timeslice,
         filters: newInput.filters,
         query: newInput.query,
       })),
@@ -277,10 +279,24 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
     dispatch(setLoading(true));
 
     // need to get filters, query, ignoreParentSettings, and timeRange from input for inheritance
-    const { ignoreParentSettings, filters, query, timeRange } = this.getInput();
+    const {
+      ignoreParentSettings,
+      filters,
+      query,
+      timeRange: globalTimeRange,
+      timeslice,
+    } = this.getInput();
 
     if (this.abortController) this.abortController.abort();
     this.abortController = new AbortController();
+    const timeRange =
+      timeslice !== undefined
+        ? {
+            from: new Date(timeslice[0]).toISOString(),
+            to: new Date(timeslice[1]).toISOString(),
+            mode: 'absolute' as 'absolute',
+          }
+        : globalTimeRange;
     const { suggestions, invalidSelections, totalCardinality } =
       await this.optionsListService.runOptionsListRequest(
         {
@@ -377,4 +393,8 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
       node
     );
   };
+
+  public isChained() {
+    return true;
+  }
 }
