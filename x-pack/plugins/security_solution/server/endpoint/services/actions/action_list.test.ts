@@ -115,6 +115,97 @@ describe('When using `getActionList()', () => {
     });
   });
 
+  it('should return expected output for multiple agent ids', async () => {
+    const agentIds = ['agent-a', 'agent-b', 'agent-x'];
+    actionRequests = createActionRequestsEsSearchResultsMock(agentIds);
+    actionResponses = createActionResponsesEsSearchResultsMock(agentIds);
+
+    applyActionListEsSearchMock(esClient, actionRequests, actionResponses);
+    const doc = actionRequests.hits.hits[0]._source;
+    // mock metadataService.findHostMetadataForFleetAgents resolved value
+    (endpointAppContextService.getEndpointMetadataService as jest.Mock) = jest
+      .fn()
+      .mockReturnValue({
+        findHostMetadataForFleetAgents: jest.fn().mockResolvedValue([
+          {
+            agent: {
+              id: 'agent-a',
+            },
+            host: {
+              hostname: 'Host-agent-a',
+            },
+          },
+          {
+            agent: {
+              id: 'agent-b',
+            },
+            host: {
+              hostname: 'Host-agent-b',
+            },
+          },
+        ]),
+      });
+    await expect(
+      getActionList({
+        esClient,
+        logger,
+        metadataService: endpointAppContextService.getEndpointMetadataService(),
+        page: 1,
+        pageSize: 10,
+      })
+    ).resolves.toEqual({
+      page: 1,
+      pageSize: 10,
+      commands: undefined,
+      userIds: undefined,
+      startDate: undefined,
+      elasticAgentIds: undefined,
+      endDate: undefined,
+      data: [
+        {
+          agents: ['agent-a', 'agent-b', 'agent-x'],
+          hosts: {
+            'agent-a': { name: 'Host-agent-a' },
+            'agent-b': { name: 'Host-agent-b' },
+            'agent-x': { name: '' },
+          },
+          command: 'unisolate',
+          completedAt: undefined,
+          wasSuccessful: false,
+          errors: undefined,
+          id: '123',
+          isCompleted: false,
+          isExpired: true,
+          startedAt: '2022-04-27T16:08:47.449Z',
+          comment: doc?.EndpointActions.data.comment,
+          createdBy: doc?.user.id,
+          parameters: doc?.EndpointActions.data.parameters,
+          agentState: {
+            'agent-a': {
+              completedAt: '2022-04-30T16:08:47.449Z',
+              isCompleted: true,
+              wasSuccessful: true,
+              errors: undefined,
+            },
+            'agent-b': {
+              completedAt: undefined,
+              isCompleted: false,
+              wasSuccessful: false,
+              errors: undefined,
+            },
+            'agent-x': {
+              completedAt: undefined,
+              isCompleted: false,
+              wasSuccessful: false,
+              errors: undefined,
+            },
+          },
+        },
+      ],
+      total: 1,
+    });
+  });
+
   it('should call query with expected filters when querying for Action Request', async () => {
     // mock metadataService.findHostMetadataForFleetAgents resolved value
     (endpointAppContextService.getEndpointMetadataService as jest.Mock) = jest
