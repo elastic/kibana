@@ -127,7 +127,7 @@ export const EntityAnalyticsHostRiskScores = () => {
     return null;
   }
 
-  if (!isModuleEnabled) {
+  if (!isModuleEnabled && !isTableLoading) {
     return <EntityAnalyticsHostRiskScoresDisable />;
   }
 

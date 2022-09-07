@@ -123,7 +123,7 @@ export const EntityAnalyticsUserRiskScores = () => {
     return null;
   }
 
-  if (!isModuleEnabled) {
+  if (!isModuleEnabled && !isTableLoading) {
     return <EntityAnalyticsUserRiskScoresDisable />;
   }
 
