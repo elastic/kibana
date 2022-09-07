@@ -17,7 +17,11 @@ import {
 } from '@elastic/eui';
 import type { ExpressionRendererParams } from '@kbn/expressions-plugin/public';
 import { useExpressionRenderer } from '@kbn/expressions-plugin/public';
-import { SCREENSHOTTING_EXPRESSION, SCREENSHOTTING_EXPRESSION_INPUT, SCREENSHOTTING_EXPRESSION_PARAMS } from '../../common';
+import {
+  SCREENSHOTTING_EXPRESSION,
+  SCREENSHOTTING_EXPRESSION_INPUT,
+  SCREENSHOTTING_EXPRESSION_PARAMS,
+} from '../../common';
 import { ScreenshotModeContext } from './screenshot_mode_context';
 
 export function App() {
