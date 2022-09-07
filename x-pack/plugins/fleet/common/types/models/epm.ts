@@ -441,7 +441,11 @@ export interface Installation extends SavedObjectAttributes {
   install_format_schema_version?: string;
   verification_status: PackageVerificationStatus;
   verification_key_id?: string | null;
-  experimental_data_stream_features?: ExperimentalDataStreamFeature[];
+  // TypeScript doesn't like using the `ExperimentalDataStreamFeature` type defined above here
+  experimental_data_stream_features?: Array<{
+    data_stream: string;
+    features: Record<ExperimentalIndexingFeature, boolean>;
+  }>;
 }
 
 export interface PackageUsageStats {
