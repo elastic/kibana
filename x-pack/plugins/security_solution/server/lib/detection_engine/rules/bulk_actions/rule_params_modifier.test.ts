@@ -361,9 +361,9 @@ describe('ruleParamsModifier', () => {
         {
           type: BulkActionEditType.set_schedule,
           value: {
-            interval: '5m',
+            interval: `${INTERVAL_IN_MINUTES}m`,
             meta: {
-              from: '1m',
+              from: `${LOOKBACK_IN_MINUTES}m`,
             },
           },
         },
