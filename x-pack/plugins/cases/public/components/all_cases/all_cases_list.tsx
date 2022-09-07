@@ -10,6 +10,7 @@ import { EuiProgress, EuiBasicTable, EuiTableSelectionType } from '@elastic/eui'
 import { difference, head, isEmpty } from 'lodash/fp';
 import styled, { css } from 'styled-components';
 
+import { useQueryClient } from '@tanstack/react-query';
 import {
   Case,
   CaseStatusWithAllStatus,
@@ -37,6 +38,10 @@ import {
 } from '../../containers/use_get_cases';
 import { useBulkGetUserProfiles } from '../../containers/user_profiles/use_bulk_get_user_profiles';
 import { useGetCurrentUserProfile } from '../../containers/user_profiles/use_get_current_user_profile';
+import {
+  USER_PROFILES_BULK_GET_CACHE_KEY,
+  USER_PROFILES_CACHE_KEY,
+} from '../../containers/constants';
 
 const ProgressLoader = styled(EuiProgress)`
   ${({ $isShow }: { $isShow: boolean }) =>
@@ -80,6 +85,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
     });
     const [queryParams, setQueryParams] = useState<QueryParams>(DEFAULT_QUERY_PARAMS);
     const [selectedCases, setSelectedCases] = useState<Case[]>([]);
+    const queryClient = useQueryClient();
 
     const {
       data = initialData,
@@ -140,6 +146,8 @@ export const AllCasesList = React.memo<AllCasesListProps>(
         deselectCases();
         if (dataRefresh) {
           refetchCases();
+          queryClient.refetchQueries([USER_PROFILES_CACHE_KEY, USER_PROFILES_BULK_GET_CACHE_KEY]);
+
           setRefresh((currRefresh: number) => currRefresh + 1);
         }
         if (doRefresh) {
@@ -149,7 +157,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
           filterRefetch.current();
         }
       },
-      [deselectCases, doRefresh, refetchCases]
+      [deselectCases, doRefresh, queryClient, refetchCases]
     );
 
     const tableOnChangeCallback = useCallback(

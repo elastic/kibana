@@ -16,8 +16,6 @@ import { AssigneeWithProfile } from '../../user_profiles/types';
 
 jest.mock('../../../containers/user_profiles/api');
 
-jest.useFakeTimers();
-
 describe('SuggestUsersPopover', () => {
   let appMockRender: AppMockRenderer;
   let defaultProps: SuggestUsersPopoverProps;

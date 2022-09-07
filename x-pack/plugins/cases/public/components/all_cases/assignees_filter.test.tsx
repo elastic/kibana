@@ -7,7 +7,7 @@
 
 import React from 'react';
 import userEvent from '@testing-library/user-event';
-import { screen, fireEvent, waitFor } from '@testing-library/react';
+import { screen, fireEvent, waitFor, within } from '@testing-library/react';
 import { AppMockRenderer, createAppMockRenderer } from '../../common/mock';
 import { AssigneesFilterPopover, AssigneesFilterPopoverProps } from './assignees_filter';
 import { userProfiles } from '../../containers/user_profiles/api.mock';
@@ -149,5 +149,37 @@ describe('AssigneesFilterPopover', () => {
 
     expect(screen.getByText('Damaged Raccoon')).toBeInTheDocument();
     expect(screen.getByText('Physical Dinosaur')).toBeInTheDocument();
+  });
+
+  it('shows the users sorted alphabetically with the current user at the front', async () => {
+    const props = {
+      ...defaultProps,
+      currentUserProfile: userProfiles[2],
+    };
+
+    appMockRender.render(<AssigneesFilterPopover {...props} />);
+
+    await waitFor(() => {
+      userEvent.click(screen.getByTestId('options-filter-popover-button-assignees'));
+      expect(screen.getByText('Wet Dingo')).toBeInTheDocument();
+    });
+    await waitForEuiPopoverOpen();
+
+    const assignees = screen.getAllByRole('option');
+    expect(within(assignees[0]).getByText('Wet Dingo')).toBeInTheDocument();
+    expect(within(assignees[1]).getByText('Damaged Raccoon')).toBeInTheDocument();
+    expect(within(assignees[2]).getByText('Physical Dinosaur')).toBeInTheDocument();
+  });
+
+  it('does not show the number of filters', async () => {
+    appMockRender.render(<AssigneesFilterPopover {...defaultProps} />);
+
+    await waitFor(() => {
+      userEvent.click(screen.getByTestId('options-filter-popover-button-assignees'));
+      expect(screen.getByText('Wet Dingo')).toBeInTheDocument();
+    });
+    await waitForEuiPopoverOpen();
+
+    expect(screen.queryByText('3')).not.toBeInTheDocument();
   });
 });
