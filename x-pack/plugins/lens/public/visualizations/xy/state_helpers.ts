@@ -7,7 +7,14 @@
 
 import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import type { SavedObjectReference } from '@kbn/core/public';
-import type { FramePublicAPI, DatasourcePublicAPI } from '../../types';
+import { isQueryAnnotationConfig } from '@kbn/event-annotation-plugin/public';
+import { i18n } from '@kbn/i18n';
+import { validateQuery } from '../../shared_components';
+import type {
+  FramePublicAPI,
+  DatasourcePublicAPI,
+  VisualizationDimensionGroupConfig,
+} from '../../types';
 import {
   visualizationTypes,
   XYLayerConfig,
@@ -17,6 +24,7 @@ import {
   YConfig,
   XYState,
   XYPersistedState,
+  State,
 } from './types';
 import { getDataLayers, isAnnotationsLayer, isDataLayer } from './visualization_helpers';
 
@@ -149,5 +157,84 @@ export function injectReferences(
         )!.id,
       };
     }),
+  };
+}
+
+export function validateColumn(
+  state: State,
+  frame: Pick<FramePublicAPI, 'dataViews'>,
+  layerId: string,
+  columnId: string,
+  group?: VisualizationDimensionGroupConfig
+): { invalid: boolean; invalidMessages?: string[] } {
+  if (group?.invalid) {
+    return {
+      invalid: true,
+      invalidMessages: group.invalidMessage ? [group.invalidMessage] : undefined,
+    };
+  }
+  const validColumn = { invalid: false };
+  const layer = state.layers.find((l) => l.layerId === layerId);
+  if (!layer || !isAnnotationsLayer(layer)) {
+    return validColumn;
+  }
+  const annotation = layer.annotations.find(({ id }) => id === columnId);
+  if (!annotation || !isQueryAnnotationConfig(annotation)) {
+    return validColumn;
+  }
+  const { dataViews } = frame || {};
+  const layerDataView = dataViews.indexPatterns[layer.indexPatternId];
+
+  const invalidMessages: string[] = [];
+
+  if (annotation.timeField && !Boolean(layerDataView.getFieldByName(annotation.timeField))) {
+    invalidMessages.push(
+      i18n.translate('xpack.lens.xyChart.annotationError.timeFieldNotFound', {
+        defaultMessage: 'Time field {timeField} not found in data view {dataView}',
+        values: { timeField: annotation.timeField, dataView: layerDataView.title },
+      })
+    );
+  }
+
+  const { isValid, error } = validateQuery(annotation?.filter, layerDataView);
+  if (!isValid && error) {
+    invalidMessages.push(error);
+  }
+  if (annotation.textField && !Boolean(layerDataView.getFieldByName(annotation.textField))) {
+    invalidMessages.push(
+      i18n.translate('xpack.lens.xyChart.annotationError.textFieldNotFound', {
+        defaultMessage: 'Text field {textField} not found in data view {dataView}',
+        values: { textField: annotation.textField, dataView: layerDataView.title },
+      })
+    );
+  }
+  if (annotation.extraFields?.length) {
+    const missingTooltipFields = [];
+    for (const field of annotation.extraFields) {
+      if (!Boolean(layerDataView.getFieldByName(field))) {
+        missingTooltipFields.push(field);
+      }
+    }
+    if (missingTooltipFields.length) {
+      invalidMessages.push(
+        i18n.translate('xpack.lens.xyChart.annotationError.textFieldNotFound', {
+          defaultMessage:
+            'Tooltip {missingFields, plural, one {field} other {fields}} {missingTooltipFields} not found in data view {dataView}',
+          values: {
+            missingTooltipFields: missingTooltipFields.join(', '),
+            missingFields: missingTooltipFields.length,
+            dataView: layerDataView.title,
+          },
+        })
+      );
+    }
+  }
+
+  if (!invalidMessages.length) {
+    return validColumn;
+  }
+  return {
+    invalid: true,
+    invalidMessages,
   };
 }

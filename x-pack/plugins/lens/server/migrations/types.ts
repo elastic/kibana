@@ -270,7 +270,7 @@ export interface XYVisualizationState830 extends VisState820 {
 export type VisStatePre830 = XYVisualizationStatePre830;
 export type VisState830 = XYVisualizationState830;
 
-export interface XYVisStatePre840 {
+export interface XYVisStatePre850 {
   layers: Array<
     | {
         layerId: string;
@@ -284,7 +284,7 @@ export interface XYVisStatePre840 {
   >;
 }
 
-export interface XYVisState840 {
+export interface XYVisState850 {
   layers: Array<
     | {
         layerId: string;
@@ -297,5 +297,5 @@ export interface XYVisState840 {
       }
   >;
 }
-export type VisState840 = XYVisState840;
-export type LensDocShape840<VisualizationState = unknown> = LensDocShape830<VisualizationState>;
+export type VisState850 = XYVisState850;
+export type LensDocShape850<VisualizationState = unknown> = LensDocShape830<VisualizationState>;

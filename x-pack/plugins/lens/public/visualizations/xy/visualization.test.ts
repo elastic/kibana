@@ -36,6 +36,8 @@ import { EventAnnotationConfig } from '@kbn/event-annotation-plugin/common';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { DataViewsState } from '../../state_management';
+import { createMockedIndexPattern } from '../../indexpattern_datasource/mocks';
+import { createMockDataViewsState } from '../../data_views_service/mocks';
 
 const exampleAnnotation: EventAnnotationConfig = {
   id: 'an1',
@@ -2432,6 +2434,98 @@ describe('xy_visualization', () => {
           longMessage: 'Data type mismatch for the Horizontal axis, use a different function.',
         },
       ]);
+    });
+
+    describe('Annotation layers', () => {
+      function createStateWithAnnotationProps(annotation: Partial<EventAnnotationConfig>) {
+        return {
+          layers: [
+            {
+              layerId: 'layerId',
+              layerType: 'annotations',
+              indexPatternId: 'first',
+              annotations: [
+                {
+                  label: 'Event',
+                  id: '1',
+                  type: 'query',
+                  timeField: 'start_date',
+                  ...annotation,
+                },
+              ],
+            },
+          ],
+        } as XYState;
+      }
+
+      function getFrameMock() {
+        return createMockFramePublicAPI({
+          datasourceLayers: { first: mockDatasource.publicAPIMock },
+          dataViews: createMockDataViewsState({
+            indexPatterns: { first: createMockedIndexPattern() },
+          }),
+        });
+      }
+      it('should return error if current annotation contains non-existent field as timeField', () => {
+        const xyState = createStateWithAnnotationProps({
+          timeField: 'non-existent',
+        });
+        const errors = xyVisualization.getErrorMessages(xyState, getFrameMock());
+        expect(errors).toHaveLength(1);
+        expect(errors![0]).toEqual(
+          expect.objectContaining({
+            shortMessage: 'Time field non-existent not found in data view my-fake-index-pattern',
+          })
+        );
+      });
+      it('should return error if current annotation contains non existent field as textField', () => {
+        const xyState = createStateWithAnnotationProps({
+          textField: 'non-existent',
+        });
+        const errors = xyVisualization.getErrorMessages(xyState, getFrameMock());
+        expect(errors).toHaveLength(1);
+        expect(errors![0]).toEqual(
+          expect.objectContaining({
+            shortMessage: 'Text field non-existent not found in data view my-fake-index-pattern',
+          })
+        );
+      });
+      it('should contain error if current annotation contains at least one non-existent field as tooltip field', () => {
+        const xyState = createStateWithAnnotationProps({
+          extraFields: ['bytes', 'memory', 'non-existent'],
+        });
+        const errors = xyVisualization.getErrorMessages(xyState, getFrameMock());
+        expect(errors).toHaveLength(1);
+        expect(errors![0]).toEqual(
+          expect.objectContaining({
+            shortMessage: 'Tooltip field non-existent not found in data view my-fake-index-pattern',
+          })
+        );
+      });
+      it('should contain error if current annotation contains invalid query', () => {
+        const xyState = createStateWithAnnotationProps({
+          filter: { type: 'kibana_query', query: 'invalid: "', language: 'kuery' },
+        });
+        const errors = xyVisualization.getErrorMessages(xyState, getFrameMock());
+        expect(errors).toHaveLength(1);
+        expect(errors![0]).toEqual(
+          expect.objectContaining({
+            shortMessage: expect.stringContaining(
+              'Expected "(", "{", value, whitespace but """ found.'
+            ),
+          })
+        );
+      });
+      it('should contain multiple errors if current annotation contains multiple non-existent fields', () => {
+        const xyState = createStateWithAnnotationProps({
+          timeField: 'non-existent',
+          textField: 'non-existent',
+          extraFields: ['bytes', 'memory', 'non-existent'],
+          filter: { type: 'kibana_query', query: 'invalid: "', language: 'kuery' },
+        });
+        const errors = xyVisualization.getErrorMessages(xyState, getFrameMock());
+        expect(errors).toHaveLength(4);
+      });
     });
   });
 

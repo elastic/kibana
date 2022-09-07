@@ -31,9 +31,9 @@ import {
   LensDocShape810,
   LensDocShape830,
   VisStatePre830,
-  XYVisStatePre840,
-  VisState840,
-  LensDocShape840,
+  XYVisStatePre850,
+  VisState850,
+  LensDocShape850,
 } from './types';
 import { DOCUMENT_FIELD_NAME, layerTypes, LegacyMetricState } from '../../common';
 import { LensDocShape } from './saved_object_migrations';
@@ -425,14 +425,14 @@ export const commonFixValueLabelsInXY = (
 };
 
 export const commonExplicitAnnotationType = (
-  attributes: LensDocShape840<XYVisStatePre840>
-): LensDocShape840<VisState840> => {
+  attributes: LensDocShape850<XYVisStatePre850>
+): LensDocShape850<VisState850> => {
   // Skip the migration heavy part if not XY or it does not contain annotations
   if (
     attributes.visualizationType !== 'lnsXY' ||
     attributes.state.visualization.layers.every((l) => l.layerType !== 'annotations')
   ) {
-    return attributes as LensDocShape840<VisState840>;
+    return attributes as LensDocShape850<VisState850>;
   }
   const newAttributes = cloneDeep(attributes);
   const { visualization } = newAttributes.state;
@@ -458,7 +458,7 @@ export const commonExplicitAnnotationType = (
 };
 
 export const commonAnnotationAddDataViewIdReferences = (
-  attributes: LensDocShape840<VisState840>,
+  attributes: LensDocShape850<VisState850>,
   references: SavedObjectReference[] | undefined
 ): SavedObjectReference[] | undefined => {
   if (
@@ -484,15 +484,15 @@ export const commonAnnotationAddDataViewIdReferences = (
 };
 
 export const commonMigrateMetricIds = (
-  attributes: LensDocShape840<unknown>
-): LensDocShape840<unknown> => {
+  attributes: LensDocShape850<unknown>
+): LensDocShape850<unknown> => {
   const typeMappings = {
     lnsMetric: 'lnsLegacyMetric',
     lnsMetricNew: 'lnsMetric',
   } as Record<string, string>;
 
   if (!attributes.visualizationType || !(attributes.visualizationType in typeMappings)) {
-    return attributes as LensDocShape840<unknown>;
+    return attributes as LensDocShape850<unknown>;
   }
 
   const newAttributes = cloneDeep(attributes);

@@ -38,14 +38,14 @@ import {
   LensDocShape713,
   LensDocShape715,
   LensDocShape810,
-  LensDocShape840,
+  LensDocShape850,
   LensDocShapePre712,
   VisState716,
   VisState810,
-  VisState840,
+  VisState850,
   VisStatePre715,
   VisStatePre830,
-  XYVisStatePre840,
+  XYVisStatePre850,
 } from '../migrations/types';
 import { extract, inject } from '../../common/embeddable_factory';
 
@@ -138,16 +138,16 @@ export const makeLensEmbeddableFactory =
               },
               '8.5.0': (state) => {
                 const lensState = state as unknown as {
-                  attributes: LensDocShape840<VisState840>;
+                  attributes: LensDocShape850<VisState850>;
                   references: SavedObjectReference[] | undefined;
                 };
 
                 let migratedLensState = commonMigrateMetricIds(
                   lensState.attributes
-                ) as LensDocShape840<XYVisStatePre840>;
+                ) as LensDocShape850<XYVisStatePre850>;
                 migratedLensState = commonExplicitAnnotationType(migratedLensState);
                 const migratedReferences = commonAnnotationAddDataViewIdReferences(
-                  migratedLensState as LensDocShape840<VisState840>,
+                  migratedLensState as LensDocShape850<VisState850>,
                   lensState.references
                 );
                 return {

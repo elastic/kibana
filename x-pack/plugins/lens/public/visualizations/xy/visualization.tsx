@@ -13,10 +13,7 @@ import { i18n } from '@kbn/i18n';
 import type { PaletteRegistry } from '@kbn/coloring';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { CoreStart, ThemeServiceStart } from '@kbn/core/public';
-import {
-  EventAnnotationServiceType,
-  isQueryAnnotationConfig,
-} from '@kbn/event-annotation-plugin/public';
+import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import { FillStyle } from '@kbn/expression-xy-plugin/common';
@@ -39,7 +36,12 @@ import {
   PersistedState,
 } from './types';
 import { layerTypes } from '../../../common';
-import { extractReferences, injectReferences, isHorizontalChart } from './state_helpers';
+import {
+  extractReferences,
+  injectReferences,
+  isHorizontalChart,
+  validateColumn,
+} from './state_helpers';
 import { toExpression, toPreviewExpression, getSortedAccessors } from './to_expression';
 import { getAccessorColorConfigs, getColorAssignments } from './color_assignment';
 import { getColumnToLabelMap } from './state_helpers';
@@ -83,7 +85,6 @@ import { AnnotationsPanel } from './xy_config_panel/annotations_config_panel';
 import { DimensionTrigger } from '../../shared_components/dimension_trigger';
 import { defaultAnnotationLabel } from './annotations/helpers';
 import { onDropForVisualization } from '../../editor_frame_service/editor_frame/config_panel/buttons/drop_targets_utils';
-import { validateQuery } from '../../shared_components';
 
 const XY_ID = 'lnsXY';
 export const getXyVisualization = ({
@@ -485,8 +486,10 @@ export const getXyVisualization = ({
       return prevState;
     }
     if (isAnnotationsLayer(foundLayer)) {
-      const newLayer = { ...foundLayer };
-      newLayer.annotations = newLayer.annotations.filter(({ id }) => id !== columnId);
+      const newLayer = {
+        ...foundLayer,
+        annotations: foundLayer.annotations.filter(({ id }) => id !== columnId),
+      };
 
       const newLayers = prevState.layers.map((l) => (l.layerId === layerId ? newLayer : l));
       return {
@@ -636,38 +639,11 @@ export const getXyVisualization = ({
     ),
 
   validateColumn(state, frame, layerId, columnId, group) {
-    if (group?.invalid) {
-      return {
-        invalid: true,
-        invalidMessage: group.invalidMessage,
-      };
+    const { invalid, invalidMessages } = validateColumn(state, frame, layerId, columnId, group);
+    if (!invalid) {
+      return { invalid };
     }
-    const validColumn = { invalid: false };
-    const layer = state.layers.find((l) => l.layerId === layerId);
-    if (!layer || !isAnnotationsLayer(layer)) {
-      return validColumn;
-    }
-    const annotation = layer.annotations.find(({ id }) => id === columnId);
-    if (!annotation || !isQueryAnnotationConfig(annotation)) {
-      return validColumn;
-    }
-    const { dataViews } = frame || {};
-    const layerDataView = dataViews.indexPatterns[layer.indexPatternId];
-
-    if (annotation.timeField && !Boolean(layerDataView.getFieldByName(annotation.timeField))) {
-      return {
-        invalid: !Boolean(layerDataView.getFieldByName(annotation.timeField)),
-        invalidMessage: i18n.translate('xpack.lens.xyChart.annotationError.timeFieldNotFound', {
-          defaultMessage: 'Time field {timeField} not found in data view {dataView}',
-          values: { timeField: annotation.timeField, dataView: layerDataView.title },
-        }),
-      };
-    }
-    const { isValid, error } = validateQuery(annotation?.filter, layerDataView);
-    return {
-      invalid: !isValid,
-      invalidMessage: error,
-    };
+    return { invalid, invalidMessage: invalidMessages![0] };
   },
 
   getErrorMessages(state, frame) {
@@ -682,26 +658,28 @@ export const getXyVisualization = ({
     if (dataViews) {
       annotationLayers.forEach((layer) => {
         layer.annotations.forEach((annotation) => {
-          const validatedColumn = this.validateColumn?.(
+          const validatedColumn = validateColumn(
             state,
             { dataViews },
             layer.layerId,
             annotation.id
           );
-          if (validatedColumn?.invalid && validatedColumn.invalidMessage) {
-            errors.push({
-              shortMessage: validatedColumn.invalidMessage,
-              longMessage: (
-                <FormattedMessage
-                  id="xpack.lens.xyChart.annotationError"
-                  defaultMessage="Annotation {annotationName} has an error: {errorMessage}"
-                  values={{
-                    annotationName: annotation.label,
-                    errorMessage: validatedColumn.invalidMessage,
-                  }}
-                />
-              ),
-            });
+          if (validatedColumn?.invalid && validatedColumn.invalidMessages?.length) {
+            errors.push(
+              ...validatedColumn.invalidMessages.map((invalidMessage) => ({
+                shortMessage: invalidMessage,
+                longMessage: (
+                  <FormattedMessage
+                    id="xpack.lens.xyChart.annotationError"
+                    defaultMessage="Annotation {annotationName} has an error: {errorMessage}"
+                    values={{
+                      annotationName: annotation.label,
+                      errorMessage: invalidMessage,
+                    }}
+                  />
+                ),
+              }))
+            );
           }
         });
       });
