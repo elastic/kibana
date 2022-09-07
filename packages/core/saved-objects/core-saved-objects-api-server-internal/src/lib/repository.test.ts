@@ -2076,20 +2076,28 @@ describe('SavedObjectsRepository', () => {
       } as estypes.BulkResponse);
 
     const repositoryBulkDeleteSuccess = async (
-      objects: SavedObjectsBulkDeleteObject[],
-      options?: SavedObjectsBulkDeleteOptions
+      objects: SavedObjectsBulkDeleteObject[] = [],
+      options?: SavedObjectsBulkDeleteOptions,
+      internalOptions: {
+        mockMGetResponseWithObject?: { initialNamespaces: string[]; type: string; id: string };
+      } = {}
     ) => {
-      //
-      const multiNamespaceObjects = objects.filter(({ type }) => registry.isMultiNamespace(type));
-      if (multiNamespaceObjects?.length) {
-        const response = getMockMgetResponse(multiNamespaceObjects, options?.namespace);
-        client.mget.mockResponseOnce(response);
-      }
-      const response = getMockEsBulkDeleteResponse(objects, options); // we're not passing the version stuff along here.
+      const multiNamespaceObjects = objects.filter(({ type }) => {
+        return registry.isMultiNamespace(type);
+      });
 
-      client.bulk.mockResponseOnce(response);
+      const { mockMGetResponseWithObject } = internalOptions;
+      if (multiNamespaceObjects.length > 0) {
+        const mockedMGetResponse = mockMGetResponseWithObject
+          ? getMockMgetResponse([mockMGetResponseWithObject], options?.namespace)
+          : getMockMgetResponse(multiNamespaceObjects, options?.namespace);
+        client.mget.mockResponseOnce(mockedMGetResponse);
+      }
+      const mockedEsBulkDeleteResponse = getMockEsBulkDeleteResponse(objects, options);
+
+      client.bulk.mockResponseOnce(mockedEsBulkDeleteResponse);
       const result = await savedObjectsRepository.bulkDelete(objects, options);
-      //
+
       expect(client.mget).toHaveBeenCalledTimes(multiNamespaceObjects?.length ? 1 : 0);
       return result;
     };
@@ -2240,14 +2248,96 @@ describe('SavedObjectsRepository', () => {
           expect.anything()
         );
       });
-
-      it.todo(`accepts force option`);
     });
     describe('legacy URL aliases', () => {
-      it.todo(`doesn't delete legacy URL aliases for single-namespace object types`);
-      it.todo(`deletes legacy URL aliases for multi-namespace object types (all spaces)`);
-      it.todo(`deletes legacy URL aliases for multi-namespace object types (specific spaces)`);
-      it.todo(`logs a message when deleteLegacyUrlAliases returns an error`);
+      it(`doesn't delete legacy URL aliases for single-namespace object types`, async () => {
+        await repositoryBulkDeleteSuccess([obj1, obj2]);
+        expect(mockDeleteLegacyUrlAliases).not.toHaveBeenCalled();
+      });
+      it(`deletes legacy URL aliases for multi-namespace object types (all spaces)`, async () => {
+        const testObject = { ...obj1, type: MULTI_NAMESPACE_TYPE };
+        const internalOptions = {
+          mockMGetResponseWithObject: {
+            ...testObject,
+            initialNamespaces: [ALL_NAMESPACES_STRING],
+          },
+        };
+        await repositoryBulkDeleteSuccess(
+          [testObject],
+          { namespace, force: true },
+          internalOptions
+        );
+        expect(mockDeleteLegacyUrlAliases).toHaveBeenCalledWith(
+          expect.objectContaining({
+            type: MULTI_NAMESPACE_TYPE,
+            id: testObject.id,
+            namespaces: [],
+            deleteBehavior: 'exclusive',
+          })
+        );
+      });
+      it(`deletes legacy URL aliases for multi-namespace object types (specific space)`, async () => {
+        const testObject = { ...obj1, type: MULTI_NAMESPACE_TYPE };
+        const internalOptions = {
+          mockMGetResponseWithObject: {
+            ...testObject,
+            initialNamespaces: [namespace],
+          },
+        };
+        // specifically test against the current namespace
+        await repositoryBulkDeleteSuccess([testObject], { namespace }, internalOptions);
+        expect(mockDeleteLegacyUrlAliases).toHaveBeenCalledWith(
+          expect.objectContaining({
+            type: MULTI_NAMESPACE_TYPE,
+            id: testObject.id,
+            namespaces: [namespace],
+            deleteBehavior: 'inclusive',
+          })
+        );
+      });
+
+      it(`deletes legacy URL aliases for multi-namespace object types shared to many specific spaces`, async () => {
+        const testObject = { ...obj1, type: MULTI_NAMESPACE_TYPE };
+        const initialTestObjectNamespaces = [namespace, 'bar-namespace'];
+        const internalOptions = {
+          mockMGetResponseWithObject: {
+            ...testObject,
+            initialNamespaces: initialTestObjectNamespaces,
+          },
+        };
+        // specifically test against named spaces ('*' is handled specifically, this assures we also take care of named spaces)
+        await repositoryBulkDeleteSuccess(
+          [testObject],
+          { namespace, force: true },
+          internalOptions
+        );
+        expect(mockDeleteLegacyUrlAliases).toHaveBeenCalledWith(
+          expect.objectContaining({
+            type: MULTI_NAMESPACE_TYPE,
+            id: testObject.id,
+            namespaces: initialTestObjectNamespaces,
+            deleteBehavior: 'inclusive',
+          })
+        );
+      });
+
+      it(`logs a message when deleteLegacyUrlAliases returns an error`, async () => {
+        const testObject = { type: MULTI_NAMESPACE_ISOLATED_TYPE, id: obj1.id };
+        client.mget.mockResolvedValueOnce(
+          elasticsearchClientMock.createSuccessTransportRequestPromise(
+            getMockMgetResponse([testObject], namespace)
+          )
+        );
+        const mockedBulkResponse = getMockEsBulkDeleteResponse([testObject], { namespace });
+        client.bulk.mockResolvedValueOnce(mockedBulkResponse);
+        mockDeleteLegacyUrlAliases.mockRejectedValueOnce(new Error('Oh no!'));
+        await savedObjectsRepository.bulkDelete([testObject], { namespace });
+        expect(client.mget).toHaveBeenCalledTimes(1);
+        expect(logger.error).toHaveBeenCalledTimes(1);
+        expect(logger.error).toHaveBeenCalledWith(
+          'Unable to delete aliases when deleting an object: Oh no!'
+        );
+      });
     });
 
     describe('errors', () => {
