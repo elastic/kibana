@@ -132,53 +132,38 @@ export const installTransform = async (
         // If manifest.yml contains destination_index_template
         // Combine the mappings and other index template settings from manifest.yml into a single index template
         // Create the index template and track the template in EsAssetReferences
-        if (isPopulatedObject(content, ['destination_index_template'])) {
-          const destinationIndexTemplate = content.destination_index_template as Record<
-            string,
-            unknown
-          >;
-          if (isPopulatedObject(packageAssets.get('mappings'))) {
-            const mergedDestinationIndexTemplateInstallationWithMappings = {
-              ...(destinationIndexTemplate ?? {}),
-              mappings: {
-                ...(destinationIndexTemplate.mappings !== null &&
-                typeof destinationIndexTemplate.mappings === 'object'
-                  ? destinationIndexTemplate.mappings
-                  : {}),
-                ...packageAssets.get('mappings'),
-              },
-            } as IndexTemplate['template'];
+        if (
+          isPopulatedObject(content, ['destination_index_template']) ||
+          isPopulatedObject(packageAssets.get('mappings'))
+        ) {
+          const destinationIndexTemplate =
+            (content.destination_index_template as Record<string, unknown>) ?? {};
+          const mergedDestinationIndexTemplateInstallationWithMappings = {
+            ...destinationIndexTemplate,
+            mappings: {
+              ...(destinationIndexTemplate.mappings !== null &&
+              typeof destinationIndexTemplate.mappings === 'object'
+                ? destinationIndexTemplate.mappings
+                : {}),
+              ...packageAssets.get('mappings'),
+            },
+          } as IndexTemplate['template'];
 
-            destinationIndexTemplates.push({
+          destinationIndexTemplates.push({
+            transformModuleId,
+            _meta: getESAssetMetadata({ packageName: installablePackage.name }),
+            installationName: getTransformNameForInstallation(
+              installablePackage,
               transformModuleId,
-              _meta: getESAssetMetadata({ packageName: installablePackage.name }),
-              installationName: getTransformNameForInstallation(
-                installablePackage,
-                transformModuleId,
-                installNameSuffix,
-                'template'
-              ),
-              template: mergedDestinationIndexTemplateInstallationWithMappings,
-            } as DestinationIndexTemplateInstallation);
-            packageAssets.set(
-              'destinationIndexTemplate',
-              mergedDestinationIndexTemplateInstallationWithMappings
-            );
-          } else {
-            packageAssets.set('destinationIndexTemplate', destinationIndexTemplate);
-
-            destinationIndexTemplates.push({
-              transformModuleId,
-              installationName: getTransformNameForInstallation(
-                installablePackage,
-                transformModuleId,
-                installNameSuffix,
-                'template'
-              ),
-              template: destinationIndexTemplate,
-              _meta: getESAssetMetadata({ packageName: installablePackage.name }),
-            } as DestinationIndexTemplateInstallation);
-          }
+              installNameSuffix,
+              'template'
+            ),
+            template: mergedDestinationIndexTemplateInstallationWithMappings,
+          } as DestinationIndexTemplateInstallation);
+          packageAssets.set(
+            'destinationIndexTemplate',
+            mergedDestinationIndexTemplateInstallationWithMappings
+          );
         }
       }
     });
@@ -216,7 +201,7 @@ export const installTransform = async (
             // as this template is applied to only an index and not a data stream
             indexTemplate: {
               template: destinationIndexTemplate.template,
-              priority: 200,
+              priority: 250,
               index_patterns: [
                 transformsSpecifications
                   .get(destinationIndexTemplate.transformModuleId)
