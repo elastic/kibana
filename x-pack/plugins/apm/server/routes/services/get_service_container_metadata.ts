@@ -6,6 +6,7 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core/server';
+import { estypes } from '@elastic/elasticsearch';
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import {
   CONTAINER,
@@ -23,7 +24,6 @@ import {
 import { Kubernetes } from '../../../typings/es_schemas/raw/fields/kubernetes';
 import { Container } from '../../../typings/es_schemas/raw/fields/container';
 import { maybe } from '../../../common/utils/maybe';
-import { estypes } from '@elastic/elasticsearch';
 
 export interface ContainerMetadata {
   kubernetes?: Kubernetes;
@@ -148,7 +148,7 @@ export const getServiceContainerMetadata = async ({
   const allLabels =
     response.aggregations?.labels?.buckets.map(
       (bucket) => bucket.all_labels.hits.hits[0]._source.kubernetes.labels
-    ) ?? [];
+    ) ?? undefined;
 
   return {
     kubernetes: {
@@ -166,7 +166,9 @@ export const getServiceContainerMetadata = async ({
         (bucket) => bucket.key
       ),
       labels: allLabels
-        .map((label) => Object.keys(label).map((key) => `${key}:${label[key]}`))
+        ?.map((label) =>
+          Object.keys(label).map((key) => `${key}:${label[key]}`)
+        )
         .flat(),
     },
     container: {
