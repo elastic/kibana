@@ -122,7 +122,22 @@ describe('actions schemas', () => {
       }).not.toThrow();
     });
 
-    it('should work with commands query params with a single action type', () => {
+    it.each(['isolate', 'unisolate', 'kill-process', 'suspend-process', 'running-processes'])(
+      'should work with commands query params with %s action',
+      (command) => {
+        expect(() => {
+          EndpointActionListRequestSchema.query.validate({
+            page: 10,
+            pageSize: 100,
+            startDate: new Date(new Date().setDate(new Date().getDate() - 1)).toISOString(), // yesterday
+            endDate: new Date().toISOString(), // today
+            commands: command,
+          });
+        }).not.toThrow();
+      }
+    );
+
+    it('should work with commands query params with a single action type in a list', () => {
       expect(() => {
         EndpointActionListRequestSchema.query.validate({
           page: 10,

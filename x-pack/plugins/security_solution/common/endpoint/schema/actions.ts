@@ -69,6 +69,14 @@ export const ActionDetailsRequestSchema = {
   }),
 };
 
+const commandsSchema = schema.oneOf([
+  schema.literal('isolate'),
+  schema.literal('unisolate'),
+  schema.literal('kill-process'),
+  schema.literal('suspend-process'),
+  schema.literal('running-processes'),
+]);
+
 const statusesSchema = schema.oneOf([
   schema.literal('failed'),
   schema.literal('pending'),
@@ -84,10 +92,7 @@ export const EndpointActionListRequestSchema = {
       ])
     ),
     commands: schema.maybe(
-      schema.oneOf([
-        schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1 }),
-        schema.string({ minLength: 1 }),
-      ])
+      schema.oneOf([schema.arrayOf(commandsSchema, { minSize: 1 }), commandsSchema])
     ),
     page: schema.maybe(schema.number({ defaultValue: 1, min: 1 })),
     pageSize: schema.maybe(

@@ -17,10 +17,14 @@ import { getActionList, getActionListByStatus } from '../../services';
 import type { SecuritySolutionRequestHandlerContext } from '../../../types';
 import type { EndpointAppContext } from '../../types';
 import { errorHandler } from '../error_handler';
-import type { ResponseActionStatus } from '../../../../common/endpoint/types';
+import type { ResponseActions, ResponseActionStatus } from '../../../../common/endpoint/types';
 
 const formatStringIds = (value: string | string[] | undefined): undefined | string[] =>
   typeof value === 'string' ? [value] : value;
+
+const formatCommandValues = (
+  value: ResponseActions | ResponseActions[] | undefined
+): undefined | ResponseActions[] => (typeof value === 'string' ? [value] : value);
 
 const formatStatusValues = (
   value: ResponseActionStatus | ResponseActionStatus[]
@@ -53,7 +57,7 @@ export const actionListHandler = (
 
     try {
       const requestParams = {
-        commands: formatStringIds(commands),
+        commands: formatCommandValues(commands),
         esClient,
         elasticAgentIds: formatStringIds(elasticAgentIds),
         metadataService: endpointContext.service.getEndpointMetadataService(),

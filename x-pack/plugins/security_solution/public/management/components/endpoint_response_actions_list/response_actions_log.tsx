@@ -160,7 +160,10 @@ export const ResponseActionsLog = memo<
   // handle on change actions filter
   const onChangeCommandsFilter = useCallback(
     (selectedCommands: string[]) => {
-      setQueryParams((prevState) => ({ ...prevState, commands: selectedCommands }));
+      setQueryParams((prevState) => ({
+        ...prevState,
+        commands: selectedCommands as ResponseActions[],
+      }));
     },
     [setQueryParams]
   );
