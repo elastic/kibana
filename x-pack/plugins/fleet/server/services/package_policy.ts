@@ -110,6 +110,7 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
       skipEnsureInstalled?: boolean;
       skipUniqueNameVerification?: boolean;
       overwrite?: boolean;
+      packageInfo?: PackageInfo;
     }
   ): Promise<PackagePolicy> {
     const agentPolicy = await agentPolicyService.get(soClient, packagePolicy.policy_id, true);
@@ -158,11 +159,13 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
         });
       }
 
-      const pkgInfo = await getPackageInfo({
-        savedObjectsClient: soClient,
-        pkgName: packagePolicy.package.name,
-        pkgVersion: packagePolicy.package.version,
-      });
+      const pkgInfo =
+        options?.packageInfo ??
+        (await getPackageInfo({
+          savedObjectsClient: soClient,
+          pkgName: packagePolicy.package.name,
+          pkgVersion: packagePolicy.package.version,
+        }));
 
       // Check if it is a limited package, and if so, check that the corresponding agent policy does not
       // already contain a package policy for this package
@@ -656,19 +659,22 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
 
     for (const id of ids) {
       try {
-        let packageInfo: PackageInfo;
-        ({ packagePolicy, packageInfo } = await this.getUpgradePackagePolicyInfo(
-          soClient,
-          id,
-          packagePolicy,
-          pkgVersion
-        ));
+        const { packagePolicy: currentPackagePolicy, packageInfo } =
+          await this.getUpgradePackagePolicyInfo(soClient, id, packagePolicy, pkgVersion);
 
-        if (packagePolicy.is_managed && !options?.force) {
+        if (currentPackagePolicy.is_managed && !options?.force) {
           throw new PackagePolicyRestrictionRelatedError(`Cannot upgrade package policy ${id}`);
         }
 
-        await this.doUpgrade(soClient, esClient, id, packagePolicy!, result, packageInfo, options);
+        await this.doUpgrade(
+          soClient,
+          esClient,
+          id,
+          currentPackagePolicy,
+          result,
+          packageInfo,
+          options
+        );
       } catch (error) {
         result.push({
           id,
@@ -1273,6 +1279,7 @@ export interface PackagePolicyServiceInterface {
       skipEnsureInstalled?: boolean;
       skipUniqueNameVerification?: boolean;
       overwrite?: boolean;
+      packageInfo?: PackageInfo;
     }
   ): Promise<PackagePolicy>;
 

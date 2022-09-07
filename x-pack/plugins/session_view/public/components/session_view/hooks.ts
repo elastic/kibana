@@ -189,14 +189,13 @@ export const useFetchAlertStatus = (
   return query;
 };
 
-// TODO: we should not load by session id, but instead a combo of process.tty.major+minor, session time range, and host.boot_id (see Rabbitholes section of epic).
 export const useFetchGetTotalIOBytes = (sessionEntityId: string) => {
   const { http } = useKibana<CoreStart>().services;
   const cachingKeys = [QUERY_KEY_GET_TOTAL_IO_BYTES, sessionEntityId];
-  const query = useQuery<number, Error>(
+  const query = useQuery<{ total: number }, Error>(
     cachingKeys,
     async () => {
-      return http.get<number>(GET_TOTAL_IO_BYTES_ROUTE, {
+      return http.get<{ total: number }>(GET_TOTAL_IO_BYTES_ROUTE, {
         query: {
           sessionEntityId,
         },

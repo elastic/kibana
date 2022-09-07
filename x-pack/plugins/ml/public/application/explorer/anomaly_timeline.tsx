@@ -26,10 +26,8 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import useDebounce from 'react-use/lib/useDebounce';
 import useObservable from 'react-use/lib/useObservable';
-import { CommentType } from '@kbn/cases-plugin/common';
-import { stringHash } from '@kbn/ml-string-hash';
+import { useCasesModal } from '../contexts/kibana/use_cases_modal';
 import { useTimeRangeUpdates } from '../contexts/kibana/use_timefilter';
-import type { AnomalySwimlaneEmbeddableInput } from '../../embeddables';
 import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '../..';
 import {
   OVERALL_LABEL,
@@ -164,34 +162,18 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
       [severityUpdate, swimLaneSeverity]
     );
 
+    const openCasesModalCallback = useCasesModal(ANOMALY_SWIMLANE_EMBEDDABLE_TYPE);
+
     const openCasesModal = useCallback(
       (swimLaneType: SwimlaneType) => {
-        const persistableStateAttachmentState = {
+        openCasesModalCallback({
           swimlaneType: swimLaneType,
           ...(swimLaneType === SWIMLANE_TYPE.VIEW_BY ? { viewBy: viewBySwimlaneFieldName } : {}),
           jobIds: selectedJobs?.map((v) => v.id),
           timeRange: globalTimeRange,
-        } as AnomalySwimlaneEmbeddableInput;
-
-        // Creates unique id based on the input
-        persistableStateAttachmentState.id = stringHash(
-          JSON.stringify(persistableStateAttachmentState)
-        ).toString();
-
-        selectCaseModal!.open({
-          attachments: [
-            {
-              type: CommentType.persistableState,
-              persistableStateAttachmentTypeId: ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
-              // TODO Cases: improve type for persistableStateAttachmentState with io-ts
-              persistableStateAttachmentState: JSON.parse(
-                JSON.stringify(persistableStateAttachmentState)
-              ),
-            },
-          ],
         });
       },
-      [selectCaseModal, selectedJobs, globalTimeRange, viewBySwimlaneFieldName]
+      [openCasesModalCallback, selectedJobs, globalTimeRange, viewBySwimlaneFieldName]
     );
 
     const annotations = useMemo(() => overallAnnotations.annotationsData, [overallAnnotations]);
@@ -231,7 +213,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
           name: (
             <FormattedMessage
               id="xpack.ml.explorer.attachToCaseLabel"
-              defaultMessage="Attach to case"
+              defaultMessage="Add to case"
             />
           ),
           'data-test-subj': 'mlAnomalyTimelinePanelAttachToCaseButton',
@@ -243,7 +225,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
           title: (
             <FormattedMessage
               id="xpack.ml.explorer.attachToCaseLabel"
-              defaultMessage="Attach to case"
+              defaultMessage="Add to case"
             />
           ),
           items: [
@@ -273,6 +255,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
       }
 
       return panels;
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [canEditDashboards, openCasesModal, viewBySwimlaneFieldName]);
 
     // If selecting a cell in the 'view by' swimlane, indicate the corresponding time in the Overall swimlane.
@@ -302,6 +285,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
 
     const onResize = useCallback((value: number) => {
       anomalyTimelineStateService.setContainerWidth(value);
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     return (

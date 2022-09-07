@@ -12,6 +12,7 @@ import { riskScore } from './all';
 import { kpiRiskScore } from './kpi';
 
 export const riskScoreFactory: Record<RiskQueries, SecuritySolutionFactory<FactoryQueryTypes>> = {
-  [RiskQueries.riskScore]: riskScore,
+  [RiskQueries.hostsRiskScore]: riskScore,
+  [RiskQueries.usersRiskScore]: riskScore,
   [RiskQueries.kpiRiskScore]: kpiRiskScore,
 };
