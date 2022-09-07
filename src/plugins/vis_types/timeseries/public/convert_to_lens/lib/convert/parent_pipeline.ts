@@ -40,7 +40,6 @@ import { createFormulaColumn } from './formula';
 import { convertToMovingAverageParams } from './moving_average';
 import { convertToPercentileColumn } from './percentile';
 import { convertToPercentileRankColumn } from './percentile_rank';
-import { convertToCounterRateFormulaColumn } from './counter_rate';
 
 type MetricAggregationWithoutParams =
   | typeof Operations.AVERAGE
@@ -92,6 +91,7 @@ const SUPPORTED_METRICS_AGGS_WITHOUT_PARAMS: MetricAggregationWithoutParams[] = 
   Operations.MIN,
   Operations.SUM,
   Operations.STANDARD_DEVIATION,
+  Operations.COUNTER_RATE,
 ];
 
 const SUPPORTED_METRIC_AGGS: MetricAggregation[] = [
@@ -158,9 +158,6 @@ export const convertMetricAggregationToColumn = (
     return convertToPercentileRankColumn(metaValue?.toString(), series, metric, dataView, {
       reducedTimeRange,
     });
-  }
-  if (aggregation.name === Operations.COUNTER_RATE) {
-    return convertToCounterRateFormulaColumn({ series, metrics: [metric], dataView });
   }
 
   if (aggregation.name === Operations.LAST_VALUE) {
@@ -237,7 +234,7 @@ const convertMovingAvgOrDerivativeToColumns = (
   const [nestedFieldId, _] = subMetricField?.split('[') ?? [];
   // support nested aggs with formula
   const additionalSubFunction = metrics.find(({ id }) => id === nestedFieldId);
-  if (additionalSubFunction) {
+  if (additionalSubFunction || pipelineAgg.name === 'counter_rate') {
     const formula = getParentPipelineSeriesFormula(
       metrics,
       subFunctionMetric,

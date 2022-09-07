@@ -10,6 +10,7 @@ import { stubLogstashDataView } from '@kbn/data-views-plugin/common/data_view.st
 import { TSVB_METRIC_TYPES } from '../../../../common/enums';
 import { Metric } from '../../../../common/types';
 import { buildCounterRateFormula } from './counter_rate_formula';
+import { SUPPORTED_METRICS } from './supported_metrics';
 
 describe('buildCounterRateFormula', () => {
   test('should return correct formula for counter rate', () => {
@@ -20,7 +21,10 @@ describe('buildCounterRateFormula', () => {
       unit: '1h',
     };
 
-    const formula = buildCounterRateFormula(metric, dataView.fields[0].name);
-    expect(formula).toStrictEqual('pick_max(differences(max(bytes), shift=1h), 0)');
+    const formula = buildCounterRateFormula(
+      SUPPORTED_METRICS[metric.type]!.name,
+      dataView.fields[0].name
+    );
+    expect(formula).toStrictEqual('counter_rate(max(bytes))');
   });
 });

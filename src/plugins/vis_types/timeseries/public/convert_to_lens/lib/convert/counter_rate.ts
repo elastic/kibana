@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { buildCounterRateFormula } from '../metrics';
-import { createFormulaColumn } from './formula';
-import { CommonColumnsConverterArgs, FormulaColumn } from './types';
+import { Operations } from '@kbn/visualizations-plugin/common/convert_to_lens';
+import { createColumn, getFormat } from './column';
+import { CommonColumnsConverterArgs, CounterRateColumn, MaxColumn } from './types';
 
-export const convertToCounterRateFormulaColumn = ({
+export const convertToCounterRateColumn = ({
   series,
   metrics,
   dataView,
-}: CommonColumnsConverterArgs): FormulaColumn | null => {
+}: CommonColumnsConverterArgs): [MaxColumn, CounterRateColumn] | null => {
   const metric = metrics[metrics.length - 1];
 
   const field = metric.field ? dataView.getFieldByName(metric.field) : undefined;
@@ -22,6 +22,20 @@ export const convertToCounterRateFormulaColumn = ({
     return null;
   }
 
-  const formula = buildCounterRateFormula(metric, field.name);
-  return createFormulaColumn(formula, { series, metric, dataView });
+  const maxColumn = {
+    operationType: Operations.MAX,
+    sourceField: field.name,
+    ...createColumn(series, metric, field),
+    params: { ...getFormat(series) },
+  };
+
+  return [
+    maxColumn,
+    {
+      operationType: Operations.COUNTER_RATE,
+      references: [maxColumn.columnId],
+      ...createColumn(series, metric, field),
+      params: { ...getFormat(series) },
+    },
+  ];
 };

@@ -269,26 +269,6 @@ describe('convertMetricAggregationToColumn', () => {
       },
     ],
     [
-      'null for counter rate if field in metric is empty',
-      [
-        SUPPORTED_METRICS.positive_rate,
-        { series, metric: { id, type: TSVB_METRIC_TYPES.POSITIVE_RATE }, dataView },
-      ],
-      null,
-    ],
-    [
-      'formula column for counter rate',
-      [
-        SUPPORTED_METRICS.positive_rate,
-        { series, metric: { id, field, type: TSVB_METRIC_TYPES.POSITIVE_RATE }, dataView },
-      ],
-      {
-        meta: { metricId: 'some-id' },
-        operationType: 'formula',
-        params: { formula: 'pick_max(differences(max(bytes)), 0)' },
-      },
-    ],
-    [
       'null for last value (unsupported)',
       [
         SUPPORTED_METRICS.top_hit,

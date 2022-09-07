@@ -23,7 +23,7 @@ import {
   convertToLastValueColumn,
   convertToStaticValueColumn,
   convertMetricAggregationColumnWithoutSpecialParams,
-  convertToCounterRateFormulaColumn,
+  convertToCounterRateColumn,
   convertToStandartDeviationColumn,
 } from '../convert';
 import { getValidColumns } from './columns';
@@ -98,7 +98,7 @@ export const getMetricsColumns = (
       return getValidColumns(formulaColumn);
     }
     case 'positive_rate': {
-      const formulaColumn = convertToCounterRateFormulaColumn(columnsConverterArgs);
+      const formulaColumn = convertToCounterRateColumn(columnsConverterArgs);
       return getValidColumns(formulaColumn);
     }
     case 'positive_only':

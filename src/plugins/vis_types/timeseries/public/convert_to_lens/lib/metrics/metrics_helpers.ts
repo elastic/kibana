@@ -131,7 +131,7 @@ export const getFormulaEquivalent = (
       );
     }
     case 'positive_rate': {
-      return buildCounterRateFormula(currentMetric, currentMetric.field!);
+      return buildCounterRateFormula(aggFormula, currentMetric.field!);
     }
     case 'filter_ratio': {
       return getFilterRatioFormula(currentMetric, reducedTimeRange);
