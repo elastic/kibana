@@ -7,7 +7,12 @@
 
 import { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { Filter } from '@kbn/es-query';
-import { getLensDataViewMigrations, getLensFilterMigrations } from './common_migrations';
+import {
+  getLensDataViewMigrations,
+  getLensFilterMigrations,
+  commonMigratePartitionChartGroups,
+} from './common_migrations';
+import { LensDocShape840 } from '..';
 
 describe('Lens migrations', () => {
   describe('applying filter migrations', () => {
@@ -104,6 +109,64 @@ describe('Lens migrations', () => {
           name: '3.3',
         },
       });
+    });
+  });
+
+  describe('migrate partition chart "groups" to new shape', () => {
+    ['donut', 'pie', 'treemap', 'mosaic', 'waffle'].forEach((chartType: string) => {
+      it(`should migrate "group" to "primaryGroups" for "${chartType}"  chart`, () => {
+        const lensVisualizationSavedObject = {
+          attributes: {
+            state: {
+              visualization: {
+                shape: chartType,
+                layers: [{ groups: ['a'] }],
+              },
+            },
+          } as LensDocShape840<{
+            shape: string;
+            layers: Array<{ groups?: string[] }>;
+          }>,
+        };
+
+        const migratedVisualization = commonMigratePartitionChartGroups(
+          lensVisualizationSavedObject.attributes
+        ).state.visualization;
+
+        expect(migratedVisualization.layers[0]).not.toHaveProperty('groups');
+        expect(migratedVisualization.layers[0]).toHaveProperty('primaryGroups', ['a']);
+      });
+    });
+
+    it(`should migrate "group" to "primaryGroups" and "secondaryGroups" for mosaic`, () => {
+      const lensVisualizationSavedObject = {
+        attributes: {
+          state: {
+            visualization: {
+              shape: 'mosaic',
+              layers: [{ groups: ['a', 'b'] }],
+            },
+          },
+        } as LensDocShape840<{
+          shape: string;
+          layers: Array<{ groups?: string[] }>;
+        }>,
+      };
+
+      const migratedVisualization = commonMigratePartitionChartGroups(
+        lensVisualizationSavedObject.attributes
+      ).state.visualization;
+
+      expect(migratedVisualization.layers[0]).toMatchInlineSnapshot(`
+        Object {
+          "primaryGroups": Array [
+            "a",
+          ],
+          "secondaryGroups": Array [
+            "b",
+          ],
+        }
+      `);
     });
   });
 });
