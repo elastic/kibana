@@ -133,6 +133,7 @@ export const createArgsWithLayers = (
   ],
   layers: Array.isArray(layers) ? layers : [layers],
   annotations: {
+    type: 'event_annotations_result',
     layers: [],
     datatable: {
       type: 'datatable',
