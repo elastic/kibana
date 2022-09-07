@@ -10,9 +10,11 @@ import type {
   DurationRange,
   OnRefreshChangeProps,
 } from '@elastic/eui/src/components/date_picker/types';
-import { RESPONSE_ACTION_STATUS } from '../../../../../common/endpoint/service/response_actions/constants';
+import {
+  RESPONSE_ACTION_COMMANDS,
+  RESPONSE_ACTION_STATUS,
+} from '../../../../../common/endpoint/service/response_actions/constants';
 import type { DateRangePickerValues } from './actions_log_date_range_picker';
-import { RESPONSE_ACTION_COMMANDS } from '../../../../../common/endpoint/types';
 import type { FILTER_NAMES } from '../translations';
 import { StatusBadge } from './status_badge';
 

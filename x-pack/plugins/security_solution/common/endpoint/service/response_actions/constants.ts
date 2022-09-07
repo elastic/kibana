@@ -5,3 +5,10 @@
  * 2.0.
  */
 export const RESPONSE_ACTION_STATUS = ['failed', 'pending', 'successful'] as const;
+export const RESPONSE_ACTION_COMMANDS = [
+  'isolate',
+  'unisolate',
+  'kill-process',
+  'suspend-process',
+  'running-processes',
+] as const;

@@ -12,7 +12,10 @@ import type {
   ResponseActionBodySchema,
   KillOrSuspendProcessRequestSchema,
 } from '../schema/actions';
-import type { RESPONSE_ACTION_STATUS } from '../service/response_actions/constants';
+import type {
+  RESPONSE_ACTION_STATUS,
+  RESPONSE_ACTION_COMMANDS,
+} from '../service/response_actions/constants';
 
 export type ISOLATION_ACTIONS = 'isolate' | 'unisolate';
 
@@ -46,14 +49,6 @@ export interface KillProcessActionOutputContent {
   pid?: number;
   entity_id?: string;
 }
-
-export const RESPONSE_ACTION_COMMANDS = [
-  'isolate',
-  'unisolate',
-  'kill-process',
-  'suspend-process',
-  'running-processes',
-] as const;
 
 export type ResponseActions = typeof RESPONSE_ACTION_COMMANDS[number];
 
