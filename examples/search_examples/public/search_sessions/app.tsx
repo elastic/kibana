@@ -33,7 +33,7 @@ import { catchError, map, tap } from 'rxjs/operators';
 import { lastValueFrom, of } from 'rxjs';
 
 import { CoreStart } from '@kbn/core/public';
-import { mountReactNode } from '@kbn/core/public/utils';
+import { mountReactNode } from '@kbn/core-mount-utils-browser-internal';
 import type { TimeRange } from '@kbn/es-query';
 import { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 

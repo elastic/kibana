@@ -45,6 +45,17 @@ describe('useEnterpriseSearchContentNav', () => {
         name: 'Content',
       },
       {
+        id: 'enterpriseSearchAnalytics',
+        name: 'Analytics',
+        items: [
+          {
+            href: '/app/enterprise_search/analytics',
+            id: 'analytics_collections',
+            name: 'Collections',
+          },
+        ],
+      },
+      {
         id: 'search',
         items: [
           {
@@ -76,7 +87,7 @@ describe('useEnterpriseSearchContentNav', () => {
 
     setMockValues({ productAccess: noProductAccess });
 
-    expect(useEnterpriseSearchNav()[2]).toEqual({
+    expect(useEnterpriseSearchNav()[3]).toEqual({
       id: 'search',
       items: [
         {
@@ -97,7 +108,7 @@ describe('useEnterpriseSearchContentNav', () => {
 
     setMockValues({ productAccess: workplaceSearchProductAccess });
 
-    expect(useEnterpriseSearchNav()[2]).toEqual({
+    expect(useEnterpriseSearchNav()[3]).toEqual({
       id: 'search',
       items: [
         {
@@ -123,7 +134,7 @@ describe('useEnterpriseSearchContentNav', () => {
 
     setMockValues({ productAccess: appSearchProductAccess });
 
-    expect(useEnterpriseSearchNav()[2]).toEqual({
+    expect(useEnterpriseSearchNav()[3]).toEqual({
       id: 'search',
       items: [
         {
