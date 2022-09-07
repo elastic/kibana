@@ -194,9 +194,10 @@ export const TableActions = ({
                 className="kbnDocViewer__actionButton"
                 data-test-subj={item['data-test-subj']}
                 aria-label={item['aria-label']}
-                onClick={item.onClick}
                 iconType={item.icon}
+                iconSize="s"
                 disabled={item.disabled}
+                onClick={item.onClick}
               />
             </EuiToolTip>
           </EuiFlexItem>
