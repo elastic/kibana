@@ -8,8 +8,8 @@
 
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { DownloadPngAction } from './actions/download_png/download_png_action';
 import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
+import { DownloadPngAction } from './actions/download_png/download_png_action';
 
 export interface ShareToPluginSetupDeps {
   uiActions: UiActionsSetup;
@@ -19,20 +19,20 @@ export interface ShareToPluginStartDeps {
   uiActions: UiActionsStart;
 }
 
-export interface ShareToSetup {
-}
+export interface ShareToSetup {}
 
-export interface ShareToStart {
-}
+export interface ShareToStart {}
 
-export class ShareToPublicPlugin implements Plugin<ShareToSetup, ShareToStart, ShareToPluginSetupDeps, ShareToPluginStartDeps> {
+export class ShareToPublicPlugin
+  implements Plugin<ShareToSetup, ShareToStart, ShareToPluginSetupDeps, ShareToPluginStartDeps>
+{
   constructor(initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup, plugins: ShareToPluginSetupDeps) {
     const downloadPngAction = new DownloadPngAction({
       http: core.http,
     });
-    
+
     plugins.uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, downloadPngAction);
 
     plugins.uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, {
@@ -96,7 +96,6 @@ export class ShareToPublicPlugin implements Plugin<ShareToSetup, ShareToStart, S
   }
 
   public start(core: CoreStart, plugins: ShareToPluginStartDeps) {
-
     return {};
   }
 
