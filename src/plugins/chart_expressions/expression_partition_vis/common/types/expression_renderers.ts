@@ -58,7 +58,7 @@ interface VisCommonParams {
 }
 
 interface VisCommonConfig extends VisCommonParams {
-  metric: ExpressionValueVisDimension | string;
+  metrics: Array<ExpressionValueVisDimension | string>;
   splitColumn?: Array<ExpressionValueVisDimension | string>;
   splitRow?: Array<ExpressionValueVisDimension | string>;
   labels: ExpressionValuePartitionLabels;
@@ -78,8 +78,7 @@ export interface PartitionVisParams extends VisCommonParams {
   nestedLegend?: boolean;
 }
 
-export interface PieVisConfig extends Omit<VisCommonConfig, 'metric'> {
-  metrics: Array<ExpressionValueVisDimension | string>;
+export interface PieVisConfig extends VisCommonConfig {
   buckets?: Array<ExpressionValueVisDimension | string>;
   partitionByColumn?: boolean;
   isDonut: boolean;

@@ -18,6 +18,7 @@ import {
   TREEMAP_VIS_EXPRESSION_NAME,
 } from '../constants';
 import { errors, strings } from './i18n';
+import { collapseMetricColumns } from '../utils';
 
 export const treemapVisFunction = (): TreemapVisExpressionFunctionDefinition => ({
   name: TREEMAP_VIS_EXPRESSION_NAME,
@@ -25,10 +26,11 @@ export const treemapVisFunction = (): TreemapVisExpressionFunctionDefinition => 
   inputTypes: ['datatable'],
   help: strings.getPieVisFunctionName(),
   args: {
-    metric: {
+    metrics: {
       types: ['vis_dimension'],
       help: strings.getMetricArgHelp(),
       required: true,
+      multi: true,
     },
     buckets: {
       types: ['vis_dimension'],
@@ -117,7 +119,8 @@ export const treemapVisFunction = (): TreemapVisExpressionFunctionDefinition => 
       throw new Error(errors.splitRowAndSplitColumnAreSpecifiedError());
     }
 
-    validateAccessor(args.metric, context.columns);
+    args.metrics.forEach((accessor) => validateAccessor(accessor, context.columns));
+
     if (args.buckets) {
       args.buckets.forEach((bucket) => validateAccessor(bucket, context.columns));
     }
@@ -128,6 +131,12 @@ export const treemapVisFunction = (): TreemapVisExpressionFunctionDefinition => 
       args.splitRow.forEach((splitRow) => validateAccessor(splitRow, context.columns));
     }
 
+    const { table, metricAccessor, bucketAccessors } = collapseMetricColumns(
+      context,
+      args.buckets,
+      args.metrics
+    );
+
     const visConfig: PartitionVisParams = {
       ...args,
       ariaLabel:
@@ -136,8 +145,8 @@ export const treemapVisFunction = (): TreemapVisExpressionFunctionDefinition => 
         handlers.getExecutionContext?.()?.description,
       palette: args.palette,
       dimensions: {
-        metric: args.metric,
-        buckets: args.buckets,
+        metric: metricAccessor,
+        buckets: bucketAccessors,
         splitColumn: args.splitColumn,
         splitRow: args.splitRow,
       },
@@ -148,10 +157,10 @@ export const treemapVisFunction = (): TreemapVisExpressionFunctionDefinition => 
       handlers.inspectorAdapters.tables.allowCsvExport = true;
 
       const logTable = prepareLogTable(
-        context,
+        table,
         [
-          [[args.metric], strings.getSliceSizeHelp()],
-          [args.buckets, strings.getSliceHelp()],
+          [[metricAccessor], strings.getSliceSizeHelp()],
+          [bucketAccessors, strings.getSliceHelp()],
           [args.splitColumn, strings.getColumnSplitHelp()],
           [args.splitRow, strings.getRowSplitHelp()],
         ],
@@ -164,7 +173,7 @@ export const treemapVisFunction = (): TreemapVisExpressionFunctionDefinition => 
       type: 'render',
       as: PARTITION_VIS_RENDERER_NAME,
       value: {
-        visData: context,
+        visData: table,
         visConfig,
         syncColors: handlers?.isSyncColorsEnabled?.() ?? false,
         visType: ChartTypes.TREEMAP,

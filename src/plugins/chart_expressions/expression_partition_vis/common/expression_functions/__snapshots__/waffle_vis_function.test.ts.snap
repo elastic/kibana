@@ -88,14 +88,16 @@ Object {
       "legendPosition": "right",
       "legendSize": "medium",
       "maxLegendLines": 2,
-      "metric": Object {
-        "accessor": 0,
-        "format": Object {
-          "id": "number",
-          "params": Object {},
+      "metrics": Array [
+        Object {
+          "accessor": 0,
+          "format": Object {
+            "id": "number",
+            "params": Object {},
+          },
+          "type": "vis_dimension",
         },
-        "type": "vis_dimension",
-      },
+      ],
       "palette": Object {
         "name": "kibana_palette",
         "type": "system_palette",
