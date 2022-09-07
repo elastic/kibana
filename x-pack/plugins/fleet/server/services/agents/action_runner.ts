@@ -61,7 +61,7 @@ export abstract class ActionRunner {
 
   protected abstract processAgents(agents: Agent[]): Promise<{ items: BulkActionResult[] }>;
 
-  public async runActionAsyncWithRetry() {
+  public async runActionAsyncWithRetry(): Promise<{ items: BulkActionResult[]; actionId: string }> {
     appContextService
       .getLogger()
       .info(
@@ -115,7 +115,7 @@ export abstract class ActionRunner {
       })
     );
 
-    return { items: [] };
+    return { items: [], actionId: this.actionParams.actionId! };
   }
 
   async createActionStatus(esClient: ElasticsearchClient, data: any): Promise<void> {

@@ -199,7 +199,7 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     it('/agents/bulk_unenroll should allow to unenroll multiple agents by kuery in batches async', async () => {
-      const { body: unenrolledBody } = await supertest
+      await supertest
         .post(`/api/fleet/agents/bulk_unenroll`)
         .set('kbn-xsrf', 'xxx')
         .send({
@@ -208,8 +208,6 @@ export default function (providerContext: FtrProviderContext) {
           batchSize: 2,
         })
         .expect(200);
-
-      expect(unenrolledBody).to.eql({});
     });
   });
 }

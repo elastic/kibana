@@ -158,7 +158,7 @@ export const bulkUpdateAgentTagsHandler: RequestHandler<
       return acc;
     }, {});
 
-    return response.ok({ body });
+    return response.ok({ body: { ...body, actionId: results.actionId } });
   } catch (error) {
     return defaultIngestErrorHandler({ error, response });
   }
@@ -274,7 +274,7 @@ export const postBulkAgentsReassignHandler: RequestHandler<
       return acc;
     }, {});
 
-    return response.ok({ body: { ...body, taskId: results.taskId } });
+    return response.ok({ body: { ...body, actionId: results.actionId } });
   } catch (error) {
     return defaultIngestErrorHandler({ error, response });
   }

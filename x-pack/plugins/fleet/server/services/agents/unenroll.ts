@@ -71,7 +71,7 @@ export async function unenrollAgents(
     revoke?: boolean;
     batchSize?: number;
   }
-): Promise<{ items: BulkActionResult[] }> {
+): Promise<{ items: BulkActionResult[]; actionId?: string }> {
   if ('agentIds' in options) {
     const givenAgents = await getAgents(esClient, options);
     return await unenrollBatch(soClient, esClient, givenAgents, options);

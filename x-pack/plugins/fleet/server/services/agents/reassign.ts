@@ -86,7 +86,7 @@ export async function reassignAgents(
     batchSize?: number;
   },
   newAgentPolicyId: string
-): Promise<{ items: BulkActionResult[]; taskId?: string }> {
+): Promise<{ items: BulkActionResult[]; actionId?: string }> {
   const newAgentPolicy = await agentPolicyService.get(soClient, newAgentPolicyId);
   if (!newAgentPolicy) {
     throw Boom.notFound(`Agent policy not found: ${newAgentPolicyId}`);
