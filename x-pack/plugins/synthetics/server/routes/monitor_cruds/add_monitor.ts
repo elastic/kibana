@@ -7,10 +7,11 @@
 import { schema } from '@kbn/config-schema';
 import {
   SavedObject,
-  SavedObjectsErrorHelpers,
   SavedObjectsClientContract,
   KibanaRequest,
+  SavedObjectsErrorHelpers,
 } from '@kbn/core/server';
+import { v4 as uuidV4 } from 'uuid';
 import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import {
   ConfigKey,
@@ -61,101 +62,130 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
       return response.badRequest({ body: { message, attributes: { details, ...payload } } });
     }
 
-    let newMonitor: SavedObject<EncryptedSyntheticsMonitor> | null = null;
-
     try {
-      newMonitor = await savedObjectsClient.create<EncryptedSyntheticsMonitor>(
-        syntheticsMonitorType,
-        formatSecrets({
-          ...monitorWithDefaults,
-          revision: 1,
-        }),
-        id
-          ? {
-              id,
-              overwrite: true,
-            }
-          : undefined
-      );
+      const { errors, newMonitor } = await syncNewMonitor({
+        normalizedMonitor: monitorWithDefaults,
+        monitor,
+        server,
+        syntheticsMonitorClient,
+        savedObjectsClient,
+        request,
+        id,
+      });
+
+      if (errors && errors.length > 0) {
+        return response.ok({
+          body: {
+            message: 'error pushing monitor to the service',
+            attributes: { errors },
+            id: newMonitor.id,
+          },
+        });
+      }
+
+      return response.ok({ body: newMonitor });
     } catch (getErr) {
       if (SavedObjectsErrorHelpers.isForbiddenError(getErr)) {
         return response.forbidden({ body: getErr });
       }
-    }
 
-    if (!newMonitor) {
       return response.customError({
         body: { message: 'Unable to create monitor' },
         statusCode: 500,
       });
     }
-
-    const errors = await syncNewMonitor({
-      monitor,
-      monitorSavedObject: newMonitor,
-      server,
-      syntheticsMonitorClient,
-      savedObjectsClient,
-      request,
-    });
-
-    if (errors && errors.length > 0) {
-      return response.ok({
-        body: {
-          message: 'error pushing monitor to the service',
-          attributes: { errors },
-          id: newMonitor.id,
-        },
-      });
-    }
-
-    return response.ok({ body: newMonitor });
   },
 });
 
+export const createNewSavedObjectMonitor = async ({
+  id,
+  savedObjectsClient,
+  normalizedMonitor,
+}: {
+  id?: string;
+  savedObjectsClient: SavedObjectsClientContract;
+  normalizedMonitor: SyntheticsMonitor;
+}) => {
+  return await savedObjectsClient.create<EncryptedSyntheticsMonitor>(
+    syntheticsMonitorType,
+    formatSecrets({
+      ...normalizedMonitor,
+      revision: 1,
+    }),
+    id
+      ? {
+          id,
+          overwrite: true,
+        }
+      : undefined
+  );
+};
+
 export const syncNewMonitor = async ({
+  id,
   monitor,
-  monitorSavedObject,
   server,
   syntheticsMonitorClient,
   savedObjectsClient,
   request,
+  normalizedMonitor,
 }: {
+  id?: string;
   monitor: SyntheticsMonitor;
-  monitorSavedObject: SavedObject<EncryptedSyntheticsMonitor>;
+  normalizedMonitor: SyntheticsMonitor;
   server: UptimeServerSetup;
   syntheticsMonitorClient: SyntheticsMonitorClient;
   savedObjectsClient: SavedObjectsClientContract;
   request: KibanaRequest;
 }) => {
+  const newMonitorId = id ?? uuidV4();
+
+  let monitorSavedObject: SavedObject<EncryptedSyntheticsMonitor> | null = null;
+
   try {
-    const errors = await syntheticsMonitorClient.addMonitor(
+    const newMonitorPromise = createNewSavedObjectMonitor({
+      normalizedMonitor,
+      id: newMonitorId,
+      savedObjectsClient,
+    });
+
+    const syncErrorsPromise = syntheticsMonitorClient.addMonitor(
       monitor as MonitorFields,
-      monitorSavedObject.id,
+      newMonitorId,
       request,
       savedObjectsClient
     );
+
+    const [monitorSavedObjectN, syncErrors] = await Promise.all([
+      newMonitorPromise,
+      syncErrorsPromise,
+    ]);
+
+    monitorSavedObject = monitorSavedObjectN;
 
     sendTelemetryEvents(
       server.logger,
       server.telemetry,
       formatTelemetryEvent({
+        errors: syncErrors,
         monitor: monitorSavedObject,
-        errors,
         isInlineScript: Boolean((monitor as MonitorFields)[ConfigKey.SOURCE_INLINE]),
         kibanaVersion: server.kibanaVersion,
       })
     );
 
-    return errors;
+    return { errors: syncErrors, newMonitor: monitorSavedObject };
   } catch (e) {
-    await deleteMonitor({
-      savedObjectsClient,
-      server,
-      monitorId: monitorSavedObject.id,
-      syntheticsMonitorClient,
-      request,
-    });
+    if (monitorSavedObject?.id) {
+      await deleteMonitor({
+        savedObjectsClient,
+        server,
+        monitorId: newMonitorId,
+        syntheticsMonitorClient,
+        request,
+      });
+    }
+
     throw e;
   }
 };
