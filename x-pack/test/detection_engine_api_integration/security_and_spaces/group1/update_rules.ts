@@ -522,7 +522,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      describe.only('saved_query and query rule type', () => {
+      describe('saved_query and query rule type', () => {
         it('should allow to save a query rule type as a saved_query rule type', async () => {
           const ruleId = 'rule-1';
           const savedQueryRule = getSimpleSavedQueryRule(ruleId);
