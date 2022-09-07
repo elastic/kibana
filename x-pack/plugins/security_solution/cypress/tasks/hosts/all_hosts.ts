@@ -12,5 +12,9 @@ export const openFirstHostDetails = () => {
 };
 
 export const waitForAllHostsToBeLoaded = () => {
-  cy.get(ALL_HOSTS_TABLE).should('be.visible');
+  /*
+   * added timeout because sometimes, default timeout of 20000 was not
+   * enough for all host table to be visible
+   */
+  cy.get(ALL_HOSTS_TABLE, { timeout: 40000 }).should('be.visible');
 };

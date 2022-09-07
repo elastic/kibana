@@ -77,8 +77,13 @@ export const UserOverview = React.memo<UserSummaryProps>(
     const capabilities = useMlCapabilities();
     const userPermissions = hasMlUserPermissions(capabilities);
     const [darkMode] = useUiSetting$<boolean>(DEFAULT_DARK_MODE);
+    const filterQuery = useMemo(
+      () => (userName ? buildUserNamesFilter([userName]) : undefined),
+      [userName]
+    );
     const [_, { data: userRisk, isModuleEnabled }] = useUserRiskScore({
-      filterQuery: userName ? buildUserNamesFilter([userName]) : undefined,
+      filterQuery,
+      skip: userName == null,
     });
 
     const getDefaultRenderer = useCallback(
