@@ -80,10 +80,7 @@ const TooltipAnnotationDetails = ({
   isGrouped?: boolean;
 }) => {
   return (
-    <div
-      className="echTooltip__item--container xyAnnotationTooltip__group__singleItem"
-      key={snakeCase(row.time)}
-    >
+    <div className="echTooltip__item--container xyAnnotationTooltip__group__singleItem">
       <span className="echTooltip__value">
         {isGrouped && <div>{moment(row.time).format('YYYY-MM-DD, hh:mm:ss')}</div>}
 
@@ -144,6 +141,7 @@ const createCustomTooltipDetails =
               >
                 {group.map((row) => (
                   <TooltipAnnotationDetails
+                    key={snakeCase(row.time)}
                     isGrouped={rows.length > 1}
                     row={row}
                     extraFields={extraFields}

@@ -285,12 +285,12 @@ describe('getFetchEventAnnotations', () => {
     (startServices[1].data.dataViews.create as jest.Mock).mockClear();
     (handleRequest as jest.Mock).mockClear();
   });
-  test('Returns null for empty groups', async () => {
+  test('Returns empty datatable for empty groups', async () => {
     const result = await runGetFetchEventAnnotations({
       interval: '2h',
       groups: [],
     });
-    expect(result).toEqual(null);
+    expect(result).toEqual({ columns: [], rows: [], type: 'datatable' });
   });
 
   describe('Manual annotations', () => {
