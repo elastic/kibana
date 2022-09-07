@@ -66,12 +66,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('a11y test on pin all filters view', async () => {
       await testSubjects.click('queryBarMenuPopover');
       await testSubjects.click('filter-sets-applyToAllFilters');
+      await PageObjects.common.sleep(1000);
       await testSubjects.click('filter-sets-pinAllFilters');
+
       await a11y.testAppSnapshot();
     });
 
     it('a11y test on unpin all filters view', async () => {
       await testSubjects.click('queryBarMenuPopover');
+
       await testSubjects.click('filter-sets-applyToAllFilters');
       await testSubjects.click('filter-sets-unpinAllFilters');
       await a11y.testAppSnapshot();
@@ -79,6 +82,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('a11y test on invert inclusion of all filters view', async () => {
       await testSubjects.click('queryBarMenuPopover');
+      await PageObjects.common.sleep(1000);
       await testSubjects.click('filter-sets-applyToAllFilters');
       await testSubjects.click('filter-sets-invertAllFilters');
       await a11y.testAppSnapshot();
