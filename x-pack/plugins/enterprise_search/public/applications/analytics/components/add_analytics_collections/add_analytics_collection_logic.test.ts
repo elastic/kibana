@@ -26,7 +26,6 @@ describe('addAnalyticsCollectionLogic', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    jest.useRealTimers();
     mount();
   });
 
