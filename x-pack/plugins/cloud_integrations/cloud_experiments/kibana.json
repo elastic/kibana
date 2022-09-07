@@ -9,7 +9,7 @@
   "description": "Provides the necessary APIs to implement A/B testing scenarios, fetching the variations in configuration and reporting back metrics to track conversion rates of the experiments.",
   "server": true,
   "ui": true,
-  "configPath": ["xpack", "cloudExperiments"],
+  "configPath": ["xpack", "cloud_integrations", "experiments"],
   "requiredPlugins": [],
   "optionalPlugins": ["usageCollection"]
 }

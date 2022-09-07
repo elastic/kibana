@@ -32,6 +32,7 @@
     { "path": "../actions/tsconfig.json" },
     { "path": "../alerting/tsconfig.json" },
     { "path": "../cases/tsconfig.json" },
+    { "path": "../cloud_integrations/cloud_experiments/tsconfig.json" },
     { "path": "../cloud_security_posture/tsconfig.json" },
     { "path": "../encrypted_saved_objects/tsconfig.json" },
     { "path": "../features/tsconfig.json" },

@@ -89,6 +89,7 @@ export const PROJECTS = [
     'src/plugins/chart_expressions/*/tsconfig.json',
     'src/plugins/vis_types/*/tsconfig.json',
     'x-pack/plugins/*/tsconfig.json',
+    'x-pack/plugins/cloud_integrations/*/tsconfig.json',
     'examples/*/tsconfig.json',
     'x-pack/examples/*/tsconfig.json',
     'test/analytics/fixtures/plugins/*/tsconfig.json',
