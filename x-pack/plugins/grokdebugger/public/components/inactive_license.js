@@ -13,8 +13,8 @@ import {
   EuiCode,
   EuiPage,
   EuiPageBody,
-  EuiPageContent,
-  EuiPageContentBody,
+  EuiPageContent_Deprecated as EuiPageContent,
+  EuiPageContentBody_Deprecated as EuiPageContentBody,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';

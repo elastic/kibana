@@ -12,12 +12,8 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { AppMountParameters, ChromeBreadcrumb, ScopedHistory } from '@kbn/core/public';
 
-import {
-  KibanaPageTemplate,
-  KibanaPageTemplateProps,
-  reactRouterNavigate,
-  KibanaThemeProvider,
-} from '@kbn/kibana-react-plugin/public';
+import { reactRouterNavigate, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaPageTemplate, KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
 import {
   ManagementSection,
   MANAGEMENT_BREADCRUMB,
@@ -97,12 +93,10 @@ export const ManagementApp = ({ dependencies, history, theme$ }: ManagementAppPr
       <KibanaThemeProvider theme$={theme$}>
         <KibanaPageTemplate
           restrictWidth={false}
-          // EUI TODO
-          // The different template options need to be manually recreated by the individual pages.
-          // These classes help enforce the layouts.
-          pageContentProps={{ className: 'kbnAppWrapper' }}
-          pageContentBodyProps={{ className: 'kbnAppWrapper' }}
           solutionNav={solution}
+          // @ts-expect-error Techincally `paddingSize` isn't supported but it is passed through,
+          // this is a stop-gap for Stack managmement specifically until page components can be converted to template components
+          mainProps={{ paddingSize: 'l' }}
         >
           <ManagementRouter
             history={history}

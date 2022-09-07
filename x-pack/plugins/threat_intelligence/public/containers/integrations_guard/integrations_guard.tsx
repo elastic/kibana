@@ -21,7 +21,7 @@ export const IntegrationsGuard: FC = ({ children }) => {
 
   if (isIndicatorsTotalCountLoading) {
     return (
-      <SecuritySolutionPluginTemplateWrapper template="noData">
+      <SecuritySolutionPluginTemplateWrapper isEmptyState>
         <EuiLoadingLogo logo="logoSecurity" size="xl" />
       </SecuritySolutionPluginTemplateWrapper>
     );

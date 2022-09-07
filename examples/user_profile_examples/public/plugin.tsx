@@ -10,7 +10,7 @@ import ReactDOM from 'react-dom';
 import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
-import { EuiPageTemplate } from '@elastic/eui';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { AvatarDemo } from './avatar_demo';
 import { PopoverDemo } from './popover_demo';
 import { SelectableDemo } from './selectable_demo';
@@ -38,7 +38,7 @@ export class UserProfilesPlugin implements Plugin<void, void, SetupDeps, StartDe
         // });
 
         ReactDOM.render(
-          <EuiPageTemplate
+          <KibanaPageTemplate
             pageHeader={{
               pageTitle: 'User profile components',
             }}
@@ -46,7 +46,7 @@ export class UserProfilesPlugin implements Plugin<void, void, SetupDeps, StartDe
             <AvatarDemo />
             <SelectableDemo />
             <PopoverDemo />
-          </EuiPageTemplate>,
+          </KibanaPageTemplate>,
           element
         );
         return () => ReactDOM.unmountComponentAtNode(element);

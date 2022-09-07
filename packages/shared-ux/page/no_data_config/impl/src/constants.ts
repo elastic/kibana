@@ -6,16 +6,4 @@
  * Side Public License, v 1.
  */
 
-import type { NoDataConfigPageProps } from '@kbn/shared-ux-page-no-data-config-types';
-
 export const NO_DATA_PAGE_MAX_WIDTH = 950;
-
-export const NO_DATA_PAGE_TEMPLATE_PROPS: NoDataConfigPageProps = {
-  restrictWidth: NO_DATA_PAGE_MAX_WIDTH,
-  template: 'centeredBody',
-  pageContentProps: {
-    hasShadow: false,
-    color: 'transparent',
-    paddingSize: 'none',
-  },
-};

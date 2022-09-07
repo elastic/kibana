@@ -6,7 +6,11 @@
  */
 
 import React, { useEffect } from 'react';
-import { EuiPageContentBody, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import {
+  EuiPageContentBody_Deprecated as EuiPageContentBody,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
 
 import { StartTrial } from './start_trial';
 import { LicensePageHeader } from './license_page_header';

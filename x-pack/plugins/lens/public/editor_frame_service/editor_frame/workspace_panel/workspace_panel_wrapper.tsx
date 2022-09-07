@@ -8,7 +8,12 @@
 import './workspace_panel_wrapper.scss';
 
 import React, { useCallback } from 'react';
-import { EuiPageContent, EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
+import {
+  EuiPageContent_Deprecated as EuiPageContent,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButton,
+} from '@elastic/eui';
 import classNames from 'classnames';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DatasourceMap, FramePublicAPI, VisualizationMap } from '../../../types';

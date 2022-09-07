@@ -7,7 +7,7 @@
  */
 
 import React, { PropsWithChildren } from 'react';
-import { EuiPage, EuiPageSideBar, EuiSideNav } from '@elastic/eui';
+import { EuiPage, EuiPageSideBar_Deprecated as EuiPageSideBar, EuiSideNav } from '@elastic/eui';
 import { CoreStart } from '@kbn/core/public';
 
 export interface ExampleLink {

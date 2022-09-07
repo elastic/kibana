@@ -12,7 +12,7 @@ import { find } from 'lodash';
 import {
   EuiPage,
   EuiPageBody,
-  EuiPageContent,
+  EuiPageContent_Deprecated as EuiPageContent,
   EuiSpacer,
   EuiFlexGrid,
   EuiFlexItem,

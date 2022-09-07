@@ -7,19 +7,14 @@
 
 import { EuiThemeComputed } from '@elastic/eui/src/services/theme/types';
 import React, { FC, useEffect } from 'react';
-import {
-  EuiPageTemplateProps,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLink,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLink, useEuiTheme } from '@elastic/eui';
 import { Route, Switch, useHistory } from 'react-router-dom';
 import { OutPortal } from 'react-reverse-portal';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { useInspectorContext } from '@kbn/observability-plugin/public';
+import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-plugin/public';
 import { MonitorAddPage } from './components/monitor_add_edit/monitor_add_page';
 import { MonitorEditPage } from './components/monitor_add_edit/monitor_edit_page';
 import { RunTestManually } from './components/monitor_summary/run_test_manually';
@@ -47,17 +42,12 @@ import {
 import { MonitorPage } from './components/monitors_page/monitor_page';
 import { apiService } from '../../utils/api_service';
 
-type RouteProps = {
+type RouteProps = LazyObservabilityPageTemplateProps & {
   path: string;
   component: React.FC;
   dataTestSubj: string;
   title: string;
-  pageHeader?: {
-    pageTitle: string | JSX.Element;
-    children?: JSX.Element;
-    rightSideItems?: JSX.Element[];
-  };
-} & EuiPageTemplateProps;
+};
 
 const baseTitle = i18n.translate('xpack.synthetics.routes.baseTitle', {
   defaultMessage: 'Synthetics - Kibana',
@@ -83,10 +73,9 @@ const getRoutes = (
       path: GETTING_STARTED_ROUTE,
       component: () => <GettingStartedPage />,
       dataTestSubj: 'syntheticsGettingStartedPage',
-      template: 'centeredBody',
-      pageContentProps: {
+      pageSectionProps: {
+        alignment: 'center',
         paddingSize: 'none',
-        hasShadow: false,
       },
     },
     {
@@ -96,11 +85,10 @@ const getRoutes = (
       }),
       path: MONITOR_ROUTE,
       component: () => <MonitorSummaryPage />,
-      template: 'centeredBody',
       dataTestSubj: 'syntheticsGettingStartedPage',
-      pageContentProps: {
+      pageSectionProps: {
+        alignment: 'center',
         paddingSize: 'none',
-        hasShadow: false,
       },
       pageHeader: {
         paddingSize: 'none',

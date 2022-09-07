@@ -10,7 +10,11 @@ import React, { useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { RouteComponentProps } from 'react-router-dom';
 
-import { EuiPageContentBody, EuiSpacer, EuiPageHeader } from '@elastic/eui';
+import {
+  EuiPageContentBody_Deprecated as EuiPageContentBody,
+  EuiSpacer,
+  EuiPageHeader,
+} from '@elastic/eui';
 import { Repository, EmptyRepository } from '../../../../common/types';
 
 import { SectionError } from '../../../shared_imports';

@@ -9,7 +9,13 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { EuiButton, EuiCallOut, EuiEmptyPrompt, EuiPageContent, EuiSpacer } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiCallOut,
+  EuiEmptyPrompt,
+  EuiPageContent_Deprecated as EuiPageContent,
+  EuiSpacer,
+} from '@elastic/eui';
 
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { extractQueryParams, SectionLoading } from '../../../shared_imports';

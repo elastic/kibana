@@ -9,7 +9,7 @@ import React, { PureComponent } from 'react';
 import {
   EuiPage,
   EuiPageBody,
-  EuiPageContent,
+  EuiPageContent_Deprecated as EuiPageContent,
   EuiPanel,
   EuiSpacer,
   EuiFlexGrid,

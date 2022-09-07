@@ -7,7 +7,12 @@
  */
 
 import React from 'react';
-import { EuiEmptyPrompt, EuiLoadingSpinner, EuiText, EuiPageContent } from '@elastic/eui';
+import {
+  EuiEmptyPrompt,
+  EuiLoadingSpinner,
+  EuiText,
+  EuiPageContent_Deprecated as EuiPageContent,
+} from '@elastic/eui';
 
 export const PageLoading: React.FunctionComponent = ({ children }) => {
   return (

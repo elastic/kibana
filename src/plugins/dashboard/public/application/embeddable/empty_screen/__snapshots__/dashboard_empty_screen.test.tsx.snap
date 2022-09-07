@@ -32,12 +32,12 @@ exports[`DashboardEmptyScreen renders correctly with edit mode 1`] = `
 
 exports[`DashboardEmptyScreen renders correctly with readonly mode 1`] = `
 <div
-  class="euiPage euiPage--paddingMedium euiPage--grow euiPage--restrictWidth-custom dshStartScreen"
+  class="euiPage dshStartScreen emotion-euiPage-row-grow-restrictWidth"
   data-test-subj="dashboardEmptyReadOnly"
   style="max-width: 500px;"
 >
   <div
-    class="euiPageBody euiPageBody--borderRadiusNone"
+    class="euiPageBody emotion-euiPageBody"
   >
     <div
       class="euiPanel euiPanel--plain euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter dshStartScreen__pageContent emotion-euiPanel-grow-m-plain-hasShadow"
@@ -73,12 +73,12 @@ exports[`DashboardEmptyScreen renders correctly with readonly mode 1`] = `
 
 exports[`DashboardEmptyScreen renders correctly with view mode 1`] = `
 <div
-  class="euiPage euiPage--paddingMedium euiPage--grow euiPage--restrictWidth-custom dshStartScreen"
+  class="euiPage dshStartScreen emotion-euiPage-row-grow-restrictWidth"
   data-test-subj="dashboardEmptyReadWrite"
   style="max-width: 500px;"
 >
   <div
-    class="euiPageBody euiPageBody--borderRadiusNone"
+    class="euiPageBody emotion-euiPageBody"
   >
     <div
       class="euiPanel euiPanel--plain euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter dshStartScreen__pageContent emotion-euiPanel-grow-m-plain-hasShadow"

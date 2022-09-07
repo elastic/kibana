@@ -15,7 +15,7 @@ import { i18n } from '@kbn/i18n';
 import {
   EuiButtonEmpty,
   EuiCallOut,
-  EuiPageContentBody,
+  EuiPageContentBody_Deprecated as EuiPageContentBody,
   EuiPageHeader,
   EuiSpacer,
 } from '@elastic/eui';

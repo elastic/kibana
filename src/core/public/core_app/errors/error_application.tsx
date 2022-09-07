@@ -12,7 +12,12 @@ import type { History } from 'history';
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n-react';
 
-import { EuiEmptyPrompt, EuiPage, EuiPageBody, EuiPageContent } from '@elastic/eui';
+import {
+  EuiEmptyPrompt,
+  EuiPage,
+  EuiPageBody,
+  EuiPageContent_Deprecated as EuiPageContent,
+} from '@elastic/eui';
 import { CoreThemeProvider } from '@kbn/core-theme-browser-internal';
 import type { IBasePath } from '@kbn/core-http-browser';
 import type { AppMountParameters } from '@kbn/core-application-browser';

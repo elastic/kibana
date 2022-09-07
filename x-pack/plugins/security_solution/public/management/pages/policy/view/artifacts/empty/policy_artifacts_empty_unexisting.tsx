@@ -6,7 +6,11 @@
  */
 
 import React, { memo } from 'react';
-import { EuiEmptyPrompt, EuiButton, EuiPageTemplate } from '@elastic/eui';
+import {
+  EuiEmptyPrompt,
+  EuiButton,
+  EuiPageTemplate_Deprecated as EuiPageTemplate,
+} from '@elastic/eui';
 import { useGetLinkTo } from './use_policy_artifacts_empty_hooks';
 import type { POLICY_ARTIFACT_EMPTY_UNEXISTING_LABELS } from './translations';
 import type { EventFiltersPageLocation } from '../../../../event_filters/types';

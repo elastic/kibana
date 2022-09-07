@@ -9,7 +9,12 @@ import React, { useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { RouteComponentProps } from 'react-router-dom';
 
-import { EuiCallOut, EuiPageContentBody, EuiPageHeader, EuiSpacer } from '@elastic/eui';
+import {
+  EuiCallOut,
+  EuiPageContentBody_Deprecated as EuiPageContentBody,
+  EuiPageHeader,
+  EuiSpacer,
+} from '@elastic/eui';
 import { Repository, EmptyRepository } from '../../../../common/types';
 
 import { PageError, SectionError, Error } from '../../../shared_imports';

@@ -10,8 +10,8 @@ import React, { memo, useMemo } from 'react';
 import type { CommonProps } from '@elastic/eui';
 import {
   EuiPageHeader,
-  EuiPageContent,
-  EuiPageContentBody,
+  EuiPageContent_Deprecated as EuiPageContent,
+  EuiPageContentBody_Deprecated as EuiPageContentBody,
   EuiFlexGroup,
   EuiFlexItem,
   EuiTitle,

@@ -33,8 +33,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('click on integrations leads to integrations', async () => {
-      const headerItems = await find.byCssSelector('.euiPageHeaderContent__rightSideItems');
-      const items = await headerItems.findAllByCssSelector('.kbnRedirectCrossAppLinks');
+      const header = await find.byCssSelector('.euiPageHeaderContent');
+      const items = await header.findAllByCssSelector('.kbnRedirectCrossAppLinks');
       expect(items!.length).to.be(3);
 
       const integrations = await items!.at(0);
@@ -46,8 +46,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.navigateToUrl('kibana_overview', '', { useActualUrl: true });
       await PageObjects.header.waitUntilLoadingHasFinished();
 
-      const headerItems = await find.byCssSelector('.euiPageHeaderContent__rightSideItems');
-      const items = await headerItems.findAllByCssSelector('.kbnRedirectCrossAppLinks');
+      const header = await find.byCssSelector('.euiPageHeaderContent');
+      const items = await header.findAllByCssSelector('.kbnRedirectCrossAppLinks');
 
       const management = await items!.at(1);
       await management!.click();
@@ -58,8 +58,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.navigateToUrl('kibana_overview', '', { useActualUrl: true });
       await PageObjects.header.waitUntilLoadingHasFinished();
 
-      const headerItems = await find.byCssSelector('.euiPageHeaderContent__rightSideItems');
-      const items = await headerItems.findAllByCssSelector('.kbnRedirectCrossAppLinks');
+      const header = await find.byCssSelector('.euiPageHeaderContent');
+      const items = await header.findAllByCssSelector('.kbnRedirectCrossAppLinks');
 
       const devTools = await items!.at(2);
       await devTools!.click();
