@@ -20,6 +20,7 @@ import {
   EuiBadge,
   useEuiTheme,
 } from '@elastic/eui';
+import { filter } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import styled from 'styled-components';
@@ -126,12 +127,7 @@ export const AgentDetailsIntegration: React.FunctionComponent<{
 
     for (let i = 0; i < agent.components?.length; i++) {
       if (agent.components[i].type === packagePolicy.package?.name) {
-        for (let j = 0; j < agent.components[i].units.length; j++) {
-          const unit = agent.components[i].units[j];
-          if (unit.status === 'failed') {
-            packageErrorUnits.push(unit);
-          }
-        }
+        packageErrorUnits.push(...filter(agent.components[i].units, { status: 'failed' }));
       }
     }
     return packageErrorUnits;
