@@ -19,7 +19,14 @@ import {
   RectAnnotation,
 } from '@elastic/charts';
 import moment from 'moment';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
+} from '@elastic/eui';
 import type {
   EventAnnotationOutput,
   ManualPointEventAnnotationArgs,
@@ -80,7 +87,7 @@ const TooltipAnnotationDetails = ({
   isGrouped?: boolean;
 }) => {
   return (
-    <div className="echTooltip__item--container xyAnnotationTooltip__group__singleItem">
+    <div className="echTooltip__item--container">
       <span className="echTooltip__value">
         {isGrouped && <div>{moment(row.time).format('YYYY-MM-DD, hh:mm:ss')}</div>}
 
@@ -139,13 +146,22 @@ const createCustomTooltipDetails =
                 borderRadius="none"
                 hasBorder={true}
               >
-                {group.map((row) => (
-                  <TooltipAnnotationDetails
-                    key={snakeCase(row.time)}
-                    isGrouped={rows.length > 1}
-                    row={row}
-                    extraFields={extraFields}
-                  />
+                {group.map((row, index) => (
+                  <>
+                    {index > 0 && (
+                      <>
+                        <EuiSpacer size="xs" />
+                        <EuiHorizontalRule margin="none" />
+                        <EuiSpacer size="xs" />
+                      </>
+                    )}
+                    <TooltipAnnotationDetails
+                      key={snakeCase(row.time)}
+                      isGrouped={rows.length > 1}
+                      row={row}
+                      extraFields={extraFields}
+                    />
+                  </>
                 ))}
               </EuiPanel>
             </div>

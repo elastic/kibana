@@ -18,13 +18,5 @@
 }
 
 .xyAnnotationTooltipDetail {
-  padding: $euiSizeXS (
-    $euiSizeXS * 2
-  );
-}
-
-.xyAnnotationTooltip__group__singleItem+.xyAnnotationTooltip__group__singleItem {
-  border-top: $euiBorderThin;
-  padding-top: $euiSizeXS;
-  margin-top: $euiSizeXS;
+  padding: $euiSizeXS ($euiSizeXS * 2);
 }
