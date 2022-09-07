@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { TOAST_CLOSE_BTN } from '../screens/navigation';
 
 describe('Edit agent policy', () => {
   beforeEach(() => {
@@ -33,7 +34,7 @@ describe('Edit agent policy', () => {
 
   it('should edit agent policy', () => {
     cy.visit('/app/fleet/policies/policy-1/settings');
-    cy.getBySel('toastCloseButton').click();
+    cy.getBySel(TOAST_CLOSE_BTN).click();
     cy.get('[placeholder="Optional description"').clear().type('desc');
 
     cy.intercept('/api/fleet/agent_policies/policy-1', {

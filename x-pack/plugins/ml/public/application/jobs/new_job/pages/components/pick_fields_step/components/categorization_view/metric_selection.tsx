@@ -56,6 +56,7 @@ export const CategorizationDetectors: FC<Props> = ({ setIsValid }) => {
       jobCreatorUpdate();
     }
     loadFieldExamples();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [categorizationFieldName]);
 
   useEffect(() => {
@@ -77,6 +78,7 @@ export const CategorizationDetectors: FC<Props> = ({ setIsValid }) => {
     if (jobCreator.categorizationFieldName !== categorizationFieldName) {
       setCategorizationFieldName(jobCreator.categorizationFieldName);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobCreatorUpdated]);
 
   async function loadFieldExamples() {
@@ -113,6 +115,7 @@ export const CategorizationDetectors: FC<Props> = ({ setIsValid }) => {
 
   useEffect(() => {
     jobCreatorUpdate();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [overallValidStatus]);
 
   return (

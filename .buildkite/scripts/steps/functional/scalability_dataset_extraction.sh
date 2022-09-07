@@ -22,7 +22,7 @@ for i in "${scalabilityJourneys[@]}"; do
     echo "Looking for JOURNEY=${JOURNEY_NAME} and BUILD_ID=${BUILD_ID} in APM traces"
 
     node scripts/extract_performance_testing_dataset \
-        --config "x-pack/test/performance/journeys/${i}/config.ts" \ \
+        --config "x-pack/test/performance/journeys/${i}/config.ts" \
         --buildId "${BUILD_ID}" \
         --es-url "${ES_SERVER_URL}" \
         --es-username "${USER_FROM_VAULT}" \
@@ -51,6 +51,6 @@ cd -
 
 echo "--- Promoting '${BUILD_ID}' dataset to LATEST"
 cd "${OUTPUT_DIR}/.."
-echo "${BUILD_ID}" > LATEST
-gsutil cp LATEST "${GCS_BUCKET}"
+echo "${BUILD_ID}" > latest
+gsutil cp latest "${GCS_BUCKET}"
 cd -
