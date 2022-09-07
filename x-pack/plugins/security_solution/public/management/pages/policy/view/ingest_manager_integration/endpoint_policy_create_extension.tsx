@@ -7,6 +7,7 @@
 
 import React, { memo, useState, useCallback, useEffect } from 'react';
 import { EuiForm, EuiFlexGroup, EuiFlexItem, EuiCheckbox, EuiRadio, EuiSelect } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { PackagePolicyCreateExtensionComponentProps } from '@kbn/fleet-plugin/public';
 import styled from 'styled-components';
@@ -15,6 +16,47 @@ import styled from 'styled-components';
  * Exports Endpoint-specific package policy instructions
  * for use in the Ingest app create / edit package policy
  */
+// const { euiTheme } = useEuiTheme();
+
+const ENDPOINT_INTEGRATION_CONFIG_KEY = 'ENDPOINT_INTEGRATION_CONFIG';
+
+const ENDPOINT = i18n.translate(
+  'xpack.securitySolution.createPackagePolicy.stepConfigure.endpointDropdownOption',
+  {
+    defaultMessage: 'Endpoint',
+  }
+);
+const CLOUD_SECURITY = i18n.translate(
+  'xpack.securitySolution.createPackagePolicy.stepConfigure.cloudSecurityDropdownOption',
+  {
+    defaultMessage: 'Cloud Security',
+  }
+);
+const INTERACTIVE_ONLY = i18n.translate(
+  'xpack.securitySolution.createPackagePolicy.stepConfigure.cloudEventFiltersInteractiveOnly',
+  {
+    defaultMessage: 'Interactive only',
+  }
+);
+const ALL_EVENTS = i18n.translate(
+  'xpack.securitySolution.createPackagePolicy.stepConfigure.cloudEventFiltersAllEvents',
+  {
+    defaultMessage: 'All events',
+  }
+);
+const PREVENT_MALWARE = i18n.translate(
+  'xpack.securitySolution.createPackagePolicy.stepConfigure.cloudEventFiltersPreventionMalware',
+  {
+    defaultMessage: 'Prevent Malware',
+  }
+);
+const PREVENT_MALICIOUS_BEHAVIOUR = i18n.translate(
+  'xpack.securitySolution.createPackagePolicy.stepConfigure.cloudEventFiltersPreventionMaliciousBehaviour',
+  {
+    defaultMessage: 'Prevent Malicious Behaviour',
+  }
+);
+
 const SelectConfigurationSettingsText = styled.div`
   font-size: 22px;
   font-weight: 700;
@@ -25,7 +67,7 @@ const SelectConfigurationSettingsText = styled.div`
 
 const RadioOptionsDetails = styled.div`
   padding-left: 24px;
-  color: #69707d;
+  color: ${(props) => props.theme.eui.euiColorDarkShade};
   font-weight: 400;
   font-size: 12.25px;
   line-height: 21px;
@@ -42,13 +84,13 @@ const CloudOptionDataIngestionMessage = styled.div`
   font-weight: 400;
   padding-top: 12px;
   padding-bottom: 10px;
-  color: #69707d;
+  color: ${(props) => props.theme.eui.euiColorDarkShade};
 `;
 
 const SubduedText = styled.div`
   font-size: 14px;
   font-weight: 400;
-  color: #69707d;
+  color: ${(props) => props.theme.eui.euiColorDarkShade};
   line-height: 24px;
 `;
 
@@ -69,9 +111,18 @@ const CloudRadioProtectionsModeContainer = styled.div`
   padding-top: 8px;
 `;
 
-const DropDownSelect = styled(EuiSelect)`
-  margin-top: 14px;
+const PaddingBottomText = styled.div`
+  padding-bottom: 14px;
 `;
+
+const dropDownOptions = [
+  { value: 'endpoint', text: ENDPOINT },
+  { value: 'cloud', text: CLOUD_SECURITY },
+];
+
+const NGAV = 'NGAV';
+const EDR_ESSENTIAL = 'EDR Essential';
+const EDR_COMPLETE = 'EDR Complete';
 
 export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionComponentProps>(
   ({ newPolicy, onChange }) => {
@@ -80,6 +131,74 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
     // only during 1st component render (thus why the eslint disabled rule below).
 
     // Run useEffect when page 1st load, default value are endpoint + NGAV
+
+    // / Endpoint Radio Options (NGAV and EDRs)
+    const [radioEndpointOption, setRadioEndpointOption] = useState(NGAV);
+
+    const [checkboxMalwareChecked, setCheckboxMalwareChecked] = useState(false);
+    const [checkboxMaliciousChecked, setCheckboxMaliciousChecked] = useState(false);
+
+    const [radioInteractiveSelected, setRadioInteractiveSelected] = useState(true);
+    const [radioComprehensiveSelected, setRadioComprehensiveSelected] = useState(false);
+
+    const setPreventions = useCallback(
+      (statusBehaviour: boolean, statusMalware: boolean) => {
+        onChange({
+          isValid: true,
+          updatedPolicy: {
+            inputs: [
+              {
+                ...newPolicy.inputs[0],
+                enabled: true,
+                streams: [],
+                type: ENDPOINT_INTEGRATION_CONFIG_KEY,
+                _config: {
+                  value: {
+                    ...newPolicy.inputs[0]._config.value,
+                    cloudConfig: {
+                      ...newPolicy.inputs[0]._config.value.cloudConfig,
+                      preventions: {
+                        ...newPolicy.inputs[0]._config.value.cloudConfig.preventions,
+                        behavior_protection: statusBehaviour,
+                        malware: statusMalware,
+                      },
+                    },
+                  },
+                },
+              },
+            ],
+          },
+        });
+      },
+      [onChange, newPolicy.inputs]
+    );
+
+    const setPreset = useCallback(
+      (presetValue: string) => {
+        onChange({
+          isValid: true,
+          updatedPolicy: {
+            inputs: [
+              {
+                enabled: true,
+                streams: [],
+                type: ENDPOINT_INTEGRATION_CONFIG_KEY,
+                _config: {
+                  value: {
+                    ...newPolicy.inputs[0]._config.value,
+                    endpointConfig: {
+                      preset: presetValue,
+                    },
+                  },
+                },
+              },
+            ],
+          },
+        });
+      },
+      [onChange, newPolicy.inputs]
+    );
+
     useEffect(() => {
       onChange({
         isValid: false,
@@ -88,10 +207,15 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
           name: '',
           inputs: [
             {
+              enabled: true,
+              streams: [],
+              type: ENDPOINT_INTEGRATION_CONFIG_KEY,
               _config: {
-                type: 'endpoint',
-                endpointConfig: {
-                  preset: 'NGAV',
+                value: {
+                  type: 'endpoint',
+                  endpointConfig: {
+                    preset: 'NGAV',
+                  },
                 },
               },
             },
@@ -101,14 +225,10 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    const dropDownOptions = [
-      { value: 'endpoint', text: 'Endpoint' },
-      { value: 'cloud', text: 'Cloud security' },
-    ];
     const [dropdownValue, setDropdownValue] = useState(dropDownOptions[0].value);
 
     const onChangeDropdown = useCallback(
-      (e: string) => {
+      (e: React.ChangeEvent<HTMLSelectElement>) => {
         setDropdownValue(e?.target?.value);
         if (e?.target?.value === 'cloud') {
           onChange({
@@ -116,16 +236,21 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
             updatedPolicy: {
               inputs: [
                 {
+                  enabled: true,
+                  streams: [],
+                  type: ENDPOINT_INTEGRATION_CONFIG_KEY,
                   _config: {
-                    type: e?.target?.value,
-                    cloudConfig: {
-                      preventions: {
-                        ransomware: false,
-                        malware: false,
+                    value: {
+                      type: e?.target?.value,
+                      cloudConfig: {
+                        preventions: {
+                          behavior_protection: checkboxMaliciousChecked,
+                          malware: checkboxMalwareChecked,
+                        },
                       },
-                    },
-                    eventFilters: {
-                      interactiveSession: true,
+                      eventFilters: {
+                        nonInteractiveSession: radioInteractiveSelected,
+                      },
                     },
                   },
                 },
@@ -138,10 +263,15 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
             updatedPolicy: {
               inputs: [
                 {
+                  enabled: true,
+                  streams: [],
+                  type: ENDPOINT_INTEGRATION_CONFIG_KEY,
                   _config: {
-                    type: e?.target?.value,
-                    endpointConfig: {
-                      preset: 'NGAV',
+                    value: {
+                      type: e?.target?.value,
+                      endpointConfig: {
+                        preset: radioEndpointOption,
+                      },
                     },
                   },
                 },
@@ -150,11 +280,14 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
           });
         }
       },
-      [onChange]
+      [
+        onChange,
+        radioEndpointOption,
+        radioInteractiveSelected,
+        checkboxMaliciousChecked,
+        checkboxMalwareChecked,
+      ]
     );
-
-    const [radioInteractiveSelected, setRadioInteractiveSelected] = useState(true);
-    const [radioComprehensiveSelected, setRadioComprehensiveSelected] = useState(false);
 
     const onChangeRadio = useCallback(() => {
       setRadioInteractiveSelected(!radioInteractiveSelected);
@@ -165,10 +298,15 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
           updatedPolicy: {
             inputs: [
               {
+                enabled: true,
+                streams: [],
+                type: ENDPOINT_INTEGRATION_CONFIG_KEY,
                 _config: {
-                  ...newPolicy.inputs[0]._config,
-                  eventFilters: {
-                    interactiveSession: false,
+                  value: {
+                    ...newPolicy.inputs[0]._config.value,
+                    eventFilters: {
+                      nonInteractiveSession: true,
+                    },
                   },
                 },
               },
@@ -181,10 +319,15 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
           updatedPolicy: {
             inputs: [
               {
+                enabled: true,
+                streams: [],
+                type: ENDPOINT_INTEGRATION_CONFIG_KEY,
                 _config: {
-                  ...newPolicy.inputs[0]._config,
-                  eventFilters: {
-                    interactiveSession: true,
+                  value: {
+                    ...newPolicy.inputs[0]._config.value,
+                    eventFilters: {
+                      nonInteractiveSession: false,
+                    },
                   },
                 },
               },
@@ -194,118 +337,25 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
       }
     }, [onChange, newPolicy, radioInteractiveSelected, radioComprehensiveSelected]);
 
-    // / Endpoint Radio Options (NGAV and EDRs)
-    const [radioEndpointOption, setRadioEndpointOption] = useState('NGAV');
-
     const onChangeRadioEndpoint = useCallback(
+      // Add value check here ?
       (e) => {
         setRadioEndpointOption(e.target.value);
-        if (e.target.value === 'NGAV') {
-          onChange({
-            isValid: true,
-            updatedPolicy: {
-              inputs: [
-                {
-                  _config: {
-                    ...newPolicy.inputs[0]._config,
-                    endpointConfig: {
-                      preset: 'NGAV',
-                    },
-                  },
-                },
-              ],
-            },
-          });
-        } else if (e.target.value === 'EDR Essential') {
-          onChange({
-            isValid: true,
-            updatedPolicy: {
-              inputs: [
-                {
-                  _config: {
-                    ...newPolicy.inputs[0]._config,
-                    endpointConfig: {
-                      preset: 'EDREssential',
-                    },
-                  },
-                },
-              ],
-            },
-          });
-        } else if (e.target.value === 'EDR Complete') {
-          onChange({
-            isValid: true,
-            updatedPolicy: {
-              inputs: [
-                {
-                  _config: {
-                    ...newPolicy.inputs[0]._config,
-                    endpointConfig: {
-                      preset: 'EDRComplete',
-                    },
-                  },
-                },
-              ],
-            },
-          });
-        }
+        setPreset(e.target.value);
       },
-      [onChange, newPolicy]
+      [setPreset]
     );
     ///
 
-    const [checkboxMalwareChecked, setCheckboxMalwareChecked] = useState(false);
-    const [checkboxRansomwareChecked, setCheckboxRansomwareChecked] = useState(false);
-
     const onChangeMalwareCheckbox = useCallback(() => {
       setCheckboxMalwareChecked(!checkboxMalwareChecked);
-
-      onChange({
-        isValid: true,
-        updatedPolicy: {
-          inputs: [
-            {
-              ...newPolicy.inputs[0],
-              _config: {
-                ...newPolicy.inputs[0]._config,
-                cloudConfig: {
-                  ...newPolicy.inputs[0]._config.cloudConfig,
-                  preventions: {
-                    ...newPolicy.inputs[0]._config.cloudConfig.preventions,
-                    malware: !checkboxMalwareChecked,
-                  },
-                },
-              },
-            },
-          ],
-        },
-      });
-    }, [checkboxMalwareChecked, newPolicy, onChange]);
+      setPreventions(checkboxMaliciousChecked, !checkboxMalwareChecked);
+    }, [checkboxMalwareChecked, checkboxMaliciousChecked, setPreventions]);
 
     const onChangeRansomwareCheckbox = useCallback(() => {
-      setCheckboxRansomwareChecked(!checkboxRansomwareChecked);
-
-      onChange({
-        isValid: true,
-        updatedPolicy: {
-          inputs: [
-            {
-              ...newPolicy.inputs[0],
-              _config: {
-                ...newPolicy.inputs[0]._config,
-                cloudConfig: {
-                  ...newPolicy.inputs[0]._config.cloudConfig,
-                  preventions: {
-                    ...newPolicy.inputs[0]._config.cloudConfig.preventions,
-                    ransomware: !checkboxRansomwareChecked,
-                  },
-                },
-              },
-            },
-          ],
-        },
-      });
-    }, [checkboxRansomwareChecked, newPolicy, onChange]);
+      setCheckboxMaliciousChecked(!checkboxMaliciousChecked);
+      setPreventions(!checkboxMaliciousChecked, checkboxMalwareChecked);
+    }, [checkboxMalwareChecked, checkboxMaliciousChecked, setPreventions]);
 
     return (
       <EuiForm component="form">
@@ -318,17 +368,26 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
         <QuickSettingInfo>
           <FormattedMessage
             id="xpack.fleet.createPackagePolicy.stepConfigure.quickSettingsTranslation"
-            defaultMessage="Use quick settings to configure the integration to {value}. You can make changes to the configurations after you add it."
+            defaultMessage="Use quick settings to configure the integration to {environments}. You can make changes to the configurations after you add it."
             values={{
-              value: <b>{"protect your tranditional endpoints or dynamic clound environments"}</b>,
+              environments: (
+                <b>
+                  <FormattedMessage
+                    id="xpack.securitySolution.endpoint.ingestManager.createPackagePolicy.environments"
+                    defaultMessage="protect your tranditional endpoints or dynamic clound environments"
+                  />
+                </b>
+              ),
             }}
           />
         </QuickSettingInfo>
-        <FormattedMessage
-          id="xpack.fleet.createPackagePolicy.stepConfigure.selectEnvironmentTextTranslation"
-          defaultMessage="Select for what environment you would like to add the integration"
-        />
-        <DropDownSelect
+        <PaddingBottomText>
+          <FormattedMessage
+            id="xpack.fleet.createPackagePolicy.stepConfigure.selectEnvironmentTextTranslation"
+            defaultMessage="Select for what environment you would like to add the integration"
+          />
+        </PaddingBottomText>
+        <EuiSelect
           id="selectIntegrationTypeId"
           options={dropDownOptions}
           value={dropdownValue}
@@ -358,8 +417,8 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
                 id="radioOptionEDREssential"
                 label="EDR Essential"
                 name="Radio Endpoint"
-                value="EDR Essential"
-                checked={radioEndpointOption === 'EDR Essential'}
+                value={EDR_ESSENTIAL}
+                checked={radioEndpointOption === EDR_ESSENTIAL}
                 onChange={(e) => onChangeRadioEndpoint(e)}
               />
               <RadioOptionsDetails>
@@ -373,8 +432,8 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
                 id="radioOptionEDRComplete"
                 label="EDR Complete"
                 name="Radio Endpoint"
-                value="EDR Complete"
-                checked={radioEndpointOption === 'EDR Complete'}
+                value={EDR_COMPLETE}
+                checked={radioEndpointOption === EDR_COMPLETE}
                 onChange={(e) => onChangeRadioEndpoint(e)}
               />
               <RadioOptionsDetails>
@@ -399,7 +458,7 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
 
               <EuiRadio
                 id="radioInteractiveOption"
-                label="Interactive only"
+                label={INTERACTIVE_ONLY}
                 checked={radioInteractiveSelected}
                 onChange={onChangeRadio}
               />
@@ -412,7 +471,7 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
 
               <EuiRadio
                 id="radioComprehensiveOption"
-                label="All events"
+                label={ALL_EVENTS}
                 checked={radioComprehensiveSelected}
                 onChange={onChangeRadio}
               />
@@ -441,16 +500,16 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
                   <EuiFlexItem>
                     <EuiCheckbox
                       id="CheckBoxIdMalware"
-                      label="Prevent malware"
+                      label={PREVENT_MALWARE}
                       checked={checkboxMalwareChecked}
                       onChange={onChangeMalwareCheckbox}
                     />
                   </EuiFlexItem>
                   <EuiFlexItem>
                     <EuiCheckbox
-                      id="CheckBoxIdRansomware"
-                      label="Prevent ransomware"
-                      checked={checkboxRansomwareChecked}
+                      id="CheckBoxIdmaliciousbehaviour"
+                      label={PREVENT_MALICIOUS_BEHAVIOUR}
+                      checked={checkboxMaliciousChecked}
                       onChange={onChangeRansomwareCheckbox}
                     />
                   </EuiFlexItem>
