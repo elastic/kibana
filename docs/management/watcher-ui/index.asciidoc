@@ -225,6 +225,10 @@ simulation. Be aware of these implementation details on overrides:
 * Condition overrides indicates if you want to force the condition to always be `true`.
 * Action overrides support {ref}/watcher-api-execute-watch.html#watcher-api-execute-watch-action-mode[multiple options].
 
+Some watches, such as those using basic auth credentials, contain passwords. For security
+reasons, these passwords will be stripped from any watches that are loaded by the
+Watcher UI. You will need to manually re-enter these passwords to simulate the watch.
+
 After starting the simulation, you’ll see a results screen. For more information
 on the fields in the response, see the {ref}/watcher-api-execute-watch.html[Execute watch API].
 
