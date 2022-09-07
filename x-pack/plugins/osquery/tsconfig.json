@@ -13,6 +13,7 @@
     "scripts/**/*",
     "scripts/**/**.json",
     "server/**/*",
+    "cypress.config.ts",
     "../../../typings/**/*",
     // ECS and Osquery schema files
     "public/common/schemas/*/**.json",
