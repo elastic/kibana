@@ -134,8 +134,8 @@ describe('helpers', () => {
           queryBar: {
             ...mockData.queryBar,
             saved_id: 'mock-test-id',
-            type: 'query',
           },
+          type: 'query',
         };
         const result = formatDefineStepData(mockStepData);
 
@@ -150,8 +150,8 @@ describe('helpers', () => {
           queryBar: {
             ...mockData.queryBar,
             saved_id: 'mock-test-id',
-            type: 'saved_query',
           },
+          type: 'saved_query',
         };
         const result = formatDefineStepData(mockStepData);
 
@@ -166,8 +166,8 @@ describe('helpers', () => {
           queryBar: {
             ...mockData.queryBar,
             saved_id: 'mock-test-id',
-            type: 'query',
           },
+          type: 'query',
           shouldLoadQueryDynamically: true,
         };
         const result = formatDefineStepData(mockStepData);
@@ -183,8 +183,8 @@ describe('helpers', () => {
           queryBar: {
             ...mockData.queryBar,
             saved_id: 'mock-test-id',
-            type: 'saved_query',
           },
+          type: 'saved_query',
           shouldLoadQueryDynamically: true,
         };
         const result = formatDefineStepData(mockStepData);
@@ -199,9 +199,9 @@ describe('helpers', () => {
           ...mockData,
           queryBar: {
             ...mockData.queryBar,
-            saved_id: undefined,
-            type: 'query',
+            saved_id: null,
           },
+          type: 'query',
           shouldLoadQueryDynamically: true,
         };
         const result = formatDefineStepData(mockStepData);
@@ -216,9 +216,9 @@ describe('helpers', () => {
           ...mockData,
           queryBar: {
             ...mockData.queryBar,
-            saved_id: undefined,
-            type: 'saved_query',
+            saved_id: null,
           },
+          type: 'saved_query',
           shouldLoadQueryDynamically: true,
         };
         const result = formatDefineStepData(mockStepData);
