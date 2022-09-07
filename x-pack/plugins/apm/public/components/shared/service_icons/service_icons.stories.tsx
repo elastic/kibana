@@ -115,10 +115,25 @@ Example.args = {
       },
     },
     container: {
-      os: 'Linux',
-      type: 'Kubernetes',
-      isContainerized: true,
       totalNumberInstances: 1,
+      image: 'container image name',
+    },
+    kubernetes: {
+      pod: {
+        name: 'opbeans-go-nsn-864bdcbc5b-pp856',
+        uid: '455809a3-53e4-413f-bced-d9fa110c9256',
+      },
+      deployment: ['opbeans-java', 'opbeans-go-nsn'],
+      replicaset: ['opbeans-go-6dff977956', 'opbeans-go-nsn-864bdcbc5b'],
+      namespace: ['default'],
+      labels: [
+        'app:opbeans-go',
+        'service:opbeans',
+        'pod-template-hash:6dff977956',
+        'app:opbeans-go-nsn',
+        'service:opbeans',
+        'pod-template-hash:864bdcbc5b',
+      ],
     },
     cloud: {
       provider: 'gcp',
