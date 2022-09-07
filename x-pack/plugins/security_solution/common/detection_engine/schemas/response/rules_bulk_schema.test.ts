@@ -64,6 +64,21 @@ describe('prepackaged_rule_schema', () => {
     expect(message.schema).toEqual({});
   });
 
+  test('it should NOT validate an invalid error message with a deleted value', () => {
+    const error = getErrorSchemaMock('fake id');
+    // @ts-expect-error
+    delete error.error;
+    const payload: RulesBulkSchema = [error];
+    const decoded = rulesBulkSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+
+    expect(getPaths(left(message.errors))).toContain(
+      'Invalid value "undefined" supplied to "error"'
+    );
+    expect(message.schema).toEqual({});
+  });
+
   test('it should NOT validate a type of "query" when it has extra data', () => {
     const rule: FullResponseSchema & { invalid_extra_data?: string } = getRulesSchemaMock();
     rule.invalid_extra_data = 'invalid_extra_data';
