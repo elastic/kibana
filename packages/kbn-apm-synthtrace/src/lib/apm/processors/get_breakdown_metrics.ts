@@ -27,6 +27,7 @@ const metricsetPicker = createPicker([
   'transaction.name',
   'span.type',
   'span.subtype',
+  'service.name',
 ]);
 
 export function getBreakdownMetrics(events: ApmFields[]) {
