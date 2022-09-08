@@ -1,0 +1,7 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/core-analytics-browser-internal",
+  "owner": "@elastic/kibana-core",
+  "runtimeDeps": [],
+  "typeDeps": []
+}

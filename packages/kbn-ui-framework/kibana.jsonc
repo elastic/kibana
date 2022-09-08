@@ -1,0 +1,7 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/ui-framework",
+  "owner": "@elastic/kibana-design",
+  "runtimeDeps": [],
+  "typeDeps": []
+}

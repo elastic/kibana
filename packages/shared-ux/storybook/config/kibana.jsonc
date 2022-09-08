@@ -1,0 +1,7 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/shared-ux-storybook-config",
+  "owner": "@elastic/shared-ux",
+  "runtimeDeps": [],
+  "typeDeps": []
+}

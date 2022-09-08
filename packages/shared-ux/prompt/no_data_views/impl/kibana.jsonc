@@ -1,0 +1,7 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/shared-ux-prompt-no-data-views",
+  "owner": "@elastic/shared-ux",
+  "runtimeDeps": [],
+  "typeDeps": []
+}

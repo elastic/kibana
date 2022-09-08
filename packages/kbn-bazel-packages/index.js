@@ -7,13 +7,26 @@
  */
 
 /** @typedef {import('./src/bazel_package').BazelPackage} BazelPackage */
+/** @typedef {import('./src/types').KibanaPackageManifest} KibanaPackageManifest */
+/** @typedef {import('./src/types').KibanaPackageType} KibanaPackageType */
+/** @typedef {import('./src/types').ParsedPackageJson} ParsedPackageJson */
 
 const { BAZEL_PACKAGE_DIRS, getAllBazelPackageDirs } = require('./src/bazel_package_dirs');
-const { discoverBazelPackageLocations, discoverBazelPackages } = require('./src/discover_packages');
+const { discoverPackageManifestPaths, discoverBazelPackages } = require('./src/discover_packages');
+const {
+  parsePackageManifest,
+  readPackageManifest,
+  validatePackageManifest,
+} = require('./src/parse_package_manifest');
+const Jsonc = require('./src/jsonc');
 
 module.exports = {
   BAZEL_PACKAGE_DIRS,
   getAllBazelPackageDirs,
-  discoverBazelPackageLocations,
+  discoverPackageManifestPaths,
   discoverBazelPackages,
+  parsePackageManifest,
+  readPackageManifest,
+  validatePackageManifest,
+  Jsonc,
 };

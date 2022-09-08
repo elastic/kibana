@@ -41,11 +41,11 @@ export const command = {
 
     const { discoverBazelPackages } = await import('@kbn/bazel-packages');
     const packages = await discoverBazelPackages(REPO_ROOT);
-    for (const { pkg, normalizedRepoRelativeDir } of packages) {
+    for (const { manifest, pkg, normalizedRepoRelativeDir } of packages) {
       if (
-        exclude.includes(pkg.name) ||
-        (include.length && !include.includes(pkg.name)) ||
-        !pkg.scripts ||
+        exclude.includes(manifest.id) ||
+        (include.length && !include.includes(manifest.id)) ||
+        !pkg?.scripts ||
         !Object.hasOwn(pkg.scripts, scriptName)
       ) {
         continue;

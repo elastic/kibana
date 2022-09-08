@@ -1,0 +1,7 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/shared-ux-storybook-mock",
+  "owner": "@elastic/shared-ux",
+  "runtimeDeps": [],
+  "typeDeps": []
+}
