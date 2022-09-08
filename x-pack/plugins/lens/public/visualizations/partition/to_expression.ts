@@ -23,6 +23,7 @@ import {
   LegendDisplay,
 } from '../../../common';
 import { getDefaultVisualValuesForLayer } from '../../shared_components/datasource_default_values';
+import { isCollapsed } from './visualization';
 
 interface Attributes {
   isPreview: boolean;
@@ -143,7 +144,7 @@ const generateCommonArguments: GenerateExpressionAstArguments = (
   return {
     labels: generateCommonLabelsAstArgs(state, attributes, layer),
     buckets: operations
-      .filter(({ columnId }) => !layer.collapseFns?.[columnId])
+      .filter(({ columnId }) => !isCollapsed(columnId, layer))
       .map(({ columnId }) => columnId)
       .map(prepareDimension),
     metric: layer.metric ? [prepareDimension(layer.metric)] : [],
@@ -221,6 +222,7 @@ const generateMosaicVisAst: GenerateExpressionAstFunction = (...rest) => ({
         ...generateCommonArguments(...rest),
         // flip order of bucket dimensions so the rows are fetched before the columns to keep them stable
         buckets: rest[2]
+          .filter(({ columnId }) => !isCollapsed(columnId, rest[3]))
           .reverse()
           .map((o) => o.columnId)
           .map(prepareDimension),
