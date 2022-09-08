@@ -13,17 +13,15 @@ import {
   EuiPanel,
   EuiTitle,
   EuiLink,
-  EuiToolTip,
-  EuiIcon,
   EuiButtonEmpty,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import moment from 'moment';
+import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
+import { asDuration } from '../../../../common/utils/formatters';
 import { PageHeaderProps } from '../types';
 import { useKibana } from '../../../utils/kibana_react';
 import { AlertStatusIndicator } from '../../../components/shared/alert_status_indicator';
-import { asDuration } from '@kbn/observability-plugin/common/utils/formatters';
-import moment from 'moment';
-import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
 
 export function AlertSummary({ alert }: PageHeaderProps) {
   const DEFAULT_DATE_FORMAT = 'MMM D, YYYY @ HH:mm:ss.SSS';
@@ -36,7 +34,8 @@ export function AlertSummary({ alert }: PageHeaderProps) {
           <div>
             <FormattedMessage
               id="xpack.observability.pages.alertDetails.alertSummary"
-              defaultMessage="Alert Summary" />
+              defaultMessage="Alert Summary"
+            />
           </div>
         </EuiTitle>
         <EuiSpacer size="s" />
@@ -47,7 +46,8 @@ export function AlertSummary({ alert }: PageHeaderProps) {
                 <h5>
                   <FormattedMessage
                     id="xpack.observability.pages.alertDetails.alertSummary.alertName"
-                    defaultMessage="Alert" />
+                    defaultMessage="Alert"
+                  />
                 </h5>
               </EuiTitle>
               <EuiSpacer size="s" />
@@ -60,7 +60,8 @@ export function AlertSummary({ alert }: PageHeaderProps) {
                 <h5>
                   <FormattedMessage
                     id="xpack.observability.pages.alertDetails.alertSummary.averageValue"
-                    defaultMessage="Actual Value" />
+                    defaultMessage="Actual Value"
+                  />
                 </h5>
               </EuiTitle>
               <EuiSpacer size="s" />
@@ -73,7 +74,8 @@ export function AlertSummary({ alert }: PageHeaderProps) {
                 <h5>
                   <FormattedMessage
                     id="xpack.observability.pages.alertDetails.alertSummary.duration"
-                    defaultMessage="Duration" />
+                    defaultMessage="Duration"
+                  />
                 </h5>
               </EuiTitle>
               <EuiSpacer size="s" />
@@ -86,13 +88,18 @@ export function AlertSummary({ alert }: PageHeaderProps) {
                 <h5>
                   <FormattedMessage
                     id="xpack.observability.pages.alertDetails.alertSummary.alertStatus"
-                    defaultMessage="Status" />
+                    defaultMessage="Status"
+                  />
                 </h5>
               </EuiTitle>
               <EuiSpacer size="s" />
               {
                 <AlertStatusIndicator
-                  alertStatus={alert['kibana.alert.status']?.toString() === ALERT_STATUS_ACTIVE ? ALERT_STATUS_ACTIVE : ALERT_STATUS_RECOVERED}
+                  alertStatus={
+                    alert['kibana.alert.status']?.toString() === ALERT_STATUS_ACTIVE
+                      ? ALERT_STATUS_ACTIVE
+                      : ALERT_STATUS_RECOVERED
+                  }
                 />
               }
             </EuiFlexItem>
@@ -103,14 +110,17 @@ export function AlertSummary({ alert }: PageHeaderProps) {
                 <h5>
                   <FormattedMessage
                     id="xpack.observability.pages.alertDetails.alertSummary.runbook"
-                    defaultMessage="Runbook" />
+                    defaultMessage="Runbook"
+                  />
                 </h5>
               </EuiTitle>
-              <EuiLink>...
+              <EuiLink>
+                ...
                 <EuiButtonEmpty
                   data-test-subj="runBookEditButton"
                   iconType={'pencil'}
-                  onClick={() => { }} />
+                  onClick={() => {}}
+                />
               </EuiLink>
             </EuiFlexItem>
             <EuiFlexItem>
@@ -118,7 +128,8 @@ export function AlertSummary({ alert }: PageHeaderProps) {
                 <h5>
                   <FormattedMessage
                     id="xpack.observability.pages.alertDetails.alertSummary.started"
-                    defaultMessage="Started" />
+                    defaultMessage="Started"
+                  />
                 </h5>
               </EuiTitle>
               <EuiSpacer size="s" />
@@ -131,7 +142,8 @@ export function AlertSummary({ alert }: PageHeaderProps) {
                 <h5>
                   <FormattedMessage
                     id="xpack.observability.pages.alertDetails.alertSummary.lastStatusUpdate"
-                    defaultMessage="Last Status Update" />
+                    defaultMessage="Last Status Update"
+                  />
                 </h5>
               </EuiTitle>
               <EuiSpacer size="s" />
@@ -141,27 +153,26 @@ export function AlertSummary({ alert }: PageHeaderProps) {
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem>
-              {
-                alert['kibana.alert.rule.tags'] &&
+              {alert['kibana.alert.rule.tags'] && (
                 <>
                   <EuiTitle size="xxs">
                     <h5>
                       <FormattedMessage
                         id="xpack.observability.pages.alertDetails.alertSummary.tags"
-                        defaultMessage="Tags" />
+                        defaultMessage="Tags"
+                      />
                     </h5>
                   </EuiTitle>
                   <EuiSpacer size="s" />
                   <div>
                     <EuiSpacer size="s" />
-                    {
-                      triggersActionsUi.getRuleTagBadge<'tagsOutPopover'>({
-                        tagsOutPopover: true,
-                        tags: alert['kibana.alert.rule.tags']
-                      })}
+                    {triggersActionsUi.getRuleTagBadge<'tagsOutPopover'>({
+                      tagsOutPopover: true,
+                      tags: alert['kibana.alert.rule.tags'],
+                    })}
                   </div>
                 </>
-              }
+              )}
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiPanel>
