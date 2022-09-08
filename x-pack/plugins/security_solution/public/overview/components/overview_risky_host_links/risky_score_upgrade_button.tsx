@@ -25,12 +25,12 @@ const RiskyScoreUpgradeButtonComponent = ({
   refetch: inputsModel.Refetch;
   moduleName: RiskScoreModuleName;
 }) => {
-  const [installationState, setInstallationState] = useState<UpgradeState>();
+  const [status, setStatus] = useState<UpgradeState>();
   const spaceId = useSpaceId();
   const { http, notifications } = useKibana().services;
 
   const upgradeHostRiskScore = useCallback(async () => {
-    setInstallationState(UpgradeState.Started);
+    setStatus(UpgradeState.Started);
 
     if (moduleName === RiskScoreModuleName.Host) {
       await upgradeHostRiskScoreModule({ http, notifications, spaceId });
@@ -39,16 +39,17 @@ const RiskyScoreUpgradeButtonComponent = ({
     if (moduleName === RiskScoreModuleName.User) {
       await upgradeUserRiskScoreModule({ http, notifications, spaceId });
     }
-    setInstallationState(UpgradeState.Done);
+    setStatus(UpgradeState.Done);
     refetch();
   }, [moduleName, refetch, http, notifications, spaceId]);
 
   return (
     <EuiButton
       onClick={upgradeHostRiskScore}
-      isLoading={installationState === UpgradeState.Started}
+      isLoading={status === UpgradeState.Started}
+      data-test-subj="risk-score-upgrade"
     >
-      {installationState === UpgradeState.Started ? (
+      {status === UpgradeState.Started ? (
         <FormattedMessage
           id="xpack.securitySolution.riskyScore.upgradingButtonTitle"
           defaultMessage="Upgrading"

@@ -50,6 +50,7 @@ const RiskyScoreEnableButtonComponent = ({
     <EuiButton
       onClick={onBoardingRiskScore}
       isLoading={installationState === InstallationState.Started}
+      data-test-subj="risk-score-enable"
     >
       {installationState === InstallationState.Started ? (
         <FormattedMessage

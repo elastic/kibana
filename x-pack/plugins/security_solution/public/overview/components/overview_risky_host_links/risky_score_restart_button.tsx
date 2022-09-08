@@ -32,7 +32,11 @@ const RiskyScoreRestartButtonComponent = ({
   }, [http, moduleName, notifications, refetch, spaceId]);
 
   return (
-    <EuiButton onClick={onBoardingHostRiskScore} isLoading={restartState === RestartState.Started}>
+    <EuiButton
+      onClick={onBoardingHostRiskScore}
+      isLoading={restartState === RestartState.Started}
+      data-test-subj="risk-score-restart"
+    >
       {restartState === RestartState.Started ? (
         <FormattedMessage
           id="xpack.securitySolution.riskyScore.restartingButtonTitle"
