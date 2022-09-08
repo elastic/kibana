@@ -17,7 +17,7 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import type { SavedObjectsFindOptionsReference } from '@kbn/core/public';
+import type { ApplicationStart, SavedObjectsFindOptionsReference } from '@kbn/core/public';
 import useMount from 'react-use/lib/useMount';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
@@ -56,7 +56,6 @@ export const DashboardListing = ({
   initialFilter,
   kbnUrlStateStorage,
 }: DashboardListingProps) => {
-  // TODO: Remove as part of https://github.com/elastic/kibana/pull/138774
   const {
     services: { savedDashboards },
   } = useKibana<DashboardAppServices>();
@@ -313,7 +312,8 @@ export const DashboardListing = ({
             tableColumns,
           }}
           theme={theme}
-          application={application}
+          // The below type conversion is necessary until the TableListView component allows partial services
+          application={application as unknown as ApplicationStart}
         >
           <DashboardUnsavedListing
             redirectTo={redirectTo}

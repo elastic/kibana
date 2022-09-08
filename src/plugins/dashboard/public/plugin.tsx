@@ -107,10 +107,10 @@ export interface DashboardStartDependencies {
   share?: SharePluginStart;
   spaces?: SpacesPluginStart;
   uiActions: UiActionsStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
   urlForwarding: UrlForwardingStart;
   usageCollection?: UsageCollectionStart;
   visualizations: VisualizationsStart;
-  unifiedSearch: UnifiedSearchPublicPluginStart;
 }
 
 export interface DashboardSetup {
@@ -248,7 +248,6 @@ export class DashboardPlugin
         };
 
         return mountApp({
-          // pass in context object
           core,
           appUnMounted,
           element: params.element,

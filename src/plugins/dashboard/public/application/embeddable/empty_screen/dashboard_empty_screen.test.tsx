@@ -23,9 +23,7 @@ describe('DashboardEmptyScreen', () => {
     const compProps = { ...defaultProps, ...props };
     return mountWithIntl(
       <DashboardServicesProvider>
-        <DashboardServicesProvider>
-          <DashboardEmptyScreen {...compProps} />
-        </DashboardServicesProvider>
+        <DashboardEmptyScreen {...compProps} />
       </DashboardServicesProvider>
     );
   }

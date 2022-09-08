@@ -79,7 +79,6 @@ export const useDashboardAppState = ({
   const [lastSavedState, setLastSavedState] = useState<DashboardState>();
   const $onLastSavedStateChange = useMemo(() => new Subject<DashboardState>(), []);
 
-  // TODO: Remove as part of https://github.com/elastic/kibana/pull/138774
   const {
     services: { savedDashboards },
   } = useKibana<DashboardAppServices>();

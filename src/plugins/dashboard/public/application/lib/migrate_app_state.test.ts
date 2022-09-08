@@ -6,8 +6,11 @@
  * Side Public License, v 1.
  */
 
+import { pluginServices } from '../../services/plugin_services';
 import { SavedDashboardPanel } from '../../types';
 import { migrateAppState } from './migrate_app_state';
+
+pluginServices.getServices().initializerContext.kibanaVersion = '8.0';
 
 test('migrate app state from 6.0', async () => {
   const appState = {
@@ -26,7 +29,7 @@ test('migrate app state from 6.0', async () => {
       },
     ],
   };
-  migrateAppState(appState as any, '8.0');
+  migrateAppState(appState as any);
   expect(appState.uiState).toBeUndefined();
 
   const newPanel = appState.panels[0] as unknown as SavedDashboardPanel;
@@ -40,7 +43,6 @@ test('migrate app state from 6.0', async () => {
 });
 
 test('migrate sort from 6.1', async () => {
-  const TARGET_VERSION = '8.0';
   const appState = {
     uiState: {
       'P-1': { vis: { defaultColors: { '0+-+100': 'rgb(0,104,55)' } } },
@@ -59,7 +61,7 @@ test('migrate sort from 6.1', async () => {
     ],
     useMargins: false,
   };
-  migrateAppState(appState as any, TARGET_VERSION);
+  migrateAppState(appState as any);
   expect(appState.uiState).toBeUndefined();
 
   const newPanel = appState.panels[0] as unknown as SavedDashboardPanel;
@@ -86,7 +88,7 @@ test('migrates 6.0 even when uiState does not exist', async () => {
       },
     ],
   };
-  migrateAppState(appState as any, '8.0');
+  migrateAppState(appState as any);
   expect((appState as any).uiState).toBeUndefined();
 
   const newPanel = appState.panels[0] as unknown as SavedDashboardPanel;
@@ -116,7 +118,7 @@ test('6.2 migration adjusts w & h without margins', async () => {
     ],
     useMargins: false,
   };
-  migrateAppState(appState as any, '8.0');
+  migrateAppState(appState as any);
   expect((appState as any).uiState).toBeUndefined();
 
   const newPanel = appState.panels[0] as unknown as SavedDashboardPanel;
@@ -148,7 +150,7 @@ test('6.2 migration adjusts w & h with margins', async () => {
     ],
     useMargins: true,
   };
-  migrateAppState(appState as any, '8.0');
+  migrateAppState(appState as any);
   expect((appState as any).uiState).toBeUndefined();
 
   const newPanel = appState.panels[0] as unknown as SavedDashboardPanel;

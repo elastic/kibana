@@ -46,10 +46,10 @@ export function DashboardApp({
     coreContext: { executionContext },
     data: { search },
     embeddable: { getStateTransfer },
-    settings: { uiSettings },
-    spaces: { getLegacyUrlConflict },
     notifications: { toasts },
     screenshotMode: { isScreenshotMode },
+    settings: { uiSettings },
+    spaces: { getLegacyUrlConflict },
   } = pluginServices.getServices();
 
   const [showNoDataPage, setShowNoDataPage] = useState<boolean>(false);

@@ -49,7 +49,9 @@ export function showOptionsPopover({
   onSyncTooltipsChange,
 }: ShowOptionsPopoverProps) {
   const {
-    settings: { theme },
+    settings: {
+      theme: { theme$ },
+    },
   } = pluginServices.getServices();
 
   if (isOpen) {
@@ -62,7 +64,7 @@ export function showOptionsPopover({
   document.body.appendChild(container);
   const element = (
     <I18nProvider>
-      <KibanaThemeProvider theme$={theme.theme$}>
+      <KibanaThemeProvider theme$={theme$}>
         <EuiWrappingPopover
           id="popover"
           button={anchorElement}

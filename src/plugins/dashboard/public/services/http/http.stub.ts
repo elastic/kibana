@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { httpServiceMock } from '@kbn/core-http-server-mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 import { PluginServiceFactory } from '@kbn/presentation-util-plugin/public';
 import { DashboardHTTPService } from './types';
 
 type HttpServiceFactory = PluginServiceFactory<DashboardHTTPService>;
 
 export const httpServiceFactory: HttpServiceFactory = () => {
-  const basePath = httpServiceMock.createBasePath() as unknown as DashboardHTTPService['basePath'];
+  const serviceMock = coreMock.createStart();
 
   return {
-    basePath,
+    basePath: serviceMock.http.basePath,
   };
 };

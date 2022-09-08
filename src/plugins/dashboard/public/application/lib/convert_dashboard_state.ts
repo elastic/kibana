@@ -54,24 +54,21 @@ export const savedObjectToDashboardState = ({
 }: SavedObjectToDashboardStateProps): DashboardState => {
   const {
     dashboardCapabilities: { showWriteControls },
-    initializerContext: { kibanaVersion },
   } = pluginServices.getServices();
 
-  const rawState = migrateAppState(
-    {
-      fullScreenMode: false,
-      title: savedDashboard.title,
-      query: savedDashboard.getQuery(),
-      filters: savedDashboard.getFilters(),
-      timeRestore: savedDashboard.timeRestore,
-      description: savedDashboard.description || '',
-      tags: getTagsFromSavedDashboard(savedDashboard),
-      panels: savedDashboard.panelsJSON ? JSON.parse(savedDashboard.panelsJSON) : [],
-      viewMode: savedDashboard.id || showWriteControls ? ViewMode.EDIT : ViewMode.VIEW,
-      options: savedDashboard.optionsJSON ? JSON.parse(savedDashboard.optionsJSON) : {},
-    },
-    kibanaVersion
-  );
+  const rawState = migrateAppState({
+    fullScreenMode: false,
+    title: savedDashboard.title,
+    query: savedDashboard.getQuery(),
+    filters: savedDashboard.getFilters(),
+    timeRestore: savedDashboard.timeRestore,
+    description: savedDashboard.description || '',
+    tags: getTagsFromSavedDashboard(savedDashboard),
+    panels: savedDashboard.panelsJSON ? JSON.parse(savedDashboard.panelsJSON) : [],
+    viewMode: savedDashboard.id || showWriteControls ? ViewMode.EDIT : ViewMode.VIEW,
+    options: savedDashboard.optionsJSON ? JSON.parse(savedDashboard.optionsJSON) : {},
+  });
+
   if (rawState.timeRestore) {
     rawState.timeRange = { from: savedDashboard.timeFrom, to: savedDashboard.timeTo } as TimeRange;
   }

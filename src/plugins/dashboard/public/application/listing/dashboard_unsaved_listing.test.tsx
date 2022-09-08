@@ -68,6 +68,8 @@ function mountWith({
   }> = ({ children }) => {
     return (
       <I18nProvider>
+        {/* Only the old savedObjects service is used for `DashboardUnsavedListing`, so will need to wrap this in 
+        `DashboardServicesProvider` instead once that is removed as part of https://github.com/elastic/kibana/pull/138774*/}
         <KibanaContextProvider services={services}>{children}</KibanaContextProvider>
       </I18nProvider>
     );

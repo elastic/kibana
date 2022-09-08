@@ -65,14 +65,7 @@ export interface TableListViewProps<V> {
   tableCaption: string;
   searchFilters?: SearchFilterConfig[];
   theme: ThemeServiceStart;
-  application:
-    | ApplicationStart
-    | {
-        getUrlForApp: ApplicationStart['getUrlForApp'];
-        capabilities: {
-          advancedSettings: ApplicationStart['capabilities']['advancedSettings'];
-        };
-      };
+  application: ApplicationStart;
 }
 
 export interface TableListViewState<V> {

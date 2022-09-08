@@ -49,6 +49,7 @@ exports[`DashboardEmptyScreen renders correctly with readonly mode 1`] = `
         <img
           alt=""
           class="euiImage emotion-euiImage-original"
+          src="/plugins/home/assets/welcome_graphic_light_2x.png"
         />
       </figure>
       <div
@@ -89,6 +90,7 @@ exports[`DashboardEmptyScreen renders correctly with view mode 1`] = `
         <img
           alt=""
           class="euiImage emotion-euiImage-original"
+          src="/plugins/home/assets/welcome_graphic_light_2x.png"
         />
       </figure>
       <div

@@ -270,6 +270,7 @@ export function DashboardTopNav({
         tags: [] as string[],
       };
       if (hasApi && newTags) {
+        // remove `hasAPI` once the savedObjectsTagging service is optional
         stateFromSaveModal.tags = newTags;
       }
 

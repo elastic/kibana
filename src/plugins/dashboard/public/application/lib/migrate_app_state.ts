@@ -13,15 +13,15 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import type { SerializableRecord } from '@kbn/utility-types';
 
 import { RawDashboardState, SavedDashboardPanel } from '../../types';
-import {
-  migratePanelsTo730,
-  type SavedDashboardPanelTo60,
-  type SavedDashboardPanel730ToLatest,
-  type SavedDashboardPanel610,
-  type SavedDashboardPanel630,
-  type SavedDashboardPanel640To720,
-  type SavedDashboardPanel620,
+import type {
+  SavedDashboardPanelTo60,
+  SavedDashboardPanel730ToLatest,
+  SavedDashboardPanel610,
+  SavedDashboardPanel630,
+  SavedDashboardPanel640To720,
+  SavedDashboardPanel620,
 } from '../../../common';
+import { migratePanelsTo730 } from '../../../common';
 import { pluginServices } from '../../services/plugin_services';
 
 /**
@@ -30,8 +30,7 @@ import { pluginServices } from '../../services/plugin_services';
  * Once we hit a major version, we can remove support for older style URLs and get rid of this logic.
  */
 export function migrateAppState(
-  appState: { [key: string]: any } & RawDashboardState,
-  kibanaVersion: string
+  appState: { [key: string]: any } & RawDashboardState
 ): RawDashboardState {
   if (!appState.panels) {
     throw new Error(
@@ -40,6 +39,11 @@ export function migrateAppState(
       })
     );
   }
+
+  const {
+    usageCollection: { reportUiCounter },
+    initializerContext: { kibanaVersion },
+  } = pluginServices.getServices();
 
   const panelNeedsMigration = (
     appState.panels as Array<
@@ -54,10 +58,6 @@ export function migrateAppState(
     if ((panel as { version?: string }).version === undefined) return true;
 
     const version = (panel as SavedDashboardPanel730ToLatest).version;
-
-    const {
-      usageCollection: { reportUiCounter },
-    } = pluginServices.getServices();
 
     if (reportUiCounter) {
       // This will help us figure out when to remove support for older style URLs.

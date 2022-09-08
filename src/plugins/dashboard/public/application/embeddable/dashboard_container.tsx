@@ -31,7 +31,6 @@ import {
 import type { Query } from '@kbn/es-query';
 import type { RefreshInterval } from '@kbn/data-plugin/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-// import { ExitFullScreenButtonKibanaProvider } from '@kbn/shared-ux-button-exit-full-screen';
 
 import { DASHBOARD_CONTAINER_TYPE } from './dashboard_constants';
 import { createPanelState } from './panel';
@@ -314,19 +313,16 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       settings: {
         theme: { theme$ },
       },
-      // chrome: { setIsVisible },
     } = pluginServices.getServices();
 
     ReactDOM.render(
       <I18nProvider>
         <KibanaThemeProvider theme$={theme$}>
-          {/* <ExitFullScreenButtonKibanaProvider coreStart={{ chrome: { setIsVisible } }}> */}
           <DashboardViewport
             container={this}
             controlGroup={this.controlGroup}
             onDataLoaded={this.onDataLoaded.bind(this)}
           />
-          {/* </ExitFullScreenButtonKibanaProvider> */}
         </KibanaThemeProvider>
       </I18nProvider>,
       dom

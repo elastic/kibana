@@ -118,6 +118,7 @@ const renderDashboardAppStateHook = ({
       wrapper: ({ children }) => {
         return (
           <Provider store={dashboardStateStore}>
+            {/* Can't get rid of KibanaContextProvider here yet because of saved dashboard tests below */}
             <KibanaContextProvider services={services}>
               <DashboardServicesProvider>{children}</DashboardServicesProvider>
             </KibanaContextProvider>

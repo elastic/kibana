@@ -98,7 +98,7 @@ test.skip('DashboardGrid removes panel when removed from container', () => {
   const { props } = prepare();
   const component = mountWithIntl(
     <DashboardServicesProvider>
-      <DashboardGrid {...props} />{' '}
+      <DashboardGrid {...props} />
     </DashboardServicesProvider>
   );
 
