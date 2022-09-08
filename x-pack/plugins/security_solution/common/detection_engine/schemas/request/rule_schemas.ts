@@ -9,7 +9,6 @@ import * as t from 'io-ts';
 
 import {
   actions,
-  response_actions,
   from,
   risk_score,
   machine_learning_job_id,
@@ -77,6 +76,7 @@ import {
   SetupGuide,
   newTermsFields,
   historyWindowStart,
+  response_actions,
 } from '../common';
 
 export const createSchema = <
@@ -190,7 +190,6 @@ const baseParams = {
     enabled,
     throttle,
     actions,
-    // response_actions,
     author,
     false_positives,
     from,

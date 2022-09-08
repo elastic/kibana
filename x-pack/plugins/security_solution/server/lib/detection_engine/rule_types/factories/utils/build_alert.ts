@@ -197,7 +197,6 @@ export const buildAlert = (
     [ALERT_RISK_SCORE]: overrides?.riskScoreOverride ?? params.riskScore,
     [ALERT_RULE_PARAMETERS]: ruleParamsSnakeCase,
     [ALERT_RULE_ACTIONS]: actions.map(transformAlertToRuleAction),
-    // [ALERT_RULE_RESPONSE_ACTIONS]: params.responseActions?.map(transformAlertToRuleResponseAction),
     [ALERT_RULE_AUTHOR]: params.author,
     [ALERT_RULE_CREATED_AT]: createdAt.toISOString(),
     [ALERT_RULE_CREATED_BY]: createdBy ?? '',

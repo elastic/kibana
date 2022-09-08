@@ -67,15 +67,6 @@ const renderWithContext = (Element: React.ReactElement) =>
 
 describe('Osquery Results', () => {
   beforeAll(() => {
-    window.IntersectionObserver = jest.fn(() => ({
-      root: null,
-      rootMargin: '',
-      thresholds: [],
-      takeRecords: jest.fn(),
-      observe: jest.fn(),
-      unobserve: jest.fn(),
-      disconnect: jest.fn(),
-    }));
     mockKibana();
     // @ts-expect-error update types
     jest.spyOn(useActions, 'useAllLiveQueries').mockImplementation(() => ({

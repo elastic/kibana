@@ -21,7 +21,7 @@ import { TELEMETRY_EBT_LIVE_QUERY_EVENT } from '../../lib/telemetry/constants';
 import type { PackSavedObjectAttributes } from '../../common/types';
 
 interface Metadata {
-  currentUser: any;
+  currentUser: string | undefined;
 }
 
 export const createActionHandler = async (

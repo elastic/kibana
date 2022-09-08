@@ -7,21 +7,11 @@
 
 import { RESPONSE_SUPPORTED_ACTION_TYPES_IDS } from '../../../../common/constants';
 
-// export interface ResponseActionValue {
-//   actionTypeId: string;
-//   id: string;
-//   params: Record<string, unknown>;
-// }
-
 export interface ResponseActionType {
   id: string;
   name: string;
   iconClass: string;
   description: string;
-  // enabled: boolean;
-  // enabledInConfig: boolean;
-  // enabledInLicense: boolean;
-  // minimumLicenseRequired: LicenseType;
 }
 
 export const getSupportedResponseActions = (

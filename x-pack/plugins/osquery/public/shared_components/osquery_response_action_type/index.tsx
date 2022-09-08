@@ -53,7 +53,7 @@ const OsqueryResponseActionParamsFormComponent: React.FunctionComponent<OsqueryR
     const uniqueId = useMemo(() => uuid.v4(), []);
     const hooksForm = useHookForm<OsqueryResponseActionsParamsFormFields>({
       defaultValues: {
-        // ecs_mapping: [defaultEcsFormData],
+        ecs_mapping: [defaultEcsFormData],
         id: uniqueId,
       },
     });
@@ -66,7 +66,7 @@ const OsqueryResponseActionParamsFormComponent: React.FunctionComponent<OsqueryR
     const watchedValues = watch();
     const { data: packData } = usePack({
       packId: watchedValues?.packId?.[0],
-      skip: !watchedValues?.packId,
+      skip: !watchedValues?.packId?.[0],
     });
     const [queryType, setQueryType] = useState<string>(
       !isEmpty(defaultParams?.queries) ? 'pack' : 'query'
@@ -111,7 +111,6 @@ const OsqueryResponseActionParamsFormComponent: React.FunctionComponent<OsqueryR
 
     useEffect(() => {
       if (queryType === 'pack' && packData) {
-        console.log({ watchedValues });
         context.updateFieldValues({
           [item.path]: {
             actionTypeId: '.osquery',
@@ -138,7 +137,6 @@ const OsqueryResponseActionParamsFormComponent: React.FunctionComponent<OsqueryR
     }, [context, item.path, packData, queryType, watchedValues]);
 
     useEffectOnce(() => {
-      console.log({ defaultParams, path: item.path });
       if (defaultParams && defaultParams.id) {
         const { packId, ...restParams } = defaultParams;
         map(restParams, (value, key: keyof OsqueryResponseActionsParamsFormFields) => {

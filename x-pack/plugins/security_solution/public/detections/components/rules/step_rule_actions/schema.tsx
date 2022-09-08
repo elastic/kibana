@@ -72,7 +72,6 @@ export const getSchema = ({
       },
     ],
   },
-  // TODO add responseActions validation
   enabled: {},
   kibanaSiemAppUrl: {},
   throttle: {

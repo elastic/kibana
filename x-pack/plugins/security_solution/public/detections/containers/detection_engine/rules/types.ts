@@ -21,7 +21,6 @@ import {
   type,
   severity_mapping,
   severity,
-  response_actions,
 } from '@kbn/securitysolution-io-ts-alerting-types';
 
 import { RuleExecutionSummary } from '../../../../../common/detection_engine/rule_monitoring';
@@ -67,6 +66,13 @@ export const action = t.exact(
   t.type({
     group: t.string,
     id: t.string,
+    action_type_id: t.string,
+    params: t.record(t.string, t.any),
+  })
+);
+
+export const responseAction = t.exact(
+  t.type({
     action_type_id: t.string,
     params: t.record(t.string, t.any),
   })
@@ -133,7 +139,7 @@ export const RuleSchema = t.intersection([
     updated_at: t.string,
     updated_by: t.string,
     actions: t.array(action),
-    response_actions,
+    response_actions: t.array(responseAction),
     throttle: t.union([t.string, t.null]),
   }),
   t.partial({

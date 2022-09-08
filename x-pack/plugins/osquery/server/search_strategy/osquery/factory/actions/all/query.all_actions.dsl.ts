@@ -26,11 +26,6 @@ export const buildActionsQuery = ({
     index: componentTemplateExists ? `${ACTIONS_INDEX}*` : AGENT_ACTIONS_INDEX,
     ignore_unavailable: true,
     body: {
-      runtime_mappings: {
-        'data.id': {
-          type: 'keyword',
-        },
-      },
       query: {
         bool: {
           filter,
@@ -66,6 +61,5 @@ export const buildActionsQuery = ({
     },
   };
 
-  // @ts-expect-error update types
   return dslQuery;
 };

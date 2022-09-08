@@ -21,8 +21,7 @@
         "siem": ["all"],
         "savedObjectsManagement": ["all"],
         "osquery": ["all"],
-        "visualize": ["read"],
-        "actions": ["all"]
+        "visualize": ["read"]
       },
       "spaces": ["*"]
     }
