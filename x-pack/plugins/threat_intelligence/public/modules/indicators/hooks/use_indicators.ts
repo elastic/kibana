@@ -153,12 +153,12 @@ export const useIndicators = ({
             setIndicatorCount(response.rawResponse.hits.total || 0);
 
             if (isCompleteResponse(response)) {
+              setLoading(false);
               searchSubscription$.current?.unsubscribe();
             } else if (isErrorResponse(response)) {
+              setLoading(false);
               searchSubscription$.current?.unsubscribe();
             }
-
-            setLoading(false);
           },
           error: (msg) => {
             searchService.showError(msg);
