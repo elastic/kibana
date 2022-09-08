@@ -25,7 +25,7 @@ export const useRecentlyViewedMonitors = () => {
     if (recentlyViewed) {
       setRecentlyViewed(JSON.stringify([...new Set([monitorId, ...JSON.parse(recentlyViewed)])]));
     } else {
-      setRecentlyViewed(JSON.stringify([monitorId]));
+      setRecentlyViewed(JSON.stringify(monitorId ? [monitorId] : []));
     }
   }, [monitorId, recentlyViewed, setRecentlyViewed]);
 
