@@ -280,13 +280,21 @@ export const getPieVisualization = ({
           return l;
         }
 
-        if (l.metric === columnId) {
-          return { ...l, metric: undefined };
+        const newLayer = { ...l };
+
+        if (l.collapseFns?.[columnId]) {
+          const newCollapseFns = { ...l.collapseFns };
+          delete newCollapseFns[columnId];
+          newLayer.collapseFns = newCollapseFns;
+        }
+
+        if (newLayer.metric === columnId) {
+          return { ...newLayer, metric: undefined };
         }
         return {
-          ...l,
-          primaryGroups: l.primaryGroups.filter((c) => c !== columnId),
-          secondaryGroups: l.secondaryGroups?.filter((c) => c !== columnId) ?? undefined,
+          ...newLayer,
+          primaryGroups: newLayer.primaryGroups.filter((c) => c !== columnId),
+          secondaryGroups: newLayer.secondaryGroups?.filter((c) => c !== columnId) ?? undefined,
         };
       }),
     };

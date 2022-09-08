@@ -31,6 +31,7 @@ import {
 } from '../../shared_components';
 import { getDefaultVisualValuesForLayer } from '../../shared_components/datasource_default_values';
 import { shouldShowValuesInLegend } from './render_helpers';
+import { CollapseSetting } from '../../shared_components/collapse_setting';
 
 const legendOptions: Array<{
   value: SharedPieLayerState['legendDisplay'];
@@ -306,14 +307,42 @@ export function DimensionEditor(
     paletteService: PaletteRegistry;
   }
 ) {
-  if (props.accessor !== Object.values(props.state.layers)[0].primaryGroups[0]) return null;
+  const currentLayer = props.state.layers.find((layer) => layer.layerId === props.layerId);
+
+  if (!currentLayer) {
+    return null;
+  }
+
+  // TODO - restore palette gating
+  // if (props.accessor !== Object.values(props.state.layers)[0].primaryGroups[0]) return null;
   return (
-    <PalettePicker
-      palettes={props.paletteService}
-      activePalette={props.state.palette}
-      setPalette={(newPalette) => {
-        props.setState({ ...props.state, palette: newPalette });
-      }}
-    />
+    <>
+      <PalettePicker
+        palettes={props.paletteService}
+        activePalette={props.state.palette}
+        setPalette={(newPalette) => {
+          props.setState({ ...props.state, palette: newPalette });
+        }}
+      />
+      <CollapseSetting
+        value={currentLayer?.collapseFns?.[props.accessor] || ''}
+        onChange={(collapseFn: string) => {
+          props.setState({
+            ...props.state,
+            layers: props.state.layers.map((layer) =>
+              layer.layerId !== props.layerId
+                ? layer
+                : {
+                    ...layer,
+                    collapseFns: {
+                      ...layer.collapseFns,
+                      [props.accessor]: collapseFn,
+                    },
+                  }
+            ),
+          });
+        }}
+      />
+    </>
   );
 }

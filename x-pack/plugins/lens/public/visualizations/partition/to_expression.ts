@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Ast } from '@kbn/interpreter';
+import type { Ast, AstFunction } from '@kbn/interpreter';
 import { Position } from '@elastic/charts';
 import type { PaletteOutput, PaletteRegistry } from '@kbn/coloring';
 
@@ -142,7 +142,10 @@ const generateCommonArguments: GenerateExpressionAstArguments = (
 ) => {
   return {
     labels: generateCommonLabelsAstArgs(state, attributes, layer),
-    buckets: operations.map((o) => o.columnId).map(prepareDimension),
+    buckets: operations
+      .filter(({ columnId }) => !layer.collapseFns?.[columnId])
+      .map(({ columnId }) => columnId)
+      .map(prepareDimension),
     metric: layer.metric ? [prepareDimension(layer.metric)] : [],
     legendDisplay: [attributes.isPreview ? LegendDisplay.HIDE : layer.legendDisplay],
     legendPosition: [layer.legendPosition || Position.Right],
@@ -298,6 +301,19 @@ function expressionHelper(
     type: 'expression',
     chain: [
       ...(datasourceAst ? datasourceAst.chain : []),
+      ...groups
+        .filter((columnId) => layer.collapseFns?.[columnId])
+        .map((columnId) => {
+          return {
+            type: 'function',
+            function: 'lens_collapse',
+            arguments: {
+              by: groups.filter((chk) => chk !== columnId),
+              metric: [layer.metric],
+              fn: [layer.collapseFns![columnId]!],
+            },
+          } as AstFunction;
+        }),
       ...(visualizationAst ? visualizationAst.chain : []),
     ],
   };
