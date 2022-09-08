@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { Plugin } from '@kbn/core/public';
 
-import { AiopsPluginSetup, AiopsPluginStart } from './types';
-
-export class AiopsPlugin implements Plugin<AiopsPluginSetup, AiopsPluginStart> {
-  public setup(core: CoreSetup) {}
-  public start(core: CoreStart) {}
+export class AiopsPlugin implements Plugin {
+  public setup() {}
+  public start() {}
   public stop() {}
 }
