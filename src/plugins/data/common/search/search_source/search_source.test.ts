@@ -93,7 +93,7 @@ describe('SearchSource', () => {
       aggs: aggsMock,
       getConfig: getConfigMock,
       search: mockSearchMethod,
-      onResponse: (_, res) => res,
+      onResponse: jest.fn().mockImplementation((_, res) => res),
     };
 
     searchSource = new SearchSource({}, searchSourceDependencies);
@@ -1014,6 +1014,7 @@ describe('SearchSource', () => {
 
         expect(next).toBeCalledTimes(2);
         expect(complete).toBeCalledTimes(1);
+        expect(searchSourceDependencies.onResponse).toBeCalledTimes(1);
         expect(next.mock.calls[0]).toMatchObject([
           { isPartial: true, isRunning: true, rawResponse: { test: 1 } },
         ]);
@@ -1202,6 +1203,7 @@ describe('SearchSource', () => {
         expect(fetchSub.next).toHaveBeenCalledTimes(2);
         expect(fetchSub.complete).toHaveBeenCalledTimes(1);
         expect(fetchSub.error).toHaveBeenCalledTimes(0);
+        expect(searchSourceDependencies.onResponse).toBeCalledTimes(1);
 
         expect(typesRegistry.get('avg').postFlightRequest).toHaveBeenCalledTimes(0);
       });
@@ -1272,6 +1274,7 @@ describe('SearchSource', () => {
 
         const resp = await lastValueFrom(fetch$);
 
+        expect(searchSourceDependencies.onResponse).toBeCalledTimes(1);
         expect(fetchSub.next).toHaveBeenCalledTimes(3);
         expect(fetchSub.complete).toHaveBeenCalledTimes(1);
         expect(fetchSub.error).toHaveBeenCalledTimes(0);
