@@ -359,14 +359,14 @@ async function main() {
     // Document Generator override that uses a custom Endpoint Metadata generator and sets the
     // `agent.version` to the current version
     DocGenerator = class extends EndpointDocGenerator {
-      constructor(seedValue) {
+      constructor(...args: ConstructorParameters<typeof EndpointDocGenerator>) {
         const MetadataGenerator = class extends EndpointMetadataGenerator {
           protected randomVersion(): string {
             return stackVersion;
           }
         };
 
-        super(seedValue, MetadataGenerator);
+        super(args[0], MetadataGenerator);
       }
     };
   }
