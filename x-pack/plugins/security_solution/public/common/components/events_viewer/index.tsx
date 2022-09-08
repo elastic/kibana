@@ -233,8 +233,6 @@ const transformControlColumns = ({
   }));
 
 const StatefulAlertBulkActions = lazy(() => import('../toolbar/bulk_actions/alert_bulk_actions'));
-const EMPTY_CONTROL_COLUMNS: ControlColumnProps[] = [];
-
 const FullScreenContainer = styled.div<{ $isFullScreen: boolean }>`
   height: ${({ $isFullScreen }) => ($isFullScreen ? '100%' : undefined)};
   flex: 1 1 auto;
@@ -391,8 +389,6 @@ const StatefulEventsViewerComponent: React.FC<StatefulEventsViewerProps> = ({
   }, []);
 
   const globalFilters = useMemo(() => [...filters, ...(pageFilters ?? [])], [filters, pageFilters]);
-  const trailingControlColumns: ControlColumnProps[] = EMPTY_CONTROL_COLUMNS;
-
   const { Navigation } = useSessionViewNavigation({
     timelineId: id,
   });
@@ -652,39 +648,36 @@ const StatefulEventsViewerComponent: React.FC<StatefulEventsViewerProps> = ({
   );
 
   const [leadingTGridControlColumns] = useMemo(() => {
-    return [
-      showCheckboxes ? [checkBoxControlColumn, ...leadingControlColumns] : leadingControlColumns,
-      trailingControlColumns,
-    ].map((controlColumns) =>
-      transformControlColumns({
-        columnHeaders: columnsHeader,
-        controlColumns,
-        data: events,
-        disabledCellActions: FIELDS_WITHOUT_CELL_ACTIONS,
-        fieldBrowserOptions,
-        isEventViewer: tableView === 'eventRenderedView',
-        loadingEventIds,
-        onRowSelected,
-        onRuleChange,
-        selectedEventIds,
-        showCheckboxes,
-        tabType: TimelineTabs.query,
-        timelineId: id,
-        isSelectAllChecked,
-        sort,
-        browserFields,
-        onSelectPage,
-        theme,
-        setEventsLoading,
-        setEventsDeleted,
-        pageSize: itemsPerPage,
-      })
-    );
+    const controlColumns = showCheckboxes
+      ? [checkBoxControlColumn, ...leadingControlColumns]
+      : leadingControlColumns;
+    return transformControlColumns({
+      columnHeaders: columnsHeader,
+      controlColumns,
+      data: events,
+      disabledCellActions: FIELDS_WITHOUT_CELL_ACTIONS,
+      fieldBrowserOptions,
+      isEventViewer: tableView === 'eventRenderedView',
+      loadingEventIds,
+      onRowSelected,
+      onRuleChange,
+      selectedEventIds,
+      showCheckboxes,
+      tabType: TimelineTabs.query,
+      timelineId: id,
+      isSelectAllChecked,
+      sort,
+      browserFields,
+      onSelectPage,
+      theme,
+      setEventsLoading,
+      setEventsDeleted,
+      pageSize: itemsPerPage,
+    });
   }, [
     columnsHeader,
     showCheckboxes,
     leadingControlColumns,
-    trailingControlColumns,
     events,
     fieldBrowserOptions,
     tableView,
@@ -764,7 +757,6 @@ const StatefulEventsViewerComponent: React.FC<StatefulEventsViewerProps> = ({
                   setQuery,
                   sort,
                   start,
-                  trailingControlColumns,
                   type: 'embedded',
                   unit,
                 })}
