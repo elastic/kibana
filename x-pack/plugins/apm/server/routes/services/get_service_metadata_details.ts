@@ -53,6 +53,7 @@ export interface ServiceMetadataDetails {
   container?: {
     ids?: string[];
     image?: string;
+    os?: string;
     totalNumberInstances?: number;
   };
   serverless?: {
@@ -190,6 +191,7 @@ export async function getServiceMetadataDetails({
     host || container || totalNumberInstances || kubernetes
       ? {
           type: (!!kubernetes ? 'Kubernetes' : 'Docker') as ContainerType,
+          os: host?.os?.platform,
           totalNumberInstances,
           ids: response.aggregations?.containerIds.buckets.map(
             (bucket) => bucket.key as string

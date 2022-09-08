@@ -40,6 +40,18 @@ export function ContainerDetails({ container, kubernetes }: Props) {
     });
   }
 
+  if (container.os) {
+    listItems.push({
+      title: i18n.translate(
+        'xpack.apm.serviceIcons.serviceDetails.container.os.label',
+        {
+          defaultMessage: 'OS',
+        }
+      ),
+      description: container.os,
+    });
+  }
+
   if (kubernetes?.deployment && kubernetes?.deployment.length > 0) {
     listItems.push({
       title: i18n.translate(
@@ -101,24 +113,6 @@ export function ContainerDetails({ container, kubernetes }: Props) {
         { defaultMessage: 'Total number of instances' }
       ),
       description: asInteger(container.totalNumberInstances),
-    });
-  }
-
-  if (kubernetes?.labels && kubernetes?.labels.length > 0) {
-    listItems.push({
-      title: i18n.translate(
-        'xpack.apm.serviceIcons.serviceDetails.kubernetes.labels',
-        { defaultMessage: 'Labels' }
-      ),
-      description: (
-        <ul>
-          {kubernetes.labels.map((label, index) => (
-            <li key={index}>
-              <EuiBadge color="hollow">{label}</EuiBadge>
-            </li>
-          ))}
-        </ul>
-      ),
     });
   }
 

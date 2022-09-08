@@ -19,7 +19,6 @@ import {
   KUBERNETES_POD_UID,
   KUBERNETES_REPLICASET_NAME,
   KUBERNETES_DEPLOYMENT_NAME,
-  KUBERNETES_LABELS,
 } from '../../../common/elasticsearch_fieldnames';
 import { Kubernetes } from '../../../typings/es_schemas/raw/fields/kubernetes';
 import { Container } from '../../../typings/es_schemas/raw/fields/container';
@@ -36,9 +35,6 @@ export interface ResponseHitSource {
       name: string;
       uid: string;
     };
-    labels: {
-      [key: string]: string;
-    };
     image: {
       name: string;
     };
@@ -54,11 +50,6 @@ interface Aggs extends estypes.AggregationsMultiBucketAggregateBase {
   buckets: Array<{
     key: string;
     key_as_string?: string;
-    all_labels: {
-      hits: {
-        hits: ResponseHit[];
-      };
-    };
   }>;
 }
 
@@ -88,7 +79,6 @@ export const getServiceContainerMetadata = async ({
     { exists: { field: KUBERNETES_POD_UID } },
     { exists: { field: KUBERNETES_REPLICASET_NAME } },
     { exists: { field: KUBERNETES_DEPLOYMENT_NAME } },
-    { exists: { field: KUBERNETES_LABELS } },
   ];
 
   const response = await esClient.search<
@@ -129,25 +119,10 @@ export const getServiceContainerMetadata = async ({
           size: 10,
         },
       },
-      labels: {
-        terms: { field: KUBERNETES_DEPLOYMENT_NAME },
-        aggs: {
-          all_labels: {
-            top_hits: {
-              _source: [KUBERNETES_LABELS],
-              size: 1,
-            },
-          },
-        },
-      },
     },
   });
 
   const sources = maybe(response.hits.hits[0])?._source as ResponseHitSource;
-
-  const allLabels = response.aggregations?.labels?.buckets.map(
-    (bucket) => bucket.all_labels?.hits?.hits?.[0]._source?.kubernetes?.labels
-  );
 
   return {
     kubernetes: {
@@ -164,12 +139,6 @@ export const getServiceContainerMetadata = async ({
       namespace: response.aggregations?.namespace?.buckets.map(
         (bucket) => bucket.key
       ),
-      labels: allLabels
-        ?.map(
-          (label) =>
-            label && Object.keys(label).map((key) => `${key}:${label[key]}`)
-        )
-        .flat(),
     },
     container: {
       image: sources?.container?.image?.name,

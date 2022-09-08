@@ -129,7 +129,6 @@ export const KUBERNETES = 'kubernetes';
 export const KUBERNETES_CONTAINER_NAME = 'kubernetes.container.name';
 export const KUBERNETES_DEPLOYMENT = 'kubernetes.deployment';
 export const KUBERNETES_DEPLOYMENT_NAME = 'kubernetes.deployment.name';
-export const KUBERNETES_LABELS = 'kubernetes.labels';
 export const KUBERNETES_NAMESPACE_NAME = 'kubernetes.namespace.name';
 export const KUBERNETES_NAMESPACE = 'kubernetes.namespace';
 export const KUBERNETES_POD_NAME = 'kubernetes.pod.name';

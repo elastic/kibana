@@ -28,7 +28,6 @@ import {
   KUBERNETES_POD_UID,
   KUBERNETES_REPLICASET,
   KUBERNETES_DEPLOYMENT,
-  KUBERNETES_LABELS,
 } from '../../../../../common/elasticsearch_fieldnames';
 
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
@@ -58,13 +57,11 @@ function toKeyValuePairs({
   data: ServiceInstanceDetails;
   showFilterByOption?: boolean;
 }) {
-  return keys.map((key) => {
-    let value = get(data, key);
-    if (Array.isArray(value)) {
-      value = value.join(' AND ');
-    }
-    return { key, value, showFilterByOption };
-  });
+  return keys.map((key) => ({
+    key,
+    value: get(data, key),
+    showFilterByOption,
+  }));
 }
 
 const serviceDetailsKeys = [
@@ -84,7 +81,6 @@ const metricsKubernetesDetailsKeys = [
   KUBERNETES_NAMESPACE,
   KUBERNETES_REPLICASET,
   KUBERNETES_DEPLOYMENT,
-  KUBERNETES_LABELS,
 ];
 const cloudDetailsKeys = [
   CLOUD_AVAILABILITY_ZONE,

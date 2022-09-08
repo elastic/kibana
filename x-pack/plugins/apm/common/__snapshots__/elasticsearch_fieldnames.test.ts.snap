@@ -97,8 +97,6 @@ exports[`Error KUBERNETES_DEPLOYMENT 1`] = `undefined`;
 
 exports[`Error KUBERNETES_DEPLOYMENT_NAME 1`] = `undefined`;
 
-exports[`Error KUBERNETES_LABELS 1`] = `undefined`;
-
 exports[`Error KUBERNETES_NAMESPACE 1`] = `undefined`;
 
 exports[`Error KUBERNETES_NAMESPACE_NAME 1`] = `undefined`;
@@ -150,8 +148,6 @@ exports[`Error OBSERVER_HOSTNAME 1`] = `undefined`;
 exports[`Error OBSERVER_LISTENING 1`] = `undefined`;
 
 exports[`Error PARENT_ID 1`] = `"parentId"`;
-
-exports[`Error POD_NAME 1`] = `undefined`;
 
 exports[`Error PROCESSOR_EVENT 1`] = `"error"`;
 
@@ -360,8 +356,6 @@ exports[`Span KUBERNETES_DEPLOYMENT 1`] = `undefined`;
 
 exports[`Span KUBERNETES_DEPLOYMENT_NAME 1`] = `undefined`;
 
-exports[`Span KUBERNETES_LABELS 1`] = `undefined`;
-
 exports[`Span KUBERNETES_NAMESPACE 1`] = `undefined`;
 
 exports[`Span KUBERNETES_NAMESPACE_NAME 1`] = `undefined`;
@@ -413,8 +407,6 @@ exports[`Span OBSERVER_HOSTNAME 1`] = `undefined`;
 exports[`Span OBSERVER_LISTENING 1`] = `undefined`;
 
 exports[`Span PARENT_ID 1`] = `"parentId"`;
-
-exports[`Span POD_NAME 1`] = `undefined`;
 
 exports[`Span PROCESSOR_EVENT 1`] = `"span"`;
 
@@ -633,8 +625,6 @@ exports[`Transaction KUBERNETES_DEPLOYMENT 1`] = `undefined`;
 
 exports[`Transaction KUBERNETES_DEPLOYMENT_NAME 1`] = `undefined`;
 
-exports[`Transaction KUBERNETES_LABELS 1`] = `undefined`;
-
 exports[`Transaction KUBERNETES_NAMESPACE 1`] = `undefined`;
 
 exports[`Transaction KUBERNETES_NAMESPACE_NAME 1`] = `undefined`;
@@ -686,8 +676,6 @@ exports[`Transaction OBSERVER_HOSTNAME 1`] = `undefined`;
 exports[`Transaction OBSERVER_LISTENING 1`] = `undefined`;
 
 exports[`Transaction PARENT_ID 1`] = `"parentId"`;
-
-exports[`Transaction POD_NAME 1`] = `undefined`;
 
 exports[`Transaction PROCESSOR_EVENT 1`] = `"transaction"`;
 

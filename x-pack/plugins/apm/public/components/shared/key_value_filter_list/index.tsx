@@ -19,6 +19,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import React, { Fragment } from 'react';
 import styled from 'styled-components';
+import { isEmpty } from 'lodash';
 
 interface KeyValue {
   key: string;
@@ -50,7 +51,7 @@ const ValueContainer = styled.div`
 `;
 
 function removeEmptyValues(items: KeyValue[]) {
-  return items.filter(({ value }) => value !== undefined);
+  return items.filter(({ value }) => !isEmpty(value));
 }
 
 export function KeyValueFilterList({
