@@ -102,7 +102,9 @@ export interface SavedObjectsTaggingApiUi {
    * )
    * ```
    */
-  getTableColumnDefinition(): EuiTableFieldDataColumnType<SavedObject>;
+  getTableColumnDefinition(
+    options?: GetTableColumnDefinitionOptions
+  ): EuiTableFieldDataColumnType<SavedObject>;
 
   /**
    * Convert given tag name to a {@link SavedObjectsFindOptionsReference | reference }
@@ -249,6 +251,28 @@ export interface SavedObjectSaveModalTagSelectorComponentProps {
    * tags selection callback
    */
   onTagsSelected: (ids: string[]) => void;
+}
+
+/**
+ * Options for the {@link SavedObjectsTaggingApiUi.getTableColumnDefinition | getTableColumnDefinition api}
+ *
+ * @public
+ */
+export interface GetTableColumnDefinitionOptions {
+  /**
+   * By default, the `tags` column definition will be automatically sortable
+   * by tag name.
+   *
+   * However, when paging is performed on the server, we need to remove the sorting
+   * capability from the column to avoid unexpected behavior by triggering fetch request
+   * when sorting by column.
+   *
+   * Should be set to `true` when generating the definition for a table that performs
+   * server-side paging.
+   *
+   * Defaults to false.
+   */
+  serverPaging?: boolean;
 }
 
 /**
