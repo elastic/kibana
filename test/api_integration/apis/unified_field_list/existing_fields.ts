@@ -1,8 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import expect from '@kbn/expect';
@@ -29,26 +30,32 @@ export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
   const kibanaServer = getService('kibanaServer');
+  const dataViewId = 'existence_index';
+  const API_PATH = `/api/unified_field_list/existing_fields/${dataViewId}`;
 
   describe('existing_fields apis', () => {
     before(async () => {
-      await esArchiver.load('x-pack/test/api_integration/es_archives/lens/constant_keyword');
+      await esArchiver.load(
+        'test/api_integration/fixtures/es_archiver/index_patterns/constant_keyword'
+      );
       await kibanaServer.importExport.load(
-        'x-pack/test/api_integration/fixtures/kbn_archiver/lens/constant_keyword.json'
+        'test/api_integration/fixtures/kbn_archiver/index_patterns/constant_keyword.json'
       );
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/api_integration/es_archives/lens/constant_keyword');
+      await esArchiver.unload(
+        'test/api_integration/fixtures/es_archiver/index_patterns/constant_keyword'
+      );
       await kibanaServer.importExport.unload(
-        'x-pack/test/api_integration/fixtures/kbn_archiver/lens/constant_keyword.json'
+        'test/api_integration/fixtures/kbn_archiver/index_patterns/constant_keyword.json'
       );
     });
 
     describe('existence', () => {
       it('should find which fields exist in the sample documents', async () => {
         const { body } = await supertest
-          .post(`/api/lens/existing_fields/existence_index`)
+          .post(API_PATH)
           .set(COMMON_HEADERS)
           .send({
             dslQuery: {
@@ -75,7 +82,7 @@ export default ({ getService }: FtrProviderContext) => {
         ];
 
         const { body } = await supertest
-          .post(`/api/lens/existing_fields/existence_index`)
+          .post(API_PATH)
           .set(COMMON_HEADERS)
           .send({
             dslQuery: {
@@ -102,7 +109,7 @@ export default ({ getService }: FtrProviderContext) => {
         ];
 
         const { body } = await supertest
-          .post(`/api/lens/existing_fields/existence_index`)
+          .post(API_PATH)
           .set(COMMON_HEADERS)
           .send({
             dslQuery: {
@@ -129,7 +136,7 @@ export default ({ getService }: FtrProviderContext) => {
         ];
 
         const { body } = await supertest
-          .post(`/api/lens/existing_fields/existence_index`)
+          .post(API_PATH)
           .set(COMMON_HEADERS)
           .send({
             dslQuery: {
