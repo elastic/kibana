@@ -78,8 +78,8 @@ const _handleViolations = (violations: Result[], skipTestFailure?: boolean) => {
   cy.task('table', violationData);
 };
 
-const logViolationsToConsoleOnly = (violations: Result[]) => {
-  _handleViolations(violations, true);
+const logViolations = (violations: Result[]) => {
+  _handleViolations(violations);
 };
 
 /*
@@ -106,5 +106,5 @@ export const checkA11y = () => {
   cy.injectAxe();
   cy.configureAxe(axeConfig);
   const context = '.kbnAppWrapper'; // Scopes a11y checks to only our app
-  cy.checkA11y(context, axeOptions, logViolationsToConsoleOnly);
+  cy.checkA11y(context, axeOptions, logViolations);
 };
