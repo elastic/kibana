@@ -26,6 +26,7 @@ export interface QueryLanguageSwitcherProps {
   anchorPosition?: PopoverAnchorPosition;
   nonKqlMode?: 'lucene' | 'text';
   isOnTopBarMenu?: boolean;
+  isDisabled?: boolean;
 }
 
 export const QueryLanguageSwitcher = React.memo(function QueryLanguageSwitcher({
@@ -34,6 +35,7 @@ export const QueryLanguageSwitcher = React.memo(function QueryLanguageSwitcher({
   onSelectLanguage,
   nonKqlMode = 'lucene',
   isOnTopBarMenu,
+  isDisabled,
 }: QueryLanguageSwitcherProps) {
   const kibana = useKibana();
   const kueryQuerySyntaxDocs = kibana.services.docLinks!.links.query.kueryQuerySyntax;
@@ -49,6 +51,7 @@ export const QueryLanguageSwitcher = React.memo(function QueryLanguageSwitcher({
       aria-label={i18n.translate('unifiedSearch.switchLanguage.buttonText', {
         defaultMessage: 'Switch language button.',
       })}
+      disabled={isDisabled}
     />
   );
 
