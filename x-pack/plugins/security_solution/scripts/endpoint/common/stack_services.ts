@@ -123,13 +123,17 @@ export const createKbnClient = ({
  * @param kbnClient
  */
 export const fetchStackVersion = async (kbnClient: KbnClient): Promise<string> => {
-  const status = await kbnClient.request<StatusResponse>({
-    method: 'GET',
-    path: '/api/status',
-  });
+  const status = (
+    await kbnClient.request<StatusResponse>({
+      method: 'GET',
+      path: '/api/status',
+    })
+  ).data;
 
   if (!status?.version?.number) {
-    throw new Error(`unable to get stack version from '/api/status'`);
+    throw new Error(
+      `unable to get stack version from '/api/status' \n${JSON.stringify(status, null, 2)}`
+    );
   }
 
   return status.version.number;

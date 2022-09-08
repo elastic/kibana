@@ -14,27 +14,12 @@ import { CA_CERT_PATH } from '@kbn/dev-utils';
 import { ToolingLog } from '@kbn/tooling-log';
 import type { KbnClientOptions } from '@kbn/test';
 import { KbnClient } from '@kbn/test';
-import { kibanaPackageJson } from '@kbn/utils';
 import { EndpointMetadataGenerator } from '../../common/endpoint/data_generators/endpoint_metadata_generator';
 import { indexHostsAndAlerts } from '../../common/endpoint/index_data';
 import { ANCESTRY_LIMIT, EndpointDocGenerator } from '../../common/endpoint/generate_data';
+import { fetchStackVersion } from './common/stack_services';
 
 main();
-
-// Document Generator override
-// A document generator that uses a custom Endpoint Metadata generator that sets the `agent.version`
-// to the current version of kibana
-const DocGenerator = class extends EndpointDocGenerator {
-  constructor(seed) {
-    const MetadataGenerator = class extends EndpointMetadataGenerator {
-      protected randomVersion(): string {
-        return kibanaPackageJson.version;
-      }
-    };
-
-    super(seed, MetadataGenerator);
-  }
-};
 
 function handleErr(err: unknown) {
   if (err instanceof errors.ResponseError && err.statusCode !== 404) {
@@ -266,6 +251,13 @@ async function main() {
       type: 'string',
       default: '',
     },
+    randomVersions: {
+      describe:
+        'By default, the data generated (that contains a stack version - ex: `agent.version`) will have a ' +
+        'version number set to be the same as the version of the running stack. Using this flag (`--randomVersions=true`) ' +
+        'will result in random version being generated',
+      default: false,
+    },
   }).argv;
   let ca: Buffer;
 
@@ -357,6 +349,28 @@ async function main() {
     process.exit(0);
   }
 
+  let DocGenerator: typeof EndpointDocGenerator = EndpointDocGenerator;
+
+  // If `--randomVersions` is NOT set, then use custom generator that ensures all data generated
+  // has a stack version number that matches that of the running stack
+  if (!argv.randomVersions) {
+    const stackVersion = await fetchStackVersion(kbnClient);
+
+    // Document Generator override that uses a custom Endpoint Metadata generator and sets the
+    // `agent.version` to the current version
+    DocGenerator = class extends EndpointDocGenerator {
+      constructor(seedValue) {
+        const MetadataGenerator = class extends EndpointMetadataGenerator {
+          protected randomVersion(): string {
+            return stackVersion;
+          }
+        };
+
+        super(seedValue, MetadataGenerator);
+      }
+    };
+  }
+
   await indexHostsAndAlerts(
     client,
     kbnClient,
@@ -384,8 +398,8 @@ async function main() {
     },
     DocGenerator
   );
-  // delete endpoint_user after
 
+  // delete endpoint_user after
   if (user) {
     const deleted = await deleteUser(client, user.username);
     if (deleted.found) {
