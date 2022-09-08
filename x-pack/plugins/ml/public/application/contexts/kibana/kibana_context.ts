@@ -16,7 +16,6 @@ import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { MapsStartApi } from '@kbn/maps-plugin/public';
 import type { DataVisualizerPluginStart } from '@kbn/data-visualizer-plugin/public';
-import type { AiopsPluginStart } from '@kbn/aiops-plugin/public';
 import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import type { DashboardSetup } from '@kbn/dashboard-plugin/public';
@@ -35,7 +34,6 @@ interface StartPlugins {
   maps?: MapsStartApi;
   triggersActionsUi?: TriggersAndActionsUIPublicPluginStart;
   dataVisualizer?: DataVisualizerPluginStart;
-  aiops?: AiopsPluginStart;
   usageCollection?: UsageCollectionSetup;
   fieldFormats: FieldFormatsRegistry;
   dashboard: DashboardSetup;
