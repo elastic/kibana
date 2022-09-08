@@ -11,7 +11,7 @@ import { kibanaPackageJson } from '@kbn/utils';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 /**
- * Test suite is mean to cover usages of endpoint functionality or access to endpoint
+ * Test suite is meant to cover usages of endpoint functionality or access to endpoint
  * functionality from other areas of security solution.
  */
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
