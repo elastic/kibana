@@ -109,7 +109,9 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
 
   const handleFieldChange = useCallback(
     ([newField]: DataViewFieldBase[]): void => {
+      console.log({ newField });
       const { updatedEntry, index } = getEntryOnFieldChange(entry, newField);
+      console.log({ updatedEntry, index });
       onChange(updatedEntry, index);
     },
     [onChange, entry]
@@ -190,6 +192,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
           isLoading={false}
           isDisabled={isDisabled || indexPattern == null}
           onChange={handleFieldChange}
+          acceptsCustomOptions={entry.nested == null}
           data-test-subj="exceptionBuilderEntryField"
         />
       );
@@ -199,6 +202,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
           <EuiFormRow
             fullWidth
             label={i18n.FIELD}
+            helpText={entry.nested == null ? i18n.CUSTOM_COMBOBOX_OPTION_TEXT : undefined}
             data-test-subj="exceptionBuilderEntryFieldFormRow"
           >
             {comboBox}
@@ -206,7 +210,12 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
         );
       } else {
         return (
-          <EuiFormRow fullWidth label={''} data-test-subj="exceptionBuilderEntryFieldFormRow">
+          <EuiFormRow
+            fullWidth
+            label={''}
+            helpText={entry.nested == null ? i18n.CUSTOM_COMBOBOX_OPTION_TEXT : undefined}
+            data-test-subj="exceptionBuilderEntryFieldFormRow"
+          >
             {comboBox}
           </EuiFormRow>
         );

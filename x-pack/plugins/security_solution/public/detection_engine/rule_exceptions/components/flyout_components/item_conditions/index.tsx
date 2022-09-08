@@ -18,17 +18,18 @@ import type {
   OsTypeArray,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
-import type { ExceptionsBuilderExceptionItem } from '@kbn/securitysolution-list-utils';
+import type {
+  ExceptionsBuilderReturnExceptionItem,
+  ExceptionsBuilderExceptionItem,
+} from '@kbn/securitysolution-list-utils';
 import type { DataViewBase } from '@kbn/es-query';
 import styled, { css } from 'styled-components';
 import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
-import { hasEqlSequenceQuery, isEqlRule } from '../../../../../common/detection_engine/utils';
-import type { Rule } from '../../../../detections/containers/detection_engine/rules/types';
-
-import { useKibana } from '../../../../common/lib/kibana';
-import type { Action } from './reducer';
+import { hasEqlSequenceQuery, isEqlRule } from '../../../../../../common/detection_engine/utils';
+import type { Rule } from '../../../../../detections/containers/detection_engine/rules/types';
+import { useKibana } from '../../../../../common/lib/kibana';
 import * as i18n from './translations';
-import * as sharedI18n from '../../utils/translations';
+import * as sharedI18n from '../../../utils/translations';
 
 const OS_OPTIONS: Array<EuiComboBoxOptionOption<OsTypeArray>> = [
   {
@@ -55,25 +56,41 @@ const SectionHeader = styled(EuiTitle)`
   `}
 `;
 
-interface ExceptionsFlyoutMetaComponentProps {
+interface ExceptionsFlyoutConditionsComponentProps {
+  /* Exception list item field value for "name" */
   exceptionItemName: string;
+  /* Not all rule types support large value lists */
   allowLargeValueLists: boolean;
+  /* Exception items - could be one being edited, or multiple being added */
   exceptionListItems: ExceptionsBuilderExceptionItem[];
+  /* Fields used to populate the field option dropdown */
   indexPatterns: DataViewBase;
+  /* Exception items can be added to zero (just being added to a shared list), one or more rules */
   rules: Rule[] | null;
+  /* OS options required for endpoint exceptions */
   showOsTypeOptions: boolean;
+  /* Selected OS option required for endpoint exceptions */
   selectedOs: OsTypeArray | undefined;
+  /* Determines whether component is being used in an add or edit functionality */
   isEdit: boolean;
-  exceptionListType?: ExceptionListType;
-  dispatch: React.Dispatch<Action>;
-  handleFilterIndexPatterns: (
+  /*
+   * Supported exception list types are 'endpoint', 'detection' and 'rule_default' */
+  exceptionListType: ExceptionListType;
+  /* OS selection handler */
+  onOsChange: (os: OsTypeArray | undefined) => void;
+  /* Exception item builder takes a callback used when there are updates to the item */
+
+  onExceptionItemAdd: (items: ExceptionsBuilderReturnExceptionItem[]) => void;
+  /* Exception item builder takes a callback used when there are updates to the item that includes information on if any form errors exist */
+  onSetErrorExists: (errorExists: boolean) => void;
+  onFilterIndexPatterns: (
     patterns: DataViewBase,
     type: ExceptionListType,
     osTypes?: Array<'linux' | 'macos' | 'windows'> | undefined
   ) => DataViewBase;
 }
 
-const ExceptionsConditionsComponent: React.FC<ExceptionsFlyoutMetaComponentProps> = ({
+const ExceptionsConditionsComponent: React.FC<ExceptionsFlyoutConditionsComponentProps> = ({
   exceptionItemName,
   allowLargeValueLists,
   exceptionListItems,
@@ -83,8 +100,10 @@ const ExceptionsConditionsComponent: React.FC<ExceptionsFlyoutMetaComponentProps
   showOsTypeOptions,
   selectedOs,
   isEdit,
-  dispatch,
-  handleFilterIndexPatterns,
+  onOsChange,
+  onExceptionItemAdd,
+  onSetErrorExists,
+  onFilterIndexPatterns,
 }): JSX.Element => {
   const { http, unifiedSearch } = useKibana().services;
   const isEndpointException = useMemo(
@@ -123,39 +142,6 @@ const ExceptionsConditionsComponent: React.FC<ExceptionsFlyoutMetaComponentProps
     return isEdit ? exceptionListItems[0].namespace_type : defaultValue;
   }, [exceptionListItems, isEdit, isEndpointException]);
 
-  /**
-   * Reducer action dispatchers
-   * */
-  const setExceptionItemsToAdd = useCallback(
-    (items: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>): void => {
-      dispatch({
-        type: 'setExceptionItems',
-        items,
-      });
-    },
-    [dispatch]
-  );
-
-  const setErrorsExist = useCallback(
-    (errorExists: boolean): void => {
-      dispatch({
-        type: 'setErrorsExist',
-        errorExists,
-      });
-    },
-    [dispatch]
-  );
-
-  const setSelectedOs = useCallback(
-    (os: OsTypeArray | undefined): void => {
-      dispatch({
-        type: 'setSelectedOsOptions',
-        selectedOs: os,
-      });
-    },
-    [dispatch]
-  );
-
   const handleBuilderOnChange = useCallback(
     ({
       exceptionItems,
@@ -166,19 +152,18 @@ const ExceptionsConditionsComponent: React.FC<ExceptionsFlyoutMetaComponentProps
       >;
       errorExists: boolean;
     }) => {
-      console.log('HITTING')
-      setExceptionItemsToAdd(exceptionItems);
-      setErrorsExist(errorExists);
+      onExceptionItemAdd(exceptionItems);
+      onSetErrorExists(errorExists);
     },
-    [setErrorsExist, setExceptionItemsToAdd]
+    [onSetErrorExists, onExceptionItemAdd]
   );
 
   const handleOSSelectionChange = useCallback(
     (selectedOptions: Array<EuiComboBoxOptionOption<OsTypeArray>>): void => {
       const os = selectedOptions[0].value;
-      setSelectedOs(os ? os : undefined);
+      onOsChange(os ? os : undefined);
     },
-    [setSelectedOs]
+    [onOsChange]
   );
 
   const osSingleSelectionOptions = useMemo(() => {
@@ -210,14 +195,6 @@ const ExceptionsConditionsComponent: React.FC<ExceptionsFlyoutMetaComponentProps
       .slice(0, -2);
   };
 
-  const listType = useMemo(() => {
-    const defaultType = isEndpointException
-      ? ExceptionListTypeEnum.ENDPOINT
-      : ExceptionListTypeEnum.DETECTION;
-
-    return isEdit && exceptionListType != null ? exceptionListType : defaultType;
-  }, [exceptionListType, isEdit, isEndpointException]);
-
   const eqlCalloutWarning = useMemo((): string => {
     return isEdit ? i18n.EDIT_EXCEPTION_SEQUENCE_WARNING : i18n.ADD_EXCEPTION_SEQUENCE_WARNING;
   }, [isEdit]);
@@ -233,7 +210,7 @@ const ExceptionsConditionsComponent: React.FC<ExceptionsFlyoutMetaComponentProps
       </SectionHeader>
       {includesRuleWithEQLSequenceStatement && (
         <>
-          <EuiCallOut data-test-subj="eql-sequence-callout" title={eqlCalloutWarning} />
+          <EuiCallOut data-test-subj="eqlSequenceCallout" title={eqlCalloutWarning} />
           <EuiSpacer />
         </>
       )}
@@ -250,7 +227,7 @@ const ExceptionsConditionsComponent: React.FC<ExceptionsFlyoutMetaComponentProps
               selectedOptions={selectedOStoOptions}
               onChange={handleOSSelectionChange}
               isClearable={false}
-              data-test-subj="os-selection-dropdown"
+              data-test-subj="osSelectionDropdown"
             />
           </EuiFormRow>
           <EuiSpacer size="l" />
@@ -258,7 +235,7 @@ const ExceptionsConditionsComponent: React.FC<ExceptionsFlyoutMetaComponentProps
       )}
       {showOsTypeOptions && isEdit && (
         <>
-          <EuiText size="xs">
+          <EuiText size="xs" data-test-subj="exceptionItemSelectedOs">
             <dl>
               <dt>{sharedI18n.OPERATING_SYSTEM_LABEL}</dt>
               <dd>{osDisplay(osTypes)}</dd>
@@ -272,18 +249,18 @@ const ExceptionsConditionsComponent: React.FC<ExceptionsFlyoutMetaComponentProps
         httpService: http,
         autocompleteService: unifiedSearch.autocomplete,
         exceptionListItems,
-        listType,
+        listType: exceptionListType,
         osTypes,
         listId: listIdToUse,
         listNamespaceType,
-        listTypeSpecificIndexPatternFilter: handleFilterIndexPatterns,
+        listTypeSpecificIndexPatternFilter: onFilterIndexPatterns,
         exceptionItemName,
         indexPatterns,
         isOrDisabled: isExceptionBuilderFormDisabled,
         isAndDisabled: isExceptionBuilderFormDisabled,
         isNestedDisabled: isExceptionBuilderFormDisabled,
-        dataTestSubj: 'alert-exception-builder',
-        idAria: 'alert-exception-builder',
+        dataTestSubj: 'alertExceptionBuilder',
+        idAria: 'alertExceptionBuilder',
         onChange: handleBuilderOnChange,
         isDisabled: isExceptionBuilderFormDisabled,
       })}

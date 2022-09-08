@@ -8,36 +8,22 @@
 import React, { useCallback } from 'react';
 import { EuiFormRow, EuiFieldText } from '@elastic/eui';
 
-import type { Action } from './reducer';
 import * as i18n from './translations';
 
 interface ExceptionsFlyoutMetaComponentProps {
   exceptionItemName: string;
-  dispatch: React.Dispatch<Action>;
+  onChange: (value: [string, string]) => void;
 }
 
 const ExceptionsFlyoutMetaComponent: React.FC<ExceptionsFlyoutMetaComponentProps> = ({
   exceptionItemName,
-  dispatch,
+  onChange,
 }): JSX.Element => {
-  /**
-   * Reducer action dispatchers
-   * */
-  const setExceptionItemMeta = useCallback(
-    (value: [string, string]): void => {
-      dispatch({
-        type: 'setExceptionItemMeta',
-        value,
-      });
-    },
-    [dispatch]
-  );
-
   const onNameChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
-      setExceptionItemMeta(['name', e.target.value]);
+      onChange(['name', e.target.value]);
     },
-    [setExceptionItemMeta]
+    [onChange]
   );
 
   return (

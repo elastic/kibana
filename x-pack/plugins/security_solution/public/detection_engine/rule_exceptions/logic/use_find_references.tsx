@@ -14,11 +14,12 @@ import { useToasts } from '../../../common/lib/kibana';
 import type { FindRulesReferencedByExceptionsListProp } from '../../../detections/containers/detection_engine/rules/types';
 import * as i18n from '../utils/translations';
 
-export type ReturnUseFindExceptionListReferences = [boolean, RuleReferences | null];
-
 export interface RuleReferences {
   [key: string]: RuleReferenceSchema[];
 }
+
+export type ReturnUseFindExceptionListReferences = [boolean, RuleReferences | null];
+
 /**
  * Hook for finding what rules are referenced by a set of exception lists
  * @param ruleExceptionLists array of exception list info stored on a rule

@@ -6,31 +6,23 @@
  */
 
 import React from 'react';
-import { ThemeProvider } from 'styled-components';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { EuiTextArea } from '@elastic/eui';
 
-import { ExceptionsFlyoutComments } from './exception_flyout_comments';
-import { getMockTheme } from '../../../lib/kibana/kibana_react.mock';
+import { ExceptionsFlyoutComments } from '.';
+import { TestProviders } from '../../../../../common/mock';
 
-jest.mock('../../../lib/kibana');
-
-const mockTheme = getMockTheme({
-  eui: {
-    euiBreakpoints: {
-      l: '1200px',
-    },
-    euiSizeM: '10px',
-    euiBorderThin: '1px solid #ece',
-  },
-});
+jest.mock('../../../../../common/lib/kibana');
 
 describe('ExceptionsFlyoutComments', () => {
   it('it renders new comment', () => {
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={mockTheme}>
-        <ExceptionsFlyoutComments newComment={'This is a new comment'} dispatch={jest.fn()} />
-      </ThemeProvider>
+      <TestProviders>
+        <ExceptionsFlyoutComments
+          newComment={'This is a new comment'}
+          onCommentChange={jest.fn()}
+        />
+      </TestProviders>
     );
 
     expect(
@@ -41,12 +33,15 @@ describe('ExceptionsFlyoutComments', () => {
     ).toEqual('This is a new comment');
   });
 
-  it('it calls dispatch on comment update change', () => {
-    const mockDispatch = jest.fn();
+  it('it calls onCommentChange on comment update change', () => {
+    const mockOnCommentChange = jest.fn();
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={mockTheme}>
-        <ExceptionsFlyoutComments newComment={'This is a new comment'} dispatch={mockDispatch} />
-      </ThemeProvider>
+      <TestProviders>
+        <ExceptionsFlyoutComments
+          newComment={'This is a new comment'}
+          onCommentChange={mockOnCommentChange}
+        />
+      </TestProviders>
     );
 
     (
@@ -57,16 +52,13 @@ describe('ExceptionsFlyoutComments', () => {
       target: { value: 'Updating my new comment' },
     } as React.ChangeEvent<HTMLInputElement>);
 
-    expect(mockDispatch).toHaveBeenCalledWith({
-      type: 'setComment',
-      comment: 'Updating my new comment',
-    });
+    expect(mockOnCommentChange).toHaveBeenCalledWith('Updating my new comment');
   });
 
   it('it renders existing comments if any exist', () => {
-    const mockDispatch = jest.fn();
+    const mockOnCommentChange = jest.fn();
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={mockTheme}>
+      <TestProviders>
         <ExceptionsFlyoutComments
           existingComments={[
             {
@@ -77,9 +69,9 @@ describe('ExceptionsFlyoutComments', () => {
             },
           ]}
           newComment={''}
-          dispatch={mockDispatch}
+          onCommentChange={mockOnCommentChange}
         />
-      </ThemeProvider>
+      </TestProviders>
     );
 
     expect(wrapper.find('[data-test-subj="addExceptionCommentsAccordion"]').exists()).toBeTruthy();

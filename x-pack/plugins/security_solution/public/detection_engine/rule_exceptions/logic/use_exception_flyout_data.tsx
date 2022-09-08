@@ -25,13 +25,14 @@ export interface ReturnUseFetchExceptionFlyoutData {
  */
 export const useFetchIndexPatterns = (rules: Rule[] | null): ReturnUseFetchExceptionFlyoutData => {
   const { data } = useKibana().services;
+  console.log('HELLO')
   const [dataViewLoading, setDataViewLoading] = useState(false);
   const isSingleRule = useMemo(() => rules != null && rules.length === 1, [rules]);
   const isMLRule = useMemo(
     () => isSingleRule && rules[0].type === 'machine_learning',
     [isSingleRule, rules]
   );
-
+    console.log({isSingleRule})
   // If data view is defined, it superceeds use of rule defined index patterns.
   // If no rule is available, use fields from default data view id.
   const memoDataViewId = useMemo(
@@ -69,7 +70,7 @@ export const useFetchIndexPatterns = (rules: Rule[] | null): ReturnUseFetchExcep
 
   // Data view logic
   const [dataViewIndexPatterns, setDataViewIndexPatterns] = useState<DataViewBase | null>(null);
-
+  console.log({memoRuleIndices, indexIndexPatterns})
   useEffect(() => {
     const fetchSingleDataView = async () => {
       if (memoDataViewId) {

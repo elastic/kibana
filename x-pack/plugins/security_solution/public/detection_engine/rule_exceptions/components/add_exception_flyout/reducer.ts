@@ -5,22 +5,17 @@
  * 2.0.
  */
 
-import type {
-  CreateExceptionListItemSchema,
-  CreateRuleExceptionListItemSchema,
-  ExceptionListItemSchema,
-  ExceptionListSchema,
-  OsTypeArray,
-} from '@kbn/securitysolution-io-ts-list-types';
-import type { AddToRuleListsRadioOptions } from './list_options';
+import type { ExceptionListSchema, OsTypeArray } from '@kbn/securitysolution-io-ts-list-types';
+import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
+import type { ExceptionsBuilderReturnExceptionItem } from '@kbn/securitysolution-list-utils';
 
 export interface State {
   exceptionItemMeta: { name: string };
-  exceptionItems: Array<
-    ExceptionListItemSchema | CreateExceptionListItemSchema | CreateRuleExceptionListItemSchema
-  >;
-  errorsExist: boolean;
+  listType: ExceptionListTypeEnum;
+  exceptionItems: ExceptionsBuilderReturnExceptionItem[];
   newComment: string;
+  listsOptionsRadioSelection: string;
+  itemConditionValidationErrorExists: boolean;
   closeSingleAlert: boolean;
   bulkCloseAlerts: boolean;
   disableBulkClose: boolean;
@@ -30,7 +25,6 @@ export interface State {
   addExceptionToRule: boolean;
   exceptionListsToAddTo: ExceptionListSchema[];
   selectedRulesToAddTo: Rule[];
-  listsOptionsRadioSelection: AddToRuleListsRadioOptions;
 }
 
 export type Action =
@@ -40,10 +34,10 @@ export type Action =
     }
   | {
       type: 'setExceptionItems';
-      items: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>;
+      items: ExceptionsBuilderReturnExceptionItem[];
     }
   | {
-      type: 'setErrorsExist';
+      type: 'setConditionValidationErrorExists';
       errorExists: boolean;
     }
   | {
@@ -83,12 +77,16 @@ export type Action =
       listsToAddTo: ExceptionListSchema[];
     }
   | {
-      type: 'setListsRadioOption';
-      option: AddToRuleListsRadioOptions;
+      type: 'setListOrRuleRadioOption';
+      option: string;
     }
   | {
       type: 'setSelectedRulesToAddTo';
       rules: Rule[];
+    }
+  | {
+      type: 'setListType';
+      listType: ExceptionListTypeEnum;
     };
 
 export const createExceptionItemsReducer =
@@ -114,12 +112,12 @@ export const createExceptionItemsReducer =
           exceptionItems: items,
         };
       }
-      case 'setErrorsExist': {
+      case 'setConditionValidationErrorExists': {
         const { errorExists } = action;
 
         return {
           ...state,
-          errorsExist: errorExists,
+          itemConditionValidationErrorExists: errorExists,
         };
       }
       case 'setComment': {
@@ -186,12 +184,17 @@ export const createExceptionItemsReducer =
           exceptionListsToAddTo: listsToAddTo,
         };
       }
-      case 'setListsRadioOption': {
+      case 'setListOrRuleRadioOption': {
         const { option } = action;
 
         return {
           ...state,
           listsOptionsRadioSelection: option,
+          listType:
+            option === 'add_to_lists'
+              ? ExceptionListTypeEnum.DETECTION
+              : ExceptionListTypeEnum.RULE_DEFAULT,
+          selectedRulesToAddTo: option === 'add_to_lists' ? [] : state.selectedRulesToAddTo,
         };
       }
       case 'setSelectedRulesToAddTo': {
@@ -200,6 +203,14 @@ export const createExceptionItemsReducer =
         return {
           ...state,
           selectedRulesToAddTo: rules,
+        };
+      }
+      case 'setListType': {
+        const { listType } = action;
+
+        return {
+          ...state,
+          listType,
         };
       }
       default:

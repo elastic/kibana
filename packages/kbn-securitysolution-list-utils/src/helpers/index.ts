@@ -14,7 +14,6 @@ import {
   EntriesArray,
   Entry,
   EntryNested,
-  ExceptionListItemSchema,
   ExceptionListType,
   ListSchema,
   NamespaceType,
@@ -57,6 +56,7 @@ import {
   EmptyEntry,
   EmptyNestedEntry,
   ExceptionsBuilderExceptionItem,
+  ExceptionsBuilderReturnExceptionItem,
   FormattedBuilderEntry,
   OperatorOption,
 } from '../types';
@@ -67,14 +67,8 @@ export const isEntryNested = (item: BuilderEntry): item is EntryNested => {
 
 export const filterExceptionItems = (
   exceptions: ExceptionsBuilderExceptionItem[]
-): Array<
-  ExceptionListItemSchema | CreateExceptionListItemSchema | CreateRuleExceptionListItemSchema
-> => {
-  return exceptions.reduce<
-    Array<
-      ExceptionListItemSchema | CreateExceptionListItemSchema | CreateRuleExceptionListItemSchema
-    >
-  >((acc, exception) => {
+): ExceptionsBuilderReturnExceptionItem[] => {
+  return exceptions.reduce<ExceptionsBuilderReturnExceptionItem[]>((acc, exception) => {
     const entries = exception.entries.reduce<BuilderEntry[]>((nestedAcc, singleEntry) => {
       const strippedSingleEntry = removeIdFromItem(singleEntry);
 
@@ -360,7 +354,8 @@ export const getEntryOnFieldChange = (
 ): { index: number; updatedEntry: BuilderEntry } => {
   const { parent, entryIndex, nested } = item;
   const newChildFieldValue = newField != null ? newField.name.split('.').slice(-1)[0] : '';
-
+  // eslint-disable-next-line no-console
+  console.log({ newChildFieldValue });
   if (nested === 'parent') {
     // For nested entries, when user first selects to add a nested
     // entry, they first see a row similar to what is shown for when
@@ -814,7 +809,7 @@ export const getFormattedBuilderEntry = (
     return {
       correspondingKeywordField,
       entryIndex: itemIndex,
-      field: foundField,
+      field: foundField ?? { name: item.field, type: 'keyword' },
       id: item.id != null ? item.id : `${itemIndex}`,
       nested: undefined,
       operator: getExceptionOperatorSelect(item),

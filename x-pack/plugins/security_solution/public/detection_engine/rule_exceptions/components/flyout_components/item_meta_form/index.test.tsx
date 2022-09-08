@@ -6,29 +6,18 @@
  */
 
 import React from 'react';
-import { ThemeProvider } from 'styled-components';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { EuiFieldText } from '@elastic/eui';
 
-import { ExceptionsFlyoutMeta } from './item_meta_info';
-import { getMockTheme } from '../../../lib/kibana/kibana_react.mock';
-
-const mockTheme = getMockTheme({
-  eui: {
-    euiBreakpoints: {
-      l: '1200px',
-    },
-    euiSizeM: '10px',
-    euiBorderThin: '1px solid #ece',
-  },
-});
+import { ExceptionsFlyoutMeta } from '.';
+import { TestProviders } from '../../../../../common/mock';
 
 describe('ExceptionsFlyoutMeta', () => {
   it('it renders component', () => {
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={mockTheme}>
-        <ExceptionsFlyoutMeta exceptionItemName={'Test name'} dispatch={jest.fn()} />
-      </ThemeProvider>
+      <TestProviders>
+        <ExceptionsFlyoutMeta exceptionItemName={'Test name'} onChange={jest.fn()} />
+      </TestProviders>
     );
 
     expect(wrapper.find('[data-test-subj="exceptionFlyoutName"]').exists()).toBeTruthy();
@@ -37,12 +26,12 @@ describe('ExceptionsFlyoutMeta', () => {
     );
   });
 
-  it('it calls dispatch on name change', () => {
-    const mockDispatch = jest.fn();
+  it('it calls onChange on name change', () => {
+    const mockOnChange = jest.fn();
     const wrapper = mountWithIntl(
-      <ThemeProvider theme={mockTheme}>
-        <ExceptionsFlyoutMeta exceptionItemName={''} dispatch={mockDispatch} />
-      </ThemeProvider>
+      <TestProviders>
+        <ExceptionsFlyoutMeta exceptionItemName={''} onChange={mockOnChange} />
+      </TestProviders>
     );
 
     (
@@ -51,9 +40,6 @@ describe('ExceptionsFlyoutMeta', () => {
       }
     ).onChange({ target: { value: 'Name change' } } as React.ChangeEvent<HTMLInputElement>);
 
-    expect(mockDispatch).toHaveBeenCalledWith({
-      type: 'setExceptionItemMeta',
-      value: ['name', 'Name change'],
-    });
+    expect(mockOnChange).toHaveBeenCalledWith(['name', 'Name change']);
   });
 });

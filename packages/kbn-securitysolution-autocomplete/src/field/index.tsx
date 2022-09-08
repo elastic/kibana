@@ -28,6 +28,7 @@ interface OperatorProps {
   onChange: (a: DataViewFieldBase[]) => void;
   placeholder: string;
   selectedField: DataViewFieldBase | undefined;
+  acceptsCustomOptions?: boolean;
 }
 
 export const FieldComponent: React.FC<OperatorProps> = ({
@@ -41,12 +42,21 @@ export const FieldComponent: React.FC<OperatorProps> = ({
   onChange,
   placeholder,
   selectedField,
+  acceptsCustomOptions = false,
 }): JSX.Element => {
   const [touched, setIsTouched] = useState(false);
+  const [customOption, setCustomOption] = useState<DataViewFieldBase | null>(null);
 
   const { availableFields, selectedFields } = useMemo(
-    () => getComboBoxFields(indexPattern, selectedField, fieldTypeFilter),
-    [indexPattern, selectedField, fieldTypeFilter]
+    () =>
+      getComboBoxFields(
+        customOption != null && indexPattern != null
+          ? { ...indexPattern, fields: [...indexPattern?.fields, customOption] }
+          : indexPattern,
+        selectedField,
+        fieldTypeFilter
+      ),
+    [indexPattern, customOption, selectedField, fieldTypeFilter]
   );
 
   const { comboOptions, labels, selectedComboOptions } = useMemo(
@@ -68,9 +78,45 @@ export const FieldComponent: React.FC<OperatorProps> = ({
     setIsTouched(true);
   }, [setIsTouched]);
 
+  const handleCreateCustomOption = useCallback(
+    (val = []) => {
+      const normalizedSearchValue = val.trim().toLowerCase();
+
+      if (!normalizedSearchValue) {
+        return;
+      }
+
+      setCustomOption({ name: val, type: 'text' });
+      onChange([{ name: val, type: 'text' }]);
+    },
+    [onChange]
+  );
+
   const fieldWidth = useMemo(() => {
     return fieldInputWidth ? { width: `${fieldInputWidth}px` } : {};
   }, [fieldInputWidth]);
+
+  if (acceptsCustomOptions) {
+    return (
+      <EuiComboBox
+        placeholder={placeholder}
+        options={comboOptions}
+        selectedOptions={selectedComboOptions}
+        onChange={handleValuesChange}
+        isLoading={isLoading}
+        isDisabled={isDisabled}
+        isClearable={isClearable}
+        isInvalid={isRequired ? touched && selectedField == null : false}
+        onFocus={handleTouch}
+        singleSelection={AS_PLAIN_TEXT}
+        data-test-subj="fieldAutocompleteComboBox"
+        style={fieldWidth}
+        onCreateOption={handleCreateCustomOption}
+        customOptionText="Add {searchValue} as your occupation"
+        fullWidth
+      />
+    );
+  }
 
   return (
     <EuiComboBox

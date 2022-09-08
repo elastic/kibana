@@ -5,14 +5,12 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useReducer, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useReducer } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import styled from 'styled-components';
 import { HttpStart } from '@kbn/core/public';
 import { addIdToItem } from '@kbn/securitysolution-utils';
 import {
-  CreateExceptionListItemSchema,
-  CreateRuleExceptionListItemSchema,
   ExceptionListItemSchema,
   ExceptionListType,
   NamespaceType,
@@ -25,6 +23,7 @@ import {
 import {
   CreateExceptionListItemBuilderSchema,
   ExceptionsBuilderExceptionItem,
+  ExceptionsBuilderReturnExceptionItem,
   OperatorOption,
   containsValueListEntry,
   filterExceptionItems,
@@ -69,9 +68,7 @@ const initialState: State = {
 
 export interface OnChangeProps {
   errorExists: boolean;
-  exceptionItems: Array<
-    ExceptionListItemSchema | CreateExceptionListItemSchema | CreateRuleExceptionListItemSchema
-  >;
+  exceptionItems: ExceptionsBuilderReturnExceptionItem[];
   exceptionsToDelete: ExceptionListItemSchema[];
   warningExists: boolean;
 }
@@ -232,7 +229,7 @@ export const ExceptionBuilderComponent = ({
         },
         ...exceptions.slice(index + 1),
       ];
-
+      console.log({updatedExceptions})
       setUpdateExceptions(updatedExceptions);
     },
     [setUpdateExceptions, exceptions]
@@ -363,12 +360,12 @@ export const ExceptionBuilderComponent = ({
   }, [handleAddNewExceptionItemEntry, setUpdateOrDisabled, setUpdateAddNested]);
 
   const memoExceptionItems = useMemo(() => {
-    console.log({exceptions})
     return filterExceptionItems(exceptions);
   }, [exceptions]);
 
   // Bubble up changes to parent
   useEffect(() => {
+    console.log({errorExists, memoExceptionItems})
     onChange({
       errorExists: errorExists > 0,
       exceptionItems: memoExceptionItems,

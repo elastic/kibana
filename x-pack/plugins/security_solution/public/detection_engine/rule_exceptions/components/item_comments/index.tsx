@@ -101,7 +101,7 @@ export const ExceptionItemComments = memo(function ExceptionItemComments({
           id={'add-exception-comments-accordion'}
           buttonClassName={COMMENT_ACCORDION_BUTTON_CLASS_NAME}
           buttonContent={commentsAccordionTitle}
-          data-test-subj="ExceptionItemCommentsAccordion"
+          data-test-subj="addExceptionCommentsAccordion"
           onToggle={(isOpen) => handleTriggerOnClick(isOpen)}
         >
           <EuiCommentList comments={formattedComments} />

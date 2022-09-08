@@ -66,7 +66,7 @@ describe('When the add exception modal is opened', () => {
   >;
   beforeEach(() => {
     mockGetExceptionBuilderComponentLazy.mockReturnValue(
-      <span data-test-subj="alert-exception-builder" />
+      <span data-test-subj="alertExceptionBuilder" />
     );
     defaultEndpointItems = jest.spyOn(helpers, 'defaultEndpointExceptionItems');
 
@@ -100,6 +100,63 @@ describe('When the add exception modal is opened', () => {
   afterEach(() => {
     jest.clearAllMocks();
     jest.restoreAllMocks();
+  });
+
+  describe('exception list type of "endpoint"', () => {
+    it('displays proper flyout title', () => {})
+
+    it('renders OS selection options', () => {})
+
+    it('does not render options to add exception to a rule or shared list', () => {})
+  })
+
+  describe('behaviors that are not dependent on the number of rules present', () => {
+    it('should show the loading spinner', () => {
+      expect(wrapper.find('[data-test-subj="loadingAddExceptionFlyout"]').exists()).toBeTruthy();
+    });
+
+    it('allows user to add an item name', () => {})
+
+    it('does not render OS selection options for exception list type of "detection"', () => {})
+
+    it('does not render OS selection options for exception list type of "rule_default"', () => {})
+
+    it('renders options to add exception to a rule or shared list when exception list type is not "endpoint"', () => {})
+
+    it('allows user to add a comment', () => {})
+
+    it('displays alert close actions if "showAlertCloseOptions" is "true"', () => {})
+  })
+
+  describe('when no rules are passed in', () => {
+    it('allows large value lists', () => {})
+
+    it('defaults to selecting add to rule option, displaying rules selection table', () => {});
+
+    it('allows user to change selection from add to rules to add to shared lists option', () => {
+      // check that it updates the listType
+    });
+  })
+
+  describe('when a single rule is passed in', () => {
+    it('does not allow large value list selection for query rule', () => {})
+    it('does not allow large value list selection if EQL rule', () => {})
+    it('does not allow large value list selection if threshold rule', () => {})
+    it('does not allow large value list selection if new trems rule', () => {})
+    it('defaults to selecting add to rule radio option', () => {});
+    it('disables add to shared lists option if rule has no shared exception lists attached already', () => {})
+    it('allows user to change selection from add to rule to add to shared lists option', () => {
+      // check that it updates the listType
+    });
+  });
+
+  describe('when multiple rules are passed in', () => {
+    it('allows large value lists', () => {});
+    it('defaults to selecting add to rules radio option', () => {})
+    it('disables add to shared lists option if rules have no shared lists in common', () => { })
+    it('allows user to change selection from add to rule to add to shared lists option', () => {
+      // check that it updates the listType
+    });
   });
 
   describe('when the modal is loading', () => {
@@ -154,7 +211,7 @@ describe('When the add exception modal is opened', () => {
       ).toBeDisabled();
     });
     it('should render the exception builder', () => {
-      expect(wrapper.find('[data-test-subj="alert-exception-builder"]').exists()).toBeTruthy();
+      expect(wrapper.find('[data-test-subj="alertExceptionBuilder"]').exists()).toBeTruthy();
     });
     it('should not render the close on add exception checkbox', () => {
       expect(
@@ -165,7 +222,7 @@ describe('When the add exception modal is opened', () => {
       expect(wrapper.find('[data-test-subj="add-exception-endpoint-text"]').exists()).toBeTruthy();
     });
     it('should render the os selection dropdown', () => {
-      expect(wrapper.find('[data-test-subj="os-selection-dropdown"]').exists()).toBeTruthy();
+      expect(wrapper.find('[data-test-subj="osSelectionDropdown"]').exists()).toBeTruthy();
     });
   });
 
@@ -201,7 +258,7 @@ describe('When the add exception modal is opened', () => {
       ).not.toBeDisabled();
     });
     it('should render the exception builder', () => {
-      expect(wrapper.find('[data-test-subj="alert-exception-builder"]').exists()).toBeTruthy();
+      expect(wrapper.find('[data-test-subj="alertExceptionBuilder"]').exists()).toBeTruthy();
     });
     it('should prepopulate endpoint items', () => {
       expect(defaultEndpointItems).toHaveBeenCalled();
@@ -222,10 +279,10 @@ describe('When the add exception modal is opened', () => {
       expect(wrapper.find('[data-test-subj="add-exception-endpoint-text"]').exists()).toBeTruthy();
     });
     it('should not display the eql sequence callout', () => {
-      expect(wrapper.find('[data-test-subj="eql-sequence-callout"]').exists()).not.toBeTruthy();
+      expect(wrapper.find('[data-test-subj="eqlSequenceCallout"]').exists()).not.toBeTruthy();
     });
     it('should not render the os selection dropdown', () => {
-      expect(wrapper.find('[data-test-subj="os-selection-dropdown"]').exists()).toBeFalsy();
+      expect(wrapper.find('[data-test-subj="osSelectionDropdown"]').exists()).toBeFalsy();
     });
   });
 
@@ -261,7 +318,7 @@ describe('When the add exception modal is opened', () => {
       ).not.toBeDisabled();
     });
     it('should render the exception builder', () => {
-      expect(wrapper.find('[data-test-subj="alert-exception-builder"]').exists()).toBeTruthy();
+      expect(wrapper.find('[data-test-subj="alertExceptionBuilder"]').exists()).toBeTruthy();
     });
     it('should not prepopulate endpoint items', () => {
       expect(defaultEndpointItems).not.toHaveBeenCalled();
@@ -279,7 +336,7 @@ describe('When the add exception modal is opened', () => {
       ).toBeDisabled();
     });
     it('should not display the eql sequence callout', () => {
-      expect(wrapper.find('[data-test-subj="eql-sequence-callout"]').exists()).not.toBeTruthy();
+      expect(wrapper.find('[data-test-subj="eqlSequenceCallout"]').exists()).not.toBeTruthy();
     });
   });
 
@@ -322,7 +379,7 @@ describe('When the add exception modal is opened', () => {
       ).not.toBeDisabled();
     });
     it('should render the exception builder', () => {
-      expect(wrapper.find('[data-test-subj="alert-exception-builder"]').exists()).toBeTruthy();
+      expect(wrapper.find('[data-test-subj="alertExceptionBuilder"]').exists()).toBeTruthy();
     });
     it('should not prepopulate endpoint items', () => {
       expect(defaultEndpointItems).not.toHaveBeenCalled();
@@ -340,7 +397,7 @@ describe('When the add exception modal is opened', () => {
       ).toBeDisabled();
     });
     it('should display the eql sequence callout', () => {
-      expect(wrapper.find('[data-test-subj="eql-sequence-callout"]').exists()).toBeTruthy();
+      expect(wrapper.find('[data-test-subj="eqlSequenceCallout"]').exists()).toBeTruthy();
     });
   });
 
@@ -423,7 +480,7 @@ describe('When the add exception modal is opened', () => {
       ).not.toBeDisabled();
     });
     it('should render the exception builder', () => {
-      expect(wrapper.find('[data-test-subj="alert-exception-builder"]').exists()).toBeTruthy();
+      expect(wrapper.find('[data-test-subj="alertExceptionBuilder"]').exists()).toBeTruthy();
     });
     it('should prepopulate endpoint items', () => {
       expect(defaultEndpointItems).toHaveBeenCalled();

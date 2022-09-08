@@ -32,7 +32,6 @@ import {
 
 import type { ExceptionsBuilderExceptionItem } from '@kbn/securitysolution-list-utils';
 import {
-  getOperatorType,
   getNewExceptionItem,
   addIdToEntries,
 } from '@kbn/securitysolution-list-utils';
@@ -279,19 +278,6 @@ export const lowercaseHashValues = (
       entries: newEntries,
     };
   });
-};
-
-export const entryHasListType = (
-  exceptionItems: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>
-) => {
-  for (const { entries } of exceptionItems) {
-    for (const exceptionEntry of entries ?? []) {
-      if (getOperatorType(exceptionEntry) === OperatorTypeEnum.LIST) {
-        return true;
-      }
-    }
-  }
-  return false;
 };
 
 /**
@@ -749,36 +735,6 @@ export const getPrepopulatedBehaviorException = ({
     ...getNewExceptionItem({ listId, namespaceType: listNamespace, name }),
     entries: addIdToEntries(entries),
   };
-};
-
-/**
- * Determines whether or not any entries within the given exceptionItems contain values not in the specified ECS mapping
- */
-export const entryHasNonEcsType = (
-  exceptionItems: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>,
-  indexPatterns: DataViewBase
-): boolean => {
-  const doesFieldNameExist = (exceptionEntry: Entry): boolean => {
-    return indexPatterns.fields.some(({ name }) => name === exceptionEntry.field);
-  };
-
-  if (exceptionItems.length === 0) {
-    return false;
-  }
-  for (const { entries } of exceptionItems) {
-    for (const exceptionEntry of entries ?? []) {
-      if (exceptionEntry.type === 'nested') {
-        for (const nestedExceptionEntry of exceptionEntry.entries) {
-          if (doesFieldNameExist(nestedExceptionEntry) === false) {
-            return true;
-          }
-        }
-      } else if (doesFieldNameExist(exceptionEntry) === false) {
-        return true;
-      }
-    }
-  }
-  return false;
 };
 
 /**
