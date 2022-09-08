@@ -71,7 +71,10 @@ export function validateLimitsForAllBundles(
     );
   }
 
-  const sorted = limitBundleIds.slice().sort((a, b) => a.localeCompare(b)).every((key, i) => limitBundleIds[i] === key)
+  const sorted = limitBundleIds
+    .slice()
+    .sort((a, b) => a.localeCompare(b))
+    .every((key, i) => limitBundleIds[i] === key);
   if (!sorted) {
     throw createFailError(
       dedent`
@@ -87,7 +90,7 @@ export function validateLimitsForAllBundles(
 
           node scripts/build_kibana_platform_plugins.js --validate-limits
       ` + '\n'
-    )
+    );
   }
 
   log.success('limits.yml file valid');
