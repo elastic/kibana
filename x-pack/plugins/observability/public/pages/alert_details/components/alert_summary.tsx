@@ -37,10 +37,6 @@ export function AlertSummary({ alert }: PageHeaderProps) {
             <FormattedMessage
               id="xpack.observability.pages.alertDetails.alertSummary"
               defaultMessage="Alert Summary" />
-            &nbsp;&nbsp;
-            <EuiToolTip content="Alert summary info here">
-              <EuiIcon type="questionInCircle" color="subdued" />
-            </EuiToolTip>
           </div>
         </EuiTitle>
         <EuiSpacer size="s" />
@@ -108,10 +104,6 @@ export function AlertSummary({ alert }: PageHeaderProps) {
                   <FormattedMessage
                     id="xpack.observability.pages.alertDetails.alertSummary.runbook"
                     defaultMessage="Runbook" />
-                  &nbsp;&nbsp;
-                  <EuiToolTip content="Runbook info here">
-                    <EuiIcon type="questionInCircle" color="subdued" />
-                  </EuiToolTip>
                 </h5>
               </EuiTitle>
               <EuiLink>...
