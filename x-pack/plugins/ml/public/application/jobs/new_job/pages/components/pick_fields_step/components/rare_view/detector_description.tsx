@@ -25,6 +25,7 @@ export const DetectorDescription: FC<Props> = ({ detectorType }) => {
   useEffect(() => {
     const desc = createDetectorDescription(jobCreator, detectorType);
     setDescription(desc);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobCreatorUpdated]);
 
   if (description === null) {

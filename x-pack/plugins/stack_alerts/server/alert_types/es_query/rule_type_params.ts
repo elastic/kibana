@@ -31,6 +31,7 @@ export type EsQueryRuleParamsExtractedParams = Omit<EsQueryRuleParams, 'searchCo
 const EsQueryRuleParamsSchemaProperties = {
   size: schema.number({ min: 0, max: ES_QUERY_MAX_HITS_PER_EXECUTION }),
   timeWindowSize: schema.number({ min: 1 }),
+  excludeHitsFromPreviousRun: schema.boolean({ defaultValue: true }),
   timeWindowUnit: schema.string({ validate: validateTimeWindowUnits }),
   threshold: schema.arrayOf(schema.number(), { minSize: 1, maxSize: 2 }),
   thresholdComparator: getComparatorSchemaType(validateComparator),

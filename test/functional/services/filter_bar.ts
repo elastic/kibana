@@ -15,6 +15,8 @@ export class FilterBarService extends FtrService {
   private readonly common = this.ctx.getPageObject('common');
   private readonly header = this.ctx.getPageObject('header');
   private readonly retry = this.ctx.getService('retry');
+  private readonly config = this.ctx.getService('config');
+  private readonly defaultTryTimeout = this.config.get('timeouts.try');
 
   /**
    * Checks if specified filter exists
@@ -130,7 +132,7 @@ export class FilterBarService extends FtrService {
    * filterBar.addFilter('extension', 'is one of', ['jpg', 'png']);
    */
   public async addFilter(field: string, operator: string, ...values: any): Promise<void> {
-    await this.retry.try(async () => {
+    await this.retry.tryForTime(this.defaultTryTimeout * 2, async () => {
       await this.testSubjects.click('addFilter');
       await this.testSubjects.existOrFail('addFilterPopover');
 
@@ -159,7 +161,7 @@ export class FilterBarService extends FtrService {
         }
       }
 
-      await this.testSubjects.clickWhenNotDisabled('saveFilter');
+      await this.testSubjects.clickWhenNotDisabledWithoutRetry('saveFilter');
     });
     await this.header.awaitGlobalLoadingIndicatorHidden();
   }

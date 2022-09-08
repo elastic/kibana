@@ -10,6 +10,7 @@ import { IconType } from '@elastic/eui';
 export interface MetaDataProps {
   id: string;
   onDocumentDelete?: Function;
+  title?: string;
 }
 
 export interface ResultFieldProps {

@@ -6,10 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { mockKibanaMigrator } from '../../../saved_objects/migrations/kibana_migrator.mock';
+import { mockKibanaMigrator } from '@kbn/core-saved-objects-migration-server-mocks';
 
 export const migratorInstanceMock = mockKibanaMigrator.create();
 export const KibanaMigratorMock = jest.fn().mockImplementation(() => migratorInstanceMock);
-jest.doMock('../../../saved_objects/migrations/kibana_migrator', () => ({
-  KibanaMigrator: KibanaMigratorMock,
-}));
+jest.doMock('@kbn/core-saved-objects-migration-server-internal', () => {
+  const actual = jest.requireActual('@kbn/core-saved-objects-migration-server-internal');
+  return {
+    ...actual,
+    KibanaMigrator: KibanaMigratorMock,
+  };
+});

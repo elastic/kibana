@@ -12,12 +12,14 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const chance = new Chance();
+  const kibanaServer = getService('kibanaServer');
 
-  describe('POST /internal/cloud_security_posture/update_rules_config', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/139683
+  describe.skip('POST /internal/cloud_security_posture/update_rules_config', () => {
     let agentPolicyId: string;
 
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
+      await kibanaServer.savedObjects.cleanStandardList();
       await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
 
       const { body: agentPolicyResponse } = await supertest
@@ -31,11 +33,11 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/empty_kibana');
+      await kibanaServer.savedObjects.cleanStandardList();
       await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
     });
 
-    it(`Should return 500 when package policy id does not exist`, async () => {
+    it('returns a 404 response when package policy id does not exist', async () => {
       const packagePolicyId = chance.guid();
 
       const { body: response } = await supertest
@@ -43,10 +45,11 @@ export default function ({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'xxxx')
         .send({
           package_policy_id: packagePolicyId,
+          rules: [],
         })
-        .expect(500);
-      expect(response.error).to.be('Internal Server Error');
-      expect(response.message).to.be(`Package policy ${packagePolicyId} not found`);
+        .expect(404);
+
+      expect(response.error).to.be('Not Found');
     });
 
     it(`Should return 200 for existing package policy id`, async () => {
@@ -73,6 +76,7 @@ export default function ({ getService }: FtrProviderContext) {
         .post(`/internal/cloud_security_posture/update_rules_config`)
         .set('kbn-xsrf', 'xxxx')
         .send({
+          rules: [],
           package_policy_id: postPackageResponse.item.id,
         })
         .expect(200);

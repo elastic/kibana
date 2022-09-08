@@ -5,120 +5,6 @@
     "functions": [
       {
         "parentPluginId": "data",
-        "id": "def-public.handleResponse",
-        "type": "Function",
-        "tags": [],
-        "label": "handleResponse",
-        "description": [],
-        "signature": [
-          "(request: ",
-          "SearchRequest",
-          ", response: ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-common.IKibanaSearchResponse",
-            "text": "IKibanaSearchResponse"
-          },
-          "<any>, { disableShardFailureWarning }: ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-common.SearchSourceSearchOptions",
-            "text": "SearchSourceSearchOptions"
-          },
-          ", theme: ",
-          "ThemeServiceStart",
-          ") => ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-common.IKibanaSearchResponse",
-            "text": "IKibanaSearchResponse"
-          },
-          "<any>"
-        ],
-        "path": "src/plugins/data/public/search/fetch/handle_response.tsx",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "data",
-            "id": "def-public.handleResponse.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "request",
-            "description": [],
-            "signature": [
-              "SearchRequest"
-            ],
-            "path": "src/plugins/data/public/search/fetch/handle_response.tsx",
-            "deprecated": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.handleResponse.$2",
-            "type": "Object",
-            "tags": [],
-            "label": "response",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.IKibanaSearchResponse",
-                "text": "IKibanaSearchResponse"
-              },
-              "<any>"
-            ],
-            "path": "src/plugins/data/public/search/fetch/handle_response.tsx",
-            "deprecated": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.handleResponse.$3",
-            "type": "Object",
-            "tags": [],
-            "label": "{ disableShardFailureWarning }",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.SearchSourceSearchOptions",
-                "text": "SearchSourceSearchOptions"
-              }
-            ],
-            "path": "src/plugins/data/public/search/fetch/handle_response.tsx",
-            "deprecated": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.handleResponse.$4",
-            "type": "Object",
-            "tags": [],
-            "label": "theme",
-            "description": [],
-            "signature": [
-              "ThemeServiceStart"
-            ],
-            "path": "src/plugins/data/public/search/fetch/handle_response.tsx",
-            "deprecated": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
         "id": "def-public.isEsError",
         "type": "Function",
         "tags": [],
@@ -593,7 +479,9 @@
             "type": "Function",
             "tags": [],
             "label": "showError",
-            "description": [],
+            "description": [
+              "\nShow toast for caught error"
+            ],
             "signature": [
               "(e: Error) => void"
             ],
@@ -606,13 +494,80 @@
                 "type": "Object",
                 "tags": [],
                 "label": "e",
-                "description": [],
+                "description": [
+                  "Error"
+                ],
                 "signature": [
                   "Error"
                 ],
                 "path": "src/plugins/data/public/search/types.ts",
                 "deprecated": false,
                 "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.ISearchStart.showWarnings",
+            "type": "Function",
+            "tags": [],
+            "label": "showWarnings",
+            "description": [
+              "\nShow warnings, or customize how they're shown"
+            ],
+            "signature": [
+              "(adapter: ",
+              {
+                "pluginId": "inspector",
+                "scope": "common",
+                "docId": "kibInspectorPluginApi",
+                "section": "def-common.RequestAdapter",
+                "text": "RequestAdapter"
+              },
+              ", cb?: ",
+              "WarningHandlerCallback",
+              " | undefined) => void"
+            ],
+            "path": "src/plugins/data/public/search/types.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-public.ISearchStart.showWarnings.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "adapter",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "inspector",
+                    "scope": "common",
+                    "docId": "kibInspectorPluginApi",
+                    "section": "def-common.RequestAdapter",
+                    "text": "RequestAdapter"
+                  }
+                ],
+                "path": "src/plugins/data/public/search/types.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-public.ISearchStart.showWarnings.$2",
+                "type": "Function",
+                "tags": [],
+                "label": "cb",
+                "description": [
+                  "WarningHandlerCallback - optional callback to intercept warnings"
+                ],
+                "signature": [
+                  "WarningHandlerCallback",
+                  " | undefined"
+                ],
+                "path": "src/plugins/data/public/search/types.ts",
+                "deprecated": false,
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -13940,7 +13895,15 @@
         "label": "handleRequest",
         "description": [],
         "signature": [
-          "({ abortSignal, aggs, filters, indexPattern, inspectorAdapters, query, searchSessionId, searchSourceService, timeFields, timeRange, getNow, executionContext, }: RequestHandlerParams) => ",
+          "({ abortSignal, aggs, filters, indexPattern, inspectorAdapters, query, searchSessionId, searchSourceService, timeFields, timeRange, disableShardWarnings, getNow, executionContext, }: ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.RequestHandlerParams",
+            "text": "RequestHandlerParams"
+          },
+          ") => ",
           "Observable",
           "<",
           {
@@ -13960,10 +13923,16 @@
             "id": "def-common.handleRequest.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  abortSignal,\n  aggs,\n  filters,\n  indexPattern,\n  inspectorAdapters,\n  query,\n  searchSessionId,\n  searchSourceService,\n  timeFields,\n  timeRange,\n  getNow,\n  executionContext,\n}",
+            "label": "{\n  abortSignal,\n  aggs,\n  filters,\n  indexPattern,\n  inspectorAdapters,\n  query,\n  searchSessionId,\n  searchSourceService,\n  timeFields,\n  timeRange,\n  disableShardWarnings,\n  getNow,\n  executionContext,\n}",
             "description": [],
             "signature": [
-              "RequestHandlerParams"
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.RequestHandlerParams",
+                "text": "RequestHandlerParams"
+              }
             ],
             "path": "src/plugins/data/common/search/expressions/esaggs/request_handler.ts",
             "deprecated": false,
@@ -24629,6 +24598,219 @@
       },
       {
         "parentPluginId": "data",
+        "id": "def-common.RequestHandlerParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "RequestHandlerParams",
+        "description": [],
+        "path": "src/plugins/data/common/search/expressions/esaggs/request_handler.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-common.RequestHandlerParams.abortSignal",
+            "type": "Object",
+            "tags": [],
+            "label": "abortSignal",
+            "description": [],
+            "signature": [
+              "AbortSignal | undefined"
+            ],
+            "path": "src/plugins/data/common/search/expressions/esaggs/request_handler.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.RequestHandlerParams.aggs",
+            "type": "Object",
+            "tags": [],
+            "label": "aggs",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.AggConfigs",
+                "text": "AggConfigs"
+              }
+            ],
+            "path": "src/plugins/data/common/search/expressions/esaggs/request_handler.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.RequestHandlerParams.filters",
+            "type": "Array",
+            "tags": [],
+            "label": "filters",
+            "description": [],
+            "signature": [
+              "Filter",
+              "[] | undefined"
+            ],
+            "path": "src/plugins/data/common/search/expressions/esaggs/request_handler.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.RequestHandlerParams.indexPattern",
+            "type": "Object",
+            "tags": [],
+            "label": "indexPattern",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/data/common/search/expressions/esaggs/request_handler.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.RequestHandlerParams.inspectorAdapters",
+            "type": "Object",
+            "tags": [],
+            "label": "inspectorAdapters",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "inspector",
+                "scope": "common",
+                "docId": "kibInspectorPluginApi",
+                "section": "def-common.Adapters",
+                "text": "Adapters"
+              }
+            ],
+            "path": "src/plugins/data/common/search/expressions/esaggs/request_handler.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.RequestHandlerParams.query",
+            "type": "Object",
+            "tags": [],
+            "label": "query",
+            "description": [],
+            "signature": [
+              "Query",
+              " | undefined"
+            ],
+            "path": "src/plugins/data/common/search/expressions/esaggs/request_handler.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.RequestHandlerParams.searchSessionId",
+            "type": "string",
+            "tags": [],
+            "label": "searchSessionId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/data/common/search/expressions/esaggs/request_handler.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.RequestHandlerParams.searchSourceService",
+            "type": "Object",
+            "tags": [],
+            "label": "searchSourceService",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.ISearchStartSearchSource",
+                "text": "ISearchStartSearchSource"
+              }
+            ],
+            "path": "src/plugins/data/common/search/expressions/esaggs/request_handler.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.RequestHandlerParams.timeFields",
+            "type": "Array",
+            "tags": [],
+            "label": "timeFields",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "src/plugins/data/common/search/expressions/esaggs/request_handler.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.RequestHandlerParams.timeRange",
+            "type": "Object",
+            "tags": [],
+            "label": "timeRange",
+            "description": [],
+            "signature": [
+              "TimeRange",
+              " | undefined"
+            ],
+            "path": "src/plugins/data/common/search/expressions/esaggs/request_handler.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.RequestHandlerParams.disableShardWarnings",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "disableShardWarnings",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/data/common/search/expressions/esaggs/request_handler.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.RequestHandlerParams.getNow",
+            "type": "Function",
+            "tags": [],
+            "label": "getNow",
+            "description": [],
+            "signature": [
+              "(() => Date) | undefined"
+            ],
+            "path": "src/plugins/data/common/search/expressions/esaggs/request_handler.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.RequestHandlerParams.executionContext",
+            "type": "Object",
+            "tags": [],
+            "label": "executionContext",
+            "description": [],
+            "signature": [
+              "KibanaExecutionContext",
+              " | undefined"
+            ],
+            "path": "src/plugins/data/common/search/expressions/esaggs/request_handler.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
         "id": "def-common.ResponseWithShardFailure",
         "type": "Interface",
         "tags": [],
@@ -27391,7 +27573,7 @@
             "section": "def-common.TimeRange",
             "text": "TimeRange"
           },
-          " | undefined; }"
+          " | undefined; disableShardWarnings?: boolean | undefined; }"
         ],
         "path": "src/plugins/data/common/search/expressions/kibana_context_type.ts",
         "deprecated": false,
@@ -35034,7 +35216,7 @@
                 "section": "def-common.TimeRange",
                 "text": "TimeRange"
               },
-              " | undefined; }"
+              " | undefined; disableShardWarnings?: boolean | undefined; }"
             ],
             "path": "src/plugins/data/common/search/expressions/remove_filter.ts",
             "deprecated": false,
@@ -35337,7 +35519,7 @@
                 "section": "def-common.TimeRange",
                 "text": "TimeRange"
               },
-              " | undefined; }"
+              " | undefined; disableShardWarnings?: boolean | undefined; }"
             ],
             "path": "src/plugins/data/common/search/expressions/select_filter.ts",
             "deprecated": false,
