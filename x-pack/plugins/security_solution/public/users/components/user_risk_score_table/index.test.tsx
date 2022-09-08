@@ -10,6 +10,7 @@ import { noop } from 'lodash';
 import React from 'react';
 import { UserRiskScoreTable } from '.';
 import type { UserRiskScore } from '../../../../common/search_strategy';
+import { RiskSeverity } from '../../../../common/search_strategy';
 import { TestProviders } from '../../../common/mock';
 import { UsersType } from '../../store/model';
 
@@ -24,7 +25,7 @@ describe('UserRiskScoreTable', () => {
           risk: {
             rule_risks: [],
             calculated_score_norm: 71,
-            calculated_level: 'High',
+            calculated_level: RiskSeverity.high,
             multipliers: [],
           },
         },

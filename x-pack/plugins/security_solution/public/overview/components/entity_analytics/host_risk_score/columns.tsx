@@ -13,6 +13,7 @@ import { HostDetailsLink } from '../../../../common/components/links';
 import { HostsTableType } from '../../../../hosts/store/model';
 import { RiskScore } from '../../../../common/components/severity/common';
 import type { HostRiskScore, RiskSeverity } from '../../../../../common/search_strategy';
+import { RiskScoreFields } from '../../../../../common/search_strategy';
 import * as i18n from './translations';
 
 type HostRiskScoreColumns = Array<EuiBasicTableColumn<HostRiskScore>>;
@@ -31,7 +32,7 @@ export const getHostRiskScoreColumns = (): HostRiskScoreColumns => [
     },
   },
   {
-    field: 'host.risk.calculated_score_norm',
+    field: RiskScoreFields.hostRiskScore,
     name: i18n.HOST_RISK_SCORE,
     truncateText: true,
     mobileOptions: { show: true },
@@ -47,7 +48,7 @@ export const getHostRiskScoreColumns = (): HostRiskScoreColumns => [
     },
   },
   {
-    field: 'host.risk.calculated_level',
+    field: RiskScoreFields.hostRisk,
     name: (
       <EuiToolTip content={i18n.HOST_RISK_TOOLTIP}>
         <>

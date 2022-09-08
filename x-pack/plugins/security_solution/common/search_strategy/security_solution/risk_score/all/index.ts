@@ -38,7 +38,7 @@ export interface RiskStats {
   rule_risks: RuleRisk[];
   calculated_score_norm: number;
   multipliers: string[];
-  calculated_level: string;
+  calculated_level: RiskSeverity;
 }
 
 export interface HostRiskScore {

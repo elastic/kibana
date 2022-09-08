@@ -33,7 +33,7 @@ export enum RiskQueries {
   kpiRiskScore = 'kpiRiskScore',
 }
 
-export enum RiskScoreEntity {
+export const enum RiskScoreEntity {
   host = 'host',
   user = 'user',
 }

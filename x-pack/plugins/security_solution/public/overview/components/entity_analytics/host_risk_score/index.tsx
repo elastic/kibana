@@ -27,6 +27,7 @@ import { HeaderSection } from '../../../../common/components/header_section';
 import { useHostRiskScore, useHostRiskScoreKpi } from '../../../../risk_score/containers';
 
 import type { RiskSeverity } from '../../../../../common/search_strategy';
+import { RiskScoreEntity } from '../../../../../common/search_strategy';
 import { SecurityPageName } from '../../../../app/types';
 import * as i18n from './translations';
 import { generateSeverityFilter } from '../../../../hosts/store/helpers';
@@ -58,7 +59,7 @@ export const EntityAnalyticsHostRiskScores = () => {
   const riskyHostsFeatureEnabled = useIsExperimentalFeatureEnabled('riskyHostsEnabled');
 
   const severityFilter = useMemo(() => {
-    const [filter] = generateSeverityFilter(selectedSeverity, 'host');
+    const [filter] = generateSeverityFilter(selectedSeverity, RiskScoreEntity.host);
 
     return filter ? JSON.stringify(filter.query) : undefined;
   }, [selectedSeverity]);

@@ -24,6 +24,7 @@ import { useRiskyHostsDashboardLinks } from '../../containers/overview_risky_hos
 import { mockTheme } from '../overview_cti_links/mock';
 import { RiskyHostsEnabledModule } from './risky_hosts_enabled_module';
 import { useDashboardButtonHref } from '../../../common/hooks/use_dashboard_button_href';
+import { RiskSeverity } from '../../../../common/search_strategy';
 
 jest.mock('../../../common/lib/kibana');
 
@@ -62,7 +63,7 @@ describe('RiskyHostsEnabledModule', () => {
                     risk: {
                       calculated_score_norm: 1,
                       rule_risks: [],
-                      calculated_level: '',
+                      calculated_level: RiskSeverity.low,
                       multipliers: [],
                     },
                   },

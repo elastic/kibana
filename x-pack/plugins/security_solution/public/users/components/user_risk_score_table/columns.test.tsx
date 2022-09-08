@@ -9,6 +9,7 @@ import { render } from '@testing-library/react';
 import type { UserRiskScoreColumns } from '.';
 import { getUserRiskScoreColumns } from './columns';
 import { TestProviders } from '../../../common/mock';
+import { RiskScoreFields } from '../../../../common/search_strategy';
 
 describe('getUserRiskScoreColumns', () => {
   const defaultProps = {
@@ -19,8 +20,8 @@ describe('getUserRiskScoreColumns', () => {
     const columns = getUserRiskScoreColumns(defaultProps);
 
     expect(columns[0].field).toBe('user.name');
-    expect(columns[1].field).toBe('user.risk.calculated_score_norm');
-    expect(columns[2].field).toBe('user.risk.calculated_level');
+    expect(columns[1].field).toBe(RiskScoreFields.userRiskScore);
+    expect(columns[2].field).toBe(RiskScoreFields.userRisk);
 
     columns.forEach((column) => {
       expect(column).toHaveProperty('name');

@@ -45,7 +45,7 @@ import { useDeepEqualSelector } from '../../common/hooks/use_selector';
 import { useInvalidFilterQuery } from '../../common/hooks/use_invalid_filter_query';
 import { UsersKpiComponent } from '../components/kpi_users';
 import type { UpdateDateRange } from '../../common/components/charts/common';
-import { LastEventIndexKey } from '../../../common/search_strategy';
+import { LastEventIndexKey, RiskScoreEntity } from '../../../common/search_strategy';
 import { generateSeverityFilter } from '../../hosts/store/helpers';
 import { UsersTableType } from '../store/model';
 import { hasMlUserPermissions } from '../../../common/machine_learning/has_ml_user_permissions';
@@ -96,7 +96,7 @@ const UsersComponent = () => {
     }
 
     if (tabName === UsersTableType.risk) {
-      const severityFilter = generateSeverityFilter(severitySelection, 'user');
+      const severityFilter = generateSeverityFilter(severitySelection, RiskScoreEntity.user);
 
       return [...severityFilter, ...filters];
     }

@@ -9,11 +9,11 @@ import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
+import { last } from 'lodash/fp';
 import type { HostsComponentsQueryProps } from './types';
 import * as i18n from '../translations';
 import { HostRiskInformationButtonEmpty } from '../../components/host_risk_information';
 import { HostRiskScoreQueryId, useHostRiskScore } from '../../../risk_score/containers';
-import type { HostRiskScore } from '../../../../common/search_strategy';
 import { buildHostNamesFilter } from '../../../../common/search_strategy';
 import { useQueryInspector } from '../../../common/components/page/manage_query';
 import { RiskScoreOverTime } from '../../../common/components/risk_score_over_time';
@@ -87,9 +87,7 @@ const HostRiskTabBodyComponent: React.FC<
     [setOverTimeToggleStatus]
   );
 
-  const lastHosttRiskItem: HostRiskScore | null =
-    data && data.length > 0 ? data[data.length - 1] : null;
-  const rules = lastHosttRiskItem ? lastHosttRiskItem.host.risk.rule_risks : [];
+  const lastHostRiskItem = last(data);
 
   return (
     <>
@@ -113,7 +111,7 @@ const HostRiskTabBodyComponent: React.FC<
             queryId={QUERY_ID}
             toggleStatus={contributorsToggleStatus}
             toggleQuery={toggleContributorsQuery}
-            rules={rules}
+            rules={lastHostRiskItem ? lastHostRiskItem.host.risk.rule_risks : []}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

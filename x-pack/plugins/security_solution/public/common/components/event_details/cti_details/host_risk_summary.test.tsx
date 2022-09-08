@@ -11,10 +11,11 @@ import { render } from '@testing-library/react';
 import { TestProviders } from '../../../mock';
 import { NO_HOST_RISK_DATA_DESCRIPTION } from './translations';
 import { HostRiskSummary } from './host_risk_summary';
+import { RiskSeverity } from '../../../../../common/search_strategy';
 
 describe('HostRiskSummary', () => {
   it('renders host risk data', () => {
-    const riskKeyword = 'test risk';
+    const riskSeverity = RiskSeverity.low;
     const hostRisk = {
       loading: false,
       isModuleEnabled: true,
@@ -26,7 +27,7 @@ describe('HostRiskSummary', () => {
             risk: {
               multipliers: [],
               calculated_score_norm: 9999,
-              calculated_level: riskKeyword,
+              calculated_level: riskSeverity,
               rule_risks: [],
             },
           },
@@ -40,7 +41,7 @@ describe('HostRiskSummary', () => {
       </TestProviders>
     );
 
-    expect(getByText(riskKeyword)).toBeInTheDocument();
+    expect(getByText(riskSeverity)).toBeInTheDocument();
   });
 
   it('renders spinner when loading', () => {
@@ -71,7 +72,7 @@ describe('HostRiskSummary', () => {
             risk: {
               multipliers: [],
               calculated_score_norm: 9999,
-              calculated_level: 'test-risk',
+              calculated_level: RiskSeverity.low,
               rule_risks: [],
             },
           },
