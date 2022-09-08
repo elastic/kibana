@@ -552,4 +552,18 @@ storiesOf('SearchBar', module)
       ],
       query: { sql: 'SELECT field1, field10 FROM DATAVIEW' },
     } as unknown as SearchBarProps<Query>)
+  )
+  .add('in disabled state', () =>
+    wrapSearchBarInContext({
+      dataViewPickerComponentProps: {
+        currentDataViewId: '1234',
+        trigger: {
+          'data-test-subj': 'dataView-switch-link',
+          label: 'logstash-*',
+          title: 'logstash-*',
+        },
+        onChangeDataView: action('onChangeDataView'),
+      },
+      isDisabled: true,
+    } as SearchBarProps)
   );

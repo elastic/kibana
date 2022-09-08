@@ -70,6 +70,7 @@ export function ChangeDataView({
   onSaveTextLanguageQuery,
   onTextLangQuerySubmit,
   textBasedLanguage,
+  isDisabled,
 }: DataViewPickerPropsExtended) {
   const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, setPopoverIsOpen] = useState(false);
@@ -140,6 +141,7 @@ export function ChangeDataView({
         iconType="arrowDown"
         title={triggerLabel}
         fullWidth={fullWidth}
+        disabled={isDisabled}
         {...rest}
       >
         {triggerLabel}

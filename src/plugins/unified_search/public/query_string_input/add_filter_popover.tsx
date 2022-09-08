@@ -24,6 +24,7 @@ interface AddFilterPopoverProps {
   filters: Filter[];
   timeRangeForSuggestionsOverride?: boolean;
   onFiltersUpdated?: (filters: Filter[]) => void;
+  isDisabled?: boolean;
   buttonProps?: Partial<EuiButtonIconProps>;
 }
 
@@ -33,6 +34,7 @@ export const AddFilterPopover = React.memo(function AddFilterPopover({
   timeRangeForSuggestionsOverride,
   onFiltersUpdated,
   buttonProps,
+  isDisabled,
 }: AddFilterPopoverProps) {
   const [isAddFilterPopoverOpen, setIsAddFilterPopoverOpen] = useState(false);
 
@@ -49,6 +51,7 @@ export const AddFilterPopover = React.memo(function AddFilterPopover({
         data-test-subj="addFilter"
         onClick={() => setIsAddFilterPopoverOpen((isOpen) => !isOpen)}
         size="m"
+        disabled={isDisabled}
         {...buttonProps}
       />
     </EuiToolTip>
