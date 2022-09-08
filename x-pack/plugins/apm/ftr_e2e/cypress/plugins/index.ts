@@ -29,7 +29,7 @@ import { createEsClientForTesting } from '@kbn/test';
  * @type {Cypress.PluginConfig}
  */
 
-const plugin: Cypress.PluginConfig = (on, config) => {
+export const plugin: Cypress.PluginConfig = (on, config) => {
   // `on` is used to hook into various events Cypress emits
   // `config` is the resolved Cypress config
 
@@ -66,5 +66,3 @@ const plugin: Cypress.PluginConfig = (on, config) => {
     },
   });
 };
-
-module.exports = plugin;

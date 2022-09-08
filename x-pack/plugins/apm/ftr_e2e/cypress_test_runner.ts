@@ -58,9 +58,6 @@ export async function cypressTestRunner({ getService }: FtrProviderContext) {
     ...cypressCliArgs,
     project: cypressProjectPath,
     config: {
-      requestTimeout: 10000,
-      responseTimeout: 60000,
-      defaultCommandTimeout: 15000,
       e2e: {
         baseUrl: kibanaUrl,
       },

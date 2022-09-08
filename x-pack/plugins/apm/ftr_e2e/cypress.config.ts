@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-const { defineConfig } = require('cypress');
+import { defineConfig } from 'cypress';
+import { plugin } from './cypress/plugins';
 
 module.exports = defineConfig({
   fileServerFolder: './cypress',
@@ -25,9 +26,11 @@ module.exports = defineConfig({
     // We've imported your old cypress plugins here.
     // You may want to clean this up later by importing these.
     setupNodeEvents(on, config) {
-      return require('./cypress/plugins')(on, config);
+      plugin(on, config);
     },
+    baseUrl: 'http://localhost:5601',
+    supportFile: './cypress/support/e2e.ts',
     specPattern: './cypress/e2e/**/*.cy.{js,jsx,ts,tsx}',
-    experimentalSessionAndOrigin: true,
+    experimentalSessionAndOrigin: false,
   },
 });
