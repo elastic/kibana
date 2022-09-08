@@ -32,6 +32,7 @@ describe('initializeKbnUrlTracking', () => {
         "appUnMounted": [Function],
         "restorePreviousUrl": [Function],
         "setTrackedUrl": [Function],
+        "setTrackingEnabled": [Function],
         "stopUrlTracker": [Function],
       }
     `);

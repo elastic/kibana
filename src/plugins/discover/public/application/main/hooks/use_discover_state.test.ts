@@ -13,6 +13,9 @@ import { savedSearchMock } from '../../../__mocks__/saved_search';
 import { useDiscoverState } from './use_discover_state';
 import { dataViewMock } from '../../../__mocks__/data_view';
 import { SearchSource } from '@kbn/data-plugin/public';
+import { setUrlTracker } from '../../../kibana_services';
+import { urlTrackerMock } from '../../../__mocks__/url_tracker.mock';
+setUrlTracker(urlTrackerMock);
 
 describe('test useDiscoverState', () => {
   const originalSavedObjectsClient = discoverServiceMock.core.savedObjects.client;

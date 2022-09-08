@@ -15,6 +15,11 @@ import { HistoryLocationState } from './build_services';
 import { DocViewsRegistry } from './services/doc_views/doc_views_registry';
 
 let uiActions: UiActionsStart;
+export interface UrlTracker {
+  setTrackedUrl: (url: string) => void;
+  restorePreviousUrl: () => void;
+  setTrackingEnabled: (value: boolean) => void;
+}
 
 export const setUiActions = (pluginUiActions: UiActionsStart) => (uiActions = pluginUiActions);
 export const getUiActions = () => uiActions;
@@ -22,11 +27,7 @@ export const getUiActions = () => uiActions;
 export const [getHeaderActionMenuMounter, setHeaderActionMenuMounter] =
   createGetterSetter<AppMountParameters['setHeaderActionMenu']>('headerActionMenuMounter');
 
-export const [getUrlTracker, setUrlTracker] = createGetterSetter<{
-  setTrackedUrl: (url: string) => void;
-  restorePreviousUrl: () => void;
-  setTrackingEnabled: (value: boolean) => void;
-}>('urlTracker');
+export const [getUrlTracker, setUrlTracker] = createGetterSetter<UrlTracker>('urlTracker');
 
 export const [getDocViewsRegistry, setDocViewsRegistry] =
   createGetterSetter<DocViewsRegistry>('DocViewsRegistry');
