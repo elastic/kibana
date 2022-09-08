@@ -15,7 +15,9 @@ export class EntityStreams<TFields> implements EntityIterable<TFields> {
     if (orders.size > 1) throw Error('Can only combine intervals with the same order()');
     this._order = orders.has('asc') ? 'asc' : 'desc';
 
-    this._ratePerMinute = dataGenerators.map((d) => d.ratePerMinute()).reduce((a, b) => a + b, 0);
+    this._ratePerMinute = dataGenerators
+      .map((d) => d.estimatedRatePerMinute())
+      .reduce((a, b) => a + b, 0);
   }
 
   private readonly _order: 'desc' | 'asc';
@@ -24,7 +26,7 @@ export class EntityStreams<TFields> implements EntityIterable<TFields> {
   }
 
   private readonly _ratePerMinute: number;
-  ratePerMinute() {
+  estimatedRatePerMinute() {
     return this._ratePerMinute;
   }
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { Cluster, LegacyRequest } from '../../../types';
-import { getNewIndexPatterns } from '../../cluster/get_index_patterns';
+import { getNewIndexPatterns, getKibanaDataset } from '../../cluster/get_index_patterns';
 import { Globals } from '../../../static_globals';
 import { createQuery } from '../../create_query';
 import { KibanaClusterRuleMetric } from '../../metrics';
@@ -39,7 +39,7 @@ export async function getInstanceRuleDataForClusters(
         body: {
           query: createQuery({
             type,
-            dsDataset: `${moduleType}.${dataset}`,
+            dsDataset: getKibanaDataset(dataset),
             metricset: dataset,
             start,
             end,

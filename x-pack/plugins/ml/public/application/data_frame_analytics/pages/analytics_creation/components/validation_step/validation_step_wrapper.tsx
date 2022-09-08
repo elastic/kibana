@@ -91,6 +91,7 @@ export const ValidationStepWrapper: FC<CreateAnalyticsStepProps> = ({
         debouncedValidationChecks();
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       showValidationStep,
       dependentVariable,
