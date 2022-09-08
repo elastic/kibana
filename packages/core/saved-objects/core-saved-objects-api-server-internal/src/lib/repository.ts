@@ -118,6 +118,8 @@ import type {
   BulkDeleteItemErrorResult,
   NewBulkItemResponse,
   BulkDeleteExpectedBulkGetResult,
+  PreflightCheckForBulkDeleteParams,
+  ExpectedBulkDeleteMultiNamespaceDocsParams,
 } from './repository_bulk_delete_internal_types';
 
 // BEWARE: The SavedObjectClient depends on the implementation details of the SavedObjectsRepository

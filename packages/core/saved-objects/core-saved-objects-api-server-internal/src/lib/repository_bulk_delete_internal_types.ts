@@ -11,8 +11,26 @@ import {
   BulkResponseItem,
   ErrorCause,
 } from '@elastic/elasticsearch/lib/api/types';
+import type { estypes, TransportResult } from '@elastic/elasticsearch';
 import { Either } from './internal_utils';
 
+/**
+ * @internal
+ */
+export interface PreflightCheckForBulkDeleteParams {
+  expectedBulkGetResults: BulkDeleteExpectedBulkGetResult[];
+  namespace?: string;
+}
+
+/**
+ * @internal
+ */
+export interface ExpectedBulkDeleteMultiNamespaceDocsParams {
+  expectedBulkGetResults: BulkDeleteExpectedBulkGetResult[];
+  multiNamespaceDocsResponse: TransportResult<estypes.MgetResponse<unknown>, unknown> | undefined;
+  namespace: string | undefined;
+  force?: boolean;
+}
 /**
  * @internal
  */
