@@ -18,6 +18,13 @@ export type ApmApplicationMetricFields = Partial<{
   'jvm.memory.heap.used': number;
   'jvm.memory.non_heap.used': number;
   'jvm.thread.count': number;
+  'container.id': string;
+  'kubernetes.pod.name': string;
+  'kubernetes.pod.uid': string;
+  'kubernetes.namespace': string;
+  'kubernetes.replicaset.name': string;
+  'kubernetes.container.name': string;
+  'kubernetes.deployment.name': string;
 }>;
 
 export type ApmUserAgentFields = Partial<{
