@@ -36,6 +36,7 @@ import {
   VisState820,
   XYVisStatePre850,
   LensDocShape850,
+  LensDocShape840,
   VisState850,
 } from './types';
 import {
@@ -58,6 +59,7 @@ import {
   getLensDataViewMigrations,
   commonMigrateMetricIds,
   commonAnnotationAddDataViewIdReferences,
+  commonMigratePartitionChartGroups,
 } from './common_migrations';
 
 interface LensDocShapePre710<VisualizationState = unknown> {
@@ -540,6 +542,18 @@ const migrateMetricIds: SavedObjectMigrationFn<LensDocShape850, LensDocShape850>
   attributes: commonMigrateMetricIds(doc.attributes),
 });
 
+const migratePartitionChartGroups: SavedObjectMigrationFn<LensDocShape840, LensDocShape840> = (
+  doc
+) => ({
+  ...doc,
+  attributes: commonMigratePartitionChartGroups(
+    doc.attributes as LensDocShape840<{
+      shape: string;
+      layers: Array<{ groups?: string[] }>;
+    }>
+  ),
+});
+
 const lensMigrations: SavedObjectMigrationMap = {
   '7.7.0': removeInvalidAccessors,
   // The order of these migrations matter, since the timefield migration relies on the aggConfigs
@@ -560,7 +574,12 @@ const lensMigrations: SavedObjectMigrationMap = {
     enhanceTableRowHeight
   ),
   '8.3.0': flow(lockOldMetricVisSettings, preserveOldLegendSizeDefault, fixValueLabelsInXY),
-  '8.5.0': flow(migrateMetricIds, addEventAnnotationType, addEventAnnotationDataViewReferences),
+  '8.5.0': flow(
+    migrateMetricIds,
+    addEventAnnotationType,
+    addEventAnnotationDataViewReferences,
+    migratePartitionChartGroups
+  ),
 };
 
 export const getAllMigrations = (

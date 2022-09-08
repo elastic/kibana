@@ -32,6 +32,7 @@ import {
   getLensDataViewMigrations,
   commonMigrateMetricIds,
   commonAnnotationAddDataViewIdReferences,
+  commonMigratePartitionChartGroups,
 } from '../migrations/common_migrations';
 import {
   CustomVisualizationMigrations,
@@ -45,7 +46,7 @@ import {
   VisState850,
   VisStatePre715,
   VisStatePre830,
-  XYVisStatePre850,
+  XYVisState850,
 } from '../migrations/types';
 import { extract, inject } from '../../common/embeddable_factory';
 
@@ -142,13 +143,19 @@ export const makeLensEmbeddableFactory =
                   references: SavedObjectReference[] | undefined;
                 };
 
-                let migratedLensState = commonMigrateMetricIds(
-                  lensState.attributes
-                ) as LensDocShape850<XYVisStatePre850>;
-                migratedLensState = commonExplicitAnnotationType(migratedLensState);
+                let migratedLensState = commonMigrateMetricIds(lensState.attributes);
+                migratedLensState = commonExplicitAnnotationType(
+                  migratedLensState as LensDocShape850<XYVisState850>
+                );
                 const migratedReferences = commonAnnotationAddDataViewIdReferences(
                   migratedLensState as LensDocShape850<VisState850>,
                   lensState.references
+                );
+                migratedLensState = commonMigratePartitionChartGroups(
+                  migratedLensState as LensDocShape850<{
+                    shape: string;
+                    layers: Array<{ groups?: string[] }>;
+                  }>
                 );
                 return {
                   ...lensState,
