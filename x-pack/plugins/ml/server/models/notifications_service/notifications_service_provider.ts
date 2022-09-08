@@ -6,8 +6,10 @@
  */
 
 import { IScopedClusterClient } from '@kbn/core/server';
+import type { SearchTotalHits } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { NotificationSource } from '../../../common/types/notifications';
 import { ML_NOTIFICATION_INDEX_PATTERN } from '../../../common/constants/index_patterns';
-import { MlClient } from '../../lib/ml_client';
+import type { MlClient } from '../../lib/ml_client';
 import type {
   MessagesSearchParams,
   NotificationsCountParams,
@@ -16,11 +18,12 @@ import type {
 export class NotificationsService {
   constructor(
     private readonly scopedClusterClient: IScopedClusterClient,
+    // @ts-ignore
     private readonly mlClient: MlClient
   ) {}
 
   async searchMessages(params: MessagesSearchParams) {
-    const responseBody = await this.scopedClusterClient.asInternalUser.search(
+    const responseBody = await this.scopedClusterClient.asInternalUser.search<NotificationSource>(
       {
         index: ML_NOTIFICATION_INDEX_PATTERN,
         ignore_unavailable: true,
@@ -67,12 +70,15 @@ export class NotificationsService {
       { maxRetries: 0 }
     );
 
-    return responseBody.hits.hits.map((v) => {
-      return {
-        ...v._source,
-        id: v._id,
-      };
-    });
+    return {
+      total: (responseBody.hits.total as SearchTotalHits).value,
+      results: responseBody.hits.hits.map((v) => {
+        return {
+          ...v._source,
+          id: v._id,
+        };
+      }),
+    };
   }
 
   /**
@@ -102,6 +108,7 @@ export class NotificationsService {
       },
     });
 
+    // @ts-ignore
     return responseBody.aggregations.by_level.buckets.reduce((acc, curr) => {
       acc[curr.key] = curr.doc_count;
       return acc;

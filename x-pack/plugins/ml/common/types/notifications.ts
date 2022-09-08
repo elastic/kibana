@@ -16,15 +16,23 @@ export interface NotificationsQueryParams {
   queryString?: string;
 }
 
-export type NotificationsSearchResponse = Array<{
-  id: string;
+export interface NotificationSource {
   message: string;
   job_id: string;
   level: MessageLevel;
   timestamp: number;
   node_name: string;
   job_type: string;
-}>;
+}
+
+export interface NotificationsSearchResponse {
+  total: number;
+  results: Array<
+    NotificationSource & {
+      id: string;
+    }
+  >;
+}
 
 export interface NotificationsCountQueryParams {
   lastCheckedAt: number;

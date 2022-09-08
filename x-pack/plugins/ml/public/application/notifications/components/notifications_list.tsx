@@ -30,7 +30,7 @@ import { ML_PAGES } from '../../../../common/constants/locator';
 import { NotificationsSearchResponse } from '../../../../common/types/notifications';
 import { useMlKibana } from '../../contexts/kibana';
 
-export type NotificationItem = NotificationsSearchResponse[number];
+export type NotificationItem = NotificationsSearchResponse['results'][number];
 
 const levelBadgeMap: Record<MessageLevel, IconColor> = {
   error: 'danger',
@@ -56,6 +56,7 @@ export const NotificationsList: FC = () => {
 
   const [isLoading, setIsLoading] = useState(false);
   const [items, setItems] = useState<NotificationItem[]>([]);
+  const [totalCount, setTotalCount] = useState<number>(0);
 
   const dateFormatter = useFieldFormatter(FIELD_FORMAT_IDS.DATE);
 
@@ -65,7 +66,7 @@ export const NotificationsList: FC = () => {
   );
 
   const { onTableChange, pagination, sorting } = useTableSettings<NotificationItem>(
-    items,
+    totalCount,
     pageState,
     updatePageState
   );
@@ -83,7 +84,8 @@ export const NotificationsList: FC = () => {
         sortDirection: sorting.sort!.direction,
         queryString: searchQueryText,
       });
-      setItems(response);
+      setItems(response.results);
+      setTotalCount(response.total);
     } catch (error) {
       displayErrorToast(
         error,
