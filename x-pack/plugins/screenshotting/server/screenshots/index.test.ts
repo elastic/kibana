@@ -72,7 +72,6 @@ describe('Screenshot Observable Pipeline', () => {
           waitForElements: 30000,
           renderComplete: 30000,
         },
-        loadDelay: 0, // this is needed as it is in the config schema, but the value is not used
         zoom: 2,
       },
       networkPolicy: { enabled: false, rules: [] },
