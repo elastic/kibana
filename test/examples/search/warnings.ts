@@ -55,10 +55,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await es.indices.addBlock({ index: testIndex, block: 'write' });
       try {
         log.info(`rolling up ${testIndex} index...`);
-        await es.rollup.rollup({
-          index: testIndex,
-          rollup_index: testRollupIndex,
-          config: { fixed_interval: '1h' },
+        // es client currently does not have method for downsample
+        await es.transport.request<void>({
+          method: 'POST',
+          path: '/sample-01/_downsample/sample-01-rollup',
+          body: { fixed_interval: '1h' },
         });
       } catch (err) {
         log.info(`ignoring resource_already_exists_exception...`);
