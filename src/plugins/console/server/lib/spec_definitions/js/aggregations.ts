@@ -301,6 +301,9 @@ const rules = {
       format: 'yyyy-MM-dd',
       time_zone: '00:00',
       missing: '',
+      calendar_interval: {
+        __one_of: ['year', 'quarter', 'week', 'day', 'hour', 'minute', 'second']
+      },
     },
     geo_distance: {
       __template: {
@@ -473,7 +476,7 @@ const rules = {
       percents: [],
     },
     sum_bucket: simple_pipeline,
-    moving_avg: {
+    moving_fn: {
       __template: {
         buckets_path: '',
       },
