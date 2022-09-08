@@ -22,10 +22,13 @@ import {
   templateExceptionList,
   addDefaultAdvancedPolicyConfigSettings,
   metricsResponseToValueListMetaData,
+  cloudOnlyLogger
 } from './helpers';
 import type { ESClusterInfo, ESLicense, ExceptionListItem } from './types';
 import type { PolicyConfig, PolicyData } from '../../../common/endpoint/types';
 import { cloneDeep, set } from 'lodash';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
+
 
 describe('test diagnostic telemetry scheduled task timing helper', () => {
   test('test -5 mins is returned when there is no previous task run', async () => {
@@ -907,3 +910,29 @@ describe('test metrics response to value list meta data', () => {
     });
   });
 });
+
+describe('test cloud only logger', () => {
+  let logger: ReturnType<typeof loggingSystemMock.createLogger>;
+
+  beforeEach(() => {
+    logger = loggingSystemMock.createLogger();
+  });
+
+  test('setup should set logger and cloud flag', () => {
+    cloudOnlyLogger.setup(logger, true);
+    expect(logger.get).toHaveBeenCalled();
+  });
+
+  test('should log when cloud', () => {
+    cloudOnlyLogger.setup(logger, true);
+    cloudOnlyLogger.log('test');
+    expect(logger.info).toHaveBeenCalled();
+  });
+
+  test('should NOT log when on prem', () => {
+    cloudOnlyLogger.setup(logger, false);
+    cloudOnlyLogger.log('test');
+    expect(logger.info).toHaveBeenCalledTimes(0);
+  });
+
+})
