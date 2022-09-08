@@ -35,7 +35,7 @@ export class EntityGenerator<TField> implements EntityIterable<TField> {
     };
 
     const peekedNumberOfEvents = peek.done ? 0 : peek.value.serialize().length;
-    this._ratePerMinute = interval.ratePerMinute() * peekedNumberOfEvents;
+    this._ratePerMinute = interval.estimatedRatePerMinute() * peekedNumberOfEvents;
   }
 
   private readonly _order: 'desc' | 'asc';
@@ -52,7 +52,7 @@ export class EntityGenerator<TField> implements EntityIterable<TField> {
   }
 
   private readonly _ratePerMinute: number;
-  ratePerMinute() {
+  estimatedRatePerMinute() {
     return this._ratePerMinute;
   }
 

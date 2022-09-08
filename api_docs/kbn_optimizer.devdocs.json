@@ -19,6 +19,7 @@
         "description": [],
         "path": "packages/kbn-optimizer/src/optimizer/optimizer_config.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/optimizer",
@@ -33,6 +34,7 @@
             ],
             "path": "packages/kbn-optimizer/src/optimizer/optimizer_config.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/optimizer",
@@ -46,6 +48,7 @@
                 ],
                 "path": "packages/kbn-optimizer/src/optimizer/optimizer_config.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -70,6 +73,7 @@
             ],
             "path": "packages/kbn-optimizer/src/optimizer/optimizer_config.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/optimizer",
@@ -83,6 +87,7 @@
                 ],
                 "path": "packages/kbn-optimizer/src/optimizer/optimizer_config.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -100,6 +105,7 @@
             ],
             "path": "packages/kbn-optimizer/src/optimizer/optimizer_config.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/optimizer",
@@ -114,6 +120,7 @@
                 ],
                 "path": "packages/kbn-optimizer/src/optimizer/optimizer_config.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -129,6 +136,7 @@
                 ],
                 "path": "packages/kbn-optimizer/src/optimizer/optimizer_config.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -143,6 +151,7 @@
                 ],
                 "path": "packages/kbn-optimizer/src/optimizer/optimizer_config.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -157,6 +166,7 @@
                 ],
                 "path": "packages/kbn-optimizer/src/optimizer/optimizer_config.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -171,6 +181,7 @@
                 ],
                 "path": "packages/kbn-optimizer/src/optimizer/optimizer_config.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -186,6 +197,7 @@
                 ],
                 "path": "packages/kbn-optimizer/src/optimizer/optimizer_config.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -200,6 +212,7 @@
                 ],
                 "path": "packages/kbn-optimizer/src/optimizer/optimizer_config.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -214,6 +227,7 @@
                 ],
                 "path": "packages/kbn-optimizer/src/optimizer/optimizer_config.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -228,6 +242,7 @@
                 ],
                 "path": "packages/kbn-optimizer/src/optimizer/optimizer_config.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -242,6 +257,7 @@
                 ],
                 "path": "packages/kbn-optimizer/src/optimizer/optimizer_config.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -256,6 +272,7 @@
                 ],
                 "path": "packages/kbn-optimizer/src/optimizer/optimizer_config.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -274,6 +291,7 @@
             ],
             "path": "packages/kbn-optimizer/src/optimizer/optimizer_config.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/optimizer",
@@ -287,6 +305,7 @@
                 ],
                 "path": "packages/kbn-optimizer/src/optimizer/optimizer_config.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -305,6 +324,7 @@
             ],
             "path": "packages/kbn-optimizer/src/optimizer/optimizer_config.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -337,6 +357,7 @@
         ],
         "path": "packages/kbn-optimizer/src/log_optimizer_progress.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/optimizer",
@@ -350,6 +371,7 @@
             ],
             "path": "packages/kbn-optimizer/src/log_optimizer_progress.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -394,6 +416,7 @@
         ],
         "path": "packages/kbn-optimizer/src/log_optimizer_state.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/optimizer",
@@ -407,6 +430,7 @@
             ],
             "path": "packages/kbn-optimizer/src/log_optimizer_state.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -427,6 +451,7 @@
             ],
             "path": "packages/kbn-optimizer/src/log_optimizer_state.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -446,6 +471,7 @@
         ],
         "path": "packages/kbn-optimizer/src/limits.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/optimizer",
@@ -459,6 +485,7 @@
             ],
             "path": "packages/kbn-optimizer/src/limits.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -477,6 +504,7 @@
         ],
         "path": "packages/kbn-optimizer/src/node/node_auto_tranpilation.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -519,6 +547,7 @@
         ],
         "path": "packages/kbn-optimizer/src/report_optimizer_timings.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/optimizer",
@@ -532,6 +561,7 @@
             ],
             "path": "packages/kbn-optimizer/src/report_optimizer_timings.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -552,6 +582,7 @@
             ],
             "path": "packages/kbn-optimizer/src/report_optimizer_timings.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -570,6 +601,7 @@
         ],
         "path": "packages/kbn-optimizer/src/audit_bundle_dependencies/find_babel_runtime_helpers_in_entry_bundles.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -586,6 +618,7 @@
         ],
         "path": "packages/kbn-optimizer/src/audit_bundle_dependencies/find_node_libs_browser_polyfills_in_entry_bundles.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -604,6 +637,7 @@
         ],
         "path": "packages/kbn-optimizer/src/audit_bundle_dependencies/find_target_node_imports.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -620,6 +654,7 @@
         ],
         "path": "packages/kbn-optimizer/src/cli.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/optimizer",
@@ -630,6 +665,7 @@
             "description": [],
             "path": "packages/kbn-optimizer/src/cli.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/optimizer",
@@ -639,7 +675,8 @@
                 "label": "defaultLimitsPath",
                 "description": [],
                 "path": "packages/kbn-optimizer/src/cli.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }
@@ -677,6 +714,7 @@
         ],
         "path": "packages/kbn-optimizer/src/run_optimizer.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/optimizer",
@@ -696,6 +734,7 @@
             ],
             "path": "packages/kbn-optimizer/src/run_optimizer.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -714,6 +753,7 @@
         ],
         "path": "packages/kbn-optimizer/src/limits.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/optimizer",
@@ -727,6 +767,7 @@
             ],
             "path": "packages/kbn-optimizer/src/limits.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -755,6 +796,7 @@
         ],
         "path": "packages/kbn-optimizer/src/limits.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/optimizer",
@@ -768,6 +810,7 @@
             ],
             "path": "packages/kbn-optimizer/src/limits.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -788,6 +831,7 @@
             ],
             "path": "packages/kbn-optimizer/src/limits.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -802,6 +846,7 @@
             ],
             "path": "packages/kbn-optimizer/src/limits.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -829,6 +874,7 @@
         ],
         "path": "packages/kbn-optimizer/src/run_optimizer.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -852,6 +898,7 @@
         ],
         "path": "packages/kbn-optimizer/src/run_optimizer.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],

@@ -23,6 +23,7 @@
         ],
         "path": "packages/kbn-datemath/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/datemath",
@@ -36,6 +37,7 @@
             ],
             "path": "packages/kbn-datemath/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -47,6 +49,7 @@
             "description": [],
             "path": "packages/kbn-datemath/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/datemath",
@@ -59,7 +62,8 @@
                   "boolean | undefined"
                 ],
                 "path": "packages/kbn-datemath/index.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "@kbn/datemath",
@@ -72,7 +76,8 @@
                   "typeof moment | undefined"
                 ],
                 "path": "packages/kbn-datemath/index.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "@kbn/datemath",
@@ -85,7 +90,8 @@
                   "Date | undefined"
                 ],
                 "path": "packages/kbn-datemath/index.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }
@@ -109,6 +115,7 @@
         ],
         "path": "packages/kbn-datemath/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -130,6 +137,7 @@
         ],
         "path": "packages/kbn-datemath/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -151,6 +159,7 @@
         ],
         "path": "packages/kbn-datemath/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -172,6 +181,7 @@
         ],
         "path": "packages/kbn-datemath/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -186,6 +196,7 @@
         ],
         "path": "packages/kbn-datemath/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -199,6 +210,7 @@
         "description": [],
         "path": "packages/kbn-datemath/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/datemath",
@@ -209,6 +221,7 @@
             "description": [],
             "path": "packages/kbn-datemath/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/datemath",
@@ -218,7 +231,8 @@
                 "label": "weight",
                 "description": [],
                 "path": "packages/kbn-datemath/index.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "@kbn/datemath",
@@ -231,7 +245,8 @@
                   "\"fixed\""
                 ],
                 "path": "packages/kbn-datemath/index.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "@kbn/datemath",
@@ -241,7 +256,8 @@
                 "label": "base",
                 "description": [],
                 "path": "packages/kbn-datemath/index.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -254,6 +270,7 @@
             "description": [],
             "path": "packages/kbn-datemath/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/datemath",
@@ -263,7 +280,8 @@
                 "label": "weight",
                 "description": [],
                 "path": "packages/kbn-datemath/index.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "@kbn/datemath",
@@ -276,7 +294,8 @@
                   "\"fixed\""
                 ],
                 "path": "packages/kbn-datemath/index.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "@kbn/datemath",
@@ -286,7 +305,8 @@
                 "label": "base",
                 "description": [],
                 "path": "packages/kbn-datemath/index.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -299,6 +319,7 @@
             "description": [],
             "path": "packages/kbn-datemath/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/datemath",
@@ -308,7 +329,8 @@
                 "label": "weight",
                 "description": [],
                 "path": "packages/kbn-datemath/index.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "@kbn/datemath",
@@ -321,7 +343,8 @@
                   "\"mixed\""
                 ],
                 "path": "packages/kbn-datemath/index.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "@kbn/datemath",
@@ -331,7 +354,8 @@
                 "label": "base",
                 "description": [],
                 "path": "packages/kbn-datemath/index.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -344,6 +368,7 @@
             "description": [],
             "path": "packages/kbn-datemath/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/datemath",
@@ -353,7 +378,8 @@
                 "label": "weight",
                 "description": [],
                 "path": "packages/kbn-datemath/index.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "@kbn/datemath",
@@ -366,7 +392,8 @@
                   "\"mixed\""
                 ],
                 "path": "packages/kbn-datemath/index.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "@kbn/datemath",
@@ -376,7 +403,8 @@
                 "label": "base",
                 "description": [],
                 "path": "packages/kbn-datemath/index.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -389,6 +417,7 @@
             "description": [],
             "path": "packages/kbn-datemath/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/datemath",
@@ -398,7 +427,8 @@
                 "label": "weight",
                 "description": [],
                 "path": "packages/kbn-datemath/index.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "@kbn/datemath",
@@ -411,7 +441,8 @@
                   "\"mixed\""
                 ],
                 "path": "packages/kbn-datemath/index.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "@kbn/datemath",
@@ -421,7 +452,8 @@
                 "label": "base",
                 "description": [],
                 "path": "packages/kbn-datemath/index.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -434,6 +466,7 @@
             "description": [],
             "path": "packages/kbn-datemath/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/datemath",
@@ -443,7 +476,8 @@
                 "label": "weight",
                 "description": [],
                 "path": "packages/kbn-datemath/index.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "@kbn/datemath",
@@ -456,7 +490,8 @@
                   "\"calendar\""
                 ],
                 "path": "packages/kbn-datemath/index.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "@kbn/datemath",
@@ -466,7 +501,8 @@
                 "label": "base",
                 "description": [],
                 "path": "packages/kbn-datemath/index.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -479,6 +515,7 @@
             "description": [],
             "path": "packages/kbn-datemath/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/datemath",
@@ -488,7 +525,8 @@
                 "label": "weight",
                 "description": [],
                 "path": "packages/kbn-datemath/index.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "@kbn/datemath",
@@ -501,7 +539,8 @@
                   "\"calendar\""
                 ],
                 "path": "packages/kbn-datemath/index.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "@kbn/datemath",
@@ -511,7 +550,8 @@
                 "label": "base",
                 "description": [],
                 "path": "packages/kbn-datemath/index.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -526,6 +566,7 @@
             ],
             "path": "packages/kbn-datemath/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/datemath",
@@ -535,7 +576,8 @@
                 "label": "weight",
                 "description": [],
                 "path": "packages/kbn-datemath/index.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "@kbn/datemath",
@@ -548,7 +590,8 @@
                   "\"calendar\""
                 ],
                 "path": "packages/kbn-datemath/index.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "@kbn/datemath",
@@ -558,7 +601,8 @@
                 "label": "base",
                 "description": [],
                 "path": "packages/kbn-datemath/index.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }

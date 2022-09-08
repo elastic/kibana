@@ -7,6 +7,9 @@
 
 import type { Interception } from 'cypress/types/net-stubbing';
 
+import { CONFIRM_MODAL } from '../screens/navigation';
+import { SETTINGS } from '../screens/integrations';
+
 describe('Install unverified package assets', () => {
   beforeEach(() => {
     cy.intercept('POST', '/api/fleet/epm/packages/fleet_server/*', (req) => {
@@ -46,13 +49,13 @@ describe('Install unverified package assets', () => {
 
   it('should show force install modal if package is unverified', () => {
     cy.visit('app/integrations/detail/fleet_server/settings');
-    cy.getBySel('installAssetsButton').click();
+    cy.getBySel(SETTINGS.INSTALL_ASSETS_BTN).click();
     // this action will install x assets modal
-    const confirmInstall = cy.getBySel('confirmModalConfirmButton');
+    const confirmInstall = cy.getBySel(CONFIRM_MODAL.CONFIRM_BUTTON);
     confirmInstall.click();
 
     // unverified integration force install modal
-    const installAnyway = cy.getBySel('confirmModalConfirmButton').contains('Install anyway');
+    const installAnyway = cy.getBySel(CONFIRM_MODAL.CONFIRM_BUTTON).contains('Install anyway');
     installAnyway.click();
 
     // cypress 'hack' to get all requests made to an intercepted request

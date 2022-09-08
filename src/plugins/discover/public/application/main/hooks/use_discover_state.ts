@@ -42,6 +42,7 @@ import { getDataViewAppState } from '../utils/get_switch_data_view_app_state';
 import { DataTableRecord } from '../../../types';
 import { restoreStateFromSavedSearch } from '../../../services/saved_searches/restore_from_saved_search';
 import { getUiActions, getUrlTracker } from '../../../kibana_services';
+import { removeAdHocDataView } from '../utils/adhoc_data_views';
 
 const MAX_NUM_OF_COLUMNS = 50;
 
@@ -322,7 +323,9 @@ export function useDiscoverState({
   const updateAdHocDataViewId = useCallback(
     async (dataViewToUpdate: DataView) => {
       const newDataView = await dataViews.create({ ...dataViewToUpdate.toSpec(), id: undefined });
+
       dataViews.clearInstanceCache(dataViewToUpdate.id);
+      removeAdHocDataView(dataViewToUpdate.id!);
       savedSearch.searchSource.setField('index', newDataView);
 
       // update filters references
