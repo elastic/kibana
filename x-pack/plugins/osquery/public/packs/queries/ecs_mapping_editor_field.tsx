@@ -262,7 +262,9 @@ const ECSComboboxFieldComponent: React.FC<ECSComboboxFieldProps> = ({
 
   return (
     <EuiFormRow
-      label="ECS field"
+      label={i18n.translate('xpack.osquery.pack.queryFlyoutForm.mappingEcsFieldLabel', {
+        defaultMessage: 'ECS field',
+      })}
       helpText={helpText}
       error={error}
       isInvalid={!!error}
@@ -534,7 +536,9 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
 
   return (
     <EuiFormRow
-      label="Value"
+      label={i18n.translate('xpack.osquery.pack.queryFlyoutForm.mappingValueFieldLabel', {
+        defaultMessage: 'Value',
+      })}
       helpText={selectedOptions[0]?.value?.description}
       error={resultFieldState.error?.message}
       isInvalid={!!resultFieldState.error?.message?.length}
