@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EcsFieldsResponse } from "@kbn/rule-registry-plugin/common/search_strategy";
+import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
 
 export interface PageHeaderProps {
   alert: EcsFieldsResponse;

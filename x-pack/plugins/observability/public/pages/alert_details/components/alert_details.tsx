@@ -7,114 +7,112 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import { useParams } from 'react-router-dom';
+import { EuiEmptyPrompt, EuiPanel } from '@elastic/eui';
+import { useLoadRuleTypes } from '@kbn/triggers-actions-ui-plugin/public';
+import { ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';
+import { AlertConsumers } from '@kbn/rule-data-utils';
 import { useKibana } from '../../../utils/kibana_react';
 import { ObservabilityAppServices } from '../../../application/types';
 import { usePluginContext } from '../../../hooks/use_plugin_context';
 import { useBreadcrumbs } from '../../../hooks/use_breadcrumbs';
 import { paths } from '../../../config/paths';
-import { useParams } from 'react-router';
 import { AlertDetailsPathParams } from '../types';
-import { EuiEmptyPrompt, EuiPanel } from '@elastic/eui';
 import { CenterJustifiedSpinner } from '../../rule_details/components/center_justified_spinner';
-import { AlertSummary } from './';
+import { AlertSummary } from '.';
 import { useFetchAlert, FetchAlertArgs } from './hooks/use_fetch_alert';
-import { useFetchRule } from '@kbn/observability-plugin/public/hooks/use_fetch_rule';
-import { useLoadRuleTypes } from '@kbn/triggers-actions-ui-plugin/public';
-import { ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';
-import { AlertConsumers } from '@kbn/rule-data-utils';
+import { useFetchRule } from '../../../hooks/use_fetch_rule';
 import PageNotFound from '../../404';
 
 export function AlertDetails() {
-    const { http } = useKibana<ObservabilityAppServices>().services;
-    const { ObservabilityPageTemplate, observabilityRuleTypeRegistry, config } = usePluginContext();
-    const { alertId, ruleId } = useParams<AlertDetailsPathParams>();
-    const [features, setFeatures] = useState<string>('');
+  const { http } = useKibana<ObservabilityAppServices>().services;
+  const { ObservabilityPageTemplate, observabilityRuleTypeRegistry, config } = usePluginContext();
+  const { alertId, ruleId } = useParams<AlertDetailsPathParams>();
+  const [features, setFeatures] = useState<string>('');
 
-    const filteredRuleTypes = useMemo(
-        () => observabilityRuleTypeRegistry.list(),
-        [observabilityRuleTypeRegistry]
-    );
+  const filteredRuleTypes = useMemo(
+    () => observabilityRuleTypeRegistry.list(),
+    [observabilityRuleTypeRegistry]
+  );
 
-    const { rule } = useFetchRule({ ruleId, http });
-    const { ruleTypes } = useLoadRuleTypes({ filteredRuleTypes });
+  const { rule } = useFetchRule({ ruleId, http });
+  const { ruleTypes } = useLoadRuleTypes({ filteredRuleTypes });
 
-    useEffect(() => {
-        if (ruleTypes.length && rule) {
-            const matchedRuleType = ruleTypes.find((type) => type.id === rule.ruleTypeId);
+  useEffect(() => {
+    if (ruleTypes.length && rule) {
+      const matchedRuleType = ruleTypes.find((type) => type.id === rule.ruleTypeId);
 
-            if (rule.consumer === ALERTS_FEATURE_ID && matchedRuleType && matchedRuleType.producer) {
-                setFeatures(matchedRuleType.producer);
-            } else setFeatures(rule.consumer);
-        }
-    }, [rule, ruleTypes]);
+      if (rule.consumer === ALERTS_FEATURE_ID && matchedRuleType && matchedRuleType.producer) {
+        setFeatures(matchedRuleType.producer);
+      } else setFeatures(rule.consumer);
+    }
+  }, [rule, ruleTypes]);
 
-    useBreadcrumbs([
+  useBreadcrumbs([
+    {
+      href: http.basePath.prepend(paths.observability.alerts),
+      text: i18n.translate('xpack.observability.breadcrumbs.alertsLinkText', {
+        defaultMessage: 'Alerts',
+      }),
+    },
+  ]);
+
+  const query = {
+    size: 1,
+    bool: {
+      filter: [
         {
-            href: http.basePath.prepend(paths.observability.alerts),
-            text: i18n.translate('xpack.observability.breadcrumbs.alertsLinkText', {
-                defaultMessage: 'Alerts',
-            }),
+          term: {
+            'kibana.alert.uuid': alertId,
+          },
         },
-    ]);
+      ],
+    },
+  };
 
-    const query = {
-        size: 1,
-        bool: {
-            filter: [
-                {
-                    term: {
-                        'kibana.alert.uuid': alertId
-                    },
-                },
-            ],
-        },
-    };
+  const fetchAlertArgs: FetchAlertArgs = {
+    featureIds: [features] as AlertConsumers[],
+    query,
+  };
 
-    const fetchAlertArgs: FetchAlertArgs = {
-        featureIds: [features] as AlertConsumers[],
-        query
-    };
+  const [isLoading, { alert }] = useFetchAlert(fetchAlertArgs);
 
-    const [isLoading, { alert }] = useFetchAlert(fetchAlertArgs);
+  if (isLoading) {
+    return <CenterJustifiedSpinner />;
+  }
 
-    if (isLoading) {
-        return (
-            <CenterJustifiedSpinner />
-        )
-    }
-
-    if (!isLoading && !alert)
-        return (
-            <EuiPanel>
-                <EuiEmptyPrompt
-                    iconType="alert"
-                    color="danger"
-                    title={
-                        <h2>
-                            {i18n.translate('xpack.observability.alertDetails.errorPromptTitle', {
-                                defaultMessage: 'Unable to load alert details',
-                            })}
-                        </h2>
-                    }
-                    body={
-                        <p>
-                            {i18n.translate('xpack.observability.alertDetails.errorPromptBody', {
-                                defaultMessage: 'There was an error loading the alert details.',
-                            })}
-                        </p>
-                    }
-                />
-            </EuiPanel>
-        );
-
-    // Redirect to the the 404 page when the user hit the page url directly in the browser while the feature flag is off.
-    if (!config.unsafe.alertDetails.enabled) {
-        return <PageNotFound />;
-    }
-
+  if (!isLoading && !alert)
     return (
-        <ObservabilityPageTemplate data-test-subj="alertDetails">
-            <AlertSummary alert={alert} />
-        </ObservabilityPageTemplate>
+      <EuiPanel>
+        <EuiEmptyPrompt
+          iconType="alert"
+          color="danger"
+          title={
+            <h2>
+              {i18n.translate('xpack.observability.alertDetails.errorPromptTitle', {
+                defaultMessage: 'Unable to load alert details',
+              })}
+            </h2>
+          }
+          body={
+            <p>
+              {i18n.translate('xpack.observability.alertDetails.errorPromptBody', {
+                defaultMessage: 'There was an error loading the alert details.',
+              })}
+            </p>
+          }
+        />
+      </EuiPanel>
     );
+
+  // Redirect to the the 404 page when the user hit the page url directly in the browser while the feature flag is off.
+  if (!config.unsafe.alertDetails.enabled) {
+    return <PageNotFound />;
+  }
+
+  return (
+    <ObservabilityPageTemplate data-test-subj="alertDetails">
+      <AlertSummary alert={alert} />
+    </ObservabilityPageTemplate>
+  );
 }
