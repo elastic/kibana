@@ -96,7 +96,7 @@ describe('percentile agg field', () => {
   });
 
   describe('getMbFieldName', () => {
-    test('should by field name when source is not MVT', () => {
+    test('should return field name when source is not MVT', () => {
       const field = new PercentileAggField({
         origin: FIELD_ORIGIN.SOURCE,
         source: {
@@ -114,7 +114,7 @@ describe('percentile agg field', () => {
       expect(field.getMbFieldName()).toEqual('agg_key');
     });
 
-    test('should include percentile when source is MVT', () => {
+    test('should return field name and percentile when source is MVT', () => {
       const field = new PercentileAggField({
         origin: FIELD_ORIGIN.SOURCE,
         source: {
@@ -132,7 +132,7 @@ describe('percentile agg field', () => {
       expect(field.getMbFieldName()).toEqual('agg_key_80.5.values.80.5');
     });
 
-    test('should include percentile with single decimal place when source is MVT and percentile is interger', () => {
+    test('should return field name and percentile with single decimal place when source is MVT and percentile is interger', () => {
       const field = new PercentileAggField({
         origin: FIELD_ORIGIN.SOURCE,
         source: {
