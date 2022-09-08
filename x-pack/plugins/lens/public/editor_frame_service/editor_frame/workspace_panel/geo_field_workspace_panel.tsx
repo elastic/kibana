@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiPageContentBody, EuiText } from '@elastic/eui';
+import { EuiPageContentBody_Deprecated as EuiPageContentBody, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { UiActionsStart, VISUALIZE_GEO_FIELD_TRIGGER } from '@kbn/ui-actions-plugin/public';
