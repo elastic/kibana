@@ -23,6 +23,7 @@
         ],
         "path": "packages/core/base/core-base-common/src/plugins.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-base-common",
@@ -34,7 +35,8 @@
               "\nIdentifier of the plugin."
             ],
             "path": "packages/core/base/core-base-common/src/plugins.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-base-common",
@@ -49,7 +51,8 @@
               "string | string[]"
             ],
             "path": "packages/core/base/core-base-common/src/plugins.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-base-common",
@@ -70,7 +73,8 @@
               }
             ],
             "path": "packages/core/base/core-base-common/src/plugins.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-base-common",
@@ -85,7 +89,8 @@
               "readonly string[]"
             ],
             "path": "packages/core/base/core-base-common/src/plugins.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-base-common",
@@ -100,7 +105,8 @@
               "readonly string[]"
             ],
             "path": "packages/core/base/core-base-common/src/plugins.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-base-common",
@@ -115,7 +121,8 @@
               "readonly string[]"
             ],
             "path": "packages/core/base/core-base-common/src/plugins.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-base-common",
@@ -130,7 +137,8 @@
               "boolean | undefined"
             ],
             "path": "packages/core/base/core-base-common/src/plugins.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -156,6 +164,7 @@
         ],
         "path": "packages/core/base/core-base-common/src/service_status.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-base-common",
@@ -170,7 +179,8 @@
               "Readonly<{ toString: () => \"available\"; valueOf: () => 0; toJSON: () => \"available\"; }> | Readonly<{ toString: () => \"degraded\"; valueOf: () => 1; toJSON: () => \"degraded\"; }> | Readonly<{ toString: () => \"unavailable\"; valueOf: () => 2; toJSON: () => \"unavailable\"; }> | Readonly<{ toString: () => \"critical\"; valueOf: () => 3; toJSON: () => \"critical\"; }>"
             ],
             "path": "packages/core/base/core-base-common/src/service_status.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-base-common",
@@ -182,7 +192,8 @@
               "\nA high-level summary of the service status."
             ],
             "path": "packages/core/base/core-base-common/src/service_status.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-base-common",
@@ -197,7 +208,8 @@
               "string | undefined"
             ],
             "path": "packages/core/base/core-base-common/src/service_status.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-base-common",
@@ -212,7 +224,8 @@
               "string | undefined"
             ],
             "path": "packages/core/base/core-base-common/src/service_status.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-base-common",
@@ -227,7 +240,8 @@
               "Meta | undefined"
             ],
             "path": "packages/core/base/core-base-common/src/service_status.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -243,6 +257,7 @@
         "description": [],
         "path": "packages/core/base/core-base-common/src/plugins.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -259,6 +274,7 @@
         ],
         "path": "packages/core/base/core-base-common/src/eui.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -275,6 +291,7 @@
         ],
         "path": "packages/core/base/core-base-common/src/plugins.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -289,6 +306,7 @@
         ],
         "path": "packages/core/base/core-base-common/src/plugins.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -305,6 +323,7 @@
         ],
         "path": "packages/core/base/core-base-common/src/service_status.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -323,6 +342,7 @@
         ],
         "path": "packages/core/base/core-base-common/src/service_status.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ]
