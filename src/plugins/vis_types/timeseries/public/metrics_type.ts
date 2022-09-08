@@ -24,9 +24,9 @@ import {
   extractIndexPatternValues,
   isStringTypeIndexPattern,
 } from '../common/index_patterns_utils';
-import { TSVB_DEFAULT_COLOR } from '../common/constants';
+import { TSVB_DEFAULT_COLOR, UI_SETTINGS } from '../common/constants';
 import { toExpressionAst } from './to_ast';
-import { getDataViewsStart } from './services';
+import { getDataViewsStart, getUISettings } from './services';
 import type { TimeseriesVisDefaultParams, TimeseriesVisParams } from './types';
 import type { IndexPatternValue, Panel } from '../common/types';
 import { convertTSVBtoLensConfiguration } from './convert_to_lens';
@@ -176,5 +176,6 @@ export const metricsVisDefinition: VisTypeDefinition<
     requests: new RequestAdapter(),
   }),
   requiresSearch: true,
+  suppressWarnings: () => !getUISettings().get(UI_SETTINGS.ALLOW_CHECKING_FOR_FAILED_SHARDS),
   getUsedIndexPattern: getUsedIndexPatterns,
 };
