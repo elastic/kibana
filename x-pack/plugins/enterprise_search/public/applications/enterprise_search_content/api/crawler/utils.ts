@@ -236,9 +236,9 @@ export const crawlerDomainsWithMetaServerToClient = ({
 });
 
 export function isBasicCrawlerAuth(auth: CrawlerAuth): auth is BasicCrawlerAuth {
-  return (auth as BasicCrawlerAuth).type === 'basic';
+  return auth !== null && (auth as BasicCrawlerAuth).type === 'basic';
 }
 
 export function isRawCrawlerAuth(auth: CrawlerAuth): auth is RawCrawlerAuth {
-  return (auth as RawCrawlerAuth).type === 'raw';
+  return auth !== null && (auth as RawCrawlerAuth).type === 'raw';
 }
