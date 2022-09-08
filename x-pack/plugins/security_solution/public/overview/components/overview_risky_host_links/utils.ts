@@ -14,6 +14,14 @@ import {
   deleteIngestPipelines,
   restartTransforms,
 } from './api';
+import {
+  INGEST_PIPELINE_DELETION_ERROR_MESSAGE,
+  INSTALLATION_ERROR,
+  START_TRANSFORMS_ERROR_MESSAGE,
+  TRANSFORM_CREATION_ERROR_MESSAGE,
+  TRANSFORM_DELETION_ERROR_MESSAGE,
+  UNINSTALLATION_ERROR,
+} from './api/translations';
 
 export enum InstallationState {
   Started = 'STARTED',
@@ -34,9 +42,6 @@ export enum RiskScoreModuleName {
   Host = 'host',
   User = 'user',
 }
-
-const INSTALLATION_ERROR = 'Installation error';
-const UNINSTALLATION_ERROR = 'Uninstallation error';
 
 export const getRiskScorePivotTransformId = (
   moduleName: RiskScoreModuleName,
@@ -419,49 +424,71 @@ export const installHostRiskScoreModule = async ({
   notifications?: NotificationsStart;
   spaceId?: string;
 }) => {
+  /**
+   * console_templates/enable_host_risk_score.console
+   * Step 5 Upload the ingest pipeline: ml_hostriskscore_ingest_pipeline
+   */
   await createIngestPipeline({
     http,
     notifications,
-    errorMessage: `${INSTALLATION_ERROR} - Ingest pipeline creation failed`,
     options: getRiskScoreIngestPipelineOptions(RiskScoreModuleName.Host),
-  }); // step 5
+  });
+  /**
+   * console_templates/enable_host_risk_score.console
+   * Step 6 create ml_host_risk_score_{spaceId} index
+   */
   await createIndices({
     http,
     notifications,
-    errorMessage: `${INSTALLATION_ERROR} - Index creation failed`,
     options: getCreateRiskScoreIndicesOptions({
       spaceId,
       moduleName: RiskScoreModuleName.Host,
     }),
-  }); // step 6 create ml_host_risk_score_default index
+  });
+  /**
+   * console_templates/enable_host_risk_score.console
+   * Step 9 create ml_host_risk_score_latest_{spaceId} index
+   */
   await createIndices({
     http,
-    errorMessage: `${INSTALLATION_ERROR} - Index creation failed`,
     options: getCreateRiskScoreLatestIndicesOptions({
       spaceId,
       moduleName: RiskScoreModuleName.Host,
     }),
-  }); // step 9 create ml_host_risk_score_latest_default index
+  });
+  /**
+   * console_templates/enable_host_risk_score.console
+   * Step 7 create transform: ml_hostriskscore_pivot_transform_{spaceId}
+   */
   await createTransform({
     http,
-    errorMessage: `${INSTALLATION_ERROR} - Transform creation failed`,
+    errorMessage: `${INSTALLATION_ERROR} - ${TRANSFORM_CREATION_ERROR_MESSAGE}`,
     transformId: getRiskScorePivotTransformId(RiskScoreModuleName.Host, spaceId),
     options: getCreateMLHostPivotTransformOptions({ spaceId }),
-  }); // step 7 create ml_hostriskscore_pivot_transform_default
+  });
+  /**
+   * console_templates/enable_host_risk_score.console
+   * Step 10 create transform: ml_hostriskscore_latest_transform_{spaceId}
+   */
   await createTransform({
     http,
-    errorMessage: `${INSTALLATION_ERROR} - Transform creation failed`,
+    errorMessage: `${INSTALLATION_ERROR} - ${TRANSFORM_CREATION_ERROR_MESSAGE}`,
     transformId: getRiskScoreLatestTransformId(RiskScoreModuleName.Host, spaceId),
     options: getCreateLatestTransformOptions({ spaceId, moduleName: RiskScoreModuleName.Host }),
-  }); // step10 create ml_hostriskscore_latest_transform_default
+  });
+  /**
+   * console_templates/enable_host_risk_score.console
+   * Step 8 Start the pivot transform
+   * Step 11 Start the latest transform
+   */
   await startTransforms({
     http,
-    errorMessage: `${INSTALLATION_ERROR} - Failed to start Transforms`,
+    errorMessage: `${INSTALLATION_ERROR} - ${START_TRANSFORMS_ERROR_MESSAGE}`,
     transformIds: [
       getRiskScorePivotTransformId(RiskScoreModuleName.Host, spaceId),
       getRiskScoreLatestTransformId(RiskScoreModuleName.Host, spaceId),
     ],
-  }); // step 8.11
+  });
 };
 
 export const installUserRiskScoreModule = async ({
@@ -473,41 +500,63 @@ export const installUserRiskScoreModule = async ({
   notifications?: NotificationsStart;
   spaceId?: string;
 }) => {
+  /**
+   * console_templates/enable_user_risk_score.console
+   * Step 4 Upload ingest pipeline: ml_userriskscore_ingest_pipeline
+   */
   await createIngestPipeline({
     http,
     notifications,
-    errorMessage: `${INSTALLATION_ERROR} - Ingest pipeline creation failed`,
     options: getRiskScoreIngestPipelineOptions(RiskScoreModuleName.User),
-  }); // step 4
+  });
+  /**
+   * console_templates/enable_user_risk_score.console
+   * Step 5 create ml_user_risk_score_{spaceId} index
+   */
   await createIndices({
     http,
     notifications,
-    errorMessage: `${INSTALLATION_ERROR} - Index creation failed`,
     options: getCreateRiskScoreIndicesOptions({
       spaceId,
       moduleName: RiskScoreModuleName.User,
     }),
-  }); // step 5 create ml_user_risk_score_default index
+  });
+  /**
+   * console_templates/enable_user_risk_score.console
+   * Step 8 create ml_user_risk_score_latest_{spaceId} index
+   */
   await createIndices({
     http,
-    errorMessage: `${INSTALLATION_ERROR} - Index creation failed`,
     options: getCreateRiskScoreLatestIndicesOptions({
       spaceId,
       moduleName: RiskScoreModuleName.User,
     }),
-  }); // step 8 create ml_user_risk_score_latest_default index
+  });
+  /**
+   * console_templates/enable_user_risk_score.console
+   * Step 6 create Transform: ml_userriskscore_pivot_transform_{spaceId}
+   */
   await createTransform({
     http,
     errorMessage: `${INSTALLATION_ERROR} - Transform creation failed`,
     transformId: getRiskScorePivotTransformId(RiskScoreModuleName.User, spaceId),
     options: getCreateMLUserPivotTransformOptions({ spaceId }),
-  }); // step 6 create ml_userriskscore_pivot_transform_default
+  });
+  /**
+   * console_templates/enable_user_risk_score.console
+   * Step 9 create Transform: ml_userriskscore_latest_transform_{spaceId}
+   */
   await createTransform({
     http,
     errorMessage: `${INSTALLATION_ERROR} - Transform creation failed`,
     transformId: getRiskScoreLatestTransformId(RiskScoreModuleName.User, spaceId),
     options: getCreateLatestTransformOptions({ spaceId, moduleName: RiskScoreModuleName.User }),
-  }); // step9 create ml_userriskscore_latest_transform_default
+  });
+  /**
+   * console_templates/enable_user_risk_score.console
+   * Step 7 Start the pivot transform
+   * Step 10 Start the latest transform
+   */
   await startTransforms({
     http,
     errorMessage: `${INSTALLATION_ERROR} - Failed to start Transforms`,
@@ -515,7 +564,7 @@ export const installUserRiskScoreModule = async ({
       getRiskScorePivotTransformId(RiskScoreModuleName.User, spaceId),
       getRiskScoreLatestTransformId(RiskScoreModuleName.User, spaceId),
     ],
-  }); // step 7, 10
+  });
 };
 
 export const uninstallRiskScoreModule = async ({
@@ -529,26 +578,31 @@ export const uninstallRiskScoreModule = async ({
   spaceId?: string;
   moduleName: RiskScoreModuleName;
 }) => {
+  const transformIds = [
+    getRiskScorePivotTransformId(moduleName, spaceId),
+    getRiskScoreLatestTransformId(moduleName, spaceId),
+  ];
   await deleteTransforms({
     http,
     notifications,
-    errorMessage: `${UNINSTALLATION_ERROR} - Failed to delete Transforms`,
-    transformIds: [
-      getRiskScorePivotTransformId(RiskScoreModuleName.Host, spaceId),
-      getRiskScoreLatestTransformId(RiskScoreModuleName.Host, spaceId),
-    ],
+    errorMessage: `${UNINSTALLATION_ERROR} - ${TRANSFORM_DELETION_ERROR_MESSAGE(
+      transformIds.length
+    )}`,
+    transformIds,
     options: {
       deleteDestIndex: true,
       deleteDestDataView: true,
       forceDelete: false,
     },
   });
+  const names = getIngestPipelineName(moduleName);
+  const count = names.split(',').length;
 
   await deleteIngestPipelines({
     http,
     notifications,
-    errorMessage: `${UNINSTALLATION_ERROR} - Failed to delete ingest pipelines`,
-    names: getIngestPipelineName(moduleName),
+    errorMessage: `${UNINSTALLATION_ERROR} - ${INGEST_PIPELINE_DELETION_ERROR_MESSAGE(count)}`,
+    names,
   });
 };
 
