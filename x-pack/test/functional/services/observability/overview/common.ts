@@ -45,16 +45,14 @@ export function ObservabilityOverviewCommonProvider({
   };
 
   const openAlertsSection = async () => {
-    return await retry.try(async () => {
-      return await (
-        await find.byCssSelector(`button[aria-controls="${ALERTS_SECTION_SELECTOR}"]`)
-      ).click();
-    });
+    return await (
+      await find.byCssSelector(`button[aria-controls="${ALERTS_SECTION_SELECTOR}"]`)
+    ).click();
   };
 
   const openAlertsSectionAndWaitToAppear = async () => {
     await openAlertsSection();
-    await retry.waitFor('alert table to appear', async () => {
+    await retry.waitFor('alerts table to appear', async () => {
       return (
         (await testSubjects.exists(ALERTS_TABLE_NO_DATA_SELECTOR)) ||
         (await testSubjects.exists(ALERTS_TABLE_WITH_DATA_SELECTOR))
