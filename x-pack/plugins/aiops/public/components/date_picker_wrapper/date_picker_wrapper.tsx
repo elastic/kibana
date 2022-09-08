@@ -16,8 +16,8 @@ import { EuiSuperDatePicker, OnRefreshProps } from '@elastic/eui';
 import type { TimeRange } from '@kbn/es-query';
 import { TimeHistoryContract, UI_SETTINGS } from '@kbn/data-plugin/public';
 
-import { useUrlState } from '../../hooks/url_state';
-import { useAiOpsKibana } from '../../kibana_context';
+import { useUrlState } from '../../hooks/use_url_state';
+import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { aiopsRefresh$ } from '../../application/services/timefilter_refresh_service';
 
 interface TimePickerQuickRange {
@@ -54,9 +54,8 @@ function updateLastRefresh(timeRange: OnRefreshProps) {
 }
 
 export const DatePickerWrapper: FC = () => {
-  const { services } = useAiOpsKibana();
-  const config = services.uiSettings;
-  const { timefilter, history } = services.data.query.timefilter;
+  const { uiSettings, data } = useAiopsAppContext();
+  const { timefilter, history } = data.query.timefilter;
 
   const [globalState, setGlobalState] = useUrlState('_g');
   const getRecentlyUsedRanges = getRecentlyUsedRangesFactory(history);
@@ -81,8 +80,8 @@ export const DatePickerWrapper: FC = () => {
     timefilter.isTimeRangeSelectorEnabled()
   );
 
-  const dateFormat = config.get('dateFormat');
-  const timePickerQuickRanges = config.get<TimePickerQuickRange[]>(
+  const dateFormat = uiSettings.get('dateFormat');
+  const timePickerQuickRanges = uiSettings.get<TimePickerQuickRange[]>(
     UI_SETTINGS.TIMEPICKER_QUICK_RANGES
   );
 

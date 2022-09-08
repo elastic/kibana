@@ -16,13 +16,13 @@ import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { MapsStartApi } from '@kbn/maps-plugin/public';
 import type { DataVisualizerPluginStart } from '@kbn/data-visualizer-plugin/public';
-import type { AiopsPluginStart } from '@kbn/aiops-plugin/public';
 import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import type { DashboardSetup } from '@kbn/dashboard-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { CasesUiStart } from '@kbn/cases-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { MlServicesContext } from '../../app';
 
 interface StartPlugins {
@@ -34,13 +34,13 @@ interface StartPlugins {
   maps?: MapsStartApi;
   triggersActionsUi?: TriggersAndActionsUIPublicPluginStart;
   dataVisualizer?: DataVisualizerPluginStart;
-  aiops?: AiopsPluginStart;
   usageCollection?: UsageCollectionSetup;
   fieldFormats: FieldFormatsRegistry;
   dashboard: DashboardSetup;
   spacesApi: SpacesPluginStart;
   charts: ChartsPluginStart;
   cases?: CasesUiStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
 }
 export type StartServices = CoreStart &
   StartPlugins & {

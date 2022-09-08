@@ -6,7 +6,7 @@
  */
 
 import { useEffect } from 'react';
-import { useAiOpsKibana } from '../kibana_context';
+import { useAiopsAppContext } from './use_aiops_app_context';
 
 interface UseTimefilterOptions {
   timeRangeSelector?: boolean;
@@ -17,8 +17,13 @@ export const useTimefilter = ({
   timeRangeSelector,
   autoRefreshSelector,
 }: UseTimefilterOptions = {}) => {
-  const { services } = useAiOpsKibana();
-  const { timefilter } = services.data.query.timefilter;
+  const {
+    data: {
+      query: {
+        timefilter: { timefilter },
+      },
+    },
+  } = useAiopsAppContext();
 
   useEffect(() => {
     if (timeRangeSelector === true && !timefilter.isTimeRangeSelectorEnabled()) {

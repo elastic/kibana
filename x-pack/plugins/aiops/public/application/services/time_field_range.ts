@@ -10,7 +10,8 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { getCoreStart } from '../../kibana_services';
+
+import type { HttpStart } from '@kbn/core/public';
 
 export interface GetTimeFieldRangeResponse {
   success: boolean;
@@ -23,16 +24,17 @@ export async function getTimeFieldRange({
   timeFieldName,
   query,
   runtimeMappings,
+  http,
 }: {
   index: string;
   timeFieldName?: string;
   query?: QueryDslQueryContainer;
   runtimeMappings?: estypes.MappingRuntimeFields;
+  http: HttpStart;
 }) {
   const body = JSON.stringify({ index, timeFieldName, query, runtimeMappings });
-  const coreStart = getCoreStart();
 
-  return await coreStart.http.fetch<GetTimeFieldRangeResponse>({
+  return await http.fetch<GetTimeFieldRangeResponse>({
     path: `/internal/file_upload/time_field_range`,
     method: 'POST',
     body,

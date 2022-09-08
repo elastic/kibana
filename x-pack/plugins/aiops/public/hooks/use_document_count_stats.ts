@@ -12,7 +12,6 @@ import { i18n } from '@kbn/i18n';
 import type { ToastsStart } from '@kbn/core/public';
 import { stringHash } from '@kbn/ml-string-hash';
 
-import { useAiOpsKibana } from '../kibana_context';
 import { extractErrorProperties } from '../application/utils/error_utils';
 import {
   DocumentCountStats,
@@ -20,6 +19,8 @@ import {
   processDocumentCountStats,
   DocumentStatsSearchStrategyParams,
 } from '../get_document_stats';
+
+import { useAiopsAppContext } from './use_aiops_app_context';
 
 export interface DocumentStats {
   totalCount: number;
@@ -59,11 +60,9 @@ export function useDocumentCountStats<TParams extends DocumentStatsSearchStrateg
   lastRefresh: number
 ): DocumentStats {
   const {
-    services: {
-      data,
-      notifications: { toasts },
-    },
-  } = useAiOpsKibana();
+    data,
+    notifications: { toasts },
+  } = useAiopsAppContext();
 
   const abortCtrl = useRef(new AbortController());
 
