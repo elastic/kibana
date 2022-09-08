@@ -202,6 +202,34 @@
         }
       }
     },
+    "cloud_provider": {
+      "properties": {
+        "name": {
+          "type": "keyword",
+          "_meta": {
+            "description": "The name of the cloud provider"
+          }
+        },
+        "vm_type": {
+          "type": "keyword",
+          "_meta": {
+            "description": "The VM instance type"
+          }
+        },
+        "region": {
+          "type": "keyword",
+          "_meta": {
+            "description": "The cloud provider region"
+          }
+        },
+        "zone": {
+          "type": "keyword",
+          "_meta": {
+            "description": "The availability zone within the region"
+          }
+        }
+      }
+    },
     "application_usage": {
       "properties": {
         "dashboards": {
@@ -6363,34 +6391,6 @@
         }
       }
     },
-    "cloud_provider": {
-      "properties": {
-        "name": {
-          "type": "keyword",
-          "_meta": {
-            "description": "The name of the cloud provider"
-          }
-        },
-        "vm_type": {
-          "type": "keyword",
-          "_meta": {
-            "description": "The VM instance type"
-          }
-        },
-        "region": {
-          "type": "keyword",
-          "_meta": {
-            "description": "The cloud provider region"
-          }
-        },
-        "zone": {
-          "type": "keyword",
-          "_meta": {
-            "description": "The availability zone within the region"
-          }
-        }
-      }
-    },
     "core": {
       "properties": {
         "config": {
@@ -7583,6 +7583,28 @@
         }
       }
     },
+    "csp": {
+      "properties": {
+        "strict": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Indicates if strict mode should be used."
+          }
+        },
+        "warnLegacyBrowsers": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Indicates if legacy browser versions should be warned."
+          }
+        },
+        "rulesChangedFromDefault": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Indicates if the rules have been changed from the default."
+          }
+        }
+      }
+    },
     "event_loop_delays": {
       "properties": {
         "daily": {
@@ -7672,28 +7694,6 @@
                 }
               }
             }
-          }
-        }
-      }
-    },
-    "csp": {
-      "properties": {
-        "strict": {
-          "type": "boolean",
-          "_meta": {
-            "description": "Indicates if strict mode should be used."
-          }
-        },
-        "warnLegacyBrowsers": {
-          "type": "boolean",
-          "_meta": {
-            "description": "Indicates if legacy browser versions should be warned."
-          }
-        },
-        "rulesChangedFromDefault": {
-          "type": "boolean",
-          "_meta": {
-            "description": "Indicates if the rules have been changed from the default."
           }
         }
       }
@@ -8535,53 +8535,6 @@
         }
       }
     },
-    "ui_counters": {
-      "properties": {
-        "dailyEvents": {
-          "type": "array",
-          "items": {
-            "properties": {
-              "appName": {
-                "type": "keyword",
-                "_meta": {
-                  "description": "Name of the app reporting ui counts."
-                }
-              },
-              "eventName": {
-                "type": "keyword",
-                "_meta": {
-                  "description": "Name of the event that happened."
-                }
-              },
-              "lastUpdatedAt": {
-                "type": "date",
-                "_meta": {
-                  "description": "Time at which the metric was last updated."
-                }
-              },
-              "fromTimestamp": {
-                "type": "date",
-                "_meta": {
-                  "description": "Time at which the metric was captured."
-                }
-              },
-              "counterType": {
-                "type": "keyword",
-                "_meta": {
-                  "description": "The type of counter used."
-                }
-              },
-              "total": {
-                "type": "integer",
-                "_meta": {
-                  "description": "The total number of times the event happened."
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "kibana": {
       "properties": {
         "index": {
@@ -8681,6 +8634,53 @@
             "type": "keyword",
             "_meta": {
               "description": "List of SO types that showed up in the break down but are not registered in Kibana. They could be a potential cause of future migration failures."
+            }
+          }
+        }
+      }
+    },
+    "ui_counters": {
+      "properties": {
+        "dailyEvents": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "appName": {
+                "type": "keyword",
+                "_meta": {
+                  "description": "Name of the app reporting ui counts."
+                }
+              },
+              "eventName": {
+                "type": "keyword",
+                "_meta": {
+                  "description": "Name of the event that happened."
+                }
+              },
+              "lastUpdatedAt": {
+                "type": "date",
+                "_meta": {
+                  "description": "Time at which the metric was last updated."
+                }
+              },
+              "fromTimestamp": {
+                "type": "date",
+                "_meta": {
+                  "description": "Time at which the metric was captured."
+                }
+              },
+              "counterType": {
+                "type": "keyword",
+                "_meta": {
+                  "description": "The type of counter used."
+                }
+              },
+              "total": {
+                "type": "integer",
+                "_meta": {
+                  "description": "The total number of times the event happened."
+                }
+              }
             }
           }
         }

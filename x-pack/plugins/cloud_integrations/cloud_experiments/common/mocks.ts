@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CloudExperimentsPluginSetup, CloudExperimentsPluginStart } from './types';
+import type { CloudExperimentsPluginSetup, CloudExperimentsPluginStart } from './types';
 
 function createStartMock(): jest.Mocked<CloudExperimentsPluginStart> {
   return {

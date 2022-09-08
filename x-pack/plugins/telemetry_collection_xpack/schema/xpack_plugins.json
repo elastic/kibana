@@ -3520,62 +3520,6 @@
         }
       }
     },
-    "rollups": {
-      "properties": {
-        "index_patterns": {
-          "properties": {
-            "total": {
-              "type": "long",
-              "_meta": {
-                "description": "Counts all the rollup index patterns"
-              }
-            }
-          }
-        },
-        "saved_searches": {
-          "properties": {
-            "total": {
-              "type": "long",
-              "_meta": {
-                "description": "Counts all the rollup saved searches"
-              }
-            }
-          }
-        },
-        "visualizations": {
-          "properties": {
-            "saved_searches": {
-              "properties": {
-                "total": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "Counts all the visualizations that are based on rollup saved searches"
-                  }
-                },
-                "lens_total": {
-                  "type": "long",
-                  "_meta": {
-                    "description": "Counts all the lens visualizations that are based on rollup saved searches"
-                  }
-                }
-              }
-            },
-            "total": {
-              "type": "long",
-              "_meta": {
-                "description": "Counts all the visualizations that are based on rollup index patterns"
-              }
-            },
-            "lens_total": {
-              "type": "long",
-              "_meta": {
-                "description": "Counts all the lens visualizations that are based on rollup index patterns"
-              }
-            }
-          }
-        }
-      }
-    },
     "reporting": {
       "properties": {
         "csv_searchsource": {
@@ -6324,6 +6268,62 @@
                 "avg": {
                   "type": "float"
                 }
+              }
+            }
+          }
+        }
+      }
+    },
+    "rollups": {
+      "properties": {
+        "index_patterns": {
+          "properties": {
+            "total": {
+              "type": "long",
+              "_meta": {
+                "description": "Counts all the rollup index patterns"
+              }
+            }
+          }
+        },
+        "saved_searches": {
+          "properties": {
+            "total": {
+              "type": "long",
+              "_meta": {
+                "description": "Counts all the rollup saved searches"
+              }
+            }
+          }
+        },
+        "visualizations": {
+          "properties": {
+            "saved_searches": {
+              "properties": {
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Counts all the visualizations that are based on rollup saved searches"
+                  }
+                },
+                "lens_total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Counts all the lens visualizations that are based on rollup saved searches"
+                  }
+                }
+              }
+            },
+            "total": {
+              "type": "long",
+              "_meta": {
+                "description": "Counts all the visualizations that are based on rollup index patterns"
+              }
+            },
+            "lens_total": {
+              "type": "long",
+              "_meta": {
+                "description": "Counts all the lens visualizations that are based on rollup index patterns"
               }
             }
           }
@@ -11721,14 +11721,109 @@
               "description": "Names of the flags received by the client"
             }
           }
-        },
-        "userMeta": {
+        }
+      }
+    },
+    "enterprise_search": {
+      "properties": {
+        "ui_viewed": {
           "properties": {
-            "DYNAMIC_KEY": {
-              "type": "keyword",
-              "_meta": {
-                "description": "User property sent to the A/B testing service"
-              }
+            "overview": {
+              "type": "long"
+            },
+            "setup_guide": {
+              "type": "long"
+            }
+          }
+        },
+        "ui_error": {
+          "properties": {
+            "cannot_connect": {
+              "type": "long"
+            }
+          }
+        },
+        "ui_clicked": {
+          "properties": {
+            "app_search": {
+              "type": "long"
+            },
+            "workplace_search": {
+              "type": "long"
+            }
+          }
+        }
+      }
+    },
+    "app_search": {
+      "properties": {
+        "ui_viewed": {
+          "properties": {
+            "setup_guide": {
+              "type": "long"
+            },
+            "engines_overview": {
+              "type": "long"
+            }
+          }
+        },
+        "ui_error": {
+          "properties": {
+            "cannot_connect": {
+              "type": "long"
+            },
+            "not_found": {
+              "type": "long"
+            }
+          }
+        },
+        "ui_clicked": {
+          "properties": {
+            "create_first_engine_button": {
+              "type": "long"
+            },
+            "engine_table_link": {
+              "type": "long"
+            }
+          }
+        }
+      }
+    },
+    "workplace_search": {
+      "properties": {
+        "ui_viewed": {
+          "properties": {
+            "setup_guide": {
+              "type": "long"
+            },
+            "overview": {
+              "type": "long"
+            }
+          }
+        },
+        "ui_error": {
+          "properties": {
+            "cannot_connect": {
+              "type": "long"
+            },
+            "not_found": {
+              "type": "long"
+            }
+          }
+        },
+        "ui_clicked": {
+          "properties": {
+            "header_launch_button": {
+              "type": "long"
+            },
+            "org_name_change_button": {
+              "type": "long"
+            },
+            "onboarding_card_button": {
+              "type": "long"
+            },
+            "recent_activity_source_details_link": {
+              "type": "long"
             }
           }
         }
@@ -12703,111 +12798,6 @@
                   }
                 }
               }
-            }
-          }
-        }
-      }
-    },
-    "app_search": {
-      "properties": {
-        "ui_viewed": {
-          "properties": {
-            "setup_guide": {
-              "type": "long"
-            },
-            "engines_overview": {
-              "type": "long"
-            }
-          }
-        },
-        "ui_error": {
-          "properties": {
-            "cannot_connect": {
-              "type": "long"
-            },
-            "not_found": {
-              "type": "long"
-            }
-          }
-        },
-        "ui_clicked": {
-          "properties": {
-            "create_first_engine_button": {
-              "type": "long"
-            },
-            "engine_table_link": {
-              "type": "long"
-            }
-          }
-        }
-      }
-    },
-    "enterprise_search": {
-      "properties": {
-        "ui_viewed": {
-          "properties": {
-            "overview": {
-              "type": "long"
-            },
-            "setup_guide": {
-              "type": "long"
-            }
-          }
-        },
-        "ui_error": {
-          "properties": {
-            "cannot_connect": {
-              "type": "long"
-            }
-          }
-        },
-        "ui_clicked": {
-          "properties": {
-            "app_search": {
-              "type": "long"
-            },
-            "workplace_search": {
-              "type": "long"
-            }
-          }
-        }
-      }
-    },
-    "workplace_search": {
-      "properties": {
-        "ui_viewed": {
-          "properties": {
-            "setup_guide": {
-              "type": "long"
-            },
-            "overview": {
-              "type": "long"
-            }
-          }
-        },
-        "ui_error": {
-          "properties": {
-            "cannot_connect": {
-              "type": "long"
-            },
-            "not_found": {
-              "type": "long"
-            }
-          }
-        },
-        "ui_clicked": {
-          "properties": {
-            "header_launch_button": {
-              "type": "long"
-            },
-            "org_name_change_button": {
-              "type": "long"
-            },
-            "onboarding_card_button": {
-              "type": "long"
-            },
-            "recent_activity_source_details_link": {
-              "type": "long"
             }
           }
         }

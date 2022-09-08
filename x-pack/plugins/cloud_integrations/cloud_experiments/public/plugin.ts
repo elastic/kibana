@@ -57,7 +57,7 @@ export class CloudExperimentsPlugin
   public setup(core: CoreSetup): CloudExperimentsPluginSetup {
     return {
       identifyUser: (userId, userMetadata) => {
-        if (!this.clientId) return;
+        if (!this.clientId) return; // Only applies in dev mode.
 
         if (!this.launchDarklyClient) {
           // If the client has not been initialized, create it with the user data..
