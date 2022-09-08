@@ -69,6 +69,7 @@ async function getMainServiceStatistics({
       },
       body: {
         size: 0,
+        track_total_hits: false,
         query: {
           bool: {
             filter: [

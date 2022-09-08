@@ -62,6 +62,7 @@ export async function getTracesPerMinute({
     },
     body: {
       size: 0,
+      track_total_hits: false,
       query: {
         bool: {
           filter: [
@@ -156,6 +157,7 @@ export async function getMainSummaryStats({
       },
       body: {
         size: 0,
+        track_total_hits: false,
         query: {
           bool: {
             filter: [

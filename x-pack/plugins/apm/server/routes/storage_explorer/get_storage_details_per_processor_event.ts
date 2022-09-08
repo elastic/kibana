@@ -67,6 +67,7 @@ export async function getStorageDetailsPerProcessorEvent({
       },
       body: {
         size: 0,
+        track_total_hits: false,
         query: {
           bool: {
             filter: [
