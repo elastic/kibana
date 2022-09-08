@@ -9,6 +9,7 @@ import React from 'react';
 import { EuiTitle, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import * as t from 'io-ts';
+import { EuiLink } from '@elastic/eui';
 import { StorageExplorer } from '../../app/storage_explorer';
 import { BetaBadge } from '../../shared/beta_badge';
 import { ApmMainTemplate } from '../templates/apm_main_template';
@@ -17,7 +18,6 @@ import {
   indexLifecyclePhaseRt,
   IndexLifecyclePhaseSelectOption,
 } from '../../../../common/storage_explorer_types';
-import { EuiLink } from '@elastic/eui';
 
 export const storageExplorer = {
   '/storage-explorer': {
@@ -56,7 +56,12 @@ export const storageExplorer = {
                 href="https://ela.st/feedback-storage-explorer"
                 target="_blank"
               >
-                Give feedback
+                {i18n.translate(
+                  'xpack.apm.views.storageExplorer.giveFeedback',
+                  {
+                    defaultMessage: 'Give feedback',
+                  }
+                )}
               </EuiLink>,
             ],
           }}
