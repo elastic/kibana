@@ -27,9 +27,15 @@ import {
 } from '../types';
 
 export function isConnectorIndex(
-  index: ElasticsearchIndexWithIngestion | undefined
+  index: ElasticsearchIndexWithIngestion | undefined,
+  includeCrawler: boolean = false
 ): index is ConnectorIndex {
   const connectorIndex = index as ConnectorIndex;
+
+  if (includeCrawler) {
+    return !!connectorIndex?.connector;
+  }
+
   return (
     !!connectorIndex?.connector &&
     connectorIndex.connector.service_type !== ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE

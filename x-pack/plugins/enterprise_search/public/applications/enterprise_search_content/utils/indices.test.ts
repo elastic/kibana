@@ -137,6 +137,9 @@ describe('Indices util functions', () => {
     it('should return false for connector-crawler indices', () => {
       expect(isConnectorIndex(connectorCrawlerIndex)).toEqual(false);
     });
+    it('should return true for connector-crawler indices if crawlers are included', () => {
+      expect(isConnectorIndex(connectorCrawlerIndex, true)).toEqual(true);
+    });
     it('should return false for crawler indices', () => {
       expect(isConnectorIndex(crawlerIndex)).toEqual(false);
     });

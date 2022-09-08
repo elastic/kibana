@@ -61,7 +61,7 @@ export const ConnectorSchedulingComponent: React.FC = () => {
     frequency: schedulingInput?.interval ? cronToFrequency(schedulingInput.interval) : 'HOUR',
   });
 
-  if (!isConnectorIndex(index)) {
+  if (!isConnectorIndex(index, true)) {
     return <></>;
   }
 

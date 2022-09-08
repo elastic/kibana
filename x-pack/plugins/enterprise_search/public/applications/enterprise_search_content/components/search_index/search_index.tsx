@@ -117,7 +117,7 @@ export const SearchIndex: React.FC = () => {
       }),
     },
     {
-      content: <AutomaticCrawlScheduler />,
+      content: <ConnectorSchedulingComponent />,
       id: SearchIndexTabId.SCHEDULING,
       name: i18n.translate('xpack.enterpriseSearch.content.searchIndex.schedulingTabLabel', {
         defaultMessage: 'Scheduling',
