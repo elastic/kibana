@@ -88,7 +88,10 @@ export const getPreloadedState = ({
 };
 
 export const setState = createAction<Partial<LensAppState>>('lens/setState');
-export const onActiveDataChange = createAction<TableInspectorAdapter>('lens/onActiveDataChange');
+export const onActiveDataChange = createAction<{
+  activeData: TableInspectorAdapter;
+  requestWarnings?: string[];
+}>('lens/onActiveDataChange');
 export const setSaveable = createAction<boolean>('lens/setSaveable');
 export const enableAutoApply = createAction<void>('lens/enableAutoApply');
 export const disableAutoApply = createAction<void>('lens/disableAutoApply');
@@ -222,10 +225,16 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
         ...payload,
       };
     },
-    [onActiveDataChange.type]: (state, { payload }: PayloadAction<TableInspectorAdapter>) => {
+    [onActiveDataChange.type]: (
+      state,
+      {
+        payload: { activeData, requestWarnings },
+      }: PayloadAction<{ activeData: TableInspectorAdapter; requestWarnings?: string[] }>
+    ) => {
       return {
         ...state,
-        activeData: payload,
+        activeData,
+        requestWarnings,
       };
     },
     [setSaveable.type]: (state, { payload }: PayloadAction<boolean>) => {

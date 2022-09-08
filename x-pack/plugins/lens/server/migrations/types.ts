@@ -298,4 +298,7 @@ export interface XYVisState850 {
   >;
 }
 export type VisState850 = XYVisState850;
-export type LensDocShape850<VisualizationState = unknown> = LensDocShape830<VisualizationState>;
+export type VisState840 = VisState830;
+export type LensDocShape840<VisualizationState = unknown> = LensDocShape830<VisualizationState>;
+
+export type LensDocShape850<VisualizationState = unknown> = LensDocShape840<VisualizationState>;

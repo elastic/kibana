@@ -65,6 +65,7 @@ export interface HeaderProps {
   navControlsLeft$: Observable<readonly ChromeNavControl[]>;
   navControlsCenter$: Observable<readonly ChromeNavControl[]>;
   navControlsRight$: Observable<readonly ChromeNavControl[]>;
+  navControlsExtension$: Observable<readonly ChromeNavControl[]>;
   basePath: HttpStart['basePath'];
   isLocked$: Observable<boolean>;
   loadingCount$: ReturnType<HttpStart['getLoadingCount$']>;
@@ -135,7 +136,13 @@ export function Header({
               {
                 items: [
                   <EuiHideFor sizes={['m', 'l', 'xl']}>
-                    <HeaderNavControls navControls$={observables.navControlsCenter$} />
+                    <>
+                      <HeaderNavControls navControls$={observables.navControlsExtension$} />
+                      <HeaderNavControls navControls$={observables.navControlsCenter$} />
+                    </>
+                  </EuiHideFor>,
+                  <EuiHideFor sizes={['xs', 's']}>
+                    <HeaderNavControls navControls$={observables.navControlsExtension$} />
                   </EuiHideFor>,
                   <HeaderHelpMenu
                     helpExtension$={observables.helpExtension$}

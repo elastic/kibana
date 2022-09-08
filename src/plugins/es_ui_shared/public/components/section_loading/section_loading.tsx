@@ -8,14 +8,9 @@
 
 import React from 'react';
 
-import {
-  EuiEmptyPrompt,
-  EuiLoadingSpinner,
-  EuiText,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiTextColor,
-} from '@elastic/eui';
+import { EuiLoadingSpinner, EuiText, EuiFlexGroup, EuiFlexItem, EuiTextColor } from '@elastic/eui';
+
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 
 interface Props {
   inline?: boolean;
@@ -40,7 +35,7 @@ export const SectionLoading: React.FunctionComponent<Props> = ({ inline, childre
   }
 
   return (
-    <EuiEmptyPrompt
+    <KibanaPageTemplate.EmptyPrompt
       title={<EuiLoadingSpinner size="xl" />}
       body={<EuiText color="subdued">{children}</EuiText>}
       data-test-subj="sectionLoading"

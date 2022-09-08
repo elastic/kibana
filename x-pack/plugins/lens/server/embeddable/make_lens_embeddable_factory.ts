@@ -11,7 +11,6 @@ import {
   mergeMigrationFunctionMaps,
   MigrateFunctionsObject,
 } from '@kbn/kibana-utils-plugin/common';
-import { SavedObjectReference } from '@kbn/core-saved-objects-common';
 import { DOC_TYPE } from '../../common';
 import {
   commonEnhanceTableRowHeight,
@@ -31,7 +30,7 @@ import {
   commonExplicitAnnotationType,
   getLensDataViewMigrations,
   commonMigrateMetricIds,
-  commonAnnotationAddDataViewIdReferences,
+  commonMigratePartitionChartGroups,
 } from '../migrations/common_migrations';
 import {
   CustomVisualizationMigrations,
@@ -45,7 +44,7 @@ import {
   VisState850,
   VisStatePre715,
   VisStatePre830,
-  XYVisStatePre850,
+  XYVisState850,
 } from '../migrations/types';
 import { extract, inject } from '../../common/embeddable_factory';
 
@@ -139,16 +138,17 @@ export const makeLensEmbeddableFactory =
               '8.5.0': (state) => {
                 const lensState = state as unknown as {
                   attributes: LensDocShape850<VisState850>;
-                  references: SavedObjectReference[] | undefined;
                 };
 
-                let migratedLensState = commonMigrateMetricIds(
-                  lensState.attributes
-                ) as LensDocShape850<XYVisStatePre850>;
-                migratedLensState = commonExplicitAnnotationType(migratedLensState);
-                const migratedReferences = commonAnnotationAddDataViewIdReferences(
-                  migratedLensState as LensDocShape850<VisState850>,
-                  lensState.references
+                let migratedLensState = commonMigrateMetricIds(lensState.attributes);
+                migratedLensState = commonExplicitAnnotationType(
+                  migratedLensState as LensDocShape850<XYVisState850>
+                );
+                migratedLensState = commonMigratePartitionChartGroups(
+                  migratedLensState as LensDocShape850<{
+                    shape: string;
+                    layers: Array<{ groups?: string[] }>;
+                  }>
                 );
                 return {
                   ...lensState,
