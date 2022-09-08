@@ -6,6 +6,5 @@
  * Side Public License, v 1.
  */
 
-export function foo() {
-  return 'hello world';
-}
+export { CoreAppsService, URL_MAX_LENGTH } from './src';
+export type { CoreAppsServiceSetupDeps, CoreAppsServiceStartDeps } from './src';

@@ -7,15 +7,16 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { CoreApp } from './core_app';
+import type { CoreAppsService } from '@kbn/core-apps-browser-internal';
 
-type CoreAppContract = PublicMethodsOf<CoreApp>;
+type CoreAppContract = PublicMethodsOf<CoreAppsService>;
+
 const createMock = (): jest.Mocked<CoreAppContract> => ({
   setup: jest.fn(),
   start: jest.fn(),
   stop: jest.fn(),
 });
 
-export const coreAppMock = {
+export const coreAppsMock = {
   create: createMock,
 };

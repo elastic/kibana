@@ -9,8 +9,12 @@
 import { i18n } from '@kbn/i18n';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import type { NotificationsSetup } from '@kbn/core-notifications-browser';
-import type { StatusResponse, ServiceStatus, ServiceStatusLevel } from '../../../../types/status';
-import type { DataType } from '.';
+import type {
+  StatusResponse,
+  ServiceStatus,
+  ServiceStatusLevel,
+} from '@kbn/core-status-common-internal';
+import type { DataType } from './format_number';
 
 interface MetricMeta {
   title: string;
@@ -18,6 +22,7 @@ interface MetricMeta {
   value?: number[];
   type?: DataType;
 }
+
 export interface Metric {
   name: string;
   value: number | number[];

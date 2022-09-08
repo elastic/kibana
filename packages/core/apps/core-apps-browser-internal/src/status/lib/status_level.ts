@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { ServiceStatusLevel } from '../../../../types/status';
+import type { ServiceStatusLevel } from '@kbn/core-status-common-internal';
 import { FormattedStatus, StatusState, STATUS_LEVEL_UI_ATTRS } from './load_status';
 
 export const orderedLevels: ServiceStatusLevel[] = [

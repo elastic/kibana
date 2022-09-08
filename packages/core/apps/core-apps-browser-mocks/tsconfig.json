@@ -8,12 +8,11 @@
     "stripInternal": false,
     "types": [
       "jest",
-      "node",
-      "react"
+      "node"
     ]
   },
   "include": [
     "**/*.ts",
-      "**/*.tsx",
+    "**/*.tsx",
   ]
 }
