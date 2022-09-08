@@ -7,34 +7,35 @@
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 import {
-  CreateExceptionListSchemaDecoded,
-  createExceptionListSchema,
+  InternalCreateExceptionListSchemaDecoded,
+  internalCreateExceptionListSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
-import { EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
+import { INTERNAL_EXCEPTIONS_LIST_ENSURE_CREATED_URL } from '@kbn/securitysolution-list-constants';
 
-import type { ListsPluginRouter } from '../types';
-import { createExceptionListHandler } from '../handlers/create_exception_list_handler';
+import { createExceptionListHandler } from '../../handlers/create_exception_list_handler';
+import type { ListsPluginRouter } from '../../types';
+import { buildRouteValidation, buildSiemResponse } from '../utils';
 
-import { buildRouteValidation, buildSiemResponse } from './utils';
-
-export const createExceptionListRoute = (router: ListsPluginRouter): void => {
+export const internalCreateExceptionListRoute = (router: ListsPluginRouter): void => {
   router.post(
     {
       options: {
         tags: ['access:lists-all'],
       },
-      path: EXCEPTION_LIST_URL,
+      path: INTERNAL_EXCEPTIONS_LIST_ENSURE_CREATED_URL,
       validate: {
         body: buildRouteValidation<
-          typeof createExceptionListSchema,
-          CreateExceptionListSchemaDecoded
-        >(createExceptionListSchema),
+          typeof internalCreateExceptionListSchema,
+          InternalCreateExceptionListSchemaDecoded
+        >(internalCreateExceptionListSchema),
       },
     },
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
       try {
-        return await createExceptionListHandler(context, request, response, siemResponse);
+        return await createExceptionListHandler(context, request, response, siemResponse, {
+          ignoreExisting: true,
+        });
       } catch (err) {
         const error = transformError(err);
         return siemResponse.error({
