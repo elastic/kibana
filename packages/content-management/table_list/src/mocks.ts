@@ -5,6 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import { from } from 'rxjs';
+
 import { Services } from './services';
 
 /**
@@ -23,6 +25,8 @@ export const getStoryServices = (params: Params, action: ActionFn = () => {}) =>
     notifyError: (title, text) => {
       action('notifyError')({ title, text });
     },
+    currentAppId$: from('mockedApp'),
+    navigateToUrl: () => undefined,
     ...params,
   };
 
