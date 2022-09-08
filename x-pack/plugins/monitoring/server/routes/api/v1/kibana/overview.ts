@@ -16,6 +16,7 @@ import {
 } from '../../../../../common/http_api/kibana';
 import { createValidationFunction } from '../../../../lib/create_route_validation_function';
 import { MonitoringCore } from '../../../../types';
+import { getKibanaDataset } from '../../../../lib/cluster/get_index_patterns';
 
 export function kibanaOverviewRoute(server: MonitoringCore) {
   const validateParams = createValidationFunction(postKibanaOverviewRequestParamsRT);
@@ -38,7 +39,7 @@ export function kibanaOverviewRoute(server: MonitoringCore) {
           (accum: Array<{ term: { [key: string]: string } }>, dsDataset) => {
             accum.push(
               ...[
-                { term: { 'data_stream.dataset': `${moduleType}.${dsDataset}` } },
+                { term: { 'data_stream.dataset': getKibanaDataset(dsDataset) } },
                 { term: { 'metricset.name': dsDataset } },
                 { term: { type: `kibana_${dsDataset}` } },
               ]

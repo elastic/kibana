@@ -176,7 +176,7 @@ describe('fetchMissingMonitoringData', () => {
     await fetchMissingMonitoringData(esClient, clusters, size, now, startMs);
     expect(params).toStrictEqual({
       index:
-        '*:.monitoring-es-*,.monitoring-es-*,*:metrics-elasticsearch.node_stats-*,metrics-elasticsearch.node_stats-*',
+        '*:.monitoring-es-*,.monitoring-es-*,*:metrics-elasticsearch.stack_monitoring.node_stats-*,metrics-elasticsearch.stack_monitoring.node_stats-*',
       filter_path: ['aggregations.clusters.buckets'],
       body: {
         size: 0,
@@ -189,7 +189,9 @@ describe('fetchMissingMonitoringData', () => {
                   should: [
                     { term: { type: 'node_stats' } },
                     { term: { 'metricset.name': 'node_stats' } },
-                    { term: { 'data_stream.dataset': 'elasticsearch.node_stats' } },
+                    {
+                      term: { 'data_stream.dataset': 'elasticsearch.stack_monitoring.node_stats' },
+                    },
                   ],
                   minimum_should_match: 1,
                 },
@@ -240,6 +242,8 @@ describe('fetchMissingMonitoringData', () => {
     });
     await fetchMissingMonitoringData(esClient, clusters, size, now, startMs);
     // @ts-ignore
-    expect(params.index).toBe('.monitoring-es-*,metrics-elasticsearch.node_stats-*');
+    expect(params.index).toBe(
+      '.monitoring-es-*,metrics-elasticsearch.stack_monitoring.node_stats-*'
+    );
   });
 });

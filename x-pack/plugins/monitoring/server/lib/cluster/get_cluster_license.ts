@@ -11,7 +11,7 @@ import { createQuery } from '../create_query';
 import { ElasticsearchMetric } from '../metrics';
 import { ElasticsearchResponse } from '../../../common/types/es';
 import { LegacyRequest } from '../../types';
-import { getNewIndexPatterns } from './get_index_patterns';
+import { getNewIndexPatterns, getElasticsearchDataset } from './get_index_patterns';
 import { Globals } from '../../static_globals';
 
 // is this being used anywhere?  not called within the app
@@ -34,7 +34,7 @@ export function getClusterLicense(req: LegacyRequest, clusterUuid: string) {
       sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
       query: createQuery({
         type: dataset,
-        dsDataset: `${moduleType}.${dataset}`,
+        dsDataset: getElasticsearchDataset(dataset),
         metricset: dataset,
         clusterUuid,
         metric: ElasticsearchMetric.getMetricFields(),

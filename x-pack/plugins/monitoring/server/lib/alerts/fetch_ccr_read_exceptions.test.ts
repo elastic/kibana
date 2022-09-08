@@ -38,7 +38,7 @@ describe('fetchCCReadExceptions', () => {
     await fetchCCRReadExceptions(esClient, 1643306331418, 1643309869056, 10000);
     expect(esClient.search).toHaveBeenCalledWith({
       index:
-        '*:.monitoring-es-*,.monitoring-es-*,*:metrics-elasticsearch.ccr-*,metrics-elasticsearch.ccr-*',
+        '*:.monitoring-es-*,.monitoring-es-*,*:metrics-elasticsearch.stack_monitoring.ccr-*,metrics-elasticsearch.stack_monitoring.ccr-*',
       filter_path: ['aggregations.remote_clusters.buckets'],
       body: {
         size: 0,
@@ -79,7 +79,7 @@ describe('fetchCCReadExceptions', () => {
                   should: [
                     { term: { type: 'ccr_stats' } },
                     { term: { 'metricset.name': 'ccr' } },
-                    { term: { 'data_stream.dataset': 'elasticsearch.ccr' } },
+                    { term: { 'data_stream.dataset': 'elasticsearch.stack_monitoring.ccr' } },
                   ],
                   minimum_should_match: 1,
                 },
@@ -137,6 +137,6 @@ describe('fetchCCReadExceptions', () => {
     await fetchCCRReadExceptions(esClient, 1643306331418, 1643309869056, 10000);
 
     // @ts-ignore
-    expect(params.index).toBe('.monitoring-es-*,metrics-elasticsearch.ccr-*');
+    expect(params.index).toBe('.monitoring-es-*,metrics-elasticsearch.stack_monitoring.ccr-*');
   });
 });

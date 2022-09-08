@@ -15,6 +15,7 @@ import { handleError } from '../../../../lib/errors';
 import { metricSet } from './metric_set_overview';
 import { MonitoringCore } from '../../../../types';
 import { createValidationFunction } from '../../../../lib/create_route_validation_function';
+import { getLogstashDataset } from '../../../../lib/cluster/get_index_patterns';
 
 export function logstashOverviewRoute(server: MonitoringCore) {
   const validateParams = createValidationFunction(postLogstashOverviewRequestParamsRT);
@@ -38,7 +39,7 @@ export function logstashOverviewRoute(server: MonitoringCore) {
             {
               bool: {
                 should: [
-                  { term: { 'data_stream.dataset': `${moduleType}.${dsDataset}` } },
+                  { term: { 'data_stream.dataset': getLogstashDataset(dsDataset) } },
                   { term: { 'metricset.name': dsDataset } },
                   { term: { type: 'logstash_stats' } },
                 ],

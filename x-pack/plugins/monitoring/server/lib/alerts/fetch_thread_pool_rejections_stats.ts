@@ -11,7 +11,7 @@ import { AlertCluster, AlertThreadPoolRejectionsStats } from '../../../common/ty
 import { createDatasetFilter } from './create_dataset_query_filter';
 import { Globals } from '../../static_globals';
 import { CCS_REMOTE_PATTERN } from '../../../common/constants';
-import { getNewIndexPatterns } from '../cluster/get_index_patterns';
+import { getNewIndexPatterns, getElasticsearchDataset } from '../cluster/get_index_patterns';
 
 const invalidNumberValue = (value: number) => {
   return isNaN(value) || value === undefined || value === null;
@@ -67,7 +67,7 @@ export async function fetchThreadPoolRejectionStats(
                 cluster_uuid: clustersIds,
               },
             },
-            createDatasetFilter('node_stats', 'node_stats', 'elasticsearch.node_stats'),
+            createDatasetFilter('node_stats', 'node_stats', getElasticsearchDataset('node_stats')),
             {
               range: {
                 timestamp: {
