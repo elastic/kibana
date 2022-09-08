@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { Column, ColumnWithMeta } from '@kbn/visualizations-plugin/common';
 import {
   getColumnsFromVis,
   getVisSchemas,
@@ -15,6 +16,21 @@ import uuid from 'uuid';
 import { getDataViewsStart } from '../services';
 import { getConfiguration } from './configurations';
 import { ConvertTableToLensVisualization } from './types';
+
+export const isColumnWithMeta = (column: Column): column is ColumnWithMeta => {
+  if ((column as ColumnWithMeta).meta) {
+    return true;
+  }
+  return false;
+};
+
+export const excludeMetaFromColumn = (column: Column) => {
+  if (isColumnWithMeta(column)) {
+    const { meta, ...rest } = column;
+    return rest;
+  }
+  return column;
+};
 
 export const convertToLens: ConvertTableToLensVisualization = async (vis, timefilter) => {
   if (!timefilter) {
@@ -63,7 +79,7 @@ export const convertToLens: ConvertTableToLensVisualization = async (vis, timefi
       {
         indexPatternId: dataView.id!,
         layerId,
-        columns: result.columns,
+        columns: result.columns.map(excludeMetaFromColumn),
         columnOrder: [],
       },
     ],

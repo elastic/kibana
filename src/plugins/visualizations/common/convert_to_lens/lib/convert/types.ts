@@ -13,10 +13,9 @@ import {
   Operation,
   BaseColumn as GenericBaseColumn,
   Column as BaseColumn,
-  ColumnWithMeta as GenericColumnWithMeta,
+  GenericColumnWithMeta,
   PercentileColumn as BasePercentileColumn,
   PercentileRanksColumn as BasePercentileRanksColumn,
-  ColumnWithMeta,
   DateHistogramColumn,
   TermsColumn,
   FiltersColumn,
@@ -99,4 +98,4 @@ export type CommonPercentileColumnWithExtendedMeta =
   | PercentileColumnWithExtendedMeta
   | PercentileRanksColumnWithExtendedMeta;
 
-export type Column = ColumnWithMeta<BaseColumn, Meta>;
+export type Column = GenericColumnWithMeta<BaseColumn, Meta>;
