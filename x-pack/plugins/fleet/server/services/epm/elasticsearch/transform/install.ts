@@ -308,7 +308,6 @@ const getTransformNameForInstallation = (
   suffix: string,
   assetType?: string
 ) => {
-  // @TODO: Should this be prefixed with `logs`?
   return `logs-${installablePackage.name}.${transformModuleId}-${
     assetType === undefined ? 'default' : assetType
   }-${suffix}`;
