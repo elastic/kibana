@@ -24,6 +24,7 @@ export async function ask(options: Options) {
   if (!process.stderr.isTTY) {
     return undefined;
   }
+
   const int = Readline.createInterface({
     input: process.stdin,
     output: process.stderr,
@@ -42,9 +43,11 @@ export async function ask(options: Options) {
         Rx.defer(() => q.call(int, `${options.question}> `)).pipe(
           Rx.mergeMap(async (answer) => {
             process.stderr.write('validating...');
-            const valid = await options.validate(answer);
-            process.stderr.write(Ansi.CLEAR_LINE_AND_MOVE_LEFT);
-            return valid;
+            try {
+              return await options.validate(answer);
+            } finally {
+              process.stderr.write(Ansi.CLEAR_LINE_AND_MOVE_LEFT);
+            }
           }),
           Rx.map((valid) => {
             if (typeof valid === 'string') {

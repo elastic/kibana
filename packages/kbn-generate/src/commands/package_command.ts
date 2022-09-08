@@ -104,7 +104,14 @@ ${BAZEL_PACKAGE_DIRS.map((dir) => `                          ./${dir}/*\n`).join
       flags.owner ||
       (await ask({
         question: 'Which Elastic team should own this package? (Must start with "@elastic/")',
-        validate: validateElasticTeam,
+        async validate(input) {
+          try {
+            return await validateElasticTeam(input)
+          } catch (error) {
+            log.error(`failed to validate team: ${error.message}`);
+            return input
+          }
+        },
       }));
     if (typeof owner !== 'string' || !owner.startsWith('@')) {
       throw createFlagError(`expected --owner to be a string starting with an @ symbol`);
