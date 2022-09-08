@@ -104,14 +104,14 @@ describe('percentile agg field', () => {
             return 'agg_key';
           },
           isMvt: () => {
-            return true;
+            return false;
           },
         } as unknown as IESAggSource,
         esDocField: mockEsDocField as ESDocField,
         percentile: 80.5,
       });
 
-      expect(field.getMbFieldName()).toEqual('agg_key');
+      expect(field.getMbFieldName()).toEqual('agg_key_80.5');
     });
 
     test('should return field name and percentile when source is MVT', () => {
