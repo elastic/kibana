@@ -13,7 +13,7 @@ import {
   AgentPolicyServiceInterface,
   AgentService,
   PackageClient,
-  PackagePolicyServiceInterface,
+  PackagePolicyClient,
   PackageService,
 } from '@kbn/fleet-plugin/server';
 import {
@@ -58,7 +58,7 @@ const mockLatestCspPackageInfo: RegistryPackage = {
 describe('CspSetupStatus route', () => {
   const router = httpServiceMock.createRouter();
   let mockContext: ReturnType<typeof createCspRequestHandlerContextMock>;
-  let mockPackagePolicyService: jest.Mocked<PackagePolicyServiceInterface>;
+  let mockPackagePolicyService: jest.Mocked<PackagePolicyClient>;
   let mockAgentPolicyService: jest.Mocked<AgentPolicyServiceInterface>;
   let mockAgentService: jest.Mocked<AgentService>;
   let mockAgentClient: jest.Mocked<AgentClient>;

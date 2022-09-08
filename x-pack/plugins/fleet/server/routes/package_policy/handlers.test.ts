@@ -13,7 +13,7 @@ import { PACKAGE_POLICY_API_ROUTES } from '../../../common/constants';
 import { appContextService, packagePolicyService } from '../../services';
 import { createAppContextStartContractMock, xpackMocks } from '../../mocks';
 import type {
-  PackagePolicyServiceInterface,
+  PackagePolicyClient,
   PostPackagePolicyCreateCallback,
   PutPackagePolicyUpdateCallback,
   FleetRequestHandlerContext,
@@ -28,12 +28,12 @@ import type { PackagePolicy } from '../../types';
 
 import { registerRoutes } from '.';
 
-const packagePolicyServiceMock = packagePolicyService as jest.Mocked<PackagePolicyServiceInterface>;
+const packagePolicyServiceMock = packagePolicyService as jest.Mocked<PackagePolicyClient>;
 
 jest.mock(
   '../../services/package_policy',
   (): {
-    packagePolicyService: jest.Mocked<PackagePolicyServiceInterface>;
+    packagePolicyService: jest.Mocked<PackagePolicyClient>;
   } => {
     return {
       packagePolicyService: {

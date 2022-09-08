@@ -7,7 +7,7 @@
 import { uniq, map } from 'lodash';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type {
-  PackagePolicyServiceInterface,
+  PackagePolicyClient,
   AgentPolicyServiceInterface,
   AgentService,
 } from '@kbn/fleet-plugin/server';
@@ -65,7 +65,7 @@ export const getCspAgentPolicies = async (
 
 export const getCspPackagePolicies = (
   soClient: SavedObjectsClientContract,
-  packagePolicyService: PackagePolicyServiceInterface,
+  packagePolicyService: PackagePolicyClient,
   packageName: string,
   queryParams: Partial<BenchmarksQueryParams>
 ): Promise<ListResult<PackagePolicy>> => {

@@ -220,11 +220,16 @@ export const createPackagePolicyHandler: FleetRequestHandler<
     );
 
     // Create package policy
-    const packagePolicy = await packagePolicyService.create(soClient, esClient, newData, {
-      user,
-      force,
-      spaceId,
-    });
+    const packagePolicy = await fleetContext.packagePolicyService.asCurrentUser.create(
+      soClient,
+      esClient,
+      newData,
+      {
+        user,
+        force,
+        spaceId,
+      }
+    );
 
     const enrichedPackagePolicy = await packagePolicyService.runExternalCallbacks(
       'packagePolicyPostCreate',
