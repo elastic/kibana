@@ -35,9 +35,9 @@ export interface DashboardItem {
 
 export type EuiTableProps = EuiInMemoryTableProps<DashboardItem>;
 
-function getDefaultEmbeddablePanelConfig(jobIds: JobId[]) {
+function getDefaultEmbeddablePanelConfig(jobIds: JobId[], queryString?: string) {
   return {
-    title: getDefaultSwimlanePanelTitle(jobIds),
+    title: getDefaultSwimlanePanelTitle(jobIds).concat(queryString ? `- ${queryString}` : ''),
     id: htmlIdGenerator()(),
   };
 }
@@ -63,7 +63,7 @@ export const AddSwimlaneToDashboardControl: FC<AddToDashboardControlProps> = ({
   const [selectedSwimlane, setSelectedSwimlane] = useState<SwimlaneType>(SWIMLANE_TYPE.OVERALL);
 
   const getEmbeddableInput = useCallback(() => {
-    const config = getDefaultEmbeddablePanelConfig(jobIds);
+    const config = getDefaultEmbeddablePanelConfig(jobIds, queryString);
 
     return {
       ...config,

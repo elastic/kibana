@@ -22,10 +22,10 @@ import { TimeRangeBounds } from '../../util/time_buckets';
 import { useTableSeverity } from '../../components/controls/select_severity';
 import { MAX_ANOMALY_CHARTS_ALLOWED } from '../../../embeddables/anomaly_charts/anomaly_charts_initializer';
 
-function getDefaultEmbeddablePanelConfig(jobIds: JobId[]) {
+function getDefaultEmbeddablePanelConfig(jobIds: JobId[], queryString?: string) {
   return {
     id: htmlIdGenerator()(),
-    title: getDefaultExplorerChartsPanelTitle(jobIds),
+    title: getDefaultExplorerChartsPanelTitle(jobIds).concat(queryString ? `- ${queryString}` : ''),
   };
 }
 
@@ -63,7 +63,7 @@ export const AddAnomalyChartsToDashboardControl: FC<AddToDashboardControlProps> 
       };
     }
 
-    const config = getDefaultEmbeddablePanelConfig(jobIds);
+    const config = getDefaultEmbeddablePanelConfig(jobIds, queryString);
 
     return {
       ...config,

@@ -9,6 +9,7 @@ import { stringHash } from '@kbn/ml-string-hash';
 import type { Job, Datafeed } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
 import type { AnomalySwimlaneEmbeddableInput } from '@kbn/ml-plugin/public';
 import type { AnomalyChartsEmbeddableInput } from '@kbn/ml-plugin/public/embeddables';
+import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-plugin/common/constants/search';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../services/ml/security_common';
 
@@ -421,6 +422,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                 from: '2016-02-07T00:00:00.000Z',
                 to: '2016-02-11T23:59:54.000Z',
               },
+              query: { query: '', language: SEARCH_QUERY_LANGUAGE.KUERY },
             } as AnomalySwimlaneEmbeddableInput;
 
             expectedAttachment.id = stringHash(JSON.stringify(expectedAttachment)).toString();
@@ -485,6 +487,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                 to: '2016-02-11T23:59:54.000Z',
               },
               maxSeriesToPlot: 6,
+              query: { query: '', language: SEARCH_QUERY_LANGUAGE.KUERY },
             } as AnomalyChartsEmbeddableInput;
 
             expectedAttachment.id = stringHash(JSON.stringify(expectedAttachment)).toString();

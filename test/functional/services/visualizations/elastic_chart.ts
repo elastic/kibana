@@ -109,9 +109,10 @@ export class ElasticChartService extends FtrService {
    */
   public async getChartDebugData(
     dataTestSubj?: string,
-    match: number = 0
+    match: number = 0,
+    timeout: number | undefined = undefined
   ): Promise<DebugState | null> {
-    const chart = await this.getChart(dataTestSubj, undefined, match);
+    const chart = await this.getChart(dataTestSubj, timeout, match);
 
     try {
       const visContainer = await chart.findByCssSelector('.echChartStatus');
