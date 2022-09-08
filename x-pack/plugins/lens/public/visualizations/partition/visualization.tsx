@@ -444,7 +444,7 @@ export const getPieVisualization = ({
                     'Your visualization has too many dimensions. Please follow the instructions in the layer panel.',
                 })}
                 <EuiSpacer size="s" />
-                {i18n.translate('xpack.lens.pie.tooManyDimensions', {
+                {i18n.translate('xpack.lens.pie.collapsedDimensionsDontCount', {
                   defaultMessage: "(Collapsed dimensions don't count toward this limit.)",
                 })}
               </span>
