@@ -306,7 +306,7 @@ export class SettingsPageObject extends FtrService {
   }
 
   async clearFieldTypeFilter(type: string) {
-    await this.testSubjects.clickWhenNotDisabled('indexedFieldTypeFilterDropdown');
+    await this.testSubjects.clickWhenNotDisabledWithoutRetry('indexedFieldTypeFilterDropdown');
     await this.retry.try(async () => {
       await this.testSubjects.existOrFail('indexedFieldTypeFilterDropdown-popover');
     });
@@ -319,7 +319,7 @@ export class SettingsPageObject extends FtrService {
   }
 
   async setFieldTypeFilter(type: string) {
-    await this.testSubjects.clickWhenNotDisabled('indexedFieldTypeFilterDropdown');
+    await this.testSubjects.clickWhenNotDisabledWithoutRetry('indexedFieldTypeFilterDropdown');
     await this.testSubjects.existOrFail('indexedFieldTypeFilterDropdown-popover');
     await this.testSubjects.existOrFail(`indexedFieldTypeFilterDropdown-option-${type}`);
     await this.testSubjects.click(`indexedFieldTypeFilterDropdown-option-${type}`);
@@ -328,7 +328,7 @@ export class SettingsPageObject extends FtrService {
   }
 
   async clearScriptedFieldLanguageFilter(type: string) {
-    await this.testSubjects.clickWhenNotDisabled('scriptedFieldLanguageFilterDropdown');
+    await this.testSubjects.clickWhenNotDisabledWithoutRetry('scriptedFieldLanguageFilterDropdown');
     await this.retry.try(async () => {
       await this.testSubjects.existOrFail('scriptedFieldLanguageFilterDropdown-popover');
     });
@@ -344,7 +344,9 @@ export class SettingsPageObject extends FtrService {
 
   async setScriptedFieldLanguageFilter(language: string) {
     await this.retry.try(async () => {
-      await this.testSubjects.clickWhenNotDisabled('scriptedFieldLanguageFilterDropdown');
+      await this.testSubjects.clickWhenNotDisabledWithoutRetry(
+        'scriptedFieldLanguageFilterDropdown'
+      );
       return await this.find.byCssSelector('div.euiPopover__panel-isOpen');
     });
     await this.testSubjects.existOrFail('scriptedFieldLanguageFilterDropdown-popover');
