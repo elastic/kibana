@@ -16,6 +16,9 @@ import { State } from '../../types';
 import { Position } from '@elastic/charts';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import moment from 'moment';
+import { EventAnnotationConfig } from '@kbn/event-annotation-plugin/common';
+import { createMockDataViewsState } from '../../../../data_views_service/mocks';
+import { createMockedIndexPattern } from '../../../../indexpattern_datasource/mocks';
 
 jest.mock('lodash', () => {
   const original = jest.requireActual('lodash');
@@ -26,8 +29,9 @@ jest.mock('lodash', () => {
   };
 });
 
-const customLineStaticAnnotation = {
+const customLineStaticAnnotation: EventAnnotationConfig = {
   id: 'ann1',
+  type: 'manual',
   key: { type: 'point_in_time' as const, timestamp: '2022-03-18T08:25:00.000Z' },
   label: 'Event',
   icon: 'triangle' as const,
@@ -49,6 +53,7 @@ describe('AnnotationsPanel', () => {
         {
           layerType: layerTypes.ANNOTATIONS,
           layerId: 'annotation',
+          indexPatternId: 'indexPattern1',
           annotations: [customLineStaticAnnotation],
         },
       ],
@@ -56,9 +61,9 @@ describe('AnnotationsPanel', () => {
   }
 
   beforeEach(() => {
-    frame = createMockFramePublicAPI();
-    frame.datasourceLayers = {};
+    frame = createMockFramePublicAPI({ datasourceLayers: {} });
   });
+
   describe('Dimension Editor', () => {
     test('shows correct options for line annotations', () => {
       const state = testState();
@@ -109,6 +114,7 @@ describe('AnnotationsPanel', () => {
             color: 'red',
             icon: 'triangle',
             id: 'ann1',
+            type: 'manual',
             isHidden: undefined,
             key: {
               endTimestamp: '2022-03-21T10:49:00.000Z',
@@ -122,6 +128,7 @@ describe('AnnotationsPanel', () => {
         ],
         layerId: 'annotation',
         layerType: 'annotations',
+        indexPatternId: 'indexPattern1',
       };
       const component = mount(
         <AnnotationsPanel
@@ -176,6 +183,7 @@ describe('AnnotationsPanel', () => {
           panelRef={React.createRef()}
         />
       );
+
       component.find('button[data-test-subj="lns-xyAnnotation-rangeSwitch"]').simulate('click');
 
       expect(setState).toBeCalledWith({
@@ -188,6 +196,7 @@ describe('AnnotationsPanel', () => {
                 id: 'ann1',
                 isHidden: undefined,
                 label: 'Event range',
+                type: 'manual',
                 key: {
                   endTimestamp: '2022-03-21T10:49:00.000Z',
                   timestamp: '2022-03-18T08:25:00.000Z',
@@ -195,6 +204,7 @@ describe('AnnotationsPanel', () => {
                 },
               },
             ],
+            indexPatternId: 'indexPattern1',
             layerId: 'annotation',
             layerType: 'annotations',
           },
@@ -215,13 +225,85 @@ describe('AnnotationsPanel', () => {
                   type: 'point_in_time',
                 },
                 label: 'Event',
+                type: 'manual',
               },
             ],
+            indexPatternId: 'indexPattern1',
             layerId: 'annotation',
             layerType: 'annotations',
           },
         ],
       });
+    });
+
+    test('shows correct options for query based', () => {
+      const state = testState();
+      const indexPattern = createMockedIndexPattern();
+      state.layers[0] = {
+        annotations: [
+          {
+            color: 'red',
+            icon: 'triangle',
+            id: 'ann1',
+            type: 'query',
+            isHidden: undefined,
+            timeField: 'timestamp',
+            key: {
+              type: 'point_in_time',
+            },
+            label: 'Query based event',
+            lineStyle: 'dashed',
+            lineWidth: 3,
+            filter: { type: 'kibana_query', query: '', language: 'kuery' },
+          },
+        ],
+        layerId: 'annotation',
+        layerType: 'annotations',
+        indexPatternId: indexPattern.id,
+      };
+      const frameMock = createMockFramePublicAPI({
+        datasourceLayers: {},
+        dataViews: createMockDataViewsState({
+          indexPatterns: { [indexPattern.id]: indexPattern },
+        }),
+      });
+
+      const component = mount(
+        <AnnotationsPanel
+          layerId={state.layers[0].layerId}
+          frame={frameMock}
+          setState={jest.fn()}
+          accessor="ann1"
+          groupId="left"
+          state={state}
+          datatableUtilities={datatableUtilities}
+          formatFactory={jest.fn()}
+          paletteService={chartPluginMock.createPaletteRegistry()}
+          panelRef={React.createRef()}
+        />
+      );
+
+      expect(
+        component.find('[data-test-subj="annotation-query-based-field-picker"]').exists()
+      ).toBeTruthy();
+      expect(
+        component.find('[data-test-subj="annotation-query-based-query-input"]').exists()
+      ).toBeTruthy();
+
+      // The provided indexPattern has 2 date fields
+      expect(
+        component
+          .find('[data-test-subj="annotation-query-based-field-picker"]')
+          .at(0)
+          .prop('options')
+      ).toHaveLength(2);
+      // When in query mode a new "field" option is added to the previous 2 ones
+      expect(
+        component.find('[data-test-subj="lns-lineMarker-text-visibility"]').at(0).prop('options')
+      ).toHaveLength(3);
+      expect(
+        component.find('[data-test-subj="lnsXY-annotation-tooltip-add_field"]').exists()
+      ).toBeTruthy();
     });
   });
 });

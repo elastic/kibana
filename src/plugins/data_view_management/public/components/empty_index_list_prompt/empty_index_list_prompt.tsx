@@ -10,11 +10,11 @@ import './empty_index_list_prompt.scss';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
-  EuiPageContentHeader,
-  EuiPageContentHeaderSection,
+  EuiPageContentHeader_Deprecated as EuiPageContentHeader,
+  EuiPageContentHeaderSection_Deprecated as EuiPageContentHeaderSection,
   EuiTitle,
-  EuiPageContentBody,
-  EuiPageContent,
+  EuiPageContentBody_Deprecated as EuiPageContentBody,
+  EuiPageContent_Deprecated as EuiPageContent,
   EuiIcon,
   EuiSpacer,
   EuiFlexItem,

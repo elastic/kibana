@@ -321,12 +321,6 @@ export const MetricVis = ({
     );
   }, [grid.length, scrollDimensions.height]);
 
-  // force chart to re-render to circumvent a charts bug
-  const magicKey = useRef(0);
-  useEffect(() => {
-    magicKey.current++;
-  }, [data]);
-
   return (
     <div
       ref={scrollContainerRef}
@@ -343,7 +337,7 @@ export const MetricVis = ({
           height: ${scrollChildHeight};
         `}
       >
-        <Chart key={magicKey.current}>
+        <Chart>
           <Settings
             theme={[
               {
