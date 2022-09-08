@@ -17149,8 +17149,6 @@
     "xpack.lens.indexPattern.percentileRanks.documentation.markdown": "\n返回小于某个值的值的百分比。例如，如果某个值大于或等于 95% 的观察值，则称它处于第 95 个百分位等级\n\n例如：获取小于 100 的值的百分比：\n`percentile_rank(bytes, value=100)`\n      ",
     "xpack.lens.indexPattern.standardDeviation.documentation.markdown": "\n返回字段的变量或差量数量。此函数仅适用于数字字段。\n\n#### 示例\n\n要获取价格的标准偏差，请使用 `standard_deviation(price)`。\n\n要获取来自英国的订单的价格方差，请使用 `square(standard_deviation(price, kql='location:UK'))`。\n      ",
     "xpack.lens.indexPattern.time_scale.documentation.markdown": "\n\n此高级函数用于将计数和总和标准化为特定时间间隔。它允许集成所存储的已标准化为特定时间间隔的指标。\n\n此函数只能在当前图表中使用了日期直方图函数时使用。\n\n例如：将已标准化指标与其他需要标准化的指标进行比较的比率。\n`normalize_by_unit(counter_rate(max(system.diskio.write.bytes)), unit='s') / last_value(apache.status.bytes_per_second)`\n      ",
-    "xpack.lens.advancedSettings.useFieldExistenceSampling.description": "如果启用，文档采样将用于确定 Lens 字段列表中的字段是否存在（可用或为空），而不依赖索引映射。",
-    "xpack.lens.advancedSettings.useFieldExistenceSampling.title": "使用字段存在采样",
     "xpack.lens.app.addToLibrary": "保存到库",
     "xpack.lens.app.cancel": "取消",
     "xpack.lens.app.cancelButtonAriaLabel": "返回到上一个应用而不保存更改",
