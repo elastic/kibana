@@ -50,19 +50,23 @@ depending on the connector type. For information about the parameter properties,
 refer to <<action-types>>.
 +
 --
-.Index connectors
+.Params properties
 [%collapsible%open]
 ====
+
+.Index connectors
+[%collapsible%open]
+=====
 `documents`::
 (Required, array of objects) The documents to index in JSON format.
 
 For more information, refer to
 {kibana-ref}/index-action-type.html[Index connector and action].
-====
+=====
 
 .Jira connectors
 [%collapsible%open]
-====
+=====
 `subAction`::
 (Required, string) The action to test. Valid values include: `fieldsByIssueType`,
 `getFields`, `getIncident`, `issue`, `issues`, `issueTypes`, and `pushToService`.
@@ -74,55 +78,55 @@ on the `subAction` value. This object is not required when `subAction` is
 +
 .Properties when `subAction` is `fieldsByIssueType`
 [%collapsible%open]
-=====
+======
 `id`:::
 (Required, string) The Jira issue type identifier. For example, `10024`.
-=====
+======
 +
 .Properties when `subAction` is `getIncident`
 [%collapsible%open]
-=====
+======
 `externalId`:::
 (Required, string) The Jira issue identifier. For example, `71778`.
-=====
+======
 +
 .Properties when `subAction` is `issue`
 [%collapsible%open]
-=====
+======
 `id`:::
 (Required, string) The Jira issue identifier. For example, `71778`.
-=====
+======
 +
 .Properties when `subAction` is `issues`
 [%collapsible%open]
-=====
+======
 `title`:::
 (Required, string) The title of the Jira issue.
-=====
+======
 +
 .Properties when `subAction` is `pushToService`
 [%collapsible%open]
-=====
+======
 comments:::
 (Optional, array of objects) Additional information that is sent to Jira.
 +
 .Properties of `comments`
 [%collapsible%open]
-======
+=======
 comment::::
 (string) A comment related to the incident. For example, describe how to
 troubleshoot the issue.
 
 commentId::::
 (integer) A unique identifier for the comment.
-======
+=======
 
 incident:::
 (Required, object) Information necessary to create or update a Jira incident.
 +
 .Properties of `incident`
 [%collapsible%open]
-======
+=======
 `description`::::
 (Optional, string) The details about the incident.
 
@@ -151,22 +155,23 @@ types of issues.
 `title`::::
 (Optional, string) A title for the incident, used for searching the contents of
 the knowledge base.
+=======
 ======
-=====
 
 For more information, refer to
 {kibana-ref}/jira-action-type.html[{jira} connector and action].
-====
+=====
 
 .Server log connectors
 [%collapsible%open]
-====
+=====
 `level`::
 (Optional, string) The log level of the message: `trace`, `debug`, `info`,
 `warn`, `error`, or `fatal`. Defaults to `info`.
 
 `message`::
 (Required, string) The message to log.
+=====
 ====
 --
 
