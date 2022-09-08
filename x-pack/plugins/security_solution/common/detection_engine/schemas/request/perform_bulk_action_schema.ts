@@ -6,7 +6,7 @@
  */
 
 import * as t from 'io-ts';
-import { NonEmptyArray, enumeration } from '@kbn/securitysolution-io-ts-types';
+import { NonEmptyArray, NonEmptyString, enumeration } from '@kbn/securitysolution-io-ts-types';
 
 import {
   throttle,
@@ -15,14 +15,7 @@ import {
   action_id as actionId,
 } from '@kbn/securitysolution-io-ts-alerting-types';
 
-import {
-  queryOrUndefined,
-  tags,
-  index,
-  timeline_id,
-  timeline_title,
-  interval,
-} from '../common/schemas';
+import { queryOrUndefined, tags, index, timeline_id, timeline_title } from '../common/schemas';
 
 export enum BulkAction {
   'enable' = 'enable',
@@ -113,10 +106,8 @@ export type BulkActionEditPayloadRuleActions = t.TypeOf<typeof bulkActionEditPay
 const bulkActionEditPayloadSchedule = t.type({
   type: t.literal(BulkActionEditType.set_schedule),
   value: t.type({
-    interval,
-    meta: t.type({
-      from: t.string,
-    }),
+    interval: NonEmptyString,
+    lookback: NonEmptyString,
   }),
 });
 export type BulkActionEditPayloadSchedule = t.TypeOf<typeof bulkActionEditPayloadSchedule>;

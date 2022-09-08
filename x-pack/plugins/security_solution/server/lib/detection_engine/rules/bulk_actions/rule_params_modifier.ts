@@ -96,7 +96,7 @@ const applyBulkActionEditToRuleParams = (
     // update look-back period in from and meta.from fields
     case BulkActionEditType.set_schedule: {
       const interval = parseInterval(action.value.interval) ?? moment.duration(0);
-      const parsedFrom = parseInterval(action.value.meta.from) ?? moment.duration(0);
+      const parsedFrom = parseInterval(action.value.lookback) ?? moment.duration(0);
 
       const from = parsedFrom.asSeconds() + interval.asSeconds();
 
@@ -104,7 +104,7 @@ const applyBulkActionEditToRuleParams = (
         ...ruleParams,
         meta: {
           ...ruleParams.meta,
-          from: action.value.meta.from,
+          from: action.value.lookback,
         },
         from: `now-${from}s`,
       };
