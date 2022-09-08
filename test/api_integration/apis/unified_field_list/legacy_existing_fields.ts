@@ -1,8 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import expect from '@kbn/expect';
@@ -185,7 +186,7 @@ export default ({ getService }: FtrProviderContext) => {
     describe('existence', () => {
       it('should find which fields exist in the sample documents', async () => {
         const { body } = await supertest
-          .post(`/api/lens/existing_fields/${encodeURIComponent('logstash-*')}`)
+          .post(`/api/unified_field_list/existing_fields/${encodeURIComponent('logstash-*')}`)
           .set(COMMON_HEADERS)
           .send({
             dslQuery: {
@@ -204,7 +205,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should succeed for thousands of fields', async () => {
         const { body } = await supertest
-          .post(`/api/lens/existing_fields/${encodeURIComponent('metricbeat-*')}`)
+          .post(`/api/unified_field_list/existing_fields/${encodeURIComponent('metricbeat-*')}`)
           .set(COMMON_HEADERS)
           .send({
             dslQuery: { match_all: {} },
@@ -255,7 +256,7 @@ export default ({ getService }: FtrProviderContext) => {
         ];
 
         const { body } = await supertest
-          .post(`/api/lens/existing_fields/${encodeURIComponent('logstash-*')}`)
+          .post(`/api/unified_field_list/existing_fields/${encodeURIComponent('logstash-*')}`)
           .set(COMMON_HEADERS)
           .send({
             dslQuery: {
