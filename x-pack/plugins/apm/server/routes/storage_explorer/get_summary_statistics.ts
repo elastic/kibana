@@ -34,6 +34,7 @@ import { environmentQuery } from '../../../common/utils/environment_query';
 import {
   getDocumentTypeFilterForTransactions,
   getProcessorEventForTransactions,
+  getDurationFieldForTransactions,
 } from '../../lib/helpers/transactions';
 import { calculateThroughputWithRange } from '../../lib/helpers/calculate_throughput';
 
@@ -102,10 +103,11 @@ export async function getTracesPerMinute({
         },
       },
       aggs: {
-        services: {
-          terms: {
-            field: SERVICE_NAME,
-            size: 1,
+        traces_count: {
+          value_count: {
+            field: getDurationFieldForTransactions(
+              searchAggregatedTransactions
+            ),
           },
         },
       },
@@ -115,11 +117,7 @@ export async function getTracesPerMinute({
   return calculateThroughputWithRange({
     start,
     end,
-    value:
-      response?.aggregations?.services.buckets.reduce(
-        (acc, curr) => acc + curr.doc_count,
-        response.aggregations.services.sum_other_doc_count ?? 0
-      ) ?? 0,
+    value: response?.aggregations?.traces_count.value ?? 0,
   });
 }
 

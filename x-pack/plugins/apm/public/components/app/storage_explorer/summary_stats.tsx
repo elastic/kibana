@@ -26,7 +26,6 @@ import { useApmRouter } from '../../../hooks/use_apm_router';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { asTransactionRate } from '../../../../common/utils/formatters';
-import { EuiSpacer } from '@elastic/eui';
 
 const INITIAL_DATA = {
   estimatedSize: 0,
@@ -84,92 +83,90 @@ export function SummaryStats() {
   const loading = status === FETCH_STATUS.LOADING;
 
   return (
-    <>
-      <EuiPanel hasBorder={true} hasShadow={false} paddingSize="l">
-        {loading && (
-          <EuiText textAlign="center">
-            <EuiLoadingSpinner size="l" />
-          </EuiText>
-        )}
-        {!loading && (
-          <EuiFlexGroup justifyContent="spaceBetween">
-            <EuiFlexItem>
-              <EuiFlexGroup gutterSize="xl">
-                <SummaryMetric
-                  label={i18n.translate(
-                    'xpack.apm.storageExplorer.summary.totalSize',
-                    {
-                      defaultMessage: 'Total APM size',
-                    }
-                  )}
-                  value={asDynamicBytes(data?.estimatedSize)}
-                  color={euiTheme.colors.primary}
-                />
-                <SummaryMetric
-                  label={i18n.translate(
-                    'xpack.apm.storageExplorer.summary.dailyDataGeneration',
-                    {
-                      defaultMessage: 'Daily data generation',
-                    }
-                  )}
-                  value={asDynamicBytes(data?.dailyDataGeneration)}
-                  color={euiTheme.colors.danger}
-                />
-                <SummaryMetric
-                  label={i18n.translate(
-                    'xpack.apm.storageExplorer.summary.tracesPerMinute',
-                    {
-                      defaultMessage: 'Traces per minute',
-                    }
-                  )}
-                  value={asTransactionRate(data?.tracesPerMinute)}
-                  color={euiTheme.colors.accent}
-                />
-                <SummaryMetric
-                  label={i18n.translate(
-                    'xpack.apm.storageExplorer.summary.numberOfServices',
-                    {
-                      defaultMessage: 'Number of services',
-                    }
-                  )}
-                  value={data?.numberOfServices.toString()}
-                  color={euiTheme.colors.success}
-                />
-              </EuiFlexGroup>
-            </EuiFlexItem>
+    <EuiPanel hasBorder={true} hasShadow={false} paddingSize="l">
+      {loading && (
+        <EuiText textAlign="center">
+          <EuiLoadingSpinner size="l" />
+        </EuiText>
+      )}
+      {!loading && (
+        <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiFlexItem>
+            <EuiFlexGroup gutterSize="xl">
+              <SummaryMetric
+                label={i18n.translate(
+                  'xpack.apm.storageExplorer.summary.totalSize',
+                  {
+                    defaultMessage: 'Total APM size',
+                  }
+                )}
+                value={asDynamicBytes(data?.estimatedSize)}
+                color={euiTheme.colors.primary}
+              />
+              <SummaryMetric
+                label={i18n.translate(
+                  'xpack.apm.storageExplorer.summary.dailyDataGeneration',
+                  {
+                    defaultMessage: 'Daily data generation',
+                  }
+                )}
+                value={asDynamicBytes(data?.dailyDataGeneration)}
+                color={euiTheme.colors.danger}
+              />
+              <SummaryMetric
+                label={i18n.translate(
+                  'xpack.apm.storageExplorer.summary.tracesPerMinute',
+                  {
+                    defaultMessage: 'Traces per minute',
+                  }
+                )}
+                value={asTransactionRate(data?.tracesPerMinute)}
+                color={euiTheme.colors.accent}
+              />
+              <SummaryMetric
+                label={i18n.translate(
+                  'xpack.apm.storageExplorer.summary.numberOfServices',
+                  {
+                    defaultMessage: 'Number of services',
+                  }
+                )}
+                value={data?.numberOfServices.toString()}
+                color={euiTheme.colors.success}
+              />
+            </EuiFlexGroup>
+          </EuiFlexItem>
 
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup direction="column" justifyContent="spaceBetween">
-                <EuiFlexItem>
-                  <EuiLink href={serviceInventoryLink}>
-                    {i18n.translate(
-                      'xpack.apm.storageExplorer.summary.serviceInventoryLink',
-                      {
-                        defaultMessage: 'Go to Service Inventory',
-                      }
-                    )}
-                  </EuiLink>
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiLink
-                    href={core.http.basePath.prepend(
-                      '/app/management/data/index_management/data_streams'
-                    )}
-                  >
-                    {i18n.translate(
-                      'xpack.apm.storageExplorer.summary.indexManagementLink',
-                      {
-                        defaultMessage: 'Go to Index Management',
-                      }
-                    )}
-                  </EuiLink>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        )}
-      </EuiPanel>
-    </>
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup direction="column" justifyContent="spaceBetween">
+              <EuiFlexItem>
+                <EuiLink href={serviceInventoryLink}>
+                  {i18n.translate(
+                    'xpack.apm.storageExplorer.summary.serviceInventoryLink',
+                    {
+                      defaultMessage: 'Go to Service Inventory',
+                    }
+                  )}
+                </EuiLink>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiLink
+                  href={core.http.basePath.prepend(
+                    '/app/management/data/index_management/data_streams'
+                  )}
+                >
+                  {i18n.translate(
+                    'xpack.apm.storageExplorer.summary.indexManagementLink',
+                    {
+                      defaultMessage: 'Go to Index Management',
+                    }
+                  )}
+                </EuiLink>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      )}
+    </EuiPanel>
   );
 }
 
