@@ -18,6 +18,7 @@ import { Indicator } from '../../../../common/types/indicator';
 import { useKibana } from '../../../hooks/use_kibana';
 import { THREAT_QUERY_BASE } from '../../../../common/constants';
 import { useSourcererDataView } from './use_sourcerer_data_view';
+import { threatIndicatorNamesOriginScript, threatIndicatorNamesScript } from '../lib/display_name';
 
 const PAGE_SIZES = [10, 25, 50];
 
@@ -125,6 +126,20 @@ export const useIndicators = ({
                 from,
                 fields: [{ field: '*', include_unmapped: true }],
                 query: queryToExecute,
+                runtime_mappings: {
+                  'threat.indicator.name': {
+                    type: 'keyword',
+                    script: {
+                      source: threatIndicatorNamesScript(),
+                    },
+                  },
+                  'threat.indicator.name_origin': {
+                    type: 'keyword',
+                    script: {
+                      source: threatIndicatorNamesOriginScript(),
+                    },
+                  },
+                },
               },
             },
           },
@@ -138,12 +153,12 @@ export const useIndicators = ({
             setIndicatorCount(response.rawResponse.hits.total || 0);
 
             if (isCompleteResponse(response)) {
+              setLoading(false);
               searchSubscription$.current?.unsubscribe();
             } else if (isErrorResponse(response)) {
+              setLoading(false);
               searchSubscription$.current?.unsubscribe();
             }
-
-            setLoading(false);
           },
           error: (msg) => {
             searchService.showError(msg);

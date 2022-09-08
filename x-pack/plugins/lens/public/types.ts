@@ -26,7 +26,7 @@ import type {
 } from '@kbn/ui-actions-plugin/public';
 import type { ClickTriggerEvent, BrushTriggerEvent } from '@kbn/charts-plugin/public';
 import type { IndexPatternAggRestrictions } from '@kbn/data-plugin/public';
-import type { FieldSpec } from '@kbn/data-views-plugin/common';
+import type { FieldSpec, DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { FieldFormatParams } from '@kbn/field-formats-plugin/common';
 import type { DraggingIdentifier, DragDropIdentifier, DragContextState } from './drag_drop';
 import type { DateRange, LayerType, SortingHint } from '../common';
@@ -47,6 +47,7 @@ import type { LensInspector } from './lens_inspector_service';
 import type { FormatSelectorOptions } from './indexpattern_datasource/dimension_panel/format_selector';
 import type { DataViewsState } from './state_management/types';
 import type { IndexPatternServiceAPI } from './indexpattern_service/service';
+import type { Document } from './persistence/saved_object_store';
 
 export interface IndexPatternRef {
   id: string;
@@ -69,11 +70,18 @@ export interface IndexPattern {
     }
   >;
   hasRestrictions: boolean;
+  spec?: DataViewSpec;
 }
 
 export type IndexPatternField = FieldSpec & {
   displayName: string;
   aggregationRestrictions?: Partial<IndexPatternAggRestrictions>;
+  /**
+   * Map of fields which can be used, but may fail partially (ranked lower than others)
+   */
+  partiallyApplicableFunctions?: Partial<Record<string, boolean>>;
+  timeSeriesMetricType?: 'histogram' | 'summary' | 'gauge' | 'counter';
+  timeSeriesRollup?: boolean;
   meta?: boolean;
   runtime?: boolean;
 };
@@ -340,6 +348,12 @@ export interface Datasource<T = unknown, P = unknown> {
     indexPatternId: string,
     layerId?: string
   ) => T;
+  onIndexPatternRename?: (state: T, oldIndexPatternId: string, newIndexPatternId: string) => T;
+  triggerOnIndexPatternChange?: (
+    state: T,
+    oldIndexPatternId: string,
+    newIndexPatternId: string
+  ) => void;
 
   onRefreshIndexPattern: () => void;
 
@@ -374,6 +388,15 @@ export interface Datasource<T = unknown, P = unknown> {
   ) => Array<DatasourceSuggestion<T>>;
 
   getPublicAPI: (props: PublicAPIProps<T>) => DatasourcePublicAPI;
+  /**
+   * uniqueLabels of dimensions exposed for aria-labels of dragged dimensions
+   */
+  uniqueLabels: (state: T) => Record<string, string>;
+  /**
+   * Check the internal state integrity and returns a list of missing references
+   */
+  checkIntegrity: (state: T, indexPatterns: IndexPatternMap) => string[];
+
   getErrorMessages: (
     state: T,
     indexPatterns: Record<string, IndexPattern>
@@ -384,14 +407,7 @@ export interface Datasource<T = unknown, P = unknown> {
         fixAction?: { label: string; newState: () => Promise<T> };
       }>
     | undefined;
-  /**
-   * uniqueLabels of dimensions exposed for aria-labels of dragged dimensions
-   */
-  uniqueLabels: (state: T) => Record<string, string>;
-  /**
-   * Check the internal state integrity and returns a list of missing references
-   */
-  checkIntegrity: (state: T, indexPatterns: IndexPatternMap) => string[];
+
   /**
    * The frame calls this function to display warnings about visualization
    */
@@ -400,6 +416,9 @@ export interface Datasource<T = unknown, P = unknown> {
     frame: FramePublicAPI,
     setState: StateSetter<T>
   ) => React.ReactNode[] | undefined;
+
+  getDeprecationMessages?: (state: T) => React.ReactNode[] | undefined;
+
   /**
    * Checks if the visualization created is time based, for example date histogram
    */
@@ -596,6 +615,8 @@ export type FieldOnlyDataType =
   | 'histogram'
   | 'geo_point'
   | 'geo_shape'
+  | 'counter'
+  | 'gauge'
   | 'murmur3';
 export type DataType = 'string' | 'number' | 'date' | 'boolean' | FieldOnlyDataType;
 
@@ -906,7 +927,7 @@ export interface Visualization<T = unknown> {
   /** Optional, if the visualization supports multiple layers */
   removeLayer?: (state: T, layerId: string) => T;
   /** Track added layers in internal state */
-  appendLayer?: (state: T, layerId: string, type: LayerType) => T;
+  appendLayer?: (state: T, layerId: string, type: LayerType, indexPatternId?: string) => T;
 
   /** Retrieve a list of supported layer types with initialization data */
   getSupportedLayers: (
@@ -1083,6 +1104,7 @@ export interface Visualization<T = unknown> {
    * This method makes it aware of the change and produces a new updated state
    */
   onIndexPatternChange?: (state: T, indexPatternId: string, layerId?: string) => T;
+  onIndexPatternRename?: (state: T, oldIndexPatternId: string, newIndexPatternId: string) => T;
   /**
    * Gets custom display options for showing the visualization.
    */
@@ -1175,4 +1197,5 @@ export type LensTopNavMenuEntryGenerator = (props: {
   query: Query;
   filters: Filter[];
   initialContext?: VisualizeFieldContext | VisualizeEditorContext;
+  currentDoc: Document | undefined;
 }) => undefined | TopNavMenuData;

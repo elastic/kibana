@@ -267,14 +267,18 @@ function PrimaryMetricEditor(props: SubProps) {
 
   const hasDynamicColoring = Boolean(state?.palette);
 
-  const startWithPercentPalette = Boolean(state.maxAccessor || state.breakdownByAccessor);
+  const supportsPercentPalette = Boolean(
+    state.maxAccessor ||
+      (state.breakdownByAccessor && !state.collapseFn) ||
+      state?.palette?.params?.rangeType === 'percent'
+  );
 
   const activePalette = state?.palette || {
     type: 'palette',
-    name: (startWithPercentPalette ? defaultPercentagePaletteParams : defaultNumberPaletteParams)
+    name: (supportsPercentPalette ? defaultPercentagePaletteParams : defaultNumberPaletteParams)
       .name,
     params: {
-      ...(startWithPercentPalette ? defaultPercentagePaletteParams : defaultNumberPaletteParams),
+      ...(supportsPercentPalette ? defaultPercentagePaletteParams : defaultNumberPaletteParams),
     },
   };
 
@@ -282,7 +286,8 @@ function PrimaryMetricEditor(props: SubProps) {
     {
       metric: state.metricAccessor!,
       max: state.maxAccessor,
-      breakdownBy: state.breakdownByAccessor,
+      // if we're collapsing, pretend like there's no breakdown to match the activeData
+      breakdownBy: !state.collapseFn ? state.breakdownByAccessor : undefined,
     },
     frame.activeData?.[state.layerId]
   );
@@ -400,11 +405,7 @@ function PrimaryMetricEditor(props: SubProps) {
                     palettes={props.paletteService}
                     activePalette={activePalette}
                     dataBounds={currentMinMax}
-                    showRangeTypeSelector={Boolean(
-                      state.breakdownByAccessor ||
-                        state.maxAccessor ||
-                        activePalette.params?.rangeType === 'percent'
-                    )}
+                    showRangeTypeSelector={supportsPercentPalette}
                     setPalette={(newPalette) => {
                       setState({
                         ...state,

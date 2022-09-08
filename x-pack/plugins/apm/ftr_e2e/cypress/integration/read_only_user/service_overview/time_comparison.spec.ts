@@ -50,9 +50,9 @@ const apisToIntercept = [
   },
 ];
 
-describe.skip('Service overview: Time Comparison', () => {
-  before(async () => {
-    await synthtrace.index(
+describe('Service overview: Time Comparison', () => {
+  before(() => {
+    synthtrace.index(
       opbeans({
         from: new Date(start).getTime(),
         to: new Date(end).getTime(),
@@ -60,72 +60,45 @@ describe.skip('Service overview: Time Comparison', () => {
     );
   });
 
-  after(async () => {
-    await synthtrace.clean();
+  after(() => {
+    synthtrace.clean();
   });
 
   beforeEach(() => {
+    cy.intercept(
+      'GET',
+      '/internal/apm/services/opbeans-java/transactions/charts/latency?*'
+    ).as('latencyChartRequest');
+    cy.intercept('GET', '/internal/apm/services/opbeans-java/throughput?*').as(
+      'throughputChartRequest'
+    );
+    cy.intercept(
+      'GET',
+      '/internal/apm/services/opbeans-java/transactions/charts/error_rate?*'
+    ).as('errorRateChartRequest');
+    cy.intercept(
+      'GET',
+      '/internal/apm/services/opbeans-java/transactions/groups/detailed_statistics?*'
+    ).as('transactionGroupsDetailedRequest');
+    cy.intercept(
+      'POST',
+      '/internal/apm/services/opbeans-java/errors/groups/detailed_statistics?*'
+    ).as('errorGroupsDetailedRequest');
+    cy.intercept(
+      'GET',
+      '/internal/apm/services/opbeans-java/service_overview_instances/detailed_statistics?*'
+    ).as('instancesDetailedRequest');
     cy.loginAsViewerUser();
   });
 
   it('enables by default the time comparison feature with Last 24 hours selected', () => {
-    cy.visit(serviceOverviewPath);
+    cy.visitKibana(serviceOverviewPath);
     cy.url().should('include', 'comparisonEnabled=true');
     cy.url().should('include', 'offset=1d');
   });
 
-  describe('when comparison is toggled off', () => {
-    it('disables select box', () => {
-      cy.visit(serviceOverviewHref);
-      cy.contains('opbeans-java');
-
-      // Comparison is enabled by default
-      cy.get('[data-test-subj="comparisonSelect"]').should('be.enabled');
-
-      // toggles off comparison
-      cy.contains('Comparison').click();
-      cy.get('[data-test-subj="comparisonSelect"]').should('be.disabled');
-    });
-
-    it('calls APIs without comparison time range', () => {
-      apisToIntercept.map(({ endpoint, name }) => {
-        cy.intercept('GET', endpoint).as(name);
-      });
-      cy.visit(serviceOverviewHref);
-
-      cy.get('[data-test-subj="comparisonSelect"]').should('be.enabled');
-      const offset = `offset=1d`;
-
-      // When the page loads it fetches all APIs with comparison time range
-      cy.wait(apisToIntercept.map(({ name }) => `@${name}`)).then(
-        (interceptions) => {
-          interceptions.map((interception) => {
-            expect(interception.request.url).include(offset);
-          });
-        }
-      );
-
-      cy.contains('opbeans-java');
-
-      // toggles off comparison
-      cy.contains('Comparison').click();
-      cy.get('[data-test-subj="comparisonSelect"]').should('be.disabled');
-      // When comparison is disabled APIs are called withou comparison time range
-      cy.wait(apisToIntercept.map(({ name }) => `@${name}`)).then(
-        (interceptions) => {
-          interceptions.map((interception) => {
-            expect(interception.request.url).not.include(offset);
-          });
-        }
-      );
-    });
-  });
-
   it('changes comparison type', () => {
-    apisToIntercept.map(({ endpoint, name }) => {
-      cy.intercept('GET', endpoint).as(name);
-    });
-    cy.visit(serviceOverviewPath);
+    cy.visitKibana(serviceOverviewPath);
     cy.contains('opbeans-java');
     // opens the page with "Day before" selected
     cy.get('[data-test-subj="comparisonSelect"]').should('have.value', '1d');
@@ -136,7 +109,7 @@ describe.skip('Service overview: Time Comparison', () => {
   });
 
   it('changes comparison type when a new time range is selected', () => {
-    cy.visit(serviceOverviewHref);
+    cy.visitKibana(serviceOverviewHref);
     cy.contains('opbeans-java');
     // Time comparison default value
     cy.get('[data-test-subj="comparisonSelect"]').should('have.value', '1d');
@@ -186,10 +159,7 @@ describe.skip('Service overview: Time Comparison', () => {
   });
 
   it('hovers over throughput chart shows previous and current period', () => {
-    apisToIntercept.map(({ endpoint, name }) => {
-      cy.intercept('GET', endpoint).as(name);
-    });
-    cy.visit(
+    cy.visitKibana(
       url.format({
         pathname: serviceOverviewPath,
         query: {
@@ -208,5 +178,49 @@ describe.skip('Service overview: Time Comparison', () => {
 
     cy.contains('Throughput');
     cy.contains('0 tpm');
+  });
+
+  describe('when comparison is toggled off', () => {
+    it('disables select box', () => {
+      cy.visitKibana(serviceOverviewHref);
+      cy.contains('opbeans-java');
+
+      // Comparison is enabled by default
+      cy.get('[data-test-subj="comparisonSelect"]').should('be.enabled');
+
+      // toggles off comparison
+      cy.contains('Comparison').click();
+      cy.get('[data-test-subj="comparisonSelect"]').should('be.disabled');
+    });
+
+    it('calls APIs without comparison time range', () => {
+      cy.visitKibana(serviceOverviewHref);
+
+      cy.get('[data-test-subj="comparisonSelect"]').should('be.enabled');
+      const offset = `offset=1d`;
+
+      // When the page loads it fetches all APIs with comparison time range
+      cy.wait(apisToIntercept.map(({ name }) => `@${name}`)).then(
+        (interceptions) => {
+          interceptions.map((interception) => {
+            expect(interception.request.url).include(offset);
+          });
+        }
+      );
+
+      cy.contains('opbeans-java');
+
+      // toggles off comparison
+      cy.contains('Comparison').click();
+      cy.get('[data-test-subj="comparisonSelect"]').should('be.disabled');
+      // When comparison is disabled APIs are called withou comparison time range
+      cy.wait(apisToIntercept.map(({ name }) => `@${name}`)).then(
+        (interceptions) => {
+          interceptions.map((interception) => {
+            expect(interception.request.url).not.include(offset);
+          });
+        }
+      );
+    });
   });
 });

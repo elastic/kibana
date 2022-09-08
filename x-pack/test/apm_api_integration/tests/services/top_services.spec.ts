@@ -33,7 +33,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   registry.when(
     'APM Services Overview with a basic license when data is not generated',
-    { config: 'basic', archives: ['apm_mappings_only_8.0.0'] },
+    { config: 'basic', archives: [] },
     () => {
       it('handles the empty state', async () => {
         const response = await apmApiClient.readUser({
@@ -57,7 +57,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   registry.when(
     'APM Services Overview with a basic license when data is generated',
-    { config: 'basic', archives: ['apm_mappings_only_8.0.0'] },
+    { config: 'basic', archives: [] },
     () => {
       let response: {
         status: number;

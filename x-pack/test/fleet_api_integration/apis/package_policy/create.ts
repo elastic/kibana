@@ -7,33 +7,33 @@
 import type { Client } from '@elastic/elasticsearch';
 import expect from '@kbn/expect';
 import { Installation } from '@kbn/fleet-plugin/common';
+import uuid from 'uuid/v4';
+
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
+
   const es: Client = getService('es');
   const supertest = getService('supertest');
+  const kibanaServer = getService('kibanaServer');
 
   const getPackagePolicyById = async (id: string) => {
     const { body } = await supertest.get(`/api/fleet/package_policies/${id}`);
     return body;
   };
-  // use function () {} and not () => {} here
-  // because `this` has to point to the Mocha context
-  // see https://mochajs.org/#arrow-functions
-
-  describe('Package Policy - create', async function () {
+  describe('Package Policy - create', () => {
     skipIfNoDockerRegistry(providerContext);
     let agentPolicyId: string;
     before(async () => {
-      await getService('esArchiver').load('x-pack/test/functional/es_archives/empty_kibana');
+      await kibanaServer.savedObjects.cleanStandardList();
       await getService('esArchiver').load(
         'x-pack/test/functional/es_archives/fleet/empty_fleet_server'
       );
     });
     after(async () => {
-      await getService('esArchiver').unload('x-pack/test/functional/es_archives/empty_kibana');
+      await kibanaServer.savedObjects.cleanStandardList();
       await getService('esArchiver').unload(
         'x-pack/test/functional/es_archives/fleet/empty_fleet_server'
       );
@@ -44,9 +44,10 @@ export default function (providerContext: FtrProviderContext) {
         .post(`/api/fleet/agent_policies`)
         .set('kbn-xsrf', 'xxxx')
         .send({
-          name: 'Test policy',
+          name: `Test policy ${uuid()}`,
           namespace: 'default',
-        });
+        })
+        .expect(200);
       agentPolicyId = agentPolicyResponse.item.id;
     });
 
@@ -68,7 +69,8 @@ export default function (providerContext: FtrProviderContext) {
           name: `Hosted policy from ${Date.now()}`,
           namespace: 'default',
           is_managed: true,
-        });
+        })
+        .expect(200);
 
       // try to add an integration to the hosted policy
       const { body: responseWithoutForce } = await supertest
@@ -80,7 +82,6 @@ export default function (providerContext: FtrProviderContext) {
           namespace: 'default',
           policy_id: hostedPolicy.id,
           enabled: true,
-          output_id: '',
           inputs: [],
           package: {
             name: 'filetest',
@@ -106,7 +107,6 @@ export default function (providerContext: FtrProviderContext) {
           namespace: 'default',
           policy_id: hostedPolicy.id,
           enabled: true,
-          output_id: '',
           inputs: [],
           package: {
             name: 'filetest',
@@ -134,7 +134,6 @@ export default function (providerContext: FtrProviderContext) {
           namespace: 'default',
           policy_id: agentPolicyId,
           enabled: true,
-          output_id: '',
           inputs: [],
           package: {
             name: 'filetest',
@@ -146,8 +145,8 @@ export default function (providerContext: FtrProviderContext) {
       const { body } = await supertest
         .get(`/internal/saved_objects_tagging/tags/_find?page=1&perPage=10000`)
         .expect(200);
-      expect(body.tags.find((tag: any) => tag.name === 'Managed').relationCount).to.be(6);
-      expect(body.tags.find((tag: any) => tag.name === 'For File Tests').relationCount).to.be(6);
+      expect(body.tags.find((tag: any) => tag.name === 'Managed').relationCount).to.be(9);
+      expect(body.tags.find((tag: any) => tag.name === 'For File Tests').relationCount).to.be(9);
     });
 
     it('should return a 400 with an empty namespace', async function () {
@@ -160,7 +159,6 @@ export default function (providerContext: FtrProviderContext) {
           namespace: '',
           policy_id: agentPolicyId,
           enabled: true,
-          output_id: '',
           inputs: [],
           package: {
             name: 'filetest',
@@ -181,7 +179,6 @@ export default function (providerContext: FtrProviderContext) {
           namespace: 'InvalidNamespace',
           policy_id: agentPolicyId,
           enabled: true,
-          output_id: '',
           inputs: [],
           package: {
             name: 'filetest',
@@ -200,7 +197,6 @@ export default function (providerContext: FtrProviderContext) {
             'testlength😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀',
           policy_id: agentPolicyId,
           enabled: true,
-          output_id: '',
           inputs: [],
           package: {
             name: 'filetest',
@@ -221,7 +217,6 @@ export default function (providerContext: FtrProviderContext) {
           namespace: 'default',
           policy_id: agentPolicyId,
           enabled: true,
-          output_id: '',
           inputs: [],
           package: {
             name: 'endpoint',
@@ -240,7 +235,6 @@ export default function (providerContext: FtrProviderContext) {
           namespace: 'default',
           policy_id: agentPolicyId,
           enabled: true,
-          output_id: '',
           inputs: [],
           package: {
             name: 'endpoint',
@@ -261,7 +255,6 @@ export default function (providerContext: FtrProviderContext) {
           namespace: 'default',
           policy_id: agentPolicyId,
           enabled: true,
-          output_id: '',
           inputs: [],
           package: {
             name: 'filetest',
@@ -279,7 +272,6 @@ export default function (providerContext: FtrProviderContext) {
           namespace: 'default',
           policy_id: agentPolicyId,
           enabled: true,
-          output_id: '',
           inputs: [],
           package: {
             name: 'filetest',
@@ -295,7 +287,7 @@ export default function (providerContext: FtrProviderContext) {
         .post(`/api/fleet/agent_policies`)
         .set('kbn-xsrf', 'xxxx')
         .send({
-          name: 'Test policy 2',
+          name: `Test policy ${uuid()}`,
           namespace: 'default',
         });
       const otherAgentPolicyId = agentPolicyResponse.item.id;
@@ -309,7 +301,6 @@ export default function (providerContext: FtrProviderContext) {
           namespace: 'default',
           policy_id: otherAgentPolicyId,
           enabled: true,
-          output_id: '',
           inputs: [],
           package: {
             name: 'filetest',
@@ -327,7 +318,6 @@ export default function (providerContext: FtrProviderContext) {
           namespace: 'default',
           policy_id: agentPolicyId,
           enabled: true,
-          output_id: '',
           inputs: [],
           package: {
             name: 'filetest',
@@ -348,7 +338,6 @@ export default function (providerContext: FtrProviderContext) {
           namespace: 'default',
           policy_id: agentPolicyId,
           enabled: true,
-          output_id: '',
           inputs: [
             {
               enabled: true,
@@ -384,7 +373,6 @@ export default function (providerContext: FtrProviderContext) {
           namespace: 'default',
           policy_id: agentPolicyId,
           enabled: true,
-          output_id: '',
           inputs: [
             {
               enabled: true,
@@ -424,7 +412,6 @@ export default function (providerContext: FtrProviderContext) {
           namespace: 'default',
           policy_id: agentPolicyId,
           enabled: true,
-          output_id: '',
           inputs: [
             {
               enabled: true,
@@ -488,7 +475,6 @@ export default function (providerContext: FtrProviderContext) {
             namespace: 'default',
             policy_id: agentPolicyId,
             enabled: true,
-            output_id: '',
             inputs: [
               {
                 type: 'logfile',
@@ -525,7 +511,6 @@ export default function (providerContext: FtrProviderContext) {
             namespace: 'default',
             policy_id: agentPolicyId,
             enabled: true,
-            output_id: '',
             inputs: [
               {
                 type: 'logfile',
@@ -562,7 +547,6 @@ export default function (providerContext: FtrProviderContext) {
             namespace: 'default',
             policy_id: agentPolicyId,
             enabled: true,
-            output_id: '',
             inputs: [
               {
                 type: 'logfile',

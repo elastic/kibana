@@ -12,15 +12,22 @@ import { useActions, useValues } from 'kea';
 import { EuiConfirmModal } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { ingestionMethodToText } from '../../utils/indices';
+
 import { IndicesLogic } from './indices_logic';
 
 export const DeleteIndexModal: React.FC = () => {
   const { closeDeleteModal, deleteIndex } = useActions(IndicesLogic);
-  const { deleteModalIndexName: indexName, isDeleteModalVisible } = useValues(IndicesLogic);
+  const {
+    deleteModalIndexName: indexName,
+    deleteModalIngestionMethod: ingestionMethod,
+    isDeleteModalVisible,
+  } = useValues(IndicesLogic);
   return isDeleteModalVisible ? (
     <EuiConfirmModal
       title={i18n.translate('xpack.enterpriseSearch.content.searchIndices.deleteModal.title', {
-        defaultMessage: 'Delete index',
+        defaultMessage: 'Are you sure you want to delete {indexName}',
+        values: { indexName },
       })}
       onCancel={() => {
         closeDeleteModal();
@@ -48,28 +55,10 @@ export const DeleteIndexModal: React.FC = () => {
           'xpack.enterpriseSearch.content.searchIndices.deleteModal.delete.description',
           {
             defaultMessage:
-              'You are about to delete the index {indexName}. This will also delete any associated connector documents or crawlers.',
+              'Deleting this index will also delete all of its data and its {ingestionMethod} configuration. Any associated search engines will no longer be able to access any data stored in this index.This can not be undone.',
             values: {
-              indexName,
+              ingestionMethod: ingestionMethodToText(ingestionMethod),
             },
-          }
-        )}
-      </p>
-      <p>
-        {i18n.translate(
-          'xpack.enterpriseSearch.content.searchIndices.deleteModal.searchEngine.description',
-          {
-            defaultMessage:
-              'Any associated search engines will no longer be able to access any data stored in this index.',
-          }
-        )}
-      </p>
-      <p>
-        {i18n.translate(
-          'xpack.enterpriseSearch.content.searchIndices.deleteModal.irrevokable.description',
-          {
-            defaultMessage:
-              "You can't recover a deleted index, connector or crawler configuration. Make sure you have appropriate backups.",
           }
         )}
       </p>

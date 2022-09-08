@@ -6,7 +6,7 @@
  */
 
 import { EuiSpacer } from '@elastic/eui';
-import React from 'react';
+import React, { useMemo } from 'react';
 
 import deepEqual from 'fast-deep-equal';
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -78,12 +78,22 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
   const { alertId, isAlert, hostName, ruleName, timestamp } =
     useBasicDataFromDetailsData(detailsData);
 
-  const [hostRiskLoading, { data, isModuleEnabled }] = useHostRiskScore({
-    filterQuery: hostName ? buildHostNamesFilter([hostName]) : undefined,
-    pagination: {
+  const filterQuery = useMemo(
+    () => (hostName ? buildHostNamesFilter([hostName]) : undefined),
+    [hostName]
+  );
+
+  const pagination = useMemo(
+    () => ({
       cursorStart: 0,
       querySize: 1,
-    },
+    }),
+    []
+  );
+
+  const [hostRiskLoading, { data, isModuleEnabled }] = useHostRiskScore({
+    filterQuery,
+    pagination,
   });
 
   const hostRisk: HostRisk | null = data

@@ -12,6 +12,7 @@ import { useParams } from 'react-router-dom';
 
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 
+import { InputsModelId } from '../../../common/store/inputs/constants';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { LastEventIndexKey } from '../../../../common/search_strategy';
 import type { FlowTargetSourceDest } from '../../../../common/search_strategy';
@@ -46,6 +47,7 @@ import { hasMlUserPermissions } from '../../../../common/machine_learning/has_ml
 import { useMlCapabilities } from '../../../common/components/ml/hooks/use_ml_capabilities';
 import { navTabsNetworkDetails } from './nav_tabs';
 import { NetworkDetailsTabs } from './details_tabs';
+import { useInstalledSecurityJobsIds } from '../../../common/components/ml/hooks/use_installed_security_jobs';
 
 export { getTrailingBreadcrumbs } from './utils';
 
@@ -74,7 +76,7 @@ const NetworkDetailsComponent: React.FC = () => {
       const fromTo = scoreIntervalToDateTime(score, interval);
       dispatch(
         setAbsoluteRangeDatePicker({
-          id: 'global',
+          id: InputsModelId.global,
           from: fromTo.from,
           to: fromTo.to,
         })
@@ -114,11 +116,14 @@ const NetworkDetailsComponent: React.FC = () => {
     ip,
   });
 
+  const { jobIds } = useInstalledSecurityJobsIds();
   const [isLoadingAnomaliesData, anomaliesData] = useAnomaliesTableData({
     criteriaFields: networkToCriteria(detailName, flowTarget),
     startDate: from,
     endDate: to,
     skip: isInitializing,
+    jobIds,
+    aggregationInterval: 'auto',
   });
 
   const headerDraggableArguments = useMemo(
@@ -137,7 +142,7 @@ const NetworkDetailsComponent: React.FC = () => {
       {indicesExist ? (
         <>
           <FiltersGlobal>
-            <SiemSearchBar indexPattern={indexPattern} id="global" />
+            <SiemSearchBar indexPattern={indexPattern} id={InputsModelId.global} />
           </FiltersGlobal>
 
           <SecuritySolutionPageWrapper>

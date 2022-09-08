@@ -31,7 +31,7 @@ import {
 } from '../../../palettes';
 
 import { RelatedIcon } from '../assets/related';
-import { isLastItem } from './utils';
+import { getAutoBoundInformation, isLastItem } from './utils';
 import { isValidColor } from '../utils';
 import {
   ColorRangeDeleteButton,
@@ -67,15 +67,6 @@ const getMode = (
   return (isLast ? checkIsMaxContinuity : checkIsMinContinuity)(continuity) ? 'auto' : 'edit';
 };
 
-const getPlaceholderForAutoMode = (isLast: boolean) =>
-  isLast
-    ? i18n.translate('coloring.dynamicColoring.customPalette.maxValuePlaceholder', {
-        defaultMessage: 'Max. value',
-      })
-    : i18n.translate('coloring.dynamicColoring.customPalette.minValuePlaceholder', {
-        defaultMessage: 'Min. value',
-      });
-
 const getActionButton = (mode: ColorRangeItemMode) => {
   if (mode === 'value') {
     return ColorRangeDeleteButton;
@@ -86,7 +77,7 @@ const getActionButton = (mode: ColorRangeItemMode) => {
 const getAppend = (rangeType: CustomPaletteParams['rangeType'], mode: ColorRangeItemMode) => {
   const items: EuiFieldNumberProps['append'] = [];
 
-  if (rangeType === 'percent' && mode !== 'auto') {
+  if (rangeType === 'percent') {
     items.push('%');
   }
 
@@ -175,6 +166,12 @@ export function ColorRangeItem({
     [euiTheme.size.xl]
   );
 
+  const autoBoundInfo = getAutoBoundInformation({
+    isPercentage: rangeType === 'percent',
+    isUpper: isLast,
+    isAuto: mode === 'auto',
+  });
+
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s" wrap={false} responsive={false}>
       <EuiFlexItem grow={false} css={isLast ? styles : null}>
@@ -220,7 +217,7 @@ export function ColorRangeItem({
           }
           disabled={isDisabled}
           onChange={onValueChange}
-          placeholder={mode === 'auto' ? getPlaceholderForAutoMode(isLast) : ''}
+          placeholder={mode === 'auto' ? autoBoundInfo.representation : ''}
           append={getAppend(rangeType, mode)}
           onBlur={onLeaveFocus}
           data-test-subj={`lnsPalettePanel_dynamicColoring_range_value_${index}`}
@@ -242,6 +239,8 @@ export function ColorRangeItem({
             rangeType={rangeType}
             colorRanges={colorRanges}
             dispatch={dispatch}
+            tooltipContent={autoBoundInfo.actionDescription}
+            iconFactory={autoBoundInfo.icon}
             accessor={accessor}
           />
         </EuiFlexItem>

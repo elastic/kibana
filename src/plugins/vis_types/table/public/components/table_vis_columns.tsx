@@ -61,7 +61,8 @@ export const createGridColumns = (
     const cellActions = formattedColumn.filterable
       ? [
           ({ rowIndex, columnId, Component }: EuiDataGridColumnCellActionProps) => {
-            const rowValue = rows[rowIndex][columnId];
+            // incoming data might change and put the current page out of bounds - check whether row actually exists
+            const rowValue = rows[rowIndex]?.[columnId];
             if (rowValue == null) return null;
             const cellContent = formattedColumn.formatter.convert(rowValue);
 
@@ -96,7 +97,8 @@ export const createGridColumns = (
             );
           },
           ({ rowIndex, columnId, Component }: EuiDataGridColumnCellActionProps) => {
-            const rowValue = rows[rowIndex][columnId];
+            // incoming data might change and put the current page out of bounds - check whether row actually exists
+            const rowValue = rows[rowIndex]?.[columnId];
             if (rowValue == null) return null;
             const cellContent = formattedColumn.formatter.convert(rowValue);
 

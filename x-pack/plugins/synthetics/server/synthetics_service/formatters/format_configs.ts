@@ -25,6 +25,8 @@ const UI_KEYS_TO_SKIP = [
   ConfigKey.IS_THROTTLING_ENABLED,
   ConfigKey.REVISION,
   ConfigKey.CUSTOM_HEARTBEAT_ID,
+  ConfigKey.FORM_MONITOR_TYPE,
+  ConfigKey.TEXT_ASSERTION,
   'secrets',
 ];
 

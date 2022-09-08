@@ -133,8 +133,8 @@ export const SessionView = ({
   } = useFetchSessionViewAlerts(sessionEntityId, investigatedAlertId);
 
   const handleRefresh = useCallback(() => {
-    refetch({ refetchPage: (page, index, allPages) => allPages.length - 1 === index });
-    refetchAlerts({ refetchPage: (page, index, allPages) => allPages.length - 1 === index });
+    refetch({ refetchPage: (_page, index, allPages) => allPages.length - 1 === index });
+    refetchAlerts({ refetchPage: (_page, index, allPages) => allPages.length - 1 === index });
   }, [refetch, refetchAlerts]);
 
   const alerts = useMemo(() => {
@@ -163,7 +163,7 @@ export const SessionView = ({
   );
 
   const { data: totalTTYOutputBytes } = useFetchGetTotalIOBytes(sessionEntityId);
-  const hasTTYOutput = !!totalTTYOutputBytes;
+  const hasTTYOutput = !!totalTTYOutputBytes?.total;
 
   useEffect(() => {
     if (newUpdatedAlertsStatus) {
@@ -400,6 +400,7 @@ export const SessionView = ({
           sessionEntityId={sessionEntityId}
           onClose={onToggleTTY}
           isFullscreen={isFullScreen}
+          onJumpToEvent={onJumpToEvent}
         />
       )}
     </div>

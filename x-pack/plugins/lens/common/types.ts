@@ -63,7 +63,8 @@ export enum EmptySizeRatios {
 }
 
 export interface SharedPieLayerState {
-  groups: string[];
+  primaryGroups: string[];
+  secondaryGroups?: string[];
   metric?: string;
   numberDisplay: NumberDisplayType;
   categoryDisplay: CategoryDisplayType;
@@ -88,7 +89,7 @@ export interface PieVisualizationState {
   layers: PieLayerState[];
   palette?: PaletteOutput;
 }
-export interface MetricState {
+export interface LegacyMetricState {
   layerId: string;
   accessor?: string;
   layerType: LayerType;

@@ -40,8 +40,9 @@ import { Start as InspectorPluginStart } from '@kbn/inspector-plugin/public';
 import { CasesUiStart } from '@kbn/cases-plugin/public';
 import { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { PLUGIN } from '../common/constants/plugin';
-import { MONITORS_ROUTE } from '../common/constants/ui';
+import { OVERVIEW_ROUTE } from '../common/constants/ui';
 import {
   LazySyntheticsPolicyCreateExtension,
   LazySyntheticsPolicyEditExtension,
@@ -76,6 +77,7 @@ export interface ClientPluginsStart {
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   cases: CasesUiStart;
   dataViews: DataViewsPublicPluginStart;
+  spaces: SpacesPluginStart;
   cloud?: CloudStart;
 }
 
@@ -194,7 +196,6 @@ export class UptimePlugin
       ],
       mount: async (params: AppMountParameters) => {
         const [coreStart, corePlugins] = await core.getStartServices();
-
         const { renderApp } = await import('./legacy_uptime/app/render_app');
         return renderApp(coreStart, plugins, corePlugins, params, this.initContext.env.mode.dev);
       },
@@ -270,7 +271,7 @@ function registerSyntheticsRoutesWithNavigation(
                     defaultMessage: 'Monitors',
                   }),
                   app: 'synthetics',
-                  path: MONITORS_ROUTE,
+                  path: OVERVIEW_ROUTE,
                   matchFullPath: true,
                   ignoreTrailingSlash: true,
                 },

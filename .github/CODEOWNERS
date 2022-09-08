@@ -17,6 +17,7 @@
 /x-pack/plugins/graph/ @elastic/kibana-data-discovery
 /x-pack/test/functional/apps/graph @elastic/kibana-data-discovery
 /src/plugins/unified_field_list/ @elastic/kibana-data-discovery
+/src/plugins/saved_objects_finder/ @elastic/kibana-data-discovery
 
 # Vis Editors
 /x-pack/plugins/lens/ @elastic/kibana-vis-editors
@@ -144,6 +145,8 @@ x-pack/examples/files_example @elastic/kibana-app-services
 /src/core/types/elasticsearch @elastic/apm-ui
 /packages/kbn-apm-synthtrace/  @elastic/apm-ui
 /packages/kbn-shared-svg @elastic/apm-ui
+/packages/kbn-utility-types/src/dot.ts @dgieselaar
+/packages/kbn-utility-types/src/dot_test.ts @dgieselaar
 #CC# /src/plugins/apm_oss/ @elastic/apm-ui
 #CC# /x-pack/plugins/observability/ @elastic/apm-ui
 
@@ -183,6 +186,7 @@ x-pack/examples/files_example @elastic/kibana-app-services
 /src/plugins/controls/ @elastic/kibana-presentation
 /test/functional/apps/dashboard/  @elastic/kibana-presentation
 /test/functional/apps/dashboard_elements/  @elastic/kibana-presentation
+/test/functional/services/dashboard/  @elastic/kibana-presentation
 /x-pack/plugins/canvas/  @elastic/kibana-presentation
 /x-pack/plugins/dashboard_enhanced/ @elastic/kibana-presentation
 /x-pack/test/functional/apps/canvas/  @elastic/kibana-presentation
@@ -190,6 +194,7 @@ x-pack/examples/files_example @elastic/kibana-app-services
 
 # Machine Learning
 /x-pack/plugins/ml/  @elastic/ml-ui
+/x-pack/plugins/ml/common/openapi/ @elastic/mlr-docs
 /x-pack/test/accessibility/apps/ml.ts  @elastic/ml-ui
 /x-pack/test/accessibility/apps/ml_embeddables_in_dashboard.ts  @elastic/ml-ui
 /x-pack/test/api_integration/apis/ml/ @elastic/ml-ui
