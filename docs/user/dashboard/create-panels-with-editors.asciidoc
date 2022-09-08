@@ -1,7 +1,15 @@
 [[aggregation-reference]]
-== Create panels with editors
+== Create visualizations with editors
 
-{kib} provides several editors that you can use to create panels of your data. Each editor supports different features and {ref}/search-aggregations.html[{es} aggregations]. To choose the best editor for your data, review the following information.
+{kib} provides several editors that you can use to create panels of your data. Each editor supports different features and {ref}/search-aggregations.html[{es} aggregations].
+
+Create visualizations with the following editors:
+
+* *TSVB* &mdash; Perform advanced analysis of your time series data.
+
+* *Custom* &mdash; Use Vega to create new types of visualizations. Requires a knowledge of Vega syntax.
+
+* *Aggregation based* &mdash; Create visualizations based on aggregations.
 
 [float]
 [[chart-types]]

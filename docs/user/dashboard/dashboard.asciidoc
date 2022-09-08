@@ -6,13 +6,11 @@
 [partintro]
 --
 
-The best way to understand your data is to visualize it. With dashboards, you can turn your data from one or more <<data-views, data views>> into a collection of panels 
-that bring clarity to your data, tell a story about your data, and allow you to focus on only the data that's important to you. 
+The best way to understand your data is to visualize it. With dashboards, you can turn your data from one or more <<data-views, data views>> into a collection of visualizations 
+that bring clarity to your data, tell a story about your data, and allow you to focus on only the data that's important to you. You can display your data in charts, tables, maps, and more, allowing you to compare your data side-by-side, identify patterns, and make connections. 
 
 [role="screenshot"]
 image:images/dashboard_ecommerceRevenueDashboard_7.15.0.png[Example dashboard]
-
-Panels display your data in charts, tables, maps, and more, which allow you to compare your data side-by-side to identify patterns and connections. Dashboards support several types of panels to display your data, and several options to create panels.
 
 [discrete]
 [[dashboard-best-practices]]
@@ -33,6 +31,32 @@ Panels display your data in charts, tables, maps, and more, which allow you to c
 [discrete]
 [[dashboard-choose-the-best-visualization-to-display-your-data]]
 === Choose the best visualization to display your data
+
+[cols="2"]
+|===
+
+| <<aggregation-reference,Editors>>
+| Use one of the editors to create visualizations of your data. Each editor varies in capabilities for all levels of analysts.
+
+| <<maps,Maps>>
+| Create beautiful displays of your geographical data.
+
+| <<xpack-ml-anomalies,Anomaly swim lane>>
+| Display the results from machine learning anomaly detection jobs.
+
+| <<xpack-ml-anomalies,Anomaly chart>>
+| Display an anomaly chart from the *Anomaly Explorer*.
+
+| <<logs-app,Log stream>>
+| Display a table of live streaming logs.
+
+| <<add-controls,Tools>>
+| Add interactive filters with *Controls* panels.
+
+| <<add-text,Text>>
+| Add context to your panels with *Text*.
+
+|===
 
 [discrete]
 [[dashboard-consider-the-right-colors]]
@@ -62,163 +86,23 @@ To enable *Labs*, contact your administrator, or configure the <<presentation-la
 
 . Click *Close*.
 
-
-[cols="2"]
-|===
-
-| <<aggregation-reference,Editors>>
-| Use one of the editors to create visualizations of your data. Each editor varies in capabilities for all levels of analysts.
-
-| <<maps,Maps>>
-| Create beautiful displays of your geographical data.
-
-| <<xpack-ml-anomalies,Anomaly swim lane>>
-| Display the results from machine learning anomaly detection jobs.
-
-| <<xpack-ml-anomalies,Anomaly chart>>
-| Display an anomaly chart from the *Anomaly Explorer*.
-
-| <<logs-app,Log stream>>
-| Display a table of live streaming logs.
-
-| <<add-controls,Tools>>
-| Add interactive filters with *Controls* panels.
-
-| <<add-text,Text>>
-| Add context to your panels with *Text*.
-
-|===
-
-[float]
-[[save-panels]]
-=== Save and add panels
-
-Consider where you want to save and add the panel in {kib}.
-
-
-
-
-[float]
-[[edit-panels]]
-== Edit panels
-
-To make changes to the panel, use the panel menu options.
-
-. In the toolbar, click *Edit*.
-
-. Open the panel menu, then use the following options:
-
-* *Edit lens* &mdash; Opens *Lens* so you can make changes to the visualization. 
-
-* *Edit visualization* &mdash; Opens the editor so you can make changes to the panel. 
-+
-To make changes without changing the original version, open the panel menu, then click *More > Unlink from library*.
-
-* *Edit panel title* &mdash; Opens the *Customize panel* window to change the *Panel title*.
-
-* *More > Replace panel* &mdash; Opens the *Visualize Library* so you can select a new panel to replace the existing panel.
-
-* *More > Delete from dashboard* &mdash; Removes the panel from the dashboard. 
-+
-If you want to use the panel later, make sure that you save the panel to the *Visualize Library*.  
-
-[float]
-[[duplicate-panels]]
-== Duplicate panels
-
-To duplicate a panel and the configured functionality, use the clone and copy panel options. Cloned and copied panels replicate all of the functionality from the original panel, 
-including renaming, editing, and cloning. 
-
-[float]
-[[clone-panels]]
-=== Clone panels
-
-Cloned panels appear next to the original panel, and move the other panels to provide a space on the dashboard.
-
-. In the toolbar, click *Edit*.
-
-. Open the panel menu, then select *Clone panel*. 
-+
-When cloned panels are saved in the *Visualize Library*, image:dashboard/images/visualize-library-icon.png[Visualize Library icon] appears in the header.
-
-[float]
-[[copy-to-dashboard]]
-=== Copy panels
-
-Copy panels from one dashboard to another dashboard.
-
-. Open the panel menu, then select *More > Copy to dashboard*.
-
-. On the *Copy to dashboard* window, select the dashboard, then click *Copy and go to dashboard*.
-
-[float]
-[[search-or-filter-your-data]]
-== Search and filter your data
-
-{kib} supports several ways to search your data and apply {es} filters. You can combine the filters with any panel
-filter to display the data want to you see.
-
-For more information about {kib} and {es} filters, refer to <<kibana-concepts-analysts,{kib} concepts>>.
-
-To apply a panel-level time filter:
-
-. Open the panel menu, then select *More > Customize time range*.
-
-. Enter the time range you want to view, then click *Add to panel*.
-
-[float]
-[[apply-design-options]]
-== Apply design options
-
-Apply a set of design options to the entire dashboard.
-
-. If you're in view mode, click *Edit* in the toolbar.
-
-. In the toolbar, *Options*, then use the following options:
-
-* *Use margins between panels* &mdash; Adds a margin of space between each panel.
-
-* *Show panel titles* &mdash; Displays the titles in the panels headers.
-
-* *Sync color pallettes across panels* &mdash; Applies the same color palette to all panels on the dashboard.
-
-* *Sync tooltips across panels* &mdash; When you hover your cursor over a *Lens*, *TSVB*, aggregation-based, or *Timelion* XY chart, the tooltips on all other related dashboard charts automatically appear.
-
-[float]
-[[download-csv]]
-== View the panel data and requests
-
-View the data in visualizations and the requests that collect the data. 
-
-. Open the panel menu, then click *More > Inspect*.
-
-. View and download the panel data.
-
-.. Open the *View* dropdown, then click *Data*.
-
-.. Click *Download CSV*, then select the format type from the dropdown:
-
-* *Formatted CSV* &mdash; Contains human-readable dates and numbers.
-
-* *Unformatted* &mdash; Best used for computer use.
-+
-When you download visualization panels with multiple layers, each layer produces a CSV file, and the file names contain the visualization and layer {data-source} names.
-
-. View the requests that collect the data.
-
-.. Open the *View* dropdown, then click *Requests*.
-
-.. From the dropdown, select the requests you want to view.
-
-.. To view the requests in *Console*, click *Request*, then click *Open in Console*.
-
 --
-include::create-dashboards-and-visualizations.asciidoc[]
+include::supported-visualizations.asciidoc[]
 
-include::lens-advanced.asciidoc[]
+include::create-dashboards-and-visualizations.asciidoc[]
 
 include::create-panels-with-editors.asciidoc[]
 
+include::lens-advanced.asciidoc[]
+
+include::create-visualizations-with-visualize-library.asciidoc[]
+
 include::make-dashboards-interactive.asciidoc[]
 
-include::dashboard-troubleshooting.asciidoc[]
+include::edit-dashboards.asciidoc[]
+
+include::analyze-dashboard-data.asciidoc[]
+
+include::tutorial-create-a-dashboard-of-lens-panels.asciidoc[]
+
+include::lens-advanced.asciidoc[]

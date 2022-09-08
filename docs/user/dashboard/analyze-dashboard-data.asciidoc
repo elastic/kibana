@@ -1,0 +1,61 @@
+[[analyze-dashboard-data]]
+== Analyze dashboard data
+:keywords: administrator, data view, data views, management, runtime fields, runtime fields in Kibana, scripted fields, field formatters, data fields, index pattern, index patterns
+:description: Conceptual and step-by-step procedures for using runtime fields, scripted fields, and field formatters.
+
+Dashboards provide you with the space where you add panels of your data.
+
+[discrete]
+[[search-or-filter-your-data]]
+=== Search and filter the data
+
+{kib} supports several ways to search your data and apply {es} filters. You can combine the filters with any panel
+filter to display the data want to you see.
+
+For more information about {kib} and {es} filters, refer to <<kibana-concepts-analysts,{kib} concepts>>.
+
+To apply a panel-level time filter:
+
+. Open the panel menu, then select *More > Customize time range*.
+
+. Enter the time range you want to view, then click *Add to panel*.
+
+[discrete]
+[[filter-the-data-with-controls]]
+=== Filter the data with controls
+
+[discrete]
+[[analyze-explore-the-data-in-discover]]
+=== Explore the data in Discover
+
+[discrete]
+[[analyze-explore-related-data]]
+=== Explore related data
+
+[float]
+[[download-csv]]
+=== Inspect the visualization data and requests
+
+View the data in visualizations and the requests that collect the data. 
+
+. Open the panel menu, then click *More > Inspect*.
+
+. View and download the panel data.
+
+.. Open the *View* dropdown, then click *Data*.
+
+.. Click *Download CSV*, then select the format type from the dropdown:
+
+* *Formatted CSV* &mdash; Contains human-readable dates and numbers.
+
+* *Unformatted* &mdash; Best used for computer use.
++
+When you download visualization panels with multiple layers, each layer produces a CSV file, and the file names contain the visualization and layer {data-source} names.
+
+. View the requests that collect the data.
+
+.. Open the *View* dropdown, then click *Requests*.
+
+.. From the dropdown, select the requests you want to view.
+
+.. To view the requests in *Console*, click *Request*, then click *Open in Console*.

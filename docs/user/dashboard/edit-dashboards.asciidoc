@@ -1,3 +1,27 @@
 * To open an existing dashboard, click the dashboard *Title* you want to open.
 +
 When you open an existing dashboard, you are in view mode. To make changes to the dashboard, click *Edit* in the toolbar. 
+
+[float]
+[[edit-panels]]
+== Edit panels
+
+To make changes to the panel, use the panel menu options.
+
+. In the toolbar, click *Edit*.
+
+. Open the panel menu, then use the following options:
+
+* *Edit lens* &mdash; Opens *Lens* so you can make changes to the visualization. 
+
+* *Edit visualization* &mdash; Opens the editor so you can make changes to the panel. 
++
+To make changes without changing the original version, open the panel menu, then click *More > Unlink from library*.
+
+* *Edit panel title* &mdash; Opens the *Customize panel* window to change the *Panel title*.
+
+* *More > Replace panel* &mdash; Opens the *Visualize Library* so you can select a new panel to replace the existing panel.
+
+* *More > Delete from dashboard* &mdash; Removes the panel from the dashboard. 
++
+If you want to use the panel later, make sure that you save the panel to the *Visualize Library*.  

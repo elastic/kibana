@@ -9,19 +9,7 @@ dashboards and external websites.
 
 Add interactive capabilities to your dashboard, such as interactive filter controls, and drilldowns that allow you to navigate to *Discover*, other dashboards, and external websites. 
 
-++++
-<script type="text/javascript" async 
-src="https://play.vidyard.com/embed/v4.js"></script>
-<img
-style="width: 100%; margin: auto; display: block;"
-class="vidyard-player-embed"
-src="https://play.vidyard.com/UhGkdJGC32HRn3oS5ZYJL1.jpg"
-data-uuid="UhGkdJGC32HRn3oS5ZYJL1"
-data-v="4"
-data-type="inline"
-/>
-</br>
-++++
+* *Sync tooltips across panels* &mdash; When you hover your cursor over a *Lens*, *TSVB*, aggregation-based, or *Timelion* XY chart, the tooltips on all other related dashboard charts automatically appear.
 
 [[add-controls]]
 === Filter dashboard data with controls

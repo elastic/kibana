@@ -1,0 +1,80 @@
+[[create-visualizations-with-visualize-library]]
+== Create visualizations with Visualize Library
+:keywords: analyst, author, visualization, visualizations, charts, visualize library, dashboards, dashboards, visualization, visualization editor, tags, discover, saved query, queries
+:description: Conceptual and step-by-step procedures for creating and saving visualizations to *Visualize Library*.
+
+To add your visualizations to multiple dashboards and *Canvas* workpads, create and save the visualizations with *Visualize Library*.
+
+[discrete]
+[[visualize-library-minimum-requirements]]
+=== Minimum requirements
+
+To create visualizations, you must meet the minimum requirements. 
+
+* If you need to set up {kib}, use https://www.elastic.co/cloud/elasticsearch-service/signup?baymax=docs-body&elektra=docs[our free trial].
+
+* Make sure you have {ref}/getting-started-index.html[data indexed into {es}] and a <<data-views, data view>>.
+
+* When the read-only indicator appears, you have insufficient privileges
+to create or save visualizations, and the options to create and save visualizations are not visible. For more information,
+refer to <<xpack-security-authorization,Granting access to {kib}>>.
+
+[discrete]
+[[create-panels-with-lens]]
+=== Create visualizations
+
+Create visualizations of your data that you can add to dashboards and *Canvas* workpads.
+
+. Open the main menu, then click *Visualize Library*.
+
+. Click *Create visualization*.
+
+. On the *New visualization* window, select the visualization type you want to create. 
+
+. Create the visualization.
+
+. In the toolbar, click *Save*.
+
+.. On the *Save* window, enter the *Title* and an optional *Description*.
+
+.. Add any applicable <<managing-tags,*Tags*>>. 
+
+.. To save the visualization to the *Visualize Library*, select *Add to library*.
++
+When you save visualizations to *Visualize Library*, the image:dashboard/images/visualize-library-icon.png[Visualize Library icon] appears in the visualization header.
+
+.. To add the visualization to a dashboard, choose one of the following options:
+
+* To add the visualization to an existing dashboard, select *Existing*, select the dashboard from the dropdown, then click *Save and go to Dashboard*.
+
+* To add the visualization to a new dashboard, select *New*, then click *Save and go to Dashboard*.
+
+[discrete]
+[[add-visualize-library-visualizations-to-dashboards]]
+=== Add Visualize Library visualizations to dashboards
+
+Add visualizations and <<save-your-search,*Discover* search results>> saved in *Visualize Library* to dashboards.
+
+. Open or create a dashboard. 
+
+. In the dashboard toolbar, click *Add from library*.
+
+. Click the visualization or saved search, then click *X*.
++
+When a panel contains a saved query, both queries are applied.
++
+When you add search results from *Discover* to dashboards, the results are not aggregated.
+
+[discrete]
+[[add-unsaved-visualizations-to-visualize-library]]
+==== Save visualizations to Visualize Library
+
+If you have visualizations on your dashboards that you'd like to add to other dashboards or *Canvas* workpads, save the visualizations to *Visualize Library*.
+
+. On the dashboard, open the visualization *Options* menu. 
+
+. Select *More > Save to library*.
+
+. Enter the visualization title, then click *Save*.
++
+The image:dashboard/images/visualize-library-icon.png[Visualize Library icon] appears in the header.
