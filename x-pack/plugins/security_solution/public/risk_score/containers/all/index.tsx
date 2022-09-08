@@ -89,6 +89,7 @@ export const useUserRiskScore = (params?: UseRiskScoreParams) => {
   const defaultIndex = spaceId ? getUserRiskIndex(spaceId, onlyLatest) : undefined;
 
   const riskyUsersFeatureEnabled = useIsExperimentalFeatureEnabled('riskyUsersEnabled');
+
   return useRiskScore({
     timerange,
     onlyLatest,
@@ -119,7 +120,7 @@ const useRiskScore = <T extends RiskQueries.hostsRiskScore | RiskQueries.usersRi
   const {
     isDeprecated,
     isEnabled,
-    loading: isDeprecatedLoading,
+    isLoading: isDeprecatedLoading,
     refetch: refetchDeprecated,
   } = useRiskScoreDeprecated(featureEnabled, factoryQueryType, defaultIndex);
 
@@ -138,9 +139,18 @@ const useRiskScore = <T extends RiskQueries.hostsRiskScore | RiskQueries.usersRi
   });
 
   const refetchAll = useCallback(() => {
-    if (defaultIndex) refetchDeprecated(defaultIndex);
-    refetch();
+    if (defaultIndex) {
+      refetchDeprecated(defaultIndex);
+      refetch();
+    }
   }, [defaultIndex, refetch, refetchDeprecated]);
+
+  // since query does not take timerange arg, we need to manually refetch when time range updates
+  // the results can be different if the user has run the ML for the first time since pressing refresh
+  useEffect(() => {
+    refetchAll();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [timerange?.to, timerange?.from]);
 
   const riskScoreResponse = useMemo(
     () => ({
@@ -169,13 +179,10 @@ const useRiskScore = <T extends RiskQueries.hostsRiskScore | RiskQueries.usersRi
                     querySize,
                   }
                 : undefined,
-            timerange: timerange
-              ? { to: timerange.to, from: timerange.from, interval: '' }
-              : undefined,
             sort,
           }
         : null,
-    [cursorStart, defaultIndex, factoryQueryType, filterQuery, querySize, sort, timerange]
+    [cursorStart, defaultIndex, factoryQueryType, filterQuery, querySize, sort]
   );
 
   useEffect(() => {

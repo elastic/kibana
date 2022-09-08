@@ -13,7 +13,7 @@ export interface Params {
     indexName: string;
     entity: 'user' | 'host';
   };
-  signal: AbortSignal;
+  signal?: AbortSignal;
 }
 export interface Response {
   isDeprecated: boolean;

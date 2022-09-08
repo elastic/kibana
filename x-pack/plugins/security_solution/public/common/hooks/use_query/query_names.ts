@@ -9,6 +9,7 @@ import { APP_UI_ID } from '../../../../common/constants';
 export const QUERY_NAMES = {
   SECURITY_DASHBOARDS: `${APP_UI_ID} fetch security dashboards`,
   ANOMALIES_TABLE: `${APP_UI_ID} fetch anomalies table data`,
+  GET_RISK_SCORE_DEPRECATED: `${APP_UI_ID} fetch is risk score deprecated`,
 } as const;
 
 export type QueryName = typeof QUERY_NAMES[keyof typeof QUERY_NAMES];

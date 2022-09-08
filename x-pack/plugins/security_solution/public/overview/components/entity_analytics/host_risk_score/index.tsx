@@ -48,7 +48,7 @@ const IconWrapper = styled.span`
 `;
 
 export const EntityAnalyticsHostRiskScores = () => {
-  const { deleteQuery, setQuery } = useGlobalTime();
+  const { deleteQuery, setQuery, to, from } = useGlobalTime();
   const [updatedAt, setUpdatedAt] = useState<number>(Date.now());
   const { toggleStatus, setToggleStatus } = useQueryToggle(TABLE_QUERY_ID);
   const columns = useMemo(() => getHostRiskScoreColumns(), []);
@@ -76,6 +76,7 @@ export const EntityAnalyticsHostRiskScores = () => {
         cursorStart: 0,
         querySize: 5,
       },
+      timerange: { to, from },
     });
 
   useQueryInspector({

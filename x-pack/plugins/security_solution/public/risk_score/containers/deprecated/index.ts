@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { API_QUERY_NAMES, useQueryTracker } from '../../../common/hooks/use_query_tracker';
+import { useCallback, useEffect, useMemo } from 'react';
+import { QUERY_NAMES, useQuery } from '../../../common/hooks/use_query';
 import { RiskQueries } from '../../../../common/search_strategy';
 import type { Params, Response } from './api';
 import { getRiskScoreDeprecated } from './api';
@@ -21,38 +21,20 @@ export const useRiskScoreDeprecated = (
     [factoryQueryType]
   );
 
-  const getDeprecated = useQueryTracker<Params, Response>(
-    getRiskScoreDeprecated,
-    API_QUERY_NAMES.GET_RISK_SCORE_DEPRECATED
+  const { query, data, isLoading, error } = useQuery<Params, Response>(
+    QUERY_NAMES.GET_RISK_SCORE_DEPRECATED,
+    getRiskScoreDeprecated
   );
 
-  const [isDeprecated, setIsDeprecated] = useState(false);
-  const [isEnabled, setIsEnabled] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const response = useMemo(() => (data ? data : { isDeprecated: false, isEnabled: false }), [data]);
 
-  const abortCtrl = useRef(new AbortController());
   const searchDeprecated = useCallback(
     (indexName: string) => {
-      const asyncSearch = async () => {
-        try {
-          abortCtrl.current = new AbortController();
-          setLoading(true);
-          const res = await getDeprecated({
-            query: { indexName, entity },
-            signal: abortCtrl.current.signal,
-          });
-          setLoading(false);
-          setIsDeprecated(res.isDeprecated);
-          setIsEnabled(res.isEnabled);
-        } catch (e) {
-          setLoading(false);
-          setIsDeprecated(false);
-        }
-      };
-      abortCtrl.current.abort();
-      asyncSearch();
+      query({
+        query: { indexName, entity },
+      });
     },
-    [entity, getDeprecated]
+    [entity, query]
   );
 
   useEffect(() => {
@@ -61,11 +43,5 @@ export const useRiskScoreDeprecated = (
     }
   }, [isFeatureEnabled, defaultIndex, searchDeprecated]);
 
-  useEffect(() => {
-    return () => {
-      abortCtrl.current.abort();
-    };
-  }, []);
-
-  return { loading, isDeprecated, isEnabled, refetch: searchDeprecated };
+  return { isLoading, ...response, refetch: searchDeprecated, error };
 };
