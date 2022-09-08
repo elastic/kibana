@@ -9,8 +9,7 @@
 import { IAggConfig, METRIC_TYPES } from '@kbn/data-plugin/common';
 import { SchemaConfig } from '../../..';
 import { Operations } from '../../constants';
-import { isMetricWithField } from '../convert/metric';
-import { getStdDeviationFormula } from '../convert/std_deviation';
+import { isMetricWithField, getStdDeviationFormula } from '../convert';
 import { getFormulaFromMetric, SUPPORTED_METRICS } from '../convert/supported_metrics';
 import {
   getFieldNameFromField,

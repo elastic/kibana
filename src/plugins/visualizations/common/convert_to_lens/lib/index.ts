@@ -6,5 +6,6 @@
  * Side Public License, v 1.
  */
 
-export { getColumnsFromVis } from './schemas';
-export { getPercentageColumnFormulaColumn } from '../../common/convert_to_lens/lib';
+export * from './buckets';
+export * from './metrics';
+export * from './convert';

@@ -15,9 +15,11 @@ import {
 } from '@kbn/data-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { Column, SchemaConfig } from '../../..';
-import { convertToDateHistogramColumn } from '../convert/date_histogram';
-import { convertToFiltersColumn } from '../convert/filters';
-import { convertToTermsColumn } from '../convert/terms';
+import {
+  convertToDateHistogramColumn,
+  convertToFiltersColumn,
+  convertToTermsColumn,
+} from '../convert';
 import { getFieldNameFromField, getLabel, isSchemaConfig } from '../utils';
 
 export type BucketAggs = BUCKET_TYPES.TERMS | BUCKET_TYPES.DATE_HISTOGRAM | BUCKET_TYPES.FILTERS;

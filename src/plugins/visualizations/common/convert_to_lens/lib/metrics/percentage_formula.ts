@@ -9,8 +9,7 @@
 import { METRIC_TYPES } from '@kbn/data-plugin/common';
 import { SchemaConfig } from '../../..';
 import { FormulaColumn } from '../../types';
-import { getFormat } from '../convert/column';
-import { createFormulaColumn } from '../convert/formula';
+import { getFormat, createFormulaColumn } from '../convert';
 import { getFormulaForAgg } from './formula';
 
 export const getPercentageColumnFormulaColumn = (agg: SchemaConfig): FormulaColumn | null => {

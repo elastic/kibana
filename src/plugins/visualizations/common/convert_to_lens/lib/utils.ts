@@ -6,14 +6,17 @@
  * Side Public License, v 1.
  */
 
-import _ from 'lodash';
+import { isEqual } from 'lodash';
 import { IAggConfig, METRIC_TYPES } from '@kbn/data-plugin/common';
 import { DataViewField } from '@kbn/data-views-plugin/common';
 import { DataViewFieldBase } from '@kbn/es-query';
 import { SchemaConfig } from '../../types';
 import { Column } from '../types';
-import { Column as ColumnWithMeta, SiblingPipelineMetric } from './convert/types';
-import { MetricsWithoutSpecialParams } from './convert/metric';
+import {
+  MetricsWithoutSpecialParams,
+  Column as ColumnWithMeta,
+  SiblingPipelineMetric,
+} from './convert';
 
 type UnwrapArray<T> = T extends Array<infer P> ? P : T;
 
@@ -140,7 +143,7 @@ export const getCutomBucketsFromSiblingAggs = (metrics: SchemaConfig[]) => {
       isSiblingPipeline(metric) &&
       metric.aggParams?.customBucket &&
       acc.every(
-        (bucket) => !_.isEqual(metric.aggParams?.customBucket?.serialize(), bucket.serialize())
+        (bucket) => !isEqual(metric.aggParams?.customBucket?.serialize(), bucket.serialize())
       )
     ) {
       acc.push(metric.aggParams.customBucket);

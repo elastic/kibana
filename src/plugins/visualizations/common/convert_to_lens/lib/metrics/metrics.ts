@@ -12,16 +12,17 @@ import { SchemaConfig } from '../../..';
 import {
   convertMetricAggregationColumnWithoutSpecialParams,
   MetricsWithoutSpecialParams,
-} from '../convert/metric';
-import { convertToParentPipelineAggColumns } from '../convert/parent_pipeline';
-import { convertToPercentileColumn } from '../convert/percentile';
-import { convertToPercentileRankColumn } from '../convert/percentile_rank';
+  convertToParentPipelineAggColumns,
+  convertToPercentileColumn,
+  convertToPercentileRankColumn,
+  convertToSiblingPipelineColumns,
+  convertToStdDeviationFormulaColumns,
+  SiblingPipelineMetric,
+  ParentPipelineMetric,
+} from '../convert';
 import { SUPPORTED_METRICS } from '../convert/supported_metrics';
 import { Column } from '../../types';
 import { getValidColumns } from '../utils';
-import { convertToSiblingPipelineColumns } from '../convert/sibling_pipeline';
-import { SiblingPipelineMetric, ParentPipelineMetric } from '../convert/types';
-import { convertToStdDeviationFormulaColumns } from '../convert/std_deviation';
 
 export const convertMetricToColumns = <T extends METRIC_TYPES | BUCKET_TYPES>(
   agg: SchemaConfig<T>,
