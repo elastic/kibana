@@ -73,7 +73,6 @@ export const useInvestigateInTimeline = ({
       if (exceptionsLists.length > 0) {
         await getExceptionListsItems({
           lists: exceptionsLists,
-          filterOptions: [],
           pagination: {
             page: 0,
             perPage: 10000,

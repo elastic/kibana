@@ -294,4 +294,70 @@ describe('RuleDetailsPageComponent', () => {
       });
     });
   });
+
+  it('renders exceptions tab', async () => {
+    await setup();
+    (useRuleWithFallback as jest.Mock).mockReturnValue({
+      error: null,
+      loading: false,
+      isExistingRule: true,
+      refresh: jest.fn(),
+      rule: {
+        ...mockRule,
+        outcome: 'conflict',
+        alias_target_id: 'aliased_rule_id',
+        alias_purpose: 'savedObjectConversion',
+      },
+    });
+    const wrapper = mount(
+      <TestProviders store={store}>
+        <Router history={mockHistory}>
+          <RuleDetailsPage />
+        </Router>
+      </TestProviders>
+    );
+    await waitFor(() => {
+      expect(wrapper.find('[data-test-subj="navigation-rule_exceptions"]').exists()).toBeTruthy();
+      expect(
+        wrapper.find('[data-test-subj="navigation-endpoint_exceptions"]').exists()
+      ).toBeFalsy();
+    });
+  });
+
+  it('renders endpoint exeptions tab when rule includes endpoint list', async () => {
+    await setup();
+    (useRuleWithFallback as jest.Mock).mockReturnValue({
+      error: null,
+      loading: false,
+      isExistingRule: true,
+      refresh: jest.fn(),
+      rule: {
+        ...mockRule,
+        outcome: 'conflict',
+        alias_target_id: 'aliased_rule_id',
+        alias_purpose: 'savedObjectConversion',
+        exceptions_list: [
+          {
+            id: 'endpoint_list',
+            list_id: 'endpoint_list',
+            type: 'endpoint',
+            namespace_type: 'agnostic',
+          },
+        ],
+      },
+    });
+    const wrapper = mount(
+      <TestProviders store={store}>
+        <Router history={mockHistory}>
+          <RuleDetailsPage />
+        </Router>
+      </TestProviders>
+    );
+    await waitFor(() => {
+      expect(wrapper.find('[data-test-subj="navigation-rule_exceptions"]').exists()).toBeTruthy();
+      expect(
+        wrapper.find('[data-test-subj="navigation-endpoint_exceptions"]').exists()
+      ).toBeTruthy();
+    });
+  });
 });
