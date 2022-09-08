@@ -6,8 +6,9 @@
  */
 
 import { useState, useEffect, useMemo, useRef } from 'react';
-import { filter, head, noop, orderBy, pipe } from 'lodash/fp';
+import { filter, head, noop, orderBy, pipe, has } from 'lodash/fp';
 import type { MlSummaryJob } from '@kbn/ml-plugin/common';
+
 import { DEFAULT_ANOMALY_SCORE } from '../../../../../common/constants';
 import * as i18n from './translations';
 import { useUiSetting$ } from '../../../lib/kibana';
@@ -27,11 +28,17 @@ export enum AnomalyJobStatus {
   'failed',
 }
 
+export const enum AnomalyEntity {
+  User,
+  Host,
+}
+
 export interface AnomaliesCount {
   name: NotableAnomaliesJobId;
   jobId?: string;
   count: number;
   status: AnomalyJobStatus;
+  entity: AnomalyEntity;
 }
 
 interface UseNotableAnomaliesSearchProps {
@@ -142,6 +149,7 @@ const getMLJobStatus = (
     ? AnomalyJobStatus.disabled
     : AnomalyJobStatus.uninstalled;
 };
+
 function formatResultData(
   buckets: Array<{
     key: string;
@@ -152,12 +160,14 @@ function formatResultData(
   return NOTABLE_ANOMALIES_IDS.map((notableJobId) => {
     const job = findJobWithId(notableJobId)(notableAnomaliesJobs);
     const bucket = buckets.find(({ key }) => key === job?.id);
+    const hasUserName = has("entity.hits.hits[0]._source['user.name']", bucket);
 
     return {
       name: notableJobId,
       jobId: job?.id,
       count: bucket?.doc_count ?? 0,
       status: getMLJobStatus(notableJobId, job, notableAnomaliesJobs),
+      entity: hasUserName ? AnomalyEntity.User : AnomalyEntity.Host,
     };
   });
 }
