@@ -41,7 +41,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         { skipBrowserRefresh: true }
       );
 
-      // await PageObjects.common.setTime({ from, to });
       await visualize.navigateToNewVisualization();
       await visualize.clickVisualBuilder();
       await visualBuilder.checkVisualBuilderIsPresent();
@@ -437,10 +436,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await visualBuilder.clickPanelOptions('metric');
         await visualBuilder.setMetricsDataTimerangeMode('Last value');
         await visualBuilder.setDropLastBucket(true);
-        // await timePicker.setAbsoluteRange(
-        //   'Sep 19, 2015 @ 06:31:44.000',
-        //   'Sep 22, 2015 @ 18:31:44.000'
-        // );
       });
 
       it('should be able to switch to gte interval (>=2d)', async () => {
