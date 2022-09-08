@@ -5,4 +5,14 @@
  * 2.0.
  */
 
-export * from './filter_in_out';
+import { CSSObject } from '@emotion/react';
+
+export const useStyles = () => {
+  const button: CSSObject = {
+    display: 'inline-flex',
+  };
+
+  return {
+    button,
+  };
+};
