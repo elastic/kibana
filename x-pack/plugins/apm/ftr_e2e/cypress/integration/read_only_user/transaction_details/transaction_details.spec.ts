@@ -59,15 +59,10 @@ describe('Transaction details', () => {
   describe('when navigating to a trace sample', () => {
     it('keeps the same trace sample after reloading the page', () => {
       cy.get('[data-test-subj="pagination-button-last"]').click();
-      cy.url().should(
-        'include',
-        'transactionId=0000000000008250&traceId=00000000000000000000000000008251'
-      );
-      cy.reload();
-      cy.url().should(
-        'include',
-        'transactionId=0000000000008250&traceId=00000000000000000000000000008251'
-      );
+      cy.url().then((url) => {
+        cy.reload();
+        cy.url().should('eq', url);
+      });
     });
   });
 });
