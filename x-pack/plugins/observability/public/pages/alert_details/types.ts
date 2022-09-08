@@ -5,18 +5,15 @@
  * 2.0.
  */
 
+import { EcsFieldsResponse } from "@kbn/rule-registry-plugin/common/search_strategy";
+
 export interface PageHeaderProps {
-  alert: unknown;
+  alert: EcsFieldsResponse;
 }
 
 export interface AlertDetailsPathParams {
   alertId: string;
-}
-
-export interface AlertSummaryItemProps {
-  formattedMessageId: string;
-  defaultMessage: string;
-  children: JSX.Element;
+  ruleId: string;
 }
 
 export const ALERT_DETAILS_PAGE_ID = 'alert-details-o11y';

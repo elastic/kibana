@@ -79,8 +79,8 @@ export function ObservabilityActions({
       : null;
   const alertId = alert.fields['kibana.alert.uuid'] ?? null;
   const linkToAlert =
-    pageId !== ALERT_DETAILS_PAGE_ID && alertId
-      ? http.basePath.prepend(paths.observability.alertDetails(alertId))
+    pageId !== ALERT_DETAILS_PAGE_ID && alertId && ruleId
+      ? http.basePath.prepend(paths.observability.alertDetails(alertId, ruleId))
       : null;
   const caseAttachments: CaseAttachmentsWithoutOwner = useMemo(() => {
     return ecsData?._id
