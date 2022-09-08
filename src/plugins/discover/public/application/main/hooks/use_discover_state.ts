@@ -40,8 +40,8 @@ export function useDiscoverState({
   history: History;
   setExpandedDoc: (doc?: DataTableRecord) => void;
 }) {
-  const { uiSettings: config, data, filterManager, dataViews, storage } = services;
-  const useNewFieldsApi = useMemo(() => !config.get(SEARCH_FIELDS_FROM_SOURCE), [config]);
+  const { uiSettings, data, filterManager, dataViews, storage } = services;
+  const useNewFieldsApi = useMemo(() => !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE), [uiSettings]);
   const { timefilter } = data.query.timefilter;
 
   const dataView = savedSearch.searchSource.getField('index')!;
@@ -56,17 +56,17 @@ export function useDiscoverState({
       getState({
         getStateDefaults: () =>
           getStateDefaults({
-            config,
+            config: uiSettings,
             data,
             savedSearch,
             storage,
           }),
-        storeInSessionStorage: config.get('state:storeInSessionStorage'),
+        storeInSessionStorage: uiSettings.get('state:storeInSessionStorage'),
         history,
         toasts: services.core.notifications.toasts,
-        uiSettings: config,
+        uiSettings,
       }),
-    [config, data, history, savedSearch, services.core.notifications.toasts, storage]
+    [uiSettings, data, history, savedSearch, services.core.notifications.toasts, storage]
   );
 
   const { appStateContainer } = stateContainer;
@@ -82,12 +82,12 @@ export function useDiscoverState({
     // A saved search is created on every page load, so we check the ID to see if we're loading a
     // previously saved search or if it is just transient
     const shouldSearchOnPageLoad =
-      config.get<boolean>(SEARCH_ON_PAGE_LOAD_SETTING) ||
+      uiSettings.get<boolean>(SEARCH_ON_PAGE_LOAD_SETTING) ||
       savedSearch.id !== undefined ||
       timefilter.getRefreshInterval().pause === false ||
       searchSessionManager.hasSearchSessionIdInURL();
     return shouldSearchOnPageLoad ? FetchStatus.LOADING : FetchStatus.UNINITIALIZED;
-  }, [config, savedSearch.id, searchSessionManager, timefilter]);
+  }, [uiSettings, savedSearch.id, searchSessionManager, timefilter]);
 
   /**
    * Data fetching logic
@@ -108,7 +108,6 @@ export function useDiscoverState({
     documents$: data$.documents$,
     dataViews,
     stateContainer,
-    query: state.query,
   });
 
   /**
@@ -146,7 +145,11 @@ export function useDiscoverState({
          *  That's because appState is updated before savedSearchData$
          *  The following line of code catches this, but should be improved
          */
-        const nextDataView = await loadDataView(nextState.index, dataViews, config);
+        const nextDataView = await loadDataView(
+          nextState.index,
+          services.dataViews,
+          services.uiSettings
+        );
         savedSearch.searchSource.setField('index', nextDataView.loaded);
 
         reset();
@@ -158,17 +161,7 @@ export function useDiscoverState({
       setState(nextState);
     });
     return () => unsubscribe();
-  }, [
-    config,
-    dataViews,
-    appStateContainer,
-    setState,
-    state,
-    refetch$,
-    data$,
-    reset,
-    savedSearch.searchSource,
-  ]);
+  }, [services, appStateContainer, state, refetch$, data$, reset, savedSearch.searchSource]);
 
   /**
    * function to revert any changes to a given saved search
@@ -185,7 +178,7 @@ export function useDiscoverState({
       const newDataView = newSavedSearch.searchSource.getField('index') || dataView;
       newSavedSearch.searchSource.setField('index', newDataView);
       const newAppState = getStateDefaults({
-        config,
+        config: uiSettings,
         data,
         savedSearch: newSavedSearch,
         storage,
@@ -199,7 +192,7 @@ export function useDiscoverState({
       await stateContainer.replaceUrlAppState(newAppState);
       setState(newAppState);
     },
-    [services, dataView, config, data, storage, stateContainer]
+    [services, dataView, uiSettings, data, storage, stateContainer]
   );
 
   /**
@@ -214,8 +207,8 @@ export function useDiscoverState({
           nextDataView,
           state.columns || [],
           (state.sort || []) as SortOrder[],
-          config.get(MODIFY_COLUMNS_ON_SWITCH),
-          config.get(SORT_DEFAULT_ORDER_SETTING),
+          uiSettings.get(MODIFY_COLUMNS_ON_SWITCH),
+          uiSettings.get(SORT_DEFAULT_ORDER_SETTING),
           state.query
         );
         stateContainer.setAppState(nextAppState);
@@ -223,7 +216,7 @@ export function useDiscoverState({
       setExpandedDoc(undefined);
     },
     [
-      config,
+      uiSettings,
       dataView,
       dataViews,
       setExpandedDoc,

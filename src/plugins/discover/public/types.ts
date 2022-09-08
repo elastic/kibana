@@ -28,7 +28,7 @@ export interface DataTableRecord {
   /**
    * The document returned by Elasticsearch for search queries
    */
-  raw: EsHitRecord;
+  raw: EsHitRecord | Record<string, unknown>;
   /**
    * A flattened version of the ES doc or data provided by SQL, aggregations ...
    */

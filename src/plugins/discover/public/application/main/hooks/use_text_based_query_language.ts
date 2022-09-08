@@ -22,25 +22,25 @@ const MAX_NUM_OF_COLUMNS = 50;
 
 /**
  * Hook to take care of text based query language state transformations when a new result is returned
+ * If necessary this is setting displayed columns and selected data view
  */
 export function useTextBasedQueryLanguage({
   documents$,
   dataViews,
   stateContainer,
-  query,
 }: {
   documents$: DataDocuments$;
   stateContainer: GetStateReturn;
-  query: AggregateQuery | Query | undefined;
   dataViews: DataViewsContract;
 }) {
-  const state = useRef<{ query: AggregateQuery | Query | undefined; columns: string[] }>({
+  const prev = useRef<{ query: AggregateQuery | Query | undefined; columns: string[] }>({
     columns: [],
     query: undefined,
   });
 
   useEffect(() => {
     const subscription = documents$.subscribe(async (next) => {
+      const { query } = next;
       let columns: string[] = [];
       if (
         next.recordRawType === 'plain' &&
@@ -52,16 +52,17 @@ export function useTextBasedQueryLanguage({
           const firstRow = next.result[0];
           const firstRowColumns = Object.keys(firstRow.raw).slice(0, MAX_NUM_OF_COLUMNS);
           if (
-            !isEqual(firstRowColumns, state.current.columns) &&
-            !isEqual(query, state.current.query)
+            !isEqual(firstRowColumns, prev.current.columns) &&
+            !isEqual(query, prev.current.query)
           ) {
             columns = firstRowColumns;
-            state.current = { columns, query };
+            prev.current = { columns, query };
           }
         }
         const indexPatternFromQuery = getIndexPatternFromSQLQuery(query.sql);
         const idsTitles = await dataViews.getIdsWithTitle();
         const dataViewObj = idsTitles.find(({ title }) => title === indexPatternFromQuery);
+
         if (dataViewObj) {
           const nextState = {
             index: dataViewObj.id,
@@ -72,5 +73,5 @@ export function useTextBasedQueryLanguage({
       }
     });
     return () => subscription.unsubscribe();
-  }, [documents$, dataViews, query, stateContainer]);
+  }, [documents$, dataViews, stateContainer]);
 }
