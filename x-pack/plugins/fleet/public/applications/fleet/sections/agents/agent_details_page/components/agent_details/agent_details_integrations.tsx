@@ -96,7 +96,8 @@ export const AgentDetailsIntegration: React.FunctionComponent<{
   const { getHref } = useLink();
   const theme = useEuiTheme();
 
-  const [showNeedsAttentionBadge, setShowNeedsAttentionBadge] = useState(false);
+  const [isAttentionBadgeNeededForPolicyResponse, setIsAttentionBadgeNeededForPolicyResponse] =
+    useState(false);
   const extensionView = useUIExtension(
     packagePolicy.package?.name ?? '',
     'package-policy-response'
@@ -112,7 +113,7 @@ export const AgentDetailsIntegration: React.FunctionComponent<{
         <ExtensionWrapper>
           <extensionView.Component
             agent={agent}
-            onShowNeedsAttentionBadge={setShowNeedsAttentionBadge}
+            onShowNeedsAttentionBadge={setIsAttentionBadgeNeededForPolicyResponse}
           />
         </ExtensionWrapper>
       )
@@ -132,6 +133,11 @@ export const AgentDetailsIntegration: React.FunctionComponent<{
     }
     return packageErrorUnits;
   }, [agent.components, packagePolicy]);
+
+  const showNeedsAttentionBadge = useMemo(
+    () => isAttentionBadgeNeededForPolicyResponse || packageErrors.length,
+    [isAttentionBadgeNeededForPolicyResponse, packageErrors.length]
+  );
 
   const genericErrorsListExtensionViewWrapper = useMemo(() => {
     return (
@@ -225,7 +231,7 @@ export const AgentDetailsIntegration: React.FunctionComponent<{
                   {packagePolicy.name}
                 </EuiLink>
               </EuiFlexItem>
-              {(showNeedsAttentionBadge || packageErrors.length) && (
+              {showNeedsAttentionBadge && (
                 <EuiFlexItem grow={false}>
                   <EuiBadge color={theme.euiTheme.colors.danger} iconType="alert" iconSide="left">
                     <FormattedMessage
