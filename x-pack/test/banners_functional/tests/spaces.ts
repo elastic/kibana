@@ -60,7 +60,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     // TLDR: No banner on login page.
     // Bugs Filed:
     // https://github.com/elastic/kibana/issues/140307
-    // https://github.com/elastic/kibana/issues/140307
+    // https://github.com/elastic/kibana/issues/140309
     it.skip('displays the global banner on the login page', async () => {
       await PageObjects.security.forceLogout();
       await PageObjects.common.navigateToApp('login');
