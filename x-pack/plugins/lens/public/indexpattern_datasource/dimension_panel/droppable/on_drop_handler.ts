@@ -127,10 +127,8 @@ function onFieldDrop(props: DropHandlerProps<DraggedField>, shouldAddField?: boo
   // discourage already used operations for a field
   const alreadyUsedOperations = new Set(
     Object.values(layer.columns)
-      .filter((column) =>
-        'sourceField' in column && column.sourceField === source.field.name
-      )
-      .map(column => column.operationType)
+      .filter((column) => 'sourceField' in column && column.sourceField === source.field.name)
+      .map((column) => column.operationType)
   );
 
   const newOperation = shouldAddField
