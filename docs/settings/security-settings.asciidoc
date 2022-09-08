@@ -8,6 +8,12 @@
 You do not need to configure any additional settings to use the
 {security-features} in {kib}. They are enabled by default.
 
+IMPORTANT: In high-availability deployments, make sure you use the same
+security settings for all instances of {kib}. Also consider storing
+sensitive security settings, such as encryption and decryption keys,
+securely in the Kibana Keystore, instead of keeping them in clear text in
+the kibana.yml file.
+
 [float]
 [[general-security-settings]]
 ==== General security settings
@@ -306,11 +312,6 @@ Use a string of `<count>[ms\|s\|m\|h\|d\|w\|M\|Y]` (e.g. '20m', '24h', '7d', '1w
 ==== Encrypted saved objects settings
 
 These settings control the encryption of saved objects with sensitive data. For more details, refer to <<xpack-security-secure-saved-objects>>.
-
-[IMPORTANT]
-============
-In high-availability deployments, make sure you use the same encryption and decryption keys for all instances of {kib}. Although the keys can be specified in clear text in `kibana.yml`, it's recommended to store them securely in the <<secure-settings,{kib} Keystore>>.
-============
 
 [cols="2*<"]
 |===
