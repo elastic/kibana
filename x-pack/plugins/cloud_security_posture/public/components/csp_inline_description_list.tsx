@@ -9,7 +9,6 @@ import { EuiDescriptionList, useEuiTheme } from '@elastic/eui';
 import React from 'react';
 import { EuiDescriptionListProps } from '@elastic/eui/src/components/description_list/description_list_types';
 
-// adds : to the end of the title, according to our designs
 const getModifiedTitlesListItems = (listItems: EuiDescriptionListProps['listItems']) =>
   listItems
     ?.filter((item) => !!item?.title && !!item?.description)
@@ -40,7 +39,7 @@ export const CspInlineDescriptionList = ({
       descriptionProps={{
         style: {
           color: euiTheme.colors.subduedText,
-          marginRight: 10,
+          marginRight: 6,
           fontSize: customFontSize,
         },
       }}

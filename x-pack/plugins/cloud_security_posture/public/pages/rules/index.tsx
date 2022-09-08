@@ -68,8 +68,15 @@ export const Rules = ({ match: { params } }: RouteComponentProps<PageUrlParams>)
 
   useCspBreadcrumbs(breadcrumbs);
 
-  console.log(packageInfo);
-  console.log(agentInfo);
+  const sharedValuesList = [
+    // TODO: right now we only have one integration, but this short name should come from the packageInfo
+    { title: 'Integration', description: 'KSPM' },
+    packageInfo?.inputs?.length && {
+      title: 'Type',
+      description: getPackageTypeDisplayName(packageInfo),
+    },
+    // { title: 'Benchmark', description: 'CIS Kubernetes' },
+  ];
 
   return (
     <CloudPosturePage query={integrationInfo}>
@@ -111,17 +118,7 @@ export const Rules = ({ match: { params } }: RouteComponentProps<PageUrlParams>)
         description={
           packageInfo?.package &&
           agentInfo?.name && (
-            <CspInlineDescriptionList
-              listItems={[
-                { title: 'Integration', description: 'KSPM' },
-                {
-                  title: 'Type',
-                  description:
-                    packageInfo?.inputs?.length && getPackageTypeDisplayName(packageInfo),
-                },
-                { title: 'Benchmark', description: 'CIS Kubernetes' },
-              ]}
-            />
+            <CspInlineDescriptionList listItems={sharedValuesList} />
             // <EuiTextColor color="subdued">
             //   <FormattedMessage
             //     id="xpack.csp.rules.rulePageHeader.pageDescriptionTitle"
