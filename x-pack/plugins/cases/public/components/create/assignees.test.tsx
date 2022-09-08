@@ -14,6 +14,8 @@ import { userProfiles } from '../../containers/user_profiles/api.mock';
 import { Assignees } from './assignees';
 import { FormProps } from './schema';
 import { act, waitFor } from '@testing-library/react';
+import * as api from '../../containers/user_profiles/api';
+import { UserProfile } from '@kbn/user-profile-components';
 
 jest.mock('../../containers/user_profiles/api');
 
@@ -49,7 +51,28 @@ describe('Assignees', () => {
     expect(result.getByTestId('createCaseAssigneesComboBox')).toBeInTheDocument();
   });
 
+  it('does not render the assign yourself link when the current user profile is undefined', async () => {
+    const spyOnGetCurrentUserProfile = jest.spyOn(api, 'getCurrentUserProfile');
+    spyOnGetCurrentUserProfile.mockResolvedValue(undefined as unknown as UserProfile);
+
+    const result = appMockRender.render(
+      <MockHookWrapperComponent>
+        <Assignees isLoading={false} />
+      </MockHookWrapperComponent>
+    );
+
+    await waitFor(() => {
+      expect(result.getByTestId('comboBoxSearchInput')).not.toBeDisabled();
+    });
+
+    expect(result.queryByTestId('create-case-assign-yourself-link')).not.toBeInTheDocument();
+    expect(result.getByTestId('createCaseAssigneesComboBox')).toBeInTheDocument();
+  });
+
   it('selects the current user correctly', async () => {
+    const spyOnGetCurrentUserProfile = jest.spyOn(api, 'getCurrentUserProfile');
+    spyOnGetCurrentUserProfile.mockResolvedValue(currentUserProfile);
+
     const result = appMockRender.render(
       <MockHookWrapperComponent>
         <Assignees isLoading={false} />

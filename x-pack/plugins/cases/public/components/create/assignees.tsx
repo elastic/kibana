@@ -40,7 +40,7 @@ interface FieldProps {
   options: EuiComboBoxOptionOption[];
   isLoading: boolean;
   isDisabled: boolean;
-  currentUserProfile: UserProfile;
+  currentUserProfile?: UserProfile;
   selectedOptions: EuiComboBoxOptionOption[];
   setSelectedOptions: React.Dispatch<React.SetStateAction<EuiComboBoxOptionOption[]>>;
   onSearchComboChange: (value: string) => void;
@@ -123,9 +123,11 @@ const AssigneesFieldComponent: React.FC<FieldProps> = React.memo(
         label={i18n.ASSIGNEES}
         labelAppend={OptionalFieldLabel}
         helpText={
-          <EuiLink data-test-subj="create-case-assign-yourself-link" onClick={onSelfAssign}>
-            {i18n.ASSIGN_YOURSELF}
-          </EuiLink>
+          currentUserProfile ? (
+            <EuiLink data-test-subj="create-case-assign-yourself-link" onClick={onSelfAssign}>
+              {i18n.ASSIGN_YOURSELF}
+            </EuiLink>
+          ) : undefined
         }
       >
         <EuiComboBox
