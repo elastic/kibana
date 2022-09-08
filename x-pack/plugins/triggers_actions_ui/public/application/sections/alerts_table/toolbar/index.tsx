@@ -6,3 +6,4 @@
  */
 
 export { getToolbarVisibility } from './toolbar_visibility';
+export { AlertsCount } from './components/alerts_count/alerts_count';
