@@ -44,7 +44,7 @@ export const login = ({
   });
 };
 
-const _handleViolations = (violations: Result[], skipTestFailure?: boolean) => {
+const handleViolations = (violations: Result[], skipTestFailure?: boolean) => {
   // Destructure keys from the violations object to create a readable array
   const violationData = violations.map(({ id, description, impact, nodes }) => ({
     description,
@@ -79,7 +79,7 @@ const _handleViolations = (violations: Result[], skipTestFailure?: boolean) => {
 };
 
 const logViolations = (violations: Result[]) => {
-  _handleViolations(violations);
+  handleViolations(violations);
 };
 
 /*
