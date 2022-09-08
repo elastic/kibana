@@ -54,7 +54,7 @@ export const useRecentlyViewedMonitors = () => {
         ({ saved_object: monitor }) => Boolean(monitor.attributes) && monitor.id !== monitorId
       )
       .map(({ saved_object: monitor }) => ({
-        id: monitor.id,
+        key: monitor.id,
         label: (monitor.attributes as MonitorFields).name,
       }));
   }, [monitorId, recentlyViewed]);
@@ -63,7 +63,10 @@ export const useRecentlyViewedMonitors = () => {
     if ((data ?? []).length === 0) {
       return [];
     }
-    return [{ id: 'recently_viewed', label: RECENTLY_VIEWED, isGroupLabel: true }, ...(data ?? [])];
+    return [
+      { key: 'recently_viewed', label: RECENTLY_VIEWED, isGroupLabel: true },
+      ...(data ?? []),
+    ];
   }, [data]);
 };
 

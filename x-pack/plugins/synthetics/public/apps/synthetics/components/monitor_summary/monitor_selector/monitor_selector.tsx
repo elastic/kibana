@@ -34,19 +34,19 @@ export const MonitorSelector = () => {
   const recentlyViewed = useRecentlyViewedMonitors();
 
   useEffect(() => {
+    let newOptions: EuiSelectableOption[] = [];
     if (recentlyViewed.length > 0 && !searchValue) {
-      let otherMonitors: EuiSelectableOption[] = values.filter((value) =>
-        recentlyViewed.every((recent) => recent.id !== value.id)
+      const otherMonitors = values.filter((value) =>
+        recentlyViewed.every((recent) => recent.key !== value.key)
       );
 
       if (otherMonitors.length > 0) {
-        otherMonitors = [
-          { id: 'monitors', label: OTHER_MONITORS, isGroupLabel: true },
-          ...otherMonitors,
-        ];
+        newOptions.push({ key: 'monitors', label: OTHER_MONITORS, isGroupLabel: true });
       }
 
-      setOptions([...recentlyViewed, ...otherMonitors]);
+      newOptions = [...newOptions, ...otherMonitors];
+
+      setOptions([...recentlyViewed, ...newOptions]);
     } else {
       setOptions(values);
     }
