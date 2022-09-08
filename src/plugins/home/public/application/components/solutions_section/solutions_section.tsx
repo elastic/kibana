@@ -7,7 +7,8 @@
  */
 
 import React, { FC } from 'react';
-import { EuiFlexGroup, EuiHorizontalRule, EuiScreenReaderOnly } from '@elastic/eui';
+import { EuiFlexGroup, EuiScreenReaderOnly } from '@elastic/eui';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SolutionPanel } from './solution_panel';
 import { FeatureCatalogueEntry, FeatureCatalogueSolution } from '../../..';
@@ -27,26 +28,28 @@ export const SolutionsSection: FC<Props> = ({ addBasePath, solutions }) => {
     solutions = solutions.sort(sortByOrder);
 
     return (
-      <>
-        <section aria-labelledby="homSolutions__title" className="homSolutions">
-          <EuiScreenReaderOnly>
-            <h2 id="homSolutions__title">
-              <FormattedMessage
-                id="home.solutionsSection.sectionTitle"
-                defaultMessage="Pick your solution"
-              />
-            </h2>
-          </EuiScreenReaderOnly>
+      <KibanaPageTemplate.Section
+        bottomBorder
+        paddingSize="xl"
+        aria-labelledby="homSolutions__title"
+        className="homSolutions"
+        contentProps={{ className: 'homSolutions__content' }}
+      >
+        <EuiScreenReaderOnly>
+          <h2 id="homSolutions__title">
+            <FormattedMessage
+              id="home.solutionsSection.sectionTitle"
+              defaultMessage="Pick your solution"
+            />
+          </h2>
+        </EuiScreenReaderOnly>
 
-          <EuiFlexGroup className="homSolutions__content">
-            {solutions.map((solution) => (
-              <SolutionPanel addBasePath={addBasePath} key={solution.id} solution={solution} />
-            ))}
-          </EuiFlexGroup>
-        </section>
-
-        <EuiHorizontalRule margin="xxl" />
-      </>
+        <EuiFlexGroup className="homSolutions__content">
+          {solutions.map((solution) => (
+            <SolutionPanel addBasePath={addBasePath} key={solution.id} solution={solution} />
+          ))}
+        </EuiFlexGroup>
+      </KibanaPageTemplate.Section>
     );
   } else {
     return null;

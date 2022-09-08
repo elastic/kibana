@@ -31,8 +31,9 @@ import {
   LensDocShape830,
   VisStatePre830,
   LensDocShape840,
+  LensDocShape850,
 } from './types';
-import { DOCUMENT_FIELD_NAME, layerTypes, LegacyMetricState } from '../../common';
+import { DOCUMENT_FIELD_NAME, layerTypes, LegacyMetricState, isPartitionShape } from '../../common';
 import { LensDocShape } from './saved_object_migrations';
 
 export const commonRenameOperationsForFormula = (
@@ -437,4 +438,52 @@ export const commonMigrateMetricIds = (
   newAttributes.visualizationType = typeMappings[attributes.visualizationType];
 
   return newAttributes;
+};
+
+export const commonMigratePartitionChartGroups = (
+  attributes: LensDocShape840<{
+    shape: string;
+    layers: Array<{ groups?: string[] }>;
+  }>
+): LensDocShape850<{
+  shape: string;
+  layers: Array<{ primaryGroups?: string[]; secondaryGroups?: string[] }>;
+}> => {
+  if (
+    attributes.state.visualization?.layers &&
+    isPartitionShape(attributes.state.visualization.shape)
+  ) {
+    return {
+      ...attributes,
+      state: {
+        ...attributes.state,
+        visualization: {
+          ...attributes.state.visualization,
+          layers: attributes.state.visualization.layers.map((l) => {
+            const groups = l.groups;
+
+            if (groups) {
+              delete l.groups;
+              if (attributes.state.visualization.shape === 'mosaic') {
+                return {
+                  ...l,
+                  primaryGroups: [groups[0]],
+                  secondaryGroups: groups.length === 2 ? [groups[1]] : undefined,
+                };
+              }
+              return {
+                ...l,
+                primaryGroups: groups,
+              };
+            }
+            return l;
+          }),
+        },
+      },
+    };
+  }
+  return attributes as LensDocShape850<{
+    shape: string;
+    layers: Array<{ primaryGroups?: string[]; secondaryGroups?: string[] }>;
+  }>;
 };
