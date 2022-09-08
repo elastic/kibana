@@ -574,7 +574,11 @@ Object {
           "combine_script": "return state",
           "init_script": "state.rule_risk_stats = new HashMap();",
           "map_script": Object {
-            "id": "ml_userriskscore_map_script",
+            "source": "// Get running sum of risk score per rule name per shard\\\\\\\\
+String rule_name = doc[\\"signal.rule.name\\"].value;
+def stats = state.rule_risk_stats.getOrDefault(rule_name, 0.0);
+stats = doc[\\"signal.rule.risk_score\\"].value;
+state.rule_risk_stats.put(rule_name, stats);",
           },
           "params": Object {
             "max_risk": 100,
@@ -582,7 +586,48 @@ Object {
             "zeta_constant": 2.612,
           },
           "reduce_script": Object {
-            "id": "ml_userriskscore_reduce_script",
+            "source": "// Consolidating time decayed risks from across all shards
+Map total_risk_stats = new HashMap();
+for (state in states) {
+    for (key in state.rule_risk_stats.keySet()) {
+    def rule_stats = state.rule_risk_stats.get(key);
+    def stats = total_risk_stats.getOrDefault(key, 0.0);
+    stats = rule_stats;
+    total_risk_stats.put(key, stats);
+    }
+}
+// Consolidating individual rule risks and arranging them in decreasing order
+List risks = new ArrayList();
+for (key in total_risk_stats.keySet()) {
+    risks.add(total_risk_stats[key])
+}
+Collections.sort(risks, Collections.reverseOrder());
+// Calculating total risk and normalizing it to a range
+double total_risk = 0.0;
+double risk_cap = params.max_risk * params.zeta_constant;
+for (int i=0;i<risks.length;i++) {
+    total_risk += risks[i] / Math.pow((1+i), params.p);
+}
+double total_norm_risk = 100 * total_risk / risk_cap;
+if (total_norm_risk < 40) {
+    total_norm_risk =  2.125 * total_norm_risk;
+}
+else if (total_norm_risk >= 40 && total_norm_risk < 50) {
+    total_norm_risk = 85 + (total_norm_risk - 40);
+}
+else {
+    total_norm_risk = 95 + (total_norm_risk - 50) / 10;
+}
+
+List rule_stats = new ArrayList();
+for (key in total_risk_stats.keySet()) {
+    Map temp = new HashMap();
+    temp[\\"rule_name\\"] = key;
+    temp[\\"rule_risk\\"] = total_risk_stats[key];
+    rule_stats.add(temp);
+}
+
+return [\\"calculated_score_norm\\": total_norm_risk, \\"rule_risks\\": rule_stats];",
           },
         },
       },

@@ -8,9 +8,9 @@
 import { EuiButton } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useSpaceId } from '../../../common/hooks/use_space_id';
-import { useKibana } from '../../../common/lib/kibana';
-import type { inputsModel } from '../../../common/store';
+import { useSpaceId } from '../../../../common/hooks/use_space_id';
+import { useKibana } from '../../../../common/lib/kibana';
+import type { inputsModel } from '../../../../common/store';
 import {
   UpgradeState,
   upgradeHostRiskScoreModule,
