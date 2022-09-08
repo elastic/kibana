@@ -55,8 +55,6 @@ const actionTimelineToHide: ActionTimelineToShow[] = ['duplicate', 'createFrom']
 
 const StyledEuiFormRow = styled(EuiFormRow)``;
 
-// TODO need to add disabled in the SearchBar
-
 export const QueryBarDefineRule = ({
   browserFields,
   dataTestSubj,
@@ -133,8 +131,16 @@ export const QueryBarDefineRule = ({
           if (isSubscribed && mySavedQuery != null) {
             setSavedQuery(mySavedQuery);
           }
-        } catch {
+        } catch (err) {
           setSavedQuery(undefined);
+          setFieldValue({
+            filters: [],
+            query: {
+              query: '',
+              language: 'kuery',
+            },
+            saved_id: null,
+          });
         }
       } else if (savedId == null && savedQuery != null) {
         setSavedQuery(undefined);
@@ -144,7 +150,7 @@ export const QueryBarDefineRule = ({
     return () => {
       isSubscribed = false;
     };
-  }, [fieldValue, filterManager, savedQuery, savedQueryServices]);
+  }, [fieldValue, filterManager, savedQuery, savedQueryServices, setFieldValue]);
 
   useEffect(() => {
     if (resetSavedQuery && savedQuery) {

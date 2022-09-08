@@ -751,14 +751,10 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
             </>
           </RuleTypeEuiFormRow>
 
-          {isQueryRule(ruleType) && (
+          {isQueryRule(ruleType) && formQuery?.saved_id && (
             <>
               <EuiSpacer size="s" />
-              <RuleTypeEuiFormRow
-                label={i18n.SAVED_QUERY_CHECKBOX_LABEL}
-                $isVisible={Boolean(formQuery?.saved_id)}
-                fullWidth
-              >
+              <RuleTypeEuiFormRow label={i18n.SAVED_QUERY_CHECKBOX_LABEL} $isVisible fullWidth>
                 <CommonUseField
                   path="shouldLoadQueryDynamically"
                   componentProps={{

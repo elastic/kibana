@@ -135,7 +135,7 @@ describe('helpers', () => {
             ...mockData.queryBar,
             saved_id: 'mock-test-id',
           },
-          type: 'query',
+          ruleType: 'query',
         };
         const result = formatDefineStepData(mockStepData);
 
@@ -151,7 +151,7 @@ describe('helpers', () => {
             ...mockData.queryBar,
             saved_id: 'mock-test-id',
           },
-          type: 'saved_query',
+          ruleType: 'saved_query',
         };
         const result = formatDefineStepData(mockStepData);
 
@@ -167,7 +167,7 @@ describe('helpers', () => {
             ...mockData.queryBar,
             saved_id: 'mock-test-id',
           },
-          type: 'query',
+          ruleType: 'query',
           shouldLoadQueryDynamically: true,
         };
         const result = formatDefineStepData(mockStepData);
@@ -184,7 +184,7 @@ describe('helpers', () => {
             ...mockData.queryBar,
             saved_id: 'mock-test-id',
           },
-          type: 'saved_query',
+          ruleType: 'saved_query',
           shouldLoadQueryDynamically: true,
         };
         const result = formatDefineStepData(mockStepData);
@@ -201,7 +201,7 @@ describe('helpers', () => {
             ...mockData.queryBar,
             saved_id: null,
           },
-          type: 'query',
+          ruleType: 'query',
           shouldLoadQueryDynamically: true,
         };
         const result = formatDefineStepData(mockStepData);
@@ -218,7 +218,7 @@ describe('helpers', () => {
             ...mockData.queryBar,
             saved_id: null,
           },
-          type: 'saved_query',
+          ruleType: 'saved_query',
           shouldLoadQueryDynamically: true,
         };
         const result = formatDefineStepData(mockStepData);
@@ -281,17 +281,6 @@ describe('helpers', () => {
         },
       };
       const result = formatDefineStepData(mockStepData);
-
-      const expected: DefineStepRuleJson = {
-        language: 'kuery',
-        filters: mockQueryBar.filters,
-        query: 'test query',
-        index: ['filebeat-'],
-        saved_id: 'test123',
-        type: 'saved_query',
-        timeline_id: '86aa74d0-2136-11ea-9864-ebc8cc1cb8c2',
-        timeline_title: '',
-      };
 
       expect(result.timeline_id).toBe('86aa74d0-2136-11ea-9864-ebc8cc1cb8c2');
       expect(result.timeline_title).toEqual('');
