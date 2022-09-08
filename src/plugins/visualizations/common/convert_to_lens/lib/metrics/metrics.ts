@@ -68,7 +68,6 @@ export const convertMetricToColumns = <T extends METRIC_TYPES | BUCKET_TYPES>(
       });
       return getValidColumns(columns);
     }
-
     case METRIC_TYPES.TOP_HITS:
     case METRIC_TYPES.TOP_METRICS:
       return null; // TODO: add support of those metrics;
