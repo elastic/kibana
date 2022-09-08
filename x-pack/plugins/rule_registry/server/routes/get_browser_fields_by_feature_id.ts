@@ -33,16 +33,26 @@ export const getBrowserFieldsByFeatureId = (router: IRouter<RacRequestHandlerCon
         const { featureIds } = request.query;
         const indices = await alertsClient.getAuthorizedAlertsIndices(featureIds.split(','));
 
-        if (!indices) {
+        if (!indices || indices.length === 0) {
           return response.notFound({
             body: {
-              message: `indices for featureIds [${featureIds}] not found`,
+              message: `No indices found for featureIds [${featureIds}]`,
               attributes: { success: false },
             },
           });
         }
 
         const o11yIndices = indices.filter((index) => index.startsWith('.alerts-observability'));
+
+        if (o11yIndices.length === 0) {
+          return response.notFound({
+            body: {
+              message: `No alerts-observability indices found for featureIds [${featureIds}]`,
+              attributes: { success: false },
+            },
+          });
+        }
+
         const browserFields = await alertsClient.getBrowserFields({
           indices: o11yIndices,
           metaFields: ['_id', '_index'],
