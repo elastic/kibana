@@ -458,9 +458,7 @@ describe('perform_bulk_action_schema', () => {
               type: BulkActionEditType.set_schedule,
               value: {
                 interval: '1m',
-                meta: {
-                  from: '1m',
-                },
+                lookback: '1m',
               },
             },
           ],

@@ -48,9 +48,7 @@ describe('bulkEditActionToRulesClientOperation', () => {
         type: BulkActionEditType.set_schedule,
         value: {
           interval: '100m',
-          meta: {
-            from: '10m',
-          },
+          lookback: '10m',
         },
       })
     ).toEqual([

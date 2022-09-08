@@ -67,7 +67,7 @@ export const computeDryRunPayload = (
       return [
         {
           type: editAction,
-          value: { interval: '1', meta: { from: '10' } },
+          value: { interval: '5m', lookback: '1m' },
         },
       ];
 
