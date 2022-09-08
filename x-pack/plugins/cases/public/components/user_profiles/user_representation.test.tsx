@@ -9,7 +9,11 @@ import React from 'react';
 import { fireEvent, screen } from '@testing-library/react';
 import { UserRepresentation, UserRepresentationProps } from './user_representation';
 import { userProfiles } from '../../containers/user_profiles/api.mock';
-import { AppMockRenderer, createAppMockRenderer } from '../../common/mock';
+import {
+  AppMockRenderer,
+  createAppMockRenderer,
+  noUpdateCasesPermissions,
+} from '../../common/mock';
 
 describe('UserRepresentation', () => {
   const dataTestSubjGroup = `user-profile-assigned-user-group-${userProfiles[0].user.username}`;
@@ -41,6 +45,15 @@ describe('UserRepresentation', () => {
     fireEvent.mouseEnter(screen.getByTestId(dataTestSubjGroup));
 
     expect(screen.getByTestId(dataTestSubjCross)).toHaveStyle('opacity: 1');
+  });
+
+  it('does not show the cross button when the user is hovering over the row and does not have update permissions', () => {
+    appMockRender = createAppMockRenderer({ permissions: noUpdateCasesPermissions() });
+    appMockRender.render(<UserRepresentation {...defaultProps} />);
+
+    fireEvent.mouseEnter(screen.getByTestId(dataTestSubjGroup));
+
+    expect(screen.queryByTestId(dataTestSubjCross)).not.toBeInTheDocument();
   });
 
   it('show the cross button when hovering over the row of an unknown user', () => {
