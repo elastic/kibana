@@ -110,6 +110,9 @@ export function columnToOperation(
         ? 'version'
         : undefined,
     hasTimeShift: Boolean(timeShift),
+    interval: isColumnOfType<DateHistogramIndexPatternColumn>('date_histogram', column)
+      ? column.params.interval
+      : undefined,
   };
 }
 
@@ -750,6 +753,9 @@ export function getIndexPatternDatasource({
       ),
     getUsedDataView: (state: IndexPatternPrivateState, layerId: string) => {
       return state.layers[layerId].indexPatternId;
+    },
+    getUsedDataViews: (state) => {
+      return Object.values(state.layers).map(({ indexPatternId }) => indexPatternId);
     },
   };
 

@@ -6,7 +6,7 @@
  */
 
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { IndexPatternServiceAPI } from '../../../indexpattern_service/service';
+import { IndexPatternServiceAPI } from '../../../data_views_service/service';
 
 import {
   Visualization,
