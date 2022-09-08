@@ -63,7 +63,6 @@ export const xyVisFn: XyVisFn['fn'] = async (data, args, handlers) => {
 
   const {
     referenceLines = [],
-    annotationLayers = [],
     // data_layer args
     seriesType,
     accessors,
@@ -101,7 +100,6 @@ export const xyVisFn: XyVisFn['fn'] = async (data, args, handlers) => {
   const layers: XYLayerConfig[] = [
     ...appendLayerIds(dataLayers, 'dataLayers'),
     ...appendLayerIds(referenceLines, 'referenceLines'),
-    ...appendLayerIds(annotationLayers, 'annotationLayers'),
   ];
 
   logDatatable(data, layers, handlers, args.splitColumnAccessor, args.splitRowAccessor);

@@ -14,7 +14,7 @@ import {
 } from './loader';
 import { IndexPatternPersistedState, IndexPatternPrivateState } from './types';
 import { DateHistogramIndexPatternColumn, TermsIndexPatternColumn } from './operations';
-import { sampleIndexPatterns } from '../indexpattern_service/mocks';
+import { sampleIndexPatterns } from '../data_views_service/mocks';
 
 const createMockStorage = (lastData?: Record<string, string>) => {
   return {

@@ -18,7 +18,7 @@ describe('xyVis', () => {
     const { layerId, layerType, table, type, ...restLayerArgs } = sampleLayer;
     const result = await xyVisFunction.fn(
       data,
-      { ...rest, ...restLayerArgs, referenceLines: [], annotationLayers: [] },
+      { ...rest, ...restLayerArgs, referenceLines: [] },
       createMockExecutionContext()
     );
 
@@ -53,7 +53,6 @@ describe('xyVis', () => {
           ...{ ...sampleLayer, markSizeAccessor: 'b' },
           markSizeRatio: 0,
           referenceLines: [],
-          annotationLayers: [],
         },
         createMockExecutionContext()
       )
@@ -67,7 +66,6 @@ describe('xyVis', () => {
           ...{ ...sampleLayer, markSizeAccessor: 'b' },
           markSizeRatio: 101,
           referenceLines: [],
-          annotationLayers: [],
         },
         createMockExecutionContext()
       )
@@ -86,7 +84,6 @@ describe('xyVis', () => {
           ...restLayerArgs,
           minTimeBarInterval: '1q',
           referenceLines: [],
-          annotationLayers: [],
         },
         createMockExecutionContext()
       )
@@ -105,7 +102,6 @@ describe('xyVis', () => {
           ...restLayerArgs,
           minTimeBarInterval: '1h',
           referenceLines: [],
-          annotationLayers: [],
         },
         createMockExecutionContext()
       )
@@ -124,7 +120,6 @@ describe('xyVis', () => {
           ...restLayerArgs,
           addTimeMarker: true,
           referenceLines: [],
-          annotationLayers: [],
         },
         createMockExecutionContext()
       )
@@ -144,7 +139,7 @@ describe('xyVis', () => {
           ...rest,
           ...restLayerArgs,
           referenceLines: [],
-          annotationLayers: [],
+
           splitRowAccessor,
         },
         createMockExecutionContext()
@@ -165,7 +160,7 @@ describe('xyVis', () => {
           ...rest,
           ...restLayerArgs,
           referenceLines: [],
-          annotationLayers: [],
+
           splitColumnAccessor,
         },
         createMockExecutionContext()
@@ -185,7 +180,7 @@ describe('xyVis', () => {
           ...rest,
           ...restLayerArgs,
           referenceLines: [],
-          annotationLayers: [],
+
           markSizeRatio: 5,
         },
         createMockExecutionContext()
@@ -207,7 +202,7 @@ describe('xyVis', () => {
           ...rest,
           ...restLayerArgs,
           referenceLines: [],
-          annotationLayers: [],
+
           seriesType: 'bar',
           showLines: true,
         },
@@ -230,7 +225,7 @@ describe('xyVis', () => {
           ...rest,
           ...restLayerArgs,
           referenceLines: [],
-          annotationLayers: [],
+
           isHistogram: true,
           xScaleType: 'time',
           xAxisConfig: {
@@ -257,7 +252,7 @@ describe('xyVis', () => {
           ...rest,
           ...restLayerArgs,
           referenceLines: [],
-          annotationLayers: [],
+
           xAxisConfig: {
             type: 'xAxisConfig',
             extent: {
@@ -287,7 +282,7 @@ describe('xyVis', () => {
           ...rest,
           ...restLayerArgs,
           referenceLines: [],
-          annotationLayers: [],
+
           xAxisConfig: {
             type: 'xAxisConfig',
             extent: { type: 'axisExtentConfig', mode: 'dataBounds' },
@@ -308,7 +303,7 @@ describe('xyVis', () => {
         ...rest,
         ...restLayerArgs,
         referenceLines: [],
-        annotationLayers: [],
+
         isHistogram: true,
         xAxisConfig: {
           type: 'xAxisConfig',

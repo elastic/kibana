@@ -30,7 +30,8 @@ import {
   LensDocShape810,
   LensDocShape830,
   VisStatePre830,
-  LensDocShape840,
+  XYVisStatePre850,
+  VisState850,
   LensDocShape850,
 } from './types';
 import { DOCUMENT_FIELD_NAME, layerTypes, LegacyMetricState, isPartitionShape } from '../../common';
@@ -422,16 +423,49 @@ export const commonFixValueLabelsInXY = (
   };
 };
 
+export const commonExplicitAnnotationType = (
+  attributes: LensDocShape850<XYVisStatePre850>
+): LensDocShape850<VisState850> => {
+  // Skip the migration heavy part if not XY or it does not contain annotations
+  if (
+    attributes.visualizationType !== 'lnsXY' ||
+    attributes.state.visualization.layers.every((l) => l.layerType !== 'annotations')
+  ) {
+    return attributes as LensDocShape850<VisState850>;
+  }
+  const newAttributes = cloneDeep(attributes);
+  const { visualization } = newAttributes.state;
+  const { layers } = visualization;
+  return {
+    ...newAttributes,
+    state: {
+      ...newAttributes.state,
+      visualization: {
+        ...visualization,
+        layers: layers.map((l) => {
+          if (l.layerType !== 'annotations') {
+            return l;
+          }
+          return {
+            ...l,
+            annotations: l.annotations.map((a) => ({ ...a, type: 'manual' })),
+          };
+        }),
+      },
+    },
+  };
+};
+
 export const commonMigrateMetricIds = (
-  attributes: LensDocShape840<unknown>
-): LensDocShape840<unknown> => {
+  attributes: LensDocShape850<unknown>
+): LensDocShape850<unknown> => {
   const typeMappings = {
     lnsMetric: 'lnsLegacyMetric',
     lnsMetricNew: 'lnsMetric',
   } as Record<string, string>;
 
   if (!attributes.visualizationType || !(attributes.visualizationType in typeMappings)) {
-    return attributes as LensDocShape840<unknown>;
+    return attributes as LensDocShape850<unknown>;
   }
 
   const newAttributes = cloneDeep(attributes);
@@ -441,7 +475,7 @@ export const commonMigrateMetricIds = (
 };
 
 export const commonMigratePartitionChartGroups = (
-  attributes: LensDocShape840<{
+  attributes: LensDocShape850<{
     shape: string;
     layers: Array<{ groups?: string[] }>;
   }>

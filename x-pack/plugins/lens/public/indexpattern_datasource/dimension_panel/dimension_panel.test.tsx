@@ -55,8 +55,8 @@ jest.mock('./reference_editor', () => ({
   ReferenceEditor: () => null,
 }));
 jest.mock('../loader');
-jest.mock('../query_input', () => ({
-  QueryInput: () => null,
+jest.mock('@kbn/unified-search-plugin/public', () => ({
+  QueryStringInput: () => null,
 }));
 
 jest.mock('../operations');

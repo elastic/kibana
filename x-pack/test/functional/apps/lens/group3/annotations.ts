@@ -76,7 +76,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         )
       ).to.be(true);
       await PageObjects.lens.closeDimensionEditor();
-      await testSubjects.existOrFail('xyVisAnnotationText');
       await testSubjects.existOrFail('xyVisGroupedAnnotationIcon');
     });
   });

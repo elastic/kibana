@@ -2,6 +2,7 @@
 
 exports[`XYChart component annotations should render basic line annotation 1`] = `
 <LineAnnotation
+  customTooltipDetails={[Function]}
   dataValues={
     Array [
       Object {
@@ -18,8 +19,10 @@ exports[`XYChart component annotations should render basic line annotation 1`] =
     <Marker
       config={
         Object {
+          "customTooltipDetails": [Function],
           "icon": "triangle",
           "id": "annotation",
+          "isGrouped": false,
           "label": "Annotation",
           "position": "bottom",
           "time": "2022-03-18T08:25:17.140Z",
@@ -38,6 +41,7 @@ exports[`XYChart component annotations should render basic line annotation 1`] =
     />
   }
   markerPosition="top"
+  placement="bottom"
   style={
     Object {
       "line": Object {
@@ -101,9 +105,9 @@ exports[`XYChart component annotations should render grouped line annotations pr
   dataValues={
     Array [
       Object {
-        "dataValue": 1647591900025,
+        "dataValue": 1647591917125,
         "details": "Event 1",
-        "header": 1647591900000,
+        "header": 1647591917100,
       },
     ]
   }
@@ -118,19 +122,19 @@ exports[`XYChart component annotations should render grouped line annotations pr
           "customTooltipDetails": [Function],
           "icon": "3",
           "id": "event1",
+          "isGrouped": true,
           "label": "Event 1",
           "lineStyle": "dashed",
           "lineWidth": 3,
           "position": "bottom",
           "textVisibility": undefined,
           "time": "2022-03-18T08:25:00.000Z",
-          "timebucket": 1647591900000,
+          "timebucket": 1647591917100,
           "type": "point",
         }
       }
       hasReducedPadding={true}
       isHorizontal={true}
-      label="Event 1"
     />
   }
   markerBody={
@@ -139,6 +143,7 @@ exports[`XYChart component annotations should render grouped line annotations pr
     />
   }
   markerPosition="top"
+  placement="bottom"
   style={
     Object {
       "line": Object {
@@ -161,9 +166,9 @@ exports[`XYChart component annotations should render grouped line annotations wi
   dataValues={
     Array [
       Object {
-        "dataValue": 1647591900025,
+        "dataValue": 1647591917125,
         "details": "Event 1",
-        "header": 1647591900000,
+        "header": 1647591917100,
       },
     ]
   }
@@ -178,19 +183,19 @@ exports[`XYChart component annotations should render grouped line annotations wi
           "customTooltipDetails": [Function],
           "icon": "2",
           "id": "event1",
+          "isGrouped": true,
           "label": "Event 1",
           "lineStyle": "solid",
           "lineWidth": 1,
           "position": "bottom",
           "textVisibility": undefined,
           "time": "2022-03-18T08:25:00.000Z",
-          "timebucket": 1647591900000,
+          "timebucket": 1647591917100,
           "type": "point",
         }
       }
       hasReducedPadding={true}
       isHorizontal={true}
-      label="Event 1"
     />
   }
   markerBody={
@@ -199,6 +204,7 @@ exports[`XYChart component annotations should render grouped line annotations wi
     />
   }
   markerPosition="top"
+  placement="bottom"
   style={
     Object {
       "line": Object {
@@ -214,6 +220,7 @@ exports[`XYChart component annotations should render grouped line annotations wi
 
 exports[`XYChart component annotations should render simplified annotations when simpleView is true 1`] = `
 <LineAnnotation
+  customTooltipDetails={[Function]}
   dataValues={
     Array [
       Object {
@@ -227,6 +234,7 @@ exports[`XYChart component annotations should render simplified annotations when
   id="annotation_2022_03_18_t_08_25_17_140_z"
   key="annotation_2022_03_18_t_08_25_17_140_z"
   markerPosition="top"
+  placement="bottom"
   style={
     Object {
       "line": Object {

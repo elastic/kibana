@@ -515,7 +515,7 @@ describe('metric visualization', () => {
   });
 
   it('clears a layer', () => {
-    expect(visualization.clearLayer(fullState, 'some-id')).toMatchInlineSnapshot(`
+    expect(visualization.clearLayer(fullState, 'some-id', 'indexPattern1')).toMatchInlineSnapshot(`
       Object {
         "layerId": "first",
         "layerType": "data",

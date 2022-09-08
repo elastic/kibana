@@ -24,9 +24,10 @@ export interface XYRender {
   value: XYChartProps;
 }
 
-export interface CollectiveConfig extends Omit<ManualPointEventAnnotationArgs, 'icon'> {
+export interface MergedAnnotation extends Omit<ManualPointEventAnnotationArgs, 'icon'> {
   timebucket: number;
   position: 'bottom';
   icon?: AvailableAnnotationIcon | string;
-  customTooltipDetails?: AnnotationTooltipFormatter | undefined;
+  customTooltipDetails: AnnotationTooltipFormatter;
+  isGrouped: boolean;
 }

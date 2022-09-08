@@ -8,6 +8,7 @@ Object {
         "addTimeMarker": Array [
           false,
         ],
+        "annotations": Array [],
         "emphasizeFitting": Array [
           true,
         ],

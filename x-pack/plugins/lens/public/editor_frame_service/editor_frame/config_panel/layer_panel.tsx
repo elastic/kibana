@@ -18,7 +18,7 @@ import {
   EuiIconTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { IndexPatternServiceAPI } from '../../../indexpattern_service/service';
+import { IndexPatternServiceAPI } from '../../../data_views_service/service';
 import { NativeRenderer } from '../../../native_renderer';
 import {
   StateSetter,
@@ -524,8 +524,13 @@ export function LayerPanel(
                                       columnId,
                                       label: columnLabelMap?.[columnId] ?? '',
                                       hideTooltip,
-                                      invalid: group.invalid,
-                                      invalidMessage: group.invalidMessage,
+                                      ...(activeVisualization?.validateColumn?.(
+                                        visualizationState,
+                                        { dataViews },
+                                        layerId,
+                                        columnId,
+                                        group
+                                      ) || { invalid: false }),
                                     })}
                                   </>
                                 )}

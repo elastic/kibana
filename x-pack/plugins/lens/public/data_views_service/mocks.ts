@@ -11,22 +11,38 @@ import {
   createMockedIndexPattern,
   createMockedRestrictedIndexPattern,
 } from '../indexpattern_datasource/mocks';
-import { IndexPattern } from '../types';
+import { DataViewsState } from '../state_management';
+import { ExistingFieldsMap, IndexPattern } from '../types';
 import { getFieldByNameFactory } from './loader';
 
-export function loadInitialDataViews() {
-  const indexPattern = createMockedIndexPattern();
-  const restricted = createMockedRestrictedIndexPattern();
+/**
+ * Create a DataViewState from partial parameters, and infer the rest from the passed one.
+ * Passing no parameter will return an empty state.
+ */
+export const createMockDataViewsState = ({
+  indexPatterns,
+  indexPatternRefs,
+  isFirstExistenceFetch,
+  existingFields,
+}: Partial<DataViewsState> = {}): DataViewsState => {
+  const refs =
+    indexPatternRefs ??
+    Object.values(indexPatterns ?? {}).map(({ id, title, name }) => ({ id, title, name }));
+  const allFields =
+    existingFields ??
+    refs.reduce((acc, { id, title }) => {
+      if (indexPatterns && id in indexPatterns) {
+        acc[title] = Object.fromEntries(indexPatterns[id].fields.map((f) => [f.displayName, true]));
+      }
+      return acc;
+    }, {} as ExistingFieldsMap);
   return {
-    indexPatternRefs: [],
-    existingFields: {},
-    indexPatterns: {
-      [indexPattern.id]: indexPattern,
-      [restricted.id]: restricted,
-    },
-    isFirstExistenceFetch: false,
+    indexPatterns: indexPatterns ?? {},
+    indexPatternRefs: refs,
+    isFirstExistenceFetch: Boolean(isFirstExistenceFetch),
+    existingFields: allFields,
   };
-}
+};
 
 export const createMockStorage = (lastData?: Record<string, string>) => {
   return {

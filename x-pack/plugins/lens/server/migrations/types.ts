@@ -270,6 +270,34 @@ export interface XYVisualizationState830 extends VisState820 {
 export type VisStatePre830 = XYVisualizationStatePre830;
 export type VisState830 = XYVisualizationState830;
 
+export interface XYVisStatePre850 {
+  layers: Array<
+    | {
+        layerId: string;
+        layerType: Exclude<LayerType, 'annotations'>;
+      }
+    | {
+        layerId: string;
+        layerType: Extract<LayerType, 'annotations'>;
+        annotations: Array<{ id: string }>;
+      }
+  >;
+}
+
+export interface XYVisState850 {
+  layers: Array<
+    | {
+        layerId: string;
+        layerType: Exclude<LayerType, 'annotations'>;
+      }
+    | {
+        layerId: string;
+        layerType: Extract<LayerType, 'annotations'>;
+        annotations: Array<{ id: string; type: 'manual' | 'query' }>;
+      }
+  >;
+}
+export type VisState850 = XYVisState850;
 export type VisState840 = VisState830;
 export type LensDocShape840<VisualizationState = unknown> = LensDocShape830<VisualizationState>;
 

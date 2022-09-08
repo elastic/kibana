@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { isEqual } from 'lodash';
 import type { Query } from '@kbn/es-query';
 import { QueryStringInput } from '@kbn/unified-search-plugin/public';
-import { useDebouncedValue } from '../shared_components';
+import { useDebouncedValue } from '../debounced_value';
 
 export const QueryInput = ({
   value,

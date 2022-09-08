@@ -19,4 +19,5 @@ export {
   defaultAnnotationRangeColor,
   isRangeAnnotationConfig,
   isManualPointAnnotationConfig,
+  isQueryAnnotationConfig,
 } from './event_annotation_service/helpers';
