@@ -22,13 +22,13 @@ const ENDPOINT_INTEGRATION_CONFIG_KEY = 'ENDPOINT_INTEGRATION_CONFIG';
 
 const NGAV = 'NGAV';
 const EDR_ESSENTIAL = i18n.translate(
-  'xpack.securitySolution.createPackagePolicy.stepConfigure.endpointDropdownOption',
+  'xpack.securitySolution.createPackagePolicy.stepConfigure.endpointDropdownOptionEDREssential',
   {
     defaultMessage: 'EDR Essential',
   }
 );
 const EDR_COMPLETE = i18n.translate(
-  'xpack.securitySolution.createPackagePolicy.stepConfigure.endpointDropdownOption',
+  'xpack.securitySolution.createPackagePolicy.stepConfigure.endpointDropdownOptionEDRComplete',
   {
     defaultMessage: 'EDR Complete',
   }
