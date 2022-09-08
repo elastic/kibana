@@ -23,6 +23,7 @@ export type {
   ParseSearchQueryOptions,
   SavedObjectSaveModalTagSelectorComponentProps,
   SavedObjectTagDecoratorTypeGuard,
+  GetTableColumnDefinitionOptions,
 } from './api';
 
 export type { TagDecoratedSavedObject } from './decorator';
