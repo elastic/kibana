@@ -8,7 +8,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import {
-  EuiPageTemplate,
+  EuiPageTemplate_Deprecated as EuiPageTemplate,
   EuiFlexGrid,
   EuiFlexItem,
   EuiPanel,
