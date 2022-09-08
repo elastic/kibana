@@ -25,7 +25,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useAiOpsKibana } from '../../kibana_context';
+import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { setFullTimeRange } from './full_time_range_selector_service';
 import { AIOPS_FROZEN_TIER_PREFERENCE, useStorage } from '../../hooks/use_storage';
 
@@ -52,16 +52,22 @@ export const FullTimeRangeSelector: FC<Props> = ({
   callback,
 }) => {
   const {
-    services: {
-      notifications: { toasts },
-    },
-  } = useAiOpsKibana();
+    http,
+    notifications: { toasts },
+  } = useAiopsAppContext();
 
   // wrapper around setFullTimeRange to allow for the calling of the optional callBack prop
   const setRange = useCallback(
     async (i: DataView, q?: QueryDslQueryContainer, excludeFrozenData?: boolean) => {
       try {
-        const fullTimeRange = await setFullTimeRange(timefilter, i, q, excludeFrozenData, toasts);
+        const fullTimeRange = await setFullTimeRange(
+          timefilter,
+          i,
+          toasts,
+          http,
+          q,
+          excludeFrozenData
+        );
         if (typeof callback === 'function') {
           callback(fullTimeRange);
         }
@@ -76,7 +82,7 @@ export const FullTimeRangeSelector: FC<Props> = ({
         );
       }
     },
-    [callback, timefilter, toasts]
+    [callback, http, timefilter, toasts]
   );
 
   const [isPopoverOpen, setPopover] = useState(false);

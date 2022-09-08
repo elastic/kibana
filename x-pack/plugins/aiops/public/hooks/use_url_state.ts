@@ -13,7 +13,7 @@ export interface Dictionary<TValue> {
   [id: string]: TValue;
 }
 
-// duplicate of ml/object_utils
+// TODO duplicate of ml/object_utils
 export const getNestedProperty = (
   obj: Record<string, any>,
   accessor: string,
