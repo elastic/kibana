@@ -21,6 +21,7 @@ import { StorageChart } from './storage_chart';
 import { PermissionDenied } from './prompts/permission_denied';
 import { useFetcher, FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { SummaryStats } from './summary_stats';
+import { ApmEnvironmentFilter } from '../../shared/environment_filter';
 
 const INITIAL_DATA = { hasPrivileges: false };
 
@@ -58,6 +59,9 @@ export function StorageExplorer() {
     <>
       <SearchBar />
       <EuiFlexGroup justifyContent="flexEnd">
+        <EuiFlexItem grow={false}>
+          <ApmEnvironmentFilter />
+        </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <IndexLifecyclePhaseSelect />
         </EuiFlexItem>

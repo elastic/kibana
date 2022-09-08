@@ -17,6 +17,7 @@ import {
   indexLifecyclePhaseRt,
   IndexLifecyclePhaseSelectOption,
 } from '../../../../common/storage_explorer_types';
+import { EuiLink } from '@elastic/eui';
 
 export const storageExplorer = {
   '/storage-explorer': {
@@ -28,26 +29,37 @@ export const storageExplorer = {
         href="/storage-explorer"
       >
         <ApmMainTemplate
-          pageTitle={
-            <EuiFlexGroup
-              justifyContent="flexStart"
-              gutterSize="s"
-              alignItems="baseline"
-            >
-              <EuiFlexItem grow={false}>
-                <EuiTitle size="l">
-                  <h2>
-                    {i18n.translate('xpack.apm.views.storageExplorer.title', {
-                      defaultMessage: 'Storage explorer',
-                    })}
-                  </h2>
-                </EuiTitle>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <BetaBadge />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          }
+          pageHeader={{
+            alignItems: 'center',
+            pageTitle: (
+              <EuiFlexGroup
+                justifyContent="flexStart"
+                gutterSize="s"
+                alignItems="baseline"
+              >
+                <EuiFlexItem grow={false}>
+                  <EuiTitle size="l">
+                    <h2>
+                      {i18n.translate('xpack.apm.views.storageExplorer.title', {
+                        defaultMessage: 'Storage explorer',
+                      })}
+                    </h2>
+                  </EuiTitle>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <BetaBadge />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            ),
+            rightSideItems: [
+              <EuiLink
+                href="https://ela.st/feedback-storage-explorer"
+                target="_blank"
+              >
+                Give feedback
+              </EuiLink>,
+            ],
+          }}
         >
           <StorageExplorer />
         </ApmMainTemplate>

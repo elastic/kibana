@@ -26,6 +26,7 @@ import { useApmRouter } from '../../../hooks/use_apm_router';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { asTransactionRate } from '../../../../common/utils/formatters';
+import { EuiSpacer } from '@elastic/eui';
 
 const INITIAL_DATA = {
   estimatedSize: 0,
@@ -84,7 +85,7 @@ export function SummaryStats() {
 
   return (
     <>
-      <EuiPanel hasBorder={true} hasShadow={false}>
+      <EuiPanel hasBorder={true} hasShadow={false} paddingSize="l">
         {loading && (
           <EuiText textAlign="center">
             <EuiLoadingSpinner size="l" />
