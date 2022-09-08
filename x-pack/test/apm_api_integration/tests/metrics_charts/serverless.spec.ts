@@ -8,8 +8,9 @@
 import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import { apm, timerange } from '@kbn/apm-synthtrace';
 import expect from '@kbn/expect';
+import { meanBy, sumBy } from 'lodash';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { roundNumber } from '../../utils';
+// import { roundNumber } from '../../utils';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
@@ -44,18 +45,47 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       const MEMORY_FREE = 94371840; // ~0.08 gb;
       const BILLED_DURATION_MS = 4000;
       const FAAS_TIMEOUT_MS = 10000;
-      const COLD_START_PYTHON = true;
       const COLD_START_DURATION_PYTHON = 4000;
-      const COLD_START_NODE = false;
       const COLD_START_DURATION_NODE = 0;
       const FAAS_DURATION = 4000;
       const TRANSACTION_DURATION = 1000;
 
+      const numberOfTransactionsCreated = 15;
+      const numberOfPythonInstances = 2;
+
       before(async () => {
-        const instancePython = apm
-          .service('lambda-python', 'test', 'python')
-          .instance('instance-python');
-        const instanceNode = apm.service('lambda-node', 'test', 'nodejs').instance('instance-node');
+        const instanceLambdaPython = apm
+          .serverless({
+            serviceName: 'lambda-python',
+            environment: 'test',
+            agentName: 'python',
+            faasId: 'arn:aws:lambda:us-west-2:123456789012:function:lambda-python',
+            coldStart: true,
+            faasTriggerType: 'other',
+          })
+          .instance('instance python');
+
+        const instanceLambdaPython2 = apm
+          .serverless({
+            serviceName: 'lambda-python',
+            environment: 'test',
+            agentName: 'python',
+            faasId: 'arn:aws:lambda:us-west-2:123456789012:function:lambda-python-2',
+            coldStart: true,
+            faasTriggerType: 'other',
+          })
+          .instance('instance python 2');
+
+        const instanceLambdaNode = apm
+          .serverless({
+            serviceName: 'lambda-node',
+            environment: 'test',
+            agentName: 'nodejs',
+            faasId: 'arn:aws:lambda:us-west-2:123456789012:function:lambda-node',
+            coldStart: false,
+            faasTriggerType: 'other',
+          })
+          .instance('instance node');
 
         const systemMetrics = {
           'system.memory.actual.free': MEMORY_FREE,
@@ -68,7 +98,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           .interval('1m')
           .rate(1)
           .generator((timestamp) => [
-            instancePython
+            instanceLambdaPython
               .transaction('GET /order/{id}')
               .defaults({
                 'service.runtime.name': 'AWS_Lambda_python3.8',
@@ -79,7 +109,18 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               .timestamp(timestamp)
               .duration(TRANSACTION_DURATION)
               .success(),
-            instanceNode
+            instanceLambdaPython2
+              .transaction('GET /order/{id}')
+              .defaults({
+                'service.runtime.name': 'AWS_Lambda_python3.8',
+                'cloud.provider': 'aws',
+                'cloud.service.name': 'lambda',
+                'cloud.region': 'us-east-1',
+              })
+              .timestamp(timestamp)
+              .duration(TRANSACTION_DURATION)
+              .success(),
+            instanceLambdaNode
               .transaction('GET /orders')
               .defaults({
                 'service.runtime.name': 'AWS_Lambda_nodejs',
@@ -96,24 +137,27 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           .interval('30s')
           .rate(1)
           .generator((timestamp) => [
-            instancePython
+            instanceLambdaPython
               .appMetrics({
                 ...systemMetrics,
-                'faas.id': `arn:aws:lambda:us-west-2:123456789012:function:lambda-python-1`,
-                'faas.coldstart': COLD_START_PYTHON,
-                'faas.trigger.type': 'other',
                 'faas.billed_duration': BILLED_DURATION_MS,
                 'faas.timeout': FAAS_TIMEOUT_MS,
                 'faas.coldstart_duration': COLD_START_DURATION_PYTHON,
                 'faas.duration': FAAS_DURATION,
               })
               .timestamp(timestamp),
-            instanceNode
+            instanceLambdaPython2
               .appMetrics({
                 ...systemMetrics,
-                'faas.id': `arn:aws:lambda:us-west-2:123456789012:function:lambda-nodejs-1`,
-                'faas.coldstart': COLD_START_NODE,
-                'faas.trigger.type': 'other',
+                'faas.billed_duration': BILLED_DURATION_MS,
+                'faas.timeout': FAAS_TIMEOUT_MS,
+                'faas.coldstart_duration': COLD_START_DURATION_PYTHON,
+                'faas.duration': FAAS_DURATION,
+              })
+              .timestamp(timestamp),
+            instanceLambdaNode
+              .appMetrics({
+                ...systemMetrics,
                 'faas.billed_duration': BILLED_DURATION_MS,
                 'faas.timeout': FAAS_TIMEOUT_MS,
                 'faas.coldstart_duration': COLD_START_DURATION_NODE,
@@ -130,7 +174,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       describe('python', () => {
         let metrics: APIReturnType<'GET /internal/apm/services/{serviceName}/metrics/charts'>;
         before(async () => {
-          const { status, body } = await callApi('lambda-python', 'pytong');
+          const { status, body } = await callApi('lambda-python', 'python');
 
           expect(status).to.be(200);
           metrics = body;
@@ -148,62 +192,115 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           ]);
         });
 
-        it('returns correct overallValue on avg duration chart', () => {
-          const metric = metrics.charts.find((chart) => chart.key === 'avg_duration');
-          expect(metric).not.to.be.empty();
-          const billedDurationSeries = metric?.series.find(
-            ({ title }) => title === 'Billed Duration'
+        describe('Avg. Duration', () => {
+          const transactionDurationInMicroSeconds = TRANSACTION_DURATION * 1000;
+          [
+            { title: 'Billed Duration', expectedValue: BILLED_DURATION_MS },
+            { title: 'Transaction Duration', expectedValue: transactionDurationInMicroSeconds },
+          ].map(({ title, expectedValue }) =>
+            it(`returns correct ${title} value`, () => {
+              const avgDurationMetric = metrics.charts.find((chart) => {
+                return chart.key === 'avg_duration';
+              });
+              const series = avgDurationMetric?.series.find((item) => item.title === title);
+              expect(series?.overallValue).to.eql(expectedValue);
+              const meanValue = meanBy(series?.data, 'y');
+              expect(meanValue).to.eql(expectedValue);
+            })
           );
-          expect(billedDurationSeries).not.to.be.empty();
-          expect(billedDurationSeries?.overallValue).to.equal(BILLED_DURATION_MS);
+        });
 
-          const transactionDurationSeries = metric?.series.find(
-            ({ title }) => title === 'Transaction Duration'
+        describe('Cold start duration', () => {
+          let coldStartDurationMetric: typeof metrics['charts'][0] | undefined;
+          before(() => {
+            coldStartDurationMetric = metrics.charts.find((chart) => {
+              return chart.key === 'cold_start_duration';
+            });
+          });
+          it('returns correct overall value', () => {
+            expect(coldStartDurationMetric?.series[0].overallValue).to.equal(
+              COLD_START_DURATION_PYTHON
+            );
+          });
+
+          it('returns correct mean value', () => {
+            const meanValue = meanBy(coldStartDurationMetric?.series[0]?.data, 'y');
+            expect(meanValue).to.equal(COLD_START_DURATION_PYTHON);
+          });
+        });
+
+        describe('Cold start count', () => {
+          let coldStartCountMetric: typeof metrics['charts'][0] | undefined;
+          before(() => {
+            coldStartCountMetric = metrics.charts.find((chart) => {
+              return chart.key === 'cold_start_count';
+            });
+          });
+
+          it('returns correct overall value', () => {
+            expect(coldStartCountMetric?.series[0].overallValue).to.equal(
+              numberOfTransactionsCreated * numberOfPythonInstances
+            );
+          });
+
+          it('returns correct sum value', () => {
+            const sumValue = sumBy(coldStartCountMetric?.series[0]?.data, 'y');
+            expect(sumValue).to.equal(numberOfTransactionsCreated * numberOfPythonInstances);
+          });
+        });
+
+        describe('memory usage', () => {
+          const expectedFreeMemory = 1 - MEMORY_FREE / MEMORY_TOTAL;
+          [
+            { title: 'Max', expectedValue: expectedFreeMemory },
+            { title: 'Average', expectedValue: expectedFreeMemory },
+          ].map(({ title, expectedValue }) =>
+            it(`returns correct ${title} value`, () => {
+              const memoryUsageMetric = metrics.charts.find((chart) => {
+                return chart.key === 'memory_usage_chart';
+              });
+              const series = memoryUsageMetric?.series.find((item) => item.title === title);
+              expect(series?.overallValue).to.eql(expectedValue);
+              const meanValue = meanBy(series?.data, 'y');
+              expect(meanValue).to.eql(expectedValue);
+            })
           );
-          expect(transactionDurationSeries).not.to.be.empty();
-          expect(transactionDurationSeries?.overallValue).to.equal(TRANSACTION_DURATION * 1000);
         });
 
-        it('returns correct overallValue on Cold start chart', () => {
-          const metric = metrics.charts.find((chart) => chart.key === 'cold_start_duration');
-          expect(metric).not.to.be.empty();
-          expect(metric?.series[0].overallValue).to.equal(COLD_START_DURATION_PYTHON);
+        describe('Compute usage', () => {
+          const GBSeconds = 1024 * 1024 * 1024 * 1000;
+          const expectedValue = (MEMORY_TOTAL * BILLED_DURATION_MS) / GBSeconds;
+          let computeUsageMetric: typeof metrics['charts'][0] | undefined;
+          before(() => {
+            computeUsageMetric = metrics.charts.find((chart) => {
+              return chart.key === 'compute_usage';
+            });
+          });
+          it('returns correct overall value', () => {
+            expect(computeUsageMetric?.series[0].overallValue).to.equal(expectedValue);
+          });
+
+          it('returns correct mean value', () => {
+            const meanValue = meanBy(computeUsageMetric?.series[0]?.data, 'y');
+            expect(meanValue).to.equal(expectedValue);
+          });
         });
 
-        it('returns correct overallValue on System memory usage chart', () => {
-          const metric = metrics.charts.find((chart) => chart.key === 'memory_usage_chart');
-          expect(metric).not.to.be.empty();
+        describe('Active instances', () => {
+          let activeInstancesMetric: typeof metrics['charts'][0] | undefined;
+          before(() => {
+            activeInstancesMetric = metrics.charts.find((chart) => {
+              return chart.key === 'active_instances';
+            });
+          });
+          it('returns correct overall value', () => {
+            expect(activeInstancesMetric?.series[0].overallValue).to.equal(numberOfPythonInstances);
+          });
 
-          const memoryValue = roundNumber(1 - MEMORY_FREE / MEMORY_TOTAL);
-
-          const maxMemorySeries = metric?.series.find(({ title }) => title === 'Max');
-
-          expect(maxMemorySeries).not.to.be.empty();
-          expect(roundNumber(maxMemorySeries?.overallValue)).to.equal(memoryValue);
-
-          const avgMemorySeries = metric?.series.find(({ title }) => title === 'Average');
-          expect(avgMemorySeries).not.to.be.empty();
-          expect(roundNumber(avgMemorySeries?.overallValue)).to.equal(memoryValue);
-        });
-
-        it('returns correct overallValue on Compute usage chart', () => {
-          const metric = metrics.charts.find((chart) => chart.key === 'compute_usage');
-          expect(metric).not.to.be.empty();
-          const bytesMs = MEMORY_TOTAL * BILLED_DURATION_MS;
-          const gbSecs = bytesMs / (1024 * 1024 * 1024 * 1000);
-          expect(metric?.series[0].overallValue).to.equal(gbSecs);
-        });
-
-        it('returns correct overallValue on Active instances chart', () => {
-          const metric = metrics.charts.find((chart) => chart.key === 'active_instances');
-          expect(metric).not.to.be.empty();
-          expect(metric?.series[0].overallValue).to.equal(1);
-        });
-
-        it('returns correct overallValue on cold start count chart', () => {
-          const metric = metrics.charts.find((chart) => chart.key === 'cold_start_count');
-          expect(metric).not.to.be.empty();
-          expect(metric?.series[0].overallValue).to.equal(30);
+          it('returns correct sum value', () => {
+            const sumValue = sumBy(activeInstancesMetric?.series[0]?.data, 'y');
+            expect(sumValue).to.equal(numberOfTransactionsCreated * numberOfPythonInstances);
+          });
         });
       });
 
@@ -226,17 +323,110 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             'System memory usage',
           ]);
         });
-
-        it('returns correct overallValue on Cold start chart', () => {
-          const metric = metrics.charts.find((chart) => chart.key === 'cold_start_duration');
-          expect(metric).not.to.be.empty();
-          expect(metric?.series[0].overallValue).to.equal(COLD_START_DURATION_NODE);
+        describe('Avg. Duration', () => {
+          const transactionDurationInMicroSeconds = TRANSACTION_DURATION * 1000;
+          [
+            { title: 'Billed Duration', expectedValue: BILLED_DURATION_MS },
+            { title: 'Transaction Duration', expectedValue: transactionDurationInMicroSeconds },
+          ].map(({ title, expectedValue }) =>
+            it(`returns correct ${title} value`, () => {
+              const avgDurationMetric = metrics.charts.find((chart) => {
+                return chart.key === 'avg_duration';
+              });
+              const series = avgDurationMetric?.series.find((item) => item.title === title);
+              expect(series?.overallValue).to.eql(expectedValue);
+              const meanValue = meanBy(series?.data, 'y');
+              expect(meanValue).to.eql(expectedValue);
+            })
+          );
         });
 
-        it('returns correct overallValue on cold start count chart', () => {
-          const metric = metrics.charts.find((chart) => chart.key === 'cold_start_count');
-          expect(metric).not.to.be.empty();
-          expect(metric?.series).to.be.empty();
+        describe('Cold start duration', () => {
+          let coldStartDurationMetric: typeof metrics['charts'][0] | undefined;
+          before(() => {
+            coldStartDurationMetric = metrics.charts.find((chart) => {
+              return chart.key === 'cold_start_duration';
+            });
+          });
+
+          it('returns 0 overall value', () => {
+            expect(coldStartDurationMetric?.series[0].overallValue).to.equal(
+              COLD_START_DURATION_NODE
+            );
+          });
+
+          it('returns 0 mean value', () => {
+            const meanValue = meanBy(coldStartDurationMetric?.series[0]?.data, 'y');
+            expect(meanValue).to.equal(COLD_START_DURATION_NODE);
+          });
+        });
+
+        describe('Cold start count', () => {
+          let coldStartCountMetric: typeof metrics['charts'][0] | undefined;
+          before(() => {
+            coldStartCountMetric = metrics.charts.find((chart) => {
+              return chart.key === 'cold_start_count';
+            });
+          });
+
+          it('does not return cold start count', () => {
+            expect(coldStartCountMetric?.series).to.be.empty();
+          });
+        });
+
+        describe('memory usage', () => {
+          const expectedFreeMemory = 1 - MEMORY_FREE / MEMORY_TOTAL;
+          [
+            { title: 'Max', expectedValue: expectedFreeMemory },
+            { title: 'Average', expectedValue: expectedFreeMemory },
+          ].map(({ title, expectedValue }) =>
+            it(`returns correct ${title} value`, () => {
+              const memoryUsageMetric = metrics.charts.find((chart) => {
+                return chart.key === 'memory_usage_chart';
+              });
+              const series = memoryUsageMetric?.series.find((item) => item.title === title);
+              expect(series?.overallValue).to.eql(expectedValue);
+              const meanValue = meanBy(series?.data, 'y');
+              expect(meanValue).to.eql(expectedValue);
+            })
+          );
+        });
+
+        describe('Compute usage', () => {
+          const GBSeconds = 1024 * 1024 * 1024 * 1000;
+          const expectedValue = (MEMORY_TOTAL * BILLED_DURATION_MS) / GBSeconds;
+          let computeUsageMetric: typeof metrics['charts'][0] | undefined;
+          before(() => {
+            computeUsageMetric = metrics.charts.find((chart) => {
+              return chart.key === 'compute_usage';
+            });
+          });
+          it('returns correct overall value', () => {
+            expect(computeUsageMetric?.series[0].overallValue).to.equal(expectedValue);
+          });
+
+          it('returns correct mean value', () => {
+            const meanValue = meanBy(computeUsageMetric?.series[0]?.data, 'y');
+            expect(meanValue).to.equal(expectedValue);
+          });
+        });
+
+        describe('Active instances', () => {
+          let activeInstancesMetric: typeof metrics['charts'][0] | undefined;
+          before(() => {
+            activeInstancesMetric = metrics.charts.find((chart) => {
+              return chart.key === 'active_instances';
+            });
+          });
+          it('returns correct overall value', () => {
+            // there's only one node instance
+            expect(activeInstancesMetric?.series[0].overallValue).to.equal(1);
+          });
+
+          it('returns correct sum value', () => {
+            const sumValue = sumBy(activeInstancesMetric?.series[0]?.data, 'y');
+            expect(sumValue).to.equal(numberOfTransactionsCreated);
+          });
         });
       });
     }

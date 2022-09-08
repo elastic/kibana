@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { termQuery } from '@kbn/observability-plugin/server';
 import {
   FAAS_COLDSTART,
-  FAAS_ID,
+  METRICSET_NAME,
 } from '../../../../../common/elasticsearch_fieldnames';
 import { Setup } from '../../../../lib/helpers/setup_request';
 import { fetchAndTransformMetrics } from '../../fetch_and_transform_metrics';
@@ -36,7 +36,6 @@ export function getColdStartCount({
   kuery,
   setup,
   serviceName,
-  faasId,
   start,
   end,
 }: {
@@ -44,7 +43,6 @@ export function getColdStartCount({
   kuery: string;
   setup: Setup;
   serviceName: string;
-  faasId?: string;
   start: number;
   end: number;
 }) {
@@ -59,7 +57,7 @@ export function getColdStartCount({
     aggs: { coldStart: { sum: { field: FAAS_COLDSTART } } },
     additionalFilters: [
       ...termQuery(FAAS_COLDSTART, true),
-      ...termQuery(FAAS_ID, faasId),
+      ...termQuery(METRICSET_NAME, 'transaction'),
     ],
     operationName: 'get_cold_start_count',
   });

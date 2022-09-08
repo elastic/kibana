@@ -7,10 +7,9 @@
 
 import * as t from 'io-ts';
 import { setupRequest } from '../../lib/helpers/setup_request';
-import { getMetricsChartDataByAgent } from './get_metrics_chart_data_by_agent';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { environmentRt, kueryRt, rangeRt } from '../default_api_types';
-import { getSearchAggregatedTransactions } from '../../lib/helpers/transactions';
+import { getMetricsChartDataByAgent } from './get_metrics_chart_data_by_agent';
 
 const metricsChartsRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/services/{serviceName}/metrics/charts',
@@ -23,7 +22,6 @@ const metricsChartsRoute = createApmServerRoute({
         agentName: t.string,
       }),
       t.partial({
-        faasId: t.string,
         serviceNodeName: t.string,
         serviceRuntimeName: t.string,
       }),
@@ -61,15 +59,7 @@ const metricsChartsRoute = createApmServerRoute({
       start,
       end,
       serviceRuntimeName,
-      faasId,
     } = params.query;
-
-    const searchAggregatedTransactions = await getSearchAggregatedTransactions({
-      ...setup,
-      kuery,
-      start,
-      end,
-    });
 
     const charts = await getMetricsChartDataByAgent({
       environment,
@@ -81,8 +71,6 @@ const metricsChartsRoute = createApmServerRoute({
       start,
       end,
       serviceRuntimeName,
-      faasId,
-      searchAggregatedTransactions,
     });
 
     return { charts };

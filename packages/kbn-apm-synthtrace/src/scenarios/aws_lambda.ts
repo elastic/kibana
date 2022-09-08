@@ -29,7 +29,7 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
           coldStart: true,
           faasTriggerType: 'other',
         })
-        .instance('instance');
+        .instance('instance python');
 
       const instanceLambdaNode = apm
         .serverless({
@@ -40,7 +40,7 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
           coldStart: false,
           faasTriggerType: 'other',
         })
-        .instance('instance b');
+        .instance('instance node');
 
       const awsLambdaEvents = timestamps.generator((timestamp) => {
         const cloudFields: ApmFields = {

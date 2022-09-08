@@ -6,11 +6,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { termQuery } from '@kbn/observability-plugin/server';
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import { euiLightVars as theme } from '@kbn/ui-theme';
 import {
-  FAAS_ID,
   SERVICE_NAME,
   SERVICE_NODE_NAME,
 } from '../../../../../common/elasticsearch_fieldnames';
@@ -18,11 +16,11 @@ import { environmentQuery } from '../../../../../common/utils/environment_query'
 import { getVizColorForIndex } from '../../../../../common/viz_colors';
 import { getMetricsDateHistogramParams } from '../../../../lib/helpers/metrics';
 import { Setup } from '../../../../lib/helpers/setup_request';
-import { GenericMetricsChart } from '../../fetch_and_transform_metrics';
 import {
   getDocumentTypeFilterForTransactions,
   getProcessorEventForTransactions,
 } from '../../../../lib/helpers/transactions';
+import { GenericMetricsChart } from '../../fetch_and_transform_metrics';
 
 export async function getActiveInstances({
   environment,
@@ -31,7 +29,6 @@ export async function getActiveInstances({
   serviceName,
   start,
   end,
-  faasId,
   searchAggregatedTransactions,
 }: {
   environment: string;
@@ -40,7 +37,6 @@ export async function getActiveInstances({
   serviceName: string;
   start: number;
   end: number;
-  faasId?: string;
   searchAggregatedTransactions: boolean;
 }): Promise<GenericMetricsChart> {
   const { apmEventClient, config } = setup;
@@ -69,7 +65,6 @@ export async function getActiveInstances({
             ...getDocumentTypeFilterForTransactions(
               searchAggregatedTransactions
             ),
-            ...termQuery(FAAS_ID, faasId),
           ],
         },
       },

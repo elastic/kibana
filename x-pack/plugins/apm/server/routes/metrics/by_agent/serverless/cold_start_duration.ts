@@ -6,11 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { termQuery } from '@kbn/observability-plugin/server';
-import {
-  FAAS_COLDSTART_DURATION,
-  FAAS_ID,
-} from '../../../../../common/elasticsearch_fieldnames';
+import { FAAS_COLDSTART_DURATION } from '../../../../../common/elasticsearch_fieldnames';
 import { Setup } from '../../../../lib/helpers/setup_request';
 import { fetchAndTransformMetrics } from '../../fetch_and_transform_metrics';
 import { ChartBase } from '../../types';
@@ -37,7 +33,6 @@ export function getColdStartDuration({
   kuery,
   setup,
   serviceName,
-  faasId,
   start,
   end,
 }: {
@@ -45,7 +40,6 @@ export function getColdStartDuration({
   kuery: string;
   setup: Setup;
   serviceName: string;
-  faasId?: string;
   start: number;
   end: number;
 }) {
@@ -58,10 +52,7 @@ export function getColdStartDuration({
     end,
     chartBase,
     aggs: { coldStart: { avg: { field: FAAS_COLDSTART_DURATION } } },
-    additionalFilters: [
-      { exists: { field: FAAS_COLDSTART_DURATION } },
-      ...termQuery(FAAS_ID, faasId),
-    ],
+    additionalFilters: [{ exists: { field: FAAS_COLDSTART_DURATION } }],
     operationName: 'get_cold_start_duration',
   });
 }

@@ -6,26 +6,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
-  kqlQuery,
-  rangeQuery,
-  termQuery,
-} from '@kbn/observability-plugin/server';
 import { euiLightVars as theme } from '@kbn/ui-theme';
-import {
-  FAAS_BILLED_DURATION,
-  FAAS_ID,
-  SERVICE_NAME,
-} from '../../../../../common/elasticsearch_fieldnames';
-import { environmentQuery } from '../../../../../common/utils/environment_query';
+import { FAAS_BILLED_DURATION } from '../../../../../common/elasticsearch_fieldnames';
+import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
 import { getVizColorForIndex } from '../../../../../common/viz_colors';
-import { getBucketSizeForAggregatedTransactions } from '../../../../lib/helpers/get_bucket_size_for_aggregated_transactions';
 import { Setup } from '../../../../lib/helpers/setup_request';
-import {
-  getDocumentTypeFilterForTransactions,
-  getDurationFieldForTransactions,
-  getProcessorEventForTransactions,
-} from '../../../../lib/helpers/transactions';
+import { getLatencyTimeseries } from '../../../transactions/get_latency_charts';
 import {
   fetchAndTransformMetrics,
   GenericMetricsChart,
@@ -53,7 +39,6 @@ async function getTransactionDurationSeries({
   kuery,
   setup,
   serviceName,
-  faasId,
   start,
   end,
   searchAggregatedTransactions,
@@ -62,62 +47,22 @@ async function getTransactionDurationSeries({
   kuery: string;
   setup: Setup;
   serviceName: string;
-  faasId?: string;
   start: number;
   end: number;
   searchAggregatedTransactions: boolean;
 }): Promise<GenericMetricsChart['series']> {
-  const { apmEventClient } = setup;
-
-  const { intervalString } = getBucketSizeForAggregatedTransactions({
+  const transactionLatency = await getLatencyTimeseries({
+    environment,
+    kuery,
+    serviceName,
+    transactionType: undefined,
+    transactionName: undefined,
+    setup,
+    searchAggregatedTransactions,
+    latencyAggregationType: LatencyAggregationType.avg,
     start,
     end,
-    searchAggregatedTransactions,
   });
-
-  const transactionDurationField = getDurationFieldForTransactions(
-    searchAggregatedTransactions
-  );
-
-  const params = {
-    apm: {
-      events: [getProcessorEventForTransactions(searchAggregatedTransactions)],
-    },
-    body: {
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            { term: { [SERVICE_NAME]: serviceName } },
-            ...getDocumentTypeFilterForTransactions(
-              searchAggregatedTransactions
-            ),
-            ...rangeQuery(start, end),
-            ...environmentQuery(environment),
-            ...kqlQuery(kuery),
-            ...termQuery(FAAS_ID, faasId),
-          ],
-        },
-      },
-      aggs: {
-        latencyTimeseries: {
-          date_histogram: {
-            field: '@timestamp',
-            fixed_interval: intervalString,
-            min_doc_count: 0,
-            extended_bounds: { min: start, max: end },
-          },
-          aggs: { latency: { avg: { field: transactionDurationField } } },
-        },
-        overall_avg_latency: { avg: { field: transactionDurationField } },
-      },
-    },
-  };
-
-  const response = await apmEventClient.search(
-    'get_transaction_duration',
-    params
-  );
 
   return [
     {
@@ -128,11 +73,8 @@ async function getTransactionDurationSeries({
       key: 'transaction_duration',
       type: 'linemark',
       color: getVizColorForIndex(1, theme),
-      overallValue: response?.aggregations?.overall_avg_latency.value ?? 0,
-      data:
-        response?.aggregations?.latencyTimeseries.buckets.map((bucket) => {
-          return { x: bucket.key, y: bucket.latency.value };
-        }) || [],
+      overallValue: transactionLatency.overallAvgDuration ?? 0,
+      data: transactionLatency.latencyTimeseries,
     },
   ];
 }
@@ -142,7 +84,6 @@ export async function getDuration({
   kuery,
   setup,
   serviceName,
-  faasId,
   start,
   end,
   searchAggregatedTransactions,
@@ -151,7 +92,6 @@ export async function getDuration({
   kuery: string;
   setup: Setup;
   serviceName: string;
-  faasId?: string;
   start: number;
   end: number;
   searchAggregatedTransactions: boolean;
@@ -172,10 +112,7 @@ export async function getDuration({
       aggs: {
         billedDurationAvg: { avg: { field: FAAS_BILLED_DURATION } },
       },
-      additionalFilters: [
-        { exists: { field: FAAS_BILLED_DURATION } },
-        ...termQuery(FAAS_ID, faasId),
-      ],
+      additionalFilters: [{ exists: { field: FAAS_BILLED_DURATION } }],
       operationName: 'get_billed_duration',
     }),
     getTransactionDurationSeries({ ...options, searchAggregatedTransactions }),

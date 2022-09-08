@@ -7,15 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import {
-  kqlQuery,
-  rangeQuery,
-  termQuery,
-} from '@kbn/observability-plugin/server';
+import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import { euiLightVars as theme } from '@kbn/ui-theme';
 import {
   FAAS_BILLED_DURATION,
-  FAAS_ID,
   METRIC_SYSTEM_TOTAL_MEMORY,
   SERVICE_NAME,
 } from '../../../../../common/elasticsearch_fieldnames';
@@ -68,7 +63,6 @@ export async function getComputeUsage({
   kuery,
   setup,
   serviceName,
-  faasId,
   start,
   end,
 }: {
@@ -76,7 +70,6 @@ export async function getComputeUsage({
   kuery: string;
   setup: Setup;
   serviceName: string;
-  faasId?: string;
   start: number;
   end: number;
 }): Promise<GenericMetricsChart> {
@@ -100,7 +93,6 @@ export async function getComputeUsage({
             ...rangeQuery(start, end),
             ...environmentQuery(environment),
             ...kqlQuery(kuery),
-            ...termQuery(FAAS_ID, faasId),
             { exists: { field: FAAS_BILLED_DURATION } },
           ],
         },
