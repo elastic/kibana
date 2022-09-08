@@ -15,13 +15,7 @@
             "risk": {
               "properties": {
                 "calculated_level": {
-                  "type": "text",
-                  "fields": {
-                    "keyword": {
-                      "type": "keyword",
-                      "ignore_above": 256
-                    }
-                  }
+                  "type": "keyword"
                 },
                 "calculated_score_norm": {
                   "type": "long"
@@ -73,13 +67,7 @@
             "risk": {
               "properties": {
                 "calculated_level": {
-                  "type": "text",
-                  "fields": {
-                    "keyword": {
-                      "type": "keyword",
-                      "ignore_above": 256
-                    }
-                  }
+                  "type": "keyword"
                 },
                 "calculated_score_norm": {
                   "type": "long"
