@@ -9,7 +9,10 @@ import { render } from '@testing-library/react';
 import React from 'react';
 import { EntityAnalyticsAnomalies } from '.';
 import type { AnomaliesCount } from '../../../../common/components/ml/anomaly/use_anomalies_search';
-import { AnomalyJobStatus } from '../../../../common/components/ml/anomaly/use_anomalies_search';
+import {
+  AnomalyJobStatus,
+  AnomalyEntity,
+} from '../../../../common/components/ml/anomaly/use_anomalies_search';
 
 import { TestProviders } from '../../../../common/mock';
 
@@ -67,6 +70,7 @@ describe('EntityAnalyticsAnomalies', () => {
       name: 'v3_windows_anomalous_script',
       count: 9999,
       status: AnomalyJobStatus.enabled,
+      entity: AnomalyEntity.User,
     };
 
     mockUseNotableAnomaliesSearch.mockReturnValue({
@@ -93,6 +97,7 @@ describe('EntityAnalyticsAnomalies', () => {
       name: 'v3_windows_anomalous_script',
       count: 0,
       status: AnomalyJobStatus.disabled,
+      entity: AnomalyEntity.User,
     };
 
     mockUseNotableAnomaliesSearch.mockReturnValue({
@@ -118,6 +123,7 @@ describe('EntityAnalyticsAnomalies', () => {
       name: 'v3_windows_anomalous_script',
       count: 0,
       status: AnomalyJobStatus.uninstalled,
+      entity: AnomalyEntity.User,
     };
 
     mockUseNotableAnomaliesSearch.mockReturnValue({
@@ -142,6 +148,7 @@ describe('EntityAnalyticsAnomalies', () => {
       name: 'v3_windows_anomalous_script',
       count: 0,
       status: AnomalyJobStatus.failed,
+      entity: AnomalyEntity.User,
     };
 
     mockUseNotableAnomaliesSearch.mockReturnValue({
@@ -166,6 +173,7 @@ describe('EntityAnalyticsAnomalies', () => {
       name: 'v3_windows_anomalous_script',
       count: 0,
       status: AnomalyJobStatus.failed,
+      entity: AnomalyEntity.User,
     };
 
     mockUseNotableAnomaliesSearch.mockReturnValue({
