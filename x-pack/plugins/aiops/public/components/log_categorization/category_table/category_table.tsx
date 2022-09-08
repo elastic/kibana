@@ -19,11 +19,12 @@ import {
   EuiTableSelectionType,
 } from '@elastic/eui';
 
-import { useDiscoverLinks } from './use_discover_links';
-import { MiniHistogram } from '../mini_histogram';
-import { useEuiTheme } from '../../hooks/use_eui_theme';
-import type { AiOpsIndexBasedAppState } from '../explain_log_rate_spikes/explain_log_rate_spikes_app_state';
-import type { EventRate, Category, SparkLinesPerCategory } from './use_categorize_request';
+import { useDiscoverLinks } from '../use_discover_links';
+import { MiniHistogram } from '../../mini_histogram';
+import { useEuiTheme } from '../../../hooks/use_eui_theme';
+import type { AiOpsIndexBasedAppState } from '../../explain_log_rate_spikes/explain_log_rate_spikes_app_state';
+import type { EventRate, Category, SparkLinesPerCategory } from '../use_categorize_request';
+import { useTableState } from './use_table_state';
 
 const QUERY_MODE = {
   INCLUDE: 'should',
@@ -61,6 +62,7 @@ export const CategoryTable: FC<Props> = ({
   const euiTheme = useEuiTheme();
   const { openInDiscoverWithFilter } = useDiscoverLinks();
   const [selectedCategories, setSelectedCategories] = useState<Category[]>([]);
+  const { onTableChange, pagination, sorting } = useTableState<Category>(categories ?? [], 'key');
 
   const openInDiscover = (mode: QueryMode, category?: Category) => {
     const timefilterActiveBounds = timefilter.getActiveBounds();
@@ -214,6 +216,9 @@ export const CategoryTable: FC<Props> = ({
         isSelectable={true}
         selection={selectionValue}
         itemId="key"
+        onTableChange={onTableChange}
+        pagination={pagination}
+        sorting={sorting}
         rowProps={(category) => {
           return {
             onClick: () => {
