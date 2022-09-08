@@ -426,7 +426,7 @@ export const FIELD: Record<string, FieldMeta> = {
           })
         : i18n.translate('xpack.synthetics.monitorConfig.create.enabled.label', {
             defaultMessage:
-              'Disabled monitors do not run tests. You can create a disabled monitor and enable it later',
+              'Disabled monitors do not run tests. You can create a disabled monitor and enable it later.',
           }),
       onChange: (event: React.ChangeEvent<HTMLInputElement>) => {
         setValue(ConfigKey.ENABLED, !!event.target.checked);
