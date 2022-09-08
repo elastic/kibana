@@ -33,6 +33,7 @@ import {
   getExceptionFilterRoute,
   importExceptionsRoute,
   importListItemRoute,
+  internalCreateExceptionListRoute,
   patchListItemRoute,
   patchListRoute,
   readEndpointListItemRoute,
@@ -109,4 +110,7 @@ export const initRoutes = (router: ListsPluginRouter, config: ConfigType): void 
 
   // exception list items summary
   summaryExceptionListRoute(router);
+
+  // internal routes
+  internalCreateExceptionListRoute(router);
 };
