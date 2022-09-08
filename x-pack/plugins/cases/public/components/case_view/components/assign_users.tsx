@@ -16,6 +16,7 @@ import {
 } from '@elastic/eui';
 
 import { UserProfileWithAvatar } from '@kbn/user-profile-components';
+import { CasesPermissions } from '../../../../common';
 import { useAssignees } from '../../../containers/user_profiles/use_assignees';
 import { CaseAssignees } from '../../../../common/api/cases/assignee';
 import * as i18n from '../translations';
@@ -29,6 +30,7 @@ import { CurrentUserProfile } from '../../types';
 interface AssigneesListProps {
   assignees: Assignee[];
   currentUserProfile: CurrentUserProfile;
+  permissions: CasesPermissions;
   assignSelf: () => void;
   togglePopOver: () => void;
   onAssigneeRemoved: (removedAssigneeUID: string) => void;
@@ -37,6 +39,7 @@ interface AssigneesListProps {
 const AssigneesList: React.FC<AssigneesListProps> = ({
   assignees,
   currentUserProfile,
+  permissions,
   assignSelf,
   togglePopOver,
   onAssigneeRemoved,
@@ -49,11 +52,15 @@ const AssigneesList: React.FC<AssigneesListProps> = ({
             <EuiText size="s" color="subdued">
               <p>
                 {i18n.NO_ASSIGNEES}
-                <br />
-                <EuiLink data-test-subj="case-view-assign-users-link" onClick={togglePopOver}>
-                  {i18n.ASSIGN_A_USER}
-                </EuiLink>
-                {currentUserProfile && (
+                {permissions.update && (
+                  <>
+                    <br />
+                    <EuiLink data-test-subj="case-view-assign-users-link" onClick={togglePopOver}>
+                      {i18n.ASSIGN_A_USER}
+                    </EuiLink>
+                  </>
+                )}
+                {currentUserProfile && permissions.update && (
                   <>
                     <span>{i18n.SPACED_OR}</span>
                     <EuiLink data-test-subj="case-view-assign-yourself-link" onClick={assignSelf}>
@@ -192,6 +199,7 @@ const AssignUsersComponent: React.FC<AssignUsersProps> = ({
       <AssigneesList
         assignees={allAssignees}
         currentUserProfile={currentUserProfile}
+        permissions={permissions}
         assignSelf={assignSelf}
         togglePopOver={togglePopover}
         onAssigneeRemoved={onAssigneeRemoved}
