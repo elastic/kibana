@@ -149,15 +149,10 @@ export class DashboardPlugin
 
   public setup(
     core: CoreSetup<DashboardStartDependencies, DashboardStart>,
-    { share, embeddable, home, urlForwarding, data, usageCollection }: DashboardSetupDependencies
+    { share, embeddable, home, urlForwarding, data }: DashboardSetupDependencies
   ): DashboardSetup {
     this.dashboardFeatureFlagConfig =
       this.initializerContext.config.get<DashboardFeatureFlagConfig>();
-
-    const getPlaceholderEmbeddableStartServices = async () => {
-      const [coreStart] = await core.getStartServices();
-      return { theme: coreStart.theme };
-    };
 
     if (share) {
       this.locator = share.url.locators.create(
@@ -223,9 +218,7 @@ export class DashboardPlugin
         dashboardContainerFactory
       );
 
-      const placeholderFactory = new PlaceholderEmbeddableFactory(
-        getPlaceholderEmbeddableStartServices
-      );
+      const placeholderFactory = new PlaceholderEmbeddableFactory();
       embeddable.registerEmbeddableFactory(placeholderFactory.type, placeholderFactory);
     });
 

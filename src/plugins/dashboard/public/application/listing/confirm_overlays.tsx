@@ -53,7 +53,9 @@ export const confirmCreateWithUnsaved = (
   const descriptionId = 'confirmDiscardOrKeepDescription';
 
   const {
-    settings: { theme },
+    settings: {
+      theme: { theme$ },
+    },
     overlays: { openModal },
   } = pluginServices.getServices();
 
@@ -114,7 +116,7 @@ export const confirmCreateWithUnsaved = (
           </div>
         </EuiOutsideClickDetector>
       </EuiFocusTrap>,
-      { theme$: theme.theme$ }
+      { theme$ }
     ),
     {
       'data-test-subj': 'dashboardCreateConfirmModal',

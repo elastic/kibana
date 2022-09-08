@@ -23,7 +23,9 @@ let bannerId: string | undefined;
 export const DashboardNoMatch = ({ history }: { history: RouteComponentProps['history'] }) => {
   const { restorePreviousUrl } = useDashboardMountContext();
   const {
-    settings: { theme },
+    settings: {
+      theme: { theme$ },
+    },
     overlays: { banners },
     urlForwarding: { navigateToLegacyKibanaUrl },
   } = pluginServices.getServices();
@@ -53,7 +55,7 @@ export const DashboardNoMatch = ({ history }: { history: RouteComponentProps['hi
               />
             </p>
           </EuiCallOut>,
-          { theme$: theme.theme$ }
+          { theme$ }
         )
       );
 
@@ -66,7 +68,7 @@ export const DashboardNoMatch = ({ history }: { history: RouteComponentProps['hi
 
       history.replace(DashboardConstants.LANDING_PAGE_PATH);
     }
-  }, [restorePreviousUrl, navigateToLegacyKibanaUrl, banners, theme, history]);
+  }, [restorePreviousUrl, navigateToLegacyKibanaUrl, banners, theme$, history]);
 
   return null;
 };

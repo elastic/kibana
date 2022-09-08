@@ -311,13 +311,15 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     this.domNode = dom;
 
     const {
-      settings: { theme },
+      settings: {
+        theme: { theme$ },
+      },
       // chrome: { setIsVisible },
     } = pluginServices.getServices();
 
     ReactDOM.render(
       <I18nProvider>
-        <KibanaThemeProvider theme$={theme.theme$}>
+        <KibanaThemeProvider theme$={theme$}>
           {/* <ExitFullScreenButtonKibanaProvider coreStart={{ chrome: { setIsVisible } }}> */}
           <DashboardViewport
             container={this}

@@ -82,7 +82,6 @@ export const EditorMenu = ({ dashboardContainer, createNewVisType }: Props) => {
     });
   }, [embeddableFactories]);
 
-  const IS_DARK_THEME = uiSettings.get('theme:darkMode');
   const LABS_ENABLED = uiSettings.get('visualize:enableLabs');
 
   const trackUiMetric = usageCollection.reportUiCounter?.bind(
@@ -309,11 +308,7 @@ export const EditorMenu = ({ dashboardContainer, createNewVisType }: Props) => {
         <EuiContextMenu
           initialPanelId={0}
           panels={getEditorMenuPanels(closePopover)}
-          className={`dshSolutionToolbar__editorContextMenu ${
-            IS_DARK_THEME
-              ? 'dshSolutionToolbar__editorContextMenu--dark'
-              : 'dshSolutionToolbar__editorContextMenu--light'
-          }`}
+          className={`dshSolutionToolbar__editorContextMenu`}
           data-test-subj="dashboardEditorContextMenu"
         />
       )}
