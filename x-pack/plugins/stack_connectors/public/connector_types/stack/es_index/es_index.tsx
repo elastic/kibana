@@ -7,7 +7,11 @@
 
 import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
-import { ActionTypeModel, GenericValidationResult, ALERT_HISTORY_PREFIX } from '@kbn/triggers-actions-ui-plugin/public/types';
+import {
+  ActionTypeModel,
+  GenericValidationResult,
+  ALERT_HISTORY_PREFIX,
+} from '@kbn/triggers-actions-ui-plugin/public/types';
 import { EsIndexConfig, IndexActionParams } from '../../types';
 
 export function getActionType(): ActionTypeModel<EsIndexConfig, unknown, IndexActionParams> {

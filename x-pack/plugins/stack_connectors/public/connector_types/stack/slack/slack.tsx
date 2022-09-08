@@ -7,7 +7,10 @@
 
 import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
-import { ActionTypeModel, GenericValidationResult } from '@kbn/triggers-actions-ui-plugin/public/types';
+import {
+  ActionTypeModel,
+  GenericValidationResult,
+} from '@kbn/triggers-actions-ui-plugin/public/types';
 import { SlackActionParams, SlackSecrets } from '../../types';
 
 export function getActionType(): ActionTypeModel<unknown, SlackSecrets, SlackActionParams> {

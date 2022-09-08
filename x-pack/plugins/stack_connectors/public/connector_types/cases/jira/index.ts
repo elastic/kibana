@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { getActionType as getJiraActionType } from './jira';
+export { getConnectorType as getJiraConnectorType } from './jira';

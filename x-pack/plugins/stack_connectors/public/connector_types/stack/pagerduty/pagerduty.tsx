@@ -12,13 +12,13 @@ import {
   ActionTypeModel,
   GenericValidationResult,
 } from '@kbn/triggers-actions-ui-plugin/public/types';
+import { hasMustacheTokens } from '@kbn/triggers-actions-ui-plugin/public/application/lib/has_mustache_tokens';
 import {
   PagerDutyConfig,
   PagerDutySecrets,
   PagerDutyActionParams,
   EventActionOptions,
 } from '../../types';
-import { hasMustacheTokens } from '../../../lib/has_mustache_tokens';
 
 export function getActionType(): ActionTypeModel<
   PagerDutyConfig,

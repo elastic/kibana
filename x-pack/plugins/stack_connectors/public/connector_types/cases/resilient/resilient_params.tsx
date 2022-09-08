@@ -18,13 +18,13 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { ResilientActionParams } from './types';
 import { TextAreaWithMessageVariables } from '@kbn/triggers-actions-ui-plugin/public/application/components/text_area_with_message_variables';
 import { TextFieldWithMessageVariables } from '@kbn/triggers-actions-ui-plugin/public/application/components/text_field_with_message_variables';
+import { useKibana } from '@kbn/triggers-actions-ui-plugin/public/common/lib/kibana';
+import { ResilientActionParams } from './types';
 
 import { useGetIncidentTypes } from './use_get_incident_types';
 import { useGetSeverity } from './use_get_severity';
-import { useKibana } from '@kbn/triggers-actions-ui-plugin/public/common/lib/kibana';
 
 const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<ResilientActionParams>> = ({
   actionConnector,

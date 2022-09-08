@@ -45,15 +45,15 @@ beforeEach(() => {
 });
 
 beforeAll(() => {
-  const actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
-  registerConnectorTypes({ actionTypeRegistry, services: RegistrationServices });
-  const getResult = actionTypeRegistry.get(ACTION_TYPE_ID);
+  const connectorTypeRegistry = new TypeRegistry<ActionTypeModel>();
+  registerConnectorTypes({ connectorTypeRegistry, services: RegistrationServices });
+  const getResult = connectorTypeRegistry.get(ACTION_TYPE_ID);
   if (getResult !== null) {
     actionTypeModel = getResult;
   }
 });
 
-describe('actionTypeRegistry.get() works', () => {
+describe('connectorTypeRegistry.get() works', () => {
   test('action type static data is as expected', () => {
     expect(actionTypeModel.id).toEqual(ACTION_TYPE_ID);
     expect(actionTypeModel.iconClass).toEqual('email');

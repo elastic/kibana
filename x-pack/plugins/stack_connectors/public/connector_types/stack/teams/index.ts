@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { getActionType as getTeamsActionType } from './teams';
+export { getConnectorType as getTeamsConnectorType } from './teams';

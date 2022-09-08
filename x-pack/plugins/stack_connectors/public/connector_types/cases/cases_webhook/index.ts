@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { getActionType as getCasesWebhookActionType } from './webhook';
+export { getConnectorType as getCasesWebhookConnectorType } from './webhook';

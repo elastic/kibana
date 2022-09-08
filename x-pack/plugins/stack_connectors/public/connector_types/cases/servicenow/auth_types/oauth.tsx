@@ -9,8 +9,8 @@ import React, { memo } from 'react';
 import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import { TextAreaField, TextField } from '@kbn/es-ui-shared-plugin/static/forms/components';
+import { PasswordField } from '@kbn/triggers-actions-ui-plugin/public/application/components/password_field';
 import * as i18n from '../translations';
-import { PasswordField } from '../../../password_field';
 
 interface Props {
   readOnly: boolean;

@@ -8,12 +8,12 @@
 import React from 'react';
 
 import { ActionConnectorFieldsProps } from '@kbn/triggers-actions-ui-plugin/public/types';
-import * as i18n from './translations';
 import {
   ConfigFieldSchema,
   SecretsFieldSchema,
   SimpleConnectorForm,
-} from '../../simple_connector_form';
+} from '@kbn/triggers-actions-ui-plugin/public/application/components/simple_connector_form';
+import * as i18n from './translations';
 
 const configFormSchema: ConfigFieldSchema[] = [
   { id: 'apiUrl', label: i18n.API_URL_LABEL, isUrlField: true },

@@ -30,8 +30,12 @@ import { DocLinksStart } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { ActionConnectorFieldsProps } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { getTimeFieldOptions } from '../../../../common/lib/get_time_options';
-import { firstFieldOption, getFields, getIndexOptions } from '../../../../common/index_controls';
+import { getTimeFieldOptions } from '@kbn/triggers-actions-ui-plugin/public/common/lib/get_time_options';
+import {
+  firstFieldOption,
+  getFields,
+  getIndexOptions,
+} from '@kbn/triggers-actions-ui-plugin/public/common/index_controls';
 import { useKibana } from '@kbn/triggers-actions-ui-plugin/public/common/lib/kibana';
 import * as translations from './translations';
 

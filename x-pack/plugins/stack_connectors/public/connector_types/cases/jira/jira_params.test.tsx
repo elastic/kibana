@@ -12,7 +12,7 @@ import { useGetIssueTypes } from './use_get_issue_types';
 import { useGetFieldsByIssueType } from './use_get_fields_by_issue_type';
 import { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { EuiComboBoxOptionOption } from '@elastic/eui';
-jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana';);
+jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
 
 jest.mock('./use_get_issue_types');
 jest.mock('./use_get_fields_by_issue_type');

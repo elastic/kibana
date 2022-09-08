@@ -9,7 +9,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { connectorDeprecatedMessage } from '../../../../common/connectors_selection';
+import { connectorDeprecatedMessage } from '@kbn/triggers-actions-ui-plugin/public/common/connectors_selection';
 
 // eslint-disable-next-line import/no-default-export
 export { ServiceNowSelectableRowIcon as default };

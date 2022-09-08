@@ -17,11 +17,11 @@ import {
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { TextField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { ActionConnectorFieldsProps } from '@kbn/triggers-actions-ui-plugin/public/types';
+import { PasswordField } from '@kbn/triggers-actions-ui-plugin/public/application/components/password_field';
+import { HiddenField } from '@kbn/triggers-actions-ui-plugin/public/application/components/hidden_field';
+import { ButtonGroupField } from '@kbn/triggers-actions-ui-plugin/public/application/components/button_group_field';
 import { XmattersAuthenticationType } from '../../types';
-import { ButtonGroupField } from '../../button_group_field';
 import * as i18n from './translations';
-import { PasswordField } from '../../password_field';
-import { HiddenField } from '../../hidden_field';
 
 const { emptyField, urlField } = fieldValidators;
 

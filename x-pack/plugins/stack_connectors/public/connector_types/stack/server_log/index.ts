@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { getActionType as getServerLogActionType } from './server_log';
+export { getConnectorType as getServerLogConnectorType } from './server_log';

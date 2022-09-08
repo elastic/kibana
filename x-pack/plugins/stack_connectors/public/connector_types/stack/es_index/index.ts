@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { getActionType as getIndexActionType } from './es_index';
+export { getConnectorType as getIndexConnectorType } from './es_index';

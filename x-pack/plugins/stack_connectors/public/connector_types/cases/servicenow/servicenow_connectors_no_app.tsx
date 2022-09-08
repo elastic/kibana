@@ -9,8 +9,8 @@ import React from 'react';
 import { useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 
 import { ActionConnectorFieldsProps } from '@kbn/triggers-actions-ui-plugin/public/types';
+import { ConnectorFormSchema } from '@kbn/triggers-actions-ui-plugin/public/application/sections/action_connector_form/types';
 import { Credentials } from './credentials';
-import { ConnectorFormSchema } from '../../../sections/action_connector_form/types';
 import { ServiceNowConfig, ServiceNowSecrets } from './types';
 
 const ServiceNowConnectorFieldsNoApp: React.FC<ActionConnectorFieldsProps> = ({

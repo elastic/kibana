@@ -22,11 +22,11 @@ import {
 import { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { TextAreaWithMessageVariables } from '@kbn/triggers-actions-ui-plugin/public/application/components/text_area_with_message_variables';
 import { TextFieldWithMessageVariables } from '@kbn/triggers-actions-ui-plugin/public/application/components/text_field_with_message_variables';
+import { useKibana } from '@kbn/triggers-actions-ui-plugin/public/common/lib/kibana';
 import { JiraActionParams } from './types';
 import { useGetIssueTypes } from './use_get_issue_types';
 import { useGetFieldsByIssueType } from './use_get_fields_by_issue_type';
 import { SearchIssues } from './search_issues';
-import { useKibana } from '@kbn/triggers-actions-ui-plugin/public/common/lib/kibana';;
 
 const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionParams>> = ({
   actionConnector,

@@ -11,11 +11,14 @@ import {
   ActionTypeExecutorResult,
   INTERNAL_BASE_ACTION_API_PATH,
 } from '@kbn/actions-plugin/common';
-import { snExternalServiceConfig } from '@kbn/stack-connectors-plugin/common/servicenow_config';
+import { snExternalServiceConfig } from '../../../../common/servicenow_config';
 import { BASE_ACTION_API_PATH } from '../../../constants';
 import { API_INFO_ERROR } from './translations';
 import { AppInfo, RESTApiError, ServiceNowActionConnector } from './types';
-import { ConnectorExecutorResult, rewriteResponseToCamelCase } from '../rewrite_response_body';
+import {
+  ConnectorExecutorResult,
+  rewriteResponseToCamelCase,
+} from '../../lib/rewrite_response_body';
 import { Choice } from './types';
 
 export async function getChoices({

@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { getActionType as getSwimlaneActionType } from './swimlane';
+export { getConnectorType as getSwimlaneConnectorType } from './swimlane';

@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { getActionType as getResilientActionType } from './resilient';
+export { getConnectorType as getResilientConnectorType } from './resilient';

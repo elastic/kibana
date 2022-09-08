@@ -10,8 +10,8 @@ import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect, EuiSpacer } from '@el
 import { i18n } from '@kbn/i18n';
 import { isUndefined } from 'lodash';
 import { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { PagerDutyActionParams } from '../../types';
 import { TextFieldWithMessageVariables } from '@kbn/triggers-actions-ui-plugin/public/application/components/text_field_with_message_variables';
+import { PagerDutyActionParams } from '../../types';
 
 const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDutyActionParams>> = ({
   actionParams,

@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { getActionType as getXmattersActionType } from './xmatters';
+export { getConnectorType as getXmattersConnectorType } from './xmatters';

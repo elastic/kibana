@@ -8,7 +8,10 @@
 import { HttpSetup } from '@kbn/core/public';
 import { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import { BASE_ACTION_API_PATH } from '../../../constants';
-import { ConnectorExecutorResult, rewriteResponseToCamelCase } from '../rewrite_response_body';
+import {
+  ConnectorExecutorResult,
+  rewriteResponseToCamelCase,
+} from '../../lib/rewrite_response_body';
 import { Fields, Issue, IssueTypes } from './types';
 
 export async function getIssueTypes({

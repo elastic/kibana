@@ -8,7 +8,7 @@
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import WebhookParamsFields from './webhook_params';
-import { MockCodeEditor } from '../../../code_editor.mock';
+import { MockCodeEditor } from '@kbn/triggers-actions-ui-plugin/public/application/code_editor.mock';
 
 const kibanaReactPath = '../../../../../../../../src/plugins/kibana_react/public';
 

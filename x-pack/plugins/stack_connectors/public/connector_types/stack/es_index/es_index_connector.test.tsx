@@ -11,7 +11,11 @@ import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { screen, fireEvent, waitFor, render } from '@testing-library/react';
 import IndexActionConnectorFields from './es_index_connector';
 import { EuiComboBox, EuiSwitch, EuiSwitchEvent, EuiSelect } from '@elastic/eui';
-import { AppMockRenderer, ConnectorFormTestProvider, createAppMockRenderer } from '../../lib/test_utils';
+import {
+  AppMockRenderer,
+  ConnectorFormTestProvider,
+  createAppMockRenderer,
+} from '../../lib/test_utils';
 import userEvent from '@testing-library/user-event';
 
 jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
@@ -24,7 +28,7 @@ jest.mock('lodash', () => {
   };
 });
 
-jest.mock('../../../../common/index_controls', () => ({
+jest.mock('@kbn/triggers-actions-ui-plugin/public/common/index_controls', () => ({
   firstFieldOption: {
     text: 'Select a field',
     value: '',
@@ -33,7 +37,9 @@ jest.mock('../../../../common/index_controls', () => ({
   getIndexOptions: jest.fn(),
 }));
 
-const { getIndexOptions } = jest.requireMock('../../../../common/index_controls');
+const { getIndexOptions } = jest.requireMock(
+  '@kbn/triggers-actions-ui-plugin/public/common/index_controls'
+);
 
 getIndexOptions.mockResolvedValueOnce([
   {
@@ -45,7 +51,9 @@ getIndexOptions.mockResolvedValueOnce([
   },
 ]);
 
-const { getFields } = jest.requireMock('../../../../common/index_controls');
+const { getFields } = jest.requireMock(
+  '@kbn/triggers-actions-ui-plugin/public/common/index_controls'
+);
 
 async function setup(actionConnector: any) {
   const wrapper = mountWithIntl(

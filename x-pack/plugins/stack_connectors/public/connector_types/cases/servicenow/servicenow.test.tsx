@@ -8,7 +8,7 @@
 import { TypeRegistry } from '@kbn/triggers-actions-ui-plugin/public/application/type_registry';
 import { registerConnectorTypes } from '../..';
 import { ActionTypeModel } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { registrationServicesMock } from '../../../../mocks';
+import { registrationServicesMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
 
 const SERVICENOW_ITSM_ACTION_TYPE_ID = '.servicenow';
 const SERVICENOW_SIR_ACTION_TYPE_ID = '.servicenow-sir';

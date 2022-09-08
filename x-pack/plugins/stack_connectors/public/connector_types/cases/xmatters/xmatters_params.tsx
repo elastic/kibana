@@ -10,8 +10,8 @@ import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect } from '@elastic/eui';
 import { isUndefined } from 'lodash';
 import { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { XmattersActionParams } from '../../types';
 import { TextFieldWithMessageVariables } from '@kbn/triggers-actions-ui-plugin/public/application/components/text_field_with_message_variables';
+import { XmattersActionParams } from '../../types';
 
 const severityOptions = [
   {

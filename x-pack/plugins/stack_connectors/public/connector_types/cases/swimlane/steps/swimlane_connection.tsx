@@ -11,8 +11,8 @@ import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { TextField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { PasswordField } from '../../../password_field';
-import { useKibana } from '../../../../../common/lib/kibana';
+import { PasswordField } from '@kbn/triggers-actions-ui-plugin/public/application/components/password_field';
+import { useKibana } from '@kbn/triggers-actions-ui-plugin/public/common/lib/kibana';
 import * as i18n from '../translations';
 
 interface Props {

@@ -12,7 +12,7 @@ import { render, act as reactAct } from '@testing-library/react';
 
 import { ConnectorValidationFunc } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { useKibana } from '@kbn/triggers-actions-ui-plugin/public/common/lib/kibana';
-import { updateActionConnector } from '../../../lib/action_connector_api';
+import { updateActionConnector } from '@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api';
 import ServiceNowConnectorFields from './servicenow_connectors';
 import { getAppInfo } from './api';
 import { ConnectorFormTestProvider } from '../../lib/test_utils';
@@ -20,7 +20,7 @@ import { mount } from 'enzyme';
 import userEvent from '@testing-library/user-event';
 
 jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
-jest.mock('../../../lib/action_connector_api');
+jest.mock('@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api');
 jest.mock('./api');
 
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;

@@ -11,20 +11,20 @@ import { EuiSpacer } from '@elastic/eui';
 import { useFormContext, useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 
 import { ActionConnectorFieldsProps } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { snExternalServiceConfig } from '../../../../common/servicenow_config';
 import { useKibana } from '@kbn/triggers-actions-ui-plugin/public/common/lib/kibana';
+import { updateActionConnector } from '@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api';
+import { ConnectorFormSchema } from '@kbn/triggers-actions-ui-plugin/public/application/sections/action_connector_form/types';
+import { HiddenField } from '@kbn/triggers-actions-ui-plugin/public/application/components/hidden_field';
+import { snExternalServiceConfig } from '../../../../common/servicenow_config';
 import { DeprecatedCallout } from './deprecated_callout';
 import { useGetAppInfo } from './use_get_app_info';
 import { ApplicationRequiredCallout } from './application_required_callout';
 import { isRESTApiError } from './helpers';
 import { InstallationCallout } from './installation_callout';
 import { UpdateConnector, UpdateConnectorFormSchema } from './update_connector';
-import { updateActionConnector } from '../../../lib/action_connector_api';
 import { Credentials } from './credentials';
 import * as i18n from './translations';
 import { ServiceNowActionConnector, ServiceNowConfig, ServiceNowSecrets } from './types';
-import { HiddenField } from '../../hidden_field';
-import { ConnectorFormSchema } from '../../../sections/action_connector_form/types';
 
 // eslint-disable-next-line import/no-default-export
 export { ServiceNowConnectorFields as default };

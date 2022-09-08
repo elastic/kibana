@@ -18,7 +18,7 @@ import {
   EuiStepStatus,
 } from '@elastic/eui';
 import { ActionConnectorFieldsProps } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { useKibana } from '@kbn/triggers-actions-ui-plugin/public/common/lib/kibana';;
+import { useKibana } from '@kbn/triggers-actions-ui-plugin/public/common/lib/kibana';
 import * as i18n from './translations';
 import { AuthStep, CreateStep, GetStep, UpdateStep } from './steps';
 

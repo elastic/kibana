@@ -14,7 +14,7 @@ import { EuiComboBoxOptionOption } from '@elastic/eui';
 
 jest.mock('./use_get_incident_types');
 jest.mock('./use_get_severity');
-jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana';);
+jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
 
 const useGetIncidentTypesMock = useGetIncidentTypes as jest.Mock;
 const useGetSeverityMock = useGetSeverity as jest.Mock;

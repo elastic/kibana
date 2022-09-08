@@ -10,12 +10,14 @@ import CasesWebhookActionConnectorFields from './webhook_connectors';
 import { ConnectorFormTestProvider, waitForComponentToUpdate } from '../../lib/test_utils';
 import { act, render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { MockCodeEditor } from '../../../code_editor.mock';
+import { MockCodeEditor } from '@kbn/triggers-actions-ui-plugin/public/application/code_editor.mock';
 import * as i18n from './translations';
 const kibanaReactPath = '../../../../../../../../src/plugins/kibana_react/public';
 
 jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana', () => {
-  const originalModule = jest.requireActual('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana';);
+  const originalModule = jest.requireActual(
+    '@kbn/triggers-actions-ui-plugin/public/common/lib/kibana'
+  );
   return {
     ...originalModule,
     useKibana: () => ({

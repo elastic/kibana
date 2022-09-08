@@ -6,7 +6,7 @@
  */
 
 export {
-  getServiceNowITSMActionType,
-  getServiceNowSIRActionType,
-  getServiceNowITOMActionType,
+  getServiceNowITSMConnectorType,
+  getServiceNowSIRConnectorType,
+  getServiceNowITOMConnectorType,
 } from './servicenow';

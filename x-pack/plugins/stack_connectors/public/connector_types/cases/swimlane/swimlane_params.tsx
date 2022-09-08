@@ -8,10 +8,10 @@
 import React, { useCallback, useEffect, useRef, useMemo } from 'react';
 import { EuiCallOut, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public/types';
-import * as i18n from './translations';
-import { SwimlaneActionConnector, SwimlaneActionParams, SwimlaneConnectorType } from './types';
 import { TextFieldWithMessageVariables } from '@kbn/triggers-actions-ui-plugin/public/application/components/text_field_with_message_variables';
 import { TextAreaWithMessageVariables } from '@kbn/triggers-actions-ui-plugin/public/application/components/text_area_with_message_variables';
+import * as i18n from './translations';
+import { SwimlaneActionConnector, SwimlaneActionParams, SwimlaneConnectorType } from './types';
 
 const SwimlaneParamsFields: React.FunctionComponent<ActionParamsProps<SwimlaneActionParams>> = ({
   actionParams,

@@ -21,8 +21,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { snExternalServiceConfig } from '@kbn/stack-connectors-plugin/common/servicenow_config';
 import { useForm, Form } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { snExternalServiceConfig } from '../../../../common/servicenow_config';
 import { CredentialsApiUrl } from './credentials_api_url';
 import { CredentialsAuth, OAuth } from './auth_types';
 import { SNStoreLink } from './sn_store_button';

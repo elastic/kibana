@@ -16,14 +16,14 @@ import {
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { ComboBoxField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 
+import { ButtonGroupField } from '@kbn/triggers-actions-ui-plugin/public/application/components/button_group_field';
 import * as i18n from '../translations';
 import {
   MappingConfigurationKeys,
   SwimlaneConnectorType,
   SwimlaneFieldMappingConfig,
-} from '../../types';
+} from '../../../types';
 import { isRequiredField, isValidFieldForConnector } from '../helpers';
-import { ButtonGroupField } from '../../../button_group_field';
 
 const SINGLE_SELECTION = { asPlainText: true };
 const EMPTY_COMBO_BOX_ARRAY: Array<EuiComboBoxOptionOption<string>> | undefined = [];

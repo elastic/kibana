@@ -12,7 +12,7 @@ import { ConnectorFormTestProvider } from '../../lib/test_utils';
 import { act, render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana';);
+jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
 
 describe('ResilientActionConnectorFields renders', () => {
   test('alerting Resilient connector fields are rendered', () => {

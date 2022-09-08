@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { getActionType as getPagerDutyActionType } from './pagerduty';
+export { getConnectorType as getPagerDutyConnectorType } from './pagerduty';

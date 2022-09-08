@@ -8,8 +8,8 @@
 import { isEmpty } from 'lodash';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { HttpSetup, IToasts } from '@kbn/core/public';
-import { AdditionalEmailServices } from '@kbn/stack-connectors-plugin/common';
 import { i18n } from '@kbn/i18n';
+import { AdditionalEmailServices } from '../../../../common';
 import { EmailConfig } from '../../types';
 import { getServiceConfig } from './api';
 
