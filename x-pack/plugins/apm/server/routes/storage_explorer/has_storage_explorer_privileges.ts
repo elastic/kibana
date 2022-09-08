@@ -6,6 +6,7 @@
  */
 
 import { every } from 'lodash';
+import { uniq } from 'lodash';
 import { ApmPluginRequestHandlerContext } from '../typings';
 import { Setup } from '../../lib/helpers/setup_request';
 
@@ -20,18 +21,21 @@ export async function hasStorageExplorerPrivileges({
     indices: { transaction, span, metric, error },
   } = setup;
 
-  const apmIndices: string[] = [];
-  [transaction, span, metric, error].forEach((indicesForProcessorEvent) => {
-    apmIndices.push(...indicesForProcessorEvent.replace(/\s/g, '').split(','));
-  });
+  const names = uniq(
+    [transaction, span, metric, error].flatMap((indexPatternString) =>
+      indexPatternString.split(',').map((indexPattern) => indexPattern.trim())
+    )
+  );
 
   const esClient = (await context.core).elasticsearch.client;
   const { index } = await esClient.asCurrentUser.security.hasPrivileges({
     body: {
-      index: apmIndices.map((idx) => ({
-        names: [idx],
-        privileges: ['monitor'],
-      })),
+      index: [
+        {
+          names,
+          privileges: ['monitor'],
+        },
+      ],
     },
   });
 
