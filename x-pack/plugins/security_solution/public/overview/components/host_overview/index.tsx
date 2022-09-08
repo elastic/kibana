@@ -78,8 +78,14 @@ export const HostOverview = React.memo<HostSummaryProps>(
     const capabilities = useMlCapabilities();
     const userPermissions = hasMlUserPermissions(capabilities);
     const [darkMode] = useUiSetting$<boolean>(DEFAULT_DARK_MODE);
+    const filterQuery = useMemo(
+      () => (hostName ? buildHostNamesFilter([hostName]) : undefined),
+      [hostName]
+    );
+
     const [_, { data: hostRisk, isModuleEnabled }] = useHostRiskScore({
-      filterQuery: hostName ? buildHostNamesFilter([hostName]) : undefined,
+      filterQuery,
+      skip: hostName == null,
     });
 
     const getDefaultRenderer = useCallback(

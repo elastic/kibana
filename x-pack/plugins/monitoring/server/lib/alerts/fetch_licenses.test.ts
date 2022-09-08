@@ -81,7 +81,7 @@ describe('fetchLicenses', () => {
     await fetchLicenses(esClient, clusters);
     expect(params).toStrictEqual({
       index:
-        '*:.monitoring-es-*,.monitoring-es-*,*:metrics-elasticsearch.cluster_stats-*,metrics-elasticsearch.cluster_stats-*',
+        '*:.monitoring-es-*,.monitoring-es-*,*:metrics-elasticsearch.stack_monitoring.cluster_stats-*,metrics-elasticsearch.stack_monitoring.cluster_stats-*',
       filter_path: [
         'hits.hits._source.license.*',
         'hits.hits._source.elasticsearch.cluster.stats.license.*',
@@ -101,7 +101,11 @@ describe('fetchLicenses', () => {
                   should: [
                     { term: { type: 'cluster_stats' } },
                     { term: { 'metricset.name': 'cluster_stats' } },
-                    { term: { 'data_stream.dataset': 'elasticsearch.cluster_stats' } },
+                    {
+                      term: {
+                        'data_stream.dataset': 'elasticsearch.stack_monitoring.cluster_stats',
+                      },
+                    },
                   ],
                   minimum_should_match: 1,
                 },
@@ -126,6 +130,8 @@ describe('fetchLicenses', () => {
     const clusters = [{ clusterUuid, clusterName }];
     await fetchLicenses(esClient, clusters);
     // @ts-ignore
-    expect(params.index).toBe('.monitoring-es-*,metrics-elasticsearch.cluster_stats-*');
+    expect(params.index).toBe(
+      '.monitoring-es-*,metrics-elasticsearch.stack_monitoring.cluster_stats-*'
+    );
   });
 });

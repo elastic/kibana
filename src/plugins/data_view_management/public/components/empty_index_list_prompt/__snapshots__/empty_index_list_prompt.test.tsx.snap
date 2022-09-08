@@ -2,7 +2,7 @@
 
 exports[`EmptyIndexListPrompt should render normally 1`] = `
 <Fragment>
-  <EuiPageContent
+  <EuiPageContent_Deprecated
     className="inpEmptyState"
     color="subdued"
     data-test-subj="indexPatternEmptyState"
@@ -10,8 +10,8 @@ exports[`EmptyIndexListPrompt should render normally 1`] = `
     horizontalPosition="center"
     verticalPosition="center"
   >
-    <EuiPageContentHeader>
-      <EuiPageContentHeaderSection>
+    <EuiPageContentHeader_Deprecated>
+      <EuiPageContentHeaderSection_Deprecated>
         <EuiTitle>
           <h2>
             <FormattedMessage
@@ -21,12 +21,12 @@ exports[`EmptyIndexListPrompt should render normally 1`] = `
             />
           </h2>
         </EuiTitle>
-      </EuiPageContentHeaderSection>
-    </EuiPageContentHeader>
+      </EuiPageContentHeaderSection_Deprecated>
+    </EuiPageContentHeader_Deprecated>
     <EuiSpacer
       size="m"
     />
-    <EuiPageContentBody>
+    <EuiPageContentBody_Deprecated>
       <EuiFlexGrid
         className="inpEmptyState__cardGrid"
         columns={3}
@@ -212,7 +212,7 @@ exports[`EmptyIndexListPrompt should render normally 1`] = `
           />
         </EuiText>
       </div>
-    </EuiPageContentBody>
-  </EuiPageContent>
+    </EuiPageContentBody_Deprecated>
+  </EuiPageContent_Deprecated>
 </Fragment>
 `;

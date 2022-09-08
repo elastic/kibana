@@ -22,6 +22,7 @@ import {
   setPanels,
   setQuery,
   setTimeRange,
+  setTimeslice,
 } from '../state';
 import { diffDashboardContainerInput } from './diff_dashboard_state';
 import { DashboardBuildContext, DashboardContainerInput } from '../../types';
@@ -129,6 +130,10 @@ export const applyContainerChangesToState = ({
     dispatchDashboardStateChange(setControlGroupState(input.controlGroupInput));
   }
   dispatchDashboardStateChange(setFullScreenMode(input.isFullScreenMode));
+
+  if (!_.isEqual(input.timeslice, latestState.timeslice)) {
+    dispatchDashboardStateChange(setTimeslice(input.timeslice));
+  }
 };
 
 export const applyStateChangesToContainer = ({
