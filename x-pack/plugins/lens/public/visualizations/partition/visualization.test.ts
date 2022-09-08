@@ -114,12 +114,36 @@ describe('pie_visualization', () => {
     });
   });
 
+  describe('#removeDimension', () => {
+    it('removes corresponding collapse function if exists', () => {
+      const state = getExampleState();
+
+      const colIds = ['1', '2', '3', '4'];
+
+      state.layers[0].primaryGroups = colIds;
+
+      state.layers[0].collapseFns = {
+        '1': 'sum',
+        '3': 'max',
+      };
+
+      const newState = pieVisualization.removeDimension({
+        layerId: LAYER_ID,
+        columnId: '3',
+        prevState: state,
+        frame: mockFrame(),
+      });
+
+      expect(newState.layers[0].collapseFns).not.toHaveProperty('3');
+    });
+  });
+
   describe('#getConfiguration', () => {
     it('assigns correct icons to accessors', () => {
       const colIds = ['1', '2', '3', '4'];
 
       const frame = mockFrame();
-      frame.datasourceLayers.l1!.getTableSpec = () =>
+      frame.datasourceLayers[LAYER_ID]!.getTableSpec = () =>
         colIds.map((id) => ({ columnId: id, fields: [] }));
 
       const state = getExampleState();
@@ -161,13 +185,13 @@ describe('pie_visualization', () => {
       `);
     });
 
-    it('doesnt count collapsed columns toward the dimension limits', () => {
+    it("doesn't count collapsed columns toward the dimension limits", () => {
       const colIds = new Array(PartitionChartsMeta.pie.maxBuckets)
         .fill(undefined)
         .map((_, i) => String(i + 1));
 
       const frame = mockFrame();
-      frame.datasourceLayers.l1!.getTableSpec = () =>
+      frame.datasourceLayers[LAYER_ID]!.getTableSpec = () =>
         colIds.map((id) => ({ columnId: id, fields: [] }));
 
       const state = getExampleState();
