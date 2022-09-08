@@ -8,18 +8,28 @@
 import { EuiDataGridToolBarVisibilityOptions } from '@elastic/eui';
 import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
 import React, { lazy, Suspense } from 'react';
+import { AlertsCount } from './components/alerts_count/alerts_count';
 import { BulkActionsConfig } from '../../../../types';
 import { LastUpdatedAt } from './components/last_updated_at';
 
 const BulkActionsToolbar = lazy(() => import('../bulk_actions/components/toolbar'));
 
-const getDefaultVisibility = (updatedAt: number) => {
+const getDefaultVisibility = ({
+  alertsCount,
+  updatedAt,
+}: {
+  alertsCount: number;
+  updatedAt: number;
+}) => {
+  const additionalControls = {
+    right: <LastUpdatedAt updatedAt={updatedAt} />,
+    left: { append: <AlertsCount count={alertsCount} /> },
+  };
+
   return {
+    additionalControls,
     showColumnSelector: true,
     showSortSelector: true,
-    additionalControls: {
-      right: <LastUpdatedAt updatedAt={updatedAt} />,
-    },
   };
 };
 
@@ -39,7 +49,7 @@ export const getToolbarVisibility = ({
   updatedAt: number;
 }): EuiDataGridToolBarVisibilityOptions => {
   const selectedRowsCount = rowSelection.size;
-  const defaultVisibility = getDefaultVisibility(updatedAt);
+  const defaultVisibility = getDefaultVisibility({ alertsCount, updatedAt });
 
   if (selectedRowsCount === 0 || selectedRowsCount === undefined || bulkActions.length === 0)
     return defaultVisibility;
@@ -51,9 +61,12 @@ export const getToolbarVisibility = ({
       ...defaultVisibility.additionalControls,
       left: {
         append: (
-          <Suspense fallback={null}>
-            <BulkActionsToolbar totalItems={alertsCount} items={bulkActions} alerts={alerts} />
-          </Suspense>
+          <>
+            <AlertsCount count={alertsCount} />
+            <Suspense fallback={null}>
+              <BulkActionsToolbar totalItems={alertsCount} items={bulkActions} alerts={alerts} />
+            </Suspense>
+          </>
         ),
       },
     },
