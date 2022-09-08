@@ -10,10 +10,18 @@ import { action } from '@storybook/addon-actions';
 
 import { FileUploadUI, Props } from './file_upload';
 
+const defaultArgs: Props = {
+  onChange: action('onChange'),
+  onDone: action('onDone'),
+  onClear: action('onClear'),
+  onUpload: action('onUpload'),
+  onCancel: action('onCancel'),
+};
+
 export default {
   title: 'components/FileUploadUI',
   component: FileUploadUI,
-  args: { onDone: action('onDone'), uploading: false },
+  args: defaultArgs,
 };
 
 const Template: ComponentStory<typeof FileUploadUI> = (props: Props) => <FileUploadUI {...props} />;
@@ -25,7 +33,17 @@ Uploading.args = {
   uploading: true,
 };
 
+export const Retry = Template.bind({});
+Retry.args = {
+  retry: true,
+};
+
 export const ImmediateUpload = Template.bind({});
 ImmediateUpload.args = {
   immediate: true,
+};
+
+export const ImmediateUploadRetry = Template.bind({});
+ImmediateUploadRetry.args = {
+  retry: true,
 };
