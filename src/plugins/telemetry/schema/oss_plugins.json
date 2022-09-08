@@ -1,5 +1,80 @@
 {
   "properties": {
+    "index-patterns": {
+      "properties": {
+        "indexPatternsCount": {
+          "type": "long"
+        },
+        "indexPatternsWithScriptedFieldCount": {
+          "type": "long"
+        },
+        "indexPatternsWithRuntimeFieldCount": {
+          "type": "long"
+        },
+        "scriptedFieldCount": {
+          "type": "long"
+        },
+        "runtimeFieldCount": {
+          "type": "long"
+        },
+        "perIndexPattern": {
+          "properties": {
+            "scriptedFieldCount": {
+              "properties": {
+                "min": {
+                  "type": "long"
+                },
+                "max": {
+                  "type": "long"
+                },
+                "avg": {
+                  "type": "float"
+                }
+              }
+            },
+            "runtimeFieldCount": {
+              "properties": {
+                "min": {
+                  "type": "long"
+                },
+                "max": {
+                  "type": "long"
+                },
+                "avg": {
+                  "type": "float"
+                }
+              }
+            },
+            "scriptedFieldLineCount": {
+              "properties": {
+                "min": {
+                  "type": "long"
+                },
+                "max": {
+                  "type": "long"
+                },
+                "avg": {
+                  "type": "float"
+                }
+              }
+            },
+            "runtimeFieldLineCount": {
+              "properties": {
+                "min": {
+                  "type": "long"
+                },
+                "max": {
+                  "type": "long"
+                },
+                "avg": {
+                  "type": "float"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "dashboard": {
       "properties": {
         "panels": {
@@ -114,81 +189,6 @@
         }
       }
     },
-    "index-patterns": {
-      "properties": {
-        "indexPatternsCount": {
-          "type": "long"
-        },
-        "indexPatternsWithScriptedFieldCount": {
-          "type": "long"
-        },
-        "indexPatternsWithRuntimeFieldCount": {
-          "type": "long"
-        },
-        "scriptedFieldCount": {
-          "type": "long"
-        },
-        "runtimeFieldCount": {
-          "type": "long"
-        },
-        "perIndexPattern": {
-          "properties": {
-            "scriptedFieldCount": {
-              "properties": {
-                "min": {
-                  "type": "long"
-                },
-                "max": {
-                  "type": "long"
-                },
-                "avg": {
-                  "type": "float"
-                }
-              }
-            },
-            "runtimeFieldCount": {
-              "properties": {
-                "min": {
-                  "type": "long"
-                },
-                "max": {
-                  "type": "long"
-                },
-                "avg": {
-                  "type": "float"
-                }
-              }
-            },
-            "scriptedFieldLineCount": {
-              "properties": {
-                "min": {
-                  "type": "long"
-                },
-                "max": {
-                  "type": "long"
-                },
-                "avg": {
-                  "type": "float"
-                }
-              }
-            },
-            "runtimeFieldLineCount": {
-              "properties": {
-                "min": {
-                  "type": "long"
-                },
-                "max": {
-                  "type": "long"
-                },
-                "avg": {
-                  "type": "float"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "kql": {
       "properties": {
         "optInCount": {
@@ -199,60 +199,6 @@
         },
         "defaultQueryLanguage": {
           "type": "keyword"
-        }
-      }
-    },
-    "search-session": {
-      "properties": {
-        "transientCount": {
-          "type": "long"
-        },
-        "persistedCount": {
-          "type": "long"
-        },
-        "totalCount": {
-          "type": "long"
-        }
-      }
-    },
-    "search": {
-      "properties": {
-        "successCount": {
-          "type": "long"
-        },
-        "errorCount": {
-          "type": "long"
-        },
-        "averageDuration": {
-          "type": "float"
-        }
-      }
-    },
-    "sample-data": {
-      "properties": {
-        "installed": {
-          "type": "array",
-          "items": {
-            "type": "keyword"
-          }
-        },
-        "last_install_date": {
-          "type": "date"
-        },
-        "last_install_set": {
-          "type": "keyword"
-        },
-        "last_uninstall_date": {
-          "type": "date"
-        },
-        "last_uninstall_set": {
-          "type": "keyword"
-        },
-        "uninstalled": {
-          "type": "array",
-          "items": {
-            "type": "keyword"
-          }
         }
       }
     },
@@ -7637,28 +7583,6 @@
         }
       }
     },
-    "csp": {
-      "properties": {
-        "strict": {
-          "type": "boolean",
-          "_meta": {
-            "description": "Indicates if strict mode should be used."
-          }
-        },
-        "warnLegacyBrowsers": {
-          "type": "boolean",
-          "_meta": {
-            "description": "Indicates if legacy browser versions should be warned."
-          }
-        },
-        "rulesChangedFromDefault": {
-          "type": "boolean",
-          "_meta": {
-            "description": "Indicates if the rules have been changed from the default."
-          }
-        }
-      }
-    },
     "event_loop_delays": {
       "properties": {
         "daily": {
@@ -7748,6 +7672,28 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "csp": {
+      "properties": {
+        "strict": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Indicates if strict mode should be used."
+          }
+        },
+        "warnLegacyBrowsers": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Indicates if legacy browser versions should be warned."
+          }
+        },
+        "rulesChangedFromDefault": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Indicates if the rules have been changed from the default."
           }
         }
       }
@@ -8589,6 +8535,53 @@
         }
       }
     },
+    "ui_counters": {
+      "properties": {
+        "dailyEvents": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "appName": {
+                "type": "keyword",
+                "_meta": {
+                  "description": "Name of the app reporting ui counts."
+                }
+              },
+              "eventName": {
+                "type": "keyword",
+                "_meta": {
+                  "description": "Name of the event that happened."
+                }
+              },
+              "lastUpdatedAt": {
+                "type": "date",
+                "_meta": {
+                  "description": "Time at which the metric was last updated."
+                }
+              },
+              "fromTimestamp": {
+                "type": "date",
+                "_meta": {
+                  "description": "Time at which the metric was captured."
+                }
+              },
+              "counterType": {
+                "type": "keyword",
+                "_meta": {
+                  "description": "The type of counter used."
+                }
+              },
+              "total": {
+                "type": "integer",
+                "_meta": {
+                  "description": "The total number of times the event happened."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "kibana": {
       "properties": {
         "index": {
@@ -8688,53 +8681,6 @@
             "type": "keyword",
             "_meta": {
               "description": "List of SO types that showed up in the break down but are not registered in Kibana. They could be a potential cause of future migration failures."
-            }
-          }
-        }
-      }
-    },
-    "ui_counters": {
-      "properties": {
-        "dailyEvents": {
-          "type": "array",
-          "items": {
-            "properties": {
-              "appName": {
-                "type": "keyword",
-                "_meta": {
-                  "description": "Name of the app reporting ui counts."
-                }
-              },
-              "eventName": {
-                "type": "keyword",
-                "_meta": {
-                  "description": "Name of the event that happened."
-                }
-              },
-              "lastUpdatedAt": {
-                "type": "date",
-                "_meta": {
-                  "description": "Time at which the metric was last updated."
-                }
-              },
-              "fromTimestamp": {
-                "type": "date",
-                "_meta": {
-                  "description": "Time at which the metric was captured."
-                }
-              },
-              "counterType": {
-                "type": "keyword",
-                "_meta": {
-                  "description": "The type of counter used."
-                }
-              },
-              "total": {
-                "type": "integer",
-                "_meta": {
-                  "description": "The total number of times the event happened."
-                }
-              }
             }
           }
         }
@@ -10115,6 +10061,60 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "search": {
+      "properties": {
+        "successCount": {
+          "type": "long"
+        },
+        "errorCount": {
+          "type": "long"
+        },
+        "averageDuration": {
+          "type": "float"
+        }
+      }
+    },
+    "search-session": {
+      "properties": {
+        "transientCount": {
+          "type": "long"
+        },
+        "persistedCount": {
+          "type": "long"
+        },
+        "totalCount": {
+          "type": "long"
+        }
+      }
+    },
+    "sample-data": {
+      "properties": {
+        "installed": {
+          "type": "array",
+          "items": {
+            "type": "keyword"
+          }
+        },
+        "last_install_date": {
+          "type": "date"
+        },
+        "last_install_set": {
+          "type": "keyword"
+        },
+        "last_uninstall_date": {
+          "type": "date"
+        },
+        "last_uninstall_set": {
+          "type": "keyword"
+        },
+        "uninstalled": {
+          "type": "array",
+          "items": {
+            "type": "keyword"
           }
         }
       }

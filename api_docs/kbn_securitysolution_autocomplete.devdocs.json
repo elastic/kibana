@@ -31,6 +31,7 @@
         ],
         "path": "packages/kbn-securitysolution-autocomplete/src/field_value_exists/index.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-autocomplete",
@@ -44,6 +45,7 @@
             ],
             "path": "packages/kbn-securitysolution-autocomplete/src/field_value_exists/index.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -62,6 +64,7 @@
         ],
         "path": "packages/kbn-securitysolution-autocomplete/src/field_value_lists/index.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-autocomplete",
@@ -75,6 +78,7 @@
             ],
             "path": "packages/kbn-securitysolution-autocomplete/src/field_value_lists/index.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -93,6 +97,7 @@
         ],
         "path": "packages/kbn-securitysolution-autocomplete/src/field_value_match_any/index.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-autocomplete",
@@ -106,6 +111,7 @@
             ],
             "path": "packages/kbn-securitysolution-autocomplete/src/field_value_match_any/index.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -124,6 +130,7 @@
         ],
         "path": "packages/kbn-securitysolution-autocomplete/src/field_value_match/index.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-autocomplete",
@@ -137,6 +144,7 @@
             ],
             "path": "packages/kbn-securitysolution-autocomplete/src/field_value_match/index.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -155,6 +163,7 @@
         ],
         "path": "packages/kbn-securitysolution-autocomplete/src/field_value_wildcard/index.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -168,7 +177,8 @@
               "P & { children?: React.ReactNode; }"
             ],
             "path": "node_modules/@types/react/index.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/securitysolution-autocomplete",
@@ -181,7 +191,8 @@
               "any"
             ],
             "path": "node_modules/@types/react/index.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -202,6 +213,7 @@
         ],
         "path": "packages/kbn-securitysolution-autocomplete/src/check_empty_value/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-autocomplete",
@@ -215,6 +227,7 @@
             ],
             "path": "packages/kbn-securitysolution-autocomplete/src/check_empty_value/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           },
           {
@@ -230,6 +243,7 @@
             ],
             "path": "packages/kbn-securitysolution-autocomplete/src/check_empty_value/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           },
           {
@@ -244,6 +258,7 @@
             ],
             "path": "packages/kbn-securitysolution-autocomplete/src/check_empty_value/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -258,6 +273,7 @@
             ],
             "path": "packages/kbn-securitysolution-autocomplete/src/check_empty_value/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -276,6 +292,7 @@
         ],
         "path": "packages/kbn-securitysolution-autocomplete/src/field/index.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-autocomplete",
@@ -289,6 +306,7 @@
             ],
             "path": "packages/kbn-securitysolution-autocomplete/src/field/index.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -311,6 +329,7 @@
         ],
         "path": "packages/kbn-securitysolution-autocomplete/src/filter_field_to_list/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-autocomplete",
@@ -326,6 +345,7 @@
             ],
             "path": "packages/kbn-securitysolution-autocomplete/src/filter_field_to_list/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -344,6 +364,7 @@
             ],
             "path": "packages/kbn-securitysolution-autocomplete/src/filter_field_to_list/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           }
         ],
@@ -371,6 +392,7 @@
         ],
         "path": "packages/kbn-securitysolution-autocomplete/src/get_generic_combo_box_props/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-autocomplete",
@@ -381,6 +403,7 @@
             "description": [],
             "path": "packages/kbn-securitysolution-autocomplete/src/get_generic_combo_box_props/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/securitysolution-autocomplete",
@@ -394,6 +417,7 @@
                 ],
                 "path": "packages/kbn-securitysolution-autocomplete/src/get_generic_combo_box_props/index.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "@kbn/securitysolution-autocomplete",
@@ -407,6 +431,7 @@
                     ],
                     "path": "packages/kbn-securitysolution-autocomplete/src/get_generic_combo_box_props/index.ts",
                     "deprecated": false,
+                    "trackAdoption": false,
                     "isRequired": true
                   }
                 ],
@@ -423,7 +448,8 @@
                   "T[]"
                 ],
                 "path": "packages/kbn-securitysolution-autocomplete/src/get_generic_combo_box_props/index.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "@kbn/securitysolution-autocomplete",
@@ -436,7 +462,8 @@
                   "T[]"
                 ],
                 "path": "packages/kbn-securitysolution-autocomplete/src/get_generic_combo_box_props/index.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }
@@ -462,6 +489,7 @@
         ],
         "path": "packages/kbn-securitysolution-autocomplete/src/get_operators/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-autocomplete",
@@ -478,6 +506,7 @@
             ],
             "path": "packages/kbn-securitysolution-autocomplete/src/get_operators/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           }
         ],
@@ -496,6 +525,7 @@
         ],
         "path": "packages/kbn-securitysolution-autocomplete/src/operator/index.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-autocomplete",
@@ -509,6 +539,7 @@
             ],
             "path": "packages/kbn-securitysolution-autocomplete/src/operator/index.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -527,6 +558,7 @@
         ],
         "path": "packages/kbn-securitysolution-autocomplete/src/param_contains_space/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-autocomplete",
@@ -540,6 +572,7 @@
             ],
             "path": "packages/kbn-securitysolution-autocomplete/src/param_contains_space/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -562,6 +595,7 @@
         ],
         "path": "packages/kbn-securitysolution-autocomplete/src/param_is_valid/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-autocomplete",
@@ -577,6 +611,7 @@
             ],
             "path": "packages/kbn-securitysolution-autocomplete/src/param_is_valid/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           },
           {
@@ -594,6 +629,7 @@
             ],
             "path": "packages/kbn-securitysolution-autocomplete/src/param_is_valid/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           },
           {
@@ -610,6 +646,7 @@
             ],
             "path": "packages/kbn-securitysolution-autocomplete/src/param_is_valid/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -626,6 +663,7 @@
             ],
             "path": "packages/kbn-securitysolution-autocomplete/src/param_is_valid/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -663,6 +701,7 @@
         ],
         "path": "packages/kbn-securitysolution-autocomplete/src/hooks/use_field_value_autocomplete/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-autocomplete",
@@ -682,6 +721,7 @@
             ],
             "path": "packages/kbn-securitysolution-autocomplete/src/hooks/use_field_value_autocomplete/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -699,6 +739,7 @@
         "description": [],
         "path": "packages/kbn-securitysolution-autocomplete/src/get_generic_combo_box_props/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-autocomplete",
@@ -712,7 +753,8 @@
               "<string | number | string[] | undefined>[]"
             ],
             "path": "packages/kbn-securitysolution-autocomplete/src/get_generic_combo_box_props/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/securitysolution-autocomplete",
@@ -725,7 +767,8 @@
               "string[]"
             ],
             "path": "packages/kbn-securitysolution-autocomplete/src/get_generic_combo_box_props/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/securitysolution-autocomplete",
@@ -739,7 +782,8 @@
               "<string | number | string[] | undefined>[]"
             ],
             "path": "packages/kbn-securitysolution-autocomplete/src/get_generic_combo_box_props/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -753,6 +797,7 @@
         "description": [],
         "path": "packages/kbn-securitysolution-autocomplete/src/hooks/use_field_value_autocomplete/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-autocomplete",
@@ -765,7 +810,8 @@
               "any"
             ],
             "path": "packages/kbn-securitysolution-autocomplete/src/hooks/use_field_value_autocomplete/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/securitysolution-autocomplete",
@@ -778,7 +824,8 @@
               "string | string[] | undefined"
             ],
             "path": "packages/kbn-securitysolution-autocomplete/src/hooks/use_field_value_autocomplete/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/securitysolution-autocomplete",
@@ -792,7 +839,8 @@
               " | undefined"
             ],
             "path": "packages/kbn-securitysolution-autocomplete/src/hooks/use_field_value_autocomplete/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/securitysolution-autocomplete",
@@ -805,7 +853,8 @@
               "ListOperatorTypeEnum"
             ],
             "path": "packages/kbn-securitysolution-autocomplete/src/hooks/use_field_value_autocomplete/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/securitysolution-autocomplete",
@@ -815,7 +864,8 @@
             "label": "query",
             "description": [],
             "path": "packages/kbn-securitysolution-autocomplete/src/hooks/use_field_value_autocomplete/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/securitysolution-autocomplete",
@@ -829,7 +879,8 @@
               " | undefined"
             ],
             "path": "packages/kbn-securitysolution-autocomplete/src/hooks/use_field_value_autocomplete/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -849,6 +900,7 @@
         ],
         "path": "packages/kbn-securitysolution-autocomplete/src/hooks/use_field_value_autocomplete/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],

@@ -14,6 +14,10 @@
   }
 }
 
+.lnsFrameLayout__wrapper {
+  position: relative;
+}
+
 .lnsFrameLayout__pageContent {
   overflow: hidden;
   flex-grow: 1;
