@@ -12,7 +12,7 @@ import {
   ProfilingRequestHandlerContext,
 } from '../types';
 
-import { registerFlameChartElasticSearchRoute } from './flamechart';
+import { registerFlameChartSearchRoute } from './flamechart';
 
 import { registerTopNFunctionsSearchRoute } from './functions';
 
@@ -34,7 +34,7 @@ export interface RouteRegisterParameters {
 }
 
 export function registerRoutes(params: RouteRegisterParameters) {
-  registerFlameChartElasticSearchRoute(params);
+  registerFlameChartSearchRoute(params);
   registerTopNFunctionsSearchRoute(params);
   registerTraceEventsTopNContainersSearchRoute(params);
   registerTraceEventsTopNDeploymentsSearchRoute(params);

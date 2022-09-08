@@ -15,11 +15,11 @@ import { getClient } from './compat';
 import { getExecutablesAndStackTraces } from './get_executables_and_stacktraces';
 import { createCommonFilter } from './query';
 
-export function registerFlameChartElasticSearchRoute({ router, logger }: RouteRegisterParameters) {
+export function registerFlameChartSearchRoute({ router, logger }: RouteRegisterParameters) {
   const paths = getRoutePaths();
   router.get(
     {
-      path: paths.FlamechartElastic,
+      path: paths.Flamechart,
       validate: {
         query: schema.object({
           timeFrom: schema.number(),
