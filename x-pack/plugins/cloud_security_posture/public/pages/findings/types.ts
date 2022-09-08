@@ -36,6 +36,7 @@ export interface CspFinding {
   host: CspFindingHost;
   event: EcsEvent;
   agent: CspFindingAgent;
+  cluster_id: string;
   ecs: {
     version: string;
   };

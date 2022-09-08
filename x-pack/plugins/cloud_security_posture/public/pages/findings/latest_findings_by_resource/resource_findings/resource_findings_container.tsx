@@ -5,11 +5,12 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiSpacer, EuiButtonEmpty } from '@elastic/eui';
+import { EuiSpacer, EuiButtonEmpty, EuiPageHeader } from '@elastic/eui';
 import { Link, useParams } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { generatePath } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
+import { CspInlineDescriptionList } from '../../../../components/csp_inline_description_list';
 import { CloudPosturePageTitle } from '../../../../components/cloud_posture_page_title';
 import * as TEST_SUBJECTS from '../../test_subjects';
 import { PageTitle, PageTitleText } from '../../layout/findings_layout';
@@ -52,6 +53,12 @@ const BackToResourcesButton = () => (
   </Link>
 );
 
+const getResourceFindingSharedValues = (sampleFinding: CspFinding) => [
+  { title: 'Resource Type', description: sampleFinding.resource.sub_type },
+  { title: 'Resource ID', description: sampleFinding.resource.id },
+  { title: 'Cluster ID', description: sampleFinding.cluster_id },
+];
+
 export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
   const params = useParams<{ resourceId: string }>();
   const getPersistedDefaultQuery = usePersistedQuery(getDefaultQuery);
@@ -80,6 +87,7 @@ export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
     enabled: !baseEsQuery.error,
   });
 
+  const sampleFinding = resourceFindings?.data?.page[0];
   const error = resourceFindings.error || baseEsQuery.error;
 
   return (
@@ -100,14 +108,21 @@ export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
               title={i18n.translate(
                 'xpack.csp.findings.resourceFindings.resourceFindingsPageTitle',
                 {
-                  defaultMessage: '{resourceId} - Findings',
-                  values: { resourceId: params.resourceId },
+                  defaultMessage: '{resourceName} - Findings',
+                  values: { resourceName: sampleFinding?.resource.name },
                 }
               )}
             />
           }
         />
       </PageTitle>
+      <EuiPageHeader
+        description={
+          sampleFinding && (
+            <CspInlineDescriptionList listItems={getResourceFindingSharedValues(sampleFinding)} />
+          )
+        }
+      />
       <EuiSpacer />
       {error && <ErrorCallout error={error} />}
       {!error && (
