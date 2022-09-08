@@ -76,6 +76,7 @@ export const NotificationsList: FC = () => {
 
   const fetchNotifications = useCallback(async () => {
     try {
+      setIsLoading(true);
       const response = await mlApiServices.notifications.findMessages({
         size: pagination.pageSize,
         sortField: sorting.sort!.field,
