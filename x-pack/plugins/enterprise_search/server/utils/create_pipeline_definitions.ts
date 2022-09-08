@@ -264,12 +264,14 @@ export const formatMlPipelineBody = async (
       {
         append: {
           field: '_source._ingest.processors',
-          value: {
-            type: modelType,
-            model_id: modelId,
-            model_version: modelVersion,
-            processed_timestamp: '{{{_ingest.timestamp}}}',
-          },
+          value: [
+            {
+              type: modelType,
+              model_id: modelId,
+              model_version: modelVersion,
+              processed_timestamp: '{{{_ingest.timestamp}}}',
+            },
+          ],
         },
       },
     ],
