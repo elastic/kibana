@@ -93,7 +93,7 @@ export async function indexHostsAndAlerts(
   const realPolicies: Record<string, CreatePackagePolicyResponse['item']> = {};
 
   for (let i = 0; i < numHosts; i++) {
-    const generator = new (DocGenerator)(random);
+    const generator = new DocGenerator(random);
     const indexedHosts = await indexEndpointHostDocs({
       numDocs,
       client,
