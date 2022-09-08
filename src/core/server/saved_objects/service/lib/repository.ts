@@ -438,7 +438,7 @@ export class SavedObjectsRepository {
       attributes: await this.optionallyEncryptAttributes(
         type,
         id,
-        savedObjectNamespace, // only used for multi-namespace object types
+        savedObjectNamespace, // only used for multi-namespace object types (ToDo: edit? only used for single namespace???)
         attributes
       ),
       migrationVersion,

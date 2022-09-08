@@ -23,9 +23,13 @@ import { internalBulkResolve, InternalBulkResolveParams } from './internal_bulk_
 import { SavedObjectsUtils } from './utils';
 import { normalizeNamespace } from './internal_utils';
 
+import type { ISavedObjectsEncryptionExtension, ISavedObjectTypeRegistry, SavedObjectTypeRegistry } from '../../..';
+import { savedObjectsEncryptionExtensionMock } from './repository.extensions.mock';
+
 const VERSION_PROPS = { _seq_no: 1, _primary_term: 1 };
 const OBJ_TYPE = 'obj-type';
 const UNSUPPORTED_TYPE = 'unsupported-type';
+const ENCRYPTED_TYPE = 'encrypted-type';
 
 beforeEach(() => {
   mockGetSavedObjectFromSource.mockReset();
@@ -42,24 +46,26 @@ describe('internalBulkResolve', () => {
   let client: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
   let serializer: SavedObjectsSerializer;
   let incrementCounterInternal: jest.Mock<any, any>;
+  let registry;
 
   /** Sets up the type registry, saved objects client, etc. and return the full parameters object to be passed to `internalBulkResolve` */
   function setup(
     objects: SavedObjectsBulkResolveObject[],
-    options: SavedObjectsBaseOptions = {}
+    options: SavedObjectsBaseOptions = {},
+    encryptionExt?: ISavedObjectsEncryptionExtension,
   ): InternalBulkResolveParams {
-    const registry = typeRegistryMock.create();
+    registry = typeRegistryMock.create();
     client = elasticsearchClientMock.createElasticsearchClient();
     serializer = new SavedObjectsSerializer(registry);
     incrementCounterInternal = jest.fn().mockRejectedValue(new Error('increment error')); // mock error to implicitly test that it is caught and swallowed
     return {
-      registry: typeRegistryMock.create(), // doesn't need additional mocks for this test suite
-      allowedTypes: [OBJ_TYPE],
+      registry, // : typeRegistryMock.create(), // doesn't need additional mocks for this test suite
+      allowedTypes: [OBJ_TYPE, ENCRYPTED_TYPE],
       client,
       serializer,
       getIndexForType: (type: string) => `index-for-${type}`,
       incrementCounterInternal,
-      encryptionExtension: undefined,
+      encryptionExtension: encryptionExt,
       securityExtension: undefined,
       objects,
       options,
@@ -342,7 +348,64 @@ describe('internalBulkResolve', () => {
     });
   }
 
-  test.todo('with encryption extension');
+  describe.only('with encryption extension', () => {
+    const namespace = 'foo';
+
+    const attributes = {
+      attrNotSoSecret: '*not-so-secret*',
+      attrOne: 'one',
+      attrSecret: '*secret*',
+      attrThree: 'three',
+      title: 'Testing',
+    };
+
+    beforeEach(() => {
+      mockGetSavedObjectFromSource.mockImplementation(
+        (_registry, type, id) => {
+          return {
+            id,
+            type,
+            namespaces: [namespace],
+            attributes,
+            references: [],
+          } as SavedObject
+        });
+    })
+
+    it.only('only attempts to decrypt and strip attributes for types that are encryptable', async () => {
+      const objects = [
+        { type: OBJ_TYPE, id: '11' }, // non encryptable type
+        { type: ENCRYPTED_TYPE, id: '12' }, // encryptable type
+      ];
+      const encryptionExtMock = savedObjectsEncryptionExtensionMock.create();
+      const params = setup(objects, { namespace }, encryptionExtMock);
+      mockBulkResults(
+        // No alias matches
+        { found: false },
+        { found: false },
+      );
+      mockMgetResults(
+        // exact matches
+        { found: true },
+        { found: true },
+      );
+
+      encryptionExtMock.isEncryptableType.mockReturnValueOnce(false);
+      encryptionExtMock.isEncryptableType.mockReturnValueOnce(true);
+
+      await internalBulkResolve(params);
+
+      expect(encryptionExtMock.isEncryptableType).toBeCalledTimes(2);
+      expect(encryptionExtMock.isEncryptableType).toBeCalledWith(OBJ_TYPE);
+      expect(encryptionExtMock.isEncryptableType).toBeCalledWith(ENCRYPTED_TYPE);
+
+      expect(encryptionExtMock.decryptOrStripResponseAttributes).toBeCalledTimes(1);
+      expect(encryptionExtMock.decryptOrStripResponseAttributes).toBeCalledWith(
+        expect.objectContaining({ type: ENCRYPTED_TYPE, id: '12', attributes})
+      )
+        ;
+    });
+  });
 
   test.todo('with security extension');
 });

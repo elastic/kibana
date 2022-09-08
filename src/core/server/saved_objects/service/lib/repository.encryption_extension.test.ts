@@ -10,17 +10,11 @@
 
 import {
   pointInTimeFinderMock,
-  // mockCollectMultiNamespaceReferences,
-  // mockGetBulkOperationError,
-  // mockInternalBulkResolve,
-  // mockUpdateObjectsSpaces,
   mockGetCurrentTime,
   mockPreflightCheckForCreate,
-  // mockDeleteLegacyUrlAliases,
   mockGetSearchDsl,
 } from './repository.test.mock';
 
-import type { Payload } from '@hapi/boom';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { schema } from '@kbn/config-schema';
 import {
@@ -30,62 +24,31 @@ import {
   SavedObjectsBaseOptions,
   SavedObjectsFindOptions,
 } from '../../types';
-// import type { SavedObjectsUpdateObjectsSpacesResponse } from './update_objects_spaces';
+
 import {
-  // SavedObjectsDeleteByNamespaceOptions,
-  // SavedObjectsIncrementCounterField,
-  // SavedObjectsIncrementCounterOptions,
   SavedObjectsRepository,
 } from './repository';
-import { SavedObjectsErrorHelpers } from './errors';
-// import {
-//   PointInTimeFinder,
-//   SavedObjectsCreatePointInTimeFinderDependencies,
-//   SavedObjectsCreatePointInTimeFinderOptions,
-// } from './point_in_time_finder';
-// import { ALL_NAMESPACES_STRING } from './utils';
 import { loggerMock } from '@kbn/logging-mocks';
 import {
-  // SavedObjectsRawDoc,
   SavedObjectsRawDocSource,
   SavedObjectsSerializer,
-  SavedObjectUnsanitizedDoc,
 } from '../../serialization';
 import { encodeHitVersion } from '../../version';
 import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import { DocumentMigrator } from '../../migrations/core/document_migrator';
 import { kibanaMigratorMock } from '../../migrations/kibana_migrator.mock';
-// import { LEGACY_URL_ALIAS_TYPE } from '../../object_types';
 import { elasticsearchClientMock } from '../../../elasticsearch/client/mocks';
-// import * as esKuery from '@kbn/es-query';
-// import { errors as EsErrors } from '@elastic/elasticsearch';
 import {
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkGetObject,
-  // SavedObjectsBulkResolveObject,
-  // SavedObjectsBulkUpdateObject,
-  // SavedObjectsBulkUpdateOptions,
+  SavedObjectsBulkUpdateObject,
+  SavedObjectsBulkUpdateOptions,
   SavedObjectsCreateOptions,
-  // SavedObjectsDeleteOptions,
-  // SavedObjectsOpenPointInTimeOptions,
-  // SavedObjectsResolveResponse,
   SavedObjectsUpdateOptions,
 } from '../saved_objects_client';
 import { SavedObjectsMappingProperties, SavedObjectsTypeMappingDefinition } from '../../mappings';
-// import {
-//   SavedObjectsCollectMultiNamespaceReferencesObject,
-//   SavedObjectsCollectMultiNamespaceReferencesResponse,
-//   SavedObjectsExtensions,
-//   SavedObjectsUpdateObjectsSpacesObject,
-//   SavedObjectsUpdateObjectsSpacesOptions,
-// } from '../../..';
-// import { InternalBulkResolveError } from './internal_bulk_resolve';
 
 import { savedObjectsEncryptionExtensionMock } from './repository.extensions.mock';
-import { not } from 'joi';
-import { resolveSavedObjectsImportErrors } from '../../import/resolve_import_errors';
-
-// const { nodeTypes } = esKuery;
 
 // BEWARE: The SavedObjectClient depends on the implementation details of the SavedObjectsRepository
 // so any breaking changes to this repository are considered breaking changes to the SavedObjectsClient.
@@ -95,24 +58,7 @@ interface TypeIdTuple {
   type: string;
 }
 
-interface ExpectedErrorResult {
-  type: string;
-  id: string;
-  error: Record<string, any>;
-}
-
-type ErrorPayload = Error & Payload;
-
-// const createBadRequestError = (reason?: string) =>
-//   SavedObjectsErrorHelpers.createBadRequestError(reason).output.payload as ErrorPayload;
-const createConflictError = (type: string, id: string, reason?: string) =>
-  SavedObjectsErrorHelpers.createConflictError(type, id, reason).output.payload as ErrorPayload;
-const createGenericNotFoundError = (type: string | null = null, id: string | null = null) =>
-  SavedObjectsErrorHelpers.createGenericNotFoundError(type, id).output.payload as ErrorPayload;
-const createUnsupportedTypeError = (type: string) =>
-  SavedObjectsErrorHelpers.createUnsupportedTypeError(type).output.payload as ErrorPayload;
-
-describe('SavedObjectsRepositoryExtensions', () => {
+describe('SavedObjectsRepository Encryption Extension', () => {
   let client: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
   let savedObjectsRepository: SavedObjectsRepository;
   let migrator: ReturnType<typeof kibanaMigratorMock.create>;
@@ -369,37 +315,6 @@ describe('SavedObjectsRepositoryExtensions', () => {
       }
     },
   });
-  const expectSuccess = ({ type, id }: { type: string; id: string }) => {
-    // @ts-expect-error TS is not aware of the extension
-    return expect.toBeDocumentWithoutError(type, id);
-  };
-
-  const expectError = ({ type, id }: { type: string; id: string }) => ({
-    type,
-    id,
-    error: expect.any(Object),
-  });
-
-  const expectErrorResult = (
-    { type, id }: TypeIdTuple,
-    error: Record<string, any>,
-    overrides: Record<string, unknown> = {}
-  ): ExpectedErrorResult => ({
-    type,
-    id,
-    error: { ...error, ...overrides },
-  });
-  const expectErrorNotFound = (obj: TypeIdTuple, overrides?: Record<string, unknown>) =>
-    expectErrorResult(obj, createGenericNotFoundError(obj.type, obj.id), overrides);
-  const expectErrorConflict = (obj: TypeIdTuple, overrides?: Record<string, unknown>) =>
-    expectErrorResult(obj, createConflictError(obj.type, obj.id), overrides);
-  const expectErrorInvalidType = (obj: TypeIdTuple, overrides?: Record<string, unknown>) =>
-    expectErrorResult(obj, createUnsupportedTypeError(obj.type), overrides);
-
-  const expectMigrationArgs = (args: unknown, contains = true, n = 1) => {
-    const obj = contains ? expect.objectContaining(args) : expect.not.objectContaining(args);
-    expect(migrator.migrateDocument).toHaveBeenNthCalledWith(n, obj);
-  };
 
   const createSpySerializer = () => {
     const spyInstance = {
@@ -479,24 +394,11 @@ describe('SavedObjectsRepositoryExtensions', () => {
 
     mockGetCurrentTime.mockReturnValue(mockTimestamp);
     mockGetSearchDsl.mockClear();
+
+    savedObjectsRepository = instantiateRepository();
   });
 
-  const mockMigrationVersion = { foo: '2.3.4' };
-  const mockMigrateDocument = (doc: SavedObjectUnsanitizedDoc<any>) => ({
-    ...doc,
-    attributes: {
-      ...doc.attributes,
-      ...(doc.attributes?.title && { title: `${doc.attributes.title}!!` }),
-    },
-    migrationVersion: mockMigrationVersion,
-    references: [{ name: 'search_0', type: 'search', id: '123' }],
-  });
-
-  describe('#get with encryption extension', () => {
-    beforeEach(() => {
-      savedObjectsRepository = instantiateRepository(); // #ToDo: pass in parameters to determine which extensions should be active in this suite
-    });
-
+  describe('#get', () => {
     it('does not attempt to decrypt or strip attributes if type is not encryptable', async () => {
       const namespace = 'foo-namespace';
       const options = { namespace };
@@ -562,9 +464,9 @@ describe('SavedObjectsRepositoryExtensions', () => {
     });
   });
 
-  describe('#create with encryption extension', () => {
+  describe('#create', () => {
     beforeEach(() => {
-      savedObjectsRepository = instantiateRepository(); // #ToDo: pass in parameters to determine which extensions should be active in this suite
+      // savedObjectsRepository = instantiateRepository(); // #ToDo: pass in parameters to determine which extensions should be active in this suite
 
       mockPreflightCheckForCreate.mockReset();
       mockPreflightCheckForCreate.mockImplementation(({ objects }) => {
@@ -676,7 +578,7 @@ describe('SavedObjectsRepositoryExtensions', () => {
           overwrite: true,
           version: mockVersion,
         })
-      ).resolves.notToThrowError;
+      ).resolves.not.toThrowError();
     });
 
     describe('namespace', () => {
@@ -716,7 +618,7 @@ describe('SavedObjectsRepositoryExtensions', () => {
     });
   });
 
-  describe('#update with encryption extension', () => {
+  describe('#update', () => {
     const attributes = { title: 'Testing' };
     const originId = 'some-origin-id';
 
@@ -770,7 +672,7 @@ describe('SavedObjectsRepositoryExtensions', () => {
     };
 
     beforeEach(() => {
-      savedObjectsRepository = instantiateRepository(); // #ToDo: pass in parameters to determine which extensions should be active in this suite
+      // savedObjectsRepository = instantiateRepository(); // #ToDo: pass in parameters to determine which extensions should be active in this suite
 
       mockPreflightCheckForCreate.mockReset();
       mockPreflightCheckForCreate.mockImplementation(({ objects }) => {
@@ -832,56 +734,12 @@ describe('SavedObjectsRepositoryExtensions', () => {
         })
       );
     });
-
-    describe('namespace', () => {
-      const doTest = async (namespace: string, expectNamespaceInDescriptor: boolean) => {
-        const options = { namespace };
-        encryptionExtMock.isEncryptableType.mockReturnValue(true);
-
-        console.log(`*** EXPECT NAMESPACE: ${expectNamespaceInDescriptor}`);
-
-        console.log(
-          `*** MULTI NAMESPACE: ${registry.isMultiNamespace(
-            expectNamespaceInDescriptor ? ENCRYPTED_TYPE : MULTI_NAMESPACE_ENCRYPTED_TYPE
-          )}`
-        );
-
-        await updateSuccess(
-          expectNamespaceInDescriptor ? ENCRYPTED_TYPE : MULTI_NAMESPACE_ENCRYPTED_TYPE,
-          encryptedSO.id,
-          encryptedSO.attributes,
-          options
-        );
-        expect(encryptionExtMock.isEncryptableType).toHaveBeenCalledTimes(2); // (no upsert) optionallyEncryptAttributes, optionallyDecryptAndRedactSingleResult
-        expect(encryptionExtMock.isEncryptableType).toHaveBeenCalledWith(
-          expectNamespaceInDescriptor ? ENCRYPTED_TYPE : MULTI_NAMESPACE_ENCRYPTED_TYPE
-        );
-        expect(encryptionExtMock.encryptAttributes).toHaveBeenCalledTimes(1);
-        expect(encryptionExtMock.encryptAttributes).toHaveBeenCalledWith(
-          {
-            id: encryptedSO.id,
-            namespace: expectNamespaceInDescriptor ? namespace : undefined,
-            type: expectNamespaceInDescriptor ? ENCRYPTED_TYPE : MULTI_NAMESPACE_ENCRYPTED_TYPE,
-          },
-          encryptedSO.attributes
-        );
-      };
-
-      it('uses `namespace` to encrypt attributes if it is specified when type is single-namespace', async () => {
-        await doTest('some-namespace', true);
-      });
-
-      it('does not use `namespace` to encrypt attributes if it is specified when type is not single-namespace', async () => {
-        // mockBaseTypeRegistry.isSingleNamespace.mockReturnValue(false);
-        await doTest('some-namespace', false);
-      });
-    });
   });
 
-  describe('#bulkGet with encryption extension', () => {
-    beforeEach(() => {
-      savedObjectsRepository = instantiateRepository(); // #ToDo: pass in parameters to determine which extensions should be active in this suite
-    });
+  describe('#bulkGet', () => {
+    // beforeEach(() => {
+    //   savedObjectsRepository = instantiateRepository(); // #ToDo: pass in parameters to determine which extensions should be active in this suite
+    // });
 
     const bulkGet = async (
       objects: SavedObjectsBulkGetObject[],
@@ -938,10 +796,10 @@ describe('SavedObjectsRepositoryExtensions', () => {
     });
   });
 
-  describe('#bulkCreate with ecryption extension', () => {
-    beforeEach(() => {
-      savedObjectsRepository = instantiateRepository(); // #ToDo: pass in parameters to determine which extensions should be active in this suite
-    });
+  describe('#bulkCreate', () => {
+    // beforeEach(() => {
+    //   savedObjectsRepository = instantiateRepository(); // #ToDo: pass in parameters to determine which extensions should be active in this suite
+    // });
 
     const getMockBulkCreateResponse = (
       objects: SavedObjectsBulkCreateObject[],
@@ -1044,21 +902,138 @@ describe('SavedObjectsRepositoryExtensions', () => {
 
       const { result } = await bulkCreateSuccess([{ ...encryptedSO, version: mockVersion }], {
         overwrite: true,
-        version: mockVersion, // this doesn't work in bulk...looks like it checks the object itself?
+        // version: mockVersion, // this doesn't work in bulk...looks like it checks the object itself?
       });
       expect(client.bulk).toHaveBeenCalledTimes(1);
       expect(result.saved_objects).not.toBeUndefined();
       expect(result.saved_objects.length).toBe(1);
       expect(result.saved_objects[0].error).toBeUndefined();
     });
-
-    it.todo(`namespace - see create`);
   });
 
-  describe('#find with encryption extension', () => {
-    beforeEach(() => {
-      savedObjectsRepository = instantiateRepository(); // #ToDo: pass in parameters to determine which extensions should be active in this suite
+  describe('#bulkUpdate', () => {
+    // beforeEach(() => {
+    //   savedObjectsRepository = instantiateRepository(); // #ToDo: pass in parameters to determine which extensions should be active in this suite
+    // });
+
+    const originId = 'some-origin-id';
+
+    const getMockBulkUpdateResponse = (
+      objects: TypeIdTuple[],
+      options?: SavedObjectsBulkUpdateOptions,
+      includeOriginId?: boolean
+    ) =>
+    ({
+      items: objects.map(({ type, id }) => ({
+        update: {
+          _id: `${registry.isSingleNamespace(type) && options?.namespace ? `${options?.namespace}:` : ''
+            }${type}:${id}`,
+          ...mockVersionProps,
+          get: {
+            _source: {
+              // "includeOriginId" is not an option for the operation; however, if the existing saved object contains an originId attribute, the
+              // operation will return it in the result. This flag is just used for test purposes to modify the mock cluster call response.
+              ...(includeOriginId && { originId }),
+            },
+          },
+          result: 'updated',
+        },
+      })),
+    } as estypes.BulkResponse);
+
+    const bulkUpdateSuccess = async (
+      objects: SavedObjectsBulkUpdateObject[],
+      options?: SavedObjectsBulkUpdateOptions,
+      includeOriginId?: boolean
+    ) => {
+      const multiNamespaceObjects = objects.filter(({ type }) => registry.isMultiNamespace(type));
+      if (multiNamespaceObjects?.length) {
+        const response = getMockMgetResponse(multiNamespaceObjects, options?.namespace);
+        client.mget.mockResponseOnce(response);
+      }
+      const response = getMockBulkUpdateResponse(objects, options, includeOriginId);
+      client.bulk.mockResponseOnce(response);
+      const result = await savedObjectsRepository.bulkUpdate(objects, options);
+      expect(client.mget).toHaveBeenCalledTimes(multiNamespaceObjects?.length ? 1 : 0);
+      return result;
+    };
+
+    it(`only attempts to encrypt and decrypt attributes for types that are encryptable`, async () => {
+      encryptionExtMock.isEncryptableType.mockReturnValueOnce(false); // optionallyEncryptAttributes
+      encryptionExtMock.isEncryptableType.mockReturnValueOnce(true);
+      encryptionExtMock.isEncryptableType.mockReturnValueOnce(false); // optionallyDecryptAndRedactSingleResult
+      encryptionExtMock.isEncryptableType.mockReturnValueOnce(true);
+
+      await bulkUpdateSuccess([nonEncryptedSO, encryptedSO]);
+      expect(client.bulk).toHaveBeenCalledTimes(1);
+
+      expect(encryptionExtMock.isEncryptableType).toHaveBeenCalledTimes(4); // 2x optionallyEncryptAttributes, optionallyDecryptAndRedactSingleResult
+      expect(encryptionExtMock.isEncryptableType).toHaveBeenCalledWith(nonEncryptedSO.type);
+      expect(encryptionExtMock.isEncryptableType).toHaveBeenCalledWith(encryptedSO.type);
+      expect(encryptionExtMock.encryptAttributes).toHaveBeenCalledTimes(1);
+      expect(encryptionExtMock.encryptAttributes).toHaveBeenCalledWith(
+        expect.objectContaining({ type: encryptedSO.type }),
+        encryptedSO.attributes
+      );
+      expect(encryptionExtMock.decryptOrStripResponseAttributes).toHaveBeenCalledTimes(1);
+      expect(encryptionExtMock.decryptOrStripResponseAttributes).toHaveBeenCalledWith(
+        expect.objectContaining({ type: encryptedSO.type }),
+        encryptedSO.attributes
+      );
     });
+
+    it('does not use options `namespace` or object `namespace` to encrypt attributes if neither are specified', async () => {
+      encryptionExtMock.isEncryptableType.mockReturnValue(true);
+
+      await bulkUpdateSuccess([{ ...encryptedSO, namespace: undefined }], { namespace: undefined });
+      expect(client.bulk).toHaveBeenCalledTimes(1);
+
+      expect(encryptionExtMock.isEncryptableType).toHaveBeenCalledTimes(2); // 2x optionallyEncryptAttributes, optionallyDecryptAndRedactSingleResult
+      expect(encryptionExtMock.isEncryptableType).toHaveBeenCalledWith(encryptedSO.type);
+      expect(encryptionExtMock.encryptAttributes).toHaveBeenCalledTimes(1);
+      expect(encryptionExtMock.encryptAttributes).toHaveBeenCalledWith(
+        { id: encryptedSO.id, type: encryptedSO.type, namespace: undefined },
+        encryptedSO.attributes
+      );
+    });
+
+    it('with a single-namespace type...uses options `namespace` to encrypt attributes if it is specified and object `namespace` is not', async () => {
+      encryptionExtMock.isEncryptableType.mockReturnValue(true);
+      const usedNamespace = 'options-namespace';
+
+      await bulkUpdateSuccess([{ ...encryptedSO, namespace: undefined }], { namespace: usedNamespace });
+      expect(client.bulk).toHaveBeenCalledTimes(1);
+
+      expect(encryptionExtMock.isEncryptableType).toHaveBeenCalledTimes(2); // 2x optionallyEncryptAttributes, optionallyDecryptAndRedactSingleResult
+      expect(encryptionExtMock.isEncryptableType).toHaveBeenCalledWith(encryptedSO.type);
+      expect(encryptionExtMock.encryptAttributes).toHaveBeenCalledTimes(1);
+      expect(encryptionExtMock.encryptAttributes).toHaveBeenCalledWith(
+        { id: encryptedSO.id, type: encryptedSO.type, namespace: usedNamespace },
+        encryptedSO.attributes
+      );
+    });
+
+    it('with a single-namespace type...uses object `namespace` to encrypt attributes if it is specified', async () => {
+      encryptionExtMock.isEncryptableType.mockReturnValue(true);
+      const usedNamespace = 'object-namespace';
+
+      await bulkUpdateSuccess([{ ...encryptedSO, namespace: usedNamespace }], { namespace: undefined });
+      expect(client.bulk).toHaveBeenCalledTimes(1);
+
+      expect(encryptionExtMock.isEncryptableType).toHaveBeenCalledTimes(2); // 2x optionallyEncryptAttributes, optionallyDecryptAndRedactSingleResult
+      expect(encryptionExtMock.isEncryptableType).toHaveBeenCalledWith(encryptedSO.type);
+      expect(encryptionExtMock.encryptAttributes).toHaveBeenCalledTimes(1);
+      expect(encryptionExtMock.encryptAttributes).toHaveBeenCalledWith(
+        { id: encryptedSO.id, type: encryptedSO.type, namespace: usedNamespace },
+        encryptedSO.attributes
+      );
+    });
+  });
+
+  describe('#find', () => {
+    // beforeEach(() => {
+    //   savedObjectsRepository = instantiateRepository(); // #ToDo: pass in parameters to determine which extensions should be active in this suite
+    // });
 
     const generateSearchResults = (namespace?: string) => {
       return {
