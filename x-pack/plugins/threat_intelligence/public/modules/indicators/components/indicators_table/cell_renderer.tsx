@@ -15,10 +15,6 @@ import { IndicatorField } from '../indicator_field/indicator_field';
 import { IndicatorsTableContext } from './context';
 import { ActionsRowCell } from './actions_row_cell';
 
-export enum ComputedIndicatorFieldId {
-  DisplayName = 'threat.indicator.name',
-}
-
 export const cellRendererFactory = (from: number) => {
   return ({ rowIndex, columnId, setCellProps }: EuiDataGridCellValueElementProps) => {
     const indicatorsTableContext = useContext(IndicatorsTableContext);

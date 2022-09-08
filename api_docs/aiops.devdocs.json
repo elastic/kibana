@@ -19,6 +19,7 @@
         ],
         "path": "x-pack/plugins/aiops/public/shared_lazy_components.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "aiops",
@@ -36,6 +37,7 @@
             ],
             "path": "x-pack/plugins/aiops/public/shared_lazy_components.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -61,6 +63,7 @@
       ],
       "path": "x-pack/plugins/aiops/public/types.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "lifecycle": "start",
       "initialIsOpen": true
     }
@@ -83,6 +86,7 @@
       ],
       "path": "x-pack/plugins/aiops/server/types.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [],
       "lifecycle": "setup",
       "initialIsOpen": true
@@ -98,6 +102,7 @@
       ],
       "path": "x-pack/plugins/aiops/server/types.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [],
       "lifecycle": "start",
       "initialIsOpen": true
@@ -123,6 +128,7 @@
         ],
         "path": "x-pack/plugins/aiops/common/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -139,6 +145,7 @@
         ],
         "path": "x-pack/plugins/aiops/common/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -155,6 +162,7 @@
         ],
         "path": "x-pack/plugins/aiops/common/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],

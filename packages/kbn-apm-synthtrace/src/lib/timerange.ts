@@ -14,6 +14,22 @@ export class Timerange {
   interval(interval: string) {
     return new Interval({ from: this.from, to: this.to, interval });
   }
+
+  ratePerMinute(rateInTpm: number) {
+    const intervalPerSecond = Math.max(1, 60 / rateInTpm);
+
+    // rate per second
+    let interval = `${intervalPerSecond}s`;
+    let rate = (rateInTpm / 60) * intervalPerSecond;
+
+    // rate per minute
+    if (!Number.isInteger(rate) || !Number.isInteger(intervalPerSecond)) {
+      interval = '1m';
+      rate = rate * 60;
+    }
+
+    return new Interval({ from: this.from, to: this.to, interval, yieldRate: rate });
+  }
 }
 
 export function timerange(from: Date | number, to: Date | number) {

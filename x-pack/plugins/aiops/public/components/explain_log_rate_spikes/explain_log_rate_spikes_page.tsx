@@ -12,9 +12,9 @@ import {
   EuiFlexItem,
   EuiHorizontalRule,
   EuiPageBody,
-  EuiPageContentBody,
-  EuiPageContentHeader,
-  EuiPageContentHeaderSection,
+  EuiPageContentBody_Deprecated as EuiPageContentBody,
+  EuiPageContentHeader_Deprecated as EuiPageContentHeader,
+  EuiPageContentHeaderSection_Deprecated as EuiPageContentHeaderSection,
   EuiPanel,
   EuiTitle,
 } from '@elastic/eui';

@@ -36,6 +36,7 @@ export const MultiMetricDetectors: FC<Props> = ({ setIsValid }) => {
 
   const fields = useMemo(
     () => sortFields([...newJobCapsService.fields, ...jobCreator.runtimeFields]),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
   const [selectedOptions, setSelectedOptions] = useState<DropDownProps>([]);
@@ -87,6 +88,7 @@ export const MultiMetricDetectors: FC<Props> = ({ setIsValid }) => {
     jobCreatorUpdate();
     loadCharts();
     setIsValid(aggFieldPairList.length > 0);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [aggFieldPairList.length]);
 
   // watch for change in jobCreator
@@ -103,6 +105,7 @@ export const MultiMetricDetectors: FC<Props> = ({ setIsValid }) => {
     }
 
     setSplitField(jobCreator.splitField);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobCreatorUpdated]);
 
   // watch for changes in split field.
@@ -123,12 +126,14 @@ export const MultiMetricDetectors: FC<Props> = ({ setIsValid }) => {
     } else {
       setFieldValues([]);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [splitField]);
 
   // watch for changes in the split field values
   // reload the charts
   useEffect(() => {
     loadCharts();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fieldValues]);
 
   async function loadCharts() {
