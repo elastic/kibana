@@ -227,7 +227,7 @@ export class SavedSearchEmbeddable
           this.services.dataViews,
           this.services.data,
           this.services.expressions,
-          !dataView?.isPersisted() ? dataView : undefined,
+          dataView && !dataView.isPersisted() ? [dataView] : [],
           this.input.filters,
           this.input.query
         );
