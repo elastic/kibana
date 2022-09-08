@@ -7,51 +7,60 @@
 
 import { Logger } from '@kbn/core/server';
 import { PluginSetupContract as ActionsPluginSetupContract } from '@kbn/actions-plugin/server';
-import { getConnectorType as getEmailConnectorType } from './email';
-import { getConnectorType as getIndexConnectorType } from './es_index';
-import { getConnectorType as getPagerDutyConnectorType } from './pagerduty';
-import { getConnectorType as getSwimlaneConnectorType } from './swimlane';
-import { getConnectorType as getServerLogConnectorType } from './server_log';
-import { getConnectorType as getSlackConnectorType } from './slack';
-import { getConnectorType as getWebhookConnectorType } from './webhook';
-import { getConnectorType as getCasesWebhookConnectorType } from './cases_webhook';
-import { getConnectorType as getXmattersConnectorType } from './xmatters';
 import {
+  getEmailConnectorType,
+  getIndexConnectorType,
+  getPagerDutyConnectorType,
+  getServerLogConnectorType,
+  getSlackConnectorType,
+  getTeamsConnectorType,
+  getWebhookConnectorType,
+} from './stack';
+import {
+  getCasesWebhookConnectorType,
+  getJiraConnectorType,
+  getResilientConnectorType,
+  getServiceNowITOMConnectorType,
   getServiceNowITSMConnectorType,
   getServiceNowSIRConnectorType,
-  getServiceNowITOMConnectorType,
-} from './servicenow';
-import { getConnectorType as getJiraConnectorType } from './jira';
-import { getConnectorType as getResilientConnectorType } from './resilient';
-import { getConnectorType as getTeamsConnectorType } from './teams';
-export type { ActionParamsType as EmailActionParams } from './email';
-export { ConnectorTypeId as EmailConnectorTypeId } from './email';
-export type { ActionParamsType as IndexActionParams } from './es_index';
-export { ConnectorTypeId as IndexConnectorTypeId } from './es_index';
-export type { ActionParamsType as PagerDutyActionParams } from './pagerduty';
-export { ConnectorTypeId as PagerDutyConnectorTypeId } from './pagerduty';
-export type { ActionParamsType as ServerLogActionParams } from './server_log';
-export { ConnectorTypeId as ServerLogConnectorTypeId } from './server_log';
-export type { ActionParamsType as SlackActionParams } from './slack';
-export { ConnectorTypeId as SlackConnectorTypeId } from './slack';
-export type { ActionParamsType as WebhookActionParams } from './webhook';
-export type { ActionParamsType as CasesWebhookActionParams } from './cases_webhook';
-export { ConnectorTypeId as CasesWebhookConnectorTypeId } from './cases_webhook';
-export { ConnectorTypeId as WebhookConnectorTypeId } from './webhook';
-export type { ActionParamsType as XmattersActionParams } from './xmatters';
-export { ConnectorTypeId as XmattersConnectorTypeId } from './xmatters';
-export type { ActionParamsType as ServiceNowActionParams } from './servicenow';
+  getSwimlaneConnectorType,
+  getXmattersConnectorType,
+} from './cases';
+
+export type {
+  EmailActionParams,
+  IndexActionParams,
+  PagerDutyActionParams,
+  ServerLogActionParams,
+  SlackActionParams,
+  TeamsActionParams,
+  WebhookActionParams,
+} from './stack';
 export {
+  EmailConnectorTypeId,
+  IndexConnectorTypeId,
+  PagerDutyConnectorTypeId,
+  ServerLogConnectorTypeId,
+  SlackConnectorTypeId,
+  TeamsConnectorTypeId,
+  WebhookConnectorTypeId,
+} from './stack';
+export type {
+  CasesWebhookActionParams,
+  JiraActionParams,
+  ResilientActionParams,
+  ServiceNowActionParams,
+  XmattersActionParams,
+} from './cases';
+export {
+  CasesWebhookConnectorTypeId,
+  JiraConnectorTypeId,
+  ResilientConnectorTypeId,
+  ServiceNowITOMConnectorTypeId,
   ServiceNowITSMConnectorTypeId,
   ServiceNowSIRConnectorTypeId,
-  ServiceNowITOMConnectorTypeId,
-} from './servicenow';
-export type { ActionParamsType as JiraActionParams } from './jira';
-export { ConnectorTypeId as JiraConnectorTypeId } from './jira';
-export type { ActionParamsType as ResilientActionParams } from './resilient';
-export { ConnectorTypeId as ResilientConnectorTypeId } from './resilient';
-export type { ActionParamsType as TeamsActionParams } from './teams';
-export { ConnectorTypeId as TeamsConnectorTypeId } from './teams';
+  XmattersConnectorTypeId,
+} from './cases';
 
 export function registerConnectorTypes({
   actions,

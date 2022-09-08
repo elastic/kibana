@@ -43,7 +43,7 @@ export async function getChoices({
 
 /**
  * The app info url should be the same as at:
- * x-pack/plugins/stack_connectors/server/connector_types/servicenow/service.ts
+ * x-pack/plugins/stack_connectors/server/connector_types/cases/servicenow/service.ts
  */
 const getAppInfoUrl = (url: string, scope: string) => `${url}/api/${scope}/elastic_api/health`;
 

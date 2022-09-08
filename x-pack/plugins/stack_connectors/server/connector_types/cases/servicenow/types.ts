@@ -27,9 +27,9 @@ import {
   ExecutorSubActionAddEventParamsSchema,
   ExternalIncidentServiceConfigurationBaseSchema,
 } from './schema';
-import { SNProductsConfigValue } from '../../../common/servicenow_config';
+import { SNProductsConfigValue } from '../../../../common/servicenow_config';
 
-export type { SNProductsConfigValue, SNProductsConfig } from '../../../common/servicenow_config';
+export type { SNProductsConfigValue, SNProductsConfig } from '../../../../common/servicenow_config';
 
 export type ServiceNowPublicConfigurationBaseType = TypeOf<
   typeof ExternalIncidentServiceConfigurationBaseSchema

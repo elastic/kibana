@@ -19,7 +19,7 @@ import {
   AlertingConnectorFeatureId,
   UptimeConnectorFeatureId,
 } from '@kbn/actions-plugin/common/connector_feature_config';
-import { withoutControlCharacters } from '../lib/string_utils';
+import { withoutControlCharacters } from '../../lib/string_utils';
 
 export type ServerLogConnectorType = ConnectorType<{}, {}, ActionParamsType>;
 export type ServerLogConnectorTypeExecutorOptions = ConnectorTypeExecutorOptions<

@@ -8,7 +8,7 @@
 import type {
   ExecutorSubActionPushParams,
   MappingConfigType,
-} from '@kbn/stack-connectors-plugin/server/connector_types/swimlane/types';
+} from '@kbn/stack-connectors-plugin/server/connector_types/cases/swimlane/types';
 import { UserConfiguredActionConnector } from '../../../../types';
 
 export type SwimlaneActionConnector = UserConfiguredActionConnector<

@@ -27,9 +27,9 @@ import {
   renderMustacheObject,
   renderMustacheString,
 } from '@kbn/actions-plugin/server/lib/mustache_renderer';
-import { AdditionalEmailServices } from '../../../common';
+import { AdditionalEmailServices } from '../../../../common';
 import { sendEmail, JSON_TRANSPORT_SERVICE, SendEmailOptions, Transport } from './send_email';
-import { portSchema } from '../lib/schemas';
+import { portSchema } from '../../lib/schemas';
 
 export type EmailConnectorType = ConnectorType<
   ConnectorTypeConfigType,

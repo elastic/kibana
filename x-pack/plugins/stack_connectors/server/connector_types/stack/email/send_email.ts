@@ -19,7 +19,7 @@ import {
 } from '@kbn/actions-plugin/server/lib/get_node_ssl_options';
 import { ConnectorTokenClientContract, ProxySettings } from '@kbn/actions-plugin/server/types';
 import { getOAuthClientCredentialsAccessToken } from '@kbn/actions-plugin/server/lib/get_oauth_client_credentials_access_token';
-import { AdditionalEmailServices } from '../../../common';
+import { AdditionalEmailServices } from '../../../../common';
 import { sendEmailGraphApi } from './send_email_graph_api';
 
 // an email "service" which doesn't actually send, just returns what it would send
