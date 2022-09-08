@@ -38,11 +38,11 @@ export function isConnectorIndex(
 
 export function isConnectorCrawlerIndex(
   index: ElasticsearchIndexWithIngestion | undefined
-): index is ConnectorIndex {
-  const connectorIndex = index as ConnectorIndex;
+): index is CrawlerIndex {
+  const crawlerIndex = index as CrawlerIndex;
   return (
-    !!connectorIndex?.connector &&
-    connectorIndex.connector.service_type === ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE
+    !!crawlerIndex?.connector &&
+    crawlerIndex.connector.service_type === ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE
   );
 }
 
