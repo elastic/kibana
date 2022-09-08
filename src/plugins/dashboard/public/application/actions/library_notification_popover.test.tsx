@@ -15,8 +15,6 @@ import {
   LibraryNotificationPopover,
   LibraryNotificationProps,
 } from './library_notification_popover';
-import { CoreStart } from '@kbn/core/public';
-import { coreMock } from '@kbn/core/public/mocks';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { EuiPopover } from '@elastic/eui';
 import { isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
@@ -37,11 +35,8 @@ describe('LibraryNotificationPopover', () => {
 
   let container: DashboardContainer;
   let defaultProps: LibraryNotificationProps;
-  let coreStart: CoreStart;
 
   beforeEach(async () => {
-    coreStart = coreMock.createStart();
-
     container = new DashboardContainer(getSampleDashboardInput());
     const contactCardEmbeddable = await container.addNewEmbeddable<
       ContactCardEmbeddableInput,

@@ -12,7 +12,6 @@ import React from 'react';
 import { skip } from 'rxjs/operators';
 
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
 import { DashboardGrid, DashboardGridProps } from './dashboard_grid';
 import { DashboardContainer } from '../dashboard_container';
@@ -49,13 +48,11 @@ function prepare(props?: Partial<DashboardGridProps>) {
   dashboardContainer = new DashboardContainer(initialInput);
   const defaultTestProps: DashboardGridProps = {
     container: dashboardContainer,
-    kibana: null as any,
     intl: null as any,
   };
 
   return {
     props: Object.assign(defaultTestProps, props),
-    options,
   };
 }
 
@@ -71,14 +68,12 @@ afterAll(() => {
 
 // unhandled promise rejection: https://github.com/elastic/kibana/issues/112699
 test.skip('renders DashboardGrid', () => {
-  const { props, options } = prepare();
+  const { props } = prepare();
 
   const component = mountWithIntl(
-    <KibanaContextProvider services={options}>
-      <DashboardServicesProvider>
-        <DashboardGrid {...props} />
-      </DashboardServicesProvider>
-    </KibanaContextProvider>
+    <DashboardServicesProvider>
+      <DashboardGrid {...props} />
+    </DashboardServicesProvider>
   );
   const panelElements = component.find('EmbeddableChildPanel');
   expect(panelElements.length).toBe(2);
@@ -86,13 +81,11 @@ test.skip('renders DashboardGrid', () => {
 
 // unhandled promise rejection: https://github.com/elastic/kibana/issues/112699
 test.skip('renders DashboardGrid with no visualizations', () => {
-  const { props, options } = prepare();
+  const { props } = prepare();
   const component = mountWithIntl(
-    <KibanaContextProvider services={options}>
-      <DashboardServicesProvider>
-        <DashboardGrid {...props} />
-      </DashboardServicesProvider>
-    </KibanaContextProvider>
+    <DashboardServicesProvider>
+      <DashboardGrid {...props} />
+    </DashboardServicesProvider>
   );
 
   props.container.updateInput({ panels: {} });
@@ -102,13 +95,11 @@ test.skip('renders DashboardGrid with no visualizations', () => {
 
 // unhandled promise rejection: https://github.com/elastic/kibana/issues/112699
 test.skip('DashboardGrid removes panel when removed from container', () => {
-  const { props, options } = prepare();
+  const { props } = prepare();
   const component = mountWithIntl(
-    <KibanaContextProvider services={options}>
-      <DashboardServicesProvider>
-        <DashboardGrid {...props} />{' '}
-      </DashboardServicesProvider>
-    </KibanaContextProvider>
+    <DashboardServicesProvider>
+      <DashboardGrid {...props} />{' '}
+    </DashboardServicesProvider>
   );
 
   const originalPanels = props.container.getInput().panels;
@@ -122,13 +113,11 @@ test.skip('DashboardGrid removes panel when removed from container', () => {
 
 // unhandled promise rejection: https://github.com/elastic/kibana/issues/112699
 test.skip('DashboardGrid renders expanded panel', () => {
-  const { props, options } = prepare();
+  const { props } = prepare();
   const component = mountWithIntl(
-    <KibanaContextProvider services={options}>
-      <DashboardServicesProvider>
-        <DashboardGrid {...props} />
-      </DashboardServicesProvider>
-    </KibanaContextProvider>
+    <DashboardServicesProvider>
+      <DashboardGrid {...props} />
+    </DashboardServicesProvider>
   );
 
   props.container.updateInput({ expandedPanelId: '1' });
@@ -151,13 +140,11 @@ test.skip('DashboardGrid renders expanded panel', () => {
 
 // unhandled promise rejection: https://github.com/elastic/kibana/issues/112699
 test.skip('DashboardGrid unmount unsubscribes', async (done) => {
-  const { props, options } = prepare();
+  const { props } = prepare();
   const component = mountWithIntl(
-    <KibanaContextProvider services={options}>
-      <DashboardServicesProvider>
-        <DashboardGrid {...props} />
-      </DashboardServicesProvider>
-    </KibanaContextProvider>
+    <DashboardServicesProvider>
+      <DashboardGrid {...props} />
+    </DashboardServicesProvider>
   );
 
   component.unmount();

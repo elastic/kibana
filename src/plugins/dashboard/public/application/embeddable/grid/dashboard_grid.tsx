@@ -16,14 +16,9 @@ import 'react-grid-layout/css/styles.css';
 import ReactGridLayout, { Layout, ReactGridLayoutProps } from 'react-grid-layout';
 
 import { injectI18n } from '@kbn/i18n-react';
-import { withKibana } from '@kbn/kibana-react-plugin/public';
 import { ViewMode, EmbeddablePhaseEvent } from '@kbn/embeddable-plugin/public';
 
-import {
-  DashboardContainer,
-  DashboardReactContextValue,
-  DashboardLoadedInfo,
-} from '../dashboard_container';
+import { DashboardContainer, DashboardLoadedInfo } from '../dashboard_container';
 import { GridData } from '../../../../common';
 import { DashboardGridItem } from './dashboard_grid_item';
 import { DashboardLoadedEventStatus, DashboardPanelState } from '../types';
@@ -108,7 +103,6 @@ const config = { monitorWidth: true };
 const ResponsiveSizedGrid = sizeMe(config)(ResponsiveGrid);
 
 export interface DashboardGridProps extends ReactIntl.InjectedIntlProps {
-  kibana: DashboardReactContextValue;
   container: DashboardContainer;
   onDataLoaded?: (data: DashboardLoadedInfo) => void;
 }
@@ -317,4 +311,4 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
   }
 }
 
-export const DashboardGrid = injectI18n(withKibana(DashboardGridUi));
+export const DashboardGrid = injectI18n(DashboardGridUi);
