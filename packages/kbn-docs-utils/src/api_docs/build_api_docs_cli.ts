@@ -25,7 +25,7 @@ import { writeDeprecationDocByApi } from './mdx/write_deprecations_doc_by_api';
 import { writeDeprecationDocByPlugin } from './mdx/write_deprecations_doc_by_plugin';
 import { writePluginDirectoryDoc } from './mdx/write_plugin_directory_doc';
 import { collectApiStatsForPlugin } from './stats';
-import { countEslintDisableLine, EslintDisableCounts } from './count_eslint_disable';
+import { countEslintDisableLines, EslintDisableCounts } from './count_eslint_disable';
 import { writeDeprecationDueByTeam } from './mdx/write_deprecations_due_by_team';
 import { trimDeletedDocsFromNav } from './trim_deleted_docs_from_nav';
 import { getAllDocFileIds } from './mdx/get_all_doc_file_ids';
@@ -37,6 +37,7 @@ function isStringArray(arr: unknown | string[]): arr is string[] {
 export function runBuildApiDocsCli() {
   run(
     async ({ log, flags }) => {
+      const collectReferences = flags.references as boolean;
       const stats = flags.stats && typeof flags.stats === 'string' ? [flags.stats] : flags.stats;
       const pluginFilter =
         flags.plugin && typeof flags.plugin === 'string' ? [flags.plugin] : flags.plugin;
@@ -77,13 +78,16 @@ export function runBuildApiDocsCli() {
         await Fsp.mkdir(outputFolder, { recursive: true });
       }
 
-      const collectReferences = flags.references as boolean;
-
-      const { pluginApiMap, missingApiItems, unreferencedDeprecations, referencedDeprecations } =
-        getPluginApiMap(project, plugins, log, {
-          collectReferences,
-          pluginFilter: pluginFilter as string[],
-        });
+      const {
+        pluginApiMap,
+        missingApiItems,
+        unreferencedDeprecations,
+        referencedDeprecations,
+        adoptionTrackedAPIs,
+      } = getPluginApiMap(project, plugins, log, {
+        collectReferences,
+        pluginFilter: pluginFilter as string[],
+      });
 
       const reporter = CiStatsReporter.fromEnv(log);
 
@@ -93,17 +97,22 @@ export function runBuildApiDocsCli() {
         const pluginApi = pluginApiMap[id];
 
         allPluginStats[id] = {
-          ...(await countEslintDisableLine(plugin.directory)),
-          ...collectApiStatsForPlugin(pluginApi, missingApiItems, referencedDeprecations),
+          ...(await countEslintDisableLines(plugin.directory)),
+          ...collectApiStatsForPlugin(
+            pluginApi,
+            missingApiItems,
+            referencedDeprecations,
+            adoptionTrackedAPIs
+          ),
           owner: plugin.manifest.owner,
           description: plugin.manifest.description,
           isPlugin: plugin.isPlugin,
         };
       }
 
-      writePluginDirectoryDoc(outputFolder, pluginApiMap, allPluginStats, log);
+      await writePluginDirectoryDoc(outputFolder, pluginApiMap, allPluginStats, log);
 
-      plugins.forEach((plugin) => {
+      for (const plugin of plugins) {
         // Note that the filtering is done here, and not above because the entire public plugin API has to
         // be parsed in order to correctly determine reference links, and ensure that `removeBrokenLinks`
         // doesn't remove more links than necessary.
@@ -155,6 +164,29 @@ export function runBuildApiDocsCli() {
           },
           {
             id,
+            meta: {
+              pluginTeam,
+              // `meta` only allows primitives or string[]
+              // Also, each string is allowed to have a max length of 2056,
+              // so it's safer to stringify each element in the array over sending the entire array as stringified.
+              // My internal tests with 4 plugins using the same API gets to a length of 156 chars,
+              // so we should have enough room for tracking popular APIs.
+              // TODO: We can do a follow-up improvement to split the report if we find out we might hit the limit.
+              adoptionTrackedAPIs: pluginStats.adoptionTrackedAPIs.map((metric) =>
+                JSON.stringify(metric)
+              ),
+            },
+            group: 'Adoption-tracked APIs',
+            value: pluginStats.adoptionTrackedAPIsCount,
+          },
+          {
+            id,
+            meta: { pluginTeam },
+            group: 'Adoption-tracked APIs that are not used anywhere',
+            value: pluginStats.adoptionTrackedAPIsUnreferencedCount,
+          },
+          {
+            id,
             meta: { pluginTeam },
             group: 'ESLint disabled line counts',
             value: pluginStats.eslintDisableLineCount,
@@ -174,7 +206,7 @@ export function runBuildApiDocsCli() {
         ]);
 
         const getLink = (d: ApiDeclaration) =>
-          `https://github.com/elastic/kibana/tree/master/${d.path}#:~:text=${encodeURIComponent(
+          `https://github.com/elastic/kibana/tree/main/${d.path}#:~:text=${encodeURIComponent(
             d.label
           )}`;
 
@@ -251,19 +283,19 @@ export function runBuildApiDocsCli() {
 
         if (pluginStats.apiCount > 0) {
           log.info(`Writing public API doc for plugin ${pluginApi.id}.`);
-          writePluginDocs(outputFolder, { doc: pluginApi, plugin, pluginStats, log });
+          await writePluginDocs(outputFolder, { doc: pluginApi, plugin, pluginStats, log });
         } else {
           log.info(`Plugin ${pluginApi.id} has no public API.`);
         }
-        writeDeprecationDocByPlugin(outputFolder, referencedDeprecations, log);
-        writeDeprecationDueByTeam(outputFolder, referencedDeprecations, plugins, log);
-        writeDeprecationDocByApi(
+        await writeDeprecationDocByPlugin(outputFolder, referencedDeprecations, log);
+        await writeDeprecationDueByTeam(outputFolder, referencedDeprecations, plugins, log);
+        await writeDeprecationDocByApi(
           outputFolder,
           referencedDeprecations,
           unreferencedDeprecations,
           log
         );
-      });
+      }
 
       if (Object.values(pathsOutsideScopes).length > 0) {
         log.warning(`Found paths outside of normal scope folders:`);

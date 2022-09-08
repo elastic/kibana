@@ -11,7 +11,7 @@ import { ScopedHistory, ApplicationStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { EuiEmptyPrompt, EuiPageContent } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiPageContent_Deprecated as EuiPageContent } from '@elastic/eui';
 
 import { getFatalErrors } from './services/notifications';
 import { routing } from './services/routing';

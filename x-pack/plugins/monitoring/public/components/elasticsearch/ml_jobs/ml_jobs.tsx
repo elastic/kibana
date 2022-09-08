@@ -11,7 +11,7 @@ import React from 'react';
 import {
   EuiLink,
   EuiPage,
-  EuiPageContent,
+  EuiPageContent_Deprecated as EuiPageContent,
   EuiPageBody,
   EuiPanel,
   EuiSpacer,
