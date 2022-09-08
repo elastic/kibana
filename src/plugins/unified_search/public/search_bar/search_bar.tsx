@@ -96,7 +96,6 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
   // defines size of suggestions query popover
   suggestionsSize?: SuggestionsListSize;
   isScreenshotMode?: boolean;
-  isDisabled?: boolean;
 }
 
 export type SearchBarProps<QT extends Query | AggregateQuery = Query> = SearchBarOwnProps<QT> &
@@ -471,10 +470,7 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
         showQueryInput={this.props.showQueryInput}
         showFilterBar={this.props.showFilterBar}
         showSaveQuery={this.props.showSaveQuery}
-        buttonProps={{
-          size: this.shouldShowDatePickerAsBadge() ? 's' : 'm',
-          isDisabled: this.props.isDisabled,
-        }}
+        buttonProps={{ size: this.shouldShowDatePickerAsBadge() ? 's' : 'm' }}
         indexPatterns={this.props.indexPatterns}
         timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
         manageFilterSetComponent={
@@ -508,7 +504,6 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
           timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
           hiddenPanelOptions={this.props.hiddenFilterPanelOptions}
           data-test-subj="unifiedFilterBar"
-          readOnly={this.props.isDisabled}
         />
       );
     }
@@ -558,7 +553,6 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
           isScreenshotMode={this.props.isScreenshotMode}
           onTextLangQuerySubmit={this.onTextLangQuerySubmit}
           onTextLangQueryChange={this.onTextLangQueryChange}
-          isDisabled={this.props.isDisabled}
         />
       </div>
     );
