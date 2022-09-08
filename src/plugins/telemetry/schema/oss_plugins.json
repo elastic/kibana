@@ -1,5 +1,80 @@
 {
   "properties": {
+    "index-patterns": {
+      "properties": {
+        "indexPatternsCount": {
+          "type": "long"
+        },
+        "indexPatternsWithScriptedFieldCount": {
+          "type": "long"
+        },
+        "indexPatternsWithRuntimeFieldCount": {
+          "type": "long"
+        },
+        "scriptedFieldCount": {
+          "type": "long"
+        },
+        "runtimeFieldCount": {
+          "type": "long"
+        },
+        "perIndexPattern": {
+          "properties": {
+            "scriptedFieldCount": {
+              "properties": {
+                "min": {
+                  "type": "long"
+                },
+                "max": {
+                  "type": "long"
+                },
+                "avg": {
+                  "type": "float"
+                }
+              }
+            },
+            "runtimeFieldCount": {
+              "properties": {
+                "min": {
+                  "type": "long"
+                },
+                "max": {
+                  "type": "long"
+                },
+                "avg": {
+                  "type": "float"
+                }
+              }
+            },
+            "scriptedFieldLineCount": {
+              "properties": {
+                "min": {
+                  "type": "long"
+                },
+                "max": {
+                  "type": "long"
+                },
+                "avg": {
+                  "type": "float"
+                }
+              }
+            },
+            "runtimeFieldLineCount": {
+              "properties": {
+                "min": {
+                  "type": "long"
+                },
+                "max": {
+                  "type": "long"
+                },
+                "avg": {
+                  "type": "float"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "dashboard": {
       "properties": {
         "panels": {
@@ -114,81 +189,6 @@
         }
       }
     },
-    "index-patterns": {
-      "properties": {
-        "indexPatternsCount": {
-          "type": "long"
-        },
-        "indexPatternsWithScriptedFieldCount": {
-          "type": "long"
-        },
-        "indexPatternsWithRuntimeFieldCount": {
-          "type": "long"
-        },
-        "scriptedFieldCount": {
-          "type": "long"
-        },
-        "runtimeFieldCount": {
-          "type": "long"
-        },
-        "perIndexPattern": {
-          "properties": {
-            "scriptedFieldCount": {
-              "properties": {
-                "min": {
-                  "type": "long"
-                },
-                "max": {
-                  "type": "long"
-                },
-                "avg": {
-                  "type": "float"
-                }
-              }
-            },
-            "runtimeFieldCount": {
-              "properties": {
-                "min": {
-                  "type": "long"
-                },
-                "max": {
-                  "type": "long"
-                },
-                "avg": {
-                  "type": "float"
-                }
-              }
-            },
-            "scriptedFieldLineCount": {
-              "properties": {
-                "min": {
-                  "type": "long"
-                },
-                "max": {
-                  "type": "long"
-                },
-                "avg": {
-                  "type": "float"
-                }
-              }
-            },
-            "runtimeFieldLineCount": {
-              "properties": {
-                "min": {
-                  "type": "long"
-                },
-                "max": {
-                  "type": "long"
-                },
-                "avg": {
-                  "type": "float"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "kql": {
       "properties": {
         "optInCount": {
@@ -199,60 +199,6 @@
         },
         "defaultQueryLanguage": {
           "type": "keyword"
-        }
-      }
-    },
-    "search-session": {
-      "properties": {
-        "transientCount": {
-          "type": "long"
-        },
-        "persistedCount": {
-          "type": "long"
-        },
-        "totalCount": {
-          "type": "long"
-        }
-      }
-    },
-    "search": {
-      "properties": {
-        "successCount": {
-          "type": "long"
-        },
-        "errorCount": {
-          "type": "long"
-        },
-        "averageDuration": {
-          "type": "float"
-        }
-      }
-    },
-    "sample-data": {
-      "properties": {
-        "installed": {
-          "type": "array",
-          "items": {
-            "type": "keyword"
-          }
-        },
-        "last_install_date": {
-          "type": "date"
-        },
-        "last_install_set": {
-          "type": "keyword"
-        },
-        "last_uninstall_date": {
-          "type": "date"
-        },
-        "last_uninstall_set": {
-          "type": "keyword"
-        },
-        "uninstalled": {
-          "type": "array",
-          "items": {
-            "type": "keyword"
-          }
         }
       }
     },
@@ -10115,6 +10061,60 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "search": {
+      "properties": {
+        "successCount": {
+          "type": "long"
+        },
+        "errorCount": {
+          "type": "long"
+        },
+        "averageDuration": {
+          "type": "float"
+        }
+      }
+    },
+    "search-session": {
+      "properties": {
+        "transientCount": {
+          "type": "long"
+        },
+        "persistedCount": {
+          "type": "long"
+        },
+        "totalCount": {
+          "type": "long"
+        }
+      }
+    },
+    "sample-data": {
+      "properties": {
+        "installed": {
+          "type": "array",
+          "items": {
+            "type": "keyword"
+          }
+        },
+        "last_install_date": {
+          "type": "date"
+        },
+        "last_install_set": {
+          "type": "keyword"
+        },
+        "last_uninstall_date": {
+          "type": "date"
+        },
+        "last_uninstall_set": {
+          "type": "keyword"
+        },
+        "uninstalled": {
+          "type": "array",
+          "items": {
+            "type": "keyword"
           }
         }
       }

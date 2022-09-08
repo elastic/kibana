@@ -5,8 +5,4 @@
  * 2.0.
  */
 
-import { fileObjectType } from './file';
-import { fileShareObjectType } from './file_share';
-
-export const hiddenTypes = [fileObjectType.name, fileShareObjectType.name];
-export { fileObjectType, fileShareObjectType };
+export { registerUsageCollector } from './register_usage_collector';
