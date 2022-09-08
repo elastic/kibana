@@ -363,7 +363,6 @@ export class TaskRunner<
             enabled,
             schedule,
             actions,
-            // responseActions,
             createdBy,
             updatedBy,
             createdAt,

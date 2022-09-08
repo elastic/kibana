@@ -58,18 +58,6 @@ export const alertMappings: SavedObjectsTypeMappingDefinition = {
         },
       },
     },
-    responseActions: {
-      type: 'nested',
-      properties: {
-        actionTypeId: {
-          type: 'keyword',
-        },
-        params: {
-          enabled: false,
-          type: 'object',
-        },
-      },
-    },
     params: {
       type: 'flattened',
       ignore_above: 4096,

@@ -326,7 +326,6 @@ export interface CreateOptions<Params extends RuleTypeParams> {
     | 'muteAll'
     | 'mutedInstanceIds'
     | 'actions'
-    | 'responseActions'
     | 'executionStatus'
     | 'snoozeSchedule'
     | 'isSnoozedUntil'

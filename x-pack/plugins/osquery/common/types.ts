@@ -30,17 +30,3 @@ export type RequiredKeepUndefined<T> = { [K in keyof T]-?: [T[K]] } extends infe
     ? { [K in keyof U]: U[K][0] }
     : never
   : never;
-
-export interface OsqueryActionType {
-  action_id: string;
-  '@timestamp': string;
-  expiration: string;
-  type: string;
-  input_type: string;
-  agents: string[];
-  user_id?: string;
-  data?: {
-    [key: string]: unknown;
-  };
-  [key: string]: unknown;
-}
