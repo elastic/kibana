@@ -53,7 +53,7 @@ import {
 
 jest.spyOn(CoreSystem.prototype, 'stop');
 (global.navigator as any).deviceMemory = 5;
-jest.spyOn(global.navigator as any, 'hardwareConcurrency', "get").mockReturnValue(4);
+jest.spyOn(global.navigator as any, 'hardwareConcurrency', 'get').mockReturnValue(4);
 
 const defaultCoreSystemParams = {
   rootDomElement: document.createElement('div'),
