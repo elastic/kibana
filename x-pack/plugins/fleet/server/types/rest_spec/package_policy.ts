@@ -9,6 +9,7 @@ import { schema } from '@kbn/config-schema';
 
 import {
   CreatePackagePolicyRequestBodySchema,
+  SimplifiedCreatePackagePolicyRequestBodySchema,
   UpdatePackagePolicyRequestBodySchema,
 } from '../models';
 
@@ -29,12 +30,18 @@ export const GetOnePackagePolicyRequestSchema = {
 };
 
 export const CreatePackagePolicyRequestSchema = {
-  body: CreatePackagePolicyRequestBodySchema,
+  body: schema.oneOf([
+    CreatePackagePolicyRequestBodySchema,
+    SimplifiedCreatePackagePolicyRequestBodySchema,
+  ]),
 };
 
 export const UpdatePackagePolicyRequestSchema = {
   ...GetOnePackagePolicyRequestSchema,
-  body: UpdatePackagePolicyRequestBodySchema,
+  body: schema.oneOf([
+    UpdatePackagePolicyRequestBodySchema,
+    SimplifiedCreatePackagePolicyRequestBodySchema,
+  ]),
 };
 
 export const DeletePackagePoliciesRequestSchema = {
