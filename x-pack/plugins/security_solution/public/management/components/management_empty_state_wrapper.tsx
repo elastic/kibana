@@ -6,7 +6,7 @@
  */
 
 import React, { memo } from 'react';
-import { EuiFlexGroup, EuiPageTemplate } from '@elastic/eui';
+import { EuiFlexGroup, EuiPageTemplate_Deprecated as EuiPageTemplate } from '@elastic/eui';
 import styled from 'styled-components';
 
 export const StyledEuiFlexGroup = styled(EuiFlexGroup)`
