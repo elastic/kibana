@@ -19,7 +19,11 @@ import {
   LayersAccessorsTitles,
   LayersFieldFormats,
 } from './layers';
-import { DatatablesWithFormatInfo, DatatableWithFormatInfo } from './data_layers';
+import {
+  DatatablesWithFormatInfo,
+  DatatableWithFormatInfo,
+  hasMultipleLayersWithSplits,
+} from './data_layers';
 
 export const defaultReferenceLineColor = euiLightVars.euiColorDarkShade;
 
@@ -59,7 +63,8 @@ export const getAllSeries = (
   columnToLabel: CommonXYDataLayerConfig['columnToLabel'],
   titles: LayerAccessorsTitles,
   fieldFormats: LayerFieldFormats,
-  accessorsCount: number
+  accessorsCount: number,
+  multipleLayersWithSplits: boolean
 ) => {
   if (!formattedDatatable.table) {
     return [];
@@ -77,7 +82,8 @@ export const getAllSeries = (
       const yTitle = columnToLabelMap[yAccessor] ?? titles?.yTitles?.[yAccessor] ?? null;
       let name = yTitle;
       if (splitName) {
-        name = accessorsCount > 1 ? `${splitName} - ${yTitle}` : splitName;
+        name =
+          accessorsCount > 1 || multipleLayersWithSplits ? `${splitName} - ${yTitle}` : splitName;
       }
 
       if (!allSeries.includes(name)) {
@@ -108,6 +114,7 @@ export function getColorAssignments(
     }
     layersPerPalette[palette].push(layer);
   });
+  const multipleLayersWithSplits = hasMultipleLayersWithSplits(layers);
 
   return mapValues(layersPerPalette, (paletteLayers) => {
     const seriesPerLayer = paletteLayers.map((layer) => {
@@ -119,7 +126,8 @@ export function getColorAssignments(
           layer.columnToLabel,
           titles[layer.layerId],
           fieldFormats[layer.layerId],
-          layer.accessors.length
+          layer.accessors.length,
+          multipleLayersWithSplits
         ) || [];
 
       return { numberOfSeries: allSeries.length, allSeries };

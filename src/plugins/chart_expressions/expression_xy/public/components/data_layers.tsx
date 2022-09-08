@@ -33,6 +33,7 @@ import {
   DatatablesWithFormatInfo,
   LayersAccessorsTitles,
   LayersFieldFormats,
+  hasMultipleLayersWithSplits,
 } from '../helpers';
 
 interface Props {
@@ -108,6 +109,7 @@ export const DataLayers: FC<Props> = ({
         { commonLayerId: formattedDatatables[layers[0].layerId] }
       )
     : getColorAssignments(layers, titles, fieldFormats, formattedDatatables);
+  const multipleLayersWithSplits = hasMultipleLayersWithSplits(layers);
   return (
     <>
       {layers.flatMap((layer) => {
@@ -163,6 +165,7 @@ export const DataLayers: FC<Props> = ({
             uiState,
             allYAccessors,
             singleTable,
+            multipleLayersWithSplits,
           });
 
           const index = `${layer.layerId}-${accessorIndex}`;
