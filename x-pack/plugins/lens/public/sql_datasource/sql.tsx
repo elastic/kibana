@@ -48,16 +48,16 @@ export function getSQLDatasource({
 }) {
   const getSuggestionsForState = (state: EsSQLPrivateState) => {
     return Object.entries(state.layers)?.map(([id, layer]) => {
-      const reducedState: EsSQLPrivateState = {
-        ...state,
-        fieldList: state.fieldList,
-        layers: {
-          [id]: state.layers[id],
-        },
-      };
+      // const reducedState: EsSQLPrivateState = {
+      //   ...state,
+      //   fieldList: state.fieldList,
+      //   layers: {
+      //     [id]: state.layers[id],
+      //   },
+      // };
       return {
         state: {
-          ...reducedState,
+          ...state,
         },
         table: {
           changeType: 'unchanged' as TableChangeType,
@@ -94,7 +94,7 @@ export function getSQLDatasource({
       let fieldList: DatatableColumn[] = [];
       if (state) {
         const layer = Object.values(state?.layers)?.[0];
-        if (layer.query && isOfAggregateQueryType(layer.query) && 'sql' in layer.query) {
+        if (layer && layer.query && isOfAggregateQueryType(layer.query) && 'sql' in layer.query) {
           const table = await fetchSql(layer.query, dataViews, data, expressions);
           const columnsFromQuery = table?.columns ?? [];
           // const layerIds = Object.keys(state.layers);
@@ -150,7 +150,6 @@ export function getSQLDatasource({
         ...initState,
         fieldList,
         removedLayers: [],
-        selectedColumns: [],
         indexPatternRefs,
       };
     },
@@ -191,7 +190,13 @@ export function getSQLDatasource({
 
     removeLayer(state: EsSQLPrivateState, layerId: string) {
       const deletedLayer = state.layers[layerId];
-      const newLayers = { ...state.layers };
+      const newLayers = {
+        ...state.layers,
+        [layerId]: {
+          ...state.layers[layerId],
+          selectedColumns: [],
+        },
+      };
       // delete newLayers[layerId];
 
       const deletedFieldList = state.fieldList;
