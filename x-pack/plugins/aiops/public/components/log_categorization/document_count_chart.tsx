@@ -9,7 +9,7 @@ import React, { FC } from 'react';
 
 import { DocumentCountChart as DocumentCountChartRoot } from '../document_count_content/document_count_chart';
 import { TotalCountHeader } from '../document_count_content/total_count_header';
-import type { Category, SparkLinesPerCategory } from './log_categorization_page';
+import type { Category, SparkLinesPerCategory } from './use_categorize_request';
 import type { EventRate } from './use_categorize_request';
 
 interface Props {

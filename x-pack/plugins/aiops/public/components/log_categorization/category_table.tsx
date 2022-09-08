@@ -19,19 +19,17 @@ import {
   EuiTableSelectionType,
 } from '@elastic/eui';
 
-import type { Category } from './log_categorization_page';
 import { useDiscoverLinks } from './use_discover_links';
 import { MiniHistogram } from '../mini_histogram';
 import { useEuiTheme } from '../../hooks/use_eui_theme';
 import type { AiOpsIndexBasedAppState } from '../explain_log_rate_spikes/explain_log_rate_spikes_app_state';
-import type { EventRate } from './use_categorize_request';
+import type { EventRate, Category, SparkLinesPerCategory } from './use_categorize_request';
 
 const QUERY_MODE = {
   INCLUDE: 'should',
   EXCLUDE: 'must_not',
 } as const;
 export type QueryMode = typeof QUERY_MODE[keyof typeof QUERY_MODE];
-export type SparkLinesPerCategory = Record<string, Record<number, number>>;
 
 interface Props {
   categories: Category[];
@@ -102,7 +100,7 @@ export const CategoryTable: FC<Props> = ({
           doc_count_overall: e.docCount,
           doc_count_change_point: gg[e.key],
           key: e.key,
-          key_as_string: e.keyAsString,
+          key_as_string: `${e.key}`,
         }));
 
         return (

@@ -8,9 +8,10 @@
 import rison from 'rison-node';
 import moment from 'moment';
 
-import { TimeRangeBounds } from '@kbn/data-plugin/common';
+import type { TimeRangeBounds } from '@kbn/data-plugin/common';
 import { useAiOpsKibana } from '../../kibana_context';
-import type { Category, QueryMode } from './log_categorization_page';
+import type { Category } from './use_categorize_request';
+import type { QueryMode } from './category_table';
 import type { AiOpsIndexBasedAppState } from '../explain_log_rate_spikes/explain_log_rate_spikes_app_state';
 
 export function useDiscoverLinks() {

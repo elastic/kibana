@@ -7,7 +7,6 @@
 import React, { FC, useState, useEffect, useCallback, useMemo } from 'react';
 import type { SavedSearch } from '@kbn/discover-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { Filter, Query } from '@kbn/es-query';
 import {
   EuiButton,
@@ -17,7 +16,6 @@ import {
   EuiPageBody,
   EuiPageContentHeader,
   EuiPageContentHeaderSection,
-  // EuiHorizontalRule,
   EuiTitle,
   EuiComboBox,
   EuiComboBoxOptionOption,
@@ -25,54 +23,35 @@ import {
   EuiLoadingContent,
 } from '@elastic/eui';
 
-import { useAiOpsKibana } from '../../kibana_context';
 import { FullTimeRangeSelector } from '../full_time_range_selector';
 import { DatePickerWrapper } from '../date_picker_wrapper';
-import { TimeBuckets } from '../../../common/time_buckets';
 import { useData } from '../../hooks/use_data';
 import { SearchPanel } from '../search_panel';
-import { SearchQueryLanguage, SavedSearchSavedObject } from '../../application/utils/search_utils';
+import type {
+  SearchQueryLanguage,
+  SavedSearchSavedObject,
+} from '../../application/utils/search_utils';
 import { useUrlState /* , usePageUrlState, AppStateKey*/ } from '../../hooks/url_state';
 import { restorableDefaults } from '../explain_log_rate_spikes/explain_log_rate_spikes_app_state';
 import { useCategorizeRequest } from './use_categorize_request';
-import type { EventRate } from './use_categorize_request';
+import type { EventRate, Category, SparkLinesPerCategory } from './use_categorize_request';
 import { CategoryTable } from './category_table';
 import { DocumentCountChart } from './document_count_chart';
 
 export interface LogCategorizationPageProps {
-  /** The data view to analyze. */
   dataView: DataView;
-  /** The saved search to analyze. */
   savedSearch: SavedSearch | SavedSearchSavedObject | null;
 }
 
-const QUERY_MODE = {
-  INCLUDE: 'should',
-  EXCLUDE: 'must_not',
-} as const;
-export type QueryMode = typeof QUERY_MODE[keyof typeof QUERY_MODE];
-
-export interface Category {
-  key: string;
-  count: number;
-  examples: string[];
-  sparkline?: Array<{ doc_count: number; key: number; key_as_string: string }>;
-}
-
-export type SparkLinesPerCategory = Record<string, Record<number, number>>;
+const BAR_TARGET = 20;
 
 export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({
   dataView,
   savedSearch,
 }) => {
-  const {
-    services: { uiSettings },
-  } = useAiOpsKibana();
-
-  const { runCategorizeRequest, runEventRateRequest, cancelRequests } = useCategorizeRequest();
-  // const [aiopsListState, setAiopsListState] = usePageUrlState(AppStateKey, restorableDefaults);
+  const { runCategorizeRequest, cancelRequest } = useCategorizeRequest();
   const [aiopsListState, setAiopsListState] = useState(restorableDefaults);
-  const [, setGlobalState] = useUrlState('_g');
+  const [globalState, setGlobalState] = useUrlState('_g');
   const [selectedField, setSelectedField] = useState<string | undefined>();
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
   const [categories, setCategories] = useState<Category[] | null>(null);
@@ -83,26 +62,11 @@ export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({
   const [pinnedCategory, setPinnedCategory] = useState<Category | null>(null);
   const [sparkLines, setSparkLines] = useState<SparkLinesPerCategory>({});
 
-  const _timeBuckets = useMemo(() => {
-    return new TimeBuckets({
-      [UI_SETTINGS.HISTOGRAM_MAX_BARS]: uiSettings.get(UI_SETTINGS.HISTOGRAM_MAX_BARS),
-      [UI_SETTINGS.HISTOGRAM_BAR_TARGET]: uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET),
-      dateFormat: uiSettings.get('dateFormat'),
-      'dateFormat:scaled': uiSettings.get('dateFormat:scaled'),
-    });
-  }, [uiSettings]);
-
-  useEffect(() => {
-    if (savedSearch) {
-      setCurrentSavedSearch(savedSearch);
-    }
-  }, [savedSearch]);
-
   useEffect(() => {
     return () => {
-      cancelRequests();
+      cancelRequest();
     };
-  }, [cancelRequests]);
+  }, [cancelRequest]);
 
   const setSearchParams = useCallback(
     (searchParams: {
@@ -128,12 +92,32 @@ export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({
     [currentSavedSearch, aiopsListState, setAiopsListState]
   );
 
-  const { timefilter, earliest, latest, searchQueryLanguage, searchString, searchQuery } = useData(
+  const {
+    documentStats,
+    timefilter,
+    earliest,
+    latest,
+    searchQueryLanguage,
+    searchString,
+    searchQuery,
+    intervalMs,
+  } = useData(
     { currentDataView: dataView, currentSavedSearch },
     aiopsListState,
     setGlobalState,
-    undefined
+    undefined,
+    BAR_TARGET
   );
+
+  useEffect(() => {
+    if (globalState?.time !== undefined) {
+      timefilter.setTime({
+        from: globalState.time.from,
+        to: globalState.time.to,
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [JSON.stringify(globalState?.time), timefilter]);
 
   const fields = useMemo(
     () =>
@@ -154,44 +138,31 @@ export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({
     }
   }, [fields]);
 
+  useEffect(() => {
+    if (documentStats.documentCountStats?.buckets) {
+      setEventRate(
+        Object.entries(documentStats.documentCountStats.buckets).map(([key, docCount]) => ({
+          key: +key,
+          docCount,
+        }))
+      );
+      setTotalCount(documentStats.totalCount);
+    }
+  }, [documentStats, earliest, latest, searchQueryLanguage, searchString, searchQuery]);
+
   const loadCategories = useCallback(async () => {
     setLoading(true);
     setCategories(null);
     const { title: index, timeFieldName: timeField } = dataView;
 
-    const timefilterActiveBounds = timefilter.getActiveBounds();
-
-    if (
-      timefilterActiveBounds === undefined ||
-      selectedField === undefined ||
-      timeField === undefined
-    ) {
+    if (selectedField === undefined || timeField === undefined) {
       return;
     }
 
-    const BAR_TARGET = 20;
-    _timeBuckets.setInterval('auto');
-    _timeBuckets.setBounds(timefilterActiveBounds);
-    _timeBuckets.setBarTarget(BAR_TARGET);
-    const intervalMs = _timeBuckets.getInterval()?.asMilliseconds();
+    cancelRequest();
 
-    cancelRequests();
-
-    runEventRateRequest(
-      index,
-      selectedField,
-      timeField,
-      earliest,
-      latest,
-      searchQuery,
-      intervalMs
-    ).then((resp) => {
-      setEventRate(resp.eventRate);
-      setTotalCount(resp.totalCount);
-    });
-
-    const { categories: tempCategories, sparkLinesPerCategory: tempSparkLinesPerCategory } =
-      await runCategorizeRequest(
+    try {
+      const resp = await runCategorizeRequest(
         index,
         selectedField,
         timeField,
@@ -201,20 +172,22 @@ export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({
         intervalMs
       );
 
-    setCategories(tempCategories);
-    setSparkLines(tempSparkLinesPerCategory);
+      setCategories(resp.categories);
+      setSparkLines(resp.sparkLinesPerCategory);
+    } catch (error) {
+      // show error toast!!!!!!!!!!!!!!!!!!!!!!!!!
+    }
+
     setLoading(false);
   }, [
     selectedField,
     dataView,
-    timefilter,
-    _timeBuckets,
     searchQuery,
     earliest,
     latest,
     runCategorizeRequest,
-    runEventRateRequest,
-    cancelRequests,
+    cancelRequest,
+    intervalMs,
   ]);
 
   const onFieldChange = (value: EuiComboBoxOptionOption[] | undefined) => {
@@ -271,7 +244,7 @@ export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({
       </EuiFlexGroup>
       <EuiSpacer size="m" />
       <EuiFlexGroup gutterSize="none">
-        <EuiFlexItem grow={false} style={{ minWidth: '410px' }}>
+        <EuiFlexItem grow={false} css={{ minWidth: '410px' }}>
           <EuiFormRow label="Category field">
             <EuiComboBox
               isDisabled={loading === true}
@@ -282,7 +255,7 @@ export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({
             />
           </EuiFormRow>
         </EuiFlexItem>
-        <EuiFlexItem grow={false} style={{ marginTop: 'auto' }}>
+        <EuiFlexItem grow={false} css={{ marginTop: 'auto' }}>
           {loading === false ? (
             <EuiButton
               disabled={selectedField === undefined}
@@ -293,10 +266,10 @@ export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({
               Run categorization
             </EuiButton>
           ) : (
-            <EuiButton onClick={() => cancelRequests()}>Cancel</EuiButton>
+            <EuiButton onClick={() => cancelRequest()}>Cancel</EuiButton>
           )}
         </EuiFlexItem>
-        <EuiFlexItem grow={false} style={{ marginTop: 'auto' }} />
+        <EuiFlexItem grow={false} css={{ marginTop: 'auto' }} />
         <EuiFlexItem />
       </EuiFlexGroup>
 

@@ -8,16 +8,10 @@ import React, { FC } from 'react';
 import type { SavedSearch } from '@kbn/discover-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { LogCategorizationPage } from './log_categorization_page';
-import {
-  // SEARCH_QUERY_LANGUAGE,
-  // SearchQueryLanguage,
-  SavedSearchSavedObject,
-} from '../../application/utils/search_utils';
+import { SavedSearchSavedObject } from '../../application/utils/search_utils';
 
 export interface LogCategorizationAppStateProps {
-  /** The data view to analyze. */
   dataView: DataView;
-  /** The saved search to analyze. */
   savedSearch: SavedSearch | SavedSearchSavedObject | null;
 }
 

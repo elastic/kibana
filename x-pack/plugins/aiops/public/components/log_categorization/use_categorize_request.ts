@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { cloneDeep } from 'lodash';
 import { useRef, useCallback } from 'react';
 import { lastValueFrom } from 'rxjs';
 import { useAiOpsKibana } from '../../kibana_context';
 
-const EXAMPLE_COUNT = 1;
+const CATEGORY_LIMIT = 1000;
+const EXAMPLE_LIMIT = 1;
 
 interface CatResponse {
   rawResponse: {
@@ -28,13 +28,19 @@ interface CatResponse {
   };
 }
 
+export interface Category {
+  key: string;
+  count: number;
+  examples: string[];
+  sparkline?: Array<{ doc_count: number; key: number; key_as_string: string }>;
+}
+
 export type EventRate = Array<{
   key: number;
   docCount: number;
-  keyAsString: string;
 }>;
 
-type SparkLinesPerCategory = Record<string, Record<number, number>>;
+export type SparkLinesPerCategory = Record<string, Record<number, number>>;
 
 export function useCategorizeRequest() {
   const {
@@ -95,12 +101,12 @@ export function useCategorizeRequest() {
                     categories: {
                       categorize_text: {
                         field,
-                        size: 1000,
+                        size: CATEGORY_LIMIT,
                       },
                       aggs: {
                         hit: {
                           top_hits: {
-                            size: EXAMPLE_COUNT,
+                            size: EXAMPLE_LIMIT,
                             sort: [timeField],
                             _source: field,
                           },
@@ -134,7 +140,7 @@ export function useCategorizeRequest() {
 
         const sparkLinesPerCategory: SparkLinesPerCategory = {};
 
-        const categories = rawResponse.aggregations!.categories.buckets.map((b) => {
+        const categories: Category[] = rawResponse.aggregations!.categories.buckets.map((b) => {
           sparkLinesPerCategory[b.key] =
             b.sparkline === undefined
               ? {}
@@ -167,83 +173,10 @@ export function useCategorizeRequest() {
     [data.search]
   );
 
-  const runEventRateRequest = useCallback(
-    async (
-      index: string,
-      field: string,
-      timeField: string,
-      from: number | undefined,
-      to: number | undefined,
-      query: any,
-      intervalMs?: number
-    ) => {
-      try {
-        const { rawResponse } = await lastValueFrom(
-          data.search.search<
-            any,
-            {
-              rawResponse: {
-                hits: { total: number };
-                aggregations?: Record<string, estypes.AggregationsAggregate> & {
-                  eventRate?: {
-                    buckets: Array<{ key: number; key_as_string: string; doc_count: number }>;
-                  };
-                };
-              };
-            }
-          >(
-            {
-              params: {
-                index,
-                size: 0,
-                body: {
-                  query,
-                  aggs: {
-                    eventRate: {
-                      date_histogram: {
-                        field: timeField,
-                        fixed_interval: `${intervalMs}ms`,
-                        min_doc_count: 0,
-                        extended_bounds: {
-                          min: from,
-                          max: to,
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-            },
-            { abortSignal: abortController.current.signal }
-          )
-        );
-
-        const eventRate: EventRate = rawResponse.aggregations!.eventRate!.buckets!.map((b) => ({
-          key: b.key,
-          keyAsString: b.key_as_string,
-          docCount: b.doc_count,
-        }));
-
-        const totalCount = rawResponse.hits.total;
-
-        return {
-          totalCount,
-          eventRate,
-        };
-      } catch (error) {
-        if (error.name === 'AbortError') {
-          return { totalCount: 0, eventRate: [] };
-        }
-        throw error;
-      }
-    },
-    [data.search]
-  );
-
-  const cancelRequests = useCallback(() => {
+  const cancelRequest = useCallback(() => {
     abortController.current.abort();
     abortController.current = new AbortController();
   }, []);
 
-  return { runCategorizeRequest, runEventRateRequest, cancelRequests };
+  return { runCategorizeRequest, cancelRequest };
 }
