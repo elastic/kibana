@@ -45,9 +45,11 @@ export function ObservabilityOverviewCommonProvider({
   };
 
   const openAlertsSection = async () => {
-    return await (
-      await find.byCssSelector(`button[aria-controls="${ALERTS_SECTION_SELECTOR}"]`)
-    ).click();
+    return await retry.try(async () => {
+      return await (
+        await find.byCssSelector(`button[aria-controls="${ALERTS_SECTION_SELECTOR}"]`)
+      ).click();
+    });
   };
 
   const openAlertsSectionAndWaitToAppear = async () => {

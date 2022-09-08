@@ -13,7 +13,7 @@ const ALL_ALERTS = 10;
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
 
-  describe.only('Observability overview', function () {
+  describe('Observability overview', function () {
     this.tags('includeFirefox');
 
     const observability = getService('observability');
