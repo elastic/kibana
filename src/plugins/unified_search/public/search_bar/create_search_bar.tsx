@@ -189,6 +189,7 @@ export function createSearchBar({
           showQueryBar={props.showQueryBar}
           showQueryInput={props.showQueryInput}
           showSaveQuery={props.showSaveQuery}
+          isDisabled={props.isDisabled}
           screenTitle={props.screenTitle}
           indexPatterns={props.indexPatterns}
           indicateNoData={props.indicateNoData}
