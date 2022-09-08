@@ -15,29 +15,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const config = {
     testFiles,
     ...performanceConfig.getAll(),
-    scalabilitySetup: {
-      warmup: [
-        {
-          action: 'constantConcurrentUsers',
-          maxUsersCount: 10,
-          duration: '30s',
-        },
-        {
-          action: 'rampConcurrentUsers',
-          minUsersCount: 10,
-          maxUsersCount: 50,
-          duration: '2m',
-        },
-      ],
-      test: [
-        {
-          action: 'constantConcurrentUsers',
-          maxUsersCount: 50,
-          duration: '5m',
-        },
-      ],
-      maxDuration: '10m',
-    },
   };
 
   const apmGlobalLabels = {
