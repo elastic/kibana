@@ -120,6 +120,7 @@ export async function reassignAgents(
       page: 1,
       perPage: batchSize,
     });
+    // running action in async mode for >10k agents (or actions > batchSize for testing purposes)
     if (res.total <= batchSize) {
       givenAgents = res.agents;
     } else {

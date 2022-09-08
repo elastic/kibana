@@ -28,6 +28,9 @@ export enum BulkActionTaskType {
   UPDATE_AGENT_TAGS_RETRY = 'fleet:update_agent_tags:retry',
 }
 
+/**
+ * Create and run retry tasks of agent bulk actions
+ */
 export class BulkActionsResolver {
   private taskManager?: TaskManagerStartContract;
 

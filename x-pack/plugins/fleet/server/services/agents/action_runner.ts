@@ -61,6 +61,12 @@ export abstract class ActionRunner {
 
   protected abstract processAgents(agents: Agent[]): Promise<{ items: BulkActionResult[] }>;
 
+  /**
+   * Common runner logic accross all agent bulk actions
+   * Starts action execution immeditalely, asynchronously
+   * On errors, starts a task with Task Manager to retry max 3 times
+   * If the last batch was stored in state, retry continues from there (searchAfter)
+   */
   public async runActionAsyncWithRetry(): Promise<{ items: BulkActionResult[]; actionId: string }> {
     appContextService
       .getLogger()

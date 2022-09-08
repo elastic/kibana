@@ -106,11 +106,14 @@ export interface CurrentUpgrade {
 
 export interface ActionStatus {
   actionId: string;
+  // how many agents are successfully included in action documents
   nbAgentsActionCreated: number;
+  // how many agents acknowledged the action sucessfully (completed)
   nbAgentsAck: number;
   version: string;
   startTime?: string;
   type?: string;
+  // how many agents were actioned by the user
   nbAgentsActioned: number;
   status: 'complete' | 'expired' | 'cancelled' | 'failed' | 'in progress';
   errorMessage?: string;

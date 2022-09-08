@@ -113,6 +113,10 @@ async function createAgentPolicy(id: string) {
   return data;
 }
 
+/**
+ * Script to create large number of agent documents at once.
+ * This is helpful for testing agent bulk actions locally as the kibana async logic kicks in for >10k agents.
+ */
 export async function run() {
   const logger = new ToolingLog({
     level: 'info',
