@@ -1,0 +1,10 @@
+{
+  "id": "savedObjectsFinder",
+  "owner": {
+    "name": "Data Discovery",
+    "githubTeam": "kibana-data-discovery"
+  },
+  "version": "kibana",
+  "ui": true,
+  "requiredBundles": ["savedObjects"]
+}

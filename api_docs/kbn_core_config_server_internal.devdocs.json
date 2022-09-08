@@ -25,6 +25,7 @@
         ],
         "path": "packages/core/config/core-config-server-internal/src/deprecation/core_deprecations.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -45,6 +46,7 @@
         ],
         "path": "packages/core/config/core-config-server-internal/src/ensure_valid_configuration.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-config-server-internal",
@@ -58,6 +60,7 @@
             ],
             "path": "packages/core/config/core-config-server-internal/src/ensure_valid_configuration.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -73,6 +76,7 @@
             ],
             "path": "packages/core/config/core-config-server-internal/src/ensure_valid_configuration.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           }
         ],

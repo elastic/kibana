@@ -94,6 +94,7 @@ export const useSearchStrategy = <QueryType extends FactoryQueryTypes>({
   initialResult,
   errorMessage,
   abort = false,
+  showErrorToast = true,
 }: {
   factoryQueryType: QueryType;
   /**
@@ -108,6 +109,10 @@ export const useSearchStrategy = <QueryType extends FactoryQueryTypes>({
    * When the flag switches from `false` to `true`, it will abort any ongoing request.
    */
   abort?: boolean;
+  /**
+   * Show error toast when error occurs on search complete
+   */
+  showErrorToast?: boolean;
 }) => {
   const abortCtrl = useRef(new AbortController());
   const refetch = useRef<inputsModel.Refetch>(noop);
@@ -121,12 +126,12 @@ export const useSearchStrategy = <QueryType extends FactoryQueryTypes>({
   >(search);
 
   useEffect(() => {
-    if (error != null && !(error instanceof AbortError)) {
+    if (showErrorToast && error != null && !(error instanceof AbortError)) {
       addError(error, {
         title: errorMessage ?? i18n.DEFAULT_ERROR_SEARCH_STRATEGY(factoryQueryType),
       });
     }
-  }, [addError, error, errorMessage, factoryQueryType]);
+  }, [addError, error, errorMessage, factoryQueryType, showErrorToast]);
 
   const searchCb = useCallback<SearchFunction<QueryType>>(
     (request) => {

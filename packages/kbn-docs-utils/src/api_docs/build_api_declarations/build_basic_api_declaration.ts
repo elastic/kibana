@@ -23,6 +23,7 @@ export function buildBasicApiDeclaration(node: Node, opts: BuildApiDecOpts): Api
   const tags = getJSDocTags(node);
   const deprecated = tags.find((t) => t.getTagName() === 'deprecated') !== undefined;
   const removeByTag = tags.find((t) => t.getTagName() === 'removeBy');
+  const trackAdoption = tags.find((t) => t.getTagName() === 'track-adoption') !== undefined;
 
   let label = opts.name;
 
@@ -49,6 +50,7 @@ export function buildBasicApiDeclaration(node: Node, opts: BuildApiDecOpts): Api
     path: getSourceForNode(node),
     deprecated,
     removeBy: removeByTag ? removeByTag.getCommentText() : undefined,
+    trackAdoption,
   };
   return {
     ...apiDec,
