@@ -17,8 +17,8 @@ import {
   EuiButton,
   EuiPage,
   EuiPageBody,
-  EuiPageContent,
-  EuiPageContentBody,
+  EuiPageContent_Deprecated as EuiPageContent,
+  EuiPageContentBody_Deprecated as EuiPageContentBody,
   EuiSpacer,
 } from '@elastic/eui';
 import { EventInput } from '../event_input';
