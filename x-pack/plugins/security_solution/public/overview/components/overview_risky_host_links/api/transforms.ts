@@ -33,9 +33,18 @@ export async function createTransform({
   options,
 }: CreateTransforms) {
   const res = await http
-    .put(`${TRANSFORM_API_BASE_PATH}/transforms/${transformId}`, {
-      body: JSON.stringify(options),
-      signal,
+    .put<{ errors: unknown[]; transformsCreated: Array<{}> }>(
+      `${TRANSFORM_API_BASE_PATH}/transforms/${transformId}`,
+      {
+        body: JSON.stringify(options),
+        signal,
+      }
+    )
+    .then((result) => {
+      const { errors } = result;
+      if (errors.length > 0) {
+        notifications?.toasts?.addDanger(errorMessage ?? TRANSFORM_CREATION_ERROR_MESSAGE);
+      }
     })
     .catch((e) => {
       notifications?.toasts?.addDanger({

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButton } from '@elastic/eui';
+import { EuiButtonEmpty } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useSpaceId } from '../../../common/hooks/use_space_id';
@@ -32,7 +32,7 @@ const RiskyScoreRestartButtonComponent = ({
   }, [http, moduleName, notifications, refetch, spaceId]);
 
   return (
-    <EuiButton
+    <EuiButtonEmpty
       onClick={onBoardingHostRiskScore}
       isLoading={restartState === RestartState.Started}
       data-test-subj="risk-score-restart"
@@ -48,7 +48,7 @@ const RiskyScoreRestartButtonComponent = ({
           defaultMessage="Restart"
         />
       )}
-    </EuiButton>
+    </EuiButtonEmpty>
   );
 };
 
