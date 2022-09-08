@@ -60,20 +60,14 @@ const initializeTimerangeFromUrlParam = (
 
     if (isEmpty(globalLinkTo.linkTo)) {
       dispatch(inputsActions.removeLinkTo([InputsModelId.global, InputsModelId.timeline]));
-      dispatch(
-        inputsActions.removeLinkTo([
-          InputsModelId.global,
-          ...(isSocTrendsEnabled ? [InputsModelId.socTrends] : []),
-        ])
-      );
+      if (isSocTrendsEnabled) {
+        dispatch(inputsActions.removeLinkTo([InputsModelId.global, InputsModelId.socTrends]));
+      }
     } else {
       dispatch(inputsActions.addLinkTo([InputsModelId.global, InputsModelId.timeline]));
-      dispatch(
-        inputsActions.addLinkTo([
-          InputsModelId.global,
-          ...(isSocTrendsEnabled ? [InputsModelId.socTrends] : []),
-        ])
-      );
+      if (isSocTrendsEnabled) {
+        dispatch(inputsActions.addLinkTo([InputsModelId.global, InputsModelId.socTrends]));
+      }
     }
 
     if (isEmpty(timelineLinkTo.linkTo)) {
