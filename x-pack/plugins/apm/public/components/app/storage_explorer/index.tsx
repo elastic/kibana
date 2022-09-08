@@ -10,6 +10,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { IndexLifecyclePhaseSelect } from './index_lifecycle_phase_select';
 import { ServicesTable } from './services_table';
 import { SearchBar } from '../../shared/search_bar';
+import { StorageChart } from './storage_chart';
 
 export function StorageExplorer() {
   return (
@@ -20,6 +21,8 @@ export function StorageExplorer() {
           <IndexLifecyclePhaseSelect />
         </EuiFlexItem>
       </EuiFlexGroup>
+      <EuiSpacer />
+      <StorageChart />
       <EuiSpacer />
       <ServicesTable />
     </>

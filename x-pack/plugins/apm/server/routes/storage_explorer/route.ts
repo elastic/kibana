@@ -21,6 +21,7 @@ import {
 import { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
 import { getStorageDetailsPerProcessorEvent } from './get_storage_details_per_processor_event';
 import { getRandomSampler } from '../../lib/helpers/get_random_sampler';
+import { getSizeTimeseries } from './get_size_timeseries';
 
 const storageExplorerRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/storage_explorer',
@@ -160,7 +161,73 @@ const storageExplorerServiceDetailsRoute = createApmServerRoute({
   },
 });
 
+const storageChartRoute = createApmServerRoute({
+  endpoint: 'GET /internal/apm/storage_chart',
+  options: { tags: ['access:apm'] },
+  params: t.type({
+    query: t.intersection([
+      indexLifecyclePhaseRt,
+      probabilityRt,
+      environmentRt,
+      kueryRt,
+      rangeRt,
+    ]),
+  }),
+  handler: async (
+    resources
+  ): Promise<{
+    storageTimeSeries: Array<{
+      serviceName: string;
+      timeseries: Array<{ x: number; y: number }>;
+    }>;
+  }> => {
+    const {
+      params,
+      context,
+      request,
+      plugins: { security },
+    } = resources;
+
+    const {
+      query: {
+        indexLifecyclePhase,
+        probability,
+        environment,
+        kuery,
+        start,
+        end,
+      },
+    } = params;
+
+    const [setup, randomSampler] = await Promise.all([
+      setupRequest(resources),
+      getRandomSampler({ security, request, probability }),
+    ]);
+
+    const searchAggregatedTransactions = await getSearchAggregatedTransactions({
+      apmEventClient: setup.apmEventClient,
+      config: setup.config,
+      kuery,
+    });
+
+    const storageTimeSeries = await getSizeTimeseries({
+      searchAggregatedTransactions,
+      indexLifecyclePhase,
+      randomSampler,
+      environment,
+      kuery,
+      start,
+      end,
+      setup,
+      context,
+    });
+
+    return { storageTimeSeries };
+  },
+});
+
 export const storageExplorerRouteRepository = {
   ...storageExplorerRoute,
   ...storageExplorerServiceDetailsRoute,
+  ...storageChartRoute,
 };
