@@ -23,6 +23,7 @@ import {
   UPDATE_FILTER_REFERENCES_TRIGGER,
 } from '@kbn/unified-search-plugin/public';
 import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
+import { useUrlTracking } from './use_url_tracking';
 import { usePersistedDataView } from '../../../hooks/use_persisted_data_view';
 import { getState } from '../services/discover_state';
 import { getStateDefaults } from '../utils/get_state_defaults';
@@ -67,6 +68,8 @@ export function useDiscoverState({
     savedSearch.searchSource.setField('index', dataView);
     return savedSearch.searchSource.createChild();
   }, [savedSearch, dataView]);
+
+  const { setUrlTracking } = useUrlTracking(savedSearch, dataView);
 
   const stateContainer = useMemo(
     () =>
@@ -232,11 +235,13 @@ export function useDiscoverState({
           config.get(SORT_DEFAULT_ORDER_SETTING),
           state.query
         );
+        setUrlTracking(nextDataView);
         stateContainer.setAppState(nextAppState);
       }
       setExpandedDoc(undefined);
     },
     [
+      setUrlTracking,
       config,
       dataView,
       dataViews,
@@ -320,6 +325,10 @@ export function useDiscoverState({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [config, documentState, dataViews]);
 
+  /**
+   * When saving a saved search with an ad hoc data view, a new id needs to be generated for the data view
+   * This is to prevent duplicate ids messing with our system
+   */
   const updateAdHocDataViewId = useCallback(
     async (dataViewToUpdate: DataView) => {
       const newDataView = await dataViews.create({ ...dataViewToUpdate.toSpec(), id: undefined });
@@ -358,18 +367,13 @@ export function useDiscoverState({
           const currentState = stateContainer.appStateContainer.getState();
           await updateSavedSearch({ savedSearch, dataView: createdDataView, state: currentState });
         }
+        getUrlTracker().setTrackingEnabled(true);
         return createdDataView;
       }
       return undefined;
     }
     return currentDataView;
   }, [stateContainer, onChangeDataView, openConfirmSavePrompt, savedSearch, updateSavedSearch]);
-
-  useEffect(() => {
-    if (!dataView.isPersisted() && !savedSearch.id) {
-      getUrlTracker().setTrackedUrl('/');
-    }
-  }, [dataView, savedSearch.id, stateContainer]);
 
   return {
     data$,

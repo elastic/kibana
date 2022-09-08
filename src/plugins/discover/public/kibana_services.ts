@@ -25,6 +25,7 @@ export const [getHeaderActionMenuMounter, setHeaderActionMenuMounter] =
 export const [getUrlTracker, setUrlTracker] = createGetterSetter<{
   setTrackedUrl: (url: string) => void;
   restorePreviousUrl: () => void;
+  setTrackingEnabled: (value: boolean) => void;
 }>('urlTracker');
 
 export const [getDocViewsRegistry, setDocViewsRegistry] =

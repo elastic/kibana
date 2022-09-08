@@ -257,9 +257,15 @@ export class DiscoverPlugin
       ),
     });
 
-    const { setTrackedUrl, restorePreviousUrl, stopUrlTracker, appMounted, appUnMounted } =
-      initializeKbnUrlTracking(baseUrl, core, this.appStateUpdater, plugins);
-    setUrlTracker({ setTrackedUrl, restorePreviousUrl });
+    const {
+      setTrackedUrl,
+      restorePreviousUrl,
+      stopUrlTracker,
+      appMounted,
+      appUnMounted,
+      setTrackingEnabled,
+    } = initializeKbnUrlTracking(baseUrl, core, this.appStateUpdater, plugins);
+    setUrlTracker({ setTrackedUrl, restorePreviousUrl, setTrackingEnabled });
     this.stopUrlTracking = () => {
       stopUrlTracker();
     };
