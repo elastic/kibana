@@ -27,7 +27,6 @@ const metricsetPicker = createPicker([
   'transaction.name',
   'span.type',
   'span.subtype',
-  'service.name',
 ]);
 
 export function getBreakdownMetrics(events: ApmFields[]) {
@@ -111,6 +110,7 @@ export function getBreakdownMetrics(events: ApmFields[]) {
         'transaction.type': transaction['transaction.type'],
         'transaction.name': transaction['transaction.name'],
         ...pickBy(event, metricsetPicker),
+        ...pickBy(event, instancePicker),
       };
 
       const instance = pickBy(event, instancePicker);
