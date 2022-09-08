@@ -32,6 +32,7 @@
         "description": [],
         "path": "packages/core/chrome/core-chrome-browser-mocks/src/chrome_service.mock.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-chrome-browser-mocks",
@@ -45,6 +46,7 @@
             ],
             "path": "packages/core/chrome/core-chrome-browser-mocks/src/chrome_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           },
@@ -64,6 +66,7 @@
             ],
             "path": "packages/core/chrome/core-chrome-browser-mocks/src/chrome_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           }

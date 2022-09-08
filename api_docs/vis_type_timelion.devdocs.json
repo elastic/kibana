@@ -16,6 +16,7 @@
       "description": [],
       "path": "src/plugins/vis_types/timelion/public/plugin.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [
         {
           "parentPluginId": "visTypeTimelion",
@@ -35,6 +36,7 @@
           ],
           "path": "src/plugins/vis_types/timelion/public/plugin.ts",
           "deprecated": false,
+          "trackAdoption": false,
           "returnComment": [],
           "children": []
         }

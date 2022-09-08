@@ -7,7 +7,7 @@
 
 import { EuiErrorBoundary } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { css } from '@emotion/react';
 import React from 'react';
 import { useTrackPageview } from '@kbn/observability-plugin/public';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
@@ -56,21 +56,32 @@ export const HostsPage = () => {
         <SourceLoadingPage />
       ) : metricIndicesExist && source ? (
         <>
-          <HostsPageWrapper className={APP_WRAPPER_CLASS}>
+          <div className={APP_WRAPPER_CLASS}>
             <MetricsPageTemplate
               hasData={metricIndicesExist}
               pageHeader={{
                 pageTitle: hostsTitle,
               }}
-              pageBodyProps={{
+              pageSectionProps={{
                 paddingSize: 'none',
+                contentProps: {
+                  // This is added to facilitate a full height layout whereby the
+                  // inner container will set its own height and be scrollable.
+                  css: css`
+                    display: flex;
+                    flex-direction: column;
+                    flex: 1 0 auto;
+                    width: 100%;
+                    height: 100%;
+                  `,
+                },
               }}
             >
               <MetricsDataViewProvider metricAlias={source.configuration.metricAlias}>
                 <HostsContent />
               </MetricsDataViewProvider>
             </MetricsPageTemplate>
-          </HostsPageWrapper>
+          </div>
         </>
       ) : hasFailedLoadingSource ? (
         <SourceErrorPage errorMessage={loadSourceFailureMessage || ''} retry={loadSource} />
@@ -80,16 +91,3 @@ export const HostsPage = () => {
     </EuiErrorBoundary>
   );
 };
-
-// This is added to facilitate a full height layout whereby the
-// inner container will set it's own height and be scrollable.
-// The "fullHeight" prop won't help us as it only applies to certain breakpoints.
-const HostsPageWrapper = euiStyled.div`
-  .euiPage .euiPageContentBody {
-    display: flex;
-    flex-direction: column;
-    flex: 1 0 auto;
-    width: 100%;
-    height: 100%;
-  }
-`;
