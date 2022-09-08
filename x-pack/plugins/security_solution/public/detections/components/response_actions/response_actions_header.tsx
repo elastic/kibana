@@ -45,7 +45,7 @@ export const ResponseActionsHeader = () => {
       <EuiFlexItem>
         <FormattedMessage
           defaultMessage="Response actions are run on each rule execution"
-          id="'xpack.securitySolution.actionForm.responseActionSectionsTitle"
+          id="xpack.securitySolution.actionForm.responseActionSectionsTitle"
         />
       </EuiFlexItem>
       <EuiSpacer size="m" />
