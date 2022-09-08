@@ -61,74 +61,9 @@ export function useCategorizeRequest() {
       intervalMs?: number
     ): Promise<{ categories: Category[]; sparkLinesPerCategory: SparkLinesPerCategory }> => {
       return new Promise((resolve, reject) => {
-        const query = cloneDeep(queryIn);
-
-        if (query.bool === undefined) {
-          query.bool = {};
-        }
-        if (query.bool.must === undefined) {
-          query.bool.must = [];
-          if (query.match_all !== undefined) {
-            query.bool.must.push({ match_all: query.match_all });
-            delete query.match_all;
-          }
-        }
-        if (query.multi_match !== undefined) {
-          query.bool.should = {
-            multi_match: query.multi_match,
-          };
-          delete query.multi_match;
-        }
-
-        query.bool.must.push({
-          range: {
-            [timeField]: {
-              gte: from,
-              lte: to,
-              format: 'epoch_millis',
-            },
-          },
-        });
-
         data.search
           .search<any, CatResponse>(
-            {
-              params: {
-                index,
-                size: 0,
-                body: {
-                  query,
-                  aggs: {
-                    categories: {
-                      categorize_text: {
-                        field,
-                        size: CATEGORY_LIMIT,
-                      },
-                      aggs: {
-                        hit: {
-                          top_hits: {
-                            size: EXAMPLE_LIMIT,
-                            sort: [timeField],
-                            _source: field,
-                            // thing: 222,
-                          },
-                        },
-                        ...(intervalMs
-                          ? {
-                              sparkline: {
-                                date_histogram: {
-                                  field: timeField,
-                                  fixed_interval: `${intervalMs}ms`,
-                                },
-                              },
-                            }
-                          : {}),
-                      },
-                    },
-                  },
-                },
-              },
-            },
+            createCategoryRequest(index, field, timeField, from, to, queryIn, intervalMs),
             { abortSignal: abortController.current.signal }
           )
           .subscribe({
@@ -154,34 +89,109 @@ export function useCategorizeRequest() {
     [data.search]
   );
 
-  function processCategoryResults(result: CatResponse, field: string) {
-    const sparkLinesPerCategory: SparkLinesPerCategory = {};
-
-    const categories: Category[] = result.rawResponse.aggregations!.categories.buckets.map((b) => {
-      sparkLinesPerCategory[b.key] =
-        b.sparkline === undefined
-          ? {}
-          : b.sparkline.buckets.reduce<Record<number, number>>((acc2, cur2) => {
-              acc2[cur2.key] = cur2.doc_count;
-              return acc2;
-            }, {});
-
-      return {
-        key: b.key,
-        count: b.doc_count,
-        examples: b.hit.hits.hits.map((h: any) => h._source[field]),
-      };
-    });
-    return {
-      categories,
-      sparkLinesPerCategory,
-    };
-  }
-
   const cancelRequest = useCallback(() => {
     abortController.current.abort();
     abortController.current = new AbortController();
   }, []);
 
   return { runCategorizeRequest, cancelRequest };
+}
+
+function createCategoryRequest(
+  index: string,
+  field: string,
+  timeField: string,
+  from: number | undefined,
+  to: number | undefined,
+  queryIn: any,
+  intervalMs?: number
+) {
+  const query = cloneDeep(queryIn);
+
+  if (query.bool === undefined) {
+    query.bool = {};
+  }
+  if (query.bool.must === undefined) {
+    query.bool.must = [];
+    if (query.match_all !== undefined) {
+      query.bool.must.push({ match_all: query.match_all });
+      delete query.match_all;
+    }
+  }
+  if (query.multi_match !== undefined) {
+    query.bool.should = {
+      multi_match: query.multi_match,
+    };
+    delete query.multi_match;
+  }
+
+  query.bool.must.push({
+    range: {
+      [timeField]: {
+        gte: from,
+        lte: to,
+        format: 'epoch_millis',
+      },
+    },
+  });
+  return {
+    params: {
+      index,
+      size: 0,
+      body: {
+        query,
+        aggs: {
+          categories: {
+            categorize_text: {
+              field,
+              size: CATEGORY_LIMIT,
+            },
+            aggs: {
+              hit: {
+                top_hits: {
+                  size: EXAMPLE_LIMIT,
+                  sort: [timeField],
+                  _source: field,
+                },
+              },
+              ...(intervalMs
+                ? {
+                    sparkline: {
+                      date_histogram: {
+                        field: timeField,
+                        fixed_interval: `${intervalMs}ms`,
+                      },
+                    },
+                  }
+                : {}),
+            },
+          },
+        },
+      },
+    },
+  };
+}
+
+function processCategoryResults(result: CatResponse, field: string) {
+  const sparkLinesPerCategory: SparkLinesPerCategory = {};
+
+  const categories: Category[] = result.rawResponse.aggregations!.categories.buckets.map((b) => {
+    sparkLinesPerCategory[b.key] =
+      b.sparkline === undefined
+        ? {}
+        : b.sparkline.buckets.reduce<Record<number, number>>((acc2, cur2) => {
+            acc2[cur2.key] = cur2.doc_count;
+            return acc2;
+          }, {});
+
+    return {
+      key: b.key,
+      count: b.doc_count,
+      examples: b.hit.hits.hits.map((h: any) => h._source[field]),
+    };
+  });
+  return {
+    categories,
+    sparkLinesPerCategory,
+  };
 }
