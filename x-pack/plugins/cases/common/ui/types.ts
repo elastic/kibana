@@ -126,6 +126,7 @@ export interface ElasticUser {
   readonly email?: string | null;
   readonly fullName?: string | null;
   readonly username?: string | null;
+  readonly profileUid?: string | null;
 }
 
 export interface FetchCasesProps extends ApiProps {

@@ -12,17 +12,18 @@ import {
   EuiButtonIcon,
   EuiText,
   EuiHorizontalRule,
-  EuiAvatar,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
-  EuiToolTip,
 } from '@elastic/eui';
 
 import styled, { css } from 'styled-components';
 
+import { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { ElasticUser } from '../../../containers/types';
 import * as i18n from '../translations';
+import { UserInfoWithAvatar } from '../../user_profiles/types';
+import { HoverableUserWithAvatar } from '../../user_profiles/hoverable_user_with_avatar';
 
 interface UserListProps {
   email: {
@@ -32,12 +33,9 @@ interface UserListProps {
   headline: string;
   loading?: boolean;
   users: ElasticUser[];
+  userProfiles?: Map<string, UserProfileWithAvatar>;
   dataTestSubj?: string;
 }
-
-const MyAvatar = styled(EuiAvatar)`
-  top: -4px;
-`;
 
 const MyFlexGroup = styled(EuiFlexGroup)`
   ${({ theme }) => css`
@@ -46,41 +44,30 @@ const MyFlexGroup = styled(EuiFlexGroup)`
 `;
 
 const renderUsers = (
-  users: ElasticUser[],
+  users: UserInfoWithAvatar[],
   handleSendEmail: (emailAddress: string | undefined | null) => void
 ) =>
-  users.map(({ fullName, username, email }, key) => (
+  users.map((userInfo, key) => (
     <MyFlexGroup key={key} justifyContent="spaceBetween" responsive={false}>
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup gutterSize="xs" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <MyAvatar name={fullName ? fullName : username ?? ''} />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiToolTip position="top" content={<p>{fullName ? fullName : username ?? ''}</p>}>
-              <p>
-                <strong>
-                  <small data-test-subj="case-view-username">{username}</small>
-                </strong>
-              </p>
-            </EuiToolTip>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <HoverableUserWithAvatar userInfo={userInfo} />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiButtonIcon
           data-test-subj="user-list-email-button"
-          onClick={handleSendEmail.bind(null, email)}
+          onClick={handleSendEmail.bind(null, userInfo.user?.email)}
           iconType="email"
-          aria-label={i18n.SEND_EMAIL_ARIA(fullName ? fullName : username ?? '')}
-          isDisabled={isEmpty(email)}
+          aria-label={i18n.SEND_EMAIL_ARIA(
+            userInfo.user?.full_name ? userInfo.user?.full_name : userInfo.user?.username ?? ''
+          )}
+          isDisabled={isEmpty(userInfo.user?.email)}
         />
       </EuiFlexItem>
     </MyFlexGroup>
   ));
 
 export const UserList: React.FC<UserListProps> = React.memo(
-  ({ email, headline, loading, users, dataTestSubj }) => {
+  ({ email, headline, loading, users, userProfiles, dataTestSubj }) => {
     const handleSendEmail = useCallback(
       (emailAddress: string | undefined | null) => {
         if (emailAddress && emailAddress != null) {
@@ -93,9 +80,9 @@ export const UserList: React.FC<UserListProps> = React.memo(
       [email.body, email.subject]
     );
 
-    const filteredUsers = users.filter(({ username }) => username != null && username !== '');
+    const validUsers = getValidUsers(users, userProfiles ?? new Map());
 
-    if (filteredUsers.length === 0) {
+    if (validUsers.length === 0) {
       return null;
     }
 
@@ -110,13 +97,47 @@ export const UserList: React.FC<UserListProps> = React.memo(
             </EuiFlexItem>
           </EuiFlexGroup>
         )}
-        {renderUsers(
-          users.filter(({ username }) => username != null && username !== ''),
-          handleSendEmail
-        )}
+        {renderUsers(validUsers, handleSendEmail)}
       </EuiText>
     );
   }
 );
 
 UserList.displayName = 'UserList';
+
+const getValidUsers = (
+  users: ElasticUser[],
+  userProfiles: Map<string, UserProfileWithAvatar>
+): UserInfoWithAvatar[] => {
+  const validUsers = users.reduce<Map<string, UserInfoWithAvatar>>((acc, user) => {
+    const addUserToMap = (username: string) => {
+      acc.set(username, {
+        user: { username, full_name: user?.fullName ?? undefined, email: user?.email ?? undefined },
+      });
+    };
+
+    const username = user.username;
+
+    if (user.profileUid != null) {
+      const profile = userProfiles.get(user.profileUid);
+
+      if (profile != null) {
+        acc.set(profile.uid, profile);
+      } else if (isValidString(username)) {
+        // we couldn't find a valid profile so let's try the username
+        addUserToMap(username);
+      } else {
+        // didn't the username wasn't valid so we'll show an unknown user
+        acc.set(user.profileUid, {});
+      }
+    } else if (isValidString(username)) {
+      addUserToMap(username);
+    }
+
+    return acc;
+  }, new Map());
+
+  return Array.from(validUsers.values());
+};
+
+const isValidString = (value?: string | null): value is string => !isEmpty(value);

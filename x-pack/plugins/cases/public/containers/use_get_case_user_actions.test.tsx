@@ -89,6 +89,56 @@ describe('useGetCaseUserActions', () => {
   });
 
   describe('getProfileUids', () => {
+    it('aggregates the uids from the createdBy field of a user action', async () => {
+      jest
+        .spyOn(api, 'getCaseUserActions')
+        .mockReturnValue(
+          Promise.resolve([
+            getUserAction('pushed', Actions.add, { createdBy: { profileUid: '456' } }),
+          ])
+        );
+
+      await act(async () => {
+        const { result } = renderHook<string, UseGetCaseUserActions>(
+          () => useGetCaseUserActions(basicCase.id, basicCase.connector.id),
+          { wrapper }
+        );
+
+        await waitFor(() => {
+          expect(result.current.data?.profileUids).toMatchInlineSnapshot(`
+            Set {
+              "456",
+            }
+          `);
+        });
+      });
+    });
+
+    it('aggregates the uids from a push', async () => {
+      jest.spyOn(api, 'getCaseUserActions').mockReturnValue(
+        Promise.resolve([
+          getUserAction('pushed', Actions.add, {
+            payload: { externalService: { pushedBy: { profileUid: '123' } } },
+          }),
+        ])
+      );
+
+      await act(async () => {
+        const { result } = renderHook<string, UseGetCaseUserActions>(
+          () => useGetCaseUserActions(basicCase.id, basicCase.connector.id),
+          { wrapper }
+        );
+
+        await waitFor(() => {
+          expect(result.current.data?.profileUids).toMatchInlineSnapshot(`
+            Set {
+              "123",
+            }
+          `);
+        });
+      });
+    });
+
     it('aggregates the uids from an assignment add user action', async () => {
       jest
         .spyOn(api, 'getCaseUserActions')

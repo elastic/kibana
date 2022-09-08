@@ -12,9 +12,12 @@ import { getName } from './display_name';
 import { SmallUserAvatar } from './small_user_avatar';
 import { UserInfoWithAvatar } from './types';
 
-const HoverableUserWithAvatarComponent: React.FC<{ userInfo?: UserInfoWithAvatar }> = ({
-  userInfo,
-}) => {
+const HoverableUserWithAvatarComponent: React.FC<{
+  userInfo?: UserInfoWithAvatar;
+  boldName?: boolean;
+}> = ({ userInfo, boldName = false }) => {
+  const name = getName(userInfo?.user);
+
   return (
     <UserToolTip userInfo={userInfo}>
       <EuiFlexGroup alignItems="center" gutterSize="s">
@@ -24,8 +27,16 @@ const HoverableUserWithAvatarComponent: React.FC<{ userInfo?: UserInfoWithAvatar
         <EuiFlexItem grow={false}>
           <EuiFlexGroup direction={'column'} gutterSize="none">
             <EuiFlexItem>
-              <EuiText size="s" className="eui-textBreakWord">
-                {getName(userInfo?.user)}
+              <EuiText
+                size="s"
+                className="eui-textBreakWord"
+                data-test-subj="user-profile-hoverable-name"
+              >
+                {boldName ? (
+                  <strong data-test-subj={'user-profile-hoverable-name-bolded'}>{name}</strong>
+                ) : (
+                  <>{name}</>
+                )}
               </EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>
