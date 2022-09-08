@@ -10,6 +10,15 @@ import { i18n } from '@kbn/i18n';
 export const USERNAME_LABEL = i18n.translate('xpack.enterpriseSearch.usernameLabel', {
   defaultMessage: 'Username',
 });
+
+export const PASSWORD_LABEL = i18n.translate('xpack.enterpriseSearch.passwordLabel', {
+  defaultMessage: 'Username',
+});
+
+export const TYPE_LABEL = i18n.translate('xpack.enterpriseSearch.typeLabel', {
+  defaultMessage: 'Type',
+});
+
 export const EMAIL_LABEL = i18n.translate('xpack.enterpriseSearch.emailLabel', {
   defaultMessage: 'Email',
 });

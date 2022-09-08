@@ -97,6 +97,8 @@ export const CrawlerDomainDetail: React.FC = () => {
             <EntryPointsTable domain={domain} indexName={indexName} items={domain.entryPoints} />
           </EuiPanel>
           <EuiSpacer />
+          <AuthenticationPanel />
+          <EuiSpacer />
           <EuiPanel paddingSize="l" hasBorder>
             <SitemapsTable domain={domain} indexName={indexName} items={domain.sitemaps} />
           </EuiPanel>
@@ -111,8 +113,6 @@ export const CrawlerDomainDetail: React.FC = () => {
           </EuiPanel>
           <EuiSpacer />
           <DeduplicationPanel />
-          <EuiSpacer />
-          <AuthenticationPanel />
         </>
       )}
       <DeleteDomainModal />

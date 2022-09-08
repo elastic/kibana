@@ -7,13 +7,13 @@
 
 import { kea, MakeLogicType } from 'kea';
 
-interface BasicCrawlerAuth {
+export interface BasicCrawlerAuth {
   password: string;
   type: 'basic';
   username: string;
 }
 
-interface RawCrawlerAuth {
+export interface RawCrawlerAuth {
   header: string;
   type: 'raw';
 }
@@ -29,8 +29,10 @@ export function isRawCrawlerAuth(auth: CrawlerAuth): auth is RawCrawlerAuth {
 }
 
 interface AuthenticationPanelValues {
+  areCredentialsVisible: boolean;
   headerContent: string;
   isEditing: boolean;
+  isModalVisible: boolean;
   password: string;
   selectedAuthOption: string | null;
   username: string;
@@ -41,8 +43,10 @@ interface AuthenticationPanelActions {
   enableEditing(currentCrawlerAuth?: CrawlerAuth): { currentCrawlerAuth: CrawlerAuth | undefined };
   selectAuthOption(authType: string): { authType: string };
   setHeaderContent(headerContent: string): { headerContent: string };
+  setIsModalVisible(isModalVisible: boolean): { isModalVisible: boolean };
   setPassword(password: string): { password: string };
   setUsername(username: string): { username: string };
+  toggleCredentialVisibility(): void;
 }
 
 export const AuthenticationPanelLogic = kea<
@@ -54,10 +58,20 @@ export const AuthenticationPanelLogic = kea<
     enableEditing: (currentCrawlerAuth) => ({ currentCrawlerAuth }),
     selectAuthOption: (authType) => ({ authType }),
     setHeaderContent: (headerContent) => ({ headerContent }),
+    setIsModalVisible: (isModalVisible) => ({ isModalVisible }),
     setPassword: (password) => ({ password }),
     setUsername: (username) => ({ username }),
+    toggleCredentialVisibility: true,
   }),
   reducers: () => ({
+    areCredentialsVisible: [
+      false,
+      {
+        disableEditing: () => false,
+        enableEditing: () => false,
+        toggleCredentialVisibility: (areCredentialsVisible) => !areCredentialsVisible,
+      },
+    ],
     headerContent: [
       '',
       {
@@ -73,6 +87,12 @@ export const AuthenticationPanelLogic = kea<
       {
         disableEditing: () => false,
         enableEditing: () => true,
+      },
+    ],
+    isModalVisible: [
+      false,
+      {
+        setIsModalVisible: (_, { isModalVisible }) => isModalVisible,
       },
     ],
     password: [
