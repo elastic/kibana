@@ -6,7 +6,7 @@
  */
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiPageContent, EuiEmptyPrompt } from '@elastic/eui';
+import { EuiPageContent_Deprecated as EuiPageContent, EuiEmptyPrompt } from '@elastic/eui';
 import React, { FunctionComponent } from 'react';
 import { Router, Switch, Route } from 'react-router-dom';
 

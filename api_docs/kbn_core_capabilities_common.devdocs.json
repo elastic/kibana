@@ -31,6 +31,7 @@
         ],
         "path": "packages/core/capabilities/core-capabilities-common/src/capabilities.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-capabilities-common",
@@ -45,7 +46,8 @@
               "{ [x: string]: boolean; }"
             ],
             "path": "packages/core/capabilities/core-capabilities-common/src/capabilities.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-capabilities-common",
@@ -60,7 +62,8 @@
               "{ [sectionId: string]: Record<string, boolean>; }"
             ],
             "path": "packages/core/capabilities/core-capabilities-common/src/capabilities.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-capabilities-common",
@@ -75,7 +78,8 @@
               "{ [x: string]: boolean; }"
             ],
             "path": "packages/core/capabilities/core-capabilities-common/src/capabilities.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-capabilities-common",
@@ -90,7 +94,8 @@
               "[key: string]:  Record<string, boolean | Record<string, boolean>>"
             ],
             "path": "packages/core/capabilities/core-capabilities-common/src/capabilities.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

@@ -26,6 +26,7 @@
         ],
         "path": "packages/kbn-config-mocks/src/env.mock.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/config-mocks",
@@ -41,6 +42,7 @@
             ],
             "path": "packages/kbn-config-mocks/src/env.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -63,6 +65,7 @@
         ],
         "path": "packages/kbn-config-mocks/src/deprecations.mock.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -84,6 +87,7 @@
         ],
         "path": "packages/kbn-config-mocks/src/config.mock.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -127,6 +131,7 @@
         ],
         "path": "packages/kbn-config-mocks/src/config_service.mock.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -147,6 +152,7 @@
         ],
         "path": "packages/kbn-config-mocks/src/raw_config_service.mock.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -160,6 +166,7 @@
         "description": [],
         "path": "packages/kbn-config-mocks/src/deprecations.mock.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/config-mocks",
@@ -174,6 +181,7 @@
             ],
             "path": "packages/kbn-config-mocks/src/deprecations.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           }
@@ -189,6 +197,7 @@
         "description": [],
         "path": "packages/kbn-config-mocks/src/config.mock.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/config-mocks",
@@ -209,6 +218,7 @@
             ],
             "path": "packages/kbn-config-mocks/src/config.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           }
@@ -224,6 +234,7 @@
         "description": [],
         "path": "packages/kbn-config-mocks/src/config_service.mock.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/config-mocks",
@@ -244,6 +255,7 @@
             ],
             "path": "packages/kbn-config-mocks/src/config_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -257,7 +269,8 @@
                   "{ atPath?: Record<string, any> | undefined; getConfig$?: Record<string, any> | undefined; }"
                 ],
                 "path": "packages/kbn-config-mocks/src/config_service.mock.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }
@@ -273,6 +286,7 @@
         "description": [],
         "path": "packages/kbn-config-mocks/src/raw_config_service.mock.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/config-mocks",
@@ -295,6 +309,7 @@
             ],
             "path": "packages/kbn-config-mocks/src/raw_config_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -310,7 +325,8 @@
                   "<Record<string, any>> | undefined; }"
                 ],
                 "path": "packages/kbn-config-mocks/src/raw_config_service.mock.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }
