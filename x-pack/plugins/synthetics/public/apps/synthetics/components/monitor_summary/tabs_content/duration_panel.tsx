@@ -13,7 +13,7 @@ import { ClientPluginsStart } from '../../../../../plugin';
 
 import { KpiWrapper } from './kpi_wrapper';
 
-export const AvailabilityPanel = () => {
+export const DurationPanel = () => {
   const {
     services: {
       observability: { ExploratoryViewEmbeddable },
@@ -24,15 +24,14 @@ export const AvailabilityPanel = () => {
   return (
     <KpiWrapper>
       <ExploratoryViewEmbeddable
-        align="left"
         reportType={ReportTypes.SINGLE_METRIC}
         attributes={[
           {
             time: { from: 'now-30d', to: 'now' },
-            name: 'Monitor availability',
+            name: 'Monitor duration',
             dataType: 'synthetics',
-            selectedMetricField: 'monitor_availability',
-            reportDefinitions: { config_id: [monitorId] },
+            selectedMetricField: 'monitor_duration',
+            reportDefinitions: { 'monitor.id': [monitorId] },
           },
         ]}
       />
