@@ -113,14 +113,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       // toasts
-      // FIXME: This test should trigger in 2 toast notifications, but could get 3 or 4.
-      // FIXME: Re-test after https://github.com/elastic/kibana/issues/139423
-      // const toasts = await find.allByCssSelector(toastsSelector);
-      // expect(toasts.length).to.be(3); // BUG: should be 2, but could be 3 or 4.
-      // const expects = ['2 of 4 shards failed', '2 of 4 shards failed', 'Query result'];
-      // await asyncForEach(toasts, async (t, index) => {
-      //   expect(await t.getVisibleText()).to.eql(expects[index]);
-      // });
+      const toasts = await find.allByCssSelector(toastsSelector);
+      expect(toasts.length).to.be(2);
+      const expects = ['2 of 4 shards failed', 'Query result'];
+      await asyncForEach(toasts, async (t, index) => {
+        expect(await t.getVisibleText()).to.eql(expects[index]);
+      });
 
       // click "see full error" button in the toast
       const [openShardModalButton] = await testSubjects.findAll('openShardFailureModalBtn');
