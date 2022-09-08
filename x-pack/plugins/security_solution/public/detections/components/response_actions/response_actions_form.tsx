@@ -17,9 +17,12 @@ import { UseField } from '../../../shared_imports';
 const GhostFormField = () => <></>;
 
 export interface ResponseActionValidatorRef {
-  validation: (actions: unknown) => Promise<{ [key: number]: { errors: Record<string, unknown> } }>;
+  validation?: (
+    actions: unknown
+  ) => Promise<{ [key: number]: { errors: Record<string, unknown> } }>;
   actions?: unknown;
 }
+
 interface IProps {
   items: ArrayItem[];
   addItem: () => void;

@@ -54,7 +54,9 @@ export const transformRuleToAlertResponseAction = ({
     return {
       params: {
         ...params,
-        ecs_mapping: convertECSMappingToFormValue(params.ecs_mapping),
+        ecs_mapping: convertECSMappingToFormValue(
+          params.ecs_mapping as Record<string, Record<'field', string>>
+        ),
       },
       actionTypeId: action_type_id,
     };
@@ -74,7 +76,7 @@ export const transformAlertToRuleResponseAction = ({
     return {
       params: {
         ...params,
-        ecs_mapping: convertECSMappingToObject(params.ecs_mapping),
+        ecs_mapping: convertECSMappingToObject(params.ecs_mapping as EcsMappingFormValueArray),
       },
       action_type_id: actionTypeId,
     };

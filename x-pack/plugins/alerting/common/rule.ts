@@ -74,7 +74,7 @@ export interface RuleAction {
 
 export interface RuleResponseAction {
   actionTypeId: string;
-  params: RuleActionParams;
+  params: Record<string, unknown>;
 }
 
 export interface RuleAggregations {

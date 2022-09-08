@@ -16,7 +16,9 @@ interface LazyOsqueryActionParamsFormProps {
   formRef: React.RefObject<ResponseActionValidatorRef>;
 }
 interface ResponseActionValidatorRef {
-  validation: (actions: unknown) => Promise<{ [key: number]: { errors: Record<string, unknown> } }>;
+  validation?: (
+    actions: unknown
+  ) => Promise<{ [key: number]: { errors: Record<string, unknown> } }>;
   actions?: unknown;
 }
 

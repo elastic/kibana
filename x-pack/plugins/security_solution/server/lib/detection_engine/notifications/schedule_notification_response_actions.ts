@@ -13,7 +13,9 @@ import type { SetupPlugins } from '../../../plugin_contract';
 interface OsqueryQuery {
   id: string;
   query: string;
-  ecs_mapping?: Record<string, Record<'field', string>>;
+  ecs_mapping: Record<string, Record<'field', string>>;
+  version: string;
+  platform: string;
 }
 
 interface OsqueryResponseAction {
@@ -69,7 +71,7 @@ export const scheduleNotificationResponseActions = (
             version: '',
             platform: '',
           };
-        }),
+        }) as unknown as OsqueryQuery[],
         ...rest,
         ecs_mapping: convertECSMappingToObject(ecsMapping),
         saved_query_id: savedQueryId,

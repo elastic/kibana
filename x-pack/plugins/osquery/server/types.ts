@@ -22,13 +22,6 @@ import type {
 import type { PluginStart as DataViewsPluginStart } from '@kbn/data-views-plugin/server';
 import type { CreateLiveQueryRequestBodySchema } from '../common/schemas/routes/live_query';
 
-export interface OsqueryActionPayload {
-  agentIds: string[];
-  query: string;
-  ecs_mapping?: Record<string, Record<'field', string>>;
-  id?: string;
-}
-
 export interface OsqueryPluginSetup {
   osqueryCreateAction: (payload: CreateLiveQueryRequestBodySchema) => void;
 }
