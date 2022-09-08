@@ -2552,9 +2552,105 @@ describe('SavedObjectsRepository', () => {
     });
 
     describe('returns', () => {
-      it.todo(`returns early for empty objects argument`);
-      it.todo(`formats the ES response`);
-      it.todo(`handles a mix of successful deletes and errors`);
+      const expectSuccessResult = ({ type, id }: SavedObjectsBulkDeleteObject) => ({
+        type,
+        id,
+        success: true,
+      });
+
+      const expectErrorResult = ({
+        type,
+        id,
+        error,
+      }: {
+        type: string;
+        id: string;
+        error?: any;
+      }) => ({
+        type,
+        id,
+        success: false,
+        error: error ?? createBadRequestError(),
+      });
+
+      const expectClientCallArgsAction = (
+        objects: TypeIdTuple[],
+        {
+          method,
+          _index = expect.any(String),
+          getId = () => expect.any(String),
+          overrides = {},
+        }: {
+          method: string;
+          _index?: string;
+          getId?: (type: string, id: string) => string;
+          overrides?: Record<string, unknown>;
+        }
+      ) => {
+        const body = [];
+        for (const { type, id } of objects) {
+          body.push({
+            [method]: {
+              _index,
+              _id: getId(type, id),
+              ...overrides,
+            },
+          });
+        }
+        expect(client.bulk).toHaveBeenCalledWith(
+          expect.objectContaining({ body }),
+          expect.anything()
+        );
+      };
+
+      const bulkDeleteMultiError = async (
+        [obj1, _obj, obj2]: SavedObjectsBulkDeleteObject[],
+        options: SavedObjectsBulkDeleteOptions | undefined,
+        mgetResponse: estypes.MgetResponse,
+        mgetOptions?: { statusCode?: number }
+      ) => {
+        const getId = (type: string, id: string) => `${options?.namespace}:${type}:${id}`;
+        // mock the response for the not found doc
+        client.mget.mockResponseOnce(mgetResponse, { statusCode: mgetOptions?.statusCode });
+        // get a mocked response for the valid docs
+        const bulkResponse = getMockEsBulkDeleteResponse([obj1, obj2], { namespace });
+        client.bulk.mockResponseOnce(bulkResponse);
+
+        const result = await savedObjectsRepository.bulkDelete([obj1, _obj, obj2], options);
+        expect(client.bulk).toHaveBeenCalledTimes(1);
+        expect(client.mget).toHaveBeenCalledTimes(1);
+
+        expectClientCallArgsAction([obj1, obj2], { method: 'delete', getId });
+        expect(result).toEqual({
+          statuses: [
+            { ...obj1, success: true },
+            { ...expectErrorNotFound(_obj), success: false },
+            { ...obj2, success: true },
+          ],
+        });
+      };
+
+      it(`returns early for empty objects argument`, async () => {
+        await savedObjectsRepository.bulkDelete([], { namespace });
+        expect(client.bulk).toHaveBeenCalledTimes(0);
+      });
+
+      it(`formats the ES response`, async () => {
+        const response = await repositoryBulkDeleteSuccess([obj1, obj2], { namespace });
+        expect(response).toEqual({
+          statuses: [obj1, obj2].map(expectSuccessResult),
+        });
+      });
+
+      it(`handles a mix of successful deletes and errors`, async () => {
+        const notFoundObj = { ...obj1, type: MULTI_NAMESPACE_ISOLATED_TYPE, found: false };
+        await bulkDeleteMultiError(
+          [obj1, notFoundObj, obj2],
+          { namespace },
+          {} as estypes.MgetResponse,
+          { statusCode: 404 }
+        );
+      });
     });
   });
 
