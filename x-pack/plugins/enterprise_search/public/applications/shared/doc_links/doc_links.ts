@@ -70,6 +70,7 @@ class DocLinks {
   public enterpriseSearchUsersAccess: string;
   public kibanaSecurity: string;
   public languageAnalyzers: string;
+  public languageClients: string;
   public licenseManagement: string;
   public pluginsIngestAttachment: string;
   public queryDsl: string;
