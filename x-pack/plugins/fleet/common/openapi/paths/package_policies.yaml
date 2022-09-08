@@ -41,11 +41,13 @@ post:
             required:
               - item
   requestBody:
+    description: You should use inputs as an object and not use the deprecated inputs array.
     content:
       application/json:
         schema:
           oneOf:
             - $ref: ../components/schemas/simplified_package_policy.yaml
+            # Using inputs as an array is deprecated
             - deprecated: true
               allOf:
                 - $ref: ../components/schemas/new_package_policy.yaml

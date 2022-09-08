@@ -1686,6 +1686,9 @@ paths:
                 required:
                   - item
       requestBody:
+        description: >-
+          You should use inputs as an object and not use the deprecated inputs
+          array.
         content:
           application/json:
             schema:
@@ -2732,6 +2735,53 @@ components:
         - online
         - inactive
         - warning
+    agent_component_status:
+      title: Agent component status
+      type: string
+      enum:
+        - starting
+        - configuring
+        - healthy
+        - degraded
+        - failed
+        - stopping
+        - stopped
+    agent_component_unit_type:
+      title: Agent component unit type
+      type: string
+      enum:
+        - input
+        - output
+    agent_component_unit:
+      title: Agent component unit
+      type: object
+      properties:
+        id:
+          type: string
+        type:
+          $ref: '#/components/schemas/agent_component_unit_type'
+        status:
+          $ref: '#/components/schemas/agent_component_status'
+        message:
+          type: string
+        payload:
+          type: object
+    agent_component:
+      title: Agent component
+      type: object
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+        status:
+          $ref: '#/components/schemas/agent_component_status'
+        message:
+          type: string
+        units:
+          type: array
+          items:
+            $ref: '#/components/schemas/agent_component_unit'
     agent:
       title: Agent
       type: object
@@ -2768,6 +2818,10 @@ components:
           $ref: '#/components/schemas/agent_status'
         default_api_key:
           type: string
+        components:
+          type: array
+          items:
+            $ref: '#/components/schemas/agent_component'
       required:
         - type
         - active
