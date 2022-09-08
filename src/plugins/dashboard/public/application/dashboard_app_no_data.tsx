@@ -33,7 +33,7 @@ export const DashboardAppNoDataPage = ({
   };
   return (
     <AnalyticsNoDataPageKibanaProvider {...analyticsServices}>
-      <AnalyticsNoDataPage onDataViewCreated={onDataViewCreated} />;
+      <AnalyticsNoDataPage onDataViewCreated={onDataViewCreated} />
     </AnalyticsNoDataPageKibanaProvider>
   );
 };
