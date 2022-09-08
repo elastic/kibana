@@ -15,6 +15,7 @@ import {
   OPTIONS_LIST_CONTROL,
   RANGE_SLIDER_CONTROL,
 } from '.';
+import { ControlGroupRenderer } from './control_group/control_group_renderer';
 import { OptionsListEmbeddableFactory, OptionsListEmbeddableInput } from './options_list';
 import { RangeSliderEmbeddableFactory, RangeSliderEmbeddableInput } from './range_slider';
 import { controlsService } from './services/controls/controls_service';
@@ -107,6 +108,7 @@ export class ControlsPlugin
     return {
       getControlFactory,
       getControlTypes,
+      ControlGroupRenderer,
     };
   }
 

@@ -22,11 +22,15 @@ import {
   IUiSettingsClient,
   OverlayStart,
 } from '@kbn/core/public';
+import { ControlsPluginStart } from '@kbn/controls-plugin/public/types';
 import { EmbeddableExamplesStart } from '@kbn/embeddable-examples-plugin/public/plugin';
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+
 import { HelloWorldEmbeddableExample } from './hello_world_embeddable_example';
 import { TodoEmbeddableExample } from './todo_embeddable_example';
 import { ListContainerExample } from './list_container_example';
 import { EmbeddablePanelExample } from './embeddable_panel_example';
+import { ControlGroupEmbeddableExample } from './control_group_example';
 
 interface PageDef {
   title: string;
@@ -66,7 +70,9 @@ interface Props {
   embeddableApi: EmbeddableStart;
   uiActionsApi: UiActionsStart;
   overlays: OverlayStart;
+  dataViews: DataViewsPublicPluginStart;
   notifications: CoreStart['notifications'];
+  controls: ControlsPluginStart;
   inspector: InspectorStartContract;
   savedObject: SavedObjectsStart;
   uiSettingsClient: IUiSettingsClient;
@@ -75,8 +81,10 @@ interface Props {
 
 const EmbeddableExplorerApp = ({
   basename,
+  controls,
   navigateToApp,
   embeddableApi,
+  dataViews,
   embeddableExamples,
 }: Props) => {
   const pages: PageDef[] = [
@@ -117,6 +125,11 @@ const EmbeddableExplorerApp = ({
           searchListContainerFactory={embeddableExamples.factories.getSearchableListContainerEmbeddableFactory()}
         />
       ),
+    },
+    {
+      title: 'Control Group Example',
+      id: 'controlGroupExample',
+      component: <ControlGroupEmbeddableExample controls={controls} dataViews={dataViews} />,
     },
   ];
 

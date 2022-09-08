@@ -20,6 +20,7 @@ import { DataViewField, DataViewsPublicPluginStart } from '@kbn/data-views-plugi
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { ControlInput } from '../common/types';
 import { ControlsServiceType } from './services/controls/types';
+import { ControlGroupRendererProps } from './control_group/control_group_renderer';
 
 export interface CommonControlOutput {
   filters?: Filter[];
@@ -77,6 +78,7 @@ export interface ControlsPluginSetup {
 export interface ControlsPluginStart {
   getControlFactory: ControlsServiceType['getControlFactory'];
   getControlTypes: ControlsServiceType['getControlTypes'];
+  ControlGroupRenderer: React.FC<ControlGroupRendererProps>;
 }
 
 export interface ControlsPluginSetupDeps {

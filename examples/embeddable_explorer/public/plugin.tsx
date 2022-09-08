@@ -12,12 +12,16 @@ import { UiActionsService } from '@kbn/ui-actions-plugin/public';
 import { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { Start as InspectorStart } from '@kbn/inspector-plugin/public';
 import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
+import { ControlsPluginStart } from '@kbn/controls-plugin/public/types';
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import img from './embeddables.png';
 
 interface StartDeps {
   uiActions: UiActionsService;
   embeddable: EmbeddableStart;
+  controls: ControlsPluginStart;
   inspector: InspectorStart;
+  dataViews: DataViewsPublicPluginStart;
   embeddableExamples: EmbeddableExamplesStart;
 }
 
@@ -44,11 +48,13 @@ export class EmbeddableExplorerPlugin implements Plugin<void, void, {}, StartDep
           {
             notifications: coreStart.notifications,
             inspector: depsStart.inspector,
+            dataViews: depsStart.dataViews,
             embeddableApi: depsStart.embeddable,
             uiActionsApi: depsStart.uiActions,
             basename: params.appBasePath,
             uiSettingsClient: coreStart.uiSettings,
             savedObject: coreStart.savedObjects,
+            controls: depsStart.controls,
             overlays: coreStart.overlays,
             navigateToApp: coreStart.application.navigateToApp,
             embeddableExamples: depsStart.embeddableExamples,
