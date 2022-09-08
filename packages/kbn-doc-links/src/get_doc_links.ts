@@ -126,6 +126,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       crawlerManaging: `${ENTERPRISE_SEARCH_DOCS}crawler-managing.html`,
       crawlerOverview: `${ENTERPRISE_SEARCH_DOCS}crawler.html`,
       languageAnalyzers: `${ELASTICSEARCH_DOCS}analysis-lang-analyzer.html`,
+      languageClients: `${ENTERPRISE_SEARCH_DOCS}programming-language-clients.html`,
       licenseManagement: `${ENTERPRISE_SEARCH_DOCS}license-management.html`,
       mailService: `${ENTERPRISE_SEARCH_DOCS}mailer-configuration.html`,
       start: `${ENTERPRISE_SEARCH_DOCS}start.html`,
