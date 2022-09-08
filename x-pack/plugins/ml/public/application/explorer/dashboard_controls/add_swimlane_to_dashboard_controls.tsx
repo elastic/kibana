@@ -16,6 +16,8 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { DashboardSavedObject } from '@kbn/dashboard-plugin/public';
+import { Query } from '@kbn/es-query';
+import { SEARCH_QUERY_LANGUAGE } from '../../../../common/constants/search';
 import { getDefaultSwimlanePanelTitle } from '../../../embeddables/anomaly_swimlane/anomaly_swimlane_embeddable';
 import { SWIMLANE_TYPE, SwimlaneType } from '../explorer_constants';
 import { JobId } from '../../../../common/types/anomaly_detection_jobs';
@@ -44,6 +46,7 @@ interface AddToDashboardControlProps {
   jobIds: JobId[];
   viewBy: string;
   onClose: (callback?: () => Promise<void>) => void;
+  queryString?: string;
 }
 
 /**
@@ -53,6 +56,7 @@ export const AddSwimlaneToDashboardControl: FC<AddToDashboardControlProps> = ({
   onClose,
   jobIds,
   viewBy,
+  queryString,
 }) => {
   const { dashboardItems, isLoading, search } = useDashboardTable();
 
@@ -66,6 +70,9 @@ export const AddSwimlaneToDashboardControl: FC<AddToDashboardControlProps> = ({
       jobIds,
       swimlaneType: selectedSwimlane,
       ...(selectedSwimlane === SWIMLANE_TYPE.VIEW_BY ? { viewBy } : {}),
+      ...(queryString !== undefined
+        ? { query: { query: queryString, language: SEARCH_QUERY_LANGUAGE.KUERY } as Query }
+        : {}),
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedSwimlane]);
