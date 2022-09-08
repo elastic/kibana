@@ -69,7 +69,7 @@ export interface PackagePolicyResponseExtensionComponentProps {
 export type PackageGenericErrorsListComponent = ComponentType<PackageGenericErrorsListProps>;
 
 export interface PackageGenericErrorsListProps {
-  /** The current agent to retrieve response from */
+  /** A list of errors from a package */
   packageErrors: FleetServerAgentComponentUnit[];
 }
 
