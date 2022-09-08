@@ -5,25 +5,17 @@
  * 2.0.
  */
 
-import { ADD_AGENT_BUTTON, ADD_AGENT_FLYOUT } from '../screens/fleet';
-import { cleanupAgentPolicies } from '../tasks/cleanup';
+import { ADD_AGENT_BUTTON, AGENT_FLYOUT } from '../screens/fleet';
+import { cleanupAgentPolicies, deleteFleetServerDocs, deleteAgentDocs } from '../tasks/cleanup';
 import { createAgentDoc } from '../tasks/agents';
-import { setFleetServerHost } from '../tasks/fleet';
+import { setFleetServerHost } from '../tasks/fleet_server';
 import { FLEET, navigateTo } from '../tasks/navigation';
 
 const FLEET_SERVER_POLICY_ID = 'fleet-server-policy';
 
 function cleanUp() {
-  cy.task('deleteDocsByQuery', {
-    index: '.fleet-agents',
-    query: { match_all: {} },
-    ignoreUnavailable: true,
-  });
-  cy.task('deleteDocsByQuery', {
-    index: '.fleet-servers',
-    query: { match_all: {} },
-    ignoreUnavailable: true,
-  });
+  deleteFleetServerDocs(true);
+  deleteAgentDocs(true);
   cleanupAgentPolicies();
 }
 let kibanaVersion: string;
@@ -80,7 +72,7 @@ describe('Fleet add agent flyout', () => {
       cy.getBySel(ADD_AGENT_BUTTON).click();
       cy.intercept('POST', '/api/fleet/agent_policies?sys_monitoring=true').as('createAgentPolicy');
 
-      cy.getBySel('createPolicyBtn').click();
+      cy.getBySel(AGENT_FLYOUT.CREATE_POLICY_BUTTON).click();
 
       let agentPolicyId: string;
       const startTime = Date.now();
@@ -89,7 +81,7 @@ describe('Fleet add agent flyout', () => {
         agentPolicyId = xhr.response.body.item.id;
       });
       // verify create button changed to dropdown
-      cy.getBySel('agentPolicyDropdown');
+      cy.getBySel(AGENT_FLYOUT.POLICY_DROPDOWN);
 
       cy.wrap(null).then(() => {
         cy.task('insertDoc', {
@@ -99,7 +91,7 @@ describe('Fleet add agent flyout', () => {
         });
       });
 
-      cy.getBySel(ADD_AGENT_FLYOUT.CONFIRM_AGENT_ENROLLMENT_BUTTON);
+      cy.getBySel(AGENT_FLYOUT.CONFIRM_AGENT_ENROLLMENT_BUTTON);
 
       cy.wrap(null).then(() => {
         cy.task('insertDoc', {
@@ -113,7 +105,7 @@ describe('Fleet add agent flyout', () => {
         });
       });
 
-      cy.getBySel(ADD_AGENT_FLYOUT.INCOMING_DATA_CONFIRMED_CALL_OUT);
+      cy.getBySel(AGENT_FLYOUT.INCOMING_DATA_CONFIRMED_CALL_OUT);
     });
   });
 });
