@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { RegistryRelease } from './epm';
+
 export interface PackagePolicyPackage {
   name: string;
   title: string;
@@ -32,6 +34,7 @@ export interface NewPackagePolicyInputStream {
       };
     };
   };
+  release?: RegistryRelease;
   vars?: PackagePolicyConfigRecord;
   config?: PackagePolicyConfigRecord;
 }
