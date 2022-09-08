@@ -38,27 +38,16 @@ export const Route = ({ children, component: Component, render, ...rest }: Route
   if (component) {
     return <ReactRouterRoute {...rest} component={component} />;
   }
-  if (render) {
+  if (render || typeof children === 'function') {
+    const renderFunction = typeof children === 'function' ? children : render;
     return (
       <ReactRouterRoute
         {...rest}
         render={(props) => (
           <>
             <MatchPropagator />
-            {render(props)}
-          </>
-        )}
-      />
-    );
-  }
-  if (typeof children === 'function') {
-    return (
-      <ReactRouterRoute
-        {...rest}
-        render={(props) => (
-          <>
-            <MatchPropagator />
-            {children(props)}
+            {/* @ts-ignore  else condition exists if renderFunction is undefined*/}
+            {renderFunction(props)}
           </>
         )}
       />
