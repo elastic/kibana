@@ -8,11 +8,12 @@
 import React, { memo, useEffect, useMemo, useState } from 'react';
 import { EuiButton, EuiCard, EuiFlexGroup, EuiFlexItem, EuiPageHeader } from '@elastic/eui';
 import styled from 'styled-components';
+import { FEATURE_FLAG_NAMES } from '@kbn/cloud-experiments-plugin/common';
 import * as i18n from './translations';
 import endpointSvg from '../../images/endpoint1.svg';
 import cloudSvg from '../../images/cloud1.svg';
 import siemSvg from '../../images/siem1.svg';
-import { ADD_DATA_PATH, ADD_DATA_PATH_VARIATION } from '../../../../common/constants';
+import { ADD_DATA_PATH } from '../../../../common/constants';
 import { useKibana } from '../../lib/kibana';
 
 const imgUrls = {
@@ -67,7 +68,7 @@ export const LandingCards = memo(() => {
   useEffect(() => {
     (async function loadVariation() {
       const variationUrl = await cloudExperiments?.getVariation(
-        ADD_DATA_PATH_VARIATION,
+        FEATURE_FLAG_NAMES['SECURITY_SOLUTIONS.ADD_INTEGRATIONS_URL'],
         ADD_DATA_PATH
       );
       if (variationUrl) {

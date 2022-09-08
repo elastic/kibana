@@ -21,7 +21,6 @@ export const APP_NAME = 'Security' as const;
 export const APP_ICON = 'securityAnalyticsApp' as const;
 export const APP_ICON_SOLUTION = 'logoSecurity' as const;
 export const APP_PATH = `/app/security` as const;
-export const ADD_DATA_PATH_VARIATION = 'security-solutions.add-integrations-url';
 export const ADD_DATA_PATH = `/app/integrations/browse/security`;
 export const DEFAULT_BYTES_FORMAT = 'format:bytes:defaultPattern' as const;
 export const DEFAULT_DATE_FORMAT = 'dateFormat' as const;

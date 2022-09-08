@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { FEATURE_FLAG_NAMES, METRIC_NAMES } from './constants';
+
 /**
  * The contract of the setup lifecycle method.
  */
@@ -27,10 +29,10 @@ export interface CloudExperimentsPluginSetup extends CloudExperimentsPluginStart
 export interface CloudExperimentsPluginStart {
   /**
    * Fetch the configuration assigned to variation `configKey`. If nothing is found, fallback to `defaultValue`.
-   * @param configKey The name of the key to find the config variation.
+   * @param configKey The name of the key to find the config variation. Valid keys are defined in {@link FEATURE_FLAG_NAMES}. When using a new feature flag, add the name to the list.
    * @param defaultValue The fallback value in case no variation is found.
    */
-  getVariation: <Data>(configKey: string, defaultValue: Data) => Promise<Data>;
+  getVariation: <Data>(configKey: FEATURE_FLAG_NAMES, defaultValue: Data) => Promise<Data>;
   /**
    * Report metrics back to the A/B testing service to measure the conversion rate for each variation in the experiment.
    * @param metric {@link CloudExperimentsMetric}
@@ -44,8 +46,10 @@ export interface CloudExperimentsPluginStart {
 export interface CloudExperimentsMetric<Data> {
   /**
    * The name of the metric.
+   * The existing metric names are defined in {@link METRIC_NAMES}.
+   * When reporting new metrics, add the name to the list.
    */
-  name: string;
+  name: METRIC_NAMES;
   /**
    * Any optional data to enrich the context of the metric. Or if the conversion is based on a non-numeric value.
    */

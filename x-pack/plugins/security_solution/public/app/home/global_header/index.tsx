@@ -17,9 +17,10 @@ import { i18n } from '@kbn/i18n';
 
 import type { AppMountParameters } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { FEATURE_FLAG_NAMES } from '@kbn/cloud-experiments-plugin/common';
 import { MlPopover } from '../../../common/components/ml_popover/ml_popover';
 import { useKibana } from '../../../common/lib/kibana';
-import { ADD_DATA_PATH, ADD_DATA_PATH_VARIATION } from '../../../../common/constants';
+import { ADD_DATA_PATH } from '../../../../common/constants';
 import { isDetectionsPath } from '../../../helpers';
 import { Sourcerer } from '../../../common/components/sourcerer';
 import { TimelineId } from '../../../../common/types/timeline';
@@ -61,7 +62,7 @@ export const GlobalHeader = React.memo(
     useEffect(() => {
       (async function loadVariation() {
         const variationUrl = await cloudExperiments?.getVariation(
-          ADD_DATA_PATH_VARIATION,
+          FEATURE_FLAG_NAMES['SECURITY_SOLUTIONS.ADD_INTEGRATIONS_URL'],
           ADD_DATA_PATH
         );
         if (variationUrl) {

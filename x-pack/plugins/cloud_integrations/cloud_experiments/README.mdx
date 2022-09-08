@@ -33,7 +33,11 @@ You can fetch the value of your feature flag by using the API `cloudExperiments.
 
 ```ts
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/(public|server)';
-import type { CloudExperimentsPluginSetup, CloudExperimentsPluginStart } from '@kbn/cloud-experiments-plugin/common';
+import {
+  FEATURE_FLAG_NAMES,
+  type CloudExperimentsPluginSetup, 
+  type CloudExperimentsPluginStart 
+} from '@kbn/cloud-experiments-plugin/common';
 
 interface SetupDeps {
   cloudExperiments?: CloudExperimentsPluginSetup;
@@ -55,7 +59,10 @@ export class MyPlugin implements Plugin<void, void, SetupDeps, StartDeps> {
   private async doSomethingBasedOnFeatureFlag(cloudExperiments?: CloudExperimentsPluginStart) {
     let myConfig = 'default config';
     if (cloudExperiments) {
-      myConfig = await cloudExperiments.getVariation('my-plugin.my-feature-flag', 'default config');
+      myConfig = await cloudExperiments.getVariation(
+        FEATURE_FLAG_NAMES.MY_FEATURE_FLAG, 
+        'default config'
+      );
     }
     // do something with the final value of myConfig...
   }
@@ -66,7 +73,10 @@ Since the `getVariation` API returns a promise, when using it in a React compone
 
 ```tsx
 import React, { useEffect, useState } from 'react';
-import type { CloudExperimentsPluginStart } from '@kbn/cloud-experiments-plugin/common';
+import {
+  FEATURE_FLAG_NAMES,
+  type CloudExperimentsPluginStart
+} from '@kbn/cloud-experiments-plugin/common';
 
 interface Props {
   cloudExperiments?: CloudExperimentsPluginStart;
@@ -77,7 +87,7 @@ export const MyReactComponent: React.FC<Props> = ({ cloudExperiments }: Props) =
   useEffect(() => {
     (async function loadVariation() {
       const variationConfig = await cloudExperiments?.getVariation(
-        'my-plugin.my-feature-flag',
+        FEATURE_FLAG_NAMES.MY_FEATURE_FLAG,
         'default config'
       );
       if (variationConfig) {
@@ -100,7 +110,11 @@ However, if our A/B testing provider's analysis tool is good enough for your use
 
 ```ts
 import type { CoreStart, Plugin } from '@kbn/core/(public|server)';
-import type { CloudExperimentsPluginSetup, CloudExperimentsPluginStart } from '@kbn/cloud-experiments-plugin/common';
+import {
+  METRIC_NAMES,
+  type CloudExperimentsPluginSetup, 
+  type CloudExperimentsPluginStart 
+} from '@kbn/cloud-experiments-plugin/common';
 
 interface SetupDeps {
   cloudExperiments?: CloudExperimentsPluginSetup;
@@ -116,7 +130,7 @@ export class MyPlugin implements Plugin<void, void, SetupDeps, StartDeps> {
     // the user performed some action, 
     // or a metric hit a threshold we want to communicate about
     deps.cloudExperiments?.reportMetric({
-      name: 'Something happened',
+      name: METRIC_NAMES.SOMETHING_HAPPENED,
       value: 22, // (optional) in case the metric requires a numeric metric
       meta: { // Optional metadata.
         hadSomething: true,  
