@@ -25,6 +25,7 @@ import {
 } from './file_kinds_registry';
 import type { FilesRequestHandlerContext, FilesRouter } from './routes/types';
 import { registerRoutes } from './routes';
+import { registerUsageCollector } from './usage';
 
 export class FilesPlugin implements Plugin<FilesSetup, FilesStart, FilesPluginSetupDependencies> {
   private readonly logger: Logger;
@@ -35,9 +36,12 @@ export class FilesPlugin implements Plugin<FilesSetup, FilesStart, FilesPluginSe
     this.logger = initializerContext.logger.get();
   }
 
-  public setup(core: CoreSetup, deps: FilesPluginSetupDependencies): FilesSetup {
+  public setup(
+    core: CoreSetup,
+    { security, usageCollection }: FilesPluginSetupDependencies
+  ): FilesSetup {
     FileServiceFactory.setup(core.savedObjects);
-    this.securitySetup = deps.security;
+    this.securitySetup = security;
 
     core.http.registerRouteHandlerContext<FilesRequestHandlerContext, typeof PLUGIN_ID>(
       PLUGIN_ID,
@@ -55,6 +59,10 @@ export class FilesPlugin implements Plugin<FilesSetup, FilesStart, FilesPluginSe
     const router: FilesRouter = core.http.createRouter();
     registerRoutes(router);
     setFileKindsRegistry(new FileKindsRegistryImpl(router));
+    registerUsageCollector({
+      usageCollection,
+      getFileService: () => this.fileServiceFactory?.asInternal(),
+    });
 
     return {
       registerFileKind(fileKind) {

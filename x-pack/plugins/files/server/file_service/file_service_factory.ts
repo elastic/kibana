@@ -14,7 +14,7 @@ import {
 import { SecurityPluginSetup } from '@kbn/security-plugin/server';
 
 import type { File, FileJSON, FileMetadata } from '../../common';
-import { fileObjectType, fileShareObjectType } from '../saved_objects';
+import { fileObjectType, fileShareObjectType, hiddenTypes } from '../saved_objects';
 import { BlobStorageService } from '../blob_storage_service';
 import { InternalFileShareService } from '../file_share_service';
 import {
@@ -63,7 +63,6 @@ export class FileServiceFactoryImpl implements FileServiceFactory {
   ) {}
 
   private createFileService(req?: KibanaRequest): FileServiceStart {
-    const hiddenTypes = [fileObjectType.name, fileShareObjectType.name];
     const soClient = req
       ? this.savedObjectsService.getScopedClient(req, {
           includedHiddenTypes: hiddenTypes,
