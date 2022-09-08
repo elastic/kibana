@@ -71,10 +71,6 @@ export interface RuleAction {
   actionTypeId: string;
   params: RuleActionParams;
 }
-export interface RuleResponseAction {
-  actionTypeId: string;
-  params: RuleActionParams;
-}
 
 export interface RuleAggregations {
   alertExecutionStatus: { [status: string]: number };
