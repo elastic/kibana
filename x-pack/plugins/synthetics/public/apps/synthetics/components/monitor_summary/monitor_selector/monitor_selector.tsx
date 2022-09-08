@@ -92,7 +92,7 @@ export const MonitorSelector = () => {
             showIcons: false,
           }}
           renderOption={(option, search) => (
-            <EuiLink href={`${basePath}/app/synthetics/monitor/${option.id}`}>
+            <EuiLink href={`${basePath}/app/synthetics/monitor/${option.key}`}>
               <EuiHighlight search={searchValue}>{option.label}</EuiHighlight>
             </EuiLink>
           )}

@@ -6,6 +6,19 @@
  */
 
 import axios from 'axios';
+import { FtrProviderContext } from '../../../../../../test/common/ftr_provider_context';
+
+export const enableMonitorManagedViaApi = async (kibanaUrl: string) => {
+  try {
+    await axios.post(kibanaUrl + '/internal/uptime/service/enablement', undefined, {
+      auth: { username: 'elastic', password: 'changeme' },
+      headers: { 'kbn-xsrf': 'true' },
+    });
+  } catch (e) {
+    // eslint-disable-next-line no-console
+    console.log(e);
+  }
+};
 
 export const addTestMonitor = async (kibanaUrl: string, name: string) => {
   data.name = name;
@@ -15,6 +28,18 @@ export const addTestMonitor = async (kibanaUrl: string, name: string) => {
       auth: { username: 'elastic', password: 'changeme' },
       headers: { 'kbn-xsrf': 'true' },
     });
+  } catch (e) {
+    // eslint-disable-next-line no-console
+    console.log(e);
+  }
+};
+
+export const cleanTestMonitors = async (params: Record<string, any>) => {
+  const getService = params.getService as FtrProviderContext['getService'];
+  const server = getService('kibanaServer');
+
+  try {
+    await server.savedObjects.clean({ types: ['synthetics-monitor'] });
   } catch (e) {
     // eslint-disable-next-line no-console
     console.log(e);
