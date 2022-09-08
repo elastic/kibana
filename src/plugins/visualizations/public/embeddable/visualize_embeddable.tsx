@@ -342,7 +342,7 @@ export class VisualizeEmbeddable
         .plugins.data.search.showWarnings(this.getInspectorAdapters()!.requests!, (warning) => {
           if (
             warning.type === 'shard_failure' &&
-            warning.reason.type === 'unsupported_aggregation_on_rollup_index'
+            warning.reason.type === 'unsupported_aggregation_on_downsampled_index'
           ) {
             warnings.push(warning.reason.reason || warning.message);
             return true;
