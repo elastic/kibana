@@ -40,7 +40,7 @@ export function ContainerDetails({ container, kubernetes }: Props) {
     });
   }
 
-  if (kubernetes?.deployment) {
+  if (kubernetes?.deployment && kubernetes?.deployment.length > 0) {
     listItems.push({
       title: i18n.translate(
         'xpack.apm.serviceIcons.serviceDetails.kubernetes.deployments',
@@ -58,7 +58,7 @@ export function ContainerDetails({ container, kubernetes }: Props) {
     });
   }
 
-  if (kubernetes?.namespace) {
+  if (kubernetes?.namespace && kubernetes?.namespace.length > 0) {
     listItems.push({
       title: i18n.translate(
         'xpack.apm.serviceIcons.serviceDetails.kubernetes.namespaces',
@@ -76,7 +76,7 @@ export function ContainerDetails({ container, kubernetes }: Props) {
     });
   }
 
-  if (kubernetes?.replicaset) {
+  if (kubernetes?.replicaset && kubernetes?.replicaset.length > 0) {
     listItems.push({
       title: i18n.translate(
         'xpack.apm.serviceIcons.serviceDetails.kubernetes.replicasets',

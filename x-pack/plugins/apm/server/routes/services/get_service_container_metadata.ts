@@ -145,16 +145,15 @@ export const getServiceContainerMetadata = async ({
 
   const sources = maybe(response.hits.hits[0])?._source as ResponseHitSource;
 
-  const allLabels =
-    response.aggregations?.labels?.buckets.map(
-      (bucket) => bucket.all_labels.hits.hits[0]._source.kubernetes.labels
-    ) ?? undefined;
+  const allLabels = response.aggregations?.labels?.buckets.map(
+    (bucket) => bucket.all_labels?.hits?.hits?.[0]._source?.kubernetes?.labels
+  );
 
   return {
     kubernetes: {
       pod: {
-        name: sources?.kubernetes?.pod.name,
-        uid: sources?.kubernetes?.pod.uid,
+        name: sources?.kubernetes?.pod?.name,
+        uid: sources?.kubernetes?.pod?.uid,
       },
       deployment: response.aggregations?.deployment?.buckets.map(
         (bucket) => bucket.key
@@ -166,13 +165,14 @@ export const getServiceContainerMetadata = async ({
         (bucket) => bucket.key
       ),
       labels: allLabels
-        ?.map((label) =>
-          Object.keys(label).map((key) => `${key}:${label[key]}`)
+        ?.map(
+          (label) =>
+            label && Object.keys(label).map((key) => `${key}:${label[key]}`)
         )
         .flat(),
     },
     container: {
-      image: sources?.container.image.name,
+      image: sources?.container?.image?.name,
       id: sources?.container.id,
     },
   };
