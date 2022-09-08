@@ -95,7 +95,6 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
   isScreenshotMode?: boolean;
   onTextLangQuerySubmit: (query?: Query | AggregateQuery) => void;
   onTextLangQueryChange: (query: AggregateQuery) => void;
-  isDisabled?: boolean;
 }
 
 const SharingMetaFields = React.memo(function SharingMetaFields({
@@ -467,12 +466,7 @@ export const QueryBarTopRow = React.memo(
               filters={props.filters}
               timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
               onFiltersUpdated={props.onFiltersUpdated}
-              buttonProps={{
-                size: shouldShowDatePickerAsBadge() ? 's' : 'm',
-                display: 'empty',
-                isDisabled: props.isDisabled,
-              }}
-            />
+              buttonProps={{ size: shouldShowDatePickerAsBadge() ? 's' : 'm', display: 'empty' }}
           </EuiFlexItem>
         )
       );
@@ -516,7 +510,6 @@ export const QueryBarTopRow = React.memo(
                 disableLanguageSwitcher={true}
                 prepend={renderFilterMenuOnly() && renderFilterButtonGroup()}
                 size={props.suggestionsSize}
-                isDisabled={props.isDisabled}
               />
             </EuiFlexItem>
           )}
