@@ -28,6 +28,8 @@ import { useGetCurrentUserProfile } from '../../containers/user_profiles/use_get
 import { OptionalFieldLabel } from './optional_field_label';
 import * as i18n from './translations';
 import { bringCurrentUserToFrontAndSort } from '../user_profiles/sort';
+import { useAvailableCasesOwners } from '../app/use_available_owners';
+import { getAllPermissionsExceptFrom } from '../../utils/permissions';
 
 interface Props {
   isLoading: boolean;
@@ -146,10 +148,12 @@ const AssigneesFieldComponent: React.FC<FieldProps> = React.memo(
 AssigneesFieldComponent.displayName = 'AssigneesFieldComponent';
 
 const AssigneesComponent: React.FC<Props> = ({ isLoading: isLoadingForm }) => {
-  const { owner } = useCasesContext();
+  const { owner: owners } = useCasesContext();
+  const availableOwners = useAvailableCasesOwners(getAllPermissionsExceptFrom('delete'));
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedOptions, setSelectedOptions] = useState<EuiComboBoxOptionOption[]>();
   const [isUserTyping, setIsUserTyping] = useState(false);
+  const hasOwners = owners.length > 0;
 
   const { data: currentUserProfile, isLoading: isLoadingCurrentUserProfile } =
     useGetCurrentUserProfile();
@@ -162,7 +166,7 @@ const AssigneesComponent: React.FC<Props> = ({ isLoading: isLoadingForm }) => {
     isFetching: isFetchingSuggest,
   } = useSuggestUserProfiles({
     name: searchTerm,
-    owners: owner,
+    owners: hasOwners ? owners : availableOwners,
     onDebounce,
   });
 
