@@ -25,6 +25,7 @@
     { "path": "../../../src/plugins/data/tsconfig.json" },
     { "path": "../../../src/plugins/navigation/tsconfig.json" },
     { "path": "../fleet/tsconfig.json" },
+    { "path": "../security_solution/tsconfig.json" },
 
     // optionalPlugins from ./kibana.json
     { "path": "../../../src/plugins/home/tsconfig.json" },
