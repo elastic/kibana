@@ -9,6 +9,7 @@
 import { mount, ReactWrapper } from 'enzyme';
 import React, { ReactElement, RefObject } from 'react';
 import { DiscoverPanelsResizable } from './discover_panels_resizable';
+import { act } from 'react-dom/test-utils';
 
 const containerHeight = 1000;
 const topPanelId = 'topPanel';
@@ -20,7 +21,6 @@ jest.mock('@elastic/eui', () => ({
 }));
 
 import * as eui from '@elastic/eui';
-import { act } from 'react-dom/test-utils';
 
 describe('Discover panels resizable', () => {
   const mountComponent = ({
@@ -40,10 +40,6 @@ describe('Discover panels resizable', () => {
     topPanel?: ReactElement;
     mainPanel?: ReactElement;
   }) => {
-    document.body.innerHTML = `<div id="discover-app" style="width: 1000px; height: 1000px"></div>`;
-
-    const mountPoint = document.getElementById('discover-app')!;
-
     return mount(
       <DiscoverPanelsResizable
         className={className}
@@ -53,8 +49,7 @@ describe('Discover panels resizable', () => {
         minMainPanelHeight={minMainPanelHeight}
         topPanel={topPanel}
         mainPanel={mainPanel}
-      />,
-      { attachTo: mountPoint }
+      />
     );
   };
 

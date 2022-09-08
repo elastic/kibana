@@ -44,7 +44,7 @@ const mountComponent = async ({
   isPlainRecord?: boolean;
   hideChart?: boolean;
 } = {}) => {
-  const services = { ...discoverServiceMock };
+  const services = discoverServiceMock;
   services.data.query.timefilter.timefilter.getAbsoluteTime = () => {
     return { from: '2020-05-14T11:05:13.590', to: '2020-05-14T11:20:13.590' };
   };
