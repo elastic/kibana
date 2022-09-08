@@ -15,7 +15,7 @@ export type PhaseWithTiming = keyof Omit<Phases, 'hot'>;
 
 export type PhaseExceptDelete = keyof Omit<Phases, 'delete'>;
 
-export type PhaseWithDownsample = 'hot' | 'warm' | 'cold' | 'frozen';
+export type PhaseWithDownsample = 'hot' | 'warm' | 'cold';
 
 export interface SerializedPolicy {
   name: string;
@@ -152,9 +152,6 @@ export interface SerializedFrozenPhase extends SerializedPhase {
      * Only available on enterprise license
      */
     searchable_snapshot?: SearchableSnapshotAction;
-    // TODO: rename the key to "downsample" when renamed in es
-    // TODO: check that this is fixed and allowed in es
-    rollup?: DownsampleAction;
   };
 }
 

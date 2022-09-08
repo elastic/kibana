@@ -346,19 +346,6 @@ export const createSerializer =
         } else {
           delete frozenPhase.actions.searchable_snapshot;
         }
-
-        /**
-         * FROZEN PHASE ROLLUP
-         */
-        if (_meta.frozen?.downsample?.enabled) {
-          frozenPhase.actions.rollup = {
-            ...frozenPhase.actions.rollup,
-            fixed_interval: `${_meta.frozen.downsample.fixedIntervalSize!}${_meta.frozen.downsample
-              .fixedIntervalUnits!}`,
-          };
-        } else {
-          delete frozenPhase.actions.rollup;
-        }
       } else {
         delete draft.phases.frozen;
       }

@@ -162,7 +162,7 @@ const getMinAgeField = (phase: PhaseWithTiming, defaultValue?: string) => ({
 });
 
 const getDownsampleFieldsToValidateOnChange = (p: PhaseWithDownsample) => {
-  const allPhases: PhaseWithDownsample[] = ['hot', 'warm', 'cold', 'frozen'];
+  const allPhases: PhaseWithDownsample[] = ['hot', 'warm', 'cold'];
   const getIntervalSizePath = (currentPhase: PhaseWithDownsample) =>
     `_meta.${currentPhase}.downsample.fixedIntervalSize`;
   const omitPreviousPhases = (currentPhase: PhaseWithDownsample) =>
@@ -340,7 +340,6 @@ export const getSchema = (isCloudEnabled: boolean): FormSchema => ({
       allocationNodeAttribute: {
         label: i18nTexts.editPolicy.allocationNodeAttributeFieldLabel,
       },
-      downsample: getDownsampleSchema('frozen'),
     },
     delete: {
       enabled: {

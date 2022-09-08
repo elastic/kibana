@@ -547,8 +547,6 @@ describe('<EditPolicy /> serialization', () => {
       await actions.togglePhase('frozen');
       await actions.frozen.setMinAgeValue('13');
       await actions.frozen.setSearchableSnapshot('myRepo');
-      await actions.frozen.downsample.toggle();
-      await actions.frozen.downsample.setDownsampleInterval('5', 'd');
 
       await actions.savePolicy();
 
@@ -560,9 +558,6 @@ describe('<EditPolicy /> serialization', () => {
       expect(parsedReqBody.phases.frozen).toEqual({
         min_age: '13d',
         actions: {
-          rollup: {
-            fixed_interval: '5d',
-          },
           searchable_snapshot: { snapshot_repository: 'myRepo' },
         },
       });

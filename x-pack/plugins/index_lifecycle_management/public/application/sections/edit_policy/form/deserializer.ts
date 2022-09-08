@@ -69,9 +69,6 @@ export const createDeserializer =
         enabled: Boolean(frozen),
         dataTierAllocationType: determineDataTierAllocationType(frozen?.actions),
         minAgeToMilliSeconds: -1,
-        downsample: {
-          enabled: Boolean(frozen?.actions?.rollup),
-        },
       },
       delete: {
         enabled: Boolean(deletePhase),
@@ -182,14 +179,6 @@ export const createDeserializer =
             const minAge = splitSizeAndUnits(draft.phases.frozen.min_age);
             draft.phases.frozen.min_age = minAge.size;
             draft._meta.frozen.minAgeUnit = minAge.units;
-          }
-
-          if (draft.phases.frozen?.actions.rollup?.fixed_interval) {
-            const downsampleInterval = splitSizeAndUnits(
-              draft.phases.frozen.actions.rollup.fixed_interval
-            );
-            draft._meta.frozen.downsample.fixedIntervalUnits = downsampleInterval.units;
-            draft._meta.frozen.downsample.fixedIntervalSize = downsampleInterval.size;
           }
         }
 

@@ -300,7 +300,6 @@ export const downsampleIntervalMultipleOfPreviousOne =
       hot: getValueFor('hot'),
       warm: getValueFor('warm'),
       cold: getValueFor('cold'),
-      frozen: getValueFor('frozen'),
     };
 
     const checkIfGreaterAndMultiple = (nextInterval: number, previousInterval: number): boolean =>
@@ -361,70 +360,6 @@ export const downsampleIntervalMultipleOfPreviousOne =
           return {
             message: i18n.translate(
               'xpack.indexLifecycleMgmt.editPolicy.downsamplePreviousIntervalColdPhaseHotError',
-              {
-                defaultMessage:
-                  'Must be greater than and a multiple of the hot phase value ({value})',
-                values: {
-                  value: intervalValues.hot.esFormat,
-                },
-              }
-            ),
-          };
-        }
-      }
-    }
-
-    if (phase === 'frozen' && intervalValues.frozen) {
-      if (intervalValues.cold) {
-        if (
-          !checkIfGreaterAndMultiple(
-            intervalValues.frozen.milliseconds,
-            intervalValues.cold.milliseconds
-          )
-        ) {
-          return {
-            message: i18n.translate(
-              'xpack.indexLifecycleMgmt.editPolicy.downsamplePreviousIntervalFrozenPhaseColdError',
-              {
-                defaultMessage:
-                  'Must be greater than and a multiple of the cold phase value ({value})',
-                values: {
-                  value: intervalValues.cold.esFormat,
-                },
-              }
-            ),
-          };
-        }
-      } else if (intervalValues.warm) {
-        if (
-          !checkIfGreaterAndMultiple(
-            intervalValues.frozen.milliseconds,
-            intervalValues.warm.milliseconds
-          )
-        ) {
-          return {
-            message: i18n.translate(
-              'xpack.indexLifecycleMgmt.editPolicy.downsamplePreviousIntervalFrozenPhaseWarmError',
-              {
-                defaultMessage:
-                  'Must be greater than and a multiple of the warm phase value ({value})',
-                values: {
-                  value: intervalValues.warm.esFormat,
-                },
-              }
-            ),
-          };
-        }
-      } else if (intervalValues.hot) {
-        if (
-          !checkIfGreaterAndMultiple(
-            intervalValues.frozen.milliseconds,
-            intervalValues.hot.milliseconds
-          )
-        ) {
-          return {
-            message: i18n.translate(
-              'xpack.indexLifecycleMgmt.editPolicy.downsamplePreviousIntervalFrozenPhaseHotError',
               {
                 defaultMessage:
                   'Must be greater than and a multiple of the hot phase value ({value})',

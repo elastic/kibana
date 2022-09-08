@@ -66,35 +66,31 @@ describe('<EditPolicy /> downsample interval validation', () => {
       error: [i18nTexts.editPolicy.errors.integerRequired],
     },
   ].forEach((testConfig: { name: string; value: string; error: string[] }) => {
-    (['hot', 'warm', 'cold', 'frozen'] as PhaseWithDownsample[]).forEach(
-      (phase: PhaseWithDownsample) => {
-        const { name, value, error } = testConfig;
-        test(`${phase}: ${name}`, async () => {
-          if (phase !== 'hot') {
-            await actions.togglePhase(phase);
-          }
+    (['hot', 'warm', 'cold'] as PhaseWithDownsample[]).forEach((phase: PhaseWithDownsample) => {
+      const { name, value, error } = testConfig;
+      test(`${phase}: ${name}`, async () => {
+        if (phase !== 'hot') {
+          await actions.togglePhase(phase);
+        }
 
-          await actions[phase].downsample.toggle();
+        await actions[phase].downsample.toggle();
 
-          // 1. We first set as dummy value to have a starting min_age value
-          await actions[phase].downsample.setDownsampleInterval('111');
-          // 2. At this point we are sure there will be a change of value and that any validation
-          // will be displayed under the field.
-          await actions[phase].downsample.setDownsampleInterval(value);
+        // 1. We first set as dummy value to have a starting min_age value
+        await actions[phase].downsample.setDownsampleInterval('111');
+        // 2. At this point we are sure there will be a change of value and that any validation
+        // will be displayed under the field.
+        await actions[phase].downsample.setDownsampleInterval(value);
 
-          actions.errors.waitForValidation();
+        actions.errors.waitForValidation();
 
-          actions.errors.expectMessages(error);
-        });
-      }
-    );
+        actions.errors.expectMessages(error);
+      });
+    });
   });
 
   test('should validate an interval is greater or multiple than previous phase interval', async () => {
     await actions.togglePhase('warm');
-
     await actions.togglePhase('cold');
-    await actions.togglePhase('frozen');
 
     await actions.hot.downsample.toggle();
     await actions.hot.downsample.setDownsampleInterval('60', 'm');
@@ -130,25 +126,5 @@ describe('<EditPolicy /> downsample interval validation', () => {
       ['Must be greater than and a multiple of the hot phase value (60m)'],
       'cold'
     );
-
-    await actions.frozen.downsample.toggle();
-    await actions.frozen.downsample.setDownsampleInterval('90', 'm');
-    actions.errors.waitForValidation();
-    actions.errors.expectMessages(
-      ['Must be greater than and a multiple of the cold phase value (90m)'],
-      'frozen'
-    );
-
-    await actions.cold.downsample.toggle(); // disable downsample in cold phase
-
-    actions.errors.waitForValidation();
-    actions.errors.expectMessages(
-      ['Must be greater than and a multiple of the hot phase value (60m)'],
-      'frozen'
-    ); // error is coming from hot phase now
-
-    await actions.frozen.downsample.setDownsampleInterval('2', 'h');
-    actions.errors.waitForValidation();
-    actions.errors.expectMessages([], 'frozen');
   }, /* increase a timeout of this test as it could fail on ci*/ 12000);
 });

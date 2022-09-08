@@ -64,7 +64,6 @@ export const createFrozenPhaseActions = (testBed: TestBed) => {
     frozen: {
       ...createMinAgeActions(testBed, 'frozen'),
       ...createSearchableSnapshotActions(testBed, 'frozen'),
-      ...createDownsampleActions(testBed, 'frozen'),
     },
   };
 };
