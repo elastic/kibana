@@ -13,7 +13,9 @@ const DATE_WITH_DATA = {
   rangeTo: '2021-10-20T13:36:22.109Z',
 };
 
-const ALERTS_SECTION_SELECTOR = 'Alerts';
+const ALERTS_SELECTOR = 'Alerts';
+const ALERTS_SECTION_SELECTOR = 'overview-page-alerts-section';
+const ALERTS_SECTION_BUTTON_SELECTOR = `button[aria-controls="${ALERTS_SELECTOR}"]`;
 const ALERTS_TABLE_NO_DATA_SELECTOR = 'alertsStateTableEmptyState';
 const ALERTS_TABLE_WITH_DATA_SELECTOR = 'alertsTable';
 
@@ -44,10 +46,15 @@ export function ObservabilityOverviewCommonProvider({
     );
   };
 
+  const waitForAlertsSectionToAppear = async () => {
+    await retry.waitFor('alert section to appear', async () => {
+      return await testSubjects.exists(ALERTS_SECTION_SELECTOR);
+    });
+  };
+
   const openAlertsSection = async () => {
-    return await (
-      await find.byCssSelector(`button[aria-controls="${ALERTS_SECTION_SELECTOR}"]`)
-    ).click();
+    await waitForAlertsSectionToAppear();
+    return await (await find.byCssSelector(ALERTS_SECTION_BUTTON_SELECTOR)).click();
   };
 
   const openAlertsSectionAndWaitToAppear = async () => {
