@@ -33,8 +33,8 @@ import {
   getNestedProperty,
   SetUrlState,
 } from '../../hooks/use_url_state';
-import type { AiopsAppDependencies } from '../../hooks/use_app_context';
-import { AiopsAppContext } from '../../hooks/use_app_context';
+import type { AiopsAppDependencies } from '../../hooks/use_aiops_app_context';
+import { AiopsAppContext } from '../../hooks/use_aiops_app_context';
 
 import { ExplainLogRateSpikesPage } from './explain_log_rate_spikes_page';
 

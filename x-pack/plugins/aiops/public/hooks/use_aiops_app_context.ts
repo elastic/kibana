@@ -31,12 +31,12 @@ export interface AiopsAppDependencies {
 
 export const AiopsAppContext = createContext<AiopsAppDependencies | undefined>(undefined);
 
-export const useAiopsContext = (): AiopsAppDependencies => {
+export const useAiopsAppContext = (): AiopsAppDependencies => {
   const aiopsAppContext = useContext(AiopsAppContext);
 
   // if `undefined`, throw an error
   if (aiopsAppContext === undefined) {
-    throw new Error('useAiopsContext was used outside of its Provider');
+    throw new Error('useAiopsAppContext was used outside of its Provider');
   }
 
   return aiopsAppContext;

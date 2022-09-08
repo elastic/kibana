@@ -20,7 +20,7 @@ import {
   DocumentStatsSearchStrategyParams,
 } from '../get_document_stats';
 
-import { useAiopsContext } from './use_app_context';
+import { useAiopsAppContext } from './use_aiops_app_context';
 
 export interface DocumentStats {
   totalCount: number;
@@ -62,7 +62,7 @@ export function useDocumentCountStats<TParams extends DocumentStatsSearchStrateg
   const {
     data,
     notifications: { toasts },
-  } = useAiopsContext();
+  } = useAiopsAppContext();
 
   const abortCtrl = useRef(new AbortController());
 

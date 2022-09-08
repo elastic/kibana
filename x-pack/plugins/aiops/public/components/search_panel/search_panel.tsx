@@ -12,7 +12,7 @@ import { Query, Filter } from '@kbn/es-query';
 import type { TimeRange } from '@kbn/es-query';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { SearchQueryLanguage } from '../../application/utils/search_utils';
-import { useAiopsContext } from '../../hooks/use_app_context';
+import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { createMergedEsQuery } from '../../application/utils/search_utils';
 interface Props {
   dataView: DataView;
@@ -46,7 +46,7 @@ export const SearchPanel: FC<Props> = ({
     },
     notifications: { toasts },
     data: { query: queryManager },
-  } = useAiopsContext();
+  } = useAiopsAppContext();
 
   // The internal state of the input query bar updated on every key stroke.
   const [searchInput, setSearchInput] = useState<Query>({

@@ -16,7 +16,7 @@ import type { SavedSearch } from '@kbn/discover-plugin/public';
 
 import { TimeBuckets } from '../../common/time_buckets';
 
-import { useAiopsContext } from './use_app_context';
+import { useAiopsAppContext } from './use_aiops_app_context';
 import { aiopsRefresh$ } from '../application/services/timefilter_refresh_service';
 import type { DocumentStatsSearchStrategyParams } from '../get_document_stats';
 import type { AiOpsIndexBasedAppState } from '../components/explain_log_rate_spikes/explain_log_rate_spikes_app_state';
@@ -43,7 +43,7 @@ export const useData = (
     data: {
       query: { filterManager },
     },
-  } = useAiopsContext();
+  } = useAiopsAppContext();
   const [lastRefresh, setLastRefresh] = useState(0);
   const [fieldStatsRequest, setFieldStatsRequest] = useState<
     DocumentStatsSearchStrategyParams | undefined

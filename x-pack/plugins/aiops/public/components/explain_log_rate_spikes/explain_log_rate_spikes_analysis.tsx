@@ -19,7 +19,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { ChangePoint } from '@kbn/ml-agg-utils';
 import type { Query } from '@kbn/es-query';
 
-import { useAiopsContext } from '../../hooks/use_app_context';
+import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { initialState, streamReducer } from '../../../common/api/stream_reducer';
 import type { ApiExplainLogRateSpikes } from '../../../common/api';
 
@@ -53,7 +53,7 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
   onSelectedChangePoint,
   selectedChangePoint,
 }) => {
-  const { http } = useAiopsContext();
+  const { http } = useAiopsAppContext();
   const basePath = http.basePath.get() ?? '';
 
   const [currentAnalysisWindowParameters, setCurrentAnalysisWindowParameters] = useState<

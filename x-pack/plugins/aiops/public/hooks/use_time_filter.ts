@@ -6,7 +6,7 @@
  */
 
 import { useEffect } from 'react';
-import { useAiopsContext } from './use_app_context';
+import { useAiopsAppContext } from './use_aiops_app_context';
 
 interface UseTimefilterOptions {
   timeRangeSelector?: boolean;
@@ -23,7 +23,7 @@ export const useTimefilter = ({
         timefilter: { timefilter },
       },
     },
-  } = useAiopsContext();
+  } = useAiopsAppContext();
 
   useEffect(() => {
     if (timeRangeSelector === true && !timefilter.isTimeRangeSelectorEnabled()) {

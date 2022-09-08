@@ -9,12 +9,12 @@ import { useMemo } from 'react';
 
 import { euiLightVars as euiThemeLight, euiDarkVars as euiThemeDark } from '@kbn/ui-theme';
 
-import { useAiopsContext } from './use_app_context';
+import { useAiopsAppContext } from './use_aiops_app_context';
 
 export type EuiThemeType = typeof euiThemeLight | typeof euiThemeDark;
 
 export function useEuiTheme() {
-  const { uiSettings } = useAiopsContext();
+  const { uiSettings } = useAiopsAppContext();
 
   return useMemo(
     () => (uiSettings.get('theme:darkMode') ? euiThemeDark : euiThemeLight),

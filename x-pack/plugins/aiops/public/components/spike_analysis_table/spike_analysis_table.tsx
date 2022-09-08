@@ -24,7 +24,7 @@ import type { ChangePoint } from '@kbn/ml-agg-utils';
 
 import { SEARCH_QUERY_LANGUAGE } from '../../application/utils/search_utils';
 import { useEuiTheme } from '../../hooks/use_eui_theme';
-import { useAiopsContext } from '../../hooks/use_app_context';
+import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 
 import { MiniHistogram } from '../mini_histogram';
 
@@ -67,7 +67,7 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
   const [sortField, setSortField] = useState<keyof ChangePoint>(DEFAULT_SORT_FIELD);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>(DEFAULT_SORT_DIRECTION);
 
-  const { application, share, data } = useAiopsContext();
+  const { application, share, data } = useAiopsAppContext();
 
   const discoverLocator = useMemo(
     () => share.url.locators.get('DISCOVER_APP_LOCATOR'),

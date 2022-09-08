@@ -26,7 +26,7 @@ import { Filter, FilterStateStore, Query } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SavedSearch } from '@kbn/discover-plugin/public';
 
-import { useAiopsContext } from '../../hooks/use_app_context';
+import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { SearchQueryLanguage, SavedSearchSavedObject } from '../../application/utils/search_utils';
 import { useUrlState, usePageUrlState, AppStateKey } from '../../hooks/use_url_state';
 import { useData } from '../../hooks/use_data';
@@ -55,7 +55,7 @@ export const ExplainLogRateSpikesPage: FC<ExplainLogRateSpikesPageProps> = ({
   dataView,
   savedSearch,
 }) => {
-  const { data: dataService } = useAiopsContext();
+  const { data: dataService } = useAiopsAppContext();
 
   const [aiopsListState, setAiopsListState] = usePageUrlState(AppStateKey, restorableDefaults);
   const [globalState, setGlobalState] = useUrlState('_g');

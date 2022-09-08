@@ -17,7 +17,7 @@ import type { TimeRange } from '@kbn/es-query';
 import { TimeHistoryContract, UI_SETTINGS } from '@kbn/data-plugin/public';
 
 import { useUrlState } from '../../hooks/use_url_state';
-import { useAiopsContext } from '../../hooks/use_app_context';
+import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { aiopsRefresh$ } from '../../application/services/timefilter_refresh_service';
 
 interface TimePickerQuickRange {
@@ -54,7 +54,7 @@ function updateLastRefresh(timeRange: OnRefreshProps) {
 }
 
 export const DatePickerWrapper: FC = () => {
-  const { uiSettings, data } = useAiopsContext();
+  const { uiSettings, data } = useAiopsAppContext();
   const { timefilter, history } = data.query.timefilter;
 
   const [globalState, setGlobalState] = useUrlState('_g');

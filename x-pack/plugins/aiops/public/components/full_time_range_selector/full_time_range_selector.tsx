@@ -25,7 +25,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useAiopsContext } from '../../hooks/use_app_context';
+import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { setFullTimeRange } from './full_time_range_selector_service';
 import { AIOPS_FROZEN_TIER_PREFERENCE, useStorage } from '../../hooks/use_storage';
 
@@ -54,7 +54,7 @@ export const FullTimeRangeSelector: FC<Props> = ({
   const {
     http,
     notifications: { toasts },
-  } = useAiopsContext();
+  } = useAiopsAppContext();
 
   // wrapper around setFullTimeRange to allow for the calling of the optional callBack prop
   const setRange = useCallback(
