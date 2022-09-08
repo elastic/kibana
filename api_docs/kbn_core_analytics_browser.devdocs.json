@@ -52,6 +52,7 @@
         ],
         "path": "packages/core/analytics/core-analytics-browser/src/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -74,6 +75,7 @@
         ],
         "path": "packages/core/analytics/core-analytics-browser/src/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],

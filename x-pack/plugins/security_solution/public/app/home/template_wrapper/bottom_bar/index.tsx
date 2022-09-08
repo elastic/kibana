@@ -8,7 +8,7 @@
 /* eslint-disable react/display-name */
 
 import React from 'react';
-import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
+import type { EuiBottomBarProps } from '@elastic/eui';
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
 import { TimelineId } from '../../../../../common/types/timeline';
 import { AutoSaveWarningMsg } from '../../../../timelines/components/timeline/auto_save_warning';
@@ -30,9 +30,7 @@ export const SecuritySolutionBottomBar = React.memo(() => {
   );
 });
 
-export const SecuritySolutionBottomBarProps: KibanaPageTemplateProps['bottomBarProps'] = {
+export const SecuritySolutionBottomBarProps: EuiBottomBarProps = {
   className: BOTTOM_BAR_CLASSNAME,
   'data-test-subj': 'timeline-bottom-bar-container',
-  position: 'fixed',
-  usePortal: false,
 };

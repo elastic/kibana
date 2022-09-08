@@ -145,7 +145,7 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({
                     defaultMessage: 'Set up a language client',
                   }
                 ),
-                to: docLinks.start,
+                to: docLinks.languageClients,
               },
               {
                 label: i18n.translate(
