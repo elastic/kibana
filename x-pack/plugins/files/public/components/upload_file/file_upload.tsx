@@ -47,6 +47,7 @@ export const FileUploadUI = React.forwardRef<EuiFilePicker, Props>((props, ref) 
     children,
     ...rest
   } = props;
+
   const cn = useMemo(() => classNames({ filesFileUpload: true }, className), [className]);
 
   return (
@@ -57,7 +58,6 @@ export const FileUploadUI = React.forwardRef<EuiFilePicker, Props>((props, ref) 
         onChange={(files) => onChange(Array.from(files ?? []))}
         multiple={false}
         initialPromptText={initialFilePromptText}
-        compressed={compressed}
         isLoading={uploading}
         disabled={uploading}
       />
@@ -67,18 +67,18 @@ export const FileUploadUI = React.forwardRef<EuiFilePicker, Props>((props, ref) 
       <EuiFlexGroup justifyContent="flexStart" direction="rowReverse" gutterSize="m">
         <EuiFlexItem grow={false}>
           {!immediate && (
-            <EuiButton disabled={uploading} onClick={onUpload} size={compressed ? 's' : 'm'}>
+            <EuiButton disabled={uploading} onClick={onUpload} size="s">
               {i18nTexts.upload}
             </EuiButton>
           )}
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           {uploading ? (
-            <EuiButtonEmpty onClick={onCancel} color="danger">
+            <EuiButtonEmpty size="s" onClick={onCancel} color="danger">
               {i18nTexts.cancel}
             </EuiButtonEmpty>
           ) : (
-            <EuiButtonEmpty onClick={onClear} size={compressed ? 's' : 'm'}>
+            <EuiButtonEmpty onClick={onClear} size="s">
               {i18nTexts.clear}
             </EuiButtonEmpty>
           )}

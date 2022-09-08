@@ -25,13 +25,7 @@ Uploading.args = {
   uploading: true,
 };
 
-export const Compressed = Template.bind({});
-Compressed.args = {
-  compressed: true,
-};
-
-export const UploadingCompressed = Template.bind({});
-UploadingCompressed.args = {
-  compressed: true,
-  uploading: true,
+export const ImmediateUpload = Template.bind({});
+ImmediateUpload.args = {
+  immediate: true,
 };
