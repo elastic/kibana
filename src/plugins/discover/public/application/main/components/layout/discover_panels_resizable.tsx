@@ -127,11 +127,14 @@ export const DiscoverPanelsResizable = ({
               minSize={`${minTopPanelHeight}px`}
               size={panelSizes.topPanelSize}
               paddingSize="none"
-              data-test-subj="dsc-panel-resizable-top"
+              data-test-subj="dsc-resizable-panel-top"
             >
               {topPanel}
             </EuiResizablePanel>
-            <EuiResizableButton css={resizeWithPortalsHackButtonCss}>
+            <EuiResizableButton
+              css={resizeWithPortalsHackButtonCss}
+              data-test-subj="dsc-resizable-button"
+            >
               <span
                 onMouseDown={enableResizeWithPortalsHack}
                 onTouchStart={enableResizeWithPortalsHack}
@@ -142,7 +145,7 @@ export const DiscoverPanelsResizable = ({
               minSize={`${minMainPanelHeight}px`}
               size={panelSizes.mainPanelSize}
               paddingSize="none"
-              data-test-subj="dsc-panel-resizable-main"
+              data-test-subj="dsc-resizable-panel-main"
             >
               {mainPanel}
             </EuiResizablePanel>
