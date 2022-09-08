@@ -59,7 +59,6 @@ const getRulesSharedValues = (packageInfo: PackagePolicy, agentInfo: AgentPolicy
       description: matchingKubeDeployOption?.label,
     },
     { title: 'Agent', description: agentInfo.name },
-    // { title: 'Benchmark', description: 'CIS Kubernetes' },
   ].filter(truthy);
 };
 
