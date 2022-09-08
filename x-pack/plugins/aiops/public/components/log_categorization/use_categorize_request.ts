@@ -7,7 +7,8 @@
 
 import { cloneDeep } from 'lodash';
 import { useRef, useCallback } from 'react';
-import { lastValueFrom } from 'rxjs';
+import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/public';
+
 import { useAiOpsKibana } from '../../kibana_context';
 
 const CATEGORY_LIMIT = 1000;
@@ -50,7 +51,7 @@ export function useCategorizeRequest() {
   const abortController = useRef(new AbortController());
 
   const runCategorizeRequest = useCallback(
-    async (
+    (
       index: string,
       field: string,
       timeField: string,
@@ -58,39 +59,39 @@ export function useCategorizeRequest() {
       to: number | undefined,
       queryIn: any,
       intervalMs?: number
-    ) => {
-      const query = cloneDeep(queryIn);
+    ): Promise<{ categories: Category[]; sparkLinesPerCategory: SparkLinesPerCategory }> => {
+      return new Promise((resolve, reject) => {
+        const query = cloneDeep(queryIn);
 
-      if (query.bool === undefined) {
-        query.bool = {};
-      }
-      if (query.bool.must === undefined) {
-        query.bool.must = [];
-        if (query.match_all !== undefined) {
-          query.bool.must.push({ match_all: query.match_all });
-          delete query.match_all;
+        if (query.bool === undefined) {
+          query.bool = {};
         }
-      }
-      if (query.multi_match !== undefined) {
-        query.bool.should = {
-          multi_match: query.multi_match,
-        };
-        delete query.multi_match;
-      }
+        if (query.bool.must === undefined) {
+          query.bool.must = [];
+          if (query.match_all !== undefined) {
+            query.bool.must.push({ match_all: query.match_all });
+            delete query.match_all;
+          }
+        }
+        if (query.multi_match !== undefined) {
+          query.bool.should = {
+            multi_match: query.multi_match,
+          };
+          delete query.multi_match;
+        }
 
-      query.bool.must.push({
-        range: {
-          [timeField]: {
-            gte: from,
-            lte: to,
-            format: 'epoch_millis',
+        query.bool.must.push({
+          range: {
+            [timeField]: {
+              gte: from,
+              lte: to,
+              format: 'epoch_millis',
+            },
           },
-        },
-      });
+        });
 
-      try {
-        const { rawResponse } = await lastValueFrom(
-          data.search.search<any, CatResponse>(
+        data.search
+          .search<any, CatResponse>(
             {
               params: {
                 index,
@@ -109,6 +110,7 @@ export function useCategorizeRequest() {
                             size: EXAMPLE_LIMIT,
                             sort: [timeField],
                             _source: field,
+                            // thing: 222,
                           },
                         },
                         ...(intervalMs
@@ -129,49 +131,52 @@ export function useCategorizeRequest() {
             },
             { abortSignal: abortController.current.signal }
           )
-        );
-        // .subscribe((thing) => {
-        //    console.log(thing);
-        // if (thing.rawResponse?.aggregations?.categories?.buckets) {
-        //   console.log(thing.rawResponse.aggregations.categories.buckets);
-        // }
-        // });
-        // console.log(resp);
-
-        const sparkLinesPerCategory: SparkLinesPerCategory = {};
-
-        const categories: Category[] = rawResponse.aggregations!.categories.buckets.map((b) => {
-          sparkLinesPerCategory[b.key] =
-            b.sparkline === undefined
-              ? {}
-              : b.sparkline.buckets.reduce<Record<number, number>>((acc2, cur2) => {
-                  acc2[cur2.key] = cur2.doc_count;
-                  return acc2;
-                }, {});
-
-          return {
-            key: b.key,
-            count: b.doc_count,
-            examples: b.hit.hits.hits.map((h: any) => h._source[field]),
-          };
-        });
-
-        // return { categories: [], sparkLinesPerCategory: {} };
-
-        // console.log(body);
-        return {
-          categories,
-          sparkLinesPerCategory,
-        };
-      } catch (error) {
-        if (error.name === 'AbortError') {
-          return { categories: [], sparkLinesPerCategory: {} };
-        }
-        throw error;
-      }
+          .subscribe({
+            next: (result) => {
+              if (isCompleteResponse(result)) {
+                resolve(processCategoryResults(result, field));
+              } else if (isErrorResponse(result)) {
+                reject(result);
+              } else {
+                // partial results
+                // console.log(result);
+              }
+            },
+            error: (error) => {
+              if (error.name === 'AbortError') {
+                return resolve({ categories: [], sparkLinesPerCategory: {} });
+              }
+              reject(error);
+            },
+          });
+      });
     },
     [data.search]
   );
+
+  function processCategoryResults(result: CatResponse, field: string) {
+    const sparkLinesPerCategory: SparkLinesPerCategory = {};
+
+    const categories: Category[] = result.rawResponse.aggregations!.categories.buckets.map((b) => {
+      sparkLinesPerCategory[b.key] =
+        b.sparkline === undefined
+          ? {}
+          : b.sparkline.buckets.reduce<Record<number, number>>((acc2, cur2) => {
+              acc2[cur2.key] = cur2.doc_count;
+              return acc2;
+            }, {});
+
+      return {
+        key: b.key,
+        count: b.doc_count,
+        examples: b.hit.hits.hits.map((h: any) => h._source[field]),
+      };
+    });
+    return {
+      categories,
+      sparkLinesPerCategory,
+    };
+  }
 
   const cancelRequest = useCallback(() => {
     abortController.current.abort();
