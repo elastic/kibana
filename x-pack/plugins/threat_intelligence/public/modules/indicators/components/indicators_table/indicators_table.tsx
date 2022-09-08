@@ -17,11 +17,11 @@ import {
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiDataGridColumn } from '@elastic/eui/src/components/datagrid/data_grid_types';
+import { CellActions } from './cell_actions';
 import { BrowserFields, SecuritySolutionDataViewBase } from '../../../../types';
 import { Indicator } from '../../../../../common/types/indicator';
 import { cellRendererFactory } from './cell_renderer';
 import { EmptyState } from '../../../../components/empty_state';
-import { AddToTimeline } from '../../../timeline/components/add_to_timeline';
 import { IndicatorsTableContext, IndicatorsTableContextValue } from './context';
 import { IndicatorsFlyout } from '../indicators_flyout/indicators_flyout';
 import { Pagination } from '../../hooks/use_indicators';
@@ -40,7 +40,6 @@ export interface IndicatorsTableProps {
 }
 
 export const TABLE_TEST_ID = 'tiIndicatorsTable';
-export const CELL_TIMELINE_BUTTON_TEST_ID = 'tiIndicatorsTableCellTimelineButton';
 
 const gridStyle = {
   border: 'horizontal',
@@ -119,11 +118,12 @@ export const IndicatorsTable: VFC<IndicatorsTableProps> = ({
       (col: EuiDataGridColumn) =>
         (col.cellActions = [
           ({ rowIndex, columnId, Component }: EuiDataGridColumnCellActionProps) => (
-            <AddToTimeline
-              data={indicators[rowIndex % pagination.pageSize]}
-              field={columnId}
-              component={Component}
-              testId={CELL_TIMELINE_BUTTON_TEST_ID}
+            <CellActions
+              rowIndex={rowIndex}
+              columnId={columnId}
+              Component={Component}
+              indicators={indicators}
+              pagination={pagination}
             />
           ),
         ])

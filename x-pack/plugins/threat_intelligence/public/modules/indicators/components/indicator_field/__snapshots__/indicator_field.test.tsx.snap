@@ -135,11 +135,11 @@ Object {
   "asFragment": [Function],
   "baseElement": <body>
     <div>
-      12.68.554.87
+      0.0.0.0
     </div>
   </body>,
   "container": <div>
-    12.68.554.87
+    0.0.0.0
   </div>,
   "debug": [Function],
   "findAllByAltText": [Function],
