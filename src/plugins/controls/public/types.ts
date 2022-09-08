@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { ReactNode } from 'react';
 import { Filter } from '@kbn/es-query';
-
 import {
   EmbeddableFactory,
   EmbeddableOutput,
@@ -25,6 +25,7 @@ import { ControlGroupRendererProps } from './control_group/control_group_rendere
 export interface CommonControlOutput {
   filters?: Filter[];
   dataViewId?: string;
+  timeslice?: [number, number];
 }
 
 export type ControlOutput = EmbeddableOutput & CommonControlOutput;
@@ -38,7 +39,10 @@ export type ControlFactory<T extends ControlInput = ControlInput> = EmbeddableFa
 export type ControlEmbeddable<
   TControlEmbeddableInput extends ControlInput = ControlInput,
   TControlEmbeddableOutput extends ControlOutput = ControlOutput
-> = IEmbeddable<TControlEmbeddableInput, TControlEmbeddableOutput>;
+> = IEmbeddable<TControlEmbeddableInput, TControlEmbeddableOutput> & {
+  isChained?: () => boolean;
+  renderPrepend?: () => ReactNode | undefined;
+};
 
 /**
  * Control embeddable editor types

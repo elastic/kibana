@@ -539,6 +539,38 @@ describe('#toExpression', () => {
     expect(getYConfigColorForLayer(expression, 1)).toEqual([defaultReferenceLineColor]);
   });
 
+  it('should ignore annotation layers with no event configured', () => {
+    const expression = xyVisualization.toExpression(
+      {
+        legend: { position: Position.Bottom, isVisible: true },
+        valueLabels: 'show',
+        preferredSeriesType: 'bar',
+        layers: [
+          {
+            layerId: 'first',
+            layerType: layerTypes.DATA,
+            seriesType: 'area',
+            splitAccessor: 'd',
+            xAccessor: 'a',
+            accessors: ['b', 'c'],
+            yConfig: [{ forAccessor: 'a' }],
+          },
+          {
+            layerId: 'first',
+            layerType: layerTypes.ANNOTATIONS,
+            annotations: [],
+            indexPatternId: 'my-indexPattern',
+          },
+        ],
+      },
+      { ...frame.datasourceLayers, referenceLine: mockDatasource.publicAPIMock },
+      undefined,
+      datasourceExpressionsByLayers
+    ) as Ast;
+
+    expect(expression.chain[0].arguments.layers).toHaveLength(1);
+  });
+
   it('should correctly set the current time marker visibility settings', () => {
     const state: XYState = {
       legend: { position: Position.Bottom, isVisible: true },

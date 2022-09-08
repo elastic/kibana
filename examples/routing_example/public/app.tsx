@@ -12,10 +12,10 @@ import { AppMountParameters } from '@kbn/core/public';
 import {
   EuiPage,
   EuiPageBody,
-  EuiPageContent,
+  EuiPageContent_Deprecated as EuiPageContent,
   EuiText,
   EuiHorizontalRule,
-  EuiPageContentHeader,
+  EuiPageContentHeader_Deprecated as EuiPageContentHeader,
   EuiListGroup,
 } from '@elastic/eui';
 import { RandomNumberRouteExample } from './random_number_example';
