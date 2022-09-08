@@ -31,7 +31,7 @@ export const EndpointUnisolateForm = memo<EndpointIsolatedFormProps>(
     );
 
     return (
-      <EuiForm>
+      <EuiForm data-test-subj="endpointHostIsolationForm">
         <EuiFormRow fullWidth>
           <EuiText size="s">
             <p>
