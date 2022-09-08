@@ -9,7 +9,7 @@ import { merge } from 'lodash';
 import { ElasticsearchResponse } from '../../../common/types/es';
 import { Globals } from '../../static_globals';
 import { LegacyRequest } from '../../types';
-import { getNewIndexPatterns } from '../cluster/get_index_patterns';
+import { getNewIndexPatterns, getKibanaDataset } from '../cluster/get_index_patterns';
 import { MissingRequiredError } from '../error_missing_required';
 import { buildKibanaInfo } from './build_kibana_info';
 import { isKibanaStatusStale } from './is_kibana_status_stale';
@@ -65,7 +65,7 @@ export function getKibanaInfo(
     body: {
       query: createQuery({
         type,
-        dsDataset: `${moduleType}.${dataset}`,
+        dsDataset: getKibanaDataset(dataset),
         metricset: dataset,
         clusterUuid,
         uuid: kibanaUuid,
