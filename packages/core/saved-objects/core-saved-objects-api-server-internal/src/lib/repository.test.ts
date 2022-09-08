@@ -2058,6 +2058,9 @@ describe('SavedObjectsRepository', () => {
 
     const namespace = 'foo-namespace';
 
+    const createNamespaceAwareGetId = (type: string, id: string) =>
+      `${registry.isSingleNamespace(type) && namespace ? `${namespace}:` : ''}${type}:${id}`;
+
     const getMockEsBulkDeleteResponse = (
       objects: TypeIdTuple[],
       options?: SavedObjectsBulkDeleteOptions
@@ -2134,19 +2137,108 @@ describe('SavedObjectsRepository', () => {
       );
     };
 
-    const expectBulkDeleteObjArgs = (
-      { type, id }: { type: string; id: string },
-      namespace: string
-    ) => [
+    const createBulkDeleteFailStatus = ({
+      type,
+      id,
+      error,
+    }: {
+      type: string;
+      id: string;
+      error?: ExpectedErrorResult['error'];
+    }) => ({
+      type,
+      id,
+      success: false,
+      error: error ?? createBadRequestError(),
+    });
+
+    const createBulkDeleteSuccessStatus = ({ type, id }: { type: string; id: string }) => ({
+      type,
+      id,
+      success: true,
+    });
+
+    // mocks a combination of success, error results for hidden and unknown object object types.
+    const repositoryBulkDeleteError = async (
+      obj: SavedObjectsBulkDeleteObject,
+      isBulkError: boolean,
+      expectedErrorResult: ExpectedErrorResult
+    ) => {
+      const objects = [obj1, obj, obj2];
+      const mockedBulkDeleteResponse = getMockEsBulkDeleteResponse(objects);
+      if (isBulkError) {
+        mockGetBulkOperationError.mockReturnValueOnce(undefined);
+        mockGetBulkOperationError.mockReturnValueOnce(expectedErrorResult.error as Payload);
+      }
+      client.bulk.mockResponseOnce(mockedBulkDeleteResponse);
+
+      const result = await savedObjectsRepository.bulkDelete(objects);
+      expect(client.bulk).toHaveBeenCalled();
+      expect(result).toEqual({
+        statuses: [
+          createBulkDeleteSuccessStatus(obj1),
+          createBulkDeleteFailStatus({ ...obj, error: expectedErrorResult.error }),
+          createBulkDeleteSuccessStatus(obj2),
+        ],
+      });
+    };
+
+    const expectClientCallArgsAction = (
+      objects: TypeIdTuple[],
       {
-        delete: expect.objectContaining({
-          _id: `${
-            registry.isSingleNamespace(type) && namespace ? `${namespace}:` : ''
-          }${type}:${id}`,
-          _index: expect.any(String),
-        }),
-      },
-    ];
+        method,
+        _index = expect.any(String),
+        getId = () => expect.any(String),
+        overrides = {},
+      }: {
+        method: string;
+        _index?: string;
+        getId?: (type: string, id: string) => string;
+        overrides?: Record<string, unknown>;
+      }
+    ) => {
+      const body = [];
+      for (const { type, id } of objects) {
+        body.push({
+          [method]: {
+            _index,
+            _id: getId(type, id),
+            ...overrides,
+          },
+        });
+      }
+      expect(client.bulk).toHaveBeenCalledWith(
+        expect.objectContaining({ body }),
+        expect.anything()
+      );
+    };
+
+    const bulkDeleteMultiNamespaceError = async (
+      [obj1, _obj, obj2]: SavedObjectsBulkDeleteObject[],
+      options: SavedObjectsBulkDeleteOptions | undefined,
+      mgetResponse: estypes.MgetResponse,
+      mgetOptions?: { statusCode?: number }
+    ) => {
+      const getId = (type: string, id: string) => `${options?.namespace}:${type}:${id}`;
+      // mock the response for the not found doc
+      client.mget.mockResponseOnce(mgetResponse, { statusCode: mgetOptions?.statusCode });
+      // get a mocked response for the valid docs
+      const bulkResponse = getMockEsBulkDeleteResponse([obj1, obj2], { namespace });
+      client.bulk.mockResponseOnce(bulkResponse);
+
+      const result = await savedObjectsRepository.bulkDelete([obj1, _obj, obj2], options);
+      expect(client.bulk).toHaveBeenCalledTimes(1);
+      expect(client.mget).toHaveBeenCalledTimes(1);
+
+      expectClientCallArgsAction([obj1, obj2], { method: 'delete', getId });
+      expect(result).toEqual({
+        statuses: [
+          createBulkDeleteSuccessStatus(obj1),
+          { ...expectErrorNotFound(_obj), success: false },
+          createBulkDeleteSuccessStatus(obj2),
+        ],
+      });
+    };
 
     beforeEach(() => {
       mockDeleteLegacyUrlAliases.mockClear();
@@ -2181,28 +2273,16 @@ describe('SavedObjectsRepository', () => {
       });
 
       it(`formats the ES request`, async () => {
+        const getId = createNamespaceAwareGetId;
         await repositoryBulkDeleteSuccess([obj1, obj2], { namespace });
-        const body = [
-          ...expectBulkDeleteObjArgs(obj1, namespace),
-          ...expectBulkDeleteObjArgs(obj2, namespace),
-        ];
-        expect(client.bulk).toHaveBeenCalledWith(
-          expect.objectContaining({ body }),
-          expect.anything()
-        );
+        expectClientCallBulkDeleteArgsAction([obj1, obj2], { method: 'delete', getId });
       });
 
       it(`formats the ES request for any types that are multi-namespace`, async () => {
         const _obj2 = { ...obj2, type: MULTI_NAMESPACE_ISOLATED_TYPE };
+        const getId = createNamespaceAwareGetId;
         await repositoryBulkDeleteSuccess([obj1, _obj2], { namespace });
-        const body = [
-          ...expectBulkDeleteObjArgs(obj1, namespace),
-          ...expectBulkDeleteObjArgs(_obj2, namespace),
-        ];
-        expect(client.bulk).toHaveBeenCalledWith(
-          expect.objectContaining({ body }),
-          expect.anything()
-        );
+        expectClientCallBulkDeleteArgsAction([obj1, _obj2], { method: 'delete', getId });
       });
 
       it(`defaults to a refresh setting of wait_for`, async () => {
@@ -2220,7 +2300,7 @@ describe('SavedObjectsRepository', () => {
       });
 
       it(`prepends namespace to the id when providing namespace for single-namespace type`, async () => {
-        const getId = (type: string, id: string) => `${namespace}:${type}:${id}`;
+        const getId = createNamespaceAwareGetId;
         await repositoryBulkDeleteSuccess([obj1, obj2], { namespace });
         expectClientCallBulkDeleteArgsAction([obj1, obj2], { method: 'delete', getId });
       });
@@ -2242,20 +2322,8 @@ describe('SavedObjectsRepository', () => {
         const _obj1 = { ...obj1, type: NAMESPACE_AGNOSTIC_TYPE };
         const _obj2 = { ...obj2, type: MULTI_NAMESPACE_ISOLATED_TYPE };
 
-        await repositoryBulkDeleteSuccess([_obj1], { namespace });
-        expectClientCallBulkDeleteArgsAction([_obj1], { method: 'delete', getId });
-        client.bulk.mockClear();
-        await repositoryBulkDeleteSuccess([_obj2], { namespace });
-        expectClientCallBulkDeleteArgsAction([_obj2], { method: 'delete', getId });
-        client.bulk.mockClear();
-      });
-
-      it(`does not pass on the force option`, async () => {
-        await repositoryBulkDeleteSuccess([obj1, obj2]);
-        expect(client.bulk).toHaveBeenCalledWith(
-          expect.not.objectContaining({ force: expect.anything() }),
-          expect.anything()
-        );
+        await repositoryBulkDeleteSuccess([_obj1, _obj2], { namespace });
+        expectClientCallBulkDeleteArgsAction([_obj1, _obj2], { method: 'delete', getId });
       });
     });
 
@@ -2264,6 +2332,7 @@ describe('SavedObjectsRepository', () => {
         await repositoryBulkDeleteSuccess([obj1, obj2]);
         expect(mockDeleteLegacyUrlAliases).not.toHaveBeenCalled();
       });
+
       it(`deletes legacy URL aliases for multi-namespace object types (all spaces)`, async () => {
         const testObject = { ...obj1, type: MULTI_NAMESPACE_TYPE };
         const internalOptions = {
@@ -2286,6 +2355,7 @@ describe('SavedObjectsRepository', () => {
           })
         );
       });
+
       it(`deletes legacy URL aliases for multi-namespace object types (specific space)`, async () => {
         const testObject = { ...obj1, type: MULTI_NAMESPACE_TYPE };
         const internalOptions = {
@@ -2333,6 +2403,7 @@ describe('SavedObjectsRepository', () => {
 
       it(`logs a message when deleteLegacyUrlAliases returns an error`, async () => {
         const testObject = { type: MULTI_NAMESPACE_ISOLATED_TYPE, id: obj1.id };
+
         client.mget.mockResolvedValueOnce(
           elasticsearchClientMock.createSuccessTransportRequestPromise(
             getMockMgetResponse([testObject], namespace)
@@ -2340,8 +2411,11 @@ describe('SavedObjectsRepository', () => {
         );
         const mockedBulkResponse = getMockEsBulkDeleteResponse([testObject], { namespace });
         client.bulk.mockResolvedValueOnce(mockedBulkResponse);
+
         mockDeleteLegacyUrlAliases.mockRejectedValueOnce(new Error('Oh no!'));
+
         await savedObjectsRepository.bulkDelete([testObject], { namespace });
+
         expect(client.mget).toHaveBeenCalledTimes(1);
         expect(logger.error).toHaveBeenCalledTimes(1);
         expect(logger.error).toHaveBeenCalledWith(
@@ -2351,99 +2425,6 @@ describe('SavedObjectsRepository', () => {
     });
 
     describe('errors', () => {
-      const expectRepositoryBulkDeleteStatusError = ({
-        type,
-        id,
-        error,
-      }: {
-        type: string;
-        id: string;
-        error?: any;
-      }) => ({
-        type,
-        id,
-        success: false,
-        error: error ?? createBadRequestError(),
-      });
-      const repositoryBulkDeleteError = async (
-        obj: SavedObjectsBulkDeleteObject,
-        isBulkError: boolean,
-        expectedErrorResult: ExpectedErrorResult
-      ) => {
-        const objects = [obj1, obj, obj2];
-        const mockedBulkDeleteResponse = getMockEsBulkDeleteResponse(objects);
-        if (isBulkError) {
-          mockGetBulkOperationError.mockReturnValueOnce(undefined);
-          mockGetBulkOperationError.mockReturnValueOnce(expectedErrorResult.error as Payload);
-        }
-        client.bulk.mockResponseOnce(mockedBulkDeleteResponse);
-
-        const result = await savedObjectsRepository.bulkDelete(objects);
-        expect(client.bulk).toHaveBeenCalled();
-        expect(result).toEqual({
-          statuses: [
-            { ...obj1, success: true },
-            { ...expectedErrorResult, success: false },
-            { ...obj2, success: true },
-          ],
-        });
-      };
-      const expectClientCallArgsAction = (
-        objects: TypeIdTuple[],
-        {
-          method,
-          _index = expect.any(String),
-          getId = () => expect.any(String),
-          overrides = {},
-        }: {
-          method: string;
-          _index?: string;
-          getId?: (type: string, id: string) => string;
-          overrides?: Record<string, unknown>;
-        }
-      ) => {
-        const body = [];
-        for (const { type, id } of objects) {
-          body.push({
-            [method]: {
-              _index,
-              _id: getId(type, id),
-              ...overrides,
-            },
-          });
-        }
-        expect(client.bulk).toHaveBeenCalledWith(
-          expect.objectContaining({ body }),
-          expect.anything()
-        );
-      };
-      const bulkDeleteMultiError = async (
-        [obj1, _obj, obj2]: SavedObjectsBulkDeleteObject[],
-        options: SavedObjectsBulkDeleteOptions | undefined,
-        mgetResponse: estypes.MgetResponse,
-        mgetOptions?: { statusCode?: number }
-      ) => {
-        const getId = (type: string, id: string) => `${options?.namespace}:${type}:${id}`;
-        // mock the response for the not found doc
-        client.mget.mockResponseOnce(mgetResponse, { statusCode: mgetOptions?.statusCode });
-        // get a mocked response for the valid docs
-        const bulkResponse = getMockEsBulkDeleteResponse([obj1, obj2], { namespace });
-        client.bulk.mockResponseOnce(bulkResponse);
-
-        const result = await savedObjectsRepository.bulkDelete([obj1, _obj, obj2], options);
-        expect(client.bulk).toHaveBeenCalledTimes(1);
-        expect(client.mget).toHaveBeenCalledTimes(1);
-
-        expectClientCallArgsAction([obj1, obj2], { method: 'delete', getId });
-        expect(result).toEqual({
-          statuses: [
-            { ...obj1, success: true },
-            { ...expectErrorNotFound(_obj), success: false },
-            { ...obj2, success: true },
-          ],
-        });
-      };
-
       it(`throws an error when options.namespace is '*'`, async () => {
         await expect(
           savedObjectsRepository.bulkDelete([obj1], { namespace: ALL_NAMESPACES_STRING })
@@ -2481,12 +2462,12 @@ describe('SavedObjectsRepository', () => {
       it(`returns an error when ES is unable to find the document during mget`, async () => {
         const notFoundObj = { ...obj1, type: MULTI_NAMESPACE_ISOLATED_TYPE, found: false };
         const mgetResponse = getMockMgetResponse([notFoundObj], namespace);
-        await bulkDeleteMultiError([obj1, notFoundObj, obj2], { namespace }, mgetResponse);
+        await bulkDeleteMultiNamespaceError([obj1, notFoundObj, obj2], { namespace }, mgetResponse);
       });
 
       it(`returns an error when ES is unable to find the index during mget`, async () => {
         const notFoundObj = { ...obj1, type: MULTI_NAMESPACE_ISOLATED_TYPE, found: false };
-        await bulkDeleteMultiError(
+        await bulkDeleteMultiNamespaceError(
           [obj1, notFoundObj, obj2],
           { namespace },
           {} as estypes.MgetResponse,
@@ -2503,7 +2484,7 @@ describe('SavedObjectsRepository', () => {
           namespace: 'bar-namespace',
         };
         const mgetResponse = getMockMgetResponse([obj], namespace);
-        await bulkDeleteMultiError([obj1, obj, obj2], { namespace }, mgetResponse);
+        await bulkDeleteMultiNamespaceError([obj1, obj, obj2], { namespace }, mgetResponse);
       });
 
       it(`returns an error when the type is multi-namespace and the document has multiple namespaces and the force option is not enabled`, async () => {
@@ -2520,7 +2501,7 @@ describe('SavedObjectsRepository', () => {
           internalOptions
         );
         expect(result.statuses[0]).toStrictEqual(
-          expectRepositoryBulkDeleteStatusError({
+          createBulkDeleteFailStatus({
             ...testObject,
             error: createBadRequestError(
               'Unable to delete saved object that exists in multiple namespaces, use the "force" option to delete it anyway'
@@ -2543,7 +2524,7 @@ describe('SavedObjectsRepository', () => {
           internalOptions
         );
         expect(result.statuses[0]).toStrictEqual(
-          expectRepositoryBulkDeleteStatusError({
+          createBulkDeleteFailStatus({
             ...testObject,
             error: createBadRequestError("Unsupported saved object type: '*'"),
           })
@@ -2552,69 +2533,6 @@ describe('SavedObjectsRepository', () => {
     });
 
     describe('returns', () => {
-      const expectSuccessResult = ({ type, id }: SavedObjectsBulkDeleteObject) => ({
-        type,
-        id,
-        success: true,
-      });
-
-      const expectClientCallArgsAction = (
-        objects: TypeIdTuple[],
-        {
-          method,
-          _index = expect.any(String),
-          getId = () => expect.any(String),
-          overrides = {},
-        }: {
-          method: string;
-          _index?: string;
-          getId?: (type: string, id: string) => string;
-          overrides?: Record<string, unknown>;
-        }
-      ) => {
-        const body = [];
-        for (const { type, id } of objects) {
-          body.push({
-            [method]: {
-              _index,
-              _id: getId(type, id),
-              ...overrides,
-            },
-          });
-        }
-        expect(client.bulk).toHaveBeenCalledWith(
-          expect.objectContaining({ body }),
-          expect.anything()
-        );
-      };
-
-      const bulkDeleteMultiError = async (
-        [obj1, _obj, obj2]: SavedObjectsBulkDeleteObject[],
-        options: SavedObjectsBulkDeleteOptions | undefined,
-        mgetResponse: estypes.MgetResponse,
-        mgetOptions?: { statusCode?: number }
-      ) => {
-        const getId = (type: string, id: string) => `${options?.namespace}:${type}:${id}`;
-        // mock the response for the not found doc
-        client.mget.mockResponseOnce(mgetResponse, { statusCode: mgetOptions?.statusCode });
-        // get a mocked response for the valid docs
-        const bulkResponse = getMockEsBulkDeleteResponse([obj1, obj2], { namespace });
-        client.bulk.mockResponseOnce(bulkResponse);
-
-        const result = await savedObjectsRepository.bulkDelete([obj1, _obj, obj2], options);
-        expect(client.bulk).toHaveBeenCalledTimes(1);
-        expect(client.mget).toHaveBeenCalledTimes(1);
-
-        expectClientCallArgsAction([obj1, obj2], { method: 'delete', getId });
-        expect(result).toEqual({
-          statuses: [
-            { ...obj1, success: true },
-            { ...expectErrorNotFound(_obj), success: false },
-            { ...obj2, success: true },
-          ],
-        });
-      };
-
       it(`returns early for empty objects argument`, async () => {
         await savedObjectsRepository.bulkDelete([], { namespace });
         expect(client.bulk).toHaveBeenCalledTimes(0);
@@ -2623,13 +2541,13 @@ describe('SavedObjectsRepository', () => {
       it(`formats the ES response`, async () => {
         const response = await repositoryBulkDeleteSuccess([obj1, obj2], { namespace });
         expect(response).toEqual({
-          statuses: [obj1, obj2].map(expectSuccessResult),
+          statuses: [obj1, obj2].map(createBulkDeleteSuccessStatus),
         });
       });
 
       it(`handles a mix of successful deletes and errors`, async () => {
         const notFoundObj = { ...obj1, type: MULTI_NAMESPACE_ISOLATED_TYPE, found: false };
-        await bulkDeleteMultiError(
+        await bulkDeleteMultiNamespaceError(
           [obj1, notFoundObj, obj2],
           { namespace },
           {} as estypes.MgetResponse,
