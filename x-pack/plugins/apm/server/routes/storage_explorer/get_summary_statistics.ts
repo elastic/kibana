@@ -27,14 +27,13 @@ import {
   SERVICE_NAME,
   TIER,
   INDEX,
-  TRANSACTION_ROOT,
-  PARENT_ID,
 } from '../../../common/elasticsearch_fieldnames';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import {
   getDocumentTypeFilterForTransactions,
   getProcessorEventForTransactions,
   getDurationFieldForTransactions,
+  isRootTransaction,
 } from '../../lib/helpers/transactions';
 import { calculateThroughputWithRange } from '../../lib/helpers/calculate_throughput';
 
@@ -79,26 +78,7 @@ export async function getTracesPerMinute({
                   indexLifeCyclePhaseToDataTier[indexLifecyclePhase]
                 )
               : []),
-            ...(searchAggregatedTransactions
-              ? [
-                  {
-                    term: {
-                      [TRANSACTION_ROOT]: true,
-                    },
-                  },
-                ]
-              : []),
-          ] as QueryDslQueryContainer[],
-          must_not: [
-            ...(!searchAggregatedTransactions
-              ? [
-                  {
-                    exists: {
-                      field: PARENT_ID,
-                    },
-                  },
-                ]
-              : []),
+            isRootTransaction(searchAggregatedTransactions),
           ],
         },
       },
