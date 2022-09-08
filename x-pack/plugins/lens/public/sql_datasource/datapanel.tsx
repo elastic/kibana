@@ -62,7 +62,7 @@ export function EsSQLDataPanel({
         const columnsFromQuery = table?.columns ?? [];
         const layerIds = Object.keys(state.layers);
         const newLayerId = layerIds.length > 0 ? layerIds[0] : generateId();
-        const existingColumns = state.layers[newLayerId].columns;
+        const existingColumns = state.layers[newLayerId].allColumns;
         const columns = [
           ...existingColumns,
           ...columnsFromQuery.map((c) => ({ columnId: c.id, fieldName: c.id, meta: c.meta })),
@@ -86,8 +86,8 @@ export function EsSQLDataPanel({
             [newLayerId]: {
               index,
               query,
-              columns: unique,
-              selectedColumns: [],
+              columns: state.layers[newLayerId].columns ?? [],
+              allColumns: unique,
               timeField: timeFieldName,
             },
           },

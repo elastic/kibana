@@ -275,7 +275,7 @@ export interface Datasource<T = unknown, P = unknown> {
     initialContext?: VisualizeFieldContext | VisualizeEditorContext,
     indexPatternRefs?: IndexPatternRef[],
     indexPatterns?: IndexPatternMap
-  ) => T;
+  ) => Promise<T>;
 
   // Given the current state, which parts should be saved?
   getPersistableState: (state: T) => { state: P; savedObjectReferences: SavedObjectReference[] };
@@ -468,6 +468,10 @@ export interface DatasourcePublicAPI {
    * Retrieve the specific source id for the current state
    */
   getSourceId: () => string | undefined;
+  /**
+   * Returns true if this is a text based language datasource
+   */
+  isTextBasedLanguage: () => boolean;
   /**
    * Collect all defined filters from all the operations in the layer. If it returns undefined, this means that filters can't be constructed for the current layer
    */

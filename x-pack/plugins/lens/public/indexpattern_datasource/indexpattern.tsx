@@ -143,7 +143,7 @@ export function getIndexPatternDatasource({
   const indexPatternDatasource: Datasource<IndexPatternPrivateState, IndexPatternPersistedState> = {
     id: DATASOURCE_ID,
 
-    initialize(
+    async initialize(
       persistedState?: IndexPatternPersistedState,
       references?: SavedObjectReference[],
       initialContext?: VisualizeFieldContext | VisualizeEditorContext,
@@ -549,6 +549,7 @@ export function getIndexPatternDatasource({
             fields: [...new Set(fieldsPerColumn[colId] || [])],
           }));
         },
+        isTextBasedLanguage: () => false,
         getOperationForColumnId: (columnId: string) => {
           if (layer && layer.columns[columnId]) {
             if (!isReferenced(layer, columnId)) {

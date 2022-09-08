@@ -14,11 +14,16 @@ export interface EsSQLLayerColumn {
   customLabel?: string;
 }
 
+export interface TextBasedLanguageField {
+  id: string;
+  field: string;
+}
+
 export interface EsSQLLayer {
   index: string;
   query: AggregateQuery | undefined;
   columns: EsSQLLayerColumn[];
-  selectedColumns: EsSQLLayerColumn[];
+  allColumns: EsSQLLayerColumn[];
   timeField?: string;
 }
 

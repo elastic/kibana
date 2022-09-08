@@ -22,7 +22,7 @@ function getExpressionForLayer(
   }
 
   let idMapper: Record<string, OriginalColumn[]> = {};
-  layer.columns.forEach((col) => {
+  layer.allColumns.forEach((col) => {
     if (idMapper[col.fieldName]) {
       idMapper[col.fieldName].push({
         id: col.columnId,

@@ -9,11 +9,11 @@ import React from 'react';
 import { render } from 'react-dom';
 import { I18nProvider } from '@kbn/i18n-react';
 import { CoreStart } from '@kbn/core/public';
-// import { i18n } from '@kbn/i18n';
+import { i18n } from '@kbn/i18n';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { isOfAggregateQueryType, AggregateQuery } from '@kbn/es-query';
-import { EuiSelect, EuiButtonEmpty } from '@elastic/eui';
-import { DatatableColumn, ExpressionsStart } from '@kbn/expressions-plugin/public';
+import { EuiButtonEmpty, EuiFormRow } from '@elastic/eui';
+import type { DatatableColumn, ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import {
@@ -25,12 +25,19 @@ import {
   DataType,
   TableChangeType,
 } from '../types';
-// import { generateId } from '../id_generator';
+import { generateId } from '../id_generator';
 import { toExpression } from './to_expression';
 import { EsSQLDataPanel } from './datapanel';
 import { fetchSql } from './fetch_sql';
 import { loadIndexPatternRefs } from './utils';
-import { EsSQLPrivateState, EsSQLPersistedState, IndexPatternRef, EsSQLLayerColumn } from './types';
+import type {
+  EsSQLPrivateState,
+  EsSQLPersistedState,
+  IndexPatternRef,
+  EsSQLLayerColumn,
+  TextBasedLanguageField,
+} from './types';
+import { FieldSelect } from './field_select';
 import { Datasource } from '../types';
 
 export function getSQLDatasource({
@@ -68,9 +75,9 @@ export function getSQLDatasource({
               return {
                 columnId: f.columnId,
                 operation: {
-                  dataType: f?.meta?.type,
+                  dataType: f?.meta?.type as DataType,
                   label: f.fieldName,
-                  isBucketed: false,
+                  isBucketed: Boolean(f?.meta?.type !== 'number'),
                 },
               };
             }) ?? [],
@@ -97,39 +104,9 @@ export function getSQLDatasource({
         if (layer && layer.query && isOfAggregateQueryType(layer.query) && 'sql' in layer.query) {
           const table = await fetchSql(layer.query, dataViews, data, expressions);
           const columnsFromQuery = table?.columns ?? [];
-          // const layerIds = Object.keys(state.layers);
-          // const newLayerId = layerIds.length > 0 ? layerIds[0] : generateId();
-          // const existingColumns = state.layers[newLayerId].columns;
-          // const columns = [
-          //   ...existingColumns,
-          //   ...columnsFromQuery.map((c) => ({ columnId: c.id, fieldName: c.id, meta: c.meta })),
-          // ];
-          // const uniqueIds: string[] = [];
-
-          // const unique = columns.filter((col) => {
-          //   const isDuplicate = uniqueIds.includes(col.columnId);
-
-          //   if (!isDuplicate) {
-          //     uniqueIds.push(col.columnId);
-
-          //     return true;
-          //   }
-
-          //   return false;
-          // });
-
-          // fieldList = unique.map((u) => {
-          //   const field = columnsFromQuery.find((c) => c.name === u.fieldName);
-          //   return {
-          //     name: u.fieldName,
-          //     id: u.columnId,
-          //     meta: field?.meta,
-          //   };
-          // }) as DatatableColumn[];
           fieldList = columnsFromQuery;
         }
       }
-      // const temp = fetchFieldList(query, data, expressions, timeFieldName);
       // if (context && 'sql' in context) {
       //   const table = await fetchSql(context, dataViews, data, expressions);
       //   const index = getIndexPatternFromSQLQuery(context.sql);
@@ -153,6 +130,7 @@ export function getSQLDatasource({
         indexPatternRefs,
       };
     },
+    onRefreshIndexPattern() {},
 
     getPersistableState({ layers }: EsSQLPrivateState) {
       return { state: { layers }, savedObjectReferences: [] };
@@ -163,7 +141,7 @@ export function getSQLDatasource({
     insertLayer(state: EsSQLPrivateState, newLayerId: string) {
       const layer = Object.values(state?.layers)?.[0];
       const query = layer?.query;
-      const columns = layer?.columns ?? [];
+      const columns = layer?.allColumns ?? [];
       const removedLayer = state.removedLayers[0];
       const newRemovedList = removedLayer ? state.removedLayers.slice(1) : state.removedLayers;
       const index =
@@ -194,7 +172,7 @@ export function getSQLDatasource({
         ...state.layers,
         [layerId]: {
           ...state.layers[layerId],
-          selectedColumns: [],
+          columns: [],
         },
       };
       // delete newLayers[layerId];
@@ -216,12 +194,13 @@ export function getSQLDatasource({
         ...state,
         layers: {
           ...state.layers,
+          [layerId]: { ...state.layers[layerId], columns: [] },
         },
       };
     },
 
     getLayers(state: EsSQLPrivateState) {
-      return Object.keys(state.layers);
+      return state && state.layers ? Object.keys(state?.layers) : [];
     },
     getCurrentIndexPatternId(state: EsSQLPrivateState) {
       const layers = Object.values(state.layers);
@@ -270,12 +249,6 @@ export function getSQLDatasource({
       return toExpression(state, layerId, timeRange);
     },
 
-    getMetaData(state: EsSQLPrivateState) {
-      return {
-        filterableIndexPatterns: [],
-      };
-    },
-
     renderDataPanel(domElement: Element, props: DatasourceDataPanelProps<EsSQLPrivateState>) {
       render(
         <I18nProvider>
@@ -290,7 +263,9 @@ export function getSQLDatasource({
       props: DatasourceDimensionTriggerProps<EsSQLPrivateState>
     ) => {
       const layer = props.state.layers[props.layerId];
-      const selectedField = layer?.columns?.find((column) => column.columnId === props.columnId)!;
+      const selectedField = layer?.allColumns?.find(
+        (column) => column.columnId === props.columnId
+      )!;
       render(
         <EuiButtonEmpty onClick={() => {}}>
           {selectedField?.customLabel ?? selectedField?.fieldName}
@@ -308,74 +283,64 @@ export function getSQLDatasource({
       props: DatasourceDimensionEditorProps<EsSQLPrivateState>
     ) => {
       const fields = props.state.fieldList;
-      const selectedField = props.state.layers[props.layerId]?.columns?.find(
+      const selectedField = props.state.layers[props.layerId]?.allColumns?.find(
         (column) => column.columnId === props.columnId
       );
       render(
-        <EuiSelect
-          value={selectedField?.fieldName || ''}
-          options={[
-            { value: '', text: 'Please select' },
-            ...fields.map((field) => ({ value: field.name, text: field.name })),
-          ]}
-          onChange={(e) => {
-            const meta = fields.find((f) => f.name === e.target.value)?.meta;
-            props.setState(
-              !selectedField
-                ? {
-                    ...props.state,
-                    // fieldList: meta
-                    //   ? [...fields, { id: props.columnId, name: e.target.value, meta }]
-                    //   : fields,
-                    layers: {
-                      ...props.state.layers,
-                      [props.layerId]: {
-                        ...props.state.layers[props.layerId],
-                        columns: [
-                          ...props.state.layers[props.layerId].columns,
-                          {
-                            columnId: props.columnId,
-                            fieldName: e.target.value,
-                            meta,
-                          },
-                        ],
-                        selectedColumns: [
-                          ...props.state.layers[props.layerId].selectedColumns,
-                          {
-                            columnId: props.columnId,
-                            fieldName: e.target.value,
-                            meta,
-                          },
-                        ],
+        <EuiFormRow
+          data-test-subj="text-based-languages-field-selection-row"
+          label={i18n.translate('xpack.lens.textBasedLanguages.chooseField', {
+            defaultMessage: 'Field',
+          })}
+          fullWidth
+          className="lnsIndexPatternDimensionEditor--padded"
+        >
+          <FieldSelect
+            existingFields={fields}
+            selectedField={selectedField}
+            onChoose={(choice) => {
+              const meta = fields.find((f) => f.name === choice.field)?.meta;
+              const newColumn = {
+                columnId: props.columnId,
+                fieldName: choice.field,
+                meta,
+              };
+              return props.setState(
+                !selectedField
+                  ? {
+                      ...props.state,
+                      layers: {
+                        ...props.state.layers,
+                        [props.layerId]: {
+                          ...props.state.layers[props.layerId],
+                          columns: [...props.state.layers[props.layerId].columns, newColumn],
+                          allColumns: [...props.state.layers[props.layerId].allColumns, newColumn],
+                        },
                       },
-                    },
-                  }
-                : {
-                    ...props.state,
-                    // fieldList: meta
-                    //   ? [...fields, { id: props.columnId, name: e.target.value, meta }]
-                    //   : fields,
-                    layers: {
-                      ...props.state.layers,
-                      [props.layerId]: {
-                        ...props.state.layers[props.layerId],
-                        columns: props.state.layers[props.layerId].columns.map((col) =>
-                          col.columnId !== props.columnId
-                            ? col
-                            : { ...col, fieldName: e.target.value, customLabel: undefined }
-                        ),
-                        selectedColumns: props.state.layers[props.layerId].selectedColumns.map(
-                          (col) =>
+                    }
+                  : {
+                      ...props.state,
+                      layers: {
+                        ...props.state.layers,
+                        [props.layerId]: {
+                          ...props.state.layers[props.layerId],
+                          columns: props.state.layers[props.layerId].columns.map((col) =>
                             col.columnId !== props.columnId
                               ? col
-                              : { ...col, fieldName: e.target.value, customLabel: undefined }
-                        ),
+                              : { ...col, fieldName: choice.field, customLabel: undefined }
+                          ),
+                          allColumns: props.state.layers[props.layerId].allColumns.map((col) =>
+                            col.columnId !== props.columnId
+                              ? col
+                              : { ...col, fieldName: choice.field, customLabel: undefined }
+                          ),
+                        },
                       },
-                    },
-                  }
-            );
-          }}
-        />,
+                    }
+              );
+            }}
+          />
+        </EuiFormRow>,
         domElement
       );
     },
@@ -424,46 +389,29 @@ export function getSQLDatasource({
     onDrop: (props) => {
       const { dropType, state, source, target } = props;
       const { layers } = state;
-      // console.dir(props);
-      // const layerId = Object.keys(layers)?.[0];
 
       if (dropType === 'field_add') {
         Object.keys(layers).forEach((layerId) => {
-          const field = layers[layerId].columns.find((f) => f.columnId === source.id);
+          const field = layers[layerId].allColumns.find((f) => f.columnId === source.id);
           const currentLayer = props.state.layers[layerId];
-          const columnExists = currentLayer.columns.some((c) => c.columnId === source.columnId);
-          const numCols = currentLayer.columns.filter((c) => c.fieldName === field?.fieldName);
+          const columnExists = currentLayer.allColumns.some((c) => c.columnId === source.columnId);
+          const numCols = currentLayer.allColumns.filter((c) => c.fieldName === field?.fieldName);
+          const newColumn = {
+            columnId: target.columnId,
+            customLabel: columnExists
+              ? `${field?.fieldName}[${numCols.length - 1}]`
+              : field?.fieldName ?? '',
+            fieldName: field?.fieldName ?? '',
+            meta: field?.meta,
+          };
           props.setState({
             ...props.state,
-            // fieldList: field
-            //   ? [...fieldList, { id: target.columnId, name: field.name, meta: field.meta }]
-            //   : fieldList,
             layers: {
               ...props.state.layers,
               [layerId]: {
                 ...props.state.layers[layerId],
-                columns: [
-                  ...currentLayer.columns,
-                  {
-                    columnId: target.columnId,
-                    customLabel: columnExists
-                      ? `${field?.fieldName}[${numCols.length - 1}]`
-                      : field?.fieldName ?? '',
-                    fieldName: field?.fieldName ?? '',
-                    meta: field?.meta,
-                  },
-                ],
-                selectedColumns: [
-                  ...currentLayer.selectedColumns,
-                  {
-                    columnId: target.columnId,
-                    customLabel: columnExists
-                      ? `${field?.fieldName}[${numCols.length - 1}]`
-                      : field?.fieldName ?? '',
-                    fieldName: field?.fieldName ?? '',
-                    meta: field?.meta,
-                  },
-                ],
+                columns: [...currentLayer.columns, newColumn],
+                allColumns: [...currentLayer.allColumns, newColumn],
                 // columns: currentLayer.columns.map((c) =>
                 //   c.columnId !== target.columnId
                 //     ? c
@@ -516,28 +464,101 @@ export function getSQLDatasource({
 
         getTableSpec: () => {
           return (
-            state.layers[layerId]?.selectedColumns?.map((column) => ({
+            state.layers[layerId]?.columns?.map((column) => ({
               columnId: column.columnId,
+              fields: [column.fieldName],
             })) || []
           );
         },
         getOperationForColumnId: (columnId: string) => {
           const layer = state.layers[layerId];
-          const column = layer?.columns?.find((c) => c.columnId === columnId);
+          const column = layer?.allColumns?.find((c) => c.columnId === columnId);
 
           if (column) {
             return {
               dataType: column?.meta?.type as DataType,
               label: column?.fieldName,
               isBucketed: false,
+              hasTimeShift: false,
             };
           }
           return null;
         },
         getVisualDefaults: () => ({}),
+        isTextBasedLanguage: () => true,
+        getMaxPossibleNumValues: (columnId) => {
+          return null;
+        },
+        getSourceId: () => {
+          const layer = state.layers[layerId];
+          return layer.index;
+        },
+        getFilters: () => {
+          return {
+            enabled: {
+              kuery: [],
+              lucene: [],
+            },
+            disabled: {
+              kuery: [],
+              lucene: [],
+            },
+          };
+        },
       };
     },
     getDatasourceSuggestionsForField(state, draggedField) {
+      const field = state.fieldList.find(
+        (f) => f.id === (draggedField as TextBasedLanguageField).id
+      );
+      if (!field) return [];
+      return Object.entries(state.layers)?.map(([id, layer]) => {
+        const newId = generateId();
+        const newColumn = {
+          columnId: newId,
+          fieldName: field?.name ?? '',
+          meta: field?.meta,
+        };
+        return {
+          state: {
+            ...state,
+            layers: {
+              ...state.layers,
+              [id]: {
+                ...state.layers[id],
+                columns: [...layer.columns, newColumn],
+                allColumns: [...layer.allColumns, newColumn],
+              },
+            },
+          },
+          table: {
+            changeType: 'initial' as TableChangeType,
+            isMultiRow: false,
+            layerId: id,
+            columns: [
+              ...layer.columns?.map((f) => {
+                return {
+                  columnId: f.columnId,
+                  operation: {
+                    dataType: f?.meta?.type as DataType,
+                    label: f.fieldName,
+                    isBucketed: Boolean(f?.meta?.type !== 'number'),
+                  },
+                };
+              }),
+              {
+                columnId: newId,
+                operation: {
+                  dataType: field?.meta?.type as DataType,
+                  label: field?.name ?? '',
+                  isBucketed: Boolean(field?.meta?.type !== 'number'),
+                },
+              },
+            ],
+          },
+          keptLayerIds: [id],
+        };
+      });
       return [];
     },
     getDatasourceSuggestionsForVisualizeField: getSuggestionsForState,
@@ -553,7 +574,7 @@ function blankLayer(index: string, query?: AggregateQuery, columns?: EsSQLLayerC
   return {
     index,
     query,
-    columns: columns ?? [],
-    selectedColumns: [],
+    columns: [],
+    allColumns: columns ?? [],
   };
 }
