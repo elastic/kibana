@@ -40,7 +40,7 @@ export async function ask(options: Options) {
             throw err;
           })
         ),
-        Rx.defer(() => q.call(int, `${options.question}> `)).pipe(
+        Rx.defer(() => q.call(int, `${Chalk.blueBright('?')} ${options.question} > `)).pipe(
           Rx.mergeMap(async (answer) => {
             process.stderr.write('validating...');
             try {
