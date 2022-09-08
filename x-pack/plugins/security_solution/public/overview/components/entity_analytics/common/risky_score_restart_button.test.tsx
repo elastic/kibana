@@ -7,7 +7,7 @@
 import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
-import { TestProviders } from '../../../common/mock';
+import { TestProviders } from '../../../../common/mock';
 import { RiskyScoreRestartButton } from './risky_score_restart_button';
 import { RiskScoreModuleName, restartRiskScoreTransforms } from './utils';
 
