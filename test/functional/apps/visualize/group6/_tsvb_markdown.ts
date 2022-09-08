@@ -60,13 +60,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('should allow printing raw timestamp of data', async () => {
         await visualBuilder.enterMarkdown('{{ count.data.raw.[0].[0] }}');
         const text = await visualBuilder.getMarkdownText();
-        expect(text).to.be('1442901600000');
+        expect(text).to.be('1442642400000');
       });
 
       it('should allow printing raw value of data', async () => {
         await visualBuilder.enterMarkdown('{{ count.data.raw.[0].[1] }}');
         const text = await visualBuilder.getMarkdownText();
-        expect(text).to.be('6');
+        expect(text).to.be('0');
       });
 
       it('should render html as plain text', async () => {
@@ -82,12 +82,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await firstVariable.selector.click();
         await visChart.waitForVisualizationRenderingStabilized();
         const markdownText = await visualBuilder.getMarkdownText();
-        expect(markdownText).to.be('46');
+        expect(markdownText).to.be('156');
       });
 
       it('should render mustache list', async () => {
         const list = '{{#each _all}}\n{{ data.formatted.[0] }} {{ data.raw.[0] }}\n{{/each}}';
-        const expectedRenderer = 'Sep 22, 2015 @ 06:00:00.000,6 1442901600000,6';
+        const expectedRenderer = 'Sep 19, 2015 @ 06:00:00.000,0 1442642400000,0';
         await visualBuilder.enterMarkdown(list);
         const markdownText = await visualBuilder.getMarkdownText();
         expect(markdownText).to.be(expectedRenderer);
@@ -95,11 +95,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('should render markdown table', async () => {
         const TABLE =
           '| raw | formatted |\n|-|-|\n| {{count.last.raw}} | {{count.last.formatted}} |';
-        const DATA = '46';
+        const DATA = '156';
 
         await visualBuilder.enterMarkdown(TABLE);
         const text = await visualBuilder.getMarkdownText();
-        const tableValues = text.split('\n').map((row) => row.split(' '))[1]; // [46, 46]
+        const tableValues = text.split('\n').map((row) => row.split(' '))[1]; // [156, 156]
 
         tableValues.forEach((value) => {
           expect(value).to.be.equal(DATA);
