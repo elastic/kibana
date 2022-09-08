@@ -33,6 +33,7 @@
         ],
         "path": "packages/kbn-yarn-lock-validator/src/yarn_lock.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -61,6 +62,7 @@
         ],
         "path": "packages/kbn-yarn-lock-validator/src/validate_yarn_lock.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/yarn-lock-validator",
@@ -74,6 +76,7 @@
             ],
             "path": "packages/kbn-yarn-lock-validator/src/validate_yarn_lock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -94,6 +97,7 @@
             ],
             "path": "packages/kbn-yarn-lock-validator/src/validate_yarn_lock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -113,6 +117,7 @@
         ],
         "path": "packages/kbn-yarn-lock-validator/src/yarn_lock.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/yarn-lock-validator",
@@ -127,7 +132,8 @@
               "[key: string]:  { version: string; resolved: string; integrity: string; dependencies?: { [key: string]: string; } | undefined; optionalDependencies?: { [key: string]: string; } | undefined; }"
             ],
             "path": "packages/kbn-yarn-lock-validator/src/yarn_lock.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

@@ -25,6 +25,7 @@
         ],
         "path": "packages/kbn-performance-testing-dataset-extractor/src/extractor.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/performance-testing-dataset-extractor",
@@ -38,6 +39,7 @@
             ],
             "path": "packages/kbn-performance-testing-dataset-extractor/src/extractor.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -56,6 +58,7 @@
         ],
         "path": "packages/kbn-performance-testing-dataset-extractor/src/cli.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [],
         "returnComment": [],
         "initialIsOpen": false

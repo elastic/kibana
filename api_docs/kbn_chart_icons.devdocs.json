@@ -33,6 +33,7 @@
         ],
         "path": "packages/kbn-chart-icons/src/assets/drop_illustration.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/chart-icons",
@@ -48,6 +49,7 @@
             ],
             "path": "packages/kbn-chart-icons/src/assets/drop_illustration.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -66,6 +68,7 @@
         ],
         "path": "packages/kbn-chart-icons/src/assets/axis_bottom.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/chart-icons",
@@ -76,6 +79,7 @@
             "description": [],
             "path": "packages/kbn-chart-icons/src/assets/axis_bottom.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/chart-icons",
@@ -85,7 +89,8 @@
                 "label": "title",
                 "description": [],
                 "path": "packages/kbn-chart-icons/src/assets/axis_bottom.tsx",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "@kbn/chart-icons",
@@ -95,7 +100,8 @@
                 "label": "titleId",
                 "description": [],
                 "path": "packages/kbn-chart-icons/src/assets/axis_bottom.tsx",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }
@@ -115,6 +121,7 @@
         ],
         "path": "packages/kbn-chart-icons/src/assets/axis_left.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/chart-icons",
@@ -125,6 +132,7 @@
             "description": [],
             "path": "packages/kbn-chart-icons/src/assets/axis_left.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/chart-icons",
@@ -134,7 +142,8 @@
                 "label": "title",
                 "description": [],
                 "path": "packages/kbn-chart-icons/src/assets/axis_left.tsx",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "@kbn/chart-icons",
@@ -144,7 +153,8 @@
                 "label": "titleId",
                 "description": [],
                 "path": "packages/kbn-chart-icons/src/assets/axis_left.tsx",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }
@@ -164,6 +174,7 @@
         ],
         "path": "packages/kbn-chart-icons/src/assets/axis_right.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/chart-icons",
@@ -174,6 +185,7 @@
             "description": [],
             "path": "packages/kbn-chart-icons/src/assets/axis_right.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/chart-icons",
@@ -183,7 +195,8 @@
                 "label": "title",
                 "description": [],
                 "path": "packages/kbn-chart-icons/src/assets/axis_right.tsx",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "@kbn/chart-icons",
@@ -193,7 +206,8 @@
                 "label": "titleId",
                 "description": [],
                 "path": "packages/kbn-chart-icons/src/assets/axis_right.tsx",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }
@@ -213,6 +227,7 @@
         ],
         "path": "packages/kbn-chart-icons/src/assets/axis_top.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/chart-icons",
@@ -223,6 +238,7 @@
             "description": [],
             "path": "packages/kbn-chart-icons/src/assets/axis_top.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/chart-icons",
@@ -232,7 +248,8 @@
                 "label": "title",
                 "description": [],
                 "path": "packages/kbn-chart-icons/src/assets/axis_top.tsx",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "@kbn/chart-icons",
@@ -242,7 +259,8 @@
                 "label": "titleId",
                 "description": [],
                 "path": "packages/kbn-chart-icons/src/assets/axis_top.tsx",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }
@@ -262,6 +280,7 @@
         ],
         "path": "packages/kbn-chart-icons/src/assets/legend.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/chart-icons",
@@ -272,6 +291,7 @@
             "description": [],
             "path": "packages/kbn-chart-icons/src/assets/legend.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/chart-icons",
@@ -281,7 +301,8 @@
                 "label": "title",
                 "description": [],
                 "path": "packages/kbn-chart-icons/src/assets/legend.tsx",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "@kbn/chart-icons",
@@ -291,7 +312,8 @@
                 "label": "titleId",
                 "description": [],
                 "path": "packages/kbn-chart-icons/src/assets/legend.tsx",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }
@@ -313,6 +335,7 @@
         ],
         "path": "packages/kbn-chart-icons/src/assets/globe_illustration.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/chart-icons",
@@ -328,6 +351,7 @@
             ],
             "path": "packages/kbn-chart-icons/src/assets/globe_illustration.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -348,6 +372,7 @@
         ],
         "path": "packages/kbn-chart-icons/src/assets/chart_area.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/chart-icons",
@@ -363,6 +388,7 @@
             ],
             "path": "packages/kbn-chart-icons/src/assets/chart_area.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -383,6 +409,7 @@
         ],
         "path": "packages/kbn-chart-icons/src/assets/chart_area_percentage.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/chart-icons",
@@ -398,6 +425,7 @@
             ],
             "path": "packages/kbn-chart-icons/src/assets/chart_area_percentage.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -418,6 +446,7 @@
         ],
         "path": "packages/kbn-chart-icons/src/assets/chart_area_stacked.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/chart-icons",
@@ -433,6 +462,7 @@
             ],
             "path": "packages/kbn-chart-icons/src/assets/chart_area_stacked.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -453,6 +483,7 @@
         ],
         "path": "packages/kbn-chart-icons/src/assets/chart_bar.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/chart-icons",
@@ -468,6 +499,7 @@
             ],
             "path": "packages/kbn-chart-icons/src/assets/chart_bar.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -488,6 +520,7 @@
         ],
         "path": "packages/kbn-chart-icons/src/assets/chart_bar_annotations.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/chart-icons",
@@ -503,6 +536,7 @@
             ],
             "path": "packages/kbn-chart-icons/src/assets/chart_bar_annotations.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -523,6 +557,7 @@
         ],
         "path": "packages/kbn-chart-icons/src/assets/chart_bar_horizontal.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/chart-icons",
@@ -538,6 +573,7 @@
             ],
             "path": "packages/kbn-chart-icons/src/assets/chart_bar_horizontal.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -558,6 +594,7 @@
         ],
         "path": "packages/kbn-chart-icons/src/assets/chart_bar_horizontal_percentage.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/chart-icons",
@@ -573,6 +610,7 @@
             ],
             "path": "packages/kbn-chart-icons/src/assets/chart_bar_horizontal_percentage.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -593,6 +631,7 @@
         ],
         "path": "packages/kbn-chart-icons/src/assets/chart_bar_horizontal_stacked.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/chart-icons",
@@ -608,6 +647,7 @@
             ],
             "path": "packages/kbn-chart-icons/src/assets/chart_bar_horizontal_stacked.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -628,6 +668,7 @@
         ],
         "path": "packages/kbn-chart-icons/src/assets/chart_bar_percentage.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/chart-icons",
@@ -643,6 +684,7 @@
             ],
             "path": "packages/kbn-chart-icons/src/assets/chart_bar_percentage.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -663,6 +705,7 @@
         ],
         "path": "packages/kbn-chart-icons/src/assets/chart_bar_reference_line.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/chart-icons",
@@ -678,6 +721,7 @@
             ],
             "path": "packages/kbn-chart-icons/src/assets/chart_bar_reference_line.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -698,6 +742,7 @@
         ],
         "path": "packages/kbn-chart-icons/src/assets/chart_bar_stacked.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/chart-icons",
@@ -713,6 +758,7 @@
             ],
             "path": "packages/kbn-chart-icons/src/assets/chart_bar_stacked.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -733,6 +779,7 @@
         ],
         "path": "packages/kbn-chart-icons/src/assets/chart_datatable.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/chart-icons",
@@ -748,6 +795,7 @@
             ],
             "path": "packages/kbn-chart-icons/src/assets/chart_datatable.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -768,6 +816,7 @@
         ],
         "path": "packages/kbn-chart-icons/src/assets/chart_donut.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/chart-icons",
@@ -783,6 +832,7 @@
             ],
             "path": "packages/kbn-chart-icons/src/assets/chart_donut.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -803,6 +853,7 @@
         ],
         "path": "packages/kbn-chart-icons/src/assets/chart_heatmap.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/chart-icons",
@@ -818,6 +869,7 @@
             ],
             "path": "packages/kbn-chart-icons/src/assets/chart_heatmap.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -838,6 +890,7 @@
         ],
         "path": "packages/kbn-chart-icons/src/assets/chart_horizontal_bullet.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/chart-icons",
@@ -853,6 +906,7 @@
             ],
             "path": "packages/kbn-chart-icons/src/assets/chart_horizontal_bullet.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -873,6 +927,7 @@
         ],
         "path": "packages/kbn-chart-icons/src/assets/chart_line.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/chart-icons",
@@ -888,6 +943,7 @@
             ],
             "path": "packages/kbn-chart-icons/src/assets/chart_line.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -908,6 +964,7 @@
         ],
         "path": "packages/kbn-chart-icons/src/assets/chart_metric.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/chart-icons",
@@ -923,6 +980,7 @@
             ],
             "path": "packages/kbn-chart-icons/src/assets/chart_metric.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -943,6 +1001,7 @@
         ],
         "path": "packages/kbn-chart-icons/src/assets/chart_mixed_xy.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/chart-icons",
@@ -958,6 +1017,7 @@
             ],
             "path": "packages/kbn-chart-icons/src/assets/chart_mixed_xy.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -978,6 +1038,7 @@
         ],
         "path": "packages/kbn-chart-icons/src/assets/chart_mosaic.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/chart-icons",
@@ -993,6 +1054,7 @@
             ],
             "path": "packages/kbn-chart-icons/src/assets/chart_mosaic.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -1013,6 +1075,7 @@
         ],
         "path": "packages/kbn-chart-icons/src/assets/chart_pie.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/chart-icons",
@@ -1028,6 +1091,7 @@
             ],
             "path": "packages/kbn-chart-icons/src/assets/chart_pie.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -1048,6 +1112,7 @@
         ],
         "path": "packages/kbn-chart-icons/src/assets/chart_treemap.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/chart-icons",
@@ -1063,6 +1128,7 @@
             ],
             "path": "packages/kbn-chart-icons/src/assets/chart_treemap.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -1083,6 +1149,7 @@
         ],
         "path": "packages/kbn-chart-icons/src/assets/chart_vertical_bullet.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/chart-icons",
@@ -1098,6 +1165,7 @@
             ],
             "path": "packages/kbn-chart-icons/src/assets/chart_vertical_bullet.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -1118,6 +1186,7 @@
         ],
         "path": "packages/kbn-chart-icons/src/assets/chart_waffle.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/chart-icons",
@@ -1133,6 +1202,7 @@
             ],
             "path": "packages/kbn-chart-icons/src/assets/chart_waffle.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -1153,6 +1223,7 @@
         ],
         "path": "packages/kbn-chart-icons/src/assets/annotation_icons/circle.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/chart-icons",
@@ -1168,6 +1239,7 @@
             ],
             "path": "packages/kbn-chart-icons/src/assets/annotation_icons/circle.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -1188,6 +1260,7 @@
         ],
         "path": "packages/kbn-chart-icons/src/assets/region_map.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/chart-icons",
@@ -1203,6 +1276,7 @@
             ],
             "path": "packages/kbn-chart-icons/src/assets/region_map.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -1223,6 +1297,7 @@
         ],
         "path": "packages/kbn-chart-icons/src/assets/annotation_icons/triangle.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/chart-icons",
@@ -1238,6 +1313,7 @@
             ],
             "path": "packages/kbn-chart-icons/src/assets/annotation_icons/triangle.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],

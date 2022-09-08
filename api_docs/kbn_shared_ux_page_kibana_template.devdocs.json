@@ -17,33 +17,58 @@
         "type": "Function",
         "tags": [],
         "label": "KibanaPageTemplate",
-        "description": [],
+        "description": [
+          "\nKibana-specific wrapper of EuiPageTemplate and it's namespaced components"
+        ],
         "signature": [
-          "({ template, className, children, solutionNav, noDataConfig, ...rest }: React.PropsWithChildren<",
+          "React.FC<",
           "KibanaPageTemplateProps",
-          ">) => JSX.Element"
+          "> & { Sidebar: React.FunctionComponent<",
+          "EuiPageSidebarProps",
+          ">; Header: React.FunctionComponent<",
+          "EuiPageHeaderProps",
+          ">; Section: React.FunctionComponent<",
+          "EuiPageSectionProps",
+          ">; BottomBar: React.FunctionComponent<",
+          "_EuiPageBottomBarProps",
+          ">; EmptyPrompt: React.FunctionComponent<",
+          "_EuiPageEmptyPromptProps",
+          ">; }"
         ],
         "path": "packages/shared-ux/page/kibana_template/impl/src/page_template.tsx",
         "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
         "children": [
           {
             "parentPluginId": "@kbn/shared-ux-page-kibana-template",
             "id": "def-server.KibanaPageTemplate.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  template,\n  className,\n  children,\n  solutionNav,\n  noDataConfig,\n  ...rest\n}",
+            "label": "props",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<",
-              "KibanaPageTemplateProps",
-              ">"
+              "P & { children?: React.ReactNode; }"
             ],
-            "path": "packages/shared-ux/page/kibana_template/impl/src/page_template.tsx",
+            "path": "node_modules/@types/react/index.d.ts",
             "deprecated": false,
-            "isRequired": true
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-page-kibana-template",
+            "id": "def-server.KibanaPageTemplate.$2",
+            "type": "Any",
+            "tags": [],
+            "label": "context",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
-        "returnComment": [],
         "initialIsOpen": false
       },
       {
@@ -62,6 +87,7 @@
         ],
         "path": "packages/shared-ux/page/kibana_template/impl/src/services.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/shared-ux-page-kibana-template",
@@ -77,6 +103,7 @@
             ],
             "path": "packages/shared-ux/page/kibana_template/impl/src/services.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -99,6 +126,7 @@
         ],
         "path": "packages/shared-ux/page/kibana_template/impl/src/services.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/shared-ux-page-kibana-template",
@@ -114,6 +142,7 @@
             ],
             "path": "packages/shared-ux/page/kibana_template/impl/src/services.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -138,6 +167,7 @@
         ],
         "path": "node_modules/@kbn/shared-ux-page-kibana-template-types/index.d.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -148,30 +178,30 @@
         "label": "KibanaPageTemplateProps",
         "description": [],
         "signature": [
-          "Omit<",
-          "EuiPageProps",
-          ", \"paddingSize\"> & { template?: \"default\" | \"empty\" | \"centeredBody\" | \"centeredContent\" | undefined; paddingSize?: \"none\" | \"m\" | \"s\" | \"l\" | undefined; pageSideBar?: React.ReactNode; pageSideBarProps?: ",
-          "EuiPageSideBarProps",
-          " | undefined; pageHeader?: ",
-          "EuiPageHeaderProps",
-          " | undefined; pageBodyProps?: ",
-          "EuiPageBodyProps",
-          "<\"main\"> | undefined; pageContentProps?: ",
-          "EuiPageContentProps",
-          " | undefined; pageContentBodyProps?: ",
-          "EuiPageContentBodyProps",
-          " | undefined; bottomBar?: React.ReactNode; bottomBarProps?: ",
-          "EuiBottomBarProps",
-          " | undefined; fullHeight?: boolean | \"noscroll\" | undefined; minHeight?: ",
+          "_EuiPageOuterProps",
+          " & Omit<",
+          "_EuiPageInnerProps",
+          "<\"main\">, \"border\"> & ",
+          "_EuiPageRestrictWidth",
+          " & ",
+          "_EuiPageBottomBorder",
+          " & { contentBorder?: boolean | undefined; minHeight?: ",
           "Property",
-          ".MinHeight<string | number> | undefined; } & { isEmptyState?: boolean | undefined; solutionNav?: ",
+          ".MinHeight<string | number> | undefined; offset?: number | undefined; mainProps?: (",
+          "CommonProps",
+          " & React.HTMLAttributes<HTMLElement>) | undefined; } & { isEmptyState?: boolean | undefined; solutionNav?: ",
           "SolutionNavProps",
           " | undefined; noDataConfig?: ",
           "NoDataPageProps",
+          " | undefined; pageHeader?: ",
+          "EuiPageHeaderProps",
+          " | undefined; pageSideBar?: React.ReactNode; pageSideBarProps?: ",
+          "EuiPageSidebarProps",
           " | undefined; }"
         ],
         "path": "node_modules/@kbn/shared-ux-page-kibana-template-types/index.d.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -188,6 +218,7 @@
         ],
         "path": "node_modules/@kbn/shared-ux-page-kibana-template-types/index.d.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -202,6 +233,7 @@
         ],
         "path": "node_modules/@kbn/shared-ux-page-no-data-config-types/index.d.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],

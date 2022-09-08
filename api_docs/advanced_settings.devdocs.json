@@ -11,6 +11,7 @@
         "description": [],
         "path": "src/plugins/advanced_settings/public/component_registry/component_registry.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "advancedSettings",
@@ -23,7 +24,8 @@
               "{ [key: string]: Id; }"
             ],
             "path": "src/plugins/advanced_settings/public/component_registry/component_registry.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "advancedSettings",
@@ -34,6 +36,7 @@
             "description": [],
             "path": "src/plugins/advanced_settings/public/component_registry/component_registry.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "advancedSettings",
@@ -47,6 +50,7 @@
                 ],
                 "path": "src/plugins/advanced_settings/public/component_registry/component_registry.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "returnComment": [],
                 "children": []
               },
@@ -62,6 +66,7 @@
                 ],
                 "path": "src/plugins/advanced_settings/public/component_registry/component_registry.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "returnComment": [],
                 "children": []
               },
@@ -77,6 +82,7 @@
                 ],
                 "path": "src/plugins/advanced_settings/public/component_registry/component_registry.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "returnComment": [],
                 "children": []
               }
@@ -91,6 +97,7 @@
             "description": [],
             "path": "src/plugins/advanced_settings/public/component_registry/component_registry.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": []
           },
           {
@@ -102,6 +109,7 @@
             "description": [],
             "path": "src/plugins/advanced_settings/public/component_registry/component_registry.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "advancedSettings",
@@ -114,7 +122,8 @@
                   "{ [key: string]: Id; }"
                 ],
                 "path": "src/plugins/advanced_settings/public/component_registry/component_registry.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "advancedSettings",
@@ -130,6 +139,7 @@
                 ],
                 "path": "src/plugins/advanced_settings/public/component_registry/component_registry.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "advancedSettings",
@@ -143,6 +153,7 @@
                     ],
                     "path": "src/plugins/advanced_settings/public/component_registry/component_registry.ts",
                     "deprecated": false,
+                    "trackAdoption": false,
                     "isRequired": true
                   },
                   {
@@ -157,6 +168,7 @@
                     ],
                     "path": "src/plugins/advanced_settings/public/component_registry/component_registry.ts",
                     "deprecated": false,
+                    "trackAdoption": false,
                     "isRequired": true
                   },
                   {
@@ -171,6 +183,7 @@
                     ],
                     "path": "src/plugins/advanced_settings/public/component_registry/component_registry.ts",
                     "deprecated": false,
+                    "trackAdoption": false,
                     "isRequired": true
                   }
                 ],
@@ -187,6 +200,7 @@
             "description": [],
             "path": "src/plugins/advanced_settings/public/component_registry/component_registry.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "advancedSettings",
@@ -199,7 +213,8 @@
                   "{ [key: string]: Id; }"
                 ],
                 "path": "src/plugins/advanced_settings/public/component_registry/component_registry.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "advancedSettings",
@@ -215,6 +230,7 @@
                 ],
                 "path": "src/plugins/advanced_settings/public/component_registry/component_registry.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "advancedSettings",
@@ -228,6 +244,7 @@
                     ],
                     "path": "src/plugins/advanced_settings/public/component_registry/component_registry.ts",
                     "deprecated": false,
+                    "trackAdoption": false,
                     "isRequired": true
                   }
                 ],
@@ -258,6 +275,7 @@
         ],
         "path": "src/plugins/advanced_settings/public/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -271,7 +289,8 @@
               "P"
             ],
             "path": "node_modules/@types/react/index.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -290,6 +309,7 @@
       "description": [],
       "path": "src/plugins/advanced_settings/public/types.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [
         {
           "parentPluginId": "advancedSettings",
@@ -302,7 +322,8 @@
             "{ componentType: { [key: string]: Id; }; register: (id: Id, component: RegistryComponent, allowOverride?: boolean) => void; }"
           ],
           "path": "src/plugins/advanced_settings/public/types.ts",
-          "deprecated": false
+          "deprecated": false,
+          "trackAdoption": false
         }
       ],
       "lifecycle": "setup",
@@ -317,6 +338,7 @@
       "description": [],
       "path": "src/plugins/advanced_settings/public/types.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [
         {
           "parentPluginId": "advancedSettings",
@@ -329,7 +351,8 @@
             "{ componentType: { [key: string]: Id; }; get: (id: Id) => RegistryComponent; }"
           ],
           "path": "src/plugins/advanced_settings/public/types.ts",
-          "deprecated": false
+          "deprecated": false,
+          "trackAdoption": false
         }
       ],
       "lifecycle": "start",

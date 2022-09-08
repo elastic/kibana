@@ -23,6 +23,7 @@
         ],
         "path": "src/plugins/chart_expressions/expression_metric/public/utils/palette_data_bounds.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "expressionMetricVis",
@@ -33,6 +34,7 @@
             "description": [],
             "path": "src/plugins/chart_expressions/expression_metric/public/utils/palette_data_bounds.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "expressionMetricVis",
@@ -42,7 +44,8 @@
                 "label": "metric",
                 "description": [],
                 "path": "src/plugins/chart_expressions/expression_metric/public/utils/palette_data_bounds.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "expressionMetricVis",
@@ -55,7 +58,8 @@
                   "string | undefined"
                 ],
                 "path": "src/plugins/chart_expressions/expression_metric/public/utils/palette_data_bounds.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "expressionMetricVis",
@@ -68,7 +72,8 @@
                   "string | undefined"
                 ],
                 "path": "src/plugins/chart_expressions/expression_metric/public/utils/palette_data_bounds.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -91,6 +96,7 @@
             ],
             "path": "src/plugins/chart_expressions/expression_metric/public/utils/palette_data_bounds.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           },
           {
@@ -105,6 +111,7 @@
             ],
             "path": "src/plugins/chart_expressions/expression_metric/public/utils/palette_data_bounds.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           }
         ],
@@ -147,6 +154,7 @@
         ],
         "path": "src/plugins/chart_expressions/expression_metric/common/expression_functions/metric_vis_function.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -162,6 +170,7 @@
         "description": [],
         "path": "src/plugins/chart_expressions/expression_metric/common/types/expression_renderers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "expressionMetricVis",
@@ -181,7 +190,8 @@
               }
             ],
             "path": "src/plugins/chart_expressions/expression_metric/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionMetricVis",
@@ -202,7 +212,8 @@
               " | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_metric/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionMetricVis",
@@ -223,7 +234,8 @@
               " | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_metric/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionMetricVis",
@@ -244,7 +256,8 @@
               " | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_metric/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -258,6 +271,7 @@
         "description": [],
         "path": "src/plugins/chart_expressions/expression_metric/common/types/expression_functions.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "expressionMetricVis",
@@ -277,7 +291,8 @@
               }
             ],
             "path": "src/plugins/chart_expressions/expression_metric/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionMetricVis",
@@ -298,7 +313,8 @@
               " | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_metric/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionMetricVis",
@@ -319,7 +335,8 @@
               " | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_metric/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionMetricVis",
@@ -340,7 +357,8 @@
               " | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_metric/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionMetricVis",
@@ -353,7 +371,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_metric/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionMetricVis",
@@ -366,7 +385,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_metric/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionMetricVis",
@@ -379,7 +399,8 @@
               "\"horizontal\" | \"vertical\""
             ],
             "path": "src/plugins/chart_expressions/expression_metric/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionMetricVis",
@@ -392,7 +413,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_metric/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionMetricVis",
@@ -414,7 +436,8 @@
               "> | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_metric/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionMetricVis",
@@ -424,7 +447,8 @@
             "label": "maxCols",
             "description": [],
             "path": "src/plugins/chart_expressions/expression_metric/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionMetricVis",
@@ -437,7 +461,8 @@
               "number | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_metric/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -451,6 +476,7 @@
         "description": [],
         "path": "src/plugins/chart_expressions/expression_metric/common/types/expression_renderers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "expressionMetricVis",
@@ -460,7 +486,8 @@
             "label": "value",
             "description": [],
             "path": "src/plugins/chart_expressions/expression_metric/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionMetricVis",
@@ -470,7 +497,8 @@
             "label": "label",
             "description": [],
             "path": "src/plugins/chart_expressions/expression_metric/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionMetricVis",
@@ -483,7 +511,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_metric/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionMetricVis",
@@ -496,7 +525,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_metric/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionMetricVis",
@@ -506,7 +536,8 @@
             "label": "lightText",
             "description": [],
             "path": "src/plugins/chart_expressions/expression_metric/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionMetricVis",
@@ -516,7 +547,8 @@
             "label": "colIndex",
             "description": [],
             "path": "src/plugins/chart_expressions/expression_metric/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionMetricVis",
@@ -526,7 +558,8 @@
             "label": "rowIndex",
             "description": [],
             "path": "src/plugins/chart_expressions/expression_metric/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -540,6 +573,7 @@
         "description": [],
         "path": "src/plugins/chart_expressions/expression_metric/common/types/expression_renderers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "expressionMetricVis",
@@ -552,7 +586,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_metric/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionMetricVis",
@@ -565,7 +600,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_metric/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionMetricVis",
@@ -578,7 +614,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_metric/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionMetricVis",
@@ -598,7 +635,8 @@
               " | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_metric/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionMetricVis",
@@ -611,7 +649,8 @@
               "\"horizontal\" | \"vertical\""
             ],
             "path": "src/plugins/chart_expressions/expression_metric/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionMetricVis",
@@ -621,7 +660,8 @@
             "label": "maxCols",
             "description": [],
             "path": "src/plugins/chart_expressions/expression_metric/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionMetricVis",
@@ -634,7 +674,8 @@
               "number | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_metric/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -648,6 +689,7 @@
         "description": [],
         "path": "src/plugins/chart_expressions/expression_metric/common/types/expression_functions.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "expressionMetricVis",
@@ -660,7 +702,8 @@
               "\"metric\""
             ],
             "path": "src/plugins/chart_expressions/expression_metric/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionMetricVis",
@@ -679,7 +722,8 @@
               }
             ],
             "path": "src/plugins/chart_expressions/expression_metric/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionMetricVis",
@@ -708,7 +752,8 @@
               "; }"
             ],
             "path": "src/plugins/chart_expressions/expression_metric/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -722,6 +767,7 @@
         "description": [],
         "path": "src/plugins/chart_expressions/expression_metric/common/types/expression_renderers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "expressionMetricVis",
@@ -731,7 +777,8 @@
             "label": "addTooltip",
             "description": [],
             "path": "src/plugins/chart_expressions/expression_metric/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionMetricVis",
@@ -741,7 +788,8 @@
             "label": "addLegend",
             "description": [],
             "path": "src/plugins/chart_expressions/expression_metric/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionMetricVis",
@@ -760,7 +808,8 @@
               }
             ],
             "path": "src/plugins/chart_expressions/expression_metric/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionMetricVis",
@@ -779,7 +828,8 @@
               }
             ],
             "path": "src/plugins/chart_expressions/expression_metric/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionMetricVis",
@@ -792,7 +842,8 @@
               "\"metric\""
             ],
             "path": "src/plugins/chart_expressions/expression_metric/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -812,6 +863,7 @@
         ],
         "path": "src/plugins/chart_expressions/expression_metric/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -832,6 +884,7 @@
         ],
         "path": "src/plugins/chart_expressions/expression_metric/common/types/expression_functions.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -903,6 +956,7 @@
         ],
         "path": "src/plugins/chart_expressions/expression_metric/common/types/expression_functions.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -917,6 +971,7 @@
         ],
         "path": "src/plugins/chart_expressions/expression_metric/common/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -931,6 +986,7 @@
         ],
         "path": "src/plugins/chart_expressions/expression_metric/common/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],

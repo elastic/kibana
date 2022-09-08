@@ -24,6 +24,7 @@
         "description": [],
         "path": "packages/core/logging/core-logging-server-mocks/src/logging_service.mock.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-logging-server-mocks",
@@ -37,6 +38,7 @@
             ],
             "path": "packages/core/logging/core-logging-server-mocks/src/logging_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           },
@@ -54,6 +56,7 @@
             ],
             "path": "packages/core/logging/core-logging-server-mocks/src/logging_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           },
@@ -71,6 +74,7 @@
             ],
             "path": "packages/core/logging/core-logging-server-mocks/src/logging_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           },
@@ -88,6 +92,7 @@
             ],
             "path": "packages/core/logging/core-logging-server-mocks/src/logging_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           }
@@ -103,6 +108,7 @@
         "description": [],
         "path": "packages/core/logging/core-logging-server-mocks/src/logging_system.mock.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-logging-server-mocks",
@@ -118,6 +124,7 @@
             ],
             "path": "packages/core/logging/core-logging-server-mocks/src/logging_system.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           },
@@ -149,6 +156,7 @@
             ],
             "path": "packages/core/logging/core-logging-server-mocks/src/logging_system.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -162,7 +170,8 @@
                   "LoggerFactory"
                 ],
                 "path": "packages/core/logging/core-logging-server-mocks/src/logging_system.mock.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -180,6 +189,7 @@
             ],
             "path": "packages/core/logging/core-logging-server-mocks/src/logging_system.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -193,7 +203,8 @@
                   "LoggerFactory"
                 ],
                 "path": "packages/core/logging/core-logging-server-mocks/src/logging_system.mock.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -210,6 +221,7 @@
             ],
             "path": "packages/core/logging/core-logging-server-mocks/src/logging_system.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -223,7 +235,8 @@
                   "string[] | undefined"
                 ],
                 "path": "node_modules/@types/kbn__logging-mocks/index.d.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }

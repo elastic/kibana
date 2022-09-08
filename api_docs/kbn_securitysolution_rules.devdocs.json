@@ -31,6 +31,7 @@
         ],
         "path": "packages/kbn-securitysolution-rules/src/utils.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-rules",
@@ -44,6 +45,7 @@
             ],
             "path": "packages/kbn-securitysolution-rules/src/utils.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -58,6 +60,7 @@
             ],
             "path": "packages/kbn-securitysolution-rules/src/utils.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -76,6 +79,7 @@
         ],
         "path": "packages/kbn-securitysolution-rules/src/utils.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-rules",
@@ -89,6 +93,7 @@
             ],
             "path": "packages/kbn-securitysolution-rules/src/utils.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -114,6 +119,7 @@
         ],
         "path": "packages/kbn-securitysolution-rules/src/utils.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-rules",
@@ -127,6 +133,7 @@
             ],
             "path": "packages/kbn-securitysolution-rules/src/utils.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -149,6 +156,7 @@
         ],
         "path": "packages/kbn-securitysolution-rules/src/rule_type_constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -163,6 +171,7 @@
         ],
         "path": "packages/kbn-securitysolution-rules/src/rule_type_constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -179,6 +188,7 @@
         ],
         "path": "packages/kbn-securitysolution-rules/src/configuration_constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -193,6 +203,7 @@
         ],
         "path": "packages/kbn-securitysolution-rules/src/rule_type_constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -207,6 +218,7 @@
         ],
         "path": "packages/kbn-securitysolution-rules/src/rule_type_constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -221,6 +233,7 @@
         ],
         "path": "packages/kbn-securitysolution-rules/src/rule_type_constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -235,6 +248,7 @@
         ],
         "path": "packages/kbn-securitysolution-rules/src/rule_type_mappings.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -249,6 +263,7 @@
         ],
         "path": "packages/kbn-securitysolution-rules/src/rule_type_mappings.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -263,6 +278,7 @@
         ],
         "path": "packages/kbn-securitysolution-rules/src/rule_type_constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -279,6 +295,7 @@
         ],
         "path": "packages/kbn-securitysolution-rules/src/rule_type_constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -293,6 +310,7 @@
         ],
         "path": "packages/kbn-securitysolution-rules/src/rule_type_constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -308,6 +326,7 @@
         ],
         "path": "packages/kbn-securitysolution-rules/src/rule_type_mappings.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-rules",
@@ -320,7 +339,8 @@
               "\"siem.eqlRule\""
             ],
             "path": "packages/kbn-securitysolution-rules/src/rule_type_mappings.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/securitysolution-rules",
@@ -333,7 +353,8 @@
               "\"siem.mlRule\""
             ],
             "path": "packages/kbn-securitysolution-rules/src/rule_type_mappings.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/securitysolution-rules",
@@ -346,7 +367,8 @@
               "\"siem.queryRule\""
             ],
             "path": "packages/kbn-securitysolution-rules/src/rule_type_mappings.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/securitysolution-rules",
@@ -359,7 +381,8 @@
               "\"siem.savedQueryRule\""
             ],
             "path": "packages/kbn-securitysolution-rules/src/rule_type_mappings.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/securitysolution-rules",
@@ -372,7 +395,8 @@
               "\"siem.indicatorRule\""
             ],
             "path": "packages/kbn-securitysolution-rules/src/rule_type_mappings.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/securitysolution-rules",
@@ -385,7 +409,8 @@
               "\"siem.thresholdRule\""
             ],
             "path": "packages/kbn-securitysolution-rules/src/rule_type_mappings.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/securitysolution-rules",
@@ -398,7 +423,8 @@
               "\"siem.newTermsRule\""
             ],
             "path": "packages/kbn-securitysolution-rules/src/rule_type_mappings.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

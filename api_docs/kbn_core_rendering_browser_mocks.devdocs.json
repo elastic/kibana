@@ -32,6 +32,7 @@
         "description": [],
         "path": "packages/core/rendering/core-rendering-browser-mocks/src/rendering_service.mock.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-rendering-browser-mocks",
@@ -45,6 +46,7 @@
             ],
             "path": "packages/core/rendering/core-rendering-browser-mocks/src/rendering_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           }

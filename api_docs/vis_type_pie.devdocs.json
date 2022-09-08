@@ -33,6 +33,7 @@
         ],
         "path": "src/plugins/vis_types/pie/public/vis_type/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "visTypePie",
@@ -46,6 +47,7 @@
             ],
             "path": "src/plugins/vis_types/pie/public/vis_type/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -63,6 +65,7 @@
         "description": [],
         "path": "src/plugins/vis_types/pie/public/types/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "visTypePie",
@@ -72,7 +75,8 @@
             "label": "accessor",
             "description": [],
             "path": "src/plugins/vis_types/pie/public/types/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visTypePie",
@@ -95,7 +99,8 @@
               "> | undefined; }"
             ],
             "path": "src/plugins/vis_types/pie/public/types/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -109,6 +114,7 @@
         "description": [],
         "path": "src/plugins/vis_types/pie/public/types/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "visTypePie",
@@ -127,7 +133,8 @@
               }
             ],
             "path": "src/plugins/vis_types/pie/public/types/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visTypePie",
@@ -147,7 +154,8 @@
               "[] | undefined"
             ],
             "path": "src/plugins/vis_types/pie/public/types/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visTypePie",
@@ -167,7 +175,8 @@
               "[] | undefined"
             ],
             "path": "src/plugins/vis_types/pie/public/types/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visTypePie",
@@ -187,7 +196,8 @@
               "[] | undefined"
             ],
             "path": "src/plugins/vis_types/pie/public/types/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -223,6 +233,7 @@
         ],
         "path": "src/plugins/vis_types/pie/common/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -237,6 +248,7 @@
         ],
         "path": "src/plugins/vis_types/pie/common/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],

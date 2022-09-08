@@ -34,6 +34,7 @@
         ],
         "path": "packages/kbn-utility-types-jest/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -48,6 +49,7 @@
         ],
         "path": "packages/kbn-utility-types-jest/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],

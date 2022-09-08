@@ -19,6 +19,7 @@
         "description": [],
         "path": "packages/kbn-repo-source-classifier/src/repo_source_classifier.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/repo-source-classifier",
@@ -32,6 +33,7 @@
             ],
             "path": "packages/kbn-repo-source-classifier/src/repo_source_classifier.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/repo-source-classifier",
@@ -45,6 +47,7 @@
                 ],
                 "path": "packages/kbn-repo-source-classifier/src/repo_source_classifier.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -63,6 +66,7 @@
             ],
             "path": "packages/kbn-repo-source-classifier/src/repo_source_classifier.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/repo-source-classifier",
@@ -76,6 +80,7 @@
                 ],
                 "path": "packages/kbn-repo-source-classifier/src/repo_source_classifier.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -101,6 +106,7 @@
         ],
         "path": "packages/kbn-repo-source-classifier/src/module_type.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],

@@ -25,6 +25,7 @@
         ],
         "path": "packages/kbn-es-errors/src/errors.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/es-errors",
@@ -38,6 +39,7 @@
             ],
             "path": "packages/kbn-es-errors/src/errors.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -58,6 +60,7 @@
         ],
         "path": "packages/kbn-es-errors/src/errors.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/es-errors",
@@ -71,6 +74,7 @@
             ],
             "path": "packages/kbn-es-errors/src/errors.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -90,6 +94,7 @@
         ],
         "path": "packages/kbn-es-errors/src/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/es-errors",
@@ -102,7 +107,8 @@
               "{ type: string; reason?: string | undefined; } | undefined"
             ],
             "path": "packages/kbn-es-errors/src/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -125,6 +131,7 @@
         ],
         "path": "packages/kbn-es-errors/src/errors.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],

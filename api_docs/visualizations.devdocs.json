@@ -21,6 +21,7 @@
         ],
         "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "visualizations",
@@ -30,7 +31,8 @@
             "label": "name",
             "description": [],
             "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -40,7 +42,8 @@
             "label": "title",
             "description": [],
             "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -50,7 +53,8 @@
             "label": "description",
             "description": [],
             "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -60,7 +64,8 @@
             "label": "note",
             "description": [],
             "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -81,7 +86,8 @@
               " | undefined) => string[]) | undefined"
             ],
             "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -118,7 +124,8 @@
               " | null> | undefined) | undefined"
             ],
             "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -132,7 +139,8 @@
               " | undefined"
             ],
             "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -145,7 +153,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -158,7 +167,8 @@
               "\"experimental\" | \"beta\" | \"production\""
             ],
             "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -168,7 +178,8 @@
             "label": "isDeprecated",
             "description": [],
             "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -187,7 +198,8 @@
               }
             ],
             "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -197,7 +209,8 @@
             "label": "titleInWizard",
             "description": [],
             "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -210,7 +223,8 @@
               "VisTypeOptions"
             ],
             "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -223,7 +237,8 @@
               "any"
             ],
             "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -236,7 +251,8 @@
               "any"
             ],
             "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -246,7 +262,8 @@
             "label": "hidden",
             "description": [],
             "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -256,7 +273,8 @@
             "label": "requiresSearch",
             "description": [],
             "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -269,7 +287,8 @@
               "boolean | ((vis: { params: TVisParams; }) => boolean)"
             ],
             "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -282,7 +301,8 @@
               "boolean | ((vis: { params: TVisParams; }) => boolean)"
             ],
             "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -311,7 +331,8 @@
               "<TVisParams>>) | undefined"
             ],
             "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -348,7 +369,8 @@
               "[]>) | undefined"
             ],
             "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -376,7 +398,8 @@
               ") | undefined"
             ],
             "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -386,7 +409,8 @@
             "label": "fetchDatatable",
             "description": [],
             "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -432,6 +456,7 @@
             ],
             "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -452,7 +477,8 @@
                   "<TVisParams>"
                 ],
                 "path": "src/plugins/visualizations/public/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "visualizations",
@@ -471,7 +497,8 @@
                   }
                 ],
                 "path": "src/plugins/visualizations/public/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -502,7 +529,8 @@
               ">) => React.ReactNode) | undefined"
             ],
             "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -523,7 +551,8 @@
               ") => string | undefined) | undefined"
             ],
             "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -536,7 +565,8 @@
               "Schemas"
             ],
             "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -550,6 +580,7 @@
             ],
             "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "visualizations",
@@ -570,6 +601,7 @@
                 ],
                 "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -597,6 +629,7 @@
         ],
         "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "visualizations",
@@ -610,6 +643,7 @@
             ],
             "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "visualizations",
@@ -623,6 +657,7 @@
                 ],
                 "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -637,6 +672,7 @@
                 ],
                 "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -654,6 +690,7 @@
             ],
             "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "visualizations",
@@ -667,6 +704,7 @@
                 ],
                 "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               },
               {
@@ -681,6 +719,7 @@
                 ],
                 "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -698,6 +737,7 @@
             ],
             "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "visualizations",
@@ -711,6 +751,7 @@
                 ],
                 "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -725,6 +766,7 @@
                 ],
                 "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -742,6 +784,7 @@
             ],
             "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "visualizations",
@@ -755,6 +798,7 @@
                 ],
                 "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -769,6 +813,7 @@
                 ],
                 "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -786,6 +831,7 @@
             ],
             "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -801,6 +847,7 @@
             ],
             "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "visualizations",
@@ -814,6 +861,7 @@
                 ],
                 "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -831,6 +879,7 @@
             ],
             "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -846,6 +895,7 @@
             ],
             "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -861,6 +911,7 @@
             ],
             "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -876,6 +927,7 @@
             ],
             "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "visualizations",
@@ -889,6 +941,7 @@
                 ],
                 "path": "src/plugins/visualizations/public/persisted_state/persisted_state.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -916,6 +969,7 @@
         ],
         "path": "src/plugins/visualizations/public/vis.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "visualizations",
@@ -935,7 +989,8 @@
               "<TVisParams>"
             ],
             "path": "src/plugins/visualizations/public/vis.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -948,7 +1003,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/visualizations/public/vis.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -958,7 +1014,8 @@
             "label": "title",
             "description": [],
             "path": "src/plugins/visualizations/public/vis.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -968,7 +1025,8 @@
             "label": "description",
             "description": [],
             "path": "src/plugins/visualizations/public/vis.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -981,7 +1039,8 @@
               "TVisParams"
             ],
             "path": "src/plugins/visualizations/public/vis.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -992,6 +1051,7 @@
             "description": [],
             "path": "src/plugins/visualizations/public/vis.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": []
           },
           {
@@ -1011,7 +1071,8 @@
               }
             ],
             "path": "src/plugins/visualizations/public/vis.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -1025,6 +1086,7 @@
             ],
             "path": "src/plugins/visualizations/public/vis.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "visualizations",
@@ -1038,6 +1100,7 @@
                 ],
                 "path": "src/plugins/visualizations/public/vis.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -1059,6 +1122,7 @@
                 ],
                 "path": "src/plugins/visualizations/public/vis.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1076,6 +1140,7 @@
             ],
             "path": "src/plugins/visualizations/public/vis.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "visualizations",
@@ -1089,6 +1154,7 @@
                 ],
                 "path": "src/plugins/visualizations/public/vis.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1114,6 +1180,7 @@
             ],
             "path": "src/plugins/visualizations/public/vis.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -1145,6 +1212,7 @@
             ],
             "path": "src/plugins/visualizations/public/vis.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -1160,6 +1228,7 @@
             ],
             "path": "src/plugins/visualizations/public/vis.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -1222,6 +1291,7 @@
         ],
         "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "visualizations",
@@ -1234,7 +1304,8 @@
               "\"visualization\""
             ],
             "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -1248,6 +1319,7 @@
             ],
             "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "visualizations",
@@ -1267,6 +1339,7 @@
                 ],
                 "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -1281,6 +1354,7 @@
                 ],
                 "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -1301,6 +1375,7 @@
                 ],
                 "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -1328,6 +1403,7 @@
                 ],
                 "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               },
               {
@@ -1365,6 +1441,7 @@
                 ],
                 "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -1382,6 +1459,7 @@
             ],
             "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -1397,6 +1475,7 @@
             ],
             "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -1428,6 +1507,7 @@
             ],
             "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -1447,6 +1527,7 @@
             ],
             "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": [
               "Local/panel-level array of filters for Visualize embeddable"
@@ -1470,6 +1551,7 @@
             ],
             "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": [
               "Local/panel-level query for Visualize embeddable"
@@ -1495,6 +1577,7 @@
             ],
             "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -1512,6 +1595,7 @@
             ],
             "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -1529,6 +1613,7 @@
             ],
             "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -1544,6 +1629,7 @@
             ],
             "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -1559,6 +1645,7 @@
             ],
             "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -1574,6 +1661,7 @@
             ],
             "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -1589,6 +1677,7 @@
             ],
             "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -1612,6 +1701,7 @@
             ],
             "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "visualizations",
@@ -1631,6 +1721,7 @@
                 ],
                 "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1650,6 +1741,7 @@
             ],
             "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "visualizations",
@@ -1663,6 +1755,7 @@
                 ],
                 "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1688,6 +1781,7 @@
             ],
             "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "visualizations",
@@ -1701,6 +1795,7 @@
                 ],
                 "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -1722,6 +1817,7 @@
                 ],
                 "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1739,6 +1835,7 @@
             ],
             "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -1754,6 +1851,7 @@
             ],
             "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -1769,6 +1867,7 @@
             ],
             "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -1793,6 +1892,7 @@
             ],
             "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "visualizations",
@@ -1812,6 +1912,7 @@
                 ],
                 "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1831,6 +1932,7 @@
             ],
             "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -1848,6 +1950,7 @@
             ],
             "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -1868,6 +1971,7 @@
         ],
         "path": "src/plugins/visualizations/public/utils/saved_visualize_utils.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "visualizations",
@@ -1881,6 +1985,7 @@
             ],
             "path": "src/plugins/visualizations/public/utils/saved_visualize_utils.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -1916,6 +2021,7 @@
         ],
         "path": "src/plugins/visualizations/public/vis_schemas.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "visualizations",
@@ -1936,6 +2042,7 @@
             ],
             "path": "src/plugins/visualizations/public/vis_schemas.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -1956,6 +2063,7 @@
             ],
             "path": "src/plugins/visualizations/public/vis_schemas.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -2020,6 +2128,7 @@
         ],
         "path": "src/plugins/visualizations/common/utils/prepare_log_table.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "visualizations",
@@ -2039,6 +2148,7 @@
             ],
             "path": "src/plugins/visualizations/common/utils/prepare_log_table.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -2060,6 +2170,7 @@
             ],
             "path": "src/plugins/visualizations/common/utils/prepare_log_table.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -2074,6 +2185,7 @@
             ],
             "path": "src/plugins/visualizations/common/utils/prepare_log_table.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -2102,6 +2214,7 @@
         ],
         "path": "src/plugins/visualizations/public/legacy/vis_update_state.d.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "visualizations",
@@ -2115,6 +2228,7 @@
             ],
             "path": "src/plugins/visualizations/public/legacy/vis_update_state.d.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -2133,6 +2247,7 @@
         ],
         "path": "src/plugins/visualizations/public/utils/saved_visualize_utils.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "visualizations",
@@ -2146,6 +2261,7 @@
             ],
             "path": "src/plugins/visualizations/public/utils/saved_visualize_utils.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -2166,6 +2282,7 @@
         ],
         "path": "src/plugins/visualizations/public/components/visualization_container.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "visualizations",
@@ -2179,6 +2296,7 @@
             ],
             "path": "src/plugins/visualizations/public/components/visualization_container.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -2196,6 +2314,7 @@
         "description": [],
         "path": "src/plugins/visualizations/common/expression_functions/xy_dimension.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "visualizations",
@@ -2205,7 +2324,8 @@
             "label": "date",
             "description": [],
             "path": "src/plugins/visualizations/common/expression_functions/xy_dimension.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -2215,7 +2335,8 @@
             "label": "interval",
             "description": [],
             "path": "src/plugins/visualizations/common/expression_functions/xy_dimension.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -2225,7 +2346,8 @@
             "label": "intervalESValue",
             "description": [],
             "path": "src/plugins/visualizations/common/expression_functions/xy_dimension.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -2235,7 +2357,8 @@
             "label": "intervalESUnit",
             "description": [],
             "path": "src/plugins/visualizations/common/expression_functions/xy_dimension.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -2245,7 +2368,8 @@
             "label": "format",
             "description": [],
             "path": "src/plugins/visualizations/common/expression_functions/xy_dimension.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -2258,7 +2382,8 @@
               "{ min: string | number; max: string | number; } | undefined"
             ],
             "path": "src/plugins/visualizations/common/expression_functions/xy_dimension.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2272,6 +2397,7 @@
         "description": [],
         "path": "src/plugins/visualizations/public/visualize_app/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "visualizations",
@@ -2290,7 +2416,8 @@
               }
             ],
             "path": "src/plugins/visualizations/public/visualize_app/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -2309,7 +2436,8 @@
               }
             ],
             "path": "src/plugins/visualizations/public/visualize_app/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -2323,7 +2451,8 @@
               "[]"
             ],
             "path": "src/plugins/visualizations/public/visualize_app/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -2336,7 +2465,8 @@
               "{ from: string; to: string; mode?: \"absolute\" | \"relative\" | undefined; }"
             ],
             "path": "src/plugins/visualizations/public/visualize_app/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -2350,7 +2480,8 @@
               " | undefined"
             ],
             "path": "src/plugins/visualizations/public/visualize_app/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -2370,7 +2501,8 @@
               " | undefined"
             ],
             "path": "src/plugins/visualizations/public/visualize_app/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -2389,7 +2521,8 @@
               }
             ],
             "path": "src/plugins/visualizations/public/visualize_app/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -2401,7 +2534,8 @@
               "\nFlag to determine if visualiztion is linked to the saved search"
             ],
             "path": "src/plugins/visualizations/public/visualize_app/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2415,6 +2549,7 @@
         "description": [],
         "path": "src/plugins/visualizations/common/expression_functions/xy_dimension.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "visualizations",
@@ -2424,7 +2559,8 @@
             "label": "defaultValue",
             "description": [],
             "path": "src/plugins/visualizations/common/expression_functions/xy_dimension.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2438,6 +2574,7 @@
         "description": [],
         "path": "src/plugins/visualizations/public/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "visualizations",
@@ -2450,7 +2587,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/visualizations/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -2463,7 +2601,8 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/visualizations/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -2477,7 +2616,8 @@
               " | undefined"
             ],
             "path": "src/plugins/visualizations/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -2490,7 +2630,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/visualizations/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -2503,7 +2644,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/visualizations/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -2516,7 +2658,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/visualizations/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2530,6 +2673,7 @@
         "description": [],
         "path": "src/plugins/visualizations/common/expression_functions/xy_dimension.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "visualizations",
@@ -2539,7 +2683,8 @@
             "label": "interval",
             "description": [],
             "path": "src/plugins/visualizations/common/expression_functions/xy_dimension.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2553,6 +2698,7 @@
         "description": [],
         "path": "src/plugins/visualizations/public/visualize_app/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "visualizations",
@@ -2574,6 +2720,7 @@
             ],
             "path": "src/plugins/visualizations/public/visualize_app/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "visualizations",
@@ -2593,6 +2740,7 @@
                 ],
                 "path": "src/plugins/visualizations/public/visualize_app/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -2610,6 +2758,7 @@
             ],
             "path": "src/plugins/visualizations/public/visualize_app/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -2625,6 +2774,7 @@
         "description": [],
         "path": "src/plugins/visualizations/public/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "visualizations",
@@ -2637,7 +2787,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/visualizations/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -2647,7 +2798,8 @@
             "label": "title",
             "description": [],
             "path": "src/plugins/visualizations/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -2660,7 +2812,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/visualizations/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -2679,7 +2832,8 @@
               }
             ],
             "path": "src/plugins/visualizations/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -2699,7 +2853,8 @@
               " | undefined"
             ],
             "path": "src/plugins/visualizations/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -2712,7 +2867,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/visualizations/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -2725,7 +2881,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/visualizations/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -2738,7 +2895,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/visualizations/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -2751,7 +2909,8 @@
               "{ outcome?: \"exactMatch\" | \"aliasMatch\" | \"conflict\" | undefined; aliasTargetId?: string | undefined; aliasPurpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; errorJSON?: string | undefined; } | undefined"
             ],
             "path": "src/plugins/visualizations/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2765,6 +2924,7 @@
         "description": [],
         "path": "src/plugins/visualizations/public/vis_types/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "visualizations",
@@ -2784,7 +2944,8 @@
               "[]"
             ],
             "path": "src/plugins/visualizations/public/vis_types/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -2804,7 +2965,8 @@
               "[]"
             ],
             "path": "src/plugins/visualizations/public/vis_types/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -2824,7 +2986,8 @@
               "[]"
             ],
             "path": "src/plugins/visualizations/public/vis_types/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2838,6 +3001,7 @@
         "description": [],
         "path": "src/plugins/visualizations/public/vis_types/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "visualizations",
@@ -2858,7 +3022,8 @@
               "; }"
             ],
             "path": "src/plugins/visualizations/public/vis_types/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -2868,7 +3033,8 @@
             "label": "type",
             "description": [],
             "path": "src/plugins/visualizations/public/vis_types/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -2881,7 +3047,8 @@
               "{ fill: string | number; legend: { isVisible: boolean; position: string; shouldTruncate: boolean; maxLines: number; showSingleSeries: boolean; }; gridLinesVisibility: { x: boolean; yLeft: boolean; yRight: boolean; }; tickLabelsVisibility?: { x: boolean; yLeft: boolean; yRight: boolean; } | undefined; axisTitlesVisibility?: { x: boolean; yLeft: boolean; yRight: boolean; } | undefined; valueLabels?: boolean | undefined; extents?: { yLeftExtent: AxisExtents; yRightExtent: AxisExtents; } | undefined; }"
             ],
             "path": "src/plugins/visualizations/public/vis_types/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2895,6 +3062,7 @@
         "description": [],
         "path": "src/plugins/visualizations/public/vis_types/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "visualizations",
@@ -2907,7 +3075,8 @@
               "string[]"
             ],
             "path": "src/plugins/visualizations/public/vis_types/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -2920,7 +3089,8 @@
               "\"none\" | \"buckets\" | \"metrics\""
             ],
             "path": "src/plugins/visualizations/public/vis_types/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -2930,7 +3100,8 @@
             "label": "max",
             "description": [],
             "path": "src/plugins/visualizations/public/vis_types/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -2940,7 +3111,8 @@
             "label": "min",
             "description": [],
             "path": "src/plugins/visualizations/public/vis_types/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -2950,7 +3122,8 @@
             "label": "name",
             "description": [],
             "path": "src/plugins/visualizations/public/vis_types/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -2970,7 +3143,8 @@
               "[]"
             ],
             "path": "src/plugins/visualizations/public/vis_types/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -2980,7 +3154,8 @@
             "label": "title",
             "description": [],
             "path": "src/plugins/visualizations/public/vis_types/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -2993,7 +3168,8 @@
               "unknown"
             ],
             "path": "src/plugins/visualizations/public/vis_types/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -3006,7 +3182,8 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/visualizations/public/vis_types/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -3019,7 +3196,8 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/visualizations/public/vis_types/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -3032,7 +3210,8 @@
               "any"
             ],
             "path": "src/plugins/visualizations/public/vis_types/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -3045,7 +3224,8 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/visualizations/public/vis_types/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -3058,7 +3238,8 @@
               "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
             ],
             "path": "src/plugins/visualizations/public/vis_types/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3072,6 +3253,7 @@
         "description": [],
         "path": "src/plugins/visualizations/public/vis_schemas.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "visualizations",
@@ -3081,7 +3263,8 @@
             "label": "accessor",
             "description": [],
             "path": "src/plugins/visualizations/public/vis_schemas.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -3091,7 +3274,8 @@
             "label": "label",
             "description": [],
             "path": "src/plugins/visualizations/public/vis_schemas.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -3106,7 +3290,8 @@
               " | undefined; }"
             ],
             "path": "src/plugins/visualizations/public/vis_schemas.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -3119,7 +3304,8 @@
               "SchemaConfigParams"
             ],
             "path": "src/plugins/visualizations/public/vis_schemas.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -3129,7 +3315,8 @@
             "label": "aggType",
             "description": [],
             "path": "src/plugins/visualizations/public/vis_schemas.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3153,6 +3340,7 @@
         ],
         "path": "src/plugins/visualizations/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "visualizations",
@@ -3165,7 +3353,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/visualizations/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -3175,7 +3364,8 @@
             "label": "title",
             "description": [],
             "path": "src/plugins/visualizations/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -3188,7 +3378,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/visualizations/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -3198,7 +3389,8 @@
             "label": "type",
             "description": [],
             "path": "src/plugins/visualizations/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -3211,7 +3403,8 @@
               "T"
             ],
             "path": "src/plugins/visualizations/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -3224,7 +3417,8 @@
               "any"
             ],
             "path": "src/plugins/visualizations/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -3243,7 +3437,8 @@
               }
             ],
             "path": "src/plugins/visualizations/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3257,6 +3452,7 @@
         "description": [],
         "path": "src/plugins/visualizations/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "visualizations",
@@ -3269,7 +3465,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/visualizations/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -3284,7 +3481,8 @@
               " | undefined; schema?: string | undefined; }[]"
             ],
             "path": "src/plugins/visualizations/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -3351,7 +3549,8 @@
               " | undefined; }"
             ],
             "path": "src/plugins/visualizations/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -3364,7 +3563,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/visualizations/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3378,6 +3578,7 @@
         "description": [],
         "path": "src/plugins/visualizations/public/vis.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "visualizations",
@@ -3390,7 +3591,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/visualizations/public/vis.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -3410,7 +3612,8 @@
               " | undefined"
             ],
             "path": "src/plugins/visualizations/public/vis.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -3430,7 +3633,8 @@
               " | undefined"
             ],
             "path": "src/plugins/visualizations/public/vis.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -3450,7 +3654,8 @@
               " | undefined"
             ],
             "path": "src/plugins/visualizations/public/vis.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -3463,7 +3668,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/visualizations/public/vis.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3487,6 +3693,7 @@
         ],
         "path": "src/plugins/visualizations/public/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "visualizations",
@@ -3505,7 +3712,8 @@
               }
             ],
             "path": "src/plugins/visualizations/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -3515,7 +3723,8 @@
             "label": "hasHistogramAgg",
             "description": [],
             "path": "src/plugins/visualizations/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -3525,7 +3734,8 @@
             "label": "isTabSelected",
             "description": [],
             "path": "src/plugins/visualizations/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -3538,7 +3748,8 @@
               "VisParamType"
             ],
             "path": "src/plugins/visualizations/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -3566,7 +3777,8 @@
               ">"
             ],
             "path": "src/plugins/visualizations/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -3585,7 +3797,8 @@
               }
             ],
             "path": "src/plugins/visualizations/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -3599,6 +3812,7 @@
             ],
             "path": "src/plugins/visualizations/public/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "visualizations",
@@ -3612,6 +3826,7 @@
                 ],
                 "path": "src/plugins/visualizations/public/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -3626,6 +3841,7 @@
                 ],
                 "path": "src/plugins/visualizations/public/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -3643,6 +3859,7 @@
             ],
             "path": "src/plugins/visualizations/public/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "visualizations",
@@ -3656,6 +3873,7 @@
                 ],
                 "path": "src/plugins/visualizations/public/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -3673,6 +3891,7 @@
             ],
             "path": "src/plugins/visualizations/public/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "visualizations",
@@ -3686,6 +3905,7 @@
                 ],
                 "path": "src/plugins/visualizations/public/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -3703,6 +3923,7 @@
         "description": [],
         "path": "src/plugins/visualizations/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "visualizations",
@@ -3715,7 +3936,8 @@
               "[key: string]:  any"
             ],
             "path": "src/plugins/visualizations/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3746,6 +3968,7 @@
         ],
         "path": "src/plugins/visualizations/public/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "visualizations",
@@ -3755,7 +3978,8 @@
             "label": "lastSavedTitle",
             "description": [],
             "path": "src/plugins/visualizations/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -3769,6 +3993,7 @@
             ],
             "path": "src/plugins/visualizations/public/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -3784,6 +4009,7 @@
             ],
             "path": "src/plugins/visualizations/public/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -3795,7 +4021,8 @@
             "label": "displayName",
             "description": [],
             "path": "src/plugins/visualizations/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -3809,7 +4036,8 @@
               " | undefined"
             ],
             "path": "src/plugins/visualizations/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -3829,7 +4057,8 @@
               " | undefined"
             ],
             "path": "src/plugins/visualizations/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -3842,7 +4071,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/visualizations/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -3855,7 +4085,8 @@
               "string[] | undefined"
             ],
             "path": "src/plugins/visualizations/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3869,6 +4100,7 @@
         "description": [],
         "path": "src/plugins/visualizations/public/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "visualizations",
@@ -3989,7 +4221,8 @@
               "; }"
             ],
             "path": "src/plugins/visualizations/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -4002,7 +4235,8 @@
               "any"
             ],
             "path": "src/plugins/visualizations/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -4015,7 +4249,8 @@
               "AbortSignal | undefined"
             ],
             "path": "src/plugins/visualizations/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -4029,6 +4264,7 @@
         "description": [],
         "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "visualizations",
@@ -4038,7 +4274,8 @@
             "label": "aliasPath",
             "description": [],
             "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -4048,7 +4285,8 @@
             "label": "aliasApp",
             "description": [],
             "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -4058,7 +4296,8 @@
             "label": "name",
             "description": [],
             "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -4068,7 +4307,8 @@
             "label": "title",
             "description": [],
             "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -4078,7 +4318,8 @@
             "label": "icon",
             "description": [],
             "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -4091,7 +4332,8 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -4101,7 +4343,8 @@
             "label": "description",
             "description": [],
             "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -4114,7 +4357,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -4128,6 +4372,7 @@
             ],
             "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -4142,7 +4387,8 @@
               "\"experimental\" | \"beta\" | \"production\""
             ],
             "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -4155,7 +4401,8 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -4170,7 +4417,8 @@
               "; } | undefined"
             ],
             "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -4196,6 +4444,7 @@
         ],
         "path": "src/plugins/visualizations/public/vis_types/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "visualizations",
@@ -4207,7 +4456,8 @@
               "\nVisualization unique name"
             ],
             "path": "src/plugins/visualizations/public/vis_types/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -4219,7 +4469,8 @@
               "\nIt is the displayed text on the wizard and the vis listing"
             ],
             "path": "src/plugins/visualizations/public/vis_types/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -4234,7 +4485,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/visualizations/public/vis_types/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -4249,7 +4501,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/visualizations/public/vis_types/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -4273,6 +4526,7 @@
             ],
             "path": "src/plugins/visualizations/public/vis_types/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "visualizations",
@@ -4293,6 +4547,7 @@
                 ],
                 "path": "src/plugins/visualizations/public/vis_types/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -4336,6 +4591,7 @@
             ],
             "path": "src/plugins/visualizations/public/vis_types/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "visualizations",
@@ -4356,6 +4612,7 @@
                 ],
                 "path": "src/plugins/visualizations/public/vis_types/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               },
               {
@@ -4377,6 +4634,7 @@
                 ],
                 "path": "src/plugins/visualizations/public/vis_types/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -4420,6 +4678,7 @@
             ],
             "path": "src/plugins/visualizations/public/vis_types/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "visualizations",
@@ -4439,6 +4698,7 @@
                 ],
                 "path": "src/plugins/visualizations/public/vis_types/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -4455,7 +4715,8 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/visualizations/public/vis_types/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -4471,7 +4732,8 @@
               " | undefined"
             ],
             "path": "src/plugins/visualizations/public/vis_types/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -4486,7 +4748,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/visualizations/public/vis_types/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -4503,7 +4766,8 @@
               "\"experimental\" | \"beta\" | \"production\" | undefined"
             ],
             "path": "src/plugins/visualizations/public/vis_types/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -4518,7 +4782,8 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/visualizations/public/vis_types/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -4542,7 +4807,8 @@
               " | undefined"
             ],
             "path": "src/plugins/visualizations/public/vis_types/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -4557,7 +4823,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/visualizations/public/vis_types/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -4572,7 +4839,8 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/visualizations/public/vis_types/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -4587,7 +4855,8 @@
               "boolean | ((vis: { params: TVisParams; }) => boolean) | undefined"
             ],
             "path": "src/plugins/visualizations/public/vis_types/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -4600,7 +4869,8 @@
               "boolean | ((vis: { params: TVisParams; }) => boolean) | undefined"
             ],
             "path": "src/plugins/visualizations/public/vis_types/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -4628,7 +4898,8 @@
               ") | undefined"
             ],
             "path": "src/plugins/visualizations/public/vis_types/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -4660,6 +4931,7 @@
             ],
             "path": "src/plugins/visualizations/public/vis_types/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "visualizations",
@@ -4688,6 +4960,7 @@
                 ],
                 "path": "src/plugins/visualizations/public/vis_types/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -4708,7 +4981,8 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/visualizations/public/vis_types/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -4756,6 +5030,7 @@
             ],
             "path": "src/plugins/visualizations/public/vis_types/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -4776,7 +5051,8 @@
                   "<TVisParams>"
                 ],
                 "path": "src/plugins/visualizations/public/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "visualizations",
@@ -4795,7 +5071,8 @@
                   }
                 ],
                 "path": "src/plugins/visualizations/public/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -4821,6 +5098,7 @@
             ],
             "path": "src/plugins/visualizations/public/vis_types/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "visualizations",
@@ -4840,6 +5118,7 @@
                 ],
                 "path": "src/plugins/visualizations/public/vis_types/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -4873,6 +5152,7 @@
             ],
             "path": "src/plugins/visualizations/public/vis_types/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "visualizations",
@@ -4893,6 +5173,7 @@
                 ],
                 "path": "src/plugins/visualizations/public/vis_types/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -4909,7 +5190,8 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/visualizations/public/vis_types/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -4924,7 +5206,8 @@
               "> | undefined"
             ],
             "path": "src/plugins/visualizations/public/vis_types/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -4939,7 +5222,8 @@
               "DefaultEditorConfig<TVisParams> | CustomEditorConfig"
             ],
             "path": "src/plugins/visualizations/public/vis_types/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -4954,7 +5238,8 @@
               "{ [x: string]: any; }"
             ],
             "path": "src/plugins/visualizations/public/vis_types/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -4968,6 +5253,7 @@
         "description": [],
         "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "visualizations",
@@ -4977,7 +5263,8 @@
             "label": "editUrl",
             "description": [],
             "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -4990,7 +5277,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -5003,7 +5291,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -5013,7 +5302,8 @@
             "label": "icon",
             "description": [],
             "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -5023,7 +5313,8 @@
             "label": "id",
             "description": [],
             "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -5036,7 +5327,8 @@
               "\"experimental\" | \"beta\" | \"production\""
             ],
             "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -5046,7 +5338,8 @@
             "label": "savedObjectType",
             "description": [],
             "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -5056,7 +5349,8 @@
             "label": "title",
             "description": [],
             "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -5069,7 +5363,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -5083,6 +5378,7 @@
             ],
             "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -5094,7 +5390,8 @@
             "label": "typeTitle",
             "description": [],
             "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -5107,7 +5404,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -5136,7 +5434,8 @@
               "> | undefined"
             ],
             "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -5150,6 +5449,7 @@
         "description": [],
         "path": "src/plugins/visualizations/public/vis_types/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "visualizations",
@@ -5159,7 +5459,8 @@
             "label": "indexPatternId",
             "description": [],
             "path": "src/plugins/visualizations/public/vis_types/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -5172,7 +5473,8 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/visualizations/public/vis_types/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -5185,7 +5487,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/visualizations/public/vis_types/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -5198,7 +5501,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/visualizations/public/vis_types/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -5211,7 +5515,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/visualizations/public/vis_types/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -5224,7 +5529,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/visualizations/public/vis_types/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -5237,7 +5543,8 @@
               "Record<string, unknown> | undefined"
             ],
             "path": "src/plugins/visualizations/public/vis_types/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -5250,7 +5557,8 @@
               "string[] | undefined"
             ],
             "path": "src/plugins/visualizations/public/vis_types/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -5263,7 +5571,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/visualizations/public/vis_types/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -5276,7 +5585,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/visualizations/public/vis_types/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -5289,7 +5599,8 @@
               "SplitByFilters[] | undefined"
             ],
             "path": "src/plugins/visualizations/public/vis_types/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -5303,7 +5614,8 @@
               "<{ [key: string]: unknown; }> | undefined"
             ],
             "path": "src/plugins/visualizations/public/vis_types/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -5316,7 +5628,8 @@
               "VisualizeEditorMetricContext[]"
             ],
             "path": "src/plugins/visualizations/public/vis_types/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -5329,7 +5642,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/visualizations/public/vis_types/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -5342,7 +5656,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/visualizations/public/vis_types/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -5355,7 +5670,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/visualizations/public/vis_types/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -5368,7 +5684,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/visualizations/public/vis_types/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -5381,7 +5698,8 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/visualizations/public/vis_types/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -5412,6 +5730,7 @@
         ],
         "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "visualizations",
@@ -5424,7 +5743,8 @@
               "{ colors?: { [key: string]: string; } | undefined; } | undefined"
             ],
             "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -5452,7 +5772,8 @@
               "> | undefined"
             ],
             "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -5472,7 +5793,8 @@
               " | undefined"
             ],
             "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -5485,7 +5807,8 @@
               "unknown"
             ],
             "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -5499,7 +5822,8 @@
               " | undefined"
             ],
             "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -5513,7 +5837,8 @@
               "[] | undefined"
             ],
             "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -5527,7 +5852,22 @@
               " | undefined"
             ],
             "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-public.VisualizeInput.timeslice",
+            "type": "Object",
+            "tags": [],
+            "label": "timeslice",
+            "description": [],
+            "signature": [
+              "[number, number] | undefined"
+            ],
+            "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -5543,6 +5883,7 @@
         "description": [],
         "path": "src/plugins/visualizations/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -5554,6 +5895,7 @@
         "description": [],
         "path": "src/plugins/visualizations/public/vis_types/vis_groups_enum.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -5570,6 +5912,7 @@
         ],
         "path": "src/plugins/visualizations/public/triggers/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -5591,6 +5934,7 @@
         ],
         "path": "src/plugins/visualizations/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -5605,6 +5949,7 @@
         ],
         "path": "src/plugins/visualizations/common/utils/prepare_log_table.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -5627,6 +5972,7 @@
         ],
         "path": "src/plugins/visualizations/common/expression_functions/vis_dimension.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -5665,6 +6011,7 @@
         ],
         "path": "src/plugins/visualizations/common/expression_functions/xy_dimension.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -5679,6 +6026,7 @@
         ],
         "path": "src/plugins/visualizations/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -5693,6 +6041,7 @@
         ],
         "path": "src/plugins/visualizations/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -5709,6 +6058,7 @@
         ],
         "path": "src/plugins/visualizations/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -5755,6 +6105,7 @@
         ],
         "path": "src/plugins/visualizations/public/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -5775,7 +6126,8 @@
               "<TVisParams>"
             ],
             "path": "src/plugins/visualizations/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -5794,7 +6146,8 @@
               }
             ],
             "path": "src/plugins/visualizations/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -5811,6 +6164,7 @@
         ],
         "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -5825,6 +6179,7 @@
         ],
         "path": "src/plugins/visualizations/public/triggers/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -5839,6 +6194,7 @@
         ],
         "path": "src/plugins/visualizations/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -5853,6 +6209,7 @@
         ],
         "path": "src/plugins/visualizations/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -6095,6 +6452,7 @@
         ],
         "path": "src/plugins/visualizations/public/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -6277,6 +6635,7 @@
         ],
         "path": "src/plugins/visualizations/public/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -6293,6 +6652,7 @@
         ],
         "path": "src/plugins/visualizations/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -6304,6 +6664,7 @@
         "description": [],
         "path": "src/plugins/visualizations/public/embeddable/events.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "visualizations",
@@ -6316,7 +6677,8 @@
               "\"FILTER_TRIGGER\""
             ],
             "path": "src/plugins/visualizations/public/embeddable/events.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -6329,7 +6691,8 @@
               "\"SELECT_RANGE_TRIGGER\""
             ],
             "path": "src/plugins/visualizations/public/embeddable/events.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -6342,7 +6705,8 @@
               "\"VALUE_CLICK_TRIGGER\""
             ],
             "path": "src/plugins/visualizations/public/embeddable/events.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -6355,7 +6719,8 @@
               "\"ROW_CLICK_TRIGGER\""
             ],
             "path": "src/plugins/visualizations/public/embeddable/events.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -6405,6 +6770,7 @@
       ],
       "path": "src/plugins/visualizations/public/plugin.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "lifecycle": "setup",
       "initialIsOpen": true
     },
@@ -6475,6 +6841,7 @@
       ],
       "path": "src/plugins/visualizations/public/plugin.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [
         {
           "parentPluginId": "visualizations",
@@ -6490,6 +6857,7 @@
           ],
           "path": "src/plugins/visualizations/public/plugin.ts",
           "deprecated": false,
+          "trackAdoption": false,
           "returnComment": [],
           "children": [
             {
@@ -6503,7 +6871,8 @@
                 "ShowNewVisModalParams"
               ],
               "path": "src/plugins/visualizations/public/wizard/show_new_vis.tsx",
-              "deprecated": false
+              "deprecated": false,
+              "trackAdoption": false
             }
           ]
         }
@@ -6530,6 +6899,7 @@
         ],
         "path": "src/plugins/visualizations/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -6543,6 +6913,7 @@
       "description": [],
       "path": "src/plugins/visualizations/server/types.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [],
       "lifecycle": "setup",
       "initialIsOpen": true
@@ -6556,6 +6927,7 @@
       "description": [],
       "path": "src/plugins/visualizations/server/types.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [],
       "lifecycle": "start",
       "initialIsOpen": true
@@ -6591,6 +6963,7 @@
         ],
         "path": "src/plugins/visualizations/common/utils/accessors.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "visualizations",
@@ -6604,6 +6977,7 @@
             ],
             "path": "src/plugins/visualizations/common/utils/accessors.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -6625,6 +6999,7 @@
             ],
             "path": "src/plugins/visualizations/common/utils/accessors.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -6658,6 +7033,7 @@
         ],
         "path": "src/plugins/visualizations/common/utils/accessors.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "visualizations",
@@ -6678,6 +7054,7 @@
             ],
             "path": "src/plugins/visualizations/common/utils/accessors.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -6712,6 +7089,7 @@
         ],
         "path": "src/plugins/visualizations/common/utils/accessors.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "visualizations",
@@ -6732,6 +7110,7 @@
             ],
             "path": "src/plugins/visualizations/common/utils/accessors.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -6753,6 +7132,7 @@
             ],
             "path": "src/plugins/visualizations/common/utils/accessors.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -6795,6 +7175,7 @@
         ],
         "path": "src/plugins/visualizations/common/utils/accessors.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "visualizations",
@@ -6815,6 +7196,7 @@
             ],
             "path": "src/plugins/visualizations/common/utils/accessors.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -6836,6 +7218,7 @@
             ],
             "path": "src/plugins/visualizations/common/utils/accessors.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -6880,6 +7263,7 @@
         ],
         "path": "src/plugins/visualizations/common/utils/accessors.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "visualizations",
@@ -6900,6 +7284,7 @@
             ],
             "path": "src/plugins/visualizations/common/utils/accessors.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -6921,6 +7306,7 @@
             ],
             "path": "src/plugins/visualizations/common/utils/accessors.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -6944,6 +7330,7 @@
             ],
             "path": "src/plugins/visualizations/common/utils/accessors.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           }
         ],
@@ -6970,6 +7357,7 @@
         ],
         "path": "src/plugins/visualizations/common/utils/accessors.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "visualizations",
@@ -6991,6 +7379,7 @@
             ],
             "path": "src/plugins/visualizations/common/utils/accessors.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           }
         ],
@@ -7055,6 +7444,7 @@
         ],
         "path": "src/plugins/visualizations/common/utils/prepare_log_table.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "visualizations",
@@ -7074,6 +7464,7 @@
             ],
             "path": "src/plugins/visualizations/common/utils/prepare_log_table.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -7095,6 +7486,7 @@
             ],
             "path": "src/plugins/visualizations/common/utils/prepare_log_table.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -7109,6 +7501,7 @@
             ],
             "path": "src/plugins/visualizations/common/utils/prepare_log_table.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -7169,6 +7562,7 @@
         ],
         "path": "src/plugins/visualizations/common/expression_functions/range.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -7201,6 +7595,7 @@
         ],
         "path": "src/plugins/visualizations/common/utils/accessors.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "visualizations",
@@ -7222,6 +7617,7 @@
             ],
             "path": "src/plugins/visualizations/common/utils/accessors.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           },
           {
@@ -7243,6 +7639,7 @@
             ],
             "path": "src/plugins/visualizations/common/utils/accessors.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -7311,6 +7708,7 @@
         ],
         "path": "src/plugins/visualizations/common/expression_functions/vis_dimension.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -7326,6 +7724,7 @@
         "description": [],
         "path": "src/plugins/visualizations/common/expression_functions/vis_dimension.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "visualizations",
@@ -7338,7 +7737,8 @@
               "string | number"
             ],
             "path": "src/plugins/visualizations/common/expression_functions/vis_dimension.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -7351,7 +7751,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/visualizations/common/expression_functions/vis_dimension.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -7364,7 +7765,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/visualizations/common/expression_functions/vis_dimension.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -7388,6 +7790,7 @@
         ],
         "path": "src/plugins/visualizations/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "visualizations",
@@ -7400,7 +7803,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/visualizations/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -7410,7 +7814,8 @@
             "label": "title",
             "description": [],
             "path": "src/plugins/visualizations/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -7423,7 +7828,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/visualizations/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -7433,7 +7839,8 @@
             "label": "type",
             "description": [],
             "path": "src/plugins/visualizations/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -7446,7 +7853,8 @@
               "T"
             ],
             "path": "src/plugins/visualizations/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -7459,7 +7867,8 @@
               "any"
             ],
             "path": "src/plugins/visualizations/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -7478,7 +7887,8 @@
               }
             ],
             "path": "src/plugins/visualizations/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -7492,6 +7902,7 @@
         "description": [],
         "path": "src/plugins/visualizations/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "visualizations",
@@ -7504,7 +7915,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/visualizations/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -7519,7 +7931,8 @@
               " | undefined; schema?: string | undefined; }[]"
             ],
             "path": "src/plugins/visualizations/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -7586,7 +7999,8 @@
               " | undefined; }"
             ],
             "path": "src/plugins/visualizations/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -7599,7 +8013,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/visualizations/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -7613,6 +8028,7 @@
         "description": [],
         "path": "src/plugins/visualizations/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "visualizations",
@@ -7625,7 +8041,8 @@
               "[key: string]:  any"
             ],
             "path": "src/plugins/visualizations/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -7650,6 +8067,7 @@
         ],
         "path": "src/plugins/visualizations/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "visualizations",
@@ -7659,7 +8077,8 @@
             "label": "description",
             "description": [],
             "path": "src/plugins/visualizations/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -7672,7 +8091,8 @@
               "{ searchSourceJSON: string; }"
             ],
             "path": "src/plugins/visualizations/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -7682,7 +8102,8 @@
             "label": "title",
             "description": [],
             "path": "src/plugins/visualizations/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -7692,7 +8113,8 @@
             "label": "version",
             "description": [],
             "path": "src/plugins/visualizations/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -7702,7 +8124,8 @@
             "label": "visState",
             "description": [],
             "path": "src/plugins/visualizations/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visualizations",
@@ -7712,7 +8135,8 @@
             "label": "uiStateJSON",
             "description": [],
             "path": "src/plugins/visualizations/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -7728,6 +8152,7 @@
         "description": [],
         "path": "src/plugins/visualizations/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -7751,6 +8176,7 @@
         ],
         "path": "src/plugins/visualizations/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -7765,6 +8191,7 @@
         ],
         "path": "src/plugins/visualizations/common/utils/prepare_log_table.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -7787,6 +8214,7 @@
         ],
         "path": "src/plugins/visualizations/common/expression_functions/vis_dimension.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -7803,6 +8231,7 @@
         ],
         "path": "src/plugins/visualizations/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -7819,6 +8248,7 @@
         ],
         "path": "src/plugins/visualizations/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ]

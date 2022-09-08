@@ -43,6 +43,7 @@
         ],
         "path": "packages/shared-ux/page/kibana_template/mocks/src/storybook/all.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/shared-ux-page-kibana-template-mocks",
@@ -53,6 +54,7 @@
             "description": [],
             "path": "packages/shared-ux/page/kibana_template/mocks/src/storybook/all.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/shared-ux-page-kibana-template-mocks",
@@ -65,7 +67,8 @@
                   "any"
                 ],
                 "path": "packages/shared-ux/page/kibana_template/mocks/src/storybook/all.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "@kbn/shared-ux-page-kibana-template-mocks",
@@ -78,7 +81,8 @@
                   "any"
                 ],
                 "path": "packages/shared-ux/page/kibana_template/mocks/src/storybook/all.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -91,6 +95,7 @@
             "description": [],
             "path": "packages/shared-ux/page/kibana_template/mocks/src/storybook/all.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": []
           },
           {
@@ -105,7 +110,8 @@
               "[]"
             ],
             "path": "packages/shared-ux/page/kibana_template/mocks/src/storybook/all.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/shared-ux-page-kibana-template-mocks",
@@ -128,6 +134,7 @@
             ],
             "path": "packages/shared-ux/page/kibana_template/mocks/src/storybook/all.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/shared-ux-page-kibana-template-mocks",
@@ -148,6 +155,7 @@
                 ],
                 "path": "packages/shared-ux/page/kibana_template/mocks/src/storybook/all.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -174,6 +182,7 @@
             ],
             "path": "packages/shared-ux/page/kibana_template/mocks/src/storybook/all.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/shared-ux-page-kibana-template-mocks",
@@ -193,6 +202,7 @@
                 ],
                 "path": "packages/shared-ux/page/kibana_template/mocks/src/storybook/all.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -228,6 +238,7 @@
         ],
         "path": "packages/shared-ux/page/kibana_template/mocks/src/storybook/no_data_config.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/shared-ux-page-kibana-template-mocks",
@@ -238,6 +249,7 @@
             "description": [],
             "path": "packages/shared-ux/page/kibana_template/mocks/src/storybook/no_data_config.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/shared-ux-page-kibana-template-mocks",
@@ -250,7 +262,8 @@
                   "any"
                 ],
                 "path": "packages/shared-ux/page/kibana_template/mocks/src/storybook/no_data_config.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -263,6 +276,7 @@
             "description": [],
             "path": "packages/shared-ux/page/kibana_template/mocks/src/storybook/no_data_config.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": []
           },
           {
@@ -277,7 +291,8 @@
               "[]"
             ],
             "path": "packages/shared-ux/page/kibana_template/mocks/src/storybook/no_data_config.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/shared-ux-page-kibana-template-mocks",
@@ -300,6 +315,7 @@
             ],
             "path": "packages/shared-ux/page/kibana_template/mocks/src/storybook/no_data_config.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/shared-ux-page-kibana-template-mocks",
@@ -320,6 +336,7 @@
                 ],
                 "path": "packages/shared-ux/page/kibana_template/mocks/src/storybook/no_data_config.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -346,6 +363,7 @@
             ],
             "path": "packages/shared-ux/page/kibana_template/mocks/src/storybook/no_data_config.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/shared-ux-page-kibana-template-mocks",
@@ -365,6 +383,7 @@
                 ],
                 "path": "packages/shared-ux/page/kibana_template/mocks/src/storybook/no_data_config.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -400,6 +419,7 @@
         ],
         "path": "packages/shared-ux/page/kibana_template/mocks/src/storybook/solution_nav.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/shared-ux-page-kibana-template-mocks",
@@ -410,6 +430,7 @@
             "description": [],
             "path": "packages/shared-ux/page/kibana_template/mocks/src/storybook/solution_nav.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/shared-ux-page-kibana-template-mocks",
@@ -422,7 +443,8 @@
                   "any"
                 ],
                 "path": "packages/shared-ux/page/kibana_template/mocks/src/storybook/solution_nav.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -435,6 +457,7 @@
             "description": [],
             "path": "packages/shared-ux/page/kibana_template/mocks/src/storybook/solution_nav.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": []
           },
           {
@@ -449,7 +472,8 @@
               "[]"
             ],
             "path": "packages/shared-ux/page/kibana_template/mocks/src/storybook/solution_nav.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/shared-ux-page-kibana-template-mocks",
@@ -472,6 +496,7 @@
             ],
             "path": "packages/shared-ux/page/kibana_template/mocks/src/storybook/solution_nav.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/shared-ux-page-kibana-template-mocks",
@@ -492,6 +517,7 @@
                 ],
                 "path": "packages/shared-ux/page/kibana_template/mocks/src/storybook/solution_nav.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -518,6 +544,7 @@
             ],
             "path": "packages/shared-ux/page/kibana_template/mocks/src/storybook/solution_nav.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/shared-ux-page-kibana-template-mocks",
@@ -537,6 +564,7 @@
                 ],
                 "path": "packages/shared-ux/page/kibana_template/mocks/src/storybook/solution_nav.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -570,6 +598,7 @@
         ],
         "path": "packages/shared-ux/page/kibana_template/mocks/src/storybook/inner.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/shared-ux-page-kibana-template-mocks",
@@ -580,6 +609,7 @@
             "description": [],
             "path": "packages/shared-ux/page/kibana_template/mocks/src/storybook/inner.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/shared-ux-page-kibana-template-mocks",
@@ -592,7 +622,8 @@
                   "any"
                 ],
                 "path": "packages/shared-ux/page/kibana_template/mocks/src/storybook/inner.tsx",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -605,6 +636,7 @@
             "description": [],
             "path": "packages/shared-ux/page/kibana_template/mocks/src/storybook/inner.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": []
           },
           {
@@ -618,7 +650,8 @@
               "never[]"
             ],
             "path": "packages/shared-ux/page/kibana_template/mocks/src/storybook/inner.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/shared-ux-page-kibana-template-mocks",
@@ -641,6 +674,7 @@
             ],
             "path": "packages/shared-ux/page/kibana_template/mocks/src/storybook/inner.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/shared-ux-page-kibana-template-mocks",
@@ -661,6 +695,7 @@
                 ],
                 "path": "packages/shared-ux/page/kibana_template/mocks/src/storybook/inner.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -687,6 +722,7 @@
             ],
             "path": "packages/shared-ux/page/kibana_template/mocks/src/storybook/inner.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/shared-ux-page-kibana-template-mocks",
@@ -706,6 +742,7 @@
                 ],
                 "path": "packages/shared-ux/page/kibana_template/mocks/src/storybook/inner.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -729,6 +766,7 @@
         ],
         "path": "packages/shared-ux/page/kibana_template/mocks/src/jest.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -746,6 +784,7 @@
         ],
         "path": "packages/shared-ux/page/kibana_template/mocks/src/jest.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -776,6 +815,7 @@
         ],
         "path": "packages/shared-ux/page/kibana_template/mocks/src/storybook/all.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -802,6 +842,7 @@
         ],
         "path": "packages/shared-ux/page/kibana_template/mocks/src/storybook/no_data_config.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -828,6 +869,7 @@
         ],
         "path": "packages/shared-ux/page/kibana_template/mocks/src/storybook/solution_nav.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -852,6 +894,7 @@
         ],
         "path": "packages/shared-ux/page/kibana_template/mocks/src/storybook/inner.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],

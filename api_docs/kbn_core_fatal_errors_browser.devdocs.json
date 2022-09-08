@@ -31,6 +31,7 @@
         ],
         "path": "packages/core/fatal-errors/core-fatal-errors-browser/src/get_error_info.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-fatal-errors-browser",
@@ -40,7 +41,8 @@
             "label": "message",
             "description": [],
             "path": "packages/core/fatal-errors/core-fatal-errors-browser/src/get_error_info.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-fatal-errors-browser",
@@ -53,7 +55,8 @@
               "string | undefined"
             ],
             "path": "packages/core/fatal-errors/core-fatal-errors-browser/src/get_error_info.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -69,6 +72,7 @@
         ],
         "path": "packages/core/fatal-errors/core-fatal-errors-browser/src/contract.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-fatal-errors-browser",
@@ -84,6 +88,7 @@
             ],
             "path": "packages/core/fatal-errors/core-fatal-errors-browser/src/contract.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-fatal-errors-browser",
@@ -99,6 +104,7 @@
                 ],
                 "path": "packages/core/fatal-errors/core-fatal-errors-browser/src/contract.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -115,6 +121,7 @@
                 ],
                 "path": "packages/core/fatal-errors/core-fatal-errors-browser/src/contract.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -144,6 +151,7 @@
             ],
             "path": "packages/core/fatal-errors/core-fatal-errors-browser/src/contract.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -173,6 +181,7 @@
         ],
         "path": "packages/core/fatal-errors/core-fatal-errors-browser/src/contract.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],

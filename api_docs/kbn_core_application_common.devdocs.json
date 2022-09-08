@@ -31,6 +31,7 @@
         ],
         "path": "packages/core/application/core-application-common/src/app_category.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-application-common",
@@ -42,7 +43,8 @@
               "\nUnique identifier for the categories"
             ],
             "path": "packages/core/application/core-application-common/src/app_category.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-application-common",
@@ -54,7 +56,8 @@
               "\nLabel used for category name.\nAlso used as aria-label if one isn't set."
             ],
             "path": "packages/core/application/core-application-common/src/app_category.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-application-common",
@@ -69,7 +72,8 @@
               "string | undefined"
             ],
             "path": "packages/core/application/core-application-common/src/app_category.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-application-common",
@@ -84,7 +88,8 @@
               "number | undefined"
             ],
             "path": "packages/core/application/core-application-common/src/app_category.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-application-common",
@@ -99,7 +104,8 @@
               "string | undefined"
             ],
             "path": "packages/core/application/core-application-common/src/app_category.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -121,6 +127,7 @@
         ],
         "path": "packages/core/application/core-application-common/src/app_wrapper_class.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -145,6 +152,7 @@
         ],
         "path": "packages/core/application/core-application-common/src/default_app_categories.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ]

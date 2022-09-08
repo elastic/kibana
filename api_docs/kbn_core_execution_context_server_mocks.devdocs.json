@@ -24,6 +24,7 @@
         "description": [],
         "path": "packages/core/execution-context/core-execution-context-server-mocks/src/execution_context_service.mock.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-execution-context-server-mocks",
@@ -39,6 +40,7 @@
             ],
             "path": "packages/core/execution-context/core-execution-context-server-mocks/src/execution_context_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           },
@@ -56,6 +58,7 @@
             ],
             "path": "packages/core/execution-context/core-execution-context-server-mocks/src/execution_context_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           },
@@ -73,6 +76,7 @@
             ],
             "path": "packages/core/execution-context/core-execution-context-server-mocks/src/execution_context_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           },
@@ -90,6 +94,7 @@
             ],
             "path": "packages/core/execution-context/core-execution-context-server-mocks/src/execution_context_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           }

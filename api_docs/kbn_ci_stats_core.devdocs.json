@@ -33,6 +33,7 @@
         ],
         "path": "packages/kbn-ci-stats-core/src/ci_stats_config.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/ci-stats-core",
@@ -46,6 +47,7 @@
             ],
             "path": "packages/kbn-ci-stats-core/src/ci_stats_config.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -65,6 +67,7 @@
         ],
         "path": "packages/kbn-ci-stats-core/src/ci_stats_metadata.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/ci-stats-core",
@@ -79,7 +82,8 @@
               "[key: string]:  string | number | boolean | string[] | undefined"
             ],
             "path": "packages/kbn-ci-stats-core/src/ci_stats_metadata.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -95,6 +99,7 @@
         ],
         "path": "packages/kbn-ci-stats-core/src/ci_stats_config.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/ci-stats-core",
@@ -106,7 +111,8 @@
               "ApiToken necessary for writing build data to ci-stats service"
             ],
             "path": "packages/kbn-ci-stats-core/src/ci_stats_config.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/ci-stats-core",
@@ -118,7 +124,8 @@
               "\nuuid which should be obtained by first creating a build with the\nci-stats service and then passing it to all subsequent steps"
             ],
             "path": "packages/kbn-ci-stats-core/src/ci_stats_config.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

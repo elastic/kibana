@@ -31,6 +31,7 @@
         ],
         "path": "packages/core/http/core-http-common/src/external_url_policy.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-http-common",
@@ -42,7 +43,8 @@
               "\nIndicates if this policy allows or denies access to the described destination."
             ],
             "path": "packages/core/http/core-http-common/src/external_url_policy.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-http-common",
@@ -57,7 +59,8 @@
               "string | undefined"
             ],
             "path": "packages/core/http/core-http-common/src/external_url_policy.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-http-common",
@@ -72,7 +75,8 @@
               "string | undefined"
             ],
             "path": "packages/core/http/core-http-common/src/external_url_policy.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

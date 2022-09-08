@@ -24,6 +24,7 @@
         "description": [],
         "path": "packages/core/node/core-node-server-internal/src/node_config.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-node-server-internal",
@@ -36,7 +37,8 @@
               "\"node\""
             ],
             "path": "packages/core/node/core-node-server-internal/src/node_config.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-node-server-internal",
@@ -52,7 +54,8 @@
               "<\"*\"[] | (\"ui\" | \"background_tasks\")[]>; }>"
             ],
             "path": "packages/core/node/core-node-server-internal/src/node_config.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

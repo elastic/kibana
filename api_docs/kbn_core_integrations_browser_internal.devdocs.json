@@ -29,6 +29,7 @@
         "description": [],
         "path": "packages/core/integrations/core-integrations-browser-internal/src/integrations_service.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-integrations-browser-internal",
@@ -41,7 +42,8 @@
               "IUiSettingsClient"
             ],
             "path": "packages/core/integrations/core-integrations-browser-internal/src/integrations_service.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

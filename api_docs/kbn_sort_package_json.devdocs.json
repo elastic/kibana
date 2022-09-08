@@ -23,6 +23,7 @@
         ],
         "path": "packages/kbn-sort-package-json/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/sort-package-json",
@@ -36,6 +37,7 @@
             ],
             "path": "packages/kbn-sort-package-json/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],

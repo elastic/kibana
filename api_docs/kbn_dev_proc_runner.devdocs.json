@@ -23,6 +23,7 @@
         ],
         "path": "packages/kbn-dev-proc-runner/src/proc_runner.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/dev-proc-runner",
@@ -36,6 +37,7 @@
             ],
             "path": "packages/kbn-dev-proc-runner/src/proc_runner.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/dev-proc-runner",
@@ -49,6 +51,7 @@
                 ],
                 "path": "packages/kbn-dev-proc-runner/src/proc_runner.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -68,6 +71,7 @@
             ],
             "path": "packages/kbn-dev-proc-runner/src/proc_runner.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/dev-proc-runner",
@@ -81,6 +85,7 @@
                 ],
                 "path": "packages/kbn-dev-proc-runner/src/proc_runner.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -95,6 +100,7 @@
                 ],
                 "path": "packages/kbn-dev-proc-runner/src/proc_runner.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -114,6 +120,7 @@
             ],
             "path": "packages/kbn-dev-proc-runner/src/proc_runner.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/dev-proc-runner",
@@ -127,6 +134,7 @@
                 ],
                 "path": "packages/kbn-dev-proc-runner/src/proc_runner.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -141,6 +149,7 @@
                 ],
                 "path": "packages/kbn-dev-proc-runner/src/proc_runner.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -162,6 +171,7 @@
             ],
             "path": "packages/kbn-dev-proc-runner/src/proc_runner.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -181,6 +191,7 @@
             ],
             "path": "packages/kbn-dev-proc-runner/src/proc_runner.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/dev-proc-runner",
@@ -194,6 +205,7 @@
                 ],
                 "path": "packages/kbn-dev-proc-runner/src/proc_runner.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -230,6 +242,7 @@
         ],
         "path": "packages/kbn-dev-proc-runner/src/with_proc_runner.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/dev-proc-runner",
@@ -243,6 +256,7 @@
             ],
             "path": "packages/kbn-dev-proc-runner/src/with_proc_runner.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -265,6 +279,7 @@
             ],
             "path": "packages/kbn-dev-proc-runner/src/with_proc_runner.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],

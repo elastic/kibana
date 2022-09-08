@@ -24,6 +24,7 @@
         "description": [],
         "path": "packages/core/doc-links/core-doc-links-server-mocks/src/doc_links_service.mock.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-doc-links-server-mocks",
@@ -37,6 +38,7 @@
             ],
             "path": "packages/core/doc-links/core-doc-links-server-mocks/src/doc_links_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           },
@@ -53,6 +55,7 @@
             ],
             "path": "packages/core/doc-links/core-doc-links-server-mocks/src/doc_links_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           },
@@ -69,6 +72,7 @@
             ],
             "path": "packages/core/doc-links/core-doc-links-server-mocks/src/doc_links_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           }

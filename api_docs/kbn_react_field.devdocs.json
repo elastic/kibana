@@ -39,6 +39,7 @@
         ],
         "path": "packages/kbn-react-field/src/field_button/field_button.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/react-field",
@@ -58,6 +59,7 @@
             ],
             "path": "packages/kbn-react-field/src/field_button/field_button.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -86,6 +88,7 @@
         ],
         "path": "packages/kbn-react-field/src/field_icon/field_icon.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/react-field",
@@ -105,6 +108,7 @@
             ],
             "path": "packages/kbn-react-field/src/field_icon/field_icon.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -132,6 +136,7 @@
         ],
         "path": "packages/kbn-react-field/src/field_button/field_button.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/react-field",
@@ -146,7 +151,8 @@
               "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
             ],
             "path": "packages/kbn-react-field/src/field_button/field_button.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/react-field",
@@ -161,7 +167,8 @@
               "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
             ],
             "path": "packages/kbn-react-field/src/field_button/field_button.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/react-field",
@@ -176,7 +183,8 @@
               "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
             ],
             "path": "packages/kbn-react-field/src/field_button/field_button.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/react-field",
@@ -191,7 +199,8 @@
               "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
             ],
             "path": "packages/kbn-react-field/src/field_button/field_button.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/react-field",
@@ -206,7 +215,8 @@
               "boolean | undefined"
             ],
             "path": "packages/kbn-react-field/src/field_button/field_button.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/react-field",
@@ -221,7 +231,8 @@
               "boolean | undefined"
             ],
             "path": "packages/kbn-react-field/src/field_button/field_button.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/react-field",
@@ -236,7 +247,8 @@
               "\"m\" | \"s\" | undefined"
             ],
             "path": "packages/kbn-react-field/src/field_button/field_button.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/react-field",
@@ -249,7 +261,8 @@
               "string | undefined"
             ],
             "path": "packages/kbn-react-field/src/field_button/field_button.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/react-field",
@@ -265,6 +278,7 @@
             ],
             "path": "packages/kbn-react-field/src/field_button/field_button.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -281,7 +295,8 @@
               "string | undefined"
             ],
             "path": "packages/kbn-react-field/src/field_button/field_button.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/react-field",
@@ -298,7 +313,8 @@
               ") | undefined"
             ],
             "path": "packages/kbn-react-field/src/field_button/field_button.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -324,6 +340,7 @@
         ],
         "path": "packages/kbn-react-field/src/field_icon/field_icon.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/react-field",
@@ -333,7 +350,8 @@
             "label": "type",
             "description": [],
             "path": "packages/kbn-react-field/src/field_icon/field_icon.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/react-field",
@@ -346,7 +364,8 @@
               "string | undefined"
             ],
             "path": "packages/kbn-react-field/src/field_icon/field_icon.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/react-field",
@@ -359,7 +378,8 @@
               "boolean | undefined"
             ],
             "path": "packages/kbn-react-field/src/field_icon/field_icon.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -379,6 +399,7 @@
         ],
         "path": "packages/kbn-react-field/src/field_button/field_button.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],

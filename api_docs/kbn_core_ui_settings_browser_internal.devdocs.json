@@ -38,6 +38,7 @@
         ],
         "path": "packages/core/ui-settings/core-ui-settings-browser-internal/src/ui_settings_client.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-ui-settings-browser-internal",
@@ -51,6 +52,7 @@
             ],
             "path": "packages/core/ui-settings/core-ui-settings-browser-internal/src/ui_settings_client.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-ui-settings-browser-internal",
@@ -64,6 +66,7 @@
                 ],
                 "path": "packages/core/ui-settings/core-ui-settings-browser-internal/src/ui_settings_client.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -85,6 +88,7 @@
             ],
             "path": "packages/core/ui-settings/core-ui-settings-browser-internal/src/ui_settings_client.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -100,6 +104,7 @@
             ],
             "path": "packages/core/ui-settings/core-ui-settings-browser-internal/src/ui_settings_client.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-ui-settings-browser-internal",
@@ -113,6 +118,7 @@
                 ],
                 "path": "packages/core/ui-settings/core-ui-settings-browser-internal/src/ui_settings_client.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -127,6 +133,7 @@
                 ],
                 "path": "packages/core/ui-settings/core-ui-settings-browser-internal/src/ui_settings_client.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -146,6 +153,7 @@
             ],
             "path": "packages/core/ui-settings/core-ui-settings-browser-internal/src/ui_settings_client.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-ui-settings-browser-internal",
@@ -159,6 +167,7 @@
                 ],
                 "path": "packages/core/ui-settings/core-ui-settings-browser-internal/src/ui_settings_client.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -173,6 +182,7 @@
                 ],
                 "path": "packages/core/ui-settings/core-ui-settings-browser-internal/src/ui_settings_client.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -190,6 +200,7 @@
             ],
             "path": "packages/core/ui-settings/core-ui-settings-browser-internal/src/ui_settings_client.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-ui-settings-browser-internal",
@@ -203,6 +214,7 @@
                 ],
                 "path": "packages/core/ui-settings/core-ui-settings-browser-internal/src/ui_settings_client.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -217,6 +229,7 @@
                 ],
                 "path": "packages/core/ui-settings/core-ui-settings-browser-internal/src/ui_settings_client.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -234,6 +247,7 @@
             ],
             "path": "packages/core/ui-settings/core-ui-settings-browser-internal/src/ui_settings_client.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-ui-settings-browser-internal",
@@ -247,6 +261,7 @@
                 ],
                 "path": "packages/core/ui-settings/core-ui-settings-browser-internal/src/ui_settings_client.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -264,6 +279,7 @@
             ],
             "path": "packages/core/ui-settings/core-ui-settings-browser-internal/src/ui_settings_client.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-ui-settings-browser-internal",
@@ -277,6 +293,7 @@
                 ],
                 "path": "packages/core/ui-settings/core-ui-settings-browser-internal/src/ui_settings_client.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -294,6 +311,7 @@
             ],
             "path": "packages/core/ui-settings/core-ui-settings-browser-internal/src/ui_settings_client.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-ui-settings-browser-internal",
@@ -307,6 +325,7 @@
                 ],
                 "path": "packages/core/ui-settings/core-ui-settings-browser-internal/src/ui_settings_client.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -324,6 +343,7 @@
             ],
             "path": "packages/core/ui-settings/core-ui-settings-browser-internal/src/ui_settings_client.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-ui-settings-browser-internal",
@@ -337,6 +357,7 @@
                 ],
                 "path": "packages/core/ui-settings/core-ui-settings-browser-internal/src/ui_settings_client.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -354,6 +375,7 @@
             ],
             "path": "packages/core/ui-settings/core-ui-settings-browser-internal/src/ui_settings_client.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-ui-settings-browser-internal",
@@ -367,6 +389,7 @@
                 ],
                 "path": "packages/core/ui-settings/core-ui-settings-browser-internal/src/ui_settings_client.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -386,6 +409,7 @@
             ],
             "path": "packages/core/ui-settings/core-ui-settings-browser-internal/src/ui_settings_client.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -403,6 +427,7 @@
             ],
             "path": "packages/core/ui-settings/core-ui-settings-browser-internal/src/ui_settings_client.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }

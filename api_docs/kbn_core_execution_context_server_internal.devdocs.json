@@ -35,6 +35,7 @@
         ],
         "path": "packages/core/execution-context/core-execution-context-server-internal/src/execution_context_service.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-execution-context-server-internal",
@@ -48,6 +49,7 @@
             ],
             "path": "packages/core/execution-context/core-execution-context-server-internal/src/execution_context_service.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-execution-context-server-internal",
@@ -61,6 +63,7 @@
                 ],
                 "path": "packages/core/execution-context/core-execution-context-server-internal/src/execution_context_service.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -79,6 +82,7 @@
             ],
             "path": "packages/core/execution-context/core-execution-context-server-internal/src/execution_context_service.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -95,6 +99,7 @@
             ],
             "path": "packages/core/execution-context/core-execution-context-server-internal/src/execution_context_service.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -110,6 +115,7 @@
             ],
             "path": "packages/core/execution-context/core-execution-context-server-internal/src/execution_context_service.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -131,6 +137,7 @@
         "description": [],
         "path": "packages/core/execution-context/core-execution-context-server-internal/src/execution_context_config.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-execution-context-server-internal",
@@ -140,7 +147,8 @@
             "label": "path",
             "description": [],
             "path": "packages/core/execution-context/core-execution-context-server-internal/src/execution_context_config.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-execution-context-server-internal",
@@ -156,7 +164,8 @@
               "<boolean>; }>"
             ],
             "path": "packages/core/execution-context/core-execution-context-server-internal/src/execution_context_config.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
