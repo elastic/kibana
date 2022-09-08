@@ -132,13 +132,21 @@ export const AnnotationsPanel = (
               currentAnnotation?.type === 'query' ? 'query' : 'staticDate'
             }`}
             onChange={(id) => {
+              const type = id === `lens_xyChart_annotation_query` ? 'query' : 'manual';
+              const key =
+                !isQueryBased && id === `lens_xyChart_annotation_query`
+                  ? { type: 'point_in_time' }
+                  : currentAnnotation?.key;
+
+              const currentIndexPattern = frame.dataViews.indexPatterns[localLayer.indexPatternId];
               setAnnotations({
-                type: id === `lens_xyChart_annotation_query` ? 'query' : 'manual',
-                // when switching to query, reset the key value
-                key:
-                  !isQueryBased && id === `lens_xyChart_annotation_query`
-                    ? { type: 'point_in_time' }
-                    : currentAnnotation?.key,
+                type,
+                key,
+                ...(type === 'query'
+                  ? {
+                      timeField: currentIndexPattern.timeFieldName,
+                    }
+                  : {}),
               });
             }}
             isFullWidth
