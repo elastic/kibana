@@ -27,7 +27,7 @@ const SUPPORTED_BUCKETS: string[] = [
   BUCKET_TYPES.FILTERS,
 ];
 
-const isSupprtedBucketAgg = (agg: SchemaConfig): agg is SchemaConfig<BucketAggs> => {
+const isSupportedBucketAgg = (agg: SchemaConfig): agg is SchemaConfig<BucketAggs> => {
   return SUPPORTED_BUCKETS.includes(agg.aggType);
 };
 
@@ -82,7 +82,7 @@ export const convertBucketToColumns = <T extends METRIC_TYPES | BUCKET_TYPES>(
   metricColumns: Column[]
 ) => {
   if (isSchemaConfig(agg)) {
-    if (!agg.aggParams || !isSupprtedBucketAgg(agg)) {
+    if (!agg.aggParams || !isSupportedBucketAgg(agg)) {
       return null;
     }
     return getBucketColumns(agg.aggType, agg.aggParams, dataView, metricColumns, {
