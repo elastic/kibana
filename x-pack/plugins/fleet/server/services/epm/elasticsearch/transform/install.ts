@@ -24,9 +24,9 @@ import type {
   IndexTemplate,
 } from '../../../../../common/types/models';
 import { getInstallation } from '../../packages';
-
 import { retryTransientEsErrors } from '../retry';
 
+import { mergeIndexTemplateWithMappings } from './merge_index_template_mappings';
 import { deleteTransforms } from './remove';
 import { getAsset } from './common';
 
@@ -138,16 +138,16 @@ export const installTransforms = async (
         ) {
           const destinationIndexTemplate =
             (content.destination_index_template as Record<string, unknown>) ?? {};
-          const mergedDestinationIndexTemplateInstallationWithMappings = {
-            ...destinationIndexTemplate,
-            mappings: {
-              ...(destinationIndexTemplate.mappings !== null &&
-              typeof destinationIndexTemplate.mappings === 'object'
-                ? destinationIndexTemplate.mappings
-                : {}),
-              ...packageAssets.get('mappings'),
-            },
-          } as IndexTemplate['template'];
+          // const mergedDestinationIndexTemplateInstallationWithMappings = {
+          //   ...destinationIndexTemplate,
+          //   mappings: {
+          //     ...(destinationIndexTemplate.mappings !== null &&
+          //     typeof destinationIndexTemplate.mappings === 'object'
+          //       ? destinationIndexTemplate.mappings
+          //       : {}),
+          //     ...packageAssets.get('mappings'),
+          //   },
+          // } as IndexTemplate['template'];
 
           destinationIndexTemplates.push({
             transformModuleId,
@@ -158,12 +158,9 @@ export const installTransforms = async (
               installNameSuffix,
               'template'
             ),
-            template: mergedDestinationIndexTemplateInstallationWithMappings,
+            template: destinationIndexTemplate,
           } as DestinationIndexTemplateInstallation);
-          packageAssets.set(
-            'destinationIndexTemplate',
-            mergedDestinationIndexTemplateInstallationWithMappings
-          );
+          packageAssets.set('destinationIndexTemplate', destinationIndexTemplate);
         }
       }
     });
@@ -190,29 +187,39 @@ export const installTransforms = async (
     );
 
     await Promise.all(
-      destinationIndexTemplates.map((destinationIndexTemplate) => {
-        return installComponentAndIndexTemplateForDataStream({
-          esClient,
-          logger,
-          componentTemplates: {},
-          indexTemplate: {
-            templateName: destinationIndexTemplate.installationName,
-            // @ts-expect-error Index template here should not contain data_stream property
-            // as this template is applied to only an index and not a data stream
-            indexTemplate: {
-              template: destinationIndexTemplate.template,
-              priority: 250,
-              index_patterns: [
-                transformsSpecifications
-                  .get(destinationIndexTemplate.transformModuleId)
-                  ?.get('destinationIndex').index,
-              ],
-              _meta: destinationIndexTemplate._meta,
-              composed_of: [],
-            },
-          },
-        });
-      })
+      destinationIndexTemplates
+        .map((destinationIndexTemplate) => {
+          const mergedTemplate = mergeIndexTemplateWithMappings(
+            destinationIndexTemplate.template,
+            transformsSpecifications
+              .get(destinationIndexTemplate.transformModuleId)
+              ?.get('mappings')
+          );
+          if (mergedTemplate !== undefined) {
+            return installComponentAndIndexTemplateForDataStream({
+              esClient,
+              logger,
+              componentTemplates: {},
+              indexTemplate: {
+                templateName: destinationIndexTemplate.installationName,
+                // @ts-expect-error Index template here should not contain data_stream property
+                // as this template is applied to only an index and not a data stream
+                indexTemplate: {
+                  template: mergedTemplate,
+                  priority: 250,
+                  index_patterns: [
+                    transformsSpecifications
+                      .get(destinationIndexTemplate.transformModuleId)
+                      ?.get('destinationIndex').index,
+                  ],
+                  _meta: destinationIndexTemplate._meta,
+                  composed_of: [],
+                },
+              },
+            });
+          }
+        })
+        .filter((p) => p !== undefined)
     );
     await Promise.all(
       transforms.map(async (transform) => {
