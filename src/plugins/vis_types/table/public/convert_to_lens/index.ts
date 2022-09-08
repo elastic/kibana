@@ -13,6 +13,7 @@ import {
 } from '@kbn/visualizations-plugin/public';
 import uuid from 'uuid';
 import { getDataViewsStart } from '../services';
+import { getConfiguration } from './configurations';
 import { ConvertTableToLensVisualization } from './types';
 
 export const convertToLens: ConvertTableToLensVisualization = async (vis, timefilter) => {
@@ -29,12 +30,12 @@ export const convertToLens: ConvertTableToLensVisualization = async (vis, timefi
     return null;
   }
 
-  const columns = getColumnsFromVis(vis, timefilter, dataView, {
+  const result = getColumnsFromVis(vis, timefilter, dataView, {
     buckets: ['bucket'],
     splits: ['split_row', 'split_column'],
   });
 
-  if (columns === null) {
+  if (result === null) {
     return null;
   }
 
@@ -51,7 +52,7 @@ export const convertToLens: ConvertTableToLensVisualization = async (vis, timefi
     if (!percentageColumn) {
       return null;
     }
-    columns.push(percentageColumn);
+    result.columns.push(percentageColumn);
   }
 
   const layerId = uuid();
@@ -62,10 +63,10 @@ export const convertToLens: ConvertTableToLensVisualization = async (vis, timefi
       {
         indexPatternId: dataView.id!,
         layerId,
-        columns,
+        columns: result.columns,
         columnOrder: [],
       },
     ],
-    configuration: {},
+    configuration: getConfiguration(layerId, vis.params, result),
   };
 };

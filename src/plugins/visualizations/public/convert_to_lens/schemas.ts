@@ -85,7 +85,7 @@ export const getColumnsFromVis = <T>(
   if (metricColumns.includes(null)) {
     return null;
   }
-
+  const metrics = metricColumns as Column[];
   const customBucketColumns = [];
 
   if (customBuckets.length) {
@@ -123,11 +123,6 @@ export const getColumnsFromVis = <T>(
     return null;
   }
 
-  const columns = [
-    ...(metricColumns as Column[]),
-    ...bucketColumns,
-    ...splitBucketColumns,
-    ...customBucketColumns,
-  ];
-  return columns;
+  const columns = [...metrics, ...bucketColumns, ...splitBucketColumns, ...customBucketColumns];
+  return { metrics: metrics.map(({ columnId }) => columnId), columns };
 };

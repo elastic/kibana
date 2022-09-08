@@ -178,7 +178,7 @@ export const metricsVisDefinition: VisTypeDefinition<
       ),
     };
   },
-  navigateToLens: async (vis?: Vis<VisParams>, timeFilter?: TimefilterContract) =>
+  navigateToLens: async (vis, timeFilter) =>
     vis?.params
       ? await convertTSVBtoLensConfiguration(vis?.params as Panel, timeFilter?.getAbsoluteTime())
       : null,
