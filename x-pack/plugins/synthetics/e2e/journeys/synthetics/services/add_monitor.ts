@@ -11,7 +11,7 @@ export const addTestMonitor = async (kibanaUrl: string, name: string) => {
   data.name = name;
 
   try {
-    const monitor = await axios.post(kibanaUrl + '/internal/uptime/service/monitors', data, {
+    await axios.post(kibanaUrl + '/internal/uptime/service/monitors', data, {
       auth: { username: 'elastic', password: 'changeme' },
       headers: { 'kbn-xsrf': 'true' },
     });
