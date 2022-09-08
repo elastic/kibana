@@ -19,6 +19,15 @@ import { suggestUserProfiles, SuggestUserProfilesArgs } from './api';
 
 type Props = Omit<SuggestUserProfilesArgs, 'signal' | 'http'> & { onDebounce?: () => void };
 
+/**
+ * Time in ms until the data become stale.
+ * We set the stale time to one minute
+ * to prevent fetching the same queries
+ * while the user is typing.
+ */
+
+const STALE_TIME = 1000 * 60;
+
 export const useSuggestUserProfiles = ({
   name,
   owners,
@@ -58,6 +67,7 @@ export const useSuggestUserProfiles = ({
     {
       retry: false,
       keepPreviousData: true,
+      staleTime: STALE_TIME,
       onError: (error: ServerError) => {
         if (error.name !== 'AbortError') {
           toasts.addError(

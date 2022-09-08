@@ -27,6 +27,7 @@ import { useCasesContext } from '../cases_context/use_cases_context';
 import { useGetCurrentUserProfile } from '../../containers/user_profiles/use_get_current_user_profile';
 import { OptionalFieldLabel } from './optional_field_label';
 import * as i18n from './translations';
+import { bringCurrentUserToFrontAndSort } from '../user_profiles/sort';
 
 interface Props {
   isLoading: boolean;
@@ -36,6 +37,7 @@ interface FieldProps {
   field: FieldHook;
   options: EuiComboBoxOptionOption[];
   isLoading: boolean;
+  isDisabled: boolean;
   currentUserProfile: UserProfile;
   selectedOptions: EuiComboBoxOptionOption[];
   setSelectedOptions: React.Dispatch<React.SetStateAction<EuiComboBoxOptionOption[]>>;
@@ -60,6 +62,7 @@ const AssigneesFieldComponent: React.FC<FieldProps> = React.memo(
   ({
     field,
     isLoading,
+    isDisabled,
     options,
     currentUserProfile,
     selectedOptions,
@@ -130,7 +133,7 @@ const AssigneesFieldComponent: React.FC<FieldProps> = React.memo(
           options={options}
           data-test-subj="createCaseAssigneesComboBox"
           selectedOptions={selectedOptions}
-          isDisabled={isLoading}
+          isDisabled={isDisabled}
           onChange={onComboChange}
           onSearchChange={onSearchComboChange}
           renderOption={renderOption}
@@ -146,24 +149,44 @@ const AssigneesComponent: React.FC<Props> = ({ isLoading: isLoadingForm }) => {
   const { owner } = useCasesContext();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedOptions, setSelectedOptions] = useState<EuiComboBoxOptionOption[]>();
+  const [isUserTyping, setIsUserTyping] = useState(false);
+
   const { data: currentUserProfile, isLoading: isLoadingCurrentUserProfile } =
     useGetCurrentUserProfile();
 
-  const { data: userProfiles, isLoading: isLoadingSuggest } = useSuggestUserProfiles({
+  const onDebounce = useCallback(() => setIsUserTyping(false), []);
+
+  const {
+    data: userProfiles,
+    isLoading: isLoadingSuggest,
+    isFetching: isFetchingSuggest,
+  } = useSuggestUserProfiles({
     name: searchTerm,
     owners: owner,
+    onDebounce,
   });
 
   const options =
-    userProfiles?.map((userProfile) => userProfileToComboBoxOption(userProfile)) ?? [];
+    bringCurrentUserToFrontAndSort(currentUserProfile, userProfiles)?.map((userProfile) =>
+      userProfileToComboBoxOption(userProfile)
+    ) ?? [];
 
   const onSearchComboChange = (value: string) => {
+    setSearchTerm(value);
+
     if (!isEmpty(value)) {
-      setSearchTerm(value);
+      setIsUserTyping(true);
     }
   };
 
-  const isLoading = isLoadingForm || isLoadingCurrentUserProfile || isLoadingSuggest;
+  const isLoading =
+    isLoadingForm ||
+    isLoadingCurrentUserProfile ||
+    isLoadingSuggest ||
+    isFetchingSuggest ||
+    isUserTyping;
+
+  const isDisabled = isLoadingForm || isLoadingCurrentUserProfile;
 
   return (
     <UseField
@@ -172,11 +195,13 @@ const AssigneesComponent: React.FC<Props> = ({ isLoading: isLoadingForm }) => {
       component={AssigneesFieldComponent}
       componentProps={{
         isLoading,
+        isDisabled,
         selectedOptions,
         setSelectedOptions,
         options,
         onSearchComboChange,
         currentUserProfile,
+        isUserTyping,
       }}
     />
   );
