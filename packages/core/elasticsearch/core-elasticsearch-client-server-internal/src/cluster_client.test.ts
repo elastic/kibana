@@ -17,6 +17,7 @@ import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
 import type { ElasticsearchClientConfig } from '@kbn/core-elasticsearch-server';
 import { ClusterClient } from './cluster_client';
 import { DEFAULT_HEADERS } from './headers';
+import { AgentManager } from './agent_manager';
 
 const createConfig = (
   parts: Partial<ElasticsearchClientConfig> = {}
@@ -93,6 +94,38 @@ describe('ClusterClient', () => {
       type: 'custom-type',
       getExecutionContext: getExecutionContextMock,
       scoped: true,
+    });
+  });
+
+  describe('when an AgentManager is provided', () => {
+    it('calls configureClient passing in the provided AgentManager', () => {
+      const config = createConfig();
+      const getExecutionContextMock = jest.fn();
+      const agentManager = new AgentManager();
+
+      new ClusterClient({
+        config,
+        logger,
+        authHeaders,
+        agentManager,
+        type: 'custom-type',
+        getExecutionContext: getExecutionContextMock,
+      });
+
+      expect(configureClientMock).toHaveBeenCalledTimes(2);
+      expect(configureClientMock).toHaveBeenCalledWith(config, {
+        logger,
+        agentManager,
+        type: 'custom-type',
+        getExecutionContext: getExecutionContextMock,
+      });
+      expect(configureClientMock).toHaveBeenCalledWith(config, {
+        logger,
+        agentManager,
+        type: 'custom-type',
+        getExecutionContext: getExecutionContextMock,
+        scoped: true,
+      });
     });
   });
 

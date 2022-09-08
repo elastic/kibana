@@ -10,17 +10,23 @@ jest.mock('./log_query_and_deprecation', () => ({
   __esModule: true,
   instrumentEsQueryAndDeprecationLogger: jest.fn(),
 }));
+jest.mock('./agent_manager');
 
+import { Agent } from 'http';
 import {
   parseClientOptionsMock,
   createTransportMock,
   ClientMock,
 } from './configure_client.test.mocks';
+import { MockedLogger } from '@kbn/logging-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { ClusterConnectionPool } from '@elastic/elasticsearch';
 import type { ElasticsearchClientConfig } from '@kbn/core-elasticsearch-server';
 import { configureClient } from './configure_client';
 import { instrumentEsQueryAndDeprecationLogger } from './log_query_and_deprecation';
+import { AgentManager } from './agent_manager';
+
+const AgentManagerMock = AgentManager as jest.Mock<AgentManager>;
 
 const createFakeConfig = (
   parts: Partial<ElasticsearchClientConfig> = {}
@@ -39,8 +45,22 @@ const createFakeClient = () => {
   return client;
 };
 
+const createFakeAgentFactory = (logger: MockedLogger) => {
+  const agentFactory = () => new Agent();
+
+  AgentManagerMock.mockImplementationOnce(() => {
+    const agentManager = new AgentManager();
+    agentManager.getAgentFactory = () => agentFactory;
+    return agentManager;
+  });
+
+  const agentManager = new AgentManager();
+
+  return { agentManager, agentFactory };
+};
+
 describe('configureClient', () => {
-  let logger: ReturnType<typeof loggingSystemMock.createLogger>;
+  let logger: MockedLogger;
   let config: ElasticsearchClientConfig;
 
   beforeEach(() => {
@@ -80,6 +100,15 @@ describe('configureClient', () => {
 
     expect(ClientMock).toHaveBeenCalledTimes(1);
     expect(ClientMock).toHaveBeenCalledWith(expect.objectContaining(parsedOptions));
+    expect(client).toBe(ClientMock.mock.results[0].value);
+  });
+
+  it('constructs a client using the provided `agentManager`', () => {
+    const { agentManager, agentFactory } = createFakeAgentFactory(logger);
+    const client = configureClient(config, { logger, type: 'test', scoped: false, agentManager });
+
+    expect(ClientMock).toHaveBeenCalledTimes(1);
+    expect(ClientMock).toHaveBeenCalledWith(expect.objectContaining({ agent: agentFactory }));
     expect(client).toBe(ClientMock.mock.results[0].value);
   });
 

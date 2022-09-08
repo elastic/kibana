@@ -66,7 +66,7 @@ export class ElasticsearchService
     this.config$ = coreContext.configService
       .atPath<ElasticsearchConfigType>('elasticsearch')
       .pipe(map((rawConfig) => new ElasticsearchConfig(rawConfig)));
-    this.agentManager = new AgentManager(this.log);
+    this.agentManager = new AgentManager();
   }
 
   public async preboot(): Promise<InternalElasticsearchServicePreboot> {
