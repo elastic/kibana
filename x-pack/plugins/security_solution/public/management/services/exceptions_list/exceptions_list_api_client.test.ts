@@ -7,7 +7,11 @@
 
 import type { CoreStart, HttpSetup } from '@kbn/core/public';
 import type { CreateExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
+import {
+  EXCEPTION_LIST_ITEM_URL,
+  EXCEPTION_LIST_URL,
+  INTERNAL_EXCEPTIONS_LIST_ENSURE_CREATED_URL,
+} from '@kbn/securitysolution-list-constants';
 import { coreMock } from '@kbn/core/public/mocks';
 import { ExceptionsListItemGenerator } from '../../../../common/endpoint/data_generators/exceptions_list_item_generator';
 import { ExceptionsListApiClient } from './exceptions_list_api_client';
@@ -62,9 +66,12 @@ describe('Exceptions List Api Client', () => {
       const exceptionsListApiClientInstance = getInstance();
 
       expect(fakeHttpServices.post).toHaveBeenCalledTimes(1);
-      expect(fakeHttpServices.post).toHaveBeenCalledWith(EXCEPTION_LIST_URL, {
-        body: JSON.stringify(getFakeListDefinition()),
-      });
+      expect(fakeHttpServices.post).toHaveBeenCalledWith(
+        INTERNAL_EXCEPTIONS_LIST_ENSURE_CREATED_URL,
+        {
+          body: JSON.stringify(getFakeListDefinition()),
+        }
+      );
       expect(exceptionsListApiClientInstance).toBeDefined();
     });
 
@@ -116,22 +123,6 @@ describe('Exceptions List Api Client', () => {
       } catch (err) {
         expect(err.response.status).toBe(500);
       }
-    });
-
-    it('Creating an instance when list already exists does not throw', async () => {
-      fakeHttpServices.post.mockRejectedValueOnce({
-        response: {
-          status: 409,
-        },
-      });
-      const newFakeListId = 'fakeListIdV4';
-      const notFailedInstance = new ExceptionsListApiClient(
-        fakeHttpServices,
-        newFakeListId,
-        getFakeListDefinition()
-      );
-      await notFailedInstance.find(getQueryParams());
-      expect(notFailedInstance).toBeDefined();
     });
   });
 
