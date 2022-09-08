@@ -16,7 +16,7 @@ import type {
   BrowserFieldItem,
 } from '@kbn/triggers-actions-ui-plugin/public/types';
 
-import { OnRowSelected, SortColumnTimeline, TimelineTabs } from '..';
+import { SortColumnTimeline, TimelineTabs } from '..';
 import { BrowserFields } from '../../../search_strategy/index_fields';
 import { ColumnHeaderOptions } from '../columns';
 import { TimelineItem, TimelineNonEcsData } from '../../../search_strategy';
@@ -34,7 +34,6 @@ export interface ActionProps {
   ariaRowindex: number;
   checked: boolean;
   columnId: string;
-  columnValues: string;
   data: TimelineNonEcsData[];
   disabled?: boolean;
   ecsData: Ecs;
@@ -45,7 +44,6 @@ export interface ActionProps {
   isEventViewer?: boolean;
   loadingEventIds: Readonly<string[]>;
   onEventDetailsPanelOpened: () => void;
-  onRowSelected: OnRowSelected;
   onRuleChange?: () => void;
   refetch?: () => void;
   rowIndex: number;
@@ -125,13 +123,10 @@ export type RowCellRender =
 interface AdditionalControlColumnProps {
   ariaRowindex: number;
   actionsColumnWidth: number;
-  columnValues: string;
-  checked: boolean;
   onRowSelected: OnRowSelected;
   eventId: string;
   id: string;
   columnId: string;
-  loadingEventIds: Readonly<string[]>;
   onEventDetailsPanelOpened: () => void;
   showCheckboxes: boolean;
   // Override these type definitions to support either a generic custom component or the one used in security_solution today.

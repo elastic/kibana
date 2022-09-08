@@ -7,12 +7,11 @@
 
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
-import { EuiButtonIcon, EuiCheckbox, EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
+import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import styled from 'styled-components';
 
 import { DEFAULT_ACTION_BUTTON_WIDTH } from '@kbn/timelines-plugin/public';
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { eventHasNotes, getEventType, getPinOnClick } from '../helpers';
 import { AlertContextMenu } from '../../../../../detections/components/alerts_table/timeline_actions/alert_context_menu';
 import { InvestigateInTimelineAction } from '../../../../../detections/components/alerts_table/timeline_actions/investigate_in_timeline_action';
@@ -53,25 +52,19 @@ const ActionsContainer = styled.div`
 
 const ActionsComponent: React.FC<ActionProps> = ({
   ariaRowindex,
-  checked,
-  columnValues,
   ecsData,
   eventId,
   eventIdToNoteIds,
   isEventPinned = false,
   isEventViewer = false,
-  loadingEventIds,
   onEventDetailsPanelOpened,
-  onRowSelected,
   onRuleChange,
   refetch,
-  showCheckboxes,
   showNotes,
   timelineId,
   toggleShowNotes,
 }) => {
   const dispatch = useDispatch();
-  const tGridEnabled = useIsExperimentalFeatureEnabled('tGridEnabled');
   const emptyNotes: string[] = [];
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const { startTransaction } = useStartTransaction();
@@ -86,15 +79,6 @@ const ActionsComponent: React.FC<ActionProps> = ({
   const onUnPinEvent: OnPinEvent = useCallback(
     (evtId) => dispatch(timelineActions.unPinEvent({ id: timelineId, eventId: evtId })),
     [dispatch, timelineId]
-  );
-
-  const handleSelectEvent = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) =>
-      onRowSelected({
-        eventIds: [eventId],
-        isSelected: event.currentTarget.checked,
-      }),
-    [eventId, onRowSelected]
   );
 
   const handlePinClicked = useCallback(
@@ -198,28 +182,11 @@ const ActionsComponent: React.FC<ActionProps> = ({
 
   return (
     <ActionsContainer>
-      {showCheckboxes && !tGridEnabled && (
-        <div key="select-event-container" data-test-subj="select-event-container">
-          <EventsTdContent textAlign="center" width={DEFAULT_ACTION_BUTTON_WIDTH}>
-            {loadingEventIds.includes(eventId) ? (
-              <EuiLoadingSpinner size="m" data-test-subj="event-loader" />
-            ) : (
-              <EuiCheckbox
-                aria-label={i18n.CHECKBOX_FOR_ROW({ ariaRowindex, columnValues, checked })}
-                data-test-subj="select-event"
-                id={eventId}
-                checked={checked}
-                onChange={handleSelectEvent}
-              />
-            )}
-          </EventsTdContent>
-        </div>
-      )}
       <div key="expand-event">
         <EventsTdContent textAlign="center" width={DEFAULT_ACTION_BUTTON_WIDTH}>
           <EuiToolTip data-test-subj="expand-event-tool-tip" content={i18n.VIEW_DETAILS}>
             <EuiButtonIcon
-              aria-label={i18n.VIEW_DETAILS_FOR_ROW({ ariaRowindex, columnValues })}
+              aria-label={i18n.VIEW_DETAILS_FOR_ROW({ ariaRowindex })}
               data-test-subj="expand-event"
               iconType="expand"
               onClick={onEventDetailsPanelOpened}
@@ -231,7 +198,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
       <>
         {timelineId !== TimelineId.active && (
           <InvestigateInTimelineAction
-            ariaLabel={i18n.SEND_ALERT_TO_TIMELINE_FOR_ROW({ ariaRowindex, columnValues })}
+            ariaLabel={i18n.SEND_ALERT_TO_TIMELINE_FOR_ROW({ ariaRowindex })}
             key="investigate-in-timeline"
             ecsRowData={ecsData}
           />
@@ -240,14 +207,14 @@ const ActionsComponent: React.FC<ActionProps> = ({
         {!isEventViewer && toggleShowNotes && (
           <>
             <AddEventNoteAction
-              ariaLabel={i18n.ADD_NOTES_FOR_ROW({ ariaRowindex, columnValues })}
+              ariaLabel={i18n.ADD_NOTES_FOR_ROW({ ariaRowindex })}
               key="add-event-note"
               showNotes={showNotes ?? false}
               toggleShowNotes={toggleShowNotes}
               timelineType={timelineType}
             />
             <PinEventAction
-              ariaLabel={i18n.PIN_EVENT_FOR_ROW({ ariaRowindex, columnValues, isEventPinned })}
+              ariaLabel={i18n.PIN_EVENT_FOR_ROW({ ariaRowindex, isEventPinned })}
               isAlert={isAlert(eventType)}
               key="pin-event"
               onPinClicked={handlePinClicked}
@@ -258,9 +225,8 @@ const ActionsComponent: React.FC<ActionProps> = ({
           </>
         )}
         <AlertContextMenu
-          ariaLabel={i18n.MORE_ACTIONS_FOR_ROW({ ariaRowindex, columnValues })}
+          ariaLabel={i18n.MORE_ACTIONS_FOR_ROW({ ariaRowindex })}
           ariaRowindex={ariaRowindex}
-          columnValues={columnValues}
           key="alert-context-menu"
           ecsRowData={ecsData}
           timelineId={timelineId}
@@ -278,7 +244,6 @@ const ActionsComponent: React.FC<ActionProps> = ({
                 <EuiButtonIcon
                   aria-label={i18n.ACTION_INVESTIGATE_IN_RESOLVER_FOR_ROW({
                     ariaRowindex,
-                    columnValues,
                   })}
                   data-test-subj="view-in-analyzer"
                   iconType="analyzeEvent"
@@ -295,7 +260,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
             <EventsTdContent textAlign="center" width={DEFAULT_ACTION_BUTTON_WIDTH}>
               <EuiToolTip data-test-subj="expand-event-tool-tip" content={i18n.OPEN_SESSION_VIEW}>
                 <EuiButtonIcon
-                  aria-label={i18n.VIEW_DETAILS_FOR_ROW({ ariaRowindex, columnValues })}
+                  aria-label={i18n.VIEW_DETAILS_FOR_ROW({ ariaRowindex })}
                   data-test-subj="session-view-button"
                   iconType="sessionViewer"
                   onClick={openSessionView}

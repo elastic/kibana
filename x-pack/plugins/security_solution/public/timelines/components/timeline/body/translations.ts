@@ -75,17 +75,10 @@ export const VIEW_DETAILS = i18n.translate(
   }
 );
 
-export const VIEW_DETAILS_FOR_ROW = ({
-  ariaRowindex,
-  columnValues,
-}: {
-  ariaRowindex: number;
-  columnValues: string;
-}) =>
+export const VIEW_DETAILS_FOR_ROW = ({ ariaRowindex }: { ariaRowindex: number }) =>
   i18n.translate('xpack.securitySolution.timeline.body.actions.viewDetailsForRowAriaLabel', {
-    values: { ariaRowindex, columnValues },
-    defaultMessage:
-      'View details for the alert or event in row {ariaRowindex}, with columns {columnValues}',
+    values: { ariaRowindex },
+    defaultMessage: 'View details for the alert or event in row {ariaRowindex}',
   });
 
 export const ACTION_INVESTIGATE_IN_RESOLVER = i18n.translate(
@@ -97,7 +90,6 @@ export const ACTION_INVESTIGATE_IN_RESOLVER = i18n.translate(
 
 export const CHECKBOX_FOR_ROW = ({
   ariaRowindex,
-  columnValues,
   checked,
 }: {
   ariaRowindex: number;
@@ -105,93 +97,60 @@ export const CHECKBOX_FOR_ROW = ({
   checked: boolean;
 }) =>
   i18n.translate('xpack.securitySolution.timeline.body.actions.checkboxForRowAriaLabel', {
-    values: { ariaRowindex, checked, columnValues },
+    values: { ariaRowindex, checked },
     defaultMessage:
-      '{checked, select, false {unchecked} true {checked}} checkbox for the alert or event in row {ariaRowindex}, with columns {columnValues}',
+      '{checked, select, false {unchecked} true {checked}} checkbox for the alert or event in row {ariaRowindex}',
   });
 
 export const ACTION_INVESTIGATE_IN_RESOLVER_FOR_ROW = ({
   ariaRowindex,
-  columnValues,
 }: {
   ariaRowindex: number;
-  columnValues: string;
 }) =>
   i18n.translate(
     'xpack.securitySolution.timeline.body.actions.investigateInResolverForRowAriaLabel',
     {
-      values: { ariaRowindex, columnValues },
-      defaultMessage:
-        'Analyze the alert or event in row {ariaRowindex}, with columns {columnValues}',
+      values: { ariaRowindex },
+      defaultMessage: 'Analyze the alert or event in row {ariaRowindex}',
     }
   );
 
-export const SEND_ALERT_TO_TIMELINE_FOR_ROW = ({
-  ariaRowindex,
-  columnValues,
-}: {
-  ariaRowindex: number;
-  columnValues: string;
-}) =>
+export const SEND_ALERT_TO_TIMELINE_FOR_ROW = ({ ariaRowindex }: { ariaRowindex: number }) =>
   i18n.translate(
     'xpack.securitySolution.timeline.body.actions.sendAlertToTimelineForRowAriaLabel',
     {
-      values: { ariaRowindex, columnValues },
-      defaultMessage:
-        'Send the alert in row {ariaRowindex} to timeline, with columns {columnValues}',
+      values: { ariaRowindex },
+      defaultMessage: 'Send the alert in row {ariaRowindex} to timeline',
     }
   );
 
-export const ADD_NOTES_FOR_ROW = ({
-  ariaRowindex,
-  columnValues,
-}: {
-  ariaRowindex: number;
-  columnValues: string;
-}) =>
+export const ADD_NOTES_FOR_ROW = ({ ariaRowindex }: { ariaRowindex: number }) =>
   i18n.translate('xpack.securitySolution.timeline.body.actions.addNotesForRowAriaLabel', {
-    values: { ariaRowindex, columnValues },
-    defaultMessage:
-      'Add notes for the event in row {ariaRowindex} to timeline, with columns {columnValues}',
+    values: { ariaRowindex },
+    defaultMessage: 'Add notes for the event in row {ariaRowindex} to timeline',
   });
 
 export const PIN_EVENT_FOR_ROW = ({
   ariaRowindex,
-  columnValues,
   isEventPinned,
 }: {
   ariaRowindex: number;
-  columnValues: string;
   isEventPinned: boolean;
 }) =>
   i18n.translate('xpack.securitySolution.timeline.body.actions.pinEventForRowAriaLabel', {
-    values: { ariaRowindex, columnValues, isEventPinned },
+    values: { ariaRowindex, isEventPinned },
     defaultMessage:
-      '{isEventPinned, select, false {Pin} true {Unpin}} the event in row {ariaRowindex} to timeline, with columns {columnValues}',
+      '{isEventPinned, select, false {Pin} true {Unpin}} the event in row {ariaRowindex} to timeline',
   });
 
-export const ATTACH_ALERT_TO_CASE_FOR_ROW = ({
-  ariaRowindex,
-  columnValues,
-}: {
-  ariaRowindex: number;
-  columnValues: string;
-}) =>
+export const ATTACH_ALERT_TO_CASE_FOR_ROW = ({ ariaRowindex }: { ariaRowindex: number }) =>
   i18n.translate('xpack.securitySolution.timeline.body.actions.attachAlertToCaseForRowAriaLabel', {
-    values: { ariaRowindex, columnValues },
-    defaultMessage:
-      'Attach the alert or event in row {ariaRowindex} to a case, with columns {columnValues}',
+    values: { ariaRowindex },
+    defaultMessage: 'Attach the alert or event in row {ariaRowindex} to a case',
   });
 
-export const MORE_ACTIONS_FOR_ROW = ({
-  ariaRowindex,
-  columnValues,
-}: {
-  ariaRowindex: number;
-  columnValues: string;
-}) =>
+export const MORE_ACTIONS_FOR_ROW = ({ ariaRowindex }: { ariaRowindex: number }) =>
   i18n.translate('xpack.securitySolution.timeline.body.actions.moreActionsForRowAriaLabel', {
-    values: { ariaRowindex, columnValues },
-    defaultMessage:
-      'Select more actions for the alert or event in row {ariaRowindex}, with columns {columnValues}',
+    values: { ariaRowindex },
+    defaultMessage: 'Select more actions for the alert or event in row {ariaRowindex}',
   });

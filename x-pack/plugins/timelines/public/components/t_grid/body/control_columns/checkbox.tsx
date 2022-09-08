@@ -15,7 +15,6 @@ export const RowCheckBox = ({
   onRowSelected,
   checked,
   ariaRowindex,
-  columnValues,
   disabled,
   loadingEventIds,
 }: ActionProps) => {
@@ -40,7 +39,7 @@ export const RowCheckBox = ({
       checked={checked && !disabled}
       disabled={disabled}
       onChange={handleSelectEvent}
-      aria-label={i18n.CHECKBOX_FOR_ROW({ ariaRowindex, columnValues, checked })}
+      aria-label={i18n.CHECKBOX_FOR_ROW({ ariaRowindex, checked })}
     />
   );
 };
