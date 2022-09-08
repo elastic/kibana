@@ -46,10 +46,16 @@ export const convertToLens: ConvertTableToLensVisualization = async (vis, timefi
     return null;
   }
 
-  const result = getColumnsFromVis(vis, timefilter, dataView, {
-    buckets: ['bucket'],
-    splits: ['split_row', 'split_column'],
-  });
+  const result = getColumnsFromVis(
+    vis,
+    timefilter,
+    dataView,
+    {
+      buckets: ['bucket'],
+      splits: ['split_row', 'split_column'],
+    },
+    { dropEmptyRowsInDateHistogram: true }
+  );
 
   if (result === null) {
     return null;
