@@ -7,7 +7,6 @@
 
 import {
   EuiAvatar,
-  EuiBadge,
   EuiBasicTable,
   EuiButtonIcon,
   EuiDescriptionList,
@@ -28,9 +27,13 @@ import { euiStyled, css } from '@kbn/kibana-react-plugin/common';
 import type { HorizontalAlignment, CriteriaWithPagination } from '@elastic/eui';
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type {
+  ResponseActions,
+  ResponseActionStatus,
+} from '../../../../common/endpoint/service/response_actions/constants';
 import { getEmptyValue } from '../../../common/components/empty_value';
 import { FormattedDate } from '../../../common/components/formatted_date';
-import type { ActionDetails } from '../../../../common/endpoint/types';
+import type { ActionListApiResponse } from '../../../../common/endpoint/types';
 import type { EndpointActionListRequestQuery } from '../../../../common/endpoint/schema/actions';
 import { ManagementEmptyStateWrapper } from '../management_empty_state_wrapper';
 import { useGetEndpointActionList } from '../../hooks';
@@ -38,13 +41,12 @@ import { OUTPUT_MESSAGES, TABLE_COLUMN_NAMES, UX_MESSAGES } from './translations
 import { MANAGEMENT_PAGE_SIZE_OPTIONS } from '../../common/constants';
 import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 import { ActionsLogFilters } from './components/actions_log_filters';
-import { useDateRangePicker } from './components/hooks';
+import { getActionStatus, useDateRangePicker } from './components/hooks';
+import { StatusBadge } from './components/status_badge';
 
 const emptyValue = getEmptyValue();
 
-const getCommand = (
-  command: ActionDetails['command']
-): Exclude<ActionDetails['command'], 'unisolate'> | 'release' =>
+const getCommand = (command: ResponseActions): Exclude<ResponseActions, 'unisolate'> | 'release' =>
   command === 'unisolate' ? 'release' : command;
 
 // Truncated usernames
@@ -109,7 +111,7 @@ export const ResponseActionsLog = memo<
 >(({ agentIds, showHostNames = false }) => {
   const getTestId = useTestIdGenerator('response-actions-list');
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<{
-    [k: ActionDetails['id']]: React.ReactNode;
+    [k: ActionListApiResponse['data'][number]['id']]: React.ReactNode;
   }>({});
 
   const [queryParams, setQueryParams] = useState<EndpointActionListRequestQuery>({
@@ -117,6 +119,7 @@ export const ResponseActionsLog = memo<
     pageSize: 10,
     agentIds,
     commands: [],
+    statuses: [],
     userIds: [],
   });
 
@@ -146,7 +149,21 @@ export const ResponseActionsLog = memo<
   // handle on change actions filter
   const onChangeCommandsFilter = useCallback(
     (selectedCommands: string[]) => {
-      setQueryParams((prevState) => ({ ...prevState, commands: selectedCommands }));
+      setQueryParams((prevState) => ({
+        ...prevState,
+        commands: selectedCommands as ResponseActions[],
+      }));
+    },
+    [setQueryParams]
+  );
+
+  // handle on change actions filter
+  const onChangeStatusesFilter = useCallback(
+    (selectedStatuses: string[]) => {
+      setQueryParams((prevState) => ({
+        ...prevState,
+        statuses: selectedStatuses as ResponseActionStatus[],
+      }));
     },
     [setQueryParams]
   );
@@ -156,7 +173,7 @@ export const ResponseActionsLog = memo<
 
   // expanded tray contents
   const toggleDetails = useCallback(
-    (item: ActionDetails) => {
+    (item: ActionListApiResponse['data'][number]) => {
       const itemIdToExpandedRowMapValues = { ...itemIdToExpandedRowMap };
       if (itemIdToExpandedRowMapValues[item.id]) {
         delete itemIdToExpandedRowMapValues[item.id];
@@ -251,7 +268,8 @@ export const ResponseActionsLog = memo<
   );
   // memoized callback for toggleDetails
   const onClickCallback = useCallback(
-    (data: ActionDetails) => () => toggleDetails(data),
+    (actionListDataItem: ActionListApiResponse['data'][number]) => () =>
+      toggleDetails(actionListDataItem),
     [toggleDetails]
   );
 
@@ -263,7 +281,7 @@ export const ResponseActionsLog = memo<
         name: TABLE_COLUMN_NAMES.time,
         width: !showHostNames ? '21%' : '15%',
         truncateText: true,
-        render: (startedAt: ActionDetails['startedAt']) => {
+        render: (startedAt: ActionListApiResponse['data'][number]['startedAt']) => {
           return (
             <FormattedDate
               fieldName={TABLE_COLUMN_NAMES.time}
@@ -278,7 +296,7 @@ export const ResponseActionsLog = memo<
         name: TABLE_COLUMN_NAMES.command,
         width: !showHostNames ? '21%' : '10%',
         truncateText: true,
-        render: (_command: ActionDetails['command']) => {
+        render: (_command: ActionListApiResponse['data'][number]['command']) => {
           const command = getCommand(_command);
           return (
             <EuiToolTip content={command} anchorClassName="eui-textTruncate">
@@ -296,7 +314,7 @@ export const ResponseActionsLog = memo<
         name: TABLE_COLUMN_NAMES.user,
         width: !showHostNames ? '21%' : '14%',
         truncateText: true,
-        render: (userId: ActionDetails['createdBy']) => {
+        render: (userId: ActionListApiResponse['data'][number]['createdBy']) => {
           return (
             <StyledFacetButton
               icon={
@@ -326,7 +344,7 @@ export const ResponseActionsLog = memo<
         name: TABLE_COLUMN_NAMES.hosts,
         width: '20%',
         truncateText: true,
-        render: (_hosts: ActionDetails['hosts']) => {
+        render: (_hosts: ActionListApiResponse['data'][number]['hosts']) => {
           const hosts = _hosts && Object.values(_hosts);
           // join hostnames if the action is for multiple agents
           // and skip empty strings for names if any
@@ -368,7 +386,7 @@ export const ResponseActionsLog = memo<
         name: TABLE_COLUMN_NAMES.comments,
         width: !showHostNames ? '21%' : '30%',
         truncateText: true,
-        render: (comment: ActionDetails['comment']) => {
+        render: (comment: ActionListApiResponse['data'][number]['comment']) => {
           return (
             <EuiToolTip content={comment} anchorClassName="eui-textTruncate">
               <EuiText
@@ -383,38 +401,20 @@ export const ResponseActionsLog = memo<
         },
       },
       {
-        field: 'isCompleted',
+        field: 'status',
         name: TABLE_COLUMN_NAMES.status,
         width: !showHostNames ? '15%' : '10%',
-        render: (isCompleted: ActionDetails['isCompleted'], data: ActionDetails) => {
-          const status = data.isExpired
-            ? UX_MESSAGES.badge.failed
-            : isCompleted
-            ? data.wasSuccessful
-              ? UX_MESSAGES.badge.completed
-              : UX_MESSAGES.badge.failed
-            : UX_MESSAGES.badge.pending;
+        render: (_status: ActionListApiResponse['data'][number]['status']) => {
+          const status = getActionStatus(_status);
 
           return (
             <EuiToolTip content={status} anchorClassName="eui-textTruncate">
-              <EuiBadge
-                data-test-subj={getTestId('column-status')}
+              <StatusBadge
                 color={
-                  data.isExpired
-                    ? 'danger'
-                    : isCompleted
-                    ? data.wasSuccessful
-                      ? 'success'
-                      : 'danger'
-                    : 'warning'
+                  _status === 'failed' ? 'danger' : _status === 'successful' ? 'success' : 'warning'
                 }
-              >
-                <FormattedMessage
-                  id="xpack.securitySolution.responseActionsList.list.item.status"
-                  defaultMessage="{status}"
-                  values={{ status }}
-                />
-              </EuiBadge>
+                status={status}
+              />
             </EuiToolTip>
           );
         },
@@ -429,13 +429,13 @@ export const ResponseActionsLog = memo<
             <span>{UX_MESSAGES.screenReaderExpand}</span>
           </EuiScreenReaderOnly>
         ),
-        render: (data: ActionDetails) => {
+        render: (actionListDataItem: ActionListApiResponse['data'][number]) => {
           return (
             <EuiButtonIcon
               data-test-subj={getTestId('expand-button')}
-              onClick={onClickCallback(data)}
-              aria-label={itemIdToExpandedRowMap[data.id] ? 'Collapse' : 'Expand'}
-              iconType={itemIdToExpandedRowMap[data.id] ? 'arrowUp' : 'arrowDown'}
+              onClick={onClickCallback(actionListDataItem)}
+              aria-label={itemIdToExpandedRowMap[actionListDataItem.id] ? 'Collapse' : 'Expand'}
+              iconType={itemIdToExpandedRowMap[actionListDataItem.id] ? 'arrowUp' : 'arrowDown'}
             />
           );
         },
@@ -463,7 +463,7 @@ export const ResponseActionsLog = memo<
 
   // handle onChange
   const handleTableOnChange = useCallback(
-    ({ page: _page }: CriteriaWithPagination<ActionDetails>) => {
+    ({ page: _page }: CriteriaWithPagination<ActionListApiResponse['data'][number]>) => {
       // table paging is 0 based
       const { index, size } = _page;
       setQueryParams((prevState) => ({
@@ -521,6 +521,7 @@ export const ResponseActionsLog = memo<
         isDataLoading={isFetching}
         onClick={reFetchEndpointActionList}
         onChangeCommandsFilter={onChangeCommandsFilter}
+        onChangeStatusesFilter={onChangeStatusesFilter}
         onRefresh={onRefresh}
         onRefreshChange={onRefreshChange}
         onTimeChange={onTimeChange}

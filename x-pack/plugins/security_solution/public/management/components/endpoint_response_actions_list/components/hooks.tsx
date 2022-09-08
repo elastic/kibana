@@ -5,14 +5,20 @@
  * 2.0.
  */
 
-import { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import type {
   DurationRange,
   OnRefreshChangeProps,
 } from '@elastic/eui/src/components/date_picker/types';
+import type { ResponseActionStatus } from '../../../../../common/endpoint/service/response_actions/constants';
+import {
+  RESPONSE_ACTION_COMMANDS,
+  RESPONSE_ACTION_STATUS,
+} from '../../../../../common/endpoint/service/response_actions/constants';
 import type { DateRangePickerValues } from './actions_log_date_range_picker';
-import { RESPONSE_ACTION_COMMANDS } from '../../../../../common/endpoint/types';
 import type { FILTER_NAMES } from '../translations';
+import { UX_MESSAGES } from '../translations';
+import { StatusBadge } from './status_badge';
 
 const defaultDateRangeOptions = Object.freeze({
   autoRefreshOptions: {
@@ -94,15 +100,48 @@ export type FilterItems = Array<{
   checked: 'on' | undefined;
 }>;
 
+export const getActionStatus = (status: ResponseActionStatus): string => {
+  if (status === 'failed') {
+    return UX_MESSAGES.badge.failed;
+  } else if (status === 'successful') {
+    return UX_MESSAGES.badge.successful;
+  } else if (status === 'pending') {
+    return UX_MESSAGES.badge.pending;
+  }
+  return '';
+};
+
 // TODO: add more filter names here
 export type FilterName = keyof typeof FILTER_NAMES;
-export const useActionsLogFilter = () => {
+export const useActionsLogFilter = (
+  filterName: FilterName
+): {
+  items: FilterItems;
+  setItems: React.Dispatch<React.SetStateAction<FilterItems>>;
+  hasActiveFilters: boolean;
+  numActiveFilters: number;
+  numFilters: number;
+} => {
+  const isStatusesFilter = filterName === 'statuses';
   const [items, setItems] = useState<FilterItems>(
-    RESPONSE_ACTION_COMMANDS.slice().map((filter) => ({
-      key: filter,
-      label: filter === 'unisolate' ? 'release' : filter,
-      checked: undefined,
-    }))
+    isStatusesFilter
+      ? RESPONSE_ACTION_STATUS.map((filter) => ({
+          key: filter,
+          label: (
+            <StatusBadge
+              color={
+                filter === 'successful' ? 'success' : filter === 'failed' ? 'danger' : 'warning'
+              }
+              status={getActionStatus(filter)}
+            />
+          ) as unknown as string,
+          checked: undefined,
+        }))
+      : RESPONSE_ACTION_COMMANDS.map((filter) => ({
+          key: filter,
+          label: filter === 'unisolate' ? 'release' : filter,
+          checked: undefined,
+        }))
   );
 
   const hasActiveFilters = useMemo(() => !!items.find((item) => item.checked === 'on'), [items]);

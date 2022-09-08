@@ -31,6 +31,7 @@ export const useGetEndpointActionList = (
           page: query.page,
           pageSize: query.pageSize,
           startDate: query.startDate,
+          statuses: query.statuses,
           userIds: query.userIds,
         },
       });
