@@ -40,6 +40,13 @@ export class PercentileAggField extends AggField implements IESAggField {
     return true;
   }
 
+  getMbFieldName(): string {
+    const isPercentileAnInteger = this._percentile - Math.floor(this._percentile) === 0;
+    return this._source.isMvt()
+      ? this.getName() + `.values.${this._percentile}${isPercentileAnInteger ? '.0' : ''}`
+      : this.getName();
+  }
+
   canValueBeFormatted(): boolean {
     return true;
   }
