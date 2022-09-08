@@ -8,7 +8,7 @@
 
 import { fromKueryExpression, fromLiteralExpression, toElasticsearchQuery } from './ast';
 import { nodeTypes } from '../node_types';
-import { DataViewBase } from '../..';
+import { DataViewBase } from '../../..';
 import { KueryNode } from '../types';
 import { fields } from '../../filters/stubs';
 
