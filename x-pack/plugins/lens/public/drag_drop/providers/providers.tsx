@@ -90,7 +90,7 @@ export function RootDragDropProvider({ children }: { children: React.ReactNode }
   );
 
   return (
-    <div>
+    <>
       <ChildDragDropProvider
         keyboardMode={keyboardModeState}
         setKeyboardMode={setKeyboardModeState}
@@ -121,7 +121,7 @@ export function RootDragDropProvider({ children }: { children: React.ReactNode }
           </p>
         </div>
       </EuiScreenReaderOnly>
-    </div>
+    </>
   );
 }
 

@@ -11,7 +11,7 @@ import { AlertCluster, AlertDiskUsageNodeStats } from '../../../common/types/ale
 import { createDatasetFilter } from './create_dataset_query_filter';
 import { Globals } from '../../static_globals';
 import { CCS_REMOTE_PATTERN } from '../../../common/constants';
-import { getNewIndexPatterns } from '../cluster/get_index_patterns';
+import { getNewIndexPatterns, getElasticsearchDataset } from '../cluster/get_index_patterns';
 
 export async function fetchDiskUsageNodeStats(
   esClient: ElasticsearchClient,
@@ -40,7 +40,7 @@ export async function fetchDiskUsageNodeStats(
                 cluster_uuid: clustersIds,
               },
             },
-            createDatasetFilter('node_stats', 'node_stats', 'elasticsearch.node_stats'),
+            createDatasetFilter('node_stats', 'node_stats', getElasticsearchDataset('node_stats')),
             {
               range: {
                 timestamp: {
