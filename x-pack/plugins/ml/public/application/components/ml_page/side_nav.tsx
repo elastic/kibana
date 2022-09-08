@@ -243,7 +243,7 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
             id: 'logCategorization',
             pathId: ML_PAGES.AIOPS_LOG_CATEGORIZATION_INDEX_SELECT,
             name: i18n.translate('xpack.ml.navMenu.logCategorizationLinkText', {
-              defaultMessage: 'Log categorization',
+              defaultMessage: 'Log Pattern Analysis',
             }),
             disabled: disableLinks,
             testSubj: 'mlMainTab logCategorization',

@@ -35,7 +35,7 @@ export const LogCategorizationPage: FC = () => {
           <EuiFlexItem grow={false}>
             <FormattedMessage
               id="xpack.ml.logCategorization.pageHeader"
-              defaultMessage="Log categorization"
+              defaultMessage="Log Pattern Analysis"
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
