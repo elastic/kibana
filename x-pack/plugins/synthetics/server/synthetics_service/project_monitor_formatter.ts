@@ -109,9 +109,12 @@ export class ProjectMonitorFormatter {
 
   public configureAllProjectMonitors = async () => {
     this.staleMonitorsMap = await this.getAllProjectMonitorsForProject();
-    for (const monitor of this.monitors) {
-      await this.configureProjectMonitor({ monitor });
-      await new Promise((resolve) => setTimeout(resolve, 100));
+    for (const monitors of this.chunkRequests(this.monitors)) {
+      await Promise.all(
+        monitors.map((monitor) =>
+          this.configureProjectMonitor({ monitor: monitor as ProjectBrowserMonitor })
+        )
+      );
     }
 
     await this.handleStaleMonitors();
@@ -289,16 +292,20 @@ export class ProjectMonitorFormatter {
         (monitor) => monitor.stale === true
       );
 
-      for (const staleMonitor of staleMonitorsData) {
-        if (!this.keepStale) {
-          await this.deleteStaleMonitor({
-            monitorId: staleMonitor.savedObjectId,
-            journeyId: staleMonitor.journeyId,
-          });
-        } else {
-          this.staleMonitors.push(staleMonitor.journeyId);
-          return null;
-        }
+      for (const staleMonitors of this.chunkRequests(staleMonitorsData)) {
+        await Promise.all(
+          (staleMonitors as StaleMonitor[]).map((staleMonitor) => {
+            if (!this.keepStale) {
+              return this.deleteStaleMonitor({
+                monitorId: staleMonitor.savedObjectId,
+                journeyId: staleMonitor.journeyId,
+              });
+            } else {
+              this.staleMonitors.push(staleMonitor.journeyId);
+              return null;
+            }
+          })
+        );
       }
     } catch (e) {
       this.server.logger.error(e);
@@ -336,5 +343,23 @@ export class ProjectMonitorFormatter {
     if (this.subject) {
       this.subject?.next(message);
     }
+  };
+
+  private chunkRequests = (requests: unknown[]) => {
+    const perChunk = 50; // items per chunk
+
+    const result = requests.reduce<unknown[][]>((resultArray, item, index) => {
+      const chunkIndex = Math.floor(index / perChunk);
+
+      if (!resultArray[chunkIndex]) {
+        resultArray[chunkIndex] = []; // start a new chunk
+      }
+
+      resultArray[chunkIndex].push(item);
+
+      return resultArray;
+    }, []);
+
+    return result;
   };
 }
