@@ -13,9 +13,25 @@ import { FileUploadUI, Props } from './file_upload';
 export default {
   title: 'components/FileUploadUI',
   component: FileUploadUI,
-  args: { onDone: action('onDone') },
+  args: { onDone: action('onDone'), uploading: false },
 };
 
 const Template: ComponentStory<typeof FileUploadUI> = (props: Props) => <FileUploadUI {...props} />;
 
-export const BasicUI = Template.bind({});
+export const Basic = Template.bind({});
+
+export const Uploading = Template.bind({});
+Uploading.args = {
+  uploading: true,
+};
+
+export const Compressed = Template.bind({});
+Compressed.args = {
+  compressed: true,
+};
+
+export const UploadingCompressed = Template.bind({});
+UploadingCompressed.args = {
+  compressed: true,
+  uploading: true,
+};

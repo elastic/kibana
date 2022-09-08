@@ -8,10 +8,16 @@
 import { i18n } from '@kbn/i18n';
 
 export const i18nTexts = {
+  upload: i18n.translate('xpack.files.uploadFile.uploadButtonLabel', {
+    defaultMessage: 'Upload',
+  }),
+  retry: i18n.translate('xpack.files.uploadFile.retryButtonLabel', {
+    defaultMessage: 'Retry',
+  }),
   clear: i18n.translate('xpack.files.uploadFile.clearButtonLabel', {
     defaultMessage: 'Clear',
   }),
-  upload: i18n.translate('xpack.files.uploadFile.uploadButtonLabel', {
-    defaultMessage: 'Upload',
+  cancel: i18n.translate('xpack.files.uploadFile.cancelButtonLabel', {
+    defaultMessage: 'Cancel',
   }),
 };
