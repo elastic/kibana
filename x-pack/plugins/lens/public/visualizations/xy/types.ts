@@ -35,6 +35,7 @@ import {
   IconChartBarHorizontal,
 } from '@kbn/chart-icons';
 
+import { DistributiveOmit } from '@elastic/eui';
 import type { VisualizationType, Suggestion } from '../../types';
 import type { ValueLabelConfig } from '../../../common/types';
 
@@ -163,7 +164,7 @@ export interface XYState {
 export type State = XYState;
 
 export type XYPersistedState = Omit<XYState, 'layers'> & {
-  layers: Array<Omit<XYLayerConfig, 'indexPatternId'>>;
+  layers: Array<DistributiveOmit<XYLayerConfig, 'indexPatternId'>>;
 };
 
 export type PersistedState = XYPersistedState;

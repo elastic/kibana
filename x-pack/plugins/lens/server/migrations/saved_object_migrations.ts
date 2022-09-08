@@ -36,6 +36,7 @@ import {
   VisState820,
   XYVisStatePre850,
   LensDocShape850,
+  LensDocShape840,
   VisState850,
 } from './types';
 import {
@@ -57,7 +58,7 @@ import {
   commonExplicitAnnotationType,
   getLensDataViewMigrations,
   commonMigrateMetricIds,
-  commonAnnotationAddDataViewIdReferences,
+  commonMigratePartitionChartGroups,
 } from './common_migrations';
 
 interface LensDocShapePre710<VisualizationState = unknown> {
@@ -527,17 +528,21 @@ const addEventAnnotationType: SavedObjectMigrationFn<
   return { ...newDoc, attributes: commonExplicitAnnotationType(newDoc.attributes) };
 };
 
-const addEventAnnotationDataViewReferences: SavedObjectMigrationFn<
-  LensDocShape850<VisState850>,
-  LensDocShape850<VisState850>
-> = (doc) => ({
-  ...doc,
-  references: commonAnnotationAddDataViewIdReferences(doc.attributes, doc.references),
-});
-
 const migrateMetricIds: SavedObjectMigrationFn<LensDocShape850, LensDocShape850> = (doc) => ({
   ...doc,
   attributes: commonMigrateMetricIds(doc.attributes),
+});
+
+const migratePartitionChartGroups: SavedObjectMigrationFn<LensDocShape840, LensDocShape840> = (
+  doc
+) => ({
+  ...doc,
+  attributes: commonMigratePartitionChartGroups(
+    doc.attributes as LensDocShape840<{
+      shape: string;
+      layers: Array<{ groups?: string[] }>;
+    }>
+  ),
 });
 
 const lensMigrations: SavedObjectMigrationMap = {
@@ -560,7 +565,7 @@ const lensMigrations: SavedObjectMigrationMap = {
     enhanceTableRowHeight
   ),
   '8.3.0': flow(lockOldMetricVisSettings, preserveOldLegendSizeDefault, fixValueLabelsInXY),
-  '8.5.0': flow(migrateMetricIds, addEventAnnotationType, addEventAnnotationDataViewReferences),
+  '8.5.0': flow(migrateMetricIds, addEventAnnotationType, migratePartitionChartGroups),
 };
 
 export const getAllMigrations = (

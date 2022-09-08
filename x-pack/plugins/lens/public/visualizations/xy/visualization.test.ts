@@ -2683,4 +2683,80 @@ describe('xy_visualization', () => {
       });
     });
   });
+
+  describe('#fromPersistableState', () => {
+    it('should inject references on annotation layers', () => {
+      const baseState = exampleState();
+      expect(
+        xyVisualization.fromPersistableState!(
+          {
+            ...baseState,
+            layers: [
+              ...baseState.layers,
+              {
+                layerId: 'annotation',
+                layerType: layerTypes.ANNOTATIONS,
+                annotations: [exampleAnnotation2],
+              },
+            ],
+          },
+          [
+            {
+              type: 'index-pattern',
+              name: `xy-visualization-layer-annotation`,
+              id: 'indexPattern1',
+            },
+          ]
+        )
+      ).toEqual({
+        ...baseState,
+        layers: [
+          ...baseState.layers,
+          {
+            layerId: 'annotation',
+            layerType: layerTypes.ANNOTATIONS,
+            indexPatternId: 'indexPattern1',
+            annotations: [exampleAnnotation2],
+          },
+        ],
+      });
+    });
+
+    it('should fallback to the first dataView reference in case there are missing annotation references', () => {
+      const baseState = exampleState();
+      expect(
+        xyVisualization.fromPersistableState!(
+          {
+            ...baseState,
+            layers: [
+              ...baseState.layers,
+              {
+                layerId: 'annotation',
+                layerType: layerTypes.ANNOTATIONS,
+                annotations: [exampleAnnotation2],
+              },
+            ],
+          },
+          [
+            {
+              type: 'index-pattern',
+              name: 'something-else',
+              id: 'indexPattern1',
+            },
+          ]
+        )
+      ).toEqual({
+        ...baseState,
+        layers: [
+          ...baseState.layers,
+          {
+            layerId: 'annotation',
+            layerType: layerTypes.ANNOTATIONS,
+            indexPatternId: 'indexPattern1',
+            annotations: [exampleAnnotation2],
+          },
+        ],
+      });
+    });
+  });
 });

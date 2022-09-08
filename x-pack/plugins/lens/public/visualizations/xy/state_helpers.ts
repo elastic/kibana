@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { DistributiveOmit } from '@elastic/eui';
 import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import type { SavedObjectReference } from '@kbn/core/public';
 import { isQueryAnnotationConfig } from '@kbn/event-annotation-plugin/public';
@@ -120,7 +121,7 @@ function getLayerReferenceName(layerId: string) {
 
 export function extractReferences(state: XYState) {
   const savedObjectReferences: SavedObjectReference[] = [];
-  const persistableLayers: Array<Omit<XYLayerConfig, 'indexPatternId'>> = [];
+  const persistableLayers: Array<DistributiveOmit<XYLayerConfig, 'indexPatternId'>> = [];
   state.layers.forEach((layer) => {
     if (isAnnotationsLayer(layer)) {
       const { indexPatternId, ...persistableLayer } = layer;
@@ -144,6 +145,7 @@ export function injectReferences(
   if (!references || !references.length) {
     return state as XYState;
   }
+  const fallbackIndexPatternId = references.find(({ type }) => type === 'index-pattern')!.id;
   return {
     ...state,
     layers: state.layers.map((layer) => {
@@ -152,9 +154,9 @@ export function injectReferences(
       }
       return {
         ...layer,
-        indexPatternId: references.find(
-          ({ name }) => name === getLayerReferenceName(layer.layerId)
-        )!.id,
+        indexPatternId:
+          references.find(({ name }) => name === getLayerReferenceName(layer.layerId))?.id ||
+          fallbackIndexPatternId,
       };
     }),
   };

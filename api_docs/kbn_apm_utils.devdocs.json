@@ -38,6 +38,7 @@
         ],
         "path": "packages/kbn-apm-utils/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/apm-utils",
@@ -58,6 +59,7 @@
             ],
             "path": "packages/kbn-apm-utils/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -86,6 +88,7 @@
         ],
         "path": "packages/kbn-apm-utils/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/apm-utils",
@@ -106,6 +109,7 @@
             ],
             "path": "packages/kbn-apm-utils/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -122,6 +126,7 @@
             ],
             "path": "packages/kbn-apm-utils/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -139,6 +144,7 @@
         "description": [],
         "path": "packages/kbn-apm-utils/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/apm-utils",
@@ -148,7 +154,8 @@
             "label": "name",
             "description": [],
             "path": "packages/kbn-apm-utils/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/apm-utils",
@@ -161,7 +168,8 @@
               "string | undefined"
             ],
             "path": "packages/kbn-apm-utils/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/apm-utils",
@@ -174,7 +182,8 @@
               "string | undefined"
             ],
             "path": "packages/kbn-apm-utils/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/apm-utils",
@@ -187,7 +196,8 @@
               "Record<string, string> | undefined"
             ],
             "path": "packages/kbn-apm-utils/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/apm-utils",
@@ -200,7 +210,8 @@
               "boolean | undefined"
             ],
             "path": "packages/kbn-apm-utils/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

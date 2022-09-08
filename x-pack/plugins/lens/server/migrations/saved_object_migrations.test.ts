@@ -2330,18 +2330,6 @@ describe('Lens migrations', () => {
         annotations: [{ id: 'annotation-id', type: 'manual' }],
       });
     });
-
-    it('adds dataView references for annotation layers', () => {
-      const result = migrations['8.5.0'](
-        {
-          ...example,
-          references: [{ id: 'dataViewId', type: 'index-pattern', name: 'datasource1' }],
-        },
-        context
-      ) as ReturnType<SavedObjectMigrationFn<LensDocShape, LensDocShape>>;
-      // A new reference has been added for the annotation layer
-      expect(result.references).toHaveLength(2);
-    });
   });
 
   describe('8.5.0 migrates metric IDs', () => {
