@@ -86,7 +86,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     beforeEach(async () => {
-      await browser.refresh(); // clear state from previous test
       await comboBox.setCustom('dataViewSelector', dataViewTitle);
       await comboBox.set('searchMetricField', testRollupField);
       await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
