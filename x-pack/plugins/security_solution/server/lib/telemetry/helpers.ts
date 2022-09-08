@@ -30,6 +30,9 @@ import {
   DEFAULT_ADVANCED_POLICY_CONFIG_SETTINGS,
 } from './constants';
 import { tagsToEffectScope } from '../../../common/endpoint/service/trusted_apps/mapping';
+import type {
+  Logger
+} from '@kbn/core/server';
 
 /**
  * Determines the when the last run was in order to execute to.
@@ -266,3 +269,21 @@ export const metricsResponseToValueListMetaData = ({
   used_in_indicator_match_rule_count:
     indicatorMatchMetricsResponse?.aggregations?.vl_used_in_indicator_match_rule_count?.value ?? 0,
 });
+
+class CloudOnlyLogger {
+  private logger?: Logger;
+  private isElasticCloudDeployment = false;
+
+  setup(logger: Logger, isElasticCloudDeployment: boolean) {
+    this.logger = logger.get('telemetry_events');
+    this.isElasticCloudDeployment = isElasticCloudDeployment;
+  }
+
+  log(message: string) {
+    if (this.isElasticCloudDeployment) {
+      this.logger?.info(message);
+    }
+  }
+}
+
+export const cloudOnlyLogger = new CloudOnlyLogger();

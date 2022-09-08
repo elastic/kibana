@@ -7,7 +7,7 @@
 
 import type { Logger } from '@kbn/core/server';
 import { LIST_DETECTION_RULE_EXCEPTION, TELEMETRY_CHANNEL_LISTS } from '../constants';
-import { batchTelemetryRecords, templateExceptionList } from '../helpers';
+import { batchTelemetryRecords, templateExceptionList, cloudOnlyLogger } from '../helpers';
 import type { ITelemetryEventsSender } from '../sender';
 import type { ITelemetryReceiver } from '../receiver';
 import type { ExceptionListItem, ESClusterInfo, ESLicense, RuleSearchResult } from '../types';
@@ -46,7 +46,7 @@ export function createTelemetryDetectionRuleListsTaskConfig(maxTelemetryBatch: n
       const { body: prebuiltRules } = await receiver.fetchDetectionRules();
 
       if (!prebuiltRules) {
-        logger.debug('no prebuilt rules found');
+        logger.info('no prebuilt rules found');
         return 0;
       }
 
@@ -87,7 +87,7 @@ export function createTelemetryDetectionRuleListsTaskConfig(maxTelemetryBatch: n
         licenseInfo,
         LIST_DETECTION_RULE_EXCEPTION
       );
-
+      cloudOnlyLogger.log(`Detection rule exception json length ${detectionRuleExceptionsJson.length}`);
       const batches = batchTelemetryRecords(detectionRuleExceptionsJson, maxTelemetryBatch);
       for (const batch of batches) {
         await sender.sendOnDemand(TELEMETRY_CHANNEL_LISTS, batch);
