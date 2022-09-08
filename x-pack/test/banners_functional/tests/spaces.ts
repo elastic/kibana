@@ -21,9 +21,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   describe('per-spaces banners', () => {
     before(async () => {
-      await kibanaServer.importExport.load(
-        'x-pack/test/functional/fixtures/kbn_archiver/banners/multispace'
-      );
       await spacesService.create({
         id: 'another-space',
         name: 'Another Space',
@@ -31,32 +28,17 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
       await kibanaServer.uiSettings.replace(
         {
-          defaultRoute: '/app/canvas',
-          buildNum: 8467,
-          'dateFormat:tz': 'UTC',
+          'banners:textContent': 'default space banner text',
         },
-        { space: 'another-space' }
+        { space: 'default' }
       );
-    });
-
-    after(async () => {
-      await spacesService.delete('another-space');
-      await kibanaServer.savedObjects.cleanStandardList();
-    });
-
-    before(async () => {
       await PageObjects.security.login(undefined, undefined, {
         expectSpaceSelector: true,
       });
-      await PageObjects.spaceSelector.clickSpaceCard('default');
-
-      await PageObjects.settings.navigateTo();
-      await PageObjects.settings.clickKibanaSettings();
-
-      await PageObjects.settings.setAdvancedSettingsTextArea(
-        'banners:textContent',
-        'default space banner text'
-      );
+    });
+    after(async () => {
+      await spacesService.delete('another-space');
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     it('displays the space-specific banner within the space', async () => {
@@ -73,7 +55,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       expect(await PageObjects.banners.getTopBannerText()).to.eql('global banner text');
     });
 
-    it('displays the global banner on the login page', async () => {
+    // The test is incorrect.
+    // Reference: https://github.com/elastic/kibana/pull/135783#issuecomment-1178178075
+    // TLDR: No banner on login page.
+    // Bugs Filed:
+    // https://github.com/elastic/kibana/issues/140307
+    // https://github.com/elastic/kibana/issues/140307
+    it.skip('displays the global banner on the login page', async () => {
       await PageObjects.security.forceLogout();
       await PageObjects.common.navigateToApp('login');
 
