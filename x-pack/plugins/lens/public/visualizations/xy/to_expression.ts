@@ -300,6 +300,7 @@ export const buildExpression = (
           fillOpacity: [state.fillOpacity || 0.3],
           valueLabels: [state?.valueLabels || 'hide'],
           hideEndzones: [state?.hideEndzones || false],
+          addTimeMarker: [state?.showCurrentTimeMarker || false],
           valuesInLegend: [state?.valuesInLegend || false],
           yAxisConfigs: [...yAxisConfigsToExpression(yAxisConfigs)],
           xAxisConfig: [
