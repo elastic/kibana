@@ -329,6 +329,7 @@ export interface RuleTypeModel<Params extends RuleTypeParams = RuleTypeParams> {
   requiresAppContext: boolean;
   defaultActionMessage?: string;
   defaultRecoveryMessage?: string;
+  alertDetailsContext?: React.FunctionComponent<any> | React.LazyExoticComponent<any>;
 }
 
 export interface IErrorObject {

@@ -31,6 +31,7 @@ export function createInventoryMetricRuleType(): ObservabilityRuleTypeModel<Inve
       return `${docLinks.links.observability.infrastructureThreshold}`;
     },
     ruleParamsExpression: React.lazy(() => import('./components/expression')),
+    alertDetailsContext: React.lazy(() => import('./components/alert_context')),
     validate: validateMetricThreshold,
     defaultActionMessage: i18n.translate(
       'xpack.infra.metrics.alerting.inventory.threshold.defaultActionMessage',
