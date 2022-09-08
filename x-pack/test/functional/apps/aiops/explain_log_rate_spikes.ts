@@ -85,14 +85,14 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await aiops.explainLogRateSpikes.adjustBrushHandler(
         'aiopsBrushDeviation',
         'handle--e',
-        targetPx
+        targetPx + intervalPx
       );
 
       // Adjust the left brush handle
       await aiops.explainLogRateSpikes.adjustBrushHandler(
         'aiopsBrushDeviation',
         'handle--w',
-        targetPx - intervalPx
+        targetPx
       );
 
       // Get the new brush selection width for later comparison.
