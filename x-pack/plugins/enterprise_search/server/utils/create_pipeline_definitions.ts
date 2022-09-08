@@ -5,15 +5,14 @@
  * 2.0.
  */
 
+import { IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient } from '@kbn/core/server';
 
 export interface CreatedPipelines {
   created: string[];
 }
 
-export interface PipelineDefinition {
-  processors?: Array<Record<string, any>>;
-  description?: string;
+export interface ESPipeline extends IngestPipeline {
   version?: number;
 }
 
@@ -237,42 +236,42 @@ export const formatMlPipelineBody = async (
   sourceField: string,
   destinationField: string,
   esClient: ElasticsearchClient
-): Promise<PipelineDefinition> => {
-  const models = await esClient.ml.getTrainedModels({model_id: modelId});
+): Promise<ESPipeline> => {
+  const models = await esClient.ml.getTrainedModels({ model_id: modelId });
   const model = models.trained_model_configs[0];
   const modelInputField = model.input.field_names[0];
   const modelType = model.model_type;
   const modelVersion = model.version;
   return {
-    "description": "",
-    "version": 1,
-    "processors": [
+    description: '',
+    version: 1,
+    processors: [
       {
-        "remove": {
-          "field": `ml.inference.${destinationField}`,
-          "ignore_missing": true
-        }
+        remove: {
+          field: `ml.inference.${destinationField}`,
+          ignore_missing: true,
+        },
       },
       {
-        "inference": {
-          "model_id": `${modelId}`,
-          "target_field": `ml.inference.${destinationField}`,
-          "field_map": {
-            sourceField: modelInputField
-          }
-        }
+        inference: {
+          model_id: `${modelId}`,
+          target_field: `ml.inference.${destinationField}`,
+          field_map: {
+            sourceField: modelInputField,
+          },
+        },
       },
       {
-        "append": {
-          "field": "_source._ingest.processors",
-          "value": {
-            "type": modelType,
-            "model_id": modelId,
-            "model_version": modelVersion,
-            "processed_timestamp": "{{{_ingest.timestamp}}}"
-          }
-        }
-      }
-    ]
+        append: {
+          field: '_source._ingest.processors',
+          value: {
+            type: modelType,
+            model_id: modelId,
+            model_version: modelVersion,
+            processed_timestamp: '{{{_ingest.timestamp}}}',
+          },
+        },
+      },
+    ],
   };
 };

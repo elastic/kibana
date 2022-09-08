@@ -7,7 +7,7 @@
 
 import { ElasticsearchClient } from '@kbn/core/server';
 
-import {createIndexPipelineDefinitions } from './create_pipeline_definitions';
+import { createIndexPipelineDefinitions } from './create_pipeline_definitions';
 import { formatMlPipelineBody } from './create_pipeline_definitions';
 
 describe('createIndexPipelineDefinitions util function', () => {
@@ -46,41 +46,41 @@ describe('formatMlPipelineBody util function', () => {
 
   const mockClient = {
     ml: {
-      getTrainedModels: jest.fn()
-    }
+      getTrainedModels: jest.fn(),
+    },
   };
 
   const expectedResult = {
-    "description": "",
-    "version": 1,
-    "processors": [
+    description: '',
+    version: 1,
+    processors: [
       {
-        "remove": {
-          "field": `ml.inference.${destField}`,
-          "ignore_missing": true
-        }
+        remove: {
+          field: `ml.inference.${destField}`,
+          ignore_missing: true,
+        },
       },
       {
-        "inference": {
-          "model_id": `${modelId}`,
-          "target_field": `ml.inference.${destField}`,
-          "field_map": {
-            sourceField: modelInputField
-          }
-        }
+        inference: {
+          model_id: `${modelId}`,
+          target_field: `ml.inference.${destField}`,
+          field_map: {
+            sourceField: modelInputField,
+          },
+        },
       },
       {
-        "append": {
-          "field": "_source._ingest.processors",
-          "value": {
-            "type": modelType,
-            "model_id": modelId,
-            "model_version": modelVersion,
-            "processed_timestamp": "{{{_ingest.timestamp}}}"
-          }
-        }
-      }
-    ]
+        append: {
+          field: '_source._ingest.processors',
+          value: {
+            type: modelType,
+            model_id: modelId,
+            model_version: modelVersion,
+            processed_timestamp: '{{{_ingest.timestamp}}}',
+          },
+        },
+      },
+    ],
   };
 
   beforeEach(() => {
@@ -89,18 +89,22 @@ describe('formatMlPipelineBody util function', () => {
 
   it('should return the pipeline body', () => {
     const mockResponse = [
-        {
-          model_id: modelId,
-          version: modelVersion,
-          model_type: modelType,
-          input: { field_names: [modelInputField] }
-        }
-      ];
-    mockClient.ml.getTrainedModels.mockImplementation((modelId: string) => Promise.resolve(mockResponse));
-    formatMlPipelineBody(modelId, sourceField, destField, mockClient as unknown as ElasticsearchClient).then((actualResult) => {
+      {
+        model_id: modelId,
+        version: modelVersion,
+        model_type: modelType,
+        input: { field_names: [modelInputField] },
+      },
+    ];
+    mockClient.ml.getTrainedModels.mockImplementation(() => Promise.resolve(mockResponse));
+    formatMlPipelineBody(
+      modelId,
+      sourceField,
+      destField,
+      mockClient as unknown as ElasticsearchClient
+    ).then((actualResult) => {
       expect(actualResult).toEqual(expectedResult);
     });
     expect(mockClient.ml.getTrainedModels).toHaveBeenCalledTimes(1);
   });
-
 });
