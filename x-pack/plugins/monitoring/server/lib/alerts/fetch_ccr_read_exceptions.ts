@@ -9,7 +9,7 @@ import { ElasticsearchClient } from '@kbn/core/server';
 import { get } from 'lodash';
 import { CCS_REMOTE_PATTERN } from '../../../common/constants';
 import { CCRReadExceptionsStats } from '../../../common/types/alerts';
-import { getNewIndexPatterns } from '../cluster/get_index_patterns';
+import { getNewIndexPatterns, getElasticsearchDataset } from '../cluster/get_index_patterns';
 import { createDatasetFilter } from './create_dataset_query_filter';
 import { Globals } from '../../static_globals';
 
@@ -63,7 +63,7 @@ export async function fetchCCRReadExceptions(
                 minimum_should_match: 1,
               },
             },
-            createDatasetFilter('ccr_stats', 'ccr', 'elasticsearch.ccr'),
+            createDatasetFilter('ccr_stats', 'ccr', getElasticsearchDataset('ccr')),
             {
               range: {
                 timestamp: {

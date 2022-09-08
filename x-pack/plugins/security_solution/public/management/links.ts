@@ -133,7 +133,7 @@ export const links: LinkItem = {
     {
       id: SecurityPageName.endpoints,
       description: i18n.translate('xpack.securitySolution.appLinks.endpointsDescription', {
-        defaultMessage: 'Hosts running endpoint security.',
+        defaultMessage: 'Hosts running Elastic Defend.',
       }),
       landingIcon: IconEndpoints,
       title: ENDPOINTS,
@@ -222,11 +222,13 @@ export const getManagementFilteredLinks = async (
       plugins.fleet?.authz,
       currentUserResponse.roles
     );
-    const hostIsolationExceptionsApiClientInstance = HostIsolationExceptionsApiClient.getInstance(
-      core.http
-    );
-
+    if (!privileges.canAccessEndpointManagement) {
+      return getFilteredLinks([SecurityPageName.hostIsolationExceptions]);
+    }
     if (!privileges.canIsolateHost) {
+      const hostIsolationExceptionsApiClientInstance = HostIsolationExceptionsApiClient.getInstance(
+        core.http
+      );
       const summaryResponse = await hostIsolationExceptionsApiClientInstance.summary();
       if (!summaryResponse.total) {
         return getFilteredLinks([SecurityPageName.hostIsolationExceptions]);
