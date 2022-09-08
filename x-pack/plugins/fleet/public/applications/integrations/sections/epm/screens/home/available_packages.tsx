@@ -370,7 +370,7 @@ export const AvailablePackages: React.FC<{
               icon={<EuiIcon type="logoSecurity" size="xxl" />}
               href={addBasePath('/app/integrations/detail/endpoint/')}
               title={i18n.translate('xpack.fleet.featuredSecurityTitle', {
-                defaultMessage: 'Endpoint and Cloud Security',
+                defaultMessage: 'Elastic Defend',
               })}
               description={i18n.translate('xpack.fleet.featuredSecurityDesc', {
                 defaultMessage:

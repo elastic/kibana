@@ -19,6 +19,7 @@ import type { SortOrder } from '@kbn/saved-search-plugin/public';
 
 export interface SearchInput extends EmbeddableInput {
   timeRange: TimeRange;
+  timeslice?: [number, number];
   query?: Query;
   filters?: Filter[];
   hidePanelTitles?: boolean;
