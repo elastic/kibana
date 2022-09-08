@@ -15,7 +15,10 @@ export const addTestMonitor = async (kibanaUrl: string, name: string) => {
       auth: { username: 'elastic', password: 'changeme' },
       headers: { 'kbn-xsrf': 'true' },
     });
-  } catch (e) {}
+  } catch (e) {
+    // eslint-disable-next-line no-console
+    console.log(e);
+  }
 };
 
 const data = {
