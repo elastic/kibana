@@ -22,6 +22,8 @@ import {
 import { useForm, FormProvider } from 'react-hook-form';
 import styled from 'styled-components';
 import type { EuiMarkdownEditorUiPluginEditorProps } from '@elastic/eui/src/components/markdown_editor/markdown_types';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '../../../../lib/kibana';
 import { LabelField } from './label_field';
 import OsqueryLogo from './osquery_icon/osquery.svg';
@@ -46,6 +48,7 @@ const OsqueryEditorComponent = ({
     ecs_mapping: { [key: string]: {} };
   };
 }>) => {
+  const isEditMode = node != null;
   const { osquery } = useKibana().services;
   const formMethods = useForm<{
     label: string;
@@ -96,9 +99,21 @@ const OsqueryEditorComponent = ({
   }, [formMethods, osquery]);
 
   return (
-    <>
+    <div style={{ width: '100%', flex: 1 }}>
       <EuiModalHeader>
-        <EuiModalHeaderTitle>{`${node ? 'Edit' : 'Add'} Osquery query`}</EuiModalHeaderTitle>
+        <EuiModalHeaderTitle>
+          {isEditMode ? (
+            <FormattedMessage
+              id="xpack.securitySolution.markdown.osquery.editModalTitle"
+              defaultMessage="Edit query"
+            />
+          ) : (
+            <FormattedMessage
+              id="xpack.securitySolution.markdown.osquery.addModalTitle"
+              defaultMessage="Add query"
+            />
+          )}
+        </EuiModalHeaderTitle>
       </EuiModalHeader>
 
       <EuiModalBody>
@@ -106,12 +121,26 @@ const OsqueryEditorComponent = ({
       </EuiModalBody>
 
       <EuiModalFooter>
-        <EuiButtonEmpty onClick={onCancel}>{'Cancel'}</EuiButtonEmpty>
+        <EuiButtonEmpty onClick={onCancel}>
+          {i18n.translate('xpack.securitySolution.markdown.osquery.modalCancelButtonLabel', {
+            defaultMessage: 'Cancel',
+          })}
+        </EuiButtonEmpty>
         <EuiButton onClick={formMethods.handleSubmit(onSubmit)} fill>
-          {'Attach query'}
+          {isEditMode ? (
+            <FormattedMessage
+              id="xpack.securitySolution.markdown.osquery.addModalConfirmButtonLabel"
+              defaultMessage="Add query"
+            />
+          ) : (
+            <FormattedMessage
+              id="xpack.securitySolution.markdown.osquery.editModalConfirmButtonLabel"
+              defaultMessage="Save changes"
+            />
+          )}
         </EuiButton>
       </EuiModalFooter>
-    </>
+    </div>
   );
 };
 
@@ -214,19 +243,27 @@ const RunOsqueryButtonRenderer = ({
   const [showFlyout, setShowFlyout] = useState(false);
   const { agentId } = useContext(BasicAlertDataContext);
 
+  const handleOpen = useCallback(() => setShowFlyout(true), [setShowFlyout]);
+
+  const handleClose = useCallback(() => setShowFlyout(false), [setShowFlyout]);
+
   return (
     <>
-      <StyledEuiButton iconType={OsqueryLogo} onClick={() => setShowFlyout(true)}>
-        {configuration.label ?? 'Run Osquery'}
+      <StyledEuiButton iconType={OsqueryLogo} onClick={handleOpen}>
+        {configuration.label ??
+          i18n.translate('xpack.securitySolution.markdown.osquery.runOsqueryButtonLabel', {
+            defaultMessage: 'Run Osquery',
+          })}
       </StyledEuiButton>
       {showFlyout && (
         <OsqueryFlyout
           defaultValues={{
             query: configuration.query,
             ecs_mapping: configuration.ecs_mapping,
+            queryField: false,
           }}
           agentId={agentId}
-          onClose={() => setShowFlyout(false)}
+          onClose={handleClose}
         />
       )}
     </>

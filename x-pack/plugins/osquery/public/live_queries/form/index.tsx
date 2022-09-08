@@ -66,7 +66,7 @@ const StyledEuiCard = styled(EuiCard)`
 
   .euiText {
     margin-top: 0;
-    // color: ${(props) => props.theme.eui.euiTextSubduedColor};
+    color: ${(props) => props.theme.eui.euiTextSubduedColor};
   }
 
   > button[role='switch'] {

@@ -15,7 +15,7 @@ interface QueryIdFieldProps {
   euiFieldProps?: Record<string, unknown>;
 }
 
-const QueryIdFieldComponent = ({ idSet, euiFieldProps }: QueryIdFieldProps) => {
+const QueryIdFieldComponentn = ({ idSet, euiFieldProps }: QueryIdFieldProps) => {
   const {
     field: { onChange, value, name: fieldName },
     fieldState: { error },
@@ -49,4 +49,4 @@ const QueryIdFieldComponent = ({ idSet, euiFieldProps }: QueryIdFieldProps) => {
   );
 };
 
-export const QueryIdField = React.memo(QueryIdFieldComponent);
+export const QueryIdField = React.memo(QueryIdFieldComponentn);

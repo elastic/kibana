@@ -13,7 +13,7 @@ interface QueryDescriptionFieldProps {
   euiFieldProps?: Record<string, unknown>;
 }
 
-const QueryDescriptionFieldComponent = ({ euiFieldProps }: QueryDescriptionFieldProps) => {
+const QueryDescriptionFieldComponentn = ({ euiFieldProps }: QueryDescriptionFieldProps) => {
   const {
     field: { onChange, value, name: fieldName },
     fieldState: { error },
@@ -46,4 +46,4 @@ const QueryDescriptionFieldComponent = ({ euiFieldProps }: QueryDescriptionField
   );
 };
 
-export const QueryDescriptionField = React.memo(QueryDescriptionFieldComponent);
+export const QueryDescriptionField = React.memo(QueryDescriptionFieldComponentn);
