@@ -1,12 +1,13 @@
 .homDataAdd__illustration {
   display: block;
-  margin: 0 auto #{-($euiSizeXXL + $euiSizeXS)} auto;
+  margin-block: 0 #{-($euiSizeXL + $euiSizeXS)};
+  margin-inline: auto;
 
   @include euiBreakpoint('m', 'l', 'xl') {
-    margin-bottom: -$euiSizeXXL;
+    margin-block-end: -$euiSizeXL;
   }
 
   @include euiBreakpoint('l', 'xl') {
-    width: 80%;
+    inline-size: 80%;
   }
 }

@@ -102,7 +102,7 @@ export const CurrentBulkUpgradeCallout: React.FunctionComponent<CurrentBulkUpgra
             size="s"
             onClick={onClickAbortUpgrade}
             isLoading={isAborting}
-            data-test-subj="abortUpgradeBtn"
+            data-test-subj="currentBulkUpgrade.sbortBtn"
           >
             <FormattedMessage
               id="xpack.fleet.currentUpgrade.abortUpgradeButtom"
