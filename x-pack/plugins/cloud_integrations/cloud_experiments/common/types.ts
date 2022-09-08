@@ -24,15 +24,24 @@ export interface CloudExperimentsPluginSetup extends CloudExperimentsPluginStart
 }
 
 /**
+ * The names of the feature flags declared in Kibana.
+ * Valid keys are defined in {@link FEATURE_FLAG_NAMES}. When using a new feature flag, add the name to the list.
+ */
+export type CloudExperimentsFeatureFlagNames = keyof typeof FEATURE_FLAG_NAMES;
+
+/**
  * The contract of the start lifecycle method
  */
 export interface CloudExperimentsPluginStart {
   /**
    * Fetch the configuration assigned to variation `configKey`. If nothing is found, fallback to `defaultValue`.
-   * @param configKey The name of the key to find the config variation. Valid keys are defined in {@link FEATURE_FLAG_NAMES}. When using a new feature flag, add the name to the list.
+   * @param featureFlagName The name of the key to find the config variation. {@link CloudExperimentsFeatureFlagNames}.
    * @param defaultValue The fallback value in case no variation is found.
    */
-  getVariation: <Data>(configKey: FEATURE_FLAG_NAMES, defaultValue: Data) => Promise<Data>;
+  getVariation: <Data>(
+    featureFlagName: CloudExperimentsFeatureFlagNames,
+    defaultValue: Data
+  ) => Promise<Data>;
   /**
    * Report metrics back to the A/B testing service to measure the conversion rate for each variation in the experiment.
    * @param metric {@link CloudExperimentsMetric}
@@ -41,15 +50,19 @@ export interface CloudExperimentsPluginStart {
 }
 
 /**
+ * The names of the metrics declared in Kibana.
+ * Valid keys are defined in {@link METRIC_NAMES}. When reporting a new metric, add the name to the list.
+ */
+export type CloudExperimentsMetricNames = keyof typeof METRIC_NAMES;
+
+/**
  * Definition of the metric to report back to the A/B testing service to measure the conversions.
  */
 export interface CloudExperimentsMetric<Data> {
   /**
-   * The name of the metric.
-   * The existing metric names are defined in {@link METRIC_NAMES}.
-   * When reporting new metrics, add the name to the list.
+   * The name of the metric {@link CloudExperimentsMetricNames}
    */
-  name: METRIC_NAMES;
+  name: CloudExperimentsMetricNames;
   /**
    * Any optional data to enrich the context of the metric. Or if the conversion is based on a non-numeric value.
    */

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { memo, useEffect, useMemo, useState } from 'react';
+import React, { memo, useMemo, useState } from 'react';
 import { EuiButton, EuiCard, EuiFlexGroup, EuiFlexItem, EuiPageHeader } from '@elastic/eui';
 import styled from 'styled-components';
-import { FEATURE_FLAG_NAMES } from '@kbn/cloud-experiments-plugin/common';
+import { useVariation } from '../utils';
 import * as i18n from './translations';
 import endpointSvg from '../../images/endpoint1.svg';
 import cloudSvg from '../../images/cloud1.svg';
@@ -65,17 +65,12 @@ export const LandingCards = memo(() => {
   } = useKibana().services;
 
   const [addIntegrationsUrl, setAddIntegrationsUrl] = useState(ADD_DATA_PATH);
-  useEffect(() => {
-    (async function loadVariation() {
-      const variationUrl = await cloudExperiments?.getVariation(
-        FEATURE_FLAG_NAMES['SECURITY_SOLUTIONS.ADD_INTEGRATIONS_URL'],
-        ADD_DATA_PATH
-      );
-      if (variationUrl) {
-        setAddIntegrationsUrl(variationUrl);
-      }
-    })();
-  }, [cloudExperiments]);
+  useVariation(
+    cloudExperiments,
+    'security-solutions.add-integrations-url',
+    ADD_DATA_PATH,
+    setAddIntegrationsUrl
+  );
 
   const href = useMemo(() => prepend(addIntegrationsUrl), [prepend, addIntegrationsUrl]);
   return (

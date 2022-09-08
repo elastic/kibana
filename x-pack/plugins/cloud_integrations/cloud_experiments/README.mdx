@@ -29,14 +29,14 @@ Please, be aware that your plugin may run even when the `cloudExperiment` plugin
 
 ### Fetching the value of the feature flags
 
-You can fetch the value of your feature flag by using the API `cloudExperiments.getVariation` as follows:
+First, make sure that your feature flag is listed in [`FEATURE_FLAG_NAMES`](./common/constants.ts). 
+Then, you can fetch the value of your feature flag by using the API `cloudExperiments.getVariation` as follows:
 
 ```ts
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/(public|server)';
-import {
-  FEATURE_FLAG_NAMES,
-  type CloudExperimentsPluginSetup, 
-  type CloudExperimentsPluginStart 
+import type { 
+  CloudExperimentsPluginSetup, 
+  CloudExperimentsPluginStart
 } from '@kbn/cloud-experiments-plugin/common';
 
 interface SetupDeps {
@@ -60,7 +60,7 @@ export class MyPlugin implements Plugin<void, void, SetupDeps, StartDeps> {
     let myConfig = 'default config';
     if (cloudExperiments) {
       myConfig = await cloudExperiments.getVariation(
-        FEATURE_FLAG_NAMES.MY_FEATURE_FLAG, 
+        'my-plugin.my-feature-flag', // The key 'my-plugin.my-feature-flag' should exist in FEATURE_FLAG_NAMES
         'default config'
       );
     }
@@ -73,10 +73,7 @@ Since the `getVariation` API returns a promise, when using it in a React compone
 
 ```tsx
 import React, { useEffect, useState } from 'react';
-import {
-  FEATURE_FLAG_NAMES,
-  type CloudExperimentsPluginStart
-} from '@kbn/cloud-experiments-plugin/common';
+import type { CloudExperimentsPluginStart } from '@kbn/cloud-experiments-plugin/common';
 
 interface Props {
   cloudExperiments?: CloudExperimentsPluginStart;
@@ -87,7 +84,7 @@ export const MyReactComponent: React.FC<Props> = ({ cloudExperiments }: Props) =
   useEffect(() => {
     (async function loadVariation() {
       const variationConfig = await cloudExperiments?.getVariation(
-        FEATURE_FLAG_NAMES.MY_FEATURE_FLAG,
+        'my-plugin.my-feature-flag', // The key 'my-plugin.my-feature-flag' should exist in FEATURE_FLAG_NAMES
         'default config'
       );
       if (variationConfig) {
@@ -106,14 +103,15 @@ Experiments require feedback to analyze which variation to the feature flag is t
 
 Our A/B testing provider allows some high-level analysis of the experiment based on the metrics. It also has some limitations about how it handles some type of metrics like number of objects or size of indices. For this reason, you might want to consider shipping the metrics via our usual telemetry channels (`core.analytics` for event-based metrics, or <DocLink id="kibUsageCollectionPlugin" />). 
 
-However, if our A/B testing provider's analysis tool is good enough for your use case, you can use the api `reportMetric` as follows:
+However, if our A/B testing provider's analysis tool is good enough for your use case, you can use the api `reportMetric` as follows.
+
+First, make sure to add the metric name in [`METRIC_NAMES`](./common/constants.ts). Then you can use it like below:
 
 ```ts
 import type { CoreStart, Plugin } from '@kbn/core/(public|server)';
-import {
-  METRIC_NAMES,
-  type CloudExperimentsPluginSetup, 
-  type CloudExperimentsPluginStart 
+import type { 
+  CloudExperimentsPluginSetup, 
+  CloudExperimentsPluginStart 
 } from '@kbn/cloud-experiments-plugin/common';
 
 interface SetupDeps {
@@ -130,7 +128,7 @@ export class MyPlugin implements Plugin<void, void, SetupDeps, StartDeps> {
     // the user performed some action, 
     // or a metric hit a threshold we want to communicate about
     deps.cloudExperiments?.reportMetric({
-      name: METRIC_NAMES.SOMETHING_HAPPENED,
+      name: 'Something happened', // The key 'Something happened' should exist in METRIC_NAMES
       value: 22, // (optional) in case the metric requires a numeric metric
       meta: { // Optional metadata.
         hadSomething: true,  

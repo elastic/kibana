@@ -17,10 +17,13 @@ import LaunchDarkly, { type LDClient, type LDUser } from 'launchdarkly-node-serv
 import type { LogMeta } from '@kbn/logging';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { registerUsageCollector } from './usage';
-import type {
-  CloudExperimentsMetric,
-  CloudExperimentsPluginSetup,
-  CloudExperimentsPluginStart,
+import {
+  FEATURE_FLAG_NAMES,
+  METRIC_NAMES,
+  type CloudExperimentsFeatureFlagNames,
+  type CloudExperimentsMetric,
+  type CloudExperimentsPluginSetup,
+  type CloudExperimentsPluginStart,
 } from '../common';
 import type { CloudExperimentsConfigType } from './config';
 
@@ -103,7 +106,11 @@ export class CloudExperimentsPlugin
     this.launchDarklyClient?.flush().catch((err) => this.logger.error(err));
   }
 
-  private getVariation = async <Data>(configKey: string, defaultValue: Data): Promise<Data> => {
+  private getVariation = async <Data>(
+    featureFlagName: CloudExperimentsFeatureFlagNames,
+    defaultValue: Data
+  ): Promise<Data> => {
+    const configKey = FEATURE_FLAG_NAMES[featureFlagName];
     if (this.flagOverrides) {
       // Only to help dev testing. This setting will fail if provided when in production.
       return get(this.flagOverrides, configKey, defaultValue) as Data;
@@ -114,10 +121,11 @@ export class CloudExperimentsPlugin
   };
 
   private reportMetric = <Data>({ name, meta, value }: CloudExperimentsMetric<Data>): void => {
+    const metricName = METRIC_NAMES[name];
     if (!this.launchDarklyUser) return; // Skip any action if no LD User is defined
-    this.launchDarklyClient?.track(name, this.launchDarklyUser, meta, value);
+    this.launchDarklyClient?.track(metricName, this.launchDarklyUser, meta, value);
     this.logger.debug<{ experimentationMetric: CloudExperimentsMetric<Data> } & LogMeta>(
-      `Reported experimentation metric ${name}`,
+      `Reported experimentation metric ${metricName}`,
       {
         experimentationMetric: { name, meta, value },
       }

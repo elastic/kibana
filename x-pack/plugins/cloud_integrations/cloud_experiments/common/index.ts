@@ -11,4 +11,5 @@ export type {
   CloudExperimentsMetric,
   CloudExperimentsPluginStart,
   CloudExperimentsPluginSetup,
+  CloudExperimentsFeatureFlagNames,
 } from './types';

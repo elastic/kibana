@@ -17,7 +17,7 @@ import { i18n } from '@kbn/i18n';
 
 import type { AppMountParameters } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
-import { FEATURE_FLAG_NAMES } from '@kbn/cloud-experiments-plugin/common';
+import { useVariation } from '../../../common/components/utils';
 import { MlPopover } from '../../../common/components/ml_popover/ml_popover';
 import { useKibana } from '../../../common/lib/kibana';
 import { ADD_DATA_PATH } from '../../../../common/constants';
@@ -59,17 +59,12 @@ export const GlobalHeader = React.memo(
     const showSourcerer = showSourcererByPath(pathname);
 
     const [addIntegrationsUrl, setAddIntegrationsUrl] = useState(ADD_DATA_PATH);
-    useEffect(() => {
-      (async function loadVariation() {
-        const variationUrl = await cloudExperiments?.getVariation(
-          FEATURE_FLAG_NAMES['SECURITY_SOLUTIONS.ADD_INTEGRATIONS_URL'],
-          ADD_DATA_PATH
-        );
-        if (variationUrl) {
-          setAddIntegrationsUrl(variationUrl);
-        }
-      })();
-    }, [cloudExperiments]);
+    useVariation(
+      cloudExperiments,
+      'security-solutions.add-integrations-url',
+      ADD_DATA_PATH,
+      setAddIntegrationsUrl
+    );
 
     const href = useMemo(() => prepend(addIntegrationsUrl), [prepend, addIntegrationsUrl]);
 

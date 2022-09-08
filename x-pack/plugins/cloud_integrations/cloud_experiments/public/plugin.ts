@@ -8,10 +8,13 @@
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import LaunchDarkly, { type LDClient } from 'launchdarkly-js-client-sdk';
 import { get } from 'lodash';
-import type {
-  CloudExperimentsMetric,
-  CloudExperimentsPluginSetup,
-  CloudExperimentsPluginStart,
+import {
+  FEATURE_FLAG_NAMES,
+  METRIC_NAMES,
+  type CloudExperimentsFeatureFlagNames,
+  type CloudExperimentsMetric,
+  type CloudExperimentsPluginSetup,
+  type CloudExperimentsPluginStart,
 } from '../common';
 
 /**
@@ -94,9 +97,12 @@ export class CloudExperimentsPlugin
     this.launchDarklyClient?.flush();
   }
 
-  private getVariation = async <Data>(configKey: string, defaultValue: Data): Promise<Data> => {
+  private getVariation = async <Data>(
+    featureFlagName: CloudExperimentsFeatureFlagNames,
+    defaultValue: Data
+  ): Promise<Data> => {
+    const configKey = FEATURE_FLAG_NAMES[featureFlagName];
     if (this.flagOverrides) {
-      console.warn('Serving config overrides');
       // Only to help dev testing. This setting will fail if provided when in production.
       return get(this.flagOverrides, configKey, defaultValue) as Data;
     }
@@ -106,9 +112,10 @@ export class CloudExperimentsPlugin
   };
 
   private reportMetric = <Data>({ name, meta, value }: CloudExperimentsMetric<Data>): void => {
-    this.launchDarklyClient?.track(name, meta, value);
+    const metricName = METRIC_NAMES[name];
+    this.launchDarklyClient?.track(metricName, meta, value);
     // eslint-disable-next-line no-console
-    console.debug(`Reported experimentation metric ${name}`, {
+    console.debug(`Reported experimentation metric ${metricName}`, {
       experimentationMetric: { name, meta, value },
     });
   };
