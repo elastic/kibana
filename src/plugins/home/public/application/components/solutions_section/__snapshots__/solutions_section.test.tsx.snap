@@ -1,129 +1,133 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`SolutionsSection renders a single solution 1`] = `
-<Fragment>
-  <section
-    aria-labelledby="homSolutions__title"
-    className="homSolutions"
-  >
-    <EuiScreenReaderOnly>
-      <h2
-        id="homSolutions__title"
-      >
-        <FormattedMessage
-          defaultMessage="Pick your solution"
-          id="home.solutionsSection.sectionTitle"
-          values={Object {}}
-        />
-      </h2>
-    </EuiScreenReaderOnly>
-    <EuiFlexGroup
-      className="homSolutions__content"
+<_EuiPageSection
+  aria-labelledby="homSolutions__title"
+  bottomBorder={true}
+  className="homSolutions"
+  contentProps={
+    Object {
+      "className": "homSolutions__content",
+    }
+  }
+  paddingSize="xl"
+>
+  <EuiScreenReaderOnly>
+    <h2
+      id="homSolutions__title"
     >
-      <SolutionPanel
-        addBasePath={[Function]}
-        key="kibana"
-        solution={
-          Object {
-            "description": "Description for Kibana",
-            "icon": "logoKibana",
-            "id": "kibana",
-            "order": 1,
-            "path": "kibana_landing_page",
-            "title": "Kibana",
-          }
-        }
+      <FormattedMessage
+        defaultMessage="Pick your solution"
+        id="home.solutionsSection.sectionTitle"
+        values={Object {}}
       />
-    </EuiFlexGroup>
-  </section>
-  <EuiHorizontalRule
-    margin="xxl"
-  />
-</Fragment>
+    </h2>
+  </EuiScreenReaderOnly>
+  <EuiFlexGroup
+    className="homSolutions__content"
+  >
+    <SolutionPanel
+      addBasePath={[Function]}
+      key="kibana"
+      solution={
+        Object {
+          "description": "Description for Kibana",
+          "icon": "logoKibana",
+          "id": "kibana",
+          "order": 1,
+          "path": "kibana_landing_page",
+          "title": "Kibana",
+        }
+      }
+    />
+  </EuiFlexGroup>
+</_EuiPageSection>
 `;
 
 exports[`SolutionsSection renders multiple solutions 1`] = `
-<Fragment>
-  <section
-    aria-labelledby="homSolutions__title"
-    className="homSolutions"
-  >
-    <EuiScreenReaderOnly>
-      <h2
-        id="homSolutions__title"
-      >
-        <FormattedMessage
-          defaultMessage="Pick your solution"
-          id="home.solutionsSection.sectionTitle"
-          values={Object {}}
-        />
-      </h2>
-    </EuiScreenReaderOnly>
-    <EuiFlexGroup
-      className="homSolutions__content"
+<_EuiPageSection
+  aria-labelledby="homSolutions__title"
+  bottomBorder={true}
+  className="homSolutions"
+  contentProps={
+    Object {
+      "className": "homSolutions__content",
+    }
+  }
+  paddingSize="xl"
+>
+  <EuiScreenReaderOnly>
+    <h2
+      id="homSolutions__title"
     >
-      <SolutionPanel
-        addBasePath={[Function]}
-        key="kibana"
-        solution={
-          Object {
-            "description": "Description for Kibana",
-            "icon": "logoKibana",
-            "id": "kibana",
-            "order": 1,
-            "path": "kibana_landing_page",
-            "title": "Kibana",
-          }
-        }
+      <FormattedMessage
+        defaultMessage="Pick your solution"
+        id="home.solutionsSection.sectionTitle"
+        values={Object {}}
       />
-      <SolutionPanel
-        addBasePath={[Function]}
-        key="solution-2"
-        solution={
-          Object {
-            "description": "Description for solution two",
-            "icon": "empty",
-            "id": "solution-2",
-            "order": 2,
-            "path": "path-to-solution-two",
-            "title": "Solution two",
-          }
+    </h2>
+  </EuiScreenReaderOnly>
+  <EuiFlexGroup
+    className="homSolutions__content"
+  >
+    <SolutionPanel
+      addBasePath={[Function]}
+      key="kibana"
+      solution={
+        Object {
+          "description": "Description for Kibana",
+          "icon": "logoKibana",
+          "id": "kibana",
+          "order": 1,
+          "path": "kibana_landing_page",
+          "title": "Kibana",
         }
-      />
-      <SolutionPanel
-        addBasePath={[Function]}
-        key="solution-3"
-        solution={
-          Object {
-            "description": "Description for solution three",
-            "icon": "empty",
-            "id": "solution-3",
-            "order": 3,
-            "path": "path-to-solution-three",
-            "title": "Solution three",
-          }
+      }
+    />
+    <SolutionPanel
+      addBasePath={[Function]}
+      key="solution-2"
+      solution={
+        Object {
+          "description": "Description for solution two",
+          "icon": "empty",
+          "id": "solution-2",
+          "order": 2,
+          "path": "path-to-solution-two",
+          "title": "Solution two",
         }
-      />
-      <SolutionPanel
-        addBasePath={[Function]}
-        key="solution-4"
-        solution={
-          Object {
-            "description": "Description for solution four",
-            "icon": "empty",
-            "id": "solution-4",
-            "order": 4,
-            "path": "path-to-solution-four",
-            "title": "Solution four",
-          }
+      }
+    />
+    <SolutionPanel
+      addBasePath={[Function]}
+      key="solution-3"
+      solution={
+        Object {
+          "description": "Description for solution three",
+          "icon": "empty",
+          "id": "solution-3",
+          "order": 3,
+          "path": "path-to-solution-three",
+          "title": "Solution three",
         }
-      />
-    </EuiFlexGroup>
-  </section>
-  <EuiHorizontalRule
-    margin="xxl"
-  />
-</Fragment>
+      }
+    />
+    <SolutionPanel
+      addBasePath={[Function]}
+      key="solution-4"
+      solution={
+        Object {
+          "description": "Description for solution four",
+          "icon": "empty",
+          "id": "solution-4",
+          "order": 4,
+          "path": "path-to-solution-four",
+          "title": "Solution four",
+        }
+      }
+    />
+  </EuiFlexGroup>
+</_EuiPageSection>
 `;
 
 exports[`SolutionsSection renders null if no solutions are available 1`] = `""`;

@@ -8,7 +8,7 @@
 
 import * as React from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { EuiPageTemplate } from '@elastic/eui';
+import { EuiPageTemplate_Deprecated as EuiPageTemplate } from '@elastic/eui';
 import { ThemeServiceSetup } from '@kbn/core/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { Error } from './error';

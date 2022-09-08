@@ -31,6 +31,7 @@
         ],
         "path": "src/plugins/data_view_field_editor/public/components/field_format_editor/editors/default/default.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "dataViewFieldEditor",
@@ -40,7 +41,8 @@
             "label": "formatId",
             "description": [],
             "path": "src/plugins/data_view_field_editor/public/components/field_format_editor/editors/default/default.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "dataViewFieldEditor",
@@ -54,7 +56,8 @@
               " & S"
             ],
             "path": "src/plugins/data_view_field_editor/public/components/field_format_editor/editors/default/default.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "dataViewFieldEditor",
@@ -80,6 +83,7 @@
             ],
             "path": "src/plugins/data_view_field_editor/public/components/field_format_editor/editors/default/default.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "dataViewFieldEditor",
@@ -100,6 +104,7 @@
                 ],
                 "path": "src/plugins/data_view_field_editor/public/components/field_format_editor/editors/default/default.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -114,6 +119,7 @@
                 ],
                 "path": "src/plugins/data_view_field_editor/public/components/field_format_editor/editors/default/default.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -131,6 +137,7 @@
             ],
             "path": "src/plugins/data_view_field_editor/public/components/field_format_editor/editors/default/default.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "dataViewFieldEditor",
@@ -144,6 +151,7 @@
                 ],
                 "path": "src/plugins/data_view_field_editor/public/components/field_format_editor/editors/default/default.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -161,6 +169,7 @@
             ],
             "path": "src/plugins/data_view_field_editor/public/components/field_format_editor/editors/default/default.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -181,6 +190,7 @@
         ],
         "path": "src/plugins/data_view_field_editor/public/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "dataViewFieldEditor",
@@ -192,7 +202,8 @@
               "\nname / path used for the field"
             ],
             "path": "src/plugins/data_view_field_editor/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "dataViewFieldEditor",
@@ -207,7 +218,8 @@
               "\"boolean\" | \"date\" | \"keyword\" | \"ip\" | \"geo_point\" | \"long\" | \"double\" | \"composite\""
             ],
             "path": "src/plugins/data_view_field_editor/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "dataViewFieldEditor",
@@ -222,7 +234,8 @@
               "{ source: string; } | undefined"
             ],
             "path": "src/plugins/data_view_field_editor/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "dataViewFieldEditor",
@@ -237,7 +250,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/data_view_field_editor/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "dataViewFieldEditor",
@@ -252,7 +266,8 @@
               "number | undefined"
             ],
             "path": "src/plugins/data_view_field_editor/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "dataViewFieldEditor",
@@ -276,7 +291,8 @@
               "> | undefined"
             ],
             "path": "src/plugins/data_view_field_editor/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -302,6 +318,7 @@
         ],
         "path": "src/plugins/data_view_field_editor/public/components/field_format_editor/editors/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "dataViewFieldEditor",
@@ -311,7 +328,8 @@
             "label": "fieldType",
             "description": [],
             "path": "src/plugins/data_view_field_editor/public/components/field_format_editor/editors/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "dataViewFieldEditor",
@@ -330,7 +348,8 @@
               }
             ],
             "path": "src/plugins/data_view_field_editor/public/components/field_format_editor/editors/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "dataViewFieldEditor",
@@ -343,7 +362,8 @@
               "{ type?: string | undefined; } & P"
             ],
             "path": "src/plugins/data_view_field_editor/public/components/field_format_editor/editors/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "dataViewFieldEditor",
@@ -359,6 +379,7 @@
             ],
             "path": "src/plugins/data_view_field_editor/public/components/field_format_editor/editors/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "dataViewFieldEditor",
@@ -372,6 +393,7 @@
                 ],
                 "path": "src/plugins/data_view_field_editor/public/components/field_format_editor/editors/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -389,6 +411,7 @@
             ],
             "path": "src/plugins/data_view_field_editor/public/components/field_format_editor/editors/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -402,7 +425,8 @@
                   "string | undefined"
                 ],
                 "path": "src/plugins/data_view_field_editor/public/components/field_format_editor/field_format_editor.tsx",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }
@@ -418,6 +442,7 @@
         "description": [],
         "path": "src/plugins/data_view_field_editor/public/open_delete_modal.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "dataViewFieldEditor",
@@ -438,7 +463,8 @@
               "; }"
             ],
             "path": "src/plugins/data_view_field_editor/public/open_delete_modal.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "dataViewFieldEditor",
@@ -452,6 +478,7 @@
             ],
             "path": "src/plugins/data_view_field_editor/public/open_delete_modal.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "dataViewFieldEditor",
@@ -465,6 +492,7 @@
                 ],
                 "path": "src/plugins/data_view_field_editor/public/open_delete_modal.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -481,7 +509,8 @@
               "string | string[]"
             ],
             "path": "src/plugins/data_view_field_editor/public/open_delete_modal.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -497,6 +526,7 @@
         ],
         "path": "src/plugins/data_view_field_editor/public/open_editor.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "dataViewFieldEditor",
@@ -519,7 +549,8 @@
               "; }"
             ],
             "path": "src/plugins/data_view_field_editor/public/open_editor.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "dataViewFieldEditor",
@@ -543,6 +574,7 @@
             ],
             "path": "src/plugins/data_view_field_editor/public/open_editor.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "dataViewFieldEditor",
@@ -562,6 +594,7 @@
                 ],
                 "path": "src/plugins/data_view_field_editor/public/open_editor.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -580,7 +613,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/data_view_field_editor/public/open_editor.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "dataViewFieldEditor",
@@ -602,7 +636,8 @@
               " | undefined"
             ],
             "path": "src/plugins/data_view_field_editor/public/open_editor.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -632,6 +667,7 @@
         ],
         "path": "src/plugins/data_view_field_editor/public/components/field_format_editor/editors/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -656,6 +692,7 @@
         ],
         "path": "src/plugins/data_view_field_editor/public/components/field_format_editor/editors/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [],
         "initialIsOpen": false
@@ -673,6 +710,7 @@
       ],
       "path": "src/plugins/data_view_field_editor/public/types.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [
         {
           "parentPluginId": "dataViewFieldEditor",
@@ -693,7 +731,8 @@
             "<{}>) => void; }"
           ],
           "path": "src/plugins/data_view_field_editor/public/types.ts",
-          "deprecated": false
+          "deprecated": false,
+          "trackAdoption": false
         }
       ],
       "lifecycle": "setup",
@@ -710,6 +749,7 @@
       ],
       "path": "src/plugins/data_view_field_editor/public/types.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [
         {
           "parentPluginId": "dataViewFieldEditor",
@@ -733,6 +773,7 @@
           ],
           "path": "src/plugins/data_view_field_editor/public/types.ts",
           "deprecated": false,
+          "trackAdoption": false,
           "children": [
             {
               "parentPluginId": "dataViewFieldEditor",
@@ -752,6 +793,7 @@
               ],
               "path": "src/plugins/data_view_field_editor/public/types.ts",
               "deprecated": false,
+              "trackAdoption": false,
               "isRequired": true
             }
           ],
@@ -777,6 +819,7 @@
           ],
           "path": "src/plugins/data_view_field_editor/public/types.ts",
           "deprecated": false,
+          "trackAdoption": false,
           "children": [
             {
               "parentPluginId": "dataViewFieldEditor",
@@ -796,6 +839,7 @@
               ],
               "path": "src/plugins/data_view_field_editor/public/types.ts",
               "deprecated": false,
+              "trackAdoption": false,
               "isRequired": true
             }
           ],
@@ -828,7 +872,8 @@
             "<P> | undefined; }"
           ],
           "path": "src/plugins/data_view_field_editor/public/types.ts",
-          "deprecated": false
+          "deprecated": false,
+          "trackAdoption": false
         },
         {
           "parentPluginId": "dataViewFieldEditor",
@@ -841,7 +886,8 @@
             "{ editIndexPattern: () => boolean; }"
           ],
           "path": "src/plugins/data_view_field_editor/public/types.ts",
-          "deprecated": false
+          "deprecated": false,
+          "trackAdoption": false
         },
         {
           "parentPluginId": "dataViewFieldEditor",
@@ -857,6 +903,7 @@
           ],
           "path": "src/plugins/data_view_field_editor/public/types.ts",
           "deprecated": false,
+          "trackAdoption": false,
           "returnComment": [],
           "children": [
             {
@@ -870,7 +917,8 @@
                 "P & { children?: React.ReactNode; }"
               ],
               "path": "node_modules/@types/react/index.d.ts",
-              "deprecated": false
+              "deprecated": false,
+              "trackAdoption": false
             },
             {
               "parentPluginId": "dataViewFieldEditor",
@@ -883,7 +931,8 @@
                 "any"
               ],
               "path": "node_modules/@types/react/index.d.ts",
-              "deprecated": false
+              "deprecated": false,
+              "trackAdoption": false
             }
           ]
         }
