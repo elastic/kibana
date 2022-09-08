@@ -24,16 +24,17 @@ type QueryFnParam<Request, Response> = (
   signal: AbortController['signal']
 ) => Promise<Response>;
 
-interface OptionsParam {
+interface OptionsParam<Request> {
   disabled?: boolean;
+  initialRequest?: Request;
 }
 
 export const useQuery = <Request, Response>(
   queryName: QueryName,
   queryFn: QueryFnParam<Request, Response>,
-  { disabled = false }: OptionsParam = {}
+  { disabled = false, initialRequest }: OptionsParam<Request> = {}
 ): Result<Request, Response> => {
-  const [request, setRequest] = useState<Request | null>(null);
+  const [request, setRequest] = useState<Request | undefined>(initialRequest);
   const [result, setResult] = useState<ResultState<Response>>({
     data: undefined,
     isLoading: false,
@@ -49,7 +50,7 @@ export const useQuery = <Request, Response>(
     const abortController = new AbortController();
 
     const asyncQuery = async () => {
-      if (request === null || disabled) {
+      if (request == null || disabled) {
         return;
       }
       setResult((current) => ({ ...current, isLoading: true, error: undefined }));
@@ -63,7 +64,7 @@ export const useQuery = <Request, Response>(
       } catch (error) {
         if (abortController.signal.aborted) {
           endTracking('aborted');
-          setResult((current) => ({ ...current, isLoading: false, error: undefined }));
+          setResult((current) => ({ ...current, isLoading: false }));
         } else {
           endTracking('error');
           setResult((current) => ({ ...current, isLoading: false, error }));
