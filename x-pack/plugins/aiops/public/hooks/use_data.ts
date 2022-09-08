@@ -16,7 +16,7 @@ import type { SavedSearch } from '@kbn/discover-plugin/public';
 
 import { TimeBuckets } from '../../common/time_buckets';
 
-import { useAiOpsKibana } from '../kibana_context';
+import { useAiopsAppContext } from './use_aiops_app_context';
 import { aiopsRefresh$ } from '../application/services/timefilter_refresh_service';
 import type { DocumentStatsSearchStrategyParams } from '../get_document_stats';
 import type { AiOpsIndexBasedAppState } from '../components/explain_log_rate_spikes/explain_log_rate_spikes_app_state';
@@ -27,7 +27,7 @@ import {
 
 import { useTimefilter } from './use_time_filter';
 import { useDocumentCountStats } from './use_document_count_stats';
-import type { Dictionary } from './url_state';
+import type { Dictionary } from './use_url_state';
 
 export const useData = (
   {
@@ -38,8 +38,12 @@ export const useData = (
   onUpdate: (params: Dictionary<unknown>) => void,
   selectedChangePoint?: ChangePoint
 ) => {
-  const { services } = useAiOpsKibana();
-  const { uiSettings, data } = services;
+  const {
+    uiSettings,
+    data: {
+      query: { filterManager },
+    },
+  } = useAiopsAppContext();
   const [lastRefresh, setLastRefresh] = useState(0);
   const [fieldStatsRequest, setFieldStatsRequest] = useState<
     DocumentStatsSearchStrategyParams | undefined
@@ -47,12 +51,11 @@ export const useData = (
 
   /** Prepare required params to pass to search strategy **/
   const { searchQueryLanguage, searchString, searchQuery } = useMemo(() => {
-    const filterManager = data.query.filterManager;
     const searchData = getEsQueryFromSavedSearch({
       dataView: currentDataView,
       uiSettings,
       savedSearch: currentSavedSearch,
-      filterManager: data.query.filterManager,
+      filterManager,
     });
 
     if (searchData === undefined || aiopsListState.searchString !== '') {

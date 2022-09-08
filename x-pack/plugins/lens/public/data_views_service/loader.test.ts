@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import { HttpHandler } from '@kbn/core/public';
-import { last } from 'lodash';
-import { DataViewsContract } from '@kbn/data-views-plugin/public';
-import { createHttpFetchError } from '@kbn/core-http-browser-mocks';
+import { DataViewsContract, DataViewSpec, FieldSpec } from '@kbn/data-views-plugin/public';
 import { IndexPattern, IndexPatternField } from '../types';
 import {
   ensureIndexPattern,
@@ -18,6 +15,12 @@ import {
 } from './loader';
 import { sampleIndexPatterns, mockDataViewsService } from './mocks';
 import { documentField } from '../indexpattern_datasource/document_field';
+import { coreMock } from '@kbn/core/public/mocks';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { UI_SETTINGS } from '@kbn/data-plugin/public';
+import { createHttpFetchError } from '@kbn/core-http-browser-mocks';
 
 describe('loader', () => {
   describe('loadIndexPatternRefs', () => {
@@ -262,6 +265,10 @@ describe('loader', () => {
   });
 
   describe('syncExistingFields', () => {
+    const core = coreMock.createStart();
+    const dataViews = dataViewPluginMocks.createStartContract();
+    const data = dataPluginMock.createStartContract();
+
     const dslQuery = {
       bool: {
         must: [],
@@ -273,27 +280,51 @@ describe('loader', () => {
 
     function getIndexPatternList() {
       return [
-        { id: '1', title: '1', fields: [], hasRestrictions: false },
-        { id: '2', title: '1', fields: [], hasRestrictions: false },
-        { id: '3', title: '1', fields: [], hasRestrictions: false },
+        {
+          id: '1',
+          title: '1',
+          fields: [{ name: 'ip1_field_1' }, { name: 'ip1_field_2' }],
+          hasRestrictions: false,
+        },
+        {
+          id: '2',
+          title: '2',
+          fields: [{ name: 'ip2_field_1' }, { name: 'ip2_field_2' }],
+          hasRestrictions: false,
+        },
+        {
+          id: '3',
+          title: '3',
+          fields: [{ name: 'ip3_field_1' }, { name: 'ip3_field_2' }],
+          hasRestrictions: false,
+        },
       ] as unknown as IndexPattern[];
     }
 
+    beforeEach(() => {
+      core.uiSettings.get.mockImplementation((key: string) => {
+        if (key === UI_SETTINGS.META_FIELDS) {
+          return [];
+        }
+      });
+      dataViews.get.mockImplementation((id: string) =>
+        Promise.resolve(
+          getIndexPatternList().find(
+            (indexPattern) => indexPattern.id === id
+          ) as unknown as DataView
+        )
+      );
+    });
+
     it('should call once for each index pattern', async () => {
       const updateIndexPatterns = jest.fn();
-      const fetchJson = jest.fn((path: string) => {
-        const indexPatternTitle = last(path.split('/'));
-        return {
-          indexPatternTitle,
-          existingFieldNames: ['field_1', 'field_2'].map(
-            (fieldName) => `ip${indexPatternTitle}_${fieldName}`
-          ),
-        };
-      }) as unknown as HttpHandler;
+      dataViews.getFieldsForIndexPattern.mockImplementation(
+        (dataView: DataViewSpec | DataView) =>
+          Promise.resolve(dataView.fields) as Promise<FieldSpec[]>
+      );
 
       await syncExistingFields({
         dateRange: { fromDate: '1900-01-01', toDate: '2000-01-01' },
-        fetchJson,
         indexPatternList: getIndexPatternList(),
         updateIndexPatterns,
         dslQuery,
@@ -301,9 +332,13 @@ describe('loader', () => {
         currentIndexPatternTitle: 'abc',
         isFirstExistenceFetch: false,
         existingFields: {},
+        core,
+        data,
+        dataViews,
       });
 
-      expect(fetchJson).toHaveBeenCalledTimes(3);
+      expect(dataViews.get).toHaveBeenCalledTimes(3);
+      expect(dataViews.getFieldsForIndexPattern).toHaveBeenCalledTimes(3);
       expect(updateIndexPatterns).toHaveBeenCalledTimes(1);
 
       const [newState, options] = updateIndexPatterns.mock.calls[0];
@@ -322,20 +357,16 @@ describe('loader', () => {
     it('should call onNoData callback if current index pattern returns no fields', async () => {
       const updateIndexPatterns = jest.fn();
       const onNoData = jest.fn();
-      const fetchJson = jest.fn((path: string) => {
-        const indexPatternTitle = last(path.split('/'));
-        return {
-          indexPatternTitle,
-          existingFieldNames:
-            indexPatternTitle === '1'
-              ? ['field_1', 'field_2'].map((fieldName) => `${indexPatternTitle}_${fieldName}`)
-              : [],
-        };
-      }) as unknown as HttpHandler;
+      dataViews.getFieldsForIndexPattern.mockImplementation(
+        async (dataView: DataViewSpec | DataView) => {
+          return (dataView.title === '1'
+            ? [{ name: `${dataView.title}_field_1` }, { name: `${dataView.title}_field_2` }]
+            : []) as unknown as Promise<FieldSpec[]>;
+        }
+      );
 
       const args = {
         dateRange: { fromDate: '1900-01-01', toDate: '2000-01-01' },
-        fetchJson,
         indexPatternList: getIndexPatternList(),
         updateIndexPatterns,
         dslQuery,
@@ -343,6 +374,9 @@ describe('loader', () => {
         currentIndexPatternTitle: 'abc',
         isFirstExistenceFetch: false,
         existingFields: {},
+        core,
+        data,
+        dataViews,
       };
 
       await syncExistingFields(args);
@@ -355,15 +389,14 @@ describe('loader', () => {
 
     it('should set all fields to available and existence error flag if the request fails', async () => {
       const updateIndexPatterns = jest.fn();
-      const fetchJson = jest.fn((path: string) => {
-        return new Promise((resolve, reject) => {
+      dataViews.getFieldsForIndexPattern.mockImplementation(() => {
+        return new Promise((_, reject) => {
           reject(new Error());
         });
-      }) as unknown as HttpHandler;
+      });
 
       const args = {
         dateRange: { fromDate: '1900-01-01', toDate: '2000-01-01' },
-        fetchJson,
         indexPatternList: [
           {
             id: '1',
@@ -378,6 +411,9 @@ describe('loader', () => {
         currentIndexPatternTitle: 'abc',
         isFirstExistenceFetch: false,
         existingFields: {},
+        core,
+        data,
+        dataViews,
       };
 
       await syncExistingFields(args);
@@ -395,8 +431,8 @@ describe('loader', () => {
 
     it('should set all fields to available and existence error flag if the request times out', async () => {
       const updateIndexPatterns = jest.fn();
-      const fetchJson = jest.fn((path: string) => {
-        return new Promise((resolve, reject) => {
+      dataViews.getFieldsForIndexPattern.mockImplementation(() => {
+        return new Promise((_, reject) => {
           const error = createHttpFetchError(
             'timeout',
             'error',
@@ -405,11 +441,10 @@ describe('loader', () => {
           );
           reject(error);
         });
-      }) as unknown as HttpHandler;
+      });
 
       const args = {
         dateRange: { fromDate: '1900-01-01', toDate: '2000-01-01' },
-        fetchJson,
         indexPatternList: [
           {
             id: '1',
@@ -424,6 +459,9 @@ describe('loader', () => {
         currentIndexPatternTitle: 'abc',
         isFirstExistenceFetch: false,
         existingFields: {},
+        core,
+        data,
+        dataViews,
       };
 
       await syncExistingFields(args);
