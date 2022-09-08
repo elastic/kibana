@@ -8,7 +8,14 @@
 import React, { useMemo, useEffect, useCallback, useState } from 'react';
 import type { CriteriaWithPagination, EuiSearchBarProps } from '@elastic/eui';
 import {
-  EuiBasicTable,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutHeader,
+  EuiText,
+  EuiTitle,
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiEmptyPrompt,
   EuiLoadingContent,
   EuiProgress,
@@ -97,6 +104,7 @@ export const ExceptionListsTable = React.memo(() => {
   const [deletingListIds, setDeletingListIds] = useState<string[]>([]);
   const [exportingListIds, setExportingListIds] = useState<string[]>([]);
   const [exportDownload, setExportDownload] = useState<{ name?: string; blob?: Blob }>({});
+  const [displayImportListFlyout, setDisplayImportListFlyout] = useState(false);
   const { navigateToUrl } = application;
   const { addError, addSuccess } = useAppToasts();
 
@@ -350,15 +358,46 @@ export const ExceptionListsTable = React.memo(() => {
     [setPagination]
   );
 
+  const handleImportExceptionList = useCallback(() => {
+    setDisplayImportListFlyout(!displayImportListFlyout);
+  }, [displayImportListFlyout]);
+
   return (
     <>
       <MissingPrivilegesCallOut />
-      <EuiPageHeader
-        pageTitle={i18n.ALL_EXCEPTIONS}
-        description={
-          <p>{timelines.getLastUpdated({ showUpdating: loading, updatedAt: lastUpdated })}</p>
-        }
-      />
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiPageHeader
+            pageTitle={i18n.ALL_EXCEPTIONS}
+            description={
+              <p>{timelines.getLastUpdated({ showUpdating: loading, updatedAt: lastUpdated })}</p>
+            }
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButton onClick={() => setDisplayImportListFlyout(true)}>
+            {'Import exception list'}
+          </EuiButton>
+        </EuiFlexItem>
+
+        <EuiFlexItem grow={false}>
+          <EuiButton>{'Create'}</EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      {displayImportListFlyout && (
+        <EuiFlyout onClose={() => setDisplayImportListFlyout(false)}>
+          <EuiFlyoutHeader hasBorder>
+            <EuiTitle size="m">
+              <h2>{'A typical flyout'}</h2>
+            </EuiTitle>
+          </EuiFlyoutHeader>
+          <EuiFlyoutBody>
+            <EuiText>{'hello world!'}</EuiText>
+          </EuiFlyoutBody>
+        </EuiFlyout>
+      )}
+
       <EuiHorizontalRule />
       <div data-test-subj="allExceptionListsPanel">
         {loadingTableInfo && (
