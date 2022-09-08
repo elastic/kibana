@@ -19,7 +19,7 @@ import {
   EuiCheckbox,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPageContent,
+  EuiPageContent_Deprecated as EuiPageContent,
   EuiScreenReaderOnly,
   EuiSpacer,
   EuiSearchBar,

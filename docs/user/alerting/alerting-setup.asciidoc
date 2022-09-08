@@ -11,7 +11,7 @@ configuration.
 [float]
 [[alerting-prerequisites]]
 === Prerequisites
-If you are using an *on-premises* Elastic Stack deployment:
+If you are using an *on-premises* {stack} deployment:
 
 * In the `kibana.yml` configuration file, add the 
 <<general-alert-action-settings,`xpack.encryptedSavedObjects.encryptionKey`>> 
@@ -19,7 +19,7 @@ setting.
 * For emails to have a footer with a link back to {kib}, set the 
 <<server-publicBaseUrl, `server.publicBaseUrl`>> configuration setting.
 
-If you are using an *on-premises* Elastic Stack deployment with 
+If you are using an *on-premises* {stack} deployment with 
 <<using-kibana-with-security, *security*>>:
 
 * If you are unable to access {kib} {alert-features}, ensure that you have not 
