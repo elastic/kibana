@@ -13,6 +13,7 @@ export interface NotificationsQueryParams {
   size?: number;
   sortField?: string;
   sortDirection?: string;
+  queryString?: string;
 }
 
 export type NotificationsSearchResponse = Array<{

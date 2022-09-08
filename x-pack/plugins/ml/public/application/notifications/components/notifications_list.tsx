@@ -10,12 +10,16 @@ import { i18n } from '@kbn/i18n';
 import {
   EuiBadge,
   EuiBasicTable,
-  EuiSearchBarProps,
-  SearchFilterConfig,
   IconColor,
+  EuiSpacer,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFieldSearch,
 } from '@elastic/eui';
 import { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
+import useDebounce from 'react-use/lib/useDebounce';
+import { useToastNotificationService } from '../../services/toast_notification_service';
 import { useFieldFormatter } from '../../contexts/kibana/use_field_formatter';
 import { useRefresh } from '../../routing/use_refresh';
 import { useTableSettings } from '../../data_frame_analytics/pages/analytics_management/components/analytics_list/use_table_settings';
@@ -48,6 +52,7 @@ export const NotificationsList: FC = () => {
       mlServices: { mlApiServices },
     },
   } = useMlKibana();
+  const { displayErrorToast } = useToastNotificationService();
 
   const [isLoading, setIsLoading] = useState(false);
   const [items, setItems] = useState<NotificationItem[]>([]);
@@ -73,14 +78,22 @@ export const NotificationsList: FC = () => {
     try {
       const response = await mlApiServices.notifications.findMessages({
         size: pagination.pageSize,
-        sortField: sorting.sort.field,
-        sortDirection: sorting.sort.direction,
+        sortField: sorting.sort!.field,
+        sortDirection: sorting.sort!.direction,
+        queryString: searchQueryText,
       });
       setItems(response);
-    } catch (e) {}
+    } catch (error) {
+      displayErrorToast(
+        error,
+        i18n.translate('xpack.ml.notifications.fetchFailedError', {
+          defaultMessage: 'Fetch notifications failed',
+        })
+      );
+    }
 
     setIsLoading(false);
-  }, [pagination, sorting]);
+  }, [pagination, sorting, searchQueryText]);
 
   useEffect(
     function updateOnTimerRefresh() {
@@ -90,14 +103,12 @@ export const NotificationsList: FC = () => {
     [refresh]
   );
 
-  useEffect(
+  useDebounce(
     function updateOnF() {
-      console.log(pagination, '___pagination___');
-      console.log(sorting, '___sorting___');
-
       fetchNotifications();
     },
-    [pagination, sorting]
+    500,
+    [pagination, sorting, searchQueryText]
   );
 
   const columns: Array<EuiBasicTableColumn<NotificationItem>> = [
@@ -149,6 +160,7 @@ export const NotificationsList: FC = () => {
     },
   ];
 
+  // @ts-ignore
   const levelOptions = useMemo(() => {
     return Object.values(MESSAGE_LEVEL).map((v) => {
       return {
@@ -158,51 +170,40 @@ export const NotificationsList: FC = () => {
     });
   }, []);
 
-  const filters: SearchFilterConfig[] = [
-    {
-      type: 'field_value_selection',
-      field: 'level',
-      name: i18n.translate('xpack.ml.notifications.levelFilter', {
-        defaultMessage: 'Level',
-      }),
-      multiSelect: 'or',
-      options: levelOptions,
-    },
-  ];
-
-  const search: EuiSearchBarProps = {
-    query: searchQueryText,
-    onChange: (searchChange) => {
-      if (searchChange.error !== null) {
-        return false;
-      }
-      updatePageState({ queryText: searchChange.queryText, pageIndex: 0 });
-      return true;
-    },
-    box: {
-      incremental: true,
-    },
-    filters,
-  };
-
   return (
-    <EuiBasicTable<NotificationItem>
-      allowNeutralSort={false}
-      columns={columns}
-      hasActions={true}
-      isExpandable={false}
-      isSelectable={false}
-      items={items}
-      itemId={'id'}
-      loading={isLoading}
-      search={search}
-      rowProps={(item) => ({
-        'data-test-subj': `mlModelsTableRow row-${item.id}`,
-      })}
-      pagination={pagination}
-      onChange={onTableChange}
-      sorting={sorting}
-      data-test-subj={isLoading ? 'mlModelsTable loading' : 'mlModelsTable loaded'}
-    />
+    <>
+      <EuiFlexGroup gutterSize="m">
+        <EuiFlexItem>
+          <EuiFieldSearch
+            fullWidth
+            placeholder={i18n.translate('xpack.ml.notifications.searchPlaceholder', {
+              defaultMessage: 'Search by message...',
+            })}
+            value={searchQueryText}
+            onChange={(e) => {
+              updatePageState({ queryText: e.target.value });
+            }}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      <EuiSpacer size={'m'} />
+      <EuiBasicTable<NotificationItem>
+        columns={columns}
+        hasActions={true}
+        isExpandable={false}
+        isSelectable={false}
+        items={items}
+        itemId={'id'}
+        loading={isLoading}
+        rowProps={(item) => ({
+          'data-test-subj': `mlModelsTableRow row-${item.id}`,
+        })}
+        pagination={pagination}
+        onChange={onTableChange}
+        sorting={sorting}
+        data-test-subj={isLoading ? 'mlModelsTable loading' : 'mlModelsTable loaded'}
+      />
+    </>
   );
 };

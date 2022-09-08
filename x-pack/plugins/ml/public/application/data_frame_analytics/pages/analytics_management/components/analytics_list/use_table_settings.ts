@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { Direction, EuiBasicTableProps, Pagination, PropertySort } from '@elastic/eui';
+import { Direction, EuiBasicTableProps, Pagination } from '@elastic/eui';
 import { useCallback, useMemo } from 'react';
+import { EuiTableSortingType } from '@elastic/eui/src/components/basic_table/table_types';
 import { ListingPageUrlState } from '../../../../../../../common/types/common';
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50];
@@ -33,7 +34,7 @@ export interface CriteriaWithPagination<T> extends Criteria<T> {
 interface UseTableSettingsReturnValue<T> {
   onTableChange: EuiBasicTableProps<T>['onChange'];
   pagination: Pagination;
-  sorting: { sort: PropertySort };
+  sorting: EuiTableSortingType<T>;
 }
 
 export function useTableSettings<TypeOfItem>(
@@ -69,7 +70,7 @@ export function useTableSettings<TypeOfItem>(
   const sorting = useMemo(
     () => ({
       sort: {
-        field: sortField as string,
+        field: sortField as keyof TypeOfItem,
         direction: sortDirection as Direction,
       },
     }),
