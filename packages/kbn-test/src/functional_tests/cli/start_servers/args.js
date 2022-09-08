@@ -6,9 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { resolve } from 'path';
+import Fs from 'fs';
+import Path from 'path';
 
+import { v4 as uuid } from 'uuid';
 import dedent from 'dedent';
+import { REPO_ROOT } from '@kbn/utils';
 import { ToolingLog, pickLevelFromFlags } from '@kbn/tooling-log';
 
 const options = {
@@ -25,6 +28,9 @@ const options = {
   'kibana-install-dir': {
     arg: '<dir>',
     desc: 'Run Kibana from existing install directory instead of from source.',
+  },
+  logToFile: {
+    desc: 'Write the log output from Kibana/Elasticsearch to files instead of to stdout',
   },
   verbose: { desc: 'Log everything.' },
   debug: { desc: 'Run in debug mode.' },
@@ -64,6 +70,7 @@ export function displayHelp() {
 export function processOptions(userOptions, defaultConfigPath) {
   validateOptions(userOptions);
 
+  const logToFile = !!userOptions.logToFile;
   const useDefaultConfig = !userOptions.config;
   const config = useDefaultConfig ? defaultConfigPath : userOptions.config;
 
@@ -80,16 +87,25 @@ export function processOptions(userOptions, defaultConfigPath) {
     delete userOptions['kibana-install-dir'];
   }
 
+  const log = new ToolingLog({
+    level: pickLevelFromFlags(userOptions),
+    writeTo: process.stdout,
+  });
+
   function createLogger() {
-    return new ToolingLog({
-      level: pickLevelFromFlags(userOptions),
-      writeTo: process.stdout,
-    });
+    return log;
+  }
+
+  const logsDir = logToFile ? Path.resolve(REPO_ROOT, 'data/ftr_servers_logs', uuid()) : undefined;
+  if (logsDir) {
+    Fs.mkdirSync(logsDir, { recursive: true });
+    log.info(`Kibana/ES logs will be written to ${Path.relative(process.cwd(), logsDir)}/`);
   }
 
   return {
     ...userOptions,
-    config: resolve(config),
+    logsDir,
+    config: Path.resolve(config),
     useDefaultConfig,
     createLogger,
     extraKbnOpts: userOptions._,
