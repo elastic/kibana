@@ -44,3 +44,13 @@ export const updateHostRiskScoreSeverityFilter = actionCreator<{
   severitySelection: RiskSeverity[];
   hostsType: HostsType;
 }>('UPDATE_HOST_RISK_SCORE_SEVERITY');
+
+export const updateHostsAnomaliesJobIdFilter = actionCreator<{
+  jobIds: string[];
+  hostsType: HostsType;
+}>('UPDATE_HOSTS_ANOMALIES_JOB_ID_FILTER');
+
+export const updateHostsAnomaliesInterval = actionCreator<{
+  interval: string;
+  hostsType: HostsType;
+}>('UPDATE_HOSTS_ANOMALIES_INTERVAL');

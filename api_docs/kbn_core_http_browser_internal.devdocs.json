@@ -38,6 +38,7 @@
         ],
         "path": "packages/core/http/core-http-browser-internal/src/base_path.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-http-browser-internal",
@@ -51,6 +52,7 @@
             ],
             "path": "packages/core/http/core-http-browser-internal/src/base_path.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-http-browser-internal",
@@ -64,6 +66,7 @@
                 ],
                 "path": "packages/core/http/core-http-browser-internal/src/base_path.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -78,6 +81,7 @@
                 ],
                 "path": "packages/core/http/core-http-browser-internal/src/base_path.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -92,6 +96,7 @@
                 ],
                 "path": "packages/core/http/core-http-browser-internal/src/base_path.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -109,6 +114,7 @@
             ],
             "path": "packages/core/http/core-http-browser-internal/src/base_path.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -124,6 +130,7 @@
             ],
             "path": "packages/core/http/core-http-browser-internal/src/base_path.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-http-browser-internal",
@@ -137,6 +144,7 @@
                 ],
                 "path": "packages/core/http/core-http-browser-internal/src/base_path.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -154,6 +162,7 @@
             ],
             "path": "packages/core/http/core-http-browser-internal/src/base_path.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-http-browser-internal",
@@ -167,6 +176,7 @@
                 ],
                 "path": "packages/core/http/core-http-browser-internal/src/base_path.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
