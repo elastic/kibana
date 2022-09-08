@@ -81,23 +81,20 @@ export class UploadState {
     );
   };
 
-  public upload = (): Observable<void> => {
+  public upload = (): void => {
     if (this.isUploading()) {
       throw new Error('Upload already in progress');
     }
     this.uploading$.next(true);
-    let sub: Subscription;
-    const upload$ = this.files$.pipe(
-      take(1),
-      switchMap((files) => forkJoin(files.map(this.uploadFile))),
-      map(() => {}),
-      finalize(() => {
-        this.uploading$.next(false);
-        sub.unsubscribe();
-      })
-    );
-    sub = upload$.subscribe();
-
-    return upload$;
+    this.files$
+      .pipe(
+        take(1),
+        switchMap((files) => forkJoin(files.map(this.uploadFile))),
+        map(() => {}),
+        finalize(() => {
+          this.uploading$.next(false);
+        })
+      )
+      .subscribe();
   };
 }
