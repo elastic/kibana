@@ -103,7 +103,7 @@ export class UrlDrilldown implements Drilldown<Config, ActionContext, ActionFact
       return () => {
         unmounted = true;
       };
-    }, [config.name, context]);
+    });
     return <>{title}</>;
   });
 
