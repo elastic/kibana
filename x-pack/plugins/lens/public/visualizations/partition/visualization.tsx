@@ -13,6 +13,7 @@ import type { PaletteRegistry } from '@kbn/coloring';
 import { ThemeServiceStart } from '@kbn/core/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
+import { EuiSpacer } from '@elastic/eui';
 import type {
   Visualization,
   OperationMetadata,
@@ -171,6 +172,7 @@ export const getPieVisualization = ({
               defaultMessage: 'Slice',
             }),
             supportsMoreColumns: totalNonCollapsedAccessors < PartitionChartsMeta.pie.maxBuckets,
+            dimensionsTooMany: totalNonCollapsedAccessors - PartitionChartsMeta.pie.maxBuckets,
             dataTestSubj: 'lnsPie_sliceByDimensionPanel',
           };
         case 'mosaic':
@@ -183,6 +185,7 @@ export const getPieVisualization = ({
               defaultMessage: 'Vertical axis',
             }),
             supportsMoreColumns: totalNonCollapsedAccessors === 0,
+            dimensionsTooMany: totalNonCollapsedAccessors - 1,
             dataTestSubj: 'lnsPie_verticalAxisDimensionPanel',
           };
         default:
@@ -196,6 +199,8 @@ export const getPieVisualization = ({
             }),
             supportsMoreColumns:
               totalNonCollapsedAccessors < PartitionChartsMeta[state.shape].maxBuckets,
+            dimensionsTooMany:
+              totalNonCollapsedAccessors - PartitionChartsMeta[state.shape].maxBuckets,
             dataTestSubj: 'lnsPie_groupByDimensionPanel',
           };
       }
@@ -234,6 +239,7 @@ export const getPieVisualization = ({
               }
             ),
             supportsMoreColumns: totalNonCollapsedAccessors === 0,
+            dimensionsTooMany: totalNonCollapsedAccessors - 1,
             dataTestSubj: 'lnsPie_horizontalAxisDimensionPanel',
           };
         default:
@@ -416,7 +422,35 @@ export const getPieVisualization = ({
   },
 
   getErrorMessages(state) {
-    // not possible to break it?
-    return undefined;
+    const hasTooManyBucketDimensions = state.layers
+      .map(
+        (layer) =>
+          Array.from(new Set([...layer.primaryGroups, ...(layer.secondaryGroups ?? [])])).filter(
+            (columnId) => !isCollapsed(columnId, layer)
+          ).length > PartitionChartsMeta[state.shape].maxBuckets
+      )
+      .some(Boolean);
+
+    return hasTooManyBucketDimensions
+      ? [
+          {
+            shortMessage: i18n.translate('xpack.lens.pie.tooManyDimensions', {
+              defaultMessage: 'Your visualization has too many dimensions.',
+            }),
+            longMessage: (
+              <span>
+                {i18n.translate('xpack.lens.pie.tooManyDimensions', {
+                  defaultMessage:
+                    'Your visualization has too many dimensions. Please follow the instructions in the layer panel.',
+                })}
+                <EuiSpacer size="s" />
+                {i18n.translate('xpack.lens.pie.tooManyDimensions', {
+                  defaultMessage: "(Collapsed dimensions don't count toward this limit.)",
+                })}
+              </span>
+            ),
+          },
+        ]
+      : [];
   },
 });

@@ -249,6 +249,52 @@ describe('LayerPanel', () => {
       expect(group).toHaveLength(1);
     });
 
+    it('should tell the user to remove the correct number of dimensions', async () => {
+      mockVisualization.getConfiguration.mockReturnValue({
+        groups: [
+          {
+            groupLabel: 'A',
+            groupId: 'a',
+            accessors: [{ columnId: 'x' }],
+            filterOperations: () => true,
+            supportsMoreColumns: false,
+            dataTestSubj: 'lnsGroup',
+            dimensionsTooMany: 1,
+          },
+          {
+            groupLabel: 'A',
+            groupId: 'a',
+            accessors: [{ columnId: 'x' }],
+            filterOperations: () => true,
+            supportsMoreColumns: false,
+            dataTestSubj: 'lnsGroup',
+            dimensionsTooMany: -1,
+          },
+          {
+            groupLabel: 'B',
+            groupId: 'b',
+            accessors: [],
+            filterOperations: () => true,
+            supportsMoreColumns: true,
+            dataTestSubj: 'lnsGroup',
+            dimensionsTooMany: 3,
+          },
+        ],
+      });
+
+      const { instance } = await mountWithProvider(<LayerPanel {...getDefaultProps()} />);
+
+      const groups = instance.find(EuiFormRow);
+
+      expect(groups.findWhere((e) => e.prop('error') === 'Please remove a dimension')).toHaveLength(
+        1
+      );
+      expect(
+        groups.findWhere((e) => e.prop('error') === 'Please remove 3 dimensions')
+      ).toHaveLength(1);
+      expect(groups.findWhere((e) => e.prop('error') === '')).toHaveLength(1);
+    });
+
     it('should render the required warning when only one group is configured (with requiredMinDimensionCount)', async () => {
       mockVisualization.getConfiguration.mockReturnValue({
         groups: [
