@@ -20,7 +20,8 @@ import { getDeferred } from '../mocks';
 import type { ResponderCapabilities } from '../../../../common/endpoint/constants';
 import { RESPONDER_CAPABILITIES } from '../../../../common/endpoint/constants';
 
-describe('When using the release action from response actions console', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/139641
+describe.skip('When using the release action from response actions console', () => {
   let render: (
     capabilities?: ResponderCapabilities[]
   ) => Promise<ReturnType<AppContextTestRender['render']>>;
