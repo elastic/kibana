@@ -82,7 +82,7 @@ export const AgentReassignAgentPolicyModal: React.FunctionComponent<Props> = ({
         throw res.error;
       }
       setIsSubmitting(false);
-      const hasCompleted = Object.keys(res.data ?? {}).length > 0;
+      const hasCompleted = isSingleAgent || Object.keys(res.data ?? {}).length > 0;
       const successMessage = i18n.translate(
         'xpack.fleet.agentReassignPolicy.successSingleNotificationTitle',
         {

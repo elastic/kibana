@@ -192,7 +192,7 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
       );
       setIsSubmitting(false);
 
-      const hasCompleted = Object.keys(data ?? {}).length > 0;
+      const hasCompleted = isSingleAgent || Object.keys(data ?? {}).length > 0;
       const submittedMessage = i18n.translate(
         'xpack.fleet.upgradeAgents.submittedNotificationTitle',
         {
