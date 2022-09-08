@@ -11,6 +11,7 @@ import React, { memo, useCallback, useEffect, useState, useMemo } from 'react';
 import styled from 'styled-components';
 
 import type { DataViewBase } from '@kbn/es-query';
+import { isThreatMatchRule } from '../../../../../common/detection_engine/utils';
 import type {
   RuleStepProps,
   AboutStepRule,
@@ -49,8 +50,7 @@ const CommonUseField = getUseField({ component: Field });
 
 interface StepAboutRuleProps extends RuleStepProps {
   defaultValues: AboutStepRule;
-  defineRuleData: DefineStepRule;
-  isThreatMatchRuleValue: boolean;
+  defineRuleData?: DefineStepRule;
   onRuleDataChange?: (data: AboutStepRule) => void;
 }
 
@@ -70,7 +70,6 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
   addPadding = false,
   defaultValues: initialState,
   defineRuleData,
-  isThreatMatchRuleValue,
   descriptionColumns = 'singleSplit',
   isReadOnlyView,
   isUpdateView = false,
@@ -80,6 +79,11 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
   onRuleDataChange,
 }) => {
   const { data } = useKibana().services;
+
+  const isThreatMatchRuleValue = useMemo(
+    () => isThreatMatchRule(defineRuleData?.ruleType),
+    [defineRuleData]
+  );
 
   const schema = useMemo(
     () =>

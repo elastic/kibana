@@ -463,7 +463,6 @@ const CreateRulePageComponent: React.FC = () => {
                   addPadding={true}
                   defaultValues={aboutRuleData}
                   defineRuleData={defineRuleData}
-                  isThreatMatchRuleValue={isThreatMatchRuleValue}
                   descriptionColumns="singleSplit"
                   isReadOnlyView={activeStep !== RuleStep.aboutRule}
                   isLoading={isLoading || loading}

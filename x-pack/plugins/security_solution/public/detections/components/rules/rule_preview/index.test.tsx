@@ -13,7 +13,7 @@ import { fields } from '@kbn/data-plugin/common/mocks';
 
 import { TestProviders } from '../../../../common/mock';
 import type { RulePreviewProps } from '.';
-import { RulePreview } from '.';
+import { RulePreview, REASONABLE_INVOCATION_COUNT } from '.';
 import { usePreviewRoute } from './use_preview_route';
 import { usePreviewHistogram } from './use_preview_histogram';
 import { DataSourceType } from '../../../pages/detection_engine/rules/types';
@@ -22,6 +22,7 @@ import {
   stepAboutDefaultValue,
   stepDefineDefaultValue,
 } from '../../../pages/detection_engine/rules/utils';
+import { usePreviewInvocationCount } from '../../../containers/detection_engine/rules/use_preview_invocation_count';
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('./use_preview_route');
@@ -34,6 +35,7 @@ jest.mock('../../../../common/containers/use_global_time', () => ({
     setQuery: jest.fn(),
   }),
 }));
+jest.mock('../../../containers/detection_engine/rules/use_preview_invocation_count');
 
 const getMockIndexPattern = (): DataViewBase => ({
   fields,
@@ -106,6 +108,8 @@ describe('PreviewQuery', () => {
       isPreviewRequestInProgress: false,
       previewId: undefined,
     });
+
+    (usePreviewInvocationCount as jest.Mock).mockReturnValue({ invocationCount: 500 });
   });
 
   afterEach(() => {
@@ -133,16 +137,9 @@ describe('PreviewQuery', () => {
     expect(await wrapper.queryByTestId('[data-test-subj="preview-histogram-panel"]')).toBeNull();
   });
 
-  test('it renders invocation count warning when advanced query is selected and warning flag is set to true', async () => {
-    (usePreviewRoute as jest.Mock).mockReturnValue({
-      hasNoiseWarning: false,
-      addNoiseWarning: jest.fn(),
-      createPreview: jest.fn(),
-      clearPreview: jest.fn(),
-      logs: [],
-      isPreviewRequestInProgress: false,
-      previewId: undefined,
-      showInvocationCountWarning: true,
+  test('it renders invocation count warning when invocation count is bigger then "REASONABLE_INVOCATION_COUNT"', async () => {
+    (usePreviewInvocationCount as jest.Mock).mockReturnValue({
+      invocationCount: REASONABLE_INVOCATION_COUNT + 1,
     });
 
     const wrapper = render(

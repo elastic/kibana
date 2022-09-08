@@ -36,7 +36,7 @@ import type {
 } from '../../../pages/detection_engine/rules/types';
 import { usePreviewInvocationCount } from '../../../containers/detection_engine/rules/use_preview_invocation_count';
 
-const REASONABLE_INVOCATION_COUNT = 200;
+export const REASONABLE_INVOCATION_COUNT = 200;
 
 const timeRanges = [
   { start: 'now/d', end: 'now', label: 'Today' },
@@ -50,7 +50,7 @@ const timeRanges = [
 ];
 
 export interface RulePreviewProps {
-  isDisabled: boolean;
+  isDisabled?: boolean;
   defineRuleData: DefineStepRule;
   aboutRuleData: AboutStepRule;
   scheduleRuleData: ScheduleStepRule;

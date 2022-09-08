@@ -75,7 +75,6 @@ import { HeaderPage } from '../../../../../common/components/header_page';
 import { useStartTransaction } from '../../../../../common/lib/apm/use_start_transaction';
 import { SINGLE_RULE_ACTIONS } from '../../../../../common/lib/apm/user_actions';
 import { PreviewFlyout } from '../preview';
-import { isThreatMatchRule } from '../../../../../../common/detection_engine/utils';
 
 const formHookNoop = async (): Promise<undefined> => undefined;
 
@@ -194,11 +193,6 @@ const EditRulePageComponent: FC = () => {
   const [indicesConfig] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
   const [threatIndicesConfig] = useUiSetting$<string[]>(DEFAULT_THREAT_INDEX_KEY);
 
-  const isThreatMatchRuleValue = useMemo(
-    () => isThreatMatchRule(defineStep.data?.ruleType),
-    [defineStep.data?.ruleType]
-  );
-
   const tabs = useMemo(
     () => [
       {
@@ -243,7 +237,6 @@ const EditRulePageComponent: FC = () => {
                   isReadOnlyView={false}
                   isLoading={isLoading}
                   isUpdateView
-                  isThreatMatchRuleValue={isThreatMatchRuleValue}
                   defaultValues={aboutStep.data}
                   defineRuleData={defineStep.data}
                   setForm={setFormHook}
@@ -314,7 +307,6 @@ const EditRulePageComponent: FC = () => {
       threatIndicesConfig,
       onDataChange,
       aboutStep.data,
-      isThreatMatchRuleValue,
       scheduleStep.data,
       actionsStep.data,
       actionMessageParams,
