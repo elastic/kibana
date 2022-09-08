@@ -153,7 +153,6 @@ export const makeLensEmbeddableFactory =
                 return {
                   ...lensState,
                   attributes: migratedLensState,
-                  references: migratedReferences,
                 } as unknown as SerializableRecord;
               },
             }),
