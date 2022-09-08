@@ -15,4 +15,16 @@ export interface AlertDetailsPathParams {
   alertId: string;
 }
 
+export interface AlertSummaryItemProps {
+  formattedMessageId: string;
+  defaultMessage: string;
+  children: JSX.Element;
+}
+
+export interface HeaderActionsProps {
+  onViewEditRuleConditions: () => void;
+  onAddToExistingCase: () => void;
+  onCreateNewCase: () => void;
+}
+
 export const ALERT_DETAILS_PAGE_ID = 'alert-details-o11y';

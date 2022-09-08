@@ -5,5 +5,6 @@
  * 2.0.
  */
 
+export { PageTitle } from './page_title';
 export { AlertSummary } from './alert_summary';
 export { AlertDetails } from './alert_details';
