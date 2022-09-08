@@ -154,7 +154,7 @@ export const getPieVisualization = ({
         filterOperations: bucketedOperations,
       };
 
-      const numNonCollapsedAccessors = accessors.reduce(
+      const totalNonCollapsedAccessors = accessors.reduce(
         (total, { columnId }) => total + (isCollapsed(columnId, layer) ? 0 : 1),
         0
       );
@@ -170,7 +170,7 @@ export const getPieVisualization = ({
             dimensionEditorGroupLabel: i18n.translate('xpack.lens.pie.sliceDimensionGroupLabel', {
               defaultMessage: 'Slice',
             }),
-            supportsMoreColumns: numNonCollapsedAccessors < PartitionChartsMeta.pie.maxBuckets,
+            supportsMoreColumns: totalNonCollapsedAccessors < PartitionChartsMeta.pie.maxBuckets,
             dataTestSubj: 'lnsPie_sliceByDimensionPanel',
           };
         case 'mosaic':
@@ -182,7 +182,7 @@ export const getPieVisualization = ({
             dimensionEditorGroupLabel: i18n.translate('xpack.lens.pie.verticalAxisDimensionLabel', {
               defaultMessage: 'Vertical axis',
             }),
-            supportsMoreColumns: numNonCollapsedAccessors === 0,
+            supportsMoreColumns: totalNonCollapsedAccessors === 0,
             dataTestSubj: 'lnsPie_verticalAxisDimensionPanel',
           };
         default:
@@ -195,7 +195,7 @@ export const getPieVisualization = ({
               defaultMessage: 'Group',
             }),
             supportsMoreColumns:
-              numNonCollapsedAccessors < PartitionChartsMeta[state.shape].maxBuckets,
+              totalNonCollapsedAccessors < PartitionChartsMeta[state.shape].maxBuckets,
             dataTestSubj: 'lnsPie_groupByDimensionPanel',
           };
       }
@@ -215,7 +215,7 @@ export const getPieVisualization = ({
         filterOperations: bucketedOperations,
       };
 
-      const numNonCollapsedAccessors = accessors.reduce(
+      const totalNonCollapsedAccessors = accessors.reduce(
         (total, { columnId }) => total + (isCollapsed(columnId, layer) ? 0 : 1),
         0
       );
@@ -233,7 +233,7 @@ export const getPieVisualization = ({
                 defaultMessage: 'Horizontal axis',
               }
             ),
-            supportsMoreColumns: numNonCollapsedAccessors === 0,
+            supportsMoreColumns: totalNonCollapsedAccessors === 0,
             dataTestSubj: 'lnsPie_horizontalAxisDimensionPanel',
           };
         default:
