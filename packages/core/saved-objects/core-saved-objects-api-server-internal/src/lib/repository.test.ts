@@ -2558,21 +2558,6 @@ describe('SavedObjectsRepository', () => {
         success: true,
       });
 
-      const expectErrorResult = ({
-        type,
-        id,
-        error,
-      }: {
-        type: string;
-        id: string;
-        error?: any;
-      }) => ({
-        type,
-        id,
-        success: false,
-        error: error ?? createBadRequestError(),
-      });
-
       const expectClientCallArgsAction = (
         objects: TypeIdTuple[],
         {
