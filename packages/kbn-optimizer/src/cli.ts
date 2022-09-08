@@ -161,7 +161,7 @@ export function runKbnOptimizerCli(options: { defaultLimitsPath: string }) {
         updateBundleLimits({
           log,
           config,
-          dropMissing: !(focus || filter),
+          dropMissing: !(focus.length || filter.length),
           limitsPath,
         });
       }
