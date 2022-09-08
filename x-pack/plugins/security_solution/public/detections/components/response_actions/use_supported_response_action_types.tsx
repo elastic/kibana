@@ -8,7 +8,7 @@
 import { useEffect, useState } from 'react';
 import type { ResponseActionType } from './get_supported_response_actions';
 import { getSupportedResponseActions, responseActionTypes } from './get_supported_response_actions';
-import { useOsqueryEnabled } from './useOsqueryEnabled';
+import { useOsqueryEnabled } from './use_osquery_enabled';
 
 export const useSupportedResponseActionTypes = () => {
   const [supportedResponseActionTypes, setSupportedResponseActionTypes] = useState<

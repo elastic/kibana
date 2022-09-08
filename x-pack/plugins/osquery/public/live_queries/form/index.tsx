@@ -20,7 +20,7 @@ import styled from 'styled-components';
 import { useForm as useHookForm, FormProvider } from 'react-hook-form';
 
 import { isEmpty, map, find, pickBy } from 'lodash';
-import { QueryPackSelectable } from './QueryPackSelectable';
+import { QueryPackSelectable } from './query_pack_selectable';
 import type { ECSMapping } from '../../../common/schemas/common';
 import type { SavedQuerySOFormData } from '../../saved_queries/form/use_saved_query_form';
 import type { EcsMappingFormField } from '../../packs/queries/ecs_mapping_editor_field';
