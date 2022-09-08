@@ -22,10 +22,11 @@ import { useFetchRule } from '@kbn/observability-plugin/public/hooks/use_fetch_r
 import { useLoadRuleTypes } from '@kbn/triggers-actions-ui-plugin/public';
 import { ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import { AlertConsumers } from '@kbn/rule-data-utils';
+import PageNotFound from '../404';
 
 export function AlertDetails() {
     const { http } = useKibana<ObservabilityAppServices>().services;
-    const { ObservabilityPageTemplate, observabilityRuleTypeRegistry } = usePluginContext();
+    const { ObservabilityPageTemplate, observabilityRuleTypeRegistry, config } = usePluginContext();
     const { alertId, ruleId } = useParams<AlertDetailsPathParams>();
     const [features, setFeatures] = useState<string>('');
 
@@ -105,6 +106,11 @@ export function AlertDetails() {
                 />
             </EuiPanel>
         );
+
+    // Redirect to the the 404 page when the user hit the page url directly in the browser while the feature flag is off.
+    if (!config.unsafe.alertDetails.enabled) {
+        return <PageNotFound />;
+    }
 
     return (
         <ObservabilityPageTemplate data-test-subj="alertDetails">
