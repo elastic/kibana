@@ -5,15 +5,7 @@
  * 2.0.
  */
 
-import {
-  BehaviorSubject,
-  ReplaySubject,
-  type Observable,
-  of,
-  from,
-  forkJoin,
-  type Subscription,
-} from 'rxjs';
+import { BehaviorSubject, ReplaySubject, type Observable, of, from, forkJoin } from 'rxjs';
 import { take, map, switchMap, mergeMap, finalize, catchError } from 'rxjs/operators';
 import type { FileKind, FileJSON } from '../../../common/types';
 import type { FilesClient } from '../../types';
