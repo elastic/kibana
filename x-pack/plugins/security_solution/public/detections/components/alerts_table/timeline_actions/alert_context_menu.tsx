@@ -45,7 +45,6 @@ import { isAlertFromEndpointAlert } from '../../../../common/utils/endpoint_aler
 interface AlertContextMenuProps {
   ariaLabel?: string;
   ariaRowindex: number;
-  columnValues: string;
   disabled: boolean;
   ecsRowData: Ecs;
   refetch: inputsModel.Refetch;
@@ -56,7 +55,6 @@ interface AlertContextMenuProps {
 const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux> = ({
   ariaLabel = i18n.MORE_ACTIONS,
   ariaRowindex,
-  columnValues,
   disabled,
   ecsRowData,
   refetch,
@@ -81,7 +79,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
     ecsData: ecsRowData,
     onMenuItemClick,
     timelineId,
-    ariaLabel: ATTACH_ALERT_TO_CASE_FOR_ROW({ ariaRowindex, columnValues }),
+    ariaLabel: ATTACH_ALERT_TO_CASE_FOR_ROW({ ariaRowindex }),
   });
 
   const { loading: canAccessEndpointManagementLoading, canAccessEndpointManagement } =

@@ -6,9 +6,12 @@
  */
 
 import React, { createContext, useContext, useMemo, useState } from 'react';
+import type { ReactNode } from 'react';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
+import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
 
 import { ViewSelection } from '../components/t_grid/event_rendered_view/selector';
+import type { ControlColumnProps } from '../../common/types/timeline';
 import { AlertStatus, CustomBulkActionProp } from '../../common/types/timeline/actions';
 import {
   ALERTS_TABLE_VIEW_SELECTION_KEY,
@@ -16,6 +19,12 @@ import {
 } from '../components/t_grid/helpers';
 
 export interface TGridComponentState {
+  /** The actions column */
+  customActionsColum?: {
+    renderer: (props: EuiDataGridCellValueElementProps) => ReactNode;
+    width: number;
+  };
+
   /** Additional bulk actions */
   customBulkActions?: CustomBulkActionProp[];
 
@@ -27,6 +36,9 @@ export interface TGridComponentState {
 
   /** The current indix/indices */
   indexName: string;
+
+  /** Row action itmes */
+  leadingControlColumns?: ControlColumnProps[];
 
   /** Whether to show alert status bulk actions */
   showAlertStatusActions: boolean;
@@ -41,9 +53,9 @@ export interface TGridComponentState {
 
 const TGridComponentStateContext = createContext<TGridComponentState>({
   customBulkActions: [],
-  indexName: '',
   filterStatus: 'open',
-  showAlertStatusActions: true,
+  indexName: '',
+  showAlertStatusActions: false,
   viewSelection: 'gridView',
   setViewSelection: () => {},
 });
@@ -57,6 +69,7 @@ const storage = new Storage(localStorage);
 export const TGridComponentStateProvider: React.FC<
   Pick<
     TGridComponentState,
+    | 'customActionsColum'
     | 'customBulkActions'
     | 'filterStatus'
     | 'filterQuery'
@@ -66,6 +79,7 @@ export const TGridComponentStateProvider: React.FC<
   >
 > = ({
   children,
+  customActionsColum,
   customBulkActions,
   filterStatus,
   filterQuery,
@@ -82,6 +96,7 @@ export const TGridComponentStateProvider: React.FC<
 
   const providerValue: TGridComponentState = useMemo(() => {
     return {
+      customActionsColum,
       customBulkActions,
       filterStatus,
       filterQuery,
@@ -92,10 +107,11 @@ export const TGridComponentStateProvider: React.FC<
       setViewSelection,
     };
   }, [
+    customActionsColum,
     customBulkActions,
-    indexName,
     filterStatus,
     filterQuery,
+    indexName,
     showAlertStatusActions,
     timelineId,
     viewSelection,

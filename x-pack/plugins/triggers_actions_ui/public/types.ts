@@ -13,7 +13,7 @@ import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import type { IconType, EuiFlyoutSize } from '@elastic/eui';
+import type { IconType, EuiFlyoutSize, EuiDataGridCellValueElementProps } from '@elastic/eui';
 import { EuiDataGridColumn, EuiDataGridControlColumn, EuiDataGridSorting } from '@elastic/eui';
 import {
   ActionType,
@@ -471,6 +471,21 @@ export interface BulkActionsConfig {
 
 export type UseBulkActionsRegistry = () => BulkActionsConfig[];
 
+export type RenderActionsRowParameters = {
+  alert: EcsFieldsResponse;
+  setFlyoutAlert: (data: unknown) => void;
+  id?: string;
+} & Pick<
+  EuiDataGridCellValueElementProps,
+  | 'colIndex'
+  | 'columnId'
+  | 'isDetails'
+  | 'isExpandable'
+  | 'isExpanded'
+  | 'rowIndex'
+  | 'setCellProps'
+>;
+
 export interface AlertsTableConfigurationRegistry {
   id: string;
   casesFeatureId: string;
@@ -483,11 +498,7 @@ export interface AlertsTableConfigurationRegistry {
   sort?: SortCombinations[];
   getRenderCellValue?: GetRenderCellValue;
   useActionsColumn?: () => {
-    renderCustomActionsRow: (
-      alert: EcsFieldsResponse,
-      setFlyoutAlert: (data: unknown) => void,
-      id?: string
-    ) => JSX.Element;
+    renderCustomActionsRow: (parameters: RenderActionsRowParameters) => JSX.Element;
     width?: number;
   };
   useBulkActions?: UseBulkActionsRegistry;

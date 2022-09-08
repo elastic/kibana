@@ -9,6 +9,7 @@ import type { GetRenderCellValue } from '@kbn/triggers-actions-ui-plugin/public'
 import type { GetTGridProps, TimelinesStartPlugins } from '../../../types';
 import type { CellValueElementProps } from '../../../../common/types/timeline/cells';
 import { useBulkActions } from './use_bulk_actions';
+import { useActionItems } from './use_action_items';
 
 const useRenderCellValue = ({
   browserFields,
@@ -46,9 +47,11 @@ export function useAlertsTableConfiguration({
     columns,
     // TODO: Is that correct?
     getRenderCellValue: useRenderCellValue as GetRenderCellValue,
-
     useBulkActions,
+    useActionsColumn: useActionItems,
   });
+
+  // TODO: what should we do with the rest of these?
   //  {
   //   useInternalFlyout?: () => {
   //       header: AlertTableFlyoutComponent;
@@ -56,14 +59,5 @@ export function useAlertsTableConfiguration({
   //       footer: AlertTableFlyoutComponent;
   //     };
   //   sort?: SortCombinations[];
-  //   useActionsColumn?: () => {
-  //     renderCustomActionsRow: (
-  //       alert: EcsFieldsResponse,
-  //       setFlyoutAlert: (data: unknown) => void,
-  //       id?: string
-  //     ) => JSX.Element;
-  //     width?: number;
-  //   };
-  //   useBulkActions?: UseBulkActionsRegistry;
   // }
 }

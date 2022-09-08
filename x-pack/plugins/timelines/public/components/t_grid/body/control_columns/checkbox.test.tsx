@@ -21,7 +21,6 @@ describe('checkbox control column', () => {
       eventId: 'test-event-id',
       loadingEventIds: [],
       onEventDetailsPanelOpened: jest.fn(),
-      showCheckboxes: true,
       data: [],
       ecsData: {
         _id: 'test-ecsData-id',

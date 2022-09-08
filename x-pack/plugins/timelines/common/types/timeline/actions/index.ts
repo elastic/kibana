@@ -49,7 +49,6 @@ export interface ActionProps {
   rowIndex: number;
   setEventsDeleted: SetEventsDeleted;
   setEventsLoading: SetEventsLoading;
-  showCheckboxes: boolean;
   showNotes?: boolean;
   tabType?: TimelineTabs;
   timelineId: string;
@@ -123,7 +122,6 @@ export type RowCellRender =
 interface AdditionalControlColumnProps {
   ariaRowindex: number;
   actionsColumnWidth: number;
-  onRowSelected: OnRowSelected;
   eventId: string;
   id: string;
   columnId: string;

@@ -31,6 +31,7 @@ import React, {
   useContext,
   useRef,
 } from 'react';
+import type { ReactNode } from 'react';
 import { connect, ConnectedProps, useDispatch } from 'react-redux';
 
 import styled, { ThemeContext } from 'styled-components';
@@ -879,6 +880,16 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
           filterStatus={filterStatus}
           filterQuery={filterQuery}
           indexName={indexNames.join()}
+          // TODO: this is rather hacky and we should clean this up for sure
+          // Accessing index 1 here means we are selecting the custom actions.
+          // Index 0 contains the checkbox column which we don't need with the
+          // new alert table.
+          customActionsColum={{
+            renderer: leadingTGridControlColumns[1].rowCellRender as (
+              props: EuiDataGridCellValueElementProps
+            ) => ReactNode,
+            width: leadingTGridControlColumns[1].width,
+          }}
           timelineId={id}
           showAlertStatusActions={showAlertStatusActions}
         >
