@@ -23,6 +23,7 @@ import { calculateBarchartColumnTimeInterval } from '../../../common/utils/dates
 import { useKibana } from '../../../hooks/use_kibana';
 import { DEFAULT_TIME_RANGE } from '../../query_bar/hooks/use_filters/utils';
 import { useSourcererDataView } from './use_sourcerer_data_view';
+import { threatIndicatorNamesOriginScript, threatIndicatorNamesScript } from '../lib/display_name';
 
 export interface UseAggregatedIndicatorsParam {
   /**
@@ -173,6 +174,20 @@ export const useAggregatedIndicators = ({
               fields: [TIMESTAMP_FIELD, field], // limit the response to only the fields we need
               size: 0, // we don't need hits, just aggregations
               query: queryToExecute,
+              runtime_mappings: {
+                'threat.indicator.name': {
+                  type: 'keyword',
+                  script: {
+                    source: threatIndicatorNamesScript(),
+                  },
+                },
+                'threat.indicator.name_origin': {
+                  type: 'keyword',
+                  script: {
+                    source: threatIndicatorNamesOriginScript(),
+                  },
+                },
+              },
             },
           },
         },
