@@ -99,7 +99,7 @@ const OsqueryEditorComponent = ({
   }, [formMethods, osquery]);
 
   return (
-    <div style={{ width: '100%', flex: 1 }}>
+    <>
       <EuiModalHeader>
         <EuiModalHeaderTitle>
           {isEditMode ? (
@@ -140,7 +140,7 @@ const OsqueryEditorComponent = ({
           )}
         </EuiButton>
       </EuiModalFooter>
-    </div>
+    </>
   );
 };
 
