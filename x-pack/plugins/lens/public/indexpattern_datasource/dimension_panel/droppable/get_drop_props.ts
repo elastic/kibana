@@ -44,12 +44,13 @@ export function getNewOperation(
   field: IndexPatternField | undefined | false,
   filterOperations: (meta: OperationMetadata) => boolean,
   targetColumn?: GenericIndexPatternColumn,
-  prioritizedOperation?: GenericIndexPatternColumn['operationType']
+  prioritizedOperation?: GenericIndexPatternColumn['operationType'],
+  alreadyUsedOperations?: Set<string>
 ) {
   if (!field) {
     return;
   }
-  const newOperations = getOperationTypesForField(field, filterOperations);
+  const newOperations = getOperationTypesForField(field, filterOperations, alreadyUsedOperations);
   if (!newOperations.length) {
     return;
   }
