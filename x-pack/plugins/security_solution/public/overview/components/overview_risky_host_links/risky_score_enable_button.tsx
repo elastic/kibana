@@ -23,9 +23,11 @@ import {
 const RiskyScoreEnableButtonComponent = ({
   refetch,
   moduleName,
+  disabled = false,
 }: {
   refetch: inputsModel.Refetch;
   moduleName: RiskScoreModuleName;
+  disabled?: boolean;
 }) => {
   const [installationState, setInstallationState] = useState<InstallationState>();
   const spaceId = useSpaceId();
@@ -48,9 +50,12 @@ const RiskyScoreEnableButtonComponent = ({
 
   return (
     <EuiButton
+      color="primary"
+      fill
       onClick={onBoardingRiskScore}
       isLoading={installationState === InstallationState.Started}
       data-test-subj="risk-score-enable"
+      disabled={disabled}
     >
       {installationState === InstallationState.Started ? (
         <FormattedMessage
