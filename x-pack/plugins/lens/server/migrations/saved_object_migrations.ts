@@ -58,7 +58,6 @@ import {
   commonExplicitAnnotationType,
   getLensDataViewMigrations,
   commonMigrateMetricIds,
-  commonAnnotationAddDataViewIdReferences,
   commonMigratePartitionChartGroups,
 } from './common_migrations';
 
@@ -529,14 +528,6 @@ const addEventAnnotationType: SavedObjectMigrationFn<
   return { ...newDoc, attributes: commonExplicitAnnotationType(newDoc.attributes) };
 };
 
-const addEventAnnotationDataViewReferences: SavedObjectMigrationFn<
-  LensDocShape850<VisState850>,
-  LensDocShape850<VisState850>
-> = (doc) => ({
-  ...doc,
-  references: commonAnnotationAddDataViewIdReferences(doc.attributes, doc.references),
-});
-
 const migrateMetricIds: SavedObjectMigrationFn<LensDocShape850, LensDocShape850> = (doc) => ({
   ...doc,
   attributes: commonMigrateMetricIds(doc.attributes),
@@ -574,12 +565,7 @@ const lensMigrations: SavedObjectMigrationMap = {
     enhanceTableRowHeight
   ),
   '8.3.0': flow(lockOldMetricVisSettings, preserveOldLegendSizeDefault, fixValueLabelsInXY),
-  '8.5.0': flow(
-    migrateMetricIds,
-    addEventAnnotationType,
-    addEventAnnotationDataViewReferences,
-    migratePartitionChartGroups
-  ),
+  '8.5.0': flow(migrateMetricIds, addEventAnnotationType, migratePartitionChartGroups),
 };
 
 export const getAllMigrations = (
