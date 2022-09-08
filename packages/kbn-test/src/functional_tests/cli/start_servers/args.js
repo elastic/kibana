@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import Fs from 'fs';
 import Path from 'path';
 
 import { v4 as uuid } from 'uuid';
@@ -70,7 +69,6 @@ export function displayHelp() {
 export function processOptions(userOptions, defaultConfigPath) {
   validateOptions(userOptions);
 
-  const logToFile = !!userOptions.logToFile;
   const useDefaultConfig = !userOptions.config;
   const config = useDefaultConfig ? defaultConfigPath : userOptions.config;
 
@@ -96,11 +94,8 @@ export function processOptions(userOptions, defaultConfigPath) {
     return log;
   }
 
+  const logToFile = !!userOptions.logToFile;
   const logsDir = logToFile ? Path.resolve(REPO_ROOT, 'data/ftr_servers_logs', uuid()) : undefined;
-  if (logsDir) {
-    Fs.mkdirSync(logsDir, { recursive: true });
-    log.info(`Kibana/ES logs will be written to ${Path.relative(process.cwd(), logsDir)}/`);
-  }
 
   return {
     ...userOptions,
