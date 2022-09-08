@@ -6,6 +6,7 @@
  */
 
 import axios from 'axios';
+import { FtrProviderContext } from '../../../../../../test/common/ftr_provider_context';
 
 export const enableMonitorManagedViaApi = async (kibanaUrl: string) => {
   try {
@@ -34,7 +35,7 @@ export const addTestMonitor = async (kibanaUrl: string, name: string) => {
 };
 
 export const cleanTestMonitors = async (params: Record<string, any>) => {
-  const getService = params.getService;
+  const getService = params.getService as FtrProviderContext['getService'];
   const server = getService('kibanaServer');
 
   try {

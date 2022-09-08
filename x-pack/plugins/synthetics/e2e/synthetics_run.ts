@@ -8,7 +8,7 @@ import { FtrConfigProviderContext } from '@kbn/test';
 import path from 'path';
 import { argv } from '@kbn/observability-plugin/e2e/parse_args_params';
 import { SyntheticsRunner } from '@kbn/observability-plugin/e2e/synthetics_runner';
-import { FtrProviderContext } from '../../../test/functional_with_es_ssl/ftr_provider_context';
+import { FtrProviderContext } from '../../../test/common/ftr_provider_context';
 
 const { headless, grep, bail: pauseOnError } = argv;
 

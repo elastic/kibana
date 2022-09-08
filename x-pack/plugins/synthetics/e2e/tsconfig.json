@@ -1,7 +1,7 @@
 {
   "extends": "../../../../tsconfig.base.json",
   "exclude": ["tmp", "target/**/*"],
-  "include": ["./**/*"],
+  "include": ["./**/*", "../../../../test/common/ftr_provider_context"],
   "compilerOptions": {
     "outDir": "target/types",
     "types": [ "node"],
@@ -15,6 +15,9 @@
     },
     {
       "path": "../tsconfig.json",
+    },
+    {
+      "path": "../../../test/tsconfig.json",
     }
   ]
 }
