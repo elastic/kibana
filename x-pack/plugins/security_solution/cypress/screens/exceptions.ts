@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-export const ADD_EXCEPTIONS_BTN = '[data-test-subj="exceptionsHeaderAddExceptionBtn"]';
-
 export const CLOSE_ALERTS_CHECKBOX =
   '[data-test-subj="bulk-close-alert-on-add-add-exception-checkbox"]';
 
@@ -67,3 +65,20 @@ export const EXCEPTION_FLYOUT_VERSION_CONFLICT =
   '[data-test-subj="exceptionsFlyoutVersionConflict"]';
 
 export const EXCEPTION_FLYOUT_LIST_DELETED_ERROR = '[data-test-subj="errorCalloutContainer"]';
+
+// Exceptions all items view
+export const NO_EXCEPTIONS_EXIST_PROMPT =
+  '[data-test-subj="exceptionItemViewerEmptyPrompts-empty-detection"]';
+
+export const ADD_EXCEPTIONS_BTN_FROM_EMPTY_PROMPT_BTN =
+  '[data-test-subj="exceptionsEmptyPromptButton"]';
+
+export const EXCEPTION_ITEM_VIEWER_CONTAINER = '[data-test-subj="exceptionItemContainer"]';
+
+export const ADD_EXCEPTIONS_BTN_FROM_VIEWER_HEADER =
+  '[data-test-subj="exceptionsHeaderAddExceptionBtn"]';
+
+export const NO_EXCEPTIONS_SEARCH_RESULTS_PROMPT =
+  '[data-test-subj="exceptionItemViewerEmptyPrompts-emptySearch"]';
+
+export const EXCEPTION_ITEM_VIEWER_SEARCH = 'input[data-test-subj="exceptionsViewerSearchBar"]';
