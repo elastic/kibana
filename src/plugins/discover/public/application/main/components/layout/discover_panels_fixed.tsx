@@ -7,7 +7,6 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { css } from '@emotion/react';
 import React, { ReactElement } from 'react';
 
 export const DiscoverPanelsFixed = ({
@@ -21,10 +20,6 @@ export const DiscoverPanelsFixed = ({
   topPanel: ReactElement;
   mainPanel: ReactElement;
 }) => {
-  const mainPanelCss = css`
-    min-height: 0;
-  `;
-
   return (
     <EuiFlexGroup
       className={className}
@@ -34,7 +29,7 @@ export const DiscoverPanelsFixed = ({
       responsive={false}
     >
       {!hideTopPanel && <EuiFlexItem grow={false}>{topPanel}</EuiFlexItem>}
-      <EuiFlexItem css={mainPanelCss}>{mainPanel}</EuiFlexItem>
+      <EuiFlexItem>{mainPanel}</EuiFlexItem>
     </EuiFlexGroup>
   );
 };
