@@ -83,7 +83,7 @@ export class TelemetryEventsSender implements ITelemetryEventsSender {
     telemetryReceiver: ITelemetryReceiver,
     telemetrySetup?: TelemetryPluginSetup,
     taskManager?: TaskManagerSetupContract,
-    telemetryUsageCounter?: UsageCounter,
+    telemetryUsageCounter?: UsageCounter
   ) {
     this.telemetrySetup = telemetrySetup;
     this.telemetryUsageCounter = telemetryUsageCounter;

@@ -87,7 +87,9 @@ export function createTelemetryDetectionRuleListsTaskConfig(maxTelemetryBatch: n
         licenseInfo,
         LIST_DETECTION_RULE_EXCEPTION
       );
-      cloudOnlyLogger.log(`Detection rule exception json length ${detectionRuleExceptionsJson.length}`);
+      cloudOnlyLogger.log(
+        `Detection rule exception json length ${detectionRuleExceptionsJson.length}`
+      );
       const batches = batchTelemetryRecords(detectionRuleExceptionsJson, maxTelemetryBatch);
       for (const batch of batches) {
         await sender.sendOnDemand(TELEMETRY_CHANNEL_LISTS, batch);

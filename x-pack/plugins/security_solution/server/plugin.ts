@@ -97,7 +97,7 @@ import type {
 import { alertsFieldMap, rulesFieldMap } from '../common/field_maps';
 import { EndpointFleetServicesFactory } from './endpoint/services/fleet';
 import { featureUsageService } from './endpoint/services/feature_usage';
-import { cloudOnlyLogger } from '../server/lib/telemetry/helpers';
+import { cloudOnlyLogger } from './lib/telemetry/helpers';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
@@ -462,7 +462,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       this.kibanaIndex!,
       DEFAULT_ALERTS_INDEX,
       this.endpointAppContextService,
-      exceptionListClient,
+      exceptionListClient
     );
 
     this.telemetryEventsSender.start(
