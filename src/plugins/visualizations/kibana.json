@@ -5,6 +5,7 @@
   "ui": true,
   "requiredPlugins": [
     "data",
+    "charts",
     "expressions",
     "fieldFormats",
     "uiActions",
@@ -19,7 +20,7 @@
     "dataViewEditor"
   ],
   "optionalPlugins": ["home", "share", "spaces", "savedObjectsTaggingOss"],
-  "requiredBundles": ["kibanaUtils", "savedSearch", "kibanaReact"],
+  "requiredBundles": ["kibanaUtils", "savedSearch", "kibanaReact", "charts"],
   "extraPublicDirs": ["common/constants", "common/utils", "common/expression_functions"],
   "owner": {
     "name": "Vis Editors",

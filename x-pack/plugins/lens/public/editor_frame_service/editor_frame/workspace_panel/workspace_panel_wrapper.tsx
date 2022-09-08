@@ -31,8 +31,10 @@ import {
   selectChangesApplied,
   applyChanges,
   selectAutoApplyEnabled,
+  selectStagedRequestWarnings,
 } from '../../../state_management';
 import { WorkspaceTitle } from './title';
+import { LensInspector } from '../../../lens_inspector_service';
 
 export const AUTO_APPLY_DISABLED_STORAGE_KEY = 'autoApplyDisabled';
 
@@ -45,6 +47,7 @@ export interface WorkspacePanelWrapperProps {
   datasourceMap: DatasourceMap;
   datasourceStates: DatasourceStates;
   isFullscreen: boolean;
+  lensInspector: LensInspector;
 }
 
 export function WorkspacePanelWrapper({
@@ -56,11 +59,13 @@ export function WorkspacePanelWrapper({
   datasourceMap,
   datasourceStates,
   isFullscreen,
+  lensInspector,
 }: WorkspacePanelWrapperProps) {
   const dispatchLens = useLensDispatch();
 
   const changesApplied = useLensSelector(selectChangesApplied);
   const autoApplyEnabled = useLensSelector(selectAutoApplyEnabled);
+  const requestWarnings = useLensSelector(selectStagedRequestWarnings);
 
   const activeVisualization = visualizationId ? visualizationMap[visualizationId] : null;
   const setVisualizationState = useCallback(
@@ -99,12 +104,18 @@ export function WorkspacePanelWrapper({
     const datasource = datasourceMap[datasourceId];
     if (!datasourceState.isLoading && datasource.getWarningMessages) {
       warningMessages.push(
-        ...(datasource.getWarningMessages(datasourceState.state, framePublicAPI, (updater) =>
-          setDatasourceState(updater, datasourceId)
+        ...(datasource.getWarningMessages(
+          datasourceState.state,
+          framePublicAPI,
+          lensInspector.adapters,
+          (updater) => setDatasourceState(updater, datasourceId)
         ) || [])
       );
     }
   });
+  if (requestWarnings) {
+    warningMessages.push(...requestWarnings);
+  }
   return (
     <>
       {!(isFullscreen && (autoApplyEnabled || warningMessages?.length)) && (

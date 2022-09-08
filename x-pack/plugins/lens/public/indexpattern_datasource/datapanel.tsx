@@ -16,9 +16,9 @@ import {
   EuiPopover,
   EuiCallOut,
   EuiFormControlLayout,
-  EuiIcon,
   EuiFilterButton,
   EuiScreenReaderOnly,
+  EuiIcon,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { EsQueryConfig, Query, Filter } from '@kbn/es-query';

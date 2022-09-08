@@ -32,7 +32,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     const testRollupIndex = 'sample-01-rollup';
     const testRollupField = 'kubernetes.container.memory.usage.bytes';
     const toastsSelector = '[data-test-subj=globalToastList] [data-test-subj=euiToastHeader]';
-    const shardFailureType = 'unsupported_aggregation_on_rollup_index';
+    const shardFailureType = 'unsupported_aggregation_on_downsampled_index';
     const shardFailureReason = `Field [${testRollupField}] of type [aggregate_metric_double] is not supported for aggregation [percentiles]`;
 
     const getTestJson = async (tabTestSubj: string, codeTestSubj: string) => {

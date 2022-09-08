@@ -28,6 +28,8 @@ export const selectVisualization = (state: LensState) => state.lens.visualizatio
 export const selectStagedPreview = (state: LensState) => state.lens.stagedPreview;
 export const selectStagedActiveData = (state: LensState) =>
   state.lens.stagedPreview?.activeData || state.lens.activeData;
+export const selectStagedRequestWarnings = (state: LensState) =>
+  state.lens.stagedPreview?.requestWarnings || state.lens.requestWarnings;
 export const selectAutoApplyEnabled = (state: LensState) => !state.lens.autoApplyDisabled;
 export const selectChangesApplied = (state: LensState) =>
   !state.lens.autoApplyDisabled || Boolean(state.lens.changesApplied);
@@ -61,6 +63,7 @@ export const selectExecutionContextSearch = createSelector(selectExecutionContex
     to: res.dateRange.toDate,
   },
   filters: res.filters,
+  disableShardWarnings: true,
 }));
 
 const selectInjectedDependencies = (_state: LensState, dependencies: unknown) => dependencies;
