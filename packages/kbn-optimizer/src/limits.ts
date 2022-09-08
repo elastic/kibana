@@ -71,6 +71,28 @@ export function validateLimitsForAllBundles(
     );
   }
 
+  const sorted = limitBundleIds
+    .slice()
+    .sort((a, b) => a.localeCompare(b))
+    .every((key, i) => limitBundleIds[i] === key);
+  if (!sorted) {
+    throw createFailError(
+      dedent`
+        The limits defined in packages/kbn-optimizer/limits.yml are not sorted correctly. To make
+        sure the file is automatically updatedable without dozens of extra changes, the keys in this
+        file must be sorted.
+
+        Please sort the keys alphabetically or, to automatically update the limits file locally run:
+
+          node scripts/build_kibana_platform_plugins.js --update-limits
+
+        To validate your changes locally run:
+
+          node scripts/build_kibana_platform_plugins.js --validate-limits
+      ` + '\n'
+    );
+  }
+
   log.success('limits.yml file valid');
 }
 
