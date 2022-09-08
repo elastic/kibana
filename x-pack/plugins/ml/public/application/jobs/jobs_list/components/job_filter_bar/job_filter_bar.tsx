@@ -56,6 +56,7 @@ export const JobFilterBar: FC<JobFilterBarProps> = ({ queryText, setFilters }) =
     } catch (e) {
       return [];
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const queryInstance: Query = useMemo(() => {
@@ -75,6 +76,7 @@ export const JobFilterBar: FC<JobFilterBarProps> = ({ queryText, setFilters }) =
     if (queryText !== undefined) {
       setFilters(queryInstance);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [queryText]);
 
   const filters: SearchFilterConfig[] = useMemo(
@@ -132,6 +134,7 @@ export const JobFilterBar: FC<JobFilterBarProps> = ({ queryText, setFilters }) =
         options: () => loadGroups(),
       },
     ],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
 

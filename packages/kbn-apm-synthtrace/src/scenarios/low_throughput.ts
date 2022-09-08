@@ -20,36 +20,35 @@ const ENVIRONMENT = getSynthtraceEnvironment(__filename);
 const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
   const logger = getLogger(runOptions);
 
-  const numServices = 3;
   const languages = ['go', 'dotnet', 'java', 'python'];
-  const services = ['web', 'order-processing', 'api-backend', 'proxy'];
+  const services = ['web', 'order-processing', 'api-backend'];
 
   return {
     generate: ({ from, to }) => {
       const range = timerange(from, to);
 
-      const successfulTimestamps = range.interval('1s').rate(1);
+      const successfulTimestamps = range.ratePerMinute(60);
       // `.randomize(3, 180);
 
-      const instances = [...Array(numServices).keys()].map((index) =>
+      const instances = services.map((service, index) =>
         apm
           .service(
             `${services[index % services.length]}-${languages[index % languages.length]}-${index}`,
             ENVIRONMENT,
             languages[index % languages.length]
           )
-          .instance('instance')
+          .instance(`instance-${index}`)
       );
 
       const urls = ['GET /order/{id}', 'POST /basket/{id}', 'DELETE /basket', 'GET /products'];
 
       const instanceSpans = (instance: Instance, url: string, index: number) => {
         const successfulTraceEvents = successfulTimestamps.generator((timestamp) => {
-          const mod = index % 4;
-          const randomHigh = random(100, mod * 1000);
-          const randomLow = random(10, randomHigh / 10 + mod * 3);
-          const duration = random(randomLow, randomHigh);
-          const childDuration = random(randomLow, duration);
+          const mod = (index % 4) + 1;
+          const randomHigh = random(100, mod * 1000, false);
+          const randomLow = random(10, randomHigh / 10 + mod * 3, false);
+          const duration = random(randomLow, randomHigh, false);
+          const childDuration = random(randomLow, duration, false);
           const remainderDuration = duration - childDuration;
           const generateError = index % random(mod, 9) === 0;
           const generateChildError = index % random(mod, 9) === 0;

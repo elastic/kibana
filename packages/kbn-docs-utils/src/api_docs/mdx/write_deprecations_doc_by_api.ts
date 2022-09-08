@@ -9,7 +9,7 @@
 import moment from 'moment';
 import { ToolingLog } from '@kbn/tooling-log';
 import dedent from 'dedent';
-import fs from 'fs';
+import Fsp from 'fs/promises';
 import Path from 'path';
 import {
   ApiReference,
@@ -20,12 +20,12 @@ import {
 import { AUTO_GENERATED_WARNING } from '../auto_generated_warning';
 import { getPluginApiDocId } from '../utils';
 
-export function writeDeprecationDocByApi(
+export async function writeDeprecationDocByApi(
   folder: string,
   deprecationsByPlugin: ReferencedDeprecationsByPlugin,
   unReferencedDeprecations: UnreferencedDeprecationsByPlugin,
   log: ToolingLog
-): void {
+): Promise<void> {
   const deprecationReferencesByApi = Object.values(deprecationsByPlugin).reduce(
     (acc, deprecations) => {
       deprecations.forEach((deprecation) => {
@@ -111,5 +111,5 @@ ${Object.values(unReferencedDeprecations)
 
 `);
 
-  fs.writeFileSync(Path.resolve(folder, 'deprecations_by_api.mdx'), mdx);
+  await Fsp.writeFile(Path.resolve(folder, 'deprecations_by_api.mdx'), mdx);
 }

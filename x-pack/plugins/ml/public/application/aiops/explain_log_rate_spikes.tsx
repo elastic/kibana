@@ -47,11 +47,13 @@ export const ExplainLogRateSpikesPage: FC = () => {
           dataView={dataView}
           savedSearch={savedSearch}
           appDependencies={pick(services, [
+            'application',
             'data',
             'charts',
             'fieldFormats',
             'http',
             'notifications',
+            'share',
             'storage',
             'uiSettings',
             'unifiedSearch',

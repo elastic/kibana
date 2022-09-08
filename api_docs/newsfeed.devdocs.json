@@ -13,6 +13,7 @@
         "description": [],
         "path": "src/plugins/newsfeed/public/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "newsfeed",
@@ -22,7 +23,8 @@
             "label": "kibanaVersion",
             "description": [],
             "path": "src/plugins/newsfeed/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "newsfeed",
@@ -32,7 +34,8 @@
             "label": "hasNew",
             "description": [],
             "path": "src/plugins/newsfeed/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "newsfeed",
@@ -52,7 +55,8 @@
               "[]"
             ],
             "path": "src/plugins/newsfeed/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "newsfeed",
@@ -65,7 +69,8 @@
               "Error | null"
             ],
             "path": "src/plugins/newsfeed/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -79,6 +84,7 @@
         "description": [],
         "path": "src/plugins/newsfeed/public/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "newsfeed",
@@ -88,7 +94,8 @@
             "label": "title",
             "description": [],
             "path": "src/plugins/newsfeed/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "newsfeed",
@@ -98,7 +105,8 @@
             "label": "description",
             "description": [],
             "path": "src/plugins/newsfeed/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "newsfeed",
@@ -111,7 +119,8 @@
               "string | null"
             ],
             "path": "src/plugins/newsfeed/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "newsfeed",
@@ -121,7 +130,8 @@
             "label": "linkUrl",
             "description": [],
             "path": "src/plugins/newsfeed/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "newsfeed",
@@ -134,7 +144,8 @@
               "string | null"
             ],
             "path": "src/plugins/newsfeed/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "newsfeed",
@@ -147,7 +158,8 @@
               "moment.Moment"
             ],
             "path": "src/plugins/newsfeed/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "newsfeed",
@@ -160,7 +172,8 @@
               "moment.Moment"
             ],
             "path": "src/plugins/newsfeed/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "newsfeed",
@@ -170,7 +183,8 @@
             "label": "hash",
             "description": [],
             "path": "src/plugins/newsfeed/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -186,6 +200,7 @@
         "description": [],
         "path": "src/plugins/newsfeed/public/lib/api.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -203,6 +218,7 @@
       ],
       "path": "src/plugins/newsfeed/public/plugin.tsx",
       "deprecated": false,
+      "trackAdoption": false,
       "lifecycle": "setup",
       "initialIsOpen": true
     },
@@ -236,6 +252,7 @@
       ],
       "path": "src/plugins/newsfeed/public/plugin.tsx",
       "deprecated": false,
+      "trackAdoption": false,
       "lifecycle": "start",
       "initialIsOpen": true
     }
