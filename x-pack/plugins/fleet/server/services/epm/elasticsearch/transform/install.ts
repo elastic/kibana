@@ -43,7 +43,7 @@ interface TransformInstallation extends TransformModuleBase {
   content: any;
 }
 
-export const installTransform = async (
+export const installTransforms = async (
   installablePackage: InstallablePackage,
   paths: string[],
   esClient: ElasticsearchClient,
@@ -93,8 +93,8 @@ export const installTransform = async (
         path
       );
 
-      // Since there can be multiple assets per transform job definition
-      // We want to create a unique list of assets/specifications for each transform job
+      // Since there can be multiple assets per transform definition
+      // We want to create a unique list of assets/specifications for each transform
       if (transformsSpecifications.get(transformModuleId) === undefined) {
         transformsSpecifications.set(transformModuleId, new Map());
       }
@@ -214,25 +214,19 @@ export const installTransform = async (
         });
       })
     );
-    // @TODO: Should we create indices for jobs that we are not starting automatically?
-    // And should these indices be tracked as ES references?
     await Promise.all(
       transforms.map(async (transform) => {
         const index = transform.content.dest.index;
         const pipelineId = transform.content.dest.pipeline;
-        const startTransform =
-          transformsSpecifications.get(transform.transformModuleId)?.get('start') !== false;
 
-        if (!startTransform) {
-          const indexExist = await esClient.indices.exists({
+        const indexExist = await esClient.indices.exists({
+          index,
+        });
+        if (indexExist !== true) {
+          return esClient.indices.create({
             index,
+            ...(pipelineId ? { settings: { default_pipeline: pipelineId } } : {}),
           });
-          if (indexExist !== true) {
-            return esClient.indices.create({
-              index,
-              ...(pipelineId ? { settings: { default_pipeline: pipelineId } } : {}),
-            });
-          }
         }
       })
     );
