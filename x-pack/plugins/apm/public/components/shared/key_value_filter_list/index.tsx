@@ -45,11 +45,6 @@ const StyledEuiDescriptionList = styled(EuiDescriptionList)`
     display: flex;
 `;
 
-const ValueContainer = styled.div`
-  display: flex;
-  align-items: center;
-`;
-
 function removeEmptyValues(items: KeyValue[]) {
   return items.filter(({ value }) => !isEmpty(value));
 }
@@ -95,27 +90,35 @@ export function KeyValueFilterList({
                 className="descriptionList__description"
                 style={{ width: '80%', height: '40px' }}
               >
-                <ValueContainer>
-                  {showFilterByOption && (
-                    <EuiButtonEmpty
-                      onClick={() => {
-                        onClickFilter({ key, value });
-                      }}
-                      data-test-subj={`filter_by_${key}`}
-                    >
-                      <EuiToolTip
-                        position="top"
-                        content={i18n.translate(
-                          'xpack.apm.keyValueFilterList.actionFilterLabel',
-                          { defaultMessage: 'Filter by value' }
-                        )}
+                <EuiFlexGroup
+                  alignItems="baseline"
+                  responsive={false}
+                  gutterSize="none"
+                >
+                  <EuiFlexItem style={{ minWidth: '32px' }} grow={false}>
+                    {showFilterByOption && (
+                      <EuiButtonEmpty
+                        onClick={() => {
+                          onClickFilter({ key, value });
+                        }}
+                        data-test-subj={`filter_by_${key}`}
                       >
-                        <EuiIcon type="filter" color="text" size="m" />
-                      </EuiToolTip>
-                    </EuiButtonEmpty>
-                  )}
-                  <EuiText size="s">{value}</EuiText>
-                </ValueContainer>
+                        <EuiToolTip
+                          position="top"
+                          content={i18n.translate(
+                            'xpack.apm.keyValueFilterList.actionFilterLabel',
+                            { defaultMessage: 'Filter by value' }
+                          )}
+                        >
+                          <EuiIcon type="filter" color="text" size="m" />
+                        </EuiToolTip>
+                      </EuiButtonEmpty>
+                    )}
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiText size="s">{value}</EuiText>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
               </EuiDescriptionListDescription>
             </Fragment>
           );
