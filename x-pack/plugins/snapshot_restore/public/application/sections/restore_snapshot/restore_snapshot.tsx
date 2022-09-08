@@ -8,7 +8,11 @@
 import React, { useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { RouteComponentProps } from 'react-router-dom';
-import { EuiPageContentBody, EuiPageHeader, EuiSpacer } from '@elastic/eui';
+import {
+  EuiPageContentBody_Deprecated as EuiPageContentBody,
+  EuiPageHeader,
+  EuiSpacer,
+} from '@elastic/eui';
 
 import { SnapshotDetails, RestoreSettings } from '../../../../common/types';
 import { SectionError, Error, PageError } from '../../../shared_imports';
