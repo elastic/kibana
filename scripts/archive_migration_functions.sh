@@ -1,36 +1,13 @@
-#!/bin/bash
-
-# ??? Should we migrate
-#     x-pack/test/functional/es_archives/spaces/multi_space
-# ### Yes, it needs migration
-#   ### Saved Object type(s) that we care about:
-#     dashboard
-#     index-pattern
-#     visualization
-#   ### Test file(s) that use it:
-#     x-pack/test/functional/apps/discover/preserve_url.ts
-#     x-pack/test/functional/apps/visualize/preserve_url.ts
-#     x-pack/test/functional/apps/dashboard/group1/preserve_url.ts
-#   ### Config(s) that govern the test file(s):
-#     x-pack/test/functional/apps/dashboard/group1/config.ts
-#     x-pack/test/functional/apps/discover/config.ts
-#     x-pack/test/functional/apps/visualize/config.ts
-
 standard_list="url,index-pattern,query,graph-workspace,tag,visualization,canvas-element,canvas-workpad,dashboard,search,lens,map,cases,uptime-dynamic-settings,osquery-saved-query,osquery-pack,infrastructure-ui-source,metrics-explorer-view,inventory-view,infrastructure-monitoring-log-view,apm-indices"
 
-orig_archive="x-pack/test/functional/es_archives/spaces/multi_space"
-new_archive="x-pack/test/functional/fixtures/kbn_archiver/spaces/multi_space"
+orig_archive="x-pack/test/functional/es_archives/banners/multispace"
+new_archive="x-pack/test/functional/fixtures/kbn_archiver/banners/multi_space"
 
 # newArchives=("x-pack/test/functional/fixtures/kbn_archiver/dashboard/session_in_space")
-# newArchives+=("x-pack/test/functional/fixtures/kbn_archiver/dashboard/session_in_another_space")
 
-testFiles=("x-pack/test/functional/apps/discover/preserve_url.ts")
-testFiles+=("x-pack/test/functional/apps/visualize/preserve_url.ts")
-testFiles+=("x-pack/test/functional/apps/dashboard/group1/preserve_url.ts")
+# testFiles=("x-pack/test/functional/apps/discover/preserve_url.ts")
 
-test_config="x-pack/test/functional/apps/dashboard/group1/config.ts"
-# test_config="x-pack/test/functional/apps/discover/config.ts"
-# test_config="x-pack/test/functional/apps/visualize/config.ts"
+test_config="x-pack/test/banners_functional/config.ts"
 
 curl_so_count() {
   local so=${1:-search-session}
