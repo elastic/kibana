@@ -63,7 +63,7 @@ export function useTableSettings<TypeOfItem>(
       totalItemCount: items.length,
       pageSizeOptions: PAGE_SIZE_OPTIONS,
     }),
-    [items, pageIndex, pageSize]
+    [items.length, pageIndex, pageSize]
   );
 
   const sorting = useMemo(
