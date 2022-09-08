@@ -7,6 +7,7 @@
 
 import { isEqual, uniqBy } from 'lodash';
 import React from 'react';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { render, unmountComponentAtNode } from 'react-dom';
 import type { DataViewBase, EsQueryConfig, Filter, Query, TimeRange } from '@kbn/es-query';
@@ -44,6 +45,7 @@ import {
   SelfStyledEmbeddable,
   FilterableEmbeddable,
 } from '@kbn/embeddable-plugin/public';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { DataViewsContract, DataView } from '@kbn/data-views-plugin/public';
 import type {
@@ -54,7 +56,7 @@ import type {
   ThemeServiceStart,
 } from '@kbn/core/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import { BrushTriggerEvent, ClickTriggerEvent } from '@kbn/charts-plugin/public';
+import { BrushTriggerEvent, ClickTriggerEvent, Warnings } from '@kbn/charts-plugin/public';
 import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
 import { getExecutionContextEvents, trackUiCounterEvents } from '../lens_ui_telemetry';
 import { Document } from '../persistence';
@@ -233,6 +235,7 @@ export class Embeddable
   private savedVis: Document | undefined;
   private expression: string | undefined | null;
   private domNode: HTMLElement | Element | undefined;
+  private warningDomNode: HTMLElement | Element | undefined;
   private subscription: Subscription;
   private isInitialized = false;
   private errors: ErrorMessage[] | undefined;
@@ -497,6 +500,26 @@ export class Embeddable
     return isDirty;
   }
 
+  private handleWarnings(adapters?: Partial<DefaultInspectorAdapters>) {
+    const activeDatasourceId = getActiveDatasourceIdFromDoc(this.savedVis);
+    if (!activeDatasourceId || !adapters?.requests) return;
+    const activeDatasource = this.deps.datasourceMap[activeDatasourceId];
+    const docDatasourceState = this.savedVis?.state.datasourceStates[activeDatasourceId];
+    const warnings: React.ReactNode[] = [];
+    this.deps.data.search.showWarnings(adapters.requests, (warning) => {
+      const warningMessage = activeDatasource.getSearchWarningMessages?.(
+        docDatasourceState,
+        warning
+      );
+
+      warnings.push(...(warningMessage || []));
+      if (warningMessage && warningMessage.length) return true;
+    });
+    if (warnings && this.warningDomNode) {
+      render(<Warnings warnings={warnings} />, this.warningDomNode);
+    }
+  }
+
   private updateActiveData: ExpressionWrapperProps['onData$'] = (data, adapters) => {
     this.activeDataInfo.activeData = adapters?.tables?.tables;
     if (this.input.onLoad) {
@@ -510,6 +533,8 @@ export class Embeddable
       loading: false,
       error: type === 'error' ? error : undefined,
     });
+
+    this.handleWarnings(adapters);
   };
 
   private onRender: ExpressionWrapperProps['onRender$'] = () => {
@@ -625,6 +650,19 @@ export class Embeddable
           }}
           noPadding={this.visDisplayOptions?.noPadding}
         />
+        <div
+          css={css({
+            position: 'absolute',
+            zIndex: 2,
+            right: euiThemeVars.euiSizeM,
+            bottom: euiThemeVars.euiSizeM,
+          })}
+          ref={(el) => {
+            if (el) {
+              this.warningDomNode = el;
+            }
+          }}
+        />
       </KibanaThemeProvider>,
       domNode
     );
@@ -665,6 +703,7 @@ export class Embeddable
         this.savedVis.state.filters,
         this.savedVis.references
       ),
+      disableShardWarnings: true,
     };
 
     if (this.externalSearchContext.query) {
