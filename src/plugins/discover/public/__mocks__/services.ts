@@ -114,4 +114,7 @@ export const discoverServiceMock = {
   },
   expressions: expressionsPlugin,
   savedObjectsTagging: {},
+  timefilter: {
+    createFilter: jest.fn(),
+  },
 } as unknown as DiscoverServices;
