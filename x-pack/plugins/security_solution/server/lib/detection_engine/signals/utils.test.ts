@@ -1671,7 +1671,7 @@ describe('utils', () => {
       expect(ruleExecutionLogger.warn).not.toHaveBeenCalled();
     });
 
-    test('logs the exception names when there are unprocessed exeptions', () => {
+    test('logs the exception names when there are unprocessed exceptions', () => {
       logUnprocessedExceptionsWarnings([getExceptionListItemSchemaMock()], ruleExecutionLogger);
       expect(ruleExecutionLogger.warn).toHaveBeenCalled();
       expect(ruleExecutionLogger.warn.mock.calls[0][0]).toContain(

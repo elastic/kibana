@@ -26,6 +26,7 @@ export * from './find_exception_list_route';
 export * from './find_list_item_route';
 export * from './find_list_route';
 export * from './find_small_list_route';
+export * from './get_exception_filter_route';
 export * from './import_exceptions_route';
 export * from './import_list_item_route';
 export * from './init_routes';

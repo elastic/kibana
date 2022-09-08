@@ -30,6 +30,7 @@ import {
   findListItemRoute,
   findListRoute,
   findSmallListRoute,
+  getExceptionFilterRoute,
   importExceptionsRoute,
   importListItemRoute,
   patchListItemRoute,
@@ -92,6 +93,9 @@ export const initRoutes = (router: ListsPluginRouter, config: ConfigType): void 
   updateExceptionListItemRoute(router);
   deleteExceptionListItemRoute(router);
   findExceptionListItemRoute(router);
+
+  // exception filter
+  getExceptionFilterRoute(router);
 
   // endpoint list
   createEndpointListRoute(router);
