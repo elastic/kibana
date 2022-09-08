@@ -50,7 +50,7 @@ export const ResponseActionAddButton = ({
             onClick={() => setAddResponseActionButtonShown(false)}
           >
             <FormattedMessage
-              id="xpack.triggersActionsUI.sections.actionForm.addActionButtonLabel"
+              id="xpack.securitySolution.sections.actionForm.addActionButtonLabel"
               defaultMessage="Add action"
             />
           </EuiButton>

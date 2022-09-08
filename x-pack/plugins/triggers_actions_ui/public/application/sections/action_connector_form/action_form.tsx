@@ -443,7 +443,7 @@ export const ActionForm = ({
               onClick={() => setIsAddActionPanelOpen(true)}
             >
               <FormattedMessage
-                id="xpack.triggersActionsUI.sections.actionForm.addActionButtonLabel"
+                id="xpack.securitySolution.sections.actionForm.addActionButtonLabel"
                 defaultMessage="Add action"
               />
             </EuiButton>
