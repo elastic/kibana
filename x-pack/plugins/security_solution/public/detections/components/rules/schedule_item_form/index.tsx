@@ -51,24 +51,27 @@ const StyledEuiFormRow = styled(EuiFormRow)`
   max-width: none;
 
   .euiFormControlLayout {
-    max-width: ${({ fullWidth }) => (fullWidth ? 'auto' : '200px !important')};
-    width: ${({ fullWidth }) => (fullWidth ? 'auto' : 'inherit')};
+    max-width: auto;
+    width: auto;
   }
 
   .euiFormControlLayout__childrenWrapper > *:first-child {
     box-shadow: none;
     height: 38px;
-    width: ${({ fullWidth }) => (fullWidth ? '100%' : 'auto')};
+    width: 100%;
   }
 
   .euiFormControlLayout__childrenWrapper > select {
-    background-color: ${({ fullWidth, theme }) =>
-      fullWidth ? transparentize(theme.eui.euiColorPrimary, 0.1) : 'inherit'};
-    color: ${({ fullWidth, theme }) => (fullWidth ? theme.eui.euiColorPrimary : 'inherit')};
+    background-color: ${({ theme }) => transparentize(theme.eui.euiColorPrimary, 0.1)};
+    color: ${({ theme }) => theme.eui.euiColorPrimary};
+  }
+
+  .euiFormControlLayout--group .euiFormControlLayout {
+    min-width: 100px;
   }
 
   .euiFormControlLayoutIcons {
-    color: ${({ fullWidth, theme }) => (fullWidth ? theme.eui.euiColorPrimary : 'inherit')};
+    color: ${({ theme }) => theme.eui.euiColorPrimary};
   }
 
   .euiFormControlLayout:not(:first-child) {

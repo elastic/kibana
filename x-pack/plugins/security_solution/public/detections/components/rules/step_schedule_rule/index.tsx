@@ -7,7 +7,6 @@
 
 import type { FC } from 'react';
 import React, { memo, useCallback, useEffect } from 'react';
-
 import type { RuleStepProps, ScheduleStepRule } from '../../../pages/detection_engine/rules/types';
 import { RuleStep } from '../../../pages/detection_engine/rules/types';
 import { StepRuleDescription } from '../description_step';
