@@ -22,7 +22,7 @@ import { useFetchRule } from '@kbn/observability-plugin/public/hooks/use_fetch_r
 import { useLoadRuleTypes } from '@kbn/triggers-actions-ui-plugin/public';
 import { ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import { AlertConsumers } from '@kbn/rule-data-utils';
-import PageNotFound from '../404';
+import PageNotFound from '../../404';
 
 export function AlertDetails() {
     const { http } = useKibana<ObservabilityAppServices>().services;
