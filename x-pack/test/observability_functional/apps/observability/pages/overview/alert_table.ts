@@ -13,7 +13,7 @@ const ALL_ALERTS = 10;
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
 
-  describe('Observability overview', function () {
+  describe.only('Observability overview', function () {
     this.tags('includeFirefox');
 
     const observability = getService('observability');
@@ -30,7 +30,7 @@ export default ({ getService }: FtrProviderContext) => {
     describe('Without alerts', function () {
       it('navigate and open alerts section', async () => {
         await observability.overview.common.navigateToOverviewPage();
-        await observability.overview.common.waitForAlertsSectionToOpen();
+        await observability.overview.common.openAlertsSectionAndWaitToAppear();
       });
 
       it('should show no data message', async () => {
@@ -43,7 +43,7 @@ export default ({ getService }: FtrProviderContext) => {
     describe('With alerts', function () {
       it('navigate and open alerts section', async () => {
         await observability.overview.common.navigateToOverviewPageWithAlerts();
-        await observability.overview.common.waitForAlertsSectionToOpen();
+        await observability.overview.common.openAlertsSectionAndWaitToAppear();
       });
 
       it('should show alerts correctly', async () => {

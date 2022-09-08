@@ -50,10 +50,9 @@ export function ObservabilityOverviewCommonProvider({
     ).click();
   };
 
-  const waitForAlertsSectionToOpen = async () => {
+  const openAlertsSectionAndWaitToAppear = async () => {
+    await openAlertsSection();
     await retry.waitFor('alert table to appear', async () => {
-      await openAlertsSection();
-
       return (
         (await testSubjects.exists(ALERTS_TABLE_NO_DATA_SELECTOR)) ||
         (await testSubjects.exists(ALERTS_TABLE_WITH_DATA_SELECTOR))
@@ -66,9 +65,9 @@ export function ObservabilityOverviewCommonProvider({
   };
 
   return {
-    navigateToOverviewPageWithAlerts,
-    waitForAlertsSectionToOpen,
-    navigateToOverviewPage,
     getAlertsTableNoDataOrFail,
+    navigateToOverviewPageWithAlerts,
+    navigateToOverviewPage,
+    openAlertsSectionAndWaitToAppear,
   };
 }
