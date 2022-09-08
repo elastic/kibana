@@ -6,7 +6,7 @@
  */
 
 import { addItemsToArray, deleteItemsFromArray, ruleParamsModifier } from './rule_params_modifier';
-import { BulkActionEditType } from '../../../../../common/detection_engine/schemas/common/schemas';
+import { BulkActionEditType } from '../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema';
 import type { RuleAlertType } from '../types';
 
 describe('addItemsToArray', () => {
@@ -38,9 +38,13 @@ describe('deleteItemsFromArray', () => {
 });
 
 describe('ruleParamsModifier', () => {
-  const ruleParamsMock = { index: ['my-index-*'], version: 1 } as RuleAlertType['params'];
+  const ruleParamsMock = {
+    index: ['initial-index-*'],
+    version: 1,
+    immutable: false,
+  } as RuleAlertType['params'];
 
-  test('should increment version', () => {
+  test('should increment version if rule is custom (immutable === false)', () => {
     const editedRuleParams = ruleParamsModifier(ruleParamsMock, [
       {
         type: BulkActionEditType.add_index_patterns,
@@ -48,6 +52,16 @@ describe('ruleParamsModifier', () => {
       },
     ]);
     expect(editedRuleParams).toHaveProperty('version', ruleParamsMock.version + 1);
+  });
+
+  test('should not increment version if rule is prebuilt (immutable === true)', () => {
+    const editedRuleParams = ruleParamsModifier({ ...ruleParamsMock, immutable: true }, [
+      {
+        type: BulkActionEditType.add_index_patterns,
+        value: ['my-index-*'],
+      },
+    ]);
+    expect(editedRuleParams).toHaveProperty('version', ruleParamsMock.version);
   });
 
   describe('index_patterns', () => {
