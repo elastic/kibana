@@ -14,6 +14,7 @@ import {
   PluginSetup,
 } from './types';
 import { defineRoutes } from './routes';
+import { getUiSettings } from './ui_settings';
 
 export class UnifiedFieldListPlugin
   implements Plugin<UnifiedFieldListServerPluginSetup, UnifiedFieldListServerPluginStart>
@@ -26,8 +27,9 @@ export class UnifiedFieldListPlugin
 
   public setup(core: CoreSetup<PluginStart>, plugins: PluginSetup) {
     this.logger.debug('unifiedFieldList: Setup');
+    core.uiSettings.register(getUiSettings());
 
-    defineRoutes(core);
+    defineRoutes(core, this.logger);
 
     return {};
   }

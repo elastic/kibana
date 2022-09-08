@@ -17127,8 +17127,6 @@
     "xpack.lens.indexPattern.percentileRanks.documentation.markdown": "\n特定の値未満の値の割合が返されます。たとえば、値が観察された値の95%以上の場合、95パーセンタイルランクであるとされます。\n\n例：100未満の値のパーセンタイルを取得します。\n`percentile_rank(bytes, value=100)`\n      ",
     "xpack.lens.indexPattern.standardDeviation.documentation.markdown": "\nフィールドの分散または散布度が返されます。この関数は数値フィールドでのみ動作します。\n\n#### 例\n\n価格の標準偏差を取得するには、standard_deviation(price)を使用します。\n\n英国からの注文書の価格の分散を取得するには、square(standard_deviation(price, kql='location:UK'))を使用します。\n      ",
     "xpack.lens.indexPattern.time_scale.documentation.markdown": "\n\nこの高度な機能は、特定の期間に対してカウントと合計を正規化する際に役立ちます。すでに特定の期間に対して正規化され、保存されたメトリックとの統合が可能です。\n\nこの機能は、現在のグラフで日付ヒストグラム関数が使用されている場合にのみ使用できます。\n\n例：すでに正規化されているメトリックを、正規化が必要な別のメトリックと比較した比率。\n`normalize_by_unit(counter_rate(max(system.diskio.write.bytes)), unit='s') / last_value(apache.status.bytes_per_second)`\n      ",
-    "xpack.lens.advancedSettings.useFieldExistenceSampling.description": "有効な場合、インデックスマッピングを使用するのではなく、ドキュメントサンプリングを使用して、Lensフィールドリストのフィールドの存在（使用可能または空）を決定します。",
-    "xpack.lens.advancedSettings.useFieldExistenceSampling.title": "フィールド存在サンプリングを使用",
     "xpack.lens.app.addToLibrary": "ライブラリに保存",
     "xpack.lens.app.cancel": "キャンセル",
     "xpack.lens.app.cancelButtonAriaLabel": "変更を保存せずに最後に使用していたアプリに戻る",

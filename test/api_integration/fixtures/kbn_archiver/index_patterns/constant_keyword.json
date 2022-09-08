@@ -1,0 +1,16 @@
+{
+  "attributes": {
+      "timeFieldName": "ts",
+      "title": "existence_index_*",
+      "runtimeFieldMap":"{\"data_view_runtime_field\":{\"type\":\"keyword\",\"script\":{\"source\":\"emit('a')\"}}}"
+  },
+  "coreMigrationVersion": "8.0.0",
+  "id": "existence_index",
+  "migrationVersion": {
+      "index-pattern": "7.11.0"
+  },
+  "references": [],
+  "type": "index-pattern",
+  "updated_at": "2018-12-21T00:43:07.096Z",
+  "version": "WzEzLDJd"
+}

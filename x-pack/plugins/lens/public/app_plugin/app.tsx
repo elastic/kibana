@@ -62,6 +62,9 @@ export function App({
 
   const {
     data,
+    dataViews,
+    uiActions,
+    uiSettings,
     chrome,
     inspector: lensInspector,
     application,
@@ -367,10 +370,10 @@ export function App({
   const indexPatternService = useMemo(
     () =>
       createIndexPatternService({
-        dataViews: lensAppServices.dataViews,
-        uiSettings: lensAppServices.uiSettings,
-        uiActions: lensAppServices.uiActions,
-        core: { http, notifications },
+        dataViews,
+        uiActions,
+        core: { http, notifications, uiSettings },
+        data,
         updateIndexPatterns: (newIndexPatternsState, options) => {
           dispatch(updateIndexPatterns(newIndexPatternsState));
           if (options?.applyImmediately) {
@@ -384,7 +387,7 @@ export function App({
           }
         },
       }),
-    [dispatch, http, notifications, lensAppServices]
+    [dataViews, uiActions, http, notifications, uiSettings, data, dispatch]
   );
 
   return (
