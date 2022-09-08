@@ -30,7 +30,6 @@ interface PartitionChartMeta {
   groupLabel: string;
   maxBuckets: number;
   isExperimental?: boolean;
-  requiredMinDimensionCount?: number;
   toolbarPopover: {
     isDisabled?: boolean;
     categoryOptions: Array<{
@@ -202,7 +201,6 @@ export const PartitionChartsMeta: Record<PieChartType, PartitionChartMeta> = {
     legend: {
       getShowLegendDefault: () => false,
     },
-    requiredMinDimensionCount: 2,
   },
   waffle: {
     icon: IconChartWaffle,
