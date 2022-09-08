@@ -10,7 +10,7 @@ import { act, renderHook } from '@testing-library/react-hooks';
 import { TestProviders } from '../../../mock';
 import type { Refetch } from '../../../store/inputs/model';
 import type { AnomaliesCount } from './use_anomalies_search';
-import { useNotableAnomaliesSearch, AnomalyJobStatus } from './use_anomalies_search';
+import { useNotableAnomaliesSearch, AnomalyJobStatus, AnomalyEntity } from './use_anomalies_search';
 
 const jobId = 'auth_rare_source_ip_for_a_user';
 const from = 'now-24h';
@@ -122,6 +122,7 @@ describe('useNotableAnomaliesSearch', () => {
             jobId,
             name: jobId,
             status: AnomalyJobStatus.enabled,
+            entity: AnomalyEntity.Host,
           },
         ])
       );
@@ -155,6 +156,7 @@ describe('useNotableAnomaliesSearch', () => {
             jobId: undefined,
             name: jobId,
             status: AnomalyJobStatus.uninstalled,
+            entity: AnomalyEntity.Host,
           },
         ])
       );
@@ -197,6 +199,7 @@ describe('useNotableAnomaliesSearch', () => {
             jobId: customJobId,
             name: jobId,
             status: AnomalyJobStatus.enabled,
+            entity: AnomalyEntity.Host,
           },
         ])
       );
@@ -254,6 +257,7 @@ describe('useNotableAnomaliesSearch', () => {
             jobId: mostRecentJobId,
             name: jobId,
             status: AnomalyJobStatus.enabled,
+            entity: AnomalyEntity.Host,
           },
         ])
       );
