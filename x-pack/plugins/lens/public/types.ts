@@ -388,6 +388,15 @@ export interface Datasource<T = unknown, P = unknown> {
   ) => Array<DatasourceSuggestion<T>>;
 
   getPublicAPI: (props: PublicAPIProps<T>) => DatasourcePublicAPI;
+  /**
+   * uniqueLabels of dimensions exposed for aria-labels of dragged dimensions
+   */
+  uniqueLabels: (state: T) => Record<string, string>;
+  /**
+   * Check the internal state integrity and returns a list of missing references
+   */
+  checkIntegrity: (state: T, indexPatterns: IndexPatternMap) => string[];
+
   getErrorMessages: (
     state: T,
     indexPatterns: Record<string, IndexPattern>
@@ -398,14 +407,7 @@ export interface Datasource<T = unknown, P = unknown> {
         fixAction?: { label: string; newState: () => Promise<T> };
       }>
     | undefined;
-  /**
-   * uniqueLabels of dimensions exposed for aria-labels of dragged dimensions
-   */
-  uniqueLabels: (state: T) => Record<string, string>;
-  /**
-   * Check the internal state integrity and returns a list of missing references
-   */
-  checkIntegrity: (state: T, indexPatterns: IndexPatternMap) => string[];
+
   /**
    * The frame calls this function to display warnings about visualization
    */
@@ -414,6 +416,9 @@ export interface Datasource<T = unknown, P = unknown> {
     frame: FramePublicAPI,
     setState: StateSetter<T>
   ) => React.ReactNode[] | undefined;
+
+  getDeprecationMessages?: (state: T) => React.ReactNode[] | undefined;
+
   /**
    * Checks if the visualization created is time based, for example date histogram
    */
