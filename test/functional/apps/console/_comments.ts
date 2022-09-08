@@ -15,8 +15,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const PageObjects = getPageObjects(['common', 'console', 'header']);
 
-  // Failing: See https://github.com/elastic/kibana/issues/139295
-  describe.skip('console app', function testComments() {
+  describe('console app', function testComments() {
     this.tags('includeFirefox');
     before(async () => {
       log.debug('navigateTo console');
