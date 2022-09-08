@@ -282,6 +282,7 @@ export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({
             selectedCategory={selectedCategory}
             sparkLines={sparkLines}
             totalCount={totalCount}
+            documentCountStats={documentStats.documentCountStats}
           />
           <EuiSpacer />
         </>

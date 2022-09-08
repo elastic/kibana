@@ -11,6 +11,7 @@ import { DocumentCountChart as DocumentCountChartRoot } from '../document_count_
 import { TotalCountHeader } from '../document_count_content/total_count_header';
 import type { Category, SparkLinesPerCategory } from './use_categorize_request';
 import type { EventRate } from './use_categorize_request';
+import { DocumentCountStats } from '../../get_document_stats';
 
 interface Props {
   totalCount: number;
@@ -18,6 +19,7 @@ interface Props {
   selectedCategory: Category | null;
   eventRate: EventRate;
   sparkLines: SparkLinesPerCategory;
+  documentCountStats?: DocumentCountStats;
 }
 
 export const DocumentCountChart: FC<Props> = ({
@@ -26,7 +28,12 @@ export const DocumentCountChart: FC<Props> = ({
   totalCount,
   pinnedCategory,
   selectedCategory,
+  documentCountStats,
 }) => {
+  if (documentCountStats?.interval === undefined) {
+    return null;
+  }
+
   const getChartPoints = () => {
     const category = selectedCategory ?? pinnedCategory ?? null;
     return eventRate.map(({ key, docCount }) => {
@@ -59,7 +66,7 @@ export const DocumentCountChart: FC<Props> = ({
         chartPointsSplit={getChartPointsSplit()}
         timeRangeEarliest={eventRate[0].key}
         timeRangeLatest={eventRate[eventRate.length - 1].key}
-        interval={10}
+        interval={documentCountStats.interval}
         changePoint={undefined}
         isBrushCleared={false}
       />
