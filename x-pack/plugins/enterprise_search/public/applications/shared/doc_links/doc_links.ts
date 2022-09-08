@@ -176,6 +176,7 @@ class DocLinks {
     this.enterpriseSearchUsersAccess = '';
     this.kibanaSecurity = '';
     this.languageAnalyzers = '';
+    this.languageClients = '';
     this.licenseManagement = '';
     this.pluginsIngestAttachment = '';
     this.queryDsl = '';
@@ -283,6 +284,7 @@ class DocLinks {
     this.enterpriseSearchUsersAccess = docLinks.links.enterpriseSearch.usersAccess;
     this.kibanaSecurity = docLinks.links.kibana.xpackSecurity;
     this.languageAnalyzers = docLinks.links.enterpriseSearch.languageAnalyzers;
+    this.languageClients = docLinks.links.enterpriseSearch.languageClients;
     this.licenseManagement = docLinks.links.enterpriseSearch.licenseManagement;
     this.pluginsIngestAttachment = docLinks.links.plugins.ingestAttachment;
     this.queryDsl = docLinks.links.query.queryDsl;
