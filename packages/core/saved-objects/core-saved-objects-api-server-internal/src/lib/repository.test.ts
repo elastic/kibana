@@ -2424,7 +2424,7 @@ describe('SavedObjectsRepository', () => {
         mgetOptions?: { statusCode?: number }
       ) => {
         const getId = (type: string, id: string) => `${options?.namespace}:${type}:${id}`;
-        // mock teh response for the not found doc
+        // mock the response for the not found doc
         client.mget.mockResponseOnce(mgetResponse, { statusCode: mgetOptions?.statusCode });
         // get a mocked response for the valid docs
         const bulkResponse = getMockEsBulkDeleteResponse([obj1, obj2], { namespace });
