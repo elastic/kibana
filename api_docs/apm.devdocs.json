@@ -13,6 +13,7 @@
         "description": [],
         "path": "x-pack/plugins/apm/public/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "apm",
@@ -22,7 +23,8 @@
             "label": "serviceMapEnabled",
             "description": [],
             "path": "x-pack/plugins/apm/public/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "apm",
@@ -32,7 +34,8 @@
             "label": "profilingEnabled",
             "description": [],
             "path": "x-pack/plugins/apm/public/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "apm",
@@ -45,7 +48,8 @@
               "{ enabled: boolean; }"
             ],
             "path": "x-pack/plugins/apm/public/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -78,6 +82,7 @@
       ],
       "path": "x-pack/plugins/apm/public/plugin.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "lifecycle": "setup",
       "initialIsOpen": true
     },
@@ -93,6 +98,7 @@
       ],
       "path": "x-pack/plugins/apm/public/plugin.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "lifecycle": "start",
       "initialIsOpen": true
     }
@@ -138,6 +144,7 @@
         ],
         "path": "x-pack/plugins/apm/server/plugin.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "apm",
@@ -151,6 +158,7 @@
             ],
             "path": "x-pack/plugins/apm/server/plugin.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "apm",
@@ -171,6 +179,7 @@
                 ],
                 "path": "x-pack/plugins/apm/server/plugin.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -212,6 +221,7 @@
             ],
             "path": "x-pack/plugins/apm/server/plugin.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "apm",
@@ -234,6 +244,7 @@
                 ],
                 "path": "x-pack/plugins/apm/server/plugin.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -248,6 +259,7 @@
                 ],
                 "path": "x-pack/plugins/apm/server/plugin.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -273,6 +285,7 @@
             ],
             "path": "x-pack/plugins/apm/server/plugin.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "apm",
@@ -292,6 +305,7 @@
                 ],
                 "path": "x-pack/plugins/apm/server/plugin.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -309,6 +323,7 @@
             ],
             "path": "x-pack/plugins/apm/server/plugin.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -327,6 +342,7 @@
         "description": [],
         "path": "x-pack/plugins/apm/server/routes/typings.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "apm",
@@ -340,7 +356,8 @@
               "<unknown, unknown, unknown, any>"
             ],
             "path": "x-pack/plugins/apm/server/routes/typings.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "apm",
@@ -384,7 +401,8 @@
               ">; }"
             ],
             "path": "x-pack/plugins/apm/server/routes/typings.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "apm",
@@ -397,7 +415,8 @@
               "{ query: { _inspect: boolean; start?: number | undefined; end?: number | undefined; }; }"
             ],
             "path": "x-pack/plugins/apm/server/routes/typings.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "apm",
@@ -412,7 +431,8 @@
               "; readonly telemetryCollectionEnabled: boolean; readonly metricsInterval: number; readonly profilingEnabled: boolean; readonly agent: Readonly<{} & { migrations: Readonly<{} & { enabled: boolean; }>; }>; }"
             ],
             "path": "x-pack/plugins/apm/server/routes/typings.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "apm",
@@ -425,7 +445,8 @@
               "Logger"
             ],
             "path": "x-pack/plugins/apm/server/routes/typings.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "apm",
@@ -454,7 +475,8 @@
               ">; }"
             ],
             "path": "x-pack/plugins/apm/server/routes/typings.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "apm",
@@ -701,7 +723,8 @@
               "; start: () => Promise<never>; } | undefined; }"
             ],
             "path": "x-pack/plugins/apm/server/routes/typings.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "apm",
@@ -720,7 +743,8 @@
               }
             ],
             "path": "x-pack/plugins/apm/server/routes/typings.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "apm",
@@ -740,7 +764,8 @@
               " | undefined"
             ],
             "path": "x-pack/plugins/apm/server/routes/typings.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "apm",
@@ -750,7 +775,8 @@
             "label": "kibanaVersion",
             "description": [],
             "path": "x-pack/plugins/apm/server/routes/typings.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -770,6 +796,7 @@
         ],
         "path": "x-pack/plugins/apm/server/routes/apm_routes/get_global_apm_server_route_repository.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -784,6 +811,7 @@
         ],
         "path": "x-pack/plugins/apm/common/alert_types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -800,6 +828,7 @@
         ],
         "path": "x-pack/plugins/apm/server/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -814,6 +843,7 @@
         ],
         "path": "x-pack/plugins/apm/server/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -5548,6 +5578,7 @@
         ],
         "path": "x-pack/plugins/apm/server/routes/apm_routes/get_global_apm_server_route_repository.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -5561,6 +5592,7 @@
       "description": [],
       "path": "x-pack/plugins/apm/server/types.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [
         {
           "parentPluginId": "apm",
@@ -5576,7 +5608,8 @@
             "; telemetryCollectionEnabled: boolean; metricsInterval: number; profilingEnabled: boolean; agent: Readonly<{} & { migrations: Readonly<{} & { enabled: boolean; }>; }>; }>>"
           ],
           "path": "x-pack/plugins/apm/server/types.ts",
-          "deprecated": false
+          "deprecated": false,
+          "trackAdoption": false
         },
         {
           "parentPluginId": "apm",
@@ -5592,6 +5625,7 @@
           ],
           "path": "x-pack/plugins/apm/server/types.ts",
           "deprecated": false,
+          "trackAdoption": false,
           "children": [],
           "returnComment": []
         },
@@ -5613,6 +5647,7 @@
           ],
           "path": "x-pack/plugins/apm/server/types.ts",
           "deprecated": false,
+          "trackAdoption": false,
           "children": [
             {
               "parentPluginId": "apm",
@@ -5623,6 +5658,7 @@
               "description": [],
               "path": "x-pack/plugins/apm/server/types.ts",
               "deprecated": false,
+              "trackAdoption": false,
               "children": [
                 {
                   "parentPluginId": "apm",
@@ -5635,7 +5671,8 @@
                     "boolean | undefined"
                   ],
                   "path": "x-pack/plugins/apm/server/types.ts",
-                  "deprecated": false
+                  "deprecated": false,
+                  "trackAdoption": false
                 },
                 {
                   "parentPluginId": "apm",
@@ -5649,7 +5686,8 @@
                     "<unknown, unknown, unknown, any>"
                   ],
                   "path": "x-pack/plugins/apm/server/types.ts",
-                  "deprecated": false
+                  "deprecated": false,
+                  "trackAdoption": false
                 },
                 {
                   "parentPluginId": "apm",
@@ -5693,7 +5731,8 @@
                     ">; }"
                   ],
                   "path": "x-pack/plugins/apm/server/types.ts",
-                  "deprecated": false
+                  "deprecated": false,
+                  "trackAdoption": false
                 }
               ]
             }

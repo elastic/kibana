@@ -29,6 +29,7 @@
         ],
         "path": "packages/core/base/core-base-server-internal/src/errors.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-base-server-internal",
@@ -42,6 +43,7 @@
             ],
             "path": "packages/core/base/core-base-server-internal/src/errors.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-base-server-internal",
@@ -55,6 +57,7 @@
                 ],
                 "path": "packages/core/base/core-base-server-internal/src/errors.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -69,6 +72,7 @@
                 ],
                 "path": "packages/core/base/core-base-server-internal/src/errors.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -83,6 +87,7 @@
                 ],
                 "path": "packages/core/base/core-base-server-internal/src/errors.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -97,6 +102,7 @@
                 ],
                 "path": "packages/core/base/core-base-server-internal/src/errors.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -123,6 +129,7 @@
         ],
         "path": "packages/core/base/core-base-server-internal/src/regexp.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ]
