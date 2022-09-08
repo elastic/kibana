@@ -15,6 +15,7 @@ import { HOST_METADATA_LIST_ROUTE } from '../../../../common/endpoint/constants'
 type GetEndpointsListResponse = Array<{
   id: HostInfo['metadata']['agent']['id'];
   name: HostInfo['metadata']['host']['hostname'];
+  selected: boolean;
 }>;
 
 /**
@@ -23,12 +24,21 @@ type GetEndpointsListResponse = Array<{
  * @param query
  * @param options
  */
-export const useGetEndpointsList = (
-  searchString: string,
-  options: UseQueryOptions<GetEndpointsListResponse, IHttpFetchError> = {}
-): UseQueryResult<GetEndpointsListResponse, IHttpFetchError> => {
+export const useGetEndpointsList = ({
+  searchString,
+  selectedAgentIds,
+  options = {},
+}: {
+  searchString: string;
+  selectedAgentIds?: string[];
+  options?: UseQueryOptions<GetEndpointsListResponse, IHttpFetchError>;
+}): UseQueryResult<GetEndpointsListResponse, IHttpFetchError> => {
   const http = useHttp();
   const kuery = `united.endpoint.host.hostname:${searchString.length ? `*${searchString}` : ''}*`;
+  let agentIdsKuery: string[] = [];
+  if (selectedAgentIds) {
+    agentIdsKuery = selectedAgentIds.map((id) => `united.endpoint.agent.id:"${id}"`);
+  }
 
   return useQuery<GetEndpointsListResponse, IHttpFetchError>({
     queryKey: ['get-endpoints-list', kuery],
@@ -38,13 +48,14 @@ export const useGetEndpointsList = (
         query: {
           page: 0,
           pageSize: 50,
-          kuery,
+          kuery: [...agentIdsKuery, kuery].join(' or '),
         },
       });
 
       return metadataListResponse.data.map((list) => ({
         id: list.metadata.agent.id,
         name: list.metadata.host.hostname,
+        selected: selectedAgentIds?.includes(list.metadata.agent.id) ?? false,
       }));
     },
   });

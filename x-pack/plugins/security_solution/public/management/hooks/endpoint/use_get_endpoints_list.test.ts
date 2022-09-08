@@ -41,7 +41,7 @@ describe('useGetEndpointsList hook', () => {
   });
 
   it('should call the API with kuery set to look for all hostnames when no search string given', async () => {
-    await renderReactQueryHook(() => useGetEndpointsList(''));
+    await renderReactQueryHook(() => useGetEndpointsList({ searchString: '' }));
 
     expect(apiMocks.responseProvider.metadataList).toHaveBeenCalledWith({
       path: HOST_METADATA_LIST_ROUTE,
@@ -50,7 +50,7 @@ describe('useGetEndpointsList hook', () => {
   });
 
   it('should call the API with kuery set to look for all matching hostnames', async () => {
-    await renderReactQueryHook(() => useGetEndpointsList('xyz'));
+    await renderReactQueryHook(() => useGetEndpointsList({ searchString: 'xyz' }));
 
     expect(apiMocks.responseProvider.metadataList).toHaveBeenCalledWith({
       path: HOST_METADATA_LIST_ROUTE,
@@ -58,9 +58,45 @@ describe('useGetEndpointsList hook', () => {
     });
   });
 
+  it('should call the API with kuery set to look for all matching agentIds if present', async () => {
+    await renderReactQueryHook(() =>
+      useGetEndpointsList({ searchString: '', selectedAgentIds: ['agent-a', 'agent-b'] })
+    );
+
+    expect(apiMocks.responseProvider.metadataList).toHaveBeenCalledWith({
+      path: HOST_METADATA_LIST_ROUTE,
+      query: {
+        page: 0,
+        pageSize: 50,
+        kuery:
+          'united.endpoint.agent.id:"agent-a" or united.endpoint.agent.id:"agent-b" or united.endpoint.host.hostname:*',
+      },
+    });
+  });
+
+  it('should call the API with kuery set to look for all matching agentIds and hostnames', async () => {
+    await renderReactQueryHook(() =>
+      useGetEndpointsList({ searchString: 'xyz', selectedAgentIds: ['agent-a', 'agent-b'] })
+    );
+
+    expect(apiMocks.responseProvider.metadataList).toHaveBeenCalledWith({
+      path: HOST_METADATA_LIST_ROUTE,
+      query: {
+        page: 0,
+        pageSize: 50,
+        kuery:
+          'united.endpoint.agent.id:"agent-a" or united.endpoint.agent.id:"agent-b" or united.endpoint.host.hostname:*xyz*',
+      },
+    });
+  });
+
   it('should allow custom options to be used', async () => {
     await renderReactQueryHook(
-      () => useGetEndpointsList('pqr', { queryKey: ['m', 'n'], enabled: false }),
+      () =>
+        useGetEndpointsList({
+          searchString: 'pqr',
+          options: { queryKey: ['m', 'n'], enabled: false },
+        }),
       false
     );
 

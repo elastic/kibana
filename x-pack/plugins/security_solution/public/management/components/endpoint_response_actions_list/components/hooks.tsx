@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import type {
   DurationRange,
   OnRefreshChangeProps,
@@ -23,6 +23,7 @@ import type { FILTER_NAMES } from '../translations';
 import { UX_MESSAGES } from '../translations';
 import { StatusBadge } from './status_badge';
 import { useActionHistoryUrlParams } from './use_action_history_url_params';
+import { useGetEndpointsList } from '../../../hooks/endpoint/use_get_endpoints_list';
 
 const defaultDateRangeOptions = Object.freeze({
   autoRefreshOptions: {
@@ -160,21 +161,42 @@ export const getCommandKey = (
 
 // TODO: add more filter names here
 export type FilterName = keyof typeof FILTER_NAMES;
-export const useActionsLogFilter = (
-  filterName: FilterName,
-  isFlyout: boolean
-): {
+export const useActionsLogFilter = ({
+  filterName,
+  isFlyout,
+  isPopoverOpen,
+  searchString,
+}: {
+  filterName: FilterName;
+  isFlyout: boolean;
+  isPopoverOpen: boolean;
+  searchString: string;
+}): {
+  isLoading: boolean;
   items: FilterItems;
   setItems: React.Dispatch<React.SetStateAction<FilterItems>>;
   hasActiveFilters: boolean;
   numActiveFilters: number;
   numFilters: number;
   setUrlActionsFilters: ReturnType<typeof useActionHistoryUrlParams>['setUrlActionsFilters'];
+  setUrlHostsFilters: ReturnType<typeof useActionHistoryUrlParams>['setUrlHostsFilters'];
   setUrlStatusesFilters: ReturnType<typeof useActionHistoryUrlParams>['setUrlStatusesFilters'];
 } => {
-  const { commands, statuses, setUrlActionsFilters, setUrlStatusesFilters } =
-    useActionHistoryUrlParams();
+  const {
+    commands,
+    statuses,
+    hosts: selectedAgentIds,
+    setUrlActionsFilters,
+    setUrlHostsFilters,
+    setUrlStatusesFilters,
+  } = useActionHistoryUrlParams();
   const isStatusesFilter = filterName === 'statuses';
+  const isHostsFilter = filterName === 'hosts';
+  const { data: endpointsList, isFetching } = useGetEndpointsList({
+    searchString,
+    selectedAgentIds,
+  });
+
   const [items, setItems] = useState<FilterItems>(
     isStatusesFilter
       ? RESPONSE_ACTION_STATUS.map((statusName) => ({
@@ -194,6 +216,8 @@ export const useActionsLogFilter = (
           checked: !isFlyout && statuses?.includes(statusName) ? 'on' : undefined,
           'data-test-subj': `${filterName}-filter-option`,
         }))
+      : isHostsFilter
+      ? []
       : RESPONSE_ACTION_COMMANDS.map((commandName) => ({
           key: commandName,
           label: getUiCommand(commandName),
@@ -205,6 +229,19 @@ export const useActionsLogFilter = (
         }))
   );
 
+  useEffect(() => {
+    if (isHostsFilter && endpointsList) {
+      setItems(
+        endpointsList?.map((list) => ({
+          key: list.id,
+          label: list.name,
+          checked: !isFlyout && list.selected ? 'on' : undefined,
+          'data-test-subj': `${filterName}-filter-option`,
+        }))
+      );
+    }
+  }, [endpointsList, filterName, isFlyout, isHostsFilter, setItems]);
+
   const hasActiveFilters = useMemo(() => !!items.find((item) => item.checked === 'on'), [items]);
   const numActiveFilters = useMemo(
     () => items.filter((item) => item.checked === 'on').length,
@@ -213,12 +250,35 @@ export const useActionsLogFilter = (
   const numFilters = useMemo(() => items.filter((item) => item.checked !== 'on').length, [items]);
 
   return {
+    isLoading: isHostsFilter && isFetching,
     items,
     setItems,
     hasActiveFilters,
     numActiveFilters,
     numFilters,
     setUrlActionsFilters,
+    setUrlHostsFilters,
     setUrlStatusesFilters,
   };
 };
+
+// !isPopoverOpen && selectedAgentIds?.length
+//         ? items
+//             .map((item) => {
+//               if (selectedAgentIds.includes(item.key)) {
+//                 item.checked = 'on';
+//               }
+//               return item;
+//             })
+//             .reduce<FilterItems>((acc, item) => {
+//               const selected: FilterItems = [];
+//               const rest: FilterItems = [];
+//               if (item.checked === 'on') {
+//                 selected.push(item);
+//               }
+//               rest.push(item);
+
+//               acc.push(...selected, ...rest);
+//               return acc;
+//             }, [])
+//         :

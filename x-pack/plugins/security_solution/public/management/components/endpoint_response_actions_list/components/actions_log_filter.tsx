@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useMemo, useCallback } from 'react';
+import React, { memo, useMemo, useState, useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSelectable, EuiPopoverTitle } from '@elastic/eui';
 import type { ResponseActions } from '../../../../../common/endpoint/service/response_actions/constants';
 import { ActionsLogFilterPopover } from './actions_log_filter_popover';
@@ -25,19 +25,38 @@ export const ActionsLogFilter = memo(
     onChangeFilterOptions: (selectedOptions: string[]) => void;
   }) => {
     const getTestId = useTestIdGenerator('response-actions-list');
+
+    // popover states and handlers
+    const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+    const onPopoverButtonClick = useCallback(() => {
+      setIsPopoverOpen(!isPopoverOpen);
+    }, [setIsPopoverOpen, isPopoverOpen]);
+    const onClosePopover = useCallback(() => {
+      setIsPopoverOpen(false);
+    }, [setIsPopoverOpen]);
+
+    // search string state
+    const [searchString, setSearchString] = useState('');
     const {
+      isLoading,
       items,
       setItems,
       hasActiveFilters,
       numActiveFilters,
       numFilters,
       setUrlActionsFilters,
+      setUrlHostsFilters,
       setUrlStatusesFilters,
-    } = useActionsLogFilter(filterName, isFlyout);
+    } = useActionsLogFilter({
+      filterName,
+      isFlyout,
+      isPopoverOpen,
+      searchString,
+    });
 
     const isSearchable = useMemo(() => filterName !== 'statuses', [filterName]);
 
-    const onChange = useCallback(
+    const onOptionsChange = useCallback(
       (newOptions: FilterItems) => {
         // update filter UI options state
         setItems(newOptions.map((option) => option));
@@ -56,6 +75,8 @@ export const ActionsLogFilter = memo(
             setUrlActionsFilters(
               selectedItems.map((item) => getUiCommand(item as ResponseActions)).join()
             );
+          } else if (filterName === 'hosts') {
+            setUrlHostsFilters(selectedItems.join());
           } else if (filterName === 'statuses') {
             setUrlStatusesFilters(selectedItems.join());
           }
@@ -70,6 +91,7 @@ export const ActionsLogFilter = memo(
         setItems,
         onChangeFilterOptions,
         setUrlActionsFilters,
+        setUrlHostsFilters,
         setUrlStatusesFilters,
       ]
     );
@@ -85,9 +107,11 @@ export const ActionsLogFilter = memo(
       );
 
       if (!isFlyout) {
-        // update URL params
+        // update URL params based on filter
         if (filterName === 'actions') {
           setUrlActionsFilters('');
+        } else if (filterName === 'hosts') {
+          setUrlHostsFilters('');
         } else if (filterName === 'statuses') {
           setUrlStatusesFilters('');
         }
@@ -101,24 +125,31 @@ export const ActionsLogFilter = memo(
       setItems,
       onChangeFilterOptions,
       setUrlActionsFilters,
+      setUrlHostsFilters,
       setUrlStatusesFilters,
     ]);
 
     return (
       <ActionsLogFilterPopover
+        closePopover={onClosePopover}
         filterName={filterName}
         hasActiveFilters={hasActiveFilters}
+        isPopoverOpen={isPopoverOpen}
         numActiveFilters={numActiveFilters}
         numFilters={numFilters}
+        onButtonClick={onPopoverButtonClick}
       >
         <EuiSelectable
           aria-label={`${filterName}`}
-          onChange={onChange}
+          emptyMessage={UX_MESSAGES.filterEmptyMessage(filterName)}
+          isLoading={isLoading}
+          onChange={onOptionsChange}
           options={items}
           searchable={isSearchable ? true : undefined}
           searchProps={{
             placeholder: UX_MESSAGES.filterSearchPlaceholder(filterName),
             compressed: true,
+            onChange: (searchValue) => setSearchString(searchValue.trim()),
           }}
         >
           {(list, search) => {
