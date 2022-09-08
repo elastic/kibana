@@ -64,7 +64,7 @@ export const StepOne = ({
   };
 
   const sendUpdateRequest = async () => {
-    const response = await guidedOnboardingApi.updateGuideState({
+    const response = await guidedOnboardingApi?.updateGuideState({
       active_guide: selectedGuide,
       active_step: selectedStep,
     });
@@ -159,7 +159,7 @@ export const StepOne = ({
           >
             <EuiButton
               onClick={async () => {
-                await guidedOnboardingApi.updateGuideState({
+                await guidedOnboardingApi?.updateGuideState({
                   active_guide: 'search',
                   active_step: '2',
                 });
