@@ -9,7 +9,7 @@
 import { ConnectionOptions as TlsConnectionOptions } from 'tls';
 import { URL } from 'url';
 import { Duration } from 'moment';
-import type { ClientOptions } from '@elastic/elasticsearch/lib/client';
+import type { ClientOptions, HttpAgentOptions } from '@elastic/elasticsearch';
 import type { ElasticsearchClientConfig } from '@kbn/core-elasticsearch-server';
 import { DEFAULT_HEADERS } from './headers';
 
@@ -23,8 +23,8 @@ import { DEFAULT_HEADERS } from './headers';
 export function parseClientOptions(
   config: ElasticsearchClientConfig,
   scoped: boolean
-): ClientOptions {
-  const clientOptions: ClientOptions = {
+): ClientOptions & { agent: HttpAgentOptions } {
+  const clientOptions: ClientOptions & { agent: HttpAgentOptions } = {
     sniffOnStart: config.sniffOnStart,
     sniffOnConnectionFault: config.sniffOnConnectionFault,
     headers: {

@@ -30,26 +30,6 @@ describe('AgentManager', () => {
       expect(agentFactory1).not.toEqual(agentFactory2);
     });
 
-    it('throws an error when an Agent factory is requested using undici params', () => {
-      const agentManager = new AgentManager();
-      expect(() => {
-        agentManager.getAgentFactory({ keepAliveTimeout: 2000 });
-      }).toThrowErrorMatchingInlineSnapshot(`"Unsupported agent options: UndiciAgentOptions"`);
-    });
-
-    describe('when configured with a custom factory', () => {
-      it('uses the provided factory', () => {
-        const customAgent = new HttpsAgent({ maxSockets: 32 });
-        expect(HttpsAgent).toBeCalledTimes(1);
-        const factory = () => customAgent;
-        const agentManager = new AgentManager();
-        const agentFactory = agentManager.getAgentFactory(factory);
-        const agent = agentFactory({ url: new URL('http://elastic-node-1:9200') });
-        expect(HttpsAgent).toBeCalledTimes(1);
-        expect(agent).toEqual(customAgent);
-      });
-    });
-
     describe('one agent factory', () => {
       it('provides instances of the http and https Agent classes', () => {
         const mockedHttpAgent = new HttpAgent();

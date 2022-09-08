@@ -8,9 +8,8 @@
 
 import { Agent as HttpAgent } from 'http';
 import { Agent as HttpsAgent } from 'https';
-import { ConnectionOptions, HttpAgentOptions, UndiciAgentOptions } from '@elastic/elasticsearch';
+import { ConnectionOptions, HttpAgentOptions } from '@elastic/elasticsearch';
 
-const HTTP = 'http:';
 const HTTPS = 'https:';
 const DEFAULT_CONFIG: HttpAgentOptions = {
   keepAlive: true,
@@ -40,34 +39,25 @@ export class AgentManager {
   // Stores Http Agent instances
   private httpStore: Set<HttpAgent>;
 
-  constructor(private baseConfig: HttpAgentOptions = DEFAULT_CONFIG) {
+  constructor(private agentOptions: HttpAgentOptions = DEFAULT_CONFIG) {
     this.httpsStore = new Set();
     this.httpStore = new Set();
   }
 
-  public getAgentFactory(
-    agentOptions?: HttpAgentOptions | UndiciAgentOptions | AgentFactory | false
-  ): AgentFactory {
-    if (isAgentFactory(agentOptions)) {
-      // use the user-provided factory directly
-      return agentOptions;
-    }
-
-    const agentConfig = assertValidAgentConfig(agentOptions);
-
-    // a given agent factory (of a given type) always provides the same Agent instances (for the same protocol)
-    // we keep the indexes for each protocol, so that we can access them later on, when the factory is invoked
+  public getAgentFactory(agentOptions?: HttpAgentOptions): AgentFactory {
+    // a given agent factory always provides the same Agent instances (for the same protocol)
+    // we keep references to the instances at factory level, to be able to reuse them
     let httpAgent: HttpAgent;
     let httpsAgent: HttpsAgent;
 
     return (connectionOpts: ConnectionOptions): NetworkAgent => {
-      if (isHttps(connectionOpts)) {
+      if (connectionOpts.url.protocol === HTTPS) {
         if (!httpsAgent) {
           const config = Object.assign(
             {},
             DEFAULT_CONFIG,
-            this.baseConfig,
-            agentConfig,
+            this.agentOptions,
+            agentOptions,
             connectionOpts.tls
           );
           httpsAgent = new HttpsAgent(config);
@@ -79,7 +69,7 @@ export class AgentManager {
       }
 
       if (!httpAgent) {
-        const config = Object.assign({}, DEFAULT_CONFIG, this.baseConfig, agentConfig);
+        const config = Object.assign({}, DEFAULT_CONFIG, this.agentOptions, agentOptions);
         httpAgent = new HttpAgent(config);
         this.httpStore.add(httpAgent);
         dereferenceOnDestroy(this.httpStore, httpAgent);
@@ -89,41 +79,6 @@ export class AgentManager {
     };
   }
 }
-
-const isHttps = (connectionOpts: ConnectionOptions): boolean => {
-  return connectionOpts.url.protocol === HTTPS;
-};
-
-const assertValidAgentConfig = (
-  agentOptions?: HttpAgentOptions | UndiciAgentOptions | false
-): HttpAgentOptions => {
-  if (!agentOptions) {
-    return {};
-  } else if (isHttpAgentOptions(agentOptions)) {
-    return agentOptions;
-  }
-
-  throw new Error('Unsupported agent options: UndiciAgentOptions');
-};
-
-const isAgentFactory = (
-  agentOptions?: HttpAgentOptions | UndiciAgentOptions | AgentFactory | false
-): agentOptions is AgentFactory => {
-  return typeof agentOptions === 'function';
-};
-
-const isHttpAgentOptions = (
-  opts: HttpAgentOptions | UndiciAgentOptions
-): opts is HttpAgentOptions => {
-  return (
-    !('keepAliveTimeout' in opts) &&
-    !('keepAliveMaxTimeout' in opts) &&
-    !('keepAliveTimeoutThreshold' in opts) &&
-    !('pipelining' in opts) &&
-    !('maxHeaderSize' in opts) &&
-    !('connections' in opts)
-  );
-};
 
 const dereferenceOnDestroy = (protocolStore: Set<NetworkAgent>, agent: NetworkAgent) => {
   const doDestroy = agent.destroy.bind(agent);
