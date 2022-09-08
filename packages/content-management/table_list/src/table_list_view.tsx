@@ -32,6 +32,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 
 import { Table, ConfirmDeleteModal, ListingLimitWarning } from './components';
 import { useServices } from './services';
@@ -140,11 +141,23 @@ function TableListViewComp<T extends UserContentCommonSchema>({
     searchQueryParser,
     notifyError,
     DateFormatterComp,
+    navigateToUrl,
+    currentAppId$,
   } = useServices();
 
   const reducer = useMemo(() => {
     return getReducer<T>({ DateFormatterComp });
   }, [DateFormatterComp]);
+
+  const redirectAppLinksCoreStart = useMemo(
+    () => ({
+      application: {
+        navigateToUrl,
+        currentAppId$,
+      },
+    }),
+    [navigateToUrl, currentAppId$]
+  );
 
   const [state, dispatch] = useReducer<(state: State<T>, action: Action<T>) => State<T>>(reducer, {
     items: [],
@@ -171,23 +184,25 @@ function TableListViewComp<T extends UserContentCommonSchema>({
           }
 
           return (
-            // eslint-disable-next-line  @elastic/eui/href-or-on-click
-            <EuiLink
-              href={getDetailViewLink ? getDetailViewLink(record) : undefined}
-              onClick={
-                onClickTitle
-                  ? (e: MouseEvent) => {
-                      e.preventDefault();
-                      onClickTitle(record);
-                    }
-                  : undefined
-              }
-              data-test-subj={`${id}ListingTitleLink-${record.attributes.title
-                .split(' ')
-                .join('-')}`}
-            >
-              {record.attributes.title}
-            </EuiLink>
+            <RedirectAppLinks coreStart={redirectAppLinksCoreStart}>
+              {/* eslint-disable-next-line  @elastic/eui/href-or-on-click */}
+              <EuiLink
+                href={getDetailViewLink ? getDetailViewLink(record) : undefined}
+                onClick={
+                  onClickTitle
+                    ? (e: MouseEvent) => {
+                        e.preventDefault();
+                        onClickTitle(record);
+                      }
+                    : undefined
+                }
+                data-test-subj={`${id}ListingTitleLink-${record.attributes.title
+                  .split(' ')
+                  .join('-')}`}
+              >
+                {record.attributes.title}
+              </EuiLink>
+            </RedirectAppLinks>
           );
         },
       },

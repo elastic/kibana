@@ -10,6 +10,7 @@ import React, { FC, useContext, useMemo } from 'react';
 import type { EuiTableFieldDataColumnType, SearchFilterConfig } from '@elastic/eui';
 import type { Observable } from 'rxjs';
 import type { FormattedRelative } from '@kbn/i18n-react';
+import { RedirectAppLinksKibanaProvider } from '@kbn/shared-ux-link-redirect-app';
 
 import { UserContentCommonSchema } from './table_list_view';
 
@@ -37,6 +38,8 @@ export interface Services {
   canEditAdvancedSettings: boolean;
   getListingLimitSettingsUrl: () => string;
   notifyError: NotifyFn;
+  currentAppId$: Observable<string | undefined>;
+  navigateToUrl: (url: string) => Promise<void> | void;
   searchQueryParser?: (searchQuery: string) => {
     searchQuery: string;
     references?: SavedObjectsFindOptionsReference[];
@@ -68,6 +71,8 @@ export interface TableListViewKibanaDependencies {
         };
       };
       getUrlForApp: (app: string, options: { path: string }) => string;
+      currentAppId$: Observable<string | undefined>;
+      navigateToUrl: (url: string) => Promise<void> | void;
     };
     notifications: {
       toasts: {
@@ -146,23 +151,27 @@ export const TableListViewKibanaProvider: FC<TableListViewKibanaDependencies> = 
   }, [savedObjectsTagging]);
 
   return (
-    <TableListViewProvider
-      canEditAdvancedSettings={Boolean(core.application.capabilities.advancedSettings?.save)}
-      getListingLimitSettingsUrl={() =>
-        core.application.getUrlForApp('management', {
-          path: `/kibana/settings?query=savedObjects:listingLimit`,
-        })
-      }
-      notifyError={(title, text) => {
-        core.notifications.toasts.addDanger({ title: toMountPoint(title), text });
-      }}
-      getTagsColumnDefinition={savedObjectsTagging?.ui.getTableColumnDefinition}
-      getSearchBarFilters={getSearchBarFilters}
-      searchQueryParser={searchQueryParser}
-      DateFormatterComp={(props) => <FormattedRelative {...props} />}
-    >
-      {children}
-    </TableListViewProvider>
+    <RedirectAppLinksKibanaProvider coreStart={core}>
+      <TableListViewProvider
+        canEditAdvancedSettings={Boolean(core.application.capabilities.advancedSettings?.save)}
+        getListingLimitSettingsUrl={() =>
+          core.application.getUrlForApp('management', {
+            path: `/kibana/settings?query=savedObjects:listingLimit`,
+          })
+        }
+        notifyError={(title, text) => {
+          core.notifications.toasts.addDanger({ title: toMountPoint(title), text });
+        }}
+        getTagsColumnDefinition={savedObjectsTagging?.ui.getTableColumnDefinition}
+        getSearchBarFilters={getSearchBarFilters}
+        searchQueryParser={searchQueryParser}
+        DateFormatterComp={(props) => <FormattedRelative {...props} />}
+        currentAppId$={core.application.currentAppId$}
+        navigateToUrl={core.application.navigateToUrl}
+      >
+        {children}
+      </TableListViewProvider>
+    </RedirectAppLinksKibanaProvider>
   );
 };
 
