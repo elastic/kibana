@@ -180,7 +180,7 @@ For more information, refer to
 (Required, string) The action to test. It must be `pushToService`.
 
 `subActionParams`::
-(Required^*^, object) The set of configuration properties.
+(Required, object) The set of configuration properties.
 +
 .Properties of `subActionParams`
 [%collapsible%open]
@@ -198,8 +198,6 @@ troubleshoot the issue.
 commentId::::
 (integer) A unique identifier for the comment.
 
-version::::
-(string) TBD
 =======
 
 `incident`:::
