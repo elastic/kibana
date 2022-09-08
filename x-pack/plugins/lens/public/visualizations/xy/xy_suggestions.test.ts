@@ -549,9 +549,11 @@ describe('xy_suggestions', () => {
     const annotationLayer: XYAnnotationLayerConfig = {
       layerId: 'second',
       layerType: layerTypes.ANNOTATIONS,
+      indexPatternId: 'indexPattern1',
       annotations: [
         {
           id: '1',
+          type: 'manual',
           key: {
             type: 'point_in_time',
             timestamp: '2020-20-22',
