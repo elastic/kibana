@@ -222,11 +222,13 @@ export const getManagementFilteredLinks = async (
       plugins.fleet?.authz,
       currentUserResponse.roles
     );
-    const hostIsolationExceptionsApiClientInstance = HostIsolationExceptionsApiClient.getInstance(
-      core.http
-    );
-
+    if (!privileges.canAccessEndpointManagement) {
+      return getFilteredLinks([SecurityPageName.hostIsolationExceptions]);
+    }
     if (!privileges.canIsolateHost) {
+      const hostIsolationExceptionsApiClientInstance = HostIsolationExceptionsApiClient.getInstance(
+        core.http
+      );
       const summaryResponse = await hostIsolationExceptionsApiClientInstance.summary();
       if (!summaryResponse.total) {
         return getFilteredLinks([SecurityPageName.hostIsolationExceptions]);
