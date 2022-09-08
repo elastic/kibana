@@ -17,18 +17,21 @@ export const getLabel = (aggParams: AggParamsDateHistogram, fieldName: string) =
 };
 
 export const convertToDateHistogramParams = (
-  aggParams: AggParamsDateHistogram
+  aggParams: AggParamsDateHistogram,
+  dropEmptyRowsInDateHistogram: boolean
 ): DateHistogramParams => {
   return {
     interval: aggParams.interval ?? 'auto',
     dropPartials: aggParams.drop_partials,
+    includeEmptyRows: !dropEmptyRowsInDateHistogram,
   };
 };
 
 export const convertToDateHistogramColumn = (
   aggParams: AggParamsDateHistogram,
   dataView: DataView,
-  isSplit: boolean
+  isSplit: boolean,
+  dropEmptyRowsInDateHistogram: boolean
 ): DateHistogramColumn | null => {
   const dateFieldName = getFieldNameFromField(aggParams.field);
 
@@ -41,7 +44,7 @@ export const convertToDateHistogramColumn = (
     return null;
   }
 
-  const params = convertToDateHistogramParams(aggParams);
+  const params = convertToDateHistogramParams(aggParams, dropEmptyRowsInDateHistogram);
   const label = getLabel(aggParams, dateFieldName);
 
   return {

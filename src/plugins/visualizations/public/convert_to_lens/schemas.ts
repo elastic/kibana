@@ -23,13 +23,14 @@ const getBucketColumns = (
   keys: Array<keyof Schemas>,
   dataView: DataView,
   isSplit: boolean,
-  metricColumns: Column[]
+  metricColumns: Column[],
+  dropEmptyRowsInDateHistogram: boolean = false
 ) => {
   const columns: Column[] = [];
   for (const key of keys) {
     if (visSchemas[key] && visSchemas[key]?.length) {
       const bucketColumns = visSchemas[key]?.flatMap((m) =>
-        convertBucketToColumns(m, dataView, isSplit, metricColumns)
+        convertBucketToColumns(m, dataView, isSplit, metricColumns, dropEmptyRowsInDateHistogram)
       );
       if (!bucketColumns || bucketColumns.includes(null)) {
         return null;
@@ -62,6 +63,9 @@ export const getColumnsFromVis = <T>(
   { splits, buckets }: { splits: Array<keyof Schemas>; buckets: Array<keyof Schemas> } = {
     splits: [],
     buckets: [],
+  },
+  config?: {
+    dropEmptyRowsInDateHistogram?: boolean;
   }
 ) => {
   const visSchemas = getVisSchemas(vis, {
@@ -93,7 +97,8 @@ export const getColumnsFromVis = <T>(
       customBuckets[0],
       dataView,
       false,
-      metricColumns as Column[]
+      metricColumns as Column[],
+      config?.dropEmptyRowsInDateHistogram
     );
     if (!customBucketColumn) {
       return null;
@@ -106,7 +111,8 @@ export const getColumnsFromVis = <T>(
     buckets,
     dataView,
     false,
-    metricColumns as Column[]
+    metricColumns as Column[],
+    config?.dropEmptyRowsInDateHistogram
   );
   if (!bucketColumns) {
     return null;
@@ -117,7 +123,8 @@ export const getColumnsFromVis = <T>(
     splits,
     dataView,
     true,
-    metricColumns as Column[]
+    metricColumns as Column[],
+    config?.dropEmptyRowsInDateHistogram
   );
   if (!splitBucketColumns) {
     return null;

@@ -36,11 +36,20 @@ export const getBucketColumns = (
   aggParams: AggParamsMapping[BucketAggs],
   dataView: DataView,
   metricColumns: Column[],
-  { label, isSplit = false }: { label: string; isSplit: boolean }
+  {
+    label,
+    isSplit = false,
+    dropEmptyRowsInDateHistogram = false,
+  }: { label: string; isSplit: boolean; dropEmptyRowsInDateHistogram: boolean }
 ) => {
   switch (aggType) {
     case BUCKET_TYPES.DATE_HISTOGRAM:
-      return convertToDateHistogramColumn(aggParams, dataView, isSplit);
+      return convertToDateHistogramColumn(
+        aggParams,
+        dataView,
+        isSplit,
+        dropEmptyRowsInDateHistogram
+      );
     case BUCKET_TYPES.FILTERS:
       return convertToFiltersColumn(aggParams, isSplit);
     case BUCKET_TYPES.TERMS:
@@ -67,7 +76,8 @@ export const getBucketColumns = (
             field: fieldName,
           },
           dataView,
-          isSplit
+          isSplit,
+          dropEmptyRowsInDateHistogram
         );
       }
   }
@@ -79,7 +89,8 @@ export const convertBucketToColumns = <T extends METRIC_TYPES | BUCKET_TYPES>(
   agg: SchemaConfig<T> | IAggConfig,
   dataView: DataView,
   isSplit: boolean = false,
-  metricColumns: Column[]
+  metricColumns: Column[],
+  dropEmptyRowsInDateHistogram: boolean = false
 ) => {
   if (isSchemaConfig(agg)) {
     if (!agg.aggParams || !isSupportedBucketAgg(agg)) {
@@ -88,6 +99,7 @@ export const convertBucketToColumns = <T extends METRIC_TYPES | BUCKET_TYPES>(
     return getBucketColumns(agg.aggType, agg.aggParams, dataView, metricColumns, {
       label: getLabel(agg),
       isSplit,
+      dropEmptyRowsInDateHistogram,
     });
   } else {
     const isTermsAgg = agg.type.dslName === 'terms';
@@ -102,7 +114,7 @@ export const convertBucketToColumns = <T extends METRIC_TYPES | BUCKET_TYPES>(
       isTermsAgg ? ({ ...aggParams, orderAgg } as AggParamsTerms) : aggParams,
       dataView,
       metricColumns,
-      { label: agg.makeLabel(), isSplit }
+      { label: agg.makeLabel(), isSplit, dropEmptyRowsInDateHistogram }
     );
   }
 };
