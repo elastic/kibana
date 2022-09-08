@@ -17,6 +17,7 @@ export type {
 export type { FieldStatsProps, FieldStatsServices } from './components/field_stats';
 export { FieldStats } from './components/field_stats';
 export { loadFieldStats } from './services/field_stats';
+export { loadFieldExisting } from './services/field_existing';
 
 // This exports static code and TypeScript types,
 // as well as, Kibana Platform `plugin()` initializer.

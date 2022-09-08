@@ -29,6 +29,7 @@ import {
   getLensFilterMigrations,
   getLensDataViewMigrations,
   commonMigrateMetricIds,
+  commonMigratePartitionChartGroups,
 } from '../migrations/common_migrations';
 import {
   CustomVisualizationMigrations,
@@ -134,7 +135,13 @@ export const makeLensEmbeddableFactory =
               },
               '8.5.0': (state) => {
                 const lensState = state as unknown as { attributes: LensDocShape840<VisState840> };
-                const migratedLensState = commonMigrateMetricIds(lensState.attributes);
+                let migratedLensState = commonMigrateMetricIds(lensState.attributes);
+                migratedLensState = commonMigratePartitionChartGroups(
+                  migratedLensState as LensDocShape840<{
+                    shape: string;
+                    layers: Array<{ groups?: string[] }>;
+                  }>
+                );
                 return {
                   ...lensState,
                   attributes: migratedLensState,

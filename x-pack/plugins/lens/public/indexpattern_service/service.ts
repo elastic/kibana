@@ -6,8 +6,9 @@
  */
 
 import type { DataViewsContract, DataView } from '@kbn/data-views-plugin/public';
-import type { CoreStart, IUiSettingsClient } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { ActionExecutionContext, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import {
   UPDATE_FILTER_REFERENCES_ACTION,
@@ -25,9 +26,9 @@ import type { DataViewsState } from '../state_management';
 import { generateId } from '../id_generator';
 
 export interface IndexPatternServiceProps {
-  core: Pick<CoreStart, 'http' | 'notifications'>;
+  core: Pick<CoreStart, 'http' | 'notifications' | 'uiSettings'>;
+  data: DataPublicPluginStart;
   dataViews: DataViewsContract;
-  uiSettings: IUiSettingsClient;
   uiActions: UiActionsStart;
   updateIndexPatterns: (
     newState: Partial<DataViewsState>,
@@ -100,7 +101,7 @@ export interface IndexPatternServiceAPI {
 export function createIndexPatternService({
   core,
   dataViews,
-  uiSettings,
+  data,
   updateIndexPatterns,
   replaceIndexPattern,
   uiActions,
@@ -145,11 +146,13 @@ export function createIndexPatternService({
     refreshExistingFields: (args) =>
       syncExistingFields({
         updateIndexPatterns,
-        fetchJson: core.http.post,
         ...args,
+        data,
+        dataViews,
+        core,
       }),
     loadIndexPatternRefs: async ({ isFullEditor }) =>
       isFullEditor ? loadIndexPatternRefs(dataViews) : [],
-    getDefaultIndex: () => uiSettings.get('defaultIndex'),
+    getDefaultIndex: () => core.uiSettings.get('defaultIndex'),
   };
 }
