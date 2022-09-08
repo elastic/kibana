@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { omitBy } from 'lodash';
+import { isDefined } from '../../../../common/types/guards';
 import type {
   NotificationsQueryParams,
   NotificationsSearchResponse,
@@ -24,7 +26,7 @@ export function notificationsProvider(httpService: HttpService) {
       return httpService.http<NotificationsSearchResponse>({
         path: `${apiBasePath}/notifications`,
         method: 'GET',
-        query: { ...params },
+        query: omitBy(params, (v) => !isDefined(v)),
       });
     },
 
@@ -32,7 +34,7 @@ export function notificationsProvider(httpService: HttpService) {
       return httpService.http$<NotificationsCountResponse>({
         path: `${apiBasePath}/notifications/count`,
         method: 'GET',
-        query: { ...params },
+        query: omitBy(params, (v) => !isDefined(v)),
       });
     },
   };

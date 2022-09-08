@@ -73,7 +73,7 @@ export const NotificationsList: FC = () => {
 
   const refresh = useRefresh();
 
-  const searchQueryText = pageState.queryText ?? '';
+  const searchQueryText = pageState.queryText;
 
   const fetchNotifications = useCallback(async () => {
     try {
