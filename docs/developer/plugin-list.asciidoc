@@ -638,7 +638,7 @@ routes, etc.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/stack_connectors/README.md[stackConnectors]
-|The Kibana stack_connectors plugin provides a framework to create executable actions. You can:
+|The stack_connectors plugin provides connector types shipped with Kibana, built on top of the framework provided in the actions plugin.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/synthetics/README.md[synthetics]
