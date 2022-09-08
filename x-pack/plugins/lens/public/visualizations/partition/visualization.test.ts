@@ -18,6 +18,8 @@ import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { createMockDatasource, createMockFramePublicAPI } from '../../mocks';
 import { FramePublicAPI } from '../../types';
 import { themeServiceMock } from '@kbn/core/public/mocks';
+import { cloneDeep } from 'lodash';
+import { PartitionChartsMeta } from './partition_charts_meta';
 
 jest.mock('../../id_generator');
 
@@ -109,6 +111,81 @@ describe('pie_visualization', () => {
           shape: PieChartTypes.DONUT,
         })
       );
+    });
+  });
+
+  describe('#getConfiguration', () => {
+    it('assigns correct icons to accessors', () => {
+      const colIds = ['1', '2', '3', '4'];
+
+      const frame = mockFrame();
+      frame.datasourceLayers.l1!.getTableSpec = () =>
+        colIds.map((id) => ({ columnId: id, fields: [] }));
+
+      const state = getExampleState();
+      state.layers[0].primaryGroups = colIds;
+      state.layers[0].collapseFns = {
+        '1': 'sum',
+        '3': 'max',
+      };
+      const configuration = pieVisualization.getConfiguration({
+        state,
+        frame,
+        layerId: state.layers[0].layerId,
+      });
+
+      // palette should be assigned to the first non-collapsed dimension
+      expect(configuration.groups[0].accessors).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "columnId": "1",
+            "triggerIcon": "aggregate",
+          },
+          Object {
+            "columnId": "2",
+            "palette": Array [
+              "red",
+              "black",
+            ],
+            "triggerIcon": "colorBy",
+          },
+          Object {
+            "columnId": "3",
+            "triggerIcon": "aggregate",
+          },
+          Object {
+            "columnId": "4",
+            "triggerIcon": undefined,
+          },
+        ]
+      `);
+    });
+
+    it('doesnt count collapsed columns toward the dimension limits', () => {
+      const colIds = new Array(PartitionChartsMeta.pie.maxBuckets)
+        .fill(undefined)
+        .map((_, i) => String(i + 1));
+
+      const frame = mockFrame();
+      frame.datasourceLayers.l1!.getTableSpec = () =>
+        colIds.map((id) => ({ columnId: id, fields: [] }));
+
+      const state = getExampleState();
+      state.layers[0].primaryGroups = colIds;
+
+      const getConfig = (_state: PieVisualizationState) =>
+        pieVisualization.getConfiguration({
+          state: _state,
+          frame,
+          layerId: state.layers[0].layerId,
+        });
+
+      expect(getConfig(state).groups[0].supportsMoreColumns).toBeFalsy();
+
+      const stateWithCollapsed = cloneDeep(state);
+      stateWithCollapsed.layers[0].collapseFns = { '1': 'sum' };
+
+      expect(getConfig(stateWithCollapsed).groups[0].supportsMoreColumns).toBeTruthy();
     });
   });
 });

@@ -45,18 +45,28 @@ const bucketedOperations = (op: OperationMetadata) => op.isBucketed;
 const numberMetricOperations = (op: OperationMetadata) =>
   !op.isBucketed && op.dataType === 'number' && !op.isStaticValue;
 
+export const isCollapsed = (columnId: string, layer: PieLayerState) =>
+  Boolean(layer.collapseFns?.[columnId]);
+
 const applyPaletteToColumnConfig = (
   columns: AccessorConfig[],
-  { palette }: PieVisualizationState,
+  layer: PieLayerState,
+  palette: PieVisualizationState['palette'],
   paletteService: PaletteRegistry
 ) => {
-  columns[0] = {
-    columnId: columns[0].columnId,
-    triggerIcon: 'colorBy',
-    palette: paletteService
-      .get(palette?.name || 'default')
-      .getCategoricalColors(10, palette?.params),
-  };
+  const firstNonCollapsedColumnIdx = columns.findIndex(
+    (column) => !isCollapsed(column.columnId, layer)
+  );
+
+  if (firstNonCollapsedColumnIdx > -1) {
+    columns[firstNonCollapsedColumnIdx] = {
+      columnId: columns[firstNonCollapsedColumnIdx].columnId,
+      triggerIcon: 'colorBy',
+      palette: paletteService
+        .get(palette?.name || 'default')
+        .getCategoricalColors(10, palette?.params),
+    };
+  }
 };
 
 export const getPieVisualization = ({
@@ -129,10 +139,11 @@ export const getPieVisualization = ({
       // When we add a column it could be empty, and therefore have no order
       const accessors: AccessorConfig[] = originalOrder.map((accessor) => ({
         columnId: accessor,
+        triggerIcon: isCollapsed(accessor, layer) ? ('aggregate' as const) : undefined,
       }));
 
       if (accessors.length) {
-        applyPaletteToColumnConfig(accessors, state, paletteService);
+        applyPaletteToColumnConfig(accessors, layer, state.palette, paletteService);
       }
 
       const primaryGroupConfigBaseProps = {
@@ -142,6 +153,11 @@ export const getPieVisualization = ({
         enableDimensionEditor: true,
         filterOperations: bucketedOperations,
       };
+
+      const numNonCollapsedAccessors = accessors.reduce(
+        (total, { columnId }) => total + (isCollapsed(columnId, layer) ? 0 : 1),
+        0
+      );
 
       switch (state.shape) {
         case 'donut':
@@ -154,7 +170,7 @@ export const getPieVisualization = ({
             dimensionEditorGroupLabel: i18n.translate('xpack.lens.pie.sliceDimensionGroupLabel', {
               defaultMessage: 'Slice',
             }),
-            supportsMoreColumns: accessors.length < PartitionChartsMeta.pie.maxBuckets,
+            supportsMoreColumns: numNonCollapsedAccessors < PartitionChartsMeta.pie.maxBuckets,
             dataTestSubj: 'lnsPie_sliceByDimensionPanel',
           };
         case 'mosaic':
@@ -166,7 +182,7 @@ export const getPieVisualization = ({
             dimensionEditorGroupLabel: i18n.translate('xpack.lens.pie.verticalAxisDimensionLabel', {
               defaultMessage: 'Vertical axis',
             }),
-            supportsMoreColumns: accessors.length === 0,
+            supportsMoreColumns: numNonCollapsedAccessors === 0,
             dataTestSubj: 'lnsPie_verticalAxisDimensionPanel',
           };
         default:
@@ -178,7 +194,8 @@ export const getPieVisualization = ({
             dimensionEditorGroupLabel: i18n.translate('xpack.lens.pie.treemapDimensionGroupLabel', {
               defaultMessage: 'Group',
             }),
-            supportsMoreColumns: accessors.length < PartitionChartsMeta[state.shape].maxBuckets,
+            supportsMoreColumns:
+              numNonCollapsedAccessors < PartitionChartsMeta[state.shape].maxBuckets,
             dataTestSubj: 'lnsPie_groupByDimensionPanel',
           };
       }
@@ -198,6 +215,11 @@ export const getPieVisualization = ({
         filterOperations: bucketedOperations,
       };
 
+      const numNonCollapsedAccessors = accessors.reduce(
+        (total, { columnId }) => total + (isCollapsed(columnId, layer) ? 0 : 1),
+        0
+      );
+
       switch (state.shape) {
         case 'mosaic':
           return {
@@ -211,7 +233,7 @@ export const getPieVisualization = ({
                 defaultMessage: 'Horizontal axis',
               }
             ),
-            supportsMoreColumns: accessors.length === 0,
+            supportsMoreColumns: numNonCollapsedAccessors === 0,
             dataTestSubj: 'lnsPie_horizontalAxisDimensionPanel',
           };
         default:
