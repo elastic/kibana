@@ -439,7 +439,7 @@ export const getPieVisualization = ({
             }),
             longMessage: (
               <span>
-                {i18n.translate('xpack.lens.pie.tooManyDimensions', {
+                {i18n.translate('xpack.lens.pie.tooManyDimensionsLong', {
                   defaultMessage:
                     'Your visualization has too many dimensions. Please follow the instructions in the layer panel.',
                 })}

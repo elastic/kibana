@@ -397,7 +397,7 @@ export function LayerPanel(
                         }
                       )
                     : i18n.translate(
-                        'xpack.lens.editorFrame.tooManyDimensionsSingularWarningLabel',
+                        'xpack.lens.editorFrame.tooManyDimensionsMultipleWarningLabel',
                         {
                           defaultMessage: 'Please remove {dimensionsTooMany} dimensions',
                           values: {
