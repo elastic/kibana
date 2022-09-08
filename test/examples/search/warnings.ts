@@ -18,7 +18,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'timePicker']);
   const testSubjects = getService('testSubjects');
   const find = getService('find');
-  const browser = getService('browser');
   const retry = getService('retry');
   const es = getService('es');
   const log = getService('log');
