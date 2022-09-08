@@ -150,6 +150,7 @@ async function slackExecutor(
   const { webhookUrl } = secrets;
   const { message } = params;
   const proxySettings = configurationUtilities.getProxySettings();
+  console.log(`proxySettings ${JSON.stringify(proxySettings)}`);
 
   const customAgents = getCustomAgents(configurationUtilities, logger, webhookUrl);
   const agent = webhookUrl.toLowerCase().startsWith('https')

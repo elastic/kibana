@@ -12,6 +12,6 @@ module.exports = {
   coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/stack_connectors',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
-    '<rootDir>/x-pack/plugins/stack_connectors/{common,server}/**/*.{js,ts,tsx}',
+    '<rootDir>/x-pack/plugins/stack_connectors/{common,public,server}/**/*.{js,ts,tsx}',
   ],
 };

@@ -9,5 +9,5 @@
   "kibanaVersion": "kibana",
   "configPath": ["xpack", "stack_connectors"],
   "requiredPlugins": ["actions"],
-  "ui": false
+  "ui": true
 }
