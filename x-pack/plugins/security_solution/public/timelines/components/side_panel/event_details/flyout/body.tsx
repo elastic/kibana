@@ -16,7 +16,6 @@ import type {
 } from '../../../../../../common/search_strategy';
 import type { HandleOnEventClosed } from '../expandable_event';
 import { ExpandableEvent } from '../expandable_event';
-import type { HostRisk } from '../../../../../risk_score/containers';
 
 const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
   .euiFlyoutBody__overflow {
@@ -40,7 +39,6 @@ interface FlyoutBodyComponentProps {
   handleIsolationActionSuccess: () => void;
   handleOnEventClosed: HandleOnEventClosed;
   hostName: string;
-  hostRisk: HostRisk | null;
   isAlert: boolean;
   isDraggable?: boolean;
   isReadOnly?: boolean;
@@ -61,7 +59,6 @@ const FlyoutBodyComponent = ({
   handleIsolationActionSuccess,
   handleOnEventClosed,
   hostName,
-  hostRisk,
   isAlert,
   isDraggable,
   isReadOnly,
@@ -100,7 +97,6 @@ const FlyoutBodyComponent = ({
           rawEventData={rawEventData}
           timelineId={timelineId}
           timelineTabType="flyout"
-          hostRisk={hostRisk}
           handleOnEventClosed={handleOnEventClosed}
           isReadOnly={isReadOnly}
         />

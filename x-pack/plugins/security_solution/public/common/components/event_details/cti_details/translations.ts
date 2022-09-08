@@ -28,13 +28,6 @@ export const INVESTIGATION_ENRICHMENT_TITLE = i18n.translate(
   }
 );
 
-export const HOST_RISK_DATA_TITLE = i18n.translate(
-  'xpack.securitySolution.alertDetails.overview.hostRiskDataTitle',
-  {
-    defaultMessage: 'Host Risk Data',
-  }
-);
-
 export const INDICATOR_TOOLTIP_CONTENT = i18n.translate(
   'xpack.securitySolution.eventDetails.ctiSummary.indicatorEnrichmentTooltipContent',
   {
@@ -114,8 +107,29 @@ export const ENRICHED_DATA = i18n.translate(
 );
 
 export const HOST_RISK_CLASSIFICATION = i18n.translate(
-  'xpack.securitySolution.alertDetails.hostRiskClassification',
+  'xpack.securitySolution.alertDetails.overview.hostRiskClassification',
   {
     defaultMessage: 'Host risk classification',
+  }
+);
+
+export const HOST_RISK_DATA_TITLE = i18n.translate(
+  'xpack.securitySolution.alertDetails.overview.hostRiskDataTitle',
+  {
+    defaultMessage: 'Host Risk Data',
+  }
+);
+
+export const USER_RISK_DATA_TITLE = i18n.translate(
+  'xpack.securitySolution.alertDetails.overview.userRiskDataTitle',
+  {
+    defaultMessage: 'User Risk Data',
+  }
+);
+
+export const USER_RISK_CLASSIFICATION = i18n.translate(
+  'xpack.securitySolution.alertDetails.overview.userRiskClassification',
+  {
+    defaultMessage: 'User risk classification',
   }
 );

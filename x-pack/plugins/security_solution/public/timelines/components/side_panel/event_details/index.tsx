@@ -15,9 +15,6 @@ import type { BrowserFields } from '../../../../common/containers/source';
 import { ExpandableEvent, ExpandableEventTitle } from './expandable_event';
 import { useTimelineEventsDetails } from '../../../containers/details';
 import type { TimelineTabs } from '../../../../../common/types/timeline';
-import { buildHostNamesFilter } from '../../../../../common/search_strategy';
-import type { HostRisk } from '../../../../risk_score/containers';
-import { useHostRiskScore } from '../../../../risk_score/containers';
 import { useHostIsolationTools } from './use_host_isolation_tools';
 import { FlyoutBody, FlyoutHeader, FlyoutFooter } from './flyout';
 import { useBasicDataFromDetailsData, getAlertIndexAlias } from './helpers';
@@ -79,34 +76,6 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
   const { alertId, isAlert, hostName, ruleName, timestamp } =
     useBasicDataFromDetailsData(detailsData);
 
-  const filterQuery = useMemo(
-    () => (hostName ? buildHostNamesFilter([hostName]) : undefined),
-    [hostName]
-  );
-
-  const pagination = useMemo(
-    () => ({
-      cursorStart: 0,
-      querySize: 1,
-    }),
-    []
-  );
-
-  const [hostRiskLoading, { data, isModuleEnabled }] = useHostRiskScore({
-    filterQuery,
-    pagination,
-  });
-
-  const hostRisk: HostRisk | null = useMemo(() => {
-    return data
-      ? {
-          loading: hostRiskLoading,
-          isModuleEnabled,
-          result: data,
-        }
-      : null;
-  }, [data, hostRiskLoading, isModuleEnabled]);
-
   const header = useMemo(
     () =>
       isFlyoutView || isHostIsolationPanelOpen ? (
@@ -149,7 +118,6 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
           detailsData={detailsData}
           event={expandedEvent}
           hostName={hostName}
-          hostRisk={hostRisk}
           handleIsolationActionSuccess={handleIsolationActionSuccess}
           handleOnEventClosed={handleOnEventClosed}
           isAlert={isAlert}
@@ -198,7 +166,6 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
             rawEventData={rawEventData}
             timelineId={timelineId}
             timelineTabType={tabType}
-            hostRisk={hostRisk}
             handleOnEventClosed={handleOnEventClosed}
           />
         </>
@@ -212,7 +179,6 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
     handleIsolationActionSuccess,
     handleOnEventClosed,
     hostName,
-    hostRisk,
     isAlert,
     isDraggable,
     isFlyoutView,
