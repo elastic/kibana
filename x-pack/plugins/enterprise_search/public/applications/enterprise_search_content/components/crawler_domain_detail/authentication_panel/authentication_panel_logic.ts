@@ -7,26 +7,12 @@
 
 import { kea, MakeLogicType } from 'kea';
 
-export interface BasicCrawlerAuth {
-  password: string;
-  type: 'basic';
-  username: string;
-}
-
-export interface RawCrawlerAuth {
-  header: string;
-  type: 'raw';
-}
-
-export type CrawlerAuth = BasicCrawlerAuth | RawCrawlerAuth;
-
-export function isBasicCrawlerAuth(auth: CrawlerAuth): auth is BasicCrawlerAuth {
-  return (auth as BasicCrawlerAuth).type === 'basic';
-}
-
-export function isRawCrawlerAuth(auth: CrawlerAuth): auth is RawCrawlerAuth {
-  return (auth as RawCrawlerAuth).type === 'raw';
-}
+import { CrawlerAuth } from '../../../api/crawler/types';
+import { isRawCrawlerAuth, isBasicCrawlerAuth } from '../../../api/crawler/utils';
+import {
+  CrawlerDomainDetailActions,
+  CrawlerDomainDetailLogic,
+} from '../crawler_domain_detail_logic';
 
 interface AuthenticationPanelValues {
   areCredentialsVisible: boolean;
@@ -38,24 +24,31 @@ interface AuthenticationPanelValues {
   username: string;
 }
 
-interface AuthenticationPanelActions {
+type AuthenticationPanelActions = {
+  deleteCredentials(): void;
   disableEditing(): void;
   enableEditing(currentCrawlerAuth?: CrawlerAuth): { currentCrawlerAuth: CrawlerAuth | undefined };
+  saveCredentials(): void;
   selectAuthOption(authType: string): { authType: string };
   setHeaderContent(headerContent: string): { headerContent: string };
   setIsModalVisible(isModalVisible: boolean): { isModalVisible: boolean };
   setPassword(password: string): { password: string };
   setUsername(username: string): { username: string };
   toggleCredentialVisibility(): void;
-}
+} & Pick<CrawlerDomainDetailActions, 'submitAuthUpdate' | 'receiveDomainData'>;
 
 export const AuthenticationPanelLogic = kea<
   MakeLogicType<AuthenticationPanelValues, AuthenticationPanelActions>
 >({
   path: ['enterprise_search', 'app_search', 'crawler', 'authentication_panel'],
+  connect: {
+    actions: [CrawlerDomainDetailLogic, ['submitAuthUpdate', 'receiveDomainData']],
+  },
   actions: () => ({
+    deleteCredentials: true,
     disableEditing: true,
     enableEditing: (currentCrawlerAuth) => ({ currentCrawlerAuth }),
+    saveCredentials: true,
     selectAuthOption: (authType) => ({ authType }),
     setHeaderContent: (headerContent) => ({ headerContent }),
     setIsModalVisible: (isModalVisible) => ({ isModalVisible }),
@@ -69,6 +62,7 @@ export const AuthenticationPanelLogic = kea<
       {
         disableEditing: () => false,
         enableEditing: () => false,
+        receiveDomainData: () => false,
         toggleCredentialVisibility: (areCredentialsVisible) => !areCredentialsVisible,
       },
     ],
@@ -79,6 +73,7 @@ export const AuthenticationPanelLogic = kea<
           currentCrawlerAuth !== undefined && isRawCrawlerAuth(currentCrawlerAuth)
             ? currentCrawlerAuth.header
             : '',
+        receiveDomainData: () => '',
         setHeaderContent: (_, { headerContent }) => headerContent,
       },
     ],
@@ -87,11 +82,13 @@ export const AuthenticationPanelLogic = kea<
       {
         disableEditing: () => false,
         enableEditing: () => true,
+        receiveDomainData: () => false,
       },
     ],
     isModalVisible: [
       false,
       {
+        receiveDomainData: () => false,
         setIsModalVisible: (_, { isModalVisible }) => isModalVisible,
       },
     ],
@@ -102,6 +99,7 @@ export const AuthenticationPanelLogic = kea<
           currentCrawlerAuth !== undefined && isBasicCrawlerAuth(currentCrawlerAuth)
             ? currentCrawlerAuth.password
             : '',
+        receiveDomainData: () => '',
         setPassword: (_, { password }) => password,
       },
     ],
@@ -109,6 +107,7 @@ export const AuthenticationPanelLogic = kea<
       null,
       {
         enableEditing: (_, { currentCrawlerAuth }) => currentCrawlerAuth?.type ?? 'basic',
+        receiveDomainData: () => null,
         selectAuthOption: (_, { authType }) => authType,
       },
     ],
@@ -119,8 +118,29 @@ export const AuthenticationPanelLogic = kea<
           currentCrawlerAuth !== undefined && isBasicCrawlerAuth(currentCrawlerAuth)
             ? currentCrawlerAuth.username
             : '',
+        receiveDomainData: () => '',
         setUsername: (_, { username }) => username,
       },
     ],
+  }),
+  listeners: ({ values }) => ({
+    saveCredentials: () => {
+      const { headerContent, password, selectedAuthOption, username } = values;
+      if (selectedAuthOption === 'basic') {
+        CrawlerDomainDetailLogic.actions.submitAuthUpdate({
+          password,
+          type: 'basic',
+          username,
+        });
+      } else if (selectedAuthOption === 'raw') {
+        CrawlerDomainDetailLogic.actions.submitAuthUpdate({
+          header: headerContent,
+          type: 'raw',
+        });
+      }
+    },
+    deleteCredentials: () => {
+      CrawlerDomainDetailLogic.actions.submitAuthUpdate(null);
+    },
   }),
 });

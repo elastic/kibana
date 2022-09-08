@@ -270,6 +270,16 @@ export function registerCrawlerRoutes(routeDependencies: RouteDependencies) {
           ),
           deduplication_enabled: schema.maybe(schema.boolean()),
           deduplication_fields: schema.maybe(schema.arrayOf(schema.string())),
+          auth: schema.maybe(
+            schema.nullable(
+              schema.object({
+                type: schema.string(),
+                username: schema.maybe(schema.string()),
+                password: schema.maybe(schema.string()),
+                value: schema.maybe(schema.string()),
+              })
+            )
+          ),
         }),
         params: schema.object({
           domainId: schema.string(),
