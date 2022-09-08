@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { EuiEmptyPrompt, EuiPage, EuiPageBody, EuiPageContent, EuiProvider } from '@elastic/eui';
+import {
+  EuiEmptyPrompt,
+  EuiPage,
+  EuiPageBody,
+  EuiPageContent_Deprecated as EuiPageContent,
+  EuiProvider,
+} from '@elastic/eui';
 // @ts-expect-error no definitions in component folder
 import { icon as EuiIconAlert } from '@elastic/eui/lib/components/icon/assets/alert';
 // @ts-expect-error no definitions in component folder

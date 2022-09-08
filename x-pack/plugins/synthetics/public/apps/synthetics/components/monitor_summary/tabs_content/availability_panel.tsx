@@ -11,6 +11,8 @@ import { ReportTypes } from '@kbn/observability-plugin/public';
 import { useParams } from 'react-router-dom';
 import { ClientPluginsStart } from '../../../../../plugin';
 
+import { KpiWrapper } from './kpi_wrapper';
+
 export const AvailabilityPanel = () => {
   const {
     services: {
@@ -20,7 +22,7 @@ export const AvailabilityPanel = () => {
   const { monitorId } = useParams<{ monitorId: string }>();
 
   return (
-    <>
+    <KpiWrapper>
       <ExploratoryViewEmbeddable
         align="left"
         reportType={ReportTypes.SINGLE_METRIC}
@@ -34,6 +36,6 @@ export const AvailabilityPanel = () => {
           },
         ]}
       />
-    </>
+    </KpiWrapper>
   );
 };
