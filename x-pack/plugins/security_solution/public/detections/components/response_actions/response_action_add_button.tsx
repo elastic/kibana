@@ -6,7 +6,14 @@
  */
 
 import React, { useMemo, useState, useCallback } from 'react';
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiKeyPadMenuItem } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiKeyPadMenuItem,
+  EuiSpacer,
+} from '@elastic/eui';
 import { suspendedComponentWithProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useLicense } from '../../../common/hooks/use_license';
@@ -44,14 +51,15 @@ export const ResponseActionAddButton = ({
     return (
       <EuiFlexGroup>
         <EuiFlexItem grow={false}>
+          <EuiSpacer size="m" />
           <EuiButton
             size="s"
             data-test-subj="addAlertActionButton"
             onClick={() => setAddResponseActionButtonShown(false)}
           >
             <FormattedMessage
-              id="xpack.securitySolution.sections.actionForm.addActionButtonLabel"
-              defaultMessage="Add action"
+              id="xpack.securitySolution.sections.actionForm.addResponseActionButtonLabel"
+              defaultMessage="Add response action"
             />
           </EuiButton>
         </EuiFlexItem>
