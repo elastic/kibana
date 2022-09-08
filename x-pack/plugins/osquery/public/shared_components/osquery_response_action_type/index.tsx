@@ -14,7 +14,7 @@ import uuid from 'uuid';
 import { useForm as useHookForm, FormProvider } from 'react-hook-form';
 import { get, isEmpty, map } from 'lodash';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
-import { QueryPackSelectable } from '../../live_queries/form/QueryPackSelectable';
+import { QueryPackSelectable } from '../../live_queries/form/query_pack_selectable';
 import type { EcsMappingFormField } from '../../packs/queries/ecs_mapping_editor_field';
 import { defaultEcsFormData } from '../../packs/queries/ecs_mapping_editor_field';
 import { convertECSMappingToFormValue } from '../../../common/schemas/common/utils';
