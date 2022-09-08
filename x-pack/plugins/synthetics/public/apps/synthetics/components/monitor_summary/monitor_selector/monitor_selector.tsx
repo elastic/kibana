@@ -35,7 +35,7 @@ export const MonitorSelector = () => {
 
   useEffect(() => {
     if (recentlyViewed.length > 0 && !searchValue) {
-      let otherMonitors = values.filter((value) =>
+      let otherMonitors: EuiSelectableOption[] = values.filter((value) =>
         recentlyViewed.every((recent) => recent.id !== value.id)
       );
 
