@@ -97,6 +97,7 @@ export const sanitizeProperties = (annotation: EventAnnotationConfig) => {
       'textField',
       'filter',
       'extraFields',
+      'ignoreGlobalFilters',
     ]);
     return lineAnnotation;
   }

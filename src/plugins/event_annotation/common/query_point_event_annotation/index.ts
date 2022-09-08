@@ -103,6 +103,12 @@ export const queryPointEventAnnotation: ExpressionFunctionDefinition<
         defaultMessage: `Switch to hide annotation`,
       }),
     },
+    ignoreGlobalFilters: {
+      types: ['boolean'],
+      help: i18n.translate('eventAnnotation.queryAnnotation.args.ignoreGlobalFilters', {
+        defaultMessage: `Switch to ignore global filters for the annotation`,
+      }),
+    },
   },
   fn: function fn(input: unknown, args: QueryPointEventAnnotationArgs) {
     return {
