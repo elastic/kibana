@@ -19,14 +19,12 @@ export default ({ getService }: FtrProviderContext) => {
     const observability = getService('observability');
     const retry = getService('retry');
 
-    beforeEach(async () => {
+    before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/observability/alerts');
-      await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
     });
 
-    afterEach(async () => {
+    after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/observability/alerts');
-      await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs');
     });
 
     describe('Without alerts', function () {

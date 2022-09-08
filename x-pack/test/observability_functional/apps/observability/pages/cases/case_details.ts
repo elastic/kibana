@@ -56,6 +56,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       after(async () => {
         await cases.api.deleteAllCases();
+        await observability.users.restoreDefaultTestUserRole();
       });
 
       it('should link to observability rule pages in case details', async () => {
