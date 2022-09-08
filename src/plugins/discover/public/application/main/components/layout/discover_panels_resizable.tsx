@@ -6,12 +6,7 @@
  * Side Public License, v 1.
  */
 
-import {
-  EuiResizableContainer,
-  useEuiTheme,
-  useGeneratedHtmlId,
-  useResizeObserver,
-} from '@elastic/eui';
+import { EuiResizableContainer, useGeneratedHtmlId, useResizeObserver } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { ReactElement, RefObject, useCallback, useEffect, useState } from 'react';
 
@@ -25,22 +20,23 @@ export const DiscoverPanelsResizable = ({
   className,
   resizeRef,
   initialTopPanelHeight,
+  minTopPanelHeight,
+  minMainPanelHeight,
   topPanel,
   mainPanel,
 }: {
   className?: string;
   resizeRef: RefObject<HTMLDivElement>;
   initialTopPanelHeight: number;
+  minTopPanelHeight: number;
+  minMainPanelHeight: number;
   topPanel: ReactElement;
   mainPanel: ReactElement;
 }) => {
-  const { euiTheme } = useEuiTheme();
-  const minTopPanelHeight = euiTheme.base * 8;
-  const minMainHeight = euiTheme.base * 10;
   const topPanelId = useGeneratedHtmlId({ prefix: 'topPanel' });
   const { height: containerHeight } = useResizeObserver(resizeRef.current);
   const [topPanelHeight, setTopPanelHeight] = useState(initialTopPanelHeight);
-  const [panelSizes, setPanelSizes] = useState({ topPanelSize: 0, mainSize: 0 });
+  const [panelSizes, setPanelSizes] = useState({ topPanelSize: 0, mainPanelSize: 0 });
 
   // EuiResizableContainer doesn't work properly when used with react-reverse-portal and
   // will cancel the resize. To work around this we keep track of when resizes start and
@@ -87,25 +83,29 @@ export const DiscoverPanelsResizable = ({
     }
 
     let topPanelSize: number;
+    let mainPanelSize: number;
 
     // If the container height is less than the minimum main content height
     // plus the current top panel height, then we need to make some adjustments.
-    if (containerHeight < minMainHeight + topPanelHeight) {
-      const newTopPanelHeight = containerHeight - minMainHeight;
+    if (containerHeight < minMainPanelHeight + topPanelHeight) {
+      const newTopPanelHeight = containerHeight - minMainPanelHeight;
 
       // Try to make the top panel height fit within the container, but if it
-      // doesn't then just use the minimum height.
+      // doesn't then just use the minimum heights.
       if (newTopPanelHeight < minTopPanelHeight) {
         topPanelSize = pixelsToPercent(containerHeight, minTopPanelHeight);
+        mainPanelSize = pixelsToPercent(containerHeight, minMainPanelHeight);
       } else {
         topPanelSize = pixelsToPercent(containerHeight, newTopPanelHeight);
+        mainPanelSize = 100 - topPanelSize;
       }
     } else {
       topPanelSize = pixelsToPercent(containerHeight, topPanelHeight);
+      mainPanelSize = 100 - topPanelSize;
     }
 
-    setPanelSizes({ topPanelSize, mainSize: 100 - topPanelSize });
-  }, [containerHeight, topPanelHeight, minTopPanelHeight, minMainHeight]);
+    setPanelSizes({ topPanelSize, mainPanelSize });
+  }, [containerHeight, topPanelHeight, minTopPanelHeight, minMainPanelHeight]);
 
   return (
     <div
@@ -118,6 +118,7 @@ export const DiscoverPanelsResizable = ({
         className={className}
         direction="vertical"
         onPanelWidthChange={onPanelSizeChange}
+        data-test-subj="dsc-resizable-container"
       >
         {(EuiResizablePanel, EuiResizableButton) => (
           <>
@@ -126,6 +127,7 @@ export const DiscoverPanelsResizable = ({
               minSize={`${minTopPanelHeight}px`}
               size={panelSizes.topPanelSize}
               paddingSize="none"
+              data-test-subj="dsc-panel-resizable-top"
             >
               {topPanel}
             </EuiResizablePanel>
@@ -137,9 +139,10 @@ export const DiscoverPanelsResizable = ({
               />
             </EuiResizableButton>
             <EuiResizablePanel
-              minSize={`${minMainHeight}px`}
-              size={panelSizes.mainSize}
+              minSize={`${minMainPanelHeight}px`}
+              size={panelSizes.mainPanelSize}
               paddingSize="none"
+              data-test-subj="dsc-panel-resizable-main"
             >
               {mainPanel}
             </EuiResizablePanel>

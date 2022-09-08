@@ -21,6 +21,8 @@ export interface DiscoverPanelsProps {
   mode: DISCOVER_PANELS_MODE;
   resizeRef: RefObject<HTMLDivElement>;
   initialTopPanelHeight: number;
+  minTopPanelHeight: number;
+  minMainPanelHeight: number;
   topPanel: ReactElement;
   mainPanel: ReactElement;
 }
@@ -32,6 +34,8 @@ export const DiscoverPanels = ({
   mode,
   resizeRef,
   initialTopPanelHeight,
+  minTopPanelHeight,
+  minMainPanelHeight,
   topPanel,
   mainPanel,
 }: DiscoverPanelsProps) => {
@@ -43,6 +47,8 @@ export const DiscoverPanels = ({
     <DiscoverPanelsResizable
       resizeRef={resizeRef}
       initialTopPanelHeight={initialTopPanelHeight}
+      minTopPanelHeight={minTopPanelHeight}
+      minMainPanelHeight={minMainPanelHeight}
       {...panelsProps}
     />
   );

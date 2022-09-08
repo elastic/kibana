@@ -104,12 +104,16 @@ export const DiscoverMainContent = ({
   const showFixedPanels = useIsWithinBreakpoints(['xs', 's']) || isPlainRecord || state.hideChart;
   const { euiTheme } = useEuiTheme();
   const topPanelHeight = euiTheme.base * 12;
+  const minTopPanelHeight = euiTheme.base * 8;
+  const minMainPanelHeight = euiTheme.base * 10;
+
   const chartClassName =
     showFixedPanels && !state.hideChart
       ? css`
           height: ${topPanelHeight}px;
         `
       : 'eui-fullHeight';
+
   const panelsMode = isPlainRecord
     ? DISCOVER_PANELS_MODE.SINGLE
     : showFixedPanels
@@ -184,6 +188,8 @@ export const DiscoverMainContent = ({
         mode={panelsMode}
         resizeRef={resizeRef}
         initialTopPanelHeight={topPanelHeight}
+        minTopPanelHeight={minTopPanelHeight}
+        minMainPanelHeight={minMainPanelHeight}
         topPanel={<OutPortal node={topPanelNode} />}
         mainPanel={<OutPortal node={mainPanelNode} />}
       />
