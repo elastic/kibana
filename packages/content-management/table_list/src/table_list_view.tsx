@@ -451,74 +451,69 @@ function TableListViewComp<T extends UserContentCommonSchema>({
 
   if (!fetchError && hasNoItems) {
     return (
-      <KibanaPageTemplate
-        data-test-subj={pageDataTestSubject}
-        pageBodyProps={{
-          'aria-labelledby': hasInitialFetchReturned ? headingId : undefined,
-        }}
-        isEmptyState={true}
-      >
-        {renderNoItemsMessage()}
+      <KibanaPageTemplate panelled isEmptyState={true} data-test-subj={pageDataTestSubject}>
+        <KibanaPageTemplate.Section
+          aria-labelledby={hasInitialFetchReturned ? headingId : undefined}
+        >
+          {renderNoItemsMessage()}
+        </KibanaPageTemplate.Section>
       </KibanaPageTemplate>
     );
   }
 
   return (
-    <KibanaPageTemplate
-      data-test-subj={pageDataTestSubject}
-      pageHeader={{
-        pageTitle: <span id={headingId}>{tableListTitle}</span>,
-        rightSideItems: [renderCreateButton() ?? <span />],
-        'data-test-subj': 'top-nav',
-      }}
-      pageBodyProps={{
-        'aria-labelledby': hasInitialFetchReturned ? headingId : undefined,
-      }}
-    >
-      {/* Any children passed to the component */}
-      {children}
-
-      {/* Too many items error */}
-      {showLimitError && (
-        <ListingLimitWarning
-          canEditAdvancedSettings={canEditAdvancedSettings}
-          advancedSettingsLink={getListingLimitSettingsUrl()}
-          entityNamePlural={entityNamePlural}
-          totalItems={totalItems}
-          listingLimit={listingLimit}
-        />
-      )}
-
-      {/* Error while fetching items */}
-      {showFetchError && renderFetchError()}
-
-      {/* Table of items */}
-      <Table<T>
-        dispatch={dispatch}
-        items={items}
-        isFetchingItems={isFetchingItems}
-        searchQuery={searchQuery}
-        tableColumns={tableColumns}
-        tableSort={tableSort}
-        pagination={pagination}
-        selectedIds={selectedIds}
-        entityName={entityName}
-        entityNamePlural={entityNamePlural}
-        deleteItems={deleteItems}
-        tableCaption={tableListTitle}
+    <KibanaPageTemplate panelled data-test-subj={pageDataTestSubject}>
+      <KibanaPageTemplate.Header
+        pageTitle={<span id={headingId}>{tableListTitle}</span>}
+        rightSideItems={[renderCreateButton() ?? <span />]}
+        data-test-subj="top-nav"
       />
+      <KibanaPageTemplate.Section aria-labelledby={hasInitialFetchReturned ? headingId : undefined}>
+        {/* Any children passed to the component */}
+        {children}
 
-      {/* Delete modal */}
-      {showDeleteModal && (
-        <ConfirmDeleteModal<T>
-          isDeletingItems={isDeletingItems}
+        {/* Too many items error */}
+        {showLimitError && (
+          <ListingLimitWarning
+            canEditAdvancedSettings={canEditAdvancedSettings}
+            advancedSettingsLink={getListingLimitSettingsUrl()}
+            entityNamePlural={entityNamePlural}
+            totalItems={totalItems}
+            listingLimit={listingLimit}
+          />
+        )}
+
+        {/* Error while fetching items */}
+        {showFetchError && renderFetchError()}
+
+        {/* Table of items */}
+        <Table<T>
+          dispatch={dispatch}
+          items={items}
+          isFetchingItems={isFetchingItems}
+          searchQuery={searchQuery}
+          tableColumns={tableColumns}
+          tableSort={tableSort}
+          pagination={pagination}
+          selectedIds={selectedIds}
           entityName={entityName}
           entityNamePlural={entityNamePlural}
-          items={selectedItems}
-          onConfirm={deleteSelectedItems}
-          onCancel={() => dispatch({ type: 'onCancelDeleteItems' })}
+          deleteItems={deleteItems}
+          tableCaption={tableListTitle}
         />
-      )}
+
+        {/* Delete modal */}
+        {showDeleteModal && (
+          <ConfirmDeleteModal<T>
+            isDeletingItems={isDeletingItems}
+            entityName={entityName}
+            entityNamePlural={entityNamePlural}
+            items={selectedItems}
+            onConfirm={deleteSelectedItems}
+            onCancel={() => dispatch({ type: 'onCancelDeleteItems' })}
+          />
+        )}
+      </KibanaPageTemplate.Section>
     </KibanaPageTemplate>
   );
 }
