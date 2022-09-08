@@ -41,6 +41,7 @@
         ],
         "path": "packages/kbn-user-profile-components/src/user_profile.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/user-profile-components",
@@ -62,6 +63,7 @@
             ],
             "path": "packages/kbn-user-profile-components/src/user_profile.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -90,6 +92,7 @@
         ],
         "path": "packages/kbn-user-profile-components/src/user_avatar.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/user-profile-components",
@@ -111,6 +114,7 @@
             ],
             "path": "packages/kbn-user-profile-components/src/user_avatar.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -139,6 +143,7 @@
         ],
         "path": "packages/kbn-user-profile-components/src/user_profiles_popover.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/user-profile-components",
@@ -160,6 +165,7 @@
             ],
             "path": "packages/kbn-user-profile-components/src/user_profiles_popover.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -188,6 +194,7 @@
         ],
         "path": "packages/kbn-user-profile-components/src/user_profiles_selectable.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/user-profile-components",
@@ -209,6 +216,7 @@
             ],
             "path": "packages/kbn-user-profile-components/src/user_profiles_selectable.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -228,6 +236,7 @@
         ],
         "path": "packages/kbn-user-profile-components/src/user_profile.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/user-profile-components",
@@ -239,7 +248,8 @@
               "\nUsername of the user."
             ],
             "path": "packages/kbn-user-profile-components/src/user_profile.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/user-profile-components",
@@ -254,7 +264,8 @@
               "string | undefined"
             ],
             "path": "packages/kbn-user-profile-components/src/user_profile.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/user-profile-components",
@@ -269,7 +280,8 @@
               "string | undefined"
             ],
             "path": "packages/kbn-user-profile-components/src/user_profile.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -297,6 +309,7 @@
         ],
         "path": "packages/kbn-user-profile-components/src/user_avatar.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/user-profile-components",
@@ -318,7 +331,8 @@
               " | undefined"
             ],
             "path": "packages/kbn-user-profile-components/src/user_avatar.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/user-profile-components",
@@ -340,7 +354,8 @@
               " | undefined"
             ],
             "path": "packages/kbn-user-profile-components/src/user_avatar.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -366,6 +381,7 @@
         ],
         "path": "packages/kbn-user-profile-components/src/user_profile.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/user-profile-components",
@@ -377,7 +393,8 @@
               "\nUnique ID for of the user profile."
             ],
             "path": "packages/kbn-user-profile-components/src/user_profile.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/user-profile-components",
@@ -389,7 +406,8 @@
               "\nIndicates whether user profile is enabled or not."
             ],
             "path": "packages/kbn-user-profile-components/src/user_profile.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/user-profile-components",
@@ -410,7 +428,8 @@
               }
             ],
             "path": "packages/kbn-user-profile-components/src/user_profile.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/user-profile-components",
@@ -425,7 +444,8 @@
               "{ [P in keyof D]?: D[P] | undefined; }"
             ],
             "path": "packages/kbn-user-profile-components/src/user_profile.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -441,6 +461,7 @@
         ],
         "path": "packages/kbn-user-profile-components/src/user_profile.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/user-profile-components",
@@ -455,7 +476,8 @@
               "string | undefined"
             ],
             "path": "packages/kbn-user-profile-components/src/user_profile.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/user-profile-components",
@@ -470,7 +492,8 @@
               "string | undefined"
             ],
             "path": "packages/kbn-user-profile-components/src/user_profile.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/user-profile-components",
@@ -485,7 +508,8 @@
               "string | undefined"
             ],
             "path": "packages/kbn-user-profile-components/src/user_profile.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -512,6 +536,7 @@
         ],
         "path": "packages/kbn-user-profile-components/src/user_profiles_popover.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/user-profile-components",
@@ -528,7 +553,8 @@
               "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
             ],
             "path": "packages/kbn-user-profile-components/src/user_profiles_popover.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/user-profile-components",
@@ -551,7 +577,8 @@
               }
             ],
             "path": "packages/kbn-user-profile-components/src/user_profiles_popover.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -579,6 +606,7 @@
         ],
         "path": "packages/kbn-user-profile-components/src/user_profiles_selectable.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/user-profile-components",
@@ -600,7 +628,8 @@
               "[] | undefined"
             ],
             "path": "packages/kbn-user-profile-components/src/user_profiles_selectable.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/user-profile-components",
@@ -622,7 +651,8 @@
               "[] | undefined"
             ],
             "path": "packages/kbn-user-profile-components/src/user_profiles_selectable.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/user-profile-components",
@@ -644,7 +674,8 @@
               "[] | undefined"
             ],
             "path": "packages/kbn-user-profile-components/src/user_profiles_selectable.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/user-profile-components",
@@ -668,6 +699,7 @@
             ],
             "path": "packages/kbn-user-profile-components/src/user_profiles_selectable.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/user-profile-components",
@@ -690,6 +722,7 @@
                 ],
                 "path": "packages/kbn-user-profile-components/src/user_profiles_selectable.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -709,6 +742,7 @@
             ],
             "path": "packages/kbn-user-profile-components/src/user_profiles_selectable.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/user-profile-components",
@@ -724,6 +758,7 @@
                 ],
                 "path": "packages/kbn-user-profile-components/src/user_profiles_selectable.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -742,7 +777,8 @@
               "boolean | undefined"
             ],
             "path": "packages/kbn-user-profile-components/src/user_profiles_selectable.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/user-profile-components",
@@ -757,7 +793,8 @@
               "string | undefined"
             ],
             "path": "packages/kbn-user-profile-components/src/user_profiles_selectable.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/user-profile-components",
@@ -772,7 +809,8 @@
               "string | undefined"
             ],
             "path": "packages/kbn-user-profile-components/src/user_profiles_selectable.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/user-profile-components",
@@ -788,6 +826,7 @@
             ],
             "path": "packages/kbn-user-profile-components/src/user_profiles_selectable.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/user-profile-components",
@@ -803,6 +842,7 @@
                 ],
                 "path": "packages/kbn-user-profile-components/src/user_profiles_selectable.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -821,7 +861,8 @@
               "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
             ],
             "path": "packages/kbn-user-profile-components/src/user_profiles_selectable.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -837,6 +878,7 @@
         ],
         "path": "packages/kbn-user-profile-components/src/user_profile.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/user-profile-components",
@@ -848,7 +890,8 @@
               "\nUsername of the user."
             ],
             "path": "packages/kbn-user-profile-components/src/user_profile.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/user-profile-components",
@@ -863,7 +906,8 @@
               "string | undefined"
             ],
             "path": "packages/kbn-user-profile-components/src/user_profile.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/user-profile-components",
@@ -878,7 +922,8 @@
               "string | undefined"
             ],
             "path": "packages/kbn-user-profile-components/src/user_profile.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -915,6 +960,7 @@
         ],
         "path": "packages/kbn-user-profile-components/src/user_avatar.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
