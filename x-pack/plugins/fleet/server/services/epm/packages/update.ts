@@ -51,7 +51,12 @@ export async function updateDatastreamExperimentalFeatures(
     features: Record<ExperimentalIndexingFeature, boolean>;
   }>
 ) {
-  await savedObjectsClient.update<Installation>(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {
-    experimental_data_stream_features: dataStreamFeatureMapping,
-  });
+  await savedObjectsClient.update<Installation>(
+    PACKAGES_SAVED_OBJECT_TYPE,
+    pkgName,
+    {
+      experimental_data_stream_features: dataStreamFeatureMapping,
+    },
+    { refresh: 'wait_for' }
+  );
 }
