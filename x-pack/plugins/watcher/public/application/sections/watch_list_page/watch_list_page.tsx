@@ -14,7 +14,7 @@ import {
   EuiInMemoryTable,
   EuiIcon,
   EuiLink,
-  EuiPageContent,
+  EuiPageContent_Deprecated as EuiPageContent,
   EuiSpacer,
   EuiText,
   EuiToolTip,

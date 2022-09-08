@@ -14,7 +14,7 @@ import { CaseFeatureNoPermissions } from './feature_no_permissions';
 import { useGetUserCasesPermissions } from '../../hooks/use_get_user_cases_permissions';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useHasData } from '../../hooks/use_has_data';
-import { LoadingObservability } from '../overview/loading_observability';
+import { LoadingObservability } from '../overview';
 import { getNoDataConfig } from '../../utils/no_data_config';
 import { ObservabilityAppServices } from '../../application/types';
 

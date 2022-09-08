@@ -29,6 +29,7 @@
         "description": [],
         "path": "packages/core/saved-objects/core-saved-objects-browser/src/contracts.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-browser",
@@ -43,7 +44,8 @@
               "SavedObjectsClientContract"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-browser/src/contracts.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
