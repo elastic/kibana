@@ -34,4 +34,4 @@ export const getEnableExternalUrls = () => getInjectedVars().enableExternalUrls;
 export const [getDocLinks, setDocLinks] = createGetterSetter<DocLinksStart>('docLinks');
 
 export const [getUsageCollectionStart, setUsageCollectionStart] =
-  createGetterSetter<UsageCollectionStart>('UsageCollection', false);
+  createGetterSetter<UsageCollectionStart>('UsageCollection');
