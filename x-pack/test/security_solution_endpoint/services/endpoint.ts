@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable max-classes-per-file */
+
 import { errors } from '@elastic/elasticsearch';
 import { Client } from '@elastic/elasticsearch';
 import {
@@ -30,7 +32,22 @@ import { DeepPartial } from 'utility-types';
 import { HostInfo, HostMetadata } from '@kbn/security-solution-plugin/common/endpoint/types';
 import { EndpointDocGenerator } from '@kbn/security-solution-plugin/common/endpoint/generate_data';
 import { merge } from 'lodash';
+import { kibanaPackageJson } from '@kbn/utils';
 import { FtrService } from '../../functional/ftr_provider_context';
+
+// Document Generator override that uses a custom Endpoint Metadata generator and sets the
+// `agent.version` to the current version
+const CurrentKibanaVersionDocGenerator = class extends EndpointDocGenerator {
+  constructor(seedValue) {
+    const MetadataGenerator = class extends EndpointMetadataGenerator {
+      protected randomVersion(): string {
+        return kibanaPackageJson.version;
+      }
+    };
+
+    super(seedValue, MetadataGenerator);
+  }
+};
 
 export class EndpointTestResources extends FtrService {
   private readonly esClient = this.ctx.getService('es');
@@ -167,7 +184,9 @@ export class EndpointTestResources extends FtrService {
           'logs-endpoint.events.process-default',
           'logs-endpoint.alerts-default',
           alertsPerHost,
-          enableFleetIntegration
+          enableFleetIntegration,
+          undefined,
+          CurrentKibanaVersionDocGenerator
         );
 
     if (waitUntilTransformed) {
