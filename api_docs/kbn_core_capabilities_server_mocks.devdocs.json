@@ -34,6 +34,7 @@
         ],
         "path": "packages/core/capabilities/core-capabilities-server-mocks/src/capabilities_service.mock.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -47,6 +48,7 @@
         "description": [],
         "path": "packages/core/capabilities/core-capabilities-server-mocks/src/capabilities_service.mock.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-capabilities-server-mocks",
@@ -68,6 +70,7 @@
             ],
             "path": "packages/core/capabilities/core-capabilities-server-mocks/src/capabilities_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           },
@@ -85,6 +88,7 @@
             ],
             "path": "packages/core/capabilities/core-capabilities-server-mocks/src/capabilities_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           },
@@ -102,6 +106,7 @@
             ],
             "path": "packages/core/capabilities/core-capabilities-server-mocks/src/capabilities_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           },
@@ -118,6 +123,7 @@
             ],
             "path": "packages/core/capabilities/core-capabilities-server-mocks/src/capabilities_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           }

@@ -21,6 +21,7 @@
         "description": [],
         "path": "packages/core/execution-context/core-execution-context-server/src/contracts.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-execution-context-server",
@@ -38,6 +39,7 @@
             ],
             "path": "packages/core/execution-context/core-execution-context-server/src/contracts.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-execution-context-server",
@@ -52,6 +54,7 @@
                 ],
                 "path": "packages/core/execution-context/core-execution-context-server/src/contracts.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               },
               {
@@ -66,6 +69,7 @@
                 ],
                 "path": "packages/core/execution-context/core-execution-context-server/src/contracts.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -84,6 +88,7 @@
             ],
             "path": "packages/core/execution-context/core-execution-context-server/src/contracts.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -99,6 +104,7 @@
         "description": [],
         "path": "packages/core/execution-context/core-execution-context-server/src/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-execution-context-server",
@@ -112,6 +118,7 @@
             ],
             "path": "packages/core/execution-context/core-execution-context-server/src/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -129,6 +136,7 @@
             ],
             "path": "packages/core/execution-context/core-execution-context-server/src/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -156,6 +164,7 @@
         ],
         "path": "packages/core/execution-context/core-execution-context-server/src/contracts.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
