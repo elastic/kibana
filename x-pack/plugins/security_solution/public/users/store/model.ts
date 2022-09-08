@@ -42,16 +42,21 @@ export interface UsersRiskScoreQuery extends BasicQueryPaginated {
   severitySelection: RiskSeverity[];
 }
 
+export interface UsersAnomaliesQuery {
+  jobIdSelection: string[];
+  intervalSelection: string;
+}
+
 export interface UsersQueries {
   [UsersTableType.allUsers]: AllUsersQuery;
   [UsersTableType.authentications]: BasicQueryPaginated;
-  [UsersTableType.anomalies]: null | undefined;
+  [UsersTableType.anomalies]: UsersAnomaliesQuery;
   [UsersTableType.risk]: UsersRiskScoreQuery;
   [UsersTableType.events]: BasicQueryPaginated;
 }
 
 export interface UserDetailsQueries {
-  [UsersTableType.anomalies]: null | undefined;
+  [UsersTableType.anomalies]: UsersAnomaliesQuery;
   [UsersTableType.events]: BasicQueryPaginated;
 }
 
