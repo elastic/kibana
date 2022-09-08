@@ -134,11 +134,11 @@ To test your code locally when developing the A/B scenarios, this plugin accepts
 
 ```yml
 xpack.cloud_integrations.experiments.enabled: true
-xpack.cloud_integrations.experiments.flag_overwrites:
+xpack.cloud_integrations.experiments.flag_overrides:
   "my-plugin.my-feature-flag": "my custom value"
 ```
 
-NOTE: This is only valid when running Kibana in dev mode and will fail in production
+NOTE: This is only valid when running Kibana in dev mode and will fail in production. Bear in mind that this service won't hit the A/B provider for **any** feature flag if this setting is set (even if it does not include the requested feature flag).
 
 
 ### How is my user identified?

@@ -7,6 +7,7 @@
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import LaunchDarkly, { type LDClient } from 'launchdarkly-js-client-sdk';
+import { get } from 'lodash';
 import type {
   CloudExperimentsMetric,
   CloudExperimentsPluginSetup,
@@ -20,14 +21,30 @@ export class CloudExperimentsPlugin
   implements Plugin<CloudExperimentsPluginSetup, CloudExperimentsPluginStart>
 {
   private launchDarklyClient?: LDClient;
-  private readonly clientId: string;
+  private readonly clientId?: string;
   private readonly kibanaVersion: string;
+  private readonly flagOverrides?: Record<string, unknown>;
 
   /** Constructor of the plugin **/
   constructor(core: PluginInitializerContext) {
     this.kibanaVersion = core.env.packageInfo.version;
-    const ldConfig = core.config.get<{ launch_darkly: { client_id: string } }>().launch_darkly;
-    this.clientId = ldConfig.client_id;
+    const config = core.config.get<{
+      launch_darkly?: { client_id: string };
+      flag_overrides?: Record<string, unknown>;
+    }>();
+    if (config.flag_overrides) {
+      this.flagOverrides = config.flag_overrides;
+    } else {
+      const ldConfig = config.launch_darkly; // If the plugin is enabled and no flag_overrides are provided (dev mode only), launch_darkly must exist
+      if (!ldConfig) {
+        throw new Error(
+          'xpack.cloud_integrations.experiments.launch_darkly configuration should exist'
+        );
+      }
+      if (ldConfig) {
+        this.clientId = ldConfig.client_id;
+      }
+    }
   }
 
   /**
@@ -37,6 +54,8 @@ export class CloudExperimentsPlugin
   public setup(core: CoreSetup): CloudExperimentsPluginSetup {
     return {
       identifyUser: (userId, userMetadata) => {
+        if (!this.clientId) return;
+
         if (!this.launchDarklyClient) {
           // If the client has not been initialized, create it with the user data..
           this.launchDarklyClient = LaunchDarkly.initialize(
@@ -76,6 +95,11 @@ export class CloudExperimentsPlugin
   }
 
   private getVariation = async <Data>(configKey: string, defaultValue: Data): Promise<Data> => {
+    if (this.flagOverrides) {
+      console.warn('Serving config overrides');
+      // Only to help dev testing. This setting will fail if provided when in production.
+      return get(this.flagOverrides, configKey, defaultValue) as Data;
+    }
     if (!this.launchDarklyClient) return defaultValue; // Skip any action if no LD User is defined
     await this.launchDarklyClient.waitForInitialization();
     return this.launchDarklyClient.variation(configKey, defaultValue);

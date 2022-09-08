@@ -28,8 +28,19 @@ const configSchema = schema.object({
   launch_darkly: schema.conditional(
     schema.siblingRef('enabled'),
     true,
-    launchDarklySchema,
+    schema.conditional(
+      schema.contextRef('dev'),
+      schema.literal(true), // this is still optional when running on dev because devs might use the `flag_overrides`
+      schema.maybe(launchDarklySchema),
+      launchDarklySchema
+    ),
     schema.maybe(launchDarklySchema)
+  ),
+  flag_overrides: schema.conditional(
+    schema.contextRef('dev'),
+    schema.literal(true), // to ease development, `flag_overrides` is allowed when running on dev mode.
+    schema.maybe(schema.recordOf(schema.string(), schema.any())),
+    schema.never()
   ),
 });
 
@@ -40,6 +51,7 @@ export const config: PluginConfigDescriptor<CloudExperimentsConfigType> = {
     launch_darkly: {
       client_id: true,
     },
+    flag_overrides: true,
   },
   schema: configSchema,
 };
