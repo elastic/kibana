@@ -45,6 +45,7 @@
         ],
         "path": "packages/core/http/core-http-context-server-mocks/src/context_container.mock.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -58,6 +59,7 @@
         "description": [],
         "path": "packages/core/http/core-http-context-server-mocks/src/context_container.mock.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-http-context-server-mocks",
@@ -78,6 +80,7 @@
             ],
             "path": "packages/core/http/core-http-context-server-mocks/src/context_container.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -91,7 +94,8 @@
                   "any"
                 ],
                 "path": "packages/core/http/core-http-context-server-mocks/src/context_container.mock.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }
@@ -107,6 +111,7 @@
         "description": [],
         "path": "packages/core/http/core-http-context-server-mocks/src/context_service.mock.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-http-context-server-mocks",
@@ -120,6 +125,7 @@
             ],
             "path": "packages/core/http/core-http-context-server-mocks/src/context_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           },
@@ -137,6 +143,7 @@
             ],
             "path": "packages/core/http/core-http-context-server-mocks/src/context_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -150,7 +157,8 @@
                   "{}"
                 ],
                 "path": "packages/core/http/core-http-context-server-mocks/src/context_service.mock.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -168,6 +176,7 @@
             ],
             "path": "packages/core/http/core-http-context-server-mocks/src/context_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -181,7 +190,8 @@
                   "{}"
                 ],
                 "path": "packages/core/http/core-http-context-server-mocks/src/context_service.mock.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }
