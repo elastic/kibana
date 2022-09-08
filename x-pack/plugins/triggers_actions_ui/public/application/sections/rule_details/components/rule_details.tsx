@@ -28,7 +28,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { RuleExecutionStatusErrorReasons, parseDuration } from '@kbn/alerting-plugin/common';
 import { UpdateApiKeyModalConfirmation } from '../../../components/update_api_key_modal_confirmation';
-import { updateAPIKey, deleteRules } from '../../../lib/rule_api';
+import { updateAPIKey, deleteRules, runSoon } from '../../../lib/rule_api';
 import { DeleteModalConfirmation } from '../../../components/delete_modal_confirmation';
 import { RuleActionsPopover } from './rule_actions_popover';
 import {
@@ -164,6 +164,26 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
   const ruleActions = rule.actions;
   const uniqueActions = Array.from(new Set(ruleActions.map((item: any) => item.actionTypeId)));
   const [editFlyoutVisible, setEditFlyoutVisibility] = useState<boolean>(false);
+  const onRunRule = async (id: string) => {
+    try {
+      const message = await runSoon({ http, id });
+      if (message) {
+        toasts.addWarning({ title: message });
+      } else {
+        toasts.addSuccess({
+          title: i18n.translate('xpack.triggersActionsUI.sections.ruleDetails.ableToRunRuleSoon', {
+            defaultMessage: 'Your rule is scheduled to run',
+          }),
+        });
+      }
+    } catch (e) {
+      toasts.addError(e, {
+        title: i18n.translate('xpack.triggersActionsUI.sections.ruleDetails.unableToRunRuleSoon', {
+          defaultMessage: 'Unable to schedule your rule to run',
+        }),
+      });
+    }
+  };
 
   // Check whether interval is below configured minium
   useEffect(() => {
@@ -411,6 +431,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
               }
               requestRefresh();
             }}
+            onRunRule={onRunRule}
           />,
           editButton,
           <EuiButtonEmpty

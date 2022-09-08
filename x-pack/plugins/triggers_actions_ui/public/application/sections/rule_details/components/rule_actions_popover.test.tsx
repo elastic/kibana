@@ -14,6 +14,7 @@ describe('rule_actions_popover', () => {
   const onDeleteMock = jest.fn();
   const onApiKeyUpdateMock = jest.fn();
   const onEnableDisableMock = jest.fn();
+  const onRunRuleMock = jest.fn();
 
   function mockRule(overloads: Partial<Rule> = {}): Rule {
     return {
@@ -53,6 +54,7 @@ describe('rule_actions_popover', () => {
           onApiKeyUpdate={onApiKeyUpdateMock}
           canSaveRule={true}
           onEnableDisable={onEnableDisableMock}
+          onRunRule={onRunRuleMock}
         />
       </IntlProvider>
     );
@@ -63,6 +65,7 @@ describe('rule_actions_popover', () => {
     expect(screen.getByText('Update API key')).toBeInTheDocument();
     expect(screen.getByText('Delete rule')).toBeInTheDocument();
     expect(screen.getByText('Disable')).toBeInTheDocument();
+    expect(screen.getByText('Run rule')).toBeInTheDocument();
   });
 
   it('calls onDelete', async () => {
@@ -75,6 +78,7 @@ describe('rule_actions_popover', () => {
           onApiKeyUpdate={onApiKeyUpdateMock}
           canSaveRule={true}
           onEnableDisable={onEnableDisableMock}
+          onRunRule={onRunRuleMock}
         />
       </IntlProvider>
     );
@@ -103,6 +107,7 @@ describe('rule_actions_popover', () => {
           onApiKeyUpdate={onApiKeyUpdateMock}
           canSaveRule={true}
           onEnableDisable={onEnableDisableMock}
+          onRunRule={onRunRuleMock}
         />
       </IntlProvider>
     );
@@ -130,6 +135,7 @@ describe('rule_actions_popover', () => {
           onApiKeyUpdate={onApiKeyUpdateMock}
           canSaveRule={true}
           onEnableDisable={onEnableDisableMock}
+          onRunRule={onRunRuleMock}
         />
       </IntlProvider>
     );
@@ -158,6 +164,7 @@ describe('rule_actions_popover', () => {
           onApiKeyUpdate={onApiKeyUpdateMock}
           canSaveRule={true}
           onEnableDisable={onEnableDisableMock}
+          onRunRule={onRunRuleMock}
         />
       </IntlProvider>
     );
@@ -176,6 +183,35 @@ describe('rule_actions_popover', () => {
     });
   });
 
+  it('calls onRunRule', async () => {
+    const rule = mockRule();
+    render(
+      <IntlProvider locale="en">
+        <RuleActionsPopover
+          rule={rule}
+          onDelete={onDeleteMock}
+          onApiKeyUpdate={onApiKeyUpdateMock}
+          canSaveRule={true}
+          onEnableDisable={onEnableDisableMock}
+          onRunRule={onRunRuleMock}
+        />
+      </IntlProvider>
+    );
+
+    const actionButton = screen.getByTestId('ruleActionsButton');
+    expect(actionButton).toBeInTheDocument();
+    fireEvent.click(actionButton);
+
+    const runRuleButton = screen.getByText('Run rule');
+    expect(runRuleButton).toBeInTheDocument();
+    fireEvent.click(runRuleButton);
+
+    expect(onRunRuleMock).toHaveBeenCalledWith('12345');
+    await waitFor(() => {
+      expect(screen.queryByText('Run rule')).not.toBeInTheDocument();
+    });
+  });
+
   it('disables buttons when the user does not have enough permission', async () => {
     const rule = mockRule();
     render(
@@ -186,6 +222,7 @@ describe('rule_actions_popover', () => {
           onApiKeyUpdate={onApiKeyUpdateMock}
           canSaveRule={false}
           onEnableDisable={onEnableDisableMock}
+          onRunRule={onRunRuleMock}
         />
       </IntlProvider>
     );
@@ -197,5 +234,6 @@ describe('rule_actions_popover', () => {
     expect(screen.getByText('Delete rule').closest('button')).toBeDisabled();
     expect(screen.getByText('Update API key').closest('button')).toBeDisabled();
     expect(screen.getByText('Disable').closest('button')).toBeDisabled();
+    expect(screen.getByText('Run rule').closest('button')).toBeDisabled();
   });
 });

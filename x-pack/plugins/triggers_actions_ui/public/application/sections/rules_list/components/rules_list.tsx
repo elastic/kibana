@@ -262,15 +262,15 @@ export const RulesList = ({
     setCurrentRuleToEdit(ruleItem);
   };
 
-  const onRunRule = async (rule: RuleTableItem) => {
+  const onRunRule = async (id: string) => {
     try {
-      const message = await runSoon({ http, id: rule.id });
+      const message = await runSoon({ http, id });
       if (message) {
         toasts.addWarning({ title: message });
       } else {
         toasts.addSuccess({
           title: i18n.translate('xpack.triggersActionsUI.sections.rulesList.ableToRunRuleSoon', {
-            defaultMessage: 'Your rule is scheduled to run soon',
+            defaultMessage: 'Your rule is scheduled to run',
           }),
         });
       }
@@ -809,7 +809,7 @@ export const RulesList = ({
             setRulesToDelete={setRulesToDelete}
             onEditRule={() => onRuleEdit(rule)}
             onUpdateAPIKey={setRulesToUpdateAPIKey}
-            onRunRule={() => onRunRule(rule)}
+            onRunRule={() => onRunRule(rule.id)}
           />
         )}
         renderRuleError={(rule) => {
