@@ -146,6 +146,56 @@ describe('IndexPatternDimensionEditorPanel: onDrop', () => {
         },
       });
     });
+    it('does not re-use an operation if there is another operation available', () => {
+      const localState = {
+        ...state,
+        layers: {
+          ...state.layers,
+          first: {
+            ...state.layers.first,
+            columns: {
+              ...state.layers.first.columns,
+              col1: {
+                ...state.layers.first.columns.col1,
+                sourceField: mockedDraggedField.field.name,
+                operationType: 'median',
+              },
+            },
+          },
+        },
+      };
+      onDrop({
+        ...defaultProps,
+        state: localState,
+        source: mockedDraggedField,
+        dropType: 'field_replace',
+        target: {
+          ...defaultProps.target,
+          filterOperations: (op: OperationMetadata) => !op.isBucketed,
+          columnId: 'col2',
+        },
+      });
+
+      expect(setState).toBeCalledTimes(1);
+      expect(setState).toHaveBeenCalledWith({
+        ...localState,
+        layers: {
+          ...localState.layers,
+          first: {
+            ...localState.layers.first,
+            columnOrder: ['col1', 'col2'],
+            columns: {
+              ...localState.layers.first.columns,
+              col2: expect.objectContaining({
+                operationType: 'average',
+                dataType: 'number',
+                sourceField: mockedDraggedField.field.name,
+              }),
+            },
+          },
+        },
+      });
+    });
     it('keeps the operation when dropping a different compatible field', () => {
       onDrop({
         ...defaultProps,

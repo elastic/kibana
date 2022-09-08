@@ -69,6 +69,7 @@ Object {
       "paramEditorCustomProps": Object {
         "headingLabel": "Value",
       },
+      "prioritizedOperation": "max",
       "required": false,
       "supportStaticValue": true,
       "supportsMoreColumns": false,
