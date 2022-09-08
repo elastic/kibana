@@ -197,6 +197,7 @@ const OsqueryResponseActionParamsFormComponent: React.ForwardRefExoticComponent<
           canRunSingleQuery={canRunSingleQuery}
           resetFormFields={resetFormFields}
         />
+        <EuiSpacer size="m" />
         {queryType === 'query' && (
           <>
             {!isSavedQueryDisabled && (

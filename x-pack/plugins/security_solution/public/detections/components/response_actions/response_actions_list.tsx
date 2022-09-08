@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback, useEffect, useRef, useMemo } from 'react';
+import { EuiSpacer } from '@elastic/eui';
 import type { ResponseActionValidatorRef } from './response_actions_form';
 import type { ResponseActionType } from './get_supported_response_actions';
 import { ResponseActionAddButton } from './response_action_add_button';
@@ -61,6 +62,7 @@ export const ResponseActionsList = React.memo(
         {items.map((actionItem, index) => {
           return (
             <div key={actionItem.id}>
+              <EuiSpacer size="m" />
               <ResponseActionTypeForm
                 item={actionItem}
                 onDeleteAction={removeItem}

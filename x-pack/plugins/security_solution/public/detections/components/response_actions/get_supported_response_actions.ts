@@ -19,9 +19,9 @@ export const getSupportedResponseActions = (
   enabledActionsMap: Record<string, boolean>
 ): ResponseActionType[] => {
   return actionTypes.filter((actionType) => {
-    if (actionType.id === '.osquery' && !enabledActionsMap['.osquery']) {
-      return false;
-    }
+    // if (actionType.id === '.osquery' && !enabledActionsMap['.osquery']) {
+    //   return false;
+    // }
     return RESPONSE_SUPPORTED_ACTION_TYPES_IDS.includes(actionType.id);
   });
 };

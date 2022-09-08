@@ -569,7 +569,7 @@ export const typeSpecificCamelToSnake = (params: TypeSpecificRuleParams): Respon
         query: params.query,
         filters: params.filters,
         saved_id: params.savedId,
-        response_actions: params.responseActions.map(transformAlertToRuleResponseAction),
+        response_actions: params.responseActions?.map(transformAlertToRuleResponseAction),
       };
     }
     case 'saved_query': {

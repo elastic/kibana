@@ -6,6 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
+import { EuiSpacer } from '@elastic/eui';
 import { ResponseActionsHeader } from './response_actions_header';
 import { ResponseActionsList } from './response_actions_list';
 
@@ -16,9 +17,7 @@ import { UseField } from '../../../shared_imports';
 const GhostFormField = () => <></>;
 
 export interface ResponseActionValidatorRef {
-  validation?: (
-    actions: unknown
-  ) => Promise<{ [key: number]: { errors: Record<string, unknown> } }>;
+  validation: (actions: unknown) => Promise<{ [key: number]: { errors: Record<string, unknown> } }>;
   actions?: unknown;
 }
 interface IProps {
@@ -48,6 +47,7 @@ export const ResponseActionsForm = ({ items, addItem, removeItem, formRef }: IPr
 
   return (
     <>
+      <EuiSpacer size="xxl" />
       <ResponseActionsHeader />
       {form}
     </>

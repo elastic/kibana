@@ -106,7 +106,7 @@ export const createQueryAlertType = (
         scheduleNotificationResponseActions(
           {
             signals: result.createdSignals,
-            responseActions: responseActions as ResponseAction[],
+            responseActions: responseActions as unknown as ResponseAction[],
           },
           osqueryCreateAction
         );

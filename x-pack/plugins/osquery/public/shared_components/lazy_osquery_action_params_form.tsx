@@ -16,9 +16,7 @@ interface LazyOsqueryActionParamsFormProps {
   formRef: React.RefObject<ResponseActionValidatorRef>;
 }
 interface ResponseActionValidatorRef {
-  validation?: (
-    actions: unknown
-  ) => Promise<{ [key: number]: { errors: Record<string, unknown> } }>;
+  validation: (actions: unknown) => Promise<{ [key: number]: { errors: Record<string, unknown> } }>;
   actions?: unknown;
 }
 
@@ -33,32 +31,7 @@ export const getLazyOsqueryResponseActionTypeForm =
     return (
       <>
         <UseField
-          path={`${item.path}.params.query`}
-          component={GhostFormField}
-          readDefaultValueOnForm={!item.isNew}
-        />
-        <UseField
-          path={`${item.path}.params.savedQueryId`}
-          component={GhostFormField}
-          readDefaultValueOnForm={!item.isNew}
-        />
-        <UseField
-          path={`${item.path}.params.id`}
-          component={GhostFormField}
-          readDefaultValueOnForm={!item.isNew}
-        />
-        <UseField
-          path={`${item.path}.params.ecs_mapping`}
-          component={GhostFormField}
-          readDefaultValueOnForm={!item.isNew}
-        />
-        <UseField
-          path={`${item.path}.params.packId`}
-          component={GhostFormField}
-          readDefaultValueOnForm={!item.isNew}
-        />
-        <UseField
-          path={`${item.path}.params.queries`}
+          path={`${item.path}.params`}
           component={GhostFormField}
           readDefaultValueOnForm={!item.isNew}
         />

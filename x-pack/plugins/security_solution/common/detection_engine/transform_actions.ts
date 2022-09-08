@@ -54,7 +54,6 @@ export const transformRuleToAlertResponseAction = ({
     return {
       params: {
         ...params,
-        // @ts-expect-error update types
         ecs_mapping: convertECSMappingToFormValue(params.ecs_mapping),
       },
       actionTypeId: action_type_id,
@@ -75,7 +74,6 @@ export const transformAlertToRuleResponseAction = ({
     return {
       params: {
         ...params,
-        // @ts-expect-error update types
         ecs_mapping: convertECSMappingToObject(params.ecs_mapping),
       },
       action_type_id: actionTypeId,

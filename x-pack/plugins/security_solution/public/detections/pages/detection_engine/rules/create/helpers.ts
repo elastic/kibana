@@ -556,7 +556,7 @@ export const formatActionsStepData = (actionsStepData: ActionsStepRule): Actions
 
   return {
     actions: actions.map(transformAlertToRuleAction),
-    response_actions: responseActions.map(transformAlertToRuleResponseAction),
+    response_actions: responseActions?.map(transformAlertToRuleResponseAction),
     enabled,
     throttle:
       actions.length || responseActions.length ? throttle : NOTIFICATION_THROTTLE_NO_ACTIONS,

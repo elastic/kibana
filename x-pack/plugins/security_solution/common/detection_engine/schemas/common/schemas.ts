@@ -138,12 +138,10 @@ export const output_index = t.string;
 export const saved_id = t.string;
 
 export const response_actions = t.array(
-  t.exact(
-    t.type({
-      action_type_id: t.string,
-      params: t.record(t.string, t.any),
-    })
-  )
+  t.type({
+    action_type_id: t.string,
+    params: t.record(t.string, t.any),
+  })
 );
 
 export const savedIdOrUndefined = t.union([saved_id, t.undefined]);

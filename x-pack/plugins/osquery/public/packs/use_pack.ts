@@ -23,7 +23,7 @@ export const usePack = ({ packId, skip = false }: UsePack) => {
     {
       select: (response) => response?.data,
       keepPreviousData: true,
-      enabled: !skip || !packId,
+      enabled: !!(!skip && packId),
     }
   );
 };
