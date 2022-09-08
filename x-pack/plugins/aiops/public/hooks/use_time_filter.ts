@@ -17,8 +17,13 @@ export const useTimefilter = ({
   timeRangeSelector,
   autoRefreshSelector,
 }: UseTimefilterOptions = {}) => {
-  const { data } = useAiopsContext();
-  const { timefilter } = data.query.timefilter;
+  const {
+    data: {
+      query: {
+        timefilter: { timefilter },
+      },
+    },
+  } = useAiopsContext();
 
   useEffect(() => {
     if (timeRangeSelector === true && !timefilter.isTimeRangeSelectorEnabled()) {

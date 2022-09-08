@@ -38,7 +38,12 @@ export const useData = (
   onUpdate: (params: Dictionary<unknown>) => void,
   selectedChangePoint?: ChangePoint
 ) => {
-  const { uiSettings, data } = useAiopsContext();
+  const {
+    uiSettings,
+    data: {
+      query: { filterManager },
+    },
+  } = useAiopsContext();
   const [lastRefresh, setLastRefresh] = useState(0);
   const [fieldStatsRequest, setFieldStatsRequest] = useState<
     DocumentStatsSearchStrategyParams | undefined
@@ -46,12 +51,11 @@ export const useData = (
 
   /** Prepare required params to pass to search strategy **/
   const { searchQueryLanguage, searchString, searchQuery } = useMemo(() => {
-    const filterManager = data.query.filterManager;
     const searchData = getEsQueryFromSavedSearch({
       dataView: currentDataView,
       uiSettings,
       savedSearch: currentSavedSearch,
-      filterManager: data.query.filterManager,
+      filterManager,
     });
 
     if (searchData === undefined || aiopsListState.searchString !== '') {

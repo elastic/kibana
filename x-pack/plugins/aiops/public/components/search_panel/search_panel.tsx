@@ -41,11 +41,13 @@ export const SearchPanel: FC<Props> = ({
 }) => {
   const {
     uiSettings,
-    unifiedSearch,
+    unifiedSearch: {
+      ui: { SearchBar },
+    },
     notifications: { toasts },
     data: { query: queryManager },
   } = useAiopsContext();
-  const { SearchBar } = unifiedSearch.ui;
+
   // The internal state of the input query bar updated on every key stroke.
   const [searchInput, setSearchInput] = useState<Query>({
     query: searchString || '',
