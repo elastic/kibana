@@ -24,6 +24,11 @@ location](https://commondatastorage.googleapis.com/chromium-browser-snapshots/in
 
 ## Build Script Usage
 
+The system OS requires a few setup steps:
+1. Required packages: `bzip2`, `git`, `lsb_release`, `python3`
+2. The `python` command needs to launch Python 3.
+3. Recommended: `tmux`, as your ssh session may get interrupted
+
 These commands show how to set up an environment to build:
 ```sh
 # Allow our scripts to use depot_tools commands
@@ -86,10 +91,6 @@ are created in x64 using cross-compiling. CentOS is not supported for building C
    - 8 CPU
    - 30GB memory
    - 80GB free space on disk (Try `ncdu /home` to see where space is used.)
-   - git
-   - python2 (`python` must link to `python2`)
-   - lsb_release
-   - tmux is recommended in case your ssh session is interrupted
    - "Cloud API access scopes": must have **read / write** scope for the Storage API
 4. Install [Google Cloud SDK](https://cloud.google.com/sdk) locally to ssh into the GCP instance
 
