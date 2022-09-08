@@ -40,6 +40,7 @@ export class BaseVisType<TVisParams = VisParams> {
   public readonly editorConfig;
   public hidden;
   public readonly requiresSearch;
+  public readonly suppressWarnings;
   public readonly hasPartialRows;
   public readonly hierarchicalData;
   public readonly setup;
@@ -64,6 +65,7 @@ export class BaseVisType<TVisParams = VisParams> {
     this.title = opts.title;
     this.icon = opts.icon;
     this.image = opts.image;
+    this.suppressWarnings = opts.suppressWarnings;
     this.visConfig = defaultsDeep({}, opts.visConfig, { defaults: {} });
     this.editorConfig = defaultsDeep({}, opts.editorConfig, { collections: {} });
     this.options = defaultsDeep({}, opts.options, defaultOptions);
