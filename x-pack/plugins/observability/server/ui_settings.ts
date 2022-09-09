@@ -21,6 +21,7 @@ import {
   apmServiceGroupMaxNumberOfServices,
   apmTraceExplorerTab,
   apmOperationsTab,
+  apmLabsButton,
 } from '../common/ui_settings_keys';
 
 const technicalPreviewLabel = i18n.translate(
@@ -225,5 +226,19 @@ export const uiSettings: Record<string, UiSettings> = {
     requiresPageReload: true,
     type: 'boolean',
     showInLabs: true,
+  },
+  [apmLabsButton]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.apmLabs', {
+      defaultMessage: 'Enable labs button in APM',
+    }),
+    description: i18n.translate('xpack.observability.apmLabsDescription', {
+      defaultMessage:
+        'This flag determines if the viewer has access to the Labs button, a quick way to enable and disable technical preview features in APM.',
+    }),
+    schema: schema.boolean(),
+    value: false,
+    requiresPageReload: true,
+    type: 'boolean',
   },
 };
