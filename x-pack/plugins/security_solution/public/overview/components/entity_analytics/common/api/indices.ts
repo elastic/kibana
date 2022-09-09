@@ -7,7 +7,10 @@
 
 import { INDICES_CREATION_ERROR_MESSAGE, INDICES_DELETION_ERROR_MESSAGE } from './translations';
 import type { CreateIndices, DeleteIndices } from './types';
-const INDEX_MANAGEMENT_API_BASE_PATH = `/api/index_management`;
+import {
+  RISKY_SCORE_CREATE_INDEX,
+  RISKY_SCORE_DELETE_INDICES,
+} from '../../../../../../common/constants';
 
 export async function createIndices({
   http,
@@ -17,7 +20,7 @@ export async function createIndices({
   options,
 }: CreateIndices) {
   const res = await http
-    .put(`${INDEX_MANAGEMENT_API_BASE_PATH}/indices/create`, {
+    .put(RISKY_SCORE_CREATE_INDEX, {
       body: JSON.stringify(options),
       signal,
     })
@@ -40,7 +43,7 @@ export async function deleteIndices({
 }: DeleteIndices) {
   const count = options.indices.length;
   const res = await http
-    .post(`${INDEX_MANAGEMENT_API_BASE_PATH}/indices/delete`, {
+    .post(RISKY_SCORE_DELETE_INDICES, {
       body: JSON.stringify(options),
       signal,
     })

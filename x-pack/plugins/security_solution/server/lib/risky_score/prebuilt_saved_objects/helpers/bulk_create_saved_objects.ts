@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FrameworkRequest } from '../../framework';
+import type { FrameworkRequest } from '../../../framework';
 import * as savedObjectsToCreate from '../saved_object';
 import type { SavedObjectTemplate } from '../types';
 

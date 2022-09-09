@@ -10,9 +10,9 @@ import fs from 'fs';
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { CustomHttpResponseOptions, KibanaResponseFactory } from '@kbn/core/server';
-import { DEV_TOOL_PREBUILT_CONTENT } from '../../../../common/constants';
+import { DEV_TOOL_PREBUILT_CONTENT } from '../../../../../common/constants';
 
-import type { SecuritySolutionPluginRouter } from '../../../types';
+import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { consoleMappings } from '../console_mappings';
 import { ReadConsoleRequestSchema } from '../schema';
 

@@ -7,15 +7,14 @@
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 
-import type { SecuritySolutionPluginRouter } from '../../../types';
+import { PREBUILT_SAVED_OBJECTS_BULK_CREATE } from '../../../../../common/constants';
+import type { SecuritySolutionPluginRouter } from '../../../../types';
 
-import { PREBUILT_SAVED_OBJECTS_BULK_CREATE } from '../../../../common/constants';
+import type { SetupPlugins } from '../../../../plugin';
 
-import type { SetupPlugins } from '../../../plugin';
+import { buildSiemResponse } from '../../../detection_engine/routes/utils';
 
-import { buildSiemResponse } from '../../detection_engine/routes/utils';
-
-import { buildFrameworkRequest } from '../../timeline/utils/common';
+import { buildFrameworkRequest } from '../../../timeline/utils/common';
 import { bulkCreateSavedObjects } from '../helpers/bulk_create_saved_objects';
 import { createPrebuiltSavedObjectsSchema } from '../schema';
 
