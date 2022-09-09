@@ -6,18 +6,11 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo, useRef, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { get } from 'lodash';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiComboBoxOptionOption,
-  EuiCode,
-  EuiCallOut,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiCallOut } from '@elastic/eui';
+import { BehaviorSubject } from 'rxjs';
 
 import {
   Form,
@@ -28,6 +21,7 @@ import {
   UseField,
   TextField,
   RuntimeType,
+  RuntimePrimitiveTypes,
 } from '../../shared_imports';
 import { Field } from '../../types';
 import { useFieldEditorContext } from '../field_editor_context';
@@ -35,16 +29,12 @@ import { useFieldPreviewContext } from '../preview';
 
 import { RUNTIME_FIELD_OPTIONS } from './constants';
 import { schema } from './form_schema';
-import { getNameFieldConfig } from './lib';
-import {
-  TypeField,
-  CustomLabelField,
-  ScriptField,
-  FormatField,
-  PopularityField,
-} from './form_fields';
-import { FormRow } from './form_row';
-import { AdvancedParametersSection } from './advanced_parameters_section';
+import { getNameFieldConfig, getFieldPreviewChanges } from './lib';
+import { TypeField } from './form_fields';
+import { FieldDetail } from './field_detail';
+import { CompositeEditor } from './composite_editor';
+import { TypeSelection } from './types';
+import { ChangeType, FieldPreview } from '../preview/types';
 
 export interface FieldEditorFormState {
   isValid: boolean | undefined;
@@ -53,8 +43,10 @@ export interface FieldEditorFormState {
   submit: FormHook<Field>['submit'];
 }
 
-export interface FieldFormInternal extends Omit<Field, 'type' | 'internalType'> {
-  type: Array<EuiComboBoxOptionOption<RuntimeType>>;
+export interface FieldFormInternal extends Omit<Field, 'type' | 'internalType' | 'fields'> {
+  // fields?: Record<string, { type: RuntimePrimitiveTypes }>;
+  fields?: Array<{ name: string; type: RuntimePrimitiveTypes }>;
+  type: TypeSelection;
   __meta__: {
     isCustomLabelVisible: boolean;
     isValueVisible: boolean;
@@ -72,66 +64,38 @@ export interface Props {
   onFormModifiedChange?: (isModified: boolean) => void;
 }
 
-const geti18nTexts = (): {
-  [key: string]: { title: string; description: JSX.Element | string };
-} => ({
-  customLabel: {
-    title: i18n.translate('indexPatternFieldEditor.editor.form.customLabelTitle', {
-      defaultMessage: 'Set custom label',
-    }),
-    description: i18n.translate('indexPatternFieldEditor.editor.form.customLabelDescription', {
-      defaultMessage: `Create a label to display in place of the field name in Discover, Maps, and Visualize. Useful for shortening a long field name.  Queries and filters use the original field name.`,
-    }),
-  },
-  value: {
-    title: i18n.translate('indexPatternFieldEditor.editor.form.valueTitle', {
-      defaultMessage: 'Set value',
-    }),
-    description: (
-      <FormattedMessage
-        id="indexPatternFieldEditor.editor.form.valueDescription"
-        defaultMessage="Set a value for the field instead of retrieving it from the field with the same name in {source}."
-        values={{
-          source: <EuiCode>{'_source'}</EuiCode>,
-        }}
-      />
-    ),
-  },
-  format: {
-    title: i18n.translate('indexPatternFieldEditor.editor.form.formatTitle', {
-      defaultMessage: 'Set format',
-    }),
-    description: i18n.translate('indexPatternFieldEditor.editor.form.formatDescription', {
-      defaultMessage: `Set your preferred format for displaying the value. Changing the format can affect the value and prevent highlighting in Discover.`,
-    }),
-  },
-  popularity: {
-    title: i18n.translate('indexPatternFieldEditor.editor.form.popularityTitle', {
-      defaultMessage: 'Set popularity',
-    }),
-    description: i18n.translate('indexPatternFieldEditor.editor.form.popularityDescription', {
-      defaultMessage: `Adjust the popularity to make the field appear higher or lower in the fields list.  By default, Discover orders fields from most selected to least selected.`,
-    }),
-  },
-});
-
 const changeWarning = i18n.translate('indexPatternFieldEditor.editor.form.changeWarning', {
   defaultMessage:
     'Changing name or type can break searches and visualizations that rely on this field.',
 });
 
-const formDeserializer = (field: Field): FieldFormInternal => {
-  let fieldType: Array<EuiComboBoxOptionOption<RuntimeType>>;
-  if (!field.type) {
-    fieldType = [RUNTIME_FIELD_OPTIONS[0]];
-  } else {
-    const label = RUNTIME_FIELD_OPTIONS.find(({ value }) => value === field.type)?.label;
-    fieldType = [{ label: label ?? field.type, value: field.type as RuntimeType }];
+const fieldTypeToComboBoxOption = (type: Field['type']): TypeSelection => {
+  if (type) {
+    const label = RUNTIME_FIELD_OPTIONS.find(({ value }) => value === type)?.label;
+    return [{ label: label ?? type, value: type as RuntimeType }];
   }
+  return [RUNTIME_FIELD_OPTIONS[0]];
+};
+
+const formDeserializer = (field: Field): FieldFormInternal => {
+  const { fields, ...rest } = field;
+  const fieldType = fieldTypeToComboBoxOption(field.type);
+
+  const format = field.format === null ? undefined : field.format;
+
+  console.log('>>>>>>> Deserializing...', field);
 
   return {
-    ...field,
+    /*
+    fields: [
+      { name: 'test', type: 'keyword' },
+      { name: 'test2', type: 'keyword' },
+    ],
+    */
+    fields: fields ? Object.entries(fields).map(([name, { type }]) => ({ name, type })) : undefined,
+    ...rest,
     type: fieldType,
+    format,
     __meta__: {
       isCustomLabelVisible: field.customLabel !== undefined,
       isValueVisible: field.script !== undefined,
@@ -142,18 +106,26 @@ const formDeserializer = (field: Field): FieldFormInternal => {
 };
 
 const formSerializer = (field: FieldFormInternal): Field => {
-  const { __meta__, type, ...rest } = field;
+  const { __meta__, type, format, fields, ...rest } = field;
+  // console.log('*** serializer', field);
   return {
-    type: type[0].value!,
+    type: type && type[0].value!,
+    fields: fields?.reduce((acc, { name, type: type2 }) => {
+      acc[name] = { type: type2 };
+      return acc;
+    }, {} as Record<string, { type: RuntimePrimitiveTypes }>), // ({ ...acc, [name]: { type2 } }), {}),
+    // By passing "null" we are explicitly telling DataView to remove the
+    // format if there is one defined for the field.
+    format: format === undefined ? null : format,
     ...rest,
   };
 };
 
 const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) => {
-  const { links, namesNotAllowed, existingConcreteFields, fieldTypeToProcess } =
-    useFieldEditorContext();
+  const { namesNotAllowed, fieldTypeToProcess, fieldName$ } = useFieldEditorContext();
   const {
     params: { update: updatePreviewParams },
+    fieldPreview$,
   } = useFieldPreviewContext();
   const { form } = useForm<Field, FieldFormInternal>({
     defaultValue: field,
@@ -161,10 +133,19 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) 
     deserializer: formDeserializer,
     serializer: formSerializer,
   });
+
+  useEffect(() => {
+    console.log('*** default field', field);
+    const a = form.subscribe((thing) => {
+      console.log('*** field changes', thing.data.internal.fields);
+    });
+
+    return () => a.unsubscribe();
+  }, [form, field]);
+
   const { submit, isValid: isFormValid, isSubmitted, getFields, isSubmitting } = form;
 
   const nameFieldConfig = getNameFieldConfig(namesNotAllowed, field);
-  const i18nTexts = geti18nTexts();
 
   const [formData] = useFormData<FieldFormInternal>({ form });
   const isFormModified = useFormIsModified({
@@ -177,6 +158,29 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) 
     ],
   });
 
+  useEffect(() => {
+    console.log('Form data changed:', formData);
+  }, [formData]);
+
+  // use observable to sidestep react state
+  useEffect(() => {
+    // const sub = form.subscribe(({ data }) => {
+    //   if (data.internal.name !== fieldName$.getValue()) {
+    //     fieldName$.next(data.internal.name);
+    //   }
+    //   if (
+    //     data.internal.type[0].value !== 'composite' &&
+    //     Object.keys(data.internal.fields || {}).length > 0
+    //   ) {
+    //     console.log('*** reset fields');
+    //     form.updateFieldValues({ ...form.getFormData(), fields: {} });
+    //   }
+    // });
+    // return () => {
+    //   sub.unsubscribe();
+    // };
+  }, [form, fieldName$]);
+
   const {
     name: updatedName,
     type: updatedType,
@@ -188,6 +192,65 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) 
   const typeHasChanged = (Boolean(field?.type) && typeField?.isModified) ?? false;
 
   const isValueVisible = get(formData, '__meta__.isValueVisible');
+
+  const lastPreview$ = useMemo(() => {
+    const replaySubj = new BehaviorSubject<FieldPreview[]>([]);
+    fieldPreview$.subscribe(replaySubj);
+    return replaySubj;
+  }, [fieldPreview$]);
+
+  const resetTypes = useCallback(() => {
+    const lastVal = lastPreview$.getValue();
+    // resets the preview history to an empty set
+    fieldPreview$.next([]);
+    // apply the last preview to get all the types
+    fieldPreview$.next(lastVal);
+  }, [fieldPreview$, lastPreview$]);
+
+  const lastPreview = useRef<FieldPreview[]>();
+
+  useEffect(() => {
+    const existingCompositeField = !!Object.keys(form.getFormData().fields || {}).length;
+
+    const subLastPreview = fieldPreview$.subscribe((val) => {
+      lastPreview.current = val;
+    });
+    const changes$ = getFieldPreviewChanges(fieldPreview$);
+
+    const subChanges = changes$.subscribe((previewFields) => {
+      const { fields } = form.getFormData();
+      // console.log('*** starting update', fields);
+
+      const modifiedFields = { ...fields };
+
+      Object.entries(previewFields).forEach(([name, change]) => {
+        if (change.changeType === ChangeType.DELETE) {
+          delete modifiedFields[name];
+        }
+        if (change.changeType === ChangeType.UPSERT) {
+          modifiedFields[name] = { type: change.type! };
+        }
+      });
+      console.log('**** UPDATING', { ...form.getFormData(), fields: modifiedFields });
+      const asArray = Object.entries(modifiedFields).map(([name, { type }]) => ({ name, type }));
+      form.updateFieldValues({ fields: asArray }, { runDeserializer: false });
+      // form.updateFieldValues({ ...form.getFormData(), fields: modifiedFields });
+    });
+
+    // first preview value is skipped for saved fields, need to populate for new fields and rerenders
+    // TODO want to make 'existingCompositeField' when switching back
+    console.log('fieldPreview prepop', existingCompositeField, lastPreview.current);
+    if (!existingCompositeField) {
+      fieldPreview$.next([]);
+    } else if (lastPreview.current) {
+      fieldPreview$.next(lastPreview.current);
+    }
+
+    return () => {
+      subChanges.unsubscribe();
+      subLastPreview.unsubscribe();
+    };
+  }, [form, fieldPreview$]);
 
   useEffect(() => {
     if (onChange) {
@@ -202,16 +265,27 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) 
       script:
         isValueVisible === false || Boolean(updatedScript?.source.trim()) === false
           ? null
-          : updatedScript,
+          : { source: updatedScript!.source },
       format: updatedFormat?.id !== undefined ? updatedFormat : null,
+      parentName: field?.parentName,
     });
-  }, [updatedName, updatedType, updatedScript, isValueVisible, updatedFormat, updatePreviewParams]);
+  }, [
+    updatedName,
+    updatedType,
+    updatedScript,
+    isValueVisible,
+    updatedFormat,
+    updatePreviewParams,
+    field,
+  ]);
 
   useEffect(() => {
     if (onFormModifiedChange) {
       onFormModifiedChange(isFormModified);
     }
-  }, [isFormModified, onFormModifiedChange]);
+  }, [isFormModified, onFormModifiedChange, form]);
+
+  console.log('*** render', form.getFormData().fields);
 
   return (
     <Form
@@ -242,10 +316,13 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) 
 
         {/* Type */}
         <EuiFlexItem>
-          <TypeField isDisabled={fieldTypeToProcess === 'concrete'} />
+          <TypeField
+            isDisabled={fieldTypeToProcess === 'concrete'}
+            includeComposite={true}
+            path="type"
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
-
       {(nameHasChanged || typeHasChanged) && (
         <>
           <EuiSpacer size="xs" />
@@ -259,56 +336,25 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) 
         </>
       )}
       <EuiSpacer size="xl" />
-
-      {/* Set custom label */}
-      <FormRow
-        title={i18nTexts.customLabel.title}
-        description={i18nTexts.customLabel.description}
-        formFieldPath="__meta__.isCustomLabelVisible"
-        data-test-subj="customLabelRow"
-        withDividerRule
-      >
-        <CustomLabelField />
-      </FormRow>
-
-      {/* Set value */}
-      {fieldTypeToProcess === 'runtime' && (
-        <FormRow
-          title={i18nTexts.value.title}
-          description={i18nTexts.value.description}
-          formFieldPath="__meta__.isValueVisible"
-          data-test-subj="valueRow"
-          withDividerRule
-        >
-          <ScriptField existingConcreteFields={existingConcreteFields} links={links} />
-        </FormRow>
+      {field?.parentName && (
+        <>
+          <EuiCallOut
+            iconType="iInCircle"
+            title={i18n.translate('indexPatternFieldEditor.editor.form.subFieldParentInfo', {
+              defaultMessage: "Field value is defined by '{parentName}'",
+              values: { parentName: field?.parentName },
+            })}
+          />
+          <EuiSpacer size="xl" />
+        </>
       )}
-
-      {/* Set custom format */}
-      <FormRow
-        title={i18nTexts.format.title}
-        description={i18nTexts.format.description}
-        formFieldPath="__meta__.isFormatVisible"
-        data-test-subj="formatRow"
-        withDividerRule
-      >
-        <FormatField />
-      </FormRow>
-
-      {/* Advanced settings */}
-      <AdvancedParametersSection>
-        <FormRow
-          title={i18nTexts.popularity.title}
-          description={i18nTexts.popularity.description}
-          formFieldPath="__meta__.isPopularityVisible"
-          data-test-subj="popularityRow"
-          withDividerRule
-        >
-          <PopularityField />
-        </FormRow>
-      </AdvancedParametersSection>
+      {updatedType && updatedType[0].value !== 'composite' ? (
+        <FieldDetail />
+      ) : (
+        <CompositeEditor onReset={resetTypes} />
+      )}
     </Form>
   );
 };
 
-export const FieldEditor = React.memo(FieldEditorComponent) as typeof FieldEditorComponent;
+export const FieldEditor = FieldEditorComponent as typeof FieldEditorComponent;

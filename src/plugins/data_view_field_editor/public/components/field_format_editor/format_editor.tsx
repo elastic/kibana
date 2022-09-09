@@ -23,7 +23,7 @@ export interface FormatEditorProps {
   onError: (error?: string) => void;
 }
 
-interface FormatEditorState {
+export interface FormatEditorState {
   EditorComponent: LazyExoticComponent<FieldFormatEditor> | null;
   fieldFormatId?: string;
 }

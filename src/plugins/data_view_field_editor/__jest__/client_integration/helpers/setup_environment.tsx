@@ -12,7 +12,7 @@ import './jest.mocks';
 import React, { FunctionComponent } from 'react';
 import { merge } from 'lodash';
 
-import { defer } from 'rxjs';
+import { defer, BehaviorSubject } from 'rxjs';
 import { notificationServiceMock, uiSettingsServiceMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { fieldFormatsMock as fieldFormats } from '@kbn/field-formats-plugin/common/mocks';
@@ -124,7 +124,7 @@ export const WithFieldEditorDependencies =
       uiSettings: uiSettingsServiceMock.createStartContract(),
       fieldTypeToProcess: 'runtime',
       existingConcreteFields: [],
-      namesNotAllowed: [],
+      namesNotAllowed: { fields: [], runtimeComposites: [] },
       links: {
         runtimePainless: 'https://elastic.co',
       },
@@ -138,6 +138,7 @@ export const WithFieldEditorDependencies =
         getById: () => undefined,
       },
       fieldFormats,
+      fieldName$: new BehaviorSubject(''),
     };
 
     const mergedDependencies = merge({}, dependencies, overridingDependencies);

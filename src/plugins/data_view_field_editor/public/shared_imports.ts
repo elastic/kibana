@@ -17,7 +17,14 @@ export type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 
 export type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 
-export type { RuntimeType, RuntimeField } from '@kbn/data-views-plugin/common';
+export type {
+  RuntimeType,
+  RuntimeField,
+  RuntimeFieldSpec,
+  RuntimeFieldSubField,
+  RuntimeFieldSubFields,
+  RuntimePrimitiveTypes,
+} from '@kbn/data-views-plugin/common';
 export { KBN_FIELD_TYPES, ES_FIELD_TYPES } from '@kbn/data-plugin/common';
 
 export {
@@ -26,7 +33,7 @@ export {
   CodeEditor,
 } from '@kbn/kibana-react-plugin/public';
 
-export { FieldFormat } from '@kbn/field-formats-plugin/common';
+export type { FieldFormat, SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 
 export type {
   FormSchema,
@@ -44,6 +51,7 @@ export {
   Form,
   UseField,
   useBehaviorSubject,
+  UseArray,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 
 export { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';

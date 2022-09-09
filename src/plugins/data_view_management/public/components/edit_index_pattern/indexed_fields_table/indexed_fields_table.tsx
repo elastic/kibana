@@ -9,7 +9,7 @@
 import React, { Component } from 'react';
 import { createSelector } from 'reselect';
 import { OverlayStart, ThemeServiceStart } from '@kbn/core/public';
-import { DataViewField, DataView } from '@kbn/data-views-plugin/public';
+import { DataViewField, DataView, RuntimeField } from '@kbn/data-views-plugin/public';
 import { Table } from './components/table';
 import { IndexedFieldItem } from './types';
 
@@ -21,13 +21,14 @@ interface IndexedFieldsTableProps {
   schemaFieldTypeFilter: string[];
   helpers: {
     editField: (fieldName: string) => void;
-    deleteField: (fieldName: string) => void;
+    deleteField: (fieldName: string[]) => void;
     getFieldInfo: (indexPattern: DataView, field: DataViewField) => string[];
   };
   fieldWildcardMatcher: (filters: string[] | undefined) => (val: string) => boolean;
   userEditPermission: boolean;
   openModal: OverlayStart['openModal'];
   theme: ThemeServiceStart;
+  compositeRuntimeFields: Record<string, RuntimeField>;
 }
 
 interface IndexedFieldsTableState {
@@ -42,14 +43,23 @@ export class IndexedFieldsTable extends Component<
     super(props);
 
     this.state = {
-      fields: this.mapFields(this.props.fields),
+      fields: [
+        ...this.mapCompositeRuntimeFields(this.props.compositeRuntimeFields),
+        ...this.mapFields(this.props.fields),
+      ],
     };
   }
 
   UNSAFE_componentWillReceiveProps(nextProps: IndexedFieldsTableProps) {
-    if (nextProps.fields !== this.props.fields) {
+    if (
+      nextProps.fields !== this.props.fields ||
+      nextProps.compositeRuntimeFields !== this.props.compositeRuntimeFields
+    ) {
       this.setState({
-        fields: this.mapFields(nextProps.fields),
+        fields: [
+          ...this.mapCompositeRuntimeFields(nextProps.compositeRuntimeFields),
+          ...this.mapFields(nextProps.fields),
+        ],
       });
     }
   }
@@ -57,7 +67,8 @@ export class IndexedFieldsTable extends Component<
   mapFields(fields: DataViewField[]): IndexedFieldItem[] {
     const { indexPattern, fieldWildcardMatcher, helpers, userEditPermission } = this.props;
     const sourceFilters =
-      indexPattern.sourceFilters && indexPattern.sourceFilters.map((f) => f.value);
+      indexPattern.sourceFilters &&
+      indexPattern.sourceFilters.map((f: Record<string, any>) => f.value);
     const fieldWildcardMatch = fieldWildcardMatcher(sourceFilters || []);
 
     return (
@@ -78,6 +89,46 @@ export class IndexedFieldsTable extends Component<
         })) ||
       []
     );
+  }
+
+  mapCompositeRuntimeFields(
+    compositeRuntimeFields: Record<string, RuntimeField>
+  ): IndexedFieldItem[] {
+    const { indexPattern, fieldWildcardMatcher, userEditPermission } = this.props;
+    const sourceFilters =
+      indexPattern.sourceFilters &&
+      indexPattern.sourceFilters.map((f: Record<string, any>) => f.value);
+    const fieldWildcardMatch = fieldWildcardMatcher(sourceFilters || []);
+
+    return Object.entries(compositeRuntimeFields).map(([name, fld]) => {
+      return {
+        spec: {
+          searchable: false,
+          aggregatable: false,
+          name,
+          type: 'composite',
+          runtimeField: {
+            type: 'composite',
+            script: fld.script,
+            fields: fld.fields,
+          },
+        },
+        name,
+        type: 'composite',
+        kbnType: '',
+        displayName: name,
+        excluded: fieldWildcardMatch ? fieldWildcardMatch(name) : false,
+        info: [],
+        isMapped: false,
+        isUserEditable: userEditPermission,
+        hasRuntime: true,
+        runtimeField: {
+          type: 'composite',
+          script: fld.script,
+          fields: fld.fields,
+        },
+      };
+    });
   }
 
   getFilteredFields = createSelector(
@@ -135,14 +186,13 @@ export class IndexedFieldsTable extends Component<
   render() {
     const { indexPattern } = this.props;
     const fields = this.getFilteredFields(this.state, this.props);
-
     return (
       <div>
         <Table
           indexPattern={indexPattern}
           items={fields}
           editField={(field) => this.props.helpers.editField(field.name)}
-          deleteField={(fieldName) => this.props.helpers.deleteField(fieldName)}
+          deleteField={(fieldNames) => this.props.helpers.deleteField(fieldNames)}
           openModal={this.props.openModal}
           theme={this.props.theme}
         />

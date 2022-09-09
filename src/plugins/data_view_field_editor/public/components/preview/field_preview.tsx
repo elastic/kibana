@@ -27,6 +27,7 @@ export const FieldPreview = () => {
     params: {
       value: { name, script, format },
     },
+    isLoadingPreview,
     fields,
     error,
     documents: { fetchDocError },
@@ -36,15 +37,15 @@ export const FieldPreview = () => {
 
   // To show the preview we at least need a name to be defined, the script or the format
   // and an first response from the _execute API
-  const isEmptyPromptVisible =
-    name === null && script === null && format === null
-      ? true
-      : // If we have some result from the _execute API call don't show the empty prompt
-      Boolean(error) || fields.length > 0
-      ? false
-      : name === null && format === null
-      ? true
-      : false;
+  let isEmptyPromptVisible = false;
+  const noParamDefined = name === null && script === null && format === null;
+  const haveResultFromPreview = error !== null || fields.length > 0;
+
+  if (noParamDefined) {
+    isEmptyPromptVisible = true;
+  } else if (!haveResultFromPreview && !isLoadingPreview && name === null && format === null) {
+    isEmptyPromptVisible = true;
+  }
 
   const doRenderListOfFields = fetchDocError === null;
   const showWarningPreviewNotAvailable = isPreviewAvailable === false && fetchDocError === null;
@@ -58,13 +59,13 @@ export const FieldPreview = () => {
       return null;
     }
 
-    const [field] = fields;
-
     return (
       <ul>
-        <li data-test-subj="fieldPreviewItem">
-          <PreviewListItem field={field} isFromScript hasScriptError={Boolean(error)} />
-        </li>
+        {fields.map((field, i) => (
+          <li key={i} data-test-subj="fieldPreviewItem">
+            <PreviewListItem field={field} isFromScript hasScriptError={Boolean(error)} />
+          </li>
+        ))}
       </ul>
     );
   };

@@ -8,8 +8,8 @@
 
 import React, { createContext, useContext, FunctionComponent, useMemo } from 'react';
 import { NotificationsStart, CoreStart } from '@kbn/core/public';
-import { FieldFormatsStart } from '../shared_imports';
-import type { DataView, DataPublicPluginStart } from '../shared_imports';
+import type { BehaviorSubject } from 'rxjs';
+import type { DataView, DataPublicPluginStart, FieldFormatsStart } from '../shared_imports';
 import { ApiService } from '../lib/api';
 import type { InternalFieldType, PluginStart } from '../types';
 
@@ -32,7 +32,10 @@ export interface Context {
    * e.g we probably don't want a user to give a name of an existing
    * runtime field (for that the user should edit the existing runtime field).
    */
-  namesNotAllowed: string[];
+  namesNotAllowed: {
+    fields: string[];
+    runtimeComposites: string[];
+  };
   /**
    * An array of existing concrete fields. If the user gives a name to the runtime
    * field that matches one of the concrete fields, a callout will be displayed
@@ -40,6 +43,7 @@ export interface Context {
    * It is also used to provide the list of field autocomplete suggestions to the code editor.
    */
   existingConcreteFields: Array<{ name: string; type: string }>;
+  fieldName$: BehaviorSubject<string>;
 }
 
 const fieldEditorContext = createContext<Context | undefined>(undefined);
@@ -55,6 +59,7 @@ export const FieldEditorProvider: FunctionComponent<Context> = ({
   namesNotAllowed,
   existingConcreteFields,
   children,
+  fieldName$,
 }) => {
   const ctx = useMemo<Context>(
     () => ({
@@ -67,6 +72,7 @@ export const FieldEditorProvider: FunctionComponent<Context> = ({
       fieldFormatEditors,
       namesNotAllowed,
       existingConcreteFields,
+      fieldName$,
     }),
     [
       dataView,
@@ -78,6 +84,7 @@ export const FieldEditorProvider: FunctionComponent<Context> = ({
       fieldFormatEditors,
       namesNotAllowed,
       existingConcreteFields,
+      fieldName$,
     ]
   );
 
