@@ -104,9 +104,9 @@ your OAuth application. This property is required when `isOAuth` is `true`.
 
 `userIdentifierValue`::
 (Required^*^, string) The identifier to use for OAuth authentication. This
-identifier should be the *User field* you selected when you created an OAuth
+identifier should be the user field you selected when you created an OAuth
 JWT API endpoint for external clients in your {sn} instance. For example, if
-the selected user field is *Email*, the user identifier should be the user's
+the selected user field is `Email`, the user identifier should be the user's
 email address. This property is required when `isOAuth` is `true`.
 
 `usesTableApi`::

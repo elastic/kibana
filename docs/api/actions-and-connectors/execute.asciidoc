@@ -215,7 +215,7 @@ on the `subAction` value.
 [%collapsible%open]
 ======
 `fields`::::
-(Required, array of strings) An array of fields. For example, `[severity]`.
+(Required, array of strings) An array of fields. For example, `["severity"]`.
 ======
 =====
 
@@ -235,7 +235,7 @@ on the `subAction` value. This object is not required when `subAction` is
 [%collapsible%open]
 ======
 `fields`::::
-(Required, array of strings) An array of fields. For example, `[category, impact]`.
+(Required, array of strings) An array of fields. For example, `["category","impact"]`.
 ======
 +
 .Properties when `subAction` is `getIncident`
@@ -336,7 +336,7 @@ on the `subAction` value. This object is not required when `subAction` is
 [%collapsible%open]
 ======
 `fields`::::
-(Required, array of strings) An array of fields. For example, `[priority, category]`.
+(Required, array of strings) An array of fields. For example, `["priority","category"]`.
 ======
 +
 .Properties when `subAction` is `getIncident`
