@@ -91,6 +91,7 @@ export default ({ getService }: FtrProviderContext) => {
           references: [],
           related_integrations: [],
           required_fields: [],
+          response_actions: [],
           setup: '',
           severity: 'high',
           severity_mapping: [],
