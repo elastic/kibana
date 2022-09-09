@@ -162,7 +162,6 @@ export const PackageListGrid: FunctionComponent<Props> = ({
                     <button
                       data-test-subj="epmList.categoryBadge.closeBtn"
                       onClick={() => {
-                        setSearchTerm('');
                         setSelectedCategory('');
                       }}
                       aria-label="Remove filter"
