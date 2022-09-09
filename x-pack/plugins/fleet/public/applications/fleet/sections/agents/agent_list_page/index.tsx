@@ -647,9 +647,9 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         selectionMode={selectionMode}
         currentQuery={kuery}
         selectedAgents={selectedAgents}
-        refreshAgents={({ refreshTags = false }: { refreshTags?: boolean } = {}) => {
-          Promise.all([fetchData({ refreshTags }), refreshUpgrades()]);
-        }}
+        refreshAgents={({ refreshTags = false }: { refreshTags?: boolean } = {}) =>
+          Promise.all([fetchData({ refreshTags }), refreshUpgrades()])
+        }
         onClickAddAgent={() => setEnrollmentFlyoutState({ isOpen: true })}
         onClickAddFleetServer={onClickAddFleetServer}
         visibleAgents={agents}
