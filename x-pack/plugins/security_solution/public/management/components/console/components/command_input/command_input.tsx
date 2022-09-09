@@ -11,6 +11,7 @@ import type { CommonProps } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, useResizeObserver, EuiButtonIcon } from '@elastic/eui';
 import styled from 'styled-components';
 import classNames from 'classnames';
+import { InputCapture } from './components/input_capture';
 import { useWithInputVisibleState } from '../../hooks/state_selectors/use_with_input_visible_state';
 import type { ConsoleDataState } from '../console_state/types';
 import { useInputHints } from './hooks/use_input_hints';
@@ -18,7 +19,6 @@ import { InputPlaceholder } from './components/input_placeholder';
 import { useWithInputTextEntered } from '../../hooks/state_selectors/use_with_input_text_entered';
 import { InputAreaPopover } from './components/input_area_popover';
 import type { KeyCaptureProps } from './key_capture';
-import { KeyCapture } from './key_capture';
 import { useConsoleStateDispatch } from '../../hooks/state_selectors/use_console_state_dispatch';
 import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
 import { useDataTestSubj } from '../../hooks/state_selectors/use_data_test_subj';
@@ -33,7 +33,7 @@ const CommandInputContainer = styled.div`
     padding-right: 1ch;
   }
 
-  &.active {
+  &:focus-within {
     border-bottom: ${({ theme: { eui } }) => eui.euiBorderThick};
     border-bottom-color: ${({ theme: { eui } }) => eui.euiColorPrimary};
   }
@@ -281,7 +281,6 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
         className={inputContainerClassname}
         onClick={handleTypingAreaClick}
         ref={containerRef}
-        tabIndex={0}
         onFocus={handleOnFocus}
         data-test-subj={getTestId('cmdInput-container')}
       >
@@ -299,22 +298,26 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
             </EuiFlexItem>
           )}
           <EuiFlexItem className="textEntered">
-            <EuiFlexGroup
-              responsive={false}
-              alignItems="center"
-              gutterSize="none"
-              justifyContent="flexStart"
-            >
-              <EuiFlexItem grow={false}>
-                <div data-test-subj={getTestId('cmdInput-userTextInput')}>{textEntered}</div>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <span className={cursorClassName} />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <div data-test-subj={getTestId('cmdInput-rightOfCursor')}>{rightOfCursor.text}</div>
-              </EuiFlexItem>
-            </EuiFlexGroup>
+            <InputCapture onCapture={handleKeyCapture} focusRef={focusRef}>
+              <EuiFlexGroup
+                responsive={false}
+                alignItems="center"
+                gutterSize="none"
+                justifyContent="flexStart"
+              >
+                <EuiFlexItem grow={false}>
+                  <div data-test-subj={getTestId('cmdInput-userTextInput')}>{textEntered}</div>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <span className={cursorClassName} />
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <div data-test-subj={getTestId('cmdInput-rightOfCursor')}>
+                    {rightOfCursor.text}
+                  </div>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </InputCapture>
             <InputPlaceholder />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -330,11 +333,11 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
           </EuiFlexItem>
         </EuiFlexGroup>
 
-        <KeyCapture
-          onCapture={handleKeyCapture}
-          focusRef={keyCaptureFocusRef}
-          onStateChange={handleKeyCaptureOnStateChange}
-        />
+        {/* <KeyCapture*/}
+        {/*  onCapture={handleKeyCapture}*/}
+        {/*  focusRef={keyCaptureFocusRef}*/}
+        {/*  onStateChange={handleKeyCaptureOnStateChange}*/}
+        {/* />*/}
       </CommandInputContainer>
     </InputAreaPopover>
   );
