@@ -119,13 +119,13 @@ describe('When on the policy list page', () => {
       expect(firstUpdatedByName.textContent).toEqual(expectedAvatarName);
     });
 
-    //FLAKY: https://github.com/elastic/kibana/issues/139778
+    // FLAKY: https://github.com/elastic/kibana/issues/139778
     it.skip('should show the correct endpoint count', async () => {
       const endpointCount = renderResult.getAllByTestId('policyEndpointCountLink');
       expect(endpointCount[0].textContent).toBe('4');
     });
 
-    //FLAKY: https://github.com/elastic/kibana/issues/140153
+    // FLAKY: https://github.com/elastic/kibana/issues/140153
     it.skip('endpoint count link should navigate to the endpoint list filtered by policy', () => {
       const policyId = policies.items[0].id;
       const filterByPolicyQuery = `?admin_query=(language:kuery,query:'united.endpoint.Endpoint.policy.applied.id : "${policyId}"')`;
@@ -190,7 +190,7 @@ describe('When on the policy list page', () => {
       });
     });
 
-    //FLAKY: https://github.com/elastic/kibana/issues/139196
+    // FLAKY: https://github.com/elastic/kibana/issues/139196
     it.skip('should pass the correct pageSize value to the api', async () => {
       await waitFor(() => {
         expect(renderResult.getByTestId('tablePaginationPopoverButton')).toBeTruthy();
