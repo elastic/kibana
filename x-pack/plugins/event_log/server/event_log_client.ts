@@ -142,7 +142,8 @@ export class EventLogClient implements IEventLogClient {
   public async aggregateEventsWithAuthFilter(
     type: string,
     authFilter: KueryNode,
-    options?: AggregateOptionsType
+    options?: AggregateOptionsType,
+    allNamespaces?: boolean
   ) {
     if (!authFilter) {
       throw new Error('No authorization filter defined!');
@@ -158,7 +159,7 @@ export class EventLogClient implements IEventLogClient {
 
     return await this.esContext.esAdapter.aggregateEventsWithAuthFilter({
       index: this.esContext.esNames.indexPattern,
-      namespace: await this.getNamespace(),
+      namespace: allNamespaces ? undefined : await this.getNamespace(),
       type,
       authFilter,
       aggregateOptions: { ...aggregateOptions, aggs } as AggregateOptionsType,

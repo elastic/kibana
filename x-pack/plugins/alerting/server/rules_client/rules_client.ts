@@ -372,6 +372,7 @@ export interface GetGlobalExecutionLogParams {
   page: number;
   perPage: number;
   sort: estypes.Sort;
+  allNamespaces?: boolean;
 }
 
 export interface GetActionErrorLogByIdParams {
@@ -891,6 +892,7 @@ export class RulesClient {
     page,
     perPage,
     sort,
+    allNamespaces,
   }: GetGlobalExecutionLogParams): Promise<IExecutionLogResult> {
     this.logger.debug(`getGlobalExecutionLogWithAuth(): getting global execution log`);
 
@@ -941,18 +943,22 @@ export class RulesClient {
             perPage,
             sort,
           }),
-        }
+        },
+        allNamespaces
       );
 
       const formattedResult = formatExecutionLogResult(aggResult);
-      const ruleIds = [...new Set(formattedResult.data.map((l) => l.rule_id))].filter(
-        Boolean
-      ) as string[];
+      const ruleIds = [
+        ...new Set(formattedResult.data.map((l) => [l.rule_id, l.space_ids])),
+      ].filter(Boolean) as Array<[string, string[]]>;
       const ruleNameIdEntries = await Promise.all(
-        ruleIds.map(async (id) => {
+        ruleIds.map(async ([id, spaceIds]) => {
           try {
-            const result = await this.get({ id });
-            return [id, result.name];
+            if (this.spaceId === spaceIds[0]) {
+              const result = await this.get({ id });
+              return [id, result.name];
+            }
+            return [id, spaceIds[0]];
           } catch (e) {
             return [id, id];
           }

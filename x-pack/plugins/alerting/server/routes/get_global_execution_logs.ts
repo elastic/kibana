@@ -38,18 +38,21 @@ const querySchema = schema.object({
   per_page: schema.number({ defaultValue: 10, min: 1 }),
   page: schema.number({ defaultValue: 1, min: 1 }),
   sort: sortFieldsSchema,
+  all_namespaces: schema.maybe(schema.boolean()),
 });
 
 const rewriteReq: RewriteRequestCase<GetGlobalExecutionLogParams> = ({
   date_start: dateStart,
   date_end: dateEnd,
   per_page: perPage,
+  all_namespaces: allNamespaces,
   ...rest
 }) => ({
   ...rest,
   dateStart,
   dateEnd,
   perPage,
+  allNamespaces,
 });
 
 export const getGlobalExecutionLogRoute = (
