@@ -33,6 +33,7 @@
         ],
         "path": "packages/kbn-shared-ux-utility/src/fallback.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -51,6 +52,7 @@
         ],
         "path": "packages/kbn-shared-ux-utility/src/utils.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/shared-ux-utility",
@@ -64,6 +66,7 @@
             ],
             "path": "packages/kbn-shared-ux-utility/src/utils.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           },
           {
@@ -78,6 +81,7 @@
             ],
             "path": "packages/kbn-shared-ux-utility/src/utils.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           }
         ],
@@ -98,6 +102,7 @@
         ],
         "path": "packages/kbn-shared-ux-utility/src/utils.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/shared-ux-utility",
@@ -111,6 +116,7 @@
             ],
             "path": "packages/kbn-shared-ux-utility/src/utils.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -131,6 +137,7 @@
         ],
         "path": "packages/kbn-shared-ux-utility/src/with_suspense.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/shared-ux-utility",
@@ -146,6 +153,7 @@
             ],
             "path": "packages/kbn-shared-ux-utility/src/with_suspense.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -162,6 +170,7 @@
             ],
             "path": "packages/kbn-shared-ux-utility/src/with_suspense.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           }
         ],

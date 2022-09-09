@@ -34,11 +34,11 @@ describe('readPrebuiltDevToolContentRoute', () => {
     readPrebuiltDevToolContentRoute(server.router);
   });
 
-  it.each([['enable_host_risk_score', 'enable_user_risk_score']])(
+  it.each([['enable_host_risk_score'], ['enable_user_risk_score']])(
     'should read content from %p template',
-    async () => {
+    async (object) => {
       const response = await server.inject(
-        readPrebuiltDevToolContentRequest('enable_user_risk_score'),
+        readPrebuiltDevToolContentRequest(object),
         requestContextMock.convertContext(context)
       );
 

@@ -30,7 +30,8 @@ import { PieChartTypes, PieLayerState, PieVisualizationState } from '../../../co
 function newLayerState(layerId: string): PieLayerState {
   return {
     layerId,
-    groups: [],
+    primaryGroups: [],
+    secondaryGroups: undefined,
     metric: undefined,
     numberDisplay: NumberDisplay.PERCENT,
     categoryDisplay: CategoryDisplay.DEFAULT,
@@ -122,21 +123,22 @@ export const getPieVisualization = ({
     }
 
     const datasource = frame.datasourceLayers[layer.layerId];
-    const originalOrder = getSortedGroups(datasource, layer);
-    // When we add a column it could be empty, and therefore have no order
-    const sortedColumns: AccessorConfig[] = originalOrder.map((accessor) => ({
-      columnId: accessor,
-    }));
 
-    if (sortedColumns.length) {
-      applyPaletteToColumnConfig(sortedColumns, state, paletteService);
-    }
+    const getPrimaryGroupConfig = (): VisualizationDimensionGroupConfig => {
+      const originalOrder = getSortedGroups(datasource, layer);
+      // When we add a column it could be empty, and therefore have no order
+      const accessors: AccessorConfig[] = originalOrder.map((accessor) => ({
+        columnId: accessor,
+      }));
 
-    const getSliceByGroup = (): VisualizationDimensionGroupConfig => {
-      const baseProps = {
+      if (accessors.length) {
+        applyPaletteToColumnConfig(accessors, state, paletteService);
+      }
+
+      const primaryGroupConfigBaseProps = {
         required: true,
-        groupId: 'groups',
-        accessors: sortedColumns,
+        groupId: 'primaryGroups',
+        accessors,
         enableDimensionEditor: true,
         filterOperations: bucketedOperations,
       };
@@ -145,33 +147,79 @@ export const getPieVisualization = ({
         case 'donut':
         case 'pie':
           return {
-            ...baseProps,
+            ...primaryGroupConfigBaseProps,
             groupLabel: i18n.translate('xpack.lens.pie.sliceGroupLabel', {
               defaultMessage: 'Slice by',
             }),
             dimensionEditorGroupLabel: i18n.translate('xpack.lens.pie.sliceDimensionGroupLabel', {
               defaultMessage: 'Slice',
             }),
-            supportsMoreColumns: sortedColumns.length < PartitionChartsMeta.pie.maxBuckets,
+            supportsMoreColumns: accessors.length < PartitionChartsMeta.pie.maxBuckets,
             dataTestSubj: 'lnsPie_sliceByDimensionPanel',
+          };
+        case 'mosaic':
+          return {
+            ...primaryGroupConfigBaseProps,
+            groupLabel: i18n.translate('xpack.lens.pie.verticalAxisLabel', {
+              defaultMessage: 'Vertical axis',
+            }),
+            dimensionEditorGroupLabel: i18n.translate('xpack.lens.pie.verticalAxisDimensionLabel', {
+              defaultMessage: 'Vertical axis',
+            }),
+            supportsMoreColumns: accessors.length === 0,
+            dataTestSubj: 'lnsPie_verticalAxisDimensionPanel',
           };
         default:
           return {
-            ...baseProps,
+            ...primaryGroupConfigBaseProps,
             groupLabel: i18n.translate('xpack.lens.pie.treemapGroupLabel', {
               defaultMessage: 'Group by',
             }),
             dimensionEditorGroupLabel: i18n.translate('xpack.lens.pie.treemapDimensionGroupLabel', {
               defaultMessage: 'Group',
             }),
-            supportsMoreColumns: sortedColumns.length < PartitionChartsMeta[state.shape].maxBuckets,
+            supportsMoreColumns: accessors.length < PartitionChartsMeta[state.shape].maxBuckets,
             dataTestSubj: 'lnsPie_groupByDimensionPanel',
-            requiredMinDimensionCount: PartitionChartsMeta[state.shape].requiredMinDimensionCount,
           };
       }
     };
 
-    const getMetricGroup = (): VisualizationDimensionGroupConfig => ({
+    const getSecondaryGroupConfig = (): VisualizationDimensionGroupConfig | undefined => {
+      const originalSecondaryOrder = getSortedGroups(datasource, layer, 'secondaryGroups');
+      const accessors = originalSecondaryOrder.map((accessor) => ({
+        columnId: accessor,
+      }));
+
+      const secondaryGroupConfigBaseProps = {
+        required: true,
+        groupId: 'secondaryGroups',
+        accessors,
+        enableDimensionEditor: true,
+        filterOperations: bucketedOperations,
+      };
+
+      switch (state.shape) {
+        case 'mosaic':
+          return {
+            ...secondaryGroupConfigBaseProps,
+            groupLabel: i18n.translate('xpack.lens.pie.horizontalAxisLabel', {
+              defaultMessage: 'Horizontal axis',
+            }),
+            dimensionEditorGroupLabel: i18n.translate(
+              'xpack.lens.pie.horizontalAxisDimensionLabel',
+              {
+                defaultMessage: 'Horizontal axis',
+              }
+            ),
+            supportsMoreColumns: accessors.length === 0,
+            dataTestSubj: 'lnsPie_horizontalAxisDimensionPanel',
+          };
+        default:
+          return undefined;
+      }
+    };
+
+    const getMetricGroupConfig = (): VisualizationDimensionGroupConfig => ({
       groupId: 'metric',
       groupLabel: i18n.translate('xpack.lens.pie.groupsizeLabel', {
         defaultMessage: 'Size by',
@@ -192,7 +240,9 @@ export const getPieVisualization = ({
     });
 
     return {
-      groups: [getSliceByGroup(), getMetricGroup()],
+      groups: [getPrimaryGroupConfig(), getSecondaryGroupConfig(), getMetricGroupConfig()].filter(
+        Boolean
+      ) as VisualizationDimensionGroupConfig[],
     };
   },
 
@@ -203,8 +253,20 @@ export const getPieVisualization = ({
         if (l.layerId !== layerId) {
           return l;
         }
-        if (groupId === 'groups') {
-          return { ...l, groups: [...l.groups.filter((group) => group !== columnId), columnId] };
+        if (groupId === 'primaryGroups') {
+          return {
+            ...l,
+            primaryGroups: [...l.primaryGroups.filter((group) => group !== columnId), columnId],
+          };
+        }
+        if (groupId === 'secondaryGroups') {
+          return {
+            ...l,
+            secondaryGroups: [
+              ...(l.secondaryGroups?.filter((group) => group !== columnId) || []),
+              columnId,
+            ],
+          };
         }
         return { ...l, metric: columnId };
       }),
@@ -221,7 +283,11 @@ export const getPieVisualization = ({
         if (l.metric === columnId) {
           return { ...l, metric: undefined };
         }
-        return { ...l, groups: l.groups.filter((c) => c !== columnId) };
+        return {
+          ...l,
+          primaryGroups: l.primaryGroups.filter((c) => c !== columnId),
+          secondaryGroups: l.secondaryGroups?.filter((c) => c !== columnId) ?? undefined,
+        };
       }),
     };
   },
@@ -288,7 +354,7 @@ export const getPieVisualization = ({
       if (
         numericColumn &&
         state.shape === 'waffle' &&
-        layer.groups.length &&
+        layer.primaryGroups.length &&
         checkTableForContainsSmallValues(frame.activeData[layerId], numericColumn.id, 1)
       ) {
         warningMessages.push(
