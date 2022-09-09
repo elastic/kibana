@@ -37,7 +37,7 @@ export interface AllUsersQuery extends BasicQueryPaginated {
   sort: SortUsersField;
 }
 
-export interface UsersRiskScoreQuery extends BasicQueryPaginated {
+export interface UserRiskScoreQuery extends BasicQueryPaginated {
   sort: RiskScoreSortField;
   severitySelection: RiskSeverity[];
 }
@@ -51,7 +51,7 @@ export interface UsersQueries {
   [UsersTableType.allUsers]: AllUsersQuery;
   [UsersTableType.authentications]: BasicQueryPaginated;
   [UsersTableType.anomalies]: UsersAnomaliesQuery;
-  [UsersTableType.risk]: UsersRiskScoreQuery;
+  [UsersTableType.risk]: UserRiskScoreQuery;
   [UsersTableType.events]: BasicQueryPaginated;
 }
 

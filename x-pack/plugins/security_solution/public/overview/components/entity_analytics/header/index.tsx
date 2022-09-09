@@ -52,7 +52,7 @@ export const EntityAnalyticsHeader = () => {
 
         dispatch(
           hostsActions.updateHostRiskScoreSort({
-            sort: { field: RiskScoreFields.riskScore, direction: Direction.desc },
+            sort: { field: RiskScoreFields.hostRiskScore, direction: Direction.desc },
             hostsType: HostsType.page,
           })
         );
@@ -74,7 +74,7 @@ export const EntityAnalyticsHeader = () => {
 
         dispatch(
           usersActions.updateTableSorting({
-            sort: { field: RiskScoreFields.riskScore, direction: Direction.desc },
+            sort: { field: RiskScoreFields.userRiskScore, direction: Direction.desc },
             tableType: UsersTableType.risk,
           })
         );

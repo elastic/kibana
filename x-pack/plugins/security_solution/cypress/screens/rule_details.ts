@@ -31,7 +31,7 @@ export const DETAILS_DESCRIPTION = '.euiDescriptionList__description';
 
 export const DETAILS_TITLE = '.euiDescriptionList__title';
 
-export const EXCEPTIONS_TAB = '[data-test-subj="navigation-rule_exceptions"]';
+export const EXCEPTIONS_TAB = 'a[data-test-subj="navigation-rule_exceptions"]';
 
 export const FALSE_POSITIVES_DETAILS = 'False positive examples';
 
