@@ -25,6 +25,7 @@ export const AlertsCount = ({ count }: { count: number }) => {
 
   return (
     <span
+      data-test-subj="toolbar-alerts-count"
       style={{
         fontSize: euiTheme.size.m,
         fontWeight: euiTheme.font.weight.semiBold,
