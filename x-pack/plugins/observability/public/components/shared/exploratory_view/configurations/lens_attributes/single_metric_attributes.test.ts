@@ -107,7 +107,7 @@ describe('SingleMetricAttributes', () => {
         },
       },
       title: 'Prefilled from exploratory view app',
-      visualizationType: 'lnsMetric',
+      visualizationType: 'lnsLegacyMetric',
     });
   });
 
@@ -173,7 +173,7 @@ describe('SingleMetricAttributes', () => {
         },
       },
       title: 'Prefilled from exploratory view app',
-      visualizationType: 'lnsMetric',
+      visualizationType: 'lnsLegacyMetric',
     });
   });
 

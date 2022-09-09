@@ -7,7 +7,7 @@
 
 import {
   EuiFlexItem,
-  EuiPageContentBody,
+  EuiPageContentBody_Deprecated as EuiPageContentBody,
   EuiPanel,
   EuiProgress,
   EuiSpacer,

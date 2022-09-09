@@ -12,7 +12,7 @@ import classnames from 'classnames';
 import type {
   IconPosition,
   ReferenceLineDecorationConfig,
-  CollectiveConfig,
+  MergedAnnotation,
 } from '../../common/types';
 import { getBaseIconPlacement } from '../components';
 import { hasIcon, iconSet } from './icon';
@@ -27,16 +27,16 @@ type PartialReferenceLineDecorationConfig = Pick<
   position?: Position;
 };
 
-type PartialCollectiveConfig = Pick<CollectiveConfig, 'position' | 'icon' | 'textVisibility'>;
+type PartialMergedAnnotation = Pick<MergedAnnotation, 'position' | 'icon' | 'textVisibility'>;
 
 const isExtendedDecorationConfig = (
-  config: PartialReferenceLineDecorationConfig | PartialCollectiveConfig | undefined
+  config: PartialReferenceLineDecorationConfig | PartialMergedAnnotation | undefined
 ): config is PartialReferenceLineDecorationConfig =>
   (config as PartialReferenceLineDecorationConfig)?.iconPosition ? true : false;
 
 // Note: it does not take into consideration whether the reference line is in view or not
 export const getLinesCausedPaddings = (
-  visualConfigs: Array<PartialReferenceLineDecorationConfig | PartialCollectiveConfig | undefined>,
+  visualConfigs: Array<PartialReferenceLineDecorationConfig | PartialMergedAnnotation | undefined>,
   axesMap: AxesMap,
   shouldRotate: boolean
 ) => {

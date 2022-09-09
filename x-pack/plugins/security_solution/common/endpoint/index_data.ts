@@ -43,6 +43,7 @@ export type IndexedHostsAndAlertsResponse = IndexedHostsResponse;
  * @param alertsPerHost
  * @param fleet
  * @param options
+ * @param DocGenerator
  */
 export async function indexHostsAndAlerts(
   client: Client,
@@ -56,7 +57,8 @@ export async function indexHostsAndAlerts(
   alertIndex: string,
   alertsPerHost: number,
   fleet: boolean,
-  options: TreeOptions = {}
+  options: TreeOptions = {},
+  DocGenerator: typeof EndpointDocGenerator = EndpointDocGenerator
 ): Promise<IndexedHostsAndAlertsResponse> {
   const random = seedrandom(seed);
   const epmEndpointPackage = await getEndpointPackageInfo(kbnClient);
@@ -91,7 +93,7 @@ export async function indexHostsAndAlerts(
   const realPolicies: Record<string, CreatePackagePolicyResponse['item']> = {};
 
   for (let i = 0; i < numHosts; i++) {
-    const generator = new EndpointDocGenerator(random);
+    const generator = new DocGenerator(random);
     const indexedHosts = await indexEndpointHostDocs({
       numDocs,
       client,
