@@ -10,7 +10,7 @@ import styled, { css } from 'styled-components';
 
 import { EuiTitle, EuiFormRow, EuiCheckbox, EuiSpacer, EuiText } from '@elastic/eui';
 import type { ExceptionListType } from '@kbn/securitysolution-io-ts-list-types';
-import type { ExceptionsBuilderExceptionItem } from '@kbn/securitysolution-list-utils';
+import type { ExceptionsBuilderReturnExceptionItem } from '@kbn/securitysolution-list-utils';
 
 import { useSignalIndex } from '../../../../../detections/containers/detection_engine/alerts/use_signal_index';
 import type { Status } from '../../../../../../common/detection_engine/schemas/common/schemas';
@@ -34,7 +34,7 @@ const SectionHeader = styled(EuiTitle)`
 `;
 
 interface ExceptionsFlyoutAlertsActionsComponentProps {
-  exceptionListItems: ExceptionsBuilderExceptionItem[];
+  exceptionListItems: ExceptionsBuilderReturnExceptionItem[];
   exceptionListType: ExceptionListType;
   shouldCloseSingleAlert: boolean;
   shouldBulkCloseAlert: boolean;

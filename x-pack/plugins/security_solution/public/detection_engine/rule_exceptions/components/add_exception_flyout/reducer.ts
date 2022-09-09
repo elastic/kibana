@@ -9,6 +9,8 @@ import type { ExceptionListSchema, OsTypeArray } from '@kbn/securitysolution-io-
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import type { ExceptionsBuilderReturnExceptionItem } from '@kbn/securitysolution-list-utils';
 
+import type { Rule } from '../../../../detections/containers/detection_engine/rules/types';
+
 export interface State {
   exceptionItemMeta: { name: string };
   listType: ExceptionListTypeEnum;
@@ -20,12 +22,26 @@ export interface State {
   bulkCloseAlerts: boolean;
   disableBulkClose: boolean;
   bulkCloseIndex: string[] | undefined;
-  selectedListsToAddTo: any[];
   selectedOs: OsTypeArray | undefined;
-  addExceptionToRule: boolean;
   exceptionListsToAddTo: ExceptionListSchema[];
   selectedRulesToAddTo: Rule[];
 }
+
+export const initialState: State = {
+  exceptionItems: [],
+  exceptionItemMeta: { name: '' },
+  newComment: '',
+  itemConditionValidationErrorExists: false,
+  closeSingleAlert: false,
+  bulkCloseAlerts: false,
+  disableBulkClose: false,
+  bulkCloseIndex: undefined,
+  selectedOs: undefined,
+  exceptionListsToAddTo: [],
+  listsOptionsRadioSelection: 'add_to_rule',
+  selectedRulesToAddTo: [],
+  listType: ExceptionListTypeEnum.RULE_DEFAULT,
+};
 
 export type Action =
   | {
@@ -61,16 +77,8 @@ export type Action =
       bulkCloseIndex: string[] | undefined;
     }
   | {
-      type: 'setSelectedListsToAddTo';
-      selectedLists: any[];
-    }
-  | {
       type: 'setSelectedOsOptions';
       selectedOs: OsTypeArray | undefined;
-    }
-  | {
-      type: 'setAddExceptionToRule';
-      addExceptionToRule: boolean;
     }
   | {
       type: 'setAddExceptionToLists';
@@ -152,28 +160,12 @@ export const createExceptionItemsReducer =
           bulkCloseIndex,
         };
       }
-      case 'setSelectedListsToAddTo': {
-        const { selectedLists } = action;
-
-        return {
-          ...state,
-          selectedListsToAddTo: selectedLists,
-        };
-      }
       case 'setSelectedOsOptions': {
         const { selectedOs } = action;
 
         return {
           ...state,
           selectedOs,
-        };
-      }
-      case 'setAddExceptionToRule': {
-        const { addExceptionToRule } = action;
-
-        return {
-          ...state,
-          addExceptionToRule,
         };
       }
       case 'setAddExceptionToLists': {

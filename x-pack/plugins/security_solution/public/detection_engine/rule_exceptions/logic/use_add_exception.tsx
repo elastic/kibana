@@ -6,11 +6,9 @@
  */
 
 import { useEffect, useRef, useState, useCallback } from 'react';
-import type {
-  ExceptionListItemSchema,
-  CreateExceptionListItemSchema,
-} from '@kbn/securitysolution-io-ts-list-types';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { useApi } from '@kbn/securitysolution-list-hooks';
+import type { ExceptionsBuilderReturnExceptionItem } from '@kbn/securitysolution-list-utils';
 
 import { formatExceptionItemForUpdate } from '../utils/helpers';
 import { useKibana } from '../../../common/lib/kibana';
@@ -27,7 +25,7 @@ import * as i18n from './translations';
  *
  */
 export type AddOrUpdateExceptionItemsFunc = (
-  exceptionItemsToAddOrUpdate: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>
+  exceptionItemsToAddOrUpdate: ExceptionsBuilderReturnExceptionItem[]
 ) => Promise<void>;
 
 export type ReturnUseAddOrUpdateException = [boolean, AddOrUpdateExceptionItemsFunc | null];
@@ -59,23 +57,21 @@ export const useAddOrUpdateException = (): ReturnUseAddOrUpdateException => {
       exceptionItemsToAddOrUpdate
     ) => {
       const addOrUpdateItems = async (
-        exceptionListItems: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>
+        exceptionListItems: ExceptionsBuilderReturnExceptionItem[]
       ): Promise<ExceptionListItemSchema[]> => {
         return Promise.all(
-          exceptionListItems.map(
-            (item: ExceptionListItemSchema | CreateExceptionListItemSchema) => {
-              if ('id' in item && item.id != null) {
-                const formattedExceptionItem = formatExceptionItemForUpdate(item);
-                return updateExceptionListItem({
-                  listItem: formattedExceptionItem,
-                });
-              } else {
-                return addExceptionListItem({
-                  listItem: item,
-                });
-              }
+          exceptionListItems.map((item: ExceptionsBuilderReturnExceptionItem) => {
+            if ('id' in item && item.id != null) {
+              const formattedExceptionItem = formatExceptionItemForUpdate(item);
+              return updateExceptionListItem({
+                listItem: formattedExceptionItem,
+              });
+            } else {
+              return addExceptionListItem({
+                listItem: item,
+              });
             }
-          )
+          })
         );
       };
 

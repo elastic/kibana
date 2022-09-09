@@ -76,7 +76,7 @@ export interface OnChangeProps {
 export interface ExceptionBuilderProps {
   allowLargeValueLists: boolean;
   autocompleteService: AutocompleteStart;
-  exceptionListItems: ExceptionsBuilderExceptionItem[];
+  exceptionListItems: ExceptionsBuilderReturnExceptionItem[];
   httpService: HttpStart;
   osTypes?: OsTypeArray;
   indexPatterns: DataViewBase;
@@ -229,7 +229,6 @@ export const ExceptionBuilderComponent = ({
         },
         ...exceptions.slice(index + 1),
       ];
-      console.log({updatedExceptions})
       setUpdateExceptions(updatedExceptions);
     },
     [setUpdateExceptions, exceptions]
@@ -365,7 +364,6 @@ export const ExceptionBuilderComponent = ({
 
   // Bubble up changes to parent
   useEffect(() => {
-    console.log({errorExists, memoExceptionItems})
     onChange({
       errorExists: errorExists > 0,
       exceptionItems: memoExceptionItems,

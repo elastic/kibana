@@ -5,10 +5,6 @@
  * 2.0.
  */
 
-// Component being re-implemented in 8.5
-
-/* eslint complexity: ["error", 35]*/
-
 import React, { memo, useEffect, useCallback, useMemo, useReducer } from 'react';
 import styled, { css } from 'styled-components';
 import {
@@ -25,15 +21,10 @@ import {
   EuiLoadingContent,
 } from '@elastic/eui';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
-import type {
-  ExceptionListType,
-  OsTypeArray,
-  ExceptionListItemSchema,
-  CreateExceptionListItemSchema,
-  ExceptionListSchema,
-} from '@kbn/securitysolution-io-ts-list-types';
+import type { OsTypeArray, ExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
 import type { ExceptionsBuilderReturnExceptionItem } from '@kbn/securitysolution-list-utils';
 import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
+import { isEmpty } from 'lodash/fp';
 import {
   isEqlRule,
   isNewTermsRule,
@@ -46,20 +37,13 @@ import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useAddOrUpdateException } from '../../logic/use_add_exception';
 import {
-  enrichNewExceptionItemsWithComments,
-  enrichExceptionItemsWithOS,
-  lowercaseHashValues,
   defaultEndpointExceptionItems,
   retrieveAlertOsTypes,
   filterIndexPatterns,
-  enrichNewExceptionItemsWithName,
-  enrichSharedExceptions,
-  enrichRuleExceptions,
 } from '../../utils/helpers';
 import { ErrorCallout } from '../error_callout';
 import type { AlertData } from '../../utils/types';
-import type { State } from './reducer';
-import { createExceptionItemsReducer } from './reducer';
+import { initialState, createExceptionItemsReducer } from './reducer';
 import { ExceptionsFlyoutMeta } from '../flyout_components/item_meta_form';
 import { ExceptionsConditions } from '../flyout_components/item_conditions';
 import { useFetchIndexPatterns } from '../../logic/use_exception_flyout_data';
@@ -69,24 +53,7 @@ import { ExceptionItemsFlyoutAlertsActions } from '../flyout_components/alerts_a
 import { useAddRuleException } from '../../logic/use_add_rule_exception';
 import { useCloseAlertsFromExceptions } from '../../logic/use_close_alerts';
 import { ExceptionsAddToRulesOrLists } from '../flyout_components/add_exception_to_rule_or_list';
-
-const initialState: State = {
-  exceptionItems: [],
-  exceptionItemMeta: { name: '' },
-  newComment: '',
-  itemConditionValidationErrorExists: false,
-  closeSingleAlert: false,
-  bulkCloseAlerts: false,
-  disableBulkClose: false,
-  bulkCloseIndex: undefined,
-  selectedListsToAddTo: [],
-  selectedOs: undefined,
-  addExceptionToRule: true,
-  exceptionListsToAddTo: [],
-  listsOptionsRadioSelection: 'add_to_rule',
-  selectedRulesToAddTo: [],
-  listType: ExceptionListTypeEnum.RULE_DEFAULT,
-};
+import { entrichNewExceptionItems } from './utils';
 
 export interface AddExceptionFlyoutProps {
   rules: Rule[] | null;
@@ -173,7 +140,6 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
       bulkCloseAlerts,
       closeSingleAlert,
       bulkCloseIndex,
-      addExceptionToRule,
       listsOptionsRadioSelection,
       selectedRulesToAddTo,
       exceptionListsToAddTo,
@@ -349,65 +315,60 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
     return hasAlertData ? retrieveAlertOsTypes(alertData) : selectedOs ? [...selectedOs] : [];
   }, [hasAlertData, alertData, selectedOs]);
 
-  const enrichExceptionItems = useCallback((): Array<
-    ExceptionListItemSchema | CreateExceptionListItemSchema
-  > => {
-    let enriched: Array<ExceptionListItemSchema | CreateExceptionListItemSchema> = [];
-    enriched =
-      newComment !== ''
-        ? enrichNewExceptionItemsWithComments(exceptionItems, [{ comment: newComment }])
-        : exceptionItems;
-
-    // enrichments that apply to all
-    if (exceptionItemName.trim() !== '') {
-      enriched = enrichNewExceptionItemsWithName(exceptionItems, exceptionItemName);
-    }
-
-    // enrichments that are list type specific
-    if (listType === ExceptionListTypeEnum.ENDPOINT) {
-      const osTypes = osTypesSelection;
-      enriched = lowercaseHashValues(enrichExceptionItemsWithOS(enriched, osTypes));
-    } else if (addExceptionToRule) {
-      enriched = enrichRuleExceptions(enriched);
-    } else {
-      enriched = enrichSharedExceptions(exceptionListsToAddTo, enriched);
-    }
-
-    return enriched;
-  }, [
-    newComment,
-    exceptionItems,
-    exceptionItemName,
-    listType,
-    addExceptionToRule,
-    osTypesSelection,
-    exceptionListsToAddTo,
-  ]);
-
   const handleOnSubmit = useCallback(async (): Promise<void> => {
+    const ruleDefaultOptions = ['add_to_rule', 'add_to_rules', 'select_rules_to_add_to'];
+    const addToRules = ruleDefaultOptions.includes(listsOptionsRadioSelection);
+    const addToSharedLists = listsOptionsRadioSelection === 'add_to_lists';
+
     try {
-      const items = enrichExceptionItems();
+      const items = entrichNewExceptionItems({
+        itemName: exceptionItemName,
+        commentToAdd: newComment,
+        addToRules,
+        addToSharedLists,
+        sharedLists: exceptionListsToAddTo,
+        listType,
+        selectedOs: osTypesSelection,
+        items: exceptionItems,
+      });
 
-      // if listsOptionsRadioSelection is one of the rule ones and selectedRulesToAddTo is not empty
-      // will need to go through and add to those rule's default rule list
+      if (addToRules && !isEmpty(selectedRulesToAddTo) && addRuleExceptions != null) {
+        // TODO: Update once bulk route is added
+        await Promise.all(
+          selectedRulesToAddTo.map(async (rule) => {
+            await addRuleExceptions(items, rule.id, rule.name);
+          })
+        );
 
-      // if listsOptionsRadioSelection is add to shared list, create the items in the selected shared lists
-
-      if (addExceptionToRule && addRuleExceptions != null) {
-        await addRuleExceptions(items, rules[0]?.id, rules[0]?.name);
-      } else if (!addExceptionToRule && addSharedExceptions != null) {
+        if (closeAlerts != null && (bulkCloseAlerts || closeSingleAlert)) {
+          const alertIdToClose = closeSingleAlert && alertData ? alertData._id : undefined;
+          await Promise.all(
+            selectedRulesToAddTo.map(async (rule) =>
+              closeAlerts(rule.rule_id, items, alertIdToClose, bulkCloseIndex)
+            )
+          );
+        }
+      } else if (addToSharedLists && addSharedExceptions != null) {
         await addSharedExceptions(items);
-      }
 
-      if (closeAlerts != null && (bulkCloseAlerts || closeSingleAlert)) {
-        const alertIdToClose = closeSingleAlert && alertData ? alertData._id : undefined;
-        await closeAlerts(rules[0]?.rule_id ?? '', items, alertIdToClose, bulkCloseIndex);
+        if (
+          rules != null &&
+          rules.length > 0 &&
+          closeAlerts != null &&
+          (bulkCloseAlerts || closeSingleAlert)
+        ) {
+          const alertIdToClose = closeSingleAlert && alertData ? alertData._id : undefined;
+          await Promise.all(
+            rules.map(async (rule) =>
+              closeAlerts(rule.rule_id, items, alertIdToClose, bulkCloseIndex)
+            )
+          );
+        }
       }
     } catch {
       onError();
     }
   }, [
-    addExceptionToRule,
     addRuleExceptions,
     addSharedExceptions,
     alertData,
@@ -415,9 +376,16 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
     bulkCloseIndex,
     closeAlerts,
     closeSingleAlert,
-    enrichExceptionItems,
+    exceptionItemName,
+    exceptionItems,
+    exceptionListsToAddTo,
+    listType,
+    listsOptionsRadioSelection,
+    newComment,
     onError,
+    osTypesSelection,
     rules,
+    selectedRulesToAddTo,
   ]);
 
   const isSubmitButtonDisabled = useMemo(

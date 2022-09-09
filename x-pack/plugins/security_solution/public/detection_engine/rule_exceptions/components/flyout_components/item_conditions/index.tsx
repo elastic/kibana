@@ -18,10 +18,7 @@ import type {
   OsTypeArray,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
-import type {
-  ExceptionsBuilderReturnExceptionItem,
-  ExceptionsBuilderExceptionItem,
-} from '@kbn/securitysolution-list-utils';
+import type { ExceptionsBuilderReturnExceptionItem } from '@kbn/securitysolution-list-utils';
 import type { DataViewBase } from '@kbn/es-query';
 import styled, { css } from 'styled-components';
 import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
@@ -62,7 +59,7 @@ interface ExceptionsFlyoutConditionsComponentProps {
   /* Not all rule types support large value lists */
   allowLargeValueLists: boolean;
   /* Exception items - could be one being edited, or multiple being added */
-  exceptionListItems: ExceptionsBuilderExceptionItem[];
+  exceptionListItems: ExceptionsBuilderReturnExceptionItem[];
   /* Fields used to populate the field option dropdown */
   indexPatterns: DataViewBase;
   /* Exception items can be added to zero (just being added to a shared list), one or more rules */
