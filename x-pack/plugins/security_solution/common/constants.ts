@@ -277,19 +277,17 @@ export const DETECTION_ENGINE_RULES_BULK_CREATE =
 export const DETECTION_ENGINE_RULES_BULK_UPDATE =
   `${DETECTION_ENGINE_RULES_URL}/_bulk_update` as const;
 
-export const DEV_TOOL_PREBUILT_CONTENT =
-  `/internal/prebuilt_content/dev_tool/{console_id}` as const;
-export const devToolPrebuiltContentUrl = (spaceId: string, consoleId: string) =>
-  `/s/${spaceId}/internal/prebuilt_content/dev_tool/${consoleId}` as const;
-export const PREBUILT_SAVED_OBJECTS_BULK_CREATE =
-  '/internal/prebuilt_content/saved_objects/_bulk_create/{template_name}';
-export const prebuiltSavedObjectsBulkCreateUrl = (templateName: string) =>
-  `/internal/prebuilt_content/saved_objects/_bulk_create/${templateName}` as const;
 export const RISKY_SCORE_BATH_PATH = '/internal/risky_score';
+export const DEV_TOOL_PREBUILT_CONTENT =
+  `${RISKY_SCORE_BATH_PATH}/prebuilt_content/dev_tool/{console_id}` as const;
+export const devToolPrebuiltContentUrl = (spaceId: string, consoleId: string) =>
+  `/s/${spaceId}${RISKY_SCORE_BATH_PATH}/prebuilt_content/dev_tool/${consoleId}` as const;
+export const PREBUILT_SAVED_OBJECTS_BULK_CREATE = `${RISKY_SCORE_BATH_PATH}/prebuilt_content/saved_objects/_bulk_create/{template_name}`;
+export const prebuiltSavedObjectsBulkCreateUrl = (templateName: string) =>
+  `${RISKY_SCORE_BATH_PATH}/prebuilt_content/saved_objects/_bulk_create/${templateName}` as const;
 export const RISKY_SCORE_CREATE_INDEX = `${RISKY_SCORE_BATH_PATH}/indices/create`;
 export const RISKY_SCORE_DELETE_INDICES = `${RISKY_SCORE_BATH_PATH}/indices/delete`;
-export const RISKY_SCORE_CREATE_TRANSFORM = `${RISKY_SCORE_BATH_PATH}/transforms/create`;
-export const RISKY_SCORE_DELETE_TRANSFORMS = `${RISKY_SCORE_BATH_PATH}/transforms/delete`;
+
 /**
  * Internal detection engine routes
  */
