@@ -492,9 +492,11 @@ export type HostInfo = Immutable<{
   };
 }>;
 
-// HostMetadataDetails is now just HostMetadata
-// HostDetails is also just HostMetadata
-export type HostMetadata = Immutable<{
+// Host metadata document streamed up to ES by the Endpoint running on host machines.
+// NOTE:  `HostMetadata` type is the original and defined as Immutable. If needing to
+//        work with metadata that is not mutable, use `HostMetadataInterface`
+export type HostMetadata = Immutable<HostMetadataInterface>;
+export interface HostMetadataInterface {
   '@timestamp': number;
   event: {
     created: number;
@@ -542,10 +544,11 @@ export type HostMetadata = Immutable<{
   agent: {
     id: string;
     version: string;
+    type: string;
   };
   host: Host;
   data_stream: DataStream;
-}>;
+}
 
 export type UnitedAgentMetadata = Immutable<{
   agent: {
