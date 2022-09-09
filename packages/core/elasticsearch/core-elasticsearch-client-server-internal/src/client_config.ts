@@ -13,6 +13,8 @@ import type { ClientOptions, HttpAgentOptions } from '@elastic/elasticsearch';
 import type { ElasticsearchClientConfig } from '@kbn/core-elasticsearch-server';
 import { DEFAULT_HEADERS } from './headers';
 
+export type ParsedClientOptions = Omit<ClientOptions, 'agent'> & { agent: HttpAgentOptions };
+
 /**
  * Parse the client options from given client config and `scoped` flag.
  *
@@ -23,8 +25,8 @@ import { DEFAULT_HEADERS } from './headers';
 export function parseClientOptions(
   config: ElasticsearchClientConfig,
   scoped: boolean
-): ClientOptions & { agent: HttpAgentOptions } {
-  const clientOptions: ClientOptions & { agent: HttpAgentOptions } = {
+): ParsedClientOptions {
+  const clientOptions: ParsedClientOptions = {
     sniffOnStart: config.sniffOnStart,
     sniffOnConnectionFault: config.sniffOnConnectionFault,
     headers: {

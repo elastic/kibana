@@ -29,14 +29,14 @@ export const configureClient = (
     type: string;
     scoped?: boolean;
     getExecutionContext?: () => string | undefined;
-    agentManager?: AgentManager;
+    agentManager: AgentManager;
   }
 ): Client => {
   const clientOptions = parseClientOptions(config, scoped);
   const KibanaTransport = createTransport({ getExecutionContext });
   const client = new Client({
     ...clientOptions,
-    ...(agentManager && { agent: agentManager.getAgentFactory(clientOptions.agent) }),
+    agent: agentManager.getAgentFactory(clientOptions.agent),
     Transport: KibanaTransport,
     Connection: HttpConnection,
     // using ClusterConnectionPool until https://github.com/elastic/elasticsearch-js/issues/1714 is addressed

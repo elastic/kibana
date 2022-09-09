@@ -56,7 +56,7 @@ export class ClusterClient implements ICustomClusterClient {
     authHeaders?: IAuthHeadersStorage;
     getExecutionContext?: () => string | undefined;
     getUnauthorizedErrorHandler?: () => UnauthorizedErrorHandler | undefined;
-    agentManager?: AgentManager;
+    agentManager: AgentManager;
   }) {
     this.config = config;
     this.authHeaders = authHeaders;

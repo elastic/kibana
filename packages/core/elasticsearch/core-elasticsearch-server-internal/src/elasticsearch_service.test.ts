@@ -135,6 +135,20 @@ describe('#preboot', () => {
       );
     });
 
+    it('creates a ClusterClient using the internal AgentManager', async () => {
+      const prebootContract = await elasticsearchService.preboot();
+      const customConfig = { keepAlive: true };
+      const clusterClient = prebootContract.createClient('custom-type', customConfig);
+
+      expect(clusterClient).toBe(mockClusterClientInstance);
+
+      expect(MockClusterClient).toHaveBeenCalledTimes(1);
+      expect(MockClusterClient.mock.calls[0][0]).toEqual(
+        // eslint-disable-next-line dot-notation
+        expect.objectContaining({ agentManager: elasticsearchService['agentManager'] })
+      );
+    });
+
     it('creates a new client on each call', async () => {
       const prebootContract = await elasticsearchService.preboot();
 

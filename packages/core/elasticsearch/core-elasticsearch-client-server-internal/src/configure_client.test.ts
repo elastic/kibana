@@ -62,12 +62,14 @@ const createFakeAgentFactory = (logger: MockedLogger) => {
 describe('configureClient', () => {
   let logger: MockedLogger;
   let config: ElasticsearchClientConfig;
+  let agentManager: AgentManager;
 
   beforeEach(() => {
     logger = loggingSystemMock.createLogger();
     config = createFakeConfig();
     parseClientOptionsMock.mockReturnValue({});
     ClientMock.mockImplementation(() => createFakeClient());
+    agentManager = new AgentManager();
   });
 
   afterEach(() => {
@@ -77,14 +79,14 @@ describe('configureClient', () => {
   });
 
   it('calls `parseClientOptions` with the correct parameters', () => {
-    configureClient(config, { logger, type: 'test', scoped: false });
+    configureClient(config, { logger, type: 'test', scoped: false, agentManager });
 
     expect(parseClientOptionsMock).toHaveBeenCalledTimes(1);
     expect(parseClientOptionsMock).toHaveBeenCalledWith(config, false);
 
     parseClientOptionsMock.mockClear();
 
-    configureClient(config, { logger, type: 'test', scoped: true });
+    configureClient(config, { logger, type: 'test', scoped: true, agentManager });
 
     expect(parseClientOptionsMock).toHaveBeenCalledTimes(1);
     expect(parseClientOptionsMock).toHaveBeenCalledWith(config, true);
@@ -96,7 +98,7 @@ describe('configureClient', () => {
     };
     parseClientOptionsMock.mockReturnValue(parsedOptions);
 
-    const client = configureClient(config, { logger, type: 'test', scoped: false });
+    const client = configureClient(config, { logger, type: 'test', scoped: false, agentManager });
 
     expect(ClientMock).toHaveBeenCalledTimes(1);
     expect(ClientMock).toHaveBeenCalledWith(expect.objectContaining(parsedOptions));
@@ -104,8 +106,13 @@ describe('configureClient', () => {
   });
 
   it('constructs a client using the provided `agentManager`', () => {
-    const { agentManager, agentFactory } = createFakeAgentFactory(logger);
-    const client = configureClient(config, { logger, type: 'test', scoped: false, agentManager });
+    const { agentManager: customAgentManager, agentFactory } = createFakeAgentFactory(logger);
+    const client = configureClient(config, {
+      logger,
+      type: 'test',
+      scoped: false,
+      agentManager: customAgentManager,
+    });
 
     expect(ClientMock).toHaveBeenCalledTimes(1);
     expect(ClientMock).toHaveBeenCalledWith(expect.objectContaining({ agent: agentFactory }));
@@ -114,14 +121,26 @@ describe('configureClient', () => {
 
   it('calls `createTransport` with the correct parameters', () => {
     const getExecutionContext = jest.fn();
-    configureClient(config, { logger, type: 'test', scoped: false, getExecutionContext });
+    configureClient(config, {
+      logger,
+      type: 'test',
+      scoped: false,
+      getExecutionContext,
+      agentManager,
+    });
 
     expect(createTransportMock).toHaveBeenCalledTimes(1);
     expect(createTransportMock).toHaveBeenCalledWith({ getExecutionContext });
 
     createTransportMock.mockClear();
 
-    configureClient(config, { logger, type: 'test', scoped: true, getExecutionContext });
+    configureClient(config, {
+      logger,
+      type: 'test',
+      scoped: true,
+      getExecutionContext,
+      agentManager,
+    });
 
     expect(createTransportMock).toHaveBeenCalledTimes(1);
     expect(createTransportMock).toHaveBeenCalledWith({ getExecutionContext });
@@ -131,7 +150,7 @@ describe('configureClient', () => {
     const mockedTransport = { mockTransport: true };
     createTransportMock.mockReturnValue(mockedTransport);
 
-    const client = configureClient(config, { logger, type: 'test', scoped: false });
+    const client = configureClient(config, { logger, type: 'test', scoped: false, agentManager });
 
     expect(ClientMock).toHaveBeenCalledTimes(1);
     expect(ClientMock).toHaveBeenCalledWith(
@@ -146,7 +165,7 @@ describe('configureClient', () => {
     const mockedTransport = { mockTransport: true };
     createTransportMock.mockReturnValue(mockedTransport);
 
-    const client = configureClient(config, { logger, type: 'test', scoped: false });
+    const client = configureClient(config, { logger, type: 'test', scoped: false, agentManager });
 
     expect(ClientMock).toHaveBeenCalledTimes(1);
     expect(ClientMock).toHaveBeenCalledWith(
@@ -158,7 +177,7 @@ describe('configureClient', () => {
   });
 
   it('calls instrumentEsQueryAndDeprecationLogger', () => {
-    const client = configureClient(config, { logger, type: 'test', scoped: false });
+    const client = configureClient(config, { logger, type: 'test', scoped: false, agentManager });
 
     expect(instrumentEsQueryAndDeprecationLogger).toHaveBeenCalledTimes(1);
     expect(instrumentEsQueryAndDeprecationLogger).toHaveBeenCalledWith({
