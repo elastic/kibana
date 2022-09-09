@@ -7,8 +7,7 @@
  */
 
 // Methods from this file will be removed after they are moved to the package
-
-import type { Filter } from '@kbn/es-query';
+import { buildEmptyFilter, Filter } from '@kbn/es-query';
 
 export enum ConditionTypes {
   OR = 'OR',
@@ -31,4 +30,18 @@ export const getConditionalOperationType = (filter: FilterItem) => {
   } else if (isOrFilter(filter)) {
     return ConditionTypes.OR;
   }
+};
+
+/** to: @kbn/es-query **/
+export const buildOrFilter = (filters: FilterItem) => {
+  const filter = buildEmptyFilter(false);
+
+  return {
+    ...filter,
+    meta: {
+      ...filter.meta,
+      type: 'OR',
+      params: filters,
+    },
+  };
 };

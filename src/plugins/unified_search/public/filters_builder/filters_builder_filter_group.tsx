@@ -14,12 +14,13 @@ import {
   EuiHorizontalRule,
   EuiPanel,
   EuiText,
-  useEuiTheme,
+  useEuiBackgroundColor,
+  useEuiPaddingSize,
 } from '@elastic/eui';
-import type { Filter } from '@kbn/es-query';
-import { cx, css } from '@emotion/css';
+import { Filter } from '@kbn/es-query';
+import { css, cx } from '@emotion/css';
 import type { Path } from './filters_builder_types';
-import { ConditionTypes, isOrFilter } from '../utils';
+import { ConditionTypes, getConditionalOperationType } from '../utils';
 import { FilterItem } from './filters_builder_filter_item';
 import { FiltersBuilderContextType } from './filters_builder_context';
 import { getPathInArray } from './filters_builder_utils';
@@ -28,142 +29,121 @@ export interface FilterGroupProps {
   filters: Filter[];
   conditionType: ConditionTypes;
   path: Path;
-  timeRangeForSuggestionsOverride?: boolean;
+
+  /** @internal used for recursive rendering **/
+  renderedLevel?: number;
   reverseBackground?: boolean;
 }
 
-const boderPadding = css`
-  padding: 14px;
-`;
+/** @internal **/
+const Delimiter = ({
+  color,
+  conditionType,
+}: {
+  color: 'subdued' | 'plain';
+  conditionType: ConditionTypes;
+}) => {
+  const xsPadding = useEuiPaddingSize('xs');
+  const mPadding = useEuiPaddingSize('m');
+  const backgroundColor = useEuiBackgroundColor(color);
 
-const maginAndFilterGroup = css`
-  margin: 2px;
-`;
+  const delimiterStyles = useMemo(
+    () => css`
+      position: relative;
 
-const OrDelimiter = ({ isRootLevelFilterGroup }: { isRootLevelFilterGroup: boolean }) => (
-  <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
-    <EuiFlexItem
-      grow={1}
-      style={{ marginLeft: isRootLevelFilterGroup ? '4px' : '-10px', flexGrow: 0.12 }}
-    >
+      .filter-builder__delimiter_text {
+        position: absolute;
+        display: block;
+        padding: ${xsPadding};
+        top: 0;
+        left: ${mPadding};
+        background: ${backgroundColor};
+      }
+    `,
+    [backgroundColor, mPadding, xsPadding]
+  );
+
+  return (
+    <div className={delimiterStyles}>
       <EuiHorizontalRule margin="s" />
-    </EuiFlexItem>
-    <EuiFlexItem grow={false}>
-      <EuiText size="xs" color="subdued">
-        {i18n.translate('unifiedSearch.filter.filtersBuilder.orDelimiterLabel', {
-          defaultMessage: 'OR',
+      <EuiText size="xs" className="filter-builder__delimiter_text">
+        {i18n.translate('unifiedSearch.filter.filtersBuilder.delimiterLabel', {
+          defaultMessage: '{conditionType}',
+          values: {
+            conditionType,
+          },
         })}
       </EuiText>
-    </EuiFlexItem>
-    <EuiFlexItem grow={10} style={{ marginRight: isRootLevelFilterGroup ? '4px' : '-10px' }}>
-      <EuiHorizontalRule margin="s" />
-    </EuiFlexItem>
-  </EuiFlexGroup>
-);
-
-const marginAndDelimiter = css`
-  margin: 4px;
-  block-size: 0px;
-`;
-
-const AndDelimiter = () => (
-  <EuiFlexGroup>
-    <EuiFlexItem grow={false}>
-      <EuiHorizontalRule className={marginAndDelimiter} />
-    </EuiFlexItem>
-  </EuiFlexGroup>
-);
+    </div>
+  );
+};
 
 export const FilterGroup = ({
   filters,
   conditionType,
   path,
-  timeRangeForSuggestionsOverride,
   reverseBackground = false,
+  renderedLevel = 0,
 }: FilterGroupProps) => {
   const {
     globalParams: { maxDepth, hideOr },
   } = useContext(FiltersBuilderContextType);
-
-  const { euiTheme } = useEuiTheme();
-
-  const border = useMemo(
-    () =>
-      css`
-        border: ${euiTheme.border.thin};
-        border-radius: ${euiTheme.border.radius.medium};
-      `,
-    [euiTheme.border.thin, euiTheme.border.radius.medium]
-  );
 
   const pathInArray = getPathInArray(path);
   const isDepthReached = maxDepth <= pathInArray.length;
   const orDisabled = hideOr || (isDepthReached && conditionType === ConditionTypes.AND);
   const andDisabled = isDepthReached && conditionType === ConditionTypes.OR;
   const removeDisabled = pathInArray.length <= 1 && filters.length === 1;
-  const isRootLevelFilterGroup = pathInArray.length <= 1;
+  const shouldNormalizeFirstLevel =
+    !path && filters.length === 1 && getConditionalOperationType(filters[0]);
 
-  const firstLevel = !path && filters.length === 1;
-  let color: 'subdued' | 'plain' = 'subdued';
-
-  if (!firstLevel) {
-    color = !reverseBackground ? 'subdued' : 'plain';
-  } else {
+  if (shouldNormalizeFirstLevel) {
     reverseBackground = true;
+    renderedLevel -= 1;
   }
 
-  const shouldDrawBorder = (filter: Filter) =>
-    (path === '' && isOrFilter(filter) && filters.length !== 1) ||
-    Array.isArray(filter) ||
-    (!isRootLevelFilterGroup && (Array.isArray(filter) || isOrFilter(filter))) ||
-    (isRootLevelFilterGroup && Array.isArray(filter));
+  const color = reverseBackground ? 'plain' : 'subdued';
 
-  return (
+  const renderedFilters = filters.map((filter, index, acc) => (
+    <EuiFlexGroup direction="column" gutterSize="xs">
+      <EuiFlexItem>
+        <FilterItem
+          filter={filter}
+          path={`${path}${path ? '.' : ''}${index}`}
+          reverseBackground={reverseBackground}
+          disableOr={orDisabled}
+          disableAnd={andDisabled}
+          disableRemove={removeDisabled}
+          color={color}
+          index={index}
+          renderedLevel={renderedLevel}
+        />
+      </EuiFlexItem>
+
+      {conditionType && index + 1 < acc.length ? (
+        <EuiFlexItem>
+          {conditionType === ConditionTypes.OR && (
+            <Delimiter color={color} conditionType={conditionType} />
+          )}
+        </EuiFlexItem>
+      ) : null}
+    </EuiFlexGroup>
+  ));
+
+  return shouldNormalizeFirstLevel ? (
+    <>{renderedFilters}</>
+  ) : (
     <EuiPanel
       color={color}
       hasShadow={false}
       paddingSize="none"
+      hasBorder
       className={cx({
-        [boderPadding]: !firstLevel,
+        'filter-builder__panel': true,
+        'filter-builder__panel-nested': renderedLevel > 0,
       })}
     >
-      {filters.map((filter, index, acc) => (
-        <EuiFlexGroup direction="column" gutterSize="none">
-          <EuiFlexItem
-            className={cx({
-              [border]: shouldDrawBorder(filter),
-            })}
-          >
-            <FilterItem
-              filter={filter}
-              path={`${path}${path ? '.' : ''}${index}`}
-              timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
-              reverseBackground={reverseBackground}
-              disableOr={orDisabled}
-              disableAnd={andDisabled}
-              disableRemove={removeDisabled}
-              color={color}
-              index={index}
-            />
-          </EuiFlexItem>
-
-          {conditionType === ConditionTypes.OR && index + 1 < acc.length ? (
-            <EuiFlexItem>
-              <OrDelimiter isRootLevelFilterGroup={isRootLevelFilterGroup} />
-            </EuiFlexItem>
-          ) : null}
-
-          {conditionType === ConditionTypes.AND && index + 1 < acc.length ? (
-            <EuiFlexItem
-              className={cx({
-                [maginAndFilterGroup]: shouldDrawBorder(filter),
-              })}
-            >
-              <AndDelimiter />
-            </EuiFlexItem>
-          ) : null}
-        </EuiFlexGroup>
-      ))}
+      {renderedFilters}
     </EuiPanel>
   );
 };
