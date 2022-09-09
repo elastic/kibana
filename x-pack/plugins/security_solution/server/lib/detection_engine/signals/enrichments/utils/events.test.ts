@@ -46,4 +46,17 @@ describe('getEventValue', () => {
       )
     ).toEqual('host name 1');
   });
+
+  it('return first item  if it is array', () => {
+    expect(
+      getEventValue(
+        createAlert('1', {
+          host: {
+            name: ['host name 1', 'host name 2'],
+          },
+        }),
+        'host.name'
+      )
+    ).toEqual('host name 1');
+  });
 });
