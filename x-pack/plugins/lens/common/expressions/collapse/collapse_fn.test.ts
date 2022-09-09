@@ -33,10 +33,43 @@ describe('collapse_fn', () => {
           { val: 8, split: 'B' },
         ],
       },
-      { metric: ['val'], fn: 'sum' }
+      { metric: ['val'], fn: ['sum'] }
     );
 
     expect(result.rows).toEqual([{ val: 1 + 2 + 3 + 4 + 5 + 6 + 7 + 8 }]);
+  });
+
+  it('can use a single function for multiple metrics', async () => {
+    const result = await runFn(
+      {
+        type: 'datatable',
+        columns: [
+          { id: 'val', name: 'val', meta: { type: 'number' } },
+          { id: 'val2', name: 'val2', meta: { type: 'number' } },
+          { id: 'val3', name: 'val3', meta: { type: 'number' } },
+          { id: 'split', name: 'split', meta: { type: 'string' } },
+        ],
+        rows: [
+          { val: 1, val2: 1, val3: 1, split: 'A' },
+          { val: 2, val2: 2, val3: 2, split: 'B' },
+          { val: 3, val2: 3, val3: 3, split: 'B' },
+          { val: 4, val2: 4, val3: 4, split: 'A' },
+          { val: 5, val2: 5, val3: 5, split: 'A' },
+          { val: 6, val2: 6, val3: 6, split: 'A' },
+          { val: 7, val2: 7, val3: 7, split: 'B' },
+          { val: 8, val2: 22, val3: 77, split: 'B' },
+        ],
+      },
+      { metric: ['val', 'val2', 'val3'], fn: ['sum'] }
+    );
+
+    expect(result.rows).toEqual([
+      {
+        val: 1 + 2 + 3 + 4 + 5 + 6 + 7 + 8,
+        val2: 1 + 2 + 3 + 4 + 5 + 6 + 7 + 22,
+        val3: 1 + 2 + 3 + 4 + 5 + 6 + 7 + 77,
+      },
+    ]);
   });
 
   it('can use different functions for each different metric', async () => {
@@ -114,7 +147,7 @@ describe('collapse_fn', () => {
   };
 
   it('splits by a column', async () => {
-    const result = await runFn(twoSplitTable, { metric: ['val'], by: ['split'], fn: 'sum' });
+    const result = await runFn(twoSplitTable, { metric: ['val'], by: ['split'], fn: ['sum'] });
     expect(result.rows).toEqual([
       { val: 1 + 4 + 6, split: 'A' },
       { val: 2 + 7 + 8, split: 'B' },
@@ -123,7 +156,7 @@ describe('collapse_fn', () => {
   });
 
   it('applies avg', async () => {
-    const result = await runFn(twoSplitTable, { metric: ['val'], by: ['split'], fn: 'avg' });
+    const result = await runFn(twoSplitTable, { metric: ['val'], by: ['split'], fn: ['avg'] });
     expect(result.rows).toEqual([
       { val: (1 + 4 + 6) / 3, split: 'A' },
       { val: (2 + 7 + 8) / 3, split: 'B' },
@@ -132,7 +165,7 @@ describe('collapse_fn', () => {
   });
 
   it('applies min', async () => {
-    const result = await runFn(twoSplitTable, { metric: ['val'], by: ['split'], fn: 'min' });
+    const result = await runFn(twoSplitTable, { metric: ['val'], by: ['split'], fn: ['min'] });
     expect(result.rows).toEqual([
       { val: 1, split: 'A' },
       { val: 2, split: 'B' },
@@ -141,7 +174,7 @@ describe('collapse_fn', () => {
   });
 
   it('applies max', async () => {
-    const result = await runFn(twoSplitTable, { metric: ['val'], by: ['split'], fn: 'max' });
+    const result = await runFn(twoSplitTable, { metric: ['val'], by: ['split'], fn: ['max'] });
     expect(result.rows).toEqual([
       { val: 6, split: 'A' },
       { val: 8, split: 'B' },
