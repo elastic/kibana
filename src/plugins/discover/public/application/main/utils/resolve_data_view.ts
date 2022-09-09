@@ -7,16 +7,14 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
+import type { DataView, DataViewListItem, DataViewsContract } from '@kbn/data-views-plugin/public';
 import type { ISearchSource } from '@kbn/data-plugin/public';
-import type { IUiSettingsClient, SavedObject, ToastsStart } from '@kbn/core/public';
-export type DataViewSavedObject = SavedObject & { title: string };
-
+import type { IUiSettingsClient, ToastsStart } from '@kbn/core/public';
 interface DataViewData {
   /**
    * List of existing data views
    */
-  list: DataViewSavedObject[];
+  list: DataViewListItem[];
   /**
    * Loaded data view (might be default data view if requested was not found)
    */
@@ -32,9 +30,9 @@ interface DataViewData {
 }
 
 export function findDataViewById(
-  dataViews: DataViewSavedObject[],
+  dataViews: DataViewListItem[],
   id: string
-): DataViewSavedObject | undefined {
+): DataViewListItem | undefined {
   if (!Array.isArray(dataViews) || !id) {
     return;
   }
@@ -46,7 +44,7 @@ export function findDataViewById(
  * the first available data view id if not
  */
 export function getFallbackDataViewId(
-  dataViews: DataViewSavedObject[],
+  dataViews: DataViewListItem[],
   defaultIndex: string = ''
 ): string {
   if (defaultIndex && findDataViewById(dataViews, defaultIndex)) {
@@ -62,7 +60,7 @@ export function getFallbackDataViewId(
  */
 export function getDataViewId(
   id: string = '',
-  dataViews: DataViewSavedObject[] = [],
+  dataViews: DataViewListItem[] = [],
   defaultIndex: string = ''
 ): string {
   if (!id || !findDataViewById(dataViews, id)) {
@@ -79,7 +77,7 @@ export async function loadDataView(
   dataViews: DataViewsContract,
   config: IUiSettingsClient
 ): Promise<DataViewData> {
-  const dataViewList = (await dataViews.getCache()) as unknown as DataViewSavedObject[];
+  const dataViewList = await dataViews.getIdsWithTitle();
 
   const actualId = getDataViewId(id, dataViewList, config.get('defaultIndex'));
   return {

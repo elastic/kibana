@@ -16,6 +16,8 @@ import { FetchStatus } from '../../types';
 import { DataDocuments$, RecordRawType } from './use_saved_search';
 import { DataTableRecord } from '../../../types';
 import { AggregateQuery, Query } from '@kbn/es-query';
+import { dataViewMock } from '@kbn/discover-plugin/public/__mocks__/data_view';
+import { DataViewListItem } from '@kbn/data-views-plugin/common';
 
 function getHookProps(
   replaceUrlAppState: (newState: Partial<AppState>) => Promise<void>,
@@ -37,6 +39,7 @@ function getHookProps(
     documents$,
     dataViews: discoverServiceMock.dataViews,
     stateContainer,
+    dataViewList: [dataViewMock as DataViewListItem],
   };
 }
 const query = { sql: 'SELECT * from the-data-view-title' };

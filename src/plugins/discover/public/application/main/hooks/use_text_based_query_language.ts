@@ -13,7 +13,7 @@ import {
   Query,
 } from '@kbn/es-query';
 import { useEffect, useRef } from 'react';
-import { DataViewsContract } from '@kbn/data-views-plugin/public';
+import { DataViewListItem, DataViewsContract } from '@kbn/data-views-plugin/public';
 import type { GetStateReturn } from '../services/discover_state';
 import type { DataDocuments$ } from './use_saved_search';
 import { FetchStatus } from '../../types';
@@ -28,10 +28,12 @@ export function useTextBasedQueryLanguage({
   documents$,
   dataViews,
   stateContainer,
+  dataViewList,
 }: {
   documents$: DataDocuments$;
   stateContainer: GetStateReturn;
   dataViews: DataViewsContract;
+  dataViewList: DataViewListItem[];
 }) {
   const prev = useRef<{ query: AggregateQuery | Query | undefined; columns: string[] }>({
     columns: [],
@@ -60,8 +62,7 @@ export function useTextBasedQueryLanguage({
           }
         }
         const indexPatternFromQuery = getIndexPatternFromSQLQuery(query.sql);
-        const idsTitles = await dataViews.getIdsWithTitle();
-        const dataViewObj = idsTitles.find(({ title }) => title === indexPatternFromQuery);
+        const dataViewObj = dataViewList.find(({ title }) => title === indexPatternFromQuery);
 
         if (dataViewObj) {
           const nextState = {
@@ -81,5 +82,5 @@ export function useTextBasedQueryLanguage({
       }
     });
     return () => subscription.unsubscribe();
-  }, [documents$, dataViews, stateContainer]);
+  }, [documents$, dataViews, stateContainer, dataViewList]);
 }

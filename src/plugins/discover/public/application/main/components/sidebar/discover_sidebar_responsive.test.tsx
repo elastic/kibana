@@ -13,8 +13,7 @@ import { getDataTableRecords } from '../../../../__fixtures__/real_hits';
 import { act } from 'react-dom/test-utils';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
-import { DataViewAttributes } from '@kbn/data-views-plugin/public';
-import { SavedObject } from '@kbn/core/types';
+import { DataViewListItem } from '@kbn/data-views-plugin/public';
 import {
   DiscoverSidebarResponsive,
   DiscoverSidebarResponsiveProps,
@@ -78,9 +77,9 @@ function getCompProps(): DiscoverSidebarResponsiveProps {
   const hits = getDataTableRecords(dataView);
 
   const dataViewList = [
-    { id: '0', attributes: { title: 'b' } } as SavedObject<DataViewAttributes>,
-    { id: '1', attributes: { title: 'a' } } as SavedObject<DataViewAttributes>,
-    { id: '2', attributes: { title: 'c' } } as SavedObject<DataViewAttributes>,
+    { id: '0', title: 'b' } as DataViewListItem,
+    { id: '1', title: 'a' } as DataViewListItem,
+    { id: '2', title: 'c' } as DataViewListItem,
   ];
 
   for (const hit of hits) {

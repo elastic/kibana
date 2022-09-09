@@ -8,7 +8,7 @@
 import { useMemo, useEffect, useState, useCallback } from 'react';
 import { isEqual } from 'lodash';
 import { History } from 'history';
-import { DataViewType } from '@kbn/data-views-plugin/public';
+import { DataViewListItem, DataViewType } from '@kbn/data-views-plugin/public';
 import { SavedSearch, getSavedSearch } from '@kbn/saved-search-plugin/public';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import { useTextBasedQueryLanguage } from './use_text_based_query_language';
@@ -34,11 +34,13 @@ export function useDiscoverState({
   history,
   savedSearch,
   setExpandedDoc,
+  dataViewList,
 }: {
   services: DiscoverServices;
   savedSearch: SavedSearch;
   history: History;
   setExpandedDoc: (doc?: DataTableRecord) => void;
+  dataViewList: DataViewListItem[];
 }) {
   const { uiSettings, data, filterManager, dataViews, storage } = services;
   const useNewFieldsApi = useMemo(() => !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE), [uiSettings]);
@@ -108,6 +110,7 @@ export function useDiscoverState({
     documents$: data$.documents$,
     dataViews,
     stateContainer,
+    dataViewList
   });
 
   /**
