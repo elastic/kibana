@@ -55,7 +55,7 @@ export function ObservabilityOverviewCommonProvider({
 
   const waitForAlertsTableLoadingToDisappear = async () => {
     await retry.try(async () => {
-      await testSubjects.missingOrFail(ALERTS_TABLE_LOADING_SELECTOR);
+      await testSubjects.missingOrFail(ALERTS_TABLE_LOADING_SELECTOR, { timeout: 5000 });
     });
   };
 
