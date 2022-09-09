@@ -35,7 +35,7 @@ export function isInputOnlyPolicyTemplate(
 export function isIntegrationPolicyTemplate(
   policyTemplate: RegistryPolicyTemplate
 ): policyTemplate is RegistryPolicyIntegrationTemplate {
-  return 'inputs' in policyTemplate;
+  return !isInputOnlyPolicyTemplate(policyTemplate);
 }
 
 export const getNormalizedInputs = (policyTemplate: RegistryPolicyTemplate): RegistryInput[] => {
