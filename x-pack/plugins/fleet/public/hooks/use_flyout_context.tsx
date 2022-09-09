@@ -15,6 +15,9 @@ const agentFlyoutContext = createContext<
       isFleetServerFlyoutOpen: boolean;
       openFleetServerFlyout: () => void;
       closeFleetServerFlyout: () => void;
+      isAgentActivityOpen: boolean;
+      openAgentActivityFlyout: () => void;
+      closeAgentActivityFlyout: () => void;
     }
   | undefined
 >(undefined);
@@ -22,6 +25,7 @@ const agentFlyoutContext = createContext<
 export const FlyoutContextProvider: React.FunctionComponent = ({ children }) => {
   const [isEnrollmentFlyoutOpen, setIsEnrollmentFlyoutOpen] = useState(false);
   const [isFleetServerFlyoutOpen, setIsFleetServerFlyoutOpen] = useState(false);
+  const [isAgentActivityOpen, setIsAgentActivityOpen] = useState(false);
 
   return (
     <agentFlyoutContext.Provider
@@ -34,6 +38,9 @@ export const FlyoutContextProvider: React.FunctionComponent = ({ children }) => 
         isFleetServerFlyoutOpen,
         openFleetServerFlyout: () => setIsFleetServerFlyoutOpen(true),
         closeFleetServerFlyout: () => setIsFleetServerFlyoutOpen(false),
+        isAgentActivityOpen,
+        openAgentActivityFlyout: () => setIsAgentActivityOpen(true),
+        closeAgentActivityFlyout: () => setIsAgentActivityOpen(false),
       }}
     >
       {children}

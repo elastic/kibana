@@ -51,7 +51,6 @@ import {
 } from '../components';
 import { useFleetServerUnhealthy } from '../hooks/use_fleet_server_unhealthy';
 
-import { CurrentBulkUpgradeCallout } from './components';
 import { AgentTableHeader } from './components/table_header';
 import type { SelectionMode } from './components/types';
 import { SearchAndFilterBar } from './components/search_and_filter_bar';
@@ -59,7 +58,6 @@ import { Tags } from './components/tags';
 import { TagsAddRemove } from './components/tags_add_remove';
 import { TableRowActions } from './components/table_row_actions';
 import { EmptyPrompt } from './components/empty_prompt';
-import { useCurrentUpgrades } from './hooks';
 
 const REFRESH_INTERVAL_MS = 30000;
 
@@ -402,8 +400,12 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     flyoutContext.openFleetServerFlyout();
   }, [flyoutContext]);
 
+  const onClickAgentActivity = useCallback(() => {
+    flyoutContext.openAgentActivityFlyout();
+  }, [flyoutContext]);
+
   // Current upgrades
-  const { abortUpgrade, currentUpgrades, refreshUpgrades } = useCurrentUpgrades(fetchData);
+  // const { abortUpgrade, currentUpgrades, refreshUpgrades } = useCurrentUpgrades(fetchData);
 
   const columns = [
     {
@@ -591,7 +593,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
             onClose={() => {
               setAgentToUpgrade(undefined);
               fetchData();
-              refreshUpgrades();
+              // refreshUpgrades();
             }}
           />
         </EuiPortal>
@@ -620,13 +622,6 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
           <EuiSpacer size="l" />
         </>
       )}
-      {/* Current upgrades callout */}
-      {currentUpgrades.map((currentUpgrade) => (
-        <React.Fragment key={currentUpgrade.actionId}>
-          <CurrentBulkUpgradeCallout currentUpgrade={currentUpgrade} abortUpgrade={abortUpgrade} />
-          <EuiSpacer size="l" />
-        </React.Fragment>
-      ))}
       {/* Search and filter bar */}
       <SearchAndFilterBar
         agentPolicies={agentPolicies}
@@ -648,11 +643,14 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         currentQuery={kuery}
         selectedAgents={selectedAgents}
         refreshAgents={({ refreshTags = false }: { refreshTags?: boolean } = {}) =>
-          Promise.all([fetchData({ refreshTags }), refreshUpgrades()])
+          Promise.all([
+            fetchData({ refreshTags }), // refreshUpgrades()
+          ])
         }
         onClickAddAgent={() => setEnrollmentFlyoutState({ isOpen: true })}
         onClickAddFleetServer={onClickAddFleetServer}
         visibleAgents={agents}
+        onClickAgentActivity={onClickAgentActivity}
       />
       <EuiSpacer size="m" />
       {/* Agent total, bulk actions and status bar */}
