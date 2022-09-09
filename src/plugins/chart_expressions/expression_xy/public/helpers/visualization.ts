@@ -57,10 +57,3 @@ const isAnnotationLayerCommon = (
 export const isAnnotationsLayer = (
   layer: CommonXYLayerConfig
 ): layer is CommonXYAnnotationLayerConfig => isAnnotationLayerCommon(layer);
-
-export const getAnnotationsLayers = (
-  layers: CommonXYLayerConfig[]
-): CommonXYAnnotationLayerConfig[] =>
-  (layers || []).filter((layer): layer is CommonXYAnnotationLayerConfig =>
-    isAnnotationsLayer(layer)
-  );

@@ -21,7 +21,7 @@ import {
   getDurationFieldForTransactions,
   getProcessorEventForTransactions,
 } from '../../../lib/helpers/transactions';
-import { calculateThroughput } from '../../../lib/helpers/calculate_throughput';
+import { calculateThroughputWithRange } from '../../../lib/helpers/calculate_throughput';
 import { getBucketSizeForAggregatedTransactions } from '../../../lib/helpers/get_bucket_size_for_aggregated_transactions';
 import {
   getLatencyAggregation,
@@ -202,7 +202,7 @@ export async function getServiceInstancesTransactionStatistics<
               aggregation: latency,
               latencyAggregationType,
             }),
-            throughput: calculateThroughput({
+            throughput: calculateThroughputWithRange({
               start: startWithOffset,
               end: endWithOffset,
               value: count,

@@ -16,13 +16,13 @@ import { createFilter } from '../../../common/containers/helpers';
 import type {
   KpiRiskScoreRequestOptions,
   KpiRiskScoreStrategyResponse,
-  RiskScoreAggByFields,
 } from '../../../../common/search_strategy';
 import {
   getHostRiskIndex,
   getUserRiskIndex,
   RiskQueries,
   RiskSeverity,
+  RiskScoreEntity,
 } from '../../../../common/search_strategy';
 
 import { useKibana } from '../../../common/lib/kibana';
@@ -32,7 +32,7 @@ import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_exper
 import type { SeverityCount } from '../../../common/components/severity/types';
 import { useSpaceId } from '../../../common/hooks/use_space_id';
 
-type GetHostsRiskScoreProps = KpiRiskScoreRequestOptions & {
+type GetHostRiskScoreProps = KpiRiskScoreRequestOptions & {
   data: DataPublicPluginStart;
   signal: AbortSignal;
 };
@@ -42,14 +42,14 @@ const getRiskScoreKpi = ({
   defaultIndex,
   signal,
   filterQuery,
-  aggBy,
-}: GetHostsRiskScoreProps): Observable<KpiRiskScoreStrategyResponse> =>
+  entity,
+}: GetHostRiskScoreProps): Observable<KpiRiskScoreStrategyResponse> =>
   data.search.search<KpiRiskScoreRequestOptions, KpiRiskScoreStrategyResponse>(
     {
       defaultIndex,
       factoryQueryType: RiskQueries.kpiRiskScore,
       filterQuery: createFilter(filterQuery),
-      aggBy,
+      entity,
     },
     {
       strategy: 'securitySolutionSearchStrategy',
@@ -58,7 +58,7 @@ const getRiskScoreKpi = ({
   );
 
 const getRiskScoreKpiComplete = (
-  props: GetHostsRiskScoreProps
+  props: GetHostRiskScoreProps
 ): Observable<KpiRiskScoreStrategyResponse> => {
   return getRiskScoreKpi(props).pipe(
     filter((response) => {
@@ -80,11 +80,11 @@ interface RiskScoreKpi {
 
 type UseHostRiskScoreKpiProps = Omit<
   UseRiskScoreKpiProps,
-  'defaultIndex' | 'aggBy' | 'featureEnabled'
+  'defaultIndex' | 'aggBy' | 'featureEnabled' | 'entity'
 >;
 type UseUserRiskScoreKpiProps = Omit<
   UseRiskScoreKpiProps,
-  'defaultIndex' | 'aggBy' | 'featureEnabled'
+  'defaultIndex' | 'aggBy' | 'featureEnabled' | 'entity'
 >;
 
 export const useUserRiskScoreKpi = ({
@@ -99,7 +99,7 @@ export const useUserRiskScoreKpi = ({
     filterQuery,
     skip,
     defaultIndex,
-    aggBy: 'user.name',
+    entity: RiskScoreEntity.user,
     featureEnabled: riskyUsersFeatureEnabled,
   });
 };
@@ -116,7 +116,7 @@ export const useHostRiskScoreKpi = ({
     filterQuery,
     skip,
     defaultIndex,
-    aggBy: 'host.name',
+    entity: RiskScoreEntity.host,
     featureEnabled: riskyHostsFeatureEnabled,
   });
 };
@@ -125,7 +125,7 @@ interface UseRiskScoreKpiProps {
   filterQuery?: string | ESTermQuery;
   skip?: boolean;
   defaultIndex: string | undefined;
-  aggBy: RiskScoreAggByFields;
+  entity: RiskScoreEntity;
   featureEnabled: boolean;
 }
 
@@ -133,7 +133,7 @@ const useRiskScoreKpi = ({
   filterQuery,
   skip,
   defaultIndex,
-  aggBy,
+  entity,
   featureEnabled,
 }: UseRiskScoreKpiProps): RiskScoreKpi => {
   const { error, result, start, loading } = useRiskScoreKpiComplete();
@@ -146,10 +146,10 @@ const useRiskScoreKpi = ({
         data,
         filterQuery,
         defaultIndex: [defaultIndex],
-        aggBy,
+        entity,
       });
     }
-  }, [data, defaultIndex, start, filterQuery, skip, aggBy, featureEnabled]);
+  }, [data, defaultIndex, start, filterQuery, skip, entity, featureEnabled]);
 
   const severityCount = useMemo(
     () => ({
@@ -162,5 +162,6 @@ const useRiskScoreKpi = ({
     }),
     [result]
   );
+
   return { error, severityCount, loading, isModuleDisabled };
 };
