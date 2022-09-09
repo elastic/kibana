@@ -71,7 +71,7 @@ export function useTextBasedQueryLanguage({
           stateContainer.replaceUrlAppState(nextState);
         }
       } else {
-        if(prev.current.query) {
+        if (prev.current.query) {
           // cleanup when it's not a text based query lang
           prev.current = {
             columns: [],
