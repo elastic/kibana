@@ -23,6 +23,7 @@
         ],
         "path": "src/plugins/unified_field_list/public/components/field_stats/index.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -36,7 +37,8 @@
               "P & { children?: React.ReactNode; }"
             ],
             "path": "node_modules/@types/react/index.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "unifiedFieldList",
@@ -49,9 +51,43 @@
               "any"
             ],
             "path": "node_modules/@types/react/index.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "unifiedFieldList",
+        "id": "def-public.loadFieldExisting",
+        "type": "Function",
+        "tags": [],
+        "label": "loadFieldExisting",
+        "description": [],
+        "signature": [
+          "({\n  data,\n  dslQuery,\n  fromDate,\n  toDate,\n  timeFieldName,\n  dataViewsService,\n  uiSettingsClient,\n  dataView,\n}: FetchFieldExistenceParams) => Promise<{ indexPatternTitle: string; existingFieldNames: string[]; }>"
+        ],
+        "path": "src/plugins/unified_field_list/public/services/field_existing/load_field_existing.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "unifiedFieldList",
+            "id": "def-public.loadFieldExisting.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  data,\n  dslQuery,\n  fromDate,\n  toDate,\n  timeFieldName,\n  dataViewsService,\n  uiSettingsClient,\n  dataView,\n}",
+            "description": [],
+            "signature": [
+              "FetchFieldExistenceParams"
+            ],
+            "path": "src/plugins/unified_field_list/public/services/field_existing/load_field_existing.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
         "initialIsOpen": false
       },
       {
@@ -68,6 +104,7 @@
         ],
         "path": "src/plugins/unified_field_list/public/services/field_stats/index.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "unifiedFieldList",
@@ -81,6 +118,7 @@
             ],
             "path": "src/plugins/unified_field_list/public/services/field_stats/index.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -102,6 +140,7 @@
         ],
         "path": "src/plugins/unified_field_list/common/types/stats.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "unifiedFieldList",
@@ -114,7 +153,8 @@
               "{ key: KeyType; count: number; }[]"
             ],
             "path": "src/plugins/unified_field_list/common/types/stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -128,6 +168,7 @@
         "description": [],
         "path": "src/plugins/unified_field_list/public/components/field_stats/field_stats.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "unifiedFieldList",
@@ -146,7 +187,8 @@
               }
             ],
             "path": "src/plugins/unified_field_list/public/components/field_stats/field_stats.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "unifiedFieldList",
@@ -161,7 +203,8 @@
               "AggregateQuery"
             ],
             "path": "src/plugins/unified_field_list/public/components/field_stats/field_stats.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "unifiedFieldList",
@@ -175,7 +218,8 @@
               "[]"
             ],
             "path": "src/plugins/unified_field_list/public/components/field_stats/field_stats.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "unifiedFieldList",
@@ -185,7 +229,8 @@
             "label": "fromDate",
             "description": [],
             "path": "src/plugins/unified_field_list/public/components/field_stats/field_stats.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "unifiedFieldList",
@@ -195,7 +240,8 @@
             "label": "toDate",
             "description": [],
             "path": "src/plugins/unified_field_list/public/components/field_stats/field_stats.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "unifiedFieldList",
@@ -215,7 +261,8 @@
               }
             ],
             "path": "src/plugins/unified_field_list/public/components/field_stats/field_stats.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "unifiedFieldList",
@@ -234,7 +281,8 @@
               }
             ],
             "path": "src/plugins/unified_field_list/public/components/field_stats/field_stats.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "unifiedFieldList",
@@ -247,7 +295,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/unified_field_list/public/components/field_stats/field_stats.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "unifiedFieldList",
@@ -261,6 +310,7 @@
             ],
             "path": "src/plugins/unified_field_list/public/components/field_stats/field_stats.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "unifiedFieldList",
@@ -271,6 +321,7 @@
                 "description": [],
                 "path": "src/plugins/unified_field_list/public/components/field_stats/field_stats.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "unifiedFieldList",
@@ -283,7 +334,8 @@
                       "boolean | undefined"
                     ],
                     "path": "src/plugins/unified_field_list/public/components/field_stats/field_stats.tsx",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   }
                 ]
               }
@@ -302,6 +354,7 @@
             ],
             "path": "src/plugins/unified_field_list/public/components/field_stats/field_stats.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "unifiedFieldList",
@@ -312,6 +365,7 @@
                 "description": [],
                 "path": "src/plugins/unified_field_list/public/components/field_stats/field_stats.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "unifiedFieldList",
@@ -324,7 +378,8 @@
                       "JSX.Element"
                     ],
                     "path": "src/plugins/unified_field_list/public/components/field_stats/field_stats.tsx",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   },
                   {
                     "parentPluginId": "unifiedFieldList",
@@ -337,7 +392,8 @@
                       "number | undefined"
                     ],
                     "path": "src/plugins/unified_field_list/public/components/field_stats/field_stats.tsx",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   },
                   {
                     "parentPluginId": "unifiedFieldList",
@@ -350,7 +406,8 @@
                       "number | undefined"
                     ],
                     "path": "src/plugins/unified_field_list/public/components/field_stats/field_stats.tsx",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   }
                 ]
               }
@@ -373,6 +430,7 @@
         ],
         "path": "src/plugins/unified_field_list/common/types/stats.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "unifiedFieldList",
@@ -385,7 +443,8 @@
               "number | undefined"
             ],
             "path": "src/plugins/unified_field_list/common/types/stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "unifiedFieldList",
@@ -398,7 +457,8 @@
               "number | undefined"
             ],
             "path": "src/plugins/unified_field_list/common/types/stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "unifiedFieldList",
@@ -411,7 +471,8 @@
               "number | undefined"
             ],
             "path": "src/plugins/unified_field_list/common/types/stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "unifiedFieldList",
@@ -425,7 +486,8 @@
               "<KeyType> | undefined"
             ],
             "path": "src/plugins/unified_field_list/common/types/stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "unifiedFieldList",
@@ -439,7 +501,8 @@
               "<KeyType> | undefined"
             ],
             "path": "src/plugins/unified_field_list/common/types/stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -453,6 +516,7 @@
         "description": [],
         "path": "src/plugins/unified_field_list/public/components/field_stats/field_stats.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "unifiedFieldList",
@@ -465,7 +529,8 @@
               "IUiSettingsClient"
             ],
             "path": "src/plugins/unified_field_list/public/components/field_stats/field_stats.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "unifiedFieldList",
@@ -484,7 +549,8 @@
               }
             ],
             "path": "src/plugins/unified_field_list/public/components/field_stats/field_stats.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "unifiedFieldList",
@@ -503,7 +569,8 @@
               }
             ],
             "path": "src/plugins/unified_field_list/public/components/field_stats/field_stats.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "unifiedFieldList",
@@ -532,7 +599,8 @@
               "; }"
             ],
             "path": "src/plugins/unified_field_list/public/components/field_stats/field_stats.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "unifiedFieldList",
@@ -551,7 +619,8 @@
               }
             ],
             "path": "src/plugins/unified_field_list/public/components/field_stats/field_stats.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -565,6 +634,7 @@
         "description": [],
         "path": "src/plugins/unified_field_list/common/types/stats.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "unifiedFieldList",
@@ -574,7 +644,8 @@
             "label": "count",
             "description": [],
             "path": "src/plugins/unified_field_list/common/types/stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "unifiedFieldList",
@@ -588,7 +659,8 @@
               "<number>"
             ],
             "path": "src/plugins/unified_field_list/common/types/stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "unifiedFieldList",
@@ -602,7 +674,8 @@
               "<number>"
             ],
             "path": "src/plugins/unified_field_list/common/types/stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -616,6 +689,7 @@
         "description": [],
         "path": "src/plugins/unified_field_list/common/types/stats.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "unifiedFieldList",
@@ -625,7 +699,8 @@
             "label": "count",
             "description": [],
             "path": "src/plugins/unified_field_list/common/types/stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "unifiedFieldList",
@@ -639,7 +714,8 @@
               "<string>"
             ],
             "path": "src/plugins/unified_field_list/common/types/stats.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -657,6 +733,7 @@
       "description": [],
       "path": "src/plugins/unified_field_list/public/types.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [],
       "lifecycle": "setup",
       "initialIsOpen": true
@@ -670,6 +747,7 @@
       "description": [],
       "path": "src/plugins/unified_field_list/public/types.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [],
       "lifecycle": "start",
       "initialIsOpen": true
@@ -688,6 +766,7 @@
         "description": [],
         "path": "src/plugins/unified_field_list/server/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [],
         "initialIsOpen": false
       },
@@ -700,6 +779,7 @@
         "description": [],
         "path": "src/plugins/unified_field_list/server/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "unifiedFieldList",
@@ -718,7 +798,8 @@
               }
             ],
             "path": "src/plugins/unified_field_list/server/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -736,6 +817,7 @@
       "description": [],
       "path": "src/plugins/unified_field_list/server/types.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [],
       "lifecycle": "setup",
       "initialIsOpen": true
@@ -749,6 +831,7 @@
       "description": [],
       "path": "src/plugins/unified_field_list/server/types.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [],
       "lifecycle": "start",
       "initialIsOpen": true
@@ -762,6 +845,21 @@
     "misc": [
       {
         "parentPluginId": "unifiedFieldList",
+        "id": "def-common.FIELD_EXISTENCE_SETTING",
+        "type": "string",
+        "tags": [],
+        "label": "FIELD_EXISTENCE_SETTING",
+        "description": [],
+        "signature": [
+          "\"lens:useFieldExistenceSampling\""
+        ],
+        "path": "src/plugins/unified_field_list/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "unifiedFieldList",
         "id": "def-common.PLUGIN_ID",
         "type": "string",
         "tags": [],
@@ -772,6 +870,7 @@
         ],
         "path": "src/plugins/unified_field_list/common/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
