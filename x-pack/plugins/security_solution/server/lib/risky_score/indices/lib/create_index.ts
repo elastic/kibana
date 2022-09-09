@@ -9,8 +9,8 @@ import { schema } from '@kbn/config-schema';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 
 export const createEsIndexBodySchema = schema.object({
-  index: schema.string(),
-  mappings: schema.maybe(schema.recordOf(schema.string(), schema.any())),
+  index: schema.string({ minLength: 1 }),
+  mappings: schema.maybe(schema.recordOf(schema.string({ minLength: 1 }), schema.any())),
 });
 
 type CreateEsIndexBodySchema = TypeOf<typeof createEsIndexBodySchema>;
