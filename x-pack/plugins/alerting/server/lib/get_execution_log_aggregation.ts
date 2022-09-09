@@ -338,7 +338,6 @@ function formatExecutionLogAggBucket(bucket: IExecutionUuidAggBucket): IExecutio
   const version = outcomeAndMessage ? outcomeAndMessage?.kibana?.version ?? '' : '';
 
   const ruleId = outcomeAndMessage ? outcomeAndMessage?.rule?.id ?? '' : '';
-  // console.log(JSON.stringify(bucket));
   const ruleName = outcomeAndMessage ? outcomeAndMessage?.rule?.name ?? '' : '';
   return {
     id: bucket?.key ?? '',
