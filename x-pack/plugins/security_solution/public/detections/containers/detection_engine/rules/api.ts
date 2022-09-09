@@ -17,6 +17,7 @@ import {
   DETECTION_ENGINE_RULES_PREVIEW,
   DETECTION_ENGINE_INSTALLED_INTEGRATIONS_URL,
   DETECTION_ENGINE_RULES_URL_FIND,
+  DETECTION_ENGINE_RULES_EXCEPTIONS_REFERENCE_URL,
 } from '../../../../../common/constants';
 import type { BulkAction } from '../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema';
 import type {
@@ -26,6 +27,7 @@ import type {
 import type {
   RulesSchema,
   GetInstalledIntegrationsResponse,
+  RulesReferencedByExceptionListsSchema,
 } from '../../../../../common/detection_engine/schemas/response';
 
 import type {
@@ -43,6 +45,7 @@ import type {
   BulkActionProps,
   BulkActionResponseMap,
   PreviewRulesProps,
+  FindRulesReferencedByExceptionsProps,
 } from './types';
 import { KibanaServices } from '../../../../common/lib/kibana';
 import * as i18n from '../../../pages/detection_engine/rules/translations';
@@ -365,6 +368,31 @@ export const fetchInstalledIntegrations = async ({
       method: 'GET',
       query: {
         packages: packages?.sort()?.join(','),
+      },
+      signal,
+    }
+  );
+
+/**
+ * Fetch info on what exceptions lists are referenced by what rules
+ *
+ * @param lists exception list information needed for making request
+ * @param signal to cancel request
+ *
+ * @throws An error if response is not OK
+ */
+export const findRuleExceptionReferences = async ({
+  lists,
+  signal,
+}: FindRulesReferencedByExceptionsProps): Promise<RulesReferencedByExceptionListsSchema> =>
+  KibanaServices.get().http.fetch<RulesReferencedByExceptionListsSchema>(
+    DETECTION_ENGINE_RULES_EXCEPTIONS_REFERENCE_URL,
+    {
+      method: 'GET',
+      query: {
+        ids: lists.map(({ id }) => id).join(','),
+        list_ids: lists.map(({ listId }) => listId).join(','),
+        namespace_types: lists.map(({ namespaceType }) => namespaceType).join(','),
       },
       signal,
     }
