@@ -74,7 +74,7 @@ export const UploadFileUI = React.forwardRef<EuiFilePicker, Props>((props, ref) 
           {!immediate && !showRetryButton && (
             <EuiButton
               color={done ? 'success' : 'primary'}
-              disabled={done || uploading || !ready}
+              disabled={done || uploading || !ready || isInvalid}
               onClick={onUpload}
               size="s"
             >

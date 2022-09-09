@@ -24,7 +24,10 @@ describe('UploadState', () => {
 
   beforeEach(() => {
     filesClient = createMockFilesClient();
-    uploadState = new UploadState({ id: 'test' } as FileKind, filesClient);
+    uploadState = new UploadState(
+      { id: 'test', http: {}, maxSizeBytes: 1000 } as FileKind,
+      filesClient
+    );
     testScheduler = getTestScheduler();
   });
 
@@ -33,8 +36,8 @@ describe('UploadState', () => {
       filesClient.create.mockReturnValue(of({ file: { id: 'test' } as FileJSON }) as any);
       filesClient.upload.mockReturnValue(of(undefined) as any);
 
-      const file1 = { name: 'test' } as File;
-      const file2 = { name: 'test 2' } as File;
+      const file1 = { name: 'test', size: 1 } as File;
+      const file2 = { name: 'test 2', size: 1 } as File;
 
       uploadState.setFiles([file1, file2]);
 
@@ -107,8 +110,8 @@ describe('UploadState', () => {
           { file: file2, status: 'uploading' },
         ],
         c: [
-          { file: file1, status: 'idle', error: new Error('Abort!') },
-          { file: file2, status: 'idle', error: new Error('Abort!') },
+          { file: file1, status: 'idle', error: undefined },
+          { file: file2, status: 'idle', error: undefined },
         ],
       });
 
@@ -117,6 +120,19 @@ describe('UploadState', () => {
       expect(filesClient.create).toHaveBeenCalledTimes(2);
       expect(filesClient.upload).toHaveBeenCalledTimes(2);
       expect(filesClient.delete).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  it('throws for files that are too large', () => {
+    testScheduler.run(({ expectObservable }) => {
+      const file = {
+        name: 'test',
+        size: 1001,
+      } as File;
+      uploadState.setFiles([file]);
+      expectObservable(uploadState.files$).toBe('a', {
+        a: [{ file, status: 'idle', error: new Error('File too large') }],
+      });
     });
   });
 });

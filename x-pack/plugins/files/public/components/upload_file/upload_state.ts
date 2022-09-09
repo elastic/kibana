@@ -8,6 +8,7 @@
 import {
   of,
   map,
+  tap,
   zip,
   from,
   race,
@@ -52,11 +53,32 @@ export class UploadState {
     return this.uploading$.getValue();
   }
 
+  private validateFiles(files: File[]): undefined | string {
+    if (
+      this.fileKind.maxSizeBytes != null &&
+      files.some((file) => file.size > this.fileKind.maxSizeBytes!)
+    ) {
+      return 'File too large';
+    }
+    return;
+  }
+
   public setFiles = (files: File[]): void => {
     if (this.isUploading()) {
       throw new Error('Cannot update files while uploading');
     }
-    this.files$$.next(files.map((file) => createStateSubject<FileState>({ file, status: 'idle' })));
+
+    const validationError = this.validateFiles(files);
+
+    this.files$$.next(
+      files.map((file) =>
+        createStateSubject<FileState>({
+          file,
+          status: 'idle',
+          error: validationError ? new Error(validationError) : undefined,
+        })
+      )
+    );
   };
 
   public abort = (): void => {
@@ -109,12 +131,12 @@ export class UploadState {
           })
         );
       }),
-      map(() => {
+      tap(() => {
         file$.setState({ status: 'uploaded', id: uploadTarget?.id });
       }),
       catchError((e) => {
         erroredOrAborted = true;
-        file$.setState({ status: 'idle', error: e });
+        file$.setState({ status: 'idle', error: e.message === 'Abort!' ? undefined : e });
         return of(e);
       }),
       finalize(() => {
@@ -138,9 +160,9 @@ export class UploadState {
         return forkJoin(files$.map((file$) => this.uploadFile(file$, abort$)));
       }),
       map((results) => {
-        const errors = results.filter(Boolean);
+        const errors = results.filter(Boolean) as Error[];
         if (errors.length) {
-          throw errors[0];
+          throw errors[0]; // Throw just the first error for now
         }
       }),
       finalize(() => {

@@ -62,3 +62,14 @@ UXError.args = {
     delete: async () => {},
   } as unknown as FilesClient,
 };
+
+export const UXAbort = Template.bind({});
+UXAbort.args = {
+  client: {
+    create: async () => ({ file: { id: 'test' } }),
+    upload: async () => {
+      await sleep(60000);
+    },
+    delete: async () => {},
+  } as unknown as FilesClient,
+};
