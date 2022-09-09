@@ -361,7 +361,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       },
       packageActionTroubleshooting: {
         // TODO: Pending to be updated when docs are ready
-        es_connection: `${SECURITY_SOLUTION_DOCS}`,
+        es_connection: '',
       },
       responseActions: `${SECURITY_SOLUTION_DOCS}response-actions.html`,
     },
