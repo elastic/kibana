@@ -7,6 +7,8 @@
 
 import * as t from 'io-ts';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import Boom from '@hapi/boom';
+import { i18n } from '@kbn/i18n';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { getSearchAggregatedTransactions } from '../../lib/helpers/transactions';
 import { setupRequest } from '../../lib/helpers/setup_request';
@@ -22,6 +24,11 @@ import { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
 import { getStorageDetailsPerProcessorEvent } from './get_storage_details_per_processor_event';
 import { getRandomSampler } from '../../lib/helpers/get_random_sampler';
 import { getSizeTimeseries } from './get_size_timeseries';
+import { hasStorageExplorerPrivileges } from './has_storage_explorer_privileges';
+import {
+  getMainSummaryStats,
+  getTracesPerMinute,
+} from './get_summary_statistics';
 
 const storageExplorerRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/storage_explorer',
@@ -226,8 +233,117 @@ const storageChartRoute = createApmServerRoute({
   },
 });
 
+const storageExplorerPrivilegesRoute = createApmServerRoute({
+  endpoint: 'GET /internal/apm/storage_explorer/privileges',
+  options: { tags: ['access:apm'] },
+
+  handler: async (resources): Promise<{ hasPrivileges: boolean }> => {
+    const {
+      plugins: { security },
+      context,
+    } = resources;
+
+    if (!security) {
+      throw Boom.internal(SECURITY_REQUIRED_MESSAGE);
+    }
+
+    const setup = await setupRequest(resources);
+    const hasPrivileges = await hasStorageExplorerPrivileges({
+      context,
+      setup,
+    });
+
+    return { hasPrivileges };
+  },
+});
+
+const storageExplorerSummaryStatsRoute = createApmServerRoute({
+  endpoint: 'GET /internal/apm/storage_explorer_summary_stats',
+  options: { tags: ['access:apm'] },
+  params: t.type({
+    query: t.intersection([
+      indexLifecyclePhaseRt,
+      probabilityRt,
+      environmentRt,
+      kueryRt,
+      rangeRt,
+    ]),
+  }),
+  handler: async (
+    resources
+  ): Promise<{
+    tracesPerMinute: number;
+    numberOfServices: number;
+    estimatedSize: number;
+    dailyDataGeneration: number;
+  }> => {
+    const {
+      params,
+      context,
+      request,
+      plugins: { security },
+    } = resources;
+
+    const {
+      query: {
+        indexLifecyclePhase,
+        probability,
+        environment,
+        kuery,
+        start,
+        end,
+      },
+    } = params;
+
+    const [setup, randomSampler] = await Promise.all([
+      setupRequest(resources),
+      getRandomSampler({ security, request, probability }),
+    ]);
+
+    const searchAggregatedTransactions = await getSearchAggregatedTransactions({
+      apmEventClient: setup.apmEventClient,
+      config: setup.config,
+      kuery,
+    });
+
+    const [mainSummaryStats, tracesPerMinute] = await Promise.all([
+      getMainSummaryStats({
+        setup,
+        context,
+        indexLifecyclePhase,
+        randomSampler,
+        start,
+        end,
+        environment,
+        kuery,
+      }),
+      getTracesPerMinute({
+        setup,
+        indexLifecyclePhase,
+        start,
+        end,
+        environment,
+        kuery,
+        searchAggregatedTransactions,
+      }),
+    ]);
+
+    return {
+      ...mainSummaryStats,
+      tracesPerMinute,
+    };
+  },
+});
+
 export const storageExplorerRouteRepository = {
   ...storageExplorerRoute,
   ...storageExplorerServiceDetailsRoute,
   ...storageChartRoute,
+  ...storageExplorerPrivilegesRoute,
+  ...storageExplorerSummaryStatsRoute,
 };
+
+const SECURITY_REQUIRED_MESSAGE = i18n.translate(
+  'xpack.apm.api.storageExplorer.securityRequired',
+  { defaultMessage: 'Security plugin is required' }
+);

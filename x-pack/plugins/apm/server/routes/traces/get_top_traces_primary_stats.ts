@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { sortBy } from 'lodash';
 import {
   kqlQuery,
@@ -23,14 +22,13 @@ import {
   getDurationFieldForTransactions,
   getDocumentTypeFilterForTransactions,
   getProcessorEventForTransactions,
+  isRootTransaction,
 } from '../../lib/helpers/transactions';
 import {
   AGENT_NAME,
-  PARENT_ID,
   SERVICE_NAME,
   TRANSACTION_TYPE,
   TRANSACTION_NAME,
-  TRANSACTION_ROOT,
 } from '../../../common/elasticsearch_fieldnames';
 import { RandomSampler } from '../../lib/helpers/get_random_sampler';
 
@@ -80,26 +78,7 @@ export async function getTopTracesPrimaryStats({
                 ...rangeQuery(start, end),
                 ...environmentQuery(environment),
                 ...kqlQuery(kuery),
-                ...(searchAggregatedTransactions
-                  ? [
-                      {
-                        term: {
-                          [TRANSACTION_ROOT]: true,
-                        },
-                      },
-                    ]
-                  : []),
-              ] as estypes.QueryDslQueryContainer[],
-              must_not: [
-                ...(!searchAggregatedTransactions
-                  ? [
-                      {
-                        exists: {
-                          field: PARENT_ID,
-                        },
-                      },
-                    ]
-                  : []),
+                isRootTransaction(searchAggregatedTransactions),
               ],
             },
           },

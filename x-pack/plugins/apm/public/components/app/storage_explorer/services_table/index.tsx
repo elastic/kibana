@@ -106,7 +106,7 @@ export function ServicesTable() {
       {
         field: 'serviceName',
         name: i18n.translate(
-          'xpack.apm.settings.storageExplorer.table.serviceColumnName',
+          'xpack.apm.storageExplorer.table.serviceColumnName',
           {
             defaultMessage: 'Service',
           }
@@ -140,7 +140,7 @@ export function ServicesTable() {
       {
         field: 'environment',
         name: i18n.translate(
-          'xpack.apm.settings.storageExplorer.table.environmentColumnName',
+          'xpack.apm.storageExplorer.table.environmentColumnName',
           {
             defaultMessage: 'Environment',
           }
@@ -156,7 +156,7 @@ export function ServicesTable() {
         name: (
           <EuiToolTip
             content={i18n.translate(
-              'xpack.apm.settings.storageExplorer.table.samplingColumnDescription',
+              'xpack.apm.storageExplorer.table.samplingColumnDescription',
               {
                 defaultMessage: `The number of sampled transactions divided by total throughput. This value may differ from the configured transaction sample rate because it might be affected by the initial service's decision when using head-based sampling or by a set of policies when using tail-based sampling.`,
               }
@@ -164,7 +164,7 @@ export function ServicesTable() {
           >
             <>
               {i18n.translate(
-                'xpack.apm.settings.storageExplorer.table.samplingColumnName',
+                'xpack.apm.storageExplorer.table.samplingColumnName',
                 {
                   defaultMessage: 'Sample rate',
                 }
@@ -194,12 +194,9 @@ export function ServicesTable() {
         name: (
           <EuiScreenReaderOnly>
             <span>
-              {i18n.translate(
-                'xpack.apm.settings.storageExplorer.table.expandRow',
-                {
-                  defaultMessage: 'Expand row',
-                }
-              )}
+              {i18n.translate('xpack.apm.storageExplorer.table.expandRow', {
+                defaultMessage: 'Expand row',
+              })}
             </span>
           </EuiScreenReaderOnly>
         ),
@@ -210,18 +207,12 @@ export function ServicesTable() {
               onClick={() => toggleRowDetails(serviceName)}
               aria-label={
                 itemIdToExpandedRowMap[serviceName]
-                  ? i18n.translate(
-                      'xpack.apm.settings.storageExplorer.table.collapse',
-                      {
-                        defaultMessage: 'Collapse',
-                      }
-                    )
-                  : i18n.translate(
-                      'xpack.apm.settings.storageExplorer.table.expand',
-                      {
-                        defaultMessage: 'Expand',
-                      }
-                    )
+                  ? i18n.translate('xpack.apm.storageExplorer.table.collapse', {
+                      defaultMessage: 'Collapse',
+                    })
+                  : i18n.translate('xpack.apm.storageExplorer.table.expand', {
+                      defaultMessage: 'Expand',
+                    })
               }
               iconType={
                 itemIdToExpandedRowMap[serviceName] ? 'arrowUp' : 'arrowDown'
@@ -234,12 +225,9 @@ export function ServicesTable() {
 
   return (
     <EuiInMemoryTable
-      tableCaption={i18n.translate(
-        'xpack.apm.settings.storageExplorer.table.caption',
-        {
-          defaultMessage: 'Storage explorer',
-        }
-      )}
+      tableCaption={i18n.translate('xpack.apm.storageExplorer.table.caption', {
+        defaultMessage: 'Storage explorer',
+      })}
       items={data?.serviceStatistics ?? []}
       columns={columns}
       pagination={true}
@@ -250,25 +238,19 @@ export function ServicesTable() {
       data-test-subj="storageExplorerServicesTable"
       error={
         status === FETCH_STATUS.FAILURE
-          ? i18n.translate(
-              'xpack.apm.settings.storageExplorer.table.errorMessage',
-              {
-                defaultMessage: 'Failed to fetch',
-              }
-            )
+          ? i18n.translate('xpack.apm.storageExplorer.table.errorMessage', {
+              defaultMessage: 'Failed to fetch',
+            })
           : ''
       }
       message={
         loading
-          ? i18n.translate('xpack.apm.settings.storageExplorer.table.loading', {
+          ? i18n.translate('xpack.apm.storageExplorer.table.loading', {
               defaultMessage: 'Loading...',
             })
-          : i18n.translate(
-              'xpack.apm.settings.storageExplorer.table.noResults',
-              {
-                defaultMessage: 'No data found',
-              }
-            )
+          : i18n.translate('xpack.apm.storageExplorer.table.noResults', {
+              defaultMessage: 'No data found',
+            })
       }
     />
   );
