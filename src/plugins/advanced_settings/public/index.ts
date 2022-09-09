@@ -26,4 +26,4 @@ export function plugin(initializerContext: PluginInitializerContext) {
   return new AdvancedSettingsPlugin();
 }
 
-export { FieldState } from './management_app/types';
+export type { FieldState } from './management_app/types';
