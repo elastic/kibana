@@ -44,8 +44,18 @@ const emptyValue = getEmptyValue();
 
 const getCommand = (
   command: ActionDetails['command']
-): Exclude<ActionDetails['command'], 'unisolate' | 'running-processes'> | 'release' | 'processes' =>
-  command === 'unisolate' ? 'release' : command === 'running-processes' ? 'processes' : command;
+):
+  | Exclude<ActionDetails['command'], 'unisolate' | 'running-processes'>
+  | 'release'
+  | 'processes' => {
+  if (command === 'unisolate') {
+    return 'release';
+  } else if (command === 'running-processes') {
+    return 'processes';
+  } else {
+    return command;
+  }
+};
 
 // Truncated usernames
 const StyledFacetButton = euiStyled(EuiFacetButton)`
