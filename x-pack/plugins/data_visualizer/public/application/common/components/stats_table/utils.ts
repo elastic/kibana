@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { getBreakpoint } from '@elastic/eui';
 import { FileBasedFieldVisConfig } from './types';
 
 export const getTFPercentage = (config: FileBasedFieldVisConfig) => {
@@ -38,7 +37,7 @@ export const getTFPercentage = (config: FileBasedFieldVisConfig) => {
   };
 };
 
-export const calculateTableColumnsDimensions = (width?: number) => {
+export const calculateTableColumnsDimensions = (breakPoint?: string) => {
   const defaultSettings = {
     expander: '40px',
     type: '75px',
@@ -48,8 +47,7 @@ export const calculateTableColumnsDimensions = (width?: number) => {
     showIcon: true,
     breakPoint: 'xl',
   };
-  if (width === undefined) return defaultSettings;
-  const breakPoint = getBreakpoint(width);
+  if (breakPoint === undefined) return defaultSettings;
   switch (breakPoint) {
     case 'xs':
     case 's':

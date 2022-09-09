@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState, useEffect } from 'react';
 
 import {
   CENTER_ALIGNMENT,
@@ -18,9 +18,9 @@ import {
   HorizontalAlignment,
   LEFT_ALIGNMENT,
   RIGHT_ALIGNMENT,
-  EuiResizeObserver,
   EuiLoadingSpinner,
   useEuiTheme,
+  useCurrentEuiBreakpoint,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { EuiTableComputedColumnType } from '@elastic/eui/src/components/basic_table/table_types';
@@ -73,6 +73,7 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
   loading,
 }: DataVisualizerTableProps<T>) => {
   const { euiTheme } = useEuiTheme();
+  const currentBreakpoint = useCurrentEuiBreakpoint();
 
   const [expandedRowItemIds, setExpandedRowItemIds] = useState<string[]>([]);
   const [expandAll, setExpandAll] = useState<boolean>(false);
@@ -84,7 +85,6 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
   );
   const [showDistributions, setShowDistributions] = useState<boolean>(showPreviewByDefault ?? true);
   const [dimensions, setDimensions] = useState(calculateTableColumnsDimensions());
-  const [tableWidth, setTableWidth] = useState<number>(1400);
 
   const toggleExpandAll = useCallback(
     (shouldExpandAll: boolean) => {
@@ -100,16 +100,12 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
     [items]
   );
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const resizeHandler = useCallback(
-    throttle((e: { width: number; height: number }) => {
-      // When window or table is resized,
-      // update the column widths and other settings accordingly
-      setTableWidth(e.width);
-      setDimensions(calculateTableColumnsDimensions(e.width));
-    }, 500),
-    [tableWidth]
-  );
+  useEffect(() => {
+    throttle(() => {
+      // When the window is resized, update the column widths and other settings accordingly
+      setDimensions(calculateTableColumnsDimensions(currentBreakpoint));
+    }, 500);
+  }, [currentBreakpoint]);
 
   const toggleShowDistribution = useCallback(() => {
     setShowDistributions(!showDistributions);
@@ -341,46 +337,40 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
   }, [items, expandedRowItemIds, getItemIdToExpandedRowMap]);
 
   return (
-    <EuiResizeObserver onResize={resizeHandler}>
-      {(resizeRef) => (
-        <div data-test-subj="dataVisualizerTableContainer" ref={resizeRef}>
-          <EuiInMemoryTable<T>
-            message={
-              loading
-                ? i18n.translate('xpack.dataVisualizer.dataGrid.searchingMessage', {
-                    defaultMessage: 'Searching',
-                  })
-                : undefined
-            }
-            className={'dvTable'}
-            items={items}
-            itemId={FIELD_NAME}
-            columns={columns}
-            pagination={pagination}
-            sorting={sorting}
-            isExpandable={true}
-            itemIdToExpandedRowMap={itemIdToExpandedRowMap}
-            isSelectable={false}
-            onTableChange={onTableChange}
-            data-test-subj={'dataVisualizerTable'}
-            rowProps={(item) => ({
-              'data-test-subj': `dataVisualizerRow row-${item.fieldName}`,
-            })}
-            css={css`
-              thead {
-                position: sticky;
-                inset-block-start: 0;
-                z-index: 1;
-                background-color: ${euiTheme.colors.emptyShade};
-                box-shadow: inset 0 0px 0, inset 0 -1px 0 ${euiTheme.border.color};
-              }
-              .euiTableRow > .euiTableRowCel {
-                border-top: 0px;
-              }
-            `}
-          />
-        </div>
-      )}
-    </EuiResizeObserver>
+    <EuiInMemoryTable<T>
+      message={
+        loading
+          ? i18n.translate('xpack.dataVisualizer.dataGrid.searchingMessage', {
+              defaultMessage: 'Searching',
+            })
+          : undefined
+      }
+      className={'dvTable'}
+      items={items}
+      itemId={FIELD_NAME}
+      columns={columns}
+      pagination={pagination}
+      sorting={sorting}
+      isExpandable={true}
+      itemIdToExpandedRowMap={itemIdToExpandedRowMap}
+      isSelectable={false}
+      onTableChange={onTableChange}
+      data-test-subj={'dataVisualizerTable'}
+      rowProps={(item) => ({
+        'data-test-subj': `dataVisualizerRow row-${item.fieldName}`,
+      })}
+      css={css`
+        thead {
+          position: sticky;
+          inset-block-start: 0;
+          z-index: 1;
+          background-color: ${euiTheme.colors.emptyShade};
+          box-shadow: inset 0 0px 0, inset 0 -1px 0 ${euiTheme.border.color};
+        }
+        .euiTableRow > .euiTableRowCel {
+          border-top: 0px;
+        }
+      `}
+    />
   );
 };
