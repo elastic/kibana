@@ -37,7 +37,7 @@ export function opbeans({ from, to }: { from: number; to: number }) {
     .rate(1)
     .generator((timestamp) => [
       opbeansJava
-        .transaction('GET /api/product')
+        .transaction({ transactionName: 'GET /api/product' })
         .timestamp(timestamp)
         .duration(1000)
         .success()
@@ -53,15 +53,21 @@ export function opbeans({ from, to }: { from: number; to: number }) {
             .destination('postgresql')
         ),
       opbeansNode
-        .transaction('GET /api/product/:id')
+        .transaction({ transactionName: 'GET /api/product/:id' })
         .timestamp(timestamp)
         .duration(500)
         .success(),
       opbeansNode
-        .transaction('Worker job', 'Worker')
+        .transaction({
+          transactionName: 'Worker job',
+          transactionType: 'Worker',
+        })
         .timestamp(timestamp)
         .duration(1000)
         .success(),
-      opbeansRum.transaction('/').timestamp(timestamp).duration(1000),
+      opbeansRum
+        .transaction({ transactionName: '/' })
+        .timestamp(timestamp)
+        .duration(1000),
     ]);
 }

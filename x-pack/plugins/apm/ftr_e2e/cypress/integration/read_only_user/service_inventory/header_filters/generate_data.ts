@@ -39,12 +39,12 @@ export function generateData({
     .rate(1)
     .generator((timestamp) => [
       service1
-        .transaction('GET /apple 🍎 ')
+        .transaction({ transactionName: 'GET /apple 🍎 ' })
         .timestamp(timestamp)
         .duration(1000)
         .success(),
       opbeansNode
-        .transaction('GET /banana 🍌')
+        .transaction({ transactionName: 'GET /banana 🍌' })
         .timestamp(timestamp)
         .duration(500)
         .success(),

@@ -31,7 +31,7 @@ export function generateData({ from, to }: { from: number; to: number }) {
   return range.interval('1m').generator((timestamp) => {
     return [
       serviceRunsInContainerInstance
-        .transaction('GET /apple 🍎')
+        .transaction({ transactionName: 'GET /apple 🍎' })
         .defaults({
           'container.id': 'foo',
           'host.hostname': 'bar',
@@ -41,7 +41,7 @@ export function generateData({ from, to }: { from: number; to: number }) {
         .duration(1000)
         .success(),
       serviceInstance
-        .transaction('GET /banana 🍌')
+        .transaction({ transactionName: 'GET /banana 🍌' })
         .defaults({
           'host.hostname': 'bar',
         })
@@ -49,7 +49,7 @@ export function generateData({ from, to }: { from: number; to: number }) {
         .duration(1000)
         .success(),
       serviceNoInfraDataInstance
-        .transaction('GET /banana 🍌')
+        .transaction({ transactionName: 'GET /banana 🍌' })
         .timestamp(timestamp)
         .duration(1000)
         .success(),

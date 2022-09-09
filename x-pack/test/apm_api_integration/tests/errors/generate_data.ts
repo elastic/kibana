@@ -45,7 +45,7 @@ export async function generateData({
       .rate(transaction.successRate)
       .generator((timestamp) =>
         serviceGoProdInstance
-          .transaction(transaction.name)
+          .transaction({ transactionName: transaction.name })
           .timestamp(timestamp)
           .duration(1000)
           .success()
@@ -56,7 +56,7 @@ export async function generateData({
           .rate(transaction.failureRate)
           .generator((timestamp) =>
             serviceGoProdInstance
-              .transaction(transaction.name)
+              .transaction({ transactionName: transaction.name })
               .errors(
                 serviceGoProdInstance.error(`Error ${index}`, transaction.name).timestamp(timestamp)
               )

@@ -43,7 +43,7 @@ export async function generateData({
       .rate(coldStartRate)
       .generator((timestamp) =>
         instance
-          .transaction(coldStartTransaction.name)
+          .transaction({ transactionName: coldStartTransaction.name })
           .defaults({
             'faas.coldstart': true,
           })
@@ -56,7 +56,7 @@ export async function generateData({
       .rate(warmStartRate)
       .generator((timestamp) =>
         instance
-          .transaction(warmStartTransaction.name)
+          .transaction({ transactionName: warmStartTransaction.name })
           .defaults({
             'faas.coldstart': false,
           })

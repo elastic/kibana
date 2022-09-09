@@ -36,7 +36,7 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
       const traces = successfulTimestamps.generator((timestamp) => {
         // opbeans-rum
         return opbeansRum
-          .transaction(transactionName)
+          .transaction({ transactionName })
           .duration(400)
           .timestamp(timestamp)
           .children(
@@ -54,7 +54,7 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
               .children(
                 // opbeans-node
                 opbeansNode
-                  .transaction('Initial transaction in opbeans-node')
+                  .transaction({ transactionName: 'Initial transaction in opbeans-node' })
                   .duration(300)
                   .timestamp(timestamp)
                   .children(
@@ -73,7 +73,7 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
                         // opbeans-go
                         opbeansGo
 
-                          .transaction('Initial transaction in opbeans-go')
+                          .transaction({ transactionName: 'Initial transaction in opbeans-go' })
                           .timestamp(timestamp)
                           .duration(200)
                           .children(

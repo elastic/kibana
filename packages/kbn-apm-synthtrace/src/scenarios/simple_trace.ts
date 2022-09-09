@@ -38,7 +38,7 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
       const instanceSpans = (instance: Instance) => {
         const successfulTraceEvents = successfulTimestamps.generator((timestamp) =>
           instance
-            .transaction(transactionName)
+            .transaction({ transactionName })
             .timestamp(timestamp)
             .duration(1000)
             .success()
@@ -59,7 +59,7 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
 
         const failedTraceEvents = failedTimestamps.generator((timestamp) =>
           instance
-            .transaction(transactionName)
+            .transaction({ transactionName })
             .timestamp(timestamp)
             .duration(1000)
             .failure()

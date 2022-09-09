@@ -49,7 +49,7 @@ export async function generateData({
       .rate(PROD_LIST_RATE)
       .generator((timestamp) =>
         serviceGoProdInstance
-          .transaction(transactionNameProductList)
+          .transaction({ transactionName: transactionNameProductList })
           .timestamp(timestamp)
           .duration(1000)
           .success()
@@ -59,7 +59,7 @@ export async function generateData({
       .rate(PROD_LIST_ERROR_RATE)
       .generator((timestamp) =>
         serviceGoProdInstance
-          .transaction(transactionNameProductList)
+          .transaction({ transactionName: transactionNameProductList })
           .errors(serviceGoProdInstance.error(ERROR_NAME_1, 'foo').timestamp(timestamp))
           .duration(1000)
           .timestamp(timestamp)
@@ -70,7 +70,7 @@ export async function generateData({
       .rate(PROD_ID_RATE)
       .generator((timestamp) =>
         serviceGoProdInstance
-          .transaction(transactionNameProductId)
+          .transaction({ transactionName: transactionNameProductId })
           .timestamp(timestamp)
           .duration(1000)
           .success()
@@ -80,7 +80,7 @@ export async function generateData({
       .rate(PROD_ID_ERROR_RATE)
       .generator((timestamp) =>
         serviceGoProdInstance
-          .transaction(transactionNameProductId)
+          .transaction({ transactionName: transactionNameProductId })
           .errors(serviceGoProdInstance.error(ERROR_NAME_2, 'bar').timestamp(timestamp))
           .duration(1000)
           .timestamp(timestamp)

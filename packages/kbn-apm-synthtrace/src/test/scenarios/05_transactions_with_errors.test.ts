@@ -20,7 +20,7 @@ describe('transactions with errors', () => {
   });
   it('generates error events', () => {
     const events = instance
-      .transaction('GET /api')
+      .transaction({ transactionName: 'GET /api' })
       .timestamp(timestamp)
       .errors(instance.error('test error').timestamp(timestamp))
       .serialize();
@@ -41,7 +41,7 @@ describe('transactions with errors', () => {
 
   it('sets the transaction and trace id', () => {
     const [transaction, error] = instance
-      .transaction('GET /api')
+      .transaction({ transactionName: 'GET /api' })
       .timestamp(timestamp)
       .errors(instance.error('test error').timestamp(timestamp))
       .serialize();
@@ -57,7 +57,7 @@ describe('transactions with errors', () => {
 
   it('sets the error grouping key', () => {
     const [, error] = instance
-      .transaction('GET /api')
+      .transaction({ transactionName: 'GET /api' })
       .timestamp(timestamp)
       .errors(instance.error('test error').timestamp(timestamp))
       .serialize();

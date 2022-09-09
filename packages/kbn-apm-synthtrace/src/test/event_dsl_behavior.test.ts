@@ -32,7 +32,7 @@ describe('DSL invocations', () => {
     .rate(1)
     .generator((timestamp, index) =>
       javaInstance
-        .transaction(`GET /api/product/${index}/${globalSeq++}`)
+        .transaction({ transactionName: `GET /api/product/${index}/${globalSeq++}` })
         .duration(1000)
         .success()
         .timestamp(timestamp)

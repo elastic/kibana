@@ -29,7 +29,10 @@ describe('transaction metrics', () => {
     );
 
     const span = (timestamp: number) =>
-      javaInstance.transaction('GET /api/product/list').duration(1000).timestamp(timestamp);
+      javaInstance
+        .transaction({ transactionName: 'GET /api/product/list' })
+        .duration(1000)
+        .timestamp(timestamp);
 
     const processor = new StreamProcessor<ApmFields>({
       processors: [getTransactionMetrics],

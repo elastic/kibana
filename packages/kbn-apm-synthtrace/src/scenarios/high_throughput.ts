@@ -68,7 +68,7 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
           const generateError = index % random(mod, 9) === 0;
           const generateChildError = index % random(mod, 9) === 0;
           const span = instance
-            .transaction(url)
+            .transaction({ transactionName: url })
             .timestamp(timestamp)
             .duration(duration)
             .children(

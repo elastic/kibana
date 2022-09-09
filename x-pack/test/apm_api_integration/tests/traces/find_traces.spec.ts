@@ -120,7 +120,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             const time = timestamp + invertedIndex * 10;
 
             const transaction: Transaction = instance
-              .transaction(`GET /${instance.fields['service.name']!}/api`)
+              .transaction({ transactionName: `GET /${instance.fields['service.name']!}/api` })
               .timestamp(time)
               .duration(duration);
 

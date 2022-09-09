@@ -90,7 +90,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 .duration(200)
                 .timestamp(timestamp),
               javaInstance
-                .transaction('GET /api/my-endpoint')
+                .transaction({ transactionName: 'GET /api/my-endpoint' })
                 .duration(100)
                 .timestamp(timestamp)
                 .children(
@@ -102,7 +102,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                     .timestamp(timestamp)
                 ),
               goInstance
-                .transaction('GET /api/my-other-endpoint')
+                .transaction({ transactionName: 'GET /api/my-other-endpoint' })
                 .duration(100)
                 .timestamp(timestamp)
                 .children(
@@ -113,7 +113,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                     .timestamp(timestamp)
                 ),
               goInstance
-                .transaction('GET /api/my-other-endpoint')
+                .transaction({ transactionName: 'GET /api/my-other-endpoint' })
                 .duration(100)
                 .timestamp(timestamp)
                 .children(

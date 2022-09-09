@@ -33,7 +33,7 @@ describe('simple trace', () => {
       .rate(1)
       .generator((timestamp) =>
         javaInstance
-          .transaction('GET /api/product/list')
+          .transaction({ transactionName: 'GET /api/product/list' })
           .duration(1000)
           .success()
           .timestamp(timestamp)

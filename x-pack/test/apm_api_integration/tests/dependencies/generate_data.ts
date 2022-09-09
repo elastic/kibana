@@ -41,7 +41,7 @@ export async function generateData({
       .rate(rate)
       .generator((timestamp) =>
         instance
-          .transaction(transaction.name)
+          .transaction({ transactionName: transaction.name })
           .timestamp(timestamp)
           .duration(transaction.duration)
           .success()

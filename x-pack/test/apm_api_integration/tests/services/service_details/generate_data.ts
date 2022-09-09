@@ -76,7 +76,7 @@ export async function generateData({
       .generator((timestamp) =>
         instance
           .containerId('instance-a')
-          .transaction(transaction.name)
+          .transaction({ transactionName: transaction.name })
           .timestamp(timestamp)
           .defaults({
             'cloud.provider': provider,
@@ -103,7 +103,7 @@ export async function generateData({
       .rate(rate)
       .generator((timestamp) =>
         instance
-          .transaction(transaction.name)
+          .transaction({ transactionName: transaction.name })
           .timestamp(timestamp)
           .defaults({
             'cloud.provider': provider,

@@ -45,7 +45,7 @@ const scenario: Scenario<ApmFields> = async () => {
         .rate(1)
         .generator((timestamp) => {
           return producerInternalOnlyInstance
-            .transaction('Transaction A')
+            .transaction({ transactionName: 'Transaction A' })
             .timestamp(timestamp)
             .duration(1000)
             .success()
@@ -69,7 +69,7 @@ const scenario: Scenario<ApmFields> = async () => {
         .rate(1)
         .generator((timestamp) => {
           return producerConsumerInstance
-            .transaction('Transaction B')
+            .transaction({ transactionName: 'Transaction B' })
             .timestamp(timestamp)
             .duration(1000)
             .success()
@@ -96,7 +96,7 @@ const scenario: Scenario<ApmFields> = async () => {
         .rate(1)
         .generator((timestamp) => {
           return consumerInstance
-            .transaction('Transaction C')
+            .transaction({ transactionName: 'Transaction C' })
             .timestamp(timestamp)
             .duration(1000)
             .success()

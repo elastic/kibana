@@ -35,7 +35,7 @@ describe('span destination metrics', () => {
           .rate(25)
           .generator((timestamp) =>
             javaInstance
-              .transaction('GET /api/product/list')
+              .transaction({ transactionName: 'GET /api/product/list' })
               .duration(1000)
               .success()
               .timestamp(timestamp)
@@ -53,7 +53,7 @@ describe('span destination metrics', () => {
           .rate(50)
           .generator((timestamp) =>
             javaInstance
-              .transaction('GET /api/product/list')
+              .transaction({ transactionName: 'GET /api/product/list' })
               .duration(1000)
               .failure()
               .timestamp(timestamp)

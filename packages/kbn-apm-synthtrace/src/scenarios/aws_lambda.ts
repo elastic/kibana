@@ -35,7 +35,7 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
       const traceEvents = ({ functionName, coldStart }: typeof traceEventsSetups[0]) => {
         return timestamps.generator((timestamp) =>
           instance
-            .transaction('GET /order/{id}')
+            .transaction({ transactionName: 'GET /order/{id}' })
             .defaults({
               'service.runtime.name': 'AWS_Lambda_python3.8',
               'cloud.provider': 'aws',

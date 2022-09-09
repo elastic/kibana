@@ -14,7 +14,13 @@ import { Transaction } from './transaction';
 import { ApmApplicationMetricFields, ApmFields } from './apm_fields';
 
 export class Instance extends Entity<ApmFields> {
-  transaction(transactionName: string, transactionType = 'request') {
+  transaction({
+    transactionName,
+    transactionType = 'request',
+  }: {
+    transactionName: string;
+    transactionType?: string;
+  }) {
     return new Transaction({
       ...this.fields,
       'transaction.name': transactionName,

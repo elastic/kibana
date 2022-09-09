@@ -12,7 +12,13 @@ import { RumSpan } from './rum_span';
 import { RumTransaction } from './rum_transaction';
 
 export class Browser extends Entity<ApmFields> {
-  transaction(transactionName: string, transactionType: string = 'page-load') {
+  transaction({
+    transactionName,
+    transactionType = 'page-load',
+  }: {
+    transactionName: string;
+    transactionType: string;
+  }) {
     return new RumTransaction({
       ...this.fields,
       'transaction.name': transactionName,

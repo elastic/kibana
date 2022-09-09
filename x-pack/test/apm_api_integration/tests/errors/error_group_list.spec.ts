@@ -78,7 +78,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             .rate(appleTransaction.successRate)
             .generator((timestamp) =>
               serviceInstance
-                .transaction(appleTransaction.name)
+                .transaction({ transactionName: appleTransaction.name })
                 .timestamp(timestamp)
                 .duration(1000)
                 .success()
@@ -88,7 +88,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             .rate(appleTransaction.failureRate)
             .generator((timestamp) =>
               serviceInstance
-                .transaction(appleTransaction.name)
+                .transaction({ transactionName: appleTransaction.name })
                 .errors(serviceInstance.error('error 1', 'foo').timestamp(timestamp))
                 .duration(1000)
                 .timestamp(timestamp)
@@ -99,7 +99,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             .rate(bananaTransaction.successRate)
             .generator((timestamp) =>
               serviceInstance
-                .transaction(bananaTransaction.name)
+                .transaction({ transactionName: bananaTransaction.name })
                 .timestamp(timestamp)
                 .duration(1000)
                 .success()
@@ -109,7 +109,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             .rate(bananaTransaction.failureRate)
             .generator((timestamp) =>
               serviceInstance
-                .transaction(bananaTransaction.name)
+                .transaction({ transactionName: bananaTransaction.name })
                 .errors(serviceInstance.error('error 2', 'bar').timestamp(timestamp))
                 .duration(1000)
                 .timestamp(timestamp)

@@ -67,7 +67,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             .generator((timestamp) =>
               instance
                 .containerId(instanceName)
-                .transaction('GET /api/product/list')
+                .transaction({ transactionName: 'GET /api/product/list' })
                 .timestamp(timestamp)
                 .duration(1000)
                 .success()

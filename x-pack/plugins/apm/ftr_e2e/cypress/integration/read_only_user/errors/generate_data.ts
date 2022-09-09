@@ -31,7 +31,7 @@ export function generateData({ from, to }: { from: number; to: number }) {
     .rate(1)
     .generator((timestamp, index) => [
       opbeansJava
-        .transaction('GET /apple 🍎 ')
+        .transaction({ transactionName: 'GET /apple 🍎 ' })
         .timestamp(timestamp)
         .duration(1000)
         .success()
@@ -41,7 +41,7 @@ export function generateData({ from, to }: { from: number; to: number }) {
             .timestamp(timestamp)
         ),
       opbeansNode
-        .transaction('GET /banana 🍌')
+        .transaction({ transactionName: 'GET /banana 🍌' })
         .timestamp(timestamp)
         .duration(500)
         .success(),
@@ -73,7 +73,7 @@ export function generateErrors({
     .rate(1)
     .generator((timestamp, index) => [
       opbeansJava
-        .transaction('GET /apple 🍎 ')
+        .transaction({ transactionName: 'GET /apple 🍎 ' })
         .timestamp(timestamp)
         .duration(1000)
         .success()

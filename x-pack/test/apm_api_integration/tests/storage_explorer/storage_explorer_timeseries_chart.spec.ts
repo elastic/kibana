@@ -68,13 +68,19 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             .interval('5m')
             .rate(1)
             .generator((timestamp) =>
-              serviceGo1.transaction('GET /api/product/list1').duration(2000).timestamp(timestamp)
+              serviceGo1
+                .transaction({ transactionName: 'GET /api/product/list1' })
+                .duration(2000)
+                .timestamp(timestamp)
             ),
           timerange(start, end)
             .interval('5m')
             .rate(1)
             .generator((timestamp) =>
-              serviceGo2.transaction('GET /api/product/list2').duration(2000).timestamp(timestamp)
+              serviceGo2
+                .transaction({ transactionName: 'GET /api/product/list2' })
+                .duration(2000)
+                .timestamp(timestamp)
             ),
         ]);
 

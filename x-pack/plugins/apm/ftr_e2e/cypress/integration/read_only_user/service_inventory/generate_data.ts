@@ -33,7 +33,7 @@ export function generateMultipleServicesData({
     .generator((timestamp, index) =>
       services.map((service) =>
         service
-          .transaction('GET /foo')
+          .transaction({ transactionName: 'GET /foo' })
           .timestamp(timestamp)
           .duration(500)
           .success()

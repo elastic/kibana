@@ -38,7 +38,7 @@ describe('breakdown metrics', () => {
       .rate(LIST_RATE)
       .generator((timestamp) =>
         javaInstance
-          .transaction('GET /api/product/list')
+          .transaction({ transactionName: 'GET /api/product/list' })
           .timestamp(timestamp)
           .duration(1000)
           .children(
@@ -55,7 +55,7 @@ describe('breakdown metrics', () => {
       .rate(ID_RATE)
       .generator((timestamp) =>
         javaInstance
-          .transaction('GET /api/product/:id')
+          .transaction({ transactionName: 'GET /api/product/:id' })
           .timestamp(timestamp)
           .duration(1000)
           .children(

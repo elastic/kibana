@@ -42,7 +42,7 @@ export async function generateData({
     .rate(rate)
     .generator((timestamp) =>
       instance
-        .transaction(transaction.name)
+        .transaction({ transactionName: transaction.name })
         .defaults({
           'kubernetes.pod.uid': 'test',
           'cloud.provider': provider,

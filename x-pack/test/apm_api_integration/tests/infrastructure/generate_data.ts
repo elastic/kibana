@@ -30,7 +30,7 @@ export async function generateData({
       .generator((timestamp) => {
         return [
           serviceRunsInContainerInstance
-            .transaction('GET /apple 🍎')
+            .transaction({ transactionName: 'GET /apple 🍎' })
             .defaults({
               'container.id': 'foo',
               'host.hostname': 'bar',
@@ -40,7 +40,7 @@ export async function generateData({
             .duration(1000)
             .success(),
           serviceInstance
-            .transaction('GET /banana 🍌')
+            .transaction({ transactionName: 'GET /banana 🍌' })
             .defaults({
               'host.hostname': 'bar',
             })

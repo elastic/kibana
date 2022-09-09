@@ -105,7 +105,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             .rate(config.multiple.prod.rps)
             .generator((timestamp) =>
               multipleEnvServiceProdInstance
-                .transaction('GET /api')
+                .transaction({ transactionName: 'GET /api' })
                 .timestamp(timestamp)
                 .duration(config.multiple.prod.duration)
                 .success()
@@ -114,7 +114,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             .rate(config.multiple.dev.rps)
             .generator((timestamp) =>
               multipleEnvServiceDevInstance
-                .transaction('GET /api')
+                .transaction({ transactionName: 'GET /api' })
                 .timestamp(timestamp)
                 .duration(config.multiple.dev.duration)
                 .failure()
@@ -123,7 +123,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             .rate(config.multiple.prod.rps)
             .generator((timestamp) =>
               multipleEnvServiceDevInstance
-                .transaction('non-request', 'rpc')
+                .transaction({ transactionName: 'non-request', transactionType: 'rpc' })
                 .timestamp(timestamp)
                 .duration(config.multiple.prod.duration)
                 .success()

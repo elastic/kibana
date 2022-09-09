@@ -79,7 +79,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             .rate(GO_PROD_RATE)
             .generator((timestamp) =>
               serviceGoProdInstance
-                .transaction('GET /api/product/list', 'Worker')
+                .transaction({
+                  transactionName: 'GET /api/product/list',
+                  transactionType: 'Worker',
+                })
                 .duration(GO_PROD_DURATION)
                 .timestamp(timestamp)
             ),
@@ -88,7 +91,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             .rate(GO_DEV_RATE)
             .generator((timestamp) =>
               serviceGoDevInstance
-                .transaction('GET /api/product/:id')
+                .transaction({ transactionName: 'GET /api/product/:id' })
                 .duration(GO_DEV_DURATION)
                 .timestamp(timestamp)
             ),

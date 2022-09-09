@@ -75,11 +75,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           const isInSpike = spikeStart <= timestamp && spikeEnd >= timestamp;
           return [
             serviceA
-              .transaction('GET /api')
+              .transaction({ transactionName: 'GET /api' })
               .duration(isInSpike ? 1000 : 1100)
               .timestamp(timestamp),
             serviceB
-              .transaction('GET /api')
+              .transaction({ transactionName: 'GET /api' })
               .duration(isInSpike ? 1000 : 4000)
               .timestamp(timestamp),
           ];
@@ -92,7 +92,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         .interval('15m')
         .rate(1)
         .generator((timestamp) => {
-          return serviceC.transaction('GET /api', 'custom').duration(1000).timestamp(timestamp);
+          return serviceC
+            .transaction({ transactionName: 'GET /api', transactionType: 'custom' })
+            .duration(1000)
+            .timestamp(timestamp);
         });
 
       await synthtraceClient.index(eventsWithinTimerange.merge(eventsOutsideOfTimerange));

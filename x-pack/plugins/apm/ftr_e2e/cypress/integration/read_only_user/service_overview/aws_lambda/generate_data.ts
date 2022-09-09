@@ -30,7 +30,7 @@ export function generateData({ start, end }: { start: number; end: number }) {
     .rate(rate)
     .generator((timestamp) =>
       instance
-        .transaction(transaction.name)
+        .transaction({ transactionName: transaction.name })
         .defaults({
           'service.runtime.name': 'AWS_Lambda_python3.8',
           'faas.coldstart': true,

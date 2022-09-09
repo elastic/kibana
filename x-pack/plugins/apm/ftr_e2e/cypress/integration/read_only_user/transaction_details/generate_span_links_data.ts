@@ -25,7 +25,7 @@ function getProducerInternalOnly() {
     .rate(1)
     .generator((timestamp) => {
       return producerInternalOnlyInstance
-        .transaction(`Transaction A`)
+        .transaction({ transactionName: `Transaction A` })
         .timestamp(timestamp)
         .duration(1000)
         .success()
@@ -80,7 +80,7 @@ function getProducerExternalOnly() {
     .rate(1)
     .generator((timestamp) => {
       return producerExternalOnlyInstance
-        .transaction(`Transaction B`)
+        .transaction({ transactionName: `Transaction B` })
         .timestamp(timestamp)
         .duration(1000)
         .success()
@@ -155,7 +155,7 @@ function getProducerConsumer({
     .rate(1)
     .generator((timestamp) => {
       return producerConsumerInstance
-        .transaction(`Transaction C`)
+        .transaction({ transactionName: `Transaction C` })
         .defaults({
           'span.links': producerInternalOnlySpanASpanLink
             ? [producerInternalOnlySpanASpanLink]
@@ -236,7 +236,7 @@ function getConsumerMultiple({
     .rate(1)
     .generator((timestamp) => {
       return consumerMultipleInstance
-        .transaction(`Transaction D`)
+        .transaction({ transactionName: `Transaction D` })
         .defaults({
           'span.links':
             producerInternalOnlySpanASpanLink && producerConsumerSpanCSpanLink

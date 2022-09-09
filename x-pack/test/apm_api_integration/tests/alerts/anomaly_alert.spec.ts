@@ -54,7 +54,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             return [
               ...range(0, count).flatMap((_) =>
                 serviceA
-                  .transaction('tx', 'request')
+                  .transaction({ transactionName: 'tx' })
                   .timestamp(timestamp)
                   .duration(duration)
                   .outcome(outcome)
