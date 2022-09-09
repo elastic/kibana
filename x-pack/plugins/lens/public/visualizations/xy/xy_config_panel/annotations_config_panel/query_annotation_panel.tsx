@@ -89,7 +89,7 @@ export const ConfigPanelQueryAnnotation = ({
           indexPatternTitle={frame.dataViews.indexPatterns[layer.indexPatternId].title}
           isInvalid={!isQueryInputValid || inputQuery.query === ''}
           onSubmit={() => {}}
-          data-test-subj="annotation-query-based-query-input"
+          data-test-subj="lnsXY-annotation-query-based-query-input"
           placeholder={
             inputQuery.language === 'kuery'
               ? i18n.translate('xpack.lens.annotations.query.queryPlaceholderKql', {
@@ -129,7 +129,7 @@ export const ConfigPanelQueryAnnotation = ({
             }
           }}
           fieldIsInvalid={!fieldIsValid}
-          data-test-subj="annotation-query-based-field-picker"
+          data-test-subj="lnsXY-annotation-query-based-field-picker"
         />
       </EuiFormRow>
     </>

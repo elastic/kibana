@@ -245,6 +245,7 @@ export const AnnotationsPanel = (
                         }
                       }}
                       fieldIsInvalid={!fieldIsValid}
+                      data-test-subj="lnsXY-annotation-query-based-text-decoration-field-picker"
                     />
                   </>
                 );
