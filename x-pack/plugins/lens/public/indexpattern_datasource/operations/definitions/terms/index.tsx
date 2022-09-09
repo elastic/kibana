@@ -235,6 +235,7 @@ export const termsOperation: OperationDefinition<
                 columnId: existingMetricColumn,
               }
             : { type: 'alphabetical', fallback: true }),
+        orderAgg: columnParams?.orderBy.type === 'custom' ? columnParams?.orderAgg : undefined,
         orderDirection: columnParams?.orderDirection ?? (existingMetricColumn ? 'desc' : 'asc'),
         otherBucket: (columnParams?.otherBucket ?? true) && !indexPattern.hasRestrictions,
         missingBucket: columnParams?.missingBucket ?? false,

@@ -274,13 +274,29 @@ function convertToColumnChange(columns: Layer['columns'], indexPattern: IndexPat
       if (
         isTermsColumn(column) &&
         column.params.orderAgg &&
+        newColumn.columnParams &&
         !columns.some((c) => c.columnId === column.params.orderAgg?.columnId)
       ) {
-        const orderAggColumn: ColumnChange = createColumnChange(
-          column.params.orderAgg,
-          indexPattern
+        const orderColumn = column.params.orderAgg;
+        const operationDefinition = operationDefinitionMap[orderColumn.operationType];
+        const layer: IndexPatternLayer = {
+          indexPatternId: indexPattern.id,
+          columns: {},
+          columnOrder: [],
+        };
+        newColumn.columnParams.orderAgg = operationDefinition.buildColumn(
+          {
+            previousColumn: {
+              ...column.params.orderAgg,
+              label: column.params.orderAgg?.label || '',
+            },
+            indexPattern,
+            layer,
+            referenceIds: [],
+            field: getFieldWithLabel(column.params.orderAgg, indexPattern)!,
+          },
+          column.params
         );
-        acc.push(orderAggColumn);
       }
       acc.push(newColumn);
     }

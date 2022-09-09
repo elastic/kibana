@@ -41,7 +41,7 @@ export interface Range {
 export interface NumberValueFormat {
   id: string;
   params?: {
-    decimals?: number;
+    decimals: number;
     suffix?: string;
   };
 }

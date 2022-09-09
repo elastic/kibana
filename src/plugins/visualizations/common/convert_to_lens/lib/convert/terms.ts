@@ -40,7 +40,7 @@ const getOrderByWithAgg = (
       return null;
     }
     return {
-      orderBy: { type: 'column', columnId: orderMetricColumn[0].columnId },
+      orderBy: { type: 'custom' },
       orderAgg: orderMetricColumn[0],
     };
   }

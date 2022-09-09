@@ -44,10 +44,12 @@ export const getFormat = (series: Series): FormatParams => {
 
   // not supported formatters should be converted to number
   if (!isSupportedFormat(series.formatter)) {
-    return { format: { id: DATA_FORMATTERS.NUMBER, ...(suffix && { params: { suffix } }) } };
+    return {
+      format: { id: DATA_FORMATTERS.NUMBER, ...(suffix && { params: { suffix, decimals: 0 } }) },
+    };
   }
 
-  return { format: { id: series.formatter, ...(suffix && { params: { suffix } }) } };
+  return { format: { id: series.formatter, ...(suffix && { params: { suffix, decimals: 0 } }) } };
 };
 
 export const createColumn = (

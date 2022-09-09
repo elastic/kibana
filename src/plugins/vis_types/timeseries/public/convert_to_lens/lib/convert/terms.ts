@@ -26,7 +26,7 @@ const getOrderByWithAgg = (series: Series, columns: Column[]): OrderByWithAgg | 
   if (series.terms_order_by === '_count' || !series.terms_order_by) {
     const columnId = uuid();
     return {
-      orderBy: { type: 'column', columnId },
+      orderBy: { type: 'custom' },
       orderAgg: {
         operationType: 'count',
         sourceField: 'document',
