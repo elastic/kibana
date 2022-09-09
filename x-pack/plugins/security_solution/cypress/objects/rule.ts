@@ -534,6 +534,7 @@ export const expectedExportedRule = (ruleResponse: Cypress.Response<RulesSchema>
     immutable: false,
     related_integrations: [],
     required_fields: [],
+    response_actions: [],
     setup: '',
     type: 'query',
     language: 'kuery',
