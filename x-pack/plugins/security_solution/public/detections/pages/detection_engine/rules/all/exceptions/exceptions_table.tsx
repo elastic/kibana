@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import React, { useMemo, useEffect, useCallback, useState } from 'react';
+import React, { useMemo, useEffect, useRef, useCallback, useState } from 'react';
 import type { CriteriaWithPagination, EuiSearchBarProps } from '@elastic/eui';
+
 import {
   EuiFlyout,
+  EuiFilePicker,
   EuiFlyoutBody,
   EuiFlyoutHeader,
   EuiText,
@@ -22,6 +24,7 @@ import {
   EuiSpacer,
   EuiPageHeader,
   EuiHorizontalRule,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import type { NamespaceType, ExceptionListFilter } from '@kbn/securitysolution-io-ts-list-types';
@@ -49,6 +52,7 @@ import type { ExceptionsTableItem } from './types';
 import { MissingPrivilegesCallOut } from '../../../../../components/callouts/missing_privileges_callout';
 import { ALL_ENDPOINT_ARTIFACT_LIST_IDS } from '../../../../../../../common/endpoint/service/artifacts/constants';
 import { ExceptionsListCard } from './exceptions_list_card';
+import { useImportExceptionList } from './use_import_exception_list';
 
 export type Func = () => Promise<void>;
 
@@ -67,6 +71,8 @@ const exceptionReferenceModalInitialState: ReferenceModalState = {
   listId: '',
   listNamespaceType: 'single',
 };
+
+const validFileTypes = ['text/json', 'application/json'];
 
 export const ExceptionListsTable = React.memo(() => {
   const { formatUrl } = useFormatUrl(SecurityPageName.rules);
@@ -358,9 +364,24 @@ export const ExceptionListsTable = React.memo(() => {
     [setPagination]
   );
 
+  const filePickerId = useGeneratedHtmlId({ prefix: 'filePicker' });
+  const [file, setFile] = useState<File | null>(null);
+  const fileIsValid = !file || validFileTypes.some((fileType) => file.type === fileType);
+
+  const { start: importExceptionList, ...importExceptionListState } = useImportExceptionList();
+  const ctrl = useRef(new AbortController());
+
   const handleImportExceptionList = useCallback(() => {
-    setDisplayImportListFlyout(!displayImportListFlyout);
-  }, [displayImportListFlyout]);
+    if (!importExceptionListState.loading && file) {
+      ctrl.current = new AbortController();
+
+      importExceptionList({ file, http, signal: ctrl.current.signal });
+    }
+  }, [file, http, importExceptionList, importExceptionListState.loading]);
+
+  const handleFileChange = useCallback((files: FileList | null) => {
+    setFile(files?.item(0) ?? null);
+  }, []);
 
   return (
     <>
@@ -394,6 +415,21 @@ export const ExceptionListsTable = React.memo(() => {
           </EuiFlyoutHeader>
           <EuiFlyoutBody>
             <EuiText>{'hello world!'}</EuiText>
+            <EuiFilePicker
+              id={filePickerId}
+              multiple
+              initialPromptText="Select or drag and drop multiple files"
+              onChange={handleFileChange}
+              display={'large'}
+              aria-label="Use aria labels when no actual label is in use"
+            />
+            <EuiButton
+              data-test-subj="exception-lists-form-import-action"
+              onClick={handleImportExceptionList}
+              disabled={file == null || importExceptionListState.loading}
+            >
+              {i18n.UPLOAD_BUTTON}
+            </EuiButton>
           </EuiFlyoutBody>
         </EuiFlyout>
       )}

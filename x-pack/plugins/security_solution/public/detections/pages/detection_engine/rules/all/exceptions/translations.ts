@@ -167,3 +167,10 @@ export const REFRESH_EXCEPTIONS_TABLE = i18n.translate(
     defaultMessage: 'Refresh',
   }
 );
+
+export const UPLOAD_BUTTON = i18n.translate(
+  'xpack.securitySolution.exceptions.exceptionListsImportButton',
+  {
+    defaultMessage: 'Import list',
+  }
+);
