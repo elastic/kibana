@@ -44,30 +44,20 @@ to re-open the flyout and change the rule properties.
 
 All rules share the following four properties:
 
-Name:: The name of the rule. While this name does not have to be unique, the
-name can be referenced in actions and also appears in the searchable rule
-listing in *{rules-ui}*. A distinctive name can help identify and find a rule.
+Name:: The name of the rule. While this name does not have to be unique, a
+distinctive name can help you identify a rule.
 Tags:: A list of tag names that can be applied to a rule. Tags can help you
-organize and find rules, because tags appear in the rule listing in
-*{rules-ui}*, which is searchable by tag.
-Check every:: This value determines how frequently the rule conditions are
-checked. Note that the timing of background rule checks is not guaranteed,
-particularly for intervals of less than 10 seconds. For more information, go to
-<<alerting-production-considerations>>.
-Notify:: This value limits how often actions are repeated when an alert remains
-active across rule checks. For more information, go to
-<<alerting-concepts-suppressing-duplicate-notifications>>. +
-- **Only on status change**: Actions are not repeated when an alert remains
-active across checks. Actions run only when the alert status changes.
-- **Every time alert is active**: Actions are repeated when an alert remains
-active across checks.
-- **On a custom action interval**: Actions are suppressed for the throttle
-interval, but repeat when an alert remains active across checks for a duration
-longer than the throttle interval.
-
-[float]
+organize and find rules.
+Check every:: Defines how often to evaluate the rule condition. Checks are
+queued; they run as close to the defined value as capacity allows. For more
+details, go to <<alerting-production-considerations,Alerting production considerations>>.
+Notify:: Defines how often to repeat actions while alerts are active. Options
+include generating actions at each check interval, only when the alert status
+changes, or at a custom action interval. 
++
+--
 [[alerting-concepts-suppressing-duplicate-notifications]]
-[NOTE]
+[TIP]
 ==============================================
 Since actions are triggered per alert, a rule can end up generating a large
 number of actions. Take the following example where a rule is monitoring three
@@ -91,6 +81,7 @@ servers that continue to exceed the threshold:
 To get notified only once when a server exceeds the threshold, you can set the
 rule notify setting to `Only on status change`. 
 ==============================================
+--
 
 [role="screenshot"]
 image::images/rule-flyout-general-details.png[alt='All rules have name, tags, check every, and notify properties in common']
@@ -196,6 +187,11 @@ A rule can have one of the following statuses:
 `error`:: An error was encountered by the rule.
 `pending`:: The rule has not yet run.  The rule was either just created, or enabled after being disabled.
 `unknown`:: A problem occurred when calculating the status. Most likely, something went wrong with the alerting code.
+
+Each alert also has one of the following statuses:
+
+`active`:: The conditions for the rule are met, and actions should be generated according to the notification settings.
+`recovered`:: The conditions for the rule are no longer met.
 
 [float]
 [[importing-and-exporting-rules]]

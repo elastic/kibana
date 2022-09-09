@@ -49,7 +49,7 @@ export const NOTIFY_WHEN_OPTIONS: Array<EuiSuperSelectOption<RuleNotifyWhenType>
         <EuiText size="s" color="subdued">
           <p>
             <FormattedMessage
-              defaultMessage="Actions run when the alert status changes."
+              defaultMessage="Actions repeat if the alert status changes."
               id="xpack.triggersActionsUI.sections.ruleForm.ruleNotifyWhen.onActionGroupChange.description"
             />
           </p>
@@ -77,7 +77,7 @@ export const NOTIFY_WHEN_OPTIONS: Array<EuiSuperSelectOption<RuleNotifyWhenType>
         <EuiText size="s" color="subdued">
           <p>
             <FormattedMessage
-              defaultMessage="Actions repeat at the rule interval when the alert is active."
+              defaultMessage="Actions repeat at each check interval."
               id="xpack.triggersActionsUI.sections.ruleForm.ruleNotifyWhen.onActiveAlert.description"
             />
           </p>
@@ -105,7 +105,7 @@ export const NOTIFY_WHEN_OPTIONS: Array<EuiSuperSelectOption<RuleNotifyWhenType>
         <EuiText size="s" color="subdued">
           <p>
             <FormattedMessage
-              defaultMessage="Actions run using the interval you set."
+              defaultMessage="Actions repeat if the alert is active longer than this interval."
               id="xpack.triggersActionsUI.sections.ruleForm.ruleNotifyWhen.onThrottleInterval.description"
             />
           </p>
@@ -165,7 +165,7 @@ export const RuleNotifyWhen = ({
         position="right"
         type="questionInCircle"
         content={i18n.translate('xpack.triggersActionsUI.sections.ruleForm.renotifyWithTooltip', {
-          defaultMessage: 'Define how often to repeat the action while the rule is active.',
+          defaultMessage: 'Define how often to repeat actions while alerts are active.',
         })}
       />
     </>
