@@ -65,6 +65,20 @@ describe('EntityAnalyticsHostRiskScores', () => {
     expect(getByTestId('enable_host_risk_score')).toBeInTheDocument();
   });
 
+  it('renders enable via dev tools button when module is disable', () => {
+    mockUseHostRiskScore.mockReturnValue([
+      false,
+      { data: undefined, inspect: null, refetch: () => {}, isModuleEnabled: false },
+    ]);
+    const { getByTestId } = render(
+      <TestProviders>
+        <EntityAnalyticsHostRiskScores />
+      </TestProviders>
+    );
+
+    expect(getByTestId('enable_host_risk_score_via_devtools')).toBeInTheDocument();
+  });
+
   it("doesn't render enable button when module is enable", () => {
     mockUseHostRiskScore.mockReturnValue([
       false,

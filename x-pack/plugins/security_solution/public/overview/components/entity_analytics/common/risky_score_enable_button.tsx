@@ -50,7 +50,7 @@ const RiskyScoreEnableButtonComponent = ({
       fill
       onClick={onBoardingRiskScore}
       isLoading={installationState === InstallationState.Started}
-      data-test-subj="risk-score-enable"
+      data-test-subj={`enable_${riskScoreEntity}_risk_score`}
       disabled={disabled}
     >
       {installationState === InstallationState.Started ? (

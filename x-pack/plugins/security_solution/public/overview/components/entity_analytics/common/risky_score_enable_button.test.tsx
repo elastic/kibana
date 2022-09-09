@@ -27,8 +27,10 @@ describe('RiskyScoreEnableButton', () => {
         </TestProviders>
       );
 
-      expect(screen.getByTestId('risk-score-enable')).toBeInTheDocument();
-      expect(screen.getByTestId('risk-score-enable')).toHaveTextContent('Enable');
+      expect(screen.getByTestId(`enable_${RiskScoreEntity.host}_risk_score`)).toBeInTheDocument();
+      expect(screen.getByTestId(`enable_${RiskScoreEntity.host}_risk_score`)).toHaveTextContent(
+        'Enable'
+      );
     });
 
     it('Triggers the right installer', async () => {
@@ -39,7 +41,7 @@ describe('RiskyScoreEnableButton', () => {
       );
 
       await act(async () => {
-        await userEvent.click(screen.getByTestId('risk-score-enable'));
+        await userEvent.click(screen.getByTestId(`enable_${RiskScoreEntity.host}_risk_score`));
       });
 
       expect(installHostRiskScoreModule).toHaveBeenCalled();
@@ -48,14 +50,16 @@ describe('RiskyScoreEnableButton', () => {
     it('Update button state while installing', async () => {
       render(
         <TestProviders>
-          <RiskyScoreEnableButton refetch={mockRefetch} riskScoreEntity={RiskScoreEntity.user} />
+          <RiskyScoreEnableButton refetch={mockRefetch} riskScoreEntity={RiskScoreEntity.host} />
         </TestProviders>
       );
 
-      userEvent.click(screen.getByTestId('risk-score-enable'));
+      userEvent.click(screen.getByTestId(`enable_${RiskScoreEntity.host}_risk_score`));
 
       await waitFor(() => {
-        expect(screen.getByTestId('risk-score-enable')).toHaveTextContent('Enabling');
+        expect(screen.getByTestId(`enable_${RiskScoreEntity.host}_risk_score`)).toHaveTextContent(
+          'Enabling'
+        );
       });
     });
 
@@ -67,7 +71,7 @@ describe('RiskyScoreEnableButton', () => {
       );
 
       await act(async () => {
-        await userEvent.click(screen.getByTestId('risk-score-enable'));
+        await userEvent.click(screen.getByTestId(`enable_${RiskScoreEntity.host}_risk_score`));
       });
 
       expect(mockRefetch).toHaveBeenCalled();
@@ -82,8 +86,10 @@ describe('RiskyScoreEnableButton', () => {
         </TestProviders>
       );
 
-      expect(screen.getByTestId('risk-score-enable')).toBeInTheDocument();
-      expect(screen.getByTestId('risk-score-enable')).toHaveTextContent('Enable');
+      expect(screen.getByTestId(`enable_${RiskScoreEntity.user}_risk_score`)).toBeInTheDocument();
+      expect(screen.getByTestId(`enable_${RiskScoreEntity.user}_risk_score`)).toHaveTextContent(
+        'Enable'
+      );
     });
 
     it('Triggers the right installer', async () => {
@@ -94,7 +100,7 @@ describe('RiskyScoreEnableButton', () => {
       );
 
       await act(async () => {
-        await userEvent.click(screen.getByTestId('risk-score-enable'));
+        await userEvent.click(screen.getByTestId(`enable_${RiskScoreEntity.user}_risk_score`));
       });
 
       expect(installUserRiskScoreModule).toHaveBeenCalled();
@@ -107,10 +113,12 @@ describe('RiskyScoreEnableButton', () => {
         </TestProviders>
       );
 
-      userEvent.click(screen.getByTestId('risk-score-enable'));
+      userEvent.click(screen.getByTestId(`enable_${RiskScoreEntity.user}_risk_score`));
 
       await waitFor(() => {
-        expect(screen.getByTestId('risk-score-enable')).toHaveTextContent('Enabling');
+        expect(screen.getByTestId(`enable_${RiskScoreEntity.user}_risk_score`)).toHaveTextContent(
+          'Enabling'
+        );
       });
     });
 
@@ -122,7 +130,7 @@ describe('RiskyScoreEnableButton', () => {
       );
 
       await act(async () => {
-        await userEvent.click(screen.getByTestId('risk-score-enable'));
+        await userEvent.click(screen.getByTestId(`enable_${RiskScoreEntity.user}_risk_score`));
       });
 
       expect(mockRefetch).toHaveBeenCalled();

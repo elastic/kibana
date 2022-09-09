@@ -65,6 +65,20 @@ describe('EntityAnalyticsUserRiskScores', () => {
     expect(getByTestId('enable_user_risk_score')).toBeInTheDocument();
   });
 
+  it('renders enable via dev tools button when module is disable', () => {
+    mockUseUserRiskScore.mockReturnValue([
+      false,
+      { data: undefined, inspect: null, refetch: () => {}, isModuleEnabled: false },
+    ]);
+    const { getByTestId } = render(
+      <TestProviders>
+        <EntityAnalyticsUserRiskScores />
+      </TestProviders>
+    );
+
+    expect(getByTestId('enable_user_risk_score_via_devtools')).toBeInTheDocument();
+  });
+
   it("doesn't render enable button when module is enable", () => {
     mockUseUserRiskScore.mockReturnValue([
       false,

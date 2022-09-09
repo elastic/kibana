@@ -27,7 +27,7 @@ describe('useEnableRiskScoreViaDevTools', () => {
   it('renders the correct path', () => {
     const { result } = renderHook(() => useEnableRiskScoreViaDevTools(RiskScoreEntity.host));
     expect(result.current).toEqual(
-      '/s/myspace/app/dev_tools#/console?load_from=testProtocol//testhostname:testPort/s/myspace/internal/prebuilt_content/dev_tool/enable_host_risk_score'
+      '/s/myspace/app/dev_tools#/console?load_from=testProtocol//testhostname:testPort/s/myspace/internal/risky_score/prebuilt_content/dev_tool/enable_host_risk_score'
     );
   });
 });
