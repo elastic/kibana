@@ -13,6 +13,8 @@ import type { AlertStatus, BulkActionsProps } from '../../common/types/timeline'
 import { useUpdateAlertsStatus } from '../container/use_update_alerts';
 import { useAppToasts } from './use_app_toasts';
 import { STANDALONE_ID } from '../components/t_grid/standalone';
+import { useStartTransaction } from '../lib/apm/use_start_transaction';
+import { APM_USER_INTERACTIONS } from '../lib/apm/constants';
 
 export const getUpdateAlertsQuery = (eventIds: Readonly<string[]>) => {
   return { bool: { filter: { terms: { _id: eventIds } } } };
@@ -33,6 +35,7 @@ export const useBulkActionItems = ({
 }: BulkActionsProps) => {
   const { updateAlertStatus } = useUpdateAlertsStatus(timelineId !== STANDALONE_ID);
   const { addSuccess, addError, addWarning } = useAppToasts();
+  const { startTransaction } = useStartTransaction();
 
   const onAlertStatusUpdateSuccess = useCallback(
     (updated: number, conflicts: number, newStatus: AlertStatus) => {
@@ -88,6 +91,14 @@ export const useBulkActionItems = ({
 
   const onClickUpdate = useCallback(
     async (status: AlertStatus) => {
+      if (query) {
+        startTransaction({ name: APM_USER_INTERACTIONS.BULK_QUERY_STATUS_UPDATE });
+      } else if (eventIds.length > 1) {
+        startTransaction({ name: APM_USER_INTERACTIONS.BULK_STATUS_UPDATE });
+      } else {
+        startTransaction({ name: APM_USER_INTERACTIONS.STATUS_UPDATE });
+      }
+
       try {
         setEventsLoading({ eventIds, isLoading: true });
 
@@ -120,6 +131,7 @@ export const useBulkActionItems = ({
       setEventsDeleted,
       onAlertStatusUpdateSuccess,
       onAlertStatusUpdateFailure,
+      startTransaction,
     ]
   );
 
