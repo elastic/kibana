@@ -670,6 +670,51 @@
         "children": [],
         "returnComment": [],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "charts",
+        "id": "def-public.Warnings",
+        "type": "Function",
+        "tags": [],
+        "label": "Warnings",
+        "description": [],
+        "signature": [
+          "({ warnings }: { warnings: React.ReactNode[]; }) => JSX.Element | null"
+        ],
+        "path": "src/plugins/charts/public/static/components/warnings.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "charts",
+            "id": "def-public.Warnings.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ warnings }",
+            "description": [],
+            "path": "src/plugins/charts/public/static/components/warnings.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "charts",
+                "id": "def-public.Warnings.$1.warnings",
+                "type": "Array",
+                "tags": [],
+                "label": "warnings",
+                "description": [],
+                "signature": [
+                  "React.ReactNode[]"
+                ],
+                "path": "src/plugins/charts/public/static/components/warnings.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
       }
     ],
     "interfaces": [
