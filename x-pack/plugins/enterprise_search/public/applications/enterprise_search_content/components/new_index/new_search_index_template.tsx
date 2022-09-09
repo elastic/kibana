@@ -32,6 +32,7 @@ import { LanguageForOptimization } from './types';
 
 export interface Props {
   buttonLoading?: boolean;
+  disabled?: boolean;
   docsUrl?: string;
   error?: string | React.ReactNode;
   onNameChange?(name: string): void;
@@ -42,6 +43,7 @@ export interface Props {
 
 export const NewSearchIndexTemplate: React.FC<Props> = ({
   children,
+  disabled,
   docsUrl,
   error,
   title,
@@ -101,12 +103,12 @@ export const NewSearchIndexTemplate: React.FC<Props> = ({
   return (
     <EuiPanel hasBorder>
       <EuiForm
+        component="form"
+        id="enterprise-search-add-connector"
         onSubmit={(event) => {
           event.preventDefault();
           onSubmit(fullIndexName, language);
         }}
-        component="form"
-        id="enterprise-search-add-connector"
       >
         <EuiFlexGroup direction="column">
           <EuiFlexItem grow={false}>
@@ -118,6 +120,7 @@ export const NewSearchIndexTemplate: React.FC<Props> = ({
             <EuiFlexGroup>
               <EuiFlexItem grow>
                 <EuiFormRow
+                  isDisabled={disabled}
                   label={i18n.translate(
                     'xpack.enterpriseSearch.content.newIndex.newSearchIndexTemplate.nameInputLabel',
                     {
@@ -145,6 +148,7 @@ export const NewSearchIndexTemplate: React.FC<Props> = ({
                       }
                     )}
                     fullWidth
+                    disabled={disabled}
                     isInvalid={false}
                     value={rawName}
                     onChange={handleNameChange}
@@ -164,6 +168,7 @@ export const NewSearchIndexTemplate: React.FC<Props> = ({
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiFormRow
+                  isDisabled={disabled}
                   label={i18n.translate(
                     'xpack.enterpriseSearch.content.newIndex.newSearchIndexTemplate.languageInputLabel',
                     {
@@ -178,6 +183,7 @@ export const NewSearchIndexTemplate: React.FC<Props> = ({
                   )}
                 >
                   <EuiSelect
+                    disabled={disabled}
                     options={SUPPORTED_LANGUAGES}
                     onChange={handleLanguageChange}
                     value={languageSelectValue}
@@ -192,7 +198,7 @@ export const NewSearchIndexTemplate: React.FC<Props> = ({
           <EuiFlexItem grow={false}>
             <EuiButton
               fill
-              isDisabled={!rawName || buttonLoading || formInvalid}
+              isDisabled={!rawName || buttonLoading || formInvalid || disabled}
               isLoading={buttonLoading}
               type="submit"
             >
