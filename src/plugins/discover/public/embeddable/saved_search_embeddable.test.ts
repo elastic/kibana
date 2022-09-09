@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { ReactElement } from 'react';
 import { FilterManager } from '@kbn/data-plugin/public';
 import { createFilterManagerMock } from '@kbn/data-plugin/public/query/filter_manager/filter_manager.mock';
 import { getSavedSearchUrl, SearchInput } from '..';
@@ -16,11 +17,18 @@ import { SavedSearchEmbeddable, SearchEmbeddableConfig } from './saved_search_em
 import { render } from 'react-dom';
 import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 import { throwError } from 'rxjs';
+import { ReactWrapper } from 'enzyme';
+import { SavedSearchEmbeddableComponent } from './saved_search_embeddable_component';
+
+let discoverComponent: ReactWrapper;
 
 jest.mock('react-dom', () => {
+  const { mount } = jest.requireActual('enzyme');
   return {
     ...jest.requireActual('react-dom'),
-    render: jest.fn(),
+    render: jest.fn((component: ReactElement) => {
+      discoverComponent = mount(component);
+    }),
   };
 });
 
@@ -34,6 +42,7 @@ describe('saved search embeddable', () => {
   const createEmbeddable = (searchMock?: jest.Mock) => {
     const savedSearchMock = {
       id: 'mock-id',
+      sort: [['message', 'asc']] as Array<[string, string]>,
       searchSource: createSearchSourceMock({ index: dataViewMock }, undefined, searchMock),
     };
 
@@ -52,14 +61,25 @@ describe('saved search embeddable', () => {
     const searchInput: SearchInput = {
       id: 'mock-embeddable-id',
       timeRange: { from: 'now-15m', to: 'now' },
+      columns: ['message', 'extension'],
+      rowHeight: 30,
+      rowsPerPage: 50,
     };
     const executeTriggerActions = jest.fn();
+
     const embeddable = new SavedSearchEmbeddable(
       savedSearchEmbeddableConfig,
       searchInput,
       executeTriggerActions
     );
-    return embeddable;
+
+    // this helps to trigger reload
+    // eslint-disable-next-line dot-notation
+    embeddable['inputSubject'].next = jest.fn(
+      (input) => (input.lastReloadRequestTime = Date.now())
+    );
+
+    return { embeddable };
   };
 
   beforeEach(() => {
@@ -73,7 +93,7 @@ describe('saved search embeddable', () => {
   });
 
   it('should render saved search embeddable two times initially', async () => {
-    const embeddable = createEmbeddable();
+    const { embeddable } = createEmbeddable();
     embeddable.updateOutput = jest.fn();
 
     embeddable.render(mountpoint);
@@ -84,9 +104,45 @@ describe('saved search embeddable', () => {
     expect(render).toHaveBeenCalledTimes(2);
   });
 
+  it('should update input correctly', async () => {
+    const { embeddable } = createEmbeddable();
+    embeddable.updateOutput = jest.fn();
+
+    embeddable.render(mountpoint);
+    await waitOneTick();
+
+    const searchProps = discoverComponent.find(SavedSearchEmbeddableComponent).prop('searchProps');
+
+    searchProps.onAddColumn!('bytes');
+    await waitOneTick();
+    expect(searchProps.columns).toEqual(['message', 'extension', 'bytes']);
+
+    searchProps.onRemoveColumn!('bytes');
+    await waitOneTick();
+    expect(searchProps.columns).toEqual(['message', 'extension']);
+
+    searchProps.onSetColumns!(['message', 'bytes', 'extension'], false);
+    await waitOneTick();
+    expect(searchProps.columns).toEqual(['message', 'bytes', 'extension']);
+
+    searchProps.onMoveColumn!('bytes', 2);
+    await waitOneTick();
+    expect(searchProps.columns).toEqual(['message', 'extension', 'bytes']);
+
+    expect(searchProps.rowHeightState).toEqual(30);
+    await waitOneTick();
+    searchProps.onUpdateRowHeight!(40);
+    expect(searchProps.rowHeightState).toEqual(40);
+
+    expect(searchProps.rowsPerPageState).toEqual(50);
+    await waitOneTick();
+    searchProps.onUpdateRowsPerPage!(100);
+    expect(searchProps.rowsPerPageState).toEqual(100);
+  });
+
   it('should emit error output in case of fetch error', async () => {
     const search = jest.fn().mockReturnValue(throwError(new Error('Fetch error')));
-    const embeddable = createEmbeddable(search);
+    const { embeddable } = createEmbeddable(search);
     embeddable.updateOutput = jest.fn();
 
     embeddable.render(mountpoint);

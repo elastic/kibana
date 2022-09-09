@@ -463,6 +463,8 @@ export class SavedSearchEmbeddable
       this.prevSort = this.input.sort;
       this.searchProps = searchProps;
       await this.fetch();
+    } else {
+      this.searchProps = searchProps;
     }
   }
 
