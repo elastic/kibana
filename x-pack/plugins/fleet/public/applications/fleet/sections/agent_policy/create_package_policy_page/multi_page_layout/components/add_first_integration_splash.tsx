@@ -6,7 +6,6 @@
  */
 import React from 'react';
 import styled from 'styled-components';
-import useWindowSize from 'react-use/lib/useWindowSize';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { EuiImageProps } from '@elastic/eui';
@@ -22,7 +21,7 @@ import {
   EuiLink,
   EuiHideFor,
   EuiShowFor,
-  isWithinMaxBreakpoint,
+  useIsWithinMaxBreakpoint,
 } from '@elastic/eui';
 
 import type { RegistryPolicyTemplate, PackageInfo } from '../../../../../types';
@@ -66,8 +65,7 @@ const CenteredEuiImage = (props: EuiImageProps) => (
 );
 
 const ResponsiveStepGroup: React.FC = ({ children }) => {
-  const { width } = useWindowSize();
-  const isScreenSmall = isWithinMaxBreakpoint(width, 's');
+  const isScreenSmall = useIsWithinMaxBreakpoint('s');
 
   return (
     <EuiFlexGroup
