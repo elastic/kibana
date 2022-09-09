@@ -20,7 +20,7 @@ import React, { memo, useCallback, useEffect, useMemo, useRef } from 'react';
 
 import type { ActionVariables } from '@kbn/triggers-actions-ui-plugin/public';
 import { UseArray } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { LazyResponseActionsForm } from '../../response_actions/lazy_response_actions';
+import { ResponseActionsForm } from '../../response_actions/response_actions_form';
 import type { RuleStepProps, ActionsStepRule } from '../../../pages/detection_engine/rules/types';
 import { RuleStep } from '../../../pages/detection_engine/rules/types';
 import { StepRuleDescription } from '../description_step';
@@ -191,7 +191,7 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
         return (
           <>
             <UseArray path="responseActions">
-              {(params) => <LazyResponseActionsForm {...params} saveClickRef={saveClickRef} />}
+              {(params) => <ResponseActionsForm {...params} saveClickRef={saveClickRef} />}
             </UseArray>
           </>
         );

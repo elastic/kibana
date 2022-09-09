@@ -32,7 +32,7 @@ interface IProps {
   }>;
 }
 
-const ResponseActionsForm = ({ items, addItem, removeItem, saveClickRef }: IProps) => {
+export const ResponseActionsForm = ({ items, addItem, removeItem, saveClickRef }: IProps) => {
   const responseActionsValidationRef = useRef<ResponseActionValidatorRef>({ validation: {} });
   const supportedResponseActionTypes = useSupportedResponseActionTypes();
 
@@ -79,5 +79,3 @@ const ResponseActionsForm = ({ items, addItem, removeItem, saveClickRef }: IProp
     </>
   );
 };
-// eslint-disable-next-line import/no-default-export
-export { ResponseActionsForm as default };
