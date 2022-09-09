@@ -91,7 +91,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       ).to.eql('Event');
       await testSubjects.click('lnsXY_xAnnotationsPanel > lns-dimensionTrigger');
       await testSubjects.click('lnsXY_annotation_query');
-      await PageObjects.lens.configureQueryAnnotation({queryString: '*', timeField: 'utc_time', textDecoration: {type: 'name'}, extraFields: ['clientip']})
+      await PageObjects.lens.configureQueryAnnotation({
+        queryString: '*',
+        timeField: 'utc_time',
+        textDecoration: { type: 'name' },
+        extraFields: ['clientip'],
+      });
       await PageObjects.lens.closeDimensionEditor();
 
       await testSubjects.existOrFail('xyVisGroupedAnnotationIcon');
