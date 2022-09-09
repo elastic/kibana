@@ -8,5 +8,12 @@
 import { get } from 'lodash';
 import type { GetEventValue } from '../types';
 
-export const getEventValue: GetEventValue = (event, path) =>
-  get(event, `_source.${path}`) || event?._source?.[path];
+export const getEventValue: GetEventValue = (event, path) => {
+  const value = get(event, `_source.${path}`) || event?._source?.[path];
+
+  if (Array.isArray(value)) {
+    return value[0];
+  }
+
+  return value;
+};

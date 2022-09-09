@@ -39,17 +39,17 @@ export const createUserRiskEnrichments: CreateRiskEnrichment = async ({
       enrichmentField: 'user.name',
     },
     createEnrichmentFunction: (enrichment) => (event) => {
-      const risk = get(enrichment, `_source.risk`);
+      const risk = get(enrichment, `_source.user.risk`);
       if (!risk) {
         return event;
       }
       const newEvent = cloneDeep(event);
-      set(newEvent, '_source.user.risk.calculated_level', risk);
-      set(
-        newEvent,
-        '_source.user.risk.calculated_score_norm',
-        enrichment?._source?.risk_stats?.risk_score
-      );
+      if (risk?.calculated_level) {
+        set(newEvent, '_source.user.risk.calculated_level', risk?.calculated_level);
+      }
+      if (risk?.calculated_score_norm) {
+        set(newEvent, '_source.user.risk.calculated_score_norm', risk?.calculated_score_norm);
+      }
       return newEvent;
     },
   });
