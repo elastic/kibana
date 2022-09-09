@@ -47,40 +47,30 @@ export function useTransactionTraceSamplesFetcher({
     status,
     error,
   } = useFetcher(
-    async (callApmApi) => {
+    (callApmApi) => {
       if (serviceName && start && end && transactionType && transactionName) {
-        const response = await callApmApi({
-          endpoint:
-            'GET /internal/apm/services/{serviceName}/transactions/traces/samples',
-          params: {
-            path: {
-              serviceName,
+        return callApmApi(
+          'GET /internal/apm/services/{serviceName}/transactions/traces/samples',
+          {
+            params: {
+              path: {
+                serviceName,
+              },
+              query: {
+                environment,
+                kuery,
+                start,
+                end,
+                transactionType,
+                transactionName,
+                transactionId,
+                traceId,
+                sampleRangeFrom,
+                sampleRangeTo,
+              },
             },
-            query: {
-              environment,
-              kuery,
-              start,
-              end,
-              transactionType,
-              transactionName,
-              transactionId,
-              traceId,
-              sampleRangeFrom,
-              sampleRangeTo,
-            },
-          },
-        });
-
-        if (response.noHits) {
-          return response;
-        }
-
-        const { traceSamples } = response;
-
-        return {
-          noHits: false,
-          traceSamples,
-        };
+          }
+        );
       }
     },
     // the samples should not be refetched if the transactionId or traceId changes

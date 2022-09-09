@@ -23,6 +23,8 @@ import { fromQuery, push, toQuery } from '../../shared/Links/url_helpers';
 import { failedTransactionsCorrelationsTab } from './failed_transactions_correlations_tab';
 import { latencyCorrelationsTab } from './latency_correlations_tab';
 import { traceSamplesTab } from './trace_samples_tab';
+import { useSampleChartSelection } from '../../../hooks/use_sample_chart_selection';
+import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 
 const tabs = [
   traceSamplesTab,
@@ -96,7 +98,7 @@ export function TransactionDetailsTabs() {
         sample.transactionId === transactionId && sample.traceId === traceId
     );
 
-    if (!selectedSample) {
+    if (traceSamplesStatus === FETCH_STATUS.SUCCESS && !selectedSample) {
       // selected sample was not found. select a new one:
       const preferredSample = maybe(traceSamples[0]);
 
@@ -111,7 +113,7 @@ export function TransactionDetailsTabs() {
         }),
       });
     }
-  }, [history, traceSamples, transactionId, traceId]);
+  }, [history, traceSamples, transactionId, traceId, traceSamplesStatus]);
 
   return (
     <>

@@ -97,7 +97,9 @@ export function WaterfallWithSummary({
               })}
             </h5>
           </EuiTitle>
-          {traceSamples && (
+        </EuiFlexItem>
+        <EuiFlexItem>
+          {traceSamples.length > 0 && (
             <EuiPagination
               pageCount={traceSamples.length}
               activePage={sampleActivePage}
