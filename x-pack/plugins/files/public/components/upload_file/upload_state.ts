@@ -32,6 +32,7 @@ const prop$ = <T = unknown>(initialValue: T) => new BehaviorSubject<T>(initialVa
 interface FileState {
   file: File;
   status: 'idle' | 'uploading' | 'uploaded';
+  id?: string;
   error?: Error;
 }
 
@@ -39,7 +40,9 @@ export class UploadState {
   private readonly abort$ = new Subject<void>();
   private readonly files$$ = prop$<Array<SimpleStateSubject<FileState>>>([]);
 
-  public readonly files$ = this.files$$.pipe(switchMap((files$) => zip(...files$)));
+  public readonly files$ = this.files$$.pipe(
+    switchMap((files$) => (files$.length ? zip(...files$) : of([])))
+  );
 
   public readonly uploading$ = prop$(false);
 
@@ -106,7 +109,7 @@ export class UploadState {
           })
         );
       }),
-      map(() => file$.setState({ status: 'uploaded' })),
+      map(() => file$.setState({ status: 'uploaded', id: uploadTarget?.id })),
       catchError((e) => {
         erroredOrAborted = true;
         file$.setState({ status: 'idle', error: e });

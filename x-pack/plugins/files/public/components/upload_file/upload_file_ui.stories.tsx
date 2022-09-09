@@ -34,7 +34,7 @@ Uploading.args = {
 
 export const Retry = Template.bind({});
 Retry.args = {
-  retry: true,
+  isInvalid: true,
 };
 
 export const ImmediateUpload = Template.bind({});
@@ -44,5 +44,5 @@ ImmediateUpload.args = {
 
 export const ImmediateUploadRetry = Template.bind({});
 ImmediateUploadRetry.args = {
-  retry: true,
+  isInvalid: true,
 };

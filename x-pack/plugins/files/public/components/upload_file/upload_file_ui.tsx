@@ -29,7 +29,6 @@ export interface Props
   done?: boolean;
   ready?: boolean;
   uploading?: boolean;
-  retry?: boolean;
   immediate?: boolean;
   initialFilePromptText?: string;
 }
@@ -46,14 +45,14 @@ export const UploadFileUI = React.forwardRef<EuiFilePicker, Props>((props, ref) 
     initialFilePromptText,
     className,
     style,
-    retry,
+    isInvalid,
     ready,
     done,
     ...rest
   } = props;
 
   const cn = useMemo(() => classNames({ filesUploadFile: true }, className), [className]);
-  const showRetryButton = retry && !uploading;
+  const showRetryButton = isInvalid;
 
   return (
     <div className={cn} style={style}>
@@ -64,6 +63,7 @@ export const UploadFileUI = React.forwardRef<EuiFilePicker, Props>((props, ref) 
         multiple={false}
         initialPromptText={initialFilePromptText}
         isLoading={uploading}
+        isInvalid={isInvalid}
         disabled={done || uploading}
       />
 
@@ -88,12 +88,12 @@ export const UploadFileUI = React.forwardRef<EuiFilePicker, Props>((props, ref) 
           )}
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          {uploading ? (
-            <EuiButtonEmpty size="s" onClick={onCancel} color="danger">
+          {uploading || !done ? (
+            <EuiButtonEmpty size="s" disabled={!uploading} onClick={onCancel} color="danger">
               {i18nTexts.cancel}
             </EuiButtonEmpty>
           ) : (
-            <EuiButtonEmpty disabled={done} onClick={onClear} size="s">
+            <EuiButtonEmpty size="s" onClick={onClear} color="primary">
               {i18nTexts.clear}
             </EuiButtonEmpty>
           )}

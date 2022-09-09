@@ -32,10 +32,15 @@ export const UploadFile: FunctionComponent<Props> = ({ client, kind, onDone }) =
 
   const ref = useRef<null | EuiFilePicker>(null);
 
+  const clearFiles = () => {
+    ref.current?.removeFiles();
+    uploadState.setFiles([]);
+  };
+
   const uploading = useBehaviorSubject(uploadState.uploading$);
   const files = useObservable(uploadState.files$, []);
-  const [done, setDone] = useState(false);
   const errors = files.filter((f) => Boolean(f.error));
+  const done = Boolean(files.length && files.every((f) => f.status === 'uploaded'));
 
   return (
     <UploadFileUI
@@ -43,20 +48,10 @@ export const UploadFile: FunctionComponent<Props> = ({ client, kind, onDone }) =
       onCancel={uploadState.abort}
       onChange={uploadState.setFiles}
       ready={Boolean(files.length)}
-      onClear={() => {
-        ref.current?.removeFiles();
-        uploadState.setFiles([]);
-      }}
+      onClear={clearFiles}
       done={done}
       isInvalid={Boolean(errors.length)}
-      onUpload={() =>
-        uploadState.upload().subscribe({
-          complete: () => {
-            onDone();
-            setDone(true);
-          },
-        })
-      }
+      onUpload={() => uploadState.upload().subscribe()}
       uploading={uploading}
     />
   );

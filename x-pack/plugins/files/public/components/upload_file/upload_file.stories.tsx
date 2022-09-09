@@ -24,12 +24,14 @@ getFileKindsRegistry().register({
   allowedMimeTypes: ['applciation/pdf'],
 });
 
+const sleep = (ms: number) => new Promise((res) => setTimeout(res, ms));
+
 const defaultArgs: Props = {
   kind,
   onDone: action('onDone'),
   client: {
     create: async () => ({ file: { id: 'test' } }),
-    upload: async () => {},
+    upload: () => sleep(1000),
   } as unknown as FilesClient,
 };
 
@@ -41,4 +43,16 @@ export default {
 
 const Template: ComponentStory<typeof UploadFile> = (props: Props) => <UploadFile {...props} />;
 
-export const Basic = Template.bind({});
+export const UX = Template.bind({});
+
+export const UXError = Template.bind({});
+UXError.args = {
+  client: {
+    create: async () => ({ file: { id: 'test' } }),
+    upload: async () => {
+      await sleep(1000);
+      throw new Error('nope!');
+    },
+    delete: async () => {},
+  } as unknown as FilesClient,
+};
