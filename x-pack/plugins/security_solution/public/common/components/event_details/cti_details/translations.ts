@@ -67,13 +67,6 @@ export const NO_ENRICHMENTS_FOUND_DESCRIPTION = i18n.translate(
   }
 );
 
-export const NO_HOST_RISK_DATA_DESCRIPTION = i18n.translate(
-  'xpack.securitySolution.alertDetails.noRiskDataDescription',
-  {
-    defaultMessage: 'These is no host risk data found for this alert',
-  }
-);
-
 export const INVESTIGATION_QUERY_TITLE = i18n.translate(
   'xpack.securitySolution.alertDetails.investigationTimeQueryTitle',
   {

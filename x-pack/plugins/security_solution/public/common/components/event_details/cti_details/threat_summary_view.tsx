@@ -141,10 +141,6 @@ const ThreatSummaryViewComponent: React.FC<{
   isDraggable,
   isReadOnly,
 }) => {
-  if (!hostRisk && enrichments.length === 0) {
-    return null;
-  }
-
   return (
     <>
       <EuiHorizontalRule />
@@ -155,11 +151,9 @@ const ThreatSummaryViewComponent: React.FC<{
       <EuiSpacer size="m" />
 
       <EuiFlexGroup direction="column" gutterSize="m" style={{ flexGrow: 0 }}>
-        {hostRisk && (
-          <EuiFlexItem grow={false}>
-            <HostRiskSummary hostRisk={hostRisk} />
-          </EuiFlexItem>
-        )}
+        <EuiFlexItem grow={false}>
+          <HostRiskSummary hostRisk={hostRisk} />
+        </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
           <UsertRiskSummary userRisk={userRisk} />
