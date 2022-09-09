@@ -97,6 +97,7 @@ import {
   canEditRuleWithActions,
   isBoolean,
 } from '../../../../../common/utils/privileges';
+import { useSavedQueryServices } from '../../../../../common/utils/saved_query_services';
 
 import {
   RuleStatus,
@@ -127,6 +128,7 @@ import { useSignalHelpers } from '../../../../../common/containers/sourcerer/use
 import { HeaderPage } from '../../../../../common/components/header_page';
 import { ExceptionsViewer } from '../../../../../detection_engine/rule_exceptions/components/all_exception_items_table';
 import type { NavTab } from '../../../../../common/components/navigation/types';
+import type { DefineStepRule } from '../types';
 
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
@@ -300,6 +302,28 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   const { globalFullScreen } = useGlobalFullScreen();
   const [filterGroup, setFilterGroup] = useState<Status>(FILTER_OPEN);
   const [dataViewOptions, setDataViewOptions] = useState<{ [x: string]: DataViewListItem }>({});
+
+  const savedQueryServices = useSavedQueryServices();
+  const [isSavedQueryLoading, setIsSavedQueryLoading] = useState(false);
+  const [savedQueryBar, setSavedQueryBar] = useState<DefineStepRule['queryBar'] | null>(null);
+
+  useEffect(() => {
+    if (rule?.type === 'saved_query' && rule?.saved_id) {
+      setIsSavedQueryLoading(true);
+      savedQueryServices
+        .getSavedQuery(rule.saved_id)
+        .then((newSavedQuery) => {
+          setIsSavedQueryLoading(false);
+          setSavedQueryBar({
+            saved_id: newSavedQuery.id,
+            filters: newSavedQuery.attributes.filters ?? [],
+            query: newSavedQuery.attributes.query,
+            name: newSavedQuery.attributes.title,
+          });
+        })
+        .finally(() => setIsSavedQueryLoading(false));
+    }
+  }, [rule?.saved_id, rule?.type, savedQueryServices]);
 
   useEffect(() => {
     const fetchDataViews = async () => {
@@ -759,13 +783,22 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                 <EuiFlexItem grow={1}>
                   <EuiFlexGroup direction="column">
                     <EuiFlexItem component="section" grow={1}>
-                      <StepPanel loading={isLoading} title={ruleI18n.DEFINITION}>
-                        {defineRuleData != null && (
+                      <StepPanel
+                        loading={isLoading || isSavedQueryLoading}
+                        title={ruleI18n.DEFINITION}
+                      >
+                        {defineRuleData != null && !isSavedQueryLoading && (
                           <StepDefineRule
                             descriptionColumns="singleSplit"
                             isReadOnlyView={true}
                             isLoading={false}
-                            defaultValues={{ dataViewTitle, ...defineRuleData }}
+                            defaultValues={{
+                              dataViewTitle,
+                              ...defineRuleData,
+                              ...(rule?.saved_id && savedQueryBar
+                                ? { queryBar: savedQueryBar, savedQueryName: savedQueryBar.name }
+                                : {}),
+                            }}
                             kibanaDataViews={dataViewOptions}
                           />
                         )}

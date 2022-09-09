@@ -73,6 +73,7 @@ export const StepRuleDescriptionComponent = <T,>({
   indexPatterns,
   schema,
 }: StepRuleDescriptionProps<T>) => {
+  console.log('>>>>> data', data);
   const kibana = useKibana();
   const [filterManager] = useState<FilterManager>(new FilterManager(kibana.services.uiSettings));
 
@@ -182,6 +183,7 @@ export const getDescriptionItem = (
       filterManager,
       query,
       savedId,
+      savedQueryName: get('savedQueryName', data),
       indexPatterns,
     });
   } else if (field === 'eqlOptions') {

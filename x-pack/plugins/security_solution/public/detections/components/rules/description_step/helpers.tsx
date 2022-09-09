@@ -78,6 +78,7 @@ export const buildQueryBarDescription = ({
   filterManager,
   query,
   savedId,
+  savedQueryName,
   indexPatterns,
   queryLabel,
 }: BuildQueryBarDescription): ListItems[] => {
@@ -119,12 +120,12 @@ export const buildQueryBarDescription = ({
       },
     ];
   }
-  if (!isEmpty(savedId)) {
+  if (!isEmpty(savedId) && !isEmpty(savedQueryName)) {
     items = [
       ...items,
       {
         title: <>{i18n.SAVED_ID_LABEL} </>,
-        description: <>{savedId} </>,
+        description: <>{savedQueryName} </>,
       },
     ];
   }
