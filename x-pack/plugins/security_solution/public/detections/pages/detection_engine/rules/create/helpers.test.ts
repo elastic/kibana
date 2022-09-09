@@ -128,7 +128,7 @@ describe('helpers', () => {
     });
 
     describe('saved_query and query rule types', () => {
-      test('returns query rule type if savedId provided but shouldLoadQueryDynamically not true', () => {
+      test('returns query rule type if savedId provided but shouldLoadQueryDynamically != true', () => {
         const mockStepData: DefineStepRule = {
           ...mockData,
           queryBar: {
@@ -144,57 +144,7 @@ describe('helpers', () => {
         expect(result.query).toBe('test query');
       });
 
-      test('returns query rule type if savedId provided but shouldLoadQueryDynamically not true and rule type is saved_query', () => {
-        const mockStepData: DefineStepRule = {
-          ...mockData,
-          queryBar: {
-            ...mockData.queryBar,
-            saved_id: 'mock-test-id',
-          },
-          ruleType: 'saved_query',
-        };
-        const result = formatDefineStepData(mockStepData);
-
-        expect(result.saved_id).toBeUndefined();
-        expect(result.type).toBe('query');
-        expect(result.query).toBe('test query');
-      });
-
-      test('returns saved_query rule if shouldLoadQueryDynamically=true and savedId provided for rule type query', () => {
-        const mockStepData: DefineStepRule = {
-          ...mockData,
-          queryBar: {
-            ...mockData.queryBar,
-            saved_id: 'mock-test-id',
-          },
-          ruleType: 'query',
-          shouldLoadQueryDynamically: true,
-        };
-        const result = formatDefineStepData(mockStepData);
-
-        expect(result.saved_id).toBe('mock-test-id');
-        expect(result.type).toBe('saved_query');
-        expect(result.query).toBeUndefined();
-      });
-
-      test('returns rule type as saved_query only if shouldLoadQueryDynamically=true and savedId provided for rule type saved_query', () => {
-        const mockStepData: DefineStepRule = {
-          ...mockData,
-          queryBar: {
-            ...mockData.queryBar,
-            saved_id: 'mock-test-id',
-          },
-          ruleType: 'saved_query',
-          shouldLoadQueryDynamically: true,
-        };
-        const result = formatDefineStepData(mockStepData);
-
-        expect(result.saved_id).toBe('mock-test-id');
-        expect(result.type).toBe('saved_query');
-        expect(result.query).toBeUndefined();
-      });
-
-      test('returns query rule if shouldLoadQueryDynamically=true and savedId not provided for rule type query', () => {
+      test('returns query rule if shouldLoadQueryDynamically = true and savedId not provided for rule type query', () => {
         const mockStepData: DefineStepRule = {
           ...mockData,
           queryBar: {
@@ -211,7 +161,7 @@ describe('helpers', () => {
         expect(result.query).toBe('test query');
       });
 
-      test('returns query rule if shouldLoadQueryDynamically=true and savedId not provided for rule type saved_query', () => {
+      test('returns query rule if shouldLoadQueryDynamically = true and savedId not provided for rule type saved_query', () => {
         const mockStepData: DefineStepRule = {
           ...mockData,
           queryBar: {
@@ -226,6 +176,56 @@ describe('helpers', () => {
         expect(result.saved_id).toBeUndefined();
         expect(result.type).toBe('query');
         expect(result.query).toBe('test query');
+      });
+
+      test('returns query rule type if savedId provided but shouldLoadQueryDynamically != true and rule type is saved_query', () => {
+        const mockStepData: DefineStepRule = {
+          ...mockData,
+          queryBar: {
+            ...mockData.queryBar,
+            saved_id: 'mock-test-id',
+          },
+          ruleType: 'saved_query',
+        };
+        const result = formatDefineStepData(mockStepData);
+
+        expect(result.saved_id).toBeUndefined();
+        expect(result.type).toBe('query');
+        expect(result.query).toBe('test query');
+      });
+
+      test('returns saved_query rule if shouldLoadQueryDynamically = true and savedId provided for rule type query', () => {
+        const mockStepData: DefineStepRule = {
+          ...mockData,
+          queryBar: {
+            ...mockData.queryBar,
+            saved_id: 'mock-test-id',
+          },
+          ruleType: 'query',
+          shouldLoadQueryDynamically: true,
+        };
+        const result = formatDefineStepData(mockStepData);
+
+        expect(result.saved_id).toBe('mock-test-id');
+        expect(result.type).toBe('saved_query');
+        expect(result.query).toBeUndefined();
+      });
+
+      test('returns saved_query rule if shouldLoadQueryDynamically = true and savedId provided for rule type saved_query', () => {
+        const mockStepData: DefineStepRule = {
+          ...mockData,
+          queryBar: {
+            ...mockData.queryBar,
+            saved_id: 'mock-test-id',
+          },
+          ruleType: 'saved_query',
+          shouldLoadQueryDynamically: true,
+        };
+        const result = formatDefineStepData(mockStepData);
+
+        expect(result.saved_id).toBe('mock-test-id');
+        expect(result.type).toBe('saved_query');
+        expect(result.query).toBeUndefined();
       });
     });
 
