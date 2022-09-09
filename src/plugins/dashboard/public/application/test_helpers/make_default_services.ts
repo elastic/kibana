@@ -17,36 +17,14 @@ import { indexPatternEditorPluginMock } from '@kbn/data-view-editor-plugin/publi
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 
 import { chromeServiceMock, coreMock, uiSettingsServiceMock } from '@kbn/core/public/mocks';
-import { SavedObjectLoader, SavedObjectLoaderFindOptions } from '../../services/saved_objects';
 import { SavedQueryService } from '../../services/data';
 import { DashboardAppServices, DashboardAppCapabilities } from '../../types';
 import { NavigationPublicPluginStart } from '../../services/navigation';
-import { getSavedDashboardMock } from './get_saved_dashboard_mock';
 import { DashboardSessionStorage } from '../lib';
 
 export function makeDefaultServices(): DashboardAppServices {
   const core = coreMock.createStart();
   core.overlays.openConfirm = jest.fn().mockResolvedValue(true);
-
-  const savedDashboards = {} as SavedObjectLoader;
-  savedDashboards.find = (search: string, sizeOrOptions: number | SavedObjectLoaderFindOptions) => {
-    const size = typeof sizeOrOptions === 'number' ? sizeOrOptions : sizeOrOptions.size ?? 10;
-    const hits = [];
-    for (let i = 0; i < size; i++) {
-      hits.push({
-        id: `dashboard${i}`,
-        title: `dashboard${i} - ${search} - title`,
-        description: `dashboard${i} desc`,
-      });
-    }
-    return Promise.resolve({
-      total: size,
-      hits,
-    });
-  };
-  savedDashboards.get = jest
-    .fn()
-    .mockImplementation((id?: string) => Promise.resolve(getSavedDashboardMock({ id })));
 
   const dashboardSessionStorage = {
     getDashboardIdsWithUnsavedChanges: jest
@@ -93,7 +71,6 @@ export function makeDefaultServices(): DashboardAppServices {
     onAppLeave: (handler) => {},
     dashboardSessionStorage,
     initializerContext,
-    savedDashboards,
     core,
   };
 }

@@ -8,14 +8,10 @@
 
 export * from './filter_utils';
 export { getDashboardIdFromUrl } from './url';
-export { saveDashboard } from './save_dashboard';
 export { addHelpMenuToAppChrome } from './help_menu_util';
 export { diffDashboardState } from './diff_dashboard_state';
-export { getTagsFromSavedDashboard } from './dashboard_tagging';
 export { syncDashboardUrlState } from './sync_dashboard_url_state';
 export { DashboardSessionStorage } from './dashboard_session_storage';
-export { loadSavedDashboardState } from './load_saved_dashboard_state';
-export { attemptLoadDashboardByTitle } from './load_dashboard_by_title';
 export { syncDashboardFilterState } from './sync_dashboard_filter_state';
 export { syncDashboardDataViews } from './sync_dashboard_data_views';
 export { syncDashboardContainerInput } from './sync_dashboard_container_input';

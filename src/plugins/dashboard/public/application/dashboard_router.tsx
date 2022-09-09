@@ -75,7 +75,6 @@ export async function mountApp({
 
   const {
     navigation,
-    savedObjects,
     urlForwarding,
     data: dataStart,
     share: shareStart,
@@ -96,7 +95,6 @@ export async function mountApp({
   const dashboardServices: DashboardAppServices = {
     navigation,
     onAppLeave,
-    savedObjects,
     urlForwarding,
     dataViewEditor,
     visualizations,
@@ -115,7 +113,6 @@ export async function mountApp({
     dataViews: dataStart.dataViews,
     savedQueryService: dataStart.query.savedQueries,
     savedObjectsClient: coreStart.savedObjects.client,
-    savedDashboards: dashboardStart.getSavedDashboardLoader(),
     savedObjectsTagging: savedObjectsTaggingOss?.getTaggingApi(),
     allowByValueEmbeddables:
       initializerContext.config.get<DashboardFeatureFlagConfig>().allowByValueEmbeddables,

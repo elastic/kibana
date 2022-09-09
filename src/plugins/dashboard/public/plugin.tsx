@@ -43,11 +43,7 @@ import type {
   ScreenshotModePluginSetup,
   ScreenshotModePluginStart,
 } from './services/screenshot_mode';
-import {
-  getSavedObjectFinder,
-  SavedObjectLoader,
-  SavedObjectsStart,
-} from './services/saved_objects';
+import { getSavedObjectFinder } from './services/saved_objects';
 import {
   CONTEXT_MENU_TRIGGER,
   EmbeddableSetup,
@@ -75,13 +71,13 @@ import {
   DashboardCapabilities,
 } from './application';
 import { DashboardAppLocatorDefinition, DashboardAppLocator } from './locator';
-import { createSavedDashboardLoader } from './saved_dashboards';
 import { DashboardConstants } from './dashboard_constants';
 import { PlaceholderEmbeddableFactory } from './application/embeddable/placeholder';
 import { ExportCSVAction } from './application/actions/export_csv_action';
 import { dashboardFeatureCatalog } from './dashboard_strings';
 import { SpacesPluginStart } from './services/spaces';
 import { FiltersNotificationBadge } from './application/actions/filters_notification_badge';
+import { loadDashboardStateFromSavedObject } from './dashboard_saved_object';
 
 export interface DashboardFeatureFlagConfig {
   allowByValueEmbeddables: boolean;
@@ -108,7 +104,6 @@ export interface DashboardStartDependencies {
   savedObjectsClient: SavedObjectsClientContract;
   share?: SharePluginStart;
   uiActions: UiActionsStart;
-  savedObjects: SavedObjectsStart;
   presentationUtil: PresentationUtilPluginStart;
   savedObjectsTaggingOss?: SavedObjectTaggingOssPluginStart;
   spaces?: SpacesPluginStart;
@@ -123,7 +118,6 @@ export interface DashboardSetup {
 }
 
 export interface DashboardStart {
-  getSavedDashboardLoader: () => SavedObjectLoader; // TODO SAVED DASHBOARDS - remove this
   getDashboardContainerByValueRenderer: () => ReturnType<
     typeof createDashboardContainerByValueRenderer
   >;
@@ -145,15 +139,7 @@ export class DashboardPlugin
 
   public setup(
     core: CoreSetup<DashboardStartDependencies, DashboardStart>,
-    {
-      share,
-      embeddable,
-      home,
-      urlForwarding,
-      data,
-      usageCollection,
-      screenshotMode,
-    }: DashboardSetupDependencies
+    { share, embeddable, home, urlForwarding, data, usageCollection }: DashboardSetupDependencies
   ): DashboardSetup {
     this.dashboardFeatureFlagConfig =
       this.initializerContext.config.get<DashboardFeatureFlagConfig>();
@@ -172,6 +158,8 @@ export class DashboardPlugin
       return {
         SavedObjectFinder: getSavedObjectFinder(coreStart.savedObjects, coreStart.uiSettings),
         showWriteControls: Boolean(coreStart.application.capabilities.dashboard.showWriteControls),
+        savedObjectsClient: coreStart.savedObjects.client,
+        presentationUtil: deps.presentationUtil,
         notifications: coreStart.notifications,
         screenshotMode: deps.screenshotMode,
         application: coreStart.application,
@@ -184,7 +172,7 @@ export class DashboardPlugin
         theme: coreStart.theme,
         http: coreStart.http,
         ExitFullScreenButton,
-        presentationUtil: deps.presentationUtil,
+        data: deps.data,
       };
     };
 
@@ -193,9 +181,21 @@ export class DashboardPlugin
         new DashboardAppLocatorDefinition({
           useHashedUrl: core.uiSettings.get('state:storeInSessionStorage'),
           getDashboardFilterFields: async (dashboardId: string) => {
-            const [, , selfStart] = await core.getStartServices();
-            const dashboard = await selfStart.getSavedDashboardLoader().get(dashboardId);
-            return dashboard?.searchSource?.getField('filter') ?? [];
+            const {
+              embeddable: embeddableStart,
+              data: dataStart,
+              savedObjectsClient,
+            } = await getStartServices();
+            return (
+              (
+                await loadDashboardStateFromSavedObject({
+                  savedObjectsClient,
+                  id: dashboardId,
+                  embeddableStart,
+                  dataStart,
+                })
+              ).dashboardState?.filters ?? []
+            );
           },
         })
       );
@@ -414,14 +414,7 @@ export class DashboardPlugin
       uiActions.attachAction(CONTEXT_MENU_TRIGGER, copyToDashboardAction.id);
     }
 
-    const savedDashboardLoader = createSavedDashboardLoader({
-      savedObjectsClient: core.savedObjects.client,
-      savedObjects: plugins.savedObjects,
-      embeddableStart: plugins.embeddable,
-    });
-
     return {
-      getSavedDashboardLoader: () => savedDashboardLoader,
       getDashboardContainerByValueRenderer: () => {
         const dashboardContainerFactory =
           plugins.embeddable.getEmbeddableFactory(DASHBOARD_CONTAINER_TYPE);

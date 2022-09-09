@@ -16,12 +16,14 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useState } from 'react';
-import { DashboardSavedObject } from '../..';
+
 import { dashboardUnsavedListingStrings, getNewDashboardTitle } from '../../dashboard_strings';
-import { useKibana } from '../../services/kibana_react';
+import { findDashboardSavedObjectsByIds } from '../../dashboard_saved_object';
 import { DASHBOARD_PANELS_UNSAVED_ID } from '../lib/dashboard_session_storage';
 import { DashboardAppServices, DashboardRedirect } from '../../types';
 import { confirmDiscardUnsavedChanges } from './confirm_overlays';
+import { useKibana } from '../../services/kibana_react';
+import { DashboardAttributes } from '../embeddable';
 
 const DashboardUnsavedItem = ({
   id,
@@ -99,7 +101,7 @@ const DashboardUnsavedItem = ({
 };
 
 interface UnsavedItemMap {
-  [key: string]: DashboardSavedObject;
+  [key: string]: DashboardAttributes;
 }
 
 export interface DashboardUnsavedListingProps {
@@ -115,9 +117,9 @@ export const DashboardUnsavedListing = ({
 }: DashboardUnsavedListingProps) => {
   const {
     services: {
-      dashboardSessionStorage,
-      savedDashboards,
+      savedObjectsClient,
       core: { overlays },
+      dashboardSessionStorage,
     },
   } = useKibana<DashboardAppServices>();
 
@@ -145,40 +147,38 @@ export const DashboardUnsavedListing = ({
       return;
     }
     let canceled = false;
-    const dashPromises = unsavedDashboardIds
-      .filter((id) => id !== DASHBOARD_PANELS_UNSAVED_ID)
-      .map((dashboardId) => {
-        return (savedDashboards.get(dashboardId) as Promise<DashboardSavedObject>).catch(
-          () => dashboardId
-        );
-      });
-    Promise.all(dashPromises).then((dashboards: Array<string | DashboardSavedObject>) => {
-      const dashboardMap = {};
-      if (canceled) {
-        return;
-      }
-      let hasError = false;
-      const newItems = dashboards.reduce((map, dashboard) => {
-        if (typeof dashboard === 'string') {
-          hasError = true;
-          dashboardSessionStorage.clearState(dashboard);
-          return map;
+    const existingDashboardsWithUnsavedChanges = unsavedDashboardIds.filter(
+      (id) => id !== DASHBOARD_PANELS_UNSAVED_ID
+    );
+    findDashboardSavedObjectsByIds(savedObjectsClient, existingDashboardsWithUnsavedChanges).then(
+      (results) => {
+        const dashboardMap = {};
+        if (canceled) {
+          return;
         }
-        return {
-          ...map,
-          [dashboard.id || DASHBOARD_PANELS_UNSAVED_ID]: dashboard,
-        };
-      }, dashboardMap);
-      if (hasError) {
-        refreshUnsavedDashboards();
-        return;
+        let hasError = false;
+        const newItems = results.reduce((map, result) => {
+          if (result.status === 'error') {
+            hasError = true;
+            dashboardSessionStorage.clearState(result.id);
+            return map;
+          }
+          return {
+            ...map,
+            [result.id || DASHBOARD_PANELS_UNSAVED_ID]: result.attributes,
+          };
+        }, dashboardMap);
+        if (hasError) {
+          refreshUnsavedDashboards();
+          return;
+        }
+        setItems(newItems);
       }
-      setItems(newItems);
-    });
+    );
     return () => {
       canceled = true;
     };
-  }, [savedDashboards, dashboardSessionStorage, refreshUnsavedDashboards, unsavedDashboardIds]);
+  }, [dashboardSessionStorage, refreshUnsavedDashboards, unsavedDashboardIds, savedObjectsClient]);
 
   return unsavedDashboardIds.length === 0 ? null : (
     <>

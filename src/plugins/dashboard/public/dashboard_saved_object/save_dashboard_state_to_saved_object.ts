@@ -21,20 +21,20 @@ import {
 import { DashboardAttributes } from '../application';
 import { NotificationsStart } from '../services/core';
 import { EmbeddableStart } from '../services/embeddable';
+import { DashboardConstants } from '../dashboard_constants';
 import { DashboardRedirect, DashboardState } from '../types';
 import { SavedObjectSaveOpts } from '../services/saved_objects';
+import { dashboardSaveToastStrings } from '../dashboard_strings';
 import { SavedObjectsTaggingApi } from '../services/saved_objects_tagging_oss';
 import { convertPanelMapToSavedPanels, extractReferences } from '../../common';
 import { convertTimeToUTCString, DashboardSessionStorage } from '../application/lib';
 import { serializeControlGroupInput } from '../application/lib/dashboard_control_group';
-import { DashboardConstants } from '../dashboard_constants';
-import { dashboardSaveToastStrings } from '../dashboard_strings';
 
 export type SavedDashboardSaveOpts = SavedObjectSaveOpts & { saveAsCopy?: boolean };
 interface SaveDashboardProps {
   version: string;
-  redirectTo: DashboardRedirect;
   currentState: DashboardState;
+  redirectTo: DashboardRedirect;
   timefilter: TimefilterContract;
   dataStart: DataPublicPluginStart;
   embeddableStart: EmbeddableStart;
@@ -48,9 +48,9 @@ interface SaveDashboardProps {
 export const saveDashboardStateToSavedObject = async ({
   toasts,
   version,
-  redirectTo,
   dataStart,
   timefilter,
+  redirectTo,
   saveOptions,
   currentState,
   embeddableStart,
@@ -121,7 +121,7 @@ export const saveDashboardStateToSavedObject = async ({
     timeFrom,
     title,
     timeTo,
-    version: 1, // todo - where does version come from?
+    version: 1, // todo - where does version come from? Why is it needed?
   };
 
   /**

@@ -382,11 +382,19 @@ export const panelStorageErrorStrings = {
     }),
 };
 
-export const dashboardLoadingErrorStrings = {
+export const dashboardSavedObjectErrorStrings = {
   getDashboardLoadError: (message: string) =>
     i18n.translate('dashboard.loadingError.errorMessage', {
       defaultMessage: 'Error encountered while loading saved dashboard: {message}',
       values: { message },
+    }),
+  getSaveDuplicateTitleRejected: () =>
+    i18n.translate('dashboard.saveError.saveDuplicateRejectedDescription', {
+      defaultMessage: 'Save with duplicate title confirmation was rejected',
+    }),
+  getErrorDeletingDashboardToast: () =>
+    i18n.translate('dashboard.deleteError.toastDescription', {
+      defaultMessage: 'Error encountered while deleting dashboard',
     }),
 };
 
@@ -427,7 +435,7 @@ export const emptyScreenStrings = {
 /*
   Dashboard Listing Page
 */
-export const dashboardListingTable = {
+export const dashboardListingTableStrings = {
   getEntityName: () =>
     i18n.translate('dashboard.listing.table.entityName', {
       defaultMessage: 'dashboard',
@@ -454,8 +462,8 @@ export const dashboardUnsavedListingStrings = {
       defaultMessage: 'You have unsaved changes in the following {dash}:',
       values: {
         dash: plural
-          ? dashboardListingTable.getEntityNamePlural()
-          : dashboardListingTable.getEntityName(),
+          ? dashboardListingTableStrings.getEntityNamePlural()
+          : dashboardListingTableStrings.getEntityName(),
       },
     }),
   getLoadingTitle: () =>

@@ -11,7 +11,7 @@ import { DashboardAppLocatorParams } from '../..';
 import { Capabilities } from '../../services/core';
 import { SharePluginStart } from '../../services/share';
 import { stateToRawDashboardState } from '../lib/convert_dashboard_state';
-import { getSavedDashboardMock, makeDefaultServices } from '../test_helpers';
+import { makeDefaultServices } from '../test_helpers';
 import { showPublicUrlSwitch, ShowShareModal, ShowShareModalProps } from './show_share_modal';
 
 describe('showPublicUrlSwitch', () => {
@@ -72,7 +72,6 @@ describe('ShowShareModal', () => {
         share,
         isDirty: true,
         kibanaVersion: 'testKibanaVersion',
-        savedDashboard: getSavedDashboardMock(),
         anchorElement: document.createElement('div'),
         dashboardCapabilities: services.dashboardCapabilities,
         currentDashboardState: { panels: {} } as unknown as DashboardState,

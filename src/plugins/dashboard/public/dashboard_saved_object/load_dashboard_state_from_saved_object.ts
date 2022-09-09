@@ -33,11 +33,11 @@ import { SavedObjectsTaggingApi } from '../services/saved_objects_tagging_oss';
 
 interface LoadDashboardFromSavedObjectProps {
   id?: string;
-  isScreenshotMode: boolean;
+  isScreenshotMode?: boolean;
   embeddableStart: EmbeddableStart;
   dataStart: DataPublicPluginStart;
   spacesService?: SpacesPluginStart;
-  getScopedHistory: () => ScopedHistory;
+  getScopedHistory?: () => ScopedHistory;
   savedObjectsTagging?: SavedObjectsTaggingApi;
   savedObjectsClient: SavedObjectsClientContract;
 }
@@ -111,8 +111,8 @@ export const loadDashboardStateFromSavedObject = async ({
   /**
    * Handle saved object resolve alias outcome by redirecting
    */
-  const scopedHistory = getScopedHistory();
-  if (outcome === 'aliasMatch' && id && aliasId) {
+  const scopedHistory = getScopedHistory?.();
+  if (scopedHistory && outcome === 'aliasMatch' && id && aliasId) {
     const path = scopedHistory.location.hash.replace(id, aliasId);
     if (isScreenshotMode) {
       scopedHistory.replace(path);
@@ -126,7 +126,7 @@ export const loadDashboardStateFromSavedObject = async ({
    * Create conflict warning component if there is a saved object id conflict
    */
   const createConflictWarning =
-    outcome === 'conflict' && aliasId
+    scopedHistory && outcome === 'conflict' && aliasId
       ? () =>
           spacesService?.ui.components.getLegacyUrlConflict({
             currentObjectId: id,

@@ -16,7 +16,6 @@ import { DashboardSessionStorage } from '../lib';
 import { coreMock } from '@kbn/core/public/mocks';
 import { DashboardConstants } from '../../dashboard_constants';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { SavedObjectLoader } from '../../services/saved_objects';
 import { DashboardAppServices, DashboardAppState } from '../../types';
 import { DashboardContainer } from '../embeddable/dashboard_container';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -25,11 +24,7 @@ import { dashboardStateStore, setDescription, setViewMode } from '../state';
 import { DashboardContainerServices } from '../embeddable/dashboard_container';
 import { createKbnUrlStateStorage, defer } from '@kbn/kibana-utils-plugin/public';
 import { useDashboardAppState, UseDashboardStateProps } from './use_dashboard_app_state';
-import {
-  getSampleDashboardInput,
-  getSavedDashboardMock,
-  makeDefaultServices,
-} from '../test_helpers';
+import { getSampleDashboardInput, makeDefaultServices } from '../test_helpers';
 import { DataView } from '../../services/data_views';
 import type { Filter } from '@kbn/es-query';
 

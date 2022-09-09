@@ -8,3 +8,9 @@
 
 export { loadDashboardStateFromSavedObject } from './load_dashboard_state_from_saved_object';
 export { saveDashboardStateToSavedObject } from './save_dashboard_state_to_saved_object';
+export { checkForDuplicateDashboardTitle } from './check_for_duplicate_dashboard_title';
+export {
+  findDashboardSavedObjects,
+  findDashboardSavedObjectsByIds,
+  findDashboardIdByTitle,
+} from './find_dashboard_saved_objects';

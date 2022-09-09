@@ -17,5 +17,3 @@ export {
   SavedObjectSaveModal,
   getSavedObjectFinder,
 } from '@kbn/saved-objects-plugin/public';
-export { SavedObjectLoader } from './saved_object_loader';
-export type { SavedObjectLoaderFindOptions } from './saved_object_loader';

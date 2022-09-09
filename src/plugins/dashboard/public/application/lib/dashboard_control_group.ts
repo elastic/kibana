@@ -13,16 +13,15 @@ import { debounceTime, distinctUntilChanged, distinctUntilKeyChanged } from 'rxj
 
 import {
   ControlGroupInput,
-  controlGroupInputToRawControlGroupAttributes,
   getDefaultControlGroupInput,
   persistableControlGroupInputIsEqual,
-  rawControlGroupAttributesToControlGroupInput,
+  controlGroupInputToRawControlGroupAttributes,
 } from '@kbn/controls-plugin/common';
 import { ControlGroupContainer } from '@kbn/controls-plugin/public';
 
 import { DashboardContainer } from '..';
 import { DashboardState } from '../../types';
-import { DashboardContainerInput, DashboardSavedObject } from '../..';
+import { DashboardContainerInput } from '../..';
 
 interface DiffChecks {
   [key: string]: (a?: unknown, b?: unknown) => boolean;
@@ -155,27 +154,6 @@ export const syncDashboardControlGroup = async ({
   };
 };
 
-export const serializeControlGroupToDashboardSavedObject = (
-  dashboardSavedObject: DashboardSavedObject,
-  dashboardState: DashboardState
-) => {
-  // only save to saved object if control group is not default
-  if (
-    persistableControlGroupInputIsEqual(
-      dashboardState.controlGroupInput,
-      getDefaultControlGroupInput()
-    )
-  ) {
-    dashboardSavedObject.controlGroupInput = undefined;
-    return;
-  }
-  if (dashboardState.controlGroupInput) {
-    dashboardSavedObject.controlGroupInput = controlGroupInputToRawControlGroupAttributes(
-      dashboardState.controlGroupInput
-    );
-  }
-};
-
 export const serializeControlGroupInput = (
   controlGroupInput: DashboardState['controlGroupInput']
 ) => {
@@ -187,13 +165,6 @@ export const serializeControlGroupInput = (
     return undefined;
   }
   return controlGroupInputToRawControlGroupAttributes(controlGroupInput);
-};
-
-export const deserializeControlGroupFromDashboardSavedObject = (
-  dashboardSavedObject: DashboardSavedObject
-): Omit<ControlGroupInput, 'id'> | undefined => {
-  if (!dashboardSavedObject.controlGroupInput) return;
-  return rawControlGroupAttributesToControlGroupInput(dashboardSavedObject.controlGroupInput);
 };
 
 export const combineDashboardFiltersWithControlGroupFilters = (

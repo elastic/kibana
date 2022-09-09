@@ -12,40 +12,46 @@ import { waitFor } from '@testing-library/react';
 import { mount } from 'enzyme';
 import React from 'react';
 
-import { DashboardSavedObject } from '../..';
 import { DashboardAppServices } from '../../types';
-import { SavedObjectLoader } from '../../services/saved_objects';
 import { KibanaContextProvider } from '../../services/kibana_react';
 import { DASHBOARD_PANELS_UNSAVED_ID } from '../lib/dashboard_session_storage';
 import { DashboardUnsavedListing, DashboardUnsavedListingProps } from './dashboard_unsaved_listing';
 import { makeDefaultServices } from '../test_helpers';
+import { DashboardAttributes } from '../embeddable';
 
-const mockedDashboards: { [key: string]: DashboardSavedObject } = {
-  dashboardUnsavedOne: {
+import * as findDashboardSavedObjects from '../../dashboard_saved_object/find_dashboard_saved_objects';
+
+const mockedDashboardResults: Awaited<
+  ReturnType<typeof findDashboardSavedObjects.findDashboardSavedObjectsByIds>
+> = [
+  {
     id: `dashboardUnsavedOne`,
-    title: `Dashboard Unsaved One`,
-  } as DashboardSavedObject,
-  dashboardUnsavedTwo: {
+    status: 'success',
+    attributes: {
+      title: `Dashboard Unsaved One`,
+    } as unknown as DashboardAttributes,
+  },
+  {
     id: `dashboardUnsavedTwo`,
-    title: `Dashboard Unsaved Two`,
-  } as DashboardSavedObject,
-  dashboardUnsavedThree: {
+    status: 'success',
+    attributes: {
+      title: `Dashboard Unsaved Two`,
+    } as unknown as DashboardAttributes,
+  },
+  {
     id: `dashboardUnsavedThree`,
-    title: `Dashboard Unsaved Three`,
-  } as DashboardSavedObject,
-};
+    status: 'success',
+    attributes: {
+      title: `Dashboard Unsaved Three`,
+    } as unknown as DashboardAttributes,
+  },
+];
 
-function makeServices(): DashboardAppServices {
-  const services = makeDefaultServices();
-  const savedDashboards = {} as SavedObjectLoader;
-  savedDashboards.get = jest
-    .fn()
-    .mockImplementation((id: string) => Promise.resolve(mockedDashboards[id]));
-  return {
-    ...services,
-    savedDashboards,
-  };
-}
+jest
+  .spyOn(findDashboardSavedObjects, 'findDashboardSavedObjectsByIds')
+  .mockImplementation((savedObjectsClient: unknown, ids: string[]) =>
+    Promise.resolve(mockedDashboardResults)
+  );
 
 const makeDefaultProps = (): DashboardUnsavedListingProps => ({
   redirectTo: jest.fn(),
@@ -60,7 +66,7 @@ function mountWith({
   services?: DashboardAppServices;
   props?: DashboardUnsavedListingProps;
 }) {
-  const services = incomingServices ?? makeServices();
+  const services = incomingServices ?? makeDefaultServices();
   const props = incomingProps ?? makeDefaultProps();
   const wrappingComponent: React.FC<{
     children: React.ReactNode;
@@ -77,18 +83,21 @@ function mountWith({
 
 describe('Unsaved listing', () => {
   it('Gets information for each unsaved dashboard', async () => {
-    const { services } = mountWith({});
+    mountWith({});
     await waitFor(() => {
-      expect(services.savedDashboards.get).toHaveBeenCalledTimes(3);
+      expect(findDashboardSavedObjects.findDashboardSavedObjectsByIds).toHaveBeenCalledTimes(1);
     });
   });
 
-  it('Does not attempt to get unsaved dashboard id', async () => {
+  it('Does not attempt to get newly created dashboard', async () => {
     const props = makeDefaultProps();
     props.unsavedDashboardIds = ['dashboardUnsavedOne', DASHBOARD_PANELS_UNSAVED_ID];
-    const { services } = mountWith({ props });
+    mountWith({ props });
     await waitFor(() => {
-      expect(services.savedDashboards.get).toHaveBeenCalledTimes(1);
+      expect(findDashboardSavedObjects.findDashboardSavedObjectsByIds).toHaveBeenCalledWith(
+        expect.any(Object),
+        ['dashboardUnsavedOne']
+      );
     });
   });
 
@@ -143,14 +152,24 @@ describe('Unsaved listing', () => {
   });
 
   it('removes unsaved changes from any dashboard which errors on fetch', async () => {
-    const services = makeServices();
     const props = makeDefaultProps();
-    services.savedDashboards.get = jest.fn().mockImplementation((id: string) => {
-      if (id === 'failCase1' || id === 'failCase2') {
-        return Promise.reject(new Error());
-      }
-      return Promise.resolve(mockedDashboards[id]);
-    });
+    jest
+      .spyOn(findDashboardSavedObjects, 'findDashboardSavedObjectsByIds')
+      .mockImplementation((savedObjectsClient: unknown, ids: string[]) =>
+        Promise.resolve([
+          ...mockedDashboardResults,
+          {
+            id: 'failCase1',
+            status: 'error',
+            error: { error: 'oh no', message: 'bwah', statusCode: 100 },
+          },
+          {
+            id: 'failCase2',
+            status: 'error',
+            error: { error: 'oh no', message: 'bwah', statusCode: 100 },
+          },
+        ])
+      );
 
     props.unsavedDashboardIds = [
       'dashboardUnsavedOne',
@@ -159,7 +178,7 @@ describe('Unsaved listing', () => {
       'failCase1',
       'failCase2',
     ];
-    const { component } = mountWith({ services, props });
+    const { component, services } = mountWith({ props });
     waitFor(() => {
       component.update();
       expect(services.dashboardSessionStorage.clearState).toHaveBeenCalledWith('failCase1');

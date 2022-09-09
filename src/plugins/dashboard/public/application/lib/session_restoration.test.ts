@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { getSavedDashboardMock } from '../test_helpers';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { createSessionRestorationDataProvider, savedObjectToDashboardState } from '.';
+import { createSessionRestorationDataProvider } from '.';
+import { DashboardState } from '../../types';
 
 describe('createSessionRestorationDataProvider', () => {
   const mockDataPlugin = dataPluginMock.createStartContract();
@@ -16,14 +16,7 @@ describe('createSessionRestorationDataProvider', () => {
   const searchSessionInfoProvider = createSessionRestorationDataProvider({
     kibanaVersion: version,
     data: mockDataPlugin,
-    getAppState: () =>
-      savedObjectToDashboardState({
-        version,
-        showWriteControls: true,
-        usageCollection: undefined,
-        savedObjectsTagging: undefined,
-        savedDashboard: getSavedDashboardMock(),
-      }),
+    getAppState: () => ({ panels: {} } as unknown as DashboardState),
     getDashboardTitle: () => 'Dashboard',
     getDashboardId: () => 'Id',
   });

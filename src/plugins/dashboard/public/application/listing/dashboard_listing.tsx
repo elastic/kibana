@@ -20,14 +20,14 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { ApplicationStart, SavedObjectsFindOptionsReference } from '@kbn/core/public';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import useMount from 'react-use/lib/useMount';
-import { attemptLoadDashboardByTitle } from '../lib';
 import { DashboardAppServices, DashboardRedirect } from '../../types';
 import {
   getDashboardBreadcrumb,
-  dashboardListingTable,
+  dashboardListingTableStrings,
   noItemsStrings,
   dashboardUnsavedListingStrings,
   getNewDashboardTitle,
+  dashboardSavedObjectErrorStrings,
 } from '../../dashboard_strings';
 import { syncQueryStateWithUrl } from '../../services/data';
 import { IKbnUrlStateStorage } from '../../services/kibana_utils';
@@ -38,6 +38,8 @@ import { confirmCreateWithUnsaved, confirmDiscardUnsavedChanges } from './confir
 import { getDashboardListItemLink } from './get_dashboard_list_item_link';
 import { DASHBOARD_PANELS_UNSAVED_ID } from '../lib/dashboard_session_storage';
 import { DashboardAppNoDataPage, isDashboardAppInNoDataState } from '../dashboard_app_no_data';
+import { findDashboardSavedObjects, findDashboardIdByTitle } from '../../dashboard_saved_object';
+import { DashboardConstants } from '../..';
 
 const SAVED_OBJECTS_LIMIT_SETTING = 'savedObjects:listingLimit';
 const SAVED_OBJECTS_PER_PAGE_SETTING = 'savedObjects:perPage';
@@ -60,7 +62,6 @@ export const DashboardListing = ({
       core,
       data,
       dataViews,
-      savedDashboards,
       savedObjectsClient,
       savedObjectsTagging,
       dashboardCapabilities,
@@ -99,7 +100,7 @@ export const DashboardListing = ({
       kbnUrlStateStorage
     );
     if (title) {
-      attemptLoadDashboardByTitle(title, savedObjectsClient).then((result) => {
+      findDashboardIdByTitle(title, savedObjectsClient).then((result) => {
         if (!result) return;
         redirectTo({
           destination: 'dashboard',
@@ -252,30 +253,40 @@ export const DashboardListing = ({
   const fetchItems = useCallback(
     (filter: string) => {
       let searchTerm = filter;
-      let references: SavedObjectsFindOptionsReference[] | undefined;
+      let hasReference: SavedObjectsFindOptionsReference[] | undefined;
       if (savedObjectsTagging) {
         const parsed = savedObjectsTagging.ui.parseSearchQuery(filter, {
           useName: true,
         });
         searchTerm = parsed.searchTerm;
-        references = parsed.tagReferences;
+        hasReference = parsed.tagReferences;
       }
 
-      return savedDashboards.find(searchTerm, {
+      return findDashboardSavedObjects({
+        savedObjectsClient,
+        search: searchTerm,
         size: listingLimit,
-        hasReference: references,
+        hasReference,
       });
     },
-    [listingLimit, savedDashboards, savedObjectsTagging]
+    [listingLimit, savedObjectsClient, savedObjectsTagging]
   );
 
   const deleteItems = useCallback(
-    (dashboards: Array<{ id: string }>) => {
-      dashboards.map((d) => dashboardSessionStorage.clearState(d.id));
+    async (dashboardsToDelete: Array<{ id: string }>) => {
+      await Promise.all(
+        dashboardsToDelete.map(({ id }) => {
+          dashboardSessionStorage.clearState(id);
+          return savedObjectsClient.delete(DashboardConstants.DASHBOARD_SAVED_OBJECT_TYPE, id);
+        })
+      ).catch((error) => {
+        core.notifications.toasts.addError(error, {
+          title: dashboardSavedObjectErrorStrings.getErrorDeletingDashboardToast(),
+        });
+      });
       setUnsavedDashboardIds(dashboardSessionStorage.getDashboardIdsWithUnsavedChanges());
-      return savedDashboards.delete(dashboards.map((d) => d.id));
     },
-    [savedDashboards, dashboardSessionStorage]
+    [savedObjectsClient, dashboardSessionStorage, core.notifications.toasts]
   );
 
   const editItem = useCallback(
@@ -291,7 +302,7 @@ export const DashboardListing = ({
   }, [savedObjectsTagging]);
 
   const { getEntityName, getTableCaption, getTableListTitle, getEntityNamePlural } =
-    dashboardListingTable;
+    dashboardListingTableStrings;
   return (
     <>
       {showNoDataPage && (
@@ -343,7 +354,7 @@ const getTableColumns = (
   return [
     {
       field: 'title',
-      name: dashboardListingTable.getTitleColumnName(),
+      name: dashboardListingTableStrings.getTitleColumnName(),
       sortable: true,
       render: (field: string, record: { id: string; title: string; timeRestore: boolean }) => (
         <EuiLink
@@ -362,7 +373,7 @@ const getTableColumns = (
     },
     {
       field: 'description',
-      name: dashboardListingTable.getDescriptionColumnName(),
+      name: dashboardListingTableStrings.getDescriptionColumnName(),
       render: (field: string, record: { description: string }) => <span>{record.description}</span>,
       sortable: true,
     },

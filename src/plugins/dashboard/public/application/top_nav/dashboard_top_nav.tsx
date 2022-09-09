@@ -24,6 +24,10 @@ import {
   SolutionToolbar,
   withSuspense,
 } from '@kbn/presentation-util-plugin/public';
+import {
+  checkForDuplicateDashboardTitle,
+  saveDashboardStateToSavedObject,
+} from '../../dashboard_saved_object';
 import { TopNavIds } from './top_nav_ids';
 import { EditorMenu } from './editor_menu';
 import { UI_SETTINGS } from '../../../common';
@@ -34,14 +38,17 @@ import { ShowShareModal } from './show_share_modal';
 import { getTopNavConfig } from './get_top_nav_config';
 import { useKibana } from '../../services/kibana_react';
 import { showOptionsPopover } from './show_options_popover';
-import { saveDashboardStateToSavedObject } from '../../dashboard_saved_object';
 import { DashboardConstants, getFullEditPath } from '../../dashboard_constants';
 import { confirmDiscardUnsavedChanges } from '../listing/confirm_overlays';
 import { DashboardAppState, DashboardSaveOptions, NavAction } from '../../types';
 import { isErrorEmbeddable, openAddPanelFlyout, ViewMode } from '../../services/embeddable';
 import { DashboardAppServices, DashboardEmbedSettings, DashboardRedirect } from '../../types';
 import { getSavedObjectFinder, SaveResult, showSaveModal } from '../../services/saved_objects';
-import { getCreateVisualizationButtonTitle, unsavedChangesBadge } from '../../dashboard_strings';
+import {
+  dashboardSavedObjectErrorStrings,
+  getCreateVisualizationButtonTitle,
+  unsavedChangesBadge,
+} from '../../dashboard_strings';
 import {
   setFullScreenMode,
   setHidePanelTitles,
@@ -260,6 +267,30 @@ export function DashboardTopNav({
         stateFromSaveModal.tags = newTags;
       }
 
+      /**
+       * Check for duplicate title
+       */
+      try {
+        await checkForDuplicateDashboardTitle(
+          {
+            title: newTitle,
+            onTitleDuplicate,
+            lastSavedTitle: currentState.title,
+            copyOnSave: newCopyOnSave,
+            isTitleDuplicateConfirmed,
+          },
+          savedObjectsClient
+        );
+      } catch (error) {
+        if (
+          error &&
+          dashboardSavedObjectErrorStrings.getSaveDuplicateTitleRejected() === error.message
+        ) {
+          return { id: '' };
+        }
+        return { error };
+      }
+
       const saveResult = await saveDashboardStateToSavedObject({
         toasts,
         timefilter,
@@ -275,8 +306,14 @@ export function DashboardTopNav({
       });
       if (saveResult.id && !saveResult.redirected) {
         dispatchDashboardStateChange(setStateFromSaveModal(stateFromSaveModal));
-        dashboardAppState.updateLastSavedState?.();
-        chrome.docTitle.change(stateFromSaveModal.title);
+        setTimeout(() => {
+          /**
+           * set timeout so dashboard state subject can update with the new title before updating the last saved state.
+           * TODO: Remove this timeout once the last saved state is also handled in Redux.
+           **/
+          dashboardAppState.updateLastSavedState?.();
+          chrome.docTitle.change(stateFromSaveModal.title);
+        }, 1);
       }
       return saveResult.id ? { id: saveResult.id } : { error: saveResult.error };
     };
@@ -367,7 +404,6 @@ export function DashboardTopNav({
         saveAsCopy: true,
       };
       const saveResult = await saveDashboardStateToSavedObject({
-        embeddableStart: embeddable,
         toasts,
         timefilter,
         redirectTo,
@@ -378,6 +414,7 @@ export function DashboardTopNav({
         savedObjectsTagging,
         version: kibanaVersion,
         dashboardSessionStorage,
+        embeddableStart: embeddable,
       });
       return saveResult.id ? { id: saveResult.id } : { error: saveResult.error };
     };

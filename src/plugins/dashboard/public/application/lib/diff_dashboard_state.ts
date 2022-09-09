@@ -12,8 +12,9 @@ import { compareFilters, COMPARE_ALL_OPTIONS, type Filter, isFilterPinned } from
 
 import { persistableControlGroupInputIsEqual } from '@kbn/controls-plugin/common';
 import { DashboardContainerInput } from '../..';
-import { DashboardOptions, DashboardPanelMap, DashboardState } from '../../types';
+import { DashboardOptions, DashboardState } from '../../types';
 import { IEmbeddable } from '../../services/embeddable';
+import { DashboardPanelMap } from '../embeddable';
 
 const stateKeystoIgnore = ['expandedPanelId', 'fullScreenMode', 'savedQuery', 'viewMode', 'tags'];
 type DashboardStateToCompare = Omit<DashboardState, typeof stateKeystoIgnore[number]>;

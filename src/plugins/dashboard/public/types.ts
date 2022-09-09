@@ -37,7 +37,7 @@ import { DashboardPanelMap, DashboardPanelState, SavedDashboardPanel } from '../
 import { SavedObjectsTaggingApi } from './services/saved_objects_tagging_oss';
 import { DataPublicPluginStart, DataViewsContract } from './services/data';
 import { ContainerInput, EmbeddableInput, ViewMode } from './services/embeddable';
-import { SavedObjectLoader, SavedObjectsStart } from './services/saved_objects';
+import { SavedObjectsStart } from './services/saved_objects';
 import type { ScreenshotModePluginStart } from './services/screenshot_mode';
 import { IKbnUrlStateStorage } from './services/kibana_utils';
 import type { DashboardContainer } from '.';
@@ -122,7 +122,6 @@ export type DashboardBuildContext = Pick<
   DashboardAppServices,
   | 'embeddable'
   | 'dataViews'
-  | 'savedDashboards'
   | 'usageCollection'
   | 'initializerContext'
   | 'savedObjectsTagging'
@@ -198,7 +197,6 @@ export interface DashboardAppServices {
   savedObjects: SavedObjectsStart;
   allowByValueEmbeddables: boolean;
   urlForwarding: UrlForwardingStart;
-  savedDashboards: SavedObjectLoader;
   scopedHistory: () => ScopedHistory;
   visualizations: VisualizationsStart;
   dataViewEditor: DataViewEditorStart;
