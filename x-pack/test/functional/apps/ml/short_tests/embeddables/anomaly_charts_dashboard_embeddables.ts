@@ -84,7 +84,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         it('create new anomaly charts panel', async () => {
           await ml.dashboardEmbeddables.clickInitializerConfirmButtonEnabled();
           await ml.dashboardEmbeddables.assertDashboardPanelExists(testData.panelTitle);
-          await ml.dashboardEmbeddables.assertNoMatchingAnomaliesMessageExists();
           await PageObjects.timePicker.pauseAutoRefresh();
           await ml.dashboardEmbeddables.assertAnomalyChartsSeverityThresholdControlExists();
           await ml.dashboardEmbeddables.assertAnomalyChartsExists();
