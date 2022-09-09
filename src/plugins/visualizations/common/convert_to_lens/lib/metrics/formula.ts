@@ -44,7 +44,7 @@ const getFormulaForAggsWithoutParams = (
   selector: string,
   reducedTimeRange?: string
 ) => {
-  const type = isSchemaConfig(agg) ? agg.aggType : (agg.type.dslName as METRIC_TYPES);
+  const type = isSchemaConfig(agg) ? agg.aggType : (agg.type.name as METRIC_TYPES);
   const op = SUPPORTED_METRICS[type];
   if (!op) {
     return null;
@@ -59,7 +59,7 @@ const getFormulaForPercentileRanks = (
   selector: string,
   reducedTimeRange?: string
 ) => {
-  const type = isSchemaConfig(agg) ? agg.aggType : (agg.type.dslName as METRIC_TYPES);
+  const type = isSchemaConfig(agg) ? agg.aggType : (agg.type.name as METRIC_TYPES);
   const value = isSchemaConfig(agg) ? Number(agg.aggId?.split('.')[1]) : agg.params.value;
   const op = SUPPORTED_METRICS[type];
   if (!op) {
@@ -75,7 +75,7 @@ const getFormulaForPercentile = (
   selector: string,
   reducedTimeRange?: string
 ) => {
-  const type = isSchemaConfig(agg) ? agg.aggType : (agg.type.dslName as METRIC_TYPES);
+  const type = isSchemaConfig(agg) ? agg.aggType : (agg.type.name as METRIC_TYPES);
   const percentile = isSchemaConfig(agg) ? Number(agg.aggId?.split('.')[1]) : agg.params.percentile;
   const op = SUPPORTED_METRICS[type];
   if (!op) {
@@ -89,7 +89,7 @@ const getFormulaForPercentile = (
 };
 
 const getFormulaForSubMetric = (agg: IAggConfig, reducedTimeRange?: string): string | null => {
-  const op = SUPPORTED_METRICS[agg.type.dslName as METRIC_TYPES];
+  const op = SUPPORTED_METRICS[agg.type.name as METRIC_TYPES];
   if (!op) {
     return null;
   }
@@ -132,20 +132,23 @@ export const getFormulaForPipelineAgg = (
       return null;
     }
 
-    const formula = getFormulaFromMetric(supportedAgg);
     const subFormula = getFormulaForSubMetric(agg.aggParams.customMetric);
     if (subFormula === null) {
       return null;
     }
 
-    return `${formula}(${subFormula})`;
+    if (PARENT_PIPELINE_AGGS.includes(supportedAgg.name)) {
+      const formula = getFormulaFromMetric(supportedAgg);
+      return `${formula}(${subFormula})`;
+    }
+
+    return subFormula;
   }
 
-  const op = SUPPORTED_METRICS[agg.type.dslName as METRIC_TYPES];
+  const op = SUPPORTED_METRICS[agg.type.name as METRIC_TYPES];
   if (!op) {
     return null;
   }
-  const formula = getFormulaFromMetric(op);
   if (!agg.params.customMetric) {
     return null;
   }
@@ -158,7 +161,12 @@ export const getFormulaForPipelineAgg = (
     return null;
   }
 
-  return `${formula}(${subFormula})`;
+  if (PARENT_PIPELINE_AGGS.includes(op.name)) {
+    const formula = getFormulaFromMetric(op);
+    return `${formula}(${subFormula})`;
+  }
+
+  return subFormula;
 };
 
 export const getFormulaForAgg = (agg: SchemaConfig<METRIC_TYPES>) => {

@@ -43,8 +43,7 @@ export const createColumn = <T extends SupportedAggregation>(
   meta: { aggId: createAggregationId(agg) },
 });
 
-export const createAggregationIdFromCustomAgg = (agg: IAggConfig): AggId =>
-  `${agg.type.dslName}.${0}`;
+export const createAggregationIdFromCustomAgg = (agg: IAggConfig): AggId => `${agg.type.name}.${0}`;
 
 export const createColumnFromCustomAgg = (
   agg: IAggConfig,

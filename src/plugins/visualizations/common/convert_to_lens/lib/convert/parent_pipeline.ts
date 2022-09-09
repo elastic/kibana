@@ -51,7 +51,7 @@ export const convertToParentPipelineAggColumns = (
     return null;
   }
 
-  const subAgg = SUPPORTED_METRICS[customMetric.type.dslName as METRIC_TYPES];
+  const subAgg = SUPPORTED_METRICS[customMetric.type.name as METRIC_TYPES];
 
   if (!subAgg) {
     return null;

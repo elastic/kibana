@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { FormulaColumn } from '../../types';
-import { getFormulaForPipelineAgg } from '../metrics/formula';
-import { createFormulaColumn } from './formula';
+import { convertMetricToColumns } from '../metrics';
+import { aggConfigToSchemaConfig } from '../utils';
 import { CommonColumnConverterArgs, SiblingPipelineMetric } from './types';
+import { Column } from '../../types';
 
 export const convertToSiblingPipelineColumns = (
   columnConverterArgs: CommonColumnConverterArgs<SiblingPipelineMetric>,
   reducedTimeRange?: string
-): FormulaColumn | null => {
+): Column | null => {
   const { aggParams } = columnConverterArgs.agg;
   if (!aggParams) {
     return null;
@@ -24,15 +24,14 @@ export const convertToSiblingPipelineColumns = (
     return null;
   }
 
-  const formula = getFormulaForPipelineAgg(columnConverterArgs.agg, reducedTimeRange);
-  if (!formula) {
+  const customMetricColumn = convertMetricToColumns(
+    aggConfigToSchemaConfig(aggParams.customMetric),
+    columnConverterArgs.dataView
+  );
+
+  if (!customMetricColumn) {
     return null;
   }
 
-  const formulaColumn = createFormulaColumn(formula, columnConverterArgs.agg);
-  if (!formulaColumn) {
-    return null;
-  }
-
-  return formulaColumn;
+  return customMetricColumn[0];
 };

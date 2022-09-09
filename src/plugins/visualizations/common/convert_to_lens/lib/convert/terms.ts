@@ -7,10 +7,10 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { AggParamsTerms, METRIC_TYPES } from '@kbn/data-plugin/common';
+import { AggParamsTerms } from '@kbn/data-plugin/common';
 import uuid from 'uuid';
 import { Column, DataType, TermsColumn, TermsParams } from '../../types';
-import { getFieldNameFromField, isColumnWithMeta } from '../utils';
+import { aggConfigToSchemaConfig, getFieldNameFromField, isColumnWithMeta } from '../utils';
 import { convertMetricToColumns } from '../metrics';
 
 interface OrderByWithAgg {
@@ -28,25 +28,11 @@ const getOrderByWithAgg = (
   }
 
   if (aggParams.orderBy === 'custom') {
-    const aggType = aggParams.orderAgg?.type.dslName as METRIC_TYPES;
-    let orderAggParams = aggParams.orderAgg?.serialize().params;
-    if (aggType === METRIC_TYPES.PERCENTILES && orderAggParams) {
-      orderAggParams = {
-        ...orderAggParams,
-        percent: [(orderAggParams as { percentile: number }).percentile],
-      };
-    } else if (aggType === METRIC_TYPES.PERCENTILE_RANKS && orderAggParams) {
-      orderAggParams = { ...orderAggParams, values: [(orderAggParams as { value: number }).value] };
+    if (!aggParams.orderAgg) {
+      return null;
     }
     const orderMetricColumn = convertMetricToColumns(
-      {
-        aggType,
-        label: aggParams.orderAgg?.makeLabel(),
-        aggParams: orderAggParams,
-        params: {},
-        format: aggParams.orderAgg?.toSerializedFieldFormat() ?? {},
-        accessor: 0,
-      },
+      aggConfigToSchemaConfig(aggParams.orderAgg),
       dataView
     );
     if (!orderMetricColumn) {

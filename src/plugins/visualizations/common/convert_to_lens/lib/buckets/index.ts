@@ -104,10 +104,10 @@ export const convertBucketToColumns = <T extends METRIC_TYPES | BUCKET_TYPES>(
       dropEmptyRowsInDateHistogram,
     });
   } else {
-    const isTermsAgg = agg.type.dslName === 'terms';
+    const isTermsAgg = agg.type.name === 'terms';
     const orderAgg = agg.getParam('orderAgg');
     const aggParams = agg.serialize().params;
-    const aggType = agg.type.dslName as BUCKET_TYPES;
+    const aggType = agg.type.name as BUCKET_TYPES;
     if (!aggParams || !SUPPORTED_BUCKETS.includes(aggType)) {
       return null;
     }
