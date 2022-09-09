@@ -26,6 +26,12 @@ export const getLabel = (agg: SchemaConfig) => {
     : agg.label;
 };
 
+export const getLabelForPercentile = (agg: SchemaConfig) => {
+  return agg.aggParams && 'customLabel' in agg.aggParams && agg.aggParams.customLabel !== ''
+    ? agg.label
+    : '';
+};
+
 export const getValidColumns = (columns: Array<Column | null> | Column | null | undefined) => {
   if (columns && Array.isArray(columns)) {
     const nonNullColumns = columns.filter(
