@@ -13,7 +13,7 @@ import {
   createIndexPatternService,
   IndexPatternServiceProps,
   IndexPatternServiceAPI,
-} from '../indexpattern_service/service';
+} from '../data_views_service/service';
 
 export function createIndexPatternServiceMock({
   core = coreMock.createStart(),
