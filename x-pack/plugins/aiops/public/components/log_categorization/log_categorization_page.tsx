@@ -8,6 +8,7 @@ import React, { FC, useState, useEffect, useCallback, useMemo } from 'react';
 import type { SavedSearch } from '@kbn/discover-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { Filter, Query } from '@kbn/es-query';
+import { i18n } from '@kbn/i18n';
 import {
   EuiButton,
   EuiSpacer,
@@ -32,11 +33,13 @@ import type {
   SavedSearchSavedObject,
 } from '../../application/utils/search_utils';
 import { useUrlState /* , usePageUrlState, AppStateKey*/ } from '../../hooks/use_url_state';
+import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { restorableDefaults } from '../explain_log_rate_spikes/explain_log_rate_spikes_app_state';
 import { useCategorizeRequest } from './use_categorize_request';
 import type { EventRate, Category, SparkLinesPerCategory } from './use_categorize_request';
 import { CategoryTable } from './category_table';
 import { DocumentCountChart } from './document_count_chart';
+import { extractErrorMessage } from '../../application/utils/error_utils';
 
 export interface LogCategorizationPageProps {
   dataView: DataView;
@@ -49,6 +52,10 @@ export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({
   dataView,
   savedSearch,
 }) => {
+  const {
+    notifications: { toasts },
+  } = useAiopsAppContext();
+
   const { runCategorizeRequest, cancelRequest } = useCategorizeRequest();
   const [aiopsListState, setAiopsListState] = useState(restorableDefaults);
   const [globalState, setGlobalState] = useUrlState('_g');
@@ -175,7 +182,14 @@ export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({
       setCategories(resp.categories);
       setSparkLines(resp.sparkLinesPerCategory);
     } catch (error) {
-      // show error toast!!!!!!!!!!!!!!!!!!!!!!!!!
+      toasts.addError(error, {
+        title: i18n.translate('xpack.aiops.index.errorLoadingDataMessage', {
+          defaultMessage: 'Error loading categories',
+          values: {
+            message: extractErrorMessage(error),
+          },
+        }),
+      });
     }
 
     setLoading(false);
@@ -188,6 +202,7 @@ export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({
     runCategorizeRequest,
     cancelRequest,
     intervalMs,
+    toasts,
   ]);
 
   const onFieldChange = (value: EuiComboBoxOptionOption[] | undefined) => {
