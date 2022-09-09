@@ -8,6 +8,7 @@
 import { Client } from '@elastic/elasticsearch';
 import { ToolingLog } from '@kbn/tooling-log';
 import { KbnClient } from '@kbn/test';
+import type { StatusResponse } from '@kbn/core-status-common-internal';
 import { createSecuritySuperuser } from './security_user_services';
 
 export interface RuntimeServices {
@@ -122,16 +123,12 @@ export const createKbnClient = ({
  * @param kbnClient
  */
 export const fetchStackVersion = async (kbnClient: KbnClient): Promise<string> => {
-  const status = // The return type from this API is defined here:
-    //    import type { StatusResponse } from '@kbn/core/types/status';
-    // However, I got build errors indicating that export was not found, so for now,
-    // just hard coding the type here.
-    (
-      await kbnClient.request<{ version: { number: string } }>({
-        method: 'GET',
-        path: '/api/status',
-      })
-    ).data;
+  const status = (
+    await kbnClient.request<StatusResponse>({
+      method: 'GET',
+      path: '/api/status',
+    })
+  ).data;
 
   if (!status?.version?.number) {
     throw new Error(
