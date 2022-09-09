@@ -39,7 +39,7 @@ NPM_MODULE_EXTRA_FILES = [
 RUNTIME_DEPS = [
   "@npm//react",
   "@npm//react-dom",
-  "@npm///history",
+  "@npm//history",
   "@npm//@elastic/eui",
   "//packages/kbn-i18n",
   "//packages/kbn-i18n-react",
