@@ -15,13 +15,11 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { findIndex } from 'lodash/fp';
-import { isEmpty, map, some } from 'lodash';
 import type { FC } from 'react';
 import React, { memo, useCallback, useEffect, useMemo, useRef } from 'react';
 
 import type { ActionVariables } from '@kbn/triggers-actions-ui-plugin/public';
 import { UseArray } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import type { ResponseActionValidatorRef } from '../../response_actions/response_actions_form';
 import { ResponseActionsForm } from '../../response_actions/response_actions_form';
 import type { RuleStepProps, ActionsStepRule } from '../../../pages/detection_engine/rules/types';
 import { RuleStep } from '../../../pages/detection_engine/rules/types';
@@ -108,7 +106,6 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
     watch: ['throttle'],
   });
   const throttle = formThrottle || initialState.throttle;
-  const responseActionsValidationRef = useRef<ResponseActionValidatorRef>({ validation: {} });
 
   const handleSubmit = useCallback(
     (enabled: boolean) => {
@@ -120,20 +117,12 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
     [getFields, onSubmit]
   );
 
-  const validateResponseActions = async () => {
-    if (!isEmpty(responseActionsValidationRef.current?.validation)) {
-      const response = await Promise.all(
-        map(responseActionsValidationRef.current?.validation, async (validation) => {
-          return validation();
-        })
-      );
-
-      return some(response, (val) => !val);
-    }
-  };
+  const saveClickRef = useRef<{ onSaveClick: () => Promise<boolean> | null }>({
+    onSaveClick: () => null,
+  });
 
   const getData = useCallback(async () => {
-    const isResponseActionsInvalid = await validateResponseActions();
+    const isResponseActionsInvalid = await saveClickRef.current.onSaveClick();
     if (isResponseActionsInvalid) {
       return {
         isValid: false,
@@ -202,9 +191,7 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
         return (
           <>
             <UseArray path="responseActions">
-              {(params) => (
-                <ResponseActionsForm {...params} formRef={responseActionsValidationRef} />
-              )}
+              {(params) => <ResponseActionsForm {...params} saveClickRef={saveClickRef} />}
             </UseArray>
           </>
         );

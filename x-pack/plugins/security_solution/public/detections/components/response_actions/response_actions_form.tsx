@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import { EuiSpacer } from '@elastic/eui';
+import { isEmpty, map, some } from 'lodash';
 import { ResponseActionsHeader } from './response_actions_header';
 import { ResponseActionsList } from './response_actions_list';
 
@@ -26,11 +27,34 @@ interface IProps {
   items: ArrayItem[];
   addItem: () => void;
   removeItem: (id: number) => void;
-  formRef: React.RefObject<ResponseActionValidatorRef>;
+  saveClickRef: React.RefObject<{
+    onSaveClick?: () => void;
+  }>;
 }
 
-export const ResponseActionsForm = ({ items, addItem, removeItem, formRef }: IProps) => {
+export const ResponseActionsForm = ({ items, addItem, removeItem, saveClickRef }: IProps) => {
+  const responseActionsValidationRef = useRef<ResponseActionValidatorRef>({ validation: {} });
   const supportedResponseActionTypes = useSupportedResponseActionTypes();
+
+  useEffect(() => {
+    if (saveClickRef && saveClickRef.current) {
+      saveClickRef.current.onSaveClick = () => {
+        return validateResponseActions();
+      };
+    }
+  }, [saveClickRef]);
+
+  const validateResponseActions = async () => {
+    if (!isEmpty(responseActionsValidationRef.current?.validation)) {
+      const response = await Promise.all(
+        map(responseActionsValidationRef.current?.validation, async (validation) => {
+          return validation();
+        })
+      );
+
+      return some(response, (val) => !val);
+    }
+  };
 
   const form = useMemo(() => {
     if (!supportedResponseActionTypes?.length) {
@@ -42,10 +66,10 @@ export const ResponseActionsForm = ({ items, addItem, removeItem, formRef }: IPr
         removeItem={removeItem}
         supportedResponseActionTypes={supportedResponseActionTypes}
         addItem={addItem}
-        formRef={formRef}
+        formRef={responseActionsValidationRef}
       />
     );
-  }, [addItem, formRef, items, removeItem, supportedResponseActionTypes]);
+  }, [addItem, responseActionsValidationRef, items, removeItem, supportedResponseActionTypes]);
 
   return (
     <>
