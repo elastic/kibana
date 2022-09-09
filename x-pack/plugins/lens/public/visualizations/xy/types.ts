@@ -35,6 +35,7 @@ import {
   IconChartBarHorizontal,
 } from '@kbn/chart-icons';
 
+import { DistributiveOmit } from '@elastic/eui';
 import type { VisualizationType, Suggestion } from '../../types';
 import type { ValueLabelConfig } from '../../../common/types';
 
@@ -115,6 +116,8 @@ export interface XYAnnotationLayerConfig {
   layerId: string;
   layerType: 'annotations';
   annotations: EventAnnotationConfig[];
+  hide?: boolean;
+  indexPatternId: string;
   simpleView?: boolean;
 }
 
@@ -159,6 +162,12 @@ export interface XYState {
 }
 
 export type State = XYState;
+
+export type XYPersistedState = Omit<XYState, 'layers'> & {
+  layers: Array<DistributiveOmit<XYLayerConfig, 'indexPatternId'>>;
+};
+
+export type PersistedState = XYPersistedState;
 
 const groupLabelForBar = i18n.translate('xpack.lens.xyVisualization.barGroupLabel', {
   defaultMessage: 'Bar',

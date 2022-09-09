@@ -6,7 +6,6 @@
  */
 
 import sinon from 'sinon';
-import { schema } from '@kbn/config-schema';
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
 import {
   RuleExecutorOptions,
@@ -1447,105 +1446,6 @@ describe('Task Runner', () => {
     expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
   });
 
-  test('validates params before running the rule type', async () => {
-    const taskRunner = new TaskRunner(
-      {
-        ...ruleType,
-        validate: {
-          params: schema.object({
-            param1: schema.string(),
-          }),
-        },
-      },
-      {
-        ...mockedTaskInstance,
-        params: {
-          ...mockedTaskInstance.params,
-          spaceId: 'foo',
-        },
-      },
-      taskRunnerFactoryInitializerParams,
-      inMemoryMetrics
-    );
-    expect(AlertingEventLogger).toHaveBeenCalled();
-
-    rulesClient.get.mockResolvedValue(mockedRuleTypeSavedObject);
-    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(SAVED_OBJECT);
-    const runnerResult = await taskRunner.run();
-    expect(runnerResult).toEqual(generateRunnerResult({ successRatio: 0 }));
-    const loggerCall = logger.error.mock.calls[0][0];
-    const loggerMeta = logger.error.mock.calls[0][1];
-    const loggerCallPrefix = (loggerCall as string).split('-');
-    expect(loggerCallPrefix[0].trim()).toMatchInlineSnapshot(
-      `"Executing Rule foo:test:1 has resulted in Error: params invalid: [param1]: expected value of type [string] but got [undefined]"`
-    );
-    expect(loggerMeta?.tags).toEqual(['test', '1', 'rule-run-failed']);
-    expect(loggerMeta?.error?.stack_trace).toBeDefined();
-    expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
-  });
-
-  test('uses API key when provided', async () => {
-    const taskRunner = new TaskRunner(
-      ruleType,
-      mockedTaskInstance,
-      taskRunnerFactoryInitializerParams,
-      inMemoryMetrics
-    );
-    expect(AlertingEventLogger).toHaveBeenCalled();
-
-    rulesClient.get.mockResolvedValue(mockedRuleTypeSavedObject);
-    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(SAVED_OBJECT);
-
-    await taskRunner.run();
-    expect(taskRunnerFactoryInitializerParams.getRulesClientWithRequest).toHaveBeenCalledWith(
-      expect.objectContaining({
-        headers: {
-          // base64 encoded "123:abc"
-          authorization: 'ApiKey MTIzOmFiYw==',
-        },
-      })
-    );
-    const [request] = taskRunnerFactoryInitializerParams.getRulesClientWithRequest.mock.calls[0];
-
-    expect(taskRunnerFactoryInitializerParams.basePathService.set).toHaveBeenCalledWith(
-      request,
-      '/'
-    );
-    expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
-  });
-
-  test(`doesn't use API key when not provided`, async () => {
-    const taskRunner = new TaskRunner(
-      ruleType,
-      mockedTaskInstance,
-      taskRunnerFactoryInitializerParams,
-      inMemoryMetrics
-    );
-    expect(AlertingEventLogger).toHaveBeenCalled();
-
-    rulesClient.get.mockResolvedValue(mockedRuleTypeSavedObject);
-    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
-      ...SAVED_OBJECT,
-      attributes: { enabled: true },
-    });
-
-    await taskRunner.run();
-
-    expect(taskRunnerFactoryInitializerParams.getRulesClientWithRequest).toHaveBeenCalledWith(
-      expect.objectContaining({
-        headers: {},
-      })
-    );
-
-    const [request] = taskRunnerFactoryInitializerParams.getRulesClientWithRequest.mock.calls[0];
-
-    expect(taskRunnerFactoryInitializerParams.basePathService.set).toHaveBeenCalledWith(
-      request,
-      '/'
-    );
-    expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
-  });
-
   test('rescheduled the rule if the schedule has update during a task run', async () => {
     const taskRunner = new TaskRunner(
       ruleType,
@@ -1618,95 +1518,8 @@ describe('Task Runner', () => {
     expect(logger.error).toBeCalledTimes(1);
   });
 
-  test('recovers gracefully when the Alert Task Runner throws an exception when fetching the encrypted attributes', async () => {
-    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockImplementation(() => {
-      throw new Error(GENERIC_ERROR_MESSAGE);
-    });
-
-    const taskRunner = new TaskRunner(
-      ruleType,
-      mockedTaskInstance,
-      taskRunnerFactoryInitializerParams,
-      inMemoryMetrics
-    );
-    expect(AlertingEventLogger).toHaveBeenCalled();
-
-    rulesClient.get.mockResolvedValue(mockedRuleTypeSavedObject);
-
-    const runnerResult = await taskRunner.run();
-
-    expect(runnerResult).toEqual(generateRunnerResult({ successRatio: 0 }));
-
-    testAlertingEventLogCalls({
-      setRuleName: false,
-      status: 'error',
-      errorReason: 'decrypt',
-      executionStatus: 'not-reached',
-    });
-
-    expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
-  });
-
-  test('recovers gracefully when the Alert Task Runner throws an exception when license is higher than supported', async () => {
-    ruleTypeRegistry.ensureRuleTypeEnabled.mockImplementation(() => {
-      throw new Error(GENERIC_ERROR_MESSAGE);
-    });
-
-    const taskRunner = new TaskRunner(
-      ruleType,
-      mockedTaskInstance,
-      taskRunnerFactoryInitializerParams,
-      inMemoryMetrics
-    );
-    expect(AlertingEventLogger).toHaveBeenCalled();
-
-    rulesClient.get.mockResolvedValue(mockedRuleTypeSavedObject);
-    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(SAVED_OBJECT);
-
-    const runnerResult = await taskRunner.run();
-
-    expect(runnerResult).toEqual(generateRunnerResult({ successRatio: 0 }));
-
-    testAlertingEventLogCalls({
-      status: 'error',
-      errorReason: 'license',
-      executionStatus: 'not-reached',
-    });
-
-    expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
-  });
-
-  test('recovers gracefully when the Alert Task Runner throws an exception when getting internal Services', async () => {
-    taskRunnerFactoryInitializerParams.getRulesClientWithRequest.mockImplementation(() => {
-      throw new Error(GENERIC_ERROR_MESSAGE);
-    });
-
-    const taskRunner = new TaskRunner(
-      ruleType,
-      mockedTaskInstance,
-      taskRunnerFactoryInitializerParams,
-      inMemoryMetrics
-    );
-    expect(AlertingEventLogger).toHaveBeenCalled();
-
-    rulesClient.get.mockResolvedValue(mockedRuleTypeSavedObject);
-    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(SAVED_OBJECT);
-
-    const runnerResult = await taskRunner.run();
-
-    expect(runnerResult).toEqual(generateRunnerResult({ successRatio: 0 }));
-
-    testAlertingEventLogCalls({
-      setRuleName: false,
-      status: 'error',
-      errorReason: 'unknown',
-      executionStatus: 'not-reached',
-    });
-
-    expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
-  });
-
-  test('recovers gracefully when the Alert Task Runner throws an exception when fetching attributes', async () => {
+  test('recovers gracefully when the Alert Task Runner throws an exception when loading rule to prepare for run', async () => {
+    // used in loadRule() which is called in prepareToRun()
     rulesClient.get.mockImplementation(() => {
       throw new Error(GENERIC_ERROR_MESSAGE);
     });
@@ -2378,42 +2191,6 @@ describe('Task Runner', () => {
     expect(
       taskRunnerFactoryInitializerParams.internalSavedObjectsRepository.update
     ).toHaveBeenCalledWith(...generateSavedObjectParams({}));
-    expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
-  });
-
-  test('successfully bails on execution if the rule is disabled', async () => {
-    const state = {
-      ...mockedTaskInstance.state,
-      previousStartedAt: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
-    };
-    const taskRunner = new TaskRunner(
-      ruleType,
-      {
-        ...mockedTaskInstance,
-        state,
-      },
-      taskRunnerFactoryInitializerParams,
-      inMemoryMetrics
-    );
-    expect(AlertingEventLogger).toHaveBeenCalled();
-
-    rulesClient.get.mockResolvedValue(mockedRuleTypeSavedObject);
-    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
-      ...SAVED_OBJECT,
-      attributes: { ...SAVED_OBJECT.attributes, enabled: false },
-    });
-    const runnerResult = await taskRunner.run();
-    expect(runnerResult.state.previousStartedAt?.toISOString()).toBe(state.previousStartedAt);
-    expect(runnerResult.schedule).toStrictEqual(mockedTaskInstance.schedule);
-
-    testAlertingEventLogCalls({
-      setRuleName: false,
-      status: 'error',
-      errorReason: 'disabled',
-      errorMessage: `Rule failed to execute because rule ran after it was disabled.`,
-      executionStatus: 'not-reached',
-    });
-
     expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
   });
 

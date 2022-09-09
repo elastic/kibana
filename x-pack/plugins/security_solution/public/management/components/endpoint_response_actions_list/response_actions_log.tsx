@@ -41,13 +41,10 @@ import { OUTPUT_MESSAGES, TABLE_COLUMN_NAMES, UX_MESSAGES } from './translations
 import { MANAGEMENT_PAGE_SIZE_OPTIONS } from '../../common/constants';
 import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 import { ActionsLogFilters } from './components/actions_log_filters';
-import { getActionStatus, useDateRangePicker } from './components/hooks';
+import { getActionStatus, getCommand, useDateRangePicker } from './components/hooks';
 import { StatusBadge } from './components/status_badge';
 
 const emptyValue = getEmptyValue();
-
-const getCommand = (command: ResponseActions): Exclude<ResponseActions, 'unisolate'> | 'release' =>
-  command === 'unisolate' ? 'release' : command;
 
 // Truncated usernames
 const StyledFacetButton = euiStyled(EuiFacetButton)`
@@ -300,11 +297,13 @@ export const ResponseActionsLog = memo<
           const command = getCommand(_command);
           return (
             <EuiToolTip content={command} anchorClassName="eui-textTruncate">
-              <FormattedMessage
-                id="xpack.securitySolution.responseActionsList.list.item.command"
-                defaultMessage="{command}"
-                values={{ command }}
-              />
+              <EuiText
+                size="s"
+                className="eui-textTruncate eui-fullWidth"
+                data-test-subj={getTestId('column-command')}
+              >
+                {command}
+              </EuiText>
             </EuiToolTip>
           );
         },

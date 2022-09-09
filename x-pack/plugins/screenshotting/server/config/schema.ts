@@ -81,9 +81,7 @@ export const ConfigSchema = schema.object({
       }),
     }),
     zoom: schema.number({ defaultValue: 2 }),
-    loadDelay: schema.oneOf([schema.number(), schema.duration()], {
-      defaultValue: moment.duration({ seconds: 3 }),
-    }),
+    loadDelay: schema.maybe(schema.oneOf([schema.number(), schema.duration()])), // deprecated, unused
   }),
   poolSize: schema.number({ defaultValue: 1, min: 1 }),
 });

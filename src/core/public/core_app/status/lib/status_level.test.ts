@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { ServiceStatus } from '../../../../types/status';
+import type { StatusInfoServiceStatus as ServiceStatus } from '@kbn/core-status-common-internal';
 import { getLevelSortValue, groupByLevel, getHighestStatus } from './status_level';
 import { FormattedStatus, StatusState } from './load_status';
 
