@@ -280,6 +280,7 @@ export interface Datasource<T = unknown, P = unknown> {
   // Given the current state, which parts should be saved?
   getPersistableState: (state: T) => { state: P; savedObjectReferences: SavedObjectReference[] };
   getCurrentIndexPatternId: (state: T) => string;
+  getUnifiedSearchErrors?: (state: T) => Error[];
 
   insertLayer: (state: T, newLayerId: string) => T;
   createEmptyLayer: (indexPatternId: string) => T;

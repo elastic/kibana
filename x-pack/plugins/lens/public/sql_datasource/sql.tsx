@@ -92,8 +92,30 @@ export function getSQLDatasource({
     checkIntegrity: () => {
       return [];
     },
-    getErrorMessages: () => {
-      return [];
+    getErrorMessages: (state) => {
+      const errors: Error[] = [];
+
+      Object.values(state.layers).forEach((layer) => {
+        if (layer.errors && layer.errors.length > 0) {
+          errors.push(...layer.errors);
+        }
+      });
+      return errors.map((err) => {
+        return {
+          shortMessage: err.message,
+          longMessage: err.message,
+        };
+      });
+    },
+    getUnifiedSearchErrors: (state) => {
+      const errors: Error[] = [];
+
+      Object.values(state.layers).forEach((layer) => {
+        if (layer.errors && layer.errors.length > 0) {
+          errors.push(...layer.errors);
+        }
+      });
+      return errors;
     },
     async initialize(state?: EsSQLPersistedState) {
       const initState = state || { layers: {} };

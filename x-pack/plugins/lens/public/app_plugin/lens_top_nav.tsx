@@ -223,6 +223,7 @@ export const LensTopNavMenu = ({
   theme$,
   indexPatternService,
   currentDoc,
+  onTextBasedSavedAndExit,
 }: LensTopNavMenuProps) => {
   const {
     data,
@@ -639,17 +640,6 @@ export const LensTopNavMenu = ({
                 currentIndexPatternId: currentIndexPattern?.id,
               })
             );
-          } else {
-            if (isOnTextBasedMode) {
-              dispatch(
-                switchAndCleanDatasource({
-                  newDatasourceId: 'indexpattern',
-                  visualizationId: visualization?.activeId,
-                  currentIndexPatternId: currentIndexPattern?.id,
-                })
-              );
-            }
-            setIsOnTextBasedMode(false);
           }
         }
       }
@@ -660,7 +650,6 @@ export const LensTopNavMenu = ({
       data.search.session,
       dispatch,
       dispatchSetState,
-      isOnTextBasedMode,
       query,
       visualization?.activeId,
     ]
@@ -765,8 +754,6 @@ export const LensTopNavMenu = ({
             closeDataViewEditor.current = dataViewEditor.openEditor({
               onSave: async (dataView) => {
                 if (dataView.id) {
-                  // console.dir(dataView);
-                  // console.log(query);
                   dispatch(
                     switchAndCleanDatasource({
                       newDatasourceId: 'indexpattern',
@@ -808,10 +795,35 @@ export const LensTopNavMenu = ({
       );
       setCurrentIndexPattern(currentDataView);
       dispatchChangeIndexPattern(newIndexPatternId);
+      if (isOnTextBasedMode) {
+        dispatch(
+          switchAndCleanDatasource({
+            newDatasourceId: 'indexpattern',
+            visualizationId: visualization?.activeId,
+            currentIndexPatternId: newIndexPatternId,
+          })
+        );
+        setIsOnTextBasedMode(false);
+      }
     },
     textBasedLanguages: supportedTextBasedLanguages as DataViewPickerProps['textBasedLanguages'],
   };
 
+  // text based languages errors should also appear to the unified search bar
+  const textBasedLanguageModeErrors: Error[] = [];
+  if (activeDatasourceId && allLoaded) {
+    if (
+      datasourceMap[activeDatasourceId] &&
+      datasourceMap[activeDatasourceId].getUnifiedSearchErrors
+    ) {
+      const errors = datasourceMap[activeDatasourceId].getUnifiedSearchErrors?.(
+        datasourceStates[activeDatasourceId].state
+      );
+      if (errors) {
+        textBasedLanguageModeErrors.push(...errors);
+      }
+    }
+  }
   return (
     <AggregateQueryTopNavMenu
       setMenuMountPoint={setHeaderActionMenu}
@@ -840,6 +852,8 @@ export const LensTopNavMenu = ({
             )
         )
       }
+      textBasedLanguageModeErrors={textBasedLanguageModeErrors}
+      onTextBasedSavedAndExit={onTextBasedSavedAndExit}
       showQueryBar={true}
       showFilterBar={true}
       data-test-subj="lnsApp_topNav"

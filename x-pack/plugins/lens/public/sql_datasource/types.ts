@@ -25,6 +25,7 @@ export interface EsSQLLayer {
   columns: EsSQLLayerColumn[];
   allColumns: EsSQLLayerColumn[];
   timeField?: string;
+  errors?: Error[];
 }
 
 export interface EsSQLPersistedState {
@@ -34,7 +35,6 @@ export interface EsSQLPersistedState {
 export type EsSQLPrivateState = EsSQLPersistedState & {
   indexPatternRefs: IndexPatternRef[];
   autoMap?: boolean;
-  // cachedFieldList: Record<string, { fields: DatatableColumn[]; singleRow: boolean }>;
   fieldList: DatatableColumn[];
   removedLayers: Array<{
     layer: EsSQLLayer;

@@ -12,7 +12,7 @@ import usePrevious from 'react-use/lib/usePrevious';
 import { isEqual } from 'lodash';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-// import type { DatatableColumn } from '@kbn/expressions-plugin/public';
+import type { DatatableColumn } from '@kbn/expressions-plugin/public';
 
 import { isOfAggregateQueryType, getIndexPatternFromSQLQuery } from '@kbn/es-query';
 import { ExpressionsStart } from '@kbn/expressions-plugin/public';
@@ -20,7 +20,7 @@ import { FieldButton } from '@kbn/react-field';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { generateId } from '../id_generator';
 import { DatasourceDataPanelProps, DataType } from '../types';
-import type { EsSQLPrivateState, IndexPatternRef } from './types';
+import type { EsSQLPrivateState, IndexPatternRef, EsSQLLayerColumn } from './types';
 import { fetchSql } from './fetch_sql';
 import { loadIndexPatternRefs } from './utils';
 import { DragDrop } from '../drag_drop';
@@ -54,32 +54,40 @@ export function EsSQLDataPanel({
     async function fetchData() {
       if (query && isOfAggregateQueryType(query) && 'sql' in query && !isEqual(query, prevQuery)) {
         const indexPatternRefs: IndexPatternRef[] = await loadIndexPatternRefs(dataViews);
-        const table = await fetchSql(query, dataViews, data, expressions);
-        const indexPattern = getIndexPatternFromSQLQuery(query.sql);
-        const index = indexPatternRefs.find((r) => r.title === indexPattern)?.id ?? '';
-        const dataView = await dataViews.get(index);
-        const timeFieldName = dataView.timeFieldName;
-        const columnsFromQuery = table?.columns ?? [];
+        const errors: Error[] = [];
         const layerIds = Object.keys(state.layers);
         const newLayerId = layerIds.length > 0 ? layerIds[0] : generateId();
-        const existingColumns = state.layers[newLayerId].allColumns;
-        const columns = [
-          ...existingColumns,
-          ...columnsFromQuery.map((c) => ({ columnId: c.id, fieldName: c.id, meta: c.meta })),
-        ];
-        const uniqueIds: string[] = [];
+        const indexPattern = getIndexPatternFromSQLQuery(query.sql);
+        const index = indexPatternRefs.find((r) => r.title === indexPattern)?.id ?? '';
+        let columnsFromQuery: DatatableColumn[] = [];
+        let unique: EsSQLLayerColumn[] = [];
+        let timeFieldName;
+        try {
+          const table = await fetchSql(query, dataViews, data, expressions);
+          const dataView = await dataViews.get(index);
+          timeFieldName = dataView.timeFieldName;
+          columnsFromQuery = table?.columns ?? [];
+          const existingColumns = state.layers[newLayerId].allColumns;
+          const columns = [
+            ...existingColumns,
+            ...columnsFromQuery.map((c) => ({ columnId: c.id, fieldName: c.id, meta: c.meta })),
+          ];
+          const uniqueIds: string[] = [];
 
-        const unique = columns.filter((col) => {
-          const isDuplicate = uniqueIds.includes(col.columnId);
+          unique = columns.filter((col) => {
+            const isDuplicate = uniqueIds.includes(col.columnId);
 
-          if (!isDuplicate) {
-            uniqueIds.push(col.columnId);
+            if (!isDuplicate) {
+              uniqueIds.push(col.columnId);
 
-            return true;
-          }
+              return true;
+            }
 
-          return false;
-        });
+            return false;
+          });
+        } catch (e) {
+          errors.push(e);
+        }
 
         const tempState = {
           layers: {
@@ -89,18 +97,10 @@ export function EsSQLDataPanel({
               columns: state.layers[newLayerId].columns ?? [],
               allColumns: unique,
               timeField: timeFieldName,
+              errors,
             },
           },
         };
-
-        // const fieldList = unique.map((u) => {
-        //   const field = columnsFromQuery.find((c) => c.name === u.fieldName);
-        //   return {
-        //     name: u.fieldName,
-        //     id: u.columnId,
-        //     meta: field?.meta,
-        //   };
-        // }) as DatatableColumn[];
 
         setState({
           ...tempState,

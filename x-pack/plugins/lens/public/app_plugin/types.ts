@@ -116,6 +116,7 @@ export interface LensTopNavMenuProps {
   currentDoc: Document | undefined;
   theme$: Observable<CoreTheme>;
   indexPatternService: IndexPatternServiceAPI;
+  onTextBasedSavedAndExit: ({ onSave }: { onSave: () => void }) => Promise<void>;
 }
 
 export interface HistoryLocationState {
