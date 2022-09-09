@@ -29,7 +29,7 @@ export const descriptions = Object.freeze(
         'xpack.securitySolution.endpoint.details.packageActions.es_connection.description',
         {
           defaultMessage:
-            "The Endpoint's connection to Elasticsearch is either down or misconfigured. Make sure it is configured correctly.",
+            "The endpoint's connection to Elasticsearch is either down or misconfigured. Make sure it is configured correctly.",
         }
       ),
     ],
