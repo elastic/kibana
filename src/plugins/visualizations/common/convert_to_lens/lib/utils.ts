@@ -162,24 +162,3 @@ export const getCutomBucketsFromSiblingAggs = (metrics: SchemaConfig[]) => {
     return acc;
   }, []);
 };
-
-export const aggConfigToSchemaConfig = (agg: IAggConfig): SchemaConfig => {
-  const aggType = agg.type.name as METRIC_TYPES;
-  let aggParams = agg.params;
-  if (aggType === METRIC_TYPES.PERCENTILES && aggParams && !aggParams.percents) {
-    aggParams = {
-      ...aggParams,
-      percents: [(aggParams as { percentile: number }).percentile],
-    };
-  } else if (aggType === METRIC_TYPES.PERCENTILE_RANKS && aggParams && !aggParams.values) {
-    aggParams = { ...aggParams, values: [(aggParams as { value: number }).value] };
-  }
-  return {
-    aggType,
-    label: agg.makeLabel(),
-    aggParams,
-    params: {},
-    format: agg.toSerializedFieldFormat() ?? {},
-    accessor: 0,
-  };
-};

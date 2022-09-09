@@ -7,9 +7,9 @@
  */
 
 import { convertMetricToColumns } from '../metrics';
-import { aggConfigToSchemaConfig } from '../utils';
 import { CommonColumnConverterArgs, SiblingPipelineMetric } from './types';
 import { Column } from '../../types';
+import { convertToSchemaConfig } from '../agg';
 
 export const convertToSiblingPipelineColumns = (
   columnConverterArgs: CommonColumnConverterArgs<SiblingPipelineMetric>,
@@ -25,7 +25,7 @@ export const convertToSiblingPipelineColumns = (
   }
 
   const customMetricColumn = convertMetricToColumns(
-    aggConfigToSchemaConfig(aggParams.customMetric),
+    convertToSchemaConfig(aggParams.customMetric),
     columnConverterArgs.dataView
   );
 

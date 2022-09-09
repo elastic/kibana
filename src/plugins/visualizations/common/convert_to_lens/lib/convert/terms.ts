@@ -10,7 +10,8 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import { AggParamsTerms } from '@kbn/data-plugin/common';
 import uuid from 'uuid';
 import { Column, DataType, TermsColumn, TermsParams } from '../../types';
-import { aggConfigToSchemaConfig, getFieldNameFromField, isColumnWithMeta } from '../utils';
+import { getFieldNameFromField, isColumnWithMeta } from '../utils';
+import { convertToSchemaConfig } from '../agg';
 import { convertMetricToColumns } from '../metrics';
 
 interface OrderByWithAgg {
@@ -32,7 +33,7 @@ const getOrderByWithAgg = (
       return null;
     }
     const orderMetricColumn = convertMetricToColumns(
-      aggConfigToSchemaConfig(aggParams.orderAgg),
+      convertToSchemaConfig(aggParams.orderAgg),
       dataView
     );
     if (!orderMetricColumn) {
