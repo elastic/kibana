@@ -38,10 +38,10 @@ import {
   type InternalApplicationStart,
 } from '@kbn/core-application-browser-internal';
 import { RenderingService } from '@kbn/core-rendering-browser-internal';
+import { CoreAppsService } from '@kbn/core-apps-browser-internal';
 import { fetchOptionalMemoryInfo } from './fetch_optional_memory_info';
 import { CoreSetup, CoreStart } from '.';
 import { PluginsService } from './plugins';
-import { CoreApp } from './core_app';
 
 import {
   LOAD_SETUP_DONE,
@@ -95,7 +95,7 @@ export class CoreSystem {
   private readonly docLinks: DocLinksService;
   private readonly rendering: RenderingService;
   private readonly integrations: IntegrationsService;
-  private readonly coreApp: CoreApp;
+  private readonly coreApp: CoreAppsService;
   private readonly deprecations: DeprecationsService;
   private readonly theme: ThemeService;
   private readonly rootDomElement: HTMLElement;
@@ -140,7 +140,7 @@ export class CoreSystem {
     this.executionContext = new ExecutionContextService();
 
     this.plugins = new PluginsService(this.coreContext, injectedMetadata.uiPlugins);
-    this.coreApp = new CoreApp(this.coreContext);
+    this.coreApp = new CoreAppsService(this.coreContext);
 
     performance.mark(KBN_LOAD_MARKS, {
       detail: LOAD_CORE_CREATED,
