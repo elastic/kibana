@@ -9,6 +9,7 @@ export {
   // Plugin id
   PLUGIN_ID,
   INTEGRATIONS_PLUGIN_ID,
+  SECURITY_SOLUTION_ID,
   // Packages
   FLEET_APM_PACKAGE,
   FLEET_SERVER_PACKAGE,
@@ -48,6 +49,8 @@ export {
   // Should probably be removed
   SO_SEARCH_LIMIT,
   // Statuses
+  // Authz
+  ENDPOINT_PRIVILEGES,
 } from './constants';
 export {
   // Route services
