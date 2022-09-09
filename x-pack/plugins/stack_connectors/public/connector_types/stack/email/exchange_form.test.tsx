@@ -15,7 +15,7 @@ import userEvent from '@testing-library/user-event';
 jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
 
 describe('ExchangeFormFields renders', () => {
-  const actionConnector = {
+  const connector = {
     secrets: {
       clientSecret: 'secret',
     },
@@ -33,7 +33,7 @@ describe('ExchangeFormFields renders', () => {
 
   test('should display exchange form fields', () => {
     const wrapper = mountWithIntl(
-      <ConnectorFormTestProvider connector={actionConnector}>
+      <ConnectorFormTestProvider connector={connector}>
         <ExchangeFormFields readOnly={false} />
       </ConnectorFormTestProvider>
     );
@@ -43,8 +43,8 @@ describe('ExchangeFormFields renders', () => {
   });
 
   test('exchange field defaults to empty when not defined', () => {
-    const connector = {
-      ...actionConnector,
+    const exchangeConnector = {
+      ...connector,
       secrets: {},
       config: {
         from: 'test@test.com',
@@ -52,7 +52,7 @@ describe('ExchangeFormFields renders', () => {
     };
 
     const wrapper = mountWithIntl(
-      <ConnectorFormTestProvider connector={connector}>
+      <ConnectorFormTestProvider connector={exchangeConnector}>
         <ExchangeFormFields readOnly={false} />
       </ConnectorFormTestProvider>
     );
@@ -81,7 +81,7 @@ describe('ExchangeFormFields renders', () => {
 
     it('connector validation succeeds when connector config is valid', async () => {
       const { getByTestId } = render(
-        <ConnectorFormTestProvider connector={actionConnector} onSubmit={onSubmit}>
+        <ConnectorFormTestProvider connector={connector} onSubmit={onSubmit}>
           <ExchangeFormFields readOnly={false} />
         </ConnectorFormTestProvider>
       );
@@ -110,7 +110,7 @@ describe('ExchangeFormFields renders', () => {
 
     it.each(tests)('validates correctly %p', async (field, value) => {
       const res = render(
-        <ConnectorFormTestProvider connector={actionConnector} onSubmit={onSubmit}>
+        <ConnectorFormTestProvider connector={connector} onSubmit={onSubmit}>
           <ExchangeFormFields readOnly={false} />
         </ConnectorFormTestProvider>
       );

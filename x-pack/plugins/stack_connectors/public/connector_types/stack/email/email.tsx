@@ -19,57 +19,39 @@ import { RegistrationServices } from '../..';
 
 const emailServices: EuiSelectOption[] = [
   {
-    text: i18n.translate(
-      'xpack.triggersActionsUI.components.builtinActionTypes.emailAction.gmailServerTypeLabel',
-      {
-        defaultMessage: 'Gmail',
-      }
-    ),
+    text: i18n.translate('xpack.stackConnectors.components.email.gmailServerTypeLabel', {
+      defaultMessage: 'Gmail',
+    }),
     value: 'gmail',
   },
   {
-    text: i18n.translate(
-      'xpack.triggersActionsUI.components.builtinActionTypes.emailAction.outlookServerTypeLabel',
-      {
-        defaultMessage: 'Outlook',
-      }
-    ),
+    text: i18n.translate('xpack.stackConnectors.components.email.outlookServerTypeLabel', {
+      defaultMessage: 'Outlook',
+    }),
     value: 'outlook365',
   },
   {
-    text: i18n.translate(
-      'xpack.triggersActionsUI.components.builtinActionTypes.emailAction.amazonSesServerTypeLabel',
-      {
-        defaultMessage: 'Amazon SES',
-      }
-    ),
+    text: i18n.translate('xpack.stackConnectors.components.email.amazonSesServerTypeLabel', {
+      defaultMessage: 'Amazon SES',
+    }),
     value: 'ses',
   },
   {
-    text: i18n.translate(
-      'xpack.triggersActionsUI.components.builtinActionTypes.emailAction.elasticCloudServerTypeLabel',
-      {
-        defaultMessage: 'Elastic Cloud',
-      }
-    ),
+    text: i18n.translate('xpack.stackConnectors.components.email.elasticCloudServerTypeLabel', {
+      defaultMessage: 'Elastic Cloud',
+    }),
     value: 'elastic_cloud',
   },
   {
-    text: i18n.translate(
-      'xpack.triggersActionsUI.components.builtinActionTypes.emailAction.exchangeServerTypeLabel',
-      {
-        defaultMessage: 'MS Exchange Server',
-      }
-    ),
+    text: i18n.translate('xpack.stackConnectors.components.email.exchangeServerTypeLabel', {
+      defaultMessage: 'MS Exchange Server',
+    }),
     value: 'exchange_server',
   },
   {
-    text: i18n.translate(
-      'xpack.triggersActionsUI.components.builtinActionTypes.emailAction.otherServerTypeLabel',
-      {
-        defaultMessage: 'Other',
-      }
-    ),
+    text: i18n.translate('xpack.stackConnectors.components.email.otherServerTypeLabel', {
+      defaultMessage: 'Other',
+    }),
     value: 'other',
   },
 ];
@@ -86,18 +68,12 @@ export function getConnectorType(
   return {
     id: '.email',
     iconClass: 'email',
-    selectMessage: i18n.translate(
-      'xpack.triggersActionsUI.components.builtinActionTypes.emailAction.selectMessageText',
-      {
-        defaultMessage: 'Send email from your server.',
-      }
-    ),
-    actionTypeTitle: i18n.translate(
-      'xpack.triggersActionsUI.components.builtinActionTypes.emailAction.actionTypeTitle',
-      {
-        defaultMessage: 'Send to email',
-      }
-    ),
+    selectMessage: i18n.translate('xpack.stackConnectors.components.email.selectMessageText', {
+      defaultMessage: 'Send email from your server.',
+    }),
+    actionTypeTitle: i18n.translate('xpack.stackConnectors.components.email.connectorTypeTitle', {
+      defaultMessage: 'Send to email',
+    }),
     validateParams: async (
       actionParams: EmailActionParams
     ): Promise<GenericValidationResult<EmailActionParams>> => {

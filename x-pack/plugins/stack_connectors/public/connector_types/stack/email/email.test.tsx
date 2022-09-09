@@ -7,7 +7,7 @@
 
 import { TypeRegistry } from '@kbn/triggers-actions-ui-plugin/public/application/type_registry';
 import { registerConnectorTypes } from '../..';
-import { ActionTypeModel } from '@kbn/triggers-actions-ui-plugin/public/types';
+import { ActionTypeModel as ConnectorTypeModel } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { getEmailServices } from './email';
 import {
   ValidatedEmail,
@@ -16,8 +16,8 @@ import {
   MustacheInEmailRegExp,
 } from '@kbn/actions-plugin/common';
 
-const ACTION_TYPE_ID = '.email';
-let actionTypeModel: ActionTypeModel;
+const CONNECTOR_TYPE_ID = '.email';
+let connectorTypeModel: ConnectorTypeModel;
 
 const RegistrationServices = {
   validateEmailAddresses: validateEmails,
@@ -45,18 +45,18 @@ beforeEach(() => {
 });
 
 beforeAll(() => {
-  const connectorTypeRegistry = new TypeRegistry<ActionTypeModel>();
+  const connectorTypeRegistry = new TypeRegistry<ConnectorTypeModel>();
   registerConnectorTypes({ connectorTypeRegistry, services: RegistrationServices });
-  const getResult = connectorTypeRegistry.get(ACTION_TYPE_ID);
+  const getResult = connectorTypeRegistry.get(CONNECTOR_TYPE_ID);
   if (getResult !== null) {
-    actionTypeModel = getResult;
+    connectorTypeModel = getResult;
   }
 });
 
 describe('connectorTypeRegistry.get() works', () => {
-  test('action type static data is as expected', () => {
-    expect(actionTypeModel.id).toEqual(ACTION_TYPE_ID);
-    expect(actionTypeModel.iconClass).toEqual('email');
+  test('connector type static data is as expected', () => {
+    expect(connectorTypeModel.id).toEqual(CONNECTOR_TYPE_ID);
+    expect(connectorTypeModel.iconClass).toEqual('email');
   });
 });
 
@@ -82,7 +82,7 @@ describe('action params validation', () => {
       subject: 'test',
     };
 
-    expect(await actionTypeModel.validateParams(actionParams)).toEqual({
+    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
       errors: {
         to: [],
         cc: [],
@@ -101,7 +101,7 @@ describe('action params validation', () => {
       subject: 'test',
     };
 
-    expect(await actionTypeModel.validateParams(actionParams)).toEqual({
+    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
       errors: {
         to: ['Email address invalid.com is not valid.'],
         cc: ['Email address bob@notallowed.com is not allowed.'],

@@ -16,12 +16,12 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { render as reactRender, RenderOptions, RenderResult } from '@testing-library/react';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 
-import { ConnectorServices } from '../../../types';
-import { TriggersAndActionsUiServices } from '../../..';
-import { createStartServicesMock } from '../../../common/lib/kibana/kibana_react.mock';
-import { ConnectorFormSchema } from '../../sections/action_connector_form/types';
-import { ConnectorFormFieldsGlobal } from '../../sections/action_connector_form/connector_form_fields_global';
-import { ConnectorProvider } from '../../context/connector_context';
+import { ConnectorServices } from '@kbn/triggers-actions-ui-plugin/public/types';
+import { TriggersAndActionsUiServices } from '@kbn/triggers-actions-ui-plugin/public';
+import { createStartServicesMock } from '@kbn/triggers-actions-ui-plugin/public/common/lib/kibana/kibana_react.mock';
+import { ConnectorFormSchema } from '@kbn/triggers-actions-ui-plugin/public/application/sections/action_connector_form/types';
+import { ConnectorFormFieldsGlobal } from '@kbn/triggers-actions-ui-plugin/public/application/sections/action_connector_form/connector_form_fields_global';
+import { ConnectorProvider } from '@kbn/triggers-actions-ui-plugin/public/application/context/connector_context';
 
 interface FormTestProviderProps {
   children: React.ReactNode;

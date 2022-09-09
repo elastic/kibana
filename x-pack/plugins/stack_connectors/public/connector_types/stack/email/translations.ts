@@ -8,171 +8,168 @@
 import { i18n } from '@kbn/i18n';
 
 export const USERNAME_LABEL = i18n.translate(
-  'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.userTextFieldLabel',
+  'xpack.stackConnectors.components.email.userTextFieldLabel',
   {
     defaultMessage: 'Username',
   }
 );
 
 export const PASSWORD_LABEL = i18n.translate(
-  'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.passwordFieldLabel',
+  'xpack.stackConnectors.components.email.passwordFieldLabel',
   {
     defaultMessage: 'Password',
   }
 );
 
 export const FROM_LABEL = i18n.translate(
-  'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.fromTextFieldLabel',
+  'xpack.stackConnectors.components.email.fromTextFieldLabel',
   {
     defaultMessage: 'Sender',
   }
 );
 
 export const SERVICE_LABEL = i18n.translate(
-  'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.serviceTextFieldLabel',
+  'xpack.stackConnectors.components.email.serviceTextFieldLabel',
   {
     defaultMessage: 'Service',
   }
 );
 
 export const TENANT_ID_LABEL = i18n.translate(
-  'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.tenantIdFieldLabel',
+  'xpack.stackConnectors.components.email.tenantIdFieldLabel',
   {
     defaultMessage: 'Tenant ID',
   }
 );
 
 export const CLIENT_ID_LABEL = i18n.translate(
-  'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.clientIdFieldLabel',
+  'xpack.stackConnectors.components.email.clientIdFieldLabel',
   {
     defaultMessage: 'Client ID',
   }
 );
 
 export const CLIENT_SECRET_LABEL = i18n.translate(
-  'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.clientSecretTextFieldLabel',
+  'xpack.stackConnectors.components.email.clientSecretTextFieldLabel',
   {
     defaultMessage: 'Client Secret',
   }
 );
 
 export const HOST_LABEL = i18n.translate(
-  'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.hostTextFieldLabel',
+  'xpack.stackConnectors.components.email.hostTextFieldLabel',
   {
     defaultMessage: 'Host',
   }
 );
 
 export const PORT_LABEL = i18n.translate(
-  'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.portTextFieldLabel',
+  'xpack.stackConnectors.components.email.portTextFieldLabel',
   {
     defaultMessage: 'Port',
   }
 );
 
 export const SECURE_LABEL = i18n.translate(
-  'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.secureSwitchLabel',
+  'xpack.stackConnectors.components.email.secureSwitchLabel',
   {
     defaultMessage: 'Secure',
   }
 );
 
 export const HAS_AUTH_LABEL = i18n.translate(
-  'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.hasAuthSwitchLabel',
+  'xpack.stackConnectors.components.email.hasAuthSwitchLabel',
   {
     defaultMessage: 'Require authentication for this server',
   }
 );
 
 export const SENDER_REQUIRED = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredFromText',
+  'xpack.stackConnectors.components.email.error.requiredFromText',
   {
     defaultMessage: 'Sender is required.',
   }
 );
 
 export const CLIENT_ID_REQUIRED = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredClientIdText',
+  'xpack.stackConnectors.components.email.error.requiredClientIdText',
   {
     defaultMessage: 'Client ID is required.',
   }
 );
 
 export const TENANT_ID_REQUIRED = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredTenantIdText',
+  'xpack.stackConnectors.components.email.error.requiredTenantIdText',
   {
     defaultMessage: 'Tenant ID is required.',
   }
 );
 
 export const PORT_REQUIRED = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredPortText',
+  'xpack.stackConnectors.components.email.error.requiredPortText',
   {
     defaultMessage: 'Port is required.',
   }
 );
 
 export const PORT_INVALID = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.error.invalidPortText',
+  'xpack.stackConnectors.components.email.error.invalidPortText',
   {
     defaultMessage: 'Port is invalid.',
   }
 );
 
 export const SERVICE_REQUIRED = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredServiceText',
+  'xpack.stackConnectors.components.email.error.requiredServiceText',
   {
     defaultMessage: 'Service is required.',
   }
 );
 
 export const HOST_REQUIRED = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredHostText',
+  'xpack.stackConnectors.components.email.error.requiredHostText',
   {
     defaultMessage: 'Host is required.',
   }
 );
 
 export const USERNAME_REQUIRED = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredAuthUserNameText',
+  'xpack.stackConnectors.components.email.error.requiredAuthUserNameText',
   {
     defaultMessage: 'Username is required.',
   }
 );
 
 export const TO_CC_REQUIRED = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredEntryText',
+  'xpack.stackConnectors.components.email.error.requiredEntryText',
   {
     defaultMessage: 'No To, Cc, or Bcc entry.  At least one entry is required.',
   }
 );
 
 export const MESSAGE_REQUIRED = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredMessageText',
+  'xpack.stackConnectors.components.email.error.requiredMessageText',
   {
     defaultMessage: 'Message is required.',
   }
 );
 
 export const SUBJECT_REQUIRED = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredSubjectText',
+  'xpack.stackConnectors.components.email.error.requiredSubjectText',
   {
     defaultMessage: 'Subject is required.',
   }
 );
 
 export function getInvalidEmailAddress(email: string) {
-  return i18n.translate(
-    'xpack.triggersActionsUI.components.builtinActionTypes.error.invalidEmail',
-    {
-      defaultMessage: 'Email address {email} is not valid.',
-      values: { email },
-    }
-  );
+  return i18n.translate('xpack.stackConnectors.components.email.error.invalidEmail', {
+    defaultMessage: 'Email address {email} is not valid.',
+    values: { email },
+  });
 }
 
 export function getNotAllowedEmailAddress(email: string) {
-  return i18n.translate('xpack.triggersActionsUI.components.builtinActionTypes.error.notAllowed', {
+  return i18n.translate('xpack.stackConnectors.components.email.error.notAllowed', {
     defaultMessage: 'Email address {email} is not allowed.',
     values: { email },
   });

@@ -50,7 +50,7 @@ const getEmailConfig = (
   helpText: (
     <EuiLink href={href} target="_blank">
       <FormattedMessage
-        id="xpack.triggersActionsUI.components.builtinActionTypes.emailAction.configureAccountsHelpLabel"
+        id="xpack.stackConnectors.components.email.configureAccountsHelpLabel"
         defaultMessage="Configure email accounts"
       />
     </EuiLink>
@@ -254,7 +254,7 @@ export const EmailActionConnectorFields: React.FunctionComponent<ActionConnector
               <EuiTitle size="xxs">
                 <h4>
                   <FormattedMessage
-                    id="xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.authenticationLabel"
+                    id="xpack.stackConnectors.components.email.authenticationLabel"
                     defaultMessage="Authentication"
                   />
                 </h4>

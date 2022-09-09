@@ -73,7 +73,7 @@ export function useEmailConfig({ http, toasts }: Props): UseEmailConfigReturnVal
             toasts.addDanger(
               error.body?.message ??
                 i18n.translate(
-                  'xpack.triggersActionsUI.components.builtinActionTypes.emailAction.updateErrorNotificationText',
+                  'xpack.stackConnectors.components.email.updateErrorNotificationText',
                   { defaultMessage: 'Cannot get service configuration' }
                 )
             );

@@ -36,7 +36,7 @@ const ExchangeFormFields: React.FC<ExchangeFormFieldsProps> = ({ readOnly }) => 
               helpText: (
                 <EuiLink href={docLinks.links.alerting.emailExchangeClientIdConfig} target="_blank">
                   <FormattedMessage
-                    id="xpack.triggersActionsUI.components.builtinActionTypes.email.exchangeForm.tenantIdHelpLabel"
+                    id="xpack.stackConnectors.components.email.exchangeForm.tenantIdHelpLabel"
                     defaultMessage="Configure Tenant ID"
                   />
                 </EuiLink>
@@ -63,7 +63,7 @@ const ExchangeFormFields: React.FC<ExchangeFormFieldsProps> = ({ readOnly }) => 
               helpText: (
                 <EuiLink href={docLinks.links.alerting.emailExchangeClientIdConfig} target="_blank">
                   <FormattedMessage
-                    id="xpack.triggersActionsUI.components.builtinActionTypes.email.exchangeForm.clientIdHelpLabel"
+                    id="xpack.stackConnectors.components.email.exchangeForm.clientIdHelpLabel"
                     defaultMessage="Configure Client ID"
                   />
                 </EuiLink>
@@ -94,7 +94,7 @@ const ExchangeFormFields: React.FC<ExchangeFormFieldsProps> = ({ readOnly }) => 
                 target="_blank"
               >
                 <FormattedMessage
-                  id="xpack.triggersActionsUI.components.builtinActionTypes.email.exchangeForm.clientSecretHelpLabel"
+                  id="xpack.stackConnectors.components.email.exchangeForm.clientSecretHelpLabel"
                   defaultMessage="Configure Client Secret"
                 />
               </EuiLink>

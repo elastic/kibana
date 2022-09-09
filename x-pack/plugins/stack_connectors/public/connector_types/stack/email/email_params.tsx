@@ -59,12 +59,9 @@ export const EmailParamsFields = ({
         fullWidth
         error={errors.to}
         isInvalid={isToInvalid}
-        label={i18n.translate(
-          'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.recipientTextFieldLabel',
-          {
-            defaultMessage: 'To',
-          }
-        )}
+        label={i18n.translate('xpack.stackConnectors.components.email.recipientTextFieldLabel', {
+          defaultMessage: 'To',
+        })}
         labelAppend={
           <>
             <span>
@@ -72,7 +69,7 @@ export const EmailParamsFields = ({
                 <EuiButtonEmpty size="xs" onClick={() => setAddCC(true)}>
                   <FormattedMessage
                     defaultMessage="Cc"
-                    id="xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.addCcButton"
+                    id="xpack.stackConnectors.components.email.addCcButton"
                   />
                 </EuiButtonEmpty>
               ) : null}
@@ -80,7 +77,7 @@ export const EmailParamsFields = ({
                 <EuiButtonEmpty size="xs" onClick={() => setAddBCC(true)}>
                   <FormattedMessage
                     defaultMessage="Bcc"
-                    id="xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.addBccButton"
+                    id="xpack.stackConnectors.components.email.addBccButton"
                   />
                 </EuiButtonEmpty>
               ) : null}
@@ -125,7 +122,7 @@ export const EmailParamsFields = ({
           isInvalid={isCCInvalid}
           isDisabled={isDisabled}
           label={i18n.translate(
-            'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.recipientCopyTextFieldLabel',
+            'xpack.stackConnectors.components.email.recipientCopyTextFieldLabel',
             {
               defaultMessage: 'Cc',
             }
@@ -167,7 +164,7 @@ export const EmailParamsFields = ({
           error={errors.bcc}
           isInvalid={isBCCInvalid}
           label={i18n.translate(
-            'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.recipientBccTextFieldLabel',
+            'xpack.stackConnectors.components.email.recipientBccTextFieldLabel',
             {
               defaultMessage: 'Bcc',
             }
@@ -209,12 +206,9 @@ export const EmailParamsFields = ({
           fullWidth
           error={errors.subject}
           isInvalid={isSubjectInvalid}
-          label={i18n.translate(
-            'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.subjectTextFieldLabel',
-            {
-              defaultMessage: 'Subject',
-            }
-          )}
+          label={i18n.translate('xpack.stackConnectors.components.email.subjectTextFieldLabel', {
+            defaultMessage: 'Subject',
+          })}
         >
           <TextFieldWithMessageVariables
             index={index}
@@ -234,7 +228,7 @@ export const EmailParamsFields = ({
           paramsProperty={'message'}
           inputTargetValue={message}
           label={i18n.translate(
-            'xpack.triggersActionsUI.sections.builtinActionTypes.emailAction.messageTextAreaFieldLabel',
+            'xpack.stackConnectors.components.email.messageTextAreaFieldLabel',
             {
               defaultMessage: 'Message',
             }
