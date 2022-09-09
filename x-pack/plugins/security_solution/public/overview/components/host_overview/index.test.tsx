@@ -82,11 +82,11 @@ describe('Host Summary Component', () => {
             {
               host: {
                 name: 'testHostmame',
-              },
-              risk,
-              risk_stats: {
-                rule_risks: [],
-                risk_score: riskScore,
+                risk: {
+                  rule_risks: [],
+                  calculated_score_norm: riskScore,
+                  calculated_level: risk,
+                },
               },
             },
           ],
