@@ -1,0 +1,179 @@
+{
+  "id": "@kbn/core-usage-data-server-internal",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [
+      {
+        "parentPluginId": "@kbn/core-usage-data-server-internal",
+        "id": "def-server.CoreUsageDataService",
+        "type": "Class",
+        "tags": [],
+        "label": "CoreUsageDataService",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-usage-data-server-internal",
+            "scope": "server",
+            "docId": "kibKbnCoreUsageDataServerInternalPluginApi",
+            "section": "def-server.CoreUsageDataService",
+            "text": "CoreUsageDataService"
+          },
+          " implements ",
+          "CoreService",
+          "<",
+          "InternalCoreUsageDataSetup",
+          ", ",
+          "CoreUsageDataStart",
+          ">"
+        ],
+        "path": "packages/core/usage-data/core-usage-data-server-internal/src/core_usage_data_service.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-usage-data-server-internal",
+            "id": "def-server.CoreUsageDataService.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/core/usage-data/core-usage-data-server-internal/src/core_usage_data_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-usage-data-server-internal",
+                "id": "def-server.CoreUsageDataService.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "core",
+                "description": [],
+                "signature": [
+                  "CoreContext"
+                ],
+                "path": "packages/core/usage-data/core-usage-data-server-internal/src/core_usage_data_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-usage-data-server-internal",
+            "id": "def-server.CoreUsageDataService.setup",
+            "type": "Function",
+            "tags": [],
+            "label": "setup",
+            "description": [],
+            "signature": [
+              "({ http, metrics, savedObjectsStartPromise, changedDeprecatedConfigPath$ }: ",
+              "SetupDeps",
+              ") => ",
+              "InternalCoreUsageDataSetup"
+            ],
+            "path": "packages/core/usage-data/core-usage-data-server-internal/src/core_usage_data_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-usage-data-server-internal",
+                "id": "def-server.CoreUsageDataService.setup.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{ http, metrics, savedObjectsStartPromise, changedDeprecatedConfigPath$ }",
+                "description": [],
+                "signature": [
+                  "SetupDeps"
+                ],
+                "path": "packages/core/usage-data/core-usage-data-server-internal/src/core_usage_data_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-usage-data-server-internal",
+            "id": "def-server.CoreUsageDataService.start",
+            "type": "Function",
+            "tags": [],
+            "label": "start",
+            "description": [],
+            "signature": [
+              "({ savedObjects, elasticsearch, exposedConfigsToUsage }: ",
+              "StartDeps",
+              ") => { getCoreUsageData: () => Promise<",
+              "CoreUsageData",
+              ">; getConfigsUsageData: () => Promise<",
+              "ConfigUsageData",
+              ">; }"
+            ],
+            "path": "packages/core/usage-data/core-usage-data-server-internal/src/core_usage_data_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-usage-data-server-internal",
+                "id": "def-server.CoreUsageDataService.start.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{ savedObjects, elasticsearch, exposedConfigsToUsage }",
+                "description": [],
+                "signature": [
+                  "StartDeps"
+                ],
+                "path": "packages/core/usage-data/core-usage-data-server-internal/src/core_usage_data_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-usage-data-server-internal",
+            "id": "def-server.CoreUsageDataService.stop",
+            "type": "Function",
+            "tags": [],
+            "label": "stop",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "packages/core/usage-data/core-usage-data-server-internal/src/core_usage_data_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}
