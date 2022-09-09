@@ -42,7 +42,7 @@ export const ConfigPanelQueryAnnotation = ({
   const inputQuery = annotation?.filter ?? defaultQuery;
   const currentIndexPattern = frame.dataViews.indexPatterns[layer.indexPatternId];
   const currentExistingFields = frame.dataViews.existingFields[currentIndexPattern.title];
-  // list only supported field by operation, remove the rest
+  // list only date fields
   const options = currentIndexPattern.fields
     .filter((field) => field.type === 'date' && field.displayName)
     .map((field) => {

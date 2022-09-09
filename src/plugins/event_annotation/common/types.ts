@@ -69,7 +69,7 @@ export type QueryPointEventAnnotationConfig = {
   id: string;
   type: QueryAnnotationType;
   filter: KibanaQueryOutput;
-  timeField: string;
+  timeField?: string;
   textField?: string;
   extraFields?: string[];
   key: {

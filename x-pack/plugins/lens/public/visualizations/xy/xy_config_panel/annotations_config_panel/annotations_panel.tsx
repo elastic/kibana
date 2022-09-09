@@ -144,7 +144,12 @@ export const AnnotationsPanel = (
                 key,
                 ...(type === 'query'
                   ? {
-                      timeField: currentIndexPattern.timeFieldName,
+                      timeField:
+                        currentIndexPattern.timeFieldName ??
+                        // fallback to the first avaiable date field in the dataView
+                        currentIndexPattern.fields.find(
+                          ({ type: fieldType }) => fieldType === 'date'
+                        ),
                     }
                   : {}),
               });
