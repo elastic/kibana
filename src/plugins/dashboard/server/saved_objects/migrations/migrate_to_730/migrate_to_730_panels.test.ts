@@ -8,13 +8,14 @@
 
 import { migratePanelsTo730 } from './migrate_to_730_panels';
 import {
+  SavedDashboardPanel730ToLatest,
+  RawSavedDashboardPanel640To720,
   RawSavedDashboardPanelTo60,
   RawSavedDashboardPanel630,
-  RawSavedDashboardPanel640To720,
   RawSavedDashboardPanel610,
   RawSavedDashboardPanel620,
-} from './bwc/types';
-import { SavedDashboardPanelTo60, SavedDashboardPanel730ToLatest } from './types';
+  SavedDashboardPanelTo60,
+} from './types';
 
 test('6.0 migrates uiState, sort, scales, and gridData', async () => {
   const uiState = {

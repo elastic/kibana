@@ -7,11 +7,16 @@
  */
 
 import { savedObjectsServiceMock } from '@kbn/core/server/mocks';
-import { createDashboardSavedObjectTypeMigrations } from './dashboard_migrations';
-import { migrations730 } from './migrations_730';
-import { DashboardDoc700To720, DashboardDoc730ToLatest, DashboardDocPre700 } from '../../common';
-import { RawSavedDashboardPanel730ToLatest } from '../../common';
 import { createEmbeddableSetupMock } from '@kbn/embeddable-plugin/server/mocks';
+
+import {
+  DashboardDocPre700,
+  DashboardDoc700To720,
+  DashboardDoc730ToLatest,
+  RawSavedDashboardPanel730ToLatest,
+} from './types';
+import { migrations730 } from './migrations_730';
+import { createDashboardSavedObjectTypeMigrations } from '../dashboard_saved_object_migrations';
 
 const mockContext = savedObjectsServiceMock.createMigrationContext();
 const migrations = createDashboardSavedObjectTypeMigrations({

@@ -11,7 +11,7 @@ import { get } from 'lodash';
 import { SavedObjectMigrationFn } from '@kbn/core/server';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
 
-import { DashboardDoc700To720 } from '../types';
+import { DashboardDoc700To720 } from './types';
 
 function migrateIndexPattern(doc: DashboardDoc700To720) {
   const searchSourceJSON = get(doc, 'attributes.kibanaSavedObjectMeta.searchSourceJSON');
