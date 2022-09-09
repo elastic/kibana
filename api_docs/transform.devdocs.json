@@ -25,6 +25,7 @@
         ],
         "path": "x-pack/plugins/transform/public/alerting/transform_health_rule_type/register_transform_health_rule.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -50,6 +51,7 @@
         ],
         "path": "x-pack/plugins/transform/server/lib/alerting/transform_health_rule_type/register_transform_health_rule_type.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "transform",
@@ -63,6 +65,7 @@
             ],
             "path": "x-pack/plugins/transform/server/lib/alerting/transform_health_rule_type/register_transform_health_rule_type.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -94,6 +97,7 @@
         ],
         "path": "x-pack/plugins/transform/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ]
