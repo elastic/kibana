@@ -266,7 +266,9 @@ describe('ProcessTreeNode component', () => {
         );
 
         expect(renderResult.queryByTestId('processTreeNodeOutpuButton')).toBeTruthy();
-        expect(renderResult.queryByTestId('processTreeNodeOutpuButton')?.textContent).toBe('Output');
+        expect(renderResult.queryByTestId('processTreeNodeOutpuButton')?.textContent).toBe(
+          'Output'
+        );
       });
     });
     describe('Child processes', () => {

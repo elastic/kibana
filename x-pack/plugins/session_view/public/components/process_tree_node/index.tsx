@@ -299,12 +299,7 @@ export function ProcessTreeNode({
               alertsCount={alerts.length}
             />
           )}
-          {hasOutputs && (
-            <OutputButton
-              onToggle={onOutputToggle}
-              isExpanded={outputExpanded}
-            />
-          )}
+          {hasOutputs && <OutputButton onToggle={onOutputToggle} isExpanded={outputExpanded} />}
         </div>
       </div>
 

@@ -65,7 +65,6 @@ export const AlertButton = ({
   );
 };
 
-
 export const OutputButton = ({
   isExpanded,
   onToggle,
