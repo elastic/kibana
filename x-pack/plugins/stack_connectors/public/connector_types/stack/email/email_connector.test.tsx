@@ -24,7 +24,7 @@ const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
 describe('EmailActionConnectorFields', () => {
   test('all connector fields are rendered', async () => {
-    const connector = {
+    const actionConnector = {
       secrets: {
         user: 'user',
         password: 'pass',
@@ -40,7 +40,7 @@ describe('EmailActionConnectorFields', () => {
     };
 
     const wrapper = mountWithIntl(
-      <ConnectorFormTestProvider connector={connector}>
+      <ConnectorFormTestProvider connector={actionConnector}>
         <EmailActionConnectorFields
           readOnly={false}
           isEdit={false}
@@ -63,7 +63,7 @@ describe('EmailActionConnectorFields', () => {
   });
 
   test('secret connector fields are not rendered when hasAuth false', async () => {
-    const connector = {
+    const actionConnector = {
       secrets: {},
       id: 'test',
       actionTypeId: '.email',
@@ -76,7 +76,7 @@ describe('EmailActionConnectorFields', () => {
     };
 
     const wrapper = mountWithIntl(
-      <ConnectorFormTestProvider connector={connector}>
+      <ConnectorFormTestProvider connector={actionConnector}>
         <EmailActionConnectorFields
           readOnly={false}
           isEdit={false}
@@ -98,7 +98,7 @@ describe('EmailActionConnectorFields', () => {
   });
 
   test('service field defaults to empty when not defined', async () => {
-    const connector = {
+    const actionConnector = {
       secrets: {
         user: 'user',
         password: 'pass',
@@ -114,7 +114,7 @@ describe('EmailActionConnectorFields', () => {
     };
 
     const wrapper = mountWithIntl(
-      <ConnectorFormTestProvider connector={connector}>
+      <ConnectorFormTestProvider connector={actionConnector}>
         <EmailActionConnectorFields
           readOnly={false}
           isEdit={false}
@@ -135,7 +135,7 @@ describe('EmailActionConnectorFields', () => {
   });
 
   test('service field are correctly selected when defined', async () => {
-    const connector = {
+    const actionConnector = {
       secrets: {
         user: 'user',
         password: 'pass',
@@ -152,7 +152,7 @@ describe('EmailActionConnectorFields', () => {
     };
 
     const wrapper = mountWithIntl(
-      <ConnectorFormTestProvider connector={connector}>
+      <ConnectorFormTestProvider connector={actionConnector}>
         <EmailActionConnectorFields
           readOnly={false}
           isEdit={false}
@@ -177,7 +177,7 @@ describe('EmailActionConnectorFields', () => {
       .spyOn(hooks, 'useEmailConfig')
       .mockImplementation(() => ({ isLoading: false, getEmailServiceConfig }));
 
-    const connector = {
+    const actionConnector = {
       secrets: {
         user: 'user',
         password: 'pass',
@@ -194,7 +194,7 @@ describe('EmailActionConnectorFields', () => {
     };
 
     const wrapper = mountWithIntl(
-      <ConnectorFormTestProvider connector={connector}>
+      <ConnectorFormTestProvider connector={actionConnector}>
         <EmailActionConnectorFields
           readOnly={false}
           isEdit={false}
@@ -221,7 +221,7 @@ describe('EmailActionConnectorFields', () => {
       .spyOn(hooks, 'useEmailConfig')
       .mockImplementation(() => ({ isLoading: false, getEmailServiceConfig }));
 
-    const connector = {
+    const actionConnector = {
       secrets: {
         user: 'user',
         password: 'pass',
@@ -238,7 +238,7 @@ describe('EmailActionConnectorFields', () => {
     };
 
     const wrapper = mountWithIntl(
-      <ConnectorFormTestProvider connector={connector}>
+      <ConnectorFormTestProvider connector={actionConnector}>
         <EmailActionConnectorFields
           readOnly={false}
           isEdit={false}
@@ -268,7 +268,7 @@ describe('EmailActionConnectorFields', () => {
     });
 
     it('submits the connector', async () => {
-      const connector = {
+      const actionConnector = {
         secrets: {
           user: 'user',
           password: 'pass',
@@ -290,7 +290,7 @@ describe('EmailActionConnectorFields', () => {
 
       const { getByTestId } = appMockRenderer.render(
         <ConnectorFormTestProvider
-          connector={connector}
+          connector={actionConnector}
           onSubmit={onSubmit}
           connectorServices={{ validateEmailAddresses }}
         >
@@ -332,7 +332,7 @@ describe('EmailActionConnectorFields', () => {
     });
 
     it('submits the connector with auth false', async () => {
-      const connector = {
+      const actionConnector = {
         secrets: {
           user: null,
           password: null,
@@ -354,7 +354,7 @@ describe('EmailActionConnectorFields', () => {
 
       const { getByTestId } = appMockRenderer.render(
         <ConnectorFormTestProvider
-          connector={connector}
+          connector={actionConnector}
           onSubmit={onSubmit}
           connectorServices={{ validateEmailAddresses }}
         >
@@ -395,7 +395,7 @@ describe('EmailActionConnectorFields', () => {
       useKibanaMock().services.actions.validateEmailAddresses = jest
         .fn()
         .mockReturnValue([{ valid: false }]);
-      const connector = {
+      const actionConnector = {
         secrets: {
           user: 'user',
           password: 'pass',
@@ -413,7 +413,7 @@ describe('EmailActionConnectorFields', () => {
 
       const { getByTestId } = appMockRenderer.render(
         <ConnectorFormTestProvider
-          connector={connector}
+          connector={actionConnector}
           onSubmit={onSubmit}
           connectorServices={{ validateEmailAddresses }}
         >
@@ -438,7 +438,7 @@ describe('EmailActionConnectorFields', () => {
     });
 
     it('connector validation fails when user specified but not password', async () => {
-      const connector = {
+      const actionConnector = {
         secrets: {
           user: 'user',
           password: '',
@@ -461,7 +461,7 @@ describe('EmailActionConnectorFields', () => {
 
       const { getByTestId } = appMockRenderer.render(
         <ConnectorFormTestProvider
-          connector={connector}
+          connector={actionConnector}
           onSubmit={onSubmit}
           connectorServices={{ validateEmailAddresses }}
         >
@@ -486,7 +486,7 @@ describe('EmailActionConnectorFields', () => {
     });
 
     it('connector validation fails when server type is not selected', async () => {
-      const connector = {
+      const actionConnector = {
         secrets: {
           user: 'user',
           password: 'password',
@@ -507,7 +507,7 @@ describe('EmailActionConnectorFields', () => {
 
       const { getByTestId } = appMockRenderer.render(
         <ConnectorFormTestProvider
-          connector={connector}
+          connector={actionConnector}
           onSubmit={onSubmit}
           connectorServices={{ validateEmailAddresses }}
         >
@@ -532,7 +532,7 @@ describe('EmailActionConnectorFields', () => {
     });
 
     it('connector validation fails when exchange service is selected, but clientId, tenantId and clientSecrets were not defined', async () => {
-      const connector = {
+      const actionConnector = {
         secrets: {
           user: 'user',
           password: 'pass',
@@ -552,7 +552,7 @@ describe('EmailActionConnectorFields', () => {
 
       const { getByTestId } = appMockRenderer.render(
         <ConnectorFormTestProvider
-          connector={connector}
+          connector={actionConnector}
           onSubmit={onSubmit}
           connectorServices={{ validateEmailAddresses }}
         >
@@ -581,7 +581,7 @@ describe('EmailActionConnectorFields', () => {
     it.each([[123.5], ['123.5']])(
       'connector validation fails when port is not an integer: %p',
       async (port) => {
-        const connector = {
+        const actionConnector = {
           secrets: {
             user: 'user',
             password: 'pass',
@@ -601,7 +601,7 @@ describe('EmailActionConnectorFields', () => {
 
         const { getByTestId } = appMockRenderer.render(
           <ConnectorFormTestProvider
-            connector={connector}
+            connector={actionConnector}
             onSubmit={onSubmit}
             connectorServices={{ validateEmailAddresses }}
           >
@@ -627,7 +627,7 @@ describe('EmailActionConnectorFields', () => {
     );
 
     it.each([[123], ['123']])('connector validation pass when port is valid: %p', async (port) => {
-      const connector = {
+      const actionConnector = {
         secrets: {
           user: 'user',
           password: 'pass',
@@ -647,7 +647,7 @@ describe('EmailActionConnectorFields', () => {
 
       const { getByTestId } = appMockRenderer.render(
         <ConnectorFormTestProvider
-          connector={connector}
+          connector={actionConnector}
           onSubmit={onSubmit}
           connectorServices={{ validateEmailAddresses }}
         >

@@ -26,7 +26,7 @@ jest.mock(kibanaReactPath, () => {
   };
 });
 
-const connector = {
+const actionConnector = {
   actionTypeId: '.index',
   config: {
     index: 'test-index',
@@ -38,7 +38,7 @@ const connector = {
   secrets: {},
 };
 
-const preconfiguredConnector = {
+const preconfiguredActionConnector = {
   actionTypeId: '.index',
   config: {
     index: 'kibana-alert-history-default',
@@ -61,7 +61,7 @@ describe('IndexParamsFields renders', () => {
         errors={{ index: [] }}
         editAction={() => {}}
         index={0}
-        actionConnector={connector}
+        actionConnector={actionConnector}
         messageVariables={[
           {
             name: 'myVar',
@@ -88,7 +88,7 @@ describe('IndexParamsFields renders', () => {
         errors={{ index: [] }}
         editAction={() => {}}
         index={0}
-        actionConnector={connector}
+        actionConnector={actionConnector}
         messageVariables={[
           {
             name: 'myVar',
@@ -116,7 +116,7 @@ describe('IndexParamsFields renders', () => {
         errors={{ index: [] }}
         editAction={() => {}}
         index={0}
-        actionConnector={preconfiguredConnector}
+        actionConnector={preconfiguredActionConnector}
         messageVariables={[
           {
             name: 'myVar',
@@ -146,7 +146,7 @@ describe('IndexParamsFields renders', () => {
         errors={{ index: [] }}
         editAction={() => {}}
         index={0}
-        actionConnector={preconfiguredConnector}
+        actionConnector={preconfiguredActionConnector}
         messageVariables={[
           {
             name: 'myVar',
