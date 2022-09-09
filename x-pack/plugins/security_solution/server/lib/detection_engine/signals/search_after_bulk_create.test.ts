@@ -99,6 +99,7 @@ describe('searchAfterAndBulkCreate', () => {
       ruleExecutionLogger
     );
     wrapHits = wrapHitsFactory({
+      completeRule: queryCompleteRule,
       mergeStrategy: 'missingFields',
       ignoreFields: [],
       spaceId: 'default',
@@ -200,7 +201,6 @@ describe('searchAfterAndBulkCreate', () => {
 
     const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
       tuple,
-
       listClient,
       exceptionsList: [exceptionItem],
       services: mockService,
@@ -294,6 +294,7 @@ describe('searchAfterAndBulkCreate', () => {
       },
     ];
     const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
+      //   completeRule: queryCompleteRule,
       tuple,
       listClient,
       exceptionsList: [exceptionItem],
