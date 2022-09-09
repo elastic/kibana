@@ -862,8 +862,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      */
     async createLayer(layerType: 'data' | 'referenceLine' | 'annotations' = 'data') {
       await testSubjects.click('lnsLayerAddButton');
-      const layerCount = (await find.allByCssSelector(`[data-test-subj^="lns-layerPanel-"]`))
-        .length;
+      const layerCount = await this.getLayerCount();
 
       await retry.waitFor('check for layer type support', async () => {
         const fasterChecks = await Promise.all([
