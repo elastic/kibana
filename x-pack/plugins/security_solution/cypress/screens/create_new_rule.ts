@@ -236,3 +236,17 @@ export const NEW_TERMS_HISTORY_SIZE =
 
 export const NEW_TERMS_HISTORY_TIME_TYPE =
   '[data-test-subj="detectionEngineStepDefineRuleHistoryWindowSize"] [data-test-subj="timeType"]';
+
+export const LOAD_QUERY_DYNAMICALLY_CHECKBOX =
+  '[data-test-subj="detectionEngineStepDefineRuleShouldLoadQueryDynamically"] input';
+
+export const SHOW_QUERY_BAR_BUTTON = '[data-test-subj="showQueryBarMenu"]';
+
+export const LOAD_SAVED_QUERIES_LIST_BUTTON =
+  '[data-test-subj="saved-query-management-load-button"]';
+
+export const getSavedQueryByName = (savedQueryName: string) =>
+  `[data-test-subj="load-saved-query-${savedQueryName}-button"]`;
+
+export const APPLY_SELECTED_SAVED_QUERY_BUTTON =
+  '[data-test-subj="saved-query-management-apply-changes-button"]';

@@ -24,6 +24,7 @@ import {
   ADD_REFERENCE_URL_BTN,
   ADVANCED_SETTINGS_BTN,
   ANOMALY_THRESHOLD_INPUT,
+  APPLY_SELECTED_SAVED_QUERY_BUTTON,
   AT_LEAST_ONE_INDEX_PATTERN,
   AT_LEAST_ONE_VALID_MATCH,
   BACK_TO_ALL_RULES_LINK,
@@ -43,6 +44,8 @@ import {
   INPUT,
   INVALID_MATCH_CONTENT,
   INVESTIGATION_NOTES_TEXTAREA,
+  LOAD_SAVED_QUERIES_LIST_BUTTON,
+  getSavedQueryByName,
   LOOK_BACK_INTERVAL,
   LOOK_BACK_TIME_TYPE,
   MACHINE_LEARNING_DROPDOWN_INPUT,
@@ -73,6 +76,7 @@ import {
   SEVERITY_DROPDOWN,
   SEVERITY_MAPPING_OVERRIDE_OPTION,
   SEVERITY_OVERRIDE_ROW,
+  SHOW_QUERY_BAR_BUTTON,
   TAGS_INPUT,
   THREAT_COMBO_BOX_INPUT,
   THREAT_ITEM_ENTRY_DELETE_BUTTON,
@@ -591,4 +595,13 @@ export const waitForTheRuleToBeExecuted = () => {
       .invoke('text')
       .then((ruleStatus) => ruleStatus === 'succeeded');
   });
+};
+
+export const loadSavedQuery = (savedQueryName: string, queryValue: string) => {
+  cy.get(SHOW_QUERY_BAR_BUTTON).eq(0).click();
+  cy.get(LOAD_SAVED_QUERIES_LIST_BUTTON).click();
+  cy.get(getSavedQueryByName(savedQueryName)).eq(0).click();
+  cy.get(APPLY_SELECTED_SAVED_QUERY_BUTTON).click();
+
+  cy.get(CUSTOM_QUERY_INPUT).should('have.value', queryValue);
 };
