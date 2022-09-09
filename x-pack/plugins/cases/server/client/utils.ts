@@ -332,11 +332,7 @@ export const constructQueryOptions = ({
   assignees,
 }: ConstructQueryParams): SavedObjectFindOptionsKueryNode => {
   const tagsFilter = buildFilter({ filters: tags, field: 'tags', operator: 'or' });
-  const reportersFilter = buildFilter({
-    filters: reporters,
-    field: 'created_by.username',
-    operator: 'or',
-  });
+  const reportersFilter = createReportersFilter(reporters);
   const sortField = sortToSnake(sortByField);
   const ownerFilter = buildFilter({ filters: owner, field: OWNER_FIELD, operator: 'or' });
 
@@ -363,6 +359,30 @@ export const constructQueryOptions = ({
     filter: combineFilterWithAuthorizationFilter(filters, authorizationFilter),
     sortField,
   };
+};
+
+const createReportersFilter = (reporters?: string | string[]): KueryNode | undefined => {
+  const reportersFilter = buildFilter({
+    filters: reporters,
+    field: 'created_by.username',
+    operator: 'or',
+  });
+
+  const reportersProfileUidFilter = buildFilter({
+    filters: reporters,
+    field: 'created_by.profile_uid',
+    operator: 'or',
+  });
+
+  const filters = [reportersFilter, reportersProfileUidFilter].filter(
+    (filter): filter is KueryNode => filter != null
+  );
+
+  if (filters.length <= 0) {
+    return;
+  }
+
+  return nodeBuilder.or(filters);
 };
 
 interface CompareArrays<T> {

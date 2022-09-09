@@ -48,6 +48,9 @@ export const createCaseSavedObjectType = (
           email: {
             type: 'keyword',
           },
+          profile_uid: {
+            type: 'keyword',
+          },
         },
       },
       created_at: {
@@ -62,6 +65,9 @@ export const createCaseSavedObjectType = (
             type: 'keyword',
           },
           email: {
+            type: 'keyword',
+          },
+          profile_uid: {
             type: 'keyword',
           },
         },
@@ -108,6 +114,9 @@ export const createCaseSavedObjectType = (
               email: {
                 type: 'keyword',
               },
+              profile_uid: {
+                type: 'keyword',
+              },
             },
           },
           connector_name: {
@@ -148,6 +157,9 @@ export const createCaseSavedObjectType = (
             type: 'keyword',
           },
           email: {
+            type: 'keyword',
+          },
+          profile_uid: {
             type: 'keyword',
           },
         },

@@ -109,19 +109,24 @@ export class CasesClientFactory {
       esClient: scopedClusterClient,
     });
 
-    const userInfo = services.caseService.getUser({ request });
+    const userInfo = await this.options.securityPluginStart?.userProfiles.getCurrent({ request });
 
     return createCasesClient({
       services,
       unsecuredSavedObjectsClient,
-      // We only want these fields from the userInfo object
-      user: { username: userInfo.username, email: userInfo.email, full_name: userInfo.full_name },
+      user: {
+        username: userInfo?.user.username,
+        email: userInfo?.user.email,
+        full_name: userInfo?.user.full_name,
+        profile_uid: userInfo?.uid,
+      },
       logger: this.logger,
       lensEmbeddableFactory: this.options.lensEmbeddableFactory,
       authorization: auth,
       actionsClient: await this.options.actionsPluginStart.getActionsClientWithRequest(request),
       persistableStateAttachmentTypeRegistry: this.options.persistableStateAttachmentTypeRegistry,
       externalReferenceAttachmentTypeRegistry: this.options.externalReferenceAttachmentTypeRegistry,
+      securityStartPlugin: this.options.securityPluginStart,
     });
   }
 
@@ -143,7 +148,6 @@ export class CasesClientFactory {
 
     const caseService = new CasesService({
       log: this.logger,
-      authentication: this.options?.securityPluginStart?.authc,
       unsecuredSavedObjectsClient,
       attachmentService,
     });

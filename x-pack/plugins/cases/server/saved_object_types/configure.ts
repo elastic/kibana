@@ -30,6 +30,9 @@ export const caseConfigureSavedObjectType: SavedObjectsType = {
           full_name: {
             type: 'keyword',
           },
+          profile_uid: {
+            type: 'keyword',
+          },
         },
       },
       connector: {
@@ -70,6 +73,9 @@ export const caseConfigureSavedObjectType: SavedObjectsType = {
             type: 'keyword',
           },
           full_name: {
+            type: 'keyword',
+          },
+          profile_uid: {
             type: 'keyword',
           },
         },

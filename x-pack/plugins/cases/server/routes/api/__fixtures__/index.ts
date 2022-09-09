@@ -6,4 +6,3 @@
  */
 
 export * from './mock_saved_objects';
-export { authenticationMock } from './authc_mock';
