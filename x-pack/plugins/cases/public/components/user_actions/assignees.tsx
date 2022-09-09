@@ -159,6 +159,7 @@ export const createAssigneesUserActionBuilder: UserActionBuilder = ({
     const label = getLabelTitle(assigneesUserAction, userProfiles);
     const commonBuilder = createCommonUpdateUserActionBuilder({
       userAction,
+      userProfiles,
       handleOutlineComment,
       label,
       icon: 'userAvatar',

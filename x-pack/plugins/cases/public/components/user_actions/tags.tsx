@@ -32,6 +32,7 @@ const getLabelTitle = (userAction: UserActionResponse<TagsUserAction>) => {
 
 export const createTagsUserActionBuilder: UserActionBuilder = ({
   userAction,
+  userProfiles,
   handleOutlineComment,
 }) => ({
   build: () => {
@@ -39,6 +40,7 @@ export const createTagsUserActionBuilder: UserActionBuilder = ({
     const label = getLabelTitle(tagsUserAction);
     const commonBuilder = createCommonUpdateUserActionBuilder({
       userAction,
+      userProfiles,
       handleOutlineComment,
       label,
       icon: 'tag',

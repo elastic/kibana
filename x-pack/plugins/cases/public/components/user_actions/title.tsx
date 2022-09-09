@@ -17,6 +17,7 @@ const getLabelTitle = (userAction: UserActionResponse<TitleUserAction>) =>
 
 export const createTitleUserActionBuilder: UserActionBuilder = ({
   userAction,
+  userProfiles,
   handleOutlineComment,
 }) => ({
   build: () => {
@@ -24,6 +25,7 @@ export const createTitleUserActionBuilder: UserActionBuilder = ({
     const label = getLabelTitle(titleUserAction);
     const commonBuilder = createCommonUpdateUserActionBuilder({
       userAction,
+      userProfiles,
       handleOutlineComment,
       label,
       icon: 'dot',

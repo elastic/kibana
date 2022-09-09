@@ -16,14 +16,5 @@ describe('HoverableUserWithAvatar', () => {
 
     expect(screen.getByText('DR')).toBeInTheDocument();
     expect(screen.getByText('Damaged Raccoon')).toBeInTheDocument();
-    expect(screen.queryByTestId('user-profile-name-bolded')).not.toBeInTheDocument();
-  });
-
-  it('renders the name bolded', () => {
-    render(<HoverableUserWithAvatar userInfo={userProfiles[0]} boldName />);
-
-    expect(screen.getByText('DR')).toBeInTheDocument();
-    expect(screen.getByText('Damaged Raccoon')).toBeInTheDocument();
-    expect(screen.getByTestId('user-profile-hoverable-name-bolded')).toBeInTheDocument();
   });
 });

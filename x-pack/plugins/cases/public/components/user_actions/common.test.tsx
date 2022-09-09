@@ -15,6 +15,7 @@ import { Actions } from '../../../common/api';
 import { createCommonUpdateUserActionBuilder } from './common';
 import { getUserAction } from '../../containers/mock';
 import { TestProviders } from '../../common/mock';
+import { userProfiles, userProfilesMap } from '../../containers/user_profiles/api.mock';
 
 jest.mock('../../common/lib/kibana');
 jest.mock('../../common/navigation/hooks');
@@ -29,8 +30,11 @@ describe('createCommonUpdateUserActionBuilder ', () => {
   });
 
   it('renders correctly', async () => {
-    const userAction = getUserAction('title', Actions.update);
+    const userAction = getUserAction('title', Actions.update, {
+      createdBy: { profileUid: userProfiles[0].uid },
+    });
     const builder = createCommonUpdateUserActionBuilder({
+      userProfiles: userProfilesMap,
       userAction,
       label,
       icon: 'dot',
@@ -45,9 +49,9 @@ describe('createCommonUpdateUserActionBuilder ', () => {
     );
 
     // The avatar
-    expect(screen.getByText('LK')).toBeInTheDocument();
+    expect(screen.getByText('DR')).toBeInTheDocument();
     // The username
-    expect(screen.getByText(userAction.createdBy.username!)).toBeInTheDocument();
+    expect(screen.getByText(userProfiles[0].user.full_name!)).toBeInTheDocument();
     // The label of the event
     expect(screen.getByText('A label')).toBeInTheDocument();
     // The copy link button
@@ -57,6 +61,7 @@ describe('createCommonUpdateUserActionBuilder ', () => {
   it('renders shows the move to comment button if the user action is an edit comment', async () => {
     const userAction = getUserAction('comment', Actions.update);
     const builder = createCommonUpdateUserActionBuilder({
+      userProfiles: userProfilesMap,
       userAction,
       label,
       icon: 'dot',
@@ -76,6 +81,7 @@ describe('createCommonUpdateUserActionBuilder ', () => {
   it('it copies the reference link when clicking the reference button', async () => {
     const userAction = getUserAction('comment', Actions.update);
     const builder = createCommonUpdateUserActionBuilder({
+      userProfiles: userProfilesMap,
       userAction,
       label,
       icon: 'dot',
@@ -96,6 +102,7 @@ describe('createCommonUpdateUserActionBuilder ', () => {
   it('calls the handleOutlineComment when clicking the reference button', async () => {
     const userAction = getUserAction('comment', Actions.update);
     const builder = createCommonUpdateUserActionBuilder({
+      userProfiles: userProfilesMap,
       userAction,
       label,
       icon: 'dot',

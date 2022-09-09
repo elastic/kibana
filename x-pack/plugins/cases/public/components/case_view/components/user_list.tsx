@@ -24,6 +24,7 @@ import { ElasticUser } from '../../../containers/types';
 import * as i18n from '../translations';
 import { UserInfoWithAvatar } from '../../user_profiles/types';
 import { HoverableUserWithAvatar } from '../../user_profiles/hoverable_user_with_avatar';
+import { convertToUserInfo } from '../../user_profiles/user_converter';
 
 interface UserListProps {
   email: {
@@ -110,28 +111,9 @@ const getValidUsers = (
   userProfiles: Map<string, UserProfileWithAvatar>
 ): UserInfoWithAvatar[] => {
   const validUsers = users.reduce<Map<string, UserInfoWithAvatar>>((acc, user) => {
-    const addUserToMap = (username: string) => {
-      acc.set(username, {
-        user: { username, full_name: user?.fullName ?? undefined, email: user?.email ?? undefined },
-      });
-    };
-
-    const username = user.username;
-
-    if (user.profileUid != null) {
-      const profile = userProfiles.get(user.profileUid);
-
-      if (profile != null) {
-        acc.set(profile.uid, profile);
-      } else if (isValidString(username)) {
-        // we couldn't find a valid profile so let's try the username
-        addUserToMap(username);
-      } else {
-        // didn't the username wasn't valid so we'll show an unknown user
-        acc.set(user.profileUid, {});
-      }
-    } else if (isValidString(username)) {
-      addUserToMap(username);
+    const convertedUser = convertToUserInfo(user, userProfiles);
+    if (convertedUser != null) {
+      acc.set(convertedUser.key, convertedUser.userInfo);
     }
 
     return acc;
@@ -139,5 +121,3 @@ const getValidUsers = (
 
   return Array.from(validUsers.values());
 };
-
-const isValidString = (value?: string | null): value is string => !isEmpty(value);
