@@ -12,10 +12,11 @@ import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { RiskScore } from '../../../../common/components/severity/common';
 import * as i18n from './translations';
 import { UsersTableType } from '../../../../users/store/model';
-import type { RiskSeverity, UsersRiskScore } from '../../../../../common/search_strategy';
+import type { RiskSeverity, UserRiskScore } from '../../../../../common/search_strategy';
+import { RiskScoreFields } from '../../../../../common/search_strategy';
 import { UserDetailsLink } from '../../../../common/components/links';
 
-type UserRiskScoreColumns = Array<EuiBasicTableColumn<UsersRiskScore>>;
+type UserRiskScoreColumns = Array<EuiBasicTableColumn<UserRiskScore>>;
 
 export const getUserRiskScoreColumns = (): UserRiskScoreColumns => [
   {
@@ -31,7 +32,7 @@ export const getUserRiskScoreColumns = (): UserRiskScoreColumns => [
     },
   },
   {
-    field: 'risk_stats.risk_score',
+    field: RiskScoreFields.userRiskScore,
     name: i18n.USER_RISK_SCORE,
     truncateText: true,
     mobileOptions: { show: true },
@@ -47,7 +48,7 @@ export const getUserRiskScoreColumns = (): UserRiskScoreColumns => [
     },
   },
   {
-    field: 'risk',
+    field: RiskScoreFields.userRisk,
     name: (
       <EuiToolTip content={i18n.USER_RISK_TOOLTIP}>
         <>
