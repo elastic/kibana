@@ -14,7 +14,7 @@ import {
 } from '../tasks/privileges';
 import { loginWithUserAndWaitForPage, logout } from '../tasks/login';
 
-import { ADD_POLICY_BTN } from '../screens/integrations';
+import { ADD_INTEGRATION_POLICY_BTN, getIntegrationCard } from '../screens/integrations';
 
 const rolesToCreate = [FleetNoneIntegrAllRole];
 const usersToCreate = [FleetNoneIntegrAllUser];
@@ -34,7 +34,7 @@ describe('When the user has All privileges for Integrations but None for for Fle
 
   it('Integrations are visible but cannot be added', () => {
     loginWithUserAndWaitForPage(INTEGRATIONS, FleetNoneIntegrAllUser);
-    cy.getBySel('integration-card:epr:apache').click();
-    cy.getBySel(ADD_POLICY_BTN).should('be.disabled');
+    cy.getBySel(getIntegrationCard('apache')).click();
+    cy.getBySel(ADD_INTEGRATION_POLICY_BTN).should('be.disabled');
   });
 });

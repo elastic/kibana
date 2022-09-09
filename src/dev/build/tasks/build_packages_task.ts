@@ -23,7 +23,7 @@ export const BuildBazelPackages: Task = {
     await runBazel(['build', '//packages:build']);
 
     for (const pkg of packages) {
-      log.info(`Copying build of`, pkg.pkg.name, 'into build');
+      log.info(`Copying build of`, pkg.manifest.id, 'into build');
 
       const pkgDirInBuild = build.resolvePath(pkg.normalizedRepoRelativeDir);
 
@@ -36,7 +36,23 @@ export const BuildBazelPackages: Task = {
         permissions: (rec) => (rec.isDirectory ? 0o755 : 0o644),
       });
 
-      await write(Path.resolve(pkgDirInBuild, 'package.json'), JSON.stringify(pkg.pkg, null, 2));
+      await write(
+        Path.resolve(pkgDirInBuild, 'kibana.jsonc'),
+        JSON.stringify(pkg.manifest, null, 2)
+      );
+      await write(
+        Path.resolve(pkgDirInBuild, 'package.json'),
+        JSON.stringify(
+          {
+            ...pkg.pkg,
+            name: pkg.manifest.id,
+            version: config.getBuildVersion(),
+            private: undefined,
+          },
+          null,
+          2
+        )
+      );
     }
   },
 };

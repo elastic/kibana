@@ -120,6 +120,7 @@ export const getAnnotationsSupportedLayer = (
 
 const getDefaultAnnotationConfig = (id: string, timestamp: string): EventAnnotationConfig => ({
   label: defaultAnnotationLabel,
+  type: 'manual',
   key: {
     type: 'point_in_time',
     timestamp,
