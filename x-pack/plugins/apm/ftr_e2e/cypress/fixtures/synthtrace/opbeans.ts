@@ -26,11 +26,11 @@ export function opbeans({ from, to }: { from: number; to: number }) {
     })
     .instance('opbeans-node-prod-1');
 
-  const opbeansRum = apm.browser(
-    'opbeans-rum',
-    'production',
-    apm.getChromeUserAgentDefaults()
-  );
+  const opbeansRum = apm.browser({
+    serviceName: 'opbeans-rum',
+    environment: 'production',
+    userAgent: apm.getChromeUserAgentDefaults(),
+  });
 
   return range
     .interval('1s')
