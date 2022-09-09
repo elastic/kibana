@@ -39,13 +39,11 @@ function FiltersBuilder({
   const [state, dispatch] = useReducer(FiltersBuilderReducer, { filters });
   const [dropTarget, setDropTarget] = useState('');
   const mPaddingSize = useEuiPaddingSize('m');
-  const xsPaddingSize = useEuiPaddingSize('xs');
 
   const filtersBuilderStyles = useMemo(
     () => css`
       .filter-builder__panel {
         &.filter-builder__panel-nested {
-          margin: ${xsPaddingSize} 0;
           padding: ${mPaddingSize} 0;
         }
       }
@@ -56,7 +54,7 @@ function FiltersBuilder({
         }
       }
     `,
-    [mPaddingSize, xsPaddingSize]
+    [mPaddingSize]
   );
 
   useEffect(() => {
