@@ -8,25 +8,36 @@
 
 import _ from 'lodash';
 import { debounceTime } from 'rxjs/operators';
+import semverSatisfies from 'semver/functions/satisfies';
 
 import { replaceUrlHashQuery } from '@kbn/kibana-utils-plugin/public';
-import { migrateAppState } from '.';
 import { setDashboardState } from '../state';
 import { migrateLegacyQuery } from './migrate_legacy_query';
 import { applyDashboardFilterState } from './sync_dashboard_filter_state';
 import { DASHBOARD_STATE_STORAGE_KEY } from '../../dashboard_constants';
 import type { DashboardBuildContext, DashboardState, RawDashboardState } from '../../types';
 import { convertSavedPanelsToPanelMap, DashboardPanelMap } from '../../../common';
+import { dashboardSavedObjectErrorStrings } from '../../dashboard_strings';
 
 type SyncDashboardUrlStateProps = DashboardBuildContext;
+
+/**
+ * We no longer support loading panels from a version older than 7.3 in the URL.
+ * @returns whether or not there is a panel in the URL state saved with a version before 7.3
+ */
+export const isPanelVersionTooOld = (panels: RawDashboardState['panels']) => {
+  for (let panel of panels) {
+    if (!panel.version || semverSatisfies(panel.version, '<7.3')) return true;
+  }
+  return false;
+};
 
 export const syncDashboardUrlState = ({
   dispatchDashboardStateChange,
   getLatestDashboardState,
   query: queryService,
   kbnUrlStateStorage,
-  usageCollection,
-  kibanaVersion,
+  notifications,
 }: SyncDashboardUrlStateProps) => {
   /**
    * Loads any dashboard state from the URL, and removes the state from the URL.
@@ -35,10 +46,13 @@ export const syncDashboardUrlState = ({
     const rawAppStateInUrl = kbnUrlStateStorage.get<RawDashboardState>(DASHBOARD_STATE_STORAGE_KEY);
     if (!rawAppStateInUrl) return {};
 
-    let panelsMap: DashboardPanelMap = {};
+    let panelsMap: DashboardPanelMap | undefined = undefined;
     if (rawAppStateInUrl.panels && rawAppStateInUrl.panels.length > 0) {
-      const rawState = migrateAppState(rawAppStateInUrl, kibanaVersion, usageCollection);
-      panelsMap = convertSavedPanelsToPanelMap(rawState.panels);
+      if (isPanelVersionTooOld(rawAppStateInUrl.panels)) {
+        notifications.toasts.addWarning(dashboardSavedObjectErrorStrings.getPanelTooOldError());
+      } else {
+        panelsMap = convertSavedPanelsToPanelMap(rawAppStateInUrl.panels);
+      }
     }
 
     const migratedQuery = rawAppStateInUrl.query
@@ -54,7 +68,7 @@ export const syncDashboardUrlState = ({
     return {
       ..._.omit(rawAppStateInUrl, ['panels', 'query']),
       ...(migratedQuery ? { query: migratedQuery } : {}),
-      ...(rawAppStateInUrl.panels ? { panels: panelsMap } : {}),
+      ...(panelsMap ? { panels: panelsMap } : {}),
     };
   };
 

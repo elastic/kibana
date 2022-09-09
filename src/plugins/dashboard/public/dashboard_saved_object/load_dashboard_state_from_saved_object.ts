@@ -31,7 +31,7 @@ import { SavedObjectNotFound } from '../services/kibana_utils';
 import { migrateLegacyQuery } from '../application/lib/migrate_legacy_query';
 import { SavedObjectsTaggingApi } from '../services/saved_objects_tagging_oss';
 
-interface LoadDashboardFromSavedObjectProps {
+export interface LoadDashboardFromSavedObjectProps {
   id?: string;
   isScreenshotMode?: boolean;
   embeddableStart: EmbeddableStart;
@@ -42,7 +42,7 @@ interface LoadDashboardFromSavedObjectProps {
   savedObjectsClient: SavedObjectsClientContract;
 }
 
-interface LoadDashboardFromSavedObjectReturn {
+export interface LoadDashboardFromSavedObjectReturn {
   redirectedToAlias?: boolean;
   dashboardState?: DashboardState;
   createConflictWarning?: () => ReactElement | undefined;

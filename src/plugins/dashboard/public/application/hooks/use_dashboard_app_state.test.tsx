@@ -28,6 +28,12 @@ import { getSampleDashboardInput, makeDefaultServices } from '../test_helpers';
 import { DataView } from '../../services/data_views';
 import type { Filter } from '@kbn/es-query';
 
+import type {
+  LoadDashboardFromSavedObjectProps,
+  LoadDashboardFromSavedObjectReturn,
+} from '../../dashboard_saved_object/load_dashboard_state_from_saved_object';
+import * as loadDashboardSavedObjectModule from '../../dashboard_saved_object/load_dashboard_state_from_saved_object';
+
 interface SetupEmbeddableFactoryReturn {
   finalizeEmbeddableCreation: () => void;
   dashboardContainer: DashboardContainer;
@@ -213,38 +219,36 @@ describe('Dashboard container lifecycle', () => {
 // FLAKY: https://github.com/elastic/kibana/issues/105018
 describe.skip('Dashboard initial state', () => {
   it('Extracts state from Dashboard Saved Object', async () => {
+    const savedTitle = 'testDash1';
+
+    jest
+      .spyOn(loadDashboardSavedObjectModule, 'loadDashboardStateFromSavedObject')
+      .mockImplementation(() =>
+        Promise.resolve({ title: savedTitle } as LoadDashboardFromSavedObjectReturn)
+      );
+
     const { renderHookResult, embeddableFactoryResult } = renderDashboardAppStateHook({});
     const getResult = () => renderHookResult.result.current;
-
-    // saved dashboard isn't applied until after the dashboard embeddable has been created.
-    expect(getResult().savedDashboard).toBeUndefined();
 
     embeddableFactoryResult.finalizeEmbeddableCreation();
     await renderHookResult.waitForNextUpdate();
 
-    expect(getResult().savedDashboard).toBeDefined();
-    expect(getResult().savedDashboard?.title).toEqual(
-      getResult().getLatestDashboardState?.().title
-    );
+    expect(savedTitle).toEqual(getResult().getLatestDashboardState?.().title);
   });
 
   it('Sets initial time range and filters from saved dashboard', async () => {
-    const savedDashboards = {} as SavedObjectLoader;
-    savedDashboards.get = jest.fn().mockImplementation((id?: string) =>
-      Promise.resolve(
-        getSavedDashboardMock({
-          getFilters: () => [{ meta: { test: 'filterMeTimbers' } } as unknown as Filter],
+    jest
+      .spyOn(loadDashboardSavedObjectModule, 'loadDashboardStateFromSavedObject')
+      .mockImplementation(() =>
+        Promise.resolve({
+          filters: [{ meta: { test: 'filterMeTimbers' } } as unknown as Filter],
           timeRestore: true,
           timeFrom: 'now-13d',
           timeTo: 'now',
-          id,
-        })
-      )
-    );
-    const partialServices: Partial<DashboardAppServices> = { savedDashboards };
-    const { renderHookResult, embeddableFactoryResult, services } = renderDashboardAppStateHook({
-      partialServices,
-    });
+        } as LoadDashboardFromSavedObjectReturn)
+      );
+
+    const { renderHookResult, embeddableFactoryResult, services } = renderDashboardAppStateHook({});
     const getResult = () => renderHookResult.result.current;
 
     embeddableFactoryResult.finalizeEmbeddableCreation();

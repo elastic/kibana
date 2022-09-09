@@ -396,6 +396,10 @@ export const dashboardSavedObjectErrorStrings = {
     i18n.translate('dashboard.deleteError.toastDescription', {
       defaultMessage: 'Error encountered while deleting dashboard',
     }),
+  getPanelTooOldError: () =>
+    i18n.translate('dashboard.loadURLError.PanelTooOld', {
+      defaultMessage: 'Cannot load panels from a URL created in a version older than 7.3.',
+    }),
 };
 
 /*

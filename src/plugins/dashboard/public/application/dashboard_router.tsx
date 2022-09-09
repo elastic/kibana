@@ -71,10 +71,11 @@ export async function mountApp({
   restorePreviousUrl,
   setHeaderActionMenu,
 }: DashboardMountProps) {
-  const [coreStart, pluginsStart, dashboardStart] = await core.getStartServices();
+  const [coreStart, pluginsStart] = await core.getStartServices();
 
   const {
     navigation,
+    savedObjects,
     urlForwarding,
     data: dataStart,
     share: shareStart,
@@ -95,6 +96,7 @@ export async function mountApp({
   const dashboardServices: DashboardAppServices = {
     navigation,
     onAppLeave,
+    savedObjects,
     urlForwarding,
     dataViewEditor,
     visualizations,

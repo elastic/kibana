@@ -18,6 +18,37 @@ import { DashboardListing, DashboardListingProps } from './dashboard_listing';
 import { makeDefaultServices } from '../test_helpers';
 import { DASHBOARD_PANELS_UNSAVED_ID } from '../lib/dashboard_session_storage';
 
+import type {
+  FindDashboardSavedObjectsArgs,
+  FindDashboardSavedObjectsResponse,
+} from '../../dashboard_saved_object/find_dashboard_saved_objects';
+import * as findDashboardSavedObjects from '../../dashboard_saved_object/find_dashboard_saved_objects';
+
+const getFindDashboardResponse = (
+  size?: number,
+  search?: string
+): Promise<FindDashboardSavedObjectsResponse> => {
+  const sizeToUse = size ?? 10;
+  const hits: FindDashboardSavedObjectsResponse['hits'] = [];
+  for (let i = 0; i < sizeToUse; i++) {
+    hits.push({
+      id: `dashboard${i}`,
+      title: `dashboard${i} - ${search} - title`,
+      description: `dashboard${i} desc`,
+    } as FindDashboardSavedObjectsResponse['hits'][0]);
+  }
+  return Promise.resolve({
+    total: sizeToUse,
+    hits,
+  });
+};
+
+jest
+  .spyOn(findDashboardSavedObjects, 'findDashboardSavedObjects')
+  .mockImplementation(({ size, search }: FindDashboardSavedObjectsArgs) =>
+    getFindDashboardResponse(size, search)
+  );
+
 function makeDefaultProps(): DashboardListingProps {
   return {
     redirectTo: jest.fn(),
@@ -58,14 +89,13 @@ describe('after fetch', () => {
   });
 
   test('renders call to action when no dashboards exist', async () => {
-    const services = makeDefaultServices();
-    services.savedDashboards.find = () => {
-      return Promise.resolve({
+    jest.spyOn(findDashboardSavedObjects, 'findDashboardSavedObjects').mockImplementation(() =>
+      Promise.resolve({
         total: 0,
         hits: [],
-      });
-    };
-    const { component } = mountWith({ services });
+      })
+    );
+    const { component } = mountWith({});
     // Ensure all promises resolve
     await new Promise((resolve) => process.nextTick(resolve));
     // Ensure the state changes are reflected
@@ -75,15 +105,17 @@ describe('after fetch', () => {
 
   test('renders call to action with continue when no dashboards exist but one is in progress', async () => {
     const services = makeDefaultServices();
-    services.savedDashboards.find = () => {
-      return Promise.resolve({
-        total: 0,
-        hits: [],
-      });
-    };
     services.dashboardSessionStorage.getDashboardIdsWithUnsavedChanges = () => [
       DASHBOARD_PANELS_UNSAVED_ID,
     ];
+
+    jest.spyOn(findDashboardSavedObjects, 'findDashboardSavedObjects').mockImplementation(() =>
+      Promise.resolve({
+        total: 0,
+        hits: [],
+      })
+    );
+
     const { component } = mountWith({ services });
     // Ensure all promises resolve
     await new Promise((resolve) => process.nextTick(resolve));
@@ -156,17 +188,6 @@ describe('after fetch', () => {
   test('showWriteControls', async () => {
     const services = makeDefaultServices();
     services.dashboardCapabilities.showWriteControls = false;
-    const { component } = mountWith({ services });
-    // Ensure all promises resolve
-    await new Promise((resolve) => process.nextTick(resolve));
-    // Ensure the state changes are reflected
-    component.update();
-    expect(component).toMatchSnapshot();
-  });
-
-  test('renders warning when listingLimit is exceeded', async () => {
-    const services = makeDefaultServices();
-    services.savedObjects.settings.getListingLimit = () => 1;
     const { component } = mountWith({ services });
     // Ensure all promises resolve
     await new Promise((resolve) => process.nextTick(resolve));

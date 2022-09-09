@@ -43,7 +43,7 @@ import type {
   ScreenshotModePluginSetup,
   ScreenshotModePluginStart,
 } from './services/screenshot_mode';
-import { getSavedObjectFinder } from './services/saved_objects';
+import { getSavedObjectFinder, SavedObjectsStart } from './services/saved_objects';
 import {
   CONTEXT_MENU_TRIGGER,
   EmbeddableSetup,
@@ -110,6 +110,7 @@ export interface DashboardStartDependencies {
   visualizations: VisualizationsStart;
   screenshotMode: ScreenshotModePluginStart;
   dataViewEditor: DataViewEditorStart;
+  savedObjects: SavedObjectsStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
 }
 

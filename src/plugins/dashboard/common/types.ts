@@ -11,7 +11,7 @@ import {
   EmbeddableStateWithType,
   PanelState,
 } from '@kbn/embeddable-plugin/common/types';
-import { Serializable, SerializableRecord } from '@kbn/utility-types';
+import { Serializable } from '@kbn/utility-types';
 import {
   PersistableControlGroupInput,
   RawControlGroupAttributes,
@@ -65,7 +65,7 @@ export interface DashboardPanelState<
 /**
  * A saved dashboard panel parsed directly from the Dashboard Attributes panels JSON
  */
-export type SavedDashboardPanel = SerializableRecord & {
+export type SavedDashboardPanel = {
   embeddableConfig: { [key: string]: Serializable }; // parsed into the panel's explicitInput
   id?: string; // the saved object id for by reference panels
   type: string; // the embeddable type

@@ -10,22 +10,30 @@ import {
   SavedObjectError,
   SavedObjectsClientContract,
   SavedObjectsFindOptionsReference,
+  SimpleSavedObject,
 } from '@kbn/core/public';
 
 import { DashboardConstants } from '..';
 import { DashboardAttributes } from '../application';
+
+export interface FindDashboardSavedObjectsArgs {
+  hasReference?: SavedObjectsFindOptionsReference[];
+  savedObjectsClient: SavedObjectsClientContract;
+  search: string;
+  size: number;
+}
+
+export interface FindDashboardSavedObjectsResponse {
+  total: number;
+  hits: Array<DashboardAttributes & Pick<SimpleSavedObject, 'references' | 'updatedAt' | 'id'>>;
+}
 
 export async function findDashboardSavedObjects({
   savedObjectsClient,
   hasReference,
   search,
   size,
-}: {
-  hasReference?: SavedObjectsFindOptionsReference[];
-  savedObjectsClient: SavedObjectsClientContract;
-  search: string;
-  size: number;
-}) {
+}: FindDashboardSavedObjectsArgs): Promise<FindDashboardSavedObjectsResponse> {
   const { total, savedObjects } = await savedObjectsClient.find<DashboardAttributes>({
     type: DashboardConstants.DASHBOARD_SAVED_OBJECT_TYPE,
     search: search ? `${search}*` : undefined,
@@ -47,7 +55,7 @@ export async function findDashboardSavedObjects({
   };
 }
 
-type FindDashboardBySavedObjectResult = { id: string } & (
+export type FindDashboardBySavedObjectResult = { id: string } & (
   | { status: 'success'; attributes: DashboardAttributes }
   | { status: 'error'; error: SavedObjectError }
 );
