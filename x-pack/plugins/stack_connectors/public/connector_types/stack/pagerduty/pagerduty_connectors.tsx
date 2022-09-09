@@ -44,7 +44,7 @@ const getRoutingKeyConfig = (docLinks: DocLinksStart): FieldConfig => ({
   helpText: (
     <EuiLink href={docLinks.links.alerting.pagerDutyAction} target="_blank">
       <FormattedMessage
-        id="xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.routingKeyNameHelpLabel"
+        id="xpack.stackConnectors.components.pagerDuty.routingKeyNameHelpLabel"
         defaultMessage="Configure a PagerDuty account"
       />
     </EuiLink>

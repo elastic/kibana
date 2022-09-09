@@ -43,12 +43,9 @@ const SlackParamsFields: React.FunctionComponent<ActionParamsProps<SlackActionPa
       messageVariables={messageVariables}
       paramsProperty={'message'}
       inputTargetValue={message}
-      label={i18n.translate(
-        'xpack.triggersActionsUI.components.builtinActionTypes.slackAction.messageTextAreaFieldLabel',
-        {
-          defaultMessage: 'Message',
-        }
-      )}
+      label={i18n.translate('xpack.stackConnectors.components.slack.messageTextAreaFieldLabel', {
+        defaultMessage: 'Message',
+      })}
       errors={(errors.message ?? []) as string[]}
     />
   );

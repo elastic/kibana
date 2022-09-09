@@ -8,21 +8,21 @@
 import { i18n } from '@kbn/i18n';
 
 export const WEBHOOK_URL_INVALID = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.slackAction.error.invalidWebhookUrlText',
+  'xpack.stackConnectors.components.slack.error.invalidWebhookUrlText',
   {
     defaultMessage: 'Webhook URL is invalid.',
   }
 );
 
 export const MESSAGE_REQUIRED = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredSlackMessageText',
+  'xpack.stackConnectors.components.slack..error.requiredSlackMessageText',
   {
     defaultMessage: 'Message is required.',
   }
 );
 
 export const WEBHOOK_URL_LABEL = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.slackAction.webhookUrlTextFieldLabel',
+  'xpack.stackConnectors.components.slack.webhookUrlTextFieldLabel',
   {
     defaultMessage: 'Webhook URL',
   }

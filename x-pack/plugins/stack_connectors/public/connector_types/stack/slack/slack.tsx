@@ -8,27 +8,21 @@
 import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
-  ActionTypeModel,
+  ActionTypeModel as ConnectorTypeModel,
   GenericValidationResult,
 } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { SlackActionParams, SlackSecrets } from '../../types';
 
-export function getActionType(): ActionTypeModel<unknown, SlackSecrets, SlackActionParams> {
+export function getConnectorType(): ConnectorTypeModel<unknown, SlackSecrets, SlackActionParams> {
   return {
     id: '.slack',
     iconClass: 'logoSlack',
-    selectMessage: i18n.translate(
-      'xpack.triggersActionsUI.components.builtinActionTypes.slackAction.selectMessageText',
-      {
-        defaultMessage: 'Send a message to a Slack channel or user.',
-      }
-    ),
-    actionTypeTitle: i18n.translate(
-      'xpack.triggersActionsUI.components.builtinActionTypes.slackAction.actionTypeTitle',
-      {
-        defaultMessage: 'Send to Slack',
-      }
-    ),
+    selectMessage: i18n.translate('xpack.stackConnectors.components.slack.selectMessageText', {
+      defaultMessage: 'Send a message to a Slack channel or user.',
+    }),
+    actionTypeTitle: i18n.translate('xpack.stackConnectors.components.slack.connectorTypeTitle', {
+      defaultMessage: 'Send to Slack',
+    }),
     validateParams: async (
       actionParams: SlackActionParams
     ): Promise<GenericValidationResult<SlackActionParams>> => {

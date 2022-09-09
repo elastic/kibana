@@ -23,7 +23,7 @@ const getWebhookUrlConfig = (docLinks: DocLinksStart): FieldConfig => ({
   helpText: (
     <EuiLink href={docLinks.links.alerting.teamsAction} target="_blank">
       <FormattedMessage
-        id="xpack.triggersActionsUI.components.builtinActionTypes.teamsAction.webhookUrlHelpLabel"
+        id="xpack.stackConnectors.components.teams.webhookUrlHelpLabel"
         defaultMessage="Create a Microsoft Teams Webhook URL"
       />
     </EuiLink>

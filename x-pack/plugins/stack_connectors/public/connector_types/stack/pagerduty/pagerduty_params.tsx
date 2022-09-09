@@ -26,7 +26,7 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
     {
       value: 'critical',
       text: i18n.translate(
-        'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.severitySelectCriticalOptionLabel',
+        'xpack.stackConnectors.components.pagerDuty.severitySelectCriticalOptionLabel',
         {
           defaultMessage: 'Critical',
         }
@@ -35,7 +35,7 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
     {
       value: 'error',
       text: i18n.translate(
-        'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.severitySelectErrorOptionLabel',
+        'xpack.stackConnectors.components.pagerDuty.severitySelectErrorOptionLabel',
         {
           defaultMessage: 'Error',
         }
@@ -44,7 +44,7 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
     {
       value: 'warning',
       text: i18n.translate(
-        'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.severitySelectWarningOptionLabel',
+        'xpack.stackConnectors.components.pagerDuty.severitySelectWarningOptionLabel',
         {
           defaultMessage: 'Warning',
         }
@@ -53,7 +53,7 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
     {
       value: 'info',
       text: i18n.translate(
-        'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.severitySelectInfoOptionLabel',
+        'xpack.stackConnectors.components.pagerDuty.severitySelectInfoOptionLabel',
         {
           defaultMessage: 'Info',
         }
@@ -64,7 +64,7 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
     {
       value: 'trigger',
       text: i18n.translate(
-        'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.eventSelectTriggerOptionLabel',
+        'xpack.stackConnectors.components.pagerDuty.eventSelectTriggerOptionLabel',
         {
           defaultMessage: 'Trigger',
         }
@@ -73,7 +73,7 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
     {
       value: 'resolve',
       text: i18n.translate(
-        'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.eventSelectResolveOptionLabel',
+        'xpack.stackConnectors.components.pagerDuty.eventSelectResolveOptionLabel',
         {
           defaultMessage: 'Resolve',
         }
@@ -82,7 +82,7 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
     {
       value: 'acknowledge',
       text: i18n.translate(
-        'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.eventSelectAcknowledgeOptionLabel',
+        'xpack.stackConnectors.components.pagerDuty.eventSelectAcknowledgeOptionLabel',
         {
           defaultMessage: 'Acknowledge',
         }
@@ -106,7 +106,7 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
           <EuiFormRow
             fullWidth
             label={i18n.translate(
-              'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.eventActionSelectFieldLabel',
+              'xpack.stackConnectors.components.pagerDuty.eventActionSelectFieldLabel',
               {
                 defaultMessage: 'Event action',
               }
@@ -134,13 +134,13 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
             label={
               isDedupeKeyRequired
                 ? i18n.translate(
-                    'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.dedupKeyTextRequiredFieldLabel',
+                    'xpack.stackConnectors.components.pagerDuty.dedupKeyTextRequiredFieldLabel',
                     {
                       defaultMessage: 'DedupKey',
                     }
                   )
                 : i18n.translate(
-                    'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.dedupKeyTextFieldLabel',
+                    'xpack.stackConnectors.components.pagerDuty.dedupKeyTextFieldLabel',
                     {
                       defaultMessage: 'DedupKey (optional)',
                     }
@@ -165,12 +165,9 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
             fullWidth
             error={errors.summary}
             isInvalid={isSummaryInvalid}
-            label={i18n.translate(
-              'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.summaryFieldLabel',
-              {
-                defaultMessage: 'Summary',
-              }
-            )}
+            label={i18n.translate('xpack.stackConnectors.components.pagerDuty.summaryFieldLabel', {
+              defaultMessage: 'Summary',
+            })}
           >
             <TextFieldWithMessageVariables
               index={index}
@@ -187,7 +184,7 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
               <EuiFormRow
                 fullWidth
                 label={i18n.translate(
-                  'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.severitySelectFieldLabel',
+                  'xpack.stackConnectors.components.pagerDuty.severitySelectFieldLabel',
                   {
                     defaultMessage: 'Severity (optional)',
                   }
@@ -211,7 +208,7 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
                 error={errors.timestamp}
                 isInvalid={isTimestampInvalid}
                 label={i18n.translate(
-                  'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.timestampTextFieldLabel',
+                  'xpack.stackConnectors.components.pagerDuty.timestampTextFieldLabel',
                   {
                     defaultMessage: 'Timestamp (optional)',
                   }
@@ -232,7 +229,7 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
           <EuiFormRow
             fullWidth
             label={i18n.translate(
-              'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.componentTextFieldLabel',
+              'xpack.stackConnectors.components.pagerDuty.componentTextFieldLabel',
               {
                 defaultMessage: 'Component (optional)',
               }
@@ -249,7 +246,7 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
           <EuiFormRow
             fullWidth
             label={i18n.translate(
-              'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.groupTextFieldLabel',
+              'xpack.stackConnectors.components.pagerDuty.groupTextFieldLabel',
               {
                 defaultMessage: 'Group (optional)',
               }
@@ -266,7 +263,7 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
           <EuiFormRow
             fullWidth
             label={i18n.translate(
-              'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.sourceTextFieldLabel',
+              'xpack.stackConnectors.components.pagerDuty.sourceTextFieldLabel',
               {
                 defaultMessage: 'Source (optional)',
               }
@@ -283,12 +280,9 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
           <EuiFormRow
             id="pagerDutyClass"
             fullWidth
-            label={i18n.translate(
-              'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.classFieldLabel',
-              {
-                defaultMessage: 'Class (optional)',
-              }
-            )}
+            label={i18n.translate('xpack.stackConnectors.components.pagerDuty.classFieldLabel', {
+              defaultMessage: 'Class (optional)',
+            })}
           >
             <TextFieldWithMessageVariables
               index={index}

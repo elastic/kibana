@@ -8,12 +8,12 @@
 import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
-  ActionTypeModel,
+  ActionTypeModel as ConnectorTypeModel,
   GenericValidationResult,
 } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { WebhookActionParams, WebhookConfig, WebhookSecrets } from '../../types';
 
-export function getActionType(): ActionTypeModel<
+export function getConnectorType(): ConnectorTypeModel<
   WebhookConfig,
   WebhookSecrets,
   WebhookActionParams
@@ -21,18 +21,12 @@ export function getActionType(): ActionTypeModel<
   return {
     id: '.webhook',
     iconClass: 'logoWebhook',
-    selectMessage: i18n.translate(
-      'xpack.triggersActionsUI.components.builtinActionTypes.webhookAction.selectMessageText',
-      {
-        defaultMessage: 'Send a request to a web service.',
-      }
-    ),
-    actionTypeTitle: i18n.translate(
-      'xpack.triggersActionsUI.components.builtinActionTypes.webhookAction.actionTypeTitle',
-      {
-        defaultMessage: 'Webhook data',
-      }
-    ),
+    selectMessage: i18n.translate('xpack.stackConnectors.components.webhook.selectMessageText', {
+      defaultMessage: 'Send a request to a web service.',
+    }),
+    actionTypeTitle: i18n.translate('xpack.stackConnectors.components.webhook.connectorTypeTitle', {
+      defaultMessage: 'Webhook data',
+    }),
     validateParams: async (
       actionParams: WebhookActionParams
     ): Promise<GenericValidationResult<WebhookActionParams>> => {

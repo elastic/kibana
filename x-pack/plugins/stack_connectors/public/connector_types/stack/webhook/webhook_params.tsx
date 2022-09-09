@@ -24,14 +24,11 @@ const WebhookParamsFields: React.FunctionComponent<ActionParamsProps<WebhookActi
       messageVariables={messageVariables}
       paramsProperty={'body'}
       inputTargetValue={body}
-      label={i18n.translate(
-        'xpack.triggersActionsUI.components.builtinActionTypes.webhookAction.bodyFieldLabel',
-        {
-          defaultMessage: 'Body',
-        }
-      )}
+      label={i18n.translate('xpack.stackConnectors.components.webhook.bodyFieldLabel', {
+        defaultMessage: 'Body',
+      })}
       aria-label={i18n.translate(
-        'xpack.triggersActionsUI.components.builtinActionTypes.webhookAction.bodyCodeEditorAriaLabel',
+        'xpack.stackConnectors.components.webhook.bodyCodeEditorAriaLabel',
         {
           defaultMessage: 'Code editor',
         }

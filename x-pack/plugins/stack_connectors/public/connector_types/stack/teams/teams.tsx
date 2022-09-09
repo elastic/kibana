@@ -8,27 +8,21 @@
 import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
-  ActionTypeModel,
+  ActionTypeModel as ConnectorTypeModel,
   GenericValidationResult,
 } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { TeamsActionParams, TeamsSecrets } from '../../types';
 
-export function getActionType(): ActionTypeModel<unknown, TeamsSecrets, TeamsActionParams> {
+export function getConnectorType(): ConnectorTypeModel<unknown, TeamsSecrets, TeamsActionParams> {
   return {
     id: '.teams',
     iconClass: lazy(() => import('./logo')),
-    selectMessage: i18n.translate(
-      'xpack.triggersActionsUI.components.builtinActionTypes.teamsAction.selectMessageText',
-      {
-        defaultMessage: 'Send a message to a Microsoft Teams channel.',
-      }
-    ),
-    actionTypeTitle: i18n.translate(
-      'xpack.triggersActionsUI.components.builtinActionTypes.teamsAction.actionTypeTitle',
-      {
-        defaultMessage: 'Send a message to a Microsoft Teams channel.',
-      }
-    ),
+    selectMessage: i18n.translate('xpack.stackConnectors.components.teams.selectMessageText', {
+      defaultMessage: 'Send a message to a Microsoft Teams channel.',
+    }),
+    actionTypeTitle: i18n.translate('xpack.stackConnectors.components.teams.connectorTypeTitle', {
+      defaultMessage: 'Send a message to a Microsoft Teams channel.',
+    }),
     validateParams: async (
       actionParams: TeamsActionParams
     ): Promise<GenericValidationResult<TeamsActionParams>> => {

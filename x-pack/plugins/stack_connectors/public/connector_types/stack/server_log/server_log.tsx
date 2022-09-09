@@ -8,23 +8,20 @@
 import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
-  ActionTypeModel,
+  ActionTypeModel as ConnectorTypeModel,
   GenericValidationResult,
 } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { ServerLogActionParams } from '../../types';
 
-export function getActionType(): ActionTypeModel<unknown, unknown, ServerLogActionParams> {
+export function getConnectorType(): ConnectorTypeModel<unknown, unknown, ServerLogActionParams> {
   return {
     id: '.server-log',
     iconClass: 'logsApp',
-    selectMessage: i18n.translate(
-      'xpack.triggersActionsUI.components.builtinActionTypes.serverLogAction.selectMessageText',
-      {
-        defaultMessage: 'Add a message to a Kibana log.',
-      }
-    ),
+    selectMessage: i18n.translate('xpack.stackConnectors.components.serverLog.selectMessageText', {
+      defaultMessage: 'Add a message to a Kibana log.',
+    }),
     actionTypeTitle: i18n.translate(
-      'xpack.triggersActionsUI.components.builtinActionTypes.serverLogAction.actionTypeTitle',
+      'xpack.stackConnectors.components.serverLog.connectorTypeTitle',
       {
         defaultMessage: 'Send to Server log',
       }
@@ -39,7 +36,7 @@ export function getActionType(): ActionTypeModel<unknown, unknown, ServerLogActi
       if (!actionParams.message?.length) {
         errors.message.push(
           i18n.translate(
-            'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredServerLogMessageText',
+            'xpack.stackConnectors.components.serverLog.error.requiredServerLogMessageText',
             {
               defaultMessage: 'Message is required.',
             }

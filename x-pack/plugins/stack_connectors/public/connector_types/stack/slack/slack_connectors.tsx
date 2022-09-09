@@ -24,7 +24,7 @@ const getWebhookUrlConfig = (docLinks: DocLinksStart): FieldConfig => ({
   helpText: (
     <EuiLink href={docLinks.links.alerting.slackAction} target="_blank">
       <FormattedMessage
-        id="xpack.triggersActionsUI.components.builtinActionTypes.slackAction.webhookUrlHelpLabel"
+        id="xpack.stackConnectors.components.slack.webhookUrlHelpLabel"
         defaultMessage="Create a Slack Webhook URL"
       />
     </EuiLink>

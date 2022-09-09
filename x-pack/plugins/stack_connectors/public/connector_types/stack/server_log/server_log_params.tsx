@@ -52,12 +52,9 @@ export const ServerLogParamsFields: React.FunctionComponent<
       <EuiFormRow
         id="loggingLevel"
         fullWidth
-        label={i18n.translate(
-          'xpack.triggersActionsUI.components.builtinActionTypes.serverLogAction.logLevelFieldLabel',
-          {
-            defaultMessage: 'Level',
-          }
-        )}
+        label={i18n.translate('xpack.stackConnectors.components.serverLog.logLevelFieldLabel', {
+          defaultMessage: 'Level',
+        })}
       >
         <EuiSelect
           fullWidth
@@ -77,12 +74,9 @@ export const ServerLogParamsFields: React.FunctionComponent<
         messageVariables={messageVariables}
         paramsProperty={'message'}
         inputTargetValue={message}
-        label={i18n.translate(
-          'xpack.triggersActionsUI.components.builtinActionTypes.serverLogAction.logMessageFieldLabel',
-          {
-            defaultMessage: 'Message',
-          }
-        )}
+        label={i18n.translate('xpack.stackConnectors.components.serverLog.logMessageFieldLabel', {
+          defaultMessage: 'Message',
+        })}
         errors={errors.message as string[]}
       />
     </>

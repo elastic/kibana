@@ -99,7 +99,7 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
           <EuiTitle size="xxs">
             <h4>
               <FormattedMessage
-                id="xpack.triggersActionsUI.components.builtinActionTypes.webhookAction.authenticationLabel"
+                id="xpack.stackConnectors.components.webhook.authenticationLabel"
                 defaultMessage="Authentication"
               />
             </h4>

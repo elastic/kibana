@@ -9,7 +9,7 @@ import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import {
-  ActionTypeModel,
+  ActionTypeModel as ConnectorTypeModel,
   GenericValidationResult,
 } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { hasMustacheTokens } from '@kbn/triggers-actions-ui-plugin/public/application/lib/has_mustache_tokens';
@@ -20,7 +20,7 @@ import {
   EventActionOptions,
 } from '../../types';
 
-export function getActionType(): ActionTypeModel<
+export function getConnectorType(): ConnectorTypeModel<
   PagerDutyConfig,
   PagerDutySecrets,
   PagerDutyActionParams
@@ -28,14 +28,11 @@ export function getActionType(): ActionTypeModel<
   return {
     id: '.pagerduty',
     iconClass: lazy(() => import('./logo')),
-    selectMessage: i18n.translate(
-      'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.selectMessageText',
-      {
-        defaultMessage: 'Send an event in PagerDuty.',
-      }
-    ),
+    selectMessage: i18n.translate('xpack.stackConnectors.components.pagerDuty.selectMessageText', {
+      defaultMessage: 'Send an event in PagerDuty.',
+    }),
     actionTypeTitle: i18n.translate(
-      'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.actionTypeTitle',
+      'xpack.stackConnectors.components.pagerDuty.connectorTypeTitle',
       {
         defaultMessage: 'Send to PagerDuty',
       }
@@ -68,17 +65,14 @@ export function getActionType(): ActionTypeModel<
         if (!moment(actionParams.timestamp).isValid()) {
           const { nowShortFormat, nowLongFormat } = getValidTimestampExamples();
           errors.timestamp.push(
-            i18n.translate(
-              'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.error.invalidTimestamp',
-              {
-                defaultMessage:
-                  'Timestamp must be a valid date, such as {nowShortFormat} or {nowLongFormat}.',
-                values: {
-                  nowShortFormat,
-                  nowLongFormat,
-                },
-              }
-            )
+            i18n.translate('xpack.stackConnectors.components.pagerDuty.error.invalidTimestamp', {
+              defaultMessage:
+                'Timestamp must be a valid date, such as {nowShortFormat} or {nowLongFormat}.',
+              values: {
+                nowShortFormat,
+                nowLongFormat,
+              },
+            })
           );
         }
       }

@@ -7,25 +7,25 @@
 
 import { TypeRegistry } from '@kbn/triggers-actions-ui-plugin/public/application/type_registry';
 import { registerConnectorTypes } from '../..';
-import { ActionTypeModel } from '@kbn/triggers-actions-ui-plugin/public/types';
+import { ActionTypeModel as ConnectorTypeModel } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { registrationServicesMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
 
-const ACTION_TYPE_ID = '.slack';
-let actionTypeModel: ActionTypeModel;
+const CONNECTOR_TYPE_ID = '.slack';
+let connectorTypeModel: ConnectorTypeModel;
 
 beforeAll(async () => {
-  const actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
-  registerConnectorTypes({ actionTypeRegistry, services: registrationServicesMock });
-  const getResult = actionTypeRegistry.get(ACTION_TYPE_ID);
+  const connectorTypeRegistry = new TypeRegistry<ConnectorTypeModel>();
+  registerConnectorTypes({ connectorTypeRegistry, services: registrationServicesMock });
+  const getResult = connectorTypeRegistry.get(CONNECTOR_TYPE_ID);
   if (getResult !== null) {
-    actionTypeModel = getResult;
+    connectorTypeModel = getResult;
   }
 });
 
-describe('actionTypeRegistry.get() works', () => {
-  test('action type static data is as expected', () => {
-    expect(actionTypeModel.id).toEqual(ACTION_TYPE_ID);
-    expect(actionTypeModel.iconClass).toEqual('logoSlack');
+describe('connectorTypeRegistry.get() works', () => {
+  test('connector type static data is as expected', () => {
+    expect(connectorTypeModel.id).toEqual(CONNECTOR_TYPE_ID);
+    expect(connectorTypeModel.iconClass).toEqual('logoSlack');
   });
 });
 
@@ -35,7 +35,7 @@ describe('slack action params validation', () => {
       message: 'message {test}',
     };
 
-    expect(await actionTypeModel.validateParams(actionParams)).toEqual({
+    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
       errors: { message: [] },
     });
   });
@@ -45,7 +45,7 @@ describe('slack action params validation', () => {
       message: '',
     };
 
-    expect(await actionTypeModel.validateParams(actionParams)).toEqual({
+    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
       errors: {
         message: ['Message is required.'],
       },

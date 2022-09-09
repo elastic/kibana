@@ -34,12 +34,9 @@ const TeamsParamsFields: React.FunctionComponent<ActionParamsProps<TeamsActionPa
       messageVariables={messageVariables}
       paramsProperty={'message'}
       inputTargetValue={message}
-      label={i18n.translate(
-        'xpack.triggersActionsUI.components.builtinActionTypes.teamsAction.messageTextAreaFieldLabel',
-        {
-          defaultMessage: 'Message',
-        }
-      )}
+      label={i18n.translate('xpack.stackConnectors.components.teams.messageTextAreaFieldLabel', {
+        defaultMessage: 'Message',
+      })}
       errors={(errors.message ?? []) as string[]}
     />
   );

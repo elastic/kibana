@@ -8,21 +8,21 @@
 import { i18n } from '@kbn/i18n';
 
 export const WEBHOOK_URL_LABEL = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.teamsAction.error.webhookUrlTextLabel',
+  'xpack.stackConnectors.components.teams.error.webhookUrlTextLabel',
   {
     defaultMessage: 'Webhook URL',
   }
 );
 
 export const WEBHOOK_URL_INVALID = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.teamsAction.error.invalidWebhookUrlText',
+  'xpack.stackConnectors.components.teams.error.invalidWebhookUrlText',
   {
     defaultMessage: 'Webhook URL is invalid.',
   }
 );
 
 export const MESSAGE_REQUIRED = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.teamsAction.error.requiredMessageText',
+  'xpack.stackConnectors.components.teams.error.requiredMessageText',
   {
     defaultMessage: 'Message is required.',
   }
