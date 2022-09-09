@@ -13,8 +13,8 @@ export function serializeApmGlobalLabels(obj: any) {
     .reduce((acc, [k, v]) => (acc ? `${acc},${k}=${v}` : `${k}=${v}`), '');
 }
 
-export async function waitForVisualizations(page: Page, visCount: number) {
-  await page.waitForFunction(function renderCompleted(cnt) {
+export function waitForVisualizations(page: Page, visCount: number) {
+  return page.waitForFunction(function renderCompleted(cnt) {
     const visualizations = Array.from(document.querySelectorAll('[data-rendering-count]'));
     const visualizationElementsLoaded = visualizations.length === cnt;
     const visualizationAnimationsFinished = visualizations.every(
@@ -22,7 +22,4 @@ export async function waitForVisualizations(page: Page, visCount: number) {
     );
     return visualizationElementsLoaded && visualizationAnimationsFinished;
   }, visCount);
-
-  // wait for a short amount of time to make sure all events are captured
-  await page.waitForTimeout(2000);
 }
