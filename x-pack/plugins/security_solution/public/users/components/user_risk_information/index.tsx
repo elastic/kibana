@@ -105,9 +105,9 @@ const UserRiskInformationFlyout = ({ handleOnClose }: { handleOnClose: () => voi
         <EuiSpacer size="l" />
         <FormattedMessage
           id="xpack.securitySolution.users.userRiskInformation.learnMore"
-          defaultMessage="You can learn more about user risk {usersRiskScoreDocumentationLink}"
+          defaultMessage="You can learn more about user risk {UserRiskScoreDocumentationLink}"
           values={{
-            usersRiskScoreDocumentationLink: (
+            UserRiskScoreDocumentationLink: (
               <EuiLink href={RISKY_USERS_DOC_LINK} target="_blank">
                 <FormattedMessage
                   id="xpack.securitySolution.users.userRiskInformation.link"

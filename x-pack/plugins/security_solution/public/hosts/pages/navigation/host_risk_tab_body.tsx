@@ -9,6 +9,7 @@ import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
+import { last } from 'lodash/fp';
 import type { HostsComponentsQueryProps } from './types';
 import * as i18n from '../translations';
 import { HostRiskInformationButtonEmpty } from '../../components/host_risk_information';
@@ -86,7 +87,7 @@ const HostRiskTabBodyComponent: React.FC<
     [setOverTimeToggleStatus]
   );
 
-  const rules = data && data.length > 0 ? data[data.length - 1].risk_stats.rule_risks : [];
+  const lastHostRiskItem = last(data);
 
   return (
     <>
@@ -110,7 +111,7 @@ const HostRiskTabBodyComponent: React.FC<
             queryId={QUERY_ID}
             toggleStatus={contributorsToggleStatus}
             toggleQuery={toggleContributorsQuery}
-            rules={rules}
+            rules={lastHostRiskItem ? lastHostRiskItem.host.risk.rule_risks : []}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

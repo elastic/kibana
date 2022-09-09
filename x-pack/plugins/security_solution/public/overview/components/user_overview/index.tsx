@@ -106,7 +106,9 @@ export const UserOverview = React.memo<UserSummaryProps>(
             title: i18n.USER_RISK_SCORE,
             description: (
               <>
-                {userRiskData ? Math.round(userRiskData.risk_stats.risk_score) : getEmptyTagValue()}
+                {userRiskData
+                  ? Math.round(userRiskData.user.risk.calculated_score_norm)
+                  : getEmptyTagValue()}
               </>
             ),
           },
@@ -115,7 +117,10 @@ export const UserOverview = React.memo<UserSummaryProps>(
             description: (
               <>
                 {userRiskData ? (
-                  <RiskScore severity={userRiskData.risk as RiskSeverity} hideBackgroundColor />
+                  <RiskScore
+                    severity={userRiskData.user.risk.calculated_level as RiskSeverity}
+                    hideBackgroundColor
+                  />
                 ) : (
                   getEmptyTagValue()
                 )}

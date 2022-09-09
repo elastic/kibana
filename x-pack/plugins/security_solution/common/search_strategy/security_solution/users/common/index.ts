@@ -5,22 +5,15 @@
  * 2.0.
  */
 
-import type { CommonFields, Maybe, RiskSeverity, SortField } from '../../..';
+import type { CommonFields, Maybe, RiskScoreFields, RiskSeverity, SortField } from '../../..';
 import type { HostEcs } from '../../../../ecs/host';
 import type { UserEcs } from '../../../../ecs/user';
 
-export const enum UserRiskScoreFields {
-  timestamp = '@timestamp',
-  userName = 'user.name',
-  riskScore = 'risk_stats.risk_score',
-  risk = 'risk',
-}
-
 export interface UserRiskScoreItem {
   _id?: Maybe<string>;
-  [UserRiskScoreFields.userName]: Maybe<string>;
-  [UserRiskScoreFields.risk]: Maybe<RiskSeverity>;
-  [UserRiskScoreFields.riskScore]: Maybe<number>;
+  [RiskScoreFields.userName]: Maybe<string>;
+  [RiskScoreFields.userRisk]: Maybe<RiskSeverity>;
+  [RiskScoreFields.userRiskScore]: Maybe<number>;
 }
 
 export interface UserItem {

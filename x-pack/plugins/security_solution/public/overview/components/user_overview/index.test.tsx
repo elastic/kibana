@@ -93,13 +93,13 @@ describe('User Summary Component', () => {
         {
           data: [
             {
-              host: {
+              user: {
                 name: 'testUsermame',
-              },
-              risk,
-              risk_stats: {
-                rule_risks: [],
-                risk_score: riskScore,
+                risk: {
+                  rule_risks: [],
+                  calculated_level: risk,
+                  calculated_score_norm: riskScore,
+                },
               },
             },
           ],

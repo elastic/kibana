@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { HostsRiskScore } from '../../../common/search_strategy/security_solution/risk_score';
+import type { HostRiskScore } from '../../../common/search_strategy/security_solution/risk_score';
 
 export * from './all';
 export * from './kpi';
@@ -25,5 +25,5 @@ export const enum HostRiskScoreQueryId {
 export interface HostRisk {
   loading: boolean;
   isModuleEnabled?: boolean;
-  result?: HostsRiskScore[];
+  result?: HostRiskScore[];
 }

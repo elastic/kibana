@@ -33,4 +33,7 @@ export enum RiskQueries {
   kpiRiskScore = 'kpiRiskScore',
 }
 
-export type RiskScoreAggByFields = 'host.name' | 'user.name';
+export const enum RiskScoreEntity {
+  host = 'host',
+  user = 'user',
+}

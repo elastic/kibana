@@ -28,7 +28,7 @@ import { SecuritySolutionPageWrapper } from '../../common/components/page_wrappe
 import { useGlobalFullScreen } from '../../common/containers/use_full_screen';
 import { useGlobalTime } from '../../common/containers/use_global_time';
 import { TimelineId } from '../../../common/types/timeline';
-import { LastEventIndexKey } from '../../../common/search_strategy';
+import { LastEventIndexKey, RiskScoreEntity } from '../../../common/search_strategy';
 import { useKibana } from '../../common/lib/kibana';
 import { convertToBuildEsQuery } from '../../common/lib/keury';
 import type { State } from '../../common/store';
@@ -103,7 +103,7 @@ const HostsComponent = () => {
     }
 
     if (tabName === HostsTableType.risk) {
-      const severityFilter = generateSeverityFilter(severitySelection);
+      const severityFilter = generateSeverityFilter(severitySelection, RiskScoreEntity.host);
 
       return [...severityFilter, ...hostNameExistsFilter, ...filters];
     }

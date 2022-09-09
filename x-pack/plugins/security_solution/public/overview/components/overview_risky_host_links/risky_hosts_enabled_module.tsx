@@ -9,20 +9,20 @@ import React, { useMemo } from 'react';
 import { RiskyHostsPanelView } from './risky_hosts_panel_view';
 import type { LinkPanelListItem } from '../link_panel';
 import { useRiskyHostsDashboardLinks } from '../../containers/overview_risky_host_links/use_risky_hosts_dashboard_links';
-import type { HostsRiskScore } from '../../../../common/search_strategy';
+import type { HostRiskScore } from '../../../../common/search_strategy';
 
-const getListItemsFromHits = (items: HostsRiskScore[]): LinkPanelListItem[] => {
-  return items.map(({ host, risk_stats: riskStats, risk: copy }) => ({
+const getListItemsFromHits = (items: HostRiskScore[]): LinkPanelListItem[] => {
+  return items.map(({ host }) => ({
     title: host.name,
-    count: riskStats.risk_score,
-    copy,
+    count: host.risk.calculated_score_norm,
+    copy: host.risk.calculated_level,
     path: '',
   }));
 };
 
 const RiskyHostsEnabledModuleComponent: React.FC<{
   from: string;
-  hostRiskScore?: HostsRiskScore[];
+  hostRiskScore?: HostRiskScore[];
   to: string;
 }> = ({ hostRiskScore, to, from }) => {
   const listItems = useMemo(() => getListItemsFromHits(hostRiskScore || []), [hostRiskScore]);

@@ -12,7 +12,6 @@ import * as i18n from './translations';
 import { RISKY_HOSTS_DOC_LINK } from '../../../../overview/components/overview_risky_host_links/risky_hosts_disabled_module';
 import { EnrichedDataRow, ThreatSummaryPanelHeader } from './threat_summary_view';
 import { RiskScore } from '../../severity/common';
-import type { RiskSeverity } from '../../../../../common/search_strategy';
 import type { HostRisk } from '../../../../risk_score/containers';
 
 const HostRiskSummaryComponent: React.FC<{
@@ -25,12 +24,12 @@ const HostRiskSummaryComponent: React.FC<{
         toolTipContent={
           <FormattedMessage
             id="xpack.securitySolution.alertDetails.overview.hostDataTooltipContent"
-            defaultMessage="Risk classification is displayed only when available for a host. Ensure {hostsRiskScoreDocumentationLink} is enabled within your environment."
+            defaultMessage="Risk classification is displayed only when available for a host. Ensure {hostRiskScoreDocumentationLink} is enabled within your environment."
             values={{
-              hostsRiskScoreDocumentationLink: (
+              hostRiskScoreDocumentationLink: (
                 <EuiLink href={RISKY_HOSTS_DOC_LINK} target="_blank">
                   <FormattedMessage
-                    id="xpack.securitySolution.alertDetails.overview.hostsRiskScoreLink"
+                    id="xpack.securitySolution.alertDetails.overview.hostRiskScoreLink"
                     defaultMessage="Host Risk Score"
                   />
                 </EuiLink>
@@ -56,7 +55,10 @@ const HostRiskSummaryComponent: React.FC<{
           <EnrichedDataRow
             field={i18n.HOST_RISK_CLASSIFICATION}
             value={
-              <RiskScore severity={hostRisk.result[0].risk as RiskSeverity} hideBackgroundColor />
+              <RiskScore
+                severity={hostRisk.result[0].host.risk.calculated_level}
+                hideBackgroundColor
+              />
             }
           />
         </>
