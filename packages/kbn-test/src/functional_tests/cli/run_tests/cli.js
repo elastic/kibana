@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { runTests } from '../../tasks';
+import { runTests, initLogsDir } from '../../tasks';
 import { runCli } from '../../lib';
 import { processOptions, displayHelp } from './args';
 
@@ -21,6 +21,7 @@ import { processOptions, displayHelp } from './args';
 export async function runTestsCli(defaultConfigPaths) {
   await runCli(displayHelp, async (userOptions) => {
     const options = processOptions(userOptions, defaultConfigPaths);
+    initLogsDir(options);
     await runTests(options);
   });
 }

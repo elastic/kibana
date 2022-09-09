@@ -13,6 +13,7 @@ Options:
   --config <file>                  Pass in a config 
   --esFrom <snapshot|source|path>  Build Elasticsearch from source, snapshot or path to existing install dir. Default: $TEST_ES_FROM or snapshot
   --kibana-install-dir <dir>       Run Kibana from existing install directory instead of from source. 
+  --logToFile                      Write the log output from Kibana/Elasticsearch to files instead of to stdout 
   --verbose                        Log everything. 
   --debug                          Run in debug mode. 
   --quiet                          Only log errors. 
@@ -26,6 +27,7 @@ Object {
   "debug": true,
   "esFrom": "snapshot",
   "extraKbnOpts": undefined,
+  "logsDir": undefined,
   "useDefaultConfig": true,
 }
 `;
@@ -36,6 +38,7 @@ Object {
   "createLogger": [Function],
   "esFrom": "snapshot",
   "extraKbnOpts": undefined,
+  "logsDir": undefined,
   "useDefaultConfig": true,
 }
 `;
@@ -51,6 +54,7 @@ Object {
   "extraKbnOpts": Object {
     "server.foo": "bar",
   },
+  "logsDir": undefined,
   "useDefaultConfig": true,
 }
 `;
@@ -61,6 +65,7 @@ Object {
   "createLogger": [Function],
   "esFrom": "snapshot",
   "extraKbnOpts": undefined,
+  "logsDir": undefined,
   "quiet": true,
   "useDefaultConfig": true,
 }
@@ -72,6 +77,7 @@ Object {
   "createLogger": [Function],
   "esFrom": "snapshot",
   "extraKbnOpts": undefined,
+  "logsDir": undefined,
   "silent": true,
   "useDefaultConfig": true,
 }
@@ -83,6 +89,7 @@ Object {
   "createLogger": [Function],
   "esFrom": "source",
   "extraKbnOpts": undefined,
+  "logsDir": undefined,
   "useDefaultConfig": true,
 }
 `;
@@ -93,6 +100,7 @@ Object {
   "createLogger": [Function],
   "esFrom": "source",
   "extraKbnOpts": undefined,
+  "logsDir": undefined,
   "useDefaultConfig": true,
 }
 `;
@@ -104,6 +112,7 @@ Object {
   "esFrom": "snapshot",
   "extraKbnOpts": undefined,
   "installDir": "foo",
+  "logsDir": undefined,
   "useDefaultConfig": true,
 }
 `;
@@ -114,6 +123,7 @@ Object {
   "createLogger": [Function],
   "esFrom": "snapshot",
   "extraKbnOpts": undefined,
+  "logsDir": undefined,
   "useDefaultConfig": true,
   "verbose": true,
 }
@@ -125,6 +135,7 @@ Object {
   "createLogger": [Function],
   "esFrom": "snapshot",
   "extraKbnOpts": undefined,
+  "logsDir": undefined,
   "useDefaultConfig": true,
 }
 `;

@@ -6,8 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { statSync } from 'fs';
+import Fs from 'fs';
+import Path from 'path';
 import { promisify } from 'util';
+import stripAnsi from 'strip-ansi';
 
 import execa from 'execa';
 import * as Rx from 'rxjs';
@@ -29,6 +31,7 @@ export interface ProcOptions {
   cwd: string;
   env?: Record<string, string | undefined>;
   stdin?: string;
+  writeLogsToPath?: string;
 }
 
 async function withTimeout(
@@ -44,13 +47,21 @@ export type Proc = ReturnType<typeof startProc>;
 export function startProc(name: string, options: ProcOptions, log: ToolingLog) {
   const { cmd, args, cwd, env, stdin } = options;
 
-  log.info('[%s] > %s', name, cmd === process.execPath ? 'node' : cmd, args.join(' '));
+  let stdioTarget: undefined | NodeJS.WritableStream;
+  if (!options.writeLogsToPath) {
+    log.info('starting [%s] > %s', name, cmd === process.execPath ? 'node' : cmd, args.join(' '));
+  } else {
+    stdioTarget = Fs.createWriteStream(options.writeLogsToPath, 'utf8');
+    const exec = cmd === process.execPath ? 'node' : cmd;
+    const relOut = Path.relative(process.cwd(), options.writeLogsToPath);
+    log.info(`starting [${name}] and writing output to ${relOut} > ${exec} ${args.join(' ')}`);
+  }
 
   // spawn fails with ENOENT when either the
   // cmd or cwd don't exist, so we check for the cwd
   // ahead of time so that the error is less ambiguous
   try {
-    if (!statSync(cwd).isDirectory()) {
+    if (!Fs.statSync(cwd).isDirectory()) {
       throw new Error(`cwd "${cwd}" exists but is not a directory`);
     }
   } catch (err) {
@@ -104,7 +115,20 @@ export function startProc(name: string, options: ProcOptions, log: ToolingLog) {
     observeLines(childProcess.stdout!), // TypeScript note: As long as the proc stdio[1] is 'pipe', then stdout will not be null
     observeLines(childProcess.stderr!) // TypeScript note: As long as the proc stdio[1] is 'pipe', then stderr will not be null
   ).pipe(
-    tap((line) => log.write(` ${chalk.gray('proc')} [${chalk.gray(name)}] ${line}`)),
+    tap({
+      next(line) {
+        if (stdioTarget) {
+          stdioTarget.write(stripAnsi(line) + '\n');
+        } else {
+          log.write(` ${chalk.gray('proc')} [${chalk.gray(name)}] ${line}`);
+        }
+      },
+      complete() {
+        if (stdioTarget) {
+          stdioTarget.end();
+        }
+      },
+    }),
     share()
   );
 

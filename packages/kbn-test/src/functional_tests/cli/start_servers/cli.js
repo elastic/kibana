@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { startServers } from '../../tasks';
+import { startServers, initLogsDir } from '../../tasks';
 import { runCli } from '../../lib';
 import { processOptions, displayHelp } from './args';
 
@@ -18,6 +18,7 @@ import { processOptions, displayHelp } from './args';
 export async function startServersCli(defaultConfigPath) {
   await runCli(displayHelp, async (userOptions) => {
     const options = processOptions(userOptions, defaultConfigPath);
+    initLogsDir(options);
     await startServers({
       ...options,
     });

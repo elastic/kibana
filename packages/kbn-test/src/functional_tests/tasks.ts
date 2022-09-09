@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import Fs from 'fs';
 import Path from 'path';
 import { setTimeout } from 'timers/promises';
 
@@ -50,6 +51,16 @@ const makeSuccessMessage = (options: StartServerOptions) => {
     '\n\n'
   );
 };
+
+export async function initLogsDir(options: { logsDir?: string; createLogger(): ToolingLog }) {
+  if (options.logsDir) {
+    options
+      .createLogger()
+      .info(`Kibana/ES logs will be written to ${Path.relative(process.cwd(), options.logsDir)}/`);
+
+    Fs.mkdirSync(options.logsDir, { recursive: true });
+  }
+}
 
 /**
  * Run servers and tests for each config
