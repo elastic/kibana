@@ -7,13 +7,13 @@
 
 import { renderHook } from '@testing-library/react-hooks';
 
-import { useKibana } from '@kbn/triggers-actions-ui-plugin/public/common/lib/kibana';
+import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
 import { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { useChoices, UseChoices, UseChoicesProps } from './use_choices';
 import { getChoices } from './api';
 
 jest.mock('./api');
-jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
+jest.mock('@kbn/triggers-actions-ui-plugin/public');
 
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 const getChoicesMock = getChoices as jest.Mock;

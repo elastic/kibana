@@ -23,7 +23,7 @@ import {
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { Field, TextField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
-import { PasswordField } from '@kbn/triggers-actions-ui-plugin/public/application/components/password_field';
+import { PasswordField } from '@kbn/triggers-actions-ui-plugin/public';
 import * as i18n from '../translations';
 const { emptyField } = fieldValidators;
 

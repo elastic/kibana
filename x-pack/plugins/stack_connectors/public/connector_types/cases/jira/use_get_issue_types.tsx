@@ -8,7 +8,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { HttpSetup, IToasts } from '@kbn/core/public';
 
-import { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
+import { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
 import { IssueTypes } from './types';
 import { getIssueTypes } from './api';
 import * as i18n from './translations';

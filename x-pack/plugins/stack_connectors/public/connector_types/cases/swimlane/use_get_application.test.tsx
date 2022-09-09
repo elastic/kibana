@@ -12,7 +12,7 @@ import { getApplication } from './api';
 import { useGetApplication, UseGetApplication } from './use_get_application';
 
 jest.mock('./api');
-jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
+jest.mock('@kbn/triggers-actions-ui-plugin/public');
 
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 const getApplicationMock = getApplication as jest.Mock;

@@ -14,10 +14,8 @@ import { MockCodeEditor } from '@kbn/triggers-actions-ui-plugin/public/applicati
 import * as i18n from './translations';
 const kibanaReactPath = '../../../../../../../src/plugins/kibana_react/public';
 
-jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana', () => {
-  const originalModule = jest.requireActual(
-    '@kbn/triggers-actions-ui-plugin/public/common/lib/kibana'
-  );
+jest.mock('@kbn/triggers-actions-ui-plugin/public', () => {
+  const originalModule = jest.requireActual('@kbn/triggers-actions-ui-plugin/public');
   return {
     ...originalModule,
     useKibana: () => ({

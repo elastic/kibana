@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import {
   GenericValidationResult,
   ActionTypeModel as ConnectorTypeModel,
-} from '@kbn/triggers-actions-ui-plugin/public/types';
+} from '@kbn/triggers-actions-ui-plugin/public';
 import { ResilientConfig, ResilientSecrets, ResilientActionParams } from './types';
 
 export const DESC = i18n.translate('xpack.stackConnectors.components.resilient.selectMessageText', {

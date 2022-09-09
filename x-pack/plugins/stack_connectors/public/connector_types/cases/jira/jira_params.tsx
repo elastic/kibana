@@ -19,10 +19,12 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { TextAreaWithMessageVariables } from '@kbn/triggers-actions-ui-plugin/public/application/components/text_area_with_message_variables';
-import { TextFieldWithMessageVariables } from '@kbn/triggers-actions-ui-plugin/public/application/components/text_field_with_message_variables';
-import { useKibana } from '@kbn/triggers-actions-ui-plugin/public/common/lib/kibana';
+import {
+  ActionParamsProps,
+  TextAreaWithMessageVariables,
+  TextFieldWithMessageVariables,
+  useKibana,
+} from '@kbn/triggers-actions-ui-plugin/public';
 import { JiraActionParams } from './types';
 import { useGetIssueTypes } from './use_get_issue_types';
 import { useGetFieldsByIssueType } from './use_get_fields_by_issue_type';

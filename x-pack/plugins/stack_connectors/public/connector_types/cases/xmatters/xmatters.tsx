@@ -8,9 +8,10 @@
 import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
+  AlertProvidedActionVariables,
   ActionTypeModel as ConnectorTypeModel,
   GenericValidationResult,
-} from '@kbn/triggers-actions-ui-plugin/public/types';
+} from '@kbn/triggers-actions-ui-plugin/public';
 import { XmattersActionParams, XmattersConfig, XmattersSecrets } from '../../types';
 
 export function getConnectorType(): ConnectorTypeModel<
@@ -45,5 +46,12 @@ export function getConnectorType(): ConnectorTypeModel<
     },
     actionConnectorFields: lazy(() => import('./xmatters_connectors')),
     actionParamsFields: lazy(() => import('./xmatters_params')),
+    defaultActionParams: {
+      alertActionGroupName: `{{${AlertProvidedActionVariables.alertActionGroupName}}}`,
+      signalId: `{{${AlertProvidedActionVariables.ruleId}}}:{{${AlertProvidedActionVariables.alertId}}}`,
+      ruleName: `{{${AlertProvidedActionVariables.ruleName}}}`,
+      date: `{{${AlertProvidedActionVariables.date}}}`,
+      spaceId: `{{${AlertProvidedActionVariables.ruleSpaceId}}}`,
+    },
   };
 }

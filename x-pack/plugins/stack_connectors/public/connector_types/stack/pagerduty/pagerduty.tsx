@@ -10,9 +10,10 @@ import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import {
   ActionTypeModel as ConnectorTypeModel,
+  AlertProvidedActionVariables,
   GenericValidationResult,
-} from '@kbn/triggers-actions-ui-plugin/public/types';
-import { hasMustacheTokens } from '@kbn/triggers-actions-ui-plugin/public/application/lib/has_mustache_tokens';
+  hasMustacheTokens,
+} from '@kbn/triggers-actions-ui-plugin/public';
 import {
   PagerDutyConfig,
   PagerDutySecrets,
@@ -80,6 +81,14 @@ export function getConnectorType(): ConnectorTypeModel<
     },
     actionConnectorFields: lazy(() => import('./pagerduty_connectors')),
     actionParamsFields: lazy(() => import('./pagerduty_params')),
+    defaultActionParams: {
+      dedupKey: `{{${AlertProvidedActionVariables.ruleId}}}:{{${AlertProvidedActionVariables.alertId}}}`,
+      eventAction: EventActionOptions.TRIGGER,
+    },
+    defaultRecoveredActionParams: {
+      dedupKey: `{{${AlertProvidedActionVariables.ruleId}}}:{{${AlertProvidedActionVariables.alertId}}}`,
+      eventAction: EventActionOptions.RESOLVE,
+    },
   };
 }
 

@@ -6,3 +6,4 @@
  */
 
 export { getTimeFieldOptions, getTimeOptions } from './get_time_options';
+export { useKibana } from './kibana';

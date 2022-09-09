@@ -29,14 +29,14 @@ import { ToggleField, SelectField } from '@kbn/es-ui-shared-plugin/static/forms/
 import { DocLinksStart } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { ActionConnectorFieldsProps } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { getTimeFieldOptions } from '@kbn/triggers-actions-ui-plugin/public/common/lib/get_time_options';
 import {
+  ActionConnectorFieldsProps,
   firstFieldOption,
   getFields,
   getIndexOptions,
-} from '@kbn/triggers-actions-ui-plugin/public/common/index_controls';
-import { useKibana } from '@kbn/triggers-actions-ui-plugin/public/common/lib/kibana';
+  getTimeFieldOptions,
+  useKibana,
+} from '@kbn/triggers-actions-ui-plugin/public';
 import * as translations from './translations';
 
 interface TimeFieldOptions {

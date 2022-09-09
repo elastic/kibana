@@ -8,6 +8,6 @@
   "version": "8.0.0",
   "kibanaVersion": "kibana",
   "configPath": ["xpack", "stack_connectors"],
-  "requiredPlugins": ["actions"],
+  "requiredPlugins": ["actions", "esUiShared", "triggersActionsUi"],
   "ui": true
 }

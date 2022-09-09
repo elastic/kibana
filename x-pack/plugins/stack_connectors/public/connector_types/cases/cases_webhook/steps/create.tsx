@@ -10,7 +10,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import { FIELD_TYPES, UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { Field } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
-import { JsonFieldWrapper } from '@kbn/triggers-actions-ui-plugin/public/application/components/json_field_wrapper';
+import { JsonFieldWrapper } from '@kbn/triggers-actions-ui-plugin/public';
 import { containsTitleAndDesc } from '../validator';
 import { casesVars } from '../action_variables';
 import { HTTP_VERBS } from '../webhook_connectors';

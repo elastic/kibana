@@ -8,8 +8,8 @@ import { EuiIconTip } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { connectorDeprecatedMessage } from '@kbn/triggers-actions-ui-plugin/public/common/connectors_selection';
+import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
+import { connectorDeprecatedMessage } from '@kbn/triggers-actions-ui-plugin/public';
 
 // eslint-disable-next-line import/no-default-export
 export { ServiceNowSelectableRowIcon as default };

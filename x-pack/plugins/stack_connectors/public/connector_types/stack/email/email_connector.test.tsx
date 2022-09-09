@@ -9,7 +9,7 @@ import React, { Suspense } from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { useKibana } from '@kbn/triggers-actions-ui-plugin/public/common/lib/kibana';
+import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
 import EmailActionConnectorFields from './email_connector';
 import * as hooks from './use_email_config';
 import {
@@ -19,7 +19,7 @@ import {
   waitForComponentToUpdate,
 } from '../../lib/test_utils';
 
-jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
+jest.mock('@kbn/triggers-actions-ui-plugin/public');
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
 describe('EmailActionConnectorFields', () => {

@@ -11,7 +11,7 @@ import {
   ActionTypeModel as ConnectorTypeModel,
   GenericValidationResult,
   ALERT_HISTORY_PREFIX,
-} from '@kbn/triggers-actions-ui-plugin/public/types';
+} from '@kbn/triggers-actions-ui-plugin/public';
 import { EsIndexConfig, IndexActionParams } from '../../types';
 
 export function getConnectorType(): ConnectorTypeModel<EsIndexConfig, unknown, IndexActionParams> {

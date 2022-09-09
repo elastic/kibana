@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import {
   GenericValidationResult,
   ActionTypeModel as ConnectorTypeModel,
-} from '@kbn/triggers-actions-ui-plugin/public/types';
+} from '@kbn/triggers-actions-ui-plugin/public';
 import { JiraConfig, JiraSecrets, JiraActionParams } from './types';
 
 export const JIRA_DESC = i18n.translate('xpack.stackConnectors.components.jira.selectMessageText', {

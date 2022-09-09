@@ -8,9 +8,11 @@
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiCallOut, EuiComboBox, EuiFormRow, EuiSpacer } from '@elastic/eui';
-import { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { TextAreaWithMessageVariables } from '@kbn/triggers-actions-ui-plugin/public/application/components/text_area_with_message_variables';
-import { TextFieldWithMessageVariables } from '@kbn/triggers-actions-ui-plugin/public/application/components/text_field_with_message_variables';
+import {
+  ActionParamsProps,
+  TextAreaWithMessageVariables,
+  TextFieldWithMessageVariables,
+} from '@kbn/triggers-actions-ui-plugin/public';
 import { CasesWebhookActionConnector, CasesWebhookActionParams } from './types';
 
 const CREATE_COMMENT_WARNING_TITLE = i18n.translate(

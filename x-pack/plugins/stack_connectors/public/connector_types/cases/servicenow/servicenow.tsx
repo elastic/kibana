@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import {
   ActionTypeModel as ConnectorTypeModel,
   GenericValidationResult,
-} from '@kbn/triggers-actions-ui-plugin/public/types';
+} from '@kbn/triggers-actions-ui-plugin/public';
 import {
   ServiceNowConfig,
   ServiceNowITOMActionParams,

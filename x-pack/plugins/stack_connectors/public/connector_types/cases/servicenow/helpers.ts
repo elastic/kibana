@@ -7,8 +7,11 @@
 
 import { lazy, ComponentType } from 'react';
 import { EuiSelectOption } from '@elastic/eui';
-import { ActionConnector, IErrorObject } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { deprecatedMessage } from '@kbn/triggers-actions-ui-plugin/public/common';
+import {
+  ActionConnector,
+  deprecatedMessage,
+  IErrorObject,
+} from '@kbn/triggers-actions-ui-plugin/public';
 import { AppInfo, Choice, RESTApiError } from './types';
 
 export const DEFAULT_CORRELATION_ID = '{{rule.id}}:{{alert.id}}';

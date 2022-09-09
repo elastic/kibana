@@ -7,10 +7,12 @@
 
 import React, { useCallback, useEffect, useRef, useMemo } from 'react';
 import { EuiFormRow, EuiSpacer, EuiTitle, EuiSelect } from '@elastic/eui';
-import { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { useKibana } from '@kbn/triggers-actions-ui-plugin/public/common/lib/kibana';
-import { TextAreaWithMessageVariables } from '@kbn/triggers-actions-ui-plugin/public/application/components/text_area_with_message_variables';
-import { TextFieldWithMessageVariables } from '@kbn/triggers-actions-ui-plugin/public/application/components/text_field_with_message_variables';
+import {
+  ActionParamsProps,
+  TextAreaWithMessageVariables,
+  TextFieldWithMessageVariables,
+  useKibana,
+} from '@kbn/triggers-actions-ui-plugin/public';
 
 import * as i18n from './translations';
 import { useChoices } from './use_choices';

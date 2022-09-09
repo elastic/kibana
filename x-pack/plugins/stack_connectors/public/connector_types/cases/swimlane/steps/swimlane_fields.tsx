@@ -16,7 +16,7 @@ import {
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { ComboBoxField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 
-import { ButtonGroupField } from '@kbn/triggers-actions-ui-plugin/public/application/components/button_group_field';
+import { ButtonGroupField } from '@kbn/triggers-actions-ui-plugin/public';
 import * as i18n from '../translations';
 import {
   MappingConfigurationKeys,

@@ -10,11 +10,13 @@ import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { useFormContext, useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 
-import { ActionConnectorFieldsProps } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { useKibana } from '@kbn/triggers-actions-ui-plugin/public/common/lib/kibana';
-import { updateActionConnector } from '@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api';
-import { ConnectorFormSchema } from '@kbn/triggers-actions-ui-plugin/public/application/sections/action_connector_form/types';
-import { HiddenField } from '@kbn/triggers-actions-ui-plugin/public/application/components/hidden_field';
+import {
+  ActionConnectorFieldsProps,
+  HiddenField,
+  updateActionConnector,
+  useKibana,
+} from '@kbn/triggers-actions-ui-plugin/public';
+import type { ConnectorFormSchema } from '@kbn/triggers-actions-ui-plugin/public';
 import { snExternalServiceConfig } from '../../../../common/servicenow_config';
 import { DeprecatedCallout } from './deprecated_callout';
 import { useGetAppInfo } from './use_get_app_info';

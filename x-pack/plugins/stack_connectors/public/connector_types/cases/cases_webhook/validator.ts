@@ -11,7 +11,7 @@ import {
   ValidationFunc,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { containsChars, isUrl } from '@kbn/es-ui-shared-plugin/static/validators/string';
-import { templateActionVariable } from '@kbn/triggers-actions-ui-plugin/public/application/lib';
+import { templateActionVariable } from '@kbn/triggers-actions-ui-plugin/public';
 import * as i18n from './translations';
 import { casesVars, commentVars, urlVars, urlVarsExt } from './action_variables';
 

@@ -9,8 +9,10 @@ import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect } from '@elastic/eui';
 import { isUndefined } from 'lodash';
-import { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { TextFieldWithMessageVariables } from '@kbn/triggers-actions-ui-plugin/public/application/components/text_field_with_message_variables';
+import {
+  ActionParamsProps,
+  TextFieldWithMessageVariables,
+} from '@kbn/triggers-actions-ui-plugin/public';
 import { XmattersActionParams } from '../../types';
 
 const severityOptions = [

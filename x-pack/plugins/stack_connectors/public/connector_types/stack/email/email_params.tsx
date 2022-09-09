@@ -9,9 +9,11 @@ import React, { useState, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiComboBox, EuiButtonEmpty, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { TextFieldWithMessageVariables } from '@kbn/triggers-actions-ui-plugin/public/application/components/text_field_with_message_variables';
-import { TextAreaWithMessageVariables } from '@kbn/triggers-actions-ui-plugin/public/application/components/text_area_with_message_variables';
+import {
+  ActionParamsProps,
+  TextAreaWithMessageVariables,
+  TextFieldWithMessageVariables,
+} from '@kbn/triggers-actions-ui-plugin/public';
 import { EmailActionParams } from '../../types';
 
 export const EmailParamsFields = ({

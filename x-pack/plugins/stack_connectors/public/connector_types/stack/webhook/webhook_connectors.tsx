@@ -29,8 +29,7 @@ import {
   ToggleField,
 } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
-import { ActionConnectorFieldsProps } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { PasswordField } from '@kbn/triggers-actions-ui-plugin/public/application/components/password_field';
+import { ActionConnectorFieldsProps, PasswordField } from '@kbn/triggers-actions-ui-plugin/public';
 import * as i18n from './translations';
 
 const HTTP_VERBS = ['post', 'put'];

@@ -17,10 +17,12 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { useKibana } from '@kbn/triggers-actions-ui-plugin/public/common/lib/kibana';
-import { TextAreaWithMessageVariables } from '@kbn/triggers-actions-ui-plugin/public/application/components/text_area_with_message_variables';
-import { TextFieldWithMessageVariables } from '@kbn/triggers-actions-ui-plugin/public/application/components/text_field_with_message_variables';
+import {
+  ActionParamsProps,
+  TextAreaWithMessageVariables,
+  TextFieldWithMessageVariables,
+  useKibana,
+} from '@kbn/triggers-actions-ui-plugin/public';
 import { ServiceNowITSMActionParams, Choice, Fields } from './types';
 import { useGetChoices } from './use_get_choices';
 import { choicesToEuiOptions, DEFAULT_CORRELATION_ID } from './helpers';
