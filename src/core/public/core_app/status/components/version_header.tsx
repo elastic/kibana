@@ -7,9 +7,14 @@
  */
 
 import React, { FC } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiPageContent, EuiText } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPageContent_Deprecated as EuiPageContent,
+  EuiText,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { ServerVersion } from '../../../../types/status';
+import type { ServerVersion } from '@kbn/core-status-common-internal';
 
 interface VersionHeaderProps {
   version: ServerVersion;

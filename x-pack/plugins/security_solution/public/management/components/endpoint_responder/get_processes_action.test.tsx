@@ -194,7 +194,8 @@ describe('When using processes action from response actions console', () => {
       });
     });
 
-    it('should display completion output if done (no additional API calls)', async () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/139707
+    it.skip('should display completion output if done (no additional API calls)', async () => {
       await render();
 
       expect(apiMocks.responseProvider.actionDetails).toHaveBeenCalledTimes(1);

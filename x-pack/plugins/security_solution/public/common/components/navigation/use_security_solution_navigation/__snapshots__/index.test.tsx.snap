@@ -241,6 +241,16 @@ Object {
           "onClick": [Function],
         },
         Object {
+          "data-href": "securitySolutionUI/action_history",
+          "data-test-subj": "navigation-action_history",
+          "disabled": false,
+          "href": "securitySolutionUI/action_history",
+          "id": "action_history",
+          "isSelected": false,
+          "name": "Action history",
+          "onClick": [Function],
+        },
+        Object {
           "data-href": "securitySolutionUI/cloud_security_posture-benchmarks",
           "data-test-subj": "navigation-cloud_security_posture-benchmarks",
           "disabled": false,

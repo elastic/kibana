@@ -9,18 +9,15 @@
 import React, { Dispatch, useCallback, useContext } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { EuiButtonIcon } from '@elastic/eui';
+import { EuiButtonIcon, EuiIconProps } from '@elastic/eui';
 
 import type { PaletteContinuity, CustomPaletteParams } from '../../../palettes';
 
-import { ValueMaxIcon } from '../assets/value_max';
-import { ValueMinIcon } from '../assets/value_min';
 import { isLastItem } from './utils';
 import { TooltipWrapper } from '../tooltip_wrapper';
 
 import type { ColorRangesActions, ColorRange, ColorRangeAccessor } from './types';
 import { ColorRangesContext } from './color_ranges_context';
-import { InfinityIcon } from '../assets/infinity';
 
 export interface ColorRangesItemButtonProps {
   index: number;
@@ -29,7 +26,8 @@ export interface ColorRangesItemButtonProps {
   continuity: PaletteContinuity;
   dispatch: Dispatch<ColorRangesActions>;
   accessor: ColorRangeAccessor;
-  displayInfinity: boolean;
+  tooltipContent: string;
+  iconFactory: (props: Omit<EuiIconProps, 'type'>) => JSX.Element;
 }
 
 const switchContinuity = (isLast: boolean, continuity: PaletteContinuity) => {
@@ -119,7 +117,8 @@ export function ColorRangeAutoDetectButton({
   continuity,
   dispatch,
   accessor,
-  displayInfinity,
+  tooltipContent,
+  iconFactory,
 }: ColorRangesItemButtonProps) {
   const { dataBounds, palettes } = useContext(ColorRangesContext);
   const isLast = isLastItem(accessor);
@@ -133,26 +132,10 @@ export function ColorRangeAutoDetectButton({
     });
   }, [continuity, dataBounds, dispatch, isLast, palettes]);
 
-  const tooltipContent = isLast
-    ? displayInfinity
-      ? i18n.translate('coloring.dynamicColoring.customPalette.useAutoMaxValueInfinity', {
-          defaultMessage: `Use positive infinity`,
-        })
-      : i18n.translate('coloring.dynamicColoring.customPalette.useAutoMaxValue', {
-          defaultMessage: `Use maximum data value`,
-        })
-    : displayInfinity
-    ? i18n.translate('coloring.dynamicColoring.customPalette.useAutoMinValueInfinity', {
-        defaultMessage: `Use negative infinity`,
-      })
-    : i18n.translate('coloring.dynamicColoring.customPalette.useAutoMinValue', {
-        defaultMessage: `Use minimum data value`,
-      });
-
   return (
     <TooltipWrapper tooltipContent={tooltipContent} condition={true} position="top" delay="regular">
       <EuiButtonIcon
-        iconType={displayInfinity ? InfinityIcon : isLast ? ValueMaxIcon : ValueMinIcon}
+        iconType={iconFactory}
         aria-label={tooltipContent}
         onClick={onExecuteAction}
         data-test-subj={`lnsPalettePanel_dynamicColoring_autoDetect_${
