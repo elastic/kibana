@@ -90,10 +90,12 @@ const ExceptionsViewerComponent = ({
   );
 
   // Reducer state
-  const [{ exceptions, pagination, currenFlyout, exceptionToEdit, viewerState, isReadOnly, lastUpdated }, dispatch] =
-    useReducer(allExceptionItemsReducer(), {
-      ...initialState,
-    });
+  const [
+    { exceptions, pagination, currenFlyout, exceptionToEdit, viewerState, isReadOnly, lastUpdated },
+    dispatch,
+  ] = useReducer(allExceptionItemsReducer(), {
+    ...initialState,
+  });
 
   // Reducer actions
   const setLastUpdated = useCallback(
