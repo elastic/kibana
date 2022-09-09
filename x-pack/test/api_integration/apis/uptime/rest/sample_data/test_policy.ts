@@ -317,6 +317,7 @@ export const getTestProjectSyntheticsPolicy = (
         {
           enabled: false,
           data_stream: { type: 'synthetics', dataset: 'http' },
+          release: 'experimental',
           vars: {
             __ui: { type: 'yaml' },
             enabled: { value: true, type: 'bool' },
@@ -364,6 +365,7 @@ export const getTestProjectSyntheticsPolicy = (
         {
           enabled: false,
           data_stream: { type: 'synthetics', dataset: 'tcp' },
+          release: 'beta',
           vars: {
             __ui: { type: 'yaml' },
             enabled: { value: true, type: 'bool' },
@@ -401,6 +403,7 @@ export const getTestProjectSyntheticsPolicy = (
       streams: [
         {
           enabled: false,
+          release: 'beta',
           data_stream: { type: 'synthetics', dataset: 'icmp' },
           vars: {
             __ui: { type: 'yaml' },
@@ -431,6 +434,7 @@ export const getTestProjectSyntheticsPolicy = (
         {
           enabled: true,
           data_stream: { type: 'synthetics', dataset: 'browser' },
+          release: 'beta',
           vars: {
             __ui: {
               value:
