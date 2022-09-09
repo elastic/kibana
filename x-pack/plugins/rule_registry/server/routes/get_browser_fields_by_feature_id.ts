@@ -21,7 +21,7 @@ export const getBrowserFieldsByFeatureId = (router: IRouter<RacRequestHandlerCon
         query: buildRouteValidation(
           t.exact(
             t.type({
-              featureIds: t.array(t.string),
+              featureIds: t.union([t.string, t.array(t.string)]),
             })
           )
         ),
@@ -34,11 +34,12 @@ export const getBrowserFieldsByFeatureId = (router: IRouter<RacRequestHandlerCon
       try {
         const racContext = await context.rac;
         const alertsClient = await racContext.getAlertsClient();
-        const { featureIds } = request.query;
+        const { featureIds = [] } = request.query;
 
-        const indices = await alertsClient.getAuthorizedAlertsIndices(featureIds);
-        const o11yIndices = indices?.filter((index) => index.startsWith('.alerts-observability'));
-        if (!o11yIndices || o11yIndices.length === 0) {
+
+        const indices = await alertsClient.getAuthorizedAlertsIndices(Array.isArray(featureIds) ? featureIds : [featureIds]);
+        const o11yIndices = indices?.filter((index) => index.startsWith('.alerts-observability')) ?? [];
+        if (o11yIndices.length === 0) {
           return response.notFound({
             body: {
               message: `No alerts-observability indices found for featureIds [${featureIds}]`,

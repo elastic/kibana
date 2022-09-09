@@ -10,12 +10,13 @@ import expect from '@kbn/expect';
 import { superUser, obsOnlySpacesAll, secOnlyRead } from '../../../common/lib/authentication/users';
 import type { User } from '../../../common/lib/authentication/types';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
+import { getSpaceUrlPrefix } from '../../../common/lib/authentication/spaces';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
-
+  const SPACE1 = 'space1';
   const TEST_URL = '/internal/rac/alerts/browser_fields';
 
   const getBrowserFieldsByFeatureId = async (
@@ -24,7 +25,7 @@ export default ({ getService }: FtrProviderContext) => {
     expectedStatusCode: number = 200
   ) => {
     const resp = await supertestWithoutAuth
-      .get(`${TEST_URL}`)
+      .get(`${getSpaceUrlPrefix(SPACE1)}${TEST_URL}`)
       .query({ featureIds })
       .auth(user.username, user.password)
       .set('kbn-xsrf', 'true')
@@ -38,7 +39,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('Users:', () => {
-      it(`${obsOnlySpacesAll.username} should be able to get feature id for o11y featureIds`, async () => {
+      it(`${obsOnlySpacesAll.username} should be able to get browser fields for o11y featureIds`, async () => {
         const browserFields = await getBrowserFieldsByFeatureId(obsOnlySpacesAll, [
           'apm',
           'infrastructure',
@@ -48,7 +49,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(Object.keys(browserFields)).to.eql(['base']);
       });
 
-      it(`${superUser.username} should be able to get feature id for o11y featureIds`, async () => {
+      it(`${superUser.username} should be able to get browser fields for o11y featureIds`, async () => {
         const browserFields = await getBrowserFieldsByFeatureId(superUser, [
           'apm',
           'infrastructure',
@@ -58,8 +59,12 @@ export default ({ getService }: FtrProviderContext) => {
         expect(Object.keys(browserFields)).to.eql(['base']);
       });
 
-      it(`${secOnlyRead.username} should not have access to o11y featureIds`, async () => {
-        await getBrowserFieldsByFeatureId(secOnlyRead, ['siem'], 403);
+      it(`${superUser.username} should NOT be able to get browser fields for siem featureId`, async () => {
+        await getBrowserFieldsByFeatureId(superUser, ['siem'], 404);
+      });
+
+      it(`${secOnlyRead.username} should NOT be able to get browser fields for siem featureId`, async () => {
+        await getBrowserFieldsByFeatureId(secOnlyRead, ['siem'], 404);
       });
     });
   });
