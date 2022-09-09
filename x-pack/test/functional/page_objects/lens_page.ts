@@ -819,7 +819,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     /**
      * Adds a new layer to the chart, fails if the chart does not support new layers
      */
-    async createLayer(layerType: string = 'data') {
+    async createLayer(layerType: 'data' | 'referenceLine' | 'annotations' = 'data') {
       await testSubjects.click('lnsLayerAddButton');
       const layerCount = (await find.allByCssSelector(`[data-test-subj^="lns-layerPanel-"]`))
         .length;
