@@ -61,10 +61,26 @@ function mockFrame(): FramePublicAPI {
 // Just a basic bootstrap here to kickstart the tests
 describe('pie_visualization', () => {
   describe('#getErrorMessages', () => {
-    it('returns undefined if no error is raised', () => {
-      const error = pieVisualization.getErrorMessages(getExampleState());
+    describe('too many dimensions', () => {
+      const state = { ...getExampleState(), shape: PieChartTypes.MOSAIC };
+      const colIds = new Array(PartitionChartsMeta.mosaic.maxBuckets + 1)
+        .fill(undefined)
+        .map((_, i) => String(i + 1));
 
-      expect(error).not.toBeDefined();
+      state.layers[0].primaryGroups = colIds.slice(0, 2);
+      state.layers[0].secondaryGroups = colIds.slice(2);
+
+      it('returns error', () => {
+        expect(pieVisualization.getErrorMessages(state)).toHaveLength(1);
+      });
+
+      it("doesn't count collapsed dimensions", () => {
+        state.layers[0].collapseFns = {
+          [colIds[0]]: 'some-fn',
+        };
+
+        expect(pieVisualization.getErrorMessages(state)).toHaveLength(0);
+      });
     });
   });
 
@@ -185,7 +201,7 @@ describe('pie_visualization', () => {
       `);
 
       const mosaicState = getExampleState();
-      mosaicState.shape = 'mosaic';
+      mosaicState.shape = PieChartTypes.MOSAIC;
       mosaicState.layers[0].primaryGroups = colIds.slice(0, 2);
       mosaicState.layers[0].secondaryGroups = colIds.slice(2);
       mosaicState.layers[0].collapseFns = {
