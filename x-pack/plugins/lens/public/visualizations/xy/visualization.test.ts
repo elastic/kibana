@@ -35,9 +35,13 @@ import { eventAnnotationServiceMock } from '@kbn/event-annotation-plugin/public/
 import { EventAnnotationConfig } from '@kbn/event-annotation-plugin/common';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import { DataViewsState } from '../../state_management';
+import { createMockedIndexPattern } from '../../indexpattern_datasource/mocks';
+import { createMockDataViewsState } from '../../data_views_service/mocks';
 
 const exampleAnnotation: EventAnnotationConfig = {
   id: 'an1',
+  type: 'manual',
   label: 'Event 1',
   key: {
     type: 'point_in_time',
@@ -47,6 +51,7 @@ const exampleAnnotation: EventAnnotationConfig = {
 };
 const exampleAnnotation2: EventAnnotationConfig = {
   icon: 'circle',
+  type: 'manual',
   id: 'an2',
   key: {
     timestamp: '2022-04-18T11:01:59.135Z',
@@ -237,7 +242,12 @@ describe('xy_visualization', () => {
 
   describe('#appendLayer', () => {
     it('adds a layer', () => {
-      const layers = xyVisualization.appendLayer!(exampleState(), 'foo', layerTypes.DATA).layers;
+      const layers = xyVisualization.appendLayer!(
+        exampleState(),
+        'foo',
+        layerTypes.DATA,
+        'indexPattern1'
+      ).layers;
       expect(layers.length).toEqual(exampleState().layers.length + 1);
       expect(layers[layers.length - 1]).toMatchObject({ layerId: 'foo' });
     });
@@ -245,7 +255,7 @@ describe('xy_visualization', () => {
 
   describe('#clearLayer', () => {
     it('clears the specified layer', () => {
-      const layer = xyVisualization.clearLayer(exampleState(), 'first').layers[0];
+      const layer = xyVisualization.clearLayer(exampleState(), 'first', 'indexPattern1').layers[0];
       expect(layer).toMatchObject({
         accessors: [],
         layerId: 'first',
@@ -460,6 +470,7 @@ describe('xy_visualization', () => {
                 {
                   layerId: 'annotation',
                   layerType: layerTypes.ANNOTATIONS,
+                  indexPatternId: 'indexPattern1',
                   annotations: [exampleAnnotation],
                 },
               ],
@@ -471,10 +482,12 @@ describe('xy_visualization', () => {
         ).toEqual({
           layerId: 'annotation',
           layerType: layerTypes.ANNOTATIONS,
+          indexPatternId: 'indexPattern1',
           annotations: [
             exampleAnnotation,
             {
               icon: 'triangle',
+              type: 'manual',
               id: 'newCol',
               key: {
                 timestamp: '2022-04-15T00:00:00.000Z',
@@ -495,6 +508,7 @@ describe('xy_visualization', () => {
                 {
                   layerId: 'annotation',
                   layerType: layerTypes.ANNOTATIONS,
+                  indexPatternId: 'indexPattern1',
                   annotations: [exampleAnnotation2],
                 },
               ],
@@ -517,6 +531,7 @@ describe('xy_visualization', () => {
         ).toEqual({
           layerId: 'annotation',
           layerType: layerTypes.ANNOTATIONS,
+          indexPatternId: 'indexPattern1',
           annotations: [exampleAnnotation2, { ...exampleAnnotation2, id: 'newColId' }],
         });
       });
@@ -530,6 +545,7 @@ describe('xy_visualization', () => {
                 {
                   layerId: 'annotation',
                   layerType: layerTypes.ANNOTATIONS,
+                  indexPatternId: 'indexPattern1',
                   annotations: [exampleAnnotation, exampleAnnotation2],
                 },
               ],
@@ -553,6 +569,7 @@ describe('xy_visualization', () => {
         ).toEqual({
           layerId: 'annotation',
           layerType: layerTypes.ANNOTATIONS,
+          indexPatternId: 'indexPattern1',
           annotations: [exampleAnnotation2, exampleAnnotation],
         });
       });
@@ -566,12 +583,14 @@ describe('xy_visualization', () => {
               layers: [
                 {
                   layerId: 'first',
-                  layerType: 'annotations',
+                  layerType: layerTypes.ANNOTATIONS,
+                  indexPatternId: 'indexPattern1',
                   annotations: [exampleAnnotation],
                 },
                 {
                   layerId: 'second',
-                  layerType: 'annotations',
+                  layerType: layerTypes.ANNOTATIONS,
+                  indexPatternId: 'indexPattern1',
                   annotations: [exampleAnnotation2],
                 },
               ],
@@ -596,11 +615,13 @@ describe('xy_visualization', () => {
           {
             layerId: 'first',
             layerType: layerTypes.ANNOTATIONS,
+            indexPatternId: 'indexPattern1',
             annotations: [exampleAnnotation],
           },
           {
             layerId: 'second',
             layerType: layerTypes.ANNOTATIONS,
+            indexPatternId: 'indexPattern1',
             annotations: [{ ...exampleAnnotation, id: 'an2' }],
           },
         ]);
@@ -614,12 +635,14 @@ describe('xy_visualization', () => {
               layers: [
                 {
                   layerId: 'first',
-                  layerType: 'annotations',
+                  layerType: layerTypes.ANNOTATIONS,
+                  indexPatternId: 'indexPattern1',
                   annotations: [exampleAnnotation],
                 },
                 {
                   layerId: 'second',
-                  layerType: 'annotations',
+                  layerType: layerTypes.ANNOTATIONS,
+                  indexPatternId: 'indexPattern1',
                   annotations: [exampleAnnotation2],
                 },
               ],
@@ -644,11 +667,13 @@ describe('xy_visualization', () => {
           {
             layerId: 'first',
             layerType: layerTypes.ANNOTATIONS,
+            indexPatternId: 'indexPattern1',
             annotations: [exampleAnnotation2],
           },
           {
             layerId: 'second',
             layerType: layerTypes.ANNOTATIONS,
+            indexPatternId: 'indexPattern1',
             annotations: [exampleAnnotation],
           },
         ]);
@@ -662,12 +687,14 @@ describe('xy_visualization', () => {
               layers: [
                 {
                   layerId: 'first',
-                  layerType: 'annotations',
+                  layerType: layerTypes.ANNOTATIONS,
+                  indexPatternId: 'indexPattern1',
                   annotations: [exampleAnnotation],
                 },
                 {
                   layerId: 'second',
-                  layerType: 'annotations',
+                  layerType: layerTypes.ANNOTATIONS,
+                  indexPatternId: 'indexPattern1',
                   annotations: [exampleAnnotation2],
                 },
               ],
@@ -692,11 +719,13 @@ describe('xy_visualization', () => {
           {
             layerId: 'first',
             layerType: layerTypes.ANNOTATIONS,
+            indexPatternId: 'indexPattern1',
             annotations: [],
           },
           {
             layerId: 'second',
             layerType: layerTypes.ANNOTATIONS,
+            indexPatternId: 'indexPattern1',
             annotations: [exampleAnnotation],
           },
         ]);
@@ -710,12 +739,14 @@ describe('xy_visualization', () => {
               layers: [
                 {
                   layerId: 'first',
-                  layerType: 'annotations',
+                  layerType: layerTypes.ANNOTATIONS,
+                  indexPatternId: 'indexPattern1',
                   annotations: [exampleAnnotation],
                 },
                 {
                   layerId: 'second',
-                  layerType: 'annotations',
+                  layerType: layerTypes.ANNOTATIONS,
+                  indexPatternId: 'indexPattern1',
                   annotations: [],
                 },
               ],
@@ -740,11 +771,13 @@ describe('xy_visualization', () => {
           {
             layerId: 'first',
             layerType: layerTypes.ANNOTATIONS,
+            indexPatternId: 'indexPattern1',
             annotations: [],
           },
           {
             layerId: 'second',
             layerType: layerTypes.ANNOTATIONS,
+            indexPatternId: 'indexPattern1',
             annotations: [exampleAnnotation],
           },
         ]);
@@ -1106,6 +1139,7 @@ describe('xy_visualization', () => {
               {
                 layerId: 'ann',
                 layerType: layerTypes.ANNOTATIONS,
+                indexPatternId: 'indexPattern1',
                 annotations: [exampleAnnotation, { ...exampleAnnotation, id: 'an2' }],
               },
             ],
@@ -1124,6 +1158,7 @@ describe('xy_visualization', () => {
         {
           layerId: 'ann',
           layerType: layerTypes.ANNOTATIONS,
+          indexPatternId: 'indexPattern1',
           annotations: [exampleAnnotation],
         },
       ]);
@@ -1843,6 +1878,7 @@ describe('xy_visualization', () => {
             {
               layerId: 'annotations',
               layerType: layerTypes.ANNOTATIONS,
+              indexPatternId: 'indexPattern1',
               annotations: [exampleAnnotation],
             },
           ],
@@ -2278,7 +2314,7 @@ describe('xy_visualization', () => {
               },
             ],
           },
-          frame.datasourceLayers
+          { datasourceLayers: frame.datasourceLayers, dataViews: {} as DataViewsState }
         )
       ).toEqual([
         {
@@ -2334,7 +2370,7 @@ describe('xy_visualization', () => {
               },
             ],
           },
-          datasourceLayers
+          { datasourceLayers, dataViews: {} as DataViewsState }
         )
       ).toEqual([
         {
@@ -2390,7 +2426,7 @@ describe('xy_visualization', () => {
               },
             ],
           },
-          datasourceLayers
+          { datasourceLayers, dataViews: {} as DataViewsState }
         )
       ).toEqual([
         {
@@ -2398,6 +2434,98 @@ describe('xy_visualization', () => {
           longMessage: 'Data type mismatch for the Horizontal axis, use a different function.',
         },
       ]);
+    });
+
+    describe('Annotation layers', () => {
+      function createStateWithAnnotationProps(annotation: Partial<EventAnnotationConfig>) {
+        return {
+          layers: [
+            {
+              layerId: 'layerId',
+              layerType: 'annotations',
+              indexPatternId: 'first',
+              annotations: [
+                {
+                  label: 'Event',
+                  id: '1',
+                  type: 'query',
+                  timeField: 'start_date',
+                  ...annotation,
+                },
+              ],
+            },
+          ],
+        } as XYState;
+      }
+
+      function getFrameMock() {
+        return createMockFramePublicAPI({
+          datasourceLayers: { first: mockDatasource.publicAPIMock },
+          dataViews: createMockDataViewsState({
+            indexPatterns: { first: createMockedIndexPattern() },
+          }),
+        });
+      }
+      it('should return error if current annotation contains non-existent field as timeField', () => {
+        const xyState = createStateWithAnnotationProps({
+          timeField: 'non-existent',
+        });
+        const errors = xyVisualization.getErrorMessages(xyState, getFrameMock());
+        expect(errors).toHaveLength(1);
+        expect(errors![0]).toEqual(
+          expect.objectContaining({
+            shortMessage: 'Time field non-existent not found in data view my-fake-index-pattern',
+          })
+        );
+      });
+      it('should return error if current annotation contains non existent field as textField', () => {
+        const xyState = createStateWithAnnotationProps({
+          textField: 'non-existent',
+        });
+        const errors = xyVisualization.getErrorMessages(xyState, getFrameMock());
+        expect(errors).toHaveLength(1);
+        expect(errors![0]).toEqual(
+          expect.objectContaining({
+            shortMessage: 'Text field non-existent not found in data view my-fake-index-pattern',
+          })
+        );
+      });
+      it('should contain error if current annotation contains at least one non-existent field as tooltip field', () => {
+        const xyState = createStateWithAnnotationProps({
+          extraFields: ['bytes', 'memory', 'non-existent'],
+        });
+        const errors = xyVisualization.getErrorMessages(xyState, getFrameMock());
+        expect(errors).toHaveLength(1);
+        expect(errors![0]).toEqual(
+          expect.objectContaining({
+            shortMessage: 'Tooltip field non-existent not found in data view my-fake-index-pattern',
+          })
+        );
+      });
+      it('should contain error if current annotation contains invalid query', () => {
+        const xyState = createStateWithAnnotationProps({
+          filter: { type: 'kibana_query', query: 'invalid: "', language: 'kuery' },
+        });
+        const errors = xyVisualization.getErrorMessages(xyState, getFrameMock());
+        expect(errors).toHaveLength(1);
+        expect(errors![0]).toEqual(
+          expect.objectContaining({
+            shortMessage: expect.stringContaining(
+              'Expected "(", "{", value, whitespace but """ found.'
+            ),
+          })
+        );
+      });
+      it('should contain multiple errors if current annotation contains multiple non-existent fields', () => {
+        const xyState = createStateWithAnnotationProps({
+          timeField: 'non-existent',
+          textField: 'non-existent',
+          extraFields: ['bytes', 'memory', 'non-existent'],
+          filter: { type: 'kibana_query', query: 'invalid: "', language: 'kuery' },
+        });
+        const errors = xyVisualization.getErrorMessages(xyState, getFrameMock());
+        expect(errors).toHaveLength(4);
+      });
     });
   });
 
@@ -2552,6 +2680,82 @@ describe('xy_visualization', () => {
         '4': 'Event [2]',
         '5': 'Event [1] [1]',
         '6': 'Custom [1]',
+      });
+    });
+  });
+
+  describe('#fromPersistableState', () => {
+    it('should inject references on annotation layers', () => {
+      const baseState = exampleState();
+      expect(
+        xyVisualization.fromPersistableState!(
+          {
+            ...baseState,
+            layers: [
+              ...baseState.layers,
+              {
+                layerId: 'annotation',
+                layerType: layerTypes.ANNOTATIONS,
+                annotations: [exampleAnnotation2],
+              },
+            ],
+          },
+          [
+            {
+              type: 'index-pattern',
+              name: `xy-visualization-layer-annotation`,
+              id: 'indexPattern1',
+            },
+          ]
+        )
+      ).toEqual({
+        ...baseState,
+        layers: [
+          ...baseState.layers,
+          {
+            layerId: 'annotation',
+            layerType: layerTypes.ANNOTATIONS,
+            indexPatternId: 'indexPattern1',
+            annotations: [exampleAnnotation2],
+          },
+        ],
+      });
+    });
+
+    it('should fallback to the first dataView reference in case there are missing annotation references', () => {
+      const baseState = exampleState();
+      expect(
+        xyVisualization.fromPersistableState!(
+          {
+            ...baseState,
+            layers: [
+              ...baseState.layers,
+              {
+                layerId: 'annotation',
+                layerType: layerTypes.ANNOTATIONS,
+                annotations: [exampleAnnotation2],
+              },
+            ],
+          },
+          [
+            {
+              type: 'index-pattern',
+              name: 'something-else',
+              id: 'indexPattern1',
+            },
+          ]
+        )
+      ).toEqual({
+        ...baseState,
+        layers: [
+          ...baseState.layers,
+          {
+            layerId: 'annotation',
+            layerType: layerTypes.ANNOTATIONS,
+            indexPatternId: 'indexPattern1',
+            annotations: [exampleAnnotation2],
+          },
+        ],
       });
     });
   });

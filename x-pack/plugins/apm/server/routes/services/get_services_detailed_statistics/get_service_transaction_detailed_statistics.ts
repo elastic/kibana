@@ -22,7 +22,7 @@ import {
   getDurationFieldForTransactions,
   getProcessorEventForTransactions,
 } from '../../../lib/helpers/transactions';
-import { calculateThroughput } from '../../../lib/helpers/calculate_throughput';
+import { calculateThroughputWithRange } from '../../../lib/helpers/calculate_throughput';
 import { getBucketSizeForAggregatedTransactions } from '../../../lib/helpers/get_bucket_size_for_aggregated_transactions';
 import { Setup } from '../../../lib/helpers/setup_request';
 import {
@@ -163,7 +163,7 @@ export async function getServiceTransactionDetailedStatistics({
         throughput: topTransactionTypeBucket.timeseries.buckets.map(
           (dateBucket) => ({
             x: dateBucket.key + offsetInMs,
-            y: calculateThroughput({
+            y: calculateThroughputWithRange({
               start,
               end,
               value: dateBucket.doc_count,
