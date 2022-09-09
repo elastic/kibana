@@ -136,7 +136,8 @@ export interface ISearchOptions {
   indexPattern?: DataView;
 
   /**
-   *
+   * TransportRequestOptions, other than `signal`, to pass through to the ES client.
+   * To pass an abort signal, use {@link ISearchOptions.abortSignal}
    */
   transport?: Omit<TransportRequestOptions, 'signal'>;
 }
