@@ -2654,15 +2654,6 @@ export class RulesClient {
 
   public async runSoon({ id }: { id: string }) {
     const { attributes } = await this.unsecuredSavedObjectsClient.get<Rule>('alert', id);
-    const taskDoc = await this.taskManager.get(id);
-    if (
-      taskDoc &&
-      (taskDoc.status === TaskStatus.Claiming || taskDoc.status === TaskStatus.Running)
-    ) {
-      return i18n.translate('xpack.alerting.rulesClient.runSoon.ruleIsRunning', {
-        defaultMessage: 'Rule is already running',
-      });
-    }
     try {
       await this.authorization.ensureAuthorized({
         ruleTypeId: attributes.alertTypeId,
@@ -2694,6 +2685,18 @@ export class RulesClient {
     );
 
     this.ruleTypeRegistry.ensureRuleTypeEnabled(attributes.alertTypeId);
+
+    const taskDoc = attributes.scheduledTaskId
+      ? await this.taskManager.get(attributes.scheduledTaskId)
+      : null;
+    if (
+      taskDoc &&
+      (taskDoc.status === TaskStatus.Claiming || taskDoc.status === TaskStatus.Running)
+    ) {
+      return i18n.translate('xpack.alerting.rulesClient.runSoon.ruleIsRunning', {
+        defaultMessage: 'Rule is already running',
+      });
+    }
 
     await this.taskManager.runSoon(id);
   }

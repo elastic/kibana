@@ -66,7 +66,6 @@ import {
   unsnoozeRule,
   deleteRules,
   updateAPIKey,
-  runSoon,
 } from '../../../lib/rule_api';
 import { loadActionTypes } from '../../../lib/action_connector_api';
 import { hasAllPrivilege, hasExecuteActionsCapability } from '../../../lib/capabilities';
@@ -89,6 +88,7 @@ import { RulesListTable, convertRulesToTableItems } from './rules_list_table';
 import { RulesListAutoRefresh } from './rules_list_auto_refresh';
 import { UpdateApiKeyModalConfirmation } from '../../../components/update_api_key_modal_confirmation';
 import { RulesListVisibleColumns } from './rules_list_column_selector';
+import { runRule } from '../../../lib/run_rule';
 
 const ENTER_KEY = 13;
 
@@ -263,24 +263,7 @@ export const RulesList = ({
   };
 
   const onRunRule = async (id: string) => {
-    try {
-      const message = await runSoon({ http, id });
-      if (message) {
-        toasts.addWarning({ title: message });
-      } else {
-        toasts.addSuccess({
-          title: i18n.translate('xpack.triggersActionsUI.sections.rulesList.ableToRunRuleSoon', {
-            defaultMessage: 'Your rule is scheduled to run',
-          }),
-        });
-      }
-    } catch (e) {
-      toasts.addError(e, {
-        title: i18n.translate('xpack.triggersActionsUI.sections.rulesList.unableToRunRuleSoon', {
-          defaultMessage: 'Unable to schedule your rule to run',
-        }),
-      });
-    }
+    await runRule(http, toasts, id);
   };
 
   const isRuleTypeEditableInContext = (ruleTypeId: string) =>

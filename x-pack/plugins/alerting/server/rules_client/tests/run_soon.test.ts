@@ -73,6 +73,7 @@ describe('runSoon()', () => {
           },
         },
       ],
+      scheduledTaskId: '1',
     },
     version: '123',
     references: [],
