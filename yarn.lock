@@ -1478,10 +1478,10 @@
   dependencies:
     object-hash "^1.3.0"
 
-"@elastic/charts@48.0.0":
-  version "48.0.0"
-  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-48.0.0.tgz#ccbbe7507102f078b80285e045a421105c0fc780"
-  integrity sha512-sj0L0JKU3KLJw0Ci1RzSj5WkhGc7ptAft/ulunF+w0i5vG7qgDdbnemCvRIPkgGiu2AnAnIj/bkK3IcxpAbmGA==
+"@elastic/charts@48.0.1":
+  version "48.0.1"
+  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-48.0.1.tgz#52391ab37bcc3188748e5ac4ffe5275ce8cd93cd"
+  integrity sha512-cmu65UTwbQSj4Gk1gdhlORfbqrCeel9FMpz/fVODOpsRWh/4dwxZhN/x9Ob1e4W5jZDfd6OV47Gc9ZfQVzxKrQ==
   dependencies:
     "@popperjs/core" "^2.4.0"
     bezier-easing "^2.1.0"
