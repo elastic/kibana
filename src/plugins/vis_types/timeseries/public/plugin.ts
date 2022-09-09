@@ -40,7 +40,7 @@ export interface MetricsPluginStartDependencies {
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
   charts: ChartsPluginStart;
-  usageCollection?: UsageCollectionStart;
+  usageCollection: UsageCollectionStart;
 }
 
 /** @internal */
@@ -74,8 +74,6 @@ export class MetricsPlugin implements Plugin<void, void> {
     setDataStart(data);
     setDataViewsStart(dataViews);
     setCoreStart(core);
-    if (usageCollection) {
-      setUsageCollectionStart(usageCollection);
-    }
+    setUsageCollectionStart(usageCollection);
   }
 }
