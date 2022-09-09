@@ -70,6 +70,8 @@ export const getNormalizedDataStreams = (packageInfo: PackageInfo): RegistryData
       dataset: createDefaultDatasetName(packageInfo, policyTemplate),
       title: policyTemplate.title + ' Dataset',
       release: packageInfo.release || 'ga',
+      package: packageInfo.name,
+      path: packageInfo.name,
       streams: [
         {
           input: policyTemplate.input,
@@ -80,8 +82,6 @@ export const getNormalizedDataStreams = (packageInfo: PackageInfo): RegistryData
           enabled: true,
         },
       ],
-      package: packageInfo.name,
-      path: packageInfo.name,
     };
 
     return dataStream;
