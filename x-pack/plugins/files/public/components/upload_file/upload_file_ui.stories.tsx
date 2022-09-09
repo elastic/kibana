@@ -8,7 +8,7 @@ import React from 'react';
 import { ComponentStory } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 
-import { FileUploadUI, Props } from './file_upload';
+import { UploadFileUI, Props } from './upload_file_ui';
 
 const defaultArgs: Props = {
   onChange: action('onChange'),
@@ -19,12 +19,12 @@ const defaultArgs: Props = {
 };
 
 export default {
-  title: 'components/FileUploadUI',
-  component: FileUploadUI,
+  title: 'components/UploadFileUI',
+  component: UploadFileUI,
   args: defaultArgs,
 };
 
-const Template: ComponentStory<typeof FileUploadUI> = (props: Props) => <FileUploadUI {...props} />;
+const Template: ComponentStory<typeof UploadFileUI> = (props: Props) => <UploadFileUI {...props} />;
 
 export const Basic = Template.bind({});
 

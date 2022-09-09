@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import { i18nTexts } from './i18n_texts';
 
-import './file_upload.scss';
+import './upload_file.scss';
 
 export interface Props
   extends Omit<EuiFilePickerProps, 'onChange' | 'value' | 'initialPromptText'> {
@@ -33,7 +33,7 @@ export interface Props
   initialFilePromptText?: string;
 }
 
-export const FileUploadUI = React.forwardRef<EuiFilePicker, Props>((props, ref) => {
+export const UploadFileUI = React.forwardRef<EuiFilePicker, Props>((props, ref) => {
   const {
     compressed,
     uploading,
@@ -49,7 +49,7 @@ export const FileUploadUI = React.forwardRef<EuiFilePicker, Props>((props, ref) 
     ...rest
   } = props;
 
-  const cn = useMemo(() => classNames({ filesFileUpload: true }, className), [className]);
+  const cn = useMemo(() => classNames({ filesUploadFile: true }, className), [className]);
   const showRetryButton = retry && !uploading;
 
   return (
