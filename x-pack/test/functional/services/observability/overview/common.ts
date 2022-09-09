@@ -13,11 +13,12 @@ const DATE_WITH_DATA = {
   rangeTo: '2021-10-20T13:36:22.109Z',
 };
 
-const ALERTS_SELECTOR = 'Alerts';
-const ALERTS_SECTION_SELECTOR = 'overview-page-alerts-section';
-const ALERTS_SECTION_BUTTON_SELECTOR = `button[aria-controls="${ALERTS_SELECTOR}"]`;
+const ALERTS_TITLE = 'Alerts';
+const ALERTS_ACCORDION_SELECTOR = `accordion-${ALERTS_TITLE}`;
+const ALERTS_SECTION_BUTTON_SELECTOR = `button[aria-controls="${ALERTS_TITLE}"]`;
 const ALERTS_TABLE_NO_DATA_SELECTOR = 'alertsStateTableEmptyState';
 const ALERTS_TABLE_WITH_DATA_SELECTOR = 'alertsTable';
+const ALERTS_TABLE_LOADING_SELECTOR = 'internalAlertsPageLoading';
 
 export function ObservabilityOverviewCommonProvider({
   getPageObjects,
@@ -46,19 +47,27 @@ export function ObservabilityOverviewCommonProvider({
     );
   };
 
-  const waitForAlertsSectionToAppear = async () => {
-    await retry.waitFor('alert section to appear', async () => {
-      return await testSubjects.exists(ALERTS_SECTION_SELECTOR);
+  const waitForAlertsAccordionToAppear = async () => {
+    await retry.waitFor('alert accordion to appear', async () => {
+      return await testSubjects.exists(ALERTS_ACCORDION_SELECTOR);
+    });
+  };
+
+  const waitForAlertsTableLoadingToDisappear = async () => {
+    await retry.try(async () => {
+      await testSubjects.missingOrFail(ALERTS_TABLE_LOADING_SELECTOR);
     });
   };
 
   const openAlertsSection = async () => {
-    await waitForAlertsSectionToAppear();
-    return await (await find.byCssSelector(ALERTS_SECTION_BUTTON_SELECTOR)).click();
+    await waitForAlertsAccordionToAppear();
+    const alertSectionButton = await find.byCssSelector(ALERTS_SECTION_BUTTON_SELECTOR);
+    return await alertSectionButton.click();
   };
 
   const openAlertsSectionAndWaitToAppear = async () => {
     await openAlertsSection();
+    await waitForAlertsTableLoadingToDisappear();
     await retry.waitFor('alerts table to appear', async () => {
       return (
         (await testSubjects.exists(ALERTS_TABLE_NO_DATA_SELECTOR)) ||

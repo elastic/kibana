@@ -153,7 +153,7 @@ export function OverviewPage() {
           onDismissClick={() => setGuidedSetupTourVisible(true)}
         />
         <EuiFlexGroup direction="column" gutterSize="s">
-          <EuiFlexItem data-test-subj={'overview-page-alerts-section'}>
+          <EuiFlexItem>
             <SectionContainer
               initialIsOpen={hasAnyData}
               title={i18n.translate('xpack.observability.overview.alerts.title', {
