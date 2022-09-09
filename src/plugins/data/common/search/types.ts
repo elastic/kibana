@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { TransportRequestOptions } from '@elastic/elasticsearch';
+import type { TransportRequestOptions } from '@elastic/elasticsearch';
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { Observable } from 'rxjs';
