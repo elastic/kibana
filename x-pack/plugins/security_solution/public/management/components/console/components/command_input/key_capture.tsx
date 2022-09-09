@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { FormEventHandler, KeyboardEventHandler, MutableRefObject } from 'react';
+import type {
+  ClipboardEventHandler,
+  FormEventHandler,
+  KeyboardEventHandler,
+  MutableRefObject,
+} from 'react';
 import React, { memo, useCallback, useMemo, useRef, useState } from 'react';
 import { pick } from 'lodash';
 import styled from 'styled-components';
@@ -65,12 +70,11 @@ export const KeyCapture = memo<KeyCaptureProps>(({ onCapture, focusRef, onStateC
   // We don't need the actual value that was last input in this component, because
   // `setLastInput()` is used with a function that returns the typed character.
   // This state is used like this:
-  //    1. user presses a keyboard key
-  //    2. `input` event is triggered - we store the letter typed
-  //    3. the next event to be triggered (after `input`) that we listen for is `keyup`,
-  //       and when that is triggered, we take the input letter (already stored) and
-  //       call `onCapture()` with it and then set the lastInput state back to an empty string
-  const [, setLastInput] = useState('');
+  //    1. User presses a keyboard key down
+  //    2. We store the key that was pressed
+  //    3. When the 'keyup' event is triggered, we call `onCapture()`
+  //        with all of the character that were entered
+  //    4. We set the last input back to an empty string
   const getTestId = useTestIdGenerator(useDataTestSubj());
   const inputRef = useRef<HTMLInputElement | null>(null);
   const blurInputRef = useRef<HTMLInputElement | null>(null);
@@ -96,15 +100,36 @@ export const KeyCapture = memo<KeyCaptureProps>(({ onCapture, focusRef, onStateC
     [onStateChange]
   );
 
-  const handleOnKeyUp = useCallback<KeyboardEventHandler<HTMLInputElement>>(
+  const handleInputOnPaste = useCallback<ClipboardEventHandler>(
     (ev) => {
-      // There is a condition (still not clear how it is actually happening) where the `Enter` key
-      // event from the EuiSelectable component gets captured here by the Input. Its likely due to
-      // the sequence of events between keyup, focus and the Focus trap component having the
-      // `returnFocus` on by default.
-      // To avoid having that key Event from actually being processed, we check for this custom
-      // property on the event and skip processing it if we find it. This property is currently
-      // set by the CommandInputHistory (using EuiSelectable).
+      const value = ev.clipboardData.getData('text');
+      ev.stopPropagation();
+
+      // hard-coded for use in onCapture and future keyboard functions
+      const metaKey = {
+        altKey: false,
+        ctrlKey: false,
+        key: 'Meta',
+        keyCode: 91,
+        metaKey: true,
+        repeat: false,
+        shiftKey: false,
+      };
+
+      onCapture({
+        value,
+        eventDetails: metaKey,
+      });
+    },
+    [onCapture]
+  );
+
+  // 1. Determine if the key press is one that we need to store ex) letters, digits, values that we see
+  // 2. If the user clicks a key we don't need to store as text, but we need to do logic with ex) backspace, delete, l/r arrows, we must call onCapture
+  const handleOnKeyDown = useCallback<KeyboardEventHandler>(
+    (ev) => {
+      // checking to ensure that the key is not a control character
+      const newValue = /^[\w\d]{2}/.test(ev.key) ? '' : ev.key;
 
       // @ts-expect-error
       if (!isCapturing || ev._CONSOLE_IGNORE_KEY) {
@@ -119,6 +144,11 @@ export const KeyCapture = memo<KeyCaptureProps>(({ onCapture, focusRef, onStateC
 
       ev.stopPropagation();
 
+      // allows for clipboard events to be captured via onPaste event handler
+      if (ev.metaKey || ev.ctrlKey) {
+        return;
+      }
+
       const eventDetails = pick(ev, [
         'key',
         'altKey',
@@ -129,25 +159,13 @@ export const KeyCapture = memo<KeyCaptureProps>(({ onCapture, focusRef, onStateC
         'shiftKey',
       ]);
 
-      setLastInput((value) => {
-        onCapture({
-          value,
-          eventDetails,
-        });
-
-        return '';
+      onCapture({
+        value: newValue,
+        eventDetails,
       });
     },
     [isCapturing, onCapture]
   );
-
-  const handleOnInput = useCallback<FormEventHandler<HTMLInputElement>>((ev) => {
-    const newValue = ev.currentTarget.value;
-
-    setLastInput((prevState) => {
-      return `${prevState || ''}${newValue}`;
-    });
-  }, []);
 
   const keyCaptureFocusMethods = useMemo<KeyCaptureFocusInterface>(() => {
     return {
@@ -183,10 +201,10 @@ export const KeyCapture = memo<KeyCaptureProps>(({ onCapture, focusRef, onStateC
         spellCheck="false"
         value=""
         tabIndex={-1}
-        onInput={handleOnInput}
-        onKeyUp={handleOnKeyUp}
+        onKeyDown={handleOnKeyDown}
         onBlur={handleInputOnBlur}
         onFocus={handleInputOnFocus}
+        onPaste={handleInputOnPaste}
         onChange={NOOP} // this just silences Jest output warnings
         ref={inputRef}
       />
