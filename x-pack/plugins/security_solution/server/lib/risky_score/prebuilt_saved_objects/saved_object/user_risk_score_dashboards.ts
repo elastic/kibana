@@ -5,6 +5,7 @@
  * 2.0.
  */
 import type { SavedObject } from '@kbn/core/types';
+import { RiskScoreFields } from '../../../../../common/search_strategy';
 
 export const userRiskScoreDashboards: SavedObject[] = [
   {
@@ -46,7 +47,7 @@ export const userRiskScoreDashboards: SavedObject[] = [
                     operationType: 'sum',
                     params: { emptyAsNull: true },
                     scale: 'ratio',
-                    sourceField: 'user.risk.calculated_score_norm',
+                    sourceField: RiskScoreFields.userRiskScore,
                   },
                   'ba672ee7-0990-4277-9bc7-6361077efe18': {
                     customLabel: true,
@@ -63,7 +64,7 @@ export const userRiskScoreDashboards: SavedObject[] = [
                       size: 30,
                     },
                     scale: 'ordinal',
-                    sourceField: 'user.name',
+                    sourceField: RiskScoreFields.userName,
                   },
                   'daefb732-9f48-4017-a49a-979cfdeef127': {
                     customLabel: true,
@@ -74,7 +75,7 @@ export const userRiskScoreDashboards: SavedObject[] = [
                     operationType: 'last_value',
                     params: { sortField: '@timestamp' },
                     scale: 'ordinal',
-                    sourceField: 'user.risk.calculated_level',
+                    sourceField: RiskScoreFields.userRisk,
                   },
                 },
                 incompleteColumns: {},
@@ -157,7 +158,7 @@ export const userRiskScoreDashboards: SavedObject[] = [
                       size: 20,
                     },
                     scale: 'ordinal',
-                    sourceField: 'user.name',
+                    sourceField: RiskScoreFields.userName,
                   },
                   '3fadebce-2f31-4eed-9fc0-237249281a1a': {
                     customLabel: true,
@@ -167,7 +168,7 @@ export const userRiskScoreDashboards: SavedObject[] = [
                     operationType: 'max',
                     params: { emptyAsNull: true },
                     scale: 'ratio',
-                    sourceField: 'user.risk.calculated_score_norm',
+                    sourceField: RiskScoreFields.userRiskScore,
                   },
                   'e82aed80-ee04-4ad1-9b9d-fde4a25be58a': {
                     dataType: 'date',

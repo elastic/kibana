@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { HttpSetup, NotificationsStart } from '@kbn/core/public';
-import { RiskScoreEntity } from '../../../../../common/search_strategy';
+import { RiskScoreEntity, RiskScoreFields } from '../../../../../common/search_strategy';
 import {
   createIngestPipeline,
   createIndices,
@@ -43,12 +43,20 @@ export const getRiskScorePivotTransformId = (
   riskScoreEntity: RiskScoreEntity,
   spaceId = 'default'
 ) => `ml_${riskScoreEntity}riskscore_pivot_transform_${spaceId}`;
+
 export const getRiskScoreLatestTransformId = (
   riskScoreEntity: RiskScoreEntity,
   spaceId = 'default'
 ) => `ml_${riskScoreEntity}riskscore_latest_transform_${spaceId}`;
-const getIngestPipelineName = (riskScoreEntity: RiskScoreEntity) =>
+
+export const getIngestPipelineName = (riskScoreEntity: RiskScoreEntity) =>
   `ml_${riskScoreEntity}riskscore_ingest_pipeline`;
+
+export const getPivoTransformIndex = (riskScoreEntity: RiskScoreEntity, spaceId = 'default') =>
+  `ml_${riskScoreEntity}_risk_score_${spaceId}`;
+
+export const getLatestTransformIndex = (riskScoreEntity: RiskScoreEntity, spaceId = 'default') =>
+  `ml_${riskScoreEntity}_risk_score_latest_${spaceId}`;
 
 /**
  * This should be aligned with
@@ -94,7 +102,7 @@ export const getCreateRiskScoreIndicesOptions = ({
   spaceId?: string;
   riskScoreEntity: RiskScoreEntity;
 }) => ({
-  index: `ml_${riskScoreEntity}_risk_score_${spaceId}`,
+  index: getPivoTransformIndex(riskScoreEntity, spaceId),
   mappings: {
     properties: {
       [riskScoreEntity]: {
@@ -157,7 +165,7 @@ export const getCreateRiskScoreLatestIndicesOptions = ({
   spaceId?: string;
   riskScoreEntity: RiskScoreEntity;
 }) => ({
-  index: `ml_${riskScoreEntity}_risk_score_latest_${spaceId}`,
+  index: getLatestTransformIndex(riskScoreEntity, spaceId),
   mappings: {
     properties: {
       [riskScoreEntity]: {
@@ -218,8 +226,8 @@ export const getCreateMLHostPivotTransformOptions = ({
   spaceId?: string;
 }) => ({
   dest: {
-    index: `ml_host_risk_score_${spaceId}`,
-    pipeline: 'ml_hostriskscore_ingest_pipeline',
+    index: getPivoTransformIndex(RiskScoreEntity.host, spaceId),
+    pipeline: getIngestPipelineName(RiskScoreEntity.host),
   },
   frequency: '1h',
   pivot: {
@@ -273,9 +281,9 @@ export const getCreateMLHostPivotTransformOptions = ({
       },
     },
     group_by: {
-      'host.name': {
+      [RiskScoreFields.hostName]: {
         terms: {
-          field: 'host.name',
+          field: RiskScoreFields.hostName,
         },
       },
     },
@@ -314,8 +322,8 @@ export const getCreateMLUserPivotTransformOptions = ({
   spaceId?: string;
 }) => ({
   dest: {
-    index: `ml_user_risk_score_${spaceId}`,
-    pipeline: 'ml_userriskscore_ingest_pipeline',
+    index: getPivoTransformIndex(RiskScoreEntity.user, spaceId),
+    pipeline: getIngestPipelineName(RiskScoreEntity.user),
   },
   frequency: '1h',
   pivot: {
@@ -395,7 +403,7 @@ export const getCreateLatestTransformOptions = ({
   riskScoreEntity: RiskScoreEntity;
 }) => ({
   dest: {
-    index: `ml_${riskScoreEntity}_risk_score_latest_${spaceId}`,
+    index: getLatestTransformIndex(riskScoreEntity, spaceId),
   },
   frequency: '1h',
   latest: {
@@ -403,7 +411,7 @@ export const getCreateLatestTransformOptions = ({
     unique_key: [`${riskScoreEntity}.name`],
   },
   source: {
-    index: [`ml_${riskScoreEntity}_risk_score_${spaceId}`],
+    index: [getPivoTransformIndex(riskScoreEntity, spaceId)],
   },
   sync: {
     time: {
@@ -536,7 +544,7 @@ export const installUserRiskScoreModule = async ({
    */
   await createTransform({
     http,
-    errorMessage: `${INSTALLATION_ERROR} - Transform creation failed`,
+    errorMessage: `${INSTALLATION_ERROR} - ${TRANSFORM_CREATION_ERROR_MESSAGE}`,
     transformId: getRiskScorePivotTransformId(RiskScoreEntity.user, spaceId),
     options: getCreateMLUserPivotTransformOptions({ spaceId }),
   });
@@ -546,7 +554,7 @@ export const installUserRiskScoreModule = async ({
    */
   await createTransform({
     http,
-    errorMessage: `${INSTALLATION_ERROR} - Transform creation failed`,
+    errorMessage: `${INSTALLATION_ERROR} - ${TRANSFORM_CREATION_ERROR_MESSAGE}`,
     transformId: getRiskScoreLatestTransformId(RiskScoreEntity.user, spaceId),
     options: getCreateLatestTransformOptions({ spaceId, riskScoreEntity: RiskScoreEntity.user }),
   });
@@ -557,7 +565,7 @@ export const installUserRiskScoreModule = async ({
    */
   await startTransforms({
     http,
-    errorMessage: `${INSTALLATION_ERROR} - Failed to start Transforms`,
+    errorMessage: `${INSTALLATION_ERROR} - ${START_TRANSFORMS_ERROR_MESSAGE}`,
     transformIds: [
       getRiskScorePivotTransformId(RiskScoreEntity.user, spaceId),
       getRiskScoreLatestTransformId(RiskScoreEntity.user, spaceId),

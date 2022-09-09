@@ -6,6 +6,7 @@
  */
 
 import type { SavedObject } from '@kbn/core/types';
+import { RiskScoreFields } from '../../../../../common/search_strategy';
 
 export const hostRiskScoreDashboards: SavedObject[] = [
   {
@@ -51,7 +52,7 @@ export const hostRiskScoreDashboards: SavedObject[] = [
                       size: 20,
                     },
                     scale: 'ordinal',
-                    sourceField: 'host.name',
+                    sourceField: RiskScoreFields.hostName,
                   },
                   'aa4ad9b2-8829-4517-aaa8-7ed7e5793e9b': {
                     customLabel: true,
@@ -60,7 +61,7 @@ export const hostRiskScoreDashboards: SavedObject[] = [
                     label: 'Cumulative Risk Score',
                     operationType: 'max',
                     scale: 'ratio',
-                    sourceField: 'host.risk.calculated_score_norm',
+                    sourceField: RiskScoreFields.hostRiskScore,
                   },
                   'e82aed80-ee04-4ad1-9b9d-fde4a25be58a': {
                     dataType: 'date',
@@ -311,7 +312,7 @@ export const hostRiskScoreDashboards: SavedObject[] = [
                       size: 20,
                     },
                     scale: 'ordinal',
-                    sourceField: 'host.name',
+                    sourceField: RiskScoreFields.hostName,
                   },
                   'c547501b-fe04-4073-8b4e-dbbdc3a4ff04': {
                     customLabel: true,
@@ -320,7 +321,7 @@ export const hostRiskScoreDashboards: SavedObject[] = [
                     label: 'Risk Score',
                     operationType: 'sum',
                     scale: 'ratio',
-                    sourceField: 'host.risk.calculated_score_norm',
+                    sourceField: RiskScoreFields.hostRiskScore,
                   },
                   'e2444d64-721a-4532-9633-5b206eee76d6': {
                     customLabel: true,
@@ -330,7 +331,7 @@ export const hostRiskScoreDashboards: SavedObject[] = [
                     operationType: 'last_value',
                     params: { sortField: '@timestamp' },
                     scale: 'ordinal',
-                    sourceField: 'host.risk.calculated_level',
+                    sourceField: RiskScoreFields.hostRisk,
                   },
                 },
                 incompleteColumns: {},
