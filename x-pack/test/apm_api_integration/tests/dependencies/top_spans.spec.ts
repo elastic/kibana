@@ -85,7 +85,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             .rate(1)
             .generator((timestamp) => [
               javaInstance
-                .span('without transaction', 'db', 'elasticsearch')
+                .span({
+                  spanName: 'without transaction',
+                  spanType: 'db',
+                  spanSubtype: 'elasticsearch',
+                })
                 .destination('elasticsearch')
                 .duration(200)
                 .timestamp(timestamp),
@@ -95,7 +99,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 .timestamp(timestamp)
                 .children(
                   javaInstance
-                    .span('/_search', 'db', 'elasticsearch')
+                    .span({ spanName: '/_search', spanType: 'db', spanSubtype: 'elasticsearch' })
                     .destination('elasticsearch')
                     .duration(100)
                     .success()
@@ -107,7 +111,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 .timestamp(timestamp)
                 .children(
                   goInstance
-                    .span('/_search', 'db', 'elasticsearch')
+                    .span({ spanName: '/_search', spanType: 'db', spanSubtype: 'elasticsearch' })
                     .destination('elasticsearch')
                     .duration(50)
                     .timestamp(timestamp)
@@ -118,7 +122,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 .timestamp(timestamp)
                 .children(
                   goInstance
-                    .span('/_search', 'db', 'fake-elasticsearch')
+                    .span({
+                      spanName: '/_search',
+                      spanType: 'db',
+                      spanSubtype: 'fake-elasticsearch',
+                    })
                     .destination('fake-elasticsearch')
                     .duration(50)
                     .timestamp(timestamp)

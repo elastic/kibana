@@ -51,7 +51,7 @@ const scenario: Scenario<ApmFields> = async () => {
             .success()
             .children(
               producerInternalOnlyInstance
-                .span('Span A', 'custom')
+                .span({ spanName: 'Span A', spanType: 'custom' })
                 .timestamp(timestamp + 50)
                 .duration(100)
                 .success()
@@ -75,7 +75,7 @@ const scenario: Scenario<ApmFields> = async () => {
             .success()
             .children(
               producerConsumerInstance
-                .span('Span B', 'external')
+                .span({ spanName: 'Span B', spanType: 'external' })
                 .defaults({
                   'span.links': shuffle([...generateExternalSpanLinks(), ...spanASpanLink]),
                 })
@@ -102,7 +102,7 @@ const scenario: Scenario<ApmFields> = async () => {
             .success()
             .children(
               consumerInstance
-                .span('Span C', 'external')
+                .span({ spanName: 'Span C', spanType: 'external' })
                 .defaults({ 'span.links': spanBSpanLink })
                 .timestamp(timestamp + 50)
                 .duration(900)

@@ -47,7 +47,7 @@ export function httpExitSpan({
 }: {
   spanName: string;
   destinationUrl: string;
-}): [string, string, string, ApmFields] {
+}) {
   // origin: 'http://opbeans-go:3000',
   // host: 'opbeans-go:3000',
   // hostname: 'opbeans-go',
@@ -57,11 +57,11 @@ export function httpExitSpan({
   const spanType = 'external';
   const spanSubType = 'http';
 
-  return [
+  return {
     spanName,
     spanType,
     spanSubType,
-    {
+    apmFields: {
       'destination.address': destination.hostname,
       'destination.port': parseInt(destination.port, 10),
       'service.target.name': destination.host,
@@ -69,27 +69,21 @@ export function httpExitSpan({
       'span.destination.service.resource': destination.host,
       'span.destination.service.type': 'external',
     },
-  ];
+  };
 }
 
-export function dbExitSpan({
-  spanName,
-  spanSubType,
-}: {
-  spanName: string;
-  spanSubType?: string;
-}): [string, string, string | undefined, ApmFields] {
+export function dbExitSpan({ spanName, spanSubType }: { spanName: string; spanSubType?: string }) {
   const spanType = 'db';
 
-  return [
+  return {
     spanName,
     spanType,
     spanSubType,
-    {
+    apmFields: {
       'service.target.type': spanSubType,
       'span.destination.service.name': spanSubType,
       'span.destination.service.resource': spanSubType,
       'span.destination.service.type': spanType,
     },
-  ];
+  };
 }

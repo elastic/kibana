@@ -27,7 +27,7 @@ function getProducerInternalOnly() {
         .success()
         .children(
           producerInternalOnlyInstance
-            .span(`Span A`, 'external', 'http')
+            .span({ spanName: `Span A`, spanType: 'external', spanSubtype: 'http' })
             .timestamp(timestamp + 50)
             .duration(100)
             .success()
@@ -74,7 +74,7 @@ function getProducerExternalOnly() {
         .success()
         .children(
           producerExternalOnlyInstance
-            .span(`Span B`, 'external', 'http')
+            .span({ spanName: `Span B`, spanType: 'external', spanSubtype: 'http' })
             .defaults({
               'span.links': [{ trace: { id: 'trace#1' }, span: { id: 'span#1' } }],
             })
@@ -82,7 +82,7 @@ function getProducerExternalOnly() {
             .duration(100)
             .success(),
           producerExternalOnlyInstance
-            .span(`Span B.1`, 'external', 'http')
+            .span({ spanName: `Span B.1`, spanType: 'external', spanSubtype: 'http' })
             .timestamp(timestamp + 50)
             .duration(100)
             .success()
@@ -154,7 +154,7 @@ function getProducerConsumer({
         .success()
         .children(
           producerConsumerInstance
-            .span(`Span C`, 'external', 'http')
+            .span({ spanName: `Span C`, spanType: 'external', spanSubtype: 'http' })
             .timestamp(timestamp + 50)
             .duration(100)
             .success()
@@ -218,7 +218,7 @@ function getConsumerMultiple({
         .success()
         .children(
           consumerMultipleInstance
-            .span(`Span E`, 'external', 'http')
+            .span({ spanName: `Span E`, spanType: 'external', spanSubtype: 'http' })
             .defaults({
               'span.links': [producerExternalOnlySpanBLink, producerConsumerTransactionCLink],
             })

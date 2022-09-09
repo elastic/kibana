@@ -22,7 +22,7 @@ describe('transactions with errors', () => {
     const events = instance
       .transaction({ transactionName: 'GET /api' })
       .timestamp(timestamp)
-      .errors(instance.error('test error').timestamp(timestamp))
+      .errors(instance.error({ message: 'test error' }).timestamp(timestamp))
       .serialize();
 
     const errorEvents = events.filter((event) => event['processor.event'] === 'error');
@@ -43,7 +43,7 @@ describe('transactions with errors', () => {
     const [transaction, error] = instance
       .transaction({ transactionName: 'GET /api' })
       .timestamp(timestamp)
-      .errors(instance.error('test error').timestamp(timestamp))
+      .errors(instance.error({ message: 'test error' }).timestamp(timestamp))
       .serialize();
 
     const keys = ['transaction.id', 'trace.id', 'transaction.type'];
@@ -59,7 +59,7 @@ describe('transactions with errors', () => {
     const [, error] = instance
       .transaction({ transactionName: 'GET /api' })
       .timestamp(timestamp)
-      .errors(instance.error('test error').timestamp(timestamp))
+      .errors(instance.error({ message: 'test error' }).timestamp(timestamp))
       .serialize();
 
     expect(error['error.grouping_name']).toEqual('test error');

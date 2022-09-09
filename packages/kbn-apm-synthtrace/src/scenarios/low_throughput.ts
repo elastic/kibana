@@ -60,13 +60,17 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
             .duration(duration)
             .children(
               instance
-                .span('GET apm-*/_search', 'db', 'elasticsearch')
+                .span({
+                  spanName: 'GET apm-*/_search',
+                  spanType: 'db',
+                  spanSubtype: 'elasticsearch',
+                })
                 .duration(childDuration)
                 .destination('elasticsearch')
                 .timestamp(timestamp)
                 .outcome(generateError && generateChildError ? 'failure' : 'success'),
               instance
-                .span('custom_operation', 'custom')
+                .span({ spanName: 'custom_operation', spanType: 'custom' })
                 .duration(remainderDuration)
                 .success()
                 .timestamp(timestamp + childDuration)
@@ -75,7 +79,9 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
             ? span.success()
             : span
                 .failure()
-                .errors(instance.error(`No handler for ${url}`).timestamp(timestamp + 50));
+                .errors(
+                  instance.error({ message: `No handler for ${url}` }).timestamp(timestamp + 50)
+                );
         });
 
         return successfulTraceEvents;

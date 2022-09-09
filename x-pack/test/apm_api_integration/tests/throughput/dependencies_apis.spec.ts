@@ -116,17 +116,25 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 .timestamp(timestamp)
                 .children(
                   serviceGoProdInstance
-                    .span('GET apm-*/_search', 'db', 'elasticsearch')
+                    .span({
+                      spanName: 'GET apm-*/_search',
+                      spanType: 'db',
+                      spanSubtype: 'elasticsearch',
+                    })
                     .duration(1000)
                     .success()
                     .destination('elasticsearch')
                     .timestamp(timestamp),
                   serviceGoProdInstance
-                    .span('custom_operation', 'app')
+                    .span({ spanName: 'custom_operation', spanType: 'app' })
                     .duration(550)
                     .children(
                       serviceGoProdInstance
-                        .span('SELECT FROM products', 'db', 'postgresql')
+                        .span({
+                          spanName: 'SELECT FROM products',
+                          spanType: 'db',
+                          spanSubtype: 'postgresql',
+                        })
                         .duration(500)
                         .success()
                         .destination('postgresql')
@@ -146,13 +154,17 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 .timestamp(timestamp)
                 .children(
                   serviceJavaInstance
-                    .span('GET apm-*/_search', 'db', 'elasticsearch')
+                    .span({
+                      spanName: 'GET apm-*/_search',
+                      spanType: 'db',
+                      spanSubtype: 'elasticsearch',
+                    })
                     .duration(1000)
                     .success()
                     .destination('elasticsearch')
                     .timestamp(timestamp),
                   serviceJavaInstance
-                    .span('custom_operation', 'app')
+                    .span({ spanName: 'custom_operation', spanType: 'app' })
                     .duration(50)
                     .success()
                     .timestamp(timestamp)

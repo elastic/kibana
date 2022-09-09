@@ -44,13 +44,17 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
             .success()
             .children(
               instance
-                .span('GET apm-*/_search', 'db', 'elasticsearch')
+                .span({
+                  spanName: 'GET apm-*/_search',
+                  spanType: 'db',
+                  spanSubtype: 'elasticsearch',
+                })
                 .duration(1000)
                 .success()
                 .destination('elasticsearch')
                 .timestamp(timestamp),
               instance
-                .span('custom_operation', 'custom')
+                .span({ spanName: 'custom_operation', spanType: 'custom' })
                 .duration(100)
                 .success()
                 .timestamp(timestamp)
@@ -64,7 +68,9 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
             .duration(1000)
             .failure()
             .errors(
-              instance.error('[ResponseError] index_not_found_exception').timestamp(timestamp + 50)
+              instance
+                .error({ message: '[ResponseError] index_not_found_exception' })
+                .timestamp(timestamp + 50)
             )
         );
 

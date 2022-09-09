@@ -318,7 +318,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           function withSpans(timestamp: number) {
             return new Array(3).fill(undefined).map(() =>
               goInstanceA
-                .span('GET apm-*/_search', 'db', 'elasticsearch')
+                .span({
+                  spanName: 'GET apm-*/_search',
+                  spanType: 'db',
+                  spanSubtype: 'elasticsearch',
+                })
                 .timestamp(timestamp + 100)
                 .duration(300)
                 .destination('elasticsearch')

@@ -43,7 +43,7 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
             // opbeans-rum -> opbeans-node
             opbeansRum
               .span(
-                ...httpExitSpan({
+                httpExitSpan({
                   spanName: 'GET /api/products/top',
                   destinationUrl: 'http://opbeans-node:3000',
                 })
@@ -61,7 +61,7 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
                     opbeansNode
                       // opbeans-node -> opbeans-go
                       .span(
-                        ...httpExitSpan({
+                        httpExitSpan({
                           spanName: 'GET opbeans-go:3000',
                           destinationUrl: 'http://opbeans-go:3000',
                         })
@@ -78,7 +78,7 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
                           .duration(200)
                           .children(
                             opbeansGo
-                              .span('custom_operation', 'custom')
+                              .span({ spanName: 'custom_operation', spanType: 'custom' })
                               .timestamp(timestamp)
                               .duration(100)
                               .success()

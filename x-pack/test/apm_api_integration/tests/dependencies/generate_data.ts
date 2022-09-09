@@ -47,7 +47,7 @@ export async function generateData({
           .success()
           .children(
             instance
-              .span(span.name, span.type, span.subType)
+              .span({ spanName: span.name, spanType: span.type, spanSubtype: span.subType })
               .duration(transaction.duration)
               .success()
               .destination(span.destination)

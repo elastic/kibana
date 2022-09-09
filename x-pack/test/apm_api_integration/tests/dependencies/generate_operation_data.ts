@@ -41,7 +41,7 @@ export async function generateOperationData({
       .rate(generateOperationDataConfig.ES_SEARCH_UNKNOWN_RATE)
       .generator((timestamp) =>
         synthGoInstance
-          .span('/_search', 'db', 'elasticsearch')
+          .span({ spanName: '/_search', spanType: 'db', spanSubtype: 'elasticsearch' })
           .destination('elasticsearch')
           .timestamp(timestamp)
           .duration(generateOperationDataConfig.ES_SEARCH_DURATION)
@@ -50,7 +50,7 @@ export async function generateOperationData({
       .rate(generateOperationDataConfig.ES_SEARCH_SUCCESS_RATE)
       .generator((timestamp) =>
         synthGoInstance
-          .span('/_search', 'db', 'elasticsearch')
+          .span({ spanName: '/_search', spanType: 'db', spanSubtype: 'elasticsearch' })
           .destination('elasticsearch')
           .timestamp(timestamp)
           .success()
@@ -60,7 +60,7 @@ export async function generateOperationData({
       .rate(generateOperationDataConfig.ES_SEARCH_FAILURE_RATE)
       .generator((timestamp) =>
         synthGoInstance
-          .span('/_search', 'db', 'elasticsearch')
+          .span({ spanName: '/_search', spanType: 'db', spanSubtype: 'elasticsearch' })
           .destination('elasticsearch')
           .timestamp(timestamp)
           .failure()
@@ -70,7 +70,7 @@ export async function generateOperationData({
       .rate(generateOperationDataConfig.ES_BULK_RATE)
       .generator((timestamp) =>
         synthJavaInstance
-          .span('/_bulk', 'db', 'elasticsearch')
+          .span({ spanName: '/_bulk', spanType: 'db', spanSubtype: 'elasticsearch' })
           .destination('elasticsearch')
           .timestamp(timestamp)
           .duration(generateOperationDataConfig.ES_BULK_DURATION)
@@ -79,7 +79,7 @@ export async function generateOperationData({
       .rate(generateOperationDataConfig.REDIS_SET_RATE)
       .generator((timestamp) =>
         synthJavaInstance
-          .span('SET', 'db', 'redis')
+          .span({ spanName: 'SET', spanType: 'db', spanSubtype: 'redis' })
           .destination('redis')
           .timestamp(timestamp)
           .duration(generateOperationDataConfig.REDIS_SET_DURATION)

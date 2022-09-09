@@ -37,7 +37,7 @@ describe('rate per minute calculations', () => {
           .timestamp(timestamp)
           .children(
             javaInstance
-              .span('GET apm-*/_search', 'db', 'elasticsearch')
+              .span({ spanName: 'GET apm-*/_search', spanType: 'db', spanSubtype: 'elasticsearch' })
               .success()
               .duration(900)
               .timestamp(timestamp + 50)

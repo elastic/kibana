@@ -128,7 +128,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               const next = order[invertedIndex + 1].fields['service.name']!;
               transaction.children(
                 instance
-                  .span(`GET ${next}/api`, 'external', 'http')
+                  .span({ spanName: `GET ${next}/api`, spanType: 'external', spanSubtype: 'http' })
                   .destination(next)
                   .duration(duration)
                   .timestamp(time + 1)
@@ -137,7 +137,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             } else if (db) {
               transaction.children(
                 instance
-                  .span(db, 'db', db)
+                  .span({ spanName: db, spanType: 'db', spanSubtype: db })
                   .destination(db)
                   .duration(duration)
                   .timestamp(time + 1)

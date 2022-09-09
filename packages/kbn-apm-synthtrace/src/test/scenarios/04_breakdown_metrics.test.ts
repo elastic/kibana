@@ -43,10 +43,13 @@ describe('breakdown metrics', () => {
           .duration(1000)
           .children(
             javaInstance
-              .span('GET apm-*/_search', 'db', 'elasticsearch')
+              .span({ spanName: 'GET apm-*/_search', spanType: 'db', spanSubtype: 'elasticsearch' })
               .timestamp(timestamp + 150)
               .duration(500),
-            javaInstance.span('GET foo', 'db', 'redis').timestamp(timestamp).duration(100)
+            javaInstance
+              .span({ spanName: 'GET foo', spanType: 'db', spanSubtype: 'redis' })
+              .timestamp(timestamp)
+              .duration(100)
           )
       );
 
@@ -60,12 +63,12 @@ describe('breakdown metrics', () => {
           .duration(1000)
           .children(
             javaInstance
-              .span('GET apm-*/_search', 'db', 'elasticsearch')
+              .span({ spanName: 'GET apm-*/_search', spanType: 'db', spanSubtype: 'elasticsearch' })
               .duration(500)
               .timestamp(timestamp + 100)
               .children(
                 javaInstance
-                  .span('bar', 'external', 'http')
+                  .span({ spanName: 'bar', spanType: 'external', spanSubtype: 'http' })
                   .timestamp(timestamp + 200)
                   .duration(100)
               )

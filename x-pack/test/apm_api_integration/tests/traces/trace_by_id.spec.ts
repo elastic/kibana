@@ -70,12 +70,16 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               .failure()
               .errors(
                 instanceJava
-                  .error('[ResponseError] index_not_found_exception')
+                  .error({ message: '[ResponseError] index_not_found_exception' })
                   .timestamp(timestamp + 50)
               )
               .children(
                 instanceJava
-                  .span('get_green_apple_🍏', 'db', 'elasticsearch')
+                  .span({
+                    spanName: 'get_green_apple_🍏',
+                    spanType: 'db',
+                    spanSubtype: 'elasticsearch',
+                  })
                   .timestamp(timestamp + 50)
                   .duration(900)
                   .success()

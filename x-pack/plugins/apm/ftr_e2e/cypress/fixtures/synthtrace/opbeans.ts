@@ -42,11 +42,17 @@ export function opbeans({ from, to }: { from: number; to: number }) {
         .duration(1000)
         .success()
         .errors(
-          opbeansJava.error('[MockError] Foo', `Exception`).timestamp(timestamp)
+          opbeansJava
+            .error({ message: '[MockError] Foo', type: `Exception` })
+            .timestamp(timestamp)
         )
         .children(
           opbeansJava
-            .span('SELECT * FROM product', 'db', 'postgresql')
+            .span({
+              spanName: 'SELECT * FROM product',
+              spanType: 'db',
+              spanSubtype: 'postgresql',
+            })
             .timestamp(timestamp)
             .duration(50)
             .success()

@@ -17,7 +17,7 @@ export class Browser extends Entity<ApmFields> {
     transactionType = 'page-load',
   }: {
     transactionName: string;
-    transactionType: string;
+    transactionType?: string;
   }) {
     return new RumTransaction({
       ...this.fields,

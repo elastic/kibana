@@ -41,7 +41,11 @@ describe('span destination metrics', () => {
               .timestamp(timestamp)
               .children(
                 javaInstance
-                  .span('GET apm-*/_search', 'db', 'elasticsearch')
+                  .span({
+                    spanName: 'GET apm-*/_search',
+                    spanType: 'db',
+                    spanSubtype: 'elasticsearch',
+                  })
                   .timestamp(timestamp)
                   .duration(1000)
                   .destination('elasticsearch')
@@ -59,13 +63,17 @@ describe('span destination metrics', () => {
               .timestamp(timestamp)
               .children(
                 javaInstance
-                  .span('GET apm-*/_search', 'db', 'elasticsearch')
+                  .span({
+                    spanName: 'GET apm-*/_search',
+                    spanType: 'db',
+                    spanSubtype: 'elasticsearch',
+                  })
                   .timestamp(timestamp)
                   .duration(1000)
                   .destination('elasticsearch')
                   .failure(),
                 javaInstance
-                  .span('custom_operation', 'app')
+                  .span({ spanName: 'custom_operation', spanType: 'app' })
                   .timestamp(timestamp)
                   .duration(500)
                   .success()
