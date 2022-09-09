@@ -146,7 +146,7 @@ describe('LayerPanel', () => {
         <LayerPanel {...getDefaultProps()} isOnlyLayer={false} />
       );
       expect(
-        instance.find('[data-test-subj="lnsLayerRemove"]').first().props()['aria-label']
+        instance.find('[data-test-subj="lnsLayerRemove-0"]').first().props()['aria-label']
       ).toContain('Delete layer');
     });
 
