@@ -109,6 +109,7 @@ x-pack/examples/files_example @elastic/kibana-app-services
 /x-pack/plugins/observability/public/pages/cases  @elastic/actionable-observability
 /x-pack/plugins/observability/public/pages/rules  @elastic/actionable-observability
 /x-pack/plugins/observability/public/pages/rule_details  @elastic/actionable-observability
+/x-pack/test/observability_functional @elastic/actionable-observability @elastic/unified-observability
 
 # Infra Monitoring
 /x-pack/plugins/infra/ @elastic/infra-monitoring-ui
