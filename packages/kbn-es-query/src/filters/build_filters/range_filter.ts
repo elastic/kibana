@@ -47,7 +47,7 @@ export interface RangeFilterParams {
   format?: string;
 }
 
-const hasRangeKeys = (params: RangeFilterParams) =>
+export const hasRangeKeys = (params: RangeFilterParams) =>
   Boolean(
     keys(params).find((key: string) => ['gte', 'gt', 'lte', 'lt', 'from', 'to'].includes(key))
   );

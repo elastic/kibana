@@ -186,4 +186,14 @@ describe('isScriptedPhraseFilter', () => {
     expect(isScriptedPhraseFilter(filter)).toBe(true);
     expect(isPhraseFilter(unknownFilter)).toBe(false);
   });
+
+  it('should return false if the filter is a range filter', () => {
+    const filter: Filter = set({ meta: {} }, 'query.script.script.params', {
+      gt: 0,
+      lt: 100,
+      value: 100,
+    }) as Filter;
+
+    expect(isScriptedPhraseFilter(filter)).toBe(false);
+  });
 });
