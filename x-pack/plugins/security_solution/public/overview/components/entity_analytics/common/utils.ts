@@ -12,7 +12,6 @@ import {
   startTransforms,
   deleteTransforms,
   deleteIngestPipelines,
-  restartTransforms,
   stopTransforms,
 } from './api';
 import {
@@ -657,13 +656,11 @@ export const restartRiskScoreTransforms = async ({
   http,
   notifications,
   spaceId,
-  callback,
   moduleName,
 }: {
   http: HttpSetup;
   notifications?: NotificationsStart;
   spaceId?: string;
-  callback: () => void;
   moduleName: RiskScoreModuleName;
 }) => {
   const transformIds = [
@@ -675,18 +672,12 @@ export const restartRiskScoreTransforms = async ({
     http,
     notifications,
     transformIds,
-    callback: () => {
-      console.log(' transforms stopped');
-    },
   });
 
   const res = await startTransforms({
     http,
     notifications,
     transformIds,
-    callback: () => {
-      console.log(' transforms started');
-    },
   });
 
   return res;

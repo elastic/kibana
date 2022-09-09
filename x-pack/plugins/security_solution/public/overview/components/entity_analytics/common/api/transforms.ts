@@ -17,7 +17,6 @@ import type {
   DeleteTransforms,
   GetTransformsState,
   GetTransformState,
-  RestartTransforms,
   StartTransforms,
   StopTransforms,
 } from './types';
@@ -60,7 +59,6 @@ export async function startTransforms({
   http,
   notifications,
   signal,
-  callback,
   errorMessage,
   transformIds,
 }: StartTransforms) {
@@ -72,11 +70,6 @@ export async function startTransforms({
         }))
       ),
       signal,
-    })
-    .then((result) => {
-      if (callback) {
-        callback(result);
-      }
     })
     .catch((e) => {
       notifications?.toasts?.addDanger({
@@ -138,7 +131,6 @@ export async function stopTransforms({
   http,
   notifications,
   signal,
-  callback,
   errorMessage,
   transformIds,
 }: StopTransforms) {
@@ -161,11 +153,6 @@ export async function stopTransforms({
         )
       ),
       signal,
-    })
-    .then((result) => {
-      if (callback) {
-        callback(result);
-      }
     })
     .catch((e) => {
       notifications?.toasts?.addDanger({
@@ -203,32 +190,6 @@ export async function deleteTransforms({
         text: e?.body?.message,
       });
     });
-
-  return res;
-}
-
-export async function restartTransforms({
-  http,
-  notifications,
-  signal,
-  errorMessage,
-  transformIds,
-}: RestartTransforms) {
-  await stopTransforms({
-    http,
-    notifications,
-    signal,
-    errorMessage,
-    transformIds,
-  });
-
-  const res = await startTransforms({
-    http,
-    notifications,
-    signal,
-    errorMessage,
-    transformIds,
-  });
 
   return res;
 }

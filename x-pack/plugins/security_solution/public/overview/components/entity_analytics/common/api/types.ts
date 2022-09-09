@@ -79,14 +79,6 @@ export interface GetTransformsState {
   transformIds: string[];
 }
 
-export interface RestartTransforms {
-  http: HttpSetup;
-  notifications?: NotificationsStart;
-  errorMessage?: string;
-  signal?: AbortSignal;
-  transformIds: string[];
-}
-
 export interface DeleteTransforms {
   http: HttpSetup;
   notifications?: NotificationsStart;

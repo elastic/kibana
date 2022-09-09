@@ -27,9 +27,6 @@ const RiskyScoreRestartButtonComponent = ({
   const [restartState, setRestartState] = useState<RestartState>();
   const { http, notifications } = useKibana().services;
   const spaceId = useSpaceId();
-  const updateButtonState = useCallback((state: RestartState) => {
-    setRestartState(state);
-  }, []);
 
   const onBoardingHostRiskScore = useCallback(async () => {
     setRestartState(RestartState.Started);
@@ -38,11 +35,10 @@ const RiskyScoreRestartButtonComponent = ({
       notifications,
       spaceId,
       moduleName,
-      callback: updateButtonState,
     });
     setRestartState(RestartState.Done);
     refetch();
-  }, [http, moduleName, notifications, refetch, spaceId, updateButtonState]);
+  }, [http, moduleName, notifications, refetch, spaceId]);
 
   return (
     <EuiButtonEmpty
