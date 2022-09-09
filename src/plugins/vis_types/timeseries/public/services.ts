@@ -31,4 +31,4 @@ export const [getI18n, setI18n] = createGetterSetter<I18nStart>('I18n');
 export const [getCharts, setCharts] = createGetterSetter<ChartsPluginStart>('ChartsPluginStart');
 
 export const [getUsageCollectionStart, setUsageCollectionStart] =
-  createGetterSetter<UsageCollectionStart>('UsageCollection', false);
+  createGetterSetter<UsageCollectionStart>('UsageCollection');
