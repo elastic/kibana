@@ -62,6 +62,20 @@ export const AIOPS_BREADCRUMB: ChromeBreadcrumb = Object.freeze({
   href: '/aiops/explain_log_rate_spikes_index_select',
 });
 
+export const EXPLAIN_LOG_RATE_SPIKES: ChromeBreadcrumb = Object.freeze({
+  text: i18n.translate('xpack.ml.aiopsBreadcrumbLabel', {
+    defaultMessage: 'Explain Log Rate Spikes',
+  }),
+  href: '/aiops/explain_log_rate_spikes_index_select',
+});
+
+export const LOG_PATTERN_ANALYSIS: ChromeBreadcrumb = Object.freeze({
+  text: i18n.translate('xpack.ml.aiopsBreadcrumbLabel', {
+    defaultMessage: 'Log Pattern Analysis',
+  }),
+  href: '/aiops/log_categorization_index_select',
+});
+
 export const CREATE_JOB_BREADCRUMB: ChromeBreadcrumb = Object.freeze({
   text: i18n.translate('xpack.ml.createJobsBreadcrumbLabel', {
     defaultMessage: 'Create job',
@@ -91,6 +105,8 @@ const breadcrumbs = {
   TRAINED_MODELS,
   DATA_VISUALIZER_BREADCRUMB,
   AIOPS_BREADCRUMB,
+  EXPLAIN_LOG_RATE_SPIKES,
+  LOG_PATTERN_ANALYSIS,
   CREATE_JOB_BREADCRUMB,
   CALENDAR_MANAGEMENT_BREADCRUMB,
   FILTER_LISTS_BREADCRUMB,
