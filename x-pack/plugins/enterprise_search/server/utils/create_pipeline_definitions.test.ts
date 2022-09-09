@@ -67,7 +67,7 @@ describe('formatMlPipelineBody util function', () => {
         },
         {
           inference: {
-            model_id: `${modelId}`,
+            model_id: modelId,
             target_field: `ml.inference.${destField}`,
             field_map: {
               sourceField: modelInputField,
@@ -151,7 +151,7 @@ describe('formatMlPipelineBody util function', () => {
         },
         {
           inference: {
-            model_id: `${modelId}`,
+            model_id: modelId,
             target_field: `ml.inference.${destField}`,
             field_map: {
               sourceField: modelInputField,

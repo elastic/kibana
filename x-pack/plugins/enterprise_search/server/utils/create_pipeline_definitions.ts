@@ -12,7 +12,7 @@ export interface CreatedPipelines {
   created: string[];
 }
 
-export interface ESPipeline extends IngestPipeline {
+export interface MlInferencePipeline extends IngestPipeline {
   version?: number;
 }
 
@@ -244,7 +244,7 @@ export const formatMlPipelineBody = async (
   sourceField: string,
   destinationField: string,
   esClient: ElasticsearchClient
-): Promise<ESPipeline> => {
+): Promise<MlInferencePipeline> => {
   const models = await esClient.ml.getTrainedModels({ model_id: modelId });
   // if we didn't find this model, we can't return anything useful
   if (models.trained_model_configs === undefined || models.trained_model_configs.length === 0) {
@@ -252,9 +252,8 @@ export const formatMlPipelineBody = async (
   }
   const model = models.trained_model_configs[0];
   // if model returned no input field, insert a placeholder
-  const modelInputField = model.input?.field_names?.length > 0
-    ? model.input.field_names[0]
-    : 'MODEL_INPUT_FIELD';
+  const modelInputField =
+    model.input?.field_names?.length > 0 ? model.input.field_names[0] : 'MODEL_INPUT_FIELD';
   const modelType = model.model_type;
   const modelVersion = model.version;
   return {
