@@ -6,6 +6,7 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
+import { RiskScoreEntity } from '../../../common/search_strategy';
 import { useEnableRiskScoreViaDevTools } from './use_enable_risk_score_via_dev_tools';
 
 jest.mock('./use_space_id', () => {
@@ -24,7 +25,7 @@ describe('useEnableRiskScoreViaDevTools', () => {
   });
 
   it('renders the correct path', () => {
-    const { result } = renderHook(() => useEnableRiskScoreViaDevTools());
+    const { result } = renderHook(() => useEnableRiskScoreViaDevTools(RiskScoreEntity.host));
     expect(result.current).toEqual(
       '/s/myspace/app/dev_tools#/console?load_from=testProtocol//testhostname:testPort/s/myspace/internal/prebuilt_content/dev_tool/enable_host_risk_score'
     );

@@ -5,13 +5,13 @@
  * 2.0.
  */
 import type { HttpSetup } from '@kbn/core/public';
+import { RiskScoreEntity } from '../../../../../common/search_strategy';
 
 import * as api from './api';
 import {
   installHostRiskScoreModule,
   installUserRiskScoreModule,
   restartRiskScoreTransforms,
-  RiskScoreModuleName,
   uninstallRiskScoreModule,
 } from './utils';
 jest.mock('./api');
@@ -93,7 +93,7 @@ describe('uninstallRiskScoreModule - Host', () => {
     await uninstallRiskScoreModule({
       http: mockHttp,
       spaceId: 'customSpace',
-      moduleName: RiskScoreModuleName.Host,
+      riskScoreEntity: RiskScoreEntity.host,
     });
   });
 
@@ -120,7 +120,7 @@ describe('uninstallRiskScoreModule - User', () => {
     await uninstallRiskScoreModule({
       http: mockHttp,
       spaceId: 'customSpace',
-      moduleName: RiskScoreModuleName.User,
+      riskScoreEntity: RiskScoreEntity.user,
     });
   });
 
@@ -147,7 +147,7 @@ describe('Restart Transforms - Host', () => {
     await restartRiskScoreTransforms({
       http: mockHttp,
       spaceId: 'customSpace',
-      moduleName: RiskScoreModuleName.Host,
+      riskScoreEntity: RiskScoreEntity.host,
     });
   });
 
@@ -156,7 +156,12 @@ describe('Restart Transforms - Host', () => {
   });
 
   it('Restart Transforms with correct Ids', () => {
-    expect((api.restartTransforms as jest.Mock).mock.calls[0][0].transformIds).toEqual([
+    expect((api.stopTransforms as jest.Mock).mock.calls[0][0].transformIds).toEqual([
+      `ml_hostriskscore_pivot_transform_customSpace`,
+      `ml_hostriskscore_latest_transform_customSpace`,
+    ]);
+
+    expect((api.startTransforms as jest.Mock).mock.calls[0][0].transformIds).toEqual([
       `ml_hostriskscore_pivot_transform_customSpace`,
       `ml_hostriskscore_latest_transform_customSpace`,
     ]);
@@ -168,7 +173,7 @@ describe('Restart Transforms - User', () => {
     await restartRiskScoreTransforms({
       http: mockHttp,
       spaceId: 'customSpace',
-      moduleName: RiskScoreModuleName.User,
+      riskScoreEntity: RiskScoreEntity.user,
     });
   });
 
@@ -177,7 +182,12 @@ describe('Restart Transforms - User', () => {
   });
 
   it('Restart Transforms with correct Ids', () => {
-    expect((api.restartTransforms as jest.Mock).mock.calls[0][0].transformIds).toEqual([
+    expect((api.stopTransforms as jest.Mock).mock.calls[0][0].transformIds).toEqual([
+      `ml_userriskscore_pivot_transform_customSpace`,
+      `ml_userriskscore_latest_transform_customSpace`,
+    ]);
+
+    expect((api.startTransforms as jest.Mock).mock.calls[0][0].transformIds).toEqual([
       `ml_userriskscore_pivot_transform_customSpace`,
       `ml_userriskscore_latest_transform_customSpace`,
     ]);

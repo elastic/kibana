@@ -7,13 +7,10 @@
 import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
+import { RiskScoreEntity } from '../../../../../common/search_strategy';
 import { TestProviders } from '../../../../common/mock';
 import { RiskyScoreUpgradeButton } from './risky_score_upgrade_button';
-import {
-  RiskScoreModuleName,
-  upgradeHostRiskScoreModule,
-  upgradeUserRiskScoreModule,
-} from './utils';
+import { upgradeHostRiskScoreModule, upgradeUserRiskScoreModule } from './utils';
 
 jest.mock('./utils');
 
@@ -26,7 +23,7 @@ describe('RiskyScoreUpgradeButton', () => {
     it('Renders expected children', () => {
       render(
         <TestProviders>
-          <RiskyScoreUpgradeButton refetch={mockRefetch} moduleName={RiskScoreModuleName.Host} />
+          <RiskyScoreUpgradeButton refetch={mockRefetch} riskScoreEntity={RiskScoreEntity.host} />
         </TestProviders>
       );
 
@@ -37,7 +34,7 @@ describe('RiskyScoreUpgradeButton', () => {
     it('Triggers the right installer', async () => {
       render(
         <TestProviders>
-          <RiskyScoreUpgradeButton refetch={mockRefetch} moduleName={RiskScoreModuleName.Host} />
+          <RiskyScoreUpgradeButton refetch={mockRefetch} riskScoreEntity={RiskScoreEntity.host} />
         </TestProviders>
       );
 
@@ -51,7 +48,7 @@ describe('RiskyScoreUpgradeButton', () => {
     it('Update button state while upgrading', async () => {
       render(
         <TestProviders>
-          <RiskyScoreUpgradeButton refetch={mockRefetch} moduleName={RiskScoreModuleName.User} />
+          <RiskyScoreUpgradeButton refetch={mockRefetch} riskScoreEntity={RiskScoreEntity.user} />
         </TestProviders>
       );
 
@@ -65,7 +62,7 @@ describe('RiskyScoreUpgradeButton', () => {
     it('Refretch the module when upgrade finished', async () => {
       render(
         <TestProviders>
-          <RiskyScoreUpgradeButton refetch={mockRefetch} moduleName={RiskScoreModuleName.Host} />
+          <RiskyScoreUpgradeButton refetch={mockRefetch} riskScoreEntity={RiskScoreEntity.host} />
         </TestProviders>
       );
 
@@ -81,7 +78,7 @@ describe('RiskyScoreUpgradeButton', () => {
     it('Renders expected children', () => {
       render(
         <TestProviders>
-          <RiskyScoreUpgradeButton refetch={mockRefetch} moduleName={RiskScoreModuleName.User} />
+          <RiskyScoreUpgradeButton refetch={mockRefetch} riskScoreEntity={RiskScoreEntity.user} />
         </TestProviders>
       );
 
@@ -92,7 +89,7 @@ describe('RiskyScoreUpgradeButton', () => {
     it('Triggers the right installer', async () => {
       render(
         <TestProviders>
-          <RiskyScoreUpgradeButton refetch={mockRefetch} moduleName={RiskScoreModuleName.User} />
+          <RiskyScoreUpgradeButton refetch={mockRefetch} riskScoreEntity={RiskScoreEntity.user} />
         </TestProviders>
       );
 
@@ -106,7 +103,7 @@ describe('RiskyScoreUpgradeButton', () => {
     it('Update button state while upgrading', async () => {
       render(
         <TestProviders>
-          <RiskyScoreUpgradeButton refetch={mockRefetch} moduleName={RiskScoreModuleName.User} />
+          <RiskyScoreUpgradeButton refetch={mockRefetch} riskScoreEntity={RiskScoreEntity.user} />
         </TestProviders>
       );
 
@@ -120,7 +117,7 @@ describe('RiskyScoreUpgradeButton', () => {
     it('Refretch the module when upgrade finished', async () => {
       render(
         <TestProviders>
-          <RiskyScoreUpgradeButton refetch={mockRefetch} moduleName={RiskScoreModuleName.Host} />
+          <RiskyScoreUpgradeButton refetch={mockRefetch} riskScoreEntity={RiskScoreEntity.host} />
         </TestProviders>
       );
 

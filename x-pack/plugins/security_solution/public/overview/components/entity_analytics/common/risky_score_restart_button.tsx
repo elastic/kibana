@@ -9,19 +9,19 @@ import { EuiButtonEmpty } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import type { RiskScoreModuleName } from './utils';
 import { RestartState, restartRiskScoreTransforms } from './utils';
 import type { inputsModel } from '../../../../common/store';
 import { useSpaceId } from '../../../../common/hooks/use_space_id';
 import { useKibana } from '../../../../common/lib/kibana';
+import type { RiskScoreEntity } from '../../../../../common/search_strategy';
 
 const RiskyScoreRestartButtonComponent = ({
   refetch,
-  moduleName,
+  riskScoreEntity,
   disabled = false,
 }: {
   refetch: inputsModel.Refetch;
-  moduleName: RiskScoreModuleName;
+  riskScoreEntity: RiskScoreEntity;
   disabled?: boolean;
 }) => {
   const [restartState, setRestartState] = useState<RestartState>();
@@ -34,11 +34,11 @@ const RiskyScoreRestartButtonComponent = ({
       http,
       notifications,
       spaceId,
-      moduleName,
+      riskScoreEntity,
     });
     setRestartState(RestartState.Done);
     refetch();
-  }, [http, moduleName, notifications, refetch, spaceId]);
+  }, [http, riskScoreEntity, notifications, refetch, spaceId]);
 
   return (
     <EuiButtonEmpty

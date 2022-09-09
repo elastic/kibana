@@ -45,7 +45,6 @@ import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_ex
 
 import type { inputsModel } from '../../../../common/store';
 import { RiskyScoreRestartButton } from '../common/risky_score_restart_button';
-import { RiskScoreModuleName } from '../common/utils';
 import { RiskyScoreEnableButton } from '../common/risky_score_enable_button';
 
 const TABLE_QUERY_ID = 'hostRiskDashboardTable';
@@ -159,7 +158,7 @@ export const EntityAnalyticsHostRiskScores = () => {
           {toggleStatus && (
             <EuiFlexGroup alignItems="center" gutterSize="m">
               <EuiFlexItem>
-                <RiskyScoreRestartButton refetch={refetch} moduleName={RiskScoreModuleName.Host} />
+                <RiskyScoreRestartButton refetch={refetch} riskScoreEntity={RiskScoreEntity.host} />
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiButtonEmpty href={RISKY_HOSTS_DOC_LINK} target="_blank">
@@ -213,7 +212,7 @@ export const EntityAnalyticsHostRiskScores = () => {
 
 const EntityAnalyticsHostRiskScoresDisable = ({ refetch }: { refetch: inputsModel.Refetch }) => {
   const { signalIndexExists } = useCheckSignalIndex();
-  const enableViaDevToolsUrl = useEnableRiskScoreViaDevTools(RiskScoreModuleName.Host);
+  const enableViaDevToolsUrl = useEnableRiskScoreViaDevTools(RiskScoreEntity.host);
 
   return (
     <EuiPanel hasBorder>
@@ -245,7 +244,7 @@ const EntityAnalyticsHostRiskScoresDisable = ({ refetch }: { refetch: inputsMode
               <EuiToolTip content={!signalIndexExists ? i18n.ENABLE_RISK_SCORE_POPOVER : null}>
                 <RiskyScoreEnableButton
                   refetch={refetch}
-                  moduleName={RiskScoreModuleName.Host}
+                  riskScoreEntity={RiskScoreEntity.host}
                   disabled={!signalIndexExists}
                 />
               </EuiToolTip>

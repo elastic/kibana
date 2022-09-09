@@ -11,19 +11,15 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useSpaceId } from '../../../../common/hooks/use_space_id';
 import { useKibana } from '../../../../common/lib/kibana';
 import type { inputsModel } from '../../../../common/store';
-import {
-  UpgradeState,
-  upgradeHostRiskScoreModule,
-  RiskScoreModuleName,
-  upgradeUserRiskScoreModule,
-} from './utils';
+import { UpgradeState, upgradeHostRiskScoreModule, upgradeUserRiskScoreModule } from './utils';
+import { RiskScoreEntity } from '../../../../../common/search_strategy';
 
 const RiskyScoreUpgradeButtonComponent = ({
   refetch,
-  moduleName,
+  riskScoreEntity,
 }: {
   refetch: inputsModel.Refetch;
-  moduleName: RiskScoreModuleName;
+  riskScoreEntity: RiskScoreEntity;
 }) => {
   const [status, setStatus] = useState<UpgradeState>();
   const spaceId = useSpaceId();
@@ -32,16 +28,16 @@ const RiskyScoreUpgradeButtonComponent = ({
   const upgradeHostRiskScore = useCallback(async () => {
     setStatus(UpgradeState.Started);
 
-    if (moduleName === RiskScoreModuleName.Host) {
+    if (riskScoreEntity === RiskScoreEntity.host) {
       await upgradeHostRiskScoreModule({ http, notifications, spaceId });
     }
 
-    if (moduleName === RiskScoreModuleName.User) {
+    if (riskScoreEntity === RiskScoreEntity.user) {
       await upgradeUserRiskScoreModule({ http, notifications, spaceId });
     }
     setStatus(UpgradeState.Done);
     refetch();
-  }, [moduleName, refetch, http, notifications, spaceId]);
+  }, [riskScoreEntity, refetch, http, notifications, spaceId]);
 
   return (
     <EuiButton

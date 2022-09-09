@@ -13,20 +13,16 @@ import { useSpaceId } from '../../../../common/hooks/use_space_id';
 import { useKibana } from '../../../../common/lib/kibana';
 import type { inputsModel } from '../../../../common/store';
 
-import {
-  InstallationState,
-  RiskScoreModuleName,
-  installHostRiskScoreModule,
-  installUserRiskScoreModule,
-} from './utils';
+import { InstallationState, installHostRiskScoreModule, installUserRiskScoreModule } from './utils';
+import { RiskScoreEntity } from '../../../../../common/search_strategy';
 
 const RiskyScoreEnableButtonComponent = ({
   refetch,
-  moduleName,
+  riskScoreEntity,
   disabled = false,
 }: {
   refetch: inputsModel.Refetch;
-  moduleName: RiskScoreModuleName;
+  riskScoreEntity: RiskScoreEntity;
   disabled?: boolean;
 }) => {
   const [installationState, setInstallationState] = useState<InstallationState>();
@@ -36,17 +32,17 @@ const RiskyScoreEnableButtonComponent = ({
   const onBoardingRiskScore = useCallback(async () => {
     setInstallationState(InstallationState.Started);
 
-    if (moduleName === RiskScoreModuleName.Host) {
+    if (riskScoreEntity === RiskScoreEntity.host) {
       await installHostRiskScoreModule({ http, notifications, spaceId });
     }
 
-    if (moduleName === RiskScoreModuleName.User) {
+    if (riskScoreEntity === RiskScoreEntity.user) {
       await installUserRiskScoreModule({ http, notifications, spaceId });
     }
 
     setInstallationState(InstallationState.Done);
     refetch();
-  }, [moduleName, refetch, http, notifications, spaceId]);
+  }, [riskScoreEntity, refetch, http, notifications, spaceId]);
 
   return (
     <EuiButton

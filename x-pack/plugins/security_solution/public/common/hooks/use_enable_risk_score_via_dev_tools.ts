@@ -6,10 +6,10 @@
  */
 import { useMemo } from 'react';
 import { devToolPrebuiltContentUrl } from '../../../common/constants';
-import type { RiskScoreModuleName } from '../../overview/components/overview_risky_host_links/utils';
+import type { RiskScoreEntity } from '../../../common/search_strategy';
 import { useSpaceId } from './use_space_id';
 
-export const useEnableRiskScoreViaDevTools = (moduleName: RiskScoreModuleName) => {
+export const useEnableRiskScoreViaDevTools = (moduleName: RiskScoreEntity) => {
   const spaceId = useSpaceId();
   const riskScoreConsoleId = `enable_${moduleName}_risk_score`;
   const loadFromUrl = useMemo(() => {

@@ -7,9 +7,10 @@
 import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
+import { RiskScoreEntity } from '../../../../../common/search_strategy';
 import { TestProviders } from '../../../../common/mock';
 import { RiskyScoreRestartButton } from './risky_score_restart_button';
-import { RiskScoreModuleName, restartRiskScoreTransforms } from './utils';
+import { restartRiskScoreTransforms } from './utils';
 
 jest.mock('./utils');
 
@@ -22,7 +23,7 @@ describe('RiskyScoreRestartButton', () => {
     it('Renders expected children', () => {
       render(
         <TestProviders>
-          <RiskyScoreRestartButton refetch={mockRefetch} moduleName={RiskScoreModuleName.Host} />
+          <RiskyScoreRestartButton refetch={mockRefetch} riskScoreEntity={RiskScoreEntity.host} />
         </TestProviders>
       );
 
@@ -33,7 +34,7 @@ describe('RiskyScoreRestartButton', () => {
     it('Triggers the right installer', async () => {
       render(
         <TestProviders>
-          <RiskyScoreRestartButton refetch={mockRefetch} moduleName={RiskScoreModuleName.Host} />
+          <RiskyScoreRestartButton refetch={mockRefetch} riskScoreEntity={RiskScoreEntity.host} />
         </TestProviders>
       );
 
@@ -41,15 +42,15 @@ describe('RiskyScoreRestartButton', () => {
         await userEvent.click(screen.getByTestId('risk-score-restart'));
       });
 
-      expect((restartRiskScoreTransforms as jest.Mock).mock.calls[0][0].moduleName).toEqual(
-        RiskScoreModuleName.Host
+      expect((restartRiskScoreTransforms as jest.Mock).mock.calls[0][0].riskScoreEntity).toEqual(
+        RiskScoreEntity.host
       );
     });
 
     it('Update button state while restarting', async () => {
       render(
         <TestProviders>
-          <RiskyScoreRestartButton refetch={mockRefetch} moduleName={RiskScoreModuleName.Host} />
+          <RiskyScoreRestartButton refetch={mockRefetch} riskScoreEntity={RiskScoreEntity.host} />
         </TestProviders>
       );
 
@@ -63,7 +64,7 @@ describe('RiskyScoreRestartButton', () => {
     it('Refretch the module when restart finished', async () => {
       render(
         <TestProviders>
-          <RiskyScoreRestartButton refetch={mockRefetch} moduleName={RiskScoreModuleName.Host} />
+          <RiskyScoreRestartButton refetch={mockRefetch} riskScoreEntity={RiskScoreEntity.host} />
         </TestProviders>
       );
 
@@ -79,7 +80,7 @@ describe('RiskyScoreRestartButton', () => {
     it('Renders expected children', () => {
       render(
         <TestProviders>
-          <RiskyScoreRestartButton refetch={mockRefetch} moduleName={RiskScoreModuleName.User} />
+          <RiskyScoreRestartButton refetch={mockRefetch} riskScoreEntity={RiskScoreEntity.user} />
         </TestProviders>
       );
 
@@ -90,7 +91,7 @@ describe('RiskyScoreRestartButton', () => {
     it('Triggers the right installer', async () => {
       render(
         <TestProviders>
-          <RiskyScoreRestartButton refetch={mockRefetch} moduleName={RiskScoreModuleName.User} />
+          <RiskyScoreRestartButton refetch={mockRefetch} riskScoreEntity={RiskScoreEntity.user} />
         </TestProviders>
       );
 
@@ -98,15 +99,15 @@ describe('RiskyScoreRestartButton', () => {
         await userEvent.click(screen.getByTestId('risk-score-restart'));
       });
 
-      expect((restartRiskScoreTransforms as jest.Mock).mock.calls[0][0].moduleName).toEqual(
-        RiskScoreModuleName.User
+      expect((restartRiskScoreTransforms as jest.Mock).mock.calls[0][0].riskScoreEntity).toEqual(
+        RiskScoreEntity.user
       );
     });
 
     it('Update button state while restarting', async () => {
       render(
         <TestProviders>
-          <RiskyScoreRestartButton refetch={mockRefetch} moduleName={RiskScoreModuleName.User} />
+          <RiskyScoreRestartButton refetch={mockRefetch} riskScoreEntity={RiskScoreEntity.user} />
         </TestProviders>
       );
 
@@ -120,7 +121,7 @@ describe('RiskyScoreRestartButton', () => {
     it('Refretch the module when restart finished', async () => {
       render(
         <TestProviders>
-          <RiskyScoreRestartButton refetch={mockRefetch} moduleName={RiskScoreModuleName.User} />
+          <RiskyScoreRestartButton refetch={mockRefetch} riskScoreEntity={RiskScoreEntity.user} />
         </TestProviders>
       );
 
