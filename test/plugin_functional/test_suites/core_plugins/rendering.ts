@@ -189,6 +189,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.global_search.search_timeout (duration)',
         'xpack.graph.canEditDrillDownUrls (boolean)',
         'xpack.graph.savePolicy (alternatives)',
+        'xpack.guided_onboarding.ui (boolean)',
         'xpack.ilm.ui.enabled (boolean)',
         'xpack.index_management.ui.enabled (boolean)',
         'xpack.infra.sources.default.fields.message (array)',
