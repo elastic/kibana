@@ -17,7 +17,7 @@ import {
   MANAGEMENT_ROUTING_POLICIES_PATH,
   MANAGEMENT_ROUTING_TRUSTED_APPS_PATH,
   MANAGEMENT_ROUTING_BLOCKLIST_PATH,
-  MANAGEMENT_ROUTING_RESPONSE_ACTIONS_PATH,
+  MANAGEMENT_ROUTING_ACTION_HISTORY_PATH,
 } from '../common/constants';
 import { NotFoundPage } from '../../app/404';
 import { EndpointsContainer } from './endpoint_hosts';
@@ -69,9 +69,9 @@ const HostIsolationExceptionsTelemetry = () => (
 );
 
 const ResponseActionsTelemetry = () => (
-  <TrackApplicationView viewId={SecurityPageName.responseActions}>
+  <TrackApplicationView viewId={SecurityPageName.actionHistory}>
     <ResponseActionsContainer />
-    <SpyRoute pageName={SecurityPageName.responseActions} />
+    <SpyRoute pageName={SecurityPageName.actionHistory} />
   </TrackApplicationView>
 );
 
@@ -103,7 +103,7 @@ export const ManagementContainer = memo(() => {
         component={HostIsolationExceptionsTelemetry}
       />
       <Route path={MANAGEMENT_ROUTING_BLOCKLIST_PATH} component={BlocklistContainer} />
-      <Route path={MANAGEMENT_ROUTING_RESPONSE_ACTIONS_PATH} component={ResponseActionsTelemetry} />
+      <Route path={MANAGEMENT_ROUTING_ACTION_HISTORY_PATH} component={ResponseActionsTelemetry} />
       <Route path={MANAGEMENT_PATH} exact>
         <Redirect to={getEndpointListPath({ name: 'endpointList' })} />
       </Route>
