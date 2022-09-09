@@ -71,12 +71,12 @@ export const action = t.exact(
   })
 );
 
-export const responseAction = t.exact(
-  t.type({
-    action_type_id: t.string,
-    params: t.record(t.string, t.any),
-  })
-);
+// export const responseAction = t.exact(
+//   t.type({
+//     action_type_id: t.string,
+//     params: t.record(t.string, t.any),
+//   })
+// );
 
 export interface CreateRulesProps {
   rule: CreateRulesSchema;
@@ -139,7 +139,7 @@ export const RuleSchema = t.intersection([
     updated_at: t.string,
     updated_by: t.string,
     actions: t.array(action),
-    response_actions: t.array(responseAction),
+    // response_actions: t.array(responseAction),
     throttle: t.union([t.string, t.null]),
   }),
   t.partial({
