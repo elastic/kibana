@@ -15,7 +15,7 @@ export const titles = Object.freeze(
     [
       'es_connection',
       i18n.translate('xpack.securitySolution.endpoint.details.packageActions.es_connection.title', {
-        defaultMessage: 'Elasticsearch Connection Failure',
+        defaultMessage: 'Elasticsearch connection failure',
       }),
     ],
   ])
