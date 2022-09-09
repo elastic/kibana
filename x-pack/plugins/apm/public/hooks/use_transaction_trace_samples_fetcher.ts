@@ -48,7 +48,7 @@ export function useTransactionTraceSamplesFetcher({
   } = useFetcher(
     (callApmApi) => {
       if (serviceName && start && end && transactionType && transactionName) {
-        const response = callApmApi(
+        return callApmApi(
           'GET /internal/apm/services/{serviceName}/transactions/traces/samples',
           {
             params: {
@@ -70,8 +70,6 @@ export function useTransactionTraceSamplesFetcher({
             },
           }
         );
-
-        return response;
       }
     },
     // the samples should not be refetched if the transactionId or traceId changes

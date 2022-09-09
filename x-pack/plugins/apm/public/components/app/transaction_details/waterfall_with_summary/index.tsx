@@ -93,7 +93,7 @@ export function WaterfallWithSummary({
         <EuiFlexItem>
           {traceSamples.length > 0 && (
             <EuiPagination
-              pageCount={traceSamples?.length ?? 0}
+              pageCount={traceSamples.length}
               activePage={sampleActivePage}
               onPageClick={goToSample}
               compressed
