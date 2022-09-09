@@ -168,6 +168,7 @@ export const PackageListGrid: FunctionComponent<Props> = ({
                       aria-label="Remove filter"
                       style={{
                         padding: euiTheme.size.xs,
+                        paddingTop: '2px',
                       }}
                     >
                       <EuiIcon
