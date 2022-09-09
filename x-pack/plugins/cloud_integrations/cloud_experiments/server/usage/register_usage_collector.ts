@@ -8,15 +8,20 @@
 import type { LDClient, LDUser } from 'launchdarkly-node-server-sdk';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 
-interface Usage {
+export interface Usage {
   initialized: boolean;
   flags: Record<string, string>;
   flagNames: string[];
 }
 
+export type LaunchDarklyEntitiesGetter = () => {
+  launchDarklyUser?: LDUser;
+  launchDarklyClient?: LDClient;
+};
+
 export function registerUsageCollector(
   usageCollection: UsageCollectionSetup,
-  getLaunchDarklyEntities: () => { launchDarklyUser?: LDUser; launchDarklyClient?: LDClient }
+  getLaunchDarklyEntities: LaunchDarklyEntitiesGetter
 ) {
   usageCollection.registerCollector(
     usageCollection.makeUsageCollector<Usage>({

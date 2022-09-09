@@ -8,14 +8,13 @@
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import LaunchDarkly, { type LDClient } from 'launchdarkly-js-client-sdk';
 import { get, has } from 'lodash';
-import {
-  FEATURE_FLAG_NAMES,
-  METRIC_NAMES,
-  type CloudExperimentsFeatureFlagNames,
-  type CloudExperimentsMetric,
-  type CloudExperimentsPluginSetup,
-  type CloudExperimentsPluginStart,
+import type {
+  CloudExperimentsFeatureFlagNames,
+  CloudExperimentsMetric,
+  CloudExperimentsPluginSetup,
+  CloudExperimentsPluginStart,
 } from '../common';
+import { FEATURE_FLAG_NAMES, METRIC_NAMES } from '../common/constants';
 
 /**
  * Browser-side implementation of the Cloud Experiments plugin
@@ -94,7 +93,10 @@ export class CloudExperimentsPlugin
    * Cleans up and flush the sending queues.
    */
   public stop() {
-    this.launchDarklyClient?.flush();
+    this.launchDarklyClient
+      ?.flush()
+      // eslint-disable-next-line no-console
+      .catch((err) => console.warn(err));
   }
 
   private getVariation = async <Data>(

@@ -17,15 +17,14 @@ import LaunchDarkly, { type LDClient, type LDUser } from 'launchdarkly-node-serv
 import type { LogMeta } from '@kbn/logging';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { registerUsageCollector } from './usage';
-import {
-  FEATURE_FLAG_NAMES,
-  METRIC_NAMES,
-  type CloudExperimentsFeatureFlagNames,
-  type CloudExperimentsMetric,
-  type CloudExperimentsPluginSetup,
-  type CloudExperimentsPluginStart,
-} from '../common';
 import type { CloudExperimentsConfigType } from './config';
+import type {
+  CloudExperimentsFeatureFlagNames,
+  CloudExperimentsMetric,
+  CloudExperimentsPluginSetup,
+  CloudExperimentsPluginStart,
+} from '../common';
+import { FEATURE_FLAG_NAMES, METRIC_NAMES } from '../common/constants';
 
 interface CloudExperimentsPluginSetupDeps {
   usageCollection?: UsageCollectionSetup;

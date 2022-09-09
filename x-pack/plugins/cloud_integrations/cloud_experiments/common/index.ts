@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-export { FEATURE_FLAG_NAMES, METRIC_NAMES } from './constants';
-
 export type {
   CloudExperimentsMetric,
   CloudExperimentsPluginStart,
