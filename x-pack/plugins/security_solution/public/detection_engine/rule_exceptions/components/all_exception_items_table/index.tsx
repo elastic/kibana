@@ -96,6 +96,16 @@ const ExceptionsViewerComponent = ({
     });
 
   // Reducer actions
+  const setLastUpdated = useCallback(
+    (lastUpdate: string | number): void => {
+      dispatch({
+        type: 'setLastUpdateTime',
+        lastUpdate,
+      });
+    },
+    [dispatch]
+  );
+
   const setExceptions = useCallback(
     ({
       exceptions: newExceptions,
@@ -109,7 +119,7 @@ const ExceptionsViewerComponent = ({
         pagination: newPagination,
       });
     },
-    [dispatch]
+    [dispatch, setLastUpdated]
   );
 
   const setViewerState = useCallback(
@@ -137,16 +147,6 @@ const ExceptionsViewerComponent = ({
       dispatch({
         type: 'setIsReadOnly',
         readOnly,
-      });
-    },
-    [dispatch]
-  );
-
-  const setLastUpdated = useCallback(
-    (lastUpdate: string | number): void => {
-      dispatch({
-        type: 'setLastUpdateTime',
-        lastUpdate,
       });
     },
     [dispatch]
