@@ -173,6 +173,7 @@ describe('utils', () => {
             muteAll: false,
             notifyWhen: 'onActiveAlert',
             actions: [],
+            responseActions: [],
           } as unknown as SanitizedRule<RuleParams>,
           undefined
         )
@@ -187,6 +188,54 @@ describe('utils', () => {
             notifyWhen: 'onThrottleInterval',
             actions: [],
             throttle: '1d',
+          } as unknown as SanitizedRule<RuleParams>,
+          undefined
+        )
+      ).toEqual(NOTIFICATION_THROTTLE_NO_ACTIONS);
+    });
+
+    test('returns "NOTIFICATION_THROTTLE_RULE" if there is responseActions in params and rule type is query', () => {
+      expect(
+        transformFromAlertThrottle(
+          {
+            muteAll: false,
+            notifyWhen: 'onActiveAlert',
+            actions: [],
+            params: {
+              type: 'query',
+              responseActions: [{}],
+            },
+          } as unknown as SanitizedRule<RuleParams>,
+          undefined
+        )
+      ).toEqual(NOTIFICATION_THROTTLE_RULE);
+    });
+    test('returns "NOTIFICATION_THROTTLE_NO_ACTIONS" if there is responseActions in params and rule with different type than query', () => {
+      expect(
+        transformFromAlertThrottle(
+          {
+            muteAll: false,
+            notifyWhen: 'onActiveAlert',
+            actions: [],
+            params: {
+              responseActions: [{}],
+            },
+          } as unknown as SanitizedRule<RuleParams>,
+          undefined
+        )
+      ).toEqual(NOTIFICATION_THROTTLE_NO_ACTIONS);
+    });
+    test('returns "NOTIFICATION_THROTTLE_NO_ACTIONS" if there is empty response actions', () => {
+      expect(
+        transformFromAlertThrottle(
+          {
+            muteAll: false,
+            notifyWhen: 'onActiveAlert',
+            actions: [],
+            params: {
+              responseActions: [],
+              type: 'query',
+            },
           } as unknown as SanitizedRule<RuleParams>,
           undefined
         )
