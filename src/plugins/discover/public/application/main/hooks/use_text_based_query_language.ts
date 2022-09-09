@@ -41,22 +41,22 @@ export function useTextBasedQueryLanguage({
   useEffect(() => {
     const subscription = documents$.subscribe(async (next) => {
       const { query } = next;
-      let columns: string[] = [];
-      if (
-        next.recordRawType === 'plain' &&
-        query &&
-        isOfAggregateQueryType(query) &&
-        'sql' in query
-      ) {
-        if (next.result?.length && next.fetchStatus === FetchStatus.COMPLETE) {
-          const firstRow = next.result[0];
+      let nextColumns: string[] = [];
+      const isTextBasedQueryLang =
+        next.recordRawType === 'plain' && query && isOfAggregateQueryType(query) && 'sql' in query;
+      const hasResults = next.result?.length && next.fetchStatus === FetchStatus.COMPLETE;
+
+      if (isTextBasedQueryLang) {
+        if (hasResults) {
+          // check if state needs to contain column transformation due to a different columns in the resultset
+          const firstRow = next.result![0];
           const firstRowColumns = Object.keys(firstRow.raw).slice(0, MAX_NUM_OF_COLUMNS);
           if (
             !isEqual(firstRowColumns, prev.current.columns) &&
             !isEqual(query, prev.current.query)
           ) {
-            columns = firstRowColumns;
-            prev.current = { columns, query };
+            nextColumns = firstRowColumns;
+            prev.current = { columns: nextColumns, query };
           }
         }
         const indexPatternFromQuery = getIndexPatternFromSQLQuery(query.sql);
@@ -66,14 +66,17 @@ export function useTextBasedQueryLanguage({
         if (dataViewObj) {
           const nextState = {
             index: dataViewObj.id,
-            ...(columns.length && { columns }),
+            ...(nextColumns.length && { columns: nextColumns }),
           };
           stateContainer.replaceUrlAppState(nextState);
         }
       } else {
-        prev.current = {
-          columns: [],
-          query: undefined,
+        if(prev.current.query) {
+          // cleanup when it's not a text based query lang
+          prev.current = {
+            columns: [],
+            query: undefined,
+          };
         }
       }
     });
