@@ -5,10 +5,26 @@
  * 2.0.
  */
 
-import { BehaviorSubject, ReplaySubject, type Observable, of, from, forkJoin } from 'rxjs';
-import { take, map, switchMap, mergeMap, finalize, catchError } from 'rxjs/operators';
+import {
+  of,
+  map,
+  from,
+  race,
+  take,
+  Subject,
+  finalize,
+  forkJoin,
+  mergeMap,
+  switchMap,
+  catchError,
+  ReplaySubject,
+  BehaviorSubject,
+  type Observable,
+} from 'rxjs';
 import type { FileKind, FileJSON } from '../../../common/types';
 import type { FilesClient } from '../../types';
+
+import { createStateSubject, type SimpleStateSubject } from './simple_state_subject';
 
 const prop$ = <T = unknown>(initialValue: T) => new BehaviorSubject<T>(initialValue);
 
@@ -19,10 +35,10 @@ interface FileState {
 }
 
 export class UploadState {
-  private readonly abort$ = new ReplaySubject(1);
+  private readonly abort$ = new Subject<void>();
   private readonly error$ = prop$<undefined | Error>(undefined);
 
-  public readonly files$ = prop$<Array<BehaviorSubject<FileState>>>([]);
+  public readonly files$ = prop$<Array<SimpleStateSubject<FileState>>>([]);
   public readonly uploading$ = prop$(false);
 
   constructor(private readonly fileKind: FileKind, private readonly client: FilesClient) {}
@@ -35,24 +51,37 @@ export class UploadState {
     if (this.isUploading()) {
       throw new Error('Cannot update files while uploading');
     }
-    this.files$.next(files.map((file) => new BehaviorSubject<FileState>({ file, status: 'idle' })));
+    this.files$.next(files.map((file) => createStateSubject<FileState>({ file, status: 'idle' })));
     this.error$.next(undefined);
   };
 
-  public abort(): void {
-    if (this.isUploading()) {
+  public abort = (): void => {
+    if (!this.isUploading()) {
       throw new Error('No upload in progress');
     }
-    this.abort$.next(undefined);
-  }
+    this.abort$.next();
+  };
 
-  private uploadFile = (file$: BehaviorSubject<FileState>): Observable<void> => {
+  /**
+   * Do not throw from this method, it is intended to work with {@link forkJoin} from rxjs which
+   * unsubscribes from all observables if one of them throws.
+   */
+  private uploadFile = (
+    file$: SimpleStateSubject<FileState>,
+    abort$: Observable<void>
+  ): Observable<void> => {
+    const abortController = new AbortController();
+    const abortSignal = abortController.signal;
     const { file, status } = file$.getValue();
     if (status !== 'idle') {
       return of(undefined);
     }
+
     let uploadTarget: undefined | FileJSON;
-    file$.next({ ...file$.getValue(), status: 'uploading' });
+    let erroredOrAborted = false;
+
+    file$.setState({ status: 'uploading' });
+
     return from(
       this.client.create({
         kind: this.fileKind.id,
@@ -61,32 +90,52 @@ export class UploadState {
     ).pipe(
       mergeMap((result) => {
         uploadTarget = result.file;
-        return this.client.upload({ body: file, id: uploadTarget.id, kind: this.fileKind.id });
+        return race(
+          abort$.pipe(
+            map(() => {
+              abortController.abort();
+              throw new Error('Abort!');
+            })
+          ),
+          this.client.upload({
+            body: file,
+            id: uploadTarget.id,
+            kind: this.fileKind.id,
+            abortSignal,
+          })
+        );
       }),
-      map(() => file$.next({ ...file$.getValue(), status: 'uploaded' })),
-      catchError(async (e) => {
-        if (uploadTarget) {
-          await this.client.delete({ id: uploadTarget.id, kind: this.fileKind.id });
+      map(() => file$.setState({ status: 'uploaded' })),
+      catchError((e) => {
+        erroredOrAborted = true;
+        file$.setState({ status: 'idle', error: e });
+        return of(undefined);
+      }),
+      finalize(() => {
+        if (erroredOrAborted && uploadTarget) {
+          this.client.delete({ id: uploadTarget.id, kind: this.fileKind.id });
         }
-        file$.next({ ...file$.getValue(), error: e });
       })
     );
   };
 
-  public upload = (): void => {
+  public upload = (): Observable<void> => {
     if (this.isUploading()) {
       throw new Error('Upload already in progress');
     }
     this.uploading$.next(true);
-    this.files$
-      .pipe(
-        take(1),
-        switchMap((files) => forkJoin(files.map(this.uploadFile))),
-        map(() => {}),
-        finalize(() => {
-          this.uploading$.next(false);
-        })
-      )
-      .subscribe();
+    const abort$ = new ReplaySubject<void>(1);
+    const sub = this.abort$.subscribe(abort$);
+    return this.files$.pipe(
+      take(1),
+      switchMap((files) => {
+        return forkJoin(files.map((file) => this.uploadFile(file, abort$)));
+      }),
+      map(() => {}),
+      finalize(() => {
+        this.uploading$.next(false);
+        sub.unsubscribe();
+      })
+    );
   };
 }

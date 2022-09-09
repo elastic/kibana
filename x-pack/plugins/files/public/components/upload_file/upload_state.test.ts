@@ -6,8 +6,7 @@
  */
 
 import { DeeplyMockedKeys } from '@kbn/utility-types-jest';
-import { of } from 'rxjs';
-import { tap } from 'rxjs/operators';
+import { of, delay, merge, mergeMap, tap } from 'rxjs';
 import { TestScheduler } from 'rxjs/testing';
 import type { FileKind, FileJSON } from '../../../common';
 import type { FilesClient } from '../../types';
@@ -48,7 +47,7 @@ describe('UploadState', () => {
   });
 
   it('uploads all provided files', async () => {
-    testScheduler.run(({ expectObservable, cold }) => {
+    testScheduler.run(({ expectObservable, cold, flush }) => {
       filesClient.create.mockReturnValue(of({ file: { id: 'test' } as FileJSON }) as any);
       filesClient.upload.mockReturnValue(of(undefined) as any);
 
@@ -60,9 +59,9 @@ describe('UploadState', () => {
       const [file1$, file2$] = uploadState.files$.getValue();
 
       // Simulate upload being triggered async
-      const upload$ = cold('--a|').pipe(tap(uploadState.upload));
+      const upload$ = cold('--a|').pipe(mergeMap(uploadState.upload));
 
-      expectObservable(upload$).toBe('--a|');
+      expectObservable(upload$).toBe('--a|', { a: undefined });
 
       expectObservable(uploadState.uploading$).toBe('a-(bc)', {
         a: false,
@@ -81,6 +80,59 @@ describe('UploadState', () => {
         b: { file: file2, status: 'uploading' },
         c: { file: file2, status: 'uploaded' },
       });
+
+      flush();
+
+      expect(filesClient.create).toHaveBeenCalledTimes(2);
+      expect(filesClient.upload).toHaveBeenCalledTimes(2);
+      expect(filesClient.delete).not.toHaveBeenCalled();
+    });
+  });
+
+  it('attempts to clean up files when aborting', async () => {
+    testScheduler.run(({ expectObservable, cold, flush }) => {
+      filesClient.create.mockReturnValue(
+        of({ file: { id: 'test' } as FileJSON }).pipe(delay(2)) as any
+      );
+      filesClient.upload.mockReturnValue(of(undefined).pipe(delay(10)) as any);
+      filesClient.delete.mockReturnValue(of(undefined) as any);
+
+      const file1 = { name: 'test' } as File;
+      const file2 = { name: 'test 2' } as File;
+
+      uploadState.setFiles([file1, file2]);
+
+      const [file1$, file2$] = uploadState.files$.getValue();
+
+      // Simulate upload being triggered async
+      const upload$ = cold('-0|').pipe(mergeMap(uploadState.upload));
+      const abort$ = cold(' --1|').pipe(tap(uploadState.abort));
+
+      expectObservable(merge(upload$, abort$)).toBe('--0(1|)', ['1', undefined]);
+
+      expectObservable(uploadState.uploading$).toBe('ab-c', {
+        a: false,
+        b: true,
+        c: false,
+      });
+
+      expectObservable(file1$).toBe('ab-c', {
+        a: { file: file1, status: 'idle' },
+        b: { file: file1, status: 'uploading' },
+        c: { file: file1, error: new Error('Abort!'), status: 'idle' },
+      });
+
+      expectObservable(file2$).toBe('ab-c', {
+        a: { file: file2, status: 'idle' },
+        b: { file: file2, status: 'uploading' },
+        c: { file: file2, error: new Error('Abort!'), status: 'idle' },
+      });
+
+      flush();
+
+      expect(filesClient.create).toHaveBeenCalledTimes(2);
+      expect(filesClient.upload).toHaveBeenCalledTimes(2);
+      expect(filesClient.delete).toHaveBeenCalledTimes(2);
     });
   });
 });
